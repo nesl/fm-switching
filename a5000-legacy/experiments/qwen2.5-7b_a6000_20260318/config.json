@@ -1,0 +1,25 @@
+{
+  "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+  "gpu": "NVIDIA RTX A6000 (48GB)",
+  "gpu_id": 1,
+  "date": "2026-03-18",
+  "vllm_version": "0.17.1",
+  "max_model_len": 16384,
+  "depths_measured": [
+    293,
+    555,
+    1073,
+    2037,
+    4082,
+    8410,
+    15732
+  ],
+  "results": {
+    "inertia_slope_ms_per_token": 0.1541,
+    "inertia_intercept_ms": -37.3,
+    "inertia_r2": 0.99613,
+    "max_depth_tokens": 15732,
+    "max_migration_cost_ms": 2444.1,
+    "notes": "ms/token has a U-shape: decreases 293->2037 (GPU BW saturation), then rises 2037->15732 (attention quadratic overhead). Minimum at ~2K tokens."
+  }
+}

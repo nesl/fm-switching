@@ -1,0 +1,80 @@
+{
+  "experiment": "mistral-7b_a6000_20260318",
+  "date": "2026-03-18",
+  "model": "mistralai/Mistral-7B-Instruct-v0.2",
+  "gpu": "NVIDIA RTX A6000 48GB",
+  "vllm_version": "0.17.1",
+  "max_model_len": 16384,
+  "prefix_caching": false,
+  "timing_method": "streaming_TTFT",
+  "depths_tested": [
+    300,
+    565,
+    1084,
+    2054,
+    4110,
+    8463,
+    12870,
+    15378
+  ],
+  "repeats_per_depth": 3,
+  "inertia_curve": {
+    "300": {
+      "ttft_ms_mean": 62.03,
+      "ttft_ms_std": 0.404,
+      "ms_per_token": 0.2068
+    },
+    "565": {
+      "ttft_ms_mean": 91.6,
+      "ttft_ms_std": 1.054,
+      "ms_per_token": 0.1621
+    },
+    "1084": {
+      "ttft_ms_mean": 155.93,
+      "ttft_ms_std": 0.551,
+      "ms_per_token": 0.1439
+    },
+    "2054": {
+      "ttft_ms_mean": 303.6,
+      "ttft_ms_std": 1.8,
+      "ms_per_token": 0.1478
+    },
+    "4110": {
+      "ttft_ms_mean": 603.37,
+      "ttft_ms_std": 1.097,
+      "ms_per_token": 0.1468
+    },
+    "8463": {
+      "ttft_ms_mean": 1326.0,
+      "ttft_ms_std": 2.905,
+      "ms_per_token": 0.1567
+    },
+    "12870": {
+      "ttft_ms_mean": 2168.53,
+      "ttft_ms_std": 2.468,
+      "ms_per_token": 0.1685
+    },
+    "15378": {
+      "ttft_ms_mean": 2712.2,
+      "ttft_ms_std": 10.221,
+      "ms_per_token": 0.1764
+    }
+  },
+  "linear_fit": {
+    "slope_ms_per_token": 0.1736,
+    "intercept_ms": -44.94,
+    "r2": 0.9964,
+    "formula": "TTFT(n) = 0.1736*n + -44.9 ms"
+  },
+  "extrapolations": {
+    "at_4k_tokens_ms": 650.0,
+    "at_8k_tokens_ms": 1344.0,
+    "at_16k_tokens_ms": 2733.0
+  },
+  "comparison_vs_qwen": {
+    "mistral_slope": 0.1736,
+    "qwen_slope": 0.1541,
+    "mistral_pct_costlier": 12.7,
+    "note": "Mistral-7B is ~13% more expensive per token than Qwen2.5-7B on the same A6000"
+  }
+}
