@@ -313,34 +313,67 @@ def render_table(summary: dict):
 
 # ── Phase 1: VLM captioning ─────────────────────────────────────────────
 
+def _load_caption_cache(captions_path: Path) -> dict:
+    """Load existing caption cache from disk; return empty dict if absent."""
+    if captions_path.exists():
+        try:
+            return json.loads(captions_path.read_text())
+        except Exception:
+            pass
+    return {}
+
+
+def _save_caption_cache(captions_path: Path, captions: dict) -> None:
+    """Atomically persist caption cache: write to .tmp then rename."""
+    tmp = captions_path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(captions, indent=2))
+    tmp.replace(captions_path)
+
+
 def caption_questions(questions, videos_dir: Path, vlm_id, quantization,
-                      n_frames, max_pixels, vlm_max_tokens):
+                      n_frames, max_pixels, vlm_max_tokens,
+                      captions_path: Path | None = None):
     """Load VLM once, caption N frames per clip, unload. Returns captions dict
-    {q_uid: [caption, ...]} and a parallel timing dict."""
+    {q_uid: [caption, ...]}. If captions_path is given, loads existing captions
+    on startup (skipping done clips) and persists after each clip."""
     import torch
     from exp5_context_inertia import load_vlm, run_vlm  # reuse, never mutate
 
+    captions = _load_caption_cache(captions_path) if captions_path else {}
+    todo = [q for q in questions if q["q_uid"] not in captions]
+    if captions_path and len(captions) > 0:
+        print(f"\nCaption cache: {len(captions)} clips already done, "
+              f"{len(todo)} remaining.")
+    if not todo:
+        print("  All clips already captioned — skipping VLM load.")
+        return captions
+
     print("\nLoading VLM...")
     vlm, vlm_proc = load_vlm(vlm_id, quantization, max_pixels)
-    captions = {}
-    for qi, q in enumerate(questions):
+    for qi, q in enumerate(todo):
         vpath = videos_dir / f"{q['q_uid']}.mp4"
         if not vpath.exists():
-            # tolerate common alternative extensions
             alt = next((p for p in videos_dir.glob(f"{q['q_uid']}.*")), None)
             vpath = alt if alt else vpath
         try:
             frames = sample_frames(vpath, n_frames)
-        except Exception as ex:  # noqa: BLE001 - record and continue
-            print(f"  [{qi+1}/{len(questions)}] {q['q_uid']}: frame error: {ex}")
+        except Exception as ex:  # noqa: BLE001
+            print(f"  [{qi+1}/{len(todo)}] {q['q_uid']}: frame error: {ex}")
             captions[q["q_uid"]] = []
+            if captions_path:
+                _save_caption_cache(captions_path, captions)
             continue
         caps = []
         for img in frames:
-            text, _lat = run_vlm(vlm, vlm_proc, img, vlm_id, vlm_max_tokens)
-            caps.append(text)
+            try:
+                text, _lat = run_vlm(vlm, vlm_proc, img, vlm_id, vlm_max_tokens)
+                caps.append(text)
+            except Exception as ex:  # noqa: BLE001 — CUDA assert or OOM
+                print(f"  [{qi+1}/{len(todo)}] {q['q_uid']}: VLM frame error (skipped): {ex}")
         captions[q["q_uid"]] = caps
-        print(f"  [{qi+1}/{len(questions)}] {q['q_uid']}: {len(caps)} captions")
+        if captions_path:
+            _save_caption_cache(captions_path, captions)
+        print(f"  [{qi+1}/{len(todo)}] {q['q_uid']}: {len(caps)} captions")
 
     del vlm, vlm_proc
     gc.collect()
@@ -476,6 +509,12 @@ def main():
     ap.add_argument("--limit", type=int, default=0,
                     help="Only the first K questions (0 = all). Smoke test: 5.")
     ap.add_argument("--output", default="results/exp7_premise.json")
+    ap.add_argument("--captions-cache", default="results/egoschema_captions.json",
+                    help="Path to per-clip caption cache (keyed by q_uid). "
+                         "Written incrementally during captioning; read on resume.")
+    ap.add_argument("--skip-captioning", action="store_true",
+                    help="Skip Phase 1 entirely — run reasoning only against the "
+                         "existing captions cache. Errors if cache is empty.")
     ap.add_argument("--dry-run", action="store_true",
                     help="No models/data: fabricate records to validate table+verdict.")
     ap.add_argument("--self-test", action="store_true",
@@ -511,13 +550,38 @@ def main():
 
         out_path = Path(args.output)
         out_path.parent.mkdir(parents=True, exist_ok=True)
+        captions_path = Path(args.captions_cache)
+        captions_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if args.skip_captioning:
+            captions = _load_caption_cache(captions_path)
+            if not captions:
+                raise SystemExit(
+                    f"--skip-captioning requested but caption cache is empty "
+                    f"or missing: {captions_path}"
+                )
+            print(f"\nSkipping captioning — loaded {len(captions)} clips from cache.")
+        else:
+            captions = caption_questions(
+                questions, Path(args.videos_dir), args.vlm, args.quantization,
+                args.frames, args.max_pixels, args.vlm_max_tokens,
+                captions_path=captions_path)
+
+        # Reasoning operates on questions whose captions are present in cache,
+        # respecting --limit. The full cache is used for the shuffled pool.
+        questions_to_score = [q for q in questions if q["q_uid"] in captions]
+        print(f"\nReasoning over {len(questions_to_score)} captioned questions "
+              f"(cache has {len(captions)} total clips).")
+
         meta = {
             "dry_run": False,
             "device": device,
             "vlm": args.vlm, "llm": args.llm,
             "quantization": args.quantization,
             "n_frames": args.frames,
-            "n_questions": len(questions),
+            "n_questions": len(questions_to_score),
+            "captions_cache": str(captions_path),
+            "skip_captioning": args.skip_captioning,
             "conditions": CONDITIONS,
             "timestamp_start": datetime.now().isoformat(),
         }
@@ -529,11 +593,8 @@ def main():
                 "summary": summarize(per),
             }, indent=2))
 
-        captions = caption_questions(
-            questions, Path(args.videos_dir), args.vlm, args.quantization,
-            args.frames, args.max_pixels, args.vlm_max_tokens)
         per_question = reason_questions(
-            questions, captions, args.llm, args.quantization,
+            questions_to_score, captions, args.llm, args.quantization,
             args.llm_max_tokens, save_cb=_save)
 
     # ── Summary + verdict ──
