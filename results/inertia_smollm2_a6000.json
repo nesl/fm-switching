@@ -1,0 +1,83 @@
+{
+  "metadata": {
+    "model": "smollm2",
+    "device": "a6000",
+    "llm": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+    "quantization": "fp16",
+    "use_chat_template": false,
+    "gpu": "NVIDIA GeForce RTX 3090 Ti",
+    "reps_per_count": 5,
+    "token_counts_requested": [
+      128,
+      256,
+      512,
+      1024,
+      2048,
+      4096,
+      8192
+    ],
+    "timestamp": "2026-06-11T12:56:48.227614"
+  },
+  "data": [
+    {
+      "context_tokens": 128,
+      "reprefill_ms": 12.54,
+      "std_ms": 0.14,
+      "reps": 4
+    },
+    {
+      "context_tokens": 256,
+      "reprefill_ms": 18.7,
+      "std_ms": 0.07,
+      "reps": 4
+    },
+    {
+      "context_tokens": 512,
+      "reprefill_ms": 33.87,
+      "std_ms": 0.47,
+      "reps": 4
+    },
+    {
+      "context_tokens": 1024,
+      "reprefill_ms": 57.6,
+      "std_ms": 0.06,
+      "reps": 4
+    },
+    {
+      "context_tokens": 2048,
+      "reprefill_ms": 109.18,
+      "std_ms": 0.5,
+      "reps": 4
+    },
+    {
+      "context_tokens": 4096,
+      "reprefill_ms": 228.46,
+      "std_ms": 0.42,
+      "reps": 4
+    },
+    {
+      "context_tokens": 8192,
+      "reprefill_ms": 469.49,
+      "std_ms": 0.61,
+      "reps": 4
+    }
+  ],
+  "_provenance": {
+    "git_commit": "68e6d7341668365defe90c9c9e3ba97c7b2a86ae",
+    "script": "inertia_profile.py",
+    "model": "smollm2",
+    "timestamp": "2026-06-11T12:56:48.227600",
+    "device": "a6000",
+    "n": 7,
+    "args": {
+      "model": "smollm2",
+      "device": "a6000",
+      "llm": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+      "quantization": "fp16",
+      "use_chat_template": false,
+      "token_counts": "128,256,512,1024,2048,4096,8192",
+      "reps": 5,
+      "output": null
+    }
+  }
+}

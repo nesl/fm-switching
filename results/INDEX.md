@@ -42,7 +42,7 @@ Machine-readable provenance is embedded in each JSON as `_provenance`. This inde
 
 | file | script | model | device | status |
 |---|---|---|---|---|
-| `inertia_qwen7b_a6000.json` | `inertia_profile.py` | qwen7b | a6000 | **PENDING** — A6000 run required |
+| `inertia_qwen7b_a6000.json` | `inertia_profile.py` | qwen7b | a6000 | optional — heterogeneous-tier extension only (not MVP) |
 
 (`inertia_smollm2_jetson.json` was pending; now **generated** on the Jetson — see the appended-rows table below.)
 
@@ -59,3 +59,4 @@ Machine-readable provenance is embedded in each JSON as `_provenance`. This inde
 | file | experiment | model | device | n | headline | source commit | old name |
 |---|---|---|---|---|---|---|---|
 | `inertia_smollm2_jetson.json` | `inertia_profile.py` | smollm2 | jetson | 5 reps × 7 depths (128–8192 tok) | re-prefill super-linear → 12.6 s @ 8k tok (0.34 s @ 128); KV residency linear 0.1875 MB/tok (1.5 GB @ 8k); D2H+serialize transfer 0.07 s → 4.06 s | pre-provenance (run 2026-06-10, predates convention) | `exp_inertia_jetson-edge_SmolLM2-1.7B.json` |
+| `inertia_smollm2_a6000.json` | `inertia_profile.py` | smollm2 | a6000 | 5 reps × 7 depths (128–8192 tok) | prefill super-linear: 12.5 ms @ 128 tok → 469.5 ms @ 8192 tok; ~2× faster than Jetson at every depth | 68e6d734 | new (no old name) |

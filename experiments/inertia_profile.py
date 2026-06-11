@@ -55,17 +55,23 @@ DEFAULT_TOKEN_COUNTS = [64, 128, 256, 384, 512, 768, 1024, 1536, 2048]
 DEFAULT_REPS = 5
 
 
-def _make_synthetic_prompt(llm_tok, n_tokens: int) -> str:
-    """Build a prompt that tokenizes to exactly n_tokens by padding with '.'."""
-    base = "Answer the following question in one word: What color is the sky?"
-    base_ids = llm_tok.encode(base, add_special_tokens=False)
-    filler_id = llm_tok.encode(".", add_special_tokens=False)[0]
-    target = n_tokens - len(base_ids)
-    if target < 0:
-        # base is already longer; truncate base
-        return llm_tok.decode(base_ids[:n_tokens])
-    padded_ids = base_ids + [filler_id] * target
-    return llm_tok.decode(padded_ids)
+def _make_synthetic_input_ids(llm_tok, n_tokens: int):
+    """Return a list of exactly n_tokens token IDs without a text roundtrip.
+
+    Bypasses decode→re-encode so BPE merging of filler characters cannot
+    compress the context. Uses BOS + repeated filler token; truncates/pads
+    to hit exactly n_tokens.
+    """
+    bos = llm_tok.bos_token_id
+    # Pick a stable single-token filler (period is 1 token in most BPE vocabs
+    # when encoded in isolation; we use the raw ID directly, no text roundtrip).
+    filler = llm_tok.encode(".", add_special_tokens=False)[0]
+    base = [bos] if bos is not None else []
+    remaining = max(0, n_tokens - len(base))
+    ids = (base + [filler] * remaining)[:n_tokens]
+    # Pad up if BOS was None and filler list came short (shouldn't happen).
+    ids += [filler] * (n_tokens - len(ids))
+    return ids
 
 
 def profile_inertia(llm, llm_tok, token_counts, reps, use_chat_template=False):
@@ -74,20 +80,30 @@ def profile_inertia(llm, llm_tok, token_counts, reps, use_chat_template=False):
     Returns list of dicts: [{context_tokens, reprefill_ms, std_ms, reps}, ...].
     """
     results = []
-    pad_id = (llm_tok.eos_token_id if use_chat_template
-               else llm_tok.pad_token_id)
+    pad_id = llm_tok.eos_token_id if use_chat_template else llm_tok.pad_token_id
 
     for n_tok in token_counts:
-        prompt = _make_synthetic_prompt(llm_tok, n_tok)
-
         if use_chat_template:
+            # Text path: chat template adds structural tokens; actual count will
+            # differ from n_tok but is reported accurately via input_ids.shape.
+            base = "Answer the following question in one word: What color is the sky?"
+            base_ids = llm_tok.encode(base, add_special_tokens=False)
+            filler = llm_tok.encode(".", add_special_tokens=False)[0]
+            target = max(0, n_tok - len(base_ids))
+            prompt = llm_tok.decode(base_ids + [filler] * target)
             formatted = llm_tok.apply_chat_template(
                 [{"role": "user", "content": prompt}],
                 tokenize=False, add_generation_prompt=True,
             )
             inputs = llm_tok(formatted, return_tensors="pt").to(llm.device)
         else:
-            inputs = llm_tok(prompt, return_tensors="pt").to(llm.device)
+            # Direct ID path: exact token count, no text roundtrip.
+            ids = _make_synthetic_input_ids(llm_tok, n_tok)
+            input_ids = torch.tensor([ids], dtype=torch.long).to(llm.device)
+            inputs = {
+                "input_ids": input_ids,
+                "attention_mask": torch.ones_like(input_ids),
+            }
 
         actual_tokens = int(inputs["input_ids"].shape[1])
         ms_samples = []

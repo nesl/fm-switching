@@ -34,8 +34,8 @@ KV bytes per token:
   Both are architectural derivations; on-device measurement pending.
 
 Inertia curves (re-prefill latency vs. context-token count):
-  Edge  : results/inertia_<MODEL>_jetson.json  [pending Jetson run]
-  Server: results/inertia_<MODEL>_a6000.json   [pending A6000 run]
+  Edge  : results/inertia_<MODEL>_<DEVICE_EDGE>.json    (default: jetson)
+  Server: results/inertia_<MODEL>_<DEVICE_SERVER>.json  (default: a6000)
   Generate with: python experiments/inertia_profile.py --model <MODEL> --device <device>
   Linear fallback active when JSON is absent.
 """
@@ -65,13 +65,14 @@ def _load_inertia_curve(json_path: str):
     except Exception as exc:
         warnings.warn(f"cost_model: could not parse {json_path}: {exc}")
         return None
-    rows = raw if isinstance(raw, list) else raw.get("data", [])
+    rows = raw if isinstance(raw, list) else raw.get("data", raw.get("depths", []))
     pairs = []
     for row in rows:
-        tok = row.get("context_tokens") or row.get("tokens")
+        tok = row.get("context_tokens") or row.get("tokens") or row.get("depth")
         lat = (row.get("reprefill_ms")
                or row.get("mean_reprefill_ms")
-               or row.get("prefill_ms"))
+               or row.get("prefill_ms")
+               or row.get("prefill_ms_mean"))
         if tok is not None and lat is not None:
             pairs.append((int(tok), float(lat)))
     if not pairs:
@@ -101,10 +102,13 @@ def _interpolate_inertia(curve, context_tokens: int) -> float:
 # Resolve paths relative to this file so imports work from any cwd.
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 
-# ── Global model knob ────────────────────────────────────────────────────
-# Change MODEL here to repoint the entire simulation to a different model.
-# Valid: "smollm2" | "qwen7b"
-MODEL = "smollm2"
+# ── Global model + device knobs ──────────────────────────────────────────
+# Change MODEL to repoint the whole sim to a different model.
+# Valid MODEL: "smollm2" | "qwen7b"
+# DEVICE_EDGE / DEVICE_SERVER match the device slugs in inertia JSON filenames.
+MODEL         = "smollm2"
+DEVICE_EDGE   = "jetson"
+DEVICE_SERVER = "a6000"
 
 # ── Per-model KV footprint (architectural, fp16 KV cache) ───────────────
 # smollm2 (MHA): 2×24×32×64×2 B = 196 608 B / 1 048 576 = 0.1875 MB/tok
@@ -138,15 +142,15 @@ def _load_frontier(json_path: str):
 # Inertia curves — both tiers use MODEL by default.
 # Schema: results/inertia_<MODEL>_<device>.json
 # Generate with: python experiments/inertia_profile.py --model <MODEL> --device <device>
-_INERTIA_EDGE_PATH   = _REPO_ROOT / "results" / f"inertia_{MODEL}_jetson.json"
-_INERTIA_SERVER_PATH = _REPO_ROOT / "results" / f"inertia_{MODEL}_a6000.json"
+_INERTIA_EDGE_PATH   = _REPO_ROOT / "results" / f"inertia_{MODEL}_{DEVICE_EDGE}.json"
+_INERTIA_SERVER_PATH = _REPO_ROOT / "results" / f"inertia_{MODEL}_{DEVICE_SERVER}.json"
 
 _INERTIA_EDGE = _load_inertia_curve(str(_INERTIA_EDGE_PATH))
 if _INERTIA_EDGE is None:
     warnings.warn(
         f"cost_model: edge inertia curve not found ({_INERTIA_EDGE_PATH.name}); "
         "falling back to linear FP16 prefill rate. "
-        f"Run: python experiments/inertia_profile.py --model {MODEL} --device jetson"
+        f"Run: python experiments/inertia_profile.py --model {MODEL} --device {DEVICE_EDGE}"
     )
 
 _INERTIA_SERVER = _load_inertia_curve(str(_INERTIA_SERVER_PATH))
@@ -154,7 +158,7 @@ if _INERTIA_SERVER is None:
     warnings.warn(
         f"cost_model: server inertia curve not found ({_INERTIA_SERVER_PATH.name}); "
         "falling back to linear CLOUD prefill rate. "
-        f"Run: python experiments/inertia_profile.py --model {MODEL} --device a6000"
+        f"Run: python experiments/inertia_profile.py --model {MODEL} --device {DEVICE_SERVER}"
     )
 
 # ── Edge FP16 (Qwen2.5-VL-3B + SmolLM2-1.7B) ───────────────────────────
@@ -238,8 +242,8 @@ KV_BYTES_PER_TOKEN_SERVER = KV_BYTES_PER_TOKEN
 # KV_MB_PER_TOKEN_SERVER    = _KV_MB_PER_TOKEN_BY_MODEL[_MODEL_SERVER]
 # KV_BYTES_PER_TOKEN_EDGE   = KV_MB_PER_TOKEN_EDGE   * 1024 * 1024
 # KV_BYTES_PER_TOKEN_SERVER = KV_MB_PER_TOKEN_SERVER * 1024 * 1024
-# _INERTIA_EDGE   = _load_inertia_curve(str(_REPO_ROOT/"results"/f"inertia_{_MODEL_EDGE}_jetson.json"))
-# _INERTIA_SERVER = _load_inertia_curve(str(_REPO_ROOT/"results"/f"inertia_{_MODEL_SERVER}_a6000.json"))
+# _INERTIA_EDGE   = _load_inertia_curve(str(_REPO_ROOT/"results"/f"inertia_{_MODEL_EDGE}_{DEVICE_EDGE}.json"))
+# _INERTIA_SERVER = _load_inertia_curve(str(_REPO_ROOT/"results"/f"inertia_{_MODEL_SERVER}_{DEVICE_SERVER}.json"))
 # _q_edge,   _t_edge   = _load_frontier(str(_REPO_ROOT/"results"/f"frontier_{_MODEL_EDGE}.json"))
 # _q_server, _t_server = _load_frontier(str(_REPO_ROOT/"results"/f"frontier_{_MODEL_SERVER}.json"))
 
