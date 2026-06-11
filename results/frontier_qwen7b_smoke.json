@@ -1,0 +1,183 @@
+{
+  "metadata": {
+    "model": "qwen7b",
+    "llm": "Qwen/Qwen2.5-7B-Instruct",
+    "vlm": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "quantization": "fp16",
+    "n_frames": 16,
+    "use_chat_template": false,
+    "n_questions_requested": 5,
+    "conditions": [
+      "blind",
+      "stateless",
+      "window-3",
+      "window-10",
+      "full",
+      "shuffled",
+      "summary-80",
+      "summary-200"
+    ],
+    "device": "NVIDIA GeForce RTX 3090 Ti",
+    "timestamp_start": "2026-06-11T12:11:14.161966",
+    "n_questions_scored": 5,
+    "captions_cache": "results/captions_cache.json",
+    "sum80_cache": "results/summaries_cache_80.json",
+    "sum200_cache": "results/summaries_cache_200.json",
+    "timestamp_end": "2026-06-11T12:11:49.868132"
+  },
+  "summary": {
+    "blind": {
+      "accuracy": 0.2,
+      "ci_lo": 0.0362,
+      "ci_hi": 0.6245,
+      "mean_prefill_ms": 140.6,
+      "std_prefill_ms": 108.6,
+      "mean_prompt_tokens": 274.0,
+      "n": 5
+    },
+    "stateless": {
+      "accuracy": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.4345,
+      "mean_prefill_ms": 92.1,
+      "std_prefill_ms": 28.9,
+      "mean_prompt_tokens": 336.0,
+      "n": 5
+    },
+    "window-3": {
+      "accuracy": 0.4,
+      "ci_lo": 0.1176,
+      "ci_hi": 0.7693,
+      "mean_prefill_ms": 115.3,
+      "std_prefill_ms": 27.4,
+      "mean_prompt_tokens": 461.8,
+      "n": 5
+    },
+    "window-10": {
+      "accuracy": 0.6,
+      "ci_lo": 0.2307,
+      "ci_hi": 0.8824,
+      "mean_prefill_ms": 193.7,
+      "std_prefill_ms": 25.0,
+      "mean_prompt_tokens": 903.8,
+      "n": 5
+    },
+    "full": {
+      "accuracy": 0.6,
+      "ci_lo": 0.2307,
+      "ci_hi": 0.8824,
+      "mean_prefill_ms": 270.6,
+      "std_prefill_ms": 33.5,
+      "mean_prompt_tokens": 1287.0,
+      "n": 5
+    },
+    "shuffled": {
+      "accuracy": 0.0,
+      "ci_lo": 0.0,
+      "ci_hi": 0.4345,
+      "mean_prefill_ms": 263.5,
+      "std_prefill_ms": 24.6,
+      "mean_prompt_tokens": 1264.2,
+      "n": 5
+    },
+    "summary-80": {
+      "accuracy": 0.4,
+      "ci_lo": 0.1176,
+      "ci_hi": 0.7693,
+      "mean_prefill_ms": 96.3,
+      "std_prefill_ms": 26.3,
+      "mean_prompt_tokens": 380.2,
+      "n": 5
+    },
+    "summary-200": {
+      "accuracy": 0.4,
+      "ci_lo": 0.1176,
+      "ci_hi": 0.7693,
+      "mean_prefill_ms": 128.6,
+      "std_prefill_ms": 26.7,
+      "mean_prompt_tokens": 521.4,
+      "n": 5
+    }
+  },
+  "significance": {
+    "full_vs_blind": {
+      "cond_a": "full",
+      "cond_b": "blind",
+      "b_a_correct_b_wrong": 2,
+      "c_a_wrong_b_correct": 0,
+      "mcnemar_p": 0.4795,
+      "delta_accuracy": 0.4
+    },
+    "full_vs_shuffled": {
+      "cond_a": "full",
+      "cond_b": "shuffled",
+      "b_a_correct_b_wrong": 3,
+      "c_a_wrong_b_correct": 0,
+      "mcnemar_p": 0.248213,
+      "delta_accuracy": 0.6
+    },
+    "stateless_vs_summary_80": {
+      "cond_a": "stateless",
+      "cond_b": "summary-80",
+      "b_a_correct_b_wrong": 0,
+      "c_a_wrong_b_correct": 2,
+      "mcnemar_p": 0.4795,
+      "delta_accuracy": -0.4
+    },
+    "summary_200_vs_full": {
+      "cond_a": "summary-200",
+      "cond_b": "full",
+      "b_a_correct_b_wrong": 1,
+      "c_a_wrong_b_correct": 2,
+      "mcnemar_p": 1.0,
+      "delta_accuracy": -0.2
+    },
+    "window_10_vs_full": {
+      "cond_a": "window-10",
+      "cond_b": "full",
+      "b_a_correct_b_wrong": 0,
+      "c_a_wrong_b_correct": 0,
+      "mcnemar_p": 1.0,
+      "delta_accuracy": 0.0
+    },
+    "summary_80_vs_summary_200": {
+      "cond_a": "summary-80",
+      "cond_b": "summary-200",
+      "b_a_correct_b_wrong": 1,
+      "c_a_wrong_b_correct": 1,
+      "mcnemar_p": 0.4795,
+      "delta_accuracy": 0.0
+    }
+  },
+  "per_question_path": "results/frontier_qwen7b_smoke_perquestion.json",
+  "_provenance": {
+    "git_commit": "4f371dc87fbbb0dcb86368d64aa4159e260f203a",
+    "script": "representation_frontier.py",
+    "model": "qwen7b",
+    "timestamp": "2026-06-11T12:11:49.867775",
+    "device": "nvidia_geforce_rtx_3090_ti",
+    "n": 5,
+    "args": {
+      "model": "qwen7b",
+      "llm": null,
+      "vlm": "Qwen/Qwen2.5-VL-3B-Instruct",
+      "quantization": "fp16",
+      "videos_dir": "data/egoschema/videos",
+      "questions": "data/egoschema/questions.json",
+      "answers": "data/egoschema/subset_answers.json",
+      "captions_cache": "results/captions_cache.json",
+      "sum80_cache": "results/summaries_cache_80.json",
+      "sum200_cache": "results/summaries_cache_200.json",
+      "skipped_log": "results/frontier_skipped_clips.json",
+      "output": "results/frontier_qwen7b_smoke.json",
+      "per_q_output": "results/frontier_qwen7b_smoke_perquestion.json",
+      "frames": 16,
+      "max_pixels": 200704,
+      "vlm_max_tokens": 60,
+      "llm_max_tokens": 16,
+      "limit": 5,
+      "skip_captioning": true,
+      "skip_summarization": true
+    }
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "metadata": {
+    "exp": "exp11_smollm2_frontier",
+    "extends": "exp10_representation_frontier",
+    "device": "NVIDIA RTX A6000",
+    "llm": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+    "quantization": "fp16",
+    "summaries_source": "Qwen/Qwen2.5-7B-Instruct (reused from exp10)",
+    "prompt_format": "chat-template (apply_chat_template) \u2014 required for SmolLM2-Instruct",
+    "n_questions_requested": 500,
+    "conditions": [
+      "blind",
+      "stateless",
+      "window-3",
+      "window-10",
+      "full",
+      "shuffled",
+      "summary-80",
+      "summary-200"
+    ],
+    "timestamp_start": "2026-06-10T22:05:02.522950",
+    "n_questions_scored": 500,
+    "captions_cache": "results/egoschema_captions.json",
+    "sum80_cache": "results/egoschema_summaries.json",
+    "sum200_cache": "results/egoschema_summaries_200.json",
+    "timestamp_end": "2026-06-10T22:12:05.418991"
+  },
+  "summary": {
+    "blind": {
+      "accuracy": 0.264,
+      "ci_lo": 0.2273,
+      "ci_hi": 0.3043,
+      "mean_prefill_ms": 27.2,
+      "std_prefill_ms": 5.4,
+      "mean_prompt_tokens": 279.4,
+      "n": 500
+    },
+    "stateless": {
+      "accuracy": 0.332,
+      "ci_lo": 0.2921,
+      "ci_hi": 0.3744,
+      "mean_prefill_ms": 29.7,
+      "std_prefill_ms": 4.0,
+      "mean_prompt_tokens": 341.2,
+      "n": 500
+    },
+    "window-3": {
+      "accuracy": 0.356,
+      "ci_lo": 0.3153,
+      "ci_hi": 0.3989,
+      "mean_prefill_ms": 35.6,
+      "std_prefill_ms": 3.4,
+      "mean_prompt_tokens": 467.4,
+      "n": 500
+    },
+    "window-10": {
+      "accuracy": 0.36,
+      "ci_lo": 0.3191,
+      "ci_hi": 0.403,
+      "mean_prefill_ms": 55.6,
+      "std_prefill_ms": 4.5,
+      "mean_prompt_tokens": 909.4,
+      "n": 500
+    },
+    "full": {
+      "accuracy": 0.384,
+      "ci_lo": 0.3424,
+      "ci_hi": 0.4274,
+      "mean_prefill_ms": 73.0,
+      "std_prefill_ms": 8.1,
+      "mean_prompt_tokens": 1290.0,
+      "n": 500
+    },
+    "shuffled": {
+      "accuracy": 0.264,
+      "ci_lo": 0.2273,
+      "ci_hi": 0.3043,
+      "mean_prefill_ms": 72.9,
+      "std_prefill_ms": 6.0,
+      "mean_prompt_tokens": 1290.1,
+      "n": 500
+    },
+    "summary-80": {
+      "accuracy": 0.388,
+      "ci_lo": 0.3463,
+      "ci_hi": 0.4314,
+      "mean_prefill_ms": 32.3,
+      "std_prefill_ms": 4.6,
+      "mean_prompt_tokens": 385.1,
+      "n": 500
+    },
+    "summary-200": {
+      "accuracy": 0.384,
+      "ci_lo": 0.3424,
+      "ci_hi": 0.4274,
+      "mean_prefill_ms": 37.4,
+      "std_prefill_ms": 7.8,
+      "mean_prompt_tokens": 531.6,
+      "n": 500
+    }
+  },
+  "significance": {
+    "full_vs_blind": {
+      "cond_a": "full",
+      "cond_b": "blind",
+      "b_a_correct_b_wrong": 83,
+      "c_a_wrong_b_correct": 23,
+      "mcnemar_p": 0.0,
+      "delta_accuracy": 0.12
+    },
+    "full_vs_shuffled": {
+      "cond_a": "full",
+      "cond_b": "shuffled",
+      "b_a_correct_b_wrong": 70,
+      "c_a_wrong_b_correct": 10,
+      "mcnemar_p": 0.0,
+      "delta_accuracy": 0.12
+    },
+    "stateless_vs_summary_80": {
+      "cond_a": "stateless",
+      "cond_b": "summary-80",
+      "b_a_correct_b_wrong": 31,
+      "c_a_wrong_b_correct": 59,
+      "mcnemar_p": 0.004427,
+      "delta_accuracy": -0.056
+    },
+    "summary_200_vs_full": {
+      "cond_a": "summary-200",
+      "cond_b": "full",
+      "b_a_correct_b_wrong": 34,
+      "c_a_wrong_b_correct": 34,
+      "mcnemar_p": 0.903479,
+      "delta_accuracy": 0.0
+    },
+    "window_10_vs_full": {
+      "cond_a": "window-10",
+      "cond_b": "full",
+      "b_a_correct_b_wrong": 13,
+      "c_a_wrong_b_correct": 25,
+      "mcnemar_p": 0.074353,
+      "delta_accuracy": -0.024
+    },
+    "summary_80_vs_summary_200": {
+      "cond_a": "summary-80",
+      "cond_b": "summary-200",
+      "b_a_correct_b_wrong": 27,
+      "c_a_wrong_b_correct": 25,
+      "mcnemar_p": 0.889707,
+      "delta_accuracy": 0.004
+    }
+  },
+  "per_question_path": "results/exp10_per_question_smollm2.json",
+  "_provenance": {
+    "git_commit": "pre-provenance",
+    "script": "representation_frontier.py",
+    "model": "smollm2",
+    "device": "nvidia_rtx_a6000",
+    "n": 500,
+    "note": "Backfilled from exp10_frontier_500_smollm2.json; git_commit unknown (pre-provenance)"
+  }
+}

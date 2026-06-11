@@ -1,0 +1,160 @@
+{
+  "metadata": {
+    "exp": "exp10_representation_frontier",
+    "device": "NVIDIA RTX A6000",
+    "vlm": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "llm": "Qwen/Qwen2.5-7B-Instruct",
+    "quantization": "fp16",
+    "n_frames": 16,
+    "n_questions_requested": 500,
+    "conditions": [
+      "blind",
+      "stateless",
+      "window-3",
+      "window-10",
+      "full",
+      "shuffled",
+      "summary-80",
+      "summary-200"
+    ],
+    "timestamp_start": "2026-06-10T18:28:46.583793",
+    "n_questions_scored": 500,
+    "captions_cache": "results/egoschema_captions.json",
+    "sum80_cache": "results/egoschema_summaries.json",
+    "sum200_cache": "results/egoschema_summaries_200.json",
+    "timestamp_end": "2026-06-10T19:20:44.468412"
+  },
+  "summary": {
+    "blind": {
+      "accuracy": 0.268,
+      "ci_lo": 0.2311,
+      "ci_hi": 0.3085,
+      "mean_prefill_ms": 56.9,
+      "std_prefill_ms": 16.7,
+      "mean_prompt_tokens": 235.0,
+      "n": 500
+    },
+    "stateless": {
+      "accuracy": 0.406,
+      "ci_lo": 0.3638,
+      "ci_hi": 0.4496,
+      "mean_prefill_ms": 65.7,
+      "std_prefill_ms": 17.4,
+      "mean_prompt_tokens": 296.3,
+      "n": 500
+    },
+    "window-3": {
+      "accuracy": 0.472,
+      "ci_lo": 0.4286,
+      "ci_hi": 0.5158,
+      "mean_prefill_ms": 89.0,
+      "std_prefill_ms": 15.8,
+      "mean_prompt_tokens": 421.3,
+      "n": 500
+    },
+    "window-10": {
+      "accuracy": 0.506,
+      "ci_lo": 0.4623,
+      "ci_hi": 0.5496,
+      "mean_prefill_ms": 152.6,
+      "std_prefill_ms": 12.6,
+      "mean_prompt_tokens": 859.3,
+      "n": 500
+    },
+    "full": {
+      "accuracy": 0.502,
+      "ci_lo": 0.4583,
+      "ci_hi": 0.5456,
+      "mean_prefill_ms": 204.6,
+      "std_prefill_ms": 15.5,
+      "mean_prompt_tokens": 1236.3,
+      "n": 500
+    },
+    "shuffled": {
+      "accuracy": 0.278,
+      "ci_lo": 0.2405,
+      "ci_hi": 0.3188,
+      "mean_prefill_ms": 204.0,
+      "std_prefill_ms": 14.3,
+      "mean_prompt_tokens": 1236.1,
+      "n": 500
+    },
+    "summary-80": {
+      "accuracy": 0.47,
+      "ci_lo": 0.4266,
+      "ci_hi": 0.5138,
+      "mean_prefill_ms": 75.1,
+      "std_prefill_ms": 16.0,
+      "mean_prompt_tokens": 339.2,
+      "n": 500
+    },
+    "summary-200": {
+      "accuracy": 0.498,
+      "ci_lo": 0.4544,
+      "ci_hi": 0.5417,
+      "mean_prefill_ms": 99.3,
+      "std_prefill_ms": 15.4,
+      "mean_prompt_tokens": 485.0,
+      "n": 500
+    }
+  },
+  "significance": {
+    "full_vs_blind": {
+      "cond_a": "full",
+      "cond_b": "blind",
+      "b_a_correct_b_wrong": 151,
+      "c_a_wrong_b_correct": 34,
+      "mcnemar_p": 0.0,
+      "delta_accuracy": 0.234
+    },
+    "full_vs_shuffled": {
+      "cond_a": "full",
+      "cond_b": "shuffled",
+      "b_a_correct_b_wrong": 138,
+      "c_a_wrong_b_correct": 26,
+      "mcnemar_p": 0.0,
+      "delta_accuracy": 0.224
+    },
+    "stateless_vs_summary_80": {
+      "cond_a": "stateless",
+      "cond_b": "summary-80",
+      "b_a_correct_b_wrong": 46,
+      "c_a_wrong_b_correct": 78,
+      "mcnemar_p": 0.005371,
+      "delta_accuracy": -0.064
+    },
+    "summary_200_vs_full": {
+      "cond_a": "summary-200",
+      "cond_b": "full",
+      "b_a_correct_b_wrong": 38,
+      "c_a_wrong_b_correct": 40,
+      "mcnemar_p": 0.90985,
+      "delta_accuracy": -0.004
+    },
+    "window_10_vs_full": {
+      "cond_a": "window-10",
+      "cond_b": "full",
+      "b_a_correct_b_wrong": 23,
+      "c_a_wrong_b_correct": 21,
+      "mcnemar_p": 0.880168,
+      "delta_accuracy": 0.004
+    },
+    "summary_80_vs_summary_200": {
+      "cond_a": "summary-80",
+      "cond_b": "summary-200",
+      "b_a_correct_b_wrong": 29,
+      "c_a_wrong_b_correct": 43,
+      "mcnemar_p": 0.125506,
+      "delta_accuracy": -0.028
+    }
+  },
+  "per_question_path": "results/exp10_per_question.json",
+  "_provenance": {
+    "git_commit": "pre-provenance",
+    "script": "representation_frontier.py",
+    "model": "qwen7b",
+    "device": "nvidia_rtx_a6000",
+    "n": 500,
+    "note": "Backfilled from exp10_representation_frontier_500.json; git_commit unknown (pre-provenance)"
+  }
+}
