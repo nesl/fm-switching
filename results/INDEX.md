@@ -15,7 +15,7 @@ Machine-readable provenance is embedded in each JSON as `_provenance`. This inde
 | Caches | `captions_cache.json`, `summaries_cache_80.json`, `summaries_cache_200.json` | — |
 
 **Model slugs:** `qwen7b` = Qwen/Qwen2.5-7B-Instruct · `smollm2` = HuggingFaceTB/SmolLM2-1.7B-Instruct  
-**Device slugs:** `a6000` = NVIDIA RTX A6000 · `jetson` = Jetson AGX Orin 15W · `a5000` = NVIDIA RTX A5000
+**Device slugs:** `a6000` = NVIDIA RTX A6000 · `jetson` = Jetson AGX Orin 15W
 
 ---
 
@@ -43,7 +43,7 @@ Machine-readable provenance is embedded in each JSON as `_provenance`. This inde
 | file | script | model | device | status |
 |---|---|---|---|---|
 | `inertia_smollm2_jetson.json` | `inertia_profile.py` | smollm2 | jetson | **PENDING** — Jetson AGX Orin run required |
-| `inertia_qwen7b_a5000.json` | `inertia_profile.py` | qwen7b | a5000 | **PENDING** — A5000 run required |
+| `inertia_qwen7b_a6000.json` | `inertia_profile.py` | qwen7b | a6000 | **PENDING** — A6000 run required |
 
 ## Caches (not tracked in git — regenerable)
 

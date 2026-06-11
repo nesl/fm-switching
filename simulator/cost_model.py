@@ -35,7 +35,7 @@ KV bytes per token:
 
 Inertia curves (re-prefill latency vs. context-token count):
   Edge  : results/inertia_<MODEL>_jetson.json  [pending Jetson run]
-  Server: results/inertia_<MODEL>_a5000.json   [pending A5000 run]
+  Server: results/inertia_<MODEL>_a6000.json   [pending A6000 run]
   Generate with: python experiments/inertia_profile.py --model <MODEL> --device <device>
   Linear fallback active when JSON is absent.
 """
@@ -139,7 +139,7 @@ def _load_frontier(json_path: str):
 # Schema: results/inertia_<MODEL>_<device>.json
 # Generate with: python experiments/inertia_profile.py --model <MODEL> --device <device>
 _INERTIA_EDGE_PATH   = _REPO_ROOT / "results" / f"inertia_{MODEL}_jetson.json"
-_INERTIA_SERVER_PATH = _REPO_ROOT / "results" / f"inertia_{MODEL}_a5000.json"
+_INERTIA_SERVER_PATH = _REPO_ROOT / "results" / f"inertia_{MODEL}_a6000.json"
 
 _INERTIA_EDGE = _load_inertia_curve(str(_INERTIA_EDGE_PATH))
 if _INERTIA_EDGE is None:
@@ -154,7 +154,7 @@ if _INERTIA_SERVER is None:
     warnings.warn(
         f"cost_model: server inertia curve not found ({_INERTIA_SERVER_PATH.name}); "
         "falling back to linear CLOUD prefill rate. "
-        f"Run: python experiments/inertia_profile.py --model {MODEL} --device a5000"
+        f"Run: python experiments/inertia_profile.py --model {MODEL} --device a6000"
     )
 
 # ── Edge FP16 (Qwen2.5-VL-3B + SmolLM2-1.7B) ───────────────────────────
@@ -239,7 +239,7 @@ KV_BYTES_PER_TOKEN_SERVER = KV_BYTES_PER_TOKEN
 # KV_BYTES_PER_TOKEN_EDGE   = KV_MB_PER_TOKEN_EDGE   * 1024 * 1024
 # KV_BYTES_PER_TOKEN_SERVER = KV_MB_PER_TOKEN_SERVER * 1024 * 1024
 # _INERTIA_EDGE   = _load_inertia_curve(str(_REPO_ROOT/"results"/f"inertia_{_MODEL_EDGE}_jetson.json"))
-# _INERTIA_SERVER = _load_inertia_curve(str(_REPO_ROOT/"results"/f"inertia_{_MODEL_SERVER}_a5000.json"))
+# _INERTIA_SERVER = _load_inertia_curve(str(_REPO_ROOT/"results"/f"inertia_{_MODEL_SERVER}_a6000.json"))
 # _q_edge,   _t_edge   = _load_frontier(str(_REPO_ROOT/"results"/f"frontier_{_MODEL_EDGE}.json"))
 # _q_server, _t_server = _load_frontier(str(_REPO_ROOT/"results"/f"frontier_{_MODEL_SERVER}.json"))
 
@@ -290,7 +290,7 @@ def inertia_ms(tier: str, context_tokens: int) -> float:
 
     Provenance:
       edge   — _INERTIA_EDGE loaded from results/inertia_<MODEL>_jetson.json
-      server — _INERTIA_SERVER loaded from results/inertia_<MODEL>_a5000.json
+      server — _INERTIA_SERVER loaded from results/inertia_<MODEL>_a6000.json
       Linear fallback active for any tier whose JSON is not yet present.
     """
     if tier == "edge":

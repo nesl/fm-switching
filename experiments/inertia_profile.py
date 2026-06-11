@@ -6,7 +6,7 @@ a target device. Output feeds directly into cost_model.py's inertia curves.
 
 Output schema: results/inertia_<model>_<device>.json
   e.g.  inertia_smollm2_jetson.json   (SmolLM2-1.7B on Jetson AGX Orin)
-        inertia_qwen7b_a5000.json     (Qwen2.5-7B on A5000)
+        inertia_qwen7b_a6000.json     (Qwen2.5-7B on A6000)
 
 Output JSON schema (list, readable by cost_model._load_inertia_curve):
   [{"context_tokens": N, "reprefill_ms": M, "std_ms": S, "reps": R}, ...]
@@ -18,9 +18,9 @@ Usage:
         --llm HuggingFaceTB/SmolLM2-1.7B-Instruct \\
         --quantization fp16
 
-    # A5000 server — Qwen2.5-7B (cloud model):
+    # A6000 server — Qwen2.5-7B (cloud model):
     python experiments/inertia_profile.py \\
-        --model qwen7b --device a5000 \\
+        --model qwen7b --device a6000 \\
         --llm Qwen/Qwen2.5-7B-Instruct \\
         --quantization fp16
 
@@ -127,7 +127,7 @@ def main():
     ap.add_argument("--model",  required=True,
                     help="Model slug for output filename, e.g. smollm2, qwen7b.")
     ap.add_argument("--device", required=True,
-                    help="Device slug for output filename, e.g. jetson, a5000, a6000.")
+                    help="Device slug for output filename, e.g. jetson, a6000.")
     ap.add_argument("--llm",    required=True,
                     help="HuggingFace model ID, e.g. HuggingFaceTB/SmolLM2-1.7B-Instruct.")
     ap.add_argument("--quantization", choices=["bnb", "prequant-bnb", "fp16"],
