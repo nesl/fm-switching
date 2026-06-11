@@ -82,3 +82,8 @@ class RoutedSyncLHPolicy(Policy):
             "cloud_failed_mid_cycle": cloud_failed,
             "successful_fallback": successful_fallback,
         }
+
+    def shadow_memory_mb(self, *, state_loc, state_quant, ctx_tokens,
+                          accumulated_tokens, **_):
+        """Report cloud replica footprint so the OOM check accounts for dual-tier KV."""
+        return replica_memory_mb("cloud", ctx_tokens, quant=state_quant)

@@ -97,10 +97,25 @@ INDOOR = np.array([
     [0.30, 0.55, 0.15],
 ])
 
+# HARSH: underground/rural CPS-style connectivity.
+# Transition matrix (rows = from-state, cols = to-state):
+#   good→{good,degraded,disc} = {0.77, 0.20, 0.03}   mean dwell good     ≈  4.3 s
+#   deg→{good,degraded,disc}  = {0.20, 0.73, 0.07}   mean dwell degraded ≈  3.7 s
+#   disc→{good,degraded,disc} = {0.03, 0.02, 0.95}   mean dwell disc     ≈ 20.0 s ≈ 2 cycles
+# Steady-state: good≈27%, degraded≈24%, disconnected≈49%.
+# Designed to force sustained multi-cycle edge spells and test whether
+# super-linear edge re-prefill (inertia) becomes the dominant cost term.
+HARSH = np.array([
+    [0.77, 0.20, 0.03],
+    [0.20, 0.73, 0.07],
+    [0.03, 0.02, 0.95],
+])
+
 PROFILES: Dict[str, np.ndarray] = {
     "campus": CAMPUS,
     "urban": URBAN,
     "indoor": INDOOR,
+    "harsh": HARSH,
 }
 
 

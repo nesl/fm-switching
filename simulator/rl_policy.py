@@ -106,7 +106,7 @@ class OrchestratorEnv:
             self.last_migration_time = self.time_s
             migrated = True
         elif action == MIGRATE_TO_EDGE and self.location == "cloud":
-            gap = migration_cost_s("to_edge", self.quant, ctx, rtt, warm_cache=True)
+            gap = migration_cost_s("to_edge", self.quant, ctx, rtt)
             self.location = "edge"
             self.last_migration_time = self.time_s
             migrated = True

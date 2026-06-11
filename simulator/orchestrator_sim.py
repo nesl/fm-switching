@@ -15,8 +15,9 @@ from typing import List, Optional, Tuple
 
 from cost_model import (FP16, INT4, CLOUD,
                         KV_GROWTH_MB_PER_CYCLE, TOKENS_PER_CYCLE_FULL,
-                        QUALITY, EFFECTIVE_TOKENS,
+                        QUALITY, EFFECTIVE_TOKENS, SUMMARIZATION_COST_S,
                         llm_latency_ms, migration_cost_s, memory_used_mb,
+                        inertia_ms,
                         edge_compute_ms as edge_compute_ms_local,
                         cloud_compute_ms as cloud_compute_ms_local,
                         cloud_serve_outcome)
@@ -32,6 +33,8 @@ SET_WINDOW_3         = "SET_WINDOW_3"
 SET_WINDOW_10        = "SET_WINDOW_10"
 SET_FULL_CONTEXT     = "SET_FULL_CONTEXT"
 SET_STATELESS        = "SET_STATELESS"
+SET_SUMMARY_80       = "SET_SUMMARY_80"
+SET_SUMMARY_200      = "SET_SUMMARY_200"
 # Latency-hiding: cloud is already prewarmed, switch with zero gap.
 # Any small residual cost (buffer-and-replay delta prefill + 1 RTT) is paid
 # by the policy and returned through its on_cycle hook.
@@ -41,6 +44,7 @@ ALL_ACTIONS = [
     STAY, MIGRATE_TO_CLOUD, MIGRATE_TO_EDGE,
     SWITCH_TO_FP16, SWITCH_TO_INT4,
     SET_WINDOW_3, SET_WINDOW_10, SET_FULL_CONTEXT, SET_STATELESS,
+    SET_SUMMARY_80, SET_SUMMARY_200,
     SWITCH_TO_CLOUD_PREWARMED,
 ]
 
@@ -109,6 +113,9 @@ class EpisodeMetrics:
     cloud_failure_events: int = 0       # cycles where cloud serving started but failed mid-cycle
     successful_fallbacks: int = 0       # LH variants: cycles where warm replica saved the cycle
     unrecoverable_cycles: int = 0       # non-LH: cycles with cloud failure and no replica
+    # Cumulative re-prefill costs (seconds) — breakdown for inertia-binding analysis:
+    cloud_failure_reprefill_s: float = 0.0  # edge re-prefill paid on forced cloud→edge returns
+    mode_switch_reprefill_s: float = 0.0    # re-prefill paid on rep-mode switches (edge or server)
 
 
 # ── Trace readers ──────────────────────────────────────────────────────
@@ -171,10 +178,12 @@ def effective_tokens(mode: str, accumulated_full_tokens: int) -> int:
 
 def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
                 start_quant="fp16", start_location="edge",
-                start_mode="full", lookahead=10, verbose=False):
+                start_mode="full", lookahead=10, verbose=False,
+                quality_override=None):
     """Run one episode of the orchestrator simulator. Returns EpisodeMetrics."""
     if hasattr(policy, "reset"):
         policy.reset()
+    _q = quality_override if quality_override is not None else QUALITY
     state_q   = start_quant
     state_loc = start_location
     state_mode = start_mode
@@ -198,6 +207,8 @@ def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
     n_cloud_failures = 0
     n_successful_fallbacks = 0
     n_unrecoverable = 0
+    cloud_failure_reprefill_s = 0.0
+    mode_switch_reprefill_s = 0.0
 
     n = len(workload)
     prev_accum_full = None
@@ -261,6 +272,7 @@ def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
 
         action = policy.decide(sim_state)
         gap_s = 0.0
+        prev_mode = state_mode
 
         # Apply action
         if action == STAY:
@@ -273,8 +285,7 @@ def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
                 n_migrations += 1
         elif action == MIGRATE_TO_EDGE:
             if state_loc != "edge":
-                gap_s = migration_cost_s("to_edge", state_q, ctx_tokens, rtt_ms,
-                                          warm_cache=True)
+                gap_s = migration_cost_s("to_edge", state_q, ctx_tokens, rtt_ms)
                 state_loc = "edge"
                 last_migration_time = time_s
                 n_migrations += 1
@@ -301,6 +312,10 @@ def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
             state_mode = "full"
         elif action == SET_STATELESS:
             state_mode = "stateless"
+        elif action == SET_SUMMARY_80:
+            state_mode = "summary-80"
+        elif action == SET_SUMMARY_200:
+            state_mode = "summary-200"
         elif action == SWITCH_TO_CLOUD_PREWARMED:
             if state_loc != "cloud" and connected:
                 # Cloud is already warmed by the latency-hiding policy. The
@@ -316,6 +331,18 @@ def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
                 n_migrations += 1
         else:
             raise ValueError(f"unknown action: {action}")
+
+        # Charge re-prefill gap when representation mode changes.
+        # The KV cache must be rebuilt for the new context depth.
+        # Summarization modes also pay SUMMARIZATION_COST_S for the summary pass.
+        if state_mode != prev_mode:
+            _new_ctx = effective_tokens(state_mode, accumulated_full)
+            _tier = "edge" if state_loc == "edge" else "server"
+            _ms_reprefill_s = inertia_ms(_tier, _new_ctx) / 1000.0
+            gap_s += _ms_reprefill_s
+            mode_switch_reprefill_s += _ms_reprefill_s
+            if state_mode in ("summary-80", "summary-200"):
+                gap_s += SUMMARIZATION_COST_S
 
         # Recompute after action (mode/loc/quant may have changed)
         ctx_tokens = effective_tokens(state_mode, accumulated_full)
@@ -379,8 +406,9 @@ def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
             if state_loc == "cloud" and not cloud_ok:
                 n_cloud_failures += 1
                 n_unrecoverable += 1
-                gap_s += migration_cost_s("to_edge", state_q, ctx_tokens,
-                                           rtt_ms, warm_cache=True)
+                _reprefill_s = migration_cost_s("to_edge", state_q, ctx_tokens, rtt_ms)
+                gap_s += _reprefill_s
+                cloud_failure_reprefill_s += _reprefill_s
                 state_loc = "edge"
                 last_migration_time = time_s
                 n_migrations += 1
@@ -432,7 +460,7 @@ def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
             cycle_total_s=cycle_total_s,
             context_tokens=ctx_tokens,
             memory_used_mb=mem,
-            quality_score=QUALITY[state_mode],
+            quality_score=_q[state_mode],
             action=action,
             migration_gap_s=gap_s,
             oom=oom,
@@ -483,4 +511,6 @@ def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
         cloud_failure_events=n_cloud_failures,
         successful_fallbacks=n_successful_fallbacks,
         unrecoverable_cycles=n_unrecoverable,
+        cloud_failure_reprefill_s=round(cloud_failure_reprefill_s, 3),
+        mode_switch_reprefill_s=round(mode_switch_reprefill_s, 3),
     )

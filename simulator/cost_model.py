@@ -284,6 +284,11 @@ _TOKENS_FALLBACK = {
 }
 EFFECTIVE_TOKENS = _t_loaded if _t_loaded else _TOKENS_FALLBACK
 
+# Cost of entering or refreshing a summary context mode: one LLM pass over
+# the full context to produce the summary (~1290 tok prefill + 80-200 tok decode
+# on edge Jetson → ~0.5 s; rounded up to 1.5 s for VLM+scheduling overhead).
+SUMMARIZATION_COST_S = 1.5
+
 
 def inertia_ms(tier: str, context_tokens: int) -> float:
     """Return the measured re-prefill (+ KV-transfer) latency in ms for
@@ -396,21 +401,37 @@ def cloud_prefill_extend_s(from_tokens, to_tokens, network_rtt_ms, gen_tokens=0)
 
 
 def migration_cost_s(direction, target_quant, context_tokens, network_rtt_ms,
-                     warm_cache=True, gen_tokens=10):
+                     cold_edge=False, gen_tokens=10):
     """direction: 'to_cloud' | 'to_edge'.
     Returns total seconds the LLM is unavailable during the migration.
+
+    Warm-server / warm-edge model (default, cold_edge=False):
+      to_cloud: cloud server is modeled as permanently warm (model resident).
+                Cost = KV re-prefill on A6000 (measured inertia curve) + RTT.
+                No weight load. Source: inertia_smollm2_a6000.json.
+      to_edge:  edge LLM is assumed resident during cloud serving (held in VRAM
+                throughout; only feasible when memory_cap_mb ≥ weights_total_mb
+                + KV — i.e., the abundant-cap scenario).
+                Cost = Jetson KV re-prefill (inertia curve). No reload.
+
+    Cold-edge sensitivity (cold_edge=True):
+      to_edge:  adds llm_load_warm_s ≈ 47 s (Jetson LLM warm-load, measured in
+                memory_loading.py).  Use only when modelling a memory-pressured
+                edge that evicts the LLM during cloud serving.
+                Source: FP16["llm_load_warm_s"] = 47 s (SmolLM2-1.7B, 3264 MB).
+
+    NOTE: warm_cache kwarg accepted as alias for backward-compat; ignored.
     """
     if direction == "to_cloud":
-        # Send context, prefill on cloud, no model load needed
-        prefill_ms = CLOUD["llm_prefill_ms_per_token"] * context_tokens
-        decode_ms  = CLOUD["llm_typical_decode_ms"] * gen_tokens
-        return (prefill_ms + decode_ms + network_rtt_ms) / 1000.0
+        # Cloud server warm: KV re-prefill (measured A6000 curve) + one RTT.
+        return (inertia_ms("server", context_tokens) + network_rtt_ms) / 1000.0
     elif direction == "to_edge":
-        # Load model on edge + prefill locally
         params = FP16 if target_quant == "fp16" else INT4
-        load_s = params["llm_load_warm_s"] if warm_cache else params["llm_load_cold_s"]
-        prefill_ms = params["llm_prefill_ms_per_token"] * context_tokens
-        return load_s + (prefill_ms / 1000.0)
+        prefill_s = inertia_ms("edge", context_tokens) / 1000.0
+        if cold_edge:
+            # SENSITIVITY: cold edge — add warm-reload time (~47 s for smollm2 FP16)
+            return params["llm_load_warm_s"] + prefill_s
+        return prefill_s
     else:
         raise ValueError(direction)
 

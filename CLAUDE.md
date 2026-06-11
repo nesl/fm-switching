@@ -43,7 +43,7 @@ Device-dependent scripts are shared and take `--device` (never put device in the
 | `premise_<model>_<tag>.json` | pilot / premise validation | `premise_qwen7b_n150.json` |
 
 **Model slugs:** `qwen7b` · `smollm2`  
-**Device slugs:** `a6000` · `jetson` · `a5000`
+**Device slugs:** `a6000` · `jetson` · `a6000`
 
 ---
 
@@ -76,17 +76,24 @@ Existing JSONs written before this convention was adopted carry `"git_commit": "
 
 ---
 
-## cost_model.py loading convention
+## cost_model.py — MODEL knob and loading convention
 
-`simulator/cost_model.py` loads at import time:
+`MODEL = "smollm2"` at the top of `simulator/cost_model.py` is the single global knob.
+Change it to switch the entire simulation to a different model. Valid: `"smollm2"` | `"qwen7b"`.
+
+`MODEL` drives three quantities at import time:
 
 | data | source | fallback |
 |---|---|---|
-| QUALITY, EFFECTIVE_TOKENS | `results/frontier_smollm2.json` | hardcoded exp11 measured values |
-| Edge inertia curve | `results/inertia_smollm2_jetson.json` | linear FP16 prefill rate |
-| Server inertia curve | `results/inertia_qwen7b_a5000.json` | linear CLOUD prefill rate |
+| QUALITY, EFFECTIVE_TOKENS | `results/frontier_<MODEL>.json` | hardcoded smollm2 measured values |
+| KV_MB_PER_TOKEN | `_KV_MB_PER_TOKEN_BY_MODEL[MODEL]` lookup | — (dict always present) |
+| Edge inertia curve | `results/inertia_<MODEL>_jetson.json` | linear FP16 prefill rate |
+| Server inertia curve | `results/inertia_<MODEL>_a6000.json` | linear CLOUD prefill rate |
 
-Drop the schema-named JSON into `results/` and re-import to activate; no code change needed.
+Both tiers use the same `MODEL` by default (keeps quality tier-independent).
+A commented heterogeneous-tier block in cost_model.py documents how to enable per-tier model overrides and explains the confound that introduces.
+
+Drop any schema-named JSON into `results/` and re-import to activate; no code change needed.
 
 ---
 
@@ -105,6 +112,6 @@ Drop the schema-named JSON into `results/` and re-import to activate; no code ch
 |---|---|---|
 | **A6000** (this box) | Accuracy / representation experiments | `representation_frontier.py`, `frame_sweep.py`, `premise_egoschema.py` |
 | **Jetson AGX Orin** | Edge inertia profiling | `inertia_profile.py --model smollm2 --device jetson` |
-| **A5000** | Server inertia profiling | `inertia_profile.py --model qwen7b --device a5000` |
+| **A6000** | Server inertia profiling | `inertia_profile.py --model qwen7b --device a6000` |
 
 Result JSONs produced on other boxes follow the same naming schema and are committed from those boxes.
