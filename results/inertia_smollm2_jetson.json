@@ -1,0 +1,117 @@
+{
+  "_provenance": {
+    "git_commit": "pre-provenance",
+    "script": "inertia_profile.py",
+    "model": "smollm2",
+    "device": "jetson",
+    "n": 5,
+    "timestamp": "2026-06-10T11:23:52.685309",
+    "note": "Backfilled post-refactor from metadata; original run (2026-06-10) predates the provenance convention, hence git_commit='pre-provenance'. n = repeats per depth (5); per-(depth,repeat) seed = 1000*depth+repeat_idx, no single global seed recorded. A fresh provenance-stamped re-run via inertia_profile.py is optional and was NOT performed."
+  },
+  "metadata": {
+    "experiment": "exp10_inertia_profile",
+    "device": "Orin",
+    "device_label": "jetson-edge",
+    "total_mem_gb": 61.36,
+    "model_arg": "SmolLM2-1.7B",
+    "model_hf_id": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+    "effective_model_id": "HuggingFaceTB/SmolLM2-1.7B-Instruct",
+    "quantization": "fp16",
+    "weights_mb": 3264.2,
+    "repeats": 5,
+    "warmup": 1,
+    "gen_tokens": 4,
+    "measure_transfer": true,
+    "kv_geometry": {
+      "num_layers": 24,
+      "num_kv_heads": 32,
+      "num_attn_heads": 32,
+      "head_dim": 64,
+      "kv_dtype_bytes": 2,
+      "kv_bytes_per_token": 196608
+    },
+    "prefill_metric": "streaming TTFT (prefill + first decoded token)",
+    "timestamp_start": "2026-06-10T11:23:52.685309",
+    "timestamp_end": "2026-06-10T11:27:23.633019",
+    "timestamp_last_save": "2026-06-10T11:27:23.633469"
+  },
+  "depths": [
+    {
+      "depth": 128,
+      "prefill_ms_mean": 340.59,
+      "prefill_ms_std": 128.34,
+      "kv_bytes": 25165824,
+      "kv_bytes_analytic": 25165824,
+      "kv_bytes_measured": 25165824,
+      "peak_mb": 3308.8,
+      "n_samples": 5,
+      "transfer_ms": 72.94
+    },
+    {
+      "depth": 256,
+      "prefill_ms_mean": 407.33,
+      "prefill_ms_std": 136.7,
+      "kv_bytes": 50331648,
+      "kv_bytes_analytic": 50331648,
+      "kv_bytes_measured": 50331648,
+      "peak_mb": 3353.4,
+      "n_samples": 5,
+      "transfer_ms": 149.75
+    },
+    {
+      "depth": 512,
+      "prefill_ms_mean": 757.25,
+      "prefill_ms_std": 145.88,
+      "kv_bytes": 100663296,
+      "kv_bytes_analytic": 100663296,
+      "kv_bytes_measured": 100663296,
+      "peak_mb": 3426.5,
+      "n_samples": 5,
+      "transfer_ms": 298.8
+    },
+    {
+      "depth": 1024,
+      "prefill_ms_mean": 1506.02,
+      "prefill_ms_std": 88.94,
+      "kv_bytes": 201326592,
+      "kv_bytes_analytic": 201326592,
+      "kv_bytes_measured": 201326592,
+      "peak_mb": 3572.5,
+      "n_samples": 5,
+      "transfer_ms": 532.41
+    },
+    {
+      "depth": 2048,
+      "prefill_ms_mean": 2595.74,
+      "prefill_ms_std": 196.7,
+      "kv_bytes": 402653184,
+      "kv_bytes_analytic": 402653184,
+      "kv_bytes_measured": 402653184,
+      "peak_mb": 3864.5,
+      "n_samples": 5,
+      "transfer_ms": 985.8
+    },
+    {
+      "depth": 4096,
+      "prefill_ms_mean": 5707.94,
+      "prefill_ms_std": 304.27,
+      "kv_bytes": 805306368,
+      "kv_bytes_analytic": 805306368,
+      "kv_bytes_measured": 805306368,
+      "peak_mb": 4448.5,
+      "n_samples": 5,
+      "transfer_ms": 2010.47
+    },
+    {
+      "depth": 8192,
+      "prefill_ms_mean": 12585.36,
+      "prefill_ms_std": 0.82,
+      "kv_bytes": 1610612736,
+      "kv_bytes_analytic": 1610612736,
+      "kv_bytes_measured": 1610612736,
+      "peak_mb": 5616.6,
+      "n_samples": 5,
+      "transfer_ms": 4059.29
+    }
+  ]
+}

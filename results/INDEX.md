@@ -42,8 +42,9 @@ Machine-readable provenance is embedded in each JSON as `_provenance`. This inde
 
 | file | script | model | device | status |
 |---|---|---|---|---|
-| `inertia_smollm2_jetson.json` | `inertia_profile.py` | smollm2 | jetson | **PENDING** — Jetson AGX Orin run required |
 | `inertia_qwen7b_a6000.json` | `inertia_profile.py` | qwen7b | a6000 | **PENDING** — A6000 run required |
+
+(`inertia_smollm2_jetson.json` was pending; now **generated** on the Jetson — see the appended-rows table below.)
 
 ## Caches (not tracked in git — regenerable)
 
@@ -52,3 +53,9 @@ Machine-readable provenance is embedded in each JSON as `_provenance`. This inde
 | `captions_cache.json` | VLM captions for 500 EgoSchema clips (Qwen2.5-VL-3B, 16 frames) | Extended from 150→500 during frontier_qwen7b run |
 | `summaries_cache_80.json` | LLM summaries ~80 tok per clip (Qwen2.5-7B-Instruct) | Reused by smollm2 run |
 | `summaries_cache_200.json` | LLM summaries ~200 tok per clip (Qwen2.5-7B-Instruct) | New during frontier_qwen7b run |
+
+## Appended rows (per-box, append-only to avoid cross-box edit conflicts)
+
+| file | experiment | model | device | n | headline | source commit | old name |
+|---|---|---|---|---|---|---|---|
+| `inertia_smollm2_jetson.json` | `inertia_profile.py` | smollm2 | jetson | 5 reps × 7 depths (128–8192 tok) | re-prefill super-linear → 12.6 s @ 8k tok (0.34 s @ 128); KV residency linear 0.1875 MB/tok (1.5 GB @ 8k); D2H+serialize transfer 0.07 s → 4.06 s | pre-provenance (run 2026-06-10, predates convention) | `exp_inertia_jetson-edge_SmolLM2-1.7B.json` |
