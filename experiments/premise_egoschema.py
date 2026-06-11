@@ -337,7 +337,7 @@ def caption_questions(questions, videos_dir: Path, vlm_id, quantization,
     {q_uid: [caption, ...]}. If captions_path is given, loads existing captions
     on startup (skipping done clips) and persists after each clip."""
     import torch
-    from exp5_context_inertia import load_vlm, run_vlm  # reuse, never mutate
+    from context_inertia import load_vlm, run_vlm  # reuse, never mutate
 
     captions = _load_caption_cache(captions_path) if captions_path else {}
     todo = [q for q in questions if q["q_uid"] not in captions]
@@ -388,7 +388,7 @@ def reason_questions(questions, captions, llm_id, quantization, llm_max_tokens,
                      save_cb=None):
     """Load LLM once, sweep CONDITIONS over cached captions. Returns
     per_question records."""
-    from exp5_context_inertia import load_llm, run_llm_two_call  # reuse
+    from context_inertia import load_llm, run_llm_two_call  # reuse
 
     print("\nLoading LLM (reasoner)...")
     llm, llm_tok = load_llm(llm_id, quantization)
@@ -508,8 +508,8 @@ def main():
     ap.add_argument("--llm-max-tokens", type=int, default=16)
     ap.add_argument("--limit", type=int, default=0,
                     help="Only the first K questions (0 = all). Smoke test: 5.")
-    ap.add_argument("--output", default="results/exp7_premise.json")
-    ap.add_argument("--captions-cache", default="results/egoschema_captions.json",
+    ap.add_argument("--output", default="results/premise_qwen7b_n150.json")
+    ap.add_argument("--captions-cache", default="results/captions_cache.json",
                     help="Path to per-clip caption cache (keyed by q_uid). "
                          "Written incrementally during captioning; read on resume.")
     ap.add_argument("--skip-captioning", action="store_true",

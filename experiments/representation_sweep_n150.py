@@ -53,7 +53,7 @@ from pathlib import Path
 import torch
 
 sys.path.insert(0, str(Path(__file__).parent))
-from exp7_premise_egoschema import (
+from premise_egoschema import (
     LETTERS,
     _load_caption_cache,
     _save_caption_cache,
@@ -320,12 +320,12 @@ def main():
                     default="fp16")
     ap.add_argument("--questions",       default="data/egoschema/questions.json")
     ap.add_argument("--answers",         default="data/egoschema/subset_answers.json")
-    ap.add_argument("--captions-cache",  default="results/egoschema_captions.json")
-    ap.add_argument("--summaries-cache", default="results/egoschema_summaries.json")
-    ap.add_argument("--premise-results", default="results/exp7_premise.json",
+    ap.add_argument("--captions-cache",  default="results/captions_cache.json")
+    ap.add_argument("--summaries-cache", default="results/summaries_cache_80.json")
+    ap.add_argument("--premise-results", default="results/premise_qwen7b_n150.json",
                     help="Exp7 results — used to get the canonical 150 q_uid order "
                          "and reference summary stats.")
-    ap.add_argument("--output", default="results/exp7_representation_sweep.json")
+    ap.add_argument("--output", default="results/representation_sweep_qwen7b_n150.json")
     ap.add_argument("--llm-max-tokens", type=int, default=16)
     ap.add_argument("--limit", type=int, default=0,
                     help="Only first K questions (0 = all 150 from premise run).")
@@ -367,7 +367,7 @@ def main():
     print(f"Device: {device}   LLM: {args.llm}   Conditions: {conditions}")
 
     # ── Load LLM once for both summarization and scoring ─────────────────
-    from exp5_context_inertia import load_llm
+    from context_inertia import load_llm
 
     print("\nLoading LLM...")
     llm, llm_tok = load_llm(args.llm, args.quantization)

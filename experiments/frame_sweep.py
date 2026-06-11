@@ -49,7 +49,7 @@ from pathlib import Path
 # ── Reuse exp7 constants and pure helpers ───────────────────────────────
 import sys
 sys.path.insert(0, str(Path(__file__).parent))
-from exp7_premise_egoschema import (
+from premise_egoschema import (
     CONDITIONS, LETTERS, SHUFFLE_SEED,
     MATERIALLY_BEATS_PP, NON_LEAKY_PP, LEAKY_PP, CONFOUNDED_PP,
     load_egoschema, build_egoschema_prompt, parse_choice,
@@ -83,7 +83,7 @@ def caption_questions_32(questions, videos_dir: Path, vlm_id, quantization,
                          frames_max: int = FRAMES_MAX_DEFAULT):
     """Caption each clip at frames_max frames; checkpoint after every clip."""
     import torch
-    from exp5_context_inertia import load_vlm, run_vlm
+    from context_inertia import load_vlm, run_vlm
 
     captions = _load_caption_cache(captions_path)
     todo = [q for q in questions if q["q_uid"] not in captions]
@@ -134,7 +134,7 @@ def reason_frame_sweep(questions, captions_32, llm_id, quantization,
 
     Returns dict: {n_frames: per_question_list}.
     """
-    from exp5_context_inertia import load_llm, run_llm_two_call
+    from context_inertia import load_llm, run_llm_two_call
 
     print("\nLoading LLM (reasoner)...")
     llm, llm_tok = load_llm(llm_id, quantization)
@@ -295,7 +295,7 @@ def main():
                     help="Run Phase 1 (captioning) only; skip reasoning.")
     ap.add_argument("--skip-captioning", action="store_true",
                     help="Skip Phase 1; run reasoning off existing cache.")
-    ap.add_argument("--output", default="results/exp7_frame_sweep.json")
+    ap.add_argument("--output", default="results/framesweep_qwen7b.json")
     ap.add_argument("--dry-run", action="store_true",
                     help="No GPU/data — fabricate results to validate table.")
     args = ap.parse_args()

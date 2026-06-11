@@ -1,7 +1,143 @@
 """
 Shared cost model parameters measured on Jetson AGX Orin (15W mode) plus A6000
 cloud reference. All other simulator files import from here.
+
+DATA PROVENANCE
+===============
+Accuracy (QUALITY) and mean state-size (EFFECTIVE_TOKENS):
+  Source : results/exp10_frontier_500_smollm2.json
+  Exp    : exp11 — EgoSchema 500-clip representation frontier.
+           Edge reasoner: HuggingFaceTB/SmolLM2-1.7B-Instruct (fp16, chat-template).
+           Captioner:     Qwen/Qwen2.5-VL-3B-Instruct (fp16, 16 frames/clip).
+           Summaries:     Qwen/Qwen2.5-7B-Instruct (7B-generated, reused from exp10).
+           Dataset:       EgoSchema public 500-question subset, 5-way MC.
+  Date   : 2026-06-10
+  Note   : QUALITY values are EgoSchema accuracy (task-quality proxy for the
+           edge model). Old synthetic normalised scores kept as comments.
+
+KV bytes per token — edge tier:
+  KV_MB_PER_TOKEN_EDGE = 0.1875 MB/tok (SmolLM2-1.7B, fp16 KV, Jetson AGX Orin 15W).
+  Derivation: 2 (K+V) × 24 layers × 32 heads × 64 head_dim × 2 B (fp16) = 196 608 B.
+  Old measured value (0.236 MB/tok, ~590 MB @ ~2 500 tok, both models combined)
+  kept as a comment below.
+
+KV bytes per token — server tier:
+  KV_MB_PER_TOKEN_SERVER = PLACEHOLDER — Qwen2.5-7B on A5000, pending A5000 inertia run.
+
+Inertia curves (re-prefill + KV-transfer latency vs. context-token count):
+  Edge  : results/exp_inertia_jetson-edge_SmolLM2-1.7B.json   [file pending]
+  Server: results/exp_inertia_a5000-server_*.json              [PLACEHOLDER — A5000 run pending]
+  Both files are loaded at import time via _load_inertia_curve(); if absent, a
+  linear fallback using llm_prefill_ms_per_token is used and a warning is printed.
+  Expected JSON schema (bare list or {"data": [...]} wrapper):
+      [{"context_tokens": N, "reprefill_ms": M}, ...]
+  Accepted latency key aliases: "reprefill_ms", "mean_reprefill_ms", "prefill_ms".
 """
+
+import json
+import os
+import warnings
+from pathlib import Path
+
+
+# ── Inertia curve loader ───────────────────────────────────────────────
+def _load_inertia_curve(json_path: str):
+    """Load a re-prefill inertia curve from *json_path*.
+
+    Returns a sorted list of (context_tokens, reprefill_ms) pairs, or None
+    if the file is missing/malformed. Callers use linear interpolation.
+
+    Expected JSON (bare list or {"data": [...]} wrapper):
+        [{"context_tokens": N, "reprefill_ms": M}, ...]
+    Accepted latency-key aliases: "reprefill_ms", "mean_reprefill_ms", "prefill_ms".
+    """
+    p = Path(json_path)
+    if not p.exists():
+        return None
+    try:
+        raw = json.loads(p.read_text())
+    except Exception as exc:
+        warnings.warn(f"cost_model: could not parse {json_path}: {exc}")
+        return None
+    rows = raw if isinstance(raw, list) else raw.get("data", [])
+    pairs = []
+    for row in rows:
+        tok = row.get("context_tokens") or row.get("tokens")
+        lat = (row.get("reprefill_ms")
+               or row.get("mean_reprefill_ms")
+               or row.get("prefill_ms"))
+        if tok is not None and lat is not None:
+            pairs.append((int(tok), float(lat)))
+    if not pairs:
+        warnings.warn(f"cost_model: {json_path} has no usable (tokens, latency) rows")
+        return None
+    return sorted(pairs, key=lambda x: x[0])
+
+
+def _interpolate_inertia(curve, context_tokens: int) -> float:
+    """Linear interpolation over a sorted (tokens, ms) curve.
+    Clamps to the curve's endpoints for out-of-range queries."""
+    if not curve:
+        return None
+    if context_tokens <= curve[0][0]:
+        return curve[0][1]
+    if context_tokens >= curve[-1][0]:
+        return curve[-1][1]
+    for i in range(len(curve) - 1):
+        t0, m0 = curve[i]
+        t1, m1 = curve[i + 1]
+        if t0 <= context_tokens <= t1:
+            frac = (context_tokens - t0) / (t1 - t0)
+            return m0 + frac * (m1 - m0)
+    return curve[-1][1]
+
+
+# Resolve paths relative to this file so imports work from any cwd.
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# ── Frontier JSON loader (quality/tokens from measured accuracy runs) ────
+def _load_frontier(json_path: str):
+    """Load QUALITY and EFFECTIVE_TOKENS from a frontier_<model>.json result.
+
+    Returns (quality_dict, tokens_dict) or (None, None) if file is absent.
+    """
+    p = Path(json_path)
+    if not p.exists():
+        return None, None
+    try:
+        raw = json.loads(p.read_text())
+        summary = raw.get("summary", {})
+        quality = {c: s["accuracy"] for c, s in summary.items() if "accuracy" in s}
+        tokens  = {c: s["mean_prompt_tokens"] for c, s in summary.items()
+                   if "mean_prompt_tokens" in s}
+        return quality, tokens
+    except Exception as exc:
+        warnings.warn(f"cost_model: could not parse {json_path}: {exc}")
+        return None, None
+
+# Edge inertia — SmolLM2-1.7B on Jetson AGX Orin 15W.
+# Schema path: results/inertia_smollm2_jetson.json  [pending Jetson run]
+# Generate with: python experiments/inertia_profile.py --model smollm2 --device jetson
+_INERTIA_EDGE_PATH = _REPO_ROOT / "results" / "inertia_smollm2_jetson.json"
+_INERTIA_EDGE = _load_inertia_curve(str(_INERTIA_EDGE_PATH))
+if _INERTIA_EDGE is None:
+    warnings.warn(
+        "cost_model: edge inertia curve not found "
+        f"({_INERTIA_EDGE_PATH.name}); falling back to linear FP16 prefill rate. "
+        "Run: python experiments/inertia_profile.py --model smollm2 --device jetson"
+    )
+
+# Server inertia — Qwen2.5-7B on A5000 (GQA). PLACEHOLDER until A5000 run lands.
+# Schema path: results/inertia_qwen7b_a5000.json  [pending A5000 run]
+# Generate with: python experiments/inertia_profile.py --model qwen7b --device a5000
+_INERTIA_SERVER_PATH = _REPO_ROOT / "results" / "inertia_qwen7b_a5000.json"
+_INERTIA_SERVER = _load_inertia_curve(str(_INERTIA_SERVER_PATH))
+if _INERTIA_SERVER is None:
+    warnings.warn(
+        "cost_model: server inertia curve not found "
+        f"({_INERTIA_SERVER_PATH.name}); falling back to linear CLOUD prefill rate. "
+        "Run: python experiments/inertia_profile.py --model qwen7b --device a5000"
+    )
 
 # ── Edge FP16 (Qwen2.5-VL-3B + SmolLM2-1.7B) ───────────────────────────
 FP16 = {
@@ -55,29 +191,92 @@ CLOUD = {
 KV_GROWTH_MB_PER_CYCLE = 20      # measured: ~590 MB over 30 cycles in full mode
 TOKENS_PER_CYCLE_FULL  = 80      # avg per-cycle context growth in full mode
 LLM_TRAINING_CONTEXT_LIMIT = 2048  # SmolLM2-1.7B trained context window
-# Empirical KV cache size per token. Measured: ~590 MB at ~2500 tokens (full
-# mode, FP16 KV regardless of weight quant) on Jetson Orin running
-# SmolLM2-1.7B + Qwen2.5-VL-3B. 0.236 MB/tok ≈ 242 KB/tok. Used by
-# `memory_used_mb` for edge KV and (when needed) for KV-transfer sync cost
-# calculations in the LH variants.
-KV_BYTES_PER_TOKEN = 0.236 * 1024 * 1024   # bytes (≈ 247 530)
-KV_MB_PER_TOKEN    = 0.236
+
+# KV bytes per token — PER TIER.
+# Edge (SmolLM2-1.7B, fp16 KV, Jetson AGX Orin 15W):
+#   Measured from architecture: 2×24×32×64×2 B = 196 608 B ≈ 0.1875 MB/tok.
+#   Source: exp11 design note (2026-06-10).
+#   Old combined measurement (both models, ~590 MB @ ~2 500 tok): 0.236 MB/tok.
+KV_MB_PER_TOKEN_EDGE   = 0.1875                          # SmolLM2-1.7B, fp16 KV
+KV_BYTES_PER_TOKEN_EDGE = KV_MB_PER_TOKEN_EDGE * 1024 * 1024  # ≈ 196 608 B
+
+# Server (Qwen2.5-7B on A5000): PLACEHOLDER — A5000 inertia run pending.
+# Replace with measured value once exp_inertia_a5000-server_*.json lands.
+KV_MB_PER_TOKEN_SERVER   = None   # ← PLACEHOLDER
+KV_BYTES_PER_TOKEN_SERVER = None  # ← PLACEHOLDER
+
+# Default aliases used by existing functions (edge model is the primary target).
+# Old value: KV_MB_PER_TOKEN = 0.236  (kept here for reference; superseded above)
+KV_MB_PER_TOKEN    = KV_MB_PER_TOKEN_EDGE
+KV_BYTES_PER_TOKEN = KV_BYTES_PER_TOKEN_EDGE
+
+# ── Quality scores + token counts: load from frontier_smollm2.json ──────
+# Schema path: results/frontier_smollm2.json  (generated by representation_frontier.py)
+# Falls back to the measured values from exp11 (2026-06-10) if JSON is absent.
+_FRONTIER_SMOLLM2_PATH = _REPO_ROOT / "results" / "frontier_smollm2.json"
+_q_loaded, _t_loaded = _load_frontier(str(_FRONTIER_SMOLLM2_PATH))
 
 # ── Quality scores per context mode ────────────────────────────────────
-QUALITY = {
-    "stateless":  0.70,
-    "window-3":   0.85,
-    "window-10":  0.90,
-    "full":       1.00,
+# Source: results/frontier_smollm2.json (SmolLM2-1.7B, EgoSchema n=500, 2026-06-10).
+# Values are 5-way MC accuracy — task-quality proxy for the edge reasoner.
+# Old synthetic normalised scores (pre-exp11):
+#   "stateless": 0.70,  "window-3": 0.85,  "window-10": 0.90,  "full": 1.00
+_QUALITY_FALLBACK = {
+    "blind":       0.264,
+    "stateless":   0.332,
+    "window-3":    0.356,
+    "window-10":   0.360,
+    "full":        0.384,
+    "shuffled":    0.264,
+    "summary-80":  0.388,   # best Pareto point (equal accuracy, 3× fewer tokens than full)
+    "summary-200": 0.384,
 }
+QUALITY = _q_loaded if _q_loaded else _QUALITY_FALLBACK
 
-# Effective context tokens by mode (rough averages from exp5)
-EFFECTIVE_TOKENS = {
-    "stateless":  161,
-    "window-3":   365,
-    "window-10":  745,
-    "full":       None,  # grows; computed dynamically
+# ── Mean context token count by mode ───────────────────────────────────
+# Source: results/frontier_smollm2.json, mean_prompt_tokens, 500-clip EgoSchema.
+# Old rough averages from context_inertia.py (fewer frames, different captioner):
+#   "stateless": 161,  "window-3": 365,  "window-10": 745,  "full": None
+_TOKENS_FALLBACK = {
+    "blind":       279,
+    "stateless":   341,
+    "window-3":    467,
+    "window-10":   909,
+    "full":        None,    # grows dynamically; mean 1290 tok at 500 clips
+    "shuffled":    1290,
+    "summary-80":  385,
+    "summary-200": 532,
 }
+EFFECTIVE_TOKENS = _t_loaded if _t_loaded else _TOKENS_FALLBACK
+
+
+def inertia_ms(tier: str, context_tokens: int) -> float:
+    """Return the measured re-prefill (+ KV-transfer) latency in ms for
+    *context_tokens* tokens on *tier* ('edge' | 'server').
+
+    Uses the measured inertia curve when available; falls back to the linear
+    prefill-rate model from FP16/CLOUD dicts when the curve JSON is absent.
+
+    Provenance:
+      edge   — _INERTIA_EDGE loaded from results/exp_inertia_jetson-edge_SmolLM2-1.7B.json
+      server — _INERTIA_SERVER loaded from results/exp_inertia_a5000-server_*.json
+               [PLACEHOLDER — A5000 run pending; linear fallback active]
+    """
+    if tier == "edge":
+        val = _interpolate_inertia(_INERTIA_EDGE, context_tokens)
+        if val is not None:
+            return val
+        # Linear fallback: stateless offset + per-token rate (FP16).
+        return (FP16["llm_stateless_prefill_ms"]
+                + FP16["llm_prefill_ms_per_token"] * context_tokens)
+    elif tier == "server":
+        val = _interpolate_inertia(_INERTIA_SERVER, context_tokens)
+        if val is not None:
+            return val
+        # Linear fallback: CLOUD prefill rate (no stateless offset measured yet).
+        return CLOUD["llm_prefill_ms_per_token"] * context_tokens
+    else:
+        raise ValueError(f"inertia_ms: unknown tier {tier!r}; expected 'edge' or 'server'")
 
 
 def edge_compute_ms(quant, context_tokens, gen_tokens=10):
