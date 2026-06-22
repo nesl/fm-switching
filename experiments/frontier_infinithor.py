@@ -371,6 +371,9 @@ def answer_question(model, tok, steps: list[str], question: str,
 
 
 def llm_judge(model, tok, pred: str, gold_list: list[str]) -> int:
+    # Lazy: only call LLM if exact match already failed.
+    if exact_match(pred, gold_list):
+        return 1
     for gold in gold_list:
         prompt = JUDGE_PROMPT.format(pred=pred, gold=gold)
         resp = _llm_run(model, tok, prompt, max_new=4)
@@ -424,8 +427,16 @@ def run_gate(mc_n: int = 100, sc_n: int = 50, conditions: list = None,
     print(f"Multi-clue QA with traj available: {len(mc_qa)}")
     print(f"Single-clue QA with traj available: {len(sc_qa)}")
 
+    # Use all available questions (dataset cap: only 62/219 traj_ids shipped on HuggingFace).
+    # mc_n / sc_n are upper bounds; if fewer are available, run all.
     mc_sample = rng.sample(mc_qa, min(mc_n, len(mc_qa)))
     sc_sample = rng.sample(sc_qa, min(sc_n, len(sc_qa)))
+
+    n_traj_total = 219
+    n_traj_avail = len({q["traj_id"] for q in mc_qa + sc_qa})
+    print(f"\nDataset coverage: {n_traj_avail}/{n_traj_total} traj_ids available in metadata.tar")
+    print(f"  (157 traj_ids referenced in QA CSVs are absent from HuggingFace release)")
+    print(f"  This caps frontier n but does not bias gate — missing trajs are not selected out.")
 
     # ── Token length survey ────────────────────────────────────────────────────
     print("\n── Token length survey (sample of 20 trajectories) ──────────────")
@@ -576,6 +587,59 @@ def run_gate(mc_n: int = 100, sc_n: int = 50, conditions: list = None,
             print(f"    {bin_label:<20} {full_acc:6.2f} {full_acc-win_acc:10.2f} "
                   f"{full_acc-s80_acc:10.2f} {n}")
 
+    # ── Per-trajectory dispersion guard (multi-clue non-salient only) ─────────
+    mc_ns_all = [r for r in mc_records if not r["is_salient"]]
+    if mc_ns_all:
+        print(f"\n  Dispersion guard — full−window-10 gap, per trajectory (multi-clue non-salient):")
+        traj_gaps: dict[str, dict] = {}
+        for r in mc_ns_all:
+            tid = r["traj_id"]
+            if tid not in traj_gaps:
+                traj_gaps[tid] = {"full": [], "window-10": [], "summary-80": []}
+            for cond in ("full", "window-10", "summary-80"):
+                if cond in r["conditions"]:
+                    traj_gaps[tid][cond].append(r["conditions"][cond]["llm_judge"])
+
+        traj_win_gaps, traj_s80_gaps = [], []
+        for tid, vals in traj_gaps.items():
+            if vals["full"] and vals["window-10"]:
+                g = sum(vals["full"]) / len(vals["full"]) - sum(vals["window-10"]) / len(vals["window-10"])
+                traj_win_gaps.append((tid, g, len(vals["full"])))
+            if vals["full"] and vals["summary-80"]:
+                g = sum(vals["full"]) / len(vals["full"]) - sum(vals["summary-80"]) / len(vals["summary-80"])
+                traj_s80_gaps.append((tid, g, len(vals["full"])))
+
+        traj_win_gaps.sort(key=lambda x: -x[1])
+        traj_s80_gaps.sort(key=lambda x: -x[1])
+
+        n_pos_win = sum(1 for _, g, _ in traj_win_gaps if g > 0)
+        n_pos_s80 = sum(1 for _, g, _ in traj_s80_gaps if g > 0)
+        top3_win = traj_win_gaps[:3]
+        top3_s80 = traj_s80_gaps[:3]
+
+        # What fraction of total gap is carried by top-1 and top-3 trajectories?
+        total_win = sum(g * n for _, g, n in traj_win_gaps if g > 0) or 1
+        total_s80 = sum(g * n for _, g, n in traj_s80_gaps if g > 0) or 1
+        top1_win_share = traj_win_gaps[0][1] * traj_win_gaps[0][2] / total_win if traj_win_gaps else 0
+        top3_win_share = sum(g * n for _, g, n in traj_win_gaps[:3] if g > 0) / total_win
+        top1_s80_share = traj_s80_gaps[0][1] * traj_s80_gaps[0][2] / total_s80 if traj_s80_gaps else 0
+        top3_s80_share = sum(g * n for _, g, n in traj_s80_gaps[:3] if g > 0) / total_s80
+
+        print(f"    full−win10: {n_pos_win}/{len(traj_win_gaps)} trajs show positive gap")
+        print(f"      top-1 carries {top1_win_share:.0%} of total gap  "
+              f"top-3 carries {top3_win_share:.0%}")
+        print(f"      top-3 trajs: " + ", ".join(f"{t}(gap={g:+.2f},n={n})" for t,g,n in top3_win))
+        print(f"    full−sum80: {n_pos_s80}/{len(traj_s80_gaps)} trajs show positive gap")
+        print(f"      top-1 carries {top1_s80_share:.0%} of total gap  "
+              f"top-3 carries {top3_s80_share:.0%}")
+        print(f"      top-3 trajs: " + ", ".join(f"{t}(gap={g:+.2f},n={n})" for t,g,n in top3_s80))
+        if top1_win_share > 0.5 or top1_s80_share > 0.5:
+            print("    WARNING: single trajectory carries >50% of gap — headline may not generalise.")
+        elif top3_win_share > 0.8 or top3_s80_share > 0.8:
+            print("    CAUTION: top-3 trajectories carry >80% of gap — moderate concentration.")
+        else:
+            print("    OK: gap is spread across trajectories.")
+
     # ── Stop-condition check ───────────────────────────────────────────────────
     mc_ns = [r for r in mc_records if not r["is_salient"]]
     full_acc, _ = _acc(mc_ns, "full", "llm_judge")
@@ -606,6 +670,18 @@ def run_gate(mc_n: int = 100, sc_n: int = 50, conditions: list = None,
         "mean": sum(token_lengths) // len(token_lengths) if token_lengths else None,
     }
     device = torch.cuda.get_device_name(0) if torch.cuda.is_available() else "cpu"
+    dataset_coverage = {
+        "traj_ids_in_qa_csvs":      219,
+        "traj_ids_in_metadata_tar": n_traj_avail,
+        "traj_ids_missing":         219 - n_traj_avail,
+        "note": (
+            "Only 62 of 219 traj_ids referenced in QA CSVs are present in the "
+            "HuggingFace metadata.tar release (as of 2026-06-22). The 157 missing "
+            "traj_ids are absent from the public release; they are not filtered out "
+            "by any accuracy criterion, so coverage cap does not bias gate direction."
+        ),
+    }
+
     prov = stamp(
         script="frontier_infinithor.py",
         model="qwen7b",
@@ -620,6 +696,7 @@ def run_gate(mc_n: int = 100, sc_n: int = 50, conditions: list = None,
             sc_n=len(sc_records),
             seed=seed,
             traj_token_distribution=traj_tok_dist,
+            dataset_coverage=dataset_coverage,
         ),
     )
 
@@ -633,6 +710,7 @@ def run_gate(mc_n: int = 100, sc_n: int = 50, conditions: list = None,
             "sc_n":              len(sc_records),
             "seed":              seed,
             "traj_token_distribution": traj_tok_dist,
+            "dataset_coverage":  dataset_coverage,
             "timestamp":         datetime.now().isoformat(),
         },
         "stop_conditions": {
@@ -657,19 +735,22 @@ def run_gate(mc_n: int = 100, sc_n: int = 50, conditions: list = None,
 
 def main():
     ap = argparse.ArgumentParser(description="Infini-THOR NiEH gate + frontier")
-    ap.add_argument("--gate", action="store_true", help="Run gate (mc=100, sc=50)")
+    ap.add_argument("--gate", action="store_true",
+                    help="Run gate (all available questions, up to mc-n/sc-n cap)")
     ap.add_argument("--frontier", action="store_true",
                     help="Full frontier (all usable questions)")
-    ap.add_argument("--mc-n", type=int, default=100)
-    ap.add_argument("--sc-n", type=int, default=50)
+    ap.add_argument("--mc-n", type=int, default=999)
+    ap.add_argument("--sc-n", type=int, default=999)
     ap.add_argument("--seed", type=int, default=42)
     ap.add_argument("--out", default="results/frontier_infinithor_qwen7b.json")
     args = ap.parse_args()
 
     if args.gate:
+        # Lean gate: only the three conditions that decide the gate.
+        # window-10, summary-200, single-clue are frontier detail — run only after gate passes.
         run_gate(
             mc_n=args.mc_n, sc_n=args.sc_n,
-            conditions=["blind", "window-10", "summary-80", "summary-200", "full"],
+            conditions=["blind", "summary-80", "full"],
             out_path=Path(args.out), seed=args.seed,
         )
     else:

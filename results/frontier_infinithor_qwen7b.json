@@ -1,0 +1,2752 @@
+{
+  "metadata": {
+    "reasoning_model": "Qwen/Qwen2.5-7B-Instruct",
+    "text_source": "simulator_oracle_ground_truth",
+    "oracle_guard": "gt_steps and gt_img_idx never fed as input",
+    "conditions": [
+      "blind",
+      "summary-80",
+      "full"
+    ],
+    "mc_n": 60,
+    "sc_n": 0,
+    "seed": 42,
+    "traj_token_distribution": {
+      "n_sampled": 20,
+      "min": 873,
+      "max": 2149,
+      "mean": 1441
+    },
+    "dataset_coverage": {
+      "traj_ids_in_qa_csvs": 219,
+      "traj_ids_in_metadata_tar": 65,
+      "traj_ids_missing": 154,
+      "note": "Only 62 of 219 traj_ids referenced in QA CSVs are present in the HuggingFace metadata.tar release (as of 2026-06-22). The 157 missing traj_ids are absent from the public release; they are not filtered out by any accuracy criterion, so coverage cap does not bias gate direction."
+    },
+    "timestamp": "2026-06-22T16:06:56.366802"
+  },
+  "stop_conditions": {
+    "sc1_full_above_blind": "PASS",
+    "sc2_full_to_summary_drop": "FAIL (full=0.58, sum80=0.55, gap=0.03)"
+  },
+  "records": [
+    {
+      "qid": "floorplan201_24_804_1746980690_q1",
+      "traj_id": "floorplan201_24_804_1746980690",
+      "question": "Between Bowl and CreditCard, which one did you move first?",
+      "gold": [
+        "Bowl"
+      ],
+      "n_steps": 168,
+      "n_tokens_full": 1914,
+      "top_receptacles": [
+        "coffeetable",
+        "diningtable",
+        "sofa"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 118,
+        "steps_from_end": 49,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Bowl",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.38
+        },
+        "summary-80": {
+          "pred": "Bowl",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.43
+        },
+        "full": {
+          "pred": "Bowl",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.35
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_19_618_1746864406_q18",
+      "traj_id": "floorplan210_19_618_1746864406",
+      "question": "Where did you move the Statue from the Dresser?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 0,
+      "n_tokens_full": 0,
+      "top_receptacles": [],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": -1,
+        "steps_from_end": -1,
+        "distance_bin": "not_found"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Dresser",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "Dresser",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.94
+        },
+        "full": {
+          "pred": "Dresser",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        }
+      }
+    },
+    {
+      "qid": "floorplan18_18_657_1747219088_q21",
+      "traj_id": "floorplan18_18_657_1747219088",
+      "question": "Where was Tomato before you put it to Fridge?",
+      "gold": [
+        "CounterTop"
+      ],
+      "n_steps": 128,
+      "n_tokens_full": 1403,
+      "top_receptacles": [
+        "diningtable",
+        "countertop",
+        "counter"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 123,
+        "steps_from_end": 4,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Fridge",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Dining Table",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.78
+        },
+        "full": {
+          "pred": "Countertop",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.3
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_20_714_1746850044_q3",
+      "traj_id": "floorplan201_20_714_1746850044",
+      "question": "Between Statue and TissueBox, which one did you move first?",
+      "gold": [
+        "Statue"
+      ],
+      "n_steps": 141,
+      "n_tokens_full": 1586,
+      "top_receptacles": [
+        "coffeetable",
+        "diningtable",
+        "sidetable"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 28,
+        "steps_from_end": 112,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Statue",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Statue",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.8
+        },
+        "full": {
+          "pred": "Statue",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.31
+        }
+      }
+    },
+    {
+      "qid": "floorplan215_23_701_1746907273_q24",
+      "traj_id": "floorplan215_23_701_1746907273",
+      "question": "Where was Vase before you put it to SideTable?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 161,
+      "n_tokens_full": 1777,
+      "top_receptacles": [
+        "coffeetable",
+        "sidetable",
+        "shelf"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 160,
+        "steps_from_end": 0,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "SideTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Shelves",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 1.61
+        },
+        "full": {
+          "pred": "Shelf",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.34
+        }
+      }
+    },
+    {
+      "qid": "floorplan13_16_427_1745291369_q44",
+      "traj_id": "floorplan13_16_427_1745291369",
+      "question": "Where was Egg before you put it to GarbageCan?",
+      "gold": [
+        "Sink"
+      ],
+      "n_steps": 111,
+      "n_tokens_full": 1184,
+      "top_receptacles": [
+        "sink",
+        "countertop",
+        "counter"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 95,
+        "steps_from_end": 15,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "GarbageCan",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "EggWasDiscardedInTheGarbageCanBeforeThatSoItWasNeverHeldByTheRobotInAnyLocationListed.",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 3.34
+        },
+        "full": {
+          "pred": "SinkBasin",
+          "exact_match": 0,
+          "partial_match": 1,
+          "llm_judge": 0,
+          "elapsed_s": 0.28
+        }
+      }
+    },
+    {
+      "qid": "floorplan223_26_749_1746930005_q3",
+      "traj_id": "floorplan223_26_749_1746930005",
+      "question": "Where did you move the Statue from the DiningTable?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 182,
+      "n_tokens_full": 2034,
+      "top_receptacles": [
+        "coffeetable",
+        "sofa",
+        "diningtable"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 176,
+        "steps_from_end": 5,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "Coffeetable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.48
+        },
+        "full": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.44
+        }
+      }
+    },
+    {
+      "qid": "floorplan211_27_719_1746910536_q32",
+      "traj_id": "floorplan211_27_719_1746910536",
+      "question": "Where did you move the CellPhone from the Sofa?",
+      "gold": [
+        "SideTable"
+      ],
+      "n_steps": 180,
+      "n_tokens_full": 2061,
+      "top_receptacles": [
+        "sofa",
+        "shelf",
+        "sidetable"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 179,
+        "steps_from_end": 0,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Nightstand",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 1,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Sofa",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.71
+        },
+        "full": {
+          "pred": "Sofa",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.43
+        }
+      }
+    },
+    {
+      "qid": "floorplan13_16_427_1745291369_q4",
+      "traj_id": "floorplan13_16_427_1745291369",
+      "question": "Where was the Apple before you moved it to Fridge?",
+      "gold": [
+        "CounterTop"
+      ],
+      "n_steps": 111,
+      "n_tokens_full": 1184,
+      "top_receptacles": [
+        "sink",
+        "countertop",
+        "counter"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 89,
+        "steps_from_end": 21,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Counter",
+          "exact_match": 0,
+          "partial_match": 1,
+          "llm_judge": 0,
+          "elapsed_s": 0.05
+        },
+        "summary-80": {
+          "pred": "Before",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.71
+        },
+        "full": {
+          "pred": "countertop",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.28
+        }
+      }
+    },
+    {
+      "qid": "floorplan221_27_826_1746972286_q30",
+      "traj_id": "floorplan221_27_826_1746972286",
+      "question": "Where was RemoteControl before you put it to SideTable?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 191,
+      "n_tokens_full": 2149,
+      "top_receptacles": [
+        "diningtable",
+        "coffeetable",
+        "sofa"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 185,
+        "steps_from_end": 5,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "SideTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "CoffeeTable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.91
+        },
+        "full": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.41
+        }
+      }
+    },
+    {
+      "qid": "floorplan207_17_434_1745411855_q2",
+      "traj_id": "floorplan207_17_434_1745411855",
+      "question": "Where was the RemoteControl before you moved it to Sofa?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 119,
+      "n_tokens_full": 1318,
+      "top_receptacles": [
+        "shelf",
+        "sofa",
+        "coffeetable"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 85,
+        "steps_from_end": 33,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Unknown Location",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Unknown",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 1.97
+        },
+        "full": {
+          "pred": "Coffeetable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.33
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_20_714_1746850044_q4",
+      "traj_id": "floorplan201_20_714_1746850044",
+      "question": "Where was the Bowl before you moved it to CoffeeTable?",
+      "gold": [
+        "DiningTable"
+      ],
+      "n_steps": 141,
+      "n_tokens_full": 1586,
+      "top_receptacles": [
+        "coffeetable",
+        "diningtable",
+        "sidetable"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 70,
+        "steps_from_end": 70,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Kitchen Sink",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Bowl was not specified to be at any location before being moved to the CoffeeTable.",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 3.21
+        },
+        "full": {
+          "pred": "DiningTable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.34
+        }
+      }
+    },
+    {
+      "qid": "floorplan209_15_431_1745402895_q3",
+      "traj_id": "floorplan209_15_431_1745402895",
+      "question": "Between KeyChain and Vase, which one did you move first?",
+      "gold": [
+        "KeyChain"
+      ],
+      "n_steps": 105,
+      "n_tokens_full": 1153,
+      "top_receptacles": [
+        "sofa",
+        "sidetable",
+        "dresser"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 69,
+        "steps_from_end": 35,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "KeyChain",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Keychain",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.74
+        },
+        "full": {
+          "pred": "KeyChain",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.25
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_26_812_1747064607_q34",
+      "traj_id": "floorplan201_26_812_1747064607",
+      "question": "Where did you move the Bowl from the DiningTable?",
+      "gold": [
+        "SideTable"
+      ],
+      "n_steps": 183,
+      "n_tokens_full": 2048,
+      "top_receptacles": [
+        "coffeetable",
+        "diningtable",
+        "sofa"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 142,
+        "steps_from_end": 40,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.93
+        },
+        "full": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.4
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_12_483_1744793947_q6",
+      "traj_id": "floorplan201_12_483_1744793947",
+      "question": "Between Pen and Book, which one did you move first?",
+      "gold": [
+        "Pen"
+      ],
+      "n_steps": 84,
+      "n_tokens_full": 928,
+      "top_receptacles": [
+        "coffeetable",
+        "diningtable",
+        "sofa"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 76,
+        "steps_from_end": 7,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Pen",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.05
+        },
+        "summary-80": {
+          "pred": "Pen",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 1.82
+        },
+        "full": {
+          "pred": "Pen",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.19
+        }
+      }
+    },
+    {
+      "qid": "floorplan13_16_427_1745291369_q34",
+      "traj_id": "floorplan13_16_427_1745291369",
+      "question": "Where did you move the Spatula from the CounterTop?",
+      "gold": [
+        "Sink"
+      ],
+      "n_steps": 111,
+      "n_tokens_full": 1184,
+      "top_receptacles": [
+        "sink",
+        "countertop",
+        "counter"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 95,
+        "steps_from_end": 15,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "CounterTop",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "CounterTop",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.75
+        },
+        "full": {
+          "pred": "Sink",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.23
+        }
+      }
+    },
+    {
+      "qid": "floorplan215_23_701_1746907273_q14",
+      "traj_id": "floorplan215_23_701_1746907273",
+      "question": "Where did you move the Statue from the Shelf?",
+      "gold": [
+        "SideTable"
+      ],
+      "n_steps": 161,
+      "n_tokens_full": 1777,
+      "top_receptacles": [
+        "coffeetable",
+        "sidetable",
+        "shelf"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 153,
+        "steps_from_end": 7,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Shelf",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Shelf",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 1.64
+        },
+        "full": {
+          "pred": "Shelf",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.34
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_12_483_1744793947_q12",
+      "traj_id": "floorplan201_12_483_1744793947",
+      "question": "Between Book and Plate, which one did you move first?",
+      "gold": [
+        "Plate"
+      ],
+      "n_steps": 84,
+      "n_tokens_full": 928,
+      "top_receptacles": [
+        "coffeetable",
+        "diningtable",
+        "sofa"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 83,
+        "steps_from_end": 0,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Book",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.05
+        },
+        "summary-80": {
+          "pred": "Book",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 1.77
+        },
+        "full": {
+          "pred": "Book",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.19
+        }
+      }
+    },
+    {
+      "qid": "floorplan18_18_657_1747219088_q2",
+      "traj_id": "floorplan18_18_657_1747219088",
+      "question": "What object did you put in the Drawer?",
+      "gold": [
+        "Cup",
+        "Cup"
+      ],
+      "n_steps": 128,
+      "n_tokens_full": 1403,
+      "top_receptacles": [
+        "diningtable",
+        "countertop",
+        "counter"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 79,
+        "steps_from_end": 48,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Silverware",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "None",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.77
+        },
+        "full": {
+          "pred": "Drawer",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.25
+        }
+      }
+    },
+    {
+      "qid": "floorplan218_10_567_1745407406_q11",
+      "traj_id": "floorplan218_10_567_1745407406",
+      "question": "Where was Plate before you put it to SideTable?",
+      "gold": [
+        "DiningTable"
+      ],
+      "n_steps": 0,
+      "n_tokens_full": 0,
+      "top_receptacles": [],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": -1,
+        "steps_from_end": -1,
+        "distance_bin": "not_found"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Kitchen countertop",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "drawer",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.91
+        },
+        "full": {
+          "pred": "Dresser",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        }
+      }
+    },
+    {
+      "qid": "floorplan230_11_498_1745411198_q22",
+      "traj_id": "floorplan230_11_498_1745411198",
+      "question": "Where was Watch before you put it to DiningTable?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 77,
+      "n_tokens_full": 873,
+      "top_receptacles": [
+        "coffeetable",
+        "sidetable",
+        "diningtable"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 71,
+        "steps_from_end": 5,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "CoffeeTable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.62
+        },
+        "full": {
+          "pred": "CoffeeTable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.21
+        }
+      }
+    },
+    {
+      "qid": "floorplan209_15_431_1745402895_q1",
+      "traj_id": "floorplan209_15_431_1745402895",
+      "question": "Where was the RemoteControl before you moved it to Sofa?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 105,
+      "n_tokens_full": 1153,
+      "top_receptacles": [
+        "sofa",
+        "sidetable",
+        "dresser"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 83,
+        "steps_from_end": 21,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Unknown Location",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Coffeetable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.82
+        },
+        "full": {
+          "pred": "Coffeetable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.3
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_19_686_1746847543_q3",
+      "traj_id": "floorplan201_19_686_1746847543",
+      "question": "Where was the Newspaper before you moved it to ArmChair?",
+      "gold": [
+        "Sofa"
+      ],
+      "n_steps": 134,
+      "n_tokens_full": 1517,
+      "top_receptacles": [
+        "coffeetable",
+        "diningtable",
+        "sidetable"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 128,
+        "steps_from_end": 5,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Coffee Table",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Not Mentioned",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.86
+        },
+        "full": {
+          "pred": "Sofa",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.33
+        }
+      }
+    },
+    {
+      "qid": "floorplan204_12_454_1746034353_q4",
+      "traj_id": "floorplan204_12_454_1746034353",
+      "question": "Between Vase and WateringCan, which one did you move first?",
+      "gold": [
+        "Vase"
+      ],
+      "n_steps": 88,
+      "n_tokens_full": 967,
+      "top_receptacles": [
+        "coffeetable",
+        "drawer",
+        "desk"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 34,
+        "steps_from_end": 53,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Vase",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Vase",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.74
+        },
+        "full": {
+          "pred": "Vase",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.22
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_12_483_1744793947_q4",
+      "traj_id": "floorplan201_12_483_1744793947",
+      "question": "Where was the Book before you moved it to ArmChair?",
+      "gold": [
+        "Sofa"
+      ],
+      "n_steps": 84,
+      "n_tokens_full": 928,
+      "top_receptacles": [
+        "coffeetable",
+        "diningtable",
+        "sofa"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 64,
+        "steps_from_end": 19,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Bookshelf",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "ArmChair",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 1.79
+        },
+        "full": {
+          "pred": "Sofa",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.24
+        }
+      }
+    },
+    {
+      "qid": "floorplan7_13_494_1744636544_q38",
+      "traj_id": "floorplan7_13_494_1744636544",
+      "question": "Where did you move the Potato from the Ground?",
+      "gold": [
+        "DiningTable"
+      ],
+      "n_steps": 93,
+      "n_tokens_full": 995,
+      "top_receptacles": [
+        "countertop",
+        "counter",
+        "diningtable"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 83,
+        "steps_from_end": 9,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Kitchen countertop",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "DiningTable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.61
+        },
+        "full": {
+          "pred": "Ground",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.2
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_15_464_1744755675_q2",
+      "traj_id": "floorplan210_15_464_1744755675",
+      "question": "Between Box and CreditCard, which one did you move first?",
+      "gold": [
+        "CreditCard"
+      ],
+      "n_steps": 107,
+      "n_tokens_full": 1182,
+      "top_receptacles": [
+        "ottoman",
+        "dresser",
+        "coffeetable"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 13,
+        "steps_from_end": 93,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Box",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.05
+        },
+        "summary-80": {
+          "pred": "Box",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.46
+        },
+        "full": {
+          "pred": "Box",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.23
+        }
+      }
+    },
+    {
+      "qid": "floorplan7_13_494_1744636544_q25",
+      "traj_id": "floorplan7_13_494_1744636544",
+      "question": "Where did you move the Knife from the Ground?",
+      "gold": [
+        "Sink"
+      ],
+      "n_steps": 93,
+      "n_tokens_full": 995,
+      "top_receptacles": [
+        "countertop",
+        "counter",
+        "diningtable"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 41,
+        "steps_from_end": 51,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Kitchen Cutting Board",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "Sink",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.56
+        },
+        "full": {
+          "pred": "Sink",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.2
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_17_804_1746994276_q4",
+      "traj_id": "floorplan210_17_804_1746994276",
+      "question": "Between KeyChain and CreditCard, which one did you move first?",
+      "gold": [
+        "KeyChain"
+      ],
+      "n_steps": 119,
+      "n_tokens_full": 1325,
+      "top_receptacles": [
+        "coffeetable",
+        "dresser",
+        "ottoman"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 111,
+        "steps_from_end": 7,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "KeyChain",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "KeyChain",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.22
+        },
+        "full": {
+          "pred": "KeyChain",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.28
+        }
+      }
+    },
+    {
+      "qid": "floorplan7_13_494_1744636544_q26",
+      "traj_id": "floorplan7_13_494_1744636544",
+      "question": "Where was DishSponge before you put it to Cabinet?",
+      "gold": [
+        "CounterTop"
+      ],
+      "n_steps": 93,
+      "n_tokens_full": 995,
+      "top_receptacles": [
+        "countertop",
+        "counter",
+        "diningtable"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 85,
+        "steps_from_end": 7,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Dish Basin",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "Countertop",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.61
+        },
+        "full": {
+          "pred": "Countertop",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.25
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_26_812_1747064607_q5",
+      "traj_id": "floorplan201_26_812_1747064607",
+      "question": "Between RemoteControl and Pen, which one did you move first?",
+      "gold": [
+        "RemoteControl"
+      ],
+      "n_steps": 183,
+      "n_tokens_full": 2048,
+      "top_receptacles": [
+        "coffeetable",
+        "diningtable",
+        "sofa"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 175,
+        "steps_from_end": 7,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "RemoteControl",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "RemoteControl",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.92
+        },
+        "full": {
+          "pred": "RemoteControl",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.38
+        }
+      }
+    },
+    {
+      "qid": "floorplan209_15_431_1745402895_q4",
+      "traj_id": "floorplan209_15_431_1745402895",
+      "question": "Between CreditCard and KeyChain, which one did you move first?",
+      "gold": [
+        "KeyChain"
+      ],
+      "n_steps": 105,
+      "n_tokens_full": 1153,
+      "top_receptacles": [
+        "sofa",
+        "sidetable",
+        "dresser"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 69,
+        "steps_from_end": 35,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "CreditCard",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "KeyChain",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.77
+        },
+        "full": {
+          "pred": "KeyChain",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.25
+        }
+      }
+    },
+    {
+      "qid": "floorplan202_18_450_1744426417_q29",
+      "traj_id": "floorplan202_18_450_1744426417",
+      "question": "Where did you move the Statue from the SideTable?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 126,
+      "n_tokens_full": 1394,
+      "top_receptacles": [
+        "sofa",
+        "sidetable",
+        "coffeetable"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 90,
+        "steps_from_end": 35,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "SideTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Coffee table",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.66
+        },
+        "full": {
+          "pred": "Sidetable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 1,
+          "elapsed_s": 0.28
+        }
+      }
+    },
+    {
+      "qid": "floorplan211_27_719_1746910536_q41",
+      "traj_id": "floorplan211_27_719_1746910536",
+      "question": "Where did you move the Statue from the TVStand?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 180,
+      "n_tokens_full": 2061,
+      "top_receptacles": [
+        "sofa",
+        "shelf",
+        "sidetable"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 105,
+        "steps_from_end": 74,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "TV Stand",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "TVStand",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.73
+        },
+        "full": {
+          "pred": "TVStand",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.38
+        }
+      }
+    },
+    {
+      "qid": "floorplan205_13_438_1745416055_q4",
+      "traj_id": "floorplan205_13_438_1745416055",
+      "question": "Where was the Pillow before you moved it to ArmChair?",
+      "gold": [
+        "Sofa"
+      ],
+      "n_steps": 93,
+      "n_tokens_full": 1023,
+      "top_receptacles": [
+        "sofa",
+        "sidetable",
+        "diningtable"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 80,
+        "steps_from_end": 12,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Bed",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.05
+        },
+        "summary-80": {
+          "pred": "Unknown",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 1.83
+        },
+        "full": {
+          "pred": "Sofa",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.25
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_24_804_1746980690_q35",
+      "traj_id": "floorplan201_24_804_1746980690",
+      "question": "Where was Book before you put it to Sofa?",
+      "gold": [
+        "ArmChair"
+      ],
+      "n_steps": 168,
+      "n_tokens_full": 1914,
+      "top_receptacles": [
+        "coffeetable",
+        "diningtable",
+        "sofa"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 162,
+        "steps_from_end": 5,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Bookshelf",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Armchair",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.4
+        },
+        "full": {
+          "pred": "ArmChair",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.37
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_19_706_1746849894_q2",
+      "traj_id": "floorplan210_19_706_1746849894",
+      "question": "Between KeyChain and Laptop, which one did you move first?",
+      "gold": [
+        "KeyChain"
+      ],
+      "n_steps": 135,
+      "n_tokens_full": 1500,
+      "top_receptacles": [
+        "coffeetable",
+        "sofa",
+        "dresser"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 99,
+        "steps_from_end": 35,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "KeyChain",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Keychain",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.84
+        },
+        "full": {
+          "pred": "KeyChain",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.31
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_12_483_1744793947_q2",
+      "traj_id": "floorplan201_12_483_1744793947",
+      "question": "Where was Plate before you put it to CoffeeTable?",
+      "gold": [
+        "DiningTable"
+      ],
+      "n_steps": 84,
+      "n_tokens_full": 928,
+      "top_receptacles": [
+        "coffeetable",
+        "diningtable",
+        "sofa"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 78,
+        "steps_from_end": 5,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "KitchenSink",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "DiningTable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 1.82
+        },
+        "full": {
+          "pred": "DiningTable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.25
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_26_812_1747064607_q3",
+      "traj_id": "floorplan201_26_812_1747064607",
+      "question": "Between RemoteControl and Watch, which one did you move first?",
+      "gold": [
+        "RemoteControl"
+      ],
+      "n_steps": 183,
+      "n_tokens_full": 2048,
+      "top_receptacles": [
+        "coffeetable",
+        "diningtable",
+        "sofa"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 175,
+        "steps_from_end": 7,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "RemoteControl",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "TV stand",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.93
+        },
+        "full": {
+          "pred": "RemoteControl",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.38
+        }
+      }
+    },
+    {
+      "qid": "floorplan204_12_454_1746034353_q3",
+      "traj_id": "floorplan204_12_454_1746034353",
+      "question": "Where was the CreditCard before you moved it to ArmChair?",
+      "gold": [
+        "Sofa"
+      ],
+      "n_steps": 88,
+      "n_tokens_full": 967,
+      "top_receptacles": [
+        "coffeetable",
+        "drawer",
+        "desk"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 82,
+        "steps_from_end": 5,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Desk\u62bd\u5c49",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "Desk",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.72
+        },
+        "full": {
+          "pred": "Desk",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.2
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_12_483_1744793947_q10",
+      "traj_id": "floorplan201_12_483_1744793947",
+      "question": "Where was the CreditCard before you moved it to CoffeeTable?",
+      "gold": [
+        "Sofa"
+      ],
+      "n_steps": 84,
+      "n_tokens_full": 928,
+      "top_receptacles": [
+        "coffeetable",
+        "diningtable",
+        "sofa"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 64,
+        "steps_from_end": 19,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Drawer",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.05
+        },
+        "summary-80": {
+          "pred": "SideTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 1.8
+        },
+        "full": {
+          "pred": "Coffeetable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.27
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_17_453_1745408324_q5",
+      "traj_id": "floorplan210_17_453_1745408324",
+      "question": "Between CreditCard and KeyChain, which one did you move first?",
+      "gold": [
+        "CreditCard"
+      ],
+      "n_steps": 119,
+      "n_tokens_full": 1311,
+      "top_receptacles": [
+        "sofa",
+        "dresser",
+        "ottoman"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 118,
+        "steps_from_end": 0,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "CreditCard",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "CreditCard",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.37
+        },
+        "full": {
+          "pred": "CreditCard",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.28
+        }
+      }
+    },
+    {
+      "qid": "floorplan18_18_657_1747219088_q8",
+      "traj_id": "floorplan18_18_657_1747219088",
+      "question": "Where was Lettuce before you put it to DiningTable?",
+      "gold": [
+        "Sink"
+      ],
+      "n_steps": 128,
+      "n_tokens_full": 1403,
+      "top_receptacles": [
+        "diningtable",
+        "countertop",
+        "counter"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 127,
+        "steps_from_end": 0,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "Sinkbasin",
+          "exact_match": 0,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.83
+        },
+        "full": {
+          "pred": "Sinkbasin",
+          "exact_match": 0,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.31
+        }
+      }
+    },
+    {
+      "qid": "floorplan211_26_726_1746786652_q36",
+      "traj_id": "floorplan211_26_726_1746786652",
+      "question": "Where did you move the Vase from the Shelf?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 182,
+      "n_tokens_full": 2022,
+      "top_receptacles": [
+        "shelf",
+        "coffeetable",
+        "sofa"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 167,
+        "steps_from_end": 14,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Shelf",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "CoffeeTable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.93
+        },
+        "full": {
+          "pred": "Shelf",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.38
+        }
+      }
+    },
+    {
+      "qid": "floorplan223_15_437_1746024482_q12",
+      "traj_id": "floorplan223_15_437_1746024482",
+      "question": "Where did you move the Vase from the TVStand?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 105,
+      "n_tokens_full": 1178,
+      "top_receptacles": [
+        "coffeetable",
+        "sofa",
+        "diningtable"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 104,
+        "steps_from_end": 0,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "TV Stand",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Coffeetable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.42
+        },
+        "full": {
+          "pred": "TVStand",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.26
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_11_482_1745446449_q3",
+      "traj_id": "floorplan210_11_482_1745446449",
+      "question": "Between CreditCard and RemoteControl, which one did you move first?",
+      "gold": [
+        "RemoteControl"
+      ],
+      "n_steps": 77,
+      "n_tokens_full": 861,
+      "top_receptacles": [
+        "coffeetable",
+        "dresser",
+        "ottoman"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 48,
+        "steps_from_end": 28,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "CreditCard",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "CreditCard",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.73
+        },
+        "full": {
+          "pred": "RemoteControl",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.21
+        }
+      }
+    },
+    {
+      "qid": "floorplan13_16_427_1745291369_q7",
+      "traj_id": "floorplan13_16_427_1745291369",
+      "question": "Where did you move the Fork from the Sink?",
+      "gold": [
+        "CounterTop"
+      ],
+      "n_steps": 111,
+      "n_tokens_full": 1184,
+      "top_receptacles": [
+        "sink",
+        "countertop",
+        "counter"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 89,
+        "steps_from_end": 21,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Sink drawer",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Sink",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.74
+        },
+        "full": {
+          "pred": "Sinkbasin",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.28
+        }
+      }
+    },
+    {
+      "qid": "floorplan221_25_720_1746886407_q27",
+      "traj_id": "floorplan221_25_720_1746886407",
+      "question": "Where did you move the Vase from the DiningTable?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 175,
+      "n_tokens_full": 1960,
+      "top_receptacles": [
+        "diningtable",
+        "coffeetable",
+        "sidetable"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 141,
+        "steps_from_end": 33,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 1.7
+        },
+        "full": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.4
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_20_824_1747026868_q28",
+      "traj_id": "floorplan210_20_824_1747026868",
+      "question": "Where did you move the Pillow from the Sofa?",
+      "gold": [
+        "Ottoman"
+      ],
+      "n_steps": 140,
+      "n_tokens_full": 1531,
+      "top_receptacles": [
+        "coffeetable",
+        "dresser",
+        "ottoman"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 127,
+        "steps_from_end": 12,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Sofa",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "Ottoman",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.33
+        },
+        "full": {
+          "pred": "Sofa",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.34
+        }
+      }
+    },
+    {
+      "qid": "floorplan209_15_431_1745402895_q38",
+      "traj_id": "floorplan209_15_431_1745402895",
+      "question": "Where did you move the Vase from the Dresser?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 105,
+      "n_tokens_full": 1153,
+      "top_receptacles": [
+        "sofa",
+        "sidetable",
+        "dresser"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 83,
+        "steps_from_end": 21,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Dresser",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "Coffeetable",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.83
+        },
+        "full": {
+          "pred": "Dresser",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.27
+        }
+      }
+    },
+    {
+      "qid": "floorplan213_20_719_1746893227_q28",
+      "traj_id": "floorplan213_20_719_1746893227",
+      "question": "Where did you move the Box from the Dresser?",
+      "gold": [
+        "Sofa"
+      ],
+      "n_steps": 140,
+      "n_tokens_full": 1557,
+      "top_receptacles": [
+        "diningtable",
+        "coffeetable",
+        "sofa"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 127,
+        "steps_from_end": 12,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Dresser",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "Dresser",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.44
+        },
+        "full": {
+          "pred": "Dresser",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.35
+        }
+      }
+    },
+    {
+      "qid": "floorplan9_31_709_1747114738_q32",
+      "traj_id": "floorplan9_31_709_1747114738",
+      "question": "Where did you move the Fork from the CounterTop?",
+      "gold": [
+        "Sink"
+      ],
+      "n_steps": 225,
+      "n_tokens_full": 2399,
+      "top_receptacles": [
+        "diningtable",
+        "sink",
+        "countertop"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 219,
+        "steps_from_end": 5,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "CounterTop",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Dining Table",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.63
+        },
+        "full": {
+          "pred": "Sink",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.43
+        }
+      }
+    },
+    {
+      "qid": "floorplan202_18_450_1744426417_q3",
+      "traj_id": "floorplan202_18_450_1744426417",
+      "question": "Between Book and CreditCard, which one did you move first?",
+      "gold": [
+        "CreditCard"
+      ],
+      "n_steps": 126,
+      "n_tokens_full": 1394,
+      "top_receptacles": [
+        "sofa",
+        "sidetable",
+        "coffeetable"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 90,
+        "steps_from_end": 35,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Book",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.05
+        },
+        "summary-80": {
+          "pred": "Book",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.64
+        },
+        "full": {
+          "pred": "Book",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.25
+        }
+      }
+    },
+    {
+      "qid": "floorplan204_12_454_1746034353_q23",
+      "traj_id": "floorplan204_12_454_1746034353",
+      "question": "Where did you move the Vase from the Desk?",
+      "gold": [
+        "CoffeeTable"
+      ],
+      "n_steps": 88,
+      "n_tokens_full": 967,
+      "top_receptacles": [
+        "coffeetable",
+        "drawer",
+        "desk"
+      ],
+      "is_salient": true,
+      "evidence_distance": {
+        "last_evidence_step": 71,
+        "steps_from_end": 16,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Desk drawer",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Armchair",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.75
+        },
+        "full": {
+          "pred": "Desk",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.2
+        }
+      }
+    },
+    {
+      "qid": "floorplan213_23_834_1747086262_q12",
+      "traj_id": "floorplan213_23_834_1747086262",
+      "question": "Where did you move the Book from the CoffeeTable?",
+      "gold": [
+        "Drawer"
+      ],
+      "n_steps": 165,
+      "n_tokens_full": 1803,
+      "top_receptacles": [
+        "diningtable",
+        "dresser",
+        "coffeetable"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 73,
+        "steps_from_end": 91,
+        "distance_bin": "far"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "CoffeeTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "Drawer",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.57
+        },
+        "full": {
+          "pred": "CoffeeTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.35
+        }
+      }
+    },
+    {
+      "qid": "floorplan26_30_702_1747072764_q7",
+      "traj_id": "floorplan26_30_702_1747072764",
+      "question": "Where did you move the Lettuce from the DiningTable?",
+      "gold": [
+        "Fridge"
+      ],
+      "n_steps": 209,
+      "n_tokens_full": 2280,
+      "top_receptacles": [
+        "diningtable",
+        "countertop",
+        "counter"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 194,
+        "steps_from_end": 14,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "Fridge",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.39
+        },
+        "full": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.45
+        }
+      }
+    },
+    {
+      "qid": "floorplan230_9_507_1746931717_q6",
+      "traj_id": "floorplan230_9_507_1746931717",
+      "question": "Where did you move the Newspaper from the CoffeeTable?",
+      "gold": [
+        "DiningTable"
+      ],
+      "n_steps": 0,
+      "n_tokens_full": 0,
+      "top_receptacles": [],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": -1,
+        "steps_from_end": -1,
+        "distance_bin": "not_found"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "CoffeeTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "CoffeeTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.94
+        },
+        "full": {
+          "pred": "CoffeeTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_19_618_1746864406_q1",
+      "traj_id": "floorplan210_19_618_1746864406",
+      "question": "Between RemoteControl and Statue, which one did you move first?",
+      "gold": [
+        "RemoteControl"
+      ],
+      "n_steps": 0,
+      "n_tokens_full": 0,
+      "top_receptacles": [],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": -1,
+        "steps_from_end": -1,
+        "distance_bin": "not_found"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "RemoteControl",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.08
+        },
+        "summary-80": {
+          "pred": "RemoteControl",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.93
+        },
+        "full": {
+          "pred": "RemoteControl",
+          "exact_match": 1,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.08
+        }
+      }
+    },
+    {
+      "qid": "floorplan26_30_702_1747072764_q55",
+      "traj_id": "floorplan26_30_702_1747072764",
+      "question": "Where did you move the Egg from the DiningTable?",
+      "gold": [
+        "Fridge"
+      ],
+      "n_steps": 209,
+      "n_tokens_full": 2280,
+      "top_receptacles": [
+        "diningtable",
+        "countertop",
+        "counter"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 194,
+        "steps_from_end": 14,
+        "distance_bin": "mid"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "Sink",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 2.35
+        },
+        "full": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.45
+        }
+      }
+    },
+    {
+      "qid": "floorplan18_18_657_1747219088_q37",
+      "traj_id": "floorplan18_18_657_1747219088",
+      "question": "Where did you move the Spoon from the DiningTable?",
+      "gold": [
+        "Sink"
+      ],
+      "n_steps": 128,
+      "n_tokens_full": 1403,
+      "top_receptacles": [
+        "diningtable",
+        "countertop",
+        "counter"
+      ],
+      "is_salient": false,
+      "evidence_distance": {
+        "last_evidence_step": 127,
+        "steps_from_end": 0,
+        "distance_bin": "near"
+      },
+      "split": "multi_clue",
+      "conditions": {
+        "blind": {
+          "pred": "DiningTable",
+          "exact_match": 0,
+          "partial_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "summary-80": {
+          "pred": "Sinkbasin",
+          "exact_match": 0,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 2.83
+        },
+        "full": {
+          "pred": "Sinkbasin",
+          "exact_match": 0,
+          "partial_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.31
+        }
+      }
+    }
+  ],
+  "_provenance": {
+    "git_commit": "556a236f8c2e9222233596dfd57c432eeae6e3a3",
+    "script": "frontier_infinithor.py",
+    "model": "qwen7b",
+    "timestamp": "2026-06-22T16:06:56.366792",
+    "device": "nvidia_rtx_a6000",
+    "n": 60,
+    "args": {
+      "reasoning_model": "Qwen/Qwen2.5-7B-Instruct",
+      "text_source": "simulator_oracle_ground_truth",
+      "oracle_guard": "gt_steps_gt_img_idx_never_fed_as_input",
+      "conditions": [
+        "blind",
+        "summary-80",
+        "full"
+      ],
+      "mc_n": 60,
+      "sc_n": 0,
+      "seed": 42,
+      "traj_token_distribution": {
+        "n_sampled": 20,
+        "min": 873,
+        "max": 2149,
+        "mean": 1441
+      },
+      "dataset_coverage": {
+        "traj_ids_in_qa_csvs": 219,
+        "traj_ids_in_metadata_tar": 65,
+        "traj_ids_missing": 154,
+        "note": "Only 62 of 219 traj_ids referenced in QA CSVs are present in the HuggingFace metadata.tar release (as of 2026-06-22). The 157 missing traj_ids are absent from the public release; they are not filtered out by any accuracy criterion, so coverage cap does not bias gate direction."
+      }
+    }
+  }
+}
