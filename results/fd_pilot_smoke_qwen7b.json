@@ -1,0 +1,775 @@
+{
+  "metadata": {
+    "caption_model": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "reasoning_model": "Qwen/Qwen2.5-7B-Instruct",
+    "caption_prompt_version": "v1",
+    "target_hl_category": "Single-Goal Temporal Tasks",
+    "target_ll_category": "Interaction Order",
+    "episodes": [
+      "ep_1",
+      "ep_2",
+      "ep_3"
+    ],
+    "n_tasks": 27,
+    "conditions": [
+      "blind",
+      "full"
+    ],
+    "gt_source": "gold_frame_caption_qwenvl7b",
+    "gt_circularity_note": "GT derived by captioning gold frames with same VLM used for input captioning. Mildly circular \u2014 both use Qwen2.5-VL-7B. Noted as limitation.",
+    "timestamp": "2026-06-18T11:00:08.716146"
+  },
+  "records": [
+    {
+      "ep_id": "ep_1",
+      "task_id": "task_36",
+      "question": "The robot's goal is: Navigate to the object you interacted with immediately after ending the interaction with android figure.",
+      "gold_frames_sample": [
+        66,
+        67,
+        68,
+        69,
+        70
+      ],
+      "gt_label": "wooden table",
+      "conditions": {
+        "blind": {
+          "pred": "Android Figure",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.21
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.58
+        }
+      }
+    },
+    {
+      "ep_id": "ep_1",
+      "task_id": "task_34",
+      "question": "The robot's goal is: Navigate to the receptacle that you picked the first object from.",
+      "gold_frames_sample": [
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "gt_label": "striped chair",
+      "conditions": {
+        "blind": {
+          "pred": "First Object Receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.15
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.52
+        }
+      }
+    },
+    {
+      "ep_id": "ep_1",
+      "task_id": "task_33",
+      "question": "The robot's goal is: Navigate to the first receptacle that you placed an object on.",
+      "gold_frames_sample": [
+        26,
+        28,
+        29,
+        30,
+        31
+      ],
+      "gt_label": "robot's hand",
+      "conditions": {
+        "blind": {
+          "pred": "First Placed Receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.18
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.52
+        }
+      }
+    },
+    {
+      "ep_id": "ep_1",
+      "task_id": "task_41",
+      "question": "The robot's goal is: Navigate to the receptacle that you placed an object on right before you started interacting with tape.",
+      "gold_frames_sample": [
+        26,
+        28,
+        29,
+        30,
+        31
+      ],
+      "gt_label": "robot's hand",
+      "conditions": {
+        "blind": {
+          "pred": "Last Placed Object",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.13
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.53
+        }
+      }
+    },
+    {
+      "ep_id": "ep_1",
+      "task_id": "task_35",
+      "question": "The robot's goal is: Navigate to the object that you picked from the first receptacle.",
+      "gold_frames_sample": [
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "gt_label": "wooden floor",
+      "conditions": {
+        "blind": {
+          "pred": "Object from first receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.15
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.52
+        }
+      }
+    },
+    {
+      "ep_id": "ep_1",
+      "task_id": "task_31",
+      "question": "The robot's goal is: Navigate to the second object that you interacted with yesterday.",
+      "gold_frames_sample": [
+        66,
+        67,
+        68,
+        69,
+        70
+      ],
+      "gt_label": "wooden table",
+      "conditions": {
+        "blind": {
+          "pred": "Second Object Interacted With Yesterday",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.18
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.52
+        }
+      }
+    },
+    {
+      "ep_id": "ep_1",
+      "task_id": "task_37",
+      "question": "The robot's goal is: Navigate to the object you interacted with immediately before starting the interaction with tape.",
+      "gold_frames_sample": [
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "gt_label": "wooden floor",
+      "conditions": {
+        "blind": {
+          "pred": "Tape Reel",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.13
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.53
+        }
+      }
+    },
+    {
+      "ep_id": "ep_1",
+      "task_id": "task_32",
+      "question": "The robot's goal is: Navigate to the first receptacle that you picked an object from.",
+      "gold_frames_sample": [
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "gt_label": "striped chair",
+      "conditions": {
+        "blind": {
+          "pred": "First Picked Receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.18
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.52
+        }
+      }
+    },
+    {
+      "ep_id": "ep_1",
+      "task_id": "task_42",
+      "question": "The robot's goal is: Navigate to the receptacle that you picked an object from right after you finished interacting with android figure.",
+      "gold_frames_sample": [
+        49,
+        50,
+        51,
+        52,
+        53
+      ],
+      "gt_label": "office chair",
+      "conditions": {
+        "blind": {
+          "pred": "Object Receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.13
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.53
+        }
+      }
+    },
+    {
+      "ep_id": "ep_2",
+      "task_id": "task_41",
+      "question": "The robot's goal is: Navigate to the receptacle that you placed an object on right before you started interacting with can.",
+      "gold_frames_sample": [
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "gt_label": "red helmet",
+      "conditions": {
+        "blind": {
+          "pred": "Object on receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.13
+        },
+        "full": {
+          "pred": "kitchen counter",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.54
+        }
+      }
+    },
+    {
+      "ep_id": "ep_2",
+      "task_id": "task_35",
+      "question": "The robot's goal is: Navigate to the object that you picked from the first receptacle.",
+      "gold_frames_sample": [
+        32,
+        33,
+        34,
+        35,
+        36
+      ],
+      "gt_label": "goal location",
+      "conditions": {
+        "blind": {
+          "pred": "Object from first receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.15
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.56
+        }
+      }
+    },
+    {
+      "ep_id": "ep_2",
+      "task_id": "task_31",
+      "question": "The robot's goal is: Navigate to the second object that you interacted with yesterday.",
+      "gold_frames_sample": [
+        63,
+        64,
+        65,
+        66,
+        67
+      ],
+      "gt_label": "metallic table",
+      "conditions": {
+        "blind": {
+          "pred": "Second Object Interacted With Yesterday",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.18
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.54
+        }
+      }
+    },
+    {
+      "ep_id": "ep_2",
+      "task_id": "task_37",
+      "question": "The robot's goal is: Navigate to the object you interacted with immediately before starting the interaction with can.",
+      "gold_frames_sample": [
+        32,
+        33,
+        34,
+        35,
+        36
+      ],
+      "gt_label": "goal location",
+      "conditions": {
+        "blind": {
+          "pred": "Previous Object",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.54
+        }
+      }
+    },
+    {
+      "ep_id": "ep_2",
+      "task_id": "task_32",
+      "question": "The robot's goal is: Navigate to the first receptacle that you picked an object from.",
+      "gold_frames_sample": [
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "gt_label": "red pepper",
+      "conditions": {
+        "blind": {
+          "pred": "First Picked Receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.18
+        },
+        "full": {
+          "pred": "kitchen counter",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.54
+        }
+      }
+    },
+    {
+      "ep_id": "ep_2",
+      "task_id": "task_42",
+      "question": "The robot's goal is: Navigate to the receptacle that you picked an object from right after you finished interacting with tomato.",
+      "gold_frames_sample": [
+        51,
+        52,
+        53,
+        54,
+        55
+      ],
+      "gt_label": "trash can",
+      "conditions": {
+        "blind": {
+          "pred": "Tomato Receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.15
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.54
+        }
+      }
+    },
+    {
+      "ep_id": "ep_2",
+      "task_id": "task_36",
+      "question": "The robot's goal is: Navigate to the object you interacted with immediately after ending the interaction with tomato.",
+      "gold_frames_sample": [
+        63,
+        64,
+        65,
+        66,
+        67
+      ],
+      "gt_label": "metallic table",
+      "conditions": {
+        "blind": {
+          "pred": "Tomato Container",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.1
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.54
+        }
+      }
+    },
+    {
+      "ep_id": "ep_2",
+      "task_id": "task_34",
+      "question": "The robot's goal is: Navigate to the receptacle that you picked the second object from.",
+      "gold_frames_sample": [
+        51,
+        52,
+        53,
+        54,
+        55
+      ],
+      "gt_label": "trash can",
+      "conditions": {
+        "blind": {
+          "pred": "Second Object's Receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.18
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.54
+        }
+      }
+    },
+    {
+      "ep_id": "ep_2",
+      "task_id": "task_33",
+      "question": "The robot's goal is: Navigate to the first receptacle that you placed an object on.",
+      "gold_frames_sample": [
+        30,
+        31,
+        32,
+        33,
+        34
+      ],
+      "gt_label": "red helmet",
+      "conditions": {
+        "blind": {
+          "pred": "First Placed Receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.18
+        },
+        "full": {
+          "pred": "kitchen counter",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.54
+        }
+      }
+    },
+    {
+      "ep_id": "ep_3",
+      "task_id": "task_34",
+      "question": "The robot's goal is: Navigate to the receptacle that you picked the first object from.",
+      "gold_frames_sample": [
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "gt_label": "wooden table",
+      "conditions": {
+        "blind": {
+          "pred": "First Object Receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.15
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.52
+        }
+      }
+    },
+    {
+      "ep_id": "ep_3",
+      "task_id": "task_36",
+      "question": "The robot's goal is: Navigate to the object you interacted with immediately after ending the interaction with toy airplane.",
+      "gold_frames_sample": [
+        74,
+        75,
+        76,
+        77,
+        78
+      ],
+      "gt_label": "kitchen counter",
+      "conditions": {
+        "blind": {
+          "pred": "Toy Car",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.52
+        }
+      }
+    },
+    {
+      "ep_id": "ep_3",
+      "task_id": "task_33",
+      "question": "The robot's goal is: Navigate to the first receptacle that you placed an object on.",
+      "gold_frames_sample": [
+        33,
+        34,
+        35,
+        36,
+        37
+      ],
+      "gt_label": "white pedestal",
+      "conditions": {
+        "blind": {
+          "pred": "First Placed Receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.18
+        },
+        "full": {
+          "pred": "kitchen counter",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.52
+        }
+      }
+    },
+    {
+      "ep_id": "ep_3",
+      "task_id": "task_31",
+      "question": "The robot's goal is: Navigate to the second object that you interacted with yesterday.",
+      "gold_frames_sample": [
+        74,
+        75,
+        76,
+        77,
+        78
+      ],
+      "gt_label": "kitchen counter",
+      "conditions": {
+        "blind": {
+          "pred": "Second Object Interacted With Yesterday",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.18
+        },
+        "full": {
+          "pred": "kitchen counter",
+          "substring_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.52
+        }
+      }
+    },
+    {
+      "ep_id": "ep_3",
+      "task_id": "task_37",
+      "question": "The robot's goal is: Navigate to the object you interacted with immediately before starting the interaction with credit card.",
+      "gold_frames_sample": [
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "gt_label": "white pedestal",
+      "conditions": {
+        "blind": {
+          "pred": "Credit Card Receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.15
+        },
+        "full": {
+          "pred": "kitchen counter",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.52
+        }
+      }
+    },
+    {
+      "ep_id": "ep_3",
+      "task_id": "task_41",
+      "question": "The robot's goal is: Navigate to the receptacle that you placed an object on right before you started interacting with credit card.",
+      "gold_frames_sample": [
+        33,
+        34,
+        35,
+        36,
+        37
+      ],
+      "gt_label": "white pedestal",
+      "conditions": {
+        "blind": {
+          "pred": "Credit Card Receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.15
+        },
+        "full": {
+          "pred": "kitchen counter",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.52
+        }
+      }
+    },
+    {
+      "ep_id": "ep_3",
+      "task_id": "task_35",
+      "question": "The robot's goal is: Navigate to the object that you picked from the second receptacle.",
+      "gold_frames_sample": [
+        74,
+        75,
+        76,
+        77,
+        78
+      ],
+      "gt_label": "kitchen counter",
+      "conditions": {
+        "blind": {
+          "pred": "Object from second receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.15
+        },
+        "full": {
+          "pred": "kitchen counter",
+          "substring_match": 1,
+          "llm_judge": 1,
+          "elapsed_s": 0.52
+        }
+      }
+    },
+    {
+      "ep_id": "ep_3",
+      "task_id": "task_42",
+      "question": "The robot's goal is: Navigate to the receptacle that you picked an object from right after you finished interacting with toy airplane.",
+      "gold_frames_sample": [
+        10,
+        11,
+        14,
+        15,
+        16
+      ],
+      "gt_label": "bed",
+      "conditions": {
+        "blind": {
+          "pred": "Toy airplane",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.08
+        },
+        "full": {
+          "pred": "wooden table",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.52
+        }
+      }
+    },
+    {
+      "ep_id": "ep_3",
+      "task_id": "task_32",
+      "question": "The robot's goal is: Navigate to the second receptacle that you picked an object from.",
+      "gold_frames_sample": [
+        10,
+        11,
+        14,
+        15,
+        16
+      ],
+      "gt_label": "bed",
+      "conditions": {
+        "blind": {
+          "pred": "Second Receptacle",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.13
+        },
+        "full": {
+          "pred": "kitchen counter",
+          "substring_match": 0,
+          "llm_judge": 0,
+          "elapsed_s": 0.52
+        }
+      }
+    }
+  ],
+  "_provenance": {
+    "git_commit": "f6fb7d1ec577b0998543e2ea07c9950392a2bc10",
+    "script": "caption_findingdory.py",
+    "model": "qwenvl7b+qwen7b",
+    "timestamp": "2026-06-18T11:00:08.716137",
+    "device": "nvidia_rtx_a6000",
+    "n": 27,
+    "args": {
+      "caption_prompt_version": "v1",
+      "captioner": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "reasoner": "Qwen/Qwen2.5-7B-Instruct",
+      "episodes": [
+        "ep_1",
+        "ep_2",
+        "ep_3"
+      ],
+      "conditions": [
+        "blind",
+        "full"
+      ]
+    }
+  }
+}

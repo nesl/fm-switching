@@ -99,8 +99,10 @@ class InertiaBlindAdaptive(Policy):
     AMORTIZE = 20
 
     def _cycle_cost_s(self, loc, quant, ctx, rtt_ms):
+        # Warm KV cache: per-cycle cost charges only TOKENS_PER_CYCLE_FULL new tokens.
         return llm_latency_ms(quant, loc, ctx, gen_tokens=10,
-                               network_rtt_ms=rtt_ms if loc == "cloud" else 0) / 1000.0
+                               network_rtt_ms=rtt_ms if loc == "cloud" else 0,
+                               warm_prefill_tokens=TOKENS_PER_CYCLE_FULL) / 1000.0
 
     def _mig_cost_linear(self, direction, quant, ctx_tokens, rtt_ms):
         """Flat token-linear migration cost — ignores measured inertia curve."""
@@ -136,8 +138,10 @@ class PlaceOnly(Policy):
     AMORTIZE = 20
 
     def _cycle_cost_s(self, loc, quant, ctx, rtt_ms):
+        # Warm KV cache: per-cycle cost charges only TOKENS_PER_CYCLE_FULL new tokens.
         return llm_latency_ms(quant, loc, ctx, gen_tokens=10,
-                               network_rtt_ms=rtt_ms if loc == "cloud" else 0) / 1000.0
+                               network_rtt_ms=rtt_ms if loc == "cloud" else 0,
+                               warm_prefill_tokens=TOKENS_PER_CYCLE_FULL) / 1000.0
 
     def _mig_cost(self, direction, quant, ctx_tokens, rtt_ms):
         if direction == "to_cloud":
@@ -244,19 +248,34 @@ class JointInertia(Policy):
 
     Cloud serving risk: orchestrator checks max(1, ceil(cloud_compute_s))
     seconds of connectivity.  p_fail = 1 - (1 - p_disc)^t_win per step.
+
+    has_warm_window10_fallback = True:
+      Edge always maintains a warm window-10 KV cache alongside cloud serving.
+      On cloud failure, fallback re-prefill is for window-10 depth (7180 tok),
+      not for the full cloud context.  This capability is reflected in both the
+      MPC evaluation (mig_back_s uses _WARM_FALLBACK_CTX) and in run_episode
+      (cloud_failure_ctx_override=_WARM_FALLBACK_CTX passed by the experiment).
     """
     name = "JointInertia"
     HORIZON = 10
     QUALITY_WEIGHT_S = 5.0
+    has_warm_window10_fallback = True
+    _WARM_FALLBACK_CTX = 7180   # window-10 token depth; edge KV always maintained
 
-    def __init__(self, quality=None):
+    def __init__(self, quality=None, oom_fallback="window-10"):
         self._q = quality if quality is not None else _QUALITY_DEFAULT
+        self._oom_fallback = oom_fallback  # mode the sim uses on edge OOM
 
-    def _cloud_serve_s(self, ctx, rtt_ms):
-        return (_cloud_ms(ctx, gen_tokens=10) + rtt_ms) / 1000.0
+    def _cloud_serve_s(self, ctx, rtt_ms, mode="full"):
+        # Warm KV cache: only TOKENS_PER_CYCLE_FULL new tokens prefilled per cycle.
+        # Stateless cold-starts at full ctx each cycle.
+        warm = (ctx if mode == "stateless" else TOKENS_PER_CYCLE_FULL)
+        return (_cloud_ms(ctx, gen_tokens=10, warm_prefill_tokens=warm) + rtt_ms) / 1000.0
 
-    def _edge_serve_s(self, quant, ctx):
-        return llm_latency_ms(quant, "edge", ctx, gen_tokens=10, network_rtt_ms=0) / 1000.0
+    def _edge_serve_s(self, quant, ctx, mode="full"):
+        warm = (ctx if mode == "stateless" else TOKENS_PER_CYCLE_FULL)
+        return llm_latency_ms(quant, "edge", ctx, gen_tokens=10, network_rtt_ms=0,
+                               warm_prefill_tokens=warm) / 1000.0
 
     def _migration_gap_s(self, direction, quant, ctx_tokens, rtt_ms):
         """Deterministic migration gap (warm-server / warm-edge model).
@@ -269,7 +288,13 @@ class JointInertia(Policy):
             return inertia_ms("server", ctx_tokens) / 1000.0 + rtt_ms / 1000.0
         return inertia_ms("edge", ctx_tokens) / 1000.0
 
-    def _evaluate(self, state, h0_action):
+    def _evaluate(self, state, action_seq):
+        """Simulate action_seq[0], action_seq[1], ..., STAY, STAY and return total cost.
+
+        action_seq is a list of actions; actions beyond its length default to STAY.
+        Supports compound h0 planning: [MIGRATE_TO_CLOUD, SET_FULL_CONTEXT] tells
+        the MPC to plan a cloud migration at h=0 followed by a mode switch at h=1.
+        """
         loc = state.llm_location
         quant = state.quantization
         mode = state.context_mode
@@ -281,13 +306,12 @@ class JointInertia(Policy):
         # Estimate disconnect probability once from h=0 state for the whole horizon.
         rtt0 = state.network_rtt_ms
         conn0 = state.network_connected
-        p0 = _p_disc(rtt0, conn0)
 
         for h in range(self.HORIZON):
             vlm = wl[h] if h < len(wl) else state.current_vlm_latency_s
             rtt = nt[h] if h < len(nt) else rtt0
             connected = rtt < _DISCONNECTED_RTT_MS
-            a = h0_action if h == 0 else STAY
+            a = action_seq[h] if h < len(action_seq) else STAY
             gap = 0.0
 
             if a == MIGRATE_TO_CLOUD and loc == "edge" and connected:
@@ -309,29 +333,37 @@ class JointInertia(Policy):
                 mode = new_mode
 
             ctx = accum if mode == "full" else EFFECTIVE_TOKENS.get(mode, 0)
-            if memory_used_mb(quant, loc, ctx) > cap:
+            # OOM penalty is edge-only: cloud has no memory cap in the model.
+            # Also model OOM fallback in the MPC so the policy sees the actual mode
+            # it will be in after OOM recovery (prevents phantom mode-switch loops
+            # where OOM penalty < quality penalty of the fallback mode).
+            if loc == "edge" and memory_used_mb(quant, loc, ctx) > cap:
                 cost += 50.0
+                mode = self._oom_fallback
+                ctx = EFFECTIVE_TOKENS.get(mode, 0) if mode != "full" else accum
 
-            # Cloud serving: expected cost includes full return-to-edge cost on failure.
-            # JointInertia has NO warm edge replica (unlike RoutedSyncLH), so cloud
-            # failure forces a 47s warm reload.  Scale p_disc to the actual cloud
-            # serving window (t_serve_s) to get per-step failure probability.
+            # Cloud serving: expected cost includes return-to-edge cost on failure.
+            # With has_warm_window10_fallback, the edge always maintains a window-10
+            # KV replica, so fallback re-prefill uses _WARM_FALLBACK_CTX not full ctx.
             if loc == "cloud":
-                cloud_compute_s = _cloud_ms(ctx, gen_tokens=10) / 1000.0
+                # Warm KV cache: cloud compute charges only incremental tokens.
+                cloud_compute_s = _cloud_ms(ctx, gen_tokens=10,
+                                            warm_prefill_tokens=(ctx if mode == "stateless"
+                                                                  else TOKENS_PER_CYCLE_FULL)) / 1000.0
                 # Orchestrator checks max(1, ceil(cloud_compute_s)) seconds of
                 # connectivity — use that same window to get the correct p_fail.
                 t_win = max(1.0, _math.ceil(cloud_compute_s))
                 p_per_s = _p_disc(rtt, connected)
                 p_fail = 1.0 - (1.0 - p_per_s) ** t_win
-                edge_s = self._edge_serve_s(quant, ctx)
-                # Warm-edge: on cloud failure, edge model is still resident.
-                # Cost = Jetson re-prefill only (no 47s reload).
-                mig_back_s = inertia_ms("edge", ctx) / 1000.0
+                edge_s = self._edge_serve_s(quant, ctx, mode)
+                # Warm window-10 fallback: edge always maintains 7180-token KV.
+                # Cloud failure re-prefill is for the fallback depth, not full ctx.
+                mig_back_s = inertia_ms("edge", self._WARM_FALLBACK_CTX) / 1000.0
                 success_s  = cloud_compute_s + rtt / 1000.0
                 fallback_s = cloud_compute_s * 0.5 + edge_s + mig_back_s
                 llm_s = (1.0 - p_fail) * success_s + p_fail * fallback_s
             else:
-                llm_s = self._edge_serve_s(quant, ctx)
+                llm_s = self._edge_serve_s(quant, ctx, mode)
 
             quality = self._q.get(mode, 0.3)
             cost += vlm + llm_s + gap + self.QUALITY_WEIGHT_S * (1.0 - quality)
@@ -339,14 +371,28 @@ class JointInertia(Policy):
         return cost
 
     def decide(self, state):
+        # Single-step candidates (h0 only; STAY for h=1..H-1)
         h0_options = list(_JOINT_REP_ACTIONS)
         if state.llm_location == "edge" and state.network_connected:
             h0_options.append(MIGRATE_TO_CLOUD)
         if state.llm_location == "cloud":
             h0_options.append(MIGRATE_TO_EDGE)
+
         best_action, best_cost = STAY, float("inf")
         for a in h0_options:
-            c = self._evaluate(state, a)
+            c = self._evaluate(state, [a])
             if c < best_cost:
                 best_cost, best_action = c, a
+
+        # Composite two-step candidates: evaluates [MIGRATE_TO_CLOUD, SET_MODE]
+        # so the MPC can discover cloud+full strategy in one planned sequence.
+        # Only added when on edge and connected (the first action must succeed).
+        if state.llm_location == "edge" and state.network_connected:
+            for h1 in (SET_FULL_CONTEXT, SET_WINDOW_10):
+                seq = [MIGRATE_TO_CLOUD, h1]
+                c = self._evaluate(state, seq)
+                if c < best_cost:
+                    best_cost = c
+                    best_action = MIGRATE_TO_CLOUD  # return h0 action
+
         return best_action

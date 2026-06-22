@@ -1,0 +1,175 @@
+{
+  "metadata": {
+    "model": "qwen7b",
+    "llm": "Qwen/Qwen2.5-7B-Instruct",
+    "quantization": "fp16",
+    "category_filter": 1,
+    "n_questions_requested": 50,
+    "conditions": [
+      "blind",
+      "stateless",
+      "window-3",
+      "window-10",
+      "full",
+      "shuffled",
+      "summary-80",
+      "summary-200"
+    ],
+    "device": "NVIDIA RTX A6000",
+    "timestamp_start": "2026-06-16T16:27:05.355590",
+    "smollm2_full_infeasible": true,
+    "smollm2_context_limit_tokens": 2048,
+    "locomo_full_history_token_range": [
+      11412,
+      22821
+    ],
+    "n_questions_scored": 50,
+    "timestamp_end": "2026-06-16T16:46:05.241300"
+  },
+  "summary": {
+    "blind": {
+      "accuracy": 0.08,
+      "ci_lo": 0.0315,
+      "ci_hi": 0.1884,
+      "mean_prefill_ms": 39.2,
+      "mean_prompt_tokens": 66.2,
+      "n": 50
+    },
+    "stateless": {
+      "accuracy": 0.02,
+      "ci_lo": 0.0035,
+      "ci_hi": 0.105,
+      "mean_prefill_ms": 40.3,
+      "mean_prompt_tokens": 89.5,
+      "n": 50
+    },
+    "window-3": {
+      "accuracy": 0.08,
+      "ci_lo": 0.0315,
+      "ci_hi": 0.1884,
+      "mean_prefill_ms": 373.6,
+      "mean_prompt_tokens": 2351.0,
+      "n": 50
+    },
+    "window-10": {
+      "accuracy": 0.16,
+      "ci_lo": 0.0834,
+      "ci_hi": 0.2851,
+      "mean_prefill_ms": 1169.6,
+      "mean_prompt_tokens": 7180.2,
+      "n": 50
+    },
+    "full": {
+      "accuracy": 0.26,
+      "ci_lo": 0.1587,
+      "ci_hi": 0.3955,
+      "mean_prefill_ms": 3621.0,
+      "mean_prompt_tokens": 18821.9,
+      "n": 50
+    },
+    "shuffled": {
+      "accuracy": 0.2,
+      "ci_lo": 0.1124,
+      "ci_hi": 0.3304,
+      "mean_prefill_ms": 3525.8,
+      "mean_prompt_tokens": 18445.4,
+      "n": 50
+    },
+    "summary-80": {
+      "accuracy": 0.06,
+      "ci_lo": 0.0206,
+      "ci_hi": 0.1622,
+      "mean_prefill_ms": 48.6,
+      "mean_prompt_tokens": 182.5,
+      "n": 50
+    },
+    "summary-200": {
+      "accuracy": 0.06,
+      "ci_lo": 0.0206,
+      "ci_hi": 0.1622,
+      "mean_prefill_ms": 55.8,
+      "mean_prompt_tokens": 247.5,
+      "n": 50
+    }
+  },
+  "significance": {
+    "full_vs_blind": {
+      "cond_a": "full",
+      "cond_b": "blind",
+      "b": 10,
+      "c": 1,
+      "mcnemar_p": 0.015861,
+      "delta_accuracy": 0.18
+    },
+    "full_vs_shuffled": {
+      "cond_a": "full",
+      "cond_b": "shuffled",
+      "b": 3,
+      "c": 0,
+      "mcnemar_p": 0.248213,
+      "delta_accuracy": 0.06
+    },
+    "full_vs_stateless": {
+      "cond_a": "full",
+      "cond_b": "stateless",
+      "b": 13,
+      "c": 1,
+      "mcnemar_p": 0.003283,
+      "delta_accuracy": 0.24
+    },
+    "summary_80_vs_full": {
+      "cond_a": "summary-80",
+      "cond_b": "full",
+      "b": 2,
+      "c": 12,
+      "mcnemar_p": 0.016157,
+      "delta_accuracy": -0.2
+    },
+    "summary_200_vs_full": {
+      "cond_a": "summary-200",
+      "cond_b": "full",
+      "b": 1,
+      "c": 11,
+      "mcnemar_p": 0.009375,
+      "delta_accuracy": -0.2
+    },
+    "window_10_vs_full": {
+      "cond_a": "window-10",
+      "cond_b": "full",
+      "b": 1,
+      "c": 6,
+      "mcnemar_p": 0.13057,
+      "delta_accuracy": -0.1
+    },
+    "summary_80_vs_summary_200": {
+      "cond_a": "summary-80",
+      "cond_b": "summary-200",
+      "b": 1,
+      "c": 1,
+      "mcnemar_p": 0.4795,
+      "delta_accuracy": 0.0
+    }
+  },
+  "per_question_path": "results/frontier_locomo_qwen7b_perquestion.json",
+  "_provenance": {
+    "git_commit": "f6fb7d1ec577b0998543e2ea07c9950392a2bc10",
+    "script": "frontier_locomo.py",
+    "model": "qwen7b",
+    "timestamp": "2026-06-16T16:46:05.239109",
+    "device": "nvidia_rtx_a6000",
+    "n": 50,
+    "args": {
+      "data": "data/locomo/locomo10.json",
+      "model": "Qwen/Qwen2.5-7B-Instruct",
+      "category": 1,
+      "limit": 50,
+      "per_conv_limit": 5,
+      "quantization": "fp16",
+      "sum80_cache": "results/locomo_summaries_80.json",
+      "sum200_cache": "results/locomo_summaries_200.json",
+      "output": "results/frontier_locomo_qwen7b.json",
+      "per_q_output": "results/frontier_locomo_qwen7b_perquestion.json",
+      "skip_summarization": false
+    }
+  }
+}

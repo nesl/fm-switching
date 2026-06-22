@@ -117,9 +117,12 @@ class ProactiveMPC(Policy):
     HORIZON = 10
     QUALITY_WEIGHT_S = 5.0  # cost-equivalent of (1.0 - quality) per cycle
 
-    def _llm_s(self, loc, quant, ctx, rtt_ms):
+    def _llm_s(self, loc, quant, ctx, rtt_ms, mode="full"):
+        # Warm KV cache: per-cycle cost uses only incremental prefill.
+        warm = (ctx if mode == "stateless" else TOKENS_PER_CYCLE_FULL)
         return llm_latency_ms(quant, loc, ctx, gen_tokens=10,
-                               network_rtt_ms=rtt_ms if loc == "cloud" else 0) / 1000.0
+                               network_rtt_ms=rtt_ms if loc == "cloud" else 0,
+                               warm_prefill_tokens=warm) / 1000.0
 
     def _evaluate(self, state, action_seq):
         """Simulate action_seq[0..H-1] forward and return total cost."""
@@ -161,11 +164,11 @@ class ProactiveMPC(Policy):
                 mode = "full"
 
             ctx = (accum if mode == "full" else EFFECTIVE_TOKENS[mode])
-            mem = memory_used_mb(quant, loc, ctx)
-            if mem > cap:
-                cost += 50.0  # heavy penalty for OOM in horizon
+            # OOM penalty is edge-only: cloud has no memory cap in the model.
+            if loc == "edge" and memory_used_mb(quant, loc, ctx) > cap:
+                cost += 50.0
 
-            llm_s = self._llm_s(loc, quant, ctx, rtt)
+            llm_s = self._llm_s(loc, quant, ctx, rtt, mode)
             quality = QUALITY[mode]
             cost += vlm + llm_s + gap + self.QUALITY_WEIGHT_S * (1.0 - quality)
             accum += TOKENS_PER_CYCLE_FULL
@@ -204,9 +207,11 @@ class Oracle(Policy):
         self.full_wl = full_workload
         self.full_net = full_network
 
-    def _llm_s(self, loc, quant, ctx, rtt_ms):
+    def _llm_s(self, loc, quant, ctx, rtt_ms, mode="full"):
+        warm = (ctx if mode == "stateless" else TOKENS_PER_CYCLE_FULL)
         return llm_latency_ms(quant, loc, ctx, gen_tokens=10,
-                               network_rtt_ms=rtt_ms if loc == "cloud" else 0) / 1000.0
+                               network_rtt_ms=rtt_ms if loc == "cloud" else 0,
+                               warm_prefill_tokens=warm) / 1000.0
 
     def _eval_seq(self, state, h0_action, h):
         """Apply h0_action at this cycle, then STAY for the rest. Return cost."""
@@ -242,10 +247,10 @@ class Oracle(Policy):
             elif a == SET_FULL_CONTEXT:
                 mode = "full"
             ctx = (accum if mode == "full" else EFFECTIVE_TOKENS[mode])
-            mem = memory_used_mb(quant, loc, ctx)
-            if mem > cap:
+            # OOM penalty is edge-only: cloud has no memory cap in the model.
+            if loc == "edge" and memory_used_mb(quant, loc, ctx) > cap:
                 cost += 50.0
-            cost += vlm + self._llm_s(loc, quant, ctx, rtt) + gap \
+            cost += vlm + self._llm_s(loc, quant, ctx, rtt, mode) + gap \
                     + self.QUALITY_WEIGHT_S * (1.0 - QUALITY[mode])
             accum += TOKENS_PER_CYCLE_FULL
         return cost

@@ -290,18 +290,34 @@ EFFECTIVE_TOKENS = _t_loaded if _t_loaded else _TOKENS_FALLBACK
 SUMMARIZATION_COST_S = 1.5
 
 
+# Override table for context depths beyond the measured ceiling.
+# Keyed as (tier, min_context_tokens): override_ms.
+# When context_tokens >= min_context_tokens the override is returned instead
+# of the clamped curve endpoint. Set by experiments to compare extrapolation
+# bounds without modifying the source JSONs.
+# Example: _INERTIA_EXTRAPOLATED[("edge", 8193)] = 25900.0  # ~26 s at 18822 tok
+_INERTIA_EXTRAPOLATED: dict = {}
+
+
 def inertia_ms(tier: str, context_tokens: int) -> float:
     """Return the measured re-prefill (+ KV-transfer) latency in ms for
     *context_tokens* tokens on *tier* ('edge' | 'server').
 
     Uses the measured inertia curve when available; falls back to the linear
     prefill-rate model from FP16/CLOUD dicts when the curve JSON is absent.
+    For depths beyond the measured ceiling, checks _INERTIA_EXTRAPOLATED for
+    an experiment-supplied override before clamping.
 
     Provenance:
       edge   — _INERTIA_EDGE loaded from results/inertia_<MODEL>_jetson.json
       server — _INERTIA_SERVER loaded from results/inertia_<MODEL>_a6000.json
       Linear fallback active for any tier whose JSON is not yet present.
     """
+    # Check extrapolation override for depths beyond the measured curve.
+    for (t, min_tok), override_val in _INERTIA_EXTRAPOLATED.items():
+        if t == tier and context_tokens >= min_tok:
+            return override_val
+
     if tier == "edge":
         val = _interpolate_inertia(_INERTIA_EDGE, context_tokens)
         if val is not None:
@@ -319,26 +335,41 @@ def inertia_ms(tier: str, context_tokens: int) -> float:
         raise ValueError(f"inertia_ms: unknown tier {tier!r}; expected 'edge' or 'server'")
 
 
-def edge_compute_ms(quant, context_tokens, gen_tokens=10):
-    """Edge-only compute time (ms): prefill + decode. No network."""
+def edge_compute_ms(quant, context_tokens, gen_tokens=10, warm_prefill_tokens=None):
+    """Edge-only compute time (ms): prefill + decode. No network.
+
+    warm_prefill_tokens: if provided, charges prefill only for this many tokens
+    (warm KV cache — only new tokens need to be prefilled). Use context_tokens
+    for memory sizing; use warm_prefill_tokens for per-cycle compute cost.
+    If None, charges full context_tokens prefill (cold start / migration).
+    """
     params = FP16 if quant == "fp16" else INT4
-    return (params["llm_prefill_ms_per_token"] * context_tokens
+    prefill_n = warm_prefill_tokens if warm_prefill_tokens is not None else context_tokens
+    return (params["llm_prefill_ms_per_token"] * prefill_n
             + params["llm_typical_decode_ms"] * gen_tokens)
 
 
-def cloud_compute_ms(context_tokens, gen_tokens=10):
-    """Cloud-only compute time (ms): prefill + decode. No network."""
-    return (CLOUD["llm_prefill_ms_per_token"] * context_tokens
+def cloud_compute_ms(context_tokens, gen_tokens=10, warm_prefill_tokens=None):
+    """Cloud-only compute time (ms): prefill + decode. No network.
+
+    warm_prefill_tokens: if provided, charges only incremental prefill for a
+    warm KV cache (analogous to edge_compute_ms).
+    """
+    prefill_n = warm_prefill_tokens if warm_prefill_tokens is not None else context_tokens
+    return (CLOUD["llm_prefill_ms_per_token"] * prefill_n
             + CLOUD["llm_typical_decode_ms"] * gen_tokens)
 
 
-def llm_latency_ms(quant, location, context_tokens, gen_tokens=10, network_rtt_ms=0):
+def llm_latency_ms(quant, location, context_tokens, gen_tokens=10, network_rtt_ms=0,
+                   warm_prefill_tokens=None):
     """Return total LLM latency in ms for one cycle.
     quant: 'fp16' | 'int4'  -- only relevant when location='edge'
     location: 'edge' | 'cloud'
-    context_tokens: prompt token count
+    context_tokens: prompt token count (used for memory sizing, cold prefill)
     gen_tokens: tokens to generate (default 10 — short response)
     network_rtt_ms: only used if location='cloud'.
+    warm_prefill_tokens: if provided, only this many tokens are prefilled
+    (warm KV cache per-cycle cost). See edge_compute_ms / cloud_compute_ms.
 
     Cloud branch = `cloud_compute_ms(...) + network_rtt_ms`. The simulator's
     network model currently exposes per-state RTT but **bandwidth_mbps is
@@ -348,11 +379,11 @@ def llm_latency_ms(quant, location, context_tokens, gen_tokens=10, network_rtt_m
     Markov state's `bandwidth_mbps`.
     """
     if location == "edge":
-        return edge_compute_ms(quant, context_tokens, gen_tokens)
-    return cloud_compute_ms(context_tokens, gen_tokens) + network_rtt_ms
+        return edge_compute_ms(quant, context_tokens, gen_tokens, warm_prefill_tokens)
+    return cloud_compute_ms(context_tokens, gen_tokens, warm_prefill_tokens) + network_rtt_ms
 
 
-def cloud_serve_outcome(trajectory, ctx_tokens, gen_tokens=10):
+def cloud_serve_outcome(trajectory, ctx_tokens, gen_tokens=10, warm_prefill_tokens=None):
     """Within-cycle cloud-serve outcome given a 1-Hz trajectory of
     (rtt_ms, connected) across the cycle's first ceil(T_cloud_compute) sub-ticks.
 
@@ -364,8 +395,9 @@ def cloud_serve_outcome(trajectory, ctx_tokens, gen_tokens=10):
 
     T_cloud is purely the cloud compute time (no RTT) to avoid circular
     dependence on the RTT we're trying to derive from the trajectory.
+    warm_prefill_tokens: passed through to cloud_compute_ms for warm-cache sizing.
     """
-    t_cloud_s = cloud_compute_ms(ctx_tokens, gen_tokens) / 1000.0
+    t_cloud_s = cloud_compute_ms(ctx_tokens, gen_tokens, warm_prefill_tokens) / 1000.0
     import math as _m
     n = max(1, _m.ceil(t_cloud_s))
     window = trajectory[:n] if trajectory else []

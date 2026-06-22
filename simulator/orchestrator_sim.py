@@ -179,7 +179,9 @@ def effective_tokens(mode: str, accumulated_full_tokens: int) -> int:
 def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
                 start_quant="fp16", start_location="edge",
                 start_mode="full", lookahead=10, verbose=False,
-                quality_override=None):
+                quality_override=None, initial_accumulated_tokens=161,
+                oom_fallback_mode="stateless",
+                cloud_failure_ctx_override=None):
     """Run one episode of the orchestrator simulator. Returns EpisodeMetrics."""
     if hasattr(policy, "reset"):
         policy.reset()
@@ -188,7 +190,7 @@ def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
     state_loc = start_location
     state_mode = start_mode
 
-    accumulated_full = 161             # would-be full-mode token count
+    accumulated_full = initial_accumulated_tokens  # would-be full-mode token count
     time_s = 0.0
     last_migration_time = -1e9
     rtt_history = []
@@ -236,11 +238,12 @@ def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
                 base_mem_mb=mem)
             if warm_mem is not None:
                 oom_mem = max(oom_mem, float(warm_mem))
-        oom = oom_mem > memory_cap_mb
+        # OOM check is edge-only: cloud has no physical memory cap in the model.
+        oom = oom_mem > memory_cap_mb and state_loc == "edge"
         if oom:
             oom_count += 1
-            # Forced fallback: switch to stateless to free KV cache
-            state_mode = "stateless"
+            # Forced fallback: drop to oom_fallback_mode to free KV cache.
+            state_mode = oom_fallback_mode
             ctx_tokens = effective_tokens(state_mode, accumulated_full)
             mem = memory_used_mb(state_q, state_loc, ctx_tokens)
 
@@ -361,17 +364,25 @@ def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
         # Standard policies (no hook) use the existing single-tier path.
         new_tokens_per_turn = (accumulated_full - prev_accum_full
                                 if prev_accum_full is not None else 0)
-        # Within-cycle network trajectory: enough sub-ticks to cover the
-        # cloud-serve compute window (ceil seconds). Standard cloud-compute
-        # for ctx ~4000 is ~0.65s → 1 sub-tick; long context grows the window.
-        cloud_compute_s_estimate = cloud_compute_ms_local(ctx_tokens, 10) / 1000.0
+        # Per-cycle warm-cache prefill: the KV cache persists across cycles.
+        # Only new tokens added this turn need to be prefilled; the full
+        # re-prefill (inertia) is paid once on a tier migration (gap_s above).
+        # Stateless has no KV persistence → cold-starts each cycle at its
+        # full effective context size.
+        _warm_prefill = (ctx_tokens if state_mode == "stateless"
+                         else TOKENS_PER_CYCLE_FULL)
+        # Within-cycle network trajectory: sized to warm cloud compute window.
+        # With warm KV cache, cloud compute is fast (~40 ms) → window = 1 tick.
+        cloud_compute_s_estimate = cloud_compute_ms_local(ctx_tokens, 10,
+                                                           _warm_prefill) / 1000.0
         import math as _math
         traj_len = max(1, _math.ceil(cloud_compute_s_estimate))
         trajectory = network_trajectory(network, time_s, traj_len)
         # Decide cloud outcome from the trajectory (used by both override
         # and standard paths).
         cloud_ok, cloud_mean_rtt, cloud_elapsed_s = cloud_serve_outcome(
-            trajectory, ctx_tokens, gen_tokens=10)
+            trajectory, ctx_tokens, gen_tokens=10,
+            warm_prefill_tokens=_warm_prefill)
 
         override = None
         if hasattr(policy, "compute_cycle_overrides"):
@@ -406,7 +417,12 @@ def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
             if state_loc == "cloud" and not cloud_ok:
                 n_cloud_failures += 1
                 n_unrecoverable += 1
-                _reprefill_s = migration_cost_s("to_edge", state_q, ctx_tokens, rtt_ms)
+                # cloud_failure_ctx_override: policies with a warm edge replica
+                # (e.g. JointInertia warm-window-10 fallback) pay re-prefill only
+                # for the fallback context depth, not the full cloud context.
+                _fb_ctx = (cloud_failure_ctx_override
+                           if cloud_failure_ctx_override is not None else ctx_tokens)
+                _reprefill_s = migration_cost_s("to_edge", state_q, _fb_ctx, rtt_ms)
                 gap_s += _reprefill_s
                 cloud_failure_reprefill_s += _reprefill_s
                 state_loc = "edge"
@@ -414,19 +430,21 @@ def run_episode(workload, network, policy, *, memory_cap_mb=13_000,
                 n_migrations += 1
                 # Recompute mem on edge for this cycle
                 mem = memory_used_mb(state_q, state_loc, ctx_tokens)
+            # Per-cycle LLM cost uses warm KV cache: only _warm_prefill tokens
+            # are prefilled this cycle. Full re-prefill is paid on migration.
             llm_ms = llm_latency_ms(state_q, state_loc, ctx_tokens,
                                      gen_tokens=10,
                                      network_rtt_ms=(cloud_mean_rtt
-                                                       if state_loc == "cloud" else 0))
-            # Single-tier compute charge: tokens = prefill+decode tokens served
-            # on the active tier (no network in this count). Seconds = same in
-            # wall time. This is the baseline; LH variants override.
-            cycle_compute_tokens = ctx_tokens + 10
+                                                       if state_loc == "cloud" else 0),
+                                     warm_prefill_tokens=_warm_prefill)
+            # Single-tier compute charge: tokens = warm_prefill + decode.
+            cycle_compute_tokens = _warm_prefill + 10
             if state_loc == "edge":
-                cycle_compute_seconds = (edge_compute_ms_local(state_q, ctx_tokens, 10)
-                                          / 1000.0)
+                cycle_compute_seconds = (edge_compute_ms_local(state_q, ctx_tokens, 10,
+                                                                _warm_prefill) / 1000.0)
             else:
-                cycle_compute_seconds = cloud_compute_ms_local(ctx_tokens, 10) / 1000.0
+                cycle_compute_seconds = (cloud_compute_ms_local(ctx_tokens, 10,
+                                                                  _warm_prefill) / 1000.0)
             mem_total = mem
             # Policies without compute overrides may still hold a shadow tier
             # (e.g. OverlapMigration during warming). Let them surface extra
