@@ -26,6 +26,7 @@ Usage:
     CUDA_VISIBLE_DEVICES=1 python experiments/locomo_audit.py
 """
 
+import argparse
 import json
 import re
 import sys
@@ -372,13 +373,13 @@ def run_audit():
         model="qwen7b",
         device=device_name.lower().replace(" ", "_"),
         n=len(perq),
-        args=type("A", (), {
-            "scorer":                "exact_normalized_substring",
-            "omission_judge":        "qwen2.5-7b_yes_no_presence",
-            "evidence_distance_method": "locomo_dia_id_annotation",
-            "llm_judge_calls":       judge_calls,
-            "ceiling_cat1":          total_cat1,
-        })(),
+        args=argparse.Namespace(
+            scorer="exact_normalized_substring",
+            omission_judge="qwen2.5-7b_yes_no_presence",
+            evidence_distance_method="locomo_dia_id_annotation",
+            llm_judge_calls=judge_calls,
+            ceiling_cat1=total_cat1,
+        ),
     )
 
     out = {
