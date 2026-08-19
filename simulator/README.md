@@ -42,4 +42,5 @@ results/frontier_smollm2.json
 results/frontier_smollm2_perquestion.json
 results/inertia_smollm2_a6000.json
 results/inertia_smollm2_jetson.json
+results/framesweep_qwen7b.json
 ```
