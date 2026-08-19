@@ -20,7 +20,13 @@ results/sprint_2/*.csv
 results/sprint_2/*.txt
 
 # Raw datasets (large video/image files — download separately)
-data/
+# Use data/* (not data/) so negations below can un-ignore specific subdirs
+data/*
+!data/audit_subsets/
+data/audit_subsets/*
+!data/audit_subsets/phase0a/
+data/audit_subsets/phase0a/*
+!data/audit_subsets/phase0a/*.json
 
 # Intermediate run checkpoints (overwritten by reruns; final result JSON is canonical)
 results/*_ckpt.json

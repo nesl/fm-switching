@@ -14,8 +14,13 @@ Machine-readable provenance is embedded in each JSON as `_provenance`. This inde
 | Historical sweep | `representation_sweep_<model>_<tag>.json` | `representation_sweep_qwen7b_n150.json` |
 | Caches | `captions_cache.json`, `summaries_cache_80.json`, `summaries_cache_200.json` | — |
 
-**Model slugs:** `qwen7b` = Qwen/Qwen2.5-7B-Instruct · `smollm2` = HuggingFaceTB/SmolLM2-1.7B-Instruct  
-**Device slugs:** `a6000` = NVIDIA RTX A6000 · `jetson` = Jetson AGX Orin 15W
+**Model slugs:** `qwen7b` = Qwen/Qwen2.5-7B-Instruct · `smollm2` = HuggingFaceTB/SmolLM2-1.7B-Instruct · `qwen3b` = Qwen/Qwen2.5-3B-Instruct · `qwenvl3b` = Qwen/Qwen2.5-VL-3B-Instruct (or fine-tuned variant) · `qwenvl7b` = Qwen/Qwen2.5-VL-7B-Instruct · `mistral7b` = mistralai/Mistral-7B-Instruct-v0.2  
+**Device slugs:** `a6000` = NVIDIA RTX A6000 (flash, GPU 1) · `rtx3090ti` = NVIDIA GeForce RTX 3090 Ti (flash, GPU 0) · `jetson_orin` = Jetson AGX Orin (separate SSH host) · `jetson` = legacy alias for `jetson_orin` (pre-reorganization files only)
+
+**Simulator pin:** `simulator/cost_model.py` imports these six files by path at load time and must not be moved:
+`results/frontier_qwen7b.json`, `results/frontier_qwen7b_perquestion.json`,
+`results/frontier_smollm2.json`, `results/frontier_smollm2_perquestion.json`,
+`results/inertia_smollm2_a6000.json`, `results/inertia_smollm2_jetson.json`.
 
 ---
 
@@ -46,13 +51,20 @@ Machine-readable provenance is embedded in each JSON as `_provenance`. This inde
 
 (`inertia_smollm2_jetson.json` was pending; now **generated** on the Jetson — see the appended-rows table below.)
 
-## Caches (not tracked in git — regenerable)
+## Caches (tracked in git — content-addressed, not regenerated per run)
+
+`captions_cache.json`, `summaries_cache_80.json`, `summaries_cache_200.json`,
+`locomo_summaries_80.json`, and `locomo_summaries_200.json` **are tracked in git**.
+They are not regenerated on every run; a run that needs a cached value reads it,
+and a run that generates new entries appends to the cache. Do not gitignore them.
 
 | file | content | note |
 |---|---|---|
 | `captions_cache.json` | VLM captions for 500 EgoSchema clips (Qwen2.5-VL-3B, 16 frames) | Extended from 150→500 during frontier_qwen7b run |
-| `summaries_cache_80.json` | LLM summaries ~80 tok per clip (Qwen2.5-7B-Instruct) | Reused by smollm2 run |
-| `summaries_cache_200.json` | LLM summaries ~200 tok per clip (Qwen2.5-7B-Instruct) | New during frontier_qwen7b run |
+| `summaries_cache_80.json` | LLM summaries ~80 tok per clip for EgoSchema (Qwen2.5-7B-Instruct) | Reused by smollm2 run |
+| `summaries_cache_200.json` | LLM summaries ~200 tok per clip for EgoSchema (Qwen2.5-7B-Instruct) | New during frontier_qwen7b run |
+| `locomo_summaries_80.json` | LLM summaries ~80 tok per LoCoMo conversation (Qwen2.5-7B-Instruct) | Generated during locomo_audit_scaled run |
+| `locomo_summaries_200.json` | LLM summaries ~200 tok per LoCoMo conversation (Qwen2.5-7B-Instruct) | Generated during locomo_audit_scaled run |
 
 ## Appended rows (per-box, append-only to avoid cross-box edit conflicts)
 
@@ -66,3 +78,43 @@ Machine-readable provenance is embedded in each JSON as `_provenance`. This inde
 | `frontier_infinithor_qwen7b.json` | `frontier_infinithor.py` | qwen7b | a6000 | 60 multi-clue (NsiEH), 65/219 traj_ids shipped on HuggingFace; conditions blind/summary-80/full; lazy LLM judge | COMPRESSIBLE — gate FAIL: full=0.58, summary-80=0.55, blind=0.36 (non-salient). Full beats blind +0.22 (history used, anchors recoverable). Full−summary-80 gap only +0.03 on non-salient (threshold >0.05 not met). Distance: NEAR gap=+0.18 (n=11), MID gap=0.00 (n=5), FAR gap=−0.08 (n=13) — summary outperforms full at far distance. Dispersion: gap carried entirely by 3 trajectories, 18/21 non-salient trajs show zero or negative gap. Interpretation: at 873–2,149 tokens (mean 1,441) templated oracle logs, summary-80 captures relevant events; compressible structured-log regime. Reduced gate / orientation audit, not a benchmark characterisation. | new | new |
 | `locomo_audit_scaled_qwen7b.json` | `locomo_audit_scaled.py` | qwen7b | a6000 | 282 cat=1 single-hop (full ceiling); conditions blind/window-10/summary-80/summary-200/full; omission judge=Qwen2.5-7B; evidence distance via dia_id annotations | INCOMPRESSIBLE BY OMISSION (scaled, confirmed): full=34.0% [28.8,39.8%], summary-80=9.9% [7.0,14.0%], gap=−24.1pp (p<0.001***), summary-200=9.9% (gap=−24.1pp, p<0.001***), window-10=22.0% (gap=−12.1pp, p<0.001***). Omission: 92.3% of gap cases (72/78) = gold absent from summary; 7.7% = model reasoning failure. Dispersion: gap spread across 78/282 questions; top-1=1.5%, top-3=4.4% of gap — not an outlier artifact. Distance: 96.5% FAR (>20 turns), full−s80 gap at FAR = +0.243; confirms structurally far-distance sparse-fact retrieval failure. | new | new |
 | `geolife_microgate_qwen7b.json` | `geolife_audit.py` (micro-gate) | qwen7b | a6000 | 123 non-salient sequential-recall questions; 20 rich weeks; Users 000+052 (GeoLife, urban Beijing); conditions blind/window-5/summary-80/summary-200/full; T1 predecessor/T2 successor/T4 transport-mode templates | INCOMPRESSIBLE — MICRO-GATE PASS: full=58.5%, summary-80=22.0%, gap=+36.6pp (p<0.0001). blind=0.0% (no prior leakage), window-5=0.8% (far-distance confirmed). Two compression mechanisms: entity omission (gold entity absent from summary, 50% of gap cases) + ordering omission (gold entity present but sequential adjacency not recoverable from unordered summary inventory, 50%). T4 transport-mode: full=100%, s80=0%, gap=+100pp. Contexts 251–728 tokens. Physical-world sequential-ordering incompressibility: summaries are unordered inventories, cannot answer what came before/after X or what mode was used for leg N. | new | new |
+
+## Phase 0a — Multi-model regime audit (appended from a6000, commit 9258061)
+
+All phase0a files live under `results/phase0a/`. Source script is `experiments/phase0a_*.py`
+(post-migration: `experiments/fidelity/multimodel_*.py`). All runs: a6000, commit 9258061.
+Subset membership: `data/audit_subsets/phase0a/` (tracked in git; IDs verified against result JSONs 2026-08-19).
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `phase0a/egoschema_qwen7b_n60.json` | `phase0a_egoschema.py` | qwen7b | a6000 | 60 | EgoSchema: full≈sum80≈sum200; gist-compressible under Qwen | 9258061 |
+| `phase0a/egoschema_mistral7b_n60.json` | `phase0a_egoschema.py` | mistral7b | a6000 | 60 | EgoSchema: full≈sum80≈sum200; gist-compressible under Mistral | 9258061 |
+| `phase0a/egoschema_sum80_mistral7b.json` | `phase0a_egoschema.py` | mistral7b | a6000 | 60 | per-condition summary-80 checkpoint for above | 9258061 |
+| `phase0a/egoschema_sum200_mistral7b.json` | `phase0a_egoschema.py` | mistral7b | a6000 | 60 | per-condition summary-200 checkpoint for above | 9258061 |
+| `phase0a/infinithor_qwen7b_n60.json` | `phase0a_infinithor.py` | qwen7b | a6000 | 60 (n57 excl 3 truncated) | Infini-THOR: Qwen SUMMARY≈FULL non-salient (gap +0.098 p=0.211); all-pool n57 gap +0.070 p=0.324 | 9258061 |
+| `phase0a/infinithor_mistral7b_n60.json` | `phase0a_infinithor.py` | mistral7b | a6000 | 60 (n57 excl 3 truncated) | Infini-THOR: Mistral FULL>>SUMMARY all-pool n57 (gap +0.140 p=0.033); non-salient gap +0.073 p=0.441 | 9258061 |
+| `phase0a/infinithor_qwen7b_n40.json` | `phase0a_infinithor.py` | qwen7b | a6000 | 40 | Infini-THOR non-salient subset (pre-expansion) | 9258061 |
+| `phase0a/infinithor_mistral7b_n40.json` | `phase0a_infinithor.py` | mistral7b | a6000 | 40 | Infini-THOR non-salient subset (pre-expansion) | 9258061 |
+| `phase0a/infinithor_sum80_qwen7b.json` | `phase0a_infinithor.py` | qwen7b | a6000 | 60 | per-condition summary-80 checkpoint | 9258061 |
+| `phase0a/infinithor_sum80_mistral7b.json` | `phase0a_infinithor.py` | mistral7b | a6000 | 60 | per-condition summary-80 checkpoint | 9258061 |
+| `phase0a/infinithor_sum200_qwen7b.json` | `phase0a_infinithor.py` | qwen7b | a6000 | 60 | per-condition summary-200 checkpoint | 9258061 |
+| `phase0a/infinithor_sum200_mistral7b.json` | `phase0a_infinithor.py` | mistral7b | a6000 | 60 | per-condition summary-200 checkpoint | 9258061 |
+| `phase0a/infinithor_truncated_rerun.json` | `phase0a_infinithor_rerun_trunc.py` | qwen7b+mistral7b | a6000 | 3 items | OOM (Qwen, 73K+ tok) and context_exceeded (Mistral, >32K); full condition irrecoverable; items permanently excluded (n=57) | pre-provenance (2026-08-16) |
+| `phase0a/locomo_qwen7b_n100.json` | `phase0a_locomo.py` | qwen7b | a6000 | 100 | LoCoMo: INCOMPRESSIBLE — full>>sum80 (gap p<0.001 under Qwen); Phase 0a gate | 9258061 |
+| `phase0a/locomo_mistral7b_n100.json` | `phase0a_locomo.py` | mistral7b | a6000 | 100 | LoCoMo: INCOMPRESSIBLE — full>>sum80 (gap p<0.001 under Mistral); Phase 0a gate passed | 9258061 |
+| `phase0a/locomo_sum80_mistral7b.json` | `phase0a_locomo.py` | mistral7b | a6000 | 100 | per-condition summary-80 checkpoint | 9258061 |
+| `phase0a/locomo_sum200_mistral7b.json` | `phase0a_locomo.py` | mistral7b | a6000 | 100 | per-condition summary-200 checkpoint | 9258061 |
+| `phase0a/phase0a_analysis.json` | `phase0a_analysis.py` | qwen7b+mistral7b | a6000 | — | computed statistics (regime table, contrasts, token distributions) for audit report | 9258061 |
+
+## Phase 1 — Cost profiling (appended from a6000, commit 5870d45 + fix-up)
+
+All phase1 cost-profile files live under `results/phase1/`. Source scripts:
+`experiments/phase1_cost_profile.py` → `experiments/cost/cost_profile.py` (post-migration);
+`experiments/phase1_update_rerun.py` → `experiments/cost/cost_update_rerun.py`.
+Analysis: `experiments/phase1_analysis.py` → `experiments/cost/cost_analysis.py`.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `phase1/cost_profiles/a6000_qwen7b.json` | `phase1_cost_profile.py` + update rerun | qwen7b | a6000 | 9 L-pts × 5 reps; sum80/200 update corrected (full-L input) | full-restore 165ms→21.7s (linear); warm-append 66ms→330ms; cold/warm ratio 68× at 64K; xC=8K; xB=~65K (corrected) | 5870d45 + fix-up |
+| `phase1/cost_profiles/rtx3090ti_qwen7b.json` | `phase1_cost_profile.py` + update rerun | qwen7b | rtx3090ti | 9 L-pts × 5 reps; update OOM at L≥32K | full-restore OOM at L≥49K; xC=4K; xB=none_in_range (update OOMs before crossover) | 5870d45 + fix-up |
+| `phase1/cost_matrix.csv` | `phase1_analysis.py` | qwen7b | a6000+rtx3090ti | 100 rows | derived CSV: restore/update/transfer costs per representation per L per tier | 5870d45 + fix-up |
