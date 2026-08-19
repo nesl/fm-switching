@@ -30,15 +30,18 @@ information the future turn needs, in a workload-dependent way).
    Key crossovers: xB (summary pipeline beats full re-prefill) = L≈65K on A6000, never in range on
    3090Ti (update OOMs above 32K). xC (window ≥10× cheaper) = L≈8K on A6000, L≈4K on 3090Ti.
 
-3. **Simulator** — *in scope; not yet started under the new framing*.
-   The accept/reject claim (C5) requires a trace-driven simulator showing that joint
-   representation + placement + timing beats decomposed policies under a quality SLO.
+3. **Simulator** — *E24 complete (2026-08-19)*.
+   Fidelity-provisioning simulator built and swept (1,260 runs). Key finding: placement-aware
+   policies beat non-placement by 12 pp; joint fidelity × placement (joint policy) adds ≤3 pp
+   over cache_value EV heuristic (0 pp at 25%+ capacity). Coupling is real but narrow; the
+   thesis claim needs scoping to placement-awareness as the essential dimension.
    Prior SSM+MPC+RL code in `simulator/` is kept for lineage.
 
 ## Next gate
 
-Trace-driven simulator: joint policy (representation × placement × timing) vs decomposed baselines,
-under quality SLO, across mobility regimes and network conditions.
+Real-hardware trace or deployment evidence showing edge nodes operate at ≤10% of full-replication
+budget (required to reinstate the joint-optimization-is-necessary claim vs cache_value).
+Alternatively: narrow the claim to placement-awareness and submit.
 
 ## Target venue
 
