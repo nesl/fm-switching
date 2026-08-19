@@ -17,7 +17,7 @@ import random
 from collections import defaultdict
 from pathlib import Path
 
-ROOT   = Path(__file__).parent.parent
+ROOT      = Path(__file__).parent.parent.parent
 OUT    = ROOT / "data" / "audit_subsets" / "phase0a"
 OUT.mkdir(parents=True, exist_ok=True)
 

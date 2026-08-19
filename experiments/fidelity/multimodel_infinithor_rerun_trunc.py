@@ -20,8 +20,8 @@ from pathlib import Path
 
 import torch
 
-ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT / "experiments"))
+ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(ROOT / "experiments" / "lib"))
 
 DATA_DIR = ROOT / "data" / "infinithor"
 OUT_PATH = ROOT / "results" / "phase0a" / "infinithor_truncated_rerun.json"

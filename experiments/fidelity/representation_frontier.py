@@ -69,7 +69,7 @@ os.environ.setdefault("CUDA_LAUNCH_BLOCKING", "1")
 
 import torch
 
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 from premise_egoschema import (
     LETTERS,
     SHUFFLE_SEED,

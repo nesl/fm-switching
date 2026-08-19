@@ -21,7 +21,7 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
-ROOT      = Path(__file__).parent.parent
+ROOT      = Path(__file__).parent.parent.parent
 RESULTS   = ROOT / "results" / "phase0a"
 FIGURES   = ROOT / "figures"
 REPORTS   = ROOT / "reports"

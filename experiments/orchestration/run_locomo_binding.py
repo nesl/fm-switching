@@ -26,7 +26,8 @@ import random
 import sys
 from pathlib import Path
 
-_SIM = Path(__file__).resolve().parent.parent / "simulator"
+_SIM = Path(__file__).resolve().parent.parent.parent / "simulator"
+sys.path.insert(0, str(_SIM.parent / "experiments" / "lib"))
 sys.path.insert(0, str(_SIM))
 
 import cost_model
@@ -47,7 +48,7 @@ VALIDATION_SEEDS = [0]
 VALIDATION_MOBILITY = ["urban", "harsh"]
 POLICY_NAMES = ["JointInertia", "ReactiveThreshold", "InertiaBlindAdaptive", "PlaceOnly"]
 
-_REPO = Path(__file__).resolve().parent.parent
+_REPO = Path(__file__).resolve().parent.parent.parent
 
 # Penalty for infeasible representations (QUALITY_WEIGHT_S × (1 + 1000) ≈ 5005 s/cycle).
 _INFEASIBLE_Q = -1000.0

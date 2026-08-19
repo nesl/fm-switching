@@ -61,8 +61,8 @@ from pathlib import Path
 
 import torch
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from experiments._provenance import stamp
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
+from _provenance import stamp
 
 # ── Constants ──────────────────────────────────────────────────────────────────
 

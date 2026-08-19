@@ -31,8 +31,8 @@ from pathlib import Path
 import torch
 from scipy import stats as scipy_stats
 
-ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT / "experiments"))
+ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(ROOT / "experiments" / "lib"))
 from premise_egoschema import (
     LETTERS, build_egoschema_prompt, load_egoschema, parse_choice
 )

@@ -34,8 +34,8 @@ from pathlib import Path
 import torch
 from scipy import stats as scipy_stats
 
-ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT / "experiments"))
+ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(ROOT / "experiments" / "lib"))
 from _provenance import stamp
 
 DATA_DIR    = ROOT / "data" / "infinithor"

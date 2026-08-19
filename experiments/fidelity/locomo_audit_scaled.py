@@ -37,8 +37,8 @@ from scipy import stats as scipy_stats
 
 import torch
 
-ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT / "experiments"))
+ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(ROOT / "experiments" / "lib"))
 from _provenance import stamp
 
 DATA_PATH   = ROOT / "data"  / "locomo" / "locomo10.json"

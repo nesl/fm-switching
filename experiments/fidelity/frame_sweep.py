@@ -48,7 +48,7 @@ from pathlib import Path
 
 # ── Reuse exp7 constants and pure helpers ───────────────────────────────
 import sys
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent / "lib"))
 from premise_egoschema import (
     CONDITIONS, LETTERS, SHUFFLE_SEED,
     MATERIALLY_BEATS_PP, NON_LEAKY_PP, LEAKY_PP, CONFOUNDED_PP,

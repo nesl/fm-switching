@@ -54,8 +54,8 @@ from pathlib import Path
 
 import torch
 
-ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT / "experiments"))
+ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(ROOT / "experiments" / "lib"))
 
 DATA_LOCOMO    = ROOT / "data" / "locomo" / "locomo10.json"
 DATA_TRAJ_TEST = ROOT / "data" / "infinithor" / "traj_test"

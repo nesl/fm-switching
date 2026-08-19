@@ -30,11 +30,11 @@ from pathlib import Path
 
 import torch
 
-ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(ROOT / "experiments"))
+ROOT = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(ROOT / "experiments" / "lib"))
 
 # Import shared helpers from the profiler
-from phase1_cost_profile import (
+from cost_profile import (
     MODELS, OUT_DIR, TIMEOUT_S, SUMMARY_PROMPT,
     build_corpus, sample_context,
     load_model, _stats, _safe, TimeoutError,

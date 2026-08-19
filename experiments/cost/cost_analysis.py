@@ -21,7 +21,7 @@ import math
 from datetime import datetime
 from pathlib import Path
 
-ROOT      = Path(__file__).parent.parent
+ROOT      = Path(__file__).parent.parent.parent
 PROF_DIR  = ROOT / "results" / "phase1" / "cost_profiles"
 FIGURES   = ROOT / "figures"
 REPORTS   = ROOT / "reports"

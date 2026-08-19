@@ -25,7 +25,8 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-_SIM = Path(__file__).resolve().parent.parent / "simulator"
+_SIM = Path(__file__).resolve().parent.parent.parent / "simulator"
+sys.path.insert(0, str(_SIM.parent / "experiments" / "lib"))
 sys.path.insert(0, str(_SIM))
 
 from _provenance import stamp
