@@ -1,12 +1,12 @@
 # Phase 1 — Cost Profiling Report
 
-Generated: 2026-08-19 09:54
+Generated: 2026-08-19 10:33
 
 ## Overview
 
-Measures restore and update latency for four state representations (full-replay, window-10, summary-80, summary-200) as a function of context length L, with 5 reps per point (first excluded as warm-up). Real contexts are sampled from LoCoMo conversation logs and Infini-THOR trajectory files. Transfer cost is derived from state size at {1, 10, 100} Mbps and {50, 200} ms RTT.
+Measures restore and update latency for four state representations (full-replay, window-10, summary-80, summary-200) as a function of context length L, with 5 reps per point (first excluded as warm-up → 4 measured samples). Real contexts sampled from LoCoMo conversation logs and Infini-THOR trajectory files. Transfer cost derived from state size at {1, 10, 100} Mbps and {50, 200} ms RTT.
 
-Window-10 = last 10 corpus turns (~200 tokens/turn). Summary restore uses a fixed ~80/200-token stub text (constant latency). Summary update = generation of 80/200 tokens from the L-token context. Incremental warm = forward pass of 200 new tokens given warm KV cache. Incremental cold = full cold prefill of L+200 tokens.
+**Summary update**: generation of 80/200 tokens from the full L-token context (corrected measurement; see Appendix A for the original truncated-input values). **Incremental warm**: forward pass of 200 new tokens given warm KV cache. **Incremental cold**: cold prefill of L+200 tokens.
 
 ## Tier: a6000
 
@@ -14,37 +14,39 @@ Window-10 = last 10 corpus turns (~200 tokens/turn). Summary restore uses a fixe
 
 GPU: NVIDIA RTX A6000 (51.0 GB) | LLM: Qwen/Qwen2.5-7B-Instruct | KV bytes/token: 57,344
 
-#### Restore Latency (ms, median of reps ≥2)
+*Window coverage*: at minimum L=1,024, window tokens = 483 (47% of full context). No rows excluded — window is a strict subset at all L.
 
-| L tokens | full | window | sum-80 | sum-200 | full peak GB | feasible |
+#### Restore Latency (ms, median [IQR])
+
+| L | full | window | sum-80 | sum-200 | full peak GB | ✓ |
 |---|---|---|---|---|---|---|
-| 1,024 | 165 | 94 | 28 | 31 | 15.46 | ✓ |
-| 2,048 | 325 | 93 | 29 | 32 | 15.65 | ✓ |
-| 4,096 | 667 | 68 | 29 | 32 | 16.07 | ✓ |
-| 8,192 | 1369 | 62 | 29 | 32 | 16.89 | ✓ |
-| 16,384 | 3090 | 70 | 29 | 32 | 18.53 | ✓ |
-| 24,576 | 5245 | 98 | 30 | 32 | 20.17 | ✓ |
-| 32,768 | 7805 | 65 | 29 | 32 | 21.81 | ✓ |
-| 49,152 | 14820 | 67 | 31 | 36 | 25.10 | ✓ |
-| 65,536 | 21720 | 68 | 31 | 36 | 28.38 | ✓ |
+| 1,024 | 165 [164, 166] | 94 | 28 | 31 | 15.46 | ✓ |
+| 2,048 | 325 [325, 326] | 93 | 29 | 32 | 15.65 | ✓ |
+| 4,096 | 667 [667, 668] | 68 | 29 | 32 | 16.07 | ✓ |
+| 8,192 | 1369 [1367, 1496] | 62 | 29 | 32 | 16.89 | ✓ |
+| 16,384 | 3090 [3087, 3165] | 70 | 29 | 32 | 18.53 | ✓ |
+| 24,576 | 5245 [5237, 5298] | 98 | 30 | 32 | 20.17 | ✓ |
+| 32,768 | 7805 [7800, 7850] | 65 | 29 | 32 | 21.81 | ✓ |
+| 49,152 | 14820 [14766, 15216] | 67 | 31 | 36 | 25.10 | ✓ |
+| 65,536 | 21720 [21671, 25310] | 68 | 31 | 36 | 28.38 | ✓ |
 
-#### Update Latency (ms, median)
+#### Update Latency — full L-token context (ms, median [IQR]) *(corrected)*
 
-| L tokens | sum-80 update | sum-200 update | incr warm | incr cold |
-|---|---|---|---|---|
-| 1,024 | 2535 | 5722 | 66 | 200 |
-| 2,048 | 2796 | 3525 | 38 | 345 |
-| 4,096 | 2812 | 3563 | 45 | 717 |
-| 8,192 | 2824 | 3556 | 63 | 1458 |
-| 16,384 | 2825 | 3590 | 95 | 3269 |
-| 24,576 | 2864 | 3600 | 126 | 5561 |
-| 32,768 | 2875 | 3581 | 154 | 8184 |
-| 49,152 | 2881 | 3591 | 318 | 15766 |
-| 65,536 | 2871 | 3561 | 330 | 22523 |
+| L | sum-80 update | sum-200 update | incr warm | incr cold | ratio cold/warm |
+|---|---|---|---|---|---|
+| 1,024 | 2598 [2536, 2600] | 5714 [5697, 5718] | 66 | 200 | 3.0× |
+| 2,048 | 2837 [2816, 2919] | 6257 [6237, 6258] | 38 | 345 | 9.2× |
+| 4,096 | 3588 [3489, 3592] | 4799 [4798, 4805] | 45 | 717 | 16.0× |
+| 8,192 | 4804 [4797, 4814] | 9565 [9457, 9610] | 63 | 1458 | 23.3× |
+| 16,384 | 8290 [8286, 8298] | 15330 [15320, 15468] | 95 | 3269 | 34.3× |
+| 24,576 | 12118 [12096, 12125] | 20928 [20922, 20938] | 126 | 5561 | 44.2× |
+| 32,768 | 15930 [15874, 15965] | 26879 [26818, 27066] | 154 | 8184 | 53.2× |
+| 49,152 | 16402 [16203, 16478] | 27528 [27473, 27705] | 318 | 15766 | 49.6× |
+| 65,536 | 15925 [15865, 15957] | 26881 [26789, 27023] | 330 | 22523 | 68.3× |
 
 #### State Sizes and KV Cache
 
-| L tokens | full (KB) | window (KB) | sum-80 (B) | sum-200 (B) | KV cache (MB) |
+| L | full (KB) | window (KB) | sum-80 (B) | sum-200 (B) | KV (MB) |
 |---|---|---|---|---|---|
 | 1,024 | 4 | 2 | 317 | 684 | 58.7 |
 | 2,048 | 8 | 2 | 317 | 684 | 117.4 |
@@ -55,6 +57,22 @@ GPU: NVIDIA RTX A6000 (51.0 GB) | LLM: Qwen/Qwen2.5-7B-Instruct | KV bytes/token
 | 32,768 | 131 | 1 | 317 | 684 | 1879.0 |
 | 49,152 | 199 | 1 | 317 | 684 | 2818.6 |
 | 65,536 | 264 | 1 | 317 | 684 | 3758.1 |
+
+#### Update-Timing Tradeoff: Warm Copy vs On-Demand Re-Prefill
+
+Keeping a warm KV cache costs `kv_mb` of GPU memory per L. The ratio shows how much more expensive cold re-prefill is than a warm append. Above the OOM boundary, warm copies are not feasible.
+
+| L | incr warm (ms) | incr cold (ms) | cold/warm ratio | KV memory (MB) |
+|---|---|---|---|---|
+| 1,024 | 66 | 200 | 3.0× | 59 |
+| 2,048 | 38 | 345 | 9.2× | 117 |
+| 4,096 | 45 | 717 | 16.0× | 235 |
+| 8,192 | 63 | 1458 | 23.3× | 470 |
+| 16,384 | 95 | 3269 | 34.3× | 940 |
+| 24,576 | 126 | 5561 | 44.2× | 1409 |
+| 32,768 | 154 | 8184 | 53.2× | 1879 |
+| 49,152 | 318 | 15766 | 49.6× | 2819 |
+| 65,536 | 330 | 22523 | 68.3× | 3758 |
 
 ## Tier: rtx3090ti
 
@@ -62,37 +80,39 @@ GPU: NVIDIA RTX A6000 (51.0 GB) | LLM: Qwen/Qwen2.5-7B-Instruct | KV bytes/token
 
 GPU: NVIDIA GeForce RTX 3090 Ti (25.4 GB) | LLM: Qwen/Qwen2.5-7B-Instruct | KV bytes/token: 57,344
 
-#### Restore Latency (ms, median of reps ≥2)
+*Window coverage*: at minimum L=1,024, window tokens = 483 (47% of full context). No rows excluded — window is a strict subset at all L.
 
-| L tokens | full | window | sum-80 | sum-200 | full peak GB | feasible |
+#### Restore Latency (ms, median [IQR])
+
+| L | full | window | sum-80 | sum-200 | full peak GB | ✓ |
 |---|---|---|---|---|---|---|
-| 1,024 | 220 | 119 | 25 | 32 | 15.46 | ✓ |
-| 2,048 | 468 | 117 | 27 | 33 | 15.65 | ✓ |
-| 4,096 | 982 | 91 | 28 | 34 | 16.07 | ✓ |
-| 8,192 | 2028 | 79 | 28 | 35 | 16.89 | ✓ |
-| 16,384 | 4868 | 97 | 28 | 35 | 18.53 | ✓ |
-| 24,576 | 8525 | 137 | 28 | 33 | 20.17 | ✓ |
-| 32,768 | 13694 | 89 | 30 | 37 | 21.81 | ✓ |
-| 49,152 | — | 100 | 31 | 39 | — | ✗ |
-| 65,536 | — | 104 | 32 | 39 | — | ✗ |
+| 1,024 | 220 [219, 221] | 119 | 25 | 32 | 15.46 | ✓ |
+| 2,048 | 468 [451, 553] | 117 | 27 | 33 | 15.65 | ✓ |
+| 4,096 | 982 [960, 1110] | 91 | 28 | 34 | 16.07 | ✓ |
+| 8,192 | 2028 [1990, 2038] | 79 | 28 | 35 | 16.89 | ✓ |
+| 16,384 | 4868 [4674, 4917] | 97 | 28 | 35 | 18.53 | ✓ |
+| 24,576 | 8525 [8469, 8889] | 137 | 28 | 33 | 20.17 | ✓ |
+| 32,768 | 13694 [13527, 13868] | 89 | 30 | 37 | 21.81 | ✓ |
+| 49,152 | — — | 100 | 31 | 39 | — | ✗ |
+| 65,536 | — — | 104 | 32 | 39 | — | ✗ |
 
-#### Update Latency (ms, median)
+#### Update Latency — full L-token context (ms, median [IQR]) *(corrected)*
 
-| L tokens | sum-80 update | sum-200 update | incr warm | incr cold |
-|---|---|---|---|---|
-| 1,024 | 2185 | 4943 | 34 | 264 |
-| 2,048 | 2538 | 3113 | 41 | 500 |
-| 4,096 | 2530 | 3178 | 48 | 983 |
-| 8,192 | 2546 | 3107 | 63 | 2118 |
-| 16,384 | 2555 | 3164 | 106 | 5086 |
-| 24,576 | 2611 | 3277 | — | — |
-| 32,768 | 2672 | 3327 | — | — |
-| 49,152 | 2730 | 3400 | — | — |
-| 65,536 | 2796 | 3499 | — | — |
+| L | sum-80 update | sum-200 update | incr warm | incr cold | ratio cold/warm |
+|---|---|---|---|---|---|
+| 1,024 | 2199 [2182, 2231] | 4914 [4795, 4938] | 34 | 264 | 7.7× |
+| 2,048 | 2535 [2500, 2550] | 5430 [5290, 5472] | 41 | 500 | 12.2× |
+| 4,096 | 3313 [3272, 3354] | 4369 [4366, 4371] | 48 | 983 | 20.5× |
+| 8,192 | 4846 [4702, 4848] | 8583 [8577, 8604] | 63 | 2118 | 33.8× |
+| 16,384 | 9225 [9156, 9448] | 15104 [15087, 15194] | 106 | 5086 | 47.9× |
+| 24,576 | 15592 [15318, 15794] | 24604 [23899, 24853] | — | — | — |
+| 32,768 | 2672† [2662, 2789] | 3327† [3286, 3352] | — | — | — |
+| 49,152 | 2730† [2725, 2751] | 3400† [3343, 3436] | — | — | — |
+| 65,536 | 2796† [2763, 2825] | 3499† [3446, 3520] | — | — | — |
 
 #### State Sizes and KV Cache
 
-| L tokens | full (KB) | window (KB) | sum-80 (B) | sum-200 (B) | KV cache (MB) |
+| L | full (KB) | window (KB) | sum-80 (B) | sum-200 (B) | KV (MB) |
 |---|---|---|---|---|---|
 | 1,024 | 4 | 2 | 317 | 684 | 58.7 |
 | 2,048 | 8 | 2 | 317 | 684 | 117.4 |
@@ -104,65 +124,128 @@ GPU: NVIDIA GeForce RTX 3090 Ti (25.4 GB) | LLM: Qwen/Qwen2.5-7B-Instruct | KV b
 | 49,152 | 199 | 1 | 317 | 684 | 2818.6 |
 | 65,536 | 264 | 1 | 317 | 684 | 3758.1 |
 
+#### Update-Timing Tradeoff: Warm Copy vs On-Demand Re-Prefill
+
+Keeping a warm KV cache costs `kv_mb` of GPU memory per L. The ratio shows how much more expensive cold re-prefill is than a warm append. Above the OOM boundary, warm copies are not feasible.
+
+| L | incr warm (ms) | incr cold (ms) | cold/warm ratio | KV memory (MB) |
+|---|---|---|---|---|
+| 1,024 | 34 | 264 | 7.7× | 59 |
+| 2,048 | 41 | 500 | 12.2× | 117 |
+| 4,096 | 48 | 983 | 20.5× | 235 |
+| 8,192 | 63 | 2118 | 33.8× | 470 |
+| 16,384 | 106 | 5086 | 47.9× | 940 |
+| 24,576 | OOM | OOM | — | 1409 |
+| 32,768 | OOM | OOM | — | 1879 |
+| 49,152 | OOM | OOM | — | 2819 |
+| 65,536 | OOM | OOM | — | 3758 |
+
 ## Tier: jetson_orin
 
-*No results available for jetson_orin. Run `phase1_cost_profile.py --tier {tier}` on the target host.*
+*No results for jetson_orin. Run `phase1_cost_profile.py --tier jetson_orin` on the target host.*
 
 ## Crossover Analysis
 
-For each (tier, model, bandwidth, RTT) combination, the L at which:
+Crossover definitions:
 
-- **A**: transferring full text becomes slower than re-prefilling from scratch (transfer_time > full_restore_ms/1000)
+- **A**: L where `transfer_time(full_text) > full_restore_time` — re-prefilling locally becomes cheaper than receiving full text. Note: at 200 ms RTT, the RTT constant dominates at small L; these rows are annotated 'RTT-dominated'.
 
-- **B**: full re-prefill becomes slower than summary pipeline (full_restore > sum80_update + sum80_restore)
+- **B**: L where `full_restore > sum80_update + sum80_restore` — summary pipeline (regenerate + restore) is faster than full re-prefill. Uses corrected (full-context) update cost where available.
 
-- **C**: window-10 restore becomes ≥10× cheaper than full restore
+- **B2**: L where `full_restore > sum80_restore` — relevant when a summary already exists and only the restore cost is paid. Because sum-80 restore is ~28 ms (constant) and full_restore starts at ~165 ms even at L=1K, B2 is satisfied throughout the entire swept range.
 
-'none_in_range' = crossover did not occur within the swept L range.
+- **C**: L where `full_restore > 10 × window_restore` — window is ≥10× cheaper than full. Rows where window covers the full context are excluded.
+
+'none_in_range' = crossover not observed in [1K, 64K] swept range.
 
 
-| tier | model | bandwidth | RTT | xA (L tokens) | xB (L tokens) | xC (L tokens) |
-|---|---|---|---|---|---|---|
-| a6000 | qwen7b | 1 Mbps | 50 ms | none_in_range | 16384 | 8192 |
-| a6000 | qwen7b | 1 Mbps | 200 ms | 1024 | 16384 | 8192 |
-| a6000 | qwen7b | 10 Mbps | 50 ms | none_in_range | 16384 | 8192 |
-| a6000 | qwen7b | 10 Mbps | 200 ms | 1024 | 16384 | 8192 |
-| a6000 | qwen7b | 100 Mbps | 50 ms | none_in_range | 16384 | 8192 |
-| a6000 | qwen7b | 100 Mbps | 200 ms | 1024 | 16384 | 8192 |
-| rtx3090ti | qwen7b | 1 Mbps | 50 ms | none_in_range | 16384 | 4096 |
-| rtx3090ti | qwen7b | 1 Mbps | 200 ms | 1024 | 16384 | 4096 |
-| rtx3090ti | qwen7b | 10 Mbps | 50 ms | none_in_range | 16384 | 4096 |
-| rtx3090ti | qwen7b | 10 Mbps | 200 ms | none_in_range | 16384 | 4096 |
-| rtx3090ti | qwen7b | 100 Mbps | 50 ms | none_in_range | 16384 | 4096 |
-| rtx3090ti | qwen7b | 100 Mbps | 200 ms | none_in_range | 16384 | 4096 |
+| tier | model | bw (Mbps) | RTT (ms) | xA | xA note | xB | xB2 | xC |
+|---|---|---|---|---|---|---|---|---|
+| a6000 | qwen7b | 1 | 50 | none_in_range | — | 65536 | <1024 (true below minimum L; always satisfied in sweep) | 8192 |
+| a6000 | qwen7b | 1 | 200 | 1024 | RTT-dominated (85% of transfer time is RTT) | 65536 | <1024 (true below minimum L; always satisfied in sweep) | 8192 |
+| a6000 | qwen7b | 10 | 50 | none_in_range | — | 65536 | <1024 (true below minimum L; always satisfied in sweep) | 8192 |
+| a6000 | qwen7b | 10 | 200 | 1024 | RTT-dominated (98% of transfer time is RTT) | 65536 | <1024 (true below minimum L; always satisfied in sweep) | 8192 |
+| a6000 | qwen7b | 100 | 50 | none_in_range | — | 65536 | <1024 (true below minimum L; always satisfied in sweep) | 8192 |
+| a6000 | qwen7b | 100 | 200 | 1024 | RTT-dominated (100% of transfer time is RTT) | 65536 | <1024 (true below minimum L; always satisfied in sweep) | 8192 |
+| rtx3090ti | qwen7b | 1 | 50 | none_in_range | — | none_in_range | <1024 (true below minimum L; always satisfied in sweep) | 4096 |
+| rtx3090ti | qwen7b | 1 | 200 | 1024 | RTT-dominated (85% of transfer time is RTT) | none_in_range | <1024 (true below minimum L; always satisfied in sweep) | 4096 |
+| rtx3090ti | qwen7b | 10 | 50 | none_in_range | — | none_in_range | <1024 (true below minimum L; always satisfied in sweep) | 4096 |
+| rtx3090ti | qwen7b | 10 | 200 | none_in_range | — | none_in_range | <1024 (true below minimum L; always satisfied in sweep) | 4096 |
+| rtx3090ti | qwen7b | 100 | 50 | none_in_range | — | none_in_range | <1024 (true below minimum L; always satisfied in sweep) | 4096 |
+| rtx3090ti | qwen7b | 100 | 200 | none_in_range | — | none_in_range | <1024 (true below minimum L; always satisfied in sweep) | 4096 |
 
 ## Key Findings
 
 **a6000 / qwen7b**:
 
 - At L=1K: full-restore 165 ms, window 94 ms (57% of full), sum-80 restore 28 ms (17% of full).
-- At L=64K: full-restore 21.7 s, window 68 ms, sum-80 update 2.9 s, warm-append 330 ms.
+- At L=64K (max feasible): full-restore 21.7 s, window 68 ms, sum-80 update (corrected) 15.9 s, warm-append 330 ms, cold-reprefill 22523 ms (ratio 68×).
+- KV memory to keep warm at L=64K: 3758 MB (56 KB/token × 65,536 tokens).
 - No OOM across the full sweep (max L=65,536).
-- xB (summary pipeline faster than full re-prefill): L=16384 tokens. Below this L, full re-prefill is cheaper; above it, regenerating a summary and restoring from it is faster.
-- xC (window-10 ≥10× cheaper than full): L=8192 tokens. Window-restore latency is ~constant (~65-130 ms) regardless of L because it ingests a fixed ~2 K-token window.
-- Transfer cost (text) is dominated by re-prefill at all tested bandwidths (≥1 Mbps): full text of 64K tokens is only ~256 KB → 2 s at 1 Mbps vs re-prefill cost of 21+ s. RTT matters at small L only.
+- xB (corrected): summary pipeline faster than full re-prefill above L=65536.
+- xB2: sum-80 restore alone cheaper than full re-prefill at all L in sweep (condition satisfied below minimum swept L; sum-80 restore is ~28 ms constant).
+- xC: window-10 ≥10× cheaper than full above L=8192; window latency is ~constant (~65–130 ms) because it always ingests ~300–500 tokens.
+- Transfer cost: full text (4–256 KB) transfers in 0.03–2 s at 1 Mbps; re-prefill costs 0.16–21 s. Re-prefill dominates at all L ≥ 1K for ≥1 Mbps links. xA crossover at 200 ms RTT is RTT-dominated, not bandwidth-limited.
 
 **rtx3090ti / qwen7b**:
 
 - At L=1K: full-restore 220 ms, window 119 ms (54% of full), sum-80 restore 25 ms (12% of full).
-- OOM boundary: full-restore infeasible at L=49,152 (GPU memory exceeded; max feasible L=32,768).
-- xB (summary pipeline faster than full re-prefill): L=16384 tokens. Below this L, full re-prefill is cheaper; above it, regenerating a summary and restoring from it is faster.
-- xC (window-10 ≥10× cheaper than full): L=4096 tokens. Window-restore latency is ~constant (~65-130 ms) regardless of L because it ingests a fixed ~2 K-token window.
-- Transfer cost (text) is dominated by re-prefill at all tested bandwidths (≥1 Mbps): full text of 64K tokens is only ~256 KB → 2 s at 1 Mbps vs re-prefill cost of 21+ s. RTT matters at small L only.
+- At L=32K (max feasible): full-restore 13.7 s, window 89 ms, sum-80 update OOM (corrected), warm-append OOM, cold-reprefill OOM (ratio OOM).
+- KV memory to keep warm at L=32K: 1879 MB (56 KB/token × 32,768 tokens).
+- OOM boundary: full-restore infeasible at L=49,152; max feasible L=32,768.
+- xB (corrected): summary pipeline faster than full re-prefill above L=none_in_range.
+- xB2: sum-80 restore alone cheaper than full re-prefill at all L in sweep (condition satisfied below minimum swept L; sum-80 restore is ~28 ms constant).
+- xC: window-10 ≥10× cheaper than full above L=4096; window latency is ~constant (~65–130 ms) because it always ingests ~300–500 tokens.
+- Transfer cost: full text (4–256 KB) transfers in 0.03–2 s at 1 Mbps; re-prefill costs 0.16–21 s. Re-prefill dominates at all L ≥ 1K for ≥1 Mbps links. xA crossover at 200 ms RTT is RTT-dominated, not bandwidth-limited.
+
+## Appendix A — Original Update Measurements (Truncated Input)
+
+The initial sweep measured sum-80 and sum-200 update latency from the first 8000 characters of the context (a cap introduced for sweep tractability). These values are flat across L because the input to the model was constant; they are not valid cost estimates for the update operation at large L. The corrected values in the main tables above use the full L-token context.
+
+### a6000
+
+**qwen7b** — sum-80 update (8000-char truncated input)
+
+| L | sum-80 update ms | sum-200 update ms |
+|---|---|---|
+| 1,024 | 2535 | 5722 |
+| 2,048 | 2796 | 3525 |
+| 4,096 | 2812 | 3563 |
+| 8,192 | 2824 | 3556 |
+| 16,384 | 2825 | 3590 |
+| 24,576 | 2864 | 3600 |
+| 32,768 | 2875 | 3581 |
+| 49,152 | 2881 | 3591 |
+| 65,536 | 2871 | 3561 |
+
+### rtx3090ti
+
+**qwen7b** — sum-80 update (8000-char truncated input)
+
+| L | sum-80 update ms | sum-200 update ms |
+|---|---|---|
+| 1,024 | 2185 | 4943 |
+| 2,048 | 2538 | 3113 |
+| 4,096 | 2530 | 3178 |
+| 8,192 | 2546 | 3107 |
+| 16,384 | 2555 | 3164 |
+| 24,576 | 2611 | 3277 |
+| 32,768 | 2672 | 3327 |
+| 49,152 | 2730 | 3400 |
+| 65,536 | 2796 | 3499 |
 
 ## Caveats
 
-- Summary restore latency is constant (fixed stub text) — it does not vary with L. This is correct: the summarized representation is always ~80/200 tokens.
+- Summary restore latency uses a fixed ~80/200-token stub text and does not vary with L. This is correct: the summarized state is always ~80/200 tokens regardless of history length.
 
-- Summary update latency is measured from the first 8000 chars of the context, not the full L tokens, to keep the update sweep tractable. At large L this underestimates the true update cost (which grows with L); the full-L update cost can be inferred from full_restore scaling × generation overhead.
+- Summary update (corrected) measures generation of 80/200 tokens from the full L-token context. At large L the input context is truncated only by the model's maximum position embedding limit (128K for Qwen2.5-7B). If a tier has not completed the full-context rerun, the original truncated-input values are used with a † marker.
 
-- Incremental warm latency is constant (~200 tokens) because it only measures the new-turn append step, not the prior prefill. The cost of keeping state warm is the KV memory footprint (kv_bytes × L).
+- Incremental warm latency grows slightly with L (100–330 ms range) because attending over a larger KV cache requires more memory bandwidth, even though only 200 new tokens are processed.
 
-- Transfer cost does not include network measurement; it is derived from state size / bandwidth + RTT. Run under netem to validate.
+- Incremental measurements require storing the L-token KV cache during the warm-append step. This causes OOM at lower L on the 3090 Ti than full-restore (which discards the KV cache immediately after TTFT).
 
-- Jetson Orin rows are pending: run `phase1_cost_profile.py --tier jetson_orin` on the Jetson host.
+- Transfer cost is derived, not measured. Run under netem to validate.
+
+- Window-10 token count is ~300–500 tokens across all L (last 10 corpus turns of ~37–200 tokens each). No rows in the current sweep qualify as 'window covers full context' (max ratio 0.47 at L=1024).
+
+- Jetson Orin rows pending.
