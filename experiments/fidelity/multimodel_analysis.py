@@ -606,7 +606,7 @@ def write_report(analyses, table, out_path):
                   "These were silently truncated by the tokenizer (the model received a clipped "
                   "trajectory) and are excluded from all n=57 contrasts below.", "")
                 W("Context fit at raised cutoff: Qwen2.5-7B-Instruct (128K context) can fit all three "
-                  "within the context window, but the A6000 (24GB) ran out of GPU memory (CUDA OOM) "
+                  "within the context window, but the A6000 (48GB) ran out of GPU memory (CUDA OOM)"
                   "during the forward pass at 73K+ token sequences (model weights ~14GB FP16 + KV cache). "
                   "Mistral-7B-Instruct-v0.2 (32K context) cannot fit any of the three items (all exceed 32K).", "")
                 rerun = load_truncated_rerun()

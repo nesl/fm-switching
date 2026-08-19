@@ -1,7 +1,6 @@
-<!-- Paths in this report predate the 2026-08-19 reorganization; see research/EXPERIMENTS.md for current file locations. -->
 # Phase 0a — Multi-model Regime Audit
 
-Generated: 2026-08-19 11:06
+Generated: 2026-08-19 11:15
 
 ## Overview
 
@@ -146,7 +145,7 @@ n_all=60 (n57=57 after excluding truncated items), n_nonsalient=44 (n57_nonsalie
 
 Three items exceeded the 28K-token cutoff in the `full` condition: `floorplan210_19_618_1746864406_q1`, `floorplan210_19_618_1746864406_q18`, `floorplan230_9_507_1746931717_q23`. Raw trajectory token counts: ≈57K–74K for Qwen, ≈69K–89K for Mistral. These were silently truncated by the tokenizer (the model received a clipped trajectory) and are excluded from all n=57 contrasts below.
 
-Context fit at raised cutoff: Qwen2.5-7B-Instruct (128K context) can fit all three within the context window, but the A6000 (24GB) ran out of GPU memory (CUDA OOM) during the forward pass at 73K+ token sequences (model weights ~14GB FP16 + KV cache). Mistral-7B-Instruct-v0.2 (32K context) cannot fit any of the three items (all exceed 32K).
+Context fit at raised cutoff: Qwen2.5-7B-Instruct (128K context) can fit all three within the context window, but the A6000 (48GB) ran out of GPU memory (CUDA OOM)during the forward pass at 73K+ token sequences (model weights ~14GB FP16 + KV cache). Mistral-7B-Instruct-v0.2 (32K context) cannot fit any of the three items (all exceed 32K).
 
 **Per-item rerun outcomes at raised cutoff:**
 
@@ -247,7 +246,7 @@ n_all=60 (n57=57 after excluding truncated items), n_nonsalient=44 (n57_nonsalie
 
 Three items exceeded the 28K-token cutoff in the `full` condition: `floorplan210_19_618_1746864406_q1`, `floorplan210_19_618_1746864406_q18`, `floorplan230_9_507_1746931717_q23`. Raw trajectory token counts: ≈57K–74K for Qwen, ≈69K–89K for Mistral. These were silently truncated by the tokenizer (the model received a clipped trajectory) and are excluded from all n=57 contrasts below.
 
-Context fit at raised cutoff: Qwen2.5-7B-Instruct (128K context) can fit all three within the context window, but the A6000 (24GB) ran out of GPU memory (CUDA OOM) during the forward pass at 73K+ token sequences (model weights ~14GB FP16 + KV cache). Mistral-7B-Instruct-v0.2 (32K context) cannot fit any of the three items (all exceed 32K).
+Context fit at raised cutoff: Qwen2.5-7B-Instruct (128K context) can fit all three within the context window, but the A6000 (48GB) ran out of GPU memory (CUDA OOM)during the forward pass at 73K+ token sequences (model weights ~14GB FP16 + KV cache). Mistral-7B-Instruct-v0.2 (32K context) cannot fit any of the three items (all exceed 32K).
 
 **Per-item rerun outcomes at raised cutoff:**
 

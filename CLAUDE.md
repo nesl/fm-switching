@@ -52,8 +52,9 @@ Host-specific files (produced on one tier) carry the tier slug in the name:
 Merged files (combining multiple tiers) carry **no** tier identifier:
 ```
 cost_matrix.csv                      # tier is a column
-reports/phase1_cost_profiling.md     # one section per tier inside
 ```
+Track merged outputs in `research/EXPERIMENTS.md` (E-id row, "output" column).
+The two existing reports (`reports/phase0a_multimodel_audit.md`, `reports/phase1_cost_profiling.md`) keep their historical filenames.
 
 **Never** use `phaseN`, `sprintN`, or ad-hoc numbers in any path or filename.
 
