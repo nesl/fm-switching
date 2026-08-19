@@ -1,0 +1,35 @@
+# FM-switching — Experiment Registry
+
+One row per experiment, in rough chronological order. Append new rows at the bottom.
+Never edit a row's verdict after its result JSON is committed; add a new row instead.
+
+**Purposes:** fidelity · cost · orchestration · feasibility · archive
+
+**Status:** canonical · superseded · archived · pending
+
+| E-id | purpose | claim | script (post-migration) | inputs | outputs | hosts | n / sweep | verdict | status |
+|---|---|---|---|---|---|---|---|---|---|
+| E01 | archive | premise | `experiments/fidelity/multimodel_make_subsets.py` (was `premise_egoschema.py`) | `data/egoschema/` | `results/archive/premise_qwen7b_n150.json` | a6000 | n=150 | Summary-80 ≈ full on EgoSchema at n=150; GO verdict | superseded by E05 |
+| E02 | archive | — | `experiments/archive/representation_sweep_n150.py` | `data/egoschema/`, E01 cache | `results/archive/representation_sweep_qwen7b_n150.json` | a6000 | n=150, 8 conditions | SUPERSEDED; 8-condition sweep before window/summary naming settled | superseded by E05 |
+| E03 | fidelity | C1 | `experiments/fidelity/frame_sweep.py` | `data/egoschema/` | `results/framesweep_qwen7b.json` | a6000 | n=150, frames ∈ {4,8,16,32} | Accuracy plateaus at 16 frames; 16 is sufficient | canonical |
+| E04 | archive | — | `experiments/archive/exp_quality_comparison.py` | — | — | a6000 | — | Superseded representation comparison | archived |
+| E05 | fidelity | C1 | `experiments/fidelity/representation_frontier.py` | `data/egoschema/` | `results/frontier_qwen7b.json`, `frontier_qwen7b_perquestion.json`, `results/fidelity/caches/` | a6000 | n=500, Qwen2.5-7B | EgoSchema: full=50.2%, sum-80≈full (47.0%), window≈full; gist-compressible regime confirmed | canonical |
+| E06 | fidelity | C1 | `experiments/fidelity/representation_frontier.py` | `data/egoschema/`, E05 caches | `results/frontier_smollm2.json`, `frontier_smollm2_perquestion.json` | a6000 | n=500, SmolLM2-1.7B | SmolLM2: full=38.4%, sum-80 matches full (38.8%); gist-compressible under second model | canonical |
+| E07 | archive | — | `experiments/archive/caption_findingdory.py` | `data/findingdory/` | `results/archive/fd_captions_qwenvl7b.json` | a6000 | n=300, QwenVL-7B | FindingDory caption generation for VQA pilot | archived |
+| E08 | archive | C3 | `experiments/archive/frontier_findingdory.py` | `data/findingdory/`, E07 captions | `results/archive/fd_pilot_smoke_qwen7b.json` | a6000 | n=5 smoke | FindingDory: subsampled captions lose reference anchors; negative result | archived |
+| E09 | archive | C3 | `experiments/archive/frontier_findingdory_v2.py` | `data/findingdory/` | `results/archive/frontier_findingdory_qwenvl3b.json` | a6000 | n=300, QwenVL-3B-FT | INCOMPRESSIBLE (cliff at b=48) but OOD confound; FindingDory closed | archived |
+| E10 | fidelity | C1 | `experiments/fidelity/frontier_locomo.py` | `data/locomo10.json` | `results/fidelity/frontier_locomo_qwen7b.json`, `frontier_locomo_qwen7b_perquestion.json` | a6000 | n=50 cat=1, Qwen2.5-7B | INCOMPRESSIBLE: full=26%, s80=6%, gap −20pp, p=0.016 | canonical |
+| E11 | fidelity | C1,C3 | `experiments/fidelity/frontier_infinithor.py` | `data/infinithor/` | `results/fidelity/frontier_infinithor_qwen7b.json` | a6000 | n=60 NsiEH, Qwen2.5-7B | STRUCTURED-COMPRESSIBLE: full≈s80 on non-salient (gap +0.03, ns); structured-log regime | canonical |
+| E12 | archive | C3 | `experiments/archive/geolife_audit.py` | GeoLife (external) | `results/archive/geolife_microgate_qwen7b.json` | a6000 | n=123, Qwen2.5-7B | MICRO-GATE PASS but question family is lookup-type; GeoLife archived | archived |
+| E13 | fidelity | C1 | `experiments/fidelity/locomo_audit_scaled.py` | `data/locomo10.json` | `results/fidelity/locomo_audit_scaled_qwen7b.json` | a6000 | n=282 cat=1, Qwen2.5-7B | INCOMPRESSIBLE (scaled, confirmed): full=34.0%, s80=9.9%, gap −24.1pp p<0.001 | canonical |
+| E14 | cost | C4 | `experiments/cost/cost_profile.py` (was `inertia_profile.py`) | — | `results/inertia_smollm2_jetson.json` | jetson_orin | 5 reps × 7 depths | SmolLM2: re-prefill super-linear → 12.6s @ 8k tok | canonical |
+| E15 | cost | C4 | `experiments/cost/cost_profile.py` | — | `results/inertia_smollm2_a6000.json` | a6000 | 5 reps × 7 depths | SmolLM2: prefill 12.5ms@128tok → 469.5ms@8192tok; ~2× faster than Jetson | canonical |
+| E16 | orchestration | C5,C6 | `experiments/orchestration/run_rq3.py` | `results/frontier_qwen7b.json` | `results/orchestration/rq3_ablation.json` | a6000 | 600 runs (grid) | C6 rejected: EgoSchema gist-compressible → representation choice not decision-relevant | canonical |
+| E17 | orchestration | C5 | `experiments/orchestration/run_locomo_binding.py` | `results/fidelity/locomo_audit_scaled_qwen7b.json` | (partial outputs) | a6000 | — | Binding test for LoCoMo inertia; prior to new cost numbers | superseded by E21 |
+| E18 | fidelity | C1,C2 | `experiments/fidelity/multimodel_egoschema.py` | `data/egoschema/`, `data/audit_subsets/` | `results/fidelity/multimodel/egoschema_*.json` | a6000 | n=60, Qwen+Mistral | EgoSchema gist-compressible under both models | canonical |
+| E19 | fidelity | C1,C2 | `experiments/fidelity/multimodel_infinithor.py` | `data/infinithor/`, `data/audit_subsets/` | `results/fidelity/multimodel/infinithor_*.json` | a6000 | n=57 (excl 3 truncated), Qwen+Mistral | Infini-THOR: Qwen SUMMARY≈FULL (p=0.211), Mistral FULL>>SUMMARY (p=0.033) — C2 tentative | canonical |
+| E20 | fidelity | C1,C2 | `experiments/fidelity/multimodel_locomo.py` | `data/locomo10.json`, `data/audit_subsets/` | `results/fidelity/multimodel/locomo_*.json` | a6000 | n=100, Qwen+Mistral | LoCoMo dense-incompressible under both models; Phase 0a gate passed | canonical |
+| E21 | cost | C4 | `experiments/cost/cost_profile.py` (was `phase1_cost_profile.py`) | LoCoMo+Infini-THOR corpus | `results/cost/profiles/a6000_qwen7b.json` | a6000 (GPU 1) | 9 L-pts × 5 reps | Qwen2.5-7B: full-restore 165ms→21.7s; warm-append 66ms→330ms; cold/warm ratio 68× at 64K | canonical |
+| E22 | cost | C4 | `experiments/cost/cost_profile.py` | LoCoMo+Infini-THOR corpus | `results/cost/profiles/rtx3090ti_qwen7b.json` | a6000 (GPU 0 = RTX 3090 Ti) | 9 L-pts × 5 reps | Qwen2.5-7B: OOM at L≥49K for full-restore; xC=4K | canonical |
+| E23 | cost | C4 | `experiments/cost/cost_profile.py` | LoCoMo+Infini-THOR corpus | `results/cost/profiles/jetson_orin_qwen7b.json` | jetson_orin | 9 L-pts × 5 reps | Pending — run after pulling post-reorganization | pending |
+| E24 | orchestration | C5 | (new script, TBD) | E13,E21,E22,E23 results | TBD | a6000 | trace-driven sim | Joint representation × placement × timing vs decomposed baselines under quality SLO | pending |
