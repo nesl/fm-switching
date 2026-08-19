@@ -22,10 +22,10 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT      = Path(__file__).parent.parent.parent
-PROF_DIR  = ROOT / "results" / "phase1" / "cost_profiles"
-FIGURES   = ROOT / "figures"
+PROF_DIR  = ROOT / "results" / "cost" / "profiles"
+FIGURES   = ROOT / "figures" / "cost"
 REPORTS   = ROOT / "reports"
-RESULTS   = ROOT / "results" / "phase1"
+RESULTS   = ROOT / "results" / "cost"
 FIGURES.mkdir(parents=True, exist_ok=True)
 REPORTS.mkdir(parents=True, exist_ok=True)
 

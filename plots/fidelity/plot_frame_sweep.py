@@ -13,7 +13,7 @@ when the 32-frame run completes and results are merged into the file).
 
 Usage:
     python plots/plot_frame_sweep.py
-    python plots/plot_frame_sweep.py --input results/exp7_frame_sweep.json \
+    python plots/plot_frame_sweep.py --input results/framesweep_qwen7b.json \
                                      --output plots/frame_sweep.png
 """
 
@@ -156,7 +156,7 @@ def make_plot(rows, out_path: Path):
 
 def main():
     ap = argparse.ArgumentParser(description="Plot frame-count sweep results")
-    ap.add_argument("--input",  default="results/exp7_frame_sweep.json")
+    ap.add_argument("--input",  default="results/framesweep_qwen7b.json")
     ap.add_argument("--output", default="plots/frame_sweep.png")
     args = ap.parse_args()
 

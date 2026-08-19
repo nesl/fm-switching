@@ -22,8 +22,8 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT      = Path(__file__).parent.parent.parent
-RESULTS   = ROOT / "results" / "phase0a"
-FIGURES   = ROOT / "figures"
+RESULTS   = ROOT / "results" / "fidelity" / "multimodel"
+FIGURES   = ROOT / "figures" / "fidelity"
 REPORTS   = ROOT / "reports"
 FIGURES.mkdir(parents=True, exist_ok=True)
 REPORTS.mkdir(parents=True, exist_ok=True)
@@ -820,7 +820,7 @@ def main():
                 print(f"  {workload:<12} {model:<12}: MISSING")
 
     print("\nGenerating figure …")
-    make_figure(analyses, table, FIGURES / "phase0a_regime_table")
+    make_figure(analyses, table, FIGURES / "multimodel_regime_table")
 
     print("Writing report …")
     write_report(analyses, table, REPORTS / "phase0a_multimodel_audit.md")

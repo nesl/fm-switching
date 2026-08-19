@@ -1,3 +1,4 @@
+<!-- Paths in this report predate the 2026-08-19 reorganization; see research/EXPERIMENTS.md for current file locations. -->
 # Personal Sensor Stream Datasets — Feasibility Report
 
 **Question:** Do open personal sensor stream datasets (OhioT1DM, PMData, T1DEXI, LifeSnaps) support a long-horizon dense-recall QA workload for the FM-switching incompressibility audit?

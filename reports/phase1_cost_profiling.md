@@ -1,6 +1,7 @@
+<!-- Paths in this report predate the 2026-08-19 reorganization; see research/EXPERIMENTS.md for current file locations. -->
 # Phase 1 — Cost Profiling Report
 
-Generated: 2026-08-19 11:02
+Generated: 2026-08-19 11:06
 
 ## Overview
 

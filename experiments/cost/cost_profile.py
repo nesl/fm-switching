@@ -60,7 +60,7 @@ sys.path.insert(0, str(ROOT / "experiments" / "lib"))
 DATA_LOCOMO    = ROOT / "data" / "locomo" / "locomo10.json"
 DATA_TRAJ_TEST = ROOT / "data" / "infinithor" / "traj_test"
 DATA_TRAJ      = ROOT / "data" / "infinithor" / "traj"
-OUT_DIR        = ROOT / "results" / "phase1" / "cost_profiles"
+OUT_DIR        = ROOT / "results" / "cost" / "profiles"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 MODELS = {
@@ -521,7 +521,7 @@ def main():
     device     = f"cuda:{args.gpu}"
     device_idx = args.gpu
     out_path   = OUT_DIR / f"{args.tier}_{args.model}.json"
-    notes_dir  = ROOT / "results" / "phase1" / args.tier
+    notes_dir  = ROOT / "results" / "cost" / "profiles" / args.tier
     notes_dir.mkdir(parents=True, exist_ok=True)
 
     gpu_name = torch.cuda.get_device_name(device_idx)

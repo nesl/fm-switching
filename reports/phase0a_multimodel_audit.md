@@ -1,6 +1,7 @@
+<!-- Paths in this report predate the 2026-08-19 reorganization; see research/EXPERIMENTS.md for current file locations. -->
 # Phase 0a — Multi-model Regime Audit
 
-Generated: 2026-08-19 11:01
+Generated: 2026-08-19 11:06
 
 ## Overview
 

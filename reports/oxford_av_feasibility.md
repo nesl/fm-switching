@@ -1,3 +1,4 @@
+<!-- Paths in this report predate the 2026-08-19 reorganization; see research/EXPERIMENTS.md for current file locations. -->
 # Oxford RobotCar / Radar RobotCar — Feasibility Report
 
 **Question:** Is Oxford RobotCar suitable as a long-horizon dense-recall incompressibility QA workload?
