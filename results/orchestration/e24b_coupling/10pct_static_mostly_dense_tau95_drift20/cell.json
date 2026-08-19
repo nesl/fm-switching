@@ -1,0 +1,735 @@
+{
+  "config": {
+    "capacity_pct": 10,
+    "mobility_level": "static",
+    "regime_mix": "mostly_dense",
+    "tau": 0.95,
+    "drift_rate": 20,
+    "n_sessions": 15,
+    "n_epochs": 100,
+    "L_init": 8192,
+    "turn_rate": 880,
+    "edge_cap_gb": 0.9733,
+    "cloud_cap_gb": 0.9733,
+    "ref_cap_new_per_node_gb": 9.7327,
+    "ref_cap_old_per_node_gb": 44.8935,
+    "seeds": [
+      0,
+      1,
+      2
+    ]
+  },
+  "policies": {
+    "reactive": {
+      "seeds": [
+        {
+          "seed": 0,
+          "slo_fraction": 0.03866666666666667,
+          "warm_hit": 0.0,
+          "warm_stale": 0.12933333333333333,
+          "cold_miss": 0.244,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.0,
+          "infeasible_miss": 0.6266666666666667,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.06454933333333333,
+          "slo_by_band": {
+            "small": 0.12,
+            "mid": 0.09523809523809523,
+            "large": 0.0
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 2,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 1,
+          "slo_fraction": 0.03866666666666667,
+          "warm_hit": 0.0,
+          "warm_stale": 0.13066666666666665,
+          "cold_miss": 0.244,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.0,
+          "infeasible_miss": 0.6253333333333333,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.06511466666666667,
+          "slo_by_band": {
+            "small": 0.12,
+            "mid": 0.09523809523809523,
+            "large": 0.0
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 2,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 2,
+          "slo_fraction": 0.03866666666666667,
+          "warm_hit": 0.0,
+          "warm_stale": 0.132,
+          "cold_miss": 0.244,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.0,
+          "infeasible_miss": 0.624,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.065888,
+          "slo_by_band": {
+            "small": 0.12,
+            "mid": 0.09523809523809523,
+            "large": 0.0
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 2,
+          "extrapolated_points": 285
+        }
+      ],
+      "mean_slo": 0.03866666666666667,
+      "min_slo": 0.03866666666666667,
+      "max_slo": 0.03866666666666667
+    },
+    "replication": {
+      "seeds": [
+        {
+          "seed": 0,
+          "slo_fraction": 0.0,
+          "warm_hit": 0.0,
+          "warm_stale": 0.0,
+          "cold_miss": 0.186,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.094,
+          "infeasible_miss": 0.72,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.0,
+          "slo_by_band": {
+            "small": 0.0,
+            "mid": 0.0,
+            "large": 0.0
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 9,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 1,
+          "slo_fraction": 0.0,
+          "warm_hit": 0.0,
+          "warm_stale": 0.0,
+          "cold_miss": 0.186,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.094,
+          "infeasible_miss": 0.72,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.0,
+          "slo_by_band": {
+            "small": 0.0,
+            "mid": 0.0,
+            "large": 0.0
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 9,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 2,
+          "slo_fraction": 0.0,
+          "warm_hit": 0.0,
+          "warm_stale": 0.0,
+          "cold_miss": 0.186,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.094,
+          "infeasible_miss": 0.72,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.0,
+          "slo_by_band": {
+            "small": 0.0,
+            "mid": 0.0,
+            "large": 0.0
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 9,
+          "extrapolated_points": 285
+        }
+      ],
+      "mean_slo": 0.0,
+      "min_slo": 0.0,
+      "max_slo": 0.0
+    },
+    "placement_only": {
+      "seeds": [
+        {
+          "seed": 0,
+          "slo_fraction": 0.06466666666666666,
+          "warm_hit": 0.06333333333333334,
+          "warm_stale": 0.0013333333333333333,
+          "cold_miss": 0.252,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.01,
+          "infeasible_miss": 0.6733333333333333,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.03227466666666667,
+          "slo_by_band": {
+            "small": 0.06,
+            "mid": 0.06666666666666667,
+            "large": 0.06451612903225806
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 1,
+          "slo_fraction": 0.06533333333333333,
+          "warm_hit": 0.06466666666666666,
+          "warm_stale": 0.0006666666666666666,
+          "cold_miss": 0.252,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.01,
+          "infeasible_miss": 0.6726666666666666,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.032557333333333334,
+          "slo_by_band": {
+            "small": 0.06,
+            "mid": 0.06666666666666667,
+            "large": 0.06559139784946237
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 2,
+          "slo_fraction": 0.066,
+          "warm_hit": 0.066,
+          "warm_stale": 0.0,
+          "cold_miss": 0.252,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.01,
+          "infeasible_miss": 0.672,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.032944,
+          "slo_by_band": {
+            "small": 0.06,
+            "mid": 0.06666666666666667,
+            "large": 0.06666666666666667
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        }
+      ],
+      "mean_slo": 0.06533333333333334,
+      "min_slo": 0.06466666666666666,
+      "max_slo": 0.066
+    },
+    "fidelity_only": {
+      "seeds": [
+        {
+          "seed": 0,
+          "slo_fraction": 0.36733333333333335,
+          "warm_hit": 0.354,
+          "warm_stale": 0.04666666666666667,
+          "cold_miss": 0.156,
+          "degraded": 0.392,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.016666666666666666,
+          "infeasible_miss": 0.034666666666666665,
+          "p50_latency_s": 7.1036269531250005,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.334168,
+          "slo_by_band": {
+            "small": 0.18,
+            "mid": 0.5380952380952381,
+            "large": 0.3204301075268817
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 1,
+          "slo_fraction": 0.362,
+          "warm_hit": 0.3486666666666667,
+          "warm_stale": 0.04733333333333333,
+          "cold_miss": 0.156,
+          "degraded": 0.4053333333333333,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.016666666666666666,
+          "infeasible_miss": 0.026,
+          "p50_latency_s": 7.49646875,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.33398,
+          "slo_by_band": {
+            "small": 0.18,
+            "mid": 0.5380952380952381,
+            "large": 0.3118279569892473
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 2,
+          "slo_fraction": 0.36866666666666664,
+          "warm_hit": 0.35533333333333333,
+          "warm_stale": 0.048,
+          "cold_miss": 0.156,
+          "degraded": 0.408,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.016666666666666666,
+          "infeasible_miss": 0.016,
+          "p50_latency_s": 7.1036269531250005,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.338392,
+          "slo_by_band": {
+            "small": 0.18,
+            "mid": 0.5380952380952381,
+            "large": 0.3225806451612903
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        }
+      ],
+      "mean_slo": 0.36599999999999994,
+      "min_slo": 0.362,
+      "max_slo": 0.36866666666666664
+    },
+    "cache_value": {
+      "seeds": [
+        {
+          "seed": 0,
+          "slo_fraction": 0.078,
+          "warm_hit": 0.002,
+          "warm_stale": 0.168,
+          "cold_miss": 0.064,
+          "degraded": 0.738,
+          "placement_miss": 0.0026666666666666666,
+          "materialization_miss": 0.025333333333333333,
+          "infeasible_miss": 0.0,
+          "p50_latency_s": 23.173865234375,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.30005466666666664,
+          "slo_by_band": {
+            "small": 0.18,
+            "mid": 0.1357142857142857,
+            "large": 0.035483870967741936
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 1,
+          "slo_fraction": 0.08066666666666666,
+          "warm_hit": 0.002,
+          "warm_stale": 0.17333333333333334,
+          "cold_miss": 0.064,
+          "degraded": 0.7326666666666667,
+          "placement_miss": 0.0026666666666666666,
+          "materialization_miss": 0.025333333333333333,
+          "infeasible_miss": 0.0,
+          "p50_latency_s": 22.618601562500004,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.299312,
+          "slo_by_band": {
+            "small": 0.18,
+            "mid": 0.1357142857142857,
+            "large": 0.03978494623655914
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 2,
+          "slo_fraction": 0.08066666666666666,
+          "warm_hit": 0.002,
+          "warm_stale": 0.16933333333333334,
+          "cold_miss": 0.064,
+          "degraded": 0.7366666666666667,
+          "placement_miss": 0.0026666666666666666,
+          "materialization_miss": 0.025333333333333333,
+          "infeasible_miss": 0.0,
+          "p50_latency_s": 23.173865234375,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.298712,
+          "slo_by_band": {
+            "small": 0.18,
+            "mid": 0.1357142857142857,
+            "large": 0.03978494623655914
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        }
+      ],
+      "mean_slo": 0.07977777777777778,
+      "min_slo": 0.078,
+      "max_slo": 0.08066666666666666
+    },
+    "joint": {
+      "seeds": [
+        {
+          "seed": 0,
+          "slo_fraction": 0.36466666666666664,
+          "warm_hit": 0.35133333333333333,
+          "warm_stale": 0.050666666666666665,
+          "cold_miss": 0.156,
+          "degraded": 0.392,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.016666666666666666,
+          "infeasible_miss": 0.03333333333333333,
+          "p50_latency_s": 7.49646875,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.334832,
+          "slo_by_band": {
+            "small": 0.18,
+            "mid": 0.5380952380952381,
+            "large": 0.3161290322580645
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 1,
+          "slo_fraction": 0.362,
+          "warm_hit": 0.3486666666666667,
+          "warm_stale": 0.054,
+          "cold_miss": 0.156,
+          "degraded": 0.4053333333333333,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.016666666666666666,
+          "infeasible_miss": 0.019333333333333334,
+          "p50_latency_s": 7.49646875,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.3373,
+          "slo_by_band": {
+            "small": 0.18,
+            "mid": 0.5380952380952381,
+            "large": 0.3118279569892473
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 2,
+          "slo_fraction": 0.36866666666666664,
+          "warm_hit": 0.35533333333333333,
+          "warm_stale": 0.048,
+          "cold_miss": 0.156,
+          "degraded": 0.408,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.016666666666666666,
+          "infeasible_miss": 0.016,
+          "p50_latency_s": 7.1036269531250005,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.338392,
+          "slo_by_band": {
+            "small": 0.18,
+            "mid": 0.5380952380952381,
+            "large": 0.3225806451612903
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        }
+      ],
+      "mean_slo": 0.3651111111111111,
+      "min_slo": 0.362,
+      "max_slo": 0.36866666666666664
+    },
+    "oracle": {
+      "seeds": [
+        {
+          "seed": 0,
+          "slo_fraction": 0.36866666666666664,
+          "warm_hit": 0.35533333333333333,
+          "warm_stale": 0.04666666666666667,
+          "cold_miss": 0.156,
+          "degraded": 0.392,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.016666666666666666,
+          "infeasible_miss": 0.03333333333333333,
+          "p50_latency_s": 7.1036269531250005,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.334832,
+          "slo_by_band": {
+            "small": 0.18,
+            "mid": 0.5380952380952381,
+            "large": 0.3225806451612903
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 1,
+          "slo_fraction": 0.36866666666666664,
+          "warm_hit": 0.35533333333333333,
+          "warm_stale": 0.04733333333333333,
+          "cold_miss": 0.156,
+          "degraded": 0.4053333333333333,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.016666666666666666,
+          "infeasible_miss": 0.019333333333333334,
+          "p50_latency_s": 7.1036269531250005,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.3373,
+          "slo_by_band": {
+            "small": 0.18,
+            "mid": 0.5380952380952381,
+            "large": 0.3225806451612903
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 2,
+          "slo_fraction": 0.36866666666666664,
+          "warm_hit": 0.35533333333333333,
+          "warm_stale": 0.048,
+          "cold_miss": 0.156,
+          "degraded": 0.408,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.016666666666666666,
+          "infeasible_miss": 0.016,
+          "p50_latency_s": 7.1036269531250005,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.338392,
+          "slo_by_band": {
+            "small": 0.18,
+            "mid": 0.5380952380952381,
+            "large": 0.3225806451612903
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        }
+      ],
+      "mean_slo": 0.36866666666666664,
+      "min_slo": 0.36866666666666664,
+      "max_slo": 0.36866666666666664
+    },
+    "libra_style": {
+      "seeds": [
+        {
+          "seed": 0,
+          "slo_fraction": 0.06266666666666666,
+          "warm_hit": 0.036,
+          "warm_stale": 0.06133333333333333,
+          "cold_miss": 0.244,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.0,
+          "infeasible_miss": 0.6586666666666666,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.046621333333333334,
+          "slo_by_band": {
+            "small": 0.12,
+            "mid": 0.13333333333333333,
+            "large": 0.021505376344086023
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 2,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 1,
+          "slo_fraction": 0.06266666666666666,
+          "warm_hit": 0.036,
+          "warm_stale": 0.07466666666666667,
+          "cold_miss": 0.244,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.0,
+          "infeasible_miss": 0.6453333333333333,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.05383466666666666,
+          "slo_by_band": {
+            "small": 0.12,
+            "mid": 0.13333333333333333,
+            "large": 0.021505376344086023
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 2,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 2,
+          "slo_fraction": 0.06266666666666666,
+          "warm_hit": 0.036,
+          "warm_stale": 0.096,
+          "cold_miss": 0.244,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.0,
+          "infeasible_miss": 0.624,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.065888,
+          "slo_by_band": {
+            "small": 0.12,
+            "mid": 0.13333333333333333,
+            "large": 0.021505376344086023
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 2,
+          "extrapolated_points": 285
+        }
+      ],
+      "mean_slo": 0.06266666666666666,
+      "min_slo": 0.06266666666666666,
+      "max_slo": 0.06266666666666666
+    },
+    "handover_sched": {
+      "seeds": [
+        {
+          "seed": 0,
+          "slo_fraction": 0.03133333333333333,
+          "warm_hit": 0.018,
+          "warm_stale": 0.04666666666666667,
+          "cold_miss": 0.252,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.01,
+          "infeasible_miss": 0.6733333333333333,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.03227466666666667,
+          "slo_by_band": {
+            "small": 0.06,
+            "mid": 0.06666666666666667,
+            "large": 0.010752688172043012
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 1,
+          "slo_fraction": 0.03133333333333333,
+          "warm_hit": 0.018,
+          "warm_stale": 0.04733333333333333,
+          "cold_miss": 0.252,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.01,
+          "infeasible_miss": 0.6726666666666666,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.032557333333333334,
+          "slo_by_band": {
+            "small": 0.06,
+            "mid": 0.06666666666666667,
+            "large": 0.010752688172043012
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        },
+        {
+          "seed": 2,
+          "slo_fraction": 0.03133333333333333,
+          "warm_hit": 0.018,
+          "warm_stale": 0.048,
+          "cold_miss": 0.252,
+          "degraded": 0.0,
+          "placement_miss": 0.0,
+          "materialization_miss": 0.01,
+          "infeasible_miss": 0.672,
+          "p50_latency_s": Infinity,
+          "p95_latency_s": Infinity,
+          "p99_latency_s": Infinity,
+          "mean_latency_s": Infinity,
+          "mean_quality": 0.032944,
+          "slo_by_band": {
+            "small": 0.06,
+            "mid": 0.06666666666666667,
+            "large": 0.010752688172043012
+          },
+          "capacity_violations": 0,
+          "cold_materializations": 0,
+          "extrapolated_points": 285
+        }
+      ],
+      "mean_slo": 0.03133333333333333,
+      "min_slo": 0.03133333333333333,
+      "max_slo": 0.03133333333333333
+    }
+  }
+}

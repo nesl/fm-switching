@@ -130,3 +130,16 @@ Sweep: 5 capacity × 4 mobility × 3 regime_mix × 3 seeds × 7 policies = 1,260
 | `figures/orchestration/e24_phase_diagram.pdf` | `plots/orchestration/plot_e24.py` | — | CPU | 60 cells | Phase diagram: joint improvement over best non-joint baseline | 2026-08-19 |
 | `figures/orchestration/e24_phase_diagram_vs_cv.pdf` | `plots/orchestration/plot_e24.py` | — | CPU | 60 cells | Phase diagram: joint improvement over cache_value specifically | 2026-08-19 |
 | `reports/e24_coupling_falsification.md` | — | — | — | — | Coupling falsification: placement-aware policies +12pp vs reactive; joint +0–3pp vs cache_value; 7 kill criteria evaluated | 2026-08-19 |
+
+## E24b — Stressed coupling falsification (2026-08-19)
+
+Script: `simulator/provisioning/sweep_b.py`. Inputs: Q-table (E05/E11/E13); costs (E21/E22); 3-edge topology; relative tau ∈ {0.80,0.90,0.95}; drift_rate ∈ {0,20}; L_init=8192 turn_rate=880. CPU only; no GPU.
+Sweep: 5 capacity × 4 mobility × 3 regime_mix × 3 tau × 2 drift × 9 policies × 3 seeds = 9,720 runs.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/orchestration/e24b_coupling/<cell>/cell.json` (360 files) | `sweep_b.py` | — (simulator) | CPU | 9,720 runs | Per-cell SLO fractions, L-band SLO, miss-type breakdown, p95/p99 latency for 9 policies | pending |
+| `figures/orchestration/e24b_phase_diagram_vs_fidelity.pdf` | `plots/orchestration/plot_e24b.py` | — | CPU | 360 cells | Phase diagram: joint improvement over fidelity_only — negative in 52/60 cells | pending |
+| `figures/orchestration/e24b_phase_diagram_vs_cv.pdf` | `plots/orchestration/plot_e24b.py` | — | CPU | 360 cells | Phase diagram: joint improvement over cache_value — positive in all cells (+18–40pp) | pending |
+| `figures/orchestration/e24b_slo_summary.pdf` | `plots/orchestration/plot_e24b.py` | — | CPU | 360 cells | Mean SLO by policy × regime_mix: fidelity_only beats joint by 6–14pp | pending |
+| `reports/e24b_coupling_falsification.md` | — | — | — | — | Null in stressed region: fidelity_only > joint; L-scaling and drift-scaling predictions falsified; thesis narrowed to placement-awareness at current serving node | pending |

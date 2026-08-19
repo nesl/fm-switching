@@ -30,18 +30,20 @@ information the future turn needs, in a workload-dependent way).
    Key crossovers: xB (summary pipeline beats full re-prefill) = L≈65K on A6000, never in range on
    3090Ti (update OOMs above 32K). xC (window ≥10× cheaper) = L≈8K on A6000, L≈4K on 3090Ti.
 
-3. **Simulator** — *E24 complete (2026-08-19)*.
-   Fidelity-provisioning simulator built and swept (1,260 runs). Key finding: placement-aware
-   policies beat non-placement by 12 pp; joint fidelity × placement (joint policy) adds ≤3 pp
-   over cache_value EV heuristic (0 pp at 25%+ capacity). Coupling is real but narrow; the
-   thesis claim needs scoping to placement-awareness as the essential dimension.
+3. **Simulator** — *E24 and E24b complete (2026-08-19)*.
+   E24 (1,260 runs, single-edge): placement-aware policies +12pp vs reactive; joint ≤3pp over cache_value.
+   E24b (9,720 runs, 3-edge, stressed): fidelity_only outperforms joint by 6–14pp across all regime mixes;
+   L-scaling and drift-scaling predictions both falsified. Coupling claim does not survive a properly stressed
+   configuration. Thesis narrowed: placement-awareness at current serving node (fidelity_only strategy) is
+   necessary and sufficient; explicit joint fidelity×placement optimization provides no measurable additional value.
    Prior SSM+MPC+RL code in `simulator/` is kept for lineage.
 
 ## Next gate
 
-Real-hardware trace or deployment evidence showing edge nodes operate at ≤10% of full-replication
-budget (required to reinstate the joint-optimization-is-necessary claim vs cache_value).
-Alternatively: narrow the claim to placement-awareness and submit.
+Narrow the thesis to: "cheapest-sufficient fidelity selection at the current serving node is the essential
+dimension; joint placement optimization does not add value in realistic 3-edge topologies." Prepare submission
+with E24+E24b as the simulator evidence. E26 (vLLM calibration) and E23 (Jetson cost) are supporting evidence;
+proceed when ready but not blocking.
 
 ## Target venue
 

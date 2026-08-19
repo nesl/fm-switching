@@ -16,7 +16,7 @@ class PlacementOnlyPolicy(BasePolicy):
         pass
 
     def decide(self, sessions, prov_state, reachable_nodes, epoch,
-               cost_model, nodes, next_serving_nodes, future_regimes):
+               cost_model, nodes, next_serving_nodes, future_regimes, **kwargs):
         decisions = []
         for sid, sess in sessions.items():
             target_node = next_serving_nodes.get(sid)
