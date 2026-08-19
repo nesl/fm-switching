@@ -1,0 +1,2917 @@
+{
+  "metadata": {
+    "model_slug": "mistral7b",
+    "model_id": "mistralai/Mistral-7B-Instruct-v0.2",
+    "workload": "infinithor",
+    "n": 60,
+    "n_nonsalient": 44,
+    "subset": "infinithor_60",
+    "conditions": [
+      "blind",
+      "window-10",
+      "summary-80",
+      "summary-200",
+      "full",
+      "cross-qwen7b-sum80",
+      "cross-qwen7b-sum200"
+    ],
+    "cross_conditions": [
+      "cross-qwen7b-sum80",
+      "cross-qwen7b-sum200"
+    ],
+    "scorer": "exact_normalized_plus_lazy_llm_judge",
+    "gpu_peak_gb": 21.51,
+    "mean_latency_per_cond_s": {
+      "blind": 0.492,
+      "window-10": 1.658,
+      "summary-80": 0.465,
+      "summary-200": 0.471,
+      "full": 2.218,
+      "cross-qwen7b-sum80": 0.463,
+      "cross-qwen7b-sum200": 0.464
+    },
+    "timestamp": "2026-08-16T21:03:13.394042"
+  },
+  "records": [
+    {
+      "qid": "floorplan210_19_618_1746864406_q1",
+      "traj_id": "floorplan210_19_618_1746864406",
+      "question": "Between RemoteControl and Statue, which one did you move first?",
+      "gold": "['RemoteControl']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 89327,
+      "dist_from_end": 10223,
+      "distance_bin": "far",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer as I have no past actions or objects in my current state to refer to",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The log does not provide enough information to determine which object (RemoteControl or Statue) was moved",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide enough information to determine which object, 'RemoteControl' or 'Statue",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide information about the objects 'RemoteControl' or 'Statue'. It only",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Image\": true",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide information about the objects 'RemoteControl' or 'Statue'. It only",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log does not provide information about the objects 'RemoteControl' or 'Statue'. It only",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan18_18_657_1747219088_q9",
+      "traj_id": "floorplan18_18_657_1747219088",
+      "question": "Where did you move the Lettuce from the Sink?",
+      "gold": "['CounterTop']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 5245,
+      "dist_from_end": -39,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "From the sink to an unknown location. The specific location is not provided in the question.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "DiningTable",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide enough information to determine where the lettuce was moved from the sink to.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide information about where the lettuce was moved from the sink to.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "DiningTable",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The lettuce was moved from the sink to the dining table.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Dining Table.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan230_11_498_1745411198_q22",
+      "traj_id": "floorplan230_11_498_1745411198",
+      "question": "Where was Watch before you put it to DiningTable?",
+      "gold": "['CoffeeTable']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 3757,
+      "dist_from_end": -496,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer as I have no information about the specific household robot or its past actions you",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The Watch was before at the Coffeetable.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about where the robot was holding the credit card (named as \"Watch",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide information about where the robot was holding the candle before putting it on the coffee",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The Watch was before at the Coffeetable.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide information about the location of the watch before it was put on the dining table",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Coffeetable.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_19_686_1746847543_q5",
+      "traj_id": "floorplan201_19_686_1746847543",
+      "question": "How many Lamp(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 8,
+      "is_salient": false,
+      "traj_tokens": 5421,
+      "dist_from_end": -204,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without having access to the specific household robot's past actions or current environment",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No Lamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No information about lamps was provided in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No Lamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "No Lamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No lamp mention in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "No Lamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan26_30_702_1747072764_q55",
+      "traj_id": "floorplan26_30_702_1747072764",
+      "question": "Where did you move the Egg from the DiningTable?",
+      "gold": "['Fridge']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 6247,
+      "dist_from_end": -657,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without knowing which household robot moved the egg and to which location it was moved",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Fridge",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about an egg being moved from the dining table.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The robot moved the egg from the DiningTable to the Fridge.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Fridge",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide information about the egg's initial location or where it was moved to.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log does not provide information about the movement of eggs in the given trajectory.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan13_16_427_1745291369_q1",
+      "traj_id": "floorplan13_16_427_1745291369",
+      "question": "How many Pot(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 12,
+      "is_salient": false,
+      "traj_tokens": 3575,
+      "dist_from_end": -369,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without knowing the specific context or environment of the room in question. The term",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No Pot(s) mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No Pot(s) mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No pot(s) mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "No Pot(s) mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No Pot(s) mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "No Pot(s) mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_19_686_1746847543_q1",
+      "traj_id": "floorplan201_19_686_1746847543",
+      "question": "Between TissueBox and CreditCard, which one did you move first?",
+      "gold": "['CreditCard']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 5421,
+      "dist_from_end": -121,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I don't have a past or the ability to move objects. I can only provide information based",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "TissueBox (appeared before CreditCard in the log)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide enough information to determine which object, TissueBox or CreditCard, was",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Plate (in steps 1 and 2) was moved before CreditCard (in step",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "TissueBox (appeared before CreditCard in the log)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide enough information to determine the order of actions related to the objects 'Tissue",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log shows that the robot moved a tissue box before a credit card in the following instances:",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan18_18_657_1747219088_q21",
+      "traj_id": "floorplan18_18_657_1747219088",
+      "question": "Where was Tomato before you put it to Fridge?",
+      "gold": "['CounterTop']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 5245,
+      "dist_from_end": -375,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "The question does not provide enough information to determine where Tomato was before it was put in the Fr",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Countertop.",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "The log does not provide enough information to determine where the tomato was before it was put on the",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Dining table.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Countertop.",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide information about where the tomato was before it was put on the countertop",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Countertop.",
+          "exact": 0,
+          "correct": 1
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_26_812_1747064607_q4",
+      "traj_id": "floorplan201_26_812_1747064607",
+      "question": "Between RemoteControl and KeyChain, which one did you move first?",
+      "gold": "['RemoteControl']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 6615,
+      "dist_from_end": -457,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I don't have a past or the ability to move objects. I can only provide information.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "RemoteControl (in various locations)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "RemoteControl (from TV stand to dining table)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "RemoteControl (in the first goal)",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "RemoteControl (in various locations)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "RemoteControl (was moved to DiningTable -> CoffeeTable)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "RemoteControl (was placed on various locations)",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan205_13_438_1745416055_q3",
+      "traj_id": "floorplan205_13_438_1745416055",
+      "question": "How many Television(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 6,
+      "is_salient": false,
+      "traj_tokens": 3498,
+      "dist_from_end": -301,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "Televisions (plural)",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No Television mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No Television mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No Television mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "No Television mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No information about televisions in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Based on the given log, there are a minimum of 3 televisions in the room. This",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan202_18_450_1744426417_q1",
+      "traj_id": "floorplan202_18_450_1744426417",
+      "question": "How many FloorLamp(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 6,
+      "is_salient": false,
+      "traj_tokens": 3917,
+      "dist_from_end": -38,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without information about the robot's past actions or the current state of the",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan218_20_823_1747084244_q19",
+      "traj_id": "floorplan218_20_823_1747084244",
+      "question": "How many times did you move Statue?",
+      "gold": "[2]",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 6346,
+      "dist_from_end": -413,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I have no past actions or the ability to move objects in a household.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The robot moved the Statue 5 times. (go to the coffeetable, pick",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not mention any movement related to a statue. The log only describes the robot moving a",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The robot moved the Statue twice.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The robot moved the Statue 5 times. (go to the coffeetable, pick",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The robot moved the statue twice. (1: from coffeetable to sidetable,",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The robot moved the statue once, from the coffeetable to the sidetable (action",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan9_31_709_1747114738_q40",
+      "traj_id": "floorplan9_31_709_1747114738",
+      "question": "How many times did you move Spatula?",
+      "gold": "[2]",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 6497,
+      "dist_from_end": -604,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer to that question as I don't have access to the past actions of",
+          "exact": 0,
+          "correct": 1
+        },
+        "window-10": {
+          "pred": "The log mentions the Spatula being moved a total of 13 times.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not mention a spatula being moved.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not mention a spatula being moved.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The log mentions the Spatula being moved a total of 13 times.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not mention any action involving a spatula.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The robot moved the spatula twice. (tasks 7 and 11)",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan209_15_431_1745402895_q3",
+      "traj_id": "floorplan209_15_431_1745402895",
+      "question": "Between KeyChain and Vase, which one did you move first?",
+      "gold": "['KeyChain']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 3587,
+      "dist_from_end": -334,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I don't have a past or the ability to move objects. I can only provide information.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "KeyChain (in relation to the sofa)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Keychain: The robot put the keychain on the sofa before putting the credit card on the sofa",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Keychain (in this case, it was placed before the vase according to the log)",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "KeyChain (in relation to the sofa)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "Keychain (1)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log does not provide enough information to determine which object, KeyChain or Vase, was moved",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan18_18_657_1747219088_q2",
+      "traj_id": "floorplan18_18_657_1747219088",
+      "question": "What object did you put in the Drawer?",
+      "gold": "['Cup', 'Cup']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 5245,
+      "dist_from_end": -445,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without knowing which household robot and which specific drawer are being referred to.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Knife (in this context, it can be assumed that 'Knife' refers to the",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The robot put a knife in the drawer.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The knife was put in the drawer.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Knife (in this context, it can be assumed that 'Knife' refers to the",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not indicate which object was put in the drawer.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "No object was put in a drawer based on the provided log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_20_714_1746850044_q3",
+      "traj_id": "floorplan201_20_714_1746850044",
+      "question": "Between Statue and TissueBox, which one did you move first?",
+      "gold": "['Statue']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 5633,
+      "dist_from_end": -598,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer as I have no past actions or objects in my current state to refer to",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Statue",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "The log does not provide enough information to answer the question as it only mentions the actions related to",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "The log does not provide enough information to answer the question as it only mentions the remote control and",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Statue",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide enough information to determine the order in which the robot moved the statue and tissue",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Neither Statue nor TissueBox were mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_12_483_1744793947_q7",
+      "traj_id": "floorplan201_12_483_1744793947",
+      "question": "How many Painting(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 4,
+      "is_salient": false,
+      "traj_tokens": 3698,
+      "dist_from_end": -102,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without knowing if there is a specific painting or paintings you have in mind that",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "There are no Painting(s) mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No painting mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No painting information was provided in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "There are no Painting(s) mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No painting mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "No painting mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan209_15_434_1746022835_q2",
+      "traj_id": "floorplan209_15_434_1746022835",
+      "question": "How many HousePlant(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 6,
+      "is_salient": false,
+      "traj_tokens": 3614,
+      "dist_from_end": -276,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without access to the specific household robot's past actions or current environment.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No HousePlant mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No HousePlant mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No HousePlant mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "No HousePlant mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No information about houseplants was provided in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "No HousePlant mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan230_11_498_1745411198_q35",
+      "traj_id": "floorplan230_11_498_1745411198",
+      "question": "How many times did you move TissueBox?",
+      "gold": "[2]",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 3757,
+      "dist_from_end": -411,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer to that question as I don't have the ability to recall specific past",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The log shows that the robot picked up the TissueBox twice and put it in the SideTable",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not mention any action related to a TissueBox.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not mention any action related to a tissue box.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The log shows that the robot picked up the TissueBox twice and put it in the SideTable",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not mention any action related to a tissue box.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log mentions two tissue box movements: to the sidetable in step 10,",
+          "exact": 0,
+          "correct": 1
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_24_804_1746980690_q1",
+      "traj_id": "floorplan201_24_804_1746980690",
+      "question": "Between Bowl and CreditCard, which one did you move first?",
+      "gold": "['Bowl']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 6458,
+      "dist_from_end": -81,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer as I have no past actions or physical presence to move objects.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Bowl (in the log, the robot first went to the diningtable to pick up the Bowl before",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Dining Table (for the bowl)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The robot moved the CreditCard first.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Bowl (in the log, the robot first went to the diningtable to pick up the Bowl before",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide enough information to determine which object was moved first between \"Bowl\"",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The robot moved the CreditCard before the Bowl. (Based on the log, the credit card was",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan209_15_431_1745402895_q41",
+      "traj_id": "floorplan209_15_431_1745402895",
+      "question": "Where did you move the Book from the Dresser?",
+      "gold": "['SideTable']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 3587,
+      "dist_from_end": -429,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without knowing which book and which dresser are being referred to.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The log does not show the Book being moved from the Dresser in this sequence.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about a book being moved from the dresser.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide information about moving a book from the dresser. The robot only placed",
+          "exact": 0,
+          "correct": 1
+        },
+        "full": {
+          "pred": "The log does not show the Book being moved from the Dresser in this sequence.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "There is no mention of a book in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log does not mention moving a book from the dresser.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_17_453_1745408324_q2",
+      "traj_id": "floorplan210_17_453_1745408324",
+      "question": "How many Chair(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 15,
+      "is_salient": false,
+      "traj_tokens": 3869,
+      "dist_from_end": -405,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without having access to the current environment or context of the household robot. The",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Armchair, Ottoman, Sofa",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log mentions an armchair. Therefore, there is at least one chair in the room.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Two (Armchair, Ottoman)",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Armchair, Ottoman, Sofa",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "Armchair.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Armchair (appears 3 times), Sofa (appears 5 times)",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan202_18_450_1744426417_q3",
+      "traj_id": "floorplan202_18_450_1744426417",
+      "question": "Between Book and CreditCard, which one did you move first?",
+      "gold": "['CreditCard']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 3917,
+      "dist_from_end": -119,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I don't have a past or the ability to move objects. I can only provide information.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The log shows that the robot first moved to put a keychain on the sofa, then to put",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The robot placed the CreditCard on the Sofa before the Book.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The robot placed the Book on the Sidetable before placing the CreditCard on the Sofa.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The log shows that the robot first moved to put a keychain on the sofa, then to put",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "CreditCard (multiple locations)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log does not provide enough information to determine which object (Book or CreditCard) was moved first",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan229_27_853_1747097312_q50",
+      "traj_id": "floorplan229_27_853_1747097312",
+      "question": "How many times did you move WateringCan?",
+      "gold": "[2]",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 6957,
+      "dist_from_end": -708,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "WateringCan (number of past actions unspecified in given context)",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The log shows that the robot picked up and put down the WateringCan a total of 1",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not mention a WateringCan.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not mention a WateringCan.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The log shows that the robot picked up and put down the WateringCan a total of 1",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not mention a WateringCan.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log does not mention the WateringCan being moved at all.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan323_16_700_1746801654_q21",
+      "traj_id": "floorplan323_16_700_1746801654",
+      "question": "Where did you move the CD from the GarbageCan?",
+      "gold": "['Desk']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 5273,
+      "dist_from_end": -480,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "CD: From GarbageCan.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "GarbageCan",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about a CD or a GarbageCan.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The CD was not mentioned in the log as being moved from the GarbageCan.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "GarbageCan",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No object named \"GarbageCan\" was mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log does not provide information about a CD being in a GarbageCan at any point. Therefore",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan13_16_427_1745291369_q4",
+      "traj_id": "floorplan13_16_427_1745291369",
+      "question": "Where was the Apple before you moved it to Fridge?",
+      "gold": "['CounterTop']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 3575,
+      "dist_from_end": -324,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "The question refers to a past action of a household robot, but it does not provide enough information to",
+          "exact": 0,
+          "correct": 1
+        },
+        "window-10": {
+          "pred": "The Apple was on the countertop before you moved it to the Fridge.",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about the location of the apple before it was moved to the fridge",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide information about the location of the apple before it was moved to the fridge",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The Apple was on the countertop before you moved it to the Fridge.",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide information about the location of the apple before it was moved to the fridge",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The apple was on the countertop before it was moved to the fridge.",
+          "exact": 0,
+          "correct": 1
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_26_812_1747064607_q34",
+      "traj_id": "floorplan201_26_812_1747064607",
+      "question": "Where did you move the Bowl from the DiningTable?",
+      "gold": "['SideTable']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 6615,
+      "dist_from_end": -639,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without knowing which specific household robot moved the bowl and to which location.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The log does not show the Bowl being moved from the DiningTable to another location. The log",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "I cannot provide an answer as the log does not mention any action related to moving a bowl from the",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "No information was provided in the log about moving a bowl from the dining table.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The log does not show the Bowl being moved from the DiningTable to another location. The log",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No bowl was mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "SideTable",
+          "exact": 1,
+          "correct": 1
+        }
+      }
+    },
+    {
+      "qid": "floorplan13_16_427_1745291369_q26",
+      "traj_id": "floorplan13_16_427_1745291369",
+      "question": "Where did you move the Spoon from the CounterTop?",
+      "gold": "['Sink']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 3575,
+      "dist_from_end": -126,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without knowing the specific instance or context of the household robot's past actions",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "CounterTop",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not mention a spoon being moved.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide information about where the robot placed the spoon after taking it from the countertop",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "CounterTop",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The robot moved a spoon from the countertop. (I couldn't determine which specific spoon from",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The robot moved a spoon from the countertop to the sink.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan211_27_719_1746910536_q32",
+      "traj_id": "floorplan211_27_719_1746910536",
+      "question": "Where did you move the CellPhone from the Sofa?",
+      "gold": "['SideTable']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 6121,
+      "dist_from_end": -211,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "Table or Counter. (Assuming the CellPhone was moved from the sofa to one of these",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The log does not show the CellPhone being moved from the Sofa to another location. The log",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about moving a CellPhone. It only describes the actions taken to place",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "The log does not provide information about moving a cell phone from the sofa.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The log does not show the CellPhone being moved from the Sofa to another location. The log",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "Armchair. (Based on the log, the cell phone was picked up from the sofa and placed",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "There is no mention of a cell phone in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_12_483_1744793947_q11",
+      "traj_id": "floorplan201_12_483_1744793947",
+      "question": "How many Television(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 20,
+      "is_salient": false,
+      "traj_tokens": 3698,
+      "dist_from_end": -259,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "Televisions (plural)",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The log does not provide information about the number of televisions in the room.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "TV stand.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "TV stand.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The log does not provide information about the number of televisions in the room.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No Television mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "TV stand.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan7_13_494_1744636544_q12",
+      "traj_id": "floorplan7_13_494_1744636544",
+      "question": "Where did you move the Book from the Shelf?",
+      "gold": "['CounterTop']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 3934,
+      "dist_from_end": -69,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "From the shelf to an unknown location. The specific shelf and book are not mentioned in the question,",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The log does not provide information about where the Book was before it was put on the Shelf.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about where the robot took the book from before putting it on the shelf",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide information about where the book was before it was put on the shelf.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The log does not provide information about where the Book was before it was put on the Shelf.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide information about where the book was moved from before being placed on the shelf.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log does not indicate that the book was moved from the shelf. The only actions related to the",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_17_804_1746994276_q4",
+      "traj_id": "floorplan210_17_804_1746994276",
+      "question": "Between KeyChain and CreditCard, which one did you move first?",
+      "gold": "['KeyChain']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 5994,
+      "dist_from_end": -596,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I don't have a past or the ability to move objects. I can only provide information.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "KeyChain (went to ottoman first)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide enough information to determine the order in which the keychain and credit card (",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide enough information to determine which keychain was moved before the credit card was mentioned",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "KeyChain (went to ottoman first)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "Keychain (from Ottoman)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "KeyChain (from ottoman to armchair)",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_19_686_1746847543_q3",
+      "traj_id": "floorplan201_19_686_1746847543",
+      "question": "Where was the Newspaper before you moved it to ArmChair?",
+      "gold": "['Sofa']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 5421,
+      "dist_from_end": -684,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "Table or Floor (depending on where the Newspaper was before being placed on the ArmCh",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The Newspaper was before the ArmChair at the GarbageCan.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "DiningTable (assuming the newspaper was on the dining table before the plate was taken)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Coffeetable.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The Newspaper was before the ArmChair at the GarbageCan.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide information about a newspaper being moved to the ArmChair. Therefore, it",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Coffee Table",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan221_27_826_1746972286_q30",
+      "traj_id": "floorplan221_27_826_1746972286",
+      "question": "Where was RemoteControl before you put it to SideTable?",
+      "gold": "['CoffeeTable']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 6815,
+      "dist_from_end": -729,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer as I have no information about the specific instance of a household robot or its",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The log does not provide information about the location of the RemoteControl before it was put on the Side",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about the location of the RemoteControl before it was put on the Side",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide information about the location of the RemoteControl before it was put on the Side",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The log does not provide information about the location of the RemoteControl before it was put on the Side",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide information about the location of the remote control before it was placed on the sid",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Coffee table.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan209_15_431_1745402895_q38",
+      "traj_id": "floorplan209_15_431_1745402895",
+      "question": "Where did you move the Vase from the Dresser?",
+      "gold": "['CoffeeTable']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 3587,
+      "dist_from_end": -334,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "From the dresser. To where it was moved is unknown with the given information.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The log does not indicate where the Vase was moved to after being picked up from the Dres",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about moving a vase from the dresser.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Coffeetable.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The log does not indicate where the Vase was moved to after being picked up from the Dres",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not mention moving a vase from the dresser.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Coffeetable.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_24_804_1746980690_q35",
+      "traj_id": "floorplan201_24_804_1746980690",
+      "question": "Where was Book before you put it to Sofa?",
+      "gold": "['ArmChair']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 6458,
+      "dist_from_end": -802,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer as I have no past actions or possession of objects to recall. This question",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Armchair (or ArmChair) before putting it to Sofa.",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about the location of the book before it was put on the sofa.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide information about the location of the bowl before it was put on the sofa.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Armchair (or ArmChair) before putting it to Sofa.",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide information about a \"Book\" being moved or located in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Sofa (before putting it in Armchair)",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan18_18_657_1747219088_q8",
+      "traj_id": "floorplan18_18_657_1747219088",
+      "question": "Where was Lettuce before you put it to DiningTable?",
+      "gold": "['Sink']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 5245,
+      "dist_from_end": -64,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "Refrigerator.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Sink",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Countertop.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Countertop.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Sink",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "Countertop.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Countertop.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan7_13_494_1744636544_q26",
+      "traj_id": "floorplan7_13_494_1744636544",
+      "question": "Where was DishSponge before you put it to Cabinet?",
+      "gold": "['CounterTop']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 3934,
+      "dist_from_end": -491,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "Sink.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "countertop",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about the location of the DishSponge before it was put",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide information about the location of the DishSponge before it was put",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "countertop",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide information about where the dish sponge was before it was put on the",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Garbage Can",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan205_13_438_1745416055_q2",
+      "traj_id": "floorplan205_13_438_1745416055",
+      "question": "How many Dresser(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 6,
+      "is_salient": false,
+      "traj_tokens": 3498,
+      "dist_from_end": -301,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without having accessed the specific information about the household robot's past actions or",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No Dresser was mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No Dresser mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No Dresser mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "No Dresser was mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No Dresser was mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "No Dresser was mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_11_482_1745446449_q3",
+      "traj_id": "floorplan210_11_482_1745446449",
+      "question": "Between CreditCard and RemoteControl, which one did you move first?",
+      "gold": "['RemoteControl']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 3660,
+      "dist_from_end": -100,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I don't have a past or the ability to move objects. I can only provide information based",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "RemoteControl (in the log, the RemoteControl was moved before the CreditCard in the sequence of",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "RemoteControl (to Sofa)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "RemoteControl (to Sofa)",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "RemoteControl (in the log, the RemoteControl was moved before the CreditCard in the sequence of",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "RemoteControl (from Dresser to Sofa)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "RemoteControl (twice)",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan26_30_702_1747072764_q9",
+      "traj_id": "floorplan26_30_702_1747072764",
+      "question": "Where did you move the ButterKnife from the Microwave?",
+      "gold": "['DiningTable']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 6247,
+      "dist_from_end": -70,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "From Microwave. To a drawer or countertop, possibly. Without more context, it'",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Countertop. The log shows that the robot put the ButterKnife on the countertop",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Countertop.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The robot moved the ButterKnife to the Sink.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Countertop. The log shows that the robot put the ButterKnife on the countertop",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide information about where the robot put the butter knife after taking it out of the",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Countertop.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_12_483_1744793947_q12",
+      "traj_id": "floorplan201_12_483_1744793947",
+      "question": "Between Book and Plate, which one did you move first?",
+      "gold": "['Plate']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 3698,
+      "dist_from_end": -391,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer as I have no past actions or abilities to move objects.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The log shows that the robot first went to the diningtable to pick up a plate, then went",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Plate (from dining table to robot's hand)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Plate: TV stand, dining table.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The log shows that the robot first went to the diningtable to pick up a plate, then went",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "Plate (dining table)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The object names in the log are: plate, credit card, pen, watch, book. The",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan221_27_826_1746972286_q15",
+      "traj_id": "floorplan221_27_826_1746972286",
+      "question": "Where did you move the Statue from the CoffeeTable?",
+      "gold": "['SideTable']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 6815,
+      "dist_from_end": -136,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without knowing which statue and which coffee table are being referred to.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The log does not provide information on where the Statue was moved from the CoffeeTable to.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "There is no mention of a statue being moved in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The robot moved the Statue from the DiningTable to the CoffeeTable in goal 5.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The log does not provide information on where the Statue was moved from the CoffeeTable to.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The robot moved the Statue from the CoffeeTable to both the CoffeeTable and DiningTable.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log does not provide information about where the robot took the statue from before placing it on both the",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan13_16_427_1745291369_q14",
+      "traj_id": "floorplan13_16_427_1745291369",
+      "question": "Where was Knife before you put it to Drawer?",
+      "gold": "['Sink']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 3575,
+      "dist_from_end": -175,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "In your question, there is no mention of a robot named Knife or any action it took before",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Countertop.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Countertop (or: The robot was holding the knife before putting it to the sink)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide information on the location of the knife before it was put in the drawer.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Countertop.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide information about where the knife was before it was put in the sink.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log does not provide information about the location of the knife before it was put in the drawer.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_12_483_1744793947_q9",
+      "traj_id": "floorplan201_12_483_1744793947",
+      "question": "How many FloorLamp(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 3,
+      "is_salient": false,
+      "traj_tokens": 3698,
+      "dist_from_end": -107,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without information about the robot's past actions or the current state of the",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan230_9_507_1746931717_q23",
+      "traj_id": "floorplan230_9_507_1746931717",
+      "question": "Where did you move the CreditCard from the Sofa?",
+      "gold": "['SideTable']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 69351,
+      "dist_from_end": 7928,
+      "distance_bin": "far",
+      "conditions": {
+        "blind": {
+          "pred": "Table or Counter (assuming the CreditCard was on the sofa and you moved it to one",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Based on the provided log, no information about the CreditCard or its initial location is given. Therefore",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide enough information to determine where the CreditCard was moved from or to.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide enough information to determine where the CreditCard was moved from the Sofa.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "action\": {",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide enough information to determine where the CreditCard was moved from.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "I cannot determine the location of the CreditCard from the provided log as it is not mentioned in the",
+          "exact": 0,
+          "correct": 1
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_12_483_1744793947_q10",
+      "traj_id": "floorplan201_12_483_1744793947",
+      "question": "Where was the CreditCard before you moved it to CoffeeTable?",
+      "gold": "['Sofa']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 3698,
+      "dist_from_end": -241,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer as I have no past actions or ability to move objects in real life.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The CreditCard was before the ArmChair.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The CreditCard was on the Sofa before it was moved to the CoffeeTable.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The credit card was before the robot moved it to the sofa.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The CreditCard was before the ArmChair.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The credit card was not mentioned before being put on the coffeetable in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "Sofa.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan204_12_454_1746034353_q1",
+      "traj_id": "floorplan204_12_454_1746034353",
+      "question": "How many Painting(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 4,
+      "is_salient": false,
+      "traj_tokens": 3537,
+      "dist_from_end": -206,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without knowing if there is a specific painting or paintings you have in mind that",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "There are no Painting(s) mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No painting mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No painting mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "There are no Painting(s) mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "None. There are no mentions of paintings or painting-related objects in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "No painting mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan18_18_657_1747219088_q42",
+      "traj_id": "floorplan18_18_657_1747219088",
+      "question": "Where did you move the Spoon from the DiningTable?",
+      "gold": "['Sink']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 5245,
+      "dist_from_end": -431,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without knowing which household robot moved the spoon and to which location it was moved",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "DiningTable",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about a spoon being moved in the given sequence of actions.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The robot put the spoon in the sink.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "DiningTable",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No spoon was mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "There is no mention of a spoon in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_11_482_1745446449_q4",
+      "traj_id": "floorplan210_11_482_1745446449",
+      "question": "How many DeskLamp(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 4,
+      "is_salient": false,
+      "traj_tokens": 3660,
+      "dist_from_end": -215,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without information about the robot's past actions or the current state of the",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No DeskLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No DeskLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No DeskLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "No DeskLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No DeskLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "No DeskLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan201_26_812_1747064607_q1",
+      "traj_id": "floorplan201_26_812_1747064607",
+      "question": "How many FloorLamp(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 12,
+      "is_salient": false,
+      "traj_tokens": 6615,
+      "dist_from_end": -637,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without information about the robot's past actions or the current state of the",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No information about FloorLamp(s) in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "No FloorLamp mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan204_12_454_1746034353_q2",
+      "traj_id": "floorplan204_12_454_1746034353",
+      "question": "How many Box(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 7,
+      "is_salient": false,
+      "traj_tokens": 3537,
+      "dist_from_end": -266,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without having access to the specific household robot and its past actions related to the",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No Boxes are mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No Box mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No Boxes mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "No Boxes are mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No Box was mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "No Box was mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_19_618_1746864406_q18",
+      "traj_id": "floorplan210_19_618_1746864406",
+      "question": "Where did you move the Statue from the Dresser?",
+      "gold": "['CoffeeTable']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 89327,
+      "dist_from_end": 10223,
+      "distance_bin": "far",
+      "conditions": {
+        "blind": {
+          "pred": "The Statue was moved from the Dresser.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Dresser (assuming the statue was on the dresser initially and was moved from it",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Dresser (assuming the statue was on the dresser before the log)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide enough information to determine which object was moved from the dresser.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Image\": true",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide enough information to determine where the statue was moved from or to. The log",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log does not provide enough information to determine where the statue was moved from the dresser.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_17_453_1745408324_q5",
+      "traj_id": "floorplan210_17_453_1745408324",
+      "question": "Between CreditCard and KeyChain, which one did you move first?",
+      "gold": "['CreditCard']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 3869,
+      "dist_from_end": -78,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I don't have a past or the ability to move objects. I can only provide information based",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "CreditCard (appeared before KeyChain in the log)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "CreditCard (armchair)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The robot moved the CreditCard before the KeyChain in the log. (Answer: CreditCard",
+          "exact": 0,
+          "correct": 1
+        },
+        "full": {
+          "pred": "CreditCard (appeared before KeyChain in the log)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The log does not provide enough information to determine the order in which the robot moved the credit card and",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The log shows that the robot moved a credit card before moving a keychain in each instance where both",
+          "exact": 0,
+          "correct": 1
+        }
+      }
+    },
+    {
+      "qid": "floorplan204_12_454_1746034353_q6",
+      "traj_id": "floorplan204_12_454_1746034353",
+      "question": "How many TVStand(s) are in this room?",
+      "gold": "['1']",
+      "num_evidence": 13,
+      "is_salient": false,
+      "traj_tokens": 3537,
+      "dist_from_end": -95,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot determine the number of TVStands in the room based on the given information.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "One TVStand. (The log mentions going to the TVStand multiple times.)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No TVStand mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "One (1) TVStand.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "One TVStand. (The log mentions going to the TVStand multiple times.)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No TVStand mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "No TVStand was mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan18_18_657_1747219088_q37",
+      "traj_id": "floorplan18_18_657_1747219088",
+      "question": "Where did you move the Spoon from the DiningTable?",
+      "gold": "['Sink']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 5245,
+      "dist_from_end": -431,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I cannot provide an answer without knowing which household robot moved the spoon and to which location it was moved",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "DiningTable",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about a spoon being moved in the given sequence of actions.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The robot put the spoon in the sink.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "DiningTable",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "No spoon was mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "There is no mention of a spoon in the log.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan204_12_454_1746034353_q4",
+      "traj_id": "floorplan204_12_454_1746034353",
+      "question": "Between Vase and WateringCan, which one did you move first?",
+      "gold": "['Vase']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 3537,
+      "dist_from_end": -373,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I don't have a past or the ability to physically move objects. I can only provide information",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Vase. The log shows that the robot picked up the vase before the watering can.",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about moving a vase or watering can. It only describes the",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Neither of the given objects (Vase, WateringCan) were mentioned in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Vase. The log shows that the robot picked up the vase before the watering can.",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The robot moved the vase before the watering can. (Based on the log, the v",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The robot placed the vase before the watering can. (From the log, the vase",
+          "exact": 0,
+          "correct": 1
+        }
+      }
+    },
+    {
+      "qid": "floorplan220_14_459_1745999102_q15",
+      "traj_id": "floorplan220_14_459_1745999102",
+      "question": "How many times did you move RemoteControl?",
+      "gold": "[3]",
+      "num_evidence": 3,
+      "is_salient": false,
+      "traj_tokens": 3729,
+      "dist_from_end": -333,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I have no past actions or the ability to move objects, including a RemoteControl.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The robot moved the RemoteControl 7 times in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The robot moved the RemoteControl twice.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The robot moved the RemoteControl twice.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "The robot moved the RemoteControl 7 times in the log.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The robot placed a RemoteControl on the armchair and on the side table. So, the answer",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The robot moved the RemoteControl a total of 3 times. (Tasks 2 to 4",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan210_17_804_1746994276_q2",
+      "traj_id": "floorplan210_17_804_1746994276",
+      "question": "Between KeyChain and Statue, which one did you move first?",
+      "gold": "['KeyChain']",
+      "num_evidence": 2,
+      "is_salient": false,
+      "traj_tokens": 5994,
+      "dist_from_end": -332,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "I don't have a past or the ability to move objects. I can only provide information.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "KeyChain (go to the armchair before Statue)",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "The log does not provide enough information to determine the order in which the keychain and the statue (",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Keychain (in 1 and 5) was moved before Statue (in 4).",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "KeyChain (go to the armchair before Statue)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "Keychain (from Ottoman)",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "KeyChain (appeared before Statue in the log).",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    },
+    {
+      "qid": "floorplan223_15_437_1746024482_q12",
+      "traj_id": "floorplan223_15_437_1746024482",
+      "question": "Where did you move the Vase from the TVStand?",
+      "gold": "['CoffeeTable']",
+      "num_evidence": 2,
+      "is_salient": true,
+      "traj_tokens": 3643,
+      "dist_from_end": -153,
+      "distance_bin": "near",
+      "conditions": {
+        "blind": {
+          "pred": "From TVStand.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "coffeetable (from TVStand)",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "The log does not provide information about moving a vase from the TVStand.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The log does not provide information about moving a vase from the TVStand.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "coffeetable (from TVStand)",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen7b-sum80": {
+          "pred": "The robot moved the vase from the TV stand to the coffee table.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen7b-sum200": {
+          "pred": "The robot moved the vase from the TV stand to the coffee table.",
+          "exact": 0,
+          "correct": 0
+        }
+      }
+    }
+  ]
+}

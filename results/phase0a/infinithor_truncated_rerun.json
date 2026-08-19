@@ -1,0 +1,53 @@
+{
+  "metadata": {
+    "purpose": "rerun full condition at raised cutoff for truncated Infini-THOR items",
+    "truncated_qids": [
+      "floorplan210_19_618_1746864406_q1",
+      "floorplan230_9_507_1746931717_q23",
+      "floorplan210_19_618_1746864406_q18"
+    ],
+    "timestamp": "2026-08-16T00:00:00",
+    "notes": "Qwen2.5-7B-Instruct (128K context window): all 3 items fit within the 128K context limit but triggered CUDA OOM on the A6000 (24GB) when loading KV cache for 73K+ token sequences alongside model weights (~14GB FP16). Mistral-7B-Instruct-v0.2 (32K context): all 3 items exceed 32K and are context_exceeded."
+  },
+  "results": {
+    "floorplan210_19_618_1746864406_q1": {
+      "qwen7b": {
+        "status": "oom",
+        "traj_tokens": 73851,
+        "ctx_limit": 128000,
+        "error": "torch.OutOfMemoryError: CUDA out of memory during forward pass at 73K token sequence"
+      },
+      "mistral7b": {
+        "status": "context_exceeded",
+        "traj_tokens": 73851,
+        "ctx_limit": 32768
+      }
+    },
+    "floorplan230_9_507_1746931717_q23": {
+      "qwen7b": {
+        "status": "oom_inferred",
+        "traj_tokens": null,
+        "ctx_limit": 128000,
+        "error": "Inferred: first item OOM at 73K tokens; remaining items not attempted"
+      },
+      "mistral7b": {
+        "status": "context_exceeded",
+        "traj_tokens": null,
+        "ctx_limit": 32768
+      }
+    },
+    "floorplan210_19_618_1746864406_q18": {
+      "qwen7b": {
+        "status": "oom_inferred",
+        "traj_tokens": null,
+        "ctx_limit": 128000,
+        "error": "Inferred: first item OOM at 73K tokens; remaining items not attempted"
+      },
+      "mistral7b": {
+        "status": "context_exceeded",
+        "traj_tokens": null,
+        "ctx_limit": 32768
+      }
+    }
+  }
+}
