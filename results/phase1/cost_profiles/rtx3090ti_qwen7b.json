@@ -1,0 +1,1118 @@
+{
+  "metadata": {
+    "tier": "rtx3090ti",
+    "model": "qwen7b",
+    "llm": "Qwen/Qwen2.5-7B-Instruct",
+    "gpu": "NVIDIA GeForce RTX 3090 Ti",
+    "gpu_mem_gb": 25.4,
+    "device": "cuda:0",
+    "reps": 5,
+    "kv_bytes_per_token": 57344,
+    "token_counts_requested": [
+      1024,
+      2048,
+      4096,
+      8192,
+      16384,
+      24576,
+      32768,
+      49152,
+      65536
+    ],
+    "timestamp": "2026-08-19T09:44:06.598838"
+  },
+  "data": [
+    {
+      "L_target": 1024,
+      "L_actual": 1024,
+      "token_counts": {
+        "full": 1024,
+        "window": 483,
+        "summary_80": 51,
+        "summary_200": 113
+      },
+      "state_bytes": {
+        "full": 4498,
+        "window": 1876,
+        "summary_80": 317,
+        "summary_200": 684,
+        "kv_cache": 58720256
+      },
+      "feasible": {
+        "full_restore": true,
+        "window_restore": true,
+        "sum80_restore": true,
+        "sum200_restore": true,
+        "sum80_update": true,
+        "sum200_update": true,
+        "incremental": true
+      },
+      "measurements": {
+        "full_restore_ms": {
+          "median": 220.34,
+          "q1": 218.83,
+          "q3": 221.41,
+          "n": 4,
+          "samples": [
+            217.56,
+            218.83,
+            220.34,
+            221.41
+          ]
+        },
+        "full_restore_peak_gb": {
+          "median": 15.46,
+          "q1": 15.46,
+          "q3": 15.46,
+          "n": 4,
+          "samples": [
+            15.46,
+            15.46,
+            15.46,
+            15.46
+          ]
+        },
+        "window_restore_ms": {
+          "median": 119.21,
+          "q1": 118.28,
+          "q3": 119.65,
+          "n": 4,
+          "samples": [
+            117.72,
+            118.28,
+            119.21,
+            119.65
+          ]
+        },
+        "sum80_restore_ms": {
+          "median": 25.34,
+          "q1": 25.16,
+          "q3": 25.69,
+          "n": 4,
+          "samples": [
+            25.16,
+            25.13,
+            25.69,
+            25.34
+          ]
+        },
+        "sum200_restore_ms": {
+          "median": 31.55,
+          "q1": 31.38,
+          "q3": 31.99,
+          "n": 4,
+          "samples": [
+            31.2,
+            31.38,
+            31.99,
+            31.55
+          ]
+        },
+        "sum80_update_ms": {
+          "median": 2184.89,
+          "q1": 2184.1,
+          "q3": 2213.72,
+          "n": 4,
+          "samples": [
+            2168.32,
+            2184.89,
+            2213.72,
+            2184.1
+          ]
+        },
+        "sum200_update_ms": {
+          "median": 4942.73,
+          "q1": 4872.68,
+          "q3": 4959.18,
+          "n": 4,
+          "samples": [
+            4959.18,
+            4810.26,
+            4942.73,
+            4872.68
+          ]
+        },
+        "incremental_warm_ms": {
+          "median": 34.23,
+          "q1": 34.17,
+          "q3": 34.52,
+          "n": 4,
+          "samples": [
+            33.97,
+            34.23,
+            34.17,
+            34.52
+          ]
+        },
+        "incremental_cold_ms": {
+          "median": 263.64,
+          "q1": 263.26,
+          "q3": 274.23,
+          "n": 4,
+          "samples": [
+            261.18,
+            263.26,
+            263.64,
+            274.23
+          ]
+        }
+      }
+    },
+    {
+      "L_target": 2048,
+      "L_actual": 2048,
+      "token_counts": {
+        "full": 2048,
+        "window": 488,
+        "summary_80": 51,
+        "summary_200": 113
+      },
+      "state_bytes": {
+        "full": 8617,
+        "window": 2176,
+        "summary_80": 317,
+        "summary_200": 684,
+        "kv_cache": 117440512
+      },
+      "feasible": {
+        "full_restore": true,
+        "window_restore": true,
+        "sum80_restore": true,
+        "sum200_restore": true,
+        "sum80_update": true,
+        "sum200_update": true,
+        "incremental": true
+      },
+      "measurements": {
+        "full_restore_ms": {
+          "median": 467.75,
+          "q1": 451.43,
+          "q3": 553.48,
+          "n": 4,
+          "samples": [
+            553.48,
+            467.75,
+            445.36,
+            451.43
+          ]
+        },
+        "full_restore_peak_gb": {
+          "median": 15.65,
+          "q1": 15.65,
+          "q3": 15.65,
+          "n": 4,
+          "samples": [
+            15.65,
+            15.65,
+            15.65,
+            15.65
+          ]
+        },
+        "window_restore_ms": {
+          "median": 116.68,
+          "q1": 115.7,
+          "q3": 121.26,
+          "n": 4,
+          "samples": [
+            113.25,
+            115.7,
+            116.68,
+            121.26
+          ]
+        },
+        "sum80_restore_ms": {
+          "median": 26.83,
+          "q1": 26.42,
+          "q3": 27.69,
+          "n": 4,
+          "samples": [
+            25.64,
+            26.83,
+            26.42,
+            27.69
+          ]
+        },
+        "sum200_restore_ms": {
+          "median": 33.04,
+          "q1": 32.46,
+          "q3": 33.29,
+          "n": 4,
+          "samples": [
+            31.6,
+            33.04,
+            32.46,
+            33.29
+          ]
+        },
+        "sum80_update_ms": {
+          "median": 2537.67,
+          "q1": 2477.39,
+          "q3": 2556.72,
+          "n": 4,
+          "samples": [
+            2477.39,
+            2556.72,
+            2451.32,
+            2537.67
+          ]
+        },
+        "sum200_update_ms": {
+          "median": 3112.66,
+          "q1": 3092.71,
+          "q3": 3118.6,
+          "n": 4,
+          "samples": [
+            3089.35,
+            3118.6,
+            3092.71,
+            3112.66
+          ]
+        },
+        "incremental_warm_ms": {
+          "median": 40.95,
+          "q1": 39.74,
+          "q3": 41.86,
+          "n": 4,
+          "samples": [
+            41.86,
+            39.74,
+            39.1,
+            40.95
+          ]
+        },
+        "incremental_cold_ms": {
+          "median": 499.8,
+          "q1": 484.48,
+          "q3": 509.63,
+          "n": 4,
+          "samples": [
+            499.8,
+            482.16,
+            484.48,
+            509.63
+          ]
+        }
+      }
+    },
+    {
+      "L_target": 4096,
+      "L_actual": 4096,
+      "token_counts": {
+        "full": 4096,
+        "window": 340,
+        "summary_80": 51,
+        "summary_200": 113
+      },
+      "state_bytes": {
+        "full": 17246,
+        "window": 1333,
+        "summary_80": 317,
+        "summary_200": 684,
+        "kv_cache": 234881024
+      },
+      "feasible": {
+        "full_restore": true,
+        "window_restore": true,
+        "sum80_restore": true,
+        "sum200_restore": true,
+        "sum80_update": true,
+        "sum200_update": true,
+        "incremental": true
+      },
+      "measurements": {
+        "full_restore_ms": {
+          "median": 981.76,
+          "q1": 960.02,
+          "q3": 1110.17,
+          "n": 4,
+          "samples": [
+            981.76,
+            927.99,
+            1110.17,
+            960.02
+          ]
+        },
+        "full_restore_peak_gb": {
+          "median": 16.07,
+          "q1": 16.07,
+          "q3": 16.07,
+          "n": 4,
+          "samples": [
+            16.07,
+            16.07,
+            16.07,
+            16.07
+          ]
+        },
+        "window_restore_ms": {
+          "median": 91.2,
+          "q1": 90.14,
+          "q3": 96.41,
+          "n": 4,
+          "samples": [
+            91.2,
+            86.96,
+            96.41,
+            90.14
+          ]
+        },
+        "sum80_restore_ms": {
+          "median": 27.51,
+          "q1": 26.73,
+          "q3": 35.35,
+          "n": 4,
+          "samples": [
+            27.51,
+            26.73,
+            35.35,
+            25.81
+          ]
+        },
+        "sum200_restore_ms": {
+          "median": 33.74,
+          "q1": 33.35,
+          "q3": 34.91,
+          "n": 4,
+          "samples": [
+            34.91,
+            33.35,
+            33.74,
+            32.75
+          ]
+        },
+        "sum80_update_ms": {
+          "median": 2529.9,
+          "q1": 2498.08,
+          "q3": 2580.94,
+          "n": 4,
+          "samples": [
+            2498.08,
+            2464.31,
+            2529.9,
+            2580.94
+          ]
+        },
+        "sum200_update_ms": {
+          "median": 3177.77,
+          "q1": 3088.78,
+          "q3": 3202.5,
+          "n": 4,
+          "samples": [
+            3088.78,
+            3202.5,
+            3065.18,
+            3177.77
+          ]
+        },
+        "incremental_warm_ms": {
+          "median": 47.95,
+          "q1": 47.42,
+          "q3": 179.47,
+          "n": 4,
+          "samples": [
+            179.47,
+            46.85,
+            47.95,
+            47.42
+          ]
+        },
+        "incremental_cold_ms": {
+          "median": 982.52,
+          "q1": 980.86,
+          "q3": 990.63,
+          "n": 4,
+          "samples": [
+            990.63,
+            964.38,
+            980.86,
+            982.52
+          ]
+        }
+      }
+    },
+    {
+      "L_target": 8192,
+      "L_actual": 8192,
+      "token_counts": {
+        "full": 8192,
+        "window": 261,
+        "summary_80": 51,
+        "summary_200": 113
+      },
+      "state_bytes": {
+        "full": 34413,
+        "window": 1122,
+        "summary_80": 317,
+        "summary_200": 684,
+        "kv_cache": 469762048
+      },
+      "feasible": {
+        "full_restore": true,
+        "window_restore": true,
+        "sum80_restore": true,
+        "sum200_restore": true,
+        "sum80_update": true,
+        "sum200_update": true,
+        "incremental": true
+      },
+      "measurements": {
+        "full_restore_ms": {
+          "median": 2027.89,
+          "q1": 1989.53,
+          "q3": 2038.03,
+          "n": 4,
+          "samples": [
+            1989.53,
+            2027.89,
+            2038.03,
+            1952.22
+          ]
+        },
+        "full_restore_peak_gb": {
+          "median": 16.89,
+          "q1": 16.89,
+          "q3": 16.89,
+          "n": 4,
+          "samples": [
+            16.89,
+            16.89,
+            16.89,
+            16.89
+          ]
+        },
+        "window_restore_ms": {
+          "median": 79.03,
+          "q1": 76.1,
+          "q3": 79.54,
+          "n": 4,
+          "samples": [
+            74.5,
+            79.54,
+            79.03,
+            76.1
+          ]
+        },
+        "sum80_restore_ms": {
+          "median": 28.11,
+          "q1": 27.27,
+          "q3": 28.71,
+          "n": 4,
+          "samples": [
+            27.17,
+            28.71,
+            28.11,
+            27.27
+          ]
+        },
+        "sum200_restore_ms": {
+          "median": 35.14,
+          "q1": 34.39,
+          "q3": 35.61,
+          "n": 4,
+          "samples": [
+            33.31,
+            35.14,
+            35.61,
+            34.39
+          ]
+        },
+        "sum80_update_ms": {
+          "median": 2546.33,
+          "q1": 2494.1,
+          "q3": 2577.51,
+          "n": 4,
+          "samples": [
+            2478.37,
+            2494.1,
+            2577.51,
+            2546.33
+          ]
+        },
+        "sum200_update_ms": {
+          "median": 3107.03,
+          "q1": 3086.59,
+          "q3": 3196.44,
+          "n": 4,
+          "samples": [
+            3079.97,
+            3086.59,
+            3107.03,
+            3196.44
+          ]
+        },
+        "incremental_warm_ms": {
+          "median": 62.62,
+          "q1": 62.19,
+          "q3": 62.99,
+          "n": 4,
+          "samples": [
+            62.99,
+            62.62,
+            61.63,
+            62.19
+          ]
+        },
+        "incremental_cold_ms": {
+          "median": 2117.85,
+          "q1": 2094.15,
+          "q3": 2156.37,
+          "n": 4,
+          "samples": [
+            2156.37,
+            2071.49,
+            2094.15,
+            2117.85
+          ]
+        }
+      }
+    },
+    {
+      "L_target": 16384,
+      "L_actual": 16384,
+      "token_counts": {
+        "full": 16384,
+        "window": 351,
+        "summary_80": 51,
+        "summary_200": 113
+      },
+      "state_bytes": {
+        "full": 68422,
+        "window": 1538,
+        "summary_80": 317,
+        "summary_200": 684,
+        "kv_cache": 939524096
+      },
+      "feasible": {
+        "full_restore": true,
+        "window_restore": true,
+        "sum80_restore": true,
+        "sum200_restore": true,
+        "sum80_update": true,
+        "sum200_update": true,
+        "incremental": true
+      },
+      "measurements": {
+        "full_restore_ms": {
+          "median": 4868.29,
+          "q1": 4674.49,
+          "q3": 4916.81,
+          "n": 4,
+          "samples": [
+            4674.49,
+            4868.29,
+            4642.27,
+            4916.81
+          ]
+        },
+        "full_restore_peak_gb": {
+          "median": 18.53,
+          "q1": 18.53,
+          "q3": 18.53,
+          "n": 4,
+          "samples": [
+            18.53,
+            18.53,
+            18.53,
+            18.53
+          ]
+        },
+        "window_restore_ms": {
+          "median": 96.69,
+          "q1": 95.23,
+          "q3": 97.29,
+          "n": 4,
+          "samples": [
+            91.15,
+            95.23,
+            96.69,
+            97.29
+          ]
+        },
+        "sum80_restore_ms": {
+          "median": 28.41,
+          "q1": 28.03,
+          "q3": 29.44,
+          "n": 4,
+          "samples": [
+            28.03,
+            28.41,
+            26.73,
+            29.44
+          ]
+        },
+        "sum200_restore_ms": {
+          "median": 34.64,
+          "q1": 34.39,
+          "q3": 34.77,
+          "n": 4,
+          "samples": [
+            34.39,
+            34.77,
+            33.04,
+            34.64
+          ]
+        },
+        "sum80_update_ms": {
+          "median": 2555.0,
+          "q1": 2518.0,
+          "q3": 2631.98,
+          "n": 4,
+          "samples": [
+            2507.48,
+            2518.0,
+            2631.98,
+            2555.0
+          ]
+        },
+        "sum200_update_ms": {
+          "median": 3163.84,
+          "q1": 3141.93,
+          "q3": 3170.57,
+          "n": 4,
+          "samples": [
+            3111.75,
+            3170.57,
+            3141.93,
+            3163.84
+          ]
+        },
+        "incremental_warm_ms": {
+          "median": 106.23,
+          "q1": 96.43,
+          "q3": 143.52,
+          "n": 4,
+          "samples": [
+            106.23,
+            91.15,
+            143.52,
+            96.43
+          ]
+        },
+        "incremental_cold_ms": {
+          "median": 5086.24,
+          "q1": 5079.04,
+          "q3": 5242.66,
+          "n": 4,
+          "samples": [
+            5079.04,
+            5014.39,
+            5086.24,
+            5242.66
+          ]
+        }
+      }
+    },
+    {
+      "L_target": 24576,
+      "L_actual": 24576,
+      "token_counts": {
+        "full": 24576,
+        "window": 427,
+        "summary_80": 51,
+        "summary_200": 113
+      },
+      "state_bytes": {
+        "full": 100906,
+        "window": 1540,
+        "summary_80": 317,
+        "summary_200": 684,
+        "kv_cache": 1409286144
+      },
+      "feasible": {
+        "full_restore": true,
+        "window_restore": true,
+        "sum80_restore": true,
+        "sum200_restore": true,
+        "sum80_update": true,
+        "sum200_update": true,
+        "incremental": false
+      },
+      "measurements": {
+        "full_restore_ms": {
+          "median": 8525.47,
+          "q1": 8468.58,
+          "q3": 8889.04,
+          "n": 4,
+          "samples": [
+            8107.03,
+            8468.58,
+            8525.47,
+            8889.04
+          ]
+        },
+        "full_restore_peak_gb": {
+          "median": 20.17,
+          "q1": 20.17,
+          "q3": 20.17,
+          "n": 4,
+          "samples": [
+            20.17,
+            20.17,
+            20.17,
+            20.17
+          ]
+        },
+        "window_restore_ms": {
+          "median": 137.03,
+          "q1": 132.66,
+          "q3": 140.79,
+          "n": 4,
+          "samples": [
+            132.66,
+            137.03,
+            125.34,
+            140.79
+          ]
+        },
+        "sum80_restore_ms": {
+          "median": 28.33,
+          "q1": 25.81,
+          "q3": 28.79,
+          "n": 4,
+          "samples": [
+            25.81,
+            28.33,
+            25.72,
+            28.79
+          ]
+        },
+        "sum200_restore_ms": {
+          "median": 33.25,
+          "q1": 33.14,
+          "q3": 35.33,
+          "n": 4,
+          "samples": [
+            33.14,
+            35.33,
+            32.09,
+            33.25
+          ]
+        },
+        "sum80_update_ms": {
+          "median": 2610.81,
+          "q1": 2578.16,
+          "q3": 2745.59,
+          "n": 4,
+          "samples": [
+            2578.16,
+            2570.87,
+            2610.81,
+            2745.59
+          ]
+        },
+        "sum200_update_ms": {
+          "median": 3277.44,
+          "q1": 3208.51,
+          "q3": 3300.93,
+          "n": 4,
+          "samples": [
+            3277.44,
+            3198.22,
+            3300.93,
+            3208.51
+          ]
+        },
+        "incremental_warm_ms": null,
+        "incremental_cold_ms": null
+      }
+    },
+    {
+      "L_target": 32768,
+      "L_actual": 32768,
+      "token_counts": {
+        "full": 32768,
+        "window": 284,
+        "summary_80": 51,
+        "summary_200": 113
+      },
+      "state_bytes": {
+        "full": 134130,
+        "window": 1288,
+        "summary_80": 317,
+        "summary_200": 684,
+        "kv_cache": 1879048192
+      },
+      "feasible": {
+        "full_restore": true,
+        "window_restore": true,
+        "sum80_restore": true,
+        "sum200_restore": true,
+        "sum80_update": true,
+        "sum200_update": true,
+        "incremental": false
+      },
+      "measurements": {
+        "full_restore_ms": {
+          "median": 13694.29,
+          "q1": 13527.18,
+          "q3": 13868.13,
+          "n": 4,
+          "samples": [
+            13397.95,
+            13527.18,
+            13694.29,
+            13868.13
+          ]
+        },
+        "full_restore_peak_gb": {
+          "median": 21.81,
+          "q1": 21.81,
+          "q3": 21.81,
+          "n": 4,
+          "samples": [
+            21.81,
+            21.81,
+            21.81,
+            21.81
+          ]
+        },
+        "window_restore_ms": {
+          "median": 89.38,
+          "q1": 87.69,
+          "q3": 90.69,
+          "n": 4,
+          "samples": [
+            87.69,
+            86.71,
+            89.38,
+            90.69
+          ]
+        },
+        "sum80_restore_ms": {
+          "median": 29.76,
+          "q1": 29.35,
+          "q3": 31.11,
+          "n": 4,
+          "samples": [
+            29.76,
+            29.35,
+            26.54,
+            31.11
+          ]
+        },
+        "sum200_restore_ms": {
+          "median": 37.34,
+          "q1": 33.0,
+          "q3": 37.76,
+          "n": 4,
+          "samples": [
+            32.74,
+            37.34,
+            33.0,
+            37.76
+          ]
+        },
+        "sum80_update_ms": {
+          "median": 2671.84,
+          "q1": 2662.2,
+          "q3": 2788.52,
+          "n": 4,
+          "samples": [
+            2662.2,
+            2637.99,
+            2788.52,
+            2671.84
+          ]
+        },
+        "sum200_update_ms": {
+          "median": 3327.37,
+          "q1": 3286.45,
+          "q3": 3352.42,
+          "n": 4,
+          "samples": [
+            3257.26,
+            3352.42,
+            3286.45,
+            3327.37
+          ]
+        },
+        "incremental_warm_ms": null,
+        "incremental_cold_ms": null
+      }
+    },
+    {
+      "L_target": 49152,
+      "L_actual": 49152,
+      "token_counts": {
+        "full": 49152,
+        "window": 308,
+        "summary_80": 51,
+        "summary_200": 113
+      },
+      "state_bytes": {
+        "full": 203588,
+        "window": 1326,
+        "summary_80": 317,
+        "summary_200": 684,
+        "kv_cache": 2818572288
+      },
+      "feasible": {
+        "full_restore": false,
+        "window_restore": true,
+        "sum80_restore": true,
+        "sum200_restore": true,
+        "sum80_update": true,
+        "sum200_update": true,
+        "incremental": false
+      },
+      "measurements": {
+        "full_restore_ms": null,
+        "full_restore_peak_gb": null,
+        "window_restore_ms": {
+          "median": 99.73,
+          "q1": 97.31,
+          "q3": 99.99,
+          "n": 4,
+          "samples": [
+            99.99,
+            99.73,
+            96.77,
+            97.31
+          ]
+        },
+        "sum80_restore_ms": {
+          "median": 31.01,
+          "q1": 25.87,
+          "q3": 31.59,
+          "n": 4,
+          "samples": [
+            25.78,
+            31.59,
+            31.01,
+            25.87
+          ]
+        },
+        "sum200_restore_ms": {
+          "median": 39.22,
+          "q1": 32.11,
+          "q3": 41.35,
+          "n": 4,
+          "samples": [
+            32.05,
+            41.35,
+            39.22,
+            32.11
+          ]
+        },
+        "sum80_update_ms": {
+          "median": 2730.28,
+          "q1": 2725.43,
+          "q3": 2751.13,
+          "n": 4,
+          "samples": [
+            2701.26,
+            2751.13,
+            2730.28,
+            2725.43
+          ]
+        },
+        "sum200_update_ms": {
+          "median": 3399.57,
+          "q1": 3343.26,
+          "q3": 3436.19,
+          "n": 4,
+          "samples": [
+            3343.26,
+            3332.71,
+            3436.19,
+            3399.57
+          ]
+        },
+        "incremental_warm_ms": null,
+        "incremental_cold_ms": null
+      }
+    },
+    {
+      "L_target": 65536,
+      "L_actual": 65536,
+      "token_counts": {
+        "full": 65536,
+        "window": 305,
+        "summary_80": 51,
+        "summary_200": 113
+      },
+      "state_bytes": {
+        "full": 269835,
+        "window": 1197,
+        "summary_80": 317,
+        "summary_200": 684,
+        "kv_cache": 3758096384
+      },
+      "feasible": {
+        "full_restore": false,
+        "window_restore": true,
+        "sum80_restore": true,
+        "sum200_restore": true,
+        "sum80_update": true,
+        "sum200_update": true,
+        "incremental": false
+      },
+      "measurements": {
+        "full_restore_ms": null,
+        "full_restore_peak_gb": null,
+        "window_restore_ms": {
+          "median": 104.4,
+          "q1": 103.85,
+          "q3": 105.56,
+          "n": 4,
+          "samples": [
+            94.42,
+            103.85,
+            105.56,
+            104.4
+          ]
+        },
+        "sum80_restore_ms": {
+          "median": 31.91,
+          "q1": 31.07,
+          "q3": 32.17,
+          "n": 4,
+          "samples": [
+            28.03,
+            31.91,
+            32.17,
+            31.07
+          ]
+        },
+        "sum200_restore_ms": {
+          "median": 39.27,
+          "q1": 36.39,
+          "q3": 40.31,
+          "n": 4,
+          "samples": [
+            36.39,
+            39.27,
+            34.65,
+            40.31
+          ]
+        },
+        "sum80_update_ms": {
+          "median": 2795.68,
+          "q1": 2762.58,
+          "q3": 2825.25,
+          "n": 4,
+          "samples": [
+            2762.58,
+            2739.58,
+            2825.25,
+            2795.68
+          ]
+        },
+        "sum200_update_ms": {
+          "median": 3499.33,
+          "q1": 3446.33,
+          "q3": 3519.84,
+          "n": 4,
+          "samples": [
+            3499.33,
+            3444.39,
+            3446.33,
+            3519.84
+          ]
+        },
+        "incremental_warm_ms": null,
+        "incremental_cold_ms": null
+      }
+    }
+  ]
+}
