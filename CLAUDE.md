@@ -6,44 +6,85 @@ Claude Code context and conventions for this repository.
 
 ## Project overview
 
-FM-switching studies state-management strategies for edge-cloud LLM orchestration. The two main tracks are:
-
-1. **Simulator** (`simulator/`) — latency-hiding (LH) policies, MPC/SSM/RL routing, cost model.
-2. **Accuracy experiments** (`experiments/`) — EgoSchema benchmark to measure how context representation affects task quality at the edge reasoner.
+FM-switching studies representation-aware warm-state continuity for mobile FM agents: session state can be held as full-replay, window-10, summary-80, or summary-200, differing in reconstruction cost and in fidelity. Context Inertia has a physical component (transfer and reconstruction latency, which grows with context length) and a semantic component (cheaper representations discard task-relevant information in a workload-dependent way). The current stage is fidelity audit complete under two models and cost profiling done on A6000 and RTX 3090 Ti; the next gate is a trace-driven simulator showing joint representation × placement × timing beats decomposed policies under a quality SLO.
 
 ---
 
-## Naming schema
+## Before any task
 
-### Scripts — named by FUNCTION, no device suffix, no ad-hoc numbers
+1. Read `research/STATUS.md` to understand the current stage and open gates.
+2. Find or request an E-id in `research/EXPERIMENTS.md`. If no matching row exists, stop and ask before proceeding.
 
-| canonical name | role |
+---
+
+## After any task
+
+1. Update the `research/EXPERIMENTS.md` row (verdict, status).
+2. Append a row to `results/INDEX.md`.
+3. Update the last-updated date in `research/STATUS.md`.
+4. Stop and ask the user to commit with a scoped file list.
+
+---
+
+## Layout and naming schema
+
+### Directory structure
+
+```
+results/<purpose>/          — all result files; never outside this tree
+experiments/<purpose>/      — scripts, organized by purpose
+figures/<purpose>/          — publication figures
+plots/<purpose>/            — plot scripts
+```
+
+**Purposes:** `fidelity` · `cost` · `orchestration` · `casestudy` · `archive`
+
+### Result file naming
+
+Host-specific files (produced on one tier) carry the tier slug in the name:
+
+```
+<slug>_<model>_<tier>.json          # device-specific
+<slug>_<model>.json                  # device-independent (accuracy box is A6000)
+<slug>_<model>_perquestion.json      # per-question arrays
+```
+
+Merged files (combining multiple tiers) carry **no** tier identifier:
+```
+cost_matrix.csv                      # tier is a column
+reports/phase1_cost_profiling.md     # one section per tier inside
+```
+
+**Never** use `phaseN`, `sprintN`, or ad-hoc numbers in any path or filename.
+
+### Model slugs
+
+| slug | model ID |
 |---|---|
-| `experiments/premise_egoschema.py` | helper module — shared primitives (imported by all other experiment scripts) |
-| `experiments/context_inertia.py` | helper module — model loading, VLM/LLM inference, TTFT timing |
-| `experiments/representation_frontier.py` | **canonical accuracy runner** — 500-clip EgoSchema, `--model qwen7b|smollm2` |
-| `experiments/frame_sweep.py` | frame-count sweep (accuracy vs N frames) |
-| `experiments/representation_sweep_n150.py` | historical 150-clip sweep (n=150 predecessor, kept for lineage) |
-| `experiments/inertia_profile.py` | **canonical inertia profiler** — re-prefill latency vs token count, `--model --device` |
-| `experiments/_provenance.py` | provenance stamp utility — embed `_provenance` in result JSONs |
-| `experiments/memory_loading.py` | model cold/warm load timing |
-| `experiments/tensorrt_int8.py` | TensorRT INT8 quantization experiment |
-| `simulator/cost_model.py` | shared cost parameters; imports frontier/inertia JSONs at load time |
+| `qwen7b` | Qwen/Qwen2.5-7B-Instruct |
+| `smollm2` | HuggingFaceTB/SmolLM2-1.7B-Instruct |
+| `qwen3b` | Qwen/Qwen2.5-3B-Instruct |
+| `qwenvl3b` | Qwen/Qwen2.5-VL-3B-Instruct (or fine-tuned variant) |
+| `qwenvl7b` | Qwen/Qwen2.5-VL-7B-Instruct |
+| `mistral7b` | mistralai/Mistral-7B-Instruct-v0.2 |
 
-Device-dependent scripts are shared and take `--device` (never put device in the script name).
+### Device slugs
 
-### Results — `<function>_<model>.json` or `<function>_<model>_<device>.json`
-
-| pattern | when | example |
+| slug | hardware | host |
 |---|---|---|
-| `frontier_<model>.json` | device-independent accuracy (A6000 is the accuracy box) | `frontier_smollm2.json` |
-| `frontier_<model>_perquestion.json` | per-question checkpoint arrays | `frontier_qwen7b_perquestion.json` |
-| `framesweep_<model>.json` | frame-count sweep | `framesweep_qwen7b.json` |
-| `inertia_<model>_<device>.json` | device-dependent latency curve | `inertia_smollm2_jetson.json` |
-| `premise_<model>_<tag>.json` | pilot / premise validation | `premise_qwen7b_n150.json` |
+| `a6000` | NVIDIA RTX A6000 | flash (GPU 1) |
+| `rtx3090ti` | NVIDIA GeForce RTX 3090 Ti | flash (GPU 0) |
+| `jetson_orin` | Jetson AGX Orin | separate SSH host |
 
-**Model slugs:** `qwen7b` · `smollm2`  
-**Device slugs:** `a6000` · `jetson` · `a6000`
+### Box roles
+
+| box | role | primary scripts |
+|---|---|---|
+| **flash / A6000** | Fidelity experiments; server-tier cost profiling | `experiments/fidelity/`, `experiments/cost/cost_profile.py --tier a6000` |
+| **flash / RTX 3090 Ti** | Edge-tier cost profiling | `experiments/cost/cost_profile.py --tier rtx3090ti` |
+| **Jetson AGX Orin** | Device-tier cost profiling | `experiments/cost/cost_profile.py --tier jetson_orin` |
+
+Result files from each host are committed from that host.
 
 ---
 
@@ -76,24 +117,13 @@ Existing JSONs written before this convention was adopted carry `"git_commit": "
 
 ---
 
-## cost_model.py — MODEL knob and loading convention
+## Rules
 
-`MODEL = "smollm2"` at the top of `simulator/cost_model.py` is the single global knob.
-Change it to switch the entire simulation to a different model. Valid: `"smollm2"` | `"qwen7b"`.
+- **Result directories:** Do not create result dirs outside `results/<purpose>/`. If a purpose directory does not exist, check `research/EXPERIMENTS.md` first — the experiment may not yet have an E-id.
 
-`MODEL` drives three quantities at import time:
+- **New datasets:** Do not propose new datasets or workloads. `research/GRAVEYARD.md` documents why candidates were closed. If a new dataset seems necessary, stop and describe the gap it would fill; do not implement.
 
-| data | source | fallback |
-|---|---|---|
-| QUALITY, EFFECTIVE_TOKENS | `results/frontier_<MODEL>.json` | hardcoded smollm2 measured values |
-| KV_MB_PER_TOKEN | `_KV_MB_PER_TOKEN_BY_MODEL[MODEL]` lookup | — (dict always present) |
-| Edge inertia curve | `results/inertia_<MODEL>_jetson.json` | linear FP16 prefill rate |
-| Server inertia curve | `results/inertia_<MODEL>_a6000.json` | linear CLOUD prefill rate |
-
-Both tiers use the same `MODEL` by default (keeps quality tier-independent).
-A commented heterogeneous-tier block in cost_model.py documents how to enable per-tier model overrides and explains the confound that introduces.
-
-Drop any schema-named JSON into `results/` and re-import to activate; no code change needed.
+- **Methodological changes** (dropping items, changing metrics, shortening contexts, changing the n, swapping models or baselines) must be flagged and discussed before being applied. Implementation fixes (bugs, wrong file paths, incorrect measurement procedures) may be applied directly and reported after.
 
 ---
 
@@ -103,15 +133,3 @@ Drop any schema-named JSON into `results/` and re-import to activate; no code ch
 - CC must NOT run `git add`, `git commit`, `git push`, or any history-altering command.
 - Use filesystem `mv` for renames (tracked by git as rename + modify on next commit).
 - Always stop and ask the user to commit at the end of a session.
-
----
-
-## Box roles
-
-| box | role | primary scripts |
-|---|---|---|
-| **A6000** (this box) | Accuracy / representation experiments | `representation_frontier.py`, `frame_sweep.py`, `premise_egoschema.py` |
-| **Jetson AGX Orin** | Edge inertia profiling | `inertia_profile.py --model smollm2 --device jetson` |
-| **A6000** | Server inertia profiling | `inertia_profile.py --model qwen7b --device a6000` |
-
-Result JSONs produced on other boxes follow the same naming schema and are committed from those boxes.
