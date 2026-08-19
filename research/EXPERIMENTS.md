@@ -3,7 +3,7 @@
 One row per experiment, in rough chronological order. Append new rows at the bottom.
 Never edit a row's verdict after its result JSON is committed; add a new row instead.
 
-**Purposes:** fidelity · cost · orchestration · feasibility · archive
+**Purposes:** fidelity · cost · orchestration · feasibility · positioning · archive
 
 **Status:** canonical · superseded · archived · pending
 
@@ -33,3 +33,4 @@ Never edit a row's verdict after its result JSON is committed; add a new row ins
 | E22 | cost | C4 | `experiments/cost/cost_profile.py` | LoCoMo+Infini-THOR corpus | `results/cost/profiles/rtx3090ti_qwen7b.json` | a6000 (GPU 0 = RTX 3090 Ti) | 9 L-pts × 5 reps | Qwen2.5-7B: OOM at L≥49K for full-restore; xC=4K | canonical |
 | E23 | cost | C4 | `experiments/cost/cost_profile.py` | LoCoMo+Infini-THOR corpus | `results/cost/profiles/jetson_orin_qwen7b.json` | jetson_orin | 9 L-pts × 5 reps | Pending — run after pulling post-reorganization | pending |
 | E24 | orchestration | C5 | (new script, TBD) | E13,E21,E22,E23 results | TBD | a6000 | trace-driven sim | Joint representation × placement × timing vs decomposed baselines under quality SLO | pending |
+| E25 | positioning | — | (web research, no GPU) | external review citations | `reports/related_work_verification.md` | — | 11 cited works + 2 additional | 9/11 verified; SmartGen and 11b (Aug-2026 partial-KV-backhaul) unverified — no paper found; AdaptCache confirmed as highest-collision citation (joint wording) | canonical |
