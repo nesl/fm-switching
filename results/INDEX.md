@@ -118,6 +118,7 @@ Analysis: `experiments/phase1_analysis.py` → `experiments/cost/cost_analysis.p
 | `results/cost/profiles/a6000_qwen7b.json` | `phase1_cost_profile.py` + update rerun | qwen7b | a6000 | 9 L-pts × 5 reps; sum80/200 update corrected (full-L input) | full-restore 165ms→21.7s (linear); warm-append 66ms→330ms; cold/warm ratio 68× at 64K; xC=8K; xB=~65K (corrected) | 5870d45 + fix-up |
 | `results/cost/profiles/rtx3090ti_qwen7b.json` | `phase1_cost_profile.py` + update rerun | qwen7b | rtx3090ti | 9 L-pts × 5 reps; update OOM at L≥32K | full-restore OOM at L≥49K; xC=4K; xB=none_in_range (update OOMs before crossover) | 5870d45 + fix-up |
 | `results/cost/cost_matrix.csv` | `phase1_analysis.py` | qwen7b | a6000+rtx3090ti | 100 rows | derived CSV: restore/update/transfer costs per representation per L per tier | 5870d45 + fix-up |
+| `results/cost/profiles/jetson_orin_qwen7b.json` | `cost_profile.py` + `cost_update_rerun.py` | qwen7b | jetson_orin | 9 L-pts × 5 reps; capped + full-context update | full-restore 4.05s@1k→75.1s@16k, **infeasible ≥24,576** (120s time budget, never OOMs / 65.9 GB unified); cold/warm ratio 36.7× @16K; sum-80 full-update 31s@1k→plateau ~229s. Ran transformers 5.10.2/torch 2.8/SDPA no-flash-attn (vs 4.46.3/flash-attn on flash → tier gap carries a software-stack component). | 642a0b7 |
 
 ## E24 — Fidelity-provisioning coupling simulation (2026-08-19)
 

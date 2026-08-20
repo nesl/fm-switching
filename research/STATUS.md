@@ -18,7 +18,7 @@ information the future turn needs, in a workload-dependent way).
 | Instrument | What it measures | Status |
 |---|---|---|
 | **Fidelity audit** | QA accuracy of blind / summary-80 / summary-200 / window-10 / full across EgoSchema, Infini-THOR, LoCoMo | Complete: three-regime taxonomy established under Qwen2.5-7B and Mistral-7B (Phase 0a gate passed) |
-| **Cost profiling** | Restore, update, and state-size as a function of context length per representation per tier | A6000 and RTX 3090 Ti done; summary-update fix-up committed; Jetson Orin pending |
+| **Cost profiling** | Restore, update, and state-size as a function of context length per representation per tier | **Complete on all three tiers** — A6000, RTX 3090 Ti, and Jetson AGX Orin (2026-08-19); summary-update full-context rerun done per tier |
 
 ## Current stage
 
@@ -26,9 +26,12 @@ information the future turn needs, in a workload-dependent way).
    EgoSchema = gist-compressible; Infini-THOR = structured-compressible; LoCoMo = dense-incompressible.
    Held under a second model (Mistral-7B); gate passed.
 
-2. **Physical inertia cost** (Phase 1) — *complete on A6000 and RTX 3090 Ti*; Jetson Orin pending.
+2. **Physical inertia cost** (Phase 1) — *complete on all three tiers* (A6000, RTX 3090 Ti, Jetson AGX Orin).
    Key crossovers: xB (summary pipeline beats full re-prefill) = L≈65K on A6000, never in range on
    3090Ti (update OOMs above 32K). xC (window ≥10× cheaper) = L≈8K on A6000, L≈4K on 3090Ti.
+   Jetson Orin: full_restore feasible ≤16K (75 s), infeasible ≥24K by the 120 s time budget (never OOMs,
+   65.9 GB unified); ran the 5.10.2/torch2.8/SDPA-no-flash-attn stack (vs 4.46.3/flash-attn on flash), so
+   Jetson-vs-flash gaps include a software-stack component. Jetson crossover rows not yet computed.
 
 3. **Simulator** — *E24 and E24b complete (2026-08-19)*.
    E24 (1,260 runs, single-edge): placement-aware policies +12pp vs reactive; joint ≤3pp over cache_value.
@@ -56,7 +59,7 @@ framing needs adjustment.
 |---|---|---|
 | **flash / A6000** | Fidelity experiments, server-tier cost profiling | Idle (Phase 1 fix-up committed) |
 | **flash / RTX 3090 Ti** | Edge-tier cost profiling (GPU 0) | Idle (Phase 1 fix-up committed) |
-| **Jetson AGX Orin** | Device-tier cost profiling (separate SSH host) | Pending: run `experiments/cost/cost_profile.py --tier jetson_orin --model qwen7b` |
+| **Jetson AGX Orin** | Device-tier cost profiling (separate SSH host) | Idle — E23 done (qwen7b cost profile + full-context update rerun committed 2026-08-19) |
 
 Flash hosts both A6000 (GPU 1) and RTX 3090 Ti (GPU 0) in the same machine.
 Jetson is a separate SSH host; pull before running so it writes to `results/cost/profiles/jetson_orin/`.

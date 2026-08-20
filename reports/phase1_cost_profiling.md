@@ -143,7 +143,63 @@ Keeping a warm KV cache costs `kv_mb` of GPU memory per L. The ratio shows how m
 
 ## Tier: jetson_orin
 
-*No results for jetson_orin. Run `phase1_cost_profile.py --tier jetson_orin` on the target host.*
+### Model: qwen7b
+
+GPU: Jetson AGX Orin ("Orin", 65.9 GB unified) | LLM: Qwen/Qwen2.5-7B-Instruct | KV bytes/token: 57,344
+
+**Software stack — affects cross-tier comparison.** This tier ran **transformers 5.10.2 / torch 2.8 (CUDA 12.6) / SDPA attention, no flash-attn** (no prebuilt flash-attn wheel for Jetson/aarch64). The `a6000` and `rtx3090ti` tiers ran **transformers 4.46.3 with flash-attn**. Jetson-vs-flash latency gaps therefore conflate the hardware difference with a **software-stack component** (attention kernel + library version) and are not a pure device comparison.
+
+**Environment probe (qwen7b, fp16):** model load **25.5 s**; single-prefill TTFT **2.5 s @ 512 tok** and **15.4 s @ 4,096 tok**; peak **~16 GB**. (Replaces the onboarding probe.)
+
+*Window coverage*: at minimum L=1,024, window tokens = 483 (47% of full context). No rows excluded — window is a strict subset at all L.
+
+#### Restore Latency (ms, median [IQR])
+
+| L | full | window | sum-80 | sum-200 | full peak GB | ✓ |
+|---|---|---|---|---|---|---|
+| 1,024 | 4052 [4052, 4053] | 2487 | 355 | 506 | 15.46 | ✓ |
+| 2,048 | 8010 [8004, 8012] | 2496 | 356 | 507 | 15.65 | ✓ |
+| 4,096 | 16311 [16238, 16335] | 1855 | 355 | 506 | 16.07 | ✓ |
+| 8,192 | 33790 [33781, 33798] | 1702 | 356 | 507 | 16.89 | ✓ |
+| 16,384 | 75054 [75048, 75055] | 1875 | 356 | 506 | 18.54 | ✓ |
+| 24,576 | — — (timeout >120 s) | 2386 | 356 | 506 | — | ✗ |
+| 32,768 | — — (timeout >120 s) | 1751 | 356 | 506 | — | ✗ |
+| 49,152 | — — (timeout >120 s) | 1892 | 356 | 506 | — | ✗ |
+| 65,536 | — — (timeout >120 s) | 1878 | 356 | 506 | — | ✗ |
+
+`full_restore` is **feasible through L=16,384 (75.1 s)** and crosses the 120 s per-measurement timeout at **L≥24,576** (recorded infeasible). Restore of the fixed summaries/window stays cheap and roughly constant, but ~1–2 orders of magnitude slower than on flash (sum-80 restore ~356 ms here vs ~28 ms on a6000; window ~1.7–2.5 s vs ~68 ms) — the SDPA-no-flash-attn stack plus slower hardware.
+
+#### Update Latency — full L-token context (ms, median [IQR])
+
+| L | sum-80 update | sum-200 update | incr warm | incr cold | ratio cold/warm |
+|---|---|---|---|---|---|
+| 1,024 | 31334 | 67551 | 579 | 4858 | 8.4× |
+| 2,048 | 35347 | 72261 | 667 | 8566 | 12.8× |
+| 4,096 | 44902 | 58117 | 855 | 17327 | 20.3× |
+| 8,192 | 65111 | 107279 | 1253 | 35896 | 28.7× |
+| 16,384 | 111760 | 161012 | 2163 | 79477 | 36.7× |
+| 24,576 | 166866 | 181883 | — (timeout) | — (timeout) | — |
+| 32,768 | 228815 | 292326 | — (timeout) | — (timeout) | — |
+| 49,152 | 228803 | 292343 | — (timeout) | — (timeout) | — |
+| 65,536 | 228796 | 292364 | — (timeout) | — (timeout) | — |
+
+Full-context summary-update grows steeply with L (prefill-dominated) and plateaus ~229 s / 292 s once the update input hits its length cap at L≈32 K. `incremental` (warm append vs cold re-prefill) is feasible through L=16,384 — cold/warm ratio reaches **36.7×** at 16 K — and hits the incremental timeout at L≥24,576. Values here are ~14× the a6000 figures at matching L, consistent with the hardware + software-stack gap.
+
+#### State Sizes and KV Cache
+
+| L | full (KB) | window (KB) | sum-80 (B) | sum-200 (B) | KV (MB) |
+|---|---|---|---|---|---|
+| 1,024 | 4 | 1 | 317 | 684 | 56.0 |
+| 2,048 | 8 | 2 | 317 | 684 | 112.0 |
+| 4,096 | 16 | 1 | 317 | 684 | 224.0 |
+| 8,192 | 33 | 1 | 317 | 684 | 448.0 |
+| 16,384 | 66 | 1 | 317 | 684 | 896.0 |
+| 24,576 | 98 | 1 | 317 | 684 | 1344.0 |
+| 32,768 | 130 | 1 | 317 | 684 | 1792.0 |
+| 49,152 | 198 | 1 | 317 | 684 | 2688.0 |
+| 65,536 | 263 | 1 | 317 | 684 | 3584.0 |
+
+State sizes and KV/token are model-intrinsic and match the other tiers (56 KB/token). Note the infeasibility edge here is set by the **120 s time budget**, not memory — the 65.9 GB unified memory never OOMs (unlike the 3090 Ti, which OOMs the incremental path at L≥24,576).
 
 ## Crossover Analysis
 
@@ -249,4 +305,4 @@ The initial sweep measured sum-80 and sum-200 update latency from the first 8000
 
 - Window-10 token count is ~300–500 tokens across all L (last 10 corpus turns of ~37–200 tokens each). No rows in the current sweep qualify as 'window covers full context' (max ratio 0.47 at L=1024).
 
-- Jetson Orin rows pending.
+- Jetson Orin complete (2026-08-19): full_restore feasible ≤16,384 (75.1 s), infeasible ≥24,576 by the 120 s time budget (not memory). Ran the 5.10.2 / torch 2.8 / SDPA-no-flash-attn stack vs 4.46.3 / flash-attn on flash, so Jetson-vs-flash gaps include a software-stack component. Crossover rows for jetson_orin not yet computed (rerun `cost_analysis.py` to extend the crossover table).
