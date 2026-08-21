@@ -1,6 +1,6 @@
 {
   "experiment": "E26",
-  "description": "vLLM cold-prefill + decode calibration vs HF baseline (E21/E27)",
+  "description": "vLLM cold-prefill + decode + warm-append calibration vs HF baseline",
   "model": "Qwen/Qwen2.5-7B-Instruct",
   "model_slug": "qwen7b",
   "device": "a6000",
@@ -16,44 +16,45 @@
     200
   ],
   "kv_cache_config": {
-    "num_gpu_blocks": null,
-    "block_size": 16
+    "total_kv_tokens": 517264,
+    "block_size": 16,
+    "note": "from engine log: GPU KV cache size: 517,264 tokens at max_model_len=131072"
   },
   "cold_prefill": {
     "1024": {
       "actual_L_tokens": 1028,
       "feasible": true,
-      "median_s": 0.1432,
-      "iqr_s": 0.0008,
+      "median_s": 0.1409,
+      "iqr_s": 0.0014,
       "all_s": [
-        0.1425,
-        0.143,
-        0.1432,
-        0.1434,
-        0.1437
+        0.1401,
+        0.1409,
+        0.1409,
+        0.1412,
+        0.1427
       ]
     },
     "8192": {
       "actual_L_tokens": 8223,
       "feasible": true,
-      "median_s": 1.1899,
+      "median_s": 1.1814,
       "iqr_s": 0.0044,
       "all_s": [
-        1.1888,
-        1.1892,
-        1.1899,
-        1.1907,
-        1.1962
+        1.1766,
+        1.1781,
+        1.1814,
+        1.1815,
+        1.182
       ]
     },
     "32768": {
+      "actual_L_tokens": 32892,
       "feasible": false,
-      "error": "EngineCore encountered an issue. See stack trace (above) for the root cause.",
-      "actual_L_tokens": 32892
+      "error": "EngineCore encountered an issue. See stack trace (above) for the root cause."
     },
     "65536": {
       "feasible": false,
-      "error": "skipped: prior L failed (RoPE OOB)"
+      "error": "skipped: prior L failed"
     }
   },
   "decode": {
@@ -62,36 +63,36 @@
       "budget_80": {
         "feasible": true,
         "total_refresh": {
-          "median_s": 1.946,
-          "iqr_s": 0.0039,
+          "median_s": 1.9426,
+          "iqr_s": 0.0014,
           "all_s": [
-            1.9448,
-            1.9451,
-            1.946,
-            1.9488,
-            1.9488
+            1.9414,
+            1.9424,
+            1.9426,
+            1.943,
+            1.9436
           ]
         },
-        "decode_only_s": 1.8028,
-        "decode_tps": 44.38,
-        "note": "total_refresh = cold_prefill(L) + decode(budget); decode_only_s = total_median - cold_prefill_median"
+        "decode_only_s": 1.8017,
+        "decode_tps": 44.4,
+        "note": "total_refresh = cold_prefill + decode(budget); decode_only = total_med - cold_med"
       },
       "budget_200": {
         "feasible": true,
         "total_refresh": {
-          "median_s": 4.6934,
-          "iqr_s": 0.0123,
+          "median_s": 4.6885,
+          "iqr_s": 0.0054,
           "all_s": [
-            4.6829,
-            4.6842,
-            4.6934,
-            4.6938,
-            4.6979
+            4.6823,
+            4.6862,
+            4.6885,
+            4.6888,
+            4.6904
           ]
         },
-        "decode_only_s": 4.5502,
-        "decode_tps": 43.95,
-        "note": "total_refresh = cold_prefill(L) + decode(budget); decode_only_s = total_median - cold_prefill_median"
+        "decode_only_s": 4.5476,
+        "decode_tps": 43.98,
+        "note": "total_refresh = cold_prefill + decode(budget); decode_only = total_med - cold_med"
       }
     },
     "8192": {
@@ -99,62 +100,244 @@
       "budget_80": {
         "feasible": true,
         "total_refresh": {
-          "median_s": 3.082,
-          "iqr_s": 0.011,
+          "median_s": 3.0701,
+          "iqr_s": 0.0104,
           "all_s": [
-            3.0738,
-            3.0741,
-            3.082,
-            3.083,
-            3.0869
+            3.0588,
+            3.0619,
+            3.0701,
+            3.0703,
+            3.0713
           ]
         },
-        "decode_only_s": 1.8921,
-        "decode_tps": 42.28,
-        "note": "total_refresh = cold_prefill(L) + decode(budget); decode_only_s = total_median - cold_prefill_median"
+        "decode_only_s": 1.8887,
+        "decode_tps": 42.36,
+        "note": "total_refresh = cold_prefill + decode(budget); decode_only = total_med - cold_med"
       },
       "budget_200": {
         "feasible": true,
         "total_refresh": {
-          "median_s": 5.9573,
-          "iqr_s": 0.013,
+          "median_s": 5.9316,
+          "iqr_s": 0.029,
           "all_s": [
-            5.9414,
-            5.9492,
-            5.9573,
-            5.9581,
-            5.9584
+            5.9147,
+            5.923,
+            5.9316,
+            5.9457,
+            5.9499
           ]
         },
-        "decode_only_s": 4.7675,
-        "decode_tps": 41.95,
-        "note": "total_refresh = cold_prefill(L) + decode(budget); decode_only_s = total_median - cold_prefill_median"
+        "decode_only_s": 4.7502,
+        "decode_tps": 42.1,
+        "note": "total_refresh = cold_prefill + decode(budget); decode_only = total_med - cold_med"
       }
     },
     "32768": {
-      "skipped": "cold prefill infeasible"
+      "actual_L_tokens": 32892
+    },
+    "65536": {}
+  },
+  "warm_append": {
+    "1024": {
+      "actual_L_tokens": 1028,
+      "feasible": true,
+      "extension_tokens": 200,
+      "median_s": 0.0259,
+      "iqr_s": 0.0003,
+      "all_s": [
+        0.0259,
+        0.0259,
+        0.0259,
+        0.0261,
+        0.0262
+      ],
+      "note": "time for vLLM to process extension with prefix cached; prefix re-primed each rep"
+    },
+    "8192": {
+      "actual_L_tokens": 8223,
+      "feasible": true,
+      "extension_tokens": 200,
+      "median_s": 0.0397,
+      "iqr_s": 0.001,
+      "all_s": [
+        0.0394,
+        0.0395,
+        0.0397,
+        0.0403,
+        0.0405
+      ],
+      "note": "time for vLLM to process extension with prefix cached; prefix re-primed each rep"
+    },
+    "32768": {
+      "actual_L_tokens": 32892,
+      "feasible": false,
+      "error": "cold infeasible"
     },
     "65536": {
-      "skipped": "prior L infeasible"
+      "feasible": false,
+      "error": "skipped"
+    }
+  },
+  "yarn_retry": {
+    "32768": {
+      "actual_L_tokens": 32892,
+      "rope_scaling": {
+        "type": "yarn",
+        "factor": 4.0,
+        "original_max_position_embeddings": 32768
+      },
+      "cold_prefill": {
+        "feasible": true,
+        "median_s": 6.8576,
+        "iqr_s": 0.1103,
+        "all_s": [
+          6.7766,
+          6.823,
+          6.8576,
+          6.8947,
+          6.9256
+        ]
+      },
+      "decode": {
+        "budget_80": {
+          "feasible": true,
+          "total_refresh": {
+            "median_s": 9.0309,
+            "iqr_s": 0.0399,
+            "all_s": [
+              9.0054,
+              9.0085,
+              9.0309,
+              9.0399,
+              9.0537
+            ]
+          },
+          "decode_only_s": 2.1733,
+          "decode_tps": 36.81,
+          "note": "total_refresh = cold_prefill + decode(budget); decode_only = total_med - cold_med"
+        },
+        "budget_200": {
+          "feasible": true,
+          "total_refresh": {
+            "median_s": 12.1424,
+            "iqr_s": 0.0412,
+            "all_s": [
+              12.1198,
+              12.1288,
+              12.1424,
+              12.157,
+              12.1741
+            ]
+          },
+          "decode_only_s": 5.2848,
+          "decode_tps": 37.84,
+          "note": "total_refresh = cold_prefill + decode(budget); decode_only = total_med - cold_med"
+        }
+      },
+      "warm_append": {
+        "feasible": true,
+        "extension_tokens": 200,
+        "median_s": 0.0872,
+        "iqr_s": 0.0015,
+        "all_s": [
+          0.0859,
+          0.087,
+          0.0872,
+          0.0875,
+          0.0885
+        ],
+        "note": "time for vLLM to process extension with prefix cached; prefix re-primed each rep"
+      }
+    },
+    "65536": {
+      "actual_L_tokens": 65783,
+      "rope_scaling": {
+        "type": "yarn",
+        "factor": 4.0,
+        "original_max_position_embeddings": 32768
+      },
+      "cold_prefill": {
+        "feasible": true,
+        "median_s": 19.6807,
+        "iqr_s": 0.1601,
+        "all_s": [
+          19.4632,
+          19.6339,
+          19.6807,
+          19.7082,
+          19.7091
+        ]
+      },
+      "decode": {
+        "budget_80": {
+          "feasible": true,
+          "total_refresh": {
+            "median_s": 21.918,
+            "iqr_s": 0.1384,
+            "all_s": [
+              21.8562,
+              21.9069,
+              21.918,
+              22.0163,
+              22.0236
+            ]
+          },
+          "decode_only_s": 2.2373,
+          "decode_tps": 35.76,
+          "note": "total_refresh = cold_prefill + decode(budget); decode_only = total_med - cold_med"
+        },
+        "budget_200": {
+          "feasible": true,
+          "total_refresh": {
+            "median_s": 25.3116,
+            "iqr_s": 0.0301,
+            "all_s": [
+              25.3015,
+              25.3016,
+              25.3116,
+              25.3281,
+              25.3353
+            ]
+          },
+          "decode_only_s": 5.6309,
+          "decode_tps": 35.52,
+          "note": "total_refresh = cold_prefill + decode(budget); decode_only = total_med - cold_med"
+        }
+      },
+      "warm_append": {
+        "feasible": true,
+        "extension_tokens": 200,
+        "median_s": 0.152,
+        "iqr_s": 0.0026,
+        "all_s": [
+          0.1502,
+          0.1518,
+          0.152,
+          0.1521,
+          0.1549
+        ],
+        "note": "time for vLLM to process extension with prefix cached; prefix re-primed each rep"
+      }
     }
   },
   "_provenance": {
-    "git_commit": "8c753752515b54bc56c94e016c48a2854f3f92da",
+    "git_commit": "e0751a10f7be7833dea37d9418282f1418e9f3c9",
     "script": "vllm_calibration.py",
     "model": "qwen7b",
-    "timestamp": "2026-08-21T08:38:09.526554",
+    "timestamp": "2026-08-21T12:29:35.978062",
     "device": "a6000",
     "n": 20,
     "args": {
       "l_tokens": "1024,8192,32768,65536",
       "reps": 5,
-      "gpu_mem_fraction": 0.92
+      "gpu_mem_fraction": 0.92,
+      "skip_yarn": false
     },
     "vllm_version": "0.8.5",
     "torch_version": "2.6.0+cu124",
     "cuda_version": "12.4",
     "max_model_len": 131072,
     "cuda_visible_devices": "1",
-    "kv_note": "peak_gpu_gb not reported: vLLM preallocates a fixed KV pool; torch.cuda.max_memory_allocated() returns 0 inside the vLLM worker process. Use kv_cache_config for pool size."
+    "kv_note": "peak_gpu_gb not reported: vLLM preallocates KV pool; torch.cuda.max_memory_allocated()=0 inside vLLM worker. See kv_cache_config."
   }
 }

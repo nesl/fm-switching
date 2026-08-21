@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-21 (E26 follow-up complete: cold + decode calibration; phase1 report updated)
+Last updated: 2026-08-21 (E26 fully complete: cold + decode + warm-append + YaRN; within-vLLM gap corrected to 75–181×; HF update-latency plateau diagnosed; phase1 report section replaced)
 
 ## Framing
 
