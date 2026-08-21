@@ -162,3 +162,21 @@ Sweep: 3 capacity × 2 mobility × 2 regime_mix × 2 tau × 2 drift × 10 polici
 | `figures/fidelity/e27_lifecycle_cost.pdf` | `plots/fidelity/plot_e27.py` | `qwen7b` | a6000 | 10 convs + 60 clips | Refresh latency by mode × budget for LoCoMo and EgoSchema; window-10 warm-append reference at 0.066 s | 2026-08-20 |
 | `reports/e27_maintenance_mechanism.md` | — | — | — | — | B (fallback): recursive does not kill the cost inversion; decode latency dominates; inversion structural at 7B scale | 2026-08-20 |
 | `results/cost/vllm_calibration_a6000_qwen7b.json` | `experiments/cost/vllm_calibration.py` + `e26_diagnostic.py` | `qwen7b` | a6000 | L ∈ {1k,8k,32k,64k} × 5 reps; cold + decode (80,200 tok) + warm-append; YaRN for L≥32k | cold: vLLM 1.10–1.17× faster; warm-append: 1.59–2.55× faster; decode: 35–44 tok/s; within-vLLM window-vs-summary gap 75–181× (all L); HF plateau at L≥32k traced to [:8000]-char summariser bug | 2026-08-21 |
+
+## E29 — Tier-heterogeneous fidelity audit (2026-08-21)
+
+Scripts: `experiments/fidelity/e29_locomo.py`, `experiments/fidelity/e29_egoschema.py`, `experiments/fidelity/e29_analysis.py`. Models: qwen3b (device tier) + qwen7b (edge/cloud tier). Subsets: phase0a fixed seeds (locomo n=100, egoschema n=60). Conditions: blind, window-10, sum-80, sum-200, full (own) + cross (3B reading 7B summaries; 7B reading 3B summaries). GPU: A6000 (GPU 1).
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/fidelity/e29_tier_heterogeneous/locomo_qwen3b_n100.json` | `e29_locomo.py` | qwen3b | a6000 | 100 | LoCoMo: full=0.230, sum80=0.090, sum200=0.120, win10=0.180, blind=0.030; dense-incompressible for device tier | 2026-08-21 |
+| `results/fidelity/e29_tier_heterogeneous/locomo_qwen7b_n100.json` | `e29_locomo.py` | qwen7b | a6000 | 100 | LoCoMo: full=0.400 (SANITY PASS delta=0.000), sum80=0.120, sum200=0.120, win10=0.230, blind=0.080 | 2026-08-21 |
+| `results/fidelity/e29_tier_heterogeneous/locomo_sum80_qwen3b.json` | `e29_locomo.py` | qwen3b | a6000 | 10 convs | qwen3b sum-80 summary cache for LoCoMo subset | 2026-08-21 |
+| `results/fidelity/e29_tier_heterogeneous/locomo_sum200_qwen3b.json` | `e29_locomo.py` | qwen3b | a6000 | 10 convs | qwen3b sum-200 summary cache for LoCoMo subset | 2026-08-21 |
+| `results/fidelity/e29_tier_heterogeneous/egoschema_qwen3b_n60.json` | `e29_egoschema.py` | qwen3b | a6000 | 60 | EgoSchema: full=0.450, sum80=0.400, sum200=0.433, win10=0.450, blind=0.300; gist-compressible for device tier | 2026-08-21 |
+| `results/fidelity/e29_tier_heterogeneous/egoschema_qwen7b_n60.json` | `e29_egoschema.py` | qwen7b | a6000 | 60 | EgoSchema: full=0.567 (SANITY PASS delta=0.000), sum80=0.433, sum200=0.483, win10=0.500, blind=0.200 | 2026-08-21 |
+| `results/fidelity/e29_tier_heterogeneous/egoschema_sum80_qwen3b.json` | `e29_egoschema.py` | qwen3b | a6000 | 60 | qwen3b sum-80 summary cache for EgoSchema subset | 2026-08-21 |
+| `results/fidelity/e29_tier_heterogeneous/egoschema_sum200_qwen3b.json` | `e29_egoschema.py` | qwen3b | a6000 | 60 | qwen3b sum-200 summary cache for EgoSchema subset | 2026-08-21 |
+| `results/fidelity/e29_tier_heterogeneous/e29_analysis.json` | `e29_analysis.py` | qwen3b+qwen7b | a6000 | — | Bootstrap CIs, paired contrasts, sufficiency table (τ=0.90/0.95), Q(fidelity,workload,model) table | 2026-08-21 |
+| `figures/fidelity/e29_q_table.pdf` | `e29_analysis.py` | qwen3b+qwen7b | a6000 | — | Q(fidelity, workload, model) heatmap; sufficiency cells marked per τ threshold | 2026-08-21 |
+| `reports/e29_tier_heterogeneous.md` | `e29_analysis.py` (+ manual implication paragraph) | qwen3b+qwen7b | a6000 | — | Q table is model-dependent in gist-compressible regime; cross-tier summaries no benefit; device tier 57% capable on dense | 2026-08-21 |

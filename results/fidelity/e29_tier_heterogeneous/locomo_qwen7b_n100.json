@@ -1,0 +1,6648 @@
+{
+  "metadata": {
+    "experiment": "E29",
+    "model_slug": "qwen7b",
+    "model_id": "Qwen/Qwen2.5-7B-Instruct",
+    "workload": "locomo",
+    "n": 100,
+    "subset": "locomo_100",
+    "conditions": [
+      "blind",
+      "window-10",
+      "summary-80",
+      "summary-200",
+      "full",
+      "cross-qwen3b-sum80",
+      "cross-qwen3b-sum200"
+    ],
+    "cross_conditions": [
+      "cross-qwen3b-sum80",
+      "cross-qwen3b-sum200"
+    ],
+    "scorer": "exact_normalized_substring_plus_lazy_llm_judge",
+    "gpu_peak_gb": 19.68,
+    "mean_latency_per_cond_s": {
+      "blind": 0.222,
+      "window-10": 1.512,
+      "summary-80": 0.208,
+      "summary-200": 0.218,
+      "full": 4.188,
+      "cross-qwen3b-sum80": 0.205,
+      "cross-qwen3b-sum200": 0.203
+    },
+    "timestamp": "2026-08-21T15:36:49.932332"
+  },
+  "records": [
+    {
+      "q_uid": "conv-26_q0004",
+      "conv_id": "conv-26",
+      "question": "What is Caroline's identity?",
+      "gold": "Transgender woman",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 414,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 14737,
+      "conditions": {
+        "blind": {
+          "pred": "Character from Pride and Prejudice",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Transgender woman",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Caroline is LGBTQ+.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Transgender",
+          "exact": 1,
+          "correct": 1
+        },
+        "full": {
+          "pred": "Transgender woman",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Transgender individual",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Caroline is transgender.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-26_q0019",
+      "conv_id": "conv-26",
+      "question": "What do Melanie's kids like?",
+      "gold": "dinosaurs, nature",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 321,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 14737,
+      "conditions": {
+        "blind": {
+          "pred": "Canoes, puzzles, cookies.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Camping, nature, stories around the campfire",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "They like nature, learning about animals, and spending time with family.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-26_q0032",
+      "conv_id": "conv-26",
+      "question": "What LGBTQ+ events has Caroline participated in?",
+      "gold": "Pride parade, school speech, support group",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 267,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 14737,
+      "conditions": {
+        "blind": {
+          "pred": "LGBTQ+ pride parade, support groups.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Pride parade, advocacy events",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Pride parades.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Support groups, pride parades, youth centers.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "LGBTQ support group, pride parade, transgender conference, art show",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Support groups, mentoring LGBTQ youth.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "LGBTQ support groups, advocacy events.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-26_q0037",
+      "conv_id": "conv-26",
+      "question": "What did Melanie paint recently?",
+      "gold": "sunset",
+      "evidence_distance": {
+        "found": false,
+        "turns_from_end": -1,
+        "distance_bin": "not_found"
+      },
+      "full_context_tokens": 14737,
+      "conditions": {
+        "blind": {
+          "pred": "Landscape painting.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Sunset inspired painting",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Landscape scenery",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Sunset inspired painting",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-26_q0039",
+      "conv_id": "conv-26",
+      "question": "In what ways is Caroline participating in the LGBTQ community?",
+      "gold": "Joining activist group, going to pride parades, participating in an art show, mentoring program",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 225,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 14737,
+      "conditions": {
+        "blind": {
+          "pred": "Attending Pride events, supporting LGBTQ organizations.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Joining activist groups, volunteering, art shows, mentoring.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Attending pride parades, pursuing counseling.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Attending support groups, pride parades, volunteering.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Attending support groups, mentoring LGBTQ youth, organizing art shows, volunteering at youth centers.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Attending support groups, mentoring youth, counseling.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Attending support groups, advocating, aspiring to counsel.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-26_q0043",
+      "conv_id": "conv-26",
+      "question": "What kind of art does Caroline make?",
+      "gold": "abstract art",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 192,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 14737,
+      "conditions": {
+        "blind": {
+          "pred": "Textiles and quilts.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Paintings, drawings, stained glass, murals.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Painting and pottery.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Painting, drawing, pottery.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Paintings, drawings, stained glass, pottery.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-26_q0048",
+      "conv_id": "conv-26",
+      "question": "What types of pottery have Melanie and her kids made?",
+      "gold": "bowls, cup",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 173,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 14737,
+      "conditions": {
+        "blind": {
+          "pred": "Melanie and her kids made bowls, vases, and figurines.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Bowl, figures",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Melanie made a bowl and her kids made pots.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-26_q0051",
+      "conv_id": "conv-26",
+      "question": "What has Melanie painted?",
+      "gold": "Horse, sunset, sunrise",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 158,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 14737,
+      "conditions": {
+        "blind": {
+          "pred": "Melanie has painted a portrait.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Sunset inspired painting",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Landscape paintings.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Inspired by sunsets, calming blue streaks.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Pottery pieces.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-26_q0055",
+      "conv_id": "conv-26",
+      "question": "What subject have Caroline and Melanie both painted?",
+      "gold": "Sunsets",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 143,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 14737,
+      "conditions": {
+        "blind": {
+          "pred": "Flowers",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Sunsets and horses",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Pride themes",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Sunsets and bowls",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Pottery",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-26_q0060",
+      "conv_id": "conv-26",
+      "question": "What instruments does Melanie play?",
+      "gold": "clarinet and violin",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 87,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 14737,
+      "conditions": {
+        "blind": {
+          "pred": "Melanie plays piano and guitar.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Clarinet, guitar",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Clarinet, guitar",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-26_q0078",
+      "conv_id": "conv-26",
+      "question": "What items has Melanie bought?",
+      "gold": "Figurines, shoes",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 13,
+        "distance_bin": "mid"
+      },
+      "full_context_tokens": 14737,
+      "conditions": {
+        "blind": {
+          "pred": "Shopping list not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Figurines",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Not specified in the conversation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified in the conversation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Figurines that remind her of family love.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-30_q0003",
+      "conv_id": "conv-30",
+      "question": "What do Jon and Gina both have in common?",
+      "gold": "They lost their jobs and decided to start their own businesses.",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 340,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 11519,
+      "conditions": {
+        "blind": {
+          "pred": "Same question, different names.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Both have entrepreneurial spirits and love dance.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Both pursued passions, started businesses.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Both are entrepreneurs pursuing passions.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Both have entrepreneurial spirits and passion for dance.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Both pursuing entrepreneurship",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Both starting new businesses",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-30_q0009",
+      "conv_id": "conv-30",
+      "question": "Which city have both Jean and John visited?",
+      "gold": "Rome",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 94,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 11519,
+      "conditions": {
+        "blind": {
+          "pred": "New York City",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Rome",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Paris and Rome",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-30_q0017",
+      "conv_id": "conv-30",
+      "question": "Why did Gina decide to start her own clothing store?",
+      "gold": "She always loved fashion trends and finding unique pieces and she lost her job so decided it was time to start her own business.",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 261,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 11519,
+      "conditions": {
+        "blind": {
+          "pred": "Entrepreneurial spirit, market opportunity.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "To take control of her destiny after losing her job.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "To pursue her passion for fashion.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "To pursue her passion for fashion.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "To take control of her destiny and combine her passions for dance and fashion.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "To build her own brand and gain recognition.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Lost her job at Door Dash",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-30_q0018",
+      "conv_id": "conv-30",
+      "question": "Do Jon and Gina start businesses out of what they love?",
+      "gold": "Yes",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 261,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 11519,
+      "conditions": {
+        "blind": {
+          "pred": "Yes, they do.",
+          "exact": 1,
+          "correct": 1
+        },
+        "window-10": {
+          "pred": "Yes, they do.",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Yes, they do.",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "Yes, they do.",
+          "exact": 1,
+          "correct": 1
+        },
+        "full": {
+          "pred": "Yes, they do.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Yes, they do.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Yes, they do.",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-30_q0024",
+      "conv_id": "conv-30",
+      "question": "Which events has Jon participated in to promote his business venture?",
+      "gold": "fair, networking events, dance competition",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 67,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 11519,
+      "conditions": {
+        "blind": {
+          "pred": "Trade shows, webinars, conferences.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Networking events, dance classes, workshops",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Dance studio grand opening",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Marketing strategies, content creation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Networking events, dance competition, dance classes",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Marketing strategies, seeking investors and mentors.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Rehearsals, marketing efforts.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-30_q0025",
+      "conv_id": "conv-30",
+      "question": "What does Jon's dance studio offer?",
+      "gold": "one-on-one metoring and training to dancers,  workshops and classes to local schools and centers",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 131,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 11519,
+      "conditions": {
+        "blind": {
+          "pred": "Dance classes, workshops, performances.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Dance classes, workshops, one-on-one mentoring and training.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Dance classes, workshops, performances.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "one-on-one mentoring and workshops",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Dance classes, workshops, one-on-one mentoring.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Dance classes, workshops, performances.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Dance classes and performances.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-30_q0027",
+      "conv_id": "conv-30",
+      "question": "Did Jon and Gina both participate in dance competitions?",
+      "gold": "Yes",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 101,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 11519,
+      "conditions": {
+        "blind": {
+          "pred": "No.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No mention of dance competitions.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No mention of that.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No mention of that.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Yes, they both participated.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "No mention of that.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "No mention of that.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-30_q0029",
+      "conv_id": "conv-30",
+      "question": "Which cities has Jon visited?",
+      "gold": "Paris, Rome",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 94,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 11519,
+      "conditions": {
+        "blind": {
+          "pred": "New York, London, Tokyo",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Rome",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Paris, Rome",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-30_q0031",
+      "conv_id": "conv-30",
+      "question": "How long did it take for Jon to open his studio?",
+      "gold": "six months",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 82,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 11519,
+      "conditions": {
+        "blind": {
+          "pred": "Time not specified.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Several months",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Several months",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-41_q0011",
+      "conv_id": "conv-41",
+      "question": "What people has Maria met and helped while volunteering?",
+      "gold": "David, Jean, Cindy, Laura",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 108,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 22124,
+      "conditions": {
+        "blind": {
+          "pred": "Seniors, children in need, park visitors.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Veterans, homeless individuals, shelter residents.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Homeless individuals, event attendees, charity participants.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Students, homeless individuals, event participants.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "A little girl named Cindy, and other shelter residents.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Homeless individuals, shelter staff, donors.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Homeless individuals.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-41_q0012",
+      "conv_id": "conv-41",
+      "question": "What test has John taken multiple times?",
+      "gold": "The military aptitude test",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 503,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 22124,
+      "conditions": {
+        "blind": {
+          "pred": "Driving test",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No test mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Political offices",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Local elections",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Military aptitude test",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-41_q0021",
+      "conv_id": "conv-41",
+      "question": "What areas of the U.S. has John been to or is planning to go to?",
+      "gold": "Pacific northwest, east coast",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 421,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 22124,
+      "conditions": {
+        "blind": {
+          "pred": "New York, California, Texas, Florida, planning Midwest.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Not specified in the conversations.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Local areas, no specific places mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Pacific Northwest, East Coast, California",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified in conversation.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-41_q0023",
+      "conv_id": "conv-41",
+      "question": "What desserts has Maria made?",
+      "gold": "Banana split sundae, Peach cobbler",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 397,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 22124,
+      "conditions": {
+        "blind": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Cakes",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Banana split sundae",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-41_q0025",
+      "conv_id": "conv-41",
+      "question": "What European countries has Maria been to?",
+      "gold": "Spain, England",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 391,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 22124,
+      "conditions": {
+        "blind": {
+          "pred": "Spain, France, Italy",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Text doesn't provide information about Maria's travel to European countries.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Spain, England, France (implied)",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-41_q0028",
+      "conv_id": "conv-41",
+      "question": "What causes does John feel passionate about supporting?",
+      "gold": "Veterans, schools, infrastructure",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 352,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 22124,
+      "conditions": {
+        "blind": {
+          "pred": "Endangered species conservation, education reform.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Supporting veterans, fire-fighting, community events, volunteering, mentoring students.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Improved education, infrastructure, politics.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Education, infrastructure, military veterans",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Education, infrastructure, military veterans, community safety.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Veterans, firefighting, education.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Veterans, firefighting, mentorship for local schools.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-41_q0035",
+      "conv_id": "conv-41",
+      "question": "What states has Maria vacationed at?",
+      "gold": "Oregon, Florida",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 255,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 22124,
+      "conditions": {
+        "blind": {
+          "pred": "No states mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The conversation does not mention Maria vacationing anywhere.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Spain, Florida, California",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-41_q0044",
+      "conv_id": "conv-41",
+      "question": "What activities has Maria done with her church friends?",
+      "gold": "Hiking, picnic, volunteer work",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 95,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 22124,
+      "conditions": {
+        "blind": {
+          "pred": "Volunteered at food bank, sang in choir.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Hiked, had picnic, played games",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Organized events, volunteered together.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Mentoring students, volunteering at homeless shelters.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Hiked, played games, had picnic",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Participated in charity events, organized fundraisers.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Volunteering at a homeless shelter, organizing fundraisers.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-41_q0052",
+      "conv_id": "conv-41",
+      "question": "Who have written notes of gratitude to Maria?",
+      "gold": "Cindy, Laura",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 108,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 22124,
+      "conditions": {
+        "blind": {
+          "pred": "Not specified in the question.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Cindy",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "John has.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "John has written notes of gratitude to Maria.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Cindy at the shelter wrote a note.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "John has.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "The conversation does not mention anyone writing notes of gratitude to Maria.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-42_q0001",
+      "conv_id": "conv-42",
+      "question": "What kind of interests do Joanna and Nate share?",
+      "gold": "Watching movies, making desserts",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 248,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19153,
+      "conditions": {
+        "blind": {
+          "pred": "Reading, hiking, cooking.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Gaming, cooking, writing, turtles, movies",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Creative hobbies, gaming, desserts, writing, filmmaking.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Video games, writing, filmmaking, pets, creativity.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Writing, video games, cooking, hiking, pets, movies.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Hobbies, projects, personal growth, pets",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Writing, gaming, cooking, pets, movies, recipes",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-42_q0005",
+      "conv_id": "conv-42",
+      "question": "What are Joanna's hobbies?",
+      "gold": "Writing, watchingmovies, exploringnature, hanging withfriends.",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 582,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19153,
+      "conditions": {
+        "blind": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Writing, baking, DIY projects, hiking",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Writing, filmmaking",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Writing, filmmaking",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Writing, reading, watching movies, exploring nature.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Writing scripts, supporting friends.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Writing, filmmaking, reading.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-42_q0023",
+      "conv_id": "conv-42",
+      "question": "Which of Joanna's screenplay were rejected from production companies?",
+      "gold": "first screenplay on drama and romance, third screenplay on loss identity and connection",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 145,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19153,
+      "conditions": {
+        "blind": {
+          "pred": "\"arose\"",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Another movie script",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Screenplay not specified.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Another road trip script",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Multiple scripts.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-42_q0058",
+      "conv_id": "conv-42",
+      "question": "What things has Nate reccomended to Joanna?",
+      "gold": "A pet,\"The Lord of the Rings\" movies,a dragon book series,coconut flavoring,\"Project Hail Mary\" book,Xenoblade Chronicles, dairy-free margarine, coconut oil",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 63,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19153,
+      "conditions": {
+        "blind": {
+          "pred": "Reading, hiking, trying new recipes.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "cooking equipment, movie recommendations, gaming content creation",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Dairy-free dessert recipes",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Cooking recipes, gaming tips.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "ice cream recipe, movie recommendations",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "No specific recommendations mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Movie recommendations, recipes.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-42_q0061",
+      "conv_id": "conv-42",
+      "question": "What mediums does Nate use to play games?",
+      "gold": "Gamecube, PC,Playstation.",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 65,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19153,
+      "conditions": {
+        "blind": {
+          "pred": "Video game console, PC, mobile device.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "video games, YouTube",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Video games, tournaments.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Video games, possibly online.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "video games, gaming console, computer",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Video game tournaments.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "YouTube, video game tournaments.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-42_q0067",
+      "conv_id": "conv-42",
+      "question": "What pets does Nate have?",
+      "gold": "A dog and threeturtles.",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 25,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19153,
+      "conditions": {
+        "blind": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Turtles",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "No pets mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Turtles",
+          "exact": 1,
+          "correct": 1
+        },
+        "full": {
+          "pred": "Turtles",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Turtles",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Turtles",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-42_q0069",
+      "conv_id": "conv-42",
+      "question": "How many turtles does Nate have?",
+      "gold": "Three",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 25,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19153,
+      "conditions": {
+        "blind": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Three",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Three turtles.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Number not specified.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-42_q0070",
+      "conv_id": "conv-42",
+      "question": "What activities does Nate do with his turtles?",
+      "gold": "takes them onwalks, holds them,feeds themstrawberries, givesthem baths.",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 17,
+        "distance_bin": "mid"
+      },
+      "full_context_tokens": 19153,
+      "conditions": {
+        "blind": {
+          "pred": "Feeds, cleans tank, plays.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Walks, baths, feeding, observing.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Feeds them dairy-free treats.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Feeds, plays with, cares for.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Walks, baths, observing, feeding.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Feeds them, cleans tank, plays with them.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Feeds them, plays with them.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-42_q0075",
+      "conv_id": "conv-42",
+      "question": "What are Nate's favorite desserts?",
+      "gold": "coconut milk icecream, dairy-free chocolate cake with berries, chocolate and mixed-berry icecream, dairy-free chocolate mousse",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 221,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19153,
+      "conditions": {
+        "blind": {
+          "pred": "Chocolate cake, ice cream.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Coconut milk ice cream, chocolate cake with raspberries.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "dairy-free desserts",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "Turtles love lettuce, not desserts.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Coconut milk ice cream, chocolate mousse",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Dairy-free desserts.",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Chocolate cake",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-42_q0082",
+      "conv_id": "conv-42",
+      "question": "What recipes has Nate made?",
+      "gold": "coconut milk icecream, chocolate and vanilla swirl",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 550,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19153,
+      "conditions": {
+        "blind": {
+          "pred": "No recipes mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Coconut milk ice cream, flavored bowls of coconut milk ice cream.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Dairy-free desserts.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Coconut milk ice cream, vegan ice cream, chocolate mousse",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "No recipes mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified in the conversation.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-43_q0009",
+      "conv_id": "conv-43",
+      "question": "Which endorsement deals has John been offered?",
+      "gold": "basketball shoes and gear deal with Nike, potential sponsorship with Gatorade, Moxie a popular beverage company, outdoor gear company",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 11,
+        "distance_bin": "mid"
+      },
+      "full_context_tokens": 21460,
+      "conditions": {
+        "blind": {
+          "pred": "Lack of context. Need more information.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Yoga and a beverage company.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Basketball-related products.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Nike and Gatorade",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Nike, Gatorade, and a beverage company.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Basketball-related endorsement deal.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Beverage company deal.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-43_q0014",
+      "conv_id": "conv-43",
+      "question": "What kind of writing does Tim do?",
+      "gold": "comments on favorite books in a fantasy literature forum, articles on fantasy novels, studying characters, themes, and making book recommendations, writing a fantasy novel",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 356,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21460,
+      "conditions": {
+        "blind": {
+          "pred": "Novels and short stories.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Not mentioned in the conversation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Fantasy novel writing",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Fantasy literature.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Fantasy literature",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-43_q0025",
+      "conv_id": "conv-43",
+      "question": "What similar sports collectible do Tim and John own?",
+      "gold": "signed basketball",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 312,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21460,
+      "conditions": {
+        "blind": {
+          "pred": "Baseball cards",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "violin and basketball",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Harry Potter-themed basketball cards",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Harry Potter figurines",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Tim has a signed basketball, John has signed jerseys.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Basketball cards",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Basketball cards",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-43_q0030",
+      "conv_id": "conv-43",
+      "question": "Which cities has John been to?",
+      "gold": "Seattle, Chicago, New York, and Paris.",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 40,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21460,
+      "conditions": {
+        "blind": {
+          "pred": "New York, Beijing, Tokyo",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Galway, Barcelona",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Minneapolis",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Minneapolis",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Minnesota, Chicago, New York City, Edinburgh, Galway, Barcelona",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-43_q0035",
+      "conv_id": "conv-43",
+      "question": "What outdoor activities does John enjoy?",
+      "gold": "Hiking, surfing",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 427,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21460,
+      "conditions": {
+        "blind": {
+          "pred": "Hiking, biking, fishing",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Yoga, hiking, basketball, speaking at charity events.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Playing basketball.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Playing basketball",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Hiking, basketball, yoga",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Basketball trips.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Basketball",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-43_q0036",
+      "conv_id": "conv-43",
+      "question": "Who is Tim and John's favorite basketball player?",
+      "gold": "LeBron James",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 312,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21460,
+      "conditions": {
+        "blind": {
+          "pred": "LeBron James",
+          "exact": 1,
+          "correct": 1
+        },
+        "window-10": {
+          "pred": "The conversation doesn't mention a specific favorite basketball player for either Tim or John.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not mentioned",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not mentioned",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "LeBron James",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-43_q0038",
+      "conv_id": "conv-43",
+      "question": "which country has Tim visited most frequently in his travels?",
+      "gold": "UK",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 284,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21460,
+      "conditions": {
+        "blind": {
+          "pred": "China",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Ireland",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Ireland",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Ireland",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Ireland",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Ireland",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Ireland",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-43_q0043",
+      "conv_id": "conv-43",
+      "question": "What does John like about Lebron James?",
+      "gold": "His heart, determination, skills, and leadership.",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 309,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21460,
+      "conditions": {
+        "blind": {
+          "pred": "His skills, athleticism, leadership.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "His skills and leadership.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Great player, inspiring.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Great athleticism and leadership.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Lebron's determination and heart.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "His skills and leadership.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "His skills and leadership.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-43_q0050",
+      "conv_id": "conv-43",
+      "question": "Which book was John reading during his recovery from an ankle injury?",
+      "gold": "The Alchemist",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 250,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21460,
+      "conditions": {
+        "blind": {
+          "pred": "The Great Gatsby",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "\"Dune\" by Frank Herbert",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Harry Potter and the Cursed Child",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The Name of the Wind",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "\"The Alchemist\"",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-43_q0059",
+      "conv_id": "conv-43",
+      "question": "Which career-high performances did John achieve in 2023?",
+      "gold": "highest point score, highest assist",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 165,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21460,
+      "conditions": {
+        "blind": {
+          "pred": "Data unavailable. Please provide more context.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Assists in a big game against a rival.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Top scorer in key games.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Organized successful benefit game, signed with Minnesota Wolves.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Assists in a big game against a rival.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not specified in summary.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified in the conversation.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-44_q0017",
+      "conv_id": "conv-44",
+      "question": "How many times did Audrey and Andew plan to hike together?",
+      "gold": "three times",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 63,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21131,
+      "conditions": {
+        "blind": {
+          "pred": "Twice",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Twice",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not mentioned",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "They planned to hike twice.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Twice",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-44_q0018",
+      "conv_id": "conv-44",
+      "question": "Where did Audrey get Pixie from?",
+      "gold": "breeder",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 425,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21131,
+      "conditions": {
+        "blind": {
+          "pred": "From a friend.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "From a shelter.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "From a friend's litter.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "From her, not specified in the conversation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "From a friend's litter.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "From a rescue center.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-44_q0023",
+      "conv_id": "conv-44",
+      "question": "What are some problems that Andrew faces before he adopted Toby?",
+      "gold": "Finding the right dog and pet-friendly apartments close to open spaces",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 557,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21131,
+      "conditions": {
+        "blind": {
+          "pred": "Lone living, loneliness.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Not specified in the conversation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Living in the city, finding dog-friendly spots.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "No prior pets, unsure about responsibilities.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Transitioning Scout into household.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-44_q0026",
+      "conv_id": "conv-44",
+      "question": "What is the biggest stressor in Andrew's life besides not being able to hike frequently?",
+      "gold": "work",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 271,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21131,
+      "conditions": {
+        "blind": {
+          "pred": "Work responsibilities.",
+          "exact": 1,
+          "correct": 1
+        },
+        "window-10": {
+          "pred": "Not being able to take his dogs to the groomer yet.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Adopting a new dog",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not adopting another dog.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Work stress",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not being able to train his new dog effectively.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Integrating Scout into his household.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-44_q0032",
+      "conv_id": "conv-44",
+      "question": "What kind of tattoo does Audrey have on her arm?",
+      "gold": "Tattoos of her four dogs.",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 129,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21131,
+      "conditions": {
+        "blind": {
+          "pred": "Flower tattoo",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Four dogs.",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Not mentioned",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not mentioned",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Audrey has tattoos of her four dogs on her arm.",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "No tattoo mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Dog paw prints",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-44_q0035",
+      "conv_id": "conv-44",
+      "question": "What are the names of Andrew's dogs?",
+      "gold": "Toby, Scout, Buddy",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 10,
+        "distance_bin": "mid"
+      },
+      "full_context_tokens": 21131,
+      "conditions": {
+        "blind": {
+          "pred": "Names not provided in question.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Toby, Buddy, Scout",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Scout",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "Andrew's main dog is Scout.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Toby, Buddy, Scout",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Buddy and Max",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Scout",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-44_q0039",
+      "conv_id": "conv-44",
+      "question": "What did Audrey get wtih having so many dogs?",
+      "gold": "Companionship",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 131,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21131,
+      "conditions": {
+        "blind": {
+          "pred": "Lots of love, but also responsibility.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Many responsibilities, lots of love.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "More companionship, busier schedule.",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "More love, more responsibility.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Audrey got lots of love, joy, and companionship.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "More love, more responsibility.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "More love, more responsibility.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-200": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        }
+      }
+    },
+    {
+      "q_uid": "conv-44_q0048",
+      "conv_id": "conv-44",
+      "question": "What does Andrew view his pets as?",
+      "gold": "Family",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 0,
+        "distance_bin": "near"
+      },
+      "full_context_tokens": 21131,
+      "conditions": {
+        "blind": {
+          "pred": "Companions and family members.",
+          "exact": 1,
+          "correct": 1
+        },
+        "window-10": {
+          "pred": "Part of his family.",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Companions and joy.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Companions and joy.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Part of his family.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Part of his family.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Companions and family members.",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-44_q0049",
+      "conv_id": "conv-44",
+      "question": "What does Audrey view her pets as?",
+      "gold": "Family",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 131,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21131,
+      "conditions": {
+        "blind": {
+          "pred": "Family members.",
+          "exact": 1,
+          "correct": 1
+        },
+        "window-10": {
+          "pred": "Part of her family.",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Family members.",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "Companions and family members.",
+          "exact": 1,
+          "correct": 1
+        },
+        "full": {
+          "pred": "Family members.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Part of her family.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Companions and family members.",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-44_q0050",
+      "conv_id": "conv-44",
+      "question": "What is a skill that Audrey learned to take care of her dogs?",
+      "gold": "Grooming",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 289,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21131,
+      "conditions": {
+        "blind": {
+          "pred": "Feeding and grooming.",
+          "exact": 1,
+          "correct": 1
+        },
+        "window-10": {
+          "pred": "Positive reinforcement techniques",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Grooming skills",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "Joined dog owners group",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Dog grooming",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Grooming skills",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Grooming",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-44_q0054",
+      "conv_id": "conv-44",
+      "question": "What activity do Audrey's dogs like to do in the dog park?",
+      "gold": "Play fetch with ball and frisbee, run around and meet other dogs",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 24,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 21131,
+      "conditions": {
+        "blind": {
+          "pred": "Chase frisbees, run, play.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Fetch and Frisbee",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Based on the information provided, the answer cannot be determined. The conversation did not mention Audrey's dogs' preferences at the park.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Fetch and Frisbee",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Play fetch and chase.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Play and run.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-44_q0056",
+      "conv_id": "conv-44",
+      "question": "Has Andrew moved into a new apartment for his dogs?",
+      "gold": "No",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 6,
+        "distance_bin": "mid"
+      },
+      "full_context_tokens": 21131,
+      "conditions": {
+        "blind": {
+          "pred": "No details provided.",
+          "exact": 1,
+          "correct": 1
+        },
+        "window-10": {
+          "pred": "No, not mentioned.",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "No mention of moving.",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "No mention of moving.",
+          "exact": 1,
+          "correct": 1
+        },
+        "full": {
+          "pred": "No, not mentioned.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "No mention of moving.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "No mention of moving.",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        }
+      }
+    },
+    {
+      "q_uid": "conv-44_q0060",
+      "conv_id": "conv-44",
+      "question": "How many dogs does Andrew have?",
+      "gold": "3",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 12,
+        "distance_bin": "mid"
+      },
+      "full_context_tokens": 21131,
+      "conditions": {
+        "blind": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Three dogs: Toby, Buddy, and Scout.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Andrew has 1 dog.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Two, including Scout.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Three dogs: Toby, Buddy, and Scout.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Two",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "One",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-47_q0002",
+      "conv_id": "conv-47",
+      "question": "Which places or events have John and James planned to meet at?",
+      "gold": "VR Club, McGee's, baseball game",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 185,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20539,
+      "conditions": {
+        "blind": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No specific places or events mentioned for meeting.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not specified in the conversation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified in the conversation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "McGee's Pub, baseball game, animal sanctuary",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not specified in the conversation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned in the conversation.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-47_q0008",
+      "conv_id": "conv-47",
+      "question": "How many pets does James have?",
+      "gold": "Three dogs.",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 582,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20539,
+      "conditions": {
+        "blind": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Three dogs.",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "No pets mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Two",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Three pets.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "One, plus Ned.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-47_q0009",
+      "conv_id": "conv-47",
+      "question": "What are the names of James's dogs?",
+      "gold": "Ned, Daisy, Max",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 582,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20539,
+      "conditions": {
+        "blind": {
+          "pred": "Names not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The conversation does not provide the names of James's dogs.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Ned",
+          "exact": 1,
+          "correct": 1
+        },
+        "full": {
+          "pred": "Max, Daisy, Ned",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Ned",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-47_q0018",
+      "conv_id": "conv-47",
+      "question": "Which books has John recommended to James?",
+      "gold": "The Name of the Wind, Stormlight Archive, Kingkiller Chronicles, Expanse",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 384,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20539,
+      "conditions": {
+        "blind": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "John mentioned a book that helped him create puzzles for his game, but no other specific books were recommended to James.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No specific books mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No books mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "\"The Name of the Wind\", \"The Stormlight Archive\", \"Kingkiller Chronicle\", \"The Expanse\" series",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "No specific books mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "No books mentioned.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-47_q0020",
+      "conv_id": "conv-47",
+      "question": "How many charity tournaments has John organized till date?",
+      "gold": "two",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 59,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20539,
+      "conditions": {
+        "blind": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "2",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Two",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "One",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-47_q0026",
+      "conv_id": "conv-47",
+      "question": "Which countries has James visited?",
+      "gold": "Italy, Mexico, Turkey, Canada, Greenland",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 303,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20539,
+      "conditions": {
+        "blind": {
+          "pred": "Information not available.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Based on the conversation, James has not mentioned visiting any specific countries. He has mentioned visiting friends and doing a road trip, but no countries are named.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Stamford, Italy, Turkey, Mexico, Canada, Greenland",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-47_q0034",
+      "conv_id": "conv-47",
+      "question": "Which countries did James visit in July 2022?",
+      "gold": "Canada, Greenland",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 303,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20539,
+      "conditions": {
+        "blind": {
+          "pred": "Lack of context or information.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Based on the conversation, there is no mention of any countries James visited in July 2022. The conversations primarily cover events from September 2022 onwards.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Nuuk, Canada",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-47_q0045",
+      "conv_id": "conv-47",
+      "question": "What kind of beer does McGee's bar serve?",
+      "gold": "Stout, lager",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 188,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20539,
+      "conditions": {
+        "blind": {
+          "pred": "Not specified.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Lager beer",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "stout",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-47_q0060",
+      "conv_id": "conv-47",
+      "question": "What games has John played with his friends at charity tournaments?",
+      "gold": "CS:GO, Fortnite, Overwatch and Apex Legends",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 57,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20539,
+      "conditions": {
+        "blind": {
+          "pred": "No specific games mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Fortnite, Overwatch, Apex Legends",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Chess tournaments.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "The Witcher 3, RPGs",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "CS:GO",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "CS:GO tournaments.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-48_q0001",
+      "conv_id": "conv-48",
+      "question": "Which of Deborah`s family and friends have passed away?",
+      "gold": "mother, father, her friend Karlie",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 551,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19768,
+      "conditions": {
+        "blind": {
+          "pred": "Lily, Tom",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Deborah's mother.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Deborah's mother.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Deborah's mother and Anna.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "The conversation does not specify which family or friends of Deborah have passed away.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-48_q0008",
+      "conv_id": "conv-48",
+      "question": "What helped Deborah find peace when grieving deaths of her loved ones?",
+      "gold": "yoga, old photos, the roses and dahlias in a flower garden, nature",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 340,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19768,
+      "conditions": {
+        "blind": {
+          "pred": "Writing and art helped.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Yoga and nature.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Yoga and nature.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Yoga and meditation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Visiting her mom's old house, sitting on a special bench.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Yoga and meditation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Her pets, hobbies, community connections.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-48_q0014",
+      "conv_id": "conv-48",
+      "question": "What were Deborah's mother's hobbies?",
+      "gold": "reading, traveling, art, cooking",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 45,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19768,
+      "conditions": {
+        "blind": {
+          "pred": "Text not provided about Deborah's mother's hobbies.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Cooking, baking",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Travel and reading.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-48_q0039",
+      "conv_id": "conv-48",
+      "question": "What time management techniques do Deborah and Jolene use?",
+      "gold": "the Pomodoro Technique - 25 minutes work and 5-minute break, scheduler or to-do list, The Eisenhower Matrix, bullet journal",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 292,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19768,
+      "conditions": {
+        "blind": {
+          "pred": "Deborah uses Pomodoro Technique; Jolene uses Eisenhower Matrix.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Deborah and Jolene use routines and schedules.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Prioritize tasks, set goals, schedule breaks.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Deborah uses daily schedules/to-do lists, Jolene uses Pomodoro Technique.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned in the conversation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-48_q0041",
+      "conv_id": "conv-48",
+      "question": "What ways do Deborah and Jolene use to enhance their yoga practice?",
+      "gold": "candles, music, essential oils",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 64,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19768,
+      "conditions": {
+        "blind": {
+          "pred": "Deborah and Jolene attend workshops, use apps, and practice regularly.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Deborah practices on the beach, uses essential oils, listens to soothing music. Jolene creates a serene space with candles and oils.",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Attending retreats, practicing regularly.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "They explore new activities like scuba diving and surfing.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Deborah uses candles and essential oils, Jolene uses candles, oils, and soft music.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Deborah organizes community classes.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Deborah initiates workshops, Jolene focuses on sustainable projects.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-48_q0077",
+      "conv_id": "conv-48",
+      "question": "Where did Jolene and her partner find a cool diving spot?",
+      "gold": "Phuket",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 48,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19768,
+      "conditions": {
+        "blind": {
+          "pred": "Blue Lagoon, Hawaii",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Last Friday's scuba diving lesson.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Briefly: Jolene didn't mention a specific spot.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "A local reef.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "During a scuba diving lesson last Friday.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned in the conversation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-48_q0079",
+      "conv_id": "conv-48",
+      "question": "Has Deborah tried surfing?",
+      "gold": "yes",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 27,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19768,
+      "conditions": {
+        "blind": {
+          "pred": "No.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No, but she wants to try it with Jolene.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No, not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Yes, she has.",
+          "exact": 1,
+          "correct": 1
+        },
+        "full": {
+          "pred": "Yes, she has tried surfing.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "No, not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-48_q0082",
+      "conv_id": "conv-48",
+      "question": "Which locations does Deborah practice her yoga at?",
+      "gold": "at her mother's old home, park, yoga studio, beach",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 545,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19768,
+      "conditions": {
+        "blind": {
+          "pred": "Deborah practices yoga at home and studios.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "beach, home, yoga retreat",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "retreats, nature",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Community center, outdoors",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Deborah practices yoga at her mom's old house, near her house, and on the beach.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Community center",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "community center, outdoors",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-48_q0085",
+      "conv_id": "conv-48",
+      "question": "Which community activities have Deborah and Anna participated in?",
+      "gold": "yoga, running",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 368,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 19768,
+      "conditions": {
+        "blind": {
+          "pred": "Deborah and Anna participated in book clubs, hiking groups, and art classes.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Deborah ran a free gardening class. Anna and her partner tried scuba diving.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Community events, gardening classes.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Deborah's community yoga events.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Yoga retreat, running group",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Deborah started a yoga retreat and a community gardening class.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Deborah started a yoga retreat and a community gardening class.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-49_q0006",
+      "conv_id": "conv-49",
+      "question": "How many roadtrips did Evan take in May 2023?",
+      "gold": "two",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 486,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 16440,
+      "conditions": {
+        "blind": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The conversation doesn't mention any road trips Evan took in May 2023.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Two road trips.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-49_q0007",
+      "conv_id": "conv-49",
+      "question": "What new hobbies did Sam consider trying?",
+      "gold": "Painting, kayaking, hiking, cooking, running",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 101,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 16440,
+      "conditions": {
+        "blind": {
+          "pred": "Painting, hiking, cooking",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Yoga",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Painting, hiking",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not mentioned.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Sam considered trying yoga.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Hiking, painting, cooking.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "painting",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-49_q0008",
+      "conv_id": "conv-49",
+      "question": "What hobby did Evan start practicing a few years ago that he enjoys?",
+      "gold": "Watercolor painting",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 358,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 16440,
+      "conditions": {
+        "blind": {
+          "pred": "Gardening",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Painting",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Painting",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "Painting",
+          "exact": 1,
+          "correct": 1
+        },
+        "full": {
+          "pred": "Watercolor painting",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Painting",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Painting",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-49_q0011",
+      "conv_id": "conv-49",
+      "question": "What health issue did Sam face that motivated him to change his lifestyle?",
+      "gold": "Weight problem",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 17,
+        "distance_bin": "mid"
+      },
+      "full_context_tokens": 16440,
+      "conditions": {
+        "blind": {
+          "pred": "Heart disease",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Weight issues motivating healthier lifestyle.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Weight concerns",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "Health issues and weight management",
+          "exact": 0,
+          "correct": 1
+        },
+        "full": {
+          "pred": "Sam faced health issues, specifically weight-related concerns, that motivated him to change his lifestyle.",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Heart scare",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "No specific health issue mentioned.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-49_q0015",
+      "conv_id": "conv-49",
+      "question": "What kind of unhealthy snacks does Sam enjoy eating?",
+      "gold": "soda, candy",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 466,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 16440,
+      "conditions": {
+        "blind": {
+          "pred": "Candy, chips, cookies",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Ginger snaps",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Candy, chips, cookies",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Sugary drinks and snacks.",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Candy, chips, cookies",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-49_q0016",
+      "conv_id": "conv-49",
+      "question": "What recurring issue frustrates Sam at the grocery store?",
+      "gold": "Malfunctioning self-checkout machines.",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 79,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 16440,
+      "conditions": {
+        "blind": {
+          "pred": "Long checkout lines",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "self-checkout issues",
+          "exact": 0,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Healthier options often more expensive.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Healthy food options limited",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "self-checkout machines are broken",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Healthier options overprocessed",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Unhealthy snack options",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-49_q0028",
+      "conv_id": "conv-49",
+      "question": "What kind of writing does Sam do to relax and cope with his health issues?",
+      "gold": "journalling, creative writing",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 299,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 16440,
+      "conditions": {
+        "blind": {
+          "pred": "Creative writing.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No mention of specific writing.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Writing journal entries",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not mentioned",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Writing in his journal and doing creative writing.",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Writes poetry",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Painting",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-49_q0032",
+      "conv_id": "conv-49",
+      "question": "What recurring frustration does Evan experience?",
+      "gold": "Evan consistently misplaces his keys every week.",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 100,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 16440,
+      "conditions": {
+        "blind": {
+          "pred": "Late meetings",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Self-checkout issues",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Health setbacks",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified in the conversation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Evan's recurring frustration is with the self-checkout machines at the supermarket being broken.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Managing stress effectively.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Car breakdowns",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-49_q0042",
+      "conv_id": "conv-49",
+      "question": "How did Evan get into painting?",
+      "gold": "His friend got him into it by gifting him a painting and giving him some advice. The painting inspired Evan.",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 358,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 16440,
+      "conditions": {
+        "blind": {
+          "pred": "Started as a hobby.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Evan started painting when he was feeling a mix of emotions and needed an outlet.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Evan tried it as a stress reliever.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not mentioned in the conversation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Evan got into painting when a friend gave him a painting and inspired him.",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Started as a stress reliever.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not mentioned in brief.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-49_q0050",
+      "conv_id": "conv-49",
+      "question": "What kind of hobbies does Evan pursue?",
+      "gold": "painting, hiking, reading books, biking, skiing, snowboarding, ice skating, swimming, camping, kayaking",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 10,
+        "distance_bin": "mid"
+      },
+      "full_context_tokens": 16440,
+      "conditions": {
+        "blind": {
+          "pred": "Reading, hiking, photography",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "painting, hiking, yoga, skiing",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Painting, hiking.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Painting, hiking",
+          "exact": 1,
+          "correct": 1
+        },
+        "full": {
+          "pred": "painting, watercolor painting, kayaking, hiking, photography",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Painting, hiking, cooking.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Evan pursues painting.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-49_q0072",
+      "conv_id": "conv-49",
+      "question": "Which activity did Sam resume in December 2023 after a long time?",
+      "gold": "hiking",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 97,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 16440,
+      "conditions": {
+        "blind": {
+          "pred": "Playing guitar",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Hiking",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Hiking",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "Kayaking",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Hiking",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Hiking",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Weight Watchers meetings",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-200": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        }
+      }
+    },
+    {
+      "q_uid": "conv-50_q0001",
+      "conv_id": "conv-50",
+      "question": "What items did Calvin buy in March 2023?",
+      "gold": "mansion in Japan, luxury car Ferrari 488 GTB",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 548,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20656,
+      "conditions": {
+        "blind": {
+          "pred": "Laptop, books, groceries",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No information provided about items Calvin bought in March 2023.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Not specified in conversation.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "A new mansion and a luxury car.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-50_q0029",
+      "conv_id": "conv-50",
+      "question": "What are Dave's hobbies other than fixing cars?",
+      "gold": "take a walk, go hiking, listen to favorite albums, live concerts, photography",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 96,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20656,
+      "conditions": {
+        "blind": {
+          "pred": "Lack of context.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Photography",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "Photography",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "Photography",
+          "exact": 1,
+          "correct": 1
+        },
+        "full": {
+          "pred": "Photography, attending car shows.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Photography",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Photography",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-50_q0033",
+      "conv_id": "conv-50",
+      "question": "What was Dave doing in San Francisco?",
+      "gold": "attending a car modification workshop",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 271,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20656,
+      "conditions": {
+        "blind": {
+          "pred": "Attending conference.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "The conversation history does not mention Dave being in San Francisco.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Attending car enthusiast event.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Working on car restoration.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Dave attended a car workshop in San Francisco.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Attending car mod workshop.",
+          "exact": 0,
+          "correct": 1
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Visiting Calvin.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-50_q0045",
+      "conv_id": "conv-50",
+      "question": "What shared activities do Dave and Calvin have?",
+      "gold": "Working on cars",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 213,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20656,
+      "conditions": {
+        "blind": {
+          "pred": "Playing video games, hiking",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Music, car restoration, photography, networking, attending events.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Car enthusiast events, photography, music.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Sharing updates, supporting each other, reminiscing, discussing passions.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Music, car restoration, photography, networking, freestyling",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Music, cars, photography",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Supporting each other's passions.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": true,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-50_q0056",
+      "conv_id": "conv-50",
+      "question": "Which cities did Dave travel to in 2023?",
+      "gold": "San Francsico, Detroit",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 111,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20656,
+      "conditions": {
+        "blind": {
+          "pred": "New York, Tokyo, London",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Boston, Detroit",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Paris, Tokyo, Berlin",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Boston, Detroit",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Boston",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-50_q0060",
+      "conv_id": "conv-50",
+      "question": "What gifts has Calvin received from his artist friends?",
+      "gold": "gold chain, custom-made guitar with an octopus on it",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 283,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20656,
+      "conditions": {
+        "blind": {
+          "pred": "Paintings, sculptures, prints.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "No mention of specific gifts from artist friends.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "No mention of specific gifts from artist friends.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "No mention of specific gifts.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-50_q0063",
+      "conv_id": "conv-50",
+      "question": "What style of guitars does Calvin own?",
+      "gold": "custom-made yellow guitar with an octopus on it, shiny purple guitar",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 278,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20656,
+      "conditions": {
+        "blind": {
+          "pred": "Acoustic and electric.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Information not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Info not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Details not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Custom-made with octopus design.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Details not provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not specified",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-50_q0064",
+      "conv_id": "conv-50",
+      "question": "What activities has Dave participated in with his friends?",
+      "gold": "weekly visits to local parks, countryside roadtrip, celebration of the opening of his car maintenance shop, card-playing nights",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 311,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20656,
+      "conditions": {
+        "blind": {
+          "pred": "No information provided.",
+          "exact": 0,
+          "correct": 0
+        },
+        "window-10": {
+          "pred": "Worked on car projects, attended conferences, took photos, performed music.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-80": {
+          "pred": "Car restoration projects, photography.",
+          "exact": 0,
+          "correct": 0
+        },
+        "summary-200": {
+          "pred": "Shared updates, discussed car mods, traveled together.",
+          "exact": 0,
+          "correct": 0
+        },
+        "full": {
+          "pred": "Card night, attending a rock concert.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Attended car mod workshop together.",
+          "exact": 0,
+          "correct": 0
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Car restoration, photography",
+          "exact": 0,
+          "correct": 0
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    },
+    {
+      "q_uid": "conv-50_q0066",
+      "conv_id": "conv-50",
+      "question": "Do all of Dave's car restoration projects go smoothly?",
+      "gold": "No",
+      "evidence_distance": {
+        "found": true,
+        "turns_from_end": 88,
+        "distance_bin": "far"
+      },
+      "full_context_tokens": 20656,
+      "conditions": {
+        "blind": {
+          "pred": "No.",
+          "exact": 1,
+          "correct": 1
+        },
+        "window-10": {
+          "pred": "No, some are challenging.",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-80": {
+          "pred": "No, not all go smoothly.",
+          "exact": 1,
+          "correct": 1
+        },
+        "summary-200": {
+          "pred": "No, not all go smoothly.",
+          "exact": 1,
+          "correct": 1
+        },
+        "full": {
+          "pred": "No, some have issues like the Mustang with unexpected noises.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum80": {
+          "pred": "Not mentioned.",
+          "exact": 1,
+          "correct": 1
+        },
+        "cross-qwen3b-sum200": {
+          "pred": "Not all go smoothly.",
+          "exact": 1,
+          "correct": 1
+        }
+      },
+      "gold_presence": {
+        "full": {
+          "exact": true,
+          "judge": true,
+          "judge_called": false
+        },
+        "summary-80": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        },
+        "summary-200": {
+          "exact": false,
+          "judge": false,
+          "judge_called": true
+        }
+      }
+    }
+  ],
+  "_provenance": {
+    "git_commit": "937db806a54f58e672b07b0727c3a52d0ce2683f",
+    "script": "e29_locomo.py",
+    "model": "qwen7b",
+    "timestamp": "2026-08-21T15:36:49.933820",
+    "device": "nvidia_rtx_a6000",
+    "n": 100,
+    "args": {
+      "model": "qwen7b"
+    }
+  }
+}

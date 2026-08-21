@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-21 (E26 fully complete: cold + decode + warm-append + YaRN; within-vLLM gap corrected to 75–181×; HF update-latency plateau diagnosed; phase1 report section replaced)
+Last updated: 2026-08-21 (E29 complete: tier-heterogeneous Q table; qwen3b device tier + qwen7b edge/cloud tier; sanity checks PASS; Q table model-dependent in gist-compressible regime; cross-tier summaries no benefit; device tier 57% capable on dense)
 
 ## Framing
 
