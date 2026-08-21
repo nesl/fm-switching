@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-20 (E27 complete; E26 2-point calibration done)
+Last updated: 2026-08-21 (E26 follow-up complete: cold + decode calibration; phase1 report updated)
 
 ## Framing
 

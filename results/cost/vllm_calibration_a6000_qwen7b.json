@@ -1,67 +1,160 @@
 {
   "experiment": "E26",
-  "description": "vLLM cold-prefill calibration vs HF baseline (E21)",
+  "description": "vLLM cold-prefill + decode calibration vs HF baseline (E21/E27)",
   "model": "Qwen/Qwen2.5-7B-Instruct",
   "model_slug": "qwen7b",
   "device": "a6000",
-  "prefix_caching_cold": false,
-  "reps": 5,
   "l_sweep": [
     1024,
     8192,
-    32768
+    32768,
+    65536
   ],
+  "reps": 5,
+  "decode_budgets": [
+    80,
+    200
+  ],
+  "kv_cache_config": {
+    "num_gpu_blocks": null,
+    "block_size": 16
+  },
   "cold_prefill": {
     "1024": {
-      "actual_L_tokens": 1024,
+      "actual_L_tokens": 1028,
       "feasible": true,
-      "median_s": 0.1465,
-      "iqr_s": 0.0009,
+      "median_s": 0.1432,
+      "iqr_s": 0.0008,
       "all_s": [
-        0.1463,
-        0.1464,
-        0.1465,
-        0.1467,
-        0.1479
-      ],
-      "peak_gpu_gb_median": 0.0
+        0.1425,
+        0.143,
+        0.1432,
+        0.1434,
+        0.1437
+      ]
     },
     "8192": {
-      "actual_L_tokens": 8192,
+      "actual_L_tokens": 8223,
       "feasible": true,
-      "median_s": 1.153,
-      "iqr_s": 0.0105,
+      "median_s": 1.1899,
+      "iqr_s": 0.0044,
       "all_s": [
-        1.149,
-        1.1494,
-        1.153,
-        1.159,
-        1.1603
-      ],
-      "peak_gpu_gb_median": 0.0
+        1.1888,
+        1.1892,
+        1.1899,
+        1.1907,
+        1.1962
+      ]
     },
     "32768": {
-      "error": "The decoder prompt (length 32918) is longer than the maximum model length of 32768. Make sure that `max_model_len` is no smaller than the number of text tokens.",
-      "feasible": false
+      "feasible": false,
+      "error": "EngineCore encountered an issue. See stack trace (above) for the root cause.",
+      "actual_L_tokens": 32892
+    },
+    "65536": {
+      "feasible": false,
+      "error": "skipped: prior L failed (RoPE OOB)"
     }
   },
-  "warm_append_secondary": {},
+  "decode": {
+    "1024": {
+      "actual_L_tokens": 1028,
+      "budget_80": {
+        "feasible": true,
+        "total_refresh": {
+          "median_s": 1.946,
+          "iqr_s": 0.0039,
+          "all_s": [
+            1.9448,
+            1.9451,
+            1.946,
+            1.9488,
+            1.9488
+          ]
+        },
+        "decode_only_s": 1.8028,
+        "decode_tps": 44.38,
+        "note": "total_refresh = cold_prefill(L) + decode(budget); decode_only_s = total_median - cold_prefill_median"
+      },
+      "budget_200": {
+        "feasible": true,
+        "total_refresh": {
+          "median_s": 4.6934,
+          "iqr_s": 0.0123,
+          "all_s": [
+            4.6829,
+            4.6842,
+            4.6934,
+            4.6938,
+            4.6979
+          ]
+        },
+        "decode_only_s": 4.5502,
+        "decode_tps": 43.95,
+        "note": "total_refresh = cold_prefill(L) + decode(budget); decode_only_s = total_median - cold_prefill_median"
+      }
+    },
+    "8192": {
+      "actual_L_tokens": 8223,
+      "budget_80": {
+        "feasible": true,
+        "total_refresh": {
+          "median_s": 3.082,
+          "iqr_s": 0.011,
+          "all_s": [
+            3.0738,
+            3.0741,
+            3.082,
+            3.083,
+            3.0869
+          ]
+        },
+        "decode_only_s": 1.8921,
+        "decode_tps": 42.28,
+        "note": "total_refresh = cold_prefill(L) + decode(budget); decode_only_s = total_median - cold_prefill_median"
+      },
+      "budget_200": {
+        "feasible": true,
+        "total_refresh": {
+          "median_s": 5.9573,
+          "iqr_s": 0.013,
+          "all_s": [
+            5.9414,
+            5.9492,
+            5.9573,
+            5.9581,
+            5.9584
+          ]
+        },
+        "decode_only_s": 4.7675,
+        "decode_tps": 41.95,
+        "note": "total_refresh = cold_prefill(L) + decode(budget); decode_only_s = total_median - cold_prefill_median"
+      }
+    },
+    "32768": {
+      "skipped": "cold prefill infeasible"
+    },
+    "65536": {
+      "skipped": "prior L infeasible"
+    }
+  },
   "_provenance": {
-    "git_commit": "565efb94018c1749ebb1cb972f47ea81ee81b176",
+    "git_commit": "8c753752515b54bc56c94e016c48a2854f3f92da",
     "script": "vllm_calibration.py",
     "model": "qwen7b",
-    "timestamp": "2026-08-20T21:04:29.493802",
+    "timestamp": "2026-08-21T08:38:09.526554",
     "device": "a6000",
-    "n": 15,
+    "n": 20,
     "args": {
-      "l_tokens": "1024,8192,32768",
+      "l_tokens": "1024,8192,32768,65536",
       "reps": 5,
-      "warm": false,
       "gpu_mem_fraction": 0.92
     },
     "vllm_version": "0.8.5",
     "torch_version": "2.6.0+cu124",
     "cuda_version": "12.4",
-    "cuda_visible_devices": "1"
+    "max_model_len": 131072,
+    "cuda_visible_devices": "1",
+    "kv_note": "peak_gpu_gb not reported: vLLM preallocates a fixed KV pool; torch.cuda.max_memory_allocated() returns 0 inside the vLLM worker process. Use kv_cache_config for pool size."
   }
 }

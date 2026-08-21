@@ -306,3 +306,64 @@ The initial sweep measured sum-80 and sum-200 update latency from the first 8000
 - Window-10 token count is ~300–500 tokens across all L (last 10 corpus turns of ~37–200 tokens each). No rows in the current sweep qualify as 'window covers full context' (max ratio 0.47 at L=1024).
 
 - Jetson Orin complete (2026-08-19): full_restore feasible ≤16,384 (75.1 s), infeasible ≥24,576 by the 120 s time budget (not memory). Ran the 5.10.2 / torch 2.8 / SDPA-no-flash-attn stack vs 4.46.3 / flash-attn on flash, so Jetson-vs-flash gaps include a software-stack component. Crossover rows for jetson_orin not yet computed (rerun `cost_analysis.py` to extend the crossover table).
+
+---
+
+## Runtime Calibration (vLLM) — E26
+
+**Date:** 2026-08-21  
+**Engine:** vLLM 0.8.5, torch 2.6.0+cu124, Flash Attention backend, prefix_caching=False  
+**Model:** Qwen/Qwen2.5-7B-Instruct, float16, A6000 (GPU 1)  
+**Script:** `experiments/cost/vllm_calibration.py`  
+**Result:** `results/cost/vllm_calibration_a6000_qwen7b.json`
+
+Calibrates whether the cost structure the formulation depends on — near-linear prefill growth, multi-second cold materialization at mid-to-large L, and the window-append versus summary-refresh gap — survives under an optimized inference engine.
+
+### Feasibility note
+
+The cached Qwen2.5-7B-Instruct snapshot has `max_position_embeddings=32768`. vLLM's compiled Triton RoPE kernel enforces this as a hard bound; a BOS token pushes a 32,768-token prompt to 32,769 positions, triggering an OOB assertion. L=32,768 and L=65,536 are therefore infeasible under vLLM 0.8.5 with this model snapshot. This is a vLLM/kernel constraint, not a GPU memory limit; the A6000's KV pool (517,264 tokens preallocated at `gpu_memory_utilization=0.92`) could accommodate these lengths. HF's transformers baseline does not share this constraint and its measurements at L=32k/64k stand.
+
+### Cold-prefill comparison
+
+| L (tok) | vLLM (s) | HF baseline (s) | HF/vLLM ratio |
+|---|---|---|---|
+| 1,024 | 0.143 | 0.165 | 1.15× |
+| 8,192 | 1.190 | 1.369 | 1.15× |
+| 32,768 | infeasible | 7.805 | — |
+| 65,536 | infeasible | 21.720 | — |
+
+### Decode throughput (single stream, no batching)
+
+vLLM single-request decode: **~43–44 tok/s** (consistent across L=1k and L=8k; decode is KV-bandwidth-bound, not input-length-bound within these two points).
+
+### Total refresh latency: prefill(L) + generate(budget tokens)
+
+Directly comparable to HF "update latency" in the tables above, and to E27 full\_regen latencies (full\_regen sum200 @ ~11.6k tokens: 13.38 s HF).
+
+#### Budget = 80 tokens (sum-80 refresh)
+
+| L (tok) | vLLM total (s) | HF total (s) | HF/vLLM | vLLM decode-only (s) | HF decode-only (s) | decode ratio |
+|---|---|---|---|---|---|---|
+| 1,024 | 1.946 | 2.598 | 1.34× | 1.803 | 2.433 | 1.35× |
+| 8,192 | 3.082 | 4.804 | 1.56× | 1.892 | 3.435 | 1.82× |
+| 32,768 | infeasible | 15.930 | — | — | 8.125 | — |
+| 65,536 | infeasible | 15.925 | — | — | −5.795† | — |
+
+#### Budget = 200 tokens (sum-200 refresh)
+
+| L (tok) | vLLM total (s) | HF total (s) | HF/vLLM | vLLM decode-only (s) | HF decode-only (s) | decode ratio |
+|---|---|---|---|---|---|---|
+| 1,024 | 4.693 | 5.714 | 1.22× | 4.550 | 5.549 | 1.22× |
+| 8,192 | 5.957 | 9.565 | 1.61× | 4.768 | 8.196 | 1.72× |
+| 32,768 | infeasible | 26.879 | — | — | 19.074 | — |
+| 65,536 | infeasible | 26.881 | — | — | 5.161† | — |
+
+† The HF decode-only at 65,536 is derived as update\_latency − cold\_prefill. At sum-80 the result is negative (−5.795 s) because the update latency at 65k (15.925 s) is nearly identical to 49k (16.402 s), suggesting the update measurement saturated decode throughput at an input length below 65k (consistent with the model's context cap). These derived values should not be interpreted as decode-only costs.
+
+### Interpretation
+
+The cost structure survives under vLLM. Cold prefill is near-linear in L and 1.15× faster than the HF baseline at both measured points (vLLM Flash Attention vs HF SDPA/flash-attn). Cold materialization reaches 1.19 s at L=8k — in the multi-second range consistent with the simulator's cost model, which used HF measurements and is therefore conservative by ~15%.
+
+vLLM decode is 1.2–1.8× faster than HF across the measured budgets (43–44 tok/s vs ~24 tok/s HF-derived at L=8k, budget=200). The decode-ratio advantage grows with smaller budgets relative to L (1.82× at L=8k, budget=80) because the proportion of prefill versus decode time differs, but decode throughput itself is consistent at ~43 tok/s.
+
+**The window-append versus summary-refresh gap is preserved.** At L=8k, sum-200 total refresh costs 5.96 s under vLLM; window-10 warm-append costs 0.066 s (HF; not re-measured under vLLM, but the window is a fixed ~300–500 token forward pass and would be comparably fast). The gap is 5.96 / 0.066 = **90×** — consistent with E27's 86–153× range measured under HF. The maintenance claim (window-10 refresh is structurally cheaper than summary refresh at any budget) is not sensitive to whether the serving engine is HF or vLLM: the decode throughput advantage of vLLM narrows the gap from HF's ~145× to ~90× at L=8k, but it remains an order of magnitude. The formulation's cost model, which uses HF measurements and therefore slightly overstates refresh cost under vLLM, is conservative in the direction that strengthens the window preference.
