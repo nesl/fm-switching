@@ -1,0 +1,67 @@
+{
+  "experiment": "E26",
+  "description": "vLLM cold-prefill calibration vs HF baseline (E21)",
+  "model": "Qwen/Qwen2.5-7B-Instruct",
+  "model_slug": "qwen7b",
+  "device": "a6000",
+  "prefix_caching_cold": false,
+  "reps": 5,
+  "l_sweep": [
+    1024,
+    8192,
+    32768
+  ],
+  "cold_prefill": {
+    "1024": {
+      "actual_L_tokens": 1024,
+      "feasible": true,
+      "median_s": 0.1465,
+      "iqr_s": 0.0009,
+      "all_s": [
+        0.1463,
+        0.1464,
+        0.1465,
+        0.1467,
+        0.1479
+      ],
+      "peak_gpu_gb_median": 0.0
+    },
+    "8192": {
+      "actual_L_tokens": 8192,
+      "feasible": true,
+      "median_s": 1.153,
+      "iqr_s": 0.0105,
+      "all_s": [
+        1.149,
+        1.1494,
+        1.153,
+        1.159,
+        1.1603
+      ],
+      "peak_gpu_gb_median": 0.0
+    },
+    "32768": {
+      "error": "The decoder prompt (length 32918) is longer than the maximum model length of 32768. Make sure that `max_model_len` is no smaller than the number of text tokens.",
+      "feasible": false
+    }
+  },
+  "warm_append_secondary": {},
+  "_provenance": {
+    "git_commit": "565efb94018c1749ebb1cb972f47ea81ee81b176",
+    "script": "vllm_calibration.py",
+    "model": "qwen7b",
+    "timestamp": "2026-08-20T21:04:29.493802",
+    "device": "a6000",
+    "n": 15,
+    "args": {
+      "l_tokens": "1024,8192,32768",
+      "reps": 5,
+      "warm": false,
+      "gpu_mem_fraction": 0.92
+    },
+    "vllm_version": "0.8.5",
+    "torch_version": "2.6.0+cu124",
+    "cuda_version": "12.4",
+    "cuda_visible_devices": "1"
+  }
+}
