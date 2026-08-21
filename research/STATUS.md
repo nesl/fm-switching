@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-21 (E29 complete: tier-heterogeneous Q table; qwen3b device tier + qwen7b edge/cloud tier; sanity checks PASS; Q table model-dependent in gist-compressible regime; cross-tier summaries no benefit; device tier 57% capable on dense)
+Last updated: 2026-08-21 (E29 follow-up: paired substitution tests, absolute sufficiency table, corrected relative-sufficiency interpretation, fidelity-sensitivity analysis; e29_substitution.pdf added)
 
 ## Framing
 

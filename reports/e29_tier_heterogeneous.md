@@ -1,6 +1,6 @@
 # E29 — Tier-Heterogeneous Fidelity Audit
 
-Generated: 2026-08-21 15:42
+Generated: 2026-08-21 15:42 · Follow-up analysis added: 2026-08-21
 
 ## Motivation
 
@@ -77,9 +77,28 @@ All sanity checks passed.
 | cross-qwen3b-sum80 | 0.417 | [0.283, 0.550] | +0.150 | 0.029 | * |
 | cross-qwen3b-sum200 | 0.450 | [0.317, 0.583] | +0.117 | 0.108 | ns |
 
-## Sufficiency Table — Q(f, w) ≥ τ·Q(full, w)
+## Paired Substitution Tests
 
-Relative sufficiency criterion (τ ∈ {0.90, 0.95}) for own-summary conditions. Cross-tier conditions excluded from sufficiency table (not a deployment option).
+Do cheaper fidelity conditions on the larger model match full fidelity on the smaller model? Paired bootstrap (1000 resamples, seed=42). Diff = 7B/condition − 3B/full. Figure: `figures/fidelity/e29_substitution.pdf`.
+
+| workload | contrast | 3B/full | 7B/cond | diff | 95% CI | p | sig | distinguishable? |
+|---|---|---|---|---|---|---|---|---|
+| LoCoMo | 7B/window-10 vs 3B/full | 0.230 | 0.230 | +0.000 | [−0.080, +0.080] | 1.000 | ns | No |
+| LoCoMo | 7B/summary-200 vs 3B/full | 0.230 | 0.120 | −0.110 | [−0.200, −0.030] | 0.010 | * | Yes (7B/sum-200 worse) |
+| LoCoMo | 7B/full vs 3B/full [ceiling] | 0.230 | 0.400 | +0.170 | [+0.080, +0.270] | 0.002 | ** | Yes |
+| EgoSchema | 7B/window-10 vs 3B/full | 0.450 | 0.500 | +0.050 | [−0.067, +0.167] | 0.459 | ns | No |
+| EgoSchema | 7B/summary-200 vs 3B/full | 0.450 | 0.483 | +0.033 | [−0.117, +0.183] | 0.663 | ns | No |
+| EgoSchema | 7B/full vs 3B/full [ceiling] | 0.450 | 0.567 | +0.117 | [−0.033, +0.267] | 0.117 | ns | No |
+
+**LoCoMo:** 7B/window-10 is statistically indistinguishable from 3B/full (p=1.000, both acc=0.230). 7B/summary-200 is significantly *worse* than 3B/full (diff=−0.110, p=0.010): on a dense-incompressible workload, deploying the larger model with a compressed summary does not recover device-tier full-context performance. Even the 7B capability ceiling (7B/full) is distinguishably better than 3B/full (diff=+0.170, p=0.002), confirming the absolute tier gap.
+
+**EgoSchema:** All three comparisons are not statistically distinguishable (p=0.459, 0.663, 0.117). 7B/window-10 (acc=0.500) and 7B/summary-200 (acc=0.483) both exceed 3B/full (acc=0.450) in raw accuracy, but the differences are not significant on n=60. The capability ceiling (7B/full vs 3B/full) is also ns on the gist-compressible workload.
+
+## Sufficiency Tables
+
+### Relative sufficiency — Q(f, w) ≥ τ·Q(full, w)
+
+Relative sufficiency criterion (τ ∈ {0.90, 0.95}) for own-summary conditions. Cross-tier conditions excluded (not a deployment option).
 
 | workload | model | condition | acc | τ=0.90 | τ=0.95 |
 |---|---|---|---|---|---|
@@ -100,14 +119,47 @@ Relative sufficiency criterion (τ ∈ {0.90, 0.95}) for own-summary conditions.
 | egoschema | qwen7b | summary-80 | 0.433 | ✗ | ✗ |
 | egoschema | qwen7b | summary-200 | 0.483 | ✗ | ✗ |
 
-### Sufficiency disagreements between qwen3b and qwen7b
+### Absolute sufficiency — acc ≥ q
 
-**τ=0.9:**
-  - egoschema/window-10 at τ=0.9: qwen3b=0.450 (sufficient), qwen7b=0.500 (insufficient)
-  - egoschema/summary-200 at τ=0.9: qwen3b=0.433 (sufficient), qwen7b=0.483 (insufficient)
-**τ=0.95:**
-  - egoschema/window-10 at τ=0.95: qwen3b=0.450 (sufficient), qwen7b=0.500 (insufficient)
-  - egoschema/summary-200 at τ=0.95: qwen3b=0.433 (sufficient), qwen7b=0.483 (insufficient)
+Application quality floor q ∈ {0.20, 0.30, 0.40}: pass if the condition's raw accuracy meets the floor regardless of model.
+
+| workload | model | condition | acc | q≥0.20 | q≥0.30 | q≥0.40 |
+|---|---|---|---|---|---|---|
+| locomo | qwen3b | blind | 0.030 | ✗ | ✗ | ✗ |
+| locomo | qwen3b | window-10 | 0.180 | ✗ | ✗ | ✗ |
+| locomo | qwen3b | summary-80 | 0.090 | ✗ | ✗ | ✗ |
+| locomo | qwen3b | summary-200 | 0.120 | ✗ | ✗ | ✗ |
+| locomo | qwen3b | full | 0.230 | ✓ | ✗ | ✗ |
+| locomo | qwen7b | blind | 0.080 | ✗ | ✗ | ✗ |
+| locomo | qwen7b | window-10 | 0.230 | ✓ | ✗ | ✗ |
+| locomo | qwen7b | summary-80 | 0.120 | ✗ | ✗ | ✗ |
+| locomo | qwen7b | summary-200 | 0.120 | ✗ | ✗ | ✗ |
+| locomo | qwen7b | full | 0.400 | ✓ | ✓ | ✓ |
+| egoschema | qwen3b | blind | 0.300 | ✓ | ✓ | ✗ |
+| egoschema | qwen3b | window-10 | 0.450 | ✓ | ✓ | ✓ |
+| egoschema | qwen3b | summary-80 | 0.400 | ✓ | ✓ | ✓ |
+| egoschema | qwen3b | summary-200 | 0.433 | ✓ | ✓ | ✓ |
+| egoschema | qwen3b | full | 0.450 | ✓ | ✓ | ✓ |
+| egoschema | qwen7b | blind | 0.200 | ✓ | ✗ | ✗ |
+| egoschema | qwen7b | window-10 | 0.500 | ✓ | ✓ | ✓ |
+| egoschema | qwen7b | summary-80 | 0.433 | ✓ | ✓ | ✓ |
+| egoschema | qwen7b | summary-200 | 0.483 | ✓ | ✓ | ✓ |
+| egoschema | qwen7b | full | 0.567 | ✓ | ✓ | ✓ |
+
+**Cheapest (fidelity, tier) meeting each floor:**
+
+| workload | q≥0.20 | q≥0.30 | q≥0.40 |
+|---|---|---|---|
+| LoCoMo | (window-10, 7B) or (full, 3B) | (full, 7B) | (full, 7B) |
+| EgoSchema | (blind, 3B) acc=0.30 | (blind, 3B) acc=0.30 | (window-10, 3B) acc=0.45 |
+
+On dense sessions (LoCoMo), even the modest q≥0.20 floor requires either 7B with windowed context or 3B at full fidelity; no compressed representation on either tier meets q≥0.30. On gist-compressible sessions (EgoSchema), the device tier (3B) with window-10 is the cheapest pair meeting all three floors.
+
+### Sufficiency disagreements — interpretation
+
+The relative disagreements on EgoSchema arise from the scaling of the bar, not from a meaningful deployment difference. 7B/window-10 achieves acc=0.500, which is *higher* than 3B/window-10 (0.450); the relative criterion nevertheless marks 7B as failing because 0.500 < 0.567×0.90 = 0.510. Likewise 7B/summary-200 (0.483) exceeds 3B/summary-200 (0.433) but fails its higher bar (0.567×0.90=0.510).
+
+The claim in the earlier draft that "a runtime provisioning system targeting a device tier can use a compressed representation that would be insufficient for the same workload on the edge tier" is incorrect. Both 7B/window-10 and 7B/summary-200 are also used at the edge. They are relatively insufficient *for the 7B model* by the τ criterion, but they deliver higher absolute accuracy than the corresponding 3B conditions. The correct statement is: the relative sufficiency verdict depends on the model's own full accuracy, and a model with higher full accuracy faces a higher bar; EgoSchema/window-10 passes for 3B (ratio=1.00) but fails for 7B (ratio=0.88) because 7B's full accuracy is 12 percentage points higher.
 
 ## Question 1: Does the sufficiency verdict change between 3B and 7B?
 
@@ -118,9 +170,9 @@ Relative sufficiency criterion (τ ∈ {0.90, 0.95}) for own-summary conditions.
   - summary-200: τ=0.90 agree  τ=0.95 agree
 **egoschema:**
   - blind: τ=0.90 agree  τ=0.95 agree
-  - window-10: τ=0.90 DISAGREE  τ=0.95 DISAGREE **← DISAGREE**
+  - window-10: τ=0.90 DISAGREE  τ=0.95 DISAGREE (3B passes, 7B fails — 7B's higher bar explains the gap)
   - summary-80: τ=0.90 agree  τ=0.95 agree
-  - summary-200: τ=0.90 DISAGREE  τ=0.95 DISAGREE **← DISAGREE**
+  - summary-200: τ=0.90 DISAGREE  τ=0.95 DISAGREE (3B passes, 7B fails — same mechanism)
 
 ## Question 2: Does a 7B-generated summary help the 3B reader?
 
@@ -128,10 +180,10 @@ Compare qwen3b reading qwen7b-generated summaries vs qwen3b reading own summarie
 
 **locomo:**
   - budget=80: 3B-own=0.090, 3B-reading-7B=0.090, diff=+0.000, p=1.000 (ns)
-  - budget=200: 3B-own=0.120, 3B-reading-7B=0.110, diff=-0.010, p=1.000 (ns)
+  - budget=200: 3B-own=0.120, 3B-reading-7B=0.110, diff=−0.010, p=1.000 (ns)
 **egoschema:**
-  - budget=80: 3B-own=0.400, 3B-reading-7B=0.383, diff=-0.017, p=1.000 (ns)
-  - budget=200: 3B-own=0.433, 3B-reading-7B=0.417, diff=-0.017, p=1.000 (ns)
+  - budget=80: 3B-own=0.400, 3B-reading-7B=0.383, diff=−0.017, p=1.000 (ns)
+  - budget=200: 3B-own=0.433, 3B-reading-7B=0.417, diff=−0.017, p=1.000 (ns)
 
 Interpretation: if diff ≈ 0 and ns, a stronger summarizer does not help the weaker reader (consistent with phase0a cross-model result on Qwen/Mistral).
 
@@ -140,6 +192,19 @@ Interpretation: if diff ≈ 0 and ns, a stronger summarizer does not help the we
 LoCoMo: qwen3b full=0.230 [0.150, 0.320], qwen3b blind=0.030; qwen7b full=0.400.
 
 The device tier (qwen3b) has non-trivial full accuracy above blind, suggesting partial self-sufficiency at device tier for some dense queries.
+
+## Fidelity Sensitivity
+
+Window-10 vs full contrast per model per workload (paired bootstrap, diff = full − window-10):
+
+| workload | model | window-10 | full | diff (full−win) | p | sig |
+|---|---|---|---|---|---|---|
+| LoCoMo | qwen3b | 0.180 | 0.230 | +0.050 | 0.127 | ns |
+| LoCoMo | qwen7b | 0.230 | 0.400 | +0.170 | 0.002 | ** |
+| EgoSchema | qwen3b | 0.450 | 0.450 | +0.000 | 1.000 | ns |
+| EgoSchema | qwen7b | 0.500 | 0.567 | +0.067 | 0.075 | ns |
+
+The smaller model (3B) is less sensitive to fidelity in both workloads. On LoCoMo — the demanding dense-incompressible workload — the full-vs-window gap is +0.170 and highly significant for 7B (p=0.002) but only +0.050 and not significant for 3B (p=0.127). On EgoSchema the gap is zero for 3B and marginal for 7B (p=0.075). This pattern is consistent with 3B having lower overall accuracy: a model that cannot reliably retrieve dense facts even with full context shows a smaller marginal benefit from full context over windowed context. The insensitivity of 3B to fidelity is therefore a symptom of lower absolute capability, not robustness.
 
 ## Q(fidelity, regime, model) Table
 
@@ -175,20 +240,22 @@ Accuracy when a model reads summaries generated by the other model.
 | workload | reader | summarizer | budget | acc | 95% CI | vs reader own | p |
 |---|---|---|---|---|---|---|---|
 | locomo | qwen3b | qwen7b | 80 | 0.090 | [0.040, 0.150] | +0.000 | 1.000 |
-| locomo | qwen3b | qwen7b | 200 | 0.110 | [0.050, 0.170] | -0.010 | 1.000 |
+| locomo | qwen3b | qwen7b | 200 | 0.110 | [0.050, 0.170] | −0.010 | 1.000 |
 | locomo | qwen7b | qwen3b | 80 | 0.130 | [0.070, 0.210] | +0.010 | 1.000 |
 | locomo | qwen7b | qwen3b | 200 | 0.140 | [0.070, 0.210] | +0.020 | 0.739 |
-| egoschema | qwen3b | qwen7b | 80 | 0.383 | [0.250, 0.500] | -0.017 | 1.000 |
-| egoschema | qwen3b | qwen7b | 200 | 0.417 | [0.283, 0.533] | -0.017 | 1.000 |
-| egoschema | qwen7b | qwen3b | 80 | 0.417 | [0.283, 0.550] | -0.017 | 1.000 |
-| egoschema | qwen7b | qwen3b | 200 | 0.450 | [0.317, 0.583] | -0.033 | 0.789 |
+| egoschema | qwen3b | qwen7b | 80 | 0.383 | [0.250, 0.500] | −0.017 | 1.000 |
+| egoschema | qwen3b | qwen7b | 200 | 0.417 | [0.283, 0.533] | −0.017 | 1.000 |
+| egoschema | qwen7b | qwen3b | 80 | 0.417 | [0.283, 0.550] | −0.017 | 1.000 |
+| egoschema | qwen7b | qwen3b | 200 | 0.450 | [0.317, 0.583] | −0.033 | 0.789 |
 
 ## Implication for the Tier Model in FORMULATION.md
 
 This experiment extends the single-model assumption (FORMULATION.md §Simplifications) by measuring Q(fidelity, regime, model) for a realistic device/edge size pair (3B device, 7B edge). The key findings are summarized here for integration. FORMULATION.md has not been edited; these findings should inform a future update.
 
-Three implications for the tier model. First, the Q table is model-dependent in the gist-compressible regime but not in the dense-incompressible regime. On LoCoMo, both 3B and 7B agree that no compressed fidelity is sufficient at any τ — the ranking of fidelities is the same (full ≫ summary ≈ window, all well below threshold). On EgoSchema, the models disagree: window-10 and summary-200 pass the τ=0.90/0.95 threshold for 3B (full=0.450) but not for 7B (full=0.567), because the larger model's higher absolute full accuracy raises the relative bar. This means a runtime provisioning system targeting a device tier can use a compressed representation that would be insufficient for the same workload on the edge tier; the regime estimate alone does not determine the fidelity choice — the serving model matters.
+**Q table model-dependence.** The relative sufficiency verdict is model-dependent in the gist-compressible regime. On LoCoMo, 3B and 7B agree across all fidelities (all insufficient). On EgoSchema, 7B delivers higher absolute accuracy at every fidelity than 3B, but because 7B's full accuracy (0.567) is higher, its relative bar is also higher, and window-10 and summary-200 fail the τ criterion for 7B while passing for 3B. This is an artifact of the relative criterion, not a deployment difference: a runtime that uses window-10 at the edge is not making an insufficient choice by the absolute standard — 7B/window-10 at 0.500 exceeds any 3B condition. Planners using absolute quality floors (the operational standard) should consult the absolute sufficiency table.
 
-Second, a stronger summarizer (7B) does not help a weaker reader (3B). Cross-tier summaries produce the same or slightly worse accuracy than own-summaries at p≫0.05 across all conditions and workloads. This is consistent with the phase0a Qwen/Mistral result and appears robust: the deficit in 3B is a reader-capacity limitation, not a summary-quality limitation. Implications: the runtime gains nothing by generating summaries on the edge tier for device-tier consumption, and the reverse (device-tier summaries read by edge) similarly adds no accuracy over edge-generated summaries.
+**Cross-tier summaries add no value.** A stronger summarizer (7B) does not help a weaker reader (3B), and vice versa. All cross-tier summary comparisons are ns (p≫0.05). The deficit in 3B is a reader-capacity limitation. The runtime gains nothing by generating summaries on the larger tier for consumption by the smaller.
 
-Third, the device tier (3B) is partially self-sufficient on dense sessions: qwen3b full=0.230 (vs blind=0.030), meaning 3B can retrieve 23% of dense facts with full context vs 7B's 40%. The device tier is not useless on dense workloads, but it answers dense queries at roughly 57% of the edge tier's capability. For sessions operating at a dense-incompressible SLO, device-only service with 3B full context will miss ~3 in 4 answerable questions that edge (7B full) would correctly answer. Whether this gap is acceptable depends on the SLO tolerance, but the cost model (which assumes a uniform model) should incorporate a model-capability penalty when sessions are served at the device tier.
+**Paired substitution: dense sessions require edge tier.** On LoCoMo, 7B/window-10 achieves the same accuracy as 3B/full (both 0.230, p=1.000). Using window-10 context on the 7B model is operationally equivalent to full context on the 3B model at dense-incompressible sessions — neither is sufficient, but they tie. By contrast 7B/summary-200 is significantly *worse* than 3B/full (p=0.010), so summary fidelity on the larger model does not recover device-tier full-context performance. Meeting q≥0.30 on dense sessions requires 7B full context; no other (fidelity, tier) pair achieves it.
+
+**Fidelity insensitivity in smaller models is an accuracy floor symptom.** 3B shows no significant fidelity sensitivity in either workload (p=0.127 LoCoMo; p=1.000 EgoSchema). 7B is significantly sensitive on LoCoMo (p=0.002) and marginally on EgoSchema (p=0.075). The interpretation is that a model too weak to retrieve dense facts even with full context shows a smaller marginal benefit from fidelity; insensitivity reflects a low accuracy ceiling, not robustness to compression.
