@@ -1,0 +1,32 @@
+"""Joint policy: full product space (node × fidelity), shared value function."""
+from __future__ import annotations
+from ...solver_c import build_candidates, greedy_knapsack
+from ..base import ProvisioningDecision
+
+
+class JointC:
+    name = "joint"
+    is_joint = True
+    is_oracle = False
+
+    def reset(self): pass
+
+    def decide_c(self, sessions, prov_state, reachable_nodes, epoch, vf, nodes,
+                 serving_distribution, current_regimes, tau, infeasibility_map):
+        L_map = {sid: sess.L for sid, sess in sessions.items()}
+        candidates = build_candidates(
+            list(sessions.keys()), reachable_nodes, L_map, current_regimes,
+            serving_distribution, vf, infeasibility_map=infeasibility_map)
+        placed = greedy_knapsack(candidates, nodes, prov_state, sessions)
+        decisions = []
+        for item in placed:
+            obj = prov_state.get(item["session_id"], item["node_id"], item["fidelity"])
+            if obj and obj.ready:
+                continue
+            decisions.append(ProvisioningDecision(
+                session_id=item["session_id"],
+                node_id=item["node_id"],
+                fidelity=item["fidelity"],
+                action="materialize",
+            ))
+        return decisions

@@ -1,0 +1,351 @@
+{
+  "config": {
+    "cap_frac": 0.5,
+    "mobility": "high",
+    "regime_mix": "mostly_dense",
+    "tau": 0.95,
+    "drift_rate": 0,
+    "n_sessions": 15,
+    "L_init": 8192,
+    "turn_rate": 880,
+    "n_epochs": 100,
+    "seeds": [
+      42,
+      1337,
+      99
+    ],
+    "latency_slo_s": 5.0
+  },
+  "policies": {
+    "joint": {
+      "policy": "joint",
+      "slo_fraction": 0.218,
+      "slo_by_band": {
+        "small": 0.455556,
+        "mid": 0.4,
+        "large": 0.065591
+      },
+      "warm_hit": 0.004667,
+      "warm_stale": 0.493333,
+      "cold_miss": 0.004667,
+      "degraded": 0.0,
+      "placement_miss": 0.104,
+      "materialization_miss": 0.005333,
+      "infeasible_miss": 0.388,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.21186,
+      "total_refresh_cost_s": Infinity,
+      "refresh_events_by_fidelity": {
+        "full": 575,
+        "sum200": 48,
+        "win": 117
+      },
+      "slo_fail_on_refresh_fraction": 0.28,
+      "mean_staleness_at_serve": 46.4589,
+      "multi_fidelity_sessions_fraction": 0.2,
+      "multi_fidelity_slo_delta": 0.1925,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.198222,
+      "slo_min": 0.177333,
+      "slo_max": 0.218
+    },
+    "fidelity_first": {
+      "policy": "fidelity_first",
+      "slo_fraction": 0.143333,
+      "slo_by_band": {
+        "small": 0.406667,
+        "mid": 0.305556,
+        "large": 0.0
+      },
+      "warm_hit": 0.005333,
+      "warm_stale": 0.508,
+      "cold_miss": 0.004667,
+      "degraded": 0.0,
+      "placement_miss": 0.098667,
+      "materialization_miss": 0.005333,
+      "infeasible_miss": 0.378,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.216345,
+      "total_refresh_cost_s": Infinity,
+      "refresh_events_by_fidelity": {
+        "full": 564,
+        "sum200": 198
+      },
+      "slo_fail_on_refresh_fraction": 0.37,
+      "mean_staleness_at_serve": 46.4234,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.126222,
+      "slo_min": 0.113333,
+      "slo_max": 0.143333
+    },
+    "fidelity_first_lifecycle": {
+      "policy": "fidelity_first_lifecycle",
+      "slo_fraction": 0.223333,
+      "slo_by_band": {
+        "small": 0.446667,
+        "mid": 0.404762,
+        "large": 0.072043
+      },
+      "warm_hit": 0.004667,
+      "warm_stale": 0.461333,
+      "cold_miss": 0.004667,
+      "degraded": 0.0,
+      "placement_miss": 0.11,
+      "materialization_miss": 0.005333,
+      "infeasible_miss": 0.414,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.196012,
+      "total_refresh_cost_s": 8955.2702,
+      "refresh_events_by_fidelity": {
+        "full": 542,
+        "win": 150
+      },
+      "slo_fail_on_refresh_fraction": 0.242667,
+      "mean_staleness_at_serve": 46.1299,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.202667,
+      "slo_min": 0.176667,
+      "slo_max": 0.223333
+    },
+    "placement_first": {
+      "policy": "placement_first",
+      "slo_fraction": 0.199333,
+      "slo_by_band": {
+        "small": 0.337778,
+        "mid": 0.346825,
+        "large": 0.076344
+      },
+      "warm_hit": 0.003333,
+      "warm_stale": 0.449333,
+      "cold_miss": 0.01,
+      "degraded": 0.0,
+      "placement_miss": 0.129333,
+      "materialization_miss": 0.0,
+      "infeasible_miss": 0.408,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.179548,
+      "total_refresh_cost_s": Infinity,
+      "refresh_events_by_fidelity": {
+        "full": 523,
+        "sum200": 46,
+        "win": 105
+      },
+      "slo_fail_on_refresh_fraction": 0.253333,
+      "mean_staleness_at_serve": 44.9816,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.178222,
+      "slo_min": 0.164,
+      "slo_max": 0.199333
+    },
+    "cache_value": {
+      "policy": "cache_value",
+      "slo_fraction": 0.218,
+      "slo_by_band": {
+        "small": 0.455556,
+        "mid": 0.4,
+        "large": 0.065591
+      },
+      "warm_hit": 0.004667,
+      "warm_stale": 0.493333,
+      "cold_miss": 0.004667,
+      "degraded": 0.0,
+      "placement_miss": 0.104,
+      "materialization_miss": 0.005333,
+      "infeasible_miss": 0.388,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.21186,
+      "total_refresh_cost_s": Infinity,
+      "refresh_events_by_fidelity": {
+        "full": 575,
+        "sum200": 48,
+        "win": 117
+      },
+      "slo_fail_on_refresh_fraction": 0.28,
+      "mean_staleness_at_serve": 46.4589,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.198222,
+      "slo_min": 0.177333,
+      "slo_max": 0.218
+    },
+    "oracle": {
+      "policy": "oracle",
+      "slo_fraction": 0.167333,
+      "slo_by_band": {
+        "small": 0.288889,
+        "mid": 0.247619,
+        "large": 0.105376
+      },
+      "warm_hit": 0.007333,
+      "warm_stale": 0.18,
+      "cold_miss": 0.035333,
+      "degraded": 0.0,
+      "placement_miss": 0.157333,
+      "materialization_miss": 0.001333,
+      "infeasible_miss": 0.618667,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.084831,
+      "total_refresh_cost_s": 4497.0109,
+      "refresh_events_by_fidelity": {
+        "full": 145,
+        "win": 125
+      },
+      "slo_fail_on_refresh_fraction": 0.02,
+      "mean_staleness_at_serve": 22.2766,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.163556,
+      "slo_min": 0.152,
+      "slo_max": 0.171333
+    },
+    "reactive": {
+      "policy": "reactive",
+      "slo_fraction": 0.086,
+      "slo_by_band": {
+        "small": 0.242222,
+        "mid": 0.204762,
+        "large": 0.0
+      },
+      "warm_hit": 0.0,
+      "warm_stale": 0.292,
+      "cold_miss": 0.021333,
+      "degraded": 0.0,
+      "placement_miss": 0.202667,
+      "materialization_miss": 0.0,
+      "infeasible_miss": 0.484,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.11116,
+      "total_refresh_cost_s": 6818.3457,
+      "refresh_events_by_fidelity": {
+        "full": 438
+      },
+      "slo_fail_on_refresh_fraction": 0.206,
+      "mean_staleness_at_serve": 49.0597,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.081556,
+      "slo_min": 0.072,
+      "slo_max": 0.086667
+    },
+    "replication": {
+      "policy": "replication",
+      "slo_fraction": 0.157333,
+      "slo_by_band": {
+        "small": 0.417778,
+        "mid": 0.344444,
+        "large": 0.0
+      },
+      "warm_hit": 0.003333,
+      "warm_stale": 0.432,
+      "cold_miss": 0.006,
+      "degraded": 0.0,
+      "placement_miss": 0.120667,
+      "materialization_miss": 0.004,
+      "infeasible_miss": 0.434,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.179897,
+      "total_refresh_cost_s": 10384.8666,
+      "refresh_events_by_fidelity": {
+        "full": 648
+      },
+      "slo_fail_on_refresh_fraction": 0.278,
+      "mean_staleness_at_serve": 48.0039,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.138222,
+      "slo_min": 0.119333,
+      "slo_max": 0.157333
+    },
+    "libra_style": {
+      "policy": "libra_style",
+      "slo_fraction": 0.134,
+      "slo_by_band": {
+        "small": 0.297778,
+        "mid": 0.239683,
+        "large": 0.0
+      },
+      "warm_hit": 0.0,
+      "warm_stale": 0.473333,
+      "cold_miss": 0.012667,
+      "degraded": 0.0,
+      "placement_miss": 0.112,
+      "materialization_miss": 0.004,
+      "infeasible_miss": 0.398,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.192997,
+      "total_refresh_cost_s": Infinity,
+      "refresh_events_by_fidelity": {
+        "full": 518,
+        "sum200": 192
+      },
+      "slo_fail_on_refresh_fraction": 0.339333,
+      "mean_staleness_at_serve": 46.6603,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.096889,
+      "slo_min": 0.070667,
+      "slo_max": 0.134
+    },
+    "handover_sched": {
+      "policy": "handover_sched",
+      "slo_fraction": 0.150667,
+      "slo_by_band": {
+        "small": 0.344444,
+        "mid": 0.28254,
+        "large": 0.000717
+      },
+      "warm_hit": 0.013333,
+      "warm_stale": 0.365333,
+      "cold_miss": 0.022,
+      "degraded": 0.0,
+      "placement_miss": 0.115333,
+      "materialization_miss": 0.0,
+      "infeasible_miss": 0.484,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.137591,
+      "total_refresh_cost_s": 7730.5282,
+      "refresh_events_by_fidelity": {
+        "full": 548
+      },
+      "slo_fail_on_refresh_fraction": 0.228,
+      "mean_staleness_at_serve": 45.6883,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.114,
+      "slo_min": 0.092667,
+      "slo_max": 0.150667
+    }
+  }
+}

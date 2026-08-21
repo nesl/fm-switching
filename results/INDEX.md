@@ -139,8 +139,25 @@ Sweep: 5 capacity × 4 mobility × 3 regime_mix × 3 tau × 2 drift × 9 policie
 
 | file | script | model | device | n | headline | source commit |
 |---|---|---|---|---|---|---|
-| `results/orchestration/e24b_coupling/<cell>/cell.json` (360 files) | `sweep_b.py` | — (simulator) | CPU | 9,720 runs | Per-cell SLO fractions, L-band SLO, miss-type breakdown, p95/p99 latency for 9 policies | pending |
-| `figures/orchestration/e24b_phase_diagram_vs_fidelity.pdf` | `plots/orchestration/plot_e24b.py` | — | CPU | 360 cells | Phase diagram: joint improvement over fidelity_only — negative in 52/60 cells | pending |
-| `figures/orchestration/e24b_phase_diagram_vs_cv.pdf` | `plots/orchestration/plot_e24b.py` | — | CPU | 360 cells | Phase diagram: joint improvement over cache_value — positive in all cells (+18–40pp) | pending |
-| `figures/orchestration/e24b_slo_summary.pdf` | `plots/orchestration/plot_e24b.py` | — | CPU | 360 cells | Mean SLO by policy × regime_mix: fidelity_only beats joint by 6–14pp | pending |
-| `reports/e24b_coupling_falsification.md` | — | — | — | — | Null in stressed region: fidelity_only > joint; L-scaling and drift-scaling predictions falsified; thesis narrowed to placement-awareness at current serving node | pending |
+| `results/orchestration/e24b_coupling/<cell>/cell.json` (360 files) | `sweep_b.py` | — (simulator) | CPU | 9,720 runs | Per-cell SLO fractions, L-band SLO, miss-type breakdown, p95/p99 latency for 9 policies | 2026-08-19 |
+| `figures/orchestration/e24b_phase_diagram_vs_fidelity.pdf` | `plots/orchestration/plot_e24b.py` | — | CPU | 360 cells | Phase diagram: joint improvement over fidelity_only — negative in 52/60 cells | 2026-08-19 |
+| `figures/orchestration/e24b_phase_diagram_vs_cv.pdf` | `plots/orchestration/plot_e24b.py` | — | CPU | 360 cells | Phase diagram: joint improvement over cache_value — positive in all cells (+18–40pp) | 2026-08-19 |
+| `figures/orchestration/e24b_slo_summary.pdf` | `plots/orchestration/plot_e24b.py` | — | CPU | 360 cells | Mean SLO by policy × regime_mix: fidelity_only beats joint by 6–14pp | 2026-08-19 |
+| `reports/e24b_coupling_falsification.md` | — | — | — | — | Null in stressed region: fidelity_only > joint; L-scaling and drift-scaling predictions falsified; thesis narrowed to placement-awareness at current serving node | 2026-08-19 |
+
+## E24c — Final coupling test with shared solver (2026-08-19)
+
+Script: `experiments/orchestration/sweep_e24c.py`. Shared ValueFunction + greedy_knapsack; containment assertion; 10 policies. CPU only; no GPU.
+Sweep: 3 capacity × 2 mobility × 2 regime_mix × 2 tau × 2 drift × 10 policies × 3 seeds = 1,440 runs.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/orchestration/e24c_coupling/<cell>/cell.json` (48 files) | `sweep_e24c.py` | — (simulator) | CPU | 1,440 runs | Per-cell SLO fractions, refresh instrumentation, multi-fidelity diagnostic, 10 policies | 2026-08-19 |
+| `figures/orchestration/e24c_gap_vs_best_decomposed_drift0.pdf` | `plots/orchestration/plot_e24c.py` | — | CPU | 48 cells | Gap heatmap: joint − best-decomposed; all ≤0; max deficit −17.2pp at tau=0.95 mixed | 2026-08-19 |
+| `figures/orchestration/e24c_gap_vs_best_decomposed_drift20.pdf` | `plots/orchestration/plot_e24c.py` | — | CPU | 48 cells | Same with drift=20; same sign, smaller magnitude | 2026-08-19 |
+| `figures/orchestration/e24c_refresh_cost.pdf` | `plots/orchestration/plot_e24c.py` | — | CPU | 12 cells | Total refresh cost by policy: joint/fidelity_first → inf; fidelity_first_lifecycle → finite (win+full only) | 2026-08-19 |
+| `reports/e24c_coupling_final.md` | — | — | — | — | FALSIFIED: median gap −1.3pp; 0/48 cells joint wins by >5pp; fidelity_first_lifecycle beats joint in 38/48 cells; root cause: joint density metric selects sum200 over win, incurring infeasible refresh at large L | 2026-08-19 |
+| `results/fidelity/e27_maintenance/e27_maintenance_qwen7b.json` | `experiments/fidelity/e27_maintenance.py` + `e27_merge_results.py` | `qwen7b` | a6000 | 10 LoCoMo convs + 60 EgoSchema clips; 5 modes × 2 budgets × 4 checkpoints | Outcome B: recursive token ratio 0.42 (LoCoMo), latency ratio 0.76; inversion vs window-10 = 86–153× (LoCoMo), 32–72× (EgoSchema); quality gap ≤ 0.01 at 100%; inversion is decode-dominated and structural | 2026-08-20 |
+| `figures/fidelity/e27_drift_curves.pdf` | `plots/fidelity/plot_e27.py` | `qwen7b` | a6000 | 10 convs | LoCoMo accuracy vs session coverage: full_regen, recursive, periodic_5 at sum80/sum200; full history and window-10 as references | 2026-08-20 |
+| `figures/fidelity/e27_lifecycle_cost.pdf` | `plots/fidelity/plot_e27.py` | `qwen7b` | a6000 | 10 convs + 60 clips | Refresh latency by mode × budget for LoCoMo and EgoSchema; window-10 warm-append reference at 0.066 s | 2026-08-20 |
+| `reports/e27_maintenance_mechanism.md` | — | — | — | — | B (fallback): recursive does not kill the cost inversion; decode latency dominates; inversion structural at 7B scale | 2026-08-20 |

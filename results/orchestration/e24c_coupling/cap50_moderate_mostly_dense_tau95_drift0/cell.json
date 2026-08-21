@@ -1,0 +1,352 @@
+{
+  "config": {
+    "cap_frac": 0.5,
+    "mobility": "moderate",
+    "regime_mix": "mostly_dense",
+    "tau": 0.95,
+    "drift_rate": 0,
+    "n_sessions": 15,
+    "L_init": 8192,
+    "turn_rate": 880,
+    "n_epochs": 100,
+    "seeds": [
+      42,
+      1337,
+      99
+    ],
+    "latency_slo_s": 5.0
+  },
+  "policies": {
+    "joint": {
+      "policy": "joint",
+      "slo_fraction": 0.133333,
+      "slo_by_band": {
+        "small": 0.377778,
+        "mid": 0.3,
+        "large": 0.022939
+      },
+      "warm_hit": 0.000667,
+      "warm_stale": 0.451333,
+      "cold_miss": 0.065333,
+      "degraded": 0.0,
+      "placement_miss": 0.084667,
+      "materialization_miss": 0.005333,
+      "infeasible_miss": 0.392667,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.194668,
+      "total_refresh_cost_s": Infinity,
+      "refresh_events_by_fidelity": {
+        "full": 555,
+        "sum200": 86,
+        "win": 36
+      },
+      "slo_fail_on_refresh_fraction": 0.318667,
+      "mean_staleness_at_serve": 48.6144,
+      "multi_fidelity_sessions_fraction": 0.2,
+      "multi_fidelity_slo_delta": 0.101895,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.136,
+      "slo_min": 0.132667,
+      "slo_max": 0.142
+    },
+    "fidelity_first": {
+      "policy": "fidelity_first",
+      "slo_fraction": 0.114667,
+      "slo_by_band": {
+        "small": 0.366667,
+        "mid": 0.279365,
+        "large": 0.000358
+      },
+      "warm_hit": 0.000667,
+      "warm_stale": 0.458667,
+      "cold_miss": 0.048667,
+      "degraded": 0.0,
+      "placement_miss": 0.1,
+      "materialization_miss": 0.005333,
+      "infeasible_miss": 0.386667,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.196969,
+      "total_refresh_cost_s": Infinity,
+      "refresh_events_by_fidelity": {
+        "full": 566,
+        "sum200": 122
+      },
+      "slo_fail_on_refresh_fraction": 0.344667,
+      "mean_staleness_at_serve": 48.63,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.115111,
+      "slo_min": 0.114667,
+      "slo_max": 0.116
+    },
+    "fidelity_first_lifecycle": {
+      "policy": "fidelity_first_lifecycle",
+      "slo_fraction": 0.132,
+      "slo_by_band": {
+        "small": 0.366667,
+        "mid": 0.3,
+        "large": 0.022939
+      },
+      "warm_hit": 0.0,
+      "warm_stale": 0.394,
+      "cold_miss": 0.066667,
+      "degraded": 0.0,
+      "placement_miss": 0.1,
+      "materialization_miss": 0.005333,
+      "infeasible_miss": 0.434,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.165784,
+      "total_refresh_cost_s": 9113.1088,
+      "refresh_events_by_fidelity": {
+        "full": 555,
+        "win": 36
+      },
+      "slo_fail_on_refresh_fraction": 0.262,
+      "mean_staleness_at_serve": 48.6736,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.134889,
+      "slo_min": 0.132,
+      "slo_max": 0.140667
+    },
+    "placement_first": {
+      "policy": "placement_first",
+      "slo_fraction": 0.122,
+      "slo_by_band": {
+        "small": 0.348889,
+        "mid": 0.288095,
+        "large": 0.020789
+      },
+      "warm_hit": 0.000667,
+      "warm_stale": 0.441333,
+      "cold_miss": 0.108667,
+      "degraded": 0.0,
+      "placement_miss": 0.047333,
+      "materialization_miss": 0.005333,
+      "infeasible_miss": 0.396667,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.189897,
+      "total_refresh_cost_s": Infinity,
+      "refresh_events_by_fidelity": {
+        "full": 552,
+        "sum200": 94,
+        "win": 16
+      },
+      "slo_fail_on_refresh_fraction": 0.32,
+      "mean_staleness_at_serve": 48.6257,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.128444,
+      "slo_min": 0.122,
+      "slo_max": 0.135333
+    },
+    "cache_value": {
+      "policy": "cache_value",
+      "slo_fraction": 0.133333,
+      "slo_by_band": {
+        "small": 0.377778,
+        "mid": 0.3,
+        "large": 0.022939
+      },
+      "warm_hit": 0.000667,
+      "warm_stale": 0.451333,
+      "cold_miss": 0.065333,
+      "degraded": 0.0,
+      "placement_miss": 0.084667,
+      "materialization_miss": 0.005333,
+      "infeasible_miss": 0.392667,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.194668,
+      "total_refresh_cost_s": Infinity,
+      "refresh_events_by_fidelity": {
+        "full": 555,
+        "sum200": 86,
+        "win": 36
+      },
+      "slo_fail_on_refresh_fraction": 0.318667,
+      "mean_staleness_at_serve": 48.6144,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.136,
+      "slo_min": 0.132667,
+      "slo_max": 0.142
+    },
+    "oracle": {
+      "policy": "oracle",
+      "slo_fraction": 0.120667,
+      "slo_by_band": {
+        "small": 0.366667,
+        "mid": 0.293651,
+        "large": 0.01362
+      },
+      "warm_hit": 0.003333,
+      "warm_stale": 0.438667,
+      "cold_miss": 0.079333,
+      "degraded": 0.0,
+      "placement_miss": 0.072667,
+      "materialization_miss": 0.005333,
+      "infeasible_miss": 0.400667,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.189676,
+      "total_refresh_cost_s": Infinity,
+      "refresh_events_by_fidelity": {
+        "full": 552,
+        "sum200": 94,
+        "win": 12
+      },
+      "slo_fail_on_refresh_fraction": 0.321333,
+      "mean_staleness_at_serve": 48.0861,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.127333,
+      "slo_min": 0.120667,
+      "slo_max": 0.133333
+    },
+    "reactive": {
+      "policy": "reactive",
+      "slo_fraction": 0.11,
+      "slo_by_band": {
+        "small": 0.324444,
+        "mid": 0.27381,
+        "large": 0.0
+      },
+      "warm_hit": 0.0,
+      "warm_stale": 0.368,
+      "cold_miss": 0.132,
+      "degraded": 0.0,
+      "placement_miss": 0.046,
+      "materialization_miss": 0.0,
+      "infeasible_miss": 0.454,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.12512,
+      "total_refresh_cost_s": 8937.2835,
+      "refresh_events_by_fidelity": {
+        "full": 552
+      },
+      "slo_fail_on_refresh_fraction": 0.258,
+      "mean_staleness_at_serve": 49.3205,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.109111,
+      "slo_min": 0.105333,
+      "slo_max": 0.112
+    },
+    "replication": {
+      "policy": "replication",
+      "slo_fraction": 0.114667,
+      "slo_by_band": {
+        "small": 0.351111,
+        "mid": 0.281746,
+        "large": 0.0
+      },
+      "warm_hit": 0.0,
+      "warm_stale": 0.388,
+      "cold_miss": 0.006,
+      "degraded": 0.0,
+      "placement_miss": 0.163333,
+      "materialization_miss": 0.004,
+      "infeasible_miss": 0.438667,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.17368,
+      "total_refresh_cost_s": 9672.5055,
+      "refresh_events_by_fidelity": {
+        "full": 582
+      },
+      "slo_fail_on_refresh_fraction": 0.273333,
+      "mean_staleness_at_serve": 49.7618,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.114,
+      "slo_min": 0.112,
+      "slo_max": 0.115333
+    },
+    "libra_style": {
+      "policy": "libra_style",
+      "slo_fraction": 0.111333,
+      "slo_by_band": {
+        "small": 0.335556,
+        "mid": 0.27381,
+        "large": 0.0
+      },
+      "warm_hit": 0.000667,
+      "warm_stale": 0.441333,
+      "cold_miss": 0.112,
+      "degraded": 0.0,
+      "placement_miss": 0.047333,
+      "materialization_miss": 0.002,
+      "infeasible_miss": 0.396667,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.161972,
+      "total_refresh_cost_s": Infinity,
+      "refresh_events_by_fidelity": {
+        "full": 552,
+        "sum200": 110
+      },
+      "slo_fail_on_refresh_fraction": 0.330667,
+      "mean_staleness_at_serve": 48.7146,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.110222,
+      "slo_min": 0.106,
+      "slo_max": 0.113333
+    },
+    "handover_sched": {
+      "policy": "handover_sched",
+      "slo_fraction": 0.11,
+      "slo_by_band": {
+        "small": 0.324444,
+        "mid": 0.27381,
+        "large": 0.0
+      },
+      "warm_hit": 0.0,
+      "warm_stale": 0.368,
+      "cold_miss": 0.132,
+      "degraded": 0.0,
+      "placement_miss": 0.046,
+      "materialization_miss": 0.0,
+      "infeasible_miss": 0.454,
+      "p95_latency_s": Infinity,
+      "p99_latency_s": Infinity,
+      "mean_quality": 0.12512,
+      "total_refresh_cost_s": 8937.2835,
+      "refresh_events_by_fidelity": {
+        "full": 552
+      },
+      "slo_fail_on_refresh_fraction": 0.258,
+      "mean_staleness_at_serve": 49.3205,
+      "multi_fidelity_sessions_fraction": 0.0,
+      "multi_fidelity_slo_delta": 0.0,
+      "capacity_violations": 0,
+      "containment_violations": 0,
+      "slo_mean": 0.109111,
+      "slo_min": 0.105333,
+      "slo_max": 0.112
+    }
+  }
+}
