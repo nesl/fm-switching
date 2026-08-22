@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-21 (E29 follow-up: paired substitution tests, absolute sufficiency table, corrected relative-sufficiency interpretation, fidelity-sensitivity analysis; e29_substitution.pdf added)
+Last updated: 2026-08-21 (E30 complete: capacity arithmetic — summaries always accelerator-bound, win-10 memory-bound at moderate ri; ordering inversion confirmed; fleet-scale contention real for summaries)
 
 ## Framing
 

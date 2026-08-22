@@ -180,4 +180,17 @@ Scripts: `experiments/fidelity/e29_locomo.py`, `experiments/fidelity/e29_egosche
 | `results/fidelity/e29_tier_heterogeneous/e29_analysis.json` | `e29_analysis.py` | qwen3b+qwen7b | a6000 | — | Bootstrap CIs, paired contrasts, sufficiency table (τ=0.90/0.95), Q(fidelity,workload,model) table | 2026-08-21 |
 | `figures/fidelity/e29_q_table.pdf` | `e29_analysis.py` | qwen3b+qwen7b | a6000 | — | Q(fidelity, workload, model) heatmap; sufficiency cells marked per τ threshold | 2026-08-21 |
 | `figures/fidelity/e29_substitution.pdf` | `e29_followup.py` | qwen3b+qwen7b | CPU | — | Accuracy by (fidelity, model) with cross-tier substitution brackets; paired bootstrap significance annotations | 2026-08-21 |
+
+## E30 — Capacity Arithmetic (2026-08-21)
+
+Script: `experiments/cost/e30_capacity.py`. CPU only; reads committed cost measurement files.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/cost/e30_capacity/memory_capacity.csv` | `e30_capacity.py` | qwen7b/qwen3b | CPU | 3 tiers × 4 fidelities × 4 L-pts | Sessions by memory: sum-80 supports 7,106 sessions on A6000 (L-independent); full supports 8–69 sessions (L-dependent) | 2026-08-21 |
+| `results/cost/e30_capacity/accelerator_demand.csv` | `e30_capacity.py` | qwen7b | CPU | 4 fidelities × 4 L-pts × 5 ri | Sessions by accelerator: win-10 supports 32–7,556; sum-80 supports 0–97 | 2026-08-21 |
+| `results/cost/e30_capacity/sessions_supported.csv` | `e30_capacity.py` | qwen7b/qwen3b | CPU | 3 tiers × 4 fidelities × 4 L-pts × 5 ri | Combined binding constraint (min of memory, accelerator) with binding label per cell | 2026-08-21 |
+| `results/cost/e30_capacity/binding_crossover.csv` | `e30_capacity.py` | qwen7b | CPU | 55 accelerator-bound cells | Cells where accelerator binds before memory; all sum-80/sum-200 rows across all ri | 2026-08-21 |
+| `figures/cost/e30_capacity_binding.pdf` | `e30_capacity.py` | qwen7b/qwen3b | CPU | — | Six-panel: (rows) memory-limit, accel-limit at ri=60s; (cols) A6000, 24-GB GPU, Jetson | 2026-08-21 |
+| `reports/e30_capacity_arithmetic.md` | `e30_capacity.py` | — | — | — | Parts A–D: memory capacity, accelerator demand sweep, binding crossover, realism check; assumption table; Part D answer | 2026-08-21 |
 | `reports/e29_tier_heterogeneous.md` | `e29_analysis.py` + `e29_followup.py` (follow-up, no new inference) | qwen3b+qwen7b | a6000 | — | Revised: paired substitution tests; absolute sufficiency table (q∈{0.20,0.30,0.40}); corrected sufficiency-disagreement interpretation; fidelity-sensitivity analysis | 2026-08-21 |
