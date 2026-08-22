@@ -194,3 +194,20 @@ Script: `experiments/cost/e30_capacity.py`. CPU only; reads committed cost measu
 | `figures/cost/e30_capacity_binding.pdf` | `e30_capacity.py` | qwen7b/qwen3b | CPU | — | Six-panel: (rows) memory-limit, accel-limit at ri=60s; (cols) A6000, 24-GB GPU, Jetson | 2026-08-21 |
 | `reports/e30_capacity_arithmetic.md` | `e30_capacity.py` | — | — | — | Parts A–D: memory capacity, accelerator demand sweep, binding crossover, realism check; assumption table; Part D answer | 2026-08-21 |
 | `reports/e29_tier_heterogeneous.md` | `e29_analysis.py` + `e29_followup.py` (follow-up, no new inference) | qwen3b+qwen7b | a6000 | — | Revised: paired substitution tests; absolute sufficiency table (q∈{0.20,0.30,0.40}); corrected sufficiency-disagreement interpretation; fidelity-sensitivity analysis | 2026-08-21 |
+
+## E31 — Network Characterization (2026-08-22)
+
+Script: `experiments/cost/e31_network.py`. CPU only; uses downloaded public traces (no GPU, no model inference).
+Datasets: Irish 5G driving (uccmisl/5Gdataset, GPL-3.0), herolab indoor RSSI (GitHub, license not stated).
+Limitation: driving mobility (not pedestrian); State=I proxy for disconnection; netem requires sudo tc (not run — loopback socket rate-limiting used).
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/cost/e31_network/reachability_series.csv` | `e31_network.py` | n/a | CPU | 28,551 s × 16 sessions | Irish 5G driving: 83% connected (State=D); 35.4 handovers/session mean | 2026-08-22 |
+| `results/cost/e31_network/bandwidth_series.csv` | `e31_network.py` | n/a | CPU | 23,102 D-state rows | Irish 5G driving DL_bitrate (kbps→Mbps): p10=0.9, p50=9.6, p90=102.9 Mbps | 2026-08-22 |
+| `results/cost/e31_network/predictability_metrics.csv` | `e31_network.py` | n/a | CPU | 16 sessions | Persistence 0.75 at H=10,30,60s; P(D→D)=0.85; BW autocorr: 0.39→0.08 (H=10→60s) | 2026-08-22 |
+| `results/cost/e31_network/transfer_latency.csv` | `e31_network.py` | n/a | CPU | 4 reps × 3 profiles | At p50 BW: sum-80=3.8s, win-10=19.2s, full-8k=392s(theoretical); KV transfer infeasible at median BW for full | 2026-08-22 |
+| `results/cost/e31_network/e31_summary.json` | `e31_network.py` | n/a | CPU | — | Summary JSON with BW profiles, connectivity fraction, predictability metrics | 2026-08-22 |
+| `figures/cost/e31_reachability.pdf` | `e31_network.py` | n/a | CPU | — | Three panels: reachability time series, handover histogram, DL_bitrate distribution | 2026-08-22 |
+| `figures/cost/e31_predictability.pdf` | `e31_network.py` | n/a | CPU | — | Two panels: persistence+BW autocorr at H={10,30,60}s; Markov matrix at H=60s | 2026-08-22 |
+| `reports/e31_network_characterization.md` | — | — | — | — | Parts A–D: dataset selection, reachability/BW series, predictability, transfer latency; prefetch decision implications | 2026-08-22 |

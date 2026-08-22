@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-21 (E30 complete: capacity arithmetic — summaries always accelerator-bound, win-10 memory-bound at moderate ri; ordering inversion confirmed; fleet-scale contention real for summaries)
+Last updated: 2026-08-22 (E31 complete: network characterization — Irish 5G driving traces; 83% connected; P(D→D)=0.85 at H=60s; BW p50=9.6 Mbps; BW autocorr collapses by 60s; KV transfer infeasible at median BW for full context)
 
 ## Framing
 
