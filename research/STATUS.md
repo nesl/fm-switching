@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-22 (E32 complete: staleness cost — full/win10 warm-append catch-up 59–89 ms (all TTFT budgets met); sum200 recursive 4.6–5.1 s (background only); quality flat across N within noise; outside-evidence questions degrade at N≥50 ~2 sessions)
+Last updated: 2026-08-23 (E31b complete: network characterization corrected — cell_id=-1 = 14.4% no-cell time in outdoor 5G (gaps 1–3 s); herolab indoor robot <1% below −75 dBm; text transfer 43–528× faster than cold prefill at p50 BW; network not the bottleneck; materialization dominates)
 
 ## Framing
 

@@ -2,6 +2,12 @@
 
 Generated: 2026-08-22
 
+> **Superseded (Parts C and D):** See `reports/e31b_network_characterization.md`.
+> Part C (reachability predictability) used State=D/I (app download activity) as the
+> reachability proxy — this is not a network signal. Part D (payload transfer) modelled
+> KV cache payloads; in the FM-switching setting different tiers run different model sizes
+> so KV is not portable: text payloads (~4 B/token) are what move. Parts A and B remain valid.
+
 ---
 
 ## Datasets

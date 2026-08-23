@@ -228,3 +228,21 @@ N sweep: {0,1,5,10,20,50,100} turns for LoCoMo; {0,1,5} for EgoSchema.
 | `figures/fidelity/e32_staleness_quality.pdf` | `e32_staleness.py --mode analysis` | — | CPU | — | Three panels: accuracy vs N for all/ev-inside/ev-outside splits per fidelity | 2026-08-22 |
 | `figures/fidelity/e32_staleness_latency.pdf` | `e32_staleness.py --mode analysis` | — | CPU | — | Catch-up latency vs N per fidelity/variant; TTFT budget reference lines | 2026-08-22 |
 | `reports/e32_staleness_cost.md` | — | — | — | — | Parts A–C + synthesis: staleness is a latency problem for sum200, not a quality problem for any fidelity at N≤20; quality threshold at N≈50 (~2 sessions) | 2026-08-22 |
+
+## E31b — Network Characterization Corrected (2026-08-23)
+
+Script: `experiments/cost/e31b_network.py`. CPU-only. Supersedes E31 Parts C and D.
+Corrected signals: cell_id=-1 (no-cell state) for Irish 5G; RSSI threshold sweep for herolab.
+Lumos5G + CRAWDAD not obtained (IEEE DataPort registration required; deviation documented).
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/cost/e31b_network/e31b_summary.json` | `e31b_network.py` | none | CPU | 28,551 Irish 5G + 16,562 herolab | All metrics; corrected reachability, RSSI thresholds, predictability, text payload table | 2026-08-23 |
+| `results/cost/e31b_network/irish5g_corrected_reachability.csv` | `e31b_network.py` | — | CPU | 16 sessions | Per-session: duration, n_real_handovers, no_cell_s | 2026-08-23 |
+| `results/cost/e31b_network/herolab_rssi_thresholds.csv` | `e31b_network.py` | — | CPU | 16,562 samples | Fraction below −65/−70/−75/−80/−85/−90 dBm | 2026-08-23 |
+| `results/cost/e31b_network/predictability_corrected.csv` | `e31b_network.py` | — | CPU | 28,551 timesteps | Persistence + Markov metrics at H={10,30,60}s × 2 corrected signals | 2026-08-23 |
+| `results/cost/e31b_network/text_payload_transfer.csv` | `e31b_network.py` | — | CPU | — | Transfer time at p10/p50/p90 BW for text payloads (4B/tok) vs cold prefill; ratio 43–528× | 2026-08-23 |
+| `results/cost/e31b_network/kv_appendix.csv` | `e31b_network.py` | — | CPU | — | KV transfer times for same-model migration (appendix only; not applicable in our setting) | 2026-08-23 |
+| `figures/cost/e31b_reachability_by_environment.pdf` | `e31b_network.py` | — | CPU | — | Three panels: CellID pie (85.6% reachable), duration-filter pie (97.6% reachable), herolab RSSI bar (<1% below −75 dBm) | 2026-08-23 |
+| `figures/cost/e31b_predictability.pdf` | `e31b_network.py` | — | CPU | — | Two panels: persistence accuracy by signal+H; text transfer vs cold prefill log-bar chart | 2026-08-23 |
+| `reports/e31b_network_characterization.md` | — | — | — | — | Parts 1–6: acquisition failures, corrected Irish 5G, herolab RSSI, premise check, predictability, text payload table; key finding: text transfer 43–528× faster than cold prefill at p50 BW | 2026-08-23 |
