@@ -1,5 +1,7 @@
 # E30 — Capacity Arithmetic: Memory and Accelerator Contention at Fleet Scale
 
+> **Superseded (win-10 rows):** See `reports/e33a_definition_audit_and_ledger.md`. WINDOW_TOKENS=400 is the cost-profile definition (last 10 turns); the paper's fidelity experiments use last 10 sessions (median 7,275 tokens, 18× larger). Corrected: N_memory(win10, A6000) ≈ 78 (not 1,421); restore cost ≈ 1,292 ms (not ~65 ms); binding crossover ≈ 101 s (not 57 s). The qualitative ordering sum-80 ≫ sum-200 > win-10 > full survives; all quantitative win-10 claims are superseded.
+
 Generated: 2026-08-21
 
 ## Assumptions (consolidated)

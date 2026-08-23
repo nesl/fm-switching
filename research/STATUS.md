@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-23 (E31b complete: network characterization corrected — cell_id=-1 = 14.4% no-cell time in outdoor 5G (gaps 1–3 s); herolab indoor robot <1% below −75 dBm; text transfer 43–528× faster than cold prefill at p50 BW; network not the bottleneck; materialization dominates)
+Last updated: 2026-08-23 (E33a complete: definition audit and evidence ledger — win-10 definition conflict confirmed (fidelity=last 10 sessions=7275 tok vs cost-profile=last 10 turns=400 tok, 18×); E30 win-10 capacity corrected (N_memory=78 not 1421; crossover≈101s not 57s); E32 Part B latency DISPUTED (cache-hit signature confirmed); E31 Part C INVALID, E31b valid; two reruns flagged: E32b (caching off) and E30b (correct win-10 tokens))
 
 ## Framing
 
