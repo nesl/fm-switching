@@ -9,3 +9,4 @@ don't collide. Clear the claim when done.
 | flash | A6000 (GPU 1) | CC | E29 tier-heterogeneous fidelity audit | 2026-08-21 | done |
 | flash | A6000 (GPU 1) | CC | E26 vLLM calibration follow-up (warm append + YaRN) | 2026-08-21 | done |
 | flash | A6000 (GPU 1) | CC | E32 staleness cost (quality HF + catch-up latency vLLM) | 2026-08-22 | done |
+| flash | A6000 (GPU 1) | CC | E34 maintenance semantics + corrected catch-up latency | 2026-08-23 | done |

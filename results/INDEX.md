@@ -225,6 +225,21 @@ N sweep: {0,1,5,10,20,50,100} turns for LoCoMo; {0,1,5} for EgoSchema.
 | `results/fidelity/e32_staleness/locomo_latency_qwen7b.json` | `e32_staleness.py --mode latency` | qwen7b | a6000 | 10 conv × 6 N × 4 variants | full/win10 warm-append: 59–89 ms (all budgets met); sum200 recursive: 4.6–5.1 s (background only); sum200 full-regen: 8.8 s (no budget) | 2026-08-22 |
 | `results/fidelity/e32_staleness/analysis_qwen7b.json` | `e32_staleness.py --mode analysis` | — | CPU | — | Tradeoff table: (fidelity, N) → acc + latency + TTFT budget verdicts | 2026-08-22 |
 | `results/fidelity/e32_staleness/caches/locomo_sum200_stale.json` | `e32_staleness.py --mode quality` | qwen7b | a6000 | 10 conv × 6 N | Stale sum200 summaries for N∈{1,5,10,20,50,100} | 2026-08-22 |
+
+## E34 — Maintenance Semantics + Corrected Catch-up Latency (2026-08-23)
+
+Script: `experiments/cost/e34_maintenance_semantics.py`. Model: qwen7b. Device: A6000 (GPU 1). vLLM 0.8.5 V1, enforce\_eager=True, YaRN for L≥32k.
+Part A: update semantics per object under WARM (prefix\_caching=True) and COLD (prefix\_caching=False). Part B: corrected catch-up latency (replaces E32 Part B) — 10 LoCoMo convs × N∈{1,5,10,20,50,100} × fidelity∈{full,win10,sum200} × {WARM,COLD} × 5 reps. Part C: CPU-only analysis.
+Three implementation bugs fixed: CUDA graph deadlock (enforce\_eager=True), vLLM V1 subprocess OOM (explicit shutdown), slide WARM pre-caching (removed new\_text warm-up).
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/cost/e34_maintenance_semantics/part_a_full.json` | `e34_maintenance_semantics.py --part A` | qwen7b | a6000 | 12 L×k pairs × 5 reps × 2 conditions | Full WARM/COLD: 30–132× ratio across L=8k–65k; WARM is cache-hit fast; COLD at committed prefill rate | 4da0eb9d |
+| `results/cost/e34_maintenance_semantics/part_a_win10.json` | `e34_maintenance_semantics.py --part A2` | qwen7b | a6000 | 10 LoCoMo convs × {growth,slide} × 2 conditions × 5 reps | Growth WARM=36ms (27× vs COLD=962ms); Slide COLD=0.975s (reliable); Slide WARM=vLLM V1 block-reuse artifact (documented, not used) | 4da0eb9d |
+| `results/cost/e34_maintenance_semantics/part_b_catchup.json` | `e34_maintenance_semantics.py --part B` | qwen7b | a6000 | 10 convs × 6 N × 3 fidelities × 2 conditions × 5 reps = 1800 measurements | COLD N-invariant: full=3.62s, win10=1.045s, sum200=0.037s (all within 2× of committed 5,984 tok/s). WARM cache-hit: 25–65ms all fidelities all N | 4da0eb9d |
+| `results/cost/e34_maintenance_semantics/part_c_analysis.json` | `e34_maintenance_semantics.py --part C` | — | CPU | — | Win10 amortized=652ms (65.7% slides); sum200 restore=32ms but update=9,565ms; full COLD 3,620ms fails interactive budget | 4da0eb9d |
+| `results/cost/e34_maintenance_semantics/e34_summary.json` | `e34_maintenance_semantics.py` | — | CPU | — | Summary metadata | 4da0eb9d |
+| `reports/e34_maintenance_semantics.md` | — | — | — | — | Full 3-part report with 6-check consistency protocol | 2026-08-23 |
 | `figures/fidelity/e32_staleness_quality.pdf` | `e32_staleness.py --mode analysis` | — | CPU | — | Three panels: accuracy vs N for all/ev-inside/ev-outside splits per fidelity | 2026-08-22 |
 | `figures/fidelity/e32_staleness_latency.pdf` | `e32_staleness.py --mode analysis` | — | CPU | — | Catch-up latency vs N per fidelity/variant; TTFT budget reference lines | 2026-08-22 |
 | `reports/e32_staleness_cost.md` | — | — | — | — | Parts A–C + synthesis: staleness is a latency problem for sum200, not a quality problem for any fidelity at N≤20; quality threshold at N≈50 (~2 sessions) | 2026-08-22 |

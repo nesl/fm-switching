@@ -1,0 +1,946 @@
+{
+  "description": "win10: growth-phase append vs sliding-phase re-prefill (bug-fixed: slide warm no longer pre-caches new_text)",
+  "cache_state": "WARM=prefix_caching=True; COLD=prefix_caching=False",
+  "measurements": [
+    {
+      "conv_id": "conv-26",
+      "n_sessions_total": 19,
+      "win10_growth": {
+        "object": "win10_growth",
+        "update_operation": "tail_append (growth phase: <10 sessions, prefix preserved)",
+        "prefix_preserved": true,
+        "old_tokens": 6547,
+        "new_tokens": 7406,
+        "delta_tokens": 858,
+        "predicted_cold_s": 0.143,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+          "extension_tokens": 858,
+          "median_s": 0.0382,
+          "iqr_s": 0.0005,
+          "min_s": 0.0379,
+          "max_s": 0.0389,
+          "all_s": [
+            0.0379,
+            0.0382,
+            0.0382,
+            0.0383,
+            0.0389
+          ],
+          "implied_toks_per_s": 22452.6,
+          "crosscheck": "FLAGGED (3.8\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 7406,
+          "median_s": 1.0427,
+          "iqr_s": 0.0057,
+          "min_s": 1.0405,
+          "max_s": 1.048,
+          "all_s": [
+            1.0405,
+            1.0418,
+            1.0427,
+            1.0457,
+            1.048
+          ],
+          "implied_toks_per_s": 7102.8,
+          "crosscheck": "ok (1.19\u00d7)"
+        }
+      },
+      "win10_slide": {
+        "object": "win10_slide",
+        "update_operation": "cold_reprefill (sliding phase: head eviction invalidates prefix)",
+        "prefix_preserved": false,
+        "old_tokens": 7406,
+        "new_tokens": 7638,
+        "predicted_cold_s": 1.276,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; OLD window primed before each rep; NEW window measured \u2014 tests whether head-eviction allows any prefix hit)",
+          "new_window_tokens": 7638,
+          "median_s": 0.0389,
+          "iqr_s": 0.5336,
+          "min_s": 0.0379,
+          "max_s": 1.1047,
+          "all_s": [
+            0.0379,
+            0.0387,
+            0.0389,
+            0.0392,
+            1.1047
+          ],
+          "implied_toks_per_s": 196497.5,
+          "crosscheck": "FLAGGED (32.8\u00d7 faster than committed cold-prefill; consistent with cache hit)",
+          "note": "If result \u2248 COLD, no prefix hit (expected). If much faster, partial hit occurred."
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 7638,
+          "median_s": 1.0726,
+          "iqr_s": 0.0036,
+          "min_s": 1.0693,
+          "max_s": 1.0751,
+          "all_s": [
+            1.0693,
+            1.0713,
+            1.0726,
+            1.0728,
+            1.0751
+          ],
+          "implied_toks_per_s": 7120.7,
+          "crosscheck": "ok (1.19\u00d7)"
+        }
+      }
+    },
+    {
+      "conv_id": "conv-30",
+      "n_sessions_total": 19,
+      "win10_growth": {
+        "object": "win10_growth",
+        "update_operation": "tail_append (growth phase: <10 sessions, prefix preserved)",
+        "prefix_preserved": true,
+        "old_tokens": 5842,
+        "new_tokens": 6429,
+        "delta_tokens": 586,
+        "predicted_cold_s": 0.098,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+          "extension_tokens": 586,
+          "median_s": 0.0355,
+          "iqr_s": 0.0006,
+          "min_s": 0.0353,
+          "max_s": 0.0363,
+          "all_s": [
+            0.0353,
+            0.0353,
+            0.0355,
+            0.0356,
+            0.0363
+          ],
+          "implied_toks_per_s": 16529.3,
+          "crosscheck": "FLAGGED (2.8\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 6429,
+          "median_s": 0.9028,
+          "iqr_s": 0.0039,
+          "min_s": 0.8994,
+          "max_s": 0.9039,
+          "all_s": [
+            0.8994,
+            0.9002,
+            0.9028,
+            0.9036,
+            0.9039
+          ],
+          "implied_toks_per_s": 7121.2,
+          "crosscheck": "ok (1.19\u00d7)"
+        }
+      },
+      "win10_slide": {
+        "object": "win10_slide",
+        "update_operation": "cold_reprefill (sliding phase: head eviction invalidates prefix)",
+        "prefix_preserved": false,
+        "old_tokens": 6429,
+        "new_tokens": 6338,
+        "predicted_cold_s": 1.059,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; OLD window primed before each rep; NEW window measured \u2014 tests whether head-eviction allows any prefix hit)",
+          "new_window_tokens": 6338,
+          "median_s": 0.0351,
+          "iqr_s": 0.4081,
+          "min_s": 0.0346,
+          "max_s": 0.8488,
+          "all_s": [
+            0.0346,
+            0.0347,
+            0.0351,
+            0.0366,
+            0.8488
+          ],
+          "implied_toks_per_s": 180375.3,
+          "crosscheck": "FLAGGED (30.1\u00d7 faster than committed cold-prefill; consistent with cache hit)",
+          "note": "If result \u2248 COLD, no prefix hit (expected). If much faster, partial hit occurred."
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 6338,
+          "median_s": 0.8922,
+          "iqr_s": 0.0013,
+          "min_s": 0.8912,
+          "max_s": 0.8928,
+          "all_s": [
+            0.8912,
+            0.8912,
+            0.8922,
+            0.8922,
+            0.8928
+          ],
+          "implied_toks_per_s": 7103.6,
+          "crosscheck": "ok (1.19\u00d7)"
+        }
+      }
+    },
+    {
+      "conv_id": "conv-41",
+      "n_sessions_total": 32,
+      "win10_growth": {
+        "object": "win10_growth",
+        "update_operation": "tail_append (growth phase: <10 sessions, prefix preserved)",
+        "prefix_preserved": true,
+        "old_tokens": 6045,
+        "new_tokens": 6838,
+        "delta_tokens": 791,
+        "predicted_cold_s": 0.132,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+          "extension_tokens": 791,
+          "median_s": 0.0365,
+          "iqr_s": 0.0006,
+          "min_s": 0.0363,
+          "max_s": 0.0372,
+          "all_s": [
+            0.0363,
+            0.0364,
+            0.0365,
+            0.0367,
+            0.0372
+          ],
+          "implied_toks_per_s": 21692.7,
+          "crosscheck": "FLAGGED (3.6\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 6838,
+          "median_s": 0.9661,
+          "iqr_s": 0.002,
+          "min_s": 0.9646,
+          "max_s": 0.9674,
+          "all_s": [
+            0.9646,
+            0.9661,
+            0.9661,
+            0.9673,
+            0.9674
+          ],
+          "implied_toks_per_s": 7078.1,
+          "crosscheck": "ok (1.18\u00d7)"
+        }
+      },
+      "win10_slide": {
+        "object": "win10_slide",
+        "update_operation": "cold_reprefill (sliding phase: head eviction invalidates prefix)",
+        "prefix_preserved": false,
+        "old_tokens": 6838,
+        "new_tokens": 7151,
+        "predicted_cold_s": 1.195,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; OLD window primed before each rep; NEW window measured \u2014 tests whether head-eviction allows any prefix hit)",
+          "new_window_tokens": 7151,
+          "median_s": 0.0378,
+          "iqr_s": 0.4647,
+          "min_s": 0.0372,
+          "max_s": 0.9659,
+          "all_s": [
+            0.0372,
+            0.0375,
+            0.0378,
+            0.0382,
+            0.9659
+          ],
+          "implied_toks_per_s": 188969.6,
+          "crosscheck": "FLAGGED (31.6\u00d7 faster than committed cold-prefill; consistent with cache hit)",
+          "note": "If result \u2248 COLD, no prefix hit (expected). If much faster, partial hit occurred."
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 7151,
+          "median_s": 1.018,
+          "iqr_s": 0.0028,
+          "min_s": 1.0171,
+          "max_s": 1.0209,
+          "all_s": [
+            1.0171,
+            1.0174,
+            1.018,
+            1.0193,
+            1.0209
+          ],
+          "implied_toks_per_s": 7024.8,
+          "crosscheck": "ok (1.17\u00d7)"
+        }
+      }
+    },
+    {
+      "conv_id": "conv-42",
+      "n_sessions_total": 29,
+      "win10_growth": {
+        "object": "win10_growth",
+        "update_operation": "tail_append (growth phase: <10 sessions, prefix preserved)",
+        "prefix_preserved": true,
+        "old_tokens": 5317,
+        "new_tokens": 5842,
+        "delta_tokens": 524,
+        "predicted_cold_s": 0.088,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+          "extension_tokens": 524,
+          "median_s": 0.0308,
+          "iqr_s": 0.0014,
+          "min_s": 0.0303,
+          "max_s": 0.033,
+          "all_s": [
+            0.0303,
+            0.0307,
+            0.0308,
+            0.0309,
+            0.033
+          ],
+          "implied_toks_per_s": 17012.6,
+          "crosscheck": "FLAGGED (2.8\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 5842,
+          "median_s": 0.8358,
+          "iqr_s": 0.001,
+          "min_s": 0.8349,
+          "max_s": 0.8362,
+          "all_s": [
+            0.8349,
+            0.8354,
+            0.8358,
+            0.8361,
+            0.8362
+          ],
+          "implied_toks_per_s": 6989.8,
+          "crosscheck": "ok (1.17\u00d7)"
+        }
+      },
+      "win10_slide": {
+        "object": "win10_slide",
+        "update_operation": "cold_reprefill (sliding phase: head eviction invalidates prefix)",
+        "prefix_preserved": false,
+        "old_tokens": 5842,
+        "new_tokens": 5861,
+        "predicted_cold_s": 0.979,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; OLD window primed before each rep; NEW window measured \u2014 tests whether head-eviction allows any prefix hit)",
+          "new_window_tokens": 5861,
+          "median_s": 0.035,
+          "iqr_s": 0.3813,
+          "min_s": 0.0341,
+          "max_s": 0.7958,
+          "all_s": [
+            0.0341,
+            0.0343,
+            0.035,
+            0.0351,
+            0.7958
+          ],
+          "implied_toks_per_s": 167252.4,
+          "crosscheck": "FLAGGED (27.9\u00d7 faster than committed cold-prefill; consistent with cache hit)",
+          "note": "If result \u2248 COLD, no prefix hit (expected). If much faster, partial hit occurred."
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 5861,
+          "median_s": 0.839,
+          "iqr_s": 0.0018,
+          "min_s": 0.8384,
+          "max_s": 0.8412,
+          "all_s": [
+            0.8384,
+            0.8388,
+            0.839,
+            0.8395,
+            0.8412
+          ],
+          "implied_toks_per_s": 6985.4,
+          "crosscheck": "ok (1.17\u00d7)"
+        }
+      }
+    },
+    {
+      "conv_id": "conv-43",
+      "n_sessions_total": 29,
+      "win10_growth": {
+        "object": "win10_growth",
+        "update_operation": "tail_append (growth phase: <10 sessions, prefix preserved)",
+        "prefix_preserved": true,
+        "old_tokens": 6551,
+        "new_tokens": 7048,
+        "delta_tokens": 496,
+        "predicted_cold_s": 0.083,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+          "extension_tokens": 496,
+          "median_s": 0.0385,
+          "iqr_s": 0.0024,
+          "min_s": 0.0368,
+          "max_s": 0.04,
+          "all_s": [
+            0.0368,
+            0.0371,
+            0.0385,
+            0.0386,
+            0.04
+          ],
+          "implied_toks_per_s": 12897.9,
+          "crosscheck": "FLAGGED (2.2\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 7048,
+          "median_s": 1.0219,
+          "iqr_s": 0.0255,
+          "min_s": 1.0201,
+          "max_s": 1.0708,
+          "all_s": [
+            1.0201,
+            1.0218,
+            1.0219,
+            1.0221,
+            1.0708
+          ],
+          "implied_toks_per_s": 6896.7,
+          "crosscheck": "ok (1.15\u00d7)"
+        }
+      },
+      "win10_slide": {
+        "object": "win10_slide",
+        "update_operation": "cold_reprefill (sliding phase: head eviction invalidates prefix)",
+        "prefix_preserved": false,
+        "old_tokens": 7048,
+        "new_tokens": 7475,
+        "predicted_cold_s": 1.249,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; OLD window primed before each rep; NEW window measured \u2014 tests whether head-eviction allows any prefix hit)",
+          "new_window_tokens": 7475,
+          "median_s": 0.0376,
+          "iqr_s": 0.5059,
+          "min_s": 0.0373,
+          "max_s": 1.0479,
+          "all_s": [
+            0.0373,
+            0.0374,
+            0.0376,
+            0.0387,
+            1.0479
+          ],
+          "implied_toks_per_s": 198974.0,
+          "crosscheck": "FLAGGED (33.3\u00d7 faster than committed cold-prefill; consistent with cache hit)",
+          "note": "If result \u2248 COLD, no prefix hit (expected). If much faster, partial hit occurred."
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 7475,
+          "median_s": 1.0835,
+          "iqr_s": 0.003,
+          "min_s": 1.0805,
+          "max_s": 1.0858,
+          "all_s": [
+            1.0805,
+            1.0832,
+            1.0835,
+            1.0839,
+            1.0858
+          ],
+          "implied_toks_per_s": 6898.7,
+          "crosscheck": "ok (1.15\u00d7)"
+        }
+      }
+    },
+    {
+      "conv_id": "conv-44",
+      "n_sessions_total": 28,
+      "win10_growth": {
+        "object": "win10_growth",
+        "update_operation": "tail_append (growth phase: <10 sessions, prefix preserved)",
+        "prefix_preserved": true,
+        "old_tokens": 6333,
+        "new_tokens": 7433,
+        "delta_tokens": 1099,
+        "predicted_cold_s": 0.184,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+          "extension_tokens": 1099,
+          "median_s": 0.0379,
+          "iqr_s": 0.0007,
+          "min_s": 0.0375,
+          "max_s": 0.0386,
+          "all_s": [
+            0.0375,
+            0.0376,
+            0.0379,
+            0.0379,
+            0.0386
+          ],
+          "implied_toks_per_s": 29020.7,
+          "crosscheck": "FLAGGED (4.8\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 7433,
+          "median_s": 1.0828,
+          "iqr_s": 0.0018,
+          "min_s": 1.0811,
+          "max_s": 1.0842,
+          "all_s": [
+            1.0811,
+            1.0823,
+            1.0828,
+            1.0828,
+            1.0842
+          ],
+          "implied_toks_per_s": 6864.7,
+          "crosscheck": "ok (1.15\u00d7)"
+        }
+      },
+      "win10_slide": {
+        "object": "win10_slide",
+        "update_operation": "cold_reprefill (sliding phase: head eviction invalidates prefix)",
+        "prefix_preserved": false,
+        "old_tokens": 7433,
+        "new_tokens": 7897,
+        "predicted_cold_s": 1.32,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; OLD window primed before each rep; NEW window measured \u2014 tests whether head-eviction allows any prefix hit)",
+          "new_window_tokens": 7897,
+          "median_s": 0.0394,
+          "iqr_s": 0.573,
+          "min_s": 0.038,
+          "max_s": 1.1823,
+          "all_s": [
+            0.038,
+            0.0382,
+            0.0394,
+            0.04,
+            1.1823
+          ],
+          "implied_toks_per_s": 200266.7,
+          "crosscheck": "FLAGGED (33.5\u00d7 faster than committed cold-prefill; consistent with cache hit)",
+          "note": "If result \u2248 COLD, no prefix hit (expected). If much faster, partial hit occurred."
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 7897,
+          "median_s": 1.1649,
+          "iqr_s": 0.0023,
+          "min_s": 1.1626,
+          "max_s": 1.1653,
+          "all_s": [
+            1.1626,
+            1.163,
+            1.1649,
+            1.1649,
+            1.1653
+          ],
+          "implied_toks_per_s": 6779.1,
+          "crosscheck": "ok (1.13\u00d7)"
+        }
+      }
+    },
+    {
+      "conv_id": "conv-47",
+      "n_sessions_total": 31,
+      "win10_growth": {
+        "object": "win10_growth",
+        "update_operation": "tail_append (growth phase: <10 sessions, prefix preserved)",
+        "prefix_preserved": true,
+        "old_tokens": 6609,
+        "new_tokens": 7060,
+        "delta_tokens": 450,
+        "predicted_cold_s": 0.075,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+          "extension_tokens": 450,
+          "median_s": 0.0368,
+          "iqr_s": 0.0017,
+          "min_s": 0.0365,
+          "max_s": 0.0387,
+          "all_s": [
+            0.0365,
+            0.0367,
+            0.0368,
+            0.0379,
+            0.0387
+          ],
+          "implied_toks_per_s": 12226.8,
+          "crosscheck": "FLAGGED (2.0\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 7060,
+          "median_s": 1.0287,
+          "iqr_s": 0.0029,
+          "min_s": 1.0271,
+          "max_s": 1.0328,
+          "all_s": [
+            1.0271,
+            1.0285,
+            1.0287,
+            1.0287,
+            1.0328
+          ],
+          "implied_toks_per_s": 6863.1,
+          "crosscheck": "ok (1.15\u00d7)"
+        }
+      },
+      "win10_slide": {
+        "object": "win10_slide",
+        "update_operation": "cold_reprefill (sliding phase: head eviction invalidates prefix)",
+        "prefix_preserved": false,
+        "old_tokens": 7060,
+        "new_tokens": 6622,
+        "predicted_cold_s": 1.107,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; OLD window primed before each rep; NEW window measured \u2014 tests whether head-eviction allows any prefix hit)",
+          "new_window_tokens": 6622,
+          "median_s": 0.0367,
+          "iqr_s": 0.4371,
+          "min_s": 0.0358,
+          "max_s": 0.9089,
+          "all_s": [
+            0.0358,
+            0.036,
+            0.0367,
+            0.0371,
+            0.9089
+          ],
+          "implied_toks_per_s": 180435.3,
+          "crosscheck": "FLAGGED (30.2\u00d7 faster than committed cold-prefill; consistent with cache hit)",
+          "note": "If result \u2248 COLD, no prefix hit (expected). If much faster, partial hit occurred."
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 6622,
+          "median_s": 0.9548,
+          "iqr_s": 0.0014,
+          "min_s": 0.9543,
+          "max_s": 0.9569,
+          "all_s": [
+            0.9543,
+            0.9546,
+            0.9548,
+            0.9549,
+            0.9569
+          ],
+          "implied_toks_per_s": 6935.3,
+          "crosscheck": "ok (1.16\u00d7)"
+        }
+      }
+    },
+    {
+      "conv_id": "conv-48",
+      "n_sessions_total": 30,
+      "win10_growth": {
+        "object": "win10_growth",
+        "update_operation": "tail_append (growth phase: <10 sessions, prefix preserved)",
+        "prefix_preserved": true,
+        "old_tokens": 5748,
+        "new_tokens": 6453,
+        "delta_tokens": 704,
+        "predicted_cold_s": 0.118,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+          "extension_tokens": 704,
+          "median_s": 0.0351,
+          "iqr_s": 0.0008,
+          "min_s": 0.0348,
+          "max_s": 0.0357,
+          "all_s": [
+            0.0348,
+            0.035,
+            0.0351,
+            0.0357,
+            0.0357
+          ],
+          "implied_toks_per_s": 20081.7,
+          "crosscheck": "FLAGGED (3.4\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 6453,
+          "median_s": 0.9256,
+          "iqr_s": 0.003,
+          "min_s": 0.9247,
+          "max_s": 0.9295,
+          "all_s": [
+            0.9247,
+            0.9249,
+            0.9256,
+            0.926,
+            0.9295
+          ],
+          "implied_toks_per_s": 6971.5,
+          "crosscheck": "ok (1.17\u00d7)"
+        }
+      },
+      "win10_slide": {
+        "object": "win10_slide",
+        "update_operation": "cold_reprefill (sliding phase: head eviction invalidates prefix)",
+        "prefix_preserved": false,
+        "old_tokens": 6453,
+        "new_tokens": 6460,
+        "predicted_cold_s": 1.08,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; OLD window primed before each rep; NEW window measured \u2014 tests whether head-eviction allows any prefix hit)",
+          "new_window_tokens": 6460,
+          "median_s": 0.0359,
+          "iqr_s": 0.4252,
+          "min_s": 0.0352,
+          "max_s": 0.8841,
+          "all_s": [
+            0.0352,
+            0.0354,
+            0.0359,
+            0.0369,
+            0.8841
+          ],
+          "implied_toks_per_s": 180172.3,
+          "crosscheck": "FLAGGED (30.1\u00d7 faster than committed cold-prefill; consistent with cache hit)",
+          "note": "If result \u2248 COLD, no prefix hit (expected). If much faster, partial hit occurred."
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 6460,
+          "median_s": 0.9284,
+          "iqr_s": 0.0019,
+          "min_s": 0.9264,
+          "max_s": 0.93,
+          "all_s": [
+            0.9264,
+            0.9282,
+            0.9284,
+            0.9285,
+            0.93
+          ],
+          "implied_toks_per_s": 6958.3,
+          "crosscheck": "ok (1.16\u00d7)"
+        }
+      }
+    },
+    {
+      "conv_id": "conv-49",
+      "n_sessions_total": 25,
+      "win10_growth": {
+        "object": "win10_growth",
+        "update_operation": "tail_append (growth phase: <10 sessions, prefix preserved)",
+        "prefix_preserved": true,
+        "old_tokens": 5932,
+        "new_tokens": 6472,
+        "delta_tokens": 539,
+        "predicted_cold_s": 0.09,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+          "extension_tokens": 539,
+          "median_s": 0.0351,
+          "iqr_s": 0.0007,
+          "min_s": 0.035,
+          "max_s": 0.0359,
+          "all_s": [
+            0.035,
+            0.0351,
+            0.0351,
+            0.0356,
+            0.0359
+          ],
+          "implied_toks_per_s": 15341.6,
+          "crosscheck": "FLAGGED (2.6\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 6472,
+          "median_s": 0.9317,
+          "iqr_s": 0.0017,
+          "min_s": 0.9296,
+          "max_s": 0.9324,
+          "all_s": [
+            0.9296,
+            0.9313,
+            0.9317,
+            0.932,
+            0.9324
+          ],
+          "implied_toks_per_s": 6946.7,
+          "crosscheck": "ok (1.16\u00d7)"
+        }
+      },
+      "win10_slide": {
+        "object": "win10_slide",
+        "update_operation": "cold_reprefill (sliding phase: head eviction invalidates prefix)",
+        "prefix_preserved": false,
+        "old_tokens": 6472,
+        "new_tokens": 6730,
+        "predicted_cold_s": 1.125,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; OLD window primed before each rep; NEW window measured \u2014 tests whether head-eviction allows any prefix hit)",
+          "new_window_tokens": 6730,
+          "median_s": 0.036,
+          "iqr_s": 0.4476,
+          "min_s": 0.0357,
+          "max_s": 0.9298,
+          "all_s": [
+            0.0357,
+            0.0359,
+            0.036,
+            0.0371,
+            0.9298
+          ],
+          "implied_toks_per_s": 186709.5,
+          "crosscheck": "FLAGGED (31.2\u00d7 faster than committed cold-prefill; consistent with cache hit)",
+          "note": "If result \u2248 COLD, no prefix hit (expected). If much faster, partial hit occurred."
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 6730,
+          "median_s": 0.9739,
+          "iqr_s": 0.0019,
+          "min_s": 0.9731,
+          "max_s": 0.9756,
+          "all_s": [
+            0.9731,
+            0.9739,
+            0.9739,
+            0.9751,
+            0.9756
+          ],
+          "implied_toks_per_s": 6910.0,
+          "crosscheck": "ok (1.15\u00d7)"
+        }
+      }
+    },
+    {
+      "conv_id": "conv-50",
+      "n_sessions_total": 30,
+      "win10_growth": {
+        "object": "win10_growth",
+        "update_operation": "tail_append (growth phase: <10 sessions, prefix preserved)",
+        "prefix_preserved": true,
+        "old_tokens": 5978,
+        "new_tokens": 6647,
+        "delta_tokens": 668,
+        "predicted_cold_s": 0.112,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+          "extension_tokens": 668,
+          "median_s": 0.0356,
+          "iqr_s": 0.0006,
+          "min_s": 0.0354,
+          "max_s": 0.0364,
+          "all_s": [
+            0.0354,
+            0.0355,
+            0.0356,
+            0.0356,
+            0.0364
+          ],
+          "implied_toks_per_s": 18784.2,
+          "crosscheck": "FLAGGED (3.1\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 6647,
+          "median_s": 0.9586,
+          "iqr_s": 0.0006,
+          "min_s": 0.9579,
+          "max_s": 0.9589,
+          "all_s": [
+            0.9579,
+            0.9586,
+            0.9586,
+            0.9588,
+            0.9589
+          ],
+          "implied_toks_per_s": 6933.7,
+          "crosscheck": "ok (1.16\u00d7)"
+        }
+      },
+      "win10_slide": {
+        "object": "win10_slide",
+        "update_operation": "cold_reprefill (sliding phase: head eviction invalidates prefix)",
+        "prefix_preserved": false,
+        "old_tokens": 6647,
+        "new_tokens": 6781,
+        "predicted_cold_s": 1.133,
+        "warm": {
+          "feasible": true,
+          "condition": "WARM (prefix_caching=True; OLD window primed before each rep; NEW window measured \u2014 tests whether head-eviction allows any prefix hit)",
+          "new_window_tokens": 6781,
+          "median_s": 0.036,
+          "iqr_s": 0.4493,
+          "min_s": 0.036,
+          "max_s": 0.9332,
+          "all_s": [
+            0.036,
+            0.036,
+            0.036,
+            0.0373,
+            0.9332
+          ],
+          "implied_toks_per_s": 188194.8,
+          "crosscheck": "FLAGGED (31.4\u00d7 faster than committed cold-prefill; consistent with cache hit)",
+          "note": "If result \u2248 COLD, no prefix hit (expected). If much faster, partial hit occurred."
+        },
+        "cold": {
+          "feasible": true,
+          "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+          "context_tokens": 6781,
+          "median_s": 0.9758,
+          "iqr_s": 0.0035,
+          "min_s": 0.9753,
+          "max_s": 0.9809,
+          "all_s": [
+            0.9753,
+            0.9754,
+            0.9758,
+            0.9767,
+            0.9809
+          ],
+          "implied_toks_per_s": 6949.2,
+          "crosscheck": "ok (1.16\u00d7)"
+        }
+      }
+    }
+  ]
+}

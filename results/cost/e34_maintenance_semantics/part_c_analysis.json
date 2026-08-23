@@ -1,0 +1,1007 @@
+{
+  "sliding_frequency": {
+    "per_conversation": [
+      {
+        "conv_id": "conv-26",
+        "n_sessions": 19,
+        "growth_tr": 9,
+        "sliding_tr": 9,
+        "total_tr": 18,
+        "slide_frac": 0.5
+      },
+      {
+        "conv_id": "conv-30",
+        "n_sessions": 19,
+        "growth_tr": 9,
+        "sliding_tr": 9,
+        "total_tr": 18,
+        "slide_frac": 0.5
+      },
+      {
+        "conv_id": "conv-41",
+        "n_sessions": 32,
+        "growth_tr": 9,
+        "sliding_tr": 22,
+        "total_tr": 31,
+        "slide_frac": 0.7097
+      },
+      {
+        "conv_id": "conv-42",
+        "n_sessions": 29,
+        "growth_tr": 9,
+        "sliding_tr": 19,
+        "total_tr": 28,
+        "slide_frac": 0.6786
+      },
+      {
+        "conv_id": "conv-43",
+        "n_sessions": 29,
+        "growth_tr": 9,
+        "sliding_tr": 19,
+        "total_tr": 28,
+        "slide_frac": 0.6786
+      },
+      {
+        "conv_id": "conv-44",
+        "n_sessions": 28,
+        "growth_tr": 9,
+        "sliding_tr": 18,
+        "total_tr": 27,
+        "slide_frac": 0.6667
+      },
+      {
+        "conv_id": "conv-47",
+        "n_sessions": 31,
+        "growth_tr": 9,
+        "sliding_tr": 21,
+        "total_tr": 30,
+        "slide_frac": 0.7
+      },
+      {
+        "conv_id": "conv-48",
+        "n_sessions": 30,
+        "growth_tr": 9,
+        "sliding_tr": 20,
+        "total_tr": 29,
+        "slide_frac": 0.6897
+      },
+      {
+        "conv_id": "conv-49",
+        "n_sessions": 25,
+        "growth_tr": 9,
+        "sliding_tr": 15,
+        "total_tr": 24,
+        "slide_frac": 0.625
+      },
+      {
+        "conv_id": "conv-50",
+        "n_sessions": 30,
+        "growth_tr": 9,
+        "sliding_tr": 20,
+        "total_tr": 29,
+        "slide_frac": 0.6897
+      }
+    ],
+    "aggregate": {
+      "median_slide_frac": 0.6786,
+      "min_slide_frac": 0.5,
+      "max_slide_frac": 0.7097,
+      "aggregate_slide_frac": 0.6565,
+      "total_sliding_tr": 172,
+      "total_transitions": 262
+    }
+  },
+  "win10_token_counts": {
+    "per_conv": [
+      8181,
+      5668,
+      6004,
+      7937,
+      7264,
+      7845,
+      6341,
+      6785,
+      7014,
+      8071
+    ],
+    "median": 7139
+  },
+  "maintenance_cost_ms": {
+    "sum80_restore": 28.6,
+    "sum200_restore": 31.82,
+    "sum80_update_L8k": 4803.62,
+    "sum200_update_L8k": 9564.8,
+    "win10_grow_warm": 36.05,
+    "win10_slide_cold": 974.8499999999999,
+    "win10_amortized": 652.3722,
+    "win10_slide_warm": 36.35,
+    "note": "win10_amortized = (1-slide_frac)\u00d7grow_warm + slide_frac\u00d7slide_cold; slide_frac=0.6565"
+  },
+  "win10_restore_ms": 974.8499999999999,
+  "win10_meets_1s_interactive_budget": true,
+  "budget_compliance": {
+    "sum80_restore": {
+      "voice_embodied_s": "PASS",
+      "interactive_s": "PASS",
+      "background_s": "PASS"
+    },
+    "sum200_restore": {
+      "voice_embodied_s": "PASS",
+      "interactive_s": "PASS",
+      "background_s": "PASS"
+    },
+    "win10_restore": {
+      "voice_embodied_s": "FAIL",
+      "interactive_s": "PASS",
+      "background_s": "PASS"
+    },
+    "win10_grow": {
+      "voice_embodied_s": "PASS",
+      "interactive_s": "PASS",
+      "background_s": "PASS"
+    },
+    "win10_slide": {
+      "voice_embodied_s": "FAIL",
+      "interactive_s": "PASS",
+      "background_s": "PASS"
+    }
+  },
+  "taxonomy": {
+    "formulation_claim": "two-class: raw-append (full,win) vs derived-regenerate (sum)",
+    "win10_slide_prefix_hit": true,
+    "warm_cold_ratio": 0.037,
+    "conclusion": "win10 slide WARM (36ms) << COLD (975ms) [ratio 0.04]: partial prefix hit detected; update semantics MAY be closer to append in this case."
+  },
+  "part_b_crosscheck_flags": [
+    {
+      "conv_id": "conv-26",
+      "fidelity": "full",
+      "N": 20,
+      "warm_median_s": 0.0423,
+      "delta_tokens": 653,
+      "implied_delta_tps": 15432.2,
+      "ratio": 2.58,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-26",
+      "fidelity": "full",
+      "N": 50,
+      "warm_median_s": 0.0423,
+      "delta_tokens": 1442,
+      "implied_delta_tps": 34117.8,
+      "ratio": 5.7,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-30",
+      "fidelity": "full",
+      "N": 50,
+      "warm_median_s": 0.0452,
+      "delta_tokens": 1349,
+      "implied_delta_tps": 29874.5,
+      "ratio": 4.99,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-41",
+      "fidelity": "full",
+      "N": 50,
+      "warm_median_s": 0.0659,
+      "delta_tokens": 1429,
+      "implied_delta_tps": 21700.1,
+      "ratio": 3.63,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-42",
+      "fidelity": "full",
+      "N": 50,
+      "warm_median_s": 0.0483,
+      "delta_tokens": 1413,
+      "implied_delta_tps": 29240.3,
+      "ratio": 4.89,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-43",
+      "fidelity": "full",
+      "N": 50,
+      "warm_median_s": 0.0647,
+      "delta_tokens": 1176,
+      "implied_delta_tps": 18188.1,
+      "ratio": 3.04,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-44",
+      "fidelity": "full",
+      "N": 50,
+      "warm_median_s": 0.0641,
+      "delta_tokens": 1429,
+      "implied_delta_tps": 22292.1,
+      "ratio": 3.73,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-47",
+      "fidelity": "full",
+      "N": 50,
+      "warm_median_s": 0.0631,
+      "delta_tokens": 1154,
+      "implied_delta_tps": 18290.7,
+      "ratio": 3.06,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-48",
+      "fidelity": "full",
+      "N": 50,
+      "warm_median_s": 0.061,
+      "delta_tokens": 1220,
+      "implied_delta_tps": 19988.6,
+      "ratio": 3.34,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-49",
+      "fidelity": "full",
+      "N": 50,
+      "warm_median_s": 0.0549,
+      "delta_tokens": 1501,
+      "implied_delta_tps": 27338.5,
+      "ratio": 4.57,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-50",
+      "fidelity": "full",
+      "N": 50,
+      "warm_median_s": 0.0632,
+      "delta_tokens": 1575,
+      "implied_delta_tps": 24903.9,
+      "ratio": 4.16,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-26",
+      "fidelity": "full",
+      "N": 100,
+      "warm_median_s": 0.0427,
+      "delta_tokens": 3176,
+      "implied_delta_tps": 74356.8,
+      "ratio": 12.43,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-30",
+      "fidelity": "full",
+      "N": 100,
+      "warm_median_s": 0.0452,
+      "delta_tokens": 2506,
+      "implied_delta_tps": 55476.9,
+      "ratio": 9.27,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-41",
+      "fidelity": "full",
+      "N": 100,
+      "warm_median_s": 0.0667,
+      "delta_tokens": 2936,
+      "implied_delta_tps": 44049.6,
+      "ratio": 7.36,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-42",
+      "fidelity": "full",
+      "N": 100,
+      "warm_median_s": 0.0483,
+      "delta_tokens": 2718,
+      "implied_delta_tps": 56239.8,
+      "ratio": 9.4,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-43",
+      "fidelity": "full",
+      "N": 100,
+      "warm_median_s": 0.0652,
+      "delta_tokens": 2544,
+      "implied_delta_tps": 38997.8,
+      "ratio": 6.52,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-44",
+      "fidelity": "full",
+      "N": 100,
+      "warm_median_s": 0.0644,
+      "delta_tokens": 2798,
+      "implied_delta_tps": 43423.8,
+      "ratio": 7.26,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-47",
+      "fidelity": "full",
+      "N": 100,
+      "warm_median_s": 0.0636,
+      "delta_tokens": 2441,
+      "implied_delta_tps": 38369.2,
+      "ratio": 6.41,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-48",
+      "fidelity": "full",
+      "N": 100,
+      "warm_median_s": 0.0619,
+      "delta_tokens": 2506,
+      "implied_delta_tps": 40460.2,
+      "ratio": 6.76,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-49",
+      "fidelity": "full",
+      "N": 100,
+      "warm_median_s": 0.0548,
+      "delta_tokens": 2766,
+      "implied_delta_tps": 50433.8,
+      "ratio": 8.43,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-50",
+      "fidelity": "full",
+      "N": 100,
+      "warm_median_s": 0.0641,
+      "delta_tokens": 3021,
+      "implied_delta_tps": 47122.3,
+      "ratio": 7.87,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-26",
+      "fidelity": "win10",
+      "N": 20,
+      "warm_median_s": 0.0394,
+      "delta_tokens": 653,
+      "implied_delta_tps": 16593.2,
+      "ratio": 2.77,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-30",
+      "fidelity": "win10",
+      "N": 20,
+      "warm_median_s": 0.0345,
+      "delta_tokens": 465,
+      "implied_delta_tps": 13476.5,
+      "ratio": 2.25,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-41",
+      "fidelity": "win10",
+      "N": 20,
+      "warm_median_s": 0.0351,
+      "delta_tokens": 545,
+      "implied_delta_tps": 15515.2,
+      "ratio": 2.59,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-42",
+      "fidelity": "win10",
+      "N": 20,
+      "warm_median_s": 0.0339,
+      "delta_tokens": 509,
+      "implied_delta_tps": 15034.5,
+      "ratio": 2.51,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-43",
+      "fidelity": "win10",
+      "N": 20,
+      "warm_median_s": 0.0378,
+      "delta_tokens": 507,
+      "implied_delta_tps": 13407.6,
+      "ratio": 2.24,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-44",
+      "fidelity": "win10",
+      "N": 20,
+      "warm_median_s": 0.0389,
+      "delta_tokens": 678,
+      "implied_delta_tps": 17418.5,
+      "ratio": 2.91,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-47",
+      "fidelity": "win10",
+      "N": 20,
+      "warm_median_s": 0.0356,
+      "delta_tokens": 459,
+      "implied_delta_tps": 12905.6,
+      "ratio": 2.16,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-48",
+      "fidelity": "win10",
+      "N": 20,
+      "warm_median_s": 0.0323,
+      "delta_tokens": 569,
+      "implied_delta_tps": 17634.1,
+      "ratio": 2.95,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-49",
+      "fidelity": "win10",
+      "N": 20,
+      "warm_median_s": 0.0378,
+      "delta_tokens": 632,
+      "implied_delta_tps": 16730.1,
+      "ratio": 2.8,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-50",
+      "fidelity": "win10",
+      "N": 20,
+      "warm_median_s": 0.0398,
+      "delta_tokens": 561,
+      "implied_delta_tps": 14083.8,
+      "ratio": 2.35,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-26",
+      "fidelity": "win10",
+      "N": 50,
+      "warm_median_s": 0.0396,
+      "delta_tokens": 1442,
+      "implied_delta_tps": 36453.8,
+      "ratio": 6.09,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-30",
+      "fidelity": "win10",
+      "N": 50,
+      "warm_median_s": 0.0345,
+      "delta_tokens": 1349,
+      "implied_delta_tps": 39136.9,
+      "ratio": 6.54,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-41",
+      "fidelity": "win10",
+      "N": 50,
+      "warm_median_s": 0.0352,
+      "delta_tokens": 1429,
+      "implied_delta_tps": 40651.4,
+      "ratio": 6.79,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-42",
+      "fidelity": "win10",
+      "N": 50,
+      "warm_median_s": 0.0336,
+      "delta_tokens": 1413,
+      "implied_delta_tps": 42019.5,
+      "ratio": 7.02,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-43",
+      "fidelity": "win10",
+      "N": 50,
+      "warm_median_s": 0.0383,
+      "delta_tokens": 1176,
+      "implied_delta_tps": 30713.0,
+      "ratio": 5.13,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-44",
+      "fidelity": "win10",
+      "N": 50,
+      "warm_median_s": 0.039,
+      "delta_tokens": 1429,
+      "implied_delta_tps": 36664.1,
+      "ratio": 6.13,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-47",
+      "fidelity": "win10",
+      "N": 50,
+      "warm_median_s": 0.0363,
+      "delta_tokens": 1154,
+      "implied_delta_tps": 31791.6,
+      "ratio": 5.31,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-48",
+      "fidelity": "win10",
+      "N": 50,
+      "warm_median_s": 0.0327,
+      "delta_tokens": 1220,
+      "implied_delta_tps": 37281.9,
+      "ratio": 6.23,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-49",
+      "fidelity": "win10",
+      "N": 50,
+      "warm_median_s": 0.0374,
+      "delta_tokens": 1501,
+      "implied_delta_tps": 40136.1,
+      "ratio": 6.71,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-50",
+      "fidelity": "win10",
+      "N": 50,
+      "warm_median_s": 0.0409,
+      "delta_tokens": 1575,
+      "implied_delta_tps": 38512.3,
+      "ratio": 6.44,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-26",
+      "fidelity": "win10",
+      "N": 100,
+      "warm_median_s": 0.04,
+      "delta_tokens": 3176,
+      "implied_delta_tps": 79351.6,
+      "ratio": 13.26,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-30",
+      "fidelity": "win10",
+      "N": 100,
+      "warm_median_s": 0.0344,
+      "delta_tokens": 2506,
+      "implied_delta_tps": 72877.9,
+      "ratio": 12.18,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-41",
+      "fidelity": "win10",
+      "N": 100,
+      "warm_median_s": 0.0362,
+      "delta_tokens": 2936,
+      "implied_delta_tps": 81058.3,
+      "ratio": 13.55,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-42",
+      "fidelity": "win10",
+      "N": 100,
+      "warm_median_s": 0.0337,
+      "delta_tokens": 2718,
+      "implied_delta_tps": 80608.8,
+      "ratio": 13.47,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-43",
+      "fidelity": "win10",
+      "N": 100,
+      "warm_median_s": 0.0386,
+      "delta_tokens": 2544,
+      "implied_delta_tps": 65885.1,
+      "ratio": 11.01,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-44",
+      "fidelity": "win10",
+      "N": 100,
+      "warm_median_s": 0.039,
+      "delta_tokens": 2798,
+      "implied_delta_tps": 71749.0,
+      "ratio": 11.99,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-47",
+      "fidelity": "win10",
+      "N": 100,
+      "warm_median_s": 0.0359,
+      "delta_tokens": 2441,
+      "implied_delta_tps": 68045.6,
+      "ratio": 11.37,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-48",
+      "fidelity": "win10",
+      "N": 100,
+      "warm_median_s": 0.0326,
+      "delta_tokens": 2506,
+      "implied_delta_tps": 76961.3,
+      "ratio": 12.86,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-49",
+      "fidelity": "win10",
+      "N": 100,
+      "warm_median_s": 0.0378,
+      "delta_tokens": 2766,
+      "implied_delta_tps": 73255.9,
+      "ratio": 12.24,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-50",
+      "fidelity": "win10",
+      "N": 100,
+      "warm_median_s": 0.0402,
+      "delta_tokens": 3021,
+      "implied_delta_tps": 75158.2,
+      "ratio": 12.56,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-26",
+      "fidelity": "sum200",
+      "N": 10,
+      "warm_median_s": 0.0244,
+      "delta_tokens": 318,
+      "implied_delta_tps": 13035.4,
+      "ratio": 2.18,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-41",
+      "fidelity": "sum200",
+      "N": 10,
+      "warm_median_s": 0.0249,
+      "delta_tokens": 317,
+      "implied_delta_tps": 12740.4,
+      "ratio": 2.13,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-43",
+      "fidelity": "sum200",
+      "N": 10,
+      "warm_median_s": 0.0249,
+      "delta_tokens": 315,
+      "implied_delta_tps": 12653.7,
+      "ratio": 2.11,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-44",
+      "fidelity": "sum200",
+      "N": 10,
+      "warm_median_s": 0.0246,
+      "delta_tokens": 372,
+      "implied_delta_tps": 15119.7,
+      "ratio": 2.53,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-26",
+      "fidelity": "sum200",
+      "N": 20,
+      "warm_median_s": 0.0243,
+      "delta_tokens": 653,
+      "implied_delta_tps": 26879.9,
+      "ratio": 4.49,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-30",
+      "fidelity": "sum200",
+      "N": 20,
+      "warm_median_s": 0.0244,
+      "delta_tokens": 465,
+      "implied_delta_tps": 19056.6,
+      "ratio": 3.18,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-41",
+      "fidelity": "sum200",
+      "N": 20,
+      "warm_median_s": 0.0249,
+      "delta_tokens": 545,
+      "implied_delta_tps": 21902.6,
+      "ratio": 3.66,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-42",
+      "fidelity": "sum200",
+      "N": 20,
+      "warm_median_s": 0.0248,
+      "delta_tokens": 509,
+      "implied_delta_tps": 20520.6,
+      "ratio": 3.43,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-43",
+      "fidelity": "sum200",
+      "N": 20,
+      "warm_median_s": 0.0248,
+      "delta_tokens": 507,
+      "implied_delta_tps": 20473.7,
+      "ratio": 3.42,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-44",
+      "fidelity": "sum200",
+      "N": 20,
+      "warm_median_s": 0.0242,
+      "delta_tokens": 678,
+      "implied_delta_tps": 27966.0,
+      "ratio": 4.67,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-47",
+      "fidelity": "sum200",
+      "N": 20,
+      "warm_median_s": 0.0244,
+      "delta_tokens": 459,
+      "implied_delta_tps": 18783.0,
+      "ratio": 3.14,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-48",
+      "fidelity": "sum200",
+      "N": 20,
+      "warm_median_s": 0.0247,
+      "delta_tokens": 569,
+      "implied_delta_tps": 23006.7,
+      "ratio": 3.84,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-49",
+      "fidelity": "sum200",
+      "N": 20,
+      "warm_median_s": 0.0247,
+      "delta_tokens": 632,
+      "implied_delta_tps": 25617.0,
+      "ratio": 4.28,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-50",
+      "fidelity": "sum200",
+      "N": 20,
+      "warm_median_s": 0.0249,
+      "delta_tokens": 561,
+      "implied_delta_tps": 22499.2,
+      "ratio": 3.76,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-26",
+      "fidelity": "sum200",
+      "N": 50,
+      "warm_median_s": 0.0244,
+      "delta_tokens": 1442,
+      "implied_delta_tps": 59171.3,
+      "ratio": 9.89,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-30",
+      "fidelity": "sum200",
+      "N": 50,
+      "warm_median_s": 0.0245,
+      "delta_tokens": 1349,
+      "implied_delta_tps": 54949.6,
+      "ratio": 9.18,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-41",
+      "fidelity": "sum200",
+      "N": 50,
+      "warm_median_s": 0.025,
+      "delta_tokens": 1429,
+      "implied_delta_tps": 57057.2,
+      "ratio": 9.53,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-42",
+      "fidelity": "sum200",
+      "N": 50,
+      "warm_median_s": 0.0247,
+      "delta_tokens": 1413,
+      "implied_delta_tps": 57135.7,
+      "ratio": 9.55,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-43",
+      "fidelity": "sum200",
+      "N": 50,
+      "warm_median_s": 0.0248,
+      "delta_tokens": 1176,
+      "implied_delta_tps": 47446.6,
+      "ratio": 7.93,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-44",
+      "fidelity": "sum200",
+      "N": 50,
+      "warm_median_s": 0.0245,
+      "delta_tokens": 1429,
+      "implied_delta_tps": 58246.2,
+      "ratio": 9.73,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-47",
+      "fidelity": "sum200",
+      "N": 50,
+      "warm_median_s": 0.0244,
+      "delta_tokens": 1154,
+      "implied_delta_tps": 47244.2,
+      "ratio": 7.9,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-48",
+      "fidelity": "sum200",
+      "N": 50,
+      "warm_median_s": 0.0246,
+      "delta_tokens": 1220,
+      "implied_delta_tps": 49518.5,
+      "ratio": 8.28,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-49",
+      "fidelity": "sum200",
+      "N": 50,
+      "warm_median_s": 0.0248,
+      "delta_tokens": 1501,
+      "implied_delta_tps": 60492.6,
+      "ratio": 10.11,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-50",
+      "fidelity": "sum200",
+      "N": 50,
+      "warm_median_s": 0.0247,
+      "delta_tokens": 1575,
+      "implied_delta_tps": 63852.1,
+      "ratio": 10.67,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-26",
+      "fidelity": "sum200",
+      "N": 100,
+      "warm_median_s": 0.0242,
+      "delta_tokens": 3176,
+      "implied_delta_tps": 131451.3,
+      "ratio": 21.97,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-30",
+      "fidelity": "sum200",
+      "N": 100,
+      "warm_median_s": 0.0245,
+      "delta_tokens": 2506,
+      "implied_delta_tps": 102308.6,
+      "ratio": 17.1,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-41",
+      "fidelity": "sum200",
+      "N": 100,
+      "warm_median_s": 0.0248,
+      "delta_tokens": 2936,
+      "implied_delta_tps": 118510.5,
+      "ratio": 19.8,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-42",
+      "fidelity": "sum200",
+      "N": 100,
+      "warm_median_s": 0.0249,
+      "delta_tokens": 2718,
+      "implied_delta_tps": 109081.9,
+      "ratio": 18.23,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-43",
+      "fidelity": "sum200",
+      "N": 100,
+      "warm_median_s": 0.0247,
+      "delta_tokens": 2544,
+      "implied_delta_tps": 102950.3,
+      "ratio": 17.2,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-44",
+      "fidelity": "sum200",
+      "N": 100,
+      "warm_median_s": 0.0243,
+      "delta_tokens": 2798,
+      "implied_delta_tps": 115316.4,
+      "ratio": 19.27,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-47",
+      "fidelity": "sum200",
+      "N": 100,
+      "warm_median_s": 0.0245,
+      "delta_tokens": 2441,
+      "implied_delta_tps": 99770.8,
+      "ratio": 16.67,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-48",
+      "fidelity": "sum200",
+      "N": 100,
+      "warm_median_s": 0.0245,
+      "delta_tokens": 2506,
+      "implied_delta_tps": 102489.7,
+      "ratio": 17.13,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-49",
+      "fidelity": "sum200",
+      "N": 100,
+      "warm_median_s": 0.0244,
+      "delta_tokens": 2766,
+      "implied_delta_tps": 113350.6,
+      "ratio": 18.94,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    },
+    {
+      "conv_id": "conv-50",
+      "fidelity": "sum200",
+      "N": 100,
+      "warm_median_s": 0.0248,
+      "delta_tokens": 3021,
+      "implied_delta_tps": 121992.9,
+      "ratio": 20.39,
+      "flag": "WARM >>2\u00d7 committed cold-prefill; likely cache hit not true extension"
+    }
+  ]
+}

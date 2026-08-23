@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-23 (E33a complete: definition audit and evidence ledger — win-10 definition conflict confirmed (fidelity=last 10 sessions=7275 tok vs cost-profile=last 10 turns=400 tok, 18×); E30 win-10 capacity corrected (N_memory=78 not 1421; crossover≈101s not 57s); E32 Part B latency DISPUTED (cache-hit signature confirmed); E31 Part C INVALID, E31b valid; two reruns flagged: E32b (caching off) and E30b (correct win-10 tokens))
+Last updated: 2026-08-23 (E34 complete: maintenance semantics + corrected catch-up latency — win10 growth WARM=36ms, slide COLD=0.975s; COLD catch-up is N-invariant; win10 amortized=652ms; sum200 restore=32ms, update=9.6s. E32 Part B superseded by E34. Three vLLM V1 implementation bugs fixed (CUDA graph deadlock, subprocess OOM, slide warm-up pre-caching).)
 
 ## Framing
 

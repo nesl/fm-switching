@@ -1,0 +1,570 @@
+{
+  "description": "full: warm-append vs cold-prefill at L+k",
+  "cache_state": "WARM=prefix_caching=True prefix-primed; COLD=prefix_caching=False",
+  "measurements": [
+    {
+      "object": "full",
+      "update_operation": "tail_append (prefix preserved)",
+      "prefix_preserved": true,
+      "L_target": 8192,
+      "L_actual": 8193,
+      "k_target": 200,
+      "k_actual": 200,
+      "full_context_tokens": 8394,
+      "yarn": false,
+      "warm": {
+        "feasible": true,
+        "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+        "extension_tokens": 200,
+        "median_s": 0.0395,
+        "iqr_s": 0.0007,
+        "min_s": 0.0391,
+        "max_s": 0.0401,
+        "all_s": [
+          0.0391,
+          0.0394,
+          0.0395,
+          0.0398,
+          0.0401
+        ],
+        "implied_toks_per_s": 5064.5,
+        "crosscheck": "ok (0.85\u00d7)"
+      },
+      "cold": {
+        "feasible": true,
+        "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+        "context_tokens": 8394,
+        "median_s": 1.1945,
+        "iqr_s": 0.0061,
+        "min_s": 1.1924,
+        "max_s": 1.2,
+        "all_s": [
+          1.1924,
+          1.1927,
+          1.1945,
+          1.1974,
+          1.2
+        ],
+        "implied_toks_per_s": 7027.1,
+        "crosscheck": "ok (1.17\u00d7)"
+      }
+    },
+    {
+      "object": "full",
+      "update_operation": "tail_append (prefix preserved)",
+      "prefix_preserved": true,
+      "L_target": 8192,
+      "L_actual": 8193,
+      "k_target": 1000,
+      "k_actual": 1000,
+      "full_context_tokens": 9194,
+      "yarn": false,
+      "warm": {
+        "feasible": true,
+        "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+        "extension_tokens": 1000,
+        "median_s": 0.0402,
+        "iqr_s": 0.001,
+        "min_s": 0.0401,
+        "max_s": 0.0417,
+        "all_s": [
+          0.0401,
+          0.0401,
+          0.0402,
+          0.0405,
+          0.0417
+        ],
+        "implied_toks_per_s": 24898.2,
+        "crosscheck": "FLAGGED (4.2\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+      },
+      "cold": {
+        "feasible": true,
+        "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+        "context_tokens": 9194,
+        "median_s": 1.3324,
+        "iqr_s": 0.0037,
+        "min_s": 1.3301,
+        "max_s": 1.3356,
+        "all_s": [
+          1.3301,
+          1.3313,
+          1.3324,
+          1.3331,
+          1.3356
+        ],
+        "implied_toks_per_s": 6900.4,
+        "crosscheck": "ok (1.15\u00d7)"
+      }
+    },
+    {
+      "object": "full",
+      "update_operation": "tail_append (prefix preserved)",
+      "prefix_preserved": true,
+      "L_target": 8192,
+      "L_actual": 8193,
+      "k_target": 3000,
+      "k_actual": 3000,
+      "full_context_tokens": 11194,
+      "yarn": false,
+      "warm": {
+        "feasible": true,
+        "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+        "extension_tokens": 3000,
+        "median_s": 0.0439,
+        "iqr_s": 0.0008,
+        "min_s": 0.0437,
+        "max_s": 0.0452,
+        "all_s": [
+          0.0437,
+          0.0439,
+          0.0439,
+          0.0441,
+          0.0452
+        ],
+        "implied_toks_per_s": 68265.2,
+        "crosscheck": "FLAGGED (11.4\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+      },
+      "cold": {
+        "feasible": true,
+        "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+        "context_tokens": 11194,
+        "median_s": 1.6722,
+        "iqr_s": 0.0055,
+        "min_s": 1.668,
+        "max_s": 1.6745,
+        "all_s": [
+          1.668,
+          1.6689,
+          1.6722,
+          1.6733,
+          1.6745
+        ],
+        "implied_toks_per_s": 6694.2,
+        "crosscheck": "ok (1.12\u00d7)"
+      }
+    },
+    {
+      "object": "full",
+      "update_operation": "tail_append (prefix preserved)",
+      "prefix_preserved": true,
+      "L_target": 16384,
+      "L_actual": 16385,
+      "k_target": 200,
+      "k_actual": 200,
+      "full_context_tokens": 16585,
+      "yarn": false,
+      "warm": {
+        "feasible": true,
+        "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+        "extension_tokens": 200,
+        "median_s": 0.054,
+        "iqr_s": 0.0019,
+        "min_s": 0.0538,
+        "max_s": 0.0563,
+        "all_s": [
+          0.0538,
+          0.0538,
+          0.054,
+          0.055,
+          0.0563
+        ],
+        "implied_toks_per_s": 3700.9,
+        "crosscheck": "ok (0.62\u00d7)"
+      },
+      "cold": {
+        "feasible": true,
+        "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+        "context_tokens": 16585,
+        "median_s": 2.7395,
+        "iqr_s": 0.0114,
+        "min_s": 2.7331,
+        "max_s": 2.7478,
+        "all_s": [
+          2.7331,
+          2.7372,
+          2.7395,
+          2.7453,
+          2.7478
+        ],
+        "implied_toks_per_s": 6053.9,
+        "crosscheck": "ok (1.01\u00d7)"
+      }
+    },
+    {
+      "object": "full",
+      "update_operation": "tail_append (prefix preserved)",
+      "prefix_preserved": true,
+      "L_target": 16384,
+      "L_actual": 16385,
+      "k_target": 1000,
+      "k_actual": 1000,
+      "full_context_tokens": 17385,
+      "yarn": false,
+      "warm": {
+        "feasible": true,
+        "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+        "extension_tokens": 1000,
+        "median_s": 0.0558,
+        "iqr_s": 0.0007,
+        "min_s": 0.0556,
+        "max_s": 0.0567,
+        "all_s": [
+          0.0556,
+          0.0557,
+          0.0558,
+          0.0561,
+          0.0567
+        ],
+        "implied_toks_per_s": 17924.5,
+        "crosscheck": "FLAGGED (3.0\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+      },
+      "cold": {
+        "feasible": true,
+        "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+        "context_tokens": 17385,
+        "median_s": 2.9213,
+        "iqr_s": 0.0137,
+        "min_s": 2.9146,
+        "max_s": 2.9332,
+        "all_s": [
+          2.9146,
+          2.917,
+          2.9213,
+          2.9258,
+          2.9332
+        ],
+        "implied_toks_per_s": 5951.2,
+        "crosscheck": "ok (0.99\u00d7)"
+      }
+    },
+    {
+      "object": "full",
+      "update_operation": "tail_append (prefix preserved)",
+      "prefix_preserved": true,
+      "L_target": 16384,
+      "L_actual": 16385,
+      "k_target": 3000,
+      "k_actual": 3000,
+      "full_context_tokens": 19385,
+      "yarn": false,
+      "warm": {
+        "feasible": true,
+        "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+        "extension_tokens": 3000,
+        "median_s": 0.0605,
+        "iqr_s": 0.0024,
+        "min_s": 0.0599,
+        "max_s": 0.0639,
+        "all_s": [
+          0.0599,
+          0.0602,
+          0.0605,
+          0.061,
+          0.0639
+        ],
+        "implied_toks_per_s": 49622.7,
+        "crosscheck": "FLAGGED (8.3\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+      },
+      "cold": {
+        "feasible": true,
+        "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+        "context_tokens": 19385,
+        "median_s": 3.3616,
+        "iqr_s": 0.0133,
+        "min_s": 3.3496,
+        "max_s": 3.3675,
+        "all_s": [
+          3.3496,
+          3.3555,
+          3.3616,
+          3.3643,
+          3.3675
+        ],
+        "implied_toks_per_s": 5766.6,
+        "crosscheck": "ok (0.96\u00d7)"
+      }
+    },
+    {
+      "object": "full",
+      "update_operation": "tail_append (prefix preserved)",
+      "prefix_preserved": true,
+      "L_target": 32768,
+      "L_actual": 32773,
+      "k_target": 200,
+      "k_actual": 200,
+      "full_context_tokens": 32973,
+      "yarn": true,
+      "warm": {
+        "feasible": true,
+        "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+        "extension_tokens": 200,
+        "median_s": 0.0852,
+        "iqr_s": 0.0006,
+        "min_s": 0.0848,
+        "max_s": 0.0856,
+        "all_s": [
+          0.0848,
+          0.0851,
+          0.0852,
+          0.0856,
+          0.0856
+        ],
+        "implied_toks_per_s": 2346.1,
+        "crosscheck": "ok (0.39\u00d7)"
+      },
+      "cold": {
+        "feasible": true,
+        "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+        "context_tokens": 32973,
+        "median_s": 7.011,
+        "iqr_s": 0.0153,
+        "min_s": 6.9988,
+        "max_s": 7.0201,
+        "all_s": [
+          6.9988,
+          7.0061,
+          7.011,
+          7.0155,
+          7.0201
+        ],
+        "implied_toks_per_s": 4703.0,
+        "crosscheck": "ok (0.79\u00d7)"
+      }
+    },
+    {
+      "object": "full",
+      "update_operation": "tail_append (prefix preserved)",
+      "prefix_preserved": true,
+      "L_target": 32768,
+      "L_actual": 32773,
+      "k_target": 1000,
+      "k_actual": 1000,
+      "full_context_tokens": 33773,
+      "yarn": true,
+      "warm": {
+        "feasible": true,
+        "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+        "extension_tokens": 1000,
+        "median_s": 0.0873,
+        "iqr_s": 0.0011,
+        "min_s": 0.0863,
+        "max_s": 0.0876,
+        "all_s": [
+          0.0863,
+          0.0865,
+          0.0873,
+          0.0874,
+          0.0876
+        ],
+        "implied_toks_per_s": 11460.5,
+        "crosscheck": "ok (1.92\u00d7)"
+      },
+      "cold": {
+        "feasible": true,
+        "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+        "context_tokens": 33773,
+        "median_s": 7.2489,
+        "iqr_s": 0.013,
+        "min_s": 7.2454,
+        "max_s": 7.2659,
+        "all_s": [
+          7.2454,
+          7.2467,
+          7.2489,
+          7.2521,
+          7.2659
+        ],
+        "implied_toks_per_s": 4659.1,
+        "crosscheck": "ok (0.78\u00d7)"
+      }
+    },
+    {
+      "object": "full",
+      "update_operation": "tail_append (prefix preserved)",
+      "prefix_preserved": true,
+      "L_target": 32768,
+      "L_actual": 32773,
+      "k_target": 3000,
+      "k_actual": 3000,
+      "full_context_tokens": 35773,
+      "yarn": true,
+      "warm": {
+        "feasible": true,
+        "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+        "extension_tokens": 3000,
+        "median_s": 0.0903,
+        "iqr_s": 0.0007,
+        "min_s": 0.0901,
+        "max_s": 0.091,
+        "all_s": [
+          0.0901,
+          0.0901,
+          0.0903,
+          0.0906,
+          0.091
+        ],
+        "implied_toks_per_s": 33227.1,
+        "crosscheck": "FLAGGED (5.6\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+      },
+      "cold": {
+        "feasible": true,
+        "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+        "context_tokens": 35773,
+        "median_s": 7.8322,
+        "iqr_s": 0.0063,
+        "min_s": 7.8281,
+        "max_s": 7.8387,
+        "all_s": [
+          7.8281,
+          7.8316,
+          7.8322,
+          7.8337,
+          7.8387
+        ],
+        "implied_toks_per_s": 4567.4,
+        "crosscheck": "ok (0.76\u00d7)"
+      }
+    },
+    {
+      "object": "full",
+      "update_operation": "tail_append (prefix preserved)",
+      "prefix_preserved": true,
+      "L_target": 65536,
+      "L_actual": 65542,
+      "k_target": 200,
+      "k_actual": 200,
+      "full_context_tokens": 65743,
+      "yarn": true,
+      "warm": {
+        "feasible": true,
+        "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+        "extension_tokens": 200,
+        "median_s": 0.154,
+        "iqr_s": 0.0018,
+        "min_s": 0.1518,
+        "max_s": 0.1541,
+        "all_s": [
+          0.1518,
+          0.1527,
+          0.154,
+          0.154,
+          0.1541
+        ],
+        "implied_toks_per_s": 1298.8,
+        "crosscheck": "ok (0.22\u00d7)"
+      },
+      "cold": {
+        "feasible": true,
+        "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+        "context_tokens": 65743,
+        "median_s": 19.7357,
+        "iqr_s": 0.0551,
+        "min_s": 19.6904,
+        "max_s": 19.7527,
+        "all_s": [
+          19.6904,
+          19.6937,
+          19.7357,
+          19.7415,
+          19.7527
+        ],
+        "implied_toks_per_s": 3331.2,
+        "crosscheck": "ok (0.56\u00d7)"
+      }
+    },
+    {
+      "object": "full",
+      "update_operation": "tail_append (prefix preserved)",
+      "prefix_preserved": true,
+      "L_target": 65536,
+      "L_actual": 65542,
+      "k_target": 1000,
+      "k_actual": 1000,
+      "full_context_tokens": 66543,
+      "yarn": true,
+      "warm": {
+        "feasible": true,
+        "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+        "extension_tokens": 1000,
+        "median_s": 0.1545,
+        "iqr_s": 0.0027,
+        "min_s": 0.1529,
+        "max_s": 0.1572,
+        "all_s": [
+          0.1529,
+          0.1543,
+          0.1545,
+          0.1554,
+          0.1572
+        ],
+        "implied_toks_per_s": 6472.5,
+        "crosscheck": "ok (1.08\u00d7)"
+      },
+      "cold": {
+        "feasible": true,
+        "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+        "context_tokens": 66543,
+        "median_s": 19.9789,
+        "iqr_s": 0.108,
+        "min_s": 19.9296,
+        "max_s": 20.0632,
+        "all_s": [
+          19.9296,
+          19.9549,
+          19.9789,
+          20.0373,
+          20.0632
+        ],
+        "implied_toks_per_s": 3330.7,
+        "crosscheck": "ok (0.56\u00d7)"
+      }
+    },
+    {
+      "object": "full",
+      "update_operation": "tail_append (prefix preserved)",
+      "prefix_preserved": true,
+      "L_target": 65536,
+      "L_actual": 65542,
+      "k_target": 3000,
+      "k_actual": 3000,
+      "full_context_tokens": 68543,
+      "yarn": true,
+      "warm": {
+        "feasible": true,
+        "condition": "WARM (prefix_caching=True; prefix re-primed before each rep)",
+        "extension_tokens": 3000,
+        "median_s": 0.1586,
+        "iqr_s": 0.003,
+        "min_s": 0.1583,
+        "max_s": 0.1618,
+        "all_s": [
+          0.1583,
+          0.1585,
+          0.1586,
+          0.1611,
+          0.1618
+        ],
+        "implied_toks_per_s": 18912.3,
+        "crosscheck": "FLAGGED (3.2\u00d7 faster than committed cold-prefill; consistent with cache hit)"
+      },
+      "cold": {
+        "feasible": true,
+        "condition": "COLD (prefix_caching=False; each rep from empty cache)",
+        "context_tokens": 68543,
+        "median_s": 20.8838,
+        "iqr_s": 0.0623,
+        "min_s": 20.8477,
+        "max_s": 20.9228,
+        "all_s": [
+          20.8477,
+          20.8481,
+          20.8838,
+          20.8977,
+          20.9228
+        ],
+        "implied_toks_per_s": 3282.1,
+        "crosscheck": "ok (0.55\u00d7)"
+      }
+    }
+  ]
+}

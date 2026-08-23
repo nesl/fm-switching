@@ -1,5 +1,7 @@
 # E32 — Staleness Cost: Quality Degradation and Catch-up Latency
 
+> **⚠ SUPERSEDED (Part B only):** E32 Part B (catch-up latency) is superseded by **E34** (`reports/e34_maintenance_semantics.md`, 2026-08-23). E32 Part B measured WARM conditions without declaring caching state; the measurements are cache-hit TTFT, not cold re-prefill. E34 measures both WARM (prefix\_caching=True, stale primed) and COLD (prefix\_caching=False) explicitly and corrects the warm-up bug. E32 Part A (quality) remains canonical.
+
 **Date:** 2026-08-22  
 **Model:** Qwen/Qwen2.5-7B-Instruct  
 **Workloads:** LoCoMo (dense, primary), EgoSchema (gist, truncation control)  
