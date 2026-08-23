@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-22 (E32 registered: staleness cost — quality and catch-up latency for stale session replicas; A6000 claimed; script written; awaiting GPU run)
+Last updated: 2026-08-22 (E32 complete: staleness cost — full/win10 warm-append catch-up 59–89 ms (all TTFT budgets met); sum200 recursive 4.6–5.1 s (background only); quality flat across N within noise; outside-evidence questions degrade at N≥50 ~2 sessions)
 
 ## Framing
 

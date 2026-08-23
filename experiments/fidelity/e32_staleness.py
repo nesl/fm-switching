@@ -810,7 +810,10 @@ def find_model_cache_path():
 
 
 def make_vllm_engine(model_path, prefix_caching, yarn=False):
-    import tempfile, shutil
+    import os, tempfile
+    # Force V0 engine: V1 (default in 0.8.5) fails to import flashinfer cubin_loader
+    # due to torch_c_dlpack ABI mismatch in this env. V0 is identical to E26's behaviour.
+    os.environ.setdefault("VLLM_USE_V1", "0")
     from vllm import LLM
     if yarn:
         import json as _json

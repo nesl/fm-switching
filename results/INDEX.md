@@ -211,3 +211,20 @@ Limitation: driving mobility (not pedestrian); State=I proxy for disconnection; 
 | `figures/cost/e31_reachability.pdf` | `e31_network.py` | n/a | CPU | — | Three panels: reachability time series, handover histogram, DL_bitrate distribution | 2026-08-22 |
 | `figures/cost/e31_predictability.pdf` | `e31_network.py` | n/a | CPU | — | Two panels: persistence+BW autocorr at H={10,30,60}s; Markov matrix at H=60s | 2026-08-22 |
 | `reports/e31_network_characterization.md` | — | — | — | — | Parts A–D: dataset selection, reachability/BW series, predictability, transfer latency; prefetch decision implications | 2026-08-22 |
+
+## E32 — Staleness Cost (2026-08-22)
+
+Script: `experiments/fidelity/e32_staleness.py`. Modes: quality (HF), latency (vLLM V0, VLLM_USE_V1=0), analysis (CPU).
+Workloads: LoCoMo n=100 (primary staleness), EgoSchema n=60 (truncation control only). Model: qwen7b.
+N sweep: {0,1,5,10,20,50,100} turns for LoCoMo; {0,1,5} for EgoSchema.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/fidelity/e32_staleness/locomo_quality_qwen7b.json` | `e32_staleness.py --mode quality` | qwen7b | a6000 | 100 q × 7 N | Sanity N=0: 0/100 disagree vs E29. Quality flat across N for all fidelities within noise; outside-evidence questions drop to 0.13–0.28 accuracy at N=50–100 | 2026-08-22 |
+| `results/fidelity/e32_staleness/egoschema_quality_qwen7b.json` | `e32_staleness.py --mode quality` | qwen7b | a6000 | 60 q × 3 N | Truncation control. Sanity N=0: 0/60 disagree. Gist-compressible; N=1,5 negligible effect | 2026-08-22 |
+| `results/fidelity/e32_staleness/locomo_latency_qwen7b.json` | `e32_staleness.py --mode latency` | qwen7b | a6000 | 10 conv × 6 N × 4 variants | full/win10 warm-append: 59–89 ms (all budgets met); sum200 recursive: 4.6–5.1 s (background only); sum200 full-regen: 8.8 s (no budget) | 2026-08-22 |
+| `results/fidelity/e32_staleness/analysis_qwen7b.json` | `e32_staleness.py --mode analysis` | — | CPU | — | Tradeoff table: (fidelity, N) → acc + latency + TTFT budget verdicts | 2026-08-22 |
+| `results/fidelity/e32_staleness/caches/locomo_sum200_stale.json` | `e32_staleness.py --mode quality` | qwen7b | a6000 | 10 conv × 6 N | Stale sum200 summaries for N∈{1,5,10,20,50,100} | 2026-08-22 |
+| `figures/fidelity/e32_staleness_quality.pdf` | `e32_staleness.py --mode analysis` | — | CPU | — | Three panels: accuracy vs N for all/ev-inside/ev-outside splits per fidelity | 2026-08-22 |
+| `figures/fidelity/e32_staleness_latency.pdf` | `e32_staleness.py --mode analysis` | — | CPU | — | Catch-up latency vs N per fidelity/variant; TTFT budget reference lines | 2026-08-22 |
+| `reports/e32_staleness_cost.md` | — | — | — | — | Parts A–C + synthesis: staleness is a latency problem for sum200, not a quality problem for any fidelity at N≤20; quality threshold at N≈50 (~2 sessions) | 2026-08-22 |
