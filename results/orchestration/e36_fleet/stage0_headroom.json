@@ -1,348 +1,247 @@
 {
-  "stage": "stage0",
-  "gate_passes": true,
-  "total_cells": 18,
-  "n_nondiscriminating": 0,
-  "frac_nondiscriminating": 0.0,
+  "stage": "stage0_corrected",
+  "device_only_model": {
+    "locomo": "warm_append_per_turn using E23 incr_warm_ms (qwen7b), scaled by A1",
+    "egoschema": "cold_restore_per_query using E23 full_restore_ms (qwen7b), scaled by A1"
+  },
+  "assumptions": [
+    "A1: qwen3b_time = scale x qwen7b_time. Shown at s=0.43 (param-count lower bound) and s=1.00 (no speedup upper bound). Not directly measured.",
+    "A2: EgoSchema contexts 1500-2500 tok assumed; sensitivity at 500-1200 tok shown.",
+    "A4: LoCoMo turns with L>16384 use rate extrapolated from L=16384 (last measured). Not extrapolated past infeasibility boundary (L=24576). For qwen3b at s=0.43, all LoCoMo contexts (<23k tok) remain feasible."
+  ],
+  "n_cells": 18,
+  "n_nondiscriminating_s043": 4,
+  "n_nondiscriminating_s100": 4,
+  "gate_passes_s043": true,
+  "gate_passes_s100": true,
   "cells": [
     {
       "workload": "locomo",
-      "ttft_budget_ms": 300.0,
+      "budget_ms": 300,
       "quality_slo": 0.2,
       "Q_device": 0.23,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        21010.5,
-        28232.0,
-        31860.4,
-        37217.4,
-        38066.4,
-        41090.0,
-        41612.0,
-        42531.9,
-        43859.6,
-        44868.1
-      ]
+      "quality_passes_slo": true,
+      "quality_gap": 0.0,
+      "lat_fail_s043": 0.8727,
+      "lat_fail_s100": 0.9708,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "locomo",
-      "ttft_budget_ms": 300.0,
+      "budget_ms": 300,
       "quality_slo": 0.3,
       "Q_device": 0.23,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        21010.5,
-        28232.0,
-        31860.4,
-        37217.4,
-        38066.4,
-        41090.0,
-        41612.0,
-        42531.9,
-        43859.6,
-        44868.1
-      ]
+      "quality_passes_slo": false,
+      "quality_gap": 0.07,
+      "lat_fail_s043": 0.8727,
+      "lat_fail_s100": 0.9708,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "locomo",
-      "ttft_budget_ms": 300.0,
+      "budget_ms": 300,
       "quality_slo": 0.4,
       "Q_device": 0.23,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        21010.5,
-        28232.0,
-        31860.4,
-        37217.4,
-        38066.4,
-        41090.0,
-        41612.0,
-        42531.9,
-        43859.6,
-        44868.1
-      ]
+      "quality_passes_slo": false,
+      "quality_gap": 0.17,
+      "lat_fail_s043": 0.8727,
+      "lat_fail_s100": 0.9708,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "locomo",
-      "ttft_budget_ms": 1000.0,
+      "budget_ms": 1000,
       "quality_slo": 0.2,
       "Q_device": 0.23,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        21010.5,
-        28232.0,
-        31860.4,
-        37217.4,
-        38066.4,
-        41090.0,
-        41612.0,
-        42531.9,
-        43859.6,
-        44868.1
-      ]
+      "quality_passes_slo": true,
+      "quality_gap": 0.0,
+      "lat_fail_s043": 0.1215,
+      "lat_fail_s100": 0.7015,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "locomo",
-      "ttft_budget_ms": 1000.0,
+      "budget_ms": 1000,
       "quality_slo": 0.3,
       "Q_device": 0.23,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        21010.5,
-        28232.0,
-        31860.4,
-        37217.4,
-        38066.4,
-        41090.0,
-        41612.0,
-        42531.9,
-        43859.6,
-        44868.1
-      ]
+      "quality_passes_slo": false,
+      "quality_gap": 0.07,
+      "lat_fail_s043": 0.1215,
+      "lat_fail_s100": 0.7015,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "locomo",
-      "ttft_budget_ms": 1000.0,
+      "budget_ms": 1000,
       "quality_slo": 0.4,
       "Q_device": 0.23,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        21010.5,
-        28232.0,
-        31860.4,
-        37217.4,
-        38066.4,
-        41090.0,
-        41612.0,
-        42531.9,
-        43859.6,
-        44868.1
-      ]
+      "quality_passes_slo": false,
+      "quality_gap": 0.17,
+      "lat_fail_s043": 0.1215,
+      "lat_fail_s100": 0.7015,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "locomo",
-      "ttft_budget_ms": 10000.0,
+      "budget_ms": 10000,
       "quality_slo": 0.2,
       "Q_device": 0.23,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        21010.5,
-        28232.0,
-        31860.4,
-        37217.4,
-        38066.4,
-        41090.0,
-        41612.0,
-        42531.9,
-        43859.6,
-        44868.1
-      ]
+      "quality_passes_slo": true,
+      "quality_gap": 0.0,
+      "lat_fail_s043": 0.0,
+      "lat_fail_s100": 0.0,
+      "discriminating_s043": false,
+      "discriminating_s100": false
     },
     {
       "workload": "locomo",
-      "ttft_budget_ms": 10000.0,
+      "budget_ms": 10000,
       "quality_slo": 0.3,
       "Q_device": 0.23,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        21010.5,
-        28232.0,
-        31860.4,
-        37217.4,
-        38066.4,
-        41090.0,
-        41612.0,
-        42531.9,
-        43859.6,
-        44868.1
-      ]
+      "quality_passes_slo": false,
+      "quality_gap": 0.07,
+      "lat_fail_s043": 0.0,
+      "lat_fail_s100": 0.0,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "locomo",
-      "ttft_budget_ms": 10000.0,
+      "budget_ms": 10000,
       "quality_slo": 0.4,
       "Q_device": 0.23,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        21010.5,
-        28232.0,
-        31860.4,
-        37217.4,
-        38066.4,
-        41090.0,
-        41612.0,
-        42531.9,
-        43859.6,
-        44868.1
-      ]
+      "quality_passes_slo": false,
+      "quality_gap": 0.17,
+      "lat_fail_s043": 0.0,
+      "lat_fail_s100": 0.0,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "egoschema",
-      "ttft_budget_ms": 300.0,
+      "budget_ms": 300,
       "quality_slo": 0.2,
       "Q_device": 0.45,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        2538.4,
-        3035.7,
-        3365.4,
-        3704.8,
-        4221.1
-      ]
+      "quality_passes_slo": true,
+      "quality_gap": 0.0,
+      "lat_fail_s043": 1.0,
+      "lat_fail_s100": 1.0,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "egoschema",
-      "ttft_budget_ms": 300.0,
+      "budget_ms": 300,
       "quality_slo": 0.3,
       "Q_device": 0.45,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        2538.4,
-        3035.7,
-        3365.4,
-        3704.8,
-        4221.1
-      ]
+      "quality_passes_slo": true,
+      "quality_gap": 0.0,
+      "lat_fail_s043": 1.0,
+      "lat_fail_s100": 1.0,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "egoschema",
-      "ttft_budget_ms": 300.0,
+      "budget_ms": 300,
       "quality_slo": 0.4,
       "Q_device": 0.45,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        2538.4,
-        3035.7,
-        3365.4,
-        3704.8,
-        4221.1
-      ]
+      "quality_passes_slo": true,
+      "quality_gap": 0.0,
+      "lat_fail_s043": 1.0,
+      "lat_fail_s100": 1.0,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "egoschema",
-      "ttft_budget_ms": 1000.0,
+      "budget_ms": 1000,
       "quality_slo": 0.2,
       "Q_device": 0.45,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        2538.4,
-        3035.7,
-        3365.4,
-        3704.8,
-        4221.1
-      ]
+      "quality_passes_slo": true,
+      "quality_gap": 0.0,
+      "lat_fail_s043": 1.0,
+      "lat_fail_s100": 1.0,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "egoschema",
-      "ttft_budget_ms": 1000.0,
+      "budget_ms": 1000,
       "quality_slo": 0.3,
       "Q_device": 0.45,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        2538.4,
-        3035.7,
-        3365.4,
-        3704.8,
-        4221.1
-      ]
+      "quality_passes_slo": true,
+      "quality_gap": 0.0,
+      "lat_fail_s043": 1.0,
+      "lat_fail_s100": 1.0,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "egoschema",
-      "ttft_budget_ms": 1000.0,
+      "budget_ms": 1000,
       "quality_slo": 0.4,
       "Q_device": 0.45,
-      "p_latency_fail_cold": 1.0,
-      "headroom_pct": 100.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        2538.4,
-        3035.7,
-        3365.4,
-        3704.8,
-        4221.1
-      ]
+      "quality_passes_slo": true,
+      "quality_gap": 0.0,
+      "lat_fail_s043": 1.0,
+      "lat_fail_s100": 1.0,
+      "discriminating_s043": true,
+      "discriminating_s100": true
     },
     {
       "workload": "egoschema",
-      "ttft_budget_ms": 10000.0,
+      "budget_ms": 10000,
       "quality_slo": 0.2,
       "Q_device": 0.45,
-      "p_latency_fail_cold": 0.0,
-      "headroom_pct": 55.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        2538.4,
-        3035.7,
-        3365.4,
-        3704.8,
-        4221.1
-      ]
+      "quality_passes_slo": true,
+      "quality_gap": 0.0,
+      "lat_fail_s043": 0.0,
+      "lat_fail_s100": 0.0,
+      "discriminating_s043": false,
+      "discriminating_s100": false
     },
     {
       "workload": "egoschema",
-      "ttft_budget_ms": 10000.0,
+      "budget_ms": 10000,
       "quality_slo": 0.3,
       "Q_device": 0.45,
-      "p_latency_fail_cold": 0.0,
-      "headroom_pct": 55.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        2538.4,
-        3035.7,
-        3365.4,
-        3704.8,
-        4221.1
-      ]
+      "quality_passes_slo": true,
+      "quality_gap": 0.0,
+      "lat_fail_s043": 0.0,
+      "lat_fail_s100": 0.0,
+      "discriminating_s043": false,
+      "discriminating_s100": false
     },
     {
       "workload": "egoschema",
-      "ttft_budget_ms": 10000.0,
+      "budget_ms": 10000,
       "quality_slo": 0.4,
       "Q_device": 0.45,
-      "p_latency_fail_cold": 0.0,
-      "headroom_pct": 55.0,
-      "discriminating": true,
-      "cold_ttfts_ms": [
-        2538.4,
-        3035.7,
-        3365.4,
-        3704.8,
-        4221.1
-      ]
+      "quality_passes_slo": true,
+      "quality_gap": 0.0,
+      "lat_fail_s043": 0.0,
+      "lat_fail_s100": 0.0,
+      "discriminating_s043": false,
+      "discriminating_s100": false
     }
   ],
-  "assumptions": [
-    "A1: qwen3b Jetson restore = 0.43x qwen7b_time (time ratio, not rate ratio). Source: E23. Not directly measured.",
-    "A2: EgoSchema context ~1500-2500 tokens. Not committed; latency cells marked [A].",
-    "A3: Device within-session warm-append assumed to meet all TTFT budgets. Not measured.",
-    "A4: LoCoMo contexts (11k-22k tok) exceed Jetson qwen7b max feasible L=16384; rate extrapolated from last measured point."
-  ]
+  "egoschema_a2_sensitivity": {
+    "0.43": {
+      "300": 1.0,
+      "1000": 0.8,
+      "10000": 0.0
+    },
+    "1.0": {
+      "300": 1.0,
+      "1000": 1.0,
+      "10000": 0.0
+    }
+  }
 }
