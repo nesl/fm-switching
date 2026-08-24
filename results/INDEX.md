@@ -320,3 +320,19 @@ lifecycle_aware co-ranks with edge_full_lru at all LoCoMo cells.
 | `results/orchestration/e36b_fleet/stage2_analysis.json` | `e36b_fleet.py` (rewrite) | — | CPU sim | 18 cells | Kill (b)/(c)/(d) fire; maintenance_aware≡always_full; fp_ranked beats maint at egoschema/300ms by 81.5pp | 2026-08-24 |
 | `results/orchestration/e36b_fleet/binding_diagnostic.json` | `e36b_fleet.py` (rewrite) | — | CPU sim | 35 rows (7 pol × 5 fleet) | Accel never binds (kill d); KV-memory-bound fraction by policy/fleet | 2026-08-24 |
 | `reports/e36b_fleet_policy.md` | — | — | — | — | Full report with 6-check consistency protocol (rewrite, supersedes prior e36b) | 2026-08-24 |
+
+## E36c — Fleet Policy with Fixed KV Capacity and Corrected Maintenance-Aware (2026-08-24)
+
+E36b corrected again: KV capacity fixed (not fleet-scaled); maintenance_aware redesigned as fleet-level greedy knapsack.
+Kill conditions (b)/(c) still fire; fleet system claim falsified. Accel binds at ti=5 s (kill d does not fire).
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/orchestration/e36c_fleet/stage0_headroom.json` | `e36c_fleet.py` | qwen3b (E37b ratio) + qwen7b (E29) | CPU sim | 18 cells | K1 PASS 22% non-discriminating | 2026-08-24 |
+| `results/orchestration/e36c_fleet/stage1_sweep.json` | `e36c_fleet.py` | qwen3b + qwen7b | CPU sim | 8,064 runs | fixed-KV sweep; fleet-level knapsack; turn_interval sweep | 2026-08-24 |
+| `results/orchestration/e36c_fleet/stage2_analysis.json` | `e36c_fleet.py` | — | CPU sim | 18 cells | Kill (b)/(c) fire; fleet claim falsified; ma within 5pp of fp_ranked in all 18 cells | 2026-08-24 |
+| `results/orchestration/e36c_fleet/binding_diagnostic.json` | `e36c_fleet.py` | — | CPU sim | rows per (policy, fleet, kv_cap, turn_interval) | Accel binds at ti=5s (maint_aware only, up to 4.3%); kill (d) no-fire | 2026-08-24 |
+| `reports/e36c_fleet_policy.md` | — | — | — | — | Full report with 6-check consistency protocol | 2026-08-24 |
+| `figures/orchestration/e36c_gap_vs_fleetsize.pdf` | `plots/orchestration/e36c_figures.py` | — | — | — | both_met vs fleet size (kv=9 GiB, ti=30 s) | 2026-08-24 |
+| `figures/orchestration/e36c_binding_resource.pdf` | `plots/orchestration/e36c_figures.py` | — | — | — | Binding resource: KV vs accel per policy/kv_cap/turn_interval | 2026-08-24 |
+| `figures/orchestration/e36c_kv_occupancy.pdf` | `plots/orchestration/e36c_figures.py` | — | — | — | KV p50/max occupancy vs kv_cap | 2026-08-24 |

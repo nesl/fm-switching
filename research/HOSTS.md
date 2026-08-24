@@ -14,4 +14,5 @@ don't collide. Clear the claim when done.
 | flash | CPU (no GPU) | CC | E36 maintenance-aware fleet admission simulation | 2026-08-23 | done |
 | flash | CPU (no GPU) | CC | E36b fleet simulation with measured A1 ratio | 2026-08-24 | done |
 | flash | CPU (no GPU) | CC | E36b rewrite — corrected fleet policy (footprint_ranked incumbent, admissibility model) | 2026-08-24 | done |
+| flash | CPU (no GPU) | CC | E36c — fleet policy with fixed KV capacity and fleet-level knapsack maintenance_aware | 2026-08-24 | done |
 | jetson_orin | Orin (65.9 GB unified) | CC | E37 qwen3b vs qwen7b device-tier time ratio | 2026-08-23 | done |

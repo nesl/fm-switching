@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-24 (E36b rewrite: corrected fleet policy experiment with footprint_ranked incumbent, admissibility-constraint quality model, binding-resource diagnostic, 7 correct policies. Kill conditions (b)/(c)/(d) fire: maintenance_aware ≡ always_full (degenerate — full always minimizes cost/quality); footprint_ranked beats maintenance_aware up to +81.5pp at egoschema/300ms; accelerator never binds (sum200 excluded from LoCoMo at q_min≥0.20). K2 PASS for 14/18 discriminating cells.)
+Last updated: 2026-08-24 (E36c: fleet policy with fixed KV capacity and corrected fleet-level greedy knapsack for maintenance_aware. Kill conditions (b)/(c) fire again: maintenance_aware within 5pp of footprint_ranked in ALL 18 cells; fleet system claim FALSIFIED. Kill condition (d) does NOT fire: accel binds for maintenance_aware at ti=5 s. Root cause: argmax(gain/kv_cost) = argmax(Q/kv_cost) for tested admissible sets — knapsack collapses to footprint_ranked. Fleet scheduling investigation closed.)
 
 ## Framing
 

@@ -1,3 +1,5 @@
+> **SUPERSEDED by E36c (2026-08-24).** Two defects corrected: (1) KV capacity now fixed independent of fleet size; (2) maintenance_aware redesigned as fleet-level greedy knapsack. Kill conditions (b)/(c) still fire; fleet system claim falsified. See `reports/e36c_fleet_policy.md`.
+
 # E36b (rewrite) — Corrected Fleet Policy Experiment
 
 **Date:** 2026-08-24  
