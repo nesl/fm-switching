@@ -7,6 +7,10 @@
 
 ---
 
+**A1 resolved (2026-08-24):** Assumption A1 has been measured (E37/E37b). The measured incr\_warm ratio is 0.593–0.705 (L-dependent, median 0.684 across LoCoMo turns), refuting both the s=0.43 lower bound (too optimistic by 38%) and s=1.00 upper bound. At the measured ratio, device\_only fails 46.5% of LoCoMo 1s queries; K2 gap ≈11pp — **K2 PASSES at the measured device speed**. See `reports/phase1_cost_profiling.md §Measured A1 ratio`. This report is superseded by E36b for any conclusion that depended on the A1 assumption.
+
+---
+
 ## Summary
 
 E36 tests whether a lifecycle-cost-aware fidelity selection policy (lifecycle_aware)

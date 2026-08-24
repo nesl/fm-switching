@@ -1,0 +1,29 @@
+operation,L_tokens,qwen3b_ms,qwen7b_ms,ratio_3b_7b,note
+full_restore_ms,1024,1924.61,4052.48,0.4749,rises with L
+full_restore_ms,4096,8089.86,16310.65,0.4960,rises with L
+full_restore_ms,8192,17486.00,33790.28,0.5175,rises with L
+full_restore_ms,16384,40670.35,75053.67,0.5419,rises with L
+sum80_restore_ms,1024,204.82,354.65,0.5775,L-independent (fixed 51-tok summary)
+sum80_restore_ms,4096,209.33,355.39,0.5889,L-independent (fixed 51-tok summary)
+sum80_restore_ms,8192,209.28,355.76,0.5883,L-independent (fixed 51-tok summary)
+sum80_restore_ms,16384,203.39,356.15,0.5711,L-independent (fixed 51-tok summary)
+sum200_restore_ms,1024,296.74,506.39,0.5860,L-independent (fixed 113-tok summary)
+sum200_restore_ms,4096,298.18,506.40,0.5888,L-independent (fixed 113-tok summary)
+sum200_restore_ms,8192,297.41,506.68,0.5870,L-independent (fixed 113-tok summary)
+sum200_restore_ms,16384,297.28,506.21,0.5873,L-independent (fixed 113-tok summary)
+sum80_update_ms,1024,11902.89,31315.66,0.3801,anomalous 7B value at L=1k (see note)
+sum80_update_ms,4096,18311.23,37413.94,0.4894,3B/7B both plateau at L>=4k
+sum80_update_ms,8192,18294.29,37413.79,0.4890,3B/7B both plateau at L>=4k
+sum80_update_ms,16384,18135.05,37398.49,0.4849,3B/7B both plateau at L>=4k
+sum200_update_ms,1024,17858.37,67403.70,0.2649,anomalous 7B value at L=1k (see note)
+sum200_update_ms,4096,21225.07,45379.28,0.4677,3B/7B both plateau at L>=4k
+sum200_update_ms,8192,21164.00,45382.43,0.4663,3B/7B both plateau at L>=4k
+sum200_update_ms,16384,20983.09,45372.82,0.4625,3B/7B both plateau at L>=4k
+incremental_warm_ms,1024,343.84,579.40,0.5934,rises with L — KEY for E36b
+incremental_warm_ms,4096,547.95,855.35,0.6406,rises with L — KEY for E36b
+incremental_warm_ms,8192,853.02,1252.51,0.6810,rises with L — KEY for E36b
+incremental_warm_ms,16384,1524.03,2162.83,0.7046,rises with L — KEY for E36b
+incremental_cold_ms,1024,2287.03,4858.27,0.4707,rises with L
+incremental_cold_ms,4096,8659.44,17327.15,0.4997,rises with L
+incremental_cold_ms,8192,18590.41,35896.34,0.5179,rises with L
+incremental_cold_ms,16384,42911.96,79476.69,0.5399,rises with L

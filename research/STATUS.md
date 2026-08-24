@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-24 (E37 complete: Jetson qwen3b measurement resolves E36's A1 assumption. Measured 3B/7B device-tier cold-prefill ratio = 0.475@1k → 0.542@16k (rises with L); replace A1's 0.43–1.00 with 0.48–0.54 (≈0.54 at the ~20k-token operating point). The 1.00 "no-speedup" bound is refuted — the 3B is 1.85–2.1× faster at prefill — so E36's K2-passing s=1.00 case does not correspond to measured behavior; the real device speed sits near the s=0.43 end where E36's K2 FAILED at locomo/1000ms. E36 complete prior: K1 PASS; K2 FAIL 3/36 cells at s=0.43, passes at s=1.00; E35 also complete from prior session.)
+Last updated: 2026-08-24 (E37b complete: A1 ratio analysis. Measured incr_warm ratio 0.593@1k→0.705@16k (median 0.684 across LoCoMo turns). At measured ratio, device_only fails 46.5% of LoCoMo 1s queries; K2 gap ≈11pp — K2 PASSES. E36's K2 violation was a s=0.43 lower-bound artifact. Device sum-update infeasible at all L and budgets (11.9–21.2s). E37 also complete: Jetson qwen3b measured.)
 
 ## Framing
 

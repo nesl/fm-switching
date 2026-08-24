@@ -494,3 +494,85 @@ The cost structure the formulation depends on survives under vLLM. Cold prefill 
 vLLM decode throughput is ~43 tok/s at small L and ~36 tok/s at large L, 1.2–1.8× faster than HF at matched contexts. vLLM warm-append is 1.6–2.6× faster than HF across all L.
 
 **The window-append versus summary-refresh gap is preserved and larger than previously reported.** The prior section quoted 90×, derived by dividing a vLLM summary-refresh number by an HF warm-append number — an invalid cross-engine comparison. Within vLLM, the gap ranges from **75× (L=1k, sum-80) to 181× (L=1k, sum-200)** with a minimum of 77× at L=8k for sum-80. At the E24c design point of L=32k (YaRN), it is 104–140×. At L=64k it is 144–167×. The gap is larger under vLLM than under HF because vLLM's warm-append is disproportionately fast relative to its summary refresh: paged attention with a cached prefix is extremely efficient for short extensions, while the decode-dominated summary generation has limited scope for optimization. The maintenance claim — that window-10 refresh is structurally cheaper than summary refresh across all feasible L and budgets — holds strongly under an optimized engine. The formulation's cost model is conservative in the direction that strengthens the window preference.
+
+---
+
+## Measured A1 ratio (Qwen2.5-3B vs Qwen2.5-7B, jetson\_orin) — E37b, 2026-08-24
+
+**Source files:** `results/cost/profiles/jetson_orin_qwen3b.json` (E37) and `results/cost/profiles/jetson_orin_qwen7b.json` (E23). Analysis only — no new GPU measurements. Full ratio table: `results/cost/a1_ratio_table.csv`.
+
+E36 carried an unmeasured assumption A1: qwen3b Jetson time = s × qwen7b Jetson time, shown at s=0.43 (3B/7B parameter-count ratio) and s=1.00 (no speedup upper bound). This section replaces that assumption with measured values from E37 at L ∈ {1024, 4096, 8192, 16384}.
+
+### Part 1 — Ratio table
+
+| operation | L=1024 | L=4096 | L=8192 | L=16384 | median | trend |
+|---|---|---|---|---|---|---|
+| full\_restore | 0.475 | 0.496 | 0.517 | 0.542 | 0.507 | rises with L |
+| sum80\_restore | 0.578 | 0.589 | 0.588 | 0.571 | 0.583 | flat (L-independent) |
+| sum200\_restore | 0.586 | 0.589 | 0.587 | 0.587 | 0.587 | flat (L-independent) |
+| sum80\_update | 0.380† | 0.489 | 0.489 | 0.485 | 0.487‡ | plateau at L≥4k |
+| sum200\_update | 0.265† | 0.468 | 0.466 | 0.463 | 0.464‡ | plateau at L≥4k |
+| incremental\_warm | 0.593 | 0.641 | 0.681 | 0.705 | 0.661 | rises with L |
+| incremental\_cold | 0.471 | 0.500 | 0.518 | 0.540 | 0.509 | rises with L |
+
+† L=1024 update ratios are anomalous (7B sum80\_update=31.3s; sum200\_update=67.4s at L=1k but ~37s/45s at L≥2k — possible GPU warmup or kernel-launch artifact in the 7B run). Median for update ops computed over L∈{4096,8192,16384} to exclude the anomalous L=1k row.
+
+‡ Exclude the anomalous L=1k value when applying these ratios.
+
+**Window rows excluded.** The 3B run reports window token counts of 261–483 across the four L points — non-monotone and shrinking as L increases. This is the short-turn window definition that E33a (§definition audit) identified as incorrect for the LoCoMo workload; the correct win10 definition is "last 10 sessions", median 7,275 tokens. The window\_restore ratios cannot be compared to any win10 cost in the formulation. Window rows are excluded from all ratio computations. **Open item:** `cost_profile.py` still constructs the window using the wrong (turn-based) definition; the win10 measurement must come from a corrected run.
+
+**Trend characterisation.** Operations on fixed-length summaries (sum80\_restore, sum200\_restore) are L-independent as expected — both models process 51 and 113 tokens respectively, and the ratio is approximately model-speed-only (≈0.58–0.59). Operations that process the full context (full\_restore, incremental\_cold) show a rising ratio because the 3B's computation time scales more steeply with L than the 7B's; the ratio rises from ~0.47–0.47 at L=1k to ~0.54–0.54 at L=16k. The incremental\_warm ratio rises more steeply (0.59→0.70) because warm-append processes only the new-turn tokens but the KV cache access pattern scales with L, and this overhead grows more for the 3B.
+
+### Part 2 — Value E36b should use
+
+The load-bearing operation for device\_only in the E36 LoCoMo workload is **incremental\_warm**: each new turn is a warm-append from the Jetson's own KV cache, accumulated continuously across the session.
+
+**Recommendation: use an L-dependent function, not a scalar.** The measured ratio rises from 0.593 at L=1k to 0.705 at L=16k. A single scalar would be correct only at one L value and biased at all others. The simplest approach is linear interpolation over the four measured points, clamping to 0.705 for L > 16384 (the last measured point before the infeasibility boundary at L=24576).
+
+For the LoCoMo context distribution used in E36 (turns span L=0 to max≈22.7k, median L across all turns ≈10k):
+
+- Ratio at L=0 (session start): 0.593 (extrapolated from L=1k)
+- Ratio at L~10k (median operating point): ≈0.670 (interpolated between L=8k and L=16k)
+- Ratio at L=16k (last measured): 0.705
+- Ratio for L > 16k: 0.705 (clamped; A4 still applies to 7B baseline extrapolation)
+
+The assumed s=0.43 lower bound is refuted: the measured minimum is 0.593, some 38% above the assumption. The assumed s=1.00 upper bound is also refuted: the measured maximum is 0.705, confirming the 3B is meaningfully faster. The true range (0.59–0.71 across measured L) sits entirely within the assumed 0.43–1.00 range but close to neither extreme.
+
+### Part 3 — Consequence for E36 K2 violation
+
+E36 reported three K2-violating cells: locomo / 1000ms TTFT budget / all quality floors, at A1 bound s=0.43.
+
+Using the same LoCoMo context distribution as E36 (n=10 conversations, LOCOMO\_CTX\_TOKENS, LOCOMO\_N\_SESSIONS, TURNS\_PER\_SESSION=22) and the L-dependent measured ratio for incremental\_warm:
+
+| budget | s=0.43 (E36) | s=1.00 (E36) | measured ratio | note |
+|---|---|---|---|---|
+| 300ms | 87.3% fail | 97.1% fail | **95.2% fail** | K2 passes both bounds and measured |
+| 1000ms | 12.1% fail | 70.2% fail | **46.5% fail** | measured is between the two bounds |
+| 10000ms | 0.0% fail | 0.0% fail | **0.0% fail** | all pass |
+
+At the measured ratio the device\_only 1000ms failure rate is 46.5% — far above the s=0.43 case (12.1%) and closer to the s=1.00 case (70.2%). The lifecycle\_aware both\_met metric stays at approximately 0.235 regardless of device speed (served from edge). The implied lifecycle\_aware vs device\_only gap at 1000ms is approximately:
+
+- device\_only both\_met (measured) ≈ (1 − 0.465) × Q(full,locomo,3b) ≈ 0.535 × 0.230 ≈ 0.123
+- lifecycle\_aware both\_met ≈ 0.235 (from E36, device-speed-independent)
+- gap ≈ 0.235 − 0.123 ≈ 11.2pp
+
+**K2 PASSES at the measured ratio.** The three K2-violating cells in E36 were artifacts of the s=0.43 lower bound; that bound was too optimistic (it underestimated 3B latency by 38%). The real device speed sits between the two assumed extremes but close enough to s=1.00 that the edge's latency advantage is genuine and substantial at the 1000ms budget.
+
+### Part 4 — Device summary-update infeasibility (tier-asymmetry finding)
+
+**3B Jetson summary-update timings:**
+
+| operation | L=1024 | L=4096 | L=8192 | L=16384 |
+|---|---|---|---|---|
+| sum80\_update\_ms (3B) | 11,903 | 18,311 | 18,294 | 18,135 |
+| sum200\_update\_ms (3B) | 17,858 | 21,225 | 21,164 | 20,983 |
+| sum80\_update\_ms (7B) | 31,316 | 37,414 | 37,414 | 37,398 |
+| sum200\_update\_ms (7B) | 67,404 | 45,379 | 45,382 | 45,373 |
+
+Both models require 11.9–21.2s to update a summary on the Jetson, even at the smallest measured context (L=1k). This is well above any plausible TTFT budget (300ms, 1s, 10s). **Derived state cannot be maintained on the device tier at any operating budget, under either model.** Summary-80 and summary-200 representations are not viable for device\_only with live updates; they would require either a pre-computed summary delivered from elsewhere or a stale summary accepted without refresh. This is a tier-asymmetry finding for the paper: the edge tier (A6000: sum200 update 5.8s, sum80 update comparable) is 5–7× faster at summary update than the device tier, and even the edge-tier cost exceeds the interactive budget (1s).
+
+Cross-check against 7B Jetson values: 3B/7B update ratio is 0.38–0.49 (sum80) and 0.26–0.47 (sum200). The 7B L=1k anomaly (sum200=67.4s, then 45.4s at all larger L) may reflect a GPU-warmup or kernel-launch artifact; the 3B run does not exhibit the same pattern. Both models agree: summary update on Jetson is infeasible under any runtime budget.
+
+**Note on rep count:** The E37 3B run reports n=4 completed reps (not the target 5). The IQRs are tight across all cells (< 0.5%), so the missing fifth rep does not affect the ratio values materially.
+
+**Note on KV footprint:** qwen3b kv\_bytes\_per\_token = 36,864 (0.643× the 7B's 57,344). Where KV cache footprint is computed for device-tier capacity planning (e.g., how many LoCoMo sessions can reside in the Jetson's 65.9 GB), use 36,864 B/tok for the 3B model.

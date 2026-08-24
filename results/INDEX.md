@@ -294,3 +294,15 @@ K2 passes at s=1.00 (+14.2pp). A1 assumption pending Jetson qwen3b measurement.
 | `results/orchestration/e36_fleet/stage1_sweep.json` | `e36_fleet.py` | qwen3b (device) + qwen7b (edge) | CPU sim | 3,024 runs | Policy sweep: edge policies +10–57pp vs device_only in most cells | 2026-08-23 |
 | `results/orchestration/e36_fleet/stage2_analysis.json` | `e36_fleet.py` | — | CPU sim | 36 cells | K2 FAIL: 3 cells locomo/1000ms/s=0.43 (+0.7pp); K2 PASS at s=1.00 (+14.2pp) | 2026-08-23 |
 | `reports/e36_fleet_policy.md` | — | — | — | — | Full report with 6-check consistency protocol and K2 violation analysis | 2026-08-23 |
+
+## E37b — A1 Ratio Resolution + E36 K2 Consequence Analysis (2026-08-24)
+
+Analysis only. Inputs: committed E37 (jetson_orin_qwen3b.json) and E23 (jetson_orin_qwen7b.json).
+Key finding: incr_warm ratio 0.593@1k→0.705@16k (median 0.684 across LoCoMo turns).
+Device_only fails 46.5% of LoCoMo 1s queries at measured ratio.
+K2 PASSES at measured device speed (gap ≈11pp). E36's K2 violation was a lower-bound artifact.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/cost/a1_ratio_table.csv` | analysis (no script) | qwen3b vs qwen7b | jetson_orin | 4 L-points × 7 ops | incr_warm ratio 0.593–0.705 (rises with L); full_restore 0.475–0.542; summary restore ~0.587 (flat) | 2026-08-24 |
+| `reports/phase1_cost_profiling.md §Measured A1 ratio` | — | — | — | — | K2 consequence: 46.5% device failure at 1s budget; K2 PASSES at measured ratio; device sum-update infeasible (11.9–21.2s) | 2026-08-24 |
