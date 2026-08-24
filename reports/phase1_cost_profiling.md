@@ -201,6 +201,87 @@ Full-context summary-update grows steeply with L (prefill-dominated) and plateau
 
 State sizes and KV/token are model-intrinsic and match the other tiers (56 KB/token). Note the infeasibility edge here is set by the **120 s time budget**, not memory — the 65.9 GB unified memory never OOMs (unlike the 3090 Ti, which OOMs the incremental path at L≥24,576).
 
+### Model: qwen3b — Qwen2.5-3B device tier (E37)
+
+GPU: Jetson AGX Orin ("Orin", 65.9 GB unified) | LLM: Qwen/Qwen2.5-3B-Instruct | KV bytes/token: 36,864
+
+**Why this run.** The fleet simulation (E36) modeled the device tier's 3B TTFT as an *assumed* fraction (0.43 param-count lower bound → 1.00 no-speedup) of the measured 7B Jetson latency; that assumption swung the device's failure rate against the 1 s interactive TTFT budget from 12% to 70% — load-bearing for a whole session class. E37 replaces the assumption with a measurement, on the **same box and the same protocol** as the committed 7B Jetson run (E23), so the ratio is a like-for-like comparison. L ∈ {1k, 4k, 8k, 16k}, 5 reps (first dropped as warm-up → 4 measured). Script/invocation: `experiments/cost/cost_profile.py --model qwen3b --tier jetson_orin --gpu 0 --token-counts 1024,4096,8192,16384 --reps 5` (no code changes; qwen3b was already a supported `--model`).
+
+**Environment record.** JetPack 6.2.2 (L4T R36, rev 5.0) · CUDA 12.6 · torch 2.8.0 · transformers 5.10.2 · accelerate 1.13.0 · Python 3.10.12 · **flash-attn NOT available** (no aarch64 wheel) → **SDPA attention** · fp16 weights. This is the *identical stack* used for the qwen7b Jetson run, so the **3B/7B ratio below is free of the software-stack confound** that affects Jetson-vs-flash comparisons (the absolute latencies still carry it). Environment probe (qwen3b, fp16): model load 10.8 s; 1-token generate on a short prompt 1.08 s; residency 6.18 GB.
+
+**Architecture note (explains the ratio's L-dependence).** 3B = 36 layers / 16 heads / 2 KV heads / hidden 2048; 7B = 28 layers / 28 heads / 4 KV heads / hidden 3584. The 3B is *deeper but narrower*. At small L, prefill is MLP/matmul-bound (∝ params) → ratio near the parameter-count floor; as L grows, attention over the sequence — repeated across 36 vs 28 layers — erodes the width advantage, so the ratio drifts upward with L.
+
+*Window coverage*: at L=1,024, window tokens = 483 (47% of full). No rows excluded. **All L feasible — no OOM, no timeout** (3B peaks at 8.16 GB, far below the 65.9 GB unified limit).
+
+#### Restore Latency (ms, median [IQR])
+
+| L | full | window | sum-80 | sum-200 | full peak GB | ✓ |
+|---|---|---|---|---|---|---|
+| 1,024 | 1925 [1923, 1927] | 1025 | 205 | 297 | 6.31 | ✓ |
+| 4,096 | 8090 [8087, 8093] | 659 | 209 | 298 | 6.68 | ✓ |
+| 8,192 | 17486 [17486, 17490] | 621 | 209 | 297 | 7.17 | ✓ |
+| 16,384 | 40670 [40669, 40676] | 665 | 203 | 297 | 8.16 | ✓ |
+
+#### Update / Incremental Latency (ms, median)
+
+| L | sum-80 update † | sum-200 update † | incr warm (82-tok Δ) | incr cold | ratio cold/warm |
+|---|---|---|---|---|---|
+| 1,024 | 11903 | 17858 | 344 | 2287 | 6.7× |
+| 4,096 | 18311 | 21225 | 548 | 8659 | 15.8× |
+| 8,192 | 18294 | 21164 | 853 | 18590 | 21.8× |
+| 16,384 | 18135 | 20983 | 1524 | 42912 | 28.2× |
+
+† Summary-update columns are the **truncated-input** (first-8000-char) measurements (`update_corrected=0`); the full-context rerun (`cost_update_rerun.py`) was **not** run for E37 because the E36 ratio it feeds needs only cold-prefill / warm-append / peak. Δ = warm-append delta is the script's fixed `NEW_TURN_TEXT` = **82 tokens** (identical to the E23 7B run), *not* 200 — the 3B/7B warm ratio is directly comparable, but the absolute warm number is for an 82-token turn.
+
+#### State Sizes and KV Cache
+
+| L | full (KB) | window (KB) | sum-80 (B) | sum-200 (B) | KV (MB) |
+|---|---|---|---|---|---|
+| 1,024 | 4 | 2 | 317 | 684 | 37.7 |
+| 4,096 | 17 | 1 | 317 | 684 | 151.0 |
+| 8,192 | 34 | 1 | 317 | 684 | 302.0 |
+| 16,384 | 67 | 2 | 317 | 684 | 604.0 |
+
+Text/summary state sizes are model-independent (match qwen7b); KV is 36,864 B/token (36 KB) vs the 7B's 57,344 B (56 KB) — a 0.64× KV footprint per token.
+
+#### Ratio table — 3B ÷ 7B (Jetson, same stack, same protocol)
+
+Denominators are the committed 7B Jetson medians (`results/cost/profiles/jetson_orin_qwen7b.json`).
+
+| L | cold prefill (full_restore) | warm append | peak mem |
+|---|---|---|---|
+| 1,024 | 0.475 | 0.593 | 0.408 |
+| 4,096 | 0.496 | 0.641 | 0.416 |
+| 8,192 | 0.517 | 0.681 | 0.425 |
+| 16,384 | 0.542 | 0.705 | 0.440 |
+
+- **Cold prefill (TTFT): 0.475 → 0.542, rising monotonically with L — NOT constant** (mean 0.51). Near the parameter-count floor (~0.40–0.43) at small L; the mild upward drift is the depth effect noted above.
+- **Warm append: 0.593 → 0.705, also rising.** Warm append is overhead/small-Δ dominated (only 82 new tokens), hence less compute-bound and a higher ratio than prefill.
+- **Peak memory: ~0.41–0.44, roughly constant** — dominated by model residency (∝ params).
+
+**Number for E36.** Replace the assumed **0.43–1.00** device 3B/7B latency fraction with the **measured cold-prefill (restore-TTFT) ratio 0.48–0.54**, L-dependent (0.475 @ 1k → 0.542 @ 16k). At E36's device-tier operating point (LoCoMo sessions, median ≈ 20k tokens) use **≈ 0.54** (extrapolating the mild upward drift just past 16k); if a single scalar is required, **0.5** is the mid-range value and 0.54 the conservative (slower) choice at the relevant L. **The upper bound of the old assumption (1.00, "no speedup") is firmly refuted** — the 3B is ~1.85–2.1× faster at prefill across the whole range, so the 70%-failure end of E36's sensitivity band does not correspond to any measured behavior.
+
+#### Results consistency check (E37)
+
+1. **Cross-check vs committed.** No prior 3B Jetson measurement exists — E37 is the first. The 7B denominators are read verbatim from the committed `jetson_orin_qwen7b.json` (ratio 1.00, agree). The derived 3B/7B prefill ratio is within ~1.1–1.3× of the parameter-count expectation (~0.40–0.43); the excess is explained by the 3B's greater depth (36 vs 28 layers). **Agree.**
+
+   | quantity | this run (3B) | prior (7B) | source | ratio | agree? |
+   |---|---|---|---|---|---|
+   | full_restore @1k | 1925 ms | 4052 ms | jetson_orin_qwen7b.json | 0.475 | ✓ (≈ param floor) |
+   | full_restore @16k | 40670 ms | 75054 ms | jetson_orin_qwen7b.json | 0.542 | ✓ |
+   | warm_append @16k | 1524 ms | 2163 ms | jetson_orin_qwen7b.json | 0.705 | ✓ |
+   | peak_mem @16k | 8.16 GB | 18.54 GB | jetson_orin_qwen7b.json | 0.440 | ✓ |
+
+2. **Physical plausibility.** 3B prefill rate 532 → 403 tok/s (1k → 16k); 7B 253 → 218 tok/s; ratio 1.85–2.11×, matching the ~2× parameter-count throughput expectation. Both decline with L (super-linear prefill) — same shape as the committed 7B curve. No rate exceeds the committed *same-model* curve; the 3B is faster only because it is a smaller model, not a caching artifact. Caching: no prefix cache — each `full_restore` re-tokenizes and re-prefills from scratch; warm vs cold are explicitly separated in `_incremental` (warm = append over cached KV; cold = fresh prefill of L+82). **Pass.**
+
+3. **Distribution sanity.** Per-L IQRs are tight (e.g. full_restore @16k IQR [40669, 40676] — 8 ms on 40.7 s) but values vary hugely across L (1925 → 40670, super-linear). Tightness within an L is expected — fixed input, greedy decode, dedicated GPU, 4 measured reps — and matches the 7B run's character (75054 [75048, 75055]). Not a short-circuit. **Pass.**
+
+4. **Definition audit.** full_restore = cold-prefill TTFT of the L-token context (`max_new_tokens=1`); incremental_warm = forward pass of the 82-token `NEW_TURN_TEXT` over a warm L-token KV; peak = full_restore peak GB. All identical to E23 (same script, same corpus of 15,923 turns, same constants). L_actual = L_target exactly. **One flag:** the task described the append as a "~200-token turn"; the script constant is 82 tokens (same as E23), so the ratio is valid but the absolute warm number is for an 82-token append.
+
+5. **Claim linkage.** Bears on **C4** (physical inertia cost) and FORMULATION.md's `materialize()`/`refresh()` costs and Assumption 2 (cold materialization threatens the latency SLO at realistic L). Measures same-model prefill/append on one tier; does **not** touch cross-architecture KV transfer (scoped out per FORMULATION.md §Scoping). Supplies the device-tier (3B) cost input E36 had assumed. **Supports.**
+
+6. **Proxy validity.** None — all three headline quantities are direct measurements (TTFT, forward-pass time, `torch.cuda.max_memory_allocated`). No proxy. **Pass.**
+
 ## Crossover Analysis
 
 Crossover definitions:

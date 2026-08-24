@@ -12,3 +12,4 @@ don't collide. Clear the claim when done.
 | flash | A6000 (GPU 1) | CC | E34 maintenance semantics + corrected catch-up latency | 2026-08-23 | done |
 | flash | A6000 (GPU 1) | CC | E35 corrected WARM catch-up latency + maintenance ordering | 2026-08-23 | done |
 | flash | CPU (no GPU) | CC | E36 maintenance-aware fleet admission simulation | 2026-08-23 | done |
+| jetson_orin | Orin (65.9 GB unified) | CC | E37 qwen3b vs qwen7b device-tier time ratio | 2026-08-23 | done |

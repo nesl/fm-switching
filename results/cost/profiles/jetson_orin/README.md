@@ -1,12 +1,12 @@
 # Phase 1 — jetson_orin measurement notes
 
-Model: qwen7b (Qwen/Qwen2.5-7B-Instruct)
+Model: qwen3b (Qwen/Qwen2.5-3B-Instruct)
 GPU: Orin (65.9 GB)
-L sweep: [1024, 2048, 4096, 8192, 16384, 24576, 32768, 49152, 65536]
+L sweep: [1024, 4096, 8192, 16384]
 Reps: 5
-Timestamp: 2026-08-19T18:29:34.581635
+Timestamp: 2026-08-23T19:25:28.641227
 
-Result file: results/phase1/cost_profiles/jetson_orin_qwen7b.json
+Result file: results/phase1/cost_profiles/jetson_orin_qwen3b.json
 
 ## Notes
 
