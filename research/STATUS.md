@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-23 (E34 complete: maintenance semantics + corrected catch-up latency — win10 growth WARM=36ms, slide COLD=0.975s; COLD catch-up is N-invariant; win10 amortized=652ms; sum200 restore=32ms, update=9.6s. E32 Part B superseded by E34. Three vLLM V1 implementation bugs fixed (CUDA graph deadlock, subprocess OOM, slide warm-up pre-caching).)
+Last updated: 2026-08-23 (E35 complete: corrected WARM catch-up — full 67ms(N=1)→681ms(N=100); win10 bimodal: 41-77ms intra-session, ~1031ms inter-session with jump at N~22 turns; sum200 TTFT 25ms; recursive 5.8-6.2s; full regen distribution 7.8-10.3s confirmed (E32 constant artifact confirmed). E34 Parts B+C superseded.)
 
 ## Framing
 

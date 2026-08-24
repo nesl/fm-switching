@@ -1,5 +1,7 @@
 # E34 — Maintenance Semantics and Corrected Catch-up Latency
 
+> **⚠ SUPERSEDED (Parts B and C):** E34 Parts B and C are superseded by **E35** (`reports/e34b_corrected_catchup.md`, 2026-08-23). E34 Part B contained a warm-up pre-caching bug (current_text cached before timing) producing a flat ~25–65 ms artifact. E34 Part C incorrectly listed full COLD re-prefill (3,620 ms) as full's maintenance cost; corrected to warm tail-append (66 ms, E26). **E34 Part A stands and is canonical.**
+
 **Date:** 2026-08-23  
 **Model:** Qwen/Qwen2.5-7B-Instruct (`qwen7b`)  
 **Device:** NVIDIA RTX A6000 (flash, GPU 1)  

@@ -1,0 +1,2580 @@
+{
+  "description": "sum200 catch-up: TTFT (N-independent, verify ~37ms), recursive generation (decode-dominated, varies slightly with N), full regen (N-independent, per-conv distribution expected \u2014 constant distribution = E32 artifact, not valid).",
+  "ttft_summary_by_N": {
+    "1": {
+      "N": 1,
+      "median_s_rep1": 0.0251,
+      "median_s_rep2": 0.0248
+    },
+    "5": {
+      "N": 5,
+      "median_s_rep1": 0.0248,
+      "median_s_rep2": 0.0246
+    },
+    "10": {
+      "N": 10,
+      "median_s_rep1": 0.0246,
+      "median_s_rep2": 0.0244
+    },
+    "20": {
+      "N": 20,
+      "median_s_rep1": 0.0246,
+      "median_s_rep2": 0.0244
+    },
+    "50": {
+      "N": 50,
+      "median_s_rep1": 0.0246,
+      "median_s_rep2": 0.0244
+    },
+    "100": {
+      "N": 100,
+      "median_s_rep1": 0.0246,
+      "median_s_rep2": 0.0244
+    }
+  },
+  "recursive_summary_by_N": {
+    "1": {
+      "N": 1,
+      "delta_tokens_median": 16,
+      "median_s_rep1": 5.784,
+      "median_s_rep2": 5.783,
+      "per_conv_rep1": [
+        {
+          "conv_id": "conv-26",
+          "elapsed_s": 5.7625
+        },
+        {
+          "conv_id": "conv-30",
+          "elapsed_s": 5.818
+        },
+        {
+          "conv_id": "conv-41",
+          "elapsed_s": 5.8276
+        },
+        {
+          "conv_id": "conv-42",
+          "elapsed_s": 5.7857
+        },
+        {
+          "conv_id": "conv-43",
+          "elapsed_s": 5.7832
+        },
+        {
+          "conv_id": "conv-44",
+          "elapsed_s": 5.7846
+        },
+        {
+          "conv_id": "conv-47",
+          "elapsed_s": 5.7832
+        },
+        {
+          "conv_id": "conv-48",
+          "elapsed_s": 5.7727
+        },
+        {
+          "conv_id": "conv-49",
+          "elapsed_s": 5.7808
+        },
+        {
+          "conv_id": "conv-50",
+          "elapsed_s": 5.7937
+        }
+      ]
+    },
+    "5": {
+      "N": 5,
+      "delta_tokens_median": 110,
+      "median_s_rep1": 5.778,
+      "median_s_rep2": 5.776,
+      "per_conv_rep1": [
+        {
+          "conv_id": "conv-26",
+          "elapsed_s": 5.7971
+        },
+        {
+          "conv_id": "conv-30",
+          "elapsed_s": 5.8171
+        },
+        {
+          "conv_id": "conv-41",
+          "elapsed_s": 5.8022
+        },
+        {
+          "conv_id": "conv-42",
+          "elapsed_s": 5.7799
+        },
+        {
+          "conv_id": "conv-43",
+          "elapsed_s": 5.7789
+        },
+        {
+          "conv_id": "conv-44",
+          "elapsed_s": 5.7737
+        },
+        {
+          "conv_id": "conv-47",
+          "elapsed_s": 5.765
+        },
+        {
+          "conv_id": "conv-48",
+          "elapsed_s": 5.7715
+        },
+        {
+          "conv_id": "conv-49",
+          "elapsed_s": 5.7644
+        },
+        {
+          "conv_id": "conv-50",
+          "elapsed_s": 5.7775
+        }
+      ]
+    },
+    "10": {
+      "N": 10,
+      "delta_tokens_median": 287,
+      "median_s_rep1": 5.803,
+      "median_s_rep2": 5.801,
+      "per_conv_rep1": [
+        {
+          "conv_id": "conv-26",
+          "elapsed_s": 5.7996
+        },
+        {
+          "conv_id": "conv-30",
+          "elapsed_s": 5.8269
+        },
+        {
+          "conv_id": "conv-41",
+          "elapsed_s": 5.8248
+        },
+        {
+          "conv_id": "conv-42",
+          "elapsed_s": 5.8041
+        },
+        {
+          "conv_id": "conv-43",
+          "elapsed_s": 5.807
+        },
+        {
+          "conv_id": "conv-44",
+          "elapsed_s": 5.8106
+        },
+        {
+          "conv_id": "conv-47",
+          "elapsed_s": 3.9823
+        },
+        {
+          "conv_id": "conv-48",
+          "elapsed_s": 5.7795
+        },
+        {
+          "conv_id": "conv-49",
+          "elapsed_s": 4.1104
+        },
+        {
+          "conv_id": "conv-50",
+          "elapsed_s": 5.8027
+        }
+      ]
+    },
+    "20": {
+      "N": 20,
+      "delta_tokens_median": 553,
+      "median_s_rep1": 5.84,
+      "median_s_rep2": 5.842,
+      "per_conv_rep1": [
+        {
+          "conv_id": "conv-26",
+          "elapsed_s": 5.8664
+        },
+        {
+          "conv_id": "conv-30",
+          "elapsed_s": 5.8819
+        },
+        {
+          "conv_id": "conv-41",
+          "elapsed_s": 5.8529
+        },
+        {
+          "conv_id": "conv-42",
+          "elapsed_s": 3.4532
+        },
+        {
+          "conv_id": "conv-43",
+          "elapsed_s": 5.8395
+        },
+        {
+          "conv_id": "conv-44",
+          "elapsed_s": 5.8545
+        },
+        {
+          "conv_id": "conv-47",
+          "elapsed_s": 5.8263
+        },
+        {
+          "conv_id": "conv-48",
+          "elapsed_s": 5.2187
+        },
+        {
+          "conv_id": "conv-49",
+          "elapsed_s": 4.2162
+        },
+        {
+          "conv_id": "conv-50",
+          "elapsed_s": 5.8397
+        }
+      ]
+    },
+    "50": {
+      "N": 50,
+      "delta_tokens_median": 1421,
+      "median_s_rep1": 5.963,
+      "median_s_rep2": 5.963,
+      "per_conv_rep1": [
+        {
+          "conv_id": "conv-26",
+          "elapsed_s": 6.0044
+        },
+        {
+          "conv_id": "conv-30",
+          "elapsed_s": 6.0105
+        },
+        {
+          "conv_id": "conv-41",
+          "elapsed_s": 5.999
+        },
+        {
+          "conv_id": "conv-42",
+          "elapsed_s": 3.389
+        },
+        {
+          "conv_id": "conv-43",
+          "elapsed_s": 5.9472
+        },
+        {
+          "conv_id": "conv-44",
+          "elapsed_s": 5.9729
+        },
+        {
+          "conv_id": "conv-47",
+          "elapsed_s": 5.9454
+        },
+        {
+          "conv_id": "conv-48",
+          "elapsed_s": 5.9535
+        },
+        {
+          "conv_id": "conv-49",
+          "elapsed_s": 5.3599
+        },
+        {
+          "conv_id": "conv-50",
+          "elapsed_s": 6.0166
+        }
+      ]
+    },
+    "100": {
+      "N": 100,
+      "delta_tokens_median": 2742,
+      "median_s_rep1": 6.21,
+      "median_s_rep2": 6.208,
+      "per_conv_rep1": [
+        {
+          "conv_id": "conv-26",
+          "elapsed_s": 6.3344
+        },
+        {
+          "conv_id": "conv-30",
+          "elapsed_s": 6.2095
+        },
+        {
+          "conv_id": "conv-41",
+          "elapsed_s": 6.2708
+        },
+        {
+          "conv_id": "conv-42",
+          "elapsed_s": 6.2106
+        },
+        {
+          "conv_id": "conv-43",
+          "elapsed_s": 6.1812
+        },
+        {
+          "conv_id": "conv-44",
+          "elapsed_s": 6.2212
+        },
+        {
+          "conv_id": "conv-47",
+          "elapsed_s": 6.1739
+        },
+        {
+          "conv_id": "conv-48",
+          "elapsed_s": 6.1797
+        },
+        {
+          "conv_id": "conv-49",
+          "elapsed_s": 5.5129
+        },
+        {
+          "conv_id": "conv-50",
+          "elapsed_s": 6.2625
+        }
+      ]
+    }
+  },
+  "fullregen_summary": {
+    "median_s_rep1": 9.939,
+    "median_s_rep2": 9.908,
+    "per_conv_rep1": [
+      {
+        "conv_id": "conv-26",
+        "fullregen_tokens": 14750,
+        "elapsed_s": 8.5058
+      },
+      {
+        "conv_id": "conv-30",
+        "fullregen_tokens": 11532,
+        "elapsed_s": 7.8014
+      },
+      {
+        "conv_id": "conv-41",
+        "fullregen_tokens": 22137,
+        "elapsed_s": 10.3074
+      },
+      {
+        "conv_id": "conv-42",
+        "fullregen_tokens": 19166,
+        "elapsed_s": 9.593
+      },
+      {
+        "conv_id": "conv-43",
+        "fullregen_tokens": 21473,
+        "elapsed_s": 10.2352
+      },
+      {
+        "conv_id": "conv-44",
+        "fullregen_tokens": 21144,
+        "elapsed_s": 10.1712
+      },
+      {
+        "conv_id": "conv-47",
+        "fullregen_tokens": 20552,
+        "elapsed_s": 10.0544
+      },
+      {
+        "conv_id": "conv-48",
+        "fullregen_tokens": 19781,
+        "elapsed_s": 9.8233
+      },
+      {
+        "conv_id": "conv-49",
+        "fullregen_tokens": 16453,
+        "elapsed_s": 9.0277
+      },
+      {
+        "conv_id": "conv-50",
+        "fullregen_tokens": 20669,
+        "elapsed_s": 10.0738
+      }
+    ],
+    "note": "N-independent. Distribution across convs should reflect different conversation lengths. Constant distribution = cache artifact."
+  },
+  "raw_ttft_reps": [
+    [
+      {
+        "conv_id": "conv-26",
+        "N": 1,
+        "current_sum_tokens": 161,
+        "elapsed_s": 0.0275,
+        "implied_tps": 5850.5,
+        "crosscheck": "ok (0.98x)"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 5,
+        "current_sum_tokens": 161,
+        "elapsed_s": 0.0248,
+        "implied_tps": 6483.4,
+        "crosscheck": "ok (1.08x)"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 10,
+        "current_sum_tokens": 161,
+        "elapsed_s": 0.0244,
+        "implied_tps": 6595.3,
+        "crosscheck": "ok (1.10x)"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 20,
+        "current_sum_tokens": 161,
+        "elapsed_s": 0.0242,
+        "implied_tps": 6642.2,
+        "crosscheck": "ok (1.11x)"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 50,
+        "current_sum_tokens": 161,
+        "elapsed_s": 0.0243,
+        "implied_tps": 6628.0,
+        "crosscheck": "ok (1.11x)"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 100,
+        "current_sum_tokens": 161,
+        "elapsed_s": 0.0244,
+        "implied_tps": 6585.9,
+        "crosscheck": "ok (1.10x)"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 1,
+        "current_sum_tokens": 135,
+        "elapsed_s": 0.0252,
+        "implied_tps": 5362.0,
+        "crosscheck": "ok (0.90x)"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 5,
+        "current_sum_tokens": 135,
+        "elapsed_s": 0.0248,
+        "implied_tps": 5437.0,
+        "crosscheck": "ok (0.91x)"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 10,
+        "current_sum_tokens": 135,
+        "elapsed_s": 0.0246,
+        "implied_tps": 5486.2,
+        "crosscheck": "ok (0.92x)"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 20,
+        "current_sum_tokens": 135,
+        "elapsed_s": 0.0245,
+        "implied_tps": 5503.6,
+        "crosscheck": "ok (0.92x)"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 50,
+        "current_sum_tokens": 135,
+        "elapsed_s": 0.0247,
+        "implied_tps": 5471.6,
+        "crosscheck": "ok (0.91x)"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 100,
+        "current_sum_tokens": 135,
+        "elapsed_s": 0.0246,
+        "implied_tps": 5497.3,
+        "crosscheck": "ok (0.92x)"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 1,
+        "current_sum_tokens": 300,
+        "elapsed_s": 0.0255,
+        "implied_tps": 11743.8,
+        "crosscheck": "ok (1.96x)"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 5,
+        "current_sum_tokens": 300,
+        "elapsed_s": 0.0253,
+        "implied_tps": 11866.6,
+        "crosscheck": "ok (1.98x)"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 10,
+        "current_sum_tokens": 300,
+        "elapsed_s": 0.0254,
+        "implied_tps": 11823.3,
+        "crosscheck": "ok (1.98x)"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 20,
+        "current_sum_tokens": 300,
+        "elapsed_s": 0.025,
+        "implied_tps": 11981.1,
+        "crosscheck": "FLAGGED (2.0x faster than committed cold-prefill)"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 50,
+        "current_sum_tokens": 300,
+        "elapsed_s": 0.0249,
+        "implied_tps": 12061.3,
+        "crosscheck": "FLAGGED (2.0x faster than committed cold-prefill)"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 100,
+        "current_sum_tokens": 300,
+        "elapsed_s": 0.0251,
+        "implied_tps": 11947.6,
+        "crosscheck": "ok (2.00x)"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 1,
+        "current_sum_tokens": 160,
+        "elapsed_s": 0.025,
+        "implied_tps": 6392.2,
+        "crosscheck": "ok (1.07x)"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 5,
+        "current_sum_tokens": 160,
+        "elapsed_s": 0.025,
+        "implied_tps": 6409.1,
+        "crosscheck": "ok (1.07x)"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 10,
+        "current_sum_tokens": 160,
+        "elapsed_s": 0.0249,
+        "implied_tps": 6432.1,
+        "crosscheck": "ok (1.07x)"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 20,
+        "current_sum_tokens": 160,
+        "elapsed_s": 0.0249,
+        "implied_tps": 6432.6,
+        "crosscheck": "ok (1.07x)"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 50,
+        "current_sum_tokens": 160,
+        "elapsed_s": 0.0248,
+        "implied_tps": 6441.3,
+        "crosscheck": "ok (1.08x)"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 100,
+        "current_sum_tokens": 160,
+        "elapsed_s": 0.0246,
+        "implied_tps": 6494.5,
+        "crosscheck": "ok (1.09x)"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 1,
+        "current_sum_tokens": 141,
+        "elapsed_s": 0.0251,
+        "implied_tps": 5623.5,
+        "crosscheck": "ok (0.94x)"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 5,
+        "current_sum_tokens": 141,
+        "elapsed_s": 0.0249,
+        "implied_tps": 5668.7,
+        "crosscheck": "ok (0.95x)"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 10,
+        "current_sum_tokens": 141,
+        "elapsed_s": 0.0247,
+        "implied_tps": 5698.8,
+        "crosscheck": "ok (0.95x)"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 20,
+        "current_sum_tokens": 141,
+        "elapsed_s": 0.0249,
+        "implied_tps": 5664.8,
+        "crosscheck": "ok (0.95x)"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 50,
+        "current_sum_tokens": 141,
+        "elapsed_s": 0.0249,
+        "implied_tps": 5667.3,
+        "crosscheck": "ok (0.95x)"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 100,
+        "current_sum_tokens": 141,
+        "elapsed_s": 0.0247,
+        "implied_tps": 5715.9,
+        "crosscheck": "ok (0.96x)"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 1,
+        "current_sum_tokens": 211,
+        "elapsed_s": 0.0251,
+        "implied_tps": 8405.4,
+        "crosscheck": "ok (1.40x)"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 5,
+        "current_sum_tokens": 211,
+        "elapsed_s": 0.0246,
+        "implied_tps": 8578.1,
+        "crosscheck": "ok (1.43x)"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 10,
+        "current_sum_tokens": 211,
+        "elapsed_s": 0.0242,
+        "implied_tps": 8709.9,
+        "crosscheck": "ok (1.46x)"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 20,
+        "current_sum_tokens": 211,
+        "elapsed_s": 0.0243,
+        "implied_tps": 8692.7,
+        "crosscheck": "ok (1.45x)"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 50,
+        "current_sum_tokens": 211,
+        "elapsed_s": 0.0243,
+        "implied_tps": 8672.0,
+        "crosscheck": "ok (1.45x)"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 100,
+        "current_sum_tokens": 211,
+        "elapsed_s": 0.0246,
+        "implied_tps": 8573.9,
+        "crosscheck": "ok (1.43x)"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 1,
+        "current_sum_tokens": 196,
+        "elapsed_s": 0.0251,
+        "implied_tps": 7810.1,
+        "crosscheck": "ok (1.31x)"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 5,
+        "current_sum_tokens": 196,
+        "elapsed_s": 0.0247,
+        "implied_tps": 7947.3,
+        "crosscheck": "ok (1.33x)"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 10,
+        "current_sum_tokens": 196,
+        "elapsed_s": 0.0245,
+        "implied_tps": 8004.8,
+        "crosscheck": "ok (1.34x)"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 20,
+        "current_sum_tokens": 196,
+        "elapsed_s": 0.0243,
+        "implied_tps": 8052.0,
+        "crosscheck": "ok (1.35x)"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 50,
+        "current_sum_tokens": 196,
+        "elapsed_s": 0.0246,
+        "implied_tps": 7964.2,
+        "crosscheck": "ok (1.33x)"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 100,
+        "current_sum_tokens": 196,
+        "elapsed_s": 0.0244,
+        "implied_tps": 8016.5,
+        "crosscheck": "ok (1.34x)"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 1,
+        "current_sum_tokens": 152,
+        "elapsed_s": 0.0248,
+        "implied_tps": 6118.3,
+        "crosscheck": "ok (1.02x)"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 5,
+        "current_sum_tokens": 152,
+        "elapsed_s": 0.0245,
+        "implied_tps": 6198.3,
+        "crosscheck": "ok (1.04x)"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 10,
+        "current_sum_tokens": 152,
+        "elapsed_s": 0.0246,
+        "implied_tps": 6178.8,
+        "crosscheck": "ok (1.03x)"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 20,
+        "current_sum_tokens": 152,
+        "elapsed_s": 0.0247,
+        "implied_tps": 6149.4,
+        "crosscheck": "ok (1.03x)"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 50,
+        "current_sum_tokens": 152,
+        "elapsed_s": 0.0245,
+        "implied_tps": 6208.0,
+        "crosscheck": "ok (1.04x)"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 100,
+        "current_sum_tokens": 152,
+        "elapsed_s": 0.0245,
+        "implied_tps": 6204.5,
+        "crosscheck": "ok (1.04x)"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 1,
+        "current_sum_tokens": 153,
+        "elapsed_s": 0.0253,
+        "implied_tps": 6044.5,
+        "crosscheck": "ok (1.01x)"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 5,
+        "current_sum_tokens": 153,
+        "elapsed_s": 0.0246,
+        "implied_tps": 6219.8,
+        "crosscheck": "ok (1.04x)"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 10,
+        "current_sum_tokens": 153,
+        "elapsed_s": 0.0245,
+        "implied_tps": 6235.2,
+        "crosscheck": "ok (1.04x)"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 20,
+        "current_sum_tokens": 153,
+        "elapsed_s": 0.0245,
+        "implied_tps": 6243.3,
+        "crosscheck": "ok (1.04x)"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 50,
+        "current_sum_tokens": 153,
+        "elapsed_s": 0.0244,
+        "implied_tps": 6270.7,
+        "crosscheck": "ok (1.05x)"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 100,
+        "current_sum_tokens": 153,
+        "elapsed_s": 0.0244,
+        "implied_tps": 6281.4,
+        "crosscheck": "ok (1.05x)"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 1,
+        "current_sum_tokens": 173,
+        "elapsed_s": 0.026,
+        "implied_tps": 6650.4,
+        "crosscheck": "ok (1.11x)"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 5,
+        "current_sum_tokens": 173,
+        "elapsed_s": 0.0251,
+        "implied_tps": 6900.1,
+        "crosscheck": "ok (1.15x)"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 10,
+        "current_sum_tokens": 173,
+        "elapsed_s": 0.0247,
+        "implied_tps": 6991.9,
+        "crosscheck": "ok (1.17x)"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 20,
+        "current_sum_tokens": 173,
+        "elapsed_s": 0.0247,
+        "implied_tps": 6998.0,
+        "crosscheck": "ok (1.17x)"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 50,
+        "current_sum_tokens": 173,
+        "elapsed_s": 0.0246,
+        "implied_tps": 7045.4,
+        "crosscheck": "ok (1.18x)"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 100,
+        "current_sum_tokens": 173,
+        "elapsed_s": 0.0249,
+        "implied_tps": 6952.2,
+        "crosscheck": "ok (1.16x)"
+      }
+    ],
+    [
+      {
+        "conv_id": "conv-26",
+        "N": 1,
+        "current_sum_tokens": 161,
+        "elapsed_s": 0.0278,
+        "implied_tps": 5788.2,
+        "crosscheck": "ok (0.97x)"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 5,
+        "current_sum_tokens": 161,
+        "elapsed_s": 0.0246,
+        "implied_tps": 6538.2,
+        "crosscheck": "ok (1.09x)"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 10,
+        "current_sum_tokens": 161,
+        "elapsed_s": 0.0247,
+        "implied_tps": 6531.4,
+        "crosscheck": "ok (1.09x)"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 20,
+        "current_sum_tokens": 161,
+        "elapsed_s": 0.0245,
+        "implied_tps": 6581.8,
+        "crosscheck": "ok (1.10x)"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 50,
+        "current_sum_tokens": 161,
+        "elapsed_s": 0.0244,
+        "implied_tps": 6589.6,
+        "crosscheck": "ok (1.10x)"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 100,
+        "current_sum_tokens": 161,
+        "elapsed_s": 0.0243,
+        "implied_tps": 6636.4,
+        "crosscheck": "ok (1.11x)"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 1,
+        "current_sum_tokens": 135,
+        "elapsed_s": 0.0246,
+        "implied_tps": 5487.1,
+        "crosscheck": "ok (0.92x)"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 5,
+        "current_sum_tokens": 135,
+        "elapsed_s": 0.0246,
+        "implied_tps": 5482.3,
+        "crosscheck": "ok (0.92x)"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 10,
+        "current_sum_tokens": 135,
+        "elapsed_s": 0.0245,
+        "implied_tps": 5509.9,
+        "crosscheck": "ok (0.92x)"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 20,
+        "current_sum_tokens": 135,
+        "elapsed_s": 0.0244,
+        "implied_tps": 5533.9,
+        "crosscheck": "ok (0.92x)"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 50,
+        "current_sum_tokens": 135,
+        "elapsed_s": 0.0244,
+        "implied_tps": 5528.5,
+        "crosscheck": "ok (0.92x)"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 100,
+        "current_sum_tokens": 135,
+        "elapsed_s": 0.0246,
+        "implied_tps": 5483.5,
+        "crosscheck": "ok (0.92x)"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 1,
+        "current_sum_tokens": 300,
+        "elapsed_s": 0.0258,
+        "implied_tps": 11620.8,
+        "crosscheck": "ok (1.94x)"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 5,
+        "current_sum_tokens": 300,
+        "elapsed_s": 0.0247,
+        "implied_tps": 12121.4,
+        "crosscheck": "FLAGGED (2.0x faster than committed cold-prefill)"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 10,
+        "current_sum_tokens": 300,
+        "elapsed_s": 0.0247,
+        "implied_tps": 12127.3,
+        "crosscheck": "FLAGGED (2.0x faster than committed cold-prefill)"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 20,
+        "current_sum_tokens": 300,
+        "elapsed_s": 0.0247,
+        "implied_tps": 12163.6,
+        "crosscheck": "FLAGGED (2.0x faster than committed cold-prefill)"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 50,
+        "current_sum_tokens": 300,
+        "elapsed_s": 0.0248,
+        "implied_tps": 12114.9,
+        "crosscheck": "FLAGGED (2.0x faster than committed cold-prefill)"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 100,
+        "current_sum_tokens": 300,
+        "elapsed_s": 0.0248,
+        "implied_tps": 12118.5,
+        "crosscheck": "FLAGGED (2.0x faster than committed cold-prefill)"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 1,
+        "current_sum_tokens": 160,
+        "elapsed_s": 0.0254,
+        "implied_tps": 6304.0,
+        "crosscheck": "ok (1.05x)"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 5,
+        "current_sum_tokens": 160,
+        "elapsed_s": 0.0251,
+        "implied_tps": 6378.4,
+        "crosscheck": "ok (1.07x)"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 10,
+        "current_sum_tokens": 160,
+        "elapsed_s": 0.0245,
+        "implied_tps": 6521.7,
+        "crosscheck": "ok (1.09x)"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 20,
+        "current_sum_tokens": 160,
+        "elapsed_s": 0.025,
+        "implied_tps": 6409.3,
+        "crosscheck": "ok (1.07x)"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 50,
+        "current_sum_tokens": 160,
+        "elapsed_s": 0.0246,
+        "implied_tps": 6494.0,
+        "crosscheck": "ok (1.09x)"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 100,
+        "current_sum_tokens": 160,
+        "elapsed_s": 0.0245,
+        "implied_tps": 6529.4,
+        "crosscheck": "ok (1.09x)"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 1,
+        "current_sum_tokens": 141,
+        "elapsed_s": 0.0249,
+        "implied_tps": 5673.0,
+        "crosscheck": "ok (0.95x)"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 5,
+        "current_sum_tokens": 141,
+        "elapsed_s": 0.0247,
+        "implied_tps": 5716.6,
+        "crosscheck": "ok (0.96x)"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 10,
+        "current_sum_tokens": 141,
+        "elapsed_s": 0.0244,
+        "implied_tps": 5769.6,
+        "crosscheck": "ok (0.96x)"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 20,
+        "current_sum_tokens": 141,
+        "elapsed_s": 0.0243,
+        "implied_tps": 5803.5,
+        "crosscheck": "ok (0.97x)"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 50,
+        "current_sum_tokens": 141,
+        "elapsed_s": 0.0245,
+        "implied_tps": 5750.3,
+        "crosscheck": "ok (0.96x)"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 100,
+        "current_sum_tokens": 141,
+        "elapsed_s": 0.0246,
+        "implied_tps": 5736.4,
+        "crosscheck": "ok (0.96x)"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 1,
+        "current_sum_tokens": 211,
+        "elapsed_s": 0.0247,
+        "implied_tps": 8539.8,
+        "crosscheck": "ok (1.43x)"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 5,
+        "current_sum_tokens": 211,
+        "elapsed_s": 0.0244,
+        "implied_tps": 8637.4,
+        "crosscheck": "ok (1.44x)"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 10,
+        "current_sum_tokens": 211,
+        "elapsed_s": 0.0242,
+        "implied_tps": 8708.6,
+        "crosscheck": "ok (1.46x)"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 20,
+        "current_sum_tokens": 211,
+        "elapsed_s": 0.0242,
+        "implied_tps": 8721.9,
+        "crosscheck": "ok (1.46x)"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 50,
+        "current_sum_tokens": 211,
+        "elapsed_s": 0.0241,
+        "implied_tps": 8760.3,
+        "crosscheck": "ok (1.46x)"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 100,
+        "current_sum_tokens": 211,
+        "elapsed_s": 0.0242,
+        "implied_tps": 8712.4,
+        "crosscheck": "ok (1.46x)"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 1,
+        "current_sum_tokens": 196,
+        "elapsed_s": 0.0247,
+        "implied_tps": 7925.0,
+        "crosscheck": "ok (1.32x)"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 5,
+        "current_sum_tokens": 196,
+        "elapsed_s": 0.0246,
+        "implied_tps": 7966.6,
+        "crosscheck": "ok (1.33x)"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 10,
+        "current_sum_tokens": 196,
+        "elapsed_s": 0.0246,
+        "implied_tps": 7955.0,
+        "crosscheck": "ok (1.33x)"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 20,
+        "current_sum_tokens": 196,
+        "elapsed_s": 0.0242,
+        "implied_tps": 8101.4,
+        "crosscheck": "ok (1.35x)"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 50,
+        "current_sum_tokens": 196,
+        "elapsed_s": 0.024,
+        "implied_tps": 8157.2,
+        "crosscheck": "ok (1.36x)"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 100,
+        "current_sum_tokens": 196,
+        "elapsed_s": 0.0241,
+        "implied_tps": 8143.6,
+        "crosscheck": "ok (1.36x)"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 1,
+        "current_sum_tokens": 152,
+        "elapsed_s": 0.0247,
+        "implied_tps": 6163.2,
+        "crosscheck": "ok (1.03x)"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 5,
+        "current_sum_tokens": 152,
+        "elapsed_s": 0.0243,
+        "implied_tps": 6250.6,
+        "crosscheck": "ok (1.04x)"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 10,
+        "current_sum_tokens": 152,
+        "elapsed_s": 0.0241,
+        "implied_tps": 6304.3,
+        "crosscheck": "ok (1.05x)"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 20,
+        "current_sum_tokens": 152,
+        "elapsed_s": 0.0245,
+        "implied_tps": 6208.7,
+        "crosscheck": "ok (1.04x)"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 50,
+        "current_sum_tokens": 152,
+        "elapsed_s": 0.0241,
+        "implied_tps": 6316.7,
+        "crosscheck": "ok (1.06x)"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 100,
+        "current_sum_tokens": 152,
+        "elapsed_s": 0.0242,
+        "implied_tps": 6288.3,
+        "crosscheck": "ok (1.05x)"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 1,
+        "current_sum_tokens": 153,
+        "elapsed_s": 0.0247,
+        "implied_tps": 6190.0,
+        "crosscheck": "ok (1.03x)"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 5,
+        "current_sum_tokens": 153,
+        "elapsed_s": 0.0246,
+        "implied_tps": 6218.1,
+        "crosscheck": "ok (1.04x)"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 10,
+        "current_sum_tokens": 153,
+        "elapsed_s": 0.0242,
+        "implied_tps": 6329.1,
+        "crosscheck": "ok (1.06x)"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 20,
+        "current_sum_tokens": 153,
+        "elapsed_s": 0.0243,
+        "implied_tps": 6290.0,
+        "crosscheck": "ok (1.05x)"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 50,
+        "current_sum_tokens": 153,
+        "elapsed_s": 0.0244,
+        "implied_tps": 6271.5,
+        "crosscheck": "ok (1.05x)"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 100,
+        "current_sum_tokens": 153,
+        "elapsed_s": 0.0241,
+        "implied_tps": 6353.8,
+        "crosscheck": "ok (1.06x)"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 1,
+        "current_sum_tokens": 173,
+        "elapsed_s": 0.0248,
+        "implied_tps": 6969.1,
+        "crosscheck": "ok (1.16x)"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 5,
+        "current_sum_tokens": 173,
+        "elapsed_s": 0.0248,
+        "implied_tps": 6984.7,
+        "crosscheck": "ok (1.17x)"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 10,
+        "current_sum_tokens": 173,
+        "elapsed_s": 0.0244,
+        "implied_tps": 7079.0,
+        "crosscheck": "ok (1.18x)"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 20,
+        "current_sum_tokens": 173,
+        "elapsed_s": 0.0245,
+        "implied_tps": 7058.9,
+        "crosscheck": "ok (1.18x)"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 50,
+        "current_sum_tokens": 173,
+        "elapsed_s": 0.0245,
+        "implied_tps": 7071.8,
+        "crosscheck": "ok (1.18x)"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 100,
+        "current_sum_tokens": 173,
+        "elapsed_s": 0.0244,
+        "implied_tps": 7090.6,
+        "crosscheck": "ok (1.18x)"
+      }
+    ]
+  ],
+  "raw_recursive_reps": [
+    [
+      {
+        "conv_id": "conv-26",
+        "N": 1,
+        "recursive_input_tokens": 206,
+        "delta_tokens": 29,
+        "elapsed_s": 5.7625,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 5,
+        "recursive_input_tokens": 294,
+        "delta_tokens": 117,
+        "elapsed_s": 5.7971,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 10,
+        "recursive_input_tokens": 495,
+        "delta_tokens": 318,
+        "elapsed_s": 5.7996,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 20,
+        "recursive_input_tokens": 830,
+        "delta_tokens": 653,
+        "elapsed_s": 5.8664,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 50,
+        "recursive_input_tokens": 1619,
+        "delta_tokens": 1442,
+        "elapsed_s": 6.0044,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 100,
+        "recursive_input_tokens": 3353,
+        "delta_tokens": 3176,
+        "elapsed_s": 6.3344,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 1,
+        "recursive_input_tokens": 158,
+        "delta_tokens": 7,
+        "elapsed_s": 5.818,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 5,
+        "recursive_input_tokens": 228,
+        "delta_tokens": 77,
+        "elapsed_s": 5.8171,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 10,
+        "recursive_input_tokens": 366,
+        "delta_tokens": 214,
+        "elapsed_s": 5.8269,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 20,
+        "recursive_input_tokens": 617,
+        "delta_tokens": 465,
+        "elapsed_s": 5.8819,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 50,
+        "recursive_input_tokens": 1502,
+        "delta_tokens": 1349,
+        "elapsed_s": 6.0105,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 100,
+        "recursive_input_tokens": 2659,
+        "delta_tokens": 2506,
+        "elapsed_s": 6.2095,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 1,
+        "recursive_input_tokens": 343,
+        "delta_tokens": 26,
+        "elapsed_s": 5.8276,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 5,
+        "recursive_input_tokens": 483,
+        "delta_tokens": 166,
+        "elapsed_s": 5.8022,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 10,
+        "recursive_input_tokens": 634,
+        "delta_tokens": 317,
+        "elapsed_s": 5.8248,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 20,
+        "recursive_input_tokens": 862,
+        "delta_tokens": 545,
+        "elapsed_s": 5.8529,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 50,
+        "recursive_input_tokens": 1746,
+        "delta_tokens": 1429,
+        "elapsed_s": 5.999,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 100,
+        "recursive_input_tokens": 3253,
+        "delta_tokens": 2936,
+        "elapsed_s": 6.2708,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 1,
+        "recursive_input_tokens": 192,
+        "delta_tokens": 16,
+        "elapsed_s": 5.7857,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 5,
+        "recursive_input_tokens": 264,
+        "delta_tokens": 88,
+        "elapsed_s": 5.7799,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 10,
+        "recursive_input_tokens": 456,
+        "delta_tokens": 280,
+        "elapsed_s": 5.8041,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 20,
+        "recursive_input_tokens": 685,
+        "delta_tokens": 509,
+        "elapsed_s": 3.4532,
+        "output_tokens": 147,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 50,
+        "recursive_input_tokens": 1589,
+        "delta_tokens": 1413,
+        "elapsed_s": 3.389,
+        "output_tokens": 138,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 100,
+        "recursive_input_tokens": 2894,
+        "delta_tokens": 2718,
+        "elapsed_s": 6.2106,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 1,
+        "recursive_input_tokens": 174,
+        "delta_tokens": 17,
+        "elapsed_s": 5.7832,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 5,
+        "recursive_input_tokens": 291,
+        "delta_tokens": 134,
+        "elapsed_s": 5.7789,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 10,
+        "recursive_input_tokens": 472,
+        "delta_tokens": 315,
+        "elapsed_s": 5.807,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 20,
+        "recursive_input_tokens": 664,
+        "delta_tokens": 507,
+        "elapsed_s": 5.8395,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 50,
+        "recursive_input_tokens": 1333,
+        "delta_tokens": 1176,
+        "elapsed_s": 5.9472,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 100,
+        "recursive_input_tokens": 2701,
+        "delta_tokens": 2544,
+        "elapsed_s": 6.1812,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 1,
+        "recursive_input_tokens": 255,
+        "delta_tokens": 28,
+        "elapsed_s": 5.7846,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 5,
+        "recursive_input_tokens": 368,
+        "delta_tokens": 141,
+        "elapsed_s": 5.7737,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 10,
+        "recursive_input_tokens": 599,
+        "delta_tokens": 372,
+        "elapsed_s": 5.8106,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 20,
+        "recursive_input_tokens": 905,
+        "delta_tokens": 678,
+        "elapsed_s": 5.8545,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 50,
+        "recursive_input_tokens": 1656,
+        "delta_tokens": 1429,
+        "elapsed_s": 5.9729,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 100,
+        "recursive_input_tokens": 3025,
+        "delta_tokens": 2798,
+        "elapsed_s": 6.2212,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 1,
+        "recursive_input_tokens": 217,
+        "delta_tokens": 5,
+        "elapsed_s": 5.7832,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 5,
+        "recursive_input_tokens": 252,
+        "delta_tokens": 40,
+        "elapsed_s": 5.765,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 10,
+        "recursive_input_tokens": 426,
+        "delta_tokens": 214,
+        "elapsed_s": 3.9823,
+        "output_tokens": 172,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 20,
+        "recursive_input_tokens": 671,
+        "delta_tokens": 459,
+        "elapsed_s": 5.8263,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 50,
+        "recursive_input_tokens": 1366,
+        "delta_tokens": 1154,
+        "elapsed_s": 5.9454,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 100,
+        "recursive_input_tokens": 2653,
+        "delta_tokens": 2441,
+        "elapsed_s": 6.1739,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 1,
+        "recursive_input_tokens": 184,
+        "delta_tokens": 16,
+        "elapsed_s": 5.7727,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 5,
+        "recursive_input_tokens": 270,
+        "delta_tokens": 102,
+        "elapsed_s": 5.7715,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 10,
+        "recursive_input_tokens": 381,
+        "delta_tokens": 213,
+        "elapsed_s": 5.7795,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 20,
+        "recursive_input_tokens": 737,
+        "delta_tokens": 569,
+        "elapsed_s": 5.2187,
+        "output_tokens": 223,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 50,
+        "recursive_input_tokens": 1388,
+        "delta_tokens": 1220,
+        "elapsed_s": 5.9535,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 100,
+        "recursive_input_tokens": 2674,
+        "delta_tokens": 2506,
+        "elapsed_s": 6.1797,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 1,
+        "recursive_input_tokens": 191,
+        "delta_tokens": 22,
+        "elapsed_s": 5.7808,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 5,
+        "recursive_input_tokens": 273,
+        "delta_tokens": 104,
+        "elapsed_s": 5.7644,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 10,
+        "recursive_input_tokens": 428,
+        "delta_tokens": 259,
+        "elapsed_s": 4.1104,
+        "output_tokens": 177,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 20,
+        "recursive_input_tokens": 801,
+        "delta_tokens": 632,
+        "elapsed_s": 4.2162,
+        "output_tokens": 179,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 50,
+        "recursive_input_tokens": 1670,
+        "delta_tokens": 1501,
+        "elapsed_s": 5.3599,
+        "output_tokens": 223,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 100,
+        "recursive_input_tokens": 2935,
+        "delta_tokens": 2766,
+        "elapsed_s": 5.5129,
+        "output_tokens": 220,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 1,
+        "recursive_input_tokens": 199,
+        "delta_tokens": 10,
+        "elapsed_s": 5.7937,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 5,
+        "recursive_input_tokens": 345,
+        "delta_tokens": 156,
+        "elapsed_s": 5.7775,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 10,
+        "recursive_input_tokens": 483,
+        "delta_tokens": 294,
+        "elapsed_s": 5.8027,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 20,
+        "recursive_input_tokens": 750,
+        "delta_tokens": 561,
+        "elapsed_s": 5.8397,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 50,
+        "recursive_input_tokens": 1764,
+        "delta_tokens": 1575,
+        "elapsed_s": 6.0166,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 100,
+        "recursive_input_tokens": 3210,
+        "delta_tokens": 3021,
+        "elapsed_s": 6.2625,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      }
+    ],
+    [
+      {
+        "conv_id": "conv-26",
+        "N": 1,
+        "recursive_input_tokens": 206,
+        "delta_tokens": 29,
+        "elapsed_s": 5.7699,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 5,
+        "recursive_input_tokens": 294,
+        "delta_tokens": 117,
+        "elapsed_s": 5.7639,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 10,
+        "recursive_input_tokens": 495,
+        "delta_tokens": 318,
+        "elapsed_s": 5.7981,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 20,
+        "recursive_input_tokens": 830,
+        "delta_tokens": 653,
+        "elapsed_s": 5.8621,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 50,
+        "recursive_input_tokens": 1619,
+        "delta_tokens": 1442,
+        "elapsed_s": 6.0081,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-26",
+        "N": 100,
+        "recursive_input_tokens": 3353,
+        "delta_tokens": 3176,
+        "elapsed_s": 6.3367,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 1,
+        "recursive_input_tokens": 158,
+        "delta_tokens": 7,
+        "elapsed_s": 5.8101,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 5,
+        "recursive_input_tokens": 228,
+        "delta_tokens": 77,
+        "elapsed_s": 5.8193,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 10,
+        "recursive_input_tokens": 366,
+        "delta_tokens": 214,
+        "elapsed_s": 5.8177,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 20,
+        "recursive_input_tokens": 617,
+        "delta_tokens": 465,
+        "elapsed_s": 5.868,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 50,
+        "recursive_input_tokens": 1502,
+        "delta_tokens": 1349,
+        "elapsed_s": 5.9971,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-30",
+        "N": 100,
+        "recursive_input_tokens": 2659,
+        "delta_tokens": 2506,
+        "elapsed_s": 6.2018,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 1,
+        "recursive_input_tokens": 343,
+        "delta_tokens": 26,
+        "elapsed_s": 5.826,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 5,
+        "recursive_input_tokens": 483,
+        "delta_tokens": 166,
+        "elapsed_s": 5.7945,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 10,
+        "recursive_input_tokens": 634,
+        "delta_tokens": 317,
+        "elapsed_s": 5.8187,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 20,
+        "recursive_input_tokens": 862,
+        "delta_tokens": 545,
+        "elapsed_s": 5.8477,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 50,
+        "recursive_input_tokens": 1746,
+        "delta_tokens": 1429,
+        "elapsed_s": 5.992,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-41",
+        "N": 100,
+        "recursive_input_tokens": 3253,
+        "delta_tokens": 2936,
+        "elapsed_s": 6.2664,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 1,
+        "recursive_input_tokens": 192,
+        "delta_tokens": 16,
+        "elapsed_s": 5.7813,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 5,
+        "recursive_input_tokens": 264,
+        "delta_tokens": 88,
+        "elapsed_s": 5.7732,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 10,
+        "recursive_input_tokens": 456,
+        "delta_tokens": 280,
+        "elapsed_s": 5.8022,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 20,
+        "recursive_input_tokens": 685,
+        "delta_tokens": 509,
+        "elapsed_s": 3.4495,
+        "output_tokens": 147,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 50,
+        "recursive_input_tokens": 1589,
+        "delta_tokens": 1413,
+        "elapsed_s": 3.3888,
+        "output_tokens": 138,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-42",
+        "N": 100,
+        "recursive_input_tokens": 2894,
+        "delta_tokens": 2718,
+        "elapsed_s": 6.2146,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 1,
+        "recursive_input_tokens": 174,
+        "delta_tokens": 17,
+        "elapsed_s": 5.7802,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 5,
+        "recursive_input_tokens": 291,
+        "delta_tokens": 134,
+        "elapsed_s": 5.7811,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 10,
+        "recursive_input_tokens": 472,
+        "delta_tokens": 315,
+        "elapsed_s": 5.8061,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 20,
+        "recursive_input_tokens": 664,
+        "delta_tokens": 507,
+        "elapsed_s": 5.8354,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 50,
+        "recursive_input_tokens": 1333,
+        "delta_tokens": 1176,
+        "elapsed_s": 5.9471,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-43",
+        "N": 100,
+        "recursive_input_tokens": 2701,
+        "delta_tokens": 2544,
+        "elapsed_s": 6.1787,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 1,
+        "recursive_input_tokens": 255,
+        "delta_tokens": 28,
+        "elapsed_s": 5.7811,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 5,
+        "recursive_input_tokens": 368,
+        "delta_tokens": 141,
+        "elapsed_s": 5.7777,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 10,
+        "recursive_input_tokens": 599,
+        "delta_tokens": 372,
+        "elapsed_s": 5.8084,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 20,
+        "recursive_input_tokens": 905,
+        "delta_tokens": 678,
+        "elapsed_s": 5.854,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 50,
+        "recursive_input_tokens": 1656,
+        "delta_tokens": 1429,
+        "elapsed_s": 5.9708,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-44",
+        "N": 100,
+        "recursive_input_tokens": 3025,
+        "delta_tokens": 2798,
+        "elapsed_s": 6.2249,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 1,
+        "recursive_input_tokens": 217,
+        "delta_tokens": 5,
+        "elapsed_s": 5.7844,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 5,
+        "recursive_input_tokens": 252,
+        "delta_tokens": 40,
+        "elapsed_s": 5.7672,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 10,
+        "recursive_input_tokens": 426,
+        "delta_tokens": 214,
+        "elapsed_s": 3.9814,
+        "output_tokens": 172,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 20,
+        "recursive_input_tokens": 671,
+        "delta_tokens": 459,
+        "elapsed_s": 5.8253,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 50,
+        "recursive_input_tokens": 1366,
+        "delta_tokens": 1154,
+        "elapsed_s": 5.9452,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-47",
+        "N": 100,
+        "recursive_input_tokens": 2653,
+        "delta_tokens": 2441,
+        "elapsed_s": 6.1762,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 1,
+        "recursive_input_tokens": 184,
+        "delta_tokens": 16,
+        "elapsed_s": 5.7796,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 5,
+        "recursive_input_tokens": 270,
+        "delta_tokens": 102,
+        "elapsed_s": 5.7752,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 10,
+        "recursive_input_tokens": 381,
+        "delta_tokens": 213,
+        "elapsed_s": 5.787,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 20,
+        "recursive_input_tokens": 737,
+        "delta_tokens": 569,
+        "elapsed_s": 5.2173,
+        "output_tokens": 223,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 50,
+        "recursive_input_tokens": 1388,
+        "delta_tokens": 1220,
+        "elapsed_s": 5.955,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-48",
+        "N": 100,
+        "recursive_input_tokens": 2674,
+        "delta_tokens": 2506,
+        "elapsed_s": 6.1785,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 1,
+        "recursive_input_tokens": 191,
+        "delta_tokens": 22,
+        "elapsed_s": 5.7844,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 5,
+        "recursive_input_tokens": 273,
+        "delta_tokens": 104,
+        "elapsed_s": 5.7705,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 10,
+        "recursive_input_tokens": 428,
+        "delta_tokens": 259,
+        "elapsed_s": 4.1132,
+        "output_tokens": 177,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 20,
+        "recursive_input_tokens": 801,
+        "delta_tokens": 632,
+        "elapsed_s": 4.2146,
+        "output_tokens": 179,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 50,
+        "recursive_input_tokens": 1670,
+        "delta_tokens": 1501,
+        "elapsed_s": 5.3613,
+        "output_tokens": 223,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-49",
+        "N": 100,
+        "recursive_input_tokens": 2935,
+        "delta_tokens": 2766,
+        "elapsed_s": 5.5126,
+        "output_tokens": 220,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 1,
+        "recursive_input_tokens": 199,
+        "delta_tokens": 10,
+        "elapsed_s": 5.788,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 5,
+        "recursive_input_tokens": 345,
+        "delta_tokens": 156,
+        "elapsed_s": 5.7773,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 10,
+        "recursive_input_tokens": 483,
+        "delta_tokens": 294,
+        "elapsed_s": 5.8005,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 20,
+        "recursive_input_tokens": 750,
+        "delta_tokens": 561,
+        "elapsed_s": 5.8634,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 50,
+        "recursive_input_tokens": 1764,
+        "delta_tokens": 1575,
+        "elapsed_s": 6.0171,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      },
+      {
+        "conv_id": "conv-50",
+        "N": 100,
+        "recursive_input_tokens": 3210,
+        "delta_tokens": 3021,
+        "elapsed_s": 6.2651,
+        "output_tokens": 250,
+        "note": "decode-dominated; within-engine cross-N contamination negligible"
+      }
+    ]
+  ],
+  "raw_fullregen_reps": [
+    [
+      {
+        "conv_id": "conv-26",
+        "fullregen_tokens": 14750,
+        "elapsed_s": 8.5058,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-30",
+        "fullregen_tokens": 11532,
+        "elapsed_s": 7.8014,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-41",
+        "fullregen_tokens": 22137,
+        "elapsed_s": 10.3074,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-42",
+        "fullregen_tokens": 19166,
+        "elapsed_s": 9.593,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-43",
+        "fullregen_tokens": 21473,
+        "elapsed_s": 10.2352,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-44",
+        "fullregen_tokens": 21144,
+        "elapsed_s": 10.1712,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-47",
+        "fullregen_tokens": 20552,
+        "elapsed_s": 10.0544,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-48",
+        "fullregen_tokens": 19781,
+        "elapsed_s": 9.8233,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-49",
+        "fullregen_tokens": 16453,
+        "elapsed_s": 9.0277,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-50",
+        "fullregen_tokens": 20669,
+        "elapsed_s": 10.0738,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      }
+    ],
+    [
+      {
+        "conv_id": "conv-26",
+        "fullregen_tokens": 14750,
+        "elapsed_s": 8.5204,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-30",
+        "fullregen_tokens": 11532,
+        "elapsed_s": 7.8152,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-41",
+        "fullregen_tokens": 22137,
+        "elapsed_s": 10.3066,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-42",
+        "fullregen_tokens": 19166,
+        "elapsed_s": 9.576,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-43",
+        "fullregen_tokens": 21473,
+        "elapsed_s": 10.2061,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-44",
+        "fullregen_tokens": 21144,
+        "elapsed_s": 10.1436,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-47",
+        "fullregen_tokens": 20552,
+        "elapsed_s": 10.0241,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-48",
+        "fullregen_tokens": 19781,
+        "elapsed_s": 9.7914,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-49",
+        "fullregen_tokens": 16453,
+        "elapsed_s": 8.9937,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      },
+      {
+        "conv_id": "conv-50",
+        "fullregen_tokens": 20669,
+        "elapsed_s": 10.0603,
+        "output_tokens": 250,
+        "note": "N-independent (input is always full current conversation)"
+      }
+    ]
+  ]
+}

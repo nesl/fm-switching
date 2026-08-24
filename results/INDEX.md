@@ -264,3 +264,16 @@ Lumos5G + CRAWDAD not obtained (IEEE DataPort registration required; deviation d
 | `results/audit/definitions.csv` | `e33a` (analysis only) | — | CPU | — | Machine-readable definition table for all named objects (win-10, sum-80, sum-200, full, blind, turn, session, reachable, stale-by-N, cold-prefill, warm-append, refresh, materialize); flags definition conflicts and superseded values | 2026-08-23 |
 | `results/audit/evidence_ledger.csv` | `e33a` (analysis only) | — | CPU | — | Machine-readable evidence ledger: quantity, value, source, how obtained, conditions, cross-check, status (VERIFIED/SUPERSEDED/DISPUTED/INVALID/ESTIMATED), claim linkage | 2026-08-23 |
 | `reports/e33a_definition_audit_and_ledger.md` | — | — | — | — | Three-part audit: (1) definition conflicts for all named objects including win-10 18× discrepancy and corrected E30 capacity; (2) evidence ledger with status codes; (3) supported vs disputed claims and priority rerun list | 2026-08-23 |
+
+## E35 (E34b) — Corrected WARM Catch-up Latency and Maintenance Ordering (2026-08-23)
+
+Script: `experiments/cost/e34b_catchup.py`. A6000, vLLM 0.8.5 V1. Supersedes E34 Parts B and C.
+Fixes: (1) warm-up bug in E34 Part B (current_text pre-cached); (2) COLD relabeled as restore; (3) full maintenance cost corrected to warm-append (66ms, E26).
+Key findings: full WARM 67ms(N=1)→681ms(N=100); win10 intra-session 41–77ms, inter-session ~1031ms (sharp jump at N~22 turns); sum200 TTFT 25ms; sum200 recursive 5.8–6.2s; full regen distribution 7.8–10.3s (E32 constant artifact confirmed).
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/cost/e34b_catchup/part1_warm_catchup.json` | `e34b_catchup.py` | qwen7b | a6000 | 10 convs × 6N × 2 fidelities × 2 reps | Full WARM: 67ms(N=1)→681ms(N=100); win10 bimodal: 41-77ms intra-session, ~1031ms inter-session with jump at N~22 turns | 2026-08-23 |
+| `results/cost/e34b_catchup/part2_sum200.json` | `e34b_catchup.py` | qwen7b | a6000 | 10 convs × 6N × 2 reps per variant | sum200 TTFT 25ms (flat); recursive 5.8-6.2s (decode-dominated); full regen 7.8-10.3s distribution (E32 constant artifact confirmed) | 2026-08-23 |
+| `results/cost/e34b_catchup/part3_maintenance.json` | `e34b_catchup.py` | — | CPU | — | Corrected ordering: sum200-restore(32ms) < full-warm-append(66ms) < win10-amortized(653ms) < sum200-recursive(5822ms) | 2026-08-23 |
+| `reports/e34b_corrected_catchup.md` | — | — | — | — | Full report with 6-check consistency protocol; corrects E34 Parts B and C defects | 2026-08-23 |

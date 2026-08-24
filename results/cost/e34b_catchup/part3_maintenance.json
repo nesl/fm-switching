@@ -1,0 +1,42 @@
+{
+  "description": "Corrected maintenance cost ordering. Key fix: full maintenance = warm tail-append (E26: 66ms), not cold re-prefill (E34 COLD: 3,620ms).",
+  "full_warm_append_ms": 66.0,
+  "full_warm_append_budget": {
+    "voice_embodied_s": true,
+    "interactive_s": true,
+    "background_s": true
+  },
+  "full_warm_catchup_N1_ms": 67.0,
+  "note_full_vs_E34": "E34 Part C listed full COLD re-prefill 3,620ms as full maintenance cost. Corrected: full maintenance is warm tail-append (66ms, E26) because the KV cache prefix is preserved between consecutive turns. Cold re-prefill applies only on GPU eviction (not the normal maintenance path).",
+  "win10_grow_warm_ms": 36.0,
+  "win10_slide_cold_ms": 974.8,
+  "win10_slide_frac": 0.657,
+  "win10_amortized_ms": 652.8,
+  "win10_amortized_budget": {
+    "voice_embodied_s": false,
+    "interactive_s": true,
+    "background_s": true
+  },
+  "sum200_restore_ms": 32.0,
+  "sum200_restore_budget": {
+    "voice_embodied_s": true,
+    "interactive_s": true,
+    "background_s": true
+  },
+  "sum200_recursive_ms": 5822.0,
+  "sum200_recursive_budget": {
+    "voice_embodied_s": false,
+    "interactive_s": false,
+    "background_s": true
+  },
+  "sum200_fullregen_ms": 9939.0,
+  "ordering_ascending_cost": [
+    "sum200 restore (32 ms) \u2014 serves query from stale summary",
+    "full warm-append (66 ms, E26) \u2014 normal per-turn cost, voice budget",
+    "win10 amortized (653 ms) \u2014 blended grow+slide, interactive budget",
+    "sum200 recursive (~5822 ms) \u2014 generate new summary, background only"
+  ],
+  "cost_matrix_restore_reference": "results/cost/cost_matrix.csv (E21/E26, sum200 restore=32ms at L=8k)",
+  "e26_warm_append_reference": "reports/phase1_cost_profiling.md (E26, warm-append=66ms at L=8k)",
+  "e34_slide_cold_reference": "results/cost/e34_maintenance_semantics/part_a_win10.json (E34 Part A)"
+}
