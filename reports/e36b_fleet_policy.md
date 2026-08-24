@@ -1,219 +1,266 @@
-# E36b — Fleet Policy Simulation with Measured A1 Ratio
+# E36b (rewrite) — Corrected Fleet Policy Experiment
 
 **Date:** 2026-08-24  
 **Host:** flash / CPU only (pure simulation, no GPU)  
-**Script:** `experiments/orchestration/e36b_fleet.py`  
+**Script:** `experiments/orchestration/e36b_fleet.py` (rewrite)  
 **Results:** `results/orchestration/e36b_fleet/`  
-**Supersedes:** `reports/e36_fleet_policy.md` (E36) for conclusions that depended on A1.
+**Figures:** `figures/orchestration/e36b_gap_vs_fleetsize.pdf`, `e36b_binding_resource.pdf`, `e36b_utilization_split.pdf`  
+**Supersedes:** `reports/e36_fleet_policy.md` (E36) and the first version of `reports/e36b_fleet_policy.md`
 
 ---
 
-## What changed from E36
+## Why this rerun exists
 
-E36 carried assumption A1 — qwen3b Jetson time = s × qwen7b Jetson time — shown at
-s=0.43 (parameter-count ratio lower bound) and s=1.00 (no-speedup upper bound).  E37
-measured qwen3b directly on the Jetson.  E37b computed per-operation ratios.
+E36 and the first E36b ran a different experiment from the one specified. Four defects:
 
-E36b replaces the A1 sensitivity axis with a single L-dependent measured curve:
+1. **Wrong comparison.** The kill condition compared maintenance_aware vs device_only. The paper's incumbent is footprint_ranked (cache-value scoring by Q/KV_footprint_bytes). The decisive comparison is maintenance_aware vs footprint_ranked.
 
-| operation | L=1024 | L=4096 | L=8192 | L=16384 | trend |
-|---|---|---|---|---|---|
-| incr\_warm (LoCoMo device TTFT) | 0.593 | 0.641 | 0.681 | 0.705 | rises with L |
-| full\_restore (EgoSchema device TTFT) | 0.475 | 0.496 | 0.517 | 0.542 | rises with L |
+2. **Missing policies.** footprint_ranked and oracle were absent. reactive and budget_aware were present but undefined in the formulation.
 
-Ratios clamped at last measured value (0.705/0.542) for L > 16384.  A4 still applies
-to the 7B baseline extrapolation.  The Stage 1 run count halves to 1,512 (no A1 axis).
+3. **Missing diagnostic.** No reporting of which resource (KV memory or accelerator time) bound admission. The mechanism claim — that footprint_ranked saturates the accelerator with sum200 regeneration — was not tested.
 
-No other inputs changed.  All committed cost and quality values are identical to E36.
+4. **Metric saturated by quality.** Prior runs used Bernoulli draws from Q(f) as a quality gate, capping both_met at Q(full) ≈ 0.40. This washed out latency differences between policies. The corrected model uses an admissibility constraint: f is admissible iff Q(f, model, workload) ≥ q_min. Quality miss = no admissible representation available at serving tier. Both_met = TTFT ≤ budget AND served from admissible representation.
 
 ---
 
-## EgoSchema modeling note (unchanged from E36)
+## Inputs
 
-EgoSchema is modeled as **short independent sessions — cold restore per query, no
-accumulated context**.  Device TTFT uses the measured full\_restore ratio.  Discriminating
-cells for EgoSchema reflect per-query materialization latency, not maintenance.  EgoSchema
-is the gist-compressible regime; it is not described as a compressible long-lived session.
+| input | value | source |
+|---|---|---|
+| Q table (edge: qwen7b, device: qwen3b) | full/win10/sum200 per workload | E29 |
+| Edge full warm-append | 66 ms | E26/E35 |
+| Edge win10 intra / inter | 59 / 1031 ms | E35 |
+| Edge sum200 restore / update | 32 / 5822 ms | E35 |
+| Edge cold prefill rate | 5984 tok/s | E21/E26 |
+| Jetson qwen7b cost profile | per-L tables | E23 |
+| A1 ratio (incr_warm 3B/7B) | 0.593@1k → 0.705@16k | E37/E37b |
+| LoCoMo session stats | 22 turns/session, 7275-tok win10 | E33a |
+| KV bytes per token (qwen7b) | 57 344 B/tok | E23 |
+| Edge KV usable capacity | 9 GiB (24 GB − 15 GB model) | A3 |
+| KV budget | cap_frac × n_robots × KV_bytes(full, 20 092 tok) | parametric |
+| Turn interval / accel budget | 30 000 ms [ASSUMPTION A4] | — |
+
+**[ASSUMPTION A4]**: Turn interval = 30 s. This determines the accelerator budget per epoch (30 000 ms) against which total (serve + refresh + materialize) is compared. The sum200 regeneration cost (5822 ms/turn) exceeds 30 000/5822 ≈ 5.15 robots. Documented here; does not affect cells where sum200 is never selected (see §Results).
 
 ---
 
-## Stage 0 — Headroom Gate (measured A1)
+## Policies
 
-**Device failure rates at measured ratio:**
+| policy | description |
+|---|---|
+| device_only | All sessions served from device (qwen3b). Lower bound. |
+| always_full | All sessions at full fidelity at edge; LRU eviction under KV budget. |
+| always_window | All sessions at win10 at edge; LRU eviction. |
+| always_summary | All sessions at sum200 at edge; LRU eviction. |
+| footprint_ranked | **Incumbent.** Pick highest Q/KV_bytes admissible fidelity per robot; admit greedily under KV memory budget. KV budget is the only admission constraint. |
+| maintenance_aware | Pick lowest maintenance_cost/Q admissible fidelity; admit greedily under BOTH KV memory and accelerator time budget. |
+| oracle | Pick highest-Q admissible fidelity; admit greedily under KV budget. Upper bound. |
 
-| workload | budget | lat\_fail | cause |
-|---|---|---|---|
-| LoCoMo | 300ms | 95.2% | warm-append for L>~300 tok exceeds 300ms at measured 3B speed |
-| LoCoMo | 1000ms | 46.5% | warm-append for L>~5k tok exceeds 1s |
-| LoCoMo | 10000ms | 0.0% | all turns feasible within 10s |
-| EgoSchema | 300ms | 100.0% | cold-restore of 1500–2500 tok ≥ 917ms (3B@1k) |
-| EgoSchema | 1000ms | 100.0% | cold-restore of 1500–2500 tok ≥ 917ms |
-| EgoSchema | 10000ms | 0.0% | all queries feasible within 10s |
+**Fidelity admissibility**: f is admissible iff Q(f, qwen7b, workload) ≥ q_min.
 
-**Non-discriminating cells (device meets both quality AND <5% latency failure):**
-- locomo / 10000ms / q_slo=0.20 — quality PASS (0.230 ≥ 0.20); 0% latency failure
-- egoschema / 10000ms / all q_slo — quality PASS (0.450); 0% latency failure (×3)
+**Fidelity selection outcome** (determined by Q table and maintenance costs):
 
-**K1: PASS — 4/18 cells non-discriminating (22%), well below 50% threshold.**
-
-Comparison with E36 A1 bounds:
-
-| workload | budget | s=0.43 (E36) | s=1.00 (E36) | measured (E36b) |
+| workload | q_slo | maint_aware picks | footprint_ranked picks | oracle picks |
 |---|---|---|---|---|
-| LoCoMo | 300ms | 87.3% | 97.1% | **95.2%** |
-| LoCoMo | 1000ms | 12.1% | 70.2% | **46.5%** |
-| LoCoMo | 10000ms | 0.0% | 0.0% | **0.0%** |
-| EgoSchema | 300ms | 100% | 100% | **100%** |
-| EgoSchema | 1000ms | 100% | 100% | **100%** |
-| EgoSchema | 10000ms | 0.0% | 0.0% | **0.0%** |
+| LoCoMo | 0.20 | full (cost/Q=165) | win10 (density > full) | full |
+| LoCoMo | 0.30 | full (only admissible) | full (only admissible) | full |
+| LoCoMo | 0.40 | full | full | full |
+| EgoSchema | 0.20 | full (cost/Q=116) | sum200 (highest density) | full |
+| EgoSchema | 0.30 | full | sum200 | full |
+| EgoSchema | 0.40 | full | sum200 | full |
 
-The measured curve sits between the two E36 bounds and is much closer to s=1.00 than to
-s=0.43, confirming that the optimistic lower bound was misleading.
-
----
-
-## Stage 1 — Fleet Simulation
-
-**Configuration:**  
-- Policies: device\_only, edge\_full\_lru, edge\_win10\_lru, edge\_sum200\_lru, reactive,
-  budget\_aware, lifecycle\_aware  
-- n\_robots ∈ {5, 10, 20} × cap\_frac ∈ {0.25, 0.50, 0.75, 1.00} × 3 seeds × 2 workloads
-  × 3 q\_SLOs = 1,512 runs  
-- n\_sessions = 20 per run; device TTFT uses measured L-dependent A1 ratio
+maintenance_aware selects full in every cell because full always has the lowest maintenance_cost/Q ratio (66ms / 0.40 = 165 for LoCoMo; 66ms / 0.567 = 116 for EgoSchema) — lower than win10 (652/0.23 = 2835; 652/0.500 = 1304) and sum200 (5822/0.12 >> 1 for LoCoMo). **maintenance_aware is therefore indistinguishable from always_full in this Q-table.**
 
 ---
 
-## Stage 2 — Per-Cell Policy Ranking
+## Sweep
 
-### LoCoMo (dense-incompressible; warm-append device model)
+- Fleet size: n\_robots ∈ {5, 10, 20, 30, 50}
+- KV capacity: cap\_frac ∈ {0.25, 0.50, 0.75, 1.00}
+- Seeds: 3 per configuration
+- Workloads: LoCoMo (dense-incompressible, warm-append device), EgoSchema (gist-compressible, cold-restore per query)
+- Quality SLOs: q\_min ∈ {0.20, 0.30, 0.40}
+- Total runs: 7 × 2 × 3 × 5 × 4 × 3 = 2520
 
-| budget | q\_slo | #1 policy | both\_met | lifecycle\_aware | gap\_lc\_vs\_dev | K2 |
-|---|---|---|---|---|---|---|
-| 300ms | any | edge\_full\_lru | 0.142 | 0.142 | **+12.6pp** | PASS |
-| 1000ms | any | edge\_full\_lru | 0.235 | 0.235 | **+6.8pp** | PASS |
-| 10000ms | any | edge\_full\_lru | 0.405 | 0.405 | **+17.7pp** | PASS |
+---
 
-lifecycle\_aware co-ranks with edge\_full\_lru at all LoCoMo cells.
+## Stage 0 — Headroom Gate
 
-### EgoSchema (gist-compressible; cold-restore-per-query device model)
+Device failure rates (qwen3b Jetson, measured A1 ratio, admissibility model):
 
-| budget | q\_slo | #1 policy | both\_met | lifecycle\_aware | gap\_lc\_vs\_dev | K2 |
-|---|---|---|---|---|---|---|
-| 300ms | any | edge\_win10\_lru | 0.502 | 0.114 | **+11.3pp** | PASS |
-| 1000ms | any | edge\_full\_lru | 0.570 | 0.570 | **+57.0pp** | PASS |
-| 10000ms | any | edge\_full\_lru | 0.570 | 0.570 | **+11.7pp** | PASS |
+| workload | budget | lat_fail | admissible on device? (any q_slo) |
+|---|---|---|---|
+| LoCoMo | 300ms | 95.2% | yes (q_slo=0.20 only; Q_dev=0.230) |
+| LoCoMo | 1000ms | 46.5% | yes (q_slo=0.20 only) |
+| LoCoMo | 10000ms | 0.0% | yes (q_slo=0.20 only) |
+| EgoSchema | 300ms | 100.0% | yes (all q_slos; Q_dev=0.450) |
+| EgoSchema | 1000ms | 100.0% | yes (all q_slos) |
+| EgoSchema | 10000ms | 0.0% | yes (all q_slos) |
 
-At 300ms budget, edge\_win10\_lru tops the ranking (+50.2pp vs device\_only) because
-lifecycle\_aware sometimes selects full fidelity whose cold-admit TTFT exceeds 300ms.
-lifecycle\_aware still passes K2 at +11.3pp.
+Non-discriminating cells (device meets latency AND quality): locomo/10000ms/q_slo=0.20 and egoschema/10000ms (×3) = **4/18 cells**.  
+**K1: PASS** — 22% non-discriminating, below 50% threshold.
+
+---
+
+## Stage 1–2 — Per-Cell Policy Ranking
+
+Primary metric at 1000ms budget, cap_frac=0.50 (representative slice):
+
+| workload | q_slo | device | fp_ranked | maint_aware | oracle | maint−fp | maint−dev |
+|---|---|---|---|---|---|---|---|
+| LoCoMo | 0.20 | 0.554 | 0.947 | 0.914 | 0.914 | −3.3pp | +36.1pp |
+| LoCoMo | 0.30 | 0.000 | 0.893 | 0.891 | 0.891 | −0.3pp | +89.1pp |
+| LoCoMo | 0.40 | 0.000 | 0.893 | 0.891 | 0.891 | −0.3pp | +89.1pp |
+| EgoSchema | 0.20 | 0.000 | 1.000 | 0.891 | 0.891 | −10.9pp | +89.1pp |
+| EgoSchema | 0.30 | 0.000 | 1.000 | 0.891 | 0.891 | −10.9pp | +89.1pp |
+| EgoSchema | 0.40 | 0.000 | 1.000 | 0.891 | 0.891 | −10.9pp | +89.1pp |
+
+Full 18-cell table (averaged over fleet size, cap_frac, seeds) in `stage2_analysis.json`.
 
 ---
 
 ## Kill-Condition Results
 
-**K1:** PASS — 22% non-discriminating (4/18).
+**Pre-registered kill conditions, applied as written:**
 
-**K2:** **PASS** — lifecycle\_aware beats device\_only by ≥5pp in all 18 cells.  
-- Minimum gap: locomo / 1000ms / any q\_slo = **+6.8pp**  
-- Maximum gap: egoschema / 1000ms / any q\_slo = **+57.0pp**
+**K1**: PASS — 22% non-discriminating (4/18 cells).
 
-E36's 3 K2-violating cells (locomo / 1000ms / s=0.43) do not arise under the measured
-ratio.  Root-cause confirmed (E37b): at the measured device speed, device\_only fails
-46.5% of LoCoMo 1s queries, giving lifecycle\_aware genuine headroom.
+**K2**: FAIL (4 cells) — maintenance_aware fails to beat device_only by ≥5pp at: locomo/10000ms/q_slo=0.20 (gap=0pp) and egoschema/10000ms/all q_slos (gap=0pp). These are exactly the 4 non-discriminating cells identified in Stage 0; they are non-discriminating by construction (device meets 10s budget everywhere).
 
-**K3:** PASS — all values trace to committed sources within 2×.
+For the 14 discriminating cells: **K2 PASS** — maintenance_aware beats device_only by +17.6pp to +89.1pp.
+
+**(a) always_window within 5pp of maintenance_aware**: FIRES — 9/18 cells. In many LoCoMo cells, always_window achieves similar both_met because win10 intra-session TTFT (59ms) reliably meets the latency budget.
+
+**(b) always_full within 5pp of maintenance_aware**: FIRES — **18/18 cells**. maintenance_aware ≡ always_full: for all workloads and q_slos tested, full fidelity minimizes maintenance_cost/Q. The policy provides no selection criterion beyond always_full. Root cause: full has the lowest cost per unit quality (66/0.40=165 for LoCoMo), and win10 and sum200 are much more expensive per quality unit despite their lower absolute cost.
+
+**(c) footprint_ranked within 5pp of maintenance_aware**: FIRES — 12/18 cells. footprint_ranked is not merely within 5pp — it **beats** maintenance_aware in 12 cells. Notably at EgoSchema/300ms: gap = −81.5pp (footprint_ranked 0.991 vs maintenance_aware 0.176), because maintenance_aware picks full fidelity (cold restore = 334ms > 300ms budget → latency fail), while footprint_ranked picks sum200 (restore = 32ms → latency pass).
+
+**(d) accelerator never binds**: FIRES. No policy saturates the 30 000ms/epoch accelerator budget in any (policy, fleet size) cell. Root cause: sum200 is never selected for LoCoMo (Q=0.12 < q_min=0.20 at minimum), so its 5822ms/turn refresh never loads the GPU. For EgoSchema, sessions are independent (no per-session refresh, A6). The mechanism claim — that footprint_ranked saturates the accelerator by choosing sum200 — cannot be verified with this Q table: the tested q_min range (0.20–0.40) excludes sum200 from LoCoMo entirely.
+
+**(e) advantage doesn't grow with fleet size**: FIRES — the gap between maintenance_aware and footprint_ranked does not grow monotonically with fleet size; it is driven by fidelity selection (full vs sum200/win10), which is independent of fleet size.
 
 ---
 
-## Consistency Check (mandatory, 6-check protocol)
+## Binding Resource Diagnostic
+
+All policies: admission is exclusively memory-bound (KV capacity). Accelerator bound fraction = 0% for every (policy, fleet size) cell.
+
+| policy | n_robots=50 | KV-bound% | Accel-bound% | binding | Accel util% |
+|---|---|---|---|---|---|
+| always_full | 50 | 29.1% | 0.0% | memory | 25.4% |
+| always_window | 50 | 14.6% | 0.0% | memory | 6.2% |
+| always_summary | 50 | 0.0% | 0.0% | neither | 2.3% |
+| footprint_ranked | 50 | 12.8% | 0.0% | memory | 7.1% |
+| maintenance_aware | 50 | 29.1% | 0.0% | memory | 25.4% |
+
+Accelerator utilization breakdown: serve dominates (refresh=0ms for all policies because sum200 is never chosen for LoCoMo and EgoSchema has no per-session refresh). The accelerator binding threshold (≥30 000ms/epoch for sum200) is not reached in any tested cell.
+
+Full per-(policy, fleet size) table in `binding_diagnostic.json`.
+
+---
+
+## Conclusions
+
+The corrected experiment falsifies the maintenance_aware policy as specified. Three findings:
+
+**Finding 1 — maintenance_aware degenerates to always_full.** For all workloads and q_slo values tested, full fidelity minimizes maintenance_cost/Q and is therefore always selected by the maintenance_aware policy. The policy is indistinguishable from always_full.
+
+**Finding 2 — footprint_ranked beats maintenance_aware at latency-sensitive cells.** footprint_ranked (which picks sum200 for EgoSchema) achieves better both_met at 300ms and 1000ms budgets than maintenance_aware (which picks full, whose cold-restore TTFT exceeds 300ms). The footprint-minimizing policy wins by being latency-efficient, not quality-efficient.
+
+**Finding 3 — accelerator saturation mechanism does not appear.** Sum200 is never chosen for LoCoMo by any policy (Q=0.12 is below q_min=0.20). The accelerator saturation claim ("footprint_ranked saturates the GPU with sum200 regeneration") cannot be exercised with the committed Q-table and q_min sweep. This is not a bug in the simulation — it is a property of the Q values: LoCoMo sum200 (Q=0.12) does not satisfy any of the tested quality floors. The claim would require q_min ≤ 0.12.
+
+**Implication for the paper.** The maintenance_aware policy, as defined (rank by maintenance_cost/Q, subject to KV and accel constraints), does not provide a useful fidelity selector when full fidelity has the globally lowest cost-per-unit-quality. The policy mechanism would require either (a) a workload where a compressed representation has better cost/quality than full — which holds for EgoSchema at 300ms budget (sum200 passes latency; full does not), but maintenance_aware does not account for latency in its selection criterion — or (b) a setting where LoCoMo sum200 is admissible (q_min < 0.12). Neither condition is satisfied in the tested sweep.
+
+The paper's thesis position (lifecycle-cost-aware fidelity selection sufficient, joint placement×fidelity adds nothing) is supported by E24/E24b/E24c. E36b (this experiment) shows the specific maintenance_aware policy needs redesign to be distinguished from always_full. This is an implementation gap, not a falsification of the thesis.
+
+---
+
+## Consistency Check (6-check protocol)
 
 ### Check 1 — Cross-check against committed measurements
 
-| quantity | this run | prior committed | source | ratio | agree/disagree |
+| quantity | this run | prior committed | source | ratio | agree? |
 |---|---|---|---|---|---|
-| Edge full warm-append | 66.0ms | 66ms (E26); 67ms (E35 N=1) | E26/E35 | 1.00 | AGREE |
-| Edge win10 intra-session | 59.0ms | 41–77ms range (E35) | E35 | in range | AGREE |
-| Edge win10 inter-session | 1031.0ms | ~1031ms (E35) | E35 | 1.00 | AGREE |
-| Edge sum200 restore | 32.0ms | 32ms (E35/cost\_matrix) | E35 | 1.00 | AGREE |
-| Jetson 7B incr\_warm 1k | 579.4ms | 579ms (E23) | E23 | 1.00 | AGREE |
-| Jetson 7B incr\_warm 16k | 2162.8ms | 2163ms (E23) | E23 | 1.00 | AGREE |
-| Measured 3B incr\_warm 1k | 343.84ms | 343.84ms (E37) | E37 | 1.00 | AGREE |
-| Measured 3B incr\_warm 16k | 1524.03ms | 1524.03ms (E37) | E37 | 1.00 | AGREE |
-| Q(full,locomo,qwen3b) | 0.230 | 0.230 (E29) | E29 | 1.00 | AGREE |
-| Q(full,egoschema,qwen3b) | 0.450 | 0.450 (E29) | E29 | 1.00 | AGREE |
+| incr_warm ratio at L=1k | 0.5934 | 0.5934 | E37/E37b | 1.00 | AGREE |
+| incr_warm ratio at L=16k | 0.7046 | 0.7046 | E37/E37b | 1.00 | AGREE |
+| full_restore ratio at L=1k | 0.4749 | 0.4749 | E37b | 1.00 | AGREE |
+| Edge full warm-append | 66.0ms | 66ms | E26/E35 | 1.00 | AGREE |
+| Edge win10 intra | 59.0ms | 59ms | E35 | 1.00 | AGREE |
+| Edge win10 inter | 1031.0ms | ~1031ms | E35 | 1.00 | AGREE |
+| Edge sum200 restore | 32.0ms | 32ms | E35 | 1.00 | AGREE |
+| Edge sum200 update | 5822.0ms | 5822ms | E35 | 1.00 | AGREE |
+| Q(full, locomo, qwen7b) | 0.400 | 0.400 | E29 | 1.00 | AGREE |
+| Q(full, egoschema, qwen7b) | 0.567 | 0.567 | E29 | 1.00 | AGREE |
+| KV bytes/tok qwen7b | 57344 | 57344 | E23 | 1.00 | AGREE |
+| win10 tokens | 7275 | 7275 (E33a) | E33a | 1.00 | AGREE |
 
 No disagreements > 2×.
 
 ### Check 2 — Physical plausibility
 
-3B incr\_warm at L=8k: 853ms → 9,604 tok/s.  7B incr\_warm at L=8k: 1253ms → 6,542 tok/s.
-3B is faster per token, consistent with smaller model.  Neither exceeds committed A6000
-warm-append rates (5,984 tok/s cold prefill; warm-append is faster still).  OK.
+EgoSchema cold restore at L=2000: (2000/5984)×1000 = 334ms. Implied rate 5984 tok/s, matches committed A6000 cold-prefill rate. OK.
 
-3B full\_restore at L=8k: 17,486ms → 469 tok/s.  7B full\_restore at L=8k: 33,790ms → 243 tok/s.
-Both consistent with committed Jetson cost curves.  OK.
+Device incr_warm at L=16k: 2163ms × 0.7046 = 1524ms. Rate: 16384/1.524 = 10,752 tok/s. 3B model at 16k: faster than 7B (6542 tok/s@16k), consistent with smaller model. No rate exceeds committed curves.
+
+Accelerator utilization at n=50/always_full: 7569ms serve / 30000ms = 25.2%. Implies 50 robots × 66ms/turn ≈ 3300ms per epoch average. The ~7569ms includes materialize overhead on first-admission turns and cap_frac=0.25 cells where fewer robots are admitted but at higher cold-restore cost. Plausible.
 
 ### Check 3 — Distribution sanity
 
-Stage 1 uses 3 seeds per configuration.  Per-seed `both_met` values vary with rng draws;
-the averaged metric is stable.  No identical constants appear across varied L, seeds, or
-fleet sizes.  The measured ratio table has tight IQRs per cell (<0.5%, E37 data).
+3 seeds per configuration. Per-seed both_met values are independent (different rng draws for ego context selection). Stage 0 device failure rates are deterministic (no rng). Fidelity selection is deterministic per policy (no rng in admissibility check). No identical constants appear where variation is expected across seeds.
 
 ### Check 4 — Definition audit
 
-| name | definition this run | prior committed | agree? |
-|---|---|---|---|
-| incr\_warm | Jetson qwen7b warm-append, E23 `incremental_warm_ms` | E23 | YES |
-| A1\_INCR\_WARM\_RATIO | 3B/7B measured ratio per L, E37 | E37b a1\_ratio\_table.csv | YES |
-| LoCoMo session / turn | same as E36 (E33a §1.6, 22 turns/session) | E33a | YES |
-| win10 tokens | 7,275 median (E33a) | E33a | YES |
-| both\_met | TTFT ≤ budget AND quality correct | E24/E24b/E36 | YES |
+| term | definition this run | matches prior? |
+|---|---|---|
+| admissible fidelity | Q(f, qwen7b, workload) ≥ q_min | new definition (replaces Bernoulli) |
+| win10 tokens | 7275 (E33a last-10-sessions) | E33a ✓ |
+| incr_warm | E23 incremental_warm_ms × A1 ratio | E37b ✓ |
+| turns_per_session | 22 | E33a ✓ |
+| kv_budget | cap_frac × n_robots × KV_bytes(full, 20092) | parametric |
+| accel_budget | 30000 ms/epoch | [ASSUMPTION A4] |
+| maintenance cost | full=66ms, win10=652ms (amortized E35), sum200=5822ms | E35 ✓ |
+
+Admissibility model is a new definition replacing Bernoulli. This changes the metric structure — both_met is now deterministic given fidelity selection and TTFT, not stochastic. Reported as a definitional change.
 
 ### Check 5 — Claim linkage
 
 | result | claim | bearing |
 |---|---|---|
-| K2 PASS at all 18 cells, minimum +6.8pp | C3: lifecycle-cost-aware fidelity selection sufficient at current node | SUPPORTS |
-| locomo/1000ms device failure 46.5% | C4: physical inertia cost significant at device tier for dense workloads | SUPPORTS |
-| EgoSchema edge policies +11–57pp vs device | C1: gist regime benefits from compression (edge representation) | SUPPORTS |
-| LoCoMo quality ceiling 0.230 (3B/full) | C1: dense-incompressible — quality floor SLOs above 0.23 infeasible on device | SUPPORTS |
+| maintenance_aware ≡ always_full (kill b fires) | C3: lifecycle-cost-aware sufficient at serving node | WEAKENS the specific policy instantiation; does not falsify the thesis (E24c evidence stands) |
+| footprint_ranked beats maintenance_aware at 300ms/EgoSchema | C3 | Incumbent beats proposed policy at latency-sensitive cells → WEAKENS |
+| Kill (d): accel never binds | Paper mechanism claim: footprint_ranked saturates accel | WEAKENS — mechanism not demonstrable at tested q_min range |
+| K2 PASS for 14/18 discriminating cells | C4: physical inertia significant | SUPPORTS (edge policies beat device by 17–89pp) |
 
-No cross-tier KV transfer measured (scoped out per FORMULATION.md).  No joint
-fidelity×placement optimization (anti-coupling constraint from E24b/E24c respected).
+No cross-tier KV transfer (out of scope, FORMULATION.md §Scoping). No joint placement×fidelity optimization (anti-coupling constraint from E24c respected).
 
 ### Check 6 — Proxy validity
 
-- Quality: Monte Carlo draw from Q\_TABLE (committed E29 values).  Valid.
-- Device TTFT: deterministic from E23 7B table × measured E37 ratio.  Both committed.
-  Ratio interpolated linearly between measured L points, clamped at L=16384 for L > 16384.
-  Limitation: no 3B measurement above L=16384 (A4 applies to 7B extrapolation; ratio
-  clamped rather than extrapolated since trend direction is unknown above the last point).
-- LoCoMo L-growth model: derived from E33a committed session statistics.  Valid as stated.
+- **Device TTFT**: deterministic from E23 7B table × E37 measured ratio. Both committed. Valid.
+- **Admissibility**: deterministic from E29 Q-table. Valid. 
+- **Accel budget**: 30 000ms/epoch [ASSUMPTION A4] — labeled as assumption; results under alternative budgets: halving to 15 000ms would cause accel binding for maintenance_aware at n≈7 robots (7×66ms/epoch ≈ 462ms; serve only; no binding). Sum200 would bind at n≥3 (3×5854=17562ms > 15000ms). Qualitative conclusions unchanged since sum200 is never selected for LoCoMo.
+- **EgoSchema independent sessions (A6)**: documented. Means no refresh cost for any policy on EgoSchema.
 
 ---
 
 ## Limitations
 
-1. **No 3B measurement above L=16384.** The ratio is clamped at 0.705/0.542 for L > 16384.
-   LoCoMo contexts reach ~22.8k tokens, so the top 26% of the L range relies on clamping
-   rather than measurement.  The actual ratio likely continues rising; clamping understates
-   the 3B's disadvantage at long contexts and is conservative in the direction that
-   understates the edge's latency advantage.
+1. **maintenance_aware degenerate.** As defined, the policy always picks full. A latency-aware variant (e.g., fall back to smallest admissible if TTFT(full) > budget) would differentiate it from always_full and potentially avoid kill condition (b).
 
-2. **EgoSchema context size not committed (A2).** Assumed 1500–2500 tokens.
-   The stage 0 discrimination at 300ms and 1000ms is robust: any L > ~500 tok fails
-   cold-restore at 1000ms under the 3B.
+2. **Sum200 not testable for LoCoMo.** The mechanism claim requires q_min ≤ 0.12 to make LoCoMo sum200 admissible. No tested q_slo satisfies this.
 
-3. **n\_sessions=20.** Short relative to committed 19–32 sessions per conversation.
-   Averaged over 10 conversations × fleet configs; mean representative.
+3. **KV budget parametrized by full fidelity at L_median.** Actual KV usage scales with current L_i per robot. The parametric budget is an approximation; robots early in their context accumulate much less KV than the budget assumes.
 
-4. **Quality model stationary.** Q\_TABLE from E29; drift not modeled.
+4. **Turn interval assumption (A4).** The 30s turn interval determines whether the accelerator ever binds. This is an unconstrained parameter; the fleet-scale accelerator saturation mechanism depends critically on it.
+
+5. **n_sessions per conversation.** Used LOCOMO_N_SESSIONS = [19…32] per conversation, capped at max=32 for the simulation. Correctly reflects E33a range.
 
 ---
 
 ## Headline
 
-Lifecycle-cost-aware fidelity selection at the edge tier (lifecycle\_aware policy)
-beats device-only serving by 6.8–57.0pp across all workloads, TTFT budgets, and
-quality SLOs under the measured Jetson qwen3b cost (E37).  Both K1 and K2 pass.
-The E36 K2 violations were artifacts of an overly optimistic A1 lower bound.
+The corrected experiment fires kill conditions (b), (c), and (d):  
+(b) maintenance_aware ≡ always_full — the policy degenerates because full minimizes maintenance_cost/Q for all tested cells;  
+(c) footprint_ranked beats maintenance_aware by up to 81.5pp (EgoSchema/300ms) — the incumbent wins on latency;  
+(d) accelerator never binds — the saturation mechanism requires LoCoMo sum200 to be admissible (q_min < 0.12), outside the tested range.  
+
+The fleet policy experiment as designed does not distinguish maintenance_aware from always_full. Redesign of the maintenance_aware policy (with latency-awareness in fidelity selection, or tested under lower q_slo where sum200 becomes admissible for LoCoMo) is required before the fleet simulation supports the paper's mechanism claim.

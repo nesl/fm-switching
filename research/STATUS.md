@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-24 (E36b complete: fleet policy simulation with measured A1 ratio. K1 PASS; K2 PASS all 18 cells (minimum +6.8pp locomo/1000ms; maximum +57.0pp egoschema/1000ms). lifecycle_aware co-ranks with edge_full_lru at all cells. E36 K2 violations confirmed as lower-bound artifacts. LoCoMo 1s device failure 46.5% at measured 3B speed. E37b and E37 also complete from same session.)
+Last updated: 2026-08-24 (E36b rewrite: corrected fleet policy experiment with footprint_ranked incumbent, admissibility-constraint quality model, binding-resource diagnostic, 7 correct policies. Kill conditions (b)/(c)/(d) fire: maintenance_aware ≡ always_full (degenerate — full always minimizes cost/quality); footprint_ranked beats maintenance_aware up to +81.5pp at egoschema/300ms; accelerator never binds (sum200 excluded from LoCoMo at q_min≥0.20). K2 PASS for 14/18 discriminating cells.)
 
 ## Framing
 

@@ -1,3 +1,7 @@
+> **SUPERSEDED.** E36 and the first E36b used wrong policies (no footprint_ranked incumbent,
+> wrong quality model, missing binding-resource diagnostic). Corrected experiment: see
+> `reports/e36b_fleet_policy.md` (rewrite, 2026-08-24).
+
 # E36 — Maintenance-Aware Fleet Admission and Representation Policy
 
 **Date:** 2026-08-23  

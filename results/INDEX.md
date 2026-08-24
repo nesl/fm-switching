@@ -315,7 +315,8 @@ lifecycle_aware co-ranks with edge_full_lru at all LoCoMo cells.
 
 | file | script | model | device | n | headline | source commit |
 |---|---|---|---|---|---|---|
-| `results/orchestration/e36b_fleet/stage0_headroom.json` | `e36b_fleet.py` | qwen3b (measured) + qwen7b (edge) | CPU sim | 18 cells | LoCoMo 1s device failure 46.5%; K1 PASS (22% non-discriminating) | 2026-08-24 |
-| `results/orchestration/e36b_fleet/stage1_sweep.json` | `e36b_fleet.py` | qwen3b + qwen7b | CPU sim | 1,512 runs | Policy sweep at measured device speed | 2026-08-24 |
-| `results/orchestration/e36b_fleet/stage2_analysis.json` | `e36b_fleet.py` | — | CPU sim | 18 cells | K2 PASS all cells; lifecycle_aware +6.8–57.0pp vs device | 2026-08-24 |
-| `reports/e36b_fleet_policy.md` | — | — | — | — | Full report with 6-check consistency protocol | 2026-08-24 |
+| `results/orchestration/e36b_fleet/stage0_headroom.json` | `e36b_fleet.py` (rewrite) | qwen3b (measured A1) + qwen7b (edge) | CPU sim | 18 cells | K1 PASS 22% non-discriminating; device 46.5% fail at 1s/LoCoMo | 2026-08-24 |
+| `results/orchestration/e36b_fleet/stage1_sweep.json` | `e36b_fleet.py` (rewrite) | qwen3b + qwen7b | CPU sim | 2520 runs | 7-policy corrected sweep; admissibility constraint quality model | 2026-08-24 |
+| `results/orchestration/e36b_fleet/stage2_analysis.json` | `e36b_fleet.py` (rewrite) | — | CPU sim | 18 cells | Kill (b)/(c)/(d) fire; maintenance_aware≡always_full; fp_ranked beats maint at egoschema/300ms by 81.5pp | 2026-08-24 |
+| `results/orchestration/e36b_fleet/binding_diagnostic.json` | `e36b_fleet.py` (rewrite) | — | CPU sim | 35 rows (7 pol × 5 fleet) | Accel never binds (kill d); KV-memory-bound fraction by policy/fleet | 2026-08-24 |
+| `reports/e36b_fleet_policy.md` | — | — | — | — | Full report with 6-check consistency protocol (rewrite, supersedes prior e36b) | 2026-08-24 |
