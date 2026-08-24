@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-23 (E35 complete: corrected WARM catch-up — full 67ms(N=1)→681ms(N=100); win10 bimodal: 41-77ms intra-session, ~1031ms inter-session with jump at N~22 turns; sum200 TTFT 25ms; recursive 5.8-6.2s; full regen distribution 7.8-10.3s confirmed (E32 constant artifact confirmed). E34 Parts B+C superseded.)
+Last updated: 2026-08-23 (E36 complete: fleet simulation — K1 PASS (22% non-discriminating); K2 FAIL in 3/36 cells at locomo/1000ms/s=0.43 (gap +0.7pp, threshold ≥5pp); K2 passes at s=1.00 (+14.2pp). Root cause: at s=0.43 device warm-append already serves 87.7% of LoCoMo turns within 1000ms. Pending: Jetson qwen3b measurement running on hardware to replace A1 assumption. E35 also complete from prior session.)
 
 ## Framing
 

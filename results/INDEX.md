@@ -277,3 +277,19 @@ Key findings: full WARM 67ms(N=1)→681ms(N=100); win10 intra-session 41–77ms,
 | `results/cost/e34b_catchup/part2_sum200.json` | `e34b_catchup.py` | qwen7b | a6000 | 10 convs × 6N × 2 reps per variant | sum200 TTFT 25ms (flat); recursive 5.8-6.2s (decode-dominated); full regen 7.8-10.3s distribution (E32 constant artifact confirmed) | 2026-08-23 |
 | `results/cost/e34b_catchup/part3_maintenance.json` | `e34b_catchup.py` | — | CPU | — | Corrected ordering: sum200-restore(32ms) < full-warm-append(66ms) < win10-amortized(653ms) < sum200-recursive(5822ms) | 2026-08-23 |
 | `reports/e34b_corrected_catchup.md` | — | — | — | — | Full report with 6-check consistency protocol; corrects E34 Parts B and C defects | 2026-08-23 |
+
+## E36 — Maintenance-Aware Fleet Admission and Representation Policy (2026-08-23)
+
+Script: `experiments/orchestration/e36_fleet.py`. CPU (pure simulation, no GPU). flash.
+Stage 0: corrected headroom gate (LoCoMo=warm-append, EgoSchema=cold-restore-per-query).
+Stage 1: 3,024 runs (7 policies × 2 workloads × 3 q-SLOs × fleet configs × 2 A1 bounds × 3 seeds).
+Stage 2: per-cell policy ranking; K2 check.
+K2 FAIL: 3/36 cells (locomo/1000ms/s=0.43) gap=+0.7pp vs ≥5pp threshold.
+K2 passes at s=1.00 (+14.2pp). A1 assumption pending Jetson qwen3b measurement.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/orchestration/e36_fleet/stage0_headroom.json` | `e36_fleet.py` | qwen3b (Jetson, A1) + qwen7b (edge) | CPU sim | 18 cells × 2 A1 bounds | K1 PASS: 22% non-discriminating; LoCoMo warm-append failure: 87.3%/97.1% at 300ms, 12.1%/70.2% at 1000ms (s=0.43/1.00) | 2026-08-23 |
+| `results/orchestration/e36_fleet/stage1_sweep.json` | `e36_fleet.py` | qwen3b (device) + qwen7b (edge) | CPU sim | 3,024 runs | Policy sweep: edge policies +10–57pp vs device_only in most cells | 2026-08-23 |
+| `results/orchestration/e36_fleet/stage2_analysis.json` | `e36_fleet.py` | — | CPU sim | 36 cells | K2 FAIL: 3 cells locomo/1000ms/s=0.43 (+0.7pp); K2 PASS at s=1.00 (+14.2pp) | 2026-08-23 |
+| `reports/e36_fleet_policy.md` | — | — | — | — | Full report with 6-check consistency protocol and K2 violation analysis | 2026-08-23 |

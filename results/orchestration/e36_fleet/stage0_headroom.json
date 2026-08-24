@@ -1,247 +1,214 @@
 {
   "stage": "stage0_corrected",
-  "device_only_model": {
-    "locomo": "warm_append_per_turn using E23 incr_warm_ms (qwen7b), scaled by A1",
-    "egoschema": "cold_restore_per_query using E23 full_restore_ms (qwen7b), scaled by A1"
-  },
-  "assumptions": [
-    "A1: qwen3b_time = scale x qwen7b_time. Shown at s=0.43 (param-count lower bound) and s=1.00 (no speedup upper bound). Not directly measured.",
-    "A2: EgoSchema contexts 1500-2500 tok assumed; sensitivity at 500-1200 tok shown.",
-    "A4: LoCoMo turns with L>16384 use rate extrapolated from L=16384 (last measured). Not extrapolated past infeasibility boundary (L=24576). For qwen3b at s=0.43, all LoCoMo contexts (<23k tok) remain feasible."
-  ],
+  "gate_passes": true,
   "n_cells": 18,
-  "n_nondiscriminating_s043": 4,
-  "n_nondiscriminating_s100": 4,
-  "gate_passes_s043": true,
-  "gate_passes_s100": true,
+  "n_nondiscrim": {
+    "0.43": 4,
+    "1.0": 4
+  },
   "cells": [
     {
       "workload": "locomo",
-      "budget_ms": 300,
+      "budget_ms": 300.0,
       "quality_slo": 0.2,
       "Q_device": 0.23,
-      "quality_passes_slo": true,
-      "quality_gap": 0.0,
+      "quality_passes": true,
       "lat_fail_s043": 0.8727,
       "lat_fail_s100": 0.9708,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "locomo",
-      "budget_ms": 300,
+      "budget_ms": 300.0,
       "quality_slo": 0.3,
       "Q_device": 0.23,
-      "quality_passes_slo": false,
-      "quality_gap": 0.07,
+      "quality_passes": false,
       "lat_fail_s043": 0.8727,
       "lat_fail_s100": 0.9708,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "locomo",
-      "budget_ms": 300,
+      "budget_ms": 300.0,
       "quality_slo": 0.4,
       "Q_device": 0.23,
-      "quality_passes_slo": false,
-      "quality_gap": 0.17,
+      "quality_passes": false,
       "lat_fail_s043": 0.8727,
       "lat_fail_s100": 0.9708,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "locomo",
-      "budget_ms": 1000,
+      "budget_ms": 1000.0,
       "quality_slo": 0.2,
       "Q_device": 0.23,
-      "quality_passes_slo": true,
-      "quality_gap": 0.0,
+      "quality_passes": true,
       "lat_fail_s043": 0.1215,
       "lat_fail_s100": 0.7015,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "locomo",
-      "budget_ms": 1000,
+      "budget_ms": 1000.0,
       "quality_slo": 0.3,
       "Q_device": 0.23,
-      "quality_passes_slo": false,
-      "quality_gap": 0.07,
+      "quality_passes": false,
       "lat_fail_s043": 0.1215,
       "lat_fail_s100": 0.7015,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "locomo",
-      "budget_ms": 1000,
+      "budget_ms": 1000.0,
       "quality_slo": 0.4,
       "Q_device": 0.23,
-      "quality_passes_slo": false,
-      "quality_gap": 0.17,
+      "quality_passes": false,
       "lat_fail_s043": 0.1215,
       "lat_fail_s100": 0.7015,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "locomo",
-      "budget_ms": 10000,
+      "budget_ms": 10000.0,
       "quality_slo": 0.2,
       "Q_device": 0.23,
-      "quality_passes_slo": true,
-      "quality_gap": 0.0,
+      "quality_passes": true,
       "lat_fail_s043": 0.0,
       "lat_fail_s100": 0.0,
-      "discriminating_s043": false,
-      "discriminating_s100": false
+      "disc_s043": false,
+      "disc_s100": false
     },
     {
       "workload": "locomo",
-      "budget_ms": 10000,
+      "budget_ms": 10000.0,
       "quality_slo": 0.3,
       "Q_device": 0.23,
-      "quality_passes_slo": false,
-      "quality_gap": 0.07,
+      "quality_passes": false,
       "lat_fail_s043": 0.0,
       "lat_fail_s100": 0.0,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "locomo",
-      "budget_ms": 10000,
+      "budget_ms": 10000.0,
       "quality_slo": 0.4,
       "Q_device": 0.23,
-      "quality_passes_slo": false,
-      "quality_gap": 0.17,
+      "quality_passes": false,
       "lat_fail_s043": 0.0,
       "lat_fail_s100": 0.0,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "egoschema",
-      "budget_ms": 300,
+      "budget_ms": 300.0,
       "quality_slo": 0.2,
       "Q_device": 0.45,
-      "quality_passes_slo": true,
-      "quality_gap": 0.0,
+      "quality_passes": true,
       "lat_fail_s043": 1.0,
       "lat_fail_s100": 1.0,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "egoschema",
-      "budget_ms": 300,
+      "budget_ms": 300.0,
       "quality_slo": 0.3,
       "Q_device": 0.45,
-      "quality_passes_slo": true,
-      "quality_gap": 0.0,
+      "quality_passes": true,
       "lat_fail_s043": 1.0,
       "lat_fail_s100": 1.0,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "egoschema",
-      "budget_ms": 300,
+      "budget_ms": 300.0,
       "quality_slo": 0.4,
       "Q_device": 0.45,
-      "quality_passes_slo": true,
-      "quality_gap": 0.0,
+      "quality_passes": true,
       "lat_fail_s043": 1.0,
       "lat_fail_s100": 1.0,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "egoschema",
-      "budget_ms": 1000,
+      "budget_ms": 1000.0,
       "quality_slo": 0.2,
       "Q_device": 0.45,
-      "quality_passes_slo": true,
-      "quality_gap": 0.0,
+      "quality_passes": true,
       "lat_fail_s043": 1.0,
       "lat_fail_s100": 1.0,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "egoschema",
-      "budget_ms": 1000,
+      "budget_ms": 1000.0,
       "quality_slo": 0.3,
       "Q_device": 0.45,
-      "quality_passes_slo": true,
-      "quality_gap": 0.0,
+      "quality_passes": true,
       "lat_fail_s043": 1.0,
       "lat_fail_s100": 1.0,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "egoschema",
-      "budget_ms": 1000,
+      "budget_ms": 1000.0,
       "quality_slo": 0.4,
       "Q_device": 0.45,
-      "quality_passes_slo": true,
-      "quality_gap": 0.0,
+      "quality_passes": true,
       "lat_fail_s043": 1.0,
       "lat_fail_s100": 1.0,
-      "discriminating_s043": true,
-      "discriminating_s100": true
+      "disc_s043": true,
+      "disc_s100": true
     },
     {
       "workload": "egoschema",
-      "budget_ms": 10000,
+      "budget_ms": 10000.0,
       "quality_slo": 0.2,
       "Q_device": 0.45,
-      "quality_passes_slo": true,
-      "quality_gap": 0.0,
+      "quality_passes": true,
       "lat_fail_s043": 0.0,
       "lat_fail_s100": 0.0,
-      "discriminating_s043": false,
-      "discriminating_s100": false
+      "disc_s043": false,
+      "disc_s100": false
     },
     {
       "workload": "egoschema",
-      "budget_ms": 10000,
+      "budget_ms": 10000.0,
       "quality_slo": 0.3,
       "Q_device": 0.45,
-      "quality_passes_slo": true,
-      "quality_gap": 0.0,
+      "quality_passes": true,
       "lat_fail_s043": 0.0,
       "lat_fail_s100": 0.0,
-      "discriminating_s043": false,
-      "discriminating_s100": false
+      "disc_s043": false,
+      "disc_s100": false
     },
     {
       "workload": "egoschema",
-      "budget_ms": 10000,
+      "budget_ms": 10000.0,
       "quality_slo": 0.4,
       "Q_device": 0.45,
-      "quality_passes_slo": true,
-      "quality_gap": 0.0,
+      "quality_passes": true,
       "lat_fail_s043": 0.0,
       "lat_fail_s100": 0.0,
-      "discriminating_s043": false,
-      "discriminating_s100": false
+      "disc_s043": false,
+      "disc_s100": false
     }
   ],
-  "egoschema_a2_sensitivity": {
-    "0.43": {
-      "300": 1.0,
-      "1000": 0.8,
-      "10000": 0.0
-    },
-    "1.0": {
-      "300": 1.0,
-      "1000": 1.0,
-      "10000": 0.0
-    }
-  }
+  "assumptions": [
+    "A1: qwen3b_time = s x qwen7b_time (time ratio, not rate). Shown at s=0.43 and s=1.00. Not directly measured.",
+    "A2: EgoSchema contexts assumed 1500-2500 tok. Not committed.",
+    "A4: incr_warm for L in (16384, 24576) uses rate extrapolated from last measured point L=16384; not past infeasibility boundary."
+  ]
 }
