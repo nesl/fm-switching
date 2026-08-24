@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-23 (E36 complete: fleet simulation — K1 PASS (22% non-discriminating); K2 FAIL in 3/36 cells at locomo/1000ms/s=0.43 (gap +0.7pp, threshold ≥5pp); K2 passes at s=1.00 (+14.2pp). Root cause: at s=0.43 device warm-append already serves 87.7% of LoCoMo turns within 1000ms. Pending: Jetson qwen3b measurement running on hardware to replace A1 assumption. E35 also complete from prior session.)
+Last updated: 2026-08-24 (E37 complete: Jetson qwen3b measurement resolves E36's A1 assumption. Measured 3B/7B device-tier cold-prefill ratio = 0.475@1k → 0.542@16k (rises with L); replace A1's 0.43–1.00 with 0.48–0.54 (≈0.54 at the ~20k-token operating point). The 1.00 "no-speedup" bound is refuted — the 3B is 1.85–2.1× faster at prefill — so E36's K2-passing s=1.00 case does not correspond to measured behavior; the real device speed sits near the s=0.43 end where E36's K2 FAILED at locomo/1000ms. E36 complete prior: K1 PASS; K2 FAIL 3/36 cells at s=0.43, passes at s=1.00; E35 also complete from prior session.)
 
 ## Framing
 
@@ -63,7 +63,7 @@ framing needs adjustment.
 |---|---|---|
 | **flash / A6000** | Fidelity experiments, server-tier cost profiling | Idle (Phase 1 fix-up committed) |
 | **flash / RTX 3090 Ti** | Edge-tier cost profiling (GPU 0) | Idle (Phase 1 fix-up committed) |
-| **Jetson AGX Orin** | Device-tier cost profiling (separate SSH host) | Idle — E23 done (qwen7b cost profile + full-context update rerun committed 2026-08-19) |
+| **Jetson AGX Orin** | Device-tier cost profiling (separate SSH host) | Idle — E37 done (qwen3b vs qwen7b device-tier time ratio, 2026-08-24); E23 done (qwen7b cost profile, 2026-08-19) |
 
 Flash hosts both A6000 (GPU 1) and RTX 3090 Ti (GPU 0) in the same machine.
 Jetson is a separate SSH host; pull before running so it writes to `results/cost/profiles/jetson_orin/`.
