@@ -306,3 +306,16 @@ K2 PASSES at measured device speed (gap ≈11pp). E36's K2 violation was a lower
 |---|---|---|---|---|---|---|
 | `results/cost/a1_ratio_table.csv` | analysis (no script) | qwen3b vs qwen7b | jetson_orin | 4 L-points × 7 ops | incr_warm ratio 0.593–0.705 (rises with L); full_restore 0.475–0.542; summary restore ~0.587 (flat) | 2026-08-24 |
 | `reports/phase1_cost_profiling.md §Measured A1 ratio` | — | — | — | — | K2 consequence: 46.5% device failure at 1s budget; K2 PASSES at measured ratio; device sum-update infeasible (11.9–21.2s) | 2026-08-24 |
+
+## E36b — Fleet Policy Simulation with Measured A1 Ratio (2026-08-24)
+
+E36 re-run using measured 3B/7B incr_warm ratio (0.593–0.705, L-dependent, E37).
+K1 PASS (22% non-discriminating). K2 PASS all 18 cells (min +6.8pp, max +57.0pp).
+lifecycle_aware co-ranks with edge_full_lru at all LoCoMo cells.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/orchestration/e36b_fleet/stage0_headroom.json` | `e36b_fleet.py` | qwen3b (measured) + qwen7b (edge) | CPU sim | 18 cells | LoCoMo 1s device failure 46.5%; K1 PASS (22% non-discriminating) | 2026-08-24 |
+| `results/orchestration/e36b_fleet/stage1_sweep.json` | `e36b_fleet.py` | qwen3b + qwen7b | CPU sim | 1,512 runs | Policy sweep at measured device speed | 2026-08-24 |
+| `results/orchestration/e36b_fleet/stage2_analysis.json` | `e36b_fleet.py` | — | CPU sim | 18 cells | K2 PASS all cells; lifecycle_aware +6.8–57.0pp vs device | 2026-08-24 |
+| `reports/e36b_fleet_policy.md` | — | — | — | — | Full report with 6-check consistency protocol | 2026-08-24 |

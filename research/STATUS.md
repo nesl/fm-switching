@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-24 (E37b complete: A1 ratio analysis. Measured incr_warm ratio 0.593@1k→0.705@16k (median 0.684 across LoCoMo turns). At measured ratio, device_only fails 46.5% of LoCoMo 1s queries; K2 gap ≈11pp — K2 PASSES. E36's K2 violation was a s=0.43 lower-bound artifact. Device sum-update infeasible at all L and budgets (11.9–21.2s). E37 also complete: Jetson qwen3b measured.)
+Last updated: 2026-08-24 (E36b complete: fleet policy simulation with measured A1 ratio. K1 PASS; K2 PASS all 18 cells (minimum +6.8pp locomo/1000ms; maximum +57.0pp egoschema/1000ms). lifecycle_aware co-ranks with edge_full_lru at all cells. E36 K2 violations confirmed as lower-bound artifacts. LoCoMo 1s device failure 46.5% at measured 3B speed. E37b and E37 also complete from same session.)
 
 ## Framing
 
