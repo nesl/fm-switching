@@ -1,0 +1,29 @@
+{
+  "s1_regime_dependent": true,
+  "s2": {
+    "pass": false,
+    "fail_count": 2,
+    "total": 16
+  },
+  "s3": {
+    "pass": true,
+    "pass_count": 4,
+    "cells": 4
+  },
+  "s4": {
+    "activating": 40,
+    "total": 288,
+    "reasons": {
+      "unknown": 10,
+      "large kv + slow turnrate: memory binds for both policies equally": 12,
+      "near-saturation: both policies close to ceiling": 12,
+      "locomo q>=0.30: only 'full' admissible, no choice": 70,
+      "egoschema: no maint (append assumed free, init at session_idx=0 for 1-session workload)": 144
+    }
+  },
+  "nc_check": {
+    "both_met_ma_ti5_kv9": 0.6593333333333333,
+    "both_met_fp_ti5_kv9": 0.5782222222222222,
+    "gap": 0.08111111111111113
+  }
+}

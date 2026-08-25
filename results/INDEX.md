@@ -337,6 +337,24 @@ Kill conditions (b)/(c) still fire; fleet system claim falsified. Accel binds at
 | `figures/orchestration/e36c_binding_resource.pdf` | `plots/orchestration/e36c_figures.py` | — | — | — | Binding resource: KV vs accel per policy/kv_cap/turn_interval | 2026-08-24 |
 | `figures/orchestration/e36c_kv_occupancy.pdf` | `plots/orchestration/e36c_figures.py` | — | — | — | KV p50/max occupancy vs kv_cap | 2026-08-24 |
 
+## E36e — Fleet Capacity Relationship: Proactive Maintenance Model (2026-08-24)
+
+Script: `experiments/orchestration/e36e_fleet.py`. CPU (no GPU). Proactive model: maintenance consumed from epoch budget, never on serving critical path. Part A: analytic P1–P4. Part A2: P1b non-monotone, batching sensitivity, refresh policy axis. Part B: 8,064 conditions × 30 epochs.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/orchestration/e36e_fleet/e36e_part_a.json` | `e36e_fleet.py --part A` | — (analytic) | CPU | — | P1 PASS: memory ordering inverted vs accelerator ordering. P2 PASS: win10 crossover ti≈17s. P3 PASS: fp_ranked selects 6 sessions, maint_ranked selects 8 (delta=2, ti=5s, kv=9GiB). P4 PASS: delta collapses with maint=0. | 2026-08-24 |
+| `results/orchestration/e36e_fleet/e36e_part_a2.json` | `e36e_fleet.py --part A2` | — (analytic) | CPU | — | P1b PASS: win10 maximizes N_eff at ti≥15s (non-monotone). Batching: 3-way collapses at B=4 ti=60s; 2-way (LoCoMo) immune to batching. Refresh: 3-way collapses at periodic-5; 2-way immune. | 2026-08-24 |
+| `results/orchestration/e36e_fleet/e36e_part_b.json` | `e36e_fleet.py --part B` | — (simulator) | CPU | 8,064 runs × 30 epochs | Fleet simulation with steady-state initialization (session_idx uniform random). Mechanism activated: both_met drops from 1.000 (bug) to 0.57–0.90 range. | 2026-08-24 |
+| `results/orchestration/e36e_fleet/e36e_part_b_analysis.json` | `e36e_fleet.py --part B` | — | CPU | 288 cells | S1 PASS (regime-dependent). S2 FAIL (2/16 cells, kv=18GiB ti≥30s, regret +12.8–13.5pp). S3 PASS (+7–26pp, 4/4 kv cells at ti=5s). S4: 40/288 activating. | 2026-08-24 |
+| `results/orchestration/e36e_fleet/e36e_part_b_init_report.json` | `e36e_fleet.py --part B` | — | CPU | n=50, seed=42 | Initialization state: epoch 0 L_mean=9520 tok, 16/50 robots above 12K TTFT threshold. Final epoch: L_mean=10692 tok, 18/50 above threshold. Session-end behavior: clamped at n_sess-1, no restart, no churn. | 2026-08-24 |
+| `results/orchestration/e36e_fleet/e36e_part_b_null_diagnosis.md` | — | — | CPU | — | INCONCLUSIVE classification of first Part B run (session_idx=0 bug: context_L=382 tok, device TTFT=344ms, mechanism absent). Fix: uniform random session_idx. | 2026-08-24 |
+| `figures/orchestration/e36e_sessions_supported.pdf` | `e36e_fleet.py` | — | CPU | — | Sessions supported vs ti for full/win10/sum200 with memory ceiling lines (kv=9GiB) | 2026-08-24 |
+| `figures/orchestration/e36e_effective_capacity_vs_turnrate.pdf` | `e36e_fleet.py` | — | CPU | — | N_eff = min(N_mem, N_accel) by representation; non-monotone win10 argmax; batching sensitivity for sum200 | 2026-08-24 |
+| `figures/orchestration/e36e_policy_gap.pdf` | `e36e_fleet.py` | — | CPU | — | both_met by policy × ti (n=50, kv=9GiB, locomo, q=0.20, ttft=1000ms); maint_aware vs fp_ranked gap | 2026-08-24 |
+| `figures/orchestration/e36e_s3_gap_heatmap.pdf` | `e36e_fleet.py` | — | CPU | — | S3 gap (maint_aware − fp_ranked) vs kv_cap at ti=5s | 2026-08-24 |
+| `reports/e36e_fleet_capacity.md` | — | — | — | — | Full report: mechanism verification (5 steps), 6-check consistency, Part A/A2/B results, S2 structural diagnosis, assumption table, kill condition verdicts | 2026-08-24 |
+
 ## E36d — Fleet Policy with Maintenance Charged to Accelerator via FIFO Queue (2026-08-24)
 
 Script: `experiments/orchestration/e36d_fleet.py`. CPU (no GPU). Supersedes E36c.

@@ -1,5 +1,7 @@
 # E36d Fleet Policy — Maintenance Charged to Accelerator
 
+> **SUPERSEDED by E36e** — E36d used a synchronous FIFO queue model where maintenance blocked the serving robot's TTFT. E36e uses the correct proactive maintenance model: maintenance happens between turns at fleet budget, never on the critical path. The E36d "Path 2" result (win10 slide 1031ms > TTFT SLO) is an artifact of the synchronous queue model and does not exist under the correct formulation. See `reports/e36e_fleet_capacity.md`.
+
 **Date:** 2026-08-24  
 **Script:** `experiments/orchestration/e36d_fleet.py`  
 **Outputs:** `results/orchestration/e36d_fleet/`  
