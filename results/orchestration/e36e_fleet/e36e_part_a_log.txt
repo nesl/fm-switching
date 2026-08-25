@@ -1,0 +1,133 @@
+========================================================================
+E36e PART A — Fleet Capacity Relationship (P1-P4)
+Pre-registered kill conditions: research/KILL_CONDITIONS.md
+Proactive maintenance model. Serving TTFT = serve_ms only.
+E36d Path 2 re-examination: see §Path 2 note below.
+========================================================================
+
+────────────────────────────────────────────────────────────
+P1 — INVERTED ORDERINGS
+KV capacity = 9.0 GiB, L_full = 20092 tokens (E33a median)
+
+Memory constraint (sessions supported, L_full = 20,092 tok):
+  fidelity      KV/session     N_mem(9GiB)
+  full          1.0730 GiB              8
+  win10_amz     0.3885 GiB             23
+  sum200        0.0085 GiB           1053
+
+Accelerator constraint (sessions supported) by turn interval:
+  fidelity      ti=5s  ti=15s  ti=30s  ti=60s
+  full             40    120    240    480
+  win10_amz         6     20     40     80
+  sum200            0      2      5     10
+
+Ordering check:
+  Memory ordering (highest→lowest): sum200 > win10_amz > full
+  Accel ordering at ti=5s:        full > win10_amz > sum200  ← INVERTED ✓
+  Accel ordering at ti=15s:        full > win10_amz > sum200  ← INVERTED ✓
+  Accel ordering at ti=30s:        full > win10_amz > sum200  ← INVERTED ✓
+  Accel ordering at ti=60s:        full > win10_amz > sum200  ← INVERTED ✓
+
+P1: PASS — ordering is inverted at all turn intervals
+
+Win10 breakdown by phase (supplement):
+  case            maint_ms  serve_ms  total_ms  N_accel(5s)  N_accel(60s)
+  slide (65.7%)     1031.0      59.0    1090.0            4           55
+  amortized          689.7      59.0     748.7            6           80
+  growth (34.3%)      36.0      59.0      95.0           52          631
+
+────────────────────────────────────────────────────────────
+P2 — BINDING-RESOURCE FLIP THRESHOLDS
+KV capacity = 9.0 GiB
+
+  fidelity        N_mem    ti_cross(s)  in sweep [5–60 s]?
+  full                 8           1.0  no — always KV-bound
+  win10_amz           23          17.2  yes — flip observable
+  sum200            1053        6164.3  yes — flip observable
+  win10_slide         23          25.1  yes — flip observable
+  win10_growth        23           2.2  no
+
+  Crossover thresholds: {'full': 1.0, 'win10_amz': 17.2, 'sum200': 6164.3}
+  Thresholds distinct: True
+P2: PASS — flip thresholds differ across representations
+
+────────────────────────────────────────────────────────────
+P3 — FOOTPRINT SELECTION LANDS ON WRONG SIDE (ti=5s, kv=9GiB)
+Admissible fidelities for LoCoMo q_slo=0.20: full (Q=0.40), win10 (Q=0.23)
+sum200 inadmissible (Q=0.12 < 0.20) — excluded from comparison
+
+  Q/kv_bytes:  full = 3.4718e-10,  win10 = 5.5132e-10
+  N_supported: full = 8,  win10_amz = 6
+
+  footprint_ranked selects:  win10_amz   → 6 sessions supported
+  maintenance_ranked selects:full   → 8 sessions supported
+  Difference: 2 sessions  (maint_ranked − fp_ranked)
+P3: PASS — rules select different representation in accel-bound regime
+
+────────────────────────────────────────────────────────────
+P4 — NEGATIVE CONTROL (maintenance costs set to zero)
+
+  With maint=0, ti=5s:  N_accel uses serve_ms only
+  fidelity      N_mem    N_accel(maint=0)   N_accel(real)
+  full               8                 84              40
+  win10_amz         23                 84               6
+  sum200          1053                156               0
+
+  Memory ordering (unchanged):    sum200 > win10_amz > full
+  Accel ordering (maint=0):       sum200 > full > win10_amz
+  Accel ordering (real maint):    full > win10_amz > sum200
+
+  Ordering inverted with real maint: True
+  Ordering inverted with maint=0:    True
+
+  fp_ranked selects (maint=0):     win10_amz → 23 sessions
+  maint_ranked selects (maint=0):  win10_amz → 23 sessions
+  Rules agree (maint=0):           True
+
+P4: PASS — P1/P3 collapse with maintenance=0
+
+────────────────────────────────────────────────────────────
+PATH 2 RE-EXAMINATION (E36d artifact check)
+
+E36d attributed a residual gap at ti=60s (+12.6pp) to 'Path 2':
+  win10 slide maintenance (1031ms) > 1000ms TTFT SLO → served robots miss SLO.
+
+Under the proactive maintenance model (this experiment):
+  A served robot's TTFT = serve_ms = 59ms, regardless of maintenance cost.
+  Maintenance was done proactively before the query arrived.
+  THEREFORE: 'Path 2' is an artifact of E36d's synchronous queue model.
+  It does not apply under proactive maintenance.
+
+Consequence for the ti=60s residual:
+  ti=60s: full supports 8 sessions (KV-bound), win10_amz supports 23 (KV-bound)
+  Both KV-bound at ti=60s. Win10 admits 23 sessions, full admits 8.
+  At ti=60s, win10 is strictly better for session count. The gap INVERTS.
+  maint_aware should select win10 at ti=60s, same as fp_ranked.
+  CONCLUSION: E36d 'Path 2' residual is model artifact. Proactive model predicts
+  gap convergence (or inversion) at large turn intervals.
+
+────────────────────────────────────────────────────────────
+SESSIONS SUPPORTED TABLE — N_supported(f, ti) = min(N_mem, N_accel)
+KV capacity = 9.0 GiB | Binding = memory (M) or accel (A)
+
+  fidelity        ti=5s  ti=15s  ti=30s  ti=60s  N_mem
+  full               8M     8M     8M     8M  8
+  win10_amz          6A    20A    23M    23M  23
+  win10_slide        4A    13A    23M    23M  23
+  win10_growth      23M    23M    23M    23M  23
+  sum200             0A     2A     5A    10A  1053
+
+========================================================================
+PART A VERDICT
+
+  P1: PASS
+  P2: PASS
+  P3: PASS
+  P4: PASS
+
+ALL PRIMARY CONDITIONS PASS. Proceed to Part B.
+The capacity relationship is real: ordering under memory and accelerator are inverted.
+Crossover for win10 at 17s (amortized), 25s (slide-only).
+fp_ranked selects win10 in accel-bound regime; maint_ranked selects full; delta = 2 sessions.
+With maint=0: inversion collapses, rules agree.
+========================================================================

@@ -1,0 +1,155 @@
+========================================================================
+E36e PART A2 — Addenda: P1b, Batching, Refresh Policy
+========================================================================
+
+────────────────────────────────────────────────────────────
+P1b — EFFECTIVE CAPACITY: min(N_mem, N_accel) per cell
+Non-monotonicity check: does the argmax land on an intermediate representation?
+KV capacity = 9.0 GiB
+
+  fidelity        ti=5s  ti=15s  ti=30s  ti=60s  N_mem
+  full               8M     8M     8M     8M  8
+  win10_amz          6A    20A    23M    23M  23
+  sum200             0A     2A     5A    10A  1053
+
+Argmax N_eff per turn interval (= representation maximizing concurrent sessions):
+  ti      argmax          N_eff   interpretation
+  5s     full                 8  maintenance-minimizing
+  15s     win10_amz           20  NEITHER EXTREME (intermediate)
+  30s     win10_amz           23  NEITHER EXTREME (intermediate)
+  60s     win10_amz           23  NEITHER EXTREME (intermediate)
+
+Cells where argmax is an intermediate representation: 3/4
+P1b: PASS — capacity is non-monotone in fidelity.
+  The intermediate win10 representation maximizes sessions supported at ti>=15s.
+  Neither footprint-ranked nor maintenance-ranked selects it by definition.
+  This is the headline result: the optimal representation is regime-dependent,
+  and it is not the extreme choice on either axis.
+
+────────────────────────────────────────────────────────────
+BATCHING ANALYSIS — sum200 only (full/win10 use append, not regenerate)
+Batching speedup B: effective maint_sum200 = MAINT_SUM200_MS / B
+Sweep B in {1, 2, 4, 8, 16}
+
+Context: sum200 regenerates 160-token summaries — embarrassingly batchable.
+full/win10 append to KV cache (single forward pass); batching gain is marginal.
+This analysis only changes the sum200 accelerator column.
+
+  N_accel for sum200 under batching (kv=9GiB):
+  B     ti=5s  ti=15s  ti=30s  ti=60s  maint_eff(ms)
+  1         0      2      5     10  5822
+  2         1      5     10     20  2911
+  4         3     10     20     40  1456
+  8         6     19     39     78  728
+  16       12     37     75    151  364
+
+  win10_amz N_accel reference (unchanged by batching):
+            6     20     40     80
+
+Inversion analysis: at what B does sum200 recover to win10 level at ti=5s?
+  B=1  : sum200 N_accel(5s)=  0, win10 N_accel(5s)=6 → sum200 < win10
+  B=2  : sum200 N_accel(5s)=  1, win10 N_accel(5s)=6 → sum200 < win10
+  B=4  : sum200 N_accel(5s)=  3, win10 N_accel(5s)=6 → sum200 < win10
+  B=8  : sum200 N_accel(5s)=  6, win10 N_accel(5s)=6 → sum200 ≥ win10 — PARTIAL INVERSION COLLAPSE
+  B=16 : sum200 N_accel(5s)= 12, win10 N_accel(5s)=6 → sum200 ≥ win10 — PARTIAL INVERSION COLLAPSE
+
+Does the FULL inversion collapse at any B? (requires accel order = memory order)
+  Memory order: sum200(1053) > win10(23) > full(8)
+  Accel order needs: sum200 > win10 > full
+  But full always has N_accel = floor(ti/(66+59)ms) — lowest maint, highest N_accel.
+  At ti=5s: full N_accel=40, win10 N_accel=6
+  Full always beats win10 in accel. The full/win10 inversion never collapses.
+  The fundamental inversion (full: worst memory, best accel) persists for any finite B.
+  B* = ∞ for full inversion. Partial collapse (sum200 recovers past win10) at B≈8 (ti=5s only).
+
+Does non-monotonicity persist? (win10 winning min(N_mem, N_accel))
+
+Three-way non-monotone (win10 as argmax across full/win10/sum200):
+  B=1  : ti=15s: (s200=2, w10=20, full=8)  ti=30s: (s200=5, w10=23, full=8)  ti=60s: (s200=10, w10=23, full=8)
+         → win10 still argmax at ti>=15s
+  B=2  : ti=15s: (s200=5, w10=20, full=8)  ti=30s: (s200=10, w10=23, full=8)  ti=60s: (s200=20, w10=23, full=8)
+         → win10 still argmax at ti>=15s
+  B=4  : ti=15s: (s200=10, w10=20, full=8)  ti=30s: (s200=20, w10=23, full=8)  ti=60s: (s200=40, w10=23, full=8)
+         → win10 loses argmax at ti=60s (s200=40 > w10=23)
+  B=8  : ti=15s: (s200=19, w10=20, full=8)  ti=30s: (s200=39, w10=23, full=8)  ti=60s: (s200=78, w10=23, full=8)
+         → win10 loses argmax at ti=30s (s200=39 > w10=23)
+  B=16 : ti=15s: (s200=37, w10=20, full=8)  ti=30s: (s200=75, w10=23, full=8)  ti=60s: (s200=151, w10=23, full=8)
+         → win10 loses argmax at ti=15s (s200=37 > w10=20)
+  Three-way non-monotone holds for B <= 2.
+  Collapses first at B=4, ti=60s (sum200 overtakes win10 in N_eff).
+
+Two-way non-monotone (full vs win10 only — LoCoMo admissible representations):
+  full and win10 both use KV-append (single forward pass); batching provides no speedup.
+  N_accel(full, ti=5s)=40 always > N_accel(win10_amz, ti=5s)=6 for any B.
+  Win10 KV-bound at 23 sessions; full KV-bound at 8 sessions. At ti>=17s: win10 wins.
+  Two-way non-monotone (win10 argmax in {full, win10}) holds for ALL finite B.
+
+[NOTE] For LoCoMo at q_slo=0.20: sum200 is inadmissible (Q=0.12 < 0.20).
+  The operative claim for LoCoMo is the TWO-WAY non-monotone (full vs win10),
+  which is immune to batching. The three-way result (where sum200 is included)
+  applies to EgoSchema and lower-q_slo cells; it collapses at B≈4 (ti=60s).
+
+────────────────────────────────────────────────────────────
+REFRESH POLICY AXIS — sum200 accelerator demand vs deadline-miss rate
+
+Policies: eager (every turn), periodic-K (K∈{2,5,10}), lazy (on-demand).
+  eager/periodic-K: regeneration is PROACTIVE → TTFT = serve_ms = 32ms (no deadline miss).
+  lazy: regeneration is ON THE QUERY PATH → TTFT = 5822+32 = 5854ms > 1000ms SLO.
+
+[ASSUMPTION A2a] Stale trigger rate R(K): for LoCoMo (dense-incompressible),
+  evidence is approximately uniformly distributed across turns. After K stale
+  turns, fraction of queries needing evidence from those turns ≈ K/22 (E33a).
+  This is a LOWER BOUND on deadline-miss rate — recency effects may make it higher.
+
+[NOTE] E27 periodic-K measurements are flagged as buggy in E27/E32 open items.
+  Those numbers are NOT used here. The trigger rates below derive solely from
+  [ASSUMPTION A2a] and are clearly labelled.
+
+  policy          mode         accel_demand/turn   deadline_miss   N_accel(5s)  N_accel(60s)
+  eager           proactive                 5822            0.0%             0            10
+  periodic-2      proactive                 2911            0.0%             1            20
+  periodic-5      proactive                 1164            0.0%             4            50
+  periodic-10     proactive                  582            0.0%             8            97
+  lazy(K=1)       on-demand                  265            4.5%            16           202
+  lazy(K=2)       on-demand                  529            9.1%             8           106
+  lazy(K=5)       on-demand                 1323           22.7%             3            44
+  lazy(K=10)      on-demand                 2646           45.5%             1            22
+
+Frontier interpretation:
+  eager:      zero deadline misses; worst accelerator utilization (5822ms/turn)
+  periodic-K: zero deadline misses; K× better accelerator; quality degrades
+             when summary is stale (K−1 turns per cycle have outdated context)
+  lazy:       deadline misses at rate R; best accelerator use; quality miss = R
+
+  For LoCoMo at q_slo=0.20: sum200 inadmissible regardless (Q=0.12 < 0.20).
+  The refresh-policy axis applies to: EgoSchema (admissible), or q_slo=0 cells.
+  For EgoSchema (Q(sum200)=0.483 >= 0.20): lazy at K=5 → 22.7% deadline misses.
+  Proactive eager dominates lazy on deadline misses; periodic-10 is the
+  Pareto-best if quality degradation from K=10 staleness is tolerable.
+
+  Refresh-policy boundary for three-way non-monotone (including sum200):
+    periodic-10: sum200 N_accel(5s)=8 vs win10 N_accel(5s)=6 → sum200 beats
+    periodic-10: sum200 N_accel(60s)=97 vs win10 N_eff(30s)=23 → sum200 beats
+    At periodic-10, sum200 beats win10 at all turn intervals — three-way non-monotone collapses.
+
+  Refresh-policy boundary for two-way non-monotone (full vs win10, LoCoMo):
+    full/win10 use KV-append — no per-session regeneration, no batching speedup.
+    TTFT = serve_ms (proactive, eager always). No refresh policy axis for these two.
+    The two-way non-monotone result is insensitive to refresh policy.
+
+  Summary: the non-monotone result has two scopes:
+    (i) TWO-WAY (full vs win10): holds for all B and all refresh policies. LoCoMo headline.
+    (ii) THREE-WAY (sum200 included): collapses at B=4 (ti=60s) or periodic-5 refresh (ti=60s).
+    The paper claim is stated as the capacity relationship; (i) is the load-bearing version.
+
+========================================================================
+PART A2 SUMMARY
+
+P1b: PASS — win10 is the capacity argmax at ti>=15s (non-monotone)
+Batching (three-way): non-monotone holds for B<=2; collapses at B=4 (ti=60s sum200 overtakes win10)
+Batching (two-way, LoCoMo): non-monotone (full vs win10) holds for all B — append has no batching speedup
+Refresh policy (three-way): non-monotone collapses at periodic-5 (sum200 N_accel(60s)=50 > win10=23)
+Refresh policy (two-way, LoCoMo): insensitive — full/win10 use append, no regeneration axis
+[LoCoMo] sum200 inadmissible at q_slo>=0.20. Load-bearing claim = two-way non-monotone (full vs win10).
+[EgoSchema] Three-way result applies; survives to B<=2 (eager/periodic-2 maint only).
+========================================================================

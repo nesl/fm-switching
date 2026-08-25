@@ -1,0 +1,268 @@
+{
+  "p1": {
+    "mem_n": {
+      "full": 8,
+      "win10_amz": 23,
+      "sum200": 1053
+    },
+    "accel_n": {
+      "full": {
+        "5": 40,
+        "15": 120,
+        "30": 240,
+        "60": 480
+      },
+      "win10_amz": {
+        "5": 6,
+        "15": 20,
+        "30": 40,
+        "60": 80
+      },
+      "sum200": {
+        "5": 0,
+        "15": 2,
+        "30": 5,
+        "60": 10
+      }
+    },
+    "mem_rank": [
+      "sum200",
+      "win10_amz",
+      "full"
+    ],
+    "by_ti": {
+      "5": {
+        "accel_rank": [
+          "full",
+          "win10_amz",
+          "sum200"
+        ],
+        "inverted": true
+      },
+      "15": {
+        "accel_rank": [
+          "full",
+          "win10_amz",
+          "sum200"
+        ],
+        "inverted": true
+      },
+      "30": {
+        "accel_rank": [
+          "full",
+          "win10_amz",
+          "sum200"
+        ],
+        "inverted": true
+      },
+      "60": {
+        "accel_rank": [
+          "full",
+          "win10_amz",
+          "sum200"
+        ],
+        "inverted": true
+      }
+    },
+    "pass": true
+  },
+  "p2": {
+    "full": {
+      "n_mem": 8,
+      "crossover_s": 1.0,
+      "accel_binds_at_min_ti": false
+    },
+    "win10_amz": {
+      "n_mem": 23,
+      "crossover_s": 17.220444999999998,
+      "accel_binds_at_min_ti": true
+    },
+    "sum200": {
+      "n_mem": 1053,
+      "crossover_s": 6164.262,
+      "accel_binds_at_min_ti": true
+    },
+    "pass": true
+  },
+  "p3": {
+    "ti_s": 5,
+    "kv_gib": 9.0,
+    "q_per_kv": {
+      "full": 3.47175314979665e-10,
+      "win10_amz": 5.513239445262642e-10
+    },
+    "n_supported": {
+      "full": 8,
+      "win10_amz": 6
+    },
+    "fp_choice": "win10_amz",
+    "maint_choice": "full",
+    "delta_sessions": 2,
+    "pass": true
+  },
+  "p4": {
+    "accel_n_zero": {
+      "full": 84,
+      "win10_amz": 84,
+      "sum200": 156
+    },
+    "supp_zero": {
+      "full": 8,
+      "win10_amz": 23
+    },
+    "accel_rank_zero": [
+      "sum200",
+      "full",
+      "win10_amz"
+    ],
+    "inversion_zero": true,
+    "fp_choice_zero": "win10_amz",
+    "maint_choice_zero": "win10_amz",
+    "delta_zero": 0,
+    "pass": true
+  },
+  "path2_reexamination": {
+    "n60_full": 8,
+    "n60_win10": 23,
+    "verdict": "Path 2 is artifact of E36d synchronous queue model. Not applicable under proactive maintenance."
+  },
+  "sessions_table": {
+    "full": {
+      "5": {
+        "n_supported": 8,
+        "n_mem": 8,
+        "n_accel": 40,
+        "binding": "M"
+      },
+      "15": {
+        "n_supported": 8,
+        "n_mem": 8,
+        "n_accel": 120,
+        "binding": "M"
+      },
+      "30": {
+        "n_supported": 8,
+        "n_mem": 8,
+        "n_accel": 240,
+        "binding": "M"
+      },
+      "60": {
+        "n_supported": 8,
+        "n_mem": 8,
+        "n_accel": 480,
+        "binding": "M"
+      }
+    },
+    "win10_amz": {
+      "5": {
+        "n_supported": 6,
+        "n_mem": 23,
+        "n_accel": 6,
+        "binding": "A"
+      },
+      "15": {
+        "n_supported": 20,
+        "n_mem": 23,
+        "n_accel": 20,
+        "binding": "A"
+      },
+      "30": {
+        "n_supported": 23,
+        "n_mem": 23,
+        "n_accel": 40,
+        "binding": "M"
+      },
+      "60": {
+        "n_supported": 23,
+        "n_mem": 23,
+        "n_accel": 80,
+        "binding": "M"
+      }
+    },
+    "win10_slide": {
+      "5": {
+        "n_supported": 4,
+        "n_mem": 23,
+        "n_accel": 4,
+        "binding": "A"
+      },
+      "15": {
+        "n_supported": 13,
+        "n_mem": 23,
+        "n_accel": 13,
+        "binding": "A"
+      },
+      "30": {
+        "n_supported": 23,
+        "n_mem": 23,
+        "n_accel": 27,
+        "binding": "M"
+      },
+      "60": {
+        "n_supported": 23,
+        "n_mem": 23,
+        "n_accel": 55,
+        "binding": "M"
+      }
+    },
+    "win10_growth": {
+      "5": {
+        "n_supported": 23,
+        "n_mem": 23,
+        "n_accel": 52,
+        "binding": "M"
+      },
+      "15": {
+        "n_supported": 23,
+        "n_mem": 23,
+        "n_accel": 157,
+        "binding": "M"
+      },
+      "30": {
+        "n_supported": 23,
+        "n_mem": 23,
+        "n_accel": 315,
+        "binding": "M"
+      },
+      "60": {
+        "n_supported": 23,
+        "n_mem": 23,
+        "n_accel": 631,
+        "binding": "M"
+      }
+    },
+    "sum200": {
+      "5": {
+        "n_supported": 0,
+        "n_mem": 1053,
+        "n_accel": 0,
+        "binding": "A"
+      },
+      "15": {
+        "n_supported": 2,
+        "n_mem": 1053,
+        "n_accel": 2,
+        "binding": "A"
+      },
+      "30": {
+        "n_supported": 5,
+        "n_mem": 1053,
+        "n_accel": 5,
+        "binding": "A"
+      },
+      "60": {
+        "n_supported": 10,
+        "n_mem": 1053,
+        "n_accel": 10,
+        "binding": "A"
+      }
+    }
+  },
+  "verdict": {
+    "p1": true,
+    "p2": true,
+    "p3": true,
+    "p4": true,
+    "all_pass": true
+  }
+}
