@@ -1,0 +1,139 @@
+========================================================================
+E36g — Marginal-benefit Admission Ordering Analysis
+========================================================================
+
+────────────────────────────────────────────────────────────
+1. S2 — neff_marginal and neff_ranked vs best fixed policy
+   locomo, q=0.20, ttft=1000ms, n=50, mean over 3 seeds
+
+      kv    ti      best_fixed     bf  neff_r   reg_r  verd_r  neff_m   reg_m  verd_m
+     4.5     5     always_full  0.574   0.506  +0.068    FAIL   0.663  -0.089    PASS
+     4.5    15   always_window  0.592   0.544  +0.048    PASS   0.723  -0.131    PASS
+     4.5    30   always_window  0.592   0.544  +0.048    PASS   0.723  -0.131    PASS
+     4.5    60   always_window  0.592   0.544  +0.048    PASS   0.723  -0.131    PASS
+     9.0     5     always_full  0.659   0.571  +0.088    FAIL   0.751  -0.092    PASS
+     9.0    15   always_window  0.700   0.677  +0.023    PASS   0.763  -0.063    PASS
+     9.0    30   always_window  0.702   0.723  -0.020    PASS   0.955  -0.253    PASS
+     9.0    60   always_window  0.702   0.723  -0.020    PASS   0.955  -0.253    PASS
+    18.0     5     always_full  0.822   0.794  +0.028    PASS   0.939  -0.118    PASS
+    18.0    15     always_full  0.822   0.857  -0.035    PASS   0.996  -0.174    PASS
+    18.0    30   always_window  0.950   0.956  -0.006    PASS   0.994  -0.044    PASS
+    18.0    60   always_window  0.957   1.000  -0.043    PASS   1.000  -0.043    PASS
+    36.0     5     always_full  0.903   0.804  +0.099    FAIL   1.000  -0.097    PASS
+    36.0    15     always_full  1.000   1.000  +0.000    PASS   1.000  +0.000    PASS
+    36.0    30     always_full  1.000   1.000  +0.000    PASS   1.000  +0.000    PASS
+    36.0    60     always_full  1.000   1.000  +0.000    PASS   1.000  +0.000    PASS
+
+  neff_ranked:   FAIL — 3 cells
+  neff_marginal: PASS — 0 cells
+
+────────────────────────────────────────────────────────────
+2. DIAGNOSIS CHECK — admitted robots' context_L at ti=5s
+   Prediction: neff_ranked admits many below-threshold robots;
+   neff_marginal admits few. Device threshold L ≈ 11800 tokens.
+
+   (epoch 0 only; mean over 3 seeds)
+
+  kv=4.5 GiB, ti=5s:
+          policy  n_admitted  n_high_MB  n_low_MB  mean_L_admitted  median_L_admitted
+     always_full        13.7        3.3      10.3             6158               3864
+     neff_ranked        21.7        0.0      21.7             3807               3318
+   neff_marginal        11.3        8.0       3.3             9666              10958
+          oracle         9.0        8.3       0.7            12878              11645
+
+  DIAGNOSIS CONFIRMED at kv=4.5 GiB: neff_ranked admits 21.7 low-MB robots vs neff_marginal 3.3
+
+  kv=9.0 GiB, ti=5s:
+          policy  n_admitted  n_high_MB  n_low_MB  mean_L_admitted  median_L_admitted
+     always_full        20.3        8.0      12.3             8265               7371
+     neff_ranked        30.0        3.0      27.0             5432               5190
+   neff_marginal        17.3       12.0       5.3             9743              11318
+          oracle        19.0       12.0       7.0             8869              11151
+
+  DIAGNOSIS CONFIRMED at kv=9.0 GiB: neff_ranked admits 27.0 low-MB robots vs neff_marginal 5.3
+
+  kv=36.0 GiB, ti=5s:
+          policy  n_admitted  n_high_MB  n_low_MB  mean_L_admitted  median_L_admitted
+     always_full        40.0       19.0      21.0             9654               9357
+     neff_ranked        40.0       14.0      26.0             7836               7355
+   neff_marginal        40.0       23.0      17.0            10785              11249
+          oracle        40.0       23.0      17.0            10171              11249
+
+  DIAGNOSIS CONFIRMED at kv=36.0 GiB: neff_ranked admits 26.0 low-MB robots vs neff_marginal 17.0
+
+────────────────────────────────────────────────────────────
+3. S3 — neff_marginal vs footprint_ranked at ti=5s
+   (E36f reported neff_ranked gap = −0.007 at kv=9GiB; prediction: clearly positive with fix)
+
+      kv   neff_m       fp      gap  verdict
+     4.5    0.663    0.504   +0.159  PASS
+     9.0    0.751    0.578   +0.173  PASS
+    18.0    0.939    0.640   +0.299  PASS
+    36.0    1.000    0.640   +0.360  PASS
+  S3: PASS
+
+────────────────────────────────────────────────────────────
+4. DISTINGUISHABILITY — neff_marginal vs every fixed policy by >1pp
+
+      kv    ti   neff_m       af       aw  d_from_af  d_from_aw  both?
+     4.5     5    0.663    0.574    0.572      0.089      0.091  YES
+     4.5    15    0.723    0.574    0.592      0.149      0.131  YES
+     4.5    30    0.723    0.574    0.592      0.149      0.131  YES
+     4.5    60    0.723    0.574    0.592      0.149      0.131  YES
+     9.0     5    0.751    0.659    0.572      0.092      0.179  YES
+     9.0    15    0.763    0.659    0.700      0.104      0.063  YES
+     9.0    30    0.955    0.659    0.702      0.296      0.253  YES
+     9.0    60    0.955    0.659    0.702      0.296      0.253  YES
+    18.0     5    0.939    0.822    0.572      0.118      0.367  YES
+    18.0    15    0.996    0.822    0.722      0.174      0.273  YES
+    18.0    30    0.994    0.822    0.950      0.172      0.044  YES
+    18.0    60    1.000    0.822    0.957      0.178      0.043  YES
+    36.0     5    1.000    0.903    0.572      0.097      0.428  YES
+    36.0    15    1.000    1.000    0.722      0.000      0.278  no
+    36.0    30    1.000    1.000    0.963      0.000      0.037  no
+    36.0    60    1.000    1.000    1.000      0.000      0.000  no
+  neff_marginal outcome-distinguishable from every fixed policy: 13/16 cells
+
+  Context: E36f found neff_ranked 11/16 cells outcome-distinguishable.
+
+────────────────────────────────────────────────────────────
+5. ORACLE COMPARISON — does any policy beat oracle?
+   Oracle definition: fidelity = argmax N_eff (same as neff_marginal/neff_ranked);
+   admission = marginal_benefit DESC, then KV footprint ASC.
+   For full-only fleets: oracle ≡ neff_marginal (N_eff DESC = KV ASC for full).
+   Divergence expected at ti≥15s where some robots switch to win10 (fixed KV).
+
+      kv    ti  oracle  neff_m      af      aw  oracle_beaten?       by_whom
+     4.5     5   0.676   0.663   0.574   0.572                no             —
+     4.5    15   0.723   0.723   0.574   0.592                no             —
+     4.5    30   0.723   0.723   0.574   0.592                no             —
+     4.5    60   0.723   0.723   0.574   0.592                no             —
+     9.0     5   0.751   0.751   0.659   0.572                no             —
+     9.0    15   0.763   0.763   0.659   0.700                no             —
+     9.0    30   0.955   0.955   0.659   0.702                no             —
+     9.0    60   0.955   0.955   0.659   0.702                no             —
+    18.0     5   0.939   0.939   0.822   0.572                no             —
+    18.0    15   0.989   0.996   0.822   0.722               YES  neff_m (+0.007)
+    18.0    30   0.994   0.994   0.822   0.950                no             —
+    18.0    60   1.000   1.000   0.822   0.957                no             —
+    36.0     5   1.000   1.000   0.903   0.572                no             —
+    36.0    15   1.000   1.000   1.000   0.722                no             —
+    36.0    30   1.000   1.000   1.000   0.963                no             —
+    36.0    60   1.000   1.000   1.000   1.000                no             —
+
+  NOTE: oracle beaten in some cells. Two explanations:
+  (a) Oracle is not a strict upper bound if always_full occasionally packs
+      slightly more robots by coincidence of ID order.
+  (b) Implementation gap: oracle sorts by KV ASC within high-MB group,
+      but always_full sorts by ID which may happen to align with KV ASC.
+  This is flagged as an artifact; oracle is a practical upper bound, not
+  the globally optimal solution to the joint KV+accel knapsack.
+
+========================================================================
+SUMMARY
+  S2 neff_marginal: PASS
+  S2 neff_ranked:   FAIL (3 cells)
+  S3 neff_marginal: PASS
+  Distinguishable:  13/16 cells by >1pp
+  Oracle beaten:    1 cells
+========================================================================

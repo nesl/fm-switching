@@ -276,14 +276,19 @@ This is a regime-conditional design rule, not a general-purpose policy. The neff
 
 ---
 
+**Diagnosis superseded by E36g:** The mixed-fidelity fleet explanation in this report is incorrect. At kv=9 and 36 GiB, ti=5s, Section 4 shows ALL robots select full (N_eff(full)≥7 > N_eff(win10)=6). The actual cause is admission ordering: N_eff(full) is larger for small-L robots, so neff_ranked admits them first — but small-L robots already meet the device SLO (marginal benefit 0). E36g (neff_marginal) fixes the admission ordering and passes S2 in all 16 cells. See `reports/e36g_marginal_admission.md`.
+
+---
+
 ## After-task protocol
 
 - [x] Mechanism verification recorded (Steps 1–5 above, before sweep)
 - [x] Six-check consistency protocol recorded above
 - [x] S2/S3 re-verification complete
 - [x] Figure: `figures/orchestration/e36f_selection_vs_turnrate.pdf`
-- [ ] EXPERIMENTS.md E36f row update (pending)
-- [ ] INDEX.md entry (pending)
-- [ ] STATUS.md update (pending)
-- [ ] One-line note in e36e_fleet_capacity.md (pending)
+- [x] EXPERIMENTS.md E36f row update
+- [x] INDEX.md entry
+- [x] STATUS.md update
+- [x] One-line note in e36e_fleet_capacity.md
+- [x] Diagnosis superseded note added (E36g)
 - [ ] Commit (user action)

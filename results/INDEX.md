@@ -372,6 +372,23 @@ Design rule: choose full at ti≤6s (N_accel(win10)=6 < N_eff(full)≥7); choose
 | `figures/orchestration/e36f_selection_vs_turnrate.pdf` | `e36f_neff.py` | — | CPU | — | 4-panel: selection fraction (full/win10) + both_met vs ti, per kv_cap; crossover marked | 2026-08-24 |
 | `reports/e36f_neff_policy.md` | — | — | — | — | Full report: mechanism verification (5 steps), 6-check consistency, S2/S3 re-verification, distinguishability, regime trace, circularity defense, activation region (honest denominator) | 2026-08-24 |
 
+## E36g — Marginal-benefit Admission Ordering (2026-08-24)
+
+Script: `experiments/orchestration/e36g_marginal.py`. CPU (no GPU). Adds neff_marginal (two-part rule) and oracle policies to E36f's fleet simulation (8 total).
+All constants identical to E36e/E36f; no new measurements. DEVICE_TTFT_1000MS_THRESHOLD = 11,800 tokens (analytic from E23 × E37).
+S2: PASS (0/16 cells for neff_marginal); S3: PASS (+0.159–0.360 pp vs fp_ranked at ti=5s, all kv_caps). Distinguishable 13/16 cells.
+E36f mixed-fidelity diagnosis superseded: actual cause = N_eff ordering admits small-L (zero marginal benefit) robots first. Two-part rule separates representation selection (Part 1 = argmax N_eff) from admission ordering (Part 2 = marginal benefit DESC).
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/orchestration/e36g_marginal/e36g_sweep.json` | `e36g_marginal.py` | — (simulator) | CPU | 1,536 runs (8 pol × 4 kv × 4 ti × 2 wl × 2 q × 3 seeds) × 30 epochs | Full policy sweep with neff_marginal and oracle added; both_met per cell per seed | 2026-08-24 |
+| `results/orchestration/e36g_marginal/e36g_diag_detail.json` | `e36g_marginal.py` | — | CPU | 3 cells × 4 policies × epoch 0 | Diagnosis: context_L, marginal_benefit per admitted robot at kv=4.5/9/36 GiB, ti=5s | 2026-08-24 |
+| `results/orchestration/e36g_marginal/e36g_analysis.json` | `e36g_marginal.py` | — | CPU | 32–128 cells (analyzed) | S2/S3 tables for neff_marginal alongside neff_ranked; distinguishability; oracle comparison | 2026-08-24 |
+| `results/orchestration/e36g_marginal/e36g_analysis_log.txt` | `e36g_marginal.py` | — | CPU | — | Full text output of analysis: S2/S3 tables, diagnosis, distinguishability, oracle cell | 2026-08-24 |
+| `figures/orchestration/e36g_admitted_by_context_length.pdf` | `e36g_marginal.py` | — | CPU | — | 3-panel histogram: context_L distribution of admitted robots at ti=5s per policy (kv=4.5/9/36 GiB); diagnosis figure | 2026-08-24 |
+| `figures/orchestration/e36g_policy_comparison.pdf` | `e36g_marginal.py` | — | CPU | — | 4-panel: both_met vs ti per kv_cap, all 8 policies; neff_marginal vs neff_ranked gap visible at ti=5s | 2026-08-24 |
+| `reports/e36g_marginal_admission.md` | — | — | — | — | Full report: mechanism verification (5 steps), 6-check consistency, 5 required items (S2 alongside neff_ranked, diagnosis check, S3, distinguishability, oracle comparison), two-part rule summary | 2026-08-24 |
+
 ## E36d — Fleet Policy with Maintenance Charged to Accelerator via FIFO Queue (2026-08-24)
 
 Script: `experiments/orchestration/e36d_fleet.py`. CPU (no GPU). Supersedes E36c.
