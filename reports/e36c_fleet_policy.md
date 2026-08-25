@@ -1,3 +1,7 @@
+**SUPERSEDED BY E36d.** E36c's null was an artifact: maintenance was not charged to the accelerator budget for any policy (refresh_ms returned 0 for full and win10), and accel budget was not enforced for always_X or footprint_ranked. E36d corrects both defects with a FIFO queue model and finds +12.6–17.8 pp gap at LoCoMo q=0.20, TTFT budget=1000ms. See `reports/e36d_fleet_policy.md`.
+
+---
+
 # E36c — Fleet Policy Experiment with Fixed Edge KV Capacity
 
 **Date:** 2026-08-24  

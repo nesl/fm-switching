@@ -336,3 +336,18 @@ Kill conditions (b)/(c) still fire; fleet system claim falsified. Accel binds at
 | `figures/orchestration/e36c_gap_vs_fleetsize.pdf` | `plots/orchestration/e36c_figures.py` | — | — | — | both_met vs fleet size (kv=9 GiB, ti=30 s) | 2026-08-24 |
 | `figures/orchestration/e36c_binding_resource.pdf` | `plots/orchestration/e36c_figures.py` | — | — | — | Binding resource: KV vs accel per policy/kv_cap/turn_interval | 2026-08-24 |
 | `figures/orchestration/e36c_kv_occupancy.pdf` | `plots/orchestration/e36c_figures.py` | — | — | — | KV p50/max occupancy vs kv_cap | 2026-08-24 |
+
+## E36d — Fleet Policy with Maintenance Charged to Accelerator via FIFO Queue (2026-08-24)
+
+Script: `experiments/orchestration/e36d_fleet.py`. CPU (no GPU). Supersedes E36c.
+Two defects fixed: (1) refresh_ms now charges full=66ms, win10=36/1031ms, sum200=5822ms; (2) FIFO queue model enforces accel budget for all policies. Serve=warm-decode-only (double-count removed).
+Realized slide fraction: 63.0% (committed 65.7%). Mechanism verification PASS (all 4 steps). 6-check consistency PASS.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/orchestration/e36d_fleet/e36d_stage0_headroom.json` | `e36d_fleet.py` | qwen3b (E37b) + qwen7b (E29) | CPU sim | 18 cells | K1 PASS: admissibility gate; LoCoMo q=0.20 admits full+win10; q≥0.30 admits full only | 2026-08-24 |
+| `results/orchestration/e36d_fleet/e36d_stage1_sweep.json` | `e36d_fleet.py` | qwen3b + qwen7b | CPU sim | 8,064 runs | Full policy sweep; FIFO queue TTFT model; maintenance charged to all policies | 2026-08-24 |
+| `results/orchestration/e36d_fleet/e36d_stage2_analysis.json` | `e36d_fleet.py` | — | CPU sim | 72 cells | maint_aware +12.6–17.8pp vs fp_ranked (LoCoMo q=0.20 @ 1000ms); 0pp EgoSchema; 0pp q≥0.30 | 2026-08-24 |
+| `results/orchestration/e36d_fleet/e36d_binding_diagnostic.json` | `e36d_fleet.py` | — | CPU sim | n=50, kv=9GiB diagnostic | maint_aware: kv_bd=36.0%, ac_bd=0%; fp_ranked: kv_bd=39.9%, ac_bd=15.7% at ti=5s | 2026-08-24 |
+| `results/orchestration/e36d_fleet/mechanism_verification.txt` | `e36d_mechanism_verification.py` | — | CPU | Steps 1–4 | All steps PASS; negative control: maint=real gap=+11; maint=0 gap=−1 (reversal confirms mechanism) | 2026-08-24 |
+| `reports/e36d_fleet_policy.md` | — | — | — | — | Full report: mechanism verification, 6-check consistency, main results table, kill conditions, binding diagnostic, two-path mechanism interpretation | 2026-08-24 |

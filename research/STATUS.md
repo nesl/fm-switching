@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-08-24 (E36c: fleet policy with fixed KV capacity and corrected fleet-level greedy knapsack for maintenance_aware. Kill conditions (b)/(c) fire again: maintenance_aware within 5pp of footprint_ranked in ALL 18 cells; fleet system claim FALSIFIED. Kill condition (d) does NOT fire: accel binds for maintenance_aware at ti=5 s. Root cause: argmax(gain/kv_cost) = argmax(Q/kv_cost) for tested admissible sets — knapsack collapses to footprint_ranked. Fleet scheduling investigation closed.)
+Last updated: 2026-08-24 (E36d: fleet policy with FIFO queue model charging maintenance to accelerator. Two E36c defects corrected: (1) refresh_ms now non-zero for full and win10; (2) accel budget enforced for all policies via FIFO queue. Mechanism PRESENT: maintenance_aware beats footprint_ranked by +12.6–17.8 pp at LoCoMo q=0.20, TTFT budget=1000ms. Gap largest at ti=5s (accel contention path), persistent at ti=60s (win10 slide maintenance 1031ms > 1000ms TTFT SLO — second activation path). Kill conditions (b)/(c) fire in 45/72 and 64/72 cells — all structurally explained. Kill condition (d) no-fire: accel binds for footprint_ranked (15.7%) at ti=5s. E36c null classified as INCONCLUSIVE (mechanism absent). 6-check consistency and mechanism verification both PASS.)
 
 ## Framing
 
