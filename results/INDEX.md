@@ -419,3 +419,14 @@ Realized slide fraction: 63.0% (committed 65.7%). Mechanism verification PASS (a
 | `results/orchestration/e36d_fleet/e36d_binding_diagnostic.json` | `e36d_fleet.py` | — | CPU sim | n=50, kv=9GiB diagnostic | maint_aware: kv_bd=36.0%, ac_bd=0%; fp_ranked: kv_bd=39.9%, ac_bd=15.7% at ti=5s | 2026-08-24 |
 | `results/orchestration/e36d_fleet/mechanism_verification.txt` | `e36d_mechanism_verification.py` | — | CPU | Steps 1–4 | All steps PASS; negative control: maint=real gap=+11; maint=0 gap=−1 (reversal confirms mechanism) | 2026-08-24 |
 | `reports/e36d_fleet_policy.md` | — | — | — | — | Full report: mechanism verification, 6-check consistency, main results table, kill conditions, binding diagnostic, two-path mechanism interpretation | 2026-08-24 |
+
+## E38 — Slide Figures (2026-08-25)
+
+Script: `experiments/figures/e38_slide_figures.py`. CPU (no GPU). Plotting only; all values from committed result files. Three advisor-presentation figures at slide legibility (≥14pt labels, ≥16pt titles). Both PDF and PNG for each figure.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `figures/slides/e38_fig1_maintenance_cost.{pdf,png}` | `e38_slide_figures.py` | — | CPU | analytic | Horizontal bar (log x): full=66ms, win10_growth=36ms, win10_amortized=653ms (E34), sum200_recursive=5822ms (E35). vLLM 1.10–1.17× faster cold; 1.59–2.55× faster warm-append (E26). | 2026-08-25 |
+| `figures/slides/e38_fig2_inversion.{pdf,png}` | `e38_slide_figures.py` | — | CPU | analytic | Two-panel: KV footprint (sum200=9.2MB, win10=417MB, full=1.15GB) vs maintenance (sum200=5822ms, win10=653ms, full=66ms). Ascending footprint = descending maintenance. | 2026-08-25 |
+| `figures/slides/e38_fig3_effective_capacity.{pdf,png}` | `e38_slide_figures.py` | — | CPU | analytic | N_eff=min(N_mem,N_accel) vs ti (1–65s) at kv=9GiB: full=8 (always mem-bound), win10 rises 6→23 (crossover at ti≈17.2s), sum200 rises 0→10. Dashed=accel limit; dotted=mem limit; solid=N_eff. | 2026-08-25 |
+| `reports/e38_slide_figures.md` | — | — | — | — | Full provenance report: every plotted value with source file, two flagged discrepancies (win10 amortized 653 vs 689.7 ms; sum200 KV 9.2 vs 11.5 MB), 6-check consistency protocol | 2026-08-25 |
