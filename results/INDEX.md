@@ -372,6 +372,22 @@ Design rule: choose full at ti≤6s (N_accel(win10)=6 < N_eff(full)≥7); choose
 | `figures/orchestration/e36f_selection_vs_turnrate.pdf` | `e36f_neff.py` | — | CPU | — | 4-panel: selection fraction (full/win10) + both_met vs ti, per kv_cap; crossover marked | 2026-08-24 |
 | `reports/e36f_neff_policy.md` | — | — | — | — | Full report: mechanism verification (5 steps), 6-check consistency, S2/S3 re-verification, distinguishability, regime trace, circularity defense, activation region (honest denominator) | 2026-08-24 |
 
+## E36h — Two-part Rule Ablation (2026-08-25)
+
+Script: `experiments/orchestration/e36h_ablation.py`. CPU (no GPU). Adds always_full_mb, always_window_mb, footprint_ranked_mb baselines; renames oracle → greedy_upper. 12 policies, 2,304 runs.
+Decomposition: best_fixed (no MB, no N_eff) → best_fixed_mb (MB only) → neff_marginal (both parts).
+admission_gain = best_fixed_mb − best_fixed; representation_gain = neff_marginal − best_fixed_mb.
+Mean admission_gain = +9.62 pp; mean representation_gain = +0.48 pp. rep_gain positive in 2/16 cells; zero in 14/16.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/orchestration/e36h_ablation/e36h_sweep.json` | `e36h_ablation.py` | — (simulator) | CPU | 2,304 runs × 30 epochs | Full policy sweep; 12 policies including always_full_mb, always_window_mb, footprint_ranked_mb, greedy_upper | 2026-08-25 |
+| `results/orchestration/e36h_ablation/e36h_fidelity_mix.json` | `e36h_ablation.py` | — | CPU | 48 (kv,ti) cells × 3 seeds | Per-epoch fidelity counts (full/win10 fraction) for neff_marginal, locomo q=0.20 | 2026-08-25 |
+| `results/orchestration/e36h_ablation/e36h_analysis.json` | `e36h_ablation.py` | — | CPU | 5 analysis sections | Decomp table, representation_gain regions, fidelity-mix diagnostic, S3 corrected, greedy_upper comparison | 2026-08-25 |
+| `results/orchestration/e36h_ablation/e36h_analysis_log.txt` | `e36h_ablation.py` | — | CPU | — | Full text output of all analysis sections | 2026-08-25 |
+| `figures/orchestration/e36h_gain_decomposition.pdf` | `e36h_ablation.py` | — | CPU | — | 4-panel stacked bar: admission_gain (blue) and representation_gain (orange) per turn interval per kv_cap | 2026-08-25 |
+| `reports/e36h_ablation.md` | — | — | — | — | Full report: mechanism verification (5 steps), 6-check consistency, 5 required items (decomp table, rep_gain regions, fidelity-mix diagnostic, S3 corrected, greedy_upper renaming) | 2026-08-25 |
+
 ## E36g — Marginal-benefit Admission Ordering (2026-08-24)
 
 Script: `experiments/orchestration/e36g_marginal.py`. CPU (no GPU). Adds neff_marginal (two-part rule) and oracle policies to E36f's fleet simulation (8 total).
