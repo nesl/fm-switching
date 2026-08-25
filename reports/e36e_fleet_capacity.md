@@ -341,3 +341,5 @@ Non-activating cells by structural reason:
 ---
 
 *After-task protocol: update research/EXPERIMENTS.md E36e row, append to results/INDEX.md, update research/STATUS.md.*
+
+**S2 resolution (E36f):** E36f implemented neff_ranked and found S2 still fails in 3 cells at ti=5s (new failure mode: dynamic-L mixed-fleet effect); the E36e S2 cells (kv=18GiB, ti≥30s) now pass. See `reports/e36f_neff_policy.md`.

@@ -355,6 +355,23 @@ Script: `experiments/orchestration/e36e_fleet.py`. CPU (no GPU). Proactive model
 | `figures/orchestration/e36e_s3_gap_heatmap.pdf` | `e36e_fleet.py` | — | CPU | — | S3 gap (maint_aware − fp_ranked) vs kv_cap at ti=5s | 2026-08-24 |
 | `reports/e36e_fleet_capacity.md` | — | — | — | — | Full report: mechanism verification (5 steps), 6-check consistency, Part A/A2/B results, S2 structural diagnosis, assumption table, kill condition verdicts | 2026-08-24 |
 
+## E36f — N_eff-ranked Policy: S2 Re-verification (2026-08-24)
+
+Script: `experiments/orchestration/e36f_neff.py`. CPU (no GPU). Adds neff_ranked policy (argmax N_eff = min(N_mem, N_accel)) to E36e's fleet simulation.
+All constants identical to E36e; no new measurements.
+S2: FAIL in 3 cells (kv=4.5,9,36 GiB, ti=5s; regret +6.8–9.9pp) — new ti=5s failure from dynamic-L mixed-fleet effect; E36e's kv=18GiB ti≥30s cells now PASS.
+S3: PASS at all kv_caps (neff_ranked ≥ fp_ranked at ti=5s, gap +0.2–16.4pp).
+Distinguishability: 0/16 cells selection-distinguishable; 11/16 outcome-distinguishable. Honest activation: 11/16.
+Design rule: choose full at ti≤6s (N_accel(win10)=6 < N_eff(full)≥7); choose win10 at ti>crossover.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/orchestration/e36f_neff/e36f_sweep.json` | `e36f_neff.py` | — (simulator) | CPU | 1152 runs (6 pol × 4 kv × 4 ti × 2 wl × 2 q × 3 seeds) × 30 epochs | Full policy sweep with neff_ranked added; both_met per cell per seed | 2026-08-24 |
+| `results/orchestration/e36f_neff/e36f_analysis.json` | `e36f_neff.py` | — | CPU | 16–64 cells (analyzed) | S2/S3 tables, distinguishability, activation region (honest 11/16) | 2026-08-24 |
+| `results/orchestration/e36f_neff/e36f_analysis_log.txt` | `e36f_neff.py` | — | CPU | — | Full text output of analysis: regime trace, circularity defense, 6 required items | 2026-08-24 |
+| `figures/orchestration/e36f_selection_vs_turnrate.pdf` | `e36f_neff.py` | — | CPU | — | 4-panel: selection fraction (full/win10) + both_met vs ti, per kv_cap; crossover marked | 2026-08-24 |
+| `reports/e36f_neff_policy.md` | — | — | — | — | Full report: mechanism verification (5 steps), 6-check consistency, S2/S3 re-verification, distinguishability, regime trace, circularity defense, activation region (honest denominator) | 2026-08-24 |
+
 ## E36d — Fleet Policy with Maintenance Charged to Accelerator via FIFO Queue (2026-08-24)
 
 Script: `experiments/orchestration/e36d_fleet.py`. CPU (no GPU). Supersedes E36c.
