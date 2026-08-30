@@ -470,6 +470,19 @@ Key findings: (RQ1) stepwise token count scales monotonically with difficulty fo
 | `figures/vision/study_c_difficulty.{pdf,png}` | `study_c_difficulty.py` | — | — | — | Two-panel: accuracy vs difficulty (all 4 model×mode curves) and stepwise token count vs difficulty | 2026-08-30 |
 | `reports/study_c_difficulty.md` | — | — | — | — | Full report: what was run, raw measurements with spread, sanity checks, RQ1-RQ3 inferences, what cannot be inferred | 2026-08-30 |
 
+## Study D — Reasoning Compute vs Parameters (partial; 2026-08-30)
+
+Script: `experiments/vision/study_d_thinking.py`. A6000 (cuda:1), bfloat16, greedy. Same 120 COCO images as Study C.
+Models run: qwen3vl4b (Instruct) and qwen3vl4b_t (Thinking). 8B models not run — stop condition fired at qwen3vl4b_t/L4 (30% budget hit > 5% threshold).
+Key findings: think tokens scale monotonically 54→1626 L1→L4. 4B-Thinking beats 4B-Instruct at L2–L4; L3 gap most reliable (+0.233, no budget hits). L4 lower-bound only (truncated). Rerun needed with max_new_tokens=8192 for 8B models and reliable L4 Thinking values.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/vision/study_d/study_d_trials.csv` | `study_d_thinking.py` | qwen3vl4b + qwen3vl4b_t | a6000 (cuda:1) | 720 rows (8 cells × 90) | Instruct acc L1–L4: 0.967/0.700/0.167/0.033. Thinking acc: 0.933/0.800/0.400/0.100†(†truncated). Think tokens median: 54/78/396/1626. | 2026-08-30 |
+| `results/vision/study_d/study_d_results.json` | `study_d_thinking.py` | qwen3vl4b + qwen3vl4b_t | CPU | 8 cells | Per-cell: acc, n_generated, n_think median/p25/p75, budget hits, unparseable | 2026-08-30 |
+| `figures/vision/study_d_thinking.{pdf,png}` | `study_d_thinking.py` | — | — | 8 cells | Two-panel: accuracy vs difficulty (4 model×mode curves) and token count vs difficulty | 2026-08-30 |
+| `reports/study_d_thinking.md` | — | — | — | — | Full report: stop condition, SC1–SC5, per-cell table, RQ1–RQ3 answers, what cannot be inferred, next steps | 2026-08-30 |
+
 ## Study C Re-scoring — Tolerance-Based Accuracy and Error Analysis (2026-08-30)
 
 Scripts: `experiments/vision/study_c_rescore.py` (CPU only, no new inference), `experiments/vision/study_c_rescore_plots.py` (plotting).
