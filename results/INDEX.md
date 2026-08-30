@@ -455,3 +455,17 @@ Key finding: cost ordering differs from text case. Vision window (377 ms constan
 | `results/vision/study_b/study_b_results.json` | `study_b_vision_kv.py` | qwenvl7b | a6000 (cuda:1) | 7 N-points × 3 conditions × 2 reps | Full: KV 24.9 MB→1,108 MB linear; construction 207→6,332 ms. Window k=3: KV=71 MB constant; construction 377 ms flat (N≥k). Summary: construction 777→27,854 ms growing; query TTFT 29→177 ms (text-only context). All SC4 ratios=1.000. | 2026-08-30 |
 | `results/vision/study_b/study_b_trials.csv` | `study_b_vision_kv.py` | qwenvl7b | a6000 | per-trial raw values | Per-(N,condition,rep): state_construction_ms, query_ttft_ms, kv_bytes_measured, peak_mem_bytes, n_generated, kv_ratio | 2026-08-30 |
 | `reports/study_b_vision_kv.md` | — | — | — | — | Full report: conditions, N sweep, raw measurement tables, 4 sanity checks, inferences, limitations | 2026-08-30 |
+
+## Study C — Difficulty Scaling: 3B vs 7B VLM Accuracy (2026-08-30)
+
+Script: `experiments/vision/study_c_difficulty.py`. A6000 (cuda:1), qwenvl7b + qwenvl3b (Qwen2.5-VL, bfloat16).
+COCO val2017, person category. Difficulty = annotated person count: L1=1, L2=2-3, L3=4-7, L4=8+. 30 images/level, 3 reps each. Two prompt modes: direct (max 30 tokens) and stepwise chain-of-thought (max 512 tokens). Greedy decoding, fixed seed 42. Trial order randomized per model.
+Key findings: (RQ1) stepwise token count scales monotonically with difficulty for both models (7B: 69→140 tok, 3B: 75→126 tok). (RQ2) accuracy gap is non-monotone and reverses at high difficulty in stepwise mode. (RQ3) chain-of-thought hurts both models at high difficulty; 7B-stepwise-L4=0.000. Neither the gap-widening nor the CoT-benefit hypothesis is supported.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/vision/study_c/study_c_results.json` | `study_c_difficulty.py` | qwenvl7b + qwenvl3b | a6000 (cuda:1) | 1,440 trials (16 cells × 90 each) | Per-cell: acc, token median [p25,p75], budget_hit_frac, unparseable_frac, latency_median_ms. SC2 PASS (stepwise >20× more tokens). SC3 PASS (max budget 3.3%). SC4 warning: 3B-stepwise-L1 6.7% unparseable. | 2026-08-30 |
+| `results/vision/study_c/study_c_trials.csv` | `study_c_difficulty.py` | qwenvl7b + qwenvl3b | a6000 | 1,440 rows | Per-trial: model, image_id, level, n_persons_gt, mode, rep, n_input, n_generated, latency_ms, budget_hit, parsed_answer, parse_status, correct | 2026-08-30 |
+| `results/vision/study_c/study_c_selection.json` | `study_c_difficulty.py` | — | — | 120 images | Per-image: image_id, n_persons_gt, level, width, height; no bytes stored | 2026-08-30 |
+| `figures/vision/study_c_difficulty.{pdf,png}` | `study_c_difficulty.py` | — | — | — | Two-panel: accuracy vs difficulty (all 4 model×mode curves) and stepwise token count vs difficulty | 2026-08-30 |
+| `reports/study_c_difficulty.md` | — | — | — | — | Full report: what was run, raw measurements with spread, sanity checks, RQ1-RQ3 inferences, what cannot be inferred | 2026-08-30 |

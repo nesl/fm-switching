@@ -1,0 +1,365 @@
+{
+  "config": {
+    "seed": 42,
+    "device": "cuda:1",
+    "dtype": "bfloat16",
+    "target_size": [
+      560,
+      560
+    ],
+    "n_per_level": 30,
+    "n_reps": 3,
+    "max_new_tokens_direct": 30,
+    "max_new_tokens_stepwise": 512,
+    "difficulty_levels": {
+      "L1": [
+        1,
+        1
+      ],
+      "L2": [
+        2,
+        3
+      ],
+      "L3": [
+        4,
+        7
+      ],
+      "L4": [
+        8,
+        999
+      ]
+    },
+    "models": {
+      "qwenvl7b": "Qwen/Qwen2.5-VL-7B-Instruct",
+      "qwenvl3b": "Qwen/Qwen2.5-VL-3B-Instruct"
+    },
+    "direct_prompt": "How many people are in this image? Answer with a single integer only. Do not explain.",
+    "stepwise_prompt": "How many people are in this image? Think step by step: describe each person you can see. Then give your final answer on its own line starting exactly with 'Final answer:' followed by the number. Example: Final answer: 3",
+    "data_source": "HuggingFace detection-datasets/coco, split=val, person category"
+  },
+  "package_versions": {
+    "transformers": "5.12.1",
+    "torch": "2.4.1+cu118",
+    "PIL": "9.2.0",
+    "python": "3.10.19",
+    "gpu_info": "NVIDIA GeForce RTX 3090 Ti, 24564, 550.163.01\nNVIDIA RTX A6000, 49140, 550.163.01",
+    "datasets": "5.0.0"
+  },
+  "summary": {
+    "qwenvl7b|stepwise|L1": {
+      "model": "qwenvl7b",
+      "mode": "stepwise",
+      "level": "L1",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.9667,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 69.0,
+      "n_generated_min": 21,
+      "n_generated_max": 106,
+      "n_generated_p25": 55.0,
+      "n_generated_p75": 89.0,
+      "latency_ms_median": 1911.2,
+      "n_input_unique": [
+        469
+      ]
+    },
+    "qwenvl7b|stepwise|L4": {
+      "model": "qwenvl7b",
+      "mode": "stepwise",
+      "level": "L4",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.0,
+      "budget_hit_frac": 0.0333,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 140.0,
+      "n_generated_min": 53,
+      "n_generated_max": 512,
+      "n_generated_p25": 115.0,
+      "n_generated_p75": 170.0,
+      "latency_ms_median": 3752.6,
+      "n_input_unique": [
+        469
+      ]
+    },
+    "qwenvl7b|stepwise|L3": {
+      "model": "qwenvl7b",
+      "mode": "stepwise",
+      "level": "L3",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.1667,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 131.0,
+      "n_generated_min": 28,
+      "n_generated_max": 179,
+      "n_generated_p25": 96.0,
+      "n_generated_p75": 144.0,
+      "latency_ms_median": 3522.6,
+      "n_input_unique": [
+        469
+      ]
+    },
+    "qwenvl7b|stepwise|L2": {
+      "model": "qwenvl7b",
+      "mode": "stepwise",
+      "level": "L2",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.7,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 95.0,
+      "n_generated_min": 47,
+      "n_generated_max": 151,
+      "n_generated_p25": 85.0,
+      "n_generated_p75": 114.0,
+      "latency_ms_median": 2571.2,
+      "n_input_unique": [
+        469
+      ]
+    },
+    "qwenvl7b|direct|L4": {
+      "model": "qwenvl7b",
+      "mode": "direct",
+      "level": "L4",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.1333,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 3.0,
+      "n_generated_min": 2,
+      "n_generated_max": 4,
+      "n_generated_p25": 2.0,
+      "n_generated_p75": 3.0,
+      "latency_ms_median": 204.8,
+      "n_input_unique": [
+        440
+      ]
+    },
+    "qwenvl7b|direct|L1": {
+      "model": "qwenvl7b",
+      "mode": "direct",
+      "level": "L1",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.9333,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 2.0,
+      "n_generated_min": 2,
+      "n_generated_max": 2,
+      "n_generated_p25": 2.0,
+      "n_generated_p75": 2.0,
+      "latency_ms_median": 179.4,
+      "n_input_unique": [
+        440
+      ]
+    },
+    "qwenvl7b|direct|L2": {
+      "model": "qwenvl7b",
+      "mode": "direct",
+      "level": "L2",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.7,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 2.0,
+      "n_generated_min": 2,
+      "n_generated_max": 2,
+      "n_generated_p25": 2.0,
+      "n_generated_p75": 2.0,
+      "latency_ms_median": 179.4,
+      "n_input_unique": [
+        440
+      ]
+    },
+    "qwenvl7b|direct|L3": {
+      "model": "qwenvl7b",
+      "mode": "direct",
+      "level": "L3",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.3667,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 2.0,
+      "n_generated_min": 2,
+      "n_generated_max": 2,
+      "n_generated_p25": 2.0,
+      "n_generated_p75": 2.0,
+      "latency_ms_median": 179.4,
+      "n_input_unique": [
+        440
+      ]
+    },
+    "qwenvl3b|stepwise|L3": {
+      "model": "qwenvl3b",
+      "mode": "stepwise",
+      "level": "L3",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.3,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 124.5,
+      "n_generated_min": 30,
+      "n_generated_max": 159,
+      "n_generated_p25": 104.0,
+      "n_generated_p75": 141.0,
+      "latency_ms_median": 2006.5,
+      "n_input_unique": [
+        469
+      ]
+    },
+    "qwenvl3b|direct|L1": {
+      "model": "qwenvl3b",
+      "mode": "direct",
+      "level": "L1",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.9667,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 2.0,
+      "n_generated_min": 2,
+      "n_generated_max": 2,
+      "n_generated_p25": 2.0,
+      "n_generated_p75": 2.0,
+      "latency_ms_median": 126.6,
+      "n_input_unique": [
+        440
+      ]
+    },
+    "qwenvl3b|stepwise|L2": {
+      "model": "qwenvl3b",
+      "mode": "stepwise",
+      "level": "L2",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.5862,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0333,
+      "n_generated_median": 93.0,
+      "n_generated_min": 56,
+      "n_generated_max": 140,
+      "n_generated_p25": 72.0,
+      "n_generated_p75": 110.0,
+      "latency_ms_median": 1512.4,
+      "n_input_unique": [
+        469
+      ]
+    },
+    "qwenvl3b|stepwise|L1": {
+      "model": "qwenvl3b",
+      "mode": "stepwise",
+      "level": "L1",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.8214,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0667,
+      "n_generated_median": 75.0,
+      "n_generated_min": 38,
+      "n_generated_max": 140,
+      "n_generated_p25": 55.0,
+      "n_generated_p75": 99.0,
+      "latency_ms_median": 1237.7,
+      "n_input_unique": [
+        469
+      ]
+    },
+    "qwenvl3b|direct|L4": {
+      "model": "qwenvl3b",
+      "mode": "direct",
+      "level": "L4",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.0667,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 3.0,
+      "n_generated_min": 2,
+      "n_generated_max": 4,
+      "n_generated_p25": 2.0,
+      "n_generated_p75": 3.0,
+      "latency_ms_median": 139.1,
+      "n_input_unique": [
+        440
+      ]
+    },
+    "qwenvl3b|direct|L2": {
+      "model": "qwenvl3b",
+      "mode": "direct",
+      "level": "L2",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.7,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 2.0,
+      "n_generated_min": 2,
+      "n_generated_max": 2,
+      "n_generated_p25": 2.0,
+      "n_generated_p75": 2.0,
+      "latency_ms_median": 126.8,
+      "n_input_unique": [
+        440
+      ]
+    },
+    "qwenvl3b|stepwise|L4": {
+      "model": "qwenvl3b",
+      "mode": "stepwise",
+      "level": "L4",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.0333,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 125.5,
+      "n_generated_min": 64,
+      "n_generated_max": 201,
+      "n_generated_p25": 89.0,
+      "n_generated_p75": 148.0,
+      "latency_ms_median": 2029.1,
+      "n_input_unique": [
+        469
+      ]
+    },
+    "qwenvl3b|direct|L3": {
+      "model": "qwenvl3b",
+      "mode": "direct",
+      "level": "L3",
+      "n_trials": 90,
+      "n_images": 30,
+      "accuracy": 0.2333,
+      "budget_hit_frac": 0.0,
+      "unparseable_frac": 0.0,
+      "n_generated_median": 2.0,
+      "n_generated_min": 2,
+      "n_generated_max": 2,
+      "n_generated_p25": 2.0,
+      "n_generated_p75": 2.0,
+      "latency_ms_median": 126.7,
+      "n_input_unique": [
+        440
+      ]
+    }
+  },
+  "sanity_checks": {
+    "SC1_input_token_constant": false,
+    "SC1_n_input_values": [
+      440,
+      469
+    ],
+    "SC2_length_separation": true,
+    "SC2_issues": [],
+    "SC3_budget_hits": true,
+    "SC3_violations": []
+  }
+}
