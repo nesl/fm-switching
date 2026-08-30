@@ -430,3 +430,28 @@ Script: `experiments/figures/e38_slide_figures.py`. CPU (no GPU). Plotting only;
 | `figures/slides/e38_fig2_inversion.{pdf,png}` | `e38_slide_figures.py` | — | CPU | analytic | Two-panel: KV footprint (sum200=9.2MB, win10=417MB, full=1.15GB) vs maintenance (sum200=5822ms, win10=653ms, full=66ms). Ascending footprint = descending maintenance. | 2026-08-25 |
 | `figures/slides/e38_fig3_effective_capacity.{pdf,png}` | `e38_slide_figures.py` | — | CPU | analytic | N_eff=min(N_mem,N_accel) vs ti (1–65s) at kv=9GiB: full=8 (always mem-bound), win10 rises 6→23 (crossover at ti≈17.2s), sum200 rises 0→10. Dashed=accel limit; dotted=mem limit; solid=N_eff. | 2026-08-25 |
 | `reports/e38_slide_figures.md` | — | — | — | — | Full provenance report: every plotted value with source file, two flagged discrepancies (win10 amortized 653 vs 689.7 ms; sum200 KV 9.2 vs 11.5 MB), 6-check consistency protocol | 2026-08-25 |
+
+## Study A — Scene Content Cost (2026-08-30)
+
+Script: `experiments/vision/study_a_scene_content.py`. A6000 (cuda:1), qwenvl7b (Qwen2.5-VL-7B-Instruct), bfloat16. 12 images at 560×560. N=3 reps + warmup + repeat-control. Cross-model check: qwenvl3b token count only.
+Key finding: vision token count, KV bytes, and output token count are all content-independent at fixed pixel dimensions. Prefill latency 145–148 ms (run-order confounded, cannot attribute spread to content).
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/vision/study_a/study_a_results.json` | `study_a_scene_content.py` | qwenvl7b + qwenvl3b (cross-model) | a6000 (cuda:1) | 12 images × 3 reps; 3 repeat-control reps | All 12 images → 400 vision tokens (both models). KV=24.9 MB, ratio=1.000. Output=2 tok uniform. Prefill 145–148 ms (2.83 ms spread, run-order confounded). H1 CONFIRMED; H2 falsified. | 2026-08-30 |
+| `results/vision/study_a/study_a_trials.csv` | `study_a_scene_content.py` | qwenvl7b | a6000 | per-trial raw values | Per-image per-rep: vision_tokens, prefill_ms, kv_bytes_measured, n_generated, kv_ratio | 2026-08-30 |
+| `results/vision/study_a/img_*.png` (12 files) | `study_a_scene_content.py` | — | — | — | 12 test images (9 synthetic + 3 natural photos resized to 560×560) | 2026-08-30 |
+| `reports/study_a_scene_content.md` | — | — | — | — | Full report: code inspection finding, raw measurements, 5 sanity checks, what can/cannot be inferred | 2026-08-30 |
+
+## Study B — Vision KV State Reduction (2026-08-30)
+
+Script: `experiments/vision/study_b_vision_kv.py`. A6000 (cuda:1), qwenvl7b (Qwen2.5-VL-7B-Instruct), bfloat16.
+Three conditions: full retention (all N frames), windowed (k=3 most recent), summary (real generation call per frame, text context for query).
+N sweep: {1, 3, 6, 12, 24, 36, 48}. N=2 reps per (N, condition). KV per-token cost: 57,344 B/token (identical to text, SC4 ratio=1.000).
+Key finding: cost ordering differs from text case. Vision window (377 ms constant) << full (6,332 ms at N=48) << summary construction (27,854 ms at N=48). Text ordering is full < window < summary (warm-append dominates text). H4 confirmed for ordering/magnitudes; H3 confirmed only for per-token KV byte cost.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/vision/study_b/study_b_results.json` | `study_b_vision_kv.py` | qwenvl7b | a6000 (cuda:1) | 7 N-points × 3 conditions × 2 reps | Full: KV 24.9 MB→1,108 MB linear; construction 207→6,332 ms. Window k=3: KV=71 MB constant; construction 377 ms flat (N≥k). Summary: construction 777→27,854 ms growing; query TTFT 29→177 ms (text-only context). All SC4 ratios=1.000. | 2026-08-30 |
+| `results/vision/study_b/study_b_trials.csv` | `study_b_vision_kv.py` | qwenvl7b | a6000 | per-trial raw values | Per-(N,condition,rep): state_construction_ms, query_ttft_ms, kv_bytes_measured, peak_mem_bytes, n_generated, kv_ratio | 2026-08-30 |
+| `reports/study_b_vision_kv.md` | — | — | — | — | Full report: conditions, N sweep, raw measurement tables, 4 sanity checks, inferences, limitations | 2026-08-30 |

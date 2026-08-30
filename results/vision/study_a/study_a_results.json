@@ -1,0 +1,261 @@
+{
+  "study": "A",
+  "research_question": "Does scene content change the cost of a frame?",
+  "code_inspection": {
+    "finding": "H1 confirmed: token count is a pure function of input pixel dimensions (H, W). smart_resize is deterministic arithmetic; image_grid_thw = [1, H//patch, W//patch]. No content-adaptive branching. H2 falsified by inspection.",
+    "analytical_vision_tokens_at_560x560": 400,
+    "analytical_resized_hw": [
+      560,
+      560
+    ],
+    "kv_bytes_per_token_analytical": 57344,
+    "kv_config": {
+      "num_hidden_layers": 28,
+      "num_kv_heads": 4,
+      "head_dim": 128,
+      "dtype_bytes": 2,
+      "formula": "2 * 4 * 128 * 28 * 2"
+    }
+  },
+  "config": {
+    "model": "Qwen2.5-VL-7B-Instruct",
+    "device": "cuda:1",
+    "dtype": "bfloat16",
+    "target_image_size_HW": [
+      560,
+      560
+    ],
+    "query": "What is the main color in this image? Answer in one word.",
+    "max_new_tokens": 10,
+    "n_reps": 3,
+    "seed": 42
+  },
+  "sanity_checks": {
+    "sc1_pixel_values_shape_identical": true,
+    "sc1_unique_shapes": [
+      [
+        1600,
+        1176
+      ]
+    ],
+    "sc2_text_only_zero_vision_tokens": true,
+    "sc2_text_only_vision_token_count": 0,
+    "sc3_repeat_control_prefill_spread_ms": 0.43,
+    "sc3_repeat_control_values_ms": [
+      146.66,
+      146.37,
+      146.8
+    ],
+    "sc4_kv_bytes_ratio_within_10pct": true,
+    "sc_h1_empirical_vision_token_unique": true,
+    "sc_h1_unique_token_counts": [
+      400
+    ]
+  },
+  "cross_model_check": {
+    "model": "Qwen2.5-VL-3B-Instruct",
+    "vision_tokens_per_image": {
+      "flat_black": 400,
+      "flat_red": 400,
+      "gradient": 400,
+      "circles": 400,
+      "checkerboard": 400,
+      "fine_stripes": 400,
+      "random_noise": 400,
+      "blurred_noise": 400,
+      "sparse_dots": 400,
+      "photo_worker": 400,
+      "photo_park": 400,
+      "photo_room": 400
+    },
+    "unique_token_counts": [
+      400
+    ],
+    "matches_7b": true
+  },
+  "complexity_proxies": {
+    "flat_black": {
+      "jpeg_bytes": 5527,
+      "entropy_bits": -0.0
+    },
+    "flat_red": {
+      "jpeg_bytes": 5530,
+      "entropy_bits": -0.0
+    },
+    "gradient": {
+      "jpeg_bytes": 12016,
+      "entropy_bits": 5.573
+    },
+    "circles": {
+      "jpeg_bytes": 70249,
+      "entropy_bits": 0.3556
+    },
+    "checkerboard": {
+      "jpeg_bytes": 84832,
+      "entropy_bits": 1.0
+    },
+    "fine_stripes": {
+      "jpeg_bytes": 58201,
+      "entropy_bits": 1.0
+    },
+    "random_noise": {
+      "jpeg_bytes": 237867,
+      "entropy_bits": 7.634
+    },
+    "blurred_noise": {
+      "jpeg_bytes": 8020,
+      "entropy_bits": 2.1289
+    },
+    "sparse_dots": {
+      "jpeg_bytes": 11620,
+      "entropy_bits": 0.0654
+    },
+    "photo_worker": {
+      "jpeg_bytes": 61332,
+      "entropy_bits": 7.7622
+    },
+    "photo_park": {
+      "jpeg_bytes": 84474,
+      "entropy_bits": 7.7448
+    },
+    "photo_room": {
+      "jpeg_bytes": 68530,
+      "entropy_bits": 7.8591
+    }
+  },
+  "per_image_summary": {
+    "flat_black": {
+      "vision_tokens": 400,
+      "prefill_ms_median": 144.81,
+      "prefill_ms_min": 144.7,
+      "prefill_ms_max": 145.05,
+      "kv_bytes_measured_median": 24944640,
+      "n_generated_median": 2,
+      "jpeg_bytes": 5527,
+      "entropy_bits": -0.0
+    },
+    "flat_red": {
+      "vision_tokens": 400,
+      "prefill_ms_median": 144.76,
+      "prefill_ms_min": 144.73,
+      "prefill_ms_max": 145.22,
+      "kv_bytes_measured_median": 24944640,
+      "n_generated_median": 2,
+      "jpeg_bytes": 5530,
+      "entropy_bits": -0.0
+    },
+    "gradient": {
+      "vision_tokens": 400,
+      "prefill_ms_median": 146.16,
+      "prefill_ms_min": 145.92,
+      "prefill_ms_max": 146.32,
+      "kv_bytes_measured_median": 24944640,
+      "n_generated_median": 2,
+      "jpeg_bytes": 12016,
+      "entropy_bits": 5.573
+    },
+    "circles": {
+      "vision_tokens": 400,
+      "prefill_ms_median": 146.26,
+      "prefill_ms_min": 146.06,
+      "prefill_ms_max": 146.43,
+      "kv_bytes_measured_median": 24944640,
+      "n_generated_median": 2,
+      "jpeg_bytes": 70249,
+      "entropy_bits": 0.3556
+    },
+    "checkerboard": {
+      "vision_tokens": 400,
+      "prefill_ms_median": 146.4,
+      "prefill_ms_min": 144.53,
+      "prefill_ms_max": 147.16,
+      "kv_bytes_measured_median": 24944640,
+      "n_generated_median": 2,
+      "jpeg_bytes": 84832,
+      "entropy_bits": 1.0
+    },
+    "fine_stripes": {
+      "vision_tokens": 400,
+      "prefill_ms_median": 145.85,
+      "prefill_ms_min": 145.59,
+      "prefill_ms_max": 146.71,
+      "kv_bytes_measured_median": 24944640,
+      "n_generated_median": 2,
+      "jpeg_bytes": 58201,
+      "entropy_bits": 1.0
+    },
+    "random_noise": {
+      "vision_tokens": 400,
+      "prefill_ms_median": 147.17,
+      "prefill_ms_min": 146.67,
+      "prefill_ms_max": 150.06,
+      "kv_bytes_measured_median": 24944640,
+      "n_generated_median": 2,
+      "jpeg_bytes": 237867,
+      "entropy_bits": 7.634
+    },
+    "blurred_noise": {
+      "vision_tokens": 400,
+      "prefill_ms_median": 147.11,
+      "prefill_ms_min": 146.78,
+      "prefill_ms_max": 147.16,
+      "kv_bytes_measured_median": 24944640,
+      "n_generated_median": 2,
+      "jpeg_bytes": 8020,
+      "entropy_bits": 2.1289
+    },
+    "sparse_dots": {
+      "vision_tokens": 400,
+      "prefill_ms_median": 147.08,
+      "prefill_ms_min": 146.4,
+      "prefill_ms_max": 147.2,
+      "kv_bytes_measured_median": 24944640,
+      "n_generated_median": 2,
+      "jpeg_bytes": 11620,
+      "entropy_bits": 0.0654
+    },
+    "photo_worker": {
+      "vision_tokens": 400,
+      "prefill_ms_median": 147.43,
+      "prefill_ms_min": 147.27,
+      "prefill_ms_max": 147.45,
+      "kv_bytes_measured_median": 24944640,
+      "n_generated_median": 2,
+      "jpeg_bytes": 61332,
+      "entropy_bits": 7.7622
+    },
+    "photo_park": {
+      "vision_tokens": 400,
+      "prefill_ms_median": 147.06,
+      "prefill_ms_min": 146.8,
+      "prefill_ms_max": 148.1,
+      "kv_bytes_measured_median": 24944640,
+      "n_generated_median": 2,
+      "jpeg_bytes": 84474,
+      "entropy_bits": 7.7448
+    },
+    "photo_room": {
+      "vision_tokens": 400,
+      "prefill_ms_median": 147.59,
+      "prefill_ms_min": 147.4,
+      "prefill_ms_max": 147.67,
+      "kv_bytes_measured_median": 24944640,
+      "n_generated_median": 2,
+      "jpeg_bytes": 68530,
+      "entropy_bits": 7.8591
+    }
+  },
+  "text_only_baseline": {
+    "prefill_ms_median": 25.84,
+    "prefill_ms_values": [
+      116.75,
+      25.8,
+      25.84
+    ],
+    "total_input_tokens_median": 33,
+    "n_generated_median": 2
+  },
+  "cross_image_prefill_spread_ms": 2.83,
+  "repeat_control_noise_floor_ms": 0.43,
+  "elapsed_total_s": 18.7
+}
