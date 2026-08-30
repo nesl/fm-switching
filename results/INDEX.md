@@ -469,3 +469,17 @@ Key findings: (RQ1) stepwise token count scales monotonically with difficulty fo
 | `results/vision/study_c/study_c_selection.json` | `study_c_difficulty.py` | — | — | 120 images | Per-image: image_id, n_persons_gt, level, width, height; no bytes stored | 2026-08-30 |
 | `figures/vision/study_c_difficulty.{pdf,png}` | `study_c_difficulty.py` | — | — | — | Two-panel: accuracy vs difficulty (all 4 model×mode curves) and stepwise token count vs difficulty | 2026-08-30 |
 | `reports/study_c_difficulty.md` | — | — | — | — | Full report: what was run, raw measurements with spread, sanity checks, RQ1-RQ3 inferences, what cannot be inferred | 2026-08-30 |
+
+## Study C Re-scoring — Tolerance-Based Accuracy and Error Analysis (2026-08-30)
+
+Scripts: `experiments/vision/study_c_rescore.py` (CPU only, no new inference), `experiments/vision/study_c_rescore_plots.py` (plotting).
+Input: `results/vision/study_c/study_c_trials.csv` (1,440 rows). All sanity checks PASS.
+Key findings: near-zero exact-match accuracy at L3–L4 is substantially a scoring artifact — within-1 accuracy is 2–3× higher (e.g., 7B-direct-L3: exact=0.367, within-1=0.800). Models track count ordinally (pooled Spearman 0.70–0.88). Systematic undercount at L2–L3 (~1 person); massive stepwise undercount at L4 (~4.5 persons, CoT collapse). Difficulty axis is usable at L3 under within-1; exact-match should be retired for L3+.
+
+| file | script | model | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/vision/study_c/study_c_rescore.json` | `study_c_rescore.py` | qwenvl7b + qwenvl3b | CPU (no GPU) | 1,440 rows (16 cells) | Per-cell: exact_conservative, within-1/2_conservative, rt25, mean/median error, MAE, Spearman. SC1–SC4 PASS. | 2026-08-30 |
+| `figures/vision/study_c_rescore_accuracy.{pdf,png}` | `study_c_rescore_plots.py` | — | CPU | 16 cells | Accuracy vs difficulty under exact / within-1 / within-2 tolerance; 4 model×mode curves per panel | 2026-08-30 |
+| `figures/vision/study_c_rescore_errors.{pdf,png}` | `study_c_rescore_plots.py` | — | CPU | 16 cells | Signed error scatter + median diamond per (model, level, mode); zero-line reference | 2026-08-30 |
+| `figures/vision/study_c_rescore_scatter.{pdf,png}` | `study_c_rescore_plots.py` | — | CPU | 4 panels (model × mode) | Parsed vs GT scatter; identity line; ±1 band; pooled Spearman in title | 2026-08-30 |
+| `reports/study_c_rescore.md` | — | — | — | — | Full report: what was recomputed, 4 sanity checks, per-cell metric table, 7B−3B gap table, pooled Spearman, RQ1–RQ3 answers, usability verdict | 2026-08-30 |
