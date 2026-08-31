@@ -1,5 +1,7 @@
 # FM-switching — Project Status
 
+Last updated: 2026-08-30 (Study D2: full 4-model run — L1–L3 main matrix (1,260 trials) + L4 probe (20 trials). Key finding: 4B-Thinking = 8B-Thinking at L3 within-1 (0.767 each); 4B-T beats 8B-I by +0.034 within-1 at 62× latency cost; think-token IQR/median=1.84 at L3 (not predictable). L4 probe: non_termination=20–30% at 8192 tokens; verbose_bounded=0 — budget failure is reasoning non-convergence, not verbosity.)
+
 Last updated: 2026-08-30 (Study D: reasoning compute vs parameters — 4B-Instruct vs 4B-Thinking on COCO person counting, 720 trials. Stop condition fired at qwen3vl4b_t/L4 (30% budget hit > 5%). Reliable finding: 4B-Thinking beats 4B-Instruct at L3 by +0.233 pp exact-match (0.400 vs 0.167); think tokens scale 54→1626 L1→L4. 8B models pending rerun with max_new_tokens=8192.)
 
 Last updated: 2026-08-30 (Study C: difficulty scaling — 1,440 trials, COCO val2017, 2 models × 2 modes × 4 difficulty levels. RQ1: stepwise token count scales monotonically with difficulty (7B: 69→140 tok, 3B: 75→126 tok). RQ2: 3B vs 7B accuracy gap is non-monotone; reverses at high difficulty in stepwise mode. RQ3: chain-of-thought does not close the gap and collapses 7B accuracy to 0.000 at L4 (8+ people). Exact-match accuracy is near-floor for both models at L3–L4 in both modes.)

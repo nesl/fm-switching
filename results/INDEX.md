@@ -496,3 +496,16 @@ Key findings: near-zero exact-match accuracy at L3–L4 is substantially a scori
 | `figures/vision/study_c_rescore_errors.{pdf,png}` | `study_c_rescore_plots.py` | — | CPU | 16 cells | Signed error scatter + median diamond per (model, level, mode); zero-line reference | 2026-08-30 |
 | `figures/vision/study_c_rescore_scatter.{pdf,png}` | `study_c_rescore_plots.py` | — | CPU | 4 panels (model × mode) | Parsed vs GT scatter; identity line; ±1 band; pooled Spearman in title | 2026-08-30 |
 | `reports/study_c_rescore.md` | — | — | — | — | Full report: what was recomputed, 4 sanity checks, per-cell metric table, 7B−3B gap table, pooled Spearman, RQ1–RQ3 answers, usability verdict | 2026-08-30 |
+
+## Study D2 — Reasoning Compute vs Parameters, Full 4-Model Run (2026-08-30)
+
+Scripts: `experiments/vision/study_d2_thinking.py`. A6000 (cuda:1), bfloat16, greedy decoding. Same 120 COCO images as Study C/D. transformers 5.12.1 · torch 2.4.1+cu118. Main matrix: L1–L3 × 4 models × 3 reps. L4 probe: 10 images × 1 rep × 2 Thinking models (termination classification only).
+
+Key finding: At L3 under within-1, 4B-Thinking (0.767) = 8B-Thinking (0.767) > 4B-Instruct (0.733) = 8B-Instruct (0.733). 4B-T beats 8B-I under exact-match (+0.067) at 62× latency cost (8693ms vs 140ms). Think-token IQR/median=1.84 at L3 — not predictable within the level. L4 probe: non_termination=20% (4B-T) / 30% (8B-T); verbose_bounded=0% for both — budget failure at L4 is always reasoning non-convergence, never post-answer verbosity.
+
+| file | script | model | device | n | headline | date |
+|------|--------|-------|--------|---|---------|------|
+| `results/vision/study_d2/study_d2_trials.csv` | `study_d2_thinking.py` | qwen3vl4b + qwen3vl8b + qwen3vl4b_t + qwen3vl8b_t | a6000 (cuda:1) | 1,280 rows (1260 main + 20 probe) | Per-trial: model, mode, probe, image_id, level, n_persons_gt, rep, n_input, n_generated, n_think_tokens, n_answer_tokens, latency_ms, tokens_per_second, budget_hit, think_closed, termination_class, parsed_answer, parse_status, correct | 2026-08-30 |
+| `results/vision/study_d2/study_d2_results.json` | `study_d2_thinking.py` | all 4 models | CPU | 12 main cells + 2 probe entries | Per-cell: exact/within-1/within-2/rt25 accuracy; think-token median/p25/p75/min/max/IQR-ratio; latency; tps; point-biserial r; think/GT ratio. Probe: termination class counts. | 2026-08-30 |
+| `figures/vision/study_d2_thinking.{pdf,png}` | `study_d2_thinking.py` | — | — | 3 panels | Panel 1: accuracy (exact + within-1 dotted) vs L1–L3. Panel 2: think-token median ± IQR shading vs difficulty. Panel 3: latency (s) vs difficulty. | 2026-08-30 |
+| `reports/study_d2_thinking.md` | — | — | — | — | Full report: what was run, raw measurements (accuracy × 4 tolerances, latency, budget hits, L4 probe), SC1–SC7, analyses A–E (accuracy, decisive comparison, think-token distributions, within-cell point-biserial r, token growth vs object count), two key questions answered, what cannot be inferred | 2026-08-30 |
