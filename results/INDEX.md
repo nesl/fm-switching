@@ -555,3 +555,19 @@ Key finding: R7 (text summary) dominates at p50 in all 24 (repr × profile) cell
 | `results/vision/study_g/study_g_part2_reconstruction.json` | `study_g_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | 6 N-points | Same as CSV plus per-rep breakdown (deser/proc/prefill) | 2026-08-31 |
 | `results/vision/study_g/study_g_part3_network.json` | `study_g_transfer_cost.py` | — | CPU (simulation) | 6 N × 7 repr (R6 skipped) × 4 profiles × 200 samples | p50/p95/p99/min/max/mean per cell; R7 campus N=12 p50=72 ms; R3 campus N=12 p50=421 ms | 2026-08-31 |
 | `results/vision/study_g/study_g_part4_dominance.json` | `study_g_transfer_cost.py` | — | CPU | 24 cells | Win counts at p50: R7=24/24; at p99: R7=21/24, R2a=2/24, R2b=1/24 | 2026-08-31 |
+
+## Study G2 — Transfer Cost Clean Rerun (2026-08-31)
+
+Script: `experiments/vision/study_g2_transfer_cost.py`. A6000 (cuda:1), qwenvl7b, bfloat16, flash_attention_2. Real Study C COCO images (120 PNGs, 560×560); LOW=L1+L2 (60 img, 0–2 persons), HIGH=L3+L4 (60 img, 3+ persons). Fixes three StudyG defects: D1 maintenance omitted, D2 synthetic frames, D3 fidelity claims. Two accountings: A (transfer+recon only) and B (maintenance_cumulative + f×p50_routing), f∈{1,2,5,10,25}. Key: under accounting B, R3 dominates at all tested f for N≥12; R7 never wins a majority of cells; crossover f >> 25 for N≥12. R7 maintenance at N=48 = 76s (LOW) / 94s (HIGH) vs R3 ≈ 29ms.
+
+| file | script | model | device | n | headline | date |
+|---|---|---|---|---|---|---|
+| `results/vision/study_g2/study_g2_environment.json` | `study_g2_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | — | Stack, constants, LOW/HIGH family sizes, image_token_id, attn=flash_attention_2 | 2026-08-31 |
+| `results/vision/study_g2/study_g2_part1_maintenance_LOW.json` | `study_g2_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | 60 frames, N checkpoints {1,3,6,12,24,48} | R7 cumulative: 795ms(N=1)→76,216ms(N=48). R3 cumulative: 0.6ms→29ms. Token spread: min=22, max=116, mean=56 | 2026-08-31 |
+| `results/vision/study_g2/study_g2_part1_maintenance_HIGH.json` | `study_g2_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | 60 frames, N checkpoints {1,3,6,12,24,48} | R7 cumulative: 626ms(N=1)→94,287ms(N=48). R3 cumulative: 0.8ms→30ms. Token spread: min=19, max=128, mean=67 | 2026-08-31 |
+| `results/vision/study_g2/study_g2_part2_payload.csv` | `study_g2_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | 6 N × 2 families × 4 repr | R7 caps at ~300B for N≥6; R3 181–285 KB; R1 409–25,549 KB; R6 21–1,050 MB (analytical) | 2026-08-31 |
+| `results/vision/study_g2/study_g2_part2_payload.json` | `study_g2_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | same | Same as CSV plus R7 per-frame payload observations; Q2: LOW/HIGH ratio 0.82–1.48× at N≤3, converges to 1.00× at N≥12 | 2026-08-31 |
+| `results/vision/study_g2/study_g2_part3_reconstruction.csv` | `study_g2_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | 6 N × 2 families × 4 repr × 3 reps | R7: 27–32ms constant; R3: 360–368ms constant; R1: 153–6,372ms linear; R5: 92–3,754ms linear | 2026-08-31 |
+| `results/vision/study_g2/study_g2_part3_reconstruction.json` | `study_g2_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | same | Same as CSV plus per-rep timing breakdown | 2026-08-31 |
+| `results/vision/study_g2/study_g2_part4_endtoend.json` | `study_g2_transfer_cost.py` | — | CPU (simulation) | 2016 rows (6 N × 2 families × 4 profiles × 7 repr × 2 accountings × 3 f-groups) | Accounting A: R7 p50 campus N=12 = 36ms; R3 = 391ms. Accounting B at f=1: R3 dominates all cells; at f=25: R3 and R7 split 12/12 (R7 wins only N≤6) | 2026-08-31 |
+| `results/vision/study_g2/study_g2_part5_dominance.json` | `study_g2_transfer_cost.py` | — | CPU | 24 cells × 2 accountings × 5 f-values | Accounting A: R7=24/24. Accounting B: R3=24/24 at f∈{1,2,5}; R3=16/24 at f=10; R3=R7=12/12 at f=25 | 2026-08-31 |
