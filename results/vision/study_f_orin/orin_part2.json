@@ -1,0 +1,129 @@
+{
+  "machine": "orin",
+  "device": "cuda:0",
+  "stack": {
+    "torch": "2.8.0",
+    "cuda": "12.6",
+    "transformers": "5.10.2",
+    "flash_attn_present": false,
+    "flash_attn_version": null,
+    "gpu": "Orin",
+    "total_mem_gb": 65.9,
+    "power_mode": "0-11",
+    "gpu_locked_freq_hz": "1300500000"
+  },
+  "unified_memory": true,
+  "unified_caveat": "Jetson LPDDR5 is unified with CPU RAM. torch.cuda.max_memory_allocated/reserved track the CUDA caching allocator's device-visible allocations, not a discrete VRAM pool. Cross-checked against /proc/meminfo system-RAM peak (ram_peak_delta_gb) sampled at 20 ms during each phase.",
+  "kv_bytes_per_token": 57344,
+  "N": {
+    "1": {
+      "input_tokens": 435,
+      "total_patches_into_vision_tower": 1600,
+      "pixel_values_shape": [
+        1600,
+        1176
+      ],
+      "vision_encoded_in_single_batched_call": true,
+      "kv_bytes_analytical": 24944640,
+      "vision_only_torch_peak_alloc_gb": 16.68,
+      "vision_only_torch_peak_reserved_gb": 16.72,
+      "vision_only_ram_peak_delta_gb": 0.54,
+      "vision_embed_shape": [
+        1600,
+        1280
+      ],
+      "full_call_torch_peak_alloc_gb": 16.77,
+      "full_call_torch_peak_reserved_gb": 16.92,
+      "full_call_ram_peak_delta_gb": 0.33,
+      "kv_bytes_measured": 0,
+      "attrib_weights_gb": 16.58,
+      "attrib_kv_gb": 0.0,
+      "attrib_vision_torch_peak_gb": 16.68,
+      "attrib_full_torch_peak_gb": 16.77,
+      "attrib_unaccounted_gb": 0.18
+    },
+    "3": {
+      "input_tokens": 1239,
+      "total_patches_into_vision_tower": 4800,
+      "pixel_values_shape": [
+        4800,
+        1176
+      ],
+      "vision_encoded_in_single_batched_call": true,
+      "kv_bytes_analytical": 71049216,
+      "vision_only_torch_peak_alloc_gb": 16.88,
+      "vision_only_torch_peak_reserved_gb": 16.99,
+      "vision_only_ram_peak_delta_gb": 0.07,
+      "vision_embed_shape": [
+        4800,
+        1280
+      ],
+      "full_call_torch_peak_alloc_gb": 17.11,
+      "full_call_torch_peak_reserved_gb": 17.54,
+      "full_call_ram_peak_delta_gb": 0.51,
+      "kv_bytes_measured": 0,
+      "attrib_weights_gb": 16.58,
+      "attrib_kv_gb": 0.0,
+      "attrib_vision_torch_peak_gb": 16.88,
+      "attrib_full_torch_peak_gb": 17.11,
+      "attrib_unaccounted_gb": 0.53
+    },
+    "6": {
+      "input_tokens": 2445,
+      "total_patches_into_vision_tower": 9600,
+      "pixel_values_shape": [
+        9600,
+        1176
+      ],
+      "vision_encoded_in_single_batched_call": true,
+      "kv_bytes_analytical": 140206080,
+      "vision_only_torch_peak_alloc_gb": 17.18,
+      "vision_only_torch_peak_reserved_gb": 17.48,
+      "vision_only_ram_peak_delta_gb": 0.0,
+      "vision_embed_shape": [
+        9600,
+        1280
+      ],
+      "full_call_torch_peak_alloc_gb": 17.64,
+      "full_call_torch_peak_reserved_gb": 18.55,
+      "full_call_ram_peak_delta_gb": 0.95,
+      "kv_bytes_measured": 0,
+      "attrib_weights_gb": 16.58,
+      "attrib_kv_gb": 0.0,
+      "attrib_vision_torch_peak_gb": 17.18,
+      "attrib_full_torch_peak_gb": 17.64,
+      "attrib_unaccounted_gb": 1.06
+    },
+    "12": {
+      "input_tokens": 4857,
+      "total_patches_into_vision_tower": 19200,
+      "pixel_values_shape": [
+        19200,
+        1176
+      ],
+      "vision_encoded_in_single_batched_call": true,
+      "kv_bytes_analytical": 278519808,
+      "vision_only_torch_peak_alloc_gb": 17.76,
+      "vision_only_torch_peak_reserved_gb": 18.3,
+      "vision_only_ram_peak_delta_gb": 0.0,
+      "vision_embed_shape": [
+        19200,
+        1280
+      ],
+      "full_call_torch_peak_alloc_gb": 18.67,
+      "full_call_torch_peak_reserved_gb": 20.43,
+      "full_call_ram_peak_delta_gb": 1.76,
+      "kv_bytes_measured": 0,
+      "attrib_weights_gb": 16.58,
+      "attrib_kv_gb": 0.0,
+      "attrib_vision_torch_peak_gb": 17.76,
+      "attrib_full_torch_peak_gb": 18.67,
+      "attrib_unaccounted_gb": 2.08
+    }
+  },
+  "attn_impl_asserted": "sdpa",
+  "vision_attn_impl": "sdpa",
+  "weight_bytes_total": 16584333312,
+  "torch_mem_after_load_gb": 16.58,
+  "ram_used_after_load_delta_gb": 8.52
+}

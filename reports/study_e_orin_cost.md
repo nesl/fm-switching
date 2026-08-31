@@ -11,6 +11,39 @@ Scripts: `experiments/vision/study_e_orin_cost.py` (Part 1),
 
 ---
 
+> ## ⚠️ CORRECTION (2026-08-31) — two headline numbers were software-stack artifacts
+>
+> A follow-up diagnostic (**Study F**, `reports/study_f_orin_diagnostic.md` (Orin arm) and
+> `reports/study_f_a6000_diagnostic.md` (A6000 arm)) found that **two numbers reported below are
+> measurement artifacts, not device properties.** The affected claims are retracted/amended:
+>
+> 1. **Decode "≈9.4 tok/s for all models, parameter-independent" — RETRACTED as a device property.**
+>    It is a **framework overhead artifact**: HF `generate()` with a dynamic cache has a fixed
+>    ~106–110 ms/token floor on this stack (Python dispatch + per-token kernel launch). The 4B runs
+>    at only **40.7% of its 23.1 tok/s bandwidth roofline** (204.8 GB/s); a bandwidth-bound 4B would
+>    be ~23 tok/s. On the A6000 the same code path *separates* 4B (48.5) from 8B (32.0). So the Orin
+>    decode figures below reflect framework overhead, **not** the device's achievable decode rate,
+>    and the "≈4× / 3–5× slower than A6000" ratios conflate overhead with silicon.
+>
+> 2. **"Full-retention ceiling N=6, peak 53.4 GB, OOM at N=12, O(L²) SDPA attention" — RETRACTED.**
+>    The Part 2 script (`study_e_state_cost.py`, `measure_full`) ran the forward **without
+>    `torch.no_grad()`** (Study B on the A6000 wrapped the identical call in `no_grad`), so it retained
+>    the autograd graph. With `no_grad`: **N=6 = 17.6 GB, N=12 = 18.7 GB, NO OOM** — matching the
+>    A6000 arm's 17.4 GB @ N=6 and the ~16.7 GB arithmetic. There is **no N=6 ceiling** and the Orin
+>    handles N=12 fine. Reproduced exactly (53.39 GB with-grad vs 17.64 GB with `no_grad`).
+>
+> 3. **AMEND:** all Orin `torch.cuda.max_memory_allocated` figures over-report ~2× vs actual system
+>    RAM under unified memory (16.6 GB counter vs 8.5 GB RAM for the weights); read them as allocator
+>    accounting, not VRAM.
+>
+> 4. **RETAINED:** Part 3 (no throttling, 65 °C, flat throughput) stands — and corroborates (1):
+>    the GPU was idle-waiting on CPU dispatch, not saturated.
+>
+> The original measured values are left in place below for the record, with inline `[CORRECTED]`
+> markers at the affected claims.
+
+---
+
 ## 1. Device configuration (as reported at the start)
 
 | item | value |
@@ -30,6 +63,8 @@ This Orin ran **torch 2.8.0 / transformers 5.10.2 with SDPA and no flash-attn**.
 gaps therefore conflate the hardware difference with a software-stack component (attention
 kernel + library versions). This is not a pure device comparison — but it *is* the realistic
 device stack, and one consequence (the O(L²) SDPA memory ceiling, §4) is the study's headline.
+**`[CORRECTED — see banner]`** That "O(L²) SDPA memory ceiling" headline is a `torch.no_grad()` bug
+(Study F), not a device consequence — retracted.
 
 **Models.** Part 1: Qwen3-VL-{4B,8B}-{Instruct,Thinking}, bfloat16, pinned to the Study D2
 snapshots. Part 2: Qwen2.5-VL-7B-Instruct, bfloat16, pinned to the Study B snapshot. All
@@ -69,6 +104,9 @@ Structure of the device cost:
   parameter-bound here — it is overhead / memory-bandwidth bound (SDPA, no flash-attn). The
   8B's extra cost appears in **prefill/TTFT (434 vs 280 ms, ~1.55×)** and **memory (17.7 vs 9.0 GB)**,
   not in decode rate.
+  **`[CORRECTED — see banner]`** Study F showed this is **framework overhead, not the device rate**:
+  a ~106–110 ms/token HF-`generate()`+dynamic-cache floor. The 4B runs at only 40.7% of its 23.1 tok/s
+  bandwidth roofline; the same code path *separates* 4B from 8B on the A6000 (48.5 vs 32.0 tok/s).
 - **Thinking latency is dominated by generated length.** L3 generates far more reasoning
   (4B: 500 think tok → 53.5 s; 8B: 408 think tok → 43.4 s). At L3 the 8B is *faster* than the 4B
   because it reasons more concisely (fewer think tokens) at the same decode rate.
@@ -99,6 +137,12 @@ Median over reps (rep 0). Peak memory is the binding quantity.
 (constant k=3 frames) and summary (text-only query) remain feasible at N=12; the sweep halted
 at the full-retention ceiling per the stop rule, so higher N was not attempted for those two.
 Ordering (as in Study B): window (constant ~3.3 s) < full (growing) < summary (most expensive to construct).
+
+> **`[CORRECTED — see banner]` This ceiling is a `torch.no_grad()` bug, not a device property.**
+> `measure_full` ran the forward without `torch.no_grad()`, retaining the autograd graph. Study F
+> reproduced 53.39 GB with-grad vs **17.64 GB with `no_grad` @ N=6**, and **N=12 is feasible at 18.7 GB
+> (no OOM)** — matching the A6000 arm's 17.4 GB and the ~16.7 GB arithmetic. There is **no N=6 ceiling**;
+> the 53.4 GB was retained gradient activations. See `reports/study_f_orin_diagnostic.md`.
 
 ### Part 3 — thermal & sustained load
 
@@ -158,6 +202,9 @@ bit-identical across the SDPA-Orin and flash-attn-A6000 kernels (e.g. 4B-T L3 n_
 8B-T L3 408 vs 468), so total latency mixes device speed with output length. The **per-token decode
 comparison is the clean one: Orin ~9.4 tok/s vs A6000 ~30–50 tok/s → the Orin decodes ~3–5× slower.**
 Instruct (n_gen=2 both, deterministic) gives a clean prefill-dominated ratio of ~4×.
+**`[CORRECTED — see banner]`** The Orin's 9.4 tok/s is not its decode capability — it is a ~106 ms/token
+HF-`generate()` overhead floor (40% of its 23 tok/s roofline). Both machines ran the same overhead-bound
+path, so this ratio compares frameworks, not silicon. Study F, §Part 1.
 
 ### Part 2 — state construction (A6000 from `reports/study_b_vision_kv.md`)
 
@@ -185,11 +232,17 @@ difference, and OOMs despite 65.9 GB unified (vs the A6000's 48 GB).
    and ~3–6× slower on Thinking total latency; on a clean per-token basis the Orin decodes ~3–5× slower
    (~9.4 vs ~30–50 tok/s). The Thinking/Instruct *ratio* is larger on the Orin than the A6000 because
    the device penalty falls hardest on decode, which Thinking is dominated by.
+   **`[CORRECTED — see banner]`** The "3–5× slower decode" is a **framework-overhead** difference, not
+   silicon: both machines ran overhead-bound HF `generate()`, and the Orin's 9.4 tok/s is a ~106 ms/token
+   dispatch floor (40% of its 23 tok/s roofline), not its achievable decode rate. Study F, §Part 1.
 
 2. **Largest N per representation vs A6000.** Full retention: **Orin N=6** (peak 53.4 GB; OOM at N=12)
    vs **A6000 N≥48** (24.4 GB, ceiling never hit). Window (k=3) and summary: feasible to at least N=12
    on both (constant/near-constant footprint). The device ceiling is ~8× lower for full retention —
    caused by O(L²) SDPA attention memory (no flash-attn), not by total memory (the Orin has more).
+   **`[CORRECTED — see banner]` This answer is WRONG — a `torch.no_grad()` bug.** With `no_grad` the
+   Orin holds **N=12 at 18.7 GB with no OOM** and shows **no N=6 ceiling** (N=6 = 17.6 GB), matching the
+   A6000. There is no ~8× device gap and no O(L²) ceiling in range. See `reports/study_f_orin_diagnostic.md`.
 
 3. **Does sustained load throttle the device?** **No.** Over 14.5 h continuous load at MAXN, GPU clock
    stayed pinned at 1.3005 GHz (0/10,345 throttle samples), max tj 65 °C, and 4B-Thinking throughput

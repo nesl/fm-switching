@@ -1,0 +1,145 @@
+{
+  "machine": "orin",
+  "device": "cuda:0",
+  "stack": {
+    "torch": "2.8.0",
+    "cuda": "12.6",
+    "transformers": "5.10.2",
+    "flash_attn_present": false,
+    "flash_attn_version": null,
+    "gpu": "Orin",
+    "total_mem_gb": 65.9,
+    "power_mode": "0-11",
+    "gpu_locked_freq_hz": "1300500000"
+  },
+  "bandwidth_GBs": 204.8,
+  "bandwidth_src": "NVIDIA Jetson AGX Orin series datasheet: 256-bit LPDDR5 @ 3200 MT/s = 204.8 GB/s",
+  "models": {
+    "qwen3vl4b": {
+      "repo": "Qwen/Qwen3-VL-4B-Instruct",
+      "attn_impl_asserted": "sdpa",
+      "attn_impl_text": "sdpa",
+      "param_device": "cuda:0",
+      "param_dtype": "torch.bfloat16",
+      "weight_bytes_total": 8875631616,
+      "weight_bytes_lm_only": 8044936192,
+      "roofline_tps_total_weights": 23.1,
+      "roofline_tps_lm_only": 25.5,
+      "conditions": {
+        "C1_dynamic": {
+          "samples": [
+            {
+              "prefill_ms": 279.7,
+              "decode_ms": 27143.8,
+              "decode_tps": 9.39,
+              "peak_gb": 9.006,
+              "n_gen": 256
+            },
+            {
+              "prefill_ms": 279.5,
+              "decode_ms": 27082.2,
+              "decode_tps": 9.42,
+              "peak_gb": 9.006,
+              "n_gen": 256
+            },
+            {
+              "prefill_ms": 279.5,
+              "decode_ms": 27100.7,
+              "decode_tps": 9.41,
+              "peak_gb": 9.006,
+              "n_gen": 256
+            },
+            {
+              "prefill_ms": 279.9,
+              "decode_ms": 27164.2,
+              "decode_tps": 9.39,
+              "peak_gb": 9.006,
+              "n_gen": 256
+            },
+            {
+              "prefill_ms": 279.8,
+              "decode_ms": 27129.8,
+              "decode_tps": 9.4,
+              "peak_gb": 9.006,
+              "n_gen": 256
+            }
+          ],
+          "decode_tps_median": 9.4,
+          "decode_tps_cv": 0.0012,
+          "pct_roofline_total": 40.7,
+          "pct_roofline_lm": 36.9
+        },
+        "C2_static": {
+          "error": "TritonMissing: Cannot find a working triton installation. Either the package is not installed or it is too old. More information on installing Triton can be found at: https://github.com/triton-lang/triton\n\nSet TORCH"
+        },
+        "C3_static_compile": {
+          "error": "TritonMissing: Cannot find a working triton installation. Either the package is not installed or it is too old. More information on installing Triton can be found at: https://github.com/triton-lang/triton\n\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you're reporting a bug t"
+        }
+      },
+      "n_input": 346
+    },
+    "qwen3vl8b": {
+      "repo": "Qwen/Qwen3-VL-8B-Instruct",
+      "attn_impl_asserted": "sdpa",
+      "attn_impl_text": "sdpa",
+      "param_device": "cuda:0",
+      "param_dtype": "torch.bfloat16",
+      "weight_bytes_total": 17534247392,
+      "weight_bytes_lm_only": 16381470720,
+      "roofline_tps_total_weights": 11.7,
+      "roofline_tps_lm_only": 12.5,
+      "conditions": {
+        "C1_dynamic": {
+          "samples": [
+            {
+              "prefill_ms": 435.3,
+              "decode_ms": 28055.7,
+              "decode_tps": 9.09,
+              "peak_gb": 26.654,
+              "n_gen": 256
+            },
+            {
+              "prefill_ms": 435.6,
+              "decode_ms": 28064.1,
+              "decode_tps": 9.09,
+              "peak_gb": 26.654,
+              "n_gen": 256
+            },
+            {
+              "prefill_ms": 435.3,
+              "decode_ms": 28043.9,
+              "decode_tps": 9.09,
+              "peak_gb": 26.654,
+              "n_gen": 256
+            },
+            {
+              "prefill_ms": 435.0,
+              "decode_ms": 28155.1,
+              "decode_tps": 9.06,
+              "peak_gb": 26.654,
+              "n_gen": 256
+            },
+            {
+              "prefill_ms": 440.3,
+              "decode_ms": 28123.5,
+              "decode_tps": 9.07,
+              "peak_gb": 26.654,
+              "n_gen": 256
+            }
+          ],
+          "decode_tps_median": 9.09,
+          "decode_tps_cv": 0.0014,
+          "pct_roofline_total": 77.8,
+          "pct_roofline_lm": 72.7
+        },
+        "C2_static": {
+          "error": "TritonMissing: Cannot find a working triton installation. Either the package is not installed or it is too old. More information on installing Triton can be found at: https://github.com/triton-lang/triton\n\nSet TORCH"
+        },
+        "C3_static_compile": {
+          "error": "TritonMissing: Cannot find a working triton installation. Either the package is not installed or it is too old. More information on installing Triton can be found at: https://github.com/triton-lang/triton\n\nSet TORCHDYNAMO_VERBOSE=1 for the internal stack trace (please do this especially if you're reporting a bug t"
+        }
+      },
+      "n_input": 346
+    }
+  }
+}
