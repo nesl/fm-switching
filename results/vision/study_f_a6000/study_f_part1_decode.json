@@ -1,0 +1,59 @@
+{
+  "a6000_bw_gbps": 768.0,
+  "decode_tokens_fixed": 256,
+  "n_reps": 5,
+  "models": {
+    "qwen3vl4b_i": {
+      "model_slug": "qwen3vl4b_i",
+      "weight_bytes": 8875631616,
+      "weight_gb": 8.876,
+      "roofline_tps": 86.5,
+      "attn_impl": "flash_attention_2",
+      "compile_ok": false,
+      "c3_error": "Unsupported: call_method GetAttrVariable(GetAttrVariable(UserFunctionVariable(), __code__), co_varnames) __contains__ [ConstantVariable()] {}\n\nfrom user code:\n   File \"/home/pragya/miniconda3/envs/fmtk/lib/python3.10/site-packages/transformers/utils/generic.py\", line 907, in wrapper\n    output = func(self, *args, **kwargs)\n  File \"/home/pragya/miniconda3/envs/fmtk/lib/python3.10/site-packages/transformers/mode",
+      "c1_noise_floor_std_tps": 1.26,
+      "per_condition": {
+        "C1": {
+          "median_decode_tps": 48.5,
+          "mean_decode_tps": 47.69,
+          "std_decode_tps": 1.26,
+          "pct_of_roofline": 56.05,
+          "n_reps": 5
+        },
+        "C2": {
+          "median_decode_tps": 54.8,
+          "mean_decode_tps": 54.71,
+          "std_decode_tps": 0.15,
+          "pct_of_roofline": 63.33,
+          "n_reps": 4
+        }
+      }
+    },
+    "qwen3vl8b_i": {
+      "model_slug": "qwen3vl8b_i",
+      "weight_bytes": 17534247392,
+      "weight_gb": 17.534,
+      "roofline_tps": 43.8,
+      "attn_impl": "flash_attention_2",
+      "compile_ok": false,
+      "c3_error": "Unsupported: call_method GetAttrVariable(GetAttrVariable(UserFunctionVariable(), __code__), co_varnames) __contains__ [ConstantVariable()] {}\n\nfrom user code:\n   File \"/home/pragya/miniconda3/envs/fmtk/lib/python3.10/site-packages/transformers/utils/generic.py\", line 907, in wrapper\n    output = func(self, *args, **kwargs)\n  File \"/home/pragya/miniconda3/envs/fmtk/lib/python3.10/site-packages/transformers/mode",
+      "c1_noise_floor_std_tps": 0.37,
+      "per_condition": {
+        "C1": {
+          "median_decode_tps": 32.02,
+          "mean_decode_tps": 31.79,
+          "std_decode_tps": 0.37,
+          "pct_of_roofline": 73.11,
+          "n_reps": 5
+        },
+        "C2": {
+          "median_decode_tps": 34.95,
+          "mean_decode_tps": 34.95,
+          "std_decode_tps": 0.04,
+          "pct_of_roofline": 79.79,
+          "n_reps": 4
+        }
+      }
+    }
+  }
+}

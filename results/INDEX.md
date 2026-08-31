@@ -510,6 +510,24 @@ Key finding: At L3 under within-1, 4B-Thinking (0.767) = 8B-Thinking (0.767) > 4
 | `figures/vision/study_d2_thinking.{pdf,png}` | `study_d2_thinking.py` | — | — | 3 panels | Panel 1: accuracy (exact + within-1 dotted) vs L1–L3. Panel 2: think-token median ± IQR shading vs difficulty. Panel 3: latency (s) vs difficulty. | 2026-08-30 |
 | `reports/study_d2_thinking.md` | — | — | — | — | Full report: what was run, raw measurements (accuracy × 4 tolerances, latency, budget hits, L4 probe), SC1–SC7, analyses A–E (accuracy, decisive comparison, think-token distributions, within-cell point-biserial r, token growth vs object count), two key questions answered, what cannot be inferred | 2026-08-30 |
 
+## Study F — A6000 Diagnostic Arm (2026-08-31)
+
+Scripts: `experiments/vision/study_f_a6000_diagnostic.py`. Device: **A6000 (cuda:1, 48 GB)**, bfloat16, flash-attn 2.6.3. torch 2.4.1+cu118 · transformers 5.12.1.
+
+Part 1: Qwen3-VL-4B-I vs 8B-I decode rate under 3 conditions (C1 dynamic cache, C2 static cache, C3 torch.compile). Fixed decode 256 tokens, EOS suppressed, 5 reps. Roofline = A6000 768 GB/s ÷ weight bytes.  
+Part 2: Qwen2.5-VL-7B phase-level memory at N=1,3,6,12 (Study B setup). Reset peak counters between phases.
+
+Key: 4B separates from 8B on A6000 (48.5 vs 32.0 tok/s C1; 54.8 vs 35.0 C2); C3 failed both (flash-attn not traceable with fullgraph=True). Phase 2: weights ~97% of peak; vision delta <0.3%; KV matches Study B (ratio 1.000). A6000 N=6 peak = 17.4 GB.
+
+| file | script | model(s) | device | n | headline | date |
+|---|---|---|---|---|---|---|
+| `results/vision/study_f_a6000/study_f_environment.json` | `study_f_a6000_diagnostic.py` | — | a6000 | — | Stack: torch 2.4.1+cu118, transformers 5.12.1, flash-attn 2.6.3, CUDA 11.8, driver 550.163.01 | 2026-08-31 |
+| `results/vision/study_f_a6000/study_f_part1_decode.csv` | `study_f_a6000_diagnostic.py` | qwen3vl4b_i + qwen3vl8b_i | a6000 (cuda:1) | 20 rows (5 reps × 2 models × 2 conditions; C3 skipped) | Per-rep: model, condition, weight_gb, n_input, n_output, prefill_ms, decode_ms, decode_tok_per_s, peak_mem, attn_impl, compile_ok, is_warmup | 2026-08-31 |
+| `results/vision/study_f_a6000/study_f_part1_decode.json` | `study_f_a6000_diagnostic.py` | qwen3vl4b_i + qwen3vl8b_i | a6000 (cuda:1) | 2 models | Rooflines (86.5 / 43.8 tok/s), per-condition median/mean/std/pct-RL, c3_error string | 2026-08-31 |
+| `results/vision/study_f_a6000/study_f_part2_memory.csv` | `study_f_a6000_diagnostic.py` | qwen2.5-VL-7B | a6000 (cuda:1) | 4 rows (N=1,3,6,12) | Per-N: after-load/after-vision/after-prefill alloc+reserved GB, peak alloc+reserved, KV analytical GB, encode_batched | 2026-08-31 |
+| `results/vision/study_f_a6000/study_f_part2_memory.json` | `study_f_a6000_diagnostic.py` | qwen2.5-VL-7B | a6000 (cuda:1) | 4 N-values | Same as CSV plus model metadata (image_size, tokens_per_frame, kv_bytes_per_token) | 2026-08-31 |
+| `reports/study_f_a6000_diagnostic.md` | — | — | — | — | Full report: stack config, raw measurements, SC1–SC6, Part 1 separation verdict, Part 2 phase attribution. N=1 GC artifact documented. | 2026-08-31 |
+
 ## Study E — Device-Side Cost on Jetson AGX Orin (2026-08-31)
 
 Scripts: `experiments/vision/study_e_orin_cost.py` (Part 1 inference), `study_e_state_cost.py` (Part 2 state construction), `thermal_sampler.py` (Part 3). Device: **jetson_orin (nesl-orin-3, 64 GB, MAXN, cuda:0)**, bfloat16, greedy. transformers 5.10.2 · torch 2.8.0 · CUDA 12.6 · **SDPA, no flash-attn** (vs A6000 flash-attn — gaps carry a software-stack component).
