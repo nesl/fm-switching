@@ -537,3 +537,21 @@ Scripts: `experiments/vision/study_e_orin_cost.py` (Part 1 inference), `study_e_
 | `results/vision/study_e/study_e_part1_trials.csv` + `study_e_part1_results.json` | `study_e_orin_cost.py` | qwen3vl4b/8b Instruct+Thinking | jetson_orin | 4 models × L2/L3 × 15 img × 3 reps = 360 | Decode ~9.4 tok/s for all models (overhead-bound, 4B=8B); 8B cost in TTFT (434 vs 280 ms) + mem (17.7 vs 9 GB). Orin ~4× A6000 Instruct latency, ~3–5× slower Thinking decode. No throttle. | uncommitted |
 | `results/vision/study_e/study_e_part2_trials.csv` + `study_e_part2_results.json` | `study_e_state_cost.py` | qwen2.5-VL-7B (=Study B model) | jetson_orin | N∈{1,3,6,12} × {full,window-k3,summary} × 2 reps | Full-retention ceiling **N=6** (peak 53.4 GB; OOM at N=12) vs A6000 N≥48 — O(L²) SDPA memory, no flash-attn, despite 64 GB unified. KV ratio 1.000, vision tokens 400 (match Study B). | uncommitted |
 | `results/vision/study_e/study_e_thermal.csv` | `thermal_sampler.py` | — | jetson_orin | 10,345 samples / 14.5 h | Sustained load: **no throttling** (max tj 65 °C, GPU pinned 1.3005 GHz, 0 throttle samples); throughput flat 9.17→9.40 tok/s. | uncommitted |
+
+## Study G — Transfer Cost (2026-08-31)
+
+Script: `experiments/vision/study_g_transfer_cost.py`. Device: **A6000 (cuda:1, 48 GB)**, bfloat16, flash_attention_2. torch 2.4.1+cu118 · transformers 5.12.1. Model: Qwen2.5-VL-7B-Instruct, Study B snapshot cc594898. Same 560×560 frames.
+
+Seven representations (R1 PNG, R2a JPEG-85, R2b JPEG-60, R3 window-k3 JPEG-85, R4 pixel tensors, R5 vision embeddings, R6 KV analytical, R7 text summary) × N ∈ {1,3,6,12,24,48}. Network: `simulator/markov_network.py`, 4 profiles (campus/urban/indoor/harsh), 200 samples/cell, stall-and-resume. N_REPS=2. R6 KV extracted=False (DynamicCache.key_cache absent in transformers 5.12.1; size analytical only).
+
+Key finding: R7 (text summary) dominates at p50 in all 24 (repr × profile) cells. R3 (window k=3) is the best non-summary representation for N≥6. R4/R5 (same-model-only) are dominated despite skipping vision encoding, because larger payloads outweigh the reconstruction savings. R6 KV (analytical: 1.1 GB at N=48) is uncompetitive on network cost. Dominance of R7 does not resolve the representation decision: R7 wins on latency and loses on semantic fidelity (LoCoMo gap ≈ −24 pp, Study E13/E20).
+
+| file | script | model | device | n | headline | date |
+|---|---|---|---|---|---|---|
+| `results/vision/study_g/study_g_environment.json` | `study_g_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | — | Stack, constants, image_token_id=151655, attn=flash_attention_2 | 2026-08-31 |
+| `results/vision/study_g/study_g_part1_payload.csv` | `study_g_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | 6 N-points × 7 repr | Payload bytes and serialization time per (N, repr); R6 analytical | 2026-08-31 |
+| `results/vision/study_g/study_g_part1_payload.json` | `study_g_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | 6 N-points × 7 repr | Same as CSV plus R7 gen cost by N (ms) | 2026-08-31 |
+| `results/vision/study_g/study_g_part2_reconstruction.csv` | `study_g_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | 6 N-points × 8 repr (R6=None) | Reconstruction median ms per (N, repr): R7 30–237 ms; R3 150–365 ms; R2a 150–6,165 ms; R4 198–8,109 ms (same-model-only); R5 91–3,749 ms (same-model-only) | 2026-08-31 |
+| `results/vision/study_g/study_g_part2_reconstruction.json` | `study_g_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | 6 N-points | Same as CSV plus per-rep breakdown (deser/proc/prefill) | 2026-08-31 |
+| `results/vision/study_g/study_g_part3_network.json` | `study_g_transfer_cost.py` | — | CPU (simulation) | 6 N × 7 repr (R6 skipped) × 4 profiles × 200 samples | p50/p95/p99/min/max/mean per cell; R7 campus N=12 p50=72 ms; R3 campus N=12 p50=421 ms | 2026-08-31 |
+| `results/vision/study_g/study_g_part4_dominance.json` | `study_g_transfer_cost.py` | — | CPU | 24 cells | Win counts at p50: R7=24/24; at p99: R7=21/24, R2a=2/24, R2b=1/24 | 2026-08-31 |
