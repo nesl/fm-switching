@@ -509,3 +509,13 @@ Key finding: At L3 under within-1, 4B-Thinking (0.767) = 8B-Thinking (0.767) > 4
 | `results/vision/study_d2/study_d2_results.json` | `study_d2_thinking.py` | all 4 models | CPU | 12 main cells + 2 probe entries | Per-cell: exact/within-1/within-2/rt25 accuracy; think-token median/p25/p75/min/max/IQR-ratio; latency; tps; point-biserial r; think/GT ratio. Probe: termination class counts. | 2026-08-30 |
 | `figures/vision/study_d2_thinking.{pdf,png}` | `study_d2_thinking.py` | — | — | 3 panels | Panel 1: accuracy (exact + within-1 dotted) vs L1–L3. Panel 2: think-token median ± IQR shading vs difficulty. Panel 3: latency (s) vs difficulty. | 2026-08-30 |
 | `reports/study_d2_thinking.md` | — | — | — | — | Full report: what was run, raw measurements (accuracy × 4 tolerances, latency, budget hits, L4 probe), SC1–SC7, analyses A–E (accuracy, decisive comparison, think-token distributions, within-cell point-biserial r, token growth vs object count), two key questions answered, what cannot be inferred | 2026-08-30 |
+
+## Study E — Device-Side Cost on Jetson AGX Orin (2026-08-31)
+
+Scripts: `experiments/vision/study_e_orin_cost.py` (Part 1 inference), `study_e_state_cost.py` (Part 2 state construction), `thermal_sampler.py` (Part 3). Device: **jetson_orin (nesl-orin-3, 64 GB, MAXN, cuda:0)**, bfloat16, greedy. transformers 5.10.2 · torch 2.8.0 · CUDA 12.6 · **SDPA, no flash-attn** (vs A6000 flash-attn — gaps carry a software-stack component).
+
+| file | script | model(s) | device | n | headline | source commit |
+|---|---|---|---|---|---|---|
+| `results/vision/study_e/study_e_part1_trials.csv` + `study_e_part1_results.json` | `study_e_orin_cost.py` | qwen3vl4b/8b Instruct+Thinking | jetson_orin | 4 models × L2/L3 × 15 img × 3 reps = 360 | Decode ~9.4 tok/s for all models (overhead-bound, 4B=8B); 8B cost in TTFT (434 vs 280 ms) + mem (17.7 vs 9 GB). Orin ~4× A6000 Instruct latency, ~3–5× slower Thinking decode. No throttle. | uncommitted |
+| `results/vision/study_e/study_e_part2_trials.csv` + `study_e_part2_results.json` | `study_e_state_cost.py` | qwen2.5-VL-7B (=Study B model) | jetson_orin | N∈{1,3,6,12} × {full,window-k3,summary} × 2 reps | Full-retention ceiling **N=6** (peak 53.4 GB; OOM at N=12) vs A6000 N≥48 — O(L²) SDPA memory, no flash-attn, despite 64 GB unified. KV ratio 1.000, vision tokens 400 (match Study B). | uncommitted |
+| `results/vision/study_e/study_e_thermal.csv` | `thermal_sampler.py` | — | jetson_orin | 10,345 samples / 14.5 h | Sustained load: **no throttling** (max tj 65 °C, GPU pinned 1.3005 GHz, 0 throttle samples); throughput flat 9.17→9.40 tok/s. | uncommitted |
