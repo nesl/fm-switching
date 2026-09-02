@@ -571,3 +571,27 @@ Script: `experiments/vision/study_g2_transfer_cost.py`. A6000 (cuda:1), qwenvl7b
 | `results/vision/study_g2/study_g2_part3_reconstruction.json` | `study_g2_transfer_cost.py` | qwenvl7b | a6000 (cuda:1) | same | Same as CSV plus per-rep timing breakdown | 2026-08-31 |
 | `results/vision/study_g2/study_g2_part4_endtoend.json` | `study_g2_transfer_cost.py` | — | CPU (simulation) | 2016 rows (6 N × 2 families × 4 profiles × 7 repr × 2 accountings × 3 f-groups) | Accounting A: R7 p50 campus N=12 = 36ms; R3 = 391ms. Accounting B at f=1: R3 dominates all cells; at f=25: R3 and R7 split 12/12 (R7 wins only N≤6) | 2026-08-31 |
 | `results/vision/study_g2/study_g2_part5_dominance.json` | `study_g2_transfer_cost.py` | — | CPU | 24 cells × 2 accountings × 5 f-values | Accounting A: R7=24/24. Accounting B: R3=24/24 at f∈{1,2,5}; R3=16/24 at f=10; R3=R7=12/12 at f=25 | 2026-08-31 |
+
+## Study H — S-EMBER Structure Audit (2026-08-31)
+
+Script: `experiments/sember/study_h_sember_structure.py`. CPU-only. No model inference. Two escalation conditions met before annotation-level analysis: E1 (HF gated, psharma05 not approved) and E2 (no shared accumulating stream — GSER protocol). S-EMBER rejected as workload. Offline findings from HF filename metadata and codebase inspection: 3,141 videos / 387.9 h confirmed; median video 367 s; GSER makes each question a fresh forward pass. Annotation-level analyses (evidence distance, exclusion, QA/video distribution) require HF access approval.
+
+| file | script | model | device | n | headline | date |
+|---|---|---|---|---|---|---|
+| `results/sember/study_h/study_h_video_structure.json` | `study_h_sember_structure.py` | — | CPU | 3,141 video filenames | 3,141 videos, 387.9 h total; median=367s, IQR=283s, bimodal at 300s (47.6%) and 600s (36.2%); max=1,213s | 2026-08-31 |
+| `results/sember/study_h/study_h_feasibility.json` | `study_h_sember_structure.py` | qwen3vl8b (analytic) | CPU (arithmetic) | 6 scenarios | Median video at 1fps: 118,908 tok, 6.8 GB KV (FITS). Max video at 2fps: 785,700 tok, 45.1 GB KV (OOM). Safe ceiling: 1fps | 2026-08-31 |
+| `results/sember/study_h/study_h_summary.json` | `study_h_sember_structure.py` | — | CPU | — | STOP: E1 (HF gated) + E2 (no session stream). S-EMBER rejected as retention workload | 2026-08-31 |
+
+## Study H2 — S-EMBER Annotation Analysis (2026-09-01)
+
+Script: `experiments/sember/study_h2_sember_annotations.py`. CPU only. No model inference. Annotation access granted. Primary finding: all 3,141 videos are multi-question (2–6 Q/video), 99.97% with distinct question_time values (median spread 204 s). E2 retracted — growing prefix exists; S-EMBER accepted as session workload. Evidence distance (nearest): median 21 s, IQR 56 s, p90 117 s — wide. After excluding counting (17.2%): 7,821 QA / 2,755 multi-Q videos. Session at 1fps fits trivially (max KV 22.3 GB, 0% exceed 32 GB).
+
+| file | script | model | device | n | headline | date |
+|---|---|---|---|---|---|---|
+| `results/sember/study_h2/study_h2_session_structure.json` | `study_h2_sember_annotations.py` | — | CPU | 3,141 videos | All 3,141 videos multi-question; only 1/3141 same-qt; median qt-spread=204s (IQR=167s, p90=429s). ACCEPT. | 2026-09-01 |
+| `results/sember/study_h2/study_h2_evidence_distance.json` | `study_h2_sember_annotations.py` | — | CPU | 9,438 pairs | Nearest (qt−aet): median=21s, IQR=56s, p90=117s, p99=335s. Category range 44s. object_comparison/spatial_aware nearest=0 (aet=qt), farthest median 68–90s. | 2026-09-01 |
+| `results/sember/study_h2/study_h2_evidence_distance_hist.csv` | `study_h2_sember_annotations.py` | — | CPU | 9,438 pairs | Log-spaced histogram: [0,1)=27.6%, [15,30)=16.4%, [30,60)=17.5%, [60,120)=14.2% — wide | 2026-09-01 |
+| `results/sember/study_h2/study_h2_exclusion.json` | `study_h2_sember_annotations.py` | — | CPU | 9,448 pairs | counting=1,627 (17.2%); remaining=7,821 QA / 3,126 videos / 2,755 multi-Q | 2026-09-01 |
+| `results/sember/study_h2/study_h2_session_feasibility.json` | `study_h2_sember_annotations.py` | qwen3vl8b (analytic) | CPU | 3,141 multi-Q videos | 1fps: final-Q median KV=5.89GB, p90=10.6GB, max=22.3GB; 0/3141 exceed 32GB — fits trivially | 2026-09-01 |
+| `results/sember/study_h2/study_h2_sanity.json` | `study_h2_sember_annotations.py` | — | CPU | 9,448 pairs | SC1/SC2/SC4b/SC5: PASS. SC3/SC4: 10 artifact records (aet=floor(qt)+1, diff=1.0s exactly), excluded from evidence distance | 2026-09-01 |
+| `results/sember/study_h2/study_h2_summary.json` | `study_h2_sember_annotations.py` | — | CPU | — | ACCEPT: growing prefix exists; E2 retracted; S-EMBER usable as session workload | 2026-09-01 |

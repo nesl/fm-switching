@@ -1,0 +1,71 @@
+{
+  "model": "Qwen3-VL-8B-Instruct",
+  "tokens_per_frame_upper_560x560": 324,
+  "tokens_per_frame_lower_560x315": 220,
+  "kv_bytes_per_token": 57344,
+  "a6000_vram_gb": 48,
+  "model_weights_gb": 16,
+  "usable_vram_gb": 32,
+  "scenarios": {
+    "median_video_367s_1fps": {
+      "duration_s": 367.4,
+      "fps": 1,
+      "n_frames": 367,
+      "vision_tokens_upper": 118908,
+      "vision_tokens_lower": 80740,
+      "kv_bytes_upper_gb": 6.82,
+      "kv_bytes_lower_gb": 4.63,
+      "fits_48gb_vram": true
+    },
+    "median_video_367s_2fps": {
+      "duration_s": 367.4,
+      "fps": 2,
+      "n_frames": 734,
+      "vision_tokens_upper": 237816,
+      "vision_tokens_lower": 161480,
+      "kv_bytes_upper_gb": 13.64,
+      "kv_bytes_lower_gb": 9.26,
+      "fits_48gb_vram": true
+    },
+    "median_video_367s_4fps": {
+      "duration_s": 367.4,
+      "fps": 4,
+      "n_frames": 1469,
+      "vision_tokens_upper": 475956,
+      "vision_tokens_lower": 323180,
+      "kv_bytes_upper_gb": 27.29,
+      "kv_bytes_lower_gb": 18.53,
+      "fits_48gb_vram": true
+    },
+    "max_video_1213s_1fps": {
+      "duration_s": 1212.7,
+      "fps": 1,
+      "n_frames": 1212,
+      "vision_tokens_upper": 392688,
+      "vision_tokens_lower": 266640,
+      "kv_bytes_upper_gb": 22.52,
+      "kv_bytes_lower_gb": 15.29,
+      "fits_48gb_vram": true
+    },
+    "max_video_1213s_2fps": {
+      "duration_s": 1212.7,
+      "fps": 2,
+      "n_frames": 2425,
+      "vision_tokens_upper": 785700,
+      "vision_tokens_lower": 533500,
+      "kv_bytes_upper_gb": 45.06,
+      "kv_bytes_lower_gb": 30.59,
+      "fits_48gb_vram": false
+    },
+    "max_video_1213s_4fps": {
+      "duration_s": 1212.7,
+      "fps": 4,
+      "n_frames": 4850,
+      "vision_tokens_upper": 1571400,
+      "vision_tokens_lower": 1067000,
+      "kv_bytes_upper_gb": 90.11,
+      "kv_bytes_lower_gb": 61.19,
+      "fits_48gb_vram": false
+    }
+  }
+}

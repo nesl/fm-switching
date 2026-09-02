@@ -1,0 +1,91 @@
+{
+  "SC1_qa_count": {
+    "expected": 9448,
+    "grounding": 9448,
+    "mcq": 9448,
+    "pass": true
+  },
+  "SC2_valid_grounding": {
+    "n_missing_temporal": 0,
+    "missing_examples": [],
+    "pass": true
+  },
+  "SC3_temporal_order": {
+    "n_violations": 10,
+    "examples": [
+      {
+        "qid": "443c89904e6a7203257a6492fa2caeb42f5c18e80e733603e3c61a54f11c77b9",
+        "issue": "end>qt",
+        "aet": 600.0,
+        "qt": 599.0
+      },
+      {
+        "qid": "ba8860c25a82c7bacb6cef89762764d60952d8c186d09f55a93160cd63e4daa1",
+        "issue": "end>qt",
+        "aet": 360.0,
+        "qt": 359.0
+      },
+      {
+        "qid": "DBB7BE2B65607CCDD767F67BB50EEBDCD6E65DADB0B189A148319646AA78D5A9",
+        "issue": "end>qt",
+        "aet": 600.0,
+        "qt": 599.0
+      },
+      {
+        "qid": "DEDF30A99C30373D290DB68E1565B315C2A4882F16ABFE2ECA8815D5987A7D70",
+        "issue": "end>qt",
+        "aet": 600.0,
+        "qt": 599.0
+      },
+      {
+        "qid": "d0554a4110f2b7afaf6c996b4d53819533330c0bda8cb176934aa23d3d187d0a",
+        "issue": "end>qt",
+        "aet": 332.0,
+        "qt": 331.0
+      }
+    ],
+    "all_violations_are_1s_artifact": true,
+    "pass": false,
+    "action": "10 records excluded from evidence distance (aet = floor(qt)+1 rounding artifact). Included in session structure. Not a causal-protocol violation."
+  },
+  "SC4_no_negative_nearest": {
+    "n_negative": 10,
+    "examples": [
+      {
+        "qid": "443c89904e6a7203257a6492fa2caeb42f5c18e80e733603e3c61a54f11c77b9",
+        "nearest": -1.0
+      },
+      {
+        "qid": "ba8860c25a82c7bacb6cef89762764d60952d8c186d09f55a93160cd63e4daa1",
+        "nearest": -1.0
+      },
+      {
+        "qid": "DBB7BE2B65607CCDD767F67BB50EEBDCD6E65DADB0B189A148319646AA78D5A9",
+        "nearest": -1.0
+      },
+      {
+        "qid": "DEDF30A99C30373D290DB68E1565B315C2A4882F16ABFE2ECA8815D5987A7D70",
+        "nearest": -1.0
+      },
+      {
+        "qid": "d0554a4110f2b7afaf6c996b4d53819533330c0bda8cb176934aa23d3d187d0a",
+        "nearest": -1.0
+      }
+    ],
+    "all_are_minus_one": true,
+    "pass": false,
+    "action": "Same 10 artifact records as SC3; excluded from evidence distance analysis."
+  },
+  "SC4b_no_negative_farthest": {
+    "n_negative": 0,
+    "examples": [],
+    "pass": true
+  },
+  "SC5_memory_recency_matches_qt_minus_ast": {
+    "n_mismatches": 0,
+    "examples": [],
+    "pass": true,
+    "note": "memory_recency should equal question_time - answer_start_time (farthest distance)"
+  },
+  "all_pass": false
+}
