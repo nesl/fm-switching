@@ -612,3 +612,11 @@ Script: `experiments/sember/study_h2_sember_annotations.py`. CPU only. No model 
 | `results/sember/study_h2/study_h2_session_feasibility.json` | `study_h2_sember_annotations.py` | qwen3vl8b (analytic) | CPU | 3,141 multi-Q videos | 1fps: final-Q median KV=5.89GB, p90=10.6GB, max=22.3GB; 0/3141 exceed 32GB — fits trivially | 2026-09-01 |
 | `results/sember/study_h2/study_h2_sanity.json` | `study_h2_sember_annotations.py` | — | CPU | 9,448 pairs | SC1/SC2/SC4b/SC5: PASS. SC3/SC4: 10 artifact records (aet=floor(qt)+1, diff=1.0s exactly), excluded from evidence distance | 2026-09-01 |
 | `results/sember/study_h2/study_h2_summary.json` | `study_h2_sember_annotations.py` | — | CPU | — | ACCEPT: growing prefix exists; E2 retracted; S-EMBER usable as session workload | 2026-09-01 |
+
+## Study I3 — S-EMBER SPARSE vs TEMPORAL (full power, n=459)
+
+| file | script | model | device | n | finding | date |
+|---|---|---|---|---|---|---|
+| `results/sember/study_i3/study_i3_trials.jsonl` | `study_i3_budget.py` | qwen3vl4b + qwen3vl8b | a6000 (cuda:1) | 1836 | 4×459 trials: SPARSE/TEMPORAL × 2 models; SPATIAL dropped | 2026-09-03 |
+| `results/sember/study_i3/study_i3_results.json` | `study_i3_budget.py` | qwen3vl4b + qwen3vl8b | a6000 (cuda:1) | 1836 | UNDERPOWERED: no category passes CI-overlap. 4B +2.6pp overall, 8B +4.8pp overall. Strongest: 8B sequential_action +11.5pp, location_trace +9.6pp — all within CI | 2026-09-03 |
+| `reports/study_i3_budget.md` | — | — | — | — | Full analysis report with A–F analyses | 2026-09-03 |
