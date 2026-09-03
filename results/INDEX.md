@@ -620,3 +620,10 @@ Script: `experiments/sember/study_h2_sember_annotations.py`. CPU only. No model 
 | `results/sember/study_i3/study_i3_trials.jsonl` | `study_i3_budget.py` | qwen3vl4b + qwen3vl8b | a6000 (cuda:1) | 1836 | 4×459 trials: SPARSE/TEMPORAL × 2 models; SPATIAL dropped | 2026-09-03 |
 | `results/sember/study_i3/study_i3_results.json` | `study_i3_budget.py` | qwen3vl4b + qwen3vl8b | a6000 (cuda:1) | 1836 | UNDERPOWERED: no category passes CI-overlap. 4B +2.6pp overall, 8B +4.8pp overall. Strongest: 8B sequential_action +11.5pp, location_trace +9.6pp — all within CI | 2026-09-03 |
 | `reports/study_i3_budget.md` | — | — | — | — | Full analysis report with A–F analyses | 2026-09-03 |
+
+## Study I3 Re-analysis — Paired McNemar Tests and Corrected Accounting
+
+| file | script | model | device | n | finding | date |
+|---|---|---|---|---|---|---|
+| `results/sember/study_i3_reanalysis/study_i3_reanalysis.json` | `study_i3_reanalyse.py` | qwen3vl4b + qwen3vl8b | CPU | 1836 (re-analysis, no new inference) | INCONCLUSIVE: no category survives BH correction. 8B overall p=0.047 (b=45,c=67). Latency defect corrected: 8B SPARSE inference 1,228ms not 5,295ms. | 2026-09-03 |
+| `reports/study_i3_reanalysis.md` | — | — | — | — | Full re-analysis report fixing 3 defects: wrong test, latency mix, reuse count header | 2026-09-03 |
