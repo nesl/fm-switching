@@ -22,7 +22,8 @@ GSER protocol: each question sees only video[0, question_time]. Asserted per tri
 Coverage arithmetic: uses answer_start_time, not answer_end_time (per Study H2 SC5 correction).
 Sampling:
   SPARSE — 16 frames uniform over [0, question_time]
-  DENSE  — 1 fps over [0, question_time], capped at 256 frames
+  DENSE  — 1 fps over [0, question_time], capped at 42 frames (processor 3D-budget limit
+           for full SPARSE-equivalent spatial resolution; see study_i_diagnostic.py Bug 1)
 Scoring: exact letter match (A/B/C/D/E); max_new_tokens=16; greedy decode.
 """
 
@@ -91,7 +92,10 @@ MODEL_CONFIGS = [
 SAMPLING_MODES = ["SPARSE", "DENSE"]
 SPARSE_N_FRAMES = 16
 DENSE_FPS = 1
-DENSE_MAX_FRAMES = 256
+# Processor 3D budget: T×H×W ≤ 25,165,824. S-EMBER native → fetch_video outputs
+# 868×672 = 583,296 px/frame. Budget crossover at 43 frames. Cap at 42 to preserve
+# SPARSE-equivalent spatial resolution (270 tok/frame). Diagnostic: study_i_diagnostic.py.
+DENSE_MAX_FRAMES = 42
 
 RUNTIME_LIMIT_S = 6 * 3600
 DOWNLOAD_LIMIT_GB = 200.0
@@ -817,12 +821,45 @@ def stamp() -> dict:
 
 # ── MAIN ─────────────────────────────────────────────────────────────────────
 
+def strip_dense_trials() -> None:
+    """Remove all DENSE rows from the trials JSONL so they can be rerun with the fixed cap."""
+    if not TRIALS_PATH.exists():
+        log("  No trials file — nothing to strip")
+        return
+    lines_in = TRIALS_PATH.read_text().splitlines()
+    kept, dropped = [], 0
+    for line in lines_in:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            r = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if r.get("sampling") == "DENSE":
+            dropped += 1
+        else:
+            kept.append(line)
+    TRIALS_PATH.write_text("\n".join(kept) + ("\n" if kept else ""))
+    log(f"  Stripped {dropped} DENSE rows; {len(kept)} SPARSE rows retained")
+
+
 def main() -> None:
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--rerun-dense", action="store_true",
+                        help="Strip existing DENSE rows before rerunning (use after Bug 1 fix)")
+    args = parser.parse_args()
+
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     VIDEO_DIR.mkdir(parents=True, exist_ok=True)
     random.seed(SEED)
 
     log("=== Study I — S-EMBER tier gap ===\n")
+
+    if args.rerun_dense:
+        log("--rerun-dense: stripping existing DENSE trials from JSONL")
+        strip_dense_trials()
 
     mcq_rows = load_jsonl(MCQ_PATH)
     log(f"Loaded {len(mcq_rows)} MCQ rows")

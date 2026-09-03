@@ -66,6 +66,23 @@ and a run that generates new entries appends to the cache. Do not gitignore them
 | `locomo_summaries_80.json` | LLM summaries ~80 tok per LoCoMo conversation (Qwen2.5-7B-Instruct) | Generated during locomo_audit_scaled run |
 | `locomo_summaries_200.json` | LLM summaries ~200 tok per LoCoMo conversation (Qwen2.5-7B-Instruct) | Generated during locomo_audit_scaled run |
 
+## Study I2 — S-EMBER frame-budget experiment (a6000)
+
+| file | script | model | device | n | headline | old name |
+|---|---|---|---|---|---|---|
+| `results/sember/study_i2/study_i2_trials.jsonl` | `study_i2_budget.py` | qwen3vl4b+8b | a6000 | 1,318 valid (4B: SPARSE 459, SPATIAL 459, TEMPORAL 100; 8B: 100 each) | TEMPORAL wins overall (4B 0.340, 8B 0.340); SPARSE second (4B 0.266, 8B 0.250); SPATIAL lowest (4B 0.218, 8B 0.250). 8B−4B gap negligible (≤0.032) — no tier-placement benefit. | — |
+| `results/sember/study_i2/study_i2_results.json` | `study_i2_budget.py` | qwen3vl4b+8b | a6000 | 1,318 valid trials | Analyses A–F: per-category accuracy, text-only baseline (+5.0pp vision), 8B−4B gap, latency/memory (TEMPORAL ~2100–3100ms ≈ SPATIAL), position bias. TEMPORAL wins time_duration and sequential_action (both models). SPARSE wins spatial_aware_reasoning and object_comparison. Vision tokens: SPARSE=4317, SPATIAL=11928, TEMPORAL=4344 (budget reduces spatial to ~44 tok/frame at 256 frames). | — |
+
+## Study I — S-EMBER tier gap (a6000)
+
+| file | script | model | device | n | headline | old name |
+|---|---|---|---|---|---|---|
+| `results/sember/study_i_diag/diag_frame_pipeline.json` | `study_i_diagnostic.py` | qwen3vl4b+8b | a6000 | 20 questions × 2 modes | SPARSE: 270 tok/f at 868×672 (stage 2 no reduction). DENSE: 48 tok/f at 352×256 at qt≥50 (5.8× spatial loss). Crossover at 43 f. Max safe DENSE = 42 f. | — |
+| `results/sember/study_i_diag/diag_below_chance.json` | `study_i_diagnostic.py` | qwen3vl4b+8b | a6000 | analysis only | 0 parse failures; 8B E-bias in spatial_aware_reasoning (19/56 E pred vs 10/56 correct E); 4B genuinely weak on location_trace. Not a scoring bug. | — |
+| `results/sember/study_i_diag/diag_text_only_trials.jsonl` | `study_i_diagnostic.py` | qwen3vl4b | a6000 | 459 text-only | text-only overall 21.6%; vision adds +5.0pp (video 26.6%). Vision load-bearing. | — |
+| `results/sember/study_i_diag/diag_text_only_summary.json` | `study_i_diagnostic.py` | qwen3vl4b | a6000 | 459 questions | Per-category vision delta: visual_detail_recall +24.5pp, sequential_action +13.1pp, object_comparison +12.5pp; time_duration −9.7pp, location_trace −11.5pp. | — |
+| `results/sember/study_i/study_i_trials.jsonl` | `study_i_tier_gap.py` | qwen3vl4b+8b | a6000 | 1,596 trials (partial) | SPARSE arms complete (4B+8B, 459 ea). DENSE arms: 4B complete (INVALID — 48 tok/f), 8B partial 219/459 (INVALID, killed). Pending rerun with ≤42-frame fix. | — |
+
 ## Appended rows (per-box, append-only to avoid cross-box edit conflicts)
 
 | file | experiment | model | device | n | headline | source commit | old name |
