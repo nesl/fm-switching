@@ -1,0 +1,541 @@
+{
+  "study": "K",
+  "preliminary": false,
+  "n_questions": 400,
+  "n_multi_image": 113,
+  "category_distribution": {
+    "Trajectory Reasoning": 66,
+    "Action Reasoning": 72,
+    "Pointing": 34,
+    "State Estimation": 55,
+    "Spatial Reasoning": 84,
+    "Multi-view Reasoning": 37,
+    "Task Reasoning": 38,
+    "Other": 14
+  },
+  "arm_accuracies": {
+    "INSTRUCT": {
+      "mean_acc_pct": 42.0,
+      "per_seed": {
+        "None": 42.0
+      }
+    },
+    "INSTRUCT_PERMUTED": {
+      "mean_acc_pct": 38.75,
+      "per_seed": {
+        "None": 38.75
+      }
+    },
+    "THINKING": {
+      "mean_acc_pct": 45.08,
+      "per_seed": {
+        "42": 44.5,
+        "123": 45.75,
+        "456": 45.0
+      }
+    },
+    "THINKING-QUICK": {
+      "mean_acc_pct": 45.75,
+      "per_seed": {
+        "42": 45.0,
+        "123": 46.0,
+        "456": 46.25
+      }
+    },
+    "THINKING_PERMUTED": {
+      "mean_acc_pct": 41.33,
+      "per_seed": {
+        "42": 41.0,
+        "123": 41.5,
+        "456": 41.5
+      }
+    }
+  },
+  "replication": {
+    "INSTRUCT": {
+      "acc_pct": 42.0,
+      "published": 41.3,
+      "diff_pp": 0.7,
+      "pass": true,
+      "per_seed": {
+        "None": 42.0
+      }
+    },
+    "THINKING": {
+      "acc_pct": 45.08,
+      "published": 47.3,
+      "diff_pp": -2.22,
+      "pass": true,
+      "per_seed": {
+        "42": 44.5,
+        "123": 45.75,
+        "456": 45.0
+      }
+    }
+  },
+  "replication_pass": true,
+  "gate_overall": {
+    "n": 400,
+    "b": 59,
+    "c": 49,
+    "diff": 0.025,
+    "ci_lo": -0.0425,
+    "ci_hi": 0.0925,
+    "pval": 0.3865,
+    "method": "chisq_continuity"
+  },
+  "gate_holds": false,
+  "gate_verdict": "FAILS \u2014 THINKING \u2264 INSTRUCT under McNemar's test",
+  "group_breakdown": {
+    "single_image": {
+      "n": 287,
+      "b": 40,
+      "c": 35,
+      "diff": 0.0174,
+      "ci_lo": -0.0627,
+      "ci_hi": 0.101,
+      "pval": 0.6442,
+      "method": "chisq_continuity",
+      "pval_bh": 1.0,
+      "sig_bh": false
+    },
+    "multi_image": {
+      "n": 113,
+      "b": 19,
+      "c": 14,
+      "diff": 0.0442,
+      "ci_lo": -0.0796,
+      "ci_hi": 0.1681,
+      "pval": 0.4862,
+      "method": "chisq_continuity",
+      "pval_bh": 1.0,
+      "sig_bh": false
+    },
+    "cat:Action Reasoning": {
+      "n": 72,
+      "b": 11,
+      "c": 10,
+      "diff": 0.0139,
+      "ci_lo": -0.1389,
+      "ci_hi": 0.1806,
+      "pval": 1.0,
+      "method": "exact_binomial",
+      "pval_bh": 1.0,
+      "sig_bh": false
+    },
+    "cat:Multi-view Reasoning": {
+      "n": 37,
+      "b": 7,
+      "c": 6,
+      "diff": 0.027,
+      "ci_lo": -0.1892,
+      "ci_hi": 0.2432,
+      "pval": 1.0,
+      "method": "exact_binomial",
+      "pval_bh": 1.0,
+      "sig_bh": false
+    },
+    "cat:Other": {
+      "n": 14,
+      "b": 3,
+      "c": 2,
+      "diff": 0.0714,
+      "ci_lo": -0.2857,
+      "ci_hi": 0.4286,
+      "pval": 1.0,
+      "method": "exact_binomial",
+      "pval_bh": 1.0,
+      "sig_bh": false
+    },
+    "cat:Pointing": {
+      "n": 34,
+      "b": 3,
+      "c": 2,
+      "diff": 0.0294,
+      "ci_lo": -0.2059,
+      "ci_hi": 0.2647,
+      "pval": 1.0,
+      "method": "exact_binomial",
+      "pval_bh": 1.0,
+      "sig_bh": false
+    },
+    "cat:Spatial Reasoning": {
+      "n": 84,
+      "b": 13,
+      "c": 3,
+      "diff": 0.119,
+      "ci_lo": -0.0357,
+      "ci_hi": 0.2619,
+      "pval": 0.0213,
+      "method": "exact_binomial",
+      "pval_bh": 0.213,
+      "sig_bh": false
+    },
+    "cat:State Estimation": {
+      "n": 55,
+      "b": 9,
+      "c": 4,
+      "diff": 0.0909,
+      "ci_lo": -0.0909,
+      "ci_hi": 0.2727,
+      "pval": 0.2668,
+      "method": "exact_binomial",
+      "pval_bh": 0.8893,
+      "sig_bh": false
+    },
+    "cat:Task Reasoning": {
+      "n": 38,
+      "b": 6,
+      "c": 7,
+      "diff": -0.0263,
+      "ci_lo": -0.2632,
+      "ci_hi": 0.2105,
+      "pval": 1.0,
+      "method": "exact_binomial",
+      "pval_bh": 1.0,
+      "sig_bh": false
+    },
+    "cat:Trajectory Reasoning": {
+      "n": 66,
+      "b": 7,
+      "c": 15,
+      "diff": -0.1212,
+      "ci_lo": -0.2879,
+      "ci_hi": 0.0455,
+      "pval": 0.1338,
+      "method": "exact_binomial",
+      "pval_bh": 0.669,
+      "sig_bh": false
+    }
+  },
+  "think_spend": {
+    "THINKING": {
+      "overall": {
+        "n": 1200,
+        "median": 523.0,
+        "iqr": 1068.8,
+        "min": 0,
+        "max": 14464,
+        "iqr_over_median": 2.043
+      },
+      "single": {
+        "n": 861,
+        "median": 402.0,
+        "iqr": 898.0,
+        "min": 0,
+        "max": 14464,
+        "iqr_over_median": 2.234
+      },
+      "multi": {
+        "n": 339,
+        "median": 875.0,
+        "iqr": 1240.5,
+        "min": 0,
+        "max": 8122,
+        "iqr_over_median": 1.418
+      },
+      "cat:Action Reasoning": {
+        "n": 216,
+        "median": 489.5,
+        "iqr": 777.0,
+        "min": 0,
+        "max": 7244,
+        "iqr_over_median": 1.587
+      },
+      "cat:Multi-view Reasoning": {
+        "n": 111,
+        "median": 685.0,
+        "iqr": 794.5,
+        "min": 0,
+        "max": 4983,
+        "iqr_over_median": 1.16
+      },
+      "cat:Other": {
+        "n": 42,
+        "median": 541.0,
+        "iqr": 1665.0,
+        "min": 0,
+        "max": 4277,
+        "iqr_over_median": 3.078
+      },
+      "cat:Pointing": {
+        "n": 102,
+        "median": 335.5,
+        "iqr": 626.0,
+        "min": 0,
+        "max": 11880,
+        "iqr_over_median": 1.866
+      },
+      "cat:Spatial Reasoning": {
+        "n": 252,
+        "median": 768.0,
+        "iqr": 1506.2,
+        "min": 0,
+        "max": 14464,
+        "iqr_over_median": 1.961
+      },
+      "cat:State Estimation": {
+        "n": 165,
+        "median": 268.0,
+        "iqr": 613.0,
+        "min": 46,
+        "max": 5954,
+        "iqr_over_median": 2.287
+      },
+      "cat:Task Reasoning": {
+        "n": 114,
+        "median": 692.0,
+        "iqr": 1510.8,
+        "min": 0,
+        "max": 6236,
+        "iqr_over_median": 2.183
+      },
+      "cat:Trajectory Reasoning": {
+        "n": 198,
+        "median": 623.0,
+        "iqr": 969.5,
+        "min": 0,
+        "max": 7392,
+        "iqr_over_median": 1.556
+      }
+    },
+    "THINKING-QUICK": {
+      "overall": {
+        "n": 1200,
+        "median": 407.5,
+        "iqr": 801.8,
+        "min": 0,
+        "max": 10441,
+        "iqr_over_median": 1.967
+      },
+      "single": {
+        "n": 861,
+        "median": 317.0,
+        "iqr": 630.0,
+        "min": 0,
+        "max": 10441,
+        "iqr_over_median": 1.987
+      },
+      "multi": {
+        "n": 339,
+        "median": 743.0,
+        "iqr": 1072.5,
+        "min": 0,
+        "max": 6315,
+        "iqr_over_median": 1.443
+      },
+      "cat:Action Reasoning": {
+        "n": 216,
+        "median": 331.0,
+        "iqr": 487.2,
+        "min": 0,
+        "max": 5797,
+        "iqr_over_median": 1.472
+      },
+      "cat:Multi-view Reasoning": {
+        "n": 111,
+        "median": 485.0,
+        "iqr": 784.0,
+        "min": 0,
+        "max": 6315,
+        "iqr_over_median": 1.616
+      },
+      "cat:Other": {
+        "n": 42,
+        "median": 509.5,
+        "iqr": 1855.2,
+        "min": 0,
+        "max": 4859,
+        "iqr_over_median": 3.641
+      },
+      "cat:Pointing": {
+        "n": 102,
+        "median": 317.0,
+        "iqr": 676.5,
+        "min": 0,
+        "max": 10441,
+        "iqr_over_median": 2.134
+      },
+      "cat:Spatial Reasoning": {
+        "n": 252,
+        "median": 603.5,
+        "iqr": 1107.5,
+        "min": 0,
+        "max": 9234,
+        "iqr_over_median": 1.835
+      },
+      "cat:State Estimation": {
+        "n": 165,
+        "median": 208.0,
+        "iqr": 405.0,
+        "min": 0,
+        "max": 7281,
+        "iqr_over_median": 1.947
+      },
+      "cat:Task Reasoning": {
+        "n": 114,
+        "median": 672.5,
+        "iqr": 1335.5,
+        "min": 59,
+        "max": 4607,
+        "iqr_over_median": 1.986
+      },
+      "cat:Trajectory Reasoning": {
+        "n": 198,
+        "median": 447.5,
+        "iqr": 625.2,
+        "min": 61,
+        "max": 5156,
+        "iqr_over_median": 1.397
+      }
+    }
+  },
+  "non_termination": {
+    "INSTRUCT": {
+      "budget_hits": 0,
+      "total_trials": 400,
+      "n_seeds": 1,
+      "hits_per_400q": 0.0,
+      "single": 0,
+      "multi": 0
+    },
+    "THINKING": {
+      "budget_hits": 15,
+      "total_trials": 1200,
+      "n_seeds": 3,
+      "hits_per_400q": 5.0,
+      "single": 9,
+      "multi": 6
+    },
+    "THINKING-QUICK": {
+      "budget_hits": 8,
+      "total_trials": 1200,
+      "n_seeds": 3,
+      "hits_per_400q": 2.7,
+      "single": 4,
+      "multi": 4
+    }
+  },
+  "think_vs_correct_corr": {
+    "overall": {
+      "n": 1200,
+      "r": -0.1228,
+      "pval": 0.0,
+      "label": "overall"
+    },
+    "single": {
+      "n": 861,
+      "r": -0.1259,
+      "pval": 0.0002,
+      "label": "single"
+    },
+    "multi": {
+      "n": 339,
+      "r": -0.1032,
+      "pval": 0.0577,
+      "label": "multi"
+    },
+    "cat:Action Reasoning": {
+      "n": 216,
+      "r": -0.0604,
+      "pval": 0.3771,
+      "label": "Action Reasoning"
+    },
+    "cat:Multi-view Reasoning": {
+      "n": 111,
+      "r": 0.0306,
+      "pval": 0.7498,
+      "label": "Multi-view Reasoning"
+    },
+    "cat:Other": {
+      "n": 42,
+      "r": 0.0201,
+      "pval": 0.8992,
+      "label": "Other"
+    },
+    "cat:Pointing": {
+      "n": 102,
+      "r": -0.1175,
+      "pval": 0.2395,
+      "label": "Pointing"
+    },
+    "cat:Spatial Reasoning": {
+      "n": 252,
+      "r": -0.2575,
+      "pval": 0.0,
+      "label": "Spatial Reasoning"
+    },
+    "cat:State Estimation": {
+      "n": 165,
+      "r": -0.0023,
+      "pval": 0.9764,
+      "label": "State Estimation"
+    },
+    "cat:Task Reasoning": {
+      "n": 114,
+      "r": -0.321,
+      "pval": 0.0005,
+      "label": "Task Reasoning"
+    },
+    "cat:Trajectory Reasoning": {
+      "n": 198,
+      "r": -0.0812,
+      "pval": 0.2557,
+      "label": "Trajectory Reasoning"
+    }
+  },
+  "thinking_quick_vs_thinking": {
+    "gate": {
+      "n": 400,
+      "b": 21,
+      "c": 20,
+      "diff": 0.0025,
+      "ci_lo": -0.065,
+      "ci_hi": 0.0725,
+      "pval": 1.0,
+      "method": "chisq_continuity"
+    },
+    "thinking_mean_acc_pct": 45.08,
+    "thinking_quick_mean_acc_pct": 45.75,
+    "median_latency_thinking": 11110.6,
+    "median_latency_quick": 8528.3,
+    "median_think_tokens_thinking": 523.0,
+    "median_think_tokens_quick": 407.5
+  },
+  "position_bias": {
+    "INSTRUCT": {
+      "acc_original_pct": 42.0,
+      "acc_permuted_pct": 38.75,
+      "diff_pp": -3.25,
+      "letter_dist_original": {
+        "D": 60,
+        "C": 105,
+        "A": 137,
+        "B": 98
+      },
+      "letter_dist_permuted": {
+        "A": 120,
+        "D": 69,
+        "B": 88,
+        "C": 121
+      }
+    },
+    "THINKING": {
+      "acc_original_pct": 44.5,
+      "acc_permuted_pct": 41.5,
+      "diff_pp": -3.0,
+      "letter_dist_original": {
+        "D": 274,
+        "C": 310,
+        "A": 276,
+        "B": 333
+      },
+      "letter_dist_permuted": {
+        "B": 310,
+        "D": 291,
+        "C": 288,
+        "A": 298
+      }
+    }
+  }
+}

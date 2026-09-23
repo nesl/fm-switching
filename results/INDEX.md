@@ -627,3 +627,6 @@ Script: `experiments/sember/study_h2_sember_annotations.py`. CPU only. No model 
 |---|---|---|---|---|---|---|
 | `results/sember/study_i3_reanalysis/study_i3_reanalysis.json` | `study_i3_reanalyse.py` | qwen3vl4b + qwen3vl8b | CPU | 1836 (re-analysis, no new inference) | INCONCLUSIVE: no category survives BH correction. 8B overall p=0.047 (b=45,c=67). Latency defect corrected: 8B SPARSE inference 1,228ms not 5,295ms. | 2026-09-03 |
 | `reports/study_i3_reanalysis.md` | — | — | — | — | Full re-analysis report fixing 3 defects: wrong test, latency mix, reuse count header | 2026-09-03 |
+| `results/erqa/study_k/study_k_trials.jsonl` | `experiments/erqa/study_k_erqa.py` | Qwen3-VL-4B-Instruct + 4B-Thinking | a6000 (cuda:1) | 4,400 trials (5 arms × up to 3 seeds × 400 q) | GATE FAILS: THINKING 45.1% vs INSTRUCT 42.0%, diff=+2.50pp, p=0.3865. Replication PASS. Position bias material for both arms (INSTRUCT −3.2pp, THINKING −3.0pp). | 2026-09-22 |
+| `results/erqa/study_k/study_k_results.json` | `experiments/erqa/study_k_analyse.py` | Qwen3-VL-4B-Instruct + 4B-Thinking | a6000 (cuda:1) | 4,400 trials | Full analysis: gate verdict, group breakdown (BH corrected), think-token correlation, THINKING-QUICK comparison, position bias | 2026-09-22 |
+| `reports/study_k_erqa.md` | `experiments/erqa/study_k_analyse.py` | — | — | — | Study K final report | 2026-09-22 |
