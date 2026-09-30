@@ -1,5 +1,7 @@
 # FM-switching — Project Status
 
+Last updated: 2026-09-30 (Study J5 — Properly powered prompt comparison on SiGNgapore2D, COMPLETE. VERDICT: SIMPLIFIED significantly reduces non-termination (McNemar p=0.0043, b=18, c=4, n=70 pairs). ORIG 25.7% raw (corrected ≈13–16%) → SIMPLIFIED 5.7%. No sign is strictly worse under SIMPLIFIED. Think-token median higher under SIMPLIFIED (4,433 vs 3,729 tok) — prompt change affects termination, not reasoning depth. Accuracy scoring NOT executable: prediction=None for all trials, answer_text not stored. Analysis 6 vacuous: a=0. Report: reports/study_j5_prompt_power.md.)
+
 Last updated: 2026-09-30 (Study J4 — Seed variance on SiGNgapore2D non-terminators, COMPLETE. VERDICT: STOCHASTIC — no cap-hit sign fails on 0/5 or 5/5 seeds. Per-sign failure rates 1–4/5, not bimodal. Pooled rate 18/70=25.7% (95% CI 16.9–37.0%), consistent with StudyJ2 20% (CI 9–35%). Two control completers failed (IMG_6567 3/5, IMG_0042 1/5) — non-termination not confined to 8 StudyJ2 cap-hits. StudyJ2 asymptote reinterpreted: describes a per-attempt failure probability, not unanswerable signs. Report: reports/study_j4_seed_variance.md.)
 
 Last updated: 2026-09-30 (Study J3 — Prompt ablation on SiGNgapore2D non-terminators, COMPLETE. VERDICT: MIXED — non-termination substantially prompt-induced. ORIGINAL-SEED123 1/8 cap-hits truncated; SIMPLIFIED 0/8 (all terminate); BUDGET-AWARE 2/8. Removing 3 constraint clauses eliminates all truncation. Report: reports/study_j3_prompt_ablation.md.)
