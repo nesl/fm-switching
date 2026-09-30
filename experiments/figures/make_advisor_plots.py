@@ -79,73 +79,89 @@ def wilson_ci(k, n, z=1.96):
 # ─────────────────────────────────────────────────────────────────────────────
 # PLOT A — Workload screening table
 # Source: reports (values hardcoded with citations below)
+# Fifth column: selection rationale (Fix 2)
 # ─────────────────────────────────────────────────────────────────────────────
 def plot_A():
-    """Workload screening matrix: 4 datasets × 4 criteria."""
+    """Workload screening matrix: 4 datasets × 5 criteria (4 ticks + rationale)."""
     rows = [
-        # (dataset, platform_sourced, multi_query_session, published_thinking_gain, released)
-        # Tick=1, Cross=0, Partial=0.5
-        # platform_sourced: captured from real device/web, not lab imagery
-        # multi_query_session: benchmark has growing prefix / sequential QA structure
-        # published_thinking_gain: thinking model published to beat instruct on this benchmark
-        # released/available: dataset publicly downloadable
-        ("S-EMBER",       1,   1,   0,   1),   # H2: session ✓; no thinking benchmark number
-        ("ERQA",          1,   0,   1,   1),   # K: multi-image but not sequential session; Qwen3-VL paper
-        ("SiGNgapore2D",  1,   0,   0,   1),   # J: single-image per inference; no published thinking gain
-        ("COCO counting", 0,   0,   0,   1),   # C: lab imagery, single-Q, no thinking gain published
+        # (dataset, platform_sourced, multi_query_session, published_thinking_gain, released, rationale)
+        ("S-EMBER",       1, 1, 0, 1,
+         "released session workload\nwith grounded evidence intervals"),
+        ("ERQA",          1, 0, 1, 1,
+         "published Qwen3-VL Instruct/Thinking\nnumbers for our exact models"),
+        ("SiGNgapore2D",  1, 0, 0, 1,
+         "paper's documented failure modes are\nreasoning, not perception; real robot deployment\n(arXiv:2506.02556)"),
+        ("COCO counting", 0, 0, 0, 1,
+         "rejected — scale-insensitive\nVLM failure mode (Study C)"),
     ]
-    # Source citations (manifest):
-    # platform_sourced: H2 report "egocentric video from first-person wearable cameras"; ERQA "egocentric robot videos"; SiGNgapore2D "outdoor navigational sign photos"; COCO "curated lab dataset"
-    # multi_query_session: H2 report §2 "every video is a multi-question session"; ERQA study_k_erqa.md "single sequential inference per question, no growing prefix"; SiGNgapore2D "single sign per image"; COCO "single Q per image"
-    # published_thinking_gain: Qwen3-VL paper Table 4: ERQA 41.3→47.3 (+6.0pp); no equivalent for S-EMBER, SiGNgapore2D, COCO
-    # released: all 4 are publicly available on HuggingFace or official repos
 
     col_labels = [
         "Platform-sourced\nimagery",
         "Multi-query\nsession",
         "Published\nthinking gain",
         "Released /\navailable",
+        "Selection rationale",
     ]
-    n_rows, n_cols = len(rows), 4
-    dataset_labels = [r[0] for r in rows]
-    values = np.array([[r[1], r[2], r[3], r[4]] for r in rows], dtype=float)
+    n_rows   = len(rows)
+    n_tick_cols = 4
 
-    fig, ax = plt.subplots(figsize=SLIDE_SIZE)
-    ax.set_xlim(-0.5, n_cols - 0.5)
-    ax.set_ylim(-0.5, n_rows - 0.5)
-    ax.set_aspect("equal")
+    fig, ax = plt.subplots(figsize=(14, 5))
     ax.axis("off")
 
     MARKERS = {1: ("✓", C["blue"]), 0: ("✗", C["red"]), 0.5: ("◑", C["yellow"])}
 
-    for ri, row in enumerate(rows):
-        row_y = (n_rows - 1 - ri)
-        # dataset label
-        ax.text(-0.7, row_y, dataset_labels[ri], ha="right", va="center",
-                fontsize=FONT_LABEL, fontweight="bold" if ri < 3 else "normal")
-        for ci in range(n_cols):
-            v = values[ri, ci]
-            sym, col = MARKERS[v]
-            ax.text(ci, row_y, sym, ha="center", va="center",
-                    fontsize=28, color=col)
-    # column headers
-    for ci, lbl in enumerate(col_labels):
-        ax.text(ci, n_rows - 0.1, lbl, ha="center", va="bottom",
-                fontsize=FONT_LABEL, fontweight="bold", wrap=True)
+    # Layout: tick columns at x=0..3, rationale column at x=5 (wider gap)
+    tick_xs = [0, 1, 2, 3]
+    rationale_x = 5.2
 
-    # legend
+    ax.set_xlim(-2.2, rationale_x + 3.5)
+    ax.set_ylim(-0.8, n_rows + 0.3)
+
+    for ri, row in enumerate(rows):
+        row_y = n_rows - 1 - ri
+        dataset, p, m, t, r, rationale = row
+        values = [p, m, t, r]
+
+        # Dataset label
+        weight = "bold" if ri < 3 else "normal"
+        color  = C["dark"] if ri < 3 else C["grey"]
+        ax.text(-2.0, row_y, dataset, ha="left", va="center",
+                fontsize=FONT_LABEL, fontweight=weight, color=color)
+
+        for ci, v in enumerate(values):
+            sym, col = MARKERS[v]
+            ax.text(tick_xs[ci], row_y, sym, ha="center", va="center",
+                    fontsize=26, color=col)
+
+        # Rationale text
+        rat_color = C["grey"] if ri == 3 else C["dark"]
+        ax.text(rationale_x, row_y, rationale, ha="left", va="center",
+                fontsize=10, color=rat_color, style="italic" if ri == 3 else "normal")
+
+    # Column headers
+    for ci, x in enumerate(tick_xs):
+        ax.text(x, n_rows - 0.1, col_labels[ci], ha="center", va="bottom",
+                fontsize=11, fontweight="bold")
+    ax.text(rationale_x, n_rows - 0.1, col_labels[4], ha="left", va="bottom",
+            fontsize=11, fontweight="bold")
+
+    # Vertical separator before rationale column
+    ax.axvline(x=rationale_x - 0.4, ymin=0.05, ymax=0.95,
+               color=C["light_grey"], linewidth=1, linestyle="-")
+
+    # Horizontal separator above COCO
+    ax.axhline(y=0.5, color=C["grey"], linewidth=1, linestyle="--",
+               xmin=0.0, xmax=0.95)
+    ax.text(-2.0, 0.0, "rejected baseline", ha="left", va="center",
+            fontsize=9, color=C["grey"], style="italic")
+
+    # Legend
     legend_elements = [
-        mpatches.Patch(color=C["blue"],  label="✓  Yes"),
-        mpatches.Patch(color=C["red"],   label="✗  No"),
-        mpatches.Patch(color=C["yellow"], label="◑  Partial"),
+        mpatches.Patch(color=C["blue"], label="✓  Yes"),
+        mpatches.Patch(color=C["red"],  label="✗  No"),
     ]
     ax.legend(handles=legend_elements, loc="lower right", fontsize=FONT_ANNOT,
-              frameon=False, bbox_to_anchor=(1.0, -0.05))
-
-    # horizontal separator above COCO (rejected baseline)
-    ax.axhline(y=0.5, color=C["grey"], linewidth=1, linestyle="--", xmin=0.05, xmax=0.95)
-    ax.text(-0.7, 0.0, "rejected\nbaseline", ha="right", va="center",
-            fontsize=10, color=C["grey"], style="italic")
+              frameon=False, bbox_to_anchor=(1.0, -0.12))
 
     fig.tight_layout()
     save(fig, "A_workload_screening")
@@ -259,9 +275,12 @@ def plot_B():
     ax.set_xticklabels(bin_labels, rotation=30, ha="right", fontsize=FONT_TICK)
     ax.set_xlabel("Nearest evidence distance (s)", fontsize=FONT_LABEL)
     ax.set_ylabel("Fraction of questions", fontsize=FONT_LABEL)
-    ax.text(0.98, 0.97, f"n={overall_n:,}\n(counting_objects_events excluded)",
-            transform=ax.transAxes, ha="right", va="top", fontsize=10, color=C["grey"])
-    ax.legend(fontsize=9, frameon=False, loc="upper right", bbox_to_anchor=(1.0, 0.92))
+    ax.text(0.98, 0.97,
+            f"n={overall_n:,} (counting_objects_events excluded)\n"
+            f"Median = {median_val:.0f}s  |  p90 = {p90_val:.0f}s\n"
+            "(median 21s in committed report includes counting)",
+            transform=ax.transAxes, ha="right", va="top", fontsize=9, color=C["grey"])
+    ax.legend(fontsize=9, frameon=False, loc="upper right", bbox_to_anchor=(1.0, 0.82))
     fig.tight_layout()
     save(fig, "B_sember_evidence_distance")
 
@@ -335,9 +354,13 @@ def plot_C():
 
     ax.set_xticks(xs)
     ax.set_xticklabels([CAT_SHORT.get(c, c) for c in cats_sorted], fontsize=FONT_TICK)
-    ax.set_ylabel("Accuracy (SPARSE arm)", fontsize=FONT_LABEL)
+    ax.set_ylabel("Accuracy — SPARSE arm\n(16 frames uniform, greedy decode)", fontsize=FONT_LABEL)
     ax.set_ylim(0, 0.65)
     ax.legend(fontsize=FONT_ANNOT, frameon=False, loc="upper right")
+    ax.text(0.98, 0.02,
+            "Models: Qwen3-VL-4B-Instruct and 8B-Instruct\nArm: SPARSE = 16 frames uniform over [0, question_time]",
+            transform=ax.transAxes, ha="right", va="bottom", fontsize=9, color=C["grey"],
+            style="italic")
     fig.tight_layout()
     save(fig, "C_sember_4b_vs_8b")
 
@@ -351,16 +374,31 @@ def plot_C():
 # Aggregation: majority vote across 3 THINKING seeds (as in study analysis)
 # ─────────────────────────────────────────────────────────────────────────────
 def plot_D():
-    k = json.load(open(REPO / "results/erqa/study_k/study_k_results.json"))
-    n  = k["gate_overall"]["n"]
-    b  = k["gate_overall"]["b"]   # THINKING correct, INSTRUCT wrong
-    c  = k["gate_overall"]["c"]   # INSTRUCT correct, THINKING wrong
-    p  = k["gate_overall"]["pval"]
+    # Fix 5: compute all four cells directly from trials using majority vote.
+    trials = [json.loads(l) for l in open(REPO / "results/erqa/study_k/study_k_trials.jsonl")]
+    instruct_bool = {t["question_id"]: (t["correct"] == "True" or t["correct"] is True)
+                     for t in trials if t["arm"] == "INSTRUCT"}
+    think_by_q = defaultdict(list)
+    for t in trials:
+        if t["arm"] == "THINKING":
+            think_by_q[t["question_id"]].append(t["correct"] == "True" or t["correct"] is True)
+    think_majority = {qid: (sum(v) > len(v) / 2) for qid, v in think_by_q.items()}
 
-    thinking_correct = round(n * k["arm_accuracies"]["THINKING"]["mean_acc_pct"] / 100)
-    instruct_correct = round(n * k["arm_accuracies"]["INSTRUCT"]["mean_acc_pct"] / 100)
-    a = thinking_correct - b          # both correct
-    d = n - a - b - c                 # both wrong
+    a = b = c = d = 0
+    for qid in instruct_bool:
+        ic = instruct_bool[qid]
+        tc = think_majority.get(qid, False)
+        if ic and tc:      a += 1
+        elif not ic and tc: b += 1
+        elif ic and not tc: c += 1
+        else:              d += 1
+    n = a + b + c + d
+
+    # Cross-check b and c against committed gate_overall
+    k_res = json.load(open(REPO / "results/erqa/study_k/study_k_results.json"))
+    assert b == k_res["gate_overall"]["b"], f"b mismatch: {b} != {k_res['gate_overall']['b']}"
+    assert c == k_res["gate_overall"]["c"], f"c mismatch: {c} != {k_res['gate_overall']['c']}"
+    p = k_res["gate_overall"]["pval"]
 
     fig, ax = plt.subplots(figsize=(7, 5))
     ax.axis("off")
@@ -530,17 +568,60 @@ def plot_E():
 # 162 THINKING signs at 2048-token budget.
 # ─────────────────────────────────────────────────────────────────────────────
 def plot_F():
-    # From study_j_signs.md §1:
-    # low (1-2): n=39, truncated=21, rate=53.8%
-    # mid (3-5): n=61, truncated=55, rate=90.2%
-    # high (6+): n=45, truncated=44, rate=97.8%
-    # other (<=0): n=17, truncated=12, rate=70.6%  [computed: 12/17]
-    # Overall: 130/162 = 80.2%
+    # Reconstruct n_gt per sign from /tmp/sign-understanding/gt/gt_annotation.json
+    # (matched against committed results/signs/study_j/study_j_trials.jsonl).
+    # n_gt = len(text_labels) + len(symbol_labels) - len(mixed)  (matching StudyJ definition)
+    GT_PATH = Path("/tmp/sign-understanding/gt/gt_annotation.json")
+    J_PATH  = REPO / "results/signs/study_j/study_j_trials.jsonl"
+
+    if GT_PATH.exists():
+        gt = json.load(open(GT_PATH))
+        sign_ngt = {}
+        for entry in gt:
+            img_path = entry["imagePath"]
+            stem = img_path[:-4]
+            for ann in entry["annotation"]:
+                crop_name = f"{stem}_{ann['objectID']}.jpg"
+                tl = ann.get("text labels") or {}
+                sl = ann.get("symbol labels") or {}
+                ml = ann.get("mixed") or {}
+                if not isinstance(tl, dict): tl = {}
+                if not isinstance(sl, dict): sl = {}
+                if not isinstance(ml, dict): ml = {}
+                sign_ngt[crop_name] = len(tl) + len(sl) - len(ml)
+
+        j_trials = [json.loads(l) for l in open(J_PATH)]
+        thinking = [t for t in j_trials if t["arm"] == "THINKING"]
+
+        bin_counts = {"low": [0,0], "mid": [0,0], "high": [0,0], "other": [0,0]}
+        for t in thinking:
+            crop = t["crop_name"]
+            if crop not in sign_ngt:
+                continue
+            n = sign_ngt[crop]
+            trunc = str(t.get("truncated", "False")).lower() == "true"
+            if n <= 0:   key = "other"
+            elif n <= 2: key = "low"
+            elif n <= 5: key = "mid"
+            else:        key = "high"
+            bin_counts[key][0] += 1          # total
+            bin_counts[key][1] += int(trunc) # truncated
+        note = "Reconstructed from GT annotation + committed trials"
+    else:
+        # Fallback to report aggregates (n_gt not in trials; GT file not available)
+        bin_counts = {
+            "low":   [39, 21],
+            "mid":   [61, 55],
+            "high":  [45, 44],
+            "other": [17, 12],  # note: report's 12 sums to 132 (inconsistency with 130 overall)
+        }
+        note = "Transcribed from reports/study_j_signs.md §1 (GT file unavailable)"
+
     bins = [
-        ("low\n(1–2 items)",  39, 21),
-        ("mid\n(3–5 items)",  61, 55),
-        ("high\n(6+ items)",  45, 44),
-        ("other\n(≤0 items)", 17, 12),
+        ("low\n(1–2 items)",  bin_counts["low"][0],   bin_counts["low"][1]),
+        ("mid\n(3–5 items)",  bin_counts["mid"][0],   bin_counts["mid"][1]),
+        ("high\n(6+ items)",  bin_counts["high"][0],  bin_counts["high"][1]),
+        ("other\n(≤0 items)", bin_counts["other"][0], bin_counts["other"][1]),
     ]
     labels = [b[0] for b in bins]
     ns     = [b[1] for b in bins]
@@ -574,6 +655,8 @@ def plot_F():
     ax.set_ylim(0, 1.15)
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:.0%}"))
     ax.legend(fontsize=FONT_ANNOT, frameon=False)
+    ax.text(0.98, 0.01, note, transform=ax.transAxes, ha="right", va="bottom",
+            fontsize=8, color=C["grey"], style="italic")
     fig.tight_layout()
     save(fig, "F_signs_truncation_by_complexity")
 
@@ -710,9 +793,23 @@ def plot_H():
     bars = ax.bar(xs, rates, width=0.6, color=colors, zorder=2)
 
     # Corrected pooled rate band: 13–16%
-    ax.axhspan(0.13, 0.16, color=C["yellow"], alpha=0.35, zorder=1,
-               label="Corrected pooled rate (13–16%)")
+    ax.axhspan(0.13, 0.16, color=C["yellow"], alpha=0.35, zorder=1)
     ax.axhline(0.161, color=C["yellow"], linewidth=1.5, linestyle="--", zorder=2)
+    ax.text(len(signs) - 0.4, 0.165,
+            "corrected per-attempt rate\n(selection-adjusted): 13–16%",
+            ha="right", va="bottom", fontsize=9, color="#8B6914",
+            style="italic")
+
+    # Annotate raw pooled rate
+    total_fails = sum(fails)
+    total_n     = sum(ns)
+    ax.text(0.01, 0.97,
+            f"Raw pooled: {total_fails}/{total_n} = {total_fails/total_n:.1%}  "
+            f"(inflated — 8 cap-hit draws on seed=42 determined by selection criterion)\n"
+            f"Corrected: 10/62 = 16.1% unbiased draws; 4/30 = 13.3% controls only",
+            transform=ax.transAxes, ha="left", va="top", fontsize=9,
+            color=C["dark"],
+            bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor=C["light_grey"], alpha=0.9))
 
     # Annotate each bar
     for xi, (rate, n, k) in enumerate(zip(rates, ns, fails)):
@@ -722,10 +819,11 @@ def plot_H():
     legend_patches = [
         mpatches.Patch(color=C["cap"],  label="Former cap-hit (StudyJ2)"),
         mpatches.Patch(color=C["ctrl"], label="Control (completed StudyJ2)"),
+        mpatches.Patch(color=C["yellow"], alpha=0.5,
+                       label="Corrected per-attempt rate 13–16%"),
     ]
-    ax.legend(handles=legend_patches + [mpatches.Patch(color=C["yellow"], alpha=0.5,
-              label="Corrected pooled rate 13–16%")],
-              fontsize=FONT_ANNOT, frameon=False, loc="upper right")
+    ax.legend(handles=legend_patches, fontsize=FONT_ANNOT, frameon=False,
+              loc="upper right", bbox_to_anchor=(1.0, 0.70))
 
     ax.set_xticks(xs)
     ax.set_xticklabels(short_labels, rotation=45, ha="right", fontsize=FONT_TICK - 2)
@@ -747,20 +845,24 @@ def plot_H():
 # ─────────────────────────────────────────────────────────────────────────────
 def plot_I():
     # arXiv 2511.21631 Table 4, 4B model: Instruct → Thinking gain
-    # (benchmark, instruct_score, thinking_score, category)
-    # Category: "symbolic" = multi-image / symbolic benchmarks; "spatial" = spatial/perception
+    # (benchmark, instruct_score, thinking_score, group)
+    # Fix 3: three groups replacing the incorrect symbolic/spatial binary split:
+    #   multi_image_knowledge: MUIRBench (multi-image reasoning), MMMU, MMMU-Pro (knowledge/symbolic)
+    #   grounding_spatial:     RefSpatialBench, VSI-Bench, SUNRGBD, RoboSpatialHome, EmbSpatialBench
+    #   mixed_unclassified:    ERQA (second-largest gain; not cleanly spatial or symbolic),
+    #                          MVBench (video understanding, mixed)
     data = [
-        # benchmark                  instruct  thinking  category
-        ("MUIRBench",               63.8,     75.0,     "symbolic"),
-        ("ERQA",                    41.3,     47.3,     "spatial"),
-        ("MMMU-Pro",                53.2,     57.0,     "symbolic"),
-        ("MMMU",                    67.4,     70.8,     "symbolic"),
-        ("EmbSpatialBench",         79.6,     80.7,     "spatial"),
-        ("MVBench",                 68.9,     69.3,     "symbolic"),
-        ("RoboSpatialHome",         61.7,     63.2,     "spatial"),
-        ("RefSpatialBench",         46.6,     45.3,     "spatial"),
-        ("VSI-Bench",               59.3,     55.2,     "spatial"),
-        ("SUNRGBD",                 34.7,     28.0,     "spatial"),
+        # benchmark                  instruct  thinking  group
+        ("MUIRBench",               63.8,     75.0,     "multi_image_knowledge"),
+        ("ERQA",                    41.3,     47.3,     "mixed_unclassified"),
+        ("MMMU-Pro",                53.2,     57.0,     "multi_image_knowledge"),
+        ("MMMU",                    67.4,     70.8,     "multi_image_knowledge"),
+        ("EmbSpatialBench",         79.6,     80.7,     "grounding_spatial"),
+        ("MVBench",                 68.9,     69.3,     "mixed_unclassified"),
+        ("RoboSpatialHome",         61.7,     63.2,     "grounding_spatial"),
+        ("RefSpatialBench",         46.6,     45.3,     "grounding_spatial"),
+        ("VSI-Bench",               59.3,     55.2,     "grounding_spatial"),
+        ("SUNRGBD",                 34.7,     28.0,     "grounding_spatial"),
     ]
     # Sort by gain descending
     data = sorted(data, key=lambda x: x[2] - x[1], reverse=True)
@@ -769,7 +871,11 @@ def plot_I():
     gains      = [d[2] - d[1] for d in data]
     categories = [d[3] for d in data]
 
-    CAT_COLOR = {"symbolic": C["blue"], "spatial": C["orange"]}
+    CAT_COLOR = {
+        "multi_image_knowledge": C["blue"],
+        "grounding_spatial":     C["orange"],
+        "mixed_unclassified":    C["grey"],
+    }
     colors = [CAT_COLOR[c] for c in categories]
 
     fig, ax = plt.subplots(figsize=SLIDE_SIZE)
@@ -798,10 +904,18 @@ def plot_I():
     ax.invert_yaxis()
 
     legend_patches = [
-        mpatches.Patch(color=C["blue"],   label="Symbolic / multi-image"),
-        mpatches.Patch(color=C["orange"], label="Spatial / perception"),
+        mpatches.Patch(color=C["blue"],   label="Multi-image / knowledge reasoning"),
+        mpatches.Patch(color=C["orange"], label="Grounding / 3D spatial"),
+        mpatches.Patch(color=C["grey"],   label="Mixed / unclassified (ERQA, MVBench)"),
     ]
     ax.legend(handles=legend_patches, fontsize=FONT_ANNOT, frameon=False, loc="lower right")
+
+    # Note about ERQA classification
+    ax.text(0.01, 0.01,
+            "ERQA = 2nd-largest gain (+6.0pp) but does not fit cleanly\n"
+            "into multi-image/knowledge or spatial — classified as mixed.",
+            transform=ax.transAxes, ha="left", va="bottom", fontsize=8.5,
+            color=C["grey"], style="italic")
 
     ax.text(0.98, 0.01,
             "Source: Qwen3-VL Technical Report, arXiv:2511.21631, Table 4\nNOT our measurements.",
