@@ -404,9 +404,13 @@ def plot_D():
     ax.axis("off")
 
     cells = [
-        [a, c],
-        [b, d],
+        [a, b],
+        [c, d],
     ]
+    assert cells[0][0] == a and cells[1][1] == d
+    assert cells[0][1] == b, "top-right must be THINKING-correct / INSTRUCT-wrong"
+    assert cells[1][0] == c, "bottom-left must be THINKING-wrong / INSTRUCT-correct"
+
     col_labels = ["INSTRUCT\ncorrect", "INSTRUCT\nwrong"]
     row_labels = ["THINKING\ncorrect", "THINKING\nwrong"]
 
@@ -433,9 +437,9 @@ def plot_D():
                     color=C["dark"])
             label = ""
             if ri == 0 and ci == 1:
-                label = f"c = {count}\n(INSTRUCT wins)"
-            elif ri == 1 and ci == 0:
                 label = f"b = {count}\n(THINKING wins)"
+            elif ri == 1 and ci == 0:
+                label = f"c = {count}\n(INSTRUCT wins)"
             if label:
                 ax.text(x + CELL_W / 2, y + CELL_H * 0.22, label,
                         ha="center", va="center", fontsize=10, color=C["dark"])

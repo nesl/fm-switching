@@ -135,21 +135,25 @@ SPARSE arm = 16 frames uniform over [0, question_time], greedy decode, no reason
 
 **Change (Fix 5):** All four cells now recomputed directly from `results/erqa/study_k/study_k_trials.jsonl` using the same majority-vote aggregation as the study analysis. Previously a and d were derived from `round(400 × mean_acc_pct)` which introduced rounding error.
 
+**Change (Fix 7 — grid placement bug):** Previous rendering placed b and c in swapped cells relative to the row/column headers, inverting the direction of the result. The figure read as INSTRUCT winning 59 and THINKING winning 49 — the reverse of the actual result. Root cause: `cells = [[a, c], [b, d]]` placed c at row 0 / col 1 (THINKING correct / INSTRUCT wrong) and b at row 1 / col 0 (THINKING wrong / INSTRUCT correct), backwards. Fixed to `cells = [[a, b], [c, d]]` with annotations corrected accordingly. The counts a=119, b=59, c=49, d=173 and the McNemar p-value were unaffected; only the grid placement was wrong.
+
 **Source file:** `results/erqa/study_k/study_k_trials.jsonl` (4,400 rows; INSTRUCT=400, THINKING=1,200 across 3 seeds)
 
 **Aggregation:** THINKING arm = majority vote across 3 seeds (42, 123, 456) per question_id. INSTRUCT = single run.
 
 **Recomputed 2×2 table (from trials, not from rounded rates):**
 
-| cell | derivation | value |
-|------|-----------|-------|
-| b (THINKING correct, INSTRUCT wrong) | direct count from trials | **59** |
-| c (INSTRUCT correct, THINKING wrong) | direct count from trials | **49** |
-| a (both correct) | direct count from trials | **119** |
-| d (both wrong) | direct count from trials | **173** |
+| cell | grid position | derivation | value |
+|------|-------------|-----------|-------|
+| a (both correct) | top-left | direct count from trials | **119** |
+| b (THINKING correct, INSTRUCT wrong) | top-right | direct count from trials | **59** |
+| c (INSTRUCT correct, THINKING wrong) | bottom-left | direct count from trials | **49** |
+| d (both wrong) | bottom-right | direct count from trials | **173** |
+
+**Verified placements (Fix 7):** 119 top-left (no label), 59 top-right labelled "THINKING wins", 49 bottom-left labelled "INSTRUCT wins", 173 bottom-right (no label). Assertions added to `plot_D()` to prevent recurrence.
 
 **Sanity check:** b=59 matches `gate_overall.b=59`. c=49 matches `gate_overall.c=49`. ✓  
-Previous derived values were a=121, d=171 (rounding error of 2). Corrected to a=119, d=173. Total still 400. ✓
+Previous derived values were a=121, d=171 (rounding error of 2, Fix 5). Corrected to a=119, d=173. Total still 400. ✓
 
 **Underlying numbers:** n=400, a=119, b=59, c=49, d=173, McNemar p=0.3865, diff=+2.5pp, 95% CI [−4.2, +9.2]. Pre-registered verdict: FAILS.
 
