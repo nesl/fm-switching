@@ -9,7 +9,7 @@ import matplotlib.ticker as mticker
 import matplotlib.lines as mlines
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 FIGURES = ROOT / "figures"
 FIGURES.mkdir(exist_ok=True)
 
@@ -42,7 +42,7 @@ plt.rcParams.update({
 
 # ── Load data ──────────────────────────────────────────────────────────────────
 
-locomo = json.load(open(ROOT / "results" / "frontier_locomo_qwen7b.json"))
+locomo = json.load(open(ROOT / "results" / "fidelity" / "frontier_locomo_qwen7b.json"))
 sm = locomo["summary"]
 
 def s(name):
@@ -77,19 +77,28 @@ ax2.spines["right"].set_edgecolor(AMBER)
 
 # ── Inertia curve ──────────────────────────────────────────────────────────────
 
-meas_curve_x = np.linspace(100, 8192, 120)
+meas_curve_x = np.linspace(100, 2048, 80)
 meas_curve_y = [inertia_s(x) for x in meas_curve_x]
-extrap_x = np.linspace(8192, 20500, 60)
+extrap_x = np.linspace(2048, 20500, 80)
 extrap_y = [inertia_s(x) for x in extrap_x]
 
 ax2.plot(meas_curve_x, meas_curve_y,  color=AMBER, lw=2.0, ls="-",  alpha=0.85, zorder=1,
-         label="edge re-prefill (measured)")
+         label="edge re-prefill (measured, ≤2K tok)")
 ax2.plot(extrap_x, extrap_y,          color=AMBER, lw=2.0, ls="--", alpha=0.55, zorder=1,
-         label="edge re-prefill (extrapolated)")
+         label="edge re-prefill (extrapolated / infeasible on SmolLM2)")
 
-# Measured limit marker
-ax2.axvline(8192, color=AMBER, lw=0.7, ls=":", alpha=0.45)
-ax2.text(8400, 0.15, "measured\nlimit\n(8K tok)", color=AMBER, fontsize=7, va="bottom", alpha=0.75)
+# Measured limit marker at 2K — SmolLM2's context limit
+ax2.axvline(2048, color=AMBER, lw=0.7, ls=":", alpha=0.45)
+ax2.text(2150, 0.15, "SmolLM2\nctx limit\n(2K tok)", color=AMBER, fontsize=7, va="bottom", alpha=0.75)
+
+# C2 — asymmetry note near inertia curve
+ax2.text(0.38, 0.30,
+         "EgoSchema full ≈ 2K → fits SmolLM2 edge model.\n"
+         "LoCoMo full ≈ 19K → does NOT fit (infeasible dashes).\n"
+         "Compressible tasks fit the edge; incompressible ones don't.",
+         transform=ax2.transAxes, fontsize=6.5, color=AMBER, alpha=0.82,
+         va="bottom", ha="left",
+         bbox=dict(boxstyle="round,pad=0.3", facecolor="white", edgecolor=AMBER, alpha=0.6))
 
 # ── Accuracy points ─────────────────────────────────────────────────────────────
 
@@ -159,7 +168,8 @@ ax2.tick_params(axis="y", labelcolor=AMBER)
 
 blind_pct = s("blind")["acc"] * 100
 ax.axhline(blind_pct, color=GRAY, lw=1.0, ls="--", alpha=0.55, zorder=1)
-ax.text(55, blind_pct + 0.5, f"blind floor ({int(blind_pct)}% — no context)",
+# C5: shift label right to avoid overlap with the blind point (~66 tok)
+ax.text(300, blind_pct + 0.5, f"blind floor ({int(blind_pct)}% — no context)",
         color=GRAY, fontsize=7.5, va="bottom")
 
 # ── Annotations ───────────────────────────────────────────────────────────────
@@ -167,7 +177,7 @@ ax.text(55, blind_pct + 0.5, f"blind floor ({int(blind_pct)}% — no context)",
 # INCOMPRESSIBLE callout — summary cluster
 ax.annotate(
     "summary ≈ blind (6% vs 8%)\ngeneric summarization discards\nthe specific fact.\n"
-    "−20 pp vs full (p = 0.016).\nINCOMPRESSIBLE.",
+    "−20 pp vs full (p = 0.016).\nINCOMPRESSIBLE (single-hop, n=50).",
     xy=(s("summary-200")["tok"], s("summary-200")["acc"] * 100),
     xytext=(420, 20),
     arrowprops=dict(arrowstyle="->", color=ORANGE, lw=1.1),
@@ -175,9 +185,9 @@ ax.annotate(
     bbox=dict(boxstyle="round,pad=0.35", facecolor="white", edgecolor=ORANGE, alpha=0.92),
 )
 
-# Accuracy tracks context — arrow to window-10
+# C3 — flat blind→window-3 then jump to full
 ax.annotate(
-    "accuracy tracks how much history\nis visible — no early saturation",
+    "flat from blind through window-3 (8%),\nthen full ≫ summary ≈ blind\n(paired p = 0.016)",
     xy=(s("window-10")["tok"], s("window-10")["acc"] * 100),
     xytext=(2000, 27),
     arrowprops=dict(arrowstyle="->", color=BLUE, lw=1.0),
@@ -220,9 +230,9 @@ ax.text(0.005, 0.985, contrast, transform=ax.transAxes,
 
 # ── Title ──────────────────────────────────────────────────────────────────────
 
-fig.suptitle("Task value tracks context — no saturation  (LoCoMo, n = 50)",
+fig.suptitle("Only full context recovers accuracy — summary collapses to blind",
              fontsize=13, fontweight="bold", y=0.985)
-ax.set_title("summary collapses to blind: context is incompressible",
+ax.set_title("LoCoMo single-hop, n=50 — incompressible",
              fontsize=9.5, color="#555", pad=5)
 
 # ── Legend ─────────────────────────────────────────────────────────────────────

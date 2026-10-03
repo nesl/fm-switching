@@ -1,4 +1,12 @@
 {
+  "status": {
+    "validity": "CONFOUNDED_DO_NOT_USE_AS_COMPRESSIBILITY_RESULT",
+    "rerun_required_before_downstream_use": true,
+    "what_is_trustworthy": "Gate only: with the corrected VIDEO-pathway pipeline + authors' relaxed_match, SFT model at full 96 frames scores temporal 0.790, multi-goal 0.339, overall 0.565 (n=60). This full-frame operating point is citable.",
+    "what_is_not_trustworthy": "The frame-budget slope / 'incompressible' verdict. The 96->48 cliff and sub-48 curve are confounded by OOD model brittleness (SFT model trained ONLY on 96-frame videos; fewer frames is out-of-distribution). Evidence: sub-cliff REASONING-set accuracy RISES as frames drop (temporal 0.087->0.090->0.125->0.174) — impossible under pure information loss — plus boundary-gold selection bias at low budgets.",
+    "blocking_confound": "No usable model can probe frame-compressibility on FindingDory: the only SUCCESS model (SFT) is welded to 96 frames; the variable-frame models (frozen Qwen/Gemini/GPT-4o) FAIL the task. Separating format-OOD from real information loss needs a model trained on variable-length subsampled video — a training effort, not a rerun.",
+    "cheap_disambiguation_if_revisited": "Dup-pad test: hold the 96-frame format fixed, feed only K UNIQUE frames duplicated to fill 96 slots. Recovery => cliff was format-OOD. Still craters => real info loss. (Not yet run.)"
+  },
   "summary_by_budget_category": {
     "96": {
       "overall": {
