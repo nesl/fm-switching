@@ -195,35 +195,62 @@ Text predictors (P4) reliably outperform elapsed-only (P1): median Δgap_closed 
 
 ## 8. Implementation Notes
 
+### P3 AUROC discrepancy — implementation fix found after results were read
+
+An external run reported AUROC 0.789 for P3 at L=120; this script reported 0.7034. Root cause identified: the main script applies `StandardScaler(with_mean=False)` to the sparse TF-IDF matrix before LogisticRegression. Unit-variance scaling of sparse TF-IDF inflates rare n-grams, causing in-fold overfitting. The external run used **no scaler**.
+
+| setting | main (this script) | external run |
+|---|---|---|
+| LogisticRegression max_iter | 1000 | 1000 |
+| C | 1.0 | 1.0 |
+| solver | lbfgs (default) | lbfgs (default) |
+| class_weight | None | None |
+| scaling | StandardScaler(with_mean=False) | **none** |
+| TF-IDF | 1-2 gram, 2000 feat, sublinear_tf | 1-2 gram, 2000 feat, sublinear_tf |
+
+**P3 AUROC and in-fold AUROC comparison (implementation fix):**
+
+| | L=60 AUROC | L=120 AUROC | L=120 in-fold |
+|---|---|---|---|
+| P3 with scaler (primary, unchanged) | 0.6764 | 0.7034 | 0.9367 |
+| P3 no scaler (diagnostic) | 0.7471 | 0.7893 | 0.8589 |
+| External ref | — | 0.789 | — |
+
+Removing the scaler reproduces the external AUROC (0.7893 vs ref 0.789). P3 without scaler at L=120, e=0.2: gap_closed = 48.1% (cov=83.0%).  
+
+**P3 no-scaler coverage across all (L, e):**
+
+| L | e | cov_pred | cov_random | cov_oracle | gap_closed |
+|---|---|---|---|---|---|
+| 60 | 0.1 | 51.1% | 47.9% | 52.1% | 76.6% |
+| 60 | 0.2 | 59.2% | 53.7% | 62.1% | 65.9% |
+| 60 | 0.3 | 66.6% | 59.5% | 72.1% | 56.5% |
+| 120 | 0.1 | 77.4% | 73.3% | 80.3% | 58.9% |
+| 120 | 0.2 | 83.0% | 76.2% | 90.3% | 48.1% |
+| 120 | 0.3 | 87.4% | 79.2% | 100.0% | 39.5% |
+
+**Would the verdict differ if P3 (no scaler) were used instead of P4?**  
+P3 no-scaler gap_closed at primary cell = 48.1% vs P4 = 44.9%.  
+P3 no-scaler OOF AUROC (0.7893) exceeds P4 (0.7656); P3 no-scaler would have been selected. Its gap_closed at primary cell = 48.1%, which meets the SIGNAL threshold (≥40%). Verdict unchanged: **SIGNAL**.
+
+**P2 and P4 scaler impact (fold 0, L=120):**  
+P2 (keyword+elapsed, dense, 2 features): ΔAUROC = -0.0000 ≤ 0.01.  
+P4 (MiniLM embedding, dense, 385 features): ΔAUROC = +0.0149 > 0.01.  
+Only P3 uses a sparse matrix; P2 and P4 use dense features where unit-variance scaling is standard.
+
 ### Model-selection deviation from pre-registration
 
 Pre-registration: 'best of P1–P4 by AUROC on training folds only.'  
 Implementation: best by **mean OOF AUROC** (held-out test fold, averaged across 5 folds).  
-In-fold AUROC (fit on training, predict on same training data) was also computed for reference.
+In-fold AUROC was also computed. P3's in-fold AUROC of 0.9367 reflects the scaler-induced overfitting documented above; without the scaler, P3 in-fold drops to 0.8589.
 
 | predictor | OOF AUROC (L=120) | in-fold AUROC (L=120) |
 |---|---|---|
 | P1 | 0.6961 | 0.6960 |
 | P2 | 0.6989 | 0.6994 |
-| P3 | 0.7038 | 0.9367 |
+| P3 | 0.7038 | 0.9367 (scaler overfitting) |
 | P4 | 0.7656 | 0.8195 |
 
-Best by OOF: **P4**.  Best by in-fold: **P3**.  
-The two criteria select **different** predictors. Primary analysis uses OOF selection (P4); in-fold selection would have chosen P3. See coverage table for both predictors' gap_closed values.
-
-### P3 AUROC discrepancy
-
-An external run reported AUROC 0.789 for P3 at L=120; this script reports 0.7034. Configuration comparison:
-
-| setting | main | external |
-|---|---|---|
-| LogisticRegression max_iter | 1000 | 2000 |
-| C | 1.0 | 1.0 |
-| solver | lbfgs (default) | lbfgs (default) |
-| class_weight | None | None |
-| scaling | StandardScaler(with_mean=False) | StandardScaler(with_mean=False) |
-| TF-IDF | 1-2 gram, 2000 feat, sublinear_tf | 1-2 gram, 2000 feat, sublinear_tf |
-
-Running full CV with max_iter=2000: AUROC = **0.7034** (vs main 0.7034, external ref 0.789).  
-max_iter=2000 does not reproduce the discrepancy; the gap (0.789 vs 0.7034) is likely due to a different data split or feature implementation in the external run. No change made to the primary analysis.
+Best by OOF: **P4**.  Best by in-fold: **P3** (P3 in-fold inflated by scaler).  
+Primary analysis uses OOF selection (P4), which is correct. In-fold selection would have chosen P3, driven by scaler-induced overfitting. The OOF criterion correctly rejects P3 in favour of P4.
 

@@ -751,13 +751,71 @@
         "pred_P5_L120": 0.161
       }
     ],
-    "p3_external_diagnostic": {
-      "description": "P3 with max_iter=2000 (external config); main uses max_iter=1000",
-      "fit_settings_main": "LogisticRegression(max_iter=1000, C=1.0, solver=lbfgs), StandardScaler(with_mean=False)",
-      "fit_settings_external": "LogisticRegression(max_iter=2000, C=1.0, solver=lbfgs), StandardScaler(with_mean=False)",
-      "auroc_main_L120": 0.7034,
-      "auroc_external_L120": 0.7034,
-      "external_ref_auroc": 0.789
+    "p3_scaler_diagnostic": {
+      "cause": "StandardScaler(with_mean=False) on sparse TF-IDF inflates rare n-grams (unit-variance scaling), causing overfitting",
+      "fit_settings_main": "TF-IDF + StandardScaler(with_mean=False) + LogisticRegression(max_iter=1000, C=1.0, solver=lbfgs)",
+      "fit_settings_noscaler": "TF-IDF (no scaler) + LogisticRegression(max_iter=1000, C=1.0, solver=lbfgs)",
+      "p3_auroc_with_scaler": {
+        "60": 0.6764,
+        "120": 0.7034
+      },
+      "p3_auroc_no_scaler": {
+        "60": 0.7471,
+        "120": 0.7893
+      },
+      "p3_infold_with_scaler": {
+        "60": 0.9006,
+        "120": 0.9367
+      },
+      "p3_infold_no_scaler": {
+        "60": 0.8275,
+        "120": 0.8589
+      },
+      "external_ref_auroc_L120": 0.789,
+      "p3_noscaler_coverage": {
+        "60": {
+          "0.1": {
+            "cov_pred": 0.5113,
+            "cov_random": 0.4791,
+            "cov_oracle": 0.5212,
+            "gap_closed": 0.7662
+          },
+          "0.2": {
+            "cov_pred": 0.5925,
+            "cov_random": 0.5369,
+            "cov_oracle": 0.6212,
+            "gap_closed": 0.6593
+          },
+          "0.3": {
+            "cov_pred": 0.6661,
+            "cov_random": 0.5948,
+            "cov_oracle": 0.7211,
+            "gap_closed": 0.5646
+          }
+        },
+        "120": {
+          "0.1": {
+            "cov_pred": 0.774,
+            "cov_random": 0.7326,
+            "cov_oracle": 0.8029,
+            "gap_closed": 0.5886
+          },
+          "0.2": {
+            "cov_pred": 0.8299,
+            "cov_random": 0.7623,
+            "cov_oracle": 0.9029,
+            "gap_closed": 0.4809
+          },
+          "0.3": {
+            "cov_pred": 0.8741,
+            "cov_random": 0.792,
+            "cov_oracle": 1.0,
+            "gap_closed": 0.3947
+          }
+        }
+      },
+      "p2_scaler_delta_fold0_L120": -0.0,
+      "p4_scaler_delta_fold0_L120": 0.0149
     }
   },
   "without_counting": {
@@ -1497,20 +1555,78 @@
         "pred_P5_L120": 0.061
       }
     ],
-    "p3_external_diagnostic": {
-      "description": "P3 with max_iter=2000 (external config); main uses max_iter=1000",
-      "fit_settings_main": "LogisticRegression(max_iter=1000, C=1.0, solver=lbfgs), StandardScaler(with_mean=False)",
-      "fit_settings_external": "LogisticRegression(max_iter=2000, C=1.0, solver=lbfgs), StandardScaler(with_mean=False)",
-      "auroc_main_L120": 0.6563,
-      "auroc_external_L120": 0.6563,
-      "external_ref_auroc": 0.789
+    "p3_scaler_diagnostic": {
+      "cause": "StandardScaler(with_mean=False) on sparse TF-IDF inflates rare n-grams (unit-variance scaling), causing overfitting",
+      "fit_settings_main": "TF-IDF + StandardScaler(with_mean=False) + LogisticRegression(max_iter=1000, C=1.0, solver=lbfgs)",
+      "fit_settings_noscaler": "TF-IDF (no scaler) + LogisticRegression(max_iter=1000, C=1.0, solver=lbfgs)",
+      "p3_auroc_with_scaler": {
+        "60": 0.6419,
+        "120": 0.6563
+      },
+      "p3_auroc_no_scaler": {
+        "60": 0.7215,
+        "120": 0.7755
+      },
+      "p3_infold_with_scaler": {
+        "60": 0.9136,
+        "120": 0.9586
+      },
+      "p3_infold_no_scaler": {
+        "60": 0.8188,
+        "120": 0.8551
+      },
+      "external_ref_auroc_L120": 0.789,
+      "p3_noscaler_coverage": {
+        "60": {
+          "0.1": {
+            "cov_pred": 0.5493,
+            "cov_random": 0.5198,
+            "cov_oracle": 0.5665,
+            "gap_closed": 0.6329
+          },
+          "0.2": {
+            "cov_pred": 0.6238,
+            "cov_random": 0.5731,
+            "cov_oracle": 0.6664,
+            "gap_closed": 0.5432
+          },
+          "0.3": {
+            "cov_pred": 0.6923,
+            "cov_random": 0.6265,
+            "cov_oracle": 0.7663,
+            "gap_closed": 0.4703
+          }
+        },
+        "120": {
+          "0.1": {
+            "cov_pred": 0.8079,
+            "cov_random": 0.7711,
+            "cov_oracle": 0.8457,
+            "gap_closed": 0.4942
+          },
+          "0.2": {
+            "cov_pred": 0.8544,
+            "cov_random": 0.7965,
+            "cov_oracle": 0.9456,
+            "gap_closed": 0.3882
+          },
+          "0.3": {
+            "cov_pred": 0.8925,
+            "cov_random": 0.8219,
+            "cov_oracle": 1.0,
+            "gap_closed": 0.3964
+          }
+        }
+      },
+      "p2_scaler_delta_fold0_L120": 0.0,
+      "p4_scaler_delta_fold0_L120": 0.0255
     }
   },
   "_provenance": {
-    "git_commit": "506a29a22be8a434f1d56d0aa3cb5bcac7b8ed98",
+    "git_commit": "768fafa4a0bd7f01a5614d99b4da55a9a8a16e07",
     "script": "study_n2_escalation.py",
     "model": "all-MiniLM-L6-v2",
-    "timestamp": "2026-10-03T11:09:31.581632",
+    "timestamp": "2026-10-03T11:26:43.392920",
     "n": 9438
   }
 }
