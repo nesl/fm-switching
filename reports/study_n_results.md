@@ -97,12 +97,13 @@ Cross-validation: 5-fold grouped by video_id, seed=42. No session leakage confir
 
 Policy A: fixed trailing window of W seconds.  
 Policy B: per-question choice between W_s=W/2 and W_l=W×2, threshold set to matched mean budget W.  
-Oracle: budget-constrained — knows true farthest distance; assigns W_s to all farthest≤W_s, then assigns W_l to the remaining easiest-to-help questions (farthest just above W_s, ascending) until mean budget = W. This is achievable with a perfect predictor subject to the same budget.  
+Oracle (binary): budget-constrained — knows true farthest; assigns W_s to all farthest≤W_s, then W_l to questions with farthest just above W_s (ascending) until mean budget = W. Best achievable by any binary W_s/W_l policy.  
+Exact oracle (continuous): assigns each question exactly its farthest distance (minimum needed), cheapest first, subject to mean budget = W. Upper bound if any window size were allowed.  
 Gap closed = (Policy B − Policy A) / (Oracle − Policy A).
 
 ### W = 60 s  (W_s=30, W_l=120)
 
-Policy A (fixed): 42.1%  |  Oracle: 50.4%
+Policy A (fixed): 42.1%  |  Oracle (binary): 50.4%  |  Exact oracle: 84.3%
 
 | predictor | policy B cov | gap closed |
 |---|---|---|
@@ -115,7 +116,7 @@ Policy A (fixed): 42.1%  |  Oracle: 50.4%
 
 ### W = 120 s  (W_s=60, W_l=240)
 
-Policy A (fixed): 70.3%  |  Oracle: 75.4%
+Policy A (fixed): 70.3%  |  Oracle (binary): 75.4%  |  Exact oracle: 100.0%
 
 | predictor | policy B cov | gap closed |
 |---|---|---|
@@ -130,7 +131,7 @@ Policy A (fixed): 70.3%  |  Oracle: 75.4%
 
 ### W = 300 s  (W_s=150, W_l=600)
 
-Policy A (fixed): 94.6%  |  Oracle: 99.8%
+Policy A (fixed): 94.6%  |  Oracle (binary): 99.8%  |  Exact oracle: 100.0%
 
 | predictor | policy B cov | gap closed |
 |---|---|---|
@@ -189,14 +190,6 @@ Policy A (fixed): 94.6%  |  Oracle: 99.8%
 
 **UNPREDICTABLE**
 
-Best non-oracle predictor (P4) closes only -196.1% of the oracle coverage gap at W=120 s (95% bootstrap CI: -254.9%–-153.6%). CI includes 0 but is clearly on the negative side. Pre-registered rule: UNPREDICTABLE (CI includes 0 and best value <15%).
+Best non-oracle predictor (P4) closes only -196.1% of the oracle coverage gap at W=120 s (95% bootstrap CI: -254.9%–-153.6%). The negative gap_closed is specific to the tested policy family: binary choice between W/2 and 2W at matched mean budget. Under that family, even the oracle gains only 5.2 pp over the fixed window at W=120 (75.4% vs 70.3%).
 
-**Why gap_closed is negative (structural, not a bug).** With W=120, W_s=60, W_l=240, frac_long=1/3:
-- P(farthest≤60) = 42.1% — covered by both W_s and Policy A
-- P(60<farthest≤120) = 28.2% — covered by Policy A (fixed W=120), NOT by W_s=60
-- P(120<farthest≤240) = 20.2% — not covered by Policy A, but covered by W_l=240
-- P(farthest>240) = 9.6% — not covered by either
-
-Policy A covers 70.3% (everything within 120s). Policy B can use W_l for only 33.3% of questions to match the budget. Even with perfect knowledge of distance (as in the budget-constrained oracle at 75.4%), W_l budget is insufficient to both (a) rescue the 28.2% missed by W_s and (b) also cover the 20.2% above 120s. The best any predictor can do under this budget constraint is 75.4%; Policy B with an imperfect predictor covers only 60.2% — less than Policy A.
-
-**Predictive signal exists but does not translate.** P4 achieves T1 Spearman ρ=0.445 (non-trivial), AUROC=0.738 at W=120, and consistently beats P0–P2 across targets. The signal is there; the binary W_s/W_l discretization under a tight budget constraint means accurate predictions still cannot rescue the medium-distance band (60–120 s) that Policy A covers for free. Adaptive allocation is counter-productive at this granularity.
+**Computed limitation — exact oracle (continuous budget):** If any window size were allowed and the oracle assigned each question exactly its farthest distance (cheapest first, mean budget = W), coverage would be 84.3% / 100.0% / 100.0% at W=60/120/300. At W=120: exact oracle = 100.0% vs binary oracle = 75.4%; the binary W_s/W_l discretization itself costs 24.6 pp of headroom before any predictor error. Per-query retention-window adaptation is not realizable in a streaming system anyway — history not retained cannot be recovered at question time — which is why Study N2 tests escalation instead.

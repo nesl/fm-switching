@@ -245,6 +245,21 @@ def coverage_oracle(rows, idx, W_s, W_l, W_budget):
     return np.mean(covered)
 
 
+def coverage_exact_oracle(rows, idx, W_budget):
+    """Continuous oracle: assign each covered question exactly its farthest distance.
+
+    Budget-constrained: total budget = len(idx) * W_budget.
+    Optimal strategy: cover cheapest (nearest farthest) questions first.
+    Returns fraction of questions that can be covered.
+    """
+    fd_arr = np.sort([rows[i]["farthest"] for i in idx])
+    n = len(fd_arr)
+    total_budget = n * W_budget
+    cumsum = np.cumsum(fd_arr)
+    k = int(np.searchsorted(cumsum, total_budget, side="right"))
+    return k / n
+
+
 def coverage_policy_b(rows, idx, scores, W_s, W_l, W_budget):
     """
     Policy B: choose W_l if score > threshold, else W_s.
@@ -394,11 +409,13 @@ def run_cv_on(rows, folds):
     for W in W_LIST:
         W_s = W // 2
         W_l = W * 2
-        policy_a = coverage_fixed(rows, all_idx, W)
-        oracle   = coverage_oracle(rows, all_idx, W_s, W_l, W)
+        policy_a     = coverage_fixed(rows, all_idx, W)
+        oracle       = coverage_oracle(rows, all_idx, W_s, W_l, W)
+        exact_oracle = coverage_exact_oracle(rows, all_idx, W)
         results["coverage"][W] = {
-            "policy_a":  round(policy_a, 4),
-            "oracle":    round(oracle, 4),
+            "policy_a":     round(policy_a, 4),
+            "oracle":       round(oracle, 4),
+            "exact_oracle": round(exact_oracle, 4),
             "predictors": {}
         }
         for p in ["P0","P1","P2","P3","P4","P5"]:
@@ -610,15 +627,16 @@ def write_report(result, rows):
     A(f"## 4. Systems Metric — Coverage at Matched Mean Budget")
     A(f"")
     A(f"Policy A: fixed trailing window of W seconds.  ")
-    A(f"Policy B: per-question choice between W_s=W/2 and W_l=W×2, threshold set to matched mean budget.  ")
-    A(f"Oracle: always picks the smaller window if evidence fits, else larger.  ")
+    A(f"Policy B: per-question choice between W_s=W/2 and W_l=W×2, threshold set to matched mean budget W.  ")
+    A(f"Oracle (binary): budget-constrained — knows true farthest; assigns W_s to all farthest≤W_s, then W_l to questions with farthest just above W_s (ascending) until mean budget = W. Best achievable by any binary W_s/W_l policy.  ")
+    A(f"Exact oracle (continuous): assigns each question exactly its farthest distance (minimum needed), cheapest first, subject to mean budget = W. Upper bound if any window size were allowed.  ")
     A(f"Gap closed = (Policy B − Policy A) / (Oracle − Policy A).")
     A(f"")
     for W in W_LIST:
         cov = r["coverage"][W]
         A(f"### W = {W} s  (W_s={W//2}, W_l={W*2})")
         A(f"")
-        A(f"Policy A (fixed): {100*cov['policy_a']:.1f}%  |  Oracle: {100*cov['oracle']:.1f}%")
+        A(f"Policy A (fixed): {100*cov['policy_a']:.1f}%  |  Oracle (binary): {100*cov['oracle']:.1f}%  |  Exact oracle: {100*cov['exact_oracle']:.1f}%")
         A(f"")
         A(f"| predictor | policy B cov | gap closed |")
         A(f"|---|---|---|")
@@ -656,6 +674,7 @@ def write_report(result, rows):
     A(f"")
     A(f"**{verdict}**")
     A(f"")
+    exact_120 = r["coverage"][W_PRIMARY]["exact_oracle"]
     if verdict == "PREDICTABLE":
         A(f"Best non-oracle predictor ({best_p}) closes {100*gc_best:.1f}% of the oracle coverage gap at W=120 s, "
           f"with 95% bootstrap CI {100*ci[0]:.1f}%–{100*ci[1]:.1f}% (excludes 0). "
@@ -663,7 +682,20 @@ def write_report(result, rows):
     elif verdict == "UNPREDICTABLE":
         A(f"Best non-oracle predictor ({best_p}) closes only {100*gc_best:.1f}% of the oracle coverage gap at W=120 s "
           f"(95% bootstrap CI: {100*ci[0]:.1f}%–{100*ci[1]:.1f}%). "
-          f"Evidence horizon is not reliably predictable from question text and elapsed time alone.")
+          f"The negative gap_closed is specific to the tested policy family: binary choice between W/2 and 2W at matched mean budget. "
+          f"Under that family, even the oracle gains only "
+          f"{100*(r['coverage'][W_PRIMARY]['oracle'] - r['coverage'][W_PRIMARY]['policy_a']):.1f} pp over the fixed window at W=120 "
+          f"({100*r['coverage'][W_PRIMARY]['oracle']:.1f}% vs {100*r['coverage'][W_PRIMARY]['policy_a']:.1f}%).")
+        A(f"")
+        A(f"**Computed limitation — exact oracle (continuous budget):** If any window size were allowed and the oracle assigned each question "
+          f"exactly its farthest distance (cheapest first, mean budget = W), coverage would be "
+          f"{100*r['coverage'][60]['exact_oracle']:.1f}% / {100*r['coverage'][120]['exact_oracle']:.1f}% / {100*r['coverage'][300]['exact_oracle']:.1f}% "
+          f"at W=60/120/300. "
+          f"At W={W_PRIMARY}: exact oracle = {100*exact_120:.1f}% vs binary oracle = {100*r['coverage'][W_PRIMARY]['oracle']:.1f}%; "
+          f"the binary W_s/W_l discretization itself costs "
+          f"{100*(exact_120 - r['coverage'][W_PRIMARY]['oracle']):.1f} pp of headroom before any predictor error. "
+          f"Per-query retention-window adaptation is not realizable in a streaming system anyway — history not retained cannot be recovered at question time — "
+          f"which is why Study N2 tests escalation instead.")
     else:
         A(f"Best non-oracle predictor ({best_p}) closes {100*gc_best:.1f}% of the oracle coverage gap at W=120 s "
           f"(95% bootstrap CI: {100*ci[0]:.1f}%–{100*ci[1]:.1f}%). "
