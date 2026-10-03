@@ -2,9 +2,9 @@
 
 **Date:** 2026-10-03  
 **VERDICT (first line, pre-registered): SIGNAL**  
-Primary cell L=120 s, e=0.2: best predictor P4 closes 44.9% of oracle coverage gap (95% CI: 41.9%–48.0%, CI lower > 15%).  
+Primary cell L=120 s, e=0.2: best predictor P4 closes 44.9% of oracle coverage gap (95% CI: 41.9%–48.0%, video-clustered bootstrap, n=3141 videos, CI lower > 15%).  
 Pre-registered rule: SIGNAL ≥40% and CI lower >15%; NO SIGNAL <15% or CI incl. 0; PARTIAL otherwise.
-Text predictors (P4) beat elapsed-only (P1): YES — median Δgap_closed 21.7% (95% CI 18.5%–24.7%, excl. 0).
+Text predictors (P4) beat elapsed-only (P1): YES — median Δgap_closed 21.7% (95% CI 18.2%–25.0%, excl. 0).
 **Disclosure:** exploratory analysis at L=120, e=0.2 found gap_closed ≈47% (AUROC 0.79). This is a confirmatory re-implementation, not independent evidence.
 
 ---
@@ -33,13 +33,13 @@ P(needs_escalation): L=60 → 0.579, L=120 → 0.297
 
 ### With counting
 
-| predictor | L=60 test | L=60 mean_oof | L=120 test | L=120 mean_oof |
+| predictor | L=60 test | L=120 test | L=120 OOF | L=120 in-fold |
 |---|---|---|---|---|
-| P1 | 0.6213 | 0.6218 | 0.6958 | 0.6961 |
-| P2 | 0.6259 | 0.6262 | 0.6987 | 0.6989 |
-| P3 | 0.6764 | 0.6766 | 0.7034 | 0.7038 |
-| P4 | 0.7229 | 0.7227 | 0.7652 | 0.7656 |
-| P5 (ORACLE-INFO) | 0.6623 | 0.6621 | 0.7122 | 0.7124 |
+| P1 | 0.6213 | 0.6958 | 0.6961 | 0.6960 |
+| P2 | 0.6259 | 0.6987 | 0.6989 | 0.6994 |
+| P3 | 0.6764 | 0.7034 | 0.7038 | 0.9367 ← in-fold |
+| P4 | 0.7229 | 0.7652 | 0.7656 ← selected | 0.8195 |
+| P5 (ORACLE-INFO) | 0.6623 | 0.7122 | 0.7124 | 0.7129 |
 
 ### Without counting
 
@@ -191,5 +191,39 @@ Primary cell L=120, e=0.2: P4 closes 44.9% of oracle gap (cov_pred=82.5%, random
 95% CI: 41.9%–48.0%.
 
 Evidence-horizon-based escalation works under the pre-registered rule. Predictive signal (AUROC=0.765) translates to coverage gain over random escalation.
-Text predictors (P4) reliably outperform elapsed-only (P1): median Δgap_closed 21.7% (95% CI 18.5%–24.7%).
+Text predictors (P4) reliably outperform elapsed-only (P1): median Δgap_closed 21.7% (95% CI 18.2%–25.0%).
+
+## 8. Implementation Notes
+
+### Model-selection deviation from pre-registration
+
+Pre-registration: 'best of P1–P4 by AUROC on training folds only.'  
+Implementation: best by **mean OOF AUROC** (held-out test fold, averaged across 5 folds).  
+In-fold AUROC (fit on training, predict on same training data) was also computed for reference.
+
+| predictor | OOF AUROC (L=120) | in-fold AUROC (L=120) |
+|---|---|---|
+| P1 | 0.6961 | 0.6960 |
+| P2 | 0.6989 | 0.6994 |
+| P3 | 0.7038 | 0.9367 |
+| P4 | 0.7656 | 0.8195 |
+
+Best by OOF: **P4**.  Best by in-fold: **P3**.  
+The two criteria select **different** predictors. Primary analysis uses OOF selection (P4); in-fold selection would have chosen P3. See coverage table for both predictors' gap_closed values.
+
+### P3 AUROC discrepancy
+
+An external run reported AUROC 0.789 for P3 at L=120; this script reports 0.7034. Configuration comparison:
+
+| setting | main | external |
+|---|---|---|
+| LogisticRegression max_iter | 1000 | 2000 |
+| C | 1.0 | 1.0 |
+| solver | lbfgs (default) | lbfgs (default) |
+| class_weight | None | None |
+| scaling | StandardScaler(with_mean=False) | StandardScaler(with_mean=False) |
+| TF-IDF | 1-2 gram, 2000 feat, sublinear_tf | 1-2 gram, 2000 feat, sublinear_tf |
+
+Running full CV with max_iter=2000: AUROC = **0.7034** (vs main 0.7034, external ref 0.789).  
+max_iter=2000 does not reproduce the discrepancy; the gap (0.789 vs 0.7034) is likely due to a different data split or feature implementation in the external run. No change made to the primary analysis.
 

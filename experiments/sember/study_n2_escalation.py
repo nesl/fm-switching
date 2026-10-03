@@ -161,7 +161,20 @@ def fit_predict(Xtr, Ytr, Xte):
     sc = StandardScaler(with_mean=False)
     Xtr2 = sc.fit_transform(Xtr)
     Xte2 = sc.transform(Xte)
+    # solver=lbfgs (default), C=1.0, no class_weight, max_iter=1000, StandardScaler
     m = LogisticRegression(max_iter=1000, C=1.0)
+    m.fit(Xtr2, Ytr.astype(int))
+    return m.predict_proba(Xte2)[:, 1]
+
+
+def fit_predict_external(Xtr, Ytr, Xte):
+    """External configuration: max_iter=2000, all else same. For P3 diagnostic."""
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.preprocessing import StandardScaler
+    sc = StandardScaler(with_mean=False)
+    Xtr2 = sc.fit_transform(Xtr)
+    Xte2 = sc.transform(Xte)
+    m = LogisticRegression(max_iter=2000, C=1.0)
     m.fit(Xtr2, Ytr.astype(int))
     return m.predict_proba(Xte2)[:, 1]
 
@@ -224,20 +237,53 @@ def coverage_stats(rows, idx, scores, L, e):
     return cov_pred, cov_random, cov_oracle, gc
 
 
-def bootstrap_gap_ci(rows, test_idx, scores, L, e, n_boot=2000, seed=42):
-    rng = np.random.default_rng(seed)
-    idx_arr = np.array(test_idx)
-    sc_arr  = np.array(scores)
-    n = len(idx_arr)
+def _vid_index(rows, all_idx):
+    """Return (unique_vids_sorted, vid_to_idx) for video-clustered bootstrap."""
+    unique_vids = sorted(set(rows[i]["vid"] for i in all_idx))
+    vid_to_idx = defaultdict(list)
+    for i in all_idx:
+        vid_to_idx[rows[i]["vid"]].append(i)
+    return unique_vids, vid_to_idx
+
+
+def bootstrap_gap_ci_clustered(rows, all_idx, scores, L, e, n_boot=2000, seed=42):
+    """Bootstrap clustered by video_id (resample videos with replacement)."""
+    unique_vids, vid_to_idx = _vid_index(rows, all_idx)
+    n_vids = len(unique_vids)
+    rng  = np.random.default_rng(seed)
     gaps = []
     for _ in range(n_boot):
-        bi = rng.integers(0, n, size=n)
-        bi_idx = list(idx_arr[bi])
-        bi_sc  = sc_arr[bi]
+        vi   = rng.integers(0, n_vids, size=n_vids)
+        bi_idx = []
+        for v in vi:
+            bi_idx.extend(vid_to_idx[unique_vids[v]])
+        bi_sc = scores[np.array(bi_idx)]
         _, _, _, gc = coverage_stats(rows, bi_idx, bi_sc, L, e)
         gaps.append(gc)
     gaps = np.array(gaps)
-    return float(np.percentile(gaps, 2.5)), float(np.percentile(gaps, 97.5))
+    return float(np.percentile(gaps, 2.5)), float(np.percentile(gaps, 97.5)), n_vids
+
+
+def paired_bootstrap_clustered(rows, all_idx, scores_best, scores_p1, L, e,
+                                n_boot=2000, seed=42):
+    """Paired bootstrap clustered by video_id."""
+    unique_vids, vid_to_idx = _vid_index(rows, all_idx)
+    n_vids = len(unique_vids)
+    rng    = np.random.default_rng(seed)
+    deltas = []
+    for _ in range(n_boot):
+        vi = rng.integers(0, n_vids, size=n_vids)
+        bi_idx = []
+        for v in vi:
+            bi_idx.extend(vid_to_idx[unique_vids[v]])
+        bi_arr = np.array(bi_idx)
+        _, _, _, gc_best = coverage_stats(rows, bi_idx, scores_best[bi_arr], L, e)
+        _, _, _, gc_p1   = coverage_stats(rows, bi_idx, scores_p1[bi_arr],   L, e)
+        deltas.append(gc_best - gc_p1)
+    deltas = np.array(deltas)
+    return (float(np.median(deltas)),
+            float(np.percentile(deltas, 2.5)),
+            float(np.percentile(deltas, 97.5)))
 
 
 # ── main CV ───────────────────────────────────────────────────────────────────
@@ -249,9 +295,10 @@ def run_cv_on(rows, folds):
     # per-L labels
     Y = {L: np.array([float(rows[i]["farthest"] > L) for i in range(n)]) for L in L_LIST}
 
-    # out-of-fold predictions; per-fold OOF test AUROCs for model selection
-    pred      = {p: {L: np.full(n, np.nan) for L in L_LIST} for p in PREDICTORS}
-    oof_auroc = {p: {L: [] for L in L_LIST} for p in PREDICTORS}
+    # out-of-fold predictions; per-fold OOF and in-fold AUROCs
+    pred         = {p: {L: np.full(n, np.nan) for L in L_LIST} for p in PREDICTORS}
+    oof_auroc    = {p: {L: [] for L in L_LIST} for p in PREDICTORS}
+    infold_auroc = {p: {L: [] for L in L_LIST} for p in PREDICTORS}
 
     for fold_idx, test_idx in enumerate(folds):
         train_idx = [i for j, f in enumerate(folds) if j != fold_idx for i in f]
@@ -265,34 +312,44 @@ def run_cv_on(rows, folds):
             Xtr1 = feat_elapsed(rows, train_idx)
             Xte1 = feat_elapsed(rows, test_idx)
             p1_te = fit_predict(Xtr1, Ytr, Xte1)
+            p1_tr = fit_predict(Xtr1, Ytr, Xtr1)
             pred["P1"][L][test_idx] = p1_te
             oof_auroc["P1"][L].append(auroc(Yte, p1_te))
+            infold_auroc["P1"][L].append(auroc(Ytr, p1_tr))
 
             # P2 — keyword + elapsed
             Xtr2 = feat_keyword(rows, train_idx)
             Xte2 = feat_keyword(rows, test_idx)
             p2_te = fit_predict(Xtr2, Ytr, Xte2)
+            p2_tr = fit_predict(Xtr2, Ytr, Xtr2)
             pred["P2"][L][test_idx] = p2_te
             oof_auroc["P2"][L].append(auroc(Yte, p2_te))
+            infold_auroc["P2"][L].append(auroc(Ytr, p2_tr))
 
             # P3 — TF-IDF + elapsed
             Xtr3, Xte3 = feat_tfidf(rows, train_idx, test_idx)
             p3_te = fit_predict(Xtr3, Ytr, Xte3)
+            p3_tr = fit_predict(Xtr3, Ytr, Xtr3)
             pred["P3"][L][test_idx] = p3_te
             oof_auroc["P3"][L].append(auroc(Yte, p3_te))
+            infold_auroc["P3"][L].append(auroc(Ytr, p3_tr))
 
             # P4 — sentence embed + elapsed
             Xtr4, Xte4 = feat_embed(rows, train_idx, test_idx)
             p4_te = fit_predict(Xtr4, Ytr, Xte4)
+            p4_tr = fit_predict(Xtr4, Ytr, Xtr4)
             pred["P4"][L][test_idx] = p4_te
             oof_auroc["P4"][L].append(auroc(Yte, p4_te))
+            infold_auroc["P4"][L].append(auroc(Ytr, p4_tr))
 
             # P5 — oracle-info: category + elapsed
             Xtr5 = feat_oracle(rows, train_idx)
             Xte5 = feat_oracle(rows, test_idx)
             p5_te = fit_predict(Xtr5, Ytr, Xte5)
+            p5_tr = fit_predict(Xtr5, Ytr, Xtr5)
             pred["P5"][L][test_idx] = p5_te
             oof_auroc["P5"][L].append(auroc(Yte, p5_te))
+            infold_auroc["P5"][L].append(auroc(Ytr, p5_tr))
 
         print(f"  fold {fold_idx+1}/{N_FOLDS} done ({len(test_idx)} test)", flush=True)
 
@@ -307,18 +364,35 @@ def run_cv_on(rows, folds):
         results["auroc"][p] = {}
         for L in L_LIST:
             results["auroc"][p][L] = {
-                "test":      round(auroc(Y[L], pred[p][L]), 4),
-                "mean_oof":  round(float(np.mean(oof_auroc[p][L])), 4),
+                "test":         round(auroc(Y[L], pred[p][L]), 4),
+                "mean_oof":     round(float(np.mean(oof_auroc[p][L])), 4),
+                "mean_infold":  round(float(np.mean(infold_auroc[p][L])), 4),
             }
 
     # ── pick best predictor for primary cell: L=120, e=0.2 ───────────────────
-    # Select by mean OOF AUROC (each fold's OOF = predictions from a model that
-    # never saw that fold; this is the standard cross-validated model-selection
-    # criterion and does not use test fold labels to fit).
-    best_p = max(["P1","P2","P3","P4"],
-                 key=lambda p: results["auroc"][p][L_PRIMARY]["mean_oof"])
-    print(f"\nBest by OOF AUROC at L={L_PRIMARY}: {best_p} "
-          f"(mean OOF AUROC={results['auroc'][best_p][L_PRIMARY]['mean_oof']:.3f})", flush=True)
+    # Use mean OOF AUROC: predictions obtained without seeing each fold's test
+    # data, averaged across folds — the standard cross-validated selection
+    # criterion. This deviates from the pre-registration literal ("training
+    # folds only"); see model_selection_note below.
+    best_p_oof    = max(["P1","P2","P3","P4"],
+                        key=lambda p: results["auroc"][p][L_PRIMARY]["mean_oof"])
+    best_p_infold = max(["P1","P2","P3","P4"],
+                        key=lambda p: results["auroc"][p][L_PRIMARY]["mean_infold"])
+    selection_agrees = (best_p_oof == best_p_infold)
+    best_p = best_p_oof  # primary analysis uses OOF selection
+    print(f"\nBest by OOF AUROC at L={L_PRIMARY}: {best_p_oof} "
+          f"(OOF={results['auroc'][best_p_oof][L_PRIMARY]['mean_oof']:.3f}, "
+          f"infold={results['auroc'][best_p_oof][L_PRIMARY]['mean_infold']:.3f})", flush=True)
+    print(f"Best by in-fold AUROC at L={L_PRIMARY}: {best_p_infold} "
+          f"(infold={results['auroc'][best_p_infold][L_PRIMARY]['mean_infold']:.3f})", flush=True)
+    print(f"Selection agrees: {selection_agrees}", flush=True)
+    results["model_selection_note"] = {
+        "best_p_oof": best_p_oof,
+        "best_p_infold": best_p_infold,
+        "agrees": selection_agrees,
+        "oof_auroc_best": results["auroc"][best_p_oof][L_PRIMARY]["mean_oof"],
+        "infold_auroc_best_infold_pick": results["auroc"][best_p_infold][L_PRIMARY]["mean_infold"],
+    }
 
     # ── systems metric ────────────────────────────────────────────────────────
     for L in L_LIST:
@@ -334,40 +408,32 @@ def run_cv_on(rows, folds):
                     "gap_closed": round(gc, 4),
                 }
 
-    # ── bootstrap CI for primary cell ────────────────────────────────────────
-    print("Computing bootstrap CI for primary cell...", flush=True)
-    ci_lo, ci_hi = bootstrap_gap_ci(rows, all_idx, pred[best_p][L_PRIMARY],
-                                    L_PRIMARY, E_PRIMARY, N_BOOTSTRAP, SEED)
+    # ── bootstrap CI for primary cell (clustered by video) ───────────────────
+    print("Computing bootstrap CI for primary cell (video-clustered)...", flush=True)
+    ci_lo, ci_hi, n_vids = bootstrap_gap_ci_clustered(
+        rows, all_idx, pred[best_p][L_PRIMARY],
+        L_PRIMARY, E_PRIMARY, N_BOOTSTRAP, SEED)
     primary_gc = results["coverage"][L_PRIMARY][E_PRIMARY][best_p]["gap_closed"]
     results["primary_cell"] = {
         "L": L_PRIMARY, "e": E_PRIMARY, "best_p": best_p,
         "gap_closed": primary_gc,
         "ci_95": [round(ci_lo, 4), round(ci_hi, 4)],
+        "n_videos_bootstrap": n_vids,
         "cov_pred":   results["coverage"][L_PRIMARY][E_PRIMARY][best_p]["cov_pred"],
         "cov_random": results["coverage"][L_PRIMARY][E_PRIMARY][best_p]["cov_random"],
         "cov_oracle": results["coverage"][L_PRIMARY][E_PRIMARY][best_p]["cov_oracle"],
     }
 
-    # ── paired bootstrap: best_p vs P1 at primary cell ───────────────────────
-    print("Computing paired bootstrap (best vs P1)...", flush=True)
-    rng = np.random.default_rng(SEED)
-    idx_arr = np.array(all_idx)
-    deltas = []
-    for _ in range(N_BOOTSTRAP):
-        bi = rng.integers(0, len(all_idx), size=len(all_idx))
-        bi_idx = list(idx_arr[bi])
-        sc_best = pred[best_p][L_PRIMARY][bi]
-        sc_p1   = pred["P1"][L_PRIMARY][bi]
-        _, _, _, gc_best = coverage_stats(rows, bi_idx, sc_best, L_PRIMARY, E_PRIMARY)
-        _, _, _, gc_p1   = coverage_stats(rows, bi_idx, sc_p1,   L_PRIMARY, E_PRIMARY)
-        deltas.append(gc_best - gc_p1)
-    deltas = np.array(deltas)
+    # ── paired bootstrap: best_p vs P1 (clustered by video) ─────────────────
+    print("Computing paired bootstrap (best vs P1, video-clustered)...", flush=True)
+    paired_med, paired_lo, paired_hi = paired_bootstrap_clustered(
+        rows, all_idx, pred[best_p][L_PRIMARY], pred["P1"][L_PRIMARY],
+        L_PRIMARY, E_PRIMARY, N_BOOTSTRAP, SEED)
     results["paired_best_vs_p1"] = {
         "best_p": best_p,
-        "gc_diff_median": round(float(np.median(deltas)), 4),
-        "ci_95": [round(float(np.percentile(deltas, 2.5)), 4),
-                  round(float(np.percentile(deltas, 97.5)), 4)],
-        "beats_p1": bool(np.percentile(deltas, 2.5) > 0),
+        "gc_diff_median": round(paired_med, 4),
+        "ci_95": [round(paired_lo, 4), round(paired_hi, 4)],
+        "beats_p1": bool(paired_lo > 0),
     }
 
     # ── verdict ───────────────────────────────────────────────────────────────
@@ -418,6 +484,30 @@ def run_cv_on(rows, folds):
             ex[f"pred_{p}_L120"] = round(float(pred[p][L_PRIMARY][i]), 3)
         examples.append(ex)
     results["examples"] = examples
+
+    # ── P3 external-config diagnostic (max_iter=2000) ─────────────────────────
+    # External run (TF-IDF 1-2g/2000/sublinear + log(1+qt), LogisticRegression
+    # max_iter=2000) reported AUROC 0.789 at L=120; this script with max_iter=1000
+    # reports 0.704.  Run one CV pass with max_iter=2000 to identify the source.
+    print("Running P3 external-config diagnostic (max_iter=2000)...", flush=True)
+    p3_ext = np.full(n, np.nan)
+    for fold_idx, test_idx in enumerate(folds):
+        train_idx2 = [i for j, f in enumerate(folds) if j != fold_idx for i in f]
+        test_idx2  = list(test_idx)
+        Ytr2 = Y[L_PRIMARY][np.array(train_idx2)]
+        Xtr3, Xte3 = feat_tfidf(rows, train_idx2, test_idx2)
+        p3_ext[test_idx2] = fit_predict_external(Xtr3, Ytr2, Xte3)
+    p3_ext_auroc = round(auroc(Y[L_PRIMARY], p3_ext), 4)
+    print(f"P3 external (max_iter=2000) AUROC at L={L_PRIMARY}: {p3_ext_auroc:.4f} "
+          f"vs main (max_iter=1000): {results['auroc']['P3'][L_PRIMARY]['test']:.4f}", flush=True)
+    results["p3_external_diagnostic"] = {
+        "description": "P3 with max_iter=2000 (external config); main uses max_iter=1000",
+        "fit_settings_main":     "LogisticRegression(max_iter=1000, C=1.0, solver=lbfgs), StandardScaler(with_mean=False)",
+        "fit_settings_external": "LogisticRegression(max_iter=2000, C=1.0, solver=lbfgs), StandardScaler(with_mean=False)",
+        "auroc_main_L120":     results["auroc"]["P3"][L_PRIMARY]["test"],
+        "auroc_external_L120": p3_ext_auroc,
+        "external_ref_auroc":  0.789,
+    }
 
     return results, rows
 
@@ -472,9 +562,11 @@ def write_report(result, rows):
     A(f"# Study N2 — Escalation Framing")
     A(f"")
     A(f"**Date:** 2026-10-03  ")
+    msn = r["model_selection_note"]
     A(f"**VERDICT (first line, pre-registered): {verdict}**  ")
     A(f"Primary cell L=120 s, e=0.2: best predictor {best_p} closes {100*gc:.1f}% of oracle coverage gap "
-      f"(95% CI: {100*ci[0]:.1f}%–{100*ci[1]:.1f}%, "
+      f"(95% CI: {100*ci[0]:.1f}%–{100*ci[1]:.1f}%, video-clustered bootstrap, "
+      f"n={pc['n_videos_bootstrap']} videos, "
       f"{'CI lower > 15%' if ci[0] > 0.15 else 'CI incl. 0 or lower ≤ 15%'}).  ")
     A(f"Pre-registered rule: SIGNAL ≥40% and CI lower >15%; NO SIGNAL <15% or CI incl. 0; PARTIAL otherwise.")
     if paired["beats_p1"]:
@@ -513,13 +605,17 @@ def write_report(result, rows):
     A(f"")
     A(f"### With counting")
     A(f"")
-    A(f"| predictor | L=60 test | L=60 mean_oof | L=120 test | L=120 mean_oof |")
+    msn = r["model_selection_note"]
+    A(f"| predictor | L=60 test | L=120 test | L=120 OOF | L=120 in-fold |")
     A(f"|---|---|---|---|---|")
     for p in ["P1","P2","P3","P4","P5"]:
         label = p + (" (ORACLE-INFO)" if p == "P5" else "")
         a60  = r["auroc"][p][60]
         a120 = r["auroc"][p][120]
-        A(f"| {label} | {a60['test']:.4f} | {a60['mean_oof']:.4f} | {a120['test']:.4f} | {a120['mean_oof']:.4f} |")
+        sel_marker = " ← selected" if p == msn["best_p_oof"] else ""
+        ifsel_marker = " ← in-fold" if (p == msn["best_p_infold"] and p != msn["best_p_oof"]) else ""
+        A(f"| {label} | {a60['test']:.4f} | {a120['test']:.4f} | "
+          f"{a120['mean_oof']:.4f}{sel_marker} | {a120['mean_infold']:.4f}{ifsel_marker} |")
     A(f"")
     A(f"### Without counting")
     A(f"")
@@ -621,6 +717,55 @@ def write_report(result, rows):
         A(f"Text predictors ({best_p}) do NOT reliably outperform elapsed-only (P1): "
           f"median Δgap_closed {100*paired['gc_diff_median']:.1f}% "
           f"(95% CI {100*paired['ci_95'][0]:.1f}%–{100*paired['ci_95'][1]:.1f}%, includes 0).")
+    A(f"")
+
+    # ── 8. implementation notes ────────────────────────────────────────────────
+    A(f"## 8. Implementation Notes")
+    A(f"")
+    msn = r["model_selection_note"]
+    A(f"### Model-selection deviation from pre-registration")
+    A(f"")
+    A(f"Pre-registration: 'best of P1–P4 by AUROC on training folds only.'  ")
+    A(f"Implementation: best by **mean OOF AUROC** (held-out test fold, averaged across 5 folds).  ")
+    A(f"In-fold AUROC (fit on training, predict on same training data) was also computed for reference.")
+    A(f"")
+    A(f"| predictor | OOF AUROC (L=120) | in-fold AUROC (L=120) |")
+    A(f"|---|---|---|")
+    for p in ["P1","P2","P3","P4"]:
+        a120 = r["auroc"][p][120]
+        A(f"| {p} | {a120['mean_oof']:.4f} | {a120['mean_infold']:.4f} |")
+    A(f"")
+    A(f"Best by OOF: **{msn['best_p_oof']}**.  Best by in-fold: **{msn['best_p_infold']}**.  ")
+    if msn["agrees"]:
+        A(f"Both criteria select the same predictor — the deviation has no effect on the primary result.")
+    else:
+        A(f"The two criteria select **different** predictors. Primary analysis uses OOF selection ({msn['best_p_oof']}); "
+          f"in-fold selection would have chosen {msn['best_p_infold']}. "
+          f"See coverage table for both predictors' gap_closed values.")
+    A(f"")
+    A(f"### P3 AUROC discrepancy")
+    A(f"")
+    diag = r["p3_external_diagnostic"]
+    A(f"An external run reported AUROC {diag['external_ref_auroc']:.3f} for P3 at L=120; this script reports "
+      f"{diag['auroc_main_L120']:.4f}. Configuration comparison:")
+    A(f"")
+    A(f"| setting | main | external |")
+    A(f"|---|---|---|")
+    A(f"| LogisticRegression max_iter | 1000 | 2000 |")
+    A(f"| C | 1.0 | 1.0 |")
+    A(f"| solver | lbfgs (default) | lbfgs (default) |")
+    A(f"| class_weight | None | None |")
+    A(f"| scaling | StandardScaler(with_mean=False) | StandardScaler(with_mean=False) |")
+    A(f"| TF-IDF | 1-2 gram, 2000 feat, sublinear_tf | 1-2 gram, 2000 feat, sublinear_tf |")
+    A(f"")
+    A(f"Running full CV with max_iter=2000: AUROC = **{diag['auroc_external_L120']:.4f}** "
+      f"(vs main {diag['auroc_main_L120']:.4f}, external ref {diag['external_ref_auroc']:.3f}).  ")
+    if abs(diag["auroc_external_L120"] - diag["auroc_main_L120"]) < 0.002:
+        A(f"max_iter=2000 does not reproduce the discrepancy; the gap ({diag['external_ref_auroc']:.3f} vs "
+          f"{diag['auroc_external_L120']:.4f}) is likely due to a different data split or feature implementation in the external run. "
+          f"No change made to the primary analysis.")
+    else:
+        A(f"max_iter=2000 partially closes the gap. The primary analysis retains max_iter=1000 unchanged.")
     A(f"")
 
     os.makedirs(os.path.dirname(OUT_REPORT), exist_ok=True)
