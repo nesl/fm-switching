@@ -14,7 +14,7 @@
 
 Pre-registered rule: **4B×N MATCHES 8B×1** if 4B accuracy at some N≤5 is within 3pp of 8B×1 with overlapping CIs. **SCALE WINS** if 8B×1 exceeds 4B×5 by >3pp.
 
-****4B×N MATCHES 8B×1** at N=1 (within 3pp, overlapping CIs).**
+****4B×N MATCHES 8B×1** at N=1 (within 3pp, overlapping CIs) — indistinguishable at n=40.**
 
 Latency at N=1: 4B×1 mean=143.9s, 8B×1 mean=118.7s, ratio=1.21×.
 
@@ -24,7 +24,7 @@ Latency at N=1: 4B×1 mean=143.9s, 8B×1 mean=118.7s, ratio=1.21×.
 
 **Arm A:** 40 trials — 28 terminated (70.0%), 12 non-terminated (30.0%), 28 parsed ok (70.0%).
 **Arm C:** 40 trials — 36 terminated (90.0%), 4 non-terminated (10.0%), 36 parsed ok (90.0%).
-**Arm D:** 40 trials — 0 terminated (0.0%), 40 non-terminated (100.0%), 0 parsed ok (0.0%).
+**Arm D:** 40 trials — 40 EOS-terminated (100.0%), 0 budget-hit (0.0%), 40 parsed ok (100.0%). (no think tags; terminated = EOS reached)
 
 **Arm B (4B-T retries) — cumulative termination after 1–5 passes:**
 
@@ -44,7 +44,7 @@ Non-terminating trials score 0 (deployment-realistic).
 |---|---|---|---|---|
 | A (4B-T×1) | 40 | 11 | 27.5% | [16.1%, 42.8%] |
 | C (8B-T×1) | 40 | 12 | 30.0% | [18.1%, 45.4%] |
-| D (8B-I×1) | 40 | 0 | 0.0% | [0.0%, 8.8%] |
+| D (8B-I×1) | 40 | 12 | 30.0% | [18.1%, 45.4%] |
 
 **Arm B (4B-T) cumulative accuracy after 1–5 passes:**
 
@@ -55,6 +55,8 @@ Non-terminating trials score 0 (deployment-realistic).
 | ≤3 | 12 | 30.0% | [18.1%, 45.4%] |
 | ≤4 | 12 | 30.0% | [18.1%, 45.4%] |
 | ≤5 | 12 | 30.0% | [18.1%, 45.4%] |
+
+**Retry note:** retries rescued 12 non-terminating signs into terminating ones but gained only 1 additional correct answer(s). Retry restores liveness, not accuracy.
 
 ## §4 Analysis 3 — Cumulative Latency
 
@@ -72,7 +74,7 @@ For arm B, mean total latency = sum of all passes attempted per sign.
 | A | 40 | 28 | 12 | 28 | 12 |
 | B (all passes) | 54 | 40 | 14 | 40 | 14 |
 | C | 40 | 36 | 4 | 36 | 4 |
-| D | 40 | 0 | 0 | 0 | 40 |
+| D | 40 | N/A | N/A | 40 | 0 |
 
 answer_text non-empty for all terminating trials: **PASS**
 

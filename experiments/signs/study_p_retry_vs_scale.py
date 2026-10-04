@@ -349,8 +349,10 @@ def parse_prediction(answer_text):
     return None, "parse_failed"
 
 
-def run_one(model, processor, img, prompt, gen_kwargs, seed):
-    """Run one inference pass. Returns dict of raw metrics."""
+def run_one(model, processor, img, prompt, gen_kwargs, seed, instruct_mode=False):
+    """Run one inference pass. Returns dict of raw metrics.
+    instruct_mode: model emits no think tags; full output is the answer.
+    """
     torch.manual_seed(seed if seed is not None else 0)
     messages = [{"role": "user", "content": [
         {"type": "image", "image": img},
@@ -370,8 +372,17 @@ def run_one(model, processor, img, prompt, gen_kwargs, seed):
 
     full_output = processor.decode(generated, skip_special_tokens=False)
     budget_hit  = len(generated) >= gen_kwargs.get("max_new_tokens", MAX_NEW_TOKENS)
-    answer_text, n_think, n_answer, think_closed = \
-        extract_think_and_answer(full_output, processor)
+
+    if instruct_mode:
+        answer_text  = full_output.replace("<|im_end|>", "").strip()
+        think_closed = None  # N/A: instruct models emit no think tags
+        n_think      = 0
+        n_answer     = len(processor.tokenizer.encode(
+            answer_text, add_special_tokens=False)) if answer_text else 0
+    else:
+        answer_text, n_think, n_answer, think_closed = \
+            extract_think_and_answer(full_output, processor)
+
     prediction, parse_status = parse_prediction(answer_text)
 
     return {
@@ -405,10 +416,12 @@ def already_done_set(path):
 
 def run_arm(arm_name, model_path, crops, gt_map_full, hf_cache, prompt,
             gen_kwargs, out_f, done, seed=42, pass_index=1,
-            print_prefix="", max_trials=None, project_n=5, hard_stop_h=None):
+            print_prefix="", max_trials=None, project_n=5, hard_stop_h=None,
+            instruct_mode=False):
     """
     Run a single-pass arm. Returns (trials, stop_flag).
     Prints projection after project_n trials; if hard_stop_h set and total > it, stop_flag=True.
+    instruct_mode: score when EOS reached (not budget_hit) instead of when think_closed.
     """
     trials = []
     lat_history = []
@@ -431,13 +444,15 @@ def run_arm(arm_name, model_path, crops, gt_map_full, hf_cache, prompt,
         img = crop_bbox(hf_cache[info['imagePath']], info['bbox'])
 
         try:
-            r = run_one(model, processor_ref[0], img, prompt, gen_kwargs, seed)
+            r = run_one(model, processor_ref[0], img, prompt, gen_kwargs, seed,
+                        instruct_mode=instruct_mode)
         except RuntimeError as e:
             print(f"ERROR {crop}: {e}", flush=True)
             continue
 
         score = None
-        if r['think_closed'] and r['prediction'] is not None:
+        score_eligible = (not r['budget_hit']) if instruct_mode else r['think_closed']
+        if score_eligible and r['prediction'] is not None:
             score = score_sign(r['prediction'], info['ann'])
 
         parsed_tuples = None
@@ -468,7 +483,10 @@ def run_arm(arm_name, model_path, crops, gt_map_full, hf_cache, prompt,
         trials.append(trial)
         lat_history.append(r['latency_ms'])
 
-        status = f"{'OK ' if r['think_closed'] else 'NC '} score={'Y' if score else ('N' if score is False else '?')}"
+        if instruct_mode:
+            status = f"{'OK ' if not r['budget_hit'] else 'BH '} score={'Y' if score else ('N' if score is False else '?')}"
+        else:
+            status = f"{'OK ' if r['think_closed'] else 'NC '} score={'Y' if score else ('N' if score is False else '?')}"
         print(f"  {print_prefix}[{i+1}] {crop[:22]}  {status}  lat={r['latency_ms']/1000:.1f}s", flush=True)
 
         # Projection after project_n trials
@@ -501,6 +519,8 @@ def main():
     parser.add_argument('--validate-only', action='store_true')
     parser.add_argument('--report-only', action='store_true',
                         help='Skip inference; just write report from existing JSONL.')
+    parser.add_argument('--arm-d-only', action='store_true',
+                        help='Re-run arm D only; skip A/B/C model loads.')
     args = parser.parse_args()
 
     # ── Checkpoint verification ────────────────────────────────────────────────
@@ -556,11 +576,19 @@ def main():
     arm_d_trials, _ = run_arm(
         'D', PATH_8BI, crops_j2, gt_map_full, hf_cache, prompt,
         INSTRUCT_GEN, out_f, done, seed=42, pass_index=1,
-        print_prefix="D1 ", project_n=5, hard_stop_h=None)
+        print_prefix="D1 ", project_n=5, hard_stop_h=None,
+        instruct_mode=True)
 
     del model
     torch.cuda.empty_cache()
     print("8B-I unloaded.")
+
+    if args.arm_d_only:
+        out_f.close()
+        trials = [json.loads(l) for l in open(TRIALS_PATH)]
+        write_report(trials, gemini_acc, crops_used=crops_j2)
+        print(f"Report written to {REPORT_PATH}")
+        return
 
     # ── Arm A: 4B-T, 1 pass (SECOND) ─────────────────────────────────────────
     print("\n" + "=" * 60)
@@ -823,12 +851,15 @@ def write_report(trials, gemini_acc, crops_used):
             break
 
     if match_n is not None:
-        verdict = f"**4B×N MATCHES 8B×1** at N={match_n} (within 3pp, overlapping CIs)."
+        verdict = (f"**4B×N MATCHES 8B×1** at N={match_n} (within 3pp, overlapping CIs) "
+                   f"— indistinguishable at n=40.")
     elif diff_5_vs_c > 0.03:
-        verdict = f"**SCALE WINS** — 8B×1 exceeds 4B×5 by {diff_5_vs_c*100:.1f}pp (>3pp threshold)."
+        verdict = (f"**SCALE WINS** — 8B×1 exceeds 4B×5 by {diff_5_vs_c*100:.1f}pp (>3pp threshold) "
+                   f"— indistinguishable at n=40.")
     else:
         verdict = (f"**INCONCLUSIVE** — 8B×1 vs 4B×5 gap = {diff_5_vs_c*100:.1f}pp "
-                   f"(within 3pp threshold, {'CI overlap' if ci_overlap else 'no CI overlap'}).")
+                   f"(within 3pp threshold, {'CI overlap' if ci_overlap else 'no CI overlap'}) "
+                   f"— indistinguishable at n=40.")
 
     A(f"**{verdict}**")
     A("")
@@ -863,14 +894,22 @@ def write_report(trials, gemini_acc, crops_used):
     A("## §2 Analysis 1 — Termination Rate")
     A("")
 
-    for arm_label, arm_ts in [('A', arm_a), ('C', arm_c), ('D', arm_d)]:
+    for arm_label, arm_ts, is_instruct in [
+            ('A', arm_a, False), ('C', arm_c, False), ('D', arm_d, True)]:
         n = len(arm_ts)
-        n_term = sum(1 for t in arm_ts if t.get('think_closed'))
-        n_nterm = n - n_term
         n_parsed = sum(1 for t in arm_ts if t.get('parse_status') == 'ok')
-        A(f"**Arm {arm_label}:** {n} trials — {n_term} terminated ({n_term/n*100:.1f}%), "
-          f"{n_nterm} non-terminated ({n_nterm/n*100:.1f}%), "
-          f"{n_parsed} parsed ok ({n_parsed/n*100:.1f}%).")
+        if is_instruct:
+            n_term = sum(1 for t in arm_ts if not t.get('budget_hit'))
+            n_nterm = n - n_term
+            A(f"**Arm {arm_label}:** {n} trials — {n_term} EOS-terminated ({n_term/n*100:.1f}%), "
+              f"{n_nterm} budget-hit ({n_nterm/n*100:.1f}%), "
+              f"{n_parsed} parsed ok ({n_parsed/n*100:.1f}%). (no think tags; terminated = EOS reached)")
+        else:
+            n_term = sum(1 for t in arm_ts if t.get('think_closed'))
+            n_nterm = n - n_term
+            A(f"**Arm {arm_label}:** {n} trials — {n_term} terminated ({n_term/n*100:.1f}%), "
+              f"{n_nterm} non-terminated ({n_nterm/n*100:.1f}%), "
+              f"{n_parsed} parsed ok ({n_parsed/n*100:.1f}%).")
 
     A("")
     A("**Arm B (4B-T retries) — cumulative termination after 1–5 passes:**")
@@ -915,6 +954,14 @@ def write_report(trials, gemini_acc, crops_used):
         A(f"| ≤{p} | {c} | {c/n_signs*100:.1f}% | [{ci[0]*100:.1f}%, {ci[1]*100:.1f}%] |")
 
     A("")
+    n_b_nterm_rescued = sum(
+        1 for crop, passes in b_by_crop.items()
+        if any(t['pass_index'] > 1 and t.get('think_closed') for t in passes))
+    n_b_correct_from_retry = (b_pass_correct.get(5, 0) - b_pass_correct.get(1, 0))
+    A(f"**Retry note:** retries rescued {n_b_nterm_rescued} non-terminating signs into terminating ones "
+      f"but gained only {n_b_correct_from_retry} additional correct answer(s). "
+      f"Retry restores liveness, not accuracy.")
+    A("")
 
     # ── Analysis 3: latency ───────────────────────────────────────────────────
     A("## §4 Analysis 3 — Cumulative Latency")
@@ -946,11 +993,12 @@ def write_report(trials, gemini_acc, crops_used):
     A("")
     A("| arm | trials | think_closed | budget_hit | parse_ok | parse_failed |")
     A("|---|---|---|---|---|---|")
-    for arm_label, arm_ts in [('A', arm_a), ('B (all passes)', arm_b_all),
-                               ('C', arm_c), ('D', arm_d)]:
+    for arm_label, arm_ts, is_instruct in [
+            ('A', arm_a, False), ('B (all passes)', arm_b_all, False),
+            ('C', arm_c, False), ('D', arm_d, True)]:
         n = len(arm_ts)
-        n_cl = sum(1 for t in arm_ts if t.get('think_closed'))
-        n_bh = sum(1 for t in arm_ts if t.get('budget_hit'))
+        n_cl = "N/A" if is_instruct else sum(1 for t in arm_ts if t.get('think_closed'))
+        n_bh = "N/A" if is_instruct else sum(1 for t in arm_ts if t.get('budget_hit'))
         n_ok = sum(1 for t in arm_ts if t.get('parse_status') == 'ok')
         n_pf = sum(1 for t in arm_ts if t.get('parse_status') == 'parse_failed')
         A(f"| {arm_label} | {n} | {n_cl} | {n_bh} | {n_ok} | {n_pf} |")
