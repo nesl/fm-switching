@@ -87,7 +87,7 @@ def _jaccard(s1, s2_list):
 def _lexical(s1, s2_list):
     jacc = _jaccard(s1, s2_list)
     s1n = s1.lower()
-    return [jacc[i] * (1 if s2.lower() in s1n or s1n in s2.lower() else 0)
+    return [jacc[i] * (1 if s1n in s2.lower() else 0)
             for i, s2 in enumerate(s2_list)]
 
 
