@@ -185,6 +185,7 @@ The two existing reports (`reports/phase0a_multimodel_audit.md`, `reports/phase1
 | `a6000` | NVIDIA RTX A6000 | flash (GPU 1) |
 | `rtx3090ti` | NVIDIA GeForce RTX 3090 Ti | flash (GPU 0) |
 | `jetson_orin` | Jetson AGX Orin | separate SSH host |
+| `h100nvl` | NVIDIA H100 NVL | sn4622120321 (shared; GPU 3 preferred — see `research/HOST_H100.md`) |
 
 ### Box roles
 

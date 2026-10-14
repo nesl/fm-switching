@@ -3,6 +3,8 @@
 Use this file to claim a GPU/host before running a long experiment, so concurrent sessions
 don't collide. Clear the claim when done.
 
+Shared H100 host (`sn4622120321`): read `research/HOST_H100.md` first — use GPU 3 by default.
+
 | host | GPU | claimed by | experiment | claimed at | status |
 |---|---|---|---|---|---|
 | flash | A6000 (GPU 1) | CC | E27 maintenance-mechanism kill test | 2026-08-20 | done |
