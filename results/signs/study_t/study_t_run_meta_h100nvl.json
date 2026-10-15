@@ -1,0 +1,116 @@
+{
+  "study": "StudyT",
+  "device": "h100nvl",
+  "gpu": "NVIDIA H100 NVL",
+  "transformers": "5.10.2",
+  "torch": "2.8.0+cu128",
+  "dataset": "NickyZimmerman/SiGNgapore2D",
+  "dataset_sha": "97d148794fc933e5cf40bf85d8c711437de6b48e",
+  "sign_understanding_commit": "381013b3b065113862d7410b10894b31161e86a6",
+  "manifest": "results/signs/study_j2/manifest.json",
+  "n_signs": 40,
+  "seed": 42,
+  "core_budget": 8192,
+  "ladder": [
+    16384,
+    24576
+  ],
+  "core_cap_h": 2.0,
+  "prompt_sha256": "b2e83879fce991b837458f4d15ad4959aea3dc694bfe0aee28f0802c7dbfcebb",
+  "thinking_gen": {
+    "do_sample": true,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0
+  },
+  "instruct_gen": {
+    "do_sample": false
+  },
+  "attn": "sdpa (flash_attn not installed)",
+  "core_elapsed_h_prior": 0.0,
+  "models": {
+    "I32": {
+      "arm": "I32",
+      "repo": "Qwen/Qwen3-VL-32B-Instruct",
+      "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+      "snapshot_path": "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+      "quant": "bf16",
+      "attn_implementation": "sdpa",
+      "load_s": 14.6,
+      "weights_allocated_gb": 66.71
+    },
+    "T32": {
+      "arm": "T32",
+      "repo": "Qwen/Qwen3-VL-32B-Thinking",
+      "revision": "7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+      "snapshot_path": "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Thinking/snapshots/7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+      "quant": "bf16",
+      "attn_implementation": "sdpa",
+      "load_s": 12.9,
+      "weights_allocated_gb": 66.75
+    },
+    "T32_postcap": {
+      "arm": "T32",
+      "repo": "Qwen/Qwen3-VL-32B-Thinking",
+      "revision": "7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+      "snapshot_path": "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Thinking/snapshots/7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+      "quant": "bf16",
+      "attn_implementation": "sdpa",
+      "load_s": 12.5,
+      "weights_allocated_gb": 66.71
+    }
+  },
+  "core_elapsed_h": 2.034,
+  "projections": [
+    {
+      "arm": "I32",
+      "after_trials": 10,
+      "mean_s": 3.0,
+      "projected_arm_h": 0.03,
+      "core_elapsed_h": 0.01,
+      "core_cap_h": 2.0,
+      "at": "2026-10-15T00:48:52.991711"
+    },
+    {
+      "arm": "T32",
+      "after_trials": 10,
+      "mean_s": 184.4,
+      "projected_arm_h": 2.05,
+      "core_elapsed_h": 0.46,
+      "core_cap_h": 2.0,
+      "at": "2026-10-15T01:21:37.851011"
+    }
+  ],
+  "cap_events": [
+    {
+      "arm": "T32",
+      "at": "2026-10-15T02:50:08.755602",
+      "msg": "CORE CAP HIT: 2.03 h > 2.0 h \u2014 stopping T32 core with partial n"
+    }
+  ],
+  "core_finished_at": "2026-10-15T02:50:08.844953",
+  "postcap_completion": {
+    "n": 0,
+    "at": "2026-10-15T08:16:58.759742"
+  },
+  "ladder_rungs": [
+    {
+      "budget": 16384,
+      "from_budget": 8192,
+      "n_need": 6,
+      "n_todo": 0,
+      "worst_case_est_h": 0.0,
+      "at": "2026-10-15T08:16:58.774018"
+    },
+    {
+      "budget": 24576,
+      "from_budget": 16384,
+      "n_need": 2,
+      "n_todo": 0,
+      "worst_case_est_h": 0.0,
+      "at": "2026-10-15T08:16:58.784763"
+    }
+  ],
+  "ladder_finished_at": "2026-10-15T08:16:58.785561"
+}

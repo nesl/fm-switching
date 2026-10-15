@@ -1,0 +1,85 @@
+{
+  "transformers": "5.10.2",
+  "torch": "2.8.0+cu128",
+  "gpu": "NVIDIA H100 NVL",
+  "quant_32b": "bf16",
+  "n_spatial": 118,
+  "thinking_gen": {
+    "do_sample": true,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "max_new_tokens": 16384
+  },
+  "instruct_gen": {
+    "do_sample": false,
+    "max_new_tokens": 512
+  },
+  "quant_32b_locked": "bf16",
+  "arms": {
+    "C": {
+      "key": "32BI",
+      "repo": "Qwen/Qwen3-VL-32B-Instruct",
+      "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+      "snapshot_path": "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+      "quant": "bf16",
+      "attn_implementation": "sdpa",
+      "load_s": 16.5,
+      "weights_allocated_gb": 66.71,
+      "peak_alloc_gb": 73.44,
+      "peak_reserved_gb": 75.41,
+      "n_new_trials": 400
+    },
+    "D": {
+      "key": "32BT",
+      "repo": "Qwen/Qwen3-VL-32B-Thinking",
+      "revision": "7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+      "snapshot_path": "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Thinking/snapshots/7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+      "quant": "bf16",
+      "attn_implementation": "sdpa",
+      "load_s": 12.3,
+      "weights_allocated_gb": 66.71,
+      "peak_alloc_gb": 73.44,
+      "peak_reserved_gb": 75.71,
+      "n_new_trials": 377
+    },
+    "A_h100": {
+      "key": "4BI",
+      "repo": "Qwen/Qwen3-VL-4B-Instruct",
+      "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+      "snapshot_path": "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec70b05090aa6165b016eac8ec08e71b17",
+      "quant": "bf16",
+      "attn_implementation": "sdpa",
+      "load_s": 2.9,
+      "weights_allocated_gb": 8.91,
+      "peak_alloc_gb": 12.43,
+      "peak_reserved_gb": 13.39,
+      "n_new_trials": 400
+    }
+  },
+  "projection_D": {
+    "after_trials": 10,
+    "mean_latency_s": 34.0,
+    "projected_full_400_h": 3.78,
+    "projected_spatial_h": 1.11,
+    "limit_h": 15.0,
+    "decision": "full_400"
+  },
+  "_provenance": {
+    "git_commit": "3e3af4f57ff4453d79af2b3d8f435dfbad3b795d",
+    "script": "study_r_erqa.py",
+    "model": "qwen3vl32b",
+    "timestamp": "2026-10-14T22:49:05.504735",
+    "device": "h100nvl",
+    "n": 400,
+    "seed": 42,
+    "args": {
+      "probe": false,
+      "quant": "bf16",
+      "arms": [
+        "A_h100"
+      ]
+    }
+  }
+}

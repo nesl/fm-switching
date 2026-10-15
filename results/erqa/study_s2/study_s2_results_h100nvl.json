@@ -1,0 +1,254 @@
+{
+  "n_trials": 802,
+  "arms_present": {
+    "C": 401,
+    "D": 401
+  },
+  "n_complete_case": {
+    "stratum (both categories)": 401,
+    "spatial_distance_judgement": 201,
+    "robotic_trajectory_selection": 200
+  },
+  "n_options": [
+    5
+  ],
+  "accuracy": {
+    "C|stratum (both categories)": {
+      "n": 401,
+      "correct": 192,
+      "acc": 47.9,
+      "ci": [
+        43.0,
+        52.8
+      ],
+      "no_letter": 0,
+      "last_found": 0
+    },
+    "C|spatial_distance_judgement": {
+      "n": 201,
+      "correct": 102,
+      "acc": 50.7,
+      "ci": [
+        43.9,
+        57.6
+      ],
+      "no_letter": 0,
+      "last_found": 0
+    },
+    "C|robotic_trajectory_selection": {
+      "n": 200,
+      "correct": 90,
+      "acc": 45.0,
+      "ci": [
+        38.3,
+        51.9
+      ],
+      "no_letter": 0,
+      "last_found": 0
+    },
+    "D|stratum (both categories)": {
+      "n": 401,
+      "correct": 186,
+      "acc": 46.4,
+      "ci": [
+        41.6,
+        51.3
+      ],
+      "no_letter": 0,
+      "last_found": 0
+    },
+    "D|spatial_distance_judgement": {
+      "n": 201,
+      "correct": 98,
+      "acc": 48.8,
+      "ci": [
+        41.9,
+        55.6
+      ],
+      "no_letter": 0,
+      "last_found": 0
+    },
+    "D|robotic_trajectory_selection": {
+      "n": 200,
+      "correct": 88,
+      "acc": 44.0,
+      "ci": [
+        37.3,
+        50.9
+      ],
+      "no_letter": 0,
+      "last_found": 0
+    }
+  },
+  "decomposition": {
+    "stratum (both categories)|D\u2212C thinking @32B = net_rescue (PRIMARY)": {
+      "n": 401,
+      "diff_pp": -1.5,
+      "ci_pp": [
+        -6.98,
+        3.99
+      ],
+      "b": 61,
+      "c": 67,
+      "discordance": 0.319,
+      "mcnemar_p": 0.6587
+    },
+    "spatial_distance_judgement|D\u2212C thinking @32B = net_rescue (PRIMARY)": {
+      "n": 201,
+      "diff_pp": -1.99,
+      "ci_pp": [
+        -9.45,
+        5.47
+      ],
+      "b": 27,
+      "c": 31,
+      "discordance": 0.289,
+      "mcnemar_p": 0.694
+    },
+    "robotic_trajectory_selection|D\u2212C thinking @32B = net_rescue (PRIMARY)": {
+      "n": 200,
+      "diff_pp": -1.0,
+      "ci_pp": [
+        -9.5,
+        7.5
+      ],
+      "b": 34,
+      "c": 36,
+      "discordance": 0.35,
+      "mcnemar_p": 0.905
+    }
+  },
+  "verdict": "THINKING DOES NOT PAY AT 32B on this stratum: the StudyS1 negative is NOT scale-specific and the four-workload negative stands at 32B",
+  "thinking": {
+    "D|stratum (both categories)": {
+      "n": 401,
+      "closed_pct": 99.5,
+      "budget_hits": 2,
+      "budget_hit_pct": 0.5,
+      "think_median": 759.0,
+      "think_q1": 436.0,
+      "think_q3": 1459.0,
+      "think_p90": 2623.2,
+      "think_max": 8010
+    },
+    "D|spatial_distance_judgement": {
+      "n": 201,
+      "closed_pct": 99.0,
+      "budget_hits": 2,
+      "budget_hit_pct": 1.0,
+      "think_median": 875.0,
+      "think_q1": 501.0,
+      "think_q3": 1661.5,
+      "think_p90": 2919.400000000001,
+      "think_max": 8010
+    },
+    "D|robotic_trajectory_selection": {
+      "n": 200,
+      "closed_pct": 100.0,
+      "budget_hits": 0,
+      "budget_hit_pct": 0.0,
+      "think_median": 659.0,
+      "think_q1": 376.5,
+      "think_q3": 1179.25,
+      "think_p90": 2147.7,
+      "think_max": 4961
+    }
+  },
+  "contended_trials": [],
+  "latency": {
+    "C|stratum (both categories)": {
+      "n": 401,
+      "median_s": 0.35,
+      "p90_s": 0.472
+    },
+    "C|spatial_distance_judgement": {
+      "n": 201,
+      "median_s": 0.27,
+      "p90_s": 0.272
+    },
+    "C|robotic_trajectory_selection": {
+      "n": 200,
+      "median_s": 0.469,
+      "p90_s": 0.475
+    },
+    "D|stratum (both categories)": {
+      "n": 401,
+      "median_s": 32.083,
+      "p90_s": 111.897
+    },
+    "D|spatial_distance_judgement": {
+      "n": 201,
+      "median_s": 36.644,
+      "p90_s": 125.879
+    },
+    "D|robotic_trajectory_selection": {
+      "n": 200,
+      "median_s": 27.737,
+      "p90_s": 90.213
+    },
+    "batched_trials_excluded": {
+      "C": 0,
+      "D": 0
+    },
+    "D/C|stratum (both categories)": 91.7,
+    "D/C|spatial_distance_judgement": 135.7,
+    "D/C|robotic_trajectory_selection": 59.1
+  },
+  "vs_S1": {},
+  "cross_study": {
+    "C\u2212I size @instruct": {
+      "acc_32b": 47.9,
+      "n_32b": 401,
+      "acc_s1": 37.4,
+      "diff_pp": 10.5,
+      "ci_pp": [
+        3.6,
+        17.2
+      ]
+    },
+    "D\u2212T size @thinking": {
+      "acc_32b": 46.4,
+      "n_32b": 401,
+      "acc_s1": 38.4,
+      "diff_pp": 8.0,
+      "ci_pp": [
+        1.1,
+        14.7
+      ]
+    },
+    "D\u2212I total device\u2192cloud": {
+      "acc_32b": 46.4,
+      "n_32b": 401,
+      "acc_s1": 37.4,
+      "diff_pp": 9.0,
+      "ci_pp": [
+        2.2,
+        15.7
+      ]
+    }
+  },
+  "_provenance": {
+    "git_commit": "3e3af4f57ff4453d79af2b3d8f435dfbad3b795d",
+    "script": "study_s2_analyse.py",
+    "model": "qwen3vl_4b_32b",
+    "timestamp": "2026-10-15T06:31:00.714047",
+    "device": "h100nvl",
+    "n": 401,
+    "seed": 0,
+    "args": {
+      "trials": "results/erqa/study_s2/study_s2_trials_h100nvl.jsonl",
+      "out": "results/erqa/study_s2/study_s2_results_h100nvl.json",
+      "procs": "logs/study_r_gpu_procs.csv",
+      "pid": [
+        "890422",
+        "939454",
+        "940774",
+        "947636",
+        "954193",
+        "964355"
+      ],
+      "gpu_uuid": "GPU-b3c6399e-00c9-2ba7-8bd4-88570c884250",
+      "contended_ids": null
+    }
+  }
+}

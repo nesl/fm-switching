@@ -1,114 +1,86 @@
 #!/usr/bin/env python3
-"""Study R: Device-tier vs Cloud-tier on ERQA — 2×2 factorial (size × thinking mode).
+"""Study R (H100 rerun): does the Instruct-vs-Thinking null at 4B persist at 32B on ERQA?
 
-Arms:
-  A: 4B-Instruct  greedy             — REUSE StudyQ arm E (answer_text=None in reused trials)
-  B: 4B-Thinking  seed=42, temp=0.6  — REUSE StudyQ arm A
-     NOTE DECODING ASYMMETRY: reused arm ran at temp=0.6; this study specifies temp=1.0.
-     Known asymmetry; stated explicitly.
-  C: 32B-Instruct greedy             — new, BnB NF4
-  D: 32B-Thinking seed=42, temp=1.0  — new, BnB NF4 (CLOUD TIER)
+Replaces the interrupted A6000 StudyR run (BnB NF4, arm D at temp=1.0; its partial trials
+remain in results/erqa/study_r/study_r_trials.jsonl and are NOT mixed into this run).
 
-Quantization: BitsAndBytes NF4 (no official Qwen AWQ for 32B Thinking; BnB NF4 gives
-equivalent ~17GB footprint and is safe at any token budget).
+2x2 arms:
+  A: Qwen3-VL-4B-Instruct  greedy, max_new_tokens=512   REUSE StudyQ arm E (itself StudyK INSTRUCT);
+                                                         answer_text absent in reused trials; A6000 latency.
+  B: Qwen3-VL-4B-Thinking  CFG-A, max_new_tokens=8192   REUSE StudyQ arm A (seed 42, A6000).
+  C: Qwen3-VL-32B-Instruct greedy, max_new_tokens=512   NEW (h100nvl)
+  D: Qwen3-VL-32B-Thinking CFG-A sampling, max_new_tokens=16384  NEW (h100nvl) — the cloud tier
+  A_h100 (supplementary): arm A rerun on h100nvl for a same-hardware D/A latency ratio only;
+     accuracy of the primary analysis still uses the reused arm A.
 
-Pre-registered rule:
-  CLOUD TIER JUSTIFIED if D > A by >5pp with non-overlapping CIs.
+Decoding (thinking): temperature=0.6, top_p=0.95, top_k=20, min_p=0, do_sample=True
+  (CFG-A, StudyS0; model card recommends temp=1.0 — deviation disclosed).
+  Budget asymmetry: B ran at 8192, D at 16384 (spec). n_generated is stored so D can be
+  re-scored as if capped at 8192.
+Seeding: per-question set_seed(42 + question_id) (resume-safe). Reused B seeded once per arm.
+
+Device: run with CUDA_VISIBLE_DEVICES=<gpu> so the target GPU is cuda:0 (see research/HOST_H100.md).
+Quantization: --quant bf16|nf4, decided by --probe (bf16 iff peak < 75 GB at 16384 new tokens).
+  Both 32B arms must use the same --quant.
+
+Order: spatial questions (Spatial Reasoning + Pointing) first, then the rest, so the primary
+subset completes even if the overall run is cut for cost (projection after 10 trials of arm D).
 """
 
-import os, sys, json, re, time, math, random, argparse
-import torch
-import torch.nn as nn
+import argparse
+import json
+import random
+import re
+import sys
+import time
+from collections import defaultdict
 from pathlib import Path
 
-# PyTorch 2.4+cu118 is missing set_submodule; add it so BnB 4-bit loading works.
-if not hasattr(nn.Module, 'set_submodule'):
-    def _set_submodule(self, target: str, module: nn.Module) -> None:
-        parts = target.split('.')
-        parent = self
-        for part in parts[:-1]:
-            parent = getattr(parent, part)
-        setattr(parent, parts[-1], module)
-    nn.Module.set_submodule = _set_submodule
-from collections import defaultdict
-from datasets import load_dataset
-from transformers import AutoProcessor, Qwen3VLForConditionalGeneration, BitsAndBytesConfig
-from qwen_vl_utils import process_vision_info
+import torch
 import transformers
+from datasets import load_dataset
+from qwen_vl_utils import process_vision_info
+from transformers import (AutoProcessor, BitsAndBytesConfig,
+                          Qwen3VLForConditionalGeneration, set_seed)
 
-PATH_4BI = "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec70b05090aa6165b016eac8ec08e71b17"
-PATH_4BT = "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-4B-Thinking/snapshots/1de27d8c51f12e819435303b9e84c4e25ba8401e"
-PATH_32BI_HUB = "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb"
-PATH_32BT_HUB = "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-32B-Thinking/snapshots/7edd10ffd1196091948fb245ff63e406ccb2d4d1"
-HF_CACHE = "/mnt/ssd/hf_models"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))
+from _provenance import stamp  # noqa: E402
 
+REPO = {
+    "4BI":  ("Qwen/Qwen3-VL-4B-Instruct",  "ebb281ec70b05090aa6165b016eac8ec08e71b17"),
+    "32BI": ("Qwen/Qwen3-VL-32B-Instruct", "0cfaf48183f594c314753d30a4c4974bc75f3ccb"),
+    "32BT": ("Qwen/Qwen3-VL-32B-Thinking", "7edd10ffd1196091948fb245ff63e406ccb2d4d1"),
+}
+REUSED_SNAPSHOTS = {  # from StudyQ (A6000, /mnt/ssd/hf_models)
+    "A": "Qwen/Qwen3-VL-4B-Instruct@ebb281ec70b05090aa6165b016eac8ec08e71b17",
+    "B": "Qwen/Qwen3-VL-4B-Thinking@1de27d8c51f12e819435303b9e84c4e25ba8401e",
+}
+
+DEVICE_SLUG = "h100nvl"
 STUDY_Q_JSONL = Path("results/erqa/study_q/study_q_trials.jsonl")
 OUT_DIR = Path("results/erqa/study_r")
-JSONL_PATH = OUT_DIR / "study_r_trials.jsonl"
+JSONL_PATH = OUT_DIR / f"study_r_trials_{DEVICE_SLUG}.jsonl"
+META_PATH = OUT_DIR / f"study_r_run_meta_{DEVICE_SLUG}.json"
+PROBE_PATH = OUT_DIR / f"study_r_vram_probe_{DEVICE_SLUG}.json"
 
-MAX_NEW_TOKENS_THINKING = 16384
-MAX_NEW_TOKENS_INSTRUCT = 512
-THINKING_GEN = dict(do_sample=True, temperature=1.0, top_p=0.95, top_k=20,
-                    max_new_tokens=MAX_NEW_TOKENS_THINKING)
-INSTRUCT_GEN = dict(do_sample=False, max_new_tokens=MAX_NEW_TOKENS_INSTRUCT)
-
-PROJECT_N = 5
-HARD_STOP_H = 20.0
-SUBSET_N = 150
-
-
-# ---------------------------------------------------------------------------
-# Transformers version check
-# ---------------------------------------------------------------------------
-
-def check_transformers_version():
-    v = transformers.__version__
-    print(f"transformers version: {v}", flush=True)
-    major, minor, *_ = v.split(".")
-    if int(major) >= 5 and int(minor) >= 17:
-        print(f"WARNING: transformers {v} is in the looping-issue range (>=5.17.0). "
-              f"Consider downgrading to 5.7.x if budget_hit rate exceeds 10%.", flush=True)
-    else:
-        print(f"  Looping issue (5.17.x): NOT AFFECTED", flush=True)
-    return v
+SPATIAL = {"Spatial Reasoning", "Pointing"}
+MAX_NEW_THINKING = 16384
+MAX_NEW_INSTRUCT = 512
+THINKING_GEN = dict(do_sample=True, temperature=0.6, top_p=0.95, top_k=20, min_p=0.0,
+                    max_new_tokens=MAX_NEW_THINKING)
+INSTRUCT_GEN = dict(do_sample=False, max_new_tokens=MAX_NEW_INSTRUCT)
+BF16_PEAK_LIMIT_GB = 75.0
+PROJECT_AFTER = 10
+FULL_RUN_LIMIT_H = 15.0
 
 
-# ---------------------------------------------------------------------------
-# Data helpers (mirrors study_q_erqa.py)
-# ---------------------------------------------------------------------------
+# --------------------------------------------------------------------------- data
+# build_messages / extract_letter are identical to study_q_erqa.py (cross-study scoring).
 
 def load_erqa():
-    import PIL.Image
-    if not hasattr(PIL.Image, 'ExifTags'):
-        class _Base:
-            Orientation = 274
-        class _FakeExifTags:
-            Base = _Base()
-        PIL.Image.ExifTags = _FakeExifTags()
     ds = load_dataset("RunsenXu/ERQA", verification_mode="no_checks")["test"]
     assert len(ds) == 400
     return ds
-
-
-def compute_stratified_subset(ds, n=SUBSET_N, seed=42):
-    rng = random.Random(seed)
-    by_cat = defaultdict(list)
-    for i, row in enumerate(ds):
-        by_cat[row['question_type']].append(i)
-    subset = []
-    total = len(ds)
-    for cat, idxs in sorted(by_cat.items()):
-        n_cat = max(1, round(n * len(idxs) / total))
-        chosen = rng.sample(idxs, min(n_cat, len(idxs)))
-        subset.extend(chosen)
-    subset = sorted(set(subset))
-    while len(subset) > n:
-        subset.pop()
-    remaining = [i for i in range(total) if i not in set(subset)]
-    rng.shuffle(remaining)
-    while len(subset) < n:
-        subset.append(remaining.pop())
-    return sorted(subset)
 
 
 def build_messages(row):
@@ -142,428 +114,262 @@ def extract_letter(text):
     return None, "no_letter"
 
 
-# ---------------------------------------------------------------------------
-# Model loading
-# ---------------------------------------------------------------------------
-
-def measure_vram():
-    used = {}
-    for i in range(torch.cuda.device_count()):
-        used[i] = torch.cuda.memory_allocated(i) / 1e9
-    return used
+def question_order(ds):
+    spatial = [i for i in range(len(ds)) if ds[i]["question_type"] in SPATIAL]
+    rest = [i for i in range(len(ds)) if ds[i]["question_type"] not in SPATIAL]
+    return spatial, rest
 
 
-def load_model_bnb4(hub_name_or_path, label, use_cache=True):
-    """Load model with BitsAndBytes NF4 quantization, device_map='auto'."""
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16,
-        bnb_4bit_use_double_quant=True,
-    )
-    vram_before = measure_vram()
-    print(f"\nLoading {label} with BnB NF4 ...", flush=True)
-    model = Qwen3VLForConditionalGeneration.from_pretrained(
-        hub_name_or_path,
-        quantization_config=bnb_config,
-        device_map="auto",
-    )
-    model.eval()
-    processor = AutoProcessor.from_pretrained(hub_name_or_path)
-    vram_after = measure_vram()
-    vram_used = {k: round(vram_after[k] - vram_before.get(k, 0), 2) for k in vram_after}
-    total_vram = sum(vram_used.values())
-    print(f"  VRAM used: {vram_used} = {total_vram:.1f}GB total", flush=True)
-    print(f"  device_map: {model.hf_device_map if hasattr(model, 'hf_device_map') else 'N/A'}", flush=True)
-    return model, processor, vram_used
+# --------------------------------------------------------------------------- model
+
+def resolve_snapshot(key):
+    from huggingface_hub import snapshot_download
+    repo, rev = REPO[key]
+    return snapshot_download(repo, revision=rev, local_files_only=True)
 
 
-def load_model_bf16(path, label):
-    """Load a small model in bf16 on cuda:1."""
-    print(f"\nLoading {label} (bf16, cuda:1) ...", flush=True)
-    vram_before = measure_vram()
-    model = Qwen3VLForConditionalGeneration.from_pretrained(
-        path, torch_dtype=torch.bfloat16, device_map="cuda:1")
-    model.eval()
+def load_model(key, quant):
+    path = resolve_snapshot(key)
+    kw = dict(device_map={"": 0})
+    if quant == "nf4":
+        kw["quantization_config"] = BitsAndBytesConfig(
+            load_in_4bit=True, bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.bfloat16, bnb_4bit_use_double_quant=True)
+    else:
+        kw["dtype"] = torch.bfloat16
+    torch.cuda.reset_peak_memory_stats(0)
+    t0 = time.time()
+    model = Qwen3VLForConditionalGeneration.from_pretrained(path, **kw).eval()
     processor = AutoProcessor.from_pretrained(path)
-    vram_after = measure_vram()
-    vram_used = {k: round(vram_after[k] - vram_before.get(k, 0), 2) for k in vram_after}
-    total_vram = sum(vram_used.values())
-    print(f"  VRAM used: {vram_used} = {total_vram:.1f}GB total", flush=True)
-    return model, processor, vram_used
+    info = {
+        "key": key, "repo": REPO[key][0], "revision": REPO[key][1], "snapshot_path": path,
+        "quant": quant, "attn_implementation": getattr(model.config, "_attn_implementation", None),
+        "load_s": round(time.time() - t0, 1),
+        "weights_allocated_gb": round(torch.cuda.memory_allocated(0) / 1e9, 2),
+    }
+    print(f"Loaded {key}: {info}", flush=True)
+    return model, processor, info
 
 
-# ---------------------------------------------------------------------------
-# Inference helpers
-# ---------------------------------------------------------------------------
-
-def infer_one(model, processor, messages, gen_kwargs, max_new_tokens, is_thinking):
+def prepare(processor, messages):
     text = processor.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     image_inputs, video_inputs = process_vision_info(messages)
+    return processor(text=[text], images=image_inputs, videos=video_inputs,
+                     padding=True, return_tensors="pt").to("cuda:0")
 
-    # For device_map="auto" models, inputs go to first device
-    first_device = next(iter(set(v for v in model.hf_device_map.values()
-                                  if isinstance(v, (int, str))))) \
-        if hasattr(model, 'hf_device_map') else "cuda:1"
-    # Simplest: let processor handle placement via model's device
-    inputs = processor(
-        text=[text], images=image_inputs, videos=video_inputs,
-        padding=True, return_tensors="pt",
-    )
-    # Move to the first device of the model
-    if hasattr(model, 'hf_device_map'):
-        # Find the embedding device
-        embed_device = model.hf_device_map.get('model.embed_tokens', 'cuda:0')
-        inputs = inputs.to(embed_device)
-    else:
-        inputs = inputs.to("cuda:1")
 
+def infer_one(model, processor, messages, gen_kwargs, is_thinking, seed=None):
+    inputs = prepare(processor, messages)
     n_input = inputs["input_ids"].shape[1]
-
+    if seed is not None:
+        set_seed(seed)
+    torch.cuda.reset_peak_memory_stats(0)
+    torch.cuda.synchronize()
     t0 = time.time()
     with torch.no_grad():
-        output_ids = model.generate(**inputs, **gen_kwargs)
+        out = model.generate(**inputs, **gen_kwargs)
+    torch.cuda.synchronize()
     lat_ms = (time.time() - t0) * 1000
+    peak_gb = torch.cuda.max_memory_allocated(0) / 1e9
+    reserved_gb = torch.cuda.max_memory_reserved(0) / 1e9
 
-    generated = output_ids[0][n_input:]
-    full_output = processor.decode(generated, skip_special_tokens=True)
-    budget_hit = (len(generated) >= max_new_tokens)
-
-    n_think = 0
-    think_closed = None
-
+    gen = out[0][n_input:]
+    n_generated = int(gen.shape[0])
+    full = processor.decode(gen, skip_special_tokens=True)
+    budget_hit = n_generated >= gen_kwargs["max_new_tokens"]
+    n_think, think_closed = 0, None
     if is_thinking:
-        think_closed = False
-        if "</think>" in full_output:
-            think_closed = True
-            think_part, answer_part = full_output.split("</think>", 1)
+        think_closed = "</think>" in full
+        if think_closed:
+            think_part, answer_part = full.split("</think>", 1)
             think_content = re.sub(r'^<think>', '', think_part).strip()
             answer_text = answer_part.strip()
             n_think = len(processor.tokenizer.encode(think_content, add_special_tokens=False))
         else:
-            answer_text = full_output
+            answer_text = full
     else:
-        answer_text = full_output.strip()
-
+        answer_text = full.strip()
     n_answer = len(processor.tokenizer.encode(answer_text, add_special_tokens=False)) if answer_text else 0
-    return answer_text, n_input, n_think, n_answer, lat_ms, budget_hit, think_closed
+    return dict(answer_text=answer_text, raw_output=full, n_input_tokens=n_input,
+                n_think_tokens=n_think, n_answer_tokens=n_answer, n_generated=n_generated,
+                total_latency_ms=round(lat_ms, 1), budget_hit=budget_hit,
+                think_closed=think_closed, peak_alloc_gb=round(peak_gb, 2),
+                peak_reserved_gb=round(reserved_gb, 2))
 
 
-def make_trial(arm, qid, row, correct_letter, seed, n_input, n_think, n_answer,
-               lat_ms, budget_hit, think_closed, predicted_letter, parse_status, answer_text):
-    correct = (predicted_letter == correct_letter) if predicted_letter else False
-    return {
-        "arm": arm,
-        "question_id": qid,
-        "category": row["question_type"],
-        "n_images": len(row["images_encoded"]),
-        "n_input_tokens": n_input,
-        "n_think_tokens": n_think,
-        "n_answer_tokens": n_answer,
-        "total_latency_ms": round(lat_ms, 1),
-        "budget_hit": budget_hit,
-        "think_closed": think_closed,
-        "predicted_letter": predicted_letter,
-        "correct_letter": correct_letter,
-        "correct": correct,
-        "parse_status": parse_status,
-        "answer_text": answer_text,
-        "seed": seed,
+# --------------------------------------------------------------------------- probe
+
+def run_probe(ds, quant):
+    """Worst-case VRAM: largest-input question, forced to generate exactly MAX_NEW_THINKING tokens."""
+    model, processor, info = load_model("32BT", quant)
+    sizes = []
+    for i in range(len(ds)):
+        msgs, _ = build_messages(ds[i])
+        sizes.append((prepare(processor, msgs)["input_ids"].shape[1], i))
+    n_in, qid = max(sizes)
+    print(f"Probe: largest input q{qid} n_input={n_in}; forcing {MAX_NEW_THINKING} new tokens", flush=True)
+    msgs, _ = build_messages(ds[qid])
+    gen = dict(THINKING_GEN, min_new_tokens=MAX_NEW_THINKING)
+    r = infer_one(model, processor, msgs, gen, is_thinking=True, seed=42)
+    result = {
+        "model": info, "question_id": qid, "n_input_tokens": n_in,
+        "forced_new_tokens": MAX_NEW_THINKING, "n_generated": r["n_generated"],
+        "peak_alloc_gb": r["peak_alloc_gb"], "peak_reserved_gb": r["peak_reserved_gb"],
+        "latency_s": round(r["total_latency_ms"] / 1000, 1),
+        "decode_tok_per_s": round(r["n_generated"] / (r["total_latency_ms"] / 1000), 1),
+        "limit_gb": BF16_PEAK_LIMIT_GB,
+        "decision": ("bf16" if r["peak_reserved_gb"] < BF16_PEAK_LIMIT_GB else "nf4")
+                    if quant == "bf16" else "nf4 (probed in nf4)",
+        "gpu": torch.cuda.get_device_name(0),
+        "gpu_total_gb": round(torch.cuda.get_device_properties(0).total_memory / 1e9, 1),
+        "transformers": transformers.__version__, "torch": torch.__version__,
     }
+    result["_provenance"] = stamp(script="study_r_erqa.py", model="qwen3vl32b_thinking",
+                                  device=DEVICE_SLUG, n=1, seed=42)
+    PROBE_PATH.write_text(json.dumps(result, indent=2))
+    print(json.dumps({k: v for k, v in result.items() if k != "_provenance"}, indent=2), flush=True)
 
 
-# ---------------------------------------------------------------------------
-# Arm runners
-# ---------------------------------------------------------------------------
+# --------------------------------------------------------------------------- arms
 
-def run_thinking_arm(arm_name, seed, questions, ds, model, processor,
-                     out_f, done_qids, hard_stop_h=None):
-    torch.manual_seed(seed)
-    gen_kwargs = dict(THINKING_GEN, max_new_tokens=MAX_NEW_TOKENS_THINKING)
-    trials = []
-    lat_history = []
-
-    for i, qid in enumerate(questions):
-        if qid in done_qids:
-            continue
-        row = ds[qid]
-        messages, correct_letter = build_messages(row)
-        answer_text, n_input, n_think, n_answer, lat_ms, budget_hit, think_closed = infer_one(
-            model, processor, messages, gen_kwargs, MAX_NEW_TOKENS_THINKING, is_thinking=True)
-        predicted_letter, parse_status = extract_letter(answer_text)
-        t = make_trial(arm_name, qid, row, correct_letter, seed, n_input, n_think, n_answer,
-                       lat_ms, budget_hit, think_closed, predicted_letter, parse_status, answer_text)
-        trials.append(t)
-        out_f.write(json.dumps(t) + "\n")
-        out_f.flush()
-        lat_history.append(lat_ms)
-
-        n_done = len(trials)
-        n_correct = sum(x["correct"] for x in trials)
-        if n_done % 50 == 1 or n_done == len(questions):
-            term = sum(1 for x in trials if x["think_closed"])
-            bh = sum(1 for x in trials if x["budget_hit"])
-            print(f"[{arm_name} seed={seed}] q{n_done}/{len(questions)} "
-                  f"acc={n_correct}/{n_done} ({100*n_correct/n_done:.1f}%) "
-                  f"term={term} bh={bh} last_lat={lat_ms/1000:.1f}s", flush=True)
-
-        if len(lat_history) == PROJECT_N:
-            mean_ms = sum(lat_history) / PROJECT_N
-            proj_h = (mean_ms * len(questions)) / 3_600_000
-            remain_h = (mean_ms * (len(questions) - n_done)) / 3_600_000
-            print(f"\n=== RUNTIME PROJECTION: {arm_name} (after {PROJECT_N} trials) ===")
-            print(f"  Mean lat: {mean_ms/1000:.1f}s  n_q: {len(questions)}")
-            print(f"  Projected total: {proj_h:.1f}h  Remaining: {remain_h:.1f}h")
-            if hard_stop_h is not None and proj_h > hard_stop_h:
-                print(f"  WARNING: projected {proj_h:.1f}h > {hard_stop_h}h — "
-                      f"caller should reduce to {SUBSET_N}-Q subset")
-            print()
-
-    n_correct = sum(x["correct"] for x in trials)
-    term = sum(1 for x in trials if x["think_closed"])
-    bh = sum(1 for x in trials if x["budget_hit"])
-    print(f"[{arm_name} seed={seed}] DONE acc={n_correct}/{len(trials)} "
-          f"({100*n_correct/max(1,len(trials)):.1f}%) term={term} bh={bh}", flush=True)
-    return trials
-
-
-def run_instruct_arm(arm_name, questions, ds, model, processor, out_f, done_qids):
-    gen_kwargs = dict(INSTRUCT_GEN)
-    trials = []
-    lat_history = []
-
-    for i, qid in enumerate(questions):
-        if qid in done_qids:
-            continue
-        row = ds[qid]
-        messages, correct_letter = build_messages(row)
-        answer_text, n_input, n_think, n_answer, lat_ms, budget_hit, think_closed = infer_one(
-            model, processor, messages, gen_kwargs, MAX_NEW_TOKENS_INSTRUCT, is_thinking=False)
-        predicted_letter, parse_status = extract_letter(answer_text)
-        t = make_trial(arm_name, qid, row, correct_letter, None, n_input, 0, n_answer,
-                       lat_ms, budget_hit, None, predicted_letter, parse_status, answer_text)
-        trials.append(t)
-        out_f.write(json.dumps(t) + "\n")
-        out_f.flush()
-        lat_history.append(lat_ms)
-
-        n_done = len(trials)
-        n_correct = sum(x["correct"] for x in trials)
-        if n_done % 100 == 1 or n_done == len(questions):
-            print(f"[{arm_name}] q{n_done}/{len(questions)} "
-                  f"acc={n_correct}/{n_done} ({100*n_correct/n_done:.1f}%)", flush=True)
-
-        if len(lat_history) == PROJECT_N:
-            mean_ms = sum(lat_history) / PROJECT_N
-            proj_h = (mean_ms * len(questions)) / 3_600_000
-            print(f"\n=== RUNTIME PROJECTION: {arm_name} (after {PROJECT_N} trials) ===")
-            print(f"  Mean lat: {mean_ms/1000:.1f}s  Projected total: {proj_h:.1f}h\n")
-
-    n_correct = sum(x["correct"] for x in trials)
-    print(f"[{arm_name}] DONE acc={n_correct}/{len(trials)} "
-          f"({100*n_correct/max(1,len(trials)):.1f}%)", flush=True)
-    return trials
-
-
-# ---------------------------------------------------------------------------
-# Resume / done tracking
-# ---------------------------------------------------------------------------
-
-def load_done(jsonl_path):
+def load_done(path):
     done = defaultdict(set)
-    if not jsonl_path.exists():
-        return done
-    for line in open(jsonl_path):
-        if not line.strip():
-            continue
-        t = json.loads(line)
-        done[t["arm"]].add(t["question_id"])
+    if path.exists():
+        for line in open(path):
+            if line.strip():
+                t = json.loads(line)
+                done[t["arm"]].add(t["question_id"])
     return done
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
+def write_reused(out_f, done):
+    q = [json.loads(l) for l in open(STUDY_Q_JSONL) if l.strip()]
+    spec = {
+        "A": ("E", "study_q_arm_E (=study_k INSTRUCT)", "greedy max_new_tokens=512; A6000; answer_text not stored"),
+        "B": ("A", "study_q_arm_A", "temp=0.6 top_p=0.95 top_k=20 min_p=0 max_new_tokens=8192, seed=42 once per arm; A6000"),
+    }
+    for arm, (src_arm, src, dec) in spec.items():
+        src_trials = [t for t in q if t["arm"] == src_arm and t.get("pass_index", 1) in (1, None)]
+        if src_arm == "A":
+            src_trials = [t for t in src_trials if t.get("seed") == 42]
+        assert len(src_trials) == 400, (arm, len(src_trials))
+        n = 0
+        for t in src_trials:
+            if t["question_id"] in done[arm]:
+                continue
+            r = {k: t.get(k) for k in ("question_id", "category", "n_images", "n_input_tokens",
+                                        "n_think_tokens", "n_answer_tokens", "total_latency_ms",
+                                        "budget_hit", "think_closed", "predicted_letter",
+                                        "correct_letter", "correct", "parse_status")}
+            r.update(arm=arm, answer_text=t.get("answer_text") if arm == "B" else None,
+                     seed=42 if arm == "B" else None, _reused_from=src, _reused_decoding=dec,
+                     _reused_snapshot=REUSED_SNAPSHOTS[arm], _hardware="a6000")
+            out_f.write(json.dumps(r) + "\n")
+            n += 1
+        out_f.flush()
+        print(f"[{arm}] reused {n} trials from {src}", flush=True)
+
+
+def run_arm(arm, key, quant, is_thinking, qids, ds, out_f, done, meta, project=False):
+    todo = [q for q in qids if q not in done[arm]]
+    if not todo:
+        print(f"[{arm}] nothing to do", flush=True)
+        return
+    model, processor, info = load_model(key, quant)
+    meta.setdefault("arms", {})[arm] = info
+    gen = THINKING_GEN if is_thinking else INSTRUCT_GEN
+    peak_alloc = peak_res = 0.0
+    lats, n_new = [], 0
+    for qid in todo:
+        row = ds[qid]
+        msgs, correct_letter = build_messages(row)
+        r = infer_one(model, processor, msgs, gen, is_thinking,
+                      seed=(42 + qid) if is_thinking else None)
+        pred, status = extract_letter(r["answer_text"])
+        r.update(arm=arm, question_id=qid, category=row["question_type"],
+                 n_images=len(row["images_encoded"]), predicted_letter=pred,
+                 correct_letter=correct_letter, correct=(pred == correct_letter) if pred else False,
+                 parse_status=status, seed=(42 + qid) if is_thinking else None,
+                 quant=quant, _hardware=DEVICE_SLUG)
+        out_f.write(json.dumps(r) + "\n")
+        out_f.flush()
+        done[arm].add(qid)
+        peak_alloc, peak_res = max(peak_alloc, r["peak_alloc_gb"]), max(peak_res, r["peak_reserved_gb"])
+        lats.append(r["total_latency_ms"])
+        n_new += 1
+        if n_new % 10 == 0 or n_new == len(todo):
+            print(f"[{arm}] {n_new}/{len(todo)} last q{qid} {row['question_type'][:12]} "
+                  f"gen={r['n_generated']} lat={r['total_latency_ms']/1000:.1f}s "
+                  f"peak={peak_res:.1f}GB", flush=True)
+        if project and n_new == PROJECT_AFTER:
+            mean_s = sum(lats) / len(lats) / 1000
+            proj_full = mean_s * 400 / 3600
+            proj_spatial = mean_s * len([q for q in qids if ds[q]["question_type"] in SPATIAL]) / 3600
+            decision = "full_400" if proj_full <= FULL_RUN_LIMIT_H else "spatial_only"
+            meta["projection_D"] = dict(after_trials=PROJECT_AFTER, mean_latency_s=round(mean_s, 1),
+                                        projected_full_400_h=round(proj_full, 2),
+                                        projected_spatial_h=round(proj_spatial, 2),
+                                        limit_h=FULL_RUN_LIMIT_H, decision=decision)
+            META_PATH.write_text(json.dumps(meta, indent=2))
+            print(f"=== PROJECTION D: mean {mean_s:.1f}s/trial -> full 400 {proj_full:.1f}h, "
+                  f"spatial {proj_spatial:.1f}h -> {decision} ===", flush=True)
+            if decision == "spatial_only":
+                # qids are spatial-first, so stopping once spatial is done drops only the rest.
+                meta["overall_dropped_for_cost"] = True
+                meta["_stop_after_spatial"] = True
+        if meta.get("_stop_after_spatial") and all(
+                q in done[arm] for q in qids if ds[q]["question_type"] in SPATIAL):
+            print(f"[{arm}] spatial subset complete; overall dropped for cost", flush=True)
+            break
+    meta["arms"][arm].update(peak_alloc_gb=round(peak_alloc, 2), peak_reserved_gb=round(peak_res, 2),
+                             n_new_trials=n_new)
+    META_PATH.write_text(json.dumps(meta, indent=2))
+    del model
+    torch.cuda.empty_cache()
+
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--resume", action="store_true")
-    parser.add_argument("--arms", nargs="+", default=["A", "B", "C", "D"])
-    args = parser.parse_args()
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--probe", action="store_true", help="worst-case VRAM probe for 32B-Thinking")
+    ap.add_argument("--quant", choices=["bf16", "nf4"], required=True)
+    ap.add_argument("--arms", nargs="+", default=["A", "B", "C", "D", "A_h100"])
+    args = ap.parse_args()
 
-    assert torch.cuda.is_available(), "CUDA not available"
-    n_gpus = torch.cuda.device_count()
-    print(f"GPUs available: {n_gpus}", flush=True)
-    for i in range(n_gpus):
-        props = torch.cuda.get_device_properties(i)
-        print(f"  cuda:{i} = {props.name}  {props.total_memory/1e9:.1f}GB", flush=True)
-
-    tv = check_transformers_version()
-
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-
-    print("\nLoading ERQA ...", flush=True)
+    assert torch.cuda.device_count() >= 1
+    print(f"cuda:0 = {torch.cuda.get_device_name(0)}; transformers {transformers.__version__}; "
+          f"torch {torch.__version__}", flush=True)
+    if transformers.__version__.startswith("5.17"):
+        print("!!! WARNING: transformers 5.17.x — Qwen3-VL repetition-loop regression (olmo-eval #441) !!!",
+              flush=True)
     ds = load_erqa()
-    n_multi = sum(1 for r in ds if len(r['images_encoded']) > 1)
-    print(f"  {len(ds)} questions, {n_multi} multi-image ({100*n_multi/400:.1f}%)", flush=True)
+    if args.probe:
+        run_probe(ds, args.quant)
+        return
 
-    subset_qids = compute_stratified_subset(ds, n=SUBSET_N)
-    questions = list(range(400))
-    reduced = False
-
+    spatial, rest = question_order(ds)
+    order = spatial + rest
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    meta = json.loads(META_PATH.read_text()) if META_PATH.exists() else {}
+    meta.update(transformers=transformers.__version__, torch=torch.__version__,
+                gpu=torch.cuda.get_device_name(0), quant_32b=args.quant,
+                n_spatial=len(spatial), thinking_gen=THINKING_GEN, instruct_gen=INSTRUCT_GEN)
+    if meta.get("quant_32b_locked") and meta["quant_32b_locked"] != args.quant:
+        sys.exit(f"quant mismatch: run started with {meta['quant_32b_locked']}")
+    meta["quant_32b_locked"] = args.quant
     done = load_done(JSONL_PATH)
-    if args.resume:
-        print(f"  Resume: done = {dict((k, len(v)) for k, v in done.items())}", flush=True)
-
-    out_f = open(JSONL_PATH, "a")
-    arms_to_run = args.arms
-
-    # ---- ARM A: reuse StudyQ arm E ----
-    if "A" in arms_to_run:
-        if len(done["A"]) < 400 or not args.resume:
-            print("\n=== ARM A: REUSE StudyQ arm E (4B-Instruct greedy) ===", flush=True)
-            assert STUDY_Q_JSONL.exists(), f"StudyQ JSONL not found: {STUDY_Q_JSONL}"
-            q_trials = [json.loads(l) for l in open(STUDY_Q_JSONL) if l.strip()]
-            e_trials = [t for t in q_trials if t["arm"] == "E"]
-            assert len(e_trials) == 400
-            n_written = 0
-            for t in e_trials:
-                qid = t["question_id"]
-                if args.resume and qid in done["A"]:
-                    continue
-                a_trial = {
-                    "arm": "A",
-                    "question_id": qid,
-                    "category": t["category"],
-                    "n_images": t["n_images"],
-                    "n_input_tokens": t["n_input_tokens"],
-                    "n_think_tokens": 0,
-                    "n_answer_tokens": t["n_answer_tokens"],
-                    "total_latency_ms": t["total_latency_ms"],
-                    "budget_hit": t["budget_hit"],
-                    "think_closed": None,
-                    "predicted_letter": t["predicted_letter"],
-                    "correct_letter": t["correct_letter"],
-                    "correct": t["correct"],
-                    "parse_status": t["parse_status"],
-                    "answer_text": None,
-                    "seed": None,
-                    "_reused_from": "study_q_arm_E",
-                    "_reused_decoding": "greedy max_new_tokens=512",
-                }
-                out_f.write(json.dumps(a_trial) + "\n")
-                n_written += 1
-            out_f.flush()
-            n_correct = sum(1 for t in e_trials if t["correct"])
-            print(f"[A] {n_written} trials written. acc={n_correct}/400 ({100*n_correct/400:.1f}%) [StudyQ]", flush=True)
-        else:
-            print(f"[A] Already done — skip", flush=True)
-
-    # ---- ARM B: reuse StudyQ arm A ----
-    if "B" in arms_to_run:
-        if len(done["B"]) < 400 or not args.resume:
-            print("\n=== ARM B: REUSE StudyQ arm A (4B-Thinking seed=42) ===", flush=True)
-            print("  DECODING ASYMMETRY: reused arm ran at temp=0.6; this study specifies temp=1.0.", flush=True)
-            assert STUDY_Q_JSONL.exists()
-            q_trials = [json.loads(l) for l in open(STUDY_Q_JSONL) if l.strip()]
-            a_trials = [t for t in q_trials if t["arm"] == "A"]
-            assert len(a_trials) == 400
-            n_written = 0
-            for t in a_trials:
-                qid = t["question_id"]
-                if args.resume and qid in done["B"]:
-                    continue
-                b_trial = {
-                    "arm": "B",
-                    "question_id": qid,
-                    "category": t["category"],
-                    "n_images": t["n_images"],
-                    "n_input_tokens": t["n_input_tokens"],
-                    "n_think_tokens": t["n_think_tokens"],
-                    "n_answer_tokens": t["n_answer_tokens"],
-                    "total_latency_ms": t["total_latency_ms"],
-                    "budget_hit": t["budget_hit"],
-                    "think_closed": t["think_closed"],
-                    "predicted_letter": t["predicted_letter"],
-                    "correct_letter": t["correct_letter"],
-                    "correct": t["correct"],
-                    "parse_status": t["parse_status"],
-                    "answer_text": t.get("answer_text"),
-                    "seed": 42,
-                    "_reused_from": "study_q_arm_A",
-                    "_reused_decoding": "temp=0.6 top_p=0.95 top_k=20 min_p=0 max_new_tokens=8192 (ASYMMETRY: study_r spec=temp=1.0 max_new_tokens=16384)",
-                }
-                out_f.write(json.dumps(b_trial) + "\n")
-                n_written += 1
-            out_f.flush()
-            n_correct = sum(1 for t in a_trials if t["correct"])
-            tc = sum(1 for t in a_trials if t.get("think_closed"))
-            bh = sum(1 for t in a_trials if t.get("budget_hit"))
-            print(f"[B] {n_written} trials written. acc={n_correct}/400 ({100*n_correct/400:.1f}%) "
-                  f"think_closed={tc} budget_hit={bh} [StudyQ]", flush=True)
-        else:
-            print(f"[B] Already done — skip", flush=True)
-
-    # ---- ARM C: 32B-Instruct BnB NF4 ----
-    if "C" in arms_to_run:
-        c_done = done["C"]
-        c_todo = [q for q in questions if q not in c_done] if args.resume else questions
-        if c_todo:
-            print("\n=== ARM C: 32B-Instruct BnB NF4 greedy ===", flush=True)
-            model, processor, vram_c = load_model_bnb4(PATH_32BI_HUB, "32B-Instruct BnB NF4")
-            run_instruct_arm("C", c_todo, ds, model, processor, out_f,
-                             c_done if args.resume else set())
-            del model; torch.cuda.empty_cache()
-        else:
-            print(f"[C] Already done — skip", flush=True)
-
-    # ---- ARM D: 32B-Thinking BnB NF4 ----
-    if "D" in arms_to_run:
-        d_done = done["D"]
-        d_todo = [q for q in questions if q not in d_done] if args.resume else questions
-        if d_todo:
-            print("\n=== ARM D: 32B-Thinking BnB NF4 seed=42 temp=1.0 max_new_tokens=16384 ===", flush=True)
-            model, processor, vram_d = load_model_bnb4(PATH_32BT_HUB, "32B-Thinking BnB NF4")
-
-            # Check if we need to reduce to subset (projection after PROJECT_N trials)
-            # If projection > HARD_STOP_H, switch to subset_qids
-            d_todo_active = d_todo
-            run_thinking_arm("D", 42, d_todo_active, ds, model, processor, out_f,
-                             d_done if args.resume else set(),
-                             hard_stop_h=HARD_STOP_H)
-            del model; torch.cuda.empty_cache()
-        else:
-            print(f"[D] Already done — skip", flush=True)
-
-    out_f.close()
-
-    # Final summary
-    print("\n=== STUDY R COMPLETE ===", flush=True)
-    print(f"transformers version: {tv}", flush=True)
-    all_trials = [json.loads(l) for l in open(JSONL_PATH) if l.strip()]
-    print(f"\nTotal trials: {len(all_trials)}")
-    for arm in ["A", "B", "C", "D"]:
-        ts = [t for t in all_trials if t["arm"] == arm]
-        if not ts:
-            continue
-        n = len(ts)
-        correct = sum(1 for t in ts if t["correct"])
-        bh = sum(1 for t in ts if t.get("budget_hit"))
-        tc_val = ts[0].get("think_closed")
-        is_instruct = tc_val is None
-        if is_instruct:
-            term = sum(1 for t in ts if not t.get("budget_hit"))
-            term_label = "EOS-term"
-        else:
-            term = sum(1 for t in ts if t.get("think_closed"))
-            term_label = "think_closed"
-        lats = [t["total_latency_ms"] for t in ts]
-        mean_lat = sum(lats) / len(lats) / 1000
-        total_h = sum(lats) / 3_600_000
-        print(f"  arm={arm}: n={n} correct={correct} ({100*correct/n:.1f}%) "
-              f"{term_label}={term} bh={bh} mean_lat={mean_lat:.1f}s total_h={total_h:.2f}h")
-
-    print("\nGIT RULE: Stop. Ask user to commit.", flush=True)
+    with open(JSONL_PATH, "a") as out_f:
+        if "A" in args.arms or "B" in args.arms:
+            write_reused(out_f, done)
+        if "C" in args.arms:
+            run_arm("C", "32BI", args.quant, False, order, ds, out_f, done, meta)
+        if "D" in args.arms:
+            run_arm("D", "32BT", args.quant, True, order, ds, out_f, done, meta, project=True)
+        if "A_h100" in args.arms:
+            run_arm("A_h100", "4BI", "bf16", False, order, ds, out_f, done, meta)
+    meta["_provenance"] = stamp(script="study_r_erqa.py", model="qwen3vl32b", device=DEVICE_SLUG,
+                                n=400, seed=42, args=args)
+    META_PATH.write_text(json.dumps(meta, indent=2))
+    print("STUDY R run finished. GIT RULE: do not commit; ask the user.", flush=True)
 
 
 if __name__ == "__main__":
