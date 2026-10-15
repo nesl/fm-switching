@@ -143,6 +143,16 @@ bound. On this workload the bounded path is not merely competitive — it domina
 two orders of magnitude on the only axis where the two differ materially. This is consistent with
 StudyQ on ERQA, where 8B-Instruct matched 4B-Thinking's accuracy at 91× the speed.
 
+**Attention backend (added 2026-10-15).** `study_s1_mvrobobench.py` passes no
+`attn_implementation`, so both arms ran on the transformers default, **SDPA** (`transformers
+5.12.1`; `flash_attn 2.6.3` is installed on this box but was not requested). The 226× ratio is
+unaffected on two counts: both arms share the backend, and the gap is driven by decode length
+(1,689 think tokens vs a single letter), which is upstream of the attention kernel. The StudyQ
+comparison is also backend-matched — no script under `experiments/erqa/` sets
+`attn_implementation`, so that family is uniformly SDPA. Absolute per-trial latencies here should
+still not be read against the flash-attn-2 cost curves in `experiments/sember/` and
+`experiments/vision/`.
+
 ### Non-termination is workload-dependent — a fourth data point
 
 | workload | model + decoding | budget | non-termination |

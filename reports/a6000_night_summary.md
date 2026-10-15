@@ -213,6 +213,34 @@ the A6000:H100 ratio is not constant across model sizes. StudyS1 is a concrete c
 226× slower than arm I on identical hardware and inputs, so per-arm cost does not scale by a
 single hardware factor.
 
+**Attention backend — a second axis, added 2026-10-15.** The incoming `research/HOST_H100.md`
+notes the H100 venv lacks `flash_attn` and falls back to SDPA. Checking this box rather than
+assuming the contrast: `flash_attn 2.6.3` IS installed here, but **none of tonight's three
+scripts requested it** — `study_o_q4.py`, `study_s1_mvrobobench.py` and `study_s0_audit2.py` all
+pass no `attn_implementation`, and the `transformers 5.12.1` default resolves to `sdpa` for both
+the text and vision towers (verified by a no-arg load of the 4B-I snapshot).
+
+So the backend split is NOT A6000-vs-H100; it runs through this repository:
+
+| family | backend | evidence |
+|---|---|---|
+| `experiments/vision/`, `experiments/sember/` cost studies | `flash_attention_2`, explicit | `study_g_transfer_cost.py:251` and `study_g2_transfer_cost.py:219` assert it; `study_i2_budget.py:457`, `study_i3_budget.py:557` set it |
+| all of `experiments/erqa/` | SDPA (default) | no `attn_implementation` anywhere in the directory |
+| tonight's three scripts | SDPA (default) | no `attn_implementation`; default verified as `sdpa` |
+
+Consequences, stated rather than repaired (no timing-only rerun, per instruction):
+
+- **Accuracy results and every verdict are unaffected** — the backend changes attention numerics,
+  not which option letter is chosen, and within each study all arms share it.
+- **Within-study latency ratios hold** (Q4's 1.5×/5.5×, S1's 226×) — one script, one backend.
+- **StudyS1 vs StudyQ is backend-matched**, since the whole `erqa/` family is SDPA.
+- **StudyO Q4 is the one genuine mismatch:** it sits in `sember/`, whose cost studies use
+  flash-attn-2, so its absolute latencies must not be read against StudyI2/I3 curves or enter
+  `cost_matrix.csv` without a backend-matched rerun. Recorded in `reports/study_o_q4_results.md` §6.
+
+This is a CLAUDE.md consistency-check-4 miss on my part — one named quantity, two configurations,
+no reconciliation — caught on 2026-10-15 in response to a direct question, not by the checklist.
+
 ---
 
 ## Files changed tonight

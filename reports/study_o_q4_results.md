@@ -214,6 +214,28 @@ level and does not transfer to accuracy.
 Total 4.83 h of GPU inference for 1,560 trials. The thinking arm costs 5.5× the local arm and
 returns **−3.85 pp**.
 
+**ATTENTION-BACKEND DISCLOSURE (added 2026-10-15, after the run).** `study_o_q4.py` passes no
+`attn_implementation`, so all three cells ran on the transformers default, **SDPA**, verified on
+this box: `transformers 5.12.1`, `flash_attn 2.6.3` installed but not requested, and a no-arg load
+of the 4B-I snapshot reports `_attn_implementation = sdpa` for both the text and vision towers.
+The committed S-EMBER latency work used a different backend — `study_i2_budget.py:457` and
+`study_i3_budget.py:557` pass `attn_implementation="flash_attention_2"` explicitly, and
+`study_g_transfer_cost.py:251` / `study_g2_transfer_cost.py:219` assert it. Consequences:
+
+- The three latencies above are **internally comparable** (one script, one backend, one GPU), so
+  the 1× / 1.5× / 5.5× ratios and the cost-vs-accuracy conclusion stand as written.
+- The **absolute** figures are SDPA numbers and must NOT be read against the committed flash-attn-2
+  S-EMBER curves. This is the CLAUDE.md consistency-check-4 failure mode — one named quantity
+  ("median latency", same model, same host) measured under two configurations — so the backend is
+  recorded here rather than reconciled by picking one value.
+- The **accuracy** results, and therefore the K4 verdict, are unaffected: the backend changes
+  attention kernel numerics, not which option letter is selected, and all three cells share it.
+- The token-budget cross-check in §4 is also unaffected — it compares input tokens per frame
+  against StudyI3's committed ~11,264, and tokenisation is upstream of attention.
+
+Not retrofitted: no timing-only rerun was performed, per the standing cross-hardware instruction.
+A backend-matched rerun would be needed before any absolute Q4 latency enters `cost_matrix.csv`.
+
 ---
 
 ## 7. What this settles
