@@ -44,11 +44,38 @@ Frame selection is from [0, question_time] for UNIFORM and RICH; from [question_
 
 ## 3. Model Arms
 
-| arm | model | HF id |
-|---|---|---|
-| 4B-I | Qwen3-VL-4B-Instruct | `Qwen/Qwen3-VL-4B-Instruct` |
-| 8B-I | Qwen3-VL-8B-Instruct | `Qwen/Qwen3-VL-8B-Instruct` |
-| 4B-T | Qwen3-VL-4B-Thinking | `Qwen/Qwen3-VL-4B-Instruct` (thinking mode) |
+**[D1 FIXED 2026-10-14]** The 4B-T arm previously named `Qwen/Qwen3-VL-4B-Instruct` "(thinking
+mode)". Thinking is a **separate checkpoint, not a mode flag** — confirmed in StudyP, which
+verified three distinct checkpoints by hidden size. Corrected, with resolved snapshots:
+
+| arm | model | HF id | resolved snapshot |
+|---|---|---|---|
+| 4B-I | Qwen3-VL-4B-Instruct | `Qwen/Qwen3-VL-4B-Instruct` | `/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec70b05090aa6165b016eac8ec08e71b17/` |
+| 8B-I | Qwen3-VL-8B-Instruct | `Qwen/Qwen3-VL-8B-Instruct` | `/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-8B-Instruct/snapshots/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b/` |
+| 4B-T | Qwen3-VL-4B-Thinking | **`Qwen/Qwen3-VL-4B-Thinking`** | `/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-4B-Thinking/snapshots/1de27d8c51f12e819435303b9e84c4e25ba8401e/` |
+
+All three snapshots verified present and distinct on flash.
+
+### Decoding — **[D2 FIXED 2026-10-14]**
+
+Previously unspecified. Frozen to **CFG-A** (StudyS0 Audit 2):
+
+| arm | decoding |
+|---|---|
+| 4B-T | `do_sample=True, temperature=0.6, top_p=0.95, top_k=20, min_p=0` |
+| 4B-I, 8B-I | greedy (`do_sample=False`) |
+
+**Disclosed deviation:** the Qwen3-VL-Thinking model card recommends `temperature=1.0` for
+vision-language tasks. CFG-A uses 0.6, on cross-study-consistency grounds with StudyK/P/Q/S1.
+StudyS0 Audit 2 found the two settings statistically indistinguishable on ERQA (41.0% vs 40.0%,
+CIs spanning ~19pp at n=100).
+
+### Token budget — **[D3 FIXED 2026-10-14]**
+
+Previously unspecified for the thinking arm. Set **`max_new_tokens = 8192`** (CFG-A); Instruct
+arms 512. **`think_closed` and `budget_hit` must be recorded per trial.** StudyM blew a 12h cap
+on exactly this omission; StudyS1 found budget_hit is workload-dependent (0% on ERQA and on
+MV-RoboBench/trajectory, 8.5% on MV-RoboBench/distance), so it cannot be assumed negligible here.
 
 **Full factorial:** 3 frame-selection arms × 3 model arms = 9 cells per question.  
 Host: A6000 (flash, cuda:1).
@@ -66,7 +93,33 @@ Host: A6000 (flash, cuda:1).
 ## 4. Q1 — Primary Interaction Analysis
 
 **Model:** mixed-effects logistic `correct ~ model_arm × evidence_covered + state_arm + (1|question_id)`.  
-`evidence_covered` = 1 if the retained frame window includes the question's farthest evidence time (farthest ≤ W for RECENT, always 1 for RICH/UNIFORM since they span [0, qt]).
+**[D4 FIXED 2026-10-14]** `evidence_covered` was coded 1 for RICH and UNIFORM "since they span
+[0, qt]". **Spanning is not covering.** UNIFORM takes 16 frames over the whole prefix, so the
+evidence moment frequently falls *between* samples.
+
+**Corrected definition**, computed per trial from the arm's **actual sampled frame timestamps**:
+
+> `evidence_covered` = 1 iff **any sampled frame timestamp falls within
+> [answer_start_time, answer_end_time]**.
+
+Measured on the 520 locally-available questions (`experiments/sember/study_o_precheck.py`):
+
+| arm | OLD (defective) | NEW (sampled) | delta |
+|---|---|---|---|
+| RECENT | 68.8% | **90.4%** | **+21.5pp** |
+| UNIFORM | 100.0% | **85.4%** | **−14.6pp** |
+| RICH | 100.0% | **99.6%** | −0.4pp |
+
+The correction **inverts the ordering**. Under the old coding RECENT was the only uncovered arm
+(68.8% vs 100%/100%), making `evidence_covered` nearly collinear with "is this the RECENT arm" —
+Q1's interaction would have been re-estimating the arm main effect. Under the corrected coding
+**UNIFORM is the worst-covered arm (85.4%)**, below RECENT (90.4%).
+
+Mechanism: the UNIFORM inter-frame gap is 15.9 s at the median and up to 77 s, while the evidence
+window is 29 s at the median and 10 s at p25; **31.5% of questions have an evidence window
+narrower than their own UNIFORM sampling gap**, so it can fall entirely between samples. RECENT
+scores higher than the old coding implied because it samples at 1 fps and the evidence *window*
+often extends into [qt−120, qt] even when its farthest point does not.
 
 **Pre-registered decision rule:**
 

@@ -296,8 +296,37 @@ MDI for net_rescue within the pooled blocks of **6.7pp**. This is adequate to te
 | # | Criterion | Result |
 |---|---|---|
 | 1 | Audit 1: n_direct ≥ 400 **and** n_compositional ≥ 400, homogeneity assessed | **FAIL as written** — the strata do not exist (§1.2). Homogeneity assessed (§1.3) and is favourable. |
-| 2 | Audit 2: a config within 5pp of 47.3% **and** think_closed ≥ 95% | **CONDITIONAL** — think_closed = 100% (pass); closest config is 6.3pp below 47.3% (marginal fail of a threshold that assumed the vendor number is reproducible; it was not reproduced in StudyK or StudyQ either). |
+| 2 | Audit 2: a config within 5pp of 47.3% **and** think_closed ≥ 95% | **CONDITIONAL** — think_closed = 100% (pass); closest config is 6.3pp below 47.3% (marginal fail — see §4.1). |
 | 3 | Audit 3: MDI ≤ 15pp | **PASS** — 3.5pp full-dataset, ≤10.3pp per category, 7.0pp for half-dataset strata. |
+
+### 4.1 Criterion 2 — recorded fragility
+
+CFG-A sits **6.3pp** from its 5pp threshold, so the criterion fails by 1.3pp. The failure is
+recorded here rather than waived, because the threshold itself rests on an assumption that the
+audit has now contradicted.
+
+**The threshold presumed the vendor's 47.3% is reproducible on our harness. It has never
+reproduced.**
+
+| study | measured | vs published 47.3% |
+|---|---|---|
+| StudyK (n=400) | 45.1% | −2.2pp |
+| StudyQ (n=400) | 43.2% | −4.1pp |
+| StudyS0 Audit 2 (n=100) | 41.0% | −6.3pp |
+
+Three independent runs, all below, with the shortfall growing as n falls — consistent with the
+subset being a noisier draw rather than with a new defect. Our 41.0% has a CI of [31.9, 50.8],
+which contains both prior committed values, so the harness agrees with *itself* across studies;
+it is the vendor anchor that is not recovered.
+
+**Consequence for the power calculation.** Audit 3 takes its discordance prior (p_disc = 0.270)
+from StudyK's ERQA contingency table. If our harness sits systematically below the published
+operating point, the discordance structure on MV-RoboBench may differ from that prior, and every
+n and MDI in §3 scales linearly with p_disc. The power figures should be treated as estimates
+conditional on an unverified prior, and the realised discordance must be recomputed from the main
+experiment's own contingency table before any null is interpreted.
+
+This is a known fragility, not a resolved issue.
 
 ---
 
@@ -341,7 +370,45 @@ discussed before being applied. **Not implemented. Awaiting direction.**
 | `experiments/erqa/study_s0_audit1_analyze.py` | Category counts, confound check, homogeneity |
 | `experiments/erqa/study_s0_audit2.py` | Decoding config validation |
 | `experiments/erqa/study_s0_audit3_power.py` | McNemar power calculation |
+| `experiments/erqa/study_s0_audit3b_auroc_power.py` | Gate 2 AUROC power (Hanley-McNeil) |
 | `results/erqa/study_s0/audit1_mvrobobench.json` | 1,708 question records |
 | `results/erqa/study_s0/audit1_summary.json` | Audit 1 summary |
 | `results/erqa/study_s0/audit2_trials.jsonl` | 300 decoding trials |
 | `results/erqa/study_s0/audit3_power.json` | Power results |
+| `results/erqa/study_s0/audit3b_auroc_power.json` | Gate 2 AUROC power results |
+
+---
+
+## 7. Open publication risk — MV-RoboBench licensing
+
+**No license is declared.** The HuggingFace dataset page for `AaronFengZY24/MV_Robobench` carries
+no license field, and the paper states only that the benchmark is released as "an open resource"
+without specifying terms. "Open resource" is not a license grant: it does not establish
+redistribution rights, permitted uses, or whether derived results may be published.
+
+**Source paper.** *Seeing Across Views: Benchmarking Spatial Reasoning of Vision-Language Models
+in Robotic Scenes*, arXiv **2510.19400**.
+
+**Authors.** Zhiyuan Feng, Zhaolu Kang, Qijie Wang, Zhiying Du, Jiongrui Yan, Shubin Shi,
+Chengbo Yuan, Huizhi Liang, Yu Deng, Qixiu Li, Rushuai Yang, Arctanx An, Leqi Zheng, Weijie Wang,
+Shawn Chen, Sicheng Xu, Yaobo Liang, Jiaolong Yang, Baining Guo.
+
+**Contact.** Corresponding author is listed as **Zhiyuan Feng** — consistent with the HF account
+`AaronFengZY24` that hosts the dataset. arXiv exposes the address only behind its obfuscation
+redirect (`arxiv.org/show-email/953d00b5/2510.19400`), so the literal address was not retrieved
+here; it is recoverable from that link or from the paper PDF. Affiliations are not shown on the
+arXiv abstract page and were **not** inferred.
+
+**Risk.** Two distinct exposures:
+1. *Redistribution* — we must not republish MV-RoboBench images or question text in the paper or
+   repository beyond fair-use excerpting. Note that `results/erqa/study_s0/audit1_mvrobobench.json`
+   currently contains the full question text and options for all 1,708 questions; if this repo
+   becomes public that file is a redistribution of the dataset's textual content and should be
+   reduced to derived statistics first.
+2. *Publication of results* — benchmarking results are normally publishable regardless, but with
+   no stated terms this is not guaranteed in writing.
+
+**Recommended action before publication:** email the corresponding author to request an explicit
+license (CC-BY-4.0 or similar) or written permission covering both uses. This does not block the
+main experiment from running internally, but it does block publication of anything that
+redistributes dataset content.
