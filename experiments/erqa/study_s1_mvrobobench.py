@@ -37,6 +37,11 @@ from huggingface_hub import hf_hub_download
 from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
 from qwen_vl_utils import process_vision_info
 
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "lib"))
+import attn_guard
+from attn_guard import assert_fa2
+
 REPO = "AaronFengZY24/MV_Robobench"
 PATH_4BI = "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec"
 PATH_4BT = ("/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-4B-Thinking/snapshots/"
@@ -129,8 +134,14 @@ def main():
     ap.add_argument("--block-contains", default=None,
                     help="restrict to blocks whose question text contains this")
     ap.add_argument("--project-after", type=int, default=10)
+    ap.add_argument("--fa2", action="store_true",
+                    help="flash-attention-2 re-run: write to a separate JSONL")
     args = ap.parse_args()
 
+    global JSONL
+    if args.fa2:
+        JSONL = OUT_DIR / "study_s1_trials_fa2.jsonl"
+        print(f"FA2 RE-RUN -> {JSONL} (SDPA trials untouched)", flush=True)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     import transformers as tr
@@ -156,7 +167,8 @@ def main():
 
     t0 = time.time()
     model = Qwen3VLForConditionalGeneration.from_pretrained(
-        path, torch_dtype=torch.bfloat16, device_map=args.device)
+        path, torch_dtype=torch.bfloat16, device_map=args.device, attn_implementation="flash_attention_2")
+    ATTN_IMPL = assert_fa2(model, "study_s1_mvrobobench")
     processor = AutoProcessor.from_pretrained(path)
     print(f"loaded in {time.time()-t0:.1f}s | "
           f"VRAM {torch.cuda.memory_allocated(model.device)/1e9:.2f}GB")
@@ -218,6 +230,7 @@ def main():
             "pred": pred,
             "answer": qa.get("correct"),
             "think_closed": think_closed,
+            "attn_implementation": attn_guard.record(),
             "budget_hit": bool(n_gen >= GEN[args.arm]["max_new_tokens"] - 5),
             "n_input": n_input,
             "n_think": n_think,

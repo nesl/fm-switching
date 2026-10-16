@@ -31,6 +31,11 @@ from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
 from qwen_vl_utils import process_vision_info
 import open_clip
 
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "lib"))
+import attn_guard
+from attn_guard import assert_fa2
+
 # ── Checkpoints ───────────────────────────────────────────────────────────────
 PATH_4BT = "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-4B-Thinking/snapshots/1de27d8c51f12e819435303b9e84c4e25ba8401e"
 PATH_8BT = "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-8B-Thinking/snapshots/92f3c4b4feadd3a016ef468d103bb5f58b2a2c6b"
@@ -394,6 +399,7 @@ def run_one(model, processor, img, prompt, gen_kwargs, seed, instruct_mode=False
         'budget_hit':         budget_hit,
         'answer_text':        answer_text,
         'parse_status':       parse_status,
+        'attn_implementation': attn_guard.record(),
         'prediction':         prediction,
         'latency_ms':         lat_ms,
     }
@@ -516,12 +522,20 @@ def main():
     global model, processor_ref
 
     parser = argparse.ArgumentParser()
+    parser.add_argument('--fa2', action='store_true',
+                        help='flash-attention-2 re-run: write to a separate JSONL')
     parser.add_argument('--validate-only', action='store_true')
     parser.add_argument('--report-only', action='store_true',
                         help='Skip inference; just write report from existing JSONL.')
     parser.add_argument('--arm-d-only', action='store_true',
                         help='Re-run arm D only; skip A/B/C model loads.')
     args = parser.parse_args()
+    global TRIALS_PATH, REPORT_PATH
+    if args.fa2:
+        TRIALS_PATH = TRIALS_PATH.replace('.jsonl', '_fa2.jsonl')
+        REPORT_PATH = REPORT_PATH.replace('.md', '_fa2_autogen.md')
+        print(f'FA2 RE-RUN -> {TRIALS_PATH} (SDPA trials untouched)', flush=True)
+        print(f'FA2 RE-RUN -> {REPORT_PATH} (SDPA report untouched)', flush=True)
 
     # ── Checkpoint verification ────────────────────────────────────────────────
     print("=" * 60)
@@ -568,7 +582,8 @@ def main():
     print("ARM D: 8B-Instruct, 1 pass, greedy (arm 1 of 4 — cheapest first)")
     print("=" * 60)
     model = Qwen3VLForConditionalGeneration.from_pretrained(
-        PATH_8BI, torch_dtype=torch.bfloat16, device_map=DEVICE)
+        PATH_8BI, torch_dtype=torch.bfloat16, device_map=DEVICE, attn_implementation="flash_attention_2")
+    ATTN_IMPL = assert_fa2(model, "study_p_retry_vs_scale")
     model.eval()
     processor_ref[0] = AutoProcessor.from_pretrained(PATH_8BI)
     print("8B-I loaded.")
@@ -595,7 +610,8 @@ def main():
     print("ARM A: 4B-Thinking, 1 pass, seed 42 (arm 2 of 4)")
     print("=" * 60)
     model = Qwen3VLForConditionalGeneration.from_pretrained(
-        PATH_4BT, torch_dtype=torch.bfloat16, device_map=DEVICE)
+        PATH_4BT, torch_dtype=torch.bfloat16, device_map=DEVICE, attn_implementation="flash_attention_2")
+    ATTN_IMPL = assert_fa2(model, "study_p_retry_vs_scale")
     model.eval()
     processor_ref[0] = AutoProcessor.from_pretrained(PATH_4BT)
     print("4B-T loaded.")
@@ -622,7 +638,8 @@ def main():
     print("ARM C: 8B-Thinking, 1 pass, seed 42 (arm 3 of 4)")
     print("=" * 60)
     model = Qwen3VLForConditionalGeneration.from_pretrained(
-        PATH_8BT, torch_dtype=torch.bfloat16, device_map=DEVICE)
+        PATH_8BT, torch_dtype=torch.bfloat16, device_map=DEVICE, attn_implementation="flash_attention_2")
+    ATTN_IMPL = assert_fa2(model, "study_p_retry_vs_scale")
     model.eval()
     processor_ref[0] = AutoProcessor.from_pretrained(PATH_8BT)
     print("8B-T loaded.")
@@ -642,7 +659,8 @@ def main():
     print("(pass 1 reused from arm A; arm 4 of 4)")
     print("=" * 60)
     model = Qwen3VLForConditionalGeneration.from_pretrained(
-        PATH_4BT, torch_dtype=torch.bfloat16, device_map=DEVICE)
+        PATH_4BT, torch_dtype=torch.bfloat16, device_map=DEVICE, attn_implementation="flash_attention_2")
+    ATTN_IMPL = assert_fa2(model, "study_p_retry_vs_scale")
     model.eval()
     processor_ref[0] = AutoProcessor.from_pretrained(PATH_4BT)
     print("4B-T loaded.")

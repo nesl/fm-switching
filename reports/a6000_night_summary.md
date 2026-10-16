@@ -233,6 +233,12 @@ Consequences, stated rather than repaired (no timing-only rerun, per instruction
 - **Accuracy results and every verdict are unaffected** — the backend changes attention numerics,
   not which option letter is chosen, and within each study all arms share it.
 - **Within-study latency ratios hold** (Q4's 1.5×/5.5×, S1's 226×) — one script, one backend.
+  *(Updated 2026-10-16: "hold" was meant as internally comparable, which is correct, but it reads
+  as backend-invariant, which is not. StudyS1 was since re-run on flash-attn-2 and its 226× reads
+  202× — the kernel speeds up the long-decode arm and not the single-token one. Within-study
+  ratios are comparable within a run; they are not constants across backends. See
+  `reports/study_s1_fa2_backend.md`, `reports/study_p_fa2_backend.md`, `reports/study_q_fa2_backend.md`,
+  `reports/study_j2_fa2_backend.md`.)*
 - **StudyS1 vs StudyQ is backend-matched**, since the whole `erqa/` family is SDPA.
 - **StudyO Q4 is the one genuine mismatch:** it sits in `sember/`, whose cost studies use
   flash-attn-2, so its absolute latencies must not be read against StudyI2/I3 curves or enter

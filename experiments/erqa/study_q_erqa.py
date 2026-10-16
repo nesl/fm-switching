@@ -22,6 +22,11 @@ from datasets import load_dataset
 from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
 from qwen_vl_utils import process_vision_info
 
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "lib"))
+import attn_guard
+from attn_guard import assert_fa2
+
 PATH_4BI = "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec70b05090aa6165b016eac8ec08e71b17"
 PATH_4BT = "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-4B-Thinking/snapshots/1de27d8c51f12e819435303b9e84c4e25ba8401e"
 PATH_8BT = "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-8B-Thinking/snapshots/92f3c4b4feadd3a016ef468d103bb5f58b2a2c6b"
@@ -150,6 +155,7 @@ def make_trial(arm, qid, row, correct_letter, pass_index, seed,
     correct = (predicted_letter == correct_letter) if predicted_letter else False
     return {
         "arm": arm,
+        "attn_implementation": attn_guard.record(),
         "question_id": qid,
         "category": row["question_type"],
         "n_images": len(row["images_encoded"]),
@@ -428,7 +434,8 @@ def load_done(jsonl_path):
 def load_model(path, label):
     print(f"\nLoading {label} from {path.split('/')[-1][:20]}...", flush=True)
     model = Qwen3VLForConditionalGeneration.from_pretrained(
-        path, torch_dtype=torch.bfloat16, device_map=DEVICE)
+        path, torch_dtype=torch.bfloat16, device_map=DEVICE, attn_implementation="flash_attention_2")
+    assert_fa2(model, "study_q_erqa")
     model.eval()
     processor = AutoProcessor.from_pretrained(path)
     p = next(model.parameters())
@@ -444,6 +451,8 @@ def load_model(path, label):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--fa2", action="store_true",
+                        help="flash-attention-2 re-run: separate JSONL, arm E run natively")
     parser.add_argument("--resume", action="store_true",
                         help="Skip already-done trials")
     parser.add_argument("--arms", nargs="+", default=["E", "D", "A", "B", "C"],
@@ -454,6 +463,10 @@ def main():
     print(f"Device cuda:1 = {torch.cuda.get_device_name(1)}", flush=True)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    global JSONL_PATH
+    if args.fa2:
+        JSONL_PATH = OUT_DIR / "study_q_trials_fa2.jsonl"
+        print(f"FA2 RE-RUN -> {JSONL_PATH} (SDPA trials untouched)", flush=True)
 
     print("Loading ERQA ...", flush=True)
     ds = load_erqa()
@@ -480,47 +493,61 @@ def main():
     arms_to_run = args.arms
     out_f = open(JSONL_PATH, "a")
 
-    # ---- ARM E: reuse StudyK INSTRUCT arm ----
+    # ---- ARM E: 4B-Instruct greedy ----
     if "E" in arms_to_run:
-        if len(done_per_arm["E"]) == 0 or (args.resume and len(done_per_arm["E"]) < 400):
-            print("\n=== ARM E: REUSE StudyK INSTRUCT ===", flush=True)
-            assert STUDY_K_JSONL.exists(), f"StudyK JSONL not found: {STUDY_K_JSONL}"
-            k_trials = [json.loads(l) for l in open(STUDY_K_JSONL) if l.strip()]
-            instruct_trials = [t for t in k_trials if t["arm"] == "INSTRUCT"]
-            assert len(instruct_trials) == 400, f"Expected 400 INSTRUCT trials, got {len(instruct_trials)}"
-            n_written = 0
-            for t in instruct_trials:
-                qid = t["question_id"]
-                if args.resume and qid in done_per_arm["E"]:
-                    continue
-                e_trial = {
-                    "arm": "E",
-                    "question_id": qid,
-                    "category": t["category"],
-                    "n_images": t["n_images"],
-                    "n_input_tokens": t["n_input_tokens"],
-                    "n_think_tokens": 0,
-                    "n_answer_tokens": t["n_answer_tokens"],
-                    "total_latency_ms": t["total_latency_ms"],
-                    "budget_hit": t["budget_hit"],
-                    "think_closed": None,  # instruct: N/A
-                    "predicted_letter": t["predicted_letter"],
-                    "correct_letter": t["correct_letter"],
-                    "correct": t["correct"],
-                    "parse_status": t["parse_status"],
-                    "answer_text": None,   # not stored in StudyK INSTRUCT
-                    "pass_index": 1,
-                    "seed": None,
-                    "_reused_from": "study_k_INSTRUCT",
-                }
-                out_f.write(json.dumps(e_trial) + "\n")
-                n_written += 1
-            out_f.flush()
-            n_correct = sum(1 for t in instruct_trials if t["correct"])
-            print(f"[E] DONE: {n_written} trials written (reused from StudyK). "
-                  f"acc={n_correct}/400 ({100*n_correct/400:.1f}%) [StudyK value]", flush=True)
+      if args.fa2:
+        # StudyK's INSTRUCT rows were produced under sdpa; copying them into a
+        # flash-attn run would mix backends in the very comparison being made.
+        e_done = done_per_arm["E"]
+        e_todo = [q for q in questions if q not in e_done] if args.resume else questions
+        if e_todo:
+            print("\n=== ARM E: 4B-Instruct greedy (NATIVE under fa2) ===", flush=True)
+            model, processor = load_model(PATH_4BI, "4B-Instruct")
+            run_arm_instruct("E", e_todo, ds, model, processor, out_f,
+                             done_qids=e_done if args.resume else set())
+            del model; torch.cuda.empty_cache()
         else:
-            print(f"[E] Already done ({len(done_per_arm['E'])} trials) — skip", flush=True)
+            print(f"[E] Already done ({len(e_done)} trials) — skip", flush=True)
+      else:
+          if len(done_per_arm["E"]) == 0 or (args.resume and len(done_per_arm["E"]) < 400):
+              print("\n=== ARM E: REUSE StudyK INSTRUCT ===", flush=True)
+              assert STUDY_K_JSONL.exists(), f"StudyK JSONL not found: {STUDY_K_JSONL}"
+              k_trials = [json.loads(l) for l in open(STUDY_K_JSONL) if l.strip()]
+              instruct_trials = [t for t in k_trials if t["arm"] == "INSTRUCT"]
+              assert len(instruct_trials) == 400, f"Expected 400 INSTRUCT trials, got {len(instruct_trials)}"
+              n_written = 0
+              for t in instruct_trials:
+                  qid = t["question_id"]
+                  if args.resume and qid in done_per_arm["E"]:
+                      continue
+                  e_trial = {
+                      "arm": "E",
+                      "question_id": qid,
+                      "category": t["category"],
+                      "n_images": t["n_images"],
+                      "n_input_tokens": t["n_input_tokens"],
+                      "n_think_tokens": 0,
+                      "n_answer_tokens": t["n_answer_tokens"],
+                      "total_latency_ms": t["total_latency_ms"],
+                      "budget_hit": t["budget_hit"],
+                      "think_closed": None,  # instruct: N/A
+                      "predicted_letter": t["predicted_letter"],
+                      "correct_letter": t["correct_letter"],
+                      "correct": t["correct"],
+                      "parse_status": t["parse_status"],
+                      "answer_text": None,   # not stored in StudyK INSTRUCT
+                      "pass_index": 1,
+                      "seed": None,
+                      "_reused_from": "study_k_INSTRUCT",
+                  }
+                  out_f.write(json.dumps(e_trial) + "\n")
+                  n_written += 1
+              out_f.flush()
+              n_correct = sum(1 for t in instruct_trials if t["correct"])
+              print(f"[E] DONE: {n_written} trials written (reused from StudyK). "
+                    f"acc={n_correct}/400 ({100*n_correct/400:.1f}%) [StudyK value]", flush=True)
+          else:
+              print(f"[E] Already done ({len(done_per_arm['E'])} trials) — skip", flush=True)
 
     # ---- ARM D: 8B-Instruct ----
     if "D" in arms_to_run:

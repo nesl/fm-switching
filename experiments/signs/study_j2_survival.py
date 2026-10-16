@@ -17,6 +17,11 @@ from huggingface_hub import hf_hub_download
 from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
 from qwen_vl_utils import process_vision_info
 
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", "lib"))
+import attn_guard
+from attn_guard import assert_fa2
+
 THINKING_PATH = "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-4B-Thinking/snapshots/1de27d8c51f12e819435303b9e84c4e25ba8401e"
 DEVICE        = "cuda:1"
 HF_REPO       = "NickyZimmerman/SiGNgapore2D"
@@ -140,8 +145,14 @@ def already_done(path):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--fa2', action='store_true',
+                        help='flash-attention-2 re-run: separate JSONL')
     parser.add_argument('--dry-manifest', action='store_true', help='Build and write manifest only, then exit')
     args = parser.parse_args()
+    global TRIALS_PATH
+    if args.fa2:
+        TRIALS_PATH = TRIALS_PATH.replace('.jsonl', '_fa2.jsonl')
+        print(f'FA2 RE-RUN -> {TRIALS_PATH} (SDPA trials untouched)', flush=True)
 
     # --- build/load manifest ---
     signs = load_gt_map()
@@ -170,7 +181,9 @@ def main():
     # --- load model ---
     print("Loading Qwen3-VL-4B-Thinking ...", flush=True)
     model     = Qwen3VLForConditionalGeneration.from_pretrained(
-        THINKING_PATH, torch_dtype=torch.bfloat16, device_map=DEVICE)
+        THINKING_PATH, torch_dtype=torch.bfloat16, device_map=DEVICE,
+        attn_implementation="flash_attention_2")
+    assert_fa2(model, "study_j2_survival")
     model.eval()
     processor = AutoProcessor.from_pretrained(THINKING_PATH)
 
@@ -231,6 +244,7 @@ def main():
                 'total_latency_ms': latency_ms,
                 'truncated':   truncated,
                 'think_closed': think_closed,
+                'attn_implementation': attn_guard.record(),
                 'parse_status': parse_status,
                 'prediction':  prediction,
                 'full_think_char_len': len(think_content),

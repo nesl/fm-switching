@@ -153,6 +153,16 @@ comparison is also backend-matched — no script under `experiments/erqa/` sets
 still not be read against the flash-attn-2 cost curves in `experiments/sember/` and
 `experiments/vision/`.
 
+**Measured, 2026-10-16.** The claim immediately above that "the 226× ratio is unaffected" has
+since been tested rather than argued: the study was re-run end to end on flash-attention-2 and
+the same median-of-medians ratio reads **202×** (per-category 144× → 120× and 372× → 357×). The
+ratio does move, by 11%, because flash-attn speeds up the long-decode thinking arm (throughput
+1.19×) and not the single-token instruct arm (0.99×), and because the sampled arm re-drew
+slightly shorter sequences (median think tokens 1,689 → 1,603). The conclusion is unchanged at
+two orders of magnitude, and `net_rescue` is +1.00pp under both backends. Full comparison:
+`reports/study_s1_fa2_backend.md`. The 226× above is the correct figure for this SDPA run and is
+left as written.
+
 ### Non-termination is workload-dependent — a fourth data point
 
 | workload | model + decoding | budget | non-termination |
