@@ -88,5 +88,27 @@ this HF Qwen3-VL path. Both distributions are tight (IQR ±0.2 tok/s), which arg
 contention as the cause, but the runs are cross-session; an interleaved same-process SDPA↔flash-attn timing is
 still required before attributing it to the kernel.
 
+**Throughput re-check (2026-10-16, analysis only, no inference; `experiments/erqa/h100_fa2_throughput.py`).**
+Prompted by the A6000 retraction (buckets defined by one backend's token count, wall time compared across
+re-sampled sequences of different length). The table above was **already** tok/s = `n_generated / latency` per
+trial, bucketed by that trial's *own* `n_generated`, so it is not that artifact — **no retraction**. Recomputed
+over all 3,793 H100 trials (0 missing `n_generated` or latency; the 800 A6000-reused arm A/B rows excluded),
+buckets by own length:
+
+| bucket (own tokens) | SDPA tok/s median [IQR] (n) | flash-attn tok/s median [IQR] (n) | flash/SDPA |
+|---|---|---|---|
+| < 2k, thinking arms | 23.75 [23.55–23.88] (717) | 18.73 [18.56–18.91] (711) | 0.79× |
+| 2k–8k | 23.87 [23.79–23.97] (113) | 18.90 [18.79–18.99] (118) | 0.79× |
+| > 8k | 24.13 [23.82–24.21] (19) | 18.80 [18.75–18.85] (33) | 0.78× |
+
+All `< 2k` trials including instruct give 0.73×, but those are 2–7-token answers whose tok/s is dominated by
+prefill, not decode. Paired by trial (n=1,681), the tok/s ratio is 0.78–0.82× under every bucketing rule. The
+**wall-time** ratio, by contrast, swings from 0.90× to 2.01× in the same 2k–8k bucket depending on which backend's
+token count defines it. That is the A6000 artifact reproduced on this data, and it is why only throughput is
+reported here. **The SDPA collapse with length does not reproduce on H100:** SDPA is flat at 23.6–24.2 tok/s
+from <500 to 16–30k tokens, with a linear fit of 41.8 ms/token and a negligible quadratic term. The H100 (32B) and
+A6000 (smaller models, different GPU) results are not directly contradictory, since model, GPU and possibly SDPA
+kernel selection all differ; this data cannot say which factor drives the A6000 collapse.
+
 **Backend mismatch:** every cross-size comparison against the 4B/8B baselines (SDPA, A6000) is BACKEND-MISMATCHED
 in the flash-attn columns until those are re-run with flash-attn on the A6000; Jetson rows are SDPA permanently.
