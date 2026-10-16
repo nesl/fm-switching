@@ -1,0 +1,265 @@
+{
+  "n_trials": 80,
+  "scorer_validation": {
+    "matched_denominator": 162,
+    "correct": 66,
+    "accuracy": 0.4074,
+    "passed": true
+  },
+  "termination_8192": {
+    "T32": [
+      29,
+      40
+    ],
+    "I32_eos": [
+      40,
+      40
+    ],
+    "T32_wilson": [
+      0.5716474916687543,
+      0.8389214656685692
+    ],
+    "budget_hits_T32": 11,
+    "priors": {
+      "4B-T (StudyP A)": [
+        28,
+        40
+      ],
+      "8B-T (StudyP C)": [
+        36,
+        40
+      ]
+    },
+    "paired_vs_studyP": {
+      "4B-T": {
+        "n": 40,
+        "b_32B_only": 6,
+        "c_prior_only": 5,
+        "mcnemar_p": 1.0
+      },
+      "8B-T": {
+        "n": 40,
+        "b_32B_only": 2,
+        "c_prior_only": 9,
+        "mcnemar_p": 0.0654
+      }
+    }
+  },
+  "accuracy_8192": {
+    "T32": {
+      "correct": 16,
+      "n": 40,
+      "wilson": [
+        0.2634811061240136,
+        0.5540438017260649
+      ],
+      "parse_failed": 0,
+      "not_eligible": 11,
+      "scorer_validated": true
+    },
+    "I32": {
+      "correct": 16,
+      "n": 40,
+      "wilson": [
+        0.2634811061240136,
+        0.5540438017260649
+      ],
+      "parse_failed": 0,
+      "not_eligible": 0,
+      "scorer_validated": true
+    },
+    "T32_vs_I32_discordance": {
+      "n": 40,
+      "b_T_right_I_wrong": 5,
+      "c_I_right_T_wrong": 5
+    }
+  },
+  "think_tokens_completers": {
+    "low": {
+      "n_completers": 13,
+      "n": 13,
+      "median": 1910.0,
+      "q1": 838.0,
+      "q3": 3912.0,
+      "p90": 5443.600000000001,
+      "max": 6799,
+      "prior_4B_median": 505
+    },
+    "mid": {
+      "n_completers": 8,
+      "n": 13,
+      "median": 4090.5,
+      "q1": 3824.25,
+      "q3": 4254.0,
+      "p90": 4852.2,
+      "max": 5912,
+      "prior_4B_median": 5416
+    },
+    "high": {
+      "n_completers": 7,
+      "n": 13,
+      "median": 5328.0,
+      "q1": 4706.5,
+      "q3": 6001.5,
+      "p90": 6034.6,
+      "max": 6046,
+      "prior_4B_median": 4897
+    },
+    "other": {
+      "n_completers": 1,
+      "n": 1,
+      "median": 2761.0,
+      "q1": 2761.0,
+      "q3": 2761.0,
+      "p90": 2761.0,
+      "max": 2761,
+      "prior_4B_median": null
+    },
+    "all": {
+      "n_completers": 29,
+      "n": 40,
+      "median": 3928.0,
+      "q1": 2414.0,
+      "q3": 4797.0,
+      "p90": 5986.2,
+      "max": 6799,
+      "prior_4B_median": 3339
+    }
+  },
+  "per_bin_termination_8192": {
+    "low": {
+      "T32": [
+        13,
+        13
+      ],
+      "J2_4B": [
+        12,
+        13
+      ]
+    },
+    "mid": {
+      "T32": [
+        8,
+        13
+      ],
+      "J2_4B": [
+        6,
+        13
+      ]
+    },
+    "high": {
+      "T32": [
+        7,
+        13
+      ],
+      "J2_4B": [
+        9,
+        13
+      ]
+    },
+    "other": {
+      "T32": [
+        1,
+        1
+      ],
+      "J2_4B": [
+        1,
+        1
+      ]
+    }
+  },
+  "survival": {
+    "1024": {
+      "T32_not_terminated": 36,
+      "T32_n": 40,
+      "T32_unobserved_nonterminated": 0,
+      "J2_4B_not_terminated": 32,
+      "J2_n": 40,
+      "complete": true
+    },
+    "2048": {
+      "T32_not_terminated": 33,
+      "T32_n": 40,
+      "T32_unobserved_nonterminated": 0,
+      "J2_4B_not_terminated": 29,
+      "J2_n": 40,
+      "complete": true
+    },
+    "4096": {
+      "T32_not_terminated": 23,
+      "T32_n": 40,
+      "T32_unobserved_nonterminated": 0,
+      "J2_4B_not_terminated": 21,
+      "J2_n": 40,
+      "complete": true
+    },
+    "8192": {
+      "T32_not_terminated": 11,
+      "T32_n": 40,
+      "T32_unobserved_nonterminated": 0,
+      "J2_4B_not_terminated": 12,
+      "J2_n": 40,
+      "complete": true
+    },
+    "16384": {
+      "T32_not_terminated": 0,
+      "T32_n": 29,
+      "T32_unobserved_nonterminated": 11,
+      "J2_4B_not_terminated": 8,
+      "J2_n": 40,
+      "complete": false
+    },
+    "24576": {
+      "T32_not_terminated": 0,
+      "T32_n": 29,
+      "T32_unobserved_nonterminated": 11,
+      "J2_4B_not_terminated": 8,
+      "J2_n": 40,
+      "complete": false
+    }
+  },
+  "ladder_prefix_match": {
+    "n": 0,
+    "matched": 0
+  },
+  "contention": {
+    "method": "checked against 17801 proc-log rows from ['logs/fa2_gpu_procs.csv']",
+    "contaminated": []
+  },
+  "latency": {
+    "I32@8192": {
+      "n": 40,
+      "median_s": 3.58805,
+      "p90_s": 7.877160000000003,
+      "decode_tok_s_median": 18.06
+    },
+    "T32@8192": {
+      "n": 40,
+      "median_s": 244.74885,
+      "p90_s": 436.34059999999994,
+      "decode_tok_s_median": 18.8
+    }
+  },
+  "trend_line": "Termination at 8192: 4B 70% \u2192 8B 90% \u2192 32B 72.5% [57.2, 83.9] (n=40).",
+  "peak_reserved_gb": {
+    "I32": 68.11,
+    "T32": 74.26
+  },
+  "_provenance": {
+    "git_commit": "3951e3f5de62c44376630fc6fe6bac86c48a06f1",
+    "script": "study_t_analyse.py",
+    "model": "qwen3vl-32b",
+    "timestamp": "2026-10-15T15:01:27.629978",
+    "device": "h100nvl",
+    "n": 40,
+    "seed": 42,
+    "args": {
+      "trials": "results/signs/study_t/study_t_trials_h100nvl_fa2.jsonl",
+      "scores": "results/signs/study_t/study_t_scores_h100nvl_fa2.jsonl",
+      "procs": [
+        "logs/fa2_gpu_procs.csv"
+      ],
+      "out": "results/signs/study_t/study_t_results_h100nvl_fa2_core.json"
+    }
+  }
+}

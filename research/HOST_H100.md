@@ -80,12 +80,18 @@ Use the project venv: `source .venv/bin/activate` (torch 2.8.0+cu128,
 transformers 5.10.2). `requirements.txt` is pinned for Jetson/aarch64; on this host
 `nvidia-cusparselt-cu12==0.8.1` is dropped (conflicts with x86 torch 2.8.0) and
 `qwen-vl-utils scipy datasets scikit-learn av` are added, with
-`huggingface_hub==1.18.0` held (newer breaks transformers 5.10.2). Not installed:
-`vllm`, `flash_attn`, `sentence-transformers`, `open_clip`. Installing `vllm` will
-replace torch — use a separate venv if needed.
+`huggingface_hub==1.18.0` held (newer breaks transformers 5.10.2). Added 2026-10-14/15, all
+`--no-deps` with torch/transformers verified unchanged: `open_clip_torch 3.3.0` (+ ftfy, timm,
+wcwidth), **`flash-attn 2.8.3`** (prebuilt wheel `cu12torch2.8cxx11abiTRUE-cp310`) and `einops 0.8.2`
+(required by flash-attn; without it the flash-attn load fails). Not installed: `vllm`,
+`sentence-transformers`. Installing `vllm` will replace torch — use a separate venv if needed.
 
-Note: without `flash_attn`, models fall back to SDPA. Latency is not comparable to
-flash's flash-attn numbers until this is resolved or stated (see Rule 6).
+**Attention backend (from 2026-10-15): pass `attn_implementation="flash_attention_2"` explicitly and
+assert `model.config._attn_implementation == "flash_attention_2"` after loading** — Qwen3-VL silently
+falls back to SDPA if flash-attn is not importable, so requesting it is not evidence it was used. Record
+the asserted value per trial. Runs before 2026-10-15 on this host (StudyR/S2/T SDPA columns) used SDPA.
+Observed: 32B bf16 batch-1 decode was 18–19 tok/s with flash-attn vs 23–24 tok/s with SDPA in separate
+sessions (CPU-contention-confounded; not yet an interleaved measurement).
 
 ---
 

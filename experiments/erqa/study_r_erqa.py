@@ -61,6 +61,26 @@ STUDY_Q_JSONL = Path("results/erqa/study_q/study_q_trials.jsonl")
 OUT_DIR = Path("results/erqa/study_r")
 JSONL_PATH = OUT_DIR / f"study_r_trials_{DEVICE_SLUG}.jsonl"
 META_PATH = OUT_DIR / f"study_r_run_meta_{DEVICE_SLUG}.json"
+# Attention backend (2026-10-15 flash-attn re-run). flash_attention_2 is MANDATORY for every load and is
+# asserted after loading (Qwen3-VL silently falls back to sdpa if flash-attn is not importable).
+# --attn sdpa reproduces the original 2026-10-14 runs and writes the un-suffixed files.
+ATTN = "flash_attention_2"
+
+
+def set_attn(attn):
+    """Select backend; flash-attn runs write to *_fa2 files so the SDPA results are never overwritten."""
+    global ATTN, JSONL_PATH, META_PATH
+    ATTN = attn
+    if attn == "flash_attention_2":
+        JSONL_PATH = OUT_DIR / f"study_r_trials_{DEVICE_SLUG}_fa2.jsonl"
+        META_PATH = OUT_DIR / f"study_r_run_meta_{DEVICE_SLUG}_fa2.json"
+
+
+def assert_attn(model):
+    got = getattr(model.config, "_attn_implementation", None)
+    if got != ATTN:
+        raise SystemExit(f"!!! ATTENTION BACKEND ASSERT FAILED: requested {ATTN}, model uses {got} — aborting !!!")
+    return got
 PROBE_PATH = OUT_DIR / f"study_r_vram_probe_{DEVICE_SLUG}.json"
 
 SPATIAL = {"Spatial Reasoning", "Pointing"}
@@ -130,7 +150,7 @@ def resolve_snapshot(key):
 
 def load_model(key, quant):
     path = resolve_snapshot(key)
-    kw = dict(device_map={"": 0})
+    kw = dict(device_map={"": 0}, attn_implementation=ATTN)
     if quant == "nf4":
         kw["quantization_config"] = BitsAndBytesConfig(
             load_in_4bit=True, bnb_4bit_quant_type="nf4",
@@ -140,6 +160,7 @@ def load_model(key, quant):
     torch.cuda.reset_peak_memory_stats(0)
     t0 = time.time()
     model = Qwen3VLForConditionalGeneration.from_pretrained(path, **kw).eval()
+    assert_attn(model)
     processor = AutoProcessor.from_pretrained(path)
     info = {
         "key": key, "repo": REPO[key][0], "revision": REPO[key][1], "snapshot_path": path,
@@ -290,7 +311,8 @@ def run_arm(arm, key, quant, is_thinking, qids, ds, out_f, done, meta, project=F
                  n_images=len(row["images_encoded"]), predicted_letter=pred,
                  correct_letter=correct_letter, correct=(pred == correct_letter) if pred else False,
                  parse_status=status, seed=(42 + qid) if is_thinking else None,
-                 quant=quant, _hardware=DEVICE_SLUG)
+                 quant=quant, _hardware=DEVICE_SLUG,
+                 attn_implementation=model.config._attn_implementation)
         out_f.write(json.dumps(r) + "\n")
         out_f.flush()
         done[arm].add(qid)
@@ -333,7 +355,11 @@ def main():
     ap.add_argument("--probe", action="store_true", help="worst-case VRAM probe for 32B-Thinking")
     ap.add_argument("--quant", choices=["bf16", "nf4"], required=True)
     ap.add_argument("--arms", nargs="+", default=["A", "B", "C", "D", "A_h100"])
+    ap.add_argument("--attn", choices=["flash_attention_2", "sdpa"], default="flash_attention_2")
+    ap.add_argument("--subset", choices=["all", "spatial", "rest"], default="all",
+                    help="restrict to the spatial subset or the non-spatial rest (same fixed order)")
     args = ap.parse_args()
+    set_attn(args.attn)
 
     assert torch.cuda.device_count() >= 1
     print(f"cuda:0 = {torch.cuda.get_device_name(0)}; transformers {transformers.__version__}; "
@@ -347,12 +373,15 @@ def main():
         return
 
     spatial, rest = question_order(ds)
-    order = spatial + rest
+    order = {"all": spatial + rest, "spatial": spatial, "rest": rest}[args.subset]
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     meta = json.loads(META_PATH.read_text()) if META_PATH.exists() else {}
     meta.update(transformers=transformers.__version__, torch=torch.__version__,
                 gpu=torch.cuda.get_device_name(0), quant_32b=args.quant,
-                n_spatial=len(spatial), thinking_gen=THINKING_GEN, instruct_gen=INSTRUCT_GEN)
+                n_spatial=len(spatial), thinking_gen=THINKING_GEN, instruct_gen=INSTRUCT_GEN,
+                attn_implementation=ATTN)
+    meta.setdefault("subset_runs", []).append(dict(subset=args.subset, arms=args.arms,
+                                                   at=time.strftime("%Y-%m-%dT%H:%M:%S")))
     if meta.get("quant_32b_locked") and meta["quant_32b_locked"] != args.quant:
         sys.exit(f"quant mismatch: run started with {meta['quant_32b_locked']}")
     meta["quant_32b_locked"] = args.quant

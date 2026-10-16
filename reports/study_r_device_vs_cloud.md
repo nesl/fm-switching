@@ -248,3 +248,47 @@ latency for a non-significant +2.5 pp.
 - Run meta: `results/erqa/study_r/study_r_run_meta_h100nvl.json`; VRAM probe: `study_r_vram_probe_h100nvl.json`
 - Results JSON: `results/erqa/study_r/study_r_results_h100nvl.json`
 - Scripts: `experiments/erqa/study_r_erqa.py`, `experiments/erqa/study_r_analyse.py`
+
+---
+
+## Flash-attn re-run (2026-10-15 10:15 → 2026-10-16 02:56, h100nvl GPU 3)
+
+Arms C and D only (A/B are 4B and out of scope here); same 400 questions, same decoding, budgets, seeds and bf16
+weights; only the attention backend changes. flash-attn 2.8.3 (`--no-deps`, + einops 0.8.2; torch 2.8.0+cu128 and
+transformers 5.10.2 verified unchanged). Every load passed `attn_implementation="flash_attention_2"` and asserted
+`model.config._attn_implementation == "flash_attention_2"`; the value is stored per trial (800/800). Order: spatial
+subset first (10:15–12:02), the non-spatial rest last (23:59–02:56). A watchdog would have halted the run on any
+foreign GPU-3 process: none appeared; 0 contended trials. Files: `study_r_trials_h100nvl_fa2.jsonl`,
+`study_r_run_meta_h100nvl_fa2.json`.
+
+**Expectation (stated before comparing):** the kernels are mathematically equivalent, so the greedy C arm should be
+near-identical (≤ ~1 pp) and D should differ only by sampling noise.
+
+### Side by side
+| | SDPA (2026-10-14) | flash-attn (2026-10-15/16) |
+|---|---|---|
+| C spatial (greedy) | 63/118 = 53.4% | 62/118 = 52.5% (−0.8 pp; 2 letters changed) |
+| C overall (greedy) | 187/400 = 46.8% | 187/400 = 46.8% (**0.0 pp**; 3 letters changed) |
+| D spatial | 66/118 = 55.9% | 68/118 = 57.6% (flash-only right 4, SDPA-only right 2) |
+| D overall | 200/400 = 50.0% | 195/400 = 48.8% (17 vs 22) |
+| **D−C spatial (PRIMARY)** | **+2.5 pp [−5.1, +11.0]**, b=13 c=10 | **+5.1 pp [−2.6, +13.6]**, b=15 c=9 |
+| D−C overall | +3.3 pp [−1.5, +8.0], b=53 c=40 | +2.0 pp [−2.8, +6.8], b=48 c=40 |
+| **Verdict** | **THINKING DOES NOT PAY AT SCALE** | **THINKING DOES NOT PAY AT SCALE** |
+| D think_closed / budget hits | 100% / 0 | 99.75% / 1 (1 `no_letter`) |
+| D think tokens median | 372 | 343 |
+| D latency median / p90 s | 16.0 / 79.3 | 19.2 / 86.9 |
+| D peak allocated / reserved | 73.6 / 75.7 GB | 73.5 / 80.3 GB |
+
+- **No verdict flip.** Both instruct-arm checks pass (−0.8 pp spatial, 0.0 pp overall).
+- **⚠ Fragility flag:** under flash-attn the spatial point estimate is **+5.08 pp, above the 5 pp threshold**;
+  the verdict stays "does not pay" only because the CI includes 0. The backend-to-backend swing of the primary
+  (+2.5 → +5.1 pp) is sampling noise of the thinking arm (4 vs 2 discordant answers) plus one greedy letter on C,
+  i.e. ±2–3 pp is the run-to-run noise floor of D−C at n=118. A 5 pp threshold sits inside that noise; the
+  pre-registered rule's CI clause is what keeps the verdict stable.
+- Reshuffling signature reproduced: thinking changes ~20% (spatial) / ~22% (overall) of answers with a small net.
+
+### Backend mismatch (labelled)
+Arms A and B (4B, reused from StudyQ) ran on the A6000 with **SDPA**. Under the flash-attn columns, **C−A, D−B and
+D−A are BACKEND-MISMATCHED** until A/B are re-run with flash-attn on the A6000. The SDPA columns are backend-matched
+(the A6000 `erqa/` family is SDPA; commit `d39aa58`), with the separately measured ~3.5% A6000-vs-H100 greedy noise.
+The primary D−C is within-size and same-backend in each column: **clean**.

@@ -249,3 +249,46 @@ matching the StudyR probe (22.6) and StudyT (23.9).
 `results/erqa/study_s2/study_s2_manifest.json`, `study_s2_armD_order.json`, `study_s2_trials_h100nvl.jsonl`,
 `study_s2_run_meta_h100nvl.json`, `study_s2_results_h100nvl.json`; scripts
 `experiments/erqa/study_s2_mvrobobench_32b.py`, `experiments/erqa/study_s2_analyse.py`.
+
+---
+
+## Flash-attn re-run (2026-10-15 15:01–21:47, h100nvl GPU 3)
+
+Same 401 questions in the fixed manifest order, same prompts, decoding (C greedy 512; D CFG-A 8192, per-question
+seeds) and bf16 weights; only the attention backend changes. Every load passed
+`attn_implementation="flash_attention_2"` and asserted `model.config._attn_implementation == "flash_attention_2"`;
+the value is stored per trial (401/401 `flash_attention_2` in both arms). Arm D ran as one block (no split); no
+D accuracy or D−C quantity was computed until its last trial. A watchdog would have halted the run on any
+foreign GPU-3 process: none appeared; 0 contended trials. Files: `study_s2_trials_h100nvl_fa2.jsonl`,
+`study_s2_run_meta_h100nvl_fa2.json`, `study_s2_results_h100nvl_fa2.json`.
+
+**Expectation (stated before comparing):** flash-attn and SDPA compute the same attention, so the greedy C arm
+should be near-identical (≤ ~1 pp) and the sampled D arm should differ only by sampling noise (different token
+paths from the same seeds).
+
+### Side by side
+| | SDPA (2026-10-14) | flash-attn (2026-10-15) | delta |
+|---|---|---|---|
+| C 32B-Instruct (greedy) | 192/401 = 47.9% | 193/401 = 48.1% | **+0.25 pp** (10/401 letters changed) — passes the ~1 pp check |
+| D 32B-Thinking | 186/401 = 46.4% | 176/401 = 43.9% | −2.5 pp (sampling: 23 flash-only right vs 33 SDPA-only right; 304/401 same letter) |
+| **net_rescue D−C (PRIMARY)** | **−1.50 pp [−6.98, +3.99]** | **−4.24 pp [−9.73, +1.00]** | |
+| b (D✓ C✗) / c (D✗ C✓) | 61 / 67 | 53 / 70 | |
+| answers changed by thinking | 128 (31.9%) | 123 (30.7%) | |
+| McNemar p | 0.66 | 0.15 | |
+| **Verdict** | **THINKING DOES NOT PAY AT 32B** | **THINKING DOES NOT PAY AT 32B** | **no flip** |
+| D think_closed / budget hits | 99.5% / 2 | 99.8% / 1 | |
+| D think tokens median (IQR) | 759 (436–1,459) | 714 (435–1,361) | |
+| D latency median / p90 s | 32.1 / 112.0 | 37.9 / 137.5 | (cross-session; CPU-contention caveat) |
+
+- **The verdict is backend-stable**, and under both backends the CI upper bound is below the 5 pp threshold
+  (+3.99 and +1.00): absence at the pre-registered effect size holds under either kernel.
+- The reshuffling signature is reproduced: ~31% of answers change, net slightly negative.
+- Per category (descriptive): SDJ D−C −0.5 pp [−7.0, +6.0] (SDPA −2.0); RTS **−8.0 pp [−16.5, +0.5]**
+  (SDPA −1.0). The RTS swing between backends (−7 pp) is within sampling noise for n=200 but is the largest
+  single-category movement in the re-run.
+
+### Backend mismatch (labelled)
+The 4B values from StudyS1 ran on the A6000 with **SDPA** (the `erqa/` family never requests flash-attn; verified
+on the A6000 in commit `d39aa58`). The flash-attn 32B arms are therefore **BACKEND-MISMATCHED** against them: every
+cross-size term (C−I, D−T, D−I) is labelled so until the 4B arms are re-run with flash-attn on the A6000. The
+primary D−C is within-size and same-backend under each column: **clean**.

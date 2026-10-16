@@ -274,7 +274,8 @@ def run_block(arm, cat, items, root, out_f, done, meta, state, smoke_gen=None):
                      correct=(pred == it["correct_letter"]) if pred else False, seed=sd,
                      batch_size=bs, batch_first_index=chunk[0]["index"], batched=bs > 1,
                      latency_ms=r["total_latency_ms"], wall_start=t_start, wall_end=t_end,
-                     max_new_tokens=gen["max_new_tokens"], _hardware=DEVICE_SLUG)
+                     max_new_tokens=gen["max_new_tokens"], _hardware=DEVICE_SLUG,
+                     attn_implementation=model.config._attn_implementation)
             out_f.write(json.dumps(r) + "\n")
             done[arm].add(it["path"])
             am["peak_alloc_gb"] = max(am.get("peak_alloc_gb", 0), r["peak_alloc_gb"])
@@ -335,12 +336,20 @@ def main():
     ap.add_argument("--smoke", help="write N trials per arm to this JSONL with small budgets; no projection")
     ap.add_argument("--smoke-n", type=int, default=3)
     ap.add_argument("--smoke-budget", type=int, default=1024)
+    ap.add_argument("--attn", choices=["flash_attention_2", "sdpa"], default="flash_attention_2",
+                    help="flash_attention_2 is mandatory and asserted at load (R.load_model); "
+                         "flash-attn runs write *_fa2 files")
     ap.add_argument("--stop-at", type=int, default=None,
                     help="only run manifest indices < N (fixed manifest order); a later launch without it resumes the same run")
     ap.add_argument("--cap-h", type=float, default=None, help="opt-in wall cap in hours (default: none)")
     ap.add_argument("--batch", nargs="*", default=[], help="per-arm batch size, e.g. T=16 D=8 (default 1)")
     ap.add_argument("--smoke-cats", nargs="+", default=CATS)
     args = ap.parse_args()
+    global JSONL_PATH, META_PATH
+    R.set_attn(args.attn)
+    if args.attn == "flash_attention_2":
+        JSONL_PATH = OUT_DIR / f"study_s2_trials_{DEVICE_SLUG}_fa2.jsonl"
+        META_PATH = OUT_DIR / f"study_s2_run_meta_{DEVICE_SLUG}_fa2.json"
     if args.build_manifest:
         build_manifest()
         return
@@ -379,7 +388,7 @@ def main():
                                             arms=args.arms, stop_at=args.stop_at))
     # an opt-in cap runs from the FIRST launch, so a crash-resume does not reset it
     state["t0"] = datetime.fromisoformat(meta["runs"][0]["start"]).timestamp()
-    meta.update(transformers=transformers.__version__, torch=torch.__version__,
+    meta.update(attn_implementation=R.ATTN, transformers=transformers.__version__, torch=torch.__version__,
                 gpu=torch.cuda.get_device_name(0), quant="bf16 (all arms)", manifest=str(MANIFEST),
                 n=len(items), n_by_category=man["n_by_category"], hf_dataset=HF_DATASET,
                 hf_revision=HF_REVISION, thinking_gen=THINKING_GEN, instruct_gen=INSTRUCT_GEN,

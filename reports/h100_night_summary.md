@@ -33,7 +33,7 @@ signs, scale does not buy termination beyond 8B, and 32B thinking again does not
 instruct +10.5 [+3.6, +17.2], thinking +8.0 [+1.1, +14.7].
 
 **Termination:** 32B-T closes `</think>` in 100% of ERQA and 99.5% of MV-RoboBench trials (4B-T on ERQA:
-1.2% budget hits). On signs: 85% at 8192 (4B 70%, 8B 90%); by 24,576 only 2/40 (5%) never terminate vs 4B's 8/40 (20%), and the never-terminating signs are disjoint across scale (ladder re-runs reproduced earlier tokens exactly, 8/8). Peak reserved VRAM reached 99.2 GB at 24,576 tokens — the card's limit.
+1.2% budget hits). On signs: 85% at 8192 (4B 70%, 8B 90%); by 24,576 only 2/40 (5%) never terminate vs 4B's 8/40 (20%), and the never-terminating signs are disjoint across scale (ladder re-runs reproduced earlier tokens exactly, 8/8). Peak reserved VRAM reached 99.2 GB at 24,576 tokens, but peak allocated was 73.6 GB — the gap is allocator fragmentation (reproduced identically under flash-attn on 2026-10-15), not offload.
 
 **Latency cost of thinking at 32B (same hardware):** ERQA D/A_h100 ≈190–200×; MV-RoboBench D/C 92×;
 signs T32 median 210 s vs I32 2.8 s (at 8192).
@@ -50,3 +50,43 @@ signs T32 median 210 s vs I32 2.8 s (at 8192).
 
 Reports: `reports/study_r_device_vs_cloud.md`, `reports/study_s2_mvrobobench_32b.md`,
 `reports/study_t_signs_32b.md`.
+
+---
+
+## Addendum — flash-attn re-run of all 32B arms (2026-10-15 08:51 → 2026-10-16 02:56)
+
+All 32B arms re-run with `flash_attention_2` (asserted at load, recorded per trial); same questions, decoding,
+budgets and seeds. GPU 3 was exclusive throughout (watchdog; 0 contended trials).
+
+| study | primary (SDPA) | primary (flash-attn) | verdict flip? | greedy instruct shift |
+|---|---|---|---|---|
+| StudyR (ERQA spatial) | D−C +2.5 [−5.1, +11.0] | D−C **+5.1** [−2.6, +13.6] | no (⚠ point estimate crosses 5 pp; CI keeps verdict) | −0.8 pp spatial / 0.0 overall |
+| StudyS2 (MV-RoboBench) | net_rescue −1.5 [−7.0, +4.0] | −4.2 [−9.7, +1.0] | no (CI upper < 5 under both) | +0.25 pp |
+| StudyT (signs, termination @8192) | 34/40 = 85.0%, indistinguishable from 8B | 29/40 = 72.5%, **reversal** | **sub-class flips** (primary "trend does not continue" stable) | 0.0 pp |
+| StudyT never-terminate @24,576 | 2/40 (5%) | 1/40 (2.5%) | no — vs 4B 20% under both | — |
+
+**The cross-study answer is unchanged:** the 4B–8B thinking null persists at 32B under both attention kernels.
+Greedy instruct arms move ≤ 0.8 pp (all checks passed), as expected for equivalent kernels; every difference in the
+thinking arms is consistent with re-sampled token paths. The StudyT 8,192 sub-classification and the StudyR
+primary's distance to 5 pp are inside that sampling noise and should not be over-read.
+
+**99.2 GB peak:** not an SDPA artifact and not offload — flash-attn reproduces it exactly at 24,576 tokens
+(allocated 73.6 GB; reserved 99.2 GB = allocator fragmentation). SDPA long-trace latencies stand.
+
+**Speed (prediction not supported):** decode rate by generated length, all thinking-arm trials:
+
+| bucket | SDPA tok/s median (n) | flash-attn tok/s median (n) | flash/SDPA |
+|---|---|---|---|
+| short (< 1k) | 23.7 (565) | 18.7 (573) | 0.79× |
+| medium (2k–6k) | 23.9 (100) | 18.9 (112) | 0.79× |
+| long (≥ 12k) | 24.2 (7) | 18.6 (7) | 0.77× |
+
+The prediction "little gain at short context, more at long" did not hold: flash-attn is a **flat ~21% slower at
+every length**, and decode rate is flat in length under both backends — attention is not the bottleneck at
+batch 1 (consistent with launch/per-step-overhead-bound decode), and flash-attn adds a constant per-step cost in
+this HF Qwen3-VL path. Both distributions are tight (IQR ±0.2 tok/s), which argues against fluctuating CPU
+contention as the cause, but the runs are cross-session; an interleaved same-process SDPA↔flash-attn timing is
+still required before attributing it to the kernel.
+
+**Backend mismatch:** every cross-size comparison against the 4B/8B baselines (SDPA, A6000) is BACKEND-MISMATCHED
+in the flash-attn columns until those are re-run with flash-attn on the A6000; Jetson rows are SDPA permanently.

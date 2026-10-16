@@ -19,3 +19,4 @@ Shared H100 host (`sn4622120321`): read `research/HOST_H100.md` first — use GP
 | flash | CPU (no GPU) | CC | E36c — fleet policy with fixed KV capacity and fleet-level knapsack maintenance_aware | 2026-08-24 | done |
 | jetson_orin | Orin (65.9 GB unified) | CC | E37 qwen3b vs qwen7b device-tier time ratio | 2026-08-23 | done |
 | sn4622120321 | H100 NVL (GPU 2 for arm C + first D trials; GPU 3 from 19:20, dedicated ~16 h) | CC | H100 night run: StudyR → StudyS2 → StudyT (bf16) | 2026-10-14 | done (2026-10-15 08:16) |
+| sn4622120321 | H100 NVL (GPU 3) | CC | Flash-attn 32B re-run: StudyT long-trace VRAM, StudyR/S2/T 32B arms (no time limit; halts on any foreign GPU-3 process) | 2026-10-15 | done (2026-10-16 02:56; 0 foreign processes) |

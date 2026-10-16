@@ -59,6 +59,12 @@ DEVICE_SLUG = "h100nvl"
 OUT_DIR     = Path("results/signs/study_t")
 TRIALS_PATH = OUT_DIR / f"study_t_trials_{DEVICE_SLUG}.jsonl"
 META_PATH   = OUT_DIR / f"study_t_run_meta_{DEVICE_SLUG}.json"
+SDPA_TRIALS_PATH = TRIALS_PATH  # the 2026-10-14 SDPA run (source of the long-trace list for --phase longdiag)
+LONGDIAG_PATH = OUT_DIR / f"study_t_longtrace_{DEVICE_SLUG}_fa2.jsonl"
+# Attention backend (2026-10-15 flash-attn re-run): flash_attention_2 is MANDATORY and asserted after every
+# load (Qwen3-VL silently falls back to sdpa when flash-attn is not importable). flash-attn runs write *_fa2
+# files and run with no core cap (user instruction 2026-10-15: no time restriction).
+ATTN = "flash_attention_2"
 
 SEED        = 42
 CORE_BUDGET = 8192
@@ -173,7 +179,10 @@ def load_model(arm):
     torch.cuda.reset_peak_memory_stats(0)
     t0 = time.time()
     model = Qwen3VLForConditionalGeneration.from_pretrained(
-        path, dtype=torch.bfloat16, device_map={"": 0}).eval()
+        path, dtype=torch.bfloat16, device_map={"": 0}, attn_implementation=ATTN).eval()
+    got = getattr(model.config, "_attn_implementation", None)
+    if got != ATTN:
+        raise SystemExit(f"!!! ATTENTION BACKEND ASSERT FAILED: requested {ATTN}, model uses {got} — aborting !!!")
     processor = AutoProcessor.from_pretrained(path)
     info = dict(arm=arm, repo=repo, revision=rev, snapshot_path=path, quant="bf16",
                 attn_implementation=getattr(model.config, "_attn_implementation", None),
@@ -183,11 +192,13 @@ def load_model(arm):
     return model, processor, info
 
 
-def run_one(model, processor, sign, prompt, arm, budget):
+def run_one(model, processor, sign, prompt, arm, budget, min_new_tokens=None):
     import torch
     from qwen_vl_utils import process_vision_info
     is_thinking = arm == "T32"
     gen_kwargs = dict(THINKING_GEN if is_thinking else INSTRUCT_GEN, max_new_tokens=budget)
+    if min_new_tokens:
+        gen_kwargs["min_new_tokens"] = min_new_tokens  # forced-length VRAM probe only
     torch.manual_seed(SEED)   # mirrors StudyJ2/StudyP: reseed immediately before each trial
     messages = [{"role": "user", "content": [
         {"type": "image", "image": sign['img']},
@@ -234,6 +245,7 @@ def run_one(model, processor, sign, prompt, arm, budget):
         gen_token_ids=(gen.tolist() if (is_thinking and budget_hit) else None),
         _hardware=DEVICE_SLUG, _cuda_visible_devices=os.environ.get("CUDA_VISIBLE_DEVICES"),
         _pid=os.getpid(), _gpu_uuid=torch.cuda.get_device_properties(0).uuid.__str__(),
+        attn_implementation=model.config._attn_implementation, forced_min_new_tokens=min_new_tokens,
     )
 
 
@@ -368,12 +380,52 @@ def run_ladder(signs, prompt, meta):
         torch.cuda.empty_cache()
 
 
+def run_longdiag(signs, prompt, meta):
+    """Step 2 (2026-10-15): re-run the 8 long-budget SDPA traces (6 @16384, 2 @24576; same sign, budget,
+    seed) under flash-attn, plus one forced-length probe at 24,576 (min_new_tokens) so the 24,576 peak is
+    measured even if the flash-attn trace terminates earlier. The allocator cache is emptied before each
+    trace so peak_reserved is per-trace, not inherited from earlier trials."""
+    import torch
+    by_id = {s['sign_id']: s for s in signs}
+    sdpa = [json.loads(l) for l in open(SDPA_TRIALS_PATH)]
+    long_sdpa = sorted((t for t in sdpa if t['arm'] == "T32" and t['budget'] > CORE_BUDGET),
+                       key=lambda t: -t['budget'])
+    jobs = [(t['sign_id'], t['budget'], None) for t in long_sdpa]
+    probe_sign = next(t['sign_id'] for t in long_sdpa if t['budget'] == 24576)
+    jobs.insert(2, (probe_sign, 24576, 24576))   # after the two natural 24,576 traces
+    done = set()
+    if LONGDIAG_PATH.exists():
+        done = {(t['sign_id'], t['budget'], t.get('forced_min_new_tokens')) for t in map(json.loads, open(LONGDIAG_PATH))}
+    print(f"=== LONGDIAG: {len(jobs)} jobs ({len(long_sdpa)} SDPA long traces + 1 forced 24,576 probe) ===", flush=True)
+    model, processor, info = load_model("T32")
+    meta.setdefault("models", {})["T32_longdiag"] = info
+    save_meta(meta)
+    for sid, budget, forced in jobs:
+        if (sid, budget, forced) in done:
+            continue
+        torch.cuda.empty_cache()
+        t = run_one(model, processor, by_id[sid], prompt, "T32", budget, min_new_tokens=forced)
+        t['phase'] = "longdiag_forced" if forced else "longdiag"
+        with open(LONGDIAG_PATH, "a") as f:
+            f.write(json.dumps(t) + "\n")
+        print(fmt(t) + f" [{t['phase']}] alloc={t['peak_alloc_gb']}GB", flush=True)
+    del model
+    torch.cuda.empty_cache()
+
+
 def main():
+    global ATTN, TRIALS_PATH, META_PATH, CORE_CAP_H
     ap = argparse.ArgumentParser()
-    ap.add_argument("--phase", choices=["core", "ladder", "all"], default="all")
+    ap.add_argument("--phase", choices=["core", "ladder", "all", "longdiag"], default="all")
+    ap.add_argument("--attn", choices=["flash_attention_2", "sdpa"], default="flash_attention_2")
     ap.add_argument("--dry-run", action="store_true",
                     help="CPU only: build manifest/crops/prompt and exercise parsing; no model")
     args = ap.parse_args()
+    ATTN = args.attn
+    if ATTN == "flash_attention_2":
+        TRIALS_PATH = OUT_DIR / f"study_t_trials_{DEVICE_SLUG}_fa2.jsonl"
+        META_PATH = OUT_DIR / f"study_t_run_meta_{DEVICE_SLUG}_fa2.json"
+        CORE_CAP_H = float("inf")  # no time restriction for the flash-attn re-run (user, 2026-10-15)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     prompt = make_prompt()
     signs = load_signs()
@@ -401,11 +453,15 @@ def main():
         sign_understanding_commit=subprocess.run(["git", "-C", "/tmp/sign-understanding", "rev-parse", "HEAD"],
                                                  capture_output=True, text=True).stdout.strip(),
         manifest=J2_MANIFEST, n_signs=len(signs), seed=SEED, core_budget=CORE_BUDGET, ladder=list(LADDER),
-        core_cap_h=CORE_CAP_H, prompt_sha256=hashlib.sha256(prompt.encode()).hexdigest(),
-        thinking_gen=THINKING_GEN, instruct_gen=INSTRUCT_GEN, attn="sdpa (flash_attn not installed)",
+        attn_implementation=ATTN, core_cap_h=str(CORE_CAP_H), prompt_sha256=hashlib.sha256(prompt.encode()).hexdigest(),
+        thinking_gen=THINKING_GEN, instruct_gen=INSTRUCT_GEN,
     )
     save_meta(meta)
 
+    if args.phase == "longdiag":
+        run_longdiag(signs, prompt, meta)
+        print("done", flush=True)
+        return
     if args.phase in ("core", "all"):
         core_t0 = time.time()
         meta["core_elapsed_h_prior"] = meta.get("core_elapsed_h", 0.0)

@@ -1,6 +1,8 @@
 # FM-switching — Project Status
 
-Last updated: 2026-10-15 (H100 night run COMPLETE — StudyR, StudyS2, StudyT. The 4B–8B thinking null persists at 32B: ERQA spatial D−C +2.5pp [−5.1, +11.0]; MV-RoboBench net_rescue −1.5pp [−7.0, +4.0]; signs 32B-T 35% vs 32B-I 40%. Device-to-cloud gap is size (+8–13pp). StudyT: termination at 8192 85% (4B 70, 8B 90) → trend does not continue; never-terminate at 24,576 5% vs 4B 20%, disjoint signs. Summary: reports/h100_night_summary.md.)
+Last updated: 2026-10-16 (Flash-attn re-run of all 32B arms COMPLETE — StudyR-fa2, StudyS2-fa2, StudyT-fa2. No accuracy verdict flips; StudyT termination sub-class flips (indistinguishable → reversal, within sampling noise); never-terminate at 24,576 stays ~2.5–5% vs 4B 20%. Greedy instruct shifts ≤0.8pp. 99.2 GB reserved = allocator fragmentation (reproduced under flash-attn), not offload. flash-attn decodes a flat ~21% slower at every length (cross-session). Cross-size comparisons BACKEND-MISMATCHED until 4B/8B re-run with flash-attn on the A6000.)
+
+Previously: 2026-10-15 (H100 night run COMPLETE — StudyR, StudyS2, StudyT. The 4B–8B thinking null persists at 32B: ERQA spatial D−C +2.5pp [−5.1, +11.0]; MV-RoboBench net_rescue −1.5pp [−7.0, +4.0]; signs 32B-T 35% vs 32B-I 40%. Device-to-cloud gap is size (+8–13pp). StudyT: termination at 8192 85% (4B 70, 8B 90) → trend does not continue; never-terminate at 24,576 5% vs 4B 20%, disjoint signs. Summary: reports/h100_night_summary.md.)
 
 Previously: 2026-10-15 (StudyS2 — MV-RoboBench SDJ+RTS at 32B, COMPLETE. VERDICT: THINKING DOES NOT PAY AT 32B — net_rescue D−C −1.50pp [−6.98, +3.99], n=401, b=61 c=67; CI upper below 5pp. The StudyS1 4B negative is not scale-specific. StudyT core: 32B-T terminates 30/35 = 85.7% at 8192 (4B 70%, 8B 90%) → trend does not continue; ladder running. Reports: reports/study_s2_mvrobobench_32b.md, reports/study_t_signs_32b.md.)
 

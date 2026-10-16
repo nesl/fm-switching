@@ -1,0 +1,178 @@
+{
+  "runs": [
+    {
+      "start": "2026-10-15T15:01:17.430225",
+      "cap_h": null,
+      "arms": [
+        "C"
+      ],
+      "stop_at": null
+    },
+    {
+      "start": "2026-10-15T15:04:49.520353",
+      "cap_h": null,
+      "arms": [
+        "D"
+      ],
+      "stop_at": null
+    }
+  ],
+  "attn_implementation": "flash_attention_2",
+  "transformers": "5.10.2",
+  "torch": "2.8.0+cu128",
+  "gpu": "NVIDIA H100 NVL",
+  "quant": "bf16 (all arms)",
+  "manifest": "results/erqa/study_s2/study_s2_manifest.json",
+  "n": 401,
+  "n_by_category": {
+    "spatial_distance_judgement": 201,
+    "robotic_trajectory_selection": 200
+  },
+  "hf_dataset": "AaronFengZY24/MV_Robobench",
+  "hf_revision": "869ea1113cf2f08498e81f57ced72597238455c0",
+  "thinking_gen": {
+    "do_sample": true,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.0,
+    "max_new_tokens": 8192
+  },
+  "instruct_gen": {
+    "do_sample": false,
+    "max_new_tokens": 512
+  },
+  "prompt_suffix": "Answer with the option's letter from the given choices directly.",
+  "batch": {},
+  "models": {
+    "I": [
+      "Qwen/Qwen3-VL-4B-Instruct",
+      "ebb281ec70b05090aa6165b016eac8ec08e71b17"
+    ],
+    "T": [
+      "Qwen/Qwen3-VL-4B-Thinking",
+      "1de27d8c51f12e819435303b9e84c4e25ba8401e"
+    ],
+    "C": [
+      "Qwen/Qwen3-VL-32B-Instruct",
+      "0cfaf48183f594c314753d30a4c4974bc75f3ccb"
+    ],
+    "D": [
+      "Qwen/Qwen3-VL-32B-Thinking",
+      "7edd10ffd1196091948fb245ff63e406ccb2d4d1"
+    ]
+  },
+  "arm_order": [
+    "D"
+  ],
+  "arms": {
+    "C": {
+      "key": "32BI",
+      "repo": "Qwen/Qwen3-VL-32B-Instruct",
+      "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+      "snapshot_path": "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+      "quant": "bf16",
+      "attn_implementation": "flash_attention_2",
+      "load_s": 13.2,
+      "weights_allocated_gb": 66.71,
+      "batch_size": 1,
+      "peak_alloc_gb": 67.33,
+      "peak_reserved_gb": 67.63
+    },
+    "D": {
+      "key": "32BT",
+      "repo": "Qwen/Qwen3-VL-32B-Thinking",
+      "revision": "7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+      "snapshot_path": "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Thinking/snapshots/7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+      "quant": "bf16",
+      "attn_implementation": "flash_attention_2",
+      "load_s": 12.7,
+      "weights_allocated_gb": 66.71,
+      "batch_size": 1,
+      "peak_alloc_gb": 69.22,
+      "peak_reserved_gb": 73.68
+    }
+  },
+  "projections": [
+    {
+      "after_arm": "C",
+      "at": "2026-10-15T15:01:35.935084",
+      "binding": false,
+      "est_s_per_trial": {
+        "I": 1.0,
+        "T": 60.0,
+        "C": 0.33,
+        "D": 150.0
+      },
+      "est_source": {
+        "I": "prior",
+        "T": "prior",
+        "C": "measured",
+        "D": "prior"
+      },
+      "elapsed_h": 0.01,
+      "remaining_h_by_category": {
+        "spatial_distance_judgement": 11.8,
+        "robotic_trajectory_selection": 11.74
+      },
+      "projected_total_h": 23.54,
+      "reference_h": 7.0,
+      "note": "exceeds 7.0h reference (informational; no action)"
+    },
+    {
+      "after_arm": "D",
+      "at": "2026-10-15T15:16:25.882546",
+      "binding": false,
+      "est_s_per_trial": {
+        "I": 1.0,
+        "T": 60.0,
+        "C": 2.0,
+        "D": 68.24
+      },
+      "est_source": {
+        "I": "prior",
+        "T": "prior",
+        "C": "prior",
+        "D": "measured"
+      },
+      "elapsed_h": 0.25,
+      "remaining_h_by_category": {
+        "spatial_distance_judgement": 7.03,
+        "robotic_trajectory_selection": 7.18
+      },
+      "projected_total_h": 14.46,
+      "reference_h": 7.0,
+      "note": "exceeds 7.0h reference (informational; no action)"
+    }
+  ],
+  "n_done": {
+    "D": 401
+  },
+  "completed": true,
+  "_provenance": {
+    "git_commit": "3951e3f5de62c44376630fc6fe6bac86c48a06f1",
+    "script": "study_s2_mvrobobench_32b.py",
+    "model": "qwen3vl_4b_32b",
+    "timestamp": "2026-10-15T21:47:36.137260",
+    "device": "h100nvl",
+    "n": 401,
+    "seed": 42,
+    "args": {
+      "build_manifest": false,
+      "arms": [
+        "D"
+      ],
+      "smoke": null,
+      "smoke_n": 3,
+      "smoke_budget": 1024,
+      "attn": "flash_attention_2",
+      "stop_at": null,
+      "cap_h": null,
+      "batch": [],
+      "smoke_cats": [
+        "spatial_distance_judgement",
+        "robotic_trajectory_selection"
+      ]
+    }
+  }
+}

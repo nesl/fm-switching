@@ -253,8 +253,9 @@ the mid bin.
 | T32 | 16,384 | 6 | 591.3 | 677.4 | 24.2 |
 | T32 | 24,576 | 2 | 1,040.4 | 1,042.8 | 23.6 |
 
-**VRAM note:** peak reserved reached **99.2 GB** at 24,576 tokens (I32 68.1 GB; T32 ≤ 73.5 GB at 8192) — at the
-card's limit. bf16 32B at 24k generated tokens on this card has essentially no headroom.
+**VRAM note (corrected 2026-10-15, see the flash-attn re-measure below):** peak *reserved* reached 99.2 GB at
+24,576 tokens, but peak *allocated* was 73.6 GB (I32 68.1 GB; T32 ≤ 73.5 GB at 8192); the gap is allocator
+fragmentation, reproduced identically under flash-attn, not memory the model needs and not offloading.
 
 ### Consistency and mechanism checks
 - **Cross-check:** 4B/8B termination and accuracy are the committed StudyP/J2 values; 32B decode 23–24 tok/s
@@ -275,3 +276,129 @@ card's limit. bf16 32B at 24k generated tokens on this card has essentially no h
 Files: `results/signs/study_t/study_t_trials_h100nvl.jsonl`, `study_t_scores_h100nvl.jsonl`,
 `study_t_results_h100nvl.json`, `scorer_validation.json`, `study_t_run_meta_h100nvl.json`; scripts
 `experiments/signs/study_t_signs_32b.py`, `study_t_score.py`, `study_t_analyse.py`.
+
+---
+
+## Flash-attn re-measure of the long-budget traces (2026-10-15 08:51–10:15, h100nvl GPU 3)
+
+Step 2 of the flash-attn re-run. flash-attn 2.8.3 installed `--no-deps` (+ `einops` 0.8.2); torch 2.8.0+cu128,
+transformers 5.10.2 unchanged. Every load passes `attn_implementation="flash_attention_2"` and asserts
+`model.config._attn_implementation == "flash_attention_2"` (passed); the value is stored per trial. The 8
+SDPA long-budget traces were re-run with the same sign, budget and seed, plus one **forced-length probe**
+(`min_new_tokens = 24,576`) so the 24,576 peak is measured even if the flash-attn trace closes earlier. The
+allocator cache was emptied before each trace. File: `results/signs/study_t/study_t_longtrace_h100nvl_fa2.jsonl`.
+
+| sign | budget | SDPA: gen / closed / alloc GB / reserved GB / tok/s | flash-attn: gen / closed / alloc GB / reserved GB / tok/s |
+|---|---|---|---|
+| IMG_6431 | 24,576 | 24,576 / no / 73.60 / 99.23 / 23.7 | 10,283 / yes / 69.83 / 78.57 / 18.9 |
+| IMG_6443 | 24,576 | 24,576 / no / 73.52 / 90.42 / 23.6 | 2,444 / yes / 67.66 / 67.99 / 18.9 |
+| **IMG_6431 (forced)** | 24,576 | — | **24,576 / — / 73.60 / 99.22 / 18.2** |
+| IMG_6415 | 16,384 | 13,435 / yes / 70.62 / 87.64 / 24.2 | 12,187 / yes / 70.29 / 85.25 / 18.9 |
+| IMG_6431 | 16,384 | 16,384 / no / 71.44 / 99.20 / 24.2 | 10,283 / yes / 69.83 / 78.57 / 18.9 |
+| IMG_6443 | 16,384 | 16,384 / no / 71.35 / 72.31 / 24.2 | 2,444 / yes / 67.66 / 67.99 / 19.0 |
+| IMG_0042 | 16,384 | 13,005 / yes / 70.45 / 72.31 / 24.1 | 11,084 / yes / 70.00 / 78.68 / 18.9 |
+| IMG_0037 | 16,384 | 15,196 / yes / 71.06 / 72.31 / 24.2 | 16,384 / no / 71.38 / 99.23 / 18.7 |
+| IMG_6566 | 16,384 | 8,527 / yes / 69.26 / 72.31 / 24.1 | 4,284 / yes / 68.14 / 68.79 / 18.9 |
+
+### The 99.2 GB figure — finding
+- **It is not an SDPA artifact.** At 24,576 generated tokens, flash-attn gives **peak allocated 73.60 GB and peak
+  reserved 99.22 GB**, identical to SDPA (73.60 / 99.23), even with the allocator cache emptied first.
+- **It is reserved, not required, memory.** The model needs **73.6 GB** (weights 66.7 GB + KV cache for ≈25.9k
+  tokens ≈ 6.5 GB + activations). The ≈25.6 GB above that is caching-allocator fragmentation: the KV cache is
+  re-allocated larger every decode step and freed blocks stay reserved. Reserved varies 68–99 GB for traces of
+  similar length under both backends (e.g. 99.2 GB at only 16,384 under flash-attn, IMG_0037).
+- **No offload or swap occurred.** The card has 95,830 MiB (≈100.5 GB; it is not an 80 GB part), weights are
+  pinned to one GPU (`device_map={"": 0}`, no offload path — overflow would raise OOM), and SDPA decode throughput
+  was flat at 23.6–24.2 tok/s from short traces to 24,576 tokens. **The SDPA long-trace latencies measure
+  inference, not swap; they stand.**
+- **Correction to the earlier text:** the core section's "peak reserved VRAM reached 99.2 GB … at the card's
+  limit" is restated as: peak *allocated* 73.6 GB at 24,576 tokens (both backends); peak *reserved* up to 99.2 GB
+  from allocator fragmentation. The SDPA figure is neither an attention artifact nor offloading, so it is not
+  retracted, but it must not be read as the memory the model needs. (Untested refinement:
+  `PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True` should bring reserved close to allocated.)
+
+### Other observations (not verdicts)
+- Flash-attn is **deterministic per seed** (IMG_6431 and IMG_6443 produce identical traces at 16,384 and
+  24,576), as SDPA was, but its token sequences differ from SDPA's — the same seed lands on different paths.
+  Termination is therefore re-sampled: 3 signs that never closed under SDPA closed under flash-attn
+  (IMG_6431, IMG_6443 at 10,283 / 2,444 tokens), and one that closed under SDPA did not (IMG_0037).
+- **Flash-attn decoded at 18.2–19.0 tok/s vs SDPA's 23.6–24.2 tok/s, at every length** — slower, not faster.
+  Decode is single-CPU-core bound (python at ~100% of one core) and other users' jobs were active on the same
+  NUMA-0 CPUs during this run (load average ~15–21; not logged for the SDPA run), so this cross-session
+  comparison is **confounded by CPU contention** and is not a backend speed measurement. A same-process,
+  interleaved SDPA↔flash-attn timing on identical forced-length prompts is required to attribute it.
+
+---
+
+## Flash-attn re-run — core (2026-10-15 12:02–15:01, h100nvl GPU 3; no cap)
+
+Same 40 signs, seed, decoding and budgets; only the attention backend changes (`flash_attention_2`, asserted
+at load and stored per trial). Scorer validated. Files: `study_t_trials_h100nvl_fa2.jsonl`,
+`study_t_scores_h100nvl_fa2.jsonl`, `study_t_results_h100nvl_fa2_core.json`.
+
+### ⚠ Verdict sub-class FLIPS between backends — both reported, neither picked
+| | SDPA (2026-10-14) | flash-attn (2026-10-15) |
+|---|---|---|
+| 32B-T terminated at 8192 | 34/40 = 85.0% [70.9, 92.9] | **29/40 = 72.5% [57.2, 83.9]** |
+| Primary verdict | TREND DOES NOT CONTINUE | TREND DOES NOT CONTINUE |
+| Sub-class | indistinguishable from 8B (upper 92.9 ≥ 90) | **reversal** (upper 83.9 < 90) |
+| Paired vs 8B-T (b / c, p) | 3 / 5, p=0.73 | 2 / 9, p=0.065 |
+| Paired vs 4B-T (b / c, p) | 9 / 3, p=0.15 | 6 / 5, p=1.00 |
+
+- **The primary verdict is backend-stable; the sub-classification is not.** Under flash-attn, 32B terminates
+  no better than 4B (72.5% vs 70%) and below 8B; under SDPA it sat between them.
+- **SDPA vs flash-attn termination, paired by sign:** both terminated 27, neither 4, SDPA-only 7, flash-attn-only 2
+  (exact McNemar p=0.18). The two backends draw different token paths from the same seed, so termination is
+  re-sampled; a 5-sign swing at n=40 is within what that noise allows (p=0.18) and is the measured backend-to-
+  backend variability of this endpoint. **Conclusion: at n=40 the reversal-vs-indistinguishable distinction is not
+  resolvable; "scale does not buy termination beyond 8B" is the robust statement.**
+
+### Accuracy (validated scorer)
+| arm | SDPA | flash-attn | delta |
+|---|---|---|---|
+| 32B-I (greedy) | 16/40 = 40.0% | 16/40 = 40.0% | **0.0 pp** (37/40 answer texts identical; the 3 differing texts score the same) |
+| 32B-T | 14/40 = 35.0% | 16/40 = 40.0% | +5.0 pp (sampling noise; 11 non-terminating scored 0) |
+| 32B-T vs 32B-I b / c | 5 / 7 | 5 / 5 | thinking does not beat instruct under either backend |
+
+The greedy instruct arm is unchanged (< 1 pp), as expected for mathematically equivalent kernels.
+
+### Think tokens among completers at 8192 (flash-attn)
+low 13/13 median 1,910; mid 8/13 median 4,090; high 7/13 median 5,328; all 29/40 median 3,928
+(SDPA: all 34/40 median 4,419). Per-bin termination flash-attn vs SDPA: low 13/13 vs 12/13, mid 8/13 vs 11/13,
+high 7/13 vs 10/13.
+
+### Decode rate
+T32 median 18.8 tok/s (flash-attn) vs 23.9 (SDPA). Same caveat as the long-trace section: cross-session and
+CPU-contention-confounded; not yet a backend measurement.
+
+## Flash-attn re-run — budget ladder (2026-10-15 21:47–23:59)
+
+11 signs not closed at 8192 under flash-attn were re-run at 16,384; the 1 still open went to 24,576. Ladder
+determinism: **12/12 re-runs reproduced the previous rung's tokens as an exact prefix** (SDPA: 8/8).
+Files: `study_t_results_h100nvl_fa2.json` (full), `study_t_scores_h100nvl_fa2.jsonl`.
+
+### Survival side by side (fraction NOT terminated by budget B)
+| B | 32B SDPA | 32B flash-attn | 4B (J2, SDPA) |
+|---|---|---|---|
+| 1,024 | 34/40 (85.0%) | 36/40 (90.0%) | 32/40 (80.0%) |
+| 2,048 | 31/40 (77.5%) | 33/40 (82.5%) | 29/40 (72.5%) |
+| 4,096 | 25/40 (62.5%) | 23/40 (57.5%) | 21/40 (52.5%) |
+| 8,192 | 6/40 (15.0%) | 11/40 (27.5%) | 12/40 (30.0%) |
+| 16,384 | 2/40 (5.0%) | **1/40 (2.5%)** | 8/40 (20.0%) |
+| 24,576 | **2/40 (5.0%)** | **1/40 (2.5%)** | **8/40 (20.0%)** |
+
+- **The never-terminate finding is backend-robust:** at 24,576, 32B leaves 5% (SDPA) / 2.5% (flash-attn) of
+  signs open vs 4B's 20%. 4B's 20% asymptote does not hold at 32B under either kernel.
+- **The 8,192 rate is not backend-robust** (85% vs 72.5%; core section above): flash-attn's extra non-terminators
+  at 8,192 are slow completers, not never-terminators — 10 of 11 close by 16,384 (8,395–12,107 think tokens).
+  The 8,192 primary endpoint is therefore sensitive to where the budget sits relative to a dense cluster of
+  ~8–12k-token traces; the asymptote is the stable quantity.
+- **The never-terminating signs differ by backend as well as by scale:** flash-attn's only never-terminator
+  (IMG_0037, open at 24,576) closed under SDPA at 15,196 tokens; SDPA's two (IMG_6431, IMG_6443) close under
+  flash-attn at 10,283 / 2,444. With 4B's 8 disjoint from both, non-termination is a property of the sampled
+  path, not of the sign.
+- Peak at 24,576 (IMG_0037, natural): allocated 73.54 GB, reserved 99.2 GB — the same allocator-fragmentation
+  signature as SDPA.
+- Decode: I32 18.1 tok/s, T32 18.3–18.8 tok/s under flash-attn vs 23.0 / 23.6–24.2 under SDPA — the slowdown
+  appears for the short greedy instruct answers (tens to a few hundred tokens) too, consistent with per-step overhead (CPU-bound launch,
+  flash-attn varlen/unpad path) rather than attention FLOPs; still cross-session and CPU-contention-confounded.
