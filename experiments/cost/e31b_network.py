@@ -986,6 +986,10 @@ def write_report(cellid_stats, stateI_stats, rssi_stats, pred_results, text_tabl
         "| `figures/cost/e31b_predictability.pdf` | Figure 2: predictability + payload comparison |",
     ]
 
+    import sys as _sys, pathlib as _pl
+    _sys.path.insert(0, str(_pl.Path(__file__).resolve().parent.parent / 'lib'))
+    from output_guard import guard_report as _guard_report
+    _guard_report(REPORT)
     with open(REPORT, "w") as f:
         f.write("\n".join(lines) + "\n")
     print(f"[report] {REPORT}")

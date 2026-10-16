@@ -54,11 +54,14 @@ the instruct arm, which generates ~56 tokens and has no KV cache worth the kerne
 
 ---
 
-## 2. Correction — the 59× → 42× cost ratio is wall-clock-per-arm, not a backend speedup
+## 2. Correction — the 59× → 42× cost ratio is mean wall-clock-per-arm, not a backend speedup
 
 **Dated correction, 2026-10-16.** The headline "4B-Thinking costs 59× the 8B-Instruct arm, 42×
 under flash-attn" was reported as though the change were a backend effect. It is not, or not
-only. It is the ratio of mean wall time per sign between two arms, and on a sampled arm that
+only. **Both figures are mean-of-means** — the ratio of arm A's mean wall time per sign to arm
+D's. The median-of-medians version of the same quantity is **64× → 50×**; the two definitions
+are not interchangeable and are not reported together anywhere else. It is the ratio of mean
+wall time per sign between two arms, and on a sampled arm that
 quantity moves when the backend re-draws the generation length.
 
 | arm | mean wall latency | mean generated tokens | throughput |
@@ -108,6 +111,9 @@ All intervals overlap heavily at n=40. Scale-buys-termination reads 70→90% und
 flips. The pre-registered rule ("4B×N MATCHES 8B×1") is satisfied under both backends — at N=1
 under SDPA and N=2 under FA2, a difference that is itself within sampling noise.
 
-**Standing discrepancy, unrelated to the backend:** the registry's 85× cost ratio for this study
-does not reproduce from this data under either backend (59× SDPA, 42× FA2). Flagged previously;
-not resolved here.
+**Retraction, 2026-10-16.** An earlier version of this section claimed "the registry's 85× cost
+ratio for this study does not reproduce". There is no 85× in the registry — the string appears
+nowhere in `research/EXPERIMENTS.md`, `results/INDEX.md` or any report. The StudyP row carries
+only the 4B-vs-8B thinking ratio, **1.21× (mean)**, which does reproduce. The 59×/42×
+thinking-vs-instruct figures above are derived here and are not in the registry at all. The
+claimed discrepancy did not exist.

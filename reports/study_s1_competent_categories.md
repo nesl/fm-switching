@@ -128,7 +128,11 @@ Stated above, first. **Neither — branch is empty. STOP.**
 
 ## 5. Think-token distribution and latency (cost side)
 
-| scope | think med | IQR | max | arm T lat med | arm I lat med | ratio |
+All ratios in this table are **median-of-medians** (median arm-T per-trial latency / median
+arm-I per-trial latency). The mean-of-means version of the POOLED figure is 452×; the two are
+not interchangeable.
+
+| scope | think med | IQR | max | arm T lat med | arm I lat med | ratio (median-of-medians) |
 |---|---|---|---|---|---|---|
 | spatial_distance_judgement | 2,562 | [1,261, 4,186] | 8,117 | 77.2 s | 0.21 s | **372×** |
 | robotic_trajectory_selection | 1,148 | [620, 1,956] | 5,683 | 27.5 s | 0.19 s | **144×** |
@@ -137,15 +141,19 @@ Stated above, first. **Neither — branch is empty. STOP.**
 Arm T consumed **7.93 h** of A6000 time for 401 questions. Arm I covered the same questions in
 roughly 80 seconds.
 
-**The cost conclusion is sharper than the accuracy one.** Thinking costs **226× the latency** of
+**The cost conclusion is sharper than the accuracy one.** Thinking costs **226× the latency**
+(median-of-medians) of
 the Instruct arm and returns **+1.00pp**, with an interval that includes zero and a negative lower
 bound. On this workload the bounded path is not merely competitive — it dominates, by more than
 two orders of magnitude on the only axis where the two differ materially. This is consistent with
-StudyQ on ERQA, where 8B-Instruct matched 4B-Thinking's accuracy at 91× the speed.
+StudyQ on ERQA, where 8B-Instruct matched 4B-Thinking's accuracy at 91× the speed (that figure
+is **mean-of-means**, not median — see `reports/study_q_fa2_backend.md`; the two studies'
+headline ratios are therefore computed on different bases).
 
 **Attention backend (added 2026-10-15).** `study_s1_mvrobobench.py` passes no
 `attn_implementation`, so both arms ran on the transformers default, **SDPA** (`transformers
-5.12.1`; `flash_attn 2.6.3` is installed on this box but was not requested). The 226× ratio is
+5.12.1`; `flash_attn 2.6.3` is installed on this box but was not requested). The 226×
+(median-of-medians) ratio is
 unaffected on two counts: both arms share the backend, and the gap is driven by decode length
 (1,689 think tokens vs a single letter), which is upstream of the attention kernel. The StudyQ
 comparison is also backend-matched — no script under `experiments/erqa/` sets
@@ -200,7 +208,7 @@ four cells rather than the two recorded in the Audit 2 report.
 ## What this settles, and what it does not
 
 **Settles:** on MV-RoboBench's two competent categories, thinking mode produces no net accuracy
-benefit over the Instruct model at 226× the latency, despite altering more than a third of the
+benefit over the Instruct model at 226× the latency (median-of-medians), despite altering more than a third of the
 answers. A real negative.
 
 **Does not settle:** the dynamicity claim. Per Condition 2, Gate 2 was never testable here — the

@@ -31,6 +31,13 @@ No arm's verdict flips. All five arms remain within a narrow band, and the bound
 Headline cost ratio: 8B-Instruct vs 4B-Thinking was **88×** under SDPA (27.32/0.31) and is
 **72×** under flash-attn (22.44/0.31). Same conclusion, smaller number.
 
+Both are **mean-of-means** — arm A's mean per-trial latency over arm D's. Carried to full
+precision they are 89.5× and 73.3×; the committed StudyQ report states the same SDPA quantity as
+**91×** (27.3/0.3), so 88× and 91× are the same number rounded differently, not two measurements.
+The **median-of-medians** version is quite different — **46.7× → 43.6×** — because arm A's
+latency distribution is long-tailed. StudyS1's headline 226× is median-of-medians, so it is not
+on the same basis as this one.
+
 The thinking arms' latency ratios (0.82, 0.95) are mean wall time over the fixed 400-question
 set, which is the right number for "what does this arm cost to run". It is not a clean backend
 speedup: on a sampled arm the backend change also re-draws the generation length. See the

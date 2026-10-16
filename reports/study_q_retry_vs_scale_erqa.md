@@ -21,7 +21,9 @@ Pre-registered rule:
 
 **BOUNDED PATH SUFFICES. Best reasoning arm (B: 43.8%) exceeds 8B-Instruct (D: 42.5%) by 1.3pp with fully overlapping CIs. No reasoning arm exceeds 8B-Instruct by >3pp. All five arms — 4B-Instruct, 8B-Instruct, 4B-Thinking×1, 4B-Thinking×5, 8B-Thinking×1 — are indistinguishable at n=400 (all CIs overlap).**
 
-Latency at N=1: 4B-T mean=27.3s vs 8B-I mean=0.3s — a 91× latency gap with no accuracy return.
+Latency at N=1: 4B-T mean=27.3s vs 8B-I mean=0.3s — a 91× latency gap (mean-of-means) with no
+accuracy return. The median-of-medians version of the same quantity is 46.7×; the distributions
+are long-tailed and the two definitions are not interchangeable.
 
 ---
 
@@ -89,7 +91,7 @@ For arm B, latency includes all new passes (6 retries only; pass 1 = arm A).
 | B (total incl. pass 1) | — | — | 3.20h |
 | C (8B-T×1) | 32.5s | — | 3.61h |
 
-8B-T is 1.19× slower than 4B-T per trial (32.5s vs 27.3s). 8B-I is 91× faster than 4B-T at identical accuracy.
+8B-T is 1.19× slower than 4B-T per trial (means, 32.5s vs 27.3s). 8B-I is 91× faster than 4B-T at identical accuracy (mean-of-means; 46.7× on medians).
 
 ---
 

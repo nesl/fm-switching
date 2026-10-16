@@ -737,6 +737,10 @@ def write_report(out, i3_res):
     W("- **TEMPORAL decode overhead vs I2:** I2 used per-frame seeks (no decode tracking); I3 used sequential cache (amortised per video). The two decode numbers are not on the same footing.")
     W("- **Position bias correction:** would require rerunning with permuted option orders.")
 
+    import sys as _sys, pathlib as _pl
+    _sys.path.insert(0, str(_pl.Path(__file__).resolve().parent.parent / 'lib'))
+    from output_guard import guard_report as _guard_report
+    _guard_report(REPORT_PATH)
     REPORT_PATH.write_text("\n".join(lines) + "\n")
 
 if __name__ == "__main__":

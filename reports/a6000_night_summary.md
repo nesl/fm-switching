@@ -210,7 +210,7 @@ For the eventual cross-hardware comparison: the H100 run's arm-A rerun yields **
 ratio, for 4B-Instruct only**. Applying that ratio to 4B-Thinking, 8B-Instruct or 8B-Thinking is a
 **projection, not a measurement**, and must be labelled as such — decode is bandwidth-bound and
 the A6000:H100 ratio is not constant across model sizes. StudyS1 is a concrete caution: arm T ran
-226× slower than arm I on identical hardware and inputs, so per-arm cost does not scale by a
+226× slower (median-of-medians) than arm I on identical hardware and inputs, so per-arm cost does not scale by a
 single hardware factor.
 
 **Attention backend — a second axis, added 2026-10-15.** The incoming `research/HOST_H100.md`
@@ -232,7 +232,7 @@ Consequences, stated rather than repaired (no timing-only rerun, per instruction
 
 - **Accuracy results and every verdict are unaffected** — the backend changes attention numerics,
   not which option letter is chosen, and within each study all arms share it.
-- **Within-study latency ratios hold** (Q4's 1.5×/5.5×, S1's 226×) — one script, one backend.
+- **Within-study latency ratios hold** (Q4's 1.5×/5.5×, S1's 226× median-of-medians) — one script, one backend.
   *(Updated 2026-10-16: "hold" was meant as internally comparable, which is correct, but it reads
   as backend-invariant, which is not. StudyS1 was since re-run on flash-attn-2 and its 226× reads
   202× — the kernel speeds up the long-decode arm and not the single-token one. Within-study

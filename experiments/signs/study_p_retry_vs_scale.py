@@ -1035,6 +1035,10 @@ def write_report(trials, gemini_acc, crops_used):
 
     # Flush
     os.makedirs(os.path.dirname(REPORT_PATH), exist_ok=True)
+    import sys as _sys, pathlib as _pl
+    _sys.path.insert(0, str(_pl.Path(__file__).resolve().parent.parent / 'lib'))
+    from output_guard import guard_report as _guard_report
+    _guard_report(REPORT_PATH)
     with open(REPORT_PATH, 'w') as f:
         f.write('\n'.join(lines) + '\n')
 

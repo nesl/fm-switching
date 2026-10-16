@@ -702,6 +702,10 @@ def write_report(result, rows):
           f"Partial predictability: above the unpredictable threshold but below the predictable threshold.")
 
     os.makedirs(os.path.dirname(OUT_REPORT), exist_ok=True)
+    import sys as _sys, pathlib as _pl
+    _sys.path.insert(0, str(_pl.Path(__file__).resolve().parent.parent / 'lib'))
+    from output_guard import guard_report as _guard_report
+    _guard_report(OUT_REPORT)
     with open(OUT_REPORT, "w") as f:
         f.write("\n".join(lines) + "\n")
 

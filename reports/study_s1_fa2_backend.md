@@ -43,14 +43,17 @@ tokens to 1.24× past 4k, and is nil on the instruct arm, which emits a single a
 
 ---
 
-## 2. Clarification — the 226× → 202× cost ratio is a per-arm wall-clock ratio
+## 2. Clarification — the 226× → 202× cost ratio is a median-of-medians per-arm wall-clock ratio
 
 **Dated note, 2026-10-16.** The committed report cites **226×** as the latency cost of thinking
 over the instruct arm, defined as the ratio of **median** per-trial wall time (43.5 s / 0.19 s).
 That definition reproduces exactly on the paired 401 questions, and the flash-attn value is
 **202×**:
 
-| scope | n | arm T median lat | arm I median lat | ratio SDPA | ratio FA2 |
+All six ratios below are **median-of-medians**: median arm-T per-trial latency divided by median
+arm-I per-trial latency. The mean-of-means version of the pooled figure is **452× → 365×**.
+
+| scope | n | arm T median lat | arm I median lat | ratio SDPA (med) | ratio FA2 (med) |
 |---|---|---|---|---|---|
 | robotic_trajectory_selection | 200 | 27.5 s → 22.8 s | 0.192 s → 0.191 s | 144× | **120×** |
 | spatial_distance_judgement | 201 | 77.2 s → 73.1 s | 0.208 s → 0.205 s | 372× | **357×** |

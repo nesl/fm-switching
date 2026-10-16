@@ -1108,6 +1108,10 @@ def write_report(results: dict, kv_info: dict, text_only: dict) -> None:
     ]
 
     REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    import sys as _sys, pathlib as _pl
+    _sys.path.insert(0, str(_pl.Path(__file__).resolve().parent.parent / 'lib'))
+    from output_guard import guard_report as _guard_report
+    _guard_report(REPORT_PATH)
     REPORT_PATH.write_text("\n".join(lines) + "\n")
     log(f"\n  Report written: {REPORT_PATH}")
 

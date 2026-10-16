@@ -547,6 +547,10 @@ def analyse(prelim=False):
         w(f"**THINKING-QUICK vs THINKING:** diff={100*tq['gate']['diff']:+.2f}pp, p={tq['gate']['pval']:.4f}.")
     w()
 
+    import sys as _sys, pathlib as _pl
+    _sys.path.insert(0, str(_pl.Path(__file__).resolve().parent.parent / 'lib'))
+    from output_guard import guard_report as _guard_report
+    _guard_report(REPORT_PATH)
     REPORT_PATH.write_text("\n".join(lines))
     print(f"\nReport: {REPORT_PATH}")
     print(f"JSON:   {JSON_PATH}")
