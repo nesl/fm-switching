@@ -38,6 +38,10 @@ if not hasattr(PIL.Image, "ExifTags"):
     PIL.Image.ExifTags = _F()
 
 from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
+import sys as _sys
+_sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))
+import attn_guard
+from attn_guard import assert_fa2
 from transformers.video_utils import VideoMetadata
 from qwen_vl_utils import process_vision_info
 
@@ -181,10 +185,18 @@ def main():
     ap.add_argument("--cell", required=True, choices=["4B-I", "8B-I", "4B-T"])
     ap.add_argument("--device", default="cuda:1")
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--fa2", action="store_true",
+                    help="flash-attention-2 re-run: write to a separate JSONL so the committed "
+                         "SDPA Q4 trials are neither mixed in nor overwritten.")
     args = ap.parse_args()
 
     model_arm = args.cell
     state_arm = dict(CELLS)[model_arm]
+    global JSONL
+    if args.fa2:
+        JSONL = OUT_DIR / "study_o_q4_trials_fa2.jsonl"
+        print(f"FA2 RE-RUN -> {JSONL} (committed SDPA trials untouched)", flush=True)
+
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     CACHE.mkdir(parents=True, exist_ok=True)
 
@@ -205,7 +217,9 @@ def main():
 
     t0 = time.time()
     model = Qwen3VLForConditionalGeneration.from_pretrained(
-        SNAP[model_arm], torch_dtype=torch.bfloat16, device_map=args.device)
+        SNAP[model_arm], torch_dtype=torch.bfloat16, device_map=args.device,
+        attn_implementation="flash_attention_2")
+    assert_fa2(model, f"study_o_q4/{model_arm}")
     proc = AutoProcessor.from_pretrained(
         SNAP[model_arm], min_pixels=MIN_PIXELS, max_pixels=MAX_PIXELS)
     print(f"loaded {model_arm} in {time.time()-t0:.1f}s "
@@ -275,6 +289,7 @@ def main():
             "frame_t_max": max(ts) if ts else None,
             "think_closed": think_closed,
             "budget_hit": bool(len(gen) >= GEN[model_arm]["max_new_tokens"] - 5),
+            "attn_implementation": attn_guard.record(),
             "n_input": n_in, "n_think": n_think, "n_gen": len(gen),
             "lat_ms": round(lat, 1),
         }) + "\n")

@@ -37,6 +37,7 @@ precision they are 89.5× and 73.3×; the committed StudyQ report states the sam
 The **median-of-medians** version is quite different — **46.7× → 43.6×** — because arm A's
 latency distribution is long-tailed. StudyS1's headline 226× is median-of-medians, so it is not
 on the same basis as this one.
+**Canonical basis switch (2026-10-16).** The project now treats **median-of-medians** as the canonical cost-ratio basis: thinking-arm latency distributions are long-tailed and the mean is driven by the same non-terminating traces analysed separately in StudyJ2/J4/J5, so a mean cost ratio double-counts that phenomenon. StudyQ's canonical figures are therefore **46.7× (SDPA)** and **43.6× (flash-attn)**. The mean-of-means values above (88×, 72×) stay as written. Registry row `StudyQ-median`.
 
 The thinking arms' latency ratios (0.82, 0.95) are mean wall time over the fixed 400-question
 set, which is the right number for "what does this arm cost to run". It is not a clean backend

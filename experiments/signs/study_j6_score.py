@@ -18,6 +18,9 @@ sys.path.insert(0, '/tmp/sign-understanding')
 from PIL import Image
 from huggingface_hub import hf_hub_download
 from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
+sys.path.insert(0, str(__import__('pathlib').Path(__file__).resolve().parent.parent / 'lib'))
+import attn_guard
+from attn_guard import assert_fa2
 from qwen_vl_utils import process_vision_info
 import open_clip
 
@@ -375,7 +378,12 @@ def extract_think_and_answer(full_output, processor):
 
 
 def parse_prediction(answer_text):
-    text = re.sub(r"```(?:json)?", "", answer_text).strip().strip("`").strip()
+    # Generation decodes with skip_special_tokens=False (required to see </think> in the raw
+    # stream), so the answer carries a trailing <|im_end|>. Without stripping it every parse
+    # fails and `prediction` is None for every trial — the StudyJ5 failure mode. study_j_signs.py
+    # does not hit this because it decodes the answer with skip_special_tokens=True.
+    text = re.sub(r"<\|[^|]*\|>", "", answer_text)
+    text = re.sub(r"```(?:json)?", "", text).strip().strip("`").strip()
     for parser in (ast.literal_eval, json.loads):
         try:
             d = parser(text)
@@ -408,7 +416,17 @@ def main():
                         help='Run scorer validation only; do not run inference.')
     parser.add_argument('--score-only', action='store_true',
                         help='Skip inference; re-score existing JSONL and write report.')
+    parser.add_argument('--fa2', action='store_true',
+                        help='flash-attention-2 re-run: write to separate trial/report files so '
+                             'the committed SDPA trials are never mixed in or overwritten.')
     args = parser.parse_args()
+
+    global TRIALS_PATH, REPORT_PATH
+    if args.fa2:
+        TRIALS_PATH = TRIALS_PATH.replace('.jsonl', '_fa2.jsonl')
+        REPORT_PATH = REPORT_PATH.replace('.md', '_fa2.md')
+        print(f'FA2 RE-RUN -> {TRIALS_PATH}', flush=True)
+        print(f'FA2 RE-RUN -> {REPORT_PATH} (SDPA trials and report untouched)', flush=True)
 
     # Step 1 — validate scorer (always runs)
     print("=" * 60)
@@ -447,7 +465,9 @@ def main():
         if pending:
             print("Loading model...", flush=True)
             model     = Qwen3VLForConditionalGeneration.from_pretrained(
-                THINKING_PATH, torch_dtype=torch.bfloat16, device_map=DEVICE)
+                THINKING_PATH, torch_dtype=torch.bfloat16, device_map=DEVICE,
+                attn_implementation="flash_attention_2")
+            assert_fa2(model, "study_j6_score")
             model.eval()
             processor = AutoProcessor.from_pretrained(THINKING_PATH)
 
@@ -516,6 +536,7 @@ def main():
                         'objectID': info['objectID'],
                         'n_gt': run['n_gt'], 'bin': run['bin'], 'role': run['role'],
                         'arm': run['arm'], 'seed': run['seed'],
+                        'attn_implementation': attn_guard.record(),
                         'n_input_tokens': n_input, 'n_generated_tokens': len(generated),
                         'n_think_tokens': n_think, 'n_answer_tokens': n_answer,
                         'total_latency_ms': lat_ms,

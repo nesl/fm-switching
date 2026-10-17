@@ -510,6 +510,10 @@ def write_markdown(trials: list[dict], A: dict, B: dict, C: dict,
         f"- Spread: {G.get('cat_gap_spread_pp','n/a')}pp",
     ]
 
+    import sys as _sys, pathlib as _pl
+    _sys.path.insert(0, str(_pl.Path(__file__).resolve().parent.parent / 'lib'))
+    from output_guard import guard_report as _guard_report
+    _guard_report(SUMMARY_PATH)
     SUMMARY_PATH.write_text("\n".join(lines) + "\n")
     print(f"\nSummary written: {SUMMARY_PATH}")
 

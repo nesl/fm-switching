@@ -60,7 +60,9 @@ the instruct arm, which generates ~56 tokens and has no KV cache worth the kerne
 under flash-attn" was reported as though the change were a backend effect. It is not, or not
 only. **Both figures are mean-of-means** — the ratio of arm A's mean wall time per sign to arm
 D's. The median-of-medians version of the same quantity is **64× → 50×**; the two definitions
-are not interchangeable and are not reported together anywhere else. It is the ratio of mean
+are not interchangeable and are not reported together anywhere else.
+**Canonical basis switch (2026-10-16).** The project now treats **median-of-medians** as the canonical cost-ratio basis — thinking-arm latency distributions are long-tailed and the mean is driven by the same non-terminating traces analysed separately in StudyJ2/J4/J5, so a mean cost ratio double-counts that phenomenon. StudyP's canonical figures are therefore **64.3× (SDPA)** and **50.0× (flash-attn)**, and the 4B-vs-8B-Thinking ratio is **1.66× (SDPA)** / **1.11× (flash-attn)** against the registry's 1.21× mean. The mean-of-means values stay as written and both are labelled. Registry row `StudyP-median`; reference table `reports/cost_ratio_basis.md`. Note that StudyP is the one family where the median ratio is LARGER than the mean, so the switch raises this headline while lowering StudyQ's.
+ It is the ratio of mean
 wall time per sign between two arms, and on a sampled arm that
 quantity moves when the backend re-draws the generation length.
 
@@ -115,5 +117,9 @@ under SDPA and N=2 under FA2, a difference that is itself within sampling noise.
 ratio for this study does not reproduce". There is no 85× in the registry — the string appears
 nowhere in `research/EXPERIMENTS.md`, `results/INDEX.md` or any report. The StudyP row carries
 only the 4B-vs-8B thinking ratio, **1.21× (mean)**, which does reproduce. The 59×/42×
-thinking-vs-instruct figures above are derived here and are not in the registry at all. The
-claimed discrepancy did not exist.
+thinking-vs-instruct figures above are derived here and are not in the registry at all.
+
+**Provenance:** the 85× was introduced in conversation, not in the repository, and was never
+attached to a source. It is not a lost or superseded measurement and there is nothing to
+recover — the discrepancy it described never existed. Recorded here so a future reader does not
+go looking for the run that produced it.

@@ -7,7 +7,10 @@ in the script could notice. This module makes that class of accident structural 
 something each script has to remember.
 
 Writing a NEW report is always allowed. Replacing one that git already tracks is not, unless
-the caller says so explicitly.
+the caller says so explicitly. The rule is scoped to markdown rather than to `reports/`: a
+tracked write-up is a committed record wherever it lives, and
+`results/sember/study_i/study_i_summary.md` carries the same exposure as anything under
+`reports/`.
 """
 
 import os
@@ -35,16 +38,20 @@ def _suggest(path):
 def guard_report(path, *, allow_overwrite=False, note=""):
     """Abort unless `path` is safe to write. Returns the path for chaining.
 
+    Applies to any git-tracked markdown file, in `reports/`, under `results/`, or anywhere
+    else. Non-markdown outputs (JSONL trials, result JSON) are out of scope: those are
+    append-or-replace data files whose overwrite semantics each script owns.
+
     allow_overwrite=True is the deliberate in-place regeneration of a committed report —
     pass it only when the run reproduces the same configuration the report was built from.
     """
     path = str(path)
-    if not allow_overwrite and _tracked(path):
+    if not allow_overwrite and path.lower().endswith(".md") and _tracked(path):
         if os.environ.get(ENV_OVERRIDE) == "1":
             print(f"  [output_guard] {ENV_OVERRIDE}=1 — overwriting tracked {path}", flush=True)
             return path
         raise SystemExit(
-            f"FATAL [output_guard]: refusing to overwrite the committed report\n"
+            f"FATAL [output_guard]: refusing to overwrite the committed write-up\n"
             f"    {path}\n"
             f"{('    ' + note + chr(10)) if note else ''}"
             f"  This file is tracked in git. A run whose configuration differs from the one that\n"

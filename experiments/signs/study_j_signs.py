@@ -27,6 +27,9 @@ Scorer: /tmp/sign-understanding/recognition_fp_metrics_eval.py with
 import os, sys, json, ast, re, time, argparse
 import torch
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))
+import attn_guard
+from attn_guard import assert_fa2
 from PIL import Image
 from huggingface_hub import hf_hub_download
 from transformers import AutoProcessor, Qwen3VLForConditionalGeneration
@@ -210,6 +213,7 @@ def run_arm(arm_cfg, seed, signs, model, processor, prompt_text, hf_cache, jsonl
             except Exception as e:
                 trial = {
                     "arm": arm_name, "seed": seed, "crop_name": crop_name,
+                    "attn_implementation": attn_guard.record(),
                     "imagePath": sign["imagePath"], "objectID": sign["objectID"],
                     "n_input_tokens": 0, "n_think_tokens": 0, "n_answer_tokens": 0,
                     "total_latency_ms": 0, "truncated": False, "think_closed": False,
@@ -256,6 +260,7 @@ def run_arm(arm_cfg, seed, signs, model, processor, prompt_text, hf_cache, jsonl
                 "arm": arm_name,
                 "seed": seed,
                 "crop_name": crop_name,
+                "attn_implementation": attn_guard.record(),
                 "imagePath": sign["imagePath"],
                 "objectID": sign["objectID"],
                 "n_input_tokens": n_input,
@@ -285,7 +290,15 @@ def run_arm(arm_cfg, seed, signs, model, processor, prompt_text, hf_cache, jsonl
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--arms", nargs="*", default=None)
+    parser.add_argument("--fa2", action="store_true",
+                        help="flash-attention-2 re-run: write to a separate JSONL so the "
+                             "committed SDPA trials are neither mixed in nor overwritten.")
     args = parser.parse_args()
+
+    global JSONL_PATH
+    if args.fa2:
+        JSONL_PATH = OUT_DIR / "study_j_trials_fa2.jsonl"
+        print(f"FA2 RE-RUN -> {JSONL_PATH} (SDPA trials untouched)", flush=True)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -336,8 +349,10 @@ def main():
             model_path = INSTRUCT_PATH if model_type == "instruct" else THINKING_PATH
             print(f"Loading {model_type} model ...", flush=True)
             model = Qwen3VLForConditionalGeneration.from_pretrained(
-                model_path, torch_dtype=torch.bfloat16, device_map=DEVICE
+                model_path, torch_dtype=torch.bfloat16, device_map=DEVICE,
+                attn_implementation="flash_attention_2"
             )
+            assert_fa2(model, f"study_j_signs/{model_type}")
             model.eval()
             processor = AutoProcessor.from_pretrained(model_path)
             current_model_type = model_type

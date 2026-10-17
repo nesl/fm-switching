@@ -92,6 +92,7 @@ For arm B, latency includes all new passes (6 retries only; pass 1 = arm A).
 | C (8B-T×1) | 32.5s | — | 3.61h |
 
 8B-T is 1.19× slower than 4B-T per trial (means, 32.5s vs 27.3s). 8B-I is 91× faster than 4B-T at identical accuracy (mean-of-means; 46.7× on medians).
+**Canonical basis switch (2026-10-16).** The project now treats **median-of-medians** as the canonical cost-ratio basis: thinking-arm latency distributions are long-tailed and the mean is driven by the same non-terminating traces analysed separately in StudyJ2/J4/J5, so a mean cost ratio double-counts that phenomenon. On that basis the figure above reads **46.7×** rather than 91×; the 91× (mean-of-means) is left as written and both are labelled. Flash-attn equivalents: 43.6× median, 73.3× mean. Registry row `StudyQ-median`; reference table `reports/cost_ratio_basis.md`. The accuracy verdict is unaffected.
 
 ---
 

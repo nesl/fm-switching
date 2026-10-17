@@ -5,6 +5,45 @@ don't collide. Clear the claim when done.
 
 Shared H100 host (`sn4622120321`): read `research/HOST_H100.md` first — use GPU 3 by default.
 
+---
+
+## Runtime-estimate rule (added 2026-10-16, mandatory)
+
+**Any runtime estimate must state the assumed median generation length and the study it was
+extrapolated from.** A latency figure carried without its token count is not transferable.
+
+Write estimates in this form:
+
+> StudyO Q4 4B-T cell: ~2.8 h for 845 trials — 11.8 s/trial mean, median 327 generated tokens,
+> measured on 10 trials of this cell (not extrapolated).
+
+Not: *"~25 h, based on StudyP's 4B-Thinking."*
+
+**Why.** Three errors in one session came from moving a latency number between workloads with
+different generation lengths:
+
+| error | wrong | actual | cause |
+|---|---|---|---|
+| StudyO Q4 sizing | 15–25 h | **2.4–3.9 h** | extrapolated from StudyP at 104 s/trial (8,192-token budget, long reasoning); S-EMBER terminates at a median of 327 tokens, 0/10 hitting the cap |
+| StudyJ6 projection | 6.1–7.0 h | ~6 h, after swinging 4.5–7.7 h | projected from the cap-hit stratum, selected for being the slowest signs, then over-corrected off two trivial ones |
+| "flash-attn is slower on short generations" | −23 to −35% | never slower, 1.00–2.26× | bucketed raw latency by one backend's token counts on sampled arms, where the other backend re-draws a different length |
+
+The same failure underlies all three: **a per-trial latency is a function of tokens generated,
+and tokens generated is a property of the workload, not the hardware.** Two numbers may be
+compared only when their generation lengths are stated and comparable.
+
+Corollaries:
+
+- Projecting from a **selected subgroup** estimates that subgroup, not the population. Say which
+  stratum the sample came from.
+- A **throughput** (tok/s) figure transfers between workloads; a **latency** figure does not.
+  Prefer tok/s when extrapolating, then multiply by the target's expected token count.
+- State a band. A 10-trial sample whose max is 2x its median has not seen the tail; ±30% is a
+  reasonable default until the real run lands.
+
+See `reports/cost_ratio_basis.md` for the related rule on mean-vs-median cost ratios, and
+`reports/multiplier_provenance_audit.md` for the provenance requirement on quoted multipliers.
+
 | host | GPU | claimed by | experiment | claimed at | status |
 |---|---|---|---|---|---|
 | flash | A6000 (GPU 1) | CC | E27 maintenance-mechanism kill test | 2026-08-20 | done |

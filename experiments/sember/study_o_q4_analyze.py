@@ -9,6 +9,7 @@ The P4 predictor (N2: all-MiniLM-L6-v2 embedding + log(1+qt)) is retrained with
 ALL Study O video_ids removed from the training set, per plan §7.
 """
 
+import argparse
 import json
 import math
 from collections import defaultdict
@@ -19,7 +20,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 
 ROOT = Path("/home/pragya/Desktop/FM-switching")
-TRIALS = ROOT / "results/sember/study_o/study_o_q4_trials.jsonl"
+TRIALS = ROOT / "results/sember/study_o/study_o_q4_trials.jsonl"  # --fa2 redirects this
 GROUNDING = ROOT / "results/sember/study_h/data/sember_grounding.jsonl"
 SEED = 42
 L = 120.0           # N2 primary cell
@@ -107,6 +108,14 @@ def clustered_bootstrap(vids, fn, nboot=NBOOT, seed=SEED):
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--fa2", action="store_true",
+                    help="analyse the flash-attn / 845-pool trials instead of the committed 520-pool file")
+    args = ap.parse_args()
+    global TRIALS
+    if args.fa2:
+        TRIALS = ROOT / "results/sember/study_o/study_o_q4_trials_fa2.jsonl"
+    print(f"trials: {TRIALS.name}")
     by = load_trials()
     have_T = len(by.get("4B-T", {}))
     print(f"cells: 4B-I={len(by.get('4B-I',{}))}, 8B-I={len(by.get('8B-I',{}))}, "

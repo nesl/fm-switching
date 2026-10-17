@@ -38,6 +38,8 @@ instruct +10.5 [+3.6, +17.2], thinking +8.0 [+1.1, +14.7].
 **Latency cost of thinking at 32B (same hardware):** ERQA D/A_h100 ≈190–200×; MV-RoboBench D/C 92×;
 signs T32 median 210 s vs I32 2.8 s (at 8192).
 
+**Basis established 2026-10-16.** All three figures above are **median-of-medians**, verified against the trial files: ERQA D/A_h100 = 198.8× (mean-of-means 328.4×, n=400); MV-RoboBench D/C = 91.6× (mean 153.2×, n=401); signs T32@8192 / I32 = 76.1× (mean 58.4×, n=40/40, medians 209.9 s and 2.76 s). The H100 family is therefore already on the project's canonical basis (adopted 2026-10-16) and no figure here changes. Reference table: `reports/cost_ratio_basis.md`. One caution: StudyR's cross-hardware D/A row (92.9×) and StudyS2's D/C row (91.6×) are numerically almost identical and measure different things — 32B-vs-4B across two GPUs versus thinking-vs-instruct at fixed size on one — so they should not be cited near each other without the distinction.
+
 ## Caveats that apply across the night
 1. Single seed per thinking arm; CIs cover question sampling only.
 2. Decoding confound: thinking arms sampled (CFG-A, temp 0.6 — model card says 1.0), instruct greedy.
