@@ -1,0 +1,303 @@
+{
+  "server_base": "http://127.0.0.1:8080",
+  "image_dir": "results/vision/study_c/study_c_images",
+  "question": "How many people are in this image? Answer with a single integer.",
+  "note_sember": "S-EMBER video frames not present on this box; multi-image decode/prefill/memory uses COCO 560x560 frames (vision-token count is content-independent at fixed resolution, Study A).",
+  "reps": 3,
+  "single_image": [
+    {
+      "rep": 0,
+      "ttft_s": 0.105,
+      "prefill_ms": 39.99,
+      "prompt_n": 1,
+      "n_tokens": 140,
+      "n_reason": 139,
+      "n_answer": 1,
+      "decode_tps_median": 28.75,
+      "decode_tps_overall": 28.3
+    },
+    {
+      "rep": 1,
+      "ttft_s": 0.081,
+      "prefill_ms": 35.329,
+      "prompt_n": 1,
+      "n_tokens": 103,
+      "n_reason": 102,
+      "n_answer": 1,
+      "decode_tps_median": 28.76,
+      "decode_tps_overall": 28.19
+    },
+    {
+      "rep": 2,
+      "ttft_s": 0.081,
+      "prefill_ms": 35.33,
+      "prompt_n": 1,
+      "n_tokens": 90,
+      "n_reason": 89,
+      "n_answer": 1,
+      "decode_tps_median": 28.77,
+      "decode_tps_overall": 28.12
+    }
+  ],
+  "single_image_decode_tps_median_of_reps": 28.76,
+  "example_trace_first40": [
+    {
+      "t_s": 0.0868,
+      "kind": "reason",
+      "tok": "So"
+    },
+    {
+      "t_s": 0.1215,
+      "kind": "reason",
+      "tok": ","
+    },
+    {
+      "t_s": 0.1562,
+      "kind": "reason",
+      "tok": " let"
+    },
+    {
+      "t_s": 0.191,
+      "kind": "reason",
+      "tok": "'s"
+    },
+    {
+      "t_s": 0.226,
+      "kind": "reason",
+      "tok": " look"
+    },
+    {
+      "t_s": 0.2608,
+      "kind": "reason",
+      "tok": " at"
+    },
+    {
+      "t_s": 0.2957,
+      "kind": "reason",
+      "tok": " the"
+    },
+    {
+      "t_s": 0.3305,
+      "kind": "reason",
+      "tok": " image"
+    },
+    {
+      "t_s": 0.3651,
+      "kind": "reason",
+      "tok": "."
+    },
+    {
+      "t_s": 0.3999,
+      "kind": "reason",
+      "tok": " First"
+    },
+    {
+      "t_s": 0.4347,
+      "kind": "reason",
+      "tok": ","
+    },
+    {
+      "t_s": 0.4694,
+      "kind": "reason",
+      "tok": " there"
+    },
+    {
+      "t_s": 0.504,
+      "kind": "reason",
+      "tok": "'s"
+    },
+    {
+      "t_s": 0.5388,
+      "kind": "reason",
+      "tok": " the"
+    },
+    {
+      "t_s": 0.5735,
+      "kind": "reason",
+      "tok": " bus"
+    },
+    {
+      "t_s": 0.6082,
+      "kind": "reason",
+      "tok": " driver"
+    },
+    {
+      "t_s": 0.6429,
+      "kind": "reason",
+      "tok": " inside"
+    },
+    {
+      "t_s": 0.6777,
+      "kind": "reason",
+      "tok": " the"
+    },
+    {
+      "t_s": 0.7124,
+      "kind": "reason",
+      "tok": " bus"
+    },
+    {
+      "t_s": 0.7472,
+      "kind": "reason",
+      "tok": "."
+    },
+    {
+      "t_s": 0.7819,
+      "kind": "reason",
+      "tok": " Then"
+    },
+    {
+      "t_s": 0.8166,
+      "kind": "reason",
+      "tok": ","
+    },
+    {
+      "t_s": 0.8515,
+      "kind": "reason",
+      "tok": " there"
+    },
+    {
+      "t_s": 0.8863,
+      "kind": "reason",
+      "tok": "'s"
+    },
+    {
+      "t_s": 0.9211,
+      "kind": "reason",
+      "tok": " a"
+    },
+    {
+      "t_s": 0.9559,
+      "kind": "reason",
+      "tok": " person"
+    },
+    {
+      "t_s": 0.9906,
+      "kind": "reason",
+      "tok": " walking"
+    },
+    {
+      "t_s": 1.0253,
+      "kind": "reason",
+      "tok": " on"
+    },
+    {
+      "t_s": 1.06,
+      "kind": "reason",
+      "tok": " the"
+    },
+    {
+      "t_s": 1.0947,
+      "kind": "reason",
+      "tok": " left"
+    },
+    {
+      "t_s": 1.1299,
+      "kind": "reason",
+      "tok": " side"
+    },
+    {
+      "t_s": 1.1647,
+      "kind": "reason",
+      "tok": " of"
+    },
+    {
+      "t_s": 1.1994,
+      "kind": "reason",
+      "tok": " the"
+    },
+    {
+      "t_s": 1.2344,
+      "kind": "reason",
+      "tok": " image"
+    },
+    {
+      "t_s": 1.269,
+      "kind": "reason",
+      "tok": ","
+    },
+    {
+      "t_s": 1.3038,
+      "kind": "reason",
+      "tok": " wearing"
+    },
+    {
+      "t_s": 1.3386,
+      "kind": "reason",
+      "tok": " a"
+    },
+    {
+      "t_s": 1.3732,
+      "kind": "reason",
+      "tok": " yellow"
+    },
+    {
+      "t_s": 1.4079,
+      "kind": "reason",
+      "tok": " vest"
+    },
+    {
+      "t_s": 1.4426,
+      "kind": "reason",
+      "tok": " and"
+    }
+  ],
+  "abort": {
+    "aborted_after_reason_tokens": 40,
+    "client_tokens_seen": 40,
+    "server_stop_latency_s": 0.002
+  },
+  "forced_answer": {
+    "forced_answer_wall_s": 0.156,
+    "answer_text": "2",
+    "prompt_n": 42,
+    "prompt_ms": 58.631,
+    "predicted_n": 2,
+    "predicted_ms": 38.148,
+    "slot_n_prompt_tokens_cache": 0,
+    "slot_n_prompt_tokens_processed": 0,
+    "partial_reason_chars": 239,
+    "caveat": "raw /completion path did not carry vision tokens (prompt_n reflects text only), so this demonstrates the forced-early-termination MECHANISM (inject </think> -> answer emitted) but the answer is not image-grounded here. Image-grounded prefill reuse is measured separately in cache_reuse."
+  },
+  "cache_reuse": {
+    "call2_prompt_n": 1,
+    "call2_prefill_ms": 35.573,
+    "call2_n_prompt_tokens_cache": 0,
+    "call2_n_prompt_tokens_processed": 0
+  },
+  "multi_image": {
+    "1": {
+      "images": 1,
+      "prefill_ms": 430.153,
+      "prompt_n": 350,
+      "ttft_s": 0.498,
+      "decode_tps_median": 28.75,
+      "decode_tps_overall": 27.69,
+      "ram_before_mb": 12223,
+      "ram_after_mb": 12300,
+      "ram_delta_mb": 77
+    },
+    "8": {
+      "images": 8,
+      "prefill_ms": 2775.377,
+      "prompt_n": 2303,
+      "ttft_s": 3.168,
+      "decode_tps_median": 27.28,
+      "decode_tps_overall": 26.92,
+      "ram_before_mb": 12300,
+      "ram_after_mb": 12411,
+      "ram_delta_mb": 111
+    },
+    "16": {
+      "images": 16,
+      "prefill_ms": 3360.621,
+      "prompt_n": 2629,
+      "ttft_s": 4.093,
+      "decode_tps_median": 25.72,
+      "decode_tps_overall": 25.68,
+      "ram_before_mb": 12412,
+      "ram_after_mb": 12406,
+      "ram_delta_mb": -6
+    }
+  }
+}
