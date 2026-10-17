@@ -145,3 +145,9 @@ naming schema in CLAUDE.md.
 
 Fidelity / accuracy experiments (device-independent outputs) may run here freely;
 note the host in provenance.
+
+## vLLM (added 2026-10-16, StudyX)
+- Separate venv `~/.venvs/fm-switching-vllm` (outside the repo; never install vLLM into `.venv`). vLLM 0.31.0+cu129 wheel from the GitHub release (PyPI default is CUDA 13; driver 570 supports ≤12.8), torch 2.13.0+cu129 from the PyTorch cu129 index, torchcodec 0.16.0+cu129 (PyPI 0.17.0 is CUDA 13 → import failure).
+- Set `VLLM_USE_FLASHINFER_SAMPLER=0`: FlashInfer's sampler JIT needs ninja + CUDA≥12 nvcc; host nvcc is 11.1.
+- Attention backend selected on H100: FLASH_ATTN (FlashAttention-3). KV budget for 32B at gmu 0.90, max_model_len 32768: 62,944 tokens.
+- Long-running chains, watchdogs and monitors run in named tmux sessions (user rule 2026-10-16: must survive SSH crashes).

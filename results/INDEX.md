@@ -2,6 +2,8 @@
 
 Machine-readable provenance is embedded in each JSON as `_provenance`. This index is the human-readable cross-box correctness trail. One row per result file.
 
+**Raw per-event files (since 2026-10-16):** per-token stamps, per-step decode times and metric timelines are committed **only** as `<name>.jsonl.gz`; token stamps are delta-encoded (`t0_ms` + integer `dt_ms`), lossless at their 1 ms recording precision. Harnesses append plain `.jsonl` during a run; compact with `python experiments/lib/rawio.py <file.jsonl>` (verifies the round trip, then removes the plain file) before committing. Read with `rawio.read_jsonl(path)`, which handles plain and gzipped forms.
+
 ## Naming schema
 
 | type | pattern | example |
@@ -681,3 +683,21 @@ Script: `experiments/sember/study_h2_sember_annotations.py`. CPU only. No model 
 | `results/signs/study_t/study_t_trials_h100nvl_fa2.jsonl` | `experiments/signs/study_t_signs_32b.py` | Qwen3-VL-32B-I/32B-T bf16, flash_attention_2 | h100nvl | 92 | StudyT core + ladder under flash-attn. | 2026-10-16 |
 | `results/signs/study_t/study_t_results_h100nvl_fa2.json` | `experiments/signs/study_t_analyse.py` | — | CPU | 40 | Termination 72.5% at 8192 (reversal sub-class); never-terminate 2.5% at 24,576. | 2026-10-16 |
 | (no result file; numbers in `reports/h100_night_summary.md` addendum) | `experiments/erqa/h100_fa2_throughput.py` | Qwen3-VL-32B-I/T bf16, SDPA vs flash_attention_2 | CPU (H100 trials) | 3,793 | Throughput recompute (own-length buckets): flash/SDPA 0.79× / 0.79× / 0.78× at <2k / 2–8k / >8k; 0.79× stands, no retraction; SDPA flat 23.6–24.2 tok/s (no collapse with length on H100). | 2026-10-16 |
+| `results/erqa/study_u/study_u_trials_h100nvl.jsonl` | `experiments/erqa/study_u_fa2_size.py` | Qwen3-VL-8B-T / 32B-T bf16 | h100nvl | 92 | StudyU trials: 80 natural 8B-T (SDPA+FA2 interleaved) + 8 forced 8B + 4 forced 32B; timing only. | 2026-10-16 |
+| `results/erqa/study_u/study_u_steps_h100nvl.jsonl.gz` | `experiments/erqa/study_u_fa2_size.py` | Qwen3-VL-8B-T / 32B-T bf16 | h100nvl | 92 | Per-step decode ms for every StudyU trial (position curves). | 2026-10-16 |
+| `results/erqa/study_u/study_u_results_h100nvl.json` | `experiments/erqa/study_u_analyse.py` | Qwen3-VL-8B-T / 32B-T bf16 | h100nvl | 92 | MACHINE/KERNEL EFFECT: 8B SDPA flat with position; FA2/SDPA 0.796× paired, same as 32B. | 2026-10-16 |
+| `results/erqa/study_u/study_u_kernel_8bt_h100nvl.json` | `experiments/erqa/study_u_kernel_probe.py` | Qwen3-VL-8B-T / 32B-T bf16 | h100nvl | 1 | H100 HF sdpa → PyTorch FlashAttention-2 for all prefill/decode calls (8B). | 2026-10-16 |
+| `results/erqa/study_u/study_u_kernel_32bt_h100nvl.json` | `experiments/erqa/study_u_kernel_probe.py` | Qwen3-VL-8B-T / 32B-T bf16 | h100nvl | 1 | H100 HF sdpa → PyTorch FlashAttention-2 for all prefill/decode calls (32B). | 2026-10-16 |
+| `results/erqa/study_u/study_u_selection.json` | `experiments/erqa/study_u_fa2_size.py --phase select` | Qwen3-VL-8B-T / 32B-T bf16 | h100nvl | 40 | Length-spanning ERQA question selection (20 long / 10 mid / 10 short). | 2026-10-16 |
+| `results/cost/study_x/study_x_requests_h100nvl.jsonl.gz` | `experiments/cost/study_x_vllm.py` | Qwen3-VL-32B-I/T (vLLM 0.31.0) | h100nvl | 4466 | StudyX per-request timing (Step 0, Part C, Part B vLLM, Part A). | 2026-10-16 |
+| `results/cost/study_x/study_x_stamps_h100nvl.jsonl.gz` | `experiments/cost/study_x_vllm.py` | Qwen3-VL-32B-I/T (vLLM) | h100nvl | 4466 | Per-token stream timestamps (stall/eviction attribution). | 2026-10-16 |
+| `results/cost/study_x/study_x_metrics_h100nvl.jsonl.gz` | `experiments/cost/study_x_vllm.py` | Qwen3-VL-32B-I/T (vLLM) | h100nvl | — | /metrics timelines (KV usage, running, waiting, preemptions) per experiment, 0.5 s. | 2026-10-16 |
+| `results/cost/study_x/study_x_drift_h100nvl.json` | `experiments/cost/study_x_vllm.py --stage step0i` | Qwen3-VL-32B-I (vLLM) | h100nvl | 40 | Greedy answer drift vs HF H100: 2/40 (5%) vs SDPA and FA2; annotated prompt-token reference fix. | 2026-10-16 |
+| `results/cost/study_x/study_x_results_h100nvl.json` | `experiments/cost/study_x_analyse.py` | — | CPU | — | KV 62,944 tok; one stuck 24,576 request = 41% of tier; C3 evictions 6/7/18/28; C2 policies (priority reverses shielding; 8,192 abort → 0 evictions; offload ineffective); B matched-cap 121×; A fixed1024 771 tok/s at c32 (KV-bound). | 2026-10-16 |
+| `results/cost/study_x/study_x_run_meta_h100nvl.json` | `experiments/cost/study_x_vllm.py` | — | h100nvl | — | Server configs, KV budget, attention backend (FA3), sampler, session checks. | 2026-10-16 |
+| `results/cost/study_w/study_w_batches_h100nvl.jsonl` | `experiments/cost/study_x_hf_static.py --mode sweep` | Qwen3-VL-32B-I/T (HF fa2) | h100nvl | 62 | HF static batching bs1–16: 32B-T 18.5→60.9 tok/s, latency 19.8→161 s; 32B-I no gain. | 2026-10-16 |
+| `results/cost/study_w/study_w_questions_h100nvl.json` | `experiments/cost/study_x_hf_static.py --mode sweep` | — | — | 16 | Length-matched ERQA question set. | 2026-10-16 |
+| `results/erqa/study_v/study_v_trials_h100nvl.jsonl` | `experiments/erqa/study_v_size_ladder.py` | Qwen3-VL-4B-I/4B-T/8B-I (HF fa2) | h100nvl | 120 | Size-ladder timing trials (8B-T reused from StudyU). | 2026-10-16 |
+| `results/erqa/study_v/study_v_steps_h100nvl.jsonl.gz` | `experiments/erqa/study_v_size_ladder.py` | as above | h100nvl | 120 | Per-step decode ms. | 2026-10-16 |
+| `results/erqa/study_v/study_v_results_h100nvl.json` | `experiments/erqa/study_v_analyse.py` | — | CPU | 160 | 4B 30.15 / 8B 30.70 / 32B 53.1 ms/token: constant ~0.84 ms per decoder layer. | 2026-10-16 |
+| `results/cost/study_x/study_x_hf_static_partB_cap8192_h100nvl.jsonl` | `experiments/cost/study_x_hf_static.py --mode partB --cap 8192` | Qwen3-VL-32B-T (HF fa2, original .venv) | h100nvl | 5 | StudyX Part B HF static bs8 at matched 8,192 cap: shorts delivered at 824–898 s (vLLM median 7.4 s). | 2026-10-17 |

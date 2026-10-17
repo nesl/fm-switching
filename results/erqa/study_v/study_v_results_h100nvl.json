@@ -1,0 +1,248 @@
+{
+ "models": {
+  "4BI": {
+   "n": 40,
+   "source": "StudyV",
+   "decoding": "greedy",
+   "gen_p50": 2.0,
+   "gen_p90": 2.0,
+   "gen_max": 4,
+   "budget_hits": 0,
+   "ttft_ms_p50": 76.45,
+   "decode_step_ms_p50": 29.655,
+   "buckets": {
+    "<2k": {
+     "n": 40,
+     "tok_s": 19.183,
+     "ms_per_token": 52.145
+    },
+    "2-8k": {
+     "n": 0,
+     "tok_s": null,
+     "ms_per_token": null
+    },
+    ">8k": {
+     "n": 0,
+     "tok_s": null,
+     "ms_per_token": null
+    }
+   },
+   "position": {
+    "0-500": {
+     "n": 0,
+     "ms": null
+    },
+    "500-2k": {
+     "n": 0,
+     "ms": null
+    },
+    "2k-4k": {
+     "n": 0,
+     "ms": null
+    },
+    "4k-8k": {
+     "n": 0,
+     "ms": null
+    },
+    "8k+": {
+     "n": 0,
+     "ms": null
+    }
+   }
+  },
+  "4BT": {
+   "n": 40,
+   "source": "StudyV",
+   "decoding": "CFG-A temp0.6/top_p0.95/top_k20/min_p0/do_sample",
+   "gen_p50": 957.5,
+   "gen_p90": 5494.6,
+   "gen_max": 16384,
+   "budget_hits": 1,
+   "ttft_ms_p50": 60.35,
+   "decode_step_ms_p50": 30.154,
+   "buckets": {
+    "<2k": {
+     "n": 25,
+     "tok_s": 33.075,
+     "ms_per_token": 30.234
+    },
+    "2-8k": {
+     "n": 13,
+     "tok_s": 33.09,
+     "ms_per_token": 30.221
+    },
+    ">8k": {
+     "n": 2,
+     "tok_s": 32.915,
+     "ms_per_token": 30.383
+    }
+   },
+   "position": {
+    "0-500": {
+     "n": 40,
+     "ms": 30.133
+    },
+    "500-2k": {
+     "n": 25,
+     "ms": 30.2
+    },
+    "2k-4k": {
+     "n": 15,
+     "ms": 30.221
+    },
+    "4k-8k": {
+     "n": 8,
+     "ms": 30.236
+    },
+    "8k+": {
+     "n": 2,
+     "ms": 30.464
+    }
+   }
+  },
+  "8BI": {
+   "n": 40,
+   "source": "StudyV",
+   "decoding": "greedy",
+   "gen_p50": 2.0,
+   "gen_p90": 2.0,
+   "gen_max": 2,
+   "budget_hits": 0,
+   "ttft_ms_p50": 71.5,
+   "decode_step_ms_p50": 30.203,
+   "buckets": {
+    "<2k": {
+     "n": 40,
+     "tok_s": 19.651,
+     "ms_per_token": 50.889
+    },
+    "2-8k": {
+     "n": 0,
+     "tok_s": null,
+     "ms_per_token": null
+    },
+    ">8k": {
+     "n": 0,
+     "tok_s": null,
+     "ms_per_token": null
+    }
+   },
+   "position": {
+    "0-500": {
+     "n": 0,
+     "ms": null
+    },
+    "500-2k": {
+     "n": 0,
+     "ms": null
+    },
+    "2k-4k": {
+     "n": 0,
+     "ms": null
+    },
+    "4k-8k": {
+     "n": 0,
+     "ms": null
+    },
+    "8k+": {
+     "n": 0,
+     "ms": null
+    }
+   }
+  },
+  "8BT": {
+   "n": 40,
+   "source": "StudyU natural (reused)",
+   "decoding": "CFG-A temp0.6/top_p0.95/top_k20/min_p0/do_sample",
+   "gen_p50": 563.5,
+   "gen_p90": 4479.1,
+   "gen_max": 16384,
+   "budget_hits": 3,
+   "ttft_ms_p50": 74.95,
+   "decode_step_ms_p50": 30.701,
+   "buckets": {
+    "<2k": {
+     "n": 29,
+     "tok_s": 32.416,
+     "ms_per_token": 30.849
+    },
+    "2-8k": {
+     "n": 8,
+     "tok_s": 32.527,
+     "ms_per_token": 30.743
+    },
+    ">8k": {
+     "n": 3,
+     "tok_s": 32.19,
+     "ms_per_token": 31.065
+    }
+   },
+   "position": {
+    "0-500": {
+     "n": 40,
+     "ms": 30.678
+    },
+    "500-2k": {
+     "n": 23,
+     "ms": 30.701
+    },
+    "2k-4k": {
+     "n": 11,
+     "ms": 30.702
+    },
+    "4k-8k": {
+     "n": 6,
+     "ms": 30.697
+    },
+    "8k+": {
+     "n": 3,
+     "ms": 31.425
+    }
+   }
+  },
+  "32BI": {
+   "n": 400,
+   "source": "StudyR-fa2 (committed; no per-step stamps)",
+   "gen_p50": 2.0,
+   "buckets": {
+    "<2k": {
+     "n": 400,
+     "tok_s": 8.287,
+     "ms_per_token": 120.675
+    },
+    "2-8k": {
+     "n": 0,
+     "tok_s": null,
+     "ms_per_token": null
+    },
+    ">8k": {
+     "n": 0,
+     "tok_s": null,
+     "ms_per_token": null
+    }
+   }
+  },
+  "32BT": {
+   "n": 400,
+   "source": "StudyR-fa2 (committed; no per-step stamps)",
+   "gen_p50": 357.0,
+   "buckets": {
+    "<2k": {
+     "n": 371,
+     "tok_s": 18.575,
+     "ms_per_token": 53.835
+    },
+    "2-8k": {
+     "n": 26,
+     "tok_s": 18.736,
+     "ms_per_token": 53.374
+    },
+    ">8k": {
+     "n": 3,
+     "tok_s": 18.597,
+     "ms_per_token": 53.773
+    }
+   }
+  }
+ }
+}

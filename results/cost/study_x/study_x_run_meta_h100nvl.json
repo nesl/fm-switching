@@ -1,0 +1,1178 @@
+{
+ "done": [
+  "step0i_smoke",
+  "step0i_drift",
+  "step0t_smoke",
+  "C1_natural_IMG_6431_frame_0015_0.jpg",
+  "C1_natural_IMG_6443_frame_0023_0.jpg",
+  "C1_natural_IMG_0037_frame_0014_0.jpg",
+  "C3_forced_k1",
+  "C3_forced_k2",
+  "C3_forced_k3",
+  "C3_forced_k4",
+  "B_vllm_batch8_b0",
+  "B_vllm_refill_b0",
+  "B_vllm_batch8_b1",
+  "B_vllm_refill_b1",
+  "B_vllm_batch8_b2",
+  "B_vllm_refill_b2",
+  "B_vllm_batch8_b3",
+  "B_vllm_refill_b3",
+  "B_vllm_batch8_b4",
+  "B_vllm_refill_b4",
+  "A_32BT_natural_c1",
+  "A_32BT_natural_c2",
+  "A_32BT_natural_c4",
+  "A_32BT_natural_c8",
+  "A_32BT_natural_c16",
+  "A_32BT_natural_c32",
+  "A_32BT_fixed1024_c1",
+  "A_32BT_fixed1024_c2",
+  "A_32BT_fixed1024_c4",
+  "A_32BT_fixed1024_c8",
+  "A_32BT_fixed1024_c16",
+  "A_32BT_fixed1024_c32",
+  "A_32BI_natural_c1",
+  "A_32BI_natural_c2",
+  "A_32BI_natural_c4",
+  "A_32BI_natural_c8",
+  "A_32BI_natural_c16",
+  "A_32BI_natural_c32",
+  "A_32BI_fixed1024_c1",
+  "A_32BI_fixed1024_c2",
+  "A_32BI_fixed1024_c4",
+  "A_32BI_fixed1024_c8",
+  "A_32BI_fixed1024_c16",
+  "A_32BI_fixed1024_c32",
+  "C4_prio_equal_k1",
+  "C4_prio_stucklow_k1",
+  "C4_prio_stucklow_k2",
+  "C5_abort8192_k1",
+  "C5_abort8192_k2",
+  "B8k_vllm_batch8_b0",
+  "B8k_vllm_refill_b0",
+  "B8k_vllm_batch8_b1",
+  "B8k_vllm_refill_b1",
+  "B8k_vllm_batch8_b2",
+  "B8k_vllm_refill_b2",
+  "B8k_vllm_batch8_b3",
+  "B8k_vllm_refill_b3",
+  "B8k_vllm_batch8_b4",
+  "B8k_vllm_refill_b4",
+  "C6_offload64_k2"
+ ],
+ "servers": [
+  {
+   "stage": "step0i",
+   "started": "2026-10-16T14:07:20.636135",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0"
+   ],
+   "startup_s": 106.1,
+   "log": "logs/study_x_server_32BI_1016_140534.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=1665274) INFO 10-16 14:05:50 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=1665274) INFO 10-16 14:05:50 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=1665274) INFO 10-16 14:05:50 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=1665274) INFO 10-16 14:05:50 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=1665274) INFO 10-16 14:05:57 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 1664078,
+    "my_pgid": 1664078,
+    "gpu3": [
+     {
+      "pid": 1665274,
+      "sid": 1664078,
+      "pgid": 1664078,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "stage": "step0t",
+   "started": "2026-10-16T14:09:23.927325",
+   "key": "32BT",
+   "repo": "Qwen/Qwen3-VL-32B-Thinking",
+   "revision": "7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Thinking/snapshots/7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+    "--served-model-name",
+    "32BT",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0"
+   ],
+   "startup_s": 106.1,
+   "log": "logs/study_x_server_32BT_1016_140737.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=1668088) INFO 10-16 14:07:53 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=1668088) INFO 10-16 14:07:53 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=1668088) INFO 10-16 14:07:54 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=1668088) INFO 10-16 14:07:54 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=1668088) INFO 10-16 14:08:02 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 1664078,
+    "my_pgid": 1664078,
+    "gpu3": [
+     {
+      "pid": 1668088,
+      "sid": 1664078,
+      "pgid": 1664078,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "stage": "A",
+   "started": "2026-10-16T18:05:25.639322",
+   "key": "32BT",
+   "repo": "Qwen/Qwen3-VL-32B-Thinking",
+   "revision": "7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Thinking/snapshots/7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+    "--served-model-name",
+    "32BT",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0"
+   ],
+   "startup_s": 54.6,
+   "log": "logs/study_x_server_32BT_1016_180430.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=1804402) INFO 10-16 18:04:46 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=1804402) INFO 10-16 18:04:46 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=1804402) INFO 10-16 18:04:47 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=1804402) INFO 10-16 18:04:47 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=1804402) INFO 10-16 18:04:54 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 1664078,
+    "my_pgid": 1664078,
+    "gpu3": [
+     {
+      "pid": 1804402,
+      "sid": 1664078,
+      "pgid": 1664078,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "stage": "A",
+   "started": "2026-10-16T18:44:55.255926",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0"
+   ],
+   "startup_s": 54.6,
+   "log": "logs/study_x_server_32BI_1016_184400.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=1825727) INFO 10-16 18:44:16 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=1825727) INFO 10-16 18:44:16 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=1825727) INFO 10-16 18:44:17 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=1825727) INFO 10-16 18:44:17 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=1825727) INFO 10-16 18:44:24 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 1664078,
+    "my_pgid": 1664078,
+    "gpu3": [
+     {
+      "pid": 1825727,
+      "sid": 1664078,
+      "pgid": 1664078,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "stage": "C_prio",
+   "started": "2026-10-16T21:05:16.664055",
+   "key": "32BT",
+   "repo": "Qwen/Qwen3-VL-32B-Thinking",
+   "revision": "7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Thinking/snapshots/7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+    "--served-model-name",
+    "32BT",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--scheduling-policy",
+    "priority"
+   ],
+   "startup_s": 54.6,
+   "log": "logs/study_x_server_32BT_1016_210421.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=1888421) INFO 10-16 21:04:37 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=1888421) INFO 10-16 21:04:37 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=1888421) INFO 10-16 21:04:38 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=1888421) INFO 10-16 21:04:38 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=1888421) INFO 10-16 21:04:45 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--scheduling-policy",
+    "priority"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 1888060,
+    "my_pgid": 1888060,
+    "gpu3": [
+     {
+      "pid": 1888421,
+      "sid": 1888060,
+      "pgid": 1888060,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "stage": "C_abort_B8k",
+   "started": "2026-10-16T22:41:14.147270",
+   "key": "32BT",
+   "repo": "Qwen/Qwen3-VL-32B-Thinking",
+   "revision": "7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Thinking/snapshots/7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+    "--served-model-name",
+    "32BT",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0"
+   ],
+   "startup_s": 54.6,
+   "log": "logs/study_x_server_32BT_1016_224019.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=1944400) INFO 10-16 22:40:35 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=1944400) INFO 10-16 22:40:35 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=1944400) INFO 10-16 22:40:36 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=1944400) INFO 10-16 22:40:36 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=1944400) INFO 10-16 22:40:43 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 1888060,
+    "my_pgid": 1888060,
+    "gpu3": [
+     {
+      "pid": 1944400,
+      "sid": 1888060,
+      "pgid": 1888060,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "stage": "C_offload",
+   "started": "2026-10-17T00:50:41.485435",
+   "key": "32BT",
+   "repo": "Qwen/Qwen3-VL-32B-Thinking",
+   "revision": "7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Thinking/snapshots/7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+    "--served-model-name",
+    "32BT",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--kv-offloading-size",
+    "64",
+    "--kv-offloading-backend",
+    "native"
+   ],
+   "startup_s": 121.4,
+   "log": "logs/study_x_server_32BT_1017_004839.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=2035172) INFO 10-17 00:48:56 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=2035172) INFO 10-17 00:48:56 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=2035172) INFO 10-17 00:48:56 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=2035172) INFO 10-17 00:48:56 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=2035172) INFO 10-17 00:49:03 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--kv-offloading-size",
+    "64",
+    "--kv-offloading-backend",
+    "native"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 1888060,
+    "my_pgid": 1888060,
+    "gpu3": [
+     {
+      "pid": 2035172,
+      "sid": 1888060,
+      "pgid": 1888060,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  }
+ ],
+ "stack": {
+  "venv": "/home/pragya/.venvs/fm-switching-vllm",
+  "vllm": "0.31.0",
+  "torch": "2.13.0+cu129",
+  "cuda": "12.9"
+ },
+ "experiments": {
+  "step0i_smoke": {
+   "finished": "2026-10-16T14:07:23.922096",
+   "prompt_tokens_vllm": 834,
+   "prompt_tokens_hf": 836
+  },
+  "step0i_drift": {
+   "finished": "2026-10-16T14:07:35.847521",
+   "n": 40,
+   "decoding": "greedy temperature=0 max_tokens=512, sequential (concurrency 1)",
+   "differ_vs_hf_sdpa": 2,
+   "differ_vs_hf_fa2": 2,
+   "hf_sdpa_vs_hf_fa2": 2,
+   "prompt_token_mismatch": 40,
+   "differ_vs_hf_sdpa_frac": 0.05,
+   "differ_vs_hf_fa2_frac": 0.05,
+   "hf_sdpa_vs_hf_fa2_frac": 0.05,
+   "FLAG_over_10pct": false
+  },
+  "step0t_smoke": {
+   "finished": "2026-10-16T14:11:01.256160",
+   "prompt_tokens_vllm": 836,
+   "prompt_tokens_hf": 836,
+   "completion_tokens": 3781,
+   "think_closed": true
+  },
+  "C1_natural_IMG_6431_frame_0015_0.jpg": {
+   "finished": "2026-10-16T14:26:09.101733",
+   "hitter": {
+    "tag": "C1_natural_IMG_6431_frame_0015_0.jpg",
+    "model": "32BT",
+    "id": "sign:IMG_6431_frame_0015_0.jpg",
+    "role": "hitter",
+    "seed": 42,
+    "params": {
+     "temperature": 0.6,
+     "top_p": 0.95,
+     "top_k": 20,
+     "min_p": 0.0,
+     "max_tokens": 24576
+    },
+    "hf_n_input_tokens": 1307,
+    "t_submit": 0.019,
+    "t_first": 2.891,
+    "t_end": 220.205,
+    "latency_s": 220.186,
+    "ttft_s": 2.872,
+    "completion_tokens": 7201,
+    "prompt_tokens": 1307,
+    "finish_reason": "stop",
+    "think_closed": true,
+    "n_chunks": 7200,
+    "error": null
+   }
+  },
+  "C1_natural_IMG_6443_frame_0023_0.jpg": {
+   "finished": "2026-10-16T14:30:02.422144",
+   "hitter": {
+    "tag": "C1_natural_IMG_6443_frame_0023_0.jpg",
+    "model": "32BT",
+    "id": "sign:IMG_6443_frame_0023_0.jpg",
+    "role": "hitter",
+    "seed": 42,
+    "params": {
+     "temperature": 0.6,
+     "top_p": 0.95,
+     "top_k": 20,
+     "min_p": 0.0,
+     "max_tokens": 24576
+    },
+    "hf_n_input_tokens": 997,
+    "t_submit": 0.03,
+    "t_first": 1.182,
+    "t_end": 49.752,
+    "latency_s": 49.722,
+    "ttft_s": 1.153,
+    "completion_tokens": 1726,
+    "prompt_tokens": 997,
+    "finish_reason": "stop",
+    "think_closed": true,
+    "n_chunks": 1725,
+    "error": null
+   }
+  },
+  "C1_natural_IMG_0037_frame_0014_0.jpg": {
+   "finished": "2026-10-16T14:45:56.419614",
+   "hitter": {
+    "tag": "C1_natural_IMG_0037_frame_0014_0.jpg",
+    "model": "32BT",
+    "id": "sign:IMG_0037_frame_0014_0.jpg",
+    "role": "hitter",
+    "seed": 42,
+    "params": {
+     "temperature": 0.6,
+     "top_p": 0.95,
+     "top_k": 20,
+     "min_p": 0.0,
+     "max_tokens": 24576
+    },
+    "hf_n_input_tokens": 1106,
+    "t_submit": 0.018,
+    "t_first": 1.182,
+    "t_end": 429.421,
+    "latency_s": 429.403,
+    "ttft_s": 1.163,
+    "completion_tokens": 13815,
+    "prompt_tokens": 1106,
+    "finish_reason": "stop",
+    "think_closed": true,
+    "n_chunks": 13814,
+    "error": null
+   }
+  },
+  "C3_forced_k1": {
+   "finished": "2026-10-16T15:10:30.442235",
+   "k": 1
+  },
+  "C3_forced_k2": {
+   "finished": "2026-10-16T15:30:47.910402",
+   "k": 2
+  },
+  "C3_forced_k3": {
+   "finished": "2026-10-16T15:56:10.714795",
+   "k": 3
+  },
+  "C3_forced_k4": {
+   "finished": "2026-10-16T16:20:38.972635",
+   "k": 4
+  },
+  "B_vllm_batch8_b0": {
+   "finished": "2026-10-16T16:27:55.890660",
+   "batch": {
+    "b": 0,
+    "long": 355,
+    "short": [
+     288,
+     102,
+     378,
+     368,
+     391,
+     342,
+     54
+    ]
+   }
+  },
+  "B_vllm_refill_b0": {
+   "finished": "2026-10-16T16:37:04.974098",
+   "batch": {
+    "b": 0,
+    "long": 355,
+    "short": [
+     288,
+     102,
+     378,
+     368,
+     391,
+     342,
+     54
+    ]
+   }
+  },
+  "B_vllm_batch8_b1": {
+   "finished": "2026-10-16T16:44:23.135515",
+   "batch": {
+    "b": 1,
+    "long": 382,
+    "short": [
+     8,
+     337,
+     135,
+     288,
+     102,
+     378,
+     368
+    ]
+   }
+  },
+  "B_vllm_refill_b1": {
+   "finished": "2026-10-16T16:49:11.394936",
+   "batch": {
+    "b": 1,
+    "long": 382,
+    "short": [
+     8,
+     337,
+     135,
+     288,
+     102,
+     378,
+     368
+    ]
+   }
+  },
+  "B_vllm_batch8_b2": {
+   "finished": "2026-10-16T16:56:27.527811",
+   "batch": {
+    "b": 2,
+    "long": 48,
+    "short": [
+     391,
+     342,
+     54,
+     8,
+     337,
+     135,
+     288
+    ]
+   }
+  },
+  "B_vllm_refill_b2": {
+   "finished": "2026-10-16T17:05:13.110896",
+   "batch": {
+    "b": 2,
+    "long": 48,
+    "short": [
+     391,
+     342,
+     54,
+     8,
+     337,
+     135,
+     288
+    ]
+   }
+  },
+  "B_vllm_batch8_b3": {
+   "finished": "2026-10-16T17:12:29.728858",
+   "batch": {
+    "b": 3,
+    "long": 115,
+    "short": [
+     102,
+     378,
+     368,
+     391,
+     342,
+     54,
+     8
+    ]
+   }
+  },
+  "B_vllm_refill_b3": {
+   "finished": "2026-10-16T17:21:53.697180",
+   "batch": {
+    "b": 3,
+    "long": 115,
+    "short": [
+     102,
+     378,
+     368,
+     391,
+     342,
+     54,
+     8
+    ]
+   }
+  },
+  "B_vllm_batch8_b4": {
+   "finished": "2026-10-16T17:29:12.868666",
+   "batch": {
+    "b": 4,
+    "long": 138,
+    "short": [
+     337,
+     135,
+     288,
+     102,
+     378,
+     368,
+     391
+    ]
+   }
+  },
+  "B_vllm_refill_b4": {
+   "finished": "2026-10-16T17:38:12.054816",
+   "batch": {
+    "b": 4,
+    "long": 138,
+    "short": [
+     337,
+     135,
+     288,
+     102,
+     378,
+     368,
+     391
+    ]
+   }
+  },
+  "A_32BT_natural_c1": {
+   "finished": "2026-10-16T18:10:18.781096",
+   "agg_tok_s": 38.75,
+   "n_req": 16
+  },
+  "A_32BT_natural_c2": {
+   "finished": "2026-10-16T18:13:47.346367",
+   "agg_tok_s": 55.06,
+   "n_req": 16
+  },
+  "A_32BT_natural_c4": {
+   "finished": "2026-10-16T18:16:01.039823",
+   "agg_tok_s": 89.02,
+   "n_req": 16
+  },
+  "A_32BT_natural_c8": {
+   "finished": "2026-10-16T18:18:07.497436",
+   "agg_tok_s": 192.74,
+   "n_req": 32
+  },
+  "A_32BT_natural_c16": {
+   "finished": "2026-10-16T18:21:26.710024",
+   "agg_tok_s": 225.89,
+   "n_req": 64
+  },
+  "A_32BT_natural_c32": {
+   "finished": "2026-10-16T18:24:32.024186",
+   "agg_tok_s": 402.47,
+   "n_req": 128
+  },
+  "A_32BT_fixed1024_c1": {
+   "finished": "2026-10-16T18:31:33.439225",
+   "agg_tok_s": 38.96,
+   "n_req": 16
+  },
+  "A_32BT_fixed1024_c2": {
+   "finished": "2026-10-16T18:35:06.278039",
+   "agg_tok_s": 77.24,
+   "n_req": 16
+  },
+  "A_32BT_fixed1024_c4": {
+   "finished": "2026-10-16T18:36:55.965597",
+   "agg_tok_s": 151.0,
+   "n_req": 16
+  },
+  "A_32BT_fixed1024_c8": {
+   "finished": "2026-10-16T18:38:52.878876",
+   "agg_tok_s": 282.43,
+   "n_req": 32
+  },
+  "A_32BT_fixed1024_c16": {
+   "finished": "2026-10-16T18:41:06.765955",
+   "agg_tok_s": 492.82,
+   "n_req": 64
+  },
+  "A_32BT_fixed1024_c32": {
+   "finished": "2026-10-16T18:43:58.544683",
+   "agg_tok_s": 766.78,
+   "n_req": 128
+  },
+  "A_32BI_natural_c1": {
+   "finished": "2026-10-16T18:45:04.165758",
+   "agg_tok_s": 7.36,
+   "n_req": 16
+  },
+  "A_32BI_natural_c2": {
+   "finished": "2026-10-16T18:45:07.458949",
+   "agg_tok_s": 12.4,
+   "n_req": 16
+  },
+  "A_32BI_natural_c4": {
+   "finished": "2026-10-16T18:45:10.793737",
+   "agg_tok_s": 14.07,
+   "n_req": 16
+  },
+  "A_32BI_natural_c8": {
+   "finished": "2026-10-16T18:45:16.873984",
+   "agg_tok_s": 12.49,
+   "n_req": 32
+  },
+  "A_32BI_natural_c16": {
+   "finished": "2026-10-16T18:45:30.469492",
+   "agg_tok_s": 10.04,
+   "n_req": 64
+  },
+  "A_32BI_natural_c32": {
+   "finished": "2026-10-16T18:45:53.810188",
+   "agg_tok_s": 11.49,
+   "n_req": 128
+  },
+  "A_32BI_fixed1024_c1": {
+   "finished": "2026-10-16T18:52:55.292610",
+   "agg_tok_s": 38.98,
+   "n_req": 16
+  },
+  "A_32BI_fixed1024_c2": {
+   "finished": "2026-10-16T18:56:27.068605",
+   "agg_tok_s": 77.78,
+   "n_req": 16
+  },
+  "A_32BI_fixed1024_c4": {
+   "finished": "2026-10-16T18:58:14.656753",
+   "agg_tok_s": 153.45,
+   "n_req": 16
+  },
+  "A_32BI_fixed1024_c8": {
+   "finished": "2026-10-16T19:00:10.521755",
+   "agg_tok_s": 285.24,
+   "n_req": 32
+  },
+  "A_32BI_fixed1024_c16": {
+   "finished": "2026-10-16T19:02:22.674555",
+   "agg_tok_s": 498.73,
+   "n_req": 64
+  },
+  "A_32BI_fixed1024_c32": {
+   "finished": "2026-10-16T19:05:13.711625",
+   "agg_tok_s": 771.11,
+   "n_req": 128
+  },
+  "C4_prio_equal_k1": {
+   "finished": "2026-10-16T21:29:36.939835",
+   "k": 1,
+   "policy": "prio",
+   "stuck_params": {
+    "priority": 0
+   },
+   "normal_params": {
+    "priority": 0
+   },
+   "guard_hit": false
+  },
+  "C4_prio_stucklow_k1": {
+   "finished": "2026-10-16T21:56:20.917778",
+   "k": 1,
+   "policy": "prio",
+   "stuck_params": {
+    "priority": 10
+   },
+   "normal_params": {
+    "priority": 0
+   },
+   "guard_hit": false
+  },
+  "C4_prio_stucklow_k2": {
+   "finished": "2026-10-16T22:40:17.433451",
+   "k": 2,
+   "policy": "prio",
+   "stuck_params": {
+    "priority": 10
+   },
+   "normal_params": {
+    "priority": 0
+   },
+   "guard_hit": false
+  },
+  "C5_abort8192_k1": {
+   "finished": "2026-10-16T22:48:05.106688",
+   "k": 1,
+   "policy": "abort",
+   "stuck_params": {
+    "_abort_after": 8192
+   },
+   "normal_params": {
+    "_abort_after": 8192
+   },
+   "guard_hit": false
+  },
+  "C5_abort8192_k2": {
+   "finished": "2026-10-16T22:55:39.228938",
+   "k": 2,
+   "policy": "abort",
+   "stuck_params": {
+    "_abort_after": 8192
+   },
+   "normal_params": {
+    "_abort_after": 8192
+   },
+   "guard_hit": false
+  },
+  "B8k_vllm_batch8_b0": {
+   "finished": "2026-10-16T22:59:13.147750",
+   "batch": {
+    "b": 0,
+    "long": 355,
+    "short": [
+     288,
+     102,
+     378,
+     368,
+     391,
+     342,
+     54
+    ]
+   },
+   "cap": 8192
+  },
+  "B8k_vllm_refill_b0": {
+   "finished": "2026-10-16T23:03:39.879884",
+   "batch": {
+    "b": 0,
+    "long": 355,
+    "short": [
+     288,
+     102,
+     378,
+     368,
+     391,
+     342,
+     54
+    ]
+   },
+   "cap": 8192
+  },
+  "B8k_vllm_batch8_b1": {
+   "finished": "2026-10-16T23:07:14.409725",
+   "batch": {
+    "b": 1,
+    "long": 382,
+    "short": [
+     8,
+     337,
+     135,
+     288,
+     102,
+     378,
+     368
+    ]
+   },
+   "cap": 8192
+  },
+  "B8k_vllm_refill_b1": {
+   "finished": "2026-10-16T23:11:46.290360",
+   "batch": {
+    "b": 1,
+    "long": 382,
+    "short": [
+     8,
+     337,
+     135,
+     288,
+     102,
+     378,
+     368
+    ]
+   },
+   "cap": 8192
+  },
+  "B8k_vllm_batch8_b2": {
+   "finished": "2026-10-16T23:15:20.126696",
+   "batch": {
+    "b": 2,
+    "long": 48,
+    "short": [
+     391,
+     342,
+     54,
+     8,
+     337,
+     135,
+     288
+    ]
+   },
+   "cap": 8192
+  },
+  "B8k_vllm_refill_b2": {
+   "finished": "2026-10-16T23:19:40.595495",
+   "batch": {
+    "b": 2,
+    "long": 48,
+    "short": [
+     391,
+     342,
+     54,
+     8,
+     337,
+     135,
+     288
+    ]
+   },
+   "cap": 8192
+  },
+  "B8k_vllm_batch8_b3": {
+   "finished": "2026-10-16T23:23:14.504843",
+   "batch": {
+    "b": 3,
+    "long": 115,
+    "short": [
+     102,
+     378,
+     368,
+     391,
+     342,
+     54,
+     8
+    ]
+   },
+   "cap": 8192
+  },
+  "B8k_vllm_refill_b3": {
+   "finished": "2026-10-16T23:27:41.659491",
+   "batch": {
+    "b": 3,
+    "long": 115,
+    "short": [
+     102,
+     378,
+     368,
+     391,
+     342,
+     54,
+     8
+    ]
+   },
+   "cap": 8192
+  },
+  "B8k_vllm_batch8_b4": {
+   "finished": "2026-10-16T23:31:18.405508",
+   "batch": {
+    "b": 4,
+    "long": 138,
+    "short": [
+     337,
+     135,
+     288,
+     102,
+     378,
+     368,
+     391
+    ]
+   },
+   "cap": 8192
+  },
+  "B8k_vllm_refill_b4": {
+   "finished": "2026-10-16T23:35:58.405585",
+   "batch": {
+    "b": 4,
+    "long": 138,
+    "short": [
+     337,
+     135,
+     288,
+     102,
+     378,
+     368,
+     391
+    ]
+   },
+   "cap": 8192
+  },
+  "C6_offload64_k2": {
+   "finished": "2026-10-17T01:15:26.159901",
+   "k": 2,
+   "policy": "offload",
+   "stuck_params": {},
+   "normal_params": {},
+   "guard_hit": false
+  }
+ }
+}

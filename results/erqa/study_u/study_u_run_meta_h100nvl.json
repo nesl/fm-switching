@@ -1,0 +1,84 @@
+{
+ "eight": {
+  "started": "2026-10-16T10:45:34.624807",
+  "finished": "2026-10-16T13:06:32.432427",
+  "models": {
+   "sdpa": {
+    "key": "8BT",
+    "repo": "Qwen/Qwen3-VL-8B-Thinking",
+    "revision": "92f3c4b4feadd3a016ef468d103bb5f58b2a2c6b",
+    "attn_implementation": "sdpa",
+    "load_s": 3.2,
+    "param_bytes_gb": 17.53,
+    "allocated_after_load_gb": 17.53
+   },
+   "flash_attention_2": {
+    "key": "8BT",
+    "repo": "Qwen/Qwen3-VL-8B-Thinking",
+    "revision": "92f3c4b4feadd3a016ef468d103bb5f58b2a2c6b",
+    "attn_implementation": "flash_attention_2",
+    "load_s": 3.1,
+    "param_bytes_gb": 17.53,
+    "allocated_after_load_gb": 35.07
+   }
+  },
+  "gen": {
+   "do_sample": true,
+   "temperature": 0.6,
+   "top_p": 0.95,
+   "top_k": 20,
+   "min_p": 0.0,
+   "max_new_tokens": 16384
+  },
+  "gpu": "NVIDIA H100 NVL",
+  "torch": "2.8.0+cu128",
+  "transformers": "5.10.2"
+ },
+ "_provenance": {
+  "git_commit": "e2bd904f4bca0115b056fa1ab5a753602e5efc0e",
+  "script": "study_u_fa2_size.py",
+  "model": "qwen3vl-8bt/32bt",
+  "timestamp": "2026-10-16T14:00:02.810926",
+  "device": "h100nvl",
+  "n": 92,
+  "seed": 42,
+  "args": {
+   "phase": "forced32"
+  }
+ },
+ "forced32": {
+  "started": "2026-10-16T13:07:39.603353",
+  "finished": "2026-10-16T14:00:02.808433",
+  "models": {
+   "sdpa": {
+    "key": "32BT",
+    "repo": "Qwen/Qwen3-VL-32B-Thinking",
+    "revision": "7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+    "attn_implementation": "sdpa",
+    "load_s": 9.7,
+    "param_bytes_gb": 66.71,
+    "allocated_after_load_gb": 66.71
+   },
+   "flash_attention_2": {
+    "key": "32BT",
+    "repo": "Qwen/Qwen3-VL-32B-Thinking",
+    "revision": "7edd10ffd1196091948fb245ff63e406ccb2d4d1",
+    "attn_implementation": "flash_attention_2",
+    "load_s": 9.5,
+    "param_bytes_gb": 66.71,
+    "allocated_after_load_gb": 66.75
+   }
+  },
+  "gen": {
+   "do_sample": true,
+   "temperature": 0.6,
+   "top_p": 0.95,
+   "top_k": 20,
+   "min_p": 0.0,
+   "max_new_tokens": 16384
+  },
+  "gpu": "NVIDIA H100 NVL",
+  "torch": "2.8.0+cu128",
+  "transformers": "5.10.2"
+ }
+}
