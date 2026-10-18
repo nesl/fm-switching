@@ -1,0 +1,4042 @@
+{
+ "done": [
+  "R5_COLD_D1",
+  "R5_WARM_D1",
+  "R5_COLD_D2",
+  "R5_WARM_D2",
+  "R5_COLD_D4",
+  "R5_WARM_D4",
+  "R5_COLD_D8",
+  "R5_WARM_D8",
+  "R5_COLD_D16",
+  "R5_WARM_D16",
+  "R5_COLD_D32",
+  "R5_WARM_D32",
+  "R5_COLD_D8_esc20",
+  "R5_WARM_D8_esc20",
+  "R5_COLD_D32_esc20",
+  "R5_WARM_D32_esc20",
+  "R5_WARM_D8_rep2",
+  "R5fp8_WARM_D8",
+  "R5fp8_WARM_D16",
+  "R5fp8_WARM_D32"
+ ],
+ "servers": [
+  {
+   "stage": "probe",
+   "started": "2026-10-17T12:58:36.668698",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 20480}}",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 54.6,
+   "log": "logs/study_x_server_32BI_1017_125741.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 65280,
+   "max_concurrency_at_max_len": 1.99,
+   "available_kv_gib": "15.94",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=2786219) INFO 10-17 12:58:00 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=2786219) INFO 10-17 12:58:00 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=2786219) INFO 10-17 12:58:01 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=2786219) INFO 10-17 12:58:01 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=2786219) INFO 10-17 12:58:09 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 20480}}",
+    "--host",
+    "127.0.0.1"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 2774488,
+    "my_pgid": 2774488,
+    "gpu3": [
+     {
+      "pid": 2786219,
+      "sid": 2774488,
+      "pgid": 2774488,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "stage": "sweep",
+   "started": "2026-10-17T13:00:17.486347",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 20480}}",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 54.6,
+   "log": "logs/study_x_server_32BI_1017_125922.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 65280,
+   "max_concurrency_at_max_len": 1.99,
+   "available_kv_gib": "15.94",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=2917492) INFO 10-17 12:59:39 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=2917492) INFO 10-17 12:59:39 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=2917492) INFO 10-17 12:59:40 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=2917492) INFO 10-17 12:59:40 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=2917492) INFO 10-17 12:59:47 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 20480}}",
+    "--host",
+    "127.0.0.1"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 2875382,
+    "my_pgid": 2875382,
+    "gpu3": [
+     {
+      "pid": 2917492,
+      "sid": 2875382,
+      "pgid": 2875382,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "stage": "sweep",
+   "started": "2026-10-17T16:30:47.277004",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 20480}}",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 51.5,
+   "log": "logs/study_x_server_32BI_1017_162955.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 65280,
+   "max_concurrency_at_max_len": 1.99,
+   "available_kv_gib": "15.94",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=3715218) INFO 10-17 16:30:11 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=3715218) INFO 10-17 16:30:11 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=3715218) INFO 10-17 16:30:12 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=3715218) INFO 10-17 16:30:12 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=3715218) INFO 10-17 16:30:19 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 20480}}",
+    "--host",
+    "127.0.0.1"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 3617830,
+    "my_pgid": 3617830,
+    "gpu3": [
+     {
+      "pid": 3715218,
+      "sid": 3617830,
+      "pgid": 3617830,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "stage": "sweep",
+   "started": "2026-10-17T18:50:34.688531",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 20480}}",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 51.6,
+   "log": "logs/study_x_server_32BI_1017_184942.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 65280,
+   "max_concurrency_at_max_len": 1.99,
+   "available_kv_gib": "15.94",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=3739669) INFO 10-17 18:49:59 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=3739669) INFO 10-17 18:49:59 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=3739669) INFO 10-17 18:49:59 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=3739669) INFO 10-17 18:49:59 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=3739669) INFO 10-17 18:50:06 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 20480}}",
+    "--host",
+    "127.0.0.1"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 3739223,
+    "my_pgid": 3739223,
+    "gpu3": [
+     {
+      "pid": 3739669,
+      "sid": 3739223,
+      "pgid": 3739223,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "stage": "fp8",
+   "started": "2026-10-17T23:28:04.330280",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 20480}}",
+    "--host",
+    "127.0.0.1",
+    "--kv-cache-dtype",
+    "fp8"
+   ],
+   "startup_s": 106.1,
+   "log": "logs/study_x_server_32BI_1017_232617.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 130720,
+   "max_concurrency_at_max_len": 3.99,
+   "available_kv_gib": "15.96",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=3920150) INFO 10-17 23:26:34 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN'].",
+    "(EngineCore pid=3920150) INFO 10-17 23:26:34 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=3920150) INFO 10-17 23:26:34 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=3920150) INFO 10-17 23:26:34 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=3920150) INFO 10-17 23:26:41 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 20480}}",
+    "--host",
+    "127.0.0.1",
+    "--kv-cache-dtype",
+    "fp8"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 3739223,
+    "my_pgid": 3739223,
+    "gpu3": [
+     {
+      "pid": 3920150,
+      "sid": 3739223,
+      "pgid": 3739223,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  }
+ ],
+ "stack": {
+  "venv": "/home/pragya/.venvs/fm-switching-vllm",
+  "vllm": "0.31.0",
+  "torch": "2.13.0+cu129",
+  "cuda": "12.9"
+ },
+ "probe": {
+  "frames_a": 10,
+  "tokens_a": 250,
+  "frames_b": 20,
+  "tokens_b": 470,
+  "tokens_per_frame": 22.0,
+  "tokens_10min": 13200.0,
+  "append_cached": 240,
+  "escalation_cached": 464,
+  "escalation_prompt": 566,
+  "errors": []
+ },
+ "experiments": {
+  "R5_COLD_D1": {
+   "finished": "2026-10-17T16:45:40.775755",
+   "policy": "COLD",
+   "D": 1,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 0.0,
+   "warmup_s": 0.0,
+   "inflight_at_window_end": 1,
+   "drain_s": 1.0,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "551100761085185_start_0.0_end_599.996",
+      "1103296728412028_start_0.0_end_364.291",
+      "9999393136796400_start_0.0_end_599.969",
+      "569442685761274_start_0.0_end_600.148",
+      "1381187519859533_start_0.0_end_600.22"
+     ],
+     "offset_s": 83.0
+    }
+   ],
+   "escalations": 14,
+   "escalation_token_hit": 0.6066
+  },
+  "R5_WARM_D1": {
+   "finished": "2026-10-17T17:00:37.101368",
+   "policy": "WARM",
+   "D": 1,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 0.42,
+   "warmup_s": 0.42,
+   "inflight_at_window_end": 1,
+   "drain_s": 1.0,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "551100761085185_start_0.0_end_599.996",
+      "1103296728412028_start_0.0_end_364.291",
+      "9999393136796400_start_0.0_end_599.969",
+      "569442685761274_start_0.0_end_600.148",
+      "1381187519859533_start_0.0_end_600.22"
+     ],
+     "offset_s": 83.0
+    }
+   ],
+   "escalations": 14,
+   "escalation_token_hit": 0.9439
+  },
+  "R5_COLD_D2": {
+   "finished": "2026-10-17T19:05:01.890897",
+   "policy": "COLD",
+   "D": 2,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 0.0,
+   "warmup_s": 0.0,
+   "inflight_at_window_end": 1,
+   "drain_s": 2.0,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "1103296728412028_start_0.0_end_364.291",
+      "569442685761274_start_0.0_end_600.148",
+      "1635001057178021_start_0.0_end_599.969",
+      "2699411960448386_start_0.0_end_599.4",
+      "1155259299736832_start_0.0_end_588.604"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "9999393136796400_start_0.0_end_599.969",
+      "1381187519859533_start_0.0_end_600.22",
+      "3565399436925631_start_0.0_end_599.987",
+      "2064767457385035_start_0.0_end_409.969",
+      "1076761904546143_start_0.0_end_372.705"
+     ],
+     "offset_s": 20.1
+    }
+   ],
+   "escalations": 23,
+   "escalation_token_hit": 0.6106
+  },
+  "R5_WARM_D2": {
+   "finished": "2026-10-17T19:20:04.212353",
+   "policy": "WARM",
+   "D": 2,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 0.55,
+   "warmup_s": 0.55,
+   "inflight_at_window_end": 1,
+   "drain_s": 1.0,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "1103296728412028_start_0.0_end_364.291",
+      "569442685761274_start_0.0_end_600.148",
+      "1635001057178021_start_0.0_end_599.969",
+      "2699411960448386_start_0.0_end_599.4",
+      "1155259299736832_start_0.0_end_588.604"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "9999393136796400_start_0.0_end_599.969",
+      "1381187519859533_start_0.0_end_600.22",
+      "3565399436925631_start_0.0_end_599.987",
+      "2064767457385035_start_0.0_end_409.969",
+      "1076761904546143_start_0.0_end_372.705"
+     ],
+     "offset_s": 20.1
+    }
+   ],
+   "escalations": 23,
+   "escalation_token_hit": 0.9494
+  },
+  "R5_COLD_D4": {
+   "finished": "2026-10-17T19:34:54.754314",
+   "policy": "COLD",
+   "D": 4,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 0.0,
+   "warmup_s": 0.0,
+   "inflight_at_window_end": 1,
+   "drain_s": 1.3,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "569442685761274_start_0.0_end_600.148",
+      "2699411960448386_start_0.0_end_599.4",
+      "1698254277549324_start_0.0_end_300.0",
+      "626382380356094_start_0.0_end_600.005",
+      "1242272464195379_start_0.0_end_599.982"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "1381187519859533_start_0.0_end_600.22",
+      "2064767457385035_start_0.0_end_409.969",
+      "1385825889152370_start_0.0_end_408.978",
+      "550798061123598_start_0.0_end_508.187",
+      "2211104685971437_start_0.0_end_600.013"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "1635001057178021_start_0.0_end_599.969",
+      "1155259299736832_start_0.0_end_588.604",
+      "1277332387280126_start_0.0_end_300.0",
+      "750546900852059_start_0.0_end_313.654",
+      "1680204915971460_start_0.0_end_316.107"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "3565399436925631_start_0.0_end_599.987",
+      "1076761904546143_start_0.0_end_372.705",
+      "731343993019620_start_0.0_end_310.045",
+      "1848337166005249_start_0.0_end_1199.976",
+      "1577671472898942_start_0.0_end_599.96"
+     ],
+     "offset_s": 105.7
+    }
+   ],
+   "escalations": 38,
+   "escalation_token_hit": 0.5468
+  },
+  "R5_WARM_D4": {
+   "finished": "2026-10-17T19:49:58.288048",
+   "policy": "WARM",
+   "D": 4,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 1.49,
+   "warmup_s": 1.49,
+   "inflight_at_window_end": 1,
+   "drain_s": 1.0,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "569442685761274_start_0.0_end_600.148",
+      "2699411960448386_start_0.0_end_599.4",
+      "1698254277549324_start_0.0_end_300.0",
+      "626382380356094_start_0.0_end_600.005",
+      "1242272464195379_start_0.0_end_599.982"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "1381187519859533_start_0.0_end_600.22",
+      "2064767457385035_start_0.0_end_409.969",
+      "1385825889152370_start_0.0_end_408.978",
+      "550798061123598_start_0.0_end_508.187",
+      "2211104685971437_start_0.0_end_600.013"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "1635001057178021_start_0.0_end_599.969",
+      "1155259299736832_start_0.0_end_588.604",
+      "1277332387280126_start_0.0_end_300.0",
+      "750546900852059_start_0.0_end_313.654",
+      "1680204915971460_start_0.0_end_316.107"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "3565399436925631_start_0.0_end_599.987",
+      "1076761904546143_start_0.0_end_372.705",
+      "731343993019620_start_0.0_end_310.045",
+      "1848337166005249_start_0.0_end_1199.976",
+      "1577671472898942_start_0.0_end_599.96"
+     ],
+     "offset_s": 105.7
+    }
+   ],
+   "escalations": 38,
+   "escalation_token_hit": 0.9515
+  },
+  "R5_COLD_D8": {
+   "finished": "2026-10-17T20:04:50.169552",
+   "policy": "COLD",
+   "D": 8,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 0.0,
+   "warmup_s": 0.0,
+   "inflight_at_window_end": 1,
+   "drain_s": 1.0,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "2699411960448386_start_0.0_end_599.4",
+      "626382380356094_start_0.0_end_600.005",
+      "1801425474121026_start_0.0_end_334.382",
+      "956333776422010_start_0.0_end_599.995",
+      "1284164833203708_start_0.0_end_438.473"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "2064767457385035_start_0.0_end_409.969",
+      "550798061123598_start_0.0_end_508.187",
+      "637875586009287_start_0.0_end_406.396",
+      "796346366290476_start_0.0_end_309.095",
+      "1084722070513954_start_0.0_end_313.88"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "1155259299736832_start_0.0_end_588.604",
+      "750546900852059_start_0.0_end_313.654",
+      "1430268204968029_start_0.0_end_343.855",
+      "2846425615529561_start_0.0_end_312.502",
+      "1088746729444047_start_0.0_end_300.239"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "1076761904546143_start_0.0_end_372.705",
+      "1848337166005249_start_0.0_end_1199.976",
+      "736388049135999_start_0.0_end_376.333",
+      "766026939144588_start_0.0_end_520.493",
+      "1253133126231861_start_0.0_end_600.45"
+     ],
+     "offset_s": 105.7
+    },
+    {
+     "device": 4,
+     "videos": [
+      "569442685761274_start_0.0_end_600.148",
+      "1698254277549324_start_0.0_end_300.0",
+      "1242272464195379_start_0.0_end_599.982",
+      "2144632229357728_start_0.0_end_315.189",
+      "704577125495171_start_0.0_end_600.183",
+      "1293981962169721_start_0.0_end_300.0"
+     ],
+     "offset_s": 520.4
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "1385825889152370_start_0.0_end_408.978",
+      "2211104685971437_start_0.0_end_600.013",
+      "616157548208645_start_0.0_end_422.008",
+      "695325632865279_start_0.0_end_599.959",
+      "762144796185953_start_0.0_end_323.717"
+     ],
+     "offset_s": 197.2
+    },
+    {
+     "device": 6,
+     "videos": [
+      "1635001057178021_start_0.0_end_599.969",
+      "1277332387280126_start_0.0_end_300.0",
+      "1680204915971460_start_0.0_end_316.107",
+      "1956610695135669_start_0.0_end_300.0",
+      "1691081251514235_start_0.0_end_600.015",
+      "671013742223430_start_0.0_end_600.122"
+     ],
+     "offset_s": 62.2
+    },
+    {
+     "device": 7,
+     "videos": [
+      "3565399436925631_start_0.0_end_599.987",
+      "731343993019620_start_0.0_end_310.045",
+      "1577671472898942_start_0.0_end_599.96",
+      "736867785903229_start_0.0_end_300.0",
+      "1945027152963275_start_0.0_end_351.938",
+      "1049395483785037_start_0.0_end_588.209"
+     ],
+     "offset_s": 215.2
+    }
+   ],
+   "escalations": 76,
+   "escalation_token_hit": 0.534
+  },
+  "R5_WARM_D8": {
+   "finished": "2026-10-17T20:19:56.020260",
+   "policy": "WARM",
+   "D": 8,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 6.0,
+   "warmup_s": 6.0,
+   "inflight_at_window_end": 1,
+   "drain_s": 0.3,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "2699411960448386_start_0.0_end_599.4",
+      "626382380356094_start_0.0_end_600.005",
+      "1801425474121026_start_0.0_end_334.382",
+      "956333776422010_start_0.0_end_599.995",
+      "1284164833203708_start_0.0_end_438.473"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "2064767457385035_start_0.0_end_409.969",
+      "550798061123598_start_0.0_end_508.187",
+      "637875586009287_start_0.0_end_406.396",
+      "796346366290476_start_0.0_end_309.095",
+      "1084722070513954_start_0.0_end_313.88"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "1155259299736832_start_0.0_end_588.604",
+      "750546900852059_start_0.0_end_313.654",
+      "1430268204968029_start_0.0_end_343.855",
+      "2846425615529561_start_0.0_end_312.502",
+      "1088746729444047_start_0.0_end_300.239"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "1076761904546143_start_0.0_end_372.705",
+      "1848337166005249_start_0.0_end_1199.976",
+      "736388049135999_start_0.0_end_376.333",
+      "766026939144588_start_0.0_end_520.493",
+      "1253133126231861_start_0.0_end_600.45"
+     ],
+     "offset_s": 105.7
+    },
+    {
+     "device": 4,
+     "videos": [
+      "569442685761274_start_0.0_end_600.148",
+      "1698254277549324_start_0.0_end_300.0",
+      "1242272464195379_start_0.0_end_599.982",
+      "2144632229357728_start_0.0_end_315.189",
+      "704577125495171_start_0.0_end_600.183",
+      "1293981962169721_start_0.0_end_300.0"
+     ],
+     "offset_s": 520.4
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "1385825889152370_start_0.0_end_408.978",
+      "2211104685971437_start_0.0_end_600.013",
+      "616157548208645_start_0.0_end_422.008",
+      "695325632865279_start_0.0_end_599.959",
+      "762144796185953_start_0.0_end_323.717"
+     ],
+     "offset_s": 197.2
+    },
+    {
+     "device": 6,
+     "videos": [
+      "1635001057178021_start_0.0_end_599.969",
+      "1277332387280126_start_0.0_end_300.0",
+      "1680204915971460_start_0.0_end_316.107",
+      "1956610695135669_start_0.0_end_300.0",
+      "1691081251514235_start_0.0_end_600.015",
+      "671013742223430_start_0.0_end_600.122"
+     ],
+     "offset_s": 62.2
+    },
+    {
+     "device": 7,
+     "videos": [
+      "3565399436925631_start_0.0_end_599.987",
+      "731343993019620_start_0.0_end_310.045",
+      "1577671472898942_start_0.0_end_599.96",
+      "736867785903229_start_0.0_end_300.0",
+      "1945027152963275_start_0.0_end_351.938",
+      "1049395483785037_start_0.0_end_588.209"
+     ],
+     "offset_s": 215.2
+    }
+   ],
+   "escalations": 76,
+   "escalation_token_hit": 0.9532
+  },
+  "R5_COLD_D16": {
+   "finished": "2026-10-17T20:34:58.574479",
+   "policy": "COLD",
+   "D": 16,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 0.0,
+   "warmup_s": 0.0,
+   "inflight_at_window_end": 2,
+   "drain_s": 1.0,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "626382380356094_start_0.0_end_600.005",
+      "956333776422010_start_0.0_end_599.995",
+      "1481441226615218_start_0.0_end_300.087",
+      "1685243758829995_start_0.0_end_579.415",
+      "1289124902905552_start_0.0_end_321.267"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "550798061123598_start_0.0_end_508.187",
+      "796346366290476_start_0.0_end_309.095",
+      "1255719099314099_start_0.0_end_599.986",
+      "573067725364367_start_0.0_end_599.932",
+      "703466115492979_start_0.0_end_600.0"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "750546900852059_start_0.0_end_313.654",
+      "2846425615529561_start_0.0_end_312.502",
+      "1290745635792905_start_0.0_end_375.416",
+      "647510435043755_start_0.0_end_600.038",
+      "2846846508853733_start_0.0_end_599.946"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "1848337166005249_start_0.0_end_1199.976",
+      "766026939144588_start_0.0_end_520.493",
+      "1517700072558199_start_0.0_end_300.178",
+      "1430582088252106_start_0.0_end_599.981",
+      "1020640039686756_start_0.0_end_600.156"
+     ],
+     "offset_s": 105.7
+    },
+    {
+     "device": 4,
+     "videos": [
+      "569442685761274_start_0.0_end_600.148",
+      "1242272464195379_start_0.0_end_599.982",
+      "704577125495171_start_0.0_end_600.183",
+      "597421306692637_start_0.0_end_600.019",
+      "1015585313840126_start_0.0_end_311.164",
+      "1413200346459502_start_0.0_end_309.855"
+     ],
+     "offset_s": 520.4
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "2211104685971437_start_0.0_end_600.013",
+      "695325632865279_start_0.0_end_599.959",
+      "1023017279799163_start_0.0_end_599.963",
+      "1422030059126560_start_0.0_end_342.155",
+      "790971550032691_start_0.0_end_328.116"
+     ],
+     "offset_s": 197.2
+    },
+    {
+     "device": 6,
+     "videos": [
+      "1635001057178021_start_0.0_end_599.969",
+      "1680204915971460_start_0.0_end_316.107",
+      "1691081251514235_start_0.0_end_600.015",
+      "1100131898240591_start_0.0_end_318.357",
+      "769785152204550_start_0.0_end_323.615",
+      "1030676578614270_start_0.0_end_601.993"
+     ],
+     "offset_s": 62.2
+    },
+    {
+     "device": 7,
+     "videos": [
+      "3565399436925631_start_0.0_end_599.987",
+      "1577671472898942_start_0.0_end_599.96",
+      "1945027152963275_start_0.0_end_351.938",
+      "672963545696130_start_0.0_end_600.072",
+      "1028481422485064_start_0.0_end_365.418",
+      "1023758566050401_start_0.0_end_599.984"
+     ],
+     "offset_s": 215.2
+    },
+    {
+     "device": 8,
+     "videos": [
+      "2699411960448386_start_0.0_end_599.4",
+      "1801425474121026_start_0.0_end_334.382",
+      "1284164833203708_start_0.0_end_438.473",
+      "1426871031983567_start_0.0_end_313.891",
+      "1156095192709404_start_0.0_end_320.979",
+      "1205682563854255_start_0.0_end_599.991"
+     ],
+     "offset_s": 420.4
+    },
+    {
+     "device": 9,
+     "videos": [
+      "2064767457385035_start_0.0_end_409.969",
+      "637875586009287_start_0.0_end_406.396",
+      "1084722070513954_start_0.0_end_313.88",
+      "1004154028515092_start_0.0_end_599.281",
+      "1323134982091489_start_0.0_end_349.862",
+      "1854310412187804_start_0.0_end_387.974"
+     ],
+     "offset_s": 256.0
+    },
+    {
+     "device": 10,
+     "videos": [
+      "1155259299736832_start_0.0_end_588.604",
+      "1430268204968029_start_0.0_end_343.855",
+      "1088746729444047_start_0.0_end_300.239",
+      "1123752046318354_start_0.0_end_328.664",
+      "788227933566046_start_0.0_end_318.044",
+      "1058687089646259_start_0.0_end_599.983"
+     ],
+     "offset_s": 154.6
+    },
+    {
+     "device": 11,
+     "videos": [
+      "1076761904546143_start_0.0_end_372.705",
+      "736388049135999_start_0.0_end_376.333",
+      "1253133126231861_start_0.0_end_600.45",
+      "726131583640362_start_0.0_end_317.492",
+      "1433930244511948_start_0.0_end_311.564",
+      "3302168133258053_start_0.0_end_600.012"
+     ],
+     "offset_s": 123.8
+    },
+    {
+     "device": 12,
+     "videos": [
+      "1698254277549324_start_0.0_end_300.0",
+      "2144632229357728_start_0.0_end_315.189",
+      "1293981962169721_start_0.0_end_300.0",
+      "1182077450362523_start_0.0_end_559.645",
+      "663844359884061_start_0.0_end_326.285",
+      "1084289347003131_start_0.0_end_300.0"
+     ],
+     "offset_s": 116.4
+    },
+    {
+     "device": 13,
+     "videos": [
+      "1385825889152370_start_0.0_end_408.978",
+      "616157548208645_start_0.0_end_422.008",
+      "762144796185953_start_0.0_end_323.717",
+      "1133927258554954_start_0.0_end_425.936",
+      "662399573527898_start_0.0_end_551.995",
+      "9864685376944003_start_0.0_end_577.681"
+     ],
+     "offset_s": 166.2
+    },
+    {
+     "device": 14,
+     "videos": [
+      "1277332387280126_start_0.0_end_300.0",
+      "1956610695135669_start_0.0_end_300.0",
+      "671013742223430_start_0.0_end_600.122",
+      "1032206425511233_start_0.0_end_600.011",
+      "4064504807202128_start_0.0_end_600.199",
+      "1468764163996157_start_0.0_end_599.996"
+     ],
+     "offset_s": 188.1
+    },
+    {
+     "device": 15,
+     "videos": [
+      "731343993019620_start_0.0_end_310.045",
+      "736867785903229_start_0.0_end_300.0",
+      "1049395483785037_start_0.0_end_588.209",
+      "2649426178590002_start_0.0_end_600.284",
+      "714753627805809_start_0.0_end_600.162",
+      "1091490079597444_start_0.0_end_321.519"
+     ],
+     "offset_s": 0.4
+    }
+   ],
+   "escalations": 146,
+   "escalation_token_hit": 0.3779
+  },
+  "R5_WARM_D16": {
+   "finished": "2026-10-17T20:53:02.693565",
+   "policy": "WARM",
+   "D": 16,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 12.08,
+   "warmup_s": 12.08,
+   "inflight_at_window_end": 154,
+   "drain_s": 170.8,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "626382380356094_start_0.0_end_600.005",
+      "956333776422010_start_0.0_end_599.995",
+      "1481441226615218_start_0.0_end_300.087",
+      "1685243758829995_start_0.0_end_579.415",
+      "1289124902905552_start_0.0_end_321.267"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "550798061123598_start_0.0_end_508.187",
+      "796346366290476_start_0.0_end_309.095",
+      "1255719099314099_start_0.0_end_599.986",
+      "573067725364367_start_0.0_end_599.932",
+      "703466115492979_start_0.0_end_600.0"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "750546900852059_start_0.0_end_313.654",
+      "2846425615529561_start_0.0_end_312.502",
+      "1290745635792905_start_0.0_end_375.416",
+      "647510435043755_start_0.0_end_600.038",
+      "2846846508853733_start_0.0_end_599.946"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "1848337166005249_start_0.0_end_1199.976",
+      "766026939144588_start_0.0_end_520.493",
+      "1517700072558199_start_0.0_end_300.178",
+      "1430582088252106_start_0.0_end_599.981",
+      "1020640039686756_start_0.0_end_600.156"
+     ],
+     "offset_s": 105.7
+    },
+    {
+     "device": 4,
+     "videos": [
+      "569442685761274_start_0.0_end_600.148",
+      "1242272464195379_start_0.0_end_599.982",
+      "704577125495171_start_0.0_end_600.183",
+      "597421306692637_start_0.0_end_600.019",
+      "1015585313840126_start_0.0_end_311.164",
+      "1413200346459502_start_0.0_end_309.855"
+     ],
+     "offset_s": 520.4
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "2211104685971437_start_0.0_end_600.013",
+      "695325632865279_start_0.0_end_599.959",
+      "1023017279799163_start_0.0_end_599.963",
+      "1422030059126560_start_0.0_end_342.155",
+      "790971550032691_start_0.0_end_328.116"
+     ],
+     "offset_s": 197.2
+    },
+    {
+     "device": 6,
+     "videos": [
+      "1635001057178021_start_0.0_end_599.969",
+      "1680204915971460_start_0.0_end_316.107",
+      "1691081251514235_start_0.0_end_600.015",
+      "1100131898240591_start_0.0_end_318.357",
+      "769785152204550_start_0.0_end_323.615",
+      "1030676578614270_start_0.0_end_601.993"
+     ],
+     "offset_s": 62.2
+    },
+    {
+     "device": 7,
+     "videos": [
+      "3565399436925631_start_0.0_end_599.987",
+      "1577671472898942_start_0.0_end_599.96",
+      "1945027152963275_start_0.0_end_351.938",
+      "672963545696130_start_0.0_end_600.072",
+      "1028481422485064_start_0.0_end_365.418",
+      "1023758566050401_start_0.0_end_599.984"
+     ],
+     "offset_s": 215.2
+    },
+    {
+     "device": 8,
+     "videos": [
+      "2699411960448386_start_0.0_end_599.4",
+      "1801425474121026_start_0.0_end_334.382",
+      "1284164833203708_start_0.0_end_438.473",
+      "1426871031983567_start_0.0_end_313.891",
+      "1156095192709404_start_0.0_end_320.979",
+      "1205682563854255_start_0.0_end_599.991"
+     ],
+     "offset_s": 420.4
+    },
+    {
+     "device": 9,
+     "videos": [
+      "2064767457385035_start_0.0_end_409.969",
+      "637875586009287_start_0.0_end_406.396",
+      "1084722070513954_start_0.0_end_313.88",
+      "1004154028515092_start_0.0_end_599.281",
+      "1323134982091489_start_0.0_end_349.862",
+      "1854310412187804_start_0.0_end_387.974"
+     ],
+     "offset_s": 256.0
+    },
+    {
+     "device": 10,
+     "videos": [
+      "1155259299736832_start_0.0_end_588.604",
+      "1430268204968029_start_0.0_end_343.855",
+      "1088746729444047_start_0.0_end_300.239",
+      "1123752046318354_start_0.0_end_328.664",
+      "788227933566046_start_0.0_end_318.044",
+      "1058687089646259_start_0.0_end_599.983"
+     ],
+     "offset_s": 154.6
+    },
+    {
+     "device": 11,
+     "videos": [
+      "1076761904546143_start_0.0_end_372.705",
+      "736388049135999_start_0.0_end_376.333",
+      "1253133126231861_start_0.0_end_600.45",
+      "726131583640362_start_0.0_end_317.492",
+      "1433930244511948_start_0.0_end_311.564",
+      "3302168133258053_start_0.0_end_600.012"
+     ],
+     "offset_s": 123.8
+    },
+    {
+     "device": 12,
+     "videos": [
+      "1698254277549324_start_0.0_end_300.0",
+      "2144632229357728_start_0.0_end_315.189",
+      "1293981962169721_start_0.0_end_300.0",
+      "1182077450362523_start_0.0_end_559.645",
+      "663844359884061_start_0.0_end_326.285",
+      "1084289347003131_start_0.0_end_300.0"
+     ],
+     "offset_s": 116.4
+    },
+    {
+     "device": 13,
+     "videos": [
+      "1385825889152370_start_0.0_end_408.978",
+      "616157548208645_start_0.0_end_422.008",
+      "762144796185953_start_0.0_end_323.717",
+      "1133927258554954_start_0.0_end_425.936",
+      "662399573527898_start_0.0_end_551.995",
+      "9864685376944003_start_0.0_end_577.681"
+     ],
+     "offset_s": 166.2
+    },
+    {
+     "device": 14,
+     "videos": [
+      "1277332387280126_start_0.0_end_300.0",
+      "1956610695135669_start_0.0_end_300.0",
+      "671013742223430_start_0.0_end_600.122",
+      "1032206425511233_start_0.0_end_600.011",
+      "4064504807202128_start_0.0_end_600.199",
+      "1468764163996157_start_0.0_end_599.996"
+     ],
+     "offset_s": 188.1
+    },
+    {
+     "device": 15,
+     "videos": [
+      "731343993019620_start_0.0_end_310.045",
+      "736867785903229_start_0.0_end_300.0",
+      "1049395483785037_start_0.0_end_588.209",
+      "2649426178590002_start_0.0_end_600.284",
+      "714753627805809_start_0.0_end_600.162",
+      "1091490079597444_start_0.0_end_321.519"
+     ],
+     "offset_s": 0.4
+    }
+   ],
+   "escalations": 147,
+   "escalation_token_hit": 0.7129
+  },
+  "R5_COLD_D32": {
+   "finished": "2026-10-17T21:08:08.957292",
+   "policy": "COLD",
+   "D": 32,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 0.0,
+   "warmup_s": 0.0,
+   "inflight_at_window_end": 5,
+   "drain_s": 6.2,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "956333776422010_start_0.0_end_599.995",
+      "1685243758829995_start_0.0_end_579.415",
+      "1415765139703147_start_0.0_end_338.988",
+      "1435659120847247_start_0.0_end_315.118",
+      "1347281533209856_start_0.0_end_322.001"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "796346366290476_start_0.0_end_309.095",
+      "573067725364367_start_0.0_end_599.932",
+      "1011205677616862_start_0.0_end_314.103",
+      "4319895641617907_start_0.0_end_337.606",
+      "1050913950543133_start_0.0_end_396.493"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "2846425615529561_start_0.0_end_312.502",
+      "647510435043755_start_0.0_end_600.038",
+      "3703477849945137_start_0.0_end_599.96",
+      "1026745422902756_start_0.0_end_600.239",
+      "729454123191062_start_0.0_end_600.298"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "766026939144588_start_0.0_end_520.493",
+      "1430582088252106_start_0.0_end_599.981",
+      "738411278796189_start_0.0_end_315.479",
+      "1098520772239459_start_0.0_end_330.054",
+      "1665695840762798_start_0.0_end_599.976"
+     ],
+     "offset_s": 105.7
+    },
+    {
+     "device": 4,
+     "videos": [
+      "569442685761274_start_0.0_end_600.148",
+      "704577125495171_start_0.0_end_600.183",
+      "1015585313840126_start_0.0_end_311.164",
+      "1120683719671428_start_0.0_end_355.28",
+      "1090178012643948_start_0.0_end_398.267",
+      "24696378519960314_start_0.0_end_414.9"
+     ],
+     "offset_s": 520.4
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "695325632865279_start_0.0_end_599.959",
+      "1422030059126560_start_0.0_end_342.155",
+      "681133988208158_start_0.0_end_600.206",
+      "1067129222293667_start_0.0_end_321.518",
+      "1094012255435167_start_0.0_end_324.2"
+     ],
+     "offset_s": 197.2
+    },
+    {
+     "device": 6,
+     "videos": [
+      "1635001057178021_start_0.0_end_599.969",
+      "1691081251514235_start_0.0_end_600.015",
+      "769785152204550_start_0.0_end_323.615",
+      "1705629320340298_start_0.0_end_402.612",
+      "1045656560982481_start_0.0_end_365.978",
+      "1259514525970928_start_0.0_end_319.107"
+     ],
+     "offset_s": 62.2
+    },
+    {
+     "device": 7,
+     "videos": [
+      "3565399436925631_start_0.0_end_599.987",
+      "1945027152963275_start_0.0_end_351.938",
+      "1028481422485064_start_0.0_end_365.418",
+      "608505332246747_start_0.0_end_600.009",
+      "1758119494909100_start_0.0_end_332.067",
+      "1221817309307098_start_0.0_end_599.991"
+     ],
+     "offset_s": 215.2
+    },
+    {
+     "device": 8,
+     "videos": [
+      "2699411960448386_start_0.0_end_599.4",
+      "1284164833203708_start_0.0_end_438.473",
+      "1156095192709404_start_0.0_end_320.979",
+      "1033183405447678_start_0.0_end_599.978",
+      "665069879728607_start_0.0_end_599.973",
+      "2826984107488489_start_0.0_end_438.824"
+     ],
+     "offset_s": 420.4
+    },
+    {
+     "device": 9,
+     "videos": [
+      "2064767457385035_start_0.0_end_409.969",
+      "1084722070513954_start_0.0_end_313.88",
+      "1323134982091489_start_0.0_end_349.862",
+      "1325490802580551_start_0.0_end_309.718",
+      "1023875076490570_start_0.0_end_599.951",
+      "1150662047093052_start_0.0_end_330.256"
+     ],
+     "offset_s": 256.0
+    },
+    {
+     "device": 10,
+     "videos": [
+      "1155259299736832_start_0.0_end_588.604",
+      "1088746729444047_start_0.0_end_300.239",
+      "788227933566046_start_0.0_end_318.044",
+      "1118011560370089_start_0.0_end_598.494",
+      "3120199581464548_start_0.0_end_600.218",
+      "1044467407574703_start_0.0_end_600.028"
+     ],
+     "offset_s": 154.6
+    },
+    {
+     "device": 11,
+     "videos": [
+      "1076761904546143_start_0.0_end_372.705",
+      "1253133126231861_start_0.0_end_600.45",
+      "1433930244511948_start_0.0_end_311.564",
+      "941275014627762_start_0.0_end_307.589",
+      "591257796777793_start_0.0_end_300.231",
+      "1369947698174600_start_0.0_end_344.012"
+     ],
+     "offset_s": 123.8
+    },
+    {
+     "device": 12,
+     "videos": [
+      "1698254277549324_start_0.0_end_300.0",
+      "1293981962169721_start_0.0_end_300.0",
+      "663844359884061_start_0.0_end_326.285",
+      "1128203379196112_start_0.0_end_600.017",
+      "1137809621482336_start_0.0_end_600.147",
+      "1271720381302919_start_0.0_end_318.135"
+     ],
+     "offset_s": 116.4
+    },
+    {
+     "device": 13,
+     "videos": [
+      "1385825889152370_start_0.0_end_408.978",
+      "762144796185953_start_0.0_end_323.717",
+      "662399573527898_start_0.0_end_551.995",
+      "1445867246834981_start_0.0_end_600.077",
+      "727459876515585_start_0.0_end_300.043",
+      "1375595773649032_start_0.0_end_300.034"
+     ],
+     "offset_s": 166.2
+    },
+    {
+     "device": 14,
+     "videos": [
+      "1277332387280126_start_0.0_end_300.0",
+      "671013742223430_start_0.0_end_600.122",
+      "4064504807202128_start_0.0_end_600.199",
+      "1395302454900837_start_0.0_end_317.486",
+      "551715897680092_start_0.0_end_600.281",
+      "1841141929794753_start_0.0_end_599.968"
+     ],
+     "offset_s": 188.1
+    },
+    {
+     "device": 15,
+     "videos": [
+      "731343993019620_start_0.0_end_310.045",
+      "1049395483785037_start_0.0_end_588.209",
+      "714753627805809_start_0.0_end_600.162",
+      "1354114522742647_start_0.0_end_300.0",
+      "632336616540910_start_0.0_end_600.145",
+      "680890187975381_start_0.0_end_599.995"
+     ],
+     "offset_s": 0.4
+    },
+    {
+     "device": 16,
+     "videos": [
+      "626382380356094_start_0.0_end_600.005",
+      "1481441226615218_start_0.0_end_300.087",
+      "1289124902905552_start_0.0_end_321.267",
+      "714149781283234_start_0.0_end_665.541",
+      "9902221866524366_start_0.0_end_1199.959",
+      "1001141161985610_start_0.0_end_599.99"
+     ],
+     "offset_s": 111.5
+    },
+    {
+     "device": 17,
+     "videos": [
+      "550798061123598_start_0.0_end_508.187",
+      "1255719099314099_start_0.0_end_599.986",
+      "703466115492979_start_0.0_end_600.0",
+      "1272099357949614_start_0.0_end_300.0",
+      "538469475795868_start_0.0_end_520.785",
+      "4176083796050393_start_0.0_end_600.048"
+     ],
+     "offset_s": 167.9
+    },
+    {
+     "device": 18,
+     "videos": [
+      "750546900852059_start_0.0_end_313.654",
+      "1290745635792905_start_0.0_end_375.416",
+      "2846846508853733_start_0.0_end_599.946",
+      "1222724952646549_start_0.0_end_336.839",
+      "720467167426580_start_0.0_end_300.0",
+      "602172215484549_start_0.0_end_599.977"
+     ],
+     "offset_s": 71.8
+    },
+    {
+     "device": 19,
+     "videos": [
+      "1848337166005249_start_0.0_end_1199.976",
+      "1517700072558199_start_0.0_end_300.178",
+      "1020640039686756_start_0.0_end_600.156",
+      "747594358192374_start_0.0_end_599.977",
+      "1314496693568074_start_0.0_end_323.325",
+      "1447459139569275_start_0.0_end_600.279"
+     ],
+     "offset_s": 730.5
+    },
+    {
+     "device": 20,
+     "videos": [
+      "1242272464195379_start_0.0_end_599.982",
+      "597421306692637_start_0.0_end_600.019",
+      "1413200346459502_start_0.0_end_309.855",
+      "3903565719895826_start_0.0_end_382.546",
+      "3601161160177668_start_0.0_end_600.202",
+      "1071206565202625_start_0.0_end_315.286"
+     ],
+     "offset_s": 186.3
+    },
+    {
+     "device": 21,
+     "videos": [
+      "2211104685971437_start_0.0_end_600.013",
+      "1023017279799163_start_0.0_end_599.963",
+      "790971550032691_start_0.0_end_328.116",
+      "1196380908704398_start_0.0_end_600.215",
+      "675833515065315_start_0.0_end_600.147",
+      "1015467527231807_start_0.0_end_599.976"
+     ],
+     "offset_s": 518.3
+    },
+    {
+     "device": 22,
+     "videos": [
+      "1680204915971460_start_0.0_end_316.107",
+      "1100131898240591_start_0.0_end_318.357",
+      "1030676578614270_start_0.0_end_601.993",
+      "1470001337521253_start_0.0_end_300.0",
+      "2250751765395216_start_0.0_end_326.402",
+      "2478973155772033_start_0.0_end_600.011"
+     ],
+     "offset_s": 179.5
+    },
+    {
+     "device": 23,
+     "videos": [
+      "1577671472898942_start_0.0_end_599.96",
+      "672963545696130_start_0.0_end_600.072",
+      "1023758566050401_start_0.0_end_599.984",
+      "1319837272968317_start_0.0_end_320.604",
+      "613891895102051_start_0.0_end_397.113",
+      "1042025564680129_start_0.0_end_314.155"
+     ],
+     "offset_s": 149.6
+    },
+    {
+     "device": 24,
+     "videos": [
+      "1801425474121026_start_0.0_end_334.382",
+      "1426871031983567_start_0.0_end_313.891",
+      "1205682563854255_start_0.0_end_599.991",
+      "1379566719773474_start_0.0_end_545.838",
+      "663621686514521_start_0.0_end_599.985",
+      "9686007581480111_start_0.0_end_565.014"
+     ],
+     "offset_s": 125.5
+    },
+    {
+     "device": 25,
+     "videos": [
+      "637875586009287_start_0.0_end_406.396",
+      "1004154028515092_start_0.0_end_599.281",
+      "1854310412187804_start_0.0_end_387.974",
+      "677637195018930_start_0.0_end_599.98",
+      "1085232373177911_start_0.0_end_328.488",
+      "1968508127271132_start_0.0_end_447.921"
+     ],
+     "offset_s": 263.9
+    },
+    {
+     "device": 26,
+     "videos": [
+      "1430268204968029_start_0.0_end_343.855",
+      "1123752046318354_start_0.0_end_328.664",
+      "1058687089646259_start_0.0_end_599.983",
+      "4023656411196583_start_0.0_end_599.996",
+      "1317747566722648_start_0.0_end_300.0",
+      "1649035665793396_start_0.0_end_335.392"
+     ],
+     "offset_s": 141.8
+    },
+    {
+     "device": 27,
+     "videos": [
+      "736388049135999_start_0.0_end_376.333",
+      "726131583640362_start_0.0_end_317.492",
+      "3302168133258053_start_0.0_end_600.012",
+      "1513631326470910_start_0.0_end_324.478",
+      "674634768606620_start_0.0_end_591.28",
+      "773647355614575_start_0.0_end_327.557"
+     ],
+     "offset_s": 223.8
+    },
+    {
+     "device": 28,
+     "videos": [
+      "2144632229357728_start_0.0_end_315.189",
+      "1182077450362523_start_0.0_end_559.645",
+      "1084289347003131_start_0.0_end_300.0",
+      "1085041543181381_start_0.0_end_386.067",
+      "780026071025974_start_0.0_end_323.192",
+      "2554992228029466_start_0.0_end_599.983"
+     ],
+     "offset_s": 14.4
+    },
+    {
+     "device": 29,
+     "videos": [
+      "616157548208645_start_0.0_end_422.008",
+      "1133927258554954_start_0.0_end_425.936",
+      "9864685376944003_start_0.0_end_577.681",
+      "791449306887400_start_0.0_end_304.403",
+      "1080931757513668_start_0.0_end_600.032",
+      "1193236635806968_start_0.0_end_599.997"
+     ],
+     "offset_s": 171.0
+    },
+    {
+     "device": 30,
+     "videos": [
+      "1956610695135669_start_0.0_end_300.0",
+      "1032206425511233_start_0.0_end_600.011",
+      "1468764163996157_start_0.0_end_599.996",
+      "729685616639719_start_0.0_end_328.273",
+      "1813544496258929_start_0.0_end_307.914",
+      "539288665917819_start_0.0_end_599.993"
+     ],
+     "offset_s": 71.8
+    },
+    {
+     "device": 31,
+     "videos": [
+      "736867785903229_start_0.0_end_300.0",
+      "2649426178590002_start_0.0_end_600.284",
+      "1091490079597444_start_0.0_end_321.519",
+      "1292749728906542_start_0.0_end_599.951",
+      "8365619113563204_start_0.0_end_599.959",
+      "3992408927674955_start_0.0_end_460.091"
+     ],
+     "offset_s": 42.4
+    }
+   ],
+   "escalations": 266,
+   "escalation_token_hit": 0.1089
+  },
+  "R5_WARM_D32": {
+   "finished": "2026-10-17T21:47:47.821419",
+   "policy": "WARM",
+   "D": 32,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 25.64,
+   "warmup_s": 25.64,
+   "inflight_at_window_end": 1823,
+   "drain_s": 1330.6,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "956333776422010_start_0.0_end_599.995",
+      "1685243758829995_start_0.0_end_579.415",
+      "1415765139703147_start_0.0_end_338.988",
+      "1435659120847247_start_0.0_end_315.118",
+      "1347281533209856_start_0.0_end_322.001"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "796346366290476_start_0.0_end_309.095",
+      "573067725364367_start_0.0_end_599.932",
+      "1011205677616862_start_0.0_end_314.103",
+      "4319895641617907_start_0.0_end_337.606",
+      "1050913950543133_start_0.0_end_396.493"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "2846425615529561_start_0.0_end_312.502",
+      "647510435043755_start_0.0_end_600.038",
+      "3703477849945137_start_0.0_end_599.96",
+      "1026745422902756_start_0.0_end_600.239",
+      "729454123191062_start_0.0_end_600.298"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "766026939144588_start_0.0_end_520.493",
+      "1430582088252106_start_0.0_end_599.981",
+      "738411278796189_start_0.0_end_315.479",
+      "1098520772239459_start_0.0_end_330.054",
+      "1665695840762798_start_0.0_end_599.976"
+     ],
+     "offset_s": 105.7
+    },
+    {
+     "device": 4,
+     "videos": [
+      "569442685761274_start_0.0_end_600.148",
+      "704577125495171_start_0.0_end_600.183",
+      "1015585313840126_start_0.0_end_311.164",
+      "1120683719671428_start_0.0_end_355.28",
+      "1090178012643948_start_0.0_end_398.267",
+      "24696378519960314_start_0.0_end_414.9"
+     ],
+     "offset_s": 520.4
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "695325632865279_start_0.0_end_599.959",
+      "1422030059126560_start_0.0_end_342.155",
+      "681133988208158_start_0.0_end_600.206",
+      "1067129222293667_start_0.0_end_321.518",
+      "1094012255435167_start_0.0_end_324.2"
+     ],
+     "offset_s": 197.2
+    },
+    {
+     "device": 6,
+     "videos": [
+      "1635001057178021_start_0.0_end_599.969",
+      "1691081251514235_start_0.0_end_600.015",
+      "769785152204550_start_0.0_end_323.615",
+      "1705629320340298_start_0.0_end_402.612",
+      "1045656560982481_start_0.0_end_365.978",
+      "1259514525970928_start_0.0_end_319.107"
+     ],
+     "offset_s": 62.2
+    },
+    {
+     "device": 7,
+     "videos": [
+      "3565399436925631_start_0.0_end_599.987",
+      "1945027152963275_start_0.0_end_351.938",
+      "1028481422485064_start_0.0_end_365.418",
+      "608505332246747_start_0.0_end_600.009",
+      "1758119494909100_start_0.0_end_332.067",
+      "1221817309307098_start_0.0_end_599.991"
+     ],
+     "offset_s": 215.2
+    },
+    {
+     "device": 8,
+     "videos": [
+      "2699411960448386_start_0.0_end_599.4",
+      "1284164833203708_start_0.0_end_438.473",
+      "1156095192709404_start_0.0_end_320.979",
+      "1033183405447678_start_0.0_end_599.978",
+      "665069879728607_start_0.0_end_599.973",
+      "2826984107488489_start_0.0_end_438.824"
+     ],
+     "offset_s": 420.4
+    },
+    {
+     "device": 9,
+     "videos": [
+      "2064767457385035_start_0.0_end_409.969",
+      "1084722070513954_start_0.0_end_313.88",
+      "1323134982091489_start_0.0_end_349.862",
+      "1325490802580551_start_0.0_end_309.718",
+      "1023875076490570_start_0.0_end_599.951",
+      "1150662047093052_start_0.0_end_330.256"
+     ],
+     "offset_s": 256.0
+    },
+    {
+     "device": 10,
+     "videos": [
+      "1155259299736832_start_0.0_end_588.604",
+      "1088746729444047_start_0.0_end_300.239",
+      "788227933566046_start_0.0_end_318.044",
+      "1118011560370089_start_0.0_end_598.494",
+      "3120199581464548_start_0.0_end_600.218",
+      "1044467407574703_start_0.0_end_600.028"
+     ],
+     "offset_s": 154.6
+    },
+    {
+     "device": 11,
+     "videos": [
+      "1076761904546143_start_0.0_end_372.705",
+      "1253133126231861_start_0.0_end_600.45",
+      "1433930244511948_start_0.0_end_311.564",
+      "941275014627762_start_0.0_end_307.589",
+      "591257796777793_start_0.0_end_300.231",
+      "1369947698174600_start_0.0_end_344.012"
+     ],
+     "offset_s": 123.8
+    },
+    {
+     "device": 12,
+     "videos": [
+      "1698254277549324_start_0.0_end_300.0",
+      "1293981962169721_start_0.0_end_300.0",
+      "663844359884061_start_0.0_end_326.285",
+      "1128203379196112_start_0.0_end_600.017",
+      "1137809621482336_start_0.0_end_600.147",
+      "1271720381302919_start_0.0_end_318.135"
+     ],
+     "offset_s": 116.4
+    },
+    {
+     "device": 13,
+     "videos": [
+      "1385825889152370_start_0.0_end_408.978",
+      "762144796185953_start_0.0_end_323.717",
+      "662399573527898_start_0.0_end_551.995",
+      "1445867246834981_start_0.0_end_600.077",
+      "727459876515585_start_0.0_end_300.043",
+      "1375595773649032_start_0.0_end_300.034"
+     ],
+     "offset_s": 166.2
+    },
+    {
+     "device": 14,
+     "videos": [
+      "1277332387280126_start_0.0_end_300.0",
+      "671013742223430_start_0.0_end_600.122",
+      "4064504807202128_start_0.0_end_600.199",
+      "1395302454900837_start_0.0_end_317.486",
+      "551715897680092_start_0.0_end_600.281",
+      "1841141929794753_start_0.0_end_599.968"
+     ],
+     "offset_s": 188.1
+    },
+    {
+     "device": 15,
+     "videos": [
+      "731343993019620_start_0.0_end_310.045",
+      "1049395483785037_start_0.0_end_588.209",
+      "714753627805809_start_0.0_end_600.162",
+      "1354114522742647_start_0.0_end_300.0",
+      "632336616540910_start_0.0_end_600.145",
+      "680890187975381_start_0.0_end_599.995"
+     ],
+     "offset_s": 0.4
+    },
+    {
+     "device": 16,
+     "videos": [
+      "626382380356094_start_0.0_end_600.005",
+      "1481441226615218_start_0.0_end_300.087",
+      "1289124902905552_start_0.0_end_321.267",
+      "714149781283234_start_0.0_end_665.541",
+      "9902221866524366_start_0.0_end_1199.959",
+      "1001141161985610_start_0.0_end_599.99"
+     ],
+     "offset_s": 111.5
+    },
+    {
+     "device": 17,
+     "videos": [
+      "550798061123598_start_0.0_end_508.187",
+      "1255719099314099_start_0.0_end_599.986",
+      "703466115492979_start_0.0_end_600.0",
+      "1272099357949614_start_0.0_end_300.0",
+      "538469475795868_start_0.0_end_520.785",
+      "4176083796050393_start_0.0_end_600.048"
+     ],
+     "offset_s": 167.9
+    },
+    {
+     "device": 18,
+     "videos": [
+      "750546900852059_start_0.0_end_313.654",
+      "1290745635792905_start_0.0_end_375.416",
+      "2846846508853733_start_0.0_end_599.946",
+      "1222724952646549_start_0.0_end_336.839",
+      "720467167426580_start_0.0_end_300.0",
+      "602172215484549_start_0.0_end_599.977"
+     ],
+     "offset_s": 71.8
+    },
+    {
+     "device": 19,
+     "videos": [
+      "1848337166005249_start_0.0_end_1199.976",
+      "1517700072558199_start_0.0_end_300.178",
+      "1020640039686756_start_0.0_end_600.156",
+      "747594358192374_start_0.0_end_599.977",
+      "1314496693568074_start_0.0_end_323.325",
+      "1447459139569275_start_0.0_end_600.279"
+     ],
+     "offset_s": 730.5
+    },
+    {
+     "device": 20,
+     "videos": [
+      "1242272464195379_start_0.0_end_599.982",
+      "597421306692637_start_0.0_end_600.019",
+      "1413200346459502_start_0.0_end_309.855",
+      "3903565719895826_start_0.0_end_382.546",
+      "3601161160177668_start_0.0_end_600.202",
+      "1071206565202625_start_0.0_end_315.286"
+     ],
+     "offset_s": 186.3
+    },
+    {
+     "device": 21,
+     "videos": [
+      "2211104685971437_start_0.0_end_600.013",
+      "1023017279799163_start_0.0_end_599.963",
+      "790971550032691_start_0.0_end_328.116",
+      "1196380908704398_start_0.0_end_600.215",
+      "675833515065315_start_0.0_end_600.147",
+      "1015467527231807_start_0.0_end_599.976"
+     ],
+     "offset_s": 518.3
+    },
+    {
+     "device": 22,
+     "videos": [
+      "1680204915971460_start_0.0_end_316.107",
+      "1100131898240591_start_0.0_end_318.357",
+      "1030676578614270_start_0.0_end_601.993",
+      "1470001337521253_start_0.0_end_300.0",
+      "2250751765395216_start_0.0_end_326.402",
+      "2478973155772033_start_0.0_end_600.011"
+     ],
+     "offset_s": 179.5
+    },
+    {
+     "device": 23,
+     "videos": [
+      "1577671472898942_start_0.0_end_599.96",
+      "672963545696130_start_0.0_end_600.072",
+      "1023758566050401_start_0.0_end_599.984",
+      "1319837272968317_start_0.0_end_320.604",
+      "613891895102051_start_0.0_end_397.113",
+      "1042025564680129_start_0.0_end_314.155"
+     ],
+     "offset_s": 149.6
+    },
+    {
+     "device": 24,
+     "videos": [
+      "1801425474121026_start_0.0_end_334.382",
+      "1426871031983567_start_0.0_end_313.891",
+      "1205682563854255_start_0.0_end_599.991",
+      "1379566719773474_start_0.0_end_545.838",
+      "663621686514521_start_0.0_end_599.985",
+      "9686007581480111_start_0.0_end_565.014"
+     ],
+     "offset_s": 125.5
+    },
+    {
+     "device": 25,
+     "videos": [
+      "637875586009287_start_0.0_end_406.396",
+      "1004154028515092_start_0.0_end_599.281",
+      "1854310412187804_start_0.0_end_387.974",
+      "677637195018930_start_0.0_end_599.98",
+      "1085232373177911_start_0.0_end_328.488",
+      "1968508127271132_start_0.0_end_447.921"
+     ],
+     "offset_s": 263.9
+    },
+    {
+     "device": 26,
+     "videos": [
+      "1430268204968029_start_0.0_end_343.855",
+      "1123752046318354_start_0.0_end_328.664",
+      "1058687089646259_start_0.0_end_599.983",
+      "4023656411196583_start_0.0_end_599.996",
+      "1317747566722648_start_0.0_end_300.0",
+      "1649035665793396_start_0.0_end_335.392"
+     ],
+     "offset_s": 141.8
+    },
+    {
+     "device": 27,
+     "videos": [
+      "736388049135999_start_0.0_end_376.333",
+      "726131583640362_start_0.0_end_317.492",
+      "3302168133258053_start_0.0_end_600.012",
+      "1513631326470910_start_0.0_end_324.478",
+      "674634768606620_start_0.0_end_591.28",
+      "773647355614575_start_0.0_end_327.557"
+     ],
+     "offset_s": 223.8
+    },
+    {
+     "device": 28,
+     "videos": [
+      "2144632229357728_start_0.0_end_315.189",
+      "1182077450362523_start_0.0_end_559.645",
+      "1084289347003131_start_0.0_end_300.0",
+      "1085041543181381_start_0.0_end_386.067",
+      "780026071025974_start_0.0_end_323.192",
+      "2554992228029466_start_0.0_end_599.983"
+     ],
+     "offset_s": 14.4
+    },
+    {
+     "device": 29,
+     "videos": [
+      "616157548208645_start_0.0_end_422.008",
+      "1133927258554954_start_0.0_end_425.936",
+      "9864685376944003_start_0.0_end_577.681",
+      "791449306887400_start_0.0_end_304.403",
+      "1080931757513668_start_0.0_end_600.032",
+      "1193236635806968_start_0.0_end_599.997"
+     ],
+     "offset_s": 171.0
+    },
+    {
+     "device": 30,
+     "videos": [
+      "1956610695135669_start_0.0_end_300.0",
+      "1032206425511233_start_0.0_end_600.011",
+      "1468764163996157_start_0.0_end_599.996",
+      "729685616639719_start_0.0_end_328.273",
+      "1813544496258929_start_0.0_end_307.914",
+      "539288665917819_start_0.0_end_599.993"
+     ],
+     "offset_s": 71.8
+    },
+    {
+     "device": 31,
+     "videos": [
+      "736867785903229_start_0.0_end_300.0",
+      "2649426178590002_start_0.0_end_600.284",
+      "1091490079597444_start_0.0_end_321.519",
+      "1292749728906542_start_0.0_end_599.951",
+      "8365619113563204_start_0.0_end_599.959",
+      "3992408927674955_start_0.0_end_460.091"
+     ],
+     "offset_s": 42.4
+    }
+   ],
+   "escalations": 266,
+   "escalation_token_hit": 0.203
+  },
+  "R5_COLD_D8_esc20": {
+   "finished": "2026-10-17T22:02:38.806635",
+   "policy": "COLD",
+   "D": 8,
+   "esc_frac": 0.2,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 0.0,
+   "warmup_s": 0.0,
+   "inflight_at_window_end": 1,
+   "drain_s": 1.4,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "2699411960448386_start_0.0_end_599.4",
+      "626382380356094_start_0.0_end_600.005",
+      "1801425474121026_start_0.0_end_334.382",
+      "956333776422010_start_0.0_end_599.995",
+      "1284164833203708_start_0.0_end_438.473"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "2064767457385035_start_0.0_end_409.969",
+      "550798061123598_start_0.0_end_508.187",
+      "637875586009287_start_0.0_end_406.396",
+      "796346366290476_start_0.0_end_309.095",
+      "1084722070513954_start_0.0_end_313.88"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "1155259299736832_start_0.0_end_588.604",
+      "750546900852059_start_0.0_end_313.654",
+      "1430268204968029_start_0.0_end_343.855",
+      "2846425615529561_start_0.0_end_312.502",
+      "1088746729444047_start_0.0_end_300.239"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "1076761904546143_start_0.0_end_372.705",
+      "1848337166005249_start_0.0_end_1199.976",
+      "736388049135999_start_0.0_end_376.333",
+      "766026939144588_start_0.0_end_520.493",
+      "1253133126231861_start_0.0_end_600.45"
+     ],
+     "offset_s": 105.7
+    },
+    {
+     "device": 4,
+     "videos": [
+      "569442685761274_start_0.0_end_600.148",
+      "1698254277549324_start_0.0_end_300.0",
+      "1242272464195379_start_0.0_end_599.982",
+      "2144632229357728_start_0.0_end_315.189",
+      "704577125495171_start_0.0_end_600.183",
+      "1293981962169721_start_0.0_end_300.0"
+     ],
+     "offset_s": 520.4
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "1385825889152370_start_0.0_end_408.978",
+      "2211104685971437_start_0.0_end_600.013",
+      "616157548208645_start_0.0_end_422.008",
+      "695325632865279_start_0.0_end_599.959",
+      "762144796185953_start_0.0_end_323.717"
+     ],
+     "offset_s": 197.2
+    },
+    {
+     "device": 6,
+     "videos": [
+      "1635001057178021_start_0.0_end_599.969",
+      "1277332387280126_start_0.0_end_300.0",
+      "1680204915971460_start_0.0_end_316.107",
+      "1956610695135669_start_0.0_end_300.0",
+      "1691081251514235_start_0.0_end_600.015",
+      "671013742223430_start_0.0_end_600.122"
+     ],
+     "offset_s": 62.2
+    },
+    {
+     "device": 7,
+     "videos": [
+      "3565399436925631_start_0.0_end_599.987",
+      "731343993019620_start_0.0_end_310.045",
+      "1577671472898942_start_0.0_end_599.96",
+      "736867785903229_start_0.0_end_300.0",
+      "1945027152963275_start_0.0_end_351.938",
+      "1049395483785037_start_0.0_end_588.209"
+     ],
+     "offset_s": 215.2
+    }
+   ],
+   "escalations": 9,
+   "escalation_token_hit": 0.0872
+  },
+  "R5_WARM_D8_esc20": {
+   "finished": "2026-10-17T22:17:45.217852",
+   "policy": "WARM",
+   "D": 8,
+   "esc_frac": 0.2,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 6.49,
+   "warmup_s": 6.49,
+   "inflight_at_window_end": 1,
+   "drain_s": 0.3,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "2699411960448386_start_0.0_end_599.4",
+      "626382380356094_start_0.0_end_600.005",
+      "1801425474121026_start_0.0_end_334.382",
+      "956333776422010_start_0.0_end_599.995",
+      "1284164833203708_start_0.0_end_438.473"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "2064767457385035_start_0.0_end_409.969",
+      "550798061123598_start_0.0_end_508.187",
+      "637875586009287_start_0.0_end_406.396",
+      "796346366290476_start_0.0_end_309.095",
+      "1084722070513954_start_0.0_end_313.88"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "1155259299736832_start_0.0_end_588.604",
+      "750546900852059_start_0.0_end_313.654",
+      "1430268204968029_start_0.0_end_343.855",
+      "2846425615529561_start_0.0_end_312.502",
+      "1088746729444047_start_0.0_end_300.239"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "1076761904546143_start_0.0_end_372.705",
+      "1848337166005249_start_0.0_end_1199.976",
+      "736388049135999_start_0.0_end_376.333",
+      "766026939144588_start_0.0_end_520.493",
+      "1253133126231861_start_0.0_end_600.45"
+     ],
+     "offset_s": 105.7
+    },
+    {
+     "device": 4,
+     "videos": [
+      "569442685761274_start_0.0_end_600.148",
+      "1698254277549324_start_0.0_end_300.0",
+      "1242272464195379_start_0.0_end_599.982",
+      "2144632229357728_start_0.0_end_315.189",
+      "704577125495171_start_0.0_end_600.183",
+      "1293981962169721_start_0.0_end_300.0"
+     ],
+     "offset_s": 520.4
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "1385825889152370_start_0.0_end_408.978",
+      "2211104685971437_start_0.0_end_600.013",
+      "616157548208645_start_0.0_end_422.008",
+      "695325632865279_start_0.0_end_599.959",
+      "762144796185953_start_0.0_end_323.717"
+     ],
+     "offset_s": 197.2
+    },
+    {
+     "device": 6,
+     "videos": [
+      "1635001057178021_start_0.0_end_599.969",
+      "1277332387280126_start_0.0_end_300.0",
+      "1680204915971460_start_0.0_end_316.107",
+      "1956610695135669_start_0.0_end_300.0",
+      "1691081251514235_start_0.0_end_600.015",
+      "671013742223430_start_0.0_end_600.122"
+     ],
+     "offset_s": 62.2
+    },
+    {
+     "device": 7,
+     "videos": [
+      "3565399436925631_start_0.0_end_599.987",
+      "731343993019620_start_0.0_end_310.045",
+      "1577671472898942_start_0.0_end_599.96",
+      "736867785903229_start_0.0_end_300.0",
+      "1945027152963275_start_0.0_end_351.938",
+      "1049395483785037_start_0.0_end_588.209"
+     ],
+     "offset_s": 215.2
+    }
+   ],
+   "escalations": 9,
+   "escalation_token_hit": 0.9669
+  },
+  "R5_COLD_D32_esc20": {
+   "finished": "2026-10-17T22:32:40.504983",
+   "policy": "COLD",
+   "D": 32,
+   "esc_frac": 0.2,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 0.0,
+   "warmup_s": 0.0,
+   "inflight_at_window_end": 0,
+   "drain_s": 0.4,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "956333776422010_start_0.0_end_599.995",
+      "1685243758829995_start_0.0_end_579.415",
+      "1415765139703147_start_0.0_end_338.988",
+      "1435659120847247_start_0.0_end_315.118",
+      "1347281533209856_start_0.0_end_322.001"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "796346366290476_start_0.0_end_309.095",
+      "573067725364367_start_0.0_end_599.932",
+      "1011205677616862_start_0.0_end_314.103",
+      "4319895641617907_start_0.0_end_337.606",
+      "1050913950543133_start_0.0_end_396.493"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "2846425615529561_start_0.0_end_312.502",
+      "647510435043755_start_0.0_end_600.038",
+      "3703477849945137_start_0.0_end_599.96",
+      "1026745422902756_start_0.0_end_600.239",
+      "729454123191062_start_0.0_end_600.298"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "766026939144588_start_0.0_end_520.493",
+      "1430582088252106_start_0.0_end_599.981",
+      "738411278796189_start_0.0_end_315.479",
+      "1098520772239459_start_0.0_end_330.054",
+      "1665695840762798_start_0.0_end_599.976"
+     ],
+     "offset_s": 105.7
+    },
+    {
+     "device": 4,
+     "videos": [
+      "569442685761274_start_0.0_end_600.148",
+      "704577125495171_start_0.0_end_600.183",
+      "1015585313840126_start_0.0_end_311.164",
+      "1120683719671428_start_0.0_end_355.28",
+      "1090178012643948_start_0.0_end_398.267",
+      "24696378519960314_start_0.0_end_414.9"
+     ],
+     "offset_s": 520.4
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "695325632865279_start_0.0_end_599.959",
+      "1422030059126560_start_0.0_end_342.155",
+      "681133988208158_start_0.0_end_600.206",
+      "1067129222293667_start_0.0_end_321.518",
+      "1094012255435167_start_0.0_end_324.2"
+     ],
+     "offset_s": 197.2
+    },
+    {
+     "device": 6,
+     "videos": [
+      "1635001057178021_start_0.0_end_599.969",
+      "1691081251514235_start_0.0_end_600.015",
+      "769785152204550_start_0.0_end_323.615",
+      "1705629320340298_start_0.0_end_402.612",
+      "1045656560982481_start_0.0_end_365.978",
+      "1259514525970928_start_0.0_end_319.107"
+     ],
+     "offset_s": 62.2
+    },
+    {
+     "device": 7,
+     "videos": [
+      "3565399436925631_start_0.0_end_599.987",
+      "1945027152963275_start_0.0_end_351.938",
+      "1028481422485064_start_0.0_end_365.418",
+      "608505332246747_start_0.0_end_600.009",
+      "1758119494909100_start_0.0_end_332.067",
+      "1221817309307098_start_0.0_end_599.991"
+     ],
+     "offset_s": 215.2
+    },
+    {
+     "device": 8,
+     "videos": [
+      "2699411960448386_start_0.0_end_599.4",
+      "1284164833203708_start_0.0_end_438.473",
+      "1156095192709404_start_0.0_end_320.979",
+      "1033183405447678_start_0.0_end_599.978",
+      "665069879728607_start_0.0_end_599.973",
+      "2826984107488489_start_0.0_end_438.824"
+     ],
+     "offset_s": 420.4
+    },
+    {
+     "device": 9,
+     "videos": [
+      "2064767457385035_start_0.0_end_409.969",
+      "1084722070513954_start_0.0_end_313.88",
+      "1323134982091489_start_0.0_end_349.862",
+      "1325490802580551_start_0.0_end_309.718",
+      "1023875076490570_start_0.0_end_599.951",
+      "1150662047093052_start_0.0_end_330.256"
+     ],
+     "offset_s": 256.0
+    },
+    {
+     "device": 10,
+     "videos": [
+      "1155259299736832_start_0.0_end_588.604",
+      "1088746729444047_start_0.0_end_300.239",
+      "788227933566046_start_0.0_end_318.044",
+      "1118011560370089_start_0.0_end_598.494",
+      "3120199581464548_start_0.0_end_600.218",
+      "1044467407574703_start_0.0_end_600.028"
+     ],
+     "offset_s": 154.6
+    },
+    {
+     "device": 11,
+     "videos": [
+      "1076761904546143_start_0.0_end_372.705",
+      "1253133126231861_start_0.0_end_600.45",
+      "1433930244511948_start_0.0_end_311.564",
+      "941275014627762_start_0.0_end_307.589",
+      "591257796777793_start_0.0_end_300.231",
+      "1369947698174600_start_0.0_end_344.012"
+     ],
+     "offset_s": 123.8
+    },
+    {
+     "device": 12,
+     "videos": [
+      "1698254277549324_start_0.0_end_300.0",
+      "1293981962169721_start_0.0_end_300.0",
+      "663844359884061_start_0.0_end_326.285",
+      "1128203379196112_start_0.0_end_600.017",
+      "1137809621482336_start_0.0_end_600.147",
+      "1271720381302919_start_0.0_end_318.135"
+     ],
+     "offset_s": 116.4
+    },
+    {
+     "device": 13,
+     "videos": [
+      "1385825889152370_start_0.0_end_408.978",
+      "762144796185953_start_0.0_end_323.717",
+      "662399573527898_start_0.0_end_551.995",
+      "1445867246834981_start_0.0_end_600.077",
+      "727459876515585_start_0.0_end_300.043",
+      "1375595773649032_start_0.0_end_300.034"
+     ],
+     "offset_s": 166.2
+    },
+    {
+     "device": 14,
+     "videos": [
+      "1277332387280126_start_0.0_end_300.0",
+      "671013742223430_start_0.0_end_600.122",
+      "4064504807202128_start_0.0_end_600.199",
+      "1395302454900837_start_0.0_end_317.486",
+      "551715897680092_start_0.0_end_600.281",
+      "1841141929794753_start_0.0_end_599.968"
+     ],
+     "offset_s": 188.1
+    },
+    {
+     "device": 15,
+     "videos": [
+      "731343993019620_start_0.0_end_310.045",
+      "1049395483785037_start_0.0_end_588.209",
+      "714753627805809_start_0.0_end_600.162",
+      "1354114522742647_start_0.0_end_300.0",
+      "632336616540910_start_0.0_end_600.145",
+      "680890187975381_start_0.0_end_599.995"
+     ],
+     "offset_s": 0.4
+    },
+    {
+     "device": 16,
+     "videos": [
+      "626382380356094_start_0.0_end_600.005",
+      "1481441226615218_start_0.0_end_300.087",
+      "1289124902905552_start_0.0_end_321.267",
+      "714149781283234_start_0.0_end_665.541",
+      "9902221866524366_start_0.0_end_1199.959",
+      "1001141161985610_start_0.0_end_599.99"
+     ],
+     "offset_s": 111.5
+    },
+    {
+     "device": 17,
+     "videos": [
+      "550798061123598_start_0.0_end_508.187",
+      "1255719099314099_start_0.0_end_599.986",
+      "703466115492979_start_0.0_end_600.0",
+      "1272099357949614_start_0.0_end_300.0",
+      "538469475795868_start_0.0_end_520.785",
+      "4176083796050393_start_0.0_end_600.048"
+     ],
+     "offset_s": 167.9
+    },
+    {
+     "device": 18,
+     "videos": [
+      "750546900852059_start_0.0_end_313.654",
+      "1290745635792905_start_0.0_end_375.416",
+      "2846846508853733_start_0.0_end_599.946",
+      "1222724952646549_start_0.0_end_336.839",
+      "720467167426580_start_0.0_end_300.0",
+      "602172215484549_start_0.0_end_599.977"
+     ],
+     "offset_s": 71.8
+    },
+    {
+     "device": 19,
+     "videos": [
+      "1848337166005249_start_0.0_end_1199.976",
+      "1517700072558199_start_0.0_end_300.178",
+      "1020640039686756_start_0.0_end_600.156",
+      "747594358192374_start_0.0_end_599.977",
+      "1314496693568074_start_0.0_end_323.325",
+      "1447459139569275_start_0.0_end_600.279"
+     ],
+     "offset_s": 730.5
+    },
+    {
+     "device": 20,
+     "videos": [
+      "1242272464195379_start_0.0_end_599.982",
+      "597421306692637_start_0.0_end_600.019",
+      "1413200346459502_start_0.0_end_309.855",
+      "3903565719895826_start_0.0_end_382.546",
+      "3601161160177668_start_0.0_end_600.202",
+      "1071206565202625_start_0.0_end_315.286"
+     ],
+     "offset_s": 186.3
+    },
+    {
+     "device": 21,
+     "videos": [
+      "2211104685971437_start_0.0_end_600.013",
+      "1023017279799163_start_0.0_end_599.963",
+      "790971550032691_start_0.0_end_328.116",
+      "1196380908704398_start_0.0_end_600.215",
+      "675833515065315_start_0.0_end_600.147",
+      "1015467527231807_start_0.0_end_599.976"
+     ],
+     "offset_s": 518.3
+    },
+    {
+     "device": 22,
+     "videos": [
+      "1680204915971460_start_0.0_end_316.107",
+      "1100131898240591_start_0.0_end_318.357",
+      "1030676578614270_start_0.0_end_601.993",
+      "1470001337521253_start_0.0_end_300.0",
+      "2250751765395216_start_0.0_end_326.402",
+      "2478973155772033_start_0.0_end_600.011"
+     ],
+     "offset_s": 179.5
+    },
+    {
+     "device": 23,
+     "videos": [
+      "1577671472898942_start_0.0_end_599.96",
+      "672963545696130_start_0.0_end_600.072",
+      "1023758566050401_start_0.0_end_599.984",
+      "1319837272968317_start_0.0_end_320.604",
+      "613891895102051_start_0.0_end_397.113",
+      "1042025564680129_start_0.0_end_314.155"
+     ],
+     "offset_s": 149.6
+    },
+    {
+     "device": 24,
+     "videos": [
+      "1801425474121026_start_0.0_end_334.382",
+      "1426871031983567_start_0.0_end_313.891",
+      "1205682563854255_start_0.0_end_599.991",
+      "1379566719773474_start_0.0_end_545.838",
+      "663621686514521_start_0.0_end_599.985",
+      "9686007581480111_start_0.0_end_565.014"
+     ],
+     "offset_s": 125.5
+    },
+    {
+     "device": 25,
+     "videos": [
+      "637875586009287_start_0.0_end_406.396",
+      "1004154028515092_start_0.0_end_599.281",
+      "1854310412187804_start_0.0_end_387.974",
+      "677637195018930_start_0.0_end_599.98",
+      "1085232373177911_start_0.0_end_328.488",
+      "1968508127271132_start_0.0_end_447.921"
+     ],
+     "offset_s": 263.9
+    },
+    {
+     "device": 26,
+     "videos": [
+      "1430268204968029_start_0.0_end_343.855",
+      "1123752046318354_start_0.0_end_328.664",
+      "1058687089646259_start_0.0_end_599.983",
+      "4023656411196583_start_0.0_end_599.996",
+      "1317747566722648_start_0.0_end_300.0",
+      "1649035665793396_start_0.0_end_335.392"
+     ],
+     "offset_s": 141.8
+    },
+    {
+     "device": 27,
+     "videos": [
+      "736388049135999_start_0.0_end_376.333",
+      "726131583640362_start_0.0_end_317.492",
+      "3302168133258053_start_0.0_end_600.012",
+      "1513631326470910_start_0.0_end_324.478",
+      "674634768606620_start_0.0_end_591.28",
+      "773647355614575_start_0.0_end_327.557"
+     ],
+     "offset_s": 223.8
+    },
+    {
+     "device": 28,
+     "videos": [
+      "2144632229357728_start_0.0_end_315.189",
+      "1182077450362523_start_0.0_end_559.645",
+      "1084289347003131_start_0.0_end_300.0",
+      "1085041543181381_start_0.0_end_386.067",
+      "780026071025974_start_0.0_end_323.192",
+      "2554992228029466_start_0.0_end_599.983"
+     ],
+     "offset_s": 14.4
+    },
+    {
+     "device": 29,
+     "videos": [
+      "616157548208645_start_0.0_end_422.008",
+      "1133927258554954_start_0.0_end_425.936",
+      "9864685376944003_start_0.0_end_577.681",
+      "791449306887400_start_0.0_end_304.403",
+      "1080931757513668_start_0.0_end_600.032",
+      "1193236635806968_start_0.0_end_599.997"
+     ],
+     "offset_s": 171.0
+    },
+    {
+     "device": 30,
+     "videos": [
+      "1956610695135669_start_0.0_end_300.0",
+      "1032206425511233_start_0.0_end_600.011",
+      "1468764163996157_start_0.0_end_599.996",
+      "729685616639719_start_0.0_end_328.273",
+      "1813544496258929_start_0.0_end_307.914",
+      "539288665917819_start_0.0_end_599.993"
+     ],
+     "offset_s": 71.8
+    },
+    {
+     "device": 31,
+     "videos": [
+      "736867785903229_start_0.0_end_300.0",
+      "2649426178590002_start_0.0_end_600.284",
+      "1091490079597444_start_0.0_end_321.519",
+      "1292749728906542_start_0.0_end_599.951",
+      "8365619113563204_start_0.0_end_599.959",
+      "3992408927674955_start_0.0_end_460.091"
+     ],
+     "offset_s": 42.4
+    }
+   ],
+   "escalations": 46,
+   "escalation_token_hit": 0.1008
+  },
+  "R5_WARM_D32_esc20": {
+   "finished": "2026-10-17T23:10:56.376947",
+   "policy": "WARM",
+   "D": 32,
+   "esc_frac": 0.2,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 23.36,
+   "warmup_s": 23.36,
+   "inflight_at_window_end": 1681,
+   "drain_s": 1329.5,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "956333776422010_start_0.0_end_599.995",
+      "1685243758829995_start_0.0_end_579.415",
+      "1415765139703147_start_0.0_end_338.988",
+      "1435659120847247_start_0.0_end_315.118",
+      "1347281533209856_start_0.0_end_322.001"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "796346366290476_start_0.0_end_309.095",
+      "573067725364367_start_0.0_end_599.932",
+      "1011205677616862_start_0.0_end_314.103",
+      "4319895641617907_start_0.0_end_337.606",
+      "1050913950543133_start_0.0_end_396.493"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "2846425615529561_start_0.0_end_312.502",
+      "647510435043755_start_0.0_end_600.038",
+      "3703477849945137_start_0.0_end_599.96",
+      "1026745422902756_start_0.0_end_600.239",
+      "729454123191062_start_0.0_end_600.298"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "766026939144588_start_0.0_end_520.493",
+      "1430582088252106_start_0.0_end_599.981",
+      "738411278796189_start_0.0_end_315.479",
+      "1098520772239459_start_0.0_end_330.054",
+      "1665695840762798_start_0.0_end_599.976"
+     ],
+     "offset_s": 105.7
+    },
+    {
+     "device": 4,
+     "videos": [
+      "569442685761274_start_0.0_end_600.148",
+      "704577125495171_start_0.0_end_600.183",
+      "1015585313840126_start_0.0_end_311.164",
+      "1120683719671428_start_0.0_end_355.28",
+      "1090178012643948_start_0.0_end_398.267",
+      "24696378519960314_start_0.0_end_414.9"
+     ],
+     "offset_s": 520.4
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "695325632865279_start_0.0_end_599.959",
+      "1422030059126560_start_0.0_end_342.155",
+      "681133988208158_start_0.0_end_600.206",
+      "1067129222293667_start_0.0_end_321.518",
+      "1094012255435167_start_0.0_end_324.2"
+     ],
+     "offset_s": 197.2
+    },
+    {
+     "device": 6,
+     "videos": [
+      "1635001057178021_start_0.0_end_599.969",
+      "1691081251514235_start_0.0_end_600.015",
+      "769785152204550_start_0.0_end_323.615",
+      "1705629320340298_start_0.0_end_402.612",
+      "1045656560982481_start_0.0_end_365.978",
+      "1259514525970928_start_0.0_end_319.107"
+     ],
+     "offset_s": 62.2
+    },
+    {
+     "device": 7,
+     "videos": [
+      "3565399436925631_start_0.0_end_599.987",
+      "1945027152963275_start_0.0_end_351.938",
+      "1028481422485064_start_0.0_end_365.418",
+      "608505332246747_start_0.0_end_600.009",
+      "1758119494909100_start_0.0_end_332.067",
+      "1221817309307098_start_0.0_end_599.991"
+     ],
+     "offset_s": 215.2
+    },
+    {
+     "device": 8,
+     "videos": [
+      "2699411960448386_start_0.0_end_599.4",
+      "1284164833203708_start_0.0_end_438.473",
+      "1156095192709404_start_0.0_end_320.979",
+      "1033183405447678_start_0.0_end_599.978",
+      "665069879728607_start_0.0_end_599.973",
+      "2826984107488489_start_0.0_end_438.824"
+     ],
+     "offset_s": 420.4
+    },
+    {
+     "device": 9,
+     "videos": [
+      "2064767457385035_start_0.0_end_409.969",
+      "1084722070513954_start_0.0_end_313.88",
+      "1323134982091489_start_0.0_end_349.862",
+      "1325490802580551_start_0.0_end_309.718",
+      "1023875076490570_start_0.0_end_599.951",
+      "1150662047093052_start_0.0_end_330.256"
+     ],
+     "offset_s": 256.0
+    },
+    {
+     "device": 10,
+     "videos": [
+      "1155259299736832_start_0.0_end_588.604",
+      "1088746729444047_start_0.0_end_300.239",
+      "788227933566046_start_0.0_end_318.044",
+      "1118011560370089_start_0.0_end_598.494",
+      "3120199581464548_start_0.0_end_600.218",
+      "1044467407574703_start_0.0_end_600.028"
+     ],
+     "offset_s": 154.6
+    },
+    {
+     "device": 11,
+     "videos": [
+      "1076761904546143_start_0.0_end_372.705",
+      "1253133126231861_start_0.0_end_600.45",
+      "1433930244511948_start_0.0_end_311.564",
+      "941275014627762_start_0.0_end_307.589",
+      "591257796777793_start_0.0_end_300.231",
+      "1369947698174600_start_0.0_end_344.012"
+     ],
+     "offset_s": 123.8
+    },
+    {
+     "device": 12,
+     "videos": [
+      "1698254277549324_start_0.0_end_300.0",
+      "1293981962169721_start_0.0_end_300.0",
+      "663844359884061_start_0.0_end_326.285",
+      "1128203379196112_start_0.0_end_600.017",
+      "1137809621482336_start_0.0_end_600.147",
+      "1271720381302919_start_0.0_end_318.135"
+     ],
+     "offset_s": 116.4
+    },
+    {
+     "device": 13,
+     "videos": [
+      "1385825889152370_start_0.0_end_408.978",
+      "762144796185953_start_0.0_end_323.717",
+      "662399573527898_start_0.0_end_551.995",
+      "1445867246834981_start_0.0_end_600.077",
+      "727459876515585_start_0.0_end_300.043",
+      "1375595773649032_start_0.0_end_300.034"
+     ],
+     "offset_s": 166.2
+    },
+    {
+     "device": 14,
+     "videos": [
+      "1277332387280126_start_0.0_end_300.0",
+      "671013742223430_start_0.0_end_600.122",
+      "4064504807202128_start_0.0_end_600.199",
+      "1395302454900837_start_0.0_end_317.486",
+      "551715897680092_start_0.0_end_600.281",
+      "1841141929794753_start_0.0_end_599.968"
+     ],
+     "offset_s": 188.1
+    },
+    {
+     "device": 15,
+     "videos": [
+      "731343993019620_start_0.0_end_310.045",
+      "1049395483785037_start_0.0_end_588.209",
+      "714753627805809_start_0.0_end_600.162",
+      "1354114522742647_start_0.0_end_300.0",
+      "632336616540910_start_0.0_end_600.145",
+      "680890187975381_start_0.0_end_599.995"
+     ],
+     "offset_s": 0.4
+    },
+    {
+     "device": 16,
+     "videos": [
+      "626382380356094_start_0.0_end_600.005",
+      "1481441226615218_start_0.0_end_300.087",
+      "1289124902905552_start_0.0_end_321.267",
+      "714149781283234_start_0.0_end_665.541",
+      "9902221866524366_start_0.0_end_1199.959",
+      "1001141161985610_start_0.0_end_599.99"
+     ],
+     "offset_s": 111.5
+    },
+    {
+     "device": 17,
+     "videos": [
+      "550798061123598_start_0.0_end_508.187",
+      "1255719099314099_start_0.0_end_599.986",
+      "703466115492979_start_0.0_end_600.0",
+      "1272099357949614_start_0.0_end_300.0",
+      "538469475795868_start_0.0_end_520.785",
+      "4176083796050393_start_0.0_end_600.048"
+     ],
+     "offset_s": 167.9
+    },
+    {
+     "device": 18,
+     "videos": [
+      "750546900852059_start_0.0_end_313.654",
+      "1290745635792905_start_0.0_end_375.416",
+      "2846846508853733_start_0.0_end_599.946",
+      "1222724952646549_start_0.0_end_336.839",
+      "720467167426580_start_0.0_end_300.0",
+      "602172215484549_start_0.0_end_599.977"
+     ],
+     "offset_s": 71.8
+    },
+    {
+     "device": 19,
+     "videos": [
+      "1848337166005249_start_0.0_end_1199.976",
+      "1517700072558199_start_0.0_end_300.178",
+      "1020640039686756_start_0.0_end_600.156",
+      "747594358192374_start_0.0_end_599.977",
+      "1314496693568074_start_0.0_end_323.325",
+      "1447459139569275_start_0.0_end_600.279"
+     ],
+     "offset_s": 730.5
+    },
+    {
+     "device": 20,
+     "videos": [
+      "1242272464195379_start_0.0_end_599.982",
+      "597421306692637_start_0.0_end_600.019",
+      "1413200346459502_start_0.0_end_309.855",
+      "3903565719895826_start_0.0_end_382.546",
+      "3601161160177668_start_0.0_end_600.202",
+      "1071206565202625_start_0.0_end_315.286"
+     ],
+     "offset_s": 186.3
+    },
+    {
+     "device": 21,
+     "videos": [
+      "2211104685971437_start_0.0_end_600.013",
+      "1023017279799163_start_0.0_end_599.963",
+      "790971550032691_start_0.0_end_328.116",
+      "1196380908704398_start_0.0_end_600.215",
+      "675833515065315_start_0.0_end_600.147",
+      "1015467527231807_start_0.0_end_599.976"
+     ],
+     "offset_s": 518.3
+    },
+    {
+     "device": 22,
+     "videos": [
+      "1680204915971460_start_0.0_end_316.107",
+      "1100131898240591_start_0.0_end_318.357",
+      "1030676578614270_start_0.0_end_601.993",
+      "1470001337521253_start_0.0_end_300.0",
+      "2250751765395216_start_0.0_end_326.402",
+      "2478973155772033_start_0.0_end_600.011"
+     ],
+     "offset_s": 179.5
+    },
+    {
+     "device": 23,
+     "videos": [
+      "1577671472898942_start_0.0_end_599.96",
+      "672963545696130_start_0.0_end_600.072",
+      "1023758566050401_start_0.0_end_599.984",
+      "1319837272968317_start_0.0_end_320.604",
+      "613891895102051_start_0.0_end_397.113",
+      "1042025564680129_start_0.0_end_314.155"
+     ],
+     "offset_s": 149.6
+    },
+    {
+     "device": 24,
+     "videos": [
+      "1801425474121026_start_0.0_end_334.382",
+      "1426871031983567_start_0.0_end_313.891",
+      "1205682563854255_start_0.0_end_599.991",
+      "1379566719773474_start_0.0_end_545.838",
+      "663621686514521_start_0.0_end_599.985",
+      "9686007581480111_start_0.0_end_565.014"
+     ],
+     "offset_s": 125.5
+    },
+    {
+     "device": 25,
+     "videos": [
+      "637875586009287_start_0.0_end_406.396",
+      "1004154028515092_start_0.0_end_599.281",
+      "1854310412187804_start_0.0_end_387.974",
+      "677637195018930_start_0.0_end_599.98",
+      "1085232373177911_start_0.0_end_328.488",
+      "1968508127271132_start_0.0_end_447.921"
+     ],
+     "offset_s": 263.9
+    },
+    {
+     "device": 26,
+     "videos": [
+      "1430268204968029_start_0.0_end_343.855",
+      "1123752046318354_start_0.0_end_328.664",
+      "1058687089646259_start_0.0_end_599.983",
+      "4023656411196583_start_0.0_end_599.996",
+      "1317747566722648_start_0.0_end_300.0",
+      "1649035665793396_start_0.0_end_335.392"
+     ],
+     "offset_s": 141.8
+    },
+    {
+     "device": 27,
+     "videos": [
+      "736388049135999_start_0.0_end_376.333",
+      "726131583640362_start_0.0_end_317.492",
+      "3302168133258053_start_0.0_end_600.012",
+      "1513631326470910_start_0.0_end_324.478",
+      "674634768606620_start_0.0_end_591.28",
+      "773647355614575_start_0.0_end_327.557"
+     ],
+     "offset_s": 223.8
+    },
+    {
+     "device": 28,
+     "videos": [
+      "2144632229357728_start_0.0_end_315.189",
+      "1182077450362523_start_0.0_end_559.645",
+      "1084289347003131_start_0.0_end_300.0",
+      "1085041543181381_start_0.0_end_386.067",
+      "780026071025974_start_0.0_end_323.192",
+      "2554992228029466_start_0.0_end_599.983"
+     ],
+     "offset_s": 14.4
+    },
+    {
+     "device": 29,
+     "videos": [
+      "616157548208645_start_0.0_end_422.008",
+      "1133927258554954_start_0.0_end_425.936",
+      "9864685376944003_start_0.0_end_577.681",
+      "791449306887400_start_0.0_end_304.403",
+      "1080931757513668_start_0.0_end_600.032",
+      "1193236635806968_start_0.0_end_599.997"
+     ],
+     "offset_s": 171.0
+    },
+    {
+     "device": 30,
+     "videos": [
+      "1956610695135669_start_0.0_end_300.0",
+      "1032206425511233_start_0.0_end_600.011",
+      "1468764163996157_start_0.0_end_599.996",
+      "729685616639719_start_0.0_end_328.273",
+      "1813544496258929_start_0.0_end_307.914",
+      "539288665917819_start_0.0_end_599.993"
+     ],
+     "offset_s": 71.8
+    },
+    {
+     "device": 31,
+     "videos": [
+      "736867785903229_start_0.0_end_300.0",
+      "2649426178590002_start_0.0_end_600.284",
+      "1091490079597444_start_0.0_end_321.519",
+      "1292749728906542_start_0.0_end_599.951",
+      "8365619113563204_start_0.0_end_599.959",
+      "3992408927674955_start_0.0_end_460.091"
+     ],
+     "offset_s": 42.4
+    }
+   ],
+   "escalations": 46,
+   "escalation_token_hit": 0.0814
+  },
+  "R5_WARM_D8_rep2": {
+   "finished": "2026-10-17T23:26:14.202636",
+   "policy": "WARM",
+   "D": 8,
+   "esc_frac": 1.0,
+   "seed": 1,
+   "window_s": 900,
+   "window_start": 15.57,
+   "warmup_s": 15.57,
+   "inflight_at_window_end": 1,
+   "drain_s": 1.3,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1354114522742647_start_0.0_end_300.0",
+      "2699411960448386_start_0.0_end_599.4",
+      "681133988208158_start_0.0_end_600.206",
+      "1091863925706471_start_0.0_end_306.991",
+      "726821053589221_start_0.0_end_300.0",
+      "1050913950543133_start_0.0_end_396.493"
+     ],
+     "offset_s": 197.9
+    },
+    {
+     "device": 1,
+     "videos": [
+      "658657526933765_start_0.0_end_600.001",
+      "2657539197786979_start_0.0_end_592.958",
+      "1094012255435167_start_0.0_end_324.2",
+      "704577125495171_start_0.0_end_600.183",
+      "1058687089646259_start_0.0_end_599.983",
+      "573067725364367_start_0.0_end_599.932"
+     ],
+     "offset_s": 243.4
+    },
+    {
+     "device": 2,
+     "videos": [
+      "725470496713219_start_0.0_end_596.49",
+      "647510435043755_start_0.0_end_600.038",
+      "729685616639719_start_0.0_end_328.273",
+      "2846425615529561_start_0.0_end_312.502",
+      "762144796185953_start_0.0_end_323.717",
+      "1395302454900837_start_0.0_end_317.486"
+     ],
+     "offset_s": 435.8
+    },
+    {
+     "device": 3,
+     "videos": [
+      "1284164833203708_start_0.0_end_438.473",
+      "1406166750800479_start_0.0_end_599.986",
+      "680890187975381_start_0.0_end_599.995",
+      "1685243758829995_start_0.0_end_579.415",
+      "1049395483785037_start_0.0_end_588.209",
+      "663844359884061_start_0.0_end_326.285"
+     ],
+     "offset_s": 50.0
+    },
+    {
+     "device": 4,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "1468764163996157_start_0.0_end_599.996",
+      "1379566719773474_start_0.0_end_545.838",
+      "1098520772239459_start_0.0_end_330.054",
+      "1272099357949614_start_0.0_end_300.0",
+      "1326352942502004_start_0.0_end_325.483"
+     ],
+     "offset_s": 77.0
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "1084289347003131_start_0.0_end_300.0",
+      "1094229492101003_start_0.0_end_300.0",
+      "1517700072558199_start_0.0_end_300.178",
+      "1400935187603278_start_0.0_end_599.928",
+      "718377594194161_start_0.0_end_600.052"
+     ],
+     "offset_s": 26.6
+    },
+    {
+     "device": 6,
+     "videos": [
+      "736388049135999_start_0.0_end_376.333",
+      "690844827311979_start_0.0_end_459.154",
+      "1596617847671078_start_0.0_end_600.128",
+      "3750472035084703_start_0.0_end_326.038",
+      "569442685761274_start_0.0_end_600.148",
+      "738411278796189_start_0.0_end_315.479"
+     ],
+     "offset_s": 23.9
+    },
+    {
+     "device": 7,
+     "videos": [
+      "597421306692637_start_0.0_end_600.019",
+      "1033183405447678_start_0.0_end_599.978",
+      "1032206425511233_start_0.0_end_600.011",
+      "1030676578614270_start_0.0_end_601.993",
+      "1085232373177911_start_0.0_end_328.488",
+      "1090178012643948_start_0.0_end_398.267"
+     ],
+     "offset_s": 43.0
+    }
+   ],
+   "escalations": 72,
+   "escalation_token_hit": 0.9568
+  },
+  "R5fp8_WARM_D8": {
+   "finished": "2026-10-17T23:43:27.298616",
+   "policy": "WARM",
+   "D": 8,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 20.53,
+   "warmup_s": 20.53,
+   "inflight_at_window_end": 1,
+   "drain_s": 0.4,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "2699411960448386_start_0.0_end_599.4",
+      "626382380356094_start_0.0_end_600.005",
+      "1801425474121026_start_0.0_end_334.382",
+      "956333776422010_start_0.0_end_599.995",
+      "1284164833203708_start_0.0_end_438.473"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "2064767457385035_start_0.0_end_409.969",
+      "550798061123598_start_0.0_end_508.187",
+      "637875586009287_start_0.0_end_406.396",
+      "796346366290476_start_0.0_end_309.095",
+      "1084722070513954_start_0.0_end_313.88"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "1155259299736832_start_0.0_end_588.604",
+      "750546900852059_start_0.0_end_313.654",
+      "1430268204968029_start_0.0_end_343.855",
+      "2846425615529561_start_0.0_end_312.502",
+      "1088746729444047_start_0.0_end_300.239"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "1076761904546143_start_0.0_end_372.705",
+      "1848337166005249_start_0.0_end_1199.976",
+      "736388049135999_start_0.0_end_376.333",
+      "766026939144588_start_0.0_end_520.493",
+      "1253133126231861_start_0.0_end_600.45"
+     ],
+     "offset_s": 105.7
+    },
+    {
+     "device": 4,
+     "videos": [
+      "569442685761274_start_0.0_end_600.148",
+      "1698254277549324_start_0.0_end_300.0",
+      "1242272464195379_start_0.0_end_599.982",
+      "2144632229357728_start_0.0_end_315.189",
+      "704577125495171_start_0.0_end_600.183",
+      "1293981962169721_start_0.0_end_300.0"
+     ],
+     "offset_s": 520.4
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "1385825889152370_start_0.0_end_408.978",
+      "2211104685971437_start_0.0_end_600.013",
+      "616157548208645_start_0.0_end_422.008",
+      "695325632865279_start_0.0_end_599.959",
+      "762144796185953_start_0.0_end_323.717"
+     ],
+     "offset_s": 197.2
+    },
+    {
+     "device": 6,
+     "videos": [
+      "1635001057178021_start_0.0_end_599.969",
+      "1277332387280126_start_0.0_end_300.0",
+      "1680204915971460_start_0.0_end_316.107",
+      "1956610695135669_start_0.0_end_300.0",
+      "1691081251514235_start_0.0_end_600.015",
+      "671013742223430_start_0.0_end_600.122"
+     ],
+     "offset_s": 62.2
+    },
+    {
+     "device": 7,
+     "videos": [
+      "3565399436925631_start_0.0_end_599.987",
+      "731343993019620_start_0.0_end_310.045",
+      "1577671472898942_start_0.0_end_599.96",
+      "736867785903229_start_0.0_end_300.0",
+      "1945027152963275_start_0.0_end_351.938",
+      "1049395483785037_start_0.0_end_588.209"
+     ],
+     "offset_s": 215.2
+    }
+   ],
+   "escalations": 76,
+   "escalation_token_hit": 0.9526
+  },
+  "R5fp8_WARM_D16": {
+   "finished": "2026-10-17T23:58:41.506428",
+   "policy": "WARM",
+   "D": 16,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 11.85,
+   "warmup_s": 11.85,
+   "inflight_at_window_end": 2,
+   "drain_s": 1.3,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "626382380356094_start_0.0_end_600.005",
+      "956333776422010_start_0.0_end_599.995",
+      "1481441226615218_start_0.0_end_300.087",
+      "1685243758829995_start_0.0_end_579.415",
+      "1289124902905552_start_0.0_end_321.267"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "550798061123598_start_0.0_end_508.187",
+      "796346366290476_start_0.0_end_309.095",
+      "1255719099314099_start_0.0_end_599.986",
+      "573067725364367_start_0.0_end_599.932",
+      "703466115492979_start_0.0_end_600.0"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "750546900852059_start_0.0_end_313.654",
+      "2846425615529561_start_0.0_end_312.502",
+      "1290745635792905_start_0.0_end_375.416",
+      "647510435043755_start_0.0_end_600.038",
+      "2846846508853733_start_0.0_end_599.946"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "1848337166005249_start_0.0_end_1199.976",
+      "766026939144588_start_0.0_end_520.493",
+      "1517700072558199_start_0.0_end_300.178",
+      "1430582088252106_start_0.0_end_599.981",
+      "1020640039686756_start_0.0_end_600.156"
+     ],
+     "offset_s": 105.7
+    },
+    {
+     "device": 4,
+     "videos": [
+      "569442685761274_start_0.0_end_600.148",
+      "1242272464195379_start_0.0_end_599.982",
+      "704577125495171_start_0.0_end_600.183",
+      "597421306692637_start_0.0_end_600.019",
+      "1015585313840126_start_0.0_end_311.164",
+      "1413200346459502_start_0.0_end_309.855"
+     ],
+     "offset_s": 520.4
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "2211104685971437_start_0.0_end_600.013",
+      "695325632865279_start_0.0_end_599.959",
+      "1023017279799163_start_0.0_end_599.963",
+      "1422030059126560_start_0.0_end_342.155",
+      "790971550032691_start_0.0_end_328.116"
+     ],
+     "offset_s": 197.2
+    },
+    {
+     "device": 6,
+     "videos": [
+      "1635001057178021_start_0.0_end_599.969",
+      "1680204915971460_start_0.0_end_316.107",
+      "1691081251514235_start_0.0_end_600.015",
+      "1100131898240591_start_0.0_end_318.357",
+      "769785152204550_start_0.0_end_323.615",
+      "1030676578614270_start_0.0_end_601.993"
+     ],
+     "offset_s": 62.2
+    },
+    {
+     "device": 7,
+     "videos": [
+      "3565399436925631_start_0.0_end_599.987",
+      "1577671472898942_start_0.0_end_599.96",
+      "1945027152963275_start_0.0_end_351.938",
+      "672963545696130_start_0.0_end_600.072",
+      "1028481422485064_start_0.0_end_365.418",
+      "1023758566050401_start_0.0_end_599.984"
+     ],
+     "offset_s": 215.2
+    },
+    {
+     "device": 8,
+     "videos": [
+      "2699411960448386_start_0.0_end_599.4",
+      "1801425474121026_start_0.0_end_334.382",
+      "1284164833203708_start_0.0_end_438.473",
+      "1426871031983567_start_0.0_end_313.891",
+      "1156095192709404_start_0.0_end_320.979",
+      "1205682563854255_start_0.0_end_599.991"
+     ],
+     "offset_s": 420.4
+    },
+    {
+     "device": 9,
+     "videos": [
+      "2064767457385035_start_0.0_end_409.969",
+      "637875586009287_start_0.0_end_406.396",
+      "1084722070513954_start_0.0_end_313.88",
+      "1004154028515092_start_0.0_end_599.281",
+      "1323134982091489_start_0.0_end_349.862",
+      "1854310412187804_start_0.0_end_387.974"
+     ],
+     "offset_s": 256.0
+    },
+    {
+     "device": 10,
+     "videos": [
+      "1155259299736832_start_0.0_end_588.604",
+      "1430268204968029_start_0.0_end_343.855",
+      "1088746729444047_start_0.0_end_300.239",
+      "1123752046318354_start_0.0_end_328.664",
+      "788227933566046_start_0.0_end_318.044",
+      "1058687089646259_start_0.0_end_599.983"
+     ],
+     "offset_s": 154.6
+    },
+    {
+     "device": 11,
+     "videos": [
+      "1076761904546143_start_0.0_end_372.705",
+      "736388049135999_start_0.0_end_376.333",
+      "1253133126231861_start_0.0_end_600.45",
+      "726131583640362_start_0.0_end_317.492",
+      "1433930244511948_start_0.0_end_311.564",
+      "3302168133258053_start_0.0_end_600.012"
+     ],
+     "offset_s": 123.8
+    },
+    {
+     "device": 12,
+     "videos": [
+      "1698254277549324_start_0.0_end_300.0",
+      "2144632229357728_start_0.0_end_315.189",
+      "1293981962169721_start_0.0_end_300.0",
+      "1182077450362523_start_0.0_end_559.645",
+      "663844359884061_start_0.0_end_326.285",
+      "1084289347003131_start_0.0_end_300.0"
+     ],
+     "offset_s": 116.4
+    },
+    {
+     "device": 13,
+     "videos": [
+      "1385825889152370_start_0.0_end_408.978",
+      "616157548208645_start_0.0_end_422.008",
+      "762144796185953_start_0.0_end_323.717",
+      "1133927258554954_start_0.0_end_425.936",
+      "662399573527898_start_0.0_end_551.995",
+      "9864685376944003_start_0.0_end_577.681"
+     ],
+     "offset_s": 166.2
+    },
+    {
+     "device": 14,
+     "videos": [
+      "1277332387280126_start_0.0_end_300.0",
+      "1956610695135669_start_0.0_end_300.0",
+      "671013742223430_start_0.0_end_600.122",
+      "1032206425511233_start_0.0_end_600.011",
+      "4064504807202128_start_0.0_end_600.199",
+      "1468764163996157_start_0.0_end_599.996"
+     ],
+     "offset_s": 188.1
+    },
+    {
+     "device": 15,
+     "videos": [
+      "731343993019620_start_0.0_end_310.045",
+      "736867785903229_start_0.0_end_300.0",
+      "1049395483785037_start_0.0_end_588.209",
+      "2649426178590002_start_0.0_end_600.284",
+      "714753627805809_start_0.0_end_600.162",
+      "1091490079597444_start_0.0_end_321.519"
+     ],
+     "offset_s": 0.4
+    }
+   ],
+   "escalations": 147,
+   "escalation_token_hit": 0.954
+  },
+  "R5fp8_WARM_D32": {
+   "finished": "2026-10-18T00:29:19.150129",
+   "policy": "WARM",
+   "D": 32,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 24.65,
+   "warmup_s": 24.65,
+   "inflight_at_window_end": 1493,
+   "drain_s": 910.3,
+   "devices": [
+    {
+     "device": 0,
+     "videos": [
+      "1127730925879057_start_0.0_end_300.0",
+      "956333776422010_start_0.0_end_599.995",
+      "1685243758829995_start_0.0_end_579.415",
+      "1415765139703147_start_0.0_end_338.988",
+      "1435659120847247_start_0.0_end_315.118",
+      "1347281533209856_start_0.0_end_322.001"
+     ],
+     "offset_s": 83.0
+    },
+    {
+     "device": 1,
+     "videos": [
+      "551100761085185_start_0.0_end_599.996",
+      "796346366290476_start_0.0_end_309.095",
+      "573067725364367_start_0.0_end_599.932",
+      "1011205677616862_start_0.0_end_314.103",
+      "4319895641617907_start_0.0_end_337.606",
+      "1050913950543133_start_0.0_end_396.493"
+     ],
+     "offset_s": 20.1
+    },
+    {
+     "device": 2,
+     "videos": [
+      "1103296728412028_start_0.0_end_364.291",
+      "2846425615529561_start_0.0_end_312.502",
+      "647510435043755_start_0.0_end_600.038",
+      "3703477849945137_start_0.0_end_599.96",
+      "1026745422902756_start_0.0_end_600.239",
+      "729454123191062_start_0.0_end_600.298"
+     ],
+     "offset_s": 102.0
+    },
+    {
+     "device": 3,
+     "videos": [
+      "9999393136796400_start_0.0_end_599.969",
+      "766026939144588_start_0.0_end_520.493",
+      "1430582088252106_start_0.0_end_599.981",
+      "738411278796189_start_0.0_end_315.479",
+      "1098520772239459_start_0.0_end_330.054",
+      "1665695840762798_start_0.0_end_599.976"
+     ],
+     "offset_s": 105.7
+    },
+    {
+     "device": 4,
+     "videos": [
+      "569442685761274_start_0.0_end_600.148",
+      "704577125495171_start_0.0_end_600.183",
+      "1015585313840126_start_0.0_end_311.164",
+      "1120683719671428_start_0.0_end_355.28",
+      "1090178012643948_start_0.0_end_398.267",
+      "24696378519960314_start_0.0_end_414.9"
+     ],
+     "offset_s": 520.4
+    },
+    {
+     "device": 5,
+     "videos": [
+      "1381187519859533_start_0.0_end_600.22",
+      "695325632865279_start_0.0_end_599.959",
+      "1422030059126560_start_0.0_end_342.155",
+      "681133988208158_start_0.0_end_600.206",
+      "1067129222293667_start_0.0_end_321.518",
+      "1094012255435167_start_0.0_end_324.2"
+     ],
+     "offset_s": 197.2
+    },
+    {
+     "device": 6,
+     "videos": [
+      "1635001057178021_start_0.0_end_599.969",
+      "1691081251514235_start_0.0_end_600.015",
+      "769785152204550_start_0.0_end_323.615",
+      "1705629320340298_start_0.0_end_402.612",
+      "1045656560982481_start_0.0_end_365.978",
+      "1259514525970928_start_0.0_end_319.107"
+     ],
+     "offset_s": 62.2
+    },
+    {
+     "device": 7,
+     "videos": [
+      "3565399436925631_start_0.0_end_599.987",
+      "1945027152963275_start_0.0_end_351.938",
+      "1028481422485064_start_0.0_end_365.418",
+      "608505332246747_start_0.0_end_600.009",
+      "1758119494909100_start_0.0_end_332.067",
+      "1221817309307098_start_0.0_end_599.991"
+     ],
+     "offset_s": 215.2
+    },
+    {
+     "device": 8,
+     "videos": [
+      "2699411960448386_start_0.0_end_599.4",
+      "1284164833203708_start_0.0_end_438.473",
+      "1156095192709404_start_0.0_end_320.979",
+      "1033183405447678_start_0.0_end_599.978",
+      "665069879728607_start_0.0_end_599.973",
+      "2826984107488489_start_0.0_end_438.824"
+     ],
+     "offset_s": 420.4
+    },
+    {
+     "device": 9,
+     "videos": [
+      "2064767457385035_start_0.0_end_409.969",
+      "1084722070513954_start_0.0_end_313.88",
+      "1323134982091489_start_0.0_end_349.862",
+      "1325490802580551_start_0.0_end_309.718",
+      "1023875076490570_start_0.0_end_599.951",
+      "1150662047093052_start_0.0_end_330.256"
+     ],
+     "offset_s": 256.0
+    },
+    {
+     "device": 10,
+     "videos": [
+      "1155259299736832_start_0.0_end_588.604",
+      "1088746729444047_start_0.0_end_300.239",
+      "788227933566046_start_0.0_end_318.044",
+      "1118011560370089_start_0.0_end_598.494",
+      "3120199581464548_start_0.0_end_600.218",
+      "1044467407574703_start_0.0_end_600.028"
+     ],
+     "offset_s": 154.6
+    },
+    {
+     "device": 11,
+     "videos": [
+      "1076761904546143_start_0.0_end_372.705",
+      "1253133126231861_start_0.0_end_600.45",
+      "1433930244511948_start_0.0_end_311.564",
+      "941275014627762_start_0.0_end_307.589",
+      "591257796777793_start_0.0_end_300.231",
+      "1369947698174600_start_0.0_end_344.012"
+     ],
+     "offset_s": 123.8
+    },
+    {
+     "device": 12,
+     "videos": [
+      "1698254277549324_start_0.0_end_300.0",
+      "1293981962169721_start_0.0_end_300.0",
+      "663844359884061_start_0.0_end_326.285",
+      "1128203379196112_start_0.0_end_600.017",
+      "1137809621482336_start_0.0_end_600.147",
+      "1271720381302919_start_0.0_end_318.135"
+     ],
+     "offset_s": 116.4
+    },
+    {
+     "device": 13,
+     "videos": [
+      "1385825889152370_start_0.0_end_408.978",
+      "762144796185953_start_0.0_end_323.717",
+      "662399573527898_start_0.0_end_551.995",
+      "1445867246834981_start_0.0_end_600.077",
+      "727459876515585_start_0.0_end_300.043",
+      "1375595773649032_start_0.0_end_300.034"
+     ],
+     "offset_s": 166.2
+    },
+    {
+     "device": 14,
+     "videos": [
+      "1277332387280126_start_0.0_end_300.0",
+      "671013742223430_start_0.0_end_600.122",
+      "4064504807202128_start_0.0_end_600.199",
+      "1395302454900837_start_0.0_end_317.486",
+      "551715897680092_start_0.0_end_600.281",
+      "1841141929794753_start_0.0_end_599.968"
+     ],
+     "offset_s": 188.1
+    },
+    {
+     "device": 15,
+     "videos": [
+      "731343993019620_start_0.0_end_310.045",
+      "1049395483785037_start_0.0_end_588.209",
+      "714753627805809_start_0.0_end_600.162",
+      "1354114522742647_start_0.0_end_300.0",
+      "632336616540910_start_0.0_end_600.145",
+      "680890187975381_start_0.0_end_599.995"
+     ],
+     "offset_s": 0.4
+    },
+    {
+     "device": 16,
+     "videos": [
+      "626382380356094_start_0.0_end_600.005",
+      "1481441226615218_start_0.0_end_300.087",
+      "1289124902905552_start_0.0_end_321.267",
+      "714149781283234_start_0.0_end_665.541",
+      "9902221866524366_start_0.0_end_1199.959",
+      "1001141161985610_start_0.0_end_599.99"
+     ],
+     "offset_s": 111.5
+    },
+    {
+     "device": 17,
+     "videos": [
+      "550798061123598_start_0.0_end_508.187",
+      "1255719099314099_start_0.0_end_599.986",
+      "703466115492979_start_0.0_end_600.0",
+      "1272099357949614_start_0.0_end_300.0",
+      "538469475795868_start_0.0_end_520.785",
+      "4176083796050393_start_0.0_end_600.048"
+     ],
+     "offset_s": 167.9
+    },
+    {
+     "device": 18,
+     "videos": [
+      "750546900852059_start_0.0_end_313.654",
+      "1290745635792905_start_0.0_end_375.416",
+      "2846846508853733_start_0.0_end_599.946",
+      "1222724952646549_start_0.0_end_336.839",
+      "720467167426580_start_0.0_end_300.0",
+      "602172215484549_start_0.0_end_599.977"
+     ],
+     "offset_s": 71.8
+    },
+    {
+     "device": 19,
+     "videos": [
+      "1848337166005249_start_0.0_end_1199.976",
+      "1517700072558199_start_0.0_end_300.178",
+      "1020640039686756_start_0.0_end_600.156",
+      "747594358192374_start_0.0_end_599.977",
+      "1314496693568074_start_0.0_end_323.325",
+      "1447459139569275_start_0.0_end_600.279"
+     ],
+     "offset_s": 730.5
+    },
+    {
+     "device": 20,
+     "videos": [
+      "1242272464195379_start_0.0_end_599.982",
+      "597421306692637_start_0.0_end_600.019",
+      "1413200346459502_start_0.0_end_309.855",
+      "3903565719895826_start_0.0_end_382.546",
+      "3601161160177668_start_0.0_end_600.202",
+      "1071206565202625_start_0.0_end_315.286"
+     ],
+     "offset_s": 186.3
+    },
+    {
+     "device": 21,
+     "videos": [
+      "2211104685971437_start_0.0_end_600.013",
+      "1023017279799163_start_0.0_end_599.963",
+      "790971550032691_start_0.0_end_328.116",
+      "1196380908704398_start_0.0_end_600.215",
+      "675833515065315_start_0.0_end_600.147",
+      "1015467527231807_start_0.0_end_599.976"
+     ],
+     "offset_s": 518.3
+    },
+    {
+     "device": 22,
+     "videos": [
+      "1680204915971460_start_0.0_end_316.107",
+      "1100131898240591_start_0.0_end_318.357",
+      "1030676578614270_start_0.0_end_601.993",
+      "1470001337521253_start_0.0_end_300.0",
+      "2250751765395216_start_0.0_end_326.402",
+      "2478973155772033_start_0.0_end_600.011"
+     ],
+     "offset_s": 179.5
+    },
+    {
+     "device": 23,
+     "videos": [
+      "1577671472898942_start_0.0_end_599.96",
+      "672963545696130_start_0.0_end_600.072",
+      "1023758566050401_start_0.0_end_599.984",
+      "1319837272968317_start_0.0_end_320.604",
+      "613891895102051_start_0.0_end_397.113",
+      "1042025564680129_start_0.0_end_314.155"
+     ],
+     "offset_s": 149.6
+    },
+    {
+     "device": 24,
+     "videos": [
+      "1801425474121026_start_0.0_end_334.382",
+      "1426871031983567_start_0.0_end_313.891",
+      "1205682563854255_start_0.0_end_599.991",
+      "1379566719773474_start_0.0_end_545.838",
+      "663621686514521_start_0.0_end_599.985",
+      "9686007581480111_start_0.0_end_565.014"
+     ],
+     "offset_s": 125.5
+    },
+    {
+     "device": 25,
+     "videos": [
+      "637875586009287_start_0.0_end_406.396",
+      "1004154028515092_start_0.0_end_599.281",
+      "1854310412187804_start_0.0_end_387.974",
+      "677637195018930_start_0.0_end_599.98",
+      "1085232373177911_start_0.0_end_328.488",
+      "1968508127271132_start_0.0_end_447.921"
+     ],
+     "offset_s": 263.9
+    },
+    {
+     "device": 26,
+     "videos": [
+      "1430268204968029_start_0.0_end_343.855",
+      "1123752046318354_start_0.0_end_328.664",
+      "1058687089646259_start_0.0_end_599.983",
+      "4023656411196583_start_0.0_end_599.996",
+      "1317747566722648_start_0.0_end_300.0",
+      "1649035665793396_start_0.0_end_335.392"
+     ],
+     "offset_s": 141.8
+    },
+    {
+     "device": 27,
+     "videos": [
+      "736388049135999_start_0.0_end_376.333",
+      "726131583640362_start_0.0_end_317.492",
+      "3302168133258053_start_0.0_end_600.012",
+      "1513631326470910_start_0.0_end_324.478",
+      "674634768606620_start_0.0_end_591.28",
+      "773647355614575_start_0.0_end_327.557"
+     ],
+     "offset_s": 223.8
+    },
+    {
+     "device": 28,
+     "videos": [
+      "2144632229357728_start_0.0_end_315.189",
+      "1182077450362523_start_0.0_end_559.645",
+      "1084289347003131_start_0.0_end_300.0",
+      "1085041543181381_start_0.0_end_386.067",
+      "780026071025974_start_0.0_end_323.192",
+      "2554992228029466_start_0.0_end_599.983"
+     ],
+     "offset_s": 14.4
+    },
+    {
+     "device": 29,
+     "videos": [
+      "616157548208645_start_0.0_end_422.008",
+      "1133927258554954_start_0.0_end_425.936",
+      "9864685376944003_start_0.0_end_577.681",
+      "791449306887400_start_0.0_end_304.403",
+      "1080931757513668_start_0.0_end_600.032",
+      "1193236635806968_start_0.0_end_599.997"
+     ],
+     "offset_s": 171.0
+    },
+    {
+     "device": 30,
+     "videos": [
+      "1956610695135669_start_0.0_end_300.0",
+      "1032206425511233_start_0.0_end_600.011",
+      "1468764163996157_start_0.0_end_599.996",
+      "729685616639719_start_0.0_end_328.273",
+      "1813544496258929_start_0.0_end_307.914",
+      "539288665917819_start_0.0_end_599.993"
+     ],
+     "offset_s": 71.8
+    },
+    {
+     "device": 31,
+     "videos": [
+      "736867785903229_start_0.0_end_300.0",
+      "2649426178590002_start_0.0_end_600.284",
+      "1091490079597444_start_0.0_end_321.519",
+      "1292749728906542_start_0.0_end_599.951",
+      "8365619113563204_start_0.0_end_599.959",
+      "3992408927674955_start_0.0_end_460.091"
+     ],
+     "offset_s": 42.4
+    }
+   ],
+   "escalations": 267,
+   "escalation_token_hit": 0.6617
+  }
+ },
+ "mechanism_check_D1": {
+  "warm_hit": 0.943884504719759,
+  "warm_ttft_median": 0.3235,
+  "cold_ttft_median": 0.5265
+ },
+ "_provenance": [
+  {
+   "git_commit": "3f2002cfbd99e233db4069122362b92b07219620",
+   "script": "study_r5_fleet.py",
+   "model": "qwen3vl-32b-instruct",
+   "timestamp": "2026-10-17T23:26:16.205310",
+   "device": "h100nvl",
+   "args": {
+    "stage": "sweep"
+   }
+  },
+  {
+   "git_commit": "3f2002cfbd99e233db4069122362b92b07219620",
+   "script": "study_r5_fleet.py",
+   "model": "qwen3vl-32b-instruct",
+   "timestamp": "2026-10-18T00:29:21.247590",
+   "device": "h100nvl",
+   "args": {
+    "stage": "fp8"
+   }
+  }
+ ]
+}
