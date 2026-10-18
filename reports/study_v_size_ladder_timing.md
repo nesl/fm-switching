@@ -41,6 +41,12 @@ trials "greedy"), with per-step timestamps.
 
 ## Findings
 
+**Scope of every finding below: H100 NVL, HF eager execution (no torch.compile, no CUDA graphs), batch 1,
+`flash_attention_2`.** The conclusions do not extend to other stacks. Under vLLM (CUDA graphs, FA3), 32B decodes at
+25.4 ms/token (StudyX), so the per-layer overhead that dominates here is largely removed. They also do not extend
+to other batch sizes or to SDPA, nor to other GPUs: on the A6000, 4B-T under the same HF flash-attn path ran at 44.5
+tok/s vs 33.1 here (consistency check 1).
+
 1. **4B and 8B decode at the same speed:** 30.15 vs 30.70 ms/token (+1.8%), although 8B has 2.0× the weights. Both
    have 36 decoder layers. 32B, with 64 layers, takes 53.1 ms. **The cost per decoder layer is constant across
    sizes:**
@@ -51,7 +57,7 @@ trials "greedy"), with per-step timestamps.
    | 8B | 0.85 |
    | 32B | 0.83 |
 
-   HF batch-1 decode on this H100 is therefore set by **layer count**, i.e. fixed per-layer kernel-launch / Python
+   HF eager batch-1 flash-attention-2 decode on this H100 is therefore set by **layer count**, i.e. fixed per-layer kernel-launch / Python
    overhead, not by weight bandwidth. The weight-read floors (at 3.9 TB/s) are well below the measured times:
 
    | model | weight-read floor | measured | ratio |
@@ -63,8 +69,8 @@ trials "greedy"), with per-step timestamps.
    This confirms, by direct measurement, what StudyU could only infer from two sizes.
 2. **Flat with position at every size:** under 1% change from position 0 to 8k at 4B and 8B. The small rise past 8k
    (4B +0.3 ms, 8B +0.7 ms, 32B +1.0 ms) is the flash-attn step StudyU already found.
-3. **Practical consequence for the cost model:** on this stack, a 4B "device" model and an 8B model have the *same*
-   per-token decode latency. Smaller models do not decode faster here. The size ladder buys memory, not speed, at
+3. **Practical consequence for the cost model (H100, HF eager, batch 1, flash-attention-2 only):** on this stack, a
+   4B "device" model and an 8B model have the *same* per-token decode latency. Smaller models do not decode faster here. The size ladder buys memory, not speed, at
    batch 1. A different stack does change this: vLLM runs 32B at 25.4 ms/token (StudyX), faster than HF runs 4B. So
    every latency figure in the cost model must carry its stack.
 4. **The 4B/8B/32B ladder is now complete on one machine and one backend,** for comparison with the A6000 ladder (SDPA
@@ -86,7 +92,8 @@ trials "greedy"), with per-step timestamps.
 3. **Distribution sanity:** per-position medians come from 2–40 trials; >8k cells are small (n=2–3), as stated.
 4. **Definitions:** as StudyU (throughput includes prefill; position curves exclude the first token).
 5. **Claim linkage:** the latency terms of the device/edge/cloud cost model. It weakens any assumption that decode
-   latency scales with model size at batch 1 on HF.
+   latency scales with model size **on H100, HF eager, batch 1, flash-attention-2**. It says nothing about compiled
+   or graph-captured stacks (vLLM), batched decode, or other GPUs.
 6. **Proxy validity:** layer count as the explanatory variable is supported by two models with identical layer
    counts and 2× different weights. That is a direct test, not a proxy.
 

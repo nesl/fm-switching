@@ -54,7 +54,9 @@ SIGN_CAP = 24576
 LONG_FORCE = 8192
 ERQA_THINK_MAX = 16384
 
-# StudyT (both H100 backends): the three signs that never closed </think> by 24,576 tokens
+# StudyT H100 signs that ran to 24,576 tokens without closing </think> -- each under only ONE HF backend
+# (IMG_6431, IMG_6443: SDPA only; IMG_0037: flash-attn only). Not "known non-terminators": all three terminate
+# under vLLM (StudyX C1).
 CAP_HITTERS = ["IMG_6431_frame_0015_0.jpg", "IMG_6443_frame_0023_0.jpg", "IMG_0037_frame_0014_0.jpg"]
 FORCED_HITTER = "IMG_0037_frame_0014_0.jpg"
 
