@@ -220,6 +220,9 @@ MODELS = {
     "4bi_f16": ("F16", dict(temperature=0.0, max_tokens=512, seed=0)),
     "4bt_q8":  ("Q8_0", dict(temperature=1.0, top_p=0.95, top_k=20, presence_penalty=0.0,
                             repeat_penalty=1.0, max_tokens=16384, seed=0)),
+    "8bt_f16": ("F16", dict(temperature=1.0, top_p=0.95, top_k=20, presence_penalty=0.0,
+                            repeat_penalty=1.0, max_tokens=16384, seed=0)),
+    "8bi_f16": ("F16", dict(temperature=0.0, max_tokens=512, seed=0)),
 }
 
 
@@ -260,7 +263,7 @@ def phase_run(model_tag, limit=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("phase", choices=["frames", "4bt_f16", "4bi_f16", "4bt_q8"])
+    ap.add_argument("phase", choices=["frames", "4bt_f16", "4bi_f16", "4bt_q8", "8bt_f16", "8bi_f16"])
     ap.add_argument("--limit", type=int, default=None)
     a = ap.parse_args()
     OUTDIR.mkdir(parents=True, exist_ok=True)
