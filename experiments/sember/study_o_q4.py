@@ -183,6 +183,11 @@ def done_keys():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--cell", required=True, choices=["4B-I", "8B-I", "4B-T"])
+    ap.add_argument("--state", default=None, choices=["RECENT", "RICH"],
+                    help="override the cell's default state arm. Part 2 (2026-10-17) needs "
+                         "4B-I x RICH, the cell that separates model size from frame selection; "
+                         "the CELLS table pairs each model with one state only. Writes to its "
+                         "own JSONL so no existing cell's rows are mixed with it.")
     ap.add_argument("--device", default="cuda:1")
     ap.add_argument("--limit", type=int, default=None)
     ap.add_argument("--fa2", action="store_true",
@@ -191,11 +196,18 @@ def main():
     args = ap.parse_args()
 
     model_arm = args.cell
-    state_arm = dict(CELLS)[model_arm]
+    default_state = dict(CELLS)[model_arm]
+    state_arm = args.state or default_state
+    off_grid = state_arm != default_state
     global JSONL
     if args.fa2:
         JSONL = OUT_DIR / "study_o_q4_trials_fa2.jsonl"
         print(f"FA2 RE-RUN -> {JSONL} (committed SDPA trials untouched)", flush=True)
+    if off_grid:
+        slug = f"{model_arm}_{state_arm}".lower().replace("-", "")
+        JSONL = OUT_DIR / f"study_o_q4_trials_{slug}_fa2.jsonl"
+        print(f"OFF-GRID CELL {model_arm} x {state_arm} (default is {default_state}) "
+              f"-> {JSONL}", flush=True)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     CACHE.mkdir(parents=True, exist_ok=True)

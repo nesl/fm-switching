@@ -20,6 +20,13 @@ Definition
 - Prompt text & answer format: copied verbatim from experiments/sember/study_o_q4.py
   (same question, options, answer instruction), with per-frame "[t=XXs]" markers added.
 
+DEV-RICH (added 2026-10-18) is the second construction: IDENTICAL in every respect
+-- same N, same 560x560 frames, same "[t=XXs]" markers, same prompt, same 12,500
+token budget -- except that the frames are uniformly spaced over [0, question_time]
+instead of [question_time - 120 s, question_time]. It is a reallocation of the same
+token budget across the whole session rather than the last 120 s, not more tokens.
+DEV-RECENT's own functions are untouched so the Orin's latency rows stay reproducible.
+
 The only measured constant is per-frame image tokens at 560x560 (PER_FRAME_IMAGE_TOKENS),
 determined empirically against the llama-server tokenizer and recorded here.
 """
@@ -64,6 +71,30 @@ def frame_times(question_time, n):
     raw = [lo + (qt - lo) * i / (n - 1) for i in range(n)]
     ts = sorted(set(int(round(t)) for t in raw))
     return ts
+
+
+def frame_times_rich(question_time, n):
+    """DEV-RICH: N timestamps uniformly spaced over [0, question_time], rounded to
+    whole seconds (the cached frames are at 1 fps), in time order, deduplicated.
+
+    Same contract as frame_times() but with lo pinned to the session start instead
+    of question_time - WINDOW_S. No frame after question_time."""
+    qt = float(question_time)
+    lo = 0.0
+    if n <= 1:
+        return [int(round(qt))]
+    raw = [lo + (qt - lo) * i / (n - 1) for i in range(n)]
+    ts = sorted(set(int(round(t)) for t in raw))
+    return ts
+
+
+def frame_times_for(construction, question_time, n):
+    """Dispatch to the construction's sampler. construction in {RECENT, RICH}."""
+    if construction == "RECENT":
+        return frame_times(question_time, n)
+    if construction == "RICH":
+        return frame_times_rich(question_time, n)
+    raise ValueError(f"unknown construction {construction!r}")
 
 
 def nearest_available(ts, available_sorted):
