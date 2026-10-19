@@ -173,14 +173,31 @@ distance, i.e. perfect knowledge of the very quantity N2's predictor estimates.
 Real exploitable headroom exists — the accuracy oracle reaches ~45% against ~33% random, about
 **+11–12 pp**. But a *perfect coverage signal* captures only **+0.57 to +1.85 pp** of it.
 
-So coverage-based escalation on this workload is not limited by predictor quality. It is limited
-because **coverage and "which arm answers correctly" are close to orthogonal**. Even a flawless
-estimate of evidence distance would leave roughly 85–95% of the available headroom on the table.
-Improving the predictor cannot fix this; the signal is close to the wrong one for the decision.
+> ### ⚠ WITHDRAWN 2026-10-17 (external audit) — the paragraph below is wrong
+>
+> The original text read: *"coverage-based escalation on this workload is not limited by
+> predictor quality. It is limited because **coverage and 'which arm answers correctly' are
+> close to orthogonal**. Even a flawless estimate of evidence distance would leave roughly
+> 85–95% of the available headroom on the table. Improving the predictor cannot fix this; the
+> signal is close to the wrong one for the decision."*
+>
+> **Both claims are contradicted by the same data** (see §8, added 2026-10-17):
+> 1. The evidence-distance oracle beats random escalation by **+1.85 pp, CI [+0.19, +3.72]**
+>    on this 520 pool and **+2.39 pp, CI [+0.92, +3.86]** on the 845 pool — **CI excludes zero
+>    on both**. A signal orthogonal to the decision cannot do that.
+> 2. The gain from escalating is **+12.0 pp where the local arm lacks the evidence** vs
+>    **−1.9 pp where it has it** (DiD +13.9 pp, CI [−2.3, +31.3] at this n; +18.3 pp,
+>    CI [+6.3, +31.5] on 845). Coverage predicts where escalation pays.
+>
+> The "85–95% of headroom left on the table" arithmetic is also unsound: its denominator, the
+> accuracy-oracle headroom of +11–12 pp, is **smaller than the 14.6% run-to-run flip rate** of
+> this very arm (§8d), so much of that headroom is noise no policy can capture.
 
-This is the result that bears on the paper. N2's SIGNAL verdict (OOF AUROC 0.766, 44.9% of the
-**coverage** gap closed) is not contradicted — it is confined. The ranking is real at the coverage
-level and does not transfer to accuracy.
+N2's SIGNAL verdict (OOF AUROC 0.766, 44.9% of the **coverage** gap closed) is **not**
+contradicted by this study. The accurate statement is narrower than either the original text or
+its withdrawal: *the specific P4-ranked top-e policy did not beat random in this design, and
+this design is underpowered for the threshold it tests* (MDE 2.43 pp vs a K4 threshold of
+1.00 pp, §8c).
 
 ---
 
@@ -250,5 +267,119 @@ cell-balance failure, which needs ~400 GB of absent video to repair (150 of 3,14
 local). Nothing here speaks to the evidence × capability interaction.
 
 **Caveat on scope:** this is one workload, one local/remote pair, and a post-hoc-authorised subset
-of a larger design. The orthogonality finding in §4 is the generalisable part; the specific
-accuracy numbers are not.
+of a larger design.
+
+**Corrected 2026-10-17:** an earlier version of this caveat said "the orthogonality finding in §4
+is the generalisable part". **That is withdrawn** — the orthogonality finding is retracted (see
+the boxed notice in §4 and the new §8). Nothing in this study generalises in the way that
+sentence claimed. The generalisable part, if any, is the **interaction**: escalation pays where
+the local representation lacks the evidence and not where it has it.
+
+---
+
+## 8. External-audit re-analysis (added 2026-10-17)
+
+Added in response to an external audit that re-checked this study against the raw trials.
+**No number in §1–§7 was deleted or altered**; the §4 interpretation is withdrawn in place with
+the original text quoted, and the analyses below are new. Produced by
+`experiments/sember/study_o_q4_analyze.py` (no `--fa2` flag = this 520-question SDPA pool);
+all CIs are 2,000 video-clustered bootstrap resamples at seed 0.
+
+### 8a. Interaction — where the remote model helps
+
+Remote = 8B-I × RICH, split by the local arm's `evidence_covered`:
+
+| stratum | n | local | remote | gain |
+|---|---|---|---|---|
+| **uncovered** | 50 | 24.0% | **36.0%** | **+12.0 pp** |
+| covered | 470 | 34.9% | 33.0% | −1.9 pp |
+
+**DiD = +13.9 pp, 95% CI [−2.3, +31.3]** — CI includes 0 at n=50 in the smaller stratum.
+On the 845 pool the same contrast is **+18.3 pp, CI [+6.3, +31.5]**, which excludes 0.
+*(Different pools, and the 845 pool is stratum-enriched by construction — not a measured change.)*
+
+Split by `farthest > 120 s`: near n=358 gain −3.9 pp, far n=162 gain +6.8 pp,
+**DiD −10.7 pp, CI [−20.9, −0.6]**, excludes 0. Both stratifiers place the remote arm's whole
+advantage in the hard stratum.
+
+### 8b. Evidence-distance oracle vs random
+
+| e | (e) oracle − (c) random | 95% CI | excludes 0 |
+|---|---|---|---|
+| 0.1 | +0.63 pp | [−0.62, +2.04] | no |
+| **0.2** | **+1.85 pp** | **[+0.19, +3.72]** | **YES** |
+| 0.3 | +2.10 pp | [+0.04, +4.31] | YES |
+
+This is the §4 number (+1.85 pp) **with a CI attached for the first time**. §4 reported it as a
+small quantity and concluded orthogonality; with the CI it is a *statistically resolvable
+positive effect*. The missing CI is what made the original error possible.
+
+### 8c. Predictor quality and power
+
+| quantity | value |
+|---|---|
+| AUROC, P4, target `farthest > 120 s`, on these 520 questions | **0.761** |
+| AUROC, `question_time` alone | 0.706 |
+| N2 reported OOF AUROC | 0.766 |
+
+P4 transfers essentially intact (0.761 vs 0.766), so §4's premise that the predictor is adequate
+was right — it is the *conclusion drawn from that premise* that was wrong.
+
+**MDE for predictor vs random at e=0.2:** bootstrap SE 0.87 pp → **2.43 pp** at 80% power,
+two-sided α=0.05. **K4's threshold is 1.00 pp = 0.41× the MDE.** The test cannot reliably detect
+an effect at the size its own rule declares meaningful, so the predictor-vs-random null here is
+**INCONCLUSIVE (underpowered)**, not a real negative.
+
+**K4's reason is a mechanical label.** `study_o_q4_analyze.py:209` picks reason (i) vs (ii) from
+a hard-coded `abs(acc_b - acc_a) < 0.02`. It is an if-branch, not a test. On this pool it printed
+reason (i).
+
+### 8d. Run-to-run flip rate — the oracle-headroom noise floor
+
+The two 4B-T runs (this 520/SDPA one and the 845/FA2 one) share 520 questions:
+**both score exactly 30.00%**, with **76/520 = 14.6% of items flipping** (38 rescues, 38 breaks,
+net +0.00 pp). The two runs differ in pool and backend, so this is an **upper bound** on
+per-attempt stochasticity rather than a clean seed replicate.
+
+**The accuracy-oracle headroom quoted in §4 is +11.27 / +11.92 pp — below this 14.6% flip
+rate.** The oracle is defined on which arm happened to be right on one draw, so a large share of
+the headroom it reports is resampling noise that no policy can capture. Every "% of oracle gap
+closed" figure in this report, including the 4.4%, has a partly-illusory denominator.
+
+### 8e. The remote arm confounds model size with frame selection
+
+Local is 4B-I × **RECENT**; remote is 8B-I × **RICH**. **Model size and state representation
+change together**, so every remote gain and every DiD above is a **model + state** effect, not a
+state effect. Measured from the trials at the matched ~12.6 k budget, RICH carries **0.53× the
+tokens per frame** of RECENT (103.0 → 54.8 tok/frame): ~1.9× more frames at ~half the per-frame
+detail. The separating cell, **4B-I × RICH**, does not exist in this design.
+
+### 8f. Predictor value over elapsed time alone (audit addition, 2026-10-17)
+
+N2 selected P4 (MiniLM sentence embedding + log(1+question_time)) over P1 (**elapsed time
+alone**, `feat_elapsed` in `study_n2_escalation.py`). The margin between them is the entire
+case for using question *text* at runtime. Measured on each population, target
+`farthest > 120 s`:
+
+| population | n | P4 / text+time | question_time alone | **margin** |
+|---|---|---|---|---|
+| **N2**, full S-EMBER (OOF, L=120) | 9,448 | **0.766** | **0.696** | **+0.070** |
+| Study O, 520 pool | 520 | 0.761 | 0.706 | +0.055 |
+| Study O, **845 pool** | 845 | **0.736** | **0.724** | **+0.012** |
+
+*(N2 figures are `reports/study_n2_results.md` §2, L=120 OOF column: P4 0.7656, P1 0.6961.)*
+
+**The margin shrinks monotonically as the population becomes more distance-stratified, and on
+the 845 pool it is essentially gone (+0.012).** That ordering is not evidence that the text
+predictor degrades. It is most likely an artifact of how the 845 pool was built: the 84 added
+videos were chosen by greedy set cover **to fill under-filled (category × distance_bin)
+strata**, which enriches the pool in exactly the distance contrast that `question_time` is
+good at predicting. Raising the informativeness of the elapsed-time baseline compresses the
+margin any text feature can add on top of it.
+
+**Consequence, stated plainly: the text predictor's added value on an unstratified population
+is untested here.** The 845 number is a lower bound distorted downward by the stratification,
+the 520 number is intermediate, and N2's +0.070 is the only one measured on an unselected
+population. None of the three is a clean estimate of what P4 buys over elapsed time on the
+workload a deployed router would see. Deciding whether the embedding is worth its cost needs a
+measurement on a population that was not selected on distance.
