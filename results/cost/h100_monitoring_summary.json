@@ -1,0 +1,663 @@
+{
+ "note": "Summary of gitignored logs/ on h100nvl; GPU 3 = UUID b3c6399e. Clocks/util are 10-s samples inside the run's chain-step windows. 'Foreign' = a GPU-3 compute process not started by the run's own vLLM servers.",
+ "runs": {
+  "StudyR1": {
+   "run": "StudyR1",
+   "chain_log": "logs/queue4_chain.log",
+   "windows": [
+    {
+     "step": "r1_parity_timing_I",
+     "start": "2026-10-17 12:33:22",
+     "end": "2026-10-17 12:35:48",
+     "rc": 1
+    },
+    {
+     "step": "r1_parity_timing_I",
+     "start": "2026-10-17 12:36:12",
+     "end": "2026-10-17 12:38:13",
+     "rc": 1
+    },
+    {
+     "step": "r1_parity_timing_I",
+     "start": "2026-10-17 12:44:58",
+     "end": "2026-10-17 12:47:02",
+     "rc": 1
+    },
+    {
+     "step": "r1_parity_timing_I",
+     "start": "2026-10-17 12:47:25",
+     "end": "2026-10-17 12:51:37",
+     "rc": 0
+    },
+    {
+     "step": "r1_timing_T",
+     "start": "2026-10-17 12:51:37",
+     "end": "2026-10-17 12:53:21",
+     "rc": 0
+    },
+    {
+     "step": "r1_I",
+     "start": "2026-10-17 13:49:18",
+     "end": "2026-10-17 15:09:52",
+     "rc": 0
+    },
+    {
+     "step": "r1_T",
+     "start": "2026-10-17 15:09:52",
+     "end": "2026-10-17 16:29:20",
+     "rc": 0
+    }
+   ],
+   "server_logs": [
+    "study_x_server_32BI_1017_123322.log",
+    "study_x_server_32BI_1017_123612.log",
+    "study_x_server_32BI_1017_124458.log",
+    "study_x_server_32BI_1017_124725.log",
+    "study_x_server_32BI_1017_134918.log",
+    "study_x_server_32BT_1017_125138.log",
+    "study_x_server_32BT_1017_150952.log"
+   ],
+   "own_vllm_pids": [
+    2197419,
+    2323734,
+    2368640,
+    2370224,
+    2464125,
+    2464372,
+    2466615,
+    2466893,
+    2470311,
+    2470505,
+    3621591,
+    3621814,
+    3668004,
+    3668196
+   ],
+   "gpu3_monitor": {
+    "samples": 995,
+    "interval_s": 10,
+    "util_pct": {
+     "min": 0.0,
+     "median": 100.0,
+     "max": 100.0,
+     "n": 995
+    },
+    "util_pct_busy_only": {
+     "min": 1.0,
+     "median": 100.0,
+     "max": 100.0,
+     "n": 899
+    },
+    "memory_used_mib": {
+     "min": 4.0,
+     "median": 91702.0,
+     "max": 91702.0,
+     "n": 995
+    },
+    "power_w": {
+     "min": 63.64,
+     "median": 397.93,
+     "max": 422.55,
+     "n": 995
+    },
+    "sm_clock_mhz": {
+     "min": 345.0,
+     "median": 930.0,
+     "max": 1785.0,
+     "n": 995
+    },
+    "sm_clock_mhz_busy_only": {
+     "min": 345.0,
+     "median": 915.0,
+     "max": 1785.0,
+     "n": 899
+    },
+    "mem_clock_mhz": {
+     "min": 2619.0,
+     "median": 2619.0,
+     "max": 2619.0,
+     "n": 995
+    },
+    "temp_c": {
+     "min": 40.0,
+     "median": 81.0,
+     "max": 83.0,
+     "n": 995
+    }
+   },
+   "foreign_processes": {
+    "gpu3_process_samples": 984,
+    "count": 0,
+    "pids": {}
+   },
+   "watchdog_foreign_lines": [],
+   "files": [
+    {
+     "file": "logs/queue4_chain.log",
+     "bytes": 2429,
+     "sha256": "be34f74684d33080473289c1b62c590381427c8e13099345041b5231b2ffabf0"
+    },
+    {
+     "file": "logs/queue4_r1_I.log",
+     "bytes": 3849,
+     "sha256": "10dc0c44e6489f6091ec3de2febd5f66a49f5eadf343521a7e8b87bb4a4955f1"
+    },
+    {
+     "file": "logs/queue4_r1_T.log",
+     "bytes": 2896,
+     "sha256": "699bfaafb7c8eb7534b82fee671de97becdfe202332a3c8a0df7f4674437bdc2"
+    },
+    {
+     "file": "logs/queue4_r1_parity_timing_I.log",
+     "bytes": 11077,
+     "sha256": "769d88b309d961bf4dc51b86610c2d2ed0834f1407b9bca08cc3bd78d7d8f033"
+    },
+    {
+     "file": "logs/queue4_r1_timing_T.log",
+     "bytes": 2454,
+     "sha256": "b53e9732f92bff64f5663acd410daa6f9939b2d6b98444448f35abeae5b1c76b"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1017_123322.log",
+     "bytes": 32493,
+     "sha256": "bd0848f7a248be74d011122318cb457b90083525436e70be4ec09a6c7b497829"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1017_123612.log",
+     "bytes": 32370,
+     "sha256": "d2e6610516bce5626d50e9107a50564c3f647e730766085c9a691a8f01c29e78"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1017_124458.log",
+     "bytes": 32525,
+     "sha256": "3ffd06c3031a4d6955863f29e2c11b3167965a6454276a6bb05c2a8e36942dc3"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1017_124725.log",
+     "bytes": 37441,
+     "sha256": "c5057f2734c1e0606b7997d0f9b35f0762d230fb710f022fafcadc78e8c703fb"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1017_134918.log",
+     "bytes": 273674,
+     "sha256": "82a660ff4b82a37789baa3811fc1a30534f6b3965b9be271a0f05970b99e2dd8"
+    },
+    {
+     "file": "logs/study_x_server_32BT_1017_125138.log",
+     "bytes": 31893,
+     "sha256": "a79a75185bbffce0fd539bfeeb7a5c2739bff2f53393afcbc7a41eefe8c589ba"
+    },
+    {
+     "file": "logs/study_x_server_32BT_1017_150952.log",
+     "bytes": 205102,
+     "sha256": "d76f745ba8a8e5cf8c48ab36194c350618c4f7227a4ed717b833e47b52eb77fe"
+    },
+    {
+     "file": "logs/queue4_gpu3_monitor.csv",
+     "bytes": 233400,
+     "sha256": "65c060e8c6719acdec57fadf83b8459d1ea43a70b309e41062bd886aa5d52946"
+    },
+    {
+     "file": "logs/queue4_gpu_procs.csv",
+     "bytes": 1081735,
+     "sha256": "321299dd2c657ac29107ae9ea9f67589a2af83cf458c3f604f1db6dc5b2fb444"
+    }
+   ]
+  },
+  "StudyR5": {
+   "run": "StudyR5",
+   "chain_log": "logs/queue4_chain.log",
+   "windows": [
+    {
+     "step": "r5_sweep",
+     "start": "2026-10-17 12:59:22",
+     "end": "2026-10-17 13:14:05",
+     "rc": 1
+    },
+    {
+     "step": "r5_sweep",
+     "start": "2026-10-17 16:29:55",
+     "end": "2026-10-17 17:00:38",
+     "rc": 1
+    },
+    {
+     "step": "r5_sweep",
+     "start": "2026-10-17 18:49:42",
+     "end": "2026-10-17 23:26:17",
+     "rc": 0
+    },
+    {
+     "step": "r5_fp8",
+     "start": "2026-10-17 23:26:17",
+     "end": "2026-10-18 00:29:22",
+     "rc": 0
+    },
+    {
+     "step": "r5_compact",
+     "start": "2026-10-18 00:29:22",
+     "end": "2026-10-18 00:29:23",
+     "rc": 0
+    }
+   ],
+   "server_logs": [
+    "study_x_server_32BI_1017_125922.log",
+    "study_x_server_32BI_1017_162955.log",
+    "study_x_server_32BI_1017_184942.log",
+    "study_x_server_32BI_1017_232617.log"
+   ],
+   "own_vllm_pids": [
+    2888590,
+    2917492,
+    3715019,
+    3715218,
+    3739424,
+    3739669,
+    3919933,
+    3920150
+   ],
+   "gpu3_monitor": {
+    "samples": 2231,
+    "interval_s": 10,
+    "util_pct": {
+     "min": 0.0,
+     "median": 0.0,
+     "max": 100.0,
+     "n": 2231
+    },
+    "util_pct_busy_only": {
+     "min": 1.0,
+     "median": 100.0,
+     "max": 100.0,
+     "n": 861
+    },
+    "memory_used_mib": {
+     "min": 4.0,
+     "median": 88508.0,
+     "max": 88510.0,
+     "n": 2231
+    },
+    "power_w": {
+     "min": 63.47,
+     "median": 113.65,
+     "max": 418.56,
+     "n": 2231
+    },
+    "sm_clock_mhz": {
+     "min": 345.0,
+     "median": 1785.0,
+     "max": 1785.0,
+     "n": 2231
+    },
+    "sm_clock_mhz_busy_only": {
+     "min": 570.0,
+     "median": 915.0,
+     "max": 1785.0,
+     "n": 861
+    },
+    "mem_clock_mhz": {
+     "min": 2619.0,
+     "median": 2619.0,
+     "max": 2619.0,
+     "n": 2231
+    },
+    "temp_c": {
+     "min": 39.0,
+     "median": 48.0,
+     "max": 83.0,
+     "n": 2231
+    }
+   },
+   "foreign_processes": {
+    "gpu3_process_samples": 2221,
+    "count": 0,
+    "pids": {}
+   },
+   "watchdog_foreign_lines": [],
+   "files": [
+    {
+     "file": "logs/queue4_chain.log",
+     "bytes": 2429,
+     "sha256": "be34f74684d33080473289c1b62c590381427c8e13099345041b5231b2ffabf0"
+    },
+    {
+     "file": "logs/queue4_r5_compact.log",
+     "bytes": 325,
+     "sha256": "1c1e54a696fa129ab3827fd61a18a12cebe33265e0b326bfbbffa6509b08187b"
+    },
+    {
+     "file": "logs/queue4_r5_fp8.log",
+     "bytes": 2910,
+     "sha256": "cfc71da1864cd609b2fb6eabfa26c69bfb536f8680502f6ce6c58a2a04649b42"
+    },
+    {
+     "file": "logs/queue4_r5_sweep.log",
+     "bytes": 12322,
+     "sha256": "643b250c39002afd41e102938f3c0677e38a83af620c7fc7a6d99cdc8120c898"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1017_125922.log",
+     "bytes": 81254,
+     "sha256": "28d4b8aaf6b52d03efc939fe88b66806c2653182099627ac6b263b67dcead094"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1017_162955.log",
+     "bytes": 172800,
+     "sha256": "aa5bdf4aa97205f9203f4723aa8993ede4f5717119a94de0f79bb716001cc32c"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1017_184942.log",
+     "bytes": 2051925,
+     "sha256": "28ceafb848e71368d0782f35355b94c90c6f399d185b3ff53656452a46cb7385"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1017_232617.log",
+     "bytes": 695927,
+     "sha256": "c0eebeccedb2e7d589cbb7c6c9c1fab39efdcdc4d3a2b3e62b7de83f74dba98c"
+    },
+    {
+     "file": "logs/queue4_gpu3_monitor.csv",
+     "bytes": 233400,
+     "sha256": "65c060e8c6719acdec57fadf83b8459d1ea43a70b309e41062bd886aa5d52946"
+    },
+    {
+     "file": "logs/queue4_gpu_procs.csv",
+     "bytes": 1081735,
+     "sha256": "321299dd2c657ac29107ae9ea9f67589a2af83cf458c3f604f1db6dc5b2fb444"
+    }
+   ]
+  },
+  "StudyRH2": {
+   "run": "StudyRH2",
+   "chain_log": "logs/queue5_chain.log",
+   "windows": [
+    {
+     "step": "rh2",
+     "start": "2026-10-18 23:07:26",
+     "end": "2026-10-19 02:09:17",
+     "rc": 0
+    }
+   ],
+   "server_logs": [
+    "study_x_server_32BI_1018_230726.log"
+   ],
+   "own_vllm_pids": [
+    109125,
+    109374
+   ],
+   "gpu3_monitor": {
+    "samples": 1052,
+    "interval_s": 10,
+    "util_pct": {
+     "min": 0.0,
+     "median": 0.0,
+     "max": 100.0,
+     "n": 1052
+    },
+    "util_pct_busy_only": {
+     "min": 1.0,
+     "median": 100.0,
+     "max": 100.0,
+     "n": 506
+    },
+    "memory_used_mib": {
+     "min": 4.0,
+     "median": 87976.0,
+     "max": 87976.0,
+     "n": 1052
+    },
+    "power_w": {
+     "min": 71.65,
+     "median": 139.82999999999998,
+     "max": 423.54,
+     "n": 1052
+    },
+    "sm_clock_mhz": {
+     "min": 345.0,
+     "median": 1770.0,
+     "max": 1785.0,
+     "n": 1052
+    },
+    "sm_clock_mhz_busy_only": {
+     "min": 592.0,
+     "median": 915.0,
+     "max": 1785.0,
+     "n": 506
+    },
+    "mem_clock_mhz": {
+     "min": 2619.0,
+     "median": 2619.0,
+     "max": 2619.0,
+     "n": 1052
+    },
+    "temp_c": {
+     "min": 47.0,
+     "median": 55.0,
+     "max": 83.0,
+     "n": 1052
+    }
+   },
+   "foreign_processes": {
+    "gpu3_process_samples": 1050,
+    "count": 0,
+    "pids": {}
+   },
+   "watchdog_foreign_lines": [],
+   "files": [
+    {
+     "file": "logs/queue5_chain.log",
+     "bytes": 755,
+     "sha256": "0f0b0d764517cd14d647226550f0bf7e81e9f3c65daceace6e88da8da36b115a"
+    },
+    {
+     "file": "logs/queue5_rh2.log",
+     "bytes": 11888,
+     "sha256": "d6fa60165fa4fe974de70c05c33dcc7a816664338e323051ab79ff607252c1da"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1018_230726.log",
+     "bytes": 1626393,
+     "sha256": "5b758f012feea55a58e1dcb87d4ce4ecb0b4bf934fc5f5de27dadfcc63984fa1"
+    },
+    {
+     "file": "logs/queue5_gpu3_monitor.csv",
+     "bytes": 240319,
+     "sha256": "01eb23f3f91d2e5fabe0e9c3dc31f5789187a2c21dd2c2a5985c712003994a90"
+    },
+    {
+     "file": "logs/queue5_gpu_procs.csv",
+     "bytes": 1116502,
+     "sha256": "0543fcd5477026041516019314563438f49ff4adfe71308c01ca4a43d3470e96"
+    }
+   ]
+  },
+  "StudyRH3": {
+   "run": "StudyRH3",
+   "chain_log": "logs/queue6_chain.log",
+   "windows": [
+    {
+     "step": "rh3_part0",
+     "start": "2026-10-19 13:11:25",
+     "end": "2026-10-19 13:13:42",
+     "rc": 0
+    },
+    {
+     "step": "rh3_cells",
+     "start": "2026-10-19 13:13:42",
+     "end": "2026-10-19 14:46:21",
+     "rc": 0
+    }
+   ],
+   "server_logs": [
+    "study_x_server_32BI_1019_131125.log",
+    "study_x_server_32BI_1019_131342.log"
+   ],
+   "own_vllm_pids": [
+    267981,
+    268201,
+    270220,
+    270463
+   ],
+   "gpu3_monitor": "MISSING: logs/queue6_gpu3_monitor.csv was not written for this run (chain launched no monitor)",
+   "foreign_processes": "MISSING: logs/queue6_gpu_procs.csv was not written for this run",
+   "watchdog_foreign_lines": [],
+   "files": [
+    {
+     "file": "logs/queue6_chain.log",
+     "bytes": 425,
+     "sha256": "13424fcfd03a36a0367553050f915f9cff0e856103a33a183142ad8e6b0868a1"
+    },
+    {
+     "file": "logs/queue6_rh3_cells.log",
+     "bytes": 6267,
+     "sha256": "389ff4489514b0f1612eeff4a1335d175ddb0d3359c2b91a7d8a8dd35810dd08"
+    },
+    {
+     "file": "logs/queue6_rh3_part0.log",
+     "bytes": 3363,
+     "sha256": "186b1d402a204e5c062577ab6539c24844ab0621ffc92843cee30dc1375e39f5"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1019_131125.log",
+     "bytes": 33802,
+     "sha256": "5793ac1eda9af438f83ebfdad0ed3f6da49efa36c753a4f7609111cd4de17e88"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1019_131342.log",
+     "bytes": 346705,
+     "sha256": "479049dd949ccc60626581aeaa2a4a03df2ca262eb4405411bf6c9637f4cf9f4"
+    }
+   ]
+  },
+  "StudyRH4": {
+   "run": "StudyRH4",
+   "chain_log": "logs/queue7_chain.log",
+   "windows": [
+    {
+     "step": "rh4_part0",
+     "start": "2026-10-19 17:57:01",
+     "end": "2026-10-19 17:59:36",
+     "rc": 0
+    },
+    {
+     "step": "rh4_cells",
+     "start": "2026-10-19 17:59:36",
+     "end": "2026-10-19 18:58:06",
+     "rc": 0
+    }
+   ],
+   "server_logs": [
+    "study_x_server_32BI_1019_175701.log",
+    "study_x_server_32BI_1019_175936.log"
+   ],
+   "own_vllm_pids": [
+    345183,
+    345418,
+    348008,
+    348444
+   ],
+   "gpu3_monitor": {
+    "samples": 354,
+    "interval_s": 10,
+    "util_pct": {
+     "min": 0.0,
+     "median": 100.0,
+     "max": 100.0,
+     "n": 354
+    },
+    "util_pct_busy_only": {
+     "min": 16.0,
+     "median": 100.0,
+     "max": 100.0,
+     "n": 325
+    },
+    "memory_used_mib": {
+     "min": 4.0,
+     "median": 88148.0,
+     "max": 88150.0,
+     "n": 354
+    },
+    "power_w": {
+     "min": 63.72,
+     "median": 398.73,
+     "max": 409.04,
+     "n": 354
+    },
+    "sm_clock_mhz": {
+     "min": 345.0,
+     "median": 915.0,
+     "max": 1785.0,
+     "n": 354
+    },
+    "sm_clock_mhz_busy_only": {
+     "min": 810.0,
+     "median": 915.0,
+     "max": 1785.0,
+     "n": 325
+    },
+    "mem_clock_mhz": {
+     "min": 2619.0,
+     "median": 2619.0,
+     "max": 2619.0,
+     "n": 354
+    },
+    "temp_c": {
+     "min": 40.0,
+     "median": 82.0,
+     "max": 83.0,
+     "n": 354
+    }
+   },
+   "foreign_processes": {
+    "gpu3_process_samples": 349,
+    "count": 0,
+    "pids": {}
+   },
+   "watchdog_foreign_lines": [],
+   "files": [
+    {
+     "file": "logs/queue7_chain.log",
+     "bytes": 423,
+     "sha256": "da022ecbbc6b551c425e8ced1307ea86f5e761c5ab04141fb7e81dd2135a1d77"
+    },
+    {
+     "file": "logs/queue7_rh4_cells.log",
+     "bytes": 5007,
+     "sha256": "05da4b6c7b49aeff2b22ed08512b88992242e093035e9f9a3377ec678c01990b"
+    },
+    {
+     "file": "logs/queue7_rh4_part0.log",
+     "bytes": 3087,
+     "sha256": "e213b50301b3ae05524df3f35acd91b82e054c718d89c005b1b6e59309b8a00b"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1019_175701.log",
+     "bytes": 33108,
+     "sha256": "1da2643165314c477bea5ecc949c02fe7cd9f8500ece2e63fcca5590a292f1da"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1019_175936.log",
+     "bytes": 272734,
+     "sha256": "ef76b8b3bb1456ccf214c61e46fc48bd046c8a4a61c83be3984bab69c9e5c12e"
+    },
+    {
+     "file": "logs/queue7_gpu3_monitor.csv",
+     "bytes": 25078,
+     "sha256": "4a2e78f9129432f509a6f7a4c76defc003ef30ef64ede7008ca6141785704a56"
+    },
+    {
+     "file": "logs/queue7_gpu_procs.csv",
+     "bytes": 114291,
+     "sha256": "51f21bab0c7553773daf9d5e7730e8b8cf390ec420ecedc84b725d0013e12283"
+    }
+   ]
+  }
+ },
+ "_provenance": {
+  "git_commit": "a269f2fe432c0c7abb7151868bfe693b85fb7475",
+  "script": "h100_monitoring_summary.py",
+  "model": "n/a",
+  "timestamp": "2026-10-19T18:59:03.339255",
+  "device": "h100nvl",
+  "n": 5
+ }
+}
