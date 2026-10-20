@@ -1,0 +1,1446 @@
+{
+ "servers": [
+  {
+   "cfg": "host",
+   "stage": "partA",
+   "kv_cache_tokens": 62944,
+   "kv_offloading": true,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 261.65746307373047,
+    "host_mem_available_gib": 1202.5105514526367
+   },
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--kv-offloading-backend",
+    "native",
+    "--kv-offloading-size",
+    "256"
+   ]
+  },
+  {
+   "cfg": "host",
+   "stage": "fleet",
+   "kv_cache_tokens": 62944,
+   "kv_offloading": true,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 261.4726333618164,
+    "host_mem_available_gib": 1204.04732131958
+   },
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--kv-offloading-backend",
+    "native",
+    "--kv-offloading-size",
+    "256"
+   ]
+  },
+  {
+   "cfg": "gpu",
+   "stage": "partA",
+   "kv_cache_tokens": 62944,
+   "kv_offloading": false,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 5.504173278808594,
+    "host_mem_available_gib": 1463.86328125
+   },
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details"
+   ]
+  },
+  {
+   "cfg": "gpu",
+   "stage": "fleet",
+   "kv_cache_tokens": 62944,
+   "kv_offloading": false,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 5.504169464111328,
+    "host_mem_available_gib": 1463.7545547485352
+   },
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details"
+   ]
+  }
+ ],
+ "partA_verification": {
+  "host": {
+   "all": true,
+   "n_verified": 36,
+   "n": 36
+  },
+  "gpu": {
+   "all": true,
+   "n_verified": 36,
+   "n": 36
+  }
+ },
+ "partA": {
+  "host/GPU-WARM/11k": {
+   "n": 12,
+   "sessions": 4,
+   "ttft_s": {
+    "n": 12,
+    "median": 0.41500000000000004,
+    "p90": 0.483,
+    "p99": 0.49991,
+    "max": 0.502,
+    "min": 0.364
+   },
+   "ttft_all": [
+    0.403,
+    0.364,
+    0.502,
+    0.442,
+    0.403,
+    0.427,
+    0.483,
+    0.46,
+    0.378,
+    0.392,
+    0.483,
+    0.394
+   ],
+   "prompt_tokens": {
+    "n": 12,
+    "median": 11050.0,
+    "p90": 11075.0,
+    "p99": 11075.0,
+    "max": 11075.0,
+    "min": 11010.0
+   },
+   "cached_tokens": {
+    "n": 12,
+    "median": 10928.0,
+    "p90": 10928.0,
+    "p99": 10928.0,
+    "max": 10928.0,
+    "min": 10928.0
+   },
+   "local_hits": {
+    "n": 12,
+    "median": 10928.0,
+    "p90": 10928.0,
+    "p99": 10928.0,
+    "max": 10928.0,
+    "min": 10928.0
+   },
+   "external_hits": {
+    "n": 12,
+    "median": 0.0,
+    "p90": 0.0,
+    "p99": 0.0,
+    "max": 0.0,
+    "min": 0.0
+   }
+  },
+  "host/GPU-WARM/28k": {
+   "n": 6,
+   "sessions": 2,
+   "ttft_s": {
+    "n": 6,
+    "median": 0.8734999999999999,
+    "p90": 0.956,
+    "p99": 0.956,
+    "max": 0.956,
+    "min": 0.803
+   },
+   "ttft_all": [
+    0.854,
+    0.803,
+    0.956,
+    0.837,
+    0.956,
+    0.893
+   ],
+   "prompt_tokens": {
+    "n": 6,
+    "median": 28114.5,
+    "p90": 28216.0,
+    "p99": 28216.0,
+    "max": 28216.0,
+    "min": 28013.0
+   },
+   "cached_tokens": {
+    "n": 6,
+    "median": 27936.0,
+    "p90": 27936.0,
+    "p99": 27936.0,
+    "max": 27936.0,
+    "min": 27936.0
+   },
+   "local_hits": {
+    "n": 6,
+    "median": 27936.0,
+    "p90": 27936.0,
+    "p99": 27936.0,
+    "max": 27936.0,
+    "min": 27936.0
+   },
+   "external_hits": {
+    "n": 6,
+    "median": 0.0,
+    "p90": 0.0,
+    "p99": 0.0,
+    "max": 0.0,
+    "min": 0.0
+   }
+  },
+  "host/HOST-WARM/11k": {
+   "n": 12,
+   "sessions": 4,
+   "ttft_s": {
+    "n": 12,
+    "median": 0.4585,
+    "p90": 0.5073,
+    "p99": 0.53481,
+    "max": 0.538,
+    "min": 0.399
+   },
+   "ttft_all": [
+    0.442,
+    0.43,
+    0.538,
+    0.462,
+    0.432,
+    0.46,
+    0.509,
+    0.478,
+    0.399,
+    0.447,
+    0.492,
+    0.457
+   ],
+   "prompt_tokens": {
+    "n": 12,
+    "median": 11050.0,
+    "p90": 11075.0,
+    "p99": 11075.0,
+    "max": 11075.0,
+    "min": 11010.0
+   },
+   "cached_tokens": {
+    "n": 12,
+    "median": 11040.0,
+    "p90": 11072.0,
+    "p99": 11072.0,
+    "max": 11072.0,
+    "min": 11008.0
+   },
+   "local_hits": {
+    "n": 12,
+    "median": 0.0,
+    "p90": 0.0,
+    "p99": 0.0,
+    "max": 0.0,
+    "min": 0.0
+   },
+   "external_hits": {
+    "n": 12,
+    "median": 11040.0,
+    "p90": 11072.0,
+    "p99": 11072.0,
+    "max": 11072.0,
+    "min": 11008.0
+   },
+   "load_gb": {
+    "n": 12,
+    "median": 2.89406976,
+    "p90": 2.902458368,
+    "p99": 2.902458368,
+    "max": 2.902458368,
+    "min": 2.885681152
+   },
+   "load_bytes_per_external_token": {
+    "n": 12,
+    "median": 262144.0,
+    "p90": 262144.0,
+    "p99": 262144.0,
+    "max": 262144.0,
+    "min": 262144.0
+   },
+   "load_time_s": {
+    "n": 12,
+    "median": 0.06086840057373048,
+    "p90": 0.06420059242248535,
+    "p99": 0.06511701530456543,
+    "max": 0.06520713806152344,
+    "min": 0.05498764801025385
+   },
+   "reload_gbps_metric": {
+    "n": 12,
+    "median": 47.561913635142474,
+    "p90": 52.275458415182285,
+    "p99": 52.50553566887664,
+    "max": 52.50885048512127,
+    "min": 44.254068462218626
+   },
+   "reload_gbps_from_ttft": {
+    "n": 12,
+    "median": 93.66621518913271,
+    "p90": 159.6352102400003,
+    "p99": 303.5138184533332,
+    "max": 321.0972728888886,
+    "min": 43.91309187878788
+   },
+   "extra_ttft_vs_gpu_warm_s": {
+    "n": 12,
+    "median": 0.031,
+    "p90": 0.062200000000000005,
+    "p99": 0.06567,
+    "max": 0.066,
+    "min": 0.009000000000000008
+   }
+  },
+  "host/HOST-WARM/28k": {
+   "n": 6,
+   "sessions": 2,
+   "ttft_s": {
+    "n": 6,
+    "median": 1.001,
+    "p90": 1.006,
+    "p99": 1.006,
+    "max": 1.006,
+    "min": 0.971
+   },
+   "ttft_all": [
+    0.976,
+    0.971,
+    1.006,
+    1.005,
+    0.997,
+    1.006
+   ],
+   "prompt_tokens": {
+    "n": 6,
+    "median": 28114.5,
+    "p90": 28216.0,
+    "p99": 28216.0,
+    "max": 28216.0,
+    "min": 28013.0
+   },
+   "cached_tokens": {
+    "n": 6,
+    "median": 28104.0,
+    "p90": 28208.0,
+    "p99": 28208.0,
+    "max": 28208.0,
+    "min": 28000.0
+   },
+   "local_hits": {
+    "n": 6,
+    "median": 0.0,
+    "p90": 0.0,
+    "p99": 0.0,
+    "max": 0.0,
+    "min": 0.0
+   },
+   "external_hits": {
+    "n": 6,
+    "median": 28104.0,
+    "p90": 28208.0,
+    "p99": 28208.0,
+    "max": 28208.0,
+    "min": 28000.0
+   },
+   "load_gb": {
+    "n": 6,
+    "median": 7.367294976,
+    "p90": 7.394557952,
+    "p99": 7.394557952,
+    "max": 7.394557952,
+    "min": 7.340032
+   },
+   "load_bytes_per_external_token": {
+    "n": 6,
+    "median": 262144.0,
+    "p90": 262144.0,
+    "p99": 262144.0,
+    "max": 262144.0,
+    "min": 262144.0
+   },
+   "load_time_s": {
+    "n": 6,
+    "median": 0.13920065307617185,
+    "p90": 0.14805074310302735,
+    "p99": 0.1538750968933106,
+    "max": 0.1545222473144532,
+    "min": 0.13326329040527352
+   },
+   "reload_gbps_metric": {
+    "n": 6,
+    "median": 52.92689600519739,
+    "p90": 54.67751256962096,
+    "p99": 55.03900812680286,
+    "max": 55.07917429982307,
+    "min": 47.50145773548721
+   },
+   "reload_gbps_from_ttft": {
+    "n": 6,
+    "median": 62.783583076164234,
+    "p90": 164.12311551999986,
+    "p99": 178.73187635199986,
+    "max": 180.35507199999984,
+    "min": 43.69066666666669
+   },
+   "extra_ttft_vs_gpu_warm_s": {
+    "n": 6,
+    "median": 0.1175,
+    "p90": 0.16799999999999993,
+    "p99": 0.16799999999999993,
+    "max": 0.16799999999999993,
+    "min": 0.041000000000000036
+   }
+  },
+  "gpu/GPU-WARM/11k": {
+   "n": 12,
+   "sessions": 4,
+   "ttft_s": {
+    "n": 12,
+    "median": 0.3815,
+    "p90": 0.4735,
+    "p99": 0.48034,
+    "max": 0.481,
+    "min": 0.336
+   },
+   "ttft_all": [
+    0.337,
+    0.362,
+    0.481,
+    0.424,
+    0.336,
+    0.392,
+    0.46,
+    0.371,
+    0.36,
+    0.37,
+    0.475,
+    0.395
+   ],
+   "prompt_tokens": {
+    "n": 12,
+    "median": 11050.0,
+    "p90": 11075.0,
+    "p99": 11075.0,
+    "max": 11075.0,
+    "min": 11010.0
+   },
+   "cached_tokens": {
+    "n": 12,
+    "median": 10928.0,
+    "p90": 10928.0,
+    "p99": 10928.0,
+    "max": 10928.0,
+    "min": 10928.0
+   },
+   "local_hits": {
+    "n": 12,
+    "median": 10928.0,
+    "p90": 10928.0,
+    "p99": 10928.0,
+    "max": 10928.0,
+    "min": 10928.0
+   },
+   "external_hits": {
+    "n": 12,
+    "median": 0.0,
+    "p90": 0.0,
+    "p99": 0.0,
+    "max": 0.0,
+    "min": 0.0
+   }
+  },
+  "gpu/GPU-WARM/28k": {
+   "n": 6,
+   "sessions": 2,
+   "ttft_s": {
+    "n": 6,
+    "median": 0.874,
+    "p90": 0.9115,
+    "p99": 0.92005,
+    "max": 0.921,
+    "min": 0.782
+   },
+   "ttft_all": [
+    0.902,
+    0.849,
+    0.921,
+    0.782,
+    0.897,
+    0.851
+   ],
+   "prompt_tokens": {
+    "n": 6,
+    "median": 28114.5,
+    "p90": 28216.0,
+    "p99": 28216.0,
+    "max": 28216.0,
+    "min": 28013.0
+   },
+   "cached_tokens": {
+    "n": 6,
+    "median": 27936.0,
+    "p90": 27936.0,
+    "p99": 27936.0,
+    "max": 27936.0,
+    "min": 27936.0
+   },
+   "local_hits": {
+    "n": 6,
+    "median": 27936.0,
+    "p90": 27936.0,
+    "p99": 27936.0,
+    "max": 27936.0,
+    "min": 27936.0
+   },
+   "external_hits": {
+    "n": 6,
+    "median": 0.0,
+    "p90": 0.0,
+    "p99": 0.0,
+    "max": 0.0,
+    "min": 0.0
+   }
+  },
+  "gpu/COLD/11k": {
+   "n": 12,
+   "sessions": 4,
+   "ttft_s": {
+    "n": 12,
+    "median": 2.4445,
+    "p90": 2.5259,
+    "p99": 2.53979,
+    "max": 2.541,
+    "min": 2.393
+   },
+   "ttft_all": [
+    2.393,
+    2.411,
+    2.47,
+    2.409,
+    2.396,
+    2.438,
+    2.541,
+    2.453,
+    2.425,
+    2.451,
+    2.53,
+    2.489
+   ],
+   "prompt_tokens": {
+    "n": 12,
+    "median": 11050.0,
+    "p90": 11075.0,
+    "p99": 11075.0,
+    "max": 11075.0,
+    "min": 11010.0
+   },
+   "cached_tokens": {
+    "n": 12,
+    "median": 0.0,
+    "p90": 0.0,
+    "p99": 0.0,
+    "max": 0.0,
+    "min": 0.0
+   },
+   "local_hits": {
+    "n": 12,
+    "median": 0.0,
+    "p90": 0.0,
+    "p99": 0.0,
+    "max": 0.0,
+    "min": 0.0
+   },
+   "external_hits": {
+    "n": 12,
+    "median": 0.0,
+    "p90": 0.0,
+    "p99": 0.0,
+    "max": 0.0,
+    "min": 0.0
+   },
+   "prefill_tok_per_s": {
+    "n": 12,
+    "median": 4528.365026688034,
+    "p90": 4597.124826142367,
+    "p99": 4600.525982364851,
+    "max": 4600.919348098621,
+    "min": 4340.810704447068
+   }
+  },
+  "gpu/COLD/28k": {
+   "n": 6,
+   "sessions": 2,
+   "ttft_s": {
+    "n": 6,
+    "median": 7.3675,
+    "p90": 7.409,
+    "p99": 7.4189,
+    "max": 7.42,
+    "min": 7.313
+   },
+   "ttft_all": [
+    7.386,
+    7.313,
+    7.349,
+    7.339,
+    7.42,
+    7.398
+   ],
+   "prompt_tokens": {
+    "n": 6,
+    "median": 28114.5,
+    "p90": 28216.0,
+    "p99": 28216.0,
+    "max": 28216.0,
+    "min": 28013.0
+   },
+   "cached_tokens": {
+    "n": 6,
+    "median": 0.0,
+    "p90": 0.0,
+    "p99": 0.0,
+    "max": 0.0,
+    "min": 0.0
+   },
+   "local_hits": {
+    "n": 6,
+    "median": 0.0,
+    "p90": 0.0,
+    "p99": 0.0,
+    "max": 0.0,
+    "min": 0.0
+   },
+   "external_hits": {
+    "n": 6,
+    "median": 0.0,
+    "p90": 0.0,
+    "p99": 0.0,
+    "max": 0.0,
+    "min": 0.0
+   },
+   "prefill_tok_per_s": {
+    "n": 6,
+    "median": 3818.602710327191,
+    "p90": 3835.004811861258,
+    "p99": 3838.991024117137,
+    "max": 3839.4339365900123,
+    "min": 3786.563936198973
+   }
+  }
+ },
+ "cells": {
+  "RH5_HOST_D4": {
+   "cfg": "host",
+   "D": 4,
+   "warmup_s": 3.89,
+   "inflight_at_window_end": 1,
+   "drain_s": 1.0,
+   "n_requests": 398,
+   "errors": 0,
+   "error_kinds": [],
+   "errors_over_context": 0,
+   "escalations": 38,
+   "ttft_s": {
+    "n": 38,
+    "median": 0.536,
+    "p90": 0.823,
+    "p99": 0.9760300000000002,
+    "max": 1.006,
+    "min": 0.212
+   },
+   "latency_s": {
+    "n": 38,
+    "median": 0.5605,
+    "p90": 0.8499,
+    "p99": 0.98443,
+    "max": 1.007,
+    "min": 0.237
+   },
+   "esc_hit_token_weighted": 0.963163426436017,
+   "esc_hit_per_request": {
+    "n": 38,
+    "median": 0.9513997790180917,
+    "p90": 0.9842083831442734,
+    "p99": 0.9941220340465317,
+    "max": 0.9948559156969485,
+    "min": 0.768668407310705
+   },
+   "esc_prompt_tokens": {
+    "n": 38,
+    "median": 8544.5,
+    "p90": 20035.0,
+    "p99": 23372.17000000001,
+    "max": 24837.0,
+    "min": 1915.0
+   },
+   "appends": 356,
+   "append_hit_token_weighted": 0.9563174522165794,
+   "computed_prompt_tok_per_s": 191.11111111111111,
+   "preemptions": 0.0,
+   "kv_usage_mean": 0.000781954887218045,
+   "kv_usage_max": 0.19450800915331812,
+   "waiting_mean": 0.0,
+   "waiting_max": 0.0,
+   "gpu_local_hit_tokens": 3792576.0,
+   "gpu_local_query_tokens": 3977502.0,
+   "host_hit_tokens": 13392.0,
+   "host_query_tokens": 184926.0,
+   "host_share_of_hits": 0.0035186843399629213,
+   "pcie_load_gb": 3.33447168,
+   "pcie_store_gb": 44.22893568,
+   "host_buffer_usage_max": 0.00457763671875,
+   "host_mem": {
+    "start": {
+     "server_tree_rss_gib": 261.4726333618164,
+     "host_mem_available_gib": 1203.560043334961
+    },
+    "window_end": {
+     "server_tree_rss_gib": 264.02077865600586,
+     "host_mem_available_gib": 1199.391212463379
+    },
+    "end": {
+     "server_tree_rss_gib": 264.0258102416992,
+     "host_mem_available_gib": 1199.3790817260742
+    }
+   }
+  },
+  "RH5_HOST_D8": {
+   "cfg": "host",
+   "D": 8,
+   "warmup_s": 14.6,
+   "inflight_at_window_end": 1,
+   "drain_s": 0.5,
+   "n_requests": 795,
+   "errors": 0,
+   "error_kinds": [],
+   "errors_over_context": 0,
+   "escalations": 76,
+   "ttft_s": {
+    "n": 76,
+    "median": 0.5225,
+    "p90": 0.858,
+    "p99": 1.151,
+    "max": 1.334,
+    "min": 0.18
+   },
+   "latency_s": {
+    "n": 76,
+    "median": 0.546,
+    "p90": 0.875,
+    "p99": 1.1945000000000001,
+    "max": 1.445,
+    "min": 0.206
+   },
+   "esc_hit_token_weighted": 0.9650801129273886,
+   "esc_hit_per_request": {
+    "n": 76,
+    "median": 0.9631052823277861,
+    "p90": 0.9851029432098941,
+    "p99": 0.9943373586354183,
+    "max": 0.9946714031971581,
+    "min": 0.03125
+   },
+   "esc_prompt_tokens": {
+    "n": 76,
+    "median": 9383.0,
+    "p90": 20191.0,
+    "p99": 25910.75,
+    "max": 27266.0,
+    "min": 512.0
+   },
+   "appends": 711,
+   "append_hit_token_weighted": 0.9518384847500683,
+   "computed_prompt_tok_per_s": 382.5811111111111,
+   "preemptions": 0.0,
+   "kv_usage_mean": 0.015680958596914013,
+   "kv_usage_max": 0.4327485380116959,
+   "waiting_mean": 0.03579676674364896,
+   "waiting_max": 2.0,
+   "gpu_local_hit_tokens": 2876368.0,
+   "gpu_local_query_tokens": 7366997.0,
+   "host_hit_tokens": 4146768.0,
+   "host_query_tokens": 4490629.0,
+   "host_share_of_hits": 0.5904439270434176,
+   "pcie_load_gb": 1087.050350592,
+   "pcie_store_gb": 88.680169472,
+   "host_buffer_usage_max": 0.0233001708984375,
+   "host_mem": {
+    "start": {
+     "server_tree_rss_gib": 264.0258102416992,
+     "host_mem_available_gib": 1199.6338653564453
+    },
+    "window_end": {
+     "server_tree_rss_gib": 266.3193817138672,
+     "host_mem_available_gib": 1196.6166229248047
+    },
+    "end": {
+     "server_tree_rss_gib": 266.3193817138672,
+     "host_mem_available_gib": 1196.6147842407227
+    }
+   }
+  },
+  "RH5_HOST_D16": {
+   "cfg": "host",
+   "D": 16,
+   "warmup_s": 25.06,
+   "inflight_at_window_end": 4,
+   "drain_s": 1.7,
+   "n_requests": 1586,
+   "errors": 0,
+   "error_kinds": [],
+   "errors_over_context": 0,
+   "escalations": 147,
+   "ttft_s": {
+    "n": 147,
+    "median": 0.602,
+    "p90": 1.0940000000000003,
+    "p99": 1.7824599999999993,
+    "max": 2.127,
+    "min": 0.156
+   },
+   "latency_s": {
+    "n": 147,
+    "median": 0.653,
+    "p90": 1.1284,
+    "p99": 1.8874399999999993,
+    "max": 2.141,
+    "min": 0.181
+   },
+   "esc_hit_token_weighted": 0.9666605137593337,
+   "esc_hit_per_request": {
+    "n": 147,
+    "median": 0.9648052557484749,
+    "p90": 0.9854777727054651,
+    "p99": 0.9943597452980688,
+    "max": 0.9948062325209748,
+    "min": 0.64
+   },
+   "esc_prompt_tokens": {
+    "n": 147,
+    "median": 10093.0,
+    "p90": 19492.400000000005,
+    "p99": 25967.59999999999,
+    "max": 27267.0,
+    "min": 900.0
+   },
+   "appends": 1423,
+   "append_hit_token_weighted": 0.9534350827308768,
+   "computed_prompt_tok_per_s": 763.4077777777778,
+   "preemptions": 0.0,
+   "kv_usage_mean": 0.04867813856178145,
+   "kv_usage_max": 0.7091278921942538,
+   "waiting_mean": 0.17314487632508835,
+   "waiting_max": 2.0,
+   "gpu_local_hit_tokens": 1114352.0,
+   "gpu_local_query_tokens": 15204331.0,
+   "host_hit_tokens": 13402912.0,
+   "host_query_tokens": 14089979.0,
+   "host_share_of_hits": 0.9232395305341282,
+   "pcie_load_gb": 3508.505935872,
+   "pcie_store_gb": 176.634724352,
+   "host_buffer_usage_max": 0.02349853515625,
+   "host_mem": {
+    "start": {
+     "server_tree_rss_gib": 266.3193817138672,
+     "host_mem_available_gib": 1197.0149993896484
+    },
+    "window_end": {
+     "server_tree_rss_gib": 266.74303436279297,
+     "host_mem_available_gib": 1194.857593536377
+    },
+    "end": {
+     "server_tree_rss_gib": 266.74303436279297,
+     "host_mem_available_gib": 1194.8282852172852
+    }
+   }
+  },
+  "RH5_HOST_D24": {
+   "cfg": "host",
+   "D": 24,
+   "warmup_s": 37.68,
+   "inflight_at_window_end": 4,
+   "drain_s": 0.6,
+   "n_requests": 2375,
+   "errors": 46,
+   "error_kinds": [
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (32981) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33431) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33881) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34229) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34331) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34781) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35231) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35681) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36131) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36581) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37031) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37481) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37931) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38381) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38831) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39281) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39731) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (40181) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (40631) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41081) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41531) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41981) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (42431) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (42881) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (43331) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (43781) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (44231) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (44681) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45131) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45581) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45701) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46031) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46481) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46931) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (47381) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (47831) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (48281) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (48731) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (49181) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (49631) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50081) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50531) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50813) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50981) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51431) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51972) exceeds model\\'s"
+   ],
+   "errors_over_context": 46,
+   "escalations": 215,
+   "ttft_s": {
+    "n": 215,
+    "median": 0.814,
+    "p90": 1.3681999999999999,
+    "p99": 1.999659999999998,
+    "max": 2.318,
+    "min": 0.197
+   },
+   "latency_s": {
+    "n": 215,
+    "median": 0.859,
+    "p90": 1.4345999999999999,
+    "p99": 2.378659999999995,
+    "max": 2.645,
+    "min": 0.219
+   },
+   "esc_hit_token_weighted": 0.9676081027290453,
+   "esc_hit_per_request": {
+    "n": 215,
+    "median": 0.9655389457120378,
+    "p90": 0.9884177043977589,
+    "p99": 0.9938760542471646,
+    "max": 0.9946293398739798,
+    "min": 0.64
+   },
+   "esc_prompt_tokens": {
+    "n": 215,
+    "median": 10189.0,
+    "p90": 20857.0,
+    "p99": 26333.079999999994,
+    "max": 27267.0,
+    "min": 900.0
+   },
+   "appends": 2091,
+   "append_hit_token_weighted": 0.9533205732144195,
+   "computed_prompt_tok_per_s": 1122.9277777777777,
+   "preemptions": 0.0,
+   "kv_usage_mean": 0.09907965863152035,
+   "kv_usage_max": 0.9677091278921942,
+   "waiting_mean": 0.4275092936802974,
+   "waiting_max": 6.0,
+   "gpu_local_hit_tokens": 1137632.0,
+   "gpu_local_query_tokens": 22352239.0,
+   "host_hit_tokens": 20205536.0,
+   "host_query_tokens": 21214607.0,
+   "host_share_of_hits": 0.946698072188721,
+   "pcie_load_gb": 5296.760029184,
+   "pcie_store_gb": 259.686137856,
+   "host_buffer_usage_max": 0.025665283203125,
+   "host_mem": {
+    "start": {
+     "server_tree_rss_gib": 266.74303436279297,
+     "host_mem_available_gib": 1196.1857147216797
+    },
+    "window_end": {
+     "server_tree_rss_gib": 266.96567153930664,
+     "host_mem_available_gib": 1192.2264366149902
+    },
+    "end": {
+     "server_tree_rss_gib": 266.96567153930664,
+     "host_mem_available_gib": 1192.2091941833496
+    }
+   }
+  },
+  "RH5_GPU_D4": {
+   "cfg": "gpu",
+   "D": 4,
+   "warmup_s": 3.95,
+   "inflight_at_window_end": 1,
+   "drain_s": 1.0,
+   "n_requests": 398,
+   "errors": 0,
+   "error_kinds": [],
+   "errors_over_context": 0,
+   "escalations": 38,
+   "ttft_s": {
+    "n": 38,
+    "median": 0.5325,
+    "p90": 0.8343000000000002,
+    "p99": 1.3686600000000002,
+    "max": 1.399,
+    "min": 0.177
+   },
+   "latency_s": {
+    "n": 38,
+    "median": 0.5565,
+    "p90": 0.8657000000000001,
+    "p99": 1.3928800000000001,
+    "max": 1.421,
+    "min": 0.2
+   },
+   "esc_hit_token_weighted": 0.9571923981091743,
+   "esc_hit_per_request": {
+    "n": 38,
+    "median": 0.9513997790180917,
+    "p90": 0.981944996070084,
+    "p99": 0.9871796246077472,
+    "max": 0.9873365165040482,
+    "min": 0.768668407310705
+   },
+   "esc_prompt_tokens": {
+    "n": 38,
+    "median": 8544.5,
+    "p90": 20035.0,
+    "p99": 23372.17000000001,
+    "max": 24837.0,
+    "min": 1915.0
+   },
+   "appends": 356,
+   "append_hit_token_weighted": 0.9532553192079505,
+   "computed_prompt_tok_per_s": 205.9911111111111,
+   "preemptions": 0.0,
+   "kv_usage_mean": 0.00032781435282438706,
+   "kv_usage_max": 0.16196287821001776,
+   "waiting_mean": 0.0,
+   "waiting_max": 0.0,
+   "gpu_local_hit_tokens": 3792576.0,
+   "gpu_local_query_tokens": 3977502.0,
+   "host_hit_tokens": 0.0,
+   "host_query_tokens": 0.0,
+   "host_share_of_hits": 0.0,
+   "pcie_load_gb": null,
+   "pcie_store_gb": null,
+   "host_buffer_usage_max": null,
+   "host_mem": {
+    "start": {
+     "server_tree_rss_gib": 5.504169464111328,
+     "host_mem_available_gib": 1463.3721351623535
+    },
+    "window_end": {
+     "server_tree_rss_gib": 8.046504974365234,
+     "host_mem_available_gib": 1466.6096496582031
+    },
+    "end": {
+     "server_tree_rss_gib": 8.051097869873047,
+     "host_mem_available_gib": 1466.5604820251465
+    }
+   }
+  },
+  "RH5_GPU_D8": {
+   "cfg": "gpu",
+   "D": 8,
+   "warmup_s": 14.38,
+   "inflight_at_window_end": 118,
+   "drain_s": 98.4,
+   "n_requests": 795,
+   "errors": 0,
+   "error_kinds": [],
+   "errors_over_context": 0,
+   "escalations": 76,
+   "ttft_s": {
+    "n": 76,
+    "median": 95.6055,
+    "p90": 201.1345,
+    "p99": 238.26075,
+    "max": 240.078,
+    "min": 0.165
+   },
+   "latency_s": {
+    "n": 76,
+    "median": 96.6015,
+    "p90": 202.8765,
+    "p99": 239.85525,
+    "max": 241.509,
+    "min": 0.191
+   },
+   "esc_hit_token_weighted": 0.7169834007535855,
+   "esc_hit_per_request": {
+    "n": 76,
+    "median": 0.9473713111181132,
+    "p90": 0.9872725876592863,
+    "p99": 0.9933221896319666,
+    "max": 0.9946714031971581,
+    "min": 0.0
+   },
+   "esc_prompt_tokens": {
+    "n": 76,
+    "median": 9383.0,
+    "p90": 20191.0,
+    "p99": 25910.75,
+    "max": 27266.0,
+    "min": 512.0
+   },
+   "appends": 711,
+   "append_hit_token_weighted": 0.35025669409717936,
+   "computed_prompt_tok_per_s": 4991.043333333333,
+   "preemptions": 0.0,
+   "kv_usage_mean": 0.2641048402729573,
+   "kv_usage_max": 0.992372234935164,
+   "waiting_mean": 80.00461361014995,
+   "waiting_max": 202.0,
+   "gpu_local_hit_tokens": 2840544.0,
+   "gpu_local_query_tokens": 7329127.0,
+   "host_hit_tokens": 0.0,
+   "host_query_tokens": 0.0,
+   "host_share_of_hits": 0.0,
+   "pcie_load_gb": null,
+   "pcie_store_gb": null,
+   "host_buffer_usage_max": null,
+   "host_mem": {
+    "start": {
+     "server_tree_rss_gib": 8.051097869873047,
+     "host_mem_available_gib": 1466.7040748596191
+    },
+    "window_end": {
+     "server_tree_rss_gib": 16.646270751953125,
+     "host_mem_available_gib": 1451.6477813720703
+    },
+    "end": {
+     "server_tree_rss_gib": 16.266685485839844,
+     "host_mem_available_gib": 1452.0552139282227
+    }
+   }
+  },
+  "RH5_GPU_D16": {
+   "cfg": "gpu",
+   "D": 16,
+   "warmup_s": 25.87,
+   "inflight_at_window_end": 1019,
+   "drain_s": 1938.1,
+   "n_requests": 1586,
+   "errors": 0,
+   "error_kinds": [],
+   "errors_over_context": 0,
+   "escalations": 147,
+   "ttft_s": {
+    "n": 147,
+    "median": 802.291,
+    "p90": 1514.1204,
+    "p99": 1903.7071399999998,
+    "max": 1922.625,
+    "min": 3.895
+   },
+   "latency_s": {
+    "n": 147,
+    "median": 803.997,
+    "p90": 1515.8074,
+    "p99": 1905.31568,
+    "max": 1924.439,
+    "min": 5.395
+   },
+   "esc_hit_token_weighted": 0.3752228321748167,
+   "esc_hit_per_request": {
+    "n": 147,
+    "median": 0.0,
+    "p90": 0.9830552406332421,
+    "p99": 0.9943597452980688,
+    "max": 0.9948062325209748,
+    "min": 0.0
+   },
+   "esc_prompt_tokens": {
+    "n": 147,
+    "median": 10093.0,
+    "p90": 19492.400000000005,
+    "p99": 25967.59999999999,
+    "max": 27267.0,
+    "min": 900.0
+   },
+   "appends": 1423,
+   "append_hit_token_weighted": 0.039655793980263275,
+   "computed_prompt_tok_per_s": 15633.95,
+   "preemptions": 0.0,
+   "kv_usage_mean": 0.25809322763645753,
+   "kv_usage_max": 0.7404017289600814,
+   "waiting_mean": 481.53973902728353,
+   "waiting_max": 1007.0,
+   "gpu_local_hit_tokens": 1133776.0,
+   "gpu_local_query_tokens": 15204331.0,
+   "host_hit_tokens": 0.0,
+   "host_query_tokens": 0.0,
+   "host_share_of_hits": 0.0,
+   "pcie_load_gb": null,
+   "pcie_store_gb": null,
+   "host_buffer_usage_max": null,
+   "host_mem": {
+    "start": {
+     "server_tree_rss_gib": 16.266685485839844,
+     "host_mem_available_gib": 1452.5663299560547
+    },
+    "window_end": {
+     "server_tree_rss_gib": 60.99775695800781,
+     "host_mem_available_gib": 1390.4632759094238
+    },
+    "end": {
+     "server_tree_rss_gib": 55.23836898803711,
+     "host_mem_available_gib": 1395.9922676086426
+    }
+   }
+  },
+  "RH5_GPU_D24": {
+   "cfg": "gpu",
+   "D": 24,
+   "warmup_s": 38.5,
+   "inflight_at_window_end": 1780,
+   "drain_s": 3095.3,
+   "n_requests": 2375,
+   "errors": 47,
+   "error_kinds": [
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (32981) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33431) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33881) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34229) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34331) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34781) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35231) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35681) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36131) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36581) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37031) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37481) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37931) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38381) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38831) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39281) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39731) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (40181) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (40631) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41081) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41531) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41981) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (42431) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (42881) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (43331) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (43781) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (44231) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (44681) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45131) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45581) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45701) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46031) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46481) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46931) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (47381) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (47831) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (48281) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (48731) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (49181) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (49631) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50081) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50531) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50813) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50981) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51431) exceeds model\\'s",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51972) exceeds model\\'s",
+    "ReadError: "
+   ],
+   "errors_over_context": 46,
+   "escalations": 215,
+   "ttft_s": {
+    "n": 215,
+    "median": 1519.858,
+    "p90": 2654.1908,
+    "p99": 3143.5522799999994,
+    "max": 3169.051,
+    "min": 7.11
+   },
+   "latency_s": {
+    "n": 215,
+    "median": 1521.115,
+    "p90": 2655.8732,
+    "p99": 3145.2311799999998,
+    "max": 3170.56,
+    "min": 8.154
+   },
+   "esc_hit_token_weighted": 0.23592200900284527,
+   "esc_hit_per_request": {
+    "n": 215,
+    "median": 0.0,
+    "p90": 0.980147883636805,
+    "p99": 0.9941668426052083,
+    "max": 0.9948062325209748,
+    "min": 0.0
+   },
+   "esc_prompt_tokens": {
+    "n": 215,
+    "median": 10189.0,
+    "p90": 20857.0,
+    "p99": 26333.079999999994,
+    "max": 27267.0,
+    "min": 900.0
+   },
+   "appends": 2090,
+   "append_hit_token_weighted": 0.09253844402694772,
+   "computed_prompt_tok_per_s": 22170.213333333333,
+   "preemptions": 0.0,
+   "kv_usage_mean": 0.2431801089298379,
+   "kv_usage_max": 0.6135265700483092,
+   "waiting_mean": 492.7494736842105,
+   "waiting_max": 1019.0,
+   "gpu_local_hit_tokens": 2410240.0,
+   "gpu_local_query_tokens": 22363432.0,
+   "host_hit_tokens": 0.0,
+   "host_query_tokens": 0.0,
+   "host_share_of_hits": 0.0,
+   "pcie_load_gb": null,
+   "pcie_store_gb": null,
+   "host_buffer_usage_max": null,
+   "host_mem": {
+    "start": {
+     "server_tree_rss_gib": 55.23836898803711,
+     "host_mem_available_gib": 1402.8953437805176
+    },
+    "window_end": {
+     "server_tree_rss_gib": 62.8581428527832,
+     "host_mem_available_gib": 1380.3531913757324
+    },
+    "end": {
+     "server_tree_rss_gib": 74.36051940917969,
+     "host_mem_available_gib": 1363.3375244140625
+    }
+   }
+  }
+ },
+ "estimate": {
+  "per_cell": {
+   "RH5_HOST_D4": {
+    "s": 960,
+    "appends": 356,
+    "mean_history": 10311,
+    "footprint": 0.66,
+    "drain_s": 0
+   },
+   "RH5_HOST_D8": {
+    "s": 960,
+    "appends": 711,
+    "mean_history": 9388,
+    "footprint": 1.19,
+    "drain_s": 0
+   },
+   "RH5_HOST_D16": {
+    "s": 960,
+    "appends": 1423,
+    "mean_history": 9744,
+    "footprint": 2.48,
+    "drain_s": 0
+   },
+   "RH5_HOST_D24": {
+    "s": 960,
+    "appends": 2132,
+    "mean_history": 10382,
+    "footprint": 3.96,
+    "drain_s": 0
+   },
+   "RH5_GPU_D4": {
+    "s": 960,
+    "appends": 356,
+    "mean_history": 10311,
+    "footprint": 0.66,
+    "drain_s": 0
+   },
+   "RH5_GPU_D8": {
+    "s": 960,
+    "appends": 711,
+    "mean_history": 9388,
+    "footprint": 1.19,
+    "drain_s": 0
+   },
+   "RH5_GPU_D16": {
+    "s": 1321,
+    "appends": 1423,
+    "mean_history": 9744,
+    "footprint": 2.48,
+    "drain_s": 361
+   },
+   "RH5_GPU_D24": {
+    "s": 2072,
+    "appends": 2132,
+    "mean_history": 10382,
+    "footprint": 3.96,
+    "drain_s": 1112
+   }
+  },
+  "part_a_s": 3600,
+  "servers_s": 360,
+  "total_s": 13113
+ },
+ "decision": {
+  "conditions": {
+   "D16_host_median_le_1p5": true,
+   "D16_host_p99_le_10": true,
+   "D16_gpu_median_gt_5": true,
+   "D24_host_median_le_1p5": true,
+   "D24_host_p99_le_10": true,
+   "D24_gpu_median_gt_5": true
+  },
+  "host_better_than_gpu_at_D24": true,
+  "outcome": "OFFLOAD REMOVES SCARCITY"
+ },
+ "_provenance": {
+  "git_commit": "e07afe38591c4f26f5cceb92a7395c1bb6b65041",
+  "script": "study_rh5_analyse.py",
+  "model": "qwen3vl-32b-instruct",
+  "timestamp": "2026-10-19T23:29:01.836694",
+  "device": "h100nvl",
+  "n": 10380
+ }
+}
