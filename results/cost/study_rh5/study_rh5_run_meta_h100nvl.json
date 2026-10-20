@@ -1,0 +1,1495 @@
+{
+ "done": [
+  "RH5_HOST_D4",
+  "RH5_HOST_D8",
+  "RH5_HOST_D16",
+  "RH5_HOST_D24",
+  "RH5_GPU_D4",
+  "RH5_GPU_D8",
+  "RH5_GPU_D16",
+  "RH5_GPU_D24"
+ ],
+ "estimate": {
+  "per_cell": {
+   "RH5_HOST_D4": {
+    "s": 960,
+    "appends": 356,
+    "mean_history": 10311,
+    "footprint": 0.66,
+    "drain_s": 0
+   },
+   "RH5_HOST_D8": {
+    "s": 960,
+    "appends": 711,
+    "mean_history": 9388,
+    "footprint": 1.19,
+    "drain_s": 0
+   },
+   "RH5_HOST_D16": {
+    "s": 960,
+    "appends": 1423,
+    "mean_history": 9744,
+    "footprint": 2.48,
+    "drain_s": 0
+   },
+   "RH5_HOST_D24": {
+    "s": 960,
+    "appends": 2132,
+    "mean_history": 10382,
+    "footprint": 3.96,
+    "drain_s": 0
+   },
+   "RH5_GPU_D4": {
+    "s": 960,
+    "appends": 356,
+    "mean_history": 10311,
+    "footprint": 0.66,
+    "drain_s": 0
+   },
+   "RH5_GPU_D8": {
+    "s": 960,
+    "appends": 711,
+    "mean_history": 9388,
+    "footprint": 1.19,
+    "drain_s": 0
+   },
+   "RH5_GPU_D16": {
+    "s": 1321,
+    "appends": 1423,
+    "mean_history": 9744,
+    "footprint": 2.48,
+    "drain_s": 361
+   },
+   "RH5_GPU_D24": {
+    "s": 2072,
+    "appends": 2132,
+    "mean_history": 10382,
+    "footprint": 3.96,
+    "drain_s": 1112
+   }
+  },
+  "part_a_s": 3600,
+  "servers_s": 360,
+  "total_s": 13113
+ },
+ "servers": [
+  {
+   "cfg": "host",
+   "stage": "partA",
+   "started": "2026-10-19T19:28:51.899040",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--kv-offloading-backend",
+    "native",
+    "--kv-offloading-size",
+    "256"
+   ],
+   "startup_s": 200.0,
+   "log": "logs/study_x_server_32BI_1019_192531.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": true,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=393415) INFO 10-19 19:25:47 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=393415) INFO 10-19 19:25:47 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=393415) INFO 10-19 19:25:48 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=393415) INFO 10-19 19:25:48 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=393415) INFO 10-19 19:25:55 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--kv-offloading-backend",
+    "native",
+    "--kv-offloading-size",
+    "256"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 393076,
+    "my_pgid": 393076,
+    "gpu3": [
+     {
+      "pid": 393415,
+      "sid": 393076,
+      "pgid": 393076,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   },
+   "kv_offloading": true,
+   "offload_log_lines": [
+    "(APIServer pid=393175) INFO 10-19 19:25:36 [api_utils.py:286] non-default args: {'model_tag': '/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb', 'enable_prompt_tokens_details': True, 'host': '127.0.0.1', 'port': 8011, 'model': '/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb', 'dtype': 'bfloat16', 'max_model_len': 32768, 'served_model_name': ['32BI'], 'gpu_memory_utilization': 0.9, 'enable_prefix_caching': True, 'kv_offloading_size': 256.0, 'limit_mm_per_prompt': {'image': 640, 'video': 0}, 'mm_processor_kwargs': {'size': {'shortest_edge': 4096, 'longest_edge': 16777216}}}",
+    "(EngineCore pid=393415) INFO 10-19 19:26:49 [factory.py:57] Creating offloading spec with name: CPUOffloadingSpec",
+    "(EngineCore pid=393415) INFO 10-19 19:26:49 [factory.py:62] Creating v1 connector with name: OffloadingConnector and engine_id: ea6fbf9e-8a3d-4c62-b0a1-2ced6badfcf2",
+    "(EngineCore pid=393415) INFO 10-19 19:26:49 [shared_offload_region.py:142] Created mmap file /dev/shm/vllm_offload_ea6fbf9e-8a3d-4c62-b0a1-2ced6badfcf2.mmap (274.88 GB)",
+    "(EngineCore pid=393415) INFO 10-19 19:26:49 [shared_offload_region.py:202] Unlinked mmap file /dev/shm/vllm_offload_ea6fbf9e-8a3d-4c62-b0a1-2ced6badfcf2.mmap",
+    "(EngineCore pid=393415) INFO 10-19 19:28:47 [factory.py:57] Creating offloading spec with name: CPUOffloadingSpec",
+    "(EngineCore pid=393415) INFO 10-19 19:28:47 [factory.py:62] Creating v1 connector with name: OffloadingConnector and engine_id: ea6fbf9e-8a3d-4c62-b0a1-2ced6badfcf2"
+   ],
+   "host_mem": {
+    "server_tree_rss_gib": 261.65746307373047,
+    "host_mem_available_gib": 1202.5105514526367
+   }
+  },
+  {
+   "cfg": "host",
+   "stage": "fleet",
+   "started": "2026-10-19T19:43:37.345698",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--kv-offloading-backend",
+    "native",
+    "--kv-offloading-size",
+    "256"
+   ],
+   "startup_s": 121.3,
+   "log": "logs/study_x_server_32BI_1019_194135.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": true,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=407357) INFO 10-19 19:41:51 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=407357) INFO 10-19 19:41:51 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=407357) INFO 10-19 19:41:52 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=407357) INFO 10-19 19:41:52 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=407357) INFO 10-19 19:41:59 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--kv-offloading-backend",
+    "native",
+    "--kv-offloading-size",
+    "256"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 393076,
+    "my_pgid": 393076,
+    "gpu3": [
+     {
+      "pid": 407357,
+      "sid": 393076,
+      "pgid": 393076,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   },
+   "kv_offloading": true,
+   "offload_log_lines": [
+    "(APIServer pid=407090) INFO 10-19 19:41:40 [api_utils.py:286] non-default args: {'model_tag': '/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb', 'enable_prompt_tokens_details': True, 'host': '127.0.0.1', 'port': 8011, 'model': '/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb', 'dtype': 'bfloat16', 'max_model_len': 32768, 'served_model_name': ['32BI'], 'gpu_memory_utilization': 0.9, 'enable_prefix_caching': True, 'kv_offloading_size': 256.0, 'limit_mm_per_prompt': {'image': 640, 'video': 0}, 'mm_processor_kwargs': {'size': {'shortest_edge': 4096, 'longest_edge': 16777216}}}",
+    "(EngineCore pid=407357) INFO 10-19 19:42:14 [factory.py:57] Creating offloading spec with name: CPUOffloadingSpec",
+    "(EngineCore pid=407357) INFO 10-19 19:42:14 [factory.py:62] Creating v1 connector with name: OffloadingConnector and engine_id: dac311b1-52f0-4452-b6e6-7ee908ecd7fd",
+    "(EngineCore pid=407357) INFO 10-19 19:42:14 [shared_offload_region.py:142] Created mmap file /dev/shm/vllm_offload_dac311b1-52f0-4452-b6e6-7ee908ecd7fd.mmap (274.88 GB)",
+    "(EngineCore pid=407357) INFO 10-19 19:42:14 [shared_offload_region.py:202] Unlinked mmap file /dev/shm/vllm_offload_dac311b1-52f0-4452-b6e6-7ee908ecd7fd.mmap",
+    "(EngineCore pid=407357) INFO 10-19 19:43:35 [factory.py:57] Creating offloading spec with name: CPUOffloadingSpec",
+    "(EngineCore pid=407357) INFO 10-19 19:43:35 [factory.py:62] Creating v1 connector with name: OffloadingConnector and engine_id: dac311b1-52f0-4452-b6e6-7ee908ecd7fd"
+   ],
+   "host_mem": {
+    "server_tree_rss_gib": 261.4726333618164,
+    "host_mem_available_gib": 1204.04732131958
+   }
+  },
+  {
+   "cfg": "gpu",
+   "stage": "partA",
+   "started": "2026-10-19T20:46:32.366654",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details"
+   ],
+   "startup_s": 54.6,
+   "log": "logs/study_x_server_32BI_1019_204537.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": true,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=448103) INFO 10-19 20:45:53 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=448103) INFO 10-19 20:45:53 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=448103) INFO 10-19 20:45:54 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=448103) INFO 10-19 20:45:54 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=448103) INFO 10-19 20:46:01 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 393076,
+    "my_pgid": 393076,
+    "gpu3": [
+     {
+      "pid": 448103,
+      "sid": 393076,
+      "pgid": 393076,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   },
+   "kv_offloading": false,
+   "offload_log_lines": [],
+   "host_mem": {
+    "server_tree_rss_gib": 5.504173278808594,
+    "host_mem_available_gib": 1463.86328125
+   }
+  },
+  {
+   "cfg": "gpu",
+   "stage": "fleet",
+   "started": "2026-10-19T21:00:43.679832",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details"
+   ],
+   "startup_s": 54.6,
+   "log": "logs/study_x_server_32BI_1019_205948.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": true,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=458240) INFO 10-19 21:00:05 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=458240) INFO 10-19 21:00:05 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=458240) INFO 10-19 21:00:05 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=458240) INFO 10-19 21:00:05 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=458240) INFO 10-19 21:00:12 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 393076,
+    "my_pgid": 393076,
+    "gpu3": [
+     {
+      "pid": 458240,
+      "sid": 393076,
+      "pgid": 393076,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   },
+   "kv_offloading": false,
+   "offload_log_lines": [],
+   "host_mem": {
+    "server_tree_rss_gib": 5.504169464111328,
+    "host_mem_available_gib": 1463.7545547485352
+   }
+  }
+ ],
+ "stack": {
+  "venv": "/home/pragya/.venvs/fm-switching-vllm",
+  "vllm": "0.31.0",
+  "torch": "2.13.0+cu129",
+  "cuda": "12.9"
+ },
+ "partA_verification": {
+  "host": {
+   "host_warm_all_verified": true,
+   "rows": [
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1001141161985610_start_0.0_end_599.99",
+     "rep": 0,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "11k",
+     "video_id": "1001141161985610_start_0.0_end_599.99",
+     "rep": 0,
+     "local_hits": 0.0,
+     "external_hits": 11008.0,
+     "load_bytes": 4678144560.912543,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1004154028515092_start_0.0_end_599.281",
+     "rep": 0,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "11k",
+     "video_id": "1004154028515092_start_0.0_end_599.281",
+     "rep": 0,
+     "local_hits": 0.0,
+     "external_hits": 11056.0,
+     "load_bytes": 2898264064.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1011205677616862_start_0.0_end_314.103",
+     "rep": 0,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "11k",
+     "video_id": "1011205677616862_start_0.0_end_314.103",
+     "rep": 0,
+     "local_hits": 0.0,
+     "external_hits": 11024.0,
+     "load_bytes": 2889875456.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1015467527231807_start_0.0_end_599.976",
+     "rep": 0,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "11k",
+     "video_id": "1015467527231807_start_0.0_end_599.976",
+     "rep": 0,
+     "local_hits": 0.0,
+     "external_hits": 11072.0,
+     "load_bytes": 2902458368.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1001141161985610_start_0.0_end_599.99",
+     "rep": 1,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "11k",
+     "video_id": "1001141161985610_start_0.0_end_599.99",
+     "rep": 1,
+     "local_hits": 0.0,
+     "external_hits": 11008.0,
+     "load_bytes": 2885681152.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1004154028515092_start_0.0_end_599.281",
+     "rep": 1,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "11k",
+     "video_id": "1004154028515092_start_0.0_end_599.281",
+     "rep": 1,
+     "local_hits": 0.0,
+     "external_hits": 11056.0,
+     "load_bytes": 2898264064.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1011205677616862_start_0.0_end_314.103",
+     "rep": 1,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "11k",
+     "video_id": "1011205677616862_start_0.0_end_314.103",
+     "rep": 1,
+     "local_hits": 0.0,
+     "external_hits": 11024.0,
+     "load_bytes": 2889875456.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1015467527231807_start_0.0_end_599.976",
+     "rep": 1,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "11k",
+     "video_id": "1015467527231807_start_0.0_end_599.976",
+     "rep": 1,
+     "local_hits": 0.0,
+     "external_hits": 11072.0,
+     "load_bytes": 2902458368.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1001141161985610_start_0.0_end_599.99",
+     "rep": 2,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "11k",
+     "video_id": "1001141161985610_start_0.0_end_599.99",
+     "rep": 2,
+     "local_hits": 0.0,
+     "external_hits": 11008.0,
+     "load_bytes": 2885681152.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1004154028515092_start_0.0_end_599.281",
+     "rep": 2,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "11k",
+     "video_id": "1004154028515092_start_0.0_end_599.281",
+     "rep": 2,
+     "local_hits": 0.0,
+     "external_hits": 11056.0,
+     "load_bytes": 2898264064.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1011205677616862_start_0.0_end_314.103",
+     "rep": 2,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "11k",
+     "video_id": "1011205677616862_start_0.0_end_314.103",
+     "rep": 2,
+     "local_hits": 0.0,
+     "external_hits": 11024.0,
+     "load_bytes": 2889875456.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1015467527231807_start_0.0_end_599.976",
+     "rep": 2,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "11k",
+     "video_id": "1015467527231807_start_0.0_end_599.976",
+     "rep": 2,
+     "local_hits": 0.0,
+     "external_hits": 11072.0,
+     "load_bytes": 2902458368.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "28k",
+     "video_id": "1848337166005249_start_0.0_end_1199.976",
+     "rep": 0,
+     "local_hits": 27936.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "28k",
+     "video_id": "1848337166005249_start_0.0_end_1199.976",
+     "rep": 0,
+     "local_hits": 0.0,
+     "external_hits": 28208.0,
+     "load_bytes": 7394557952.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "28k",
+     "video_id": "9902221866524366_start_0.0_end_1199.959",
+     "rep": 0,
+     "local_hits": 27936.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "28k",
+     "video_id": "9902221866524366_start_0.0_end_1199.959",
+     "rep": 0,
+     "local_hits": 0.0,
+     "external_hits": 28000.0,
+     "load_bytes": 7340032000.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "28k",
+     "video_id": "1848337166005249_start_0.0_end_1199.976",
+     "rep": 1,
+     "local_hits": 27936.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "28k",
+     "video_id": "1848337166005249_start_0.0_end_1199.976",
+     "rep": 1,
+     "local_hits": 0.0,
+     "external_hits": 28208.0,
+     "load_bytes": 7394557952.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "28k",
+     "video_id": "9902221866524366_start_0.0_end_1199.959",
+     "rep": 1,
+     "local_hits": 27936.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "28k",
+     "video_id": "9902221866524366_start_0.0_end_1199.959",
+     "rep": 1,
+     "local_hits": 0.0,
+     "external_hits": 28000.0,
+     "load_bytes": 7340032000.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "28k",
+     "video_id": "1848337166005249_start_0.0_end_1199.976",
+     "rep": 2,
+     "local_hits": 27936.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "28k",
+     "video_id": "1848337166005249_start_0.0_end_1199.976",
+     "rep": 2,
+     "local_hits": 0.0,
+     "external_hits": 28208.0,
+     "load_bytes": 7394557952.0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "28k",
+     "video_id": "9902221866524366_start_0.0_end_1199.959",
+     "rep": 2,
+     "local_hits": 27936.0,
+     "external_hits": 0.0,
+     "load_bytes": 0.0,
+     "verified": true
+    },
+    {
+     "state": "HOST-WARM",
+     "size": "28k",
+     "video_id": "9902221866524366_start_0.0_end_1199.959",
+     "rep": 2,
+     "local_hits": 0.0,
+     "external_hits": 28000.0,
+     "load_bytes": 7340032000.0,
+     "verified": true
+    }
+   ]
+  },
+  "gpu": {
+   "host_warm_all_verified": true,
+   "rows": [
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1001141161985610_start_0.0_end_599.99",
+     "rep": 0,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "11k",
+     "video_id": "1001141161985610_start_0.0_end_599.99",
+     "rep": 0,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1004154028515092_start_0.0_end_599.281",
+     "rep": 0,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "11k",
+     "video_id": "1004154028515092_start_0.0_end_599.281",
+     "rep": 0,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1011205677616862_start_0.0_end_314.103",
+     "rep": 0,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "11k",
+     "video_id": "1011205677616862_start_0.0_end_314.103",
+     "rep": 0,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1015467527231807_start_0.0_end_599.976",
+     "rep": 0,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "11k",
+     "video_id": "1015467527231807_start_0.0_end_599.976",
+     "rep": 0,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1001141161985610_start_0.0_end_599.99",
+     "rep": 1,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "11k",
+     "video_id": "1001141161985610_start_0.0_end_599.99",
+     "rep": 1,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1004154028515092_start_0.0_end_599.281",
+     "rep": 1,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "11k",
+     "video_id": "1004154028515092_start_0.0_end_599.281",
+     "rep": 1,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1011205677616862_start_0.0_end_314.103",
+     "rep": 1,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "11k",
+     "video_id": "1011205677616862_start_0.0_end_314.103",
+     "rep": 1,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1015467527231807_start_0.0_end_599.976",
+     "rep": 1,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "11k",
+     "video_id": "1015467527231807_start_0.0_end_599.976",
+     "rep": 1,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1001141161985610_start_0.0_end_599.99",
+     "rep": 2,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "11k",
+     "video_id": "1001141161985610_start_0.0_end_599.99",
+     "rep": 2,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1004154028515092_start_0.0_end_599.281",
+     "rep": 2,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "11k",
+     "video_id": "1004154028515092_start_0.0_end_599.281",
+     "rep": 2,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1011205677616862_start_0.0_end_314.103",
+     "rep": 2,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "11k",
+     "video_id": "1011205677616862_start_0.0_end_314.103",
+     "rep": 2,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "11k",
+     "video_id": "1015467527231807_start_0.0_end_599.976",
+     "rep": 2,
+     "local_hits": 10928.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "11k",
+     "video_id": "1015467527231807_start_0.0_end_599.976",
+     "rep": 2,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "28k",
+     "video_id": "1848337166005249_start_0.0_end_1199.976",
+     "rep": 0,
+     "local_hits": 27936.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "28k",
+     "video_id": "1848337166005249_start_0.0_end_1199.976",
+     "rep": 0,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "28k",
+     "video_id": "9902221866524366_start_0.0_end_1199.959",
+     "rep": 0,
+     "local_hits": 27936.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "28k",
+     "video_id": "9902221866524366_start_0.0_end_1199.959",
+     "rep": 0,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "28k",
+     "video_id": "1848337166005249_start_0.0_end_1199.976",
+     "rep": 1,
+     "local_hits": 27936.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "28k",
+     "video_id": "1848337166005249_start_0.0_end_1199.976",
+     "rep": 1,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "28k",
+     "video_id": "9902221866524366_start_0.0_end_1199.959",
+     "rep": 1,
+     "local_hits": 27936.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "28k",
+     "video_id": "9902221866524366_start_0.0_end_1199.959",
+     "rep": 1,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "28k",
+     "video_id": "1848337166005249_start_0.0_end_1199.976",
+     "rep": 2,
+     "local_hits": 27936.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "28k",
+     "video_id": "1848337166005249_start_0.0_end_1199.976",
+     "rep": 2,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "GPU-WARM",
+     "size": "28k",
+     "video_id": "9902221866524366_start_0.0_end_1199.959",
+     "rep": 2,
+     "local_hits": 27936.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    },
+    {
+     "state": "COLD",
+     "size": "28k",
+     "video_id": "9902221866524366_start_0.0_end_1199.959",
+     "rep": 2,
+     "local_hits": 0.0,
+     "external_hits": 0.0,
+     "load_bytes": 0,
+     "verified": true
+    }
+   ]
+  }
+ },
+ "_provenance": [
+  {
+   "git_commit": "e07afe38591c4f26f5cceb92a7395c1bb6b65041",
+   "script": "study_rh5_host_offload.py",
+   "model": "qwen3vl-32b-instruct",
+   "timestamp": "2026-10-19T19:41:34.613571",
+   "device": "h100nvl",
+   "args": {
+    "stage": "partA",
+    "cfg": "host"
+   }
+  },
+  {
+   "git_commit": "e07afe38591c4f26f5cceb92a7395c1bb6b65041",
+   "script": "study_rh5_host_offload.py",
+   "model": "qwen3vl-32b-instruct",
+   "timestamp": "2026-10-19T20:45:36.301460",
+   "device": "h100nvl",
+   "args": {
+    "stage": "fleet",
+    "cfg": "host"
+   }
+  },
+  {
+   "git_commit": "e07afe38591c4f26f5cceb92a7395c1bb6b65041",
+   "script": "study_rh5_host_offload.py",
+   "model": "qwen3vl-32b-instruct",
+   "timestamp": "2026-10-19T20:59:47.657180",
+   "device": "h100nvl",
+   "args": {
+    "stage": "partA",
+    "cfg": "gpu"
+   }
+  },
+  {
+   "git_commit": "e07afe38591c4f26f5cceb92a7395c1bb6b65041",
+   "script": "study_rh5_host_offload.py",
+   "model": "qwen3vl-32b-instruct",
+   "timestamp": "2026-10-19T23:28:31.401038",
+   "device": "h100nvl",
+   "args": {
+    "stage": "fleet",
+    "cfg": "gpu"
+   }
+  }
+ ],
+ "experiments": {
+  "RH5_HOST_D4": {
+   "finished": "2026-10-19T19:58:45.432947",
+   "cfg": "host",
+   "policy": "WARM",
+   "D": 4,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 3.89,
+   "warmup_s": 3.89,
+   "inflight_at_window_end": 1,
+   "drain_s": 1.0,
+   "host_mem_start": {
+    "server_tree_rss_gib": 261.4726333618164,
+    "host_mem_available_gib": 1203.560043334961
+   },
+   "host_mem_window_end": {
+    "server_tree_rss_gib": 264.02077865600586,
+    "host_mem_available_gib": 1199.391212463379
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 264.0258102416992,
+    "host_mem_available_gib": 1199.3790817260742
+   },
+   "summary": {
+    "n": 38,
+    "ttft_median": 0.536,
+    "ttft_p99": 0.9760300000000002,
+    "hit": 0.9632
+   }
+  },
+  "RH5_HOST_D8": {
+   "finished": "2026-10-19T20:14:00.926521",
+   "cfg": "host",
+   "policy": "WARM",
+   "D": 8,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 14.6,
+   "warmup_s": 14.6,
+   "inflight_at_window_end": 1,
+   "drain_s": 0.5,
+   "host_mem_start": {
+    "server_tree_rss_gib": 264.0258102416992,
+    "host_mem_available_gib": 1199.6338653564453
+   },
+   "host_mem_window_end": {
+    "server_tree_rss_gib": 266.3193817138672,
+    "host_mem_available_gib": 1196.6166229248047
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 266.3193817138672,
+    "host_mem_available_gib": 1196.6147842407227
+   },
+   "summary": {
+    "n": 76,
+    "ttft_median": 0.5225,
+    "ttft_p99": 1.151,
+    "hit": 0.9651
+   }
+  },
+  "RH5_HOST_D16": {
+   "finished": "2026-10-19T20:29:29.125301",
+   "cfg": "host",
+   "policy": "WARM",
+   "D": 16,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 25.06,
+   "warmup_s": 25.06,
+   "inflight_at_window_end": 4,
+   "drain_s": 1.7,
+   "host_mem_start": {
+    "server_tree_rss_gib": 266.3193817138672,
+    "host_mem_available_gib": 1197.0149993896484
+   },
+   "host_mem_window_end": {
+    "server_tree_rss_gib": 266.74303436279297,
+    "host_mem_available_gib": 1194.857593536377
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 266.74303436279297,
+    "host_mem_available_gib": 1194.8282852172852
+   },
+   "summary": {
+    "n": 147,
+    "ttft_median": 0.602,
+    "ttft_p99": 1.7824599999999993,
+    "hit": 0.9667
+   }
+  },
+  "RH5_HOST_D24": {
+   "finished": "2026-10-19T20:45:08.470335",
+   "cfg": "host",
+   "policy": "WARM",
+   "D": 24,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 37.68,
+   "warmup_s": 37.68,
+   "inflight_at_window_end": 4,
+   "drain_s": 0.6,
+   "host_mem_start": {
+    "server_tree_rss_gib": 266.74303436279297,
+    "host_mem_available_gib": 1196.1857147216797
+   },
+   "host_mem_window_end": {
+    "server_tree_rss_gib": 266.96567153930664,
+    "host_mem_available_gib": 1192.2264366149902
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 266.96567153930664,
+    "host_mem_available_gib": 1192.2091941833496
+   },
+   "summary": {
+    "n": 215,
+    "ttft_median": 0.814,
+    "ttft_p99": 1.999659999999998,
+    "hit": 0.9676
+   }
+  },
+  "RH5_GPU_D4": {
+   "finished": "2026-10-19T21:15:51.848467",
+   "cfg": "gpu",
+   "policy": "WARM",
+   "D": 4,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 3.95,
+   "warmup_s": 3.95,
+   "inflight_at_window_end": 1,
+   "drain_s": 1.0,
+   "host_mem_start": {
+    "server_tree_rss_gib": 5.504169464111328,
+    "host_mem_available_gib": 1463.3721351623535
+   },
+   "host_mem_window_end": {
+    "server_tree_rss_gib": 8.046504974365234,
+    "host_mem_available_gib": 1466.6096496582031
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 8.051097869873047,
+    "host_mem_available_gib": 1466.5604820251465
+   },
+   "summary": {
+    "n": 38,
+    "ttft_median": 0.5325,
+    "ttft_p99": 1.3686600000000002,
+    "hit": 0.9572
+   }
+  },
+  "RH5_GPU_D8": {
+   "finished": "2026-10-19T21:32:44.510839",
+   "cfg": "gpu",
+   "policy": "WARM",
+   "D": 8,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 14.38,
+   "warmup_s": 14.38,
+   "inflight_at_window_end": 118,
+   "drain_s": 98.4,
+   "host_mem_start": {
+    "server_tree_rss_gib": 8.051097869873047,
+    "host_mem_available_gib": 1466.7040748596191
+   },
+   "host_mem_window_end": {
+    "server_tree_rss_gib": 16.646270751953125,
+    "host_mem_available_gib": 1451.6477813720703
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 16.266685485839844,
+    "host_mem_available_gib": 1452.0552139282227
+   },
+   "summary": {
+    "n": 76,
+    "ttft_median": 95.6055,
+    "ttft_p99": 238.26075,
+    "hit": 0.717
+   }
+  },
+  "RH5_GPU_D16": {
+   "finished": "2026-10-19T22:20:30.063905",
+   "cfg": "gpu",
+   "policy": "WARM",
+   "D": 16,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 25.87,
+   "warmup_s": 25.87,
+   "inflight_at_window_end": 1019,
+   "drain_s": 1938.1,
+   "host_mem_start": {
+    "server_tree_rss_gib": 16.266685485839844,
+    "host_mem_available_gib": 1452.5663299560547
+   },
+   "host_mem_window_end": {
+    "server_tree_rss_gib": 60.99775695800781,
+    "host_mem_available_gib": 1390.4632759094238
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 55.23836898803711,
+    "host_mem_available_gib": 1395.9922676086426
+   },
+   "summary": {
+    "n": 147,
+    "ttft_median": 802.291,
+    "ttft_p99": 1903.7071399999998,
+    "hit": 0.3752
+   }
+  },
+  "RH5_GPU_D24": {
+   "finished": "2026-10-19T23:28:28.215813",
+   "cfg": "gpu",
+   "policy": "WARM",
+   "D": 24,
+   "esc_frac": 1.0,
+   "seed": 0,
+   "window_s": 900,
+   "window_start": 38.5,
+   "warmup_s": 38.5,
+   "inflight_at_window_end": 1780,
+   "drain_s": 3095.3,
+   "host_mem_start": {
+    "server_tree_rss_gib": 55.23836898803711,
+    "host_mem_available_gib": 1402.8953437805176
+   },
+   "host_mem_window_end": {
+    "server_tree_rss_gib": 62.8581428527832,
+    "host_mem_available_gib": 1380.3531913757324
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 74.36051940917969,
+    "host_mem_available_gib": 1363.3375244140625
+   },
+   "summary": {
+    "n": 215,
+    "ttft_median": 1519.858,
+    "ttft_p99": 3143.5522799999994,
+    "hit": 0.2359
+   }
+  }
+ }
+}

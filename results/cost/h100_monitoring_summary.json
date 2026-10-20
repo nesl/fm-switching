@@ -650,14 +650,175 @@
      "sha256": "51f21bab0c7553773daf9d5e7730e8b8cf390ec420ecedc84b725d0013e12283"
     }
    ]
+  },
+  "StudyRH5": {
+   "run": "StudyRH5",
+   "chain_log": "logs/queue8_chain.log",
+   "windows": [
+    {
+     "step": "rh5_partA_host",
+     "start": "2026-10-19 19:25:31",
+     "end": "2026-10-19 19:41:35",
+     "rc": 0
+    },
+    {
+     "step": "rh5_fleet_host",
+     "start": "2026-10-19 19:41:35",
+     "end": "2026-10-19 20:45:37",
+     "rc": 0
+    },
+    {
+     "step": "rh5_partA_gpu",
+     "start": "2026-10-19 20:45:37",
+     "end": "2026-10-19 20:59:48",
+     "rc": 0
+    },
+    {
+     "step": "rh5_fleet_gpu",
+     "start": "2026-10-19 20:59:48",
+     "end": "2026-10-19 23:28:33",
+     "rc": 0
+    }
+   ],
+   "server_logs": [
+    "study_x_server_32BI_1019_192531.log",
+    "study_x_server_32BI_1019_194135.log",
+    "study_x_server_32BI_1019_204537.log",
+    "study_x_server_32BI_1019_205948.log"
+   ],
+   "own_vllm_pids": [
+    393175,
+    393415,
+    407090,
+    407357,
+    447893,
+    448103,
+    458023,
+    458240
+   ],
+   "gpu3_monitor": {
+    "samples": 1403,
+    "interval_s": 10,
+    "util_pct": {
+     "min": 0.0,
+     "median": 100.0,
+     "max": 100.0,
+     "n": 1403
+    },
+    "util_pct_busy_only": {
+     "min": 1.0,
+     "median": 100.0,
+     "max": 100.0,
+     "n": 995
+    },
+    "memory_used_mib": {
+     "min": 4.0,
+     "median": 88384.0,
+     "max": 88896.0,
+     "n": 1403
+    },
+    "power_w": {
+     "min": 63.64,
+     "median": 397.64,
+     "max": 422.12,
+     "n": 1403
+    },
+    "sm_clock_mhz": {
+     "min": 345.0,
+     "median": 960.0,
+     "max": 1785.0,
+     "n": 1403
+    },
+    "sm_clock_mhz_busy_only": {
+     "min": 547.0,
+     "median": 915.0,
+     "max": 1785.0,
+     "n": 995
+    },
+    "mem_clock_mhz": {
+     "min": 2619.0,
+     "median": 2619.0,
+     "max": 2619.0,
+     "n": 1403
+    },
+    "temp_c": {
+     "min": 40.0,
+     "median": 81.0,
+     "max": 83.0,
+     "n": 1403
+    }
+   },
+   "foreign_processes": {
+    "gpu3_process_samples": 1395,
+    "count": 0,
+    "pids": {}
+   },
+   "watchdog_foreign_lines": [],
+   "files": [
+    {
+     "file": "logs/queue8_chain.log",
+     "bytes": 677,
+     "sha256": "0c21b15ba3977f68743ee376a37f702aa4357a2700f47aa073bcea8a710474e5"
+    },
+    {
+     "file": "logs/queue8_rh5_fleet_gpu.log",
+     "bytes": 3555,
+     "sha256": "6cdafadb7b40920140888dba06b2b0de5614e7f38dfdf2885f857ebc3a80d254"
+    },
+    {
+     "file": "logs/queue8_rh5_fleet_host.log",
+     "bytes": 4781,
+     "sha256": "399ee638463c7b8db9eb480d2b46d7366895aac552ab23e92152d73009205187"
+    },
+    {
+     "file": "logs/queue8_rh5_partA_gpu.log",
+     "bytes": 6130,
+     "sha256": "b4e549bb874a4d5b9aec272b4adcb431c03f50a18df20820a00b164e575e0ba8"
+    },
+    {
+     "file": "logs/queue8_rh5_partA_host.log",
+     "bytes": 32031,
+     "sha256": "b789b153119cc9ff99ada821f4389f24992e72002c5f47777c3dbceeab604f41"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1019_192531.log",
+     "bytes": 114737,
+     "sha256": "714558a8d80187176ceb463d422db927d0237165c82f5d97eaf23620a361f797"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1019_194135.log",
+     "bytes": 990736,
+     "sha256": "87696697b2c844a687b1877a2d7acbc847d55db1b76f133b9d2afa0c956a8d4d"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1019_204537.log",
+     "bytes": 65662,
+     "sha256": "944dad67e916bbd4c2b3e444de44a436a25c563afffe96915c2d0a0d2b331c92"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1019_205948.log",
+     "bytes": 1048953,
+     "sha256": "823b2c4c4a65a8bb5a8912e52f9395c3a00f18b7fb101bbd161928ecd47e5c7c"
+    },
+    {
+     "file": "logs/queue8_gpu3_monitor.csv",
+     "bytes": 99084,
+     "sha256": "3212d802cd7c2f4ccf5088e541377f41a17f9d33488a4340d380fc8907e510dc"
+    },
+    {
+     "file": "logs/queue8_gpu_procs.csv",
+     "bytes": 387823,
+     "sha256": "bdd28bdf7f4923409581ddfb58db293c49ac714641825e312e521b336f44ef0e"
+    }
+   ]
   }
  },
  "_provenance": {
-  "git_commit": "a269f2fe432c0c7abb7151868bfe693b85fb7475",
+  "git_commit": "e07afe38591c4f26f5cceb92a7395c1bb6b65041",
   "script": "h100_monitoring_summary.py",
   "model": "n/a",
-  "timestamp": "2026-10-19T18:59:03.339255",
+  "timestamp": "2026-10-19T23:29:44.953702",
   "device": "h100nvl",
-  "n": 5
+  "n": 6
  }
 }
