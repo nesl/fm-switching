@@ -811,14 +811,189 @@
      "sha256": "bdd28bdf7f4923409581ddfb58db293c49ac714641825e312e521b336f44ef0e"
     }
    ]
+  },
+  "StudyRH6": {
+   "run": "StudyRH6",
+   "chain_log": "logs/queue9_chain.log",
+   "windows": [
+    {
+     "step": "rh6_smoke",
+     "start": "2026-10-20 09:10:26",
+     "end": "2026-10-20 09:14:48",
+     "rc": 1
+    },
+    {
+     "step": "rh6_smoke",
+     "start": "2026-10-20 09:15:35",
+     "end": "2026-10-20 09:21:02",
+     "rc": 0
+    },
+    {
+     "step": "rh6_partA",
+     "start": "2026-10-20 09:21:02",
+     "end": "2026-10-20 11:52:35",
+     "rc": 0
+    },
+    {
+     "step": "rh6_partB",
+     "start": "2026-10-20 11:52:35",
+     "end": "2026-10-20 12:45:32",
+     "rc": 0
+    },
+    {
+     "step": "rh6_partC",
+     "start": "2026-10-20 12:45:32",
+     "end": "2026-10-20 15:14:13",
+     "rc": 0
+    }
+   ],
+   "server_logs": [
+    "study_x_server_32BI_1020_091116.log",
+    "study_x_server_32BI_1020_091625.log",
+    "study_x_server_32BI_1020_092151.log",
+    "study_x_server_32BI_1020_115405.log",
+    "study_x_server_32BI_1020_124621.log"
+   ],
+   "own_vllm_pids": [
+    593516,
+    593774,
+    598331,
+    598579,
+    603752,
+    604013,
+    838724,
+    839402,
+    928836,
+    929133
+   ],
+   "gpu3_monitor": {
+    "samples": 2090,
+    "interval_s": 10,
+    "util_pct": {
+     "min": 0.0,
+     "median": 100.0,
+     "max": 100.0,
+     "n": 2090
+    },
+    "util_pct_busy_only": {
+     "min": 1.0,
+     "median": 100.0,
+     "max": 100.0,
+     "n": 1490
+    },
+    "memory_used_mib": {
+     "min": 4.0,
+     "median": 88666.0,
+     "max": 89182.0,
+     "n": 2090
+    },
+    "power_w": {
+     "min": 63.31,
+     "median": 297.03499999999997,
+     "max": 420.09,
+     "n": 2090
+    },
+    "sm_clock_mhz": {
+     "min": 345.0,
+     "median": 1155.0,
+     "max": 1785.0,
+     "n": 2090
+    },
+    "sm_clock_mhz_busy_only": {
+     "min": 592.0,
+     "median": 975.0,
+     "max": 1785.0,
+     "n": 1490
+    },
+    "mem_clock_mhz": {
+     "min": 2619.0,
+     "median": 2619.0,
+     "max": 2619.0,
+     "n": 2090
+    },
+    "temp_c": {
+     "min": 39.0,
+     "median": 67.0,
+     "max": 83.0,
+     "n": 2090
+    }
+   },
+   "foreign_processes": {
+    "gpu3_process_samples": 2047,
+    "count": 0,
+    "pids": {}
+   },
+   "watchdog_foreign_lines": [],
+   "files": [
+    {
+     "file": "logs/queue9_chain.log",
+     "bytes": 1116,
+     "sha256": "80a7e3cac9f33dc2bf25d874fae883b6d87ab9e153f8a1efdced13cfec64f3d3"
+    },
+    {
+     "file": "logs/queue9_rh6_partA.log",
+     "bytes": 4369,
+     "sha256": "a1b86102d30e6610826fd34373a88ac984d7580d5b2b4dba7b8ea59fb145f5ca"
+    },
+    {
+     "file": "logs/queue9_rh6_partB.log",
+     "bytes": 3901,
+     "sha256": "b9b11529503df198ad77429deba839d5ec7cbfcf1cfe180f4f057db25d58eac8"
+    },
+    {
+     "file": "logs/queue9_rh6_partC.log",
+     "bytes": 2932,
+     "sha256": "9cda759cbd0a209c266b01b7e176b211bb941355f506129d118666fa7ac7a2f0"
+    },
+    {
+     "file": "logs/queue9_rh6_smoke.log",
+     "bytes": 6362,
+     "sha256": "b87015ee6ed20f9f21e2ace06d654f613f644a728bd5933b248315562f1ac7b4"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1020_091116.log",
+     "bytes": 44032,
+     "sha256": "b8c8e32b10f91d59ec1bfeb212b23a94b1dc3047017d44c6dc447e3456e02555"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1020_091625.log",
+     "bytes": 51409,
+     "sha256": "5e073e2e591b6070dfb753fc8ac4890c4c3e22514a50d847cc2d774c19100009"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1020_092151.log",
+     "bytes": 3307169,
+     "sha256": "54d9a050c52c2ce2292515ac55b5f5c9da48f10b17b9dabd7122f260786e2cd3"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1020_115405.log",
+     "bytes": 1174403,
+     "sha256": "5b93efd9a89b07f88d25e4c7c14aabc6b2eef00a1a9c05a6191545db516a7d4b"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1020_124621.log",
+     "bytes": 2178053,
+     "sha256": "7204b72f14da953e9579873b3d0b90d57efcd6d8f1b42b0da5807bb8a968cce3"
+    },
+    {
+     "file": "logs/queue9_gpu3_monitor.csv",
+     "bytes": 147986,
+     "sha256": "476dce62faca93c25485ffd449f9af84e8781cf6719f9ed91edfdefee0b3a50a"
+    },
+    {
+     "file": "logs/queue9_gpu_procs.csv",
+     "bytes": 334751,
+     "sha256": "974bbf0f2029c7d66dd86052c98baf6ba5368c9b4126c3914a0d354719dad212"
+    }
+   ]
   }
  },
  "_provenance": {
-  "git_commit": "e07afe38591c4f26f5cceb92a7395c1bb6b65041",
+  "git_commit": "649a522c5afd0514b0cd57dcbbd55cbdc16d7478",
   "script": "h100_monitoring_summary.py",
   "model": "n/a",
-  "timestamp": "2026-10-19T23:29:44.953702",
+  "timestamp": "2026-10-20T15:14:37.232914",
   "device": "h100nvl",
-  "n": 6
+  "n": 7
  }
 }

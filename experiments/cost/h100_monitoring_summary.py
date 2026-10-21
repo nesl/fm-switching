@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""H100 monitoring summary for the latency/accuracy studies run on GPU 3 (R1, R5, RH2, RH3; RH4 and RH5 added). CPU only, any venv.
+"""H100 monitoring summary for the latency/accuracy studies run on GPU 3 (R1, R5, RH2, RH3; RH4, RH5 and RH6 added). CPU only, any venv.
 
 Source: the gitignored logs/ written by the chains (not committed). Per run:
   windows   START/END pairs of the run's steps in logs/queueN_chain.log
@@ -28,7 +28,8 @@ OUT = Path("results/cost/h100_monitoring_summary.json")
 GPU3 = "GPU-b3c6399e"
 RUNS = {"StudyR1": ("queue4", r"^r1_"), "StudyR5": ("queue4", r"^r5_"), "StudyRH2": ("queue5", r"^rh2$"),
         "StudyRH3": ("queue6", r"^rh3_(part0|cells)$"), "StudyRH4": ("queue7", r"^rh4_(part0|cells)$"),
-        "StudyRH5": ("queue8", r"^rh5_(partA|fleet)_(host|gpu)$")}
+        "StudyRH5": ("queue8", r"^rh5_(partA|fleet)_(host|gpu)$"),
+        "StudyRH6": ("queue9", r"^rh6_(smoke|partA|partB|partC)$")}
 F = "%Y-%m-%d %H:%M:%S"
 
 
