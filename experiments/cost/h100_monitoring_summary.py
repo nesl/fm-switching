@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""H100 monitoring summary for the latency/accuracy studies run on GPU 3 (R1, R5, RH2, RH3; RH4, RH5 and RH6 added). CPU only, any venv.
+"""H100 monitoring summary for the latency/accuracy studies run on GPU 3 (R1, R5, RH2, RH3; RH4, RH5, RH6 and RH7 added). CPU only, any venv.
 
 Source: the gitignored logs/ written by the chains (not committed). Per run:
   windows   START/END pairs of the run's steps in logs/queueN_chain.log
@@ -29,7 +29,8 @@ GPU3 = "GPU-b3c6399e"
 RUNS = {"StudyR1": ("queue4", r"^r1_"), "StudyR5": ("queue4", r"^r5_"), "StudyRH2": ("queue5", r"^rh2$"),
         "StudyRH3": ("queue6", r"^rh3_(part0|cells)$"), "StudyRH4": ("queue7", r"^rh4_(part0|cells)$"),
         "StudyRH5": ("queue8", r"^rh5_(partA|fleet)_(host|gpu)$"),
-        "StudyRH6": ("queue9", r"^rh6_(smoke|partA|partB|partC)$")}
+        "StudyRH6": ("queue9", r"^rh6_(smoke|partA|partB|partC)$"),
+        "StudyRH7": ("queue10", r"^rh7_(step0|smoke|fleet)$")}
 F = "%Y-%m-%d %H:%M:%S"
 
 
@@ -40,7 +41,7 @@ def sha(p):
 def windows(chain, pat):
     out, open_ = [], {}
     for line in chain.read_text(errors="replace").splitlines():
-        m = re.match(r"=== QUEUE\d (\S+ \S+) (START|END) (\S+)(?: rc=(\d+))?", line)
+        m = re.match(r"=== QUEUE\d+ (\S+ \S+) (START|END) (\S+)(?: rc=(\d+))?", line)
         if not m or not re.match(pat, m.group(3)):
             continue
         t = datetime.strptime(m.group(1), F)
