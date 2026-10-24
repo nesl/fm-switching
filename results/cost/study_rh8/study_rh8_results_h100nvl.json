@@ -1,0 +1,4871 @@
+{
+ "servers": [
+  {
+   "stage": "RH8_ALL-EAGER_D64",
+   "kv_cache_tokens": 62944,
+   "kv_offloading_gib": 256,
+   "mm_processor_cache_gb": 128,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 261.43752670288086,
+    "host_mem_available_gib": 1169.5945587158203
+   },
+   "startup_s": 185.2
+  },
+  {
+   "stage": "RH8_ALL-LAZY_D64",
+   "kv_cache_tokens": 62944,
+   "kv_offloading_gib": 256,
+   "mm_processor_cache_gb": 128,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 261.476863861084,
+    "host_mem_available_gib": 1175.2101364135742
+   },
+   "startup_s": 175.9
+  },
+  {
+   "stage": "RH8_MIX-RANDOM_D64",
+   "kv_cache_tokens": 62944,
+   "kv_offloading_gib": 256,
+   "mm_processor_cache_gb": 128,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 261.4693260192871,
+    "host_mem_available_gib": 1221.5959243774414
+   },
+   "startup_s": 151.7
+  },
+  {
+   "stage": "RH8_MIX-DEMAND_D64",
+   "kv_cache_tokens": 62944,
+   "kv_offloading_gib": 256,
+   "mm_processor_cache_gb": 128,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 261.4834976196289,
+    "host_mem_available_gib": 1219.4083862304688
+   },
+   "startup_s": 142.7
+  },
+  {
+   "stage": "RH8_ALL-EAGER_D96",
+   "kv_cache_tokens": 62944,
+   "kv_offloading_gib": 256,
+   "mm_processor_cache_gb": 128,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 261.4290580749512,
+    "host_mem_available_gib": 1218.063003540039
+   },
+   "startup_s": 142.6
+  },
+  {
+   "stage": "RH8_ALL-LAZY_D96",
+   "kv_cache_tokens": 62944,
+   "kv_offloading_gib": 256,
+   "mm_processor_cache_gb": 128,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 261.4906196594238,
+    "host_mem_available_gib": 1215.229694366455
+   },
+   "startup_s": 142.7
+  },
+  {
+   "stage": "RH8_MIX-RANDOM_D96",
+   "kv_cache_tokens": 62944,
+   "kv_offloading_gib": 256,
+   "mm_processor_cache_gb": 128,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 261.43138885498047,
+    "host_mem_available_gib": 1217.357307434082
+   },
+   "startup_s": 145.6
+  },
+  {
+   "stage": "RH8_MIX-DEMAND_D96",
+   "kv_cache_tokens": 62944,
+   "kv_offloading_gib": 256,
+   "mm_processor_cache_gb": 128,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 261.47537994384766,
+    "host_mem_available_gib": 1215.6895027160645
+   },
+   "startup_s": 145.7
+  },
+  {
+   "stage": "RH8_REP-EAGER_D64",
+   "kv_cache_tokens": 62944,
+   "kv_offloading_gib": 256,
+   "mm_processor_cache_gb": 128,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 261.41640853881836,
+    "host_mem_available_gib": 1211.5230293273926
+   },
+   "startup_s": 142.6
+  },
+  {
+   "stage": "RH8_REP-LAZYD_D64",
+   "kv_cache_tokens": 62944,
+   "kv_offloading_gib": 256,
+   "mm_processor_cache_gb": 128,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "host_mem": {
+    "server_tree_rss_gib": 261.4860153198242,
+    "host_mem_available_gib": 1210.811725616455
+   },
+   "startup_s": 145.6
+  }
+ ],
+ "stack": {
+  "venv": "/home/pragya/.venvs/fm-switching-vllm",
+  "vllm": "0.31.0",
+  "torch": "2.13.0+cu129",
+  "cuda": "12.9"
+ },
+ "estimate": {
+  "cells_s": {
+   "RH8_ALL-EAGER_D64": 1269,
+   "RH8_ALL-LAZY_D64": 1162,
+   "RH8_MIX-RANDOM_D64": 1269,
+   "RH8_MIX-DEMAND_D64": 1269,
+   "RH8_ALL-EAGER_D96": 1486,
+   "RH8_ALL-LAZY_D96": 1172,
+   "RH8_MIX-RANDOM_D96": 1486,
+   "RH8_MIX-DEMAND_D96": 1486,
+   "RH8_REP-EAGER_D64": 1269,
+   "RH8_REP-LAZYD_D64": 1162
+  },
+  "total_s": 13930,
+  "total_without_repeats_s": 11499,
+  "rh7_wall_s": {
+   "RH7_EAGER_D32": 1210.600704,
+   "RH7_LAZY_D32": 1161.298087,
+   "RH7_LAZYD_D32": 1162.045357,
+   "RH7_EAGER_D48": 1240.355669,
+   "RH7_LAZY_D48": 1162.725215,
+   "RH7_LAZYD_D48": 1161.350859,
+   "RH7_EAGER_D64": 1269.293482,
+   "RH7_LAZY_D64": 1163.952576,
+   "RH7_LAZYD_D64": 1161.965948,
+   "RH7_EAGER_D96": 1485.512547,
+   "RH7_LAZY_D96": 1201.062739,
+   "RH7_LAZYD_D96": 1171.76
+  },
+  "basis": "RH7 measured per-cell wall time of the slower analogue policy at the same D; smoke 900 s"
+ },
+ "cells": {
+  "RH8_ALL-EAGER_D64": {
+   "part": "ALL-EAGER",
+   "D": 64,
+   "fmt": "D2",
+   "cadence": 10,
+   "lazy": false,
+   "offload_gib": 256,
+   "coverage": {
+    "devices": 64,
+    "devices_without_sessions": 0,
+    "devices_plan_ends_before_window_end": 10,
+    "sessions_per_device": [
+     3,
+     4
+    ]
+   },
+   "warmup_s": 107.18,
+   "inflight_at_window_end": 1,
+   "drain_s": 0.1,
+   "whole_s": 901.7,
+   "n_requests": 5757,
+   "appends": 5430,
+   "escalations": 218,
+   "req_per_s_window": 6.325555555555556,
+   "esc_ttft_s": {
+    "n": 218,
+    "median": 0.913,
+    "p90": 3.0668000000000015,
+    "p99": 4.9791099999999995,
+    "max": 5.129,
+    "min": 0.089,
+    "mean": 1.308119266055046
+   },
+   "esc_latency_s": {
+    "n": 218,
+    "median": 1.02,
+    "p90": 3.2908000000000004,
+    "p99": 5.0645,
+    "max": 5.504,
+    "min": 0.164,
+    "mean": 1.4322201834862385
+   },
+   "append_ttft_s": {
+    "n": 5430,
+    "median": 0.9404999999999999,
+    "p90": 3.455300000000001,
+    "p99": 5.38513,
+    "max": 6.283,
+    "min": 0.09,
+    "mean": 1.3964353591160221
+   },
+   "esc_hit": 0.9701924311756078,
+   "append_hit": 0.9522323075915343,
+   "token_hit": 0.9530134571112158,
+   "esc_prompt_tokens": {
+    "n": 218,
+    "median": 10057.5,
+    "p90": 19367.900000000005,
+    "p99": 25841.989999999998,
+    "max": 26402.0,
+    "min": 1184.0,
+    "mean": 10858.642201834862
+   },
+   "body_mb": {
+    "n": 5693,
+    "median": 0.944,
+    "p90": 1.16766,
+    "p99": 1.369716,
+    "max": 54.0483,
+    "min": 0.0029,
+    "mean": 1.01427403829264
+   },
+   "gpu_local_hit_tokens": 517184.0,
+   "host_hit_tokens": 51351616.0,
+   "host_share_of_hits": 0.9900289962366586,
+   "pcie_load_gb": 13461.518024704,
+   "pcie_store_gb": 658.434424832,
+   "pcie_load_gbps_avg": 14.929042946328046,
+   "pcie_store_gbps_avg": 0.730214511292004,
+   "pcie_load_gbps_peak_1s": 28.281010951453936,
+   "pcie_load_gbps_best_30s": 17.667679100753972,
+   "load_bytes_per_host_hit_token": 262144.0,
+   "allocation_failures": 0,
+   "computed_tok_s_achieved": 2857.470333813907,
+   "computed_tok_s_demand": 2841.4377777777777,
+   "kv_usage": {
+    "n": 865,
+    "median": 0.4708873633358759,
+    "p90": 0.7811848461734046,
+    "p99": 0.9646478515128402,
+    "max": 0.9989829646580218,
+    "min": 0.0,
+    "mean": 0.4489017634981312
+   },
+   "waiting": {
+    "n": 865,
+    "median": 3.0,
+    "p90": 19.600000000000023,
+    "p99": 31.0,
+    "max": 35.0,
+    "min": 0.0,
+    "mean": 6.098265895953757
+   },
+   "running": {
+    "n": 865,
+    "median": 1.0,
+    "p90": 2.0,
+    "p99": 4.0,
+    "max": 8.0,
+    "min": 0.0,
+    "mean": 0.8716763005780347
+   },
+   "preemptions": 0.0,
+   "api_cores": {
+    "n": 866,
+    "median": 0.47,
+    "p90": 0.7035,
+    "p99": 1.2726500000000005,
+    "max": 1.664,
+    "min": 0.01,
+    "mean": 0.49162124711316396
+   },
+   "api_max_thread_cores": {
+    "n": 866,
+    "median": 0.134,
+    "p90": 0.202,
+    "p99": 0.269,
+    "max": 0.313,
+    "min": 0.019,
+    "mean": 0.13840646651270208
+   },
+   "engine_cores": {
+    "n": 866,
+    "median": 0.9095,
+    "p90": 1.084,
+    "p99": 1.1487500000000002,
+    "max": 1.214,
+    "min": 0.019,
+    "mean": 0.8486720554272518
+   },
+   "harness_cores": {
+    "n": 866,
+    "median": 0.086,
+    "p90": 0.125,
+    "p99": 0.192,
+    "max": 0.256,
+    "min": 0.029,
+    "mean": 0.09034526558891454
+   },
+   "gpu_util": {
+    "n": 866,
+    "median": 100.0,
+    "p90": 100.0,
+    "p99": 100.0,
+    "max": 100.0,
+    "min": 0.0,
+    "mean": 87.82909930715935
+   },
+   "submit_lag_s": {
+    "n": 5693,
+    "median": 0.003,
+    "p90": 0.005,
+    "p99": 0.036079999999999925,
+    "max": 0.12,
+    "min": 0.001,
+    "mean": 0.004324784823467417
+   },
+   "errors": 46,
+   "errors_over_context": 46,
+   "error_kinds": [
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (32983) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33433) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33883) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34231) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34333) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34783) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35233) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35683) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36133) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36583) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37033) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37483) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37933) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38383) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38833) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39283) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39733) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (40183) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (40633) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41083) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41533) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41983) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (42433) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (42883) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (43333) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (43783) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (44233) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (44683) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45133) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45583) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45703) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46033) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46483) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46933) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (47383) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (47833) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (48283) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (48733) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (49183) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (49633) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50083) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50533) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50815) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50983) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51433) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51974) exceeds model\\'s maximum c"
+   ],
+   "warm_requests_checked": 5509,
+   "warm_misses": 0,
+   "warm_miss_frac": 0.0,
+   "host_verification": {
+    "external_hit_tokens": 51351824.0,
+    "load_bytes": 13463365333424.945,
+    "bytes_per_hit_token": 262178.91176416527,
+    "verified": true,
+    "note": ""
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 299.91918563842773,
+    "host_mem_available_gib": 1130.1226692199707
+   },
+   "binding_flags": {
+    "kv_running_set": true,
+    "gpu_compute": false,
+    "pcie": false,
+    "host_capacity": false,
+    "api_cpu": false
+   },
+   "diagnostics": {
+    "scrape_coverage_window": 0.96,
+    "upstream_of_engine_window": {
+     "n": 864,
+     "median": 2.0,
+     "p90": 4.0,
+     "p99": 7.0,
+     "max": 9.0,
+     "min": -1.0,
+     "mean": 1.8483796296296295
+    },
+    "engine_queue_window": {
+     "n": 864,
+     "median": 4.0,
+     "p90": 20.0,
+     "p99": 31.370000000000005,
+     "max": 35.0,
+     "min": 0.0,
+     "mean": 6.9780092592592595
+    },
+    "engine_waiting_window": {
+     "n": 864,
+     "median": 3.0,
+     "p90": 19.700000000000045,
+     "p99": 31.0,
+     "max": 35.0,
+     "min": 0.0,
+     "mean": 6.105324074074074
+    },
+    "kv_usage_window": {
+     "n": 864,
+     "median": 0.4716501398423595,
+     "p90": 0.7812865497076024,
+     "p99": 0.9646758199847445,
+     "max": 0.9989829646580218,
+     "min": 0.0,
+     "mean": 0.44942132572440224
+    },
+    "gpu_util_window": {
+     "n": 864,
+     "median": 100.0,
+     "p90": 100.0,
+     "p99": 100.0,
+     "max": 100.0,
+     "min": 0.0,
+     "mean": 88.0324074074074
+    },
+    "api_cores_window": {
+     "n": 864,
+     "median": 0.47,
+     "p90": 0.7045000000000002,
+     "p99": 1.27303,
+     "max": 1.664,
+     "min": 0.096,
+     "mean": 0.4925555555555555
+    },
+    "api_max_thread_cores_window": {
+     "n": 864,
+     "median": 0.134,
+     "p90": 0.202,
+     "p99": 0.269,
+     "max": 0.313,
+     "min": 0.029,
+     "mean": 0.13864814814814816
+    },
+    "served_req_per_s_window": 6.325555555555556,
+    "served_req_per_s_drain": null,
+    "offered_body_mb_per_s": 6.415846777777769,
+    "served_body_mb_per_s_window": 6.473381222222213
+   },
+   "harness_valid": true,
+   "breach": false,
+   "policy": "ALL-EAGER",
+   "demand": "hetero",
+   "eager_devices": 64,
+   "eager_and_high": 16,
+   "window_plan": {
+    "escalations": 222,
+    "escalations_high": 140,
+    "escalations_low": 82,
+    "escalations_on_eager": 222,
+    "appends": 5471,
+    "eager_devices": 64,
+    "eager_and_high": 16
+   },
+   "fallbacks": 30,
+   "fallback_frac": 0.005211047420531527,
+   "fallback_flag": false,
+   "host_memory": {
+    "api_rss_peak_gib": 12.19,
+    "engine_rss_peak_gib": 293.51,
+    "tree_rss_peak_gib": 299.73,
+    "mem_available_min_gib": 1130.4,
+    "kv_offload_buffer_gib": 256,
+    "processor_cache_items_est": 33191,
+    "processor_cache_est_gib": 70.09939200000001,
+    "processor_cache_note": "estimate: items cached x 2.16 MB (vLLM exposes no cache-size metric); LRU cap 128 GiB; engine-core RSS includes both"
+   },
+   "body_over_full": {
+    "n": 5663,
+    "median": 0.05077282922699622,
+    "p90": 0.2213096144160985,
+    "p99": 1.0007604985919603,
+    "max": 1.0013607756421161,
+    "min": 0.0007742339058049597,
+    "mean": 0.10461312555632239
+   },
+   "median_history_frames": 96.0,
+   "body_over_full_at_median_history": {
+    "n": 455,
+    "median": 0.053309647604962276,
+    "p90": 0.06108891382742459,
+    "p99": 0.4975480458320689,
+    "max": 1.0019613376605052,
+    "min": 0.0007900744599243917,
+    "mean": 0.06210549584158194
+   },
+   "censored": 0,
+   "drain_capped": false,
+   "errors_non_censored": 46,
+   "computed_tokens_window": 2557294,
+   "computed_tokens_per_escalation": 11730.70642201835,
+   "computed_tokens_per_escalation_esc_only": 323.6697247706422,
+   "warmup_computed_tokens": 532003,
+   "body_mb_window": 5774.262099999992,
+   "mm_cache_queries": 623026.0,
+   "mm_cache_hits": 595518.0,
+   "whole_counter_window": [
+    107.18,
+    1008.8800000000001
+   ],
+   "timeline_points": 966,
+   "binding": [
+    "kv_running_set"
+   ],
+   "host_reload_tb": 13.461518024704,
+   "live_set": {
+    "peak_tokens": 691380.0,
+    "mean_tokens": 605089.591160221,
+    "peak_gib": 168.7939453125,
+    "peak_over_capacity": 0.622013099179502
+   },
+   "all": {
+    "n": 218,
+    "failed": 0,
+    "ttft_s": {
+     "n": 218,
+     "median": 0.913,
+     "p90": 3.0668000000000015,
+     "p99": 4.9791099999999995,
+     "max": 5.129,
+     "min": 0.089,
+     "mean": 1.308119266055046
+    },
+    "computed_tokens_per_escalation_esc_only": 323.6697247706422,
+    "fallbacks": 30,
+    "frac_within": {
+     "2s": 0.8211009174311926,
+     "5s": 0.9908256880733946,
+     "15s": 1.0
+    }
+   },
+   "high_demand": {
+    "n": 136,
+    "failed": 0,
+    "ttft_s": {
+     "n": 136,
+     "median": 0.967,
+     "p90": 3.108,
+     "p99": 4.97605,
+     "max": 5.129,
+     "min": 0.089,
+     "mean": 1.3403749999999999
+    },
+    "computed_tokens_per_escalation_esc_only": 320.45588235294116,
+    "fallbacks": 21,
+    "frac_within": {
+     "2s": 0.8235294117647058,
+     "5s": 0.9926470588235294,
+     "15s": 1.0
+    }
+   },
+   "low_demand": {
+    "n": 82,
+    "failed": 0,
+    "ttft_s": {
+     "n": 82,
+     "median": 0.8260000000000001,
+     "p90": 2.976,
+     "p99": 4.674559999999999,
+     "max": 5.099,
+     "min": 0.164,
+     "mean": 1.2546219512195123
+    },
+    "computed_tokens_per_escalation_esc_only": 329.0,
+    "fallbacks": 9,
+    "frac_within": {
+     "2s": 0.8170731707317073,
+     "5s": 0.9878048780487805,
+     "15s": 1.0
+    }
+   },
+   "eager_devices_esc": {
+    "n": 218,
+    "failed": 0,
+    "ttft_s": {
+     "n": 218,
+     "median": 0.913,
+     "p90": 3.0668000000000015,
+     "p99": 4.9791099999999995,
+     "max": 5.129,
+     "min": 0.089,
+     "mean": 1.308119266055046
+    },
+    "computed_tokens_per_escalation_esc_only": 323.6697247706422,
+    "fallbacks": 30,
+    "frac_within": {
+     "2s": 0.8211009174311926,
+     "5s": 0.9908256880733946,
+     "15s": 1.0
+    }
+   },
+   "lazy_devices_esc": {
+    "n": 0,
+    "failed": 0,
+    "ttft_s": null,
+    "computed_tokens_per_escalation_esc_only": null,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": null,
+     "5s": null,
+     "15s": null
+    }
+   },
+   "escalations_excluded_over_context": 4
+  },
+  "RH8_ALL-LAZY_D64": {
+   "part": "ALL-LAZY",
+   "D": 64,
+   "fmt": "D2",
+   "cadence": 10,
+   "lazy": true,
+   "offload_gib": 256,
+   "coverage": {
+    "devices": 64,
+    "devices_without_sessions": 0,
+    "devices_plan_ends_before_window_end": 10,
+    "sessions_per_device": [
+     3,
+     4
+    ]
+   },
+   "warmup_s": 0.06,
+   "inflight_at_window_end": 0,
+   "drain_s": 0.0,
+   "whole_s": 902.3,
+   "n_requests": 222,
+   "appends": 0,
+   "escalations": 218,
+   "req_per_s_window": 0.24666666666666667,
+   "esc_ttft_s": {
+    "n": 218,
+    "median": 1.6684999999999999,
+    "p90": 4.017100000000001,
+    "p99": 8.832669999999982,
+    "max": 9.662,
+    "min": 0.243,
+    "mean": 2.2140229357798162
+   },
+   "esc_latency_s": {
+    "n": 218,
+    "median": 1.7475,
+    "p90": 4.4748,
+    "p99": 9.209249999999987,
+    "max": 10.216,
+    "min": 0.266,
+    "mean": 2.3333577981651374
+   },
+   "append_ttft_s": null,
+   "esc_hit": 0.3920269822709177,
+   "append_hit": 0.0,
+   "token_hit": 0.3920269822709177,
+   "esc_prompt_tokens": {
+    "n": 218,
+    "median": 10057.5,
+    "p90": 19367.900000000005,
+    "p99": 25841.989999999998,
+    "max": 26402.0,
+    "min": 1184.0,
+    "mean": 10858.642201834862
+   },
+   "body_mb": {
+    "n": 222,
+    "median": 10.293050000000001,
+    "p90": 27.91564,
+    "p99": 48.16528199999999,
+    "max": 68.3745,
+    "min": 0.2666,
+    "mean": 13.506516666666665
+   },
+   "gpu_local_hit_tokens": 109696.0,
+   "host_hit_tokens": 818304.0,
+   "host_share_of_hits": 0.8817931034482759,
+   "pcie_load_gb": 214.513483776,
+   "pcie_store_gb": 376.8582144,
+   "pcie_load_gbps_avg": 0.23774075559791646,
+   "pcie_store_gbps_avg": 0.4176639858140308,
+   "pcie_load_gbps_peak_1s": 5.7938964078430795,
+   "pcie_load_gbps_best_30s": 0.9081192627612215,
+   "load_bytes_per_host_hit_token": 262144.0,
+   "allocation_failures": 0,
+   "computed_tok_s_achieved": 1595.017178322066,
+   "computed_tok_s_demand": 1599.0933333333332,
+   "kv_usage": {
+    "n": 865,
+    "median": 0.0,
+    "p90": 0.2606153063818968,
+    "p99": 0.4957742181540814,
+    "max": 0.7426900584795322,
+    "min": 0.0,
+    "mean": 0.05999479724694999
+   },
+   "waiting": {
+    "n": 865,
+    "median": 0.0,
+    "p90": 0.0,
+    "p99": 1.0,
+    "max": 2.0,
+    "min": 0.0,
+    "mean": 0.04161849710982659
+   },
+   "running": {
+    "n": 865,
+    "median": 0.0,
+    "p90": 1.0,
+    "p99": 2.0,
+    "max": 3.0,
+    "min": 0.0,
+    "mean": 0.25317919075144507
+   },
+   "preemptions": 0.0,
+   "api_cores": {
+    "n": 865,
+    "median": 0.019,
+    "p90": 0.6194000000000002,
+    "p99": 1.4443200000000005,
+    "max": 1.922,
+    "min": 0.0,
+    "mean": 0.17110867052023115
+   },
+   "api_max_thread_cores": {
+    "n": 865,
+    "median": 0.01,
+    "p90": 0.153,
+    "p99": 0.4044400000000001,
+    "max": 0.826,
+    "min": 0.0,
+    "mean": 0.050746820809248555
+   },
+   "engine_cores": {
+    "n": 865,
+    "median": 0.038,
+    "p90": 1.018,
+    "p99": 1.0988,
+    "max": 1.378,
+    "min": 0.009,
+    "mean": 0.2741872832369942
+   },
+   "harness_cores": {
+    "n": 865,
+    "median": 0.048,
+    "p90": 0.096,
+    "p99": 0.19372000000000003,
+    "max": 0.298,
+    "min": 0.029,
+    "mean": 0.05747976878612718
+   },
+   "gpu_util": {
+    "n": 865,
+    "median": 0.0,
+    "p90": 100.0,
+    "p99": 100.0,
+    "max": 100.0,
+    "min": 0.0,
+    "mean": 32.38497109826589
+   },
+   "submit_lag_s": {
+    "n": 222,
+    "median": 0.0235,
+    "p90": 0.10690000000000001,
+    "p99": 0.21696999999999966,
+    "max": 0.276,
+    "min": 0.004,
+    "mean": 0.04321171171171172
+   },
+   "errors": 4,
+   "errors_over_context": 4,
+   "error_kinds": [
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34231) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45703) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50815) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51974) exceeds model\\'s maximum c"
+   ],
+   "warm_requests_checked": 102,
+   "warm_misses": 0,
+   "warm_miss_frac": 0.0,
+   "host_verification": {
+    "external_hit_tokens": 818304.0,
+    "load_bytes": 216306267825.28915,
+    "bytes_per_hit_token": 264334.8533372551,
+    "verified": true,
+    "note": ""
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 278.5130615234375,
+    "host_mem_available_gib": 1155.497787475586
+   },
+   "binding_flags": {
+    "kv_running_set": false,
+    "gpu_compute": false,
+    "pcie": false,
+    "host_capacity": false,
+    "api_cpu": false
+   },
+   "diagnostics": {
+    "scrape_coverage_window": 0.9588888888888889,
+    "upstream_of_engine_window": {
+     "n": 863,
+     "median": 0.0,
+     "p90": 1.0,
+     "p99": 2.0,
+     "max": 3.0,
+     "min": 0.0,
+     "mean": 0.27578215527230593
+    },
+    "engine_queue_window": {
+     "n": 863,
+     "median": 0.0,
+     "p90": 1.0,
+     "p99": 2.0,
+     "max": 3.0,
+     "min": 0.0,
+     "mean": 0.2954808806488992
+    },
+    "engine_waiting_window": {
+     "n": 863,
+     "median": 0.0,
+     "p90": 0.0,
+     "p99": 1.0,
+     "max": 2.0,
+     "min": 0.0,
+     "mean": 0.04171494785631518
+    },
+    "kv_usage_window": {
+     "n": 863,
+     "median": 0.0,
+     "p90": 0.2606153063818968,
+     "p99": 0.4965776760742434,
+     "max": 0.7426900584795322,
+     "min": 0.0,
+     "mean": 0.06013383501577259
+    },
+    "gpu_util_window": {
+     "n": 862,
+     "median": 0.0,
+     "p90": 100.0,
+     "p99": 100.0,
+     "max": 100.0,
+     "min": 0.0,
+     "mean": 32.49767981438515
+    },
+    "api_cores_window": {
+     "n": 862,
+     "median": 0.019,
+     "p90": 0.6220999999999998,
+     "p99": 1.4454299999999995,
+     "max": 1.922,
+     "min": 0.0,
+     "mean": 0.17163805104408353
+    },
+    "api_max_thread_cores_window": {
+     "n": 862,
+     "median": 0.01,
+     "p90": 0.153,
+     "p99": 0.40456,
+     "max": 0.826,
+     "min": 0.0,
+     "mean": 0.0508677494199536
+    },
+    "served_req_per_s_window": 0.24666666666666667,
+    "served_req_per_s_drain": null,
+    "offered_body_mb_per_s": 3.3316074444444452,
+    "served_body_mb_per_s_window": 3.3316074444444452
+   },
+   "harness_valid": true,
+   "breach": true,
+   "policy": "ALL-LAZY",
+   "demand": "hetero",
+   "eager_devices": 0,
+   "eager_and_high": 0,
+   "window_plan": {
+    "escalations": 222,
+    "escalations_high": 140,
+    "escalations_low": 82,
+    "escalations_on_eager": 0,
+    "appends": 0,
+    "eager_devices": 0,
+    "eager_and_high": 0
+   },
+   "fallbacks": 0,
+   "fallback_frac": 0.0,
+   "fallback_flag": false,
+   "host_memory": {
+    "api_rss_peak_gib": 3.86,
+    "engine_rss_peak_gib": 276.06,
+    "tree_rss_peak_gib": 278.51,
+    "mem_available_min_gib": 1155.3,
+    "kv_offload_buffer_gib": 256,
+    "processor_cache_items_est": 15599,
+    "processor_cache_est_gib": 32.945088000000005,
+    "processor_cache_note": "estimate: items cached x 2.16 MB (vLLM exposes no cache-size metric); LRU cap 128 GiB; engine-core RSS includes both"
+   },
+   "body_over_full": {
+    "n": 222,
+    "median": 1.0005443567668064,
+    "p90": 1.0008150131928781,
+    "p99": 1.00111866874664,
+    "max": 1.0012799241526427,
+    "min": 0.01068943845992701,
+    "mean": 0.6846541454489401
+   },
+   "median_history_frames": 111.5,
+   "body_over_full_at_median_history": {
+    "n": 9,
+    "median": 0.6641459594190294,
+    "p90": 1.0007584314946887,
+    "p99": 1.0009550713824644,
+    "max": 1.0009769202588839,
+    "min": 0.41176440816078635,
+    "mean": 0.7330127723484762
+   },
+   "censored": 0,
+   "drain_capped": false,
+   "errors_non_censored": 4,
+   "computed_tokens_window": 1439184,
+   "computed_tokens_per_escalation": 6601.761467889908,
+   "computed_tokens_per_escalation_esc_only": 6601.761467889908,
+   "warmup_computed_tokens": 0,
+   "body_mb_window": 2998.446700000001,
+   "mm_cache_queries": 27877.0,
+   "mm_cache_hits": 11704.0,
+   "whole_counter_window": [
+    0.06,
+    902.3599999999999
+   ],
+   "timeline_points": 865,
+   "binding": [
+    "engine (unattributed)"
+   ],
+   "host_reload_tb": 0.214513483776,
+   "live_set": null,
+   "all": {
+    "n": 218,
+    "failed": 0,
+    "ttft_s": {
+     "n": 218,
+     "median": 1.6684999999999999,
+     "p90": 4.017100000000001,
+     "p99": 8.832669999999982,
+     "max": 9.662,
+     "min": 0.243,
+     "mean": 2.2140229357798162
+    },
+    "computed_tokens_per_escalation_esc_only": 6601.761467889908,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.5779816513761468,
+     "5s": 0.9403669724770642,
+     "15s": 1.0
+    }
+   },
+   "high_demand": {
+    "n": 136,
+    "failed": 0,
+    "ttft_s": {
+     "n": 136,
+     "median": 1.4865,
+     "p90": 3.894,
+     "p99": 8.36315000000001,
+     "max": 9.662,
+     "min": 0.243,
+     "mean": 1.9160882352941173
+    },
+    "computed_tokens_per_escalation_esc_only": 5155.161764705882,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.6838235294117647,
+     "5s": 0.9558823529411765,
+     "15s": 1.0
+    }
+   },
+   "low_demand": {
+    "n": 82,
+    "failed": 0,
+    "ttft_s": {
+     "n": 82,
+     "median": 2.578,
+     "p90": 4.7836,
+     "p99": 8.212989999999996,
+     "max": 9.283,
+     "min": 0.344,
+     "mean": 2.7081585365853655
+    },
+    "computed_tokens_per_escalation_esc_only": 9001.0,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.4024390243902439,
+     "5s": 0.9146341463414634,
+     "15s": 1.0
+    }
+   },
+   "eager_devices_esc": {
+    "n": 0,
+    "failed": 0,
+    "ttft_s": null,
+    "computed_tokens_per_escalation_esc_only": null,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": null,
+     "5s": null,
+     "15s": null
+    }
+   },
+   "lazy_devices_esc": {
+    "n": 218,
+    "failed": 0,
+    "ttft_s": {
+     "n": 218,
+     "median": 1.6684999999999999,
+     "p90": 4.017100000000001,
+     "p99": 8.832669999999982,
+     "max": 9.662,
+     "min": 0.243,
+     "mean": 2.2140229357798162
+    },
+    "computed_tokens_per_escalation_esc_only": 6601.761467889908,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.5779816513761468,
+     "5s": 0.9403669724770642,
+     "15s": 1.0
+    }
+   },
+   "escalations_excluded_over_context": 4
+  },
+  "RH8_MIX-RANDOM_D64": {
+   "part": "MIX-RANDOM",
+   "D": 64,
+   "fmt": "D2",
+   "cadence": 10,
+   "lazy": false,
+   "offload_gib": 256,
+   "coverage": {
+    "devices": 64,
+    "devices_without_sessions": 0,
+    "devices_plan_ends_before_window_end": 10,
+    "sessions_per_device": [
+     3,
+     4
+    ]
+   },
+   "warmup_s": 23.19,
+   "inflight_at_window_end": 1,
+   "drain_s": 0.1,
+   "whole_s": 901.7,
+   "n_requests": 1632,
+   "appends": 1394,
+   "escalations": 218,
+   "req_per_s_window": 1.7955555555555556,
+   "esc_ttft_s": {
+    "n": 218,
+    "median": 1.3900000000000001,
+    "p90": 4.268800000000001,
+    "p99": 8.83792,
+    "max": 9.325,
+    "min": 0.069,
+    "mean": 1.9540091743119268
+   },
+   "esc_latency_s": {
+    "n": 218,
+    "median": 1.4945,
+    "p90": 4.4969,
+    "p99": 8.900749999999999,
+    "max": 9.387,
+    "min": 0.094,
+    "mean": 2.0656146788990823
+   },
+   "append_ttft_s": {
+    "n": 1394,
+    "median": 0.329,
+    "p90": 3.1568,
+    "p99": 7.218419999999994,
+    "max": 11.551,
+    "min": 0.106,
+    "mean": 1.0601750358680058
+   },
+   "esc_hit": 0.5329201278819052,
+   "append_hit": 0.9496088227214913,
+   "token_hit": 0.8840706010111601,
+   "esc_prompt_tokens": {
+    "n": 218,
+    "median": 10057.5,
+    "p90": 19367.900000000005,
+    "p99": 25841.989999999998,
+    "max": 26402.0,
+    "min": 1184.0,
+    "mean": 10858.642201834862
+   },
+   "body_mb": {
+    "n": 1616,
+    "median": 0.9648,
+    "p90": 1.94805,
+    "p99": 32.000379999999986,
+    "max": 68.3751,
+    "min": 0.013,
+    "mean": 2.385861819306931
+   },
+   "gpu_local_hit_tokens": 495424.0,
+   "host_hit_tokens": 12810224.0,
+   "host_share_of_hits": 0.9627658870879494,
+   "pcie_load_gb": 3358.123360256,
+   "pcie_store_gb": 454.008242176,
+   "pcie_load_gbps_avg": 3.7242135524631252,
+   "pcie_store_gbps_avg": 0.5035025420605522,
+   "pcie_load_gbps_peak_1s": 21.946078870588625,
+   "pcie_load_gbps_best_30s": 5.976919122439203,
+   "load_bytes_per_host_hit_token": 262144.0,
+   "allocation_failures": 0,
+   "computed_tok_s_achieved": 1956.3879339026282,
+   "computed_tok_s_demand": 1938.6533333333334,
+   "kv_usage": {
+    "n": 865,
+    "median": 0.0,
+    "p90": 0.4001525553012968,
+    "p99": 0.8577676074243584,
+    "max": 0.9992372234935164,
+    "min": 0.0,
+    "mean": 0.11949547992457478
+   },
+   "waiting": {
+    "n": 865,
+    "median": 0.0,
+    "p90": 2.0,
+    "p99": 9.0,
+    "max": 14.0,
+    "min": 0.0,
+    "mean": 0.7329479768786127
+   },
+   "running": {
+    "n": 865,
+    "median": 0.0,
+    "p90": 1.0,
+    "p99": 3.0,
+    "max": 5.0,
+    "min": 0.0,
+    "mean": 0.38265895953757223
+   },
+   "preemptions": 0.0,
+   "api_cores": {
+    "n": 865,
+    "median": 0.154,
+    "p90": 0.6518,
+    "p99": 1.4908800000000002,
+    "max": 2.106,
+    "min": 0.01,
+    "mean": 0.2569514450867052
+   },
+   "api_max_thread_cores": {
+    "n": 865,
+    "median": 0.048,
+    "p90": 0.154,
+    "p99": 0.403,
+    "max": 0.808,
+    "min": 0.0,
+    "mean": 0.07123583815028903
+   },
+   "engine_cores": {
+    "n": 865,
+    "median": 0.259,
+    "p90": 1.027,
+    "p99": 1.0681600000000002,
+    "max": 1.231,
+    "min": 0.0,
+    "mean": 0.401114450867052
+   },
+   "harness_cores": {
+    "n": 865,
+    "median": 0.058,
+    "p90": 0.106,
+    "p99": 0.163,
+    "max": 0.245,
+    "min": 0.02,
+    "mean": 0.06461502890173411
+   },
+   "gpu_util": {
+    "n": 865,
+    "median": 37.0,
+    "p90": 100.0,
+    "p99": 100.0,
+    "max": 100.0,
+    "min": 0.0,
+    "mean": 45.27630057803468
+   },
+   "submit_lag_s": {
+    "n": 1616,
+    "median": 0.004,
+    "p90": 0.014,
+    "p99": 0.0598499999999999,
+    "max": 0.104,
+    "min": 0.001,
+    "mean": 0.007025990099009903
+   },
+   "errors": 4,
+   "errors_over_context": 4,
+   "error_kinds": [
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34231) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45703) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50815) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51974) exceeds model\\'s maximum c"
+   ],
+   "warm_requests_checked": 1492,
+   "warm_misses": 0,
+   "warm_miss_frac": 0.0,
+   "host_verification": {
+    "external_hit_tokens": 12810240.0,
+    "load_bytes": 3359920339668.8604,
+    "bytes_per_hit_token": 262283.94937712804,
+    "verified": true,
+    "note": ""
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 283.1621551513672,
+    "host_mem_available_gib": 1197.221118927002
+   },
+   "binding_flags": {
+    "kv_running_set": true,
+    "gpu_compute": false,
+    "pcie": false,
+    "host_capacity": false,
+    "api_cpu": false
+   },
+   "diagnostics": {
+    "scrape_coverage_window": 0.96,
+    "upstream_of_engine_window": {
+     "n": 864,
+     "median": 0.0,
+     "p90": 3.0,
+     "p99": 8.0,
+     "max": 12.0,
+     "min": -1.0,
+     "mean": 1.0138888888888888
+    },
+    "engine_queue_window": {
+     "n": 864,
+     "median": 0.0,
+     "p90": 3.0,
+     "p99": 11.370000000000005,
+     "max": 17.0,
+     "min": 0.0,
+     "mean": 1.1168981481481481
+    },
+    "engine_waiting_window": {
+     "n": 864,
+     "median": 0.0,
+     "p90": 2.0,
+     "p99": 9.0,
+     "max": 14.0,
+     "min": 0.0,
+     "mean": 0.7337962962962963
+    },
+    "kv_usage_window": {
+     "n": 864,
+     "median": 0.0,
+     "p90": 0.40035596236969245,
+     "p99": 0.8581108568522757,
+     "max": 0.9992372234935164,
+     "min": 0.0,
+     "mean": 0.1196337848781912
+    },
+    "gpu_util_window": {
+     "n": 864,
+     "median": 37.0,
+     "p90": 100.0,
+     "p99": 100.0,
+     "max": 100.0,
+     "min": 0.0,
+     "mean": 45.3287037037037
+    },
+    "api_cores_window": {
+     "n": 864,
+     "median": 0.154,
+     "p90": 0.6521000000000001,
+     "p99": 1.49096,
+     "max": 2.106,
+     "min": 0.01,
+     "mean": 0.2571041666666667
+    },
+    "api_max_thread_cores_window": {
+     "n": 864,
+     "median": 0.048,
+     "p90": 0.154,
+     "p99": 0.403,
+     "max": 0.808,
+     "min": 0.0,
+     "mean": 0.07128472222222222
+    },
+    "served_req_per_s_window": 1.7955555555555556,
+    "served_req_per_s_drain": null,
+    "offered_body_mb_per_s": 4.28394744444445,
+    "served_body_mb_per_s_window": 4.341482000000006
+   },
+   "harness_valid": true,
+   "breach": false,
+   "policy": "MIX-RANDOM",
+   "demand": "hetero",
+   "eager_devices": 16,
+   "eager_and_high": 5,
+   "window_plan": {
+    "escalations": 222,
+    "escalations_high": 140,
+    "escalations_low": 82,
+    "escalations_on_eager": 65,
+    "appends": 1394,
+    "eager_devices": 16,
+    "eager_and_high": 5
+   },
+   "fallbacks": 13,
+   "fallback_frac": 0.007965686274509803,
+   "fallback_flag": false,
+   "host_memory": {
+    "api_rss_peak_gib": 3.86,
+    "engine_rss_peak_gib": 280.53,
+    "tree_rss_peak_gib": 283.12,
+    "mem_available_min_gib": 1196.9,
+    "kv_offload_buffer_gib": 256,
+    "processor_cache_items_est": 20047,
+    "processor_cache_est_gib": 42.339264,
+    "processor_cache_note": "estimate: items cached x 2.16 MB (vLLM exposes no cache-size metric); LRU cap 128 GiB; engine-core RSS includes both"
+   },
+   "body_over_full": {
+    "n": 1603,
+    "median": 0.05930430769459807,
+    "p90": 0.46335444871860193,
+    "p99": 1.000913499848765,
+    "max": 1.0012799241526427,
+    "min": 0.0007767975942347775,
+    "mean": 0.16589257263618512
+   },
+   "median_history_frames": 91.0,
+   "body_over_full_at_median_history": {
+    "n": 132,
+    "median": 0.05720119025807154,
+    "p90": 0.0654096197235967,
+    "p99": 1.0013971221947147,
+    "max": 1.0019754480033864,
+    "min": 0.0007946679160867428,
+    "mean": 0.10202761712218643
+   },
+   "censored": 0,
+   "drain_capped": false,
+   "errors_non_censored": 4,
+   "computed_tokens_window": 1744788,
+   "computed_tokens_per_escalation": 8003.614678899083,
+   "computed_tokens_per_escalation_esc_only": 5071.853211009175,
+   "warmup_computed_tokens": 111858,
+   "body_mb_window": 3855.5527000000047,
+   "mm_cache_queries": 168136.0,
+   "mm_cache_hits": 148752.0,
+   "whole_counter_window": [
+    23.19,
+    924.8900000000001
+   ],
+   "timeline_points": 888,
+   "binding": [
+    "kv_running_set"
+   ],
+   "host_reload_tb": 3.358123360256,
+   "live_set": {
+    "peak_tokens": 185196.0,
+    "mean_tokens": 142577.1270718232,
+    "peak_gib": 45.2138671875,
+    "peak_over_capacity": 0.16661508564848135
+   },
+   "all": {
+    "n": 218,
+    "failed": 0,
+    "ttft_s": {
+     "n": 218,
+     "median": 1.3900000000000001,
+     "p90": 4.268800000000001,
+     "p99": 8.83792,
+     "max": 9.325,
+     "min": 0.069,
+     "mean": 1.9540091743119268
+    },
+    "computed_tokens_per_escalation_esc_only": 5071.853211009175,
+    "fallbacks": 13,
+    "frac_within": {
+     "2s": 0.6238532110091743,
+     "5s": 0.9403669724770642,
+     "15s": 1.0
+    }
+   },
+   "high_demand": {
+    "n": 136,
+    "failed": 0,
+    "ttft_s": {
+     "n": 136,
+     "median": 1.0870000000000002,
+     "p90": 3.768,
+     "p99": 8.86935,
+     "max": 9.325,
+     "min": 0.161,
+     "mean": 1.6471838235294118
+    },
+    "computed_tokens_per_escalation_esc_only": 3637.1617647058824,
+    "fallbacks": 10,
+    "frac_within": {
+     "2s": 0.7132352941176471,
+     "5s": 0.9558823529411765,
+     "15s": 1.0
+    }
+   },
+   "low_demand": {
+    "n": 82,
+    "failed": 0,
+    "ttft_s": {
+     "n": 82,
+     "median": 2.4865000000000004,
+     "p90": 4.960100000000001,
+     "p99": 8.432949999999998,
+     "max": 8.842,
+     "min": 0.069,
+     "mean": 2.462890243902439
+    },
+    "computed_tokens_per_escalation_esc_only": 7451.341463414634,
+    "fallbacks": 3,
+    "frac_within": {
+     "2s": 0.47560975609756095,
+     "5s": 0.9146341463414634,
+     "15s": 1.0
+    }
+   },
+   "eager_devices_esc": {
+    "n": 65,
+    "failed": 0,
+    "ttft_s": {
+     "n": 65,
+     "median": 0.335,
+     "p90": 2.5082000000000004,
+     "p99": 8.8618,
+     "max": 8.897,
+     "min": 0.069,
+     "mean": 1.0824307692307693
+    },
+    "computed_tokens_per_escalation_esc_only": 291.7230769230769,
+    "fallbacks": 13,
+    "frac_within": {
+     "2s": 0.8,
+     "5s": 0.9692307692307692,
+     "15s": 1.0
+    }
+   },
+   "lazy_devices_esc": {
+    "n": 153,
+    "failed": 0,
+    "ttft_s": {
+     "n": 153,
+     "median": 1.823,
+     "p90": 4.406000000000001,
+     "p99": 8.567879999999995,
+     "max": 9.325,
+     "min": 0.259,
+     "mean": 2.3242875816993465
+    },
+    "computed_tokens_per_escalation_esc_only": 7102.6274509803925,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.5490196078431373,
+     "5s": 0.9281045751633987,
+     "15s": 1.0
+    }
+   },
+   "escalations_excluded_over_context": 4
+  },
+  "RH8_MIX-DEMAND_D64": {
+   "part": "MIX-DEMAND",
+   "D": 64,
+   "fmt": "D2",
+   "cadence": 10,
+   "lazy": false,
+   "offload_gib": 256,
+   "coverage": {
+    "devices": 64,
+    "devices_without_sessions": 0,
+    "devices_plan_ends_before_window_end": 10,
+    "sessions_per_device": [
+     3,
+     4
+    ]
+   },
+   "warmup_s": 25.25,
+   "inflight_at_window_end": 0,
+   "drain_s": 0.0,
+   "whole_s": 902.5,
+   "n_requests": 1617,
+   "appends": 1338,
+   "escalations": 218,
+   "req_per_s_window": 1.778888888888889,
+   "esc_ttft_s": {
+    "n": 218,
+    "median": 0.5105,
+    "p90": 3.6525,
+    "p99": 6.619779999999994,
+    "max": 8.34,
+    "min": 0.05,
+    "mean": 1.3557385321100917
+   },
+   "esc_latency_s": {
+    "n": 218,
+    "median": 0.5549999999999999,
+    "p90": 3.7637000000000005,
+    "p99": 6.737169999999998,
+    "max": 8.405,
+    "min": 0.072,
+    "mean": 1.4247844036697246
+   },
+   "append_ttft_s": {
+    "n": 1338,
+    "median": 0.2985,
+    "p90": 2.0766999999999975,
+    "p99": 5.280099999999992,
+    "max": 8.164,
+    "min": 0.097,
+    "mean": 0.7192653213751868
+   },
+   "esc_hit": 0.6697569741007231,
+   "append_hit": 0.9529376245621223,
+   "token_hit": 0.908905907768601,
+   "esc_prompt_tokens": {
+    "n": 218,
+    "median": 10058.5,
+    "p90": 19368.900000000005,
+    "p99": 25842.989999999998,
+    "max": 26403.0,
+    "min": 1185.0,
+    "mean": 10859.642201834862
+   },
+   "body_mb": {
+    "n": 1601,
+    "median": 0.9316,
+    "p90": 1.2083,
+    "p99": 31.9096,
+    "max": 54.0489,
+    "min": 0.0076,
+    "mean": 1.9979843222985634
+   },
+   "gpu_local_hit_tokens": 994176.0,
+   "host_hit_tokens": 12844320.0,
+   "host_share_of_hits": 0.928158666953403,
+   "pcie_load_gb": 3367.06142208,
+   "pcie_store_gb": 362.396254208,
+   "pcie_load_gbps_avg": 3.7308159801440444,
+   "pcie_store_gbps_avg": 0.4015470960753462,
+   "pcie_load_gbps_peak_1s": 23.484069415384795,
+   "pcie_load_gbps_best_30s": 5.536341469866669,
+   "load_bytes_per_host_hit_token": 262144.0,
+   "allocation_failures": 0,
+   "computed_tok_s_achieved": 1536.7844875346261,
+   "computed_tok_s_demand": 1541.0533333333333,
+   "kv_usage": {
+    "n": 867,
+    "median": 0.0,
+    "p90": 0.2606153063818968,
+    "p99": 0.7011950165268245,
+    "max": 0.8911772184083397,
+    "min": 0.0,
+    "mean": 0.07214645778144943
+   },
+   "waiting": {
+    "n": 867,
+    "median": 0.0,
+    "p90": 1.0,
+    "p99": 6.0,
+    "max": 12.0,
+    "min": 0.0,
+    "mean": 0.3679354094579008
+   },
+   "running": {
+    "n": 867,
+    "median": 0.0,
+    "p90": 1.0,
+    "p99": 2.0,
+    "max": 5.0,
+    "min": 0.0,
+    "mean": 0.22606689734717417
+   },
+   "preemptions": 0.0,
+   "api_cores": {
+    "n": 868,
+    "median": 0.144,
+    "p90": 0.49300000000000066,
+    "p99": 1.3567200000000035,
+    "max": 2.181,
+    "min": 0.01,
+    "mean": 0.2183110599078341
+   },
+   "api_max_thread_cores": {
+    "n": 868,
+    "median": 0.039,
+    "p90": 0.115,
+    "p99": 0.39159000000000094,
+    "max": 0.601,
+    "min": 0.0,
+    "mean": 0.06189055299539171
+   },
+   "engine_cores": {
+    "n": 868,
+    "median": 0.2275,
+    "p90": 1.017,
+    "p99": 1.05633,
+    "max": 1.354,
+    "min": 0.01,
+    "mean": 0.34274884792626725
+   },
+   "harness_cores": {
+    "n": 868,
+    "median": 0.058,
+    "p90": 0.10530000000000006,
+    "p99": 0.17597000000000035,
+    "max": 0.292,
+    "min": 0.01,
+    "mean": 0.061350230414746555
+   },
+   "gpu_util": {
+    "n": 868,
+    "median": 5.0,
+    "p90": 100.0,
+    "p99": 100.0,
+    "max": 100.0,
+    "min": 0.0,
+    "mean": 38.21774193548387
+   },
+   "submit_lag_s": {
+    "n": 1601,
+    "median": 0.003,
+    "p90": 0.006,
+    "p99": 0.054,
+    "max": 0.093,
+    "min": 0.001,
+    "mean": 0.005312929419113054
+   },
+   "errors": 46,
+   "errors_over_context": 46,
+   "error_kinds": [
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (32984) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33434) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33884) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34232) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34334) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34784) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35234) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35684) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36134) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36584) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37034) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37484) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37934) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38384) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38834) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39284) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39734) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (40184) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (40634) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41084) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41534) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41984) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (42434) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (42884) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (43334) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (43784) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (44234) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (44684) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45134) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45584) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45704) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46034) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46484) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46934) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (47384) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (47834) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (48284) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (48734) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (49184) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (49634) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50084) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50534) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50816) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50984) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51434) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51975) exceeds model\\'s maximum c"
+   ],
+   "warm_requests_checked": 1453,
+   "warm_misses": 0,
+   "warm_miss_frac": 0.0,
+   "host_verification": {
+    "external_hit_tokens": 12844320.0,
+    "load_bytes": 3368854208302.2666,
+    "bytes_per_hit_token": 262283.57813432446,
+    "verified": true,
+    "note": ""
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 279.8898735046387,
+    "host_mem_available_gib": 1199.3370056152344
+   },
+   "binding_flags": {
+    "kv_running_set": false,
+    "gpu_compute": false,
+    "pcie": false,
+    "host_capacity": false,
+    "api_cpu": false
+   },
+   "diagnostics": {
+    "scrape_coverage_window": 0.9611111111111111,
+    "upstream_of_engine_window": {
+     "n": 865,
+     "median": 0.0,
+     "p90": 3.0,
+     "p99": 7.0,
+     "max": 11.0,
+     "min": -1.0,
+     "mean": 0.8196531791907514
+    },
+    "engine_queue_window": {
+     "n": 865,
+     "median": 0.0,
+     "p90": 2.0,
+     "p99": 7.0,
+     "max": 13.0,
+     "min": 0.0,
+     "mean": 0.5953757225433526
+    },
+    "engine_waiting_window": {
+     "n": 865,
+     "median": 0.0,
+     "p90": 1.0,
+     "p99": 6.0,
+     "max": 12.0,
+     "min": 0.0,
+     "mean": 0.36878612716763004
+    },
+    "kv_usage_window": {
+     "n": 865,
+     "median": 0.0,
+     "p90": 0.2606153063818968,
+     "p99": 0.7012967200610223,
+     "max": 0.8911772184083397,
+     "min": 0.0,
+     "mean": 0.07231327040059729
+    },
+    "gpu_util_window": {
+     "n": 865,
+     "median": 6.0,
+     "p90": 100.0,
+     "p99": 100.0,
+     "max": 100.0,
+     "min": 0.0,
+     "mean": 38.35028901734104
+    },
+    "api_cores_window": {
+     "n": 865,
+     "median": 0.144,
+     "p90": 0.4960000000000002,
+     "p99": 1.3592400000000011,
+     "max": 2.181,
+     "min": 0.01,
+     "mean": 0.21900115606936413
+    },
+    "api_max_thread_cores_window": {
+     "n": 865,
+     "median": 0.039,
+     "p90": 0.115,
+     "p99": 0.3922800000000003,
+     "max": 0.601,
+     "min": 0.0,
+     "mean": 0.06204971098265897
+    },
+    "served_req_per_s_window": 1.778888888888889,
+    "served_req_per_s_drain": null,
+    "offered_body_mb_per_s": 3.5541921111111106,
+    "served_body_mb_per_s_window": 3.5541921111111106
+   },
+   "harness_valid": true,
+   "breach": false,
+   "policy": "MIX-DEMAND",
+   "demand": "hetero",
+   "eager_devices": 16,
+   "eager_and_high": 16,
+   "window_plan": {
+    "escalations": 222,
+    "escalations_high": 140,
+    "escalations_low": 82,
+    "escalations_on_eager": 140,
+    "appends": 1379,
+    "eager_devices": 16,
+    "eager_and_high": 16
+   },
+   "fallbacks": 21,
+   "fallback_frac": 0.012987012987012988,
+   "fallback_flag": true,
+   "host_memory": {
+    "api_rss_peak_gib": 5.21,
+    "engine_rss_peak_gib": 276.62,
+    "tree_rss_peak_gib": 279.89,
+    "mem_available_min_gib": 1199.2,
+    "kv_offload_buffer_gib": 256,
+    "processor_cache_items_est": 16221,
+    "processor_cache_est_gib": 34.258752,
+    "processor_cache_note": "estimate: items cached x 2.16 MB (vLLM exposes no cache-size metric); LRU cap 128 GiB; engine-core RSS includes both"
+   },
+   "body_over_full": {
+    "n": 1580,
+    "median": 0.04936016952089584,
+    "p90": 0.3187882694504904,
+    "p99": 1.0008553560335036,
+    "max": 1.0013607756421161,
+    "min": 0.0007767975942347775,
+    "mean": 0.14038050845102165
+   },
+   "median_history_frames": 101.0,
+   "body_over_full_at_median_history": {
+    "n": 115,
+    "median": 0.049676786011965395,
+    "p90": 0.05971518282488447,
+    "p99": 1.0008159301511663,
+    "max": 1.0017859420844497,
+    "min": 0.0007946679160867428,
+    "mean": 0.07349957767775119
+   },
+   "censored": 0,
+   "drain_capped": false,
+   "errors_non_censored": 46,
+   "computed_tokens_window": 1386948,
+   "computed_tokens_per_escalation": 6362.146788990825,
+   "computed_tokens_per_escalation_esc_only": 3586.321100917431,
+   "warmup_computed_tokens": 125896,
+   "body_mb_window": 3198.7728999999995,
+   "mm_cache_queries": 189401.0,
+   "mm_cache_hits": 174366.0,
+   "whole_counter_window": [
+    25.25,
+    927.75
+   ],
+   "timeline_points": 892,
+   "binding": [
+    "engine (unattributed)"
+   ],
+   "host_reload_tb": 3.36706142208,
+   "live_set": {
+    "peak_tokens": 238372.0,
+    "mean_tokens": 165001.2375690608,
+    "peak_gib": 58.1962890625,
+    "peak_over_capacity": 0.21445588023607312
+   },
+   "all": {
+    "n": 218,
+    "failed": 0,
+    "ttft_s": {
+     "n": 218,
+     "median": 0.5105,
+     "p90": 3.6525,
+     "p99": 6.619779999999994,
+     "max": 8.34,
+     "min": 0.05,
+     "mean": 1.3557385321100917
+    },
+    "computed_tokens_per_escalation_esc_only": 3586.321100917431,
+    "fallbacks": 21,
+    "frac_within": {
+     "2s": 0.7293577981651376,
+     "5s": 0.9724770642201835,
+     "15s": 1.0
+    }
+   },
+   "high_demand": {
+    "n": 136,
+    "failed": 0,
+    "ttft_s": {
+     "n": 136,
+     "median": 0.3005,
+     "p90": 2.134,
+     "p99": 3.8691500000000008,
+     "max": 6.316,
+     "min": 0.05,
+     "mean": 0.6637794117647059
+    },
+    "computed_tokens_per_escalation_esc_only": 321.45588235294116,
+    "fallbacks": 21,
+    "frac_within": {
+     "2s": 0.8897058823529411,
+     "5s": 0.9926470588235294,
+     "15s": 1.0
+    }
+   },
+   "low_demand": {
+    "n": 82,
+    "failed": 0,
+    "ttft_s": {
+     "n": 82,
+     "median": 2.527,
+     "p90": 4.627300000000002,
+     "p99": 7.1387699999999965,
+     "max": 8.34,
+     "min": 0.299,
+     "mean": 2.5033780487804878
+    },
+    "computed_tokens_per_escalation_esc_only": 9001.219512195123,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.4634146341463415,
+     "5s": 0.9390243902439024,
+     "15s": 1.0
+    }
+   },
+   "eager_devices_esc": {
+    "n": 136,
+    "failed": 0,
+    "ttft_s": {
+     "n": 136,
+     "median": 0.3005,
+     "p90": 2.134,
+     "p99": 3.8691500000000008,
+     "max": 6.316,
+     "min": 0.05,
+     "mean": 0.6637794117647059
+    },
+    "computed_tokens_per_escalation_esc_only": 321.45588235294116,
+    "fallbacks": 21,
+    "frac_within": {
+     "2s": 0.8897058823529411,
+     "5s": 0.9926470588235294,
+     "15s": 1.0
+    }
+   },
+   "lazy_devices_esc": {
+    "n": 82,
+    "failed": 0,
+    "ttft_s": {
+     "n": 82,
+     "median": 2.527,
+     "p90": 4.627300000000002,
+     "p99": 7.1387699999999965,
+     "max": 8.34,
+     "min": 0.299,
+     "mean": 2.5033780487804878
+    },
+    "computed_tokens_per_escalation_esc_only": 9001.219512195123,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.4634146341463415,
+     "5s": 0.9390243902439024,
+     "15s": 1.0
+    }
+   },
+   "escalations_excluded_over_context": 4
+  },
+  "RH8_ALL-EAGER_D96": {
+   "part": "ALL-EAGER",
+   "D": 96,
+   "fmt": "D2",
+   "cadence": 10,
+   "lazy": false,
+   "offload_gib": 256,
+   "coverage": {
+    "devices": 96,
+    "devices_without_sessions": 0,
+    "devices_plan_ends_before_window_end": 68,
+    "sessions_per_device": [
+     2,
+     3
+    ]
+   },
+   "warmup_s": 168.68,
+   "inflight_at_window_end": 653,
+   "drain_s": 118.2,
+   "whole_s": 1020.0,
+   "n_requests": 6871,
+   "appends": 6448,
+   "escalations": 267,
+   "req_per_s_window": 7.527777777777778,
+   "esc_ttft_s": {
+    "n": 267,
+    "median": 131.223,
+    "p90": 179.663,
+    "p99": 182.96272,
+    "max": 183.57,
+    "min": 0.346,
+    "mean": 116.45171910112359
+   },
+   "esc_latency_s": {
+    "n": 267,
+    "median": 131.288,
+    "p90": 179.8342,
+    "p99": 183.06928,
+    "max": 183.839,
+    "min": 0.374,
+    "mean": 116.62031460674156
+   },
+   "append_ttft_s": {
+    "n": 6448,
+    "median": 126.123,
+    "p90": 179.71220000000002,
+    "p99": 183.03524,
+    "max": 183.874,
+    "min": 0.146,
+    "mean": 112.90637484491315
+   },
+   "esc_hit": 0.9719331953983215,
+   "append_hit": 0.9551249729183304,
+   "token_hit": 0.955876968127554,
+   "esc_prompt_tokens": {
+    "n": 267,
+    "median": 10993.0,
+    "p90": 20617.2,
+    "p99": 26560.75999999999,
+    "max": 27183.0,
+    "min": 765.0,
+    "mean": 11516.397003745318
+   },
+   "body_mb": {
+    "n": 6775,
+    "median": 0.9391,
+    "p90": 1.16976,
+    "p99": 1.399052,
+    "max": 56.3063,
+    "min": 0.006,
+    "mean": 1.0609564723247231
+   },
+   "gpu_local_hit_tokens": 662432.0,
+   "host_hit_tokens": 65033216.0,
+   "host_share_of_hits": 0.989916653230972,
+   "pcie_load_gb": 17048.067375104,
+   "pcie_store_gb": 782.57324032,
+   "pcie_load_gbps_avg": 16.713791544219607,
+   "pcie_store_gbps_avg": 0.767228666980392,
+   "pcie_load_gbps_peak_1s": 29.26425819428619,
+   "pcie_load_gbps_best_30s": 19.437623593572653,
+   "load_bytes_per_host_hit_token": 262144.0,
+   "allocation_failures": 0,
+   "computed_tok_s_achieved": 2973.0333333333333,
+   "computed_tok_s_demand": 3369.4377777777777,
+   "kv_usage": {
+    "n": 976,
+    "median": 0.5924230867022628,
+    "p90": 0.8110856852275616,
+    "p99": 0.9544876684464785,
+    "max": 0.9811848461734045,
+    "min": 0.0,
+    "mean": 0.5781489018936031
+   },
+   "waiting": {
+    "n": 976,
+    "median": 816.0,
+    "p90": 1168.5,
+    "p99": 1183.0,
+    "max": 1186.0,
+    "min": 0.0,
+    "mean": 740.6936475409836
+   },
+   "running": {
+    "n": 976,
+    "median": 0.0,
+    "p90": 3.0,
+    "p99": 5.0,
+    "max": 7.0,
+    "min": 0.0,
+    "mean": 0.8094262295081968
+   },
+   "preemptions": 0.0,
+   "api_cores": {
+    "n": 980,
+    "median": 0.5465,
+    "p90": 0.9122000000000001,
+    "p99": 1.6567800000000006,
+    "max": 2.58,
+    "min": 0.029,
+    "mean": 0.5514683673469388
+   },
+   "api_max_thread_cores": {
+    "n": 980,
+    "median": 0.162,
+    "p90": 0.269,
+    "p99": 0.5572100000000001,
+    "max": 0.74,
+    "min": 0.019,
+    "mean": 0.16497857142857142
+   },
+   "engine_cores": {
+    "n": 980,
+    "median": 1.039,
+    "p90": 1.103,
+    "p99": 1.1552600000000002,
+    "max": 1.209,
+    "min": 0.019,
+    "mean": 0.9908346938775511
+   },
+   "harness_cores": {
+    "n": 980,
+    "median": 0.173,
+    "p90": 0.259,
+    "p99": 0.3972600000000002,
+    "max": 0.607,
+    "min": 0.048,
+    "mean": 0.17528673469387757
+   },
+   "gpu_util": {
+    "n": 980,
+    "median": 100.0,
+    "p90": 100.0,
+    "p99": 100.0,
+    "max": 100.0,
+    "min": 0.0,
+    "mean": 93.2734693877551
+   },
+   "submit_lag_s": {
+    "n": 6775,
+    "median": 0.005,
+    "p90": 0.011,
+    "p99": 0.046,
+    "max": 0.302,
+    "min": 0.001,
+    "mean": 0.006947011070110701
+   },
+   "errors": 61,
+   "errors_over_context": 59,
+   "error_kinds": [
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (32983) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33433) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33883) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34333) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34783) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35233) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35683) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36133) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36583) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37033) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37483) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37933) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38383) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38833) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39283) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39733) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (40183) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (40633) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41083) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41533) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41983) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (42433) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (42883) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (43333) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (43783) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (44233) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (44683) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45133) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45583) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46033) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46483) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46933) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (47383) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (47833) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (48283) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (48733) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (49183) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (49633) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50083) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50533) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50983) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51433) exceeds model\\'s maximum c",
+    "ReadError: "
+   ],
+   "warm_requests_checked": 5280,
+   "warm_misses": 0,
+   "warm_miss_frac": 0.0,
+   "host_verification": {
+    "external_hit_tokens": 65033616.0,
+    "load_bytes": 17049965020025.03,
+    "bytes_per_hit_token": 262171.5670865515,
+    "verified": true,
+    "note": ""
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 317.7480125427246,
+    "host_mem_available_gib": 1157.277244567871
+   },
+   "binding_flags": {
+    "kv_running_set": true,
+    "gpu_compute": false,
+    "pcie": false,
+    "host_capacity": false,
+    "api_cpu": false
+   },
+   "diagnostics": {
+    "scrape_coverage_window": 0.9566666666666667,
+    "upstream_of_engine_window": {
+     "n": 861,
+     "median": 2.0,
+     "p90": 6.0,
+     "p99": 10.0,
+     "max": 13.0,
+     "min": -2.0,
+     "mean": 2.751451800232288
+    },
+    "engine_queue_window": {
+     "n": 861,
+     "median": 894.0,
+     "p90": 1170.0,
+     "p99": 1184.0,
+     "max": 1187.0,
+     "min": 0.0,
+     "mean": 798.1939605110337
+    },
+    "engine_waiting_window": {
+     "n": 861,
+     "median": 894.0,
+     "p90": 1170.0,
+     "p99": 1183.0,
+     "max": 1186.0,
+     "min": 0.0,
+     "mean": 797.3275261324042
+    },
+    "kv_usage_window": {
+     "n": 861,
+     "median": 0.5995423340961099,
+     "p90": 0.8133740147470124,
+     "p99": 0.9547927790490719,
+     "max": 0.9811848461734045,
+     "min": 0.0,
+     "mean": 0.585569319788218
+    },
+    "gpu_util_window": {
+     "n": 864,
+     "median": 100.0,
+     "p90": 100.0,
+     "p99": 100.0,
+     "max": 100.0,
+     "min": 0.0,
+     "mean": 93.52777777777777
+    },
+    "api_cores_window": {
+     "n": 864,
+     "median": 0.593,
+     "p90": 0.932,
+     "p99": 1.67174,
+     "max": 2.58,
+     "min": 0.038,
+     "mean": 0.6188750000000001
+    },
+    "api_max_thread_cores_window": {
+     "n": 864,
+     "median": 0.173,
+     "p90": 0.2728000000000002,
+     "p99": 0.5639200000000001,
+     "max": 0.74,
+     "min": 0.019,
+     "mean": 0.18230902777777777
+    },
+    "served_req_per_s_window": 6.802222222222222,
+    "served_req_per_s_drain": 5.441666666666666,
+    "offered_body_mb_per_s": 7.986644555555549,
+    "served_body_mb_per_s_window": 7.099943888888884
+   },
+   "harness_valid": true,
+   "breach": true,
+   "policy": "ALL-EAGER",
+   "demand": "hetero",
+   "eager_devices": 96,
+   "eager_and_high": 24,
+   "window_plan": {
+    "escalations": 267,
+    "escalations_high": 170,
+    "escalations_low": 97,
+    "escalations_on_eager": 267,
+    "appends": 6508,
+    "eager_devices": 96,
+    "eager_and_high": 24
+   },
+   "fallbacks": 40,
+   "fallback_frac": 0.0058215689128220055,
+   "fallback_flag": false,
+   "host_memory": {
+    "api_rss_peak_gib": 17.82,
+    "engine_rss_peak_gib": 303.0,
+    "tree_rss_peak_gib": 318.62,
+    "mem_available_min_gib": 1155.5,
+    "kv_offload_buffer_gib": 256,
+    "processor_cache_items_est": 41540,
+    "processor_cache_est_gib": 87.73248000000001,
+    "processor_cache_note": "estimate: items cached x 2.16 MB (vLLM exposes no cache-size metric); LRU cap 128 GiB; engine-core RSS includes both"
+   },
+   "body_over_full": {
+    "n": 6735,
+    "median": 0.04665410841422975,
+    "p90": 0.18819595890646665,
+    "p99": 1.0006977225260358,
+    "max": 1.0013607756421161,
+    "min": 0.0007742339058049597,
+    "mean": 0.09365072597910724
+   },
+   "median_history_frames": 106.0,
+   "body_over_full_at_median_history": {
+    "n": 538,
+    "median": 0.047997830361462566,
+    "p90": 0.05481665919230693,
+    "p99": 0.06574494643139521,
+    "max": 1.0019517135817642,
+    "min": 0.007865197400529142,
+    "mean": 0.052814142092183596
+   },
+   "censored": 0,
+   "drain_capped": false,
+   "errors_non_censored": 61,
+   "computed_tokens_window": 3032494,
+   "computed_tokens_per_escalation": 11357.655430711611,
+   "computed_tokens_per_escalation_esc_only": 323.22846441947564,
+   "warmup_computed_tokens": 827665,
+   "body_mb_window": 7187.980099999994,
+   "mm_cache_queries": 786254.0,
+   "mm_cache_hits": 753580.0,
+   "whole_counter_window": [
+    168.68,
+    1188.68
+   ],
+   "timeline_points": 1134,
+   "binding": [
+    "kv_running_set"
+   ],
+   "host_reload_tb": 17.048067375104,
+   "live_set": {
+    "peak_tokens": 978788.0,
+    "mean_tokens": 764972.8839779006,
+    "peak_gib": 238.9619140625,
+    "peak_over_capacity": 0.8805851446667626
+   },
+   "all": {
+    "n": 267,
+    "failed": 0,
+    "ttft_s": {
+     "n": 267,
+     "median": 131.223,
+     "p90": 179.663,
+     "p99": 182.96272,
+     "max": 183.57,
+     "min": 0.346,
+     "mean": 116.45171910112359
+    },
+    "computed_tokens_per_escalation_esc_only": 323.22846441947564,
+    "fallbacks": 39,
+    "frac_within": {
+     "2s": 0.00749063670411985,
+     "5s": 0.018726591760299626,
+     "15s": 0.0599250936329588
+    }
+   },
+   "high_demand": {
+    "n": 170,
+    "failed": 0,
+    "ttft_s": {
+     "n": 170,
+     "median": 133.7375,
+     "p90": 179.327,
+     "p99": 182.70511,
+     "max": 183.57,
+     "min": 0.346,
+     "mean": 115.85095294117644
+    },
+    "computed_tokens_per_escalation_esc_only": 321.78823529411767,
+    "fallbacks": 27,
+    "frac_within": {
+     "2s": 0.011764705882352941,
+     "5s": 0.029411764705882353,
+     "15s": 0.06470588235294118
+    }
+   },
+   "low_demand": {
+    "n": 97,
+    "failed": 0,
+    "ttft_s": {
+     "n": 97,
+     "median": 127.359,
+     "p90": 180.3466,
+     "p99": 182.9666,
+     "max": 183.125,
+     "min": 6.251,
+     "mean": 117.5046082474227
+    },
+    "computed_tokens_per_escalation_esc_only": 325.7525773195876,
+    "fallbacks": 12,
+    "frac_within": {
+     "2s": 0.0,
+     "5s": 0.0,
+     "15s": 0.05154639175257732
+    }
+   },
+   "eager_devices_esc": {
+    "n": 267,
+    "failed": 0,
+    "ttft_s": {
+     "n": 267,
+     "median": 131.223,
+     "p90": 179.663,
+     "p99": 182.96272,
+     "max": 183.57,
+     "min": 0.346,
+     "mean": 116.45171910112359
+    },
+    "computed_tokens_per_escalation_esc_only": 323.22846441947564,
+    "fallbacks": 39,
+    "frac_within": {
+     "2s": 0.00749063670411985,
+     "5s": 0.018726591760299626,
+     "15s": 0.0599250936329588
+    }
+   },
+   "lazy_devices_esc": {
+    "n": 0,
+    "failed": 0,
+    "ttft_s": null,
+    "computed_tokens_per_escalation_esc_only": null,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": null,
+     "5s": null,
+     "15s": null
+    }
+   },
+   "escalations_excluded_over_context": 0
+  },
+  "RH8_ALL-LAZY_D96": {
+   "part": "ALL-LAZY",
+   "D": 96,
+   "fmt": "D2",
+   "cadence": 10,
+   "lazy": true,
+   "offload_gib": 256,
+   "coverage": {
+    "devices": 96,
+    "devices_without_sessions": 0,
+    "devices_plan_ends_before_window_end": 68,
+    "sessions_per_device": [
+     2,
+     3
+    ]
+   },
+   "warmup_s": 0.06,
+   "inflight_at_window_end": 0,
+   "drain_s": 0.0,
+   "whole_s": 901.6,
+   "n_requests": 267,
+   "appends": 0,
+   "escalations": 267,
+   "req_per_s_window": 0.2966666666666667,
+   "esc_ttft_s": {
+    "n": 267,
+    "median": 2.664,
+    "p90": 8.189,
+    "p99": 13.626999999999992,
+    "max": 15.264,
+    "min": 0.194,
+    "mean": 3.625606741573034
+   },
+   "esc_latency_s": {
+    "n": 267,
+    "median": 2.776,
+    "p90": 9.104800000000001,
+    "p99": 14.579319999999981,
+    "max": 15.956,
+    "min": 0.219,
+    "mean": 3.883614232209738
+   },
+   "append_ttft_s": null,
+   "esc_hit": 0.34978688585368267,
+   "append_hit": 0.0,
+   "token_hit": 0.34978688585368267,
+   "esc_prompt_tokens": {
+    "n": 267,
+    "median": 10993.0,
+    "p90": 20617.2,
+    "p99": 26560.75999999999,
+    "max": 27183.0,
+    "min": 765.0,
+    "mean": 11516.397003745318
+   },
+   "body_mb": {
+    "n": 267,
+    "median": 11.7541,
+    "p90": 32.92812,
+    "p99": 54.46060799999984,
+    "max": 68.3745,
+    "min": 0.4176,
+    "mean": 15.185284269662922
+   },
+   "gpu_local_hit_tokens": 29872.0,
+   "host_hit_tokens": 1045680.0,
+   "host_share_of_hits": 0.9722263544672874,
+   "pcie_load_gb": 274.11873792,
+   "pcie_store_gb": 523.583356928,
+   "pcie_load_gbps_avg": 0.30403586725820764,
+   "pcie_store_gbps_avg": 0.5807268821295475,
+   "pcie_load_gbps_peak_1s": 7.586044061538312,
+   "pcie_load_gbps_best_30s": 0.8492029194520551,
+   "load_bytes_per_host_hit_token": 262144.0,
+   "allocation_failures": 0,
+   "computed_tok_s_achieved": 2217.531055900621,
+   "computed_tok_s_demand": 2221.4733333333334,
+   "kv_usage": {
+    "n": 867,
+    "median": 0.0,
+    "p90": 0.39105008899059246,
+    "p99": 0.6533943554538522,
+    "max": 0.9232138316806509,
+    "min": 0.0,
+    "mean": 0.12070197726568231
+   },
+   "waiting": {
+    "n": 867,
+    "median": 0.0,
+    "p90": 1.0,
+    "p99": 3.0,
+    "max": 4.0,
+    "min": 0.0,
+    "mean": 0.23414071510957324
+   },
+   "running": {
+    "n": 867,
+    "median": 0.0,
+    "p90": 1.0,
+    "p99": 3.0,
+    "max": 4.0,
+    "min": 0.0,
+    "mean": 0.4982698961937716
+   },
+   "preemptions": 0.0,
+   "api_cores": {
+    "n": 866,
+    "median": 0.019,
+    "p90": 0.774,
+    "p99": 1.7014,
+    "max": 2.312,
+    "min": 0.0,
+    "mean": 0.21476096997690527
+   },
+   "api_max_thread_cores": {
+    "n": 866,
+    "median": 0.01,
+    "p90": 0.1915,
+    "p99": 0.5409500000000008,
+    "max": 0.726,
+    "min": 0.0,
+    "mean": 0.061278290993071596
+   },
+   "engine_cores": {
+    "n": 866,
+    "median": 0.1195,
+    "p90": 1.023,
+    "p99": 1.1527,
+    "max": 1.397,
+    "min": 0.0,
+    "mean": 0.38746189376443413
+   },
+   "harness_cores": {
+    "n": 866,
+    "median": 0.048,
+    "p90": 0.096,
+    "p99": 0.16710000000000014,
+    "max": 0.264,
+    "min": 0.01,
+    "mean": 0.05402540415704389
+   },
+   "gpu_util": {
+    "n": 866,
+    "median": 0.0,
+    "p90": 100.0,
+    "p99": 100.0,
+    "max": 100.0,
+    "min": 0.0,
+    "mean": 45.51154734411085
+   },
+   "submit_lag_s": {
+    "n": 267,
+    "median": 0.011,
+    "p90": 0.038,
+    "p99": 0.11003999999999985,
+    "max": 0.136,
+    "min": 0.002,
+    "mean": 0.018093632958801502
+   },
+   "errors": 0,
+   "errors_over_context": 0,
+   "error_kinds": [],
+   "warm_requests_checked": 122,
+   "warm_misses": 1,
+   "warm_miss_frac": 0.00819672131147541,
+   "host_verification": {
+    "external_hit_tokens": 1045680.0,
+    "load_bytes": 275911526625.47906,
+    "bytes_per_hit_token": 263858.4716409218,
+    "verified": true,
+    "note": ""
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 284.81201553344727,
+    "host_mem_available_gib": 1192.329288482666
+   },
+   "binding_flags": {
+    "kv_running_set": false,
+    "gpu_compute": false,
+    "pcie": false,
+    "host_capacity": false,
+    "api_cpu": false
+   },
+   "diagnostics": {
+    "scrape_coverage_window": 0.9622222222222222,
+    "upstream_of_engine_window": {
+     "n": 866,
+     "median": 0.0,
+     "p90": 1.0,
+     "p99": 3.0,
+     "max": 4.0,
+     "min": 0.0,
+     "mean": 0.4226327944572748
+    },
+    "engine_queue_window": {
+     "n": 866,
+     "median": 0.0,
+     "p90": 2.0,
+     "p99": 5.0,
+     "max": 7.0,
+     "min": 0.0,
+     "mean": 0.733256351039261
+    },
+    "engine_waiting_window": {
+     "n": 866,
+     "median": 0.0,
+     "p90": 1.0,
+     "p99": 3.0,
+     "max": 4.0,
+     "min": 0.0,
+     "mean": 0.23441108545034642
+    },
+    "kv_usage_window": {
+     "n": 866,
+     "median": 0.0,
+     "p90": 0.39105008899059246,
+     "p99": 0.653445207220951,
+     "max": 0.9232138316806509,
+     "min": 0.0,
+     "mean": 0.12084135599231706
+    },
+    "gpu_util_window": {
+     "n": 865,
+     "median": 0.0,
+     "p90": 100.0,
+     "p99": 100.0,
+     "max": 100.0,
+     "min": 0.0,
+     "mean": 45.564161849710985
+    },
+    "api_cores_window": {
+     "n": 865,
+     "median": 0.019,
+     "p90": 0.774,
+     "p99": 1.70144,
+     "max": 2.312,
+     "min": 0.0,
+     "mean": 0.21497572254335257
+    },
+    "api_max_thread_cores_window": {
+     "n": 865,
+     "median": 0.01,
+     "p90": 0.19160000000000002,
+     "p99": 0.5413200000000005,
+     "max": 0.726,
+     "min": 0.0,
+     "mean": 0.061327167630057806
+    },
+    "served_req_per_s_window": 0.2966666666666667,
+    "served_req_per_s_drain": null,
+    "offered_body_mb_per_s": 4.504967666666668,
+    "served_body_mb_per_s_window": 4.504967666666668
+   },
+   "harness_valid": true,
+   "breach": true,
+   "policy": "ALL-LAZY",
+   "demand": "hetero",
+   "eager_devices": 0,
+   "eager_and_high": 0,
+   "window_plan": {
+    "escalations": 267,
+    "escalations_high": 170,
+    "escalations_low": 97,
+    "escalations_on_eager": 0,
+    "appends": 0,
+    "eager_devices": 0,
+    "eager_and_high": 0
+   },
+   "fallbacks": 0,
+   "fallback_frac": 0.0,
+   "fallback_flag": false,
+   "host_memory": {
+    "api_rss_peak_gib": 3.57,
+    "engine_rss_peak_gib": 282.49,
+    "tree_rss_peak_gib": 285.14,
+    "mem_available_min_gib": 1191.8,
+    "kv_offload_buffer_gib": 256,
+    "processor_cache_items_est": 21717,
+    "processor_cache_est_gib": 45.86630400000001,
+    "processor_cache_note": "estimate: items cached x 2.16 MB (vLLM exposes no cache-size metric); LRU cap 128 GiB; engine-core RSS includes both"
+   },
+   "body_over_full": {
+    "n": 267,
+    "median": 1.000552301895872,
+    "p90": 1.0008062460646683,
+    "p99": 1.0009964498163728,
+    "max": 1.0010896154595508,
+    "min": 0.045504786061967284,
+    "mean": 0.7038285883991875
+   },
+   "median_history_frames": 120.0,
+   "body_over_full_at_median_history": {
+    "n": 19,
+    "median": 1.0005807135234603,
+    "p90": 1.0007901151785614,
+    "p99": 1.001038661829382,
+    "max": 1.0010896154595508,
+    "min": 0.22957795982372184,
+    "mean": 0.7811649845195316
+   },
+   "censored": 0,
+   "drain_capped": false,
+   "errors_non_censored": 0,
+   "computed_tokens_window": 1999326,
+   "computed_tokens_per_escalation": 7488.112359550561,
+   "computed_tokens_per_escalation_esc_only": 7488.112359550561,
+   "warmup_computed_tokens": 0,
+   "body_mb_window": 4054.470900000001,
+   "mm_cache_queries": 33641.0,
+   "mm_cache_hits": 11924.0,
+   "whole_counter_window": [
+    0.06,
+    901.66
+   ],
+   "timeline_points": 867,
+   "binding": [
+    "engine (unattributed)"
+   ],
+   "host_reload_tb": 0.27411873792,
+   "live_set": null,
+   "all": {
+    "n": 267,
+    "failed": 0,
+    "ttft_s": {
+     "n": 267,
+     "median": 2.664,
+     "p90": 8.189,
+     "p99": 13.626999999999992,
+     "max": 15.264,
+     "min": 0.194,
+     "mean": 3.625606741573034
+    },
+    "computed_tokens_per_escalation_esc_only": 7488.112359550561,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.4232209737827715,
+     "5s": 0.7303370786516854,
+     "15s": 0.9962546816479401
+    }
+   },
+   "high_demand": {
+    "n": 170,
+    "failed": 0,
+    "ttft_s": {
+     "n": 170,
+     "median": 1.9545,
+     "p90": 7.6859,
+     "p99": 12.661660000000003,
+     "max": 14.358,
+     "min": 0.194,
+     "mean": 3.170441176470588
+    },
+    "computed_tokens_per_escalation_esc_only": 5809.035294117647,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.5058823529411764,
+     "5s": 0.7647058823529411,
+     "15s": 1.0
+    }
+   },
+   "low_demand": {
+    "n": 97,
+    "failed": 0,
+    "ttft_s": {
+     "n": 97,
+     "median": 3.487,
+     "p90": 9.515600000000001,
+     "p99": 13.594559999999987,
+     "max": 15.264,
+     "min": 0.263,
+     "mean": 4.423319587628867
+    },
+    "computed_tokens_per_escalation_esc_only": 10430.824742268042,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.27835051546391754,
+     "5s": 0.6701030927835051,
+     "15s": 0.9896907216494846
+    }
+   },
+   "eager_devices_esc": {
+    "n": 0,
+    "failed": 0,
+    "ttft_s": null,
+    "computed_tokens_per_escalation_esc_only": null,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": null,
+     "5s": null,
+     "15s": null
+    }
+   },
+   "lazy_devices_esc": {
+    "n": 267,
+    "failed": 0,
+    "ttft_s": {
+     "n": 267,
+     "median": 2.664,
+     "p90": 8.189,
+     "p99": 13.626999999999992,
+     "max": 15.264,
+     "min": 0.194,
+     "mean": 3.625606741573034
+    },
+    "computed_tokens_per_escalation_esc_only": 7488.112359550561,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.4232209737827715,
+     "5s": 0.7303370786516854,
+     "15s": 0.9962546816479401
+    }
+   },
+   "escalations_excluded_over_context": 0
+  },
+  "RH8_MIX-RANDOM_D96": {
+   "part": "MIX-RANDOM",
+   "D": 96,
+   "fmt": "D2",
+   "cadence": 10,
+   "lazy": false,
+   "offload_gib": 256,
+   "coverage": {
+    "devices": 96,
+    "devices_without_sessions": 0,
+    "devices_plan_ends_before_window_end": 68,
+    "sessions_per_device": [
+     2,
+     3
+    ]
+   },
+   "warmup_s": 49.35,
+   "inflight_at_window_end": 0,
+   "drain_s": 0.0,
+   "whole_s": 902.2,
+   "n_requests": 1931,
+   "appends": 1623,
+   "escalations": 267,
+   "req_per_s_window": 2.118888888888889,
+   "esc_ttft_s": {
+    "n": 267,
+    "median": 2.856,
+    "p90": 7.763400000000001,
+    "p99": 10.623359999999995,
+    "max": 11.864,
+    "min": 0.1,
+    "mean": 3.436760299625468
+   },
+   "esc_latency_s": {
+    "n": 267,
+    "median": 2.972,
+    "p90": 8.004199999999999,
+    "p99": 11.18787999999999,
+    "max": 11.893,
+    "min": 0.123,
+    "mean": 3.597977528089888
+   },
+   "append_ttft_s": {
+    "n": 1623,
+    "median": 0.771,
+    "p90": 6.656799999999999,
+    "p99": 10.062639999999996,
+    "max": 11.954,
+    "min": 0.094,
+    "mean": 2.2270616142945165
+   },
+   "esc_hit": 0.5148301818803868,
+   "append_hit": 0.9545322490219793,
+   "token_hit": 0.8848177152634343,
+   "esc_prompt_tokens": {
+    "n": 267,
+    "median": 10993.0,
+    "p90": 20617.2,
+    "p99": 26560.75999999999,
+    "max": 27183.0,
+    "min": 765.0,
+    "mean": 11516.397003745318
+   },
+   "body_mb": {
+    "n": 1907,
+    "median": 0.935,
+    "p90": 3.582800000000002,
+    "p99": 33.07853200000002,
+    "max": 68.3751,
+    "min": 0.0076,
+    "mean": 2.4641309386470893
+   },
+   "gpu_local_hit_tokens": 386896.0,
+   "host_hit_tokens": 16773088.0,
+   "host_share_of_hits": 0.9774535920313212,
+   "pcie_load_gb": 4396.964380672,
+   "pcie_store_gb": 578.776203264,
+   "pcie_load_gbps_avg": 4.87360272741299,
+   "pcie_store_gbps_avg": 0.6415165188029262,
+   "pcie_load_gbps_peak_1s": 24.330996184614907,
+   "pcie_load_gbps_best_30s": 8.659936476105583,
+   "load_bytes_per_host_hit_token": 262144.0,
+   "allocation_failures": 0,
+   "computed_tok_s_achieved": 2475.9731766792283,
+   "computed_tok_s_demand": 2482.0255555555555,
+   "kv_usage": {
+    "n": 867,
+    "median": 0.12382405288583775,
+    "p90": 0.6308161708619375,
+    "p99": 0.8541062801932369,
+    "max": 0.9801678108314263,
+    "min": 0.0,
+    "mean": 0.22458943943111712
+   },
+   "waiting": {
+    "n": 867,
+    "median": 0.0,
+    "p90": 10.0,
+    "p99": 21.0,
+    "max": 28.0,
+    "min": 0.0,
+    "mean": 2.875432525951557
+   },
+   "running": {
+    "n": 867,
+    "median": 0.0,
+    "p90": 2.0,
+    "p99": 4.0,
+    "max": 5.0,
+    "min": 0.0,
+    "mean": 0.6343713956170703
+   },
+   "preemptions": 0.0,
+   "api_cores": {
+    "n": 868,
+    "median": 0.173,
+    "p90": 0.7483000000000001,
+    "p99": 1.6799300000000008,
+    "max": 2.589,
+    "min": 0.01,
+    "mean": 0.2967384792626728
+   },
+   "api_max_thread_cores": {
+    "n": 868,
+    "median": 0.058,
+    "p90": 0.192,
+    "p99": 0.48593000000000086,
+    "max": 0.711,
+    "min": 0.0,
+    "mean": 0.08420967741935483
+   },
+   "engine_cores": {
+    "n": 868,
+    "median": 0.422,
+    "p90": 1.046,
+    "p99": 1.1569800000000003,
+    "max": 1.563,
+    "min": 0.0,
+    "mean": 0.5570115207373272
+   },
+   "harness_cores": {
+    "n": 868,
+    "median": 0.058,
+    "p90": 0.106,
+    "p99": 0.2026600000000001,
+    "max": 0.269,
+    "min": 0.02,
+    "mean": 0.065
+   },
+   "gpu_util": {
+    "n": 868,
+    "median": 85.0,
+    "p90": 100.0,
+    "p99": 100.0,
+    "max": 100.0,
+    "min": 0.0,
+    "mean": 61.29838709677419
+   },
+   "submit_lag_s": {
+    "n": 1907,
+    "median": 0.003,
+    "p90": 0.009,
+    "p99": 0.048,
+    "max": 0.137,
+    "min": 0.001,
+    "mean": 0.005847404299947562
+   },
+   "errors": 17,
+   "errors_over_context": 17,
+   "error_kinds": [
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (32983) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33433) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33883) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34333) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34783) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35233) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35683) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36133) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36583) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37033) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37483) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37933) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38383) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38833) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39283) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39733) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (40183) exceeds model\\'s maximum c"
+   ],
+   "warm_requests_checked": 1747,
+   "warm_misses": 1,
+   "warm_miss_frac": 0.0005724098454493417,
+   "host_verification": {
+    "external_hit_tokens": 16773184.0,
+    "load_bytes": 4398782336271.639,
+    "bytes_per_hit_token": 262250.8842847988,
+    "verified": true,
+    "note": ""
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 291.3787727355957,
+    "host_mem_available_gib": 1185.4631423950195
+   },
+   "binding_flags": {
+    "kv_running_set": true,
+    "gpu_compute": false,
+    "pcie": false,
+    "host_capacity": false,
+    "api_cpu": false
+   },
+   "diagnostics": {
+    "scrape_coverage_window": 0.9611111111111111,
+    "upstream_of_engine_window": {
+     "n": 865,
+     "median": 1.0,
+     "p90": 5.0,
+     "p99": 11.0,
+     "max": 14.0,
+     "min": -2.0,
+     "mean": 1.5942196531791908
+    },
+    "engine_queue_window": {
+     "n": 865,
+     "median": 1.0,
+     "p90": 12.0,
+     "p99": 22.360000000000014,
+     "max": 30.0,
+     "min": 0.0,
+     "mean": 3.517919075144509
+    },
+    "engine_waiting_window": {
+     "n": 865,
+     "median": 0.0,
+     "p90": 10.0,
+     "p99": 21.0,
+     "max": 28.0,
+     "min": 0.0,
+     "mean": 2.8820809248554915
+    },
+    "kv_usage_window": {
+     "n": 865,
+     "median": 0.12382405288583775,
+     "p90": 0.6308161708619375,
+     "p99": 0.8542588354945335,
+     "max": 0.9801678108314263,
+     "min": 0.0,
+     "mean": 0.2251087213719983
+    },
+    "gpu_util_window": {
+     "n": 865,
+     "median": 85.0,
+     "p90": 100.0,
+     "p99": 100.0,
+     "max": 100.0,
+     "min": 0.0,
+     "mean": 61.510982658959534
+    },
+    "api_cores_window": {
+     "n": 865,
+     "median": 0.173,
+     "p90": 0.7486,
+     "p99": 1.6805600000000003,
+     "max": 2.589,
+     "min": 0.01,
+     "mean": 0.2976890173410404
+    },
+    "api_max_thread_cores_window": {
+     "n": 865,
+     "median": 0.058,
+     "p90": 0.192,
+     "p99": 0.48656000000000027,
+     "max": 0.711,
+     "min": 0.0,
+     "mean": 0.08443583815028903
+    },
+    "served_req_per_s_window": 2.118888888888889,
+    "served_req_per_s_drain": null,
+    "offered_body_mb_per_s": 5.22121966666667,
+    "served_body_mb_per_s_window": 5.22121966666667
+   },
+   "harness_valid": true,
+   "breach": true,
+   "policy": "MIX-RANDOM",
+   "demand": "hetero",
+   "eager_devices": 24,
+   "eager_and_high": 6,
+   "window_plan": {
+    "escalations": 267,
+    "escalations_high": 170,
+    "escalations_low": 97,
+    "escalations_on_eager": 70,
+    "appends": 1640,
+    "eager_devices": 24,
+    "eager_and_high": 6
+   },
+   "fallbacks": 8,
+   "fallback_frac": 0.004142931123770067,
+   "fallback_flag": false,
+   "host_memory": {
+    "api_rss_peak_gib": 6.47,
+    "engine_rss_peak_gib": 287.43,
+    "tree_rss_peak_gib": 291.41,
+    "mem_available_min_gib": 1183.9,
+    "kv_offload_buffer_gib": 256,
+    "processor_cache_items_est": 26660,
+    "processor_cache_est_gib": 56.30592000000001,
+    "processor_cache_note": "estimate: items cached x 2.16 MB (vLLM exposes no cache-size metric); LRU cap 128 GiB; engine-core RSS includes both"
+   },
+   "body_over_full": {
+    "n": 1899,
+    "median": 0.053548039831344756,
+    "p90": 0.4538241680032908,
+    "p99": 1.0008565562168998,
+    "max": 1.0013607756421161,
+    "min": 0.0007946679160867428,
+    "mean": 0.15918966259011647
+   },
+   "median_history_frames": 106.0,
+   "body_over_full_at_median_history": {
+    "n": 144,
+    "median": 0.04825532229744966,
+    "p90": 0.0584039081956348,
+    "p99": 1.0007718926661944,
+    "max": 1.0017859420844497,
+    "min": 0.00916365068813551,
+    "mean": 0.09127425870240986
+   },
+   "censored": 0,
+   "drain_capped": false,
+   "errors_non_censored": 17,
+   "computed_tokens_window": 2233823,
+   "computed_tokens_per_escalation": 8366.378277153559,
+   "computed_tokens_per_escalation_esc_only": 5587.408239700375,
+   "warmup_computed_tokens": 239922,
+   "body_mb_window": 4699.097700000003,
+   "mm_cache_queries": 221089.0,
+   "mm_cache_hits": 197001.0,
+   "whole_counter_window": [
+    49.35,
+    951.5500000000001
+   ],
+   "timeline_points": 915,
+   "binding": [
+    "kv_running_set"
+   ],
+   "host_reload_tb": 4.396964380671999,
+   "live_set": {
+    "peak_tokens": 259164.0,
+    "mean_tokens": 190246.85082872928,
+    "peak_gib": 63.2724609375,
+    "peak_over_capacity": 0.23316179645890311
+   },
+   "all": {
+    "n": 267,
+    "failed": 0,
+    "ttft_s": {
+     "n": 267,
+     "median": 2.856,
+     "p90": 7.763400000000001,
+     "p99": 10.623359999999995,
+     "max": 11.864,
+     "min": 0.1,
+     "mean": 3.436760299625468
+    },
+    "computed_tokens_per_escalation_esc_only": 5587.408239700375,
+    "fallbacks": 8,
+    "frac_within": {
+     "2s": 0.4232209737827715,
+     "5s": 0.7191011235955056,
+     "15s": 1.0
+    }
+   },
+   "high_demand": {
+    "n": 170,
+    "failed": 0,
+    "ttft_s": {
+     "n": 170,
+     "median": 2.1325000000000003,
+     "p90": 7.4806,
+     "p99": 10.047540000000001,
+     "max": 11.864,
+     "min": 0.1,
+     "mean": 3.1028823529411764
+    },
+    "computed_tokens_per_escalation_esc_only": 4465.035294117647,
+    "fallbacks": 4,
+    "frac_within": {
+     "2s": 0.4823529411764706,
+     "5s": 0.7588235294117647,
+     "15s": 1.0
+    }
+   },
+   "low_demand": {
+    "n": 97,
+    "failed": 0,
+    "ttft_s": {
+     "n": 97,
+     "median": 3.794,
+     "p90": 8.288200000000002,
+     "p99": 10.783639999999995,
+     "max": 11.399,
+     "min": 0.102,
+     "mean": 4.021907216494846
+    },
+    "computed_tokens_per_escalation_esc_only": 7554.453608247422,
+    "fallbacks": 4,
+    "frac_within": {
+     "2s": 0.31958762886597936,
+     "5s": 0.6494845360824743,
+     "15s": 1.0
+    }
+   },
+   "eager_devices_esc": {
+    "n": 70,
+    "failed": 0,
+    "ttft_s": {
+     "n": 70,
+     "median": 0.6859999999999999,
+     "p90": 7.0599,
+     "p99": 9.790720000000002,
+     "max": 10.006,
+     "min": 0.1,
+     "mean": 2.4701714285714287
+    },
+    "computed_tokens_per_escalation_esc_only": 322.92857142857144,
+    "fallbacks": 8,
+    "frac_within": {
+     "2s": 0.6,
+     "5s": 0.7857142857142857,
+     "15s": 1.0
+    }
+   },
+   "lazy_devices_esc": {
+    "n": 197,
+    "failed": 0,
+    "ttft_s": {
+     "n": 197,
+     "median": 3.036,
+     "p90": 7.8420000000000005,
+     "p99": 10.783639999999995,
+     "max": 11.864,
+     "min": 0.213,
+     "mean": 3.780218274111675
+    },
+    "computed_tokens_per_escalation_esc_only": 7458.035532994923,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.3604060913705584,
+     "5s": 0.6954314720812182,
+     "15s": 1.0
+    }
+   },
+   "escalations_excluded_over_context": 0
+  },
+  "RH8_MIX-DEMAND_D96": {
+   "part": "MIX-DEMAND",
+   "D": 96,
+   "fmt": "D2",
+   "cadence": 10,
+   "lazy": false,
+   "offload_gib": 256,
+   "coverage": {
+    "devices": 96,
+    "devices_without_sessions": 0,
+    "devices_plan_ends_before_window_end": 68,
+    "sessions_per_device": [
+     2,
+     3
+    ]
+   },
+   "warmup_s": 50.78,
+   "inflight_at_window_end": 0,
+   "drain_s": 0.0,
+   "whole_s": 901.8,
+   "n_requests": 1918,
+   "appends": 1627,
+   "escalations": 267,
+   "req_per_s_window": 2.1044444444444443,
+   "esc_ttft_s": {
+    "n": 267,
+    "median": 1.209,
+    "p90": 6.5278,
+    "p99": 12.343259999999999,
+    "max": 13.501,
+    "min": 0.098,
+    "mean": 2.492
+   },
+   "esc_latency_s": {
+    "n": 267,
+    "median": 1.271,
+    "p90": 6.601,
+    "p99": 12.794439999999984,
+    "max": 13.603,
+    "min": 0.121,
+    "mean": 2.611932584269663
+   },
+   "append_ttft_s": {
+    "n": 1627,
+    "median": 0.379,
+    "p90": 4.603,
+    "p99": 10.822280000000001,
+    "max": 13.355,
+    "min": 0.1,
+    "mean": 1.5019575906576523
+   },
+   "esc_hit": 0.6531230234671861,
+   "append_hit": 0.9560528565337229,
+   "token_hit": 0.9088628682489683,
+   "esc_prompt_tokens": {
+    "n": 267,
+    "median": 10994.0,
+    "p90": 20618.2,
+    "p99": 26561.75999999999,
+    "max": 27184.0,
+    "min": 766.0,
+    "mean": 11517.397003745318
+   },
+   "body_mb": {
+    "n": 1894,
+    "median": 0.93765,
+    "p90": 1.2278,
+    "p99": 35.622099999999996,
+    "max": 60.6063,
+    "min": 0.0062,
+    "mean": 2.2484180570221755
+   },
+   "gpu_local_hit_tokens": 932048.0,
+   "host_hit_tokens": 17009344.0,
+   "host_share_of_hits": 0.9480504076829713,
+   "pcie_load_gb": 4458.897473536,
+   "pcie_store_gb": 468.050771968,
+   "pcie_load_gbps_avg": 4.94444164286538,
+   "pcie_store_gbps_avg": 0.5190183765446884,
+   "pcie_load_gbps_peak_1s": 28.06588562285532,
+   "pcie_load_gbps_best_30s": 8.155383416935203,
+   "load_bytes_per_host_hit_token": 262144.0,
+   "allocation_failures": 0,
+   "computed_tok_s_achieved": 1995.0,
+   "computed_tok_s_demand": 1998.99,
+   "kv_usage": {
+    "n": 866,
+    "median": 0.0,
+    "p90": 0.5540300025425884,
+    "p99": 0.9181286549707602,
+    "max": 0.9758454106280193,
+    "min": 0.0,
+    "mean": 0.14885768492926263
+   },
+   "waiting": {
+    "n": 866,
+    "median": 0.0,
+    "p90": 5.5,
+    "p99": 19.350000000000023,
+    "max": 30.0,
+    "min": 0.0,
+    "mean": 1.6235565819861433
+   },
+   "running": {
+    "n": 866,
+    "median": 0.0,
+    "p90": 1.0,
+    "p99": 3.0,
+    "max": 5.0,
+    "min": 0.0,
+    "mean": 0.4064665127020785
+   },
+   "preemptions": 0.0,
+   "api_cores": {
+    "n": 866,
+    "median": 0.163,
+    "p90": 0.7444999999999999,
+    "p99": 1.6263000000000005,
+    "max": 1.952,
+    "min": 0.0,
+    "mean": 0.2726466512702078
+   },
+   "api_max_thread_cores": {
+    "n": 866,
+    "median": 0.048,
+    "p90": 0.163,
+    "p99": 0.44865000000000044,
+    "max": 0.764,
+    "min": 0.0,
+    "mean": 0.07638221709006929
+   },
+   "engine_cores": {
+    "n": 866,
+    "median": 0.317,
+    "p90": 1.034,
+    "p99": 1.13135,
+    "max": 1.191,
+    "min": 0.0,
+    "mean": 0.4690415704387991
+   },
+   "harness_cores": {
+    "n": 866,
+    "median": 0.058,
+    "p90": 0.115,
+    "p99": 0.183,
+    "max": 0.263,
+    "min": 0.02,
+    "mean": 0.06634872979214781
+   },
+   "gpu_util": {
+    "n": 866,
+    "median": 61.0,
+    "p90": 100.0,
+    "p99": 100.0,
+    "max": 100.0,
+    "min": 0.0,
+    "mean": 50.42494226327945
+   },
+   "submit_lag_s": {
+    "n": 1894,
+    "median": 0.003,
+    "p90": 0.005,
+    "p99": 0.05883999999999924,
+    "max": 0.127,
+    "min": 0.001,
+    "mean": 0.005320485744456178
+   },
+   "errors": 0,
+   "errors_over_context": 0,
+   "error_kinds": [],
+   "warm_requests_checked": 1773,
+   "warm_misses": 1,
+   "warm_miss_frac": 0.0005640157924421884,
+   "host_verification": {
+    "external_hit_tokens": 17009344.0,
+    "load_bytes": 4460690264477.2295,
+    "bytes_per_hit_token": 262249.400357664,
+    "verified": true,
+    "note": ""
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 286.8250312805176,
+    "host_mem_available_gib": 1185.6878509521484
+   },
+   "binding_flags": {
+    "kv_running_set": true,
+    "gpu_compute": false,
+    "pcie": false,
+    "host_capacity": false,
+    "api_cpu": false
+   },
+   "diagnostics": {
+    "scrape_coverage_window": 0.9611111111111111,
+    "upstream_of_engine_window": {
+     "n": 865,
+     "median": 0.0,
+     "p90": 5.0,
+     "p99": 10.0,
+     "max": 17.0,
+     "min": -1.0,
+     "mean": 1.438150289017341
+    },
+    "engine_queue_window": {
+     "n": 865,
+     "median": 0.0,
+     "p90": 7.0,
+     "p99": 22.0,
+     "max": 31.0,
+     "min": 0.0,
+     "mean": 2.032369942196532
+    },
+    "engine_waiting_window": {
+     "n": 865,
+     "median": 0.0,
+     "p90": 5.600000000000023,
+     "p99": 19.360000000000014,
+     "max": 30.0,
+     "min": 0.0,
+     "mean": 1.6254335260115607
+    },
+    "kv_usage_window": {
+     "n": 865,
+     "median": 0.0,
+     "p90": 0.5541825578438851,
+     "p99": 0.9181286549707602,
+     "max": 0.9758454106280193,
+     "min": 0.0,
+     "mean": 0.1490297747384294
+    },
+    "gpu_util_window": {
+     "n": 865,
+     "median": 61.0,
+     "p90": 100.0,
+     "p99": 100.0,
+     "max": 100.0,
+     "min": 0.0,
+     "mean": 50.48323699421965
+    },
+    "api_cores_window": {
+     "n": 865,
+     "median": 0.163,
+     "p90": 0.7454000000000002,
+     "p99": 1.6264800000000004,
+     "max": 1.952,
+     "min": 0.0,
+     "mean": 0.27293988439306355
+    },
+    "api_max_thread_cores_window": {
+     "n": 865,
+     "median": 0.048,
+     "p90": 0.163,
+     "p99": 0.4488400000000003,
+     "max": 0.764,
+     "min": 0.0,
+     "mean": 0.0764485549132948
+    },
+    "served_req_per_s_window": 2.1044444444444443,
+    "served_req_per_s_drain": null,
+    "offered_body_mb_per_s": 4.731670888888888,
+    "served_body_mb_per_s_window": 4.731670888888888
+   },
+   "harness_valid": true,
+   "breach": true,
+   "policy": "MIX-DEMAND",
+   "demand": "hetero",
+   "eager_devices": 24,
+   "eager_and_high": 24,
+   "window_plan": {
+    "escalations": 267,
+    "escalations_high": 170,
+    "escalations_low": 97,
+    "escalations_on_eager": 170,
+    "appends": 1627,
+    "eager_devices": 24,
+    "eager_and_high": 24
+   },
+   "fallbacks": 27,
+   "fallback_frac": 0.014077163712200209,
+   "fallback_flag": true,
+   "host_memory": {
+    "api_rss_peak_gib": 6.72,
+    "engine_rss_peak_gib": 282.65,
+    "tree_rss_peak_gib": 286.88,
+    "mem_available_min_gib": 1185.1,
+    "kv_offload_buffer_gib": 256,
+    "processor_cache_items_est": 22001,
+    "processor_cache_est_gib": 46.466112,
+    "processor_cache_note": "estimate: items cached x 2.16 MB (vLLM exposes no cache-size metric); LRU cap 128 GiB; engine-core RSS includes both"
+   },
+   "body_over_full": {
+    "n": 1867,
+    "median": 0.046251919408124335,
+    "p90": 0.3058253907836203,
+    "p99": 1.000838704635843,
+    "max": 1.0011602610587382,
+    "min": 0.0007904842257985664,
+    "mean": 0.1327013935854228
+   },
+   "median_history_frames": 111.0,
+   "body_over_full_at_median_history": {
+    "n": 154,
+    "median": 0.04662786875970712,
+    "p90": 0.05582644043099584,
+    "p99": 1.001147670785656,
+    "max": 1.0018905216120992,
+    "min": 0.0011438391107053674,
+    "mean": 0.1010488425907182
+   },
+   "censored": 0,
+   "drain_capped": false,
+   "errors_non_censored": 0,
+   "computed_tokens_window": 1799091,
+   "computed_tokens_per_escalation": 6738.168539325843,
+   "computed_tokens_per_escalation_esc_only": 3995.119850187266,
+   "warmup_computed_tokens": 247198,
+   "body_mb_window": 4258.5037999999995,
+   "mm_cache_queries": 218016.0,
+   "mm_cache_hits": 198754.0,
+   "whole_counter_window": [
+    50.78,
+    952.5799999999999
+   ],
+   "timeline_points": 915,
+   "binding": [
+    "kv_running_set"
+   ],
+   "host_reload_tb": 4.458897473536,
+   "live_set": {
+    "peak_tokens": 263028.0,
+    "mean_tokens": 186903.8453038674,
+    "peak_gib": 64.2158203125,
+    "peak_over_capacity": 0.23663811717288039
+   },
+   "all": {
+    "n": 267,
+    "failed": 0,
+    "ttft_s": {
+     "n": 267,
+     "median": 1.209,
+     "p90": 6.5278,
+     "p99": 12.343259999999999,
+     "max": 13.501,
+     "min": 0.098,
+     "mean": 2.492
+    },
+    "computed_tokens_per_escalation_esc_only": 3995.119850187266,
+    "fallbacks": 27,
+    "frac_within": {
+     "2s": 0.5730337078651685,
+     "5s": 0.8352059925093633,
+     "15s": 1.0
+    }
+   },
+   "high_demand": {
+    "n": 170,
+    "failed": 0,
+    "ttft_s": {
+     "n": 170,
+     "median": 0.405,
+     "p90": 4.775499999999998,
+     "p99": 9.933530000000005,
+     "max": 12.369,
+     "min": 0.098,
+     "mean": 1.6166352941176472
+    },
+    "computed_tokens_per_escalation_esc_only": 322.78823529411767,
+    "fallbacks": 27,
+    "frac_within": {
+     "2s": 0.7352941176470589,
+     "5s": 0.9,
+     "15s": 1.0
+    }
+   },
+   "low_demand": {
+    "n": 97,
+    "failed": 0,
+    "ttft_s": {
+     "n": 97,
+     "median": 3.32,
+     "p90": 8.239400000000003,
+     "p99": 13.235079999999998,
+     "max": 13.501,
+     "min": 0.27,
+     "mean": 4.0261443298969075
+    },
+    "computed_tokens_per_escalation_esc_only": 10431.164948453608,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.28865979381443296,
+     "5s": 0.7216494845360825,
+     "15s": 1.0
+    }
+   },
+   "eager_devices_esc": {
+    "n": 170,
+    "failed": 0,
+    "ttft_s": {
+     "n": 170,
+     "median": 0.405,
+     "p90": 4.775499999999998,
+     "p99": 9.933530000000005,
+     "max": 12.369,
+     "min": 0.098,
+     "mean": 1.6166352941176472
+    },
+    "computed_tokens_per_escalation_esc_only": 322.78823529411767,
+    "fallbacks": 27,
+    "frac_within": {
+     "2s": 0.7352941176470589,
+     "5s": 0.9,
+     "15s": 1.0
+    }
+   },
+   "lazy_devices_esc": {
+    "n": 97,
+    "failed": 0,
+    "ttft_s": {
+     "n": 97,
+     "median": 3.32,
+     "p90": 8.239400000000003,
+     "p99": 13.235079999999998,
+     "max": 13.501,
+     "min": 0.27,
+     "mean": 4.0261443298969075
+    },
+    "computed_tokens_per_escalation_esc_only": 10431.164948453608,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.28865979381443296,
+     "5s": 0.7216494845360825,
+     "15s": 1.0
+    }
+   },
+   "escalations_excluded_over_context": 0
+  },
+  "RH8_REP-EAGER_D64": {
+   "part": "REP-EAGER",
+   "D": 64,
+   "fmt": "D2",
+   "cadence": 10,
+   "lazy": false,
+   "offload_gib": 256,
+   "coverage": {
+    "devices": 64,
+    "devices_without_sessions": 0,
+    "devices_plan_ends_before_window_end": 10,
+    "sessions_per_device": [
+     3,
+     4
+    ]
+   },
+   "warmup_s": 105.63,
+   "inflight_at_window_end": 1,
+   "drain_s": 0.1,
+   "whole_s": 901.7,
+   "n_requests": 6072,
+   "appends": 5430,
+   "escalations": 533,
+   "req_per_s_window": 6.6755555555555555,
+   "esc_ttft_s": {
+    "n": 533,
+    "median": 1.179,
+    "p90": 2.5564,
+    "p99": 3.9174399999999983,
+    "max": 4.45,
+    "min": 0.14,
+    "mean": 1.355515947467167
+   },
+   "esc_latency_s": {
+    "n": 533,
+    "median": 1.31,
+    "p90": 2.6786000000000003,
+    "p99": 4.126599999999995,
+    "max": 4.507,
+    "min": 0.169,
+    "mean": 1.4820694183864915
+   },
+   "append_ttft_s": {
+    "n": 5430,
+    "median": 1.0795,
+    "p90": 2.47,
+    "p99": 3.97513,
+    "max": 4.54,
+    "min": 0.092,
+    "mean": 1.2714694290976059
+   },
+   "esc_hit": 0.9718681531274576,
+   "append_hit": 0.9528275207176351,
+   "token_hit": 0.9548060568483906,
+   "esc_prompt_tokens": {
+    "n": 533,
+    "median": 10611.0,
+    "p90": 20978.800000000003,
+    "p99": 26666.839999999982,
+    "max": 27270.0,
+    "min": 766.0,
+    "mean": 11327.257035647279
+   },
+   "body_mb": {
+    "n": 6008,
+    "median": 0.9276,
+    "p90": 1.16743,
+    "p99": 12.687498000000238,
+    "max": 56.3063,
+    "min": 0.0029,
+    "mean": 1.1768235019973368
+   },
+   "gpu_local_hit_tokens": 1360112.0,
+   "host_hit_tokens": 54115808.0,
+   "host_share_of_hits": 0.975482840122345,
+   "pcie_load_gb": 14186.134372352,
+   "pcie_store_gb": 677.195546624,
+   "pcie_load_gbps_avg": 15.732654288956414,
+   "pcie_store_gbps_avg": 0.7510209012132637,
+   "pcie_load_gbps_peak_1s": 28.577191253334572,
+   "pcie_load_gbps_best_30s": 18.03146727870661,
+   "load_bytes_per_host_hit_token": 262144.0,
+   "allocation_failures": 0,
+   "computed_tok_s_achieved": 2912.108239991128,
+   "computed_tok_s_demand": 2917.608888888889,
+   "kv_usage": {
+    "n": 866,
+    "median": 0.5094075769132977,
+    "p90": 0.8245614035087718,
+    "p99": 0.9608568522756166,
+    "max": 0.9918637172641749,
+    "min": 0.0,
+    "mean": 0.4771040799441453
+   },
+   "waiting": {
+    "n": 866,
+    "median": 4.0,
+    "p90": 14.0,
+    "p99": 22.350000000000023,
+    "max": 27.0,
+    "min": 0.0,
+    "mean": 5.573903002309469
+   },
+   "running": {
+    "n": 866,
+    "median": 1.0,
+    "p90": 3.0,
+    "p99": 5.0,
+    "max": 8.0,
+    "min": 0.0,
+    "mean": 0.9884526558891455
+   },
+   "preemptions": 0.0,
+   "api_cores": {
+    "n": 866,
+    "median": 0.4835,
+    "p90": 0.796,
+    "p99": 1.5861000000000003,
+    "max": 1.823,
+    "min": 0.038,
+    "mean": 0.5397078521939954
+   },
+   "api_max_thread_cores": {
+    "n": 866,
+    "median": 0.143,
+    "p90": 0.211,
+    "p99": 0.27735000000000004,
+    "max": 0.308,
+    "min": 0.019,
+    "mean": 0.14485565819861432
+   },
+   "engine_cores": {
+    "n": 866,
+    "median": 0.9105000000000001,
+    "p90": 1.066,
+    "p99": 1.104,
+    "max": 1.133,
+    "min": 0.202,
+    "mean": 0.8695762124711316
+   },
+   "harness_cores": {
+    "n": 866,
+    "median": 0.086,
+    "p90": 0.134,
+    "p99": 0.1984000000000001,
+    "max": 0.318,
+    "min": 0.039,
+    "mean": 0.09233833718244802
+   },
+   "gpu_util": {
+    "n": 866,
+    "median": 100.0,
+    "p90": 100.0,
+    "p99": 100.0,
+    "max": 100.0,
+    "min": 0.0,
+    "mean": 91.20900692840647
+   },
+   "submit_lag_s": {
+    "n": 6008,
+    "median": 0.003,
+    "p90": 0.005,
+    "p99": 0.039,
+    "max": 0.092,
+    "min": 0.001,
+    "mean": 0.004173102529960054
+   },
+   "errors": 46,
+   "errors_over_context": 46,
+   "error_kinds": [
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (32984) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33434) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (33884) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34232) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34334) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34784) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35234) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (35684) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36134) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (36584) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37034) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37484) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (37934) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38384) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (38834) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39284) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (39734) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (40184) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (40634) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41084) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41534) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (41984) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (42434) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (42884) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (43334) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (43784) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (44234) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (44684) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45134) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45584) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45704) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46034) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46484) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (46934) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (47384) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (47834) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (48284) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (48734) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (49184) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (49634) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50084) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50534) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50816) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50984) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51434) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51975) exceeds model\\'s maximum c"
+   ],
+   "warm_requests_checked": 5824,
+   "warm_misses": 0,
+   "warm_miss_frac": 0.0,
+   "host_verification": {
+    "external_hit_tokens": 54115808.0,
+    "load_bytes": 14187927164479.285,
+    "bytes_per_hit_token": 262177.1288064161,
+    "verified": true,
+    "note": ""
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 299.99715423583984,
+    "host_mem_available_gib": 1171.410800933838
+   },
+   "binding_flags": {
+    "kv_running_set": true,
+    "gpu_compute": false,
+    "pcie": false,
+    "host_capacity": false,
+    "api_cpu": false
+   },
+   "diagnostics": {
+    "scrape_coverage_window": 0.9611111111111111,
+    "upstream_of_engine_window": {
+     "n": 865,
+     "median": 2.0,
+     "p90": 4.0,
+     "p99": 7.0,
+     "max": 9.0,
+     "min": -2.0,
+     "mean": 2.0254335260115606
+    },
+    "engine_queue_window": {
+     "n": 865,
+     "median": 5.0,
+     "p90": 14.0,
+     "p99": 24.0,
+     "max": 27.0,
+     "min": 0.0,
+     "mean": 6.569942196531792
+    },
+    "engine_waiting_window": {
+     "n": 865,
+     "median": 4.0,
+     "p90": 14.0,
+     "p99": 22.360000000000014,
+     "max": 27.0,
+     "min": 0.0,
+     "mean": 5.580346820809249
+    },
+    "kv_usage_window": {
+     "n": 865,
+     "median": 0.5105517416730232,
+     "p90": 0.8246122552758708,
+     "p99": 0.9608644800406814,
+     "max": 0.9918637172641749,
+     "min": 0.0,
+     "mean": 0.4776556453544853
+    },
+    "gpu_util_window": {
+     "n": 865,
+     "median": 100.0,
+     "p90": 100.0,
+     "p99": 100.0,
+     "max": 100.0,
+     "min": 0.0,
+     "mean": 91.31445086705202
+    },
+    "api_cores_window": {
+     "n": 865,
+     "median": 0.486,
+     "p90": 0.796,
+     "p99": 1.5861600000000002,
+     "max": 1.823,
+     "min": 0.038,
+     "mean": 0.5401433526011561
+    },
+    "api_max_thread_cores_window": {
+     "n": 865,
+     "median": 0.143,
+     "p90": 0.211,
+     "p99": 0.27736000000000005,
+     "max": 0.308,
+     "min": 0.019,
+     "mean": 0.14496763005780347
+    },
+    "served_req_per_s_window": 6.674444444444444,
+    "served_req_per_s_drain": null,
+    "offered_body_mb_per_s": 7.85595066666666,
+    "served_body_mb_per_s_window": 7.854941222222216
+   },
+   "harness_valid": true,
+   "breach": false,
+   "policy": "REP-EAGER",
+   "demand": "rate1",
+   "eager_devices": 64,
+   "eager_and_high": 64,
+   "window_plan": {
+    "escalations": 537,
+    "escalations_high": 537,
+    "escalations_low": 0,
+    "escalations_on_eager": 537,
+    "appends": 5471,
+    "eager_devices": 64,
+    "eager_and_high": 64
+   },
+   "fallbacks": 81,
+   "fallback_frac": 0.0133399209486166,
+   "fallback_flag": true,
+   "host_memory": {
+    "api_rss_peak_gib": 12.62,
+    "engine_rss_peak_gib": 293.71,
+    "tree_rss_peak_gib": 299.8,
+    "mem_available_min_gib": 1171.6,
+    "kv_offload_buffer_gib": 256,
+    "processor_cache_items_est": 33377,
+    "processor_cache_est_gib": 70.49222400000001,
+    "processor_cache_note": "estimate: items cached x 2.16 MB (vLLM exposes no cache-size metric); LRU cap 128 GiB; engine-core RSS includes both"
+   },
+   "body_over_full": {
+    "n": 5927,
+    "median": 0.04820366404948846,
+    "p90": 0.20491976473925103,
+    "p99": 1.0007515073101971,
+    "max": 1.0013607756421161,
+    "min": 0.0007742339058049597,
+    "mean": 0.1002483147886436
+   },
+   "median_history_frames": 96.0,
+   "body_over_full_at_median_history": {
+    "n": 474,
+    "median": 0.052902753463440075,
+    "p90": 0.06132298136370734,
+    "p99": 1.0017131557985308,
+    "max": 1.0021939309108352,
+    "min": 0.0007900744599243917,
+    "mean": 0.07426854642643788
+   },
+   "censored": 0,
+   "drain_capped": false,
+   "errors_non_censored": 46,
+   "computed_tokens_window": 2625848,
+   "computed_tokens_per_escalation": 4926.544090056285,
+   "computed_tokens_per_escalation_esc_only": 318.65666041275796,
+   "warmup_computed_tokens": 531970,
+   "body_mb_window": 7070.3555999999935,
+   "mm_cache_queries": 662927.0,
+   "mm_cache_hits": 635238.0,
+   "whole_counter_window": [
+    105.63,
+    1007.33
+   ],
+   "timeline_points": 967,
+   "binding": [
+    "kv_running_set"
+   ],
+   "host_reload_tb": 14.186134372352,
+   "live_set": {
+    "peak_tokens": 691380.0,
+    "mean_tokens": 605089.591160221,
+    "peak_gib": 168.7939453125,
+    "peak_over_capacity": 0.622013099179502
+   },
+   "all": {
+    "n": 533,
+    "failed": 0,
+    "ttft_s": {
+     "n": 533,
+     "median": 1.179,
+     "p90": 2.5564,
+     "p99": 3.9174399999999983,
+     "max": 4.45,
+     "min": 0.14,
+     "mean": 1.355515947467167
+    },
+    "computed_tokens_per_escalation_esc_only": 318.65666041275796,
+    "fallbacks": 81,
+    "frac_within": {
+     "2s": 0.8255159474671669,
+     "5s": 1.0,
+     "15s": 1.0
+    }
+   },
+   "high_demand": {
+    "n": 533,
+    "failed": 0,
+    "ttft_s": {
+     "n": 533,
+     "median": 1.179,
+     "p90": 2.5564,
+     "p99": 3.9174399999999983,
+     "max": 4.45,
+     "min": 0.14,
+     "mean": 1.355515947467167
+    },
+    "computed_tokens_per_escalation_esc_only": 318.65666041275796,
+    "fallbacks": 81,
+    "frac_within": {
+     "2s": 0.8255159474671669,
+     "5s": 1.0,
+     "15s": 1.0
+    }
+   },
+   "low_demand": {
+    "n": 0,
+    "failed": 0,
+    "ttft_s": null,
+    "computed_tokens_per_escalation_esc_only": null,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": null,
+     "5s": null,
+     "15s": null
+    }
+   },
+   "eager_devices_esc": {
+    "n": 533,
+    "failed": 0,
+    "ttft_s": {
+     "n": 533,
+     "median": 1.179,
+     "p90": 2.5564,
+     "p99": 3.9174399999999983,
+     "max": 4.45,
+     "min": 0.14,
+     "mean": 1.355515947467167
+    },
+    "computed_tokens_per_escalation_esc_only": 318.65666041275796,
+    "fallbacks": 81,
+    "frac_within": {
+     "2s": 0.8255159474671669,
+     "5s": 1.0,
+     "15s": 1.0
+    }
+   },
+   "lazy_devices_esc": {
+    "n": 0,
+    "failed": 0,
+    "ttft_s": null,
+    "computed_tokens_per_escalation_esc_only": null,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": null,
+     "5s": null,
+     "15s": null
+    }
+   },
+   "escalations_excluded_over_context": 4
+  },
+  "RH8_REP-LAZYD_D64": {
+   "part": "REP-LAZYD",
+   "D": 64,
+   "fmt": "D2",
+   "cadence": 10,
+   "lazy": true,
+   "offload_gib": 256,
+   "coverage": {
+    "devices": 64,
+    "devices_without_sessions": 0,
+    "devices_plan_ends_before_window_end": 10,
+    "sessions_per_device": [
+     3,
+     4
+    ]
+   },
+   "warmup_s": 0.06,
+   "inflight_at_window_end": 0,
+   "drain_s": 0.0,
+   "whole_s": 902.6,
+   "n_requests": 537,
+   "appends": 0,
+   "escalations": 533,
+   "req_per_s_window": 0.5966666666666667,
+   "esc_ttft_s": {
+    "n": 533,
+    "median": 2.862,
+    "p90": 15.841800000000001,
+    "p99": 26.037319999999994,
+    "max": 30.323,
+    "min": 0.176,
+    "mean": 5.305290806754222
+   },
+   "esc_latency_s": {
+    "n": 533,
+    "median": 3.138,
+    "p90": 16.6556,
+    "p99": 27.42703999999997,
+    "max": 31.202,
+    "min": 0.2,
+    "mean": 5.694393996247655
+   },
+   "append_ttft_s": null,
+   "esc_hit": 0.5118787617210512,
+   "append_hit": 0.0,
+   "token_hit": 0.5118787617210512,
+   "esc_prompt_tokens": {
+    "n": 533,
+    "median": 10612.0,
+    "p90": 20979.800000000003,
+    "p99": 26667.839999999982,
+    "max": 27271.0,
+    "min": 767.0,
+    "mean": 11328.257035647279
+   },
+   "body_mb": {
+    "n": 537,
+    "median": 8.3623,
+    "p90": 21.671560000000007,
+    "p99": 49.41670399999998,
+    "max": 68.3748,
+    "min": 0.2667,
+    "mean": 11.055626629422719
+   },
+   "gpu_local_hit_tokens": 55024.0,
+   "host_hit_tokens": 3035680.0,
+   "host_share_of_hits": 0.9821969363614245,
+   "pcie_load_gb": 795.78529792,
+   "pcie_store_gb": 771.609329664,
+   "pcie_load_gbps_avg": 0.8816588720584977,
+   "pcie_store_gbps_avg": 0.8548740634433857,
+   "pcie_load_gbps_peak_1s": 10.179253169230707,
+   "pcie_load_gbps_best_30s": 2.017520594379716,
+   "load_bytes_per_host_hit_token": 262144.0,
+   "allocation_failures": 0,
+   "computed_tok_s_achieved": 3265.2969200088633,
+   "computed_tok_s_demand": 3274.73,
+   "kv_usage": {
+    "n": 867,
+    "median": 0.2237477752351894,
+    "p90": 0.6662598525298754,
+    "p99": 0.8965166539537249,
+    "max": 0.9654207983727434,
+    "min": 0.0,
+    "mean": 0.2660582636907532
+   },
+   "waiting": {
+    "n": 867,
+    "median": 0.0,
+    "p90": 7.0,
+    "p99": 15.0,
+    "max": 18.0,
+    "min": 0.0,
+    "mean": 1.5409457900807382
+   },
+   "running": {
+    "n": 867,
+    "median": 1.0,
+    "p90": 2.0,
+    "p99": 4.0,
+    "max": 6.0,
+    "min": 0.0,
+    "mean": 0.9434832756632064
+   },
+   "preemptions": 0.0,
+   "api_cores": {
+    "n": 866,
+    "median": 0.077,
+    "p90": 0.937,
+    "p99": 1.8488500000000003,
+    "max": 2.374,
+    "min": 0.0,
+    "mean": 0.31517782909930714
+   },
+   "api_max_thread_cores": {
+    "n": 866,
+    "median": 0.029,
+    "p90": 0.2395,
+    "p99": 0.547,
+    "max": 0.768,
+    "min": 0.0,
+    "mean": 0.08454618937644341
+   },
+   "engine_cores": {
+    "n": 866,
+    "median": 0.6094999999999999,
+    "p90": 1.065,
+    "p99": 1.205,
+    "max": 1.489,
+    "min": 0.01,
+    "mean": 0.569689376443418
+   },
+   "harness_cores": {
+    "n": 866,
+    "median": 0.048,
+    "p90": 0.105,
+    "p99": 0.163,
+    "max": 0.245,
+    "min": 0.01,
+    "mean": 0.059466512702078526
+   },
+   "gpu_util": {
+    "n": 866,
+    "median": 100.0,
+    "p90": 100.0,
+    "p99": 100.0,
+    "max": 100.0,
+    "min": 0.0,
+    "mean": 68.81870669745959
+   },
+   "submit_lag_s": {
+    "n": 537,
+    "median": 0.008,
+    "p90": 0.025,
+    "p99": 0.085,
+    "max": 0.112,
+    "min": 0.001,
+    "mean": 0.01308566108007449
+   },
+   "errors": 4,
+   "errors_over_context": 4,
+   "error_kinds": [
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (34233) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (45705) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (50817) exceeds model\\'s maximum c",
+    "HTTP 400: b'{\"error\":{\"message\":\"Input length (51976) exceeds model\\'s maximum c"
+   ],
+   "warm_requests_checked": 339,
+   "warm_misses": 8,
+   "warm_miss_frac": 0.02359882005899705,
+   "host_verification": {
+    "external_hit_tokens": 3035680.0,
+    "load_bytes": 797578091154.689,
+    "bytes_per_hit_token": 262734.5738532022,
+    "verified": true,
+    "note": ""
+   },
+   "host_mem_end": {
+    "server_tree_rss_gib": 295.5019836425781,
+    "host_mem_available_gib": 1175.8915710449219
+   },
+   "binding_flags": {
+    "kv_running_set": true,
+    "gpu_compute": false,
+    "pcie": false,
+    "host_capacity": false,
+    "api_cpu": false
+   },
+   "diagnostics": {
+    "scrape_coverage_window": 0.9611111111111111,
+    "upstream_of_engine_window": {
+     "n": 865,
+     "median": 1.0,
+     "p90": 3.0,
+     "p99": 5.0,
+     "max": 6.0,
+     "min": 0.0,
+     "mean": 0.8959537572254336
+    },
+    "engine_queue_window": {
+     "n": 865,
+     "median": 1.0,
+     "p90": 9.0,
+     "p99": 17.0,
+     "max": 21.0,
+     "min": 0.0,
+     "mean": 2.4901734104046245
+    },
+    "engine_waiting_window": {
+     "n": 865,
+     "median": 0.0,
+     "p90": 7.0,
+     "p99": 15.0,
+     "max": 18.0,
+     "min": 0.0,
+     "mean": 1.544508670520231
+    },
+    "kv_usage_window": {
+     "n": 865,
+     "median": 0.22578184591914574,
+     "p90": 0.6663107042969744,
+     "p99": 0.8965166539537249,
+     "max": 0.9654207983727434,
+     "min": 0.0,
+     "mean": 0.2666734273062231
+    },
+    "gpu_util_window": {
+     "n": 864,
+     "median": 100.0,
+     "p90": 100.0,
+     "p99": 100.0,
+     "max": 100.0,
+     "min": 0.0,
+     "mean": 68.97800925925925
+    },
+    "api_cores_window": {
+     "n": 864,
+     "median": 0.0775,
+     "p90": 0.9386000000000003,
+     "p99": 1.84907,
+     "max": 2.374,
+     "min": 0.0,
+     "mean": 0.31586342592592587
+    },
+    "api_max_thread_cores_window": {
+     "n": 864,
+     "median": 0.029,
+     "p90": 0.23970000000000002,
+     "p99": 0.547,
+     "max": 0.768,
+     "min": 0.0,
+     "mean": 0.08470833333333333
+    },
+    "served_req_per_s_window": 0.5966666666666667,
+    "served_req_per_s_drain": null,
+    "offered_body_mb_per_s": 6.596523888888892,
+    "served_body_mb_per_s_window": 6.596523888888892
+   },
+   "harness_valid": true,
+   "breach": true,
+   "policy": "REP-LAZYD",
+   "demand": "rate1",
+   "eager_devices": 0,
+   "eager_and_high": 0,
+   "window_plan": {
+    "escalations": 537,
+    "escalations_high": 537,
+    "escalations_low": 0,
+    "escalations_on_eager": 0,
+    "appends": 0,
+    "eager_devices": 0,
+    "eager_and_high": 0
+   },
+   "fallbacks": 0,
+   "fallback_frac": 0.0,
+   "fallback_flag": false,
+   "host_memory": {
+    "api_rss_peak_gib": 4.89,
+    "engine_rss_peak_gib": 292.27,
+    "tree_rss_peak_gib": 295.58,
+    "mem_available_min_gib": 1175.6,
+    "kv_offload_buffer_gib": 256,
+    "processor_cache_items_est": 31331,
+    "processor_cache_est_gib": 66.17107200000001,
+    "processor_cache_note": "estimate: items cached x 2.16 MB (vLLM exposes no cache-size metric); LRU cap 128 GiB; engine-core RSS includes both"
+   },
+   "body_over_full": {
+    "n": 537,
+    "median": 0.46298153347892623,
+    "p90": 1.0007769829313196,
+    "p99": 1.0010494518113098,
+    "max": 1.0012799241526427,
+    "min": 0.01069770775218585,
+    "mean": 0.5687901536582803
+   },
+   "median_history_frames": 116.0,
+   "body_over_full_at_median_history": {
+    "n": 35,
+    "median": 0.49629807651766206,
+    "p90": 1.000762737915638,
+    "p99": 1.0009258988997332,
+    "max": 1.0009837044273484,
+    "min": 0.07378395370619859,
+    "mean": 0.5569786316104979
+   },
+   "censored": 0,
+   "drain_capped": false,
+   "errors_non_censored": 4,
+   "computed_tokens_window": 2947257,
+   "computed_tokens_per_escalation": 5529.562851782364,
+   "computed_tokens_per_escalation_esc_only": 5529.562851782364,
+   "warmup_computed_tokens": 0,
+   "body_mb_window": 5936.871500000003,
+   "mm_cache_queries": 68034.0,
+   "mm_cache_hits": 36129.0,
+   "whole_counter_window": [
+    0.06,
+    902.66
+   ],
+   "timeline_points": 867,
+   "binding": [
+    "kv_running_set"
+   ],
+   "host_reload_tb": 0.79578529792,
+   "live_set": null,
+   "all": {
+    "n": 533,
+    "failed": 0,
+    "ttft_s": {
+     "n": 533,
+     "median": 2.862,
+     "p90": 15.841800000000001,
+     "p99": 26.037319999999994,
+     "max": 30.323,
+     "min": 0.176,
+     "mean": 5.305290806754222
+    },
+    "computed_tokens_per_escalation_esc_only": 5529.562851782364,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.34146341463414637,
+     "5s": 0.7091932457786116,
+     "15s": 0.8874296435272045
+    }
+   },
+   "high_demand": {
+    "n": 533,
+    "failed": 0,
+    "ttft_s": {
+     "n": 533,
+     "median": 2.862,
+     "p90": 15.841800000000001,
+     "p99": 26.037319999999994,
+     "max": 30.323,
+     "min": 0.176,
+     "mean": 5.305290806754222
+    },
+    "computed_tokens_per_escalation_esc_only": 5529.562851782364,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.34146341463414637,
+     "5s": 0.7091932457786116,
+     "15s": 0.8874296435272045
+    }
+   },
+   "low_demand": {
+    "n": 0,
+    "failed": 0,
+    "ttft_s": null,
+    "computed_tokens_per_escalation_esc_only": null,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": null,
+     "5s": null,
+     "15s": null
+    }
+   },
+   "eager_devices_esc": {
+    "n": 0,
+    "failed": 0,
+    "ttft_s": null,
+    "computed_tokens_per_escalation_esc_only": null,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": null,
+     "5s": null,
+     "15s": null
+    }
+   },
+   "lazy_devices_esc": {
+    "n": 533,
+    "failed": 0,
+    "ttft_s": {
+     "n": 533,
+     "median": 2.862,
+     "p90": 15.841800000000001,
+     "p99": 26.037319999999994,
+     "max": 30.323,
+     "min": 0.176,
+     "mean": 5.305290806754222
+    },
+    "computed_tokens_per_escalation_esc_only": 5529.562851782364,
+    "fallbacks": 0,
+    "frac_within": {
+     "2s": 0.34146341463414637,
+     "5s": 0.7091932457786116,
+     "15s": 0.8874296435272045
+    }
+   },
+   "escalations_excluded_over_context": 4
+  }
+ },
+ "decision": {
+  "per_D": {
+   "64": {
+    "frac_within": {
+     "ALL-EAGER": {
+      "2s": 0.8211009174311926,
+      "5s": 0.9908256880733946,
+      "15s": 1.0
+     },
+     "ALL-LAZY": {
+      "2s": 0.5779816513761468,
+      "5s": 0.9403669724770642,
+      "15s": 1.0
+     },
+     "MIX-RANDOM": {
+      "2s": 0.6238532110091743,
+      "5s": 0.9403669724770642,
+      "15s": 1.0
+     },
+     "MIX-DEMAND": {
+      "2s": 0.7293577981651376,
+      "5s": 0.9724770642201835,
+      "15s": 1.0
+     }
+    },
+    "binding": {
+     "ALL-EAGER": [
+      "kv_running_set"
+     ],
+     "ALL-LAZY": [
+      "engine (unattributed)"
+     ],
+     "MIX-RANDOM": [
+      "kv_running_set"
+     ],
+     "MIX-DEMAND": [
+      "engine (unattributed)"
+     ]
+    },
+    "margin_2s": {
+     "mix_demand": 0.7293577981651376,
+     "best_rival": "ALL-EAGER",
+     "best_rival_value": 0.8211009174311926,
+     "margin": -0.09174311926605505,
+     "boot95_device_clustered": [
+      -0.19277414225429632,
+      -0.004290932334946562
+     ]
+    },
+    "margin_5s": {
+     "mix_demand": 0.9724770642201835,
+     "best_rival": "ALL-EAGER",
+     "best_rival_value": 0.9908256880733946,
+     "margin": -0.01834862385321101,
+     "boot95_device_clustered": [
+      -0.046391752577319534,
+      0.0050000000000000044
+     ]
+    },
+    "margin_15s": {
+     "mix_demand": 1.0,
+     "best_rival": "ALL-EAGER",
+     "best_rival_value": 1.0,
+     "margin": 0.0,
+     "boot95_device_clustered": [
+      0.0,
+      0.0
+     ]
+    },
+    "verdict": "COORDINATION NOT SHOWN",
+    "dominant_pure_policy": {
+     "policy": "ALL-EAGER",
+     "frac5": 0.9908256880733946,
+     "binding": [
+      "kv_running_set"
+     ],
+     "tie": false
+    }
+   },
+   "96": {
+    "frac_within": {
+     "ALL-EAGER": {
+      "2s": 0.00749063670411985,
+      "5s": 0.018726591760299626,
+      "15s": 0.0599250936329588
+     },
+     "ALL-LAZY": {
+      "2s": 0.4232209737827715,
+      "5s": 0.7303370786516854,
+      "15s": 0.9962546816479401
+     },
+     "MIX-RANDOM": {
+      "2s": 0.4232209737827715,
+      "5s": 0.7191011235955056,
+      "15s": 1.0
+     },
+     "MIX-DEMAND": {
+      "2s": 0.5730337078651685,
+      "5s": 0.8352059925093633,
+      "15s": 1.0
+     }
+    },
+    "binding": {
+     "ALL-EAGER": [
+      "kv_running_set"
+     ],
+     "ALL-LAZY": [
+      "engine (unattributed)"
+     ],
+     "MIX-RANDOM": [
+      "kv_running_set"
+     ],
+     "MIX-DEMAND": [
+      "kv_running_set"
+     ]
+    },
+    "margin_2s": {
+     "mix_demand": 0.5730337078651685,
+     "best_rival": "ALL-LAZY",
+     "best_rival_value": 0.4232209737827715,
+     "margin": 0.14981273408239698,
+     "boot95_device_clustered": [
+      0.09452638382888708,
+      0.1972450679130299
+     ]
+    },
+    "margin_5s": {
+     "mix_demand": 0.8352059925093633,
+     "best_rival": "ALL-LAZY",
+     "best_rival_value": 0.7303370786516854,
+     "margin": 0.10486891385767794,
+     "boot95_device_clustered": [
+      0.06730769230769229,
+      0.14626312868243524
+     ]
+    },
+    "margin_15s": {
+     "mix_demand": 1.0,
+     "best_rival": "MIX-RANDOM",
+     "best_rival_value": 1.0,
+     "margin": 0.0,
+     "boot95_device_clustered": [
+      0.0,
+      0.0
+     ]
+    },
+    "verdict": "DEMAND-AWARE ALLOCATION WINS",
+    "dominant_pure_policy": {
+     "policy": "ALL-LAZY",
+     "frac5": 0.7303370786516854,
+     "binding": [
+      "engine (unattributed)"
+     ],
+     "tie": false
+    }
+   }
+  },
+  "rule": "MIX-DEMAND frac(TTFT<=5 s) - best rival >= 0.05",
+  "run_to_run_variance": {
+   "RH8_REP-EAGER_D64": {
+    "reference": "RH7_EAGER_D64",
+    "median_rh8": 1.179,
+    "p90_rh8": 2.5564,
+    "p99_rh8": 3.9174399999999983,
+    "max_rh8": 4.45,
+    "median_rh7": 1.126,
+    "p90_rh7": 2.1196,
+    "p99_rh7": 2.98236,
+    "max_rh7": 3.454,
+    "median_ratio": 1.0470692717584371,
+    "p90_ratio": 1.2060766182298546,
+    "p99_ratio": 1.313536930484582,
+    "max_ratio": 1.2883613202084538,
+    "hit_rh8": 0.9718681531274576,
+    "hit_rh7": 0.9718621911674614,
+    "n_rh8": 533,
+    "n_rh7": 533
+   },
+   "RH8_REP-LAZYD_D64": {
+    "reference": "RH7_LAZYD_D64",
+    "median_rh8": 2.862,
+    "p90_rh8": 15.841800000000001,
+    "p99_rh8": 26.037319999999994,
+    "max_rh8": 30.323,
+    "median_rh7": 2.919,
+    "p90_rh7": 15.573,
+    "p99_rh7": 26.350839999999977,
+    "max_rh7": 28.287,
+    "median_ratio": 0.9804727646454265,
+    "p90_ratio": 1.017260643421306,
+    "p99_ratio": 0.9881020870681928,
+    "max_ratio": 1.0719765263195107,
+    "hit_rh8": 0.5118787617210512,
+    "hit_rh7": 0.5091306043918272,
+    "n_rh8": 533,
+    "n_rh7": 533
+   }
+  },
+  "stop_checks": {
+   "host_verification": {
+    "RH8_ALL-EAGER_D64": true,
+    "RH8_ALL-LAZY_D64": true,
+    "RH8_MIX-RANDOM_D64": true,
+    "RH8_MIX-DEMAND_D64": true,
+    "RH8_ALL-EAGER_D96": true,
+    "RH8_ALL-LAZY_D96": true,
+    "RH8_MIX-RANDOM_D96": true,
+    "RH8_MIX-DEMAND_D96": true,
+    "RH8_REP-EAGER_D64": true,
+    "RH8_REP-LAZYD_D64": true
+   },
+   "fallback_frac": {
+    "RH8_ALL-EAGER_D64": 0.005211047420531527,
+    "RH8_ALL-LAZY_D64": 0.0,
+    "RH8_MIX-RANDOM_D64": 0.007965686274509803,
+    "RH8_MIX-DEMAND_D64": 0.012987012987012988,
+    "RH8_ALL-EAGER_D96": 0.0058215689128220055,
+    "RH8_ALL-LAZY_D96": 0.0,
+    "RH8_MIX-RANDOM_D96": 0.004142931123770067,
+    "RH8_MIX-DEMAND_D96": 0.014077163712200209,
+    "RH8_REP-EAGER_D64": 0.0133399209486166,
+    "RH8_REP-LAZYD_D64": 0.0
+   }
+  }
+ },
+ "_provenance": {
+  "git_commit": "27d435e589ddd8dd0b0d26a2656b64004e036ab1",
+  "script": "study_rh8_analyse.py",
+  "model": "qwen3vl-32b-instruct",
+  "timestamp": "2026-10-23T16:12:51.719662",
+  "device": "h100nvl",
+  "n": 26824
+ }
+}

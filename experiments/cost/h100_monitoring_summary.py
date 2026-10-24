@@ -30,7 +30,8 @@ RUNS = {"StudyR1": ("queue4", r"^r1_"), "StudyR5": ("queue4", r"^r5_"), "StudyRH
         "StudyRH3": ("queue6", r"^rh3_(part0|cells)$"), "StudyRH4": ("queue7", r"^rh4_(part0|cells)$"),
         "StudyRH5": ("queue8", r"^rh5_(partA|fleet)_(host|gpu)$"),
         "StudyRH6": ("queue9", r"^rh6_(smoke|partA|partB|partC)$"),
-        "StudyRH7": ("queue10", r"^rh7_(step0|smoke|fleet)$")}
+        "StudyRH7": ("queue10", r"^rh7_(step0|smoke|fleet)$"),
+        "StudyRH8": ("queue11", r"^rh8_(smoke|fleet)$"), "StudyR9": ("queue11", r"^r9$")}
 F = "%Y-%m-%d %H:%M:%S"
 
 
