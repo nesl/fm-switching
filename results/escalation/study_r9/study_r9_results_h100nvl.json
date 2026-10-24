@@ -1,0 +1,263 @@
+{
+ "n": 845,
+ "positives": 97,
+ "device_accuracy": 31.4792899408284,
+ "cloud_k1_accuracy": 39.52662721893491,
+ "servers": [
+  {
+   "detector": "C0",
+   "key": "32BI",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "startup_s": 75.9,
+   "kv_cache_tokens": 62944,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--mm-processor-cache-gb",
+    "0"
+   ]
+  },
+  {
+   "detector": "C1",
+   "key": "4BI",
+   "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+   "startup_s": 88.1,
+   "kv_cache_tokens": 516512,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--mm-processor-cache-gb",
+    "0"
+   ]
+  },
+  {
+   "detector": "C2",
+   "key": "32BI",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "startup_s": 72.8,
+   "kv_cache_tokens": 62944,
+   "flash_attention_version": "3",
+   "cuda_graphs": true,
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--host",
+    "127.0.0.1",
+    "--mm-processor-cache-gb",
+    "0"
+   ]
+  }
+ ],
+ "stack": {
+  "venv": "/home/pragya/.venvs/fm-switching-vllm",
+  "vllm": "0.31.0",
+  "torch": "2.13.0+cu129",
+  "cuda": "12.9"
+ },
+ "pilot": {
+  "C0": {
+   "n": 30,
+   "parse_rate": 1.0,
+   "distinct_values": null,
+   "passed": true
+  },
+  "C1": {
+   "n": 30,
+   "parse_rate": 1.0,
+   "distinct_values": 29,
+   "passed": true
+  },
+  "C2": {
+   "n": 30,
+   "parse_rate": 1.0,
+   "distinct_values": 27,
+   "passed": true
+  }
+ },
+ "baselines": {
+  "random": {
+   "0.05": 31.87927593571654,
+   "0.1": 32.27926193060467,
+   "0.12": 32.441161023773674,
+   "0.2": 33.08875739644971
+  },
+  "evidence_oracle": {
+   "0.05": 32.760324528762276,
+   "0.1": 34.04135911669615,
+   "0.12": 34.465082428883335,
+   "0.2": 34.92769673765149
+  },
+  "perfect_oracle": {
+   "0.05": 36.44970414201183,
+   "0.1": 41.42011834319526,
+   "0.12": 43.43195266272189,
+   "0.2": 51.005917159763314
+  },
+  "evidence_oracle_at_97": 34.437869822485204
+ },
+ "detectors": {
+  "C0": {
+   "n": 845,
+   "missing": 0,
+   "errors": 0,
+   "parse_rate": 1.0,
+   "auroc": 0.4302745465571421,
+   "auroc_ci95": [
+    0.3659533876097242,
+    0.49323472491201736
+   ],
+   "gpu_s_per_question": {
+    "mean": 0.052595857988165684,
+    "median": 0.0503,
+    "p90": 0.0594,
+    "max": 0.2436,
+    "total_h": 0.012345416666666666
+   },
+   "prompt_tokens": {
+    "mean": 200.18343195266272,
+    "max": 519
+   },
+   "escalation_accuracy": {
+    "0.05": 31.4792899408284,
+    "0.1": 32.544378698224854,
+    "0.12": 32.42603550295858,
+    "0.2": 33.37278106508876
+   },
+   "score_by_truth": {
+    "positive_median": 6.332017183144063,
+    "negative_median": 6.742928081907934
+   },
+   "text_digit_hist": {
+    "0": 123,
+    "1": 0,
+    "2": 0,
+    "3": 135,
+    "4": 0,
+    "5": 6,
+    "6": 1,
+    "7": 303,
+    "8": 0,
+    "9": 277
+   }
+  },
+  "C1": {
+   "n": 845,
+   "missing": 0,
+   "errors": 0,
+   "parse_rate": 1.0,
+   "auroc": 0.6409118474006285,
+   "auroc_ci95": [
+    0.5704751781918792,
+    0.711599018844742
+   ],
+   "gpu_s_per_question": {
+    "mean": 0.9803781065088757,
+    "median": 0.8009,
+    "p90": 2.06236,
+    "max": 3.2229,
+    "total_h": 0.23011652777777777
+   },
+   "prompt_tokens": {
+    "mean": 7416.350295857988,
+    "max": 19022
+   },
+   "escalation_accuracy": {
+    "0.05": 32.662721893491124,
+    "0.1": 33.55029585798817,
+    "0.12": 33.84615384615385,
+    "0.2": 34.28007889546351
+   },
+   "score_by_truth": {
+    "positive_median": -83.0,
+    "negative_median": -106.0
+   },
+   "auroc_binary_older": 0.6852706874689894,
+   "older_flag_rate": 0.09467455621301775,
+   "older_flag_tpr": 0.422680412371134,
+   "older_flag_fpr": 0.05213903743315508,
+   "t_pred_inside_interval": 0.5585798816568047,
+   "dist_to_interval_s": {
+    "median": 0.0,
+    "p90": 85.60000000000002
+   },
+   "t_pred_after_qt": 0.0
+  },
+  "C2": {
+   "n": 845,
+   "missing": 0,
+   "errors": 0,
+   "parse_rate": 0.9976331360946745,
+   "auroc": 0.7547825128176856,
+   "auroc_ci95": [
+    0.6856820018023742,
+    0.8192468529138588
+   ],
+   "gpu_s_per_question": {
+    "mean": 2.108682603550296,
+    "median": 1.7836,
+    "p90": 4.2926,
+    "max": 6.4268,
+    "total_h": 0.49495466666666665
+   },
+   "prompt_tokens": {
+    "mean": 7416.350295857988,
+    "max": 19022
+   },
+   "escalation_accuracy": {
+    "0.05": 32.18934911242604,
+    "0.1": 33.13609467455621,
+    "0.12": 33.84615384615385,
+    "0.2": 35.14792899408284
+   },
+   "score_by_truth": {
+    "positive_median": 44.0,
+    "negative_median": -74.0
+   },
+   "auroc_binary_older": 0.7972187000385909,
+   "older_flag_rate": 0.23668639053254437,
+   "older_flag_tpr": 0.7628865979381443,
+   "older_flag_fpr": 0.16844919786096257,
+   "t_pred_inside_interval": 0.6204033214709371,
+   "dist_to_interval_s": {
+    "median": 0.0,
+    "p90": 66.80000000000007
+   },
+   "t_pred_after_qt": 0.0
+  }
+ },
+ "decision": {
+  "c1_auroc": 0.6409118474006285,
+  "c1_accuracy_e012": 33.84615384615385,
+  "evidence_oracle_ref": 34.44,
+  "evidence_oracle_at_e012": 34.465082428883335,
+  "c1_over_c2_gpu_s": 0.4649244532383661,
+  "clauses": {
+   "auroc": false,
+   "accuracy": true,
+   "cost": false
+  },
+  "verdict": "DOES NOT WORK (failing: auroc, cost)"
+ },
+ "_provenance": {
+  "git_commit": "27d435e589ddd8dd0b0d26a2656b64004e036ab1",
+  "script": "study_r9_analyse.py",
+  "model": "qwen3vl-32b-instruct+qwen3vl-4b-instruct",
+  "timestamp": "2026-10-23T16:13:46.089327",
+  "device": "h100nvl",
+  "n": 2535
+ }
+}
