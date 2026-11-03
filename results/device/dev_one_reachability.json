@@ -1,0 +1,37 @@
+{
+  "host": "sn4622120321",
+  "checks": {
+    "resolve": {
+      "ok": false,
+      "error": "gaierror: [Errno -3] Temporary failure in name resolution"
+    },
+    "ping": {
+      "rc": 2,
+      "stdout": "",
+      "stderr": "ping: sn4622120321: Temporary failure in name resolution\n"
+    },
+    "route": "Error: any valid prefix is expected rather than \"sn4622120321\".",
+    "tcp": {
+      "22": "gaierror",
+      "8000": "gaierror",
+      "8080": "gaierror"
+    },
+    "tools_present": {
+      "iperf3": true,
+      "iperf": false,
+      "nc": true,
+      "ssh": true,
+      "scp": true,
+      "rsync": true,
+      "curl": true
+    },
+    "ssh_config_alias": "no ~/.ssh/config"
+  },
+  "_provenance": {
+    "git_commit": "5bc10e0f605d2e7a679785287a9f51f72069c08c",
+    "script": "study_dev_one.py",
+    "model": "n/a",
+    "timestamp": "2026-11-03T10:57:35.325048",
+    "device": "jetson_orin"
+  }
+}
