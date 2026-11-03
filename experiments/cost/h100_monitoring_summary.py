@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""H100 monitoring summary for the latency/accuracy studies run on GPU 3 (R1, R5, RH2, RH3; RH4, RH5, RH6 and RH7 added). CPU only, any venv.
+"""H100 monitoring summary for the latency/accuracy studies run on GPU 3 (R1, R5, RH2, RH3; RH4–RH8, R9 added; StudyClean on GPU 1). CPU only, any venv.
 
 Source: the gitignored logs/ written by the chains (not committed). Per run:
   windows   START/END pairs of the run's steps in logs/queueN_chain.log
@@ -130,15 +130,98 @@ def summarise(name, q, pat):
     return res
 
 
+GPU1 = "GPU-235c6d2d"
+
+
+def summarise_clean():
+    """StudyClean (GPU 1; GPU 3 was held by another user): logs/clean_chain.log '=== CLEAN <ts> START|END <cmd>' windows,
+    logs/clean_gpus.csv (1-s samples, all GPUs: ts, index, util, mem, power, SM, temp), logs/clean_gpu_procs.csv
+    (10-s), and the watchdog's FOREIGN lines (the 12:50:04 kill during the pass-1/pass-2 gap is expected here)."""
+    chain = LOGS / "clean_chain.log"
+    res = dict(run="StudyClean", gpu="h100nvl GPU 1 (UUID GPU-235c6d2d…)", chain_log=str(chain))
+    if not chain.exists():
+        return dict(res, missing="chain log missing")
+    ws, open_ = [], None
+    for line in chain.read_text(errors="replace").splitlines():
+        m = re.match(r"=== CLEAN (\S+ \S+) (START|END)(?: rc=(\d+))? (.*)", line)
+        if not m:
+            continue
+        t = datetime.strptime(m.group(1)[:19], F)
+        step = re.sub(r"^\S*python3? ", "", m.group(4)).strip()
+        if m.group(2) == "START":
+            open_ = (step, t)
+        elif open_:
+            ws.append(dict(step=step, start=open_[1], end=t, rc=int(m.group(3))))
+            open_ = None
+    res["windows"] = [dict(step=w["step"], start=w["start"].strftime(F), end=w["end"].strftime(F), rc=w["rc"]) for w in ws]
+    files = [chain]
+    own, srv = set(), []
+    for p in sorted(LOGS.glob("study_x_server_*.log")):
+        m = re.search(r"_(\d{4})_(\d{6})\.log$", p.name)
+        t = datetime.strptime(f"2026{m.group(1)}{m.group(2)}", "%Y%m%d%H%M%S")
+        if inside(t, ws):
+            srv.append(p)
+            own |= {int(x) for x in re.findall(r"pid=(\d+)", p.read_text(errors="replace"))}
+    res["server_logs"] = [p.name for p in srv]
+    files += srv
+    mon = LOGS / "clean_gpus.csv"
+    if mon.exists():
+        per = {}
+        for r in csv.reader(open(mon)):
+            if len(r) < 7:
+                continue
+            t = datetime.strptime(r[0].strip(), F)
+            if inside(t, ws):
+                per.setdefault(r[1].strip(), []).append([num(v) for v in r[2:7]])
+        g1 = per.get("1", [])
+        busy = [v for v in g1 if v[0] > 0]
+        res["gpu1_monitor"] = dict(samples=len(g1), interval_s=1, util_pct=stats([v[0] for v in g1]),
+                                   memory_used_mib=stats([v[1] for v in g1]), power_w=stats([v[2] for v in g1]),
+                                   sm_clock_mhz_busy_only=stats([v[3] for v in busy]),
+                                   power_w_busy_only=stats([v[2] for v in busy]), temp_c=stats([v[4] for v in g1]))
+        res["neighbour_gpus_util_pct"] = {f"GPU {k}": stats([v[0] for v in vs]) for k, vs in per.items() if k != "1"}
+        files.append(mon)
+    procs = LOGS / "clean_gpu_procs.csv"
+    if procs.exists():
+        seen, foreign = 0, {}
+        for r in csv.reader(open(procs)):
+            if len(r) < 3 or GPU1 not in r[1]:
+                continue
+            t = datetime.strptime(r[0].strip(), F)
+            if not inside(t, ws):
+                continue
+            seen += 1
+            if int(r[2]) not in own:
+                foreign.setdefault(int(r[2]), []).append(t.strftime(F))
+        res["foreign_processes_in_windows"] = dict(gpu1_process_samples=seen, count=len(foreign),
+                                                   pids={str(k): dict(first=v[0], last=v[-1], samples=len(v))
+                                                         for k, v in foreign.items()})
+        files.append(procs)
+    res["watchdog_foreign_lines"] = [ln for ln in chain.read_text(errors="replace").splitlines() if "FOREIGN" in ln]
+    res["note"] = ("Own-pid detection reads vLLM server logs only, so H4's HF process (pid 3095566, 9.0-9.6 GiB = the 4B "
+                   "model, 12:24:40-12:25:39 inside the H4 window; the session watchdog did not fire) is listed as "
+                   "'foreign in windows' but was ours. Watchdog lines: 12:50:04 liying during the pass-1/pass-2 gap "
+                   "(chain killed, nothing of ours on the GPU); 13:39:16 liying after the chain completed (13:32:20).")
+    res["files"] = [sha(p) for p in files + [p for p in (LOGS / "clean_dmon.log", LOGS / "clean_loadavg.log") if p.exists()]]
+    return res
+
+
 def main():
     out = dict(note="Summary of gitignored logs/ on h100nvl; GPU 3 = UUID b3c6399e. Clocks/util are 10-s samples "
                     "inside the run's chain-step windows. 'Foreign' = a GPU-3 compute process not started by the "
                     "run's own vLLM servers.",
                runs={n: summarise(n, q, p) for n, (q, p) in RUNS.items()})
+    out["runs"]["StudyClean"] = summarise_clean()
     out["_provenance"] = stamp(script="h100_monitoring_summary.py", model="n/a", device="h100nvl",
                                n=len(out["runs"]))
     OUT.write_text(json.dumps(out, indent=1))
     for n, r in out["runs"].items():
+        if n == "StudyClean":
+            m, fp = r.get("gpu1_monitor"), r.get("foreign_processes_in_windows")
+            print(n, len(r.get("windows", [])), "windows; GPU 1:", m and f"{m['samples']} samples, SM busy "
+                  f"{m['sm_clock_mhz_busy_only']}", "| foreign in windows:", fp and fp["count"], "| watchdog lines",
+                  len(r["watchdog_foreign_lines"]), "| files", len(r.get("files", [])))
+            continue
         m = r.get("gpu3_monitor")
         fp = r.get("foreign_processes")
         print(n, len(r.get("windows", [])), "windows;", "monitor:", m if isinstance(m, str) else
