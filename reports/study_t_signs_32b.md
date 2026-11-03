@@ -1,5 +1,12 @@
 # StudyT — SiGNgapore2D non-termination at 32B: does scale buy termination? (h100nvl)
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: CONFOUNDED (Thinking arms only).** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> The Thinking arm is sampled at **temperature 0.6** (`do_sample=True, temperature=0.6, top_p=0.95, top_k=20, min_p=0`) while its Instruct comparator is **greedy** (`do_sample=False`), verified in `experiments/signs/study_t_signs_32b.py`. Decoding is therefore not matched across the arms being compared, and any Thinking-minus-Instruct difference reported here carries a decoding confound. **The Instruct arms are unaffected.**
+
+
 Status: **COMPLETE (2026-10-15 08:16).** Verdict (primary, termination at 8192): **TREND DOES NOT CONTINUE —
 indistinguishable from 8B** (within-cap 30/35 = 85.7% [70.6, 93.7]; all 40 incl. post-cap 34/40 = 85.0%
 [70.9, 92.9]). Ladder: 32B never-terminate at 24,576 = **2/40 (5%) vs 4B's 8/40 (20%)**. The pre-registration

@@ -1,5 +1,16 @@
 # Study I2 — S-EMBER Token Budget Allocation
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: INVALID for the SPATIAL and TEMPORAL arms; SPARSE unaffected.** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> These arms build frame times as `[float(i) for i in range(n_req)]` — seconds 0, 1, ..., n-1, i.e. the **first N seconds of the video**, not the N seconds before the question. The defect bites whenever `question_time` exceeds the arm's frame cap.
+> Verified in `experiments/sember/study_i2_budget.py` (`load_frames`): **SPATIAL** 543 of 559
+> trials (97.1%) have `qt > 42`; **TEMPORAL** 90 of 200 (45.0%) have `qt > 256`. **SPARSE is
+> unaffected** — it uses `[question_time * i / (n - 1) for i in range(n)]`, sampling uniformly
+> across the whole of `[0, question_time]`.
+
+
 **Date:** 2026-09-03
 **Script:** `experiments/sember/study_i2_budget.py`
 **Data:** Study I manifest — 150 videos, 459 questions, 7 categories

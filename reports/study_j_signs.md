@@ -1,5 +1,21 @@
 # Study J — Navigational Sign Recognition: Thinking Gate
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: INVALID as a gate.** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> Verified in `experiments/signs/study_j_signs.py` and
+> `results/signs/study_j/study_j_trials.jsonl`. Three facts defeat the gate: the THINKING arms
+> are sampled at **temperature 0.6** while INSTRUCT is greedy, so the arms are
+> decoding-mismatched; the Thinking budget is **`max_new_tokens=2048`**, well below the 16,384
+> the pre-registration discussed, so signs that need longer traces are truncated by
+> construction; and **the trial file stores no score or correctness field at all** (keys are
+> `arm, budget_hit, crop_name, imagePath, n_answer_tokens, n_input_tokens, n_think_tokens,
+> objectID, parse_status, prediction, raw_answer, seed, think_closed, total_latency_ms`). No
+> accuracy gate could be evaluated from these records. The study remains usable as a
+> **termination / non-termination** observation; it is not a reasoning gate.
+
+
 **Date:** 2026-09-29  
 **Status:** Truncation finding complete (seed=42); further seeds suspended pending interpretation  
 **Pre-registered decision rule:** premise HOLDS only if THINKING > INSTRUCT under paired test at α=0.05 overall

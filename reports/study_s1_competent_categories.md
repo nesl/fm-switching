@@ -1,5 +1,12 @@
 # StudyS1 — Gate 1 on the competent-category stratum
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: CONFOUNDED (Thinking arms only).** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> The Thinking arm is sampled at **temperature 0.6** (`do_sample=True, temperature=0.6, top_p=0.95, top_k=20, min_p=0`) while its Instruct comparator is **greedy** (`do_sample=False`), verified in `experiments/erqa/study_s1_mvrobobench.py`. Decoding is therefore not matched across the arms being compared, and any Thinking-minus-Instruct difference reported here carries a decoding confound. **The Instruct arms are unaffected.**
+
+
 **Date:** 2026-10-06
 **Pre-registration:** `reports/study_s0_plan.md` §StudyS1 AMENDMENT, recorded **before** this run.
 **Analysis script:** `experiments/erqa/study_s1_analyze.py` · **Trials:** `results/mvrobobench/study_s1/study_s1_trials.jsonl`

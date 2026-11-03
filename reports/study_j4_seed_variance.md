@@ -1,5 +1,18 @@
 # Study J4 — Seed Variance on SiGNgapore2D Non-Terminators
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: valid at temperature 0.6 only.** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> Verified in `experiments/signs/study_j4_seed_variance.py`:
+> `do_sample=True, temperature=0.6, top_p=0.95, top_k=20, min_p=0`. This study measures
+> seed-to-seed variance **at that temperature**, which is exactly what it set out to do, so it is
+> **valid at temperature 0.6 only**. Its variance figures do not transfer to greedy decoding or
+> to any other temperature, and it cannot be used to argue that a Thinking-versus-Instruct
+> difference elsewhere is or is not seed noise, because those comparisons mix sampled Thinking
+> arms with greedy Instruct arms.
+
+
 **Date:** 2026-09-30  
 **Status:** Complete  
 **Follow-up to:** StudyJ2 (20% non-termination asymptote at 24,576 tokens, single seed=42)  

@@ -1,5 +1,12 @@
 # Study J3 — Prompt Ablation on SiGNgapore2D Non-Terminators
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: CONFOUNDED (Thinking arms only).** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> The Thinking arm is sampled at **temperature 0.6** (`do_sample=True, temperature=0.6, top_p=0.95, top_k=20, min_p=0`) while its Instruct comparator is **greedy** (`do_sample=False`), verified in `experiments/signs/study_j3_prompt_ablation.py`. Decoding is therefore not matched across the arms being compared, and any Thinking-minus-Instruct difference reported here carries a decoding confound. **The Instruct arms are unaffected.**
+
+
 **Date:** 2026-09-30  
 **Status:** Complete (data); underpowered for primary hypothesis  
 **Follow-up to:** StudyJ2 (20% non-termination asymptote at 24,576 tokens, seed=42)  

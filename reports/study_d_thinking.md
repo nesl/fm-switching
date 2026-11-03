@@ -1,5 +1,12 @@
 # Study D — Reasoning Compute vs Parameters with Scene Difficulty
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: INVALID.** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> Thinking was decoded **greedily** (`do_sample=False, temperature=None, top_p=None`) in `experiments/vision/study_d_thinking.py`, against a model card that specifies sampling for thinking mode. With greedy decoding and a fixed input the repetitions carry no independent information, and they do not: **all 240 repetition groups are byte-identical** across `rep` on `(parsed_answer, n_generated, n_think_tokens, correct)`. Any spread, variance or confidence interval computed across reps here is zero by construction, and the three reps are one measurement, not three.
+
+
 **Date:** 2026-08-30  
 **Script:** `experiments/vision/study_d_thinking.py`  
 **Models:** Qwen3-VL-4B-Instruct (`qwen3vl4b`), Qwen3-VL-4B-Thinking (`qwen3vl4b_t`)  

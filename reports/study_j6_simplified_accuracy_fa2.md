@@ -1,5 +1,12 @@
 # StudyJ6 — Accuracy Cost of the Simplified Prompt
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: CONFOUNDED (Thinking arms only).** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> The Thinking arm is sampled at **temperature 0.6** (`do_sample=True, temperature=0.6, top_p=0.95, top_k=20, min_p=0`) while its Instruct comparator is **greedy** (`do_sample=False`), verified in `experiments/signs/study_j6_score.py`. Decoding is therefore not matched across the arms being compared, and any Thinking-minus-Instruct difference reported here carries a decoding confound. **The Instruct arms are unaffected.**
+
+
 **Date:** 2026-10-03  
 **Pre-registered:** `research/EXPERIMENTS.md` row StudyJ6  
 **Pre-registered decision rule:** FIX if SIMPLIFIED accuracy on terminating trials is not significantly worse than ORIGINAL (McNemar/Fisher, α=0.05 on sign pairs where both terminate); TRADE if accuracy drops significantly.
