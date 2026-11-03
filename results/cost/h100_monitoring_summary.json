@@ -1555,14 +1555,228 @@
      "sha256": "c1cf6c94d3f8b8e050a670afd4e16a17303014befcaeccc0a931d4715dfa709a"
     }
    ]
+  },
+  "StudyClean": {
+   "run": "StudyClean",
+   "gpu": "h100nvl GPU 1 (UUID GPU-235c6d2d\u2026)",
+   "chain_log": "logs/clean_chain.log",
+   "windows": [
+    {
+     "step": "experiments/cost/study_clean_vllm.py --stages estimate",
+     "start": "2026-11-03 11:36:20",
+     "end": "2026-11-03 11:36:20",
+     "rc": 0
+    },
+    {
+     "step": "experiments/cost/study_clean_vllm.py --stages h5build",
+     "start": "2026-11-03 11:36:20",
+     "end": "2026-11-03 11:38:32",
+     "rc": 0
+    },
+    {
+     "step": "experiments/cost/study_clean_vllm.py --stages SAN",
+     "start": "2026-11-03 11:38:32",
+     "end": "2026-11-03 11:41:40",
+     "rc": 0
+    },
+    {
+     "step": "experiments/cost/study_clean_vllm.py --stages H1,H2",
+     "start": "2026-11-03 11:41:40",
+     "end": "2026-11-03 12:09:22",
+     "rc": 0
+    },
+    {
+     "step": "experiments/cost/study_clean_vllm.py --stages H3",
+     "start": "2026-11-03 12:09:22",
+     "end": "2026-11-03 12:24:32",
+     "rc": 0
+    },
+    {
+     "step": "experiments/cost/study_clean_h4.py",
+     "start": "2026-11-03 12:24:32",
+     "end": "2026-11-03 12:25:58",
+     "rc": 0
+    },
+    {
+     "step": "experiments/cost/study_clean_vllm.py --stages H5 --model 32BI --pass 1",
+     "start": "2026-11-03 12:25:58",
+     "end": "2026-11-03 12:38:25",
+     "rc": 0
+    },
+    {
+     "step": "experiments/cost/study_clean_vllm.py --stages H5 --model 4BI --pass 1",
+     "start": "2026-11-03 12:38:25",
+     "end": "2026-11-03 12:43:31",
+     "rc": 0
+    },
+    {
+     "step": "experiments/cost/study_clean_vllm.py --stages H5 --model 32BI --pass 2",
+     "start": "2026-11-03 13:14:05",
+     "end": "2026-11-03 13:26:30",
+     "rc": 0
+    },
+    {
+     "step": "experiments/cost/study_clean_vllm.py --stages H5 --model 4BI --pass 2",
+     "start": "2026-11-03 13:26:30",
+     "end": "2026-11-03 13:32:20",
+     "rc": 0
+    }
+   ],
+   "server_logs": [
+    "study_x_server_32BI_1103_113833.log",
+    "study_x_server_32BI_1103_120922.log",
+    "study_x_server_32BI_1103_122558.log",
+    "study_x_server_32BI_1103_131405.log",
+    "study_x_server_4BI_1103_114140.log",
+    "study_x_server_4BI_1103_123825.log",
+    "study_x_server_4BI_1103_132630.log"
+   ],
+   "gpu1_monitor": {
+    "samples": 3795,
+    "interval_s": 1,
+    "util_pct": {
+     "min": 0.0,
+     "median": 99.0,
+     "max": 100.0,
+     "n": 3795
+    },
+    "memory_used_mib": {
+     "min": 4.0,
+     "median": 87364.0,
+     "max": 90318.0,
+     "n": 3795
+    },
+    "power_w": {
+     "min": 67.59,
+     "median": 274.58,
+     "max": 427.14,
+     "n": 3795
+    },
+    "sm_clock_mhz_busy_only": {
+     "min": 487.0,
+     "median": 1020.0,
+     "max": 1785.0,
+     "n": 2631
+    },
+    "power_w_busy_only": {
+     "min": 82.79,
+     "median": 352.67,
+     "max": 427.14,
+     "n": 2631
+    },
+    "temp_c": {
+     "min": 38.0,
+     "median": 65.0,
+     "max": 79.0,
+     "n": 3795
+    }
+   },
+   "neighbour_gpus_util_pct": {
+    "GPU 0": {
+     "min": 0.0,
+     "median": 96.0,
+     "max": 100.0,
+     "n": 3795
+    },
+    "GPU 2": {
+     "min": 0.0,
+     "median": 96.0,
+     "max": 100.0,
+     "n": 3795
+    },
+    "GPU 3": {
+     "min": 0.0,
+     "median": 100.0,
+     "max": 100.0,
+     "n": 3795
+    }
+   },
+   "foreign_processes_in_windows": {
+    "gpu1_process_samples": 361,
+    "count": 1,
+    "pids": {
+     "3095566": {
+      "first": "2026-11-03 12:24:40",
+      "last": "2026-11-03 12:25:39",
+      "samples": 6
+     }
+    }
+   },
+   "watchdog_foreign_lines": [
+    "=== CLEAN 2026-11-03 12:50:04.990782838 FOREIGN PROCESS ON GPU 1: pid=3140266 sid=3140234 owner=liying cmd=.venv-qwen35/bin/python curriculum_learning_ecgqa_quick_ab.py \u2014 CHAIN SESSION KILLED (SIGKILL) ===",
+    "=== CLEAN 2026-11-03 13:39:16.155724969 FOREIGN PROCESS ON GPU 1: pid=3217782 sid=3217766 owner=liying cmd=.venv/bin/python -u curriculum_learning_ecgqa_quick_ab.py \u2014 CHAIN SESSION KILLED (SIGKILL) ==="
+   ],
+   "note": "Own-pid detection reads vLLM server logs only, so H4's HF process (pid 3095566, 9.0-9.6 GiB = the 4B model, 12:24:40-12:25:39 inside the H4 window; the session watchdog did not fire) is listed as 'foreign in windows' but was ours. Watchdog lines: 12:50:04 liying during the pass-1/pass-2 gap (chain killed, nothing of ours on the GPU); 13:39:16 liying after the chain completed (13:32:20).",
+   "files": [
+    {
+     "file": "logs/clean_chain.log",
+     "bytes": 35869,
+     "sha256": "1da6b14e6ef185fc1279d84bd9616d5d77bf0011c1a78b6ed3353c8eea5a7470"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1103_113833.log",
+     "bytes": 35214,
+     "sha256": "4afb9485f8d46b507a3dd3206542217d4ff23e7fa3a4ca33f3782665890009db"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1103_120922.log",
+     "bytes": 110950,
+     "sha256": "c953170538932fb6fc78ddabf2cd9a3deda949769151aa4fa7b529e3e6873b22"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1103_122558.log",
+     "bytes": 79879,
+     "sha256": "a181f8ff409f554d8507de5e0e908f54d3e0ce8a64fd7b703f8c7940d54ab249"
+    },
+    {
+     "file": "logs/study_x_server_32BI_1103_131405.log",
+     "bytes": 81484,
+     "sha256": "f3f1a3f231fca3c3676f32b20a47d496c2f4450da3bfd1cb7d3cd74b9f7a535f"
+    },
+    {
+     "file": "logs/study_x_server_4BI_1103_114140.log",
+     "bytes": 184975,
+     "sha256": "f06d8d601dd4e6d0db5c2848a2e50abde427550fddb2a21883f7f227b0dd8fe1"
+    },
+    {
+     "file": "logs/study_x_server_4BI_1103_123825.log",
+     "bytes": 64916,
+     "sha256": "c1d56eb181fc77b16e3f4145ec76ea45c0c4b45bd64e5d22183974f176851957"
+    },
+    {
+     "file": "logs/study_x_server_4BI_1103_132630.log",
+     "bytes": 68917,
+     "sha256": "e24c6db24dde8caac2ec7fb64de36bb72f4c43b777954b5fc9382a5267ca574c"
+    },
+    {
+     "file": "logs/clean_gpus.csv",
+     "bytes": 1134492,
+     "sha256": "10a73a20472b2a60b0bdcc500b742d4ed912e21a3f96aac2f37c5f975e8dbbd4"
+    },
+    {
+     "file": "logs/clean_gpu_procs.csv",
+     "bytes": 141353,
+     "sha256": "3f53d284f5e67e55a5393708fdc332e45e73fc692407f47c3a1b87992933fb89"
+    },
+    {
+     "file": "logs/clean_dmon.log",
+     "bytes": 1508767,
+     "sha256": "512022c490b8b84cdf670b2ca60239f368b082beb40a6d7dde1b0da80c05db7c"
+    },
+    {
+     "file": "logs/clean_loadavg.log",
+     "bytes": 224686,
+     "sha256": "ccb5108ab895a6d5c04c173a3836b3075eea35a9504c653e9df5d7dfbb916fe9"
+    }
+   ]
   }
  },
  "_provenance": {
-  "git_commit": "27d435e589ddd8dd0b0d26a2656b64004e036ab1",
+  "git_commit": "0250a828a3488959357dd572899138b0912be283",
   "script": "h100_monitoring_summary.py",
   "model": "n/a",
-  "timestamp": "2026-10-23T16:13:46.751055",
+  "timestamp": "2026-11-03T13:42:05.176221",
   "device": "h100nvl",
-  "n": 10
+  "n": 11
  }
 }
