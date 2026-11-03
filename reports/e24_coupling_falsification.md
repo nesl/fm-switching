@@ -1,5 +1,21 @@
 # E24: Coupling Falsification Report
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: INVALID.** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> **Verified against `simulator/provisioning/sweep.py` and the policies it builds.**
+> `make_policies()` returns seven policies, each a **deterministic single-point rule** with no
+> candidate set, no allocator and no shared value function. Per session and epoch:
+> `JointPolicy` takes (predicted next-serving node, `CHEAPEST_SUFFICIENT[regime]`);
+> `FidelityOnlyPolicy` takes (**current** serving node, `CHEAPEST_SUFFICIENT[regime]`);
+> `PlacementOnlyPolicy` takes (predicted next-serving node, **always `"full"`**). These are
+> disjoint singletons: joint cannot represent fidelity-only's node choice, and neither can
+> represent placement-only's fidelity choice. **No policy's action space contains another's**, so
+> "joint versus decomposed" was never compared. The result is not evidence for or against joint
+> optimization in either direction.
+
+
 **Date:** 2026-08-19  
 **Experiment:** E24 (simulator, purpose=orchestration)  
 **Script:** `simulator/provisioning/sweep.py`  

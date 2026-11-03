@@ -1,5 +1,16 @@
 # Study I3 — S-EMBER SPARSE vs TEMPORAL at Full Power
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: INVALID for the TEMPORAL arm; SPARSE unaffected.** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> These arms build frame times as `[float(i) for i in range(n_req)]` — seconds 0, 1, ..., n-1, i.e. the **first N seconds of the video**, not the N seconds before the question. The defect bites whenever `question_time` exceeds the arm's frame cap.
+> Verified in `experiments/sember/study_i3_budget.py`: the per-video cache is decoded only to
+> `min(qt, TEMPORAL_MAX_FRAMES)` seconds and `frames_from_cache` then takes
+> `eligible[:TEMPORAL_MAX_FRAMES]` after sorting by time — the first 256 seconds. **424 of 918
+> TEMPORAL trials (46.2%)** have `qt > 256`. **SPARSE is unaffected.**
+
+
 **Date:** 2026-09-03
 **Script:** `experiments/sember/study_i3_budget.py`
 **Data:** Study I manifest — 150 videos, 459 questions, 7 categories

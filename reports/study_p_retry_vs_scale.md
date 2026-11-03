@@ -1,5 +1,12 @@
 # StudyP — Retry vs Scale on SiGNgapore2D
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: CONFOUNDED (Thinking arms only).** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> The Thinking arm is sampled at **temperature 0.6** (`do_sample=True, temperature=0.6, top_p=0.95, top_k=20, min_p=0`) while its Instruct comparator is **greedy** (`do_sample=False`), verified in `experiments/signs/study_p_retry_vs_scale.py`. Decoding is therefore not matched across the arms being compared, and any Thinking-minus-Instruct difference reported here carries a decoding confound. **The Instruct arms are unaffected.**
+
+
 **Date:** 2026-10-03  
 **n_signs:** 40 (40-sign StudyJ2 subset)  
 **Sample size note:** n=40 limits detection to large effects. Wilson 95% CI half-width ≈ 14–15pp at ~40% accuracy; for two CIs to be non-overlapping the difference must be ≈ 29pp. The 3pp pre-registered threshold is well below this; verdicts of MATCHES or INCONCLUSIVE reflect insufficient power, not absence of an effect.  

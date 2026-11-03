@@ -1,5 +1,17 @@
 # Study J5 — Properly Powered Prompt Comparison on SiGNgapore2D
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: CONFOUNDED (Thinking arms only).** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> The Thinking arm is sampled at **temperature 0.6** (`do_sample=True, temperature=0.6, top_p=0.95, top_k=20, min_p=0`) while its Instruct comparator is **greedy** (`do_sample=False`), verified in `experiments/signs/study_j5_prompt_power.py`. Decoding is therefore not matched across the arms being compared, and any Thinking-minus-Instruct difference reported here carries a decoding confound. **The Instruct arms are unaffected.**
+>
+> **Additionally: the ORIGINAL arm is not freshly sampled.** 70 of the 140 trials carry
+> `reused_from: "StudyJ4"` — the whole ORIGINAL arm is copied from StudyJ4, including its
+> seed-42 trials, while the SIMPLIFIED arm was run fresh. The prompt comparison is therefore
+> between a reused arm and a new one.
+
+
 **Date:** 2026-09-30  
 **Status:** Complete  
 **Pre-registered:** `research/EXPERIMENTS.md` row StudyJ5  

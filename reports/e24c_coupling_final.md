@@ -1,5 +1,38 @@
 # E24c Coupling Falsification — Final Report
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: INVALID.** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> **Verified against `experiments/orchestration/sweep_e24c.py`, `simulator/provisioning/solver_c.py`
+> and `simulator/provisioning/policies/c/`. The "disjoint single-point rules" description used for
+> E24 and E24b does NOT apply here, and the earlier audit wording was wrong about this study.**
+> What the code actually does: all ten policies share **one** value function and **one** greedy
+> allocator — `solver_c.py` states "All policies use this exact value function and allocator.
+> Policies differ only in which (session, node, fidelity) candidates they pass to the allocator —
+> not in how they score or pack them." `JointC` passes the **full node × fidelity product space**;
+> `FidelityFirst` passes the same space filtered to `cheapest_sufficient_tau` per session. So
+> **joint's action space strictly CONTAINS the decomposed policies'** — the opposite of the
+> E24/E24b defect.
+>
+> **The defect is the value function, not the action space.**
+> `V(i, j, f) = P_serve × 1[sufficient(f, regime, tau)] × latency_saved_s` with
+> `latency_saved_s = cold_prefill(full, L, node_tier)`: **V does not depend on `f` beyond the
+> binary sufficiency test**, so every sufficient fidelity carries identical value while
+> `_s_ready_gb` differs by orders of magnitude (sum80 4.59 MB, sum200 11.47 MB, win 117.44 MB,
+> full 1.15 GB at the LoCoMo median L = 20,092). `greedy_knapsack` ranks by
+> density = value / s_ready_gb, so sum80 scores **25.6× denser than win** and **251× denser than
+> full**. Refresh and maintenance cost appear nowhere in V.
+>
+> Consequently the larger candidate set *steers* joint into the smallest sufficient
+> representation, and a greedy over a superset can underperform a greedy over a filtered subset
+> when the ranking metric is misspecified. The reported median gap (joint − best-decomposed
+> = −1.3 pp) measures an **incomplete objective**, not the absence of coupling value — which is
+> the same conclusion the report's own root-cause note reaches ("joint's density metric
+> (V/S_ready) over-selects sum200 ... Value function incomplete — does not capture lifecycle").
+> **INVALID status unchanged**; only the stated reason is corrected.
+
+
 **Date:** 2026-08-19  
 **Sweep:** 48 cells × 10 policies × 3 seeds = 1,440 runs  
 **Script:** `experiments/orchestration/sweep_e24c.py`  

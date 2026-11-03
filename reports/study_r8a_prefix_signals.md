@@ -1,5 +1,54 @@
 # StudyR8a — do device reasoning PREFIXES improve the escalation decision?
 
+> ## CORRECTION — 2026-11-03 audit (target mismatch in Part 1)
+>
+> The text below is unchanged. **Part 1's figures for the `evidence_outside_window` target
+> compare mismatched targets**, so the two claims built on them do not hold as written. New
+> results: `results/escalation/study_r8a/target_fix.json`, script
+> `experiments/escalation/study_r8a_target_fix.py`, summary in `reports/audit_2026_11_03.md`.
+>
+> **What the code does.** `study_r8a_prefix_signals.py:587` sets `sc = r["fail"]` for *every*
+> target in the Part 1 loop. Every AUROC against `evidence_outside_window` (and against
+> `wrong_on_all_samples`) is therefore produced by a model **fitted on device-failure labels**
+> and then scored on a different label. **No router in StudyR8a was ever fitted on the evidence
+> label.**
+>
+> **What happens when they are.** Fitting each router on `evidence_outside_window` inside the
+> same GroupKFold-by-video folds, with the same 2,000-resample video-clustered bootstrap:
+>
+> | router (fitted on the evidence label) | AUROC, all 845 | Δ vs query-only |
+> |---|---|---|
+> | `query_only` (text + category + question time) | **0.7885** [0.7366, 0.8327] | — |
+> | `category + question_time` | 0.7856 [0.7326, 0.8317] | -0.0030 [-0.0123, 0.0056] |
+> | `question_time` alone | 0.6573 [0.6014, 0.7138] | -0.1313 [-0.1849, -0.0769] |
+> | `prefix_hand_k100` | 0.6917 [0.6249, 0.7505] | -0.0969 [-0.1749, -0.0193] |
+> | `query+prefix_hand_k100` | 0.8210 [0.7727, 0.8643] | +0.0324 [-0.0016, 0.0688] |
+>
+> 1. **"The question text is at chance for predicting evidence coverage" is wrong.** A query-only
+> router *fitted on that label* scores **0.7885** [0.7366, 0.8327], not the 0.4741 reported.
+> The 0.4741 figure is a device-failure model evaluated on the evidence label; it measures target
+> mismatch, not the query's information content. Question time alone already reaches
+> **0.6573**.
+> 2. **"This is the clearest positive result in the study" is wrong.** `prefix_hand_k100` fitted
+> on the evidence label scores **0.6917**, which is
+> **0.0969 BELOW** query-only with a CI excluding 0 — the prefix alone is
+> substantially *worse* than the question. Adding the prefix to the query gives
+> **+0.0324** [-0.0016, 0.0688], whose CI includes 0. The same holds at k = 25
+> and k = 50, on the v1 trace and on both v2 seeds, and on the `qt > 120` subset.
+> 3. The §426 replication table and the "k = 50 is the honest anchor" reading inherit the same
+> mismatch and should be read against `target_fix.json` instead.
+>
+> **The pre-registered gate verdict is unchanged.** The gate is defined on the *utility* metric
+> (escalation accuracy at e = 0.2), not on this AUROC, so NOT SHOWN (v1) and the
+> non-replicating v2 pass both stand exactly as recorded.
+>
+> **Expected-value check** (v1, all 845, tolerance 0.02): query-only expected 0.80, got
+> 0.7885 (diff 0.0115); category + question time expected 0.79, got
+> 0.7856 (diff 0.0044); **question time alone expected 0.685, got
+> 0.6573 — diff 0.0277, OVER the 0.02 tolerance** and reported rather than
+> reconciled.
+
+
 **E-id:** `StudyR8a` (pre-registered in `research/EXPERIMENTS.md` on 2026-10-23, before any
 number in this report was computed)
 **Scripts:** `experiments/escalation/study_r8a_prefix_signals.py` (compute),

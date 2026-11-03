@@ -1,5 +1,20 @@
 # E24b: Coupling Falsification Report — Stressed Configuration
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: INVALID.** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> **Verified against `simulator/provisioning/sweep_b.py` and the `_b` policies it builds.**
+> `_make_policies(tau)` returns nine policies. The structure is the same defect as E24:
+> `JointBPolicy` takes (predicted next-serving node, `cheapest_sufficient_tau(regime, tau)`) and
+> `FidelityOnlyBPolicy` takes (**`sess.serving_node`**, `cheapest_sufficient_tau(regime, tau)`) —
+> one (node, fidelity) pair each, no candidate set and no allocator. Both gained a shared
+> cloud-fallback branch when `fidelity == "full"` is infeasible, which does not change the
+> single-point structure. **The two differ only in the node, and neither action space contains
+> the other.** The falsification of the L-scaling and drift-scaling predictions rests on the same
+> comparison and inherits the defect.
+
+
 **Date:** 2026-08-19  
 **Experiment:** E24b (purpose=orchestration)  
 **Script:** `simulator/provisioning/sweep_b.py`  

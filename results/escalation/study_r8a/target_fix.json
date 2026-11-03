@@ -1,0 +1,753 @@
+{
+ "study": "StudyR8a-target-fix",
+ "what": "Routers fitted ON the evidence_outside_window label, in StudyR8a's folds. StudyR8a Part 1 instead scored its device-failure score against this label (study_r8a_prefix_signals.py:587), so its figures for this target are target-mismatched.",
+ "label": "evidence_outside_window = NOT K3 evidence_covered (R1 K3, batched)",
+ "nboot": 2000,
+ "bootstrap_seed": 0,
+ "n_folds": 5,
+ "folds": "GroupKFold by video_id, identical to study_r8a_prefix_signals.folds_for()",
+ "ks": [
+  25,
+  50,
+  100
+ ],
+ "arms": {
+  "v1_C3_seed0": {
+   "n": 845,
+   "device_arm": "v1_C3_seed0",
+   "results": {
+    "all_845": {
+     "n": 845,
+     "n_positive": 97,
+     "routers": {
+      "query_only": {
+       "auroc": 0.7885,
+       "ci": [
+        0.7366,
+        0.8327
+       ],
+       "delta_vs_query_only": 0.0,
+       "delta_ci": [
+        0.0,
+        0.0
+       ]
+      },
+      "category+question_time": {
+       "auroc": 0.7856,
+       "ci": [
+        0.7326,
+        0.8317
+       ],
+       "delta_vs_query_only": -0.003,
+       "delta_ci": [
+        -0.0123,
+        0.0056
+       ]
+      },
+      "question_time_only": {
+       "auroc": 0.6573,
+       "ci": [
+        0.6014,
+        0.7138
+       ],
+       "delta_vs_query_only": -0.1313,
+       "delta_ci": [
+        -0.1849,
+        -0.0769
+       ]
+      },
+      "prefix_hand_k25": {
+       "auroc": 0.5675,
+       "ci": [
+        0.5066,
+        0.634
+       ],
+       "delta_vs_query_only": -0.2211,
+       "delta_ci": [
+        -0.2934,
+        -0.1462
+       ]
+      },
+      "query+prefix_hand_k25": {
+       "auroc": 0.7965,
+       "ci": [
+        0.7426,
+        0.8419
+       ],
+       "delta_vs_query_only": 0.008,
+       "delta_ci": [
+        -0.0058,
+        0.0225
+       ]
+      },
+      "prefix_hand_k50": {
+       "auroc": 0.6369,
+       "ci": [
+        0.573,
+        0.6986
+       ],
+       "delta_vs_query_only": -0.1516,
+       "delta_ci": [
+        -0.2239,
+        -0.0765
+       ]
+      },
+      "query+prefix_hand_k50": {
+       "auroc": 0.8012,
+       "ci": [
+        0.7462,
+        0.8491
+       ],
+       "delta_vs_query_only": 0.0127,
+       "delta_ci": [
+        -0.0134,
+        0.0393
+       ]
+      },
+      "prefix_hand_k100": {
+       "auroc": 0.6917,
+       "ci": [
+        0.6249,
+        0.7505
+       ],
+       "delta_vs_query_only": -0.0969,
+       "delta_ci": [
+        -0.1749,
+        -0.0193
+       ]
+      },
+      "query+prefix_hand_k100": {
+       "auroc": 0.821,
+       "ci": [
+        0.7727,
+        0.8643
+       ],
+       "delta_vs_query_only": 0.0324,
+       "delta_ci": [
+        -0.0016,
+        0.0688
+       ]
+      }
+     }
+    },
+    "qt_gt_120": {
+     "n": 678,
+     "n_positive": 97,
+     "routers": {
+      "query_only": {
+       "auroc": 0.769,
+       "ci": [
+        0.7174,
+        0.8166
+       ],
+       "delta_vs_query_only": 0.0,
+       "delta_ci": [
+        0.0,
+        0.0
+       ]
+      },
+      "category+question_time": {
+       "auroc": 0.763,
+       "ci": [
+        0.7109,
+        0.8113
+       ],
+       "delta_vs_query_only": -0.006,
+       "delta_ci": [
+        -0.0163,
+        0.0035
+       ]
+      },
+      "question_time_only": {
+       "auroc": 0.5661,
+       "ci": [
+        0.5027,
+        0.6343
+       ],
+       "delta_vs_query_only": -0.2029,
+       "delta_ci": [
+        -0.2633,
+        -0.1401
+       ]
+      },
+      "prefix_hand_k25": {
+       "auroc": 0.5596,
+       "ci": [
+        0.4916,
+        0.6242
+       ],
+       "delta_vs_query_only": -0.2094,
+       "delta_ci": [
+        -0.2838,
+        -0.1327
+       ]
+      },
+      "query+prefix_hand_k25": {
+       "auroc": 0.7791,
+       "ci": [
+        0.7262,
+        0.8283
+       ],
+       "delta_vs_query_only": 0.0101,
+       "delta_ci": [
+        -0.005,
+        0.026
+       ]
+      },
+      "prefix_hand_k50": {
+       "auroc": 0.6198,
+       "ci": [
+        0.557,
+        0.6877
+       ],
+       "delta_vs_query_only": -0.1492,
+       "delta_ci": [
+        -0.2238,
+        -0.0719
+       ]
+      },
+      "query+prefix_hand_k50": {
+       "auroc": 0.7838,
+       "ci": [
+        0.7276,
+        0.8345
+       ],
+       "delta_vs_query_only": 0.0148,
+       "delta_ci": [
+        -0.0126,
+        0.0417
+       ]
+      },
+      "prefix_hand_k100": {
+       "auroc": 0.683,
+       "ci": [
+        0.6235,
+        0.7464
+       ],
+       "delta_vs_query_only": -0.086,
+       "delta_ci": [
+        -0.1608,
+        -0.0025
+       ]
+      },
+      "query+prefix_hand_k100": {
+       "auroc": 0.8057,
+       "ci": [
+        0.7562,
+        0.8512
+       ],
+       "delta_vs_query_only": 0.0367,
+       "delta_ci": [
+        0.0026,
+        0.0769
+       ]
+      }
+     }
+    }
+   }
+  },
+  "v2_seed1": {
+   "n": 845,
+   "device_arm": "v2_seed1",
+   "results": {
+    "all_845": {
+     "n": 845,
+     "n_positive": 97,
+     "routers": {
+      "query_only": {
+       "auroc": 0.7885,
+       "ci": [
+        0.7366,
+        0.8327
+       ],
+       "delta_vs_query_only": 0.0,
+       "delta_ci": [
+        0.0,
+        0.0
+       ]
+      },
+      "category+question_time": {
+       "auroc": 0.7856,
+       "ci": [
+        0.7326,
+        0.8317
+       ],
+       "delta_vs_query_only": -0.003,
+       "delta_ci": [
+        -0.0123,
+        0.0056
+       ]
+      },
+      "question_time_only": {
+       "auroc": 0.6573,
+       "ci": [
+        0.6014,
+        0.7138
+       ],
+       "delta_vs_query_only": -0.1313,
+       "delta_ci": [
+        -0.1849,
+        -0.0769
+       ]
+      },
+      "prefix_hand_k25": {
+       "auroc": 0.5318,
+       "ci": [
+        0.4725,
+        0.5947
+       ],
+       "delta_vs_query_only": -0.2567,
+       "delta_ci": [
+        -0.3295,
+        -0.1859
+       ]
+      },
+      "query+prefix_hand_k25": {
+       "auroc": 0.7926,
+       "ci": [
+        0.739,
+        0.8389
+       ],
+       "delta_vs_query_only": 0.004,
+       "delta_ci": [
+        -0.0108,
+        0.0191
+       ]
+      },
+      "prefix_hand_k50": {
+       "auroc": 0.6048,
+       "ci": [
+        0.5417,
+        0.6661
+       ],
+       "delta_vs_query_only": -0.1838,
+       "delta_ci": [
+        -0.2624,
+        -0.101
+       ]
+      },
+      "query+prefix_hand_k50": {
+       "auroc": 0.7871,
+       "ci": [
+        0.7336,
+        0.8342
+       ],
+       "delta_vs_query_only": -0.0014,
+       "delta_ci": [
+        -0.034,
+        0.0302
+       ]
+      },
+      "prefix_hand_k100": {
+       "auroc": 0.6426,
+       "ci": [
+        0.5791,
+        0.7026
+       ],
+       "delta_vs_query_only": -0.146,
+       "delta_ci": [
+        -0.2212,
+        -0.0735
+       ]
+      },
+      "query+prefix_hand_k100": {
+       "auroc": 0.7918,
+       "ci": [
+        0.7405,
+        0.8379
+       ],
+       "delta_vs_query_only": 0.0032,
+       "delta_ci": [
+        -0.0246,
+        0.0302
+       ]
+      }
+     }
+    },
+    "qt_gt_120": {
+     "n": 678,
+     "n_positive": 97,
+     "routers": {
+      "query_only": {
+       "auroc": 0.769,
+       "ci": [
+        0.7174,
+        0.8166
+       ],
+       "delta_vs_query_only": 0.0,
+       "delta_ci": [
+        0.0,
+        0.0
+       ]
+      },
+      "category+question_time": {
+       "auroc": 0.763,
+       "ci": [
+        0.7109,
+        0.8113
+       ],
+       "delta_vs_query_only": -0.006,
+       "delta_ci": [
+        -0.0163,
+        0.0035
+       ]
+      },
+      "question_time_only": {
+       "auroc": 0.5661,
+       "ci": [
+        0.5027,
+        0.6343
+       ],
+       "delta_vs_query_only": -0.2029,
+       "delta_ci": [
+        -0.2633,
+        -0.1401
+       ]
+      },
+      "prefix_hand_k25": {
+       "auroc": 0.5273,
+       "ci": [
+        0.4658,
+        0.5891
+       ],
+       "delta_vs_query_only": -0.2417,
+       "delta_ci": [
+        -0.3186,
+        -0.1644
+       ]
+      },
+      "query+prefix_hand_k25": {
+       "auroc": 0.778,
+       "ci": [
+        0.7234,
+        0.8268
+       ],
+       "delta_vs_query_only": 0.009,
+       "delta_ci": [
+        -0.0072,
+        0.0252
+       ]
+      },
+      "prefix_hand_k50": {
+       "auroc": 0.5874,
+       "ci": [
+        0.5245,
+        0.651
+       ],
+       "delta_vs_query_only": -0.1816,
+       "delta_ci": [
+        -0.2633,
+        -0.0959
+       ]
+      },
+      "query+prefix_hand_k50": {
+       "auroc": 0.7673,
+       "ci": [
+        0.7137,
+        0.8165
+       ],
+       "delta_vs_query_only": -0.0017,
+       "delta_ci": [
+        -0.0347,
+        0.0329
+       ]
+      },
+      "prefix_hand_k100": {
+       "auroc": 0.6375,
+       "ci": [
+        0.5726,
+        0.7001
+       ],
+       "delta_vs_query_only": -0.1315,
+       "delta_ci": [
+        -0.2127,
+        -0.0532
+       ]
+      },
+      "query+prefix_hand_k100": {
+       "auroc": 0.7748,
+       "ci": [
+        0.7227,
+        0.8249
+       ],
+       "delta_vs_query_only": 0.0058,
+       "delta_ci": [
+        -0.0226,
+        0.0346
+       ]
+      }
+     }
+    }
+   }
+  },
+  "v2_seed2": {
+   "n": 845,
+   "device_arm": "v2_seed2",
+   "results": {
+    "all_845": {
+     "n": 845,
+     "n_positive": 97,
+     "routers": {
+      "query_only": {
+       "auroc": 0.7885,
+       "ci": [
+        0.7366,
+        0.8327
+       ],
+       "delta_vs_query_only": 0.0,
+       "delta_ci": [
+        0.0,
+        0.0
+       ]
+      },
+      "category+question_time": {
+       "auroc": 0.7856,
+       "ci": [
+        0.7326,
+        0.8317
+       ],
+       "delta_vs_query_only": -0.003,
+       "delta_ci": [
+        -0.0123,
+        0.0056
+       ]
+      },
+      "question_time_only": {
+       "auroc": 0.6573,
+       "ci": [
+        0.6014,
+        0.7138
+       ],
+       "delta_vs_query_only": -0.1313,
+       "delta_ci": [
+        -0.1849,
+        -0.0769
+       ]
+      },
+      "prefix_hand_k25": {
+       "auroc": 0.5047,
+       "ci": [
+        0.4419,
+        0.5704
+       ],
+       "delta_vs_query_only": -0.2839,
+       "delta_ci": [
+        -0.3564,
+        -0.2098
+       ]
+      },
+      "query+prefix_hand_k25": {
+       "auroc": 0.7958,
+       "ci": [
+        0.7429,
+        0.8399
+       ],
+       "delta_vs_query_only": 0.0073,
+       "delta_ci": [
+        -0.0072,
+        0.0217
+       ]
+      },
+      "prefix_hand_k50": {
+       "auroc": 0.6074,
+       "ci": [
+        0.5487,
+        0.6696
+       ],
+       "delta_vs_query_only": -0.1812,
+       "delta_ci": [
+        -0.2572,
+        -0.0992
+       ]
+      },
+      "query+prefix_hand_k50": {
+       "auroc": 0.8079,
+       "ci": [
+        0.7566,
+        0.8548
+       ],
+       "delta_vs_query_only": 0.0194,
+       "delta_ci": [
+        -0.0052,
+        0.0465
+       ]
+      },
+      "prefix_hand_k100": {
+       "auroc": 0.6022,
+       "ci": [
+        0.5446,
+        0.6581
+       ],
+       "delta_vs_query_only": -0.1864,
+       "delta_ci": [
+        -0.2534,
+        -0.1136
+       ]
+      },
+      "query+prefix_hand_k100": {
+       "auroc": 0.7714,
+       "ci": [
+        0.7147,
+        0.8232
+       ],
+       "delta_vs_query_only": -0.0172,
+       "delta_ci": [
+        -0.048,
+        0.0085
+       ]
+      }
+     }
+    },
+    "qt_gt_120": {
+     "n": 678,
+     "n_positive": 97,
+     "routers": {
+      "query_only": {
+       "auroc": 0.769,
+       "ci": [
+        0.7174,
+        0.8166
+       ],
+       "delta_vs_query_only": 0.0,
+       "delta_ci": [
+        0.0,
+        0.0
+       ]
+      },
+      "category+question_time": {
+       "auroc": 0.763,
+       "ci": [
+        0.7109,
+        0.8113
+       ],
+       "delta_vs_query_only": -0.006,
+       "delta_ci": [
+        -0.0163,
+        0.0035
+       ]
+      },
+      "question_time_only": {
+       "auroc": 0.5661,
+       "ci": [
+        0.5027,
+        0.6343
+       ],
+       "delta_vs_query_only": -0.2029,
+       "delta_ci": [
+        -0.2633,
+        -0.1401
+       ]
+      },
+      "prefix_hand_k25": {
+       "auroc": 0.4991,
+       "ci": [
+        0.4324,
+        0.5647
+       ],
+       "delta_vs_query_only": -0.2699,
+       "delta_ci": [
+        -0.3473,
+        -0.1876
+       ]
+      },
+      "query+prefix_hand_k25": {
+       "auroc": 0.7756,
+       "ci": [
+        0.7237,
+        0.8232
+       ],
+       "delta_vs_query_only": 0.0066,
+       "delta_ci": [
+        -0.0093,
+        0.0224
+       ]
+      },
+      "prefix_hand_k50": {
+       "auroc": 0.5837,
+       "ci": [
+        0.5213,
+        0.647
+       ],
+       "delta_vs_query_only": -0.1853,
+       "delta_ci": [
+        -0.2702,
+        -0.0941
+       ]
+      },
+      "query+prefix_hand_k50": {
+       "auroc": 0.7899,
+       "ci": [
+        0.7353,
+        0.8372
+       ],
+       "delta_vs_query_only": 0.021,
+       "delta_ci": [
+        -0.0064,
+        0.0493
+       ]
+      },
+      "prefix_hand_k100": {
+       "auroc": 0.6017,
+       "ci": [
+        0.5446,
+        0.6609
+       ],
+       "delta_vs_query_only": -0.1673,
+       "delta_ci": [
+        -0.2366,
+        -0.0906
+       ]
+      },
+      "query+prefix_hand_k100": {
+       "auroc": 0.7532,
+       "ci": [
+        0.6949,
+        0.805
+       ],
+       "delta_vs_query_only": -0.0158,
+       "delta_ci": [
+        -0.0481,
+        0.0113
+       ]
+      }
+     }
+    }
+   }
+  }
+ },
+ "expected_check": {
+  "basis": "v1_C3_seed0, all 845",
+  "tolerance": 0.02,
+  "checks": {
+   "query_only": {
+    "expected": 0.8,
+    "recomputed": 0.7885,
+    "abs_diff": 0.0115,
+    "over_0_02": false
+   },
+   "category+question_time": {
+    "expected": 0.79,
+    "recomputed": 0.7856,
+    "abs_diff": 0.0044,
+    "over_0_02": false
+   },
+   "question_time_only": {
+    "expected": 0.685,
+    "recomputed": 0.6573,
+    "abs_diff": 0.0277,
+    "over_0_02": true
+   }
+  },
+  "any_over_tolerance": true
+ },
+ "elapsed_h": 0.03,
+ "_provenance": {
+  "git_commit": "0250a828a3488959357dd572899138b0912be283",
+  "script": "study_r8a_target_fix.py",
+  "model": "none",
+  "timestamp": "2026-11-03T12:39:30.794305",
+  "device": "cpu",
+  "n": 2535,
+  "args": {}
+ }
+}

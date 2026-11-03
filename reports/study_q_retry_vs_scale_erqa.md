@@ -1,5 +1,12 @@
 # StudyQ — Retry vs Scale on ERQA
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: CONFOUNDED (Thinking arms only).** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> The Thinking arm is sampled at **temperature 0.6** (`do_sample=True, temperature=0.6, top_p=0.95, top_k=20, min_p=0`) while its Instruct comparator is **greedy** (`do_sample=False`), verified in `experiments/erqa/study_q_erqa.py`. Decoding is therefore not matched across the arms being compared, and any Thinking-minus-Instruct difference reported here carries a decoding confound. **The Instruct arms are unaffected.**
+
+
 **Date:** 2026-10-04  
 **n_questions:** 400 (RunsenXu/ERQA full test set)  
 **Sample size note:** n=400, 4 options per question. Wilson 95% CI half-width ≈ 4.9pp at ~43% accuracy; for two CIs to be non-overlapping the difference must be ≈ 10pp. The 3pp pre-registered threshold is below this; a verdict of BOUNDED PATH SUFFICES or INCONCLUSIVE reflects power, not absence of effect.  

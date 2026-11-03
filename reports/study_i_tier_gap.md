@@ -1,5 +1,20 @@
 # Study I — S-EMBER Tier Gap: Accuracy × Category × Evidence Distance
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: the DENSE arm carries the same window defect as StudyI2/I3.** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> **This notice concerns the DENSE arm.** `experiments/sember/study_i_tier_gap.py` builds DENSE
+> frame times as `[float(i) for i in range(n_sec)]` with `n_sec = min(int(question_time),
+> DENSE_MAX_FRAMES)` — the **first** 42 seconds of the video, not the 42 seconds before the
+> question. **37 of 38 DENSE trials (97.4%)** have `qt > 42` and are affected. The arm is small
+> next to SPARSE (38 trials vs 918).
+>
+> **SPARSE is unaffected**: it uses `[question_time * i / (n - 1) for i in range(n)]` and samples
+> uniformly across the whole of `[0, question_time]`. The tier-gap result rests mainly on SPARSE;
+> any DENSE-versus-SPARSE contrast here is confounded by the window defect, not only by density.
+
+
 **Date:** 2026-09-02  
 **Status:** INFER complete for 4B (SPARSE+DENSE) and 8B SPARSE; 8B DENSE in progress.  
 **Script:** `experiments/sember/study_i_tier_gap.py`  

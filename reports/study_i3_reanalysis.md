@@ -1,5 +1,16 @@
 # Study I3 Re-analysis — Paired Tests and Corrected Accounting
 
+> ## NOTICE — audit of 2026-11-03
+>
+> **Status in `research/EXPERIMENTS.md`: INVALID for the TEMPORAL arm.** The text below is unchanged. Evidence and recomputation: **`reports/audit_2026_11_03.md`**.
+>
+> This re-analysis corrects the statistics of Study I3 (paired McNemar in place of
+> CI-overlap) but reads the **same trials**, so it inherits Study I3's frame-window defect: the
+> TEMPORAL arm samples the **first** 256 seconds of video, not the 256 seconds before the
+> question, in 424 of 918 trials (46.2%). Fixing the test does not fix the inputs. **SPARSE is
+> unaffected.**
+
+
 **Date:** 2026-09-03
 **Input:** `results/sember/study_i3/study_i3_trials.jsonl` (1,836 trials)
 **Script:** `experiments/sember/study_i3_reanalyse.py`
