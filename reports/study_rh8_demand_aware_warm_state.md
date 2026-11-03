@@ -1,5 +1,25 @@
 # StudyRH8 — demand-aware partial warm state vs all-eager and all-lazy (H100, vLLM)
 
+> ## CORRECTION — 2026-11-03 audit
+>
+> The text below is unchanged. These items are corrected by the audit; full recomputation and evidence in **`reports/audit_2026_11_03.md`**.
+>
+> 1. **MIX-DEMAND's margin depends on the exclusion rule.** Fraction of in-window D96
+> escalations within 5 s: MIX-DEMAND 83.52% vs the best rival (ALL-LAZY) 73.03% = **+10.49 pp**
+> on all data; **+6.25 pp** excluding the first 120 s by wall clock; **+12.09 pp** excluding by
+> session time. The three are not interchangeable and the rule must be stated.
+> 2. **D96 is a single seed with synthetic demand.** High-demand devices are
+> `random.Random(0).sample(range(D), D // 4)` — one fixed seed, 25% of devices escalating every
+> question at rate 1.0 and the rest at `LOW_RATE = 0.20`. Demand is assigned, not measured, and
+> there is no replication across seeds.
+> 3. **MIX-DEMAND is given the ground-truth demand labels.** Its eager set is *exactly* the
+> high-demand device set, while MIX-RANDOM draws an independent set (`random.Random(1)`). The
+> comparison therefore contrasts a policy with oracle knowledge of the synthetic demand
+> assignment against one with none; it does not show that demand can be *predicted*.
+> 4. **Eager's warm-up cost is excluded** from in-window metrics here as in RH7 — see item 2 of
+> the correction block in `reports/study_rh7_eager_vs_lazy.md`.
+
+
 _Pre-registered 2026-10-23 (research/EXPERIMENTS.md, StudyRH8). Stack: vLLM 0.31.0 venv `~/.venvs/fm-switching-vllm`, FlashAttention 3, H100 NVL GPU 3, native OffloadingConnector 256 GiB + processor cache 128 GiB, Qwen3-VL-32B-Instruct bf16. vLLM numbers only._
 
 ## Decisions

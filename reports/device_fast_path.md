@@ -1,5 +1,27 @@
 # On-device fast path — shortened DEV-RECENT latency + energy (Jetson AGX Orin)
 
+> ## CORRECTION — 2026-11-03 audit
+>
+> The text below is unchanged. These items are corrected by the audit; full recomputation and evidence in **`reports/audit_2026_11_03.md`**.
+>
+> 1. **3.9 s is 3.80 s for 4B-I TTFT.** The median with the warm first row excluded is
+> **3.796 s** (the table's own 3.79 is right); the prose "17.0 s → 7.8 s → 3.9 s" overstates the
+> N = 9 figure. Recomputed medians excluding the warm row: **16.985 / 7.760 / 3.796 s** at
+> N = 37 / 18 / 9.
+> 2. **A warm row is counted as a measurement.** The first row of every cell has
+> `input_tokens = 1`, `prefill_ms` 57–64 ms and TTFT 0.374–1.438 s — it carries **no frames** and
+> is not an N-frame prefill. `experiments/device/dev_fast_analyse.py` reads all 120 rows, so this
+> row becomes the reported `min` of the TTFT distribution (1.438 / 0.685 / 0.374 s in
+> `devfast_stats.json`) and is included in the `input_tokens` and `n_frames` medians. The
+> medians are barely affected; the minima are artefacts.
+> 3. **`N` is a target, not the delivered frame count.** At N = 37 only **95 of 120** rows carry
+> 37 frames (20 carry 36, five carry 14–35); at N = 18, 119/120; at N = 9, 120/120.
+> 4. **TTFT is near-linear in tokens, with a mild superlinear term.** Median TTFT per prompt
+> token rises 1.2159 → 1.2690 → 1.3699 ms/token as N goes 9 → 18 → 37, and prefill is ~88% of
+> TTFT at every N. The fast path buys time in proportion to tokens removed; it does not change
+> the shape of the cost.
+
+
 **Date:** 2026-10-23 · **Host:** nesl-orin-3 (Jetson AGX Orin, 64 GB) · **Runtime:** llama.cpp `c0fd786` (CUDA sm_87) · **E-id:** StudyDevFast
 
 **Question.** Can the device answer a DEV-RECENT S-EMBER question within a few seconds when the recent-frame input is shortened, and what is the energy cost per configuration?

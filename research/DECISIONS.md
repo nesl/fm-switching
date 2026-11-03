@@ -5,6 +5,30 @@ or conversation that settled it. Decisions here are final unless explicitly reop
 
 ---
 
+## 2026-11-03 — "Joint optimization falsified" and "token allocation is static" are WITHDRAWN
+
+Neither conclusion was ever recorded as an entry in this log; both were carried in
+`research/STATUS.md` (the E24/E24b/E24c roadmap block, "COUPLING FALSIFIED (final)") and relied
+on in planning. Both are withdrawn here.
+
+**Reason.** The 2026-11-03 audit found that the E24 series never compared joint against
+decomposed policies. `JointPolicy`, `FidelityOnlyPolicy` and `PlacementOnlyPolicy` are each a
+deterministic single-point rule — predicted node + cheapest-sufficient fidelity, current node +
+cheapest-sufficient, and predicted node + always-full respectively. Their action spaces are
+disjoint singletons: none contains another, so no policy in the comparison could have
+represented another's choice. A result from that comparison cannot falsify coupling, and equally
+cannot support it.
+
+**State now: no conclusion exists on either question.** Joint representation × placement ×
+timing versus decomposed policies is **untested** (see `research/CLAIMS.md` C5, which already
+reads "untested" and now carries an audit note). Whether token allocation is static or adaptive
+is likewise untested. Neither may be cited in either direction until an experiment whose
+policies share a common action space is run.
+
+Evidence: `reports/audit_2026_11_03.md`; `simulator/provisioning/policies/{joint,fidelity_only,placement_only}.py`.
+
+---
+
 ## 2026-08-19 — Phase 1 gate passed (pending Jetson)
 
 Physical inertia crossovers confirmed on two tiers (A6000, RTX 3090 Ti).

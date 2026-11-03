@@ -1,5 +1,26 @@
 # StudyRH7 — eager vs lazy with the history re-send removed (H100, vLLM)
 
+> ## CORRECTION — 2026-11-03 audit
+>
+> The text below is unchanged. These items are corrected by the audit; full recomputation and evidence in **`reports/audit_2026_11_03.md`**.
+>
+> 1. **The fallback share is systematic, not incidental.** At D64, 81 of 537 in-window EAGER
+> escalations fall back (15.1%), and they carry **1,803 of 2,002 MB (90.1%)** of the body bytes.
+> More importantly the fallback set is **exactly** the set of questions whose `question_time` is
+> a multiple of 10 s — 45/45 at D32, 57/57 at D48, 81/81 at D64 (100/102 at D96) — although only
+> 136 of 845 questions sit on that grid. Fallback is a deterministic property of the frame
+> schedule, not cache pressure, and any eager number is an average over a policy that re-sends
+> full frames on a fixed, identifiable tenth of its traffic.
+> 2. **Eager's warm-up is unmeasured.** The 240 `kind == "warmup"` records occur **only** in the
+> EAGER cells (exactly D per cell: 32/48/64/96), all carry `in_window = False`, and together they
+> move **4,289 MB**. LAZY cells have no warm-up at all. Every in-window comparison therefore
+> omits a cost that one arm pays and the other does not.
+> 3. **The first-120-s effect is real and definitional.** Excluding the first 120 s of the
+> measurement window changes conclusions, and "first 120 s" is ambiguous: by wall clock the RH8
+> D96 MIX-DEMAND advantage is **+6.25 pp**, by session time it is **+12.09 pp**. Any
+> window-start exclusion must say which it means.
+
+
 **Stack:** vLLM 0.31.0+cu129 (venv `~/.venvs/fm-switching-vllm`, torch 2.13.0+cu129), FlashAttention 3, CUDA graphs, gmu 0.90, max_model_len 32768, bf16 KV (62,944 tokens on GPU), prefix caching ON, Qwen3-VL-32B-Instruct @0cfaf481, h100nvl GPU 3. Server = RH6's GPU+host server (native `OffloadingConnector`, 256 GiB) **+ `--mm-processor-cache-gb 128`** (the one approved flag change), restarted for every cell. Harness = RH6's (RH2 plans, seed 0, per-device headers, 1× real time, 15-min window, escalation rate 1.0, greedy, max_tokens 1 / 4, D2 frames).
 
 Pre-registration: research/EXPERIMENTS.md StudyRH7 (2026-10-21, before any GPU run), amended with the user's approval after Step 0 and before the fleet (gate clause withdrawn, D128 → D64, processor-cache flag, fallback handling, binding-attribution rule). Step 0 10:51–10:55; smoke 11:09–11:20; fleet 11:21–15:02 (3.7 h vs 4.95 h estimate, cap 8 h). Watchdog (foreign process on GPU 3, MemAvailable < 150 GiB) and GPU monitor ran for every GPU stage: 0 foreign processes, floor never reached (MemAvailable ≥ 1,148 GiB). One repetition per cell. Analysis: original `.venv`, CPU.

@@ -465,7 +465,7 @@ def slide1():
 
 
 def erqa_panel(S, table_rows, forest_rows):
-    """ERQA rows for slide 1. Device 4B/8B = A6000 HF sdpa; cloud 32B = H100 HF fa2."""
+    """ERQA rows for slide 1. Device 4B = 3090 Ti HF sdpa, 8B = A6000 HF sdpa; cloud 32B = H100 HF fa2."""
     di = r4_rows("erqa", "instruct")
     dt = r4_rows("erqa", "thinking")
     di_d = {r["qid"]: r for r in di}
@@ -475,9 +475,9 @@ def erqa_panel(S, table_rows, forest_rows):
     ids = common_ids(di_d, dt_d, cC, cD, q8i, q8t)
 
     series = [
-        ("ERQA  device 4B-I (A6000 HF sdpa)", erqa_ok(di_d, ids),
+        ("ERQA  device 4B-I (3090 Ti HF sdpa)", erqa_ok(di_d, ids),
          "results/erqa/r4_signals/r4_erqa_instruct.jsonl", "r4_device_signals_prep.md §Escalation", 42.0),
-        ("ERQA  device 4B-T (A6000 HF sdpa)", erqa_ok(dt_d, ids),
+        ("ERQA  device 4B-T (3090 Ti HF sdpa)", erqa_ok(dt_d, ids),
          "results/erqa/r4_signals/r4_erqa_thinking.jsonl", "r4_device_signals_prep.md §Escalation", 45.0),
         ("ERQA  device 8B-I, StudyQ arm D (A6000 HF sdpa)", erqa_ok(q8i, ids),
          "results/erqa/study_q/study_q_trials.jsonl arm=D", "study_q_retry_vs_scale_erqa.md", 42.5),
@@ -496,7 +496,7 @@ def erqa_panel(S, table_rows, forest_rows):
         table_rows.append((lab, len(ok), f"{a:.1f}", f"[{lo:.1f}, {hi:.1f}]"))
         vals[lab] = ok
     note(S, "ERQA 8B **is** available (StudyQ arms D = 8B-Instruct and C = 8B-Thinking, "
-            "A6000 HF sdpa) and is included. MV-RoboBench has no 8B arm in the repository.")
+            "A6000 HF sdpa) and is included. The 4B arms of both workloads come from r4_signals, which ran on the RTX 3090 Ti (GPU 0), so the 4B and 8B ERQA rows are on DIFFERENT cards. MV-RoboBench has no 8B arm in the repository.")
 
     for lab, a_, b_ in [
         ("ERQA  32B-I (fa2) − 4B-I (sdpa)", vals[series[0][0]], vals[series[4][0]]),
@@ -519,9 +519,9 @@ def mvrobo_panel(S, table_rows, forest_rows):
     ids = common_ids(di, dt, cC, cD)
 
     series = [
-        ("MV-RoboBench  device 4B-I (A6000 HF sdpa)", erqa_ok(di, ids),
+        ("MV-RoboBench  device 4B-I (3090 Ti HF sdpa)", erqa_ok(di, ids),
          "results/erqa/r4_signals/r4_mvrobo_instruct.jsonl", "r4_device_signals_prep.md §Escalation", 36.9),
-        ("MV-RoboBench  device 4B-T (A6000 HF sdpa)", erqa_ok(dt, ids),
+        ("MV-RoboBench  device 4B-T (3090 Ti HF sdpa)", erqa_ok(dt, ids),
          "results/erqa/r4_signals/r4_mvrobo_thinking.jsonl", "r4_device_signals_prep.md §Escalation", 43.6),
         ("MV-RoboBench  cloud 32B-I, StudyS2 arm C (H100 HF fa2)", erqa_ok(cC, ids),
          "study_s2_trials_h100nvl_fa2.jsonl arm=C", "study_s2_mvrobobench_32b.md §Flash-attn", 48.1),
@@ -621,10 +621,10 @@ def slide2():
     dt = {r["qid"]: r for r in r4_rows("erqa", "thinking")}
     ide = common_ids(di, dt)
     d, lo, hi, _ = paired_diff(erqa_ok(di, ide), erqa_ok(dt, ide))
-    rec(S, "ERQA device 4B  T−I (A6000 HF sdpa)", round(d, 2),
+    rec(S, "ERQA device 4B  T−I (3090 Ti HF sdpa)", round(d, 2),
         "r4_erqa_instruct.jsonl, r4_erqa_thinking.jsonl",
         "r4_device_signals_prep.md §Escalation (45.0 − 42.0)", 3.0, note=f"[{lo:+.2f}, {hi:+.2f}]")
-    diffs.append(("ERQA  device 4B (A6000 HF sdpa)", d, lo, hi, "device"))
+    diffs.append(("ERQA  device 4B (3090 Ti HF sdpa)", d, lo, hi, "device"))
     ch = 100.0 * float((preds(di, ide, "predicted_letter") != preds(dt, ide, "predicted_letter")).mean())
     rec(S, "ERQA device 4B  answers changed by thinking (letter changed)", round(ch, 2),
         "r4_erqa_* predicted_letter", unit="%")
@@ -632,7 +632,7 @@ def slide2():
     rec(S, "ERQA device 4B  discordant correctness b+c", bb + cc, "r4_erqa_* correct",
         unit="questions", note=f"b={bb} c={cc} of n={len(ide)}")
     changed.append(("ERQA  device 4B", ch, len(ide), "device"))
-    lengths.append(("ERQA  device 4B-T\n(A6000 HF sdpa)",
+    lengths.append(("ERQA  device 4B-T\n(3090 Ti HF sdpa)",
                     float(np.median([dt[i]["n_think_tokens"] or 0 for i in ide])),
                     float(np.median([dt[i]["lat_ms"] for i in ide])) / 1000.0, "device"))
 
@@ -661,10 +661,10 @@ def slide2():
     mt = {r["qid"]: r for r in r4_rows("mvrobo", "thinking")}
     idm = common_ids(mi, mt)
     d, lo, hi, _ = paired_diff(erqa_ok(mi, idm), erqa_ok(mt, idm))
-    rec(S, "MV-RoboBench device 4B  T−I (A6000 HF sdpa)", round(d, 2),
+    rec(S, "MV-RoboBench device 4B  T−I (3090 Ti HF sdpa)", round(d, 2),
         "r4_mvrobo_instruct.jsonl, r4_mvrobo_thinking.jsonl",
         "r4_device_signals_prep.md §Escalation (43.6 − 36.9)", 6.7, note=f"[{lo:+.2f}, {hi:+.2f}]")
-    diffs.append(("MV-RoboBench  device 4B (A6000 HF sdpa)", d, lo, hi, "device"))
+    diffs.append(("MV-RoboBench  device 4B (3090 Ti HF sdpa)", d, lo, hi, "device"))
     ch = 100.0 * float((preds(mi, idm, "predicted_letter") != preds(mt, idm, "predicted_letter")).mean())
     rec(S, "MV-RoboBench device 4B  answers changed by thinking (letter changed)", round(ch, 2),
         "r4_mvrobo_* predicted_letter", unit="%")
@@ -672,7 +672,7 @@ def slide2():
     rec(S, "MV-RoboBench device 4B  discordant correctness b+c", bb + cc, "r4_mvrobo_* correct",
         unit="questions", note=f"b={bb} c={cc} of n={len(idm)}")
     changed.append(("MV-RoboBench  device 4B", ch, len(idm), "device"))
-    lengths.append(("MV-RoboBench  device 4B-T\n(A6000 HF sdpa)",
+    lengths.append(("MV-RoboBench  device 4B-T\n(3090 Ti HF sdpa)",
                     float(np.median([mt[i]["n_think_tokens"] or 0 for i in idm])),
                     float(np.median([mt[i]["lat_ms"] for i in idm])) / 1000.0, "device"))
 
@@ -1079,7 +1079,7 @@ def slide4():
             base, cloudacc = _esc_panel(
                 ax, f"{wl_name} — device 4B-{arm.capitalize()} → cloud 32B-I (arm C)",
                 dev_ok, cloud_ok, sigs,
-                f"device A6000 HF sdpa · cloud H100 HF fa2 · n={n}")
+                f"device 3090 Ti HF sdpa · cloud H100 HF fa2 · n={n}")
             # legend is shared at figure level (see below)
 
             # keep the rng stream aligned with r4_analyse (escalation draws)
@@ -1777,7 +1777,8 @@ def write_numbers():
     for a, b in [
         ("A6000 llama.cpp F16", "flash / RTX A6000 GPU 1, llama.cpp c0fd786, GGUF F16, DEV-RECENT or DEV-RICH image inputs"),
         ("Orin llama.cpp F16", "Jetson AGX Orin 64 GB, llama.cpp c0fd786 (sm_87), GGUF F16, DEV-RECENT image inputs"),
-        ("A6000 HF sdpa", "flash / RTX A6000, HuggingFace transformers, attn_implementation = sdpa"),
+        ("3090 Ti HF sdpa", "flash / RTX 3090 Ti GPU 0, HuggingFace transformers, attn_implementation = sdpa — the 4B ERQA and MV-RoboBench arms (r4_signals)"),
+        ("A6000 HF sdpa", "flash / RTX A6000 GPU 1, HuggingFace transformers, attn_implementation = sdpa — the 8B ERQA arms (StudyQ)"),
         ("H100 HF fa2", "sn4622120321 GPU 3, HuggingFace transformers, flash_attention_2, bf16"),
         ("H100 vLLM", "sn4622120321 GPU 3, vLLM 0.31.0+cu129, bf16 weights and KV, prefix caching as stated per study"),
     ]:

@@ -1,5 +1,31 @@
 # R4 prep — device-side confidence signals on ERQA and MV-RoboBench
 
+> ## CORRECTION — 2026-11-03 audit
+>
+> The text below is unchanged. These items are corrected by the audit; full recomputation and evidence in **`reports/audit_2026_11_03.md`**.
+>
+> 1. **"Orthogonal" was never computed.** The claim that device uncertainty and tier
+> disagreement "are close to orthogonal", and the related "anti-correlated" wording, have **no
+> supporting statistic anywhere** — `experiments/erqa/r4_analyse.py` computes AUROCs against
+> device correctness and escalation curves, and contains no correlation, covariance, mutual
+> information or orthogonality calculation. These are assertions, not results.
+> 2. **"Actively negative" rests on one decile.** The ERQA/Instruct gap-closed figures are
+> **−0.261 at e = 0.1**, then −0.171, −0.115 and **−0.015** at e = 0.2, 0.3 and 0.5 — shrinking
+> monotonically to essentially zero. The conclusion holds at the smallest escalation rate tested
+> and all but vanishes by e = 0.5.
+> 3. **Budget hits are not all scored incorrect.** MV-RoboBench-Thinking has 10 budget hits of
+> which **3 are scored correct**; ERQA-Thinking has 5, all incorrect. Treating budget exhaustion
+> as equivalent to failure is wrong for 3 of the 15 budget-hit trials.
+> 4. **The best signal is selected on the evaluation labels.** The "best signal" column differs
+> per workload/arm (`neg_entropy`, `neg_hesitation_wait`, `option_mass`, `margin_norm`), chosen
+> from 23 AUROCs computed on the same device-correctness labels used to score the policy. There
+> is no held-out split, so the per-cell figures are optimistically biased by selection.
+> 5. **The features are post-completion.** `n_generated`, `n_think_tokens`, `think_closed`,
+> `budget_hit` and `answer_pos` are only known once generation has finished. A router using them
+> cannot avoid the device's generation cost, so these signals cannot support a pre-generation
+> escalation decision — only a post-hoc one.
+
+
 **E-id:** `StudyR4-prep` (pre-registered 2026-10-18 before running)
 **Script:** `experiments/erqa/r4_device_signals.py`; analysis `experiments/erqa/r4_analyse.py`
 **Host:** flash / NVIDIA GeForce RTX 3090 Ti (GPU 0), `CUDA_VISIBLE_DEVICES=0`

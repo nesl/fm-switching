@@ -1,5 +1,21 @@
 # StudyRH3 — accuracy of warmable history representations (H100, vLLM)
 
+> ## CORRECTION — 2026-11-03 audit
+>
+> The text below is unchanged. These items are corrected by the audit; full recomputation and evidence in **`reports/audit_2026_11_03.md`**.
+>
+> 1. **Token parity holds on the mean only.** D2 and K3 agree in aggregate (mean ratio 0.936)
+> but never per band: the D2/K3 prompt-token ratio runs **0.304** at `qt < 120`, 0.654 at
+> 120–240, 1.223 at 240–480 and **2.011** at 480–720 — a 6.6× spread. K3 is nearly flat (a fixed
+> 120 s window) while D2 grows with `qt`. "Matched budget" is an artefact of averaging over an
+> unbalanced `qt` distribution.
+> 2. **D2 − K3 is not an equal-budget contrast.** On the load-bearing RECENT-miss cell D2 carries
+> **1.19× K3's prompt tokens** (mean 14,857 vs 12,442). The reported RECENT-miss advantage is
+> obtained with ~19% more prompt budget on exactly the questions it is claimed for.
+> 3. The `study_rh4_parity_h100nvl.json` gate (n = 10, `match: true`) verifies **vLLM vs HF token
+> accounting**, not budget parity between D-cells and K-cells. It does not support a parity claim.
+
+
 **Stack:**
 - vLLM 0.31.0+cu129 (venv `~/.venvs/fm-switching-vllm`, torch 2.13.0+cu129), FlashAttention 3, CUDA graphs, gmu 0.90, max_model_len 32768.
 - Qwen3-VL-32B-Instruct @0cfaf481 on h100nvl GPU 3; no foreign process on the GPU during the run.
