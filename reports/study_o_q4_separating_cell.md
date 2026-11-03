@@ -1,5 +1,19 @@
 # Study O Q4 — the separating cell: 4B-I × RICH
 
+> ## CORRECTION — 2026-11-03 audit
+>
+> The text below is unchanged. These items are corrected by the audit; full recomputation and evidence in **`reports/audit_2026_11_03.md`**.
+>
+> 1. **Contrast 1 changes frames and resolution together.** (4B-I × RICH) carries a median 231
+> frames at 54.8 tokens/frame; (4B-I × RECENT) carries 121 frames at 103.0 tokens/frame, with
+> input tokens nearly matched (12,597 vs 12,437). The contrast is a budget-matched swap of
+> resolution for frame count, not a clean "more state" manipulation.
+> 2. **The 4B-T row is at temperature 0.6** (`do_sample=True, temperature=0.6, top_p=0.95,
+> top_k=20`, `experiments/sember/study_o_q4.py`), while the 4B-I and 8B-I rows are greedy
+> (`do_sample=False`). Any 4B-T versus Instruct comparison here is decoding-confounded; the
+> StudyO row in `research/EXPERIMENTS.md` is marked CONFOUNDED for the 4B-T × RICH cell.
+
+
 **Date:** 2026-10-17
 **Pre-registered:** `research/EXPERIMENTS.md`, row `StudyO-q4-sep`, written **before** the run
 with all four contrasts and the decision rules fixed.

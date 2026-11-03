@@ -3,6 +3,16 @@
 Status: pre-registered 2026-08-24, before the next run. Supersedes the conditions
 used in E36/E36b/E36c/E36d. Fixed now and applied as written.
 
+> **AUDIT NOTE (2026-11-03).** These conditions are retained as written. Two cautions from the
+> written-record audit: (1) they were authored against the E36 series, whose
+> mechanism_verification cell records `NOT PERFORMED` — E36 is deliberately left unflagged but
+> its citations are listed in `reports/audit_2026_11_03.md`; (2) any condition expressed as a
+> device-versus-cloud accuracy or latency gap is **not currently measurable on matched input** —
+> no such comparison in the record uses identical input, and no cloud number includes a network.
+> `results/device/identical_input_manifest.json` exists for exactly that replay, but StudyDevOne
+> Part 3 records that the Orin cannot reach the H100, so the matched comparison has not been
+> made. See `reports/audit_2026_11_03.md`.
+
 ---
 
 ## Why the previous conditions were wrong

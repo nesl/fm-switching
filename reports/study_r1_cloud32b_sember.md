@@ -1,5 +1,33 @@
 # StudyR1 — the 32B cloud tier on S-EMBER (accuracy + single-request latency)
 
+> ## CORRECTION — 2026-11-03 audit
+>
+> The text below is unchanged. These items are corrected by the audit; full recomputation and evidence in **`reports/audit_2026_11_03.md`**.
+>
+> 1. **The 4B-I RICH cell exists.** It is
+> `results/sember/study_o/study_o_q4_trials_4bi_rich_fa2.jsonl` (845 trials, 4B-I × RICH,
+> flash_attention_2). Any statement here that the cell is absent, or that the 4B comparison can
+> only be made at RECENT, is wrong. K1 − 4B-I RICH is **+8.99 pp [+5.73, +12.10]**.
+> 2. **"Dominated by history" is not supported.** The whole-sample history effect (K1 − K3) is
+> **+1.18 pp [−1.52, +3.89]** — a null. It decomposes into +17.53 pp (OLDER), +10.18 pp
+> (OVERLAP) and **−5.80 pp [−9.49, −2.11]** (INSIDE): more history *hurts* when the evidence is
+> already in the recent window. History's aggregate contribution is null and sign-dependent, so
+> it cannot be the dominant term.
+> 3. **"Model size adds about 3 pp" is not supported as written.** The +3.3 pp figure is the
+> 32B→8B step (recomputed **+3.31 pp [+0.12, +6.57]**). The device-relevant 32B→4B step is
+> **+8.99 pp [+5.73, +12.10]**, about 2.7× larger, and it is cross-stack (vLLM vs HF fa2). Size
+> is the better-evidenced effect here, not history — the opposite of the conclusion drawn.
+> 4. **The covered stratum is not a null control.** INSIDE gives **−5.80 pp [−9.49, −2.11]**, a
+> CI excluding 0 — a real effect of the opposite sign, not an inert baseline. The only genuine
+> null control in this design is the `qt ≤ 120` subset, and §2 of the device-accuracy correction
+> explains why even that cannot fail.
+> 5. **K1 vs K3 changes window, frame count and resolution together.** K1 carries a median 231
+> frames at 54.8 tokens/frame; K3 carries 121 frames at 103.0 tokens/frame. Total prompt tokens
+> are nearly equal (12,597 vs 12,437) because the server trades resolution for frames to hold the
+> budget. The contrast is therefore *not* "more history, all else equal" — it is a
+> budget-matched, three-way-confounded swap.
+
+
 **Host:** h100nvl (`sn4622120321`), **GPU 3**, exclusive (session watchdog; only our processes ever appeared) ·
 **Run:** 2026-10-17 13:49 → 16:29 · **Pre-registered:** `research/EXPERIMENTS.md` row StudyR1, written before any GPU run.
 

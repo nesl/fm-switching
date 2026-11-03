@@ -1,5 +1,27 @@
 # Device runtime probe — Qwen3-VL-4B-Thinking on Jetson AGX Orin
 
+> ## CORRECTION — 2026-11-03 audit
+>
+> The text below is unchanged. These items are corrected by the audit; full recomputation and evidence in **`reports/audit_2026_11_03.md`**.
+>
+> 1. **The multi-image "scaling" rows are partly cache-warm.** `prompt_n` is the number of
+> tokens *processed*, not the prompt size — visible in the `single_image` rows, where
+> `prompt_n = 1` against `n_tokens` of 90–140. At 560×560 each frame is ~332 tokens, so 16 images
+> should present ~5,300 tokens, yet only **2,629** were processed (8 images: 2,303; +326 for
+> eight more images). Roughly half the 16-image prompt was served from the cache, so the
+> 1/8/16-image row set is not a cold scaling curve and understates the 16-image cost.
+> 2. **The cache-reuse evidence is weaker than stated.** The 12× claim (35 ms vs 430 ms) rests on
+> `prompt_n` and `prefill_ms`; the two counters that would demonstrate reuse read zero —
+> `cache_reuse.call2_n_prompt_tokens_cache = 0` and
+> `cache_reuse.call2_n_prompt_tokens_processed = 0`. The cold/warm *labels* at 430 ms and 35 ms
+> are correctly separated; the instrumentation behind them is not.
+> 3. **`accuracy_C1_cacheprobe` is a frame-cache check, not prompt-cache evidence.** It is 8
+> trials re-running C1 against the rebuilt JPEG cache (`frame_cache:
+> /home/pragya/device_tier/oframes`); 8/8 predictions and 8/8 `frame_timestamps` match C1
+> exactly, and the records contain no cache fields at all. It establishes that the rebuilt frame
+> cache reproduces C1; it says nothing about prompt caching.
+
+
 **Date:** 2026-10-17 · **Host:** nesl-orin-3 (Jetson AGX Orin, 64 GB) · **Status:** Track A step 4 COMPLETE; Track A step 5 (bf16 parity) BLOCKED on-device; Track B (vLLM) not started (gated behind this report per the chosen plan).
 
 This is the gate report. It covers **Track A (llama.cpp)**. Track B and Track A step 5 are open decisions at the end.

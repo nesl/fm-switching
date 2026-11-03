@@ -1,0 +1,51 @@
+{
+  "study": "StudyR8b",
+  "cell": "C3_logprobs",
+  "seed": 1,
+  "n_trials": 845,
+  "n_correct": 273,
+  "accuracy_pct": 32.308,
+  "elapsed_h": 4.724,
+  "contended": true,
+  "contention_note": "R8a (CPU) and R8c (3090 Ti) shared the host; every duration recorded here is contended, not a latency measurement",
+  "model": "4B-T",
+  "gen": {
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 20,
+    "presence_penalty": 0.0,
+    "repeat_penalty": 1.0,
+    "max_tokens": 16384
+  },
+  "server_flags": "--jinja --reasoning-format deepseek -ngl 99 -fa on -c 16384",
+  "logprobs": {
+    "requested_top_k": 20,
+    "post_sampling_probs": false,
+    "note": "llama-server returns PRE-sampling-chain logprobs; the temperature/top-p/top-k chain is NOT applied to them"
+  },
+  "top20_truncated_questions": 381,
+  "top20_rule": "top-20 kept for reasoning tokens 0-399; chosen logprob kept for every token",
+  "files": [
+    "results/device/accuracy_C3_logprobs_s1_part01.jsonl.gz",
+    "results/device/accuracy_C3_logprobs_s1_part02.jsonl.gz"
+  ],
+  "file_sizes_mb": [
+    18.92,
+    9.734
+  ],
+  "_provenance": {
+    "git_commit": "27d435e589ddd8dd0b0d26a2656b64004e036ab1",
+    "script": "r8b_c3_logprobs.py",
+    "model": "qwen3vl4b_thinking_gguf_f16",
+    "timestamp": "2026-10-23T17:17:22.344384",
+    "device": "a6000",
+    "n": 845,
+    "seed": 1,
+    "args": {
+      "mode": "run",
+      "seed": 1,
+      "port": 8101,
+      "limit": null
+    }
+  }
+}

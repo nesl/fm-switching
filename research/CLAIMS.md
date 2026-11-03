@@ -94,6 +94,16 @@ Evidence: `results/cost/profiles/a6000_qwen7b.json`,
 
 **Status: untested**
 
+> **AUDIT NOTE (2026-11-03).** "untested" is correct and is now load-bearing: the E24 series
+> (E24, E24b, E24c) must **not** be read as evidence against this claim. Its policies had
+> disjoint single-point action spaces, so the comparison could not test coupling in either
+> direction; those rows are marked INVALID and the "coupling falsified" conclusion is withdrawn
+> (`research/DECISIONS.md`, 2026-11-03). Any future test must use policies that share a common
+> action space. Separately, **no device-versus-cloud comparison in the record runs on identical
+> input and no cloud number includes a network** (all cloud serving is loopback), so accuracy
+> gaps quoted in support of or against C5 are confounded by model size, serving stack and often
+> host. See `reports/audit_2026_11_03.md`.
+
 This is the paper's accept/reject claim. Prior simulator work (SSM+MPC+RL in `simulator/`)
 used the old framing and is kept only for lineage. A new trace-driven simulator is needed
 that plugs in the measured fidelity and cost numbers and evaluates joint vs decomposed

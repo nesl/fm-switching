@@ -1,0 +1,53 @@
+{
+  "study": "StudyR8c",
+  "workload": "erqa",
+  "arm": "thinking",
+  "seed": 1,
+  "n_trials": 20,
+  "n_correct": 11,
+  "n_oom": 0,
+  "n_gate_mismatch": 0,
+  "elapsed_h": 0.101,
+  "contended": true,
+  "contention_note": "R8a (CPU) and R8b (A6000) shared the host; every duration recorded here is contended, not a latency measurement",
+  "attn_implementation": "sdpa",
+  "model_path": "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-4B-Thinking/snapshots/1de27d8c51f12e819435303b9e84c4e25ba8401e",
+  "gpu": "NVIDIA GeForce RTX 3090 Ti",
+  "gen_config": {
+    "do_sample": true,
+    "temperature": 0.1,
+    "top_p": 0.95,
+    "top_k": 20,
+    "presence_penalty": 0.0,
+    "repetition_penalty": 1.0,
+    "max_new_tokens": 8192,
+    "seed": 1
+  },
+  "deliberate_changes_vs_r4": [
+    "temperature 0.6 -> 1.0 (model card); accuracy drift expected",
+    "sampling applied by this script's processor so entropy is pre-truncation"
+  ],
+  "entropy_definition": "full-vocabulary Shannon entropy in bits of softmax(logits/T), computed before top-k and top-p",
+  "files": [
+    "results/erqa/r8c_signals/r8c_erqa_thinking_s1_t01control_part01.jsonl.gz"
+  ],
+  "file_sizes_mb": [
+    0.314
+  ],
+  "_provenance": {
+    "git_commit": "27d435e589ddd8dd0b0d26a2656b64004e036ab1",
+    "script": "r8c_erqa_entropy.py",
+    "model": "qwen3vl4b_thinking",
+    "timestamp": "2026-10-23T12:05:54.834478",
+    "device": "rtx3090ti",
+    "n": 20,
+    "seed": 1,
+    "args": {
+      "seed": 1,
+      "limit": 20,
+      "tag": "t01control",
+      "temperature": 0.1,
+      "device": "cuda:0"
+    }
+  }
+}

@@ -1,5 +1,30 @@
 # Device-tier accuracy on the llama.cpp runtime — DEV-RECENT vs DEV-RICH
 
+> ## CORRECTION — 2026-11-03 audit
+>
+> The text below is unchanged. These items are corrected by the audit; full recomputation and evidence in **`reports/audit_2026_11_03.md`**.
+>
+> 1. **The effective generation cap on C3/C4 is ~3,850–3,975 tokens, not 16,384.** `-c 16384`
+> is the whole context, and the prompt already consumes a median 12,422 (C3) / 12,413 (C4)
+> tokens, leaving a median **3,962 / 3,971** for generation. Observed maxima are 4,201 (C3) and
+> 4,222 (C4), sitting right at that ceiling. The 11 (C3) and 12 (C4) "budget-exhaustion" trials
+> hit the **context remainder**, not a 16,384-token generation budget.
+> 2. **The negative control cannot fail.** On all 167 `qt ≤ 120` questions, C1 and C2 have
+> **identical** `frame_timestamps` and identical `n_input_tokens`. With greedy decoding,
+> identical inputs must produce identical outputs, so 0% disagreement is a tautology, not
+> evidence. The control has no power to detect anything.
+> 3. **The P4 verdict depends on one random mask.** `experiments/device/device_tier_analyse.py`
+> builds its random comparator as `np.random.default_rng(SEED).shuffle(rndm)` *inside* the
+> contrast function, so the same single permutation is reused in every bootstrap resample. The
+> "P4 − random" figure is one draw, not an average. (`experiments/erqa/r4_analyse.py` averages
+> 200 draws and `study_r8a_prefix_signals.py` uses 200 — this cell is the outlier.)
+> 4. **38.8% is 38.2%.** Construction changes the prediction on **259 of 678** questions with
+> `qt > 120` = **38.20%**. 38.8% would be 263.
+> 5. **Not all cells have N = 37.** Only **661 of 845** rows carry 37 frames; 167 carry 36, and
+> 17 carry between 7 and 35 (identically across C1–C4). The statement that all four cells use
+> N = 37 frames is wrong for 184 of 845 questions.
+
+
 **E-id:** `StudyDevAcc-llamacpp` (pre-registered 2026-10-18 before any GPU run)
 **Script:** `experiments/device/device_tier_accuracy.py`; analysis `experiments/device/device_tier_analyse.py`
 **Host:** flash / NVIDIA RTX A6000 (GPU 1), `CUDA_VISIBLE_DEVICES=1`

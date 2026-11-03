@@ -1,5 +1,22 @@
 # StudyRH4 — fixed-stride, append-only histories (H100, vLLM)
 
+> ## CORRECTION — 2026-11-03 audit
+>
+> The text below is unchanged. These items are corrected by the audit; full recomputation and evidence in **`reports/audit_2026_11_03.md`**.
+>
+> 1. **The analysable RECENT-miss n is 94, not 97.** Three of the 97 RECENT-miss questions
+> returned no answer (HTTP 400, "Input length exceeds model's..."), so the paired contrasts rest
+> on **94**. Every table headed "RECENT-miss (97)" overstates its n; the report's own §38 note
+> ("3 of the 6 are RECENT-miss") is the same fact, unreconciled with the headers.
+> 2. **D1 returned no answer at high `qt`.** Four D1 questions (`qt` = 1011, 1124, 1146, 1155)
+> and six D2 questions (from `qt` = 757) failed with HTTP 400 on context length and carry
+> `pred = 'X'`. At `qt` ≳ 1000 the D1 representation does not fit the model at all — a hard
+> feasibility limit, not a scoring event.
+> 3. **D2 − K3 is not at equal budget**, and token parity holds on the mean only — see the
+> correction block in `reports/study_rh3_warmable_representations.md`, items 1–2. On the
+> RECENT-miss cell D2 carries 1.19× K3's tokens.
+
+
 **Stack:**
 - vLLM 0.31.0+cu129 (venv `~/.venvs/fm-switching-vllm`, torch 2.13.0+cu129), FlashAttention 3, CUDA graphs, gmu 0.90, max_model_len 32768.
 - Qwen3-VL-32B-Instruct @0cfaf481 on h100nvl GPU 3.

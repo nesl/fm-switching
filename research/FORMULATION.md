@@ -5,6 +5,14 @@ warm-state orchestration). This file is the spec for the trace-driven
 simulator (E24) and the anchor for the decisive phase-diagram experiment.
 Measured values in brackets cite results/fidelity/ and results/cost/.
 
+> **AUDIT NOTE (2026-11-03).** **The E24 series did not test this formulation.** E24, E24b and
+> E24c compared `JointPolicy`, `FidelityOnlyPolicy` and `PlacementOnlyPolicy`, which are
+> deterministic single-point rules with disjoint action spaces — none contains another — so the
+> joint-versus-decomposed question this file specifies was never exercised. The E24 rows in
+> `research/EXPERIMENTS.md` are marked INVALID and the "coupling falsified" conclusion is
+> withdrawn (`research/DECISIONS.md`, 2026-11-03). This formulation remains **untested**, not
+> refuted. See `reports/audit_2026_11_03.md`.
+
 Changes from v1, after external review: (1) two-level state abstraction
 separating semantic fidelity from materialization level, fixing a resource
 accounting bug; (2) "fidelity" replaces "representation" throughout —

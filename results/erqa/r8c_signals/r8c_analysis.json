@@ -1,0 +1,87 @@
+{
+  "r4_reference": {
+    "n": 400,
+    "accuracy": 45.0,
+    "ci": [
+      40.2,
+      49.9
+    ]
+  },
+  "seeds": {
+    "1": {
+      "n": 400,
+      "accuracy": 45.75,
+      "wilson": [
+        40.93,
+        50.65
+      ],
+      "delta_vs_r4": 0.75,
+      "overlaps_r4_ci": true,
+      "median_generated": 592,
+      "median_think_tokens": 588,
+      "budget_hits": 4,
+      "gate_steps_equal_generated": true,
+      "gate_text_reassembles": true,
+      "truncated_input_steps": 0,
+      "entropy": {
+        "mean_bits": 0.7293,
+        "median_bits": 0.4487,
+        "sd_within_trace_median": 0.7426,
+        "sd_across_questions": 0.1807,
+        "mean_first50": 0.3581,
+        "mean_last50": 0.5863,
+        "n_steps": 440907
+      }
+    },
+    "2": {
+      "n": 400,
+      "accuracy": 45.25,
+      "wilson": [
+        40.44,
+        50.15
+      ],
+      "delta_vs_r4": 0.25,
+      "overlaps_r4_ci": true,
+      "median_generated": 642,
+      "median_think_tokens": 638,
+      "budget_hits": 1,
+      "gate_steps_equal_generated": true,
+      "gate_text_reassembles": true,
+      "truncated_input_steps": 0,
+      "entropy": {
+        "mean_bits": 0.7334,
+        "median_bits": 0.4587,
+        "sd_within_trace_median": 0.7527,
+        "sd_across_questions": 0.1834,
+        "mean_first50": 0.357,
+        "mean_last50": 0.5913,
+        "n_steps": 460096
+      }
+    }
+  },
+  "temperature_control": {
+    "n": 20,
+    "temperature": 0.1,
+    "entropy": {
+      "mean_bits": 0.037,
+      "median_bits": 0.0,
+      "sd_within_trace_median": 0.1878,
+      "sd_across_questions": 0.0158,
+      "mean_first50": 0.0346,
+      "mean_last50": 0.0488,
+      "n_steps": 19046
+    },
+    "note": "Step 4 control: entropy must fall against temperature 1.0"
+  },
+  "repeated_sample_counts": {
+    "n": 400,
+    "n_samples": 3,
+    "distribution": {
+      "0": 173,
+      "1": 47,
+      "2": 43,
+      "3": 137
+    },
+    "note": "R4 (seed 42, temperature 0.6) plus the R8c seeds (temperature 1.0); the arms differ in temperature, which is a deliberate, recorded change"
+  }
+}

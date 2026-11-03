@@ -180,7 +180,8 @@ def slide2():
         erqa.append((lab, a, lo, hi, tier))
     rec("t2_erqa_n", S, "ERQA — n", len(eids), "common question_ids across the three arms",
         unit="questions")
-    M.note(S, "ERQA device arms are A6000 HF sdpa and the cloud arm is H100 HF fa2, so the "
+    M.note(S, "The ERQA 4B arm ran on the RTX 3090 Ti (GPU 0, r4_signals), the 8B arm on the "
+              "A6000 (GPU 1, StudyQ) and the cloud arm on the H100 (HF fa2), so the "
               "ERQA device↔cloud gap is BACKEND-MISMATCHED, exactly as "
               "reports/study_r_device_vs_cloud.md labels it. ERQA device latency was never "
               "measured, so only S-EMBER carries a latency axis.")
@@ -249,7 +250,7 @@ def slide2():
            f"S-EMBER: device = Jetson AGX Orin, llama.cpp F16, DEV-RECENT 37-frame inputs, "
            f"n={n};  cloud = H100 NVL, Qwen3-VL-32B-Instruct, vLLM, RICH history (R1 K1), "
            f"single-request latency n=50;  TTFT bar = StudyRH5 Part A, 11k history, no network.   "
-           f"ERQA: device 4B/8B = A6000 HF sdpa, cloud 32B = H100 HF fa2, n={len(eids)} "
+           f"ERQA: device 4B = 3090 Ti HF sdpa, device 8B = A6000 HF sdpa, cloud 32B = H100 HF fa2, n={len(eids)} "
            f"(backend-mismatched).  Error bars: Wilson 95%.",
            "A larger cloud model is more accurate — and faster")
 
@@ -408,7 +409,7 @@ def slide4():
     lt_i = float(np.median([di[i]["lat_ms"] for i in ide])) / 1000
     lt_t = float(np.median([dt[i]["lat_ms"] for i in ide])) / 1000
     ch = 100.0 * float((preds(di, ide, "predicted_letter") != preds(dt, ide, "predicted_letter")).mean())
-    rows.append(("ERQA · device 4B\n(A6000 HF sdpa)", d, lo, hi, lt_t / lt_i, ch,
+    rows.append(("ERQA · device 4B\n(3090 Ti HF sdpa)", d, lo, hi, lt_t / lt_i, ch,
                  len(ide), DEVICE, "t4_erqa_dev"))
 
     cC, cD = study_r_arm("C"), study_r_arm("D")
@@ -463,7 +464,7 @@ def slide4():
            "S-EMBER rows: video-clustered bootstrap, 2,000 resamples, seed 0 "
            "(device = A6000 llama.cpp F16 DEV-RECENT; cloud = H100 vLLM RICH).   "
            "ERQA rows: paired question-level bootstrap, 2,000 resamples, seed 0 "
-           "(device = A6000 HF sdpa; cloud = H100 HF fa2).   "
+           "(device = 3090 Ti HF sdpa; cloud = H100 HF fa2).   "
            "Latency multiples are medians on the same stack as the row.",
            "More thinking does not buy accuracy at either tier")
 
@@ -573,7 +574,7 @@ def slide5():
             "agreement as recoverable.",
             transform=ax.transAxes, fontsize=14, color=GREY, style="italic")
     finish(fig, "t5_device_signals",
-           f"ERQA, device 4B-Thinking (A6000 HF sdpa, r4_erqa_thinking.jsonl) → cloud "
+           f"ERQA, device 4B-Thinking (3090 Ti HF sdpa, r4_erqa_thinking.jsonl) → cloud "
            f"32B-Instruct (H100 HF fa2, StudyR arm C), paired n={n}.  Backend-mismatched.  "
            f"Signal order is least-confident-first; AUROC from experiments/erqa/r4_analyse.py "
            f"(2,000-resample question bootstrap, seed 0).",
@@ -761,7 +762,8 @@ def write_numbers():
                                  "DEV-RECENT 37-frame image inputs"),
         ("A6000 llama.cpp F16", "flash / RTX A6000 GPU 1, llama.cpp c0fd786, GGUF F16 — the "
                                 "accuracy mirror of the Orin construction"),
-        ("A6000 HF sdpa", "flash / RTX A6000, HuggingFace transformers, attn_implementation=sdpa"),
+        ("3090 Ti HF sdpa", "flash / RTX 3090 Ti GPU 0, HuggingFace transformers, attn_implementation=sdpa — the ERQA 4B arm (r4_signals)"),
+        ("A6000 HF sdpa", "flash / RTX A6000 GPU 1, HuggingFace transformers, attn_implementation=sdpa — the ERQA 8B arm (StudyQ)"),
         ("cloud (H100) vLLM", "sn4622120321 GPU 3, Qwen3-VL-32B-Instruct, vLLM 0.31.0+cu129, bf16"),
         ("cloud (H100) HF fa2", "sn4622120321 GPU 3, HuggingFace transformers, "
                                 "flash_attention_2, bf16"),

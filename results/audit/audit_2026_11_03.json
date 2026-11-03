@@ -1,0 +1,621 @@
+{
+ "_meta": {
+  "nboot": 2000,
+  "bootstrap_seed": 0,
+  "bootstrap": "experiments/sember/study_o_q4_analyze.clustered_bootstrap (resamples VIDEOS with replacement)",
+  "n_questions": 845
+ },
+ "strata": {
+  "definition": "qt>120 only; OLDER = R1 K3 evidence_covered False; OVERLAP = covered and answer_start_time < qt-120; INSIDE = covered and answer_start_time >= qt-120",
+  "counts": {
+   "QT_LE_120": 167,
+   "INSIDE": 414,
+   "OVERLAP": 167,
+   "OLDER": 97
+  },
+  "n_qt_gt_120": 678,
+  "n_k3_uncovered_total": 97,
+  "n_k3_uncovered_with_qt_le_120": 0,
+  "answer_start_time_source": "results/device/accuracy_C1.jsonl",
+  "evidence_covered_source": "results/sember/study_r1 K3 (batched)"
+ },
+ "a_K1_minus_K3": {
+  "ALL": {
+   "label": "K1(RICH) - K3(RECENT), 32B-I, H100, batched",
+   "n": 845,
+   "delta_pp": 1.1834,
+   "ci": [
+    -1.5188,
+    3.8911
+   ],
+   "mean_a_pct": 39.5266,
+   "mean_b_pct": 38.3432,
+   "discordant_a_only": 68,
+   "discordant_b_only": 58
+  },
+  "OLDER": {
+   "label": "K1(RICH) - K3(RECENT), 32B-I, H100, batched",
+   "n": 97,
+   "delta_pp": 17.5258,
+   "ci": [
+    7.2898,
+    28.2649
+   ],
+   "mean_a_pct": 42.268,
+   "mean_b_pct": 24.7423,
+   "discordant_a_only": 24,
+   "discordant_b_only": 7
+  },
+  "OVERLAP": {
+   "label": "K1(RICH) - K3(RECENT), 32B-I, H100, batched",
+   "n": 167,
+   "delta_pp": 10.1796,
+   "ci": [
+    3.5498,
+    16.7688
+   ],
+   "mean_a_pct": 36.5269,
+   "mean_b_pct": 26.3473,
+   "discordant_a_only": 23,
+   "discordant_b_only": 6
+  },
+  "INSIDE": {
+   "label": "K1(RICH) - K3(RECENT), 32B-I, H100, batched",
+   "n": 414,
+   "delta_pp": -5.7971,
+   "ci": [
+    -9.4878,
+    -2.1052
+   ],
+   "mean_a_pct": 34.058,
+   "mean_b_pct": 39.8551,
+   "discordant_a_only": 21,
+   "discordant_b_only": 45
+  }
+ },
+ "b_C2_minus_C1": {
+  "ALL": {
+   "label": "C2 - C1, 4B device (llama.cpp F16)",
+   "n": 845,
+   "delta_pp": -0.4734,
+   "ci": [
+    -2.9906,
+    2.2006
+   ],
+   "mean_a_pct": 31.0059,
+   "mean_b_pct": 31.4793,
+   "discordant_a_only": 57,
+   "discordant_b_only": 61
+  },
+  "OLDER": {
+   "label": "C2 - C1, 4B device (llama.cpp F16)",
+   "n": 97,
+   "delta_pp": 19.5876,
+   "ci": [
+    10.2041,
+    28.8666
+   ],
+   "mean_a_pct": 36.0825,
+   "mean_b_pct": 16.4948,
+   "discordant_a_only": 22,
+   "discordant_b_only": 3
+  },
+  "OVERLAP": {
+   "label": "C2 - C1, 4B device (llama.cpp F16)",
+   "n": 167,
+   "delta_pp": 0.0,
+   "ci": [
+    -6.6677,
+    6.8329
+   ],
+   "mean_a_pct": 23.3533,
+   "mean_b_pct": 23.3533,
+   "discordant_a_only": 15,
+   "discordant_b_only": 15
+  },
+  "INSIDE": {
+   "label": "C2 - C1, 4B device (llama.cpp F16)",
+   "n": 414,
+   "delta_pp": -5.5556,
+   "ci": [
+    -9.2417,
+    -1.9511
+   ],
+   "mean_a_pct": 26.57,
+   "mean_b_pct": 32.1256,
+   "discordant_a_only": 20,
+   "discordant_b_only": 43
+  }
+ },
+ "c_cross_stack": {
+  "note": "CROSS-STACK: cloud arms are 32B-I on H100 via vLLM at temperature 0.0; the 4B-I comparators are HF transformers flash_attention_2 runs from Study O. Model size, serving stack and kernel all differ at once.",
+  "K1_minus_4BI_RICH": {
+   "label": "K1 (32B-I RICH, H100 vLLM) - 4B-I RICH (Study O, HF fa2) [CROSS-STACK]",
+   "n": 845,
+   "delta_pp": 8.9941,
+   "ci": [
+    5.7309,
+    12.1027
+   ],
+   "mean_a_pct": 39.5266,
+   "mean_b_pct": 30.5325,
+   "discordant_a_only": 148,
+   "discordant_b_only": 72
+  },
+  "K3_minus_4BI_RECENT": {
+   "label": "K3 (32B-I RECENT, H100 vLLM) - 4B-I RECENT (Study O, HF fa2) [CROSS-STACK]",
+   "n": 845,
+   "delta_pp": 5.5621,
+   "ci": [
+    2.3719,
+    8.9941
+   ],
+   "mean_a_pct": 38.3432,
+   "mean_b_pct": 32.7811,
+   "discordant_a_only": 125,
+   "discordant_b_only": 78
+  },
+  "n_frames_K1_median": 231.0,
+  "n_frames_4BI_RICH_median": 231.0,
+  "n_frames_K3_median": 121.0,
+  "n_frames_4BI_RECENT_median": 121.0
+ },
+ "d_erqa_same_host": {
+  "label": "ERQA 32B-I arm C - 4B-I arm A_h100 (both H100 NVL, sdpa, greedy) [SAME HOST]",
+  "n": 400,
+  "delta_pp": 6.0,
+  "ci": [
+   0.75,
+   11.5
+  ],
+  "mean_a_pct": 46.75,
+  "mean_b_pct": 40.75,
+  "discordant_a_only": 77,
+  "discordant_b_only": 53,
+  "bootstrap": "ordinary paired case bootstrap (one cluster per question)"
+ },
+ "e_mvrobo_cross_host": {
+  "label": "MV-RoboBench 32B-I arm C (H100 NVL, sdpa, greedy) - 4B-I R4 (RTX 3090 Ti, sdpa, greedy) [CROSS-HOST]",
+  "n": 401,
+  "delta_pp": 10.9726,
+  "ci": [
+   5.2369,
+   16.7082
+  ],
+  "mean_a_pct": 47.8803,
+  "mean_b_pct": 36.9077,
+  "discordant_a_only": 89,
+  "discordant_b_only": 45,
+  "bootstrap": "ordinary paired case bootstrap"
+ },
+ "j_uncovered_97_vs_105": {
+  "cloud_K3_uncovered": 97,
+  "device_C1_uncovered": 105,
+  "device_C3_uncovered": 105,
+  "device_RICH_C2_uncovered": 51,
+  "cloud_RICH_K1_uncovered": 0,
+  "cloud_uncovered_not_in_device": 0,
+  "explanation": "Both arms use the same 120 s RECENT window, so the 8 extra are NOT a window difference. They are a frame-SAMPLING-DENSITY difference: the device samples 37 frames across the 120 s window (mean stride 3.33 s) while cloud K3 samples 121 frames at ~1 fps. All 8 have answer intervals of only 1-2 s, and in every case a single device frame gap straddles the whole interval, so the evidence lies inside the window but between two sampled frames. evidence_covered is therefore a property of the ARM's frame budget, not of the question.",
+  "extra_8": [
+   {
+    "question_id": "03e2734e1f9991a2c519e3018f76efb4e6c6d406fb2373875e7affb2150f60d4",
+    "question_time": 505.0,
+    "answer_start_time": 473.0,
+    "answer_end_time": 474.0,
+    "answer_duration_s": 1.0,
+    "device_n_frames": 37,
+    "cloud_K3_n_frames": 121,
+    "device_mean_stride_s": 3.333,
+    "straddling_device_frame_gap": [
+     472.0,
+     475.0
+    ],
+    "stratum": "INSIDE"
+   },
+   {
+    "question_id": "1c4ab45ae748bb416da24da6990ec9d9761eb0c0d00300db3d75fbca6f18505f",
+    "question_time": 131.0,
+    "answer_start_time": 45.0,
+    "answer_end_time": 47.0,
+    "answer_duration_s": 2.0,
+    "device_n_frames": 37,
+    "cloud_K3_n_frames": 121,
+    "device_mean_stride_s": 3.333,
+    "straddling_device_frame_gap": [
+     44.0,
+     48.0
+    ],
+    "stratum": "INSIDE"
+   },
+   {
+    "question_id": "1d0e5d732817459031ca515c1a429b1790b009a5e34f343a01b4264af07efcfc",
+    "question_time": 130.0,
+    "answer_start_time": 34.0,
+    "answer_end_time": 36.0,
+    "answer_duration_s": 2.0,
+    "device_n_frames": 37,
+    "cloud_K3_n_frames": 121,
+    "device_mean_stride_s": 3.333,
+    "straddling_device_frame_gap": [
+     33.0,
+     37.0
+    ],
+    "stratum": "INSIDE"
+   },
+   {
+    "question_id": "25acfa1e1707266e7cdf4c9873a2ce51848158a2214c096d774cf91360d0f891",
+    "question_time": 495.0,
+    "answer_start_time": 469.0,
+    "answer_end_time": 471.0,
+    "answer_duration_s": 2.0,
+    "device_n_frames": 37,
+    "cloud_K3_n_frames": 121,
+    "device_mean_stride_s": 3.333,
+    "straddling_device_frame_gap": [
+     468.0,
+     472.0
+    ],
+    "stratum": "INSIDE"
+   },
+   {
+    "question_id": "95287fa7aa1d5acff58c18be75d96f318518d3c43d3bef6e1e860a5fda546aa9",
+    "question_time": 125.0,
+    "answer_start_time": 49.0,
+    "answer_end_time": 51.0,
+    "answer_duration_s": 2.0,
+    "device_n_frames": 37,
+    "cloud_K3_n_frames": 121,
+    "device_mean_stride_s": 3.333,
+    "straddling_device_frame_gap": [
+     48.0,
+     52.0
+    ],
+    "stratum": "INSIDE"
+   },
+   {
+    "question_id": "FC3E574FD7446AF863CABFD1C25CF8260C6831686D57D99F1F0A45CD13F1ECB1",
+    "question_time": 293.0,
+    "answer_start_time": 207.0,
+    "answer_end_time": 209.0,
+    "answer_duration_s": 2.0,
+    "device_n_frames": 37,
+    "cloud_K3_n_frames": 121,
+    "device_mean_stride_s": 3.333,
+    "straddling_device_frame_gap": [
+     206.0,
+     210.0
+    ],
+    "stratum": "INSIDE"
+   },
+   {
+    "question_id": "cbde5ca1b88d397890e5dacfa8951f1254e1576a82acf2437703ac51c45d5270",
+    "question_time": 246.0,
+    "answer_start_time": 194.0,
+    "answer_end_time": 195.0,
+    "answer_duration_s": 1.0,
+    "device_n_frames": 37,
+    "cloud_K3_n_frames": 121,
+    "device_mean_stride_s": 3.333,
+    "straddling_device_frame_gap": [
+     193.0,
+     196.0
+    ],
+    "stratum": "INSIDE"
+   },
+   {
+    "question_id": "f98550520f707667f19672230d08ca9c19100215b0fc80bd8787fef61a092327",
+    "question_time": 117.0,
+    "answer_start_time": 11.0,
+    "answer_end_time": 12.0,
+    "answer_duration_s": 1.0,
+    "device_n_frames": 37,
+    "cloud_K3_n_frames": 118,
+    "device_mean_stride_s": 3.25,
+    "straddling_device_frame_gap": [
+     10.0,
+     13.0
+    ],
+    "stratum": "QT_LE_120"
+   }
+  ],
+  "n_answer_intervals_le_2s_all845": 47
+ },
+ "f_rh7_eager_fallbacks": {
+  "per_D": {
+   "D32": {
+    "n_in_window_escalations": 271,
+    "n_fallback": 45,
+    "fallback_share_pct": 16.61,
+    "body_mb_total": 1043.4,
+    "body_mb_fallback": 942.8,
+    "fallback_body_share_pct": 90.35,
+    "qt_mod10_eq0_n": 45,
+    "qt_mod10_eq0_fallback": 45,
+    "qt_mod10_eq0_fallback_share_pct": 100.0,
+    "fallback_set_equals_qt_mod10_set": true
+   },
+   "D48": {
+    "n_in_window_escalations": 401,
+    "n_fallback": 57,
+    "fallback_share_pct": 14.21,
+    "body_mb_total": 1372.3,
+    "body_mb_fallback": 1221.0,
+    "fallback_body_share_pct": 88.98,
+    "qt_mod10_eq0_n": 57,
+    "qt_mod10_eq0_fallback": 57,
+    "qt_mod10_eq0_fallback_share_pct": 100.0,
+    "fallback_set_equals_qt_mod10_set": true
+   },
+   "D64": {
+    "n_in_window_escalations": 537,
+    "n_fallback": 81,
+    "fallback_share_pct": 15.08,
+    "body_mb_total": 2001.7,
+    "body_mb_fallback": 1803.3,
+    "fallback_body_share_pct": 90.09,
+    "qt_mod10_eq0_n": 81,
+    "qt_mod10_eq0_fallback": 81,
+    "qt_mod10_eq0_fallback_share_pct": 100.0,
+    "fallback_set_equals_qt_mod10_set": true
+   },
+   "D96": {
+    "n_in_window_escalations": 662,
+    "n_fallback": 100,
+    "fallback_share_pct": 15.11,
+    "body_mb_total": 2549.1,
+    "body_mb_fallback": 2300.1,
+    "fallback_body_share_pct": 90.23,
+    "qt_mod10_eq0_n": 102,
+    "qt_mod10_eq0_fallback": 100,
+    "qt_mod10_eq0_fallback_share_pct": 98.04,
+    "fallback_set_equals_qt_mod10_set": false
+   }
+  },
+  "n_questions_with_qt_mod10_eq0": 136,
+  "n_questions_total": 845,
+  "finding": "Fallbacks are not spread across questions: at D32/D48/D64 the fallback set is EXACTLY the set of questions whose question_time is a multiple of 10 s (45/45, 57/57, 81/81). The fallback is a deterministic property of the question's frame schedule, not a cache-pressure effect."
+ },
+ "g_rh7_lazy_tail_and_rh8_mix_demand": {
+  "rh7_LAZY_D64": {
+   "n": 533,
+   "p50": 3.124,
+   "p99": 25.907,
+   "within_5s_pct": 69.79
+  },
+  "rh7_LAZY_D64_excl_first120s_wallclock": {
+   "n": 442,
+   "p50": 2.706,
+   "p99": 10.718,
+   "within_5s_pct": 82.35
+  },
+  "rh8_D96_all": {
+   "cells": {
+    "ALL-EAGER": {
+     "n": 267,
+     "p50": 131.223,
+     "p99": 182.963,
+     "within_5s_pct": 1.87
+    },
+    "ALL-LAZY": {
+     "n": 267,
+     "p50": 2.664,
+     "p99": 13.627,
+     "within_5s_pct": 73.03
+    },
+    "MIX-RANDOM": {
+     "n": 267,
+     "p50": 2.856,
+     "p99": 10.623,
+     "within_5s_pct": 71.91
+    },
+    "MIX-DEMAND": {
+     "n": 267,
+     "p50": 1.209,
+     "p99": 12.343,
+     "within_5s_pct": 83.52
+    }
+   },
+   "best_rival": "ALL-LAZY",
+   "mix_demand_minus_best_rival_pp": 10.49
+  },
+  "rh8_D96_excl_first_120s_wallclock": {
+   "cells": {
+    "ALL-EAGER": {
+     "n": 224,
+     "p50": 146.226,
+     "p99": 182.966,
+     "within_5s_pct": 0.0
+    },
+    "ALL-LAZY": {
+     "n": 224,
+     "p50": 2.498,
+     "p99": 13.756,
+     "within_5s_pct": 75.45
+    },
+    "MIX-RANDOM": {
+     "n": 224,
+     "p50": 2.623,
+     "p99": 10.711,
+     "within_5s_pct": 75.0
+    },
+    "MIX-DEMAND": {
+     "n": 224,
+     "p50": 1.229,
+     "p99": 12.36,
+     "within_5s_pct": 81.7
+    }
+   },
+   "best_rival": "ALL-LAZY",
+   "mix_demand_minus_best_rival_pp": 6.25
+  },
+  "rh8_D96_excl_session_t_lt_120": {
+   "cells": {
+    "ALL-EAGER": {
+     "n": 215,
+     "p50": 132.823,
+     "p99": 182.967,
+     "within_5s_pct": 0.93
+    },
+    "ALL-LAZY": {
+     "n": 215,
+     "p50": 2.89,
+     "p99": 13.783,
+     "within_5s_pct": 68.84
+    },
+    "MIX-RANDOM": {
+     "n": 215,
+     "p50": 3.056,
+     "p99": 10.729,
+     "within_5s_pct": 68.84
+    },
+    "MIX-DEMAND": {
+     "n": 215,
+     "p50": 1.683,
+     "p99": 12.364,
+     "within_5s_pct": 80.93
+    }
+   },
+   "best_rival": "ALL-LAZY",
+   "mix_demand_minus_best_rival_pp": 12.09
+  },
+  "definition_note": "'without the first 120 s' is the WALL-CLOCK window start (t_submit minus the cell's first t_submit), which reproduces the +6.3 pp figure. Excluding by session_t >= 120 instead gives +12.09 pp - a different quantity. The metric is the fraction of in-window escalations with TTFT <= 5 s."
+ },
+ "h_devfast_4bi_ttft": {
+  "N37": {
+   "n_rows": 120,
+   "n_used": 119,
+   "excluded_first_row": {
+    "ttft_s": 1.438,
+    "input_tokens": 1,
+    "prefill_ms": 63.886,
+    "n_frames": 37
+   },
+   "ttft_s_median_excl_first": 16.985,
+   "ttft_s_mean_excl_first": 16.815,
+   "ttft_s_median_incl_first": 16.982,
+   "ttft_s_mean_incl_first": 16.687,
+   "input_tokens_median": 12422,
+   "prefill_ms_median": 15155.4,
+   "prefill_ms_per_token_median": 1.2185,
+   "ttft_ms_per_token_median": 1.3699,
+   "prefill_share_of_ttft_pct": 88.94,
+   "rows_by_actual_n_frames": {
+    "14": 1,
+    "31": 1,
+    "32": 1,
+    "33": 1,
+    "35": 1,
+    "36": 20,
+    "37": 95
+   }
+  },
+  "N18": {
+   "n_rows": 120,
+   "n_used": 119,
+   "excluded_first_row": {
+    "ttft_s": 0.685,
+    "input_tokens": 1,
+    "prefill_ms": 58.74,
+    "n_frames": 18
+   },
+   "ttft_s_median_excl_first": 7.76,
+   "ttft_s_mean_excl_first": 7.755,
+   "ttft_s_median_incl_first": 7.76,
+   "ttft_s_mean_incl_first": 7.696,
+   "input_tokens_median": 6123,
+   "prefill_ms_median": 6848.6,
+   "prefill_ms_per_token_median": 1.1181,
+   "ttft_ms_per_token_median": 1.269,
+   "prefill_share_of_ttft_pct": 88.16,
+   "rows_by_actual_n_frames": {
+    "14": 1,
+    "18": 119
+   }
+  },
+  "N9": {
+   "n_rows": 120,
+   "n_used": 119,
+   "excluded_first_row": {
+    "ttft_s": 0.374,
+    "input_tokens": 1,
+    "prefill_ms": 57.19,
+    "n_frames": 9
+   },
+   "ttft_s_median_excl_first": 3.796,
+   "ttft_s_mean_excl_first": 3.805,
+   "ttft_s_median_incl_first": 3.795,
+   "ttft_s_mean_incl_first": 3.777,
+   "input_tokens_median": 3131,
+   "prefill_ms_median": 3338.1,
+   "prefill_ms_per_token_median": 1.0658,
+   "ttft_ms_per_token_median": 1.2159,
+   "prefill_share_of_ttft_pct": 87.85,
+   "rows_by_actual_n_frames": {
+    "9": 120
+   }
+  },
+  "note": "The first row of every cell has input_tokens = 1 and prefill_ms 57-64 ms: it is a warm-up row carrying no frames, not an N-frame prefill. The expected 16.98 / 7.76 / 3.80 s are MEDIANS with it excluded. n_frames does NOT always equal N: at N=37 only 95/120 rows carry 37 frames (20 carry 36, 5 carry 14-35); at N=18, 119/120; at N=9, 120/120."
+ },
+ "i_d2_uplink": {
+  "RH7": {
+   "fmt": [
+    "D2"
+   ],
+   "body_mode": [
+    "delta",
+    "full"
+   ],
+   "n_appends_with_new_frames": 19080,
+   "n_new_frames_per_append_median": 5.0,
+   "bytes_per_frame_sent_median_kB": 185.44,
+   "append_body_MB_median": 0.9381,
+   "new_frames_MB_median": 0.9178,
+   "base64_overhead_share_of_frame_bytes_pct": 24.99,
+   "raw_png_bytes_per_frame_median_kB": 139.03,
+   "json_envelope_bytes_per_frame": 69,
+   "mean_uplink_MB_per_active_device": {
+    "RH7_EAGER_D32": 114.1,
+    "RH7_EAGER_D48": 110.4,
+    "RH7_EAGER_D64": 110.4,
+    "RH7_EAGER_D96": 89.5,
+    "RH7_LAZYD_D32": 91.9,
+    "RH7_LAZYD_D48": 93.5,
+    "RH7_LAZYD_D64": 92.8,
+    "RH7_LAZYD_D96": 80.0,
+    "RH7_LAZY_D32": 198.1,
+    "RH7_LAZY_D48": 194.0,
+    "RH7_LAZY_D64": 197.2,
+    "RH7_LAZY_D96": 166.3
+   }
+  },
+  "RH8": {
+   "fmt": [
+    "D2"
+   ],
+   "body_mode": [
+    "delta"
+   ],
+   "n_appends_with_new_frames": 23490,
+   "n_new_frames_per_append_median": 5.0,
+   "bytes_per_frame_sent_median_kB": 185.38,
+   "append_body_MB_median": 0.9432,
+   "new_frames_MB_median": 0.9221,
+   "base64_overhead_share_of_frame_bytes_pct": 24.99,
+   "raw_png_bytes_per_frame_median_kB": 138.98,
+   "json_envelope_bytes_per_frame": 69,
+   "mean_uplink_MB_per_active_device": {
+    "RH8_ALL-EAGER_D64": 90.2,
+    "RH8_ALL-EAGER_D96": 74.9,
+    "RH8_ALL-LAZY_D64": 51.7,
+    "RH8_ALL-LAZY_D96": 46.1,
+    "RH8_MIX-DEMAND_D64": 55.2,
+    "RH8_MIX-DEMAND_D96": 48.4,
+    "RH8_MIX-RANDOM_D64": 65.3,
+    "RH8_MIX-RANDOM_D96": 52.2,
+    "RH8_REP-EAGER_D64": 110.5,
+    "RH8_REP-LAZYD_D64": 92.8
+   }
+  },
+  "note": "body_mb is len(HTTP body)/1e6 - the actual bytes on the wire (MB, not MiB). Frames are PNG, base64-encoded into a data: URL (study_rh6_offload_knee.py:85), so base64 inflates the raw PNG by 4/3 and accounts for 25% of every frame byte sent. All RH7/RH8 records are fmt=D2."
+ }
+}

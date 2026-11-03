@@ -1,5 +1,25 @@
 # Study M Smoke Test — T-OFF Results and NO-GO Decision
 
+> ## CORRECTION — 2026-11-03 audit
+>
+> The text below is unchanged. These items are corrected by the audit; full recomputation and evidence in **`reports/audit_2026_11_03.md`**.
+>
+> 1. **The model is below the trivial baseline.** Always answering "A" scores **31.11%** (84 of
+> 270) against the model's **24.07%** (65 of 270). The answer key is imbalanced (A 84, D 69,
+> C 66, B 51) and the model's own predictions are A-skewed (A 102, D 83, C 58, B 27). A
+> below-constant-baseline score strengthens the NO-GO but means the reported accuracy cannot be
+> read as partial competence.
+> 2. **Prompts are over 3× the planned size.** `reports/study_m_plan.md` §87 specifies
+> "1,132–1,260 tokens per series"; delivered prompts are a median **4,288** tokens (min 3,820,
+> max 4,417) — **3.4–3.8×** the planned maximum. Whatever drove the inflation was not the
+> encoding described in the plan.
+> 3. **Four T-ON rows are in the trial file.** `results/ts/study_m_smoke/study_m_smoke_trials.jsonl`
+> holds **274** rows: 270 T-OFF plus **4 T-ON** from the aborted run. The report's "T-ON: not
+> run" is true as a design statement, but any analysis reading the file without filtering on
+> `arm` will include them. (The `StudyM-toff` row in `research/EXPERIMENTS.md` already records
+> the 274/270+4 split.)
+
+
 **Date:** 2026-10-01  
 **Status:** COMPLETE — FLOOR CLAUSE FIRES → NO-GO  
 **Pre-registered rule:** `research/EXPERIMENTS.md` row StudyM  

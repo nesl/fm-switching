@@ -240,6 +240,12 @@ Existing JSONs written before this convention was adopted carry `"git_commit": "
 
 ---
 
+## Citing results
+
+- **Before citing any result, check its status in `research/EXPERIMENTS.md`.**
+- **Never cite or recompute from a result marked INVALID.**
+- **Comparisons between arms must state whether input, stack and decoding match.**
+
 ## Git rules (read-only from CC)
 
 - CC may run read-only git commands: `git rev-parse HEAD`, `git log`, `git status`, `git diff`.
