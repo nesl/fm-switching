@@ -1,0 +1,2855 @@
+{
+ "study": "StudyD0-nexar (with DoTA metadata-only)",
+ "at": "2026-11-04T11:22:33.012023",
+ "expected_vs_observed": [
+  {
+   "check": "nexar rows (all splits)",
+   "expected": "2.84k",
+   "observed": 2844
+  },
+  {
+   "check": "nexar train videos",
+   "expected": 1500,
+   "observed": 1500
+  },
+  {
+   "check": "nexar train positive / negative",
+   "expected": "750 / 750",
+   "observed": "750 / 750"
+  },
+  {
+   "check": "nexar collision / near-collision",
+   "expected": "400 / 350",
+   "observed": "absent: no metadata column distinguishes collision from near-collision"
+  },
+  {
+   "check": "nexar resolution",
+   "expected": "1280x720",
+   "observed": {
+    "1280x720": 1500
+   }
+  },
+  {
+   "check": "nexar fps",
+   "expected": "~30",
+   "observed": {
+    "30.0": 892,
+    "30.6": 256,
+    "29.9": 103,
+    "30.5": 86,
+    "29.8": 22,
+    "29.2": 15,
+    "29.7": 11,
+    "29.3": 11
+   }
+  },
+  {
+   "check": "nexar duration (train)",
+   "expected": "~40 s, bimodal",
+   "observed": {
+    "min": 14.0,
+    "p5": 18.0,
+    "p50": 40.131,
+    "max": 60.0
+   }
+  },
+  {
+   "check": "event - alert mean (train pos)",
+   "expected": 1.6,
+   "observed": 1.6004
+  },
+  {
+   "check": "event - alert max (train pos)",
+   "expected": 4.5,
+   "observed": 4.466
+  },
+  {
+   "check": "frac train pos >= 1 s after event",
+   "expected": null,
+   "observed": 1.0
+  },
+  {
+   "check": "frac train pos >= 2 s after event",
+   "expected": null,
+   "observed": 1.0
+  },
+  {
+   "check": "frac train pos >= 3 s before alert",
+   "expected": null,
+   "observed": 0.9986666666666667
+  },
+  {
+   "check": "nexar corrupt / unreadable",
+   "expected": 0,
+   "observed": 0
+  },
+  {
+   "check": "dota metadata_train / val",
+   "expected": "3275 / 1402",
+   "observed": "3275 / 1402"
+  },
+  {
+   "check": "dota sum num_frames",
+   "expected": 477650,
+   "observed": 477650
+  },
+  {
+   "check": "dota frames on disk",
+   "expected": "477,650 or 731,932",
+   "observed": "UNAVAILABLE (Drive 404)"
+  },
+  {
+   "check": "dota ego5 clips",
+   "expected": 2261,
+   "observed": 2261
+  }
+ ],
+ "nexar": {
+  "data_dir": "/home/pragya/data/dashcam/nexar/hf",
+  "at": "2026-11-04T11:16:05.510709",
+  "layout": {
+   "top_level": [
+    ".gitattributes",
+    "LICENSE",
+    "README.md",
+    "evaluate_submission.py",
+    "sample_submission.csv",
+    "solution.csv",
+    "test-private",
+    "test-public",
+    "time_to_accident_test_map.csv",
+    "train"
+   ],
+   "n_files": 2857,
+   "total_bytes": 31379033414,
+   "by_dir": {
+    "train/positive": {
+     "mp4": 750,
+     "other": [
+      "metadata.csv"
+     ]
+    },
+    "train/negative": {
+     "mp4": 750,
+     "other": [
+      "metadata.csv"
+     ]
+    },
+    "test-public/positive": {
+     "mp4": 334,
+     "other": [
+      "metadata.csv"
+     ]
+    },
+    "test-public/negative": {
+     "mp4": 333,
+     "other": [
+      "metadata.csv"
+     ]
+    },
+    "test-private/positive": {
+     "mp4": 338,
+     "other": [
+      "metadata.csv"
+     ]
+    },
+    "test-private/negative": {
+     "mp4": 339,
+     "other": [
+      "metadata.csv"
+     ]
+    }
+   }
+  },
+  "metadata_columns": {
+   "train/positive": [
+    "file_name",
+    "time_of_event",
+    "time_of_alert",
+    "light_conditions",
+    "weather",
+    "scene",
+    "time_to_accident"
+   ],
+   "train/negative": [
+    "file_name",
+    "time_of_event",
+    "time_of_alert",
+    "light_conditions",
+    "weather",
+    "scene",
+    "time_to_accident"
+   ],
+   "test-public/positive": [
+    "file_name",
+    "time_of_event",
+    "time_of_alert",
+    "light_conditions",
+    "weather",
+    "scene",
+    "time_to_accident"
+   ],
+   "test-public/negative": [
+    "file_name",
+    "time_of_event",
+    "time_of_alert",
+    "light_conditions",
+    "weather",
+    "scene",
+    "time_to_accident"
+   ],
+   "test-private/positive": [
+    "file_name",
+    "time_of_event",
+    "time_of_alert",
+    "light_conditions",
+    "weather",
+    "scene",
+    "time_to_accident"
+   ],
+   "test-private/negative": [
+    "file_name",
+    "time_of_event",
+    "time_of_alert",
+    "light_conditions",
+    "weather",
+    "scene",
+    "time_to_accident"
+   ]
+  },
+  "per_split": {
+   "train/positive": {
+    "rows": 750,
+    "mp4_files": 750,
+    "rows_without_file": [],
+    "n_rows_without_file": 0,
+    "files_without_row": [],
+    "n_files_without_row": 0,
+    "duplicate_rows": 0,
+    "missing": {
+     "file_name": 0,
+     "time_of_event": 0,
+     "time_of_alert": 0,
+     "light_conditions": 0,
+     "weather": 1,
+     "scene": 0,
+     "time_to_accident": 750
+    },
+    "light": {
+     "Normal": 680,
+     "Bright": 7,
+     "Dark": 22,
+     "Twilight": 41
+    },
+    "weather": {
+     "Cloudy": 243,
+     "Clear": 445,
+     "Rain": 60,
+     "": 1,
+     "Snow": 1
+    },
+    "scene": {
+     "Urban": 475,
+     "Sub-urban": 75,
+     "Highway": 171,
+     "Other": 22,
+     "Rural": 3,
+     "Industrial": 3,
+     "Nature": 1
+    },
+    "time_to_accident": {
+     "": 750
+    }
+   },
+   "train/negative": {
+    "rows": 750,
+    "mp4_files": 750,
+    "rows_without_file": [],
+    "n_rows_without_file": 0,
+    "files_without_row": [],
+    "n_files_without_row": 0,
+    "duplicate_rows": 0,
+    "missing": {
+     "file_name": 0,
+     "time_of_event": 750,
+     "time_of_alert": 750,
+     "light_conditions": 0,
+     "weather": 1,
+     "scene": 0,
+     "time_to_accident": 750
+    },
+    "light": {
+     "Normal": 675,
+     "Twilight": 47,
+     "Dark": 25,
+     "Bright": 3
+    },
+    "weather": {
+     "Clear": 474,
+     "Rain": 23,
+     "Cloudy": 252,
+     "": 1
+    },
+    "scene": {
+     "Sub-urban": 196,
+     "Urban": 309,
+     "Highway": 208,
+     "Rural": 15,
+     "Other": 12,
+     "Industrial": 10
+    },
+    "time_to_accident": {
+     "": 750
+    }
+   },
+   "test-public/positive": {
+    "rows": 334,
+    "mp4_files": 334,
+    "rows_without_file": [],
+    "n_rows_without_file": 0,
+    "files_without_row": [],
+    "n_files_without_row": 0,
+    "duplicate_rows": 0,
+    "missing": {
+     "file_name": 0,
+     "time_of_event": 0,
+     "time_of_alert": 0,
+     "light_conditions": 0,
+     "weather": 0,
+     "scene": 0,
+     "time_to_accident": 0
+    },
+    "light": {
+     "Normal": 308,
+     "Twilight": 18,
+     "Dark": 5,
+     "Bright": 3
+    },
+    "weather": {
+     "Clear": 234,
+     "Rain": 21,
+     "Cloudy": 79
+    },
+    "scene": {
+     "Urban": 178,
+     "Highway": 98,
+     "Other": 11,
+     "Sub-urban": 34,
+     "Rural": 10,
+     "Industrial": 3
+    },
+    "time_to_accident": {
+     "0.500": 142,
+     "1.000": 115,
+     "1.500": 77
+    }
+   },
+   "test-public/negative": {
+    "rows": 333,
+    "mp4_files": 333,
+    "rows_without_file": [],
+    "n_rows_without_file": 0,
+    "files_without_row": [],
+    "n_files_without_row": 0,
+    "duplicate_rows": 0,
+    "missing": {
+     "file_name": 0,
+     "time_of_event": 333,
+     "time_of_alert": 333,
+     "light_conditions": 0,
+     "weather": 0,
+     "scene": 0,
+     "time_to_accident": 0
+    },
+    "light": {
+     "Normal": 300,
+     "Dark": 16,
+     "Twilight": 17
+    },
+    "weather": {
+     "Cloudy": 98,
+     "Clear": 224,
+     "Rain": 11
+    },
+    "scene": {
+     "Urban": 137,
+     "Sub-urban": 84,
+     "Highway": 85,
+     "Other": 12,
+     "Rural": 6,
+     "Industrial": 9
+    },
+    "time_to_accident": {
+     "0.500": 142,
+     "1.000": 116,
+     "1.500": 75
+    }
+   },
+   "test-private/positive": {
+    "rows": 338,
+    "mp4_files": 338,
+    "rows_without_file": [],
+    "n_rows_without_file": 0,
+    "files_without_row": [],
+    "n_files_without_row": 0,
+    "duplicate_rows": 0,
+    "missing": {
+     "file_name": 0,
+     "time_of_event": 0,
+     "time_of_alert": 0,
+     "light_conditions": 0,
+     "weather": 0,
+     "scene": 0,
+     "time_to_accident": 0
+    },
+    "light": {
+     "Normal": 317,
+     "Bright": 5,
+     "Twilight": 15,
+     "Dark": 1
+    },
+    "weather": {
+     "Clear": 214,
+     "Cloudy": 101,
+     "Rain": 23
+    },
+    "scene": {
+     "Highway": 62,
+     "Urban": 219,
+     "Rural": 10,
+     "Sub-urban": 44,
+     "Other": 3
+    },
+    "time_to_accident": {
+     "0.500": 142,
+     "1.000": 117,
+     "1.500": 79
+    }
+   },
+   "test-private/negative": {
+    "rows": 339,
+    "mp4_files": 339,
+    "rows_without_file": [],
+    "n_rows_without_file": 0,
+    "files_without_row": [],
+    "n_files_without_row": 0,
+    "duplicate_rows": 0,
+    "missing": {
+     "file_name": 0,
+     "time_of_event": 339,
+     "time_of_alert": 339,
+     "light_conditions": 0,
+     "weather": 0,
+     "scene": 0,
+     "time_to_accident": 0
+    },
+    "light": {
+     "Normal": 320,
+     "Dark": 4,
+     "Twilight": 15
+    },
+    "weather": {
+     "Clear": 201,
+     "Cloudy": 121,
+     "Rain": 14,
+     "Fog": 3
+    },
+    "scene": {
+     "Urban": 156,
+     "Highway": 99,
+     "Sub-urban": 65,
+     "Rural": 6,
+     "Industrial": 2,
+     "Other": 11
+    },
+    "time_to_accident": {
+     "0.500": 142,
+     "1.000": 116,
+     "1.500": 81
+    }
+   }
+  },
+  "rows_total": 2844,
+  "videos_total": 2844,
+  "extra_columns_beyond_card": [],
+  "sha256_manifest": "results/data_check/nexar_sha256_manifest.txt",
+  "hf_snapshot_note": "local_dir download (hf download --local-dir); per-file commit hashes in .cache metadata",
+  "hf_commit_from_cache_metadata": "7535d0656dac31d7da2846913bb69c6331d2a70a",
+  "corrupt_or_unreadable": {
+   "n": 0,
+   "n_videos": 2844,
+   "frac": 0.0,
+   "items": []
+  },
+  "video_props": {
+   "train/positive": {
+    "duration_s": {
+     "n": 750,
+     "min": 14.0,
+     "p5": 18.0,
+     "p25": 39.734,
+     "p50": 40.134,
+     "p75": 40.36175,
+     "p95": 41.036849999999994,
+     "max": 60.0,
+     "mean": 38.37764000000001,
+     "sd": 6.166577252231877
+    },
+    "duration_hist_2s": {
+     "0-2": 0,
+     "2-4": 0,
+     "4-6": 0,
+     "6-8": 0,
+     "8-10": 0,
+     "10-12": 0,
+     "12-14": 0,
+     "14-16": 1,
+     "16-18": 0,
+     "18-20": 59,
+     "20-22": 0,
+     "22-24": 0,
+     "24-26": 1,
+     "26-28": 0,
+     "28-30": 0,
+     "30-32": 4,
+     "32-34": 2,
+     "34-36": 3,
+     "36-38": 7,
+     "38-40": 148,
+     "40-42": 505,
+     "42-44": 14,
+     "44-46": 3,
+     "46-48": 0,
+     "48-50": 1,
+     "50-52": 0,
+     "52-54": 0,
+     "54-56": 0,
+     "56-58": 0,
+     "58-60": 0,
+     "60-62": 2,
+     "62-64": 0
+    },
+    "avg_fps": {
+     "30.0": 450,
+     "30.6": 132,
+     "29.9": 50,
+     "30.5": 40,
+     "31.0": 10,
+     "29.8": 10,
+     "30.4": 9,
+     "29.2": 7
+    },
+    "r_fps": {
+     "30.0": 450,
+     "30.6": 132,
+     "29.9": 50,
+     "30.5": 40,
+     "31.0": 10,
+     "29.8": 10,
+     "30.4": 9,
+     "29.2": 7
+    },
+    "resolution": {
+     "1280x720": 750
+    },
+    "codec": {
+     "h264": 750
+    },
+    "pix_fmt": {
+     "yuv420p": 750
+    },
+    "audio_streams": {
+     "0": 750
+    }
+   },
+   "train/negative": {
+    "duration_s": {
+     "n": 750,
+     "min": 15.0,
+     "p5": 18.0,
+     "p25": 39.334,
+     "p50": 40.1,
+     "p75": 40.3365,
+     "p95": 41.0205,
+     "max": 60.0,
+     "mean": 37.10564,
+     "sd": 7.810974670560573
+    },
+    "duration_hist_2s": {
+     "0-2": 0,
+     "2-4": 0,
+     "4-6": 0,
+     "6-8": 0,
+     "8-10": 0,
+     "10-12": 0,
+     "12-14": 0,
+     "14-16": 1,
+     "16-18": 0,
+     "18-20": 104,
+     "20-22": 0,
+     "22-24": 0,
+     "24-26": 0,
+     "26-28": 0,
+     "28-30": 0,
+     "30-32": 2,
+     "32-34": 2,
+     "34-36": 4,
+     "36-38": 9,
+     "38-40": 153,
+     "40-42": 453,
+     "42-44": 5,
+     "44-46": 10,
+     "46-48": 2,
+     "48-50": 3,
+     "50-52": 0,
+     "52-54": 0,
+     "54-56": 0,
+     "56-58": 0,
+     "58-60": 0,
+     "60-62": 2,
+     "62-64": 0
+    },
+    "avg_fps": {
+     "30.0": 442,
+     "30.6": 124,
+     "29.9": 53,
+     "30.5": 46,
+     "29.8": 12,
+     "29.2": 8,
+     "29.6": 7,
+     "28.9": 7
+    },
+    "r_fps": {
+     "30.0": 442,
+     "30.6": 124,
+     "29.9": 53,
+     "30.5": 46,
+     "29.8": 12,
+     "29.2": 8,
+     "29.6": 7,
+     "28.9": 7
+    },
+    "resolution": {
+     "1280x720": 750
+    },
+    "codec": {
+     "h264": 750
+    },
+    "pix_fmt": {
+     "yuv420p": 750
+    },
+    "audio_streams": {
+     "0": 750
+    }
+   },
+   "test-public/positive": {
+    "duration_s": {
+     "n": 334,
+     "min": 8.134,
+     "p5": 9.3561,
+     "p25": 9.7,
+     "p50": 9.967,
+     "p75": 10.19925,
+     "p95": 10.554,
+     "max": 10.904,
+     "mean": 9.94269760479042,
+     "sd": 0.3947780326579999
+    },
+    "duration_hist_2s": {
+     "0-2": 0,
+     "2-4": 0,
+     "4-6": 0,
+     "6-8": 0,
+     "8-10": 179,
+     "10-12": 155,
+     "12-14": 0,
+     "14-16": 0,
+     "16-18": 0,
+     "18-20": 0,
+     "20-22": 0,
+     "22-24": 0,
+     "24-26": 0,
+     "26-28": 0,
+     "28-30": 0,
+     "30-32": 0,
+     "32-34": 0,
+     "34-36": 0,
+     "36-38": 0,
+     "38-40": 0,
+     "40-42": 0,
+     "42-44": 0,
+     "44-46": 0,
+     "46-48": 0,
+     "48-50": 0,
+     "50-52": 0,
+     "52-54": 0,
+     "54-56": 0,
+     "56-58": 0,
+     "58-60": 0,
+     "60-62": 0,
+     "62-64": 0
+    },
+    "avg_fps": {
+     "30.0": 184,
+     "30.6": 52,
+     "29.9": 29,
+     "30.5": 22,
+     "29.7": 7,
+     "29.3": 7,
+     "28.0": 6,
+     "29.8": 5
+    },
+    "r_fps": {
+     "30.0": 184,
+     "30.6": 52,
+     "29.9": 29,
+     "30.5": 22,
+     "29.7": 7,
+     "29.3": 7,
+     "28.0": 6,
+     "29.8": 5
+    },
+    "resolution": {
+     "1280x720": 334
+    },
+    "codec": {
+     "h264": 334
+    },
+    "pix_fmt": {
+     "yuv420p": 334
+    },
+    "audio_streams": {
+     "0": 334
+    }
+   },
+   "test-public/negative": {
+    "duration_s": {
+     "n": 333,
+     "min": 7.334,
+     "p5": 8.0,
+     "p25": 9.634,
+     "p50": 9.9,
+     "p75": 10.167,
+     "p95": 10.467,
+     "max": 11.334,
+     "mean": 9.72134834834835,
+     "sd": 0.7320984272647969
+    },
+    "duration_hist_2s": {
+     "0-2": 0,
+     "2-4": 0,
+     "4-6": 0,
+     "6-8": 15,
+     "8-10": 185,
+     "10-12": 133,
+     "12-14": 0,
+     "14-16": 0,
+     "16-18": 0,
+     "18-20": 0,
+     "20-22": 0,
+     "22-24": 0,
+     "24-26": 0,
+     "26-28": 0,
+     "28-30": 0,
+     "30-32": 0,
+     "32-34": 0,
+     "34-36": 0,
+     "36-38": 0,
+     "38-40": 0,
+     "40-42": 0,
+     "42-44": 0,
+     "44-46": 0,
+     "46-48": 0,
+     "48-50": 0,
+     "50-52": 0,
+     "52-54": 0,
+     "54-56": 0,
+     "56-58": 0,
+     "58-60": 0,
+     "60-62": 0,
+     "62-64": 0
+    },
+    "avg_fps": {
+     "30.0": 227,
+     "30.6": 29,
+     "29.9": 23,
+     "30.5": 21,
+     "29.4": 11,
+     "29.2": 9,
+     "30.4": 3,
+     "29.6": 3
+    },
+    "r_fps": {
+     "30.0": 227,
+     "30.6": 29,
+     "29.9": 23,
+     "30.5": 21,
+     "29.4": 11,
+     "29.2": 9,
+     "30.4": 3,
+     "29.6": 3
+    },
+    "resolution": {
+     "1280x720": 333
+    },
+    "codec": {
+     "h264": 333
+    },
+    "pix_fmt": {
+     "yuv420p": 333
+    },
+    "audio_streams": {
+     "0": 333
+    }
+   },
+   "test-private/positive": {
+    "duration_s": {
+     "n": 338,
+     "min": 8.567,
+     "p5": 9.49265,
+     "p25": 9.76825,
+     "p50": 10.0,
+     "p75": 10.234,
+     "p95": 10.5699,
+     "max": 11.0,
+     "mean": 10.003508875739646,
+     "sd": 0.34760620336996895
+    },
+    "duration_hist_2s": {
+     "0-2": 0,
+     "2-4": 0,
+     "4-6": 0,
+     "6-8": 0,
+     "8-10": 165,
+     "10-12": 173,
+     "12-14": 0,
+     "14-16": 0,
+     "16-18": 0,
+     "18-20": 0,
+     "20-22": 0,
+     "22-24": 0,
+     "24-26": 0,
+     "26-28": 0,
+     "28-30": 0,
+     "30-32": 0,
+     "32-34": 0,
+     "34-36": 0,
+     "36-38": 0,
+     "38-40": 0,
+     "40-42": 0,
+     "42-44": 0,
+     "44-46": 0,
+     "46-48": 0,
+     "48-50": 0,
+     "50-52": 0,
+     "52-54": 0,
+     "54-56": 0,
+     "56-58": 0,
+     "58-60": 0,
+     "60-62": 0,
+     "62-64": 0
+    },
+    "avg_fps": {
+     "30.0": 173,
+     "30.6": 52,
+     "29.9": 31,
+     "30.5": 13,
+     "29.8": 10,
+     "29.1": 6,
+     "30.4": 6,
+     "30.3": 6
+    },
+    "r_fps": {
+     "30.0": 173,
+     "30.6": 52,
+     "29.9": 31,
+     "30.5": 13,
+     "29.8": 10,
+     "29.1": 6,
+     "30.4": 6,
+     "30.3": 6
+    },
+    "resolution": {
+     "1280x720": 338
+    },
+    "codec": {
+     "h264": 338
+    },
+    "pix_fmt": {
+     "yuv420p": 338
+    },
+    "audio_streams": {
+     "0": 338
+    }
+   },
+   "test-private/negative": {
+    "duration_s": {
+     "n": 339,
+     "min": 6.567,
+     "p5": 8.130600000000001,
+     "p25": 9.7335,
+     "p50": 9.967,
+     "p75": 10.167,
+     "p95": 10.5023,
+     "max": 10.785,
+     "mean": 9.818330383480825,
+     "sd": 0.6488831164453586
+    },
+    "duration_hist_2s": {
+     "0-2": 0,
+     "2-4": 0,
+     "4-6": 0,
+     "6-8": 9,
+     "8-10": 166,
+     "10-12": 164,
+     "12-14": 0,
+     "14-16": 0,
+     "16-18": 0,
+     "18-20": 0,
+     "20-22": 0,
+     "22-24": 0,
+     "24-26": 0,
+     "26-28": 0,
+     "28-30": 0,
+     "30-32": 0,
+     "32-34": 0,
+     "34-36": 0,
+     "36-38": 0,
+     "38-40": 0,
+     "40-42": 0,
+     "42-44": 0,
+     "44-46": 0,
+     "46-48": 0,
+     "48-50": 0,
+     "50-52": 0,
+     "52-54": 0,
+     "54-56": 0,
+     "56-58": 0,
+     "58-60": 0,
+     "60-62": 0,
+     "62-64": 0
+    },
+    "avg_fps": {
+     "30.0": 216,
+     "30.6": 56,
+     "29.9": 21,
+     "30.5": 18,
+     "29.7": 4,
+     "29.5": 4,
+     "26.8": 3,
+     "28.7": 3
+    },
+    "r_fps": {
+     "30.0": 216,
+     "30.6": 56,
+     "29.9": 21,
+     "30.5": 18,
+     "29.7": 4,
+     "29.5": 4,
+     "26.8": 3,
+     "28.7": 3
+    },
+    "resolution": {
+     "1280x720": 339
+    },
+    "codec": {
+     "h264": 339
+    },
+    "pix_fmt": {
+     "yuv420p": 339
+    },
+    "audio_streams": {
+     "0": 339
+    }
+   },
+   "train_all": {
+    "duration_s": {
+     "n": 1500,
+     "min": 14.0,
+     "p5": 18.0,
+     "p25": 39.560249999999996,
+     "p50": 40.131,
+     "p75": 40.36,
+     "p95": 41.03565,
+     "max": 60.0,
+     "mean": 37.74164,
+     "sd": 7.063337122772773
+    },
+    "duration_hist_2s": {
+     "0-2": 0,
+     "2-4": 0,
+     "4-6": 0,
+     "6-8": 0,
+     "8-10": 0,
+     "10-12": 0,
+     "12-14": 0,
+     "14-16": 2,
+     "16-18": 0,
+     "18-20": 163,
+     "20-22": 0,
+     "22-24": 0,
+     "24-26": 1,
+     "26-28": 0,
+     "28-30": 0,
+     "30-32": 6,
+     "32-34": 4,
+     "34-36": 7,
+     "36-38": 16,
+     "38-40": 301,
+     "40-42": 958,
+     "42-44": 19,
+     "44-46": 13,
+     "46-48": 2,
+     "48-50": 4,
+     "50-52": 0,
+     "52-54": 0,
+     "54-56": 0,
+     "56-58": 0,
+     "58-60": 0,
+     "60-62": 4,
+     "62-64": 0
+    },
+    "avg_fps": {
+     "30.0": 892,
+     "30.6": 256,
+     "29.9": 103,
+     "30.5": 86,
+     "29.8": 22,
+     "29.2": 15,
+     "29.7": 11,
+     "29.3": 11
+    },
+    "r_fps": {
+     "30.0": 892,
+     "30.6": 256,
+     "29.9": 103,
+     "30.5": 86,
+     "29.8": 22,
+     "29.2": 15,
+     "29.7": 11,
+     "29.3": 11
+    },
+    "resolution": {
+     "1280x720": 1500
+    },
+    "codec": {
+     "h264": 1500
+    },
+    "pix_fmt": {
+     "yuv420p": 1500
+    },
+    "audio_streams": {
+     "0": 1500
+    }
+   }
+  },
+  "timing": {
+   "train/positive": {
+    "n": 750,
+    "has_time_of_event": 750,
+    "has_time_of_alert": 750,
+    "time_of_event": {
+     "n": 750,
+     "min": 3.032,
+     "p5": 10.1108,
+     "p25": 19.133,
+     "p50": 19.802,
+     "p75": 20.333,
+     "p95": 21.38515,
+     "max": 56.8,
+     "mean": 19.101628,
+     "sd": 3.5651196818728867
+    },
+    "time_of_alert": {
+     "n": 750,
+     "min": 1.966,
+     "p5": 8.53135,
+     "p25": 17.29,
+     "p50": 18.259,
+     "p75": 18.9775,
+     "p95": 20.067,
+     "max": 55.467,
+     "mean": 17.50127066666667,
+     "sd": 3.6589751890365245
+    },
+    "event_minus_alert": {
+     "n": 750,
+     "min": 0.0329999999999977,
+     "p5": 0.4004500000000011,
+     "p25": 0.9862499999999996,
+     "p50": 1.4329999999999998,
+     "p75": 2.0894999999999992,
+     "p95": 3.283049999999999,
+     "max": 4.466000000000001,
+     "mean": 1.6003573333333334,
+     "sd": 0.8660634357901499
+    },
+    "n_alert_after_event": 0,
+    "n_alert_equals_event": 0,
+    "footage_after_event": {
+     "n": 750,
+     "min": 3.200000000000003,
+     "p5": 8.53545,
+     "p25": 19.566999999999997,
+     "p50": 20.200000000000003,
+     "p75": 20.78,
+     "p95": 21.667,
+     "max": 36.439,
+     "mean": 19.276012,
+     "sd": 3.6105730748864224
+    },
+    "frac_after_event_ge_1s": 1.0,
+    "frac_after_event_ge_2s": 1.0,
+    "n_event_beyond_duration": 0,
+    "footage_before_alert": {
+     "n": 750,
+     "min": 1.966,
+     "p5": 8.53135,
+     "p25": 17.29,
+     "p50": 18.259,
+     "p75": 18.9775,
+     "p95": 20.067,
+     "max": 55.467,
+     "mean": 17.50127066666667,
+     "sd": 3.6589751890365245
+    },
+    "frac_before_alert_ge_3s": 0.9986666666666667,
+    "frac_before_event_ge_4s": 0.9973333333333333
+   },
+   "train/negative": {
+    "n": 750,
+    "has_time_of_event": 0,
+    "has_time_of_alert": 0
+   },
+   "test-public/positive": {
+    "n": 334,
+    "has_time_of_event": 334,
+    "has_time_of_alert": 334,
+    "time_of_event": {
+     "n": 334,
+     "min": 9.628,
+     "p5": 14.147,
+     "p25": 19.4,
+     "p50": 20.0,
+     "p75": 20.5375,
+     "p95": 21.823,
+     "max": 26.852,
+     "mean": 19.640458083832335,
+     "sd": 2.4049046386625355
+    },
+    "time_of_alert": {
+     "n": 334,
+     "min": 7.928,
+     "p5": 12.175,
+     "p25": 17.233,
+     "p50": 18.049500000000002,
+     "p75": 18.88275,
+     "p95": 19.822599999999998,
+     "max": 24.827,
+     "mean": 17.711907185628743,
+     "sd": 2.48231290003939
+    },
+    "event_minus_alert": {
+     "n": 334,
+     "min": 0.03300000000000125,
+     "p5": 0.7298000000000003,
+     "p25": 1.3329999999999984,
+     "p50": 1.8329999999999984,
+     "p75": 2.3504999999999985,
+     "p95": 3.5279999999999987,
+     "max": 4.299999999999999,
+     "mean": 1.9285508982035928,
+     "sd": 0.8456164775661145
+    },
+    "n_alert_after_event": 0,
+    "n_alert_equals_event": 0,
+    "footage_after_event": {
+     "n": 334,
+     "min": -16.950000000000003,
+     "p5": -11.910899999999998,
+     "p25": -10.611,
+     "p50": -10.021,
+     "p75": -9.403749999999999,
+     "p95": -4.8950000000000236,
+     "max": -0.4919999999999991,
+     "mean": -9.697760479041916,
+     "sd": 2.302255743835814
+    },
+    "frac_after_event_ge_1s": 0.0,
+    "frac_after_event_ge_2s": 0.0,
+    "n_event_beyond_duration": 334,
+    "footage_before_alert": {
+     "n": 334,
+     "min": 7.928,
+     "p5": 12.175,
+     "p25": 17.233,
+     "p50": 18.049500000000002,
+     "p75": 18.88275,
+     "p95": 19.822599999999998,
+     "max": 24.827,
+     "mean": 17.711907185628743,
+     "sd": 2.48231290003939
+    },
+    "frac_before_alert_ge_3s": 1.0,
+    "frac_before_event_ge_4s": 1.0
+   },
+   "test-public/negative": {
+    "n": 333,
+    "has_time_of_event": 0,
+    "has_time_of_alert": 0
+   },
+   "test-private/positive": {
+    "n": 338,
+    "has_time_of_event": 338,
+    "has_time_of_alert": 338,
+    "time_of_event": {
+     "n": 338,
+     "min": 9.558,
+     "p5": 18.11975,
+     "p25": 19.467,
+     "p50": 20.0155,
+     "p75": 20.5,
+     "p95": 21.9656,
+     "max": 35.214,
+     "mean": 20.129139053254438,
+     "sd": 2.257118615953133
+    },
+    "time_of_alert": {
+     "n": 338,
+     "min": 8.526,
+     "p5": 15.83425,
+     "p25": 17.433,
+     "p50": 18.367,
+     "p75": 19.00875,
+     "p95": 20.033,
+     "max": 30.833,
+     "mean": 18.238979289940826,
+     "sd": 2.257427372212916
+    },
+    "event_minus_alert": {
+     "n": 338,
+     "min": 0.0329999999999977,
+     "p5": 0.7508500000000012,
+     "p25": 1.3925,
+     "p50": 1.6999999999999993,
+     "p75": 2.3039999999999985,
+     "p95": 3.7330000000000005,
+     "max": 4.381,
+     "mean": 1.8901597633136096,
+     "sd": 0.838758042893562
+    },
+    "n_alert_after_event": 0,
+    "n_alert_equals_event": 0,
+    "footage_after_event": {
+     "n": 338,
+     "min": -25.72,
+     "p5": -12.012450000000001,
+     "p25": -10.600000000000001,
+     "p50": -10.041,
+     "p75": -9.36625,
+     "p95": -8.0877,
+     "max": -0.49099999999999966,
+     "mean": -10.125630177514791,
+     "sd": 2.26455500556097
+    },
+    "frac_after_event_ge_1s": 0.0,
+    "frac_after_event_ge_2s": 0.0,
+    "n_event_beyond_duration": 338,
+    "footage_before_alert": {
+     "n": 338,
+     "min": 8.526,
+     "p5": 15.83425,
+     "p25": 17.433,
+     "p50": 18.367,
+     "p75": 19.00875,
+     "p95": 20.033,
+     "max": 30.833,
+     "mean": 18.238979289940826,
+     "sd": 2.257427372212916
+    },
+    "frac_before_alert_ge_3s": 1.0,
+    "frac_before_event_ge_4s": 1.0
+   },
+   "test-private/negative": {
+    "n": 339,
+    "has_time_of_event": 0,
+    "has_time_of_alert": 0
+   }
+  },
+  "test_clip_timebase": {
+   "test-public": {
+    "event_minus_duration_minus_tta": {
+     "n": 334,
+     "min": -0.008000000000000895,
+     "p5": 4.220000000000003,
+     "p25": 8.4195,
+     "p50": 9.083,
+     "p75": 9.76325,
+     "p95": 11.201349999999996,
+     "max": 15.950000000000003,
+     "mean": 8.795065868263473,
+     "sd": 2.3287897761442893
+    },
+    "duration": {
+     "n": 334,
+     "min": 8.134,
+     "p5": 9.3561,
+     "p25": 9.7,
+     "p50": 9.967,
+     "p75": 10.19925,
+     "p95": 10.554,
+     "max": 10.904,
+     "mean": 9.94269760479042,
+     "sd": 0.3947780326579999
+    }
+   },
+   "test-private": {
+    "event_minus_duration_minus_tta": {
+     "n": 338,
+     "min": -0.009000000000000341,
+     "p5": 7.06235,
+     "p25": 8.4805,
+     "p50": 9.133500000000002,
+     "p75": 9.73825,
+     "p95": 11.131999999999998,
+     "max": 25.22,
+     "mean": 9.218825443786981,
+     "sd": 2.285981797724718
+    },
+    "duration": {
+     "n": 338,
+     "min": 8.567,
+     "p5": 9.49265,
+     "p25": 9.76825,
+     "p50": 10.0,
+     "p75": 10.234,
+     "p95": 10.5699,
+     "max": 11.0,
+     "mean": 10.003508875739646,
+     "sd": 0.34760620336996895
+    }
+   }
+  },
+  "negatives": {
+   "train/negative": {
+    "rows": 750,
+    "time_of_event_present": 0,
+    "time_of_alert_present": 0,
+    "time_to_accident": {
+     "": 750
+    }
+   },
+   "test-public/negative": {
+    "rows": 333,
+    "time_of_event_present": 0,
+    "time_of_alert_present": 0,
+    "time_to_accident": {
+     "0.500": 142,
+     "1.000": 116,
+     "1.500": 75
+    }
+   },
+   "test-private/negative": {
+    "rows": 339,
+    "time_of_event_present": 0,
+    "time_of_alert_present": 0,
+    "time_to_accident": {
+     "0.500": 142,
+     "1.000": 116,
+     "1.500": 81
+    }
+   }
+  },
+  "collision_type_field": "absent: no metadata column distinguishes collision from near-collision"
+ },
+ "dota": {
+  "source": "github.com/MoonBlvd/Detection-of-Traffic-Anomaly",
+  "repo_commit": "f8f603b8c06a946bc314752947ed480a4f33f82a",
+  "file_sha256": {
+   "metadata_train.json": "1d8a7a6b90a15992a962a3cdf0c24cec2b88e2add6829581aae604c3f599b5d1",
+   "metadata_val.json": "306ccc896ef6cc8a7c59ffe6dd668880153a7ee0b055c675f21c544c57748ea4",
+   "DoTA_annotations.zip": "56209f87398cbf47b9eeee4b516461e71cd3f97f9dd8c4432773315db307ff15"
+  },
+  "frames_on_disk": "UNAVAILABLE \u2014 full archive (Drive file 1RQp4hOP9X7TW6S3_vbqZvFSkrbbFzrRj) and split-archive folder (1_WzhwZC2NIpzZIpX7YCvapq66rtBc67n) both returned HTTP 404 to gdown and curl on 2026-11-04",
+  "n_train": 3275,
+  "n_val": 1402,
+  "n_overlap_keys": 0,
+  "sum_num_frames": 477650,
+  "sum_num_frames_train": 334903,
+  "sum_num_frames_val": 142747,
+  "paper_frames": 731932,
+  "n_annotation_jsons": 4677,
+  "metadata_keys_without_annotation": 0,
+  "annotation_vs_metadata_mismatch": 0,
+  "sum_num_frames_annotations": 477650,
+  "sum_label_entries_annotations": 477655,
+  "class_counts": {
+   "ego: turning": 951,
+   "other: turning": 745,
+   "ego: lateral": 478,
+   "ego: moving_ahead_or_waiting": 417,
+   "ego: oncoming": 371,
+   "other: lateral": 248,
+   "other: moving_ahead_or_waiting": 246,
+   "other: leave_to_right": 218,
+   "other: leave_to_left": 191,
+   "ego: leave_to_left": 179,
+   "ego: leave_to_right": 144,
+   "other: oncoming": 107,
+   "other: pedestrian": 56,
+   "other: start_stop_or_stationary": 51,
+   "ego: obstacle": 48,
+   "ego: unknown": 48,
+   "other: obstacle": 47,
+   "ego: pedestrian": 44,
+   "other: unknown": 44,
+   "ego: start_stop_or_stationary": 44
+  },
+  "ego5_classes": [
+   "ego: turning",
+   "ego: lateral",
+   "ego: moving_ahead_or_waiting",
+   "ego: oncoming",
+   "ego: start_stop_or_stationary"
+  ],
+  "ego5_count": 2261,
+  "ego5_by_class": {
+   "ego: turning": 951,
+   "ego: lateral": 478,
+   "ego: moving_ahead_or_waiting": 417,
+   "ego: oncoming": 371,
+   "ego: start_stop_or_stationary": 44
+  },
+  "ego5_pre_onset_s": {
+   "n": 2261,
+   "min": 0.0,
+   "p5": 1.5,
+   "p25": 2.7,
+   "p50": 3.6,
+   "p75": 4.6,
+   "p95": 6.7,
+   "max": 18.2,
+   "mean": 3.8078726227333033
+  },
+  "ego5_frac_pre_ge": {
+   "2": 0.8956214064573198,
+   "3": 0.6797877045555064,
+   "4": 0.40336134453781514,
+   "5": 0.1968155683325962
+  },
+  "ego5_post_onset_s": {
+   "n": 2261,
+   "min": 0.4,
+   "p5": 1.8,
+   "p25": 4.6,
+   "p50": 5.6,
+   "p75": 6.8,
+   "p95": 9.7,
+   "max": 26.0,
+   "mean": 5.785448916408669
+  },
+  "ego5_frac_post_ge": {
+   "2": 0.946483856700575,
+   "4": 0.83812472357364
+  },
+  "ego5_num_frames": {
+   "n": 2261,
+   "min": 26.0,
+   "p5": 56.0,
+   "p25": 79.0,
+   "p50": 94.0,
+   "p75": 109.0,
+   "p95": 142.0,
+   "max": 300.0,
+   "mean": 95.93321539141972
+  },
+  "fps_assumed": 10.0
+ },
+ "contact_sheets": {
+  "seed": 0,
+  "rule": "random.Random(0).sample(sorted train positives, 10) then .sample(sorted train negatives, 5); collision type unavailable in metadata",
+  "purpose": "inspection only; must not select clips",
+  "sheets": [
+   {
+    "file": "results/data_check/contact_sheets/nexar_positive_01_00547.jpg",
+    "clip": "train/positive/00547.mp4",
+    "bytes": 167218,
+    "jpeg_quality": 85,
+    "duration_s": 40.833333,
+    "fps": 30.0,
+    "time_of_event": 19.967,
+    "time_of_alert": 17.8,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": -19.967,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.824,
+      "offset_from_event": -14.143,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 11.648,
+      "offset_from_event": -8.319,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 17.471,
+      "offset_from_event": -2.496,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 23.295,
+      "offset_from_event": 3.328,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 29.119,
+      "offset_from_event": 9.152,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 34.943,
+      "offset_from_event": 14.976,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 40.767,
+      "offset_from_event": 20.8,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 15.967,
+      "offset_from_event": -4.0,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 16.824,
+      "offset_from_event": -3.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 17.681,
+      "offset_from_event": -2.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.538,
+      "offset_from_event": -1.429,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 19.396,
+      "offset_from_event": -0.571,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 20.253,
+      "offset_from_event": 0.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 21.11,
+      "offset_from_event": 1.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 21.967,
+      "offset_from_event": 2.0,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_positive_02_00594.jpg",
+    "clip": "train/positive/00594.mp4",
+    "bytes": 151805,
+    "jpeg_quality": 85,
+    "duration_s": 40.622951,
+    "fps": 30.5,
+    "time_of_event": 19.282,
+    "time_of_alert": 18.269,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": -19.282,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.794,
+      "offset_from_event": -13.488,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 11.588,
+      "offset_from_event": -7.694,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 17.382,
+      "offset_from_event": -1.9,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 23.176,
+      "offset_from_event": 3.894,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 28.97,
+      "offset_from_event": 9.688,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 34.763,
+      "offset_from_event": 15.481,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 40.557,
+      "offset_from_event": 21.275,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 15.282,
+      "offset_from_event": -4.0,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 16.139,
+      "offset_from_event": -3.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 16.996,
+      "offset_from_event": -2.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 17.853,
+      "offset_from_event": -1.429,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.711,
+      "offset_from_event": -0.571,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 19.568,
+      "offset_from_event": 0.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 20.425,
+      "offset_from_event": 1.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 21.282,
+      "offset_from_event": 2.0,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_positive_03_00057.jpg",
+    "clip": "train/positive/00057.mp4",
+    "bytes": 187334,
+    "jpeg_quality": 85,
+    "duration_s": 40.533333,
+    "fps": 30.0,
+    "time_of_event": 20.317,
+    "time_of_alert": 19.133,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": -20.317,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.781,
+      "offset_from_event": -14.536,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 11.562,
+      "offset_from_event": -8.755,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 17.343,
+      "offset_from_event": -2.974,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 23.124,
+      "offset_from_event": 2.807,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 28.905,
+      "offset_from_event": 8.588,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 34.686,
+      "offset_from_event": 14.369,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 40.467,
+      "offset_from_event": 20.15,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 16.317,
+      "offset_from_event": -4.0,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 17.174,
+      "offset_from_event": -3.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.031,
+      "offset_from_event": -2.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.888,
+      "offset_from_event": -1.429,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 19.746,
+      "offset_from_event": -0.571,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 20.603,
+      "offset_from_event": 0.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 21.46,
+      "offset_from_event": 1.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 22.317,
+      "offset_from_event": 2.0,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_positive_04_00364.jpg",
+    "clip": "train/positive/00364.mp4",
+    "bytes": 154459,
+    "jpeg_quality": 85,
+    "duration_s": 40.52459,
+    "fps": 30.5,
+    "time_of_event": 20.427,
+    "time_of_alert": 19.447,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": -20.427,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.78,
+      "offset_from_event": -14.647,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 11.56,
+      "offset_from_event": -8.867,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 17.34,
+      "offset_from_event": -3.087,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 23.119,
+      "offset_from_event": 2.692,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 28.899,
+      "offset_from_event": 8.472,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 34.679,
+      "offset_from_event": 14.252,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 40.459,
+      "offset_from_event": 20.032,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 16.427,
+      "offset_from_event": -4.0,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 17.284,
+      "offset_from_event": -3.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.141,
+      "offset_from_event": -2.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.998,
+      "offset_from_event": -1.429,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 19.856,
+      "offset_from_event": -0.571,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 20.713,
+      "offset_from_event": 0.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 21.57,
+      "offset_from_event": 1.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 22.427,
+      "offset_from_event": 2.0,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_positive_05_00709.jpg",
+    "clip": "train/positive/00709.mp4",
+    "bytes": 165441,
+    "jpeg_quality": 85,
+    "duration_s": 40.033333,
+    "fps": 30.0,
+    "time_of_event": 20.333,
+    "time_of_alert": 18.8,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": -20.333,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.71,
+      "offset_from_event": -14.623,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 11.419,
+      "offset_from_event": -8.914,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 17.129,
+      "offset_from_event": -3.204,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 22.838,
+      "offset_from_event": 2.505,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 28.548,
+      "offset_from_event": 8.215,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 34.257,
+      "offset_from_event": 13.924,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 39.967,
+      "offset_from_event": 19.634,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 16.333,
+      "offset_from_event": -4.0,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 17.19,
+      "offset_from_event": -3.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.047,
+      "offset_from_event": -2.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.904,
+      "offset_from_event": -1.429,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 19.762,
+      "offset_from_event": -0.571,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 20.619,
+      "offset_from_event": 0.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 21.476,
+      "offset_from_event": 1.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 22.333,
+      "offset_from_event": 2.0,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_positive_06_00675.jpg",
+    "clip": "train/positive/00675.mp4",
+    "bytes": 129481,
+    "jpeg_quality": 85,
+    "duration_s": 40.566667,
+    "fps": 30.0,
+    "time_of_event": 19.2,
+    "time_of_alert": 18.5,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": -19.2,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.786,
+      "offset_from_event": -13.414,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 11.571,
+      "offset_from_event": -7.629,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 17.357,
+      "offset_from_event": -1.843,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 23.143,
+      "offset_from_event": 3.943,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 28.929,
+      "offset_from_event": 9.729,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 34.714,
+      "offset_from_event": 15.514,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 40.5,
+      "offset_from_event": 21.3,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 15.2,
+      "offset_from_event": -4.0,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 16.057,
+      "offset_from_event": -3.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 16.914,
+      "offset_from_event": -2.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 17.771,
+      "offset_from_event": -1.429,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.629,
+      "offset_from_event": -0.571,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 19.486,
+      "offset_from_event": 0.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 20.343,
+      "offset_from_event": 1.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 21.2,
+      "offset_from_event": 2.0,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_positive_07_00574.jpg",
+    "clip": "train/positive/00574.mp4",
+    "bytes": 149612,
+    "jpeg_quality": 85,
+    "duration_s": 40.392157,
+    "fps": 30.6,
+    "time_of_event": 19.567,
+    "time_of_alert": 17.248,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": -19.567,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.761,
+      "offset_from_event": -13.806,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 11.522,
+      "offset_from_event": -8.045,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 17.283,
+      "offset_from_event": -2.284,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 23.044,
+      "offset_from_event": 3.477,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 28.805,
+      "offset_from_event": 9.238,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 34.566,
+      "offset_from_event": 14.999,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 40.327,
+      "offset_from_event": 20.76,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 15.567,
+      "offset_from_event": -4.0,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 16.424,
+      "offset_from_event": -3.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 17.281,
+      "offset_from_event": -2.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.138,
+      "offset_from_event": -1.429,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.996,
+      "offset_from_event": -0.571,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 19.853,
+      "offset_from_event": 0.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 20.71,
+      "offset_from_event": 1.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 21.567,
+      "offset_from_event": 2.0,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_positive_08_00428.jpg",
+    "clip": "train/positive/00428.mp4",
+    "bytes": 120255,
+    "jpeg_quality": 85,
+    "duration_s": 37.1,
+    "fps": 30.0,
+    "time_of_event": 16.867,
+    "time_of_alert": 15.467,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": -16.867,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.29,
+      "offset_from_event": -11.577,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 10.581,
+      "offset_from_event": -6.286,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 15.871,
+      "offset_from_event": -0.996,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 21.162,
+      "offset_from_event": 4.295,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 26.452,
+      "offset_from_event": 9.585,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 31.743,
+      "offset_from_event": 14.876,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 37.033,
+      "offset_from_event": 20.166,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 12.867,
+      "offset_from_event": -4.0,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 13.724,
+      "offset_from_event": -3.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 14.581,
+      "offset_from_event": -2.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 15.438,
+      "offset_from_event": -1.429,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 16.296,
+      "offset_from_event": -0.571,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 17.153,
+      "offset_from_event": 0.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.01,
+      "offset_from_event": 1.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.867,
+      "offset_from_event": 2.0,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_positive_09_00665.jpg",
+    "clip": "train/positive/00665.mp4",
+    "bytes": 158232,
+    "jpeg_quality": 85,
+    "duration_s": 40.295082,
+    "fps": 30.5,
+    "time_of_event": 19.86,
+    "time_of_alert": 18.125,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": -19.86,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.747,
+      "offset_from_event": -14.113,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 11.494,
+      "offset_from_event": -8.366,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 17.241,
+      "offset_from_event": -2.619,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 22.988,
+      "offset_from_event": 3.128,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 28.735,
+      "offset_from_event": 8.875,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 34.482,
+      "offset_from_event": 14.622,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 40.23,
+      "offset_from_event": 20.37,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 15.86,
+      "offset_from_event": -4.0,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 16.717,
+      "offset_from_event": -3.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 17.574,
+      "offset_from_event": -2.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.431,
+      "offset_from_event": -1.429,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 19.289,
+      "offset_from_event": -0.571,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 20.146,
+      "offset_from_event": 0.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 21.003,
+      "offset_from_event": 1.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 21.86,
+      "offset_from_event": 2.0,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_positive_10_00505.jpg",
+    "clip": "train/positive/00505.mp4",
+    "bytes": 163443,
+    "jpeg_quality": 85,
+    "duration_s": 34.633333,
+    "fps": 30.0,
+    "time_of_event": 17.7,
+    "time_of_alert": 16.967,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": -17.7,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 4.938,
+      "offset_from_event": -12.762,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 9.876,
+      "offset_from_event": -7.824,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 14.814,
+      "offset_from_event": -2.886,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 19.752,
+      "offset_from_event": 2.052,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 24.69,
+      "offset_from_event": 6.99,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 29.629,
+      "offset_from_event": 11.929,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 34.567,
+      "offset_from_event": 16.867,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 13.7,
+      "offset_from_event": -4.0,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 14.557,
+      "offset_from_event": -3.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 15.414,
+      "offset_from_event": -2.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 16.271,
+      "offset_from_event": -1.429,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 17.129,
+      "offset_from_event": -0.571,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 17.986,
+      "offset_from_event": 0.286,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 18.843,
+      "offset_from_event": 1.143,
+      "decoded": true
+     },
+     {
+      "row": "event window [-4.00, +2.00] s",
+      "t": 19.7,
+      "offset_from_event": 2.0,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_negative_11_01922.jpg",
+    "clip": "train/negative/01922.mp4",
+    "bytes": 72847,
+    "jpeg_quality": 85,
+    "duration_s": 41.0,
+    "fps": 30.0,
+    "time_of_event": null,
+    "time_of_alert": null,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.848,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 11.695,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 17.543,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 23.39,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 29.238,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 35.086,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 40.933,
+      "offset_from_event": null,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_negative_12_01383.jpg",
+    "clip": "train/negative/01383.mp4",
+    "bytes": 63189,
+    "jpeg_quality": 85,
+    "duration_s": 19.0,
+    "fps": 30.0,
+    "time_of_event": null,
+    "time_of_alert": null,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 2.705,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.41,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 8.114,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 10.819,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 13.524,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 16.229,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 18.933,
+      "offset_from_event": null,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_negative_13_01798.jpg",
+    "clip": "train/negative/01798.mp4",
+    "bytes": 69639,
+    "jpeg_quality": 85,
+    "duration_s": 40.233333,
+    "fps": 30.0,
+    "time_of_event": null,
+    "time_of_alert": null,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.738,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 11.476,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 17.214,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 22.952,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 28.69,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 34.429,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 40.167,
+      "offset_from_event": null,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_negative_14_01266.jpg",
+    "clip": "train/negative/01266.mp4",
+    "bytes": 70027,
+    "jpeg_quality": 85,
+    "duration_s": 40.066667,
+    "fps": 30.0,
+    "time_of_event": null,
+    "time_of_alert": null,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.714,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 11.429,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 17.143,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 22.857,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 28.571,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 34.286,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 40.0,
+      "offset_from_event": null,
+      "decoded": true
+     }
+    ]
+   },
+   {
+    "file": "results/data_check/contact_sheets/nexar_negative_15_01478.jpg",
+    "clip": "train/negative/01478.mp4",
+    "bytes": 87152,
+    "jpeg_quality": 85,
+    "duration_s": 40.06689,
+    "fps": 29.9,
+    "time_of_event": null,
+    "time_of_alert": null,
+    "frames": [
+     {
+      "row": "whole clip",
+      "t": 0.0,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 5.714,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 11.429,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 17.143,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 22.857,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 28.571,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 34.286,
+      "offset_from_event": null,
+      "decoded": true
+     },
+     {
+      "row": "whole clip",
+      "t": 40.0,
+      "offset_from_event": null,
+      "decoded": true
+     }
+    ]
+   }
+  ]
+ }
+}
