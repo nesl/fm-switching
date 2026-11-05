@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # D-series GPU queue on GPU 2 (tmux "dseries"). Steps are read one at a time from the queue file; a step's done marker
-# (logs/dseries_done/<name>) makes it skip on restart. One GPU job at a time. Host state logged at start/end of each step.
+# (logs/dseries_done/<name>) makes it skip on restart. CONTINUE_ON_FAIL=1: a failed job gets a FAILED marker and
+# the queue goes on (a foreign process on GPU 2 still stops everything via the watchdog). One GPU job at a time. Host state logged at start/end of each step.
 cd /home/pragya/Desktop/fm-switching
 export DS_GPU_UUID=GPU-4f1d7e47-e769-a289-4860-e71c0d97267c
 export CLEAN_GPU_UUID=$DS_GPU_UUID CUDA_VISIBLE_DEVICES=$DS_GPU_UUID HF_HUB_OFFLINE=1
@@ -17,7 +18,14 @@ while true; do
   { echo "=== DS $(date '+%F %T') START $name: $cmd"; host start; } | tee -a $LOG
   bash -c "$cmd" 2>&1 | tee -a $LOG; rc=${PIPESTATUS[0]}
   { host end; echo "=== DS $(date '+%F %T') END rc=$rc $name"; } | tee -a $LOG
-  [ $rc -eq 0 ] || { echo "=== DS CHAIN STOPPED at $name" | tee -a $LOG; exit $rc; }
+  if [ $rc -ne 0 ]; then
+    if [ "${CONTINUE_ON_FAIL:-0}" = "1" ]; then
+      echo "FAILED rc=$rc $(date -Is)" > logs/dseries_done/$name
+      echo "=== DS $(date '+%F %T') JOB FAILED/STOPPED: $name (rc=$rc) — recorded; continuing with the next job" | tee -a $LOG
+      continue
+    fi
+    echo "=== DS CHAIN STOPPED at $name" | tee -a $LOG; exit $rc
+  fi
   date -Is > logs/dseries_done/$name
 done
 echo "=== DS CHAIN QUEUE EMPTY $(date '+%F %T')" | tee -a $LOG
