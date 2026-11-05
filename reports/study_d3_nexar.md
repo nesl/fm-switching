@@ -5,7 +5,9 @@
 **Status:** finished on 2026-11-04.
 - Mechanism verification was recorded BEFORE the sweep.
 - Primary: **not supported** (+0.009, 95 % CI [−0.036, +0.050]).
-- Consistency check 1: the pilot's slow-gap disagreement (+0.006 vs +0.079) was followed up and remains not fully explained. The Rule 2 classification is held for review.
+- Consistency check 1: the pilot's slow-gap disagreement (+0.006 vs +0.079) was followed up and remains unexplained (no further analysis, per the user's decision of 2026-11-05).
+- **Classification (user decision, 2026-11-05):** the primary null is a **real negative** for a difference of about 0.05 AUROC or more. It does not rule out smaller differences.
+- **Correction (2026-11-05):** secondary (f) "waiting vs upgrading" is **NOT VALID** for comparing models (see (f) below). Its numbers are kept.
 - Per-request rows are gzipped (`d3_requests_h100nvl.jsonl.gz`); the analysis reads either form.
 
 **Clips:** development clips only, excluding the D2 pilot clips. No validation or test frame was read.
@@ -129,7 +131,11 @@ Source: `results/dashcam/study_d3_nexar/d3_results_h100nvl.json` and `d3_summary
     | 1 | −0.129 [−0.257, −0.004] | −0.062 [−0.199, +0.075] |
     | 3 | +0.095 [−0.025, +0.219] | +0.138 [+0.002, +0.273] |
     | 9 | +0.155 [+0.021, +0.297] | +0.120 [−0.031, +0.270] |
-- **(f) Waiting vs upgrading** (change in mean log P(Yes) per step):
+- **(f) Waiting vs upgrading — NOT VALID for comparing models (correction, 2026-11-05).** Numbers kept below for the record; do not cite them as a model comparison.
+  - **Why not valid:** the measure is the per-clip log-odds of the correct answer. Log-odds are not comparable across models with different calibration, so a 4B → 32B difference in log-odds need not reflect a difference in ranking ability.
+  - **Observation that exposed it:** the upgrade effect is largest (+3.31) at −3 s, where the N = 9 AUROC gap (32B − 4B) is about 0.01 (−0.007 on the 27 scored positives; +0.012 on the fixed slow cohort). The upgrade effect is smallest (+1.12) around the alert, where the AUROC gap is about 0.10.
+  - A cause for this mismatch is not confirmed.
+  - (The earlier label "change in mean log P(Yes)" was also inaccurate: `sec_waiting` in `d3_analyse.py` uses the log-odds of the correct answer, i.e. logit P(Yes) for positive clips and its negative for negative clips.)
   - Upgrading 4B → 32B at a fixed offset: +1.1 to +3.3 at every step, all CIs above 0.
   - Waiting one step: within ±0.6 for 4B and within ±1.04 for 32B, with mixed signs. It is positive only around the alert (−0.5 → 0 → +0.5) and negative after +0.5.
 - **(g) Scene split:**
@@ -197,10 +203,10 @@ Source: `results/dashcam/study_d3_nexar/d3_results_h100nvl.json` and `d3_summary
   - Only **0.9 %** of the D3 draws are ≤ the pilot's +0.006.
   - This run's gap(slow) (+0.079) lies just above the pilot's upper bound (+0.078).
 - **Outcome of the follow-up: the discrepancy is NOT fully explained.** Sampling variation at the pilot's size makes a value as low as +0.006 unlikely (about 1 % of draws) though not impossible.
-- **Possible explanations (not tested):**
-  - The pilot's slow clips differ systematically from the other development clips.
-  - The pilot's hypothesis was chosen because it was the most striking exploratory result, which makes an extreme pilot value more likely.
-- Following CLAUDE.md, I do not choose between the two values. Both are reported, and the interpretation below is marked accordingly.
+- **Status (user decision, 2026-11-05): kept as unexplained; no further analysis.**
+  - The primary hypothesis was chosen after seeing the pilot data, so an extreme pilot value is expected under that selection.
+  - Another possibility, not tested: the pilot's slow clips differ systematically from the other development clips.
+- Following CLAUDE.md, I do not choose between the two values. Both are reported.
 
 **2. Physical plausibility.** No latency or throughput was measured in this study; N/A.
 
@@ -223,10 +229,10 @@ Source: `results/dashcam/study_d3_nexar/d3_results_h100nvl.json` and `d3_summary
 - F1 / F2 / F3 predict the sudden / slow label only weakly (AUROC ≤ 0.56), so the label is not strongly visible from frame features.
 - This is a limitation of the proxy.
 
-### Interpretation (consistency check 1 has an unexplained discrepancy; see above)
+### Interpretation (consistency check 1 has an unexplained discrepancy, kept as such by user decision; see above)
 
 - **The pre-registered verdict stands either way:** NOT SUPPORTED, by the mechanical decision rule applied to the pre-registered confirmatory sample.
-- **Classification:** under CLAUDE.md Rule 2 the null would be a **real negative** for an effect as large as the pilot's. That classification is **held for the user's review** because check 1 is not fully resolved.
+- **Classification (user decision, 2026-11-05):** a **real negative** under CLAUDE.md Rule 2 for a difference of about 0.05 AUROC or more.
   - Every causal link was present, and the capability gap was non-zero in both subgroups.
   - The pilot's +0.100 lies outside this run's CI (upper bound +0.050).
 - **What it does not rule out:** a difference smaller than about 0.05 AUROC. The same holds for N = 3 and N = 1.

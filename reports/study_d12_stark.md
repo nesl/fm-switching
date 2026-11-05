@@ -90,7 +90,7 @@
 - STARK's parser reads only the first span, so the prediction is shorter than the answer.
 - The identical count across arms shows this is a property of the single-turn prompt combined with the ported measure, not of any model.
 - I did not change the measure.
-- **These 60 items are unscored.** Scoring them would need a decision (e.g. multi-turn online evaluation as STARK may intend, or concatenating spans), which is a methodological change for the user to decide.
+- **These 60 items stay unscored (user decision, 2026-11-05).** The measure is not changed. Scoring them would need a methodological change (e.g. multi-turn online evaluation as STARK may intend, or concatenating spans), which was not adopted.
 
 **Median error by family** (n in parentheses; the Thinking column has all items, then parsed-only; lower is better):
 
@@ -177,4 +177,4 @@
 - **Thinking costs a great deal more:** a median of about 175 s per request versus 4.6 s (32B-I) and 0.09 s (4B-I). A quarter of its outputs hit the 16k cap.
 - **Continuous items:** Thinking's measured error is dominated by truncation; it parsed only 36 % of them. Where it finished, its errors are mostly the lowest.
   - With five of eleven families resting on 0–3 parsed items, I do not rank the arms on continuous items.
-- **Online-tracking items:** the 60 unscored items need a scoring decision before any statement about them.
+- **Online-tracking items:** the 60 items stay unscored (user decision, 2026-11-05); no statement is made about them.
