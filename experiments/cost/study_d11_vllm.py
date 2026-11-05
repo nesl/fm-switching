@@ -114,12 +114,48 @@ def body(arm, row, m, model, max_tokens=None, token_ids=False, stream=True):
     return b, [len(i) for _, i in vs]
 
 
+TRANSPORT = ("ReadError", "RemoteProtocolError", "ConnectError", "WriteError", "ReadTimeout", "ConnectTimeout",
+             "PoolTimeout", "WriteTimeout", "CloseError")
+MAX_ATTEMPTS_PER_PASS = 3          # first try + up to 2 automatic retries (user rule 2026-11-04)
+SRV = None
+SRV_ERR = ("ERROR", "Traceback", "Exception", "out of memory", "CUDA error", "OutOfMemory")
+
+
+def server_log_errors():
+    if SRV is None or not SRV.logpath.exists():
+        return []
+    return [l.strip()[:300] for l in SRV.logpath.read_text(errors="replace").splitlines()
+            if any(k in l for k in SRV_ERR)]
+
+
+def expected_tokens(cell, q):
+    """Prompt tokens a retried request must reproduce: the same cell's 32B row (identical input; 4B and 32B share
+    the processor — the K3/H1 gates and StudyClean H1 vs K3 show equal counts), or the reference arm for CHECK cells."""
+    if cell.startswith("CHK"):
+        return None
+    twin = cell[:-1] + "32" if cell.endswith("4") else None
+    if twin is None:
+        return None
+    for r in read_jsonl(REQ):
+        if r["cell"] == twin and r["question_id"] == q and not r["error"]:
+            return r["prompt_tokens"]
+    return None
+
+
 async def run(cell, arm, model, rows, order, man, qs, conc=R.CONC):
+    """Closed loop at `conc`. Rows are append-only: every attempt is a row with `attempt` (1-based, per cell and
+    question, counting earlier rows) and `concurrency`. A client transport error (httpx Read/Connect/... error, no
+    HTTP status) is retried automatically up to 2 more times; HTTP errors are not retried."""
+    prior = {}
+    for r in (read_jsonl(REQ) if REQ.exists() else []):
+        if r["cell"] == cell:
+            prior[r["question_id"]] = prior.get(r["question_id"], 0) + 1
     have = R.done(cell, "batched")
     todo = [q for q in qs if q not in have]
     X.log(f"D11 {cell}: {len(todo)} to run (conc {conc})")
     sem = asyncio.Semaphore(conc)
     n = 0
+    events = []
 
     async def one(c, q):
         nonlocal n
@@ -130,22 +166,55 @@ async def run(cell, arm, model, rows, order, man, qs, conc=R.CONC):
                 nv = [row["n_frames"]]
             else:
                 b, nv = await asyncio.to_thread(body, arm, row, man[q], model)
-            X.CURRENT.write_text(json.dumps(dict(cell=cell, q=q)))
-            rec = await R.send(c, b, row, cell, "batched")
-            rec.update(arm=arm, model=model, frames_per_video=nv, n_videos=len(nv), stratum_qt_le_120=row[
-                "question_time"] <= W)
-            R.append(rec)
+            for k in range(MAX_ATTEMPTS_PER_PASS):
+                X.CURRENT.write_text(json.dumps(dict(cell=cell, q=q)))
+                prior[q] = prior.get(q, 0) + 1
+                rec = await R.send(c, b, row, cell, "batched")
+                rec.update(arm=arm, model=model, frames_per_video=nv, n_videos=len(nv),
+                           stratum_qt_le_120=row["question_time"] <= W, attempt=prior[q], concurrency=conc)
+                R.append(rec)
+                if rec["error"] and rec["error"].split(":")[0] in TRANSPORT and k < MAX_ATTEMPTS_PER_PASS - 1:
+                    events.append(dict(cell=cell, question_id=q, attempt=prior[q], error=rec["error"][:200],
+                                       at=rec["at"]))
+                    X.log(f"D11 {cell}: transport error on {q[:10]} attempt {prior[q]} ({rec['error'][:60]}) — retry")
+                    continue
+                if not rec["error"] and prior[q] > 1:
+                    exp = expected_tokens(cell, q)
+                    if exp is not None and rec["prompt_tokens"] != exp:
+                        raise SystemExit(f"D11 {cell}: retried {q} prompt tokens {rec['prompt_tokens']} != {exp} — STOP")
+                break
             n += 1
             if n % 100 == 0:
                 X.log(f"D11 {cell}: {n}/{len(todo)}")
     async with httpx.AsyncClient(timeout=None) as c:
         await asyncio.gather(*(one(c, q) for q in todo))
+    mm = X.meta_load()
+    mm.setdefault("transport_retries", []).extend(events)
+    X.meta_save(mm)
+    se = server_log_errors()
+    if se:
+        mm = X.meta_load()
+        mm.setdefault("server_log_errors", {})[cell] = se[:20]
+        X.meta_save(mm)
+        raise SystemExit(f"D11 {cell}: server log has error lines ({len(se)}) — STOP: {se[0]}")
     rs = [r for r in read_jsonl(REQ) if r["cell"] == cell]
-    err = sum(bool(r["error"]) for r in rs)
-    X.log(f"D11 {cell}: {len(rs)} rows, {err} errors, acc {sum(r['correct'] for r in rs) / max(1, len(rs)):.4f}")
-    if err > 0.01 * len(rs):
-        raise SystemExit(f"D11 {cell}: {err} errors > 1 % — STOP")
-    return {r["question_id"]: r for r in rs if not r["error"]}
+    ok = {r["question_id"]: r for r in rs if not r["error"]}
+    failed = [q for q in qs if q not in ok]
+    X.log(f"D11 {cell}: {len(rs)} rows ({sum(bool(r['error']) for r in rs)} error rows), {len(ok)}/{len(qs)} questions "
+          f"answered, {len(failed)} still failed, acc {sum(r['correct'] for r in ok.values()) / max(1, len(ok)):.4f}")
+    return ok, failed
+
+
+async def run_with_fallback(cell, arm, model, rows, order, man, qs, ref):
+    ok, failed = await run(cell, arm, model, rows, order, man, qs)
+    if failed and model == "4BI":
+        X.log(f"D11 {cell}: {len(failed)} still failed — concurrency-4 fallback gate (30 K3 vs H1)")
+        g = await run(f"CHKN{SHORT[model]}c4", "K3N", model, rows, order, man, order[:CHECK_N], conc=4)
+        gate("npz_transport_conc4", g[0], ref, order[:CHECK_N], None, model)
+        ok, failed = await run(cell, arm, model, rows, order, man, qs, conc=4)
+    if len(failed) > 0.01 * len(qs):
+        raise SystemExit(f"D11 {cell}: {len(failed)}/{len(qs)} still failed after retries (> 1 %) — STOP")
+    return ok
 
 
 def ref_rows(model):
@@ -216,7 +285,9 @@ def main():
         raise SystemExit("token bound exceeds --max-model-len — STOP (no truncation)")
     os.environ["PYTHONPATH"] = str(HERE / "d11_site") + os.pathsep + os.environ.get("PYTHONPATH", "")
     os.environ["D11_NPZ_LOADER"] = "1"
+    global SRV
     srv = X.Server(a.model, FLAGS)
+    SRV = srv
     try:
         info = srv.start()
         import torch
@@ -229,15 +300,15 @@ def main():
         st = a.stages.split(",")
         if "CHECK" in st:
             qs = order[:CHECK_N]
-            got = asyncio.run(run(f"CHKJ{s}", "K3J", a.model, rows, order, man, qs))
+            got = asyncio.run(run_with_fallback(f"CHKJ{s}", "K3J", a.model, rows, order, man, qs, ref))
             gate("jpeg_transport_video2", got, ref, qs, None, a.model)
-            got = asyncio.run(run(f"CHKN{s}", "K3N", a.model, rows, order, man, qs))
+            got = asyncio.run(run_with_fallback(f"CHKN{s}", "K3N", a.model, rows, order, man, qs, ref))
             gate("npz_transport_video2", got, ref, qs, None, a.model)
             if a.model == "32BI":
                 tq = next(q for q in order if man[q]["question_time"] > 300 and man[q]["n_old"] > 0)
                 asyncio.run(prompt_trace(a.model, rows, man, tq))
         if "U" in st:
-            got = asyncio.run(run(f"U{s}", "U", a.model, rows, order, man, order))
+            got = asyncio.run(run_with_fallback(f"U{s}", "U", a.model, rows, order, man, order, ref))
             le = [q for q in order if man[q]["question_time"] <= W]
             mis = [dict(question_id=q, pred=got[q]["pred"], ref=ref[q]["pred"]) for q in le if got[q]["pred"] != ref[q]["pred"]]
             mm = X.meta_load()
@@ -248,8 +319,9 @@ def main():
             if mis:
                 raise SystemExit("negative control: U != reference at qt <= 120 — STOP")
         if "I" in st:
-            gi = asyncio.run(run(f"I{s}", "I", a.model, rows, order, man, order))
+            gi = asyncio.run(run_with_fallback(f"I{s}", "I", a.model, rows, order, man, order, ref))
             gu = {r["question_id"]: r for r in read_jsonl(REQ) if r["cell"] == f"U{s}" and not r["error"]}
+            gi = {q: r for q, r in gi.items()}
             rel = {q: (gi[q]["prompt_tokens"] - gu[q]["prompt_tokens"]) / gu[q]["prompt_tokens"] for q in gi if q in gu}
             bad = [q for q, v in rel.items() if abs(v) > 0.01]
             mm = X.meta_load()
@@ -262,7 +334,7 @@ def main():
             if bad:
                 raise SystemExit("I prompt tokens differ from U by > 1 % — STOP")
         if "F" in st:
-            asyncio.run(run(f"F{s}", "F", a.model, rows, order, man, [q for q in order if man[q]["question_time"] > W]))
+            asyncio.run(run_with_fallback(f"F{s}", "F", a.model, rows, order, man, [q for q in order if man[q]["question_time"] > W], ref))
     finally:
         srv.stop()
     from _provenance import stamp

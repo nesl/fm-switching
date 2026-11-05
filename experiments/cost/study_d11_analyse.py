@@ -13,6 +13,7 @@ Also: the one-question trace (K3 / U / I per-frame sha256), qt ≤ 120 identity 
 prompt tokens. Writes results/cost/study_d11/study_d11_results_h100nvl.json.
 """
 import hashlib
+from collections import Counter
 import json
 import sys
 from datetime import datetime
@@ -37,9 +38,35 @@ DIN = Path.home() / ".cache/fm-switching/d11_inputs"
 
 
 def cells():
+    """Successful attempt per (cell, question); failed attempts stay in the log and are counted separately."""
     rows = list(read_jsonl(REQ if REQ.exists() else Path(f"{REQ}.gz")))
     return {c: {r["question_id"]: r for r in rows if r["cell"] == c and not r["error"]}
             for c in {r["cell"] for r in rows}}, sum(bool(r["error"]) for r in rows)
+
+
+def retries(strat):
+    """Per cell: error rows, questions that needed > 1 attempt, their strata vs all, attempts / concurrency used."""
+    rows = list(read_jsonl(REQ if REQ.exists() else Path(f"{REQ}.gz")))
+    out = {}
+    for c in sorted({r["cell"] for r in rows}):
+        rs = [r for r in rows if r["cell"] == c]
+        err = [r for r in rs if r["error"]]
+        if not err:
+            out[c] = dict(error_rows=0, concurrency=sorted({r.get("concurrency", 8) for r in rs}))
+            continue
+        qs = sorted({r["question_id"] for r in err})
+        ok = {r["question_id"]: r for r in rs if not r["error"]}
+        allq = sorted({r["question_id"] for r in rs})
+        out[c] = dict(error_rows=len(err), questions_retried=len(qs),
+                      retried_success=sum(q in ok for q in qs), still_failed=[q for q in qs if q not in ok],
+                      success_attempt=dict(Counter(ok[q].get("attempt", 1) for q in qs if q in ok)),
+                      errors=dict(Counter(r["error"].split(":")[0] for r in err)),
+                      error_times=[r["at"] for r in err],
+                      strata_retried=dict(Counter(strat[q] for q in qs)),
+                      strata_all=dict(Counter(strat[q] for q in allq)),
+                      concurrency=sorted({r.get("concurrency", 8) for r in rs}),
+                      cause="UNCONFIRMED (client-side transport error; no server-side error logged)")
+    return out
 
 
 def tokdiff(a, b, qs):
@@ -68,7 +95,7 @@ def main():
     C, nerr = cells()
     man = {r["question_id"]: r for r in map(json.loads, open(MAN))}
     ref, strat, vid = IX.load()
-    res = dict(errors_logged=nerr, cells={c: len(v) for c, v in C.items()},
+    res = dict(errors_logged=nerr, retries=retries(strat), cells={c: len(v) for c, v in C.items()},
                strata_note="ORACLE labels (MCQ answer interval); not observable at request time", models={})
     for s, big in (("32", True), ("4", False)):
         a_rec, a_rich = (ref["K3"], ref["K1"]) if big else (ref["H1"], ref["H2"])

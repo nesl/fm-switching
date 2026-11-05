@@ -40,6 +40,9 @@ FLAGS = ["--limit-mm-per-prompt", json.dumps({"image": 1, "video": 0}), "--mm-pr
 GEN = dict(temperature=0.0, max_tokens=512, seed=0)
 ARMS = [("wisdm", "text"), ("wisdm", "plot"), ("mitdb", "text"), ("mitdb", "plot"), ("stark", "text")]
 CONC = 8
+ATTEMPTS = 3        # first try + up to 2 automatic retries on client transport errors (user rule 2026-11-04)
+TRANSPORT = ("ReadError", "RemoteProtocolError", "ConnectError", "WriteError", "ReadTimeout", "ConnectTimeout", "PoolTimeout", "WriteTimeout", "CloseError")
+SRV_ERR = ("ERROR", "Traceback", "Exception", "out of memory", "CUDA error", "OutOfMemory")
 
 
 def gpu_pids():
@@ -66,6 +69,16 @@ def body(it, arm, model):
 async def send(c, it, ds, arm, model, sem):
     async with sem:
         b = body(it, arm, model)
+        for attempt in range(1, ATTEMPTS + 1):
+            rec = await send_once(c, b, it, ds, arm, model, attempt)
+            if rec["error"] and rec["error"].split(":")[0] in TRANSPORT and attempt < ATTEMPTS:
+                X.log(f"D12 transport error {it['item_id']} {arm} attempt {attempt} — retry")
+                continue
+            return rec
+
+
+async def send_once(c, b, it, ds, arm, model, attempt):
+    if True:
         t0 = time.time()
         first, chunks, usage, finish, err = None, [], None, None, None
         try:
@@ -94,7 +107,7 @@ async def send(c, it, ds, arm, model, sem):
                    completion_tokens=u.get("completion_tokens"),
                    prep_prompt_tokens_4b=(it.get("prompt_tokens") or {}).get(arm),
                    latency_s=round(time.time() - t0, 3), ttft_s=round(first - t0, 3) if first else None,
-                   at=datetime.now().isoformat())
+                   attempt=attempt, at=datetime.now().isoformat())
         with open(REQ, "a") as f:
             f.write(json.dumps(rec) + "\n")
         return rec
@@ -134,8 +147,14 @@ def main():
         srv.stop()
     rs = [json.loads(l) for l in open(REQ)]
     rs = [r for r in rs if r["model"] == a.model]
-    err = sum(bool(r["error"]) for r in rs)
-    X.log(f"D12 pilot {a.model}: {len(rs)} rows, {err} errors")
+    keys = {(r["dataset"], r["arm"], r["item_id"]) for r in rs}
+    okk = {(r["dataset"], r["arm"], r["item_id"]) for r in rs if not r["error"]}
+    err = len(keys - okk)
+    X.log(f"D12 pilot {a.model}: {len(rs)} rows ({sum(bool(r['error']) for r in rs)} error rows), {err} items still failed")
+    se = [l.strip()[:300] for l in srv.logpath.read_text(errors="replace").splitlines() if any(k in l for k in SRV_ERR)]
+    if se:
+        raise SystemExit(f"D12 pilot {a.model}: server log error lines ({len(se)}) — STOP: {se[0]}")
+    rs = list(keys)
     from _provenance import stamp
     m = X.meta_load()
     m.setdefault("_provenance", []).append(stamp(script="study_d12_pilot_vllm.py", model=a.model,

@@ -1,0 +1,367 @@
+{
+ "label": "INDICATIVE (n = 50 per dataset)",
+ "own_formulations": "WISDM (18-way activity) and MIT-BIH (5-way AAMI beat class) are OUR OWN task formulations; STARK questions/answers are the benchmark's, verbatim",
+ "errors": 0,
+ "cells": {
+  "32BI/mitdb/plot": {
+   "n": 50,
+   "errors": 0,
+   "failures_no_parse": 0,
+   "empty_answers": 0,
+   "finish_length": 0,
+   "prompt_tokens": {
+    "median": 507.0,
+    "max": 507
+   },
+   "prompt_tokens_vs_prep_4b": {
+    "equal": 50,
+    "max_abs_diff": 0
+   },
+   "completion_tokens_median": 11.0,
+   "accuracy_pct": 20.0,
+   "correct": 10,
+   "wilson95_pct": [
+    11.243629945973886,
+    33.03737210448524
+   ],
+   "majority_baseline_pct": 20.0,
+   "chance_pct": 20.0,
+   "pred_distribution": {
+    "1": 50
+   }
+  },
+  "32BI/mitdb/text": {
+   "n": 50,
+   "errors": 0,
+   "failures_no_parse": 0,
+   "empty_answers": 0,
+   "finish_length": 0,
+   "prompt_tokens": {
+    "median": 2785.0,
+    "max": 2785
+   },
+   "prompt_tokens_vs_prep_4b": {
+    "equal": 50,
+    "max_abs_diff": 0
+   },
+   "completion_tokens_median": 11.0,
+   "accuracy_pct": 24.0,
+   "correct": 12,
+   "wilson95_pct": [
+    14.297252401872207,
+    37.41294937519236
+   ],
+   "majority_baseline_pct": 20.0,
+   "chance_pct": 20.0,
+   "pred_distribution": {
+    "1": 44,
+    "3": 6
+   }
+  },
+  "32BI/stark/text": {
+   "n": 50,
+   "errors": 0,
+   "failures_no_parse": 7,
+   "empty_answers": 0,
+   "finish_length": 7,
+   "prompt_tokens": {
+    "median": 535.0,
+    "max": 2118
+   },
+   "prompt_tokens_vs_prep_4b": {
+    "equal": 50,
+    "max_abs_diff": 0
+   },
+   "completion_tokens_median": 216.5,
+   "categorical": {
+    "n": 34,
+    "accuracy_pct": 73.52941176470588,
+    "correct": 25,
+    "wilson95_pct": [
+     56.88253783710155,
+     85.39897245844621
+    ],
+    "majority_baseline_pct": 52.94117647058823,
+    "chance_pct": 50.0,
+    "answer_distribution": {
+     "1.0": 16,
+     "0.0": 18
+    }
+   },
+   "continuous": {
+    "n": 16,
+    "parsed": 16,
+    "shape_match": 10,
+    "rmse_per_item": {
+     "loc_event_spatio": 2.8484387762952217,
+     "loc_bearing": 4.265586031479693,
+     "loc_event_temp": 0.018876248715212318,
+     "loc_range": 4.6842333001142595,
+     "loc_range_bearing": 0.43448432313613616,
+     "loc_region": 1.309441517926762,
+     "spatial_impute": 0.15009583651243474,
+     "spatiotemporal_forecast": 1.8942016788082519,
+     "spatiotemporal_impute": 0.8124038404635978,
+     "temporal_impute": 0.05000000000000426,
+     "track_event_spatio_online": null,
+     "track_bearing_online": null,
+     "track_event_temp_online": null,
+     "track_range_bearing_online": null,
+     "track_range_online": null,
+     "track_region_online": null
+    },
+    "note": "no accuracy for continuous families (paper scores RMSE/RMSPE)"
+   }
+  },
+  "32BI/wisdm/plot": {
+   "n": 50,
+   "errors": 0,
+   "failures_no_parse": 7,
+   "empty_answers": 0,
+   "finish_length": 7,
+   "prompt_tokens": {
+    "median": 490.0,
+    "max": 490
+   },
+   "prompt_tokens_vs_prep_4b": {
+    "equal": 50,
+    "max_abs_diff": 0
+   },
+   "completion_tokens_median": 281.0,
+   "accuracy_pct": 8.0,
+   "correct": 4,
+   "wilson95_pct": [
+    3.1549003255790686,
+    18.838502545063704
+   ],
+   "majority_baseline_pct": 6.0,
+   "chance_pct": 5.555555555555555,
+   "pred_distribution": {
+    "5": 18,
+    "2": 13,
+    "4": 11,
+    "null": 7,
+    "1": 1
+   }
+  },
+  "32BI/wisdm/text": {
+   "n": 50,
+   "errors": 0,
+   "failures_no_parse": 0,
+   "empty_answers": 0,
+   "finish_length": 0,
+   "prompt_tokens": {
+    "median": 3851.0,
+    "max": 4071
+   },
+   "prompt_tokens_vs_prep_4b": {
+    "equal": 50,
+    "max_abs_diff": 0
+   },
+   "completion_tokens_median": 11.0,
+   "accuracy_pct": 8.0,
+   "correct": 4,
+   "wilson95_pct": [
+    3.1549003255790686,
+    18.838502545063704
+   ],
+   "majority_baseline_pct": 6.0,
+   "chance_pct": 5.555555555555555,
+   "pred_distribution": {
+    "5": 23,
+    "4": 12,
+    "3": 7,
+    "2": 6,
+    "13": 2
+   }
+  },
+  "4BI/mitdb/plot": {
+   "n": 50,
+   "errors": 0,
+   "failures_no_parse": 0,
+   "empty_answers": 0,
+   "finish_length": 0,
+   "prompt_tokens": {
+    "median": 507.0,
+    "max": 507
+   },
+   "prompt_tokens_vs_prep_4b": {
+    "equal": 50,
+    "max_abs_diff": 0
+   },
+   "completion_tokens_median": 11.0,
+   "accuracy_pct": 20.0,
+   "correct": 10,
+   "wilson95_pct": [
+    11.243629945973886,
+    33.03737210448524
+   ],
+   "majority_baseline_pct": 20.0,
+   "chance_pct": 20.0,
+   "pred_distribution": {
+    "1": 50
+   }
+  },
+  "4BI/mitdb/text": {
+   "n": 50,
+   "errors": 0,
+   "failures_no_parse": 0,
+   "empty_answers": 0,
+   "finish_length": 0,
+   "prompt_tokens": {
+    "median": 2785.0,
+    "max": 2785
+   },
+   "prompt_tokens_vs_prep_4b": {
+    "equal": 50,
+    "max_abs_diff": 0
+   },
+   "completion_tokens_median": 11.0,
+   "accuracy_pct": 24.0,
+   "correct": 12,
+   "wilson95_pct": [
+    14.297252401872207,
+    37.41294937519236
+   ],
+   "majority_baseline_pct": 20.0,
+   "chance_pct": 20.0,
+   "pred_distribution": {
+    "1": 36,
+    "3": 14
+   }
+  },
+  "4BI/stark/text": {
+   "n": 50,
+   "errors": 0,
+   "failures_no_parse": 0,
+   "empty_answers": 0,
+   "finish_length": 0,
+   "prompt_tokens": {
+    "median": 535.0,
+    "max": 2118
+   },
+   "prompt_tokens_vs_prep_4b": {
+    "equal": 50,
+    "max_abs_diff": 0
+   },
+   "completion_tokens_median": 12.0,
+   "categorical": {
+    "n": 34,
+    "accuracy_pct": 88.23529411764706,
+    "correct": 30,
+    "wilson95_pct": [
+     73.37882520370121,
+     95.32862902656389
+    ],
+    "majority_baseline_pct": 52.94117647058823,
+    "chance_pct": 50.0,
+    "answer_distribution": {
+     "0.0": 18,
+     "1.0": 16
+    }
+   },
+   "continuous": {
+    "n": 16,
+    "parsed": 16,
+    "shape_match": 10,
+    "rmse_per_item": {
+     "loc_event_temp": 0.018876248715212318,
+     "loc_bearing": 5.836167201205427,
+     "loc_event_spatio": 3.417517020899257,
+     "loc_range": 4.515763175505452,
+     "loc_region": 2.1220071540495966,
+     "loc_range_bearing": 2.379446665117739,
+     "spatial_impute": 0.12190416348756727,
+     "temporal_impute": 0.0,
+     "track_bearing_online": null,
+     "track_event_temp_online": null,
+     "spatiotemporal_forecast": 1.8477012745571189,
+     "track_event_spatio_online": null,
+     "spatiotemporal_impute": 0.8602325267042622,
+     "track_range_bearing_online": null,
+     "track_range_online": null,
+     "track_region_online": null
+    },
+    "note": "no accuracy for continuous families (paper scores RMSE/RMSPE)"
+   }
+  },
+  "4BI/wisdm/plot": {
+   "n": 50,
+   "errors": 0,
+   "failures_no_parse": 0,
+   "empty_answers": 0,
+   "finish_length": 0,
+   "prompt_tokens": {
+    "median": 490.0,
+    "max": 490
+   },
+   "prompt_tokens_vs_prep_4b": {
+    "equal": 50,
+    "max_abs_diff": 0
+   },
+   "completion_tokens_median": 11.0,
+   "accuracy_pct": 6.0,
+   "correct": 3,
+   "wilson95_pct": [
+    2.0614596364630478,
+    16.217343370877003
+   ],
+   "majority_baseline_pct": 6.0,
+   "chance_pct": 5.555555555555555,
+   "pred_distribution": {
+    "5": 48,
+    "4": 2
+   }
+  },
+  "4BI/wisdm/text": {
+   "n": 50,
+   "errors": 0,
+   "failures_no_parse": 0,
+   "empty_answers": 0,
+   "finish_length": 0,
+   "prompt_tokens": {
+    "median": 3851.0,
+    "max": 4071
+   },
+   "prompt_tokens_vs_prep_4b": {
+    "equal": 50,
+    "max_abs_diff": 0
+   },
+   "completion_tokens_median": 11.0,
+   "accuracy_pct": 4.0,
+   "correct": 2,
+   "wilson95_pct": [
+    1.1038652660826578,
+    13.460337877954668
+   ],
+   "majority_baseline_pct": 6.0,
+   "chance_pct": 5.555555555555555,
+   "pred_distribution": {
+    "5": 30,
+    "15": 6,
+    "4": 5,
+    "12": 4,
+    "11": 3,
+    "10": 1
+   }
+  }
+ },
+ "main_sweep_estimate_32B_thinking": {
+  "basis": "StudyD9 32B-Thinking, same vLLM stack, conc 8: 801 image questions per seed in ~43 min (ERQA / MV-RoboBench prompts ~1.0-3.5k tokens; median 570 completion tokens, max 10.1k) = ~3.2 s per item at conc 8; StudyD10 single-request decode ~43 tok/s. Time-series prompts here are 0.5-4k tokens, comparable; completion length on these tasks is UNKNOWN until measured (it dominates).",
+  "per_1000_items_h_at_conc8": {
+   "if_median_570_tok": 0.89,
+   "if_median_2000_tok": 3.12,
+   "if_median_4000_tok": 6.24
+  },
+  "note": "not run; a 30-item 32B-Thinking timing probe would pin the completion length"
+ },
+ "at": "2026-11-04T18:10:43.573809",
+ "_provenance": {
+  "git_commit": "205b9f1ee90522eeffaee545dda23ce8aebb0f18",
+  "script": "study_d12_pilot_analyse.py",
+  "model": "4BI,32BI",
+  "timestamp": "2026-11-04T18:10:43.575445",
+  "device": "cpu",
+  "n": 500
+ }
+}
