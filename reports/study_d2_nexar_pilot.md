@@ -2,7 +2,10 @@
 
 **E-id:** StudyD2-nexar (pre-registered 2026-11-04 ~15:30, before any rendering or inference).
 
-**Status: COMPLETE, with three stop-and-ask flags** (see "Flags").
+**Status: COMPLETE.** The three stop-and-ask flags (see "Flags") were resolved by the user on 2026-11-04:
+1. The `EngineDeadError` at 32B shutdown is accepted as a shutdown artifact.
+2. The grey frames do not meet the stop condition.
+3. The ~1e-9 grey-score variation for 32B SMALL is accepted.
 - Inputs rendered.
 - Mechanism verification recorded below, BEFORE inference.
 - Inference ran on h100nvl GPU 2 on 2026-11-04 (4B 17:58–18:06; 32B 18:06–18:48).
