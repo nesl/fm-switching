@@ -1,0 +1,234 @@
+{
+  "config": {
+    "model": "Qwen3VL-4B-Instruct-F16",
+    "commit": "c0fd786",
+    "cache_prompt": false,
+    "gen": {
+      "temperature": 0.0,
+      "max_tokens": 512,
+      "seed": 0
+    },
+    "pinned_hz": 1300500000,
+    "n3_from": "N=9 positions 1/5/9 (time order)",
+    "frames_note": "DEV-RECENT manifest frames; NOT Nexar, NOT H100 bytes; ~332 tok/frame \u2248 Nexar SMALL ~336",
+    "input_sha256_verify": {
+      "checked": 1560,
+      "ok": 1560,
+      "n_bad": 0,
+      "bad": []
+    }
+  },
+  "parts": {
+    "A": {
+      "N3": {
+        "N": 3,
+        "n": 50,
+        "input_tokens": {
+          "p50": 1133,
+          "min": 1079,
+          "max": 1242
+        },
+        "ttft_s": {
+          "p50": 1.3392,
+          "p90": 1.3648,
+          "p99": 1.3928
+        },
+        "total_latency_s": {
+          "p50": 1.394,
+          "p90": 1.4196,
+          "p99": 1.4476,
+          "max": 1.4477
+        },
+        "energy_j": {
+          "p50": 43.5968,
+          "p90": 44.6174
+        },
+        "rail_energy_j_p50": {
+          "gpu_j": 30.9147,
+          "cpu_j": 2.7867,
+          "sys_j": 9.8699
+        },
+        "cached_n_min": 0,
+        "cached_n_max": 0,
+        "greedy_match_rate": null,
+        "n_repeated_q": 0,
+        "clock_bad_rows": 0,
+        "accuracy_indicative": 0.22
+      },
+      "N1": {
+        "N": 1,
+        "n": 20,
+        "input_tokens": {
+          "p50": 443,
+          "min": 414,
+          "max": 487
+        },
+        "ttft_s": {
+          "p50": 0.5004,
+          "p90": 0.5184,
+          "p99": 0.5271
+        },
+        "total_latency_s": {
+          "p50": 0.5546,
+          "p90": 0.5723,
+          "p99": 0.5812,
+          "max": 0.5832
+        },
+        "energy_j": {
+          "p50": 12.8493,
+          "p90": 13.3885
+        },
+        "rail_energy_j_p50": {
+          "gpu_j": 8.5903,
+          "cpu_j": 1.0851,
+          "sys_j": 3.1839
+        },
+        "cached_n_min": 0,
+        "cached_n_max": 0,
+        "greedy_match_rate": null,
+        "n_repeated_q": 0,
+        "clock_bad_rows": 0,
+        "accuracy_indicative": 0.1,
+        "vs_studyd8_ttft_p50_ratio": 0.9754
+      },
+      "N9": {
+        "N": 9,
+        "n": 20,
+        "input_tokens": {
+          "p50": 3099,
+          "min": 3075,
+          "max": 3151
+        },
+        "ttft_s": {
+          "p50": 3.869,
+          "p90": 3.9429,
+          "p99": 3.9666
+        },
+        "total_latency_s": {
+          "p50": 3.9257,
+          "p90": 3.9992,
+          "p99": 4.0228,
+          "max": 4.0281
+        },
+        "energy_j": {
+          "p50": 149.0777,
+          "p90": 149.9157
+        },
+        "rail_energy_j_p50": {
+          "gpu_j": 108.4985,
+          "cpu_j": 8.3199,
+          "sys_j": 32.0262
+        },
+        "cached_n_min": 0,
+        "cached_n_max": 0,
+        "greedy_match_rate": null,
+        "n_repeated_q": 0,
+        "clock_bad_rows": 0,
+        "accuracy_indicative": 0.05,
+        "vs_studyd8_ttft_p50_ratio": 1.0068
+      }
+    },
+    "B": {
+      "cadence_s": 2.0,
+      "duration_s": 1800,
+      "baseline": {
+        "window_s": 600.1,
+        "n_samples": 5726,
+        "mean_total_w": 9.6567,
+        "mean_gpu_w": 4.7701,
+        "mean_cpu_w": 1.6187,
+        "mean_sys_w": 3.2679,
+        "min_total_w": 9.591,
+        "max_total_w": 12.096,
+        "tj_mean": 49.84
+      },
+      "baseline_w": 9.6567,
+      "requests_completed": 900,
+      "missed_ticks": 0,
+      "throttled": null,
+      "input_tokens_median": 1134,
+      "ttft_s": {
+        "p50": 1.3393,
+        "p90": 1.3778,
+        "p99": 1.3999
+      },
+      "total_latency_s": {
+        "p50": 1.394,
+        "p90": 1.4325,
+        "p99": 1.4547,
+        "max": 1.5304
+      },
+      "staleness_s": {
+        "p50": 0.0103,
+        "p90": 0.0131,
+        "max": 0.0176
+      },
+      "energy_j_per_req": {
+        "p50": 46.4648,
+        "p90": 47.9522
+      },
+      "mean_board_w": 33.378,
+      "energy_per_hour_total_j": 120160.8,
+      "energy_per_hour_above_baseline_j": 85396.7,
+      "tj_max_c": 61.28,
+      "drift_first10": {
+        "n": 300,
+        "ttft_p50": 1.3386
+      },
+      "drift_last10": {
+        "n": 300,
+        "ttft_p50": 1.3406
+      },
+      "clock_bad_rows": 0,
+      "greedy_match_rate": 1.0,
+      "n_repeated_q": 120,
+      "cached_n_min": 0,
+      "cached_n_max": 0,
+      "accuracy_indicative": 0.24
+    },
+    "C": {
+      "n_windows": 50,
+      "resolution": [
+        384,
+        216
+      ],
+      "note": "committed d2_flow.py UNMODIFIED; FR redirected to manifest frames; working resolution 384x216 (task said 768x432 \u2014 features not changed); system cv2 4.8.0",
+      "time_per_window_s": {
+        "p50": 0.2609,
+        "p90": 0.2685,
+        "p99": 0.2719,
+        "min": 0.23124,
+        "max": 0.27288
+      },
+      "pairs_per_window": 8,
+      "new_frame_update_s": {
+        "single_pair_p50": 0.0223,
+        "single_pair_p90": 0.0223,
+        "window_over_8_p50": 0.03261
+      },
+      "cpu_rail_power_w": 3.1438,
+      "board_power_w": 11.7492,
+      "power_detail": {
+        "window_s": 13.05,
+        "n_samples": 124,
+        "mean_total_w": 11.7492,
+        "mean_gpu_w": 4.7688,
+        "mean_cpu_w": 3.1438,
+        "mean_sys_w": 3.8366,
+        "min_total_w": 10.199,
+        "max_total_w": 11.897,
+        "tj_mean": 58.07
+      },
+      "no_incremental_api": true
+    }
+  },
+  "_provenance": {
+    "git_commit": "66e4aafa0ff9a943a1fb0f675cc3ac87053bfd35",
+    "script": "study_d4_orin.py",
+    "model": "4bi_f16",
+    "timestamp": "2026-11-04T20:05:41.643255",
+    "device": "jetson_orin",
+    "n": 120,
+    "seed": 0
+  }
+}
