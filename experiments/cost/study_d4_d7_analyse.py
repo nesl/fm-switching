@@ -9,6 +9,9 @@ D7: per model x N x level: the run's own level summaries; derived streams per GP
     p99 TTFT <= L and errors + unfinished = 0) x T. Arithmetic for this input and server setup on localhost (no
     network); not a deployment claim. "< lowest tested level" when even the 25 % level misses L.
 Writes results/cost/study_d4/study_d4_results_h100nvl.json and results/cost/study_d7/study_d7_results_h100nvl.json.
+StudyD7b (N = 1; `d7b` argument): same D7 summary and formula on results/cost/study_d7b/study_d7b_*; both d7 and d7b
+also count, per level, how many request ids recur within the level (the D3 manifest has 6,010 requests per N, so a
+level above ~20 req/s over 300 s must cycle; caches are off, so a repeat is recomputed in full).
 """
 import json
 import sys
@@ -66,15 +69,26 @@ def d4():
     print("D4 VOID", res["void"])
 
 
-def d7():
-    lv = [json.loads(l) for l in open(D7 / "study_d7_levels_h100nvl.jsonl")]
-    iso = [json.loads(l) for l in open(D7 / "study_d7_isolation_h100nvl.jsonl")]
+def repeats(path):
+    import gzip
+    ids = {}
+    for l in gzip.open(path, "rt"):
+        r = json.loads(l)
+        if r.get("request_id"):
+            ids.setdefault(r["level"], []).append(r["request_id"])
+    return {k: dict(requests=len(v), distinct=len(set(v)), repeated=len(v) - len(set(v))) for k, v in ids.items()}
+
+
+def d7(D7=D7, slug="study_d7", ns=(3, 9)):
+    lv = [json.loads(l) for l in open(D7 / f"{slug}_levels_h100nvl.jsonl")]
+    iso = [json.loads(l) for l in open(D7 / f"{slug}_isolation_h100nvl.jsonl")]
     run = [i for i in iso if i["tag"] != "pre-start wait"]
-    meta = json.load(open(D7 / "study_d7_run_meta_h100nvl.json")) if (D7 / "study_d7_run_meta_h100nvl.json").exists() else {}
+    mp = D7 / f"{slug}_run_meta_h100nvl.json"
+    meta = json.load(open(mp)) if mp.exists() else {}
     res = dict(void=any(i["overlap"] for i in run), isolation_checks=len(run), settings=meta.get("settings"),
                levels=lv, derived={})
     for m in ("32BI", "4BI"):
-        for n in (3, 9):
+        for n in ns:
             op = [l for l in lv if l["model"] == m and l["n"] == n and l["part"] == "B_open"]
             for L in (1.0, 2.0, 5.0):
                 good = [l for l in op if l["ttft_p99"] <= L and l["errors"] == 0 and l["unfinished"] == 0]
@@ -85,9 +99,10 @@ def d7():
                         else dict(streams=None, note="even the lowest tested open-loop level missed the p99 limit"))
     res["derived_note"] = ("streams = highest open-loop throughput meeting p99 TTFT <= L with no errors x evaluation "
                            "interval T; arithmetic for this input / server on localhost, no network; not a deployment claim")
+    res["repeats_within_level"] = repeats(D7 / f"{slug}_requests_h100nvl.jsonl.gz")
     res["at"] = datetime.now().isoformat()
     res["_provenance"] = stamp(script="study_d4_d7_analyse.py", model="32BI,4BI", device="cpu", n=len(lv))
-    (D7 / "study_d7_results_h100nvl.json").write_text(json.dumps(res, indent=1, default=float))
+    (D7 / f"{slug}_results_h100nvl.json").write_text(json.dumps(res, indent=1, default=float))
     for l in lv:
         print("D7", l["model"], f"N{l['n']}", l["part"], l["level"], f"{l['throughput_rps']:.2f} rps",
               f"p50 {l['ttft_p50']:.3f} p99 {l['ttft_p99']:.3f}", "err", l["errors"], "unf", l["unfinished"],
@@ -101,3 +116,5 @@ if __name__ == "__main__":
         d4()
     if "d7" in which:
         d7()
+    if "d7b" in which:
+        d7(Path("results/cost/study_d7b"), "study_d7b", (1,))

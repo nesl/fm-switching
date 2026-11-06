@@ -14,6 +14,9 @@ the SCHEDULED arrival time; dispatch lateness (actual send − scheduled) record
 Per request: scheduled / sent / first-token / end times, TTFT, total, tokens, error. Per level: GPU-2 utilisation and
 memory (pynvml, 200 ms). Isolation (study_d10_latency.isolation): waits until no other work of ours runs; VOID on any
 in-run overlap. Raw rows -> results/cost/study_d7/study_d7_requests_h100nvl.jsonl.gz (written per level).
+StudyD7b (pre-registered 2026-11-05): the same procedure with --ns 1 --out results/cost/study_d7b --slug study_d7b
+(N and output location are the only parameters; defaults reproduce StudyD7). Other users' activity is written to
+<slug>_others_h100nvl.jsonl (StudyD7's own run wrote it under StudyD4's name; renamed afterwards).
 """
 import argparse
 import asyncio
@@ -220,10 +223,28 @@ def done_levels():
     return {(l["model"], l["n"], l["part"], l["level"]): l for l in map(json.loads, open(LEVELS))}
 
 
+def configure(out, slug):
+    global OUT, REQ, LEVELS, META
+    OUT = Path(out)
+    REQ = OUT / f"{slug}_requests_h100nvl.jsonl.gz"
+    LEVELS = OUT / f"{slug}_levels_h100nvl.jsonl"
+    META = OUT / f"{slug}_run_meta_h100nvl.json"
+    L.ISO = OUT / f"{slug}_isolation_h100nvl.jsonl"
+    L.DMON = Path(f"logs/{slug}_dmon.log")
+    X.META_PATH = META
+    X.CURRENT = Path(f"logs/{slug}_current.json")
+    D4.OTHERS = f"{slug}_others_h100nvl.jsonl"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--wait-clear-h", type=float, default=10.0)
+    ap.add_argument("--ns", default="3,9")
+    ap.add_argument("--out", default="results/cost/study_d7")
+    ap.add_argument("--slug", default="study_d7")
     a = ap.parse_args()
+    ns = [int(x) for x in a.ns.split(",")]
+    configure(a.out, a.slug)
     OUT.mkdir(parents=True, exist_ok=True)
     t_end, clear = time.time() + 3600 * a.wait_clear_h, 0
     while clear < 2:
@@ -250,7 +271,7 @@ def main():
                                                         flags=FLAGS))
                 X.meta_save(m)
                 gm = GpuMon()
-                for n in (3, 9):
+                for n in ns:
                     done = done_levels()
                     bodies = Bodies(model, n)
                     try:
@@ -308,7 +329,7 @@ def main():
     m.setdefault("_provenance", []).append(stamp(script="study_d7_capacity.py", model="32BI,4BI",
                                                  device=f"{X.DEV}_gpu2", n=0, args=a))
     X.meta_save(m)
-    X.log(f"D7 done; VOID={m['isolation']['void']}")
+    X.log(f"D7 ({a.slug}) done; VOID={m['isolation']['void']}")
 
 
 if __name__ == "__main__":
