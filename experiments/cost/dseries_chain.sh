@@ -8,6 +8,8 @@ export CLEAN_GPU_UUID=$DS_GPU_UUID CUDA_VISIBLE_DEVICES=$DS_GPU_UUID HF_HUB_OFFL
 export VL=~/.venvs/fm-switching-vllm/bin/python
 LOG=logs/dseries_chain.log; Q=${1:-logs/dseries_queue.txt}; mkdir -p logs/dseries_done
 SID=$(ps -o sid= -p $$ | tr -d ' ')
+# Replace any helper sessions left from an earlier chain (a defunct chain shell can keep them alive).
+tmux kill-session -t dswd 2>/dev/null; tmux kill-session -t dsmon 2>/dev/null
 tmux new-session -d -s dswd "bash experiments/cost/dseries_watchdog.sh $SID"
 tmux new-session -d -s dsmon "bash experiments/cost/dseries_monitor.sh $SID"
 host() { echo "--- host $1 $(date '+%F %T'): load $(cut -d' ' -f1-3 /proc/loadavg)"; nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory --format=csv,noheader | while IFS=, read g p m; do echo "    $g pid$p $m $(ps -o user=,args= -p $p | cut -c1-100)"; done; }
@@ -29,3 +31,4 @@ while true; do
   date -Is > logs/dseries_done/$name
 done
 echo "=== DS CHAIN QUEUE EMPTY $(date '+%F %T')" | tee -a $LOG
+tmux kill-session -t dsmon 2>/dev/null; tmux kill-session -t dswd 2>/dev/null

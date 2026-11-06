@@ -1,0 +1,189 @@
+{
+ "host": "h100nvl (sn4622120321)",
+ "created": "2026-11-05T16:48:41.242500",
+ "source": "flash's read-only share fmnet-flash:/mnt/ssd/hf_models/datasets via ~/.local/bin/fmpull (rsync --partial --append-verify); NOT re-downloaded from Hugging Face. No committed flash manifest exists on origin/main (results/datasets/download_manifest.json missing); flash's own preflight.json / annotations_report.json / archives.json / ffprobe.jsonl (pulled to /home/pragya/data/flash/meta and the dataset dirs) are the reference.",
+ "disk_floor": "user lowered the free-space floor from 130 GB to 20 GB (2026-11-05); free after pulls: 38 GB",
+ "datasets": {
+  "ovo_bench": {
+   "local_dir": "/home/pragya/data/datasets/ovo_bench",
+   "hf_repo": "JoeLeelyf/OVO-Bench",
+   "hf_revision": "fec29e3385747b5642d995370143ba92d2819bd2",
+   "revision_matches_flash_preflight": true,
+   "code_repo": "JoeLeelyf/OVO-Bench",
+   "code_commit": "c34093f9a072d93f9e1c6b923446dfba71f4528e",
+   "code_remote": "https://github.com/JoeLeelyf/OVO-Bench.git",
+   "code_fsck_ok": true,
+   "code_clean": true,
+   "local_bytes": 92699097912,
+   "hf_metadata_files_checked": 2,
+   "hf_metadata_mismatches": 0,
+   "annotation_sha256": {
+    "code/data/ovo_bench_new.json": "dc4a90daf26764dc8ab8b228ea4af864ba2ea50c2833ead8c9af6573f78ccf97"
+   },
+   "counts": {
+    "questions": 3035,
+    "entries": 1640,
+    "backward_entries": 1468,
+    "forward_subqueries": 1567,
+    "unique_videos": 644
+   },
+   "counts_match_flash": true,
+   "video_ids_match_flash": true,
+   "scope": "annotations (code/data/ovo_bench_new.json), code, hf/README + .gitattributes, hf/src_videos.tar.parta[a-e] (chunked_videos.tar.part* EXCLUDED), extracted src_videos/",
+   "archives": {
+    "parts": 5,
+    "all_parts_sha256_match_hf": true,
+    "tar_members": 660,
+    "tar_regular_files": 645,
+    "flash_tar_members": 660,
+    "tar_exit": 0
+   },
+   "videos": {
+    "count": 645,
+    "flash": 645,
+    "ffprobe_failures": 0,
+    "differences_vs_flash": 231,
+    "difference_fields": "duration only"
+   },
+   "extracted": true
+  },
+  "rtv_bench": {
+   "local_dir": "/home/pragya/data/datasets/rtv_bench",
+   "hf_repo": "RTVBench/RTV-Bench",
+   "hf_revision": "62ec75f8cd7c8ec00ff1c382d950175065bea9b6",
+   "revision_matches_flash_preflight": true,
+   "code_repo": "LJungang/RTV-Bench",
+   "code_commit": "a928cbe82b11fd7be7c6f7c0a40c662427ec40d7",
+   "code_remote": "https://github.com/LJungang/RTV-Bench.git",
+   "code_fsck_ok": true,
+   "code_clean": true,
+   "local_bytes": 101145915994,
+   "hf_metadata_files_checked": 3,
+   "hf_metadata_mismatches": 0,
+   "annotation_sha256": {
+    "hf/QA.json": "cf7b3ee4872a6052262dafeec34936661717a8a8bb92aa063eccdce967fc4d29"
+   },
+   "counts": {
+    "questions": 4608,
+    "unique_videos": 552
+   },
+   "counts_match_flash": true,
+   "video_ids_match_flash": true,
+   "scope": "annotations (hf/QA.json), code, hf/README + .gitattributes, hf/videos/** (552 plain mp4; no archives)",
+   "videos": {
+    "count": 552,
+    "flash": 552,
+    "ffprobe_failures": 0,
+    "sha256_match_hf": 552,
+    "sha256_mismatch_hf": 0,
+    "differences_vs_flash": 345,
+    "difference_fields": "duration only"
+   },
+   "extracted": "n/a (no archives)"
+  },
+  "herbench": {
+   "local_dir": "/home/pragya/data/datasets/herbench",
+   "hf_repo": "DanBenAmi/HERBench",
+   "hf_revision": "30b42e97180f2c7c0fdc3f2aed412ae04f0366ca",
+   "revision_matches_flash_preflight": true,
+   "code_repo": "DanBenAmi/HERBench",
+   "code_commit": "fe66f377fd4a4a1689b97837129edbaacd489ebe",
+   "code_remote": "https://github.com/DanBenAmi/HERBench.git",
+   "code_fsck_ok": true,
+   "code_clean": true,
+   "local_bytes": 59100603,
+   "hf_metadata_files_checked": 19,
+   "hf_metadata_mismatches": 0,
+   "annotation_sha256": {
+    "hf/data/herbench_annotations.json": "91c5eec5bd74d8966259addb736eb76e997148138e5a567bb8f5d02219d419dd",
+    "hf/data/herbench_annotations_lite.json": "dce4898dcfd87be7a02a8f5f3baf0add4a4a8ba3413d09a2a7634c94613597e6",
+    "hf/data/herbench_annotations_lite_v2.json": "247eeca9f76cf1745a5d853a111463f0bb1af4f64fa1d945df6c40c15abd88a1",
+    "hf/data/video_metadata.json": "4572a37586c35709d8b79de0c3254bc4a768e79f567a98df3983ec904a415ead"
+   },
+   "counts": {
+    "questions": 27631,
+    "unique_videos": 335,
+    "lite_questions": 2000,
+    "lite_videos": 68,
+    "lite_v2_questions": 1971,
+    "lite_v2_videos": 68,
+    "metadata_videos": 335
+   },
+   "counts_match_flash": true,
+   "video_ids_match_flash": true,
+   "scope": "annotations, metadata and code ONLY; videos NOT pulled (do not fit on this disk: flash's copy ~378 GB)",
+   "videos": null,
+   "extracted": false,
+   "published_checksums": "hf/videos/videos.tar.checksums.txt pulled and matches HF; the parts it covers were not pulled, so it was not run here (flash's herbench_fix.log: all 17 OK)"
+  },
+  "streaming_bench": {
+   "local_dir": "/home/pragya/data/datasets/streaming_bench",
+   "hf_repo": "mjuicem/StreamingBench",
+   "hf_revision": "48872fa707124474ce4c5172ddc58efb8bc88058",
+   "revision_matches_flash_preflight": true,
+   "code_repo": "THUNLP-MT/StreamingBench",
+   "code_commit": "89299232c4cc1cc3721951173c5f107b48cf6877",
+   "code_remote": "https://github.com/THUNLP-MT/StreamingBench.git",
+   "code_fsck_ok": true,
+   "code_clean": true,
+   "local_bytes": 84954415,
+   "hf_metadata_files_checked": 18,
+   "hf_metadata_mismatches": 0,
+   "annotation_sha256": {
+    "hf/StreamingBench/Contextual_Understanding.csv": "c668659a1dc1a6145c8a43695753511639176d44f88a5b7bca8b86efd963a3e8",
+    "hf/StreamingBench/Omni_Source_Understanding.csv": "1edeb827b118b3d696efaa13cf324fecd9fe17c7abfc060b22a51c7030b107ac",
+    "hf/StreamingBench/Proactive_Output.csv": "12c984e2ef693e08e5904cb21c956844c4dbf110dd02a810ab5386470db6adf0",
+    "hf/StreamingBench/Proactive_Output_50.csv": "62f2b2662bd4222de6ed8f392d01fbe75dd9e632919c7f5b4c04d731424b258f",
+    "hf/StreamingBench/Real_Time_Visual_Understanding.csv": "0121417a71e1dcf367222ae97e9512e3e99725d72e60d50760a050816ccd58da",
+    "hf/StreamingBench/Sequential_Question_Answering.csv": "1966ccb2eb5143e3a621d9b49aa40749e67791b8d6d0432a9e9424cd1a839a72"
+   },
+   "counts": {
+    "questions": 4500,
+    "unique_videos": 901,
+    "per_file": {
+     "Contextual_Understanding.csv": {
+      "rows": 500,
+      "videos": 100
+     },
+     "Omni_Source_Understanding.csv": {
+      "rows": 1000,
+      "videos": 200
+     },
+     "Proactive_Output.csv": {
+      "rows": 250,
+      "videos": 51
+     },
+     "Proactive_Output_50.csv": {
+      "rows": 50,
+      "videos": 1
+     },
+     "Real_Time_Visual_Understanding.csv": {
+      "rows": 2500,
+      "videos": 500
+     },
+     "Sequential_Question_Answering.csv": {
+      "rows": 250,
+      "videos": 50
+     }
+    }
+   },
+   "counts_match_flash": true,
+   "video_ids_match_flash": true,
+   "scope": "annotations, metadata and code ONLY; videos NOT pulled (do not fit on this disk: flash's copy ~538 GB)",
+   "videos": null,
+   "extracted": false
+  }
+ },
+ "ffprobe": {
+  "version": "ffprobe version 4.4.2-0ubuntu0.22.04.1 Copyright (c) 2007-2021 the FFmpeg developers",
+  "definitions": "duration = first video stream duration (container duration kept); fps = r_frame_rate rounded to 3 decimals"
+ },
+ "_provenance": {
+  "git_commit": "59228595ca7b06cfa378ed6836c11707d9dd4b0f",
+  "script": "experiments/datasets/*",
+  "model": "-",
+  "timestamp": "2026-11-05T16:48:41.279913",
+  "device": "h100nvl_cpu",
+  "n": 4
+ }
+}

@@ -35,6 +35,7 @@ import d3_infer_vllm as D3  # noqa: E402
 C, X = L.C, L.X
 X.REPO["4BI"] = ("Qwen/Qwen3-VL-4B-Instruct", "ebb281ec70b05090aa6165b016eac8ec08e71b17")
 OUT = Path("results/cost/study_d4")
+OTHERS = "study_d4_others_h100nvl.jsonl"  # StudyD7 / D7b set their own name
 REQ = OUT / "study_d4_requests_h100nvl.jsonl"
 META = OUT / "study_d4_run_meta_h100nvl.json"
 L.ISO = OUT / "study_d4_isolation_h100nvl.jsonl"
@@ -66,7 +67,7 @@ def others(tag):
     rec = dict(tag=tag, at=datetime.now().isoformat(), gpu_processes=g,
                cpu_pct_by_user={k: round(v, 1) for k, v in sorted(cpu.items(), key=lambda x: -x[1])[:8]},
                loadavg=Path("/proc/loadavg").read_text().strip())
-    with open(OUT / "study_d4_others_h100nvl.jsonl", "a") as f:
+    with open(OUT / OTHERS, "a") as f:
         f.write(json.dumps(rec) + "\n")
 
 
