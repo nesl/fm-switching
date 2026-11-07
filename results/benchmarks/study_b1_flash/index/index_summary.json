@@ -1,0 +1,125 @@
+{
+ "skipped": {
+  "streaming_bench": {
+   "Omni_Source_Understanding.csv": {
+    "rows": 1000,
+    "reason": "requires audio by upstream definition (README.md:39 'integrate visual and audio inputs')"
+   },
+   "Proactive_Output.csv": {
+    "rows": 250,
+    "reason": "upstream scoring cannot be applied unchanged (StreamingBenchProactive.py:35-50 polls the model once per second to ground_truth_time_stamp+4; count.py:43-57 needs dialog_history times and scores a hit within +/-2 s) AND needs video after the query time (ground_truth_time_stamp > time_stamp)"
+   },
+   "Proactive_Output_50.csv": {
+    "rows": 50,
+    "reason": "upstream scoring cannot be applied unchanged (StreamingBenchProactive.py:35-50 polls the model once per second to ground_truth_time_stamp+4; count.py:43-57 needs dialog_history times and scores a hit within +/-2 s) AND needs video after the query time (ground_truth_time_stamp > time_stamp)"
+   }
+  }
+ },
+ "datasets": {
+  "rtv_bench": {
+   "rows": 4608,
+   "videos": 552,
+   "tasks": {
+    "Action-FP": 365,
+    "Action-GU": 92,
+    "Action-IA": 339,
+    "Action-PU": 148,
+    "Action-SP": 225,
+    "Action-SR": 213,
+    "Action-TP": 170,
+    "Action-VP": 140,
+    "Event-FP": 119,
+    "Event-GU": 247,
+    "Event-IA": 126,
+    "Event-PU": 127,
+    "Event-SP": 112,
+    "Event-SR": 214,
+    "Event-TP": 114,
+    "Event-VP": 458,
+    "Object-FP": 102,
+    "Object-GU": 135,
+    "Object-IA": 87,
+    "Object-PU": 270,
+    "Object-SP": 200,
+    "Object-SR": 161,
+    "Object-TP": 303,
+    "Object-VP": 141
+   },
+   "dropped_missing_video": 0,
+   "dropped_qids_sample": []
+  },
+  "ovo_bench": {
+   "rows": 3035,
+   "videos": 644,
+   "tasks": {
+    "ACR": 109,
+    "ASI": 148,
+    "ATR": 116,
+    "CRR": 240,
+    "EPM": 297,
+    "FPD": 101,
+    "HLD": 186,
+    "OCR": 149,
+    "OJR": 184,
+    "REC": 698,
+    "SSR": 629,
+    "STU": 178
+   },
+   "dropped_missing_video": 0,
+   "dropped_qids_sample": []
+  },
+  "herbench": {
+   "rows": 27566,
+   "videos": 334,
+   "tasks": {
+    "Action Counting": 2040,
+    "Action Sequence Integrity Identification": 2212,
+    "Appearance-Grounded Attribute Recognition": 868,
+    "Appearance-Grounded Behavior & Interactions": 1207,
+    "Appearance-Grounded Localization & Trajectory": 2340,
+    "False Action Memory": 2276,
+    "False Object Memory": 2310,
+    "Multi-Entities Grounding and Localization": 2922,
+    "Multi-Person Duration Reasoning": 2564,
+    "Region Localized People Counting": 2115,
+    "Scene Verification & Arrangement": 4568,
+    "Temporal Shot Ordering": 2144
+   },
+   "dropped_missing_video": 65,
+   "dropped_qids_sample": [
+    "AGBI_01091",
+    "AGBI_01092",
+    "AGBI_01093",
+    "AGBI_01094",
+    "AGBI_01095",
+    "AGBI_01096",
+    "AGBI_01097",
+    "AGBI_01098",
+    "AGBI_01099",
+    "AGBI_01100"
+   ],
+   "lite_v2_rows": 1429
+  },
+  "streaming_bench": {
+   "rows": 3250,
+   "videos": 650,
+   "tasks": {
+    "Action Perception": 352,
+    "Anomaly Context Understanding": 250,
+    "Attribute Perception": 312,
+    "Causal Reasoning": 128,
+    "Clips Summarize": 317,
+    "Counting": 188,
+    "Event Understanding": 159,
+    "Misleading Context Recognition": 250,
+    "Object Perception": 369,
+    "Prospective Reasoning": 108,
+    "Sequential Question Answering": 250,
+    "Spatial Understanding": 246,
+    "Text-Rich Understanding": 321
+   },
+   "dropped_missing_video": 0,
+   "dropped_qids_sample": []
+  }
+ }
+}

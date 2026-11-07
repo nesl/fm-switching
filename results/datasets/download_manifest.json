@@ -1,0 +1,399 @@
+{
+ "_note": "StudyDataDownload. Data preparation only; no inference, no GPU. Counts are reported against upstream claims and NOT reconciled.",
+ "host": "flash (CPU/disk/network only; neither GPU used)",
+ "data_root": "/mnt/ssd/hf_models/datasets",
+ "data_root_note": "/mnt/ssd is not writable by this user, so /mnt/ssd/datasets could not be created; /mnt/ssd/hf_models/datasets was used.",
+ "datasets": {
+  "rtv_bench": {
+   "repo_id": "RTVBench/RTV-Bench",
+   "commit_sha": "62ec75f8cd7c8ec00ff1c382d950175065bea9b6",
+   "commit_sha_pinned_for_download": "62ec75f8cd7c8ec00ff1c382d950175065bea9b6",
+   "code_repo": "LJungang/RTV-Bench",
+   "code_repo_sha": "a928cbe82b11fd7be7c6f7c0a40c662427ec40d7",
+   "local_path": "/mnt/ssd/hf_models/datasets/rtv_bench",
+   "video_root": "/mnt/ssd/hf_models/datasets/rtv_bench/hf/videos",
+   "license": {
+    "hf_card": "mit",
+    "code_LICENSE": null,
+    "readme": null
+   },
+   "hf_declared_license": "mit",
+   "gated": false,
+   "sizes": {
+    "hf_files_checked": 555,
+    "hf_size_mismatches": 0,
+    "downloaded_bytes": 101138565005,
+    "on_disk_bytes_total": 101145870463
+   },
+   "counts": {
+    "videos_on_disk": 552,
+    "questions": 4608,
+    "upstream_claims": {
+     "videos": 552,
+     "questions_paper": 4631,
+     "questions_readme": 4608
+    },
+    "crosscheck": {
+     "questions": 4608,
+     "videos_referenced": 552,
+     "videos_on_disk": 552,
+     "questions_with_missing_video": 0
+    }
+   },
+   "ffprobe": {
+    "probed": 552,
+    "ok": 552,
+    "failures": 0,
+    "failure_paths": [],
+    "duration_s": {
+     "min": 127.80263,
+     "median": 523.333311,
+     "max": 11087.922653,
+     "total_hours": 167.21
+    },
+    "codecs": {
+     "h264": 533,
+     "vp9": 11,
+     "av1": 8
+    }
+   },
+   "archives": [],
+   "verification_status": "PASS"
+  },
+  "herbench": {
+   "repo_id": "DanBenAmi/HERBench",
+   "commit_sha": "30b42e97180f2c7c0fdc3f2aed412ae04f0366ca",
+   "commit_sha_pinned_for_download": "30b42e97180f",
+   "code_repo": "DanBenAmi/HERBench",
+   "code_repo_sha": "fe66f377fd4a4a1689b97837129edbaacd489ebe",
+   "local_path": "/mnt/ssd/hf_models/datasets/herbench",
+   "video_root": "/mnt/ssd/hf_models/datasets/herbench/extracted_full",
+   "license": {
+    "hf_card": "cc-by-nc-sa-4.0",
+    "code_LICENSE": "MIT",
+    "readme": "CC BY-NC-SA 4.0 (non-commercial)"
+   },
+   "hf_declared_license": "cc-by-nc-sa-4.0",
+   "gated": false,
+   "sizes": {
+    "hf_files_checked": 36,
+    "hf_size_mismatches": 0,
+    "downloaded_bytes": 170800612509,
+    "on_disk_bytes_total": 378418962832
+   },
+   "counts": {
+    "videos_on_disk": 334,
+    "questions": 27631,
+    "upstream_claims": {
+     "videos_readme": 335,
+     "videos_citation": 337,
+     "questions_readme": 27936,
+     "questions_citation": 26806,
+     "lite": 5960,
+     "lite_v2": 1971
+    },
+    "crosscheck": {
+     "questions": 27631,
+     "videos_referenced": 335,
+     "videos_on_disk": 334,
+     "questions_with_missing_video": 65
+    }
+   },
+   "ffprobe": {
+    "probed": 334,
+    "ok": 334,
+    "failures": 0,
+    "failure_paths": [],
+    "duration_s": {
+     "min": 28.433333,
+     "median": 179.996663,
+     "max": 4485.133333,
+     "total_hours": 48.76
+    },
+    "codecs": {
+     "h264": 256,
+     "mpeg4": 77,
+     "vp9": 1
+    }
+   },
+   "archives": [
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/herbench/videos.tar (from 17 parts)",
+     "type": "split-tar",
+     "ok": true,
+     "members": "334",
+     "error": null
+    }
+   ],
+   "verification_status": "PASS"
+  },
+  "ovo_bench": {
+   "repo_id": "JoeLeelyf/OVO-Bench",
+   "commit_sha": "fec29e3385747b5642d995370143ba92d2819bd2",
+   "commit_sha_pinned_for_download": "fec29e338574",
+   "code_repo": "JoeLeelyf/OVO-Bench",
+   "code_repo_sha": "c34093f9a072d93f9e1c6b923446dfba71f4528e",
+   "local_path": "/mnt/ssd/hf_models/datasets/ovo_bench",
+   "video_root": "/mnt/ssd/hf_models/datasets/ovo_bench/src_videos",
+   "license": {
+    "hf_card": "cc-by-sa-4.0",
+    "code_LICENSE": "MIT",
+    "readme": "CC BY-NC-SA 4.0 -- CONFLICTS WITH HF CARD"
+   },
+   "hf_declared_license": "cc-by-sa-4.0",
+   "gated": false,
+   "sizes": {
+    "hf_files_checked": 7,
+    "hf_size_mismatches": 0,
+    "downloaded_bytes": 46341748321,
+    "on_disk_bytes_total": 92698851428
+   },
+   "counts": {
+    "videos_on_disk": 645,
+    "questions": 3035,
+    "upstream_claims": {
+     "videos": 644,
+     "qa_paper": 2814,
+     "queries_readme": 3100
+    },
+    "crosscheck": {
+     "entries": 1640,
+     "videos_referenced": 644,
+     "videos_on_disk": 645,
+     "entries_with_missing_video": 0,
+     "n_missing_videos": 0,
+     "n_videos_with_no_question": 1
+    }
+   },
+   "ffprobe": {
+    "probed": 645,
+    "ok": 645,
+    "failures": 0,
+    "failure_paths": [],
+    "duration_s": {
+     "min": 6.04,
+     "median": 308.0,
+     "max": 9047.079708,
+     "total_hours": 85.17
+    },
+    "codecs": {
+     "mpeg4": 48,
+     "h264": 434,
+     "vp9": 163
+    }
+   },
+   "archives": [
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/ovo_bench/src_videos.tar (from 5 parts)",
+     "type": "split-tar",
+     "ok": true,
+     "members": "660",
+     "error": null
+    }
+   ],
+   "verification_status": "PASS"
+  },
+  "streaming_bench": {
+   "repo_id": "mjuicem/StreamingBench",
+   "commit_sha": "48872fa707124474ce4c5172ddc58efb8bc88058",
+   "commit_sha_pinned_for_download": "48872fa70712",
+   "code_repo": "THUNLP-MT/StreamingBench",
+   "code_repo_sha": "89299232c4cc1cc3721951173c5f107b48cf6877",
+   "local_path": "/mnt/ssd/hf_models/datasets/streaming_bench",
+   "video_root": "/mnt/ssd/hf_models/datasets/streaming_bench/extracted_by_task",
+   "license": {
+    "hf_card": null,
+    "code_LICENSE": "MIT",
+    "readme": null
+   },
+   "hf_declared_license": null,
+   "gated": false,
+   "sizes": {
+    "hf_files_checked": 39,
+    "hf_size_mismatches": 0,
+    "downloaded_bytes": 202569478681,
+    "on_disk_bytes_total": 538467180635
+   },
+   "counts": {
+    "videos_on_disk": 900,
+    "questions": 4500,
+    "upstream_claims": {
+     "videos": 900,
+     "qa": 4500
+    },
+    "crosscheck": {
+     "questions": 4500,
+     "video_dirs_referenced": 901,
+     "video_dirs_on_disk": 900,
+     "questions_with_missing_video": 502
+    }
+   },
+   "ffprobe": {
+    "probed": 900,
+    "ok": 900,
+    "failures": 0,
+    "failure_paths": [],
+    "duration_s": {
+     "min": 90.0,
+     "median": 597.031474,
+     "max": 1691.341497,
+     "total_hours": 145.9
+    },
+    "codecs": {
+     "h264": 880,
+     "hevc": 20
+    }
+   },
+   "archives": [
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Anomaly Context Understanding.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Emotion Recognition.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Misleading Context Understanding.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Multimodal Alignment.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Proactive Output_1-25.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Proactive Output_26-50.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Real-Time Visual Understanding_1-50.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Real-Time Visual Understanding_101-150.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Real-Time Visual Understanding_151-200.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Real-Time Visual Understanding_201-250.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Real-Time Visual Understanding_251-300.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Real-Time Visual Understanding_301-350.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Real-Time Visual Understanding_351-400.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Real-Time Visual Understanding_401-450.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Real-Time Visual Understanding_451-500.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Real-Time Visual Understanding_51-100.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Scene Understanding_1-25.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Scene Understanding_26-50.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Sequential Question Answering_1-25.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Sequential Question Answering_26-50.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    },
+    {
+     "archive": "/mnt/ssd/hf_models/datasets/streaming_bench/hf/Source Discrimination.zip",
+     "type": "zip",
+     "ok": true,
+     "first_bad": null,
+     "members": null
+    }
+   ],
+   "verification_status": "PASS"
+  }
+ }
+}

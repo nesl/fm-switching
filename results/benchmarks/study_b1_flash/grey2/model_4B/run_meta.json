@@ -1,0 +1,117 @@
+{
+ "study": "StudyB1-grey2",
+ "model": "4B",
+ "gpu": 0,
+ "supersedes": "grey control of the 2026-11-05/06 run (b1_run.py:428-433)",
+ "template_sha256": "25a230fd94807c6c11eded1b4c0e481dee87e66eed0597e72b19fd864e1e0274",
+ "frames_sha256": "16d37b520dc102b6605033b361b2aaba46b0621fc3a5056c91b76f3c126e2b7a",
+ "grey_n_per_cell": 100,
+ "seed": 0,
+ "datasets": [
+  "rtv_bench",
+  "ovo_bench",
+  "streaming_bench"
+ ],
+ "herbench": "removed from StudyB1 by user decision 2026-11-06",
+ "servers": [
+  {
+   "arm": "Instruct",
+   "repo": "Qwen/Qwen3-VL-4B-Instruct",
+   "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+   "cmd": [
+    "/mnt/ssd/hf_models/venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec70b05090aa6165b016eac8ec08e71b17",
+    "--served-model-name",
+    "4BI",
+    "--port",
+    "8010",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.90",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 37, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 42.1,
+   "log": "server_4BI_1106_134532.log",
+   "started": "2026-11-06T13:46:14.388221"
+  },
+  {
+   "arm": "Thinking",
+   "repo": "Qwen/Qwen3-VL-4B-Thinking",
+   "revision": "1de27d8c51f12e819435303b9e84c4e25ba8401e",
+   "cmd": [
+    "/mnt/ssd/hf_models/venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-4B-Thinking/snapshots/1de27d8c51f12e819435303b9e84c4e25ba8401e",
+    "--served-model-name",
+    "4BT",
+    "--port",
+    "8010",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.90",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 37, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 42.1,
+   "log": "server_4BT_1106_145512.log",
+   "started": "2026-11-06T14:55:54.495298"
+  }
+ ],
+ "events": [
+  {
+   "arm": "Instruct",
+   "stopped": "2026-11-06T14:55:12.434597",
+   "counters": {
+    "ok": 1396,
+    "fail": 0,
+    "skip": 0
+   }
+  },
+  {
+   "arm": "Thinking",
+   "stopped": "2026-11-06T15:40:49.003882",
+   "counters": {
+    "ok": 1996,
+    "fail": 0,
+    "skip": 0
+   }
+  }
+ ],
+ "spotcheck": {
+  "n": 20,
+  "mismatches": [],
+  "all_match": true
+ },
+ "final_counters": {
+  "ok": 1996,
+  "fail": 0,
+  "skip": 0
+ },
+ "finished": "2026-11-06T15:40:49.004201"
+}

@@ -1,0 +1,117 @@
+{
+ "study": "StudyB1-grey2",
+ "model": "8B",
+ "gpu": 1,
+ "supersedes": "grey control of the 2026-11-05/06 run (b1_run.py:428-433)",
+ "template_sha256": "25a230fd94807c6c11eded1b4c0e481dee87e66eed0597e72b19fd864e1e0274",
+ "frames_sha256": "16d37b520dc102b6605033b361b2aaba46b0621fc3a5056c91b76f3c126e2b7a",
+ "grey_n_per_cell": 100,
+ "seed": 0,
+ "datasets": [
+  "rtv_bench",
+  "ovo_bench",
+  "streaming_bench"
+ ],
+ "herbench": "removed from StudyB1 by user decision 2026-11-06",
+ "servers": [
+  {
+   "arm": "Instruct",
+   "repo": "Qwen/Qwen3-VL-8B-Instruct",
+   "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+   "cmd": [
+    "/mnt/ssd/hf_models/venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-8B-Instruct/snapshots/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "--served-model-name",
+    "8BI",
+    "--port",
+    "8020",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.90",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 37, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 78.1,
+   "log": "server_8BI_1106_134532.log",
+   "started": "2026-11-06T13:46:50.427514"
+  },
+  {
+   "arm": "Thinking",
+   "repo": "Qwen/Qwen3-VL-8B-Thinking",
+   "revision": "92f3c4b4feadd3a016ef468d103bb5f58b2a2c6b",
+   "cmd": [
+    "/mnt/ssd/hf_models/venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-8B-Thinking/snapshots/92f3c4b4feadd3a016ef468d103bb5f58b2a2c6b",
+    "--served-model-name",
+    "8BT",
+    "--port",
+    "8020",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.90",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 37, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 42.1,
+   "log": "server_8BT_1106_142322.log",
+   "started": "2026-11-06T14:24:04.656528"
+  }
+ ],
+ "events": [
+  {
+   "arm": "Instruct",
+   "stopped": "2026-11-06T14:23:22.584994",
+   "counters": {
+    "ok": 884,
+    "fail": 0,
+    "skip": 0
+   }
+  },
+  {
+   "arm": "Thinking",
+   "stopped": "2026-11-06T15:07:09.753505",
+   "counters": {
+    "ok": 1484,
+    "fail": 0,
+    "skip": 0
+   }
+  }
+ ],
+ "spotcheck": {
+  "n": 20,
+  "mismatches": [],
+  "all_match": true
+ },
+ "final_counters": {
+  "ok": 1484,
+  "fail": 0,
+  "skip": 0
+ },
+ "finished": "2026-11-06T15:07:09.753870"
+}

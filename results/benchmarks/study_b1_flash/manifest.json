@@ -1,0 +1,183 @@
+{
+ "study": "StudyB1-flash",
+ "description": "Per-question capability of Qwen3-VL 4B/8B, Instruct/Thinking on RTV-Bench, OVO-Bench, StreamingBench, HERBench at each benchmark's published query time. Descriptive capability pass.",
+ "host": "flash",
+ "gpus": {
+  "4B": "RTX 3090 Ti (GPU 0)",
+  "8B": "RTX A6000 (GPU 1)"
+ },
+ "window": {
+  "start": "2026-11-05T19:37:18-08:00",
+  "new_requests_stopped": "2026-11-06T09:00 local (pre-registered)",
+  "4B_finished": "2026-11-06T09:02:25",
+  "8B_finished": "2026-11-06T09:08:48"
+ },
+ "git_commit_at_analysis": "1be44225e911ebcc83a04664e13a5a04e8a44083",
+ "stack": {
+  "vllm": "0.19.1",
+  "torch": "2.10.0+cu128",
+  "driver": "550.163.01",
+  "note": "CUDA-12 ceiling: every PyPI vLLM >=0.20.0 is a CUDA-13 build. Differs from D-series 0.31.0/torch 2.13.0+cu129."
+ },
+ "code": {
+  "frames": "experiments/benchmarks/b1_frames.py",
+  "frames_sha256": "16d37b520dc102b6605033b361b2aaba46b0621fc3a5056c91b76f3c126e2b7a",
+  "parse": "experiments/benchmarks/b1_parse.py",
+  "parse_sha256": "1487345ef6883e1b86560d85d02f5307205243be519eb687d8c958bb94b1c0f4",
+  "run": "experiments/benchmarks/b1_run.py",
+  "analyse": "experiments/benchmarks/b1_analyse_flash.py",
+  "watchdog": "experiments/benchmarks/b1_watchdog.sh",
+  "analyse_rev2": "experiments/benchmarks/b1_analyse2.py",
+  "grey2": "experiments/benchmarks/b1_grey2.py"
+ },
+ "row_counts": {
+  "total": 40080,
+  "benchmark": 39276,
+  "grey_control": 800,
+  "render_errors": 4
+ },
+ "stop_rules": {
+  "disk_50GB": "not triggered (min free 1801 GB)",
+  "per_arm_failure_1pct": "not triggered (2 per ~20000)",
+  "cutoff_0900": "reached as pre-registered"
+ },
+ "known_defects": {
+  "grey_control_degenerate": "The grey-frame negative control was built as one synthetic question with constant gold 'A' repeated 100x per cell, instead of real benchmark questions with grey frames. It measures answer-position bias, not accuracy-without-video. Reported in reports/study_b1_flash.md section 7; the section 8.2 nulls are INCONCLUSIVE pending a correct re-run (~800 requests).",
+  "corrupt_source_video": "StreamingBench 'Real-Time Visual Understanding/sample_332' fails PyAV decode identically on both GPUs; 2 questions x 2 models unevaluable, counted as coverage loss not as wrong answers."
+ },
+ "files": [
+  {
+   "path": "SUPERSEDED.md",
+   "bytes": 2385,
+   "sha256": "e0b5c671a3f016e39fd303feccb5e50a1fe3fb1914ab0024cac6bbb9ad0c20b7",
+   "rows": null
+  },
+  {
+   "path": "analysis.json",
+   "bytes": 212912,
+   "sha256": "3648712b16910cd305bb2300a39949f936fcdbbcc1701aa0a6c62b2ada888917",
+   "rows": null
+  },
+  {
+   "path": "analysis_rev2.json",
+   "bytes": 287188,
+   "sha256": "9976539919bfbbfca12566aa9c52b55771ee64aac20b1b1656df14b5f3c6b104",
+   "rows": null
+  },
+  {
+   "path": "crosshost_frame_check.json",
+   "bytes": 5508,
+   "sha256": "8df8a2d41efe8d8eae5bdf29f949825b04b595321e7ca2074d28a8b0928f85f4",
+   "rows": null
+  },
+  {
+   "path": "grey2/model_4B/requests.part000.jsonl.gz",
+   "bytes": 1838291,
+   "sha256": "265bcfe802819fa9c146dd03cab6550a4f38abc4c05c9f4365324640c729d86a",
+   "rows": 1996
+  },
+  {
+   "path": "grey2/model_4B/run_meta.json",
+   "bytes": 2660,
+   "sha256": "85c5fe473f582f3dc79688ff5c3db1286140b3559a0f2aefde7844b06b8c695b",
+   "rows": null
+  },
+  {
+   "path": "grey2/model_8B/requests.part000.jsonl.gz",
+   "bytes": 870098,
+   "sha256": "01ebc3d92f2f3239ed0111d66e0dec4cf28979e22d211e3973255857e85fe998",
+   "rows": 1484
+  },
+  {
+   "path": "grey2/model_8B/run_meta.json",
+   "bytes": 2659,
+   "sha256": "b846e8df514fe16bfa52876a79e76832591ba8c88922cda9558b424a8846ddf8",
+   "rows": null
+  },
+  {
+   "path": "index/herbench.jsonl",
+   "bytes": 33675504,
+   "sha256": "16e7cdbbeb93b3ad5aa0d8599b8f178f53db8beeae16cf1f2e5f7f4e37cb9c29",
+   "rows": 27566
+  },
+  {
+   "path": "index/index_summary.json",
+   "bytes": 3401,
+   "sha256": "a3c17184fd1270f81e4e4cdf497ab616015fe227a80664b960069ee16587d9c7",
+   "rows": null
+  },
+  {
+   "path": "index/ovo_bench.jsonl",
+   "bytes": 1605193,
+   "sha256": "164e0fcbd747595a074d159eb79597c0c2db62566db038a19cea050cf1488999",
+   "rows": 3035
+  },
+  {
+   "path": "index/rtv_bench.jsonl",
+   "bytes": 2490280,
+   "sha256": "785e02ddfcee3a32173f079b597fc57bd0df49415272217209dad2ebfcd5ee27",
+   "rows": 4608
+  },
+  {
+   "path": "index/streaming_bench.jsonl",
+   "bytes": 2762043,
+   "sha256": "950b9dae8d4f94df0b0ae9d1ecc836b02e7410e0de58568b318809707bdb708f",
+   "rows": 3250
+  },
+  {
+   "path": "model_4B/requests.part000.jsonl.gz",
+   "bytes": 25645330,
+   "sha256": "7412d02d03131ac6b1f8d3ada5a45ce25a3862ba46908d8028c25ef9c9edc413",
+   "rows": 19736
+  },
+  {
+   "path": "model_4B/run_meta.json",
+   "bytes": 4046,
+   "sha256": "93795c06b0ea6c320c9c4ddba6726e568342ab782d3187b0d3242d534f352bc1",
+   "rows": null
+  },
+  {
+   "path": "model_8B/requests.part000.jsonl.gz",
+   "bytes": 26827101,
+   "sha256": "e69f9df24d1630edd1c48c46e49189e70ecbc0e4641d1875442c3dcbd0a35365",
+   "rows": 20344
+  },
+  {
+   "path": "model_8B/run_meta.json",
+   "bytes": 4046,
+   "sha256": "96ef0666268ba4b3e834c567638e1d3ecdb8ddf0fa3cdcdaba5dbcfbc77d243e",
+   "rows": null
+  }
+ ],
+ "renamed_on_merge": {
+  "experiments/benchmarks/b1_analyse.py": "experiments/benchmarks/b1_analyse_flash.py",
+  "experiments/datasets/verify_annotations.py": "experiments/datasets/verify_annotations_flash.py",
+  "reason": "origin/main commit 1be4422 added different H100-host scripts at both paths; flash's versions renamed so both hosts' scripts coexist (user decision 2026-11-06)."
+ },
+ "revision": 2,
+ "revision_2": {
+  "date": "2026-11-06",
+  "what": "StudyB1-grey2: corrected grey-frame control + RTV-Bench Instruct HISTORY remainder.",
+  "script": "experiments/benchmarks/b1_grey2.py",
+  "analysis": "experiments/benchmarks/b1_analyse2.py -> analysis_rev2.json",
+  "rows": {
+   "4B": 1996,
+   "8B": 1484,
+   "failures": 0,
+   "rtv_remainder": {
+    "4B": 896,
+    "8B": 384
+   },
+   "grey2_cells": 22,
+   "grey2_per_cell": 100
+  },
+  "spotcheck": "20 already-completed RTV Instruct HISTORY requests re-run per model; identical predicted answers AND identical frame SHA-256 on 20/20 for both models.",
+  "coverage_change": "RTV-Bench Instruct HISTORY 80.6%->100% (4B) and 91.7%->100% (8B).",
+  "scope_changes_user_2026_11_06": [
+   "HERBench removed from StudyB1; its 288 partial rows kept on disk, excluded from all analysis.",
+   "StreamingBench Instruct HISTORY remainder not run; coverage reported as is (0/3250).",
+   "Thinking stays at its current sample; all Thinking comparisons matched-only."
+  ],
+  "supersedes": "analysis.json and the grey block of the 2026-11-05/06 run; see SUPERSEDED.md"
+ }
+}
