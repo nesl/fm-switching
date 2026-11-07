@@ -1,0 +1,143 @@
+{
+ "servers": [
+  {
+   "model": "8B",
+   "arm": "Instruct",
+   "repo": "Qwen/Qwen3-VL-8B-Instruct",
+   "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+   "cmd": [
+    "/mnt/ssd/hf_models/venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-8B-Instruct/snapshots/0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+    "--served-model-name",
+    "8BI",
+    "--port",
+    "8020",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.90",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 37, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--host",
+    "127.0.0.1"
+   ],
+   "gpu": 1,
+   "startup_s": 45.1,
+   "log": "server_8BI_1105_193721.log",
+   "started": "2026-11-05T19:38:06.408652",
+   "vllm": "0.19.1"
+  },
+  {
+   "model": "8B",
+   "arm": "Thinking",
+   "repo": "Qwen/Qwen3-VL-8B-Thinking",
+   "revision": "92f3c4b4feadd3a016ef468d103bb5f58b2a2c6b",
+   "cmd": [
+    "/mnt/ssd/hf_models/venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/mnt/ssd/hf_models/models--Qwen--Qwen3-VL-8B-Thinking/snapshots/92f3c4b4feadd3a016ef468d103bb5f58b2a2c6b",
+    "--served-model-name",
+    "8BT",
+    "--port",
+    "8020",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.90",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 37, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--host",
+    "127.0.0.1"
+   ],
+   "gpu": 1,
+   "startup_s": 81.1,
+   "log": "server_8BT_1106_050152.log",
+   "started": "2026-11-06T05:03:13.334120",
+   "vllm": "0.19.1"
+  }
+ ],
+ "events": [
+  {
+   "arm": "Instruct",
+   "stopped": "2026-11-06T05:01:52.236276",
+   "counters": {
+    "ok": 18350,
+    "fail": 2,
+    "skip": 0
+   },
+   "stop_reason": null
+  },
+  {
+   "arm": "Thinking",
+   "stopped": "2026-11-06T09:08:48.660261",
+   "counters": {
+    "ok": 20342,
+    "fail": 2,
+    "skip": 0
+   },
+   "stop_reason": null
+  }
+ ],
+ "frames_spec": {
+  "code_path": "experiments/benchmarks/b1_frames.py",
+  "code_sha256": "16d37b520dc102b6605033b361b2aaba46b0621fc3a5056c91b76f3c126e2b7a",
+  "parse_path": "experiments/benchmarks/b1_parse.py",
+  "parse_sha256": "1487345ef6883e1b86560d85d02f5307205243be519eb687d8c958bb94b1c0f4",
+  "run_path": "experiments/benchmarks/b1_run.py",
+  "recent_n": 9,
+  "recent_span_s": 3.0,
+  "history_n": 37,
+  "out_wh": [
+   768,
+   432
+  ],
+  "resize": "PIL LANCZOS",
+  "encode": "PNG lossless",
+  "versions": {
+   "pyav": "17.1.0",
+   "ffmpeg_libavcodec": "62.28.101",
+   "ffmpeg_libavformat": "62.12.101",
+   "ffmpeg_libavutil": "60.26.101",
+   "pillow": "12.3.0"
+  },
+  "template_sha256": "25a230fd94807c6c11eded1b4c0e481dee87e66eed0597e72b19fd864e1e0274",
+  "templates": {
+   "letter": "You are given {n} frames extracted from a video, ordered oldest first.\nThey are the only visual information available.\n\n{images}\nQuestion: {question}\nOptions:\n{options}\nAnswer with the letter of the best option and nothing else.",
+   "count": "You are given {n} frames extracted from a video, ordered oldest first.\nThey are the only visual information available.\n\n{images}\n{question}\nProvide your answer as a single number (e.g., 0, 1, 2, 3...) indicating the total count.\nDo not include any additional text or explanation in your response.",
+   "yesno": "You are given {n} frames extracted from a video, ordered oldest first.\nThey are the only visual information available.\n\n{images}\n{question}\nAnswer only with \u201cYes\u201d or \u201cNo\u201d.\nDo not include any additional text or explanation in your response."
+  }
+ },
+ "concurrency": 8,
+ "render_threads": 8,
+ "finished": "2026-11-06T09:08:48.660672",
+ "final_counters": {
+  "ok": 20342,
+  "fail": 2,
+  "skip": 0
+ },
+ "frame_cache": {
+  "entries": 18740,
+  "bytes": 6442363493,
+  "hits": 29337,
+  "misses": 381187
+ }
+}

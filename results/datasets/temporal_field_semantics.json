@@ -1,0 +1,1004 @@
+{
+ "_note": "Annotation-file structural checks only; no inference, no video decoding.",
+ "rtv_bench": {
+  "n_questions": 4608,
+  "n_videos": 552,
+  "recurrence_by_video_and_question_text": {
+   "groups": 2889,
+   "groups_gt1_row": 1116,
+   "groups_where_answer_changes": 1102,
+   "rows_per_group": {
+    "1": 1773,
+    "2": 703,
+    "3": 233,
+    "4": 171,
+    "5": 8,
+    "6": 1
+   }
+  },
+  "recurrence_by_questionID_group_token": {
+   "id_groups": 1011,
+   "groups_gt1_row": 1010,
+   "groups_where_answer_changes": 1010,
+   "rows_per_group": {
+    "1": 1,
+    "2": 3,
+    "3": 20,
+    "4": 597,
+    "5": 212,
+    "6": 160,
+    "7": 11,
+    "8": 7
+   },
+   "id_groups_spanning_more_than_one_video": 0,
+   "id_format": "q-group-<token>-<question_index>-option<N>"
+  },
+  "start_time": {
+   "distinct_values": [
+    0
+   ],
+   "meaning": "constant 0 in every row; carries no per-question information. Used only by scripts/data_preparation/prepare_rtv_clips.py:128-157 (an optional clip-prep path), never by the eval path.",
+   "source": "data: 4608/4608 rows have start_time==0; scripts/infer/infer_model_rtv.py:101,107 passes only end_time"
+  },
+  "end_time": {
+   "meaning": "query timestamp: the point in the stream at which the question is asked. The clip handed to the model is [0, end_time].",
+   "source": "scripts/utils/video_utils.py:177-187 crop_video_ffmpeg runs ffmpeg -ss 0 -t <end_time>; called at scripts/infer/infer_model_rtv.py:101,107 with end_time=float(sample['end_time']); README.md:122-127 'evaluation operates on video clips ... split according to the provided timestamps'"
+  },
+  "multi_answer_over_time": {
+   "verdict": "PRESENT",
+   "source": "README.md:38 'Multi-Timestamp Question Answering: answers evolve as video content changes over time'; plus the recurrence counts above"
+  },
+  "examples": [
+   {
+    "group": "q-group-77wizqc9s",
+    "video": "SportsCam_010.mp4",
+    "type": "Event-IA",
+    "rows": [
+     {
+      "questionID": "q-group-77wizqc9s-0-option1",
+      "end_time": 227.67,
+      "question": "Does this shot show the referee?",
+      "options": {
+       "A": "Yes",
+       "B": "No",
+       "C": "I don't know"
+      },
+      "answer": "B"
+     },
+     {
+      "questionID": "q-group-77wizqc9s-2-option0",
+      "end_time": 283.9,
+      "question": "What is the reason for the referee's decision here?",
+      "options": {
+       "A": "Indicates the attacking player is offside when receiving the ball",
+       "B": "Indicates the defending player committed a foul",
+       "C": "Indicates the attacking player is taking a free kick",
+       "D": "The referee made no decision"
+      },
+      "answer": "A"
+     },
+     {
+      "questionID": "q-group-77wizqc9s-1-option2",
+      "end_time": 302.04,
+      "question": "How many referees are there in this shot?",
+      "options": {
+       "A": "0",
+       "B": "1",
+       "C": "2",
+       "D": "3"
+      },
+      "answer": "C"
+     },
+     {
+      "questionID": "q-group-77wizqc9s-2-option2",
+      "end_time": 476.76,
+      "question": "What is the reason for the referee's decision here?",
+      "options": {
+       "A": "Indicates the attacking player is offside when receiving the ball",
+       "B": "Indicates the defending player committed a foul",
+       "C": "Indicates the attacking player is taking a free kick",
+       "D": "The referee made no decision"
+      },
+      "answer": "C"
+     }
+    ]
+   },
+   {
+    "group": "q-group-u1yjsiyl5",
+    "video": "SportsCam_010.mp4",
+    "type": "Event-PU",
+    "rows": [
+     {
+      "questionID": "q-group-u1yjsiyl5-2-option0",
+      "end_time": 74.6,
+      "question": "What happened at this moment?",
+      "options": {
+       "A": "One team is making a substitution",
+       "B": "Player celebrates the goal",
+       "C": "Player takes a set piece",
+       "D": "A player from one team scores a goal"
+      },
+      "answer": "A"
+     },
+     {
+      "questionID": "q-group-u1yjsiyl5-2-option3",
+      "end_time": 146.95,
+      "question": "What happened at this moment?",
+      "options": {
+       "A": "One team is making a substitution",
+       "B": "Player celebrates the goal",
+       "C": "Player takes a set piece",
+       "D": "A player from one team scores a goal"
+      },
+      "answer": "D"
+     },
+     {
+      "questionID": "q-group-u1yjsiyl5-2-option2",
+      "end_time": 153.68,
+      "question": "What happened at this moment?",
+      "options": {
+       "A": "One team is making a substitution",
+       "B": "Player celebrates the goal",
+       "C": "Player takes a set piece",
+       "D": "A player from one team scores a goal"
+      },
+      "answer": "C"
+     },
+     {
+      "questionID": "q-group-u1yjsiyl5-0-option2",
+      "end_time": 202.85,
+      "question": "How many defending players are there in this shot?",
+      "options": {
+       "A": "4",
+       "B": "5",
+       "C": "6",
+       "D": "7"
+      },
+      "answer": "C"
+     },
+     {
+      "questionID": "q-group-u1yjsiyl5-1-option1",
+      "end_time": 649.89,
+      "question": "How many goals were scored in this video?",
+      "options": {
+       "A": "4",
+       "B": "5",
+       "C": "6",
+       "D": "7"
+      },
+      "answer": "B"
+     },
+     {
+      "questionID": "q-group-u1yjsiyl5-2-option1",
+      "end_time": 657.74,
+      "question": "What happened at this moment?",
+      "options": {
+       "A": "One team is making a substitution",
+       "B": "Player celebrates the goal",
+       "C": "Player takes a set piece",
+       "D": "A player from one team scores a goal"
+      },
+      "answer": "B"
+     }
+    ]
+   },
+   {
+    "group": "q-group-9eq4fqfqg",
+    "video": "SportsCam_001.mp4",
+    "type": "Object-SP",
+    "rows": [
+     {
+      "questionID": "q-group-9eq4fqfqg-0-option2",
+      "end_time": 14.96,
+      "question": "How many teams are shown in the opening scene?",
+      "options": {
+       "A": "3",
+       "B": "4",
+       "C": "5",
+       "D": "Other"
+      },
+      "answer": "C"
+     },
+     {
+      "questionID": "q-group-9eq4fqfqg-1-option1",
+      "end_time": 61.9,
+      "question": "In which tournament did this match take place?",
+      "options": {
+       "A": "2014 Brazil World Cup",
+       "B": "2018 Russia World Cup",
+       "C": "2022 Qatar World Cup",
+       "D": "2022 Qatar World Cup"
+      },
+      "answer": "B"
+     },
+     {
+      "questionID": "q-group-9eq4fqfqg-2-option2",
+      "end_time": 583.53,
+      "question": "Which brand appeared on the sidelines at this moment?",
+      "options": {
+       "A": "VISA",
+       "B": "GAZPROM",
+       "C": "WANDA",
+       "D": "Adidas"
+      },
+      "answer": "C"
+     },
+     {
+      "questionID": "q-group-9eq4fqfqg-2-option1",
+      "end_time": 3255.93,
+      "question": "Which brand appeared on the sidelines at this moment?",
+      "options": {
+       "A": "VISA",
+       "B": "GAZPROM",
+       "C": "WANDA",
+       "D": "Adidas"
+      },
+      "answer": "B"
+     },
+     {
+      "questionID": "q-group-9eq4fqfqg-2-option0",
+      "end_time": 4606.22,
+      "question": "Which brand appeared on the sidelines at this moment?",
+      "options": {
+       "A": "VISA",
+       "B": "GAZPROM",
+       "C": "WANDA",
+       "D": "Adidas"
+      },
+      "answer": "A"
+     },
+     {
+      "questionID": "q-group-9eq4fqfqg-2-option3",
+      "end_time": 5256.73,
+      "question": "Which brand appeared on the sidelines at this moment?",
+      "options": {
+       "A": "VISA",
+       "B": "GAZPROM",
+       "C": "WANDA",
+       "D": "Adidas"
+      },
+      "answer": "D"
+     }
+    ]
+   }
+  ]
+ },
+ "ovo_bench": {
+  "n_entries": 1640,
+  "n_videos": 644,
+  "n_queries_backward_plus_subqueries": 3035,
+  "per_task": {
+   "ACR": {
+    "entries": 109,
+    "fields_present": {
+     "realtime": 109,
+     "ask_time": 0,
+     "clue_time": 0,
+     "start_times": 0,
+     "end_times": 0,
+     "start_time": 0,
+     "end_time": 0,
+     "test_info": 0
+    },
+    "test_info_subqueries": 0,
+    "example": {
+     "id": 1210,
+     "task": "ACR",
+     "video": "Ego4D/video/e1fa5de2-eb21-41a3-85b3-882a3652df42.mp4",
+     "realtime": 201.93,
+     "question": "What is he doing with that tool?",
+     "answer": "He is inflating the tire with the tool.",
+     "options": [
+      "He is repairing a bicycle.",
+      "She is using a jack to lift a car.",
+      "He is tightening bolts on a wheel.",
+      "He is inflating a tire."
+     ],
+     "gt": 3
+    }
+   },
+   "ASI": {
+    "entries": 148,
+    "fields_present": {
+     "realtime": 148,
+     "ask_time": 0,
+     "clue_time": 0,
+     "start_times": 0,
+     "end_times": 0,
+     "start_time": 0,
+     "end_time": 0,
+     "test_info": 0
+    },
+    "test_info_subqueries": 0,
+    "example": {
+     "id": 483,
+     "task": "ASI",
+     "video": "COIN/Hf2AisK1wHY.mp4",
+     "realtime": 136,
+     "question": "What does the person do after load the wheel",
+     "answer": "pump up the tire",
+     "options": [
+      "pump up the tire",
+      "unload the wheel",
+      "load the tire",
+      "load the inner tube"
+     ],
+     "gt": 0
+    }
+   },
+   "ATR": {
+    "entries": 116,
+    "fields_present": {
+     "realtime": 116,
+     "ask_time": 0,
+     "clue_time": 0,
+     "start_times": 0,
+     "end_times": 0,
+     "start_time": 0,
+     "end_time": 0,
+     "test_info": 0
+    },
+    "test_info_subqueries": 0,
+    "example": {
+     "id": 993,
+     "task": "ATR",
+     "video": "YouTube_Games/PLJ3VIGhVd3r8Int6IZT_v3S_BzG9RVfiG&index=1.mp4",
+     "realtime": 279,
+     "question": "What is the color of the dog?",
+     "answer": "Black.",
+     "options": [
+      "White.",
+      "Black.",
+      "Pink.",
+      "Brown."
+     ],
+     "gt": 1
+    }
+   },
+   "CRR": {
+    "entries": 48,
+    "fields_present": {
+     "realtime": 0,
+     "ask_time": 48,
+     "clue_time": 48,
+     "start_times": 0,
+     "end_times": 0,
+     "start_time": 0,
+     "end_time": 0,
+     "test_info": 48
+    },
+    "test_info_subqueries": 240,
+    "example": {
+     "id": 1468,
+     "task": "CRR",
+     "video": "MovieNet/tt0048028.mp4",
+     "question": "The woman in a black coat walks towards the direction of the black car, what action does she take to the car?",
+     "answer": "She walks past the car.",
+     "ask_time": 297,
+     "clue_time": 308,
+     "test_info": [
+      {
+       "realtime": 297,
+       "type": 0
+      },
+      {
+       "realtime": 302,
+       "type": 0
+      },
+      {
+       "realtime": 310,
+       "type": 1
+      },
+      {
+       "realtime": 318,
+       "type": 1
+      },
+      {
+       "realtime": 338,
+       "type": 1
+      }
+     ]
+    }
+   },
+   "EPM": {
+    "entries": 297,
+    "fields_present": {
+     "realtime": 297,
+     "ask_time": 0,
+     "clue_time": 0,
+     "start_times": 0,
+     "end_times": 0,
+     "start_time": 0,
+     "end_time": 0,
+     "test_info": 0
+    },
+    "test_info_subqueries": 0,
+    "example": {
+     "id": 0,
+     "task": "EPM",
+     "video": "Ego4D/clips/ec4a3ba3-eb00-4aa8-9b41-36043ece98f7.mp4",
+     "realtime": 215,
+     "question": "Who did I communicate to  when chopping egg plants?",
+     "answer": "a person with blue shirt",
+     "options": [
+      "a person with brown shirt",
+      "a person with green shirt",
+      "a person with blue shirt",
+      "a person with white shirt"
+     ],
+     "gt": 2
+    }
+   },
+   "FPD": {
+    "entries": 101,
+    "fields_present": {
+     "realtime": 101,
+     "ask_time": 0,
+     "clue_time": 0,
+     "start_times": 0,
+     "end_times": 0,
+     "start_time": 0,
+     "end_time": 0,
+     "test_info": 0
+    },
+    "test_info_subqueries": 0,
+    "example": {
+     "id": 1109,
+     "task": "FPD",
+     "video": "Ego4D/video/005efbab-c314-48d8-8dd9-bfc1263ec5df.mp4",
+     "realtime": 88.43,
+     "question": "What is this person going to do?",
+     "answer": "The person is going to drill a hole into the wires or material in front of them.",
+     "options": [
+      "The individual intends to plant a tree.",
+      "The person is going to drill a hole.",
+      "The person is planning to paint a mural.",
+      "The person is preparing to change a tire."
+     ],
+     "gt": 1
+    }
+   },
+   "HLD": {
+    "entries": 186,
+    "fields_present": {
+     "realtime": 186,
+     "ask_time": 0,
+     "clue_time": 0,
+     "start_times": 0,
+     "end_times": 0,
+     "start_time": 0,
+     "end_time": 0,
+     "test_info": 0
+    },
+    "test_info_subqueries": 0,
+    "example": {
+     "id": 297,
+     "task": "HLD",
+     "video": "Ego4D/clips/93231c7e-1cf4-4a20-b1f8-9cc9428915b2.mp4",
+     "question": "what did I put in the black dustbin?",
+     "answer": "Unable to answer",
+     "options": [
+      "empty water bottles",
+      "Unable to answer",
+      "old newspapers",
+      "food scraps"
+     ],
+     "gt": 1,
+     "realtime": 371
+    }
+   },
+   "OCR": {
+    "entries": 149,
+    "fields_present": {
+     "realtime": 149,
+     "ask_time": 0,
+     "clue_time": 0,
+     "start_times": 0,
+     "end_times": 0,
+     "start_time": 0,
+     "end_time": 0,
+     "test_info": 0
+    },
+    "test_info_subqueries": 0,
+    "example": {
+     "id": 1319,
+     "task": "OCR",
+     "video": "AutoEvalMetaData/106.mp4",
+     "realtime": 54.2,
+     "question": "What are the names listed on each lane of the pool?",
+     "answer": "Rapsys, Di Cola, De Tullio, Popovici, Djakovic, Maertens, Auboek, Markos",
+     "options": [
+      "Rapsys, Di Cola, De Tullio, Popovici, Djakovic, Maertens, Auboek, Markos",
+      "Leclos, Vekovishchev, Seto, Irie, Grothe, Schooling, Solaeche, Lazor",
+      "Fraser-Holmes, Krutohzmov, Meyer, Hosszu, Kromowidjojo, Stupp, Ohashi, King",
+      "Lochte, Dressel, Phelps, Cseh, Chalmers, Larkin, Peaty, Kenderesi"
+     ],
+     "gt": 0
+    }
+   },
+   "OJR": {
+    "entries": 184,
+    "fields_present": {
+     "realtime": 184,
+     "ask_time": 0,
+     "clue_time": 0,
+     "start_times": 0,
+     "end_times": 0,
+     "start_time": 0,
+     "end_time": 0,
+     "test_info": 0
+    },
+    "test_info_subqueries": 0,
+    "example": {
+     "id": 809,
+     "task": "OJR",
+     "video": "YouTube_Games/PLJ3VIGhVd3r8Int6IZT_v3S_BzG9RVfiG&index=1.mp4",
+     "realtime": 172,
+     "question": "What is under the monkey?",
+     "answer": "A piece of cloud.",
+     "options": [
+      "The trees",
+      "A piece of rock.",
+      "A piece of cloud.",
+      "The ground."
+     ],
+     "gt": 2
+    }
+   },
+   "REC": {
+    "entries": 82,
+    "fields_present": {
+     "realtime": 0,
+     "ask_time": 0,
+     "clue_time": 0,
+     "start_times": 82,
+     "end_times": 82,
+     "start_time": 0,
+     "end_time": 0,
+     "test_info": 82
+    },
+    "test_info_subqueries": 698,
+    "example": {
+     "id": 1558,
+     "task": "REC",
+     "video": "perception_test/video_4017.mp4",
+     "activity": "breaking something",
+     "start_times": [
+      6
+     ],
+     "end_times": [
+      17
+     ],
+     "test_info": [
+      {
+       "realtime": 17,
+       "count": 1
+      },
+      {
+       "realtime": 19,
+       "count": 1
+      },
+      {
+       "realtime": 32.0,
+       "count": 1
+      }
+     ]
+    }
+   },
+   "SSR": {
+    "entries": 42,
+    "fields_present": {
+     "realtime": 0,
+     "ask_time": 0,
+     "clue_time": 0,
+     "start_times": 0,
+     "end_times": 0,
+     "start_time": 42,
+     "end_time": 42,
+     "test_info": 42
+    },
+    "test_info_subqueries": 629,
+    "example": {
+     "id": 1516,
+     "task": "SSR",
+     "video": "COIN/xZecGPPhbHE.mp4",
+     "tutorial": "PutOnHairExtensions",
+     "all_steps": [
+      "pull up the hair to reserve place for the hair extensions",
+      "put on the hair extensions",
+      "put down the hair and comb"
+     ],
+     "start_time": [
+      25,
+      31,
+      107
+     ],
+     "end_time": [
+      30,
+      49,
+      117
+     ],
+     "test_info": [
+      {
+       "realtime": 27,
+       "step": "pull up the hair to reserve place for the hair extensions",
+       "type": 1
+      },
+      {
+       "realtime": 30,
+       "step": "pull up the hair to reserve place for the hair extensions",
+       "type": 1
+      },
+      {
+       "realtime": 26,
+       "step": "put on the hair extensions",
+       "type": 0
+      },
+      {
+       "realtime": 29,
+       "step": "put on the hair extensions",
+       "type": 0
+      },
+      {
+       "realtime": 33,
+       "step": "put on the hair extensions",
+       "type": 1
+      },
+      {
+       "realtime": 36,
+       "step": "put on the hair extensions",
+       "type": 1
+      },
+      {
+       "realtime": 49,
+       "step": "put on the hair extensions",
+       "type": 1
+      },
+      {
+       "realtime": 102,
+       "step": "put down the hair and comb",
+       "type": 0
+      },
+      {
+       "realtime": 105,
+       "step": "put down the hair and comb",
+       "type": 0
+      },
+      {
+       "realtime": 109,
+       "step": "put down the hair and comb",
+       "type": 1
+      },
+      {
+       "realtime": 112,
+       "step": "put down the hair and comb",
+       "type": 1
+      },
+      {
+       "realtime": 117,
+       "step": "put down the hair and comb",
+       "type": 1
+      }
+     ]
+    }
+   },
+   "STU": {
+    "entries": 178,
+    "fields_present": {
+     "realtime": 178,
+     "ask_time": 0,
+     "clue_time": 0,
+     "start_times": 0,
+     "end_times": 0,
+     "start_time": 0,
+     "end_time": 0,
+     "test_info": 0
+    },
+    "test_info_subqueries": 0,
+    "example": {
+     "id": 631,
+     "task": "STU",
+     "video": "YouTube_Games/PLJ3VIGhVd3r8Int6IZT_v3S_BzG9RVfiG&index=1.mp4",
+     "realtime": 172,
+     "question": "Where is the biggest giant standing?",
+     "answer": "In the back of other four giants.",
+     "options": [
+      "In the front of other four giants.",
+      "In the back of other four giants.",
+      "In the left of other four giants.",
+      "In the right of other four giants."
+     ],
+     "gt": 1
+    }
+   }
+  },
+  "meanings": {
+   "realtime": "query timestamp. The chunk given to the model is video[0:ceil(realtime)].",
+   "realtime_source": "utils/chunk_videos.py:30,39 end_time=math.ceil(data[i]['realtime']); clip=video.subclip(0,end_time); consumed at utils/OVOBench.py:30,62",
+   "test_info[].realtime": "query timestamp of each successive probe of the same item; chunk is video[0:ceil(realtime)] per probe.",
+   "test_info_source": "utils/chunk_videos.py:46,56; utils/OVOBench.py:93-105 loops test_info and writes a response per probe",
+   "ask_time": "CRR only: the time the question is posed. Strictly earlier than clue_time in 48/48 entries and equal to the first probe time in 48/48.",
+   "clue_time": "CRR only: the time from which the answer becomes supported by the video. test_info[].type is 0 strictly before it and 1 from it onward in 48/48 entries, and type selects the ground truth.",
+   "clue_time_source": "utils/OVOBenchScore.py:67 gt = 'No' if test_info_['type']==0 else 'Yes'; verified against the data (0 violations in 48 entries)",
+   "start_times/end_times": "REC only: intervals of each occurrence of the activity.",
+   "start_time/end_time": "SSR only: intervals of each tutorial step (parallel to all_steps).",
+   "REC_answer_over_time": "test_info[].count is the running number of occurrences visible by that probe time; scored at utils/OVOBenchScore.py:52 get_score_REC(response, test_info_['count'])",
+   "SSR_answer_over_time": "test_info[].type flips the yes/no ground truth per step and probe; utils/OVOBenchScore.py:59"
+  },
+  "crr_clue_time_check": {
+   "n": 48,
+   "entries_where_type0_iff_realtime_lt_clue_time": 48,
+   "entries_where_ask_time_lt_clue_time": 48,
+   "entries_where_ask_time_eq_first_probe": 48
+  }
+ },
+ "herbench": {
+  "full": {
+   "n": 27631,
+   "populated": 20919,
+   "fraction": 0.7571,
+   "by_task_type": {
+    "Action Counting": {
+     "n": 2040,
+     "with_required_timestamps": 2040,
+     "fraction": 1.0
+    },
+    "Action Sequence Integrity Identification": {
+     "n": 2212,
+     "with_required_timestamps": 2212,
+     "fraction": 1.0
+    },
+    "Appearance-Grounded Attribute Recognition": {
+     "n": 875,
+     "with_required_timestamps": 875,
+     "fraction": 1.0
+    },
+    "Appearance-Grounded Behavior & Interactions": {
+     "n": 1222,
+     "with_required_timestamps": 1222,
+     "fraction": 1.0
+    },
+    "Appearance-Grounded Localization & Trajectory": {
+     "n": 2360,
+     "with_required_timestamps": 2360,
+     "fraction": 1.0
+    },
+    "False Action Memory": {
+     "n": 2276,
+     "with_required_timestamps": 2276,
+     "fraction": 1.0
+    },
+    "False Object Memory": {
+     "n": 2310,
+     "with_required_timestamps": 2310,
+     "fraction": 1.0
+    },
+    "Multi-Entities Grounding and Localization": {
+     "n": 2922,
+     "with_required_timestamps": 2922,
+     "fraction": 1.0
+    },
+    "Multi-Person Duration Reasoning": {
+     "n": 2564,
+     "with_required_timestamps": 2564,
+     "fraction": 1.0
+    },
+    "Region Localized People Counting": {
+     "n": 2138,
+     "with_required_timestamps": 2138,
+     "fraction": 1.0
+    },
+    "Scene Verification & Arrangement": {
+     "n": 4568,
+     "with_required_timestamps": 0,
+     "fraction": 0.0
+    },
+    "Temporal Shot Ordering": {
+     "n": 2144,
+     "with_required_timestamps": 0,
+     "fraction": 0.0
+    }
+   },
+   "forms": {
+    "list of 'M:SS:mmm' (points)": 8838,
+    "absent": 6712,
+    "single string 'MM:SS-MM:SS' (one interval)": 6595,
+    "list of 'HH:MM:SS.mmm - HH:MM:SS.mmm' (intervals)": 5486
+   },
+   "list_length_histogram": {
+    "1": 591,
+    "2": 2892,
+    "3": 2694,
+    "4": 4848,
+    "5": 222,
+    "6": 174,
+    "7": 149,
+    "8": 105,
+    "9": 93,
+    "10": 50,
+    "11": 57,
+    "12": 56,
+    "13": 63,
+    "14": 35,
+    "15": 32,
+    "16": 35,
+    "17": 28,
+    "18": 33,
+    "19": 75,
+    "20": 74,
+    "21": 134,
+    "22": 155,
+    "23": 313,
+    "24": 544,
+    "25": 848,
+    "26": 3,
+    "27": 1,
+    "28": 1,
+    "29": 3,
+    "31": 4,
+    "32": 3,
+    "33": 1,
+    "34": 1,
+    "39": 2,
+    "42": 1,
+    "43": 1,
+    "47": 1,
+    "50": 1,
+    "63": 1
+   }
+  },
+  "lite_v2": {
+   "n": 1971,
+   "populated": 1491,
+   "fraction": 0.7565,
+   "by_task_type": {
+    "Action Counting": {
+     "n": 144,
+     "with_required_timestamps": 144,
+     "fraction": 1.0
+    },
+    "Action Sequence Integrity Identification": {
+     "n": 154,
+     "with_required_timestamps": 154,
+     "fraction": 1.0
+    },
+    "Appearance-Grounded Attribute Recognition": {
+     "n": 32,
+     "with_required_timestamps": 32,
+     "fraction": 1.0
+    },
+    "Appearance-Grounded Behavior & Interactions": {
+     "n": 87,
+     "with_required_timestamps": 87,
+     "fraction": 1.0
+    },
+    "Appearance-Grounded Localization & Trajectory": {
+     "n": 182,
+     "with_required_timestamps": 182,
+     "fraction": 1.0
+    },
+    "False Action Memory": {
+     "n": 158,
+     "with_required_timestamps": 158,
+     "fraction": 1.0
+    },
+    "False Object Memory": {
+     "n": 159,
+     "with_required_timestamps": 159,
+     "fraction": 1.0
+    },
+    "Multi-Entities Grounding and Localization": {
+     "n": 231,
+     "with_required_timestamps": 231,
+     "fraction": 1.0
+    },
+    "Multi-Person Duration Reasoning": {
+     "n": 196,
+     "with_required_timestamps": 196,
+     "fraction": 1.0
+    },
+    "Region Localized People Counting": {
+     "n": 148,
+     "with_required_timestamps": 148,
+     "fraction": 1.0
+    },
+    "Scene Verification & Arrangement": {
+     "n": 328,
+     "with_required_timestamps": 0,
+     "fraction": 0.0
+    },
+    "Temporal Shot Ordering": {
+     "n": 152,
+     "with_required_timestamps": 0,
+     "fraction": 0.0
+    }
+   },
+   "forms": {
+    "list of 'M:SS:mmm' (points)": 615,
+    "absent": 480,
+    "single string 'MM:SS-MM:SS' (one interval)": 449,
+    "list of 'HH:MM:SS.mmm - HH:MM:SS.mmm' (intervals)": 427
+   },
+   "list_length_histogram": {
+    "1": 135,
+    "2": 228,
+    "3": 191,
+    "4": 318,
+    "5": 160,
+    "6": 1,
+    "7": 2,
+    "8": 4,
+    "9": 1,
+    "11": 2
+   }
+  },
+  "meaning": {
+   "required_timestamps": "UNKNOWN",
+   "why": "The string 'required_timestamps' does not appear anywhere in the upstream code repo (grep over DanBenAmi/HERBench @fe66f377), and neither README.md nor USAGE_GUIDE.md defines it. Its format is read off the data only.",
+   "mrfs_does_not_use_it": "MRFS (Minimum Required Frame Set) is computed by searching over frame counts chosen by a frame_selector (uniform or BLIP similarity) and re-querying the model, not from any annotated timestamp.",
+   "mrfs_source": "evaluation/calculate_mrfs.py:68-74 (text-only -> MRFS=0; full context wrong -> undefined), :218 'mrfs': best_k; evaluation/frame_selectors/{uniform,vanila_blip_similarity}.py",
+   "event_onset": "REMOVED - no upstream source supports reading these as event onsets."
+  }
+ },
+ "streaming_bench": {
+  "per_file": {
+   "Contextual_Understanding.csv": {
+    "rows": 500,
+    "stripped_video_ids": 100
+   },
+   "Omni_Source_Understanding.csv": {
+    "rows": 1000,
+    "stripped_video_ids": 200
+   },
+   "Proactive_Output.csv": {
+    "rows": 250,
+    "stripped_video_ids": 51
+   },
+   "Proactive_Output_50.csv": {
+    "rows": 50,
+    "stripped_video_ids": 1
+   },
+   "Real_Time_Visual_Understanding.csv": {
+    "rows": 2500,
+    "stripped_video_ids": 500
+   },
+   "Sequential_Question_Answering.csv": {
+    "rows": 250,
+    "stripped_video_ids": 50
+   }
+  },
+  "ground_truth_time_stamp": {
+   "Proactive_Output.csv": {
+    "rows_with_gt_time_stamp": 250,
+    "videos": 51
+   },
+   "Proactive_Output_50.csv": {
+    "rows_with_gt_time_stamp": 50,
+    "videos": 1
+   }
+  },
+  "union_stripped_video_ids_excl_Proactive_Output_50": 901,
+  "upstream_claim_videos": 900,
+  "the_901": {
+   "cause": "Within the single video 'sample_2' of Proactive_Output.csv, three rows are prefixed 'Proactive Output' and two are prefixed 'Active Output'. Stripping the trailing question index therefore yields two ids for one video, so the union is 901 rather than 900.",
+   "anomalous_question_ids": [
+    "Active Output_sample_2_2",
+    "Active Output_sample_2_5"
+   ],
+   "all_sample_2_question_ids": [
+    "Active Output_sample_2_2",
+    "Active Output_sample_2_5",
+    "Proactive Output_sample_2_1",
+    "Proactive Output_sample_2_3",
+    "Proactive Output_sample_2_4"
+   ],
+   "note": "Reported only; no data was changed."
+  },
+  "meanings": {
+   "time_stamp": "query timestamp. The clip handed to the model ends here: split_video(video_path, time_start, timestamp) with time_start=0 unless a context window is configured.",
+   "time_stamp_source": "src/benchmark/StreamingBench.py:41-50; src/utils/video_execution.py:4,23-25 (ffmpeg ss=start, t=end-start)",
+   "ground_truth_time_stamp": "Proactive_Output only: the time at which the model is expected to emit ground_truth_output. The harness polls the model once per second from time_stamp+1 until ground_truth_time_stamp+4.",
+   "ground_truth_time_stamp_source": "src/benchmark/StreamingBenchProactive.py:35-50 (max_time = ground_truth_time + 4); src/data/count.py:43-57 scores a hit when the output lands within +/-2 s of ground_truth_time"
+  }
+ }
+}
