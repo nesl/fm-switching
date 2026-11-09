@@ -2,7 +2,7 @@
 
 **E-id:** StudyB1-h100 (pre-registered 2026-11-05 ~19:40, before any B1 inference; authorised by the user).
 
-**Status:** IN PROGRESS. **SNAPSHOT 2026-11-06 ~13:20: 32B-Thinking RESUMED with no deadline at the user's request (10:09); still running.** The numbers below are from the 09:00 deadline-stopped state (32B-T 5,818 / 15,286 main questions). `b1_rows_32BT.jsonl.gz` in this commit already holds more rows (a mid-run snapshot), so `b1_results_h100nvl.json` does not yet reflect them. Final numbers replace this section when the resumed run ends. Sections written before inference are marked.
+**Status:** COMPLETE 2026-11-06 19:25. All arms at 100 % coverage after the user-requested resume of 32B-Thinking (no deadline). Sections written before inference are marked.
 
 **Scope:** a descriptive capability pass at each benchmark's query time.
 - **No time-shift, policy or latency claim.** Batched, concurrency 8; no latency is reported.
@@ -79,11 +79,11 @@ The query time t is the field a cited source identifies; it is used **unrounded*
 
 | causal link | implementing quantity | value / range in this run | varies as expected? | evidence |
 |---|---|---|---|---|
-| identical input across arms | per-request frame SHA-256 lists and prompt tokens, compared across arms on matched (item, input) | 0 frame mismatches in 8,218 matched pairs; prompt tokens equal (4B vs 32B-I), +2 on every 32B-T (template prefix) | CONSTANT, as required | analysis check |
+| identical input across arms | per-request frame SHA-256 lists and prompt tokens, compared across arms on matched (item, input) | 0 frame mismatches in 17,686 matched pairs; prompt tokens equal (4B vs 32B-I), +2 on every 32B-T (template prefix) | CONSTANT, as required | analysis check |
 | arm differs | served model / revision; decoding settings | 4BI / 32BI / 32BT; greedy vs T 1.0 | yes, by construction | run meta |
-| reasoning mode active | Thinking completion tokens; `</think>` closed | p50 133–150, p90 672–1,368, max 16,384; `</think>` closed on all but 2 / 5,818 | > 0 and varies by item: yes | rows |
-| answer differs | per-question disagreement between arms on matched items | 32B-T vs 32B-I 13–18 %; 32B-I vs 4B-I 15–23 % | > 0 % repeat control: yes | rows |
-| correctness differs | per-question correctness difference (matched) | 32B-T − 32B-I −0.019 to +0.024; 32B-I − 4B-I +0.007 to +0.077 | — | analysis |
+| reasoning mode active | Thinking completion tokens; `</think>` closed | p50 135–160, p90 687–1,407, max 16,384; `</think>` closed on all but 6 / 15,286 | > 0 and varies by item: yes | rows |
+| answer differs | per-question disagreement between arms on matched items | 32B-T vs 32B-I 13–19 %; 32B-I vs 4B-I 15–23 % | > 0 % repeat control: yes | rows |
+| correctness differs | per-question correctness difference (matched) | 32B-T − 32B-I −0.003 to +0.026; 32B-I − 4B-I +0.007 to +0.077 | — | analysis |
 
 **Step 3: trace one request** (`b1_mv_32BI.jsonl.gz`, recorded 2026-11-05 19:46, before any sweep). 32B-I, RECENT, RTV `rtv_2420_q-group-jigunncp6-2-option0` (Object-SP), video `embodied_perspective/EmbodiedPerspective_082.mp4`, t = `end_time` = 55.43 s.
 
@@ -127,16 +127,17 @@ The query time t is the field a cited source identifies; it is used **unrounded*
 - Thinking also changes decoding (sampled vs greedy), so **reasoning mode and decoding are confounded by design**. This cannot be separated here and is stated as a limitation.
 
 ## Run record (written after the run)
-- **Host / GPU:** h100nvl GPU 2, vLLM 0.31.0, FlashAttention 3 for both the language model and the vision encoder (the same in all three server logs), prefix caching off, `--mm-processor-cache-gb 0`, `--limit-mm-per-prompt {"image": 37, "video": 0}`, max_model_len 32,768, concurrency 8.
-- `b1_common.py` SHA-256 at the end of the run equals the registration SHA (`50d3d54d…8b19`), so the input code path did not change during the run.
+- **Host / GPU:** h100nvl GPU 2, vLLM 0.31.0, FlashAttention 3 for both the language model and the vision encoder (the same in every server log), prefix caching off, `--mm-processor-cache-gb 0`, `--limit-mm-per-prompt {"image": 37, "video": 0}`, max_model_len 32,768, concurrency 8.
+- `b1_common.py` SHA-256 at the end of the run equals the registration SHA (`50d3d54d…8b19`).
 - **Order run:**
-  - mv (19:42);
+  - mv (2026-11-05 19:42);
   - 4B-I bridge (19:45–19:52, 1,400 requests);
-  - 32B-I (19:54 → 02:47 Nov 6, 15,486 requests);
-  - 32B-T (02:48 → deadline stop 09:00:05, 6,018 requests).
+  - 32B-I (19:54 → 02:47 on Nov 6, 15,486 requests);
+  - 32B-T (02:48 → registered deadline stop at 09:00:05, 6,018 requests).
+- **Deviation from the registered time box (user decision, 2026-11-06):** the user asked to remove the deadline and run all tasks. 32B-T resumed at 10:09 from its rows file (done requests skipped; same server settings, decoding and order) and finished at 19:25. All 15,486 requests are answered.
 - **Errors:** 0 request errors and 0 still-failed requests in every arm. 0 `ERROR` / `Traceback` lines in any server log.
-- **GPU 2:** no foreign process at any point; no stop rule fired. Free disk on the data volume stayed at 37–38 GB.
-- **Stops:** one, the registered 09:00 deadline. 32B-T sent no request after 09:00:05 and drained in-flight requests by 09:01:02.
+- **GPU 2:** no foreign process at any point. Free disk on the data volume stayed at 37–38 GiB.
+- **Stops:** the 09:00 deadline, followed by the user-requested resume. No stop rule fired.
 
 ### Coverage
 
@@ -144,13 +145,7 @@ The query time t is the field a cited source identifies; it is used **unrounded*
 |---|---|---|---|
 | 4B-I bridge | 1,200 (first 300 per dataset × input) + 200 grey | 1,400 | 100 % |
 | 32B-I | 15,286 + 200 grey | 15,486 | 100 % |
-| 32B-T | 15,286 + 200 grey | 6,018 (5,818 main + 200 grey) | 38 % of main |
-
-- 32B-T covered:
-  - the first 1,000 questions of each OVO part under both inputs;
-  - the first 1,000 RTV questions under RECENT and 818 under HISTORY (the batch in progress at the deadline).
-- These are the leading questions of the task-stratified seed-0 order, so each task appears in proportion (OVO 64–68 %, RTV 18–22 % per task).
-- **Every 32B-T comparison below is on matched questions only.** The 32B-T rows are not a full-benchmark number.
+| 32B-T | 15,286 + 200 grey | 15,486 (two runs: 6,018 by the deadline, 9,468 after the resume) | 100 % |
 
 ## Observations (written after the run; no interpretation in this section)
 
@@ -178,19 +173,19 @@ The query time t is the field a cited source identifies; it is used **unrounded*
 | 32BI | ovo_bench:ovo_other/RECENT | 1468 | 1.00 | 0.26 | 0.754 [0.73, 0.78] | 0.721 | 0.004 | 0.039 | 2 / 10 / 64 |
 | 32BI | rtv_bench/HISTORY | 4608 | 1.00 | 0.30 | 0.600 [0.58, 0.62] | 0.599 | 0.001 | 0.003 | 2 / 6 / 64 |
 | 32BI | rtv_bench/RECENT | 4608 | 1.00 | 0.30 | 0.687 [0.67, 0.70] | 0.686 | 0.002 | 0.003 | 2 / 6 / 64 |
-| 32BT | ovo_bench/HISTORY | 2000 | 0.66 | 0.35 | 0.639 [0.61, 0.67] | 0.638 | 0.001 | 0.002 | 141 / 1368 / 16384 |
-| 32BT | ovo_bench/RECENT | 2000 | 0.66 | 0.35 | 0.608 [0.57, 0.65] | 0.608 | 0.000 | 0.001 | 133 / 732 / 4802 |
-| 32BT | ovo_bench:ovo_forward/HISTORY | 1000 | 0.64 | 0.50 | 0.595 [0.54, 0.65] | 0.595 | 0.001 | 0.001 | 237 / 2501 / 16384 |
-| 32BT | ovo_bench:ovo_forward/RECENT | 1000 | 0.64 | 0.50 | 0.455 [0.40, 0.51] | 0.455 | 0.000 | 0.000 | 156 / 955 / 4802 |
-| 32BT | ovo_bench:ovo_other/HISTORY | 1000 | 0.68 | 0.26 | 0.683 [0.65, 0.72] | 0.682 | 0.001 | 0.002 | 104 / 365 / 16384 |
-| 32BT | ovo_bench:ovo_other/RECENT | 1000 | 0.68 | 0.26 | 0.761 [0.73, 0.79] | 0.760 | 0.000 | 0.001 | 116 / 420 / 3973 |
-| 32BT | rtv_bench/HISTORY | 818 | 0.18 | 0.30 | 0.616 [0.59, 0.65] | 0.615 | 0.000 | 0.004 | 150 / 672 / 7012 |
-| 32BT | rtv_bench/RECENT | 1000 | 0.22 | 0.30 | 0.691 [0.66, 0.72] | 0.690 | 0.000 | 0.005 | 139 / 722 / 6040 |
+| 32BT | ovo_bench/HISTORY | 3035 | 1.00 | 0.35 | 0.638 [0.61, 0.67] | 0.638 | 0.001 | 0.001 | 145 / 1407 / 16384 |
+| 32BT | ovo_bench/RECENT | 3035 | 1.00 | 0.35 | 0.604 [0.57, 0.64] | 0.603 | 0.000 | 0.000 | 135 / 729 / 4802 |
+| 32BT | ovo_bench:ovo_forward/HISTORY | 1567 | 1.00 | 0.50 | 0.593 [0.54, 0.64] | 0.593 | 0.001 | 0.001 | 261 / 2505 / 16384 |
+| 32BT | ovo_bench:ovo_forward/RECENT | 1567 | 1.00 | 0.50 | 0.456 [0.40, 0.51] | 0.456 | 0.000 | 0.000 | 160 / 945 / 4802 |
+| 32BT | ovo_bench:ovo_other/HISTORY | 1468 | 1.00 | 0.26 | 0.687 [0.66, 0.71] | 0.686 | 0.001 | 0.001 | 104 / 363 / 16384 |
+| 32BT | ovo_bench:ovo_other/RECENT | 1468 | 1.00 | 0.26 | 0.762 [0.73, 0.79] | 0.761 | 0.000 | 0.001 | 116 / 424 / 4380 |
+| 32BT | rtv_bench/HISTORY | 4608 | 1.00 | 0.30 | 0.610 [0.60, 0.63] | 0.609 | 0.001 | 0.004 | 160 / 687 / 16384 |
+| 32BT | rtv_bench/RECENT | 4608 | 1.00 | 0.30 | 0.684 [0.67, 0.70] | 0.683 | 0.000 | 0.003 | 139 / 745 / 6040 |
 
 **Spread across tasks** (min–max accuracy over the 36 tasks):
 - 32B-I: 0.17–0.97 (RECENT), 0.40–0.86 (HISTORY).
-- 32B-T: 0.21–0.96 (RECENT), 0.43–0.83 (HISTORY).
-- The minimum is OVO REC under RECENT in both arms.
+- 32B-T: 0.20–0.95 (RECENT), 0.44–0.84 (HISTORY).
+- The RECENT minimum is OVO REC in both arms.
 
 ### Truncation, unparsed answers and generated tokens (main questions)
 
@@ -200,21 +195,21 @@ The query time t is the field a cited source identifies; it is used **unrounded*
 | 4B-I | RTV RECENT / HISTORY | 300 / 300 | 0 / 0 | 0 / 0 | 0 / 0 | — | 0.670 / 0.610 |
 | 32B-I | OVO RECENT / HISTORY | 3,035 / 3,035 | 6 / 1 | 57 / 68 | 52 / 66 | — | 0.573 / 0.625 |
 | 32B-I | RTV RECENT / HISTORY | 4,608 / 4,608 | 9 / 3 | 13 / 12 | 8 / 10 | — | 0.688 / 0.601 |
-| 32B-T | OVO RECENT / HISTORY | 2,000 / 2,000 | 0 / 2 | 1 / 3 | 1 / 1 | 0 / 2 | 0.608 / 0.639 |
-| 32B-T | RTV RECENT / HISTORY | 1,000 / 818 | 0 / 0 | 5 / 3 | 4 / 2 | 0 / 0 | 0.693 / 0.617 |
+| 32B-T | OVO RECENT / HISTORY | 3,035 / 3,035 | 0 / 3 | 1 / 4 | 1 / 1 | 0 / 3 | 0.603 / 0.639 |
+| 32B-T | RTV RECENT / HISTORY | 4,608 / 4,608 | 0 / 3 | 16 / 17 | 13 / 9 | 0 / 3 | 0.685 / 0.611 |
 
 - **32B-I truncation:** the 64-token cap; at most 0.4 % per cell.
-- **32B-T truncation:** the 16,384-token cap. 2 truncations in 5,818 main questions, both OVO HISTORY.
-- **32B-T reasoning lengths:** p50 133–150 tokens per dataset × input; p90 672–1,368; max 16,384.
-- **OVO multiple-choice "unparsed" for the Instruct arms is mostly ambiguous answers:** the response contains more than one option letter, e.g. "C. A man…". Under the upstream substring scorer these can still score correct, which is why upstream accuracy exceeds strict accuracy by up to 0.04 on OVO "other" and by 0 on RTV.
+- **32B-T truncation:** the 16,384-token cap. 6 truncations in 15,286 main questions (0.04 %), all under HISTORY.
+- **32B-T reasoning lengths:** p50 135–160 tokens per dataset × input; p90 687–1,407; max 16,384.
+- **OVO multiple-choice "unparsed" for the Instruct arms is mostly ambiguous answers:** the response contains more than one option letter. Under the upstream substring scorer these can still score correct, so upstream accuracy exceeds strict accuracy by up to 0.048 per dataset / part cell (0 on RTV).
 
 ### Thinking − Instruct, HISTORY − RECENT, 32B − 4B (matched questions; video bootstrap, 2,000 resamples, seed 0)
 - **Input, stack and decoding:**
-  - **Same input in every row:** frame SHA-256 lists are identical on every matched request (0 mismatches: 4B|32B-I 1,200, 4B|32B-T 1,200, 32B-I|32B-T 5,818).
-  - **Prompt tokens:** identical for 4B-I vs 32B-I; **exactly +2 on every 32B-T request** (7,018 of 7,018). This is the Thinking chat template's generation prefix, not an input difference.
+  - **Same input in every row:** frame SHA-256 lists are identical on every matched request (0 mismatches: 4B|32B-I 1,200, 4B|32B-T 1,200, 32B-I|32B-T 15,286).
+  - **Prompt tokens:** identical for 4B-I vs 32B-I; **exactly +2 on every 32B-T request** (16,486 of 16,486). This is the Thinking chat template's generation prefix, not an input difference.
   - **Same stack:** host, GPU, vLLM and backend are the same for every arm.
   - **Decoding differs** between Thinking and Instruct by design (sampled with up to 16k tokens vs greedy with 64), so reasoning mode and decoding are confounded.
-  - **HISTORY − RECENT is a comparison of INPUTS** at a fixed frame count (37 frames over [0, t] vs 9 over the last 3 s): about 4× the prompt tokens (12.6k vs 3.1k). It is not a frame-budget-matched comparison.
+  - **HISTORY − RECENT is a comparison of INPUTS** at a fixed frame count (37 frames over [0, t] vs 9 over the last 3 s): about 4× the prompt tokens (12.6k vs 3.1k). It is not frame-budget-matched.
 
 | comparison | n | n videos | acc a | acc b | diff a−b [video CI] | disagree |
 |---|---|---|---|---|---|---|
@@ -222,38 +217,40 @@ The query time t is the field a cited source identifies; it is used **unrounded*
 | 4BI/rtv_bench/HISTORY-RECENT | 300 | 235 | 0.610 | 0.670 | -0.060 [-0.108, -0.010] | 0.200 |
 | 32BI/ovo_bench/HISTORY-RECENT | 3035 | 644 | 0.629 | 0.577 | +0.051 [+0.029, +0.073] | 0.244 |
 | 32BI/rtv_bench/HISTORY-RECENT | 4608 | 552 | 0.600 | 0.687 | -0.087 [-0.101, -0.073] | 0.227 |
-| 32BT/ovo_bench/HISTORY-RECENT | 2000 | 568 | 0.639 | 0.608 | +0.031 [+0.003, +0.061] | 0.252 |
-| 32BT/rtv_bench/HISTORY-RECENT | 818 | 407 | 0.616 | 0.685 | -0.068 [-0.097, -0.040] | 0.220 |
-| 32BT-32BI/ovo_bench/RECENT | 2000 | 568 | 0.608 | 0.584 | +0.024 [+0.009, +0.039] | 0.132 |
-| 32BT-32BI/ovo_bench/HISTORY | 2000 | 568 | 0.639 | 0.631 | +0.007 [-0.014, +0.029] | 0.179 |
-| 32BT-32BI/rtv_bench/RECENT | 1000 | 447 | 0.691 | 0.710 | -0.019 [-0.041, +0.004] | 0.137 |
-| 32BT-32BI/rtv_bench/HISTORY | 818 | 407 | 0.616 | 0.612 | +0.004 [-0.020, +0.030] | 0.141 |
-| 32BI-4BI/ovo_bench/RECENT | 300 | 210 | 0.603 | 0.560 | +0.043 [-0.006, +0.094] | 0.150 |
-| 32BI-4BI/ovo_bench/HISTORY | 300 | 210 | 0.650 | 0.573 | +0.077 [+0.025, +0.128] | 0.223 |
-| 32BI-4BI/rtv_bench/RECENT | 300 | 235 | 0.693 | 0.670 | +0.023 [-0.024, +0.073] | 0.183 |
-| 32BI-4BI/rtv_bench/HISTORY | 300 | 235 | 0.617 | 0.610 | +0.007 [-0.045, +0.063] | 0.227 |
-| 32BT-4BI/ovo_bench/RECENT | 300 | 210 | 0.633 | 0.560 | +0.073 [+0.020, +0.127] | 0.173 |
-| 32BT-4BI/ovo_bench/HISTORY | 300 | 210 | 0.630 | 0.573 | +0.057 [+0.003, +0.110] | 0.257 |
-| 32BT-4BI/rtv_bench/RECENT | 300 | 235 | 0.697 | 0.670 | +0.027 [-0.017, +0.072] | 0.160 |
-| 32BT-4BI/rtv_bench/HISTORY | 300 | 235 | 0.653 | 0.610 | +0.043 [-0.014, +0.103] | 0.263 |
+| 32BT/ovo_bench/HISTORY-RECENT | 3035 | 644 | 0.638 | 0.604 | +0.035 [+0.009, +0.062] | 0.263 |
+| 32BT/rtv_bench/HISTORY-RECENT | 4608 | 552 | 0.610 | 0.684 | -0.074 [-0.088, -0.059] | 0.232 |
+| 32BT-32BI/ovo_bench/RECENT | 3035 | 644 | 0.604 | 0.577 | +0.026 [+0.013, +0.040] | 0.132 |
+| 32BT-32BI/ovo_bench/HISTORY | 3035 | 644 | 0.638 | 0.629 | +0.010 [-0.009, +0.028] | 0.189 |
+| 32BT-32BI/rtv_bench/RECENT | 4608 | 552 | 0.684 | 0.687 | -0.003 [-0.014, +0.008] | 0.150 |
+| 32BT-32BI/rtv_bench/HISTORY | 4608 | 552 | 0.610 | 0.600 | +0.010 [-0.000, +0.021] | 0.166 |
+| 32BI-4BI/ovo_bench/RECENT | 300 | 210 | 0.603 | 0.560 | +0.043 [-0.006, +0.093] | 0.150 |
+| 32BI-4BI/ovo_bench/HISTORY | 300 | 210 | 0.650 | 0.573 | +0.077 [+0.026, +0.127] | 0.223 |
+| 32BI-4BI/rtv_bench/RECENT | 300 | 235 | 0.693 | 0.670 | +0.023 [-0.026, +0.074] | 0.183 |
+| 32BI-4BI/rtv_bench/HISTORY | 300 | 235 | 0.617 | 0.610 | +0.007 [-0.046, +0.063] | 0.227 |
+| 32BT-4BI/ovo_bench/RECENT | 300 | 210 | 0.633 | 0.560 | +0.073 [+0.023, +0.125] | 0.173 |
+| 32BT-4BI/ovo_bench/HISTORY | 300 | 210 | 0.630 | 0.573 | +0.057 [+0.003, +0.111] | 0.257 |
+| 32BT-4BI/rtv_bench/RECENT | 300 | 235 | 0.697 | 0.670 | +0.027 [-0.020, +0.073] | 0.160 |
+| 32BT-4BI/rtv_bench/HISTORY | 300 | 235 | 0.653 | 0.610 | +0.043 [-0.016, +0.101] | 0.263 |
 
 **Observed, matched:**
 - **32B-T − 32B-I:**
-  - +0.024 [+0.009, +0.039] on OVO RECENT;
-  - +0.007 [−0.014, +0.029] on OVO HISTORY;
-  - −0.019 [−0.041, +0.004] on RTV RECENT;
-  - +0.004 [−0.020, +0.030] on RTV HISTORY.
-  - Per-question disagreement is 13–18 %, against 0 % for the same arm run twice (repeat control).
+  - +0.026 [+0.013, +0.040] on OVO RECENT;
+  - +0.010 [−0.009, +0.028] on OVO HISTORY;
+  - −0.003 [−0.014, +0.008] on RTV RECENT;
+  - +0.010 [−0.000, +0.021] on RTV HISTORY.
+  - Per-question correctness disagreement is 13–19 %, against 0 % for the same arm run twice (repeat control).
 - **HISTORY − RECENT** has the same sign in all three arms:
-  - positive on OVO: 32B-I +0.051 [+0.029, +0.073];
-  - negative on RTV: 32B-I −0.087 [−0.101, −0.073].
-  - Within OVO, the HISTORY gain comes from the forward tasks (REC 0.17 → 0.42 and CRR 0.40 → 0.54 for 32B-I), while OVO "other" goes down (0.754 → 0.708).
-- **32B-I − 4B-I** (n 300 per cell): +0.077 [+0.025, +0.128] on OVO HISTORY. The other three cells have CIs that include 0.
+  - positive on OVO: 32B-I +0.051 [+0.029, +0.073], 32B-T +0.035 [+0.009, +0.062];
+  - negative on RTV: 32B-I −0.087 [−0.101, −0.073], 32B-T −0.074 [−0.088, −0.059].
+  - Within OVO, the HISTORY gain comes from the forward tasks (32B-I REC 0.17 → 0.42, CRR 0.40 → 0.54), while OVO "other" goes down (32B-I 0.754 → 0.708, 32B-T 0.762 → 0.687).
+- **32B − 4B (bridge, n 300 per cell):**
+  - 32B-I − 4B-I is +0.077 [+0.025, +0.128] on OVO HISTORY; the other three cells have CIs that include 0.
+  - 32B-T − 4B-I: see the table.
 
 **OVO CRR below 0.5 under RECENT:**
-- 32B-I scores 0.396 [0.37, 0.42] and 32B-T 0.425.
+- 32B-I scores 0.396 and 32B-T 0.442.
 - CRR's ground truth is "Yes" on 144 / 240 questions.
-- 32B-I answers "No" on 205 / 240 under RECENT and on 137 / 240 under HISTORY. 32B-T answers "No" on 127 / 153 and 112 / 153.
+- "No" answers under RECENT / HISTORY: 32B-I 205 / 137 of 240; 32B-T 200 / 164 of 240.
 - Always answering "No" would score 0.40.
 
 ### Grey-frame control (visual input removed; first 50 questions of each dataset's order, the same 100 per arm × input)
@@ -267,21 +264,19 @@ The query time t is the field a cited source identifies; it is used **unrounded*
 | 32BT/RECENT | 100 | 0.35 | 0.32 | {'A': 27, 'B': 20, 'D': 17, 'No': 15, '0': 11, 'C': 9, 'None': 1} | 1 | 0 |
 | 32BT/HISTORY | 100 | 0.31 | 0.32 | {'A': 24, 'B': 20, 'D': 17, 'No': 15, 'C': 13, '0': 11} | 0 | 0 |
 
-- **Grey accuracy vs floor:** grey accuracy is 0.31–0.39 against a floor of 0.32 in every arm × input. The upper end is 0.07 above the floor.
+- **Grey accuracy vs floor:** grey accuracy is 0.31–0.39 against a floor of 0.32 in every arm × input.
 - **Answers are skewed:** "A" is the most frequent letter, and every arm answers "No" to all 15 SSR / CRR items and "0" to all 11 REC items.
-- **Real frames vs grey:** on the same 100 questions with real frames, 32B-I scores 0.67 under both RECENT and HISTORY.
+- **Real frames vs grey:** on the same 100 questions with real frames, 32B-I scores 0.67 under both inputs.
 
 ### Other checks
-- **Frames at or before t:** every frame of every request is at or before t (asserted per request and re-checked in the analysis; `frames_le_t` = true).
+- **Frames at or before t:** every frame of every request is at or before t (asserted per request and re-checked in the analysis).
 - **Fewer distinct frames than N:**
-  - 32B-I: 194 RECENT and 136 HISTORY requests;
-  - 32B-T: 129 and 57;
+  - 194 RECENT and 136 HISTORY requests per 32B arm (the same requests in both arms);
   - 4B-I: 21 and 12.
   - Causes: short videos, a low frame rate, or RTV t beyond the video end.
-- **Short span:** 139 RECENT requests had t < 3 s, so their span was shorter than 3 s.
-- **First target before the first frame:** 4,025 requests, mostly HISTORY, whose first target is 0. The first frame is used; it is still ≤ t.
+- **Short span:** 139 RECENT requests per arm had t < 3 s.
 - **Repeat control (mv):** 30 / 30 identical texts, correctness and frames.
-- **Published numbers:** not compared. The input is not like-for-like with OVO-Bench or RTV-Bench published results:
+- **Published numbers:** not compared, because the input is not like-for-like:
   - upstream `ceil(t)` is not reproduced;
   - the frame count and resolution differ;
   - the prompt differs.
@@ -292,48 +287,46 @@ The query time t is the field a cited source identifies; it is used **unrounded*
    | quantity | this run | prior run | source of prior | ratio | agree? |
    |---|---|---|---|---|---|
    | prompt tokens per 768×432 frame (Qwen3-VL) | ≈ 340 (RECENT 3,140 / 9; HISTORY 12,605 / 37, including text) | ≈ 336 | StudyD4-orin / StudyClean H100 byte-identical frames | 1.01 | agree |
-   | 32B-I throughput, ~3.1k-token requests, conc 8 | ≈ 1.7 req/s (RECENT phase, wall-clock) | 1.8 req/s peak at N = 9 | StudyD7 (`reports/study_d7_capacity.md`) | 0.94 | agree |
-   | Thinking − Instruct, 32B, matched vLLM stack | +0.004 to +0.024 (OVO), −0.019 to +0.004 (RTV) | pooled +0.5 pp [−2.6, +3.8] on images | StudyD9 | — (different benchmark) | same order, no > 2× conflict |
-   | Thinking truncation at 16,384 | 0.03 % (2 / 5,818) | 25.8 % on STARK time series | StudyD12 | — (different task) | not comparable; noted |
+   | 32B-I throughput, ~3.1k-token requests, conc 8 | ≈ 1.7 req/s (RECENT phase, wall-clock) | 1.8 req/s peak at N = 9 | StudyD7 | 0.94 | agree |
+   | Thinking − Instruct, 32B, matched vLLM stack | −0.003 to +0.026 | pooled +0.5 pp [−2.6, +3.8] on images | StudyD9 | — (different benchmark) | same order, no > 2× conflict |
+   | Thinking truncation at 16,384 | 0.04 % (6 / 15,286) | 25.8 % on STARK time series | StudyD12 | — (different task) | not comparable; noted |
 
    No disagreement > 2× on a like-for-like quantity.
 2. **Physical plausibility.**
-   - 32B-I HISTORY ran at ≈ 0.39 req/s × ≈ 12.6k prompt tokens ≈ 4.9k tokens/s prefill. RECENT ran at ≈ 1.7 × 3.1k ≈ 5.3k tokens/s.
-   - Both are within the D7 / D4 32B H100 curves, with prefix caching off. Nothing is faster than the committed curves.
-   - 32B-T: 6,018 requests in 6 h 12 m (0.27 req/s).
+   - 32B-I HISTORY ran at ≈ 0.39 req/s × 12.6k prompt tokens ≈ 4.9k tokens/s prefill; RECENT at ≈ 1.7 × 3.1k ≈ 5.3k tokens/s. Both are within the D7 / D4 32B H100 curves, with prefix caching off.
+   - 32B-T: 15,486 requests in 6 h 12 m + 9 h 16 m (≈ 0.28 req/s).
 3. **Distribution sanity.**
-   - Per-task accuracy spans 0.17–0.97, and completion tokens range 1–64 (Instruct) and up to 16,384 (Thinking).
-   - Prompt tokens vary per request (3,106–3,196 RECENT; 12,571–12,661 HISTORY) with the question length. No constant appears where a distribution is expected.
-   - The +2 prompt-token offset is constant by construction (template).
+   - Per-task accuracy spans 0.17–0.97. Completion tokens are 1–64 (Instruct) and up to 16,384 (Thinking).
+   - Prompt tokens vary with the question (3,106–3,196 RECENT; 12,571–12,661 HISTORY).
+   - The +2 offset is constant by construction (template).
 4. **Definition audit.**
-   - **RECENT / HISTORY:** RECENT = 9 frames over [max(0, t − 3), t] and HISTORY = 37 frames over [0, t], at 768×432. These are defined in this study. **Name clash:** "RECENT" is also used in the D-series and StudyClean (K3 RECENT) with a different window. Here it always means the B1 definition.
-   - **Query time:** as cited above; the RTV reading is flagged.
-   - **Accuracy:** upstream scorer (primary), with strict beside it.
+   - **RECENT / HISTORY:** RECENT = 9 frames over [max(0, t − 3), t] and HISTORY = 37 frames over [0, t], at 768×432.
+   - **Name clash:** "RECENT" is also used in the D-series and StudyClean (K3 RECENT) with a different window. Here it always means the B1 definition.
+   - **Query time:** as cited above; the RTV reading was accepted by the user (2026-11-06).
 5. **Claim linkage.**
-   - This bears on FORMULATION.md §Regime uncertainty / §Decisions: whether capability tiers answer the same query differently.
+   - This bears on FORMULATION.md §Regime uncertainty / §Decisions.
    - **Supports:** tiers disagree on 13–26 % of matched questions, far above the 0 % repeat-control floor.
-   - **Does not speak to:** any policy, latency or time-shift claim, by design.
-   - It does not measure anything scoped out.
+   - **Does not speak to:** policy, latency or time-shift claims, by design.
 6. **Proxy validity.**
-   - **RTV `end_time` as the query time** is a reading of the evaluation protocol, not a documented field. The RTV rows are valid only under that reading; flagged for the user.
-   - **The upstream OVO multiple-choice scorer (`gt in response`)** is a lenient proxy for "chose the right option". Strict accuracy is reported beside it; they differ by ≤ 0.05 per dataset / part cell (up to 0.17 on single small tasks, e.g. 4B-I OJR). Paired comparisons were computed on the upstream scorer only.
+   - **RTV `end_time` as the query time:** accepted by the user.
+   - **The upstream OVO multiple-choice scorer is lenient.** Strict accuracy is reported beside it; they differ by ≤ 0.048 per dataset / part cell. Paired comparisons were computed on the upstream scorer; StudyB2's analysis adds strict-scorer pairs.
 
-**Outcome:** no check failed. Two items are flagged for the user: RTV query-time reading, OVO forward-template deviation.
+**Outcome:** no check failed. The remaining flag is the OVO forward-template deviation.
 
 ## Interpretation
-- **Thinking vs Instruct (32B):** Thinking does not change per-question accuracy materially on these two benchmarks at their query time.
-  - The largest matched difference is +2.4 pp (OVO RECENT), and three of four cells have CIs including 0, on 38 % coverage of the Thinking arm.
-  - It does change which questions are answered correctly (13–18 % disagreement), at about 70× the generated tokens at the median (p50 ≈ 2 vs ≈ 140).
-  - Reasoning mode and sampled decoding are confounded, so this is the difference between the two configurations, not between reasoning and no reasoning.
+- **Thinking vs Instruct (32B):** Thinking changes per-question accuracy little on these two benchmarks at their query time.
+  - The largest matched difference is +2.6 pp (OVO RECENT). The other three cells are within ±1 pp, with CIs including or touching 0.
+  - It does change which questions are answered correctly (13–19 % disagreement), at about 70× the generated tokens at the median (p50 ≈ 2 vs ≈ 140).
+  - Reasoning mode and sampled decoding are confounded.
 - **Inputs:**
-  - Under these inputs, the full-history input helps OVO's forward-active-responding tasks, which ask about a state that develops over the video (REC counts, CRR clue arrival).
-  - It hurts RTV and OVO's other tasks, which ask about the current scene. This matches the RTV-Bench examples ("In the current scene…").
-  - These are inputs with different token budgets (≈ 4×), so the result does not separate "more frames" from "older frames".
-- **4B vs 32B (bridge, n 300 per cell):** only OVO HISTORY separates (+7.7 pp). The bridge is too small to bound smaller gaps.
+  - The full-history input helps OVO's forward-active-responding tasks (REC counts, CRR clue arrival).
+  - It hurts RTV and OVO's other tasks, which ask about the current scene.
+  - This holds for both modes. These are inputs with different token budgets (≈ 4×), so the result does not separate "more frames" from "older frames".
+- **4B vs 32B (bridge, n 300 per cell):** only OVO HISTORY separates for Instruct (+7.7 pp). StudyB2 runs 4B and 8B on all questions.
 - **Low accuracies:**
-  - The low REC and CRR accuracies under RECENT are what a 3-second window allows, since the count or clue may lie outside it.
-  - CRR's below-0.5 score coincides with a "No" bias on a "Yes"-majority task. The cause of the bias is not tested here.
-- **Grey control:** stays near the floor, with a letter-A / "No" bias. The visual input carries the accuracy above the floor.
+  - Low REC and CRR accuracies under RECENT are what a 3-second window allows.
+  - CRR's below-0.5 score coincides with a "No" bias on a "Yes"-majority task; the cause is not tested here.
+- **Grey control:** stays near the floor, so the visual input carries the accuracy above it.
 
 ## Appendix: per-task results (all arms)
 
@@ -483,78 +476,78 @@ The query time t is the field a cited source identifies; it is used **unrounded*
 | 32BI | rtv_bench/Object-TP/RECENT | 303 | 1.00 | 0.28 | 0.759 [0.71, 0.81] | 0.756 | 0.000 | 0.003 | 2 / 6 / 11 |
 | 32BI | rtv_bench/Object-VP/HISTORY | 141 | 1.00 | 0.28 | 0.603 [0.52, 0.69] | 0.596 | 0.000 | 0.021 | 4 / 6 / 12 |
 | 32BI | rtv_bench/Object-VP/RECENT | 141 | 1.00 | 0.28 | 0.709 [0.63, 0.79] | 0.702 | 0.000 | 0.014 | 2 / 6 / 16 |
-| 32BT | ovo_bench/ACR/HISTORY | 74 | 0.68 | 0.25 | 0.689 [0.56, 0.80] | 0.689 | 0.000 | 0.000 | 113 / 386 / 2055 |
-| 32BT | ovo_bench/ACR/RECENT | 74 | 0.68 | 0.25 | 0.878 [0.81, 0.94] | 0.878 | 0.000 | 0.000 | 122 / 288 / 3514 |
-| 32BT | ovo_bench/ASI/HISTORY | 101 | 0.68 | 0.25 | 0.832 [0.75, 0.90] | 0.832 | 0.000 | 0.000 | 155 / 546 / 1927 |
-| 32BT | ovo_bench/ASI/RECENT | 101 | 0.68 | 0.25 | 0.713 [0.62, 0.80] | 0.713 | 0.000 | 0.000 | 236 / 854 / 3440 |
-| 32BT | ovo_bench/ATR/HISTORY | 80 | 0.69 | 0.25 | 0.762 [0.65, 0.87] | 0.762 | 0.000 | 0.000 | 78 / 201 / 370 |
-| 32BT | ovo_bench/ATR/RECENT | 80 | 0.69 | 0.25 | 0.900 [0.83, 0.96] | 0.900 | 0.000 | 0.000 | 81 / 214 / 453 |
-| 32BT | ovo_bench/CRR/HISTORY | 153 | 0.64 | 0.50 | 0.562 [0.48, 0.69] | 0.562 | 0.000 | 0.000 | 171 / 477 / 2134 |
-| 32BT | ovo_bench/CRR/RECENT | 153 | 0.64 | 0.50 | 0.425 [0.37, 0.50] | 0.425 | 0.000 | 0.000 | 137 / 615 / 1879 |
-| 32BT | ovo_bench/EPM/HISTORY | 203 | 0.68 | 0.28 | 0.626 [0.55, 0.70] | 0.626 | 0.005 | 0.005 | 90 / 279 / 16384 |
-| 32BT | ovo_bench/EPM/RECENT | 203 | 0.68 | 0.28 | 0.631 [0.56, 0.70] | 0.631 | 0.000 | 0.000 | 107 / 446 / 1659 |
-| 32BT | ovo_bench/FPD/HISTORY | 69 | 0.68 | 0.25 | 0.754 [0.64, 0.87] | 0.754 | 0.000 | 0.000 | 119 / 459 / 893 |
-| 32BT | ovo_bench/FPD/RECENT | 69 | 0.68 | 0.25 | 0.710 [0.59, 0.83] | 0.710 | 0.000 | 0.000 | 138 / 311 / 1259 |
-| 32BT | ovo_bench/HLD/HISTORY | 126 | 0.68 | 0.28 | 0.500 [0.41, 0.59] | 0.500 | 0.000 | 0.000 | 154 / 444 / 1611 |
-| 32BT | ovo_bench/HLD/RECENT | 126 | 0.68 | 0.28 | 0.667 [0.57, 0.76] | 0.667 | 0.000 | 0.000 | 160 / 416 / 2019 |
-| 32BT | ovo_bench/OCR/HISTORY | 101 | 0.68 | 0.25 | 0.832 [0.74, 0.91] | 0.832 | 0.000 | 0.000 | 68 / 198 / 2616 |
-| 32BT | ovo_bench/OCR/RECENT | 101 | 0.68 | 0.25 | 0.960 [0.92, 0.99] | 0.960 | 0.000 | 0.000 | 76 / 204 / 3450 |
-| 32BT | ovo_bench/OJR/HISTORY | 125 | 0.68 | 0.25 | 0.728 [0.63, 0.81] | 0.720 | 0.000 | 0.008 | 76 / 281 / 4449 |
-| 32BT | ovo_bench/OJR/RECENT | 125 | 0.68 | 0.25 | 0.840 [0.77, 0.90] | 0.832 | 0.000 | 0.008 | 82 / 217 / 3973 |
-| 32BT | ovo_bench/REC/HISTORY | 446 | 0.64 | — | 0.469 [0.39, 0.56] | 0.469 | 0.002 | 0.002 | 876 / 4094 / 16384 |
-| 32BT | ovo_bench/REC/RECENT | 446 | 0.64 | — | 0.211 [0.17, 0.26] | 0.211 | 0.000 | 0.000 | 416 / 1718 / 4802 |
-| 32BT | ovo_bench/SSR/HISTORY | 401 | 0.64 | 0.50 | 0.748 [0.70, 0.79] | 0.748 | 0.000 | 0.000 | 112 / 536 / 2416 |
-| 32BT | ovo_bench/SSR/RECENT | 401 | 0.64 | 0.50 | 0.738 [0.69, 0.79] | 0.738 | 0.000 | 0.000 | 96 / 326 / 1448 |
-| 32BT | ovo_bench/STU/HISTORY | 121 | 0.68 | 0.25 | 0.579 [0.48, 0.69] | 0.579 | 0.000 | 0.000 | 144 / 408 / 2065 |
-| 32BT | ovo_bench/STU/RECENT | 121 | 0.68 | 0.25 | 0.736 [0.63, 0.83] | 0.736 | 0.000 | 0.000 | 129 / 451 / 3115 |
-| 32BT | rtv_bench/Action-FP/HISTORY | 65 | 0.18 | 0.35 | 0.662 [0.57, 0.76] | 0.662 | 0.000 | 0.000 | 125 / 301 / 672 |
-| 32BT | rtv_bench/Action-FP/RECENT | 79 | 0.22 | 0.34 | 0.734 [0.65, 0.82] | 0.734 | 0.000 | 0.000 | 140 / 494 / 2306 |
-| 32BT | rtv_bench/Action-GU/HISTORY | 17 | 0.18 | 0.25 | 0.471 [0.24, 0.71] | 0.471 | 0.000 | 0.000 | 279 / 957 / 4648 |
-| 32BT | rtv_bench/Action-GU/RECENT | 20 | 0.22 | 0.27 | 0.550 [0.32, 0.78] | 0.550 | 0.000 | 0.000 | 184 / 977 / 2633 |
-| 32BT | rtv_bench/Action-IA/HISTORY | 61 | 0.18 | 0.34 | 0.689 [0.58, 0.79] | 0.689 | 0.000 | 0.000 | 133 / 485 / 2126 |
-| 32BT | rtv_bench/Action-IA/RECENT | 74 | 0.22 | 0.34 | 0.757 [0.66, 0.85] | 0.757 | 0.000 | 0.000 | 174 / 583 / 1462 |
-| 32BT | rtv_bench/Action-PU/HISTORY | 27 | 0.18 | 0.34 | 0.667 [0.52, 0.83] | 0.667 | 0.000 | 0.000 | 163 / 448 / 842 |
-| 32BT | rtv_bench/Action-PU/RECENT | 32 | 0.22 | 0.35 | 0.906 [0.82, 1.00] | 0.906 | 0.000 | 0.000 | 118 / 465 / 1169 |
-| 32BT | rtv_bench/Action-SP/HISTORY | 40 | 0.18 | 0.33 | 0.500 [0.34, 0.65] | 0.500 | 0.000 | 0.000 | 315 / 1183 / 2166 |
-| 32BT | rtv_bench/Action-SP/RECENT | 49 | 0.22 | 0.34 | 0.673 [0.56, 0.79] | 0.673 | 0.000 | 0.000 | 200 / 475 / 2203 |
-| 32BT | rtv_bench/Action-SR/HISTORY | 37 | 0.17 | 0.29 | 0.486 [0.36, 0.62] | 0.486 | 0.000 | 0.000 | 285 / 603 / 904 |
-| 32BT | rtv_bench/Action-SR/RECENT | 46 | 0.22 | 0.29 | 0.522 [0.37, 0.68] | 0.522 | 0.000 | 0.000 | 340 / 845 / 2304 |
-| 32BT | rtv_bench/Action-TP/HISTORY | 30 | 0.18 | 0.31 | 0.433 [0.30, 0.58] | 0.433 | 0.000 | 0.000 | 268 / 635 / 872 |
-| 32BT | rtv_bench/Action-TP/RECENT | 37 | 0.22 | 0.31 | 0.730 [0.58, 0.86] | 0.730 | 0.000 | 0.000 | 128 / 1235 / 2231 |
-| 32BT | rtv_bench/Action-VP/HISTORY | 25 | 0.18 | 0.39 | 0.480 [0.32, 0.64] | 0.480 | 0.000 | 0.000 | 207 / 889 / 1663 |
-| 32BT | rtv_bench/Action-VP/RECENT | 30 | 0.21 | 0.36 | 0.600 [0.45, 0.77] | 0.600 | 0.000 | 0.000 | 132 / 624 / 901 |
-| 32BT | rtv_bench/Event-FP/HISTORY | 21 | 0.18 | 0.26 | 0.714 [0.50, 0.89] | 0.714 | 0.000 | 0.000 | 220 / 446 / 1484 |
-| 32BT | rtv_bench/Event-FP/RECENT | 26 | 0.22 | 0.27 | 0.692 [0.52, 0.86] | 0.692 | 0.000 | 0.000 | 127 / 672 / 2867 |
-| 32BT | rtv_bench/Event-GU/HISTORY | 43 | 0.17 | 0.28 | 0.512 [0.37, 0.66] | 0.512 | 0.000 | 0.000 | 480 / 1746 / 7012 |
-| 32BT | rtv_bench/Event-GU/RECENT | 54 | 0.22 | 0.28 | 0.444 [0.32, 0.57] | 0.444 | 0.000 | 0.000 | 401 / 1843 / 4478 |
-| 32BT | rtv_bench/Event-IA/HISTORY | 22 | 0.17 | 0.32 | 0.591 [0.37, 0.78] | 0.591 | 0.000 | 0.000 | 116 / 362 / 411 |
-| 32BT | rtv_bench/Event-IA/RECENT | 27 | 0.21 | 0.32 | 0.778 [0.57, 0.93] | 0.778 | 0.000 | 0.000 | 158 / 852 / 1687 |
-| 32BT | rtv_bench/Event-PU/HISTORY | 22 | 0.17 | 0.28 | 0.591 [0.37, 0.77] | 0.591 | 0.000 | 0.000 | 104 / 710 / 1304 |
-| 32BT | rtv_bench/Event-PU/RECENT | 27 | 0.21 | 0.28 | 0.593 [0.43, 0.75] | 0.593 | 0.000 | 0.000 | 109 / 560 / 1272 |
-| 32BT | rtv_bench/Event-SP/HISTORY | 20 | 0.18 | 0.27 | 0.550 [0.29, 0.82] | 0.550 | 0.000 | 0.000 | 225 / 579 / 4134 |
-| 32BT | rtv_bench/Event-SP/RECENT | 24 | 0.21 | 0.27 | 0.708 [0.48, 0.91] | 0.708 | 0.000 | 0.000 | 80 / 355 / 606 |
-| 32BT | rtv_bench/Event-SR/HISTORY | 38 | 0.18 | 0.28 | 0.632 [0.51, 0.76] | 0.632 | 0.000 | 0.000 | 206 / 516 / 2315 |
-| 32BT | rtv_bench/Event-SR/RECENT | 47 | 0.22 | 0.28 | 0.617 [0.50, 0.73] | 0.617 | 0.000 | 0.000 | 172 / 832 / 6040 |
-| 32BT | rtv_bench/Event-TP/HISTORY | 21 | 0.18 | 0.31 | 0.810 [0.63, 0.95] | 0.810 | 0.000 | 0.000 | 80 / 312 / 355 |
-| 32BT | rtv_bench/Event-TP/RECENT | 25 | 0.22 | 0.30 | 0.720 [0.53, 0.88] | 0.720 | 0.000 | 0.000 | 105 / 310 / 820 |
-| 32BT | rtv_bench/Event-VP/HISTORY | 81 | 0.18 | 0.33 | 0.691 [0.59, 0.78] | 0.691 | 0.000 | 0.000 | 141 / 353 / 2325 |
-| 32BT | rtv_bench/Event-VP/RECENT | 100 | 0.22 | 0.33 | 0.690 [0.60, 0.77] | 0.690 | 0.000 | 0.000 | 130 / 433 / 1588 |
-| 32BT | rtv_bench/Object-FP/HISTORY | 18 | 0.18 | 0.34 | 0.833 [0.68, 1.00] | 0.833 | 0.000 | 0.000 | 140 / 240 / 313 |
-| 32BT | rtv_bench/Object-FP/RECENT | 22 | 0.22 | 0.34 | 0.864 [0.71, 1.00] | 0.864 | 0.000 | 0.000 | 118 / 900 / 1410 |
-| 32BT | rtv_bench/Object-GU/HISTORY | 23 | 0.17 | 0.25 | 0.739 [0.59, 0.89] | 0.739 | 0.000 | 0.000 | 160 / 870 / 1015 |
-| 32BT | rtv_bench/Object-GU/RECENT | 29 | 0.21 | 0.26 | 0.655 [0.50, 0.80] | 0.655 | 0.000 | 0.000 | 135 / 1377 / 2047 |
-| 32BT | rtv_bench/Object-IA/HISTORY | 16 | 0.18 | 0.27 | 0.438 [0.25, 0.64] | 0.438 | 0.000 | 0.000 | 300 / 816 / 1483 |
-| 32BT | rtv_bench/Object-IA/RECENT | 19 | 0.22 | 0.27 | 0.474 [0.25, 0.69] | 0.474 | 0.000 | 0.000 | 263 / 988 / 1786 |
-| 32BT | rtv_bench/Object-PU/HISTORY | 48 | 0.18 | 0.26 | 0.604 [0.49, 0.72] | 0.604 | 0.000 | 0.000 | 120 / 441 / 1624 |
-| 32BT | rtv_bench/Object-PU/RECENT | 58 | 0.21 | 0.25 | 0.793 [0.69, 0.89] | 0.793 | 0.000 | 0.000 | 93 / 325 / 2628 |
-| 32BT | rtv_bench/Object-SP/HISTORY | 36 | 0.18 | 0.28 | 0.778 [0.62, 0.91] | 0.750 | 0.000 | 0.028 | 88 / 333 / 2305 |
-| 32BT | rtv_bench/Object-SP/RECENT | 43 | 0.21 | 0.28 | 0.884 [0.78, 0.96] | 0.860 | 0.000 | 0.047 | 79 / 350 / 1224 |
-| 32BT | rtv_bench/Object-SR/HISTORY | 28 | 0.17 | 0.25 | 0.464 [0.34, 0.60] | 0.464 | 0.000 | 0.000 | 139 / 404 / 2127 |
-| 32BT | rtv_bench/Object-SR/RECENT | 35 | 0.22 | 0.25 | 0.571 [0.41, 0.77] | 0.571 | 0.000 | 0.000 | 132 / 895 / 2505 |
-| 32BT | rtv_bench/Object-TP/HISTORY | 54 | 0.18 | 0.27 | 0.630 [0.52, 0.76] | 0.630 | 0.000 | 0.019 | 134 / 837 / 2602 |
-| 32BT | rtv_bench/Object-TP/RECENT | 66 | 0.22 | 0.27 | 0.742 [0.64, 0.85] | 0.742 | 0.000 | 0.030 | 124 / 494 / 1079 |
-| 32BT | rtv_bench/Object-VP/HISTORY | 25 | 0.18 | 0.29 | 0.640 [0.48, 0.80] | 0.640 | 0.000 | 0.040 | 107 / 422 / 1472 |
-| 32BT | rtv_bench/Object-VP/RECENT | 31 | 0.22 | 0.28 | 0.742 [0.63, 0.88] | 0.742 | 0.000 | 0.032 | 114 / 653 / 1241 |
+| 32BT | ovo_bench/ACR/HISTORY | 109 | 1.00 | 0.25 | 0.725 [0.62, 0.82] | 0.725 | 0.000 | 0.000 | 111 / 329 / 2055 |
+| 32BT | ovo_bench/ACR/RECENT | 109 | 1.00 | 0.25 | 0.890 [0.84, 0.94] | 0.890 | 0.000 | 0.000 | 118 / 298 / 3514 |
+| 32BT | ovo_bench/ASI/HISTORY | 148 | 1.00 | 0.25 | 0.838 [0.78, 0.89] | 0.838 | 0.000 | 0.000 | 147 / 463 / 1927 |
+| 32BT | ovo_bench/ASI/RECENT | 148 | 1.00 | 0.25 | 0.689 [0.61, 0.76] | 0.689 | 0.000 | 0.000 | 222 / 811 / 3440 |
+| 32BT | ovo_bench/ATR/HISTORY | 116 | 1.00 | 0.25 | 0.802 [0.71, 0.89] | 0.802 | 0.000 | 0.000 | 84 / 203 / 828 |
+| 32BT | ovo_bench/ATR/RECENT | 116 | 1.00 | 0.25 | 0.888 [0.83, 0.94] | 0.888 | 0.000 | 0.000 | 81 / 225 / 1255 |
+| 32BT | ovo_bench/CRR/HISTORY | 240 | 1.00 | 0.50 | 0.567 [0.51, 0.65] | 0.567 | 0.000 | 0.000 | 172 / 549 / 2158 |
+| 32BT | ovo_bench/CRR/RECENT | 240 | 1.00 | 0.50 | 0.442 [0.42, 0.47] | 0.442 | 0.000 | 0.000 | 143 / 610 / 1879 |
+| 32BT | ovo_bench/EPM/HISTORY | 297 | 1.00 | 0.27 | 0.613 [0.55, 0.67] | 0.613 | 0.003 | 0.003 | 89 / 246 / 16384 |
+| 32BT | ovo_bench/EPM/RECENT | 297 | 1.00 | 0.27 | 0.596 [0.54, 0.65] | 0.596 | 0.000 | 0.000 | 107 / 455 / 1659 |
+| 32BT | ovo_bench/FPD/HISTORY | 101 | 1.00 | 0.25 | 0.723 [0.62, 0.82] | 0.723 | 0.000 | 0.000 | 129 / 533 / 3791 |
+| 32BT | ovo_bench/FPD/RECENT | 101 | 1.00 | 0.25 | 0.752 [0.65, 0.85] | 0.752 | 0.000 | 0.000 | 139 / 354 / 2544 |
+| 32BT | ovo_bench/HLD/HISTORY | 186 | 1.00 | 0.28 | 0.484 [0.41, 0.56] | 0.484 | 0.000 | 0.000 | 156 / 472 / 1757 |
+| 32BT | ovo_bench/HLD/RECENT | 186 | 1.00 | 0.28 | 0.694 [0.62, 0.76] | 0.694 | 0.000 | 0.000 | 158 / 392 / 2019 |
+| 32BT | ovo_bench/OCR/HISTORY | 149 | 1.00 | 0.25 | 0.819 [0.75, 0.89] | 0.819 | 0.000 | 0.000 | 69 / 231 / 2616 |
+| 32BT | ovo_bench/OCR/RECENT | 149 | 1.00 | 0.25 | 0.953 [0.92, 0.98] | 0.953 | 0.000 | 0.000 | 76 / 207 / 3450 |
+| 32BT | ovo_bench/OJR/HISTORY | 184 | 1.00 | 0.25 | 0.750 [0.69, 0.82] | 0.745 | 0.000 | 0.005 | 78 / 327 / 4449 |
+| 32BT | ovo_bench/OJR/RECENT | 184 | 1.00 | 0.25 | 0.842 [0.78, 0.89] | 0.837 | 0.000 | 0.005 | 82 / 237 / 3973 |
+| 32BT | ovo_bench/REC/HISTORY | 698 | 1.00 | — | 0.460 [0.38, 0.54] | 0.460 | 0.003 | 0.003 | 881 / 4004 / 16384 |
+| 32BT | ovo_bench/REC/RECENT | 698 | 1.00 | — | 0.198 [0.16, 0.24] | 0.198 | 0.000 | 0.000 | 410 / 1578 / 4802 |
+| 32BT | ovo_bench/SSR/HISTORY | 629 | 1.00 | 0.50 | 0.750 [0.71, 0.79] | 0.750 | 0.000 | 0.000 | 109 / 596 / 3832 |
+| 32BT | ovo_bench/SSR/RECENT | 629 | 1.00 | 0.50 | 0.747 [0.71, 0.79] | 0.747 | 0.000 | 0.000 | 96 / 363 / 1967 |
+| 32BT | ovo_bench/STU/HISTORY | 178 | 1.00 | 0.25 | 0.601 [0.52, 0.69] | 0.601 | 0.000 | 0.000 | 130 / 398 / 3012 |
+| 32BT | ovo_bench/STU/RECENT | 178 | 1.00 | 0.25 | 0.770 [0.68, 0.84] | 0.770 | 0.000 | 0.000 | 124 / 451 / 4380 |
+| 32BT | rtv_bench/Action-FP/HISTORY | 365 | 1.00 | 0.35 | 0.633 [0.59, 0.68] | 0.633 | 0.000 | 0.000 | 149 / 430 / 1950 |
+| 32BT | rtv_bench/Action-FP/RECENT | 365 | 1.00 | 0.35 | 0.682 [0.64, 0.72] | 0.682 | 0.000 | 0.000 | 123 / 545 / 2306 |
+| 32BT | rtv_bench/Action-GU/HISTORY | 92 | 1.00 | 0.28 | 0.598 [0.52, 0.67] | 0.598 | 0.000 | 0.000 | 180 / 857 / 4648 |
+| 32BT | rtv_bench/Action-GU/RECENT | 92 | 1.00 | 0.28 | 0.620 [0.53, 0.71] | 0.620 | 0.000 | 0.000 | 171 / 1160 / 2794 |
+| 32BT | rtv_bench/Action-IA/HISTORY | 339 | 1.00 | 0.34 | 0.637 [0.59, 0.68] | 0.637 | 0.000 | 0.000 | 156 / 535 / 8848 |
+| 32BT | rtv_bench/Action-IA/RECENT | 339 | 1.00 | 0.34 | 0.720 [0.67, 0.77] | 0.720 | 0.000 | 0.000 | 178 / 617 / 1840 |
+| 32BT | rtv_bench/Action-PU/HISTORY | 148 | 1.00 | 0.36 | 0.642 [0.58, 0.70] | 0.642 | 0.000 | 0.000 | 140 / 476 / 961 |
+| 32BT | rtv_bench/Action-PU/RECENT | 148 | 1.00 | 0.36 | 0.757 [0.69, 0.82] | 0.757 | 0.000 | 0.000 | 152 / 762 / 3030 |
+| 32BT | rtv_bench/Action-SP/HISTORY | 225 | 1.00 | 0.33 | 0.480 [0.43, 0.53] | 0.480 | 0.000 | 0.000 | 321 / 944 / 3653 |
+| 32BT | rtv_bench/Action-SP/RECENT | 225 | 1.00 | 0.33 | 0.587 [0.53, 0.64] | 0.587 | 0.000 | 0.000 | 318 / 956 / 3510 |
+| 32BT | rtv_bench/Action-SR/HISTORY | 213 | 1.00 | 0.29 | 0.441 [0.38, 0.50] | 0.441 | 0.000 | 0.000 | 303 / 688 / 1720 |
+| 32BT | rtv_bench/Action-SR/RECENT | 213 | 1.00 | 0.29 | 0.474 [0.40, 0.54] | 0.474 | 0.000 | 0.000 | 369 / 998 / 4235 |
+| 32BT | rtv_bench/Action-TP/HISTORY | 170 | 1.00 | 0.32 | 0.482 [0.40, 0.56] | 0.482 | 0.006 | 0.006 | 208 / 683 / 16384 |
+| 32BT | rtv_bench/Action-TP/RECENT | 170 | 1.00 | 0.32 | 0.718 [0.64, 0.79] | 0.718 | 0.000 | 0.000 | 134 / 1050 / 3013 |
+| 32BT | rtv_bench/Action-VP/HISTORY | 140 | 1.00 | 0.34 | 0.564 [0.49, 0.64] | 0.564 | 0.000 | 0.000 | 262 / 972 / 1816 |
+| 32BT | rtv_bench/Action-VP/RECENT | 140 | 1.00 | 0.34 | 0.643 [0.56, 0.73] | 0.643 | 0.000 | 0.000 | 270 / 789 / 2141 |
+| 32BT | rtv_bench/Event-FP/HISTORY | 119 | 1.00 | 0.30 | 0.597 [0.52, 0.66] | 0.597 | 0.000 | 0.000 | 132 / 369 / 1484 |
+| 32BT | rtv_bench/Event-FP/RECENT | 119 | 1.00 | 0.30 | 0.689 [0.61, 0.76] | 0.689 | 0.000 | 0.000 | 113 / 529 / 2867 |
+| 32BT | rtv_bench/Event-GU/HISTORY | 247 | 1.00 | 0.27 | 0.538 [0.48, 0.60] | 0.538 | 0.000 | 0.000 | 362 / 1791 / 8825 |
+| 32BT | rtv_bench/Event-GU/RECENT | 247 | 1.00 | 0.27 | 0.526 [0.47, 0.59] | 0.526 | 0.000 | 0.000 | 236 / 1551 / 4478 |
+| 32BT | rtv_bench/Event-IA/HISTORY | 126 | 1.00 | 0.34 | 0.635 [0.53, 0.74] | 0.635 | 0.008 | 0.008 | 109 / 405 / 16384 |
+| 32BT | rtv_bench/Event-IA/RECENT | 126 | 1.00 | 0.34 | 0.690 [0.59, 0.80] | 0.690 | 0.000 | 0.000 | 124 / 536 / 4085 |
+| 32BT | rtv_bench/Event-PU/HISTORY | 127 | 1.00 | 0.28 | 0.591 [0.50, 0.68] | 0.591 | 0.000 | 0.000 | 111 / 562 / 2599 |
+| 32BT | rtv_bench/Event-PU/RECENT | 127 | 1.00 | 0.28 | 0.630 [0.56, 0.70] | 0.630 | 0.000 | 0.000 | 100 / 558 / 3188 |
+| 32BT | rtv_bench/Event-SP/HISTORY | 112 | 1.00 | 0.28 | 0.625 [0.54, 0.71] | 0.625 | 0.000 | 0.000 | 142 / 689 / 4134 |
+| 32BT | rtv_bench/Event-SP/RECENT | 112 | 1.00 | 0.28 | 0.732 [0.66, 0.81] | 0.732 | 0.000 | 0.000 | 117 / 504 / 1934 |
+| 32BT | rtv_bench/Event-SR/HISTORY | 214 | 1.00 | 0.27 | 0.598 [0.54, 0.66] | 0.598 | 0.000 | 0.000 | 184 / 768 / 2870 |
+| 32BT | rtv_bench/Event-SR/RECENT | 214 | 1.00 | 0.27 | 0.682 [0.62, 0.75] | 0.682 | 0.000 | 0.000 | 220 / 845 / 6040 |
+| 32BT | rtv_bench/Event-TP/HISTORY | 114 | 1.00 | 0.29 | 0.570 [0.47, 0.68] | 0.561 | 0.000 | 0.009 | 98 / 525 / 5163 |
+| 32BT | rtv_bench/Event-TP/RECENT | 114 | 1.00 | 0.29 | 0.737 [0.65, 0.82] | 0.737 | 0.000 | 0.000 | 101 / 527 / 1377 |
+| 32BT | rtv_bench/Event-VP/HISTORY | 458 | 1.00 | 0.33 | 0.666 [0.62, 0.71] | 0.666 | 0.000 | 0.000 | 163 / 586 / 5427 |
+| 32BT | rtv_bench/Event-VP/RECENT | 458 | 1.00 | 0.33 | 0.703 [0.65, 0.75] | 0.703 | 0.000 | 0.000 | 134 / 548 / 2063 |
+| 32BT | rtv_bench/Object-FP/HISTORY | 102 | 1.00 | 0.35 | 0.627 [0.55, 0.70] | 0.627 | 0.000 | 0.000 | 151 / 458 / 2774 |
+| 32BT | rtv_bench/Object-FP/RECENT | 102 | 1.00 | 0.35 | 0.755 [0.70, 0.81] | 0.755 | 0.000 | 0.000 | 118 / 863 / 1644 |
+| 32BT | rtv_bench/Object-GU/HISTORY | 135 | 1.00 | 0.25 | 0.600 [0.52, 0.68] | 0.600 | 0.000 | 0.000 | 200 / 1304 / 5363 |
+| 32BT | rtv_bench/Object-GU/RECENT | 135 | 1.00 | 0.25 | 0.570 [0.50, 0.63] | 0.570 | 0.000 | 0.000 | 144 / 964 / 2127 |
+| 32BT | rtv_bench/Object-IA/HISTORY | 87 | 1.00 | 0.28 | 0.575 [0.49, 0.65] | 0.575 | 0.000 | 0.000 | 248 / 841 / 1889 |
+| 32BT | rtv_bench/Object-IA/RECENT | 87 | 1.00 | 0.28 | 0.621 [0.55, 0.68] | 0.621 | 0.000 | 0.000 | 272 / 813 / 1786 |
+| 32BT | rtv_bench/Object-PU/HISTORY | 270 | 1.00 | 0.26 | 0.696 [0.64, 0.76] | 0.696 | 0.000 | 0.000 | 93 / 413 / 1624 |
+| 32BT | rtv_bench/Object-PU/RECENT | 270 | 1.00 | 0.26 | 0.789 [0.74, 0.83] | 0.789 | 0.000 | 0.000 | 88 / 323 / 2628 |
+| 32BT | rtv_bench/Object-SP/HISTORY | 200 | 1.00 | 0.29 | 0.750 [0.70, 0.80] | 0.740 | 0.000 | 0.020 | 83 / 509 / 4738 |
+| 32BT | rtv_bench/Object-SP/RECENT | 200 | 1.00 | 0.29 | 0.830 [0.78, 0.88] | 0.820 | 0.000 | 0.025 | 82 / 318 / 1796 |
+| 32BT | rtv_bench/Object-SR/HISTORY | 161 | 1.00 | 0.26 | 0.609 [0.56, 0.66] | 0.609 | 0.000 | 0.000 | 133 / 520 / 2130 |
+| 32BT | rtv_bench/Object-SR/RECENT | 161 | 1.00 | 0.26 | 0.683 [0.60, 0.76] | 0.683 | 0.000 | 0.000 | 126 / 738 / 3539 |
+| 32BT | rtv_bench/Object-TP/HISTORY | 303 | 1.00 | 0.28 | 0.680 [0.63, 0.73] | 0.673 | 0.003 | 0.017 | 115 / 631 / 16384 |
+| 32BT | rtv_bench/Object-TP/RECENT | 303 | 1.00 | 0.28 | 0.749 [0.70, 0.80] | 0.743 | 0.000 | 0.020 | 102 / 633 / 3264 |
+| 32BT | rtv_bench/Object-VP/HISTORY | 141 | 1.00 | 0.28 | 0.631 [0.54, 0.71] | 0.617 | 0.000 | 0.035 | 108 / 656 / 3510 |
+| 32BT | rtv_bench/Object-VP/RECENT | 141 | 1.00 | 0.28 | 0.773 [0.70, 0.85] | 0.759 | 0.000 | 0.035 | 113 / 635 / 2492 |
 
 ## Files
 - `results/benchmarks/study_b1_h100/`: `b1_rows_{4BI,32BI,32BT}.jsonl.gz` (one row per request, including the whole Thinking response and Instruct logprobs), `b1_mv_32BI.jsonl.gz`, `b1_run_meta_h100nvl.json`, `b1_results_h100nvl.json`, `frame_selection_check.json`.
