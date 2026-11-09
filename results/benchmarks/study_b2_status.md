@@ -1,11 +1,11 @@
 # StudyB2-h100 status
 
-Updated: 2026-11-09 08:32 (written every 30 min by `experiments/benchmarks/b2_status.py`).
+Updated: 2026-11-09 15:28 (written every 30 min by `experiments/benchmarks/b2_status.py`).
 
-- **Stage:** Stage 4 HERBench: shard 0 queued (smoke, repeat control, Lite-v2 x6 arms, shard-0 full x6 arms); pulling parts 04-13.
-- **Running step:** B2h0F_4BT (since 2026-11-09 03:30:11)
-- **Next step:** B2h0F_8BT
-- **Disk free (data disk):** 47.8 GiB (floor 20 GiB)
+- **Stage:** StudyB2 STOPPED by the user 2026-11-09 15:27 after HERBench shard 0's 8BT full-set arm (32BT shard-0 full set, latency sample and shards 1-9 not run). CPU-only StudyE1/E2 job running.
+- **Running step:** none
+- **Next step:** — (queue empty; see stage note)
+- **Disk free (data disk):** 51.3 GiB (floor 20 GiB)
 - **HALT:** none
 
 ## Coverage (error-free rows)
@@ -25,8 +25,8 @@ Updated: 2026-11-09 08:32 (written every 30 min by `experiments/benchmarks/b2_st
 | herbench | 4BI | 7325 / 28701 | 100 / 200 | 25.7 % | 1 file(s), 18.3 MB |
 | herbench | 8BI | 7325 / 28701 | 100 / 200 | 25.7 % | 1 file(s), 18.1 MB |
 | herbench | 32BI | 7325 / 28701 | 100 / 200 | 25.7 % | 1 file(s), 18.4 MB |
-| herbench | 4BT | 6541 / 28701 | 100 / 200 | 23.0 % | 1 file(s), 28.3 MB |
-| herbench | 8BT | 1971 / 28701 | 100 / 200 | 7.2 % | 1 file(s), 8.2 MB |
+| herbench | 4BT | 7325 / 28701 | 100 / 200 | 25.7 % | 1 file(s), 31.7 MB |
+| herbench | 8BT | 7325 / 28701 | 100 / 200 | 25.7 % | 1 file(s), 29.9 MB |
 | herbench | 32BT | 1971 / 28701 | 100 / 200 | 7.2 % | 1 file(s), 7.5 MB |
 
 ## Queue
@@ -89,23 +89,23 @@ Updated: 2026-11-09 08:32 (written every 30 min by `experiments/benchmarks/b2_st
 | B2h0F_4BI | 2026-11-08T22:19:43-08:00 |
 | B2h0F_8BI | 2026-11-08T23:30:46-08:00 |
 | B2h0F_32BI | 2026-11-09T03:30:11-08:00 |
-| B2h0F_4BT | pending |
-| B2h0F_8BT | pending |
-| B2h0F_32BT | pending |
-| B2h_latency | pending |
+| B2h0F_4BT | 2026-11-09T09:27:13-08:00 |
+| B2h0F_8BT | 2026-11-09T15:27:48-08:00 |
+| B2h0F_32BT | SKIPPED (user decision 2026-11-09 ~14:50 |
+| B2h_latency | SKIPPED (user decision 2026-11-09 ~14:50 |
 
 ## Latest progress lines
 
-- `[07:52:10] B2 herbench 4BT main: 4000/5354`
-- `[08:06:24] B2 herbench 4BT main: 4200/5354`
-- `[08:22:00] B2 herbench 4BT main: 4400/5354`
+- `[15:04:27] B2 herbench 8BT main: 5000/5354`
+- `[15:16:50] B2 herbench 8BT main: 5200/5354`
+- `[15:27:46] B2 herbench 8BT: 7425 ok, 0 still failed, frame-checked 5354`
 
 ## Latest stops / flags
 
-- `[11:20:22] B2 herbench 4BT: 2071 ok, 0 still failed, frame-checked 2071`
-- `[13:40:00] B2 herbench 8BT: 2071 ok, 0 still failed, frame-checked 2071`
 - `[21:31:31] B2 herbench 32BT: 2071 ok, 0 still failed, frame-checked 2071`
 - `[22:19:42] B2 herbench 4BI: 7425 ok, 0 still failed, frame-checked 0`
 - `[23:30:44] B2 herbench 8BI: 7425 ok, 0 still failed, frame-checked 5354`
 - `[03:30:09] B2 herbench 32BI: 7425 ok, 0 still failed, frame-checked 5354`
+- `[09:27:11] B2 herbench 4BT: 7425 ok, 0 still failed, frame-checked 5354`
+- `[15:27:46] B2 herbench 8BT: 7425 ok, 0 still failed, frame-checked 5354`
 

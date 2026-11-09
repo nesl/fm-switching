@@ -2197,7 +2197,147 @@
    "b1_common_sha256": "50d3d54d39662302997250b80e2fb23bf47da731abec1a80cbb27d49676a8b19",
    "ovo_constant_sha256": "00f73a1a3c9875cf59e61ff1c77b4251e8526283f2b4b880d54060412c5e6459",
    "shard": 0,
-   "frame_reference": "this dataset's 4BI rows"
+   "frame_reference": "this dataset's 4BI rows",
+   "ended": "2026-11-09T09:27:11.884854",
+   "rows": 7425,
+   "ok": 7425,
+   "still_failed": 0,
+   "error_rows": 0,
+   "frame_checked": 5354,
+   "first_history_ok": [
+    true
+   ]
+  },
+  {
+   "dataset": "herbench",
+   "model": "8BT",
+   "repo": "Qwen/Qwen3-VL-8B-Thinking",
+   "revision": "92f3c4b4feadd3a016ef468d103bb5f58b2a2c6b",
+   "started": "2026-11-09T09:28:06.810274",
+   "server": {
+    "key": "8BT",
+    "repo": "Qwen/Qwen3-VL-8B-Thinking",
+    "revision": "92f3c4b4feadd3a016ef468d103bb5f58b2a2c6b",
+    "server_cmd": [
+     "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+     "serve",
+     "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-8B-Thinking/snapshots/92f3c4b4feadd3a016ef468d103bb5f58b2a2c6b",
+     "--served-model-name",
+     "8BT",
+     "--port",
+     "8011",
+     "--max-model-len",
+     "32768",
+     "--gpu-memory-utilization",
+     "0.9",
+     "--tensor-parallel-size",
+     "1",
+     "--no-enable-prefix-caching",
+     "--limit-mm-per-prompt",
+     "{\"image\": 16}",
+     "--dtype",
+     "bfloat16",
+     "--seed",
+     "0",
+     "--limit-mm-per-prompt",
+     "{\"image\": 37, \"video\": 0}",
+     "--mm-processor-cache-gb",
+     "0",
+     "--host",
+     "127.0.0.1"
+    ],
+    "startup_s": 42.5,
+    "log": "logs/study_x_server_8BT_1109_092720.log",
+    "max_model_len": 32768,
+    "gpu_memory_utilization": 0.9,
+    "tensor_parallel_size": 1,
+    "prefix_caching": false,
+    "kv_cache_tokens": 454656,
+    "max_concurrency_at_max_len": 13.88,
+    "available_kv_gib": "62.44",
+    "model_weights_gib": "16.79",
+    "attention_backend_lines": [
+     "(EngineCore pid=1434784) INFO 11-09 09:27:38 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+     "(EngineCore pid=1434784) INFO 11-09 09:27:38 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+     "(EngineCore pid=1434784) INFO 11-09 09:27:39 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+     "(EngineCore pid=1434784) INFO 11-09 09:27:39 [flash_attn.py:1167] Using FlashAttention version 3",
+     "(EngineCore pid=1434784) INFO 11-09 09:27:42 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+    ],
+    "cuda_graphs": true,
+    "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+    "extra_server_args": [
+     "--limit-mm-per-prompt",
+     "{\"image\": 37, \"video\": 0}",
+     "--mm-processor-cache-gb",
+     "0",
+     "--host",
+     "127.0.0.1"
+    ],
+    "flash_attention_version": "3",
+    "session_check": {
+     "my_sid": 3455059,
+     "my_pgid": 3455059,
+     "gpu3": [
+      {
+       "pid": 1434784,
+       "sid": 3455059,
+       "pgid": 3455059,
+       "cmd": "VLLM::EngineCore                                                                                                        "
+      }
+     ],
+     "all_same_session": true,
+     "all_same_pgid": true
+    }
+   },
+   "flags": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 37, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--host",
+    "127.0.0.1"
+   ],
+   "gen": {
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 20,
+    "repetition_penalty": 1.0,
+    "presence_penalty": 0.0,
+    "max_tokens": 16384,
+    "seed": 0
+   },
+   "gen_source": "model card README 'Generation Hyperparameters' VL section of each pinned snapshot (4B/8B/32B identical: greedy=false, top_p 0.95, top_k 20, repetition_penalty 1.0, presence_penalty 0.0, temperature 1.0); max_tokens 16384 and seed 0 per the B2 spec. Note: 32B-Thinking generation_config.json says temperature 0.8; the card VL value 1.0 is used and set explicitly in every request.",
+   "concurrency": 8,
+   "limit_mm_37_in_log": true,
+   "vllm": "0.31.0",
+   "torch": "2.13.0+cu129",
+   "pyav": "17.1.0",
+   "libavcodec": [
+    62,
+    28,
+    101
+   ],
+   "libavformat": [
+    62,
+    12,
+    101
+   ],
+   "pil": "12.3.0",
+   "n_planned": 5454,
+   "n_bridge": 0,
+   "b1_common_sha256": "50d3d54d39662302997250b80e2fb23bf47da731abec1a80cbb27d49676a8b19",
+   "ovo_constant_sha256": "00f73a1a3c9875cf59e61ff1c77b4251e8526283f2b4b880d54060412c5e6459",
+   "shard": 0,
+   "frame_reference": "this dataset's 4BI rows",
+   "ended": "2026-11-09T15:27:46.829184",
+   "rows": 7425,
+   "ok": 7425,
+   "still_failed": 0,
+   "error_rows": 0,
+   "frame_checked": 5354,
+   "first_history_ok": [
+    true
+   ]
   }
  ],
  "_provenance": [
@@ -2451,6 +2591,38 @@
    "args": {
     "dataset": "herbench",
     "model": "32BI",
+    "shard": 0,
+    "parts": "her_full",
+    "repeat_control": 0,
+    "limit": 0
+   }
+  },
+  {
+   "git_commit": "e43aa2b1a66fd3eefc2aca5c15ac0db8076670d1",
+   "script": "b2_infer_vllm.py",
+   "model": "4BT",
+   "timestamp": "2026-11-09T09:27:11.889361",
+   "device": "h100nvl_gpu2",
+   "n": 7425,
+   "args": {
+    "dataset": "herbench",
+    "model": "4BT",
+    "shard": 0,
+    "parts": "her_full",
+    "repeat_control": 0,
+    "limit": 0
+   }
+  },
+  {
+   "git_commit": "e43aa2b1a66fd3eefc2aca5c15ac0db8076670d1",
+   "script": "b2_infer_vllm.py",
+   "model": "8BT",
+   "timestamp": "2026-11-09T15:27:46.833381",
+   "device": "h100nvl_gpu2",
+   "n": 7425,
+   "args": {
+    "dataset": "herbench",
+    "model": "8BT",
     "shard": 0,
     "parts": "her_full",
     "repeat_control": 0,

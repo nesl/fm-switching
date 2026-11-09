@@ -2,7 +2,10 @@
 
 **E-id:** StudyB2-herbench (pre-registered 2026-11-08 ~06:45, before any HERBench inference; authorised by the user).
 
-**Status:** running. Shard 0 verified (parts 00–03 = published checksums and HF; 68 / 68 videos, sizes equal flash's). Smoke × 6 and repeat control passed. **Lite-v2 complete (all six arms, 21:31)**; shard 0 full-set arms running. Rows files committed on 2026-11-09 (~08:20) are a **mid-run snapshot** (shard 0 full set in progress; shards 1–9 not started).
+**Status:** STOPPED by the user on 2026-11-09 15:27, at an arm boundary, for a CPU-only job.
+- **Complete:** Lite-v2 on all six arms. The shard 0 full-set questions (5,354) on 4BI, 8BI, 32BI, 4BT and 8BT.
+- **Not run:** 32BT on the shard 0 full set, the latency sample, and shards 1–9.
+- **Data state:** shard 1 is prepared (all 17 tar parts verified, 28 videos extracted). The shard 0 and shard 1 videos and the tar parts remain on disk; none were deleted, since their arms are not all finished.
 
 **Purpose:** descriptive per-question rows for the full 6-arm matrix. No policy, threshold or time-shift claim.
 
