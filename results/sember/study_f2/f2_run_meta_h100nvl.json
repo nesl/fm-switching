@@ -1,0 +1,396 @@
+{
+ "done": [],
+ "stack_captions": {
+  "venv": "/home/pragya/.venvs/fm-switching-vllm",
+  "vllm": "0.31.0",
+  "torch": "2.13.0+cu129",
+  "gpu": "h100nvl GPU 1",
+  "gpu_uuid": "GPU-235c6d2d-40df-9060-e2f8-6524c4928d2d",
+  "flags": [
+   "--limit-mm-per-prompt",
+   "{\"image\": 8, \"video\": 0}",
+   "--mm-processor-kwargs",
+   "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+   "--mm-processor-cache-gb",
+   "0",
+   "--enable-prompt-tokens-details",
+   "--host",
+   "127.0.0.1"
+  ],
+  "gen": {
+   "temperature": 0.0,
+   "max_tokens": 128,
+   "seed": 0
+  },
+  "concurrency": 8,
+  "prompt": "Describe what happens in these frames: people, objects, actions, and where objects are placed. Be factual and concise."
+ },
+ "servers": [
+  {
+   "stage": "captions",
+   "started": "2026-11-10T12:53:30.887732",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8031",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--limit-mm-per-prompt",
+    "{\"image\": 8, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--enable-prompt-tokens-details",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 57.6,
+   "log": "logs/study_x_server_32BI_1110_125230.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=1315068) INFO 11-10 12:52:47 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=1315068) INFO 11-10 12:52:47 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=1315068) INFO 11-10 12:52:47 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=1315068) INFO 11-10 12:52:47 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=1315068) INFO 11-10 12:52:58 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 8, \"video\": 0}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--enable-prompt-tokens-details",
+    "--host",
+    "127.0.0.1"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 1304330,
+    "my_pgid": 1304330,
+    "gpu3": [
+     {
+      "pid": 1315068,
+      "sid": 1304330,
+      "pgid": 1304330,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "stage": "answers_32BI",
+   "started": "2026-11-10T13:13:55.769154",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8031",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--limit-mm-per-prompt",
+    "{\"image\": 0, \"video\": 1}",
+    "--mm-processor-kwargs",
+    "{\"fps\": 1.0, \"do_sample_frames\": false}",
+    "--trust-request-mm-kwargs",
+    "--host",
+    "127.0.0.1",
+    "--mm-processor-cache-gb",
+    "0",
+    "--enable-prompt-tokens-details"
+   ],
+   "startup_s": 57.7,
+   "log": "logs/study_x_server_32BI_1110_131256.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 64624,
+   "max_concurrency_at_max_len": 1.97,
+   "available_kv_gib": "15.78",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=1325441) INFO 11-10 13:13:13 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=1325441) INFO 11-10 13:13:13 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=1325441) INFO 11-10 13:13:13 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=1325441) INFO 11-10 13:13:13 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=1325441) INFO 11-10 13:13:24 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 0, \"video\": 1}",
+    "--mm-processor-kwargs",
+    "{\"fps\": 1.0, \"do_sample_frames\": false}",
+    "--trust-request-mm-kwargs",
+    "--host",
+    "127.0.0.1",
+    "--mm-processor-cache-gb",
+    "0",
+    "--enable-prompt-tokens-details"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 1304330,
+    "my_pgid": 1304330,
+    "gpu3": [
+     {
+      "pid": 1325441,
+      "sid": 1304330,
+      "pgid": 1304330,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "stage": "answers_4BI",
+   "started": "2026-11-10T13:53:17.899135",
+   "key": "4BI",
+   "repo": "Qwen/Qwen3-VL-4B-Instruct",
+   "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec70b05090aa6165b016eac8ec08e71b17",
+    "--served-model-name",
+    "4BI",
+    "--port",
+    "8031",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--limit-mm-per-prompt",
+    "{\"image\": 0, \"video\": 1}",
+    "--mm-processor-kwargs",
+    "{\"fps\": 1.0, \"do_sample_frames\": false}",
+    "--trust-request-mm-kwargs",
+    "--host",
+    "127.0.0.1",
+    "--mm-processor-cache-gb",
+    "0",
+    "--enable-prompt-tokens-details"
+   ],
+   "startup_s": 39.4,
+   "log": "logs/study_x_server_4BI_1110_135237.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 520016,
+   "max_concurrency_at_max_len": 15.87,
+   "available_kv_gib": "71.41",
+   "model_weights_gib": "8.69",
+   "attention_backend_lines": [
+    "(EngineCore pid=1342782) INFO 11-10 13:52:54 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=1342782) INFO 11-10 13:52:54 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=1342782) INFO 11-10 13:52:54 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=1342782) INFO 11-10 13:52:54 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=1342782) INFO 11-10 13:52:56 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 0, \"video\": 1}",
+    "--mm-processor-kwargs",
+    "{\"fps\": 1.0, \"do_sample_frames\": false}",
+    "--trust-request-mm-kwargs",
+    "--host",
+    "127.0.0.1",
+    "--mm-processor-cache-gb",
+    "0",
+    "--enable-prompt-tokens-details"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 1304330,
+    "my_pgid": 1304330,
+    "gpu3": [
+     {
+      "pid": 1342782,
+      "sid": 1304330,
+      "pgid": 1304330,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  }
+ ],
+ "caption_batched_segments": [
+  {
+   "chunks": 1974,
+   "wall_s": 1052.6,
+   "concurrency": 8,
+   "at": "2026-11-10T13:11:03.466456"
+  }
+ ],
+ "_provenance": [
+  {
+   "git_commit": "840d9a695733de1d5b992aa2f1fbd14197500169",
+   "script": "study_f2_captions_vllm.py",
+   "model": "32BI",
+   "timestamp": "2026-11-10T13:12:52.562253",
+   "device": "h100nvl_gpu1",
+   "n": 1974,
+   "args": {
+    "plan_only": false
+   }
+  },
+  {
+   "git_commit": "840d9a695733de1d5b992aa2f1fbd14197500169",
+   "script": "study_f2_infer_vllm.py",
+   "model": "32BI",
+   "timestamp": "2026-11-10T13:52:32.828503",
+   "device": "h100nvl_gpu1",
+   "n": 845,
+   "args": {
+    "model": "32BI"
+   }
+  },
+  {
+   "git_commit": "840d9a695733de1d5b992aa2f1fbd14197500169",
+   "script": "study_f2_infer_vllm.py",
+   "model": "4BI",
+   "timestamp": "2026-11-10T14:08:30.615995",
+   "device": "h100nvl_gpu1",
+   "n": 845,
+   "args": {
+    "model": "4BI"
+   }
+  }
+ ],
+ "caption_summary": {
+  "planned": 1974,
+  "ok": 1974,
+  "still_failed": 0
+ },
+ "length_check": {
+  "32BI": {
+   "worst_estimated_total": 17448,
+   "max_model_len": 32768
+  },
+  "4BI": {
+   "worst_estimated_total": 17448,
+   "max_model_len": 32768
+  }
+ },
+ "stack_answers": {
+  "venv": "/home/pragya/.venvs/fm-switching-vllm",
+  "vllm": "0.31.0",
+  "torch": "2.13.0+cu129",
+  "gpu": "h100nvl GPU 1",
+  "gpu_uuid": "GPU-235c6d2d-40df-9060-e2f8-6524c4928d2d",
+  "flags": [
+   "--limit-mm-per-prompt",
+   "{\"image\": 0, \"video\": 1}",
+   "--mm-processor-kwargs",
+   "{\"fps\": 1.0, \"do_sample_frames\": false}",
+   "--trust-request-mm-kwargs",
+   "--host",
+   "127.0.0.1",
+   "--mm-processor-cache-gb",
+   "0",
+   "--enable-prompt-tokens-details"
+  ],
+  "gen": {
+   "temperature": 0.0,
+   "max_tokens": 64,
+   "logprobs": true,
+   "top_logprobs": 20
+  },
+  "seed": 42,
+  "concurrency": 8
+ },
+ "summary": {
+  "32BI": {
+   "ok": 845,
+   "still_failed": 0,
+   "error_rows": 0
+  },
+  "4BI": {
+   "ok": 845,
+   "still_failed": 0,
+   "error_rows": 0
+  }
+ },
+ "negative_control": {
+  "32BI": {
+   "reference": "K3",
+   "n": 167,
+   "letter_mismatch": 0,
+   "prompt_token_mismatch": 0,
+   "mismatched": []
+  },
+  "4BI": {
+   "reference": "H1",
+   "n": 167,
+   "letter_mismatch": 0,
+   "prompt_token_mismatch": 0,
+   "mismatched": []
+  }
+ }
+}

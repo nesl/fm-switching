@@ -1,0 +1,845 @@
+{
+ "label": "StudyF2-summary: generic 30-s chunk captions (32B, question-blind) for history older than qt - 120 s + K3's RECENT video; H100 GPU 1 vLLM stack; accuracy only",
+ "strata_counts": {
+  "QT_LE_120": 167,
+  "INSIDE": 414,
+  "OVERLAP": 167,
+  "OLDER": 97
+ },
+ "checks": {
+  "32BI": {
+   "rows_ok": 845,
+   "missing": 0,
+   "error_rows_retried": 0,
+   "unparsed_X": 0,
+   "finish_length": 0,
+   "cached_tokens_nonzero": 0
+  },
+  "4BI": {
+   "rows_ok": 845,
+   "missing": 0,
+   "error_rows_retried": 0,
+   "unparsed_X": 0,
+   "finish_length": 0,
+   "cached_tokens_nonzero": 0
+  }
+ },
+ "accuracy": {
+  "32BI/F2/ALL": {
+   "n": 845,
+   "est": 0.378698224852071,
+   "ci": [
+    0.3439706914267098,
+    0.41423609349545376
+   ]
+  },
+  "32BI/recent_K3/ALL": {
+   "n": 845,
+   "est": 0.3834319526627219,
+   "ci": [
+    0.34914751868008465,
+    0.4205526692169837
+   ]
+  },
+  "32BI/rich_K1/ALL": {
+   "n": 845,
+   "est": 0.3952662721893491,
+   "ci": [
+    0.361242330424993,
+    0.4301386389753286
+   ]
+  },
+  "32BI/U32/ALL": {
+   "n": 845,
+   "est": 0.41420118343195267,
+   "ci": [
+    0.3802291422675813,
+    0.45006458843054387
+   ]
+  },
+  "32BI/F2/OLDER": {
+   "n": 97,
+   "est": 0.2268041237113402,
+   "ci": [
+    0.1414141414141414,
+    0.3146067415730337
+   ]
+  },
+  "32BI/recent_K3/OLDER": {
+   "n": 97,
+   "est": 0.24742268041237114,
+   "ci": [
+    0.16160801564027372,
+    0.3368421052631579
+   ]
+  },
+  "32BI/rich_K1/OLDER": {
+   "n": 97,
+   "est": 0.422680412371134,
+   "ci": [
+    0.3173076923076923,
+    0.5308738425925925
+   ]
+  },
+  "32BI/U32/OLDER": {
+   "n": 97,
+   "est": 0.422680412371134,
+   "ci": [
+    0.3173076923076923,
+    0.532608695652174
+   ]
+  },
+  "32BI/F2/OVERLAP": {
+   "n": 167,
+   "est": 0.2874251497005988,
+   "ci": [
+    0.2261904761904762,
+    0.35543185009978556
+   ]
+  },
+  "32BI/recent_K3/OVERLAP": {
+   "n": 167,
+   "est": 0.2634730538922156,
+   "ci": [
+    0.19883040935672514,
+    0.3277173318753415
+   ]
+  },
+  "32BI/rich_K1/OVERLAP": {
+   "n": 167,
+   "est": 0.3652694610778443,
+   "ci": [
+    0.29238585594420835,
+    0.4394904458598726
+   ]
+  },
+  "32BI/U32/OVERLAP": {
+   "n": 167,
+   "est": 0.3473053892215569,
+   "ci": [
+    0.27682701894317047,
+    0.4265798226164079
+   ]
+  },
+  "32BI/F2/INSIDE": {
+   "n": 414,
+   "est": 0.38405797101449274,
+   "ci": [
+    0.3365617433414044,
+    0.4306228826878078
+   ]
+  },
+  "32BI/recent_K3/INSIDE": {
+   "n": 414,
+   "est": 0.39855072463768115,
+   "ci": [
+    0.35235120399818265,
+    0.4447058823529412
+   ]
+  },
+  "32BI/rich_K1/INSIDE": {
+   "n": 414,
+   "est": 0.34057971014492755,
+   "ci": [
+    0.29656820486815416,
+    0.38422887337450606
+   ]
+  },
+  "32BI/U32/INSIDE": {
+   "n": 414,
+   "est": 0.3864734299516908,
+   "ci": [
+    0.33914892646432704,
+    0.43204188417817235
+   ]
+  },
+  "32BI/F2/QT_LE_120": {
+   "n": 167,
+   "est": 0.5449101796407185,
+   "ci": [
+    0.4580586863583366,
+    0.6309850230414744
+   ]
+  },
+  "32BI/recent_K3/QT_LE_120": {
+   "n": 167,
+   "est": 0.5449101796407185,
+   "ci": [
+    0.4642857142857143,
+    0.6325301204819277
+   ]
+  },
+  "32BI/rich_K1/QT_LE_120": {
+   "n": 167,
+   "est": 0.5449101796407185,
+   "ci": [
+    0.4602246583937535,
+    0.6369178153717626
+   ]
+  },
+  "32BI/U32/QT_LE_120": {
+   "n": 167,
+   "est": 0.5449101796407185,
+   "ci": [
+    0.4602272727272727,
+    0.6287472225360599
+   ]
+  },
+  "4BI/F2/ALL": {
+   "n": 845,
+   "est": 0.31242603550295855,
+   "ci": [
+    0.2810104631594351,
+    0.3447068893673172
+   ]
+  },
+  "4BI/recent_H1/ALL": {
+   "n": 845,
+   "est": 0.3254437869822485,
+   "ci": [
+    0.2946641516378358,
+    0.35671968168041523
+   ]
+  },
+  "4BI/rich_H2/ALL": {
+   "n": 845,
+   "est": 0.30177514792899407,
+   "ci": [
+    0.26885546660387727,
+    0.3341525731795107
+   ]
+  },
+  "4BI/U4/ALL": {
+   "n": 845,
+   "est": 0.336094674556213,
+   "ci": [
+    0.3033112146365343,
+    0.3693938397620791
+   ]
+  },
+  "4BI/F2/OLDER": {
+   "n": 97,
+   "est": 0.18556701030927836,
+   "ci": [
+    0.11212357217030114,
+    0.2666831683168316
+   ]
+  },
+  "4BI/recent_H1/OLDER": {
+   "n": 97,
+   "est": 0.20618556701030927,
+   "ci": [
+    0.12631323454266735,
+    0.2912722491909384
+   ]
+  },
+  "4BI/rich_H2/OLDER": {
+   "n": 97,
+   "est": 0.32989690721649484,
+   "ci": [
+    0.22997916666666668,
+    0.43299828178694155
+   ]
+  },
+  "4BI/U4/OLDER": {
+   "n": 97,
+   "est": 0.3402061855670103,
+   "ci": [
+    0.23330357142857144,
+    0.4444444444444444
+   ]
+  },
+  "4BI/F2/OVERLAP": {
+   "n": 167,
+   "est": 0.2275449101796407,
+   "ci": [
+    0.16483360389610388,
+    0.28823800072176103
+   ]
+  },
+  "4BI/recent_H1/OVERLAP": {
+   "n": 167,
+   "est": 0.2275449101796407,
+   "ci": [
+    0.16664364640883977,
+    0.2901329402027726
+   ]
+  },
+  "4BI/rich_H2/OVERLAP": {
+   "n": 167,
+   "est": 0.24550898203592814,
+   "ci": [
+    0.18284546271338725,
+    0.3103501820518312
+   ]
+  },
+  "4BI/U4/OVERLAP": {
+   "n": 167,
+   "est": 0.2874251497005988,
+   "ci": [
+    0.22346368715083798,
+    0.35185185185185186
+   ]
+  },
+  "4BI/F2/INSIDE": {
+   "n": 414,
+   "est": 0.32608695652173914,
+   "ci": [
+    0.28211116506327577,
+    0.37070994028018084
+   ]
+  },
+  "4BI/recent_H1/INSIDE": {
+   "n": 414,
+   "est": 0.34782608695652173,
+   "ci": [
+    0.3062176545259252,
+    0.3939411395056556
+   ]
+  },
+  "4BI/rich_H2/INSIDE": {
+   "n": 414,
+   "est": 0.2632850241545894,
+   "ci": [
+    0.2200488997555012,
+    0.3048780487804878
+   ]
+  },
+  "4BI/U4/INSIDE": {
+   "n": 414,
+   "est": 0.3140096618357488,
+   "ci": [
+    0.26666259168704154,
+    0.35962877030162416
+   ]
+  },
+  "4BI/F2/QT_LE_120": {
+   "n": 167,
+   "est": 0.437125748502994,
+   "ci": [
+    0.355014605647517,
+    0.5176523109243698
+   ]
+  },
+  "4BI/recent_H1/QT_LE_120": {
+   "n": 167,
+   "est": 0.437125748502994,
+   "ci": [
+    0.35426835043409627,
+    0.5136768149882903
+   ]
+  },
+  "4BI/rich_H2/QT_LE_120": {
+   "n": 167,
+   "est": 0.437125748502994,
+   "ci": [
+    0.3575649350649351,
+    0.5209709415524778
+   ]
+  },
+  "4BI/U4/QT_LE_120": {
+   "n": 167,
+   "est": 0.437125748502994,
+   "ci": [
+    0.35259294534944824,
+    0.5187756002824858
+   ]
+  }
+ },
+ "paired": {
+  "32BI/F2-recent_K3/ALL": {
+   "n": 845,
+   "est": -0.004733727810650888,
+   "ci": [
+    -0.02459088463090731,
+    0.014069312115963135
+   ],
+   "agreement": 0.8828402366863906,
+   "ref_prompt_tokens_median": 12437.0
+  },
+  "32BI/F2-rich_K1/ALL": {
+   "n": 845,
+   "est": -0.016568047337278107,
+   "ci": [
+    -0.04342850581751378,
+    0.009781152568438626
+   ],
+   "agreement": 0.7313609467455622,
+   "ref_prompt_tokens_median": 12597.0
+  },
+  "32BI/F2-U32/ALL": {
+   "n": 845,
+   "est": -0.03550295857988166,
+   "ci": [
+    -0.05683388877419609,
+    -0.012721076217843515
+   ],
+   "agreement": 0.808284023668639,
+   "ref_prompt_tokens_median": 18246.0
+  },
+  "32BI/F2-recent_K3/OLDER": {
+   "n": 97,
+   "est": -0.020618556701030927,
+   "ci": [
+    -0.08421052631578947,
+    0.04081632653061224
+   ],
+   "agreement": 0.7731958762886598,
+   "ref_prompt_tokens_median": 12441.0
+  },
+  "32BI/F2-rich_K1/OLDER": {
+   "n": 97,
+   "est": -0.1958762886597938,
+   "ci": [
+    -0.3020833333333333,
+    -0.0891089108910891
+   ],
+   "agreement": 0.5051546391752577,
+   "ref_prompt_tokens_median": 12614.0
+  },
+  "32BI/F2-U32/OLDER": {
+   "n": 97,
+   "est": -0.1958762886597938,
+   "ci": [
+    -0.28888888888888886,
+    -0.10750861259004081
+   ],
+   "agreement": 0.5567010309278351,
+   "ref_prompt_tokens_median": 20074.0
+  },
+  "32BI/F2-recent_K3/OVERLAP": {
+   "n": 167,
+   "est": 0.023952095808383235,
+   "ci": [
+    -0.023813088109495294,
+    0.07643405769951292
+   ],
+   "agreement": 0.7964071856287425,
+   "ref_prompt_tokens_median": 12458.0
+  },
+  "32BI/F2-rich_K1/OVERLAP": {
+   "n": 167,
+   "est": -0.07784431137724551,
+   "ci": [
+    -0.14201183431952663,
+    -0.017964071856287425
+   ],
+   "agreement": 0.6107784431137725,
+   "ref_prompt_tokens_median": 12636.0
+  },
+  "32BI/F2-U32/OVERLAP": {
+   "n": 167,
+   "est": -0.059880239520958084,
+   "ci": [
+    -0.11764705882352941,
+    0.0
+   ],
+   "agreement": 0.6347305389221557,
+   "ref_prompt_tokens_median": 19811.0
+  },
+  "32BI/F2-recent_K3/INSIDE": {
+   "n": 414,
+   "est": -0.014492753623188406,
+   "ci": [
+    -0.041097548840757565,
+    0.01020408163265306
+   ],
+   "agreement": 0.8961352657004831,
+   "ref_prompt_tokens_median": 12448.5
+  },
+  "32BI/F2-rich_K1/INSIDE": {
+   "n": 414,
+   "est": 0.043478260869565216,
+   "ci": [
+    0.0024094937442076,
+    0.08252484429382671
+   ],
+   "agreement": 0.7246376811594203,
+   "ref_prompt_tokens_median": 12609.0
+  },
+  "32BI/F2-U32/INSIDE": {
+   "n": 414,
+   "est": -0.0024154589371980675,
+   "ci": [
+    -0.03242054376818974,
+    0.025821596244131457
+   ],
+   "agreement": 0.8599033816425121,
+   "ref_prompt_tokens_median": 18646.0
+  },
+  "32BI/F2-recent_K3/QT_LE_120": {
+   "n": 167,
+   "est": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "agreement": 1.0,
+   "ref_prompt_tokens_median": 12010.0
+  },
+  "32BI/F2-rich_K1/QT_LE_120": {
+   "n": 167,
+   "est": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "agreement": 1.0,
+   "ref_prompt_tokens_median": 12010.0
+  },
+  "32BI/F2-U32/QT_LE_120": {
+   "n": 167,
+   "est": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "agreement": 1.0,
+   "ref_prompt_tokens_median": 12010.0
+  },
+  "4BI/F2-recent_H1/ALL": {
+   "n": 845,
+   "est": -0.01301775147928994,
+   "ci": [
+    -0.032793659395745835,
+    0.004796163069544364
+   ],
+   "agreement": 0.8497041420118343,
+   "ref_prompt_tokens_median": 12437.0
+  },
+  "4BI/F2-rich_H2/ALL": {
+   "n": 845,
+   "est": 0.010650887573964497,
+   "ci": [
+    -0.016223421793893487,
+    0.03742799622005834
+   ],
+   "agreement": 0.727810650887574,
+   "ref_prompt_tokens_median": 12597.0
+  },
+  "4BI/F2-U4/ALL": {
+   "n": 845,
+   "est": -0.023668639053254437,
+   "ci": [
+    -0.046062937062937064,
+    -0.0035623151301931643
+   ],
+   "agreement": 0.7917159763313609,
+   "ref_prompt_tokens_median": 18246.0
+  },
+  "4BI/F2-recent_H1/OLDER": {
+   "n": 97,
+   "est": -0.020618556701030927,
+   "ci": [
+    -0.10101293837248894,
+    0.06451612903225806
+   ],
+   "agreement": 0.7319587628865979,
+   "ref_prompt_tokens_median": 12441.0
+  },
+  "4BI/F2-rich_H2/OLDER": {
+   "n": 97,
+   "est": -0.14432989690721648,
+   "ci": [
+    -0.2549123904881101,
+    -0.04121628657711143
+   ],
+   "agreement": 0.5051546391752577,
+   "ref_prompt_tokens_median": 12614.0
+  },
+  "4BI/F2-U4/OLDER": {
+   "n": 97,
+   "est": -0.15463917525773196,
+   "ci": [
+    -0.25,
+    -0.05434782608695652
+   ],
+   "agreement": 0.5463917525773195,
+   "ref_prompt_tokens_median": 20074.0
+  },
+  "4BI/F2-recent_H1/OVERLAP": {
+   "n": 167,
+   "est": 0.0,
+   "ci": [
+    -0.04375,
+    0.043478260869565216
+   ],
+   "agreement": 0.8323353293413174,
+   "ref_prompt_tokens_median": 12458.0
+  },
+  "4BI/F2-rich_H2/OVERLAP": {
+   "n": 167,
+   "est": -0.017964071856287425,
+   "ci": [
+    -0.08280348999359288,
+    0.046256295845586916
+   ],
+   "agreement": 0.5988023952095808,
+   "ref_prompt_tokens_median": 12636.0
+  },
+  "4BI/F2-U4/OVERLAP": {
+   "n": 167,
+   "est": -0.059880239520958084,
+   "ci": [
+    -0.11629606963144294,
+    -0.0059162895927601855
+   ],
+   "agreement": 0.6526946107784432,
+   "ref_prompt_tokens_median": 19811.0
+  },
+  "4BI/F2-recent_H1/INSIDE": {
+   "n": 414,
+   "est": -0.021739130434782608,
+   "ci": [
+    -0.051051600020422166,
+    0.0068070716658756285
+   ],
+   "agreement": 0.8236714975845411,
+   "ref_prompt_tokens_median": 12448.5
+  },
+  "4BI/F2-rich_H2/INSIDE": {
+   "n": 414,
+   "est": 0.06280193236714976,
+   "ci": [
+    0.028775257306116832,
+    0.09799347203306248
+   ],
+   "agreement": 0.7222222222222222,
+   "ref_prompt_tokens_median": 12609.0
+  },
+  "4BI/F2-U4/INSIDE": {
+   "n": 414,
+   "est": 0.012077294685990338,
+   "ci": [
+    -0.016630061712259486,
+    0.03980331057478563
+   ],
+   "agreement": 0.821256038647343,
+   "ref_prompt_tokens_median": 18646.0
+  },
+  "4BI/F2-recent_H1/QT_LE_120": {
+   "n": 167,
+   "est": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "agreement": 1.0,
+   "ref_prompt_tokens_median": 12010.0
+  },
+  "4BI/F2-rich_H2/QT_LE_120": {
+   "n": 167,
+   "est": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "agreement": 1.0,
+   "ref_prompt_tokens_median": 12010.0
+  },
+  "4BI/F2-U4/QT_LE_120": {
+   "n": 167,
+   "est": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "agreement": 1.0,
+   "ref_prompt_tokens_median": 12010.0
+  }
+ },
+ "tokens": {
+  "32BI/ALL": {
+   "prompt_median": 12896.0,
+   "prompt_max": 17380,
+   "summary_tokens_median": 414.0,
+   "summary_tokens_max": 4720,
+   "chunks_median": 3.0,
+   "extra_over_K3_median": 414.0
+  },
+  "32BI/OLDER": {
+   "prompt_median": 13270.0,
+   "prompt_max": 17380,
+   "summary_tokens_median": 829.0,
+   "summary_tokens_max": 4716,
+   "chunks_median": 6.0,
+   "extra_over_K3_median": 829.0
+  },
+  "32BI/OVERLAP": {
+   "prompt_median": 13209.0,
+   "prompt_max": 17181,
+   "summary_tokens_median": 691.0,
+   "summary_tokens_max": 4720,
+   "chunks_median": 5.0,
+   "extra_over_K3_median": 691.0
+  },
+  "32BI/INSIDE": {
+   "prompt_median": 12985.5,
+   "prompt_max": 16512,
+   "summary_tokens_median": 551.0,
+   "summary_tokens_max": 4025,
+   "chunks_median": 4.0,
+   "extra_over_K3_median": 551.0
+  },
+  "32BI/QT_LE_120": {
+   "prompt_median": 12010.0,
+   "prompt_max": 12658,
+   "summary_tokens_median": 0.0,
+   "summary_tokens_max": 0,
+   "chunks_median": 0.0,
+   "extra_over_K3_median": 0.0
+  },
+  "4BI/ALL": {
+   "prompt_median": 12896.0,
+   "prompt_max": 17380,
+   "summary_tokens_median": 414.0,
+   "summary_tokens_max": 4720,
+   "chunks_median": 3.0,
+   "extra_over_K3_median": 414.0
+  },
+  "4BI/OLDER": {
+   "prompt_median": 13270.0,
+   "prompt_max": 17380,
+   "summary_tokens_median": 829.0,
+   "summary_tokens_max": 4716,
+   "chunks_median": 6.0,
+   "extra_over_K3_median": 829.0
+  },
+  "4BI/OVERLAP": {
+   "prompt_median": 13209.0,
+   "prompt_max": 17181,
+   "summary_tokens_median": 691.0,
+   "summary_tokens_max": 4720,
+   "chunks_median": 5.0,
+   "extra_over_K3_median": 691.0
+  },
+  "4BI/INSIDE": {
+   "prompt_median": 12985.5,
+   "prompt_max": 16512,
+   "summary_tokens_median": 551.0,
+   "summary_tokens_max": 4025,
+   "chunks_median": 4.0,
+   "extra_over_K3_median": 551.0
+  },
+  "4BI/QT_LE_120": {
+   "prompt_median": 12010.0,
+   "prompt_max": 12658,
+   "summary_tokens_median": 0.0,
+   "summary_tokens_max": 0,
+   "chunks_median": 0.0,
+   "extra_over_K3_median": 0.0
+  }
+ },
+ "caption_cost": {
+  "chunks": 1974,
+  "videos": 231,
+  "chunks_per_video_hour": 120.0,
+  "batched": {
+   "chunks": 1974,
+   "wall_s": 1052.6,
+   "concurrency": 8,
+   "gpu_s_per_chunk_amortised": 0.5332320162107396,
+   "gpu_s_per_video_hour_amortised": 63.98784194528875
+  },
+  "serial": {
+   "n": 30,
+   "total_s_median": 2.9974,
+   "total_s_p90": 3.00792,
+   "gpu_s_per_video_hour_serial": 359.688,
+   "cached_nonzero": 0
+  },
+  "caption_tokens": {
+   "median": 128.0,
+   "p90": 128.0,
+   "max": 128,
+   "hit_128_cap": 1971
+  },
+  "caption_prompt_tokens_median": 752.0
+ },
+ "negative_control": {
+  "32BI": {
+   "reference": "K3",
+   "n": 167,
+   "letter_mismatch": 0,
+   "prompt_token_mismatch": 0,
+   "mismatched": []
+  },
+  "4BI": {
+   "reference": "H1",
+   "n": 167,
+   "letter_mismatch": 0,
+   "prompt_token_mismatch": 0,
+   "mismatched": []
+  }
+ },
+ "caption_sample": [
+  {
+   "chunk_id": "726821053589221_start_0.0_end_300.0#0",
+   "range": "0-30 s",
+   "caption": "The video takes place inside a clothing store, likely a department or discount retailer, with bright fluorescent lighting and multiple clothing racks and displays.\n\n- **Frame 1**: A wide shot of the store interior. Clothing is displayed on racks and tables. A mannequin in a brown coat and white beanie stands on the right. A blue \"ARIZONA\" sign is visible on a display wall. Folded clothes are arranged on wooden tables in the foreground.\n\n- **Frame 2**: A closer view of a clothing section. A mauve cable-knit sweater hangs on a rack in the foreground. Behind it, plaid shirts",
+   "tokens": 128
+  },
+  {
+   "chunk_id": "1517700072558199_start_0.0_end_300.178#3",
+   "range": "90-120 s",
+   "caption": "The sequence of frames shows a person unboxing a \"Merry & Bright Cat Toys\" advent calendar in a home gym setting, with a dog observing.\n\n- **Frame 1**: The person holds two discount coupons ($10 and $15 off) over the closed advent calendar box, which is placed on a towel on the floor. The background shows a weight rack and black rubber flooring.\n\n- **Frame 2**: The person holds the coupons over the box, which is now slightly open. A dog enters the frame from the left, sniffing near the box.\n\n- **Frame 3**: The person opens the box fully",
+   "tokens": 128
+  },
+  {
+   "chunk_id": "672963545696130_start_0.0_end_600.072#11",
+   "range": "330-360 s",
+   "caption": "The sequence of frames shows a dining or living area with a wooden table set for a meal, decorated with holiday-themed items. A black tray of loaded fries (with cheese, bacon, and sauce) is in the foreground. On the table, there is a closed silver laptop, a brown leather wallet, a white power bank, and a clear plastic bag. A small red and white KFC-style dipping sauce container is also present.\n\nIn the background, a white tufted sofa is visible, along with a decorative snowman figure, glass jars filled with white material (possibly faux snow) and pinecones, and a small p",
+   "tokens": 128
+  },
+  {
+   "chunk_id": "766026939144588_start_0.0_end_520.493#0",
+   "range": "0-30 s",
+   "caption": "These frames depict a sequence of domestic activities in a home, primarily in the kitchen and dining area, with a black dog present.\n\n- **Frame 1**: A kitchen counter with a black coffee maker (lid open, showing a filter) and a silver toaster. A grey towel hangs from a wooden cabinet above. Electrical outlets are visible with plugs in use.\n\n- **Frame 2**: A black dog sits on a red rug in a hallway, near a white baby gate blocking a doorway. A wooden chair with a red cushion is to the right.\n\n- **Frame 3**: A person\u2019s hand reaches into a white trash can on",
+   "tokens": 128
+  },
+  {
+   "chunk_id": "1691081251514235_start_0.0_end_600.015#4",
+   "range": "120-150 s",
+   "caption": "The sequence of frames shows a person working at a cluttered art or craft desk, engaging in a creative or experimental activity involving a small white helmet-like object.\n\n- **Frame 1**: A person\u2019s right hand, adorned with a bracelet, reaches toward a black corded device (possibly a small heater or lamp) on a desk. To the left are stacked white papers and a green-and-pink abstract painting. The wall is textured and off-white.\n\n- **Frame 2**: The view shifts slightly. A mannequin torso with a blue, star-adorned garment is visible in the background. The abstract painting and white",
+   "tokens": 128
+  },
+  {
+   "chunk_id": "1023758566050401_start_0.0_end_599.984#4",
+   "range": "120-150 s",
+   "caption": "The sequence of images shows the interior of a modern electronics retail store, likely a computer or tech specialty shop, with a focus on laptops, desktops, and accessories.\n\n- **People**: A person in a black t-shirt is visible in the foreground of the first few images, walking through the store. In later images, other customers and staff are seen: two individuals (one in a blue shirt) are interacting with a desktop computer setup, and another person in a dark jacket is seen in the background near a display.\n\n- **Objects and Displays**:\n  - **Laptops**: Multiple laptops are displayed on white counters, some open",
+   "tokens": 128
+  },
+  {
+   "chunk_id": "1290745635792905_start_0.0_end_375.416#0",
+   "range": "0-30 s",
+   "caption": "The sequence of frames captures a person moving through a library or bookstore, focusing on various objects and areas.\n\n- **Frame 1**: A close-up of a decorative, black-framed, glass-paneled lamp on a wooden table. Below it, a book titled *Privacy and Digital Security* lies face-up. A hand is visible in the lower right, suggesting the person is interacting with or near the book.\n\n- **Frame 2**: The camera moves to show a wider view. The same book is now on the floor, held or being placed by a hand holding a smartphone. In the background, a green wall, a small",
+   "tokens": 128
+  },
+  {
+   "chunk_id": "2211104685971437_start_0.0_end_600.013#8",
+   "range": "240-270 s",
+   "caption": "The sequence of frames captures a city street scene, likely in a downtown area during the holiday season, with a focus on pedestrian activity and urban elements.\n\n**Frames 1\u20135:**\n- A paved sidewalk runs alongside a row of tall buildings. On the left, a line of blue and silver public bicycles is docked at a station.\n- A decorated Christmas tree with blue and white lights stands near the center of the sidewalk, next to a stone building with large windows and planters.\n- Two people walk along the sidewalk: one in a light-colored coat and dark pants, and another in a dark puffer coat and black boots",
+   "tokens": 128
+  },
+  {
+   "chunk_id": "1945027152963275_start_0.0_end_351.938#4",
+   "range": "120-150 s",
+   "caption": "The sequence of frames shows a person preparing a meal in a kitchen, focusing on making a salad and cooking bacon.\n\n- **Frame 1**: A hand wipes a white kitchen countertop with a cloth. A clear plastic container with mixed greens is visible on the counter.\n\n- **Frame 2**: The person pours a creamy dressing from a glass measuring cup into a large glass bowl filled with leafy greens. A stack of colorful plates is visible on a shelf above the counter, along with a dark green bottle (likely olive oil) on the counter.\n\n- **Frame 3**: The person continues pouring the dressing over the greens while using",
+   "tokens": 128
+  },
+  {
+   "chunk_id": "1665695840762798_start_0.0_end_599.976#6",
+   "range": "180-210 s",
+   "caption": "The video shows a person shopping in a store aisle dedicated to baby and toddler products, specifically on shelves stocked with sippy cups, bottles, and related accessories.\n\n- **Initial frames (1\u20134)**: The camera pans across shelves displaying various baby products. On the top shelf, there are pink baby bibs or clothing in red boxes labeled \u201c12+\u201d and \u201c6+\u201d, alongside blue sippy cups with cartoon designs. Below, on the middle shelf, a cardboard box holds a few loose items: a purple sippy cup with a red spout, a blue-lidded bottle, and a pink-lidded",
+   "tokens": 128
+  }
+ ],
+ "_provenance": {
+  "git_commit": "840d9a695733de1d5b992aa2f1fbd14197500169",
+  "script": "study_f2_analyse.py",
+  "model": "4BI,32BI",
+  "timestamp": "2026-11-10T15:11:39.635760",
+  "device": "cpu",
+  "n": 845
+ }
+}

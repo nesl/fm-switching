@@ -1,0 +1,407 @@
+{
+ "done": [],
+ "stack": {
+  "venv": "/home/pragya/.venvs/fm-switching-vllm",
+  "vllm": "0.31.0",
+  "torch": "2.13.0+cu129",
+  "gpu": "h100nvl GPU 1",
+  "gpu_uuid": "GPU-235c6d2d-40df-9060-e2f8-6524c4928d2d",
+  "flags": [
+   "--limit-mm-per-prompt",
+   "{\"image\": 9, \"video\": 0}",
+   "--mm-processor-cache-gb",
+   "0",
+   "--enable-prompt-tokens-details",
+   "--host",
+   "127.0.0.1"
+  ],
+  "gen": {
+   "temperature": 0.0,
+   "max_tokens": 64,
+   "seed": 0,
+   "logprobs": true,
+   "top_logprobs": 20
+  },
+  "concurrency": 8
+ },
+ "servers": [
+  {
+   "model": "4BI",
+   "ns": [
+    1,
+    3,
+    9
+   ],
+   "started": "2026-11-10T12:34:16.955153",
+   "key": "4BI",
+   "repo": "Qwen/Qwen3-VL-4B-Instruct",
+   "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec70b05090aa6165b016eac8ec08e71b17",
+    "--served-model-name",
+    "4BI",
+    "--port",
+    "8031",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--limit-mm-per-prompt",
+    "{\"image\": 9, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--enable-prompt-tokens-details",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 39.5,
+   "log": "logs/study_x_server_4BI_1110_123334.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 516512,
+   "max_concurrency_at_max_len": 15.76,
+   "available_kv_gib": "70.93",
+   "model_weights_gib": "8.69",
+   "attention_backend_lines": [
+    "(EngineCore pid=1301739) INFO 11-10 12:33:51 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=1301739) INFO 11-10 12:33:51 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=1301739) INFO 11-10 12:33:51 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=1301739) INFO 11-10 12:33:51 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=1301739) INFO 11-10 12:33:54 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 9, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--enable-prompt-tokens-details",
+    "--host",
+    "127.0.0.1"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 1301334,
+    "my_pgid": 1301334,
+    "gpu3": [
+     {
+      "pid": 1301739,
+      "sid": 1301334,
+      "pgid": 1301334,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "model": "32BI",
+   "ns": [
+    1,
+    3,
+    9
+   ],
+   "started": "2026-11-10T12:38:08.999836",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8031",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--limit-mm-per-prompt",
+    "{\"image\": 9, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--enable-prompt-tokens-details",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 60.7,
+   "log": "logs/study_x_server_32BI_1110_123705.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=1304873) INFO 11-10 12:37:22 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=1304873) INFO 11-10 12:37:22 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=1304873) INFO 11-10 12:37:22 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=1304873) INFO 11-10 12:37:22 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=1304873) INFO 11-10 12:37:33 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 9, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--enable-prompt-tokens-details",
+    "--host",
+    "127.0.0.1"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 1301334,
+    "my_pgid": 1301334,
+    "gpu3": [
+     {
+      "pid": 1304873,
+      "sid": 1301334,
+      "pgid": 1301334,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  }
+ ],
+ "grey_questions": [
+  "00ac6f932f407123e3c689635c4e36561000dc2903d5d6ede74b7012de8ab225",
+  "037f0a416ef56dd68a4ce81ba751061b5c03607474d7d835c430ad44a81524cc",
+  "0EC4CF4189934B3A517F3C55AD4F81733FF7AE715D5E9639C3AF438533205333",
+  "12350B11A4ED74813A93B8B6A1CA6868C3EA629D647CA19A17BC41C599CBCA33",
+  "1243b03776555dc121a64f196978d7659fd6d131261b053ca6b4153ffd80a691",
+  "14dadca5630ebf452265ed225a3b3bf98fa4d41f600c1f6f16b8ec6486898f96",
+  "17a2857be3e3417d37441db59cadb62d23b3728f803595ef505e8fd2938a55b0",
+  "1a1955a118df7113cdc9165881f1d1098a79c3bd2b066e2a725f6812a86819dc",
+  "1a3648794cfc5e4c9f0586c3051d3a1429d6527039d43ea4527449c76015de09",
+  "1b026efbc01e79d49d317f94f8878ea6c43593fd191e8830494da658d111623b",
+  "1cc8edee0b101ebbbbc57d37d3f3bf80a168f141fcc203e0afa8fb8c019c98d9",
+  "1d0e5d732817459031ca515c1a429b1790b009a5e34f343a01b4264af07efcfc",
+  "1f318d6389de2023df7da3a1a5b31d66003869011cf5a250a0ec8e71a848a26c",
+  "23ada3596a2066628761ae051a4312c15f4428ca90a550947bece4d71580aa01",
+  "2828fbf677388a0e03662d591dd3cc4dae207345dcafc86e604a3b1f909b9dcd",
+  "282d4a4af9c011c27357a7bd3533ec996fffb152b3c9a8ef3650951bf1ffc97f",
+  "28E132A3A4C4CD988F594EB641D3791C32933970D9CA4F5D904E87537D264DAF",
+  "2EEECA4FB999C6BCE3FA05F6915D9BBA6CCD2644C7A435F756DC71A48FD6CBCA",
+  "388cee5952a90a5aa842330d0392dc7a086ca3412a5adb528900844ee6118380",
+  "39951ea4e40d659a833f35c0370415b57c75fe7286fcc141e765ca5512b65d73",
+  "3cd1dd1aeb5b320f2e6592d2fdcec2a9e13bf7508c94c932573a090148e2a9c9",
+  "3cf847c5180d8f3490d7e6527c8711809c188970695ed54bc0a1b3c68b5ff633",
+  "4158151a8ddd9af8a0b4b1e6f7923610bb513906ec4e0d25bf32aa8ded9dc20a",
+  "4233b113cbe1e7bf5760d676ee3087fc8c9818359ffc132dd72d6c8222f1119d",
+  "47548ced5fa12cd41996f28d78c86ac2f7ff16bd003d0a07cd69a8a7f061e439",
+  "47cb746d8e6946f6896556a9645ee1a090ecd4a91ac3acf8b8a69e8c13c2f5f0",
+  "4821222e649c3fa321a41d520898dac4b10fe7377725d4c3190d62b0f37538f8",
+  "4987be158856de3820a485815ea5c07c8904d3ae56f64c8287656cd6b1c649bc",
+  "4EDCFE70317597A20259287DE9AE5EC0FB01E47C4C40DA89AAF3AB48ACBC4F16",
+  "4a0aa646eb75871c81e7986f530cc6ef2482fbbcb91081b1f974dc613a856828",
+  "516FBDCC95CD1E35A050F46EA83358D7F818819C115CFA20B7FBD70E772359A3",
+  "53ac5816ba402d8fd3fead6ca30562ca79350328ff3c67130e74286a9689f6e7",
+  "562756077906bf9c013e81c329b1d9cfb809eba54fffa451912c50c360a16ccb",
+  "564088781ccd3bcf85b831ef2ed8d87453273e28d48f52da7f07b0f86637abbb",
+  "58abeb5e29fd64016d02acbaff9865c202ce5806c0fc95f917dce60e02387d5c",
+  "5919bbe972953f68f69fefdcdf4afeedb1af16bd12fff698f18ea0906a46d472",
+  "59851f464ca0e82f6ad86eb961bbfc6a8a57176851d67830d5b9c67e1c1f9c48",
+  "5DC41DD421D82DAD49D3685BB19D0638D251C95B9979595691E9C0895D181453",
+  "5E1EEC42C38822C71A9E23AD259F37EF8C8BABE33A8B22DC3E56D853C3793FB3",
+  "5a8ca9710d43b3d19ff5c2113093c7e4dd7692b3c3bd1208ec2f22ae6f1b1c7a",
+  "5da847b91da0554eda2684105c3342de257b8edc54c4c6b69185b6f763670fae",
+  "60b6c0a9e44adedc3db50a209fc3a34d095fd0c3fa0305b5106148a34a462bfe",
+  "61d1331620dbbaca09f52c9d3524ba7093eb854bffcea489f0709f5f36ef29ec",
+  "628a49ac1065dba1eacca78ba5ff0cb40fbd69c2853844cd544e9b76c6466b33",
+  "67dfd10683c6285c8631ec213ade41fe448929eef0ae558678131d1de6e97588",
+  "694ff7306b17acefb9e8709992fd65fadd5e17c653b087c7a6074715e5810a62",
+  "7244bfa38177d57e23ca73c4ae7c36bebfad320c5966e6f62f1d792a2c05c704",
+  "7678e31cae77ba0531e20961d5ded36fb33f85101a67e4005a000f4fdf09af4c",
+  "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+  "7cadae74f8609e053b6519a7f51e73b50ada65849e97917b5452da57c60e287c",
+  "8183934340644956BBC85A0F508615FFE63875CD17DE9646957977CABD59D100",
+  "849290ba193dfb76410f074794fd188d6ae7a18fc149f43d231365eff87874ad",
+  "85c18bc58ceb3cf2df486f9f6c8c87cd7747c472b7e4ca25bae730eaafba0be5",
+  "868D3BEFE6C704FADC8A2D2A71D4DF429AF8D8063C4D40470F5C996C0A3D2CCF",
+  "8d394f82ef93d9761f04f09712fa058cf38738969215f6f11acf40b89cee345d",
+  "902dacb846ad7908435eb99cd141b3c59c475c09a4371eb7497f7397ca42c2b3",
+  "92fa08fb9ec08cc86f7683be95069aa020bac2b3cecd03677feafec92fcb91ec",
+  "93F5A7956294C73476DD061F267536C3D6EC8512160AF8E70F7F478B32390C1B",
+  "94a464b5c9dc4d9ef3a485f976873faad31200ac54e342343715b2752a58f2e0",
+  "981f7052045c91ac33fd5ae142a6d77731aa8275ceb41c8b4b9e173d080bc3ab",
+  "98e60054b2fa4192538c3688e3d41ec4a6974002bdcc68a22e991096f5ca516d",
+  "994a3d672d30b37a8acb723ee59301e9f5136dfd99f9c5dde84443419c49d80e",
+  "9a387822e6a0bdff7652bb5111583f8cbf6fc000499f8ebc57c306bcd3544681",
+  "9e30bada96ce2346a7b68df9a8b4176722a381c24b4b9311c185759b667388cd",
+  "A6A6DC4A0093FEC1ED1A9C07A42CC064F958A3B2AB3797337436A8C2AE6D0BFE",
+  "A8399ACDC1BBD53D63F4B79BBFB3C9D5DE19F0915F341724E753325E2870970C",
+  "AE2118FB7F73CC043CFD8DC7568B74E13D3470F43E1719EF4AFB390FE9FB02CB",
+  "B0274A5596B69EE7550974755EF7AE4A3282F6E8F6E3989E045335DE879CC641",
+  "B0F9B6A0364399F6CB60D748DD8F1CE16A8A9B2C5FC2237BF0B393A93C836F6C",
+  "B160C97FD8026C66DD7DDAE41BF57986FC7A4F18D9E3617850AE313ED8E6DD9E",
+  "BBC880E6E4B7E29B7C68A7D33817CA9AB7D5A1218762564845712000D8D163C2",
+  "C6C6C79F7124B62991CFE63A76B81389C9DCF25A0DAD45F88C34FA781D56FD99",
+  "D07D3D419D13AB6367338F1F75AABD6BE05F0442E1EFE045434C81582887E238",
+  "D9164F825D5EB63D8F4DC8DA578A841560846D7CA54FA479EB7ED26528315B25",
+  "DC86687E8C1A04E431D1132F9DA2E8F911D20C2BDC6F26F6BE2A5519E75CF939",
+  "E705820FFD009E152F8276F5C5C1F222F62574AFB88E3F79C1D198FFA5FE9DA5",
+  "EC5E0938F8284CF00B1FC3233BEF07AA8A939878934671B04443AFAFAA873D6F",
+  "EDE91E43C580F77982D3A718B2E6E4576E1E64E9AC13A91F758C0D8088BD36F1",
+  "F76C95535E0D9930498794F324F5D432333C0E1093E391F39CFC292BAEB90689",
+  "F8002A1421D287646BB86F0A8CAE83CF8F0975BE8330E40AD9FF9F4276868EA1",
+  "a21a2632d6576f76e7beb522e9b11faf80d668b36c23892246a7fd78b5576f3d",
+  "a46d2fdec37881948ab02e0b44be31577f9b7ab2b09b2e87e5d44b2b6fe6d90c",
+  "abc8ff4291cad2dfa8ea35f24bed6ca9a00a624107f5688438f9a8f88083fe5c",
+  "b701d2be3258610771148917b55f9b916b1393cfa264a6dd6725b57a44fb0bd7",
+  "c138fec0146b03fab0715921ee3f80c19e9de34c06a494098f3476f954c7aff5",
+  "cc2369a7c5499aa4ddc9f07a7eebb55b864e81a9c87c43a3d7b3332cd2fa8144",
+  "ccea28fe041bd609f64131f63f18023d7f385264e7ea04055ac4f69bcad55612",
+  "cd9b9e0f1f4976d49753b9c287929224a1a607706c96f68656b65ad5736369f4",
+  "cf32f91071b5d53216ddf2f4a255d5d4e3d747b4dcea07fa95ab750908460434",
+  "d2be01dcbbd182602efc8da9e1906114514c29c1ad267c3cb0a48741949fd9ea",
+  "d6937338a91697f8ebdf3d7e1d2430ff796b1565d62dce4fc9591251db1b8f11",
+  "da923814fddd739e602b12d7164d56d4823eeb179840a50a45634a72161abd45",
+  "df73e6c0aa1572edc77f78562f6cd3e32e745e9307aeb8dceb6165bd030acf55",
+  "dfec5448058c6dccf6026476dee430c426733b4e004f7cf0f772af7b06a953b5",
+  "e0a70d4d080e911afedab52fa5445903e2e86672c4b46a6792db830fc0d57cfb",
+  "ef1fe9f5e9f798434dd83b186f414edfd9faca209ba2ad9ff22eb9c3b3c7c7ea",
+  "f6122f8c66a7461d89dec6c862f977b659718ff6c457d6b4154881e34f023b27",
+  "f6adfd50f319cfd656c803fb30c5185846fcde68c0eca158f77a80617e2cad1a",
+  "fba35e09bef4a2f0cdb5df6f426493f310d43d9c548bc7dc321c65f3c4cc6f9a",
+  "ffb5fced0ecf9addbd9d2069674c00b12bf12bdf6c40c8b59ab91c683f7b62a7"
+ ],
+ "prompt_trace": {
+  "4BI_N1": {
+   "question_id": "B058EEFB45F90384CBB0303ACD15C74AA70FE74F52F6BDE25F38CABFAABE7B84",
+   "prompt_tokens": 439,
+   "image_pads_per_frame": [
+    324
+   ],
+   "forbidden_found": []
+  },
+  "4BI_N3": {
+   "question_id": "B058EEFB45F90384CBB0303ACD15C74AA70FE74F52F6BDE25F38CABFAABE7B84",
+   "prompt_tokens": 1101,
+   "image_pads_per_frame": [
+    324,
+    324,
+    324
+   ],
+   "forbidden_found": []
+  },
+  "4BI_N9": {
+   "question_id": "B058EEFB45F90384CBB0303ACD15C74AA70FE74F52F6BDE25F38CABFAABE7B84",
+   "prompt_tokens": 3057,
+   "image_pads_per_frame": [
+    324,
+    324,
+    324,
+    324,
+    324,
+    324,
+    324,
+    324,
+    324
+   ],
+   "forbidden_found": []
+  },
+  "32BI_N1": {
+   "question_id": "B058EEFB45F90384CBB0303ACD15C74AA70FE74F52F6BDE25F38CABFAABE7B84",
+   "prompt_tokens": 439,
+   "image_pads_per_frame": [
+    324
+   ],
+   "forbidden_found": []
+  },
+  "32BI_N3": {
+   "question_id": "B058EEFB45F90384CBB0303ACD15C74AA70FE74F52F6BDE25F38CABFAABE7B84",
+   "prompt_tokens": 1101,
+   "image_pads_per_frame": [
+    324,
+    324,
+    324
+   ],
+   "forbidden_found": []
+  },
+  "32BI_N9": {
+   "question_id": "B058EEFB45F90384CBB0303ACD15C74AA70FE74F52F6BDE25F38CABFAABE7B84",
+   "prompt_tokens": 3057,
+   "image_pads_per_frame": [
+    324,
+    324,
+    324,
+    324,
+    324,
+    324,
+    324,
+    324,
+    324
+   ],
+   "forbidden_found": []
+  }
+ },
+ "_provenance": [
+  {
+   "git_commit": "840d9a695733de1d5b992aa2f1fbd14197500169",
+   "script": "study_f1_infer_vllm.py",
+   "model": "4BI",
+   "timestamp": "2026-11-10T12:37:04.097105",
+   "device": "h100nvl_gpu1",
+   "n": 2835,
+   "args": {
+    "model": "4BI",
+    "ns": "1,3,9"
+   }
+  },
+  {
+   "git_commit": "840d9a695733de1d5b992aa2f1fbd14197500169",
+   "script": "study_f1_infer_vllm.py",
+   "model": "32BI",
+   "timestamp": "2026-11-10T12:52:09.576453",
+   "device": "h100nvl_gpu1",
+   "n": 2835,
+   "args": {
+    "model": "32BI",
+    "ns": "1,3,9"
+   }
+  }
+ ],
+ "summary": {
+  "4BI_N1,3,9": {
+   "ok": 2835,
+   "still_failed": 0,
+   "error_rows": 0
+  },
+  "32BI_N1,3,9": {
+   "ok": 2835,
+   "still_failed": 0,
+   "error_rows": 0
+  }
+ }
+}
