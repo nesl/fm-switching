@@ -1,0 +1,2425 @@
+{
+ "label": "StudyE6 PART 0: E4 upload-consistency fix. OFFLINE ANALYSIS OF EXISTING RESULTS; CPU only; no inference.",
+ "at": "2026-11-10T12:27:25.266673",
+ "assumption_stated": [
+  "cloud-held history arms (RICH/U/D2) pay only the newest pending frame per question, exactly as E4's session analysis; RECENT pays its full per-question upload under both rules",
+  "RICH re-samples frames at each question (StudyRH3), so a cloud holding all frames at 1 fps can build the RICH input without a fresh upload"
+ ],
+ "tables": {
+  "prev_question/13.6Mbps_44ms/png/1s": {
+   "n": 845,
+   "oracle": 0.002366863905325444,
+   "static_crossfit": 0.002366863905325444,
+   "pertype_crossfit": 0.002366863905325444,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.0,
+    "cl-4B-U": 0.0,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.002366863905325444
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "prev_question/13.6Mbps_44ms/png/2s": {
+   "n": 845,
+   "oracle": 0.016568047337278107,
+   "static_crossfit": 0.016568047337278107,
+   "pertype_crossfit": 0.016568047337278107,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.0,
+    "cl-4B-U": 0.0,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.016568047337278107
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "prev_question/13.6Mbps_44ms/png/5s": {
+   "n": 845,
+   "oracle": 0.13964497041420118,
+   "static_crossfit": 0.13609467455621302,
+   "pertype_crossfit": 0.13609467455621302,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0035502958579881616,
+   "headroom_over_pertype": 0.0035502958579881616,
+   "headroom_over_static_ci": [
+    0.0,
+    0.008159223817118552
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.008159223817118552
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.001183431952662722,
+    "dev-4B-RICH": 0.001183431952662722,
+    "cl-4B-RECENT": 0.001183431952662722,
+    "cl-4B-RICH": 0.005917159763313609,
+    "cl-4B-U": 0.0035502958579881655,
+    "cl-32B-RECENT": 0.002366863905325444,
+    "cl-32B-RICH": 0.004733727810650888,
+    "cl-32B-U": 0.002366863905325444,
+    "cl-32B-D2": 0.13609467455621302
+   },
+   "classes_any": {
+    "representation": 3,
+    "evidence": 1
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 2,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 3
+  },
+  "prev_question/13.6Mbps_44ms/png/10s": {
+   "n": 845,
+   "oracle": 0.33254437869822484,
+   "static_crossfit": 0.2556213017751479,
+   "pertype_crossfit": 0.2650887573964497,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.07692307692307693,
+   "headroom_over_pertype": 0.06745562130177513,
+   "headroom_over_static_ci": [
+    0.0595947556615018,
+    0.09529571346167709
+   ],
+   "headroom_over_pertype_ci": [
+    0.05076634498571256,
+    0.08544025143939327
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.007100591715976331,
+    "dev-4B-RICH": 0.007100591715976331,
+    "cl-4B-RECENT": 0.004733727810650888,
+    "cl-4B-RICH": 0.05088757396449704,
+    "cl-4B-U": 0.01775147928994083,
+    "cl-32B-RECENT": 0.004733727810650888,
+    "cl-32B-RICH": 0.10887573964497041,
+    "cl-32B-U": 0.009467455621301775,
+    "cl-32B-D2": 0.2556213017751479
+   },
+   "classes_any": {
+    "representation": 45,
+    "interaction": 11,
+    "evidence": 1,
+    "capability": 1
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 44,
+    "interaction": 11,
+    "evidence": 1,
+    "capability": 1
+   },
+   "n_oracle_beats_pertype": 57
+  },
+  "prev_question/13.6Mbps_44ms/raw/1s": {
+   "n": 845,
+   "oracle": 0.0,
+   "static_crossfit": 0.0,
+   "pertype_crossfit": 0.0,
+   "static_insample_config": "dev-4B-RICH",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.0,
+    "cl-4B-U": 0.0,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.0
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "prev_question/13.6Mbps_44ms/raw/2s": {
+   "n": 845,
+   "oracle": 0.007100591715976331,
+   "static_crossfit": 0.007100591715976331,
+   "pertype_crossfit": 0.007100591715976331,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.0,
+    "cl-4B-U": 0.0,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.007100591715976331
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "prev_question/13.6Mbps_44ms/raw/5s": {
+   "n": 845,
+   "oracle": 0.06272189349112427,
+   "static_crossfit": 0.06272189349112427,
+   "pertype_crossfit": 0.06272189349112427,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.001183431952662722,
+    "dev-4B-RICH": 0.001183431952662722,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.0035502958579881655,
+    "cl-4B-U": 0.001183431952662722,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.06272189349112427
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "prev_question/13.6Mbps_44ms/raw/10s": {
+   "n": 845,
+   "oracle": 0.2106508875739645,
+   "static_crossfit": 0.18698224852071005,
+   "pertype_crossfit": 0.18698224852071005,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.023668639053254448,
+   "headroom_over_pertype": 0.023668639053254448,
+   "headroom_over_static_ci": [
+    0.014067995310668241,
+    0.03418828616352203
+   ],
+   "headroom_over_pertype_ci": [
+    0.014067995310668241,
+    0.03418828616352203
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.007100591715976331,
+    "dev-4B-RICH": 0.007100591715976331,
+    "cl-4B-RECENT": 0.001183431952662722,
+    "cl-4B-RICH": 0.014201183431952662,
+    "cl-4B-U": 0.0035502958579881655,
+    "cl-32B-RECENT": 0.002366863905325444,
+    "cl-32B-RICH": 0.03195266272189349,
+    "cl-32B-U": 0.002366863905325444,
+    "cl-32B-D2": 0.18698224852071005
+   },
+   "classes_any": {
+    "representation": 17,
+    "interaction": 3,
+    "evidence": 1
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 16,
+    "interaction": 3,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 20
+  },
+  "prev_question/88Mbps_22ms/png/1s": {
+   "n": 845,
+   "oracle": 0.0378698224852071,
+   "static_crossfit": 0.036686390532544376,
+   "pertype_crossfit": 0.036686390532544376,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0011834319526627252,
+   "headroom_over_pertype": 0.0011834319526627252,
+   "headroom_over_static_ci": [
+    0.0,
+    0.003632071318511999
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.003632071318511999
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.001183431952662722,
+    "cl-4B-RICH": 0.001183431952662722,
+    "cl-4B-U": 0.001183431952662722,
+    "cl-32B-RECENT": 0.001183431952662722,
+    "cl-32B-RICH": 0.001183431952662722,
+    "cl-32B-U": 0.001183431952662722,
+    "cl-32B-D2": 0.036686390532544376
+   },
+   "classes_any": {
+    "evidence": 1,
+    "representation": 1
+   },
+   "classes_exclusive_spec_order": {
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 1
+  },
+  "prev_question/88Mbps_22ms/png/2s": {
+   "n": 845,
+   "oracle": 0.14319526627218934,
+   "static_crossfit": 0.1242603550295858,
+   "pertype_crossfit": 0.11834319526627218,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.018934911242603547,
+   "headroom_over_pertype": 0.02485207100591716,
+   "headroom_over_static_ci": [
+    0.009779652566938633,
+    0.028675552121563308
+   ],
+   "headroom_over_pertype_ci": [
+    0.015115840153418141,
+    0.0359718299601039
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.004733727810650888,
+    "cl-4B-RICH": 0.029585798816568046,
+    "cl-4B-U": 0.010650887573964497,
+    "cl-32B-RECENT": 0.0035502958579881655,
+    "cl-32B-RICH": 0.0035502958579881655,
+    "cl-32B-U": 0.0035502958579881655,
+    "cl-32B-D2": 0.1242603550295858
+   },
+   "classes_any": {
+    "interaction": 20,
+    "evidence": 1,
+    "representation": 1
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 20,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 21
+  },
+  "prev_question/88Mbps_22ms/png/5s": {
+   "n": 845,
+   "oracle": 0.4532544378698225,
+   "static_crossfit": 0.28402366863905326,
+   "pertype_crossfit": 0.31005917159763313,
+   "static_insample_config": "cl-4B-RECENT",
+   "headroom_over_static": 0.16923076923076924,
+   "headroom_over_pertype": 0.14319526627218937,
+   "headroom_over_static_ci": [
+    0.14473113781563737,
+    0.19464405080213898
+   ],
+   "headroom_over_pertype_ci": [
+    0.12043626655852929,
+    0.16550599342314626
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.001183431952662722,
+    "dev-4B-RICH": 0.001183431952662722,
+    "cl-4B-RECENT": 0.28402366863905326,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.015384615384615385,
+    "cl-32B-RICH": 0.11952662721893491,
+    "cl-32B-U": 0.02485207100591716,
+    "cl-32B-D2": 0.26627218934911245
+   },
+   "classes_any": {
+    "interaction": 101,
+    "representation": 9,
+    "evidence": 14
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 101,
+    "representation": 6,
+    "evidence": 14
+   },
+   "n_oracle_beats_pertype": 121
+  },
+  "prev_question/88Mbps_22ms/png/10s": {
+   "n": 845,
+   "oracle": 0.5538461538461539,
+   "static_crossfit": 0.3940828402366864,
+   "pertype_crossfit": 0.38461538461538464,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.1597633136094675,
+   "headroom_over_pertype": 0.16923076923076924,
+   "headroom_over_static_ci": [
+    0.1349756066519599,
+    0.18597035621841482
+   ],
+   "headroom_over_pertype_ci": [
+    0.14521793407784467,
+    0.19471232825567505
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.007100591715976331,
+    "dev-4B-RICH": 0.007100591715976331,
+    "cl-4B-RECENT": 0.28402366863905326,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.3834319526627219,
+    "cl-32B-RICH": 0.3940828402366864,
+    "cl-32B-U": 0.12307692307692308,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "interaction": 24,
+    "capability": 50,
+    "evidence": 62,
+    "representation": 33
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 24,
+    "capability": 50,
+    "evidence": 55,
+    "representation": 14
+   },
+   "n_oracle_beats_pertype": 143
+  },
+  "prev_question/88Mbps_22ms/raw/1s": {
+   "n": 845,
+   "oracle": 0.016568047337278107,
+   "static_crossfit": 0.016568047337278107,
+   "pertype_crossfit": 0.016568047337278107,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.0,
+    "cl-4B-U": 0.0,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.016568047337278107
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "prev_question/88Mbps_22ms/raw/2s": {
+   "n": 845,
+   "oracle": 0.08994082840236686,
+   "static_crossfit": 0.0863905325443787,
+   "pertype_crossfit": 0.08402366863905325,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0035502958579881616,
+   "headroom_over_pertype": 0.005917159763313612,
+   "headroom_over_static_ci": [
+    0.0,
+    0.008284023668639048
+   ],
+   "headroom_over_pertype_ci": [
+    0.0012194010609607928,
+    0.011616781858685086
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.001183431952662722,
+    "cl-4B-RICH": 0.004733727810650888,
+    "cl-4B-U": 0.002366863905325444,
+    "cl-32B-RECENT": 0.002366863905325444,
+    "cl-32B-RICH": 0.002366863905325444,
+    "cl-32B-U": 0.002366863905325444,
+    "cl-32B-D2": 0.0863905325443787
+   },
+   "classes_any": {
+    "interaction": 4,
+    "evidence": 1,
+    "representation": 1
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 4,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 5
+  },
+  "prev_question/88Mbps_22ms/raw/5s": {
+   "n": 845,
+   "oracle": 0.27928994082840236,
+   "static_crossfit": 0.24615384615384617,
+   "pertype_crossfit": 0.24615384615384617,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.033136094674556194,
+   "headroom_over_pertype": 0.033136094674556194,
+   "headroom_over_static_ci": [
+    0.02214373464373467,
+    0.04613610149942332
+   ],
+   "headroom_over_pertype_ci": [
+    0.02214373464373467,
+    0.04613610149942332
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.001183431952662722,
+    "dev-4B-RICH": 0.001183431952662722,
+    "cl-4B-RECENT": 0.007100591715976331,
+    "cl-4B-RICH": 0.06863905325443787,
+    "cl-4B-U": 0.028402366863905324,
+    "cl-32B-RECENT": 0.004733727810650888,
+    "cl-32B-RICH": 0.03076923076923077,
+    "cl-32B-U": 0.005917159763313609,
+    "cl-32B-D2": 0.24615384615384617
+   },
+   "classes_any": {
+    "representation": 12,
+    "interaction": 16,
+    "evidence": 1
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 11,
+    "interaction": 16,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 28
+  },
+  "prev_question/88Mbps_22ms/raw/10s": {
+   "n": 845,
+   "oracle": 0.5431952662721894,
+   "static_crossfit": 0.31952662721893493,
+   "pertype_crossfit": 0.3431952662721893,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.22366863905325446,
+   "headroom_over_pertype": 0.20000000000000007,
+   "headroom_over_static_ci": [
+    0.1954158174230135,
+    0.2535889480585204
+   ],
+   "headroom_over_pertype_ci": [
+    0.17216568466169788,
+    0.22921674237057407
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.007100591715976331,
+    "dev-4B-RICH": 0.007100591715976331,
+    "cl-4B-RECENT": 0.28402366863905326,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.263905325443787,
+    "cl-32B-RICH": 0.31952662721893493,
+    "cl-32B-U": 0.07928994082840236,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "evidence": 73,
+    "representation": 34,
+    "capability": 56,
+    "interaction": 41
+   },
+   "classes_exclusive_spec_order": {
+    "evidence": 59,
+    "representation": 13,
+    "capability": 56,
+    "interaction": 41
+   },
+   "n_oracle_beats_pertype": 169
+  },
+  "prev_question/5Mbps_142ms/png/1s": {
+   "n": 845,
+   "oracle": 0.0,
+   "static_crossfit": 0.0,
+   "pertype_crossfit": 0.0,
+   "static_insample_config": "dev-4B-RICH",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.0,
+    "cl-4B-U": 0.0,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.0
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "prev_question/5Mbps_142ms/png/2s": {
+   "n": 845,
+   "oracle": 0.002366863905325444,
+   "static_crossfit": 0.002366863905325444,
+   "pertype_crossfit": 0.002366863905325444,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.0,
+    "cl-4B-U": 0.0,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.002366863905325444
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "prev_question/5Mbps_142ms/png/5s": {
+   "n": 845,
+   "oracle": 0.029585798816568046,
+   "static_crossfit": 0.029585798816568046,
+   "pertype_crossfit": 0.029585798816568046,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.001183431952662722,
+    "dev-4B-RICH": 0.001183431952662722,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.001183431952662722,
+    "cl-4B-U": 0.001183431952662722,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.029585798816568046
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "prev_question/5Mbps_142ms/png/10s": {
+   "n": 845,
+   "oracle": 0.1349112426035503,
+   "static_crossfit": 0.12189349112426036,
+   "pertype_crossfit": 0.12189349112426036,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.013017751479289949,
+   "headroom_over_pertype": 0.013017751479289949,
+   "headroom_over_static_ci": [
+    0.005987488031097702,
+    0.021352947143303956
+   ],
+   "headroom_over_pertype_ci": [
+    0.005987488031097702,
+    0.021352947143303956
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.007100591715976331,
+    "dev-4B-RICH": 0.007100591715976331,
+    "cl-4B-RECENT": 0.001183431952662722,
+    "cl-4B-RICH": 0.005917159763313609,
+    "cl-4B-U": 0.0035502958579881655,
+    "cl-32B-RECENT": 0.002366863905325444,
+    "cl-32B-RICH": 0.014201183431952662,
+    "cl-32B-U": 0.002366863905325444,
+    "cl-32B-D2": 0.12189349112426036
+   },
+   "classes_any": {
+    "representation": 9,
+    "interaction": 2,
+    "evidence": 1
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 8,
+    "interaction": 2,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 11
+  },
+  "prev_question/5Mbps_142ms/raw/1s": {
+   "n": 845,
+   "oracle": 0.0,
+   "static_crossfit": 0.0,
+   "pertype_crossfit": 0.0,
+   "static_insample_config": "dev-4B-RICH",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.0,
+    "cl-4B-U": 0.0,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.0
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "prev_question/5Mbps_142ms/raw/2s": {
+   "n": 845,
+   "oracle": 0.0,
+   "static_crossfit": 0.0,
+   "pertype_crossfit": 0.0,
+   "static_insample_config": "dev-4B-RICH",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.0,
+    "cl-4B-U": 0.0,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.0
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "prev_question/5Mbps_142ms/raw/5s": {
+   "n": 845,
+   "oracle": 0.009467455621301775,
+   "static_crossfit": 0.009467455621301775,
+   "pertype_crossfit": 0.009467455621301775,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.001183431952662722,
+    "dev-4B-RICH": 0.001183431952662722,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.0,
+    "cl-4B-U": 0.0,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.009467455621301775
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "prev_question/5Mbps_142ms/raw/10s": {
+   "n": 845,
+   "oracle": 0.0485207100591716,
+   "static_crossfit": 0.04142011834319527,
+   "pertype_crossfit": 0.04142011834319527,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.00710059171597633,
+   "headroom_over_pertype": 0.00710059171597633,
+   "headroom_over_static_ci": [
+    0.0023418518975033237,
+    0.013856812933025403
+   ],
+   "headroom_over_pertype_ci": [
+    0.0023418518975033237,
+    0.013856812933025403
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.007100591715976331,
+    "dev-4B-RICH": 0.007100591715976331,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.002366863905325444,
+    "cl-4B-U": 0.001183431952662722,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.004733727810650888,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.04142011834319527
+   },
+   "classes_any": {
+    "representation": 4,
+    "interaction": 2
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 4,
+    "interaction": 2
+   },
+   "n_oracle_beats_pertype": 6
+  },
+  "newest_frame/13.6Mbps_44ms/png/1s": {
+   "n": 845,
+   "oracle": 0.06153846153846154,
+   "static_crossfit": 0.05798816568047337,
+   "pertype_crossfit": 0.05798816568047337,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0035502958579881685,
+   "headroom_over_pertype": 0.0035502958579881685,
+   "headroom_over_static_ci": [
+    0.0,
+    0.008235294117647049
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.008235294117647049
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.004733727810650888,
+    "cl-4B-U": 0.004733727810650888,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.002366863905325444,
+    "cl-32B-U": 0.002366863905325444,
+    "cl-32B-D2": 0.05798816568047337
+   },
+   "classes_any": {
+    "interaction": 2,
+    "evidence": 1,
+    "representation": 1
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 2,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 3
+  },
+  "newest_frame/13.6Mbps_44ms/png/2s": {
+   "n": 845,
+   "oracle": 0.22366863905325443,
+   "static_crossfit": 0.1621301775147929,
+   "pertype_crossfit": 0.15502958579881657,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.06153846153846154,
+   "headroom_over_pertype": 0.06863905325443787,
+   "headroom_over_static_ci": [
+    0.045773306309132636,
+    0.07819955116031048
+   ],
+   "headroom_over_pertype_ci": [
+    0.050946359965226166,
+    0.08675277157708224
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.004733727810650888,
+    "cl-32B-U": 0.004733727810650888,
+    "cl-32B-D2": 0.1621301775147929
+   },
+   "classes_any": {
+    "interaction": 57,
+    "evidence": 1,
+    "representation": 1
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 57,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 58
+  },
+  "newest_frame/13.6Mbps_44ms/png/5s": {
+   "n": 845,
+   "oracle": 0.46745562130177515,
+   "static_crossfit": 0.39289940828402364,
+   "pertype_crossfit": 0.3881656804733728,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.0745562130177515,
+   "headroom_over_pertype": 0.07928994082840235,
+   "headroom_over_static_ci": [
+    0.057714392497961425,
+    0.09251128354828421
+   ],
+   "headroom_over_pertype_ci": [
+    0.06126987215316147,
+    0.09838203806825584
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.001183431952662722,
+    "dev-4B-RICH": 0.001183431952662722,
+    "cl-4B-RECENT": 0.001183431952662722,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.002366863905325444,
+    "cl-32B-RICH": 0.39289940828402364,
+    "cl-32B-U": 0.12307692307692308,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "representation": 40,
+    "capability": 30,
+    "evidence": 4,
+    "interaction": 3
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 30,
+    "capability": 30,
+    "evidence": 4,
+    "interaction": 3
+   },
+   "n_oracle_beats_pertype": 67
+  },
+  "newest_frame/13.6Mbps_44ms/png/10s": {
+   "n": 845,
+   "oracle": 0.46745562130177515,
+   "static_crossfit": 0.3940828402366864,
+   "pertype_crossfit": 0.3893491124260355,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.07337278106508877,
+   "headroom_over_pertype": 0.07810650887573967,
+   "headroom_over_static_ci": [
+    0.056860321384425205,
+    0.09122817410825643
+   ],
+   "headroom_over_pertype_ci": [
+    0.060023409363745485,
+    0.09730517854241277
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.007100591715976331,
+    "dev-4B-RICH": 0.007100591715976331,
+    "cl-4B-RECENT": 0.004733727810650888,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.004733727810650888,
+    "cl-32B-RICH": 0.3940828402366864,
+    "cl-32B-U": 0.12307692307692308,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "representation": 39,
+    "capability": 30,
+    "evidence": 4,
+    "interaction": 3
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 29,
+    "capability": 30,
+    "evidence": 4,
+    "interaction": 3
+   },
+   "n_oracle_beats_pertype": 66
+  },
+  "newest_frame/13.6Mbps_44ms/raw/1s": {
+   "n": 845,
+   "oracle": 0.05088757396449704,
+   "static_crossfit": 0.05088757396449704,
+   "pertype_crossfit": 0.05088757396449704,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.001183431952662722,
+    "cl-4B-U": 0.001183431952662722,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.05088757396449704
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "newest_frame/13.6Mbps_44ms/raw/2s": {
+   "n": 845,
+   "oracle": 0.22130177514792898,
+   "static_crossfit": 0.15502958579881657,
+   "pertype_crossfit": 0.1502958579881657,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.06627218934911241,
+   "headroom_over_pertype": 0.07100591715976329,
+   "headroom_over_static_ci": [
+    0.05017502917152861,
+    0.0834326579261025
+   ],
+   "headroom_over_pertype_ci": [
+    0.053631607395293386,
+    0.08933055632329136
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.1467455621301775,
+    "cl-4B-U": 0.08165680473372781,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0035502958579881655,
+    "cl-32B-U": 0.0035502958579881655,
+    "cl-32B-D2": 0.15502958579881657
+   },
+   "classes_any": {
+    "interaction": 59,
+    "evidence": 1,
+    "representation": 1
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 59,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 60
+  },
+  "newest_frame/13.6Mbps_44ms/raw/5s": {
+   "n": 845,
+   "oracle": 0.4662721893491124,
+   "static_crossfit": 0.3893491124260355,
+   "pertype_crossfit": 0.3834319526627219,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.07692307692307693,
+   "headroom_over_pertype": 0.08284023668639051,
+   "headroom_over_static_ci": [
+    0.0600695048337356,
+    0.09512768246418664
+   ],
+   "headroom_over_pertype_ci": [
+    0.06433392076881447,
+    0.10211460368047699
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.001183431952662722,
+    "dev-4B-RICH": 0.001183431952662722,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.3893491124260355,
+    "cl-32B-U": 0.11952662721893491,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "representation": 43,
+    "capability": 31,
+    "evidence": 6,
+    "interaction": 4
+   },
+   "classes_exclusive_spec_order": {
+    "capability": 31,
+    "representation": 29,
+    "evidence": 6,
+    "interaction": 4
+   },
+   "n_oracle_beats_pertype": 70
+  },
+  "newest_frame/13.6Mbps_44ms/raw/10s": {
+   "n": 845,
+   "oracle": 0.46745562130177515,
+   "static_crossfit": 0.3940828402366864,
+   "pertype_crossfit": 0.3893491124260355,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.07337278106508877,
+   "headroom_over_pertype": 0.07810650887573967,
+   "headroom_over_static_ci": [
+    0.056860321384425205,
+    0.09122817410825643
+   ],
+   "headroom_over_pertype_ci": [
+    0.060023409363745485,
+    0.09730517854241277
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.007100591715976331,
+    "dev-4B-RICH": 0.007100591715976331,
+    "cl-4B-RECENT": 0.001183431952662722,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.002366863905325444,
+    "cl-32B-RICH": 0.3940828402366864,
+    "cl-32B-U": 0.12307692307692308,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "representation": 39,
+    "capability": 30,
+    "evidence": 4,
+    "interaction": 3
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 29,
+    "capability": 30,
+    "evidence": 4,
+    "interaction": 3
+   },
+   "n_oracle_beats_pertype": 66
+  },
+  "newest_frame/88Mbps_22ms/png/1s": {
+   "n": 845,
+   "oracle": 0.11242603550295859,
+   "static_crossfit": 0.07928994082840236,
+   "pertype_crossfit": 0.0970414201183432,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.03313609467455622,
+   "headroom_over_pertype": 0.015384615384615385,
+   "headroom_over_static_ci": [
+    0.022139041448554025,
+    0.04528774711399449
+   ],
+   "headroom_over_pertype_ci": [
+    0.00815850815850816,
+    0.023981294964028777
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.001183431952662722,
+    "cl-4B-RICH": 0.04142011834319527,
+    "cl-4B-U": 0.020118343195266272,
+    "cl-32B-RECENT": 0.001183431952662722,
+    "cl-32B-RICH": 0.0035502958579881655,
+    "cl-32B-U": 0.0035502958579881655,
+    "cl-32B-D2": 0.07928994082840236
+   },
+   "classes_any": {
+    "interaction": 12,
+    "evidence": 1,
+    "representation": 1
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 12,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 13
+  },
+  "newest_frame/88Mbps_22ms/png/2s": {
+   "n": 845,
+   "oracle": 0.23076923076923078,
+   "static_crossfit": 0.16923076923076924,
+   "pertype_crossfit": 0.15266272189349112,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.06153846153846154,
+   "headroom_over_pertype": 0.07810650887573967,
+   "headroom_over_static_ci": [
+    0.045773306309132664,
+    0.07819955116031048
+   ],
+   "headroom_over_pertype_ci": [
+    0.059391649048625816,
+    0.09665871121718378
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.004733727810650888,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.0035502958579881655,
+    "cl-32B-RICH": 0.008284023668639054,
+    "cl-32B-U": 0.008284023668639054,
+    "cl-32B-D2": 0.16923076923076924
+   },
+   "classes_any": {
+    "interaction": 65,
+    "evidence": 1,
+    "representation": 1
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 65,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 66
+  },
+  "newest_frame/88Mbps_22ms/png/5s": {
+   "n": 845,
+   "oracle": 0.527810650887574,
+   "static_crossfit": 0.3940828402366864,
+   "pertype_crossfit": 0.3834319526627219,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.13372781065088757,
+   "headroom_over_pertype": 0.14437869822485205,
+   "headroom_over_static_ci": [
+    0.11188502673796795,
+    0.15721206672660074
+   ],
+   "headroom_over_pertype_ci": [
+    0.12189065033327333,
+    0.1686342538804721
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.001183431952662722,
+    "dev-4B-RICH": 0.001183431952662722,
+    "cl-4B-RECENT": 0.28402366863905326,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.015384615384615385,
+    "cl-32B-RICH": 0.3940828402366864,
+    "cl-32B-U": 0.12307692307692308,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "representation": 38,
+    "interaction": 65,
+    "capability": 24,
+    "evidence": 5
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 28,
+    "interaction": 65,
+    "capability": 24,
+    "evidence": 5
+   },
+   "n_oracle_beats_pertype": 122
+  },
+  "newest_frame/88Mbps_22ms/png/10s": {
+   "n": 845,
+   "oracle": 0.5538461538461539,
+   "static_crossfit": 0.3940828402366864,
+   "pertype_crossfit": 0.38461538461538464,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.1597633136094675,
+   "headroom_over_pertype": 0.16923076923076924,
+   "headroom_over_static_ci": [
+    0.1349756066519599,
+    0.18597035621841482
+   ],
+   "headroom_over_pertype_ci": [
+    0.14521793407784467,
+    0.19471232825567505
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.007100591715976331,
+    "dev-4B-RICH": 0.007100591715976331,
+    "cl-4B-RECENT": 0.28402366863905326,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.3834319526627219,
+    "cl-32B-RICH": 0.3940828402366864,
+    "cl-32B-U": 0.12307692307692308,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "interaction": 24,
+    "capability": 50,
+    "evidence": 62,
+    "representation": 33
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 24,
+    "capability": 50,
+    "evidence": 55,
+    "representation": 14
+   },
+   "n_oracle_beats_pertype": 143
+  },
+  "newest_frame/88Mbps_22ms/raw/1s": {
+   "n": 845,
+   "oracle": 0.08757396449704143,
+   "static_crossfit": 0.0757396449704142,
+   "pertype_crossfit": 0.07928994082840236,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.011834319526627224,
+   "headroom_over_pertype": 0.008284023668639062,
+   "headroom_over_static_ci": [
+    0.0047955907350491905,
+    0.019583878582427574
+   ],
+   "headroom_over_pertype_ci": [
+    0.0023781212841854915,
+    0.014618110582520936
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.01775147928994083,
+    "cl-4B-U": 0.010650887573964497,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.002366863905325444,
+    "cl-32B-U": 0.002366863905325444,
+    "cl-32B-D2": 0.0757396449704142
+   },
+   "classes_any": {
+    "interaction": 6,
+    "evidence": 1,
+    "representation": 1
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 6,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 7
+  },
+  "newest_frame/88Mbps_22ms/raw/2s": {
+   "n": 845,
+   "oracle": 0.23076923076923078,
+   "static_crossfit": 0.16923076923076924,
+   "pertype_crossfit": 0.15266272189349112,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.06153846153846154,
+   "headroom_over_pertype": 0.07810650887573967,
+   "headroom_over_static_ci": [
+    0.045773306309132664,
+    0.07819955116031048
+   ],
+   "headroom_over_pertype_ci": [
+    0.059391649048625816,
+    0.09665871121718378
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.001183431952662722,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.002366863905325444,
+    "cl-32B-RICH": 0.007100591715976331,
+    "cl-32B-U": 0.007100591715976331,
+    "cl-32B-D2": 0.16923076923076924
+   },
+   "classes_any": {
+    "interaction": 65,
+    "evidence": 1,
+    "representation": 1
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 65,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 66
+  },
+  "newest_frame/88Mbps_22ms/raw/5s": {
+   "n": 845,
+   "oracle": 0.46745562130177515,
+   "static_crossfit": 0.3940828402366864,
+   "pertype_crossfit": 0.3893491124260355,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.07337278106508877,
+   "headroom_over_pertype": 0.07810650887573967,
+   "headroom_over_static_ci": [
+    0.056860321384425205,
+    0.09122817410825643
+   ],
+   "headroom_over_pertype_ci": [
+    0.060023409363745485,
+    0.09730517854241277
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.001183431952662722,
+    "dev-4B-RICH": 0.001183431952662722,
+    "cl-4B-RECENT": 0.007100591715976331,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.004733727810650888,
+    "cl-32B-RICH": 0.3940828402366864,
+    "cl-32B-U": 0.12307692307692308,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "representation": 39,
+    "capability": 30,
+    "evidence": 4,
+    "interaction": 3
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 29,
+    "capability": 30,
+    "evidence": 4,
+    "interaction": 3
+   },
+   "n_oracle_beats_pertype": 66
+  },
+  "newest_frame/88Mbps_22ms/raw/10s": {
+   "n": 845,
+   "oracle": 0.5502958579881657,
+   "static_crossfit": 0.3940828402366864,
+   "pertype_crossfit": 0.378698224852071,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.15621301775147933,
+   "headroom_over_pertype": 0.17159763313609472,
+   "headroom_over_static_ci": [
+    0.13269961395545468,
+    0.18129142300194928
+   ],
+   "headroom_over_pertype_ci": [
+    0.14783577511547347,
+    0.19711624109263653
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.007100591715976331,
+    "dev-4B-RICH": 0.007100591715976331,
+    "cl-4B-RECENT": 0.28402366863905326,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.263905325443787,
+    "cl-32B-RICH": 0.3940828402366864,
+    "cl-32B-U": 0.12307692307692308,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "interaction": 35,
+    "evidence": 54,
+    "capability": 46,
+    "representation": 33
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 35,
+    "evidence": 46,
+    "capability": 46,
+    "representation": 18
+   },
+   "n_oracle_beats_pertype": 145
+  },
+  "newest_frame/5Mbps_142ms/png/1s": {
+   "n": 845,
+   "oracle": 0.03195266272189349,
+   "static_crossfit": 0.03195266272189349,
+   "pertype_crossfit": 0.03195266272189349,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.001183431952662722,
+    "cl-4B-U": 0.001183431952662722,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.03195266272189349
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "newest_frame/5Mbps_142ms/png/2s": {
+   "n": 845,
+   "oracle": 0.2118343195266272,
+   "static_crossfit": 0.13136094674556212,
+   "pertype_crossfit": 0.15384615384615385,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.08047337278106509,
+   "headroom_over_pertype": 0.05798816568047335,
+   "headroom_over_static_ci": [
+    0.0631704410011919,
+    0.09792281007998907
+   ],
+   "headroom_over_pertype_ci": [
+    0.04221915272429527,
+    0.07424830437274312
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.13136094674556212,
+    "cl-4B-U": 0.06627218934911243,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.002366863905325444,
+    "cl-32B-U": 0.002366863905325444,
+    "cl-32B-D2": 0.14319526627218934
+   },
+   "classes_any": {
+    "interaction": 48,
+    "evidence": 1,
+    "representation": 1
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 48,
+    "evidence": 1
+   },
+   "n_oracle_beats_pertype": 49
+  },
+  "newest_frame/5Mbps_142ms/png/5s": {
+   "n": 845,
+   "oracle": 0.4650887573964497,
+   "static_crossfit": 0.37751479289940826,
+   "pertype_crossfit": 0.37514792899408284,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.08757396449704147,
+   "headroom_over_pertype": 0.08994082840236689,
+   "headroom_over_static_ci": [
+    0.06976675463192035,
+    0.10689262260723767
+   ],
+   "headroom_over_pertype_ci": [
+    0.0712588356455185,
+    0.10898315912138208
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.001183431952662722,
+    "dev-4B-RICH": 0.001183431952662722,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.37751479289940826,
+    "cl-32B-U": 0.10650887573964497,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "representation": 43,
+    "capability": 35,
+    "evidence": 5,
+    "interaction": 7
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 29,
+    "capability": 35,
+    "evidence": 5,
+    "interaction": 7
+   },
+   "n_oracle_beats_pertype": 76
+  },
+  "newest_frame/5Mbps_142ms/png/10s": {
+   "n": 845,
+   "oracle": 0.46745562130177515,
+   "static_crossfit": 0.3940828402366864,
+   "pertype_crossfit": 0.3893491124260355,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.07337278106508877,
+   "headroom_over_pertype": 0.07810650887573967,
+   "headroom_over_static_ci": [
+    0.056860321384425205,
+    0.09122817410825643
+   ],
+   "headroom_over_pertype_ci": [
+    0.060023409363745485,
+    0.09730517854241277
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.007100591715976331,
+    "dev-4B-RICH": 0.007100591715976331,
+    "cl-4B-RECENT": 0.001183431952662722,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.002366863905325444,
+    "cl-32B-RICH": 0.3940828402366864,
+    "cl-32B-U": 0.12307692307692308,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "representation": 39,
+    "capability": 30,
+    "evidence": 4,
+    "interaction": 3
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 29,
+    "capability": 30,
+    "evidence": 4,
+    "interaction": 3
+   },
+   "n_oracle_beats_pertype": 66
+  },
+  "newest_frame/5Mbps_142ms/raw/1s": {
+   "n": 845,
+   "oracle": 0.008284023668639054,
+   "static_crossfit": 0.008284023668639054,
+   "pertype_crossfit": 0.008284023668639054,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.0,
+   "headroom_over_pertype": 0.0,
+   "headroom_over_static_ci": [
+    0.0,
+    0.0
+   ],
+   "headroom_over_pertype_ci": [
+    0.0,
+    0.0
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.0,
+    "cl-4B-U": 0.0,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.008284023668639054
+   },
+   "classes_any": {},
+   "classes_exclusive_spec_order": {},
+   "n_oracle_beats_pertype": 0
+  },
+  "newest_frame/5Mbps_142ms/raw/2s": {
+   "n": 845,
+   "oracle": 0.18579881656804734,
+   "static_crossfit": 0.1289940828402367,
+   "pertype_crossfit": 0.1502958579881657,
+   "static_insample_config": "cl-32B-D2",
+   "headroom_over_static": 0.05680473372781064,
+   "headroom_over_pertype": 0.035502958579881644,
+   "headroom_over_static_ci": [
+    0.042203985932004695,
+    0.0727061436775382
+   ],
+   "headroom_over_pertype_ci": [
+    0.02352872053639317,
+    0.048193462714232346
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.0,
+    "dev-4B-RICH": 0.0,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.06272189349112427,
+    "cl-4B-U": 0.001183431952662722,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.0,
+    "cl-32B-U": 0.0,
+    "cl-32B-D2": 0.1289940828402367
+   },
+   "classes_any": {
+    "interaction": 30
+   },
+   "classes_exclusive_spec_order": {
+    "interaction": 30
+   },
+   "n_oracle_beats_pertype": 30
+  },
+  "newest_frame/5Mbps_142ms/raw/5s": {
+   "n": 845,
+   "oracle": 0.4544378698224852,
+   "static_crossfit": 0.2698224852071006,
+   "pertype_crossfit": 0.3289940828402367,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.18461538461538457,
+   "headroom_over_pertype": 0.1254437869822485,
+   "headroom_over_static_ci": [
+    0.15751625034422617,
+    0.21236977244815264
+   ],
+   "headroom_over_pertype_ci": [
+    0.10380455879222479,
+    0.14771597684397914
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.001183431952662722,
+    "dev-4B-RICH": 0.001183431952662722,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.2911242603550296,
+    "cl-32B-U": 0.036686390532544376,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "representation": 74,
+    "capability": 25,
+    "interaction": 17,
+    "evidence": 5
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 59,
+    "capability": 25,
+    "interaction": 17,
+    "evidence": 5
+   },
+   "n_oracle_beats_pertype": 106
+  },
+  "newest_frame/5Mbps_142ms/raw/10s": {
+   "n": 845,
+   "oracle": 0.46745562130177515,
+   "static_crossfit": 0.3940828402366864,
+   "pertype_crossfit": 0.3893491124260355,
+   "static_insample_config": "cl-32B-RICH",
+   "headroom_over_static": 0.07337278106508877,
+   "headroom_over_pertype": 0.07810650887573967,
+   "headroom_over_static_ci": [
+    0.056860321384425205,
+    0.09122817410825643
+   ],
+   "headroom_over_pertype_ci": [
+    0.060023409363745485,
+    0.09730517854241277
+   ],
+   "per_config_utility": {
+    "dev-4B-RECENT": 0.007100591715976331,
+    "dev-4B-RICH": 0.007100591715976331,
+    "cl-4B-RECENT": 0.0,
+    "cl-4B-RICH": 0.14911242603550295,
+    "cl-4B-U": 0.08402366863905325,
+    "cl-32B-RECENT": 0.0,
+    "cl-32B-RICH": 0.3940828402366864,
+    "cl-32B-U": 0.12307692307692308,
+    "cl-32B-D2": 0.27928994082840236
+   },
+   "classes_any": {
+    "representation": 39,
+    "capability": 30,
+    "evidence": 4,
+    "interaction": 3
+   },
+   "classes_exclusive_spec_order": {
+    "representation": 29,
+    "capability": 30,
+    "evidence": 4,
+    "interaction": 3
+   },
+   "n_oracle_beats_pertype": 66
+  }
+ },
+ "upload_bytes_example": {
+  "H1/png/prev_question": {
+   "median": 34260182.0,
+   "mean": 33267227.693491124,
+   "max": 34473600.0,
+   "n": 845
+  },
+  "H1/png/newest_frame": {
+   "median": 34260182.0,
+   "mean": 33267227.693491124,
+   "max": 34473600.0,
+   "n": 845
+  },
+  "K3/png/prev_question": {
+   "median": 34260182.0,
+   "mean": 33267227.693491124,
+   "max": 34473600.0,
+   "n": 845
+  },
+  "K3/png/newest_frame": {
+   "median": 34260182.0,
+   "mean": 33267227.693491124,
+   "max": 34473600.0,
+   "n": 845
+  },
+  "H2/png/prev_question": {
+   "median": 15083460.0,
+   "mean": 17624848.28639053,
+   "max": 36310320.0,
+   "n": 845
+  },
+  "H2/png/newest_frame": {
+   "median": 156510.0,
+   "mean": 221741.99289940827,
+   "max": 695576.0,
+   "n": 845
+  },
+  "K1/png/prev_question": {
+   "median": 15083460.0,
+   "mean": 17624848.28639053,
+   "max": 36310320.0,
+   "n": 845
+  },
+  "K1/png/newest_frame": {
+   "median": 156510.0,
+   "mean": 221741.99289940827,
+   "max": 695576.0,
+   "n": 845
+  },
+  "U32/png/prev_question": {
+   "median": 29874516.0,
+   "mean": 27953858.017751478,
+   "max": 60970577.0,
+   "n": 845
+  },
+  "U32/png/newest_frame": {
+   "median": 283142.0,
+   "mean": 315647.99526627216,
+   "max": 695576.0,
+   "n": 845
+  },
+  "D2/png/prev_question": {
+   "median": 6293025.0,
+   "mean": 7461789.171632896,
+   "max": 33283110.0,
+   "n": 839
+  },
+  "D2/png/newest_frame": {
+   "median": 139845.0,
+   "mean": 139845.0,
+   "max": 139845.0,
+   "n": 839
+  }
+ },
+ "latency_status_counts": {
+  "dev-4B-RECENT": {
+   "measured/interpolated": 720,
+   "UNKNOWN": 125
+  },
+  "dev-4B-RICH": {
+   "measured/interpolated": 374,
+   "UNKNOWN": 471
+  },
+  "cl-4B-RECENT": {
+   "measured/interpolated": 720,
+   "UNKNOWN": 125
+  },
+  "cl-4B-RICH": {
+   "measured/interpolated": 374,
+   "UNKNOWN": 471
+  },
+  "cl-4B-U": {
+   "measured/interpolated": 160,
+   "UNKNOWN": 685
+  },
+  "cl-32B-RECENT": {
+   "measured/interpolated": 845
+  },
+  "cl-32B-RICH": {
+   "measured/interpolated": 844,
+   "UNKNOWN": 1
+  },
+  "cl-32B-U": {
+   "measured/interpolated": 198,
+   "UNKNOWN": 647
+  },
+  "cl-32B-D2": {
+   "measured/interpolated": 546,
+   "UNKNOWN": 293,
+   "INFEASIBLE": 6
+  }
+ },
+ "check_reproduces_e4_old_rule": {
+  "max_abs_diff": 0.0,
+  "cells": 24,
+  "detail": {
+   "13.6Mbps_44ms/png/1s": {
+    "oracle": {
+     "e4": 0.002366863905325444,
+     "here": 0.002366863905325444,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.002366863905325444,
+     "here": 0.002366863905325444,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.002366863905325444,
+     "here": 0.002366863905325444,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    }
+   },
+   "13.6Mbps_44ms/png/2s": {
+    "oracle": {
+     "e4": 0.016568047337278107,
+     "here": 0.016568047337278107,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.016568047337278107,
+     "here": 0.016568047337278107,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.016568047337278107,
+     "here": 0.016568047337278107,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    }
+   },
+   "13.6Mbps_44ms/png/5s": {
+    "oracle": {
+     "e4": 0.13964497041420118,
+     "here": 0.13964497041420118,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.13609467455621302,
+     "here": 0.13609467455621302,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.13609467455621302,
+     "here": 0.13609467455621302,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0035502958579881616,
+     "here": 0.0035502958579881616,
+     "diff": 0.0
+    }
+   },
+   "13.6Mbps_44ms/png/10s": {
+    "oracle": {
+     "e4": 0.33254437869822484,
+     "here": 0.33254437869822484,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.2556213017751479,
+     "here": 0.2556213017751479,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.2650887573964497,
+     "here": 0.2650887573964497,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.06745562130177513,
+     "here": 0.06745562130177513,
+     "diff": 0.0
+    }
+   },
+   "13.6Mbps_44ms/raw/1s": {
+    "oracle": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    }
+   },
+   "13.6Mbps_44ms/raw/2s": {
+    "oracle": {
+     "e4": 0.007100591715976331,
+     "here": 0.007100591715976331,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.007100591715976331,
+     "here": 0.007100591715976331,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.007100591715976331,
+     "here": 0.007100591715976331,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    }
+   },
+   "13.6Mbps_44ms/raw/5s": {
+    "oracle": {
+     "e4": 0.06272189349112427,
+     "here": 0.06272189349112427,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.06272189349112427,
+     "here": 0.06272189349112427,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.06272189349112427,
+     "here": 0.06272189349112427,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    }
+   },
+   "13.6Mbps_44ms/raw/10s": {
+    "oracle": {
+     "e4": 0.2106508875739645,
+     "here": 0.2106508875739645,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.18698224852071005,
+     "here": 0.18698224852071005,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.18698224852071005,
+     "here": 0.18698224852071005,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.023668639053254448,
+     "here": 0.023668639053254448,
+     "diff": 0.0
+    }
+   },
+   "88Mbps_22ms/png/1s": {
+    "oracle": {
+     "e4": 0.0378698224852071,
+     "here": 0.0378698224852071,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.036686390532544376,
+     "here": 0.036686390532544376,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.036686390532544376,
+     "here": 0.036686390532544376,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0011834319526627252,
+     "here": 0.0011834319526627252,
+     "diff": 0.0
+    }
+   },
+   "88Mbps_22ms/png/2s": {
+    "oracle": {
+     "e4": 0.14319526627218934,
+     "here": 0.14319526627218934,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.1242603550295858,
+     "here": 0.1242603550295858,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.11834319526627218,
+     "here": 0.11834319526627218,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.02485207100591716,
+     "here": 0.02485207100591716,
+     "diff": 0.0
+    }
+   },
+   "88Mbps_22ms/png/5s": {
+    "oracle": {
+     "e4": 0.4532544378698225,
+     "here": 0.4532544378698225,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.28402366863905326,
+     "here": 0.28402366863905326,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.31005917159763313,
+     "here": 0.31005917159763313,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.14319526627218937,
+     "here": 0.14319526627218937,
+     "diff": 0.0
+    }
+   },
+   "88Mbps_22ms/png/10s": {
+    "oracle": {
+     "e4": 0.5538461538461539,
+     "here": 0.5538461538461539,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.3940828402366864,
+     "here": 0.3940828402366864,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.38461538461538464,
+     "here": 0.38461538461538464,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.16923076923076924,
+     "here": 0.16923076923076924,
+     "diff": 0.0
+    }
+   },
+   "88Mbps_22ms/raw/1s": {
+    "oracle": {
+     "e4": 0.016568047337278107,
+     "here": 0.016568047337278107,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.016568047337278107,
+     "here": 0.016568047337278107,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.016568047337278107,
+     "here": 0.016568047337278107,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    }
+   },
+   "88Mbps_22ms/raw/2s": {
+    "oracle": {
+     "e4": 0.08994082840236686,
+     "here": 0.08994082840236686,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.0863905325443787,
+     "here": 0.0863905325443787,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.08402366863905325,
+     "here": 0.08402366863905325,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.005917159763313612,
+     "here": 0.005917159763313612,
+     "diff": 0.0
+    }
+   },
+   "88Mbps_22ms/raw/5s": {
+    "oracle": {
+     "e4": 0.27928994082840236,
+     "here": 0.27928994082840236,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.24615384615384617,
+     "here": 0.24615384615384617,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.24615384615384617,
+     "here": 0.24615384615384617,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.033136094674556194,
+     "here": 0.033136094674556194,
+     "diff": 0.0
+    }
+   },
+   "88Mbps_22ms/raw/10s": {
+    "oracle": {
+     "e4": 0.5431952662721894,
+     "here": 0.5431952662721894,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.31952662721893493,
+     "here": 0.31952662721893493,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.3431952662721893,
+     "here": 0.3431952662721893,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.20000000000000007,
+     "here": 0.20000000000000007,
+     "diff": 0.0
+    }
+   },
+   "5Mbps_142ms/png/1s": {
+    "oracle": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    }
+   },
+   "5Mbps_142ms/png/2s": {
+    "oracle": {
+     "e4": 0.002366863905325444,
+     "here": 0.002366863905325444,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.002366863905325444,
+     "here": 0.002366863905325444,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.002366863905325444,
+     "here": 0.002366863905325444,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    }
+   },
+   "5Mbps_142ms/png/5s": {
+    "oracle": {
+     "e4": 0.029585798816568046,
+     "here": 0.029585798816568046,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.029585798816568046,
+     "here": 0.029585798816568046,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.029585798816568046,
+     "here": 0.029585798816568046,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    }
+   },
+   "5Mbps_142ms/png/10s": {
+    "oracle": {
+     "e4": 0.1349112426035503,
+     "here": 0.1349112426035503,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.12189349112426036,
+     "here": 0.12189349112426036,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.12189349112426036,
+     "here": 0.12189349112426036,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.013017751479289949,
+     "here": 0.013017751479289949,
+     "diff": 0.0
+    }
+   },
+   "5Mbps_142ms/raw/1s": {
+    "oracle": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    }
+   },
+   "5Mbps_142ms/raw/2s": {
+    "oracle": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    }
+   },
+   "5Mbps_142ms/raw/5s": {
+    "oracle": {
+     "e4": 0.009467455621301775,
+     "here": 0.009467455621301775,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.009467455621301775,
+     "here": 0.009467455621301775,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.009467455621301775,
+     "here": 0.009467455621301775,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.0,
+     "here": 0.0,
+     "diff": 0.0
+    }
+   },
+   "5Mbps_142ms/raw/10s": {
+    "oracle": {
+     "e4": 0.0485207100591716,
+     "here": 0.0485207100591716,
+     "diff": 0.0
+    },
+    "static_crossfit": {
+     "e4": 0.04142011834319527,
+     "here": 0.04142011834319527,
+     "diff": 0.0
+    },
+    "pertype_crossfit": {
+     "e4": 0.04142011834319527,
+     "here": 0.04142011834319527,
+     "diff": 0.0
+    },
+    "headroom_over_pertype": {
+     "e4": 0.00710059171597633,
+     "here": 0.00710059171597633,
+     "diff": 0.0
+    }
+   }
+  }
+ },
+ "_provenance": {
+  "git_commit": "840d9a695733de1d5b992aa2f1fbd14197500169",
+  "script": "study_e6_part0_upload_fix.py",
+  "model": "4BI,32BI (existing results)",
+  "timestamp": "2026-11-10T12:27:53.285817",
+  "device": "cpu",
+  "n": 845
+ }
+}
