@@ -1,5 +1,42 @@
 # StudyE6-intervention — can a policy predict WHICH intervention helps, and does a combined policy beat an independent evidence selector plus model router?
 
+> ## CORRECTION — 2026-11-11 (StudyE6b-mobility)
+>
+> The body below is unchanged. These items are corrected by **StudyE6b-mobility**
+> (`reports/study_e6b_mobility.md`, pre-registered 2026-11-11); the recomputation and the
+> evidence are there.
+>
+> **Three costing errors affect every timely-utility (delivered-within-deadline) number in this
+> report. All three favour 32B-RICH.**
+>
+> 1. **Mixed deployment modes.** RECENT arms (H1, K3) were charged a full on-demand upload of
+> their whole frame set at every question, while cloud-held history arms (RICH, U, D2) were
+> charged as if streamed. The same session cannot be both. StudyE6b applies one deployment mode
+> — STREAM or ON-DEMAND — to **all** cloud arms and never mixes them.
+> 2. **The 4B cold latency curve ended at 12,501 tokens.** It was built from image-format runs
+> only, so 4B-RICH (median 12,597 tokens) fell outside it and was counted UNKNOWN, i.e.
+> unavailable, on **471 of 845** questions. StudyF3's 4B video COLD curve covers
+> 1,810–22,387 tokens and prices those questions.
+> 3. **The 32B cold curve pooled image-format and video-format runs** in 100-token bins, so K3
+> (≈12.4k tokens) was priced on image-format rows and K1 (≈12.6k tokens) on video-format rows.
+> StudyF3 measures the two formats on the same card back to back and finds ≈0.8 s between them
+> at equal token count, so the pooled curve is wrong by about that much in opposite directions
+> for the two arms. StudyE6b uses StudyF3's separate per-format, per-cache-state curves.
+>
+> **What is superseded:** every timely-utility result in this report (any table whose metric is
+> "correct AND delivered within the deadline", and any conclusion drawn from one). The
+> accuracy-only results are unaffected.
+>
+> **StudyE6's "real negative" for the joint claim is withdrawn.** StudyE6 §13 classified the
+> combined-vs-independent null as a REAL NEGATIVE under CLAUDE.md Rule 2. That classification
+> rested on setting (b) as well as setting (a), and setting (b) is built on the three costs
+> above. Under CLAUDE.md Rule 2 the joint claim is reclassified **INCONCLUSIVE (mechanism
+> absent)**: the costing errors removed the arms whose delivery the policy was supposed to
+> choose between, so the decision the claim is about was not exercised. **StudyE6 setting (a)
+> (accuracy only, both models in the cloud, always reachable) stands as reported**, including
+> its own negative result, which does not depend on any delivery cost.
+
+
 **OFFLINE ANALYSIS OF EXISTING RESULTS.** CPU only on the flash host: no GPU was used, no model server was started, and no inference was run. All numbers come from committed per-question result files of earlier studies.
 
 **E-id:** `StudyE6-intervention`, pre-registered in `research/EXPERIMENTS.md` on 2026-11-10 **before any number in this report was computed** (user-authorized row).  
