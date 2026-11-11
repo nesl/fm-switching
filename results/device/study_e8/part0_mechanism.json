@@ -1,0 +1,189 @@
+{
+  "n_ctx": 57344,
+  "kv_mem": {
+    "n_ctx_slot": 57344,
+    "kv_unified": "false",
+    "note": "Jetson unified memory (no discrete VRAM); memory reported via server RSS + tegrastats peak RAM",
+    "server_rss_mib_postload": 18303.6,
+    "erase_endpoint_ok": false
+  },
+  "stack": {
+    "llama_cpp": "c0fd786",
+    "model": "4bi_f16",
+    "seed": 0,
+    "top_logprobs": 20,
+    "parser": "R1 last standalone A-E in final 300 chars else X",
+    "note_seed": "request block seed=42; using task-mandated 0 (immaterial under temp-0 greedy)"
+  },
+  "part0": {
+    "video": "1067129222293667_start_0.0_end_321.518",
+    "history_frames": 30,
+    "frame_tok_est": 90,
+    "reuse_threshold": 270,
+    "R1_history": {
+      "prompt_tokens": 2739,
+      "evaluated": 2739,
+      "cache_n": 0,
+      "reused": 0,
+      "prefill_ms": 4894.308,
+      "n_gen": 1,
+      "ttft_s": 5.2479,
+      "total_latency_s": 5.248,
+      "answer_text": "The",
+      "pred": "X",
+      "answer_logprob": null,
+      "gpu_clock_before": 1300500000,
+      "gpu_clock_after": 1300500000,
+      "clock_ok": true,
+      "wall_start": 1794420062.3964033,
+      "wall_end": 1794420067.6444113
+    },
+    "R2_plus_frame": {
+      "prompt_tokens": 2829,
+      "evaluated": 95,
+      "cache_n": 2734,
+      "reused": 2734,
+      "prefill_ms": 226.214,
+      "n_gen": 1,
+      "ttft_s": 0.5867,
+      "total_latency_s": 0.5868,
+      "answer_text": "The",
+      "pred": "X",
+      "answer_logprob": null,
+      "gpu_clock_before": 1300500000,
+      "gpu_clock_after": 1300500000,
+      "clock_ok": true,
+      "wall_start": 1794420067.6770837,
+      "wall_end": 1794420068.2638469
+    },
+    "R3_plus_question": {
+      "prompt_tokens": 2921,
+      "evaluated": 97,
+      "cache_n": 2824,
+      "reused": 2824,
+      "prefill_ms": 90.493,
+      "n_gen": 2,
+      "ttft_s": 0.4528,
+      "total_latency_s": 0.5103,
+      "answer_text": "B",
+      "pred": "B",
+      "answer_logprob": {
+        "token": "B",
+        "logprob": -0.8655456304550171,
+        "top": [
+          {
+            "token": "B",
+            "logprob": -0.8655456304550171
+          },
+          {
+            "token": "C",
+            "logprob": -1.2051986455917358
+          },
+          {
+            "token": "A",
+            "logprob": -1.9094184637069702
+          },
+          {
+            "token": "E",
+            "logprob": -2.032778024673462
+          },
+          {
+            "token": "D",
+            "logprob": -7.808201313018799
+          },
+          {
+            "token": "F",
+            "logprob": -14.812654495239258
+          },
+          {
+            "token": "B",
+            "logprob": -15.490720748901367
+          },
+          {
+            "token": "H",
+            "logprob": -15.88637924194336
+          },
+          {
+            "token": "C",
+            "logprob": -16.126081466674805
+          },
+          {
+            "token": "G",
+            "logprob": -16.32212257385254
+          },
+          {
+            "token": "S",
+            "logprob": -16.368741989135742
+          },
+          {
+            "token": "N",
+            "logprob": -16.420106887817383
+          },
+          {
+            "token": "R",
+            "logprob": -16.422073364257812
+          },
+          {
+            "token": "E",
+            "logprob": -16.4332218170166
+          },
+          {
+            "token": "P",
+            "logprob": -16.663175582885742
+          },
+          {
+            "token": "O",
+            "logprob": -16.761289596557617
+          },
+          {
+            "token": "A",
+            "logprob": -16.805830001831055
+          },
+          {
+            "token": "M",
+            "logprob": -16.97196388244629
+          },
+          {
+            "token": "I",
+            "logprob": -17.046825408935547
+          },
+          {
+            "token": "L",
+            "logprob": -17.064485549926758
+          }
+        ]
+      },
+      "gpu_clock_before": 1300500000,
+      "gpu_clock_after": 1300500000,
+      "clock_ok": true,
+      "wall_start": 1794420068.2945867,
+      "wall_end": 1794420068.8049192
+    },
+    "R4_plus_frame": {
+      "prompt_tokens": 2919,
+      "evaluated": 95,
+      "cache_n": 2824,
+      "reused": 2824,
+      "prefill_ms": 223.455,
+      "n_gen": 1,
+      "ttft_s": 0.5964,
+      "total_latency_s": 0.5965,
+      "answer_text": "The",
+      "pred": "X",
+      "answer_logprob": null,
+      "gpu_clock_before": 1300500000,
+      "gpu_clock_after": 1300500000,
+      "clock_ok": true,
+      "wall_start": 1794420068.8378232,
+      "wall_end": 1794420069.4343257
+    },
+    "R2_reuses_image_prefix": true,
+    "R4_reuses_after_question_tail": true,
+    "passed": true,
+    "kv_mem": {
+      "n_ctx_slot": 57344,
+      "kv_unified": "false",
+      "note": "Jetson unified memory (no discrete VRAM); memory reported via server RSS + tegrastats peak RAM"
+    }
+  }
+}
