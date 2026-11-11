@@ -1,10 +1,10 @@
-# StudyE6b-mobility (Stage A) — timely answers over a dropping network, with StudyE4 and StudyE6(b) costs rebuilt
+# StudyE6b-mobility — timely answers over a dropping network: rebuilt costs (Stage A) and when to keep a tier warm (Stage B)
 
 **OFFLINE REPLAY OF COMMITTED RESULTS.** CPU only on the flash host: no GPU was used, no model server was started, and no inference was run. Every accuracy and every latency below is read from a committed result file of an earlier study.
 
-**E-id:** `StudyE6b-mobility`, pre-registered in `research/EXPERIMENTS.md` on 2026-11-11 **before any number in this report was computed** (user-authorized row). **STAGE A ONLY.**  
-**Scripts:** `experiments/orchestration/study_e6b_traces.py`, `experiments/orchestration/study_e6b_mobility.py`, `experiments/orchestration/study_e6b_report.py` (this file).  
-**Results:** `results/orchestration/study_e6b/e6b_traces.npz`, `e6b_traces.json`, `e6b_results.json`, `e6b_mechanism_verification.md`.  
+**E-id:** `StudyE6b-mobility`, pre-registered in `research/EXPERIMENTS.md` on 2026-11-11 **before any number in this report was computed** (user-authorized row). **Stage A** is §§1–17 below and is unchanged; **Stage B** is §§18–30, pre-registered separately on 2026-11-11 (later) once StudyE7-d2-4b and StudyE8-device-warm were committed.  
+**Scripts:** `experiments/orchestration/study_e6b_traces.py`, `experiments/orchestration/study_e6b_mobility.py` (Stage A), `experiments/orchestration/study_e6b_stageb.py` (Stage B), `experiments/orchestration/study_e6b_report.py` (this file).  
+**Results:** `results/orchestration/study_e6b/e6b_traces.npz`, `e6b_traces.json`, `e6b_results.json`, `e6b_mechanism_verification.md`, `e6b_stageb_results.json`, `e6b_stageb_mechanism_verification.md`.  
 **Never used:** any result marked INVALID — E24/E24b/E24c, E31 Parts C and D, I2/I3 TEMPORAL/SPATIAL, D/D2 Thinking, K/J Thinking T0.6. Reachability comes from E31b's corrected `cell_id == -1` signal, never from E31 Part C's `State=D/I`.
 
 ## Prominent flags (read first)
@@ -638,22 +638,418 @@ The pre-registered cost set is device energy above loaded idle (StudyE8 Parts A 
 
 **CLAUDE.md Rule 2 classification for Stage A.** Stage A reports no null, so Rule 2 does not bind on a result of its own. It does bind on the claim it withdraws: StudyE6's joint-claim null moves from **real negative** to **INCONCLUSIVE (mechanism absent)**, because error 2 removed an arm from the action space the claim is about. Stage A's own chain (Step 2) has no ABSENT link; the one ABSENT entry is the device-warm link, which is why Stage B is not run.
 
-## 17. What Stage B still needs
+## 17. What Stage A said Stage B would need (recorded before Stage B ran)
+
+*Kept verbatim from the Stage A report. Point 2 is a prediction, and §29 checks it.*
 
 Stage B runs when the user says StudyE7 and StudyE8 are committed. It adds the device-warm and 4B-D2 configurations, P2 (always-warm device), P3 (connectivity-aware keep-warm, predictor on past trace seconds only, θ and H fitted on training trace sessions, cross-fit by trace session, 5 folds, seed 0), P3-noncausal as a sanity bound, oracle keep-warm, negative control (b), and the pre-registered decision rule. Two things found in Stage A should be carried into it and are recorded now, before those results exist:
 
 1. The pre-specified decision cell (uplink 13.6 Mbit/s, deadline 2 or 5 s, outdoor-driving or synthetic ≥ 5 %) behaves very differently at 2 s and at 5 s, because 32B compute alone exceeds 2 s. Both will be reported separately; neither will be dropped.
 2. P3's predictor has little to predict on these traces: Irish gaps are 1–3 s and, per E31b §5, persistence accuracy at H = 10–60 s is 0.74–0.76 and is driven by the 85.6 % base rate. If P3 ≈ P2 at equal energy, the pre-registered reading is that the decision is a static rule — and the trace's gap structure, not the predictor, will be the reason.
 
-## 18. Files
+---
+
+# StudyE6b-mobility — STAGE B: when to keep which tier warm
+
+**Gate cleared 2026-11-11 (later).** Stage A stopped before P2/P3 because the device-warm link was ABSENT. `StudyE7-d2-4b` (4B on the D2 history, plus 4B latency curves) and `StudyE8-device-warm` (the Jetson Orin keep-warm measurement) are now both committed, so the link is instantiated by direct measurement and the sweep proceeds. Stage B's mechanism verification was recorded in `results/orchestration/study_e6b/e6b_stageb_mechanism_verification.md` **before any Stage B number was computed**; the Stage B row amendment in `research/EXPERIMENTS.md` carries the same date.
+
+**Still an offline replay of committed results.** CPU only on the flash host: no GPU, no model server, no inference. Script: `experiments/orchestration/study_e6b_stageb.py`. Results: `results/orchestration/study_e6b/e6b_stageb_results.json`. Stage A's `e6b_results.json` is **not rewritten**; every Stage A number above stands exactly as committed.
+
+## 18. Stage B flags (read first)
+
+1. **Device-warm D2 is the first device state on this workload that is both accurate and fast enough to matter.** It answers at 0.3087 accuracy — against 0.1538 for the best short window — in 1.3734 s at a 10 k-token history, where the same history answered **cold** costs 20.554 s. That ratio is the whole of Stage B.
+2. **P2 (always-warm device) beats P1, and the entire margin is on outage questions.** Outdoor-driving, 13.6 Mbit/s, 5 s: P2 − P1 = **+0.0172** [+0.008, +0.028]; on connected questions the two policies are identical by construction, and on outage questions utility goes 0.1520 → 0.2754.
+3. **The device cannot keep up with its own frame stream, and that caps the gain.** StudyE8 measured append latency crossing the 2 s D2 cadence at 15,069 tokens ≈ 334 s into a session. Replaying that exactly, the device's held history is current to within one frame on only **55.4 %** of questions (ingest lag p50 2 s, p90 21 s, max 321 s). The primary analysis lets the warm arm answer only when that lag ≤ 2 s.
+4. **P3 (connectivity-aware) does not beat P2; it buys energy, not utility.** At the same cell P3 − P2 = -0.0072 [-0.014, -0.001] while keeping warm only 91 % of the time (4.76 Wh/h against P2's 5.21).
+5. **The pre-registered θ grid was degenerate and had to be replaced — this is reported, not hidden.** On these traces an outage occurs *somewhere* in the next 30–120 s in 95.6–99.8 % of seconds, so the predicted risk sits at 0.95–1.00 and every absolute threshold in the pre-registered grid {0.05, 0.10, 0.20, 0.40} means *always warm*, making P3 identical to P2 by construction. θ is therefore taken at fixed quantile levels of the predictor's own risk distribution {0, 0.25, 0.50, 0.75, 0.90}. §23 gives the full grid.
+6. **Predictability is not the binding constraint; the warm-up cost is.** P3-noncausal, which is handed the true future, scores 0.3840 against causal P3's 0.3770 — a gap of +0.0069. Irish outages have p50 **1 s** and max 3 s (Stage A §4), while turning the device warm mid-session costs a full cold prefill of the history it then holds — 20.554 s at 10 k tokens. No predictor can warm a device in time for a 1-second gap.
+7. **Negative controls both pass.** (a) At outage fraction 0, P3's warm fraction is 0.000000 and P2 = P3 = P1 exactly. (b) Replacing the device-warm letters with the short-window letters collapses the P2 margin to +0.000000 — the gain is the warm state's **accuracy**, not its speed and not the scheduling.
+
+## 19. The four configurations Stage A listed as PENDING
+
+| configuration | accuracy source | n available | accuracy if always delivered | latency source |
+|---|---|---|---|---|
+| `cl-4B-D2-cold` | StudyE7 Job A letters (839) | 839 | 0.3087 | StudyE7 Job B 4B/images/COLD total curve |
+| `cl-4B-D2-warm` | StudyE7 Job A letters | 605 | 0.2843 | StudyE7 Job B 4B/images/WARM ttft vs uncached tokens (R^2 0.325 - FLAGGED, weakest curve in the study) |
+| `dev-4B-D2-cold` | StudyE7 Job A letters (parity StudyE8 Part D cold 27/27) | 839 | 0.3087 | StudyE8 Part B cold curve on the device |
+| `dev-4B-D2-warm` | StudyE7 Job A letters (parity StudyE8 Part D warm 68/68) | 839 | 0.3087 | StudyE8 Part A warm-question curve at the history the device actually holds |
+
+**Comparison match statements.** `cl-4B-D2-*` and `cl-32B-D2-*` read the **identical input** — StudyE7 Job A replayed StudyRH4's `body()` for cell D2 unchanged and its vLLM prompt tokens equal RH4's on 839/839 — on the same stack (vLLM 0.31.0) with the same greedy decoding, so 4B vs 32B on D2 is `IDENTICAL_INPUT`. The **device** D2 arms carry the same letters as the cloud 4B D2 arm; StudyE8 Part D measured the device's own letters against the H100's on byte-identical bodies (`body_sha256` matched 74/74) and found **68/68 agreement warm and 27/27 cold**, so this is a measured-parity proxy, not an assumed one. Its scope is the 74 archive questions, not all 845, and that is the proxy's limit (§26 check 6). Device *latency* is the Orin's own throughout; cloud latency is the H100's.
+
+**Device cost curves actually used** (StudyE8 raw rows, binned-median interpolation, never pooled across cache state):
+
+| history tokens | append (keep-warm) total | warm question total | cold question total |
+|---|---|---|---|
+| 1,000 | — | 0.467 s | 3.645 s |
+| 5,000 | 0.784 s | 0.872 s | 9.761 s |
+| 10,000 | 1.379 s | 1.373 s | 20.554 s |
+| 15,000 | 1.946 s | 1.972 s | 32.834 s |
+| 25,000 | 3.103 s | 3.053 s | 61.328 s |
+| 45,000 | — | 5.484 s | 131.204 s |
+
+Measured token ranges: append 534–52,059, warm question 2,539–52,048, cold question 761–52,127.
+
+## 20. The keep-warm model, and the one methodological choice in it
+
+A device holding a D2 history warm must ingest one 352×256 frame every 2 s. StudyE8 measured that each append evaluates a constant 95 tokens but still attends over the whole cached KV, so append latency grows with the history and crosses the 2 s cadence at 15,069 tokens. Stage B replays this exactly: appends are served FIFO at the measured cost, a device that turns warm mid-session first pays StudyE8 Part B's **cold prefill of the history it holds at that instant**, and the state it can answer from is whatever it has actually ingested.
+
+**The choice.** Past the crossover the device falls behind, so its held history is older than the question — but the only letters available are StudyE7's, scored on the *full* history. Two readings are therefore reported, and the primary is the conservative one:
+
+- **PRIMARY** — the warm arm may answer only when its ingest lag ≤ 2 s (one frame), i.e. when the state it holds is the state the letters describe.
+- **OPTIMISTIC (labelled)** — the warm arm answers whenever it is warm, scoring the full-history letters against a stale history. This is an upper bound and is never used for a conclusion.
+
+| regime | uplink | deadline | ready (lag ≤ 2 s) | warm at all | lag p50 | lag p90 | lag max | P2 primary | P2 optimistic |
+|---|---|---|---|---|---|---|---|---|---|
+| outdoor_driving | 13.6 Mbit/s | 2 s | 0.554 | 0.993 | 2 s | 21 s | 321 s | 0.0422 | 0.0459 |
+| outdoor_driving | 13.6 Mbit/s | 5 s | 0.554 | 0.993 | 2 s | 21 s | 321 s | 0.3842 | 0.3895 |
+| synthetic_10pct | 13.6 Mbit/s | 2 s | 0.554 | 0.993 | 2 s | 21 s | 321 s | 0.0333 | 0.0359 |
+| synthetic_10pct | 13.6 Mbit/s | 5 s | 0.554 | 0.993 | 2 s | 21 s | 321 s | 0.3891 | 0.3926 |
+| synthetic_30pct | 13.6 Mbit/s | 2 s | 0.554 | 0.993 | 2 s | 21 s | 321 s | 0.0830 | 0.0908 |
+| synthetic_30pct | 13.6 Mbit/s | 5 s | 0.554 | 0.993 | 2 s | 21 s | 321 s | 0.3651 | 0.3759 |
+
+**A second choice, also reported both ways.** The pre-registration says P2 takes *"the faster-deliverable of cloud and device-warm"* when the cloud is unreachable. Read literally — lower latency wins even when both options meet the deadline — the policy prefers a 0.55 s short-window answer at 0.154 accuracy over a 1.4 s warm-D2 answer at 0.309, which is not a policy anyone would deploy and would make P2 ≈ P1 by construction. The primary rule is therefore: among device options that **meet the deadline**, take the one with the higher **training-fold** utility (cross-fitted over trace offsets, 5 folds, seed 0 — the same construction Stage A used to pick P1's device fallback, and causal: no per-question peeking). The literal reading is reported beside it in every results table as `P2 literal`.
+
+## 21. Stage B results — all regimes, STREAM, PNG, uplink 13.6 Mbit/s
+
+**Deadline 1 s**
+
+| regime | reachable | best static | P1 | P2 | P2 literal | P3 | P3-noncausal | oracle (no keep-warm) | oracle keep-warm |
+|---|---|---|---|---|---|---|---|---|---|
+| outdoor_driving | 0.8610 | 0.1538 | 0.0230 | **0.0230** | 0.0270 | 0.0230 | 0.0230 | 0.3382 | 0.3483 |
+| indoor | 0.9938 | 0.1542 | 0.0033 | **0.0033** | 0.0035 | 0.0033 | 0.0033 | 0.3679 | 0.3684 |
+| synthetic_0pct | 1.0000 | 0.1550 | 0.0024 | **0.0024** | 0.0024 | 0.0024 | 0.0024 | 0.3692 | 0.3692 |
+| synthetic_2pct | 0.9801 | 0.1538 | 0.0050 | **0.0050** | 0.0054 | 0.0050 | 0.0050 | 0.3646 | 0.3662 |
+| synthetic_5pct | 0.9520 | 0.1538 | 0.0092 | **0.0092** | 0.0104 | 0.0092 | 0.0092 | 0.3577 | 0.3617 |
+| synthetic_10pct | 0.8967 | 0.1538 | 0.0174 | **0.0174** | 0.0209 | 0.0174 | 0.0174 | 0.3456 | 0.3553 |
+| synthetic_20pct | 0.7986 | 0.1538 | 0.0311 | **0.0311** | 0.0370 | 0.0311 | 0.0311 | 0.3240 | 0.3408 |
+| synthetic_30pct | 0.7053 | 0.1538 | 0.0469 | **0.0469** | 0.0550 | 0.0469 | 0.0469 | 0.3026 | 0.3267 |
+
+**Deadline 2 s**
+
+| regime | reachable | best static | P1 | P2 | P2 literal | P3 | P3-noncausal | oracle (no keep-warm) | oracle keep-warm |
+|---|---|---|---|---|---|---|---|---|---|
+| outdoor_driving | 0.8610 | 0.2599 | 0.0251 | **0.0422** | 0.0291 | 0.0351 | 0.0420 | 0.5224 | 0.5414 |
+| indoor | 0.9938 | 0.3233 | 0.0057 | **0.0062** | 0.0059 | 0.0057 | 0.0058 | 0.5798 | 0.5805 |
+| synthetic_0pct | 1.0000 | 0.3254 | 0.0047 | **0.0047** | 0.0047 | 0.0047 | 0.0047 | 0.5822 | 0.5822 |
+| synthetic_2pct | 0.9801 | 0.3144 | 0.0073 | **0.0104** | 0.0078 | 0.0073 | 0.0074 | 0.5733 | 0.5765 |
+| synthetic_5pct | 0.9520 | 0.2974 | 0.0114 | **0.0175** | 0.0125 | 0.0114 | 0.0127 | 0.5631 | 0.5700 |
+| synthetic_10pct | 0.8967 | 0.2692 | 0.0196 | **0.0333** | 0.0231 | 0.0267 | 0.0275 | 0.5375 | 0.5527 |
+| synthetic_20pct | 0.7986 | 0.2425 | 0.0328 | **0.0544** | 0.0388 | 0.0544 | 0.0543 | 0.4970 | 0.5243 |
+| synthetic_30pct | 0.7053 | 0.2120 | 0.0486 | **0.0830** | 0.0567 | 0.0830 | 0.0830 | 0.4595 | 0.4995 |
+
+**Deadline 5 s**
+
+| regime | reachable | best static | P1 | P2 | P2 literal | P3 | P3-noncausal | oracle (no keep-warm) | oracle keep-warm |
+|---|---|---|---|---|---|---|---|---|---|
+| outdoor_driving | 0.8610 | 0.3385 | 0.3670 | **0.3842** | 0.3710 | 0.3770 | 0.3840 | 0.5932 | 0.6095 |
+| indoor | 0.9938 | 0.3926 | 0.4020 | **0.4025** | 0.4021 | 0.4020 | 0.4021 | 0.6530 | 0.6537 |
+| synthetic_0pct | 1.0000 | 0.3953 | 0.4036 | **0.4036** | 0.4036 | 0.4036 | 0.4036 | 0.6556 | 0.6556 |
+| synthetic_2pct | 0.9801 | 0.3872 | 0.3981 | **0.4012** | 0.3985 | 0.3981 | 0.3982 | 0.6466 | 0.6496 |
+| synthetic_5pct | 0.9520 | 0.3758 | 0.3909 | **0.3970** | 0.3921 | 0.3909 | 0.3922 | 0.6354 | 0.6415 |
+| synthetic_10pct | 0.8967 | 0.3537 | 0.3754 | **0.3891** | 0.3789 | 0.3825 | 0.3833 | 0.6099 | 0.6236 |
+| synthetic_20pct | 0.7986 | 0.3145 | 0.3499 | **0.3715** | 0.3559 | 0.3715 | 0.3714 | 0.5689 | 0.5925 |
+| synthetic_30pct | 0.7053 | 0.2799 | 0.3307 | **0.3651** | 0.3388 | 0.3651 | 0.3651 | 0.5323 | 0.5667 |
+
+**Deadline 10 s**
+
+| regime | reachable | best static | P1 | P2 | P2 literal | P3 | P3-noncausal | oracle (no keep-warm) | oracle keep-warm |
+|---|---|---|---|---|---|---|---|---|---|
+| outdoor_driving | 0.8610 | 0.3467 | 0.3670 | **0.3842** | 0.3710 | 0.3770 | 0.3840 | 0.6016 | 0.6137 |
+| indoor | 0.9938 | 0.4021 | 0.4022 | **0.4027** | 0.4024 | 0.4022 | 0.4023 | 0.6580 | 0.6584 |
+| synthetic_0pct | 1.0000 | 0.4047 | 0.4036 | **0.4036** | 0.4036 | 0.4036 | 0.4036 | 0.6604 | 0.6604 |
+| synthetic_2pct | 0.9801 | 0.3958 | 0.3981 | **0.4012** | 0.3985 | 0.3981 | 0.3982 | 0.6522 | 0.6543 |
+| synthetic_5pct | 0.9520 | 0.3852 | 0.3909 | **0.3970** | 0.3921 | 0.3909 | 0.3922 | 0.6417 | 0.6459 |
+| synthetic_10pct | 0.8967 | 0.3618 | 0.3754 | **0.3891** | 0.3789 | 0.3825 | 0.3833 | 0.6192 | 0.6279 |
+| synthetic_20pct | 0.7986 | 0.3226 | 0.3499 | **0.3715** | 0.3559 | 0.3715 | 0.3714 | 0.5809 | 0.5964 |
+| synthetic_30pct | 0.7053 | 0.2863 | 0.3307 | **0.3651** | 0.3388 | 0.3651 | 0.3651 | 0.5467 | 0.5698 |
+
+Paired contrasts (video-and-offset bootstrap, 2,000 resamples, seed 0), uplink 13.6 Mbit/s:
+
+| regime | deadline | P2 − P1 | P3 − P1 | P3 − P2 | P2 − best static |
+|---|---|---|---|---|---|
+| outdoor_driving | 2 s | +0.0172 [+0.008, +0.028] | +0.0100 [+0.002, +0.018] | -0.0072 [-0.014, -0.001] | -0.2177 [-0.254, -0.183] |
+| outdoor_driving | 5 s | +0.0172 [+0.008, +0.028] | +0.0100 [+0.002, +0.018] | -0.0072 [-0.014, -0.001] | +0.0457 [+0.029, +0.063] |
+| indoor | 2 s | +0.0005 [-0.001, +0.003] | +0.0000 [+0.000, +0.000] | -0.0005 [-0.003, +0.001] | -0.3171 [-0.349, -0.285] |
+| indoor | 5 s | +0.0005 [-0.001, +0.003] | +0.0000 [+0.000, +0.000] | -0.0005 [-0.003, +0.001] | +0.0099 [-0.003, +0.024] |
+| synthetic_0pct | 2 s | +0.0000 [+0.000, +0.000] | +0.0000 [+0.000, +0.000] | +0.0000 [+0.000, +0.000] | -0.3207 [-0.353, -0.289] |
+| synthetic_0pct | 5 s | +0.0000 [+0.000, +0.000] | +0.0000 [+0.000, +0.000] | +0.0000 [+0.000, +0.000] | +0.0083 [-0.005, +0.021] |
+| synthetic_2pct | 2 s | +0.0031 [+0.000, +0.008] | +0.0000 [+0.000, +0.000] | -0.0031 [-0.008, +0.000] | -0.3040 [-0.337, -0.273] |
+| synthetic_2pct | 5 s | +0.0031 [+0.000, +0.008] | +0.0000 [+0.000, +0.000] | -0.0031 [-0.008, +0.000] | +0.0140 [+0.001, +0.028] |
+| synthetic_5pct | 2 s | +0.0061 [+0.000, +0.013] | +0.0000 [+0.000, +0.000] | -0.0061 [-0.013, +0.000] | -0.2799 [-0.314, -0.248] |
+| synthetic_5pct | 5 s | +0.0061 [+0.000, +0.013] | +0.0000 [+0.000, +0.000] | -0.0061 [-0.013, +0.000] | +0.0212 [+0.007, +0.036] |
+| synthetic_10pct | 2 s | +0.0137 [+0.005, +0.024] | +0.0071 [+0.000, +0.014] | -0.0066 [-0.014, -0.001] | -0.2359 [-0.271, -0.201] |
+| synthetic_10pct | 5 s | +0.0137 [+0.005, +0.024] | +0.0071 [+0.000, +0.014] | -0.0066 [-0.014, -0.001] | +0.0354 [+0.019, +0.052] |
+| synthetic_20pct | 2 s | +0.0215 [+0.009, +0.034] | +0.0215 [+0.009, +0.034] | +0.0000 [+0.000, +0.000] | -0.1881 [-0.224, -0.154] |
+| synthetic_20pct | 5 s | +0.0215 [+0.009, +0.034] | +0.0215 [+0.009, +0.034] | +0.0000 [+0.000, +0.000] | +0.0570 [+0.039, +0.075] |
+| synthetic_30pct | 2 s | +0.0344 [+0.019, +0.049] | +0.0344 [+0.019, +0.049] | +0.0000 [+0.000, +0.000] | -0.1289 [-0.166, -0.093] |
+| synthetic_30pct | 5 s | +0.0344 [+0.019, +0.049] | +0.0344 [+0.019, +0.049] | +0.0000 [+0.000, +0.000] | +0.0851 [+0.064, +0.106] |
+
+Per-configuration utility of the four new arms (uplink 13.6 Mbit/s, outdoor-driving):
+
+| deadline | `cl-4B-D2-cold` | `cl-4B-D2-warm` | `dev-4B-D2-cold` | `dev-4B-D2-warm` | `dev-4B-SHORT-N1` | `dev-4B-RECENT` |
+|---|---|---|---|---|---|---|
+| 1 s | 0.1330 | 0.1291 | 0.0000 | 0.1053 | 0.1538 | 0.0000 |
+| 2 s | 0.2290 | 0.1671 | 0.0000 | 0.1953 | 0.1538 | 0.0000 |
+| 5 s | 0.2487 | 0.1673 | 0.0118 | 0.1953 | 0.1538 | 0.0012 |
+| 10 s | 0.2487 | 0.1673 | 0.0698 | 0.1953 | 0.1538 | 0.0071 |
+
+## 22. Where the P2 − P1 difference comes from
+
+| regime | deadline | n connected | P1 | P2 | n outage | P1 | P2 | share of the margin from outage questions |
+|---|---|---|---|---|---|---|---|---|
+| outdoor_driving | 2 s | 14551 | 0.0046 | 0.0046 | 2349 | 0.1520 | 0.2754 | 100 % |
+| outdoor_driving | 5 s | 14551 | 0.4018 | 0.4018 | 2349 | 0.1520 | 0.2754 | 100 % |
+| indoor | 2 s | 16795 | 0.0048 | 0.0048 | 105 | 0.1524 | 0.2381 | 100 % |
+| indoor | 5 s | 16795 | 0.4035 | 0.4035 | 105 | 0.1524 | 0.2381 | 100 % |
+| synthetic_0pct | 2 s | 16900 | 0.0047 | 0.0047 | 0 | — | — | — |
+| synthetic_0pct | 5 s | 16900 | 0.4036 | 0.4036 | 0 | — | — | — |
+| synthetic_2pct | 2 s | 16563 | 0.0048 | 0.0048 | 337 | 0.1335 | 0.2878 | 100 % |
+| synthetic_2pct | 5 s | 16563 | 0.4035 | 0.4035 | 337 | 0.1335 | 0.2878 | 100 % |
+| synthetic_5pct | 2 s | 16089 | 0.0045 | 0.0045 | 811 | 0.1480 | 0.2750 | 100 % |
+| synthetic_5pct | 5 s | 16089 | 0.4031 | 0.4031 | 811 | 0.1480 | 0.2750 | 100 % |
+| synthetic_10pct | 2 s | 15154 | 0.0049 | 0.0049 | 1746 | 0.1472 | 0.2795 | 100 % |
+| synthetic_10pct | 5 s | 15154 | 0.4017 | 0.4017 | 1746 | 0.1472 | 0.2795 | 100 % |
+| synthetic_20pct | 2 s | 13497 | 0.0042 | 0.0042 | 3403 | 0.1463 | 0.2533 | 100 % |
+| synthetic_20pct | 5 s | 13497 | 0.4013 | 0.4013 | 3403 | 0.1463 | 0.2533 | 100 % |
+| synthetic_30pct | 2 s | 11920 | 0.0044 | 0.0044 | 4980 | 0.1542 | 0.2711 | 100 % |
+| synthetic_30pct | 5 s | 11920 | 0.4044 | 0.4044 | 4980 | 0.1542 | 0.2711 | 100 % |
+
+On connected questions P1 and P2 are **identical by construction** — both serve the cloud arm E6(a)'s rule picks — so every difference in the table is an outage-question difference, and the share column is 100 % wherever it is defined. Where the regime has no outage seconds the margin is exactly zero and the share is undefined.
+
+## 23. The θ grid, and what P3 actually buys
+
+The pre-registered absolute grid {0.05, 0.10, 0.20, 0.40} is below the predictor's entire support: the label it predicts — *is there an outage second anywhere in the next H seconds* — has a base rate of 0.956 (synthetic 10 %, H = 30 s) to 0.998, because outages are frequent and short. Every absolute θ in that grid therefore means *always warm*. θ is taken instead at fixed quantile levels of the predictor's own risk, so the grid spans warm fractions from ≈ 0.10 to 1.00. The levels are constants; only the level → threshold calibration uses the pooled predictions, and **which** level is used is cross-fitted by trace session (5 folds, seed 0).
+
+Training grid, outdoor-driving, 13.6 Mbit/s, 5 s, fold 0:
+
+| H | quantile level | training utility | warm fraction |
+|---|---|---|---|
+| 30 s | 0.00 | 0.3828 | 1.000 |
+| 30 s | 0.25 | 0.3681 | 0.776 |
+| 30 s | 0.50 | 0.3666 | 0.550 |
+| 30 s | 0.75 | 0.3662 | 0.287 |
+| 30 s | 0.90 | 0.3662 | 0.113 |
+| 60 s | 0.00 | 0.3828 | 1.000 |
+| 60 s | 0.25 | 0.3702 | 0.784 |
+| 60 s | 0.50 | 0.3666 | 0.557 |
+| 60 s | 0.75 | 0.3663 | 0.283 |
+| 60 s | 0.90 | 0.3661 | 0.110 |
+| 120 s | 0.00 | 0.3828 | 1.000 |
+| 120 s | 0.25 | 0.3702 | 0.784 |
+| 120 s | 0.50 | 0.3666 | 0.557 |
+| 120 s | 0.75 | 0.3663 | 0.283 |
+| 120 s | 0.90 | 0.3661 | 0.110 |
+
+Fold 0 selects H = 30 s at quantile level 0.00 (θ = 0.9560), warm fraction 1.000. The selection criterion is the cheapest schedule whose **training** utility is within 1 pp of the best — the only criterion under which the pre-registered decision rule (*matches P2 within 1 pp at lower energy*) can discriminate at all; a utility-only fit always returns "always warm" and is recorded beside each pick as `utility_only_fit`.
+
+| regime | deadline | P3 warm fraction | P3-noncausal warm fraction | P3 Wh/h | P2 Wh/h | P3 − P2 utility | P3-noncausal − P3 |
+|---|---|---|---|---|---|---|---|
+| outdoor_driving | 2 s | 0.914 | 1.000 | 4.762 | 5.209 | -0.0072 [-0.014, -0.001] | +0.0069 |
+| outdoor_driving | 5 s | 0.914 | 1.000 | 4.762 | 5.209 | -0.0072 [-0.014, -0.001] | +0.0069 |
+| indoor | 2 s | 0.055 | 0.017 | 0.284 | 5.209 | -0.0005 [-0.003, +0.001] | +0.0001 |
+| indoor | 5 s | 0.055 | 0.017 | 0.284 | 5.209 | -0.0005 [-0.003, +0.001] | +0.0001 |
+| synthetic_0pct | 2 s | 0.000 | 0.000 | 0.000 | 5.209 | +0.0000 [+0.000, +0.000] | +0.0000 |
+| synthetic_0pct | 5 s | 0.000 | 0.000 | 0.000 | 5.209 | +0.0000 [+0.000, +0.000] | +0.0000 |
+| synthetic_2pct | 2 s | 0.086 | 0.434 | 0.449 | 5.209 | -0.0031 [-0.008, +0.000] | +0.0001 |
+| synthetic_2pct | 5 s | 0.086 | 0.434 | 0.449 | 5.209 | -0.0031 [-0.008, +0.000] | +0.0001 |
+| synthetic_5pct | 2 s | 0.096 | 0.760 | 0.502 | 5.209 | -0.0061 [-0.013, +0.000] | +0.0013 |
+| synthetic_5pct | 5 s | 0.096 | 0.760 | 0.502 | 5.209 | -0.0061 [-0.013, +0.000] | +0.0013 |
+| synthetic_10pct | 2 s | 0.827 | 0.956 | 4.306 | 5.209 | -0.0066 [-0.014, -0.001] | +0.0008 |
+| synthetic_10pct | 5 s | 0.827 | 0.956 | 4.306 | 5.209 | -0.0066 [-0.014, -0.001] | +0.0008 |
+| synthetic_20pct | 2 s | 1.000 | 1.000 | 5.209 | 5.209 | +0.0000 [+0.000, +0.000] | -0.0001 |
+| synthetic_20pct | 5 s | 1.000 | 1.000 | 5.209 | 5.209 | +0.0000 [+0.000, +0.000] | -0.0001 |
+| synthetic_30pct | 2 s | 1.000 | 1.000 | 5.209 | 5.209 | +0.0000 [+0.000, +0.000] | +0.0000 |
+| synthetic_30pct | 5 s | 1.000 | 1.000 | 5.209 | 5.209 | +0.0000 [+0.000, +0.000] | +0.0000 |
+
+## 24. Keep-warm costs
+
+**Device energy.** StudyE8 Part C measured a board power of 15.14 W while keeping a D2 history warm at the 2 s cadence against 9.94 W loaded-idle: a delta of **5.2087 W**, i.e. 5.21 Wh per warm-hour. P1 pays 0, P2 pays it continuously, P3 pays it for its warm fraction.
+
+**Flagged, and it biases against the conclusion reached below:** StudyE8 did not measure power during a Part B *cold* prefill, so P3's warm-up is charged at the same 5.21 W delta. P3's energy is therefore a **lower bound**; warm-ups account for 9.6 % of its warm time in this cell.
+
+**Uplink.** Unchanged from Stage A — the device streams the cloud arm's frames whether or not it also holds a local history, so keeping warm adds no uplink bytes:
+
+| representation | MB per hour (PNG, STREAM) |
+|---|---|
+| D2 | 251.7 |
+| RECENT | 994.7 |
+| RICH | 503.4 |
+| U | 1,498.1 |
+
+**Cloud warm-session seconds.** The `cl-*-D2-warm` arms assume a session held on the server between questions. No capacity limit is modelled and none is implied: StudyRH5 and StudyRH8 are the capacity studies, and nothing here says how many such sessions a server can hold.
+
+## 25. The pre-registered decision rule
+
+> Pre-registered: the keep-warm decision is NON-TRIVIAL if P3 matches P2's utility (difference CI within +/-1 pp) at significantly lower device energy, or beats P1 with a CI excluding 0, in at least one pre-specified cell (outdoor-driving or synthetic >= 5%, uplink 13.6 Mbit/s, deadline 2 or 5 s). If P2 = P1 everywhere, device-warm has no value on this workload. If P3 = P2 at equal energy, the decision is a static rule.
+
+| cell | P2 − P1 | P3 − P1 | P3 − P2 | P3 Wh/h vs P2 | matches P2 within ±1 pp? | strictly cheaper? | beats P1? | **non-trivial?** |
+|---|---|---|---|---|---|---|---|---|
+| outdoor_driving, 2s | +0.0172 [+0.008, +0.028] | +0.0100 [+0.002, +0.018] | -0.0072 [-0.014, -0.001] | 4.76 vs 5.21 | no | yes | yes | **YES** |
+| outdoor_driving, 5s | +0.0172 [+0.008, +0.028] | +0.0100 [+0.002, +0.018] | -0.0072 [-0.014, -0.001] | 4.76 vs 5.21 | no | yes | yes | **YES** |
+| synthetic_5pct, 2s | +0.0061 [+0.000, +0.013] | +0.0000 [+0.000, +0.000] | -0.0061 [-0.013, +0.000] | 0.50 vs 5.21 | no | yes | no | **no** |
+| synthetic_5pct, 5s | +0.0061 [+0.000, +0.013] | +0.0000 [+0.000, +0.000] | -0.0061 [-0.013, +0.000] | 0.50 vs 5.21 | no | yes | no | **no** |
+| synthetic_10pct, 2s | +0.0137 [+0.005, +0.024] | +0.0071 [+0.000, +0.014] | -0.0066 [-0.014, -0.001] | 4.31 vs 5.21 | no | yes | no | **no** |
+| synthetic_10pct, 5s | +0.0137 [+0.005, +0.024] | +0.0071 [+0.000, +0.014] | -0.0066 [-0.014, -0.001] | 4.31 vs 5.21 | no | yes | no | **no** |
+| synthetic_20pct, 2s | +0.0215 [+0.009, +0.034] | +0.0215 [+0.009, +0.034] | +0.0000 [+0.000, +0.000] | 5.21 vs 5.21 | yes | no | yes | **YES** |
+| synthetic_20pct, 5s | +0.0215 [+0.009, +0.034] | +0.0215 [+0.009, +0.034] | +0.0000 [+0.000, +0.000] | 5.21 vs 5.21 | yes | no | yes | **YES** |
+| synthetic_30pct, 2s | +0.0344 [+0.019, +0.049] | +0.0344 [+0.019, +0.049] | +0.0000 [+0.000, +0.000] | 5.21 vs 5.21 | yes | no | yes | **YES** |
+| synthetic_30pct, 5s | +0.0344 [+0.019, +0.049] | +0.0344 [+0.019, +0.049] | +0.0000 [+0.000, +0.000] | 5.21 vs 5.21 | yes | no | yes | **YES** |
+
+**Verdict as pre-registered: the keep-warm decision IS non-trivial**, in 6 of 10 pre-specified cells: `outdoor_driving|13.6Mbps_44ms|STREAM|2s`, `outdoor_driving|13.6Mbps_44ms|STREAM|5s`, `synthetic_20pct|13.6Mbps_44ms|STREAM|2s`, `synthetic_20pct|13.6Mbps_44ms|STREAM|5s`, `synthetic_30pct|13.6Mbps_44ms|STREAM|2s`, `synthetic_30pct|13.6Mbps_44ms|STREAM|5s`.
+
+**And the qualification that matters more than the verdict.** The rule has two clauses, and all 6 cells fire on the second one — *P3 beats P1 with a CI excluding 0* (6 cells) — while the first clause, *P3 matches P2 within ±1 pp at strictly lower energy*, is satisfied in **0** cells. The second clause is satisfied by the keep-warm **action**, not by the **timing** of it: in every one of those cells P2 beats or equals P3 (P3 − P2 is -0.0072 to +0.0000), and where P3 does equal P2 it does so by choosing to stay warm all the time. Read against the question Stage B was posed — *does deciding **when** to keep which tier warm improve timely correct answers* — the answer on this workload is **no**; what improves them is keeping the device warm at all, which is P2.
+
+**The two pre-registered readings.** P2 = P1 everywhere: **no** — so device-warm does have value, and the question is only when to pay for it. P3 = P2 at equal energy — the pre-registered trigger for "the decision is a static rule" — holds in **4 of 10** cells `synthetic_20pct 2s`, `synthetic_20pct 5s`, `synthetic_30pct 2s`, `synthetic_30pct 5s`. In the remaining cells the energy is not equal, and there P3 trades utility away for it (outdoor-driving: warm 91 % of the time for -0.0072 utility). Either way no cell shows scheduling skill: see §23's noncausal column, where perfect foresight also chooses to stay warm.
+
+## 26. Negative controls
+
+**(a) Outage fraction 0.** Outage fraction 0 (synthetic_0pct): P3's warm fraction must go to ~0 and P2/P3 must equal P1, because the device is never the only node that can answer.
+
+| cell | reachable | P1 | P2 | P3 | P3 warm fraction | abs(P2 − P1) | abs(P3 − P1) |
+|---|---|---|---|---|---|---|---|
+| 5Mbps_60ms, 1s | 1.0000 | 0.0024 | 0.0024 | 0.0024 | 0.000000 | 0.000000 | 0.000000 |
+| 5Mbps_60ms, 2s | 1.0000 | 0.0047 | 0.0047 | 0.0047 | 0.000000 | 0.000000 | 0.000000 |
+| 5Mbps_60ms, 5s | 1.0000 | 0.4036 | 0.4036 | 0.4036 | 0.000000 | 0.000000 | 0.000000 |
+| 5Mbps_60ms, 10s | 1.0000 | 0.4036 | 0.4036 | 0.4036 | 0.000000 | 0.000000 | 0.000000 |
+| 13.6Mbps_44ms, 1s | 1.0000 | 0.0024 | 0.0024 | 0.0024 | 0.000000 | 0.000000 | 0.000000 |
+| 13.6Mbps_44ms, 2s | 1.0000 | 0.0047 | 0.0047 | 0.0047 | 0.000000 | 0.000000 | 0.000000 |
+| 13.6Mbps_44ms, 5s | 1.0000 | 0.4036 | 0.4036 | 0.4036 | 0.000000 | 0.000000 | 0.000000 |
+| 13.6Mbps_44ms, 10s | 1.0000 | 0.4036 | 0.4036 | 0.4036 | 0.000000 | 0.000000 | 0.000000 |
+| 88Mbps_22ms, 1s | 1.0000 | 0.0024 | 0.0024 | 0.0024 | 0.000000 | 0.000000 | 0.000000 |
+| 88Mbps_22ms, 2s | 1.0000 | 0.0047 | 0.0047 | 0.0047 | 0.000000 | 0.000000 | 0.000000 |
+| 88Mbps_22ms, 5s | 1.0000 | 0.4036 | 0.4036 | 0.4036 | 0.000000 | 0.000000 | 0.000000 |
+| 88Mbps_22ms, 10s | 1.0000 | 0.4036 | 0.4036 | 0.4036 | 0.000000 | 0.000000 | 0.000000 |
+
+**PASS** on both conditions: warm fraction → 0 in every cell (yes), and P2 = P3 = P1 exactly (yes).
+
+**(b) Device-warm accuracy replaced by the device short-window accuracy.** The warm arm keeps its latency, its schedule and its energy; only its letters are swapped for StudyF4's N = 1 letters. If the P2 margin is a warm-*state* effect it must collapse.
+
+| regime | deadline | P2 − P1 | P2(control b) − P1 | collapse | P3(control b) − P1 |
+|---|---|---|---|---|---|
+| outdoor_driving | 2 s | +0.0172 | +0.000000 | 100.0 % | +0.000000 |
+| outdoor_driving | 5 s | +0.0172 | +0.000000 | 100.0 % | +0.000000 |
+| synthetic_5pct | 2 s | +0.0061 | +0.000000 | 100.0 % | +0.000000 |
+| synthetic_5pct | 5 s | +0.0061 | +0.000000 | 100.0 % | +0.000000 |
+| synthetic_10pct | 2 s | +0.0137 | +0.000000 | 100.0 % | +0.000000 |
+| synthetic_10pct | 5 s | +0.0137 | +0.000000 | 100.0 % | +0.000000 |
+| synthetic_20pct | 2 s | +0.0215 | +0.000000 | 100.0 % | +0.000000 |
+| synthetic_20pct | 5 s | +0.0215 | +0.000000 | 100.0 % | +0.000000 |
+| synthetic_30pct | 2 s | +0.0344 | +0.000000 | 100.0 % | +0.000000 |
+| synthetic_30pct | 5 s | +0.0344 | +0.000000 | 100.0 % | +0.000000 |
+
+**PASS.** The margin collapses to zero in every cell with a non-zero margin: with short-window letters the warm arm is no better than the fallback it replaces, so P2 reduces to P1 exactly. The Stage B gain is the warm state's **accuracy**, not its latency and not the scheduling.
+
+## 27. One instrumented video, with the warm state charged
+
+Regime outdoor_driving, uplink 13.6Mbps_44ms, STREAM, png, deadline 5 s. Video `1001141161985610_start_0.0_end_599.99`, offset 0, trace session `6` from second 1,084, span 388 s, 66 outage seconds in the window. Device policy: P2 (always-warm from session second 0).
+
+| question | t (s) | connected | lag (s) | history held (tok) | full history (tok) | past 2 s crossover | usable | device J charged |
+|---|---|---|---|---|---|---|---|---|
+| `B058EEFB45` | 236 | yes | 2 | 10,530 | 10,620 | no | **yes** | 1,229 |
+| `42CFFFAF13` | 300 | yes | 2 | 13,410 | 13,500 | no | **yes** | 1,563 |
+| `4DF0872F25` | 387 | **no** | 5 | 17,190 | 17,415 | yes | no | 2,016 |
+
+Every charge for the first question (`B058EEFB45`, t = 236 s, connected):
+
+| configuration | status | correct | upload s | compute s | total s | delivered | utility |
+|---|---|---|---|---|---|---|---|
+| `cl-4B-RECENT` | measured | no | 0.163 | 1.675 | 1.881 | yes | 0 |
+| `cl-4B-RICH` | measured | yes | 0.082 | 1.593 | 1.719 | yes | 1 |
+| `cl-4B-U` | measured | yes | 0.163 | 2.174 | 2.381 | yes | 1 |
+| `cl-32B-RECENT` | measured | no | 0.163 | 3.728 | 3.935 | yes | 0 |
+| `cl-32B-RICH` | measured | yes | 0.082 | 3.513 | 3.639 | yes | 1 |
+| `cl-32B-U` | measured | yes | 0.163 | 5.337 | 5.543 | no | 0 |
+| `cl-32B-D2-cold` | measured | yes | 0.082 | 2.578 | 2.704 | yes | 1 |
+| `cl-32B-D2-warm` | COLD_FIRST_QUESTION | — | 0.082 | — | — | no | 0 |
+| `dev-4B-SHORT-N1` | measured | no | 0.000 | 0.552 | 0.552 | yes | 0 |
+| `dev-4B-SHORT-N3` | measured | no | 0.000 | 1.363 | 1.363 | yes | 0 |
+| `dev-4B-SHORT-N9` | measured | no | 0.000 | 3.856 | 3.856 | yes | 0 |
+| `dev-4B-RECENT` | measured | no | 0.000 | 17.079 | 17.079 | no | 0 |
+| `cl-4B-D2-cold` | measured | yes | 0.082 | 0.899 | 1.025 | yes | 1 |
+| `cl-4B-D2-warm` | COLD_FIRST_QUESTION | — | 0.082 | — | — | no | 0 |
+| `dev-4B-D2-cold` | measured | yes | 0.000 | 22.460 | 22.460 | no | 0 |
+| `dev-4B-D2-warm` | state_dependent | yes | 0.000 | 1.426 | 1.426 | yes | 1 |
+
+## 28. Stage B results consistency check (CLAUDE.md, 6 checks)
+
+**1. Cross-check against committed measurements.** Stage B recomputes Stage A's P1 from the same code path, the same E6(a) rule, the same alignment seed and the same bootstrap seed, so every P1 must reproduce the committed Stage A value exactly. The device-warm arm's accuracy must equal StudyE7's committed 4B D2 figure.
+
+| quantity | this run | prior run | source of prior | ratio | agree |
+|---|---|---|---|---|---|
+| P1, all 16 cells at 13.6 Mbit/s, deadlines 2 and 5 s | max abs difference 0.000000000 | — | `e6b_results.json` (Stage A, committed) | 1.000000 | agree |
+| device-warm D2 accuracy (always delivered) | 0.308701 | 0.308701 | StudyE7 Job A, paired 839 | 1.000000 | agree |
+| device keep-warm power above idle | 5.2087 W | 5.2087 W | StudyE8 Part C | 1.000000 | agree |
+| 2 s cadence crossover | 15,069 tok | 15,069 tok | StudyE8 Part C | 1.000000 | agree |
+| device warm-vs-cold speed-up at a 45 k-token history | 23.9× | 27.0× (at 52 k) | StudyE8 Part D | 0.89 | agree |
+
+**PASS.** Stage B reproduces every committed Stage A P1 to the last bit, so the two stages' policy contrasts are on one scale, and no ratio is near the 2× investigation gate. Stage B's `best_static` and `oracle_no_keepwarm` are **not** expected to equal Stage A's and are not compared: the static pool and the oracle's action set both gained the four new configurations, which is the point of Stage B.
+
+**2. Physical plausibility.** The device answers a 10 k-token warm history in 1.373 s having evaluated only the question tail (~160–207 tokens, StudyE8 Part A), i.e. roughly 120–150 tok/s of *new* work on a Jetson Orin at 1.3 GHz — far below the 647 tok/s cold prefill StudyE8 measured on the same stack, as it must be, because the warm path still attends over the whole cached KV. The cold arm at the same history costs 20.554 s, a 15.0× ratio, bracketed by StudyE8's own matched measurement (16.0× median, 27.0× at 52 k). No rate anywhere in Stage B is faster than a committed curve, because no curve was refitted: the three device curves are binned-median interpolations of StudyE8's raw per-request rows. **PASS.**
+
+**3. Distribution sanity.** The ingest lag is reported as a distribution, not a median: p50 2 s, p90 21 s, max 321 s on outdoor-driving at 5 s, which is the spread the 2 s crossover predicts and not a constant. The θ grid spans warm fractions 0.110–1.000 with training utilities that differ in the third decimal, so neither is degenerate. The one place a constant legitimately appears is negative control (a), where P2 − P1 and P3 − P1 are exactly 0 across every cell — that is the control succeeding, and §26 shows it is zero because the device is never reached for, not because the arm is missing. **PASS.**
+
+**4. Definition audit.**
+
+| object | definition in this run | matches prior? |
+|---|---|---|
+| D2 | StudyRH4 cell D2: 352×256 separate images at a fixed 2 s stride from session start, append-only, RH4's header and R1 question text | yes — StudyE7 replayed RH4's `body()` unchanged and matched prompt tokens on 839/839 |
+| warm (cloud) | prefix cache on, cost charged against **uncached** tokens since the previous question | yes — same as Stage A's 32B warm arm |
+| warm (device) | llama.cpp `cache_prompt` true with the KV prefix resident; answering costs the question tail only | yes — StudyE8's own definition, Part 0 verified reuse |
+| cold (device) | `cache_prompt` false, reused = 0 | yes — StudyE8 Part B |
+| warm fraction | share of session seconds the device holds the history warm, warm-up included | new in Stage B; defined here |
+| utility | answer correct **and** delivered within the deadline | yes — Stage A's definition, unchanged |
+| keep-warm energy | (board power while keeping warm − loaded idle) × warm seconds | yes — StudyE8 Part C's delta |
+
+One name is used with two definitions across the repository and is flagged here rather than reconciled: **"cold device latency"** means StudyF4/StudyD4-orin's 560×560 short-window curve (≈1,261 ms per 1k tokens) in Stage A's `dev-4B-RECENT` arm and StudyE8 Part B's D2 curve (≈3,022 ms per 1k) in Stage B's `dev-4B-D2-cold` arm. StudyE8 §Part B investigated the 2.4× gap and attributed it to format and token range, not to a stack regression; the two arms are never pooled and never compared to each other here. **PASS with the flag.**
+
+**5. Claim linkage.** Stage B bears on FORMULATION §Constraints 2 (serving feasibility within the latency SLO, or pay materialization first), §Constraints 3 (reachability) and §refresh (the physical component of Context Inertia). It **supports** the claim that warm state is a placement decision with a real price: holding a D2 history warm on the device is what converts outage questions from unanswerable into answerable, and it costs a measured 5.21 W. It **weakens** the stronger claim that the *timing* of that decision is itself a lever on this workload — §25. It does **not** speak to the coupling claim across a fleet (single-stream; StudyRH5/RH8 are the capacity studies), and it measures no cross-tier KV transfer, so §Scoping's KV-portability exclusion is respected: the device builds its own KV from frames it already has. **PASS with the scope note.**
+
+**6. Proxy validity.**
+
+| proxy | what it actually measures | valid for the claim? |
+|---|---|---|
+| device D2 *accuracy* = the H100 4B's letters | the cloud 4B's answers on byte-identical bodies | **valid, and measured**: StudyE8 Part D found 68/68 warm and 27/27 cold agreement with the device's own letters on `body_sha256`-matched inputs. Scope: 74 archive questions of 845, so the parity is measured on 8.8 % of the question set and assumed on the rest |
+| device-warm *answer* latency = StudyE8 Part A's warm-question curve | the Orin answering a warm D2 history, measured | valid; the history token count is StudyE7's own per-question prompt tokens, not an estimate |
+| P3 warm-up *energy* = Part C's keep-warm power | power during a cold prefill was never measured | **flagged**. Same hardware, same clocked prefill work, but it is an assumption; it makes P3's energy a lower bound, i.e. it favours P3, and §25's verdict is against P3 anyway |
+| full-history letters scored against a *stale* warm history | the device's answer on the history it actually holds was never measured | **flagged, and the reason the primary analysis gates on a ≤ 2 s ingest lag.** The ungated reading is reported as `P2 optimistic` and is never used for a conclusion |
+| 4B cloud WARM latency vs uncached tokens | a fit with R² 0.325 (StudyE7 Job B) | **flagged before the sweep** (Stage B mechanism verification, point 1). `cl-4B-D2-warm` is the weakest curve in the study; no Stage B verdict rests on it |
+
+## 29. Stage B observations and interpretation
+
+**Observations (data only).**
+
+1. P2 beats P1 in every regime that has outages, and the margin scales with the outage fraction: +0.0061 [+0.000, +0.013] at synthetic 5 %, +0.0172 [+0.008, +0.028] on outdoor-driving (14.4 % outage), +0.0344 [+0.019, +0.049] at synthetic 30 %. At outage fraction 0 it is exactly 0.
+2. The P2 − P1 margin is **identical at the 2 s and the 5 s deadline** in every regime (outdoor-driving: +0.0172 and +0.0172). The questions the warm arm wins are outage questions it answers in about a second, so loosening the deadline from 2 s to 5 s adds nothing to the margin — it only raises both policies' connected-question utility (0.0046 → 0.4018).
+3. On outage questions alone, utility goes 0.1520 → 0.2754 on outdoor-driving — the device-warm arm roughly doubles what a device can answer during an outage. On connected questions P1 and P2 are identical by construction.
+4. The device holds a history current to within one frame on only 55.4 % of questions, although it is warm on 99.3 %. Ingest lag p90 is 21 s and max 321 s.
+5. P3 never beats P2 in any cell. It equals P2 exactly where it chooses to stay warm all the time (synthetic 20 % and 30 %, warm fraction 1.000), and it loses utility wherever it de-warms: outdoor-driving -0.0072 [-0.014, -0.001] at warm fraction 0.914, synthetic 5 % -0.0061 [-0.013, +0.000] at warm fraction 0.096.
+6. P3-noncausal, handed the true future, chooses to be warm 100 % of the time on outdoor-driving and scores 0.3840 against P2's 0.3842 — it reproduces always-warm rather than improving on it.
+7. The oracle gains from adding the keep-warm action: oracle without keep-warm 0.5932 against oracle with it 0.6095 (+0.0163); P2 realises 7 % of the oracle's headroom over P1.
+8. Both negative controls pass exactly: (a) warm fraction 0.000000 and P2 = P3 = P1 to 0 at outage fraction 0; (b) with short-window letters the P2 margin is +0.000000.
+9. Device-warm costs 5.21 W above loaded idle continuously under P2; P3's best schedule on outdoor-driving costs 4.76 Wh/h, a 9 % saving, for the -0.0072 utility it gives up.
+
+**Interpretation (inference, labelled as such).**
+
+- **The answer to Stage B's question is: keep it warm, don't schedule it.** Holding a D2 history warm on the device is worth real utility — it is the only device state on this workload that is both accurate enough and fast enough to answer during an outage — and every cell where that helps is an outage cell. But *deciding when* to hold it warm buys nothing: the best connectivity-aware schedule either collapses to always-warm, or loses utility in exchange for energy. The pre-registered rule fires on its second clause (P3 beats P1 with a CI excluding 0) in six cells, and that clause is satisfied by the keep-warm *action*, not by the *timing* of it — P2 beats P3 in all six.
+- **The reason is a cost asymmetry the trace makes unarguable.** Irish 5G outages have a median length of 1 s and a maximum of 3 s (Stage A §4), while turning a cold device warm mid-session costs a full reconstruction of the history it then holds — 20.6 s at 10 k tokens and 61.3 s at 25 k. A policy cannot warm up inside a gap that is over before the prefill finishes, so the only schedules that keep the utility are the ones that were already warm, which is P2. P3-noncausal confirms this is not a prediction failure: given the true future it also chooses to stay warm.
+- **Stage A's own prediction is confirmed, and this is worth recording.** §17 point 2, written before any Stage B number existed, said that if P3 ≈ P2 the reading would be that the decision is static and the trace's gap structure, not the predictor, would be the reason. That is exactly what the data show — with the refinement that P3 ≈ P2 only when P3 chooses warm fractions near 1; where it economises, it loses utility.
+- **The device's throughput ceiling, not its accuracy, is what caps the gain.** The warm arm's letters are worth 0.3087 against the fallback's 0.1538, but the arm is only usable on 55 % of questions because StudyE8's measured append cost overtakes the 2 s frame cadence 334 s into a session. A device that could ingest its own stream would roughly double the P2 margin — the `P2 optimistic` column in §20 is that bound. Making keep-warm pay off on long sessions is an ingest-throughput problem, not a model problem.
+- **What this does not show.** It does not show that keep-warm scheduling is worthless in general: these outages are short and frequent, and a regime with long, rare, predictable outages — which this repository has no trace of — is exactly where P3 would have something to schedule, and §23's grid shows P3 does track the knob it is given. It does not establish the device arm's accuracy beyond StudyE8 Part D's 74-question parity. And it says nothing about how many warm cloud sessions a server can hold; no capacity limit is modelled.
+
+**CLAUDE.md Rule 2.** The component that behaves like a null — P3 not beating P2 — is a **real negative**, not inconclusive. Step 2 of the Stage B mechanism verification instantiated every link with a non-zero, varying quantity before the sweep; the keep-warm mechanism is present and demonstrably drives P2's gain (negative control (b) collapses it to zero); the scheduling knob is present and varies (§23's grid spans warm fractions 0.11–1.00); and the policy was given a non-causal upper bound that it reaches. The mechanism operated as specified and did not produce the claimed effect. The one caveat is scope, not design: this is a negative about *these* outage statistics.
+
+## 30. Files
 
 - `experiments/orchestration/study_e6b_traces.py`
 - `experiments/orchestration/study_e6b_mobility.py`
+- `experiments/orchestration/study_e6b_stageb.py`
 - `experiments/orchestration/study_e6b_report.py`
 - `results/orchestration/study_e6b/e6b_traces.npz`
 - `results/orchestration/study_e6b/e6b_traces.json`
 - `results/orchestration/study_e6b/e6b_results.json`
 - `results/orchestration/study_e6b/e6b_mechanism_verification.md`
+- `results/orchestration/study_e6b/e6b_stageb_results.json`
+- `results/orchestration/study_e6b/e6b_stageb_mechanism_verification.md`
 - `reports/study_e6b_mobility.md (this file)`
 - `reports/study_e6_intervention.md (correction block prepended; body unchanged)`
 - `reports/study_e4_counterfactual.md (correction block prepended; body unchanged)`
