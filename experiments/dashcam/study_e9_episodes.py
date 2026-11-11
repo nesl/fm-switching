@@ -38,6 +38,7 @@ PRIMARY = dict(k=2, q=0.75, lmax=10, c=0)
 
 # ---- committed measurements -------------------------------------------------
 FRAME_BYTES = {1: 354902, 3: 1057532, 9: 3188243}      # StudyD4 median PNG bytes per request
+FRAME_BYTES_JPEG = {1: 59601, 3: 177773, 9: 529361}    # StudyD4 JPEG q90 bytes per request
 UPLINK_BPS = 13.6e6 / 8.0
 RTT_S = 0.044
 DEV_LAT_S = 0.567                                       # StudyD8 arm A, sustained 1 Hz N=1, total p50
@@ -53,7 +54,7 @@ PROMPT_TOK = {1: 378, 3: 1062, 9: 3090}                 # StudyD3 / D4 / D14
 
 
 def upload_s(n):
-    return FRAME_BYTES[n] / UPLINK_BPS
+    return UPLOAD_BYTES[n] / UPLINK_BPS
 
 
 def cloud_delay_s(model, n, load_pct):
@@ -61,6 +62,21 @@ def cloud_delay_s(model, n, load_pct):
 
 
 LATENCY_SETTINGS = ["zero", "measured@25", "measured@75"]
+UPLOAD_BYTES = FRAME_BYTES
+OUTFILE = "e9_results.json"
+
+# Latency setting (iii), JPEG upload: SENSITIVITY ONLY. Model scores are unchanged (they are the
+# PNG scores); only the upload time, hence d_cloud, changes. JPEG accuracy parity is pending
+# StudyE10a. Setting (i) and (ii) numbers are never recomputed here: this mode writes its own file.
+JPEG_MODE = "--jpeg" in sys.argv
+if JPEG_MODE:
+    UPLOAD_BYTES = FRAME_BYTES_JPEG
+    LATENCY_SETTINGS = ["jpeg@25", "jpeg@75"]
+    DISMISS_Q = (PRIMARY["q"],)
+    K_CONSEC = (PRIMARY["k"],)
+    L_MAX = (PRIMARY["lmax"],)
+    COOLDOWN = (PRIMARY["c"],)
+    OUTFILE = "e9_results_jpeg.json"
 
 
 def delays(setting, model, n):
@@ -618,8 +634,15 @@ def main():
         res["cells"][k2].pop("_boot", None)
         res["cells"][k2].pop("invocations_per_clip", None)
     res["_provenance"] = stamp(script="study_e9_episodes.py", model=None, device="cpu",
-                               n=len(clips), args=None)
-    (OUT / "e9_results.json").write_text(json.dumps(res, indent=1))
+                               n=len(clips), args=("--jpeg" if JPEG_MODE else None))
+    res["upload_bytes_per_request"] = dict(UPLOAD_BYTES)
+    res["jpeg_sensitivity"] = JPEG_MODE
+    if JPEG_MODE:
+        res["label"] = ("StudyE9-episodes latency setting (iii) JPEG upload, SENSITIVITY: model "
+                        "scores are the PNG scores; JPEG accuracy parity is pending StudyE10a. "
+                        "Only upload time (hence d_cloud) differs from setting (ii). Primary "
+                        "episode config only (k=2, q=0.75, L_max=10, c=0).")
+    (OUT / OUTFILE).write_text(json.dumps(res, indent=1))
     print("cells:", len(res["cells"]), "baselines:", len(res["baselines"]))
 
 

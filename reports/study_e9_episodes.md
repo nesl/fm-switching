@@ -258,7 +258,7 @@ AP is computed on the score stream the application actually sees: the resolver's
 | 32B N = 3 vs 4B N = 1 | (ii) measured @75 % load | +0.00 s [+0.00, +0.58] | +0.06 s [-0.50, +1.26] | -0.18 s [-1.00, +1.00] | -0.59 s [-1.50, +0.50] | -1.02 s [-2.00, +0.00] |
 | 32B N = 9 vs 4B N = 1 | (ii) measured @75 % load | +0.00 s [+0.00, +0.00] | -0.50 s [-0.50, -0.46] | -1.00 s [-1.00, -0.17] | -1.50 s [-1.50, +0.50] | -2.00 s [-2.00, +0.00] |
 
-Read this as: at the AP the 4B arm reaches at horizon h, the 32B arm reaches the same AP this much further ahead of the event. **It is a property of the two AP-vs-horizon curves, not a claim that 32B notices any particular crash earlier** — StudyE5's within-clip rise analysis found no earliness advantage, and nothing here contradicts that. The shift is bounded above by the 0.5 s horizon grid and below by it as well, so values pinned at exactly ±0.5 / ±1.0 / ±2.0 are at a grid edge.
+Read this as: at the AP the 4B arm reaches at horizon h, the 32B arm reaches the same AP this much further ahead of the event. Earliness is reported as the AP-curve horizon shift, per the project's metric rule; it is a property of the AP curves, measured on a 1-s decision grid, so sub-second values are interpolated. The shift is bounded above by the 0.5 s horizon grid and below by it as well, so values pinned at exactly ±0.5 / ±1.0 / ±2.0 are at a grid edge.
 
 ## 4. Output 2 — alarm timing
 
@@ -804,6 +804,8 @@ The first row is the one that matters: **the device arm's accuracy is a cloud me
 
 **Seconds with no score available.** Under latency setting (ii) the first `d` seconds of each clip carry no score and are ranked below every observed value. No positive clip's target second at any horizon falls in that window (0 of 750 checked at every d from 0 to 4), so AP's positive side is unaffected; on the negative side it removes `d` × 150 seconds from contention (150 of 5,196 at d = 1, 600 at d = 4), which mildly favours the larger-`d` arms. The effect is identical for device-only, always-cloud and escalation at the same `d`, so within-setting comparisons are fair; comparisons **across** N under setting (ii) carry it and are flagged here rather than corrected.
 
+**The integer latency grid hides the cloud's latency advantage at N = 1 (LIMITATION, not a finding).** The rule `d = ceil(latency)` rounds every sub-second latency up to one whole second, so at N = 1 under setting (ii) the cloud's 0.395 s end-to-end latency and the device's 0.567 s both become `d` = 1 s. The cloud is in fact the *faster* of the two at N = 1 — by 0.172 s at 25 % load and 0.017 s at 75 % load — and the 1-s decision grid discards that difference entirely, charging escalation a delay it does not incur relative to the device arm. Every N = 1 comparison in this report is therefore conservative towards the cloud in timing (though not in cloud work, which is counted per wall second regardless). Measuring the advantage requires a sub-second trace, which StudyD14 does not provide: its scores are on a 1 Hz grid. This is a property of the measurement grid, not a result about either tier.
+
 ## 14. Observations (data only, no interpretation)
 
 1. Zero-latency AP reproduces StudyE5 Part G exactly for all five arms at all five horizons.
@@ -824,15 +826,183 @@ The first row is the one that matters: **the device arm's accuracy is a cloud me
 - **Latency, not capability, is the governing variable in this design, and it acts like a horizon.** A score that takes `d` seconds to produce is a score about `d` seconds ago, so a policy with `d` seconds of latency competing at horizon h is really competing at horizon h + d. That single fact explains the N = 9 reversal, the collapse of negative control (b) under setting (ii), and why the secondary 4B N = 3 device arm is worse than 4B N = 1 despite being a better model on the same frames. It is also why the two decision rules disagree about N.
 - **Re-escalation is where the design actually spends its budget.** The cap is 10 s, but the median first-trigger-to-final-resolution span is about 22 s, because a clip typically opens two to three episodes. Any accounting that charges one episode per alarm understates cloud work by roughly a factor of three on this data, which is exactly why the pre-registration required re-escalations to be included.
 - **The false-dismissal rate is the uncomfortable number.** At the primary configuration between 112 and 143 episodes on 150 positive clips are dismissed before the event happens. That is not a failure of escalation specifically — the same thresholds dismiss on negative clips at the rate they were fitted for — but it says the dismiss rule as specified is too eager for a safety application, and the k / L_max / dismiss-quantile sensitivity table shows the price of fixing it (k = 3, L_max = 20 s, q = 50 % cuts false dismissals to 19 for +24 % cloud work).
-- **What this does not show.** It does not show that 32B notices any individual crash earlier: the horizon shift in §3.1 is a property of two AP curves, and StudyE5's within-clip analysis found no earliness advantage. It does not establish the device arm's accuracy — that is a cloud measurement standing in for an Orin run that has not been done on Nexar. And it is a single-stream study: nothing here speaks to what happens when many devices escalate at once, which is StudyD7's and StudyRH8's territory.
+- **What this does not show.** Earliness is reported as the AP-curve horizon shift (section 3.1), per the project's metric rule; it is a property of the AP curves, measured on a 1-s decision grid, so sub-second values are interpolated. It does not establish the device arm's accuracy — that is a cloud measurement standing in for an Orin run that has not been done on Nexar. And it is a single-stream study: nothing here speaks to what happens when many devices escalate at once, which is StudyD7's and StudyRH8's territory.
 
 **CLAUDE.md Rule 2.** Both pre-registered rules returned a positive finding, so no null classification is required. The one component that behaves like a null — negative control (b) under latency setting (ii) — is **inconclusive, not a real negative**: the mechanism it tests (within-clip timing information in the resolver's score) was already removed by the latency shift before the control was applied, so the control had nothing to disable. It is reported as uninformative there and passing under setting (i), where the mechanism is present.
 
-## 16. Files
+## 16. Latency setting (iii) — JPEG upload (SENSITIVITY)
+
+**(iii) JPEG upload, SENSITIVITY: model scores are the PNG scores; JPEG accuracy parity is pending StudyE10a.** This section replaces only the *upload time* of latency setting (ii) with the time to send StudyD4's JPEG q90 request bytes (59,601 / 177,773 / 529,361 B at N = 1 / 3 / 9) over the same 13.6 Mbit/s uplink, with the same 0.044 s RTT, the same server TTFT at 25 % and 75 % of peak, the same device latency, and the same `d = ceil(latency)` rule. **No score in this study was recomputed on JPEG frames**; every arm still reads StudyD14's PNG scores, so this isolates the transport effect and assumes accuracy parity that has not been measured. Setting (i) and setting (ii) numbers are untouched — this run writes its own file, `e9_results_jpeg.json`, and the primary file was not rewritten.
+
+The (iii) run covers the primary episode configuration only (k = 2, dismiss quantile 75 %, L_max = 10 s, cooldown 0 s), which is what decision rules 1 and 2 and output 1 use.
+
+### 16.1 What changes: upload time and `d_cloud`
+
+| load | resolver | upload (ii) PNG | upload (iii) JPEG | cloud latency (ii) | cloud latency (iii) | `d_cloud` (ii) | `d_cloud` (iii) | changed? |
+|---|---|---|---|---|---|---|---|---|
+| 25 % | 32B N = 1 | 0.209 s | 0.035 s | 0.395 s | 0.221 s | 1 s | 1 s | no |
+| 25 % | 32B N = 3 | 0.622 s | 0.105 s | 0.930 s | 0.413 s | 1 s | 1 s | no |
+| 25 % | 32B N = 9 | 1.875 s | 0.311 s | 2.554 s | 0.990 s | 3 s | 1 s | **yes** |
+| 25 % | 4B N = 1 (counterfactual resolver) | 0.209 s | 0.035 s | 0.335 s | 0.162 s | 1 s | 1 s | no |
+| 75 % | 32B N = 1 | 0.209 s | 0.035 s | 0.550 s | 0.377 s | 1 s | 1 s | no |
+| 75 % | 32B N = 3 | 0.622 s | 0.105 s | 1.258 s | 0.740 s | 2 s | 1 s | **yes** |
+| 75 % | 32B N = 9 | 1.875 s | 0.311 s | 3.900 s | 2.336 s | 4 s | 3 s | **yes** |
+| 75 % | 4B N = 1 (counterfactual resolver) | 0.209 s | 0.035 s | 0.389 s | 0.215 s | 1 s | 1 s | no |
+
+`d_device` is 1 s in both settings (0.567 s). Three cells change, all at the large-N arms where the PNG payload dominated: **32B N = 3 at 75 % load (2 s → 1 s), 32B N = 9 at 25 % load (3 s → 1 s) and 32B N = 9 at 75 % load (4 s → 3 s)**. Every N = 1 cell and 32B N = 3 at 25 % load are unchanged, so their (iii) numbers must equal their (ii) numbers exactly — that equality is check 1 below.
+
+### 16.2 Output 1 — AP at h ≤ 1 s, (iii) vs (ii)
+
+Baseline policies, alarm FPR 5 % (AP does not depend on the alarm threshold). Values that differ from (ii) are the three changed `d_cloud` cells.
+
+| load | policy | AP h = 0 (ii) | AP h = 0 (iii) | AP h = 0.5 (ii) | AP h = 0.5 (iii) | AP h = 1.0 (ii) | AP h = 1.0 (iii) |
+|---|---|---|---|---|---|---|---|
+| 25 % | device-only | 0.0528 | 0.0528 | 0.0416 | 0.0416 | 0.0386 | 0.0386 |
+| 25 % | always-cloud 32B N = 1 | 0.0748 | 0.0748 | 0.0493 | 0.0493 | 0.0423 | 0.0423 |
+| 25 % | always-cloud 32B N = 3 | 0.0674 | 0.0674 | 0.0497 | 0.0497 | 0.0435 | 0.0435 |
+| 25 % | always-cloud 32B N = 9 | 0.0391 | 0.0618 ** | 0.0349 | 0.0467 ** | 0.0328 | 0.0409 ** |
+| 75 % | device-only | 0.0528 | 0.0528 | 0.0416 | 0.0416 | 0.0386 | 0.0386 |
+| 75 % | always-cloud 32B N = 1 | 0.0748 | 0.0748 | 0.0493 | 0.0493 | 0.0423 | 0.0423 |
+| 75 % | always-cloud 32B N = 3 | 0.0451 | 0.0674 ** | 0.0422 | 0.0497 ** | 0.0366 | 0.0435 ** |
+| 75 % | always-cloud 32B N = 9 | 0.0338 | 0.0391 ** | 0.0321 | 0.0349 ** | 0.0321 | 0.0328 ** |
+
+`**` marks a value that differs from (ii). The effect is exactly the horizon shift of flag 1 run backwards: the arms whose `d_cloud` falls gain the AP they had been losing to delay.
+
+### 16.3 Decision rule 1 under (iii)
+
+Same pre-registered rule, same paired clip bootstrap (2,000 resamples, seed 0): paired difference escalation-32B − escalation-4B in invocations per clip-hour over all 300 clips, negative = 32B uses fewer, `*` = CI excludes 0 on the favourable side.
+
+**(iii) JPEG @25 % load**
+
+| resolver | alarm FPR | trigger 5 % | trigger 10 % | trigger 20 % | trigger 40 % |
+|---|---|---|---|---|---|
+| 32B N = 1 | 1 % | -45.3 [-71.8, -17.9]* | -38.5 [-65.8, -12.2]* | +4.1 [-21.8, +30.1] | +42.6 [+20.3, +65.3] |
+| 32B N = 1 | 5 % | -30.1 [-55.9, -5.3]* | -66.2 [-95.2, -38.3]* | -37.8 [-64.3, -11.2]* | +18.2 [-2.0, +38.0] |
+| 32B N = 1 | 10 % | -10.1 [-29.6, +9.1] | -20.6 [-49.6, +5.8] | -48.0 [-73.0, -23.7]* | -1.0 [-19.7, +18.0] |
+| 32B N = 3 | 1 % | -25.3 [-57.1, +7.2] | -11.8 [-43.9, +19.3] | +31.7 [+3.4, +61.8] | +83.4 [+56.6, +110.4] |
+| 32B N = 3 | 5 % | -8.1 [-37.2, +23.2] | -50.0 [-80.6, -21.2]* | -26.7 [-50.6, -1.4]* | +37.1 [+15.0, +59.0] |
+| 32B N = 3 | 10 % | -5.4 [-24.4, +14.8] | -6.1 [-37.5, +21.3] | -39.8 [-66.2, -14.4]* | +1.4 [-19.6, +22.2] |
+| 32B N = 9 | 1 % | -33.1 [-64.4, -2.7]* | -17.6 [-50.1, +12.9] | +18.6 [-9.0, +45.4] | +87.5 [+60.4, +116.4] |
+| 32B N = 9 | 5 % | -23.0 [-51.0, +5.1] | -56.7 [-87.3, -28.8]* | -38.5 [-62.8, -13.5]* | +33.4 [+13.6, +54.8] |
+| 32B N = 9 | 10 % | -21.6 [-41.7, -1.3]* | -23.0 [-53.7, +7.1] | -55.0 [-79.8, -31.7]* | -5.4 [-23.0, +12.2] |
+
+**(iii) JPEG @75 % load**
+
+| resolver | alarm FPR | trigger 5 % | trigger 10 % | trigger 20 % | trigger 40 % |
+|---|---|---|---|---|---|
+| 32B N = 1 | 1 % | -45.3 [-71.8, -17.9]* | -38.5 [-65.8, -12.2]* | +4.1 [-21.8, +30.1] | +42.6 [+20.3, +65.3] |
+| 32B N = 1 | 5 % | -30.1 [-55.9, -5.3]* | -66.2 [-95.2, -38.3]* | -37.8 [-64.3, -11.2]* | +18.2 [-2.0, +38.0] |
+| 32B N = 1 | 10 % | -10.1 [-29.6, +9.1] | -20.6 [-49.6, +5.8] | -48.0 [-73.0, -23.7]* | -1.0 [-19.7, +18.0] |
+| 32B N = 3 | 1 % | -25.3 [-57.1, +7.2] | -11.8 [-43.9, +19.3] | +31.7 [+3.4, +61.8] | +83.4 [+56.6, +110.4] |
+| 32B N = 3 | 5 % | -8.1 [-37.2, +23.2] | -50.0 [-80.6, -21.2]* | -26.7 [-50.6, -1.4]* | +37.1 [+15.0, +59.0] |
+| 32B N = 3 | 10 % | -5.4 [-24.4, +14.8] | -6.1 [-37.5, +21.3] | -39.8 [-66.2, -14.4]* | +1.4 [-19.6, +22.2] |
+| 32B N = 9 | 1 % | +25.0 [-6.4, +58.1] | +88.1 [+55.7, +120.6] | +153.3 [+120.5, +186.7] | +231.0 [+200.0, +262.7] |
+| 32B N = 9 | 5 % | +59.4 [+31.4, +89.5] | +63.2 [+32.2, +92.4] | +119.9 [+90.2, +151.3] | +190.5 [+164.2, +218.6] |
+| 32B N = 9 | 10 % | +74.6 [+52.2, +97.9] | +110.8 [+81.3, +139.6] | +115.5 [+87.4, +144.9] | +165.5 [+140.2, +191.1] |
+
+**Rows at 25 % and 75 % load coincide wherever `d_cloud` is the same**, which under (iii) is every arm except 32B N = 9: server load enters this study only through TTFT, and TTFT only through `d`, so two load points that round to the same whole second produce identical episodes. That is a property of the 1-s grid (§13), not a result.
+
+Rule outcome, (ii) against (iii), counting alarm-FPR levels won with a CI excluding 0:
+
+| load | resolver | trigger | (ii) PNG | (iii) JPEG | rule at this cell |
+|---|---|---|---|---|---|
+| 25 % | 32B N = 1 | 5 % | 2 / 3 | 2 / 3 | met in both |
+| 25 % | 32B N = 1 | 10 % | 2 / 3 | 2 / 3 | met in both |
+| 25 % | 32B N = 1 | 20 % | 2 / 3 | 2 / 3 | met in both |
+| 25 % | 32B N = 1 | 40 % | 0 / 3 | 0 / 3 | not met in either |
+| 25 % | 32B N = 3 | 5 % | 0 / 3 | 0 / 3 | not met in either |
+| 25 % | 32B N = 3 | 10 % | 1 / 3 | 1 / 3 | not met in either |
+| 25 % | 32B N = 3 | 20 % | 2 / 3 | 2 / 3 | met in both |
+| 25 % | 32B N = 3 | 40 % | 0 / 3 | 0 / 3 | not met in either |
+| 25 % | 32B N = 9 | 5 % | 0 / 3 | 2 / 3 | **met only under (iii)** |
+| 25 % | 32B N = 9 | 10 % | 0 / 3 | 1 / 3 | not met in either |
+| 25 % | 32B N = 9 | 20 % | 0 / 3 | 2 / 3 | **met only under (iii)** |
+| 25 % | 32B N = 9 | 40 % | 0 / 3 | 0 / 3 | not met in either |
+| 75 % | 32B N = 1 | 5 % | 2 / 3 | 2 / 3 | met in both |
+| 75 % | 32B N = 1 | 10 % | 2 / 3 | 2 / 3 | met in both |
+| 75 % | 32B N = 1 | 20 % | 2 / 3 | 2 / 3 | met in both |
+| 75 % | 32B N = 1 | 40 % | 0 / 3 | 0 / 3 | not met in either |
+| 75 % | 32B N = 3 | 5 % | 0 / 3 | 0 / 3 | not met in either |
+| 75 % | 32B N = 3 | 10 % | 0 / 3 | 1 / 3 | not met in either |
+| 75 % | 32B N = 3 | 20 % | 0 / 3 | 2 / 3 | **met only under (iii)** |
+| 75 % | 32B N = 3 | 40 % | 0 / 3 | 0 / 3 | not met in either |
+| 75 % | 32B N = 9 | 5 % | 0 / 3 | 0 / 3 | not met in either |
+| 75 % | 32B N = 9 | 10 % | 0 / 3 | 0 / 3 | not met in either |
+| 75 % | 32B N = 9 | 20 % | 0 / 3 | 0 / 3 | not met in either |
+| 75 % | 32B N = 9 | 40 % | 0 / 3 | 0 / 3 | not met in either |
+
+**The rule outcome changes in 3 of 24 cells**, all of them at the arms whose `d_cloud` fell: 25 % load, N = 9, trigger 5 % (0 / 3 → 2 / 3); 25 % load, N = 9, trigger 20 % (0 / 3 → 2 / 3); 75 % load, N = 3, trigger 20 % (0 / 3 → 2 / 3).
+
+### 16.4 Decision rule 2 under (iii)
+
+Same pre-registered rule: AP within 0.01 of always-cloud at h ≤ 1 s with overlapping CIs, using ≤ 50 % of always-cloud's cloud work. Both the escalation cell and the always-cloud reference are recomputed under (iii), so the comparison stays within one latency setting.
+
+**27 of the 72 (load × N × alarm-FPR × trigger) cells meet the rule under (iii)**, against 18 of the same 72 cells under (ii). Every cell that satisfies all three conditions under (iii):
+
+| load | resolver | alarm FPR | trigger | AP gap h = 0 | h = 0.5 | h = 1.0 | invocations / clip-h | % of always-cloud | GPU-s / clip-h |
+|---|---|---|---|---|---|---|---|---|---|
+| 25 % | 32B N = 1 | 5 % | 20 % | +0.0094 | +0.0083 | +0.0064 | 1,281 | 36 % | 86.5 |
+| 25 % | 32B N = 3 | 1 % | 5 % | +0.0099 | +0.0083 | +0.0054 | 491 | 14 % | 93.2 |
+| 25 % | 32B N = 3 | 1 % | 10 % | +0.0076 | +0.0070 | +0.0062 | 859 | 24 % | 162.9 |
+| 25 % | 32B N = 3 | 1 % | 20 % | +0.0093 | +0.0073 | +0.0057 | 1,367 | 38 % | 259.3 |
+| 25 % | 32B N = 3 | 5 % | 10 % | +0.0043 | +0.0060 | +0.0058 | 771 | 21 % | 146.2 |
+| 25 % | 32B N = 3 | 5 % | 20 % | +0.0081 | +0.0060 | +0.0048 | 1,292 | 36 % | 245.1 |
+| 25 % | 32B N = 3 | 10 % | 5 % | +0.0098 | +0.0070 | +0.0042 | 380 | 11 % | 72.1 |
+| 25 % | 32B N = 3 | 10 % | 10 % | +0.0062 | +0.0057 | +0.0049 | 723 | 20 % | 137.1 |
+| 25 % | 32B N = 3 | 10 % | 20 % | +0.0093 | +0.0076 | +0.0057 | 1,236 | 34 % | 234.4 |
+| 25 % | 32B N = 9 | 1 % | 5 % | +0.0052 | +0.0056 | +0.0016 | 484 | 13 % | 266.8 |
+| 25 % | 32B N = 9 | 1 % | 10 % | +0.0038 | +0.0055 | +0.0023 | 853 | 24 % | 470.7 |
+| 25 % | 32B N = 9 | 1 % | 20 % | +0.0050 | +0.0041 | +0.0001 | 1,354 | 38 % | 747.2 |
+| 25 % | 32B N = 9 | 5 % | 5 % | +0.0039 | +0.0052 | +0.0011 | 408 | 11 % | 225.3 |
+| 25 % | 32B N = 9 | 5 % | 10 % | +0.0053 | +0.0054 | +0.0022 | 764 | 21 % | 421.7 |
+| 25 % | 32B N = 9 | 5 % | 20 % | +0.0051 | +0.0042 | -0.0000 | 1,281 | 36 % | 706.6 |
+| 25 % | 32B N = 9 | 10 % | 5 % | +0.0015 | +0.0043 | +0.0015 | 364 | 10 % | 200.9 |
+| 25 % | 32B N = 9 | 10 % | 10 % | -0.0001 | +0.0029 | +0.0017 | 706 | 20 % | 389.6 |
+| 25 % | 32B N = 9 | 10 % | 20 % | +0.0043 | +0.0033 | +0.0013 | 1,221 | 34 % | 673.6 |
+| 75 % | 32B N = 1 | 5 % | 20 % | +0.0094 | +0.0083 | +0.0064 | 1,281 | 36 % | 86.5 |
+| 75 % | 32B N = 3 | 1 % | 5 % | +0.0099 | +0.0083 | +0.0054 | 491 | 14 % | 93.2 |
+| 75 % | 32B N = 3 | 1 % | 10 % | +0.0076 | +0.0070 | +0.0062 | 859 | 24 % | 162.9 |
+| 75 % | 32B N = 3 | 1 % | 20 % | +0.0093 | +0.0073 | +0.0057 | 1,367 | 38 % | 259.3 |
+| 75 % | 32B N = 3 | 5 % | 10 % | +0.0043 | +0.0060 | +0.0058 | 771 | 21 % | 146.2 |
+| 75 % | 32B N = 3 | 5 % | 20 % | +0.0081 | +0.0060 | +0.0048 | 1,292 | 36 % | 245.1 |
+| 75 % | 32B N = 3 | 10 % | 5 % | +0.0098 | +0.0070 | +0.0042 | 380 | 11 % | 72.1 |
+| 75 % | 32B N = 3 | 10 % | 10 % | +0.0062 | +0.0057 | +0.0049 | 723 | 20 % | 137.1 |
+| 75 % | 32B N = 3 | 10 % | 20 % | +0.0093 | +0.0076 | +0.0057 | 1,236 | 34 % | 234.4 |
+
+Cheapest under (iii): 32B N = 9 at 10 % alarm FPR and a 5 % trigger rate, 10 % of always-cloud's cloud work (364 invocations and 200.9 GPU-s per clip-hour), with AP gaps of +0.0015 / +0.0043 / +0.0015 at h = 0 / 0.5 / 1.0 s. Note that rule 2 is written on **invocations**, and invocations are not GPU-seconds: the cheapest cell by invocations is an N = 9 cell costing 201 GPU-s per clip-hour, against 72.1 GPU-s for the cheapest N = 3 cell at the same 10 % of always-cloud's invocations. On a shared server the N = 3 cell is the one to prefer, and that ordering is unchanged from (ii).
+
+### 16.5 Consistency check for the (iii) numbers (CLAUDE.md, 6 checks)
+
+**1. Cross-check against committed measurements.** Where `d_cloud` is unchanged, (iii) must reproduce (ii) exactly — same scores, same thresholds, same seed, same episode arithmetic.
+
+| cell | quantity | (ii) | (iii) | ratio | agree |
+|---|---|---|---|---|---|
+| 25 %, 32B N = 1 (`d_cloud` unchanged) | always-cloud AP h = 0 | 0.074840 | 0.074840 | 1.000000 | agree |
+| 25 %, 32B N = 1 (`d_cloud` unchanged) | escalation invocations / clip-h (FPR 5 %, trigger 20 %) | 1,281.3 | 1,281.3 | 1.000000 | agree |
+| 25 %, 32B N = 3 (`d_cloud` unchanged) | always-cloud AP h = 0 | 0.067421 | 0.067421 | 1.000000 | agree |
+| 25 %, 32B N = 3 (`d_cloud` unchanged) | escalation invocations / clip-h (FPR 5 %, trigger 20 %) | 1,292.4 | 1,292.4 | 1.000000 | agree |
+| 75 %, 32B N = 1 (`d_cloud` unchanged) | always-cloud AP h = 0 | 0.074840 | 0.074840 | 1.000000 | agree |
+| 75 %, 32B N = 1 (`d_cloud` unchanged) | escalation invocations / clip-h (FPR 5 %, trigger 20 %) | 1,281.3 | 1,281.3 | 1.000000 | agree |
+| device-only (`d_device` unchanged) | AP h = 0 | 0.052812 | 0.052812 | 1.000000 | agree |
+
+**PASS** — every unchanged-`d_cloud` cell reproduces (ii) bit for bit, and no ratio is near the 2× investigation threshold.
+
+**2. Physical plausibility.** The implied uplink rate is unchanged at 13.6 Mbit/s; only the payload changed. JPEG q90 at N = 1 is 59,601 B against PNG's 354,902 B, a ratio of 5.95×, and at N = 9 6.02×, both read from StudyD4's committed request-bytes table (the image-bytes columns, the same columns the PNG figures in setting (ii) come from). Upload times fall from 1.875 s to 0.311 s at N = 9, i.e. by the same ratio; no rate in this section is faster than a committed curve because no curve was re-measured. **PASS.**
+
+**3. Distribution sanity.** The (iii) cells carry the same clip-level bootstrap spreads as (ii): the CI widths in §16.3 are of the same order as the corresponding (ii) rows in §7, and no cell reports a constant where a distribution is expected. The exact agreement in check 1 is expected by construction (identical inputs and identical seed), not a sign of short-circuiting — it is confined to the cells whose `d_cloud` did not move, and the three cells whose `d_cloud` did move all changed. **PASS.**
+
+**4. Definition audit.** Every definition is the one used in (i) and (ii) and is unchanged: `d = ceil(latency)`; an episode's invocations counted per wall second it is open; AP at fixed horizons on the continuous score with positives at the whole second nearest event − h and negatives all 5,196 negative seconds; thresholds fitted by 2-fold cross-fitting by clip, stratified by label, seed 0. The one quantity redefined is the upload payload: PNG median request bytes → JPEG q90 request bytes, both from StudyD4, both per request at the same N. **PASS.**
+
+**5. Claim linkage.** This section bears on the same FORMULATION §Constraints 2 (serving feasibility within the latency SLO) as §13 check 5. It sharpens the finding there: the N = 9 reversal in decision rule 1 was attributed to transport-dominated latency, and cutting the transport by a factor of six is the direct test of that attribution. It does not speak to any accuracy claim, because no score was recomputed. **PASS, with the scope note of §13 check 5.**
+
+**6. Proxy validity.** The load-bearing proxy is new and it is the reason this is a sensitivity and not a result: **JPEG q90 bytes are charged for transport while PNG scores are used for accuracy**. That assumes the 4B and 32B models score JPEG q90 frames as they score the lossless PNGs, which has not been measured on Nexar or anywhere else in this repository; StudyE10a is the pending measurement. The assumption is favourable to escalation in an unknown direction and magnitude, so **no conclusion in §14 or §15 is restated on the basis of this section**, and every table here is labelled (iii) SENSITIVITY. **Flagged; the section is marked unvalidated.**
+
+## 17. Files
 
 - `experiments/dashcam/study_e9_episodes.py`
 - `experiments/dashcam/study_e9_report.py`
 - `results/dashcam/study_e9/e9_results.json`
+- `results/dashcam/study_e9/e9_results_jpeg.json (latency setting (iii), SENSITIVITY)`
 - `results/dashcam/study_e9/e9_mechanism_verification.md`
 - `reports/study_e9_episodes.md (this file)`
 

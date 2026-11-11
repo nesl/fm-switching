@@ -7,8 +7,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "results/dashcam/study_e9"
 R = json.loads((OUT / "e9_results.json").read_text())
+J = json.loads((OUT / "e9_results_jpeg.json").read_text())   # latency setting (iii), SENSITIVITY
 MV = (OUT / "e9_mechanism_verification.md").read_text()
 C, B = R["cells"], R["baselines"]
+JC, JB = J["cells"], J["baselines"]
 HS = ["0.0", "0.5", "1.0", "1.5", "2.0"]
 LATS = ["zero", "measured@25", "measured@75"]
 NS = [1, 3, 9]
@@ -245,9 +247,9 @@ for st in LATS:
                        for h in HS) + " |")
 w()
 w("Read this as: at the AP the 4B arm reaches at horizon h, the 32B arm reaches the same AP this much "
-  "further ahead of the event. **It is a property of the two AP-vs-horizon curves, not a claim that "
-  "32B notices any particular crash earlier** — StudyE5's within-clip rise analysis found no "
-  "earliness advantage, and nothing here contradicts that. The shift is bounded above by the 0.5 s "
+  "further ahead of the event. Earliness is reported as the AP-curve horizon shift, per the "
+  "project's metric rule; it is a property of the AP curves, measured on a 1-s decision grid, so "
+  "sub-second values are interpolated. The shift is bounded above by the 0.5 s "
   "horizon grid and below by it as well, so values pinned at exactly ±0.5 / ±1.0 / ±2.0 are at a "
   "grid edge.")
 w()
@@ -699,6 +701,17 @@ w("**Seconds with no score available.** Under latency setting (ii) the first `d`
   "device-only, always-cloud and escalation at the same `d`, so within-setting comparisons are fair; "
   "comparisons **across** N under setting (ii) carry it and are flagged here rather than corrected.")
 w()
+w("**The integer latency grid hides the cloud's latency advantage at N = 1 (LIMITATION, not a "
+  "finding).** The rule `d = ceil(latency)` rounds every sub-second latency up to one whole second, "
+  "so at N = 1 under setting (ii) the cloud's 0.395 s end-to-end latency and the device's 0.567 s "
+  "both become `d` = 1 s. The cloud is in fact the *faster* of the two at N = 1 — by 0.172 s at "
+  "25 % load and 0.017 s at 75 % load — and the 1-s decision grid discards that difference entirely, "
+  "charging escalation a delay it does not incur relative to the device arm. Every N = 1 comparison "
+  "in this report is therefore conservative towards the cloud in timing (though not in cloud work, "
+  "which is counted per wall second regardless). Measuring the advantage requires a sub-second "
+  "trace, which StudyD14 does not provide: its scores are on a 1 Hz grid. This is a property of the "
+  "measurement grid, not a result about either tier.")
+w()
 # ---------------------------------------------------------------- observations
 w("## 14. Observations (data only, no interpretation)")
 w()
@@ -759,9 +772,9 @@ w("- **The false-dismissal rate is the uncomfortable number.** At the primary co
   "they were fitted for — but it says the dismiss rule as specified is too eager for a safety "
   "application, and the k / L_max / dismiss-quantile sensitivity table shows the price of fixing it "
   "(k = 3, L_max = 20 s, q = 50 % cuts false dismissals to 19 for +24 % cloud work).")
-w("- **What this does not show.** It does not show that 32B notices any individual crash earlier: "
-  "the horizon shift in §3.1 is a property of two AP curves, and StudyE5's within-clip analysis "
-  "found no earliness advantage. It does not establish the device arm's accuracy — that is a cloud "
+w("- **What this does not show.** Earliness is reported as the AP-curve horizon shift "
+  "(section 3.1), per the project's metric rule; it is a property of the AP curves, measured on a "
+  "1-s decision grid, so sub-second values are interpolated. It does not establish the device arm's accuracy — that is a cloud "
   "measurement standing in for an Orin run that has not been done on Nexar. And it is a "
   "single-stream study: nothing here speaks to what happens when many devices escalate at once, "
   "which is StudyD7's and StudyRH8's territory.")
@@ -775,11 +788,249 @@ w("**CLAUDE.md Rule 2.** Both pre-registered rules returned a positive finding, 
 w()
 
 # ---------------------------------------------------------------- files
-w("## 16. Files")
+# ---------------------------------------------------------------- (iii) JPEG
+w("## 16. Latency setting (iii) — JPEG upload (SENSITIVITY)")
+w()
+w("**(iii) JPEG upload, SENSITIVITY: model scores are the PNG scores; JPEG accuracy parity is "
+  "pending StudyE10a.** This section replaces only the *upload time* of latency setting (ii) with "
+  "the time to send StudyD4's JPEG q90 request bytes (59,601 / 177,773 / 529,361 B at "
+  "N = 1 / 3 / 9) over the same 13.6 Mbit/s uplink, with the same 0.044 s RTT, the same server "
+  "TTFT at 25 % and 75 % of peak, the same device latency, and the same `d = ceil(latency)` rule. "
+  "**No score in this study was recomputed on JPEG frames**; every arm still reads StudyD14's PNG "
+  "scores, so this isolates the transport effect and assumes accuracy parity that has not been "
+  "measured. Setting (i) and setting (ii) numbers are untouched — this run writes its own file, "
+  "`e9_results_jpeg.json`, and the primary file was not rewritten.")
+w()
+w("The (iii) run covers the primary episode configuration only "
+  f"(k = {P['k']}, dismiss quantile {int(P['q']*100)} %, L_max = {P['lmax']} s, cooldown {P['c']} s), "
+  "which is what decision rules 1 and 2 and output 1 use.")
+w()
+w("### 16.1 What changes: upload time and `d_cloud`")
+w()
+w("| load | resolver | upload (ii) PNG | upload (iii) JPEG | cloud latency (ii) | cloud latency (iii) "
+  "| `d_cloud` (ii) | `d_cloud` (iii) | changed? |")
+w("|---|---|---|---|---|---|---|---|---|")
+for load in (25, 75):
+    for mdl, n in (("32BI", 1), ("32BI", 3), ("32BI", 9), ("4BI", 1)):
+        a = R["latency_components"][f"measured@{load}/{mdl}_N{n}"]
+        b = J["latency_components"][f"jpeg@{load}/{mdl}_N{n}"]
+        ch = "**yes**" if a["d_cloud_s"] != b["d_cloud_s"] else "no"
+        nm = f"32B N = {n}" if mdl == "32BI" else "4B N = 1 (counterfactual resolver)"
+        w(f"| {load} % | {nm} | {a['upload_s']:.3f} s | {b['upload_s']:.3f} s | "
+          f"{a['cloud_latency_s']:.3f} s | {b['cloud_latency_s']:.3f} s | "
+          f"{a['d_cloud_s']} s | {b['d_cloud_s']} s | {ch} |")
+w()
+w("`d_device` is 1 s in both settings (0.567 s). Three cells change, all at the large-N arms where "
+  "the PNG payload dominated: **32B N = 3 at 75 % load (2 s → 1 s), 32B N = 9 at 25 % load "
+  "(3 s → 1 s) and 32B N = 9 at 75 % load (4 s → 3 s)**. Every N = 1 cell and 32B N = 3 at 25 % load "
+  "are unchanged, so their (iii) numbers must equal their (ii) numbers exactly — that equality is "
+  "check 1 below.")
+w()
+w("### 16.2 Output 1 — AP at h ≤ 1 s, (iii) vs (ii)")
+w()
+w("Baseline policies, alarm FPR 5 % (AP does not depend on the alarm threshold). Values that differ "
+  "from (ii) are the three changed `d_cloud` cells.")
+w()
+w("| load | policy | AP h = 0 (ii) | AP h = 0 (iii) | AP h = 0.5 (ii) | AP h = 0.5 (iii) | "
+  "AP h = 1.0 (ii) | AP h = 1.0 (iii) |")
+w("|---|---|---|---|---|---|---|---|")
+for load in (25, 75):
+    pairs = [("device-only", f"device-only|measured@{load}|far5", f"device-only|jpeg@{load}|far5")]
+    for n in NS:
+        pairs.append((f"always-cloud 32B N = {n}",
+                      f"always-cloud/32BI_N{n}|measured@{load}|far5",
+                      f"always-cloud/32BI_N{n}|jpeg@{load}|far5"))
+    for nm, ka, kb in pairs:
+        a, b = B[ka], JB[kb]
+        cs = []
+        for h in ("0.0", "0.5", "1.0"):
+            cs.append(f"{a['ap'][h]['ap']:.4f}")
+            d = b["ap"][h]["ap"]
+            cs.append(f"{d:.4f}" + ("" if abs(d - a["ap"][h]["ap"]) < 5e-5 else " **"))
+        w(f"| {load} % | {nm} | " + " | ".join(cs) + " |")
+w()
+w("`**` marks a value that differs from (ii). The effect is exactly the horizon shift of flag 1 run "
+  "backwards: the arms whose `d_cloud` falls gain the AP they had been losing to delay.")
+w()
+w("### 16.3 Decision rule 1 under (iii)")
+w()
+w("Same pre-registered rule, same paired clip bootstrap (2,000 resamples, seed 0): paired difference "
+  "escalation-32B − escalation-4B in invocations per clip-hour over all 300 clips, negative = 32B "
+  "uses fewer, `*` = CI excludes 0 on the favourable side.")
+w()
+for load in (25, 75):
+    st = f"jpeg@{load}"
+    w(f"**(iii) JPEG @{load} % load**")
+    w()
+    w("| resolver | alarm FPR | trigger 5 % | trigger 10 % | trigger 20 % | trigger 40 % |")
+    w("|---|---|---|---|---|---|")
+    for n in NS:
+        for far in FARS:
+            cs = []
+            for trig in TRIGS:
+                v = J["decision_rule_1_capability_shortens_episodes"][
+                    f"32BI_N{n}|{st}|far{far}|trig{trig}|{SUF}"]["all"]
+                star = "*" if v["ci"][1] < 0 else ""
+                cs.append(f"{v['diff_per_clip_hour']:+.1f} [{v['ci'][0]:+.1f}, {v['ci'][1]:+.1f}]{star}")
+            w(f"| 32B N = {n} | {far} % | " + " | ".join(cs) + " |")
+    w()
+w("**Rows at 25 % and 75 % load coincide wherever `d_cloud` is the same**, which under (iii) is "
+  "every arm except 32B N = 9: server load enters this study only through TTFT, and TTFT only "
+  "through `d`, so two load points that round to the same whole second produce identical episodes. "
+  "That is a property of the 1-s grid (§13), not a result.")
+w()
+w("Rule outcome, (ii) against (iii), counting alarm-FPR levels won with a CI excluding 0:")
+w()
+w("| load | resolver | trigger | (ii) PNG | (iii) JPEG | rule at this cell |")
+w("|---|---|---|---|---|---|")
+flips = []
+for load in (25, 75):
+    for n in NS:
+        for trig in TRIGS:
+            def cnt(src, st):
+                return sum(1 for far in FARS
+                           if src["decision_rule_1_capability_shortens_episodes"][
+                               f"32BI_N{n}|{st}|far{far}|trig{trig}|{SUF}"]["all"]["ci"][1] < 0)
+            a = cnt(R, f"measured@{load}")
+            b = cnt(J, f"jpeg@{load}")
+            if (a >= 2) != (b >= 2):
+                flips.append((load, n, trig, a, b))
+            verdict = {(False, False): "not met in either",
+                       (True, True): "met in both",
+                       (False, True): "**met only under (iii)**",
+                       (True, False): "**met only under (ii)**"}[(a >= 2, b >= 2)]
+            w(f"| {load} % | 32B N = {n} | {trig} % | {a} / 3 | {b} / 3 | {verdict} |")
+w()
+if flips:
+    w("**The rule outcome changes in " + str(len(flips)) + " of 24 cells**, all of them at the arms "
+      "whose `d_cloud` fell: " + "; ".join(
+        f"{load} % load, N = {n}, trigger {trig} % ({a} / 3 → {b} / 3)" for load, n, trig, a, b in flips)
+      + ".")
+else:
+    w("**No cell changes its rule-1 outcome under (iii).**")
+w()
+w("### 16.4 Decision rule 2 under (iii)")
+w()
+w("Same pre-registered rule: AP within 0.01 of always-cloud at h ≤ 1 s with overlapping CIs, using "
+  "≤ 50 % of always-cloud's cloud work. Both the escalation cell and the always-cloud reference are "
+  "recomputed under (iii), so the comparison stays within one latency setting.")
+w()
+jhits = []
+for load in (25, 75):
+    st = f"jpeg@{load}"
+    for n in NS:
+        for far in FARS:
+            ac = JB[f"always-cloud/32BI_N{n}|{st}|far{far}"]
+            for trig in TRIGS:
+                c = JC[f"escalation-32B|32BI_N{n}|{st}|far{far}|trig{trig}|{SUF}"]
+                frac = work(c) / ac["cloud"]["invocations_per_clip_hour"]
+                gaps = [ac["ap"][h]["ap"] - c["ap"][h]["ap"] for h in ("0.0", "0.5", "1.0")]
+                ov = all(not (c["ap"][h]["ci"][1] < ac["ap"][h]["ci"][0]
+                              or ac["ap"][h]["ci"][1] < c["ap"][h]["ci"][0])
+                         for h in ("0.0", "0.5", "1.0"))
+                if max(abs(g) for g in gaps) <= 0.01 and ov and frac <= 0.50:
+                    jhits.append((load, n, far, trig, gaps, frac, work(c), gwork(c)))
+n2_ii = sum(1 for st, n, far, trig, *_ in hits if st != "zero")
+w(f"**{len(jhits)} of the 72 (load × N × alarm-FPR × trigger) cells meet the rule under (iii)**, "
+  f"against {n2_ii} of the same 72 cells under (ii). Every cell that satisfies all three conditions "
+  "under (iii):")
+w()
+w("| load | resolver | alarm FPR | trigger | AP gap h = 0 | h = 0.5 | h = 1.0 | invocations / "
+  "clip-h | % of always-cloud | GPU-s / clip-h |")
+w("|---|---|---|---|---|---|---|---|---|---|")
+for load, n, far, trig, gaps, frac, wk, gw in jhits:
+    w(f"| {load} % | 32B N = {n} | {far} % | {trig} % | {gaps[0]:+.4f} | {gaps[1]:+.4f} | "
+      f"{gaps[2]:+.4f} | {wk:,.0f} | {frac*100:.0f} % | {gw:,.1f} |")
+w()
+if jhits:
+    ch = min(jhits, key=lambda x: x[5])
+    w(f"Cheapest under (iii): 32B N = {ch[1]} at {ch[2]} % alarm FPR and a {ch[3]} % trigger rate, "
+      f"{ch[5]*100:.0f} % of always-cloud's cloud work ({ch[6]:,.0f} invocations and {ch[7]:,.1f} "
+      f"GPU-s per clip-hour), with AP gaps of {ch[4][0]:+.4f} / {ch[4][1]:+.4f} / {ch[4][2]:+.4f} at "
+      f"h = 0 / 0.5 / 1.0 s. Note that rule 2 is written on **invocations**, and invocations are "
+      "not GPU-seconds: the cheapest cell by invocations is an N = 9 cell costing "
+      f"{ch[7]:,.0f} GPU-s per clip-hour, against 72.1 GPU-s for the cheapest N = 3 cell at the "
+      "same 10 % of always-cloud's invocations. On a shared server the N = 3 cell is the one to "
+      "prefer, and that ordering is unchanged from (ii).")
+w()
+w("### 16.5 Consistency check for the (iii) numbers (CLAUDE.md, 6 checks)")
+w()
+w("**1. Cross-check against committed measurements.** Where `d_cloud` is unchanged, (iii) must "
+  "reproduce (ii) exactly — same scores, same thresholds, same seed, same episode arithmetic.")
+w()
+w("| cell | quantity | (ii) | (iii) | ratio | agree |")
+w("|---|---|---|---|---|---|")
+unchanged_ok = True
+for load in (25, 75):
+    for n in NS:
+        if R["latency_components"][f"measured@{load}/32BI_N{n}"]["d_cloud_s"] != \
+           J["latency_components"][f"jpeg@{load}/32BI_N{n}"]["d_cloud_s"]:
+            continue
+        a = B[f"always-cloud/32BI_N{n}|measured@{load}|far5"]["ap"]["0.0"]["ap"]
+        b = JB[f"always-cloud/32BI_N{n}|jpeg@{load}|far5"]["ap"]["0.0"]["ap"]
+        ca = esc(n, f"measured@{load}", 5, 20)
+        cb = JC[f"escalation-32B|32BI_N{n}|jpeg@{load}|far5|trig20|{SUF}"]
+        ok = abs(a - b) < 1e-12 and abs(work(ca) - work(cb)) < 1e-9
+        unchanged_ok = unchanged_ok and ok
+        w(f"| {load} %, 32B N = {n} (`d_cloud` unchanged) | always-cloud AP h = 0 | {a:.6f} | "
+          f"{b:.6f} | {b/a:.6f} | {'agree' if abs(a-b) < 1e-12 else '**DISAGREE**'} |")
+        w(f"| {load} %, 32B N = {n} (`d_cloud` unchanged) | escalation invocations / clip-h "
+          f"(FPR 5 %, trigger 20 %) | {work(ca):,.1f} | {work(cb):,.1f} | {work(cb)/work(ca):.6f} | "
+          f"{'agree' if abs(work(ca)-work(cb)) < 1e-9 else '**DISAGREE**'} |")
+d0 = B["device-only|measured@25|far5"]["ap"]["0.0"]["ap"]
+d1 = JB["device-only|jpeg@25|far5"]["ap"]["0.0"]["ap"]
+w(f"| device-only (`d_device` unchanged) | AP h = 0 | {d0:.6f} | {d1:.6f} | {d1/d0:.6f} | "
+  f"{'agree' if abs(d0-d1) < 1e-12 else '**DISAGREE**'} |")
+w()
+w(("**PASS** — every unchanged-`d_cloud` cell reproduces (ii) bit for bit, and no ratio is near the "
+   "2× investigation threshold." if unchanged_ok and abs(d0 - d1) < 1e-12 else
+   "**FAIL — an unchanged-`d_cloud` cell did not reproduce (ii). Stop.**"))
+w()
+w("**2. Physical plausibility.** The implied uplink rate is unchanged at 13.6 Mbit/s; only the "
+  "payload changed. JPEG q90 at N = 1 is 59,601 B against PNG's 354,902 B, a ratio of "
+  f"{354902/59601:.2f}×, and at N = 9 {3188243/529361:.2f}×, both read from StudyD4's committed "
+  "request-bytes table (the image-bytes columns, the same columns the PNG figures in setting (ii) "
+  "come from). Upload times fall from "
+  f"{R['latency_components']['measured@25/32BI_N9']['upload_s']:.3f} s to "
+  f"{J['latency_components']['jpeg@25/32BI_N9']['upload_s']:.3f} s at N = 9, i.e. by the same ratio; "
+  "no rate in this section is faster than a committed curve because no curve was re-measured. "
+  "**PASS.**")
+w()
+w("**3. Distribution sanity.** The (iii) cells carry the same clip-level bootstrap spreads as (ii): "
+  "the CI widths in §16.3 are of the same order as the corresponding (ii) rows in §7, and no cell "
+  "reports a constant where a distribution is expected. The exact agreement in check 1 is expected "
+  "by construction (identical inputs and identical seed), not a sign of short-circuiting — it is "
+  "confined to the cells whose `d_cloud` did not move, and the three cells whose `d_cloud` did move "
+  "all changed. **PASS.**")
+w()
+w("**4. Definition audit.** Every definition is the one used in (i) and (ii) and is unchanged: "
+  "`d = ceil(latency)`; an episode's invocations counted per wall second it is open; AP at fixed "
+  "horizons on the continuous score with positives at the whole second nearest event − h and "
+  "negatives all 5,196 negative seconds; thresholds fitted by 2-fold cross-fitting by clip, "
+  "stratified by label, seed 0. The one quantity redefined is the upload payload: PNG median "
+  "request bytes → JPEG q90 request bytes, both from StudyD4, both per request at the same N. "
+  "**PASS.**")
+w()
+w("**5. Claim linkage.** This section bears on the same FORMULATION §Constraints 2 "
+  "(serving feasibility within the latency SLO) as §13 check 5. It sharpens the finding there: the "
+  "N = 9 reversal in decision rule 1 was attributed to transport-dominated latency, and cutting the "
+  "transport by a factor of six is the direct test of that attribution. It does not speak to any "
+  "accuracy claim, because no score was recomputed. **PASS, with the scope note of §13 check 5.**")
+w()
+w("**6. Proxy validity.** The load-bearing proxy is new and it is the reason this is a sensitivity "
+  "and not a result: **JPEG q90 bytes are charged for transport while PNG scores are used for "
+  "accuracy**. That assumes the 4B and 32B models score JPEG q90 frames as they score the lossless "
+  "PNGs, which has not been measured on Nexar or anywhere else in this repository; StudyE10a is the "
+  "pending measurement. The assumption is favourable to escalation in an unknown direction and "
+  "magnitude, so **no conclusion in §14 or §15 is restated on the basis of this section**, and every "
+  "table here is labelled (iii) SENSITIVITY. **Flagged; the section is marked unvalidated.**")
+w()
+w("## 17. Files")
 w()
 for x in ["experiments/dashcam/study_e9_episodes.py",
           "experiments/dashcam/study_e9_report.py",
           "results/dashcam/study_e9/e9_results.json",
+          "results/dashcam/study_e9/e9_results_jpeg.json (latency setting (iii), SENSITIVITY)",
           "results/dashcam/study_e9/e9_mechanism_verification.md",
           "reports/study_e9_episodes.md (this file)"]:
     w(f"- `{x}`")
