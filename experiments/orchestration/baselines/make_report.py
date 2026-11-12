@@ -113,21 +113,47 @@ RELATED = [
     ("ctHO", "arXiv:2603.28018 (2026-03-30)", "verified (arXiv API)",
      "edge LLM handover with joint KV transfer; a mobility/handover mechanism, and StudyE6b "
      "already covers our mobility question."),
-    ("llm-d / CacheRoute", "NOT VERIFIED", "**UNVERIFIED** - no index record found",
-     "a Kubernetes-native distributed inference stack / cache-aware router; infrastructure "
-     "rather than a published policy we can reconstruct."),
-    ("MSAO", "NOT VERIFIED", "**UNVERIFIED** - no index record found",
-     "multi-server adaptive offloading; could not confirm the paper exists under this name."),
-    ("AceSpec", "NOT VERIFIED", "**UNVERIFIED** - no index record found",
-     "speculative decoding; a decode-time accelerator, orthogonal to placement."),
-    ("Splitwise-DRL", "NOT VERIFIED", "**UNVERIFIED** - no index record found",
-     "a reinforcement-learning variant of Splitwise; same cluster-provisioning scope."),
-    ("SpotVLM / edgeVLM", "NOT VERIFIED", "**UNVERIFIED** - no index record found",
-     "on-device VLM execution; a device-side runtime, not a scheduler."),
-    ("SAIL", "MobiSys 2026 (claimed)", "**UNVERIFIED** - no index record found",
-     "could not confirm; if it exists it is an on-device VLM system rather than a scheduler."),
-    ("HERMES", "ACL 2026 (claimed)", "**UNVERIFIED** - no index record found",
-     "could not confirm under this name."),
+    ("llm-d", "software, not a paper (user decision 2026-11-12)",
+     "cited as software - `github.com/llm-d/llm-d`",
+     "a Kubernetes-native distributed inference stack; infrastructure rather than a published "
+     "policy we can reconstruct, and cited as software per the user's instruction."),
+    ("CacheRoute", "DROPPED (no identifier)", "dropped - user decision 2026-11-12",
+     "a cache-aware router; no identifier could be found, so it is dropped rather than cited."),
+    ("MSAO", "arXiv:2604.02945 (2026-04)", "verified (arXiv API, id supplied by the user)",
+     "multi-server adaptive offloading; a multi-server provisioning/offloading problem, while we "
+     "have one cloud replica and a fixed device."),
+    ("AceSpec", "arXiv:2609.02514 (2026-09)", "verified (arXiv API, id supplied by the user)",
+     "speculative decoding; a decode-time accelerator, orthogonal to placement, and our costs "
+     "are prefill-dominated (StudyE10d)."),
+    ("Splitwise-DRL", "arXiv:2512.23310 (2025-12)", "verified (arXiv API, id supplied by the "
+     "user) - NOTE: a DIFFERENT Splitwise from ISCA'24 (its title is \"Splitwise: Collaborative "
+     "Edge-Cloud Inference for LLMs via Lya...\")",
+     "collaborative edge-cloud inference chosen by a learned controller; the closest related "
+     "work in this list, and the reason B9 exists - but it decides a split point inside the "
+     "model, which FORMULATION scopes out, so it cannot be expressed in our action space."),
+    ("SpotVLM / edgeVLM", "arXiv:2508.12638 (2025-08)",
+     "verified (arXiv API, id supplied by the user)",
+     "on-device VLM execution; a device-side runtime, not a placement or admission policy."),
+    ("SAIL", "MobiSys 2026, DOI 10.1145/3745756.3809224",
+     "verified (Crossref, DOI supplied by the user)",
+     "an on-device VLM system rather than a scheduler; same reason as VLMCache, which is from the "
+     "same venue and already listed above."),
+    ("HERMES", "ACL 2026, anthology `2026.acl-long.381` (pp. 8411-8430)",
+     "verified (ACL Anthology, id supplied by the user)",
+     "\"KV Cache as Hierarchical Memory for Efficient Streaming Video Understanding\" - it "
+     "restructures the KV cache INSIDE one model, which our action space cannot express (the "
+     "R3-Streaming limitation, `cards/r3streaming.md` A1)."),
+    ("QueryStream", "ICLR 2026 poster, OpenReview `738HjJEbml`",
+     "verified (ICLR virtual site, id resolved from the poster page) - **VERIFIED, NOT BUILT**",
+     "requested as a P1 component baseline. Verified, but its gating component (RTAR) is named "
+     "and neither defined nor released, so building it would mean inventing the trigger - see "
+     "section 9.1 for the missing component."),
+    ("Route2Look", "DROPPED (does not appear to exist)",
+     "**NOT FOUND** (OpenAlex; title, venue, id and authors all unresolvable) - dropped per the "
+     "user's instruction 2026-11-12", "nothing was built; nothing else was done."),
+    ("Fairway", "DROPPED (does not appear to exist)",
+     "**NOT FOUND** (OpenAlex; title, venue, id and authors all unresolvable) - dropped per the "
+     "user's instruction 2026-11-12", "nothing was built; nothing else was done."),
 ]
 
 NAIVE = [r for r in ROWS if r["case"] == "naive"]
@@ -145,26 +171,51 @@ w("E-id: StudyB-baselines (`research/EXPERIMENTS.md`). **This is an engineering 
 w()
 w("## 0. Three things to read before the tables")
 w()
-w("**(a) StudyE10e does not exist.** The tuned-engine baseline was specified as \"the best "
-  "engine configuration from StudyE10c / E10e (priority + step budget + long-prefill "
-  "threshold)\". There is no `reports/study_e10e*.md` and no StudyE10e row in the registry (only "
-  "E10a, E10b, E10c, E10d). Worse for the specification: **StudyE10c's verdict is that no engine "
-  "setting helps** - E0 (default), E1 (priority), E2 (2,048-token step budget) and E4 (both) "
-  "were \"identical to E0 in 12 / 12 comparable ladders\" - and **the long-prefill threshold was "
-  "never run** (StudyE10d lists it as an untested lever). So the best *measured* configuration is "
-  "the default. `tuned_engine.py` therefore exposes only the four configurations a committed "
-  "study measured, defaults to E0 with the reason attached, and **raises** if asked for any other "
-  "name, so no table downstream can contain a number no measurement supports. **This needs your "
-  "decision** (see §7).")
+w("**(a) The tuned engine: DECIDED 2026-11-12 - it is StudyE10e's P1.** This baseline was specified as \"the best engine configuration from StudyE10c / "
+  "E10e\". When the suite was first built **StudyE10e did not exist**, so it was flagged as "
+  "under-specified. StudyE10e has since run and tested exactly the missing lever - the "
+  "long-prefill threshold - and its pre-registered verdict is **\"no config removes the "
+  "interference\"**: P1 (threshold 1024), P2 (512) and P3 (1024 + priority) each hold C0 capacity "
+  "at the 40 % ladder top with no loss, exactly like the default, and each collapses to **< 10 %** "
+  "under cold recall (C1) and under KV-host-plus-cold-recall (C4) - five ladder levels below "
+  "their own C0. **And under recall they are strictly worse than the default**: the caps do cut "
+  "episodic p99 at C1 (2.646 s -> 1.978 s at P2, about -25 %) but never approach the 0.45 s "
+  "budget, while charging cold-recall TTFT p99 +12-13 % at C1 and +14-21 % at C4, and degrading "
+  "warm recall at C4 (P2 appends / escalations +37 % / +30 %; P3 escalation x2.1, because "
+  "priority demotes warm recall). StudyE10e also records that the two partial-prefill counters "
+  "originally requested do not exist in vLLM 0.31.0. So `tuned_engine.py` now exposes all SEVEN "
+  "measured configurations - E10c's E0 / E1 / E2 / E4 and E10e's P1 / P2 / P3 - keeps "
+  "`BEST_MEASURED = E0` with a measurement rather than an absence behind it, and still raises on "
+  "any unmeasured name. **The user set `TUNED = P1`** (`--long-prefill-token-threshold 1024`, "
+  "default step budget, FCFS) on that evidence, and the choice is well founded: P1 cuts episodic "
+  "p99 by 19-25 % at C1 and 18-30 % at C4 at **no C0 capacity cost**, and **alone among the three "
+  "it spares warm recall** - at C4 its warm append p50 rises x1.02 and its escalation x1.01, "
+  "against P2's x1.37 / x1.30 and P3's x1.53 / x2.09. Its cost is confined to cold recall (TTFT "
+  "p99 x1.12 at C1, x1.14 at C4). `TUNED = P1` and `BEST_MEASURED = E0` are kept as two separate "
+  "recorded senses - the tuned choice, and the best under E10c / E10e's capacity rule - so they "
+  "are never conflated, and **it does not restore capacity**: E10e's verdict stands and is quoted "
+  "in `cards/tuned_engine.md`. One caveat is carried from E10e: its verdict covers its own "
+  "controls plus E10c's, not two documented 0.31.0 combinations it did not try (a 2,048-token "
+  "step budget together with the 512-token cap, and `--no-async-scheduling`).")
+w()
+w("One consequence of the switch, stated so no one reads more into it than it says: the 10-minute "
+  "replay smoke test was re-run under `TUNED = P1` and **every recorded field of all 38 "
+  "configurations is unchanged** (only wall-clock times differ). That is expected and is not "
+  "evidence for P1 - the replay harness charges no engine-configuration cost, so `engine_config` "
+  "is a field the policy emits and the harness validates but does not price. P1's benefit and its "
+  "cold-recall cost live in StudyE10e's measured latency curves, not in this replay; any study "
+  "that wants to see them must charge them.")
 w()
 w("**(b) Ekya's repository has no licence.** `github.com/edge-video-services/ekya` is Microsoft "
   "Research's own release, but it contains **no LICENSE or COPYING file anywhere** and the README "
   "names none, so no right to use or modify is granted. Applied consequence: the clone is used "
   "for citation and commit pinning only, **no file in it was opened, run or copied**, its own "
   "CPU-runnable toy simulator was deliberately left unrun, and the adapted baseline was written "
-  "from the paper. Flagged rather than resolved.")
+  "from the paper. **RESOLVED 2026-11-12: the user approved citation-only use** (section 9 "
+  "item 2); the clone and the pin stay, and nothing in it is opened.")
 w()
-w("**(c) StudyRH8's winning policy reads labels.** RH8's MIX-DEMAND keeps warm \"exactly the "
+w("**(c) StudyRH8's winning policy reads labels - the resolution below was approved "
+  "2026-11-12 (section 9 item 3).** RH8's MIX-DEMAND keeps warm \"exactly the "
   "high-demand devices\" - in the code, the same `random.Random(0).sample(...)` draw that "
   "*assigned* the synthetic demand. RH8's own 2026-11-03 audit says this \"does not show that "
   "demand can be *predicted*\". Our interface forbids a policy from reading labels, so rather "
@@ -371,20 +422,35 @@ for nm, vid, ver, why in RELATED:
     w(f"| {nm} | {vid} | {ver} | {why} |")
 w()
 unver = [nm for nm, _v, ver, _w in RELATED if "UNVERIFIED" in ver]
-w(f"### Citations I could not verify ({len(unver)})")
+assert not unver, f"unexpected UNVERIFIED related-work rows: {unver}"
+w("### Citations: RESOLVED 2026-11-12 - nothing in this table is unverified")
 w()
-w("Searched OpenAlex by title, the arXiv API by identifier where one was given, and the web; no "
-  "index record was found for:")
+w("The eight citations this section previously flagged were resolved by the user's §9 answers "
+  "and then checked independently here; **none is left unverified.** What changed:")
 w()
-for nm in unver:
-    w(f"- **{nm}**")
+w("| work | previously | now | checked against |")
+w("|---|---|---|---|")
+w("| SpotVLM / edgeVLM | unverified | arXiv:2508.12638 | arXiv API |")
+w("| MSAO | unverified | arXiv:2604.02945 | arXiv API |")
+w("| AceSpec | unverified | arXiv:2609.02514 | arXiv API |")
+w("| Splitwise-DRL | unverified | arXiv:2512.23310 | arXiv API |")
+w("| SAIL | unverified (MobiSys 2026 claimed) | DOI 10.1145/3745756.3809224, MobiSys 2026 | "
+  "Crossref |")
+w("| HERMES | unverified (ACL 2026 claimed) | `2026.acl-long.381`, ACL 2026 pp. 8411-8430 | "
+  "ACL Anthology |")
+w("| QueryStream | no identifier | ICLR 2026 poster, OpenReview `738HjJEbml` | the ICLR virtual "
+  "site; **verified, not built** (§9.1) |")
+w("| llm-d | unverified | cited **as software**, `github.com/llm-d/llm-d` | user decision - it "
+  "is a project, not a paper |")
+w("| CacheRoute | unverified | **dropped** | no identifier exists; user decision |")
+w("| Route2Look, Fairway | requested as candidates | **dropped, nothing built** | OpenAlex: "
+  "title, venue, id and authors all unresolvable (§11) |")
 w()
-w("These are flagged rather than cited. Four of them (llm-d / CacheRoute, SAIL, VLMCache, "
-  "HERMES) were given with a venue or product name but no identifier, and the remaining ones "
-  "(MSAO, AceSpec, Splitwise-DRL, SpotVLM / edgeVLM) may be internal shorthands rather than "
-  "paper titles. **If any of these is meant to be in the related-work section, it needs an "
-  "identifier.** Note that VLMCache (MobiSys 2026) *did* verify and is listed above; SAIL, also "
-  "given as MobiSys 2026, did not.")
+w("**One correction worth recording.** arXiv:2512.23310 is a *different* Splitwise from the "
+  "ISCA'24 paper already in this table - its title is \"Splitwise: Collaborative Edge-Cloud "
+  "Inference for LLMs via Lya...\". The two are listed as separate rows and must not be "
+  "conflated: the ISCA'24 one splits prefill from decode across machine pools, the 2025 one "
+  "splits one model across edge and cloud.")
 w()
 w("Two further partial verifications, stated plainly: OpenAlex returned the **preprint** record "
   "but not the proceedings record for VTC, Sarathi-Serve, DistServe and Llumnix. Their OSDI 2024 "
@@ -413,25 +479,79 @@ w("4. **INAR-VL's image signals are substituted.** We do not re-read pixels, so 
 w("5. **Clockwork loses batching.** Our action space has no batch dimension, so §5.3's batch-size "
   "strategies and speculative growth are dropped. See `cards/clockwork.md` A4.")
 w()
+w("6. **The device arm is a validated-to-first-order stand-in, and StudyD15 now bounds it.** "
+  "Every episodic baseline's \"device\" is StudyD14b's H100-served `4BI_N1` score, not the Orin "
+  "running llama.cpp. StudyD15 Part A tested exactly that proxy and **REJECTED** it as an "
+  "adequate *exact* numerical stand-in under its strict pre-registered bar (every AP-diff CI must "
+  "contain 0 **and** both StudyE9 decision-rule outcomes unchanged). It is a strong first-order "
+  "match - Pearson and Spearman **0.943**, trigger same-side 89.9-96.7 %, **4 of 5** streaming-AP "
+  "horizons with a paired-bootstrap CI containing 0 - and where it differs (h = 0.5 s, +0.017) "
+  "the **real device is slightly better, not worse**; what fails the bar is that StudyE9's "
+  "decision rule 2 outcome changes. For this suite: fairness rule 1 is unaffected because every "
+  "baseline uses the same arm, but **no exact device-side number may be read off these "
+  "baselines**. StudyD15 Part B separately confirms that the device's held-history cost is "
+  "client-side request handling of resent frames (~9.7 ms per held frame; 88 ms server "
+  "prompt-eval at 480 frames with the history KV-cached), not model compute - which leaves "
+  "`costs.DEV_LAT_S` (StudyD8 arm A's single-frame N = 1 total p50, 0.567 s) untouched, since "
+  "that path sends one frame.")
+w()
 w("Two reconstruction gaps where a paper did not print something needed, each marked in its card "
   "and its module: Hybrid LLM's label-transformation closed form (§3.3 gives the objective and "
   "says `t` is grid-searched, not the function) and PerLLM's `P(t)` term (it appears in the "
   "CS-UCB figure undefined; set to zero).")
 w()
 
-w("## 9. Open questions for you")
+w("## 9. Decisions - ALL ANSWERED 2026-11-12")
 w()
-w("1. **The tuned engine (§0a).** Either StudyE10e is planned and this baseline should wait for "
-  "it, or the intended baseline is \"E10c's best measured configuration\", which is the **default "
-  "engine** - in which case `tuned-engine` and `naive.always-cloud-fcfs` differ only in name. "
-  "Needs a decision; I will not guess a tuned combination.")
-w("2. **Ekya's licence (§0b).** Confirm that citation-only use is what you want, or ask the "
-  "authors for a licence if the original needs to run.")
-w("3. **RH8 (§0c).** Confirm that the oracle arm is to be reported as an upper bound and the "
-  "causal arm as a separate, clearly-labelled policy that StudyRH8 never measured.")
-w("4. **The 8 unverifiable citations (§7).** Identifiers needed, or drop them.")
-w("5. **FlashBack and TMO** are decided but not built (§6). Both are under the half-day bar; say "
-  "the word and they go in.")
+w("Every question this section opened has been answered by the user. Recorded here, in the "
+  "registry and in the affected cards.")
+w()
+w("| # | question | decision |")
+w("|---|---|---|")
+w("| 1 | the tuned engine | **= StudyE10e's P1** (`--long-prefill-token-threshold 1024`, default "
+  "step budget, FCFS). It does not restore capacity, but it cuts episodic p99 19-25 % at C1 and "
+  "18-30 % at C4 at no C0 capacity cost and alone among P1/P2/P3 spares warm recall; cold-recall "
+  "p99 +12-14 % is the accepted cost. `cards/tuned_engine.md` records StudyE10c, E10d and E10e's "
+  "verdicts and every measured cost, and **the guard that raises on unmeasured configurations is "
+  "kept**. |")
+w("| 2 | Ekya's missing licence | **citation-only use approved.** The clone stays for citation and "
+  "commit pinning; nothing in it was opened, run or copied; the adapted baseline stays written "
+  "from the paper. |")
+w("| 3 | StudyRH8's oracle labels | **approved as proposed.** `rh8-demand-aware-ORACLE` is "
+  "reported as an upper bound alongside the hindsight oracle and excluded from every deployable "
+  "comparison; `RH8CausalDemand` is a separate deployable policy, labelled as **not** what "
+  "StudyRH8 measured. |")
+w("| 4 | the unverifiable citations | **identifiers supplied and verified** (§7). Route2Look and "
+  "Fairway **dropped**; CacheRoute **dropped** (no identifier); llm-d cited **as software, not a "
+  "paper**; QueryStream **verified but not built** (§9.1). |")
+w("| 5 | FlashBack and TMO | **not built for now.** Both stay verified and recorded; TMO's clone "
+  "and pin stand. |")
+w()
+w("### 9.1 QueryStream: verified, NOT built - and exactly what is missing")
+w()
+w("The user's rule was to build it if the mechanism is fully specified and otherwise to mark it "
+  "\"verified, not built\" with the missing component. **Verified:** *QueryStream: Advancing "
+  "Streaming Video Understanding with Query-Aware Pruning and Proactive Response*, Zhang, Yang, "
+  "Wang, Qian and Xu, **ICLR 2026 poster**, OpenReview id **`738HjJEbml`**, with author-linked "
+  "code at `github.com/Zhangkr2003/QueryStream` (**Apache-2.0**, cloned and pinned at "
+  "`b793153403f7`).")
+w()
+w("**Not built, and the missing component is specific.** The paper has two parts: **QDP** "
+  "(Query-aware Differential Pruning - filtering visual tokens by query relevance and temporal "
+  "novelty) and **RTAR** (Relevance-Triggered Active Response - deciding when to respond). The "
+  "addendum asked for the **gating / response logic**, i.e. RTAR. RTAR is **named** in the "
+  "repository's README but neither **defined** there nor **implemented** in the release: the "
+  "README's own \"At a glance\" table gives the released inference as \"Single-query QDP\", and "
+  "the released `querystream/` tree contains only `demo/infer.py` plus a patched Qwen2.5-VL - a "
+  "search for `rtar`, `proactive`, `trigger` and `should_respond` across the repository finds "
+  "only README prose. The OpenReview PDF would not fetch and the OpenReview API returns 403, so "
+  "**the relevance statistic and the firing condition could not be read**. Building it would mean "
+  "inventing the trigger, which is what the rule forbids.")
+w()
+w("Separately, QDP prunes visual tokens *inside* the model, which our action space cannot express "
+  "in any case (the same limitation as R3-Streaming's compression ratio, `cards/r3streaming.md` "
+  "A1). **To build this baseline we need RTAR's statistic and firing condition** - from the paper "
+  "PDF, or from an RTAR implementation.")
 w()
 
 w("## 10. Files")
@@ -479,18 +599,35 @@ w("## 11. Verification first: Route2Look, Fairway, QueryStream")
 w()
 w("The addendum requires Route2Look and Fairway to be **verified before anything is built**, and "
   "that if a paper cannot be found it is marked \"unverified, not built\" and nothing else is "
-  "done. Applied, and extended to a third candidate that turned out the same way:")
+  "done. Applied, and extended to a third candidate. **All three were re-checked on 2026-11-12 "
+  "after the user's §9 answers, and they did not come out the same way:**")
 w()
-w("| candidate | requested as | verification attempted | outcome |")
-w("|---|---|---|---|")
-for r in UNVER:
+w("| candidate | outcome 2026-11-12 | basis |")
+w("|---|---|---|")
+w("| `route2look` | **DROPPED, unverified** | OpenAlex returns no record under this title; no "
+  "venue, id or author list could be established. Nothing built, nothing else done. |")
+w("| `fairway` | **DROPPED, unverified** | as above. |")
+w("| `querystream` | **VERIFIED - NOT BUILT** | the user supplied the ICLR 2026 poster page; the "
+  "paper and an Apache-2.0 author-linked repository both exist (OpenReview `738HjJEbml`, code "
+  "pinned at `b793153403f7`). It is not built because its **RTAR** trigger is unspecified in "
+  "every source reachable from here - see §9.1. |")
+w()
+RESOLVED3 = [r for r in ROWS if r["name"] in ("route2look", "fairway", "querystream")]
+assert len(RESOLVED3) == 3, [r["name"] for r in RESOLVED3]
+w("The registry entries, which are what the suite loader reads:")
+w()
+w("| candidate | requested as | verification | registry case | note |")
+w("|---|---|---|---|---|")
+for r in RESOLVED3:
     w(f"| `{r['name']}` | {r.get('priority','-')} | {r.get('verified','-')} | "
-      f"**{r['case']}** — {r.get('notes','')} |")
+      f"**{r['case']}** | {r.get('notes','')} |")
 w()
-w("**QueryStream was requested as a P1 component baseline**, but no index record exists for it "
-  "under that name (the addendum gives no identifier, only \"ICLR 2026\"). Building it would "
-  "mean inventing its gating and response logic, so it is treated exactly like Route2Look and "
-  "Fairway. **All three need an identifier before they can enter the suite.**")
+w("**QueryStream is no longer in this position.** It was requested as a P1 component baseline "
+  "and at first could not be found under that name; the user's §9 answer supplied the poster "
+  "page, and it verified. It is still not built, but for a different and narrower reason than "
+  "Route2Look and Fairway: the paper exists and the missing piece is one named component (RTAR's "
+  "relevance statistic and firing condition), recorded in §9.1. Route2Look and Fairway remain "
+  "unfound and are dropped.")
 w()
 w("## 12. The six fairness rules, enforced")
 w()

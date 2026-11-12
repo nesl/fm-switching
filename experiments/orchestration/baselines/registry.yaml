@@ -147,7 +147,7 @@ baselines:
     license: "NONE FOUND - all rights reserved"
     decides: "episodic mode, cadence, frame count, recall decision, session action"
     card: "cards/ekya.md"
-    notes: "LICENSE FLAG: no licence file; clone used for citation only, nothing opened or run"
+    notes: "LICENCE FLAG, RESOLVED BY THE USER 2026-11-12: the repository has no licence file, and citation-only use is APPROVED - the clone is used for citation and commit pinning only, nothing in it was opened, run or copied, and the adapted baseline stays written from the paper."
     versions:
       - "original (cloned, NOT executed)"
       - "adapted"
@@ -165,7 +165,7 @@ baselines:
     license: null
     decides: "engine configuration"
     card: "cards/tuned_engine.md"
-    notes: "UNDER-SPECIFIED: StudyE10e does not exist; StudyE10c found no setting beats the default; the long-prefill threshold is untested. Defaults to E0 and refuses unmeasured names."
+    notes: "DECIDED BY THE USER 2026-11-12: tuned-engine = StudyE10e P1 (--long-prefill-token-threshold 1024, default step budget, FCFS). It does NOT restore capacity - StudyE10e pre-registered verdict that no config removes the cold-recall interference stands, and P1 is five ladder levels below its own C0 under recall - but it cuts episodic p99 19-25 % at C1 and 18-30 % at C4 at NO C0 capacity cost, and alone among P1/P2/P3 it spares warm recall (C4 append x1.02, escalation x1.01, against P2 x1.37/x1.30 and P3 x1.53/x2.09). Its cost is confined to cold recall: TTFT p99 x1.12 at C1, x1.14 at C4. The module exposes all seven measured configurations (E10c E0/E1/E2/E4 + E10e P1/P2/P3), keeps TUNED=P1 and BEST_MEASURED=E0 as separate recorded senses, and KEEPS THE GUARD that raises on any unmeasured name. Card records StudyE10c, E10d and E10e verdicts and all measured costs."
     versions:
       - "adapted"
     files:
@@ -352,7 +352,7 @@ baselines:
     license: null
     decides: "session action"
     card: "cards/rh8.md"
-    notes: "INTERFACE CONFLICT: RH8's MIX-DEMAND reads the ground-truth demand labels (its own 2026-11-03 audit says so), which the interface forbids. Both readings ship, labelled."
+    notes: "INTERFACE CONFLICT, RESOLVED AS PROPOSED AND APPROVED BY THE USER 2026-11-12: RH8's MIX-DEMAND reads the ground-truth demand labels (its own 2026-11-03 audit says so), which the interface forbids. Both readings ship, labelled - rh8-demand-aware-ORACLE is reported as an UPPER BOUND alongside the hindsight oracle and excluded from every deployable comparison, and RH8CausalDemand is a SEPARATE DEPLOYABLE policy labelled as NOT what StudyRH8 measured."
     versions:
       - "ORACLE (upper bound)"
       - "causal (deployable)"
@@ -387,7 +387,7 @@ baselines:
     license: null
     decides: null
     card: null
-    notes: "BORDERLINE. Case D. Its decision - whether a query needs history BEFORE retrieving it - IS expressible as our representation + readiness choice, and it is close to R3-Streaming's Respond stage which is already built. Not built: the marginal value over r3-streaming is low. Half-day rule: under budget, but deliberately deferred."
+    notes: "NOT BUILT FOR NOW - user decision 2026-11-12. Case D, verified (arXiv:2610.01192, 1 Oct 2026). Its decision - whether a query needs history BEFORE retrieving it - IS expressible as our representation + readiness choice, and it is close to R3-Streaming's Respond stage which is already built, so the marginal value is low. Under the half-day bar if it is ever wanted."
     versions: []
     files: []
   - name: "covstream-PRE-ADDENDUM-SUPERSEDED"
@@ -411,7 +411,7 @@ baselines:
     license: "MIT"
     decides: null
     card: null
-    notes: "BORDERLINE. Author-linked code, MIT, cloned and pinned. Not built: its decision logic IS a trained constrained-RL policy, so an adapted version would have to RETRAIN (torch + stable_baselines3), and using it untrained would not be TMO. Deferred."
+    notes: "NOT BUILT FOR NOW - user decision 2026-11-12. Case B, author-linked code (MIT), cloned and pinned. Its decision logic IS a trained constrained-RL policy, so an adapted version would have to RETRAIN (torch + stable_baselines3) and using it untrained would not be TMO. The clone and pin stand if it is ever wanted."
     versions:
       - "original (cloned)"
     files:
@@ -498,7 +498,7 @@ baselines:
     case: "D"
     priority: "P1"
     paper: "Pan et al., KVFlow: Efficient Prefix Caching for Accelerating LLM-Based Multi-Agent Workflows, arXiv:2507.07400"
-    verified: "arXiv API verifies the id; the NeurIPS 2025 venue the addendum gives is **UNVERIFIED**"
+    verified: "arXiv:2507.07400 verified (arXiv API); NeurIPS 2025 venue CONFIRMED by the user 2026-11-12 via https://neurips.cc/virtual/2025/poster/119883"
     code_url: "none found"
     pinned_commit: null
     license: null
@@ -518,7 +518,7 @@ baselines:
     case: "D"
     priority: "P1"
     paper: "Huang et al., UniScale: Adaptive Unified Inference Scaling via Online Joint Optimization of Model Routing and Test-Time Scaling, arXiv:2605.30898"
-    verified: "arXiv API verifies the id; the ICML 2026 venue the addendum gives is **UNVERIFIED**"
+    verified: "arXiv:2605.30898 verified (arXiv API); ICML 2026 venue CONFIRMED by the user 2026-11-12 via https://icml.cc/virtual/2026/poster/60578"
     code_url: "none found"
     pinned_commit: null
     license: null
@@ -538,7 +538,7 @@ baselines:
     case: "D"
     priority: "P1"
     paper: "Zhang et al., Progressive Online Video Understanding with Evidence-Aligned Timing and Transparent Decisions, arXiv:2604.18459"
-    verified: "arXiv API verifies the id; the ICLR 2026 venue the addendum gives is **UNVERIFIED**"
+    verified: "arXiv:2604.18459 verified (arXiv API); ICLR 2026 venue CONFIRMED by the user 2026-11-12 via the ICLR proceedings page (hash 093b793f0af498e8fa218eb5445daeb0)"
     code_url: "none found"
     pinned_commit: null
     license: null
@@ -593,20 +593,20 @@ baselines:
       - "reconstructed/test_covstream_toy.py"
       - "covstream_adapted.py"
   - name: "route2look"
-    case: "UNVERIFIED - NOT BUILT"
+    case: "DROPPED (unverified)"
     priority: "-"
     paper: "Route2Look (no identifier given)"
-    verified: "**NOT FOUND**: OpenAlex title search returned no record"
+    verified: "**NOT FOUND**: OpenAlex title search for Route2Look returned no record (2026-11-12); DROPPED by the user as unverified"
     code_url: null
     pinned_commit: null
     license: null
     card: null
-    notes: "Per the addendum: verified first, no paper found, so marked unverified and nothing else was done."
+    notes: "DROPPED by the user 2026-11-12: unverified. Verification attempted 2026-11-12 (OpenAlex title search, repeated with a second phrasing for Fairway); no index record exists. Retained as a row only so the attempt is on record."
     experiments: []
     versions: []
     files: []
   - name: "fairway"
-    case: "UNVERIFIED - NOT BUILT"
+    case: "DROPPED (unverified)"
     priority: "-"
     paper: "Fairway (no identifier given)"
     verified: "**NOT FOUND**: two OpenAlex title searches returned no record"
@@ -614,20 +614,20 @@ baselines:
     pinned_commit: null
     license: null
     card: null
-    notes: "Per the addendum: verified first, no paper found, so marked unverified and nothing else was done."
+    notes: "DROPPED by the user 2026-11-12: unverified. Verification attempted 2026-11-12 (OpenAlex title search, repeated with a second phrasing for Fairway); no index record exists. Retained as a row only so the attempt is on record."
     experiments: []
     versions: []
     files: []
   - name: "querystream"
-    case: "UNVERIFIED - NOT BUILT"
+    case: "VERIFIED - NOT BUILT (mechanism not fully specified)"
+    code_url: "https://github.com/Zhangkr2003/QueryStream"
+    pinned_commit: "b793153403f73c3fecaccb6be324494bed1c7f62"
+    license: "Apache-2.0"
     priority: "P1 (requested)"
-    paper: "QueryStream, claimed ICLR 2026 (no identifier given)"
-    verified: "**NOT FOUND**: OpenAlex title search returned no record"
-    code_url: null
-    pinned_commit: null
-    license: null
+    paper: "Zhang, Yang, Wang, Qian, Xu, QueryStream: Advancing Streaming Video Understanding with Query-Aware Pruning and Proactive Response, ICLR 2026 poster; OpenReview id 738HjJEbml"
+    verified: "VERIFIED 2026-11-12 from the ICLR 2026 poster page supplied by the user (https://iclr.cc/virtual/2026/poster/10011335): title, five authors, abstract and OpenReview id 738HjJEbml; author-linked code at https://github.com/Zhangkr2003/QueryStream (Apache-2.0)"
     card: null
-    notes: "Requested as a P1 component baseline, but no paper could be located, so building it would mean inventing its gating logic. Treated like Route2Look and Fairway: unverified, not built. NEEDS AN IDENTIFIER."
+    notes: "VERIFIED, NOT BUILT, per the user rule that it be built only if the mechanism is fully specified. MISSING COMPONENT: the RTAR trigger rule. The paper has two parts - QDP (Query-aware Differential Pruning, filtering visual tokens by query relevance and temporal novelty) and RTAR (Relevance-Triggered Active Response, which decides when to respond). The addendum asked for the gating/response logic, i.e. RTAR. RTAR is NAMED in the repo README but neither DEFINED there nor IMPLEMENTED in the release: the repo README own At-a-glance table says the released inference is Single-query QDP, and the released querystream/ tree contains only demo/infer.py plus a patched Qwen2.5-VL, with no RTAR code (grep for rtar/proactive/trigger/should_respond finds only README prose). The OpenReview PDF would not fetch and the OpenReview API returns 403, so the relevance statistic and the trigger condition could not be read. Building it would mean inventing the trigger. SEPARATELY, QDP prunes visual tokens INSIDE the model, which our action space cannot express in any case. TO BUILD IT we need RTAR fully specified - the statistic and the firing condition - from the paper PDF or an RTAR implementation."
     experiments: []
     versions: []
     files: []
