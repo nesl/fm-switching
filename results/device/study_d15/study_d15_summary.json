@@ -1,0 +1,74 @@
+{
+  "stack": {
+    "llama_cpp": "c0fd786",
+    "model": "4bi_f16",
+    "n_ctx": 57344,
+    "seed": 0,
+    "top_logprobs": 20,
+    "max_tokens": 8,
+    "cache_prompt": false,
+    "query": "Is a collision or near-collision involving the camera vehicle happening or about to happen? Answer only Yes or No."
+  },
+  "parts_run": "AB",
+  "kv_mem": {
+    "n_ctx_slot": 57344,
+    "kv_unified": "false",
+    "note": "Jetson unified memory (no discrete VRAM); memory reported via server RSS + tegrastats peak RAM",
+    "server_rss_mib_postload": 18299.3,
+    "server_rss_mib_peak": 32339.5,
+    "tegrastats_peak_ram_mib": 39331
+  },
+  "partA_complete": true,
+  "determinism_A": {
+    "request_id": "00996_t19_N1",
+    "scores": [
+      -13.668709722610448,
+      -13.668709722610448,
+      -13.668709722610448,
+      -13.668709722610448,
+      -13.668709722610448,
+      -13.668709722610448,
+      -13.668709722610448,
+      -13.668709722610448,
+      -13.668709722610448,
+      -13.668709722610448
+    ],
+    "identical": true,
+    "n": 10
+  },
+  "partB": {
+    "session": "9902221866524366_start_0.0_end_1199.959",
+    "sizes": [
+      50,
+      150,
+      300,
+      480,
+      578
+    ],
+    "reps": 10,
+    "microbench": {
+      "frame": "frames/9902221866524366_start_0.0_end_1199.959/t00000.0.png",
+      "n": 200,
+      "median_s": 0.003294,
+      "p10_s": 0.003286,
+      "p90_s": 0.003301,
+      "img_size": [
+        256,
+        352
+      ]
+    }
+  },
+  "_provenance": {
+    "git_commit": "c552de70a695471c29c59329afae91dae86e624b",
+    "script": "study_d15_orin_nexar.py",
+    "model": "4bi_f16",
+    "timestamp": "2026-11-12T13:30:14.314702",
+    "device": "jetson_orin",
+    "n": 10660,
+    "args": {
+      "parts": "AB",
+      "smoke": 0,
+      "no_verify": false
+    }
+  }
+}
