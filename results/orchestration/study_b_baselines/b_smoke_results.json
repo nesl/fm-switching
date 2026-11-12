@@ -1,0 +1,2055 @@
+[
+ {
+  "policy": "device-only",
+  "case": "naive",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 0.0,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 0,
+  "recall": {
+   "cloud": 0,
+   "device": 40,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "recall_decision"
+  ],
+  "defaults_used": [],
+  "experiments": [
+   "A-episodic",
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic",
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 0.0,
+  "sessions_warmed": 0,
+  "label": "device-only",
+  "wall_s": 4.54
+ },
+ {
+  "policy": "always-cloud-fcfs",
+  "case": "naive",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.967,
+  "budget_respected": true,
+  "budget_refusals": 6338,
+  "cloud_calls": 1647.0,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "recall_decision"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "session_action",
+   "order",
+   "engine_config"
+  ],
+  "experiments": [
+   "A-episodic",
+   "B-recall",
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic",
+    "B-recall",
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 584.5,
+  "sessions_warmed": 0,
+  "label": "always-cloud-fcfs",
+  "wall_s": 4.53
+ },
+ {
+  "policy": "random-admission",
+  "case": "naive",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.981,
+  "budget_respected": true,
+  "budget_refusals": 1534,
+  "cloud_calls": 1677.0,
+  "recall": {
+   "cloud": 10,
+   "device": 30,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "recall_decision"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "A-episodic",
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic",
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 595.2,
+  "sessions_warmed": 0,
+  "label": "random-admission",
+  "wall_s": 4.57
+ },
+ {
+  "policy": "round-robin",
+  "case": "naive",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.986,
+  "budget_respected": true,
+  "budget_refusals": 1784,
+  "cloud_calls": 1517.0,
+  "recall": {
+   "cloud": 24,
+   "device": 16,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "recall_decision"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "A-episodic"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 538.4,
+  "sessions_warmed": 0,
+  "label": "round-robin",
+  "wall_s": 4.58
+ },
+ {
+  "policy": "static-partition",
+  "case": "naive",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.967,
+  "budget_respected": true,
+  "budget_refusals": 1516,
+  "cloud_calls": 1647.0,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "recall_decision"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "A-episodic",
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic",
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 584.5,
+  "sessions_warmed": 0,
+  "label": "static-partition",
+  "wall_s": 4.58
+ },
+ {
+  "policy": "edf-service-time",
+  "case": "naive",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.967,
+  "budget_respected": true,
+  "budget_refusals": 6338,
+  "cloud_calls": 1647.0,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "recall_decision",
+   "order"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "session_action",
+   "episodic_mode"
+  ],
+  "experiments": [
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 584.5,
+  "sessions_warmed": 0,
+  "label": "edf-service-time",
+  "wall_s": 4.58
+ },
+ {
+  "policy": "hindsight-oracle",
+  "case": "naive",
+  "reads_future": true,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.967,
+  "budget_respected": true,
+  "budget_refusals": 6338,
+  "cloud_calls": 1647.0,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "all"
+  ],
+  "defaults_used": [],
+  "experiments": [
+   "A-episodic",
+   "B-recall",
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": true,
+   "experiments": [
+    "A-episodic",
+    "B-recall",
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 584.5,
+  "sessions_warmed": 0,
+  "label": "hindsight-oracle",
+  "wall_s": 4.57
+ },
+ {
+  "policy": "videostorm",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 29.313,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 0,
+  "recall": {
+   "cloud": 40,
+   "device": 0,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count"
+  ],
+  "defaults_used": [
+   "recall_decision",
+   "representation",
+   "session_action",
+   "order",
+   "engine_config"
+  ],
+  "experiments": [
+   "A-episodic"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 0.0,
+  "sessions_warmed": 0,
+  "label": "videostorm/maxmin",
+  "wall_s": 4.63
+ },
+ {
+  "policy": "videostorm",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 29.313,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 0,
+  "recall": {
+   "cloud": 40,
+   "device": 0,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count"
+  ],
+  "defaults_used": [
+   "recall_decision",
+   "representation",
+   "session_action",
+   "order",
+   "engine_config"
+  ],
+  "experiments": [
+   "A-episodic"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 0.0,
+  "sessions_warmed": 0,
+  "label": "videostorm/maxsum",
+  "wall_s": 4.64
+ },
+ {
+  "policy": "ekya",
+  "case": "B",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 117.739,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 1665.5,
+  "recall": {
+   "cloud": 8,
+   "device": 32,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "recall_decision",
+   "session_action"
+  ],
+  "defaults_used": [
+   "representation",
+   "order",
+   "engine_config"
+  ],
+  "experiments": [
+   "A-episodic",
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic",
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 591.1,
+  "sessions_warmed": 0,
+  "label": "ekya",
+  "wall_s": 4.67
+ },
+ {
+  "policy": "tuned-engine",
+  "case": "own",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.967,
+  "budget_respected": true,
+  "budget_refusals": 6338,
+  "cloud_calls": 1647.0,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "engine_config"
+  ],
+  "defaults_used": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "recall_decision",
+   "representation",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 584.5,
+  "sessions_warmed": 0,
+  "label": "tuned-engine",
+  "wall_s": 4.59
+ },
+ {
+  "policy": "clockwork",
+  "case": "B",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.967,
+  "budget_respected": true,
+  "budget_refusals": 6338,
+  "cloud_calls": 1647.0,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "recall_decision",
+   "order",
+   "session_action"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "episodic_mode",
+   "engine_config"
+  ],
+  "experiments": [
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 584.5,
+  "sessions_warmed": 0,
+  "label": "clockwork",
+  "wall_s": 4.58
+ },
+ {
+  "policy": "confidence-cascade",
+  "case": "B",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 98.752,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 1463.0,
+  "recall": {
+   "cloud": 0,
+   "device": 40,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "recall_decision"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "A-episodic"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 519.2,
+  "sessions_warmed": 0,
+  "label": "confidence-cascade",
+  "wall_s": 4.58
+ },
+ {
+  "policy": "inar-vl",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.957,
+  "budget_respected": true,
+  "budget_refusals": 6725,
+  "cloud_calls": 1712.0,
+  "recall": {
+   "cloud": 6,
+   "device": 34,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "recall_decision"
+  ],
+  "defaults_used": [
+   "representation",
+   "session_action",
+   "order",
+   "engine_config"
+  ],
+  "experiments": [
+   "A-episodic",
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic",
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 607.6,
+  "sessions_warmed": 0,
+  "label": "inar-vl",
+  "wall_s": 4.8
+ },
+ {
+  "policy": "hybrid-llm",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 29.313,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 0,
+  "recall": {
+   "cloud": 40,
+   "device": 0,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "recall_decision"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "A-episodic",
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic",
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 0.0,
+  "sessions_warmed": 0,
+  "label": "hybrid-llm",
+  "wall_s": 4.94
+ },
+ {
+  "policy": "routellm",
+  "case": "B",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.967,
+  "budget_respected": true,
+  "budget_refusals": 5001,
+  "cloud_calls": 1647.0,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "recall_decision"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "A-episodic",
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic",
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 584.5,
+  "sessions_warmed": 0,
+  "label": "routellm",
+  "wall_s": 4.97
+ },
+ {
+  "policy": "perllm",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 31.164,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 14.8,
+  "recall": {
+   "cloud": 40,
+   "device": 0,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "recall_decision"
+  ],
+  "defaults_used": [
+   "representation",
+   "session_action",
+   "order",
+   "engine_config"
+  ],
+  "experiments": [
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 10.2,
+  "sessions_warmed": 0,
+  "label": "perllm",
+  "wall_s": 4.62
+ },
+ {
+  "policy": "attentionstore",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.988,
+  "budget_respected": true,
+  "budget_refusals": 6599,
+  "cloud_calls": 1516.5,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "session_action",
+   "recall_decision",
+   "order"
+  ],
+  "defaults_used": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "representation"
+  ],
+  "experiments": [
+   "B-recall"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "B-recall"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 9.854,
+  "uplink_mb": 538.2,
+  "sessions_warmed": 2,
+  "label": "attentionstore",
+  "wall_s": 4.6
+ },
+ {
+  "policy": "lmcache",
+  "case": "B",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.986,
+  "budget_respected": true,
+  "budget_refusals": 6593,
+  "cloud_calls": 1519.5,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "session_action"
+  ],
+  "defaults_used": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "recall_decision",
+   "representation",
+   "order"
+  ],
+  "experiments": [
+   "B-recall"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "B-recall"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 9.854,
+  "uplink_mb": 539.3,
+  "sessions_warmed": 2,
+  "label": "lmcache",
+  "wall_s": 4.6
+ },
+ {
+  "policy": "pensieve",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.967,
+  "budget_respected": true,
+  "budget_refusals": 6338,
+  "cloud_calls": 1647.0,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "session_action",
+   "recall_decision",
+   "order"
+  ],
+  "defaults_used": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "representation"
+  ],
+  "experiments": [
+   "B-recall"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "B-recall"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 584.5,
+  "sessions_warmed": 0,
+  "label": "pensieve",
+  "wall_s": 4.6
+ },
+ {
+  "policy": "rh8-demand-aware-causal",
+  "case": "A",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.967,
+  "budget_respected": true,
+  "budget_refusals": 6338,
+  "cloud_calls": 1647.0,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "session_action"
+  ],
+  "defaults_used": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "recall_decision",
+   "representation",
+   "order"
+  ],
+  "experiments": [
+   "B-recall"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "B-recall"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 584.5,
+  "sessions_warmed": 0,
+  "label": "rh8-demand-aware-causal",
+  "wall_s": 4.6
+ },
+ {
+  "policy": "rh8-demand-aware-ORACLE",
+  "case": "A",
+  "reads_future": true,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.968,
+  "budget_respected": true,
+  "budget_refusals": 6397,
+  "cloud_calls": 1617.5,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "session_action"
+  ],
+  "defaults_used": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "recall_decision",
+   "representation",
+   "order"
+  ],
+  "experiments": [
+   "B-recall"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": true,
+   "experiments": [
+    "B-recall"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 2.456,
+  "uplink_mb": 574.1,
+  "sessions_warmed": 1,
+  "label": "rh8-demand-aware-ORACLE",
+  "wall_s": 4.59
+ },
+ {
+  "policy": "r3-streaming",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 74.149,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 1098.5,
+  "recall": {
+   "cloud": 0,
+   "device": 40,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "recall_decision",
+   "representation",
+   "defer_s"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "A-episodic",
+   "B-recall"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic",
+    "B-recall"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 389.9,
+  "sessions_warmed": 0,
+  "label": "r3-streaming",
+  "wall_s": 4.6
+ },
+ {
+  "policy": "eco-llm",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.711,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 1673.0,
+  "recall": {
+   "cloud": 10,
+   "device": 30,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "recall_decision",
+   "representation"
+  ],
+  "defaults_used": [
+   "session_action",
+   "order",
+   "engine_config"
+  ],
+  "experiments": [
+   "A-episodic",
+   "B-recall",
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic",
+    "B-recall",
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 593.8,
+  "sessions_warmed": 0,
+  "label": "eco-llm",
+  "wall_s": 4.59
+ },
+ {
+  "policy": "streamscout",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 0.0,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 0,
+  "recall": {
+   "cloud": 0,
+   "device": 40,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "recall_decision",
+   "representation",
+   "episodic_mode"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "B-recall"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "B-recall"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 0.0,
+  "sessions_warmed": 0,
+  "label": "streamscout",
+  "wall_s": 4.58
+ },
+ {
+  "policy": "preble",
+  "case": "B",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.999,
+  "budget_respected": true,
+  "budget_refusals": 6629,
+  "cloud_calls": 1501.5,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "recall_decision",
+   "order",
+   "session_action"
+  ],
+  "defaults_used": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "engine_config"
+  ],
+  "experiments": [
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": true,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 9.854,
+  "uplink_mb": 532.9,
+  "sessions_warmed": 2,
+  "label": "preble",
+  "wall_s": 4.6
+ },
+ {
+  "policy": "mooncake",
+  "case": "B",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.999,
+  "budget_respected": true,
+  "budget_refusals": 6629,
+  "cloud_calls": 1501.5,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "recall_decision",
+   "order",
+   "session_action"
+  ],
+  "defaults_used": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "engine_config"
+  ],
+  "experiments": [
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": true,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 9.854,
+  "uplink_mb": 532.9,
+  "sessions_warmed": 2,
+  "label": "mooncake",
+  "wall_s": 4.59
+ },
+ {
+  "policy": "kvflow",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.991,
+  "budget_respected": true,
+  "budget_refusals": 6605,
+  "cloud_calls": 1513.5,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "session_action",
+   "recall_decision"
+  ],
+  "defaults_used": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "order"
+  ],
+  "experiments": [
+   "B-recall"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "B-recall"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 9.854,
+  "uplink_mb": 537.1,
+  "sessions_warmed": 2,
+  "label": "kvflow",
+  "wall_s": 4.61
+ },
+ {
+  "policy": "uniscale",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.959,
+  "budget_respected": true,
+  "budget_refusals": 18,
+  "cloud_calls": 1135.2,
+  "recall": {
+   "cloud": 22,
+   "device": 18,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count"
+  ],
+  "defaults_used": [
+   "recall_decision",
+   "representation",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "A-episodic",
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic",
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 559.4,
+  "sessions_warmed": 0,
+  "label": "uniscale",
+  "wall_s": 4.72
+ },
+ {
+  "policy": "thinking-qwenvl-atdm",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 65.171,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 965.5,
+  "recall": {
+   "cloud": 0,
+   "device": 0,
+   "deferred": 45640,
+   "rejected": 0
+  },
+  "decides": [
+   "recall_decision",
+   "defer_s",
+   "episodic_mode"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "A-episodic"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": "decides readiness / stopping only",
+   "rule4_reason": "it is a COMPONENT baseline for response timing, which is the property under test; every other part of the action space takes the documented defaults so the timing decision is isolated",
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 342.7,
+  "sessions_warmed": 0,
+  "label": "thinking-qwenvl-atdm",
+  "wall_s": 4.93
+ },
+ {
+  "policy": "simplestream",
+  "case": "B",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 29.313,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 0,
+  "recall": {
+   "cloud": 40,
+   "device": 0,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "recall_decision",
+   "representation",
+   "episodic_mode"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "B-recall"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "B-recall"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 0.0,
+  "sessions_warmed": 0,
+  "label": "simplestream",
+  "wall_s": 4.6
+ },
+ {
+  "policy": "covstream",
+  "case": "D",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 35.074,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 0,
+  "recall": {
+   "cloud": 40,
+   "device": 0,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "recall_decision",
+   "representation",
+   "session_action",
+   "episodic_mode"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "order"
+  ],
+  "experiments": [
+   "B-recall"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "B-recall"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 9.854,
+  "uplink_mb": 0.0,
+  "sessions_warmed": 2,
+  "label": "covstream",
+  "wall_s": 4.59
+ },
+ {
+  "policy": "B3-best-static",
+  "case": "constructed",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.967,
+  "budget_respected": true,
+  "budget_refusals": 5137,
+  "cloud_calls": 1647.0,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "recall_decision",
+   "representation"
+  ],
+  "defaults_used": [
+   "session_action",
+   "order",
+   "engine_config"
+  ],
+  "experiments": [
+   "A-episodic",
+   "B-recall",
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic",
+    "B-recall",
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 584.5,
+  "sessions_warmed": 0,
+  "label": "B3-best-static",
+  "wall_s": 4.56
+ },
+ {
+  "policy": "B4-query-type-routing",
+  "case": "constructed",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.971,
+  "budget_respected": true,
+  "budget_refusals": 157,
+  "cloud_calls": 1386.5,
+  "recall": {
+   "cloud": 36,
+   "device": 4,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "recall_decision",
+   "representation"
+  ],
+  "defaults_used": [
+   "cadence_s",
+   "frame_count",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 492.1,
+  "sessions_warmed": 0,
+  "label": "B4-query-type-routing",
+  "wall_s": 4.56
+ },
+ {
+  "policy": "B6-latency-aware-routing",
+  "case": "constructed",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.957,
+  "budget_respected": true,
+  "budget_refusals": 6725,
+  "cloud_calls": 1712.0,
+  "recall": {
+   "cloud": 6,
+   "device": 34,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "recall_decision",
+   "representation"
+  ],
+  "defaults_used": [
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 607.6,
+  "sessions_warmed": 0,
+  "label": "B6-latency-aware-routing",
+  "wall_s": 4.57
+ },
+ {
+  "policy": "B7-edf-feasibility",
+  "case": "constructed",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 119.967,
+  "budget_respected": true,
+  "budget_refusals": 6338,
+  "cloud_calls": 1647.0,
+  "recall": {
+   "cloud": 12,
+   "device": 28,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "recall_decision",
+   "defer_s",
+   "order"
+  ],
+  "defaults_used": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "representation",
+   "session_action"
+  ],
+  "experiments": [
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 584.5,
+  "sessions_warmed": 0,
+  "label": "B7-edf-feasibility",
+  "wall_s": 4.57
+ },
+ {
+  "policy": "B8-utility-per-gpu-second",
+  "case": "constructed",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 120.0,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 1495.5,
+  "recall": {
+   "cloud": 26,
+   "device": 14,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "recall_decision"
+  ],
+  "defaults_used": [
+   "representation",
+   "session_action",
+   "order"
+  ],
+  "experiments": [
+   "A-episodic",
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "A-episodic",
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 0.0,
+  "uplink_mb": 530.8,
+  "sessions_warmed": 0,
+  "label": "B8-utility-per-gpu-second",
+  "wall_s": 4.58
+ },
+ {
+  "policy": "B9-best-of-breed",
+  "case": "constructed",
+  "reads_future": false,
+  "epochs": 2401,
+  "ran": true,
+  "errors": [],
+  "interface_respected": true,
+  "budget_gpu_s": 120.0,
+  "spent_gpu_s": 35.074,
+  "budget_respected": true,
+  "budget_refusals": 0,
+  "cloud_calls": 0,
+  "recall": {
+   "cloud": 40,
+   "device": 0,
+   "deferred": 0,
+   "rejected": 0
+  },
+  "decides": [
+   "episodic_mode",
+   "cadence_s",
+   "frame_count",
+   "recall_decision",
+   "representation",
+   "session_action",
+   "order"
+  ],
+  "defaults_used": [
+   "engine_config"
+  ],
+  "experiments": [
+   "C-mixed"
+  ],
+  "fairness": {
+   "rule1_models": [
+    "4BI",
+    "32BI"
+   ],
+   "rule2_multi_instance_adapted": false,
+   "rule4_restricts": null,
+   "rule4_reason": null,
+   "rule5_reads_future": false,
+   "experiments": [
+    "C-mixed"
+   ]
+  },
+  "trace_digest": "59bf1d34e2ad12b6",
+  "warming_gpu_s": 9.854,
+  "uplink_mb": 0.0,
+  "sessions_warmed": 2,
+  "label": "B9-best-of-breed",
+  "wall_s": 4.61
+ }
+]

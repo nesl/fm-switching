@@ -1,0 +1,732 @@
+# StudyB-baselines registry
+# One entry per baseline. 'versions' lists what exists; 'files' are repo-relative unless
+# they start with ~ (third-party clones live OUTSIDE this repo).
+# NO PERFORMANCE CLAIM IS MADE ANYWHERE IN THIS SUITE.
+
+baselines:
+  - name: "device-only"
+    experiments: 
+      - "A-episodic"
+      - "C-mixed"
+    case: "naive"
+    paper: null
+    code_url: null
+    pinned_commit: null
+    license: null
+    decides: "episodic mode, recall decision"
+    card: null
+    notes: null
+    versions:
+      - "adapted"
+    files:
+      - "naive.py::DeviceOnly"
+  - name: "always-cloud-fcfs"
+    experiments: 
+      - "A-episodic"
+      - "B-recall"
+      - "C-mixed"
+    case: "naive"
+    paper: null
+    code_url: null
+    pinned_commit: null
+    license: null
+    decides: "episodic mode, recall decision (vLLM default)"
+    card: null
+    notes: null
+    versions:
+      - "adapted"
+    files:
+      - "naive.py::AlwaysCloudFCFS"
+  - name: "random-admission"
+    experiments: 
+      - "A-episodic"
+      - "C-mixed"
+    case: "naive"
+    paper: null
+    code_url: null
+    pinned_commit: null
+    license: null
+    decides: "episodic mode, recall decision; 20 seeds"
+    card: null
+    notes: null
+    versions:
+      - "adapted"
+    files:
+      - "naive.py::RandomAdmission"
+  - name: "round-robin"
+    experiments: 
+      - "A-episodic"
+    case: "naive"
+    paper: null
+    code_url: null
+    pinned_commit: null
+    license: null
+    decides: "equal cloud share per stream"
+    card: null
+    notes: null
+    versions:
+      - "adapted"
+    files:
+      - "naive.py::RoundRobin"
+  - name: "static-partition"
+    experiments: 
+      - "A-episodic"
+      - "C-mixed"
+    case: "naive"
+    paper: null
+    code_url: null
+    pinned_commit: null
+    license: null
+    decides: "fixed cloud share per query class"
+    card: null
+    notes: null
+    versions:
+      - "adapted"
+    files:
+      - "naive.py::StaticPartition"
+  - name: "edf-service-time"
+    experiments: 
+      - "C-mixed"
+    case: "naive"
+    paper: null
+    code_url: null
+    pinned_commit: null
+    license: null
+    decides: "recall admission by service-time estimate, EDF order"
+    card: null
+    notes: null
+    versions:
+      - "adapted"
+    files:
+      - "naive.py::EDFServiceTime"
+  - name: "hindsight-oracle"
+    experiments: 
+      - "A-episodic"
+      - "B-recall"
+      - "C-mixed"
+    case: "naive"
+    paper: null
+    code_url: null
+    pinned_commit: null
+    license: null
+    decides: "everything; UPPER BOUND, reads the future"
+    card: null
+    notes: "UPPER BOUND, excluded from the causality check"
+    versions:
+      - "adapted"
+    files:
+      - "naive.py::HindsightOracle"
+  - name: "videostorm"
+    experiments: 
+      - "A-episodic"
+    case: "D"
+    paper: "Zhang et al., Live Video Analytics at Scale with Approximation and Delay-Tolerance, NSDI 2017"
+    verified: "OpenAlex: NSDI 2017"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    decides: "episodic mode, cadence, frame count"
+    card: "cards/videostorm.md"
+    toy_test: "6/6 behaviours (Eq. 1, 2, 3, 4, S6.2.2, S6.3)"
+    versions:
+      - "reconstruction"
+      - "adapted"
+    files:
+      - "reconstructed/videostorm.py"
+      - "reconstructed/test_videostorm_toy.py"
+      - "videostorm_adapted.py"
+  - name: "ekya"
+    experiments: 
+      - "A-episodic"
+      - "C-mixed"
+    case: "B"
+    paper: "Bhardwaj et al., Ekya, NSDI 2022"
+    verified: "OpenAlex: arXiv 2020 record; USENIX NSDI 2022 page"
+    code_url: "https://github.com/edge-video-services/ekya"
+    pinned_commit: "2a6c8201db957cff2799d7ee831dac6f517b8a10"
+    license: "NONE FOUND - all rights reserved"
+    decides: "episodic mode, cadence, frame count, recall decision, session action"
+    card: "cards/ekya.md"
+    notes: "LICENSE FLAG: no licence file; clone used for citation only, nothing opened or run"
+    versions:
+      - "original (cloned, NOT executed)"
+      - "adapted"
+    files:
+      - "ekya_adapted.py"
+      - "~/baselines_src/ekya"
+  - name: "tuned-engine"
+    experiments: 
+      - "C-mixed"
+    case: "own"
+    paper: null
+    verified: null
+    code_url: "ours (StudyE10c)"
+    pinned_commit: null
+    license: null
+    decides: "engine configuration"
+    card: "cards/tuned_engine.md"
+    notes: "UNDER-SPECIFIED: StudyE10e does not exist; StudyE10c found no setting beats the default; the long-prefill threshold is untested. Defaults to E0 and refuses unmeasured names."
+    versions:
+      - "adapted"
+    files:
+      - "tuned_engine.py"
+  - name: "clockwork"
+    experiments: 
+      - "C-mixed"
+    case: "B"
+    paper: "Gujarati et al., Serving DNNs like Clockwork, OSDI 2020"
+    verified: "OpenAlex: arXiv 2020 record; USENIX OSDI 2020 page"
+    code_url: "https://gitlab.mpi-sws.org/cld/ml/clockwork"
+    pinned_commit: "6ce83e029051015ce1df6135b55256d214fd9503"
+    license: "Apache-2.0"
+    decides: "recall admission, order, session action"
+    card: "cards/clockwork.md"
+    notes: "original smoke: cmake configure fails at find_package(Boost); needs Boost + CUDA + TVM"
+    versions:
+      - "original (cloned, not built)"
+      - "adapted"
+    files:
+      - "clockwork_adapted.py"
+      - "~/baselines_src/clockwork"
+  - name: "confidence-cascade"
+    experiments: 
+      - "A-episodic"
+    case: "B"
+    paper: "Chen et al., FrugalGPT, TMLR 2024; Aggarwal et al., AutoMix, NeurIPS 2024"
+    verified: "OpenAlex: FrugalGPT arXiv 2023 record; AutoMix NeurIPS 2024"
+    code_url: "https://github.com/stanford-futuredata/FrugalGPT ; https://github.com/automix-llm/automix"
+    pinned_commit: "frugalgpt 2b23e6acbd4b39f71912816640dcc59e45aa4b5e; automix 531af3ee3c4e4f4a53da1ffbc91dec4d6bb73781"
+    license: "Apache-2.0 (both)"
+    decides: "episodic mode, recall decision"
+    card: "cards/cascade.md"
+    notes: "original smoke: FrugalGPT's committed summary CSV loads (PASS); its package needs transformers. AutoMix's example needs a data/ directory the repo does not ship."
+    versions:
+      - "original (cloned)"
+      - "adapted"
+    files:
+      - "cascade_adapted.py"
+      - "~/baselines_src/frugalgpt"
+      - "~/baselines_src/automix"
+  - name: "inar-vl"
+    experiments: 
+      - "A-episodic"
+      - "C-mixed"
+    case: "D"
+    paper: "Sabanovic, Maliakel, Brandic, INAR-VL, arXiv:2605.18853 (EdgeSys 2026)"
+    verified: "arXiv abstract page"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    decides: "episodic mode, cadence, frame count, recall decision"
+    card: "cards/inarvl.md"
+    toy_test: "6/6 behaviours (S3 stages 3, 4, 5)"
+    versions:
+      - "reconstruction"
+      - "adapted"
+    files:
+      - "reconstructed/inarvl.py"
+      - "reconstructed/test_inarvl_toy.py"
+      - "inarvl_adapted.py"
+  - name: "hybrid-llm"
+    experiments: 
+      - "A-episodic"
+      - "C-mixed"
+    case: "D"
+    paper: "Ding et al., Hybrid LLM, ICLR 2024"
+    verified: "OpenAlex: arXiv 2024 record; ICLR 2024 proceedings page"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    decides: "episodic mode, recall decision"
+    card: "cards/hybrid_llm.md"
+    toy_test: "6/6 behaviours (S3, S3.1-3.3, Eq. 1-4)"
+    versions:
+      - "reconstruction"
+      - "adapted"
+    files:
+      - "reconstructed/hybrid_llm.py"
+      - "reconstructed/test_hybrid_llm_toy.py"
+      - "hybrid_llm_adapted.py"
+  - name: "routellm"
+    experiments: 
+      - "A-episodic"
+      - "C-mixed"
+    case: "B"
+    paper: "Ong et al., RouteLLM, arXiv:2406.18665"
+    verified: "OpenAlex: arXiv 2024 record"
+    code_url: "https://github.com/lm-sys/RouteLLM"
+    pinned_commit: "0b64fdafe049e596a3f5657c219329f24af24198"
+    license: "Apache-2.0"
+    decides: "episodic mode, recall decision"
+    card: "cards/routellm.md"
+    notes: "original smoke: its tests need an OpenAI key and network; not run (no credentials)"
+    versions:
+      - "original (cloned)"
+      - "adapted"
+    files:
+      - "routellm_adapted.py"
+      - "~/baselines_src/routellm"
+  - name: "perllm"
+    experiments: 
+      - "C-mixed"
+    case: "D"
+    paper: "Yang et al., PerLLM, arXiv:2405.14636"
+    verified: "OpenAlex: arXiv 2024 record"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    decides: "episodic mode, cadence, frame count, recall decision"
+    card: "cards/perllm.md"
+    toy_test: "7/7 behaviours (S3.2, Eq. 4, CS-UCB, Algorithm 1)"
+    versions:
+      - "reconstruction"
+      - "adapted"
+    files:
+      - "reconstructed/perllm.py"
+      - "reconstructed/test_perllm_toy.py"
+      - "perllm_adapted.py"
+  - name: "attentionstore"
+    experiments: 
+      - "B-recall"
+    case: "D"
+    paper: "Gao et al., CachedAttention / AttentionStore, USENIX ATC 2024 (arXiv:2403.19708)"
+    verified: "OpenAlex: arXiv 2024 record; USENIX ATC 2024 page"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    decides: "session action, recall decision, order"
+    card: "cards/attentionstore.md"
+    toy_test: "6/6 behaviours (S4.1 Figs 6-7, S4.2, S4.3)"
+    versions:
+      - "reconstruction"
+      - "adapted"
+    files:
+      - "reconstructed/attentionstore.py"
+      - "reconstructed/test_attentionstore_toy.py"
+      - "attentionstore_adapted.py"
+  - name: "lmcache"
+    experiments: 
+      - "B-recall"
+    case: "B"
+    paper: "LMCache (system paper arXiv:2510.09665)"
+    verified: "repository + arXiv id"
+    code_url: "https://github.com/LMCache/LMCache"
+    pinned_commit: "6d8376b1248cbbc79806a9aacc2530f3951a41e1"
+    license: "Apache-2.0"
+    decides: "session action (LRU)"
+    card: "cards/lmcache.md"
+    notes: "original smoke: targets CUDA; tests import torch; not run on CPU"
+    versions:
+      - "original (cloned)"
+      - "adapted"
+    files:
+      - "lmcache_adapted.py"
+      - "~/baselines_src/lmcache"
+  - name: "pensieve"
+    experiments: 
+      - "B-recall"
+    case: "D"
+    paper: "Yu, Lin, Li, Pensieve, EuroSys 2025 (arXiv:2312.05516)"
+    verified: "OpenAlex: EuroSys 2025"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    decides: "session action, recall decision, order"
+    card: "cards/pensieve.md"
+    toy_test: "6/6 behaviours (S4 value ordering, token granularity, AOT swap)"
+    versions:
+      - "reconstruction"
+      - "adapted"
+    files:
+      - "reconstructed/pensieve.py"
+      - "reconstructed/test_pensieve_toy.py"
+      - "pensieve_adapted.py"
+  - name: "rh8-demand-aware"
+    experiments: 
+      - "B-recall"
+    case: "A"
+    paper: "StudyRH8 (ours)"
+    verified: "our own report"
+    code_url: "experiments/cost/study_rh8_demand_aware.py"
+    pinned_commit: null
+    license: null
+    decides: "session action"
+    card: "cards/rh8.md"
+    notes: "INTERFACE CONFLICT: RH8's MIX-DEMAND reads the ground-truth demand labels (its own 2026-11-03 audit says so), which the interface forbids. Both readings ship, labelled."
+    versions:
+      - "ORACLE (upper bound)"
+      - "causal (deployable)"
+    files:
+      - "rh8_adapted.py"
+  - name: "r3-streaming"
+    experiments: 
+      - "A-episodic"
+      - "B-recall"
+    case: "D"
+    paper: "Liu et al., R3-Streaming, arXiv:2605.17921"
+    verified: "arXiv abstract page"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    decides: "episodic mode, recall decision, representation, defer"
+    card: "cards/r3streaming.md"
+    toy_test: "7/7 behaviours (S4.2 Fig 2, S4(ii), S4(iii))"
+    versions:
+      - "reconstruction"
+      - "adapted"
+    files:
+      - "reconstructed/r3streaming.py"
+      - "reconstructed/test_r3streaming_toy.py"
+      - "r3streaming_adapted.py"
+  - name: "flashback"
+    case: "D (decided, NOT built)"
+    paper: "Chen et al., FlashBack: Knowing When to Remember in Streaming Vision-Language Models, arXiv:2610.01192"
+    verified: "arXiv abstract page (1 Oct 2026)"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    decides: null
+    card: null
+    notes: "BORDERLINE. Case D. Its decision - whether a query needs history BEFORE retrieving it - IS expressible as our representation + readiness choice, and it is close to R3-Streaming's Respond stage which is already built. Not built: the marginal value over r3-streaming is low. Half-day rule: under budget, but deliberately deferred."
+    versions: []
+    files: []
+  - name: "covstream-PRE-ADDENDUM-SUPERSEDED"
+    case: "SUPERSEDED by the addendum entry below"
+    paper: "Liu et al., CoVStream, arXiv:2606.22804"
+    verified: "arXiv abstract page"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    decides: null
+    card: null
+    notes: "This entry recorded the pre-addendum decision NOT to build CoVStream, on the grounds that its caption/entity-graph representation is one we have never measured. The addendum promoted it to conditional P1 once its representation-construction compute is CHARGED, which removes the unfairness; see the covstream entry below and cards/covstream.md. Kept so the change of decision is visible."
+    versions: []
+    files: []
+  - name: "tmo"
+    case: "B (decided, NOT built)"
+    paper: "Yuan, Han, Wang, Brinton, TMO / Three-M Offloading, MobiHoc 2025; journal version IEEE/ACM Trans. Networking"
+    verified: "OpenAlex: IEEE Transactions on Networking 2026; arXiv:2502.11007 v5"
+    code_url: "https://github.com/liangqiyuan/TMO"
+    pinned_commit: "80830c6d863e2a1cdde831bd6a4d0d1dfb599a78"
+    license: "MIT"
+    decides: null
+    card: null
+    notes: "BORDERLINE. Author-linked code, MIT, cloned and pinned. Not built: its decision logic IS a trained constrained-RL policy, so an adapted version would have to RETRAIN (torch + stable_baselines3), and using it untrained would not be TMO. Deferred."
+    versions:
+      - "original (cloned)"
+    files:
+      - "~/baselines_src/tmo"
+
+# ---- addendum entries ----
+  - name: "eco-llm"
+    case: "D"
+    priority: "P0"
+    paper: "Patidar, Crown, Hsieh, Xu, ECO-LLM: Orchestration for Domain-specific Edge-Cloud Language Models, arXiv:2507.09003 (11 Jul 2025, Microsoft Research)"
+    verified: "arXiv API: id, title, authors, date. NAME NOTE: a DIFFERENT 2024 paper also uses the ECO-LLM name; the id resolves to the MSR one"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    card: "cards/ecollm.md"
+    toy_test: "6/6 behaviours"
+    experiments:
+      - "A-episodic"
+      - "B-recall"
+      - "C-mixed"
+    versions:
+      - "reconstruction"
+      - "adapted"
+    files:
+      - "reconstructed/ecollm.py"
+      - "reconstructed/test_ecollm_toy.py"
+      - "ecollm_adapted.py"
+  - name: "streamscout"
+    case: "D"
+    priority: "P0"
+    paper: "StreamScout: Learning When to Look Deeper for Streaming Video Understanding, arXiv:2609.00291"
+    verified: "arXiv API (id found by title search; the addendum gave none)"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    card: "cards/streamscout.md"
+    toy_test: "7/7 behaviours"
+    experiments:
+      - "B-recall"
+    versions:
+      - "reconstruction"
+      - "adapted"
+    files:
+      - "reconstructed/streamscout.py"
+      - "reconstructed/test_streamscout_toy.py"
+      - "streamscout_adapted.py"
+  - name: "preble"
+    case: "B"
+    priority: "P0"
+    paper: "Srivatsa, He, Abhyankar, Li et al., Preble: Efficient Distributed Prompt Scheduling for LLM Serving, arXiv:2407.00023"
+    verified: "OpenAlex + arXiv API"
+    code_url: "https://github.com/WukLab/preble"
+    pinned_commit: "1a35eae20c416f7062ca81775aab72890323fd97"
+    license: "Apache-2.0"
+    card: "cards/preble.md"
+    notes: "LABELLED a policy adaptation, not a reproduction: Preble is multi-GPU and we have one replica (multi_instance_adapted=True, fairness rule 2)"
+    experiments:
+      - "C-mixed"
+    versions:
+      - "original (cloned)"
+      - "adapted"
+    files:
+      - "preble_adapted.py"
+      - "~/baselines_src/preble"
+  - name: "mooncake"
+    case: "B"
+    priority: "P0/P1"
+    paper: "Qin et al., Mooncake: A KVCache-centric Disaggregated Architecture for LLM Serving, ACM Transactions on Storage 2025 / FAST 25 (arXiv:2407.00079)"
+    verified: "OpenAlex: ACM Transactions on Storage 2025"
+    code_url: "https://github.com/kvcache-ai/Mooncake"
+    pinned_commit: "5ffbf763368d4084b3a95c0e7f87d259e3d2872e"
+    license: "Apache-2.0"
+    card: "cards/mooncake.md"
+    notes: "prediction-based early rejection kept; the TBT SLO has no analogue here (StudyE10d: our requests are prefill-dominated) and is stated as dropped"
+    experiments:
+      - "C-mixed"
+    versions:
+      - "original (cloned)"
+      - "adapted"
+    files:
+      - "mooncake_adapted.py"
+      - "~/baselines_src/mooncake"
+  - name: "kvflow"
+    case: "D"
+    priority: "P1"
+    paper: "Pan et al., KVFlow: Efficient Prefix Caching for Accelerating LLM-Based Multi-Agent Workflows, arXiv:2507.07400"
+    verified: "arXiv API verifies the id; the NeurIPS 2025 venue the addendum gives is **UNVERIFIED**"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    card: "cards/kvflow.md"
+    toy_test: "6/6 behaviours"
+    notes: "the paper's steps-to-execution comes from a KNOWN workflow graph, which fairness rule 5 forbids; the adapted version estimates it causally from observed inter-arrivals - a principle adaptation, NOT a reproduction"
+    experiments:
+      - "B-recall"
+    versions:
+      - "reconstruction"
+      - "adapted"
+    files:
+      - "reconstructed/kvflow.py"
+      - "reconstructed/test_kvflow_toy.py"
+      - "kvflow_adapted.py"
+  - name: "uniscale"
+    case: "D"
+    priority: "P1"
+    paper: "Huang et al., UniScale: Adaptive Unified Inference Scaling via Online Joint Optimization of Model Routing and Test-Time Scaling, arXiv:2605.30898"
+    verified: "arXiv API verifies the id; the ICML 2026 venue the addendum gives is **UNVERIFIED**"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    card: "cards/uniscale.md"
+    toy_test: "7/7 behaviours"
+    experiments:
+      - "A-episodic"
+      - "C-mixed"
+    versions:
+      - "reconstruction"
+      - "adapted"
+    files:
+      - "reconstructed/uniscale.py"
+      - "reconstructed/test_uniscale_toy.py"
+      - "uniscale_adapted.py"
+  - name: "thinking-qwenvl-atdm"
+    case: "D"
+    priority: "P1"
+    paper: "Zhang et al., Progressive Online Video Understanding with Evidence-Aligned Timing and Transparent Decisions, arXiv:2604.18459"
+    verified: "arXiv API verifies the id; the ICLR 2026 venue the addendum gives is **UNVERIFIED**"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    card: "cards/thinking_qwenvl.md"
+    toy_test: "7/7 behaviours"
+    notes: "COMPONENT baseline: declares restricts_action_space with a reason (fairness rule 4)"
+    experiments:
+      - "A-episodic"
+    versions:
+      - "reconstruction"
+      - "adapted"
+    files:
+      - "reconstructed/thinking_qwenvl.py"
+      - "reconstructed/test_thinking_qwenvl_toy.py"
+      - "thinking_qwenvl_adapted.py"
+  - name: "simplestream"
+    case: "B"
+    priority: "required"
+    paper: "Shen, Tian, Yang, Liu, A Simple Baseline for Streaming Video Understanding, arXiv:2604.02317"
+    verified: "arXiv API"
+    code_url: "https://github.com/EvolvingLMMs-Lab/SimpleStream"
+    pinned_commit: "be227ee8ce90a258b286a34161688c2a59eeeadb"
+    license: "NONE FOUND - all rights reserved"
+    card: "cards/simplestream.md"
+    notes: "LICENCE FLAG as Ekya: no licence file, so citation only - nothing opened, run or copied. Window FITTED on the StudyD3 development split (1 s, AUROC 0.654 vs 0.632-0.644), never set to an arbitrarily poor value"
+    experiments:
+      - "B-recall"
+    versions:
+      - "original (cloned, NOT executed)"
+      - "adapted"
+    files:
+      - "simplestream_adapted.py"
+      - "~/baselines_src/simplestream"
+  - name: "covstream"
+    case: "D"
+    priority: "conditional P1"
+    paper: "Liu, Chen, Yan, Wu, Wang, CoVStream: Edge-Cloud Collaboration for Understanding of Long Video Streams, arXiv:2606.22804"
+    verified: "arXiv abstract page"
+    code_url: "none found"
+    pinned_commit: null
+    license: null
+    card: "cards/covstream.md"
+    toy_test: "6/6 behaviours"
+    notes: "PROMOTED from related-work-only by the addendum once its representation-construction compute is CHARGED (fairness rule 3), which is what made it unfair before. Largest substitution in the suite: we do not caption and do not build an entity graph"
+    experiments:
+      - "B-recall"
+    versions:
+      - "reconstruction"
+      - "adapted"
+    files:
+      - "reconstructed/covstream.py"
+      - "reconstructed/test_covstream_toy.py"
+      - "covstream_adapted.py"
+  - name: "route2look"
+    case: "UNVERIFIED - NOT BUILT"
+    priority: "-"
+    paper: "Route2Look (no identifier given)"
+    verified: "**NOT FOUND**: OpenAlex title search returned no record"
+    code_url: null
+    pinned_commit: null
+    license: null
+    card: null
+    notes: "Per the addendum: verified first, no paper found, so marked unverified and nothing else was done."
+    experiments: []
+    versions: []
+    files: []
+  - name: "fairway"
+    case: "UNVERIFIED - NOT BUILT"
+    priority: "-"
+    paper: "Fairway (no identifier given)"
+    verified: "**NOT FOUND**: two OpenAlex title searches returned no record"
+    code_url: null
+    pinned_commit: null
+    license: null
+    card: null
+    notes: "Per the addendum: verified first, no paper found, so marked unverified and nothing else was done."
+    experiments: []
+    versions: []
+    files: []
+  - name: "querystream"
+    case: "UNVERIFIED - NOT BUILT"
+    priority: "P1 (requested)"
+    paper: "QueryStream, claimed ICLR 2026 (no identifier given)"
+    verified: "**NOT FOUND**: OpenAlex title search returned no record"
+    code_url: null
+    pinned_commit: null
+    license: null
+    card: null
+    notes: "Requested as a P1 component baseline, but no paper could be located, so building it would mean inventing its gating logic. Treated like Route2Look and Fairway: unverified, not built. NEEDS AN IDENTIFIER."
+    experiments: []
+    versions: []
+    files: []
+  - name: "B3-best-static"
+    case: "constructed"
+    priority: "-"
+    paper: null
+    verified: null
+    code_url: "ours"
+    pinned_commit: null
+    license: null
+    card: "cards/constructed.md"
+    notes: null
+    experiments:
+      - "A-episodic"
+      - "B-recall"
+      - "C-mixed"
+    versions:
+      - "constructed"
+    files:
+      - "constructed.py::B3BestStatic"
+  - name: "B4-query-type-routing"
+    case: "constructed"
+    priority: "-"
+    paper: null
+    verified: null
+    code_url: "ours"
+    pinned_commit: null
+    license: null
+    card: "cards/constructed.md"
+    notes: null
+    experiments:
+      - "C-mixed"
+    versions:
+      - "constructed"
+    files:
+      - "constructed.py::B4QueryTypeRouting"
+  - name: "B6-latency-aware-routing"
+    case: "constructed"
+    priority: "-"
+    paper: null
+    verified: null
+    code_url: "ours"
+    pinned_commit: null
+    license: null
+    card: "cards/constructed.md"
+    notes: null
+    experiments:
+      - "C-mixed"
+    versions:
+      - "constructed"
+    files:
+      - "constructed.py::B6LatencyAwareRouting"
+  - name: "B7-edf-feasibility"
+    case: "constructed"
+    priority: "-"
+    paper: null
+    verified: null
+    code_url: "ours"
+    pinned_commit: null
+    license: null
+    card: "cards/constructed.md"
+    notes: null
+    experiments:
+      - "C-mixed"
+    versions:
+      - "constructed"
+    files:
+      - "constructed.py::B7EDFFeasibility"
+  - name: "B8-utility-per-gpu-second"
+    case: "constructed"
+    priority: "-"
+    paper: null
+    verified: null
+    code_url: "ours"
+    pinned_commit: null
+    license: null
+    card: "cards/constructed.md"
+    notes: null
+    experiments:
+      - "A-episodic"
+      - "C-mixed"
+    versions:
+      - "constructed"
+    files:
+      - "constructed.py::B8UtilityPerGPUSecond"
+  - name: "B9-best-of-breed"
+    case: "constructed"
+    priority: "-"
+    paper: null
+    verified: null
+    code_url: "ours"
+    pinned_commit: null
+    license: null
+    card: "cards/constructed.md"
+    notes: "THE PRIMARY COMPETITOR: four independent mechanisms with a documented precedence; see the card"
+    experiments:
+      - "C-mixed"
+    versions:
+      - "constructed"
+    files:
+      - "constructed.py::B9BestOfBreed"

@@ -1,0 +1,58 @@
+{
+ "frugalgpt": {
+  "ran": true,
+  "what": "loaded the repo's own committed cascade summary summary_HEADLINES_e8_full_2024.csv",
+  "detail": "30 rows, columns ['Unnamed: 0', 'Test_acc', 'Test_cost', 'Test_size', 'Train_acc', 'Train_cost']",
+  "full_import_blocked_by": "ModuleNotFoundError: transformers (the package imports a model stack; cohere/anthropic/requests installed fine)",
+  "pinned_commit": "2b23e6acbd4b39f71912816640dcc59e45aa4b5e",
+  "path": "/home/pragya/baselines_src/frugalgpt"
+ },
+ "clockwork": {
+  "ran": false,
+  "what": "cmake configure attempted",
+  "detail": "configure fails at find_package(Boost) - Boost is not installed on this host; the repo is ~26k lines of C++ and its docs require Boost, CUDA and TVM. The paper's emulated-worker mode would permit a GPU-free run, but building the toolchain is outside this task.",
+  "license": "Apache-2.0 (MPI-SWS)",
+  "pinned_commit": "6ce83e029051015ce1df6135b55256d214fd9503",
+  "path": "/home/pragya/baselines_src/clockwork"
+ },
+ "ekya": {
+  "ran": false,
+  "what": "NOT EXECUTED BY CHOICE",
+  "detail": "the repository has NO LICENSE file anywhere (searched LICENSE/COPYING and the README), so no use or modification right is granted. It was cloned for citation and commit pinning only; no file was opened, run or copied, and the adapted baseline was written from the PAPER. Its own CPU-runnable toy example (simulator/tiny_sim.ipynb, numpy + matplotlib only) was therefore left unrun. FLAGGED for the user.",
+  "license": "NONE FOUND - all rights reserved by default",
+  "pinned_commit": "2a6c8201db957cff2799d7ee831dac6f517b8a10",
+  "path": "/home/pragya/baselines_src/ekya"
+ },
+ "automix": {
+  "ran": false,
+  "what": "Scoring.ipynb inspected",
+  "detail": "its offline scorer needs only pandas, but reads data/automix_llama2_outputs_ver_n32.jsonl, and the repo ships no data/ directory, so its own example cannot run without downloading the generations.",
+  "license": "Apache-2.0",
+  "pinned_commit": "531af3ee3c4e4f4a53da1ffbc91dec4d6bb73781",
+  "path": "/home/pragya/baselines_src/automix"
+ },
+ "routellm": {
+  "ran": false,
+  "what": "tests inspected",
+  "detail": "routellm/tests/{test_openai_client,test_openai_server}.py both require an OpenAI API key and network calls. The task forbids handling credentials, so they were not run; the mf router additionally downloads a checkpoint from HuggingFace.",
+  "license": "Apache-2.0",
+  "pinned_commit": "0b64fdafe049e596a3f5657c219329f24af24198",
+  "path": "/home/pragya/baselines_src/routellm"
+ },
+ "lmcache": {
+  "ran": false,
+  "what": "tests inspected",
+  "detail": "the package targets CUDA (CMakeLists.txt + csrc/); its light tests import the lmcache package, which pulls torch. Not run on a CPU-only host.",
+  "license": "Apache-2.0",
+  "pinned_commit": "6d8376b1248cbbc79806a9aacc2530f3951a41e1",
+  "path": "/home/pragya/baselines_src/lmcache"
+ },
+ "tmo": {
+  "ran": false,
+  "what": "requirements inspected",
+  "detail": "requires torch 2.8.0, gymnasium and stable_baselines3; CPU-feasible in principle but a heavy install, and TMO is a BORDERLINE candidate, so it was not built (see the borderline decision in the report).",
+  "license": "MIT",
+  "pinned_commit": "80830c6d863e2a1cdde831bd6a4d0d1dfb599a78",
+  "path": "/home/pragya/baselines_src/tmo"
+ }
+}
