@@ -1,0 +1,191 @@
+{
+ "label": "StudyE10a-full: JPEG q88 vs PNG on all 845 S-EMBER questions, 32B-I K3 / K1 (H100 GPU 2, vLLM 0.31.0, batched, prefix caching off, processor cache 0)",
+ "cells": {
+  "K3": {
+   "n": 845,
+   "rows": 845,
+   "error_rows": 0,
+   "retried": 0,
+   "still_failed": 0,
+   "prompt_tokens_match_r1": 845,
+   "r1_prompt_tokens_match": 845,
+   "cached_nonzero": 0,
+   "unparsed_jpeg": 0,
+   "unparsed_png": 0,
+   "acc_png_r1": 0.3834319526627219,
+   "acc_jpeg": 0.39171597633136096,
+   "acc_png_r1_video_ci": [
+    0.34777141038965975,
+    0.4194436225022627
+   ],
+   "acc_jpeg_video_ci": [
+    0.3548588670191931,
+    0.4267487689672706
+   ],
+   "jpeg_minus_png": {
+    "n": 845,
+    "videos": 234,
+    "est": 0.008284023668639054,
+    "ci": [
+     -0.002448205967177815,
+     0.020071431362533875
+    ]
+   },
+   "ci_inside_pm2pp": false,
+   "letter_agreement": 0.9408284023668639,
+   "disagreements": 50,
+   "disagreement_kinds": {
+    "both_wrong": 25,
+    "jpeg_right": 16,
+    "png_right": 9
+   },
+   "by_category": {
+    "counting_objects_events": {
+     "n": 110,
+     "png": 0.2727272727272727,
+     "jpeg": 0.2545454545454545
+    },
+    "location_trace": {
+     "n": 97,
+     "png": 0.4020618556701031,
+     "jpeg": 0.4020618556701031
+    },
+    "object_comparison": {
+     "n": 91,
+     "png": 0.3626373626373626,
+     "jpeg": 0.3956043956043956
+    },
+    "sequential_action": {
+     "n": 102,
+     "png": 0.38235294117647056,
+     "jpeg": 0.38235294117647056
+    },
+    "spatial_aware_reasoning": {
+     "n": 91,
+     "png": 0.15384615384615385,
+     "jpeg": 0.17582417582417584
+    },
+    "temporal_ordering_recognition": {
+     "n": 90,
+     "png": 0.4,
+     "jpeg": 0.4222222222222222
+    },
+    "time_duration": {
+     "n": 121,
+     "png": 0.4462809917355372,
+     "jpeg": 0.4628099173553719
+    },
+    "visual_detail_recall": {
+     "n": 143,
+     "png": 0.5524475524475524,
+     "jpeg": 0.5524475524475524
+    }
+   },
+   "video_url_mb_median": 7.324516,
+   "png_request_mb_median_jobA": 33.41275,
+   "n_frames_median": 122.0
+  },
+  "K1": {
+   "n": 845,
+   "rows": 845,
+   "error_rows": 0,
+   "retried": 0,
+   "still_failed": 0,
+   "prompt_tokens_match_r1": 845,
+   "r1_prompt_tokens_match": 845,
+   "cached_nonzero": 0,
+   "unparsed_jpeg": 0,
+   "unparsed_png": 0,
+   "acc_png_r1": 0.3952662721893491,
+   "acc_jpeg": 0.3893491124260355,
+   "acc_png_r1_video_ci": [
+    0.36098116594483703,
+    0.43022124357764496
+   ],
+   "acc_jpeg_video_ci": [
+    0.3537323790716372,
+    0.4250325205551117
+   ],
+   "jpeg_minus_png": {
+    "n": 845,
+    "videos": 234,
+    "est": -0.005917159763313609,
+    "ci": [
+     -0.02142984998295261,
+     0.008383484828903342
+    ]
+   },
+   "ci_inside_pm2pp": false,
+   "letter_agreement": 0.9124260355029585,
+   "disagreements": 74,
+   "disagreement_kinds": {
+    "png_right": 22,
+    "jpeg_right": 17,
+    "both_wrong": 35
+   },
+   "by_category": {
+    "counting_objects_events": {
+     "n": 110,
+     "png": 0.2636363636363636,
+     "jpeg": 0.2636363636363636
+    },
+    "location_trace": {
+     "n": 97,
+     "png": 0.30927835051546393,
+     "jpeg": 0.29896907216494845
+    },
+    "object_comparison": {
+     "n": 91,
+     "png": 0.38461538461538464,
+     "jpeg": 0.3956043956043956
+    },
+    "sequential_action": {
+     "n": 102,
+     "png": 0.45098039215686275,
+     "jpeg": 0.43137254901960786
+    },
+    "spatial_aware_reasoning": {
+     "n": 91,
+     "png": 0.15384615384615385,
+     "jpeg": 0.14285714285714285
+    },
+    "temporal_ordering_recognition": {
+     "n": 90,
+     "png": 0.45555555555555555,
+     "jpeg": 0.4777777777777778
+    },
+    "time_duration": {
+     "n": 121,
+     "png": 0.4628099173553719,
+     "jpeg": 0.4628099173553719
+    },
+    "visual_detail_recall": {
+     "n": 143,
+     "png": 0.5804195804195804,
+     "jpeg": 0.5524475524475524
+    }
+   },
+   "video_url_mb_median": 7.965568,
+   "png_request_mb_median_jobA": 34.914,
+   "n_frames_median": 232.0
+  }
+ },
+ "e10a_subset_check": {
+  "n": 100,
+  "same_letter": 100
+ },
+ "verdict": {
+  "rule": "JPEG acceptable for S-EMBER iff, for EACH of K3 and K1, the 95 % CI of the paired accuracy difference (JPEG - PNG, video bootstrap 2,000, seed 0) lies inside [-2, +2] pp",
+  "K3_inside": false,
+  "K1_inside": false,
+  "acceptable": false
+ },
+ "_provenance": {
+  "git_commit": "7a72faca7f5b6cb2ffae99d0d9d1a85aa998f0be",
+  "script": "study_e10a_full_analyse.py",
+  "model": "32BI",
+  "timestamp": "2026-11-11T22:21:48.262122",
+  "device": "cpu",
+  "n": 1690
+ }
+}

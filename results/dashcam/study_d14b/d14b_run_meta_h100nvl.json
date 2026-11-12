@@ -1,0 +1,364 @@
+{
+ "done": [],
+ "stack": {
+  "venv": "/home/pragya/.venvs/fm-switching-vllm",
+  "vllm": "0.31.0",
+  "torch": "2.13.0+cu129",
+  "gpu": "h100nvl GPU 2",
+  "gpu_uuid": "GPU-4f1d7e47-e769-a289-4860-e71c0d97267c",
+  "flags": [
+   "--limit-mm-per-prompt",
+   "{\"image\": 9, \"video\": 0}",
+   "--mm-processor-cache-gb",
+   "0",
+   "--host",
+   "127.0.0.1"
+  ],
+  "gen": {
+   "temperature": 0.0,
+   "max_tokens": 8,
+   "seed": 0,
+   "logprobs": true,
+   "top_logprobs": 20
+  },
+  "query": "Is a collision or near-collision involving the camera vehicle happening or about to happen? Answer only Yes or No.",
+  "concurrency": 8,
+  "prefix_caching": false,
+  "processor_cache_gb": 0
+ },
+ "servers": [
+  {
+   "model": "4BI",
+   "ns": [
+    1
+   ],
+   "started": "2026-11-11T17:40:14.494479",
+   "key": "4BI",
+   "repo": "Qwen/Qwen3-VL-4B-Instruct",
+   "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec70b05090aa6165b016eac8ec08e71b17",
+    "--served-model-name",
+    "4BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--limit-mm-per-prompt",
+    "{\"image\": 9, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 45.5,
+   "log": "logs/study_x_server_4BI_1111_173925.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 516512,
+   "max_concurrency_at_max_len": 15.76,
+   "available_kv_gib": "70.93",
+   "model_weights_gib": "8.69",
+   "attention_backend_lines": [
+    "(EngineCore pid=2119925) INFO 11-11 17:39:42 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=2119925) INFO 11-11 17:39:42 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=2119925) INFO 11-11 17:39:43 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=2119925) INFO 11-11 17:39:43 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=2119925) INFO 11-11 17:39:46 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 9, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--host",
+    "127.0.0.1"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 2119524,
+    "my_pgid": 2119524,
+    "gpu3": [
+     {
+      "pid": 2119925,
+      "sid": 2119524,
+      "pgid": 2119524,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "model": "32BI",
+   "ns": [
+    1,
+    3
+   ],
+   "started": "2026-11-11T17:55:59.771136",
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--limit-mm-per-prompt",
+    "{\"image\": 9, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 63.7,
+   "log": "logs/study_x_server_32BI_1111_175452.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=2129303) INFO 11-11 17:55:10 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=2129303) INFO 11-11 17:55:10 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=2129303) INFO 11-11 17:55:11 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=2129303) INFO 11-11 17:55:11 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=2129303) INFO 11-11 17:55:20 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 9, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--host",
+    "127.0.0.1"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 2119524,
+    "my_pgid": 2119524,
+    "gpu3": [
+     {
+      "pid": 2129303,
+      "sid": 2119524,
+      "pgid": 2119524,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  },
+  {
+   "model": "4BI",
+   "ns": [
+    3
+   ],
+   "started": "2026-11-11T22:20:05.810887",
+   "key": "4BI",
+   "repo": "Qwen/Qwen3-VL-4B-Instruct",
+   "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec70b05090aa6165b016eac8ec08e71b17",
+    "--served-model-name",
+    "4BI",
+    "--port",
+    "8011",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--limit-mm-per-prompt",
+    "{\"image\": 9, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--host",
+    "127.0.0.1"
+   ],
+   "startup_s": 39.5,
+   "log": "logs/study_x_server_4BI_1111_221922.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 516512,
+   "max_concurrency_at_max_len": 15.76,
+   "available_kv_gib": "70.93",
+   "model_weights_gib": "8.69",
+   "attention_backend_lines": [
+    "(EngineCore pid=2261923) INFO 11-11 22:19:40 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=2261923) INFO 11-11 22:19:40 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=2261923) INFO 11-11 22:19:40 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=2261923) INFO 11-11 22:19:40 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=2261923) INFO 11-11 22:19:43 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 9, \"video\": 0}",
+    "--mm-processor-cache-gb",
+    "0",
+    "--host",
+    "127.0.0.1"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 2119524,
+    "my_pgid": 2119524,
+    "gpu3": [
+     {
+      "pid": 2261923,
+      "sid": 2119524,
+      "pgid": 2119524,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   }
+  }
+ ],
+ "prompt_trace": {
+  "N1": {
+   "request_id": "01040_t03.00_N1",
+   "header": "The following is 1 dashcam frame.",
+   "prompt_tokens": 378,
+   "digits_outside_header": [],
+   "passed": true
+  },
+  "N3": {
+   "request_id": "01040_t03.00_N3",
+   "header": "The following are 3 consecutive dashcam frames covering 3 seconds, oldest first.",
+   "prompt_tokens": 1062,
+   "digits_outside_header": [],
+   "passed": true
+  }
+ },
+ "determinism": {
+  "4BI_N1": {
+   "identical": 10660,
+   "compared": 10660
+  },
+  "32BI_N1": {
+   "identical": 10660,
+   "compared": 10660
+  },
+  "32BI_N3": {
+   "identical": 10660,
+   "compared": 10660
+  },
+  "4BI_N3": {
+   "identical": 10660,
+   "compared": 10660
+  }
+ },
+ "_provenance": [
+  {
+   "git_commit": "7a72faca7f5b6cb2ffae99d0d9d1a85aa998f0be",
+   "script": "d14b_infer_vllm.py",
+   "model": "4BI",
+   "timestamp": "2026-11-11T17:54:50.747147",
+   "device": "h100nvl_gpu2",
+   "n": 42114,
+   "args": {
+    "model": "4BI",
+    "ns": "1"
+   }
+  },
+  {
+   "git_commit": "7a72faca7f5b6cb2ffae99d0d9d1a85aa998f0be",
+   "script": "d14b_infer_vllm.py",
+   "model": "32BI",
+   "timestamp": "2026-11-11T21:06:40.839420",
+   "device": "h100nvl_gpu2",
+   "n": 84228,
+   "args": {
+    "model": "32BI",
+    "ns": "1,3"
+   }
+  },
+  {
+   "git_commit": "7a72faca7f5b6cb2ffae99d0d9d1a85aa998f0be",
+   "script": "d14b_infer_vllm.py",
+   "model": "4BI",
+   "timestamp": "2026-11-11T22:45:57.064670",
+   "device": "h100nvl_gpu2",
+   "n": 42114,
+   "args": {
+    "model": "4BI",
+    "ns": "3"
+   }
+  }
+ ],
+ "summary": {
+  "4BI_N1": {
+   "ok_rows": 42114,
+   "error_rows": 0,
+   "still_failed": 0,
+   "neither": 0
+  },
+  "32BI_N1,3": {
+   "ok_rows": 84228,
+   "error_rows": 0,
+   "still_failed": 0,
+   "neither": 0
+  },
+  "4BI_N3": {
+   "ok_rows": 42114,
+   "error_rows": 0,
+   "still_failed": 0,
+   "neither": 0
+  }
+ }
+}

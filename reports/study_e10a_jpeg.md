@@ -168,7 +168,7 @@ Notes, not changing the verdict:
 ## 4. Deviations
 
 - **JPEG q90 bytes for Nexar** are re-encoded from the PNG-decoded pixels, as the spec says. They are not taken from the stored on-disk JPEG (1.11× PNG; it is the D14 frame cache, not a wire format).
-- **S-EMBER JPEG frames** are the q88 cache bytes sent directly. The K3 reference sent PNG frames decoded from the same cache, so the comparison is "q88 JPEG bytes vs lossless re-encoding of the same pixels".
+- **S-EMBER JPEG frames** are R1's final-size frames (the K3 request's npz frames, already resized to the request resolution), JPEG q88-encoded on the client by `study_e10a_parity_vllm.jpeg_b64`, as specified. The K3 reference sent the same final-size frames PNG-encoded, so the comparison is "JPEG q88 vs lossless PNG of the same final-size pixels". *(Wording corrected 2026-11-11 under StudyE10a-full; an earlier version said "the q88 cache bytes sent directly", which does not describe the code. No number or verdict changed.)*
 - Run metadata records GPU 2 and UUID GPU-4f1d7e47… (nvidia-smi index 2).
 
 ## 5. Outputs
