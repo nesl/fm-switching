@@ -1,5 +1,7 @@
 # FM-switching — Project Status
 
+Last updated: 2026-11-13 (later) (**StudySLICE1 PART C COMPLETE (h100nvl GPU 2): MANAGING WARM TRAFFIC LIKE COLD SLICES DOES NOT RESTORE EPISODIC CAPACITY.** P5 (Part B's P4 cold path + warm appends held until a predicted episodic gap, escalations gap-aligned) reaches 10 % at C4a (KV-HOST k 8 + cold r 0.05) and < 10 % at C4 (r 0.1; 0.453 s at 10 %, inside run noise of 0.007 s) against this run's warm-only C2-P0 ceiling of 30 %, and does not raise warm-only capacity (C2 P5 30 % = P0 30 %). Recalls (100 % <= 10 s) and escalations (100 % <= 5 s) meet their deadlines; escalation letters agree with P0 (99 / 95 / 100 %); warm GPU work 1.00x. Mechanism (measured): appends take longer under load than the low-load prediction (0.425 vs 0.307 s) and independently gap-released held work bunches into the same gaps, so the hold helps at 10 % and hurts at 20 % and above. Real negative for this rule; a load-aware, jointly scheduled release is untested. Coalescing UNEXERCISED (held appends release within 3.4 s, next append due at 10 s); no claim. P4 with 1,024-token slices at C1b: 25 % (Part B n 2,048: 20 %), 86.7 % <= 10 s, below the 30 % rule. 22 cells, 2 h 44 min, not VOID; consistency PASS 6/6; mechanism verification before the sweep (report §11-16).)
+
 ## Last updated: 2026-11-13 (StudySIM1d-validate)
 
 **StudySIM1d-validate is COMPLETE and two pre-registered stopping conditions fired.** It is an

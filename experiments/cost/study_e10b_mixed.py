@@ -185,6 +185,7 @@ class Episodic:
 
 
 R1ROWS = None
+WARM_DEVICE = None          # StudySLICE1 Part C hook: replaces R6.device for warm sessions when set; None = R6.device
 
 
 def k1_body(q):
@@ -285,7 +286,7 @@ async def run_cell(kv, k, r, n, frac, srv_pid, ep, cold_cursor):
     X.log(f"{tg}: warm-up {warmup_s:.1f}s; window starts (episodic {rate:.2f} req/s, k {k}, cold {r} req/s)")
     await asyncio.gather(dispatch(client, "episodic", ep_times, ep_items, t_w0, cell.t0, tasks, dict(n=n)),
                          dispatch(client, "cold_recall", cold_times, cold_items, t_w0, cell.t0, tasks, {}),
-                         *(R6.device(cell, d, plans[d], offsets[d], window_end) for d in range(k)))
+                         *((WARM_DEVICE or R6.device)(cell, d, plans[d], offsets[d], window_end) for d in range(k)))
     await asyncio.sleep(max(0.0, window_end - time.time()))
     m_w1 = await R5.scrape_once(cell.client)
     inflight_end = sum(not t.done() for t in tasks) + len(cell.inflight)
