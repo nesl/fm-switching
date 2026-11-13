@@ -106,6 +106,25 @@ def warm_miss_fraction(footprint: float) -> float:
 # gate runs at 10-40 % load, inside the regime where the estimate was taken.
 #
 # DEFAULT OFF (0.0). With the default, this file's behaviour is byte-identical to StudySIM1.
+# ---------------------------------------------------------------- StudySIM1d option (OFF here)
+# THE MODE-INDEPENDENT OVERLAP COST. StudySIM1b found that an episodic request whose service
+# overlaps an in-flight WARM recall request pays 0.05-0.07 s, and that the penalty is the SAME
+# SIZE in KV-GPU and KV-HOST cells, so it is not a property of the host-offload connector. SIM1b
+# did not model it because its own pre-registered rule required the effect to be host-specific.
+#
+# StudySIM1d fits it on cells that are in NO StudySIM1 gate cell: StudyE10b's KV-GPU k = 2
+# ladders and StudyE10c's / StudyE10e's KV-HOST cells at engine configurations E1, E2, E4, P1,
+# P2 and P3, which the gate never reproduces. Its pre-registered test of the FORM is StudySIM1b's
+# own: the per-cell OVERLAP-minus-CLEAR difference rises with load (slope +0.066 s per unit load,
+# CI +0.033 to +0.092), so the cost is BLOCKING - engine time that queueing amplifies - and is
+# charged as a per-step cost on every step that contains a warm recall request's prefill, paid by
+# every request in that step. The magnitude is read at the lowest load on the ladder (10 %),
+# where queueing amplification is smallest: the median of 12 held-out cells.
+#
+# DEFAULT OFF (0.0). With the default, this file's behaviour is byte-identical to StudySIM1.
+OVERLAP_STEP_COST_S = 0.0481
+OVERLAP_KINDS = ("append", "escalation")
+
 HOST_MODE_COST_S = 0.0385
 HOST_MODE_COST_CELLS_S = {("N1", 25): 0.0414, ("N1", 50): 0.0355,
                           ("N1", 75): -0.0006, ("N1", 90): 0.0170,
@@ -178,7 +197,8 @@ class Engine:
                  gpu_kv_tokens: int = GPU_KV_TOKENS,
                  step_overhead_s: float = STEP_OVERHEAD_S,
                  host_mode_cost_s: float = 0.0,
-                 host_mode_cost_force: bool = False) -> None:
+                 host_mode_cost_force: bool = False,
+                 overlap_step_cost_s: float = 0.0) -> None:
         if config not in CONFIGS:
             raise ValueError(f"unmeasured engine configuration {config!r}; measured: "
                              f"{sorted(CONFIGS)}")
@@ -194,6 +214,8 @@ class Engine:
         # the cost in GPU mode too, where it must make the cell DISAGREE with its measurement.
         self.host_mode_cost_s = float(host_mode_cost_s)
         self.host_mode_cost_force = bool(host_mode_cost_force)
+        # StudySIM1d option, OFF by default (0.0).
+        self.overlap_step_cost_s = float(overlap_step_cost_s)
         self.clock = 0.0
         self._pending: List[Tuple[float, int, Request]] = []    # heap by visible time
         self._seq = 0
@@ -206,7 +228,7 @@ class Engine:
         self.touch: Dict[str, float] = {}
         self.stats = dict(steps=0, step_tokens=0.0, gpu_busy_s=0.0, evictions=0, re_prefills=0,
                           host_reloads=0, host_reload_tokens=0, cap_applied=0, cap_exempt=0,
-                          gpu_kv_peak=0, slice_steps=0)
+                          gpu_kv_peak=0, slice_steps=0, overlap_steps=0, overlap_cost_s=0.0)
 
     # ---------------------------------------------------------------- KV bookkeeping
     def kv_used(self) -> int:
@@ -309,6 +331,7 @@ class Engine:
                 return []
         budget = float(self.budget)
         step_time = 0.0
+        warm_in_step = False
         n_sys = self.n_in_system()
         finished: List[Request] = []
         for r in self._order(self.running) + self._order(self.waiting):
@@ -326,6 +349,7 @@ class Engine:
                         self.stats["host_reloads"] += 1
                         self.stats["host_reload_tokens"] += r.prompt_tokens
                 step_time += r.unit_s
+                warm_in_step = warm_in_step or (r.kind in OVERLAP_KINDS)
                 r.unit_s = 0.0
                 r.remaining = 0.0
                 r.steps += 1
@@ -353,6 +377,7 @@ class Engine:
                     self.stats["host_reloads"] += 1
                     self.stats["host_reload_tokens"] += r.prompt_tokens
             r.remaining -= take
+            warm_in_step = warm_in_step or (r.kind in OVERLAP_KINDS)
             r.steps += 1
             budget -= take
             step_time += take / r.rate_tok_s
@@ -362,6 +387,12 @@ class Engine:
             if r.remaining <= 1e-9:
                 finished.append(r)
         step_time += self.step_overhead_s
+        if self.overlap_step_cost_s and warm_in_step:
+            # StudySIM1d form (a): a step that carries a warm recall request's prefill is longer,
+            # and every request sharing that step pays for it. OFF by default.
+            step_time += self.overlap_step_cost_s
+            self.stats["overlap_steps"] += 1
+            self.stats["overlap_cost_s"] += self.overlap_step_cost_s
         self.clock += step_time
         self.stats["steps"] += 1
         self.stats["gpu_busy_s"] += step_time
@@ -503,6 +534,14 @@ SOURCES = {
     "STEP_OVERHEAD_S": "DERIVED from StudyE10e's cold-TTFT ratios; the two implied values "
                        "disagree (0.003 and 0.016 s), so the midpoint is used and both reported",
     "CONFIGS": "StudyE10e P0-P3 and StudyE10c E2, with vLLM's own cap exemption",
+    "OVERLAP_STEP_COST_S": "StudySIM1d Part B, from cells in NO StudySIM1 gate cell "
+                           "(StudyE10b KV-GPU k = 2; StudyE10c / E10e KV-HOST cells at engine "
+                           "configurations E1, E2, E4, P1, P2, P3): the OVERLAP-minus-CLEAR "
+                           "episodic TTFT difference is 0.032-0.088 s, the SAME size in both KV "
+                           "modes, and it GROWS with load (slope +0.066 s per unit load, CI "
+                           "+0.033 to +0.092), so it is charged as BLOCKING per-step engine "
+                           "time. The value is the median of the 12 held-out cells at the "
+                           "lowest load on the ladder. OFF by default",
     "HOST_MODE_COST_S": "StudySIM1b Step 1, from StudyE10b's HELD-OUT KVHOST k = 0 vs KVGPU "
                         "k = 0 ladders (in no StudySIM1 gate cell): episodic TTFT p50 +0.0414 s "
                         "at 25 % load and +0.0355 s at 50 %, against a 0.0165 s between-study "

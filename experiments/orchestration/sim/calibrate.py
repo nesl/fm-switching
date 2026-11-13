@@ -138,7 +138,8 @@ def run_cell(cond: str, n_frames: int, level_pct: int, config: str = "P0",
              seed_level_index: int = 0, step_overhead_s: float = E.STEP_OVERHEAD_S,
              hold_disabled: bool = False, kv_unlimited: bool = False,
              recall_free: bool = False, host_mode_cost_s: float = 0.0,
-             host_mode_cost_force: bool = False) -> Dict:
+             host_mode_cost_force: bool = False,
+             overlap_step_cost_s: float = 0.0) -> Dict:
     """One StudyE10b / E10c cell: a 30-s discard plus a 240-s measured window of Poisson episodic
     arrivals, with the condition's warm sessions and cold recall running alongside."""
     kv_mode, k, r = CONDITIONS[cond]
@@ -148,7 +149,8 @@ def run_cell(cond: str, n_frames: int, level_pct: int, config: str = "P0",
                    gpu_kv_tokens=(10 ** 9 if kv_unlimited else E.GPU_KV_TOKENS),
                    step_overhead_s=step_overhead_s,
                    host_mode_cost_s=host_mode_cost_s,
-                   host_mode_cost_force=host_mode_cost_force)
+                   host_mode_cost_force=host_mode_cost_force,
+                   overlap_step_cost_s=overlap_step_cost_s)
     if hold_disabled:
         # Step-4 negative control: the hold is the mechanism under test. Capping a running prefill
         # at ONE token per step is the strongest possible version of "the long prefill does not
