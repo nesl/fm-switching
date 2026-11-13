@@ -85,6 +85,27 @@ here so the comparison is honest: B9 is not a weak composition, it is the strong
 one this suite can build, and any advantage our scheduler shows over it must come from
 coordinating the four decisions rather than from having better components.
 
+### B9-noHost — the labelled variant run in StudySIM1c-scoped
+
+StudySIM1c-scoped runs the baselines in a declared world with **no host-offload tier** (the
+scoped gate of StudySIM1 passes only there; see `reports/study_sim1c_scoped.md` section 0).
+B9 uses host offload as ONE component among four, so it is not excluded; it runs there as the
+labelled variant **B9-noHost**.
+
+| what was disabled | what was NOT changed |
+|---|---|
+| component (iv)'s **host offload**: the HOST-WARM readiness state does not exist in that world and OFFLOAD_TO_HOST is mapped to EVICT by the harness's availability flag | everything else in (iv) - Preble-style cache-affinity admission under load and KVFlow-style reuse-aware eviction on the causal inter-arrival estimate - runs unchanged |
+| | components (i), (ii) and (iii) are untouched |
+| | the precedence order above is untouched |
+| | every hyperparameter below is untouched |
+
+The disabling is done by the **harness**, not by editing B9: `run.py` sets
+`HOST_AVAILABLE = False` and maps the action. B9's own code is byte-identical in both worlds, and
+its file hash is recorded at the start and the end of that study.
+
+**This variant says nothing about B9 with host offload**, which is the configuration this card
+otherwise describes.
+
 ## Hyperparameters and provenance
 
 | name | value | from |

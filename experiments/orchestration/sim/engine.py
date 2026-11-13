@@ -89,6 +89,29 @@ def warm_miss_fraction(footprint: float) -> float:
             return miss
     return WARM_MISS_BY_FOOTPRINT[-1][1]        # StudyRH5 (64 layers x 8 KV heads x 128 x K,V x bf16)
 
+# ---------------------------------------------------------------- StudySIM1b option (OFF here)
+# THE HOST-MODE COST. StudySIM1b measured it from HELD-OUT cells that appear in no StudySIM1
+# gate cell: StudyE10b ran episodic-only ladders (k = 0, r = 0) under BOTH KV modes, so the
+# difference between E10B_KVHOST_k0_r0_N1_L{25,50,75,90} and E10B_KVGPU_k0_r0_N1_L{25,50,75,90}
+# is the cost of enabling the host-offload connector with NO warm session in the system at all.
+# Measured episodic TTFT p50: +0.0414 s at 25 % load (CI +0.0384 to +0.0456) and +0.0355 s at
+# 50 % (CI +0.0290 to +0.0405), against a between-study drift floor of 0.0165 s at N = 1. The
+# registered value is the median of the two cells that clear their own drift floor.
+#
+# It is charged as NON-BLOCKING time, not engine occupancy, and StudySIM1b's own data is why:
+# an added per-request service time would be AMPLIFIED by queueing at 75 % and 90 % load, and
+# the measured difference instead falls to +0.000 s and +0.017 s there. A cost on the connector
+# path reproduces the low-load difference without adding engine work. The vanishing at high load
+# is NOT reproduced by this option and is reported as its stated limit; every KV-HOST cell in the
+# gate runs at 10-40 % load, inside the regime where the estimate was taken.
+#
+# DEFAULT OFF (0.0). With the default, this file's behaviour is byte-identical to StudySIM1.
+HOST_MODE_COST_S = 0.0385
+HOST_MODE_COST_CELLS_S = {("N1", 25): 0.0414, ("N1", 50): 0.0355,
+                          ("N1", 75): -0.0006, ("N1", 90): 0.0170,
+                          ("N3", 25): 0.0112, ("N3", 50): 0.0171,
+                          ("N3", 75): 0.0379, ("N3", 90): 0.0062}
+
 # Per-step overhead. DERIVED, and the derivation disagrees with itself, so it is stated as a range
 # and the midpoint is used - never re-tuned. StudyE10e capped a 12,645-token cold prefill at 1,024
 # tokens (P1), turning 2 steps into 13, and its cold TTFT p50 rose 5 % (3.899 -> 4.075 s), which
@@ -153,7 +176,9 @@ class Engine:
 
     def __init__(self, config: str = "P0", kv_mode: str = "GPU",
                  gpu_kv_tokens: int = GPU_KV_TOKENS,
-                 step_overhead_s: float = STEP_OVERHEAD_S) -> None:
+                 step_overhead_s: float = STEP_OVERHEAD_S,
+                 host_mode_cost_s: float = 0.0,
+                 host_mode_cost_force: bool = False) -> None:
         if config not in CONFIGS:
             raise ValueError(f"unmeasured engine configuration {config!r}; measured: "
                              f"{sorted(CONFIGS)}")
@@ -165,6 +190,10 @@ class Engine:
         self.kv_mode = kv_mode
         self.gpu_kv_tokens = int(gpu_kv_tokens)
         self.step_overhead_s = float(step_overhead_s)
+        # StudySIM1b option, OFF by default (0.0). `force` is the negative control: it applies
+        # the cost in GPU mode too, where it must make the cell DISAGREE with its measurement.
+        self.host_mode_cost_s = float(host_mode_cost_s)
+        self.host_mode_cost_force = bool(host_mode_cost_force)
         self.clock = 0.0
         self._pending: List[Tuple[float, int, Request]] = []    # heap by visible time
         self._seq = 0
@@ -225,6 +254,11 @@ class Engine:
     # ---------------------------------------------------------------- submission
     def submit(self, r: Request) -> Request:
         r.visible_s = r.arrival_s + r.frontend_s
+        if self.host_mode_cost_s and (self.kv_mode == "HOST" or self.host_mode_cost_force):
+            # every request pays it, which is the hypothesis under test: it is the cost of the
+            # connector being enabled, not of any session being resident
+            r.visible_s += self.host_mode_cost_s
+            r.meta["host_mode_cost_s"] = self.host_mode_cost_s
         r.remaining = float(r.compute_tokens)
         r.encoder_left = float(r.encoder_s)
         self._seq += 1
@@ -469,4 +503,9 @@ SOURCES = {
     "STEP_OVERHEAD_S": "DERIVED from StudyE10e's cold-TTFT ratios; the two implied values "
                        "disagree (0.003 and 0.016 s), so the midpoint is used and both reported",
     "CONFIGS": "StudyE10e P0-P3 and StudyE10c E2, with vLLM's own cap exemption",
+    "HOST_MODE_COST_S": "StudySIM1b Step 1, from StudyE10b's HELD-OUT KVHOST k = 0 vs KVGPU "
+                        "k = 0 ladders (in no StudySIM1 gate cell): episodic TTFT p50 +0.0414 s "
+                        "at 25 % load and +0.0355 s at 50 %, against a 0.0165 s between-study "
+                        "drift floor; the registered value is the median of those two. OFF by "
+                        "default, charged as non-blocking time",
 }

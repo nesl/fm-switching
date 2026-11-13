@@ -1,0 +1,321 @@
+{
+ "1_all_cloud_no_recall": {
+  "rule": "with all-cloud and no recall (and no outages, which StudyE9c's cell also has none of), the episodic challenge mAP must equal StudyE9c's delivered cloud cell",
+  "reference_mAP": 0.5675307471627266,
+  "sim_mAP": 0.5675307471627266,
+  "abs_diff": 0.0,
+  "pass_": true
+ },
+ "2_device_only": {
+  "rule": "an all-device arm must equal the device-only reference EXACTLY",
+  "reference_mAP": 0.4776042449177038,
+  "sim_mAP": 0.4776042449177038,
+  "abs_diff": 0.0,
+  "pass_": true
+ },
+ "3_trace_digest": {
+  "rule": "the demand-trace sha256 must be identical for every arm in every cell (fairness rule 6)",
+  "cells": {
+   "episodic-dominant|F2": {
+    "digest": "4e0ab49bb3ced8ba",
+    "n_distinct": 1
+   },
+   "episodic-dominant|F4": {
+    "digest": "5823cea8b0778317",
+    "n_distinct": 1
+   },
+   "episodic-dominant|F8": {
+    "digest": "a3a364f6137d9015",
+    "n_distinct": 1
+   },
+   "episodic-dominant|F16": {
+    "digest": "212468f522cf57b7",
+    "n_distinct": 1
+   },
+   "episodic-dominant|F32": {
+    "digest": "7bb6aa2be9333a89",
+    "n_distinct": 1
+   },
+   "balanced|F2": {
+    "digest": "f909a6fbcfa40b67",
+    "n_distinct": 1
+   },
+   "balanced|F4": {
+    "digest": "990f7113de23a2eb",
+    "n_distinct": 1
+   },
+   "balanced|F8": {
+    "digest": "0c4f0adda68292fe",
+    "n_distinct": 1
+   },
+   "balanced|F16": {
+    "digest": "89fd61b6de8c9884",
+    "n_distinct": 1
+   },
+   "balanced|F32": {
+    "digest": "d5912a9a46a6f4cb",
+    "n_distinct": 1
+   },
+   "recall-dominant|F2": {
+    "digest": "0c74774933a8131f",
+    "n_distinct": 1
+   },
+   "recall-dominant|F4": {
+    "digest": "6e3726e57a521e1a",
+    "n_distinct": 1
+   },
+   "recall-dominant|F8": {
+    "digest": "27cc46bcb69cf433",
+    "n_distinct": 1
+   },
+   "recall-dominant|F16": {
+    "digest": "53a69851668d5cf0",
+    "n_distinct": 1
+   },
+   "recall-dominant|F32": {
+    "digest": "9569b44eb9294962",
+    "n_distinct": 1
+   }
+  },
+  "pass_": true
+ },
+ "4_recall_free": {
+  "rule": "with recall cost set to 0, the recall load must stop affecting the episodic metric, so every arm's mAP must move TOWARDS its no-recall value",
+  "arms": [
+   {
+    "arm": "device-only",
+    "recall_free_mAP": 0.4776042449177038,
+    "with_recall_mAP": 0.4776042449177038,
+    "diff": 0.0
+   },
+   {
+    "arm": "always-cloud-fcfs",
+    "recall_free_mAP": 0.5684636727041066,
+    "with_recall_mAP": 0.5178725885482929,
+    "diff": 0.050591084155813704
+   },
+   {
+    "arm": "random-admission",
+    "recall_free_mAP": 0.5095318232206533,
+    "with_recall_mAP": 0.5184723983156753,
+    "diff": -0.008940575095021996
+   },
+   {
+    "arm": "round-robin",
+    "recall_free_mAP": 0.4683803685830257,
+    "with_recall_mAP": 0.470205074130804,
+    "diff": -0.0018247055477783047
+   },
+   {
+    "arm": "static-partition",
+    "recall_free_mAP": 0.5249636559145902,
+    "with_recall_mAP": 0.5234549481345301,
+    "diff": 0.0015087077800600701
+   },
+   {
+    "arm": "edf-service-time",
+    "recall_free_mAP": 0.5684636727041066,
+    "with_recall_mAP": 0.5178725885482929,
+    "diff": 0.050591084155813704
+   },
+   {
+    "arm": "hindsight-oracle",
+    "recall_free_mAP": 0.5684636727041066,
+    "with_recall_mAP": 0.5178725885482929,
+    "diff": 0.050591084155813704
+   },
+   {
+    "arm": "videostorm/maxmin",
+    "recall_free_mAP": 0.4776042449177038,
+    "with_recall_mAP": 0.4776042449177038,
+    "diff": 0.0
+   },
+   {
+    "arm": "videostorm/maxsum",
+    "recall_free_mAP": 0.4776042449177038,
+    "with_recall_mAP": 0.4776042449177038,
+    "diff": 0.0
+   },
+   {
+    "arm": "ekya",
+    "recall_free_mAP": 0.4425530085973725,
+    "with_recall_mAP": 0.4419167889831745,
+    "diff": 0.0006362196141980192
+   },
+   {
+    "arm": "tuned-engine",
+    "recall_free_mAP": 0.5684636727041066,
+    "with_recall_mAP": 0.5163389339227878,
+    "diff": 0.052124738781318736
+   },
+   {
+    "arm": "clockwork",
+    "recall_free_mAP": 0.5616390985047377,
+    "with_recall_mAP": 0.4423030020393628,
+    "diff": 0.11933609646537491
+   },
+   {
+    "arm": "confidence-cascade",
+    "recall_free_mAP": 0.48928553060835567,
+    "with_recall_mAP": 0.48928553060835567,
+    "diff": 0.0
+   },
+   {
+    "arm": "inar-vl",
+    "recall_free_mAP": 0.42936820328945413,
+    "with_recall_mAP": 0.42867532471548936,
+    "diff": 0.0006928785739647725
+   },
+   {
+    "arm": "hybrid-llm",
+    "recall_free_mAP": 0.4776042449177038,
+    "with_recall_mAP": 0.4776042449177038,
+    "diff": 0.0
+   },
+   {
+    "arm": "routellm",
+    "recall_free_mAP": 0.5652014478136166,
+    "with_recall_mAP": 0.5176203940690444,
+    "diff": 0.04758105374457222
+   },
+   {
+    "arm": "perllm",
+    "recall_free_mAP": 0.4752457863971952,
+    "with_recall_mAP": 0.4752457863971952,
+    "diff": 0.0
+   },
+   {
+    "arm": "rh8-demand-aware-causal",
+    "recall_free_mAP": 0.5616390985047377,
+    "with_recall_mAP": 0.4423030020393628,
+    "diff": 0.11933609646537491
+   },
+   {
+    "arm": "rh8-demand-aware-ORACLE",
+    "recall_free_mAP": 0.5616390985047377,
+    "with_recall_mAP": 0.4423030020393628,
+    "diff": 0.11933609646537491
+   },
+   {
+    "arm": "r3-streaming",
+    "recall_free_mAP": 0.49514922248975,
+    "with_recall_mAP": 0.49514922248975,
+    "diff": 0.0
+   },
+   {
+    "arm": "eco-llm",
+    "recall_free_mAP": 0.4417556615504316,
+    "with_recall_mAP": 0.44111115662987155,
+    "diff": 0.0006445049205600628
+   },
+   {
+    "arm": "streamscout",
+    "recall_free_mAP": 0.4776042449177038,
+    "with_recall_mAP": 0.4776042449177038,
+    "diff": 0.0
+   },
+   {
+    "arm": "preble",
+    "recall_free_mAP": 0.5616390985047377,
+    "with_recall_mAP": 0.4423030020393628,
+    "diff": 0.11933609646537491
+   },
+   {
+    "arm": "mooncake",
+    "recall_free_mAP": 0.5616390985047377,
+    "with_recall_mAP": 0.4423030020393628,
+    "diff": 0.11933609646537491
+   },
+   {
+    "arm": "kvflow",
+    "recall_free_mAP": 0.5616390985047377,
+    "with_recall_mAP": 0.4423030020393628,
+    "diff": 0.11933609646537491
+   },
+   {
+    "arm": "uniscale",
+    "recall_free_mAP": 0.4691143514585729,
+    "with_recall_mAP": 0.48531079887839274,
+    "diff": -0.016196447419819848
+   },
+   {
+    "arm": "thinking-qwenvl-atdm",
+    "recall_free_mAP": 0.47149341338297707,
+    "with_recall_mAP": 0.47149341338297707,
+    "diff": 0.0
+   },
+   {
+    "arm": "simplestream",
+    "recall_free_mAP": 0.4776042449177038,
+    "with_recall_mAP": 0.4776042449177038,
+    "diff": 0.0
+   },
+   {
+    "arm": "covstream",
+    "recall_free_mAP": 0.4776042449177038,
+    "with_recall_mAP": 0.4776042449177038,
+    "diff": 0.0
+   },
+   {
+    "arm": "B3-best-static",
+    "recall_free_mAP": 0.5684636727041066,
+    "with_recall_mAP": 0.5178725885482929,
+    "diff": 0.050591084155813704
+   },
+   {
+    "arm": "B4-query-type-routing",
+    "recall_free_mAP": 0.48928553060835567,
+    "with_recall_mAP": 0.4911239976222035,
+    "diff": -0.001838467013847822
+   },
+   {
+    "arm": "B6-latency-aware-routing",
+    "recall_free_mAP": 0.42936820328945413,
+    "with_recall_mAP": 0.42867532471548936,
+    "diff": 0.0006928785739647725
+   },
+   {
+    "arm": "B7-edf-feasibility",
+    "recall_free_mAP": 0.5684636727041066,
+    "with_recall_mAP": 0.5178725885482929,
+    "diff": 0.050591084155813704
+   },
+   {
+    "arm": "B8-utility-per-gpu-second",
+    "recall_free_mAP": 0.5360875805433339,
+    "with_recall_mAP": 0.5368655440450403,
+    "diff": -0.0007779635017063358
+   },
+   {
+    "arm": "B9-noHost",
+    "recall_free_mAP": 0.4776042449177038,
+    "with_recall_mAP": 0.4776042449177038,
+    "diff": 0.0
+   },
+   {
+    "arm": "B10-blocking-aware-admission",
+    "recall_free_mAP": 0.5696573282599854,
+    "with_recall_mAP": 0.5015867957348223,
+    "diff": 0.06807053252516304
+   },
+   {
+    "arm": "B11-naive-slicing",
+    "recall_free_mAP": 0.5569922549668113,
+    "with_recall_mAP": 0.4744454225038188,
+    "diff": 0.08254683246299244
+   }
+  ],
+  "n_improved_or_equal": 32,
+  "n_total": 37,
+  "pass_": false
+ },
+ "all_pass": false,
+ "_provenance": {
+  "git_commit": "bcb7222933c3b8ede2cd56e18db727894ffff990",
+  "script": "run.py --sanity",
+  "model": null,
+  "timestamp": "2026-11-12T19:50:05.164443",
+  "device": "cpu",
+  "n": 4
+ }
+}

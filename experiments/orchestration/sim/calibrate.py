@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import math
 import sys
+import zlib
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -136,7 +137,8 @@ def hist_tokens(session_start_s: float, now_s: float) -> int:
 def run_cell(cond: str, n_frames: int, level_pct: int, config: str = "P0",
              seed_level_index: int = 0, step_overhead_s: float = E.STEP_OVERHEAD_S,
              hold_disabled: bool = False, kv_unlimited: bool = False,
-             recall_free: bool = False) -> Dict:
+             recall_free: bool = False, host_mode_cost_s: float = 0.0,
+             host_mode_cost_force: bool = False) -> Dict:
     """One StudyE10b / E10c cell: a 30-s discard plus a 240-s measured window of Poisson episodic
     arrivals, with the condition's warm sessions and cold recall running alongside."""
     kv_mode, k, r = CONDITIONS[cond]
@@ -144,7 +146,9 @@ def run_cell(cond: str, n_frames: int, level_pct: int, config: str = "P0",
         k, r = 0, 0.0
     eng = E.Engine(config=config, kv_mode=kv_mode,
                    gpu_kv_tokens=(10 ** 9 if kv_unlimited else E.GPU_KV_TOKENS),
-                   step_overhead_s=step_overhead_s)
+                   step_overhead_s=step_overhead_s,
+                   host_mode_cost_s=host_mode_cost_s,
+                   host_mode_cost_force=host_mode_cost_force)
     if hold_disabled:
         # Step-4 negative control: the hold is the mechanism under test. Capping a running prefill
         # at ONE token per step is the strongest possible version of "the long prefill does not
@@ -155,6 +159,9 @@ def run_cell(cond: str, n_frames: int, level_pct: int, config: str = "P0",
 
     # ---- episodic arrivals: Poisson at `rate`, seeded by the level index as StudyE10c did
     rng = np.random.default_rng(seed_level_index)
+    # the warm-miss coin, keyed on (cell, arrival seed) - see the draw site below
+    rng_miss = np.random.default_rng(
+        [zlib.crc32(f"{cond}|N{n_frames}|{level_pct}".encode()), seed_level_index])
     t, eps = 0.0, []
     while t < total_s:
         t += rng.exponential(1.0 / rate)
@@ -218,7 +225,15 @@ def run_cell(cond: str, n_frames: int, level_pct: int, config: str = "P0",
                 float(eng.gpu_kv_tokens)
             if kv_mode == "GPU":
                 miss_f = E.warm_miss_fraction(foot)
-                miss = (hash((sid, int(ta))) % 100) < int(round(miss_f * 100))
+                # SUPERSEDED DRAW (StudySIM1b section 1). This was `hash((sid, int(ta)))`,
+                # which Python randomises per process, so the two KV-GPU k = 8 collapse cells
+                # were irreproducible; and it was keyed on the touch alone, so all five arrival
+                # seeds of a cell shared ONE miss pattern and the reported 5-seed spread
+                # understated the real variance in every warm cell. The draw is now keyed on
+                # (cell, arrival seed) like every other stochastic element of the cell, so the
+                # miss pattern varies across seeds and the 5-seed median and range mean the same
+                # thing here as they do everywhere else in the gate.
+                miss = bool(rng_miss.random() < miss_f)
                 ready = "COLD" if miss else "GPU-WARM"
             else:
                 ready = "HOST-WARM"

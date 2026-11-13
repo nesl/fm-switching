@@ -1,0 +1,1208 @@
+{
+ "label": "StudySIM1c-scoped: scope declaration, file hashes, the scoped calibration gate and the runnable arm list. CPU only; no GPU, no model server, no inference. No baseline is run in this file and no arm is compared with another.",
+ "scope": {
+  "world": "one 32B vLLM 0.31.0 replica with NO host-offload tier: GPU-warm, cold and device fallback only",
+  "excluded": "the HOST-WARM readiness state and the OFFLOAD_TO_HOST action",
+  "why": "StudySIM1's calibration gate failed only in KV-HOST cells, and StudySIM1b's mode-cost model leaves it at 69 % against an 80 % bar. The simulator does calibrate where there is no host-offload tier, and this study runs only there.",
+  "cannot_claim": "nothing here bears on any arm's behaviour WITH host offload, and nothing here says which baseline is best beyond the tables"
+ },
+ "hashes_start": {
+  "experiments/orchestration/sim/calibrate.py": "fa78b4ac6bd4a4df43ffd28e213fdb81a8f5430842c544fc4b6edce874846259",
+  "experiments/orchestration/sim/engine.py": "732440b6d2908f19cf7ef8bffe4366ec342e6f6c45b41e4fbd26a61b8a492e76",
+  "experiments/orchestration/sim/sim1_report.py": "130a264df695fbbbeb2647dc5dd3cc187e3ed779f2212076f37c5070b4ffb699",
+  "experiments/orchestration/sim/sim1b_hosttax.py": "f1c5ebc74a2b53cce5c3fc9965c48a8e6a13fff0eb7288d2afb8a8523a4ad7d1",
+  "experiments/orchestration/sim/sim1c_scope.py": "7727d99be9478122bd43ac2b3cb89eea281781569eb6eb66bdf557fee7e588cd",
+  "experiments/orchestration/baselines/attentionstore_adapted.py": "3c2fbf7f362c838c7cbb3fb89a7102e58fd0a31e1d1bb6968c188895278629fb",
+  "experiments/orchestration/baselines/cards/attentionstore.md": "0f8d7473ea99d1bdee5cb0605028ae65666d2ce9c5c8979c3118a4a1716a23b7",
+  "experiments/orchestration/baselines/cards/cascade.md": "bf6f2456372b58fc3e0852bc3d39f4ef747b714defbacdbd9ed24f8dc458882e",
+  "experiments/orchestration/baselines/cards/clockwork.md": "637f1f63a453ddeee73dd09d82365350a990d3c012820951204ed121a6524625",
+  "experiments/orchestration/baselines/cards/constructed.md": "c8e4cd89187ee786914ec6b37df7971dbfe5719c9237b20415a513a004691a10",
+  "experiments/orchestration/baselines/cards/covstream.md": "e9d05f39f9c4815443d1deabfd9eab49c803f778c794a5aa02b69ce24eda0a16",
+  "experiments/orchestration/baselines/cards/ecollm.md": "c1e2123328a53a70705b86d46df83dc2a8f2caa21bbee864889298e2488424f3",
+  "experiments/orchestration/baselines/cards/ekya.md": "700b15e6d64e77da616abcd1396070930cdd4cb894011ba82954bf9cf81cffc2",
+  "experiments/orchestration/baselines/cards/hybrid_llm.md": "03492baddf6177b9c16c766d49f22434bde8f2db7b02593115c7eb2853d01258",
+  "experiments/orchestration/baselines/cards/inarvl.md": "e5d87feaa0b4449376fc35ed72a05ab80a8a18e02385e3e0f1cf1ecc3c371765",
+  "experiments/orchestration/baselines/cards/kvflow.md": "7d56f2c628e404411dbf8eebc723dc92f5572ac67ee616da1b196a6428f84131",
+  "experiments/orchestration/baselines/cards/lmcache.md": "f2237c582cd5b5aeac7984733c0ad4fcef7133a5ba089f994cf3e9db22af8415",
+  "experiments/orchestration/baselines/cards/mooncake.md": "3b3c7daaa2e21227a84cfbefee3fd4774c27b85248b44912ddee1a2f4bba310d",
+  "experiments/orchestration/baselines/cards/pensieve.md": "4ebafab9dfcd11417979865e6f6bb07b46d98a434dfdb564470c70dc6896963e",
+  "experiments/orchestration/baselines/cards/perllm.md": "77ec113cf7ba6f56bd3de8fe636b64323a455242db2616371bca9c6a9bd3b520",
+  "experiments/orchestration/baselines/cards/preble.md": "eb780a95a88c026759ea45e01d8fcc6a2700b8b588bb5a6692ee2410b402997a",
+  "experiments/orchestration/baselines/cards/r3streaming.md": "e2856dc429bc5d082cf3551038d514c3144bd17f2076df9a8f701fb93388a3a7",
+  "experiments/orchestration/baselines/cards/rh8.md": "36610fcdded6af00fbdcbb4d23be7549ab85d5c93f2dbfb632eaf4953dbf16eb",
+  "experiments/orchestration/baselines/cards/routellm.md": "5263a4386e1da0cf138801e6f0970384ac965748975d6424bc78f1edc91b99e3",
+  "experiments/orchestration/baselines/cards/simplestream.md": "d43aaa648aec2d44c53815daddf2106094d8adc4b1ff3c4a8dd8a926062f0c7f",
+  "experiments/orchestration/baselines/cards/streamscout.md": "23a2ff0c0d2e098f4fb17ff020ecf6104a3e11d15eddced1ad4b5b9fe789d35d",
+  "experiments/orchestration/baselines/cards/thinking_qwenvl.md": "867d285fc7a539651d01e5a35212f5e2ad71189fec40d693dd0374d1dcb596a5",
+  "experiments/orchestration/baselines/cards/tuned_engine.md": "4411c060014b73f88269670ef8666387fa9c939af34b410d7f197dcef29a5323",
+  "experiments/orchestration/baselines/cards/uniscale.md": "43f9d94d893ef7850553a1891a3e633a223fae0c69aadba57ef81114b28463d1",
+  "experiments/orchestration/baselines/cards/videostorm.md": "b25bbba233ece72a5f547e9b036926caba2cb2160dab62067b533f0191788178",
+  "experiments/orchestration/baselines/cascade_adapted.py": "662968bc1e73bd8eb1fed4affe8af71e7a29a7bd4a4a08634394c907b33e1273",
+  "experiments/orchestration/baselines/clockwork_adapted.py": "e878911f9644ae541693d9b982945735141f360493878b2b2985b42085f9fb08",
+  "experiments/orchestration/baselines/constructed.py": "a084d47d00b9ef3c2635170a9b08054ad98cf80db891305acefadcd49ee4e4e0",
+  "experiments/orchestration/baselines/costs.py": "8b93d6cd5f351b1dda4df58b3573c7b9d372a5b57441cd01e5cf890e6a847089",
+  "experiments/orchestration/baselines/covstream_adapted.py": "5835cc54b1753eb22ab5d91cb495c931a922edcd6be133e50c15b54490956343",
+  "experiments/orchestration/baselines/devsplit.py": "2d55fab9723a1333d2d6285641037d1a1be58c1cca9a29d6128c9969852a8542",
+  "experiments/orchestration/baselines/ecollm_adapted.py": "225d3905d94f3392b0143ec69bf4e80e62ba7071adf8a9df5c4253a27b3d64e7",
+  "experiments/orchestration/baselines/ekya_adapted.py": "06160c1f67854a2f0948b4406083ba273302f461844a225fa5ef941e144ad2b6",
+  "experiments/orchestration/baselines/hybrid_llm_adapted.py": "89cc100c2dd2c7488b346cacf4827b8bfbc67dae2ca3ded423064fdfa78d1f6a",
+  "experiments/orchestration/baselines/inarvl_adapted.py": "ebe0bd9cde757c8454c28965cc19decb79a64ee38e2f6c27779822ba191b639f",
+  "experiments/orchestration/baselines/interface.py": "14b8625af0a25d60e594deaf2f23988122a39c14b3e05a7083fada5a6d7a620e",
+  "experiments/orchestration/baselines/kvflow_adapted.py": "aa096bd3aa2ccf44c2f7b0b2910d1c4de5c4f9a51e1f946c59b933c47e992df5",
+  "experiments/orchestration/baselines/lmcache_adapted.py": "c70d1c0c28dba5e47c381b917348cfa0d793e11d7911bd3d4663b8c46f0ae6b0",
+  "experiments/orchestration/baselines/make_report.py": "bb66cb3b11457304cb9abd19345eff1f21102359e77b7ce1811abc3e1292dd37",
+  "experiments/orchestration/baselines/mooncake_adapted.py": "22a01345e8f367a9b001f48cd580151eed9a03adae6823005fe8b1ffc634a2e7",
+  "experiments/orchestration/baselines/naive.py": "48ac22b618f123e37acf2a44c3042ffb8077886b3d1fc756ce550ac4fd8cda52",
+  "experiments/orchestration/baselines/pensieve_adapted.py": "c626a919d0e2a418047ec1e56464e417050382a772b9c61277846dc8539d9d49",
+  "experiments/orchestration/baselines/perllm_adapted.py": "4e8195f174d6a5bc0c80ea4dcacbf3e4ddbb21d15db6a74ec964e27c5acdce70",
+  "experiments/orchestration/baselines/preble_adapted.py": "085b15522dc5992d5fe8396f13029e2003bdf17bf1bb39c7ad659391193c8df0",
+  "experiments/orchestration/baselines/profiles.py": "8e4657523186bc4231b8ead7b533fcf50818aa27a4f721d9a532239e733fc2e5",
+  "experiments/orchestration/baselines/r3streaming_adapted.py": "c393f9a91df0ef83b1b766338387f68cef8fa82228bd13284aee0fe028d6a062",
+  "experiments/orchestration/baselines/recall_profiles.py": "35729c899dd47fff56e4ca19941ac6e2373801d4e89fe991f80d7188a7c70e23",
+  "experiments/orchestration/baselines/reconstructed/attentionstore.py": "58e7b20e0fc07a33647ae2badf0fedc5e9384e7c37bd6b8164d1489c3f46f99a",
+  "experiments/orchestration/baselines/reconstructed/covstream.py": "a22d5cc2b731b61e661da3827c32c50213b4b0c58f98087c5cd73de853c19338",
+  "experiments/orchestration/baselines/reconstructed/ecollm.py": "23a4fc8cd5c3b4c76ca74df2c00d49202eb9bf169b4dd40a76ba866480efee31",
+  "experiments/orchestration/baselines/reconstructed/hybrid_llm.py": "aadb74675d5647272aabda8661c933f1215e31d908b13dee39d733e20fde24d0",
+  "experiments/orchestration/baselines/reconstructed/inarvl.py": "8d1085e2b0446303fc4149852e69d5ab84d32cf9b4e3f26123228ec2d6848121",
+  "experiments/orchestration/baselines/reconstructed/kvflow.py": "a1aeb36ac25eb924a207e503a27dc279ae06e5aa8a062fbb64442a3e852f9fff",
+  "experiments/orchestration/baselines/reconstructed/pensieve.py": "71c655743e7b11441089d79e6fd5152e1387708be756e893f0307ca4b9a62ccb",
+  "experiments/orchestration/baselines/reconstructed/perllm.py": "66ec9b44e12fd75dc452bb8475d2162e6f6bfd602459d2d16d0e7f4618eb9034",
+  "experiments/orchestration/baselines/reconstructed/r3streaming.py": "969e0e96f3e1128a39008f1bcabbf0e3577dd0f2af5e4897b1d3c74f0a6a0805",
+  "experiments/orchestration/baselines/reconstructed/streamscout.py": "5662af3bbc5ba81ec8a3550368008c1ca9f81a28526f2ef1f6c1e7b1e4c7f6e3",
+  "experiments/orchestration/baselines/reconstructed/test_attentionstore_toy.py": "5cc4762be08f3063ee69648ef2e3e09d0679a046cb0580ba7e3845ef9587e080",
+  "experiments/orchestration/baselines/reconstructed/test_constructed_amendment_toy.py": "a4f3769850a389d05b891c4bb521462af2a535b247e9c56c01a5763f995d5ee5",
+  "experiments/orchestration/baselines/reconstructed/test_covstream_toy.py": "a7635beccbb8524073a57fbbc2282f4355a7e2061534f823a4bc64ba68e7b394",
+  "experiments/orchestration/baselines/reconstructed/test_ecollm_toy.py": "067b02452bd1f170a8d24ddc4e55d314423de06113f057acb24f48518223ba64",
+  "experiments/orchestration/baselines/reconstructed/test_hybrid_llm_toy.py": "29ff45912cdc18d37fb6cd01da755e2c3c0fa595107f5eeda6536e4a885783df",
+  "experiments/orchestration/baselines/reconstructed/test_inarvl_toy.py": "886ab868bf3371181fcf19cdbe589a5ad273672301083f4c800b4f5656cc1c58",
+  "experiments/orchestration/baselines/reconstructed/test_kvflow_toy.py": "5b965319c72d9efd9b294a48bfe302e34e5ea56b9b4a956e30a69410957181ff",
+  "experiments/orchestration/baselines/reconstructed/test_pensieve_toy.py": "c664daea03b1c4b397349046a5eb9cfc7d0c6d1b75bf57d32c9134f69e2cfdb7",
+  "experiments/orchestration/baselines/reconstructed/test_perllm_toy.py": "6299cb413b20c1350bad468384f9ce539a093e06f539b8e9befe725f436fbaa5",
+  "experiments/orchestration/baselines/reconstructed/test_r3streaming_toy.py": "462339b0ad4c6a58ed0325aae67e983bbcb98a5e46876758ccf3ae491ce3e419",
+  "experiments/orchestration/baselines/reconstructed/test_streamscout_toy.py": "c7e7a8a5aaabdd3b4b9a9d047e6bd8027442bffb08874e5a14564594356ff3c5",
+  "experiments/orchestration/baselines/reconstructed/test_thinking_qwenvl_toy.py": "883c45f8a8503ca33f7cd868bf438bd2217be2dd73c29511fb06547f73b30008",
+  "experiments/orchestration/baselines/reconstructed/test_uniscale_toy.py": "f3ecc987f1ba4fdbfb01eaa71043d11b254d7ca31851f14951a0e233b07a003d",
+  "experiments/orchestration/baselines/reconstructed/test_videostorm_toy.py": "b9113c93456cf6fbc0a8b86be75c849d3989798705bff79f779d3c97f03af357",
+  "experiments/orchestration/baselines/reconstructed/thinking_qwenvl.py": "16e00bf2ef56533db060724a7c36be80641ebf6f72ab6b0c5f03dbd5ac93ec12",
+  "experiments/orchestration/baselines/reconstructed/uniscale.py": "afc3e5ed2a815d7f09a3bd44739c78cd7c3f292e204e319cfefe6180e8652fa5",
+  "experiments/orchestration/baselines/reconstructed/videostorm.py": "c169a7d591087457750c2602f4af8be8ae29b7ea5b549b2e8a7b011074aa2128",
+  "experiments/orchestration/baselines/registry.yaml": "7bcaac3dc2f8351ffa9d09b3514bd4dbebaf82b91e2c7b62e93be4d0615e6781",
+  "experiments/orchestration/baselines/rh8_adapted.py": "dcd8d22b4e8afcdef34d47b70fa2bb89589bba7bfe15e35714f1f3570f5e1888",
+  "experiments/orchestration/baselines/routellm_adapted.py": "206cc446314c1c21e1e984cf839e440f24f16f1d9b4611cbcf0534068600095c",
+  "experiments/orchestration/baselines/simplestream_adapted.py": "0d72047699556fb3e402c2c236ee3e35b07fadaea1ae2c27f7b259260ea35b24",
+  "experiments/orchestration/baselines/smoke/replay.py": "650f8d70bcdc3893373a3c7aabd14ca7c679e699aad15d83cadca08a58f09f4c",
+  "experiments/orchestration/baselines/smoke/run_all.py": "672e40720d5c62fbe0eb11ed833c7a34f678b2a577bb31e2dcfb997fa2f306d8",
+  "experiments/orchestration/baselines/streamscout_adapted.py": "fa22057bb913ea451afff65e7e2a6ffadabf15775dce010c60630f6e2dacf981",
+  "experiments/orchestration/baselines/thinking_qwenvl_adapted.py": "d3fddea1c69da3ecc10c1b2fc8f779177bbf2b66b6fed8867bfe915d467677e0",
+  "experiments/orchestration/baselines/tuned_engine.py": "7b2fbf392c34d9e043a18ffed3f273bd5092f4ec5c5fda820c7b1dd4f1585a5c",
+  "experiments/orchestration/baselines/uniscale_adapted.py": "1d1a52fd9f251e5a7c50b7cf50faaaa20b283091495914d168d91856550d01b5",
+  "experiments/orchestration/baselines/videostorm_adapted.py": "a23886344fb2018dcbcb8b7f88ee78a281b41d746d235936b65e7c5501d9ffca"
+ },
+ "scoped_gate": {
+  "label": "StudySIM1c SCOPED calibration gate: StudySIM1's gate restricted to the cells with no KV-HOST tier (C0, C1 at r = 0.05 and 0.10, KV-GPU k = 4 and 8, at N = 1 and N = 3), at StudySIM1's exact bars.",
+  "conditions": [
+   "C0",
+   "C1-r05",
+   "C1-r10",
+   "KVGPU-k4",
+   "KVGPU-k8"
+  ],
+  "rule": "PASS iff episodic p99 is within +/-25 % in >= 80 % of cells AND the capacity level matches in >= 80 % of ladders",
+  "cells": [
+   {
+    "condition": "C0",
+    "n_frames": 1,
+    "level_pct": 10,
+    "measured_p99_s": 0.216,
+    "source": "StudyE10e P0 C0 ladder",
+    "sim_p99_s": 0.22844684854478034,
+    "ratio": 1.0576242988184275,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.14400000000000546,
+    "sim_p99_min": 0.2158990062026095,
+    "sim_p99_max": 0.24410655598183414,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C0",
+    "n_frames": 1,
+    "level_pct": 20,
+    "measured_p99_s": 0.276,
+    "source": "StudyE10e P0 C0 ladder",
+    "sim_p99_s": 0.2790123478260482,
+    "ratio": 1.0109143037175659,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.14400000000000546,
+    "sim_p99_min": 0.2665043957991599,
+    "sim_p99_max": 0.28533551422492415,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C0",
+    "n_frames": 1,
+    "level_pct": 25,
+    "measured_p99_s": 0.271,
+    "source": "StudyE10e P0 C0 (StudyE10c E0 0.279, StudyE10b 0.286)",
+    "sim_p99_s": 0.3005002974513656,
+    "ratio": 1.1088571861674006,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.14400000000000546,
+    "sim_p99_min": 0.27876169670070966,
+    "sim_p99_max": 0.3180231065019927,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C0",
+    "n_frames": 1,
+    "level_pct": 30,
+    "measured_p99_s": 0.294,
+    "source": "StudyE10e P0 C0 ladder",
+    "sim_p99_s": 0.3263698825682531,
+    "ratio": 1.110101641388616,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.14400000000000546,
+    "sim_p99_min": 0.3086101751061079,
+    "sim_p99_max": 0.33723371679714387,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C0",
+    "n_frames": 1,
+    "level_pct": 40,
+    "measured_p99_s": 0.383,
+    "source": "StudyE10e P0 C0 ladder",
+    "sim_p99_s": 0.39955401933411977,
+    "ratio": 1.043221982595613,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.14400000000000546,
+    "sim_p99_min": 0.3543000165093231,
+    "sim_p99_max": 0.41634213955277316,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C0",
+    "n_frames": 1,
+    "level_pct": 50,
+    "measured_p99_s": 0.452,
+    "source": "StudyE10c E0 C0 (StudyE10b 0.461)",
+    "sim_p99_s": 0.4840241112810622,
+    "ratio": 1.070849803719164,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.1706616926330824,
+    "sim_p99_min": 0.41260307317257694,
+    "sim_p99_max": 0.6103543057229658,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C0",
+    "n_frames": 3,
+    "level_pct": 10,
+    "measured_p99_s": 0.36,
+    "source": "StudyE10c E0 C0 N3 ladder",
+    "sim_p99_s": 0.4565286605101387,
+    "ratio": 1.2681351680837185,
+    "within_25pct": false,
+    "collapse_agreement": false,
+    "agree": false,
+    "sim_p50_s": 0.2638360138757463,
+    "sim_p99_min": 0.4370447809544106,
+    "sim_p99_max": 0.515817892635711,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C0",
+    "n_frames": 3,
+    "level_pct": 25,
+    "measured_p99_s": 0.51,
+    "source": "StudyE10c E0 C0 N3 ladder",
+    "sim_p99_s": 0.6294903091318425,
+    "ratio": 1.2342947237879263,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.2638360138757463,
+    "sim_p99_min": 0.5788617777017296,
+    "sim_p99_max": 0.7833681689710532,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C0",
+    "n_frames": 3,
+    "level_pct": 50,
+    "measured_p99_s": 1.058,
+    "source": "StudyE10c E0 C0 N3 (StudyE10b 0.988)",
+    "sim_p99_s": 1.0610704546781524,
+    "ratio": 1.0029021310757584,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.26631816945200626,
+    "sim_p99_min": 0.8056975488835062,
+    "sim_p99_max": 1.288639784656897,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C1-r05",
+    "n_frames": 1,
+    "level_pct": 10,
+    "measured_p99_s": 2.646,
+    "source": "StudyE10e P0 C1 (StudyE10c 2.739, StudyE10d V1 2.974)",
+    "sim_p99_s": 3.856939796090037,
+    "ratio": 1.4576492048715182,
+    "within_25pct": false,
+    "collapse_agreement": false,
+    "agree": false,
+    "sim_p50_s": 0.14400000000000546,
+    "sim_p99_min": 2.423819682601243,
+    "sim_p99_max": 4.7992563632714385,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C1-r05",
+    "n_frames": 1,
+    "level_pct": 25,
+    "measured_p99_s": 2.942,
+    "source": "StudyE10b GPU r0.05 N1 25 %",
+    "sim_p99_s": 2.7986727566596343,
+    "ratio": 0.95128237819838,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.14400000000000546,
+    "sim_p99_min": 2.5873644101876843,
+    "sim_p99_max": 4.323274256707971,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C1-r05",
+    "n_frames": 3,
+    "level_pct": 25,
+    "measured_p99_s": 2.708,
+    "source": "StudyE10b GPU r0.05 N3 25 %",
+    "sim_p99_s": 3.40437566145749,
+    "ratio": 1.257154970996119,
+    "within_25pct": false,
+    "collapse_agreement": false,
+    "agree": false,
+    "sim_p50_s": 0.2638360138757463,
+    "sim_p99_min": 2.0964938853963724,
+    "sim_p99_max": 3.992887332927096,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C1-r05",
+    "n_frames": 3,
+    "level_pct": 50,
+    "measured_p99_s": 4.472,
+    "source": "StudyE10b GPU r0.05 N3 50 %",
+    "sim_p99_s": 4.505245765380345,
+    "ratio": 1.0074342051387175,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.3953623802826769,
+    "sim_p99_min": 3.715790318468981,
+    "sim_p99_max": 7.984374411553478,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C1-r10",
+    "n_frames": 1,
+    "level_pct": 25,
+    "measured_p99_s": 8.521,
+    "source": "StudyE10b GPU r0.1 N1 25 %",
+    "sim_p99_s": 6.715791804220936,
+    "ratio": 0.7881459692783636,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.1681208405565684,
+    "sim_p99_min": 5.021014259669587,
+    "sim_p99_max": 11.35435274776722,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C1-r10",
+    "n_frames": 3,
+    "level_pct": 25,
+    "measured_p99_s": 7.129,
+    "source": "StudyE10b GPU r0.1 N3 25 %",
+    "sim_p99_s": 7.118640966153627,
+    "ratio": 0.9985469162790893,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.3595451383419572,
+    "sim_p99_min": 5.195102375239851,
+    "sim_p99_max": 8.627137671329296,
+    "n_seeds": 5
+   },
+   {
+    "condition": "C1-r10",
+    "n_frames": 3,
+    "level_pct": 50,
+    "measured_p99_s": 8.619,
+    "source": "StudyE10b GPU r0.1 N3 50 %",
+    "sim_p99_s": 9.19306934900967,
+    "ratio": 1.0666050990845424,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.9549686130053487,
+    "sim_p99_min": 5.111521992677161,
+    "sim_p99_max": 11.49714134194164,
+    "n_seeds": 5
+   },
+   {
+    "condition": "KVGPU-k4",
+    "n_frames": 1,
+    "level_pct": 25,
+    "measured_p99_s": 0.536,
+    "source": "StudyE10b GPU k4 N1 25 %",
+    "sim_p99_s": 0.3389734769698121,
+    "ratio": 0.6324132033018882,
+    "within_25pct": false,
+    "collapse_agreement": false,
+    "agree": false,
+    "sim_p50_s": 0.14400000000000546,
+    "sim_p99_min": 0.3002468105186468,
+    "sim_p99_max": 0.3845967555091457,
+    "n_seeds": 5
+   },
+   {
+    "condition": "KVGPU-k4",
+    "n_frames": 3,
+    "level_pct": 25,
+    "measured_p99_s": 0.705,
+    "source": "StudyE10b GPU k4 N3 25 % (definition-sensitive, see E10b)",
+    "sim_p99_s": 0.6403136191945494,
+    "ratio": 0.908246268361063,
+    "within_25pct": true,
+    "collapse_agreement": false,
+    "agree": true,
+    "sim_p50_s": 0.2638360138757463,
+    "sim_p99_min": 0.58989246657095,
+    "sim_p99_max": 0.7867916717263767,
+    "n_seeds": 5
+   },
+   {
+    "condition": "KVGPU-k8",
+    "n_frames": 1,
+    "level_pct": 25,
+    "measured_p99_s": 192.8,
+    "source": "StudyE10b GPU k8 N1 25 % (collapse)",
+    "sim_p99_s": 138.73746137103615,
+    "ratio": 0.7195926419659551,
+    "within_25pct": false,
+    "collapse_agreement": true,
+    "agree": true,
+    "sim_p50_s": 70.17235110057551,
+    "sim_p99_min": 134.4247829338438,
+    "sim_p99_max": 143.322013742605,
+    "n_seeds": 5
+   },
+   {
+    "condition": "KVGPU-k8",
+    "n_frames": 3,
+    "level_pct": 25,
+    "measured_p99_s": 183.3,
+    "source": "StudyE10b GPU k8 N3 25 % (collapse)",
+    "sim_p99_s": 132.44058522734645,
+    "ratio": 0.7225345620695387,
+    "within_25pct": false,
+    "collapse_agreement": true,
+    "agree": true,
+    "sim_p50_s": 78.7897947022891,
+    "sim_p99_min": 126.78447926404087,
+    "sim_p99_max": 141.40463191396708,
+    "n_seeds": 5
+   }
+  ],
+  "ladders": [
+   {
+    "condition": "C0",
+    "n_frames": 1,
+    "measured_capacity_pct": 40,
+    "source": "StudyE10c / E10e C0 N1",
+    "sim_capacity_pct": 40,
+    "agree": true,
+    "sim_p99_by_level": {
+     "10": 0.22844684854478034,
+     "20": 0.2790123478260482,
+     "25": 0.3005002974513656,
+     "30": 0.3263698825682531,
+     "40": 0.39955401933411977,
+     "50": 0.4840241112810622
+    }
+   },
+   {
+    "condition": "C0",
+    "n_frames": 3,
+    "measured_capacity_pct": 50,
+    "source": "StudyE10c C0 N3, ladder top",
+    "sim_capacity_pct": 50,
+    "agree": true,
+    "sim_p99_by_level": {
+     "10": 0.4565286605101387,
+     "20": 0.6224799566432829,
+     "25": 0.6294903091318425,
+     "35": 0.7772319771489956,
+     "50": 1.0610704546781524
+    }
+   },
+   {
+    "condition": "C1-r05",
+    "n_frames": 1,
+    "measured_capacity_pct": null,
+    "source": "StudyE10c / E10e C1 N1: < 10 %",
+    "sim_capacity_pct": null,
+    "agree": true,
+    "sim_p99_by_level": {
+     "10": 3.856939796090037
+    }
+   },
+   {
+    "condition": "C1-r05",
+    "n_frames": 3,
+    "measured_capacity_pct": null,
+    "source": "StudyE10b / E10c C1 N3: < 25 % / < 10 %",
+    "sim_capacity_pct": null,
+    "agree": true,
+    "sim_p99_by_level": {
+     "10": 3.6921399222574487
+    }
+   },
+   {
+    "condition": "C1-r10",
+    "n_frames": 1,
+    "measured_capacity_pct": null,
+    "source": "StudyE10b GPU r0.1 N1: < 25 %",
+    "sim_capacity_pct": null,
+    "agree": true,
+    "sim_p99_by_level": {
+     "10": 6.528402356850485
+    }
+   },
+   {
+    "condition": "C1-r10",
+    "n_frames": 3,
+    "measured_capacity_pct": null,
+    "source": "StudyE10b GPU r0.1 N3: < 25 %",
+    "sim_capacity_pct": null,
+    "agree": true,
+    "sim_p99_by_level": {
+     "10": 6.350676155501818
+    }
+   },
+   {
+    "condition": "KVGPU-k4",
+    "n_frames": 1,
+    "measured_capacity_pct": null,
+    "source": "StudyE10b GPU k4 N1: < 25 %",
+    "sim_capacity_pct": 40,
+    "agree": false,
+    "sim_p99_by_level": {
+     "10": 0.2698660599394488,
+     "20": 0.31519512741143,
+     "25": 0.3389734769698121,
+     "30": 0.34395548942146337,
+     "40": 0.4274668949556379,
+     "50": 0.5604171274001928
+    }
+   },
+   {
+    "condition": "KVGPU-k4",
+    "n_frames": 3,
+    "measured_capacity_pct": 25,
+    "source": "StudyE10b GPU k4 N3: 25 %",
+    "sim_capacity_pct": 50,
+    "agree": false,
+    "sim_p99_by_level": {
+     "10": 0.5067344280730062,
+     "20": 0.631422386317789,
+     "25": 0.6403136191945494,
+     "35": 0.7805682698939745,
+     "50": 1.0945297470685864
+    }
+   },
+   {
+    "condition": "KVGPU-k8",
+    "n_frames": 1,
+    "measured_capacity_pct": null,
+    "source": "StudyE10b GPU k8 N1: < 25 % (collapse)",
+    "sim_capacity_pct": null,
+    "agree": true,
+    "sim_p99_by_level": {
+     "10": 83.33655422128969
+    }
+   },
+   {
+    "condition": "KVGPU-k8",
+    "n_frames": 3,
+    "measured_capacity_pct": null,
+    "source": "StudyE10b GPU k8 N3: < 25 % (collapse)",
+    "sim_capacity_pct": null,
+    "agree": true,
+    "sim_p99_by_level": {
+     "10": 100.24392272823647
+    }
+   }
+  ],
+  "p99_cells_total": 20,
+  "p99_cells_agree": 16,
+  "p99_fraction_agree": 0.8,
+  "ladders_total": 10,
+  "ladders_agree": 8,
+  "ladders_fraction_agree": 0.8,
+  "gate_p99_pass": true,
+  "gate_capacity_pass": true,
+  "GATE": "PASS"
+ },
+ "arms": {
+  "rule": "the HOST-WARM readiness state and the OFFLOAD_TO_HOST action are UNAVAILABLE to every arm, enforced by an availability flag in the harness (OFFLOAD_TO_HOST is mapped to EVICT and readiness HOST-WARM is never reported) and never by editing a baseline's logic",
+  "n_total": 40,
+  "n_runnable": 37,
+  "n_not_runnable": 3,
+  "n_oracle": 2,
+  "arms": [
+   {
+    "name": "device-only",
+    "case": "naive",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic",
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "always-cloud-fcfs",
+    "case": "naive",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic",
+     "B-recall",
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "random-admission",
+    "case": "naive",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic",
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "round-robin",
+    "case": "naive",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic"
+    ]
+   },
+   {
+    "name": "static-partition",
+    "case": "naive",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic",
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "edf-service-time",
+    "case": "naive",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "hindsight-oracle",
+    "case": "naive",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": true,
+    "experiments": [
+     "A-episodic",
+     "B-recall",
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "videostorm/maxmin",
+    "case": "D",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic"
+    ]
+   },
+   {
+    "name": "videostorm/maxsum",
+    "case": "D",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic"
+    ]
+   },
+   {
+    "name": "ekya",
+    "case": "B",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": "decides episodic resource allocation; it demotes every session unconditionally",
+    "reads_future": false,
+    "experiments": [
+     "A-episodic",
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "tuned-engine",
+    "case": "own",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "clockwork",
+    "case": "B",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": "decides admission from a predicted LOAD time; the COLD branch of that prediction is used instead of the HOST-WARM branch",
+    "reads_future": false,
+    "experiments": [
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "confidence-cascade",
+    "case": "B",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic"
+    ]
+   },
+   {
+    "name": "inar-vl",
+    "case": "D",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic",
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "hybrid-llm",
+    "case": "D",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic",
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "routellm",
+    "case": "B",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic",
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "perllm",
+    "case": "D",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "attentionstore",
+    "case": "D",
+    "runnable": false,
+    "variant": null,
+    "reason": "AttentionStore IS a host-side KV cache hierarchy: its contribution is keeping whole attention caches on host memory and the scheduling that depends on them. With no host tier the paper's object does not exist, and what would run is not AttentionStore.",
+    "reads_future": false
+   },
+   {
+    "name": "lmcache",
+    "case": "B",
+    "runnable": false,
+    "variant": null,
+    "reason": "LMCache IS a CPU/disk KV cache layer under the engine. With no host tier it reduces to the engine's own GPU prefix cache, which is what `always-cloud-fcfs` already is.",
+    "reads_future": false
+   },
+   {
+    "name": "pensieve",
+    "case": "D",
+    "runnable": false,
+    "variant": null,
+    "reason": "Pensieve's mechanism is MULTI-TIER PARTIAL RESIDENCY, adapted here (adaptation A1) as whole-session OFFLOAD_TO_HOST because our action space has no partial tier. Removing the host tier removes the mechanism itself, not a component of it.",
+    "reads_future": false
+   },
+   {
+    "name": "rh8-demand-aware-causal",
+    "case": "A",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "B-recall"
+    ]
+   },
+   {
+    "name": "rh8-demand-aware-ORACLE",
+    "case": "A",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": true,
+    "experiments": [
+     "B-recall"
+    ]
+   },
+   {
+    "name": "r3-streaming",
+    "case": "D",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic",
+     "B-recall"
+    ]
+   },
+   {
+    "name": "eco-llm",
+    "case": "D",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic",
+     "B-recall",
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "streamscout",
+    "case": "D",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "B-recall"
+    ]
+   },
+   {
+    "name": "preble",
+    "case": "B",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": "decides request order by prefix affinity; its AFFINITY weight for HOST-WARM (0.5) never applies",
+    "reads_future": false,
+    "experiments": [
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "mooncake",
+    "case": "B",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": "decides request ORDER by prefix affinity; readiness HOST-WARM simply never occurs",
+    "reads_future": false,
+    "experiments": [
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "kvflow",
+    "case": "D",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": "decides WHICH sessions stay GPU-warm (workflow-aware eviction); the demotion target is not the decision",
+    "reads_future": false,
+    "experiments": [
+     "B-recall"
+    ]
+   },
+   {
+    "name": "uniscale",
+    "case": "D",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic",
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "thinking-qwenvl-atdm",
+    "case": "D",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic"
+    ]
+   },
+   {
+    "name": "simplestream",
+    "case": "B",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "B-recall"
+    ]
+   },
+   {
+    "name": "covstream",
+    "case": "D",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": "keeps its top-4 coverage sessions GPU-warm and demotes the rest",
+    "reads_future": false,
+    "experiments": [
+     "B-recall"
+    ]
+   },
+   {
+    "name": "B3-best-static",
+    "case": "constructed",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic",
+     "B-recall",
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "B4-query-type-routing",
+    "case": "constructed",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "B6-latency-aware-routing",
+    "case": "constructed",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "B7-edf-feasibility",
+    "case": "constructed",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "B8-utility-per-gpu-second",
+    "case": "constructed",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "A-episodic",
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "B9-best-of-breed",
+    "case": "constructed",
+    "runnable": true,
+    "variant": "B9-noHost",
+    "host_component_note": "uses host offload as ONE component among several; runs as the labelled variant B9-noHost with that component disabled and every other component and the precedence order unchanged",
+    "reads_future": false,
+    "experiments": [
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "B10-blocking-aware-admission",
+    "case": "constructed",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "C-mixed"
+    ]
+   },
+   {
+    "name": "B11-naive-slicing",
+    "case": "constructed",
+    "runnable": true,
+    "variant": null,
+    "host_component_note": null,
+    "reads_future": false,
+    "experiments": [
+     "B-recall",
+     "C-mixed"
+    ]
+   }
+  ]
+ },
+ "_provenance": {
+  "git_commit": "bcb7222933c3b8ede2cd56e18db727894ffff990",
+  "script": "sim1c_scope.py",
+  "model": null,
+  "timestamp": "2026-11-12T19:30:27.674613",
+  "device": "cpu",
+  "n": 20
+ },
+ "hashes_end": {
+  "experiments/orchestration/sim/calibrate.py": "fa78b4ac6bd4a4df43ffd28e213fdb81a8f5430842c544fc4b6edce874846259",
+  "experiments/orchestration/sim/engine.py": "732440b6d2908f19cf7ef8bffe4366ec342e6f6c45b41e4fbd26a61b8a492e76",
+  "experiments/orchestration/sim/metrics.py": "a8cbb467e872225e5f75fe69c8bb8bee3afe53e83ad141f40f7b47944569c822",
+  "experiments/orchestration/sim/run.py": "94bf410ccfbfdf3d638df9bb0b32a32d10d39c42f8d5e41de471df7a1da87990",
+  "experiments/orchestration/sim/sim1_report.py": "130a264df695fbbbeb2647dc5dd3cc187e3ed779f2212076f37c5070b4ffb699",
+  "experiments/orchestration/sim/sim1b_hosttax.py": "f1c5ebc74a2b53cce5c3fc9965c48a8e6a13fff0eb7288d2afb8a8523a4ad7d1",
+  "experiments/orchestration/sim/sim1c_report.py": "9b9888fe5dbab6fd55912d9ac162f0365cb7495ebd0342e6f3645ba6c18e0b6b",
+  "experiments/orchestration/sim/sim1c_scope.py": "c60fd612647049f7d06507be80b07f381cca63dd1e986daaa07a8d73906e6fcb",
+  "experiments/orchestration/sim/workload.py": "bf6d41e92c0d328a06e33c3d0c41b9ab75515a1871e58ac9ef73d52a9e1ef50a",
+  "experiments/orchestration/baselines/attentionstore_adapted.py": "3c2fbf7f362c838c7cbb3fb89a7102e58fd0a31e1d1bb6968c188895278629fb",
+  "experiments/orchestration/baselines/cards/attentionstore.md": "0f8d7473ea99d1bdee5cb0605028ae65666d2ce9c5c8979c3118a4a1716a23b7",
+  "experiments/orchestration/baselines/cards/cascade.md": "bf6f2456372b58fc3e0852bc3d39f4ef747b714defbacdbd9ed24f8dc458882e",
+  "experiments/orchestration/baselines/cards/clockwork.md": "637f1f63a453ddeee73dd09d82365350a990d3c012820951204ed121a6524625",
+  "experiments/orchestration/baselines/cards/constructed.md": "b96783ab7f0a794198ffc1bb6cffa8113ce4a5785592b793d92821c262ddd040",
+  "experiments/orchestration/baselines/cards/covstream.md": "e9d05f39f9c4815443d1deabfd9eab49c803f778c794a5aa02b69ce24eda0a16",
+  "experiments/orchestration/baselines/cards/ecollm.md": "c1e2123328a53a70705b86d46df83dc2a8f2caa21bbee864889298e2488424f3",
+  "experiments/orchestration/baselines/cards/ekya.md": "700b15e6d64e77da616abcd1396070930cdd4cb894011ba82954bf9cf81cffc2",
+  "experiments/orchestration/baselines/cards/hybrid_llm.md": "03492baddf6177b9c16c766d49f22434bde8f2db7b02593115c7eb2853d01258",
+  "experiments/orchestration/baselines/cards/inarvl.md": "e5d87feaa0b4449376fc35ed72a05ab80a8a18e02385e3e0f1cf1ecc3c371765",
+  "experiments/orchestration/baselines/cards/kvflow.md": "7d56f2c628e404411dbf8eebc723dc92f5572ac67ee616da1b196a6428f84131",
+  "experiments/orchestration/baselines/cards/lmcache.md": "f2237c582cd5b5aeac7984733c0ad4fcef7133a5ba089f994cf3e9db22af8415",
+  "experiments/orchestration/baselines/cards/mooncake.md": "3b3c7daaa2e21227a84cfbefee3fd4774c27b85248b44912ddee1a2f4bba310d",
+  "experiments/orchestration/baselines/cards/pensieve.md": "4ebafab9dfcd11417979865e6f6bb07b46d98a434dfdb564470c70dc6896963e",
+  "experiments/orchestration/baselines/cards/perllm.md": "77ec113cf7ba6f56bd3de8fe636b64323a455242db2616371bca9c6a9bd3b520",
+  "experiments/orchestration/baselines/cards/preble.md": "eb780a95a88c026759ea45e01d8fcc6a2700b8b588bb5a6692ee2410b402997a",
+  "experiments/orchestration/baselines/cards/r3streaming.md": "e2856dc429bc5d082cf3551038d514c3144bd17f2076df9a8f701fb93388a3a7",
+  "experiments/orchestration/baselines/cards/rh8.md": "36610fcdded6af00fbdcbb4d23be7549ab85d5c93f2dbfb632eaf4953dbf16eb",
+  "experiments/orchestration/baselines/cards/routellm.md": "5263a4386e1da0cf138801e6f0970384ac965748975d6424bc78f1edc91b99e3",
+  "experiments/orchestration/baselines/cards/simplestream.md": "d43aaa648aec2d44c53815daddf2106094d8adc4b1ff3c4a8dd8a926062f0c7f",
+  "experiments/orchestration/baselines/cards/streamscout.md": "23a2ff0c0d2e098f4fb17ff020ecf6104a3e11d15eddced1ad4b5b9fe789d35d",
+  "experiments/orchestration/baselines/cards/thinking_qwenvl.md": "867d285fc7a539651d01e5a35212f5e2ad71189fec40d693dd0374d1dcb596a5",
+  "experiments/orchestration/baselines/cards/tuned_engine.md": "4411c060014b73f88269670ef8666387fa9c939af34b410d7f197dcef29a5323",
+  "experiments/orchestration/baselines/cards/uniscale.md": "43f9d94d893ef7850553a1891a3e633a223fae0c69aadba57ef81114b28463d1",
+  "experiments/orchestration/baselines/cards/videostorm.md": "b25bbba233ece72a5f547e9b036926caba2cb2160dab62067b533f0191788178",
+  "experiments/orchestration/baselines/cascade_adapted.py": "662968bc1e73bd8eb1fed4affe8af71e7a29a7bd4a4a08634394c907b33e1273",
+  "experiments/orchestration/baselines/clockwork_adapted.py": "e878911f9644ae541693d9b982945735141f360493878b2b2985b42085f9fb08",
+  "experiments/orchestration/baselines/constructed.py": "a084d47d00b9ef3c2635170a9b08054ad98cf80db891305acefadcd49ee4e4e0",
+  "experiments/orchestration/baselines/costs.py": "8b93d6cd5f351b1dda4df58b3573c7b9d372a5b57441cd01e5cf890e6a847089",
+  "experiments/orchestration/baselines/covstream_adapted.py": "5835cc54b1753eb22ab5d91cb495c931a922edcd6be133e50c15b54490956343",
+  "experiments/orchestration/baselines/devsplit.py": "2d55fab9723a1333d2d6285641037d1a1be58c1cca9a29d6128c9969852a8542",
+  "experiments/orchestration/baselines/ecollm_adapted.py": "225d3905d94f3392b0143ec69bf4e80e62ba7071adf8a9df5c4253a27b3d64e7",
+  "experiments/orchestration/baselines/ekya_adapted.py": "06160c1f67854a2f0948b4406083ba273302f461844a225fa5ef941e144ad2b6",
+  "experiments/orchestration/baselines/hybrid_llm_adapted.py": "89cc100c2dd2c7488b346cacf4827b8bfbc67dae2ca3ded423064fdfa78d1f6a",
+  "experiments/orchestration/baselines/inarvl_adapted.py": "ebe0bd9cde757c8454c28965cc19decb79a64ee38e2f6c27779822ba191b639f",
+  "experiments/orchestration/baselines/interface.py": "14b8625af0a25d60e594deaf2f23988122a39c14b3e05a7083fada5a6d7a620e",
+  "experiments/orchestration/baselines/kvflow_adapted.py": "aa096bd3aa2ccf44c2f7b0b2910d1c4de5c4f9a51e1f946c59b933c47e992df5",
+  "experiments/orchestration/baselines/lmcache_adapted.py": "c70d1c0c28dba5e47c381b917348cfa0d793e11d7911bd3d4663b8c46f0ae6b0",
+  "experiments/orchestration/baselines/make_report.py": "bb66cb3b11457304cb9abd19345eff1f21102359e77b7ce1811abc3e1292dd37",
+  "experiments/orchestration/baselines/mooncake_adapted.py": "22a01345e8f367a9b001f48cd580151eed9a03adae6823005fe8b1ffc634a2e7",
+  "experiments/orchestration/baselines/naive.py": "48ac22b618f123e37acf2a44c3042ffb8077886b3d1fc756ce550ac4fd8cda52",
+  "experiments/orchestration/baselines/pensieve_adapted.py": "c626a919d0e2a418047ec1e56464e417050382a772b9c61277846dc8539d9d49",
+  "experiments/orchestration/baselines/perllm_adapted.py": "4e8195f174d6a5bc0c80ea4dcacbf3e4ddbb21d15db6a74ec964e27c5acdce70",
+  "experiments/orchestration/baselines/preble_adapted.py": "085b15522dc5992d5fe8396f13029e2003bdf17bf1bb39c7ad659391193c8df0",
+  "experiments/orchestration/baselines/profiles.py": "8e4657523186bc4231b8ead7b533fcf50818aa27a4f721d9a532239e733fc2e5",
+  "experiments/orchestration/baselines/r3streaming_adapted.py": "c393f9a91df0ef83b1b766338387f68cef8fa82228bd13284aee0fe028d6a062",
+  "experiments/orchestration/baselines/recall_profiles.py": "35729c899dd47fff56e4ca19941ac6e2373801d4e89fe991f80d7188a7c70e23",
+  "experiments/orchestration/baselines/reconstructed/attentionstore.py": "58e7b20e0fc07a33647ae2badf0fedc5e9384e7c37bd6b8164d1489c3f46f99a",
+  "experiments/orchestration/baselines/reconstructed/covstream.py": "a22d5cc2b731b61e661da3827c32c50213b4b0c58f98087c5cd73de853c19338",
+  "experiments/orchestration/baselines/reconstructed/ecollm.py": "23a4fc8cd5c3b4c76ca74df2c00d49202eb9bf169b4dd40a76ba866480efee31",
+  "experiments/orchestration/baselines/reconstructed/hybrid_llm.py": "aadb74675d5647272aabda8661c933f1215e31d908b13dee39d733e20fde24d0",
+  "experiments/orchestration/baselines/reconstructed/inarvl.py": "8d1085e2b0446303fc4149852e69d5ab84d32cf9b4e3f26123228ec2d6848121",
+  "experiments/orchestration/baselines/reconstructed/kvflow.py": "a1aeb36ac25eb924a207e503a27dc279ae06e5aa8a062fbb64442a3e852f9fff",
+  "experiments/orchestration/baselines/reconstructed/pensieve.py": "71c655743e7b11441089d79e6fd5152e1387708be756e893f0307ca4b9a62ccb",
+  "experiments/orchestration/baselines/reconstructed/perllm.py": "66ec9b44e12fd75dc452bb8475d2162e6f6bfd602459d2d16d0e7f4618eb9034",
+  "experiments/orchestration/baselines/reconstructed/r3streaming.py": "969e0e96f3e1128a39008f1bcabbf0e3577dd0f2af5e4897b1d3c74f0a6a0805",
+  "experiments/orchestration/baselines/reconstructed/streamscout.py": "5662af3bbc5ba81ec8a3550368008c1ca9f81a28526f2ef1f6c1e7b1e4c7f6e3",
+  "experiments/orchestration/baselines/reconstructed/test_attentionstore_toy.py": "5cc4762be08f3063ee69648ef2e3e09d0679a046cb0580ba7e3845ef9587e080",
+  "experiments/orchestration/baselines/reconstructed/test_constructed_amendment_toy.py": "a4f3769850a389d05b891c4bb521462af2a535b247e9c56c01a5763f995d5ee5",
+  "experiments/orchestration/baselines/reconstructed/test_covstream_toy.py": "a7635beccbb8524073a57fbbc2282f4355a7e2061534f823a4bc64ba68e7b394",
+  "experiments/orchestration/baselines/reconstructed/test_ecollm_toy.py": "067b02452bd1f170a8d24ddc4e55d314423de06113f057acb24f48518223ba64",
+  "experiments/orchestration/baselines/reconstructed/test_hybrid_llm_toy.py": "29ff45912cdc18d37fb6cd01da755e2c3c0fa595107f5eeda6536e4a885783df",
+  "experiments/orchestration/baselines/reconstructed/test_inarvl_toy.py": "886ab868bf3371181fcf19cdbe589a5ad273672301083f4c800b4f5656cc1c58",
+  "experiments/orchestration/baselines/reconstructed/test_kvflow_toy.py": "5b965319c72d9efd9b294a48bfe302e34e5ea56b9b4a956e30a69410957181ff",
+  "experiments/orchestration/baselines/reconstructed/test_pensieve_toy.py": "c664daea03b1c4b397349046a5eb9cfc7d0c6d1b75bf57d32c9134f69e2cfdb7",
+  "experiments/orchestration/baselines/reconstructed/test_perllm_toy.py": "6299cb413b20c1350bad468384f9ce539a093e06f539b8e9befe725f436fbaa5",
+  "experiments/orchestration/baselines/reconstructed/test_r3streaming_toy.py": "462339b0ad4c6a58ed0325aae67e983bbcb98a5e46876758ccf3ae491ce3e419",
+  "experiments/orchestration/baselines/reconstructed/test_streamscout_toy.py": "c7e7a8a5aaabdd3b4b9a9d047e6bd8027442bffb08874e5a14564594356ff3c5",
+  "experiments/orchestration/baselines/reconstructed/test_thinking_qwenvl_toy.py": "883c45f8a8503ca33f7cd868bf438bd2217be2dd73c29511fb06547f73b30008",
+  "experiments/orchestration/baselines/reconstructed/test_uniscale_toy.py": "f3ecc987f1ba4fdbfb01eaa71043d11b254d7ca31851f14951a0e233b07a003d",
+  "experiments/orchestration/baselines/reconstructed/test_videostorm_toy.py": "b9113c93456cf6fbc0a8b86be75c849d3989798705bff79f779d3c97f03af357",
+  "experiments/orchestration/baselines/reconstructed/thinking_qwenvl.py": "16e00bf2ef56533db060724a7c36be80641ebf6f72ab6b0c5f03dbd5ac93ec12",
+  "experiments/orchestration/baselines/reconstructed/uniscale.py": "afc3e5ed2a815d7f09a3bd44739c78cd7c3f292e204e319cfefe6180e8652fa5",
+  "experiments/orchestration/baselines/reconstructed/videostorm.py": "c169a7d591087457750c2602f4af8be8ae29b7ea5b549b2e8a7b011074aa2128",
+  "experiments/orchestration/baselines/registry.yaml": "7bcaac3dc2f8351ffa9d09b3514bd4dbebaf82b91e2c7b62e93be4d0615e6781",
+  "experiments/orchestration/baselines/rh8_adapted.py": "dcd8d22b4e8afcdef34d47b70fa2bb89589bba7bfe15e35714f1f3570f5e1888",
+  "experiments/orchestration/baselines/routellm_adapted.py": "206cc446314c1c21e1e984cf839e440f24f16f1d9b4611cbcf0534068600095c",
+  "experiments/orchestration/baselines/simplestream_adapted.py": "0d72047699556fb3e402c2c236ee3e35b07fadaea1ae2c27f7b259260ea35b24",
+  "experiments/orchestration/baselines/smoke/replay.py": "650f8d70bcdc3893373a3c7aabd14ca7c679e699aad15d83cadca08a58f09f4c",
+  "experiments/orchestration/baselines/smoke/run_all.py": "672e40720d5c62fbe0eb11ed833c7a34f678b2a577bb31e2dcfb997fa2f306d8",
+  "experiments/orchestration/baselines/streamscout_adapted.py": "fa22057bb913ea451afff65e7e2a6ffadabf15775dce010c60630f6e2dacf981",
+  "experiments/orchestration/baselines/thinking_qwenvl_adapted.py": "d3fddea1c69da3ecc10c1b2fc8f779177bbf2b66b6fed8867bfe915d467677e0",
+  "experiments/orchestration/baselines/tuned_engine.py": "7b2fbf392c34d9e043a18ffed3f273bd5092f4ec5c5fda820c7b1dd4f1585a5c",
+  "experiments/orchestration/baselines/uniscale_adapted.py": "1d1a52fd9f251e5a7c50b7cf50faaaa20b283091495914d168d91856550d01b5",
+  "experiments/orchestration/baselines/videostorm_adapted.py": "a23886344fb2018dcbcb8b7f88ee78a281b41d746d235936b65e7c5501d9ffca"
+ },
+ "hash_comparison": {
+  "n_files_start": 90,
+  "n_files_end": 94,
+  "added": [
+   "experiments/orchestration/sim/metrics.py",
+   "experiments/orchestration/sim/run.py",
+   "experiments/orchestration/sim/sim1c_report.py",
+   "experiments/orchestration/sim/workload.py"
+  ],
+  "removed": [],
+  "changed": [
+   "experiments/orchestration/baselines/cards/constructed.md",
+   "experiments/orchestration/sim/sim1c_scope.py"
+  ],
+  "identical": false,
+  "added_code": [
+   "experiments/orchestration/sim/metrics.py",
+   "experiments/orchestration/sim/run.py",
+   "experiments/orchestration/sim/sim1c_report.py",
+   "experiments/orchestration/sim/workload.py"
+  ],
+  "changed_code": [
+   "experiments/orchestration/sim/sim1c_scope.py"
+  ],
+  "removed_code": [],
+  "documentation_files_changed": [
+   "experiments/orchestration/baselines/cards/constructed.md"
+  ],
+  "sweep_window": {
+   "start": "19:42:04",
+   "end": "22:01:24"
+  },
+  "files_modified_during_the_sweep": [
+   {
+    "path": "experiments/orchestration/sim/run.py",
+    "modified": "19:43:29",
+    "is_code": true
+   },
+   {
+    "path": "experiments/orchestration/baselines/cards/constructed.md",
+    "modified": "19:46:10",
+    "is_code": false
+   }
+  ],
+  "stop": false,
+  "rule": "a file ADDED after the start snapshot is this study's own new code, not a mutation; a file CHANGED while the sweep was executing is the case the rule is about, and the reproduction check below is the empirical test of whether it altered default behaviour",
+  "reproduction": {
+   "ran": true,
+   "n_runs": 36,
+   "n_mismatches": 0,
+   "cells": [
+    {
+     "cell": "episodic-dominant|F2|d2|seed4",
+     "digests_identical": true,
+     "arms_checked": 12
+    },
+    {
+     "cell": "balanced|F8|d5|seed12",
+     "digests_identical": true,
+     "arms_checked": 12
+    },
+    {
+     "cell": "recall-dominant|F32|d10|seed18",
+     "digests_identical": true,
+     "arms_checked": 12
+    }
+   ],
+   "bit_exact": true,
+   "rule": "re-execute recorded sweep cells with the current code and require the recorded challenge mAP and recall timely accuracy back bit-exactly"
+  },
+  "note": "`sim1c_scope.py` itself was also edited at 19:47:28, inside the sweep window, to add this `--finish` entry point and again afterwards to separate added from changed files and to add the reproduction check; its later mtime is why it no longer appears in the list above. The edits do not touch NOT_RUNNABLE, HOST_AS_COMPONENT, `scoped_gate` or `classify_arms`, which are the only parts the sweep reads, and the reproduction check covers it: `run.py::_arms` imports this module, so a changed arm list would change the recorded rows."
+ }
+}
