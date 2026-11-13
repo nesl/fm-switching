@@ -200,7 +200,7 @@ w("**(a) The tuned engine: DECIDED 2026-11-12 - it is StudyE10e's P1.** This bas
 w()
 w("One consequence of the switch, stated so no one reads more into it than it says: the 10-minute "
   "replay smoke test was re-run under `TUNED = P1` and **every recorded field of all 38 "
-  "configurations is unchanged** (only wall-clock times differ). That is expected and is not "
+  "configurations then in the suite is unchanged** (only wall-clock times differ). That is expected and is not "
   "evidence for P1 - the replay harness charges no engine-configuration cost, so `engine_config` "
   "is a field the policy emits and the harness validates but does not price. P1's benefit and its "
   "cold-recall cost live in StudyE10e's measured latency curves, not in this replay; any study "
@@ -233,6 +233,11 @@ w("- **Causal observations only.** `Observation` is frozen and the fields that c
   "future are absent; `scrub()` additionally asserts that no field or dict key named in "
   "`FORBIDDEN_FIELDS` (17 of them: labels, correctness, `time_of_event`, future arrivals, oracle "
   "values, ...) reached the policy. It runs on **every** epoch via `Policy.__call__`.")
+w("- **Two actions added by the 2026-11-12 amendment**, both validated like the rest: "
+  "`MATERIALIZE(session, target_tokens, slice_tokens)` - the explicit act of BUILDING a session's "
+  "cloud-side state, as against `KEEP_GPU_WARM`, which only holds state that exists - and "
+  "per-stream `SUSPEND_UNTIL(t)`, which issues no cloud call until *t* while the application reads "
+  "the device's own scores. `slice_tokens = None` means one monolithic prefill. See section 13.")
 w("- **One action space.** `validate_action` rejects a cadence outside {0.25, 0.5, 1.0} s, a "
   "frame count outside {1, 3}, an unknown representation or session action, a negative defer, or "
   "an action naming an entity the observation did not contain - which is how a policy would "
@@ -753,6 +758,197 @@ for exp, lbl in (("A-episodic", "A — episodic"), ("B-recall", "B — recall"),
         w(f"| `{r['name']}` | {r['case']} | {r.get('priority','-')} |")
     w()
 w("**Our scheduler is not in these lists**; it is added later and compared against them.")
+w()
+
+# ============================================================ amendment 2026-11-12 (part 2)
+import json as _json  # noqa: E402
+_SM = {r["policy"]: r for r in _json.loads(
+    (ROOT / "results/orchestration/study_b_baselines/b_smoke_results.json").read_text())}
+_RA = _json.loads(
+    (ROOT / "results/orchestration/study_b_baselines/b_recall_accuracy.json").read_text())
+_E9D = _json.loads((ROOT / "results/dashcam/study_e9d/e9d_results.json").read_text())
+
+w("---")
+w()
+w("# AMENDMENT (2026-11-12, later 2): two new actions, the recall and delay profiles, B10 and B11")
+w()
+w("Everything above still holds, and **no baseline number, cost constant or case decision from it "
+  "changes**. This part records what the amendment added. It was pre-registered in the "
+  "`StudyB-baselines` row of `research/EXPERIMENTS.md` before any of it was written.")
+w()
+w("## 13. The interface: MATERIALIZE and SUSPEND_UNTIL")
+w()
+w("| action | signature | what it means | validation |")
+w("|---|---|---|---|")
+w("| `MATERIALIZE` | `SessionAction(session, \"MATERIALIZE\", target_tokens, slice_tokens)` | "
+  "**build** a session's cloud-side state up to `target_tokens`. `slice_tokens = None` means one "
+  "monolithic prefill; an integer means chain slices of that size | `target_tokens` must be a "
+  "positive int; `slice_tokens` must be `None` or a positive int; both fields are rejected on any "
+  "other session action |")
+w("| `SUSPEND_UNTIL` | `StreamAction(stream, \"suspend\", suspend_until_s=t)` | issue **no** "
+  "cloud call for this stream until *t*; the application uses the device's own scores meanwhile | "
+  "*t* must be in the future; a suspended stream may not carry a cadence or a frame count, and "
+  "`suspend_until_s` is rejected on a non-suspended stream |")
+w()
+w("**`slice_tokens = None` is the property under test, not a defect of the baselines.** Every "
+  "baseline written before the amendment can express only the monolithic form, and `interface."
+  "FAIRNESS_RULES[4]` now says so explicitly. B11 is the slicing ablation and B10 its "
+  "no-slicing counterpart (section 15).")
+w()
+w("**Five baselines whose own papers prefetch or eagerly warm are wired to `MATERIALIZE`**, with "
+  "`slice_tokens = None` because each of those papers moves whole prefixes:")
+w()
+w("| baseline | what in the paper is a BUILD | card |")
+w("|---|---|---|")
+w("| `kvflow` | the prefetch that pulls a KV node in ahead of its predicted next execution | "
+  "`cards/kvflow.md` |")
+w("| `attentionstore` | the scheduler-aware fetch that promotes a session from DRAM into HBM | "
+  "`cards/attentionstore.md` |")
+w("| `pensieve` | moving a chunk into the GPU tier that is not already there | "
+  "`cards/pensieve.md` |")
+w("| `lmcache` | the loader that builds a GPU-resident KV copy | `cards/lmcache.md` |")
+w("| `rh8-demand-aware` (both arms) | StudyRH8's EAGER warm-up pass, whose cost its own "
+  "2026-11-03 audit records as EXCLUDED from RH8's in-window metrics (240 warm-up records moving "
+  "4,289 MB, present only in the EAGER cells) | `cards/rh8.md` |")
+w()
+w("**What changed is what those baselines DECLARE, not what they are charged.** The harness "
+  "already billed a session's first promotion to GPU-warm at the measured cold-prefill cost "
+  "(fairness rule 3) and bills `MATERIALIZE` on the same path. The re-run smoke record is "
+  "identical field for field to the pre-amendment one apart from the new counters, which is the "
+  "check that this is true.")
+w()
+w("| baseline | MATERIALIZE calls | monolithic | sliced | slice sizes |")
+w("|---|---|---|---|---|")
+for _nm, _r in sorted(_SM.items()):
+    if _r.get("materialize_calls"):
+        w(f"| `{_nm}` | {_r['materialize_calls']} | {_r['materialize_monolithic']} | "
+          f"{_r['materialize_sliced']} | {_r['slice_token_sizes'] or '—'} |")
+w()
+w("Two of the five never warm anything in this particular replay and so never call it: "
+  "`pensieve`'s eviction leaves the GPU tier empty, and `rh8-demand-aware-causal`'s eager count "
+  "is `round(0.25 x 2) = 0` with only two sessions. Both are properties of a two-session, "
+  "10-minute replay and neither is changed by the amendment.")
+w()
+w("**No baseline uses `SUSPEND_UNTIL` yet** (0 suspended steps across all 40). It exists because "
+  "StudyE9d measured what suspending costs, and because a policy that cannot express \"stop "
+  "calling the cloud for the next second\" cannot be compared against one that can.")
+w()
+w("## 14. The profiles the amendment added")
+w()
+w("### 14.1 Recall accuracy per category x question-time bin x configuration")
+w()
+w("`recall_profiles.py` -> `results/orchestration/study_b_baselines/b_recall_accuracy.json` and "
+  "`.csv`. **Every cell is a count of committed per-question `correct` flags.** Nothing is "
+  "estimated, fitted or interpolated, and the loaders are StudyE6b's own so there is one "
+  "definition of each configuration in the repository. Question-time bins are StudyE6b's "
+  f"(`le120`, `120-480`, `gt480`); CIs are video-clustered bootstraps, "
+  f"{_RA['n_bootstrap']} resamples, seed {_RA['seed']}.")
+w()
+w("| configuration | tier | source | n | accuracy | CI | le120 | 120-480 | gt480 |")
+w("|---|---|---|---|---|---|---|---|---|")
+for _nm, _c in _RA["configs"].items():
+    _b = _c["by_bin"]
+    def _bb(k):
+        v = _b[k]
+        if v["accuracy"] is None:
+            return "—"
+        return (f"{v['accuracy']:.3f} (n={v['n']})"
+                + (" **UNRELIABLE**" if v["unreliable"] else ""))
+    w(f"| `{_nm}` | {_c['tier']} | {_c['source']} | {_c['n']} | **{_c['accuracy']:.4f}** | "
+      f"[{_c['ci'][0]:.3f}, {_c['ci'][1]:.3f}] | {_bb('le120')} | {_bb('120-480')} | "
+      f"{_bb('gt480')} |")
+w()
+w("Per-category and per-(category x bin) cells are in the JSON and the CSV; a cell with "
+  f"fewer than {_RA['small_n_flag']} questions is flagged `UNRELIABLE` rather than quoted, and "
+  "there are many of those at the category x bin level.")
+w()
+w("**`4B-D2` is the DEVICE PROXY and is labelled as such everywhere.** Its letters are the "
+  "H100 4B's for StudyE7's D2 input. StudyE8 Part D measured device-vs-H100 agreement at 68/68 "
+  "warm and 27/27 cold on byte-identical inputs and StudyF4 measured per-question agreement "
+  "0.972-0.981 with no cell below 90 %; but **StudyD15 Part A rejected the H100-for-Orin proxy as "
+  "an EXACT numerical stand-in**, so these tables are valid for ordering and first-order value "
+  "and never as exact device numbers.")
+w()
+w("### 14.2 The StudyE9d delay curves")
+w()
+w("`profiles.delay_curve`, `profiles.value_at_delay`, `profiles.d_star_s` and "
+  "`profiles.blocking_loss` read StudyE9d directly. The four facts a policy can now consult:")
+w()
+w("| quantity | what it is | value |")
+w("|---|---|---|")
+_k = "always-cloud 32BI_N1@0.5"
+_k3 = "always-cloud 32BI_N3@0.5"
+w(f"| V(d) | challenge mAP against added delivery delay, 0 to 3 s in 0.25-s steps | 32B N = 1 at "
+  f"cadence 0.5 s: {_E9D['vd'][_k + '|d0.0']['challenge_mAP']['value']:.4f} at d = 0 falling to "
+  f"{_E9D['vd'][_k + '|d3.0']['challenge_mAP']['value']:.4f} at d = 3 s |")
+w(f"| d\* | the added delay at which a cloud arm falls to the device's value | 32B N = 1 "
+  f"**{_E9D['dstar'][_k]['challenge_mAP']['d_star_s']:.2f} s** (challenge mAP), "
+  f"{_E9D['dstar'][_k]['streaming_h0.0']['d_star_s']:.2f} s (streaming AP at h = 0); 32B N = 3 "
+  f"{_E9D['dstar'][_k3]['challenge_mAP']['d_star_s']:.2f} s and "
+  f"{_E9D['dstar'][_k3]['streaming_h0.0']['d_star_s']:.2f} s |")
+w(f"| blocking loss | value lost to a cloud-path outage of w seconds | at w = 2 s, QUEUE "
+  f"{_E9D['blocking'][_k + '|QUEUE|w2.0']['mAP_loss']['mean']:+.4f} mAP against SUSPEND "
+  f"{_E9D['blocking'][_k + '|SUSPEND|w2.0']['mAP_loss']['mean']:+.4f} |")
+w("| interpolation | value BETWEEN StudyE9d's 0.25-s grid points | linear, held flat beyond "
+  "3.0 s - **a RULE, not a measurement**, stated in `profiles.PROVENANCE` and in the B10 card |")
+w()
+w("**Two warnings are carried from StudyE9d into every card that uses it**: d\* has a wide CI "
+  "and is not a threshold (the curve is the usable object), and a loss below about 0.001 challenge "
+  "mAP is inside the noise floor and should be read as zero.")
+w()
+w("## 15. B10 and B11")
+w()
+w("| id | what it is | why it exists |")
+w("|---|---|---|")
+w("| **B10** blocking-aware admission, **no slicing** | defers a recall whose predicted "
+  "non-preemptive engine time would hold an episodic stream past StudyE9d's d\*, unless its "
+  "deadline slack is exhausted; EDF otherwise; recall served at whatever readiness the session "
+  "actually has; KV management is B9's component (iv) verbatim | it is the strongest policy that "
+  "uses the blocking mechanism StudyE10c / E10d / E10e located **without** slicing |")
+w("| **B11** naive slicing | every materialization chained in fixed 2,048-token slices, FCFS, no "
+  "awareness of episodic timing; everything else as tuned-engine always-cloud (StudyE10e's P1) | "
+  "it is slicing **without** scheduling - the ablation that separates the two mechanisms |")
+w()
+w("B10's rule, verbatim from `constructed.py`:")
+w()
+w("```")
+w("T        = costs.recall_ttft_s(readiness_tokens, readiness)   # predicted non-preemptive time")
+w("affected = connected streams with a call due inside T (cadence <= T)")
+w("d*       = profiles.d_star_s(arm, cadence)                    # StudyE9d")
+w("if slack <= T:        ADMIT     # a deadline is never sacrificed to a stream")
+w("elif T >= min(d*):    DEFER by min(0.25 s, slack - T)")
+w("else:                 ADMIT")
+w("```")
+w()
+w("Every component choice is tabulated in `cards/constructed.md`, including the three that are "
+  "rules rather than measurements: the TTFT interpolation between StudyRH5's 11k and 28k points, "
+  "reading \"no crossing inside the 3-s grid\" as 3.0 s, and the 0.25-s defer quantum.")
+w()
+w("**B11's per-slice overhead is NOT measured.** StudySIM1 sweeps it over "
+  "{0.02, 0.05, 0.1, 0.2, 0.47} s and **every B11 result is labelled parametric** until "
+  "StudySLICE1 measures it. It is the one free parameter in the suite and it is exposed here "
+  "rather than buried in a constructor.")
+w()
+w("### What the smoke replay exercises, and what it does not")
+w()
+_b10 = _SM.get("B10-blocking-aware-admission", {})
+w(f"**All 40 configurations ran, respected the interface and stayed in budget** (was 38; B10 and "
+  f"B11 are the two new ones). But B10's deferral rule **never fires in this replay**: both of its "
+  f"sessions stay HOST-WARM, so T = 0.46-1.00 s against d\* = 2.54 s, and the record shows "
+  f"{_b10.get('recall', {}).get('cloud', '?')} admitted, "
+  f"{_b10.get('recall', {}).get('deferred', '?')} deferred and "
+  f"{_b10.get('materialize_calls', '?')} materializations. **That is exactly the "
+  "silently-unexercised mechanism CLAUDE.md's protocol exists to catch**, so it is stated here "
+  "rather than left for a reader to infer from a PASS.")
+w()
+w("The rule is instead exercised explicitly in "
+  "`reconstructed/test_constructed_amendment_toy.py`, which asserts **24 named behaviours, all "
+  "reproduced**: that d\* is read from StudyE9d and not guessed (2.537 s); that a COLD 28k "
+  "recall's predicted hold exceeds it (7.40 s) and a HOST-WARM 11k recall's does not (0.46 s); "
+  "that B10 therefore DEFERS the first while it has slack and ADMITS it once the slack is "
+  "exhausted; that admitting a COLD query materializes the session monolithically; that B11 "
+  "slices at 2,048 tokens, is FCFS and runs engine P1; and that the interface REJECTS each of the "
+  "eight malformed uses of the two new actions.")
 w()
 
 out = ROOT / "reports/study_b_baselines.md"

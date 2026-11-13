@@ -18,7 +18,8 @@ from typing import List
 sys.path.insert(0, str(Path(__file__).resolve().parent / "reconstructed"))
 
 import costs as C
-from interface import (Action, Observation, Policy, RecallAction, SessionAction, StreamAction)
+from interface import (Action, Observation, Policy, RecallAction, SessionAction,
+                       StreamAction, materialize)
 from pensieve import CPU, GPU, Chunk, chunk_value, evict_to_fit  # noqa: E402
 
 
@@ -50,7 +51,10 @@ class PensieveAdapted(Policy):
                                 GPU if sid in obs.cloud.gpu_warm_sessions else CPU,
                                 recompute_tok_s=rate, reuse_horizon_s=self.reuse_horizon_s))
         after = evict_to_fit(chunks, self.cap)
-        sess = [SessionAction(c.sid, "KEEP_GPU_WARM" if c.tier == GPU else "OFFLOAD_TO_HOST")
+        sess = [(materialize(c.sid, max(tokens.get(c.sid, 11000), 1), slice_tokens=None)
+                 if (c.tier == GPU and c.sid not in obs.cloud.gpu_warm_sessions)
+                 else SessionAction(c.sid, "KEEP_GPU_WARM" if c.tier == GPU
+                                    else "OFFLOAD_TO_HOST"))
                 for c in after]
         return Action(
             streams=[StreamAction(s.stream_id, "cloud") for s in obs.streams],

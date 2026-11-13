@@ -34,15 +34,29 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Set
 
-from interface import (Action, Observation, Policy, RecallAction, SessionAction, StreamAction)
+from interface import (Action, Observation, Policy, RecallAction, SessionAction,
+                       StreamAction, materialize)
 
 HIGH_FRAC = 0.25        # StudyRH8 HIGH_FRAC
 LOW_RATE = 0.20         # StudyRH8 LOW_RATE (its low-demand escalation rate)
 
 
-def _warm_actions(all_sessions: Sequence[str], warm: Set[str]) -> List[SessionAction]:
-    return [SessionAction(s, "KEEP_GPU_WARM" if s in warm else "OFFLOAD_TO_HOST")
-            for s in all_sessions]
+def _warm_actions(all_sessions: Sequence[str], warm: Set[str],
+                  already_gpu: Sequence[str] = (), tokens: Optional[Dict[str, int]] = None
+                  ) -> List[SessionAction]:
+    """StudyRH8's EAGER set. Amendment 2026-11-12: warming a session whose state does not exist
+    yet is RH8's eager WARM-UP, which its own 2026-11-03 audit records as an excluded cost, so it
+    is declared as MATERIALIZE with slice_tokens = None (RH8 warmed whole histories, never
+    slices). Sessions already GPU-warm are held, not rebuilt."""
+    g, tk = set(already_gpu), (tokens or {})
+    out: List[SessionAction] = []
+    for s in all_sessions:
+        if s in warm:
+            out.append(SessionAction(s, "KEEP_GPU_WARM") if s in g
+                       else materialize(s, max(tk.get(s, 11000), 1), slice_tokens=None))
+        else:
+            out.append(SessionAction(s, "OFFLOAD_TO_HOST"))
+    return out
 
 
 class RH8OracleDemand(Policy):
@@ -65,7 +79,10 @@ class RH8OracleDemand(Policy):
                           | {q.session_id for q in obs.recall})
         return Action(streams=[StreamAction(s.stream_id, "cloud") for s in obs.streams],
                       recall=[RecallAction(q.query_id, "CLOUD") for q in obs.recall],
-                      sessions=_warm_actions(sessions, self.high & set(sessions)))
+                      sessions=_warm_actions(
+                          sessions, self.high & set(sessions),
+                          already_gpu=obs.cloud.gpu_warm_sessions,
+                          tokens={q.session_id: q.readiness_tokens for q in obs.recall}))
 
 
 class RH8CausalDemand(Policy):
@@ -112,4 +129,6 @@ class RH8CausalDemand(Policy):
         warm = set(ranked[:k])
         return Action(streams=[StreamAction(s.stream_id, "cloud") for s in obs.streams],
                       recall=[RecallAction(q.query_id, "CLOUD") for q in obs.recall],
-                      sessions=_warm_actions(sessions, warm))
+                      sessions=_warm_actions(
+                          sessions, warm, already_gpu=obs.cloud.gpu_warm_sessions,
+                          tokens={q.session_id: q.readiness_tokens for q in obs.recall}))

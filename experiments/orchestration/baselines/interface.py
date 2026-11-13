@@ -31,7 +31,19 @@ CADENCES_S: Tuple[float, ...] = (0.25, 0.5, 1.0)
 FRAME_COUNTS: Tuple[int, ...] = (1, 3)
 REPRESENTATIONS: Tuple[str, ...] = ("RECENT", "RICH", "D2")
 READINESS: Tuple[str, ...] = ("COLD", "HOST-WARM", "GPU-WARM")
-SESSION_ACTIONS: Tuple[str, ...] = ("KEEP_GPU_WARM", "OFFLOAD_TO_HOST", "EVICT")
+SESSION_ACTIONS: Tuple[str, ...] = ("KEEP_GPU_WARM", "OFFLOAD_TO_HOST", "EVICT", "MATERIALIZE")
+STREAM_MODES: Tuple[str, ...] = ("local", "cloud", "suspend")
+# StudyB-baselines amendment 2026-11-12. MATERIALIZE(session, target_tokens, slice_tokens) builds a
+# session's cloud-side state up to `target_tokens`. `slice_tokens = None` means ONE MONOLITHIC
+# PREFILL, which is the only option every pre-amendment baseline can express; that restriction is
+# the PROPERTY UNDER TEST (fairness rule 4), not a defect of those baselines, and a policy that
+# chains slices must declare it. The per-slice overhead is NOT a measured quantity: StudySIM1
+# sweeps it and every slicing result is labelled parametric until StudySLICE1 measures it.
+MATERIALIZE_MONOLITHIC = None
+SLICING_IS_THE_PROPERTY_UNDER_TEST = (
+    "slice_tokens = None (one monolithic prefill) is what every baseline written before the "
+    "2026-11-12 amendment can express. A baseline that chains slices is exercising the property "
+    "under test and must say so in its card.")
 RECALL_ACTIONS: Tuple[str, ...] = ("DEVICE", "CLOUD", "DEFER", "REJECT")
 EPOCH_KINDS: Tuple[str, ...] = (
     "stream_arrival", "stream_departure", "recall_arrival", "request_completion",
@@ -161,9 +173,12 @@ def scrub(obs: Observation) -> Observation:
 @dataclass
 class StreamAction:
     stream_id: str
-    mode: str                                # "local" | "cloud"
+    mode: str                                # in STREAM_MODES
     cadence_s: Optional[float] = None
     frame_count: Optional[int] = None
+    # mode == "suspend": issue no cloud call until this wall time; the application uses the
+    # DEVICE's scores meanwhile (StudyE9d's SUSPEND mode, whose cost that study measured).
+    suspend_until_s: Optional[float] = None
 
 
 @dataclass
@@ -178,6 +193,9 @@ class RecallAction:
 class SessionAction:
     session_id: str
     action: str                              # in SESSION_ACTIONS
+    # action == "MATERIALIZE" only:
+    target_tokens: Optional[int] = None      # how much of the session's history to build
+    slice_tokens: Optional[int] = None       # None = one monolithic prefill (see above)
 
 
 @dataclass
@@ -188,6 +206,22 @@ class Action:
     engine_config: Optional[str] = None
     order: Optional[str] = None
     notes: Dict[str, Any] = field(default_factory=dict)
+
+
+def materialize(session_id: str, target_tokens: int,
+                slice_tokens: Optional[int] = MATERIALIZE_MONOLITHIC) -> SessionAction:
+    """The explicit act of BUILDING a session's cloud-side state, as against KEEP_GPU_WARM, which
+    only keeps state that already exists. A baseline whose paper prefetches or eagerly warms says
+    so with this; the harness charges the build at the measured cold-prefill cost either way, so
+    wiring a baseline to it changes what the baseline DECLARES, not what it is charged."""
+    return SessionAction(session_id, "MATERIALIZE", target_tokens=int(target_tokens),
+                         slice_tokens=slice_tokens)
+
+
+def suspend_stream(stream_id: str, until_s: float) -> StreamAction:
+    """SUSPEND_UNTIL(t): issue no cloud call for this stream until t; the application uses the
+    device's own scores meanwhile. StudyE9d measured what that costs (its SUSPEND mode)."""
+    return StreamAction(stream_id, "suspend", suspend_until_s=float(until_s))
 
 
 def apply_defaults(action: Action) -> Action:
@@ -224,8 +258,16 @@ def validate_action(action: Action, obs: Observation) -> Action:
         if s.stream_id in seen:
             raise ValueError(f"two actions for stream {s.stream_id!r}")
         seen.add(s.stream_id)
-        if s.mode not in ("local", "cloud"):
+        if s.mode not in STREAM_MODES:
             raise ValueError(f"bad mode {s.mode!r}")
+        if s.mode == "suspend":
+            if s.suspend_until_s is None or s.suspend_until_s <= obs.now_s + 1e-9:
+                raise ValueError("suspend_until_s must be in the future")
+            if s.cadence_s is not None or s.frame_count is not None:
+                raise ValueError("a suspended stream issues no cloud call, so it has no cadence "
+                                 "or frame count")
+        if s.mode != "suspend" and s.suspend_until_s is not None:
+            raise ValueError("suspend_until_s is only meaningful with mode 'suspend'")
         if s.mode == "cloud":
             if s.cadence_s not in CADENCES_S:
                 raise ValueError(f"cadence {s.cadence_s!r} not in {CADENCES_S}")
@@ -249,6 +291,15 @@ def validate_action(action: Action, obs: Observation) -> Action:
             raise ValueError(f"bad session action {x.action!r}")
         if x.session_id not in known_sessions:
             raise ValueError(f"action names unknown session {x.session_id!r}")
+        if x.action == "MATERIALIZE":
+            if not (isinstance(x.target_tokens, int) and x.target_tokens > 0):
+                raise ValueError("MATERIALIZE needs a positive target_tokens")
+            if x.slice_tokens is not None and not (isinstance(x.slice_tokens, int)
+                                                   and x.slice_tokens > 0):
+                raise ValueError("slice_tokens must be None (monolithic) or a positive int")
+        elif x.target_tokens is not None or x.slice_tokens is not None:
+            raise ValueError(f"target_tokens / slice_tokens are only meaningful with "
+                             f"MATERIALIZE, not {x.action!r}")
     return action
 
 
@@ -328,7 +379,11 @@ FAIRNESS_RULES = {
        "measured cold-prefill cost and charges uplink bytes per episodic cloud call.",
     4: "Same feasible actions and deadlines, unless restricting the action space IS the property "
        "being tested - in which case the policy must declare `restricts_action_space` with a "
-       "reason, which the harness records.",
+       "reason, which the harness records. Since the 2026-11-12 amendment the action space also "
+       "holds MATERIALIZE(session, target_tokens, slice_tokens) and per-stream SUSPEND_UNTIL(t). "
+       "Every baseline written before the amendment can express only slice_tokens = None (one "
+       "monolithic prefill), and that is recorded as the PROPERTY UNDER TEST rather than as a "
+       "restriction those baselines chose.",
     5: "No future knowledge except the oracle: `scrub()` on every epoch, and any policy that "
        "reads the future must declare `reads_future = True` and is excluded from the causality "
        "check and from every deployable comparison.",

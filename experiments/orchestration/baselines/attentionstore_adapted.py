@@ -21,7 +21,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "reconstructed"))
 import costs as C
 from attentionstore import (DRAM, HBM, Session, scheduler_aware_evict,  # noqa: E402
                             scheduler_aware_fetch)
-from interface import (Action, Observation, Policy, RecallAction, SessionAction, StreamAction)
+from interface import (Action, Observation, Policy, RecallAction, SessionAction,
+                       StreamAction, materialize)
 
 
 class AttentionStoreAdapted(Policy):
@@ -56,7 +57,11 @@ class AttentionStoreAdapted(Policy):
         demote = scheduler_aware_evict(queue, sess, over)
         acts: List[SessionAction] = []
         for sid in promote:
-            acts.append(SessionAction(sid, "KEEP_GPU_WARM"))
+            # AttentionStore's scheduler-aware FETCH is a build, not a hold: amendment 2026-11-12
+            # wires it to MATERIALIZE with slice_tokens = None (the paper loads a whole prefix).
+            acts.append(materialize(sid, max(sess[sid].tokens, 1), slice_tokens=None)
+                        if sid not in obs.cloud.gpu_warm_sessions
+                        else SessionAction(sid, "KEEP_GPU_WARM"))
         for sid in demote:
             if sid not in promote:
                 acts.append(SessionAction(sid, "OFFLOAD_TO_HOST"))

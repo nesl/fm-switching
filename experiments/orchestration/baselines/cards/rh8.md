@@ -52,3 +52,19 @@ suite unchanged. Rather than invent a hybrid, both readings ship, each labelled:
 |---|---|---|
 | `high_frac` | 0.25 | StudyRH8 `HIGH_FRAC` |
 | `half_life_s` | 60 s | our own, for the causal demand estimate only |
+
+## AMENDMENT 2026-11-12: wired to MATERIALIZE
+
+The interface gained `MATERIALIZE(session, target_tokens, slice_tokens)`, which is the explicit act
+of BUILDING a session's cloud-side state, as against `KEEP_GPU_WARM`, which only holds state that
+already exists. StudyRH8's EAGER set is warmed by an explicit warm-up pass, which its own 2026-11-03 audit records as a cost EXCLUDED from RH8's in-window metrics (240 warm-up records moving 4,289 MB, present only in the EAGER cells). Both RH8 arms now emit `MATERIALIZE` for a session they warm that is not already GPU-warm, which makes that previously invisible build cost explicit in our suite.
+
+`slice_tokens = None` (one monolithic prefill) — the paper warmed whole histories, never slices, so the monolithic form is the
+faithful one. Whether SLICING helps is the property under test (fairness rule 4) and is tested by
+B11, not here.
+
+**What changed, and what did not.** What changed is what this baseline DECLARES. What did not
+change is what it is charged: the harness already billed the first promotion of a session to
+GPU-warm at the measured cold-prefill cost (fairness rule 3), and it bills `MATERIALIZE` on the
+same path. The re-run smoke record is identical field for field apart from the new
+`materialize_*` counters.

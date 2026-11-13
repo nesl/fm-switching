@@ -22,6 +22,7 @@ import costs as C
 ROOT = Path(__file__).resolve().parents[3]
 E9B = ROOT / "results/dashcam/study_e9b/e9b_study1_results.json"
 E9C = ROOT / "results/dashcam/study_e9c/e9c_results.json"
+E9D = ROOT / "results/dashcam/study_e9d/e9d_results.json"
 
 _S1 = json.loads(E9B.read_text())
 _S2 = json.loads(E9C.read_text())
@@ -103,7 +104,104 @@ def stream_profile(setting: str = "measured@25", horizon: float = 0.5,
     return rows
 
 
+# ================================================================ amendment 2026-11-12
+# (b) the StudyE9d delay curves and the committed recall accuracy tables.
+_S3 = json.loads(E9D.read_text())
+DELAYS_S = tuple(float(d) for d in _S3["delays_s"])
+BLOCK_WINDOWS_S = tuple(float(w) for w in _S3["windows_s"])
+
+
+def delay_curve(arm: str, cadence_s: float = 0.5, quality: str = "challenge",
+                horizon: float = 0.0) -> List[Tuple[float, float]]:
+    """StudyE9d's V(d): [(added delay s, value)] for one arm and cadence.
+
+    `quality` = "challenge" (StudyE9c mAP) or "streaming" (StudyE9b AP at `horizon`). The two are
+    NOT comparable in level; a caller picks one and says which, per StudyE9c's rule.
+    """
+    key = f"always-cloud {arm}@{cadence_s}"
+    out = []
+    for d in DELAYS_S:
+        c = _S3["vd"].get(f"{key}|d{d}")
+        if c is None:
+            continue
+        out.append((d, c["challenge_mAP"]["value"] if quality == "challenge"
+                    else c["streaming"][str(horizon)]["ap"]))
+    if not out:
+        raise KeyError(f"StudyE9d has no curve for {key}")
+    return out
+
+
+def device_value(quality: str = "challenge", horizon: float = 0.0) -> float:
+    """The device arm's value on the same scale - StudyE9d's reference line."""
+    c = _S3["vd"]["device-only 4BI_N1"]
+    return (c["challenge_mAP"]["value"] if quality == "challenge"
+            else c["streaming"][str(horizon)]["ap"])
+
+
+def value_at_delay(arm: str, delay_s: float, cadence_s: float = 0.5,
+                   quality: str = "challenge", horizon: float = 0.0) -> float:
+    """V(d) at an arbitrary delay, by LINEAR INTERPOLATION between StudyE9d's 0.25-s grid points
+    and held flat beyond 3.0 s. The interpolation is a RULE, not a measurement, and is stated in
+    every card that uses it."""
+    cur = delay_curve(arm, cadence_s, quality, horizon)
+    xs = [x for x, _ in cur]
+    ys = [y for _, y in cur]
+    if delay_s <= xs[0]:
+        return ys[0]
+    if delay_s >= xs[-1]:
+        return ys[-1]
+    return _lerp(xs, ys, delay_s)
+
+
+def _lerp(xs, ys, x):
+    for i in range(1, len(xs)):
+        if x <= xs[i]:
+            f = (x - xs[i - 1]) / (xs[i] - xs[i - 1])
+            return ys[i - 1] + f * (ys[i] - ys[i - 1])
+    return ys[-1]
+
+
+def d_star_s(arm: str, cadence_s: float = 0.5, quality: str = "challenge",
+             horizon: float = 0.0) -> Optional[float]:
+    """StudyE9d's d*: the added delay at which this arm falls to the device's value. None means it
+    does not cross inside StudyE9d's 3-s grid. StudyE9d's own warning applies: the CIs are wide
+    and d* is NOT a threshold - a policy should read the curve."""
+    k = f"always-cloud {arm}@{cadence_s}"
+    m = "challenge_mAP" if quality == "challenge" else f"streaming_h{horizon}"
+    return _S3["dstar"][k][m]["d_star_s"]
+
+
+def blocking_loss(arm: str, window_s: float, mode: str = "QUEUE", cadence_s: float = 0.5,
+                  quality: str = "challenge", horizon: float = 0.0) -> Optional[float]:
+    """StudyE9d part (b): the mean value LOST when the cloud path is blocked for `window_s`,
+    under QUEUE or SUSPEND. StudyE9d's noise floor (about 0.001 mAP) applies: a loss smaller than
+    that is not resolvable and should be read as zero."""
+    c = _S3["blocking"].get(f"always-cloud {arm}@{cadence_s}|{mode}|w{window_s}")
+    if c is None:
+        return None
+    return (c["mAP_loss"]["mean"] if quality == "challenge"
+            else c["streaming_loss"][str(horizon)]["mean"])
+
+
+def recall_accuracy(config: str, category: Optional[str] = None,
+                    question_time_s: Optional[float] = None) -> Optional[float]:
+    """Committed recall accuracy per configuration x category x question-time bin.
+
+    Reads `recall_profiles`, which counts COMMITTED per-question `correct` flags and never
+    estimates. Returns None where no committed cell exists.
+    """
+    import recall_profiles as RP
+    return RP.accuracy(config, category, question_time_s)
+
+
 PROVENANCE = {
+    "delay curves": "StudyE9d V(d) on StudyD14b's 0.25-s grid, setting (ii) at 25 % load; "
+                    "value BETWEEN grid points is linearly interpolated, which is a RULE",
+    "blocking loss": "StudyE9d part (b), mean over 20 window placements; noise floor about "
+                     "0.001 challenge mAP",
+    "recall accuracy": "committed per-question `correct` flags via recall_profiles (StudyR1 K1 / "
+                       "K3, StudyRH4 D2, StudyD11 U, StudyClean H1 / H2, StudyE7 4B D2 as the "
+                       "DEVICE PROXY, StudyF4 device N = 1 / 3 / 9); never estimated",
     "quality (streaming)": "StudyE9b always-on AP at the requested horizon, alarm FPR 5 %",
     "quality (challenge)": "StudyE9c challenge mAP; scored at cadence 0.5 s only, so other "
                            "cadences return None rather than an interpolated value",

@@ -1,0 +1,2410 @@
+{
+ "label": "StudyB-baselines recall accuracy profiles: committed per-question `correct` flags, counted per S-EMBER question category x question-time bin x configuration. NOTHING IS ESTIMATED OR INTERPOLATED. CPU only; no model is run.",
+ "bins": [
+  "le120",
+  "120-480",
+  "gt480"
+ ],
+ "categories": [
+  "counting_objects_events",
+  "location_trace",
+  "object_comparison",
+  "sequential_action",
+  "spatial_aware_reasoning",
+  "temporal_ordering_recognition",
+  "time_duration",
+  "visual_detail_recall"
+ ],
+ "n_questions": 845,
+ "seed": 0,
+ "n_bootstrap": 2000,
+ "small_n_flag": 20,
+ "bin_rule": "StudyE6b's: le120 = question_time <= 120 s, 120-480 = (120, 480], gt480 > 480 s",
+ "ci_rule": "video-clustered bootstrap, 2,000 resamples, seed 0 (StudyE6b's unit)",
+ "device_proxy_note": "4B-D2 carries the H100 4B's letters for StudyE7's D2 input. StudyE8 Part D: 68/68 warm and 27/27 cold identical on byte-identical inputs; StudyF4: per-question agreement 0.972-0.981. StudyD15 Part A rejected the H100-for-Orin proxy as an EXACT numerical stand-in, so these tables are valid for ordering and first-order value, not as exact device numbers.",
+ "configs": {
+  "32B-RICH": {
+   "name": "32B-RICH",
+   "source": "StudyR1 K1 (32BI, RICH video)",
+   "tier": "cloud",
+   "n": 845,
+   "accuracy": 0.3952662721893491,
+   "ci": [
+    0.35881577091268163,
+    0.43175433627021564
+   ],
+   "mean_prompt_tokens": 12268.75976331361,
+   "by_category": {
+    "counting_objects_events": {
+     "n": 110,
+     "accuracy": 0.2636363636363636,
+     "ci": [
+      0.18269230769230768,
+      0.34210526315789475
+     ],
+     "unreliable": false
+    },
+    "location_trace": {
+     "n": 97,
+     "accuracy": 0.30927835051546393,
+     "ci": [
+      0.22337470449172575,
+      0.3978494623655914
+     ],
+     "unreliable": false
+    },
+    "object_comparison": {
+     "n": 91,
+     "accuracy": 0.38461538461538464,
+     "ci": [
+      0.28885057471264364,
+      0.4839765745007675
+     ],
+     "unreliable": false
+    },
+    "sequential_action": {
+     "n": 102,
+     "accuracy": 0.45098039215686275,
+     "ci": [
+      0.3428505291005291,
+      0.560018691588785
+     ],
+     "unreliable": false
+    },
+    "spatial_aware_reasoning": {
+     "n": 91,
+     "accuracy": 0.15384615384615385,
+     "ci": [
+      0.07954545454545454,
+      0.23595505617977527
+     ],
+     "unreliable": false
+    },
+    "temporal_ordering_recognition": {
+     "n": 90,
+     "accuracy": 0.45555555555555555,
+     "ci": [
+      0.3516483516483517,
+      0.5638644773358
+     ],
+     "unreliable": false
+    },
+    "time_duration": {
+     "n": 121,
+     "accuracy": 0.4628099173553719,
+     "ci": [
+      0.36752136752136755,
+      0.5528673654505138
+     ],
+     "unreliable": false
+    },
+    "visual_detail_recall": {
+     "n": 143,
+     "accuracy": 0.5804195804195804,
+     "ci": [
+      0.5,
+      0.6643380109823063
+     ],
+     "unreliable": false
+    }
+   },
+   "by_bin": {
+    "le120": {
+     "n": 167,
+     "accuracy": 0.5449101796407185,
+     "ci": [
+      0.46239482980089913,
+      0.6298877078335676
+     ],
+     "unreliable": false
+    },
+    "120-480": {
+     "n": 594,
+     "accuracy": 0.36363636363636365,
+     "ci": [
+      0.32529875599960817,
+      0.4010306559749053
+     ],
+     "unreliable": false
+    },
+    "gt480": {
+     "n": 84,
+     "accuracy": 0.32142857142857145,
+     "ci": [
+      0.22104957160342717,
+      0.4250071839080459
+     ],
+     "unreliable": false
+    }
+   },
+   "by_category_bin": {
+    "counting_objects_events|le120": {
+     "n": 19,
+     "accuracy": 0.5789473684210527,
+     "unreliable": true
+    },
+    "counting_objects_events|120-480": {
+     "n": 78,
+     "accuracy": 0.21794871794871795,
+     "unreliable": false
+    },
+    "counting_objects_events|gt480": {
+     "n": 13,
+     "accuracy": 0.07692307692307693,
+     "unreliable": true
+    },
+    "location_trace|le120": {
+     "n": 17,
+     "accuracy": 0.4117647058823529,
+     "unreliable": true
+    },
+    "location_trace|120-480": {
+     "n": 64,
+     "accuracy": 0.328125,
+     "unreliable": false
+    },
+    "location_trace|gt480": {
+     "n": 16,
+     "accuracy": 0.125,
+     "unreliable": true
+    },
+    "object_comparison|le120": {
+     "n": 18,
+     "accuracy": 0.3888888888888889,
+     "unreliable": true
+    },
+    "object_comparison|120-480": {
+     "n": 71,
+     "accuracy": 0.38028169014084506,
+     "unreliable": false
+    },
+    "object_comparison|gt480": {
+     "n": 2,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "sequential_action|le120": {
+     "n": 11,
+     "accuracy": 0.5454545454545454,
+     "unreliable": true
+    },
+    "sequential_action|120-480": {
+     "n": 81,
+     "accuracy": 0.4691358024691358,
+     "unreliable": false
+    },
+    "sequential_action|gt480": {
+     "n": 10,
+     "accuracy": 0.2,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|le120": {
+     "n": 10,
+     "accuracy": 0.1,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|120-480": {
+     "n": 71,
+     "accuracy": 0.14084507042253522,
+     "unreliable": false
+    },
+    "spatial_aware_reasoning|gt480": {
+     "n": 10,
+     "accuracy": 0.3,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|le120": {
+     "n": 18,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|120-480": {
+     "n": 63,
+     "accuracy": 0.42857142857142855,
+     "unreliable": false
+    },
+    "temporal_ordering_recognition|gt480": {
+     "n": 9,
+     "accuracy": 0.5555555555555556,
+     "unreliable": true
+    },
+    "time_duration|le120": {
+     "n": 20,
+     "accuracy": 0.6,
+     "unreliable": false
+    },
+    "time_duration|120-480": {
+     "n": 90,
+     "accuracy": 0.4111111111111111,
+     "unreliable": false
+    },
+    "time_duration|gt480": {
+     "n": 11,
+     "accuracy": 0.6363636363636364,
+     "unreliable": true
+    },
+    "visual_detail_recall|le120": {
+     "n": 54,
+     "accuracy": 0.7037037037037037,
+     "unreliable": false
+    },
+    "visual_detail_recall|120-480": {
+     "n": 76,
+     "accuracy": 0.5131578947368421,
+     "unreliable": false
+    },
+    "visual_detail_recall|gt480": {
+     "n": 13,
+     "accuracy": 0.46153846153846156,
+     "unreliable": true
+    }
+   }
+  },
+  "32B-RECENT": {
+   "name": "32B-RECENT",
+   "source": "StudyR1 K3 (32BI, RECENT video)",
+   "tier": "cloud",
+   "n": 845,
+   "accuracy": 0.3834319526627219,
+   "ci": [
+    0.3484469609078052,
+    0.4200724630575684
+   ],
+   "mean_prompt_tokens": 12255.551479289941,
+   "by_category": {
+    "counting_objects_events": {
+     "n": 110,
+     "accuracy": 0.2727272727272727,
+     "ci": [
+      0.18269230769230768,
+      0.36036036036036034
+     ],
+     "unreliable": false
+    },
+    "location_trace": {
+     "n": 97,
+     "accuracy": 0.4020618556701031,
+     "ci": [
+      0.30526315789473685,
+      0.5
+     ],
+     "unreliable": false
+    },
+    "object_comparison": {
+     "n": 91,
+     "accuracy": 0.3626373626373626,
+     "ci": [
+      0.2696629213483146,
+      0.4639267304860088
+     ],
+     "unreliable": false
+    },
+    "sequential_action": {
+     "n": 102,
+     "accuracy": 0.38235294117647056,
+     "ci": [
+      0.2828282828282828,
+      0.4903891509433962
+     ],
+     "unreliable": false
+    },
+    "spatial_aware_reasoning": {
+     "n": 91,
+     "accuracy": 0.15384615384615385,
+     "ci": [
+      0.08137195936915265,
+      0.23157894736842105
+     ],
+     "unreliable": false
+    },
+    "temporal_ordering_recognition": {
+     "n": 90,
+     "accuracy": 0.4,
+     "ci": [
+      0.2988505747126437,
+      0.5054945054945055
+     ],
+     "unreliable": false
+    },
+    "time_duration": {
+     "n": 121,
+     "accuracy": 0.4462809917355372,
+     "ci": [
+      0.3577090592334495,
+      0.5322712850343733
+     ],
+     "unreliable": false
+    },
+    "visual_detail_recall": {
+     "n": 143,
+     "accuracy": 0.5524475524475524,
+     "ci": [
+      0.47101449275362317,
+      0.6301369863013698
+     ],
+     "unreliable": false
+    }
+   },
+   "by_bin": {
+    "le120": {
+     "n": 167,
+     "accuracy": 0.5449101796407185,
+     "ci": [
+      0.46239482980089913,
+      0.6298877078335676
+     ],
+     "unreliable": false
+    },
+    "120-480": {
+     "n": 594,
+     "accuracy": 0.3434343434343434,
+     "ci": [
+      0.3038381566431189,
+      0.38144329896907214
+     ],
+     "unreliable": false
+    },
+    "gt480": {
+     "n": 84,
+     "accuracy": 0.34523809523809523,
+     "ci": [
+      0.2413793103448276,
+      0.4625228658536584
+     ],
+     "unreliable": false
+    }
+   },
+   "by_category_bin": {
+    "counting_objects_events|le120": {
+     "n": 19,
+     "accuracy": 0.5789473684210527,
+     "unreliable": true
+    },
+    "counting_objects_events|120-480": {
+     "n": 78,
+     "accuracy": 0.20512820512820512,
+     "unreliable": false
+    },
+    "counting_objects_events|gt480": {
+     "n": 13,
+     "accuracy": 0.23076923076923078,
+     "unreliable": true
+    },
+    "location_trace|le120": {
+     "n": 17,
+     "accuracy": 0.4117647058823529,
+     "unreliable": true
+    },
+    "location_trace|120-480": {
+     "n": 64,
+     "accuracy": 0.40625,
+     "unreliable": false
+    },
+    "location_trace|gt480": {
+     "n": 16,
+     "accuracy": 0.375,
+     "unreliable": true
+    },
+    "object_comparison|le120": {
+     "n": 18,
+     "accuracy": 0.3888888888888889,
+     "unreliable": true
+    },
+    "object_comparison|120-480": {
+     "n": 71,
+     "accuracy": 0.352112676056338,
+     "unreliable": false
+    },
+    "object_comparison|gt480": {
+     "n": 2,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "sequential_action|le120": {
+     "n": 11,
+     "accuracy": 0.5454545454545454,
+     "unreliable": true
+    },
+    "sequential_action|120-480": {
+     "n": 81,
+     "accuracy": 0.38271604938271603,
+     "unreliable": false
+    },
+    "sequential_action|gt480": {
+     "n": 10,
+     "accuracy": 0.2,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|le120": {
+     "n": 10,
+     "accuracy": 0.1,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|120-480": {
+     "n": 71,
+     "accuracy": 0.1267605633802817,
+     "unreliable": false
+    },
+    "spatial_aware_reasoning|gt480": {
+     "n": 10,
+     "accuracy": 0.4,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|le120": {
+     "n": 18,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|120-480": {
+     "n": 63,
+     "accuracy": 0.4126984126984127,
+     "unreliable": false
+    },
+    "temporal_ordering_recognition|gt480": {
+     "n": 9,
+     "accuracy": 0.1111111111111111,
+     "unreliable": true
+    },
+    "time_duration|le120": {
+     "n": 20,
+     "accuracy": 0.6,
+     "unreliable": false
+    },
+    "time_duration|120-480": {
+     "n": 90,
+     "accuracy": 0.4,
+     "unreliable": false
+    },
+    "time_duration|gt480": {
+     "n": 11,
+     "accuracy": 0.5454545454545454,
+     "unreliable": true
+    },
+    "visual_detail_recall|le120": {
+     "n": 54,
+     "accuracy": 0.7037037037037037,
+     "unreliable": false
+    },
+    "visual_detail_recall|120-480": {
+     "n": 76,
+     "accuracy": 0.4605263157894737,
+     "unreliable": false
+    },
+    "visual_detail_recall|gt480": {
+     "n": 13,
+     "accuracy": 0.46153846153846156,
+     "unreliable": true
+    }
+   }
+  },
+  "32B-D2": {
+   "name": "32B-D2",
+   "source": "StudyRH4 D2 (32BI, 2-s stride 352x256 images)",
+   "tier": "cloud",
+   "n": 839,
+   "accuracy": 0.3957091775923719,
+   "ci": [
+    0.36096057417628974,
+    0.43047534467696114
+   ],
+   "mean_prompt_tokens": 11467.500595947557,
+   "by_category": {
+    "counting_objects_events": {
+     "n": 109,
+     "accuracy": 0.22935779816513763,
+     "ci": [
+      0.1574074074074074,
+      0.31093427937212614
+     ],
+     "unreliable": false
+    },
+    "location_trace": {
+     "n": 97,
+     "accuracy": 0.41237113402061853,
+     "ci": [
+      0.3157894736842105,
+      0.5104222074468084
+     ],
+     "unreliable": false
+    },
+    "object_comparison": {
+     "n": 91,
+     "accuracy": 0.3956043956043956,
+     "ci": [
+      0.30337078651685395,
+      0.4943820224719101
+     ],
+     "unreliable": false
+    },
+    "sequential_action": {
+     "n": 101,
+     "accuracy": 0.4752475247524752,
+     "ci": [
+      0.36893203883495146,
+      0.5825242718446602
+     ],
+     "unreliable": false
+    },
+    "spatial_aware_reasoning": {
+     "n": 91,
+     "accuracy": 0.15384615384615385,
+     "ci": [
+      0.08333333333333333,
+      0.2282835144927535
+     ],
+     "unreliable": false
+    },
+    "temporal_ordering_recognition": {
+     "n": 88,
+     "accuracy": 0.4318181818181818,
+     "ci": [
+      0.3258361640972041,
+      0.5368825910931172
+     ],
+     "unreliable": false
+    },
+    "time_duration": {
+     "n": 121,
+     "accuracy": 0.4380165289256198,
+     "ci": [
+      0.34710743801652894,
+      0.525
+     ],
+     "unreliable": false
+    },
+    "visual_detail_recall": {
+     "n": 141,
+     "accuracy": 0.5531914893617021,
+     "ci": [
+      0.47792446524064175,
+      0.631954656862745
+     ],
+     "unreliable": false
+    }
+   },
+   "by_bin": {
+    "le120": {
+     "n": 167,
+     "accuracy": 0.5269461077844312,
+     "ci": [
+      0.45340427475337963,
+      0.60119138913234
+     ],
+     "unreliable": false
+    },
+    "120-480": {
+     "n": 594,
+     "accuracy": 0.367003367003367,
+     "ci": [
+      0.3281695910425343,
+      0.40563150823912414
+     ],
+     "unreliable": false
+    },
+    "gt480": {
+     "n": 78,
+     "accuracy": 0.3333333333333333,
+     "ci": [
+      0.23376623376623376,
+      0.44
+     ],
+     "unreliable": false
+    }
+   },
+   "by_category_bin": {
+    "counting_objects_events|le120": {
+     "n": 19,
+     "accuracy": 0.5263157894736842,
+     "unreliable": true
+    },
+    "counting_objects_events|120-480": {
+     "n": 78,
+     "accuracy": 0.16666666666666666,
+     "unreliable": false
+    },
+    "counting_objects_events|gt480": {
+     "n": 12,
+     "accuracy": 0.16666666666666666,
+     "unreliable": true
+    },
+    "location_trace|le120": {
+     "n": 17,
+     "accuracy": 0.4117647058823529,
+     "unreliable": true
+    },
+    "location_trace|120-480": {
+     "n": 64,
+     "accuracy": 0.421875,
+     "unreliable": false
+    },
+    "location_trace|gt480": {
+     "n": 16,
+     "accuracy": 0.375,
+     "unreliable": true
+    },
+    "object_comparison|le120": {
+     "n": 18,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "object_comparison|120-480": {
+     "n": 71,
+     "accuracy": 0.36619718309859156,
+     "unreliable": false
+    },
+    "object_comparison|gt480": {
+     "n": 2,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "sequential_action|le120": {
+     "n": 11,
+     "accuracy": 0.5454545454545454,
+     "unreliable": true
+    },
+    "sequential_action|120-480": {
+     "n": 81,
+     "accuracy": 0.49382716049382713,
+     "unreliable": false
+    },
+    "sequential_action|gt480": {
+     "n": 9,
+     "accuracy": 0.2222222222222222,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|le120": {
+     "n": 10,
+     "accuracy": 0.1,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|120-480": {
+     "n": 71,
+     "accuracy": 0.14084507042253522,
+     "unreliable": false
+    },
+    "spatial_aware_reasoning|gt480": {
+     "n": 10,
+     "accuracy": 0.3,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|le120": {
+     "n": 18,
+     "accuracy": 0.4444444444444444,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|120-480": {
+     "n": 63,
+     "accuracy": 0.42857142857142855,
+     "unreliable": false
+    },
+    "temporal_ordering_recognition|gt480": {
+     "n": 7,
+     "accuracy": 0.42857142857142855,
+     "unreliable": true
+    },
+    "time_duration|le120": {
+     "n": 20,
+     "accuracy": 0.65,
+     "unreliable": false
+    },
+    "time_duration|120-480": {
+     "n": 90,
+     "accuracy": 0.37777777777777777,
+     "unreliable": false
+    },
+    "time_duration|gt480": {
+     "n": 11,
+     "accuracy": 0.5454545454545454,
+     "unreliable": true
+    },
+    "visual_detail_recall|le120": {
+     "n": 54,
+     "accuracy": 0.6296296296296297,
+     "unreliable": false
+    },
+    "visual_detail_recall|120-480": {
+     "n": 76,
+     "accuracy": 0.5394736842105263,
+     "unreliable": false
+    },
+    "visual_detail_recall|gt480": {
+     "n": 11,
+     "accuracy": 0.2727272727272727,
+     "unreliable": true
+    }
+   }
+  },
+  "32B-U": {
+   "name": "32B-U",
+   "source": "StudyD11 arm U (32BI, union)",
+   "tier": "cloud",
+   "n": 845,
+   "accuracy": 0.41420118343195267,
+   "ci": [
+    0.3771375913028708,
+    0.4488419377181065
+   ],
+   "mean_prompt_tokens": 17287.40946745562,
+   "by_category": {
+    "counting_objects_events": {
+     "n": 110,
+     "accuracy": 0.3,
+     "ci": [
+      0.20754716981132076,
+      0.3859856007944388
+     ],
+     "unreliable": false
+    },
+    "location_trace": {
+     "n": 97,
+     "accuracy": 0.38144329896907214,
+     "ci": [
+      0.2828227931488801,
+      0.48514851485148514
+     ],
+     "unreliable": false
+    },
+    "object_comparison": {
+     "n": 91,
+     "accuracy": 0.4175824175824176,
+     "ci": [
+      0.31521739130434784,
+      0.5227272727272727
+     ],
+     "unreliable": false
+    },
+    "sequential_action": {
+     "n": 102,
+     "accuracy": 0.49019607843137253,
+     "ci": [
+      0.3823302001212856,
+      0.5980392156862745
+     ],
+     "unreliable": false
+    },
+    "spatial_aware_reasoning": {
+     "n": 91,
+     "accuracy": 0.14285714285714285,
+     "ci": [
+      0.07690217391304348,
+      0.21739130434782608
+     ],
+     "unreliable": false
+    },
+    "temporal_ordering_recognition": {
+     "n": 90,
+     "accuracy": 0.43333333333333335,
+     "ci": [
+      0.32558139534883723,
+      0.5393258426966292
+     ],
+     "unreliable": false
+    },
+    "time_duration": {
+     "n": 121,
+     "accuracy": 0.4462809917355372,
+     "ci": [
+      0.3577090592334495,
+      0.5344827586206896
+     ],
+     "unreliable": false
+    },
+    "visual_detail_recall": {
+     "n": 143,
+     "accuracy": 0.6013986013986014,
+     "ci": [
+      0.5208333333333334,
+      0.678327922077922
+     ],
+     "unreliable": false
+    }
+   },
+   "by_bin": {
+    "le120": {
+     "n": 167,
+     "accuracy": 0.5449101796407185,
+     "ci": [
+      0.46239482980089913,
+      0.6298877078335676
+     ],
+     "unreliable": false
+    },
+    "120-480": {
+     "n": 594,
+     "accuracy": 0.38047138047138046,
+     "ci": [
+      0.3402061855670103,
+      0.41918590389611154
+     ],
+     "unreliable": false
+    },
+    "gt480": {
+     "n": 84,
+     "accuracy": 0.39285714285714285,
+     "ci": [
+      0.28408740179573516,
+      0.5001470588235286
+     ],
+     "unreliable": false
+    }
+   },
+   "by_category_bin": {
+    "counting_objects_events|le120": {
+     "n": 19,
+     "accuracy": 0.5789473684210527,
+     "unreliable": true
+    },
+    "counting_objects_events|120-480": {
+     "n": 78,
+     "accuracy": 0.24358974358974358,
+     "unreliable": false
+    },
+    "counting_objects_events|gt480": {
+     "n": 13,
+     "accuracy": 0.23076923076923078,
+     "unreliable": true
+    },
+    "location_trace|le120": {
+     "n": 17,
+     "accuracy": 0.4117647058823529,
+     "unreliable": true
+    },
+    "location_trace|120-480": {
+     "n": 64,
+     "accuracy": 0.40625,
+     "unreliable": false
+    },
+    "location_trace|gt480": {
+     "n": 16,
+     "accuracy": 0.25,
+     "unreliable": true
+    },
+    "object_comparison|le120": {
+     "n": 18,
+     "accuracy": 0.3888888888888889,
+     "unreliable": true
+    },
+    "object_comparison|120-480": {
+     "n": 71,
+     "accuracy": 0.4225352112676056,
+     "unreliable": false
+    },
+    "object_comparison|gt480": {
+     "n": 2,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "sequential_action|le120": {
+     "n": 11,
+     "accuracy": 0.5454545454545454,
+     "unreliable": true
+    },
+    "sequential_action|120-480": {
+     "n": 81,
+     "accuracy": 0.5061728395061729,
+     "unreliable": false
+    },
+    "sequential_action|gt480": {
+     "n": 10,
+     "accuracy": 0.3,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|le120": {
+     "n": 10,
+     "accuracy": 0.1,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|120-480": {
+     "n": 71,
+     "accuracy": 0.1267605633802817,
+     "unreliable": false
+    },
+    "spatial_aware_reasoning|gt480": {
+     "n": 10,
+     "accuracy": 0.3,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|le120": {
+     "n": 18,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|120-480": {
+     "n": 63,
+     "accuracy": 0.3968253968253968,
+     "unreliable": false
+    },
+    "temporal_ordering_recognition|gt480": {
+     "n": 9,
+     "accuracy": 0.5555555555555556,
+     "unreliable": true
+    },
+    "time_duration|le120": {
+     "n": 20,
+     "accuracy": 0.6,
+     "unreliable": false
+    },
+    "time_duration|120-480": {
+     "n": 90,
+     "accuracy": 0.3888888888888889,
+     "unreliable": false
+    },
+    "time_duration|gt480": {
+     "n": 11,
+     "accuracy": 0.6363636363636364,
+     "unreliable": true
+    },
+    "visual_detail_recall|le120": {
+     "n": 54,
+     "accuracy": 0.7037037037037037,
+     "unreliable": false
+    },
+    "visual_detail_recall|120-480": {
+     "n": 76,
+     "accuracy": 0.5394736842105263,
+     "unreliable": false
+    },
+    "visual_detail_recall|gt480": {
+     "n": 13,
+     "accuracy": 0.5384615384615384,
+     "unreliable": true
+    }
+   }
+  },
+  "4B-RICH": {
+   "name": "4B-RICH",
+   "source": "StudyClean H2 (4BI, RICH video)",
+   "tier": "cloud",
+   "n": 845,
+   "accuracy": 0.30177514792899407,
+   "ci": [
+    0.2697270990980213,
+    0.33568075117370894
+   ],
+   "mean_prompt_tokens": 12268.75976331361,
+   "by_category": {
+    "counting_objects_events": {
+     "n": 110,
+     "accuracy": 0.20909090909090908,
+     "ci": [
+      0.1388888888888889,
+      0.28040332093276454
+     ],
+     "unreliable": false
+    },
+    "location_trace": {
+     "n": 97,
+     "accuracy": 0.21649484536082475,
+     "ci": [
+      0.13826147816349385,
+      0.30694973343488186
+     ],
+     "unreliable": false
+    },
+    "object_comparison": {
+     "n": 91,
+     "accuracy": 0.34065934065934067,
+     "ci": [
+      0.24468085106382978,
+      0.43820224719101125
+     ],
+     "unreliable": false
+    },
+    "sequential_action": {
+     "n": 102,
+     "accuracy": 0.3431372549019608,
+     "ci": [
+      0.24752475247524752,
+      0.43878743086019445
+     ],
+     "unreliable": false
+    },
+    "spatial_aware_reasoning": {
+     "n": 91,
+     "accuracy": 0.15384615384615385,
+     "ci": [
+      0.08602150537634409,
+      0.22826086956521738
+     ],
+     "unreliable": false
+    },
+    "temporal_ordering_recognition": {
+     "n": 90,
+     "accuracy": 0.28888888888888886,
+     "ci": [
+      0.18888888888888888,
+      0.3888888888888889
+     ],
+     "unreliable": false
+    },
+    "time_duration": {
+     "n": 121,
+     "accuracy": 0.2975206611570248,
+     "ci": [
+      0.22031831335262506,
+      0.38095238095238093
+     ],
+     "unreliable": false
+    },
+    "visual_detail_recall": {
+     "n": 143,
+     "accuracy": 0.4825174825174825,
+     "ci": [
+      0.39864746739746737,
+      0.5655172413793104
+     ],
+     "unreliable": false
+    }
+   },
+   "by_bin": {
+    "le120": {
+     "n": 167,
+     "accuracy": 0.437125748502994,
+     "ci": [
+      0.35542168674698793,
+      0.5182983288166215
+     ],
+     "unreliable": false
+    },
+    "120-480": {
+     "n": 594,
+     "accuracy": 0.28114478114478114,
+     "ci": [
+      0.2443987349107831,
+      0.3180365126676602
+     ],
+     "unreliable": false
+    },
+    "gt480": {
+     "n": 84,
+     "accuracy": 0.17857142857142858,
+     "ci": [
+      0.10344827586206896,
+      0.2613771645021644
+     ],
+     "unreliable": false
+    }
+   },
+   "by_category_bin": {
+    "counting_objects_events|le120": {
+     "n": 19,
+     "accuracy": 0.3157894736842105,
+     "unreliable": true
+    },
+    "counting_objects_events|120-480": {
+     "n": 78,
+     "accuracy": 0.20512820512820512,
+     "unreliable": false
+    },
+    "counting_objects_events|gt480": {
+     "n": 13,
+     "accuracy": 0.07692307692307693,
+     "unreliable": true
+    },
+    "location_trace|le120": {
+     "n": 17,
+     "accuracy": 0.23529411764705882,
+     "unreliable": true
+    },
+    "location_trace|120-480": {
+     "n": 64,
+     "accuracy": 0.21875,
+     "unreliable": false
+    },
+    "location_trace|gt480": {
+     "n": 16,
+     "accuracy": 0.1875,
+     "unreliable": true
+    },
+    "object_comparison|le120": {
+     "n": 18,
+     "accuracy": 0.4444444444444444,
+     "unreliable": true
+    },
+    "object_comparison|120-480": {
+     "n": 71,
+     "accuracy": 0.30985915492957744,
+     "unreliable": false
+    },
+    "object_comparison|gt480": {
+     "n": 2,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "sequential_action|le120": {
+     "n": 11,
+     "accuracy": 0.2727272727272727,
+     "unreliable": true
+    },
+    "sequential_action|120-480": {
+     "n": 81,
+     "accuracy": 0.37037037037037035,
+     "unreliable": false
+    },
+    "sequential_action|gt480": {
+     "n": 10,
+     "accuracy": 0.2,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|le120": {
+     "n": 10,
+     "accuracy": 0.2,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|120-480": {
+     "n": 71,
+     "accuracy": 0.16901408450704225,
+     "unreliable": false
+    },
+    "spatial_aware_reasoning|gt480": {
+     "n": 10,
+     "accuracy": 0.0,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|le120": {
+     "n": 18,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|120-480": {
+     "n": 63,
+     "accuracy": 0.25396825396825395,
+     "unreliable": false
+    },
+    "temporal_ordering_recognition|gt480": {
+     "n": 9,
+     "accuracy": 0.1111111111111111,
+     "unreliable": true
+    },
+    "time_duration|le120": {
+     "n": 20,
+     "accuracy": 0.3,
+     "unreliable": false
+    },
+    "time_duration|120-480": {
+     "n": 90,
+     "accuracy": 0.28888888888888886,
+     "unreliable": false
+    },
+    "time_duration|gt480": {
+     "n": 11,
+     "accuracy": 0.36363636363636365,
+     "unreliable": true
+    },
+    "visual_detail_recall|le120": {
+     "n": 54,
+     "accuracy": 0.6481481481481481,
+     "unreliable": false
+    },
+    "visual_detail_recall|120-480": {
+     "n": 76,
+     "accuracy": 0.40789473684210525,
+     "unreliable": false
+    },
+    "visual_detail_recall|gt480": {
+     "n": 13,
+     "accuracy": 0.23076923076923078,
+     "unreliable": true
+    }
+   }
+  },
+  "4B-RECENT": {
+   "name": "4B-RECENT",
+   "source": "StudyClean H1 (4BI, RECENT video)",
+   "tier": "cloud",
+   "n": 845,
+   "accuracy": 0.3254437869822485,
+   "ci": [
+    0.2946569360828961,
+    0.3579996729851294
+   ],
+   "mean_prompt_tokens": 12255.551479289941,
+   "by_category": {
+    "counting_objects_events": {
+     "n": 110,
+     "accuracy": 0.16363636363636364,
+     "ci": [
+      0.09907697876447877,
+      0.2336448598130841
+     ],
+     "unreliable": false
+    },
+    "location_trace": {
+     "n": 97,
+     "accuracy": 0.30927835051546393,
+     "ci": [
+      0.22580645161290322,
+      0.3936667056347905
+     ],
+     "unreliable": false
+    },
+    "object_comparison": {
+     "n": 91,
+     "accuracy": 0.3516483516483517,
+     "ci": [
+      0.2608695652173913,
+      0.45351479915433385
+     ],
+     "unreliable": false
+    },
+    "sequential_action": {
+     "n": 102,
+     "accuracy": 0.3137254901960784,
+     "ci": [
+      0.221125,
+      0.4117647058823529
+     ],
+     "unreliable": false
+    },
+    "spatial_aware_reasoning": {
+     "n": 91,
+     "accuracy": 0.2087912087912088,
+     "ci": [
+      0.13186813186813187,
+      0.2891566265060241
+     ],
+     "unreliable": false
+    },
+    "temporal_ordering_recognition": {
+     "n": 90,
+     "accuracy": 0.34444444444444444,
+     "ci": [
+      0.24724605353466025,
+      0.4444444444444444
+     ],
+     "unreliable": false
+    },
+    "time_duration": {
+     "n": 121,
+     "accuracy": 0.2975206611570248,
+     "ci": [
+      0.21816205533596836,
+      0.38844123048668494
+     ],
+     "unreliable": false
+    },
+    "visual_detail_recall": {
+     "n": 143,
+     "accuracy": 0.5384615384615384,
+     "ci": [
+      0.44850498765939945,
+      0.6283973957401109
+     ],
+     "unreliable": false
+    }
+   },
+   "by_bin": {
+    "le120": {
+     "n": 167,
+     "accuracy": 0.437125748502994,
+     "ci": [
+      0.35542168674698793,
+      0.5182983288166215
+     ],
+     "unreliable": false
+    },
+    "120-480": {
+     "n": 594,
+     "accuracy": 0.30303030303030304,
+     "ci": [
+      0.26666383701188456,
+      0.3389573712822864
+     ],
+     "unreliable": false
+    },
+    "gt480": {
+     "n": 84,
+     "accuracy": 0.2619047619047619,
+     "ci": [
+      0.16882725708026913,
+      0.3614457831325301
+     ],
+     "unreliable": false
+    }
+   },
+   "by_category_bin": {
+    "counting_objects_events|le120": {
+     "n": 19,
+     "accuracy": 0.3157894736842105,
+     "unreliable": true
+    },
+    "counting_objects_events|120-480": {
+     "n": 78,
+     "accuracy": 0.15384615384615385,
+     "unreliable": false
+    },
+    "counting_objects_events|gt480": {
+     "n": 13,
+     "accuracy": 0.0,
+     "unreliable": true
+    },
+    "location_trace|le120": {
+     "n": 17,
+     "accuracy": 0.23529411764705882,
+     "unreliable": true
+    },
+    "location_trace|120-480": {
+     "n": 64,
+     "accuracy": 0.359375,
+     "unreliable": false
+    },
+    "location_trace|gt480": {
+     "n": 16,
+     "accuracy": 0.1875,
+     "unreliable": true
+    },
+    "object_comparison|le120": {
+     "n": 18,
+     "accuracy": 0.4444444444444444,
+     "unreliable": true
+    },
+    "object_comparison|120-480": {
+     "n": 71,
+     "accuracy": 0.323943661971831,
+     "unreliable": false
+    },
+    "object_comparison|gt480": {
+     "n": 2,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "sequential_action|le120": {
+     "n": 11,
+     "accuracy": 0.2727272727272727,
+     "unreliable": true
+    },
+    "sequential_action|120-480": {
+     "n": 81,
+     "accuracy": 0.345679012345679,
+     "unreliable": false
+    },
+    "sequential_action|gt480": {
+     "n": 10,
+     "accuracy": 0.1,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|le120": {
+     "n": 10,
+     "accuracy": 0.2,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|120-480": {
+     "n": 71,
+     "accuracy": 0.16901408450704225,
+     "unreliable": false
+    },
+    "spatial_aware_reasoning|gt480": {
+     "n": 10,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|le120": {
+     "n": 18,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|120-480": {
+     "n": 63,
+     "accuracy": 0.30158730158730157,
+     "unreliable": false
+    },
+    "temporal_ordering_recognition|gt480": {
+     "n": 9,
+     "accuracy": 0.3333333333333333,
+     "unreliable": true
+    },
+    "time_duration|le120": {
+     "n": 20,
+     "accuracy": 0.3,
+     "unreliable": false
+    },
+    "time_duration|120-480": {
+     "n": 90,
+     "accuracy": 0.28888888888888886,
+     "unreliable": false
+    },
+    "time_duration|gt480": {
+     "n": 11,
+     "accuracy": 0.36363636363636365,
+     "unreliable": true
+    },
+    "visual_detail_recall|le120": {
+     "n": 54,
+     "accuracy": 0.6481481481481481,
+     "unreliable": false
+    },
+    "visual_detail_recall|120-480": {
+     "n": 76,
+     "accuracy": 0.4868421052631579,
+     "unreliable": false
+    },
+    "visual_detail_recall|gt480": {
+     "n": 13,
+     "accuracy": 0.38461538461538464,
+     "unreliable": true
+    }
+   }
+  },
+  "4B-D2": {
+   "name": "4B-D2",
+   "source": "StudyE7 Job A (4BI on RH4's D2 input) - DEVICE PROXY",
+   "tier": "device-proxy",
+   "n": 839,
+   "accuracy": 0.30870083432657924,
+   "ci": [
+    0.27744964488302576,
+    0.3413483444714459
+   ],
+   "mean_prompt_tokens": 11467.500595947557,
+   "by_category": {
+    "counting_objects_events": {
+     "n": 109,
+     "accuracy": 0.21100917431192662,
+     "ci": [
+      0.1388888888888889,
+      0.2897196261682243
+     ],
+     "unreliable": false
+    },
+    "location_trace": {
+     "n": 97,
+     "accuracy": 0.27835051546391754,
+     "ci": [
+      0.1958762886597938,
+      0.36538461538461536
+     ],
+     "unreliable": false
+    },
+    "object_comparison": {
+     "n": 91,
+     "accuracy": 0.3076923076923077,
+     "ci": [
+      0.2164802014995314,
+      0.4044943820224719
+     ],
+     "unreliable": false
+    },
+    "sequential_action": {
+     "n": 101,
+     "accuracy": 0.31683168316831684,
+     "ci": [
+      0.22115384615384615,
+      0.4117798665858095
+     ],
+     "unreliable": false
+    },
+    "spatial_aware_reasoning": {
+     "n": 91,
+     "accuracy": 0.14285714285714285,
+     "ci": [
+      0.07777777777777778,
+      0.21505376344086022
+     ],
+     "unreliable": false
+    },
+    "temporal_ordering_recognition": {
+     "n": 88,
+     "accuracy": 0.2840909090909091,
+     "ci": [
+      0.18181818181818182,
+      0.38461538461538464
+     ],
+     "unreliable": false
+    },
+    "time_duration": {
+     "n": 121,
+     "accuracy": 0.3140495867768595,
+     "ci": [
+      0.23769449847179772,
+      0.40003937007873996
+     ],
+     "unreliable": false
+    },
+    "visual_detail_recall": {
+     "n": 141,
+     "accuracy": 0.5177304964539007,
+     "ci": [
+      0.44029850746268656,
+      0.5985915492957746
+     ],
+     "unreliable": false
+    }
+   },
+   "by_bin": {
+    "le120": {
+     "n": 167,
+     "accuracy": 0.41317365269461076,
+     "ci": [
+      0.3389440573983571,
+      0.4966938834272551
+     ],
+     "unreliable": false
+    },
+    "120-480": {
+     "n": 594,
+     "accuracy": 0.2946127946127946,
+     "ci": [
+      0.2568897008449418,
+      0.3316705641886162
+     ],
+     "unreliable": false
+    },
+    "gt480": {
+     "n": 78,
+     "accuracy": 0.19230769230769232,
+     "ci": [
+      0.10975609756097561,
+      0.28
+     ],
+     "unreliable": false
+    }
+   },
+   "by_category_bin": {
+    "counting_objects_events|le120": {
+     "n": 19,
+     "accuracy": 0.21052631578947367,
+     "unreliable": true
+    },
+    "counting_objects_events|120-480": {
+     "n": 78,
+     "accuracy": 0.21794871794871795,
+     "unreliable": false
+    },
+    "counting_objects_events|gt480": {
+     "n": 12,
+     "accuracy": 0.16666666666666666,
+     "unreliable": true
+    },
+    "location_trace|le120": {
+     "n": 17,
+     "accuracy": 0.29411764705882354,
+     "unreliable": true
+    },
+    "location_trace|120-480": {
+     "n": 64,
+     "accuracy": 0.296875,
+     "unreliable": false
+    },
+    "location_trace|gt480": {
+     "n": 16,
+     "accuracy": 0.1875,
+     "unreliable": true
+    },
+    "object_comparison|le120": {
+     "n": 18,
+     "accuracy": 0.3888888888888889,
+     "unreliable": true
+    },
+    "object_comparison|120-480": {
+     "n": 71,
+     "accuracy": 0.29577464788732394,
+     "unreliable": false
+    },
+    "object_comparison|gt480": {
+     "n": 2,
+     "accuracy": 0.0,
+     "unreliable": true
+    },
+    "sequential_action|le120": {
+     "n": 11,
+     "accuracy": 0.18181818181818182,
+     "unreliable": true
+    },
+    "sequential_action|120-480": {
+     "n": 81,
+     "accuracy": 0.35802469135802467,
+     "unreliable": false
+    },
+    "sequential_action|gt480": {
+     "n": 9,
+     "accuracy": 0.1111111111111111,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|le120": {
+     "n": 10,
+     "accuracy": 0.3,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|120-480": {
+     "n": 71,
+     "accuracy": 0.14084507042253522,
+     "unreliable": false
+    },
+    "spatial_aware_reasoning|gt480": {
+     "n": 10,
+     "accuracy": 0.0,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|le120": {
+     "n": 18,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|120-480": {
+     "n": 63,
+     "accuracy": 0.2222222222222222,
+     "unreliable": false
+    },
+    "temporal_ordering_recognition|gt480": {
+     "n": 7,
+     "accuracy": 0.2857142857142857,
+     "unreliable": true
+    },
+    "time_duration|le120": {
+     "n": 20,
+     "accuracy": 0.35,
+     "unreliable": false
+    },
+    "time_duration|120-480": {
+     "n": 90,
+     "accuracy": 0.3,
+     "unreliable": false
+    },
+    "time_duration|gt480": {
+     "n": 11,
+     "accuracy": 0.36363636363636365,
+     "unreliable": true
+    },
+    "visual_detail_recall|le120": {
+     "n": 54,
+     "accuracy": 0.5925925925925926,
+     "unreliable": false
+    },
+    "visual_detail_recall|120-480": {
+     "n": 76,
+     "accuracy": 0.5,
+     "unreliable": false
+    },
+    "visual_detail_recall|gt480": {
+     "n": 11,
+     "accuracy": 0.2727272727272727,
+     "unreliable": true
+    }
+   }
+  },
+  "device-N1": {
+   "name": "device-N1",
+   "source": "StudyF4 Part A, 1-frame last-3-s window (Jetson Orin)",
+   "tier": "device",
+   "n": 845,
+   "accuracy": 0.15384615384615385,
+   "ci": [
+    0.1306942358201351,
+    0.17857247775726037
+   ],
+   "mean_prompt_tokens": 477.1834319526627,
+   "by_category": {
+    "counting_objects_events": {
+     "n": 110,
+     "accuracy": 0.08181818181818182,
+     "ci": [
+      0.03636363636363636,
+      0.13209216897645676
+     ],
+     "unreliable": false
+    },
+    "location_trace": {
+     "n": 97,
+     "accuracy": 0.10309278350515463,
+     "ci": [
+      0.04950495049504951,
+      0.16842105263157894
+     ],
+     "unreliable": false
+    },
+    "object_comparison": {
+     "n": 91,
+     "accuracy": 0.32967032967032966,
+     "ci": [
+      0.2352628285356696,
+      0.42857142857142855
+     ],
+     "unreliable": false
+    },
+    "sequential_action": {
+     "n": 102,
+     "accuracy": 0.11764705882352941,
+     "ci": [
+      0.05880925185608224,
+      0.1900119047619047
+     ],
+     "unreliable": false
+    },
+    "spatial_aware_reasoning": {
+     "n": 91,
+     "accuracy": 0.2087912087912088,
+     "ci": [
+      0.13185425685425686,
+      0.2976253799392097
+     ],
+     "unreliable": false
+    },
+    "temporal_ordering_recognition": {
+     "n": 90,
+     "accuracy": 0.14444444444444443,
+     "ci": [
+      0.07608695652173914,
+      0.22343712646425992
+     ],
+     "unreliable": false
+    },
+    "time_duration": {
+     "n": 121,
+     "accuracy": 0.14049586776859505,
+     "ci": [
+      0.08264462809917356,
+      0.2063557654466745
+     ],
+     "unreliable": false
+    },
+    "visual_detail_recall": {
+     "n": 143,
+     "accuracy": 0.13986013986013987,
+     "ci": [
+      0.08695652173913043,
+      0.2013888888888889
+     ],
+     "unreliable": false
+    }
+   },
+   "by_bin": {
+    "le120": {
+     "n": 167,
+     "accuracy": 0.1317365269461078,
+     "ci": [
+      0.08125,
+      0.18674698795180722
+     ],
+     "unreliable": false
+    },
+    "120-480": {
+     "n": 594,
+     "accuracy": 0.15993265993265993,
+     "ci": [
+      0.12991341991341993,
+      0.18954385445453348
+     ],
+     "unreliable": false
+    },
+    "gt480": {
+     "n": 84,
+     "accuracy": 0.15476190476190477,
+     "ci": [
+      0.0769047619047619,
+      0.24390243902439024
+     ],
+     "unreliable": false
+    }
+   },
+   "by_category_bin": {
+    "counting_objects_events|le120": {
+     "n": 19,
+     "accuracy": 0.05263157894736842,
+     "unreliable": true
+    },
+    "counting_objects_events|120-480": {
+     "n": 78,
+     "accuracy": 0.10256410256410256,
+     "unreliable": false
+    },
+    "counting_objects_events|gt480": {
+     "n": 13,
+     "accuracy": 0.0,
+     "unreliable": true
+    },
+    "location_trace|le120": {
+     "n": 17,
+     "accuracy": 0.058823529411764705,
+     "unreliable": true
+    },
+    "location_trace|120-480": {
+     "n": 64,
+     "accuracy": 0.109375,
+     "unreliable": false
+    },
+    "location_trace|gt480": {
+     "n": 16,
+     "accuracy": 0.125,
+     "unreliable": true
+    },
+    "object_comparison|le120": {
+     "n": 18,
+     "accuracy": 0.3333333333333333,
+     "unreliable": true
+    },
+    "object_comparison|120-480": {
+     "n": 71,
+     "accuracy": 0.323943661971831,
+     "unreliable": false
+    },
+    "object_comparison|gt480": {
+     "n": 2,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "sequential_action|le120": {
+     "n": 11,
+     "accuracy": 0.09090909090909091,
+     "unreliable": true
+    },
+    "sequential_action|120-480": {
+     "n": 81,
+     "accuracy": 0.12345679012345678,
+     "unreliable": false
+    },
+    "sequential_action|gt480": {
+     "n": 10,
+     "accuracy": 0.1,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|le120": {
+     "n": 10,
+     "accuracy": 0.2,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|120-480": {
+     "n": 71,
+     "accuracy": 0.19718309859154928,
+     "unreliable": false
+    },
+    "spatial_aware_reasoning|gt480": {
+     "n": 10,
+     "accuracy": 0.3,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|le120": {
+     "n": 18,
+     "accuracy": 0.2777777777777778,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|120-480": {
+     "n": 63,
+     "accuracy": 0.1111111111111111,
+     "unreliable": false
+    },
+    "temporal_ordering_recognition|gt480": {
+     "n": 9,
+     "accuracy": 0.1111111111111111,
+     "unreliable": true
+    },
+    "time_duration|le120": {
+     "n": 20,
+     "accuracy": 0.05,
+     "unreliable": false
+    },
+    "time_duration|120-480": {
+     "n": 90,
+     "accuracy": 0.14444444444444443,
+     "unreliable": false
+    },
+    "time_duration|gt480": {
+     "n": 11,
+     "accuracy": 0.2727272727272727,
+     "unreliable": true
+    },
+    "visual_detail_recall|le120": {
+     "n": 54,
+     "accuracy": 0.09259259259259259,
+     "unreliable": false
+    },
+    "visual_detail_recall|120-480": {
+     "n": 76,
+     "accuracy": 0.17105263157894737,
+     "unreliable": false
+    },
+    "visual_detail_recall|gt480": {
+     "n": 13,
+     "accuracy": 0.15384615384615385,
+     "unreliable": true
+    }
+   }
+  },
+  "device-N3": {
+   "name": "device-N3",
+   "source": "StudyF4 Part A, 3-frame last-3-s window (Jetson Orin)",
+   "tier": "device",
+   "n": 845,
+   "accuracy": 0.13727810650887573,
+   "ci": [
+    0.11398206131282632,
+    0.16019985903003567
+   ],
+   "mean_prompt_tokens": 1139.1834319526627,
+   "by_category": {
+    "counting_objects_events": {
+     "n": 110,
+     "accuracy": 0.08181818181818182,
+     "ci": [
+      0.03669724770642202,
+      0.1346283783783783
+     ],
+     "unreliable": false
+    },
+    "location_trace": {
+     "n": 97,
+     "accuracy": 0.10309278350515463,
+     "ci": [
+      0.05,
+      0.17172531769305957
+     ],
+     "unreliable": false
+    },
+    "object_comparison": {
+     "n": 91,
+     "accuracy": 0.32967032967032966,
+     "ci": [
+      0.23076923076923078,
+      0.42391304347826086
+     ],
+     "unreliable": false
+    },
+    "sequential_action": {
+     "n": 102,
+     "accuracy": 0.10784313725490197,
+     "ci": [
+      0.05453316953316953,
+      0.16981132075471697
+     ],
+     "unreliable": false
+    },
+    "spatial_aware_reasoning": {
+     "n": 91,
+     "accuracy": 0.2087912087912088,
+     "ci": [
+      0.12643375680580762,
+      0.3011004704301074
+     ],
+     "unreliable": false
+    },
+    "temporal_ordering_recognition": {
+     "n": 90,
+     "accuracy": 0.1111111111111111,
+     "ci": [
+      0.05433321645628798,
+      0.17246391339214087
+     ],
+     "unreliable": false
+    },
+    "time_duration": {
+     "n": 121,
+     "accuracy": 0.06611570247933884,
+     "ci": [
+      0.025418387694060678,
+      0.11403508771929824
+     ],
+     "unreliable": false
+    },
+    "visual_detail_recall": {
+     "n": 143,
+     "accuracy": 0.13286713286713286,
+     "ci": [
+      0.0828014495936745,
+      0.19333333333333333
+     ],
+     "unreliable": false
+    }
+   },
+   "by_bin": {
+    "le120": {
+     "n": 167,
+     "accuracy": 0.1437125748502994,
+     "ci": [
+      0.09316770186335403,
+      0.19883040935672514
+     ],
+     "unreliable": false
+    },
+    "120-480": {
+     "n": 594,
+     "accuracy": 0.13973063973063973,
+     "ci": [
+      0.1111111111111111,
+      0.1674883098697207
+     ],
+     "unreliable": false
+    },
+    "gt480": {
+     "n": 84,
+     "accuracy": 0.10714285714285714,
+     "ci": [
+      0.04597701149425287,
+      0.17857142857142858
+     ],
+     "unreliable": false
+    }
+   },
+   "by_category_bin": {
+    "counting_objects_events|le120": {
+     "n": 19,
+     "accuracy": 0.10526315789473684,
+     "unreliable": true
+    },
+    "counting_objects_events|120-480": {
+     "n": 78,
+     "accuracy": 0.08974358974358974,
+     "unreliable": false
+    },
+    "counting_objects_events|gt480": {
+     "n": 13,
+     "accuracy": 0.0,
+     "unreliable": true
+    },
+    "location_trace|le120": {
+     "n": 17,
+     "accuracy": 0.11764705882352941,
+     "unreliable": true
+    },
+    "location_trace|120-480": {
+     "n": 64,
+     "accuracy": 0.109375,
+     "unreliable": false
+    },
+    "location_trace|gt480": {
+     "n": 16,
+     "accuracy": 0.0625,
+     "unreliable": true
+    },
+    "object_comparison|le120": {
+     "n": 18,
+     "accuracy": 0.3333333333333333,
+     "unreliable": true
+    },
+    "object_comparison|120-480": {
+     "n": 71,
+     "accuracy": 0.323943661971831,
+     "unreliable": false
+    },
+    "object_comparison|gt480": {
+     "n": 2,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "sequential_action|le120": {
+     "n": 11,
+     "accuracy": 0.09090909090909091,
+     "unreliable": true
+    },
+    "sequential_action|120-480": {
+     "n": 81,
+     "accuracy": 0.1111111111111111,
+     "unreliable": false
+    },
+    "sequential_action|gt480": {
+     "n": 10,
+     "accuracy": 0.1,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|le120": {
+     "n": 10,
+     "accuracy": 0.2,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|120-480": {
+     "n": 71,
+     "accuracy": 0.2112676056338028,
+     "unreliable": false
+    },
+    "spatial_aware_reasoning|gt480": {
+     "n": 10,
+     "accuracy": 0.2,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|le120": {
+     "n": 18,
+     "accuracy": 0.16666666666666666,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|120-480": {
+     "n": 63,
+     "accuracy": 0.09523809523809523,
+     "unreliable": false
+    },
+    "temporal_ordering_recognition|gt480": {
+     "n": 9,
+     "accuracy": 0.1111111111111111,
+     "unreliable": true
+    },
+    "time_duration|le120": {
+     "n": 20,
+     "accuracy": 0.05,
+     "unreliable": false
+    },
+    "time_duration|120-480": {
+     "n": 90,
+     "accuracy": 0.05555555555555555,
+     "unreliable": false
+    },
+    "time_duration|gt480": {
+     "n": 11,
+     "accuracy": 0.18181818181818182,
+     "unreliable": true
+    },
+    "visual_detail_recall|le120": {
+     "n": 54,
+     "accuracy": 0.12962962962962962,
+     "unreliable": false
+    },
+    "visual_detail_recall|120-480": {
+     "n": 76,
+     "accuracy": 0.14473684210526316,
+     "unreliable": false
+    },
+    "visual_detail_recall|gt480": {
+     "n": 13,
+     "accuracy": 0.07692307692307693,
+     "unreliable": true
+    }
+   }
+  },
+  "device-N9": {
+   "name": "device-N9",
+   "source": "StudyF4 Part A, 9-frame last-3-s window (Jetson Orin)",
+   "tier": "device",
+   "n": 845,
+   "accuracy": 0.1514792899408284,
+   "ci": [
+    0.12673717390120365,
+    0.1766898674242424
+   ],
+   "mean_prompt_tokens": 3095.183431952663,
+   "by_category": {
+    "counting_objects_events": {
+     "n": 110,
+     "accuracy": 0.09090909090909091,
+     "ci": [
+      0.0446329804045512,
+      0.14545454545454545
+     ],
+     "unreliable": false
+    },
+    "location_trace": {
+     "n": 97,
+     "accuracy": 0.13402061855670103,
+     "ci": [
+      0.07142857142857142,
+      0.20618556701030927
+     ],
+     "unreliable": false
+    },
+    "object_comparison": {
+     "n": 91,
+     "accuracy": 0.32967032967032966,
+     "ci": [
+      0.23333333333333334,
+      0.422711228148812
+     ],
+     "unreliable": false
+    },
+    "sequential_action": {
+     "n": 102,
+     "accuracy": 0.1568627450980392,
+     "ci": [
+      0.09523809523809523,
+      0.225831393415364
+     ],
+     "unreliable": false
+    },
+    "spatial_aware_reasoning": {
+     "n": 91,
+     "accuracy": 0.18681318681318682,
+     "ci": [
+      0.10524785801713586,
+      0.273687343358396
+     ],
+     "unreliable": false
+    },
+    "temporal_ordering_recognition": {
+     "n": 90,
+     "accuracy": 0.1,
+     "ci": [
+      0.044931335830212235,
+      0.1595744680851064
+     ],
+     "unreliable": false
+    },
+    "time_duration": {
+     "n": 121,
+     "accuracy": 0.10743801652892562,
+     "ci": [
+      0.05785123966942149,
+      0.16529088306110495
+     ],
+     "unreliable": false
+    },
+    "visual_detail_recall": {
+     "n": 143,
+     "accuracy": 0.13986013986013987,
+     "ci": [
+      0.08695652173913043,
+      0.19870860927152298
+     ],
+     "unreliable": false
+    }
+   },
+   "by_bin": {
+    "le120": {
+     "n": 167,
+     "accuracy": 0.15568862275449102,
+     "ci": [
+      0.10428451916181977,
+      0.20809248554913296
+     ],
+     "unreliable": false
+    },
+    "120-480": {
+     "n": 594,
+     "accuracy": 0.15656565656565657,
+     "ci": [
+      0.12714703826664336,
+      0.18557310532181664
+     ],
+     "unreliable": false
+    },
+    "gt480": {
+     "n": 84,
+     "accuracy": 0.10714285714285714,
+     "ci": [
+      0.047619047619047616,
+      0.17722925457102665
+     ],
+     "unreliable": false
+    }
+   },
+   "by_category_bin": {
+    "counting_objects_events|le120": {
+     "n": 19,
+     "accuracy": 0.10526315789473684,
+     "unreliable": true
+    },
+    "counting_objects_events|120-480": {
+     "n": 78,
+     "accuracy": 0.08974358974358974,
+     "unreliable": false
+    },
+    "counting_objects_events|gt480": {
+     "n": 13,
+     "accuracy": 0.07692307692307693,
+     "unreliable": true
+    },
+    "location_trace|le120": {
+     "n": 17,
+     "accuracy": 0.11764705882352941,
+     "unreliable": true
+    },
+    "location_trace|120-480": {
+     "n": 64,
+     "accuracy": 0.171875,
+     "unreliable": false
+    },
+    "location_trace|gt480": {
+     "n": 16,
+     "accuracy": 0.0,
+     "unreliable": true
+    },
+    "object_comparison|le120": {
+     "n": 18,
+     "accuracy": 0.4444444444444444,
+     "unreliable": true
+    },
+    "object_comparison|120-480": {
+     "n": 71,
+     "accuracy": 0.29577464788732394,
+     "unreliable": false
+    },
+    "object_comparison|gt480": {
+     "n": 2,
+     "accuracy": 0.5,
+     "unreliable": true
+    },
+    "sequential_action|le120": {
+     "n": 11,
+     "accuracy": 0.09090909090909091,
+     "unreliable": true
+    },
+    "sequential_action|120-480": {
+     "n": 81,
+     "accuracy": 0.16049382716049382,
+     "unreliable": false
+    },
+    "sequential_action|gt480": {
+     "n": 10,
+     "accuracy": 0.2,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|le120": {
+     "n": 10,
+     "accuracy": 0.1,
+     "unreliable": true
+    },
+    "spatial_aware_reasoning|120-480": {
+     "n": 71,
+     "accuracy": 0.19718309859154928,
+     "unreliable": false
+    },
+    "spatial_aware_reasoning|gt480": {
+     "n": 10,
+     "accuracy": 0.2,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|le120": {
+     "n": 18,
+     "accuracy": 0.2222222222222222,
+     "unreliable": true
+    },
+    "temporal_ordering_recognition|120-480": {
+     "n": 63,
+     "accuracy": 0.07936507936507936,
+     "unreliable": false
+    },
+    "temporal_ordering_recognition|gt480": {
+     "n": 9,
+     "accuracy": 0.0,
+     "unreliable": true
+    },
+    "time_duration|le120": {
+     "n": 20,
+     "accuracy": 0.05,
+     "unreliable": false
+    },
+    "time_duration|120-480": {
+     "n": 90,
+     "accuracy": 0.1111111111111111,
+     "unreliable": false
+    },
+    "time_duration|gt480": {
+     "n": 11,
+     "accuracy": 0.18181818181818182,
+     "unreliable": true
+    },
+    "visual_detail_recall|le120": {
+     "n": 54,
+     "accuracy": 0.12962962962962962,
+     "unreliable": false
+    },
+    "visual_detail_recall|120-480": {
+     "n": 76,
+     "accuracy": 0.15789473684210525,
+     "unreliable": false
+    },
+    "visual_detail_recall|gt480": {
+     "n": 13,
+     "accuracy": 0.07692307692307693,
+     "unreliable": true
+    }
+   }
+  }
+ },
+ "cells": {},
+ "coverage_by_n_configs": {
+  "8": 6,
+  "10": 839
+ },
+ "_provenance": {
+  "git_commit": "914a94e8f5aa193327f55490353d51e632441d4c",
+  "script": "recall_profiles.py",
+  "model": null,
+  "timestamp": "2026-11-12T15:23:22.716341",
+  "device": "cpu",
+  "n": 845
+ }
+}

@@ -59,3 +59,19 @@ the overlapping of vision/embedding stages; the paper's throughput and TTFT meas
 |---|---|---|
 | `gpu_warm_slots` | 4 | StudyE10b's capacity table shows k = 4 warm sessions halving episodic capacity, so 4 is the measured operating point, not a guess |
 | buffer layers | exposed, default 1 | the paper varies it (Figs. 6–7) without printing a value |
+
+## AMENDMENT 2026-11-12: wired to MATERIALIZE
+
+The interface gained `MATERIALIZE(session, target_tokens, slice_tokens)`, which is the explicit act
+of BUILDING a session's cloud-side state, as against `KEEP_GPU_WARM`, which only holds state that
+already exists. AttentionStore's scheduler-aware **fetch** promotes a session from the DRAM tier into HBM, which is a build, so the adapted policy now emits `MATERIALIZE` for a promotion of a session that is not already GPU-warm.
+
+`slice_tokens = None` (one monolithic prefill) — the paper loads a whole prefix in one fetch, so the monolithic form is the
+faithful one. Whether SLICING helps is the property under test (fairness rule 4) and is tested by
+B11, not here.
+
+**What changed, and what did not.** What changed is what this baseline DECLARES. What did not
+change is what it is charged: the harness already billed the first promotion of a session to
+GPU-warm at the measured cold-prefill cost (fairness rule 3), and it bills `MATERIALIZE` on the
+same path. The re-run smoke record is identical field for field apart from the new
+`materialize_*` counters.

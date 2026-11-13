@@ -6,7 +6,7 @@ E-id: StudyB-baselines (`research/EXPERIMENTS.md`). **This is an engineering and
 
 **(a) The tuned engine: DECIDED 2026-11-12 - it is StudyE10e's P1.** This baseline was specified as "the best engine configuration from StudyE10c / E10e". When the suite was first built **StudyE10e did not exist**, so it was flagged as under-specified. StudyE10e has since run and tested exactly the missing lever - the long-prefill threshold - and its pre-registered verdict is **"no config removes the interference"**: P1 (threshold 1024), P2 (512) and P3 (1024 + priority) each hold C0 capacity at the 40 % ladder top with no loss, exactly like the default, and each collapses to **< 10 %** under cold recall (C1) and under KV-host-plus-cold-recall (C4) - five ladder levels below their own C0. **And under recall they are strictly worse than the default**: the caps do cut episodic p99 at C1 (2.646 s -> 1.978 s at P2, about -25 %) but never approach the 0.45 s budget, while charging cold-recall TTFT p99 +12-13 % at C1 and +14-21 % at C4, and degrading warm recall at C4 (P2 appends / escalations +37 % / +30 %; P3 escalation x2.1, because priority demotes warm recall). StudyE10e also records that the two partial-prefill counters originally requested do not exist in vLLM 0.31.0. So `tuned_engine.py` now exposes all SEVEN measured configurations - E10c's E0 / E1 / E2 / E4 and E10e's P1 / P2 / P3 - keeps `BEST_MEASURED = E0` with a measurement rather than an absence behind it, and still raises on any unmeasured name. **The user set `TUNED = P1`** (`--long-prefill-token-threshold 1024`, default step budget, FCFS) on that evidence, and the choice is well founded: P1 cuts episodic p99 by 19-25 % at C1 and 18-30 % at C4 at **no C0 capacity cost**, and **alone among the three it spares warm recall** - at C4 its warm append p50 rises x1.02 and its escalation x1.01, against P2's x1.37 / x1.30 and P3's x1.53 / x2.09. Its cost is confined to cold recall (TTFT p99 x1.12 at C1, x1.14 at C4). `TUNED = P1` and `BEST_MEASURED = E0` are kept as two separate recorded senses - the tuned choice, and the best under E10c / E10e's capacity rule - so they are never conflated, and **it does not restore capacity**: E10e's verdict stands and is quoted in `cards/tuned_engine.md`. One caveat is carried from E10e: its verdict covers its own controls plus E10c's, not two documented 0.31.0 combinations it did not try (a 2,048-token step budget together with the 512-token cap, and `--no-async-scheduling`).
 
-One consequence of the switch, stated so no one reads more into it than it says: the 10-minute replay smoke test was re-run under `TUNED = P1` and **every recorded field of all 38 configurations is unchanged** (only wall-clock times differ). That is expected and is not evidence for P1 - the replay harness charges no engine-configuration cost, so `engine_config` is a field the policy emits and the harness validates but does not price. P1's benefit and its cold-recall cost live in StudyE10e's measured latency curves, not in this replay; any study that wants to see them must charge them.
+One consequence of the switch, stated so no one reads more into it than it says: the 10-minute replay smoke test was re-run under `TUNED = P1` and **every recorded field of all 38 configurations then in the suite is unchanged** (only wall-clock times differ). That is expected and is not evidence for P1 - the replay harness charges no engine-configuration cost, so `engine_config` is a field the policy emits and the harness validates but does not price. P1's benefit and its cold-recall cost live in StudyE10e's measured latency curves, not in this replay; any study that wants to see them must charge them.
 
 **(b) Ekya's repository has no licence.** `github.com/edge-video-services/ekya` is Microsoft Research's own release, but it contains **no LICENSE or COPYING file anywhere** and the README names none, so no right to use or modify is granted. Applied consequence: the clone is used for citation and commit pinning only, **no file in it was opened, run or copied**, its own CPU-runnable toy simulator was deliberately left unrun, and the adapted baseline was written from the paper. **RESOLVED 2026-11-12: the user approved citation-only use** (section 9 item 2); the clone and the pin stay, and nothing in it is opened.
 
@@ -17,6 +17,7 @@ One consequence of the switch, stated so no one reads more into it than it says:
 Defined first, in `experiments/orchestration/baselines/interface.py`, before any baseline. It is enforced, not merely documented:
 
 - **Causal observations only.** `Observation` is frozen and the fields that could leak the future are absent; `scrub()` additionally asserts that no field or dict key named in `FORBIDDEN_FIELDS` (17 of them: labels, correctness, `time_of_event`, future arrivals, oracle values, ...) reached the policy. It runs on **every** epoch via `Policy.__call__`.
+- **Two actions added by the 2026-11-12 amendment**, both validated like the rest: `MATERIALIZE(session, target_tokens, slice_tokens)` - the explicit act of BUILDING a session's cloud-side state, as against `KEEP_GPU_WARM`, which only holds state that exists - and per-stream `SUSPEND_UNTIL(t)`, which issues no cloud call until *t* while the application reads the device's own scores. `slice_tokens = None` means one monolithic prefill. See section 13.
 - **One action space.** `validate_action` rejects a cadence outside {0.25, 0.5, 1.0} s, a frame count outside {1, 3}, an unknown representation or session action, a negative defer, or an action naming an entity the observation did not contain - which is how a policy would smuggle in knowledge of the future.
 - **One set of defaults.** A baseline that decides only part of the space leaves the rest `None` and `apply_defaults` fills it from `DEFAULTS`, *identically for every baseline*: cloud N = 1 at c = 0.5 s, recall on cloud with RECENT, LRU host offload, FCFS order, default engine. Each card lists which defaults its baseline relies on.
 - **One budget.** `Budget` is checked by the harness, not the policy, so no baseline can award itself more cloud work than our scheduler gets.
@@ -146,8 +147,10 @@ Each case-D reconstruction runs in **the paper's own abstract setting** and each
 | `B7-edf-feasibility` | 2401 | PASS | PASS | PASS | 119.967 | 12/28/0 | no |
 | `B8-utility-per-gpu-second` | 2401 | PASS | PASS | PASS | 120.0 | 26/14/0 | no |
 | `B9-best-of-breed` | 2401 | PASS | PASS | PASS | 35.074 | 40/0/0 | no |
+| `B10-blocking-aware-admission` | 2401 | PASS | PASS | PASS | 35.074 | 40/0/0 | no |
+| `B11-naive-slicing` | 2401 | PASS | PASS | PASS | 119.986 | 12/28/0 | no |
 
-**38 of 38 configurations ran, respected the interface and stayed inside the shared budget.** Two of them (`hindsight-oracle`, `rh8-demand-aware-ORACLE`) are upper bounds that read information the interface forbids, by construction and by declaration.
+**40 of 40 configurations ran, respected the interface and stayed inside the shared budget.** Two of them (`hindsight-oracle`, `rh8-demand-aware-ORACLE`) are upper bounds that read information the interface forbids, by construction and by declaration.
 
 ### 5.2 Case-B originals: what ran on CPU and what did not
 
@@ -315,7 +318,7 @@ The addendum's rules are enforced in `interface.py` and the harness, not merely 
 | **1** | Same models and evidence: the device tier is 4BI, the cloud tier is 32BI, every policy sees the same observation, and no externally trained VLM may be substituted. Enforced by `validate_action` (no model field exists in the action space) and by `check_fairness`, which rejects a policy declaring a model outside MODELS. |
 | **2** | Same resources: ONE H100 replica. A multi-instance algorithm must be adapted and LABELLED as such via `Policy.multi_instance_adapted = True`; the action space has no instance dimension, so a policy cannot route across replicas. |
 | **3** | Same state accounting: every policy pays synchronisation, upload, cache construction, GPU/host occupancy, recomputation and INITIAL WARMING. Cloud-only gets no free history. Enforced by the harness, which charges a session's first promotion to GPU-warm at the measured cold-prefill cost and charges uplink bytes per episodic cloud call. |
-| **4** | Same feasible actions and deadlines, unless restricting the action space IS the property being tested - in which case the policy must declare `restricts_action_space` with a reason, which the harness records. |
+| **4** | Same feasible actions and deadlines, unless restricting the action space IS the property being tested - in which case the policy must declare `restricts_action_space` with a reason, which the harness records. Since the 2026-11-12 amendment the action space also holds MATERIALIZE(session, target_tokens, slice_tokens) and per-stream SUSPEND_UNTIL(t). Every baseline written before the amendment can express only slice_tokens = None (one monolithic prefill), and that is recorded as the PROPERTY UNDER TEST rather than as a restriction those baselines chose. |
 | **5** | No future knowledge except the oracle: `scrub()` on every epoch, and any policy that reads the future must declare `reads_future = True` and is excluded from the causality check and from every deployable comparison. |
 | **6** | Identical demand traces, seeds, deadlines and bootstrap units across policies: the harness builds the trace once from a fixed seed and asserts the digest is identical for every policy it runs. |
 
@@ -358,6 +361,8 @@ Two policies declare `reads_future = True` and are excluded from every deployabl
 | `B7-edf-feasibility` | see `cards/constructed.md` | C-mixed |
 | `B8-utility-per-gpu-second` | see `cards/constructed.md` | A-episodic, C-mixed |
 | `B9-best-of-breed` | see `cards/constructed.md` | C-mixed |
+| `B10-blocking-aware-admission` | see `cards/constructed.md` | C-mixed |
+| `B11-naive-slicing` | see `cards/constructed.md` | B-recall, C-mixed |
 
 **B9 is the primary competitor and is built to be as strong as this suite allows.** Its four mechanisms, and why each choice was made over the alternative the addendum offered:
 
@@ -397,7 +402,7 @@ Metrics are the addendum's: **A** uses challenge mAP (StudyE9c's definition) as 
 | `round-robin` | naive | - |
 | `static-partition` | naive | - |
 
-### Experiment B — recall — 13 baselines
+### Experiment B — recall — 14 baselines
 
 | baseline | case | priority |
 |---|---|---|
@@ -411,11 +416,12 @@ Metrics are the addendum's: **A** uses challenge mAP (StudyE9c's definition) as 
 | `pensieve` | D | - |
 | `r3-streaming` | D | - |
 | `streamscout` | D | P0 |
+| `B11-naive-slicing` | constructed | - |
 | `B3-best-static` | constructed | - |
 | `always-cloud-fcfs` | naive | - |
 | `hindsight-oracle` | naive | - |
 
-### Experiment C — mixed — 23 baselines
+### Experiment C — mixed — 25 baselines
 
 | baseline | case | priority |
 |---|---|---|
@@ -429,6 +435,8 @@ Metrics are the addendum's: **A** uses challenge mAP (StudyE9c's definition) as 
 | `inar-vl` | D | - |
 | `perllm` | D | - |
 | `uniscale` | D | P1 |
+| `B10-blocking-aware-admission` | constructed | - |
+| `B11-naive-slicing` | constructed | - |
 | `B3-best-static` | constructed | - |
 | `B4-query-type-routing` | constructed | - |
 | `B6-latency-aware-routing` | constructed | - |
@@ -444,4 +452,107 @@ Metrics are the addendum's: **A** uses challenge mAP (StudyE9c's definition) as 
 | `tuned-engine` | own | - |
 
 **Our scheduler is not in these lists**; it is added later and compared against them.
+
+---
+
+# AMENDMENT (2026-11-12, later 2): two new actions, the recall and delay profiles, B10 and B11
+
+Everything above still holds, and **no baseline number, cost constant or case decision from it changes**. This part records what the amendment added. It was pre-registered in the `StudyB-baselines` row of `research/EXPERIMENTS.md` before any of it was written.
+
+## 13. The interface: MATERIALIZE and SUSPEND_UNTIL
+
+| action | signature | what it means | validation |
+|---|---|---|---|
+| `MATERIALIZE` | `SessionAction(session, "MATERIALIZE", target_tokens, slice_tokens)` | **build** a session's cloud-side state up to `target_tokens`. `slice_tokens = None` means one monolithic prefill; an integer means chain slices of that size | `target_tokens` must be a positive int; `slice_tokens` must be `None` or a positive int; both fields are rejected on any other session action |
+| `SUSPEND_UNTIL` | `StreamAction(stream, "suspend", suspend_until_s=t)` | issue **no** cloud call for this stream until *t*; the application uses the device's own scores meanwhile | *t* must be in the future; a suspended stream may not carry a cadence or a frame count, and `suspend_until_s` is rejected on a non-suspended stream |
+
+**`slice_tokens = None` is the property under test, not a defect of the baselines.** Every baseline written before the amendment can express only the monolithic form, and `interface.FAIRNESS_RULES[4]` now says so explicitly. B11 is the slicing ablation and B10 its no-slicing counterpart (section 15).
+
+**Five baselines whose own papers prefetch or eagerly warm are wired to `MATERIALIZE`**, with `slice_tokens = None` because each of those papers moves whole prefixes:
+
+| baseline | what in the paper is a BUILD | card |
+|---|---|---|
+| `kvflow` | the prefetch that pulls a KV node in ahead of its predicted next execution | `cards/kvflow.md` |
+| `attentionstore` | the scheduler-aware fetch that promotes a session from DRAM into HBM | `cards/attentionstore.md` |
+| `pensieve` | moving a chunk into the GPU tier that is not already there | `cards/pensieve.md` |
+| `lmcache` | the loader that builds a GPU-resident KV copy | `cards/lmcache.md` |
+| `rh8-demand-aware` (both arms) | StudyRH8's EAGER warm-up pass, whose cost its own 2026-11-03 audit records as EXCLUDED from RH8's in-window metrics (240 warm-up records moving 4,289 MB, present only in the EAGER cells) | `cards/rh8.md` |
+
+**What changed is what those baselines DECLARE, not what they are charged.** The harness already billed a session's first promotion to GPU-warm at the measured cold-prefill cost (fairness rule 3) and bills `MATERIALIZE` on the same path. The re-run smoke record is identical field for field to the pre-amendment one apart from the new counters, which is the check that this is true.
+
+| baseline | MATERIALIZE calls | monolithic | sliced | slice sizes |
+|---|---|---|---|---|
+| `B11-naive-slicing` | 2 | 0 | 2 | [2048] |
+| `attentionstore` | 2 | 2 | 0 | — |
+| `kvflow` | 2 | 2 | 0 | — |
+| `lmcache` | 2 | 2 | 0 | — |
+| `rh8-demand-aware-ORACLE` | 1 | 1 | 0 | — |
+
+Two of the five never warm anything in this particular replay and so never call it: `pensieve`'s eviction leaves the GPU tier empty, and `rh8-demand-aware-causal`'s eager count is `round(0.25 x 2) = 0` with only two sessions. Both are properties of a two-session, 10-minute replay and neither is changed by the amendment.
+
+**No baseline uses `SUSPEND_UNTIL` yet** (0 suspended steps across all 40). It exists because StudyE9d measured what suspending costs, and because a policy that cannot express "stop calling the cloud for the next second" cannot be compared against one that can.
+
+## 14. The profiles the amendment added
+
+### 14.1 Recall accuracy per category x question-time bin x configuration
+
+`recall_profiles.py` -> `results/orchestration/study_b_baselines/b_recall_accuracy.json` and `.csv`. **Every cell is a count of committed per-question `correct` flags.** Nothing is estimated, fitted or interpolated, and the loaders are StudyE6b's own so there is one definition of each configuration in the repository. Question-time bins are StudyE6b's (`le120`, `120-480`, `gt480`); CIs are video-clustered bootstraps, 2000 resamples, seed 0.
+
+| configuration | tier | source | n | accuracy | CI | le120 | 120-480 | gt480 |
+|---|---|---|---|---|---|---|---|---|
+| `32B-RICH` | cloud | StudyR1 K1 (32BI, RICH video) | 845 | **0.3953** | [0.359, 0.432] | 0.545 (n=167) | 0.364 (n=594) | 0.321 (n=84) |
+| `32B-RECENT` | cloud | StudyR1 K3 (32BI, RECENT video) | 845 | **0.3834** | [0.348, 0.420] | 0.545 (n=167) | 0.343 (n=594) | 0.345 (n=84) |
+| `32B-D2` | cloud | StudyRH4 D2 (32BI, 2-s stride 352x256 images) | 839 | **0.3957** | [0.361, 0.430] | 0.527 (n=167) | 0.367 (n=594) | 0.333 (n=78) |
+| `32B-U` | cloud | StudyD11 arm U (32BI, union) | 845 | **0.4142** | [0.377, 0.449] | 0.545 (n=167) | 0.380 (n=594) | 0.393 (n=84) |
+| `4B-RICH` | cloud | StudyClean H2 (4BI, RICH video) | 845 | **0.3018** | [0.270, 0.336] | 0.437 (n=167) | 0.281 (n=594) | 0.179 (n=84) |
+| `4B-RECENT` | cloud | StudyClean H1 (4BI, RECENT video) | 845 | **0.3254** | [0.295, 0.358] | 0.437 (n=167) | 0.303 (n=594) | 0.262 (n=84) |
+| `4B-D2` | device-proxy | StudyE7 Job A (4BI on RH4's D2 input) - DEVICE PROXY | 839 | **0.3087** | [0.277, 0.341] | 0.413 (n=167) | 0.295 (n=594) | 0.192 (n=78) |
+| `device-N1` | device | StudyF4 Part A, 1-frame last-3-s window (Jetson Orin) | 845 | **0.1538** | [0.131, 0.179] | 0.132 (n=167) | 0.160 (n=594) | 0.155 (n=84) |
+| `device-N3` | device | StudyF4 Part A, 3-frame last-3-s window (Jetson Orin) | 845 | **0.1373** | [0.114, 0.160] | 0.144 (n=167) | 0.140 (n=594) | 0.107 (n=84) |
+| `device-N9` | device | StudyF4 Part A, 9-frame last-3-s window (Jetson Orin) | 845 | **0.1515** | [0.127, 0.177] | 0.156 (n=167) | 0.157 (n=594) | 0.107 (n=84) |
+
+Per-category and per-(category x bin) cells are in the JSON and the CSV; a cell with fewer than 20 questions is flagged `UNRELIABLE` rather than quoted, and there are many of those at the category x bin level.
+
+**`4B-D2` is the DEVICE PROXY and is labelled as such everywhere.** Its letters are the H100 4B's for StudyE7's D2 input. StudyE8 Part D measured device-vs-H100 agreement at 68/68 warm and 27/27 cold on byte-identical inputs and StudyF4 measured per-question agreement 0.972-0.981 with no cell below 90 %; but **StudyD15 Part A rejected the H100-for-Orin proxy as an EXACT numerical stand-in**, so these tables are valid for ordering and first-order value and never as exact device numbers.
+
+### 14.2 The StudyE9d delay curves
+
+`profiles.delay_curve`, `profiles.value_at_delay`, `profiles.d_star_s` and `profiles.blocking_loss` read StudyE9d directly. The four facts a policy can now consult:
+
+| quantity | what it is | value |
+|---|---|---|
+| V(d) | challenge mAP against added delivery delay, 0 to 3 s in 0.25-s steps | 32B N = 1 at cadence 0.5 s: 0.5675 at d = 0 falling to 0.4759 at d = 3 s |
+| d\* | the added delay at which a cloud arm falls to the device's value | 32B N = 1 **2.54 s** (challenge mAP), 1.13 s (streaming AP at h = 0); 32B N = 3 1.38 s and 0.74 s |
+| blocking loss | value lost to a cloud-path outage of w seconds | at w = 2 s, QUEUE +0.0005 mAP against SUSPEND +0.0114 |
+| interpolation | value BETWEEN StudyE9d's 0.25-s grid points | linear, held flat beyond 3.0 s - **a RULE, not a measurement**, stated in `profiles.PROVENANCE` and in the B10 card |
+
+**Two warnings are carried from StudyE9d into every card that uses it**: d\* has a wide CI and is not a threshold (the curve is the usable object), and a loss below about 0.001 challenge mAP is inside the noise floor and should be read as zero.
+
+## 15. B10 and B11
+
+| id | what it is | why it exists |
+|---|---|---|
+| **B10** blocking-aware admission, **no slicing** | defers a recall whose predicted non-preemptive engine time would hold an episodic stream past StudyE9d's d\*, unless its deadline slack is exhausted; EDF otherwise; recall served at whatever readiness the session actually has; KV management is B9's component (iv) verbatim | it is the strongest policy that uses the blocking mechanism StudyE10c / E10d / E10e located **without** slicing |
+| **B11** naive slicing | every materialization chained in fixed 2,048-token slices, FCFS, no awareness of episodic timing; everything else as tuned-engine always-cloud (StudyE10e's P1) | it is slicing **without** scheduling - the ablation that separates the two mechanisms |
+
+B10's rule, verbatim from `constructed.py`:
+
+```
+T        = costs.recall_ttft_s(readiness_tokens, readiness)   # predicted non-preemptive time
+affected = connected streams with a call due inside T (cadence <= T)
+d*       = profiles.d_star_s(arm, cadence)                    # StudyE9d
+if slack <= T:        ADMIT     # a deadline is never sacrificed to a stream
+elif T >= min(d*):    DEFER by min(0.25 s, slack - T)
+else:                 ADMIT
+```
+
+Every component choice is tabulated in `cards/constructed.md`, including the three that are rules rather than measurements: the TTFT interpolation between StudyRH5's 11k and 28k points, reading "no crossing inside the 3-s grid" as 3.0 s, and the 0.25-s defer quantum.
+
+**B11's per-slice overhead is NOT measured.** StudySIM1 sweeps it over {0.02, 0.05, 0.1, 0.2, 0.47} s and **every B11 result is labelled parametric** until StudySLICE1 measures it. It is the one free parameter in the suite and it is exposed here rather than buried in a constructor.
+
+### What the smoke replay exercises, and what it does not
+
+**All 40 configurations ran, respected the interface and stayed in budget** (was 38; B10 and B11 are the two new ones). But B10's deferral rule **never fires in this replay**: both of its sessions stay HOST-WARM, so T = 0.46-1.00 s against d\* = 2.54 s, and the record shows 40 admitted, 0 deferred and 0 materializations. **That is exactly the silently-unexercised mechanism CLAUDE.md's protocol exists to catch**, so it is stated here rather than left for a reader to infer from a PASS.
+
+The rule is instead exercised explicitly in `reconstructed/test_constructed_amendment_toy.py`, which asserts **24 named behaviours, all reproduced**: that d\* is read from StudyE9d and not guessed (2.537 s); that a COLD 28k recall's predicted hold exceeds it (7.40 s) and a HOST-WARM 11k recall's does not (0.46 s); that B10 therefore DEFERS the first while it has slack and ADMITS it once the slack is exhausted; that admitting a COLD query materializes the session monolithically; that B11 slices at 2,048 tokens, is FCFS and runs engine P1; and that the interface REJECTS each of the eight malformed uses of the two new actions.
 

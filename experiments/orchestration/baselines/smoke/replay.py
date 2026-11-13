@@ -137,6 +137,11 @@ def run(policy: Policy, seed: int = 0, verbose: bool = False) -> Dict[str, objec
     ever_warmed: set = set()
     warming_gpu_s = 0.0
     uplink_bytes = 0.0
+    materialize_calls = 0
+    materialize_monolithic = 0
+    materialize_sliced = 0
+    slice_token_sizes: set = set()
+    suspend_steps = 0
     epochs = 0
     cloud_calls = 0
     budget_violations = 0
@@ -193,6 +198,12 @@ def run(policy: Policy, seed: int = 0, verbose: bool = False) -> Dict[str, objec
         # apply: charge the cloud work the action implies for one step
         for sa in act.streams:
             st = stream_state[sa.stream_id]
+            if sa.mode == "suspend":
+                # SUSPEND_UNTIL: no cloud call is issued, so nothing is charged, and the
+                # application reads the device's own scores. StudyE9d measured what that costs.
+                suspend_steps += 1
+                st["on_cloud"] = False
+                continue
             st["on_cloud"] = (sa.mode == "cloud")
             if sa.mode == "cloud":
                 st["cadence_s"], st["frame_count"] = sa.cadence_s, sa.frame_count
@@ -226,7 +237,14 @@ def run(policy: Policy, seed: int = 0, verbose: bool = False) -> Dict[str, objec
                 served["rejected"] += 1
         pending = keep
         for xa in act.sessions:
-            if xa.action == "KEEP_GPU_WARM":
+            if xa.action == "MATERIALIZE":
+                materialize_calls += 1
+                if xa.slice_tokens is None:
+                    materialize_monolithic += 1
+                else:
+                    materialize_sliced += 1
+                    slice_token_sizes.add(int(xa.slice_tokens))
+            if xa.action in ("KEEP_GPU_WARM", "MATERIALIZE"):
                 if xa.session_id not in gpu_warm:
                     # FAIRNESS RULE 3: the FIRST promotion of a session to GPU-warm pays the
                     # measured cold prefill that builds its cache. No policy gets free history.
@@ -269,4 +287,8 @@ def run(policy: Policy, seed: int = 0, verbose: bool = False) -> Dict[str, objec
         fairness=fair, trace_digest=dg,
         warming_gpu_s=round(warming_gpu_s, 3), uplink_mb=round(uplink_bytes / 1e6, 1),
         sessions_warmed=len(ever_warmed),
+        # amendment 2026-11-12: which policies use the two new actions, and how
+        materialize_calls=materialize_calls, materialize_monolithic=materialize_monolithic,
+        materialize_sliced=materialize_sliced, slice_token_sizes=sorted(slice_token_sizes),
+        suspend_stream_steps=suspend_steps,
     )

@@ -286,6 +286,7 @@ baselines:
       - "reconstructed/test_perllm_toy.py"
       - "perllm_adapted.py"
   - name: "attentionstore"
+    notes: "AMENDMENT 2026-11-12: wired to MATERIALIZE with slice_tokens = None (the paper builds whole prefixes); what changed is what the baseline DECLARES, not what it is charged - the harness already billed the first promotion at the measured cold prefill (fairness rule 3) and bills MATERIALIZE on the same path."
     experiments: 
       - "B-recall"
     case: "D"
@@ -315,7 +316,7 @@ baselines:
     license: "Apache-2.0"
     decides: "session action (LRU)"
     card: "cards/lmcache.md"
-    notes: "original smoke: targets CUDA; tests import torch; not run on CPU"
+    notes: "original smoke: targets CUDA; tests import torch; not run on CPU AMENDMENT 2026-11-12: wired to MATERIALIZE with slice_tokens = None (the paper builds whole prefixes); what changed is what the baseline DECLARES, not what it is charged - the harness already billed the first promotion at the measured cold prefill (fairness rule 3) and bills MATERIALIZE on the same path."
     versions:
       - "original (cloned)"
       - "adapted"
@@ -323,6 +324,7 @@ baselines:
       - "lmcache_adapted.py"
       - "~/baselines_src/lmcache"
   - name: "pensieve"
+    notes: "AMENDMENT 2026-11-12: wired to MATERIALIZE with slice_tokens = None (the paper builds whole prefixes); what changed is what the baseline DECLARES, not what it is charged - the harness already billed the first promotion at the measured cold prefill (fairness rule 3) and bills MATERIALIZE on the same path."
     experiments: 
       - "B-recall"
     case: "D"
@@ -352,7 +354,7 @@ baselines:
     license: null
     decides: "session action"
     card: "cards/rh8.md"
-    notes: "INTERFACE CONFLICT, RESOLVED AS PROPOSED AND APPROVED BY THE USER 2026-11-12: RH8's MIX-DEMAND reads the ground-truth demand labels (its own 2026-11-03 audit says so), which the interface forbids. Both readings ship, labelled - rh8-demand-aware-ORACLE is reported as an UPPER BOUND alongside the hindsight oracle and excluded from every deployable comparison, and RH8CausalDemand is a SEPARATE DEPLOYABLE policy labelled as NOT what StudyRH8 measured."
+    notes: "INTERFACE CONFLICT, RESOLVED AS PROPOSED AND APPROVED BY THE USER 2026-11-12: RH8's MIX-DEMAND reads the ground-truth demand labels (its own 2026-11-03 audit says so), which the interface forbids. Both readings ship, labelled - rh8-demand-aware-ORACLE is reported as an UPPER BOUND alongside the hindsight oracle and excluded from every deployable comparison, and RH8CausalDemand is a SEPARATE DEPLOYABLE policy labelled as NOT what StudyRH8 measured. AMENDMENT 2026-11-12: wired to MATERIALIZE with slice_tokens = None (the paper builds whole prefixes); what changed is what the baseline DECLARES, not what it is charged - the harness already billed the first promotion at the measured cold prefill (fairness rule 3) and bills MATERIALIZE on the same path."
     versions:
       - "ORACLE (upper bound)"
       - "causal (deployable)"
@@ -504,7 +506,7 @@ baselines:
     license: null
     card: "cards/kvflow.md"
     toy_test: "6/6 behaviours"
-    notes: "the paper's steps-to-execution comes from a KNOWN workflow graph, which fairness rule 5 forbids; the adapted version estimates it causally from observed inter-arrivals - a principle adaptation, NOT a reproduction"
+    notes: "the paper's steps-to-execution comes from a KNOWN workflow graph, which fairness rule 5 forbids; the adapted version estimates it causally from observed inter-arrivals - a principle adaptation, NOT a reproduction AMENDMENT 2026-11-12: wired to MATERIALIZE with slice_tokens = None (the paper builds whole prefixes); what changed is what the baseline DECLARES, not what it is charged - the harness already billed the first promotion at the measured cold prefill (fairness rule 3) and bills MATERIALIZE on the same path."
     experiments:
       - "B-recall"
     versions:
@@ -730,3 +732,38 @@ baselines:
       - "constructed"
     files:
       - "constructed.py::B9BestOfBreed"
+  - name: "B10-blocking-aware-admission"
+    case: "constructed"
+    priority: "-"
+    paper: null
+    verified: null
+    code_url: "ours"
+    pinned_commit: null
+    license: null
+    card: "cards/constructed.md"
+    notes: "AMENDMENT 2026-11-12. Blocking-aware admission WITHOUT slicing: defers a recall whose predicted non-preemptive engine time (StudyRH5 TTFT) would hold an episodic stream past StudyE9d's d*, unless its deadline slack is exhausted; EDF otherwise; KV management = B9 component (iv). Declares restricts_action_space = slice_tokens None, the property under test. Its deferral rule does NOT fire in the 10-minute smoke replay (both sessions stay HOST-WARM, T = 0.46-1.00 s < d* = 2.54 s); it is exercised in reconstructed/test_constructed_amendment_toy.py"
+    experiments:
+      - "C-mixed"
+    versions:
+      - "constructed"
+    files:
+      - "constructed.py::B10BlockingAwareAdmission"
+      - "reconstructed/test_constructed_amendment_toy.py"
+  - name: "B11-naive-slicing"
+    case: "constructed"
+    priority: "-"
+    paper: null
+    verified: null
+    code_url: "ours"
+    pinned_commit: null
+    license: null
+    card: "cards/constructed.md"
+    notes: "AMENDMENT 2026-11-12. Naive slicing: every materialization chained in fixed 2,048-token slices (StudyE10c's E2 step budget), FCFS, no awareness of episodic timing, everything else as tuned-engine always-cloud (StudyE10e P1). The ablation of slicing WITHOUT scheduling. THE PER-SLICE OVERHEAD IS UNMEASURED: StudySIM1 sweeps {0.02, 0.05, 0.1, 0.2, 0.47} s and every B11 result is labelled parametric until StudySLICE1 measures it"
+    experiments:
+      - "B-recall"
+      - "C-mixed"
+    versions:
+      - "constructed"
+    files:
+      - "constructed.py::B11NaiveSlicing"
+      - "reconstructed/test_constructed_amendment_toy.py"

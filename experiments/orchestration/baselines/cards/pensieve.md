@@ -56,3 +56,19 @@ results.
 | `gpu_capacity_tokens` | 60,000 | StudyRH5's measured GPU KV capacity (62,944 tokens at bf16), rounded down |
 | `reuse_horizon_s` | 30 s | our own constant; see A3 |
 | recompute rates | 4,500 / 3,800 tok/s | StudyRH5 Part A |
+
+## AMENDMENT 2026-11-12: wired to MATERIALIZE
+
+The interface gained `MATERIALIZE(session, target_tokens, slice_tokens)`, which is the explicit act
+of BUILDING a session's cloud-side state, as against `KEEP_GPU_WARM`, which only holds state that
+already exists. Pensieve's placement decides which chunks live in the GPU tier; moving a chunk there that is not already GPU-warm is a build, so the adapted policy now emits `MATERIALIZE` for that case.
+
+`slice_tokens = None` (one monolithic prefill) — the paper moves whole chunks, so the monolithic form is the
+faithful one. Whether SLICING helps is the property under test (fairness rule 4) and is tested by
+B11, not here.
+
+**What changed, and what did not.** What changed is what this baseline DECLARES. What did not
+change is what it is charged: the harness already billed the first promotion of a session to
+GPU-warm at the measured cold-prefill cost (fairness rule 3), and it bills `MATERIALIZE` on the
+same path. The re-run smoke record is identical field for field apart from the new
+`materialize_*` counters.

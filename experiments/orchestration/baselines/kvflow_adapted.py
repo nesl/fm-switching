@@ -26,7 +26,8 @@ from typing import Dict, List
 sys.path.insert(0, str(Path(__file__).resolve().parent / "reconstructed"))
 
 import costs as C
-from interface import (Action, Observation, Policy, RecallAction, SessionAction, StreamAction)
+from interface import (Action, Observation, Policy, RecallAction, SessionAction,
+                       StreamAction, materialize)
 from kvflow import KVNode, evict, prefetch  # noqa: E402
 
 
@@ -83,8 +84,15 @@ class KVFlowAdapted(Policy):
         sess = []
         for n in after:
             keep = n.resident or n.node_id in pull
-            sess.append(SessionAction(n.node_id,
-                                      "KEEP_GPU_WARM" if keep else "OFFLOAD_TO_HOST"))
+            if keep and not n.resident:
+                # the paper's PREFETCH: this session's state does not exist on the GPU yet and
+                # KVFlow pulls it in ahead of the predicted arrival. Amendment 2026-11-12: that
+                # is MATERIALIZE, monolithic, because KVFlow prefetches a whole prefix.
+                sess.append(materialize(n.node_id, tokens.get(n.node_id, 11000),
+                                        slice_tokens=None))
+            else:
+                sess.append(SessionAction(n.node_id,
+                                          "KEEP_GPU_WARM" if keep else "OFFLOAD_TO_HOST"))
         return Action(
             streams=[StreamAction(s.stream_id, "cloud") for s in obs.streams],
             recall=[RecallAction(q.query_id, "CLOUD") for q in obs.recall],

@@ -19,7 +19,8 @@ from __future__ import annotations
 
 from typing import Dict, List
 
-from interface import (Action, Observation, Policy, RecallAction, SessionAction, StreamAction)
+from interface import (Action, Observation, Policy, RecallAction, SessionAction,
+                       StreamAction, materialize)
 
 
 class LMCacheAdapted(Policy):
@@ -46,10 +47,16 @@ class LMCacheAdapted(Policy):
         for sid in known:
             self._last.setdefault(sid, -1.0)
         # LRU: keep the most recently used in the GPU tier, offload the rest to host.
+        tokens = {q.session_id: q.readiness_tokens for q in obs.recall}
         ranked = sorted(known, key=lambda s: -self._last[s])
         warm = set(ranked[:self.gpu_slots])
         return Action(
             streams=[StreamAction(s.stream_id, "cloud") for s in obs.streams],
             recall=[RecallAction(q.query_id, "CLOUD") for q in obs.recall],
-            sessions=[SessionAction(s, "KEEP_GPU_WARM" if s in warm else "OFFLOAD_TO_HOST")
+            # Amendment 2026-11-12: LMCache's own loader BUILDS a GPU-resident KV copy for a
+            # session whose state is not there yet, so that case is declared as MATERIALIZE with
+            # slice_tokens = None (LMCache moves whole prefixes, not slices).
+            sessions=[(SessionAction(s, "KEEP_GPU_WARM") if s in obs.cloud.gpu_warm_sessions
+                       else materialize(s, max(tokens.get(s, 11000), 1), slice_tokens=None))
+                      if s in warm else SessionAction(s, "OFFLOAD_TO_HOST")
                       for s in known])

@@ -56,3 +56,19 @@ paper's agentic benchmarks.
 | `gpu_capacity_tokens` | 60,000 | StudyRH5's measured GPU KV capacity (62,944 at bf16), rounded down |
 | `prefetch_horizon_s` | 5 s | our own, stated |
 | `alpha` (EWMA) | 0.3 | our own, stated |
+
+## AMENDMENT 2026-11-12: wired to MATERIALIZE
+
+The interface gained `MATERIALIZE(session, target_tokens, slice_tokens)`, which is the explicit act
+of BUILDING a session's cloud-side state, as against `KEEP_GPU_WARM`, which only holds state that
+already exists. KVFlow's **prefetch** pulls a KV node in ahead of its predicted next execution, which is a build, so the adapted policy now emits `MATERIALIZE` for a node it keeps that is not yet GPU-resident and `KEEP_GPU_WARM` for one that is.
+
+`slice_tokens = None` (one monolithic prefill) — the paper prefetches a whole prefix, not a part of one, so the monolithic form is the
+faithful one. Whether SLICING helps is the property under test (fairness rule 4) and is tested by
+B11, not here.
+
+**What changed, and what did not.** What changed is what this baseline DECLARES. What did not
+change is what it is charged: the harness already billed the first promotion of a session to
+GPU-warm at the measured cold-prefill cost (fairness rule 3), and it bills `MATERIALIZE` on the
+same path. The re-run smoke record is identical field for field apart from the new
+`materialize_*` counters.

@@ -46,3 +46,19 @@ disk tier; its vLLM connector.
 | name | value | from |
 |---|---|---|
 | `gpu_slots` | 4 | StudyE10b's measured warm-session operating point, as in the AttentionStore card |
+
+## AMENDMENT 2026-11-12: wired to MATERIALIZE
+
+The interface gained `MATERIALIZE(session, target_tokens, slice_tokens)`, which is the explicit act
+of BUILDING a session's cloud-side state, as against `KEEP_GPU_WARM`, which only holds state that
+already exists. LMCache's loader builds a GPU-resident KV copy for a session whose state is not there yet, so the adapted policy now emits `MATERIALIZE` for a session it decides to keep warm that is not already GPU-warm.
+
+`slice_tokens = None` (one monolithic prefill) — the paper moves whole prefixes, so the monolithic form is the
+faithful one. Whether SLICING helps is the property under test (fairness rule 4) and is tested by
+B11, not here.
+
+**What changed, and what did not.** What changed is what this baseline DECLARES. What did not
+change is what it is charged: the harness already billed the first promotion of a session to
+GPU-warm at the measured cold-prefill cost (fairness rule 3), and it bills `MATERIALIZE` on the
+same path. The re-run smoke record is identical field for field apart from the new
+`materialize_*` counters.
