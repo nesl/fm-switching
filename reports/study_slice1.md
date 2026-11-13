@@ -208,3 +208,259 @@ Part B, the live mixed test, is designed in §0 of the EXPERIMENTS row. It waits
    - Letter equality is a proxy for "same answer": valid for these 5-option, letter-only questions. Instability in the monolithic answer itself is reported separately.
 
 **Result: PASS 6 / 6.**
+
+## 5. Part B design (recorded before the Part B run)
+
+**User decisions (2026-11-12):**
+1. The cold recall is the ~11k D2 history, comparable to the 12.6k cold K1 recall in E10b–f.
+2. The ~28k set is moot. Any future 28k cell would use the same 20 Part A sessions.
+3. Default engine (E0) only, all six policies. Run order:
+   1. C1 r = 0.05 (C1a), all policies;
+   2. C4, all policies;
+   3. C0 at 25 % and 40 % (controls);
+   4. C1 r = 0.1 (C1b).
+   P0 runs first within each condition. Once 5 h have elapsed, finish the current cell and stop to ask.
+
+**Harness:** `experiments/cost/study_slice1_live.py`. It is the E10c / E10e `study_e10b_mixed.run_cell`, imported unchanged:
+- episodic N = 1, open loop over distinct D14 requests, D7 Poisson arrivals, E10c's seed-index map;
+- 30-s discard, 240-s scored window, 300-s drain cap;
+- RH7 warm sessions for C4 (k = 8, KV-HOST 256 GiB);
+- exclusivity monitor with VOID on overlap;
+- a fresh server per cell. The server is vLLM 0.31.0 defaults (E0), prefix caching ON, processor cache 128 GiB. The server's "non-default args" line is checked to contain no scheduler flags.
+
+Only the cold-recall path changes. Cold arrivals (Poisson at r, seed 1000 + level index) are handed to an orchestrator client instead of being posted directly.
+
+**Cold recall:**
+- One of the 20 Part A ~11k sessions (10,923–11,517 prompt tokens), taken in `random.Random(0)` order.
+- Every recall uses a fresh namespace (new header tag and new frame uuids), so nothing is served from the prefix or processor cache. This is checked per cell: a recall's first request must have ≤ 16 cached tokens, and each later slice must leave a gap of ≤ 32 tokens to its prefix; otherwise STOP.
+- Reference answer: the Part A monolithic letter (majority of 5).
+- Time to answer is measured from the scheduled arrival to the first answer token. Deadlines are 5 s and 10 s.
+- Predicted engine time = computed tokens ÷ the session's Part A monolithic prefill rate (5,307–5,419 tok/s).
+
+**Policies.** Episodic calls are never delayed by any policy. The episodic arrival schedule is known to the orchestrator (devices declare their call times). Warm C4 traffic passes through.
+
+| policy | cold request form | admission and dispatch rule |
+|---|---|---|
+| P0 | monolithic | posted at arrival (= E10c / E10e) |
+| P1 | monolithic | EDF queue (deadline = arrival + 10 s), at most one cold request in the engine at a time |
+| P2 | monolithic | P1, and the head request is held while any episodic call is due within its predicted engine time (~2.05 s). It is released anyway once its slack is exhausted (now + predicted ≥ deadline). |
+| P3_1024 / P3_2048 | prefix-chained slices, n // 90 frames each (11–12 or 6 slices) | P1 queue. Each slice is sent after the previous slice finished. If an episodic call is due within the slice's predicted time (~0.19 / 0.38 s), the slice waits until 5 ms after that call's dispatch; otherwise it goes immediately. |
+| P4 | P3_2048 (n = 2,048: Part A's best by cost, chain / monolithic 0.990, overhead −0.004 s) | Each slice is held while any episodic call is due within its predicted time. Once the recall's slack is exhausted (now + predicted remaining chain time ≥ deadline), the remaining slices go back-to-back. |
+
+**Measured per cell:**
+- Episodic p50 / p90 / p99 TTFT from the scheduled arrival. Capacity is the highest ladder level (10 / 20 / 25 / 30 / 40 % of 15.1 req/s) with p99 ≤ 0.45 s and no errors, found bottom-up and stopping at the first failure.
+- Per cold recall: time to answer, meets 5 s / 10 s, letter vs reference, computed tokens (GPU work), slices, hold time and release reason.
+- The 1-s /metrics timeline.
+
+**Decision (pre-registered, unchanged):** slicing restores capacity if P3 or P4's C1 capacity is within one level of C0's and ≥ 90 % of their recalls meet the 10-s deadline. The rule is applied at C1a (primary) and at C1b. P2 is reported against the same rule. C0 is measured at 25 / 40 %; E10e found C0 capacity at the 40 % ladder top, so "within one level" means C1 capacity ≥ 30 %.
+
+## 6. Mechanism verification for Part B (recorded BEFORE the Part B sweep)
+
+**Step 1, the causal chain.** E10d–f established the chain:
+1. A cold history prefill is one long engine unit (~2.05 s for ~11k tokens on E0).
+2. Episodic calls arriving while it runs wait behind its steps.
+3. Episodic p99 then exceeds 0.45 s at every load level, so C1 capacity falls below 10 % against 40 % at C0.
+
+This bears on FORMULATION's reconstruction cost: the physical component of Context Inertia, the cost of rebuilding state on the serving tier, charged to a shared accelerator. Part A showed the unit can be cut into short prefix-chained pieces at ≤ 10 % extra cost. The claim under test is that if the orchestrator dispatches those short pieces only around the episodic calls, each episodic call waits at most one short slice step rather than the whole prefill, so p99 stays within budget at higher load. The recall still finishes, with an answer time set by the extra links and holds.
+
+**Step 2, link instantiation.** These are planned quantities; observed values are filled in after the smoke run.
+
+| causal link | implementing quantity | expected value / range | varies as expected? | evidence (to fill) |
+|---|---|---|---|---|
+| cold unit length | longest engine unit per recall | ~2.05 s (P0–P2) vs ~0.2 / ~0.4 s (P3 / P4) | must differ by policy | Part A per-link engine times; Part B slice rows |
+| orchestrator acts | hold time and release reason per recall or slice | 0 for P0; > 0 for P2 / P3 / P4 | must be non-zero for P2–P4 | slice rows `held_s`, `released_by` |
+| prefix reuse under load | cached tokens per slice vs previous prompt | gap ≤ 32 | constant small gap required | per-cell STOP check |
+| episodic waiting | episodic p99 | > 0.45 s for P0 at C1 (E10e: 2.65 s) | must fall for P3 / P4 if the claim holds | cell summaries |
+| recall cost | time to answer, computed tokens | ~2.5–4 s P0; longer for holds and chains | measured | cold rows |
+
+**Step 3, trace.** One P4 recall from the smoke run will be traced slice by slice: send time, hold, release reason, prompt / cached / computed tokens, TTFT, and the episodic calls dispatched around it.
+
+**Step 4, negative control.** P0 is the mechanism-off control within every condition: the same cold work arrives monolithic and unheld. In addition, C0 has no cold work at all. If P3 / P4 did not change episodic p99 relative to P0, the slicing mechanism would not be acting.
+
+**Step 5, alternative explanation.** An improvement under P3 / P4 could come from serializing cold work and delaying it (also done by P1 / P2) rather than from slicing. P1 and P2 isolate that: each has the same queue and P2 the same gap-holding, but with a monolithic unit. A capacity gain over P2 is attributable to slicing. A second alternative is that cold recalls are simply postponed beyond the window. That is detected by the drain-time unanswered count and by the time-to-answer distribution.
+
+### 6a. Part B smoke run (18:15 → 18:24; recorded before the sweep)
+
+**Setup:** C1 r = 0.1, 10 % load (1.51 req/s), 60-s window (first 10 s discarded), one fresh E0 server per policy. Files: `results/cost/study_slice1/slice1_live_smoke_*`.
+
+| policy | episodic p99 (s) | meets 0.45 s | recalls in window | met 10 s | met 5 s | letters = ref |
+|---|---|---|---|---|---|---|
+| P0 | 3.670 | no | 4 | 4 | 4 | 4 |
+| P2 | 2.291 | no | 4 | 3 | 1 | 4 |
+| P3_1024 | 0.396 | yes | 4 | 4 | 3 | 4 |
+| P4 | 0.201 | yes | 4 | 4 | 3 | 4 |
+
+Every link is instantiated and varies by policy as Step 2 requires:
+
+- **Cold unit length:** P0 / P2 send one ~11k-token request. In P3 / P4, each slice is one ~1–2k-token request taking 0.35–0.56 s of client latency.
+- **Orchestrator acts:**
+  - P0 holds are 0.
+  - P2 holds the request 0.6–7.9 s, and two recalls were released by `slack`.
+  - P4 holds 0–0.58 s, every release by `gap`.
+- **Prefix reuse under load:** first-request cached tokens were 0 in every recall. The largest gap between a link's cached tokens and the previous prompt was 20 tokens, below the 32-token STOP threshold.
+- **Episodic waiting:** p99 falls from 3.67 s (P0) to 0.40 / 0.20 s (P3 / P4).
+
+**Step 3 trace: P4 recall S1B24.**
+- Session 115609519270, 11,028 prompt tokens, scheduled at t = 13.818 s, reference letter A.
+- 6 slices, sent back-to-back because each one found a gap.
+
+| slice | sent at (s after arrival) | held (s) | predicted engine (s) | prompt tokens | cached tokens | computed | client latency (s) |
+|---|---|---|---|---|---|---|---|
+| 0 | 0.001 | 0 | 0.375 | 2,021 | 0 | 2,021 | 0.454 |
+| 1 | 0.455 | 0 | 0.369 | 4,001 | 2,016 | 1,985 | 0.460 |
+| 2 | 0.916 | 0 | 0.369 | 5,981 | 3,984 | 1,997 | 0.487 |
+| 3 | 1.403 | 0 | 0.369 | 7,961 | 5,968 | 1,993 | 0.522 |
+| 4 | 1.925 | 0 | 0.369 | 9,941 | 7,952 | 1,989 | 0.565 |
+| 5 (question) | 2.490 | 0 | 0.168 | 11,028 | 9,936 | 1,092 | 0.355 (answer A) |
+
+- **Outcome:** answered at 2.844 s, meeting both deadlines; computed tokens 11,077 (1.004× the prompt).
+- **Episodic calls during the recall:** scheduled at +1.88, +2.46 and +3.24 s, with TTFTs of 0.212, 0.137 and 0.134 s, all within budget.
+- **Binding constraint:** none. The orchestrator never had to hold a slice.
+
+**Implementation fix after the smoke run (before the sweep): slack guard.** P2 released its slack-exhausted recalls at deadline − predicted engine time. Client time to answer is longer than engine time (request transfer and image processing), so those recalls missed 10 s by ~0.8 s (10.82 / 10.92 s). The guard now predicts time to answer as predicted engine time × Part A's largest client-latency / engine-time ratio, plus 0.25 s for load. The ratios are 1.321 for monolithic (range 1.276–1.321) and 1.373 for the n = 2,048 chain (range 1.307–1.373). The window that checks for a blocking episodic call still uses predicted engine time. The smoke rows above predate the fix; the P2 / P4 hold rule is otherwise unchanged.
+
+## 7. Part B run (2026-11-12 18:25 → 21:15)
+
+- **Scale:** 28 cells on 28 fresh E0 servers, h100nvl GPU 2, 4 h 50 min (inside the 5-h guard).
+- **Status:** not VOID; every server's "non-default args" line showed no scheduler flags; 0 cold-recall errors and 0 unfinished.
+- **Cache checks:** every recall started cold (first-request cached tokens 0). The largest gap between a link's cached tokens and the previous prompt was 20 tokens; Part A saw 5–20.
+- **Files:** `results/cost/study_slice1/slice1_live_{requests,slices,metrics,cpu,monitor}_h100nvl.jsonl`, `slice1_live_run_meta_h100nvl.json`, `slice1_live_results.json` (from `study_slice1_live_analyse.py`).
+
+## 8. Part B results
+
+### 8.1 Episodic capacity
+
+Episodic N = 1, p99 TTFT ≤ 0.45 s from the scheduled arrival. Each cell shows episodic p99 in seconds; ✗ = over budget; – = not run because the ladder stops at the first failure.
+
+| condition | policy | 10 % | 20 % | 25 % | 30 % | 40 % | capacity |
+|---|---|---|---|---|---|---|---|
+| C0 (no cold) | P0 | – | – | 0.272 | – | 0.391 | **40 %** (ladder top; E10e: 40 %) |
+| C1 r 0.05 | P0 pass-through | 3.049 ✗ | | | | | < 10 % |
+| | P1 EDF | 2.809 ✗ | | | | | < 10 % |
+| | P2 blocking-aware | 2.501 ✗ | | | | | < 10 % |
+| | P3_1024 | 0.397 | 0.460 ✗ | | | | 10 % |
+| | P3_2048 | 0.555 ✗ | | | | | < 10 % |
+| | **P4** | 0.244 | 0.397 | 0.341 | 0.357 | 0.516 ✗ | **30 %** |
+| C1 r 0.1 | P0 | 4.328 ✗ | | | | | < 10 % |
+| | P1 | 2.847 ✗ | | | | | < 10 % |
+| | P2 | 2.772 ✗ | | | | | < 10 % |
+| | P3_1024 | 0.424 | 0.473 ✗ | | | | 10 % |
+| | P3_2048 | 0.583 ✗ | | | | | < 10 % |
+| | **P4** | 0.263 | 0.355 | 0.619 ✗ | | | **20 %** |
+| C4 (k 8 warm + r 0.1) | P0 | 4.458 ✗ | | | | | < 10 % |
+| | P1 | 3.179 ✗ | | | | | < 10 % |
+| | P2 | 3.021 ✗ | | | | | < 10 % |
+| | P3_1024 | 0.488 ✗ | | | | | < 10 % |
+| | P3_2048 | 0.645 ✗ | | | | | < 10 % |
+| | P4 | 0.531 ✗ | | | | | < 10 % |
+
+Episodic p50 is 0.145–0.17 s in every cell. Every policy leaves the median alone; only the tail differs.
+
+### 8.2 Cold recalls
+
+Time to answer is measured from the scheduled arrival, over all scored-window recalls of each ladder, failing cell included.
+
+| condition | policy | recalls | answer time p50 / p90 (s) | meet 10 s | meet 5 s | 10 s within capacity cells | letters = Part A |
+|---|---|---|---|---|---|---|---|
+| C1 r 0.05 | P0 | 11 | 2.97 / 3.77 | 100 % | 100 % | – | 10 / 11 |
+| | P1 | 11 | 2.92 / 4.59 | 100 % | 100 % | – | 10 / 11 |
+| | P2 | 11 | 9.83 / 9.96 | 90.9 % | 36.4 % | – | 11 / 11 |
+| | P3_1024 | 21 | 4.09 / 4.62 | 100 % | 90.5 % | 11 / 11 | 20 / 21 |
+| | P3_2048 | 11 | 3.40 / 5.45 | 100 % | 81.8 % | – | 11 / 11 |
+| | **P4** | 54 | 6.14 / 9.46 | **94.4 %** | 37.0 % | **41 / 41** | 54 / 54 |
+| C1 r 0.1 | P0 | 26 | 2.89 / 3.93 | 100 % | 96.2 % | – | 26 / 26 |
+| | P1 | 26 | 2.90 / 4.66 | 100 % | 88.5 % | – | 26 / 26 |
+| | P2 | 26 | 9.95 / 10.84 | 73.1 % | 11.5 % | – | 26 / 26 |
+| | P3_1024 | 48 | 4.27 / 7.14 | 100 % | 72.9 % | 26 / 26 | 48 / 48 |
+| | P3_2048 | 26 | 3.58 / 5.75 | 100 % | 76.9 % | – | 26 / 26 |
+| | **P4** | 76 | 5.72 / 10.39 | **84.2 %** | 42.1 % | 48 / 48 | 76 / 76 |
+| C4 | P0 | 26 | 3.02 / 4.11 | 100 % | 92.3 % | – | 26 / 26 |
+| | P1 | 26 | 3.03 / 4.93 | 100 % | 88.5 % | – | 26 / 26 |
+| | P2 | 26 | 10.02 / 11.21 | 46.2 % | 11.5 % | – | 26 / 26 |
+| | P3_1024 | 26 | 4.53 / 7.69 | 100 % | 61.5 % | – | 25 / 26 |
+| | P3_2048 | 26 | 3.84 / 7.05 | 100 % | 73.1 % | – | 26 / 26 |
+| | P4 | 26 | 4.42 / 7.73 | 100 % | 65.4 % | – | 26 / 26 |
+
+**Answers.** 4 of 503 letters differ from the reference, all from session 762144796185, whose Part A monolithic answers were themselves A C C C C. Every other recall matches.
+
+**GPU work.** Computed tokens per recall over prompt tokens, median: 1.000 for monolithic, 1.0048 for n = 2,048 chains and 1.0112 for n = 1,024, the same as Part A's 1.005 / 1.012. Slicing adds ≈ 0.5–1 % prefill work.
+
+### 8.3 Why each policy behaves as it does
+
+- **P0 / P1.** The ~11k monolithic prefill (one ~2-s engine unit) blocks every episodic call that arrives during it, exactly as in E10c–f. EDF admission (P1) only serializes cold requests, and at r ≤ 0.1 they rarely overlap. It changes nothing.
+- **P2, blocking-aware but monolithic.** It holds the request (median 0.9–3.2 s) for a ~2.05-s gap in the episodic schedule. Even at 1.5 req/s such gaps are rare, so most recalls are released by `slack` (6 of 11, 18 of 26 and 19 of 26 at C1a, C1b and C4). The ~2-s unit then runs anyway. Episodic p99 only falls from 3.0–4.5 to 2.5–3.0 s, and recalls lose their deadline margin: 46–91 % meet 10 s. Blocking-aware admission without slicing cannot restore capacity: it can only move the long unit, not shorten it.
+- **P3_1024 vs P3_2048, sliced and aligned but not held.** An episodic call that lands behind a slice waits up to one slice's engine time: ~0.2 s at 1,024, or ~0.4–0.55 s at 2,048. At 2,048 that alone exceeds the budget's headroom over the ~0.15-s episodic service time, so P3_2048 fails at 10 %. P3_1024 passes 10 % but not 20 %, where more arrivals land behind slices.
+- **P4, n 2,048 slices plus the gap-hold guard.** Each slice waits until no episodic call is due within its predicted ~0.37 s.
+  - Up to the capacity level, every release in every cell was by `gap` (66 / 60 / 60 / 60 at C1a 10–30 %; 156 / 132 at C1b 10–20 %). The orchestrator never had to force a slice, and episodic p99 stayed at 0.24–0.40 s.
+  - Holding costs answer time: median 3.4 s at 10 % rising to 8.2 s at 30 % (C1a).
+  - The failing levels coincide with the guard firing. At C1a 40 %, 14 slices were released by `slack`, and 19 of the 28 over-budget episodic calls overlapped a cold slice. At C1b 25 %, 62 slices were released by `slack`, all 54 over-budget calls overlapped a slice, and 12 of 28 recalls missed 10 s.
+  - Capacity is reached where the gaps needed to fit a recall's slices before its deadline no longer exist.
+- **C4.** Every policy is below 10 %, P4 included (0.531 s). Of the 8 over-budget episodic calls in the P4 cell, 7 overlapped both a cold slice and an in-flight warm request (computed tokens > 200). The other one overlapped a cold slice only. For P3_1024 the count is 10 of 10 overlapping both. The 8 warm sessions' appends and escalations pass through the orchestrator unmanaged by design. They are themselves multi-frame prefills, so they add the long units that slicing removes from the cold path. Combined with the sliced cold path, they push the tail just over budget (P4 0.531 vs P0 4.458 s).
+
+## 9. Part B decision (pre-registered rule)
+
+The rule: a policy restores capacity if its C1 capacity is within one ladder level of C0's (40 %, so ≥ 30 %) AND ≥ 90 % of its recalls meet 10 s.
+
+| C1 | P2 | P3_1024 | P3_2048 | P4 | slicing restores capacity? |
+|---|---|---|---|---|---|
+| r 0.05 (C1a, primary) | < 10 %, 90.9 % → no | 10 %, 100 % → no | < 10 %, 100 % → no | **30 %, 94.4 % → YES** | **YES (P4)** |
+| r 0.1 (C1b) | < 10 %, 73.1 % → no | 10 %, 100 % → no | < 10 %, 100 % → no | 20 %, 84.2 % → no | **NO** |
+
+P4's 10-s fraction counts every recall of the ladder, including the failing top cell. Within its passing cells it is 41 / 41 at C1a and 48 / 48 at C1b.
+
+**Verdict.**
+- At the primary cold rate (r = 0.05 / s), slicing the cold D2 history and dispatching the slices in the gaps between episodic calls (P4) raises episodic capacity from < 10 % to 30 % of peak. That is within one level of the no-cold capacity of 40 %, while 94 % of recalls are answered within 10 s with the monolithic answer. **Slicing restores capacity under the pre-registered rule.**
+- At double the cold rate (r = 0.1 / s), P4 reaches 20 %, two levels below C0. Restoration is partial and does not meet the rule.
+- With 8 warm sessions passing through unmanaged (C4), no policy reaches 10 %.
+- Both ingredients are needed:
+  - Slicing without holding (P3) gives 10 % at best.
+  - Holding without slicing (P2) gives < 10 % and does not meet the rule.
+  - Only short units combined with gap-aware dispatch do.
+- The price is recall latency: median time to answer rises from ~2.9 s (P0) to 3.4–8.2 s across P4's passing cells, and only 37–42 % of recalls meet 5 s.
+
+**Mechanism classification.** All Step 2 links were present and varied as expected, and P0 acted as the negative control (§6a and §8.3):
+- the longest cold unit falls from ~2 s to ≤ 0.55 s;
+- holds and their release reasons are non-zero only for P2 / P4;
+- prefix reuse holds under load;
+- episodic p99 tracks the policy.
+
+The C1a result is a positive finding. The C1b and C4 shortfalls are **real negatives at those loads**, not design failures: the mechanism operated (P4 released by `gap` until capacity), and it ran out of gaps (C1b) or met an unmanaged second source of long units (C4).
+
+## 10. Part B consistency protocol (6 checks)
+
+1. **Cross-check against committed measurements.** PASS.
+
+   | quantity | this run | prior | source | ratio | agree |
+   |---|---|---|---|---|---|
+   | C0 N1 25 % episodic p99 | 0.272 s | 0.271 s | E10e P0 | 1.01 | yes |
+   | C0 N1 40 % episodic p99 | 0.391 s | 0.383 s | E10e P0 | 1.02 | yes |
+   | C1 r 0.05, 10 %, P0 episodic p99 | 3.049 s | 2.646 s | E10e P0 (K1 video 12.6k cold) | 1.15 | yes (different cold body) |
+   | C4 10 %, P0 episodic p99 | 4.458 s | 4.710 s | E10e P0 | 0.95 | yes |
+   | P0 cold time to answer under C1 load, p50 | 2.97 s | 2.69 s idle | Part A monolithic TTFT (11k) | 1.10 | yes (load adds queueing) |
+   | chain computed / prompt | 1.0048 / 1.0112 | 1.005 / 1.012 | Part A | 1.00 | yes |
+   | link prefix gap | ≤ 20 tokens | 5–20 | Part A | – | yes |
+
+2. **Physical plausibility.** PASS.
+   - The P0 cold recall implies ≈ 11.1k tokens / 2.97 s ≈ 3.8k tok/s client-side. The engine-side rate is 5.3–5.4k tok/s (Part A), and RH4 / E10d measured 5.4–5.8k.
+   - No recall or slice is faster than the committed curve.
+   - P4's longer answer times are holds, recorded per slice (`held_s`), not faster or slower compute.
+3. **Distribution sanity.** PASS.
+   - Answer time is given as p50 / p90 with per-cell medians and maxima (§8.3).
+   - Episodic p99 differs in every cell (0.244–4.458 s).
+   - Hold times and release counts vary by load.
+   - No constants appear where distributions are expected.
+4. **Definition audit.** PASS, with one flagged difference.
+   - Capacity, the ladder, the 0.45-s budget, C0 / C1 / C4, seeds, the 30-s discard, the 240-s window and the drain cap are identical to E10c / E10e.
+   - **Flagged:** the cold recall is the ~11k D2 history (RH7 image-by-reference PNG frames, 10,923–11,517 tokens), not E10b–f's K1 RICH video (12.6k). This was a user decision, made because D2 is append-only and therefore sliceable. P0 reproduces E10e's C1 / C4 failures with it (rows 3–4 above).
+   - "Time to answer" runs from the scheduled arrival to the first answer token. For chains, that is the final link's first token.
+5. **Claim linkage.**
+   - FORMULATION's physical component of Context Inertia (reconstruction cost grows with history) and the timing dimension of the joint placement × timing policy.
+   - Part B **supports** the claim that reconstruction timing is a lever. The same reconstruction work (+0.5 % tokens), cut into short units and timed into episodic gaps, recovers most of the shared replica's episodic capacity at r = 0.05.
+   - It **weakens** any claim that this holds at higher cold rates or with unmanaged warm traffic (C1b, C4).
+   - It does not speak to representation choice: every recall was full history.
+6. **Proxy validity.**
+   - **Known schedule:** the orchestrator knows the episodic arrival schedule. This stands in for devices declaring their call cadence. It is valid for periodic sensing, but optimistic for bursty or unannounced calls, and that is a limitation of the P2 / P4 result.
+   - **Letters:** letter equality stands in for "same answer" (see Part A).
+   - **Prediction:** predicted engine time comes from Part A's idle prefill rate per session. Under load slices run slower, which the slack guard absorbs with a margin. The hold rule's window does not, so P4's capacity is a lower bound for a load-aware predictor.
+
+**Result: PASS 6 / 6** (check 4 records the flagged cold-body difference; check 6 records the known-schedule limitation).
