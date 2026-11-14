@@ -1,0 +1,597 @@
+{
+ "label": "StudyLIVE1-port: the H100 run plan. NOT RUN.",
+ "cost_model": {
+  "minutes_per_cell": 7.45,
+  "cells_per_arm_condition": 2.44,
+  "source": "StudySLICE1 Part C: 22 cells in 2 h 44 min over 9 (policy, condition) pairs, each cell 30 s discard + 270 s window + a drain of up to 300 s plus a server start"
+ },
+ "conditions": {
+  "C1a": "KV-GPU, k = 0 warm sessions, cold recall r = 0.05",
+  "C4a": "KV-HOST, k = 8 warm sessions, cold recall r = 0.05",
+  "C1b": "KV-GPU, k = 0, cold recall r = 0.1",
+  "C2": "KV-HOST, k = 8, no cold recall (warm only)"
+ },
+ "stream_ladder": [
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "ladder_note": "StudySLICE1 Part D-b's cadence model: the ladder is the number of episodic streams, 1 to 5, and the capacity walk stops at the first level whose episodic p99 misses the budget",
+ "fairness": "every arm gets the same per-cell arrival trace (sha256 asserted), the same E0 server configuration unless the arm IS a configuration, the same budget, and the same cold sessions and warm plan",
+ "totals": {
+  "by_tier": {
+   "tier0": {
+    "n_arms": 4,
+    "gpu_hours": 4.8
+   },
+   "tier1": {
+    "n_arms": 7,
+    "gpu_hours": 8.5
+   },
+   "tier2": {
+    "n_arms": 22,
+    "gpu_hours": 26.6
+   }
+  },
+  "n_arms": 33,
+  "total_cells": 323.4,
+  "total_gpu_hours": 39.9,
+  "tier0_plus_tier1_gpu_hours": 13.3
+ },
+ "excluded": [
+  {
+   "arm": "hindsight-oracle",
+   "level": "ORCHESTRATOR-LEVEL (EXCLUDED)",
+   "reason": "it is enactable, but it reads the future (`reads_future = True`), so it is an upper bound and is excluded from every deployable live comparison, exactly as in the simulator."
+  },
+  {
+   "arm": "tuned-engine",
+   "level": "SERVER CONFIGURATION",
+   "reason": "it IS an engine configuration (StudyE10e's P1 flags). Live, it is not a policy at all: it is the server the cell is started with, and it may be run only as a config arm with every other arm held at E0."
+  },
+  {
+   "arm": "attentionstore",
+   "level": "ENGINE-LEVEL",
+   "reason": "AttentionStore IS a host-side KV cache hierarchy with its own lookup, placement and prefetch inside the engine. An orchestrator can move a SESSION between tiers but cannot implement a cache layer under vLLM's attention, so what would run live is not AttentionStore."
+  },
+  {
+   "arm": "lmcache",
+   "level": "SERVER CONFIGURATION",
+   "reason": "LMCache is a CPU / disk KV cache layer under the engine. vLLM 0.31.0's native OffloadingConnector (`--kv-offloading-backend native --kv-offloading-size 256`, the KV-HOST configuration this suite already measures) is the same kind of thing, so live it is represented by that SERVER CONFIGURATION and never by a policy. Any claim is about vLLM's native offload, not about LMCache."
+  },
+  {
+   "arm": "pensieve",
+   "level": "ENGINE-LEVEL",
+   "reason": "its mechanism is MULTI-TIER PARTIAL RESIDENCY inside the KV manager - part of a session's cache resident, part not. The API exposes no partial residency, so only whole-session placement could be enacted, which is the mechanism removed rather than adapted."
+  },
+  {
+   "arm": "flashback",
+   "level": "NOT BUILT",
+   "reason": "decided, not built"
+  },
+  {
+   "arm": "covstream-PRE-ADDENDUM-SUPERSEDED",
+   "level": "NOT BUILT",
+   "reason": "superseded by the addendum entry"
+  },
+  {
+   "arm": "tmo",
+   "level": "NOT BUILT",
+   "reason": "decided, not built"
+  },
+  {
+   "arm": "route2look",
+   "level": "NOT BUILT",
+   "reason": "dropped (unverified)"
+  },
+  {
+   "arm": "fairway",
+   "level": "NOT BUILT",
+   "reason": "dropped (unverified)"
+  },
+  {
+   "arm": "querystream",
+   "level": "NOT BUILT",
+   "reason": "verified, not built (mechanism not fully specified)"
+  }
+ ],
+ "arms": [
+  {
+   "order": 1,
+   "tier": 0,
+   "arm": "always-cloud-fcfs",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the live reference; every other arm is read against it",
+   "cumulative_gpu_hours": 1.21
+  },
+  {
+   "order": 2,
+   "tier": 0,
+   "arm": "device-only",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the floor; it sends nothing, so it bounds what routing can win",
+   "cumulative_gpu_hours": 2.42
+  },
+  {
+   "order": 3,
+   "tier": 0,
+   "arm": "B10-blocking-aware-admission",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "it IS StudySLICE1's P2, already measured in Part B, so it is the port's own validation cell: the live port must reproduce Part B's P2 numbers",
+   "cumulative_gpu_hours": 3.63
+  },
+  {
+   "order": 4,
+   "tier": 0,
+   "arm": "B11-naive-slicing",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "it IS StudySLICE1's P3_2048, same validation argument, and live it can align each link, which the simulator could not express",
+   "cumulative_gpu_hours": 4.84
+  },
+  {
+   "order": 5,
+   "tier": 1,
+   "arm": "B9-best-of-breed",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the primary competitor, and live it runs FULL with the real host tier rather than the no-host variant the simulator was restricted to",
+   "cumulative_gpu_hours": 6.05
+  },
+  {
+   "order": 6,
+   "tier": 1,
+   "arm": "eco-llm",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the strongest joint routing arm in the simulator (challenge mAP 0.5263 on the audit cell)",
+   "cumulative_gpu_hours": 7.26
+  },
+  {
+   "order": 7,
+   "tier": 1,
+   "arm": "inar-vl",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the other strongest routing arm, same level",
+   "cumulative_gpu_hours": 8.47
+  },
+  {
+   "order": 8,
+   "tier": 1,
+   "arm": "B6-latency-aware-routing",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the constructed routing arm at the same level, and it reads the MEASURED latency estimate, which only exists live",
+   "cumulative_gpu_hours": 9.68
+  },
+  {
+   "order": 9,
+   "tier": 1,
+   "arm": "videostorm",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "both objectives; after amendment 2 it routes to the cloud, so the live cell is the first that tests its allocation rather than its adapter",
+   "cumulative_gpu_hours": 10.89
+  },
+  {
+   "order": 10,
+   "tier": 1,
+   "arm": "B8-utility-per-gpu-second",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the admission arm the task names",
+   "cumulative_gpu_hours": 12.1
+  },
+  {
+   "order": 11,
+   "tier": 1,
+   "arm": "B7-edf-feasibility",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the deadline arm the task names; its self-fulfilling DEFER dynamic needs a live service time to be judged",
+   "cumulative_gpu_hours": 13.31
+  },
+  {
+   "order": 12,
+   "tier": 2,
+   "arm": "random-admission",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 14.52
+  },
+  {
+   "order": 13,
+   "tier": 2,
+   "arm": "round-robin",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 15.73
+  },
+  {
+   "order": 14,
+   "tier": 2,
+   "arm": "static-partition",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 16.94
+  },
+  {
+   "order": 15,
+   "tier": 2,
+   "arm": "edf-service-time",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 18.15
+  },
+  {
+   "order": 16,
+   "tier": 2,
+   "arm": "ekya",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 19.36
+  },
+  {
+   "order": 17,
+   "tier": 2,
+   "arm": "clockwork",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 20.57
+  },
+  {
+   "order": 18,
+   "tier": 2,
+   "arm": "confidence-cascade",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 21.78
+  },
+  {
+   "order": 19,
+   "tier": 2,
+   "arm": "hybrid-llm",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 22.99
+  },
+  {
+   "order": 20,
+   "tier": 2,
+   "arm": "routellm",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 24.2
+  },
+  {
+   "order": 21,
+   "tier": 2,
+   "arm": "perllm",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 25.41
+  },
+  {
+   "order": 22,
+   "tier": 2,
+   "arm": "rh8-demand-aware",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 26.62
+  },
+  {
+   "order": 23,
+   "tier": 2,
+   "arm": "r3-streaming",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 27.83
+  },
+  {
+   "order": 24,
+   "tier": 2,
+   "arm": "streamscout",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 29.04
+  },
+  {
+   "order": 25,
+   "tier": 2,
+   "arm": "preble",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 30.25
+  },
+  {
+   "order": 26,
+   "tier": 2,
+   "arm": "mooncake",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 31.46
+  },
+  {
+   "order": 27,
+   "tier": 2,
+   "arm": "kvflow",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 32.67
+  },
+  {
+   "order": 28,
+   "tier": 2,
+   "arm": "uniscale",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 33.88
+  },
+  {
+   "order": 29,
+   "tier": 2,
+   "arm": "thinking-qwenvl-atdm",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 35.09
+  },
+  {
+   "order": 30,
+   "tier": 2,
+   "arm": "simplestream",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 36.3
+  },
+  {
+   "order": 31,
+   "tier": 2,
+   "arm": "covstream",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 37.51
+  },
+  {
+   "order": 32,
+   "tier": 2,
+   "arm": "B3-best-static",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 38.72
+  },
+  {
+   "order": 33,
+   "tier": 2,
+   "arm": "B4-query-type-routing",
+   "conditions": [
+    "C1a",
+    "C4a",
+    "C1b",
+    "C2"
+   ],
+   "expected_cells": 9.8,
+   "gpu_hours": 1.21,
+   "why": "the remaining ported arms, in registry order",
+   "cumulative_gpu_hours": 39.93
+  }
+ ]
+}

@@ -28,7 +28,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "reconstructed"))
 
 import devsplit as DS
 from hybrid_llm import HybridRouter  # noqa: E402
-from interface import Action, Observation, Policy, RecallAction, StreamAction
+from interface import (Action, DEFAULTS, Observation, Policy, RecallAction,
+                       StreamAction)
 
 
 def _features(stream) -> List[float]:
@@ -49,8 +50,9 @@ class HybridLLMAdapted(Policy):
     case = "D"
     experiments = ('A-episodic', 'C-mixed')
     paper = "Ding et al., Hybrid LLM: Cost-Efficient and Quality-Aware Query Routing, ICLR 2024"
-    decides = ("episodic_mode", "recall_decision")
-    defaults_used = ("cadence_s", "frame_count", "representation", "session_action", "order")
+    decides = ("episodic_mode",)
+    defaults_used = ("recall_decision", "cadence_s", "frame_count", "representation",
+                     "session_action", "order")
 
     def __init__(self, variant: str = "trans", threshold: float = 0.5,
                  cadence_s: float = 0.5, frame_count: int = 1) -> None:
@@ -73,11 +75,13 @@ class HybridLLMAdapted(Policy):
             acts.append(StreamAction(s.stream_id, "local" if keep_local else "cloud",
                                      None if keep_local else self.cadence_s,
                                      None if keep_local else self.frame_count))
-        # Hybrid LLM routes a single request, not a stateful session; recall queries use the same
-        # router on the device answer's confidence where one exists, else the documented default.
-        rec = []
-        for q in obs.recall:
-            c = q.device_answer_confidence
-            rec.append(RecallAction(q.query_id, "DEVICE" if (c is not None and c >= 0.5)
-                                    else "CLOUD"))
+        # Hybrid LLM routes a single request, not a stateful session. **amendment 2 item 3b
+        # (2026-11-13): the paper's router reads the QUERY (Section 3: it emits
+        # p_w(x) ~ Pr[H(x) >= 0] from the query's features x) and routes BEFORE either model
+        # answers, so it may not read `device_answer_confidence`.** We hold no committed
+        # query-side router features for a recall query - the router is fitted on StudyD3
+        # device-score TRAJECTORY features, which a recall query does not have - so the recall
+        # path takes the documented default and the routing claim is made for episodic streams
+        # only. `reads_device_answer` stays False.
+        rec = [RecallAction(q.query_id, DEFAULTS["recall_decision"]) for q in obs.recall]
         return Action(streams=acts, recall=rec)

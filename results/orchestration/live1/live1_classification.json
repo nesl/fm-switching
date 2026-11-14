@@ -1,0 +1,278 @@
+{
+ "rule": {
+  "orchestrator": "decides routing, admission, deferral, rate or cadence, recall placement or session retention, all enactable through the vLLM OpenAI API and the existing host tier",
+  "engine": "the mechanism lives inside the serving engine: scheduler internals, KV layout, or its own cache layer"
+ },
+ "n_arms": 44,
+ "n_orchestrator": 34,
+ "n_engine": 2,
+ "n_server_config": 2,
+ "n_not_built": 6,
+ "n_runs_live": 33,
+ "arms": [
+  {
+   "arm": "device-only",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "it decides routing only: every episodic call and every recall stays on the device, so the orchestrator simply sends nothing to the server. It is the floor of the live comparison.",
+   "runs_live": true
+  },
+  {
+   "arm": "always-cloud-fcfs",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "every call goes to the server in arrival order, which is what the orchestrator does by default. It is the live reference.",
+   "runs_live": true
+  },
+  {
+   "arm": "random-admission",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "admission only, 20 seeds; the orchestrator draws and sends or does not send.",
+   "runs_live": true
+  },
+  {
+   "arm": "round-robin",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "an equal cloud share per stream is a sending decision.",
+   "runs_live": true
+  },
+  {
+   "arm": "static-partition",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "a fixed cloud share per query class is a sending decision.",
+   "runs_live": true
+  },
+  {
+   "arm": "edf-service-time",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "admission by a service-time estimate with EDF order: the orchestrator holds its own queue and submits in its own order.",
+   "runs_live": true
+  },
+  {
+   "arm": "hindsight-oracle",
+   "level": "ORCHESTRATOR-LEVEL (EXCLUDED)",
+   "reason": "it is enactable, but it reads the future (`reads_future = True`), so it is an upper bound and is excluded from every deployable live comparison, exactly as in the simulator.",
+   "runs_live": false
+  },
+  {
+   "arm": "videostorm",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "rate allocation across streams: cadence and frame count per stream are what the orchestrator puts in the request and how often it sends it.",
+   "runs_live": true
+  },
+  {
+   "arm": "ekya",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "resource allocation across streams plus session demotion; both are sending and retention decisions.",
+   "runs_live": true
+  },
+  {
+   "arm": "tuned-engine",
+   "level": "SERVER CONFIGURATION",
+   "reason": "it IS an engine configuration (StudyE10e's P1 flags). Live, it is not a policy at all: it is the server the cell is started with, and it may be run only as a config arm with every other arm held at E0.",
+   "runs_live": false
+  },
+  {
+   "arm": "clockwork",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "admission from a predicted load time. The prediction reads the live TTFT history the harness already records; the decision is whether to send.",
+   "runs_live": true
+  },
+  {
+   "arm": "confidence-cascade",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "device first, escalate on low confidence: the orchestrator runs the device answer and decides whether to send a cloud request.",
+   "runs_live": true
+  },
+  {
+   "arm": "inar-vl",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "joint routing, cadence and frame count per stream.",
+   "runs_live": true
+  },
+  {
+   "arm": "hybrid-llm",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "a query router: it decides device or cloud per episodic stream.",
+   "runs_live": true
+  },
+  {
+   "arm": "routellm",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "a query router, as above.",
+   "runs_live": true
+  },
+  {
+   "arm": "perllm",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "joint routing and rate selection under an SLO.",
+   "runs_live": true
+  },
+  {
+   "arm": "attentionstore",
+   "level": "ENGINE-LEVEL",
+   "reason": "AttentionStore IS a host-side KV cache hierarchy with its own lookup, placement and prefetch inside the engine. An orchestrator can move a SESSION between tiers but cannot implement a cache layer under vLLM's attention, so what would run live is not AttentionStore.",
+   "runs_live": false
+  },
+  {
+   "arm": "lmcache",
+   "level": "SERVER CONFIGURATION",
+   "reason": "LMCache is a CPU / disk KV cache layer under the engine. vLLM 0.31.0's native OffloadingConnector (`--kv-offloading-backend native --kv-offloading-size 256`, the KV-HOST configuration this suite already measures) is the same kind of thing, so live it is represented by that SERVER CONFIGURATION and never by a policy. Any claim is about vLLM's native offload, not about LMCache.",
+   "runs_live": false
+  },
+  {
+   "arm": "pensieve",
+   "level": "ENGINE-LEVEL",
+   "reason": "its mechanism is MULTI-TIER PARTIAL RESIDENCY inside the KV manager - part of a session's cache resident, part not. The API exposes no partial residency, so only whole-session placement could be enacted, which is the mechanism removed rather than adapted.",
+   "runs_live": false
+  },
+  {
+   "arm": "rh8-demand-aware",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "which sessions are kept warm, from demand. Keeping a session warm is an orchestrator action (hold it on the GPU, push it to the host tier, or drop it).",
+   "runs_live": true
+  },
+  {
+   "arm": "r3-streaming",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "remember / respond / reason: representation choice, deferral and escalation are all sending decisions.",
+   "runs_live": true
+  },
+  {
+   "arm": "flashback",
+   "level": "NOT BUILT",
+   "reason": "decided, not built",
+   "runs_live": false
+  },
+  {
+   "arm": "covstream-PRE-ADDENDUM-SUPERSEDED",
+   "level": "NOT BUILT",
+   "reason": "superseded by the addendum entry",
+   "runs_live": false
+  },
+  {
+   "arm": "tmo",
+   "level": "NOT BUILT",
+   "reason": "decided, not built",
+   "runs_live": false
+  },
+  {
+   "arm": "eco-llm",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "joint tier, representation, cadence and frame-count selection under SLOs.",
+   "runs_live": true
+  },
+  {
+   "arm": "streamscout",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "a recall-side cascade over increasingly deep views: each stage is a different request the orchestrator may or may not send.",
+   "runs_live": true
+  },
+  {
+   "arm": "preble",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "cache-affinity-aware admission and ORDER. The orchestrator holds the queue and chooses what to submit next; LIMITATION, declared: once submitted, vLLM's own scheduler controls execution order, so the arm controls submission order and not engine order.",
+   "runs_live": true
+  },
+  {
+   "arm": "mooncake",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "same as preble: prefix-affinity ordering of its own submissions. The paper's disaggregated prefill / decode architecture is NOT reproduced and no claim is made about it.",
+   "runs_live": true
+  },
+  {
+   "arm": "kvflow",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "reuse-aware eviction and prefetch of SESSIONS: push to the host tier, hold on the GPU, or rebuild. All three are orchestrator actions here.",
+   "runs_live": true
+  },
+  {
+   "arm": "uniscale",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "it scales the per-stream configuration, which is a sending decision.",
+   "runs_live": true
+  },
+  {
+   "arm": "thinking-qwenvl-atdm",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "response timing: when to answer and when to defer.",
+   "runs_live": true
+  },
+  {
+   "arm": "simplestream",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "a fixed recent window fed to the model: the window is what the orchestrator puts in the request.",
+   "runs_live": true
+  },
+  {
+   "arm": "covstream",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "an edge / cloud split of where the session state lives, plus a heavy model on query only. Both are orchestrator decisions.",
+   "runs_live": true
+  },
+  {
+   "arm": "route2look",
+   "level": "NOT BUILT",
+   "reason": "dropped (unverified)",
+   "runs_live": false
+  },
+  {
+   "arm": "fairway",
+   "level": "NOT BUILT",
+   "reason": "dropped (unverified)",
+   "runs_live": false
+  },
+  {
+   "arm": "querystream",
+   "level": "NOT BUILT",
+   "reason": "verified, not built (mechanism not fully specified)",
+   "runs_live": false
+  },
+  {
+   "arm": "B3-best-static",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "a static configuration choice.",
+   "runs_live": true
+  },
+  {
+   "arm": "B4-query-type-routing",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "routing by query type.",
+   "runs_live": true
+  },
+  {
+   "arm": "B6-latency-aware-routing",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "routing from the measured latency estimate, which is live state the harness records.",
+   "runs_live": true
+  },
+  {
+   "arm": "B7-edf-feasibility",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "EDF feasibility admission.",
+   "runs_live": true
+  },
+  {
+   "arm": "B8-utility-per-gpu-second",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "utility-per-GPU-second admission.",
+   "runs_live": true
+  },
+  {
+   "arm": "B9-best-of-breed",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "all four components are orchestrator-level, and live it runs FULL - with the real host tier - rather than as the no-host variant the simulator had to use.",
+   "runs_live": true
+  },
+  {
+   "arm": "B10-blocking-aware-admission",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "it is StudySLICE1's P2, which the live harness already runs: hold the cold build while an episodic call is due, release on a gap or on slack.",
+   "runs_live": true
+  },
+  {
+   "arm": "B11-naive-slicing",
+   "level": "ORCHESTRATOR-LEVEL",
+   "reason": "it is StudySLICE1's P3_2048, which the live harness already runs: the orchestrator chunks the build into prefix-chained requests. Live it CAN align each link, which the simulator's 1-s decision epoch could not.",
+   "runs_live": true
+  }
+ ]
+}

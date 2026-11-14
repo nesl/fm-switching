@@ -14,6 +14,15 @@ At each stage the policy answers if the sufficiency signal clears that stage's t
 otherwise it escalates. The thresholds are distilled on the DEVELOPMENT split, never on
 evaluation data.
 
+StudyB-baselines amendment 2 (2026-11-13), item 3: the stage signal is now the COMMITTED
+per-question device-answer probability (`device_confidence.py`, StudyE7 Job A's `letter_probs`
+for the 4B-D2 configuration the harness answers a DEVICE recall with), supplied by the harness.
+Nothing is synthesized: where no committed probability exists the field is None and the old
+evidence-count surrogate is used, which is the same rule as before. The arm's cascade is
+unchanged. DECLARED LIMITATION: reading this confidence assumes the device answered before the
+decision epoch, and the harness does not charge that device answer's latency to an arm that then
+escalates.
+
 CPU only.
 """
 from __future__ import annotations
@@ -28,7 +37,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "reconstructed"))
 
 import costs as C
 import devsplit as DS
-from interface import (Action, Observation, Policy, RecallAction, StreamAction)
+from interface import (Action, DEFAULTS, Observation, Policy, RecallAction, StreamAction)
 from streamscout import STAGES, cascade, fit_thresholds  # noqa: E402
 
 STAGE_REP = ("RECENT", "D2", "RICH")
@@ -40,6 +49,10 @@ class StreamScoutAdapted(Policy):
     experiments = ("B-recall",)
     paper = "StreamScout: Learning When to Look Deeper for Streaming Video Understanding, arXiv:2609.00291"
     decides = ("recall_decision", "representation", "episodic_mode")
+    # amendment 2 item 3b (2026-11-13): this baseline's PUBLISHED mechanism observes the
+    # device-side model's own answer before deciding, so it receives
+    # `device_answer_confidence` and the harness charges that device answer.
+    reads_device_answer = True
     defaults_used = ("cadence_s", "frame_count", "session_action", "order")
 
     def __init__(self, thresholds: Optional[Sequence[float]] = None) -> None:
@@ -84,5 +97,7 @@ class StreamScoutAdapted(Policy):
             else:
                 rec.append(RecallAction(q.query_id, "CLOUD", representation=rep))
         # StreamScout is a recall-side cascade; episodic streams take the documented default.
-        return Action(streams=[StreamAction(s.stream_id, "local") for s in obs.streams],
-                      recall=rec)
+        # amendment 2 item 2 (2026-11-13): that default is DEFAULTS["episodic_mode"], not the
+        # literal "local" this module used to emit.
+        return Action(streams=[StreamAction(s.stream_id, DEFAULTS["episodic_mode"])
+                               for s in obs.streams], recall=rec)

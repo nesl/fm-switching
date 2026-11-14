@@ -13,8 +13,13 @@ Translation (and nothing else is changed):
                         and cadence (or StudyE9c's challenge mAP); demand D_k(c) = cloud
                         GPU-seconds per wall second; lag = StudyE9b's sample-and-hold shift
   capacity R         <- the budget's remaining cloud GPU-seconds per wall second
-  lag L_{k,t}        <- the configuration's hold shift (a property of the tier, not a backlog)
-  allocation a_k     <- read back as: a_k > 0 and the chosen configuration is a cloud one
+  lag L_{k,t}        <- the configuration's hold shift (a property of the tier, not a backlog),
+                        passed as the PREDICTED lag of that configuration (amendment 2 item 1,
+                        2026-11-13): Eq. (2)'s backlog recursion is not run over our constant,
+                        because it would add the whole horizon each period. alpha_l is unchanged
+                        at the paper's template value.
+  allocation a_k     <- the DEMAND of the configuration assigned to the stream (amendment 2,
+                        ADAPTATION A5b); read back as: the assigned configuration is a cloud one
                         => that stream runs on the cloud at that (c, N); otherwise local
   recall queries     <- VideoStorm has no stateful jobs, so these take the documented defaults
                         (serve on cloud, FCFS, LRU host offload), as the task specifies
@@ -31,7 +36,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "reconstructed"))
 
 import profiles as P
 from interface import (Action, Observation, Policy, RecallAction, SessionAction, StreamAction)
-from videostorm import Config, Query, allocate_maxmin, allocate_maxsum, utility  # noqa: E402
+from videostorm import (Config, Query, allocate_discrete, allocate_maxmin,  # noqa: E402
+                        allocate_maxsum, utility)
 
 
 class VideoStormAdapted(Policy):
@@ -71,7 +77,10 @@ class VideoStormAdapted(Policy):
                      for r in self._rows],
             u_base=self.u_base, alpha_q=self.alpha_q, alpha_min_q=self.q_min,
             alpha_l=self.alpha_l, lag_max_s=self.lag_max_s,
-            lag_s=0.0)
+            lag_s=0.0,
+            # amendment 2 item 1: each configuration's OWN predicted delivery lag (its hold
+            # shift), with no backlog recursion over the horizon. alpha_l is NOT changed.
+            lag_by_config={r["name"]: float(r["lag_s"]) for r in self._rows})
 
     def decide(self, obs: Observation) -> Action:
         if not obs.streams:
@@ -88,13 +97,16 @@ class VideoStormAdapted(Policy):
         # Capacity R: the cloud GPU-seconds per wall second the budget still affords over the
         # horizon. A stream that is not reachable cannot be allocated at all.
         cap = max(obs.budget_remaining_gpu_s / max(self.horizon_s, 1e-9), 0.0)
-        alloc = (allocate_maxmin if self.objective == "maxmin" else allocate_maxsum)(
-            qs, cap, self.horizon_s, self.delta)
+        # amendment 2 (2026-11-13), ADAPTATION A5b: each stream is allocated the DEMAND of the
+        # configuration it is assigned, never a partial delta, and a configuration is feasible
+        # only while the total allocated demand stays within R. The read-back is the assigned
+        # CONFIGURATION, not a_k, because with A4b's lag the utility does not depend on a_k.
+        alloc = allocate_discrete(qs, cap, self.horizon_s, self.objective)
         acts: List[StreamAction] = []
         for s in obs.streams:
             a, cfg = alloc[s.stream_id]
             row = by_name[cfg.name]
-            if row["mode"] == "local" or a <= 0.0 or not s.network.connected:
+            if row["mode"] == "local" or not s.network.connected:
                 acts.append(StreamAction(s.stream_id, "local"))
             else:
                 acts.append(StreamAction(s.stream_id, "cloud", row["cadence_s"],

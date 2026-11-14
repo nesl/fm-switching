@@ -190,3 +190,47 @@ mechanism CLAUDE.md's protocol exists to catch. The rule is therefore exercised 
 that B10 defers a COLD 28k query with slack (T = 7.40 s > d\* = 2.54 s), admits the same query
 once its slack is exhausted, admits a HOST-WARM 11k query (T = 0.46 s), and that B11 slices at
 2,048 tokens and runs engine P1. All 24 pass.
+
+## StudyB-baselines amendment 2 (2026-11-13)
+
+**B10 is REDEFINED as StudySLICE1's P2 and B11 as StudySLICE1's P3_2048** (items 7 and 8).
+StudySIM1d section 1.3 showed that B10 held nothing (0 DEFERs in 83 decisions: `affected` needed
+`cadence_s <= T` with T averaging 0.014 s against a 0.5-s cadence, and `d_star_s` raised KeyError
+at unscored cadences so `_tolerable_hold_s` returned infinity) and that B11 sliced nothing
+(4 sliced MATERIALIZEs, engine `slice_steps` = 0, because `run.py` applied recall actions before
+session actions and the CLOUD recall had already placed the session on the GPU).
+
+The rules and constants are mirrored in `slice_rules.py` from `experiments/cost/study_slice1_live.py`:
+`ALIGN_S = 0.005` (l. 73), `P3_SLICE_TOKENS = 2048` (l. 74 and l. 118), `LAT_FACTOR` and
+`SLACK_MARGIN_S` (l. 79-80), `next_due_s` from `next_ep_due` (l. 157-162), `gap_release` from
+`wait_gap` (l. 164-177), `align_release` from `align_after_due` (l. 179-186), P2's
+`deadline_start` (l. 211-213), P3's per-link alignment (l. 214-215) and the one-cold-request lock
+with EDF (l. 204-205, l. 231-232).
+
+Two departures, both declared:
+
+- **the schedule is PREDICTED, not looked up.** StudySLICE1's harness reads its own episodic
+  schedule out of `STATE["ep_abs"]`; a policy may not. B10 predicts the next episodic call from
+  the cadence-only model of StudySLICE1 Part D-b - each stream's own past deliveries, its cadence
+  and a 0.125-s jitter margin - which is strictly less information.
+- **B11 cannot align each link.** Our action space submits a chain as ONE MATERIALIZE with
+  `slice_tokens`, and the decision epoch is 1.0 s (`workload.TICK_S`) against a 0.5-s cadence, so
+  every alignment wait P3 would perform (at most one cadence period plus 5 ms) is SUB-TICK. B11
+  therefore chains without waiting and declares the restriction under fairness rule 4; the live
+  port can express per-link alignment.
+
+Also fixed in B10, as the amendment asks: the affected-streams rule now reads "streams whose NEXT
+CALL is due inside the predicted engine time" rather than "streams whose cadence is <= T", and
+`_tolerable_hold_s` falls back to the NEAREST SCORED cadence (StudyE9d scored d* at 0.5 and 1.0 s
+only) instead of returning infinity. d* is REPORTED in the action notes and is no longer part of
+any decision.
+
+**Measured consequence, representative cell (balanced, F = 4, deadline 5 s, seed 0).** B11 now
+slices: engine `slice_steps` 0 -> 14. B10 now holds: 0 DEFERs -> 403, and its recall timely
+accuracy falls from 0.381 to 0.000 (EVAL split: 0.009). That is P2 behaving exactly as
+StudySLICE1 measured it, against a deadline it was not run at: P2's slack guard releases at
+`deadline - (pred x 1.321 + 0.25)`, which for an 11,050-token cold build (pred 2.456 s) is 1.506 s
+after arrival; at a 1.0-s decision epoch the release lands at the next tick and the 2.456-s build
+then finishes outside a 5-s deadline. StudySLICE1 ran P2 at a 10-s recall deadline. The hold is
+faithful; the deadline is not the one it was designed against, and this is reported rather than
+tuned.

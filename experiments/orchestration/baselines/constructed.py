@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "reconstructed"))
 import costs as C
 import devsplit as DS
 import profiles as P
+import slice_rules as SR
 from interface import (Action, Observation, Policy, RecallAction, SessionAction, StreamAction,
                        materialize)
 
@@ -350,12 +351,18 @@ class B9BestOfBreed(Policy):
                          for r in self.rows],
                 u_base=0.0, alpha_q=1.0, alpha_min_q=0.0, alpha_l=1.0, lag_max_s=0.5,
                 lag_s=self.by.get(f"cloud/32BI_N{s.frame_count}@{s.cadence_s}",
-                                  self.local)["lag_s"]))
+                                  self.local)["lag_s"],
+                # amendment 2 item 1, the same translation the standalone VideoStorm arm uses:
+                # each configuration's own predicted delivery lag, no backlog recursion.
+                lag_by_config={r["name"]: float(r["lag_s"]) for r in self.rows}))
         cap = max(obs.budget_remaining_gpu_s / max(self.horizon_s, 1e-9), 0.0)
-        alloc = V.allocate_maxmin(qs, cap, self.horizon_s, 0.01)
+        # amendment 2 ADAPTATION A5b, applied identically to the standalone VideoStorm arm:
+        # allocate each stream the demand of its assigned configuration and read back the
+        # configuration, not a_k.
+        alloc = V.allocate_discrete(qs, cap, self.horizon_s, "maxmin")
         for s in live:
-            a, cfg = alloc[s.stream_id]
-            out[s.stream_id] = self.by[cfg.name] if a > 0 else self.local
+            _a, cfg = alloc[s.stream_id]
+            out[s.stream_id] = self.by[cfg.name]
         return out
 
     # ---- component (i): ECO-LLM joint selection, as an SLO check that may only DOWNGRADE
@@ -472,35 +479,34 @@ class B9BestOfBreed(Policy):
 
 # ================================================================ B10
 class B10BlockingAwareAdmission(Policy):
-    """B10: blocking-aware admission, WITHOUT slicing.
+    """B10: blocking-aware admission, WITHOUT slicing. **REDEFINED as StudySLICE1's P2.**
 
-    StudyB-baselines amendment (2026-11-12) item (c). The mechanism it tests is the one
-    StudyE10c / E10d / E10e located and StudyE9d priced:
+    StudyB-baselines amendment 2 (2026-11-13) item 7. StudySIM1d section 1.3 showed that the
+    first definition of B10 never fired: `affected = [s for s in on_cloud if s.cadence_s <= T]`
+    is empty whenever the predicted engine time T is below the cadence, and `d_star_s` raised
+    KeyError at cadences StudyE9d did not score, so `_tolerable_hold_s` returned infinity and
+    `T >= worst` was never true - 0 DEFERs in 83 decisions. The user's decision is to redefine
+    B10 to be EXACTLY StudySLICE1's P2, which is the same mechanism stated in terms that can
+    fire, and which has now been MEASURED live on the H100 rather than only argued:
 
-      * a cloud recall request runs as ONE non-preemptive unit on the shared replica, and every
-        episodic request arriving during it is held until its first token (StudyE10c section 6,
-        StudyE10d: the LM prefill is the unsplittable unit; StudyE10e: capping the per-step
-        tokens cuts the hold by 19-30 % and does not remove it);
-      * a held episodic score is delivered late, and StudyE9d measured exactly what lateness
-        costs - V(d), with d* the added delay at which a cloud stream falls to the device's own
-        value.
+      hold the monolithic cold prefill while an episodic call is due inside its predicted engine
+      time; release on a gap, or on slack when the predicted answer no longer fits the deadline.
 
-    So B10 admits a recall query only when the hold it would impose does not push an episodic
-    stream past the step where its value falls. Concretely, for each pending query:
+    The rules and constants are mirrored in `slice_rules.py` with the `study_slice1_live.py` line
+    ranges cited there. Two fixes the amendment also asks for:
 
-      T        = predicted non-preemptive engine time = `costs.recall_ttft_s(tokens, readiness)`
-      affected = cloud streams with at least one call due inside T (cadence <= T)
-      d*       = `profiles.d_star_s(arm, cadence)` from StudyE9d's curve
-      DEFER if T >= d* for any affected stream, UNLESS the query's deadline slack is exhausted
-      (slack <= T), in which case it is ADMITTED - a deadline is not sacrificed to a stream.
+      * the AFFECTED-STREAMS rule now reads "streams whose next call is due inside T" (the
+        cadence-only prediction of StudySLICE1 Part D-b), not "streams whose cadence is <= T";
+      * `_tolerable_hold_s` no longer returns infinity on a KeyError: StudyE9d scored d* at
+        cadences 0.5 and 1.0 s only, so an unscored cadence falls back to the NEAREST SCORED
+        cadence, which is a RULE and is labelled one. d* is REPORTED in the action notes as a
+        diagnostic; P2's rule does not read it, and B10 no longer decides from it.
 
-    Everything else: EDF order; recall served at whatever readiness the session actually has
-    (COLD, HOST-WARM or GPU-WARM, never upgraded for free); KV management is B9's component (iv)
-    - the causal inter-arrival estimate ranks sessions for the GPU-warm slots.
+    Everything else is unchanged: EDF, one cold build in the engine at a time (StudySLICE1's
+    `cold_q` lock, l. 204-205 / 231-232), recall served at whatever readiness the session has,
+    and KV management by B9's component (iv) causal inter-arrival estimate.
 
-    **No slicing.** B10 builds state monolithically (`slice_tokens = None`), which is what every
-    pre-amendment baseline can express, and declares that restriction: whether slicing helps is
-    the property under test, and B11 is its ablation.
+    **No slicing**, which is still the property under test: B11 is the slicing ablation.
     """
 
     name = "B10-blocking-aware-admission"
@@ -514,6 +520,7 @@ class B10BlockingAwareAdmission(Policy):
                           "the admission rule and the slicing mechanism can be attributed "
                           "separately; B11 is the slicing-without-scheduling ablation and the "
                           "monolithic restriction is the property under test (fairness rule 4).")
+    MIRRORS = "StudySLICE1 P2, via slice_rules.py"
 
     def __init__(self, defer_quantum_s: float = 0.25, gpu_warm_slots: int = 4,
                  quality: str = "challenge", horizon: float = 0.0, alpha: float = 0.3) -> None:
@@ -523,10 +530,12 @@ class B10BlockingAwareAdmission(Policy):
         self.alpha = float(alpha)
         self._last: Dict[str, float] = {}
         self._gap: Dict[str, float] = {}
+        self._busy_until_s = -1.0          # the cold_q lock: one build in the engine at a time
 
     def reset(self, seed: int = 0) -> None:
         self._last.clear()
         self._gap.clear()
+        self._busy_until_s = -1.0
 
     # ---- B9 component (iv), verbatim: the CAUSAL reuse estimate
     def _observe(self, obs: Observation) -> None:
@@ -544,45 +553,67 @@ class B10BlockingAwareAdmission(Policy):
             return float("inf")
         return max(g - (now_s - self._last.get(sid, now_s)), 0.0)
 
+    @staticmethod
+    def _next_due(obs: Observation) -> Optional[float]:
+        """The cadence-only prediction of the next episodic call over the cloud streams."""
+        pairs = [((s.delivered_times_s[-1] if s.delivered_times_s else None), s.cadence_s)
+                 for s in obs.streams if s.network.connected]
+        return SR.soonest_due_s(obs.now_s, pairs) if pairs else None
+
+    def _affected(self, obs: Observation, pred_s: float) -> List:
+        """amendment 2 item 7: streams whose NEXT CALL is due inside the predicted engine time."""
+        out = []
+        for s in obs.streams:
+            if not s.network.connected:
+                continue
+            last = s.delivered_times_s[-1] if s.delivered_times_s else None
+            d = SR.next_due_s(obs.now_s, last, s.cadence_s)
+            if d is not None and d - obs.now_s <= pred_s:
+                out.append(s)
+        return out
+
     def _tolerable_hold_s(self, s) -> float:
-        """How much added delivery delay this stream can take before it stops being worth calling
-        - StudyE9d's d*. A stream the policy would not put on the cloud anyway tolerates any hold,
-        and `None` (no crossing inside StudyE9d's 3-s grid) is read as its 3-s maximum."""
+        """StudyE9d's d*, REPORTED and no longer decided from. amendment 2 item 7: StudyE9d
+        scored d* at cadences 0.5 and 1.0 s only, so an unscored cadence falls back to the
+        nearest scored one - a RULE, not a measurement - instead of returning infinity."""
         arm = f"32BI_N{s.frame_count}"
-        try:
-            d = P.d_star_s(arm, s.cadence_s, self.quality, self.horizon)
-        except KeyError:
-            return float("inf")
-        return float(P.DELAYS_S[-1]) if d is None else float(d)
+        for cad in (s.cadence_s, min((0.5, 1.0), key=lambda c: abs(c - s.cadence_s))):
+            try:
+                d = P.d_star_s(arm, cad, self.quality, self.horizon)
+            except KeyError:
+                continue
+            return float(P.DELAYS_S[-1]) if d is None else float(d)
+        return float(P.DELAYS_S[-1])
 
     def decide(self, obs: Observation) -> Action:
         self._observe(obs)
-        # B10 does not decide placement: it relies on DEFAULTS["episodic_mode"] = "cloud", so
-        # every connected stream is a cloud stream and is affected by a hold. Reading
-        # `s.on_cloud` instead would silently exempt every stream in a replay where the harness
-        # has not yet put one on the cloud, and the admission rule would never fire.
-        on_cloud = [s for s in obs.streams if s.network.connected]
+        nxt = self._next_due(obs)
         rec: List[RecallAction] = []
         sess_build: List[SessionAction] = []
+        admitted_this_epoch = False
+        notes_rel: Dict[str, str] = {}
         for q in sorted(obs.recall, key=lambda x: x.deadline_s):          # EDF
-            T = C.recall_ttft_s(max(q.readiness_tokens, 1), q.readiness)
-            slack = q.slack_s(obs.now_s)
-            affected = [s for s in on_cloud if s.cadence_s <= T]
-            worst = min((self._tolerable_hold_s(s) for s in affected), default=float("inf"))
-            if slack <= T:
-                # the deadline is about to be missed: a deadline is not sacrificed to a stream
-                rec.append(RecallAction(q.query_id, "CLOUD"))
-                if q.readiness == "COLD":
-                    sess_build.append(materialize(q.session_id, max(q.readiness_tokens, 1),
-                                                  slice_tokens=None))
-            elif T >= worst:
+            tok = max(q.readiness_tokens, 1)
+            pred = C.recall_ttft_s(tok, q.readiness)
+            start = SR.deadline_start_s(q.deadline_s, pred, None)
+            release, why, hold_until = SR.gap_release(obs.now_s, pred, start, nxt)
+            busy = (obs.now_s < self._busy_until_s) or admitted_this_epoch
+            if busy and why != "slack":
+                # the cold_q lock: one cold build in the engine at a time, EDF ordered
+                rec.append(RecallAction(q.query_id, "DEFER", defer_s=self.defer_q))
+                notes_rel[q.query_id] = "queued"
+                continue
+            if not release:
                 rec.append(RecallAction(q.query_id, "DEFER",
-                                        defer_s=min(self.defer_q, max(slack - T, 0.0))))
-            else:
-                rec.append(RecallAction(q.query_id, "CLOUD"))
-                if q.readiness == "COLD":
-                    sess_build.append(materialize(q.session_id, max(q.readiness_tokens, 1),
-                                                  slice_tokens=None))
+                                        defer_s=max(hold_until - obs.now_s, 0.0)))
+                notes_rel[q.query_id] = why
+                continue
+            rec.append(RecallAction(q.query_id, "CLOUD"))
+            notes_rel[q.query_id] = why
+            admitted_this_epoch = True
+            self._busy_until_s = obs.now_s + pred
+            if q.readiness == "COLD":
+                sess_build.append(materialize(q.session_id, tok, slice_tokens=None))
         known = sorted(set(obs.cloud.gpu_warm_sessions) | set(obs.cloud.host_warm_sessions)
                        | {q.session_id for q in obs.recall})
         building = {a.session_id for a in sess_build}
@@ -590,28 +621,38 @@ class B10BlockingAwareAdmission(Policy):
         sess = list(sess_build) + [
             SessionAction(s, "KEEP_GPU_WARM" if s in warm else "OFFLOAD_TO_HOST")
             for s in known if s not in building]
+        d_star = {s.stream_id: round(self._tolerable_hold_s(s), 3) for s in obs.streams}
         return Action(streams=[], recall=rec, sessions=sess, order="EDF",
-                      notes=dict(rule="defer a recall whose non-preemptive engine time exceeds "
-                                      "the affected streams' StudyE9d d*, unless its slack is "
-                                      "exhausted", slicing=False))
+                      notes=dict(rule="StudySLICE1 P2: hold the monolithic cold prefill while an "
+                                      "episodic call is due inside its predicted engine time; "
+                                      "release on a gap or on slack",
+                                 mirrors=self.MIRRORS, slicing=False,
+                                 next_episodic_due_s=(None if nxt is None else round(nxt, 3)),
+                                 released_by=notes_rel,
+                                 d_star_s_reported_not_used=d_star))
 
 
 # ================================================================ B11
 class B11NaiveSlicing(Policy):
-    """B11: naive slicing - the ablation of slicing WITHOUT scheduling.
+    """B11: naive slicing - the ablation of slicing WITHOUT scheduling. **REDEFINED as P3.**
 
-    StudyB-baselines amendment (2026-11-12) item (c). Every materialization is chained in FIXED
-    2,048-token slices, FCFS, with NO awareness of episodic timing; everything else is the
-    tuned-engine always-cloud baseline (StudyE10e's P1, the engine the user chose on 2026-11-12).
+    StudyB-baselines amendment 2 (2026-11-13) item 8. StudySIM1d section 1.3 showed that B11's
+    four sliced MATERIALIZEs produced `slice_steps = 0`, because `run.py` applied recall actions
+    before session actions and the CLOUD recall had already placed the session on the GPU. That
+    ordering is fixed in the harness, and B11 is redefined to be EXACTLY StudySLICE1's P3:
 
-    It exists so that any gain from slicing can be separated from any gain from scheduling: B10
-    schedules without slicing, B11 slices without scheduling, and a policy that beats both does
-    something neither mechanism does alone.
+      2,048-token prefix-chained slices, gap-aligned, NO hold and no slack guard.
 
-    **The per-slice overhead is NOT a measured quantity.** StudySIM1 sweeps it over
-    {0.02, 0.05, 0.1, 0.2, 0.47} s and every result involving B11 is labelled parametric until
-    StudySLICE1 measures it. 2,048 tokens is StudyE10c's E2 step budget, chosen because it is a
-    documented vLLM 0.31.0 value rather than a tuned one.
+    The constants are mirrored in `slice_rules.py` with the `study_slice1_live.py` line ranges.
+
+    **The one part of P3 this harness cannot express, declared rather than hidden.** P3 aligns
+    EVERY link of the chain behind an episodic call that is due inside that link's predicted time
+    (l. 214-215). Our action space submits a chain as ONE MATERIALIZE with `slice_tokens`, and
+    the decision epoch is 1.0 s (`workload.TICK_S`) against a 0.5-s episodic cadence, so every
+    alignment wait P3 would perform (at most one cadence period plus 5 ms) is SUB-TICK and
+    strictly shorter than one decision epoch. B11 therefore chains and does not wait, and the
+    ordering of a slice against an episodic request is left to the engine's own step scheduler.
+    The live port (StudyLIVE1) can express per-link alignment; this harness cannot.
     """
 
     name = "B11-naive-slicing"
@@ -619,7 +660,16 @@ class B11NaiveSlicing(Policy):
     experiments = ("B-recall", "C-mixed")
     decides = ("recall_decision", "session_action", "engine_config")
     defaults_used = ("episodic_mode", "cadence_s", "frame_count", "representation", "order")
-    SLICE_TOKENS = 2048          # StudyE10c's E2 step budget, a documented vLLM 0.31.0 value
+    SLICE_TOKENS = SR.P3_SLICE_TOKENS      # StudySLICE1 P3_2048, l. 74 / l. 118
+    MIRRORS = "StudySLICE1 P3_2048, via slice_rules.py"
+    restricts_action_space = ("per-link gap alignment: the chain is submitted as one "
+                              "MATERIALIZE and the 1.0-s decision epoch is longer than every "
+                              "alignment wait P3 would perform")
+    restriction_reason = ("StudySLICE1 P3 aligns each link behind a due episodic call; our "
+                          "action space submits the chain as one request and our decision epoch "
+                          "(1.0 s) exceeds the longest alignment wait (one 0.5-s cadence period "
+                          "plus 5 ms), so the wait is not representable here and is declared "
+                          "instead of approximated. The live port can express it.")
 
     def __init__(self, slice_tokens: int = SLICE_TOKENS) -> None:
         import tuned_engine as TE
@@ -633,11 +683,15 @@ class B11NaiveSlicing(Policy):
         sess = [(SessionAction(s, "KEEP_GPU_WARM") if s in obs.cloud.gpu_warm_sessions
                  else materialize(s, max(tok.get(s, 11000), 1),
                                   slice_tokens=self.slice_tokens)) for s in known]
+        n_links = {s: SR.n_slices(max(tok.get(s, 11000), 1), self.slice_tokens)
+                   for s in known if s not in obs.cloud.gpu_warm_sessions}
         return Action(streams=[StreamAction(s.stream_id, "cloud") for s in obs.streams],
                       recall=[RecallAction(q.query_id, "CLOUD") for q in obs.recall],
                       sessions=sess, order="FCFS", engine_config=self.engine,
                       notes=dict(slicing=True, slice_tokens=self.slice_tokens,
-                                 per_slice_overhead="UNMEASURED - StudySIM1 sweeps it"))
+                                 mirrors=self.MIRRORS, links_per_build=n_links,
+                                 alignment="not representable at a 1.0-s decision epoch; "
+                                           "declared in restricts_action_space"))
 
 
 CONSTRUCTED = {

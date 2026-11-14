@@ -1,0 +1,97 @@
+{
+ "rule": "split by video on sha256(video_id); lowest 30% of the digest order is DEV; stratify only if a bucket holds under 20% of its share on either side",
+ "n_questions": 845,
+ "n_videos": 234,
+ "n_dev_videos": 70,
+ "n_eval_videos": 164,
+ "n_dev_questions": 243,
+ "n_eval_questions": 602,
+ "dev_question_share": 0.2876,
+ "overlap_questions": 0,
+ "overlap_videos": 0,
+ "buckets": {
+  "question_category": {
+   "counting_objects_events": {
+    "dev": 36,
+    "eval": 74,
+    "n": 110,
+    "dev_share": 0.3273
+   },
+   "location_trace": {
+    "dev": 29,
+    "eval": 68,
+    "n": 97,
+    "dev_share": 0.299
+   },
+   "object_comparison": {
+    "dev": 16,
+    "eval": 75,
+    "n": 91,
+    "dev_share": 0.1758
+   },
+   "sequential_action": {
+    "dev": 27,
+    "eval": 75,
+    "n": 102,
+    "dev_share": 0.2647
+   },
+   "spatial_aware_reasoning": {
+    "dev": 25,
+    "eval": 66,
+    "n": 91,
+    "dev_share": 0.2747
+   },
+   "temporal_ordering_recognition": {
+    "dev": 33,
+    "eval": 57,
+    "n": 90,
+    "dev_share": 0.3667
+   },
+   "time_duration": {
+    "dev": 39,
+    "eval": 82,
+    "n": 121,
+    "dev_share": 0.3223
+   },
+   "visual_detail_recall": {
+    "dev": 38,
+    "eval": 105,
+    "n": 143,
+    "dev_share": 0.2657
+   }
+  },
+  "video_length": {
+   "120-480": {
+    "dev": 166,
+    "eval": 410,
+    "n": 576,
+    "dev_share": 0.2882
+   },
+   "gt480": {
+    "dev": 77,
+    "eval": 190,
+    "n": 267,
+    "dev_share": 0.2884
+   },
+   "le120": {
+    "dev": 0,
+    "eval": 2,
+    "n": 2,
+    "dev_share": 0.0
+   }
+  }
+ },
+ "buckets_below_trigger": [
+  "question_category:object_comparison",
+  "video_length:le120"
+ ],
+ "stratification_applied": true,
+ "stratification_band": [
+  0.2,
+  0.8
+ ],
+ "category_band_breaches": [
+  "object_comparison"
+ ],
+ "stratification_note": "the unstratified hash split left question category `object_comparison` at a DEV share of 0.1868 and the video-length bucket `le120` (2 questions in total) at 0.0, so the pre-registered trigger fired. The stratification rule was written into this module BEFORE it was applied: strata are the video length buckets, the digest order inside a stratum is unchanged, and question category is reported rather than stratified because a video carries several categories"
+}

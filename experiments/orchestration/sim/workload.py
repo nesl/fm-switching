@@ -50,6 +50,7 @@ for p in (ROOT / "experiments/dashcam", ROOT / "experiments/orchestration/baseli
 
 STEP_S = 0.25                      # StudyE9b's dense grid
 TICK_S = 1.0                       # decision-epoch tick; a declared harness parameter
+QUESTION_SET = "EVAL"              # amendment 2: recall arrivals from the EVAL split
 MIXES = ("episodic-dominant", "balanced", "recall-dominant")
 FLEET_LADDER = (2, 4, 8, 16, 32)
 DEADLINES_S = (2.0, 5.0, 10.0)
@@ -104,10 +105,30 @@ def questions():
             byv.setdefault(r["video_id"], []).append(
                 (float(r["question_time"]), r["question_category"], qid))
         assert len(seen) == 845, len(seen)
+        # StudyB-baselines amendment 2 (2026-11-13): recall arrivals are drawn from the
+        # pre-registered S-EMBER EVAL split ONLY, so a question any constant was fitted on never
+        # enters an evaluation run. QUESTION_SET = "ALL" restores the pre-amendment workload and
+        # exists only so the amendment's own before / after comparison can be made on the
+        # original question set; every reported recall metric uses "EVAL".
+        if QUESTION_SET == "EVAL":
+            import sember_split as SS
+            keep = SS.split()["eval_questions"]
+            byv = {v: [r for r in rows if r[2] in keep] for v, rows in byv.items()}
+            byv = {v: rows for v, rows in byv.items() if rows}
+        elif QUESTION_SET != "ALL":
+            raise ValueError(QUESTION_SET)
         for v in byv:
             byv[v].sort()
         _QUESTIONS = byv
     return _QUESTIONS
+
+
+def set_question_set(which: str) -> None:
+    """Switch between the EVAL split (the default) and the pre-amendment ALL set."""
+    global QUESTION_SET, _QUESTIONS
+    if which not in ("EVAL", "ALL"):
+        raise ValueError(which)
+    QUESTION_SET, _QUESTIONS = which, None
 
 
 # ================================================================ the trace

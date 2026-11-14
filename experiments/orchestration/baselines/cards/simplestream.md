@@ -58,3 +58,12 @@ VLM call (our RECENT representation has a fixed, measured frame budget).
 | name | value | from |
 |---|---|---|
 | window | 1 s, selected on development data | `_select_window()` over StudyD3, 6,010 rows / 601 clips |
+
+## StudyB-baselines amendment 2 (2026-11-13)
+
+**Item 2: the episodic stream action follows `DEFAULTS["episodic_mode"]`.** The module's own
+docstring said "episodic streams take the documented default"; the code emitted a literal
+`StreamAction(sid, "local")`. That adapter bug is why StudySIM1c scored this arm at exactly the
+device-only challenge mAP 0.4776 at every fleet size. With the fix its challenge mAP on the
+representative cell is 0.5169 (ALL questions) and 0.5163 (EVAL), and its window selection, which
+was always its point, is unchanged and still fitted on StudyD3's development clips.

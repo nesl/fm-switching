@@ -60,3 +60,25 @@ head's weights; the visual-token compressor's internals; the benchmark numbers.
 | `nearby_window_s` | 10 s | our own; the paper's "Nearby" window is benchmark-specific |
 | `readiness_threshold` | 0.5 | our own, stated not fitted |
 | `escalation_budget` | 0.25 | our own; the paper's budget is set by TB-GRPO's target |
+
+## StudyB-baselines amendment 2 (2026-11-13)
+
+**Item 3b: `reads_device_answer = True`, and the device answer is charged.** R3-Streaming's
+Respond decision is a readiness head over the streaming model's own state; in our mapping that
+model is the device, so the field is supplied (StudyE7 Job A's committed per-question
+probability) and the harness charges the device answer (StudyD8's 0.567 s, a RULE) before the
+arm's next action on the query.
+
+**Measured consequence** on the representative cell: the readiness gate now sees a real number
+instead of the evidence-count surrogate (which was a constant 2/3 = 0.667 and always cleared the
+0.5 threshold). Recall decisions go from 83 DEVICE to 71 DEVICE + 12 queries deferred to the end
+of the run, and recall timely accuracy falls from 0.305 to 0.263. One decision, checkable by
+hand: query `8249a92b...` arrives at 98.0 s with a committed device confidence of **0.4866**
+against `readiness_threshold = 0.5`, so `readiness()` is False and the arm DEFERS.
+
+**DEFERRAL UNEXERCISED - read the recall numbers with this.** The confidence is STATIC (one
+committed value per question), so a deferred query is re-decided on exactly the same number and
+is deferred again until the run ends. The harness now honours `defer_s`, so the DEFER count is a
+property of the arm rather than of the 1-s tick, and a starved query counts as untimely; but the
+mechanism R3's Respond head exists to test - defer, accumulate evidence, then answer - is NOT
+exercised in this harness.

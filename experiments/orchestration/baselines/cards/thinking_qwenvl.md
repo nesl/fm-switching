@@ -52,3 +52,32 @@ benchmarks.
 | `progress_threshold` | 0.6 | our own, stated |
 | `confidence_threshold` | 0.6 | our own, stated |
 | `defer_s` | 0.5 s | our own, stated |
+
+## StudyB-baselines amendment 2 (2026-11-13)
+
+**Item 4: the evidence inventory now lists the representations that exist.** StudySIM1d section
+1.1 found rho = 0.3333 in every query of every cell, because the harness built every inventory
+from two `EvidenceItem`s that both carried `D2`. `research/FORMULATION.md` (Section "State
+objects: fidelity x materialization") describes a session's state at several fidelities at once,
+and this system genuinely holds two of them for a recall: the device's own recent window (RECENT;
+`device_always_warm` is a fixed design assumption, and StudyF4 Part A measured the device
+answering from exactly that window, median 467 input tokens) and the session's strided history
+(D2), stored on the device and ready on the GPU when the session is GPU-warm. RICH - the full
+history - is NOT listed, because nothing in this world retains it server-side. The arm's rule is
+unchanged: rho is still the count of distinct representations divided by 3, and it is now
+**0.667** against the 0.6 threshold, so the progress gate passes and the arm's timing decision is
+exercised for the first time.
+
+**Item 3b: `reads_device_answer = True`.** ATDM answers when progress and CONFIDENCE both clear
+their thresholds, and the confidence is the running model's own; in our two-tier mapping that
+model is the device, so the field is supplied and the device answer is charged.
+
+**Measured consequence** on the representative cell: recall timely accuracy 0.000 -> 0.253, with
+54 of 83 queries answered and 29 DEFERRED to the end of the run.
+
+**DEFERRAL UNEXERCISED - read the recall numbers with this.** The harness's per-query device
+confidence is STATIC: the committed tables give one value per question, so a deferral can never
+gain evidence and a query below the confidence threshold is deferred until the run ends. The
+amendment makes the harness honour `defer_s` (so the DEFER count is a property of the arm and not
+of the tick rate) and counts a starved query as untimely, but the mechanism ATDM exists to test -
+wait, gather more evidence, then answer - is NOT exercised here.

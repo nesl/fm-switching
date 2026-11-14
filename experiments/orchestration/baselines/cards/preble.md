@@ -51,3 +51,13 @@ across replicas. Also its prefix-tree matching, since our sessions do not share 
 | `load_weight` | 1.0 | our own; the paper tunes the trade per cluster |
 | `max_load_pressure` | 0.9 | our own admission threshold, stated |
 | `gpu_warm_slots` | 4 | StudyE10b's measured warm-session operating point |
+
+## StudyB-baselines amendment 2 (2026-11-13)
+
+**Item 5: `host_offload_intent = "retain"`.** Preble's cache-affinity scheduling exists to keep
+prefixes resident; mapping its OFFLOAD_TO_HOST to EVICT in the no-host world destroyed exactly
+the state it schedules around. The harness now maps it to KEEP_GPU_WARM with the engine's GPU KV
+capacity and LRU eviction, the budget and fairness rule 3 all still binding. Measured consequence
+on the representative cell: challenge mAP 0.5135 -> 0.5169 (ALL). Its ADMISSION branch still
+never fires - load pressure is 0.0046 mean and 0.125 max against its 0.9 threshold - which
+StudySIM1d reported and this amendment does not change.

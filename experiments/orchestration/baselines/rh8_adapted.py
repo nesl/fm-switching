@@ -29,6 +29,7 @@ CPU only.
 """
 from __future__ import annotations
 
+import math
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -64,6 +65,9 @@ class RH8OracleDemand(Policy):
 
     name = "rh8-demand-aware-ORACLE"
     case = "A"
+    # amendment 2 item 5: OFFLOAD_TO_HOST here means RETAIN this session's state, not
+    # discard it; see interface.Policy.host_offload_intent.
+    host_offload_intent = "retain"
     experiments = ('B-recall',)
     paper = "StudyRH8 (ours), reports/study_rh8_demand_aware_warm_state.md"
     reads_future = True
@@ -93,6 +97,9 @@ class RH8CausalDemand(Policy):
 
     name = "rh8-demand-aware-causal"
     case = "A"
+    # amendment 2 item 5: OFFLOAD_TO_HOST here means RETAIN this session's state, not
+    # discard it; see interface.Policy.host_offload_intent.
+    host_offload_intent = "retain"
     experiments = ('B-recall',)
     paper = "StudyRH8 (ours), adapted to a causal demand estimate"
     decides = ("session_action",)
@@ -124,7 +131,9 @@ class RH8CausalDemand(Policy):
         self._observe(obs)
         sessions = sorted(set(obs.cloud.gpu_warm_sessions) | set(obs.cloud.host_warm_sessions)
                           | {q.session_id for q in obs.recall})
-        k = max(int(round(self.high_frac * len(sessions))), 0)
+        # amendment 2 item 6 (2026-11-13): CEIL, not round. round(0.25 x n) is 0 for every cell
+        # with fewer than two sessions, so RH8's HIGH_FRAC kept nothing warm by construction.
+        k = max(math.ceil(self.high_frac * len(sessions)), 0) if sessions else 0
         ranked = sorted(sessions, key=lambda s: -self._count.get(s, 0.0))
         warm = set(ranked[:k])
         return Action(streams=[StreamAction(s.stream_id, "cloud") for s in obs.streams],

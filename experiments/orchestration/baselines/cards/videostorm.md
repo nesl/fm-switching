@@ -77,3 +77,54 @@ by author); none links code. No third-party reimplementation is author-linked ei
 | `U^B`, `α^Q`, `Q^M` | 0, 1, 0 | the paper says these are "query-specific and set based on the application" (§6.1) and suggests a template set; ours is the neutral template (utility = quality) so the scheduler is not handed a preference we invented |
 | `α^L`, `L^M` | 1 (per second), 0.5 s | same; `L^M` = 0.5 s is our own deadline scale, stated not fitted |
 | objective | MaxMin and MaxSum both built | the paper reports both (§8.2.1, §8.2.2) |
+
+## StudyB-baselines amendment 2 (2026-11-13)
+
+**A4b: L is the configuration's own predicted delivery lag, and Eq. (2)'s recursion is not run
+over it.** StudySIM1d section 1.2 showed what A4 cost: our `lag_s` is a CONSTANT hold shift
+(0.50-1.00 s), and Eq. (2) is a BACKLOG recursion that adds the whole 10-s horizon each period,
+so every cloud configuration was predicted 10.75 s behind and `U_cloud = -10.234` against
+`U_local = +0.01043` on a quality gap of +0.0057 - the lag penalty was 1,800x the quality term.
+The paper's L is a backlog that GROWS when a query is under-allocated; ours is a property of the
+tier. Passing the configuration's own hold shift restores the paper's MEANING of L (how late
+this configuration's answers are) instead of running a constant through a recursion that was
+written for a quantity that accumulates. `alpha_l` is NOT changed: it stays at the paper's
+template value of 1.0, so the correction is in the quantity and not in the weight.
+`reconstructed/videostorm.py` keeps Eq. (2) exactly as the paper writes it and uses it whenever
+`lag_by_config` is absent.
+
+With the fix, on the StudySIM1d audit cell (balanced, F = 4, deadline 5 s, seed 0):
+
+| configuration | Q | demand (GPU-s/s) | lag L | U = Q - max(L - 0.5, 0) |
+|---|---|---|---|---|
+| local | 0.01043 | 0.000 | 0.75 | **-0.23957** |
+| cloud/32BI_N1@0.25 | 0.01690 | 0.270 | 0.50 | **+0.01690** |
+| cloud/32BI_N1@0.5 | 0.01613 | 0.135 | 0.50 | +0.01613 |
+| cloud/32BI_N1@1.0 | 0.01439 | 0.068 | 0.50 | +0.01439 |
+| cloud/32BI_N3@0.25 | 0.01329 | 0.759 | 1.00 | -0.48671 |
+| cloud/32BI_N3@0.5 | 0.01276 | 0.379 | 1.00 | -0.48724 |
+| cloud/32BI_N3@1.0 | 0.01173 | 0.190 | 1.00 | -0.48827 |
+
+**A5b: allocate the assigned configuration's DEMAND, not a partial delta, and read back the
+CONFIGURATION.** A4b has a second consequence the first run exposed: utility no longer depends on
+`a_k`, so the paper's delta-greedy loops stop at once - MaxSum's gain is exactly 0 at the first
+step and allocates nothing, and MaxMin spends a single Delta on one query because it feeds the
+worst query before testing improvement. In a DISCRETE configuration space the paper's capacity
+semantics are kept by allocating each query the DEMAND `D_k(c)` of the configuration it is
+assigned, with a configuration feasible only while the total allocated demand stays within `R`,
+and by keeping each heuristic's own ordering: MaxMin improves the currently worst-utility query,
+MaxSum takes the largest utility gain per unit of demand, and both stop when no feasible
+improvement remains. A stream runs on the cloud iff its assigned configuration is a cloud one.
+`allocate_maxmin` and `allocate_maxsum` are untouched; `allocate_discrete` is the new function
+and is marked ADAPTATION A5b.
+
+One epoch's arithmetic, four streams, R = budget / horizon = 2,664.75 / 10 = 266.475 GPU-s per
+wall second: every query starts at `local` (demand 0, U = -0.23957); MaxMin picks the worst
+(all tie, so the lowest `qid`), finds `cloud/32BI_N1@0.25` feasible (0.270 <= 266.475) and
+improving (+0.01690 > -0.23957) and assigns it; the next worst is the next still-local query,
+and so on until all four hold `cloud/32BI_N1@0.25` for a total demand of 1.080 GPU-s/s. MaxSum
+reaches the same assignment by gain per unit demand: (0.01690 + 0.23957) / 0.270 = 0.950 per
+GPU-s/s for the N1@0.25 step against 1.890 for N1@0.5 and 3.786 for N1@1.0 - it takes the
+cheapest step first and then improves each query upwards while capacity allows. At a capacity of
+0.3 GPU-s/s only the first query is upgraded and the other three stay local, which is the
+capacity constraint doing its job.

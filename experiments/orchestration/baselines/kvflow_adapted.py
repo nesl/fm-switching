@@ -37,6 +37,9 @@ class KVFlowAdapted(Policy):
     experiments = ("B-recall",)
     paper = "Pan et al., KVFlow: Efficient Prefix Caching for Accelerating LLM-Based Multi-Agent Workflows, arXiv:2507.07400"
     decides = ("session_action", "recall_decision")
+    # amendment 2 item 5: OFFLOAD_TO_HOST here means RETAIN this session's state, not
+    # discard it; see interface.Policy.host_offload_intent.
+    host_offload_intent = "retain"
     defaults_used = ("episodic_mode", "cadence_s", "frame_count", "representation", "order")
 
     def __init__(self, gpu_capacity_tokens: int = 60000, prefetch_horizon_s: float = 5.0,

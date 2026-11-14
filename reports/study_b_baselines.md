@@ -556,3 +556,344 @@ Every component choice is tabulated in `cards/constructed.md`, including the thr
 
 The rule is instead exercised explicitly in `reconstructed/test_constructed_amendment_toy.py`, which asserts **24 named behaviours, all reproduced**: that d\* is read from StudyE9d and not guessed (2.537 s); that a COLD 28k recall's predicted hold exceeds it (7.40 s) and a HOST-WARM 11k recall's does not (0.46 s); that B10 therefore DEFERS the first while it has slack and ADMITS it once the slack is exhausted; that admitting a COLD query materializes the session monolithically; that B11 slices at 2,048 tokens, is FCFS and runs engine P1; and that the interface REJECTS each of the eight malformed uses of the two new actions.
 
+
+---
+
+# AMENDMENT 2 (2026-11-13): the StudySIM1d arm fixes, an S-EMBER DEV / EVAL split, and the
+# device-answer rules
+
+CPU only on flash; no GPU, no model server, no inference. Pre-registered in
+`research/EXPERIMENTS.md` (this row) before anything was computed, twice: once for the eight
+accepted fixes and the expected-change set, and again for the S-EMBER split after the first
+overlap check failed.
+
+StudySIM1d-validate section 1.5 listed eight proposed changes affecting twelve arms and applied
+none of them, because each changes WHAT an arm decides. The user accepted all eight. This
+amendment applies them, and the three decisions that the application itself forced.
+
+## 16. What was applied
+
+| # | arm(s) | what the code now does |
+|---|---|---|
+| 1 | videostorm/maxmin, videostorm/maxsum, B9 component (ii) | each configuration's OWN predicted delivery lag (its hold shift) is passed as L; Eq. (2)'s backlog recursion is not run over it; `alpha_l` is unchanged. ADAPTATION A4b in `cards/videostorm.md` |
+| 1b | the same three | **A5b**, forced by A4b: utility no longer depends on `a_k`, so the paper's delta-greedy stops at once. Each stream is allocated the DEMAND of the configuration it is assigned, a configuration is feasible only while the total allocated demand stays within R, MaxMin improves the worst-utility stream and MaxSum takes the largest gain per unit demand, and the read-back is the assigned CONFIGURATION |
+| 2 | covstream, simplestream, streamscout | the episodic stream action follows `DEFAULTS["episodic_mode"]`, as all three docstrings already said |
+| 3 | streamscout (and every arm that may read it) | `device_answer_confidence` is supplied from COMMITTED tables: StudyE7 Job A's per-question `letter_probs` for the 4B-D2 configuration the harness answers a DEVICE recall with, 839 of 845 questions. Nothing is synthesized |
+| 3b | confidence-cascade, streamscout, thinking-qwenvl-atdm, r3-streaming (receive it); hybrid-llm (does NOT) | the field is supplied only to an arm whose PUBLISHED mechanism observes the device's own answer before deciding, and the harness CHARGES that answer: the query is withheld until the device answer has completed (StudyD8's 0.567 s, a RULE) and a DEVICE decision is delivered at that time |
+| 4 | thinking-qwenvl-atdm (and every arm that reads the inventory) | the evidence inventory lists the representations that really exist: RECENT (the device's own window, StudyF4 Part A median 467 tokens) and D2 (stored on the device, ready on the GPU when GPU-warm). RICH is not listed because this world does not retain it server-side. rho goes from 0.3333 to 0.667 against a 0.6 threshold |
+| 5 | kvflow, preble, both rh8 arms | `host_offload_intent = "retain"`: in the no-host scope OFFLOAD_TO_HOST maps to KEEP_GPU_WARM, with the engine's GPU KV capacity (62,944 tokens), its LRU eviction, the budget and fairness rule 3's first-promotion charge all still binding. In the live harness the real host tier is used |
+| 6 | rh8-demand-aware-causal | `ceil` instead of `round` for the HIGH_FRAC warm-slot count |
+| 7 | B10 | REDEFINED as StudySLICE1's P2, mirrored in `slice_rules.py`; the affected-streams rule reads "due inside T" and `d_star_s` falls back to the nearest scored cadence instead of returning infinity |
+| 8 | B11, and `run.py` | B11 REDEFINED as StudySLICE1's P3_2048; `run.py` applies SESSION actions before RECALL actions, and a session materialized in the same tick as its CLOUD recall carries that recall's answer instead of a second request being submitted |
+| harness | every arm | `DEFER(defer_s)` is HONOURED: a deferred query is withheld until its `defer_s` has elapsed and is then re-decided |
+
+## 17. The S-EMBER DEV / EVAL split
+
+Item 3 required a check: are the questions a constant is fitted on disjoint from the questions a
+metric is reported over? **They were not.** The only committed per-question device-answer
+probabilities are StudyE7 Job A (839 questions) and StudyD13 (the same 845), and the recall
+evaluation used all 845 questions over 234 videos: overlap **839 of 839 questions and 234 of 234
+videos**. StudyD3's development split holds Nexar clips and no S-EMBER questions, so it cannot
+supply a recall constant.
+
+A split was therefore pre-registered and then computed:
+
+- **the rule** - split BY VIDEO on sha256(video_id); the lowest 30 % of the digest order is DEV;
+  stratify only if a question-category or video-length bucket falls below 20 % of its share on
+  either side.
+- **the trigger fired** on the unstratified split (`object_comparison` at a DEV share of 0.1868,
+  and the `le120` video-length bucket at 0.0 with 2 questions in total), so the stratification
+  rule was written into `sember_split.py` BEFORE being applied: strata are the video LENGTH
+  buckets (a video-level attribute), the digest order inside a stratum is unchanged, and question
+  category is REPORTED rather than stratified because a video carries several categories.
+- **the result**: DEV 70 videos / 243 questions (28.8%), EVAL
+  164 videos / 602 questions. **Overlap 0 questions, 0 videos.** The
+  length buckets land at 0.288 and 0.288; `object_comparison` remains at 0.1758, which is
+  REPORTED as a band breach and not adjusted, and `le120` holds 2 questions from a single video,
+  which no video-level split can divide.
+
+**What it binds, for every arm and for our own scheduler.** Any threshold, floor, profile, lookup
+table or prior fitted from S-EMBER data is fitted on DEV only, and every reported recall metric is
+computed on EVAL only - the harness draws recall arrivals from EVAL questions
+(`workload.QUESTION_SET`), so a DEV question never enters an evaluation run. **The committed
+StudySIM1c recall numbers are SUPERSEDED FOR COMPARISON** (a different question set), not INVALID.
+
+## 18. The fitting audit
+
+`experiments/orchestration/baselines/amend2_audit.py` scans every arm's own source for the call
+sites that fit a constant, so the table below is checkable by grep.
+
+| what | where | fitted on | refit on DEV? |
+|---|---|---|---|
+| confidence-cascade's recall confidence floor | `cascade_adapted.py` | **S-EMBER** | **yes: the median committed device confidence over DEV questions = 0.7358** |
+| every router, score quantile and window selection (confidence-cascade's tau, hybrid-llm's router, routellm's factorisation and threshold, simplestream's window, streamscout's thresholds, B7/B8's device thresholds) | `cascade`, `hybrid_llm`, `routellm`, `simplestream`, `streamscout`, `constructed` | Nexar **DEV** (StudyD3 development clips, via `devsplit.py`) | not needed |
+| the committed S-EMBER recall-accuracy lookup table | `recall_profiles.py` | S-EMBER, full question set | **read by no arm** - only by the report generator - so no arm carries it |
+| per-question device-answer probability | `device_confidence.py` | S-EMBER, one value per question | it is a MEASUREMENT of that question, not a constant fitted across questions; supplied only to the four arms of item 3b |
+
+**Episodic tunables fitted on evaluation clips: none. Episodic inputs MEASURED on evaluation
+clips: one, and it is large.** The resource-quality profile `profiles.stream_profile` - quality
+from StudyE9b / E9c, lag from StudyE9b's hold shift, demand from StudyE9 / E9b - and StudyE9d's
+V(d) and d* curves are all measured on StudyD14b's 300 VALIDATION clips, and they are inputs to
+videostorm, eco-llm, ekya, inar-vl, perllm, uniscale, B3, B6, B8, B9 and B10. This is the suite's
+documented ADAPTATION A2 (the paper profiles online; we substitute a measured profile). It is a
+known flow of evaluation-clip information into a decision rule; it is reported here and NOT
+fixed, because re-measuring the profile on StudyD3's development clips needs GPU time.
+
+## 19. Before and after, every runnable arm, one cell
+
+The cell is StudySIM1d's: balanced mix, F = 4, deadline 5 s, seed 0. To make the before and after
+comparable, both columns use the PRE-AMENDMENT question set (`--question-set ALL`); the last
+numeric column is the same arm on the EVAL split, which is what every recall metric is reported
+on from now on. 15 of 37 arms changed.
+
+| arm | challenge mAP | episodic cloud fraction | recall timely accuracy | timely, EVAL | why it changed |
+|---|---|---|---|---|---|
+| B10-blocking-aware-admission | 0.5169 -> 0.5190 | - -> - | 0.3812 -> 0.0000 | 0.0094 | item 7 (B10 is redefined as StudySLICE1's P2) |
+| B11-naive-slicing | 0.5169 -> 0.5169 | 1.0000 -> 1.0000 | 0.3812 -> 0.3812 | 0.3658 | item 8 (B11 is redefined as StudySLICE1's P3) and the ordering fix |
+| B9-noHost | 0.4776 -> 0.5259 | 0.0000 -> 0.8624 | 0.3870 -> 0.3870 | 0.3817 | item 1 via component (ii); item 4 via the evidence inventory |
+| confidence-cascade | 0.4845 -> 0.4845 | 0.1749 -> 0.1750 | 0.3048 -> 0.3405 | 0.3330 | **NOT in the pre-declared set** |
+| covstream | 0.4776 -> 0.5169 | 0.0000 -> 1.0000 | 0.3870 -> 0.3870 | 0.3817 | item 2 (stream action follows DEFAULTS); item 4 via the evidence inventory |
+| kvflow | 0.5135 -> 0.5169 | 1.0000 -> 1.0000 | 0.3812 -> 0.3812 | 0.3658 | item 5 (OFFLOAD_TO_HOST -> KEEP_GPU_WARM in scope); item 8 (action ordering) |
+| preble | 0.5135 -> 0.5169 | 1.0000 -> 1.0000 | 0.3812 -> 0.3812 | 0.3658 | item 5 |
+| r3-streaming | 0.4990 -> 0.4990 | 0.2172 -> 0.2172 | 0.3048 -> 0.2619 | 0.2630 | **NOT in the pre-declared set** |
+| rh8-demand-aware-ORACLE | 0.5135 -> 0.5169 | 1.0000 -> 1.0000 | 0.3812 -> 0.3812 | 0.3658 | items 5 and 6; item 8 (action ordering) |
+| rh8-demand-aware-causal | 0.5135 -> 0.5169 | 1.0000 -> 1.0000 | 0.3812 -> 0.3812 | 0.3658 | items 5 and 6; item 8 (action ordering) |
+| simplestream | 0.4776 -> 0.5169 | 0.0000 -> 1.0000 | 0.3812 -> 0.3812 | 0.3658 | item 2 |
+| streamscout | 0.4776 -> 0.5164 | 0.0000 -> 1.0000 | 0.3048 -> 0.3797 | 0.3643 | item 2; item 3 (committed device confidence); item 4 via the inventory |
+| thinking-qwenvl-atdm | 0.4649 -> 0.4649 | 0.1081 -> 0.1082 | 0.0000 -> 0.2526 | 0.2532 | item 4 (the inventory lists the representations that exist) |
+| videostorm/maxmin | 0.4776 -> 0.5263 | 0.0000 -> 0.8644 | 0.3812 -> 0.3812 | 0.3658 | item 1 (lag as the configuration's own hold shift) |
+| videostorm/maxsum | 0.4776 -> 0.5263 | 0.0000 -> 0.8644 | 0.3812 -> 0.3812 | 0.3658 | item 1 |
+
+**22 arms did not change at all**: `B3-best-static`, `B4-query-type-routing`, `B6-latency-aware-routing`, `B7-edf-feasibility`, `B8-utility-per-gpu-second`, `always-cloud-fcfs`, `clockwork`, `device-only`, `eco-llm`, `edf-service-time`, `ekya`, `hindsight-oracle`, `hybrid-llm`, `inar-vl`, `mooncake`, `perllm`, `random-admission`, `round-robin`, `routellm`, `static-partition`, `tuned-engine`, `uniscale`.
+
+## 20. The two arms that changed outside the pre-declared set, mechanically
+
+Both read state the harness had never supplied, and neither arm's own rule was edited. The user
+accepted item 3 and item 4 for every arm (one shared observation, fairness rule 1) and required
+the device answer to be charged and the field to be gated by the published mechanism; both are
+done, and both arms keep the field.
+
+**confidence-cascade** (FrugalGPT's scorer / AutoMix's verifier). Its rule is: no committed
+confidence -> DEVICE; confidence below the floor -> CLOUD; otherwise DEVICE. With the floor fitted
+at 0.7358 on DEV questions, 40 of 83 queries escalate and 43 stay on the device. One decision,
+checkable by hand: query `8249a92b...` arrives at 98.0 s with a committed device confidence of
+**0.4866**, which is below 0.7358, so it escalates. Before the amendment the field was always
+None and every query took the first branch, which is why the arm answered all 83 on the device.
+
+**r3-streaming** (the Respond readiness head). `readiness(score, 0.5)` previously read the
+evidence-count surrogate `min(len(evidence)/3, 1)`, a constant 0.667 that always cleared the
+threshold. It now reads the committed confidence: the same query `8249a92b...` has 0.4866 against
+a 0.5 threshold, so the head says "not ready" and the arm DEFERS. **14,744 DEFER actions over the
+run are 12 distinct queries**: the committed confidence of a question never changes, so a deferred
+query is re-decided on exactly the same number at every epoch it becomes visible and is deferred
+again until the run ends. Those 12 queries are counted as untimely.
+
+**DEFERRAL IS UNEXERCISED in this harness, for r3-streaming and for thinking-qwenvl-atdm.** The
+per-query device confidence is STATIC - the committed tables give one value per question - so a
+deferral can never gain evidence, which is exactly what both arms' deferral mechanisms exist to
+do. The harness now honours `defer_s`, so a DEFER count is a property of the arm rather than of
+the 1-s tick, and a starved query counts as untimely; but **both arms' recall results are marked
+"deferral unexercised"** here and in their cards, and no claim about either mechanism may be made
+from them.
+
+## 21. B10 and B11 now fire, and what that costs B10
+
+**B11 slices.** 4 sliced MATERIALIZEs, and the engine executes them: `slice_steps` 0 -> 14 (ALL
+set) and 12 on EVAL, with 88 of 88 recalls answered on time. The ordering fix is what did it, and
+a session materialized in the same tick as its CLOUD recall now carries that recall's answer
+rather than paying for a second request.
+
+**B10 holds, and misses the deadline.** 0 DEFERs -> 403 (ALL) / 424 (EVAL), and its recall timely
+accuracy falls from 0.381 to 0.000 (ALL) / 0.009 (EVAL). The trace is hand-checkable: query
+`48d60ecc...` arrives at 31.0 s with a 36.0 s deadline and an 11,050-token COLD build whose
+predicted engine time is 2.456 s. P2's slack guard releases at
+`36.0 - (2.456 x 1.321 + 0.25) = 32.506 s`; at 31.0 and 32.0 the rule returns `hold` (an episodic
+call is always due inside 2.456 s at a 0.5-s cadence) and at 33.0 - the first decision epoch at or
+after 32.506 - it returns `slack` and admits. The build then finishes after the 36.0 s deadline.
+**This is P2 behaving exactly as StudySLICE1 measured it, against a deadline it was never run
+at**: StudySLICE1 ran P2 at a 10-s recall deadline, and this cell's is 5 s. It is reported, not
+tuned.
+
+## 22. Limitations this amendment adds
+
+1. **The device answer is charged but its COMPUTE is not.** An arm that reads
+   `device_answer_confidence` waits StudyD8's 0.567 s before it may act, and a DEVICE answer is
+   delivered at that time; no device GPU-seconds are charged, because the budget in this harness
+   meters the cloud replica only.
+2. **0.567 s is a RULE.** StudyF4 measured device recall ACCURACY, not latency; the nearest
+   committed device-side request latency is StudyD8 arm A total p50. StudySIM1c's limitation on
+   it still applies.
+3. **The committed device confidence is a PROXY twice over.** It is StudyE7's H100 4B on
+   StudyRH4's D2 input (the suite's documented DEVICE PROXY), not the Jetson. The true-device
+   table (StudyF4 Part A, N = 1, `answer_logprob`) exists and covers 843 questions, but it is a
+   different representation - a last-3-s window, not D2 - and the two agree weakly per question
+   (Spearman rho **0.106** over the 837 questions both cover; medians 0.753 against 0.925). Any
+   confidence-gated cascade's behaviour therefore depends on WHICH device table it reads, and
+   that is a finding this amendment did not look for.
+4. **B11 cannot align each link** at a 1.0-s decision epoch; declared under fairness rule 4.
+5. **B10's schedule is predicted, not looked up** (the cadence-only model of StudySLICE1 Part
+   D-b), which is strictly less information than the live harness's own lookup.
+
+## 23. Amendment 2: the StudySIM1c scoped sweep, re-run with the fixes
+
+**UNCALIBRATED SIMULATOR (gate 19/29, out-of-sample fail): secondary, not headline.** StudySIM1d-validate's out-of-sample check failed at 15/19 against an 80 % bar and the calibration gate stands at 19/29. The HEADLINE evaluation runs LIVE on the H100 through the StudySLICE1 harness (StudyLIVE1-port). Nothing in this section is a headline number, and no number here may be cited as one.
+
+CPU only on flash: no GPU, no model server, no inference. The sweep is the StudySIM1c scoped sweep (one 32B replica, NO host-offload tier) re-run after amendment 2, on the finer fleet ladder StudySIM1d section 5 proposed.
+
+| | |
+|---|---|
+| runs | 59940 |
+| cells (arm x mix x fleet x deadline) | 2997 |
+| fleet ladder | 1, 2, 3, 4, 5, 6, 8 (anchors 16, 32) |
+| deadlines (s) | 2, 5, 10 |
+| seeds per cell | 20 |
+| mixes | episodic-dominant, balanced, recall-dominant |
+| arms | 37, of which 33 are compared |
+| excluded from every comparison | `B10-blocking-aware-admission`, `B11-naive-slicing` |
+| why | after amendment 2 these ARE StudySLICE1's P2 and P3_2048, whose mechanism is per-link timing; a 1.0-s decision epoch cannot express it, so they are reported separately and never ranked against the other arms |
+| reported separately (reads the future) | `hindsight-oracle`, `rh8-demand-aware-ORACLE` |
+
+References, unchanged: cloud-only delivered challenge mAP **0.5675** (StudyE9c), device-only **0.4776**.
+
+### 23.1 episodic-dominant, deadline 5 s
+
+*UNCALIBRATED SIMULATOR (gate 19/29, out-of-sample fail): secondary, not headline. B10 and B11 are not in this table.*
+
+| arm | F=1 | F=2 | F=3 | F=4 | F=5 | F=6 | F=8 | F=16 | F=32 | mean |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `simplestream` | 0.5420 | 0.5452 | 0.5433 | 0.5324 | 0.5318 | 0.5294 | 0.5294 | 0.4607 | 0.4617 | 0.5195 |
+| `rh8-demand-aware-causal` | 0.5420 | 0.5452 | 0.5433 | 0.5324 | 0.5318 | 0.5294 | 0.5294 | 0.4607 | 0.4617 | 0.5195 |
+| `preble` | 0.5420 | 0.5452 | 0.5433 | 0.5324 | 0.5318 | 0.5294 | 0.5294 | 0.4607 | 0.4617 | 0.5195 |
+| `kvflow` | 0.5420 | 0.5452 | 0.5433 | 0.5324 | 0.5318 | 0.5294 | 0.5294 | 0.4607 | 0.4617 | 0.5195 |
+| `edf-service-time` | 0.5420 | 0.5452 | 0.5433 | 0.5324 | 0.5318 | 0.5294 | 0.5294 | 0.4607 | 0.4617 | 0.5195 |
+| `covstream` | 0.5420 | 0.5452 | 0.5433 | 0.5324 | 0.5318 | 0.5294 | 0.5294 | 0.4607 | 0.4617 | 0.5195 |
+| `always-cloud-fcfs` | 0.5420 | 0.5452 | 0.5433 | 0.5324 | 0.5318 | 0.5294 | 0.5294 | 0.4607 | 0.4617 | 0.5195 |
+| `B7-edf-feasibility` | 0.5420 | 0.5452 | 0.5433 | 0.5324 | 0.5318 | 0.5294 | 0.5294 | 0.4607 | 0.4617 | 0.5195 |
+| `B3-best-static` | 0.5420 | 0.5452 | 0.5433 | 0.5324 | 0.5318 | 0.5294 | 0.5294 | 0.4607 | 0.4617 | 0.5195 |
+| `tuned-engine` | 0.5420 | 0.5452 | 0.5432 | 0.5323 | 0.5317 | 0.5298 | 0.5290 | 0.4607 | 0.4617 | 0.5195 |
+| `streamscout` | 0.5419 | 0.5449 | 0.5433 | 0.5324 | 0.5315 | 0.5295 | 0.5293 | 0.4607 | 0.4617 | 0.5195 |
+| `routellm` | 0.5419 | 0.5450 | 0.5433 | 0.5320 | 0.5310 | 0.5295 | 0.5277 | 0.4601 | 0.4623 | 0.5192 |
+| `mooncake` | 0.5423 | 0.5441 | 0.5394 | 0.5296 | 0.5287 | 0.5271 | 0.5152 | 0.4607 | 0.4617 | 0.5165 |
+| `clockwork` | 0.5423 | 0.5441 | 0.5394 | 0.5296 | 0.5287 | 0.5271 | 0.5152 | 0.4607 | 0.4617 | 0.5165 |
+| `B8-utility-per-gpu-second` | 0.5181 | 0.5204 | 0.5214 | 0.5138 | 0.5185 | 0.5138 | 0.5178 | 0.5117 | 0.4682 | 0.5115 |
+| `B9-noHost` | 0.5475 | 0.5512 | 0.5497 | 0.5390 | 0.4634 | 0.4634 | 0.4733 | 0.4781 | 0.4747 | 0.5045 |
+| `eco-llm` | 0.5475 | 0.5512 | 0.5496 | 0.5388 | 0.4637 | 0.4645 | 0.4741 | 0.4752 | 0.4744 | 0.5043 |
+| `videostorm/maxmin` | 0.5475 | 0.5512 | 0.5496 | 0.5388 | 0.4632 | 0.4642 | 0.4751 | 0.4746 | 0.4747 | 0.5043 |
+| `videostorm/maxsum` | 0.5475 | 0.5512 | 0.5496 | 0.5388 | 0.4646 | 0.4642 | 0.4741 | 0.4747 | 0.4736 | 0.5042 |
+| `round-robin` | 0.5420 | 0.5452 | 0.5130 | 0.4969 | 0.4936 | 0.4891 | 0.4914 | 0.4788 | 0.4825 | 0.5036 |
+| `ekya` | 0.5469 | 0.5491 | 0.5410 | 0.5120 | 0.4636 | 0.4642 | 0.4752 | 0.4752 | 0.4744 | 0.5002 |
+| `inar-vl` | 0.5475 | 0.5512 | 0.5496 | 0.5388 | 0.4617 | 0.4584 | 0.4665 | 0.4614 | 0.4622 | 0.4997 |
+| `B6-latency-aware-routing` | 0.5475 | 0.5512 | 0.5496 | 0.5388 | 0.4617 | 0.4584 | 0.4665 | 0.4614 | 0.4622 | 0.4997 |
+| `static-partition` | 0.4776 | 0.5051 | 0.5167 | 0.5006 | 0.4948 | 0.5010 | 0.5024 | 0.5007 | 0.4709 | 0.4966 |
+| `random-admission` | 0.5037 | 0.5025 | 0.4982 | 0.4984 | 0.4964 | 0.4982 | 0.4923 | 0.4872 | 0.4675 | 0.4938 |
+| `r3-streaming` | 0.4776 | 0.4776 | 0.4858 | 0.4892 | 0.4812 | 0.4855 | 0.4835 | 0.4728 | 0.4773 | 0.4812 |
+| `uniscale` | 0.4710 | 0.4842 | 0.4884 | 0.4937 | 0.4841 | 0.4795 | 0.4781 | 0.4685 | 0.4731 | 0.4801 |
+| `perllm` | 0.4777 | 0.4776 | 0.4776 | 0.4769 | 0.4780 | 0.4780 | 0.4779 | 0.4775 | 0.4785 | 0.4777 |
+| `device-only` | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 |
+| `hybrid-llm` | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 |
+| `confidence-cascade` | 0.4744 | 0.4762 | 0.4751 | 0.4696 | 0.4762 | 0.4751 | 0.4766 | 0.4701 | 0.4562 | 0.4722 |
+| `B4-query-type-routing` | 0.4744 | 0.4762 | 0.4750 | 0.4698 | 0.4761 | 0.4751 | 0.4762 | 0.4703 | 0.4484 | 0.4713 |
+| `thinking-qwenvl-atdm` | 0.4681 | 0.4678 | 0.4665 | 0.4645 | 0.4701 | 0.4658 | 0.4682 | 0.4658 | 0.4638 | 0.4667 |
+
+### 23.2 balanced, deadline 5 s
+
+*UNCALIBRATED SIMULATOR (gate 19/29, out-of-sample fail): secondary, not headline. B10 and B11 are not in this table.*
+
+| arm | F=1 | F=2 | F=3 | F=4 | F=5 | F=6 | F=8 | F=16 | F=32 | mean |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `simplestream` | 0.5436 | 0.5470 | 0.5357 | 0.5317 | 0.5315 | 0.5258 | 0.5032 | 0.4513 | 0.4577 | 0.5142 |
+| `edf-service-time` | 0.5436 | 0.5470 | 0.5357 | 0.5317 | 0.5315 | 0.5258 | 0.5032 | 0.4513 | 0.4577 | 0.5142 |
+| `always-cloud-fcfs` | 0.5436 | 0.5470 | 0.5357 | 0.5317 | 0.5315 | 0.5258 | 0.5032 | 0.4513 | 0.4577 | 0.5142 |
+| `B7-edf-feasibility` | 0.5436 | 0.5470 | 0.5357 | 0.5317 | 0.5315 | 0.5258 | 0.5032 | 0.4513 | 0.4577 | 0.5142 |
+| `B3-best-static` | 0.5436 | 0.5470 | 0.5357 | 0.5317 | 0.5315 | 0.5258 | 0.5032 | 0.4513 | 0.4577 | 0.5142 |
+| `tuned-engine` | 0.5436 | 0.5470 | 0.5356 | 0.5318 | 0.5314 | 0.5262 | 0.5028 | 0.4514 | 0.4577 | 0.5142 |
+| `routellm` | 0.5432 | 0.5470 | 0.5353 | 0.5313 | 0.5312 | 0.5255 | 0.5044 | 0.4507 | 0.4554 | 0.5138 |
+| `streamscout` | 0.5436 | 0.5469 | 0.5357 | 0.5313 | 0.5315 | 0.5251 | 0.5004 | 0.4511 | 0.4577 | 0.5137 |
+| `rh8-demand-aware-causal` | 0.5436 | 0.5470 | 0.5357 | 0.5317 | 0.5315 | 0.5240 | 0.4969 | 0.4513 | 0.4577 | 0.5133 |
+| `kvflow` | 0.5436 | 0.5470 | 0.5357 | 0.5317 | 0.5315 | 0.5240 | 0.4969 | 0.4513 | 0.4577 | 0.5133 |
+| `preble` | 0.5436 | 0.5470 | 0.5357 | 0.5317 | 0.5315 | 0.5241 | 0.4963 | 0.4513 | 0.4577 | 0.5132 |
+| `covstream` | 0.5436 | 0.5470 | 0.5357 | 0.5317 | 0.5297 | 0.5246 | 0.4918 | 0.4513 | 0.4577 | 0.5126 |
+| `mooncake` | 0.5438 | 0.5440 | 0.5339 | 0.5271 | 0.5240 | 0.5108 | 0.4601 | 0.4513 | 0.4577 | 0.5059 |
+| `clockwork` | 0.5438 | 0.5440 | 0.5339 | 0.5271 | 0.5240 | 0.5108 | 0.4601 | 0.4513 | 0.4577 | 0.5059 |
+| `B8-utility-per-gpu-second` | 0.5164 | 0.5208 | 0.5148 | 0.5133 | 0.5174 | 0.5193 | 0.5154 | 0.4549 | 0.4714 | 0.5049 |
+| `round-robin` | 0.5436 | 0.5470 | 0.5129 | 0.4962 | 0.4949 | 0.4881 | 0.4802 | 0.4807 | 0.4815 | 0.5028 |
+| `videostorm/maxmin` | 0.5493 | 0.5514 | 0.5489 | 0.5313 | 0.4531 | 0.4618 | 0.4709 | 0.4701 | 0.4756 | 0.5014 |
+| `B9-noHost` | 0.5493 | 0.5513 | 0.5492 | 0.5319 | 0.4549 | 0.4637 | 0.4711 | 0.4677 | 0.4716 | 0.5012 |
+| `eco-llm` | 0.5493 | 0.5514 | 0.5489 | 0.5313 | 0.4540 | 0.4613 | 0.4710 | 0.4693 | 0.4721 | 0.5010 |
+| `videostorm/maxsum` | 0.5493 | 0.5514 | 0.5489 | 0.5313 | 0.4532 | 0.4613 | 0.4710 | 0.4690 | 0.4728 | 0.5009 |
+| `ekya` | 0.5493 | 0.5467 | 0.5419 | 0.4839 | 0.4535 | 0.4630 | 0.4717 | 0.4696 | 0.4715 | 0.4946 |
+| `inar-vl` | 0.5493 | 0.5514 | 0.5489 | 0.5313 | 0.4503 | 0.4500 | 0.4566 | 0.4522 | 0.4569 | 0.4941 |
+| `B6-latency-aware-routing` | 0.5493 | 0.5514 | 0.5489 | 0.5313 | 0.4503 | 0.4500 | 0.4566 | 0.4522 | 0.4569 | 0.4941 |
+| `random-admission` | 0.5012 | 0.5058 | 0.4978 | 0.4999 | 0.4987 | 0.4948 | 0.4911 | 0.4784 | 0.4660 | 0.4926 |
+| `static-partition` | 0.4776 | 0.4999 | 0.5159 | 0.4983 | 0.4935 | 0.5048 | 0.4947 | 0.4757 | 0.4689 | 0.4921 |
+| `r3-streaming` | 0.4776 | 0.4776 | 0.4941 | 0.4826 | 0.4801 | 0.4860 | 0.4807 | 0.4782 | 0.4743 | 0.4813 |
+| `uniscale` | 0.4729 | 0.4833 | 0.4836 | 0.4872 | 0.4913 | 0.4828 | 0.4716 | 0.4619 | 0.4713 | 0.4784 |
+| `perllm` | 0.4775 | 0.4779 | 0.4776 | 0.4772 | 0.4776 | 0.4786 | 0.4768 | 0.4769 | 0.4788 | 0.4777 |
+| `hybrid-llm` | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4777 | 0.4776 | 0.4776 |
+| `device-only` | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 |
+| `confidence-cascade` | 0.4720 | 0.4735 | 0.4760 | 0.4739 | 0.4734 | 0.4748 | 0.4716 | 0.4715 | 0.4388 | 0.4695 |
+| `B4-query-type-routing` | 0.4720 | 0.4736 | 0.4760 | 0.4731 | 0.4740 | 0.4749 | 0.4707 | 0.4689 | 0.4363 | 0.4688 |
+| `thinking-qwenvl-atdm` | 0.4653 | 0.4652 | 0.4660 | 0.4628 | 0.4669 | 0.4665 | 0.4657 | 0.4698 | 0.4489 | 0.4641 |
+
+### 23.3 recall-dominant, deadline 5 s
+
+*UNCALIBRATED SIMULATOR (gate 19/29, out-of-sample fail): secondary, not headline. B10 and B11 are not in this table.*
+
+| arm | F=1 | F=2 | F=3 | F=4 | F=5 | F=6 | F=8 | F=16 | F=32 | mean |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `tuned-engine` | 0.5445 | 0.5461 | 0.5398 | 0.5464 | 0.5459 | 0.5404 | 0.5404 | 0.5226 | 0.4630 | 0.5321 |
+| `simplestream` | 0.5445 | 0.5459 | 0.5399 | 0.5464 | 0.5457 | 0.5402 | 0.5405 | 0.5196 | 0.4623 | 0.5317 |
+| `edf-service-time` | 0.5445 | 0.5459 | 0.5399 | 0.5464 | 0.5457 | 0.5402 | 0.5405 | 0.5196 | 0.4623 | 0.5317 |
+| `always-cloud-fcfs` | 0.5445 | 0.5459 | 0.5399 | 0.5464 | 0.5457 | 0.5402 | 0.5405 | 0.5196 | 0.4623 | 0.5317 |
+| `B7-edf-feasibility` | 0.5445 | 0.5459 | 0.5399 | 0.5464 | 0.5457 | 0.5402 | 0.5405 | 0.5196 | 0.4623 | 0.5317 |
+| `B3-best-static` | 0.5445 | 0.5459 | 0.5399 | 0.5464 | 0.5457 | 0.5402 | 0.5405 | 0.5196 | 0.4623 | 0.5317 |
+| `streamscout` | 0.5446 | 0.5462 | 0.5402 | 0.5464 | 0.5464 | 0.5407 | 0.5386 | 0.5181 | 0.4606 | 0.5313 |
+| `routellm` | 0.5441 | 0.5454 | 0.5398 | 0.5462 | 0.5456 | 0.5400 | 0.5398 | 0.5187 | 0.4621 | 0.5313 |
+| `covstream` | 0.5445 | 0.5459 | 0.5399 | 0.5464 | 0.5447 | 0.5382 | 0.5397 | 0.5184 | 0.4625 | 0.5311 |
+| `videostorm/maxmin` | 0.5523 | 0.5514 | 0.5470 | 0.5508 | 0.5508 | 0.5465 | 0.5410 | 0.4689 | 0.4697 | 0.5309 |
+| `videostorm/maxsum` | 0.5523 | 0.5514 | 0.5470 | 0.5508 | 0.5508 | 0.5465 | 0.5410 | 0.4688 | 0.4695 | 0.5309 |
+| `eco-llm` | 0.5523 | 0.5514 | 0.5470 | 0.5508 | 0.5508 | 0.5465 | 0.5410 | 0.4685 | 0.4695 | 0.5309 |
+| `rh8-demand-aware-causal` | 0.5445 | 0.5459 | 0.5399 | 0.5464 | 0.5457 | 0.5407 | 0.5380 | 0.5128 | 0.4623 | 0.5307 |
+| `kvflow` | 0.5445 | 0.5459 | 0.5399 | 0.5464 | 0.5457 | 0.5407 | 0.5380 | 0.5128 | 0.4623 | 0.5307 |
+| `preble` | 0.5445 | 0.5459 | 0.5399 | 0.5464 | 0.5457 | 0.5407 | 0.5380 | 0.5124 | 0.4623 | 0.5306 |
+| `round-robin` | 0.5445 | 0.5459 | 0.5399 | 0.5464 | 0.5457 | 0.5404 | 0.5405 | 0.4908 | 0.4758 | 0.5300 |
+| `B9-noHost` | 0.5520 | 0.5514 | 0.5472 | 0.5504 | 0.5494 | 0.5404 | 0.5376 | 0.4696 | 0.4708 | 0.5299 |
+| `inar-vl` | 0.5523 | 0.5514 | 0.5470 | 0.5508 | 0.5508 | 0.5465 | 0.5410 | 0.4671 | 0.4609 | 0.5298 |
+| `B6-latency-aware-routing` | 0.5523 | 0.5514 | 0.5470 | 0.5508 | 0.5508 | 0.5465 | 0.5410 | 0.4671 | 0.4609 | 0.5298 |
+| `mooncake` | 0.5433 | 0.5441 | 0.5360 | 0.5427 | 0.5400 | 0.5333 | 0.5345 | 0.5081 | 0.4634 | 0.5273 |
+| `clockwork` | 0.5433 | 0.5441 | 0.5360 | 0.5427 | 0.5400 | 0.5333 | 0.5345 | 0.5081 | 0.4634 | 0.5273 |
+| `ekya` | 0.5512 | 0.5467 | 0.5400 | 0.5439 | 0.5406 | 0.5331 | 0.5309 | 0.4717 | 0.4697 | 0.5253 |
+| `B8-utility-per-gpu-second` | 0.5180 | 0.5188 | 0.5152 | 0.5190 | 0.5221 | 0.5161 | 0.5169 | 0.5167 | 0.4904 | 0.5148 |
+| `static-partition` | 0.5010 | 0.5039 | 0.5003 | 0.5049 | 0.5097 | 0.5023 | 0.5039 | 0.4956 | 0.4918 | 0.5015 |
+| `random-admission` | 0.5001 | 0.5029 | 0.4989 | 0.5004 | 0.5012 | 0.5043 | 0.4946 | 0.4956 | 0.4879 | 0.4984 |
+| `uniscale` | 0.4876 | 0.4860 | 0.4837 | 0.4862 | 0.4857 | 0.4822 | 0.4791 | 0.4831 | 0.4660 | 0.4822 |
+| `r3-streaming` | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4802 | 0.4802 | 0.4782 |
+| `perllm` | 0.4777 | 0.4779 | 0.4771 | 0.4779 | 0.4774 | 0.4781 | 0.4775 | 0.4776 | 0.4785 | 0.4777 |
+| `hybrid-llm` | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 |
+| `device-only` | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 | 0.4776 |
+| `confidence-cascade` | 0.4737 | 0.4771 | 0.4749 | 0.4751 | 0.4752 | 0.4735 | 0.4746 | 0.4716 | 0.4716 | 0.4741 |
+| `B4-query-type-routing` | 0.4737 | 0.4769 | 0.4747 | 0.4746 | 0.4751 | 0.4735 | 0.4743 | 0.4703 | 0.4675 | 0.4734 |
+| `thinking-qwenvl-atdm` | 0.4658 | 0.4663 | 0.4683 | 0.4653 | 0.4663 | 0.4662 | 0.4690 | 0.4661 | 0.4626 | 0.4662 |
+
+### 23.4 The two arms excluded from the comparison, reported alone
+
+*UNCALIBRATED SIMULATOR (gate 19/29, out-of-sample fail): secondary, not headline. after amendment 2 these ARE StudySLICE1's P2 and P3_2048, whose mechanism is per-link timing; a 1.0-s decision epoch cannot express it, so they are reported separately and never ranked against the other arms.*
+
+| arm | mix | F=1 | F=2 | F=3 | F=4 | F=5 | F=6 | F=8 | F=16 | F=32 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `B10-blocking-aware-admission` | episodic-dominant | 0.5420 | 0.5451 | 0.5433 | 0.5321 | 0.5318 | 0.5289 | 0.5274 | 0.4607 | 0.4617 |
+| `B10-blocking-aware-admission` | balanced | 0.5436 | 0.5470 | 0.5353 | 0.5312 | 0.5319 | 0.5253 | 0.4874 | 0.4512 | 0.4577 |
+| `B10-blocking-aware-admission` | recall-dominant | 0.5445 | 0.5456 | 0.5396 | 0.5461 | 0.5440 | 0.5396 | 0.5383 | 0.5235 | 0.4624 |
+| `B11-naive-slicing` | episodic-dominant | 0.5420 | 0.5452 | 0.5432 | 0.5323 | 0.5317 | 0.5298 | 0.5290 | 0.4607 | 0.4617 |
+| `B11-naive-slicing` | balanced | 0.5436 | 0.5470 | 0.5356 | 0.5318 | 0.5314 | 0.5243 | 0.4939 | 0.4514 | 0.4577 |
+| `B11-naive-slicing` | recall-dominant | 0.5445 | 0.5461 | 0.5398 | 0.5464 | 0.5459 | 0.5407 | 0.5383 | 0.5184 | 0.4631 |
+
+### 23.5 What this sweep does and does not establish
+
+1. **It is not evidence about the H100.** The simulator is uncalibrated out of sample (15/19) and its gate is 19/29. The tables order arms INSIDE the simulator's own world.
+2. **The amendment-2 fixes changed the ordering**, which is the point of the re-run: the arms that the fixes moved off the device-only floor (VideoStorm both objectives, B9-noHost, covstream, simplestream, streamscout, the KV arms) now appear above it here, where before the fixes they sat at 0.4776 by construction.
+3. **B10 and B11 are reported alone** for the reason in the table above; no ranking includes them.
+4. **The tied rows are real, not short-circuiting** (consistency check 3). At the low fleet levels many arms agree to four decimals because, with nothing binding, they all send every episodic call to the cloud at the same cadence: they differ only in recall placement, session retention or order, and none of those binds until the replica saturates. The arms separate from F=5 upward, where the budget and the KV capacity start to bind, and the per-cell spread (min, max and the bootstrap CI over the 20 seeds) is in `sim1c_amend2_cells.csv` for every cell. References cross-check unchanged: device-only sits at exactly 0.4776 at every level, as it must, and no arm exceeds the cloud-only 0.5675.
+5. **Recall metrics are EVAL-split only** (the pre-registered S-EMBER DEV/EVAL split), so they are not comparable with the committed StudySIM1c recall numbers, which were computed on the full question set and are SUPERSEDED FOR COMPARISON, not invalid.
+
+Artifacts: `results/orchestration/sim1c_amend2/sim1c_runs.jsonl.gz` (59940 runs), `sim1c_amend2_cells.csv` (2997 cells), `sim1c_amend2_summary.json`.

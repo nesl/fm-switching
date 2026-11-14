@@ -71,3 +71,27 @@ to order); AutoMix's POMDP meta-verifier; both papers' trained scorers (they nee
 | `trigger_rate` | 0.20 primary | StudyE9 / E9b's primary trigger rate |
 | `tau_trigger` | −7.0009 | fitted on 3,000 StudyD3 development-split negative scores |
 | `confidence_floor` | caller-supplied, `None` by default | **no committed StudyD13 confidence distribution was used to pick one**; with `None` the cascade escalates whenever a device answer exists, which is the conservative reading. FLAGGED. |
+
+## StudyB-baselines amendment 2 (2026-11-13)
+
+**Item 3: the confidence is committed, and item 3b: it is declared and charged.** The recall
+stage reads StudyE7 Job A's per-question `letter_probs` (the 4B-D2 configuration the harness
+answers a DEVICE recall with) through `device_confidence.py`. FrugalGPT's scorer and AutoMix's
+verifier both read the SMALL MODEL'S ANSWER, so `reads_device_answer = True` and the harness
+charges that device answer (StudyD8's 0.567 s, a RULE) before the arm's next action on the query.
+
+**The floor is now FITTED, on a pre-registered DEV split.** Until this amendment
+`confidence_floor` was None, and the rule `if c is None -> DEVICE; elif floor is None or c < floor
+-> CLOUD; else DEVICE` therefore escalated EVERY query that had a committed probability: 81 of 83
+in the representative cell, with the 2 that stayed on the device being the ones with no committed
+value. S-EMBER had no development split, so amendment 2 pre-registered one (`sember_split.py`:
+split by video on sha256(video_id), lowest 30 % of the digest order to DEV, stratified by video
+length bucket) and the floor is the **median committed device confidence over DEV questions =
+0.7358**. Every recall metric in this suite is now reported on EVAL questions only, so the floor
+is not fitted on anything it is scored over.
+
+**Measured consequence** on the representative cell. On the pre-amendment question set, so that
+the before and after are the same cell: recall timely accuracy 0.3048 -> 0.3405 and recall
+decisions 83 DEVICE -> 40 CLOUD + 43 DEVICE (the 43 are the queries whose committed device
+confidence is at or above the fitted floor, plus the 2 with no committed value at all). On the EVAL split, which is what every recall metric
+is now reported on, the arm's timely accuracy is 0.3330.

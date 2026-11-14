@@ -36,6 +36,10 @@ class ThinkingQwenVLAdapted(Policy):
     paper = ("Zhang et al., Progressive Online Video Understanding with Evidence-Aligned Timing "
              "and Transparent Decisions, arXiv:2604.18459")
     decides = ("recall_decision", "defer_s", "episodic_mode")
+    # amendment 2 item 3b (2026-11-13): this baseline's PUBLISHED mechanism observes the
+    # device-side model's own answer before deciding, so it receives
+    # `device_answer_confidence` and the harness charges that device answer.
+    reads_device_answer = True
     defaults_used = ("cadence_s", "frame_count", "representation", "session_action", "order")
     restricts_action_space = "decides readiness / stopping only"
     restriction_reason = ("it is a COMPONENT baseline for response timing, which is the property "

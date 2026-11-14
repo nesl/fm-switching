@@ -55,3 +55,26 @@ paper's token and latency measurements.
 |---|---|---|
 | thresholds | distilled, `[-9.664, -10.970, -inf]` | `fit_thresholds` on 6,010 StudyD3 development rows |
 | last threshold | `-inf` | the paper: the deepest view must answer |
+
+## StudyB-baselines amendment 2 (2026-11-13)
+
+**Item 2: the episodic stream action follows `DEFAULTS["episodic_mode"]`** (which is `cloud`),
+as this card and the module docstring already said it did. The previous literal
+`StreamAction(sid, "local")` was an adapter bug, and it is why StudySIM1c scored this arm at
+exactly the device-only challenge mAP.
+
+**Item 3: the stage signal is a COMMITTED device-answer probability.** `device_confidence.py`
+reads StudyE7 Job A's per-question `letter_probs` for the 4B-D2 configuration the harness answers
+a DEVICE recall with (839 of 845 questions). Nothing is synthesized: a question with no committed
+probability keeps the old evidence-count surrogate. The cascade's rule is unchanged.
+
+**Item 3b: the device answer is DECLARED and CHARGED.** StreamScout's published mechanism is a
+cascade - it looks at the shallowest view first - so it observes the device-side model's own
+answer before deciding. `reads_device_answer = True`, and the harness therefore withholds a query
+until the device answer that produced the confidence has completed (StudyD8's 0.567 s, a RULE)
+and delivers a DEVICE decision at that time rather than at the decision epoch.
+
+**Measured consequence** on the representative cell: 83 recall decisions go from 83 DEVICE to
+81 CLOUD + 2 DEVICE, and the 2 that stay are exactly the questions with no committed probability.
+With the floor the cascade is no longer degenerate, and challenge mAP rises from 0.4776 (the
+device-only value) to 0.5164 because the stream action is now the documented default.

@@ -68,6 +68,12 @@ class Query:
     mu: float = 1.0          # Section 6.4 running average R_k / D_k(c)
     alloc: float = 0.0       # a_k
     config: Optional[Config] = None
+    # StudyB-baselines amendment 2 (2026-11-13), ADAPTATION A4b. Our L is not the paper's
+    # BACKLOG: it is the tier's delivery HOLD SHIFT, a fixed property of a configuration. When
+    # this map is supplied, `predict_lag` reads the chosen configuration's OWN hold shift and
+    # does NOT run Eq. (2)'s backlog recursion over the horizon. Left None, Eq. (2) is used
+    # exactly as the paper writes it, so the reconstruction itself is unchanged.
+    lag_by_config: Optional[Dict[str, float]] = None
 
 
 def utility(q: Query, quality: float, lag_s: float) -> float:
@@ -78,7 +84,15 @@ def utility(q: Query, quality: float, lag_s: float) -> float:
 
 
 def predict_lag(q: Query, alloc: float, cfg: Config, horizon_s: float) -> float:
-    """Equation (2), Section 6.2.1, with Section 6.4's mis-estimation correction."""
+    """Equation (2), Section 6.2.1, with Section 6.4's mis-estimation correction.
+
+    If the caller supplied `q.lag_by_config` (our ADAPTATION A4b), the configuration's own
+    predicted delivery lag is returned instead and no recursion is run: feeding a constant hold
+    shift into a backlog recursion adds the whole horizon every period and makes every cloud
+    configuration look a horizon behind, which is not what the paper's L means.
+    """
+    if q.lag_by_config is not None:
+        return float(q.lag_by_config.get(cfg.name, q.lag_s))
     if cfg.demand <= 0:
         return max(q.lag_s - horizon_s, 0.0)
     drained = horizon_s * (alloc / cfg.demand) * (1.0 / max(q.mu, 1e-9))
@@ -140,6 +154,78 @@ def allocate_maxmin(queries: Sequence[Query], capacity: float, horizon_s: float,
         cfg[worst.qid], cur[worst.qid] = c, u
         spent += delta
     return {qid: (alloc[qid], cfg[qid]) for qid in alloc}
+
+
+# ================================================================ discrete-configuration
+# allocation (ADAPTATION A5b, StudyB-baselines amendment 2, 2026-11-13)
+#
+# The paper allocates a CONTINUOUS resource in increments of a small Delta, and Eq. (2) turns
+# more resource into less lag. Our L is a configuration's delivery HOLD SHIFT (ADAPTATION A4b),
+# so utility does not depend on a_k at all and the delta-greedy loops stop at the first step:
+# MaxSum's gain is exactly zero everywhere and MaxMin spends one Delta on one query. The
+# allocation that keeps the paper's CAPACITY semantics in a discrete configuration space is to
+# allocate each query the DEMAND of the configuration it is assigned - a configuration is
+# feasible only while the total allocated demand stays within R - and to keep each heuristic's
+# own ordering: MaxMin improves the currently worst-utility query, MaxSum takes the largest
+# utility gain per unit of demand. Both stop when no feasible improvement remains.
+#
+# The delta-greedy functions above are UNCHANGED and remain the paper's own procedure.
+
+def _start_config(q: Query) -> Config:
+    """a_k = 0 in the paper: the cheapest configuration, ties broken towards quality."""
+    return min(q.profile, key=lambda c: (c.demand, -c.quality))
+
+
+def _u(q: Query, c: Config, horizon_s: float) -> float:
+    return utility(q, c.quality, predict_lag(q, c.demand, c, horizon_s))
+
+
+def allocate_discrete(queries: Sequence[Query], capacity: float, horizon_s: float,
+                      objective: str = "maxmin") -> Dict[str, Tuple[float, Config]]:
+    """Eq. (4) (maxmin) or Eq. (3) (maxsum) over a discrete configuration space; see above."""
+    if objective not in ("maxmin", "maxsum"):
+        raise ValueError(objective)
+    assign = {q.qid: _start_config(q) for q in queries}
+    util = {q.qid: _u(q, assign[q.qid], horizon_s) for q in queries}
+    used = sum(assign[q.qid].demand for q in queries)
+    if objective == "maxmin":
+        done: set = set()
+        while len(done) < len(queries):
+            pending = [q for q in queries if q.qid not in done]
+            q = min(pending, key=lambda x: (util[x.qid], x.qid))
+            best = None
+            for c in q.profile:
+                if used - assign[q.qid].demand + c.demand > capacity + 1e-12:
+                    continue
+                u = _u(q, c, horizon_s)
+                if u > util[q.qid] + 1e-12 and (best is None or u > best[1]):
+                    best = (c, u)
+            if best is None:
+                done.add(q.qid)
+                continue
+            used += best[0].demand - assign[q.qid].demand
+            assign[q.qid], util[q.qid] = best[0], best[1]
+    else:
+        while True:
+            best = None
+            for q in queries:
+                for c in q.profile:
+                    d = c.demand - assign[q.qid].demand
+                    if used + d > capacity + 1e-12:
+                        continue
+                    u = _u(q, c, horizon_s)
+                    gain = u - util[q.qid]
+                    if gain <= 1e-12:
+                        continue
+                    ratio = gain / d if d > 1e-12 else float("inf")
+                    if best is None or ratio > best[0]:
+                        best = (ratio, q.qid, c, u, d)
+            if best is None:
+                break
+            _r, qid, c, u, d = best
+            used += d
+            assign[qid], util[qid] = c, u
+    return {q.qid: (assign[q.qid].demand, assign[q.qid]) for q in queries}
 
 
 def placement_score(machine_avail: Sequence[float], machine_util: float, machine_util_max: float,

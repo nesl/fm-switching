@@ -61,3 +61,15 @@ The captioner; the entity-graph builder; retrieval over the graph; the paper's L
 | `edge_cost_s_per_frame` | 0.01 s | declared, not measured (A3) |
 | `graph_cost_s_per_packet` | 0.002 s | declared, not measured (A3) |
 | feature / caption bytes | 4,000 / 400 B | declared, not measured (A3) |
+
+## StudyB-baselines amendment 2 (2026-11-13)
+
+**Item 2: the episodic stream action follows `DEFAULTS["episodic_mode"]`.** The adapter emitted
+`StreamAction(sid, "local")` unconditionally, which was not computed from anything; CoVStream's
+edge-cloud split is about where the SESSION STATE lives, not about forcing every episodic call to
+the device. With the fix its challenge mAP on the representative cell is 0.5169 (ALL) and 0.5163
+(EVAL) instead of the device-only 0.4776, and its session actions are unchanged.
+
+**Item 4 reaches this arm too:** its recall representation choice reads the evidence inventory,
+which now lists RECENT as well as D2. Its rule (prefer D2, then RICH, then RECENT) still selects
+D2, so the representation it picks does not change.

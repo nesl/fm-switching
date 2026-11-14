@@ -1,0 +1,3121 @@
+{
+ "label": "StudyMAP1-bridge: committed live cells scored on StudyE9c's challenge mAP and StudyE9b's streaming AP by replaying each episodic request's MEASURED delivery time through StudyE9b's delivery model on StudyD14b's committed score traces.",
+ "step_s": 0.25,
+ "seed": 0,
+ "n_bootstrap": 2000,
+ "mapping": {
+  "n_ids": 1595,
+  "n_mapped": 1595,
+  "n_unmapped": 0,
+  "unmapped": [],
+  "n_off_grid": 0,
+  "off_grid": [],
+  "exact": true,
+  "rule": "a live request id is a StudyD14 1-s request id; StudyD14b's manifest carries that id on the coinciding 0.25-s grid point, so the mapping is a lookup and never an interpolation"
+ },
+ "validation": {
+  "rule": "every TTFT equal to StudyE9b's constant cloud latency must reproduce StudyE9c's always-cloud 32BI_N1 | measured@25 challenge mAP exactly, and the device fill must reproduce StudyE9c's device-only arm exactly",
+  "latency_s": 0.394966,
+  "hold_shift_steps": 2,
+  "cadence_steps": 2,
+  "cloud": {
+   "expected": 0.5675307471627267,
+   "got": 0.5675307471627266,
+   "difference": -1.1102230246251565e-16,
+   "bit_exact": false
+  },
+  "device": {
+   "expected": 0.47760424491770376,
+   "got": 0.4776042449177038,
+   "difference": 5.551115123125783e-17,
+   "bit_exact": false
+  },
+  "delivery_arrays": {
+   "n_clips": 300,
+   "cloud_identical": 300,
+   "device_identical": 300,
+   "identical": true,
+   "note": "the per-request delivery model returns StudyE9d's `cloud_delivered` arrays bit for bit on every clip, so the DELIVERY MODEL reproduction is exact"
+  },
+  "residual": {
+   "cloud_abs": 1.1102230246251565e-16,
+   "device_abs": 5.551115123125783e-17,
+   "explanation": "StudyE9c computed its committed mAP with scikit-learn's `average_precision_score`; this bridge computes AP with StudyE9d's `ap_fast`, which StudyE9d control (d) verified against it on every real cell with a worst absolute difference of 1.1e-16. The residual here IS that worst case, on a value of 0.57, and it is an AP implementation difference, not a delivery difference"
+  },
+  "PASS": true,
+  "pass_rule": "the delivery arrays must be identical to StudyE9d's on every clip AND the challenge mAP must match StudyE9c's committed value to within one unit in the last place of a double (2.3e-16), which is the committed ap_fast equivalence bound"
+ },
+ "zero_delay_control": {
+  "rule": "zero added delay reproduces the un-delayed stream exactly",
+  "identical": true,
+  "mAP_zero_delay": 0.6233582498318349,
+  "mAP_reference": 0.6233582498318349
+ },
+ "cells": [
+  {
+   "tag": "SLICE1B_P0_C0_N1_L25",
+   "study": "SLICE1B",
+   "policy": "P0",
+   "condition": "C0",
+   "n_frames": 1,
+   "level_pct": 25,
+   "challenge_mAP": 0.48540792908779795,
+   "challenge_mAP_ci": [
+    0.43772157460676864,
+    0.5621619320373724
+   ],
+   "challenge_ap": {
+    "0.5": 0.5788295798217498,
+    "1.0": 0.5148278848881865,
+    "1.5": 0.3625663225534577
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5295671226921359,
+     0.6526776617239236
+    ],
+    "1.0": [
+     0.4527776002008612,
+     0.6026507397036658
+    ],
+    "1.5": [
+     0.2994016117322087,
+     0.4685161685084816
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.01351852949442205,
+    "0.5": 0.011232425949279869,
+    "1.0": 0.011034872380239348,
+    "1.5": 0.009933799987216108
+   },
+   "n_requests_used": 902,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 27,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.4851810986724277,
+    "headroom": -0.0002268304153702494,
+    "grid_steps_touched": 3571,
+    "grid_steps_changed_by_delay": 1644,
+    "fraction_of_grid_changed": 0.4603752450294035,
+    "latency_s_mean": 0.4158881661666884,
+    "latency_s_p99": 0.5251348823529411
+   },
+   "n_rows": 902
+  },
+  {
+   "tag": "SLICE1B_P0_C0_N1_L40",
+   "study": "SLICE1B",
+   "policy": "P0",
+   "condition": "C0",
+   "n_frames": 1,
+   "level_pct": 40,
+   "challenge_mAP": 0.5089992838382603,
+   "challenge_mAP_ci": [
+    0.457089083019134,
+    0.5875091106807186
+   ],
+   "challenge_ap": {
+    "0.5": 0.6006355960732741,
+    "1.0": 0.542962076055479,
+    "1.5": 0.3834001793860281
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5481720778883573,
+     0.6748897148076793
+    ],
+    "1.0": [
+     0.4754545482468011,
+     0.6266425424762372
+    ],
+    "1.5": [
+     0.31653594627225606,
+     0.4899251983304767
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.014630482698983125,
+    "0.5": 0.012135103180947352,
+    "1.0": 0.011995653450102603,
+    "1.5": 0.010680226261406715
+   },
+   "n_requests_used": 1455,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 44,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.510988053508724,
+    "headroom": 0.001988769670463686,
+    "grid_steps_touched": 5846,
+    "grid_steps_changed_by_delay": 2763,
+    "fraction_of_grid_changed": 0.4726308587068081,
+    "latency_s_mean": 0.44039557307459065,
+    "latency_s_p99": 0.6435378823529418
+   },
+   "n_rows": 1455
+  },
+  {
+   "tag": "SLICE1B_P0_C1a_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P0",
+   "condition": "C1a",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483240420316998,
+   "challenge_mAP_ci": [
+    0.43291109531674293,
+    0.5605755463027682
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5122862433419829,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44785866895296933,
+     0.5995287632252896
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.01305495301549993,
+    "0.5": 0.010807528599011042,
+    "1.0": 0.010617588784464055,
+    "1.5": 0.00953160087102266
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0033142918344621353,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 697,
+    "fraction_of_grid_changed": 0.4353529044347283,
+    "latency_s_mean": 0.6134487394957983,
+    "latency_s_p99": 3.3018018823529407
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P0_C1b_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P0",
+   "condition": "C1b",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.4861170279991775,
+   "challenge_mAP_ci": [
+    0.43636528165416866,
+    0.5638924895922208
+   ],
+   "challenge_ap": {
+    "0.5": 0.5762873765315424,
+    "1.0": 0.5126009722725258,
+    "1.5": 0.3694627351934643
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5252473262310889,
+     0.6507206110197858
+    ],
+    "1.0": [
+     0.44823421323542845,
+     0.599524452584372
+    ],
+    "1.5": [
+     0.2994964450254784,
+     0.47715561312568566
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.01310465120948038,
+    "0.5": 0.010838029092621179,
+    "1.0": 0.01064615678226889,
+    "1.5": 0.009552952272840596
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.006190899516641646,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 831,
+    "fraction_of_grid_changed": 0.5190505933791381,
+    "latency_s_mean": 1.0012421680672268,
+    "latency_s_p99": 4.580826882352939
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P0_C4_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P0",
+   "condition": "C4",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.48613353264187115,
+   "challenge_mAP_ci": [
+    0.43636528165416866,
+    0.5639215346908375
+   ],
+   "challenge_ap": {
+    "0.5": 0.5763368904596233,
+    "1.0": 0.5126009722725258,
+    "1.5": 0.3694627351934643
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5252979930539574,
+     0.6507571258385944
+    ],
+    "1.0": [
+     0.44823421323542845,
+     0.599524452584372
+    ],
+    "1.5": [
+     0.2994964450254784,
+     0.47715561312568566
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013097213980309063,
+    "0.5": 0.010830676428947115,
+    "1.0": 0.0106401939371505,
+    "1.5": 0.009549720335418198
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.006207404159335295,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 859,
+    "fraction_of_grid_changed": 0.5365396627108058,
+    "latency_s_mean": 1.0697027394957983,
+    "latency_s_p99": 4.710919882352937
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P1_C1a_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P1",
+   "condition": "C1a",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483240420316998,
+   "challenge_mAP_ci": [
+    0.43291109531674293,
+    0.5605755463027682
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5122862433419829,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44785866895296933,
+     0.5995287632252896
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013059960056065002,
+    "0.5": 0.010812783431511337,
+    "1.0": 0.010622531988309248,
+    "1.5": 0.009536611547588648
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0033142918344621353,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 704,
+    "fraction_of_grid_changed": 0.4397251717676452,
+    "latency_s_mean": 0.6033821680672268,
+    "latency_s_p99": 3.062122882352941
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P1_C1b_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P1",
+   "condition": "C1b",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.48616001910413825,
+   "challenge_mAP_ci": [
+    0.43636528165416866,
+    0.5639591659591904
+   ],
+   "challenge_ap": {
+    "0.5": 0.5763485787105935,
+    "1.0": 0.512668743408357,
+    "1.5": 0.3694627351934643
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5253212980774312,
+     0.6507571258385944
+    ],
+    "1.0": [
+     0.4482666807950712,
+     0.5995418836538416
+    ],
+    "1.5": [
+     0.2994964450254784,
+     0.47715561312568566
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013107218507447236,
+    "0.5": 0.0108417586521694,
+    "1.0": 0.01064341919201256,
+    "1.5": 0.009543325359394336
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0062338906216024,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 832,
+    "fraction_of_grid_changed": 0.5196752029981262,
+    "latency_s_mean": 0.9437255966386554,
+    "latency_s_p99": 3.0997108823529405
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P1_C4_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P1",
+   "condition": "C4",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.4861506371356632,
+   "challenge_mAP_ci": [
+    0.43636528165416866,
+    0.5639435077224796
+   ],
+   "challenge_ap": {
+    "0.5": 0.5763368904596233,
+    "1.0": 0.512652285753902,
+    "1.5": 0.3694627351934643
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5252979930539574,
+     0.6507571258385944
+    ],
+    "1.0": [
+     0.4482505035924828,
+     0.5995257064512532
+    ],
+    "1.5": [
+     0.2994964450254784,
+     0.47715561312568566
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013110132962586347,
+    "0.5": 0.010843787468859214,
+    "1.0": 0.010643266600012288,
+    "1.5": 0.009542106230328019
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0062245086531273475,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 864,
+    "fraction_of_grid_changed": 0.5396627108057465,
+    "latency_s_mean": 0.9978621680672269,
+    "latency_s_p99": 3.4320848823529397
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P2_C1a_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P2",
+   "condition": "C1a",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483240420316998,
+   "challenge_mAP_ci": [
+    0.43291109531674293,
+    0.5605755463027682
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5122862433419829,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44785866895296933,
+     0.5995287632252896
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013071954015537497,
+    "0.5": 0.010823519672069808,
+    "1.0": 0.010631917109276169,
+    "1.5": 0.009547159278518475
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0033142918344621353,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 677,
+    "fraction_of_grid_changed": 0.42286071205496567,
+    "latency_s_mean": 0.49938302521008415,
+    "latency_s_p99": 2.7539418823529407
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P2_C1b_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P2",
+   "condition": "C1b",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.4837702228646812,
+   "challenge_mAP_ci": [
+    0.4335265650159973,
+    0.5613266152635907
+   ],
+   "challenge_ap": {
+    "0.5": 0.5678727466382791,
+    "1.0": 0.5128538164649686,
+    "1.5": 0.3705841054907958
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5173702960145772,
+     0.6423773064218629
+    ],
+    "1.0": [
+     0.44857477105073224,
+     0.5997889081462385
+    ],
+    "1.5": [
+     0.3008371046578519,
+     0.47798606097334867
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013032722021421158,
+    "0.5": 0.010793692737319867,
+    "1.0": 0.010608942468766326,
+    "1.5": 0.009536448855834743
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0038440943821453355,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 785,
+    "fraction_of_grid_changed": 0.49031855090568394,
+    "latency_s_mean": 0.766141025210084,
+    "latency_s_p99": 3.024921882352941
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P2_C4_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P2",
+   "condition": "C4",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.4837372448666814,
+   "challenge_mAP_ci": [
+    0.4335252809136722,
+    0.561280857603007
+   ],
+   "challenge_ap": {
+    "0.5": 0.5678305184704501,
+    "1.0": 0.5127971106387983,
+    "1.5": 0.3705841054907958
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5173072193943214,
+     0.6423773064218629
+    ],
+    "1.0": [
+     0.4483715930503996,
+     0.5997155081475057
+    ],
+    "1.5": [
+     0.3008371046578519,
+     0.47798606097334867
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013025616111338222,
+    "0.5": 0.010788386547148731,
+    "1.0": 0.010603976013765734,
+    "1.5": 0.009532406784842469
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.003811116384145552,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 799,
+    "fraction_of_grid_changed": 0.4990630855715178,
+    "latency_s_mean": 0.8189335966386554,
+    "latency_s_p99": 3.27415388235294
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P3_1024_C1a_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P3_1024",
+   "condition": "C1a",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483240420316998,
+   "challenge_mAP_ci": [
+    0.43291109531674293,
+    0.5605755463027682
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5122862433419829,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44785866895296933,
+     0.5995287632252896
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013063371221318315,
+    "0.5": 0.010817245586018188,
+    "1.0": 0.010627146969968953,
+    "1.5": 0.009543137354096322
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0033142918344621353,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 646,
+    "fraction_of_grid_changed": 0.40349781386633354,
+    "latency_s_mean": 0.4187441680672269,
+    "latency_s_p99": 0.6497468823529411
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P3_1024_C1a_N1_L20",
+   "study": "SLICE1B",
+   "policy": "P3_1024",
+   "condition": "C1a",
+   "n_frames": 1,
+   "level_pct": 20,
+   "challenge_mAP": 0.4820966574623005,
+   "challenge_mAP_ci": [
+    0.4351254820282593,
+    0.5602168919068405
+   ],
+   "challenge_ap": {
+    "0.5": 0.5708372618962805,
+    "1.0": 0.5145395509234811,
+    "1.5": 0.36091315956714
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5217417519324469,
+     0.6465095480398044
+    ],
+    "1.0": [
+     0.45239842837132016,
+     0.6024746332847672
+    ],
+    "1.5": [
+     0.2969280502216856,
+     0.4671717452051844
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013315544987919918,
+    "0.5": 0.011064223037231728,
+    "1.0": 0.010875346303222198,
+    "1.5": 0.009782668578083804
+   },
+   "n_requests_used": 780,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 24,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.48271492941677846,
+    "headroom": 0.0006182719544779447,
+    "grid_steps_touched": 3131,
+    "grid_steps_changed_by_delay": 1500,
+    "fraction_of_grid_changed": 0.47908016608112425,
+    "latency_s_mean": 0.4368408823529412,
+    "latency_s_p99": 0.7124718823529419
+   },
+   "n_rows": 780
+  },
+  {
+   "tag": "SLICE1B_P3_1024_C1b_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P3_1024",
+   "condition": "C1b",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.48341250686420123,
+   "challenge_mAP_ci": [
+    0.43306068206008513,
+    0.5609088651981541
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5128025029835925,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44849533524333085,
+     0.5997880924817852
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013071793840894928,
+    "0.5": 0.01082469164775516,
+    "1.0": 0.010633843531581899,
+    "1.5": 0.009547710567263813
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.003486378381665378,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 682,
+    "fraction_of_grid_changed": 0.4259837601499063,
+    "latency_s_mean": 0.4482027394957983,
+    "latency_s_p99": 0.6764938823529412
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P3_1024_C1b_N1_L20",
+   "study": "SLICE1B",
+   "policy": "P3_1024",
+   "condition": "C1b",
+   "n_frames": 1,
+   "level_pct": 20,
+   "challenge_mAP": 0.48728449880986613,
+   "challenge_mAP_ci": [
+    0.4380855641720862,
+    0.5666295994249331
+   ],
+   "challenge_ap": {
+    "0.5": 0.5708372618962805,
+    "1.0": 0.5145395509234811,
+    "1.5": 0.37647668360983666
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5217417519324469,
+     0.6465095480398044
+    ],
+    "1.0": [
+     0.45239842837132016,
+     0.6024746332847672
+    ],
+    "1.5": [
+     0.3059040754510227,
+     0.4848793019097553
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013332998603226549,
+    "0.5": 0.011078462977129385,
+    "1.0": 0.010887887418920637,
+    "1.5": 0.009791158192837362
+   },
+   "n_requests_used": 780,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 24,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.48271492941677846,
+    "headroom": -0.004569569393087669,
+    "grid_steps_touched": 3131,
+    "grid_steps_changed_by_delay": 1538,
+    "fraction_of_grid_changed": 0.4912168636218461,
+    "latency_s_mean": 0.4521711387631976,
+    "latency_s_p99": 0.7260708823529415
+   },
+   "n_rows": 780
+  },
+  {
+   "tag": "SLICE1B_P3_1024_C4_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P3_1024",
+   "condition": "C4",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.48341250686420123,
+   "challenge_mAP_ci": [
+    0.43306068206008513,
+    0.5609088651981541
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5128025029835925,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44849533524333085,
+     0.5997880924817852
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013071191937303706,
+    "0.5": 0.010823703862401958,
+    "1.0": 0.010632634270669714,
+    "1.5": 0.009546405587288654
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.003486378381665378,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 705,
+    "fraction_of_grid_changed": 0.44034978138663333,
+    "latency_s_mean": 0.46697559663865545,
+    "latency_s_p99": 0.740293882352941
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P3_2048_C1a_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P3_2048",
+   "condition": "C1a",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483240420316998,
+   "challenge_mAP_ci": [
+    0.43291109531674293,
+    0.5605755463027682
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5122862433419829,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44785866895296933,
+     0.5995287632252896
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013063489362685055,
+    "0.5": 0.01081739855773724,
+    "1.0": 0.010627028576732735,
+    "1.5": 0.009542680519290168
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0033142918344621353,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 655,
+    "fraction_of_grid_changed": 0.4091193004372267,
+    "latency_s_mean": 0.4230958823529412,
+    "latency_s_p99": 0.8073728823529411
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P3_2048_C1b_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P3_2048",
+   "condition": "C1b",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.48603564172362174,
+   "challenge_mAP_ci": [
+    0.4357018720944494,
+    0.5637543268249143
+   ],
+   "challenge_ap": {
+    "0.5": 0.5756402783554433,
+    "1.0": 0.5128025029835925,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5238470079770001,
+     0.6494866385978996
+    ],
+    "1.0": [
+     0.44849533524333085,
+     0.5997880924817852
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013089467505767092,
+    "0.5": 0.010836685432000623,
+    "1.0": 0.010643619464636567,
+    "1.5": 0.009553099758580576
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.006109513241085884,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 686,
+    "fraction_of_grid_changed": 0.42848219862585885,
+    "latency_s_mean": 0.4490424537815126,
+    "latency_s_p99": 0.835886882352941
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P3_2048_C4_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P3_2048",
+   "condition": "C4",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.48603564172362174,
+   "challenge_mAP_ci": [
+    0.4357018720944494,
+    0.5637543268249143
+   ],
+   "challenge_ap": {
+    "0.5": 0.5756402783554433,
+    "1.0": 0.5128025029835925,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5238470079770001,
+     0.6494866385978996
+    ],
+    "1.0": [
+     0.44849533524333085,
+     0.5997880924817852
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013082356539920065,
+    "0.5": 0.010833033678100073,
+    "1.0": 0.010639628170922434,
+    "1.5": 0.009550342905139158
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.006109513241085884,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 726,
+    "fraction_of_grid_changed": 0.45346658338538415,
+    "latency_s_mean": 0.48137245378151255,
+    "latency_s_p99": 0.8972948823529411
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P4_C1a_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P4",
+   "condition": "C1a",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483240420316998,
+   "challenge_mAP_ci": [
+    0.43291109531674293,
+    0.5605755463027682
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5122862433419829,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44785866895296933,
+     0.5995287632252896
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013068270642342637,
+    "0.5": 0.01082080286476046,
+    "1.0": 0.0106306551142274,
+    "1.5": 0.009545933084920083
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0033142918344621353,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 631,
+    "fraction_of_grid_changed": 0.39412866958151155,
+    "latency_s_mean": 0.40767645378151257,
+    "latency_s_p99": 0.4966388823529412
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P4_C1a_N1_L20",
+   "study": "SLICE1B",
+   "policy": "P4",
+   "condition": "C1a",
+   "n_frames": 1,
+   "level_pct": 20,
+   "challenge_mAP": 0.47933018643247677,
+   "challenge_mAP_ci": [
+    0.4313855779098599,
+    0.5588291297119921
+   ],
+   "challenge_ap": {
+    "0.5": 0.5632855263543792,
+    "1.0": 0.5145395509234811,
+    "1.5": 0.3601654820195699
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5149387682854373,
+     0.6374355826568403
+    ],
+    "1.0": [
+     0.45239842837132016,
+     0.6024746332847672
+    ],
+    "1.5": [
+     0.29615483922527225,
+     0.4670104031566579
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013315504748987184,
+    "0.5": 0.011064887028320185,
+    "1.0": 0.010877042609667119,
+    "1.5": 0.009784029377107756
+   },
+   "n_requests_used": 780,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 24,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.48271492941677846,
+    "headroom": 0.003384742984301692,
+    "grid_steps_touched": 3131,
+    "grid_steps_changed_by_delay": 1456,
+    "fraction_of_grid_changed": 0.4650271478760779,
+    "latency_s_mean": 0.4246403695324283,
+    "latency_s_p99": 0.6494078823529411
+   },
+   "n_rows": 780
+  },
+  {
+   "tag": "SLICE1B_P4_C1a_N1_L25",
+   "study": "SLICE1B",
+   "policy": "P4",
+   "condition": "C1a",
+   "n_frames": 1,
+   "level_pct": 25,
+   "challenge_mAP": 0.4819544726900855,
+   "challenge_mAP_ci": [
+    0.4335545275733387,
+    0.5612693243187175
+   ],
+   "challenge_ap": {
+    "0.5": 0.5684692106286123,
+    "1.0": 0.5148278848881865,
+    "1.5": 0.3625663225534577
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5204975141778443,
+     0.6432281456897208
+    ],
+    "1.0": [
+     0.4527776002008612,
+     0.6026507397036658
+    ],
+    "1.5": [
+     0.2994016117322087,
+     0.4685161685084816
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.01351271660353255,
+    "0.5": 0.011228184137823848,
+    "1.0": 0.011031362320070947,
+    "1.5": 0.009931449743558116
+   },
+   "n_requests_used": 902,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 27,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.4851810986724277,
+    "headroom": 0.0032266259823421906,
+    "grid_steps_touched": 3571,
+    "grid_steps_changed_by_delay": 1665,
+    "fraction_of_grid_changed": 0.4662559507140857,
+    "latency_s_mean": 0.4204908269205686,
+    "latency_s_p99": 0.5942088823529412
+   },
+   "n_rows": 902
+  },
+  {
+   "tag": "SLICE1B_P4_C1a_N1_L30",
+   "study": "SLICE1B",
+   "policy": "P4",
+   "condition": "C1a",
+   "n_frames": 1,
+   "level_pct": 30,
+   "challenge_mAP": 0.49001499908511265,
+   "challenge_mAP_ci": [
+    0.4403501536901694,
+    0.5692538325494105
+   ],
+   "challenge_ap": {
+    "0.5": 0.5797539676995761,
+    "1.0": 0.5226023420573624,
+    "1.5": 0.3676886874983994
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5302958048343531,
+     0.653680328209814
+    ],
+    "1.0": [
+     0.4586487859991013,
+     0.6107491706068262
+    ],
+    "1.5": [
+     0.30417399084838953,
+     0.47388465662180046
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013770795666762,
+    "0.5": 0.011450825351863722,
+    "1.0": 0.011250421544292904,
+    "1.5": 0.010141372520427598
+   },
+   "n_requests_used": 1110,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 33,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.49071897787261004,
+    "headroom": 0.0007039787874973946,
+    "grid_steps_touched": 4456,
+    "grid_steps_changed_by_delay": 2087,
+    "fraction_of_grid_changed": 0.4683572710951526,
+    "latency_s_mean": 0.42912858505564383,
+    "latency_s_p99": 0.6096398823529413
+   },
+   "n_rows": 1110
+  },
+  {
+   "tag": "SLICE1B_P4_C1a_N1_L40",
+   "study": "SLICE1B",
+   "policy": "P4",
+   "condition": "C1a",
+   "n_frames": 1,
+   "level_pct": 40,
+   "challenge_mAP": 0.5046182240448566,
+   "challenge_mAP_ci": [
+    0.45327064409044987,
+    0.5849749156690703
+   ],
+   "challenge_ap": {
+    "0.5": 0.5874924166930624,
+    "1.0": 0.542962076055479,
+    "1.5": 0.3834001793860281
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5360953178386544,
+     0.6624619621554487
+    ],
+    "1.0": [
+     0.4754545482468011,
+     0.6266425424762372
+    ],
+    "1.5": [
+     0.31653594627225606,
+     0.4899251983304767
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.014620464570883384,
+    "0.5": 0.012125662091497524,
+    "1.0": 0.01198747468165914,
+    "1.5": 0.010671271969966301
+   },
+   "n_requests_used": 1455,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 44,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.510988053508724,
+    "headroom": 0.006369829463867438,
+    "grid_steps_touched": 5846,
+    "grid_steps_changed_by_delay": 2845,
+    "fraction_of_grid_changed": 0.4866575436195689,
+    "latency_s_mean": 0.45314746310895493,
+    "latency_s_p99": 0.7690298823529415
+   },
+   "n_rows": 1455
+  },
+  {
+   "tag": "SLICE1B_P4_C1b_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P4",
+   "condition": "C1b",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483240420316998,
+   "challenge_mAP_ci": [
+    0.43291109531674293,
+    0.5605755463027682
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5122862433419829,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44785866895296933,
+     0.5995287632252896
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013068278847383607,
+    "0.5": 0.010819924411545648,
+    "1.0": 0.010630078920742388,
+    "1.5": 0.00954589803308169
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0033142918344621353,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 635,
+    "fraction_of_grid_changed": 0.3966271080574641,
+    "latency_s_mean": 0.4110504537815126,
+    "latency_s_p99": 0.515859882352941
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1B_P4_C1b_N1_L20",
+   "study": "SLICE1B",
+   "policy": "P4",
+   "condition": "C1b",
+   "n_frames": 1,
+   "level_pct": 20,
+   "challenge_mAP": 0.47856020815557526,
+   "challenge_mAP_ci": [
+    0.43057518774548015,
+    0.5577222513286259
+   ],
+   "challenge_ap": {
+    "0.5": 0.5609755915236747,
+    "1.0": 0.5145395509234811,
+    "1.5": 0.3601654820195699
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5124057180975131,
+     0.6352597740563862
+    ],
+    "1.0": [
+     0.45239842837132016,
+     0.6024746332847672
+    ],
+    "1.5": [
+     0.29615483922527225,
+     0.4670104031566579
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013312462722442074,
+    "0.5": 0.01106516608533288,
+    "1.0": 0.0108769442889582,
+    "1.5": 0.009785083037615976
+   },
+   "n_requests_used": 780,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 24,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.48271492941677846,
+    "headroom": 0.004154721261203198,
+    "grid_steps_touched": 3131,
+    "grid_steps_changed_by_delay": 1457,
+    "fraction_of_grid_changed": 0.46534653465346537,
+    "latency_s_mean": 0.4264561387631976,
+    "latency_s_p99": 0.6078708823529412
+   },
+   "n_rows": 780
+  },
+  {
+   "tag": "SLICE1B_P4_C1b_N1_L25",
+   "study": "SLICE1B",
+   "policy": "P4",
+   "condition": "C1b",
+   "n_frames": 1,
+   "level_pct": 25,
+   "challenge_mAP": 0.4855171157458984,
+   "challenge_mAP_ci": [
+    0.43801103769565836,
+    0.563381887671614
+   ],
+   "challenge_ap": {
+    "0.5": 0.576413306084207,
+    "1.0": 0.5174962304553132,
+    "1.5": 0.3626418106981749
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5261019726771058,
+     0.6504865880431003
+    ],
+    "1.0": [
+     0.4548374441726456,
+     0.6043534662961496
+    ],
+    "1.5": [
+     0.2994053658764499,
+     0.4685864191440676
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013508708405980426,
+    "0.5": 0.011225254972169299,
+    "1.0": 0.011028003644823285,
+    "1.5": 0.009927084587043385
+   },
+   "n_requests_used": 902,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 27,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.4851810986724277,
+    "headroom": -0.00033601707347069576,
+    "grid_steps_touched": 3571,
+    "grid_steps_changed_by_delay": 1777,
+    "fraction_of_grid_changed": 0.4976197143657239,
+    "latency_s_mean": 0.45530457414895004,
+    "latency_s_p99": 0.8722508823529412
+   },
+   "n_rows": 902
+  },
+  {
+   "tag": "SLICE1B_P4_C4_N1_L10",
+   "study": "SLICE1B",
+   "policy": "P4",
+   "condition": "C4",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.48341250686420123,
+   "challenge_mAP_ci": [
+    0.43306068206008513,
+    0.5609088651981541
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5128025029835925,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44849533524333085,
+     0.5997880924817852
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013057064414241419,
+    "0.5": 0.010814151191663438,
+    "1.0": 0.010623927498198923,
+    "1.5": 0.009541102663802549
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.003486378381665378,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 674,
+    "fraction_of_grid_changed": 0.42098688319800126,
+    "latency_s_mean": 0.44184445378151266,
+    "latency_s_p99": 0.7842408823529411
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1C_P0_C2_N1_L10",
+   "study": "SLICE1C",
+   "policy": "P0",
+   "condition": "C2",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483240420316998,
+   "challenge_mAP_ci": [
+    0.43291109531674293,
+    0.5605755463027682
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5122862433419829,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44785866895296933,
+     0.5995287632252896
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.01306612273138265,
+    "0.5": 0.010819223010016355,
+    "1.0": 0.010629211178553633,
+    "1.5": 0.00954449447649794
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0033142918344621353,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 644,
+    "fraction_of_grid_changed": 0.40224859462835727,
+    "latency_s_mean": 0.4174421680672269,
+    "latency_s_p99": 0.531929882352941
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1C_P0_C2_N1_L20",
+   "study": "SLICE1C",
+   "policy": "P0",
+   "condition": "C2",
+   "n_frames": 1,
+   "level_pct": 20,
+   "challenge_mAP": 0.4830541690309494,
+   "challenge_mAP_ci": [
+    0.43616782469070414,
+    0.5612492383371881
+   ],
+   "challenge_ap": {
+    "0.5": 0.5732102813352452,
+    "1.0": 0.5157867437380331,
+    "1.5": 0.3601654820195699
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5240393547716541,
+     0.6492494153862026
+    ],
+    "1.0": [
+     0.4532001520760547,
+     0.6038230668748937
+    ],
+    "1.5": [
+     0.29615483922527225,
+     0.4670104031566579
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013319366759821627,
+    "0.5": 0.011067902055146073,
+    "1.0": 0.010878238361714162,
+    "1.5": 0.009785746499645313
+   },
+   "n_requests_used": 780,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 24,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.48271492941677846,
+    "headroom": -0.0003392396141709275,
+    "grid_steps_touched": 3131,
+    "grid_steps_changed_by_delay": 1491,
+    "fraction_of_grid_changed": 0.4762056850846375,
+    "latency_s_mean": 0.4350817797888386,
+    "latency_s_p99": 0.6044278823529413
+   },
+   "n_rows": 780
+  },
+  {
+   "tag": "SLICE1C_P0_C2_N1_L25",
+   "study": "SLICE1C",
+   "policy": "P0",
+   "condition": "C2",
+   "n_frames": 1,
+   "level_pct": 25,
+   "challenge_mAP": 0.4846025045086171,
+   "challenge_mAP_ci": [
+    0.4371023528115118,
+    0.5619225619545873
+   ],
+   "challenge_ap": {
+    "0.5": 0.576413306084207,
+    "1.0": 0.5148278848881865,
+    "1.5": 0.3625663225534577
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5261019726771058,
+     0.6504865880431003
+    ],
+    "1.0": [
+     0.4527776002008612,
+     0.6026507397036658
+    ],
+    "1.5": [
+     0.2994016117322087,
+     0.4685161685084816
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013522528353849277,
+    "0.5": 0.011235312945330747,
+    "1.0": 0.011036891518652022,
+    "1.5": 0.009934719831859224
+   },
+   "n_requests_used": 902,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 27,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.4851810986724277,
+    "headroom": 0.0005785941638106196,
+    "grid_steps_touched": 3571,
+    "grid_steps_changed_by_delay": 1704,
+    "fraction_of_grid_changed": 0.47717726127135257,
+    "latency_s_mean": 0.4331308490935176,
+    "latency_s_p99": 0.6029568823529411
+   },
+   "n_rows": 902
+  },
+  {
+   "tag": "SLICE1C_P0_C2_N1_L30",
+   "study": "SLICE1C",
+   "policy": "P0",
+   "condition": "C2",
+   "n_frames": 1,
+   "level_pct": 30,
+   "challenge_mAP": 0.4899412463553075,
+   "challenge_mAP_ci": [
+    0.44017627314744867,
+    0.568830888332915
+   ],
+   "challenge_ap": {
+    "0.5": 0.5795327095101609,
+    "1.0": 0.5226023420573624,
+    "1.5": 0.3676886874983994
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5303489322632813,
+     0.6533879461432791
+    ],
+    "1.0": [
+     0.4586487859991013,
+     0.6107491706068262
+    ],
+    "1.5": [
+     0.30417399084838953,
+     0.47407421847382647
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013766200725822892,
+    "0.5": 0.01144609131596586,
+    "1.0": 0.011245168501981475,
+    "1.5": 0.010137200324098115
+   },
+   "n_requests_used": 1110,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 33,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.49071897787261004,
+    "headroom": 0.0007777315173025379,
+    "grid_steps_touched": 4456,
+    "grid_steps_changed_by_delay": 2151,
+    "fraction_of_grid_changed": 0.48271992818671455,
+    "latency_s_mean": 0.44245624271330153,
+    "latency_s_p99": 0.6277798823529417
+   },
+   "n_rows": 1110
+  },
+  {
+   "tag": "SLICE1C_P0_C2_N1_L40",
+   "study": "SLICE1C",
+   "policy": "P0",
+   "condition": "C2",
+   "n_frames": 1,
+   "level_pct": 40,
+   "challenge_mAP": 0.5087882566279116,
+   "challenge_mAP_ci": [
+    0.4566354520976782,
+    0.5872151674583286
+   ],
+   "challenge_ap": {
+    "0.5": 0.601091500306207,
+    "1.0": 0.541818948367357,
+    "1.5": 0.38345432121017087
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5482999328713417,
+     0.6751839576569001
+    ],
+    "1.0": [
+     0.47385376909817034,
+     0.6254349077824183
+    ],
+    "1.5": [
+     0.31653731993930784,
+     0.4899251983304767
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.014623938169129916,
+    "0.5": 0.012130101953653674,
+    "1.0": 0.011990038612903578,
+    "1.5": 0.010673954459859658
+   },
+   "n_requests_used": 1455,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 44,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.510988053508724,
+    "headroom": 0.002199796880812399,
+    "grid_steps_touched": 5846,
+    "grid_steps_changed_by_delay": 2941,
+    "fraction_of_grid_changed": 0.5030790283954841,
+    "latency_s_mean": 0.46442842530826756,
+    "latency_s_p99": 0.7498278823529413
+   },
+   "n_rows": 1455
+  },
+  {
+   "tag": "SLICE1C_P0_C4a_N1_L10",
+   "study": "SLICE1C",
+   "policy": "P0",
+   "condition": "C4a",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483240420316998,
+   "challenge_mAP_ci": [
+    0.43291109531674293,
+    0.5605755463027682
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5122862433419829,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44785866895296933,
+     0.5995287632252896
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013067710210191683,
+    "0.5": 0.010815779953984975,
+    "1.0": 0.010624339744254908,
+    "1.5": 0.009535968147891101
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0033142918344621353,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 715,
+    "fraction_of_grid_changed": 0.4465958775765147,
+    "latency_s_mean": 0.6629055966386554,
+    "latency_s_p99": 3.6515298823529405
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1C_P4_1024_C1b_N1_L10",
+   "study": "SLICE1C",
+   "policy": "P4_1024",
+   "condition": "C1b",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483240420316998,
+   "challenge_mAP_ci": [
+    0.43291109531674293,
+    0.5605755463027682
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5122862433419829,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44785866895296933,
+     0.5995287632252896
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.01307263421144938,
+    "0.5": 0.010823161150228175,
+    "1.0": 0.01063196401792989,
+    "1.5": 0.009545996202223107
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0033142918344621353,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 661,
+    "fraction_of_grid_changed": 0.41286695815115554,
+    "latency_s_mean": 0.4307804537815126,
+    "latency_s_p99": 0.6514588823529411
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1C_P4_1024_C1b_N1_L20",
+   "study": "SLICE1C",
+   "policy": "P4_1024",
+   "condition": "C1b",
+   "n_frames": 1,
+   "level_pct": 20,
+   "challenge_mAP": 0.4821213190004236,
+   "challenge_mAP_ci": [
+    0.43517200480621315,
+    0.5602322094513204
+   ],
+   "challenge_ap": {
+    "0.5": 0.5708372618962805,
+    "1.0": 0.5145395509234811,
+    "1.5": 0.36098714418150907
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5217417519324469,
+     0.6465095480398044
+    ],
+    "1.0": [
+     0.45239842837132016,
+     0.6024746332847672
+    ],
+    "1.5": [
+     0.2970348497401102,
+     0.46724222749077016
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013327089921921281,
+    "0.5": 0.01107243050011339,
+    "1.0": 0.010882907464296562,
+    "1.5": 0.00978767134406651
+   },
+   "n_requests_used": 780,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 24,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.48271492941677846,
+    "headroom": 0.0005936104163548617,
+    "grid_steps_touched": 3131,
+    "grid_steps_changed_by_delay": 1487,
+    "fraction_of_grid_changed": 0.4749281379750878,
+    "latency_s_mean": 0.43425498491704373,
+    "latency_s_p99": 0.6481168823529413
+   },
+   "n_rows": 780
+  },
+  {
+   "tag": "SLICE1C_P4_1024_C1b_N1_L25",
+   "study": "SLICE1C",
+   "policy": "P4_1024",
+   "condition": "C1b",
+   "n_frames": 1,
+   "level_pct": 25,
+   "challenge_mAP": 0.4856450123155656,
+   "challenge_mAP_ci": [
+    0.4381908897194636,
+    0.5635152408666352
+   ],
+   "challenge_ap": {
+    "0.5": 0.5767969957932086,
+    "1.0": 0.5174962304553132,
+    "1.5": 0.3626418106981749
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.52711889751053,
+     0.6508729417949634
+    ],
+    "1.0": [
+     0.4548374441726456,
+     0.6043534662961496
+    ],
+    "1.5": [
+     0.2994053658764499,
+     0.4685864191440676
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013526917756198608,
+    "0.5": 0.011238681784308008,
+    "1.0": 0.011039643615975937,
+    "1.5": 0.00993710874571779
+   },
+   "n_requests_used": 902,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 27,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.4851810986724277,
+    "headroom": -0.0004639136431379143,
+    "grid_steps_touched": 3571,
+    "grid_steps_changed_by_delay": 1775,
+    "fraction_of_grid_changed": 0.49705964715765893,
+    "latency_s_mean": 0.4525584544150254,
+    "latency_s_p99": 0.6960568823529412
+   },
+   "n_rows": 902
+  },
+  {
+   "tag": "SLICE1C_P4_1024_C1b_N1_L30",
+   "study": "SLICE1C",
+   "policy": "P4_1024",
+   "condition": "C1b",
+   "n_frames": 1,
+   "level_pct": 30,
+   "challenge_mAP": 0.48983211385529346,
+   "challenge_mAP_ci": [
+    0.4403891694397536,
+    0.5689704063829042
+   ],
+   "challenge_ap": {
+    "0.5": 0.5793592980752574,
+    "1.0": 0.5231960335397935,
+    "1.5": 0.36694100995082934
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5301371430373247,
+     0.6533853102053109
+    ],
+    "1.0": [
+     0.4597226380110079,
+     0.6112235815651603
+    ],
+    "1.5": [
+     0.3033180196298292,
+     0.4733555463052133
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013787425359270626,
+    "0.5": 0.011460678621665055,
+    "1.0": 0.011259080174224032,
+    "1.5": 0.010146624801260905
+   },
+   "n_requests_used": 1110,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 33,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.49071897787261004,
+    "headroom": 0.0008868640173165798,
+    "grid_steps_touched": 4456,
+    "grid_steps_changed_by_delay": 2180,
+    "fraction_of_grid_changed": 0.48922800718132853,
+    "latency_s_mean": 0.44981173820879705,
+    "latency_s_p99": 0.721757882352942
+   },
+   "n_rows": 1110
+  },
+  {
+   "tag": "SLICE1C_P4_C4_N1_L10",
+   "study": "SLICE1C",
+   "policy": "P4",
+   "condition": "C4",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.48341250686420123,
+   "challenge_mAP_ci": [
+    0.43306068206008513,
+    0.5609088651981541
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5128025029835925,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44849533524333085,
+     0.5997880924817852
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013062098627857661,
+    "0.5": 0.01081705298223789,
+    "1.0": 0.010626746793921614,
+    "1.5": 0.009543069168377159
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.003486378381665378,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 667,
+    "fraction_of_grid_changed": 0.4166146158650843,
+    "latency_s_mean": 0.44104759663865545,
+    "latency_s_p99": 0.7972408823529404
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1C_P4_C4a_N1_L10",
+   "study": "SLICE1C",
+   "policy": "P4",
+   "condition": "C4a",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483240420316998,
+   "challenge_mAP_ci": [
+    0.43291109531674293,
+    0.5605755463027682
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5122862433419829,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44785866895296933,
+     0.5995287632252896
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.0130695376980906,
+    "0.5": 0.010820214662543503,
+    "1.0": 0.010629744156438149,
+    "1.5": 0.00954348045953197
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0033142918344621353,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 670,
+    "fraction_of_grid_changed": 0.4184884447220487,
+    "latency_s_mean": 0.4424401680672268,
+    "latency_s_p99": 0.6393178823529411
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1C_P4_C4a_N1_L20",
+   "study": "SLICE1C",
+   "policy": "P4",
+   "condition": "C4a",
+   "n_frames": 1,
+   "level_pct": 20,
+   "challenge_mAP": 0.48545417033758875,
+   "challenge_mAP_ci": [
+    0.43708451777251645,
+    0.5631708283499055
+   ],
+   "challenge_ap": {
+    "0.5": 0.5651281318629675,
+    "1.0": 0.5157867437380331,
+    "1.5": 0.37544763541176573
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5166453180672107,
+     0.6393325578726424
+    ],
+    "1.0": [
+     0.4532001520760547,
+     0.6038230668748937
+    ],
+    "1.5": [
+     0.30502531093351265,
+     0.48345671442744304
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013324179524563166,
+    "0.5": 0.011073179879515359,
+    "1.0": 0.010885468050982495,
+    "1.5": 0.009791608597335846
+   },
+   "n_requests_used": 780,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 24,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.48271492941677846,
+    "headroom": -0.002739240920810293,
+    "grid_steps_touched": 3131,
+    "grid_steps_changed_by_delay": 1535,
+    "fraction_of_grid_changed": 0.4902587032896838,
+    "latency_s_mean": 0.4536928054298643,
+    "latency_s_p99": 0.893010882352942
+   },
+   "n_rows": 780
+  },
+  {
+   "tag": "SLICE1C_P5_C2_N1_L10",
+   "study": "SLICE1C",
+   "policy": "P5",
+   "condition": "C2",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483240420316998,
+   "challenge_mAP_ci": [
+    0.43291109531674293,
+    0.5605755463027682
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5122862433419829,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44785866895296933,
+     0.5995287632252896
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013071406321769074,
+    "0.5": 0.010823525176905551,
+    "1.0": 0.010632443696451247,
+    "1.5": 0.0095476339149204
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0033142918344621353,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 659,
+    "fraction_of_grid_changed": 0.41161773891317927,
+    "latency_s_mean": 0.4258513109243698,
+    "latency_s_p99": 0.5574938823529412
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1C_P5_C2_N1_L20",
+   "study": "SLICE1C",
+   "policy": "P5",
+   "condition": "C2",
+   "n_frames": 1,
+   "level_pct": 20,
+   "challenge_mAP": 0.4821818978441872,
+   "challenge_mAP_ci": [
+    0.4351254820282593,
+    0.5603658274773832
+   ],
+   "challenge_ap": {
+    "0.5": 0.5708372618962805,
+    "1.0": 0.5147952720691412,
+    "1.5": 0.36091315956714
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5217417519324469,
+     0.6465095480398044
+    ],
+    "1.0": [
+     0.4524199325854844,
+     0.6027181641567425
+    ],
+    "1.5": [
+     0.2969280502216856,
+     0.4671717452051844
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013324347768169976,
+    "0.5": 0.011072022053303293,
+    "1.0": 0.010881970553774262,
+    "1.5": 0.009787355425726967
+   },
+   "n_requests_used": 780,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 24,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.48271492941677846,
+    "headroom": 0.0005330315725912693,
+    "grid_steps_touched": 3131,
+    "grid_steps_changed_by_delay": 1489,
+    "fraction_of_grid_changed": 0.4755669115298627,
+    "latency_s_mean": 0.4323079336349925,
+    "latency_s_p99": 0.5953118823529413
+   },
+   "n_rows": 780
+  },
+  {
+   "tag": "SLICE1C_P5_C2_N1_L25",
+   "study": "SLICE1C",
+   "policy": "P5",
+   "condition": "C2",
+   "n_frames": 1,
+   "level_pct": 25,
+   "challenge_mAP": 0.4846276672235228,
+   "challenge_mAP_ci": [
+    0.4371352983106413,
+    0.5619303333558309
+   ],
+   "challenge_ap": {
+    "0.5": 0.576413306084207,
+    "1.0": 0.5148278848881865,
+    "1.5": 0.3626418106981749
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5261019726771058,
+     0.6504865880431003
+    ],
+    "1.0": [
+     0.4527776002008612,
+     0.6026507397036658
+    ],
+    "1.5": [
+     0.2994053658764499,
+     0.4685864191440676
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013518536462209714,
+    "0.5": 0.011232277310582642,
+    "1.0": 0.011034950528605253,
+    "1.5": 0.00993432259084108
+   },
+   "n_requests_used": 902,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 27,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.4851810986724277,
+    "headroom": 0.0005534314489049064,
+    "grid_steps_touched": 3571,
+    "grid_steps_changed_by_delay": 1701,
+    "fraction_of_grid_changed": 0.4763371604592551,
+    "latency_s_mean": 0.43334470718664403,
+    "latency_s_p99": 0.6106398823529412
+   },
+   "n_rows": 902
+  },
+  {
+   "tag": "SLICE1C_P5_C2_N1_L30",
+   "study": "SLICE1C",
+   "policy": "P5",
+   "condition": "C2",
+   "n_frames": 1,
+   "level_pct": 30,
+   "challenge_mAP": 0.4909443035679457,
+   "challenge_mAP_ci": [
+    0.44054263616241657,
+    0.5698020044259963
+   ],
+   "challenge_ap": {
+    "0.5": 0.5798434135158648,
+    "1.0": 0.525379445730116,
+    "1.5": 0.3676100514578565
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5310829322065778,
+     0.6542919391500117
+    ],
+    "1.0": [
+     0.4609828369071458,
+     0.6122651427753091
+    ],
+    "1.5": [
+     0.30401133773002126,
+     0.47378123968756364
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.0137721475672974,
+    "0.5": 0.01145241376305853,
+    "1.0": 0.011250518996655605,
+    "1.5": 0.010141356057702606
+   },
+   "n_requests_used": 1110,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 33,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.49071897787261004,
+    "headroom": -0.00022532569533567637,
+    "grid_steps_touched": 4456,
+    "grid_steps_changed_by_delay": 2144,
+    "fraction_of_grid_changed": 0.48114901256732495,
+    "latency_s_mean": 0.44106182829888707,
+    "latency_s_p99": 0.6419578823529413
+   },
+   "n_rows": 1110
+  },
+  {
+   "tag": "SLICE1C_P5_C2_N1_L40",
+   "study": "SLICE1C",
+   "policy": "P5",
+   "condition": "C2",
+   "n_frames": 1,
+   "level_pct": 40,
+   "challenge_mAP": 0.5080303183771671,
+   "challenge_mAP_ci": [
+    0.4563219825400328,
+    0.5864731981220481
+   ],
+   "challenge_ap": {
+    "0.5": 0.5983793331876778,
+    "1.0": 0.5423114425577953,
+    "1.5": 0.3834001793860281
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5449355588928749,
+     0.6726061616574981
+    ],
+    "1.0": [
+     0.4742057316254396,
+     0.6261108536764608
+    ],
+    "1.5": [
+     0.31653594627225606,
+     0.4899251983304767
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.014623469640143405,
+    "0.5": 0.012127029331452342,
+    "1.0": 0.011988614698001745,
+    "1.5": 0.010673237632527439
+   },
+   "n_requests_used": 1455,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 44,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.510988053508724,
+    "headroom": 0.002957735131556949,
+    "grid_steps_touched": 5846,
+    "grid_steps_changed_by_delay": 2898,
+    "fraction_of_grid_changed": 0.49572357167293873,
+    "latency_s_mean": 0.4618839579543157,
+    "latency_s_p99": 0.7665098823529412
+   },
+   "n_rows": 1455
+  },
+  {
+   "tag": "SLICE1C_P5_C4_N1_L10",
+   "study": "SLICE1C",
+   "policy": "P5",
+   "condition": "C4",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.48341250686420123,
+   "challenge_mAP_ci": [
+    0.43306068206008513,
+    0.5609088651981541
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5128025029835925,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44849533524333085,
+     0.5997880924817852
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013070013618235106,
+    "0.5": 0.010822067458641324,
+    "1.0": 0.010631079322525038,
+    "1.5": 0.009546578363394844
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.003486378381665378,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 678,
+    "fraction_of_grid_changed": 0.42348532167395375,
+    "latency_s_mean": 0.44359873949579837,
+    "latency_s_p99": 0.705932882352941
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1C_P5_C4a_N1_L10",
+   "study": "SLICE1C",
+   "policy": "P5",
+   "condition": "C4a",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483240420316998,
+   "challenge_mAP_ci": [
+    0.43291109531674293,
+    0.5605755463027682
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5122862433419829,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.44785866895296933,
+     0.5995287632252896
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013071582218453098,
+    "0.5": 0.010823641547946388,
+    "1.0": 0.010632541362118383,
+    "1.5": 0.009547702904166394
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.0033142918344621353,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 662,
+    "fraction_of_grid_changed": 0.4134915677701437,
+    "latency_s_mean": 0.4316821680672269,
+    "latency_s_p99": 0.6097228823529411
+   },
+   "n_rows": 350
+  },
+  {
+   "tag": "SLICE1C_P5_C4a_N1_L20",
+   "study": "SLICE1C",
+   "policy": "P5",
+   "condition": "C4a",
+   "n_frames": 1,
+   "level_pct": 20,
+   "challenge_mAP": 0.4845705048815267,
+   "challenge_mAP_ci": [
+    0.4357963843139759,
+    0.5619992153998032
+   ],
+   "challenge_ap": {
+    "0.5": 0.5632855263543792,
+    "1.0": 0.5147952720691412,
+    "1.5": 0.3756307162210596
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5149387682854373,
+     0.6374355826568403
+    ],
+    "1.0": [
+     0.4524199325854844,
+     0.6027181641567425
+    ],
+    "1.5": [
+     0.3050302493588286,
+     0.48359333253285025
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013316389104853726,
+    "0.5": 0.011068024415728728,
+    "1.0": 0.01087950261299874,
+    "1.5": 0.009786989879024129
+   },
+   "n_requests_used": 780,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 24,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.48271492941677846,
+    "headroom": -0.001855575464748238,
+    "grid_steps_touched": 3131,
+    "grid_steps_changed_by_delay": 1560,
+    "fraction_of_grid_changed": 0.4982433727243692,
+    "latency_s_mean": 0.46074806184012057,
+    "latency_s_p99": 1.013504882352944
+   },
+   "n_rows": 780
+  },
+  {
+   "tag": "SLICE1C_P5nc_C4a_N1_L10",
+   "study": "SLICE1C",
+   "policy": "P5nc",
+   "condition": "C4a",
+   "n_frames": 1,
+   "level_pct": 10,
+   "challenge_mAP": 0.483257997429347,
+   "challenge_mAP_ci": [
+    0.43292814115155387,
+    0.5605948638022582
+   ],
+   "challenge_ap": {
+    "0.5": 0.5677708737771816,
+    "1.0": 0.5123389746790302,
+    "1.5": 0.36966414383182944
+   },
+   "challenge_ap_ci": {
+    "0.5": [
+     0.5176525479766654,
+     0.6420184446868299
+    ],
+    "1.0": [
+     0.4478658243382515,
+     0.5995614674033493
+    ],
+    "1.5": [
+     0.2995802106395854,
+     0.47709615497477886
+    ]
+   },
+   "streaming_ap": {
+    "0.0": 0.013067965533383881,
+    "0.5": 0.010821074015430998,
+    "1.0": 0.010630422784312579,
+    "1.5": 0.009545802562181622
+   },
+   "n_requests_used": 350,
+   "n_requests_skipped": 0,
+   "n_clips_touched": 12,
+   "n_clips_total": 300,
+   "device_filled": true,
+   "diagnostics": {
+    "mAP_zero_added_delay": 0.47992612848253585,
+    "headroom": -0.003331868946811145,
+    "grid_steps_touched": 1601,
+    "grid_steps_changed_by_delay": 659,
+    "fraction_of_grid_changed": 0.41161773891317927,
+    "latency_s_mean": 0.4310141680672268,
+    "latency_s_p99": 0.616983882352941
+   },
+   "n_rows": 350
+  }
+ ],
+ "paired": [
+  {
+   "study": "SLICE1B",
+   "condition": "C1a",
+   "level_pct": 10,
+   "policy": "P1",
+   "reference": "P0",
+   "difference": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C1a",
+   "level_pct": 10,
+   "policy": "P2",
+   "reference": "P0",
+   "difference": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C1a",
+   "level_pct": 10,
+   "policy": "P3_1024",
+   "reference": "P0",
+   "difference": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C1a",
+   "level_pct": 10,
+   "policy": "P3_2048",
+   "reference": "P0",
+   "difference": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C1a",
+   "level_pct": 10,
+   "policy": "P4",
+   "reference": "P0",
+   "difference": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C1a",
+   "level_pct": 20,
+   "policy": "P4",
+   "reference": "P3_1024",
+   "difference": -0.002766471029823747,
+   "ci": [
+    -0.010900448964995571,
+    0.0015552941358226208
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C1b",
+   "level_pct": 10,
+   "policy": "P1",
+   "reference": "P0",
+   "difference": 4.2991104960754534e-05,
+   "ci": [
+    0.0,
+    0.00016364954512002944
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C1b",
+   "level_pct": 10,
+   "policy": "P2",
+   "reference": "P0",
+   "difference": -0.0023468051344963103,
+   "ci": [
+    -0.008142092592403307,
+    0.0006394407537052734
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C1b",
+   "level_pct": 10,
+   "policy": "P3_1024",
+   "reference": "P0",
+   "difference": -0.0027045211349762677,
+   "ci": [
+    -0.00847176765051745,
+    0.0002898765462273128
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C1b",
+   "level_pct": 10,
+   "policy": "P3_2048",
+   "reference": "P0",
+   "difference": -8.13862755557615e-05,
+   "ci": [
+    -0.0006671577097939446,
+    0.0003843105638694926
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C1b",
+   "level_pct": 10,
+   "policy": "P4",
+   "reference": "P0",
+   "difference": -0.0028766076821795106,
+   "ci": [
+    -0.008677986228477643,
+    0.0002761596234295935
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C1b",
+   "level_pct": 20,
+   "policy": "P4",
+   "reference": "P3_1024",
+   "difference": -0.008724290654290867,
+   "ci": [
+    -0.026049771910594977,
+    0.0
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C4",
+   "level_pct": 10,
+   "policy": "P1",
+   "reference": "P0",
+   "difference": 1.710449379205281e-05,
+   "ci": [
+    0.0,
+    7.75364197943634e-05
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C4",
+   "level_pct": 10,
+   "policy": "P2",
+   "reference": "P0",
+   "difference": -0.0023962877751897427,
+   "ci": [
+    -0.008218178744468965,
+    0.0005857578721762152
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C4",
+   "level_pct": 10,
+   "policy": "P3_1024",
+   "reference": "P0",
+   "difference": -0.0027210257776699165,
+   "ci": [
+    -0.008497007689845463,
+    0.00028562605716784205
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C4",
+   "level_pct": 10,
+   "policy": "P3_2048",
+   "reference": "P0",
+   "difference": -9.789091824941032e-05,
+   "ci": [
+    -0.0007182094303300176,
+    0.0003843105638694926
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1B",
+   "condition": "C4",
+   "level_pct": 10,
+   "policy": "P4",
+   "reference": "P0",
+   "difference": -0.0027210257776699165,
+   "ci": [
+    -0.008497007689845463,
+    0.00028562605716784205
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1C",
+   "condition": "C2",
+   "level_pct": 10,
+   "policy": "P5",
+   "reference": "P0",
+   "difference": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1C",
+   "condition": "C2",
+   "level_pct": 20,
+   "policy": "P5",
+   "reference": "P0",
+   "difference": -0.0008722711867621968,
+   "ci": [
+    -0.0031182283596764364,
+    0.0006975524338936279
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1C",
+   "condition": "C2",
+   "level_pct": 25,
+   "policy": "P5",
+   "reference": "P0",
+   "difference": 2.51627149057132e-05,
+   "ci": [
+    0.0,
+    0.00011142153118575957
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1C",
+   "condition": "C2",
+   "level_pct": 30,
+   "policy": "P5",
+   "reference": "P0",
+   "difference": 0.0010030572126382142,
+   "ci": [
+    -0.00016215951296669195,
+    0.003214394372580565
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1C",
+   "condition": "C2",
+   "level_pct": 40,
+   "policy": "P5",
+   "reference": "P0",
+   "difference": -0.0007579382507445498,
+   "ci": [
+    -0.002653354378285061,
+    0.00025223939483404845
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1C",
+   "condition": "C4",
+   "level_pct": 10,
+   "policy": "P5",
+   "reference": "P4",
+   "difference": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1C",
+   "condition": "C4a",
+   "level_pct": 10,
+   "policy": "P4",
+   "reference": "P0",
+   "difference": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1C",
+   "condition": "C4a",
+   "level_pct": 10,
+   "policy": "P5",
+   "reference": "P0",
+   "difference": 0.0,
+   "ci": [
+    0.0,
+    0.0
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1C",
+   "condition": "C4a",
+   "level_pct": 10,
+   "policy": "P5nc",
+   "reference": "P0",
+   "difference": 1.7577112349009827e-05,
+   "ci": [
+    0.0,
+    7.548849698984781e-05
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  },
+  {
+   "study": "SLICE1C",
+   "condition": "C4a",
+   "level_pct": 20,
+   "policy": "P5",
+   "reference": "P4",
+   "difference": -0.0008836654560620549,
+   "ci": [
+    -0.003215921726431606,
+    0.0006755666559409996
+   ],
+   "n_bootstrap": 2000,
+   "seed": 0,
+   "excludes_zero": false
+  }
+ ],
+ "_provenance": {
+  "git_commit": "7b13bdd85b3a08d6e59d0043716f42c84b2221d9",
+  "script": "map_bridge.py",
+  "model": null,
+  "timestamp": "2026-11-13T13:45:41.120404",
+  "device": "cpu",
+  "n": 50
+ }
+}

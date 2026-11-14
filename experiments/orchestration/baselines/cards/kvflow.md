@@ -72,3 +72,14 @@ change is what it is charged: the harness already billed the first promotion of 
 GPU-warm at the measured cold-prefill cost (fairness rule 3), and it bills `MATERIALIZE` on the
 same path. The re-run smoke record is identical field for field apart from the new
 `materialize_*` counters.
+
+## StudyB-baselines amendment 2 (2026-11-13)
+
+**Item 5: `host_offload_intent = "retain"`.** KVFlow's OFFLOAD_TO_HOST means "this session's
+state should survive somewhere cheaper", not "discard it". In StudySIM1c's no-host world the
+harness mapped it to EVICT, so no session was ever GPU-warm and all 83 recalls were COLD. The
+harness now maps a RETAIN arm's OFFLOAD_TO_HOST to KEEP_GPU_WARM, with the engine's GPU KV
+capacity (62,944 tokens) and its LRU eviction still binding, the budget still binding, and
+fairness rule 3 still charging a first promotion at the measured cold-prefill cost. In the live
+harness, where a host tier exists, the arm uses the real host tier and nothing is mapped.
+Measured consequence on the representative cell: challenge mAP 0.5135 -> 0.5169 (ALL).

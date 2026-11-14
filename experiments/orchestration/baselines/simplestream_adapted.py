@@ -27,7 +27,7 @@ from typing import Dict, List, Optional, Sequence
 import numpy as np
 
 import devsplit as DS
-from interface import (Action, Observation, Policy, RecallAction, StreamAction)
+from interface import (Action, DEFAULTS, Observation, Policy, RecallAction, StreamAction)
 
 # The recent-window options we actually hold: StudyRH4's RECENT representation and the committed
 # episodic frame counts. A window is expressed as the number of 0.25-s grid steps of history.
@@ -84,5 +84,7 @@ class SimpleStreamAdapted(Policy):
         # The paper's baseline: feed the most recent N frames to an off-the-shelf VLM. In our
         # action space that is the RECENT representation on the cloud, with no history reuse.
         rec = [RecallAction(q.query_id, "CLOUD", representation="RECENT") for q in obs.recall]
-        return Action(streams=[StreamAction(s.stream_id, "local") for s in obs.streams],
-                      recall=rec)
+        # amendment 2 item 2 (2026-11-13): the episodic stream action follows
+        # DEFAULTS["episodic_mode"], as this module's own docstring says it does.
+        return Action(streams=[StreamAction(s.stream_id, DEFAULTS["episodic_mode"])
+                               for s in obs.streams], recall=rec)

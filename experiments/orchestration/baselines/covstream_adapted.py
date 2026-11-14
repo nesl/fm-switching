@@ -32,7 +32,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "reconstructed"))
 
 import costs as C
 from covstream import cloud_ingest, edge_encode, standing_cost_s  # noqa: E402
-from interface import (Action, Observation, Policy, RecallAction, SessionAction, StreamAction)
+from interface import (Action, DEFAULTS, Observation, Policy, RecallAction, SessionAction,
+                       StreamAction)
 
 
 class CoVStreamAdapted(Policy):
@@ -81,7 +82,9 @@ class CoVStreamAdapted(Policy):
                        | {q.session_id for q in obs.recall})
         # the cloud keeps the structure resident; that is the whole design
         return Action(
-            streams=[StreamAction(s.stream_id, "local") for s in obs.streams],
+            # amendment 2 item 2 (2026-11-13): the episodic stream action follows
+            # DEFAULTS["episodic_mode"]; the previous literal "local" was an adapter bug.
+            streams=[StreamAction(s.stream_id, DEFAULTS["episodic_mode"]) for s in obs.streams],
             recall=rec,
             sessions=[SessionAction(s, "KEEP_GPU_WARM") for s in known[:4]]
                      + [SessionAction(s, "OFFLOAD_TO_HOST") for s in known[4:]],

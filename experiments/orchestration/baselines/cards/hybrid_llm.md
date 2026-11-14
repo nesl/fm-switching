@@ -72,3 +72,18 @@ distribution (A6); the paper's benchmark suite.
 | `t*` | grid-searched, 0.1 on our development data | Eq. (3), grid `linspace(0.1, 3.0, 30)` |
 | routing threshold | 0.5 default | the paper's cost knob; swept, not fitted |
 | training rows | 6,010 over 601 development clips | StudyD3 |
+
+## StudyB-baselines amendment 2 (2026-11-13)
+
+**Item 3b: hybrid-llm does NOT receive `device_answer_confidence`, and its recall path is
+restored to a query-only decision.** The paper's router emits p_w(x) ~ Pr[H(x) >= 0] from the
+QUERY's features x and routes BEFORE either model answers (Section 3), so reading the device
+answer's confidence would give it an input its published mechanism does not have. The adapter's
+recall branch read exactly that, and when amendment 2 made the field non-None for the first time
+the arm's recall decisions moved from 83 CLOUD to 69 DEVICE + 14 CLOUD. That is reverted: the
+recall path now takes `DEFAULTS["recall_decision"]`, `reads_device_answer` stays False, and
+`decides` no longer claims `recall_decision`. We hold no committed query-side router features for
+a recall query - the router is fitted on StudyD3 device-score TRAJECTORY features, which a recall
+query does not have - so **the routing claim for this arm is made for episodic streams only**.
+Its episodic behaviour is unchanged by the amendment (p_w 0.679-0.846 against a 0.5 threshold,
+so "keep local" remains the rule's own answer everywhere).

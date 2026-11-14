@@ -1,0 +1,446 @@
+{
+ "label": "UNCALIBRATED SIMULATOR (gate 19/29, out-of-sample fail): secondary, not headline",
+ "runs": 59940,
+ "cells": 2997,
+ "arms": 37,
+ "compared": 33,
+ "excluded_from_comparison": [
+  "B10-blocking-aware-admission",
+  "B11-naive-slicing"
+ ],
+ "excluded_why": "after amendment 2 these ARE StudySLICE1's P2 and P3_2048, whose mechanism is per-link timing; a 1.0-s decision epoch cannot express it, so they are reported separately and never ranked against the other arms",
+ "oracle_reported_separately": [
+  "hindsight-oracle",
+  "rh8-demand-aware-ORACLE"
+ ],
+ "fleets": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  8,
+  16,
+  32
+ ],
+ "deadlines": [
+  2.0,
+  5.0,
+  10.0
+ ],
+ "seeds": 20,
+ "source": "results/orchestration/sim1c_amend2/sim1c_runs.jsonl",
+ "ranking_at_deadline_5_s": {
+  "episodic-dominant": [
+   {
+    "arm": "simplestream",
+    "mAP_mean_over_ladder": 0.5195349615439319
+   },
+   {
+    "arm": "rh8-demand-aware-causal",
+    "mAP_mean_over_ladder": 0.5195349615439319
+   },
+   {
+    "arm": "preble",
+    "mAP_mean_over_ladder": 0.5195349615439319
+   },
+   {
+    "arm": "kvflow",
+    "mAP_mean_over_ladder": 0.5195349615439319
+   },
+   {
+    "arm": "edf-service-time",
+    "mAP_mean_over_ladder": 0.5195349615439319
+   },
+   {
+    "arm": "covstream",
+    "mAP_mean_over_ladder": 0.5195349615439319
+   },
+   {
+    "arm": "always-cloud-fcfs",
+    "mAP_mean_over_ladder": 0.5195349615439319
+   },
+   {
+    "arm": "B7-edf-feasibility",
+    "mAP_mean_over_ladder": 0.5195349615439319
+   },
+   {
+    "arm": "B3-best-static",
+    "mAP_mean_over_ladder": 0.5195349615439319
+   },
+   {
+    "arm": "tuned-engine",
+    "mAP_mean_over_ladder": 0.5195258804784353
+   },
+   {
+    "arm": "streamscout",
+    "mAP_mean_over_ladder": 0.5194701344180445
+   },
+   {
+    "arm": "routellm",
+    "mAP_mean_over_ladder": 0.519202773138579
+   },
+   {
+    "arm": "mooncake",
+    "mAP_mean_over_ladder": 0.5165378315773846
+   },
+   {
+    "arm": "clockwork",
+    "mAP_mean_over_ladder": 0.5165378315773846
+   },
+   {
+    "arm": "B8-utility-per-gpu-second",
+    "mAP_mean_over_ladder": 0.5115102939689661
+   },
+   {
+    "arm": "B9-noHost",
+    "mAP_mean_over_ladder": 0.5044727559021214
+   },
+   {
+    "arm": "eco-llm",
+    "mAP_mean_over_ladder": 0.5043116518236495
+   },
+   {
+    "arm": "videostorm/maxmin",
+    "mAP_mean_over_ladder": 0.5043024199618399
+   },
+   {
+    "arm": "videostorm/maxsum",
+    "mAP_mean_over_ladder": 0.5042292916383565
+   },
+   {
+    "arm": "round-robin",
+    "mAP_mean_over_ladder": 0.5036045064462935
+   },
+   {
+    "arm": "ekya",
+    "mAP_mean_over_ladder": 0.5001687178685494
+   },
+   {
+    "arm": "inar-vl",
+    "mAP_mean_over_ladder": 0.49969083258774183
+   },
+   {
+    "arm": "B6-latency-aware-routing",
+    "mAP_mean_over_ladder": 0.49969083258774183
+   },
+   {
+    "arm": "static-partition",
+    "mAP_mean_over_ladder": 0.4966443186870993
+   },
+   {
+    "arm": "random-admission",
+    "mAP_mean_over_ladder": 0.49381271638104973
+   },
+   {
+    "arm": "r3-streaming",
+    "mAP_mean_over_ladder": 0.48116405705891285
+   },
+   {
+    "arm": "uniscale",
+    "mAP_mean_over_ladder": 0.48007045025493894
+   },
+   {
+    "arm": "perllm",
+    "mAP_mean_over_ladder": 0.47773150999755715
+   },
+   {
+    "arm": "device-only",
+    "mAP_mean_over_ladder": 0.47760424491770365
+   },
+   {
+    "arm": "hybrid-llm",
+    "mAP_mean_over_ladder": 0.4776034961507064
+   },
+   {
+    "arm": "confidence-cascade",
+    "mAP_mean_over_ladder": 0.4721620967845991
+   },
+   {
+    "arm": "B4-query-type-routing",
+    "mAP_mean_over_ladder": 0.47127477995529365
+   },
+   {
+    "arm": "thinking-qwenvl-atdm",
+    "mAP_mean_over_ladder": 0.46672663549189647
+   }
+  ],
+  "balanced": [
+   {
+    "arm": "simplestream",
+    "mAP_mean_over_ladder": 0.5141581669148196
+   },
+   {
+    "arm": "edf-service-time",
+    "mAP_mean_over_ladder": 0.5141581669148196
+   },
+   {
+    "arm": "always-cloud-fcfs",
+    "mAP_mean_over_ladder": 0.5141581669148196
+   },
+   {
+    "arm": "B7-edf-feasibility",
+    "mAP_mean_over_ladder": 0.5141581669148196
+   },
+   {
+    "arm": "B3-best-static",
+    "mAP_mean_over_ladder": 0.5141581669148196
+   },
+   {
+    "arm": "tuned-engine",
+    "mAP_mean_over_ladder": 0.514150961085635
+   },
+   {
+    "arm": "routellm",
+    "mAP_mean_over_ladder": 0.5138001239299608
+   },
+   {
+    "arm": "streamscout",
+    "mAP_mean_over_ladder": 0.5137165795844394
+   },
+   {
+    "arm": "rh8-demand-aware-causal",
+    "mAP_mean_over_ladder": 0.5132621197817002
+   },
+   {
+    "arm": "kvflow",
+    "mAP_mean_over_ladder": 0.5132621197817002
+   },
+   {
+    "arm": "preble",
+    "mAP_mean_over_ladder": 0.5131910771660024
+   },
+   {
+    "arm": "covstream",
+    "mAP_mean_over_ladder": 0.5125610896159186
+   },
+   {
+    "arm": "mooncake",
+    "mAP_mean_over_ladder": 0.5058514289981646
+   },
+   {
+    "arm": "clockwork",
+    "mAP_mean_over_ladder": 0.5058514289981646
+   },
+   {
+    "arm": "B8-utility-per-gpu-second",
+    "mAP_mean_over_ladder": 0.5048603967230103
+   },
+   {
+    "arm": "round-robin",
+    "mAP_mean_over_ladder": 0.5027795349376201
+   },
+   {
+    "arm": "videostorm/maxmin",
+    "mAP_mean_over_ladder": 0.5013699208579883
+   },
+   {
+    "arm": "B9-noHost",
+    "mAP_mean_over_ladder": 0.5012006652845096
+   },
+   {
+    "arm": "eco-llm",
+    "mAP_mean_over_ladder": 0.5009534119392046
+   },
+   {
+    "arm": "videostorm/maxsum",
+    "mAP_mean_over_ladder": 0.500914377280968
+   },
+   {
+    "arm": "ekya",
+    "mAP_mean_over_ladder": 0.49455622546236977
+   },
+   {
+    "arm": "inar-vl",
+    "mAP_mean_over_ladder": 0.49409783941276864
+   },
+   {
+    "arm": "B6-latency-aware-routing",
+    "mAP_mean_over_ladder": 0.49409783941276864
+   },
+   {
+    "arm": "random-admission",
+    "mAP_mean_over_ladder": 0.49264980281349646
+   },
+   {
+    "arm": "static-partition",
+    "mAP_mean_over_ladder": 0.4921391833093797
+   },
+   {
+    "arm": "r3-streaming",
+    "mAP_mean_over_ladder": 0.4812501732876329
+   },
+   {
+    "arm": "uniscale",
+    "mAP_mean_over_ladder": 0.47844217095266334
+   },
+   {
+    "arm": "perllm",
+    "mAP_mean_over_ladder": 0.47766159286882576
+   },
+   {
+    "arm": "hybrid-llm",
+    "mAP_mean_over_ladder": 0.4776085592403249
+   },
+   {
+    "arm": "device-only",
+    "mAP_mean_over_ladder": 0.47760424491770365
+   },
+   {
+    "arm": "confidence-cascade",
+    "mAP_mean_over_ladder": 0.46950669761202096
+   },
+   {
+    "arm": "B4-query-type-routing",
+    "mAP_mean_over_ladder": 0.46881381898116115
+   },
+   {
+    "arm": "thinking-qwenvl-atdm",
+    "mAP_mean_over_ladder": 0.46411448309171643
+   }
+  ],
+  "recall-dominant": [
+   {
+    "arm": "tuned-engine",
+    "mAP_mean_over_ladder": 0.5321177778174513
+   },
+   {
+    "arm": "simplestream",
+    "mAP_mean_over_ladder": 0.5316635878702383
+   },
+   {
+    "arm": "edf-service-time",
+    "mAP_mean_over_ladder": 0.5316635878702383
+   },
+   {
+    "arm": "always-cloud-fcfs",
+    "mAP_mean_over_ladder": 0.5316635878702383
+   },
+   {
+    "arm": "B7-edf-feasibility",
+    "mAP_mean_over_ladder": 0.5316635878702383
+   },
+   {
+    "arm": "B3-best-static",
+    "mAP_mean_over_ladder": 0.5316635878702383
+   },
+   {
+    "arm": "streamscout",
+    "mAP_mean_over_ladder": 0.5313163351340493
+   },
+   {
+    "arm": "routellm",
+    "mAP_mean_over_ladder": 0.5312958286297986
+   },
+   {
+    "arm": "covstream",
+    "mAP_mean_over_ladder": 0.5311189991492989
+   },
+   {
+    "arm": "videostorm/maxmin",
+    "mAP_mean_over_ladder": 0.5309337884222673
+   },
+   {
+    "arm": "videostorm/maxsum",
+    "mAP_mean_over_ladder": 0.5308976908259223
+   },
+   {
+    "arm": "eco-llm",
+    "mAP_mean_over_ladder": 0.530873717588609
+   },
+   {
+    "arm": "rh8-demand-aware-causal",
+    "mAP_mean_over_ladder": 0.530680164218523
+   },
+   {
+    "arm": "kvflow",
+    "mAP_mean_over_ladder": 0.530680164218523
+   },
+   {
+    "arm": "preble",
+    "mAP_mean_over_ladder": 0.5306466464506312
+   },
+   {
+    "arm": "round-robin",
+    "mAP_mean_over_ladder": 0.5299864933932237
+   },
+   {
+    "arm": "B9-noHost",
+    "mAP_mean_over_ladder": 0.5298644768842371
+   },
+   {
+    "arm": "inar-vl",
+    "mAP_mean_over_ladder": 0.5297615238946238
+   },
+   {
+    "arm": "B6-latency-aware-routing",
+    "mAP_mean_over_ladder": 0.5297615238946238
+   },
+   {
+    "arm": "mooncake",
+    "mAP_mean_over_ladder": 0.5272654754022902
+   },
+   {
+    "arm": "clockwork",
+    "mAP_mean_over_ladder": 0.5272654754022902
+   },
+   {
+    "arm": "ekya",
+    "mAP_mean_over_ladder": 0.5253062227174607
+   },
+   {
+    "arm": "B8-utility-per-gpu-second",
+    "mAP_mean_over_ladder": 0.5148042592295897
+   },
+   {
+    "arm": "static-partition",
+    "mAP_mean_over_ladder": 0.5014980610181085
+   },
+   {
+    "arm": "random-admission",
+    "mAP_mean_over_ladder": 0.49842901823221386
+   },
+   {
+    "arm": "uniscale",
+    "mAP_mean_over_ladder": 0.4821829204926256
+   },
+   {
+    "arm": "r3-streaming",
+    "mAP_mean_over_ladder": 0.4781838827094023
+   },
+   {
+    "arm": "perllm",
+    "mAP_mean_over_ladder": 0.47773533998897183
+   },
+   {
+    "arm": "hybrid-llm",
+    "mAP_mean_over_ladder": 0.47760849194173655
+   },
+   {
+    "arm": "device-only",
+    "mAP_mean_over_ladder": 0.47760424491770365
+   },
+   {
+    "arm": "confidence-cascade",
+    "mAP_mean_over_ladder": 0.474137759789048
+   },
+   {
+    "arm": "B4-query-type-routing",
+    "mAP_mean_over_ladder": 0.4734054800426269
+   },
+   {
+    "arm": "thinking-qwenvl-atdm",
+    "mAP_mean_over_ladder": 0.4662180541860094
+   }
+  ]
+ },
+ "_provenance": {
+  "git_commit": "37189c593915b60ccc05a5bbeed6027b8a1e31ef",
+  "script": "amend2_sweep_report.py",
+  "model": null,
+  "timestamp": "2026-11-13T18:50:06.887400",
+  "device": "cpu",
+  "n": 59940
+ }
+}

@@ -38,6 +38,10 @@ class R3StreamingAdapted(Policy):
     experiments = ('A-episodic', 'B-recall')
     paper = "Liu et al., An Efficient Streaming Video Understanding Framework with Agentic Control (R3-Streaming), arXiv:2605.17921"
     decides = ("episodic_mode", "recall_decision", "representation", "defer_s")
+    # amendment 2 item 3b (2026-11-13): this baseline's PUBLISHED mechanism observes the
+    # device-side model's own answer before deciding, so it receives
+    # `device_answer_confidence` and the harness charges that device answer.
+    reads_device_answer = True
     defaults_used = ("cadence_s", "frame_count", "session_action", "order")
 
     def __init__(self, readiness_threshold: float = 0.5, escalation_budget: float = 0.25,

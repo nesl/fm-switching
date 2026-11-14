@@ -1,0 +1,1215 @@
+{
+ "cell": {
+  "mix": "balanced",
+  "fleet": 4,
+  "deadline_s": 5.0,
+  "seed": 0,
+  "trace_digest": "c1aaf04cc656ec63",
+  "length_s": 2664.75,
+  "question_set": "EVAL"
+ },
+ "n_arms": 37,
+ "arms": [
+  {
+   "arm": "device-only",
+   "challenge_mAP": 0.477604,
+   "episodic_cloud_fraction": 0.0,
+   "recall_timely_accuracy": 0.2972534869623908,
+   "stream_actions": {
+    "local": 10660
+   },
+   "recall_actions": {
+    "DEVICE": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 0,
+   "engine_gpu_busy_s": 0.0,
+   "episodic_submitted": 0,
+   "episodic_completed": 0,
+   "recall_n": 88,
+   "gpu_s": 0.0,
+   "decisions": {
+    "recall_cloud": 0,
+    "recall_device": 88,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "always-cloud-fcfs",
+   "challenge_mAP": 0.51626,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9120,
+   "engine_gpu_busy_s": 1303.1,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1265.604,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "random-admission",
+   "challenge_mAP": 0.48643,
+   "episodic_cloud_fraction": 0.507036,
+   "recall_timely_accuracy": 0.3246824835538384,
+   "stream_actions": {
+    "cloud": 5405,
+    "local": 5255
+   },
+   "recall_actions": {
+    "CLOUD": 36,
+    "DEVICE": 52
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 6483,
+   "engine_gpu_busy_s": 685.94,
+   "episodic_submitted": 9242,
+   "episodic_completed": 9242,
+   "recall_n": 88,
+   "gpu_s": 645.928,
+   "decisions": {
+    "recall_cloud": 36,
+    "recall_device": 52,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "round-robin",
+   "challenge_mAP": 0.504915,
+   "episodic_cloud_fraction": 0.5,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 5330,
+    "local": 5330
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 6889,
+   "engine_gpu_busy_s": 680.46,
+   "episodic_submitted": 9062,
+   "episodic_completed": 9062,
+   "recall_n": 88,
+   "gpu_s": 653.717,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "static-partition",
+   "challenge_mAP": 0.480142,
+   "episodic_cloud_fraction": 0.5,
+   "recall_timely_accuracy": 0.32956147430419336,
+   "stream_actions": {
+    "cloud": 5330,
+    "local": 5330
+   },
+   "recall_actions": {
+    "DEVICE": 43,
+    "CLOUD": 45
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 6633,
+   "engine_gpu_busy_s": 676.86,
+   "episodic_submitted": 9076,
+   "episodic_completed": 9076,
+   "recall_n": 88,
+   "gpu_s": 638.174,
+   "decisions": {
+    "recall_cloud": 45,
+    "recall_device": 43,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "edf-service-time",
+   "challenge_mAP": 0.51626,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9120,
+   "engine_gpu_busy_s": 1303.1,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1265.604,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "hindsight-oracle",
+   "challenge_mAP": 0.51626,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9120,
+   "engine_gpu_busy_s": 1303.1,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1265.604,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "videostorm/maxmin",
+   "challenge_mAP": 0.516019,
+   "episodic_cloud_fraction": 0.864447,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 9215,
+    "local": 1445
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 8822,
+   "engine_gpu_busy_s": 2504.29,
+   "episodic_submitted": 36310,
+   "episodic_completed": 36310,
+   "recall_n": 88,
+   "gpu_s": 2492.957,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "videostorm/maxsum",
+   "challenge_mAP": 0.516019,
+   "episodic_cloud_fraction": 0.864447,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 9215,
+    "local": 1445
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 8822,
+   "engine_gpu_busy_s": 2504.29,
+   "episodic_submitted": 36310,
+   "episodic_completed": 36310,
+   "recall_n": 88,
+   "gpu_s": 2492.957,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "ekya",
+   "challenge_mAP": 0.473728,
+   "episodic_cloud_fraction": 0.864447,
+   "recall_timely_accuracy": 0.2853046029222725,
+   "stream_actions": {
+    "cloud": 9215,
+    "local": 1445
+   },
+   "recall_actions": {
+    "CLOUD": 86,
+    "DEVICE": 2
+   },
+   "session_actions": {
+    "OFFLOAD_TO_HOST": 86
+   },
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 3849,
+   "engine_gpu_busy_s": 2601.31,
+   "episodic_submitted": 36236,
+   "episodic_completed": 36236,
+   "recall_n": 88,
+   "gpu_s": 2657.108,
+   "decisions": {
+    "recall_cloud": 86,
+    "recall_device": 2,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "tuned-engine",
+   "challenge_mAP": 0.51626,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9124,
+   "engine_gpu_busy_s": 1303.14,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1265.604,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "clockwork",
+   "challenge_mAP": 0.518409,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {
+    "OFFLOAD_TO_HOST": 88
+   },
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 8443,
+   "engine_gpu_busy_s": 1451.77,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1439.661,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "confidence-cascade",
+   "challenge_mAP": 0.48455,
+   "episodic_cloud_fraction": 0.174859,
+   "recall_timely_accuracy": 0.33297407048667904,
+   "stream_actions": {
+    "local": 8796,
+    "cloud": 1864
+   },
+   "recall_actions": {
+    "DEVICE": 48,
+    "CLOUD": 40
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 3096,
+   "engine_gpu_busy_s": 272.12,
+   "episodic_submitted": 3502,
+   "episodic_completed": 3502,
+   "recall_n": 88,
+   "gpu_s": 260.011,
+   "decisions": {
+    "recall_cloud": 40,
+    "recall_device": 48,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "inar-vl",
+   "challenge_mAP": 0.516019,
+   "episodic_cloud_fraction": 0.864447,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 9215,
+    "local": 1445
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 8822,
+   "engine_gpu_busy_s": 2504.29,
+   "episodic_submitted": 36310,
+   "episodic_completed": 36310,
+   "recall_n": 88,
+   "gpu_s": 2492.957,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "hybrid-llm",
+   "challenge_mAP": 0.477604,
+   "episodic_cloud_fraction": 0.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "local": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 90,
+   "engine_gpu_busy_s": 12.34,
+   "episodic_submitted": 0,
+   "episodic_completed": 0,
+   "recall_n": 88,
+   "gpu_s": 42.032,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "routellm",
+   "challenge_mAP": 0.516935,
+   "episodic_cloud_fraction": 0.857036,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 9136,
+    "local": 1524
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9090,
+   "engine_gpu_busy_s": 1292.41,
+   "episodic_submitted": 17970,
+   "episodic_completed": 17970,
+   "recall_n": 88,
+   "gpu_s": 1255.007,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "perllm",
+   "challenge_mAP": 0.477637,
+   "episodic_cloud_fraction": 0.002064,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "local": 10638,
+    "cloud": 22
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 102,
+   "engine_gpu_busy_s": 18.71,
+   "episodic_submitted": 51,
+   "episodic_completed": 51,
+   "recall_n": 88,
+   "gpu_s": 48.406,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "rh8-demand-aware-causal",
+   "challenge_mAP": 0.51626,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {
+    "MATERIALIZE": 2,
+    "KEEP_GPU_WARM": 2632,
+    "OFFLOAD_TO_HOST": 7703
+   },
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9120,
+   "engine_gpu_busy_s": 1303.1,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1265.604,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 2,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "rh8-demand-aware-ORACLE",
+   "challenge_mAP": 0.51626,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {
+    "OFFLOAD_TO_HOST": 10337
+   },
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9120,
+   "engine_gpu_busy_s": 1303.1,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1265.604,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "r3-streaming",
+   "challenge_mAP": 0.499041,
+   "episodic_cloud_fraction": 0.217167,
+   "recall_timely_accuracy": 0.26303066995287344,
+   "stream_actions": {
+    "cloud": 2315,
+    "local": 8345
+   },
+   "recall_actions": {
+    "DEVICE": 78,
+    "DEFER": 17122
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 4512,
+   "engine_gpu_busy_s": 343.93,
+   "episodic_submitted": 4512,
+   "episodic_completed": 4512,
+   "recall_n": 88,
+   "gpu_s": 304.56,
+   "decisions": {
+    "recall_cloud": 0,
+    "recall_device": 78,
+    "defer": 17122,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "eco-llm",
+   "challenge_mAP": 0.516019,
+   "episodic_cloud_fraction": 0.864447,
+   "recall_timely_accuracy": 0.3817445965042761,
+   "stream_actions": {
+    "cloud": 9215,
+    "local": 1445
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 8822,
+   "engine_gpu_busy_s": 2504.29,
+   "episodic_submitted": 36310,
+   "episodic_completed": 36310,
+   "recall_n": 88,
+   "gpu_s": 2492.957,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "streamscout",
+   "challenge_mAP": 0.51658,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.3643049090249628,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 86,
+    "DEVICE": 2
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9119,
+   "engine_gpu_busy_s": 1303.0,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1264.837,
+   "decisions": {
+    "recall_cloud": 86,
+    "recall_device": 2,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "preble",
+   "challenge_mAP": 0.51626,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {
+    "KEEP_GPU_WARM": 88,
+    "OFFLOAD_TO_HOST": 10249
+   },
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9120,
+   "engine_gpu_busy_s": 1303.1,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1265.604,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "mooncake",
+   "challenge_mAP": 0.518409,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {
+    "KEEP_GPU_WARM": 88,
+    "OFFLOAD_TO_HOST": 88
+   },
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 8443,
+   "engine_gpu_busy_s": 1451.77,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1439.661,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "kvflow",
+   "challenge_mAP": 0.51626,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {
+    "OFFLOAD_TO_HOST": 4,
+    "KEEP_GPU_WARM": 10333
+   },
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9120,
+   "engine_gpu_busy_s": 1303.1,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1265.604,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "uniscale",
+   "challenge_mAP": 0.47165,
+   "episodic_cloud_fraction": 0.353659,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "local": 6890,
+    "cloud": 3770
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 2998,
+   "engine_gpu_busy_s": 580.37,
+   "episodic_submitted": 6030,
+   "episodic_completed": 6030,
+   "recall_n": 88,
+   "gpu_s": 591.353,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "thinking-qwenvl-atdm",
+   "challenge_mAP": 0.464859,
+   "episodic_cloud_fraction": 0.108068,
+   "recall_timely_accuracy": 0.25322445219117634,
+   "stream_actions": {
+    "local": 9508,
+    "cloud": 1152
+   },
+   "recall_actions": {
+    "CLOUD": 61,
+    "DEFER": 32288
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 1980,
+   "engine_gpu_busy_s": 167.68,
+   "episodic_submitted": 2079,
+   "episodic_completed": 2079,
+   "recall_n": 88,
+   "gpu_s": 172.011,
+   "decisions": {
+    "recall_cloud": 61,
+    "recall_device": 0,
+    "defer": 32288,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "simplestream",
+   "challenge_mAP": 0.51626,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9120,
+   "engine_gpu_busy_s": 1303.1,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1265.604,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "covstream",
+   "challenge_mAP": 0.51626,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.3817445965042761,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {
+    "KEEP_GPU_WARM": 10337
+   },
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9120,
+   "engine_gpu_busy_s": 1303.1,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1265.604,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "B3-best-static",
+   "challenge_mAP": 0.51626,
+   "episodic_cloud_fraction": 0.864447,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 9215,
+    "local": 1445
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9120,
+   "engine_gpu_busy_s": 1303.1,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1265.604,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "B4-query-type-routing",
+   "challenge_mAP": 0.48455,
+   "episodic_cloud_fraction": 0.175047,
+   "recall_timely_accuracy": 0.3817445965042761,
+   "stream_actions": {
+    "local": 8794,
+    "cloud": 1866
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 3139,
+   "engine_gpu_busy_s": 275.01,
+   "episodic_submitted": 3506,
+   "episodic_completed": 3506,
+   "recall_n": 88,
+   "gpu_s": 278.687,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "B6-latency-aware-routing",
+   "challenge_mAP": 0.516019,
+   "episodic_cloud_fraction": 0.864447,
+   "recall_timely_accuracy": 0.3817445965042761,
+   "stream_actions": {
+    "cloud": 9215,
+    "local": 1445
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 8822,
+   "engine_gpu_busy_s": 2504.29,
+   "episodic_submitted": 36310,
+   "episodic_completed": 36310,
+   "recall_n": 88,
+   "gpu_s": 2492.957,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "B7-edf-feasibility",
+   "challenge_mAP": 0.51626,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9120,
+   "engine_gpu_busy_s": 1303.1,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1265.604,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "B8-utility-per-gpu-second",
+   "challenge_mAP": 0.516108,
+   "episodic_cloud_fraction": 0.864447,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 9215,
+    "local": 1445
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {},
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 6376,
+   "engine_gpu_busy_s": 674.47,
+   "episodic_submitted": 9049,
+   "episodic_completed": 9049,
+   "recall_n": 88,
+   "gpu_s": 652.839,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "B9-noHost",
+   "challenge_mAP": 0.5156,
+   "episodic_cloud_fraction": 0.862383,
+   "recall_timely_accuracy": 0.3817445965042761,
+   "stream_actions": {
+    "local": 1467,
+    "cloud": 9193
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {
+    "KEEP_GPU_WARM": 10337
+   },
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 8799,
+   "engine_gpu_busy_s": 2498.24,
+   "episodic_submitted": 36222,
+   "episodic_completed": 36222,
+   "recall_n": 88,
+   "gpu_s": 2487.017,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 0,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "B10-blocking-aware-admission",
+   "challenge_mAP": 0.516225,
+   "episodic_cloud_fraction": null,
+   "recall_timely_accuracy": 0.009416294692181908,
+   "stream_actions": {},
+   "recall_actions": {
+    "DEFER": 424,
+    "CLOUD": 88
+   },
+   "session_actions": {
+    "KEEP_GPU_WARM": 10333,
+    "MATERIALIZE": 4
+   },
+   "slice_materializations": 0,
+   "engine_slice_steps": 0,
+   "engine_steps": 9093,
+   "engine_gpu_busy_s": 1310.42,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1275.426,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 424,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 4,
+    "materialize_sliced": 0
+   },
+   "epochs": 2665
+  },
+  {
+   "arm": "B11-naive-slicing",
+   "challenge_mAP": 0.51626,
+   "episodic_cloud_fraction": 1.0,
+   "recall_timely_accuracy": 0.36575081080250255,
+   "stream_actions": {
+    "cloud": 10660
+   },
+   "recall_actions": {
+    "CLOUD": 88
+   },
+   "session_actions": {
+    "MATERIALIZE": 4,
+    "KEEP_GPU_WARM": 10333
+   },
+   "slice_materializations": 4,
+   "engine_slice_steps": 12,
+   "engine_steps": 9124,
+   "engine_gpu_busy_s": 1303.14,
+   "episodic_submitted": 18127,
+   "episodic_completed": 18127,
+   "recall_n": 88,
+   "gpu_s": 1265.604,
+   "decisions": {
+    "recall_cloud": 88,
+    "recall_device": 0,
+    "defer": 0,
+    "reject": 0,
+    "suspend_epochs": 0,
+    "materialize": 4,
+    "materialize_sliced": 4
+   },
+   "epochs": 2665
+  }
+ ]
+}

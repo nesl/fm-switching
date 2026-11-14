@@ -1,6 +1,74 @@
 # FM-switching — Project Status
 
-Last updated: 2026-11-13 (later) (**StudySLICE1 PART C COMPLETE (h100nvl GPU 2): MANAGING WARM TRAFFIC LIKE COLD SLICES DOES NOT RESTORE EPISODIC CAPACITY.** P5 (Part B's P4 cold path + warm appends held until a predicted episodic gap, escalations gap-aligned) reaches 10 % at C4a (KV-HOST k 8 + cold r 0.05) and < 10 % at C4 (r 0.1; 0.453 s at 10 %, inside run noise of 0.007 s) against this run's warm-only C2-P0 ceiling of 30 %, and does not raise warm-only capacity (C2 P5 30 % = P0 30 %). Recalls (100 % <= 10 s) and escalations (100 % <= 5 s) meet their deadlines; escalation letters agree with P0 (99 / 95 / 100 %); warm GPU work 1.00x. Mechanism (measured): appends take longer under load than the low-load prediction (0.425 vs 0.307 s) and independently gap-released held work bunches into the same gaps, so the hold helps at 10 % and hurts at 20 % and above. Real negative for this rule; a load-aware, jointly scheduled release is untested. Coalescing UNEXERCISED (held appends release within 3.4 s, next append due at 10 s); no claim. P4 with 1,024-token slices at C1b: 25 % (Part B n 2,048: 20 %), 86.7 % <= 10 s, below the 30 % rule. 22 cells, 2 h 44 min, not VOID; consistency PASS 6/6; mechanism verification before the sweep (report §11-16).)
+Last updated: 2026-11-13 (later 2) (**StudyB-baselines amendment 2, StudyLIVE1-port and StudyMAP1-bridge COMPLETE.** The headline evaluation will run LIVE on the H100 through the StudySLICE1 harness; the simulator is secondary. 33 literature and constructed arms now run unchanged in the live harness, and live cells can be scored on StudyE9c's challenge mAP.)
+
+## Last updated: 2026-11-13 (later 2) (StudyB-baselines amendment 2, StudyLIVE1-port, StudyMAP1-bridge)
+
+**Three studies, in order, on flash, CPU only; no GPU, no model server, no inference. The
+HEADLINE evaluation is now decided: it runs LIVE on the H100 through the StudySLICE1 harness,
+and the simulator is SECONDARY.**
+
+**StudyB-baselines amendment 2 applied all eight accepted StudySIM1d fixes, plus three decisions
+the application forced.** 15 of 37 runnable arms change on StudySIM1d's representative cell and
+22 do not change at all. VideoStorm's L is now each configuration's own hold shift with no
+backlog recursion (U(local) = -0.23957 against U(cloud/32BI_N1@0.25) = +0.01690, where it used to
+be -10.234 against +0.01043), and because utility no longer depends on a_k the allocation is now
+the assigned configuration's DEMAND rather than a greedy delta (ADAPTATION A5b): videostorm/maxmin
+and /maxsum both go from the device-only 0.4776 to 0.5263, B9-noHost to 0.5259. covstream,
+simplestream and streamscout follow DEFAULTS["episodic_mode"]. B10 IS StudySLICE1's P2 and B11 IS
+P3_2048, `run.py` applies session actions before recall actions, and B11 now slices (engine
+slice_steps 0 -> 14) while B10 now holds (0 -> 403 DEFERs) and misses a 5-s deadline P2 was never
+designed against. **Two pre-registered stop conditions fired and both were answered by the user.**
+The first: confidence-cascade and r3-streaming changed outside the declared set because they read
+state the harness had never supplied; items 3 and 4 were kept for every arm (one shared
+observation), the device answer is now CHARGED (StudyD8's 0.567 s, a RULE) to any arm that reads
+its confidence, and the field is gated by whether the arm's PUBLISHED mechanism observes that
+answer - hybrid-llm's router reads the QUERY, so it no longer receives it. The second: the
+committed device-confidence tables overlapped the recall evaluation set completely, so an S-EMBER
+DEV / EVAL split was pre-registered and computed (by video, sha256 order, lowest 30 % to DEV,
+stratified by video-length bucket after the trigger fired): **DEV 70 videos / 243 questions, EVAL
+164 / 602, overlap 0 and 0.** Every S-EMBER-fitted constant is now fitted on DEV (there is
+exactly one in the suite: confidence-cascade's floor, 0.7358) and every reported recall metric is
+computed on EVAL only, so **the committed StudySIM1c recall numbers are SUPERSEDED FOR
+COMPARISON, not INVALID**. The fitting audit also LISTS what is measured on evaluation clips and
+feeds a decision rule - the resource-quality profile and StudyE9d's V(d) and d* curves, inputs to
+11 arms - reported and not fixed, because re-measuring them needs GPU time.
+
+**The simulator sweep was re-run with the amendment-2 fixes (optional last item).** 59,940 runs and 2,997 cells on the finer ladder (fleets 1-6, 8 plus anchors 16 and 32, three mixes, deadlines 2 / 5 / 10 s, 20 seeds) in 1 h 52 min on 12 CPU workers; tables in
+`reports/study_b_baselines.md` section 23, every one of them labelled **UNCALIBRATED SIMULATOR
+(gate 19/29, out-of-sample fail): secondary, not headline**, with B10 and B11 excluded from
+every comparison. The fixes move VideoStorm, B9-noHost, covstream, simplestream, streamscout
+and the KV arms off the device-only floor 0.4776; the best cell is 0.5530 against cloud-only
+0.5675; arms tie at the low fleet levels, where nothing binds, and separate from F=5 upward.
+
+**StudyLIVE1-port: the literature baselines can run live tomorrow.** Every registry arm is
+classified ORCHESTRATOR-LEVEL or ENGINE-LEVEL with its reason; the orchestrator-level arms run
+unchanged inside a live loop through the same `baselines/interface.py` contract, with the
+observation built from measured TTFTs, in-flight state, the server's own `/metrics` and the
+harness's session bookkeeping, and with actions enacted against an OpenAI-compatible endpoint.
+The orchestrator knows only the cadence-only schedule of StudySLICE1 Part D-b, never the future.
+44 registry entries classified: 34 orchestrator-level, 2 engine-level (attentionstore, pensieve),
+2 server configurations (tuned-engine, lmcache), 6 not built; 33 run live. All 34 exercised arms ran
+against a fake OpenAI-compatible server whose delays are committed draws: **34 of 34 ok, 0 failed,
+every action legal, the arrival-trace sha256 identical across arms
+(6d468569bdc40df14e863f05bb122e98), 0 future reads, one decision trace per arm.** Nothing from the
+stub is a measurement. The H100 run plan is written and **NOT run**: 33 arms in 3 tiers,
+**39.9 GPU-hours** in full and 13.3 for the first two tiers, costed from Part C's measured 7.45 min
+per cell. One integration item remains: injecting the committed body builders at the `Backend`
+protocol.
+
+**StudyMAP1-bridge: live cells can now be scored on the headline metric, and at these loads the
+metric cannot see the capacity story.** The bridge replays each episodic request's MEASURED
+delivery time through StudyE9b's delivery model on StudyD14b's committed traces; the live-to-D14b
+mapping is an exact lookup (every live request id is a StudyD14 id that StudyD14b's manifest
+carries on the coinciding grid point), and the pre-registered gate passes: the delivered arrays
+are StudyE9d's own bit for bit on all 300 clips and the challenge mAP matches StudyE9c to 1 ulp
+(the committed ap_fast-vs-sklearn difference). Applied to all 50 committed StudySLICE1 Part B and
+Part C cells: a 9x spread in p99 delivery time across policies (C1b 10 %: P0 4.581 s against P4
+0.516 s) moves challenge mAP by at most 0.0087, **every one of the 27 paired clip-bootstrap
+intervals includes zero**, and the per-cell CI is 0.128 wide. The reason is the cells, not the
+bridge: each touches 12 to 44 of the 300 scored clips on StudyD14's 1-s grid, and the challenge
+crop reads one grid point per clip. Part D's cell design can fix all three.
 
 ## Last updated: 2026-11-13 (StudySIM1d-validate)
 

@@ -68,3 +68,15 @@ change is what it is charged: the harness already billed the first promotion of 
 GPU-warm at the measured cold-prefill cost (fairness rule 3), and it bills `MATERIALIZE` on the
 same path. The re-run smoke record is identical field for field apart from the new
 `materialize_*` counters.
+
+## StudyB-baselines amendment 2 (2026-11-13)
+
+**Item 5: `host_offload_intent = "retain"`** on both RH8 arms - RH8's whole subject is which
+sessions are warm, and the tier is how that is expressed, so in the no-host world the harness
+keeps a retained session GPU-warm instead of evicting it (GPU KV capacity, LRU eviction, budget
+and fairness rule 3 all still bind).
+
+**Item 6: CEIL, not round, for the HIGH_FRAC warm-slot count.** `round(0.25 x n_sessions)` is 0
+for every cell with fewer than two sessions, so RH8's own HIGH_FRAC kept nothing warm by
+construction; `ceil` keeps at least one session warm whenever there is one. Measured consequence
+on the representative cell: challenge mAP 0.5135 -> 0.5169 (ALL) for both arms.

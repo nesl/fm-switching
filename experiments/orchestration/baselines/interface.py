@@ -351,6 +351,23 @@ class Policy:
     reads_future: bool = False                 # rule 5
     restricts_action_space: Optional[str] = None   # rule 4
     restriction_reason: Optional[str] = None
+    # StudyB-baselines amendment 2 (2026-11-13), item 5. What this policy MEANS by
+    # OFFLOAD_TO_HOST: "demote" (the default, and the literal reading - put this state somewhere
+    # cheaper and accept losing it if there is nowhere) or "retain" (the intent is KEEP THIS
+    # STATE, and the host is merely where it would have gone). In a world with a host tier the
+    # two are identical; in StudySIM1c's no-host scope the harness maps "retain" to
+    # KEEP_GPU_WARM and "demote" to EVICT. The engine's GPU KV capacity and LRU eviction, the
+    # budget and fairness rule 3's first-promotion charge all still bind either way.
+    host_offload_intent: str = "demote"        # "demote" | "retain"
+    # StudyB-baselines amendment 2 (2026-11-13), items 3 and 3b. Does this policy's PUBLISHED
+    # mechanism observe the device's own answer before it decides? A cascade does (that is what
+    # a cascade is); a router that reads the QUERY and routes before either model answers does
+    # not, and must not receive `device_answer_confidence`. The harness supplies the field ONLY
+    # to a policy that declares True here, and CHARGES that device answer: a query is not
+    # actionable until the device answer that produced the confidence has completed (StudyD8's
+    # 0.567 s, a RULE and not a measurement of device recall latency), and a DEVICE decision is
+    # delivered at that time rather than at the decision epoch.
+    reads_device_answer: bool = False
 
     def reset(self, seed: int = 0) -> None:
         """Called once before a replay."""
@@ -410,6 +427,8 @@ def check_fairness(policy: "Policy") -> Dict[str, Any]:
     out["rule4_restricts"] = r
     out["rule4_reason"] = getattr(policy, "restriction_reason", None)
     out["rule5_reads_future"] = bool(getattr(policy, "reads_future", False))
+    out["reads_device_answer"] = bool(getattr(policy, "reads_device_answer", False))
+    out["host_offload_intent"] = getattr(policy, "host_offload_intent", "demote")
     exps = getattr(policy, "experiments", ())
     bad = [e for e in exps if e not in EXPERIMENTS]
     if bad:

@@ -8,6 +8,14 @@ here; `sim1c_report.py` tabulates and the report states what may not be claimed.
 THE SCOPE IS ENFORCED IN THIS FILE, NOT IN ANY BASELINE. `HOST_AVAILABLE = False` makes the
 harness map OFFLOAD_TO_HOST to EVICT and never report readiness HOST-WARM. No baseline's logic
 is edited; an arm whose CORE decision is host offload is simply not run (see `sim1c_scope.py`).
+StudyB-baselines amendment 2 (2026-11-13) adds ONE distinction to that mapping: an arm that
+DECLARES `host_offload_intent = "retain"` means "keep this state", not "discard it", so in this
+world its OFFLOAD_TO_HOST becomes KEEP_GPU_WARM, with the engine's GPU KV capacity, its LRU
+eviction, the budget and fairness rule 3's first-promotion charge all still binding. The same
+amendment applies SESSION actions before RECALL actions, supplies the committed per-question
+device-answer probability only to an arm whose published mechanism observes the device's answer
+(and charges that answer), lists RECENT as well as D2 in the evidence inventory, honours
+DEFER(defer_s), and draws recall arrivals from the pre-registered S-EMBER EVAL split.
 
 WHAT A STREAM SEES. The application's score for a clip at grid index i is the most recent
 DELIVERY, whichever path produced it: the device's own 4B score (always available, StudyD8's
@@ -37,6 +45,7 @@ for p in (ROOT / "experiments/dashcam", ROOT / "experiments/orchestration/baseli
           ROOT / "experiments/lib"):
     sys.path.insert(0, str(p))
 
+import device_confidence as DC     # noqa: E402
 import engine as E                 # noqa: E402
 import metrics as M                # noqa: E402
 import workload as W               # noqa: E402
@@ -62,6 +71,18 @@ SLICE_OVERHEAD_SWEEP_S = (0.02, 0.05, 0.1, 0.2, 0.47)
 # is a RULE, not a measurement of device recall. It is far inside every deadline tested
 # (2 / 5 / 10 s), so no result here turns on its exact value; the report states this.
 DEVICE_RECALL_S = C.DEV_LAT_S
+# StudyB-baselines amendment 2 item 4 (2026-11-13). The evidence inventory now lists the
+# representations the system REALLY holds for a recall, which is what thinking-qwenvl-atdm's rho
+# counts: the device's own recent window (RECENT, always warm by the device_always_warm design
+# assumption) AND the session's strided history (D2), stored on the device and ready on the GPU
+# when the session is GPU-warm. RICH (the full video history) is NOT listed, because nothing in
+# this world retains it server-side. The window's token count is StudyF4 Part A's committed
+# median input size at N = 1, the device's own last-3-s window.
+RECENT_WINDOW_TOKENS = 467
+EVIDENCE_RULE = ("RECENT (the device's last-3-s window, StudyF4 Part A median 467 tokens) and D2 "
+                 "(the session's strided history, stored on the device and ready on the GPU when "
+                 "GPU-warm). RICH is not listed: this world does not retain the full history "
+                 "server-side.")
 ENGINE_CONFIG = {"default": "P0", "P0": "P0", "P1": "P1", "P2": "P2", "P3": "P3", "E2": "E2"}
 
 
@@ -102,6 +123,24 @@ def run_cell(trace: W.Trace, policy: Policy, seed: int = 0,
     cloud_arr = {n: ctx["arrs"][("32BI", n)] for n in (1, 3)}
     check_fairness(policy)
     policy.reset(seed)
+    # amendment 2 items 3 and 3b (2026-11-13). The committed per-question device-answer
+    # probability is supplied ONLY to a policy whose published mechanism observes the device's
+    # own answer before deciding (`reads_device_answer`), and that answer is CHARGED: such a
+    # policy does not see a query until the device answer that produced the confidence has
+    # completed, and a DEVICE decision is delivered at that time rather than at the decision
+    # epoch. DEVICE_RECALL_S is a RULE (StudyD8 arm A total p50), not a measurement of device
+    # recall latency; StudySIM1c's limitation on it still applies.
+    reads_device = bool(getattr(policy, "reads_device_answer", False))
+    device_answer_charge_s = DEVICE_RECALL_S if reads_device else 0.0
+    # amendment 2 (2026-11-13), harness fix: DEFER(defer_s) is HONOURED. Until this change the
+    # harness re-presented a deferred query at every tick, so a policy whose deferral condition
+    # cannot change re-decided it every epoch and its DEFER count was the tick rate, not a
+    # property of the policy. A deferred query is now withheld until its defer_s has elapsed and
+    # is then re-decided. LIMITATION, declared: this harness's per-query device confidence is
+    # STATIC (the committed tables give one value per question), so a deferral can never gain
+    # evidence and any arm that defers on a confidence threshold has its deferral mechanism
+    # UNEXERCISED here.
+    defer_until: Dict[str, float] = {}
 
     length = trace.length_s
     budget = Budget(gpu_seconds=length * 1.0)      # ONE replica for the length of the run
@@ -172,12 +211,20 @@ def run_cell(trace: W.Trace, policy: Policy, seed: int = 0,
             ready = eng.readiness(sid)
             if ready == "HOST-WARM":              # cannot happen in scope; asserted
                 raise AssertionError("HOST-WARM readiness leaked into a scoped run")
-            ev = (EvidenceItem("D2", "device", tok, tok * 4),
+            ev = (EvidenceItem("RECENT", "device", RECENT_WINDOW_TOKENS,
+                               RECENT_WINDOW_TOKENS * 4),
+                  EvidenceItem("D2", "device", tok, tok * 4),
                   EvidenceItem("D2", "gpu" if ready == "GPU-WARM" else "device", tok,
                                C.host_reload_bytes(tok)))
             q = RecallQuery(query_id=qid, session_id=sid, category=cat, arrival_s=round(at, 3),
                             deadline_s=round(at + trace.deadline_s, 3), evidence=ev,
-                            readiness=ready, readiness_tokens=tok)
+                            readiness=ready, readiness_tokens=tok,
+                            # amendment 2 item 3: the COMMITTED per-question device-answer
+                            # probability (StudyE7 Job A, the 4B-D2 configuration the harness
+                            # answers a DEVICE recall with). None where no committed value
+                            # exists; nothing is synthesized.
+                            device_answer_confidence=(DC.confidence(qid) if reads_device
+                                                      else None))
             pend.append(q)
             qmeta[qid] = dict(category=cat, question_time_s=qt, arrival_s=at, session=sid,
                               tokens=tok)
@@ -206,8 +253,13 @@ def run_cell(trace: W.Trace, policy: Policy, seed: int = 0,
             latency_estimate_s=dict(
                 recall=0.0,
                 episodic=C.episodic_cloud_latency_s("32BI", 1, SETTING_LOAD)))
+        # the device answer this policy reads has to have finished first
+        visible = [q for q in pend
+                   if t + 1e-9 >= q.arrival_s + device_answer_charge_s
+                   and t + 1e-9 >= defer_until.get(q.query_id, -1.0)]
+        withheld = [q for q in pend if q not in visible]
         obs = Observation(now_s=round(t, 3), epoch=epoch, streams=tuple(eps),
-                          recall=tuple(pend), cloud=cloud,
+                          recall=tuple(visible), cloud=cloud,
                           budget_remaining_gpu_s=budget.remaining_gpu_s())
         act = policy(obs)
         if act.engine_config and eng_cfg_requested is None:
@@ -237,16 +289,79 @@ def run_cell(trace: W.Trace, policy: Policy, seed: int = 0,
             if s.mode == "suspend" and t >= s.suspend_until_s:
                 s.mode = "cloud"
 
-        # ---- apply recall actions
+        # ---- apply SESSION actions FIRST (THE SCOPE FLAG lives here)
+        # StudyB-baselines amendment 2 item 8 (2026-11-13): session actions are applied
+        # BEFORE recall actions. Until this change a CLOUD recall placed its session on the
+        # GPU first, so a MATERIALIZE in the same tick found it resident and submitted
+        # nothing, which is why B11 declared slices the engine never executed.
+        warmed_this_tick: Dict[str, str] = {}
+        for xa in act.sessions:
+            a = xa.action
+            if a == "OFFLOAD_TO_HOST" and not HOST_AVAILABLE:
+                # amendment 2 item 5: an arm whose OFFLOAD_TO_HOST means RETAIN THIS STATE
+                # ELSEWHERE (kvflow, preble, rh8) keeps the session GPU-warm in a world with
+                # no host tier, instead of losing it. The engine's GPU KV capacity and its
+                # LRU eviction still bind, and fairness rule 3 still charges a first
+                # promotion at the measured cold-prefill cost.
+                a = ("KEEP_GPU_WARM"
+                     if getattr(policy, "host_offload_intent", "demote") == "retain"
+                     else "EVICT")   # the host tier does not exist in this world
+            if a == "MATERIALIZE":
+                materialize_calls += 1
+                if xa.slice_tokens:
+                    materialize_sliced += 1
+            if a in ("KEEP_GPU_WARM", "MATERIALIZE"):
+                if xa.session_id not in eng.gpu:
+                    tok = sess_tokens.get(xa.session_id, 11050)
+                    if xa.session_id not in ever_warmed:
+                        # FAIRNESS RULE 3: the first promotion pays the measured cold prefill
+                        wc = C.recall_gpu_s(tok, "COLD")
+                        if not budget.can_spend(wc):
+                            budget_refusals += 1
+                            continue
+                        budget.spend(wc)
+                        ever_warmed.add(xa.session_id)
+                        rid += 1
+                        key = f"w{rid}"
+                        sl = xa.slice_tokens if a == "MATERIALIZE" else None
+                        ov = (slice_overhead_s if slice_overhead_s is not None
+                              else SLICE_OVERHEAD_MEASURED_S.get(int(sl or 0), 0.015))
+                        eng.submit(E.cold_recall_request(
+                            key, t, tok, session=xa.session_id, body="text", encoder=False,
+                            slice_tokens=sl, slice_overhead_s=(ov if sl else 0.0)))
+                        req_meta[key] = dict(kind="warm")
+                        warmed_this_tick[xa.session_id] = key
+                    eng.place(xa.session_id, tok, "gpu")
+            else:
+                eng.gpu.pop(xa.session_id, None)
+                eng.host.pop(xa.session_id, None)
+
+        # ---- apply recall actions (AFTER the session actions, amendment 2 item 8)
         keep = []
         for ra in act.recall:
             q = next(x for x in pend if x.query_id == ra.query_id)
             qm = qmeta[q.query_id]
             if ra.decision == "DEVICE":
                 n_recall_device += 1
+                # for a policy that READ the device answer, that answer already exists and was
+                # charged at arrival; for every other policy the device runs now.
+                dev_done = (q.arrival_s + DEVICE_RECALL_S if reads_device
+                            else t + DEVICE_RECALL_S)
                 answers.append(dict(decision="DEVICE", config=M.DEVICE_CONFIG,
-                                    delivered_s=t + DEVICE_RECALL_S, **qm))
+                                    delivered_s=dev_done, **qm))
             elif ra.decision == "CLOUD":
+                # amendment 2 item 8: if this session was MATERIALIZED in this same tick, that
+                # build IS this recall's prefill (StudySLICE1 P2 and P3: the final link carries
+                # the question and produces the answer), it has already been charged, and a
+                # second request would double the work the engine does.
+                mkey = warmed_this_tick.get(q.session_id)
+                if mkey is not None:
+                    n_recall_cloud += 1
+                    req_meta[mkey] = dict(kind="recall", qid=q.query_id,
+                                          config=M.CLOUD_CONFIG.get(
+                                              ra.representation or "RECENT", "32B-RECENT"),
+                                          qm=qm)
+                    continue
                 g = C.recall_gpu_s(q.readiness_tokens, q.readiness)
                 if not budget.can_spend(g):
                     budget_refusals += 1
@@ -279,46 +394,13 @@ def run_cell(trace: W.Trace, policy: Policy, seed: int = 0,
                                                                "32B-RECENT"), qm=qm)
             elif ra.decision == "DEFER":
                 n_defer += 1
+                defer_until[q.query_id] = t + max(float(ra.defer_s or 0.0), 0.0)
                 keep.append(q)
             else:
                 n_reject += 1
                 answers.append(dict(decision="REJECT", config=M.DEVICE_CONFIG,
                                     delivered_s=None, **qm))
-        pend = keep
-
-        # ---- apply session actions (THE SCOPE FLAG lives here)
-        for xa in act.sessions:
-            a = xa.action
-            if a == "OFFLOAD_TO_HOST" and not HOST_AVAILABLE:
-                a = "EVICT"                     # the host tier does not exist in this world
-            if a == "MATERIALIZE":
-                materialize_calls += 1
-                if xa.slice_tokens:
-                    materialize_sliced += 1
-            if a in ("KEEP_GPU_WARM", "MATERIALIZE"):
-                if xa.session_id not in eng.gpu:
-                    tok = sess_tokens.get(xa.session_id, 11050)
-                    if xa.session_id not in ever_warmed:
-                        # FAIRNESS RULE 3: the first promotion pays the measured cold prefill
-                        wc = C.recall_gpu_s(tok, "COLD")
-                        if not budget.can_spend(wc):
-                            budget_refusals += 1
-                            continue
-                        budget.spend(wc)
-                        ever_warmed.add(xa.session_id)
-                        rid += 1
-                        key = f"w{rid}"
-                        sl = xa.slice_tokens if a == "MATERIALIZE" else None
-                        ov = (slice_overhead_s if slice_overhead_s is not None
-                              else SLICE_OVERHEAD_MEASURED_S.get(int(sl or 0), 0.015))
-                        eng.submit(E.cold_recall_request(
-                            key, t, tok, session=xa.session_id, body="text", encoder=False,
-                            slice_tokens=sl, slice_overhead_s=(ov if sl else 0.0)))
-                        req_meta[key] = dict(kind="warm")
-                    eng.place(xa.session_id, tok, "gpu")
-            else:
-                eng.gpu.pop(xa.session_id, None)
-                eng.host.pop(xa.session_id, None)
+        pend = keep + withheld
 
         # ---- issue this tick's episodic cloud calls
         t_end = min(t + TICK_S, length)
@@ -534,14 +616,22 @@ def main() -> int:
     ap.add_argument("--sensitivity", action="store_true",
                     help="also run the slice-overhead sweep for the slicing arms")
     ap.add_argument("--probe", action="store_true", help="one cell per mix, for timing")
+    ap.add_argument("--fleets", default=None,
+                    help="comma-separated fleet ladder; the default is workload.FLEET_LADDER. "
+                         "StudySIM1d section 5 proposed the finer ladder 1,2,3,4,5,6,8 plus the "
+                         "16 and 32 anchors")
+    ap.add_argument("--deadlines", default=None, help="comma-separated deadlines in seconds")
     a = ap.parse_args()
+    fleets = ([int(x) for x in a.fleets.split(",")] if a.fleets else list(W.FLEET_LADDER))
+    deadlines = ([float(x) for x in a.deadlines.split(",")] if a.deadlines
+                 else list(W.DEADLINES_S))
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
 
     cells = []
     for mix in W.MIXES:
-        for F in W.FLEET_LADDER:
-            for d in W.DEADLINES_S:
+        for F in fleets:
+            for d in deadlines:
                 for s in range(a.seeds):
                     cells.append((mix, F, d, s, None))
                     if a.probe:

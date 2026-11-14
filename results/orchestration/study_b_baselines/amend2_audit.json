@@ -1,0 +1,284 @@
+{
+ "label": "StudyB-baselines amendment 2 fitting audit. A marker is a call site in the arm's own source, so this table is checkable by grep.",
+ "modules": [
+  {
+   "module": "cascade_adapted.py",
+   "uses": [
+    {
+     "marker": "DS.load",
+     "what": "a score quantile fitted on StudyD3 DEVELOPMENT clips",
+     "fitted_on": "Nexar DEV (StudyD3)"
+    },
+    {
+     "marker": "_DC.dev_median",
+     "what": "the device-confidence floor fitted on S-EMBER DEV questions",
+     "fitted_on": "S-EMBER DEV"
+    },
+    {
+     "marker": "device_answer_confidence",
+     "what": "the committed per-question DEVICE answer probability",
+     "fitted_on": "S-EMBER, per question (a measurement, not a fitted constant)",
+     "receives_the_field": true,
+     "note": "the published mechanism observes the device's own answer before deciding, so the harness supplies the field and charges the device answer"
+    }
+   ]
+  },
+  {
+   "module": "constructed.py",
+   "uses": [
+    {
+     "marker": "DS.load",
+     "what": "a score quantile fitted on StudyD3 DEVELOPMENT clips",
+     "fitted_on": "Nexar DEV (StudyD3)"
+    },
+    {
+     "marker": "P.stream_profile",
+     "what": "the measured resource-quality profile (quality, demand, lag)",
+     "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+    },
+    {
+     "marker": "P.d_star_s",
+     "what": "StudyE9d's d* delay curve",
+     "fitted_on": "Nexar EVALUATION clips (StudyE9d on StudyD14b)"
+    }
+   ]
+  },
+  {
+   "module": "ecollm_adapted.py",
+   "uses": [
+    {
+     "marker": "P.stream_profile",
+     "what": "the measured resource-quality profile (quality, demand, lag)",
+     "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+    }
+   ]
+  },
+  {
+   "module": "ekya_adapted.py",
+   "uses": [
+    {
+     "marker": "P.stream_profile",
+     "what": "the measured resource-quality profile (quality, demand, lag)",
+     "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+    }
+   ]
+  },
+  {
+   "module": "hybrid_llm_adapted.py",
+   "uses": [
+    {
+     "marker": "DS.router_dataset",
+     "what": "a router / threshold fitted on StudyD3 DEVELOPMENT clips",
+     "fitted_on": "Nexar DEV (StudyD3)"
+    },
+    {
+     "marker": "device_answer_confidence",
+     "what": "the committed per-question DEVICE answer probability",
+     "fitted_on": "S-EMBER, per question (a measurement, not a fitted constant)",
+     "receives_the_field": false,
+     "note": "the published mechanism decides from the QUERY before either model answers, so the harness does NOT supply the field (the name appears only in the comment that records this)"
+    }
+   ]
+  },
+  {
+   "module": "inarvl_adapted.py",
+   "uses": [
+    {
+     "marker": "P.stream_profile",
+     "what": "the measured resource-quality profile (quality, demand, lag)",
+     "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+    }
+   ]
+  },
+  {
+   "module": "perllm_adapted.py",
+   "uses": [
+    {
+     "marker": "P.stream_profile",
+     "what": "the measured resource-quality profile (quality, demand, lag)",
+     "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+    }
+   ]
+  },
+  {
+   "module": "r3streaming_adapted.py",
+   "uses": [
+    {
+     "marker": "device_answer_confidence",
+     "what": "the committed per-question DEVICE answer probability",
+     "fitted_on": "S-EMBER, per question (a measurement, not a fitted constant)",
+     "receives_the_field": true,
+     "note": "the published mechanism observes the device's own answer before deciding, so the harness supplies the field and charges the device answer"
+    }
+   ]
+  },
+  {
+   "module": "routellm_adapted.py",
+   "uses": [
+    {
+     "marker": "DS.router_dataset",
+     "what": "a router / threshold fitted on StudyD3 DEVELOPMENT clips",
+     "fitted_on": "Nexar DEV (StudyD3)"
+    }
+   ]
+  },
+  {
+   "module": "simplestream_adapted.py",
+   "uses": [
+    {
+     "marker": "DS.router_dataset",
+     "what": "a router / threshold fitted on StudyD3 DEVELOPMENT clips",
+     "fitted_on": "Nexar DEV (StudyD3)"
+    },
+    {
+     "marker": "DS.load",
+     "what": "a score quantile fitted on StudyD3 DEVELOPMENT clips",
+     "fitted_on": "Nexar DEV (StudyD3)"
+    }
+   ]
+  },
+  {
+   "module": "streamscout_adapted.py",
+   "uses": [
+    {
+     "marker": "DS.router_dataset",
+     "what": "a router / threshold fitted on StudyD3 DEVELOPMENT clips",
+     "fitted_on": "Nexar DEV (StudyD3)"
+    },
+    {
+     "marker": "device_answer_confidence",
+     "what": "the committed per-question DEVICE answer probability",
+     "fitted_on": "S-EMBER, per question (a measurement, not a fitted constant)",
+     "receives_the_field": true,
+     "note": "the published mechanism observes the device's own answer before deciding, so the harness supplies the field and charges the device answer"
+    }
+   ]
+  },
+  {
+   "module": "thinking_qwenvl_adapted.py",
+   "uses": [
+    {
+     "marker": "device_answer_confidence",
+     "what": "the committed per-question DEVICE answer probability",
+     "fitted_on": "S-EMBER, per question (a measurement, not a fitted constant)",
+     "receives_the_field": true,
+     "note": "the published mechanism observes the device's own answer before deciding, so the harness supplies the field and charges the device answer"
+    }
+   ]
+  },
+  {
+   "module": "uniscale_adapted.py",
+   "uses": [
+    {
+     "marker": "P.stream_profile",
+     "what": "the measured resource-quality profile (quality, demand, lag)",
+     "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+    }
+   ]
+  },
+  {
+   "module": "videostorm_adapted.py",
+   "uses": [
+    {
+     "marker": "P.stream_profile",
+     "what": "the measured resource-quality profile (quality, demand, lag)",
+     "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+    }
+   ]
+  }
+ ],
+ "sember_fitted": [
+  {
+   "module": "cascade_adapted.py",
+   "marker": "_DC.dev_median",
+   "what": "the device-confidence floor fitted on S-EMBER DEV questions",
+   "fitted_on": "S-EMBER DEV"
+  },
+  {
+   "module": "cascade_adapted.py",
+   "marker": "device_answer_confidence",
+   "what": "the committed per-question DEVICE answer probability",
+   "fitted_on": "S-EMBER, per question (a measurement, not a fitted constant)",
+   "receives_the_field": true,
+   "note": "the published mechanism observes the device's own answer before deciding, so the harness supplies the field and charges the device answer"
+  },
+  {
+   "module": "r3streaming_adapted.py",
+   "marker": "device_answer_confidence",
+   "what": "the committed per-question DEVICE answer probability",
+   "fitted_on": "S-EMBER, per question (a measurement, not a fitted constant)",
+   "receives_the_field": true,
+   "note": "the published mechanism observes the device's own answer before deciding, so the harness supplies the field and charges the device answer"
+  },
+  {
+   "module": "streamscout_adapted.py",
+   "marker": "device_answer_confidence",
+   "what": "the committed per-question DEVICE answer probability",
+   "fitted_on": "S-EMBER, per question (a measurement, not a fitted constant)",
+   "receives_the_field": true,
+   "note": "the published mechanism observes the device's own answer before deciding, so the harness supplies the field and charges the device answer"
+  },
+  {
+   "module": "thinking_qwenvl_adapted.py",
+   "marker": "device_answer_confidence",
+   "what": "the committed per-question DEVICE answer probability",
+   "fitted_on": "S-EMBER, per question (a measurement, not a fitted constant)",
+   "receives_the_field": true,
+   "note": "the published mechanism observes the device's own answer before deciding, so the harness supplies the field and charges the device answer"
+  }
+ ],
+ "episodic_inputs_measured_on_evaluation_clips": [
+  {
+   "module": "constructed.py",
+   "marker": "P.stream_profile",
+   "what": "the measured resource-quality profile (quality, demand, lag)",
+   "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+  },
+  {
+   "module": "constructed.py",
+   "marker": "P.d_star_s",
+   "what": "StudyE9d's d* delay curve",
+   "fitted_on": "Nexar EVALUATION clips (StudyE9d on StudyD14b)"
+  },
+  {
+   "module": "ecollm_adapted.py",
+   "marker": "P.stream_profile",
+   "what": "the measured resource-quality profile (quality, demand, lag)",
+   "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+  },
+  {
+   "module": "ekya_adapted.py",
+   "marker": "P.stream_profile",
+   "what": "the measured resource-quality profile (quality, demand, lag)",
+   "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+  },
+  {
+   "module": "inarvl_adapted.py",
+   "marker": "P.stream_profile",
+   "what": "the measured resource-quality profile (quality, demand, lag)",
+   "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+  },
+  {
+   "module": "perllm_adapted.py",
+   "marker": "P.stream_profile",
+   "what": "the measured resource-quality profile (quality, demand, lag)",
+   "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+  },
+  {
+   "module": "uniscale_adapted.py",
+   "marker": "P.stream_profile",
+   "what": "the measured resource-quality profile (quality, demand, lag)",
+   "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+  },
+  {
+   "module": "videostorm_adapted.py",
+   "marker": "P.stream_profile",
+   "what": "the measured resource-quality profile (quality, demand, lag)",
+   "fitted_on": "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"
+  }
+ ],
+ "conclusion": {
+  "sember": "the only S-EMBER-FITTED constant in the suite is confidence-cascade's recall confidence floor, and amendment 2 fits it on the DEV split. The committed S-EMBER recall-accuracy table (`recall_profiles.py`) is read by no arm - only by the report generator - so no arm carries a constant fitted on the full question set. Every per-question device-answer probability a policy reads is a MEASUREMENT of that question, not a constant fitted across questions, and the harness supplies it only to the arms whose published mechanism observes the device's answer.",
+  "nexar": "every FITTED episodic tunable in the suite (every router, every score quantile, every window selection) comes from `devsplit`, which is StudyD3's DEVELOPMENT clips. NOT fitted but MEASURED ON THE EVALUATION CLIPS, and listed here as the amendment requires: the resource-quality profile (`profiles.stream_profile`: quality from StudyE9b / E9c, lag from StudyE9b's hold shift, demand from StudyE9 / E9b) and StudyE9d's V(d) and d* curves, all measured on StudyD14b's 300 validation clips. They are inputs to videostorm, eco-llm, inar-vl, perllm, B3, B6, B8, B9 and B10. This is the suite's documented ADAPTATION A2 (the paper profiles online; we substitute a measured profile), and it is a KNOWN leak of evaluation-clip information into a decision rule, reported and not fixed: re-measuring the profile on StudyD3's development clips needs GPU time."
+ }
+}

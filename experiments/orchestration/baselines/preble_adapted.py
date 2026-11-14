@@ -40,6 +40,9 @@ class PrebleAdapted(Policy):
     defaults_used = ("episodic_mode", "cadence_s", "frame_count", "representation",
                      "engine_config")
     multi_instance_adapted = True
+    # amendment 2 item 5: OFFLOAD_TO_HOST here means RETAIN this session's state, not
+    # discard it; see interface.Policy.host_offload_intent.
+    host_offload_intent = "retain"
     restricts_action_space = None
 
     def __init__(self, load_weight: float = 1.0, max_load_pressure: float = 0.9,

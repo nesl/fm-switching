@@ -46,6 +46,10 @@ class CascadeAdapted(Policy):
     paper = ("Chen et al., FrugalGPT, TMLR 2024; Aggarwal et al., AutoMix, NeurIPS 2024 "
              "(arXiv:2310.12963)")
     decides = ("episodic_mode", "recall_decision")
+    # amendment 2 item 3b (2026-11-13): this baseline's PUBLISHED mechanism observes the
+    # device-side model's own answer before deciding, so it receives
+    # `device_answer_confidence` and the harness charges that device answer.
+    reads_device_answer = True
     defaults_used = ("cadence_s", "frame_count", "representation", "session_action", "order")
 
     def __init__(self, trigger_rate: float = 0.20, confidence_floor: Optional[float] = None,
@@ -60,9 +64,17 @@ class CascadeAdapted(Policy):
                         if lab[clip] == "negative" for v in per.values()])
         self.tau_trigger = float(np.quantile(neg, 1.0 - self.trigger_rate))
         self.n_dev_negatives = int(len(neg))
-        # The recall confidence floor is the median device confidence on development data when it
-        # is available; otherwise the caller must supply one (never fitted on evaluation data).
-        self.confidence_floor = confidence_floor
+        # The recall confidence floor is the median device confidence on DEVELOPMENT data.
+        # amendment 2 (2026-11-13): S-EMBER now has a pre-registered DEV / EVAL split by video
+        # (`sember_split.py`), so this floor is FITTED on the committed device-answer
+        # probabilities of DEV questions only and every recall metric is reported on EVAL only.
+        # Before the split it was left None, which made the cascade escalate every query that
+        # had a committed probability at all.
+        import device_confidence as _DC
+        self.confidence_floor = (float(confidence_floor) if confidence_floor is not None
+                                 else _DC.dev_median())
+        self.confidence_floor_source = ("median committed device confidence (StudyE7 Job A "
+                                        "4B-D2) over S-EMBER DEV questions")
 
     def decide(self, obs: Observation) -> Action:
         acts: List[StreamAction] = []
