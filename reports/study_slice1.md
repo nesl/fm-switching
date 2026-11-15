@@ -756,3 +756,466 @@ At low load (10 %) gaps are long and P5 helps slightly: -0.030 s at C4a and -0.0
    - **Letters:** letter equality stands in for "same answer", as before.
 
 **Result: PASS 6 / 6** (check 4 records two flags; check 6 records the predictor limitation that bounds the P5 negative).
+
+## 17. Part D design (recorded before the Part D run)
+
+**Questions.**
+- **D1.** Does a single coordinated background lane (P6) remove bunching and restore capacity where P4 / P5 fail?
+- **D2.** How much of the gap-aware policies' benefit survives when the orchestrator knows only stream cadences, not the exact arrival times?
+- **D3.** Live baseline numbers under the realistic arrival model, for the baselines that run on this harness today.
+
+**Validity issue addressed.** In Parts B and C the orchestrator knew the exact future Poisson arrival times of the episodic calls. That is oracle knowledge for every gap-aware policy. Part D-a keeps that model, so it stays comparable to B and C. Part D-b replaces it with the target system's model: each device stream calls at a declared cadence, and only the phase and the network jitter are uncertain.
+
+**Harness.** `experiments/cost/study_slice1_partd.py` on top of Part C's `study_slice1_partc.py` (warm post with letters, warm device loop, server and sanity checks), Part B's `study_slice1_live.py` (cold sessions, fresh namespaces, chain bodies) and `study_e10b_mixed.run_cell`, used through the existing default-off `WARM_DEVICE` hook and the modules' existing monkeypatch points: `E.dispatch`, `L.run_recall`, `L.next_ep_due`, `L.align_after_due` and `E.FRACS`. No shared file changes. If any change becomes necessary, it will be default-off, with the diff recorded in §18. Part B / C behaviour stays the default.
+
+Everything fixed in Parts B and C is unchanged:
+- E0 server (vLLM 0.31.0 defaults, prefix caching ON, processor cache 128 GiB, E10d logging flags), with KV-HOST adding native offloading of 256 GiB;
+- a fresh server per cell;
+- cold sessions, order, fresh namespaces and deadlines (5 / 10 s);
+- the k = 8 RH7 warm plan;
+- 30-s discard, 240-s scored window, 300-s drain cap;
+- p99 budget 0.45 s;
+- exclusivity monitor with VOID on overlap, and the "non-default args" check.
+
+**Policy P6 (one background lane).**
+- **Background units:** cold slices (2,048 tokens for P6; 1,024 for P6_1024), warm appends and warm escalations. Warm-ups pass through. Episodic calls are never delayed.
+- **One unit at a time:** at most ONE background unit is in flight at any time (submitted and not yet finished). A cold recall's next slice is enqueued only when its previous slice has finished. There is no separate cold lock; the lane serializes.
+- **Queue order:** escalations first (by arrival), then cold slices by recall deadline (EDF, deadline = arrival + 10 s), then appends by due time.
+- **Release rule:** the head unit is released only when the lane is empty AND now + predicted service < next predicted episodic arrival - margin. The margin is 5 ms in D-a and the jitter p90 (0.044 s) in D-b. When the head cannot go, the lane waits until just after the blocking episodic call (+5 ms), until a higher-priority unit arrives, or until the head's slack trigger, then re-checks.
+- **Predicted service:** an EWMA (alpha 0.3) of MEASURED service times (submit to finish) of completed units of the same kind and size bucket. It is updated online and reset to its committed initial value at the start of every cell. Non-learned.
+
+  | bucket | initial value (s) | committed source |
+  |---|---|---|
+  | cold 2,048 non-final slice | 0.478 | Part A n 2,048 links, 11k sessions, latency p50 (n 100) |
+  | cold 2,048 final slice (question) | 0.367 | Part A, n 20 |
+  | cold 1,024 non-final slice | 0.285 | Part A n 1,024, n 209 |
+  | cold 1,024 final slice | 0.346 | Part A, n 20 |
+  | append, <= 5 new frames | 0.288 | StudyE10c E0 C2 10 % appends, latency p50 (n 189) |
+  | append, 6 to 10 new frames | 0.484 | Part C fit (0.1273 + 0.000390 x tokens) at 10 frames |
+  | append, > 10 new frames | 0.660 | Part C fit at 15 frames |
+  | escalation, <= 5 new frames | 0.311 | StudyE10c E0 C2 10 % escalations, latency p50 (n 21) |
+  | escalation, > 5 new frames | 0.539 | Part C escalation fit at 10 frames |
+
+- **Slack guard (cold head only):** if the head slice's recall deadline - now < (predicted remaining chain time x 1.373 + 0.25 s) (Part B's rule, applied to the EWMA predictions), ONE unit is released regardless of the gap. It still waits for an empty lane. There is never a back-to-back chain; the next unit waits for the lane again. Escalations and appends have no slack release.
+- **Coalescing:** if a session's append is still queued when its next append becomes due, the later one supersedes it (the Part C rule). Under a single lane this can now fire, and the count is reported.
+- **Absorption (declared implementation choice):** when an escalation is released, any still-queued append of the same session with an earlier session time is dropped and counted as `absorbed`. The escalation's delta body already carries those frames, because a queued append has not advanced the session's dispatched state. Releasing the append afterwards would send a request with no new frames.
+- **P6_nolane (Steps 4 / 5 only):** the same queue, EWMA and release rule, but without the one-in-flight constraint. Each head unit is released as soon as its own gap check passes, and the next head is checked immediately.
+
+**Episodic arrival models.**
+- **D-a, known schedule:** Part C's model (D7 Poisson at the ladder fraction, E10c seed-index map). The orchestrator knows the exact arrival times (oracle, as in B / C).
+- **D-b, cadence-only schedule (the realistic model):**
+  - S episodic N = 1 streams per replica. Each calls at a fixed 0.5-s cadence with a random phase, uniform in [0, 0.5) s and seeded per cell (`numpy default_rng(5000 + 100 x S + condition index)`).
+  - Each call reaches the replica at nominal time + jitter. Jitter is independent per call, half-normal with p90 = 0.044 s (sigma = 0.0268 s, seeded per cell).
+  - **The jitter is an ASSUMPTION, not a measurement.** It is one committed RTT of StudyE9b setting (ii) (RTT 0.044 s, PNG at 13.6 Mbit/s). E9b commits only point values, and StudyE31b commits only bandwidth percentiles (p10 / p50 / p90 = 0.90 / 9.58 / 102.9 Mbit/s) with an assumed 20-ms RTT, so no committed per-call latency distribution exists (user decision, 2026-11-13). A measured per-call latency trace (for example from the Orin / 5G setup) would replace this assumption later.
+  - **TTFT clock:** episodic TTFT is measured from the call's arrival at the replica (nominal + jitter). Network delay is outside the replica's budget. The nominal scheduled time and the applied jitter are recorded per call for the mAP bridge.
+  - **Episodic content:** each stream takes its own contiguous block of the D14 N = 1 manifest (10,660 requests in clip order; block length 545), so nothing repeats within a server load. `request_id`, clip (`file_name`) and time index `t` are recorded per request.
+  - **Orchestrator knowledge:** it sees only past arrivals. Each stream's next call is predicted at its last observed arrival + 0.5 s. A call that is overdue counts as due now until it arrives or the margin (0.044 s) passes; after that the stream's next prediction moves on by 0.5 s. A stream not yet seen counts as due now (within the discarded first 30 s). It never reads the future schedule.
+  - **Policies under D-b:**
+    - P2 and P4 use the prediction minus the margin as the earliest arrival.
+    - P3's "just after the call has been dispatched" waits for the predicted call to be observed (or for the margin to pass), then adds 5 ms.
+    - P6 uses the rule above with margin 0.044 s.
+  - **Ladder in streams per replica: 1, 2, 3, 4, 5** (2, 4, 6, 8, 10 req/s = 13.2 / 26.5 / 39.7 / 53.0 / 66.2 % of the 15.1 req/s peak). Capacity is the highest stream count with episodic p99 <= 0.45 s and no errors, found bottom-up and stopping at the first failure. Cold arrival seeds for D-b rungs use new seed indices (1009 to 1013), since the rungs are new levels.
+
+**Conditions and order.**
+0. **Smoke:** C4a P6 at 10 %, D-a, 60-s window. Then the **Step 4 cell:** C4a P6_nolane at 10 %, D-a, full window. Both are recorded with the mechanism verification (§18) before the sweep.
+1. **D-a (known schedule; Part C's ladder 10 / 20 / 25 / 30 / 40 %):**
+   - C4a P6 ladder;
+   - Step 5 cell: C4a P6_nolane at P6's C4a capacity level, unless that level is 10 %, where the Step 4 cell already is that cell;
+   - C1b P6_1024 ladder;
+   - C1b P6 ladder;
+   - C4 P4 at 10 % (drift check: within +/-25 % of Part C's 0.544 s, i.e. 0.408 to 0.680 s, otherwise STOP AND ASK);
+   - C4 P6 ladder;
+   - C2 P6 ladder.
+2. **D-b (cadence only; ladder 1 to 5 streams):**
+   1. C1a and C4a: P0, P2, P3_1024, P4, P6 (P0 first);
+   2. C1b: P0, P4_1024, P6_1024;
+   3. C2: P0, P6;
+   4. **Tuned engine** (StudyE10e P1: `--long-prefill-token-threshold 1024`; non-default args must show exactly that and no other scheduler flag): P0 at C1a, C4a and C2;
+   5. C0 (no recall): P0 at E0 and at the tuned engine (the ceiling).
+3. **Sensitivity, only if the guard leaves time after D-b items 1 to 5:** P4 and P6 at C1a under (i) zero jitter (margin 5 ms) and (ii) half-normal p90 = 0.20 s with margin 0.20 s, to bracket the assumption.
+
+**Guard.** 8 hours of GPU time in total, counted from the smoke run's start. Once exceeded, the current cell finishes and the run stops and reports what is done and what remains, in the priority order above. **Amended 2026-11-13 13:50 (user decision, during D-a): no time guard.** The running sweep keeps its 8-h check, but if it trips, the sweep resumes at once with `--no-guard` (completed cells are skipped), so the full plan, including the sensitivity cells, runs to completion.
+
+**Measured per cell.** Everything Part C measured (episodic p50 / p90 / p99 and capacity; cold time to answer, 5 / 10 s, letters, computed tokens, slices, holds, release reasons; warm rows with hold, release, coalesced, staleness, escalation time to answer within 1 / 2 / 5 s and letters vs P0 in the same condition; warm computed tokens; over-budget overlap classes), plus:
+- **Lane:** occupancy (fraction of the window with a unit in flight), maximum concurrent background units (live counter; P6 must be <= 1), queue length over time (event-driven), and per unit its kind, bucket, enqueue / release / finish times, hold, release reason (gap / slack), predicted vs measured service (prediction error by load), and the EWMA value after the update;
+- **Bunching** in every cell, from the rows: background units submitted within 50 ms of another, and the maximum number concurrently in flight;
+- coalesced and absorbed appends;
+- **per episodic request:** stream, call index, nominal scheduled time, applied jitter, arrival, predicted arrival (D-b), `request_id`, clip and `t`.
+
+**Pre-registered decisions.**
+- **D1, C4a in D-a:** P6 restores capacity if its C4a capacity >= 20 % AND >= 90 % of cold recalls are within 10 s AND >= 90 % of escalations are within 5 s.
+- **C1b in D-a:** P6_1024 >= 30 % with >= 90 % of recalls within 10 s (P6 at n 2,048 is reported against the same rule).
+- **Mechanism check:** the maximum number of concurrent background units is 1 in every P6 cell. If it ever exceeds 1, it is a bug: STOP.
+- **D2:** for each policy, capacity in streams under D-b vs the known-schedule capacity converted to streams (known capacity fraction x 15.1 / 2, floored: 10 % -> 0, 20 / 25 % -> 1, 30 % -> 2, 40 % -> 3). The loss per policy is reported, with no pass bar.
+- **D3:** tabulated only, with no claim about which baseline is best.
+
+**Sanity.**
+- Every cold recall's first request has <= 16 cached tokens, and every slice's prefix gap is <= 32 tokens (STOP otherwise).
+- Scheduler flags are as declared (none for E0; exactly E10e P1's flag for the tuned engine).
+- Exclusivity monitor, VOID on overlap.
+- The drift check above.
+
+**Stop and ask if:** GPU 2 is not idle; a hook cannot be default-off and byte-identical; the drift check fails; P6 ever has more than 1 background unit in flight; anything needs a methodological change beyond this specification.
+
+## 18. Mechanism verification for Part D (recorded BEFORE the Part D sweep)
+
+**Shared code.** No shared file changed (`git diff` on `study_e10b_mixed.py`, `study_slice1_live.py`, `study_slice1_partc.py` is empty). Part D uses only the existing default-off `WARM_DEVICE` hook and module-level monkeypatches set per cell inside `study_slice1_partd.py`: `E.dispatch`, `L.run_recall`, `L.next_ep_due`, `L.align_after_due`, and `E.FRACS` extended with new D-b seed indices after the existing nine. Part B and C code paths are therefore byte-identical, and their defaults are untouched.
+
+**Offline tests (before any GPU use).**
+- **Lane with fake units** (a synthetic Poisson schedule at 2 and 8 req/s; 6 appends, 1 cold slice with a tight deadline, 1 escalation):
+  - Single lane: at most 1 unit in flight, 0 violations, release order escalation, then cold, then appends; the cold slice released by `slack`; the EWMA moved from 0.288 to 0.211 s after 0.2-s units.
+  - Without the lane: 5 to 7 of 8 units released within 50 ms of each other, with up to 8 in flight.
+- **D-b plan and predictor** (3 streams):
+  - 1,620 calls with unique request ids, and contiguous manifest blocks with clip and `t` recorded;
+  - jitter p50 / p90 / max 0.018 / 0.044 / 0.092 s;
+  - over a replay, true next arrival minus prediction was -0.036 / +0.001 / +0.036 s (p5 / p50 / p95), and 2.1 % of calls arrived earlier than prediction minus margin.
+
+### 18a. Part D smoke run (13:01 to 13:06, 2026-11-13)
+
+C4a P6 at 10 %, D-a, 60-s window (first 10 s discarded). Files: `slice1_partd_smoke_*`.
+
+| quantity | value |
+|---|---|
+| episodic p50 / p99 (n 70) | 0.150 / 0.279 s (meets) |
+| cold recalls in window | 2 / 2 within 10 s and 5 s, letters 2 / 2; first cached 0, max prefix gap 20 |
+| escalations | 6 / 6 within 5 s (0.15 to 0.56 s) |
+| lane units / max in flight / violations | 79 / **1** / 0 |
+| lane occupancy (scored window) | 0.31 |
+| queue length p50 / p90 / max | 1 / 2 / 4 |
+| unit hold p50 / p90 | 0.0004 / 0.678 s |
+| release reasons | gap 57, slack 0 |
+| bunching (units within 50 ms of another; max concurrent) | 0 of 57; 1 |
+| EWMA after the cell (initial) | cold 2,048 link 0.500 (0.478), final 0.414 (0.367), append <= 5 0.196 (0.288), escalation 0.249 (0.311) |
+| measured - predicted service p50 / p90 | cold -0.009 / +0.052, append -0.008 / +0.063, escalation -0.040 / +0.097 s |
+| coalesced / absorbed | 0 / 0 |
+
+### 18b. Step 4 negative control (13:06 to 13:15)
+
+C4a P6_nolane at 10 %, D-a, full 240-s window: the same queue, EWMA and release rule without the one-in-flight constraint.
+
+| quantity | P6_nolane (this run) | P5, Part C, same cell | P4, Part C, same cell |
+|---|---|---|---|
+| episodic p99 | 0.378 s (meets) | 0.357 / 0.364 s (replicate) | 0.387 s |
+| background units within 50 ms of another | **90 of 275** | 43 of 276 (replicate 36) | 20 of 276 |
+| max concurrent background units | **6** | 4 | 4 |
+| lane max in flight | 6 | | |
+| releases | gap 274, slack 1; 1 append absorbed | | |
+| EWMA after the cell | append 0.486, escalation 0.703, cold link 0.577 s | | |
+| cold recalls / escalations | 11 / 11 within 10 s; 21 / 21 within 5 s | 11 / 11; 21 / 21 | |
+
+Removing the single-lane constraint brings bunching back. Measured on the same metric, it is stronger than under P5, because the lane also releases cold slices and escalations on the same gap check. The p99 is in P5's range. The control behaves as required: the one-in-flight constraint is what removes bunching.
+
+**Step 1, the causal chain.**
+1. Part C found that independently gap-released background work bunches into the same gap, and that the low-load service prediction is too short under load. Both leave background work in flight when an episodic call arrives.
+2. FORMULATION's physical component of Context Inertia (warm maintenance and cold reconstruction are work on the shared accelerator) and its timing dimension say the orchestrator can reduce interference by timing that work.
+3. The claim under test is that if all background work passes through one lane, with at most one unit in flight and released only when its load-aware predicted service fits before the next predicted episodic arrival, then at most one short unit overlaps any episodic call and its predicted length tracks the current load.
+4. Episodic p99 should then stay within budget at higher load than P4 / P5, while the slack guard keeps cold recalls within 10 s.
+5. D2 asks whether this survives when the "next predicted arrival" comes from stream cadences and past arrivals instead of the exact schedule.
+
+**Step 2, link instantiation (smoke and Step 4 cell).**
+
+| causal link | implementing quantity | value in this run | varies as expected? | evidence |
+|---|---|---|---|---|
+| one unit in flight | lane max in flight / bunching | 1 (P6) vs 6 (no lane); within-50-ms 0 vs 90 | yes | §18a, §18b |
+| units held for gaps | unit hold | p90 0.678 s (P6 smoke), 0.605 s (no lane) | yes (non-zero, load-dependent) | lane rows |
+| lane occupancy | busy fraction of the window | 0.31 (P6) vs 0.54 (no lane, overlapping units) | yes | lane summary |
+| load-aware prediction | EWMA per bucket | append 0.288 -> 0.196 (P6, quiet lane) / 0.486 (no lane, contended); escalation 0.311 -> 0.249 / 0.703 | yes: falls when units run alone, rises under contention | lane summary |
+| slack release | units released by slack | 0 (smoke, 2 recalls), 1 (Step 4 cell) | non-zero, load-dependent; to be confirmed rising with load in the D-a ladders | lane rows |
+| coalescing / absorption | dropped appends | 0 / 0 (smoke), 0 / 1 (Step 4) | load-dependent; coalescing needs a held append to wait 10 s, which a single lane can now cause at higher load | lane rows |
+| episodic waiting | episodic p99 | 0.279 s (P6 smoke 10 %) | to be tested by the sweep | cell summary |
+
+No link is ABSENT or CONSTANT. Slack and coalescing are load-dependent and are tracked per cell. If either stays at 0 in every D-a cell, it will be reported as UNEXERCISED, as coalescing was in Part C.
+
+**Step 3, trace (smoke).** Cold recall S1B2 under P6 (session prompt 11,515 tokens, scheduled at 26.085 s, reference letter E):
+
+| slice | sent (s after arrival) | held (s) | release | predicted service (s, EWMA) | prompt / cached tokens | measured latency (s) | queue length behind it |
+|---|---|---|---|---|---|---|---|
+| 0 | 0.001 | 0.000 | gap | 0.531 | 2,019 / 0 | 0.466 | 0 |
+| 1 | 0.466 | 0.000 | gap | 0.511 | 3,999 / 2,000 | 0.456 | 1 |
+| 2 | 0.923 | 0.000 | gap | 0.495 | 5,979 / 3,984 | 0.471 | 1 |
+| 3 | 1.394 | 0.000 | gap | 0.488 | 7,959 / 5,968 | 0.490 | 1 |
+| 4 | 1.884 | 0.000 | gap | 0.488 | 9,939 / 7,952 | 0.522 | 2 |
+| 5 (question) | 2.407 | 0.000 | gap | 0.400 | 11,515 / 9,920 | 0.467 | 3 |
+
+- **Outcome:** answered E (reference E) at 2.850 s; computed 11,586 tokens.
+- **Lane behaviour:** each slice entered the lane as soon as its predecessor finished. Cold slices outrank the 1 to 3 appends that queued behind them, and each fit a predicted gap, so none was held.
+- **Prediction:** the EWMA tracked the measured link latency within about 0.05 s.
+- **Binding constraint:** none (the lane, not the episodic schedule, set the pace). The other in-window recall (S1B3) was held 0.088 s in total.
+
+**Step 4, negative control.** §18b: without the single-lane constraint, bunching reappears (90 vs 0 units within 50 ms; 6 vs 1 in flight).
+
+**Step 5, alternative explanation.** A P6 gain could come from the EWMA predictor alone rather than from the single lane. P6_nolane keeps the EWMA and drops the lane. At 10 % the Step 4 cell is that cell. The Step 5 cell at P6's C4a capacity level (run in the sweep if that level is above 10 %) separates the two: if P6_nolane matches P6 there, the lane is not what helps. A second alternative, run-to-run noise, is bounded by Part C's replicate (+0.007 s at C4a 10 %).
+
+### 17a. Amendment (2026-11-13, about 17:00; recorded before any P6b run): P6 lane deadlock under D-b, and P6b
+
+**Finding (D-b, C4a, P6).** The lane deadlocks when warm sessions are present.
+- **How it starts:** once cold slices are released by slack ahead of a session's appends, that session's frames accumulate. Its next escalation then carries more than 5 new frames, which puts it in the `esc_gt5` bucket with a predicted service of 0.539 s.
+- **Why it cannot clear:** with a strict 0.5-s cadence, the largest predicted gap is 0.456 s (0.5 s minus the 0.044-s margin). Escalations have no slack release (§17) and are first in the queue. So from about 20 s into the window no unit of any kind could be released: no cold slices (their slack trigger is never reached while an escalation is the head), no appends.
+- **After the window:** the cadence predictor keeps predicting calls after the streams stop, so the deadlock persists through the drain. All cold recalls reached the 300-s drain cap unanswered.
+- **Cells:** `SLICE1D_b_E0_P6_C4a_S1` (p99 0.190 s) and `_S2` (p99 0.251 s), each with 0 of 11 / 15 recalls answered within the window or the drain. Their low p99 only reflects that no background work ran.
+- **Why D-a and C1a / C1b were unaffected:** in D-a, Poisson gaps are occasionally long enough. C1a / C1b have no escalations.
+
+**Declared methodological change (user decision, 2026-11-13).**
+- The D-b P6 cells at C4a are reported as **DEGENERATE**: lane deadlock (escalation predicted 0.539 s cannot fit the 0.456-s cadence gap; escalations have no slack; no background work ran after about 20 s). They carry starvation counts and **no capacity figure**.
+- The D-b C4a P6 ladder stops after the cell that was in progress (S3).
+- D-b C2 P6 is **not run: deadlocked by construction, demonstrated at 1 to 2 streams at C4a.** Same warm plan and escalation rule, with no cold slices needed to start the backlog: appends alone accumulate behind any long escalation.
+
+**P6b (pre-registered here).** P6 (§17) plus three rules. The lane stays strictly single: at most one background unit in flight, always.
+1. **Per-unit deadline guards.** A head unit whose guard has tripped is released regardless of the gap, one unit at a time (it still waits for the empty lane):
+   - **escalation:** guard = escalation arrival + 5 s - (predicted remaining service of its chain x 1.373 + 0.25 s), where the chain is its catch-up units (rule 3) plus the escalation;
+   - **append:** guard = the session's next append due time - (predicted service x 1.373 + 0.25 s), so a held append is released in time to finish before the next append would supersede it. If it is not at the head when the next append comes due, coalescing still applies (§17);
+   - **cold:** unchanged (Part B's slack rule).
+2. **Stream-ended rule (D-b predictor).** A stream that misses 2 consecutive predicted calls (each beyond the margin) is treated as ended and no longer predicted, until it is observed again.
+3. **Catch-up slicing.** When an escalation arrives for a session with pending (not yet dispatched) frames:
+   - those frames are first sent as append units (`catchup`), queued at escalation priority ahead of their escalation;
+   - each unit carries as many frames as fit the current gap estimate (at least 1 frame per unit): its predicted service, from the append fit 0.1273 + 0.000390 x (10.6 + 90.3 x frames) scaled by the current append EWMA / 0.288, must fit the gap estimate;
+   - **gap estimate** = the median predicted inter-arrival gap over the next 2 s, minus the margin (D-a: from the exact schedule; D-b: from the stream predictions);
+   - any still-queued append of that session is dropped as `absorbed_catchup`, since its frames are part of the catch-up;
+   - the escalation then carries only its question (no new frames, `esc_le5` bucket);
+   - in the lane each catch-up unit is predicted with the same value it was sized by (the scaled fit), not with the coarse 6-to-10-frame bucket EWMA, so a unit sized to fit a gap is also judged to fit it; its measured service still updates its bucket's EWMA. (Offline test: 1 stream at 0.5 s, 20 pending frames: catch-up units of 9 + 9 + 2 frames, each released on a gap one cadence period apart, then the escalation; at most 1 unit in flight. P6 on the same input never released the escalation.)
+   - catch-up units fall under their escalation's deadline guard (rule 1);
+   - escalation answer time is measured from the escalation's arrival, so it includes the catch-up.
+
+**P6b runs, in the priority order.**
+- D-b C4a P6b ladder: in item 1, in place of the stopped P6 ladder.
+- D-b C2 P6b ladder: in item 3, in place of C2 P6.
+- Then D-a C4a P6b ladder, for comparison with D-a P6 (10 %).
+
+All other items keep their order.
+
+**P6b checks and reporting.**
+- **Mechanism check:** maximum concurrent background units = 1 in every P6b cell, otherwise STOP.
+- **Reported:** deadline-guard releases by kind (escalation, catch-up, append, cold slack); catch-up units per escalation; and escalation predicted service before (the bucket it would have had without catch-up) and after catch-up.
+- **Decision:** P6b is read against the same D1 rule at D-a C4a (capacity >= 20 % AND >= 90 % of recalls within 10 s AND >= 90 % of escalations within 5 s). Its D-b capacities enter the D2 / D3 tables.
+
+**Guard.** Per the user's latest instruction ("keep the 8-h guard"), the 8-h GPU-time guard is re-instated: it trips at about 21:01 and is no longer auto-resumed. The current cell then finishes and the run stops and reports what is done and what remains. **Amended again 2026-11-13 about 20:46 (user decision): no time bound.** If the guard trips, the sweep resumes at once with `--no-guard` (completed cells skipped), so C0 on the tuned engine and all sensitivity cells run.
+
+## 19. Part D run (2026-11-13 13:01 to 21:41)
+
+- **Timeline:**
+  - smoke 13:01 to 13:06; Step 4 cell 13:06 to 13:15;
+  - sweep 13:15 to 17:03, stopped by user decision after D-b C4a P6 S3 (§17a);
+  - `sweep3` 17:04 to 21:06 (P6b added; stopped by the 8-h guard at 8.08 h);
+  - `sweep4` 21:06 to 21:41, resumed with `--no-guard` (user decision: no time bound).
+- **Total GPU time:** 8 h 40 min on h100nvl GPU 2.
+- **Scale:** 74 cells on 74 fresh servers: 62 E0 and 12 tuned (E10e P1).
+- **Status:** not VOID. Every server's "non-default args" matched its engine: none of the scheduler flags for E0, and exactly `'long_prefill_token_threshold': 1024` for the tuned engine.
+- **Cache checks:** every cold recall started cold (first-request cached tokens 0). The largest link prefix gap was 20 tokens.
+- **Drift check:** C4 P4 at 10 % in D-a had p99 0.527 s, 0.97x Part C's 0.544 s (limit +/-25 %). PASS.
+- **Errors:**
+  - 1 episodic request failed with a client-side `httpx ReadError` (connection dropped mid-stream; no server error), in D-a C4a P6b 20 %, a cell that already fails on p99 (0.549 s).
+  - 0 warm request errors.
+- **Mechanism check:** at most 1 background unit was in flight in every one of the 27 P6 / P6_1024 / P6b cells, with 0 violations.
+- **D-b jitter:** observed per-call jitter p90 was 0.044 to 0.048 s in every 0.044-s cell, 0.218 s at 0.20 s, and 0 at zero jitter. Arrival minus prediction was -0.047 / +0.000 / +0.046 s (p5 / p50 / p95) across cells. Values include a constant rounding offset of up to 5 ms from the recorded window start.
+- **mAP bridge:** every D-b episodic row records stream, call index, nominal time, applied jitter, arrival, predicted arrival, `request_id`, clip and `t`.
+- **Files:** `results/cost/study_slice1/slice1_partd_{requests,slices,warm,lane,metrics,cpu,monitor}_h100nvl.jsonl`, `slice1_partd_run_meta_h100nvl.json`, `slice1_partd_results.json` (from `study_slice1_partd_analyse.py`); smoke `slice1_partd_smoke_*`.
+
+## 20. Part D results
+
+### 20.1 D-a (known Poisson schedule): capacity, cold recalls, escalations
+
+| condition | policy | capacity | p99 per level (s): 10 / 20 / 25 / 30 / 40 % | recalls <= 10 s / <= 5 s; answer p50 (s) | escalations <= 5 s; p50 (s) |
+|---|---|---|---|---|---|
+| C4a | P6 | **10 %** | 0.287 / 0.515 | 21 / 21, 29 %; 7.99 | 42 / 42; 0.47 |
+| C4a | P6b | **10 %** | 0.317 / 0.549 | 20 / 21, 24 %; 8.00 | 42 / 42; 0.58 |
+| C4a | P6_nolane (Step 4) | meets at 10 % | 0.378 | 11 / 11, 36 %; 5.79 | 21 / 21; 0.50 |
+| C4a | Part C P4 / P5 (reference) | 10 % / 10 % | 0.387 / 0.640 and 0.357 / 0.761 | 100 % | 100 % |
+| C1b | P6_1024 | **20 %** | 0.413 / 0.411 / 0.485 | 66 / 76 (86.8 %), 16 %; 7.88 | |
+| C1b | P6 | **10 %** | 0.363 / 0.569 | 46 / 48 (95.8 %), 23 %; 7.72 | |
+| C1b | Part C P4_1024 (reference) | 25 % | 0.399 / 0.395 / 0.443 / 0.469 | 86.7 % | |
+| C4 | P4 (drift check) | fails at 10 % | 0.527 | 26 / 26 | 21 / 21 |
+| C4 | P6 | **< 10 %** | 0.549 | 26 / 26, 38 %; 5.52 | 21 / 21; 0.55 |
+| C2 | P6 | **40 % (ladder top)** | 0.293 / 0.315 / 0.315 / 0.332 / 0.401 | | 95 / 105 (90.5 %); 0.56 |
+| C2 | Part C P0 / P5 (reference) | 30 % / 30 % | ... / 0.375 / 0.497 and ... / 0.389 / 0.514 | | 100 % |
+
+At C2 40 %, P6's escalations pay for the capacity: only 12 / 21 (57 %) were within 5 s (p90 11.2 s, staleness up to 42 frames). At 30 % it was 20 / 21 (95 %). With escalations held to >= 90 % within 5 s, P6's C2 capacity is 30 %, equal to P0's.
+
+### 20.2 D-b (cadence-only streams, jitter p90 0.044 s ASSUMED): capacity in streams
+
+One stream = 2 req/s = 13.2 % of peak; 5 streams = 66.2 %.
+
+| condition | engine | policy | capacity | p99 per rung (s): 1 / 2 / 3 / 4 / 5 streams | recalls <= 10 s | escalations <= 5 s; p50 (s) |
+|---|---|---|---|---|---|---|
+| C1a | E0 | P0 | < 1 | 4.355 | 11 / 11 | |
+| C1a | E0 | P2 | < 1 | 2.673 | 4 / 11 | |
+| C1a | E0 | P3_1024 | **3** | 0.352 / 0.422 / 0.447 / 0.519 | 47 / 58 (81 %) | |
+| C1a | E0 | P4 | < 1 | 0.517 | 11 / 11 | |
+| C1a | E0 | P6 | < 1 | 0.504 | 9 / 11 | |
+| C4a | E0 | P0 | < 1 | 4.788 | 11 / 11 | 21 / 21; 0.22 |
+| C4a | E0 | P2 | < 1 | 2.938 | 2 / 11 | 21 / 21; 0.36 |
+| C4a | E0 | P3_1024 | **1** | 0.430 / 0.535 | 21 / 26 (81 %) | 42 / 42; 0.34 |
+| C4a | E0 | P4 | **1** | 0.433 / 0.541 | 25 / 26 (96 %) | 42 / 42; 0.34 |
+| C4a | E0 | P6 | **DEGENERATE** (no capacity figure) | 0.190 / 0.251 / 0.210 | 0 / 46 | 0 / 63 |
+| C4a | E0 | P6b | < 1 | 0.567 | 8 / 11 | 21 / 21; 0.87 |
+| C1b | E0 | P0 | < 1 | 4.891 | 25 / 25 | |
+| C1b | E0 | P4_1024 | **2** | 0.410 / 0.420 / 0.459 | 46 / 79 (58 %) | |
+| C1b | E0 | P6_1024 | **2** | 0.405 / 0.410 / 0.471 | 42 / 79 (53 %) | |
+| C2 | E0 | P0 | **4** | 0.249 / 0.258 / 0.287 / 0.425 / 0.522 | | 105 / 105; 0.34 |
+| C2 | E0 | P6b | **3** | 0.266 / 0.290 / 0.361 / 0.462 | | 82 / 84 (97.6 %); 2.21 |
+| C1a | tuned | P0 | < 1 | 2.288 | 11 / 11 | |
+| C4a | tuned | P0 | < 1 | 2.629 | 11 / 11 | 21 / 21; 0.25 |
+| C2 | tuned | P0 | **4** | 0.234 / 0.262 / 0.291 / 0.416 / 0.516 | | 105 / 105; 0.34 |
+| C0 | E0 | P0 | **5 (ladder top)** | 0.187 / 0.194 / 0.233 / 0.252 / 0.316 | | |
+| C0 | tuned | P0 | **5 (ladder top)** | 0.192 / 0.195 / 0.237 / 0.256 / 0.319 | | |
+
+**DEGENERATE (D-b C4a P6, §17a):** lane deadlock. The lane's last release came at 19.9 / 28.0 / 74.9 s into the window (S1 / S2 / S3), with 151 units never released. 0 of 46 recalls and 0 of 63 escalations were answered, and 537 appends coalesced. D-b C2 P6 was not run (deadlocked by construction).
+
+**Escalation cost of P6b under cadence (C2):** within 5 s, 21 / 21, 21 / 21, 20 / 21 and 20 / 21 at 1 to 4 streams, but answer p50 rose from 0.58 s (1 stream) to 2.03 / 4.53 / 3.96 s (2 / 3 / 4 streams). Catch-up units per escalation had a median of 1 at 1 stream and 4 to 8 at 3 to 4 streams.
+
+### 20.3 Jitter sensitivity (C1a, D-b)
+
+| policy | zero jitter (margin 5 ms) | p90 0.044 s (primary) | p90 0.20 s (margin 0.20 s) |
+|---|---|---|---|
+| P4 | **2 streams** (0.221 / 0.337 / 0.721 s) | < 1 (0.517 s) | < 1 (0.510 s) |
+| P6 | < 1 (0.497 s; 63 of 66 units by slack) | < 1 (0.504 s) | < 1 (0.529 s; 66 of 66 by slack) |
+
+### 20.4 Lane (P6 / P6_1024 / P6b) and bunching
+
+| cell | occupancy | queue p50 / p90 / max | unit hold p50 / p90 (s) | releases | coalesced / absorbed | measured - predicted service p50 / p90 (s) | background units within 50 ms of another; max in flight |
+|---|---|---|---|---|---|---|---|
+| D-a C4a P6 10 % | 0.37 | 1 / 6 / 8 | 0.08 / 4.66 | gap 273, slack 1 | 0 / 2 | append +0.005 / +0.088, cold +0.014 / +0.057 | 0 of 274; 1 |
+| D-a C4a P6 20 % | 0.39 | 4 / 8 / 10 | 1.06 / 7.77 | gap 234, slack 17 | 17 / 9 | append +0.009 / +0.105, cold -0.006 / +0.085 | 0 of 252; 1 |
+| D-a C4a P6_nolane 10 % (Step 4) | 0.54 | 0 / 1 / 5 | 0.00 / 0.60 | gap 274, slack 1 | 0 / 1 | append -0.009 / **+0.276** | **90 of 275; 6** |
+| D-a C2 P6 40 % | 0.18 | 6 / 9 / 11 | 3.36 / 9.51 | gap 116 | 86 / 8 | append -0.000 / +0.111 | 0 of 119; 1 |
+| D-a C1b P6_1024 25 % | 0.44 | 1 / 3 / 6 | 0.04 / 0.88 | gap 194, slack 118 | | cold +0.001 / +0.085 | 0 of 322; 1 |
+| D-b C1a P6 1 stream | 0.14 | 1 / 2 / 3 | 0.18 / 5.56 | gap 2, slack 64 | | cold +0.002 / +0.038 | 0 of 66; 1 |
+| D-b C2 P6b 3 streams | 0.32 | 8 / 16 / 23 | 4.50 / 9.34 | gap 147, deadline 142 | 49 / 21 (catch-up) | append +0.041 / +0.143 | 0 of 299; 1 |
+| D-b C4a P6b 1 stream | 0.39 | 5 / 9 / 12 | 0.50 / 7.89 | gap 199, slack 62, deadline 10 | 25 / 15 (catch-up) | append +0.013 / +0.084 | 0 of 277; 1 |
+
+For comparison, the non-lane policies under D-b C4a bunch: P4 had 12 of 276 units within 50 ms and up to 4 in flight; P0 had 10 of 221 and up to 10.
+
+- **P6b deadline releases** (D-b): C2 at 1 / 2 / 3 / 4 streams: 1 / 100 / 156 / 107 (appends 1 / 94 / 109 / 91, catch-up 0 / 2 / 33 / 11, escalations 0 / 4 / 14 / 5); C4a 1 stream: 13 (appends 11, catch-up 2). D-a C4a: 0.
+- **P6b catch-up:** 95 units at D-a C4a and 386 at D-b C2. Escalation predicted service before / after catch-up (median): D-b C2 0.290 / 0.172 s; D-b C4a 0.177 / 0.169 s; D-a C4a 0.146 / 0.136 s.
+- **Warm GPU work** under the lane: 89,977 to 95,944 computed tokens per cell vs 91,301 under P0 (0.99x to 1.05x). Coalescing saves little because the superseding append carries the dropped frames.
+
+### 20.5 What over-budget episodic calls overlapped
+
+| cell | over budget | classes |
+|---|---|---|
+| D-a C4a P6 20 % | 16 | cold 16 (no warm) |
+| D-a C4a P6b 20 % | 21 | cold 21 |
+| D-a C4 P6 10 % | 8 | cold 8 |
+| D-a C4 P4 10 % (no lane) | 6 | append + cold 5, append + cold + escalation 1 |
+| D-a C1b P6 20 % | 25 | cold 25 |
+| D-b C1a P4 1 stream | 6 | cold 6 |
+| D-b C1a P3_1024 4 streams | 99 | cold 99 |
+| D-b C4a P4 2 streams | 18 | append + cold 11, cold 7 |
+| D-b C4a P6b 1 stream | 18 | cold 15, append + cold 3 |
+| D-b C2 P0 5 streams | 107 | append 90, append + escalation 16, escalation 1 |
+| D-b C2 P6b 4 streams | 21 | append 21 |
+
+Under the single lane, warm work no longer overlaps over-budget episodic calls whenever cold slices are present: every over-budget call in a P6 / P6b cell with cold recall overlapped a cold slice, and in D-a none overlapped warm work. **The remaining binding unit is the 2,048-token cold slice** (measured 0.47 to 0.58 s at the lane's EWMA), which no gap rule can make shorter.
+
+### 20.6 D2: known schedule vs cadence only (capacity in streams)
+
+Known-schedule capacity is converted as fraction x 15.1 / 2, floored. The column "benefit over P0" is the policy's capacity minus P0's in the same arrival model.
+
+| condition | policy | known schedule (source) | known, streams | benefit over P0 (known) | cadence only | benefit over P0 (cadence) | loss of benefit |
+|---|---|---|---|---|---|---|---|
+| C0 | P0 (E0 / tuned) | 40 %, ladder top (Part B / E10e P1) | >= 3 | | >= 5 (ladder top) | | (arrival process alone: >= +2) |
+| C2 | P0 | 30 % (Part C) | 2 | | 4 | | (arrival process: +2) |
+| C2 | P6 / P6b | P6 40 %, ladder top (D-a); 30 % with escalations >= 90 % | 3 | +1 (0 with escalations) | P6b 3 | -1 | 1 to 2 |
+| C1a | P0 / P2 | < 10 % (Part B) | 0 | | 0 | | |
+| C1a | P3_1024 | 10 % (Part B) | 0 | 0 | **3** | **+3** | gain of 3 |
+| C1a | P4 | 30 % (Part B) | 2 | +2 | 0 (2 at zero jitter) | 0 (+2 at zero jitter) | **2** (0 at zero jitter) |
+| C1a | P6 | not run under D-a | | | 0 | 0 | |
+| C4a | P4 | 10 % (Part C) | 0 | 0 | 1 | +1 | gain of 1 |
+| C4a | P3_1024 | not run under D-a | | | 1 | +1 | |
+| C4a | P6 / P6b | 10 % / 10 % (D-a) | 0 / 0 | 0 / 0 | DEGENERATE / 0 | / 0 | 0 |
+| C1b | P4_1024 | 25 % (Part C) | 1 | +1 | 2 | +2 | gain of 1 |
+| C1b | P6_1024 | 20 % (D-a) | 1 | +1 | 2 | +2 | gain of 1 |
+| C1a | tuned P0 | < 10 % (E10e P1 C1, K1 video cold body) | 0 | | 0 | | |
+
+Reading D2:
+- **Cadence arrivals are much smoother than Poisson.** With no background work they alone raise pass-through capacity: C0 holds >= 5 streams (66 %) against 3, and C2 P0 holds 4 against 2. Losses are therefore read on the benefit over P0, not on raw capacity.
+- **What survives depends on whether the background unit fits a cadence gap.** The cadence gap is 0.5 s; minus the 0.044-s margin it is 0.456 s.
+  - 1,024-token slices (about 0.29 s) fit. P3_1024 gains 3 streams at C1a, and P4_1024 / P6_1024 gain 1 at C1b.
+  - 2,048-token slices (0.47 to 0.52 s measured) do not. P4 loses all of its known-schedule benefit at C1a (2 streams -> 0), and keeps it only at zero jitter (2 streams).
+  - P6 uses its measured service time (EWMA about 0.5 s) instead of the 0.38-s engine-time prediction, so even at zero jitter it never fits and falls back to slack releases (< 1 stream).
+- **Warm sessions under cadence:** the plain lane deadlocks (§17a). The P6b fixes remove the deadlock but add no capacity at C4a, and cost one stream at C2 against pass-through, while slowing escalations (p50 2 to 4.5 s at 2 to 4 streams).
+
+### 20.7 D3: live baselines under the cadence model (tabulated; no claim about which is best)
+
+| condition | E0 P0 | tuned P0 (E10e P1) | best sliced policy measured (streams) |
+|---|---|---|---|
+| C0 | >= 5 (p99 0.316 s at 5) | >= 5 (0.319 s at 5) | |
+| C1a | < 1 (4.355 s at 1) | < 1 (2.288 s) | P3_1024 3 |
+| C4a | < 1 (4.788 s) | < 1 (2.629 s) | P3_1024 1, P4 1 |
+| C1b | < 1 (4.891 s) | not run | P4_1024 2, P6_1024 2 |
+| C2 | 4 (0.425 s at 4) | 4 (0.416 s at 4) | P6b 3 |
+
+The tuned engine roughly halves pass-through p99 under cold recall (2.29 vs 4.36 s at C1a, 2.63 vs 4.79 s at C4a), but that is not enough to reach the budget at 1 stream.
+
+## 21. Part D decisions (pre-registered rules)
+
+| rule | measured | verdict |
+|---|---|---|
+| D1, C4a in D-a: P6 >= 20 % AND >= 90 % recalls <= 10 s AND >= 90 % escalations <= 5 s | P6 10 %; 100 %; 100 % | **NO** |
+| D1 applied to P6b (§17a) | P6b 10 %; 95.2 %; 100 % | **NO** |
+| C1b in D-a: P6_1024 >= 30 % and >= 90 % <= 10 s | 20 %; 86.8 % | **NO** |
+| C1b P6 (n 2,048), same rule | 10 %; 95.8 % | **NO** |
+| Mechanism: max concurrent background units = 1 in every P6 cell | 1 in all 27 P6 / P6_1024 / P6b cells, 0 violations | **PASS** |
+| D2 (no bar) | §20.6 | reported |
+| D3 (tabulate only) | §20.7 | reported |
+
+**Classification (CLAUDE.md Rule 2).**
+- **D1 (P6 and P6b at C4a): real negative.** The mechanism was present and acted:
+  - the single lane held 1 unit in flight;
+  - bunching fell from 90 of 275 units (no-lane control) to 0;
+  - over-budget episodic calls no longer overlapped any warm work.
+
+  Capacity stayed at 10 % because the 2,048-token cold slice remains the binding unit.
+- **Positive result (D-a, warm only):** the lane raised C2 capacity to 40 % (ladder top) against 30 % for P0 and P5. This was not a pre-registered decision, and it holds only if escalations may slow: at 40 %, 57 % of escalations were within 5 s. With escalations held to 90 % it is 30 %, equal to P0.
+- **C1b P6_1024: real negative** against Part B's rule (20 %; Part C's P4_1024 reached 25 %).
+- **D-b C4a P6: DEGENERATE**, a design defect of the registered P6 under cadence, not a finding about capacity. D-b C2 P6 was not run.
+- **Step 5 (EWMA alone vs lane): INCONCLUSIVE at C4a.** P6's capacity level is 10 %, where both P6 and P6_nolane meet the budget (0.287 vs 0.378 s), so capacity cannot separate them. Bunching (0 vs 90) and p99 favour the lane. Whether the EWMA alone helps is not separable at this level.
+- **D2 is assumption-dependent for 2,048-token policies.** P4 at C1a keeps its benefit at zero jitter (2 streams) and loses it at the assumed 0.044 s. A measured per-call latency trace is needed before this is a headline.
+
+## 22. Part D consistency protocol (6 checks)
+
+1. **Cross-check against committed measurements.** PASS.
+
+   | quantity | this run | prior | source | ratio | agree |
+   |---|---|---|---|---|---|
+   | C4 P4 10 % p99 (D-a) | 0.527 s | 0.544 s | Part C | 0.97 | yes |
+   | C4a P6 10 % p99 (D-a) | 0.287 s | 0.279 s (smoke) / 0.387 s (P4) / 0.357 s (P5) | §18a / Part C | 1.03 / 0.74 / 0.80 | yes (lane lower, as designed) |
+   | C1b sliced capacity (D-a) | P6_1024 20 %, P6 10 % | P4_1024 25 %, P4 20 % | Part C / Part B | | consistent within one level |
+   | C0 P0 p99 near 25 % load | 0.194 s (2 streams = 26.5 %, cadence) | 0.272 s (25 %, Poisson) | Part B | 0.71 | yes, explained by the arrival process |
+   | C2 P0 p99 near 25 % | 0.258 s (2 streams, cadence) | 0.350 s (25 %, Poisson) | Part C | 0.74 | yes, same explanation |
+   | tuned C1a P0 p99 | 2.288 s at 2 req/s | 2.124 s at 1.51 req/s | StudyE10e P1 C1 | 1.08 | yes (different cold body: K1 video) |
+   | lane EWMA, 2,048-token link (final) | 0.50 to 0.58 s | 0.478 s initial (idle) | Part A | 1.05 to 1.21 | yes (load) |
+   | warm computed tokens per cell | 89,977 to 95,944 | 91,301 | Part C P0 | 0.99 to 1.05 | yes |
+
+2. **Physical plausibility.** PASS.
+   - A 2,048-token link measured 0.47 to 0.58 s end to end, about 3.5 to 4.4k tok/s, below the 5.3k tok/s engine prefill curve (Part A).
+   - A 1,024-token link measured about 0.29 s (about 3.5k tok/s).
+   - An append measured about 0.2 to 0.3 s for about 460 new tokens over a 13 to 25k cached prefix (KV-HOST lookups).
+   - Nothing is faster than the committed curves.
+3. **Distribution sanity.** PASS.
+   - p99 differs in every cell (0.187 to 4.891 s), and holds, queue lengths and release mixes vary with load.
+   - Observed jitter matches the assumption (p90 0.044 to 0.048 s), with spread across calls.
+   - Warm computed tokens are nearly constant across cells, as expected: the same warm plan runs in every cell.
+   - The DEGENERATE cells' low p99 is explained (no background work ran) and is not reported as capacity.
+4. **Definition audit.** PASS, with flags.
+   - The ladder, budget, window, seeds and conditions are identical to Parts B / C for D-a.
+   - D-b defines capacity in streams (1 stream = 2 req/s). Its TTFT runs from the arrival at the replica, the same reference point as D-a's scheduled arrival.
+   - **Flagged:**
+     - the jitter is an assumption, not a measurement;
+     - D-b C4a P6 is DEGENERATE and D-b C2 P6 was not run (declared change, §17a);
+     - P6b was added after the deadlock (pre-registered in §17a before running);
+     - the tuned-engine known-schedule reference (E10e) used the K1 video cold body, not the 11k D2 history;
+     - the time guard was lifted, re-instated, then lifted (user decisions, §17 / §17a).
+5. **Claim linkage.**
+   - FORMULATION's physical component of Context Inertia (reconstruction and maintenance work on the shared accelerator) and the timing dimension of the joint placement x timing policy.
+   - Part D **weakens** the claim that gap-timing background work recovers capacity under realistic knowledge:
+     - with exact schedules, one coordinated lane removes bunching and warm interference but not the cold-slice bottleneck;
+     - with cadence-only knowledge, 2,048-token slices no longer fit the gaps under the assumed jitter.
+   - It **supports** a narrower claim: background units shorter than the cadence gap minus the jitter margin (1,024-token slices) keep and even extend their benefit under cadence (P3_1024 3 streams at C1a).
+   - It does not speak to representation choice.
+6. **Proxy validity.**
+   - **Jitter:** the half-normal jitter (p90 0.044 s, one E9b RTT) is an assumption. The sensitivity cells show it is decisive for 2,048-token policies (P4: 2 streams at zero jitter, < 1 at 0.044 and 0.20 s). The D-b P4 / P6 results are therefore **unvalidated for a headline** until a measured per-call latency trace replaces the assumption.
+   - **Cadence:** the strict 0.5-s cadence stands in for "devices declare their call cadence". Real streams may drift or batch.
+   - **D-a oracle:** the D-a results keep Part B / C's oracle schedule and are an upper bound for gap-aware policies.
+   - **Letters:** escalation letters agree with P0 in 95 to 100 % of comparisons per policy (lowest 20 / 21 = 95.2 % for D-b C4a P6b), so no condition is flagged.
+
+**Result: PASS 6 / 6** (check 4 records five flags; check 6 marks the D-b 2,048-token results as assumption-dependent).
