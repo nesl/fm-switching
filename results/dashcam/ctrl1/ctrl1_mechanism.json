@@ -1,0 +1,250 @@
+{
+ "step1_causal_chain": "If the device's own score trajectory carries information about an approaching event (StudyD14b measured it: the 4B's score rises before the event), then a controller reading only SELF-NORMALIZED features of that trajectory (z, rise, instability against its own window median and IQR, spec 7.7) fires more often shortly before events than elsewhere; each firing opens an episode of 0.5-s cloud calls whose answers are delivered 2 grid steps later and become the application's displayed score; because the 32B's score separates positives from negatives better than the 4B's at the same instant (StudyE9c: 0.5675 against 0.4776 over all 300 clips), replacing the displayed score at the challenge crop instants raises challenge mAP; so escalation-only cloud use captures part of the always-cloud minus device-only gap, and the share captured rises with the escalation budget.",
+ "step2_links": [
+  {
+   "link": "device score trajectory -> self-normalized signal",
+   "quantity": "max(z, rise, instability) per device sample, DEV clips",
+   "value": {
+    "n": 4055,
+    "p50": 0.8571434785545592,
+    "p05": 0.08289933335437835,
+    "p95": 2.666666741912453,
+    "min": 0.0,
+    "max": 3.9999999999709646,
+    "median_within_2s_before_event": 0.9565254052428181,
+    "median_far_from_event": 0.8571428417189917
+   },
+   "varies": true,
+   "evidence": "the signal is non-degenerate across DEV samples and its median differs between the 2 s before an event and times far from any event"
+  },
+  {
+   "link": "signal -> escalation decision",
+   "quantity": "escalated fraction of device-time as theta moves",
+   "value": [
+    {
+     "theta": 0.5,
+     "escalated_fraction": 0.8496757868100585,
+     "n_episodes": 939
+    },
+    {
+     "theta": 1.0,
+     "escalated_fraction": 0.593468290368496,
+     "n_episodes": 934
+    },
+    {
+     "theta": 1.5,
+     "escalated_fraction": 0.3522853076071485,
+     "n_episodes": 678
+    },
+    {
+     "theta": 2.0,
+     "escalated_fraction": 0.20385892772418157,
+     "n_episodes": 435
+    },
+    {
+     "theta": 3.0,
+     "escalated_fraction": 0.06389372133480943,
+     "n_episodes": 135
+    },
+    {
+     "theta": 4.0,
+     "escalated_fraction": 0.0,
+     "n_episodes": 0
+    },
+    {
+     "theta": 5.0,
+     "escalated_fraction": 0.0,
+     "n_episodes": 0
+    }
+   ],
+   "varies": true,
+   "evidence": "the fraction falls monotonically from theta 0.5 to theta 5.0"
+  },
+  {
+   "link": "escalation -> an episode open at the scored instant",
+   "quantity": "fraction of scored positive DEV clips with an open episode at each challenge horizon, by budget",
+   "value": {
+    "0.05": {
+     "0.5": 0.1111111111111111,
+     "1.0": 0.10526315789473684,
+     "1.5": 0.13636363636363635
+    },
+    "0.1": {
+     "0.5": 0.17777777777777778,
+     "1.0": 0.15789473684210525,
+     "1.5": 0.18181818181818182
+    },
+    "0.2": {
+     "0.5": 0.2222222222222222,
+     "1.0": 0.18421052631578946,
+     "1.5": 0.13636363636363635
+    },
+    "0.4": {
+     "0.5": 0.4,
+     "1.0": 0.3684210526315789,
+     "1.5": 0.36363636363636365
+    }
+   },
+   "varies": true,
+   "evidence": "the fraction rises with the budget at every horizon"
+  },
+  {
+   "link": "cloud delivery -> displayed score",
+   "quantity": "grid points where the displayed score differs from device-only at the 40 % budget",
+   "value": {
+    "changed": 3800,
+    "total": 12646,
+    "fraction": 0.30049027360430175
+   },
+   "varies": true,
+   "evidence": "the mixed stream differs from the device stream on a non-zero share of the grid"
+  },
+  {
+   "link": "displayed score -> challenge mAP",
+   "quantity": "DEV challenge mAP by budget against the two references",
+   "value": {
+    "by_budget": {
+     "0.05": 0.5179486731324502,
+     "0.1": 0.5259378243880403,
+     "0.2": 0.5459055335013665,
+     "0.4": 0.564566611408519
+    },
+    "device_only": 0.4922174586396322,
+    "always_cloud": 0.5481359562517328
+   },
+   "varies": true,
+   "evidence": "escalation-only sits strictly above device-only on DEV"
+  }
+ ],
+ "step3_trace": {
+  "clip": "00086.mp4",
+  "label": "positive",
+  "event_s": 19.4,
+  "budget": 0.1,
+  "horizon_s": 0.5,
+  "crop_index": 64,
+  "crop_time_s": 19.0,
+  "window_samples": [
+   {
+    "index": 16,
+    "t_capture_s": 15.0,
+    "t_readable_s": 15.75,
+    "score": -14.999999949352796
+   },
+   {
+    "index": 17,
+    "t_capture_s": 15.75,
+    "t_readable_s": 16.5,
+    "score": -15.999999994188139
+   },
+   {
+    "index": 18,
+    "t_capture_s": 16.5,
+    "t_readable_s": 17.25,
+    "score": -13.500000895623822
+   },
+   {
+    "index": 19,
+    "t_capture_s": 17.25,
+    "t_readable_s": 18.0,
+    "score": -3.529750260184317
+   }
+  ],
+  "window_median": -14.25000042248831,
+  "window_iqr": 4.242561723797685,
+  "z": 2.5268342242780317,
+  "rise": 2.9393207561494727,
+  "theta": 2.6666622161865234,
+  "episode": {
+   "open_index": 60,
+   "open_time_s": 18.0,
+   "call_indices": [
+    60,
+    62,
+    64
+   ],
+   "call_times_s": [
+    18.0,
+    18.5,
+    19.0
+   ],
+   "delivery_times_s": [
+    18.5,
+    19.0,
+    19.5
+   ],
+   "close_index": 66,
+   "close_time_s": 19.5
+  },
+  "displayed_score_at_crop": {
+   "device_only": -6.501502449971225,
+   "escalation_only": -11.375011532510673,
+   "cloud_score_at_crop_capture": -4.141014842635655
+  },
+  "arithmetic": "the window IQR and median are computed from the listed samples; z = (last sample - median) / IQR; the episode opens at the first decision instant whose max signal exceeds theta; each call is captured at its call index and readable 2 grid steps (0.50 s) later; the displayed score at the crop index is the most recent delivery from either source"
+ },
+ "step4_control_no_cloud_advantage": {
+  "control": "cloud score replaced by the device's OWN score, so an escalation buys the cloud PATH (calls every 0.50 s delivered after 0.395 s) and nothing else",
+  "per_budget": [
+   {
+    "budget": 0.05,
+    "escalation_only": 0.5179486731324502,
+    "control_device_scores_through_cloud_path": 0.502725649101976,
+    "device_only": 0.4922174586396322,
+    "total_gain": 0.02573121449281801,
+    "gain_from_path_freshness": 0.010508190462343858,
+    "gain_from_cloud_score_quality": 0.015223024030474153,
+    "share_from_cloud_score_quality": 0.591617004114716
+   },
+   {
+    "budget": 0.1,
+    "escalation_only": 0.5259378243880403,
+    "control_device_scores_through_cloud_path": 0.5073181925288176,
+    "device_only": 0.4922174586396322,
+    "total_gain": 0.03372036574840809,
+    "gain_from_path_freshness": 0.015100733889185425,
+    "gain_from_cloud_score_quality": 0.018619631859222663,
+    "share_from_cloud_score_quality": 0.5521776364511017
+   },
+   {
+    "budget": 0.2,
+    "escalation_only": 0.5459055335013665,
+    "control_device_scores_through_cloud_path": 0.5157377945811695,
+    "device_only": 0.4922174586396322,
+    "total_gain": 0.053688074861734325,
+    "gain_from_path_freshness": 0.02352033594153735,
+    "gain_from_cloud_score_quality": 0.030167738920196974,
+    "share_from_cloud_score_quality": 0.5619076302864185
+   },
+   {
+    "budget": 0.4,
+    "escalation_only": 0.564566611408519,
+    "control_device_scores_through_cloud_path": 0.5141777448161775,
+    "device_only": 0.4922174586396322,
+    "total_gain": 0.07234915276888687,
+    "gain_from_path_freshness": 0.02196028617654533,
+    "gain_from_cloud_score_quality": 0.05038886659234154,
+    "share_from_cloud_score_quality": 0.6964679566228568
+   }
+  ],
+  "device_only": 0.4922174586396322,
+  "full_collapse": false,
+  "reading": "THE CONTROL DOES NOT COLLAPSE TO THE NULL, and that is a result, not a failure: escalation-only's gain decomposes into a path-freshness part (the control's gain over device-only) and a cloud-score-quality part (the rest). Both are mechanisms the policy can use, but only the second is what 'the cloud is better' means, so the shares are reported with every headline number and the random-escalation arm at the same budget is the comparator that isolates targeting from both.",
+  "mAP": 0.5141777448161775
+ },
+ "step4_cell": {
+  "side": "DEV",
+  "clips": 90,
+  "budget": 0.4,
+  "setting": "measured@25"
+ },
+ "step5_alternative": "The same headline could be produced by (a) the controller TIMING cloud calls to the moments that matter [the claimed mechanism], or (b) nothing more than the cloud path being FRESHER and FASTER than the device path (calls every 0.50 s delivered after 0.39 s, against device samples every 0.75 s delivered after 0.567 s), so that any escalation at all, however placed, would help. The two are distinguished by the RANDOM-escalation arm, which has the same cadence and latency and the same budget but no targeting, and by the ABSOLUTE-CONFIDENCE arm, which targets on the raw score instead. If escalation-only does not beat random at the same budget, explanation (b) is the live one and the controller's targeting is not doing the work.",
+ "_provenance": {
+  "git_commit": "456ae78f4ae69a71ff9189f72393fde0fb6f9510",
+  "script": "ctrl1_controller.py --stage mechanism",
+  "model": null,
+  "timestamp": "2026-11-15T13:23:46.892306",
+  "device": "cpu",
+  "n": 90
+ }
+}

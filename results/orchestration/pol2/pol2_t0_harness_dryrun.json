@@ -1,0 +1,56 @@
+{
+ "split": "synthetic",
+ "n": 8,
+ "per_condition": [
+  {
+   "condition": "episode_call",
+   "n": 4,
+   "delay_residual": {
+    "n": 4,
+    "mean": 0.0,
+    "p50": 0.0,
+    "p05": 0.0,
+    "p95": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "max_abs": 0.0
+   },
+   "completion_residual": null,
+   "within_delay_tolerance": true,
+   "within_completion_tolerance": null,
+   "n_out_of_sample": 0
+  },
+  {
+   "condition": "rc_piece",
+   "n": 4,
+   "delay_residual": {
+    "n": 4,
+    "mean": 0.0,
+    "p50": 0.0,
+    "p05": 0.0,
+    "p95": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "max_abs": 0.0
+   },
+   "completion_residual": null,
+   "within_delay_tolerance": true,
+   "within_completion_tolerance": null,
+   "n_out_of_sample": 0
+  }
+ ],
+ "tolerance_delay_s": 0.05,
+ "tolerance_completion_s": 0.25,
+ "verdict": "PASS",
+ "note": "a PASS on a SYNTHETIC dataset establishes only that the harness computes what it claims; T0 is established by live measurement on the H100 (spec 11)",
+ "dataset_note": "SYNTHETIC: the 'measurement' is the model itself plus 0.000 s, so this exercises the harness and NOT the engine model",
+ "refusal_rule": "T0Harness.run raises HoldoutRefused on any split named holdout, eval or test, and on any unrecognized split name; the refusal is not overridable",
+ "_provenance": {
+  "git_commit": "456ae78f4ae69a71ff9189f72393fde0fb6f9510",
+  "script": "policy/run_pol2.py --t0",
+  "model": null,
+  "timestamp": "2026-11-15T16:45:13.958568",
+  "device": "cpu",
+  "n": 8
+ }
+}

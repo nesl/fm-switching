@@ -1,0 +1,42 @@
+{
+ "check1_all300": {
+  "always_cloud": 0.5675307471627266,
+  "device_only": 0.4776042449177038,
+  "committed_always_cloud": 0.5675307471627267,
+  "committed_device_only": 0.47760424491770376,
+  "diff_cloud": -1.1102230246251565e-16,
+  "diff_device": 5.551115123125783e-17,
+  "agree": true,
+  "note": "the pooled design scores all 300 clips, so this is a DIRECT comparison with StudyE9c's committed references rather than the subset recomputation StudyCTRL1 had to make"
+ },
+ "check2_rates": {
+  "arm_latencies_s": {
+   "32BI_N1": 0.39496588235294117,
+   "32BI_N3": 0.9303776470588235,
+   "4BI_N1": 0.33546588235294117,
+   "4BI_N3": null
+  },
+  "uplink_mbit_s": 13.6,
+  "rtt_s": 0.044,
+  "device_cadence_s": 0.75,
+  "device_latency_s": 0.567,
+  "cloud_latency_s": 0.39496588235294117,
+  "call_cadence_s": 0.5,
+  "note": "nothing is timed in this row; every latency is a committed constant"
+ },
+ "check4_definitions": {
+  "challenge_metric": "study_e9d_delay.Challenge, horizons 0.5 / 1.0 / 1.5 s, one crop per clip, unweighted mean of per-horizon AP",
+  "ap": "study_e9d_delay.ap_fast (sklearn is absent in this environment and a raising stub is installed by metrics._ensure_sklearn_importable before the import)",
+  "delivery": "study_e9b_dense held_stream / study_e9d_delay.cloud_delivered, setting (ii) measured@25",
+  "budget": "call fraction (B1), NOT StudyCTRL1's open-episode-time fraction; both are reported for every arm",
+  "fold_rule": "within each label stratum, order by sha256(file_name) hex; fold = rank mod 5; pre-registered in research/EXPERIMENTS.md (StudyCTRL1b-crossfit) before any computation"
+ },
+ "_provenance": {
+  "git_commit": "456ae78f4ae69a71ff9189f72393fde0fb6f9510",
+  "script": "ctrl1b_crossfit.py --stage pool",
+  "model": null,
+  "timestamp": "2026-11-15T15:26:41.477613",
+  "device": "cpu",
+  "n": 300
+ }
+}

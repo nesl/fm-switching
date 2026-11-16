@@ -1,6 +1,84 @@
 # FM-switching — Project Status
 
-Last updated: 2026-11-13 (later 2) (**StudySLICE1 PART D COMPLETE (h100nvl GPU 2): ONE COORDINATED BACKGROUND LANE REMOVES BUNCHING BUT NOT THE COLD-SLICE BOTTLENECK, AND MOST OF THE GAP-AWARE BENEFIT DOES NOT SURVIVE CADENCE-ONLY KNOWLEDGE FOR 2,048-TOKEN SLICES.** D-a (exact Poisson schedule): P6 (at most one background unit in flight, EDF lane, EWMA-predicted service, slack guard, coalescing) held 1 unit in flight in all 27 lane cells and cut bunching from 90 of 275 units (no-lane control) to 0; over-budget episodic calls then overlapped only cold slices. C4a capacity stayed 10 % (P6 and P6b; D1 NO), C1b P6_1024 20 % (NO). Warm only (C2): P6 40 % ladder top vs P0 30 %, but with 57 % of escalations <= 5 s at 40 % (30 % if escalations must hold 90 %). D-b (S streams at a 0.5-s cadence, random phase, per-call half-normal jitter p90 0.044 s ASSUMED, predictor = last arrival + 0.5 s, margin 0.044 s): smooth arrivals alone raise pass-through capacity (C0 >= 5 streams = 66 %, C2 4); 1,024-token slices fit the 0.456-s gap and gain (P3_1024 C1a 3 streams, P4_1024 / P6_1024 C1b 2); 2,048-token P4 loses its known-schedule benefit (C1a 2 -> 0 streams) but keeps it at zero jitter (2), so the result hinges on the jitter assumption; a measured per-call latency trace (Orin / 5G) is the gate. The plain lane deadlocks with warm sessions under cadence (D-b C4a P6 DEGENERATE; C2 P6 not run); P6b (deadline guards, stream-ended rule, catch-up slicing; pre-registered §17a) removes the deadlock but reaches < 1 stream at C4a and 3 at C2 (P0 4), slowing escalations (p50 2 to 4.5 s). Tuned engine (E10e P1) halves pass-through p99 under cold recall but stays < 1 stream. 74 cells, 8 h 40 min GPU, not VOID; consistency PASS 6/6; mechanism verification before the sweep, amendment before P6b (report §17-22).)
+Last updated: 2026-11-15 (**StudyCTRL1b-crossfit and StudyPOL2-build COMPLETE.** Cross-fitting on all 300 clips resolves the always-cloud minus device-only gap at last (+0.0899, CI +0.0357 to +0.1497), and the binding problem turns out not to be trigger quality but SCORE CALIBRATION between tiers: the 32B's scores run a median -5.125 log units below the 4B's, so a label-correlated trigger moves the rank metric by itself. The v3.1 policy core is built, tested and measured, with every conditional mechanism off by default.)
+
+## Last updated: 2026-11-15 (StudyCTRL1b-crossfit, StudyPOL2-build)
+
+**Two studies on flash, CPU only; no GPU, no model server, no inference, and no scikit-learn.** Both prerequisites named by the brief are now on disk and were moved into `research/` with a filesystem `mv`, uncommitted: `research/POLICY_SPEC_v3.md` and `research/POLICY_SPEC_v3_1_ADDENDUM.md` (v3.1 = v3 plus the addendum; where they conflict the addendum wins).
+
+**StudyCTRL1b-crossfit: the gap is resolved, and the problem is not the trigger.** Five label-stratified folds over all 300 D14b clips, every tunable chosen on the other four folds, the pooled result concatenating the five held-out folds. The denominator the 210-clip subset could not resolve is now resolved: always-cloud minus device-only is **+0.0899, CI +0.0357 to +0.1497**. Capture fractions at the 20 % call-fraction budget: device filter (spec 7.7) +24 % [-6, +60], cloud trickle +14 % [-16, +43], context-modulated trickle +11 % [-21, +38], learned ceiling +25 % [+5, +66], absolute confidence +6 % [-60, +38], random +16 % [-16, +48], and the non-causal timing bound +80 % [+53, +101].
+
+**The finding that reorders the question.** The two tiers' scores are not on one scale: the 32B's log P(Yes) runs a median -5.125 log units below the 4B's, and at the crop instants the cloud's score is usually LOWER than the device's. The challenge metric ranks one crop per clip across clips, so an escalation pattern correlated with the label biases it through the offset alone. The brief's positives-only oracle therefore scores 0.4042, BELOW device-only 0.4951, while the identical timing applied to every clip's crop instant scores 0.4179. The control that isolates this holds the timing fixed and removes only the label correlation. The brief's two requirements for that arm (escalate only before positive events, and bound any trigger at that budget) are incompatible on this metric, so both readings are reported. The policy consequence is direct: spec 4.1's u_SH must be a CALIBRATED utility, never a raw tier score, which is how StudyPOL2-build's library reads it.
+
+**Two gaps in the machine, declared rather than worked around.** The cloud trickle is INFEASIBLE at the 5 % and 10 % budgets because the brief's cheapest background cadence of 4 s already costs 0.1250 of the call rate; the grid was not widened, since that would be a methodological change beyond the brief. And the predictability ceiling could use no visual feature at all: the D14b frame store (`/home/pragya/data/dashcam/d14b_frames`) does not exist on this machine and opencv is absent, while ego speed does not exist in the committed Nexar table (its columns are file_name, label, scene, light, weather, duration_s, split). Elapsed time in the clip was excluded by decision, because Nexar events sit at a characteristic position and the clock would leak the dataset's event placement. The ceiling is therefore a ceiling on SCORE-DYNAMICS-AND-CONTEXT predictability (training r2 0.023 to 0.042 across folds) and NOT on what images could add.
+
+**StudyFRAMES1 re-run on all 300 clips.** Cross-fitting it is a power gain rather than a bias removal, because the matched-delay comparison has no tunable. Pooled matched-delay gain -0.0041 at zero delay and -0.0254 at 3 s; at own latencies the 32B at N = 3 is -0.0172 against N = 1 (CI -0.0774 to +0.0402). The genuinely cross-fitted object is CHOOSE-N, which picks N on the training folds and applies it held out.
+
+**StudyPOL2-build: the v3.1 policy core exists, is tested and is measured.** `experiments/orchestration/policy/`, 17 modules, 58 spec sections mapped to named symbols with the map itself asserted by a test, 120 unit and property tests passing. All five conditional mechanisms default OFF and each carries its unmet enabling condition in code; merging is not merely unestablished but WEAKENED, so the m = 3 utility table cannot be read unless merging is explicitly enabled. The engine model is behind one protocol, built from committed evidence only, and tags every prediction with an in_sample flag that the rollout and DeltaJ propagate, which is the instrumentation the later T0-T4 verification needs. The v3.1 addendum is implemented: one escalation basis Ghat for every request type, used by the device's filter AND inside the cloud's DeltaJ_H (equal to 12 decimal places on SH), evidence coverage wired to the two committed device tables whose gap IS the value of the cloud holding more evidence, a non-learned keyword and temporal-reference type posterior, a timeliness gate that zeroes Ghat, and a device-uncertainty multiplier left at IDENTITY and marked PLACEHOLDER because no committed DEV table maps uncertainty to gain. Queries escalate as metadata only and the payload is pulled solely on admission. No request type is routed by a hard-coded rule and that is tested four ways. Queries are sent COMPLETE by default per the revised A2, with question-first as an exception path for an RC query whose unsent history is large AND whose uplink already carries higher-value traffic; the delivered delay is computed for the path actually used, the question-first path charges one control round trip and the coordinator's own measured decision latency, and a declined query is DISCARDED with nothing left in the pending set. Two defects surfaced and were fixed in the process: deferring job registration to admission revealed that the rollout could not see the candidate job, so every RC admission had been scoring exactly zero; and spec 3.5's terminal backlog term, written as a plus while mu is a price, had backlog RAISING terminal value, which now subtracts. The addendum FILE still carries the superseded metadata-first wording in A2, so the code follows the user's instruction and the discrepancy is recorded rather than silently resolved. Addendum A6, partial-prefix survival, is implemented too: the rollout carries a KV pool whose predicted eviction supplies P_loss, the expected remaining work under deferral feeds the continuation value, the feasibility class and piece sizing, an in-progress prefix is valued in the memory decision at its continuation value at risk plus its state value for future questions with the single-counting rule ASSERTED on every rollout, and the coordinator verifies believed residency before releasing a piece and re-plans on loss. Under KV pressure the prefix is predicted fully lost if the piece is deferred and fully safe if it is released, so deferring scores -1.7991 with the pool against -0.4338 without; at zero pressure every A6 term is exactly zero. Two findings about the spec came out of it: restore work that still meets the deadline cannot move an indicator Phat_r, so A6 reaches release timing only through the backlog price mu, which is a placeholder at zero and therefore silent by default; and charging the eviction risk over the whole horizon made deferring look cheaper than releasing until the exposure window was scoped to begin when the job last referenced its prefix. M4: one DeltaJ_H costs 0.33 ms, but a 64-item release loop costs 59.2 ms, which is 8 % of a 0.75-s horizon, so spec 7.2's release loop and not the rollout is the cost to watch; one Ghat costs about 4 microseconds and changes nothing.
+
+**What is still open.** T0 has not been run, so the rollout's fidelity is unmeasured and every DeltaJ_H rests on a model known to fail out of sample on slice-versus-episodic mixtures. T1 to T4 are untouched: no baseline comparison and no capacity number. The addendum's Q11 (which SH trigger family) is left open in code on purpose, with the three families interchangeable, so the decision can be made from StudyCTRL1b's table with one assignment.
+
+**Supersedes, not deletes.** StudyCTRL1-episodes' 90/210 results and StudyFRAMES1's remain in `results/dashcam/ctrl1/`, `results/dashcam/frames1/`, `reports/study_ctrl1_episodes.md` and `reports/study_frames1.md`, and are labelled superseded there and here.
+
+## Last updated: 2026-11-15 (StudyCTRL1-episodes, StudyFRAMES1, StudyPROF1-dev)
+
+**Three studies on flash, CPU only; no GPU, no model server, no inference. Part 4
+(StudyPOL2-build, the v3 policy core) is NOT started: the spec is present on disk as
+`policy_spec.md` at the repository root but is untracked and unpushed, and the brief names
+`research/POLICY_SPEC_v3.md`.**
+
+**A stop condition fired first, and the answer changed the shape of all three studies.** The
+brief asked for the Nexar DEV / EVAL split covering StudyD14b's clips. There is none: the
+canonical split is dev 751 / val 300 / test 449 and **StudyD14b IS the 300 val clips**, while
+StudyD3 ran the dev clips as a 10-offset design with no 0.25-s trajectory for a window length, a
+lag or a frame count to be fitted against. The user authorized a pre-registered video-level split
+of the 300: sha256(file_name) order, lowest 30 % to DEV, stratified by label, giving **DEV 90 /
+EVAL 210 with overlap 0**. Consequence carried on every number: the committed challenge-mAP
+references (0.5675 and 0.4776 over all 300) are recomputed per side (EVAL 0.5420 and 0.4822) and
+the all-300 values are reference-only. The pipeline reproduces both committed values to 1 ulp,
+which is the strongest available check that the delivery model, crop geometry and AP are
+StudyE9b / E9c / E9d's own.
+
+**StudyCTRL1-episodes: the controller is sound and its DEV-fitted parameters transfer nothing.**
+Spec 7.7 with the price term off, reading only the device's own delivered 0.75-s samples. On the
+90 DEV clips a 162-combination search captures 46 / 60 / 96 / 129 % of the cloud-minus-device gap
+at the 5 / 10 / 20 / 40 % escalation budgets. On the 210 held-out clips the same settings capture
+**-18.2 / +1.9 / -3.2 / +15.2 %, every CI spanning zero**, and no paired difference excludes zero
+anywhere, including always-cloud minus device-only itself (+0.0598, CI -0.0076 to +0.1395). So the
+key number is **INCONCLUSIVE by power** (CLAUDE.md Rule 2), not a real negative: the mechanism was
+verified present before the EVAL numbers were written. Self-normalization is not measurably better
+than an absolute-confidence threshold, nor better than random escalation at the same budget, and
+the point estimates sit inside StudyE9b's committed 3-18 % range. Episodes run 2.10 to 13.38 per
+device-minute with p50 length 1.25-1.75 s, and **false episodes on negative clips track the
+escalation rate almost exactly** (2.14 against 2.10 per minute at the 5 % budget), which is the
+cleanest statement that the controller fires at a rate rather than at the right moments. The
+negative control is the most consequential single result: replacing the cloud's score with the
+device's own does NOT collapse to the null, decomposing the DEV gain into **30-45 % cloud path
+freshness and 55-70 % cloud score quality**. Workload traces (escalations, episode call times,
+eligible-opportunity grid) are written for the live evaluation.
+
+**StudyFRAMES1: frames are the wrong place to spend.** At matched total delivered delay the third
+frame buys nothing measurable on EVAL (32B +0.0017 at 0 s, -0.0296 at 1.5 s, -0.0402 at 3 s; the
+4B is negative at every delay), and charged its own upload the 32B at N=3 is **-0.0291 mAP behind
+N=1** (CI -0.0989 to +0.0285). DEV says the opposite at short delay (+0.0943), which is the same
+transfer failure again. The row BOUNDS spec 7.9's merge rule rather than measuring it, because
+StudyD14b's N=3 is three consecutive frames, the most redundant arrangement; one GPU run on
+cadence-spaced pairs would close it.
+
+**StudyPROF1-dev: the DEV profile tables exist, with their provenance on their face.** One JSON,
+every entry marked MEASURED, DERIVED RULE, ASSUMPTION or PROPOSAL. u_SH uses the identity mapping
+(challenge AP is already bounded) and shows the device overtaking a cloud answer beyond about 1 s
+of delivered delay. Five RC tables restricted to the same 243 S-EMBER DEV questions reproduce the
+committed accuracies exactly before restriction. omega_RC = 0.4246 against omega_SH = 1 is
+**computed but marked a PROPOSAL awaiting approval**, and omega_SS is null because no committed SS
+pair exists. Eight of ten duration families are marked for replacement by StudyENG1, and catch-up
+per frame is a DERIVED RULE because no video-domain measurement exists. **Two gaps are reported
+rather than filled:** committed data carries connectivity bits, not a bandwidth series, so
+bandwidth percentiles do not exist and jitter is declared absent rather than invented; and spec
+6.4's conditional recall rate is NOT COMPUTABLE, because escalation episodes live on the Nexar
+traces and recall questions on S-EMBER videos and no committed trace carries both on one stream,
+so the mechanism is left off.
+
 
 Last updated: 2026-11-13 (later) (**StudySLICE1 PART C COMPLETE (h100nvl GPU 2): MANAGING WARM TRAFFIC LIKE COLD SLICES DOES NOT RESTORE EPISODIC CAPACITY.** P5 (Part B's P4 cold path + warm appends held until a predicted episodic gap, escalations gap-aligned) reaches 10 % at C4a (KV-HOST k 8 + cold r 0.05) and < 10 % at C4 (r 0.1; 0.453 s at 10 %, inside run noise of 0.007 s) against this run's warm-only C2-P0 ceiling of 30 %, and does not raise warm-only capacity (C2 P5 30 % = P0 30 %). Recalls (100 % <= 10 s) and escalations (100 % <= 5 s) meet their deadlines; escalation letters agree with P0 (99 / 95 / 100 %); warm GPU work 1.00x. Mechanism (measured): appends take longer under load than the low-load prediction (0.425 vs 0.307 s) and independently gap-released held work bunches into the same gaps, so the hold helps at 10 % and hurts at 20 % and above. Real negative for this rule; a load-aware, jointly scheduled release is untested. Coalescing UNEXERCISED (held appends release within 3.4 s, next append due at 10 s); no claim. P4 with 1,024-token slices at C1b: 25 % (Part B n 2,048: 20 %), 86.7 % <= 10 s, below the 30 % rule. 22 cells, 2 h 44 min, not VOID; consistency PASS 6/6; mechanism verification before the sweep (report §11-16).)
 

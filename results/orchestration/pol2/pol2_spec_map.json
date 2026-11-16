@@ -1,0 +1,870 @@
+{
+ "check": {
+  "n_sections": 58,
+  "n_ambiguities": 29,
+  "missing": [],
+  "ok": true
+ },
+ "spec_map": [
+  {
+   "section": "1.2 eligible opportunities",
+   "code": "rollout.Rollout._opportunity_utility",
+   "note": "every decision instant on the task cadence is scored, escalated or not"
+  },
+  {
+   "section": "2.1 per-device state",
+   "code": "state.Device, state.HistoryBelief, state.Link",
+   "note": "the believed tier is a DISTRIBUTION, not a tier"
+  },
+  {
+   "section": "2.2 cloud state",
+   "code": "state.Fleet",
+   "note": "pending set, jobs, calendar"
+  },
+  {
+   "section": "3.1 SLOs over eligible opportunities",
+   "code": "params.Params.p_k, params.Params.q_k, params.Params.L_k",
+   "note": "application parameters, swept; the denominator is the opportunity list"
+  },
+  {
+   "section": "3.2 bounded task utility and gain",
+   "code": "utility.gain",
+   "note": "g_r may be zero or negative (D39)"
+  },
+  {
+   "section": "3.3 deficit counters",
+   "code": "state.Device.bump_z, coordinator.Coordinator.update_deficit"
+  },
+  {
+   "section": "3.4 predicted versus measured success",
+   "code": "rollout.Rollout._z_term",
+   "note": "Phat only; the measured S_r is an offline quantity the harness reports"
+  },
+  {
+   "section": "3.5 action score",
+   "code": "rollout.delta_j, rollout.Rollout.run",
+   "note": "the four reference actions are the only ones delta_j accepts"
+  },
+  {
+   "section": "4.1 u_SH",
+   "code": "utility.u_sh_cloud, utility.u_sh_device"
+  },
+  {
+   "section": "4.2 u_SS",
+   "code": "utility.u_ss",
+   "note": "raises: no committed SS accuracy"
+  },
+  {
+   "section": "4.3 u_RC and T_ready",
+   "code": "utility.t_ready_s, utility.u_rc"
+  },
+  {
+   "section": "5.1 horizon rollout",
+   "code": "rollout.Rollout.run"
+  },
+  {
+   "section": "5.2 T0 fidelity",
+   "code": "t0_harness.T0Harness"
+  },
+  {
+   "section": "5.3 terminal value, one rule",
+   "code": "rollout.Rollout._terminal"
+  },
+  {
+   "section": "5.4 job continuation value",
+   "code": "continuation.continuation_value, continuation.continuation_schedule"
+  },
+  {
+   "section": "5.5 closed-form fallback",
+   "code": "rollout.Rollout.closed_form",
+   "note": "behind the fallback flag, which is off"
+  },
+  {
+   "section": "6.1 state value",
+   "code": "readiness.state_value",
+   "note": "future questions only; the in-progress question is excluded"
+  },
+  {
+   "section": "6.2 state actions",
+   "code": "readiness.state_actions"
+  },
+  {
+   "section": "6.3 tier assignment",
+   "code": "readiness.tier_assignment",
+   "note": "greedy by value per byte; refuses a zero capacity"
+  },
+  {
+   "section": "6.4 demand predictors",
+   "code": "demand.Demand",
+   "note": "separate rc-per-representation and escalation rates"
+  },
+  {
+   "section": "6.5 residency verification",
+   "code": "telemetry.ResidencyBelief"
+  },
+  {
+   "section": "7.0 core versus conditional",
+   "code": "flags.Flags, flags.CONDITIONAL"
+  },
+  {
+   "section": "7.1 admission",
+   "code": "coordinator.Coordinator._admission, coordinator.Coordinator._plan"
+  },
+  {
+   "section": "7.2 coordinator",
+   "code": "coordinator.Coordinator._release_loop"
+  },
+  {
+   "section": "7.3 feasibility and bounded waiting",
+   "code": "continuation.classify, continuation.bounded_waiting_breach"
+  },
+  {
+   "section": "7.4 adaptive granularity",
+   "code": "params.Params.piece_sizes_tokens, coordinator.Coordinator._plan",
+   "note": "piece size is chosen among measured sizes plus whole-job by the rollout"
+  },
+  {
+   "section": "7.5 outages",
+   "code": "coordinator.Coordinator.on_outage, coordinator.Coordinator.on_reconnect"
+  },
+  {
+   "section": "7.6 deficit counters",
+   "code": "coordinator.Coordinator.update_deficit"
+  },
+  {
+   "section": "7.7 device controller and price",
+   "code": "controller.DeviceController, coordinator.Coordinator.price"
+  },
+  {
+   "section": "7.8 phase assignment",
+   "code": "coordinator.Coordinator._phase",
+   "note": "conditional, off"
+  },
+  {
+   "section": "7.9 hold and merge",
+   "code": "coordinator.Coordinator.hold_or_merge",
+   "note": "hold is core, merge is conditional and off"
+  },
+  {
+   "section": "7.10 summaries",
+   "code": "readiness.state_actions",
+   "note": "conditional, off; REFRESH_SUMMARY appears only with the flag"
+  },
+  {
+   "section": "7.11 predictive upload",
+   "code": "readiness.state_actions",
+   "note": "conditional, off; REQUEST_UPLOAD appears only with the flag"
+  },
+  {
+   "section": "8 main loop",
+   "code": "coordinator.Coordinator.on_event"
+  },
+  {
+   "section": "9 parameters",
+   "code": "params.Params, params.PROVENANCE"
+  },
+  {
+   "section": "v3.1 A1 unified escalation basis Ghat",
+   "code": "escalation.ghat, escalation.GhatTables",
+   "note": "one formula for SH, SS and RC; the same Ghat enters DeltaJ_H"
+  },
+  {
+   "section": "v3.1 A1 evidence coverage",
+   "code": "escalation.evidence_coverage",
+   "note": "in-window 4B-D2 against out-of-window device-N1-orin, both committed"
+  },
+  {
+   "section": "v3.1 A1 timeliness gate",
+   "code": "coordinator.Coordinator.predicted_delivered_delay_s",
+   "note": "a late cloud answer has Ghat exactly zero"
+  },
+  {
+   "section": "v3.1 A0 three flows kept distinct",
+   "code": "flags.CONDITIONAL, escalation.FAMILIES, coordinator.Coordinator.escalate",
+   "note": "history sync is the batched predictive upload (conditional, off), monitoring is the trigger family, a query is sent complete"
+  },
+  {
+   "section": "v3.1 A6.1 expected remaining work under deferral",
+   "code": "continuation.expected_remaining_work, continuation.restore_costs_s",
+   "note": "w_left + P_loss x [P_host x reload + (1 - P_host) x rebuild], in engine seconds"
+  },
+  {
+   "section": "v3.1 A6.1 in the continuation value and feasibility",
+   "code": "continuation.continuation_value, continuation.classify, continuation.p_finish",
+   "note": "all three take extra_work_s, so they price the same risk"
+  },
+  {
+   "section": "v3.1 A6.2 KV pool",
+   "code": "kvpool.KVPool, rollout.Rollout._build_pool",
+   "note": "occupancy, referenced versus unreferenced, free-block order by recency"
+  },
+  {
+   "section": "v3.1 A6.2 P_loss from predicted eviction",
+   "code": "kvpool.KVPool.predict_loss, rollout.Rollout._prefix_risk",
+   "note": "read from the rollout's own predicted eviction, never set by hand"
+  },
+  {
+   "section": "v3.1 A6.2 beyond-horizon survival curve",
+   "code": "kvpool.survival_p_loss",
+   "note": "pluggable, absent until M5, and flagged rather than filled in"
+  },
+  {
+   "section": "v3.1 A6.3 in-progress prefix in the memory decision",
+   "code": "readiness.prefix_items, rollout.Rollout.continuation_value_at_risk",
+   "note": "continuation value at risk plus state value for future questions, never pinned"
+  },
+  {
+   "section": "v3.1 A6.3 single counting",
+   "code": "readiness.assert_single_counting",
+   "note": "asserted on every rollout, not merely intended"
+  },
+  {
+   "section": "v3.1 A6.4 verify on resume",
+   "code": "coordinator.Coordinator.verify_prefix_before_release",
+   "note": "checks believed residency before releasing the next piece, re-plans and logs"
+  },
+  {
+   "section": "v3.1 A6.5 piece sizing with deferral risk",
+   "code": "coordinator.Coordinator.choose_piece_size",
+   "note": "candidate sizes scored with the exposure each one implies"
+  },
+  {
+   "section": "v3.1 A6 reporting",
+   "code": "coordinator.Coordinator.prefix_loss_events",
+   "note": "prefix-loss events per job, their cost, and predicted versus observed loss"
+  },
+  {
+   "section": "v3.1 A2 query paths (revised)",
+   "code": "escalation.choose_path, coordinator.Coordinator.escalate, coordinator.Coordinator.pull_payload",
+   "note": "COMPLETE by default; question-first only when the unsent history exceeds the threshold AND higher-value traffic is in flight"
+  },
+  {
+   "section": "v3.1 A2 discard on decline",
+   "code": "coordinator.Coordinator._discard",
+   "note": "a declined query leaves no pending item, no job and no in-flight work"
+  },
+  {
+   "section": "v3.1 A2 delivered delay per path",
+   "code": "coordinator.Coordinator.predicted_delivered_delay_s",
+   "note": "question-first adds the control round trip and the M4 decision latency"
+  },
+  {
+   "section": "v3.1 A2 higher-value traffic test",
+   "code": "coordinator.Coordinator.higher_value_in_flight"
+  },
+  {
+   "section": "v3.1 A2 trigger families (Q11)",
+   "code": "escalation.DeviceFilter, escalation.CloudTrickle, escalation.ContextModulatedTrickle",
+   "note": "interchangeable; the choice comes from StudyCTRL1b"
+  },
+  {
+   "section": "v3.1 A3 task-type posterior",
+   "code": "escalation.type_posterior",
+   "note": "non-learned keyword and temporal-reference rules"
+  },
+  {
+   "section": "v3.1 A1 Ghat inside DeltaJ_H",
+   "code": "rollout.Rollout._rc_utility",
+   "note": "the rollout uses the request's own Ghat when the basis has already estimated it"
+  },
+  {
+   "section": "11 approval tests T0",
+   "code": "t0_harness.T0Harness"
+  },
+  {
+   "section": "12 evaluation implications",
+   "code": "m4.measure_decision_time",
+   "note": "this row measures M4 only; the two evaluation tracks belong to the live study"
+  }
+ ],
+ "ambiguities": [
+  {
+   "id": "A1",
+   "where": "spec 3.5 Jhat_H",
+   "question": "Is Uhat_H an absolute utility or a gain against the device's own answer?",
+   "choice": "GAINS, so device-only is exactly zero.",
+   "why": "Spec 3.2 defines the quantity the policy optimizes as a GAIN. The two readings differ by a constant that is identical in both rollouts of a DeltaJ, so no decision changes; the gain reading makes an action's sign readable on its own.",
+   "reversible_at": "rollout.Rollout._opportunity_utility"
+  },
+  {
+   "id": "A2",
+   "where": "spec 4.1 u_SH(cloud, d, m)",
+   "question": "What delay d does an opportunity served by an older held answer carry?",
+   "choice": "d = opportunity instant minus the serving answer's CAPTURE time.",
+   "why": "This is StudyE9b's own sample-and-hold semantics, which every committed Nexar number uses; measuring d from the delivery instead would make a held answer eternally fresh.",
+   "reversible_at": "rollout.Rollout._opportunity_utility"
+  },
+  {
+   "id": "A3",
+   "where": "spec 8 'update mu'",
+   "question": "Spec 3.5 and 8 use mu as a GPU-backlog price but give no update rule.",
+   "choice": "An EWMA of the realized marginal utility per GPU-second of the last released item, floored at zero, with alpha a PLACEHOLDER parameter.",
+   "why": "Spec 6.3 defines nu_tier the same way (the gain per byte of the last promotion into a full tier), so the analogous rule for GPU time is the one the spec's own style implies. It carries no evidence and is marked PLACEHOLDER.",
+   "reversible_at": "coordinator.Coordinator._update_mu"
+  },
+  {
+   "id": "A4",
+   "where": "spec 5.4 Phat_r",
+   "question": "The expected-value rollout produces a schedule, not a distribution, so what is the PROBABILITY of finishing?",
+   "choice": "The indicator of the continuation schedule meeting the deadline, multiplied by P(reachable within H_s).",
+   "why": "Spec 5.1 makes the expected-value rollout the default and sampled scenarios optional (flag off). An indicator is the honest reading of a deterministic schedule; with the sampling flag on it becomes a frequency over draws.",
+   "reversible_at": "continuation.p_finish"
+  },
+  {
+   "id": "A5",
+   "where": "spec 7.3 'competing work'",
+   "question": "How much competing engine time does pi_0 put ahead of a job's remaining pieces?",
+   "choice": "An explicit `competing_s` argument, zero by default, supplied by the caller from the calendar and the arrival rates.",
+   "why": "The spec describes the quantity but not its estimator. Making it an argument keeps the estimator outside the feasibility rule, so a better estimator does not change the classification code.",
+   "reversible_at": "continuation.continuation_schedule"
+  },
+  {
+   "id": "A6",
+   "where": "spec 4.3 durations",
+   "question": "StudyRH5 measured 11k and 28k histories only; what rate applies at other sizes?",
+   "choice": "The committed rate at the NEAREST measured size, never an extrapolation outside the measured pair.",
+   "why": "The profile states a linear interpolation rule between the two sizes for warm states; outside them there is no evidence, and this repository's own failures (E30 versus E32) came from carrying a rate past its measurement.",
+   "reversible_at": "profiles.Profiles.seconds_per_token"
+  },
+  {
+   "id": "A7",
+   "where": "spec 6.1 'the next colder state or the device'",
+   "question": "Which is the comparison when the belief is a distribution over three tiers?",
+   "choice": "max(expected utility of the next colder tier, the device's own accuracy), under the same belief distribution.",
+   "why": "Spec 6.1 writes 'or the device', and the device is always available (spec 1.1), so the fallback is whichever is better; using the colder tier alone would credit readiness for beating an option no one would take.",
+   "reversible_at": "readiness.state_value"
+  },
+  {
+   "id": "A8",
+   "where": "spec 7.7 'instability over n_c frames'",
+   "question": "Variance or answer flips?",
+   "choice": "Both, selected on DEV, exactly as StudyCTRL1-episodes implemented it (its A2).",
+   "why": "The policy must accept whichever reading the DEV fit chose, or the fitted parameters are not transferable.",
+   "reversible_at": "controller.DeviceController.signal"
+  },
+  {
+   "id": "A9",
+   "where": "spec 7.7 rise term",
+   "question": "The rise is written unnormalized while all three signals are called self-normalized.",
+   "choice": "Rise and instability are divided by the same window IQR as z.",
+   "why": "A raw log-unit rise and a dimensionless z cannot share one threshold without a unit error; this matches StudyCTRL1-episodes (its A1), so the fitted theta transfers.",
+   "reversible_at": "controller.DeviceController.signal"
+  },
+  {
+   "id": "A10",
+   "where": "spec 7.2 step 3",
+   "question": "How many releases may one event commit?",
+   "choice": "Repeat while some pending item has positive DeltaJ_H, bounded by a configurable max_releases, and re-score after every release.",
+   "why": "Spec 7.2 says one release at a time, re-score, repeat until none is positive, and spec 7.2 step 5 says commit only the immediate releases. The bound exists so a pathological state cannot spin; it is not a policy parameter.",
+   "reversible_at": "coordinator.Coordinator._release_loop"
+  },
+  {
+   "id": "A11",
+   "where": "spec 3.1 and 3.3",
+   "question": "A declined or suppressed escalation counts as a device-only OUTCOME; does it count as a FAILURE for Z?",
+   "choice": "It counts as an opportunity whose outcome is the device's, and it meets the SLO only if the device's own answer does.",
+   "why": "Spec 3.1 says exactly this ('a suppressed or declined escalation counts as a device-only outcome') and notes that suppression therefore cannot improve measured attainment by hiding difficult situations.",
+   "reversible_at": "rollout.Rollout._opportunity_utility"
+  },
+  {
+   "id": "A12",
+   "where": "the brief's oracle arm (StudyCTRL1b)",
+   "question": "Can an oracle that escalates only before positive events be an upper bound on any trigger?",
+   "choice": "No, and both readings are reported. See StudyCTRL1b's B2b.",
+   "why": "The two tiers' scores are on different scales, so a label-correlated escalation pattern moves a rank metric by itself. This is the measured reason spec 4.1's u_SH must be a CALIBRATED utility and not a raw tier score, and the policy reads u_SH from the DEV table rather than from any score.",
+   "reversible_at": "utility.u_sh_cloud and the profile's mapping entry"
+  },
+  {
+   "id": "A14",
+   "where": "v3.1 A1 device uncertainty",
+   "question": "The addendum makes the device's self-normalized uncertainty a determinant of Ghat, but no committed DEV table maps uncertainty to gain.",
+   "choice": "The multiplier is IDENTITY and marked PLACEHOLDER; the slot is a single callable.",
+   "why": "Inventing a monotone function here would put an unmeasured curve inside every escalation decision. Addendum A4 names the measurement that fills it, StudyCTRL1b's predictability-ceiling arm, and a test asserts that filling the slot changes Ghat without touching any other code.",
+   "reversible_at": "escalation.GhatTables.uncertainty_multiplier"
+  },
+  {
+   "id": "A15",
+   "where": "v3.1 A1 evidence coverage",
+   "question": "Which device accuracy applies when the request references evidence outside the device's window?",
+   "choice": "In window, the committed 4B-D2 table (StudyE7 Job A); out of window, the committed device-N1-orin table (StudyF4 Part A).",
+   "why": "Those are the two committed measurements of the device answering WITH and WITHOUT its history, so their gap is the measured value of the cloud holding more evidence. No new number is introduced.",
+   "reversible_at": "escalation._device_accuracy"
+  },
+  {
+   "id": "A16",
+   "where": "v3.1 A3 task-type posterior",
+   "question": "What is the posterior when the keyword and temporal-reference rules match nothing?",
+   "choice": "Ghat REFUSES to score the request (MissingEvidence) rather than assuming a uniform posterior.",
+   "why": "A uniform posterior over eight question types is a fabricated belief that would flow straight into an admission decision. Addendum A3's own fallback is the device model labelling the question, and no committed measurement of that labelling accuracy exists, so the honest state is a refusal that names what is missing.",
+   "reversible_at": "escalation.type_posterior and escalation.ghat"
+  },
+  {
+   "id": "A17",
+   "where": "v3.1 A1 versus spec 13 P2",
+   "question": "The addendum says every type is escalated on one rule, but there is no committed SS accuracy at all.",
+   "choice": "SS is refused by the EVIDENCE gap, never by a type rule: ghat raises because the SS table is missing, exactly as it would for an RC type with no committed accuracy.",
+   "why": "This keeps the addendum's requirement literally true, that no type is routed by rule, while not inventing an SS accuracy. The refusal message names the missing table rather than the task type.",
+   "reversible_at": "profiles.Profiles.omega and the SS rows of the profile"
+  },
+  {
+   "id": "A18",
+   "where": "v3.1 A2 (Q11)",
+   "question": "Which SH trigger family is the default while the question is open?",
+   "choice": "DeviceFilter with threshold 0, that is escalate when Ghat is positive at all.",
+   "why": "Zero is the only threshold that carries no fitted content: it says escalate exactly when the estimated gain is positive. The family is an injected object, so StudyCTRL1b's measured winner replaces it with one assignment.",
+   "reversible_at": "coordinator.Coordinator.sh_trigger"
+  },
+  {
+   "id": "A19",
+   "where": "spec 3.5 terminal value",
+   "question": "Spec 3.5 writes '+ mu * (GPU backlog at t + H)' while mu is described everywhere else as a PRICE (spec 7.7: pi = mu x GPU-seconds, how expensive help is right now). Taken literally, backlog would RAISE terminal value.",
+   "choice": "Backlog SUBTRACTS: the term is -mu * residual_backlog_s.",
+   "why": "A price that rewards backlog would make every admission look better the more work it leaves behind, which inverts the mechanism mu exists for and contradicts spec 6.3's nu_tier, defined as the gain per byte of the last promotion into a full tier. A unit test (a declined query under a large mu) is what surfaced the literal reading as untenable.",
+   "reversible_at": "rollout.Rollout._terminal"
+  },
+  {
+   "id": "A20",
+   "where": "v3.1 A2 as revised (the user's message of 2026-11-15)",
+   "question": "The addendum FILE still carries the superseded 'METADATA escalation request' wording for queries; the revision exists only in the user's instruction.",
+   "choice": "The code implements the revision: queries complete by default, question-first as an exception, and this is stated in the report and the EXPERIMENTS row.",
+   "why": "The user confirmed the pasted file is the latest and directed the change explicitly after being shown that the file and the instruction disagree. The discrepancy is recorded rather than silently resolved so the next reader is not misled by the file.",
+   "reversible_at": "coordinator.Coordinator.escalate and escalation.choose_path"
+  },
+  {
+   "id": "A21",
+   "where": "v3.1 A2 as revised, ordering",
+   "question": "The path choice needs Ghat (to judge 'higher-value traffic') and Ghat's timeliness term needs the path. Which is computed first?",
+   "choice": "Ghat on the COMPLETE path first, that value decides the exception, and if the path switches Ghat is RECOMPUTED on the path actually used.",
+   "why": "The default path is the one to score first, and recomputing is cheap (one Ghat is about 4 microseconds by M4), so the reported Ghat and deadline check always describe the real path rather than the default.",
+   "reversible_at": "coordinator.Coordinator.escalate"
+  },
+  {
+   "id": "A22",
+   "where": "v3.1 A2 as revised, delivered delay",
+   "question": "The revised A2 is cited for 'A2 formulas', but the file contains no formula for either query path.",
+   "choice": "Spec 4's delivered-delay definition per path: COMPLETE is up(question) + up(payload) + compute + down; QUESTION-FIRST adds one CONTROL ROUND TRIP (the device's own RTT) and the coordinator's measured decision latency from M4, and REFUSES to quote a delay when M4 is unmeasured.",
+   "why": "Spec 4 is the only committed delivered-delay definition, and the two extra terms are exactly what the user's instruction names. Refusing rather than defaulting to zero keeps the path from being quoted as cheaper than it is.",
+   "reversible_at": "coordinator.Coordinator.predicted_delivered_delay_s"
+  },
+  {
+   "id": "A23",
+   "where": "v3.1 A6.2",
+   "question": "P_loss is 'the probability the built prefix is evicted'. With a deterministic predicted eviction, is that an indicator?",
+   "choice": "The FRACTION of the prefix's blocks the predicted demand frees.",
+   "why": "A partial eviction is the common case and it costs a partial restore, so a fraction carries the information an indicator throws away, and it multiplies cleanly by the restore cost in A6.1's formula.",
+   "reversible_at": "kvpool.KVPool.predict_loss"
+  },
+  {
+   "id": "A24",
+   "where": "v3.1 A6.1 P_host",
+   "question": "A6 assigns P_host to M5, which has not been run.",
+   "choice": "Default 0.0, the CONSERVATIVE extreme: assume evicted blocks are NOT recoverable and a full rebuild is needed.",
+   "why": "It never understates the cost of deferring, and it matches spec 6.5's own convention that ambiguity resolves toward the colder tier. A measured M5 value replaces one parameter.",
+   "reversible_at": "params.Params.p_host"
+  },
+  {
+   "id": "A25",
+   "where": "v3.1 A6.2 beyond the horizon",
+   "question": "A6 extends P_loss with the measured survival curve where the rollout does not reach the resume time; no such curve exists.",
+   "choice": "The curve is a pluggable callable defaulting to NONE, the beyond-horizon part of the gap then contributes zero, and every affected result carries `beyond_horizon_unmeasured`.",
+   "why": "Zero is the only value that adds no unmeasured content, and the flag stops the result being read as if the long-gap case had been modelled.",
+   "reversible_at": "params.Params.survival_curve and kvpool.survival_p_loss"
+  },
+  {
+   "id": "A26",
+   "where": "v3.1 A6.1 versus spec 5.4",
+   "question": "How does the expected restore work change a DeltaJ when the job still meets its deadline?",
+   "choice": "Through spec 5.3's third terminal item: the restore work is GPU backlog not covered by any job's continuation value, priced at mu.",
+   "why": "Phat_r is an indicator (A4), so restore work that still fits before the deadline cannot move the continuation value at all; without this channel A6 would be invisible to release timing. THE CONSEQUENCE IS STATED RATHER THAN HIDDEN: mu is a PLACEHOLDER at 0, so with the shipped default this channel is SILENT and A6 reaches decisions only through feasibility and the memory decision. A test pins that fact.",
+   "reversible_at": "rollout.Rollout._terminal"
+  },
+  {
+   "id": "A27",
+   "where": "v3.1 A6.1 'for the defer branch'",
+   "question": "Which demand can evict the prefix, all of the horizon's or only part?",
+   "choice": "Only the competing work released AFTER this job's prefix was last referenced, that is inside the exposure window.",
+   "why": "A6's mechanism is that the prefix is unreferenced BETWEEN pieces. Charging a job's own released piece for the risk it removes made deferring look cheaper than releasing, which inverts A6; scoping the demand to the exposure window is what makes release strictly safer than deferral, as the spec intends.",
+   "reversible_at": "rollout.Rollout._prefix_risk"
+  },
+  {
+   "id": "A28",
+   "where": "v3.1 A6.4 'observed or believed likely'",
+   "question": "What makes a loss 'likely'?",
+   "choice": "P_loss at or above `Params.prefix_loss_replan_threshold`, default 0.5, swept.",
+   "why": "The spec gives no number. 0.5 is the neutral reading of 'likely' and is a declared PLACEHOLDER rather than a fitted value.",
+   "reversible_at": "params.Params.prefix_loss_replan_threshold"
+  },
+  {
+   "id": "A29",
+   "where": "v3.1 A6.1 units",
+   "question": "A6 writes w_left as 'the job's unreleased pieces', a count, while the restore terms are costs.",
+   "choice": "Everything is converted to ENGINE SECONDS through the engine model.",
+   "why": "A count and a cost cannot be added. Engine seconds is the unit the continuation schedule and the step model already use, so the sum composes with both.",
+   "reversible_at": "continuation.expected_remaining_work"
+  },
+  {
+   "id": "A13",
+   "where": "spec 7.4",
+   "question": "Which piece sizes are candidates?",
+   "choice": "The committed measured sizes (1,024 and 2,048 tokens) plus whole-job, with the closed form k* available only as a seed.",
+   "why": "Spec 7.4 says measured sizes plus whole-job and that the closed form is not a foundational claim; SLICE1 Parts A-D measured exactly those two sizes.",
+   "reversible_at": "params.Params.piece_sizes_tokens"
+  }
+ ],
+ "flags": {
+  "defaults": {
+   "escalation_price": false,
+   "phase_assignment": false,
+   "merging": false,
+   "summaries": false,
+   "predictive_upload": false,
+   "conditional_recall_rate": false,
+   "sampled_scenarios": false,
+   "closed_form_fallback": false
+  },
+  "conditional": {
+   "escalation_price": {
+    "spec": "7.7",
+    "enabling_condition": "beta calibrated on DEV so a higher price suppresses the lowest-benefit escalations first; evaluated separately from admission",
+    "status": "NOT MET: no committed DEV calibration of beta exists"
+   },
+   "phase_assignment": {
+    "spec": "7.8",
+    "enabling_condition": "predicted clustering gain exceeds the capture-time shift cost",
+    "status": "NOT MET: requires M1's step model to predict clustering gain"
+   },
+   "merging": {
+    "spec": "7.9",
+    "enabling_condition": "M3 shows merged-call utility exceeds the device's at the delays involved",
+    "status": "NOT MET AND WEAKENED: StudyFRAMES1 and StudyCTRL1b found no measurable m = 3 benefit on held-out clips and a negative point estimate once m = 3 pays its own upload; the DEV-positive m = 3 entries in profiles_dev.json are marked DEV-OPTIMISTIC and must not be used to enable this"
+   },
+   "summaries": {
+    "spec": "7.10",
+    "enabling_condition": "DEV quality competitive for some question types and refresh cost measured",
+    "status": "NOT MET: StudyF2 inconclusive; no committed SUMMARY recall table"
+   },
+   "predictive_upload": {
+    "spec": "7.11",
+    "enabling_condition": "improves time-to-ready over on-demand upload under measured links",
+    "status": "NOT MET: no measured bandwidth series exists (StudyPROF1-dev link_model marks bandwidth an ASSUMPTION), so the comparison cannot be made"
+   },
+   "conditional_recall_rate": {
+    "spec": "6.4",
+    "enabling_condition": "DEV data shows recall questions concentrate around episodes",
+    "status": "NOT COMPUTABLE: StudyPROF1-dev found no committed trace carrying escalations and recall questions on one stream, so the conservative default applies and the rate is not used"
+   },
+   "sampled_scenarios": {
+    "spec": "5.1",
+    "enabling_condition": "T0 and M4 show sampling is affordable and more faithful than the expected-value rollout",
+    "status": "NOT MET: T0 has not been run"
+   },
+   "closed_form_fallback": {
+    "spec": "5.5",
+    "enabling_condition": "the fallback itself passes T0",
+    "status": "NOT MET: T0 has not been run"
+   }
+  }
+ },
+ "parameters": {
+  "values": {
+   "H": 0.75,
+   "H_s": 10.0,
+   "T_k": {
+    "SH": 0.5
+   },
+   "E_k": {
+    "SH": 10
+   },
+   "W_k": {
+    "SH": 3
+   },
+   "L_k": {
+    "SH": 1.5,
+    "SS": 2.0,
+    "RC": 10.0
+   },
+   "q_k": {
+    "SH": 0.0,
+    "SS": 0.0,
+    "RC": 0.0
+   },
+   "p_k": {
+    "SH": 0.9,
+    "SS": 0.9,
+    "RC": 0.9
+   },
+   "omega": {
+    "SH": 1.0,
+    "RC": 0.42463109124188936,
+    "SS": null
+   },
+   "feasibility_threshold": 0.5,
+   "mu": 0.0,
+   "mu_ewma_alpha": 0.1,
+   "belief_conservatism": 0.5,
+   "piece_sizes_tokens": [
+    1024,
+    2048
+   ],
+   "allow_whole_job_piece": true,
+   "theta_k": {
+    "SH": 2.0
+   },
+   "beta": 0.0,
+   "W_c": 3.0,
+   "delta": 1.5,
+   "n_c": 3,
+   "K_c": 2,
+   "K_e": 2,
+   "instability_mode": "var",
+   "H_up": 5.0,
+   "theta_up": 0.5,
+   "N_sum": 0,
+   "gpu_kv_capacity_tokens": 200000,
+   "host_kv_capacity_tokens": 2000000,
+   "question_first_history_bytes": 1000000,
+   "kv_pool_model": true,
+   "p_host": 0.0,
+   "survival_curve": null,
+   "prefix_loss_replan_threshold": 0.5,
+   "decision_latency_s": 0.00039500463753938675,
+   "continuation_resolution_s": 0.25,
+   "episode_cadence_grid_s": 0.25
+  },
+  "provenance": {
+   "H": {
+    "kind": "PLACEHOLDER",
+    "note": "spec 9 says 0.5-1 s and SWEPT; 0.75 s is the midpoint and carries no evidence of its own"
+   },
+   "H_s": {
+    "kind": "PLACEHOLDER",
+    "note": "spec 9 says seconds and swept; 10 s chosen as the order of the committed recall inter-arrival p50 (68.0 s) divided by a small factor, and must be swept"
+   },
+   "T_k": {
+    "kind": "DEV-FITTED",
+    "note": "SH cadence 0.5 s; StudyCTRL1-episodes and StudyCTRL1b-crossfit ran the controller at this cadence"
+   },
+   "E_k": {
+    "kind": "DEV-FITTED",
+    "note": "10 calls per episode, StudyCTRL1-episodes"
+   },
+   "W_k": {
+    "kind": "PLACEHOLDER",
+    "note": "merge window in frames; merging is OFF and its enabling condition is not met, so this is unused"
+   },
+   "L_k": {
+    "kind": "PLACEHOLDER",
+    "note": "application parameters, spec 9 says swept; the SH value is the longest challenge horizon and the RC value is SLICE1 Part B's reporting deadline, neither is an application requirement"
+   },
+   "q_k": {
+    "kind": "PLACEHOLDER",
+    "note": "quality floors are application parameters; 0.0 means unconstrained and must be swept"
+   },
+   "p_k": {
+    "kind": "PLACEHOLDER",
+    "note": "attainment targets are application parameters"
+   },
+   "omega": {
+    "kind": "DEV-FITTED",
+    "note": "StudyPROF1-dev class_weights_omega, omega_SH = 1 and omega_RC = 0.4246, marked a PROPOSAL awaiting user approval; omega_SS is None because no committed SS accuracy pair exists, and the policy raises if an SS opportunity is scored while it is None"
+   },
+   "feasibility_threshold": {
+    "kind": "PLACEHOLDER",
+    "note": "spec 7.3 and 9 say DEV and swept; no committed DEV value exists"
+   },
+   "mu": {
+    "kind": "PLACEHOLDER",
+    "note": "GPU backlog price in utility per GPU-second; spec 3.5 and 8 use it but give no update rule, see spec_map.AMBIGUITIES A3"
+   },
+   "mu_ewma_alpha": {
+    "kind": "PLACEHOLDER",
+    "note": "smoothing of the mu update, our choice"
+   },
+   "belief_conservatism": {
+    "kind": "PLACEHOLDER",
+    "note": "spec 9 says fixed and reported; 0.5 puts half the ambiguous mass on the colder tier"
+   },
+   "piece_sizes_tokens": {
+    "kind": "COMMITTED",
+    "note": "SLICE1 Parts A-D measured 1,024 and 2,048-token prefix-chained pieces"
+   },
+   "allow_whole_job_piece": {
+    "kind": "COMMITTED",
+    "note": "spec 7.4 says measured sizes plus whole-job"
+   },
+   "theta_k": {
+    "kind": "DEV-FITTED",
+    "note": "the controller threshold is solved per budget by StudyCTRL1b-crossfit on training folds; 2.0 is a neutral starting value only"
+   },
+   "beta": {
+    "kind": "PLACEHOLDER",
+    "note": "escalation price coefficient; the price flag is OFF and beta has no committed DEV calibration, so it is held at 0"
+   },
+   "W_c": {
+    "kind": "DEV-FITTED",
+    "note": "StudyCTRL1-episodes grid, seconds of device samples"
+   },
+   "delta": {
+    "kind": "DEV-FITTED",
+    "note": "StudyCTRL1-episodes grid, rise lag in seconds"
+   },
+   "n_c": {
+    "kind": "DEV-FITTED",
+    "note": "StudyCTRL1-episodes grid, instability window"
+   },
+   "K_c": {
+    "kind": "DEV-FITTED",
+    "note": "StudyCTRL1-episodes grid, below-threshold samples that close an episode"
+   },
+   "K_e": {
+    "kind": "PLACEHOLDER",
+    "note": "cloud-side episode end after K_e negative DeltaJ calls; spec 7.7 names it and gives no value"
+   },
+   "instability_mode": {
+    "kind": "DEV-FITTED",
+    "note": "StudyCTRL1-episodes A2: var or flips, chosen on DEV"
+   },
+   "H_up": {
+    "kind": "PLACEHOLDER",
+    "note": "upload trigger horizon; predictive upload is OFF"
+   },
+   "theta_up": {
+    "kind": "PLACEHOLDER",
+    "note": "upload trigger threshold; predictive upload is OFF"
+   },
+   "N_sum": {
+    "kind": "PLACEHOLDER",
+    "note": "summary refresh trigger; summaries are OFF"
+   },
+   "gpu_kv_capacity_tokens": {
+    "kind": "PLACEHOLDER",
+    "note": "0 means 'not supplied'; the tier assignment refuses to run until a capacity is given, because a wrong capacity silently changes every allocation"
+   },
+   "host_kv_capacity_tokens": {
+    "kind": "PLACEHOLDER",
+    "note": "as above; the host tier is always available per spec 1.1 (D29) but its size is a deployment fact"
+   },
+   "kv_pool_model": {
+    "kind": "COMMITTED",
+    "note": "addendum A6 makes the KV-pool model part of the core, so it is ON. The switch exists because A6's own acceptance test requires showing that with ZERO pressure the A6 terms vanish and the results equal the pre-A6 path"
+   },
+   "p_host": {
+    "kind": "PLACEHOLDER",
+    "note": "A6.1's P_host, the probability that evicted blocks are recoverable from the host tier. A6 assigns its measurement to M5, which does not exist, so the default is the CONSERVATIVE extreme 0.0 (assume a full rebuild), which never understates the cost of deferring. Spec 6.5's belief convention is the same: ambiguity resolves toward the colder tier"
+   },
+   "survival_curve": {
+    "kind": "PLACEHOLDER",
+    "note": "A6.2's beyond-horizon extension of P_loss, assigned to M5. None means NO CURVE EXISTS; the beyond-horizon part of a gap then contributes nothing and every result that depended on it carries beyond_horizon_unmeasured"
+   },
+   "prefix_loss_replan_threshold": {
+    "kind": "PLACEHOLDER",
+    "note": "A6.4 says to re-plan on loss that is observed OR believed likely; 'likely' needs a number and the spec gives none, so 0.5 is used and swept"
+   },
+   "question_first_history_bytes": {
+    "kind": "PLACEHOLDER",
+    "note": "the unsent-history size above which an RC query MAY take the question-first path (addendum A2 as revised). No committed study sets it; 1 MB is about three StudyD4 frames at the committed 354,902 B and must be swept"
+   },
+   "decision_latency_s": {
+    "kind": "COMMITTED",
+    "note": "the coordinator's own decision latency, charged ONLY on the question-first path and irrelevant on the complete path. Measured by this row's own M4 and read back from results/orchestration/pol2/pol2_m4_decision_time.json. Resolved from this row's M4 measurement when the file is present; None means UNMEASURED and the question-first path then refuses to quote a delivered delay rather than quoting one that omits it"
+   },
+   "continuation_resolution_s": {
+    "kind": "PLACEHOLDER",
+    "note": "spec 9 says set by M4; 0.25 s is the committed decision grid"
+   },
+   "episode_cadence_grid_s": {
+    "kind": "COMMITTED",
+    "note": "StudyD14b 0.25-s decision grid"
+   }
+  },
+  "placeholders": [
+   "H",
+   "H_s",
+   "W_k",
+   "L_k",
+   "q_k",
+   "p_k",
+   "feasibility_threshold",
+   "mu",
+   "mu_ewma_alpha",
+   "belief_conservatism",
+   "beta",
+   "K_e",
+   "H_up",
+   "theta_up",
+   "N_sum",
+   "gpu_kv_capacity_tokens",
+   "host_kv_capacity_tokens",
+   "p_host",
+   "survival_curve",
+   "prefix_loss_replan_threshold",
+   "question_first_history_bytes",
+   "continuation_resolution_s"
+  ]
+ },
+ "engine": {
+  "name": "PlaceholderEngine",
+  "replace_with": "M1 measured step-time and admission model on the H100",
+  "overlap_cost_s": 0.05,
+  "prefill_tok_s": {
+   "11000": 4500.0,
+   "28000": 3800.0
+  },
+  "sub_linear_batching": false,
+  "sources": [
+   "StudySIM1d overlap cost and no sub-linear batching",
+   "StudyRH5 prefill and readiness TTFT",
+   "StudyD7 / D7b episodic TTFT",
+   "SLICE1 Part A near-monolithic prefix-chained total work"
+  ],
+  "known_failure": "StudySIM1d failed out of sample on slice-versus-episodic interactions, which is why T0 precedes any reliance on this"
+ },
+ "tests": {
+  "run": 120,
+  "failures": 0,
+  "errors": 0,
+  "ok": true,
+  "command": "cd experiments/orchestration && python3 -m unittest discover -s policy/tests -t ."
+ },
+ "decision_latency": {
+  "available": true,
+  "seconds": 0.00039500463753938675,
+  "horizon_s": 0.75,
+  "pending_items": 4,
+  "source": "/home/pragya/Desktop/FM-switching/results/orchestration/pol2/pol2_m4_decision_time.json",
+  "basis": "M4 p50 of one DeltaJ_H at the nearest measured cell, flash CPU only"
+ },
+ "query_paths": {
+  "default": "complete",
+  "exception": "question_first",
+  "exception_conditions": [
+   "the request is an RC query",
+   "its unsent history exceeds Params.question_first_history_bytes",
+   "the device's uplink already carries higher-value traffic"
+  ],
+  "delivered_delay": {
+   "complete": "up(question) + up(payload) + compute + down",
+   "question_first": "up(question) + decision latency (M4) + one control round trip + up(payload) + compute + down"
+  },
+  "on_decline": "the query is DISCARDED: no pending item, no job, no in-flight work, and the device's answer stands",
+  "file_discrepancy": "research/POLICY_SPEC_v3_1_ADDENDUM.md still carries the superseded 'METADATA escalation request' wording in A2; the code follows the user's revision of 2026-11-15, recorded as ambiguity A20"
+ },
+ "profiles": {
+  "path": "/home/pragya/Desktop/FM-switching/results/orchestration/prof1/profiles_dev.json",
+  "u_sh_device": 0.4922174586396322,
+  "omega": {
+   "SH": 1.0,
+   "RC": 0.42463109124188936,
+   "SS": null
+  },
+  "frames_warning": "StudyFRAMES1 found NO measurable benefit from m = 3 on held-out clips and a negative point estimate once m = 3 pays its own upload, while the DEV curves here show a positive m = 3 effect at short delay. The m = 3 entries are therefore marked DEV-OPTIMISTIC: do not enable merging on them (spec 7.9's enabling condition)."
+ },
+ "_provenance": {
+  "git_commit": "456ae78f4ae69a71ff9189f72393fde0fb6f9510",
+  "script": "policy/run_pol2.py",
+  "model": null,
+  "timestamp": "2026-11-15T16:45:13.838230",
+  "device": "cpu",
+  "n": 58
+ }
+}

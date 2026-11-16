@@ -1,0 +1,1436 @@
+{
+ "label": "StudyPROF1-dev: the DEV-only profile tables the scheduling policy reads. CPU only; committed measurements; no inference. Every entry carries a provenance kind: MEASURED, DERIVED RULE, ASSUMPTION or PROPOSAL.",
+ "evidence_rule": "spec D6: every table is fitted on DEV only. Nexar DEV = the 90-clip DEV side of the pre-registered StudyD14b split; S-EMBER DEV = the 70-video DEV side of StudyB-baselines amendment 2. No EVAL clip or question is read by this file.",
+ "nexar_split": {
+  "rule": "sha256(file_name) hex order, lowest 30 % to DEV, stratified by label; pre-registered in research/EXPERIMENTS.md (StudyCTRL1-episodes) before any computation",
+  "n_dev": 90,
+  "n_eval": 210
+ },
+ "u_SH": {
+  "provenance": "MEASURED (committed StudyD14b traces) through StudyE9d's own Challenge",
+  "n_dev_clips": 90,
+  "setting": "measured@25",
+  "grid_step_s": 0.25,
+  "mapping": {
+   "primary": "IDENTITY: u_SH = StudyE9c challenge mAP, which is already bounded [0, 1]",
+   "alternative": "AFFINE PROPOSAL: u = clip((AP - base) / (AP_zero_delay_cloud - base), 0, 1), with base = the challenge base rate averaged over horizons and AP_zero_delay_cloud = 32B N=1 at zero delay on DEV",
+   "challenge_base_rate": 0.4287298447521429,
+   "zero_delay_cloud_ap": 0.6032421998900089,
+   "warning": "the affine map changes the scale on which omega_k trades SH against RC; it is a PROPOSAL and must be approved before use"
+  },
+  "u_device": {
+   "u_identity": 0.4922174586396322,
+   "u_affine_proposal": 0.3638001093809869,
+   "cadence_s": 0.75,
+   "hold_shift_s": 0.75,
+   "latency_s": 0.567,
+   "provenance": "MEASURED: 4BI N=1 at StudyE9b's saturated duty, StudyD8 latency"
+  },
+  "cloud": {
+   "m1@0.5|d0.00": {
+    "m_frames": 1,
+    "cadence_s": 0.5,
+    "delay_s": 0.0,
+    "u_identity": 0.6032421998900089,
+    "challenge_ap": {
+     "0.5": 0.7128625974114787,
+     "1.0": 0.6036364444388309,
+     "1.5": 0.4932275578197173
+    },
+    "u_affine_proposal": 1.0
+   },
+   "m1@0.5|d0.25": {
+    "m_frames": 1,
+    "cadence_s": 0.5,
+    "delay_s": 0.25,
+    "u_identity": 0.562265419879903,
+    "challenge_ap": {
+     "0.5": 0.6173983953098853,
+     "1.0": 0.5883005098807206,
+     "1.5": 0.48109735444910284
+    },
+    "u_affine_proposal": 0.7651926708700137
+   },
+   "m1@0.5|d0.50": {
+    "m_frames": 1,
+    "cadence_s": 0.5,
+    "delay_s": 0.5,
+    "u_identity": 0.5481359562517328,
+    "challenge_ap": {
+     "0.5": 0.6530102476328394,
+     "1.0": 0.5643489075522738,
+     "1.5": 0.42704871357008534
+    },
+    "u_affine_proposal": 0.6842272651999811
+   },
+   "m1@0.5|d0.75": {
+    "m_frames": 1,
+    "cadence_s": 0.5,
+    "delay_s": 0.75,
+    "u_identity": 0.5446939818278672,
+    "challenge_ap": {
+     "0.5": 0.6540152356668316,
+     "1.0": 0.5638377699805992,
+     "1.5": 0.41622893983617104
+    },
+    "u_affine_proposal": 0.6645038798777989
+   },
+   "m1@0.5|d1.00": {
+    "m_frames": 1,
+    "cadence_s": 0.5,
+    "delay_s": 1.0,
+    "u_identity": 0.5344376509586133,
+    "challenge_ap": {
+     "0.5": 0.6203640260988393,
+     "1.0": 0.5181912949643179,
+     "1.5": 0.4647576318126828
+    },
+    "u_affine_proposal": 0.605732506004864
+   },
+   "m1@0.5|d1.25": {
+    "m_frames": 1,
+    "cadence_s": 0.5,
+    "delay_s": 1.25,
+    "u_identity": 0.5170866467879995,
+    "challenge_ap": {
+     "0.5": 0.6413287308568889,
+     "1.0": 0.5100685723403333,
+     "1.5": 0.3998626371667763
+    },
+    "u_affine_proposal": 0.5063068569904643
+   },
+   "m1@0.5|d1.50": {
+    "m_frames": 1,
+    "cadence_s": 0.5,
+    "delay_s": 1.5,
+    "u_identity": 0.5161232940544641,
+    "challenge_ap": {
+     "0.5": 0.5980472321820522,
+     "1.0": 0.5536124167126375,
+     "1.5": 0.39671023326870264
+    },
+    "u_affine_proposal": 0.5007866018040944
+   },
+   "m1@0.5|d1.75": {
+    "m_frames": 1,
+    "cadence_s": 0.5,
+    "delay_s": 1.75,
+    "u_identity": 0.4960141622496132,
+    "challenge_ap": {
+     "0.5": 0.5645060357271142,
+     "1.0": 0.518048805493617,
+     "1.5": 0.4054876455281083
+    },
+    "u_affine_proposal": 0.3855561827947094
+   },
+   "m1@0.5|d2.00": {
+    "m_frames": 1,
+    "cadence_s": 0.5,
+    "delay_s": 2.0,
+    "u_identity": 0.4995306253692828,
+    "challenge_ap": {
+     "0.5": 0.609742290224039,
+     "1.0": 0.5189944331607363,
+     "1.5": 0.3698551527230728
+    },
+    "u_affine_proposal": 0.405706407212296
+   },
+   "m1@0.5|d2.25": {
+    "m_frames": 1,
+    "cadence_s": 0.5,
+    "delay_s": 2.25,
+    "u_identity": 0.4932310297414628,
+    "challenge_ap": {
+     "0.5": 0.5509338557034129,
+     "1.0": 0.5325677048093462,
+     "1.5": 0.3961915287116293
+    },
+    "u_affine_proposal": 0.369608128538312
+   },
+   "m1@0.5|d2.50": {
+    "m_frames": 1,
+    "cadence_s": 0.5,
+    "delay_s": 2.5,
+    "u_identity": 0.4745285619009132,
+    "challenge_ap": {
+     "0.5": 0.5479870178844471,
+     "1.0": 0.4952345664129573,
+     "1.5": 0.3803641014053353
+    },
+    "u_affine_proposal": 0.26243825036106466
+   },
+   "m1@0.5|d2.75": {
+    "m_frames": 1,
+    "cadence_s": 0.5,
+    "delay_s": 2.75,
+    "u_identity": 0.48076517382592554,
+    "challenge_ap": {
+     "0.5": 0.5691827238893449,
+     "1.0": 0.5234752139869648,
+     "1.5": 0.3496375836014669
+    },
+    "u_affine_proposal": 0.2981756164637992
+   },
+   "m1@0.5|d3.00": {
+    "m_frames": 1,
+    "cadence_s": 0.5,
+    "delay_s": 3.0,
+    "u_identity": 0.47496000678454803,
+    "challenge_ap": {
+     "0.5": 0.5297061781888874,
+     "1.0": 0.5315195505137486,
+     "1.5": 0.36365429165100815
+    },
+    "u_affine_proposal": 0.2649105388319525
+   },
+   "m1@1.0|d0.00": {
+    "m_frames": 1,
+    "cadence_s": 1.0,
+    "delay_s": 0.0,
+    "u_identity": 0.5776456558241004,
+    "challenge_ap": {
+     "0.5": 0.6965102300484984,
+     "1.0": 0.5965282822664754,
+     "1.5": 0.43989845515732745
+    },
+    "u_affine_proposal": 0.8533253187392547
+   },
+   "m1@1.0|d0.25": {
+    "m_frames": 1,
+    "cadence_s": 1.0,
+    "delay_s": 0.25,
+    "u_identity": 0.5598968810665939,
+    "challenge_ap": {
+     "0.5": 0.6486107943416173,
+     "1.0": 0.5560174065792989,
+     "1.5": 0.4750624422788654
+    },
+    "u_affine_proposal": 0.7516203435042066
+   },
+   "m1@1.0|d0.50": {
+    "m_frames": 1,
+    "cadence_s": 1.0,
+    "delay_s": 0.5,
+    "u_identity": 0.5557405851001943,
+    "challenge_ap": {
+     "0.5": 0.6502113344763971,
+     "1.0": 0.5186290588908742,
+     "1.5": 0.4983813619333115
+    },
+    "u_affine_proposal": 0.7278037148012357
+   },
+   "m1@1.0|d0.75": {
+    "m_frames": 1,
+    "cadence_s": 1.0,
+    "delay_s": 0.75,
+    "u_identity": 0.5246664452870521,
+    "challenge_ap": {
+     "0.5": 0.6189926767515042,
+     "1.0": 0.5489968737301958,
+     "1.5": 0.4060097853794562
+    },
+    "u_affine_proposal": 0.5497410223999245
+   },
+   "m1@1.0|d1.00": {
+    "m_frames": 1,
+    "cadence_s": 1.0,
+    "delay_s": 1.0,
+    "u_identity": 0.5190271623341352,
+    "challenge_ap": {
+     "0.5": 0.5782636461752058,
+     "1.0": 0.558891801973212,
+     "1.5": 0.4199260388539876
+    },
+    "u_affine_proposal": 0.5174265026144236
+   },
+   "m1@1.0|d1.25": {
+    "m_frames": 1,
+    "cadence_s": 1.0,
+    "delay_s": 1.25,
+    "u_identity": 0.49963138588833794,
+    "challenge_ap": {
+     "0.5": 0.5976455295066869,
+     "1.0": 0.49430268172253583,
+     "1.5": 0.4069459464357911
+    },
+    "u_affine_proposal": 0.4062837905097454
+   },
+   "m1@1.0|d1.50": {
+    "m_frames": 1,
+    "cadence_s": 1.0,
+    "delay_s": 1.5,
+    "u_identity": 0.5004134448738309,
+    "challenge_ap": {
+     "0.5": 0.602449940172786,
+     "1.0": 0.5247269471104354,
+     "1.5": 0.3740634473382711
+    },
+    "u_affine_proposal": 0.410765186597003
+   },
+   "m1@1.0|d1.75": {
+    "m_frames": 1,
+    "cadence_s": 1.0,
+    "delay_s": 1.75,
+    "u_identity": 0.48017504751785994,
+    "challenge_ap": {
+     "0.5": 0.5375569105950208,
+     "1.0": 0.5244419939817783,
+     "1.5": 0.3785262379767808
+    },
+    "u_affine_proposal": 0.2947940432359358
+   },
+   "m1@1.0|d2.00": {
+    "m_frames": 1,
+    "cadence_s": 1.0,
+    "delay_s": 2.0,
+    "u_identity": 0.4831218458869497,
+    "challenge_ap": {
+     "0.5": 0.5656795030125202,
+     "1.0": 0.5016246192294915,
+     "1.5": 0.38206141541883737
+    },
+    "u_affine_proposal": 0.3116799443330916
+   },
+   "m1@1.0|d2.25": {
+    "m_frames": 1,
+    "cadence_s": 1.0,
+    "delay_s": 2.25,
+    "u_identity": 0.4888641563026385,
+    "challenge_ap": {
+     "0.5": 0.5629066972442054,
+     "1.0": 0.5166887338981235,
+     "1.5": 0.3869970377655866
+    },
+    "u_affine_proposal": 0.34458483757776975
+   },
+   "m1@1.0|d2.50": {
+    "m_frames": 1,
+    "cadence_s": 1.0,
+    "delay_s": 2.5,
+    "u_identity": 0.4862945943493911,
+    "challenge_ap": {
+     "0.5": 0.5394810749958643,
+     "1.0": 0.5100068556161761,
+     "1.5": 0.4093958524361329
+    },
+    "u_affine_proposal": 0.32986059669971013
+   },
+   "m1@1.0|d2.75": {
+    "m_frames": 1,
+    "cadence_s": 1.0,
+    "delay_s": 2.75,
+    "u_identity": 0.5013540483052622,
+    "challenge_ap": {
+     "0.5": 0.5522247014101154,
+     "1.0": 0.5002598923423874,
+     "1.5": 0.4515775511632838
+    },
+    "u_affine_proposal": 0.4161550825197773
+   },
+   "m1@1.0|d3.00": {
+    "m_frames": 1,
+    "cadence_s": 1.0,
+    "delay_s": 3.0,
+    "u_identity": 0.50255981880683,
+    "challenge_ap": {
+     "0.5": 0.5437231578710511,
+     "1.0": 0.5172778729315763,
+     "1.5": 0.44667842561786264
+    },
+    "u_affine_proposal": 0.4230644529228941
+   },
+   "m3@0.5|d0.00": {
+    "m_frames": 3,
+    "cadence_s": 0.5,
+    "delay_s": 0.0,
+    "u_identity": 0.6974965794312942,
+    "challenge_ap": {
+     "0.5": 0.7878383804378614,
+     "1.0": 0.7351924362790287,
+     "1.5": 0.5694589215769924
+    },
+    "u_affine_proposal": 1.0
+   },
+   "m3@0.5|d0.25": {
+    "m_frames": 3,
+    "cadence_s": 0.5,
+    "delay_s": 0.25,
+    "u_identity": 0.640031830545906,
+    "challenge_ap": {
+     "0.5": 0.7379818962895187,
+     "1.0": 0.6609847205557898,
+     "1.5": 0.5211288747924092
+    },
+    "u_affine_proposal": 1.0
+   },
+   "m3@0.5|d0.50": {
+    "m_frames": 3,
+    "cadence_s": 0.5,
+    "delay_s": 0.5,
+    "u_identity": 0.6153473934207622,
+    "challenge_ap": {
+     "0.5": 0.7738303986439888,
+     "1.0": 0.6185227012798452,
+     "1.5": 0.4536890803384527
+    },
+    "u_affine_proposal": 1.0
+   },
+   "m3@0.5|d0.75": {
+    "m_frames": 3,
+    "cadence_s": 0.5,
+    "delay_s": 0.75,
+    "u_identity": 0.5906595612210077,
+    "challenge_ap": {
+     "0.5": 0.7174899250896053,
+     "1.0": 0.5812142970420133,
+     "1.5": 0.47327446153140434
+    },
+    "u_affine_proposal": 0.9278982931663443
+   },
+   "m3@0.5|d1.00": {
+    "m_frames": 3,
+    "cadence_s": 0.5,
+    "delay_s": 1.0,
+    "u_identity": 0.553222062277561,
+    "challenge_ap": {
+     "0.5": 0.6582092613528857,
+     "1.0": 0.5141668305702224,
+     "1.5": 0.48729009490957487
+    },
+    "u_affine_proposal": 0.7133719410701227
+   },
+   "m3@0.5|d1.25": {
+    "m_frames": 3,
+    "cadence_s": 0.5,
+    "delay_s": 1.25,
+    "u_identity": 0.5125834958015995,
+    "challenge_ap": {
+     "0.5": 0.6415039263830323,
+     "1.0": 0.5193118294258339,
+     "1.5": 0.3769347315959323
+    },
+    "u_affine_proposal": 0.48050266116236623
+   },
+   "m3@0.5|d1.50": {
+    "m_frames": 3,
+    "cadence_s": 0.5,
+    "delay_s": 1.5,
+    "u_identity": 0.49229370375998815,
+    "challenge_ap": {
+     "0.5": 0.5691667390840441,
+     "1.0": 0.547601823031153,
+     "1.5": 0.3601125491647675
+    },
+    "u_affine_proposal": 0.3642370132339877
+   },
+   "m3@0.5|d1.75": {
+    "m_frames": 3,
+    "cadence_s": 0.5,
+    "delay_s": 1.75,
+    "u_identity": 0.4839109637787686,
+    "challenge_ap": {
+     "0.5": 0.5564692194740979,
+     "1.0": 0.47955312151879875,
+     "1.5": 0.41571055034340904
+    },
+    "u_affine_proposal": 0.3162017897416616
+   },
+   "m3@0.5|d2.00": {
+    "m_frames": 3,
+    "cadence_s": 0.5,
+    "delay_s": 2.0,
+    "u_identity": 0.4716202481064656,
+    "challenge_ap": {
+     "0.5": 0.5969796063073102,
+     "1.0": 0.4545195945576677,
+     "1.5": 0.36336154345441873
+    },
+    "u_affine_proposal": 0.24577287562498923
+   },
+   "m3@0.5|d2.25": {
+    "m_frames": 3,
+    "cadence_s": 0.5,
+    "delay_s": 2.25,
+    "u_identity": 0.44722956411355685,
+    "challenge_ap": {
+     "0.5": 0.5316125222628695,
+     "1.0": 0.4874079487317466,
+     "1.5": 0.32266822134605466
+    },
+    "u_affine_proposal": 0.10600807803435501
+   },
+   "m3@0.5|d2.50": {
+    "m_frames": 3,
+    "cadence_s": 0.5,
+    "delay_s": 2.5,
+    "u_identity": 0.41808719502421066,
+    "challenge_ap": {
+     "0.5": 0.49993947644443826,
+     "1.0": 0.4520988914587945,
+     "1.5": 0.30222321716939926
+    },
+    "u_affine_proposal": 0.0
+   },
+   "m3@0.5|d2.75": {
+    "m_frames": 3,
+    "cadence_s": 0.5,
+    "delay_s": 2.75,
+    "u_identity": 0.4228392423153812,
+    "challenge_ap": {
+     "0.5": 0.5317971712346479,
+     "1.0": 0.43509722116582766,
+     "1.5": 0.30162333454566803
+    },
+    "u_affine_proposal": 0.0
+   },
+   "m3@0.5|d3.00": {
+    "m_frames": 3,
+    "cadence_s": 0.5,
+    "delay_s": 3.0,
+    "u_identity": 0.4100608046623897,
+    "challenge_ap": {
+     "0.5": 0.49432187490471097,
+     "1.0": 0.4221984252806496,
+     "1.5": 0.3136621138018086
+    },
+    "u_affine_proposal": 0.0
+   },
+   "m3@1.0|d0.00": {
+    "m_frames": 3,
+    "cadence_s": 1.0,
+    "delay_s": 0.0,
+    "u_identity": 0.6660358575195703,
+    "challenge_ap": {
+     "0.5": 0.7787644472835171,
+     "1.0": 0.7104531157394043,
+     "1.5": 0.5088900095357896
+    },
+    "u_affine_proposal": 1.0
+   },
+   "m3@1.0|d0.25": {
+    "m_frames": 3,
+    "cadence_s": 1.0,
+    "delay_s": 0.25,
+    "u_identity": 0.6501666460610506,
+    "challenge_ap": {
+     "0.5": 0.7493495550571074,
+     "1.0": 0.678641331027481,
+     "1.5": 0.5225090520985631
+    },
+    "u_affine_proposal": 1.0
+   },
+   "m3@1.0|d0.50": {
+    "m_frames": 3,
+    "cadence_s": 1.0,
+    "delay_s": 0.5,
+    "u_identity": 0.6073780873283142,
+    "challenge_ap": {
+     "0.5": 0.750194640116516,
+     "1.0": 0.5714661212083293,
+     "1.5": 0.5004735006600974
+    },
+    "u_affine_proposal": 1.0
+   },
+   "m3@1.0|d0.75": {
+    "m_frames": 3,
+    "cadence_s": 1.0,
+    "delay_s": 0.75,
+    "u_identity": 0.5774842920204255,
+    "challenge_ap": {
+     "0.5": 0.7434251126766055,
+     "1.0": 0.5586064853314968,
+     "1.5": 0.43042127805317426
+    },
+    "u_affine_proposal": 0.8524006632697467
+   },
+   "m3@1.0|d1.00": {
+    "m_frames": 3,
+    "cadence_s": 1.0,
+    "delay_s": 1.0,
+    "u_identity": 0.5232806511165963,
+    "challenge_ap": {
+     "0.5": 0.6245182784337868,
+     "1.0": 0.529098330566286,
+     "1.5": 0.41622534434971614
+    },
+    "u_affine_proposal": 0.5418000707729694
+   },
+   "m3@1.0|d1.25": {
+    "m_frames": 3,
+    "cadence_s": 1.0,
+    "delay_s": 1.25,
+    "u_identity": 0.4830171853066121,
+    "challenge_ap": {
+     "0.5": 0.6068863810949746,
+     "1.0": 0.48014131116154557,
+     "1.5": 0.36202386366331624
+    },
+    "u_affine_proposal": 0.3110802126965842
+   },
+   "m3@1.0|d1.50": {
+    "m_frames": 3,
+    "cadence_s": 1.0,
+    "delay_s": 1.5,
+    "u_identity": 0.4729897682491801,
+    "challenge_ap": {
+     "0.5": 0.5859669037557036,
+     "1.0": 0.4897617792838217,
+     "1.5": 0.34324062170801517
+    },
+    "u_affine_proposal": 0.2536205729506748
+   },
+   "m3@1.0|d1.75": {
+    "m_frames": 3,
+    "cadence_s": 1.0,
+    "delay_s": 1.75,
+    "u_identity": 0.4427654974666642,
+    "challenge_ap": {
+     "0.5": 0.5198895054557519,
+     "1.0": 0.46174158374717544,
+     "1.5": 0.3466654031970654
+    },
+    "u_affine_proposal": 0.08042784537193982
+   },
+   "m3@1.0|d2.00": {
+    "m_frames": 3,
+    "cadence_s": 1.0,
+    "delay_s": 2.0,
+    "u_identity": 0.4390183160223495,
+    "challenge_ap": {
+     "0.5": 0.5262912295920854,
+     "1.0": 0.4475894878809351,
+     "1.5": 0.3431742305940278
+    },
+    "u_affine_proposal": 0.05895554651175633
+   },
+   "m3@1.0|d2.25": {
+    "m_frames": 3,
+    "cadence_s": 1.0,
+    "delay_s": 2.25,
+    "u_identity": 0.42240855275067163,
+    "challenge_ap": {
+     "0.5": 0.5070756345287157,
+     "1.0": 0.4499045268126019,
+     "1.5": 0.31024549691069736
+    },
+    "u_affine_proposal": 0.0
+   },
+   "m3@1.0|d2.50": {
+    "m_frames": 3,
+    "cadence_s": 1.0,
+    "delay_s": 2.5,
+    "u_identity": 0.40891293377991805,
+    "challenge_ap": {
+     "0.5": 0.49200226770784594,
+     "1.0": 0.4348437805325668,
+     "1.5": 0.2998927530993415
+    },
+    "u_affine_proposal": 0.0
+   },
+   "m3@1.0|d2.75": {
+    "m_frames": 3,
+    "cadence_s": 1.0,
+    "delay_s": 2.75,
+    "u_identity": 0.41690927317819665,
+    "challenge_ap": {
+     "0.5": 0.4987875461648664,
+     "1.0": 0.4126664990731118,
+     "1.5": 0.3392737742966116
+    },
+    "u_affine_proposal": 0.0
+   },
+   "m3@1.0|d3.00": {
+    "m_frames": 3,
+    "cadence_s": 1.0,
+    "delay_s": 3.0,
+    "u_identity": 0.4078009423748792,
+    "challenge_ap": {
+     "0.5": 0.48183647164847954,
+     "1.0": 0.40395476441923384,
+     "1.5": 0.3376115910569242
+    },
+    "u_affine_proposal": 0.0
+   }
+  },
+  "note_on_frames": "StudyFRAMES1 found NO measurable benefit from m = 3 on held-out clips and a negative point estimate once m = 3 pays its own upload, while the DEV curves here show a positive m = 3 effect at short delay. The m = 3 entries are therefore marked DEV-OPTIMISTIC: do not enable merging on them (spec 7.9's enabling condition)."
+ },
+ "RC": {
+  "dev_rule": "S-EMBER DEV videos from StudyB-baselines amendment 2 (sember_split.py): 70 videos, 243 questions",
+  "tables": {
+   "32B-RICH": {
+    "source": "StudyR1 cell K1 (32BI, RICH video)",
+    "tier": "cloud",
+    "representation": "RICH",
+    "provenance": "MEASURED",
+    "by_category": {
+     "counting_objects_events": {
+      "n": 36,
+      "accuracy": 0.25,
+      "unreliable": false
+     },
+     "location_trace": {
+      "n": 29,
+      "accuracy": 0.3103448275862069,
+      "unreliable": false
+     },
+     "object_comparison": {
+      "n": 16,
+      "accuracy": 0.375,
+      "unreliable": true
+     },
+     "sequential_action": {
+      "n": 27,
+      "accuracy": 0.5185185185185185,
+      "unreliable": false
+     },
+     "spatial_aware_reasoning": {
+      "n": 25,
+      "accuracy": 0.2,
+      "unreliable": false
+     },
+     "temporal_ordering_recognition": {
+      "n": 33,
+      "accuracy": 0.5151515151515151,
+      "unreliable": false
+     },
+     "time_duration": {
+      "n": 39,
+      "accuracy": 0.38461538461538464,
+      "unreliable": false
+     },
+     "visual_detail_recall": {
+      "n": 38,
+      "accuracy": 0.6052631578947368,
+      "unreliable": false
+     }
+    },
+    "n_dev_questions": 243,
+    "n_rows_seen": 900,
+    "n_duplicate_rows_dropped": 13,
+    "accuracy": 0.40329218106995884
+   },
+   "32B-RECENT": {
+    "source": "StudyR1 cell K3 (32BI, RECENT video)",
+    "tier": "cloud",
+    "representation": "RECENT",
+    "provenance": "MEASURED",
+    "by_category": {
+     "counting_objects_events": {
+      "n": 36,
+      "accuracy": 0.25,
+      "unreliable": false
+     },
+     "location_trace": {
+      "n": 29,
+      "accuracy": 0.4482758620689655,
+      "unreliable": false
+     },
+     "object_comparison": {
+      "n": 16,
+      "accuracy": 0.375,
+      "unreliable": true
+     },
+     "sequential_action": {
+      "n": 27,
+      "accuracy": 0.4074074074074074,
+      "unreliable": false
+     },
+     "spatial_aware_reasoning": {
+      "n": 25,
+      "accuracy": 0.28,
+      "unreliable": false
+     },
+     "temporal_ordering_recognition": {
+      "n": 33,
+      "accuracy": 0.42424242424242425,
+      "unreliable": false
+     },
+     "time_duration": {
+      "n": 39,
+      "accuracy": 0.38461538461538464,
+      "unreliable": false
+     },
+     "visual_detail_recall": {
+      "n": 38,
+      "accuracy": 0.5,
+      "unreliable": false
+     }
+    },
+    "n_dev_questions": 243,
+    "n_rows_seen": 900,
+    "n_duplicate_rows_dropped": 13,
+    "accuracy": 0.3868312757201646
+   },
+   "32B-D2": {
+    "source": "StudyRH4 cell D2 (32BI, 2-s stride 352x256)",
+    "tier": "cloud",
+    "representation": "D2",
+    "provenance": "MEASURED",
+    "by_category": {
+     "counting_objects_events": {
+      "n": 36,
+      "accuracy": 0.2222222222222222,
+      "unreliable": false
+     },
+     "location_trace": {
+      "n": 29,
+      "accuracy": 0.4827586206896552,
+      "unreliable": false
+     },
+     "object_comparison": {
+      "n": 16,
+      "accuracy": 0.375,
+      "unreliable": true
+     },
+     "sequential_action": {
+      "n": 27,
+      "accuracy": 0.5555555555555556,
+      "unreliable": false
+     },
+     "spatial_aware_reasoning": {
+      "n": 25,
+      "accuracy": 0.24,
+      "unreliable": false
+     },
+     "temporal_ordering_recognition": {
+      "n": 33,
+      "accuracy": 0.48484848484848486,
+      "unreliable": false
+     },
+     "time_duration": {
+      "n": 39,
+      "accuracy": 0.4358974358974359,
+      "unreliable": false
+     },
+     "visual_detail_recall": {
+      "n": 38,
+      "accuracy": 0.5263157894736842,
+      "unreliable": false
+     }
+    },
+    "n_dev_questions": 243,
+    "n_rows_seen": 844,
+    "n_duplicate_rows_dropped": 5,
+    "accuracy": 0.41975308641975306
+   },
+   "4B-D2": {
+    "source": "StudyE7 Job A (4BI on RH4's D2 input) - DEVICE PROXY, not an Orin measurement",
+    "tier": "device-proxy",
+    "representation": "D2",
+    "provenance": "MEASURED (proxy)",
+    "by_category": {
+     "counting_objects_events": {
+      "n": 36,
+      "accuracy": 0.16666666666666666,
+      "unreliable": false
+     },
+     "location_trace": {
+      "n": 29,
+      "accuracy": 0.27586206896551724,
+      "unreliable": false
+     },
+     "object_comparison": {
+      "n": 16,
+      "accuracy": 0.25,
+      "unreliable": true
+     },
+     "sequential_action": {
+      "n": 27,
+      "accuracy": 0.48148148148148145,
+      "unreliable": false
+     },
+     "spatial_aware_reasoning": {
+      "n": 25,
+      "accuracy": 0.24,
+      "unreliable": false
+     },
+     "temporal_ordering_recognition": {
+      "n": 33,
+      "accuracy": 0.3333333333333333,
+      "unreliable": false
+     },
+     "time_duration": {
+      "n": 39,
+      "accuracy": 0.3333333333333333,
+      "unreliable": false
+     },
+     "visual_detail_recall": {
+      "n": 38,
+      "accuracy": 0.39473684210526316,
+      "unreliable": false
+     }
+    },
+    "n_dev_questions": 243,
+    "n_rows_seen": 839,
+    "n_duplicate_rows_dropped": 0,
+    "accuracy": 0.31275720164609055
+   },
+   "device-N1-orin": {
+    "source": "StudyF4 Part A, 1-frame last-3-s window, Jetson Orin",
+    "tier": "device",
+    "representation": "RECENT-1frame",
+    "provenance": "MEASURED",
+    "by_category": {
+     "counting_objects_events": {
+      "n": 36,
+      "accuracy": 0.05555555555555555,
+      "unreliable": false
+     },
+     "location_trace": {
+      "n": 29,
+      "accuracy": 0.06896551724137931,
+      "unreliable": false
+     },
+     "object_comparison": {
+      "n": 16,
+      "accuracy": 0.4375,
+      "unreliable": true
+     },
+     "sequential_action": {
+      "n": 27,
+      "accuracy": 0.0,
+      "unreliable": false
+     },
+     "spatial_aware_reasoning": {
+      "n": 25,
+      "accuracy": 0.16,
+      "unreliable": false
+     },
+     "temporal_ordering_recognition": {
+      "n": 33,
+      "accuracy": 0.18181818181818182,
+      "unreliable": false
+     },
+     "time_duration": {
+      "n": 39,
+      "accuracy": 0.15384615384615385,
+      "unreliable": false
+     },
+     "visual_detail_recall": {
+      "n": 38,
+      "accuracy": 0.10526315789473684,
+      "unreliable": false
+     }
+    },
+    "n_dev_questions": 243,
+    "n_rows_seen": 845,
+    "n_duplicate_rows_dropped": 0,
+    "accuracy": 0.12757201646090535
+   }
+  },
+  "question_type_to_representation": {
+   "counting_objects_events": {
+    "representation": "RICH",
+    "cloud_accuracy": 0.25,
+    "candidates": {
+     "RICH": {
+      "accuracy": 0.25,
+      "n": 36,
+      "unreliable": false
+     },
+     "RECENT": {
+      "accuracy": 0.25,
+      "n": 36,
+      "unreliable": false
+     },
+     "D2": {
+      "accuracy": 0.2222222222222222,
+      "n": 36,
+      "unreliable": false
+     }
+    },
+    "device_accuracy_4B_D2": 0.16666666666666666,
+    "device_minus_cloud": -0.08333333333333334,
+    "unreliable": false,
+    "provenance": "PROPOSAL: DEV argmax over the three committed cloud representations"
+   },
+   "location_trace": {
+    "representation": "D2",
+    "cloud_accuracy": 0.4827586206896552,
+    "candidates": {
+     "RICH": {
+      "accuracy": 0.3103448275862069,
+      "n": 29,
+      "unreliable": false
+     },
+     "RECENT": {
+      "accuracy": 0.4482758620689655,
+      "n": 29,
+      "unreliable": false
+     },
+     "D2": {
+      "accuracy": 0.4827586206896552,
+      "n": 29,
+      "unreliable": false
+     }
+    },
+    "device_accuracy_4B_D2": 0.27586206896551724,
+    "device_minus_cloud": -0.20689655172413796,
+    "unreliable": false,
+    "provenance": "PROPOSAL: DEV argmax over the three committed cloud representations"
+   },
+   "object_comparison": {
+    "representation": "RICH",
+    "cloud_accuracy": 0.375,
+    "candidates": {
+     "RICH": {
+      "accuracy": 0.375,
+      "n": 16,
+      "unreliable": true
+     },
+     "RECENT": {
+      "accuracy": 0.375,
+      "n": 16,
+      "unreliable": true
+     },
+     "D2": {
+      "accuracy": 0.375,
+      "n": 16,
+      "unreliable": true
+     }
+    },
+    "device_accuracy_4B_D2": 0.25,
+    "device_minus_cloud": -0.125,
+    "unreliable": true,
+    "provenance": "PROPOSAL: DEV argmax over the three committed cloud representations"
+   },
+   "sequential_action": {
+    "representation": "D2",
+    "cloud_accuracy": 0.5555555555555556,
+    "candidates": {
+     "RICH": {
+      "accuracy": 0.5185185185185185,
+      "n": 27,
+      "unreliable": false
+     },
+     "RECENT": {
+      "accuracy": 0.4074074074074074,
+      "n": 27,
+      "unreliable": false
+     },
+     "D2": {
+      "accuracy": 0.5555555555555556,
+      "n": 27,
+      "unreliable": false
+     }
+    },
+    "device_accuracy_4B_D2": 0.48148148148148145,
+    "device_minus_cloud": -0.07407407407407413,
+    "unreliable": false,
+    "provenance": "PROPOSAL: DEV argmax over the three committed cloud representations"
+   },
+   "spatial_aware_reasoning": {
+    "representation": "RECENT",
+    "cloud_accuracy": 0.28,
+    "candidates": {
+     "RICH": {
+      "accuracy": 0.2,
+      "n": 25,
+      "unreliable": false
+     },
+     "RECENT": {
+      "accuracy": 0.28,
+      "n": 25,
+      "unreliable": false
+     },
+     "D2": {
+      "accuracy": 0.24,
+      "n": 25,
+      "unreliable": false
+     }
+    },
+    "device_accuracy_4B_D2": 0.24,
+    "device_minus_cloud": -0.040000000000000036,
+    "unreliable": false,
+    "provenance": "PROPOSAL: DEV argmax over the three committed cloud representations"
+   },
+   "temporal_ordering_recognition": {
+    "representation": "RICH",
+    "cloud_accuracy": 0.5151515151515151,
+    "candidates": {
+     "RICH": {
+      "accuracy": 0.5151515151515151,
+      "n": 33,
+      "unreliable": false
+     },
+     "RECENT": {
+      "accuracy": 0.42424242424242425,
+      "n": 33,
+      "unreliable": false
+     },
+     "D2": {
+      "accuracy": 0.48484848484848486,
+      "n": 33,
+      "unreliable": false
+     }
+    },
+    "device_accuracy_4B_D2": 0.3333333333333333,
+    "device_minus_cloud": -0.18181818181818182,
+    "unreliable": false,
+    "provenance": "PROPOSAL: DEV argmax over the three committed cloud representations"
+   },
+   "time_duration": {
+    "representation": "D2",
+    "cloud_accuracy": 0.4358974358974359,
+    "candidates": {
+     "RICH": {
+      "accuracy": 0.38461538461538464,
+      "n": 39,
+      "unreliable": false
+     },
+     "RECENT": {
+      "accuracy": 0.38461538461538464,
+      "n": 39,
+      "unreliable": false
+     },
+     "D2": {
+      "accuracy": 0.4358974358974359,
+      "n": 39,
+      "unreliable": false
+     }
+    },
+    "device_accuracy_4B_D2": 0.3333333333333333,
+    "device_minus_cloud": -0.10256410256410259,
+    "unreliable": false,
+    "provenance": "PROPOSAL: DEV argmax over the three committed cloud representations"
+   },
+   "visual_detail_recall": {
+    "representation": "RICH",
+    "cloud_accuracy": 0.6052631578947368,
+    "candidates": {
+     "RICH": {
+      "accuracy": 0.6052631578947368,
+      "n": 38,
+      "unreliable": false
+     },
+     "RECENT": {
+      "accuracy": 0.5,
+      "n": 38,
+      "unreliable": false
+     },
+     "D2": {
+      "accuracy": 0.5263157894736842,
+      "n": 38,
+      "unreliable": false
+     }
+    },
+    "device_accuracy_4B_D2": 0.39473684210526316,
+    "device_minus_cloud": -0.21052631578947367,
+    "unreliable": false,
+    "provenance": "PROPOSAL: DEV argmax over the three committed cloud representations"
+   }
+  },
+  "device_proxy_warning": "4B-D2 is the H100 4B standing in for the device (StudyD15 Part A rejected it as an exact numerical stand-in); device-N1-orin is the only true device measurement and uses a different input (1 frame, last 3 s), so the two are not interchangeable."
+ },
+ "class_weights_omega": {
+  "provenance": "PROPOSAL - requires user approval before the policy uses it",
+  "rule": "equalize the mean utility gain per eligible opportunity across classes at the stated operating point; omega_k = 1 / gain_k normalized to omega_SH = 1",
+  "operating_point": {
+   "SH": "32B N=1 at setting (ii), cadence 0.5 s, hold shift 0.50 s, against the device arm at its own 0.75-s cadence, on DEV clips",
+   "RC": "the DEV-chosen representation per question type against the 4B-D2 device answer, averaged over question types weighted by DEV question counts",
+   "SS": "EXCLUDED: no committed SS accuracy pair exists on this workload"
+  },
+  "gains": {
+   "SH": 0.05591849761210066,
+   "RC": 0.13168724279835392,
+   "SS": null
+  },
+  "per_question_type": [
+   {
+    "question_type": "counting_objects_events",
+    "n_dev": 36,
+    "representation": "RICH",
+    "cloud": 0.25,
+    "device": 0.16666666666666666,
+    "gain": 0.08333333333333334
+   },
+   {
+    "question_type": "location_trace",
+    "n_dev": 29,
+    "representation": "D2",
+    "cloud": 0.4827586206896552,
+    "device": 0.27586206896551724,
+    "gain": 0.20689655172413796
+   },
+   {
+    "question_type": "object_comparison",
+    "n_dev": 16,
+    "representation": "RICH",
+    "cloud": 0.375,
+    "device": 0.25,
+    "gain": 0.125
+   },
+   {
+    "question_type": "sequential_action",
+    "n_dev": 27,
+    "representation": "D2",
+    "cloud": 0.5555555555555556,
+    "device": 0.48148148148148145,
+    "gain": 0.07407407407407413
+   },
+   {
+    "question_type": "spatial_aware_reasoning",
+    "n_dev": 25,
+    "representation": "RECENT",
+    "cloud": 0.28,
+    "device": 0.24,
+    "gain": 0.040000000000000036
+   },
+   {
+    "question_type": "temporal_ordering_recognition",
+    "n_dev": 33,
+    "representation": "RICH",
+    "cloud": 0.5151515151515151,
+    "device": 0.3333333333333333,
+    "gain": 0.18181818181818182
+   },
+   {
+    "question_type": "time_duration",
+    "n_dev": 39,
+    "representation": "D2",
+    "cloud": 0.4358974358974359,
+    "device": 0.3333333333333333,
+    "gain": 0.10256410256410259
+   },
+   {
+    "question_type": "visual_detail_recall",
+    "n_dev": 38,
+    "representation": "RICH",
+    "cloud": 0.6052631578947368,
+    "device": 0.39473684210526316,
+    "gain": 0.21052631578947367
+   }
+  ],
+  "omega": {
+   "SH": 1.0,
+   "RC": 0.42463109124188936,
+   "SS": null
+  },
+  "reading": "one point of RC accuracy is worth 0.425 points of SH challenge mAP at this operating point, so an unweighted coordinator would spend almost everything on whichever class is measured on the wider scale."
+ },
+ "durations": {
+  "episodic_ttft_by_n": {
+   "provenance": "MEASURED",
+   "replace_with_eng1": true,
+   "source": "StudyD7b (N=1) and StudyD7 (N=3, N=9), open-loop TTFT p50 at 25 % and 75 % of peak load",
+   "values_s": {
+    "32BI_N1_load25": 0.1422,
+    "32BI_N1_load75": 0.2976,
+    "32BI_N3_load25": 0.2643,
+    "32BI_N3_load75": 0.5915,
+    "32BI_N9_load25": 0.6347,
+    "32BI_N9_load75": 1.9803,
+    "4BI_N1_load25": 0.0827,
+    "4BI_N1_load75": 0.1359
+   },
+   "note": "the policy adds RTT and upload itself; see the link model"
+  },
+  "episodic_end_to_end_by_n": {
+   "provenance": "DERIVED RULE",
+   "replace_with_eng1": true,
+   "rule": "RTT + frame bytes / uplink + TTFT, unrounded (StudyE9b setting (ii))",
+   "values_s": {
+    "32BI_N1": 0.39496588235294117,
+    "32BI_N3": 0.9303776470588235,
+    "4BI_N1": 0.33546588235294117
+   }
+  },
+  "recall_ttft_by_readiness": {
+   "provenance": "MEASURED",
+   "replace_with_eng1": true,
+   "source": "StudyRH5 Part A, isolated reload, D2 format, one request at a time, TTFT medians",
+   "values_s": {
+    "11000|COLD": 2.445,
+    "11000|GPU-WARM": 0.382,
+    "11000|HOST-WARM": 0.459,
+    "28000|COLD": 7.367,
+    "28000|GPU-WARM": 0.874,
+    "28000|HOST-WARM": 1.001
+   },
+   "interpolation_rule": "linear in tokens between 11k and 28k for the warm states; COLD uses the measured cold prefill rate. STATED RULE, not a measurement."
+  },
+  "cold_rebuild_per_token": {
+   "provenance": "MEASURED",
+   "replace_with_eng1": true,
+   "source": "StudyRH5 cold re-prefill rates",
+   "tokens_per_s": {
+    "11000": 4500.0,
+    "28000": 3800.0
+   },
+   "seconds_per_token": {
+    "11000": 0.00022222222222222223,
+    "28000": 0.0002631578947368421
+   }
+  },
+  "host_reload_per_token": {
+   "provenance": "MEASURED",
+   "replace_with_eng1": true,
+   "source": "StudyRH5: 64 layers x 8 KV heads x 128 x {K,V} x bf16 per token, and vLLM's own load-time metric",
+   "bytes_per_token": 262144,
+   "gb_per_s": {
+    "11000": 47.6,
+    "28000": 52.9
+   },
+   "seconds_per_token": {
+    "11000": 5.5072268907563025e-06,
+    "28000": 4.955463137996219e-06
+   }
+  },
+  "catchup_per_frame": {
+   "provenance": "DERIVED RULE",
+   "replace_with_eng1": true,
+   "rule": "appending s seconds of D2 history is an incremental prefill of its tokens: t_catchup = (frames x tokens_per_frame) / prefill_tok_s. NO committed video-domain measurement of catch-up exists; StudyE32 measured catch-up on LoCoMo text conversations and its numbers are flagged in CLAUDE.md, so they are NOT used here.",
+   "tokens_per_frame_d2": {
+    "provenance": "DERIVED RULE from StudyRH4 committed per-question prompt tokens",
+    "median": 91.4734833266372,
+    "p25": 90.96077922077922,
+    "p75": 92.58966973886328,
+    "n_questions": 844,
+    "note": "prompt tokens include the question text, so this is an upper bound per frame"
+   },
+   "prefill_tok_s": {
+    "32BI": 5600.0,
+    "4BI": 29500.0
+   },
+   "seconds_per_frame": {
+    "32BI": 0.016334550594042357,
+    "4BI": 0.0031007960449707522
+   },
+   "d2_stride_s": 2.0
+  },
+  "answer_time_by_context": {
+   "provenance": "MEASURED",
+   "replace_with_eng1": true,
+   "source": "StudyE10d: a cold K1 RICH recall is 12,645 prompt tokens, LM prefill about 2.17 s (~5.8k tok/s), frontend 1.47 s for the PNG body / 0.75 s JPEG / 0.04 s text-only, vision encoder about 0.2 s",
+   "k1_rich_tokens": 12645,
+   "lm_prefill_s": 2.17,
+   "frontend_s": {
+    "png": 1.47,
+    "jpeg": 0.75,
+    "text": 0.04
+   },
+   "vision_encoder_s": 0.2
+  },
+  "prefix_chained_piece_overhead": {
+   "provenance": "MEASURED",
+   "replace_with_eng1": false,
+   "source": "StudySLICE1 Part A, 40 chains over RH4 D2 sessions",
+   "chain_over_monolithic_ratio": {
+    "1024": 1.093,
+    "2048": 0.99
+   },
+   "median_per_link_overhead_s": {
+    "1024": 0.015,
+    "2048": -0.004
+   },
+   "longest_engine_unit_s": {
+    "11k_n1024": 0.23,
+    "11k_n2048": 0.39,
+    "27k_n1024": 0.31,
+    "27k_n2048": 0.55
+   },
+   "note": "Part A's gate passed; the 2,048-token chain is the one StudySLICE1 P3 uses"
+  },
+  "episodic_capacity_req_s": {
+   "provenance": "MEASURED",
+   "replace_with_eng1": true,
+   "source": "StudyE10b, one 32B replica, N = 3, p99 budget met",
+   "values": {
+    "GPU|k0|r0.0": 2.69,
+    "HOST|k0|r0.0": 2.69,
+    "GPU|k4|r0.0": 1.34,
+    "HOST|k8|r0.0": 1.34
+   }
+  },
+  "device_answer_latency": {
+   "provenance": "MEASURED",
+   "replace_with_eng1": false,
+   "source": "StudyD8 arm A, Orin sustained 1 Hz N=1, total latency p50",
+   "seconds": 0.567,
+   "note": "StudyB-baselines amendment 2 charges this as a RULE whenever a policy reads the device's answer confidence"
+  }
+ },
+ "link_model": {
+  "connectivity": {
+   "provenance": "MEASURED",
+   "source": "StudyE31b outdoor-driving traces as StudyE6b committed them (`results/orchestration/study_e6b/e6b_traces.npz`), 1 bit per second",
+   "n_traces": 16,
+   "seconds": 28551,
+   "fraction_connected": 0.8562221988721936,
+   "outage_count": 3829,
+   "outage_length_s": {
+    "p50": 1.0,
+    "p90": 1.0,
+    "p99": 2.0,
+    "max": 3.0,
+    "mean": 1.0720814834160355
+   },
+   "outages_per_minute": 8.046653357150362
+  },
+  "bandwidth": {
+   "provenance": "ASSUMPTION (single committed value, no measured distribution)",
+   "uplink_bytes_per_s": 1700000.0,
+   "uplink_mbit_s": 13.6,
+   "source": "StudyE9 setting (ii) uses a single 13.6 Mbit/s uplink",
+   "warning": "the committed traces carry CONNECTIVITY (1 bit per second), NOT a bandwidth time series, so no percentiles can be computed from them. The policy must treat bandwidth as a constant with an outage process on top, and spec 4's t_up = payload / b_i uses this constant.",
+   "percentiles": "NOT AVAILABLE from committed data",
+   "replace_with_eng1": false
+  },
+  "rtt": {
+   "provenance": "MEASURED",
+   "seconds": 0.044,
+   "source": "StudyE9 setting (ii); it is a ROUND trip, so an answer's downlink is already inside it"
+  },
+  "jitter": {
+   "provenance": "ASSUMPTION",
+   "model": "none: the delivery model is deterministic given the payload and the server TTFT, and every committed study uses it that way. A jitter term would have to be invented, so it is declared absent rather than guessed.",
+   "what_would_measure_it": "per-request end-to-end timings on a real link, which StudyENG1's live runs will produce",
+   "replace_with_eng1": true
+  }
+ },
+ "demand": {
+  "provenance": "MEASURED (S-EMBER DEV videos only)",
+  "n_dev_videos": 70,
+  "n_dev_questions": 243,
+  "questions_per_video": {
+   "mean": 3.4714285714285715,
+   "p50": 3.0,
+   "min": 2.0,
+   "max": 6.0
+  },
+  "arrival_rate_per_video_per_minute": {
+   "mean": 0.5960485240008236,
+   "p50": 0.5371741848610176,
+   "p25": 0.4203766142363782,
+   "p75": 0.7493606138107417
+  },
+  "inter_arrival_s": {
+   "mean": 105.00578034682081,
+   "p50": 89.0,
+   "p25": 48.0,
+   "p75": 146.0
+  },
+  "lambda_rc_default_per_s": 0.009934142066680394,
+  "conditional_rate_test_6_4": {
+   "status": "NOT COMPUTABLE FROM COMMITTED DATA",
+   "windows_s": [
+    10,
+    30,
+    60
+   ],
+   "rate_ratio": null,
+   "ci": null,
+   "reason": "escalation episodes exist only on the Nexar dashcam traces (SH) and recall questions only on S-EMBER videos (RC); no committed trace carries both on the same stream, and the simulator's pairing of the two is a harness construction, so a test on it would measure our own generator",
+   "decision": "the conditional recall rate is NOT USED, which is the action the user's rule prescribes when the CI includes 1 at every W, and which spec 6.4 already requires absent DEV support",
+   "what_would_make_it_computable": "one stream that carries both: a continuous SH task and timestamped recall questions on the same video, which no current dataset in this project provides"
+  }
+ },
+ "_provenance": {
+  "git_commit": "456ae78f4ae69a71ff9189f72393fde0fb6f9510",
+  "script": "prof1_profiles.py",
+  "model": null,
+  "timestamp": "2026-11-15T13:35:44.406541",
+  "device": "cpu",
+  "n": 90
+ }
+}

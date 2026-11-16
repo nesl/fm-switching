@@ -1,0 +1,148 @@
+{
+ "high_pressure": {
+  "capacity_tokens": 12000,
+  "mu": 1.0,
+  "n_rivals": 6,
+  "delta_j_defer_pool_on": -1.7991111111111113,
+  "delta_j_defer_pool_off": -0.43377777777777776,
+  "p_loss_if_deferred": [
+   1.0
+  ],
+  "p_loss_if_released": [
+   0.0
+  ],
+  "expected_restore_s": [
+   1.3653333333333335
+  ],
+  "kv": {
+   "capacity_tokens": 12000,
+   "occupancy_tokens": 12000,
+   "pressure": 1.0,
+   "n_prefixes": 3,
+   "referenced": [],
+   "free_order": [
+    "prefix:j0",
+    "prefix:rival0",
+    "prefix:rival1"
+   ]
+  }
+ },
+ "zero_pressure": {
+  "capacity_tokens": 100000000,
+  "mu": 1.0,
+  "n_rivals": 0,
+  "delta_j_defer_pool_on": 0.0,
+  "delta_j_defer_pool_off": 0.0,
+  "p_loss_if_deferred": [
+   0.0
+  ],
+  "p_loss_if_released": [
+   0.0
+  ],
+  "expected_restore_s": [
+   0.0
+  ],
+  "kv": {
+   "capacity_tokens": 100000000,
+   "occupancy_tokens": 6144,
+   "pressure": 6.144e-05,
+   "n_prefixes": 1,
+   "referenced": [],
+   "free_order": [
+    "prefix:j0"
+   ]
+  }
+ },
+ "gpu_price_zero": {
+  "capacity_tokens": 12000,
+  "mu": 0.0,
+  "n_rivals": 6,
+  "delta_j_defer_pool_on": 0.0,
+  "delta_j_defer_pool_off": 0.0,
+  "p_loss_if_deferred": [
+   1.0
+  ],
+  "p_loss_if_released": [
+   0.0
+  ],
+  "expected_restore_s": [
+   1.3653333333333335
+  ],
+  "kv": {
+   "capacity_tokens": 12000,
+   "occupancy_tokens": 12000,
+   "pressure": 1.0,
+   "n_prefixes": 3,
+   "referenced": [],
+   "free_order": [
+    "prefix:j0",
+    "prefix:rival0",
+    "prefix:rival1"
+   ]
+  }
+ },
+ "piece_sizing": {
+  "chosen": {
+   "size_tokens": 8192,
+   "n_pieces": 1,
+   "gaps": 0,
+   "work_s": 1.8204444444444445,
+   "p_loss": 1.0,
+   "expected_restore_s": 0.0,
+   "expected_total_s": 1.8204444444444445
+  },
+  "candidates": [
+   {
+    "size_tokens": 8192,
+    "n_pieces": 1,
+    "gaps": 0,
+    "work_s": 1.8204444444444445,
+    "p_loss": 1.0,
+    "expected_restore_s": 0.0,
+    "expected_total_s": 1.8204444444444445
+   },
+   {
+    "size_tokens": 2048,
+    "n_pieces": 4,
+    "gaps": 3,
+    "work_s": 1.8204444444444445,
+    "p_loss": 1.0,
+    "expected_restore_s": 1.3653333333333335,
+    "expected_total_s": 3.185777777777778
+   },
+   {
+    "size_tokens": 1024,
+    "n_pieces": 8,
+    "gaps": 7,
+    "work_s": 1.8204444444444443,
+    "p_loss": 1.0,
+    "expected_restore_s": 1.592888888888889,
+    "expected_total_s": 3.413333333333333
+   }
+  ],
+  "rule": "minimize expected total engine work including the deferral exposure each size implies (A6.5)"
+ },
+ "p_host": {
+  "value": 0.0,
+  "provenance": {
+   "kind": "PLACEHOLDER",
+   "note": "A6.1's P_host, the probability that evicted blocks are recoverable from the host tier. A6 assigns its measurement to M5, which does not exist, so the default is the CONSERVATIVE extreme 0.0 (assume a full rebuild), which never understates the cost of deferring. Spec 6.5's belief convention is the same: ambiguity resolves toward the colder tier"
+  }
+ },
+ "survival_curve": {
+  "supplied": false,
+  "provenance": {
+   "kind": "PLACEHOLDER",
+   "note": "A6.2's beyond-horizon extension of P_loss, assigned to M5. None means NO CURVE EXISTS; the beyond-horizon part of a gap then contributes nothing and every result that depended on it carries beyond_horizon_unmeasured"
+  }
+ },
+ "reading": "A6's restore work reaches a release decision through spec 5.3's backlog price. Under pressure the pool predicts the prefix is fully lost if the piece is deferred and fully safe if it is released, which is the asymmetry A6 exists to create. At zero pressure every A6 term is exactly zero and the result equals the pre-A6 path. With mu at its PLACEHOLDER zero the channel is silent and A6 acts only through feasibility and the memory decision.",
+ "_provenance": {
+  "git_commit": "456ae78f4ae69a71ff9189f72393fde0fb6f9510",
+  "script": "policy/run_pol2.py --a6",
+  "model": null,
+  "timestamp": "2026-11-15T16:45:13.950726",
+  "device": "cpu",
+  "n": 3
+ }
+}

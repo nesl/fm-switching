@@ -1,0 +1,176 @@
+{
+ "rows": [
+  {
+   "horizon_s": 0.5,
+   "pending_items": 1,
+   "n": 15,
+   "mean_s": 0.0005295487120747566,
+   "p50_s": 0.0006380896084010601,
+   "p95_s": 0.0008062669076025486,
+   "min_s": 0.0003339247778058052,
+   "max_s": 0.0008062669076025486,
+   "per_release_loop_s": 0.0006380896084010601
+  },
+  {
+   "horizon_s": 0.5,
+   "pending_items": 4,
+   "n": 15,
+   "mean_s": 0.0004074218062063058,
+   "p50_s": 0.00038882670924067497,
+   "p95_s": 0.000578553881496191,
+   "min_s": 0.00037587806582450867,
+   "max_s": 0.000578553881496191,
+   "per_release_loop_s": 0.0015553068369626999
+  },
+  {
+   "horizon_s": 0.5,
+   "pending_items": 16,
+   "n": 15,
+   "mean_s": 0.0004996251314878464,
+   "p50_s": 0.0004972591996192932,
+   "p95_s": 0.0005210777744650841,
+   "min_s": 0.0004891869612038136,
+   "max_s": 0.0005210777744650841,
+   "per_release_loop_s": 0.007956147193908691
+  },
+  {
+   "horizon_s": 0.5,
+   "pending_items": 64,
+   "n": 15,
+   "mean_s": 0.0009394904598593711,
+   "p50_s": 0.0009354283101856709,
+   "p95_s": 0.0010035419836640358,
+   "min_s": 0.0009232168085873127,
+   "max_s": 0.0010035419836640358,
+   "per_release_loop_s": 0.059867411851882935
+  },
+  {
+   "horizon_s": 0.75,
+   "pending_items": 1,
+   "n": 15,
+   "mean_s": 0.0003451403540869554,
+   "p50_s": 0.0003424938768148422,
+   "p95_s": 0.0003688349388539791,
+   "min_s": 0.000338112935423851,
+   "max_s": 0.0003688349388539791,
+   "per_release_loop_s": 0.0003424938768148422
+  },
+  {
+   "horizon_s": 0.75,
+   "pending_items": 4,
+   "n": 15,
+   "mean_s": 0.00039869189883271855,
+   "p50_s": 0.0003950619138777256,
+   "p95_s": 0.00043747294694185257,
+   "min_s": 0.0003893766552209854,
+   "max_s": 0.00043747294694185257,
+   "per_release_loop_s": 0.0015802476555109024
+  },
+  {
+   "horizon_s": 0.75,
+   "pending_items": 16,
+   "n": 15,
+   "mean_s": 0.0005158055884142717,
+   "p50_s": 0.000512734055519104,
+   "p95_s": 0.000529406126588583,
+   "min_s": 0.0005071759223937988,
+   "max_s": 0.000529406126588583,
+   "per_release_loop_s": 0.008203744888305664
+  },
+  {
+   "horizon_s": 0.75,
+   "pending_items": 64,
+   "n": 15,
+   "mean_s": 0.0009676285398503144,
+   "p50_s": 0.0009631728753447533,
+   "p95_s": 0.0010038958862423897,
+   "min_s": 0.0009517199359834194,
+   "max_s": 0.0010038958862423897,
+   "per_release_loop_s": 0.06164306402206421
+  },
+  {
+   "horizon_s": 1.0,
+   "pending_items": 1,
+   "n": 15,
+   "mean_s": 0.00034556730339924493,
+   "p50_s": 0.00034322217106819153,
+   "p95_s": 0.00037167780101299286,
+   "min_s": 0.0003394349478185177,
+   "max_s": 0.00037167780101299286,
+   "per_release_loop_s": 0.00034322217106819153
+  },
+  {
+   "horizon_s": 1.0,
+   "pending_items": 4,
+   "n": 15,
+   "mean_s": 0.00040090950205922126,
+   "p50_s": 0.00039743585512042046,
+   "p95_s": 0.00042673200368881226,
+   "min_s": 0.00039329472929239273,
+   "max_s": 0.00042673200368881226,
+   "per_release_loop_s": 0.0015897434204816818
+  },
+  {
+   "horizon_s": 1.0,
+   "pending_items": 16,
+   "n": 15,
+   "mean_s": 0.0005222675700982412,
+   "p50_s": 0.0005189566873013973,
+   "p95_s": 0.0005696089938282967,
+   "min_s": 0.0005089081823825836,
+   "max_s": 0.0005696089938282967,
+   "per_release_loop_s": 0.008303306996822357
+  },
+  {
+   "horizon_s": 1.0,
+   "pending_items": 64,
+   "n": 15,
+   "mean_s": 0.0009634839991728465,
+   "p50_s": 0.0009619598276913166,
+   "p95_s": 0.0010135523043572903,
+   "min_s": 0.0009415978565812111,
+   "max_s": 0.0010135523043572903,
+   "per_release_loop_s": 0.06156542897224426
+  }
+ ],
+ "note": "each row is ONE DeltaJ_H, which is two rollouts. Spec 7.2's release loop scores every pending item per event, so the per-event cost is about pending_items times the row's p50; `per_release_loop_s` reports that product.",
+ "host": "flash CPU only; no GPU, no model server",
+ "caveat": "a lower bound on deployment cost: this is pure Python on committed tables, and the real decision also pays for telemetry reads and the engine's own admission path",
+ "ghat": {
+  "rows": {
+   "sh": {
+    "n": 200,
+    "mean_s": 4.693730734288692e-06,
+    "p50_s": 4.573492333292961e-06,
+    "p95_s": 4.942063242197037e-06,
+    "min_s": 4.352070391178131e-06,
+    "max_s": 1.4326069504022598e-05
+   },
+   "rc_known_type": {
+    "n": 200,
+    "mean_s": 4.72105573862791e-06,
+    "p50_s": 4.6102795749902725e-06,
+    "p95_s": 5.068723112344742e-06,
+    "min_s": 4.433095455169678e-06,
+    "max_s": 1.398380845785141e-05
+   },
+   "rc_unknown_type": {
+    "n": 200,
+    "mean_s": 8.260819595307111e-06,
+    "p50_s": 8.045928552746773e-06,
+    "p95_s": 8.495990186929703e-06,
+    "min_s": 7.703900337219238e-06,
+    "max_s": 3.177020698785782e-05
+   }
+  },
+  "note": "one Ghat per request, including the task-type posterior rules and the predicted delivered delay on the device's link; the unknown-type row pays for the expectation over the posterior"
+ },
+ "_provenance": {
+  "git_commit": "456ae78f4ae69a71ff9189f72393fde0fb6f9510",
+  "script": "policy/run_pol2.py --m4",
+  "model": null,
+  "timestamp": "2026-11-15T16:45:13.946683",
+  "device": "cpu",
+  "n": 12
+ }
+}
