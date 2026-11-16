@@ -1,0 +1,118 @@
+{
+ "form": "Step-time model (non-learned, piecewise-linear), fitted by least squares on busy-interval step durations:\n    ms = intercept + per_tok*tok + sum_k per_tok_above_k*max(0, tok - k) + per_encoder_input*images_in_step\n       + per_decode_req*decode_reqs + per_prefill_req*prefill_reqs + per_tok_x_ctx*tok*ctx/1e6\n       + admission_per_image*images_of_next_step + admission_per_1k_encoder_tokens*encoder_tokens_of_next_step/1e3",
+ "knots": [
+  512,
+  2048,
+  4096
+ ],
+ "coef": {
+  "intercept_ms": 28.69451533217085,
+  "per_tok_ms": 0.07403882654657767,
+  "per_tok_above_512_ms": 0.019023001786639154,
+  "per_tok_above_2048_ms": -0.007830007328201336,
+  "per_tok_above_4096_ms": 0.09249914968752022,
+  "per_encoder_input_ms": 8.621865151417994,
+  "per_decode_req_ms": -0.5711150811457119,
+  "per_prefill_req_ms": 3.884497411910981,
+  "per_tok_x_ctx_per_1e6_ms": 1.9455541359398874,
+  "admission_per_image_ms": -1.2492171229127111,
+  "admission_per_1k_encoder_tokens_ms": 18.14846848957969
+ },
+ "n": 5974,
+ "r2": 0.9845517041726302,
+ "residual_bands": {
+  "tok_0_1": {
+   "n": 2485,
+   "median_abs_res_ms": 2.9013371864499433,
+   "p90_abs_res_ms": 21.13050314309698,
+   "median_rel_res": 0.11560117431764073
+  },
+  "tok_1_512": {
+   "n": 1095,
+   "median_abs_res_ms": 5.673407253303779,
+   "p90_abs_res_ms": 24.68829326376524,
+   "median_rel_res": 0.10945921532398104
+  },
+  "tok_512_2048": {
+   "n": 1255,
+   "median_abs_res_ms": 10.596589923667892,
+   "p90_abs_res_ms": 47.78613276821123,
+   "median_rel_res": 0.05593277846172279
+  },
+  "tok_2048_4096": {
+   "n": 677,
+   "median_abs_res_ms": 25.606337696693686,
+   "p90_abs_res_ms": 117.43700779039898,
+   "median_rel_res": 0.050609258543389476
+  },
+  "tok_4096_8193": {
+   "n": 462,
+   "median_abs_res_ms": 111.24856225135363,
+   "p90_abs_res_ms": 174.7722321538434,
+   "median_rel_res": 0.07065133590847994
+  },
+  "admission_steps": {
+   "n": 1907,
+   "median_abs_res_ms": 27.86603937783579
+  }
+ },
+ "residual_by_server": {
+  "A_E0": {
+   "n": 3646,
+   "median_abs_res_ms": 6.738235170201662
+  },
+  "A_E0_part1": {
+   "n": 1555,
+   "median_abs_res_ms": 7.220722242140965
+  },
+  "B_E0": {
+   "n": 773,
+   "median_abs_res_ms": 3.502287840167515
+  }
+ },
+ "admission": {
+  "n": 268,
+  "form": "stall_ms = a + b * images admitted in the next step (decode-only admission steps)",
+  "a_ms": 12.739804469282337,
+  "b_ms_per_image": 1.1489732925358012,
+  "median_abs_res_ms": 5.5267591978499055,
+  "by_image_bin": {
+   ">=1": {
+    "n": 3,
+    "median_ms": 22.181987762451172
+   },
+   ">=2": {
+    "n": 2,
+    "median_ms": 33.11002254486084
+   },
+   ">=5": {
+    "n": 31,
+    "median_ms": 32.03988075256348
+   },
+   ">=16": {
+    "n": 145,
+    "median_ms": 33.48207473754883
+   },
+   ">=41": {
+    "n": 87,
+    "median_ms": 66.03968143463135
+   }
+  },
+  "decode_baseline_ms": {
+   "1": 25.027036666870117,
+   "2": 25.19702911376953,
+   "3": 24.469494819641113,
+   "4": 24.500489234924316,
+   "5": 24.993181228637695,
+   "6": 25.296926498413086,
+   "7": 25.490999221801758,
+   "11": 24.436473846435547,
+   "12": 24.631023406982422,
+   "13": 24.389028549194336,
+   "14": 23.742198944091797,
+   "15": 23.604154586791992
+  },
+  "effect_on_running": "every request decoding during an admission step waits the stall: its inter-token gap grows by the stall (the step's output is delayed for all running requests)"
+ },
+ "fit_data": "Part A (A_E0) and Part B E0 (B_E0) steps; Part C (incl. HOLDOUT) not used"
+}
