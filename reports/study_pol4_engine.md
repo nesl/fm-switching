@@ -8,6 +8,28 @@ the burst4 over-prediction as that decision required found a defect in term (c)'
 which had flipped the term's sign; correcting it supports diagnosis C, raises criterion (i) from
 0.6355 to 0.7562 and changes this report's Part 1 conclusion about term (c). The erratum is in
 section 2.3 and nothing in Part 1's other two terms changed by a single digit.
+
+**ERRATUM INDEX (Part 1b, 2026-11-17).** Part 1 of this report stated that term (c) fitted as a
+PENALTY and that StudyT0-fidelity's diagnosis C was refuted by the measurement. **Both statements
+are withdrawn.** The cause was a defect in term (c)'s own fit script and not in any measurement:
+`fit_pol4_terms._a1_cells` passed each A1 cell's `N`, the QUERY'S FRAME COUNT (1 or 3), where the
+simulator counts encoder work in the step model's own 90-token ENCODER UNITS, in which a 378-token
+single-frame query is **4** units and a 1,062-token three-frame query is **12**. Every A1 request
+was therefore charged a quarter of its measured encoder work, which depressed the predicted base
+and flipped the sign. **Corrected, the fitted exponent is a GAIN of +0.100** (10 % window 0.090 to
+0.110, excluding zero; the absolute-objective secondary agrees in sign at +0.150), the old model
+gives 15 % to 18 % TOO LITTLE batching gain at k = 16 against the published anchors, and
+**diagnosis C is SUPPORTED**. Part 1's original wording is kept where it stands, marked, so the
+record shows what was claimed and what corrected it. Every location:
+
+| where | what Part 1 said | corrected in |
+|---|---|---|
+| section 2.3 | the exponent is a penalty (-0.030); the old model reproduces the anchors; diagnosis C "not supported by the measurement" | section 2.3's own ERRATUM, with the measured anchors recomputed |
+| section 3, mechanism Step 2 | one link "CONTRARY to the claim that motivated it" | the ERRATUM note in Step 2 |
+| section 3, mechanism Step 5 | alternative (c), a k-independent base error | section 2A.5, which refutes it on Part B's idle-engine rows |
+| section 3, Rule 2 | term (c) classified against diagnosis C | the Rule 2 paragraph, now a real positive FOR diagnosis C |
+| the `StudyPOL4-engine` row of `research/EXPERIMENTS.md` | the same penalty record in its mechanism_verification field | an inline erratum in that field |
+| `experiments/orchestration/policy/tests/test_pol4_engine.py` | a test asserting the penalty sign | the test now asserts a gain, and a second test re-derives every A1 cell's encoder-unit count |
 CPU only on flash: no GPU, no model server, no inference. Every live measurement used here was
 taken on h100nvl GPU 2 by StudyENG1-steptime and StudyENG1b-prefix-survival and is only READ.
 This row is an explicit METHODOLOGICAL CHANGE to the cost model StudyT0-fidelity froze, declared
@@ -257,6 +279,10 @@ Per cell its over-charge grows with k and holds at both frame counts:
 | N=3 k=4 | 0.7655 | 0.9111 (1.190) | 0.8487 (1.109) |
 | N=3 k=16 | 2.9433 | 3.9619 (1.346) | 3.3607 (1.142) |
 
+**ERRATUM (Part 1b): this coefficient replaces the -0.030 PENALTY Part 1 reported; the sign was an
+artefact of passing the frame count `N` instead of 90-token encoder units, see the erratum index and
+section 2.3.**
+
 `batch_prefill_gain(m) = m ** (-0.100)` for m > 1 prefills sharing a step, 1.0 at m = 1. Fitted on
 **StudyENG1 Part A A1, 10 cells, 300 batches**, on the batching RATIO `t(k) / (k x t(1))`, which
 is StudyENG1's own H-step statistic and is invariant to any error in the single-request base. The
@@ -487,7 +513,10 @@ as unattributable; the long-prefill scale is 0.88995 to 0.89543 over L = 10,927 
 steps and 1.0 everywhere else; the batching gain spans 1.021 to 1.096 on 2,055 steps with m
 running 1 to 21. One link was recorded as **CONTRARY to the claim that motivated it** before any
 Part C result was seen: term (c)'s fitted sign was a penalty and the old model appeared to
-reproduce the published anchors. **Part 1b withdrew that record.** The sign was an artefact of
+reproduce the published anchors. **ERRATUM (Part 1b): that record is WITHDRAWN.** It came from
+`fit_pol4_terms._a1_cells` passing the query's frame count `N` (1 and 3) where the simulator needs
+90-token encoder units (4 and 12); corrected, the exponent is a GAIN of +0.100 and diagnosis C is
+supported. The sign was an artefact of
 term (c)'s own fit script (section 2.3), and under the simulator's own encoder-token convention
 the link runs in the direction diagnosis C claimed: the old model gives 15 % to 18 % too little
 batching gain at k = 16, measured on Part A data that entered no fit here. The gain now spans

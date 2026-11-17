@@ -1,0 +1,311 @@
+{
+ "step1_causal_chain": "StudyENG1c Part D injects one device's next request into a running trace. If the physical component of context inertia is real (FORMULATION.md: reconstruction cost grows with context length), then the tier the history is in at arrival decides the action's own work: a GPU-warm or host-warm arrival needs a transfer at most, while a cold arrival needs a full prefill of about 11k tokens. That work occupies the engine, and the engine is shared, so it delays every request queued behind it. The cost model therefore predicts the imposed delay by charging the action's prefill (term b for its length, term c for how it batches with co-arriving prefills) or its host transfer (term a), replaying both arms of the recorded pair, and differencing them. T0b asks whether that predicted difference matches the measured one. The tier itself is an input, not a prediction (RESIDENCY GIVEN), so the chain tested here starts at the action's work and not at the eviction rule.",
+ "step2_instantiation": [
+  {
+   "causal_link": "the action occupies the engine",
+   "implementing_quantity": "EngineSim step time over the action's prefill",
+   "value_range": "predicted imposed delay -0.0333 to 29.0103 (n 360)",
+   "varies": "yes",
+   "evidence": "per state: {'cold': '1.3319 to 29.0103 (n 235)', 'warm_host': '-0.0079 to 12.2262 (n 90)', 'warm_local': '-0.0333 to 0.0839 (n 35)'}"
+  },
+  {
+   "causal_link": "a cold history costs a full prefill, a host-warm one a transfer",
+   "implementing_quantity": "the action's prompt and cached tokens, and term (a)'s external_cached_tokens",
+   "value_range": "action prompt tokens 10928.0000 to 77356.0000 (n 360); host-transferred tokens 0.0000 to 11520.0000 (n 360)",
+   "varies": "yes",
+   "evidence": "cold trials n=235, host-warm n=90, locally warm n=35"
+  },
+  {
+   "causal_link": "the occupied engine delays the requests queued behind it",
+   "implementing_quantity": "the paired difference of background TTFTs in the simulation",
+   "value_range": "control with the action removed: -0.0543 to 0.0066 (n 40)",
+   "varies": "yes",
+   "evidence": "Step 4 (a): removing the action collapses the predicted delay"
+  },
+  {
+   "causal_link": "the host tier makes a warm arrival cheap",
+   "implementing_quantity": "term (a), 50.1377 GB/s and 0.8845 ms fixed",
+   "value_range": "term on minus off, host trials: -0.0002 to 0.4184 (n 90)",
+   "varies": "yes",
+   "evidence": "Step 4 (b): 46 of 90 host trials change, 0 of 270 non-host trials change"
+  }
+ ],
+ "step2_verdict": "PASS: no link is ABSENT or CONSTANT",
+ "step3_unit_trace": {
+  "key": "27_P25|mono11k|0",
+  "cell": "27_P25|mono11k",
+  "t_inj_rel": 3.7328,
+  "action_rows": [
+   {
+    "rid": "D11012x260c-inj",
+    "prompt_tokens": 10995,
+    "cached_tokens": 0,
+    "external_cached_tokens": 0,
+    "n_images_charged": 122,
+    "body_mb": 0.0202,
+    "measured_ttft_s": 2.24141
+   }
+  ],
+  "n_background_with": 46,
+  "n_background_without": 46,
+  "n_steps_with": 46,
+  "n_steps_without": 64,
+  "predicted_action_ttft_s": [
+   2.2296740014760736
+  ],
+  "predicted_imposed_delay_s": 29.010267430510588,
+  "measured_imposed_delay_s": 26.69462999999999,
+  "n_matched": 46,
+  "per_request_first_ten": [
+   {
+    "key": "('episodic', 0)",
+    "with_s": 0.1338360697843602,
+    "without_s": 0.1338360697843602,
+    "delta_s": 0.0
+   },
+   {
+    "key": "('episodic', 1)",
+    "with_s": 0.28461594510793253,
+    "without_s": 0.2848088257384257,
+    "delta_s": -0.00019288063049316406
+   },
+   {
+    "key": "('episodic', 10)",
+    "with_s": 0.13665194978436013,
+    "without_s": 0.13665194978436013,
+    "delta_s": 0.0
+   },
+   {
+    "key": "('episodic', 11)",
+    "with_s": 0.1302647097843601,
+    "without_s": 0.1302647097843601,
+    "delta_s": 0.0
+   },
+   {
+    "key": "('episodic', 12)",
+    "with_s": 0.1391325097843601,
+    "without_s": 0.1391325097843601,
+    "delta_s": 0.0
+   },
+   {
+    "key": "('episodic', 13)",
+    "with_s": 2.7609639719466132,
+    "without_s": 0.13257760978436028,
+    "delta_s": 2.628386362162253
+   },
+   {
+    "key": "('episodic', 14)",
+    "with_s": 2.4260218695143623,
+    "without_s": 0.12994554978436046,
+    "delta_s": 2.296076319730002
+   },
+   {
+    "key": "('episodic', 15)",
+    "with_s": 2.3856740549544257,
+    "without_s": 0.18449366458095895,
+    "delta_s": 2.201180390373467
+   },
+   {
+    "key": "('episodic', 16)",
+    "with_s": 2.290246064994709,
+    "without_s": 0.1829435566450135,
+    "delta_s": 2.1073025083496955
+   },
+   {
+    "key": "('episodic', 17)",
+    "with_s": 2.2126899317244453,
+    "without_s": 0.38319374896743863,
+    "delta_s": 1.8294961827570067
+   }
+  ],
+  "bound_by": "the engine's step queue: the action's prefill occupies steps the background requests then wait for; no KV or accelerator budget binds in a Part D trial",
+  "outcome": {
+   "criterion_i": {
+    "passed": true,
+    "within_abs": false,
+    "within_ratio": true,
+    "ratio": 1.0867454402069106,
+    "abs_error_s": 2.3156374305105984
+   }
+  }
+ },
+ "step4_negative_control": {
+  "control_a": {
+   "what": "remove the action from the with arm and re-predict the paired difference",
+   "n": 40,
+   "predicted_delay_s": {
+    "n": 40,
+    "min": -0.054309616296670526,
+    "p10": -0.007572401057142825,
+    "p50": -0.0007294416427612305,
+    "p90": 0.002871131896972656,
+    "max": 0.00661468505859375,
+    "mean": -0.00366058347282332
+   },
+   "max_abs_s": 0.054309616296670526,
+   "median_abs_s": 0.002492070198059082,
+   "median_abs_with_action_s": 3.6737115206399302,
+   "shrink_factor": 1474.1605286645436,
+   "collapses": true,
+   "reading": "the two arms are replayed from their OWN recorded arrival times, so their difference is not identically zero even without the action; the control is that the residue is an order of magnitude below the predicted delay WITH the action on the same trials"
+  },
+  "control_b": {
+   "what": "zero term (a)'s host-transfer input and re-predict",
+   "n_host": 90,
+   "n_non_host": 270,
+   "n_host_changed": 46,
+   "n_non_host_changed": 0,
+   "median_change_host_s": 3.5599411405184966e-05,
+   "n_host_action_ttft_changed": 90,
+   "median_action_ttft_change_host_s": 0.05869061091735528,
+   "reading": "term (a) changes the ACTION's own predicted TTFT in every host trial (the host transfer of about 11k tokens), and it changes the delay imposed on others only where a compared background request was queued behind the action; in the remaining host trials the transfer lands in an idle window and reaches nobody, which is the mechanism and not an absent term",
+   "rows": [
+    {
+     "key": "27_P25|mono11k|8",
+     "external_tokens": 11152,
+     "with_term_s": -0.00113677978515625,
+     "term_off_s": -0.00113677978515625,
+     "changed": false,
+     "action_ttft_change_s": 0.059192545310270184,
+     "action_ttft_changed": true,
+     "n_background": 39
+    },
+    {
+     "key": "27_P25|piece1024|9",
+     "external_tokens": 10992,
+     "with_term_s": -0.0009810924530029297,
+     "term_off_s": -0.0009810924530029297,
+     "changed": false,
+     "action_ttft_change_s": 0.05835598798874564,
+     "action_ttft_changed": true,
+     "n_background": 42
+    },
+    {
+     "key": "27_P25|piece1024|13",
+     "external_tokens": 11216,
+     "with_term_s": 0.07813390826838074,
+     "term_off_s": 0.018606740029500912,
+     "changed": true,
+     "action_ttft_change_s": 0.059527168238879824,
+     "action_ttft_changed": true,
+     "n_background": 40
+    },
+    {
+     "key": "27_P25|piece1024|15",
+     "external_tokens": 2832,
+     "with_term_s": 3.7706694752880026,
+     "term_off_s": 3.692211652333069,
+     "changed": true,
+     "action_ttft_change_s": 0.01569156459098675,
+     "action_ttft_changed": true,
+     "n_background": 35
+    },
+    {
+     "key": "27_P25|piece2048|1",
+     "external_tokens": 11152,
+     "with_term_s": 0.007768773591945166,
+     "term_off_s": -0.00559234619140625,
+     "changed": true,
+     "action_ttft_change_s": 0.059192545310270184,
+     "action_ttft_changed": true,
+     "n_background": 43
+    },
+    {
+     "key": "27_P25|piece2048|11",
+     "external_tokens": 11296,
+     "with_term_s": 0.07664425414265041,
+     "term_off_s": 0.016698807243007874,
+     "changed": true,
+     "action_ttft_change_s": 0.05994544689964254,
+     "action_ttft_changed": true,
+     "n_background": 30
+    },
+    {
+     "key": "27_S2|mono11k|1",
+     "external_tokens": 11088,
+     "with_term_s": 0.07662632386779578,
+     "term_off_s": 0.017768401486135232,
+     "changed": true,
+     "action_ttft_change_s": 0.05885792238166054,
+     "action_ttft_changed": true,
+     "n_background": 40
+    },
+    {
+     "key": "27_S2|piece1024|12",
+     "external_tokens": 2384,
+     "with_term_s": 9.784470727624639,
+     "term_off_s": 9.650978686717465,
+     "changed": true,
+     "action_ttft_change_s": 0.013349204090717492,
+     "action_ttft_changed": true,
+     "n_background": 40
+    },
+    {
+     "key": "27_S2|piece2048|10",
+     "external_tokens": 11024,
+     "with_term_s": 0.0703653869319858,
+     "term_off_s": 0.011842087478934893,
+     "changed": true,
+     "action_ttft_change_s": 0.05852329945305046,
+     "action_ttft_changed": true,
+     "n_background": 40
+    },
+    {
+     "key": "27_S2|piece2048|18",
+     "external_tokens": 3680,
+     "with_term_s": 9.910523913866275,
+     "term_off_s": 9.680149297580975,
+     "changed": true,
+     "action_ttft_change_s": 0.020125318395067815,
+     "action_ttft_changed": true,
+     "n_background": 40
+    }
+   ]
+  },
+  "cell": "every scored FIT trial for control (b); the first 40 trials in record order for control (a)"
+ },
+ "step5_alternative_explanation": "The headline could be produced by (a) the cost model pricing the action's own work correctly [the claimed mechanism], or (b) the imposed delay being dominated by the number of background arrivals during the action, which the replay reproduces from the record whatever the action costs. The two separate on the cold-versus-warm contrast: under (b) the predicted delay would be about equal for a cold and a warm arrival in the same cell, because the trace is the same; under (a) it tracks the action's own work. Control (b) above is the sharp form of the same test, and the per-state ranges in Step 2 report it. A second alternative, that the model is right only because residency was given to it, is why the residency input is labelled and why predicting residency is a separate test.",
+ "note": "recorded before any criterion verdict was written; the sweep is the FIT dry run",
+ "holdout_audit": {
+  "split": "fit",
+  "n_trials": 360,
+  "n_fit_pairs_in_record": 360,
+  "n_holdout_pairs_in_record": 120,
+  "n_holdout_pairs_in_split_file": 120,
+  "holdout_pairs_built": 0,
+  "holdout_trials_used": 0,
+  "rows_read": 45173,
+  "kinds": {
+   "build": 136,
+   "churn": 480,
+   "episodic": 40413,
+   "inject": 2152,
+   "job": 480,
+   "pair_check": 480,
+   "run_summary": 1032
+  },
+  "split_file": "results/cost/study_eng1c/eng1c_holdout_split.json",
+  "authorization": "",
+  "assertions": [
+   "the record's holdout flag selects exactly the split file's pair count",
+   "no trial of the other split is constructed at all",
+   "every scored trial carries a with arm and a without arm"
+  ]
+ },
+ "labels": {
+  "out_of_sample": "OUT OF SAMPLE FOR THE MODEL. No StudyPOL4 term and no StudyT0 parameter was fitted on any StudyENG1c datum; the terms were fitted on StudyENG1 Parts A, B and D and on StudyENG1b. These are ENG1c's own FIT pairs, used for implementation verification and for the old-versus-new comparison; the 120 ENG1c HOLDOUT pairs are untouched.",
+  "residency": "DELAY MODEL WITH RESIDENCY GIVEN. The tier at arrival is an input taken from the measurement (the injected job's own recorded cached tokens, with ENG1c's write-order simulator as the cross-check), not a prediction. The model is scored on what delay the action imposes given its tier, not on predicting the tier."
+ },
+ "_provenance": {
+  "git_commit": "8e827927ba405e5ded9684fa2855b67e5a7094b2",
+  "script": "policy/score_t0b.py",
+  "model": null,
+  "timestamp": "2026-11-17T07:59:34.423341",
+  "n": 360,
+  "args": {
+   "models": "eng1,pol4",
+   "split": "fit",
+   "out_dir": null
+  }
+ }
+}

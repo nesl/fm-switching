@@ -1,0 +1,162 @@
+{
+ "study": "StudyT0b-fidelity",
+ "kind": "erratum, sidecar to results/orchestration/study_t0b/t0b_freeze.json (which is NOT edited)",
+ "what_changed": "A rebase onto origin/main (StudyENG1c-hostfull, 8b51be8) rewrote the StudyPOL4-engine Part 1 commit, so the sha recorded in t0b_freeze.json git.head no longer exists.",
+ "sha_map": {
+  "recorded_in_freeze": "4a9facba5c597a91a08dc8da39518c73e0263858",
+  "same_commit_after_rebase": "cfd30ce966cd2d2dff6fec3e59f6f3cb065eca03",
+  "part1b_commit": "8e827927ba405e5ded9684fa2855b67e5a7094b2",
+  "upstream_commit_rebased_onto": "8b51be89a901704e659a68b9466cb2f996f6b488"
+ },
+ "md5_verification": {
+  "rule": "The md5 list in t0b_freeze.json is the binding record. Content, not the sha, decides whether the frozen model changed.",
+  "result": "ALL 12 RECORDED MD5s MATCH the tree at 8e82792 and the working tree exactly. 10 of 12 also match cfd30ce; the two that do not (experiments/orchestration/policy/fit_pol4_terms.py and results/orchestration/study_pol4/pol4_terms.json) were uncommitted Part 1b files in the working tree when the freeze was taken, which the freeze itself records (git.clean false, both listed in git.porcelain). They were committed in 8e82792.",
+  "frozen_content_commit": "8e82792",
+  "n_files": 12,
+  "n_match_part1b_commit": 12,
+  "n_match_worktree": 12,
+  "n_match_cfd30ce": 10,
+  "per_file": {
+   "experiments/orchestration/policy/eng1_engine.py": {
+    "cfd30ce": "7e8779ceaeecdb055ff37bde4b3893c1",
+    "8e82792": "7e8779ceaeecdb055ff37bde4b3893c1",
+    "worktree": "7e8779ceaeecdb055ff37bde4b3893c1",
+    "recorded": "7e8779ceaeecdb055ff37bde4b3893c1",
+    "matches_recorded": {
+     "cfd30ce": true,
+     "8e82792": true,
+     "worktree": true
+    }
+   },
+   "experiments/orchestration/policy/fit_pol4_terms.py": {
+    "cfd30ce": "33bf0f4f6c646965a00a032d934de84c",
+    "8e82792": "ee15fa84fa7a2a0d56c569271be75271",
+    "worktree": "ee15fa84fa7a2a0d56c569271be75271",
+    "recorded": "ee15fa84fa7a2a0d56c569271be75271",
+    "matches_recorded": {
+     "cfd30ce": false,
+     "8e82792": true,
+     "worktree": true
+    }
+   },
+   "experiments/orchestration/policy/freeze_t0b.py": {
+    "cfd30ce": "f465266c313738f8b628b8c3577a3450",
+    "8e82792": "f465266c313738f8b628b8c3577a3450",
+    "worktree": "f465266c313738f8b628b8c3577a3450",
+    "recorded": "f465266c313738f8b628b8c3577a3450",
+    "matches_recorded": {
+     "cfd30ce": true,
+     "8e82792": true,
+     "worktree": true
+    }
+   },
+   "experiments/orchestration/policy/kvpool.py": {
+    "cfd30ce": "69e2622e9e49e5503a3a9a8a09651f61",
+    "8e82792": "69e2622e9e49e5503a3a9a8a09651f61",
+    "worktree": "69e2622e9e49e5503a3a9a8a09651f61",
+    "recorded": "69e2622e9e49e5503a3a9a8a09651f61",
+    "matches_recorded": {
+     "cfd30ce": true,
+     "8e82792": true,
+     "worktree": true
+    }
+   },
+   "experiments/orchestration/policy/params.py": {
+    "cfd30ce": "abbbca7ae904e41851ca4b99fae73345",
+    "8e82792": "abbbca7ae904e41851ca4b99fae73345",
+    "worktree": "abbbca7ae904e41851ca4b99fae73345",
+    "recorded": "abbbca7ae904e41851ca4b99fae73345",
+    "matches_recorded": {
+     "cfd30ce": true,
+     "8e82792": true,
+     "worktree": true
+    }
+   },
+   "experiments/orchestration/policy/run_pol4.py": {
+    "cfd30ce": "02a68eec82a7953390897ae63a5af114",
+    "8e82792": "02a68eec82a7953390897ae63a5af114",
+    "worktree": "02a68eec82a7953390897ae63a5af114",
+    "recorded": "02a68eec82a7953390897ae63a5af114",
+    "matches_recorded": {
+     "cfd30ce": true,
+     "8e82792": true,
+     "worktree": true
+    }
+   },
+   "experiments/orchestration/policy/run_t0.py": {
+    "cfd30ce": "3f7d2edfc193e7d21e2ae0bc162c91e6",
+    "8e82792": "3f7d2edfc193e7d21e2ae0bc162c91e6",
+    "worktree": "3f7d2edfc193e7d21e2ae0bc162c91e6",
+    "recorded": "3f7d2edfc193e7d21e2ae0bc162c91e6",
+    "matches_recorded": {
+     "cfd30ce": true,
+     "8e82792": true,
+     "worktree": true
+    }
+   },
+   "experiments/orchestration/policy/t0_harness.py": {
+    "cfd30ce": "2c41bdef137d79f3ca816ae190da9a42",
+    "8e82792": "2c41bdef137d79f3ca816ae190da9a42",
+    "worktree": "2c41bdef137d79f3ca816ae190da9a42",
+    "recorded": "2c41bdef137d79f3ca816ae190da9a42",
+    "matches_recorded": {
+     "cfd30ce": true,
+     "8e82792": true,
+     "worktree": true
+    }
+   },
+   "experiments/orchestration/policy/tiers.py": {
+    "cfd30ce": "b4607d14d0897eaed4a02d55f75cdb51",
+    "8e82792": "b4607d14d0897eaed4a02d55f75cdb51",
+    "worktree": "b4607d14d0897eaed4a02d55f75cdb51",
+    "recorded": "b4607d14d0897eaed4a02d55f75cdb51",
+    "matches_recorded": {
+     "cfd30ce": true,
+     "8e82792": true,
+     "worktree": true
+    }
+   },
+   "experiments/orchestration/policy/trace_replay.py": {
+    "cfd30ce": "c8590fd16b12adceeb1ba672d4ef4396",
+    "8e82792": "c8590fd16b12adceeb1ba672d4ef4396",
+    "worktree": "c8590fd16b12adceeb1ba672d4ef4396",
+    "recorded": "c8590fd16b12adceeb1ba672d4ef4396",
+    "matches_recorded": {
+     "cfd30ce": true,
+     "8e82792": true,
+     "worktree": true
+    }
+   },
+   "results/cost/study_eng1/eng1_step_model.json": {
+    "cfd30ce": "7da0a984bca4ba4f0ff81d5cee54d18c",
+    "8e82792": "7da0a984bca4ba4f0ff81d5cee54d18c",
+    "worktree": "7da0a984bca4ba4f0ff81d5cee54d18c",
+    "recorded": "7da0a984bca4ba4f0ff81d5cee54d18c",
+    "matches_recorded": {
+     "cfd30ce": true,
+     "8e82792": true,
+     "worktree": true
+    }
+   },
+   "results/orchestration/study_pol4/pol4_terms.json": {
+    "cfd30ce": "150c22189af0412cb150b8205bc2382a",
+    "8e82792": "d7ddbd2878e4d7127abde86de3ce5337",
+    "worktree": "d7ddbd2878e4d7127abde86de3ce5337",
+    "recorded": "d7ddbd2878e4d7127abde86de3ce5337",
+    "matches_recorded": {
+     "cfd30ce": false,
+     "8e82792": true,
+     "worktree": true
+    }
+   }
+  }
+ },
+ "conclusion": "The frozen model is unchanged. The freeze stays binding: read its git.head as cfd30ce for the Part 1 commit, and 8e82792 as the commit whose tree reproduces every frozen md5.",
+ "_provenance": {
+  "git_commit": "8e827927ba405e5ded9684fa2855b67e5a7094b2",
+  "script": "t0b_freeze_md5_reverify (inline, StudyT0b Part 2 step 0)",
+  "model": "n/a",
+  "timestamp": "2026-11-17T07:47:41.278825",
+  "n": 12
+ }
+}
