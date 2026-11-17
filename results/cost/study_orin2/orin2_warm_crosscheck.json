@@ -1,0 +1,20 @@
+{
+ "n_measurements": 40,
+ "criteria": "total prompt tokens identical AND answer token identical AND harness_qtok >= server_evaluated",
+ "n_total_mismatch": 0,
+ "n_answer_mismatch": 0,
+ "n_harness_fewer_tokens": 0,
+ "boundary_offset_distribution": {
+  "0": 2,
+  "15": 32,
+  "17": 2,
+  "18": 2,
+  "16": 2
+ },
+ "boundary_offset_median": 15,
+ "boundary_offset_cause": "server prefix cache extends ~15 template/vision-wrapper tokens past the last image into the cached region; totals conserved; harness evaluates that superset, biasing against the device (conservative)",
+ "total_mismatches": [],
+ "answer_mismatches": [],
+ "harness_fewer_token_cases": [],
+ "pass": true
+}

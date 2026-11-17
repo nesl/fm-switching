@@ -1,0 +1,33 @@
+{
+ "model": "4bi_f16_orin",
+ "stack": "llama.cpp c0fd786 F16 GGUF",
+ "feature": "log_pyes",
+ "form": "log_odds = a*log(p_yes) + b",
+ "a": 0.114932,
+ "b": 1.174287,
+ "raw_logpyes_at_p0.5": -10.217272,
+ "fit_split": "StudyD3 DEV (601 clips x 10 offsets = 6010 N=1 requests)",
+ "clip_level_label": true,
+ "seed": 0,
+ "compare": {
+  "h100_4b": {
+   "a": 0.114603,
+   "b": 1.140751
+  },
+  "h100_32b": {
+   "a": 0.129472,
+   "b": 1.848187
+  }
+ },
+ "_provenance": {
+  "git_commit": "f5413e56324fec4b9f147a8d09d59e6cc54be20b",
+  "script": "study_orin2_calibrate.py",
+  "model": "qwenvl4b",
+  "timestamp": "2026-11-16T22:13:37.956539",
+  "device": "jetson_orin",
+  "n": 6010,
+  "args": {
+   "part": 1
+  }
+ }
+}

@@ -1,0 +1,56 @@
+{
+ "status": "COMPLETE",
+ "n_scores": 6010,
+ "sanity": {
+  "n_null": 0,
+  "n_neither": 0,
+  "clock_pinned_all": true
+ },
+ "h100_agreement": {
+  "n_matched": 6010,
+  "pearson": 0.9418,
+  "mean_orin_minus_h100": -0.2576
+ },
+ "platt_validation": {
+  "refit_a": 0.114596,
+  "refit_b": 1.140683,
+  "target_a": 0.114603,
+  "target_b": 1.140751,
+  "a_abs_err": 7e-06,
+  "b_abs_err": 6.8e-05,
+  "n_h100_fit": 6010,
+  "reproduces_ctrl1c_map": true,
+  "routine": "sklearn LogisticRegression(C=1.0, lbfgs) on log(p_yes), clip-level label"
+ },
+ "orin_4b_map": {
+  "a": 0.114932,
+  "b": 1.174287,
+  "feature": "log_pyes",
+  "form": "log_odds = a*log(p_yes) + b",
+  "raw_logpyes_at_p0.5": -10.217272,
+  "n_fit": 6010,
+  "n_clips": 601
+ },
+ "h100_4b_map": {
+  "a": 0.114603,
+  "b": 1.140751
+ },
+ "h100_32b_map": {
+  "a": 0.129472,
+  "b": 1.848187
+ },
+ "apply_to_dense": {
+  "n_dense": 42014,
+  "n_applied": 42014,
+  "mean_calibrated_logodds": -0.081391,
+  "dev_eval_clip_overlap": 0,
+  "h100_4b_residual_vs_32B_ref": -0.1197,
+  "tier_residual": {
+   "set": "D3 DEV (both tiers present)",
+   "n": 6010,
+   "orin4b_minus_cal32b_logodds": -0.017146,
+   "h100_4b_minus_cal32b_ref_ctrl1c": -0.1197,
+   "note": "dense set has no 32B scores; tier residual measured where both tiers exist"
+  }
+ }
+}
