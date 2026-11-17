@@ -409,7 +409,18 @@ def _a1_cells() -> Dict[Tuple[int, int], Dict[str, Any]]:
             spread=dict(min=min(vals), max=max(vals)),
             prompt_tokens=int(statistics.median([x["prompt_tokens"] for x in rs])),
             body_mb=statistics.median([x["body_mb"] for x in rs]),
-            n_images=int(statistics.median([x["N"] for x in rs])),
+            # StudyPOL4 Part 1b, implementation fix. The first fit read `N` here. `N` is the
+            # QUERY'S FRAME COUNT (StudyENG1 section 2: "A1 episodic batches, N=1 378 tokens,
+            # N=3 about 1,062 tokens", i.e. a 36-token question plus 342 tokens per query
+            # image), while the simulator's `n_images` is counted in the step model's own
+            # ENCODER-TOKEN UNITS of 90 (`TOKENS_PER_FRAME`), because `per_encoder_input_ms`
+            # was fitted on steps whose images were 90-token D2 history frames. The two are not
+            # the same number: N=1 is 4 units and N=3 is 12, not 1 and 3. Passing 1 and 3 made
+            # the simulator charge a quarter of the measured encoder work for every A1 request,
+            # which under-predicted every cell's base and flipped the fitted sign to a penalty.
+            # The convention here is now the one every other call site uses.
+            n_images=max(int(round(int(statistics.median([x["prompt_tokens"] for x in rs]))
+                                   / float(TOKENS_PER_FRAME))), 1),
             out_tokens=max(int(statistics.median([x.get("completion_tokens") or 1
                                                   for x in rs])), 1))
     return cells
@@ -489,12 +500,36 @@ def fit_batch_gain(step: StepModel) -> Dict[str, Any]:
                   "the MEASURED one, over k in 2, 4, 8, 16 at N = 1 and N = 3",
         secondary_absolute_ttft_best_exponent=best_abs[0],
         secondary_absolute_ttft_sq_log_error=best_abs[1],
-        secondary_note="Fitting the ABSOLUTE batch completion time instead would give exponent "
-                       "%.3f, but that objective is not admissible for this term: the old model "
-                       "already under-predicts the A1 batch completion at k = 1 and k = 2, which "
-                       "no term on MULTI-prefill steps can represent, so the exponent would "
-                       "absorb a k-independent base error and would then mis-state the very "
-                       "statistic StudyENG1 measured. Reported, not used." % best_abs[0],
+        secondary_note="Fitting the ABSOLUTE batch completion time instead gives exponent "
+                       "%.3f. The RATIO objective is still the primary one, because only it is "
+                       "invariant to an error in the single-request base that a term on "
+                       "MULTI-prefill steps cannot represent. StudyPOL4 Part 1b checked whether "
+                       "such a base error exists and found none worth a term: under the "
+                       "simulator's own encoder-token convention the old model's single-request "
+                       "cells are %.3f (N=1) and %.3f (N=3) of measured, and Part B's 20 "
+                       "independently measured solo_ep requests are reproduced at 0.945. The "
+                       "two objectives therefore agree in SIGN, which is the finding that "
+                       "matters, and the ratio fit is reported." % (
+                           best_abs[0],
+                           _a1_predict(osim, cells[(ns[0], 1)])
+                           / cells[(ns[0], 1)]["measured_last_first_token_s"],
+                           _a1_predict(osim, cells[(ns[-1], 1)])
+                           / cells[(ns[-1], 1)]["measured_last_first_token_s"]),
+        old_model_vs_published_anchors=dict(
+            note="StudyENG1 section 5's published H-step anchors are the MEASURED ratios 0.510 "
+                 "(N=1) and 0.731 (N=3). The first StudyPOL4 fit reported that the old model "
+                 "already reproduced them to 4.0 % and 0.3 %; that comparison was computed "
+                 "under the wrong encoder-token convention (see `_a1_cells`). Under the "
+                 "simulator's own convention the old model's ratios are the values below, so "
+                 "the old model does NOT reproduce the anchors: it gives too little batching "
+                 "gain, which is StudyT0-fidelity's diagnosis C.",
+            **{"N=%d" % N: dict(
+                measured=meas_ratio[(N, 16)],
+                old_model=(_a1_predict(osim, cells[(N, 16)])
+                           / (16.0 * _a1_predict(osim, cells[(N, 1)]))),
+                new_model=(_a1_predict(bsim, cells[(N, 16)])
+                           / (16.0 * _a1_predict(bsim, cells[(N, 1)]))))
+               for N in ns}),
         n_cells=len(cells), n_batches=sum(c["n_batches"] for c in cells.values()),
         reproduced_published_anchors=anchors,
         implied_ratio_t16_over_16t1=implied,
@@ -502,7 +537,10 @@ def fit_batch_gain(step: StepModel) -> Dict[str, Any]:
         definition="gain(m) = m ** (-exponent) multiplies a step's PREFILL cost when m > 1 "
                    "short prefills share the step (StudyENG1's H-step). A positive exponent is "
                    "a sub-linear gain, zero is the old model, a negative exponent is a batching "
-                   "PENALTY. m = 1 is always 1.0, so a step with a single prefill is unchanged.",
+                   "PENALTY. m = 1 is always 1.0, so a step with a single prefill is unchanged. "
+                   "A positive fitted exponent also shortens a MERGED multi-prefill step, which "
+                   "is the channel through which it reaches the imposed delay: an arrival that "
+                   "lands inside such a step waits for the rest of it.",
         fit_data="StudyENG1 Part A A1 batch rows, k in 1, 2, 4, 8, 16 at N = 1 and N = 3, 30 "
                  "batches per cell, batch completion = the batch's last first token. Part C and "
                  "the HOLDOUT did not enter this fit.")

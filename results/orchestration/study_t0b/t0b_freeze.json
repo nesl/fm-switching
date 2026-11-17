@@ -25,7 +25,7 @@
      "host_kv_lookup_fixed_ms": 0.8845,
      "long_prefill_scale_intercept": 0.7891186909894499,
      "long_prefill_scale_per_1k_tokens": 0.009228028622738832,
-     "batch_prefill_gain_exponent": -0.03
+     "batch_prefill_gain_exponent": 0.1
     },
     "chunk_tokens": 8192
    },
@@ -77,7 +77,7 @@
    "host_kv_lookup_fixed_ms": 0.8845,
    "long_prefill_scale_intercept": 0.7891186909894499,
    "long_prefill_scale_per_1k_tokens": 0.009228028622738832,
-   "batch_prefill_gain_exponent": -0.03
+   "batch_prefill_gain_exponent": 0.1
   },
   "fit_data": "results/cost/study_eng1/eng1_holdout_split.json was loaded ONLY to exclude its 174 triples. Terms (a), (b) and (c) were fitted on StudyENG1 Parts A, B and D only, which contain no Part C trial at all; the only Part C rows this script reads are the FIT hostreload run summaries used as an OUT-OF-SAMPLE cross-check, and every holdout key encountered there was skipped and counted.",
   "terms": {
@@ -87,14 +87,14 @@
   }
  },
  "git": {
-  "head": "35825d5ceec12646f341cb40fd23f51e2c3e59ce",
+  "head": "4a9facba5c597a91a08dc8da39518c73e0263858",
   "branch": "main",
-  "porcelain": "M experiments/orchestration/policy/eng1_engine.py\n M experiments/orchestration/policy/trace_replay.py\n?? experiments/orchestration/policy/fit_pol4_terms.py\n?? experiments/orchestration/policy/freeze_t0b.py\n?? experiments/orchestration/policy/run_pol4.py\n?? experiments/orchestration/policy/tests/test_pol4_engine.py\n?? results/orchestration/study_pol4/\n?? results/orchestration/study_t0b/",
+  "porcelain": "M experiments/orchestration/policy/fit_pol4_terms.py\n M experiments/orchestration/policy/tests/test_pol4_engine.py\n M results/orchestration/study_pol4/pol4_fit_rescore_eng1.json\n M results/orchestration/study_pol4/pol4_fit_rescore_pol4.json\n M results/orchestration/study_pol4/pol4_fit_rescore_pol4_nobatch.json\n M results/orchestration/study_pol4/pol4_old_vs_new.json\n M results/orchestration/study_pol4/pol4_terms.json\n?? experiments/orchestration/policy/analyze_pol4_1b.py\n?? experiments/orchestration/policy/tests/test_pol4_part1b.py\n?? results/orchestration/study_pol4/pol4_part1b.json",
   "clean": false
  },
  "files": {
   "experiments/orchestration/policy/eng1_engine.py": "7e8779ceaeecdb055ff37bde4b3893c1",
-  "experiments/orchestration/policy/fit_pol4_terms.py": "33bf0f4f6c646965a00a032d934de84c",
+  "experiments/orchestration/policy/fit_pol4_terms.py": "ee15fa84fa7a2a0d56c569271be75271",
   "experiments/orchestration/policy/freeze_t0b.py": "f465266c313738f8b628b8c3577a3450",
   "experiments/orchestration/policy/kvpool.py": "69e2622e9e49e5503a3a9a8a09651f61",
   "experiments/orchestration/policy/params.py": "abbbca7ae904e41851ca4b99fae73345",
@@ -104,32 +104,32 @@
   "experiments/orchestration/policy/tiers.py": "b4607d14d0897eaed4a02d55f75cdb51",
   "experiments/orchestration/policy/trace_replay.py": "c8590fd16b12adceeb1ba672d4ef4396",
   "results/cost/study_eng1/eng1_step_model.json": "7da0a984bca4ba4f0ff81d5cee54d18c",
-  "results/orchestration/study_pol4/pol4_terms.json": "150c22189af0412cb150b8205bc2382a"
+  "results/orchestration/study_pol4/pol4_terms.json": "d7ddbd2878e4d7127abde86de3ce5337"
  },
- "frozen_at": "2026-11-17T04:11:34.701952+00:00",
+ "frozen_at": "2026-11-17T05:36:55.025724+00:00",
  "note": "StudyPOL4-engine: the revised cost model StudyT0b is to score. After this freeze the model may not change for T0b; a change is visible in git.",
  "binding": "StudyT0b must be evaluated on FRESH held-out data only. The 174 StudyENG1 Part C HOLDOUT triples are SPENT and were not read, predicted or evaluated by StudyPOL4-engine; the 406 Part C FIT trials are also not a held-out sample for this model, because they informed which three terms were added.",
  "verify_at_freeze": {
   "ok": true,
   "changed": [],
   "git_frozen": {
-   "head": "35825d5ceec12646f341cb40fd23f51e2c3e59ce",
+   "head": "4a9facba5c597a91a08dc8da39518c73e0263858",
    "branch": "main",
-   "porcelain": "M experiments/orchestration/policy/eng1_engine.py\n M experiments/orchestration/policy/trace_replay.py\n?? experiments/orchestration/policy/fit_pol4_terms.py\n?? experiments/orchestration/policy/freeze_t0b.py\n?? experiments/orchestration/policy/run_pol4.py\n?? experiments/orchestration/policy/tests/test_pol4_engine.py\n?? results/orchestration/study_pol4/\n?? results/orchestration/study_t0b/",
+   "porcelain": "M experiments/orchestration/policy/fit_pol4_terms.py\n M experiments/orchestration/policy/tests/test_pol4_engine.py\n M results/orchestration/study_pol4/pol4_fit_rescore_eng1.json\n M results/orchestration/study_pol4/pol4_fit_rescore_pol4.json\n M results/orchestration/study_pol4/pol4_fit_rescore_pol4_nobatch.json\n M results/orchestration/study_pol4/pol4_old_vs_new.json\n M results/orchestration/study_pol4/pol4_terms.json\n?? experiments/orchestration/policy/analyze_pol4_1b.py\n?? experiments/orchestration/policy/tests/test_pol4_part1b.py\n?? results/orchestration/study_pol4/pol4_part1b.json",
    "clean": false
   },
   "git_now": {
-   "head": "35825d5ceec12646f341cb40fd23f51e2c3e59ce",
+   "head": "4a9facba5c597a91a08dc8da39518c73e0263858",
    "branch": "main",
-   "porcelain": "M experiments/orchestration/policy/eng1_engine.py\n M experiments/orchestration/policy/trace_replay.py\n?? experiments/orchestration/policy/fit_pol4_terms.py\n?? experiments/orchestration/policy/freeze_t0b.py\n?? experiments/orchestration/policy/run_pol4.py\n?? experiments/orchestration/policy/tests/test_pol4_engine.py\n?? results/orchestration/study_pol4/\n?? results/orchestration/study_t0b/",
+   "porcelain": "M experiments/orchestration/policy/fit_pol4_terms.py\n M experiments/orchestration/policy/tests/test_pol4_engine.py\n M results/orchestration/study_pol4/pol4_fit_rescore_eng1.json\n M results/orchestration/study_pol4/pol4_fit_rescore_pol4.json\n M results/orchestration/study_pol4/pol4_fit_rescore_pol4_nobatch.json\n M results/orchestration/study_pol4/pol4_old_vs_new.json\n M results/orchestration/study_pol4/pol4_terms.json\n?? experiments/orchestration/policy/analyze_pol4_1b.py\n?? experiments/orchestration/policy/tests/test_pol4_part1b.py\n?? results/orchestration/study_pol4/pol4_part1b.json",
    "clean": false
   }
  },
  "_provenance": {
-  "git_commit": "35825d5ceec12646f341cb40fd23f51e2c3e59ce",
+  "git_commit": "4a9facba5c597a91a08dc8da39518c73e0263858",
   "script": "policy/freeze_t0b.py",
   "model": null,
-  "timestamp": "2026-11-16T20:11:34.721153",
+  "timestamp": "2026-11-16T21:36:55.047331",
   "device": "cpu",
   "n": 12,
   "args": {

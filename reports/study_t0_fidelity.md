@@ -32,6 +32,10 @@ Three numbers belong together and are reported together everywhere this verdict 
 |---|---|---|
 | **90 %** (pre-registered) | **83.9 %** (73 of 87: StudyENG1's own independent repeats scored on the same criterion) | **58.6 %** (102 of 174 holdout triples) |
 
+> **ERRATUM, 2026-11-17: the ceiling is 82.76 %, not 83.9 %.** See section 0A. The verdict,
+> the FAIL, the classification as a real fidelity gap and every other number in this report are
+> unchanged; the shortfall of the model below the ceiling widens from 25.3 to 24.2 points.
+
 Two things are true at once and neither cancels the other. The bar was set above what the
 measurement can support, so a perfect predictor would also have failed it. **And the model falls
 well below the ceiling as well**: it agrees with the measurement on 58.6 % of trials where the
@@ -44,6 +48,47 @@ inconclusive and NOT merely an artefact of the threshold. Section 7 gives the ar
 tolerance to the measurement's own repeatability so that the bar and the gap can be separated.
 
 ---
+
+---
+
+## 0A. Erratum: the repeatability ceiling is 82.76 %, not 83.9 %
+
+**Raised and traced by StudyPOL4-engine on 2026-11-17** while reproducing this report's numbers
+under the old model, and recorded here on the user's instruction. It changes no verdict.
+
+**What this report says.** The repeatability ceiling for criterion (i) is quoted as **83.9 %**
+(0.8391, 73 of 87 repeat pairs) at every site where the bar/ceiling/model triple appears: the
+headline above, the verdict table of section 7, sections 9 and 10, the interpretation in section
+11.6 and the ruling record in section 11.7.
+
+**What is correct.** **82.76 %** (0.8276, **72** of the same 87 repeat pairs).
+
+**The cause.** The `COMPARED_KINDS` fix recorded in section 8, check 1 of this report. The
+registered one-shot holdout run summed the imposed delay over the superset of background kinds,
+which wrongly included the eight warm sessions' own appends in the W25 cells; the corrected
+definition sums over the episodic background stream only, which is StudyENG1 section 9's published
+quantity. That fix landed between the one-shot run and the dry-run re-score. It moves exactly one
+repeat pair out of the passing set, and the pair is identified rather than inferred: scoring the
+same 87 repeats both ways gives **73 of 87 under the superset definition and 72 of 87 under the
+episodic-only one**, and the single trial that flips is **`W25|piece1024|0`**, a W25 cell, which
+is where the two definitions can differ at all. So the ceiling computed from the corrected
+definition is 72 of 87 and the 83.9 % figure is the PRE-FIX value. This report's committed dry-run artifact
+`results/orchestration/study_t0/t0_dryrun_partc_fit.json` already records 0.8276; only the prose
+carried the pre-fix number forward. StudyPOL4 reproduces 0.8276 exactly from the same 87 repeats
+and records the cross-check in `reports/study_pol4_engine.md` section 6, check 1.
+
+**What does not change.** The model's 58.6 % is scored on the holdout and is untouched by this.
+The bar is 90 % and is pre-registered. The FAIL stands. The bar is still above the ceiling, so a
+perfect predictor would still have failed; and the model is still well below the ceiling, so this
+is still a real fidelity gap and not only an over-strict bar. The one quantity that moves is the
+size of that shortfall: **24.2 points, not 25.3**. The registered verdict, its log and the frozen
+artifacts are NOT edited, in keeping with the user's ruling of 2026-11-16 that the registered T0
+verdict and its log stay exactly as run; this erratum sits beside them.
+
+**Where the figure is used downstream.** T0b's criterion (i-b) is a RATIO and does not contain the
+number, so the pre-registered criterion is unaffected; the figure it cited in its rationale
+(section 12) is corrected in place to 82.76 % with a pointer here. StudyPOL4-engine quotes 0.8276
+throughout, which is the post-fix value.
 
 ## 1. What was predicted, and from what
 
@@ -928,9 +973,11 @@ reported.
 
 **Why (i-b) is the right instrument.** It makes the denominator the measurement's own agreement
 with itself, so a bar set above the measurement's repeatability can no longer absorb the verdict
-and a real model gap can no longer hide behind one. On T0's data the two quantities were 83.9 %
-and 58.6 %; (i-b) asks for the second to reach 0.9 of the first, on the same conditions, which is
-a question about the MODEL and not about the threshold.
+and a real model gap can no longer hide behind one. On T0's data the two quantities were **82.76 %
+and 58.6 %** (the ceiling corrected per the erratum in section 0A; this rationale originally cited
+83.9 %, and the criterion itself is a ratio that does not contain either number, so the
+pre-registered wording is unchanged); (i-b) asks for the second to reach 0.9 of the first, on the
+same conditions, which is a question about the MODEL and not about the threshold.
 
 **BINDING CONSTRAINT, recorded on the row: T0b must be evaluated on FRESH held-out data only. The
 174 StudyENG1 Part C HOLDOUT triples are SPENT and must not be used to evaluate T0b or any revised

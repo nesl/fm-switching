@@ -223,22 +223,45 @@ class TestTermCSubLinearBatching(unittest.TestCase):
         for m in (1, 2, 4, 8, 16):
             self.assertEqual(p.batch_prefill_gain(m), 1.0)
 
-    def test_the_fitted_sign_is_recorded_as_a_penalty_not_a_gain(self):
-        """StudyPOL4's finding, asserted so it cannot be silently reversed: fitted on StudyENG1
-        Part A A1's own batching ratio, the exponent is NEGATIVE, i.e. a small penalty, and the
-        old model already reproduced the published anchors."""
+    def test_the_fitted_sign_is_recorded_as_a_gain_not_a_penalty(self):
+        """StudyPOL4 Part 1b's finding, asserted so it cannot be silently reversed.
+
+        The first fit returned a small PENALTY and the report concluded that
+        StudyT0-fidelity's diagnosis C was refuted. That was an artefact of the fit script
+        passing the A1 cells' `N` as the image count: `N` is the query's FRAME count (1 or 3)
+        while the simulator prices encoder work in units of 90 tokens (4 or 12), so every A1
+        request was charged a quarter of its encoder work. Under the simulator's own convention
+        the old model gives too LITTLE batching gain and the fitted exponent is POSITIVE. The
+        published measured anchors are unchanged; what changed is the model's own ratio against
+        them."""
         raw = Pol4Terms.load().raw["sub_linear_batching"]
-        self.assertLess(raw["batch_prefill_gain_exponent"], 0.0)
+        self.assertGreater(raw["batch_prefill_gain_exponent"], 0.0)
         a = raw["reproduced_published_anchors"]
         self.assertLess(abs(a["N=1"]["ratio_t16_over_16t1"] / 0.510 - 1.0), 0.01)
         self.assertLess(abs(a["N=3"]["ratio_t16_over_16t1"] / 0.731 - 1.0), 0.01)
-        implied = raw["implied_ratio_t16_over_16t1"]["N=1|k=16"]
-        self.assertLess(abs(implied["old_over_measured"] - 1.0), 0.05)
+        anc = raw["old_model_vs_published_anchors"]
+        for N, measured in (("N=1", 0.510), ("N=3", 0.731)):
+            # the old model over-states the ratio, i.e. gives too little gain, on BOTH
+            self.assertGreater(anc[N]["old_model"] / measured, 1.02)
+            self.assertLess(anc[N]["new_model"] / measured, anc[N]["old_model"] / measured)
+
+    def test_the_a1_fit_uses_encoder_units_and_not_the_frame_count(self):
+        """Regression guard for the defect above: a 378-token query is 4 encoder units, not 1,
+        and a 1,062-token one is 12, not 3."""
+        from policy.fit_pol4_terms import _a1_cells
+        cells = _a1_cells()
+        for (N, k), c in cells.items():
+            self.assertEqual(c["n_images"],
+                             max(int(round(c["prompt_tokens"] / 90.0)), 1),
+                             "A1 cell N=%d k=%d must carry encoder units" % (N, k))
+            self.assertNotEqual(c["n_images"], N)
 
     def test_it_is_monotone_in_the_number_of_prefills(self):
         t = Pol4Terms.load()
         vals = [t.batch_prefill_gain(m) for m in (2, 4, 8, 16)]
-        self.assertEqual(vals, sorted(vals))
+        # a gain: strictly decreasing in m and below 1
+        self.assertEqual(vals, sorted(vals, reverse=True))
+        self.assertLess(vals[0], 1.0)
 
     def test_it_changes_a_shared_step_and_only_a_shared_step(self):
         probe = Pol4Terms.for_probe(
