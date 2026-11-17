@@ -1,0 +1,121 @@
+{
+ "part1": {
+  "status": "COMPLETE",
+  "n_scores": 42014,
+  "d15_reproduction": {
+   "n_overlap": 10660,
+   "pearson": 1.0,
+   "max_abs_diff": 0.0,
+   "gate_pass_ge_0.99": true
+  },
+  "h100_agreement": {
+   "n_matched": 42014,
+   "pearson": 0.9426,
+   "spearman": 0.9416,
+   "median_abs_diff": 0.9957
+  },
+  "challenge_ap": {
+   "ap_orin": 0.5735,
+   "ap_h100": 0.5764,
+   "diff_orin_minus_h100": -0.0029,
+   "diff_ci95": [
+    -0.0079,
+    0.0019
+   ],
+   "ci_includes_0": true,
+   "n_clips": 300
+  }
+ },
+ "part2": {
+  "n_stream": 10660,
+  "rise_lag_s": 2.0,
+  "hz": 4.0,
+  "updates": 5000,
+  "stream_source": "results/device/study_d15/partA_scores.jsonl (real Orin scores)",
+  "windows": {
+   "20": {
+    "n_updates": 5000,
+    "mean_us": 8.436,
+    "p50_us": 8.32,
+    "p99_us": 9.28,
+    "max_us": 40.832,
+    "implied_budget_per_update_us_at_4hz": 250000.0
+   },
+   "60": {
+    "n_updates": 5000,
+    "mean_us": 19.261,
+    "p50_us": 19.233,
+    "p99_us": 20.224,
+    "max_us": 29.759,
+    "implied_budget_per_update_us_at_4hz": 250000.0
+   },
+   "240": {
+    "n_updates": 5000,
+    "mean_us": 79.997,
+    "p50_us": 79.903,
+    "p99_us": 85.407,
+    "max_us": 98.462,
+    "implied_budget_per_update_us_at_4hz": 250000.0
+   }
+  },
+  "_provenance": {
+   "git_commit": "456ae78f4ae69a71ff9189f72393fde0fb6f9510",
+   "script": "study_orin1_dense.py",
+   "model": "4bi_f16",
+   "timestamp": "2026-11-15T13:17:16.656506",
+   "device": "jetson_orin",
+   "n": 5000
+  }
+ },
+ "part3": {
+  "n_rows": 40,
+  "by_size": {
+   "11000": {
+    "n": 20,
+    "held": true,
+    "history_tokens_cached_median": 11029,
+    "question_tokens_evaluated_median": 123,
+    "n_gen_median": 2,
+    "ttft_s": {
+     "p50": 1.4148,
+     "p90": 1.4441,
+     "min": 1.386,
+     "max": 1.487
+    },
+    "total_s": {
+     "p50": 1.4783,
+     "p90": 1.5344,
+     "min": 1.45,
+     "max": 1.681
+    },
+    "server_prompt_ms_p50": 125.1,
+    "ttft_minus_prompt_ms_p50": 1289.7,
+    "clock_pinned_all": true
+   },
+   "28000": {
+    "n": 20,
+    "held": true,
+    "history_tokens_cached_median": 28039,
+    "question_tokens_evaluated_median": 123,
+    "n_gen_median": 2,
+    "ttft_s": {
+     "p50": 3.431,
+     "p90": 3.4765,
+     "min": 3.307,
+     "max": 3.573
+    },
+    "total_s": {
+     "p50": 3.5125,
+     "p90": 3.6196,
+     "min": 3.384,
+     "max": 3.739
+    },
+    "server_prompt_ms_p50": 188.3,
+    "ttft_minus_prompt_ms_p50": 3242.7,
+    "clock_pinned_all": true
+   }
+  },
+  "ttft_slope_ms_per_history_token": 0.1185,
+  "note": "warm recall latency scales with history size though only the question tokens are evaluated: TTFT is dominated by client-side resend+parse of the full image payload (StudyD15b), not model compute (server prompt_ms is 0.12-0.19 s)"
+ }
+}

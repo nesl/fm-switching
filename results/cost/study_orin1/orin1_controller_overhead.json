@@ -1,0 +1,41 @@
+{
+ "n_stream": 10660,
+ "rise_lag_s": 2.0,
+ "hz": 4.0,
+ "updates": 5000,
+ "stream_source": "results/device/study_d15/partA_scores.jsonl (real Orin scores)",
+ "windows": {
+  "20": {
+   "n_updates": 5000,
+   "mean_us": 8.436,
+   "p50_us": 8.32,
+   "p99_us": 9.28,
+   "max_us": 40.832,
+   "implied_budget_per_update_us_at_4hz": 250000.0
+  },
+  "60": {
+   "n_updates": 5000,
+   "mean_us": 19.261,
+   "p50_us": 19.233,
+   "p99_us": 20.224,
+   "max_us": 29.759,
+   "implied_budget_per_update_us_at_4hz": 250000.0
+  },
+  "240": {
+   "n_updates": 5000,
+   "mean_us": 79.997,
+   "p50_us": 79.903,
+   "p99_us": 85.407,
+   "max_us": 98.462,
+   "implied_budget_per_update_us_at_4hz": 250000.0
+  }
+ },
+ "_provenance": {
+  "git_commit": "456ae78f4ae69a71ff9189f72393fde0fb6f9510",
+  "script": "study_orin1_dense.py",
+  "model": "4bi_f16",
+  "timestamp": "2026-11-15T13:17:16.656506",
+  "device": "jetson_orin",
+  "n": 5000
+ }
+}
