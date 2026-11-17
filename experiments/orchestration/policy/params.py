@@ -11,6 +11,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field, asdict
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
+# D56: both warm-tier sizes are INPUTS. These are the values StudyENG1 and StudyENG1b ran at on
+# h100nvl, kept as named constants so a reproduction can pass them explicitly. They are NOT
+# defaults: `Params` leaves both capacities at 0, which refuses rather than guessing.
+H100NVL_KV_POOL_TOKENS = 62_944          # StudyENG1 section 1.2 and StudyENG1b section 3
+HOST_OFFLOAD_GIB_ENG1B = 256             # StudyENG1b: --kv-offloading-size 256, native backend
+
 
 @dataclass
 class Params:
@@ -45,12 +51,39 @@ class Params:
     host_kv_capacity_tokens: int = 0
     question_first_history_bytes: int = 1_000_000
     kv_pool_model: bool = True
-    p_host: float = 0.0
+    p_host: Optional[float] = None
+    host_eviction_rule: str = "lru"
+    tier_calibration: Optional[Any] = None
+    mu_estimator: str = "none"
     survival_curve: Optional[Any] = None
     prefix_loss_replan_threshold: float = 0.5
     decision_latency_s: Optional[float] = None
     continuation_resolution_s: float = 0.25
     episode_cadence_grid_s: float = 0.25
+
+    def p_host_for(self, host_pool: Any = None, evicted_tokens: int = 0,
+                   prefix_id: Optional[str] = None, t: float = 0.0) -> Dict[str, Any]:
+        """D56: P_host is a FUNCTION OF HOST OCCUPANCY, not a constant.
+
+        `p_host` is now an OPTIONAL OVERRIDE. None, the default, means 'derive it', and the
+        derivation is `tiers.p_host_from_occupancy`: StudyENG1b's measured 0.999 when the host
+        tier has room for the evicted blocks, and the fraction the host eviction rule keeps when
+        it does not. A float pins it, which is what a sweep or a reproduction of the POL2
+        behaviour (0.0, the conservative extreme) does."""
+        from .tiers import p_host_from_occupancy
+        if self.p_host is not None:
+            return dict(p_host=float(self.p_host), basis="pinned by Params.p_host",
+                        measured=False, host_occupancy_fraction=None,
+                        source="supplied by the caller or the sweep")
+        return p_host_from_occupancy(host_pool, evicted_tokens, prefix_id=prefix_id, t=t)
+
+    def host_eviction_callable(self) -> Any:
+        from . import tiers
+        rules = {"lru": tiers.lru_rule, "largest_first": tiers.largest_first_rule}
+        if self.host_eviction_rule not in rules:
+            raise ValueError("unknown host eviction rule %r; known: %s"
+                             % (self.host_eviction_rule, sorted(rules)))
+        return rules[self.host_eviction_rule]
 
     def placeholders(self) -> List[str]:
         return [k for k, v in PROVENANCE.items() if v["kind"] == "PLACEHOLDER"
@@ -114,26 +147,60 @@ PROVENANCE: Dict[str, Dict[str, str]] = {
     "H_up": dict(kind="PLACEHOLDER", note="upload trigger horizon; predictive upload is OFF"),
     "theta_up": dict(kind="PLACEHOLDER", note="upload trigger threshold; predictive upload is OFF"),
     "N_sum": dict(kind="PLACEHOLDER", note="summary refresh trigger; summaries are OFF"),
-    "gpu_kv_capacity_tokens": dict(kind="PLACEHOLDER", note="0 means 'not supplied'; the tier "
-                                                            "assignment refuses to run until a "
-                                                            "capacity is given, because a wrong "
-                                                            "capacity silently changes every "
-                                                            "allocation"),
-    "host_kv_capacity_tokens": dict(kind="PLACEHOLDER", note="as above; the host tier is always "
-                                                             "available per spec 1.1 (D29) but "
-                                                             "its size is a deployment fact"),
+    "gpu_kv_capacity_tokens": dict(
+        kind="PLACEHOLDER",
+        note="D56: an INPUT, not the H100's value. 0 means 'not supplied' and the tier "
+             "assignment refuses to run until a capacity is given, because a wrong capacity "
+             "silently changes every allocation. The value StudyENG1 and StudyENG1b ran at is "
+             "H100NVL_KV_POOL_TOKENS = 62,944 and is available as a named constant for a "
+             "reproduction, never as a default"),
+    "host_kv_capacity_tokens": dict(
+        kind="PLACEHOLDER",
+        note="D56: an INPUT and BOUNDED. 0 means 'not supplied'. The host tier is always "
+             "available per spec 1.1 (D29), but its SIZE is a deployment fact and the bound is "
+             "what makes P_host a function of occupancy rather than a constant. StudyENG1b ran "
+             "with 256 GiB of offload, which is HOST_OFFLOAD_GIB_ENG1B"),
     "kv_pool_model": dict(
         kind="COMMITTED",
         note="addendum A6 makes the KV-pool model part of the core, so it is ON. The switch "
              "exists because A6's own acceptance test requires showing that with ZERO pressure "
              "the A6 terms vanish and the results equal the pre-A6 path"),
     "p_host": dict(
-        kind="PLACEHOLDER",
+        kind="COMMITTED",
         note="A6.1's P_host, the probability that evicted blocks are recoverable from the host "
-             "tier. A6 assigns its measurement to M5, which does not exist, so the default is "
-             "the CONSERVATIVE extreme 0.0 (assume a full rebuild), which never understates the "
-             "cost of deferring. Spec 6.5's belief convention is the same: ambiguity resolves "
-             "toward the colder tier"),
+             "tier. NO LONGER A CONSTANT (D56, 2026-11-16): the default is None, meaning DERIVE "
+             "IT FROM HOST OCCUPANCY through Params.p_host_for and tiers.p_host_from_occupancy. "
+             "StudyENG1b measured the with-room value: 853,936 of 854,898 evicted prefix tokens "
+             "returned as external host hits on the KV-HOST server, P_host = 0.999, because the "
+             "offloading connector writes every built block through to host as it is computed. "
+             "With no host tier configured it is 0.0, which is StudyENG1b's E0 server by "
+             "construction. With a FULL host tier the host eviction rule decides what survives, "
+             "and that part carries the rule's ASSUMPTION label. A float pins the value, which "
+             "is how a sweep, or the old conservative 0.0, is expressed"),
+    "host_eviction_rule": dict(
+        kind="PLACEHOLDER",
+        note="ASSUMPTION, labelled as such in tiers.EVICTION_RULE_ASSUMPTION and in the report. "
+             "The default is LRU. StudyENG1 Part D found vLLM 0.31.0 exposes eviction only as "
+             "sampled lifetime and idle histograms and no counter for cached-but-unreferenced "
+             "blocks, so the host tier's eviction order was never observed. StudyENG1c is the "
+             "measurement that replaces it; the rule is a pluggable callable"),
+    "tier_calibration": dict(
+        kind="PLACEHOLDER",
+        note="D57's per-tier monotone map from a raw score to a probability, LOADED FROM A FILE "
+             "and fitted on DEV by StudyCTRL1c, which has not delivered it. None means NOT "
+             "SUPPLIED, and calibration.require_calibrated then RAISES on any comparison, "
+             "ranking, upgrade or gain estimate that mixes tiers, rather than silently "
+             "comparing two different scales. StudyCTRL1b measured that the two tiers' raw "
+             "scores are on different scales (ambiguity A12), which is why the failure is loud"),
+    "mu_estimator": dict(
+        kind="PLACEHOLDER",
+        note="WHICH estimator updates mu, chosen EXPLICITLY rather than by default. 'none' is "
+             "the default and holds mu at its PLACEHOLDER 0, so the backlog channel is silent "
+             "and says so. 'ewma_marginal_utility' is the rule POL2 ambiguity A3 describes, an "
+             "EWMA of the realized marginal utility per GPU-second of the last released item "
+             "floored at zero. Spec 8 says only 'update mu' and spec 9 does not list mu at all, "
+             "so the spec does NOT determine the estimator; reports/study_pol3_update.md writes "
+             "out the options and their consequences instead of choosing one silently"),
     "survival_curve": dict(
         kind="PLACEHOLDER",
         note="A6.2's beyond-horizon extension of P_loss, assigned to M5. None means NO CURVE "

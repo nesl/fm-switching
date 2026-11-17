@@ -1,0 +1,1026 @@
+{
+ "step1_causal_chain": "If the two tiers' raw scores are on different scales (StudyCTRL1b measured a median -5.125 log-unit offset), then a rank metric over a MIXED stream is partly reading tier identity rather than evidence, so an arm whose calls are label-correlated is rewarded or punished by the offset alone; a PER-TIER calibration maps each tier's score to the same quantity, the probability that the clip contains the event (FORMULATION / POLICY_SPEC v3.1 spec 4.1 as the addendum reads it: u_SH must be a CALIBRATED utility and never a raw tier score); with the offset removed, the measured ordering of the trigger families is a statement about WHEN each trigger spends and not about WHICH TIER it spends on, and the positives-only oracle, which spends only where the label is, must stop scoring below device-only. In parallel, because the challenge mAP reads one crop per clip, the primary metric moves to StudyE9b's STREAMING AP over all decision instants, so a trigger that improves the displayed score away from the single crop is now credited for it; and because the cheapest pre-registered background cadence cost more than the 5 % and 10 % budgets, extending the cadence grid is what makes the cloud-initiated family TESTABLE at those budgets at all.",
+ "step2_links": [
+  {
+   "change": "C1 calibration",
+   "link": "per-tier calibration -> the tiers' scale offset",
+   "quantity": "median of (cloud minus device) at the crop instants of training positives, and the two tiers' median over all training instants",
+   "value": {
+    "raw_median_offset_all_instants": -5.124983770601705,
+    "calibrated_median_offset_all_instants": -0.06392552896099468,
+    "raw_at_crops": {
+     "n": 257,
+     "p50": -3.2499990987848726,
+     "mean": -3.297898460637397,
+     "fraction_cloud_higher": 0.24124513618677043
+    },
+    "calibrated_at_crops": {
+     "n": 257,
+     "p50": 0.09505213520037814,
+     "mean": 0.07518115991835048,
+     "fraction_cloud_higher": 0.5836575875486382
+    }
+   },
+   "varies": true,
+   "evidence": "the quantity the calibration exists to remove is non-zero before it and smaller after it; if it were zero before, the calibration could not matter"
+  },
+  {
+   "change": "C1 calibration",
+   "link": "scale offset -> the positives-only oracle's sign",
+   "quantity": "training-fold challenge mAP of the positives-only oracle against device-only, raw and calibrated",
+   "value": {
+    "raw": {
+     "oracle_positives_only_challenge": 0.40422986201148675,
+     "oracle_every_crop_challenge": 0.4138184976265257,
+     "device_only_challenge": 0.49514106674719255,
+     "always_cloud_challenge": 0.5467703021409163,
+     "oracle_positives_only_streaming": 0.008995852694480444,
+     "device_only_streaming": 0.011749503425251244
+    },
+    "calibrated_crossfit": {
+     "oracle_positives_only_challenge": 0.5826059929928017,
+     "oracle_every_crop_challenge": 0.553752850467099,
+     "device_only_challenge": 0.4866810193778206,
+     "always_cloud_challenge": 0.5425971415438761,
+     "oracle_positives_only_streaming": 0.05190665985873997,
+     "device_only_streaming": 0.011179491957738487
+    },
+    "calibrated_one_map": {
+     "oracle_positives_only_challenge": 0.5967323492641597,
+     "oracle_every_crop_challenge": 0.567047787441501,
+     "device_only_challenge": 0.49514106674719255,
+     "always_cloud_challenge": 0.5467703021409163,
+     "oracle_positives_only_streaming": 0.09538085941212182,
+     "device_only_streaming": 0.011749503425251244
+    }
+   },
+   "varies": true,
+   "evidence": "this is the artifact D57 identified; the control in Step 4 is the raw row, which is the mechanism-off condition for the calibration"
+  },
+  {
+   "change": "C2 primary metric",
+   "link": "episodes -> delivered score -> STREAMING AP",
+   "quantity": "training-fold streaming AP of the device filter by budget, against the two references",
+   "value": {
+    "by_budget": {
+     "0.05": {
+      "streaming_ap": 0.013138549159380697,
+      "call_fraction": 0.04950553680345828,
+      "n_episodes": 341
+     },
+     "0.1": {
+      "streaming_ap": 0.013898553103288608,
+      "call_fraction": 0.0999585479954995,
+      "n_episodes": 248
+     },
+     "0.2": {
+      "streaming_ap": 0.01392995125925637,
+      "call_fraction": 0.199917095990999,
+      "n_episodes": 833
+     },
+     "0.4": {
+      "streaming_ap": 0.01540292416761331,
+      "call_fraction": 0.3999526262805709,
+      "n_episodes": 859
+     }
+    },
+    "device_only": 0.011749503425251244,
+    "always_cloud": 0.014527608873248934,
+    "spread": 0.0022643750082326133,
+    "gap": 0.0027781054479976905
+   },
+   "varies": true,
+   "evidence": "the primary metric moves with the budget and the denominator it is divided by is non-zero; a constant primary or a zero gap would make every capture fraction undefined"
+  },
+  {
+   "change": "C3 extended cadences",
+   "link": "background cadence -> budget floor -> feasibility",
+   "quantity": "the budget each cadence costs before any episode, and how many cadences are feasible per budget in the extended grid against StudyCTRL1b's",
+   "value": {
+    "background_floor_by_cadence_s": {
+     "1": 0.5,
+     "2": 0.25,
+     "4": 0.125,
+     "5": 0.1,
+     "6": 0.08333333333333333,
+     "8": 0.0625,
+     "10": 0.05
+    },
+    "by_budget": {
+     "0.05": {
+      "chosen_cadence_s": 10.0,
+      "n_feasible_cadences": 1,
+      "n_feasible_in_ctrl1b_grid": 0,
+      "trigger_degenerate": true,
+      "episode_budget_headroom": 0.0
+     },
+     "0.1": {
+      "chosen_cadence_s": 8.0,
+      "n_feasible_cadences": 4,
+      "n_feasible_in_ctrl1b_grid": 0,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.037500000000000006
+     },
+     "0.2": {
+      "chosen_cadence_s": 8.0,
+      "n_feasible_cadences": 5,
+      "n_feasible_in_ctrl1b_grid": 1,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.1375
+     },
+     "0.4": {
+      "chosen_cadence_s": 8.0,
+      "n_feasible_cadences": 6,
+      "n_feasible_in_ctrl1b_grid": 2,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.3375
+     }
+    }
+   },
+   "varies": true,
+   "evidence": "the floor varies across the grid and the extension adds feasible cadences at the budgets where StudyCTRL1b had none; where the floor EQUALS the budget the trigger has no room to fire and that cell is marked trigger_degenerate, which is reported as such and not as a measured arm"
+  },
+  {
+   "change": "C4 retargeted ceiling",
+   "link": "calibrated signed per-instant gain -> the learned prediction",
+   "quantity": "the target's distribution on the calibrated scale against the raw scale, and the fitted model's spread",
+   "value": {
+    "calibrated": {
+     "n": 11054,
+     "mean": 0.030602498889179052,
+     "sd": 0.4126444832605395,
+     "fraction_positive": 0.5286774018454858
+    },
+    "raw": {
+     "n": 11054,
+     "mean": 0.27342800903443887,
+     "sd": 6.51775630518817,
+     "fraction_positive": 0.5201736927808938
+    },
+    "prediction_sd": 0.03239869451494284,
+    "gbt_train_r2": 0.01156384796452492
+   },
+   "varies": true,
+   "evidence": "the retargeted objective is non-degenerate and the model's prediction varies across instants; a flat prediction would make the ceiling identical to random at the same budget"
+  }
+ ],
+ "step3_trace": {
+  "clip": "00005.mp4",
+  "label": "positive",
+  "event_s": 20.874,
+  "budget": 0.1,
+  "theta": 3.1860265731811523,
+  "k_c": 4,
+  "window": {
+   "w_c": 3.0,
+   "delta": 1.5,
+   "n_c": 2,
+   "mode": "var"
+  },
+  "calibrated_window_samples": [
+   {
+    "sample": 19,
+    "t_capture_s": 17.25,
+    "t_readable_s": 18.0,
+    "calibrated_log_odds": 0.18447594968727177
+   },
+   {
+    "sample": 20,
+    "t_capture_s": 18.0,
+    "t_readable_s": 18.75,
+    "calibrated_log_odds": -0.05378323268523344
+   },
+   {
+    "sample": 21,
+    "t_capture_s": 18.75,
+    "t_readable_s": 19.5,
+    "calibrated_log_odds": 0.18447594961312463
+   },
+   {
+    "sample": 22,
+    "t_capture_s": 19.5,
+    "t_readable_s": 20.25,
+    "calibrated_log_odds": 0.5306966182635493
+   }
+  ],
+  "window_median": 0.1844759496501982,
+  "window_iqr": 0.14611996279280606,
+  "z": 2.3694275716746667,
+  "episode": {
+   "open_index": 70,
+   "open_time_s": 20.5,
+   "call_times_s": [
+    20.5,
+    21.0,
+    21.5,
+    22.0,
+    22.5,
+    23.0,
+    23.5
+   ],
+   "delivery_times_s": [
+    21.0,
+    21.5,
+    22.0,
+    22.5,
+    23.0,
+    23.5,
+    24.0
+   ],
+   "calibrated_call_scores": [
+    0.13298341757861332,
+    0.4075931506522842,
+    1.2944695208439287,
+    1.2922953643267643,
+    1.2354205058337033,
+    1.155780263176129,
+    0.864905808998248
+   ],
+   "close_index": 84,
+   "n_calls": 7
+  },
+  "budget_charged": {
+   "calls": 7,
+   "decision_instants_on_this_clip": 75,
+   "call_fraction_on_this_clip": 0.09333333333333334,
+   "background_samples": 0
+  },
+  "displayed_at_crops": [
+   {
+    "horizon_s": 0.5,
+    "crop_index": 69,
+    "crop_time_s": 20.25,
+    "device_only_calibrated": 0.5306966182635493,
+    "arm_calibrated": 0.5306966182635493,
+    "upgraded_by_the_cloud": false
+   }
+  ],
+  "arithmetic": "every score listed is the CALIBRATED log-odds a * raw + b of its own tier. The window median and IQR are computed from the listed device samples; z = (last sample - median) / IQR and the episode opens at the first decision instant whose max signal exceeds theta. Each call is captured at its call time and readable 2 grid steps (0.50 s) later; the displayed score at a crop is the most recent delivery from either tier. The budget charged is calls divided by the clip's own decision instants on the 0.5-s cadence."
+ },
+ "step4_controls": {
+  "calibration_disabled": {
+   "control": "the identity map in place of the fitted one, which is the row's raw scale: the mechanism-off condition for C1, holding every episode and every budget fixed",
+   "value": {
+    "raw": {
+     "oracle_positives_only_challenge": 0.40422986201148675,
+     "oracle_every_crop_challenge": 0.4138184976265257,
+     "device_only_challenge": 0.49514106674719255,
+     "always_cloud_challenge": 0.5467703021409163,
+     "oracle_positives_only_streaming": 0.008995852694480444,
+     "device_only_streaming": 0.011749503425251244
+    },
+    "calibrated_crossfit": {
+     "oracle_positives_only_challenge": 0.5826059929928017,
+     "oracle_every_crop_challenge": 0.553752850467099,
+     "device_only_challenge": 0.4866810193778206,
+     "always_cloud_challenge": 0.5425971415438761,
+     "oracle_positives_only_streaming": 0.05190665985873997,
+     "device_only_streaming": 0.011179491957738487
+    },
+    "calibrated_one_map": {
+     "oracle_positives_only_challenge": 0.5967323492641597,
+     "oracle_every_crop_challenge": 0.567047787441501,
+     "device_only_challenge": 0.49514106674719255,
+     "always_cloud_challenge": 0.5467703021409163,
+     "oracle_positives_only_streaming": 0.09538085941212182,
+     "device_only_streaming": 0.011749503425251244
+    }
+   },
+   "reading": "if the positives-only oracle sits below device-only without the calibration and at or above it with the calibration, the calibration is what removed the artifact. If it sits below in BOTH, the calibration did not fix the defect and the sanity-check gate fails"
+  },
+  "device_scores_through_the_cloud_path": {
+   "control": "the cloud's score replaced by the device's own while the call pattern is unchanged, so an escalation buys the cloud PATH and nothing else (StudyCTRL1b's control, recomputed on the calibrated scale)",
+   "per_budget": [
+    {
+     "budget": 0.05,
+     "device_filter_streaming_ap": 0.013138549159380697,
+     "device_scores_through_cloud_path": 0.01202941709639748,
+     "device_only": 0.011749503425251244,
+     "total_gain": 0.0013890457341294536,
+     "gain_from_path_freshness": 0.00027991367114623723,
+     "gain_from_cloud_score_quality": 0.0011091320629832164
+    },
+    {
+     "budget": 0.1,
+     "device_filter_streaming_ap": 0.013898553103288608,
+     "device_scores_through_cloud_path": 0.011952901904494858,
+     "device_only": 0.011749503425251244,
+     "total_gain": 0.002149049678037364,
+     "gain_from_path_freshness": 0.000203398479243614,
+     "gain_from_cloud_score_quality": 0.0019456511987937502
+    },
+    {
+     "budget": 0.2,
+     "device_filter_streaming_ap": 0.01392995125925637,
+     "device_scores_through_cloud_path": 0.012039921296894962,
+     "device_only": 0.011749503425251244,
+     "total_gain": 0.0021804478340051257,
+     "gain_from_path_freshness": 0.0002904178716437184,
+     "gain_from_cloud_score_quality": 0.0018900299623614072
+    },
+    {
+     "budget": 0.4,
+     "device_filter_streaming_ap": 0.01540292416761331,
+     "device_scores_through_cloud_path": 0.01228028908668301,
+     "device_only": 0.011749503425251244,
+     "total_gain": 0.003653420742362067,
+     "gain_from_path_freshness": 0.0005307856614317659,
+     "gain_from_cloud_score_quality": 0.003122635080930301
+    }
+   ]
+  },
+  "affine_invariance_of_the_device_filter": {
+   "control": "the device filter's episodes under the fitted theta, computed on the raw arrays and on the calibrated ones. Platt is affine with a > 0 and every controller signal is divided by the window IQR, so the episodes MUST be identical; if they are not, the calibration has changed the controller and not only the scale",
+   "per_budget": {
+    "0.05": {
+     "episodes_identical": true,
+     "n_episodes_calibrated": 341,
+     "n_episodes_raw": 341
+    },
+    "0.1": {
+     "episodes_identical": true,
+     "n_episodes_calibrated": 248,
+     "n_episodes_raw": 248
+    },
+    "0.2": {
+     "episodes_identical": true,
+     "n_episodes_calibrated": 833,
+     "n_episodes_raw": 833
+    },
+    "0.4": {
+     "episodes_identical": true,
+     "n_episodes_calibrated": 859,
+     "n_episodes_raw": 859
+    }
+   }
+  }
+ },
+ "step4_cell": {
+  "side": "TRAINING folds of fold 0",
+  "clips": 240,
+  "budgets": [
+   0.05,
+   0.1,
+   0.2,
+   0.4
+  ],
+  "setting": "measured@25",
+  "calibration": "platt"
+ },
+ "step5_alternative": "The headline could be produced by (a) the calibration removing the tier offset so that the metric reads evidence rather than tier identity [the claimed mechanism], or (b) the calibration merely compressing the score range so that every arm's values crowd together and the rank metric is driven by ties, or (c) the change of primary metric alone, since the streaming AP reads every instant and the challenge mAP one crop per clip, so the two could reorder the arms without any calibration. The three are separated by: for (b), the affine-invariance control, because an affine map with a > 0 creates no ties and leaves every single-tier arm's AP bit-identical, which is measured; for (c), the secondary challenge-mAP table, which is computed on the SAME arms, so the metric change and the calibration change are reported as separate columns and not as one number. A fourth explanation cannot be separated here and is stated with the numbers: because the calibration is CROSS-FITTED, the five folds carry five different affine maps, so a cross-clip rank metric also sees fold identity; the report measures that by re-scoring the identical episodes on one common map.",
+ "calibration_kind": "platt",
+ "ctrl1b_protocol": {
+  "note": "StudyCTRL1b's own Steps 1 to 5 for the arms themselves, re-run UNCHANGED on the calibrated scale, so that the arms' links are verified in this row too and not inherited",
+  "new_arms": {
+   "step1_causal_chain": {
+    "oracle_trigger": "If a cloud answer delivered AT a challenge crop instant carries a better-separating score than the device's own held sample at that instant (StudyE9c measured the pooled separation: 32B 0.5675 against 4B 0.4776 over all 300 clips), then placing calls so that each positive clip's crop instants are served by a cloud delivery, and spending nothing on negatives, must capture at least as much of the always-cloud minus device-only gap as any causal trigger at the same budget. The oracle therefore bounds TIMING: whatever remains uncaptured at a given budget cannot be recovered by a better trigger, only by a better cloud answer or by more budget.",
+    "cloud_initiated": "If the cloud's own 32B score at a background cadence c carries the approach of an event (the same signal StudyD14b measured on the 4B, on a stronger model), then background sampling at cadence c detects it, an episode opened at the 0.5-s cadence covers the crop instants that follow, and the delivered 32B scores replace the device's at those instants, raising challenge mAP. The cost is paid twice over, in background samples and in episode calls, so the arm is only worth it if the detection is sharp enough that the episodes land where they matter."
+   },
+   "step2_links": [
+    {
+     "arm": "oracle-trigger",
+     "link": "oracle placement -> a cloud delivery at the crop instant",
+     "quantity": "fraction of scored positive-clip crop instants served by a cloud delivery",
+     "value": {
+      "oracle": 1.0,
+      "n_crop_instants": 257,
+      "escalation_only_at_10pct": 0.16342412451361868
+     },
+     "varies": true,
+     "evidence": "the oracle serves every crop instant it is defined on, the fitted controller a minority of them, so the quantity separates the arms"
+    },
+    {
+     "arm": "oracle-trigger",
+     "link": "lead extension -> budget -> metric",
+     "quantity": "call fraction and training mAP as the lead grows",
+     "value": [
+      {
+       "lead_calls": 0,
+       "call_fraction": 0.01521880736661337,
+       "open_time_fraction": 0.018852775877962472,
+       "train_mAP": 0.5579663908335695
+      },
+      {
+       "lead_calls": 2,
+       "call_fraction": 0.029430923195357374,
+       "open_time_fraction": 0.03312617086443249,
+       "train_mAP": 0.5579663908335695
+      },
+      {
+       "lead_calls": 8,
+       "call_fraction": 0.07206727068158938,
+       "open_time_fraction": 0.07594635582384252,
+       "train_mAP": 0.5579663908335695
+      },
+      {
+       "lead_calls": 32,
+       "call_fraction": 0.22076153253982353,
+       "open_time_fraction": 0.225281750869785,
+       "train_mAP": 0.5579663908335695
+      },
+      {
+       "lead_calls": 128,
+       "call_fraction": 0.22934801918635636,
+       "open_time_fraction": 0.2339052603407773,
+       "train_mAP": 0.5579663908335695
+      }
+     ],
+     "varies": true,
+     "metric_varies": false,
+     "metric_spread": 0.0,
+     "status": "CONSTANT in the metric",
+     "evidence": "the call fraction rises monotonically with the lead, but the metric is EXACTLY CONSTANT across it (spread 0.00e+00): the crop instant is served by the same call whatever the lead and the challenge metric reads no other instant. Per CLAUDE.md a CONSTANT link cannot carry a claim, so the oracle is reported as ONE number rather than as a budget curve, and the budget matching the brief asks for is recorded as cosmetic (B2c)."
+    },
+    {
+     "arm": "oracle-trigger",
+     "link": "cloud answer -> a better score AT the crop instant",
+     "quantity": "cloud score at the serving call minus the device's displayed score, at the crop instants of training positives",
+     "value": {
+      "n": 257,
+      "mean": 0.07518115991835048,
+      "p50": 0.09505213520037814,
+      "fraction_positive": 0.5836575875486382,
+      "n_negative_crops": 359,
+      "mean_on_negatives": -0.07128099405751707,
+      "p50_on_negatives": -0.08010833748496671,
+      "n_crops_dropped_sentinel": 1
+     },
+     "varies": true,
+     "evidence": "the cloud's score at the instant the oracle serves differs from the device's, so perfect timing has something to deliver; its SIGN is what decides whether the bound is above or below device-only"
+    },
+    {
+     "arm": "both new arms",
+     "link": "tier score scale -> rank metric",
+     "quantity": "raw log P(Yes) percentiles of the two tiers over the training clips",
+     "value": {
+      "cloud_p05": -0.5789709038738612,
+      "cloud_p50": -0.00940738385930584,
+      "cloud_p95": 1.0927898712766972,
+      "device_p05": -0.5736341870413879,
+      "device_p50": 0.05451814510168884,
+      "device_p95": 0.8420749583722846,
+      "median_offset_cloud_minus_device": -0.06392552896099468
+     },
+     "varies": true,
+     "evidence": "the two tiers are NOT on a common scale, so any arm whose calls are label-correlated moves the rank metric through the scale offset alone. This link is the reason the oracle has two readings (B2b) and it bears directly on spec 4.1: u_SH must be a calibrated utility, not a raw tier score."
+    },
+    {
+     "arm": "cloud-initiated",
+     "link": "background cloud score -> episode trigger",
+     "quantity": "episodes and total calls as tau moves, at the chosen cadence",
+     "value": [
+      {
+       "tau": -8.0,
+       "n_episodes": 915,
+       "n_background": 915,
+       "call_fraction": 0.5943625273879315
+      },
+      {
+       "tau": -4.0,
+       "n_episodes": 915,
+       "n_background": 915,
+       "call_fraction": 0.5943625273879315
+      },
+      {
+       "tau": -2.0,
+       "n_episodes": 915,
+       "n_background": 915,
+       "call_fraction": 0.5943625273879315
+      },
+      {
+       "tau": -1.0,
+       "n_episodes": 915,
+       "n_background": 915,
+       "call_fraction": 0.5943625273879315
+      },
+      {
+       "tau": -0.5,
+       "n_episodes": 824,
+       "n_background": 915,
+       "call_fraction": 0.5096820039083318
+      }
+     ],
+     "varies": true,
+     "evidence": "the trigger count falls as tau rises, so the threshold is a live knob"
+    },
+    {
+     "arm": "cloud-initiated",
+     "link": "episode -> displayed score -> challenge mAP",
+     "quantity": "fraction of positive crop instants inside an open episode, and training mAP, by budget",
+     "value": {
+      "0.05": {
+       "fraction_crops_in_open_episode": 0.0,
+       "train_mAP": 0.49908058305885006,
+       "device_only": 0.49514106674719255,
+       "always_cloud": 0.5467703021409163
+      },
+      "0.1": {
+       "fraction_crops_in_open_episode": 0.03501945525291829,
+       "train_mAP": 0.5072989754688605,
+       "device_only": 0.49514106674719255,
+       "always_cloud": 0.5467703021409163
+      },
+      "0.2": {
+       "fraction_crops_in_open_episode": 0.14007782101167315,
+       "train_mAP": 0.5096762239392816,
+       "device_only": 0.49514106674719255,
+       "always_cloud": 0.5467703021409163
+      },
+      "0.4": {
+       "fraction_crops_in_open_episode": 0.22178988326848248,
+       "train_mAP": 0.5108940848108494,
+       "device_only": 0.49514106674719255,
+       "always_cloud": 0.5467703021409163
+      }
+     },
+     "varies": true,
+     "evidence": "both move with the budget where the arm is feasible"
+    }
+   ],
+   "step3_trace": {
+    "oracle-trigger": {
+     "clip": "00005.mp4",
+     "label": "positive",
+     "event_s": 20.874,
+     "budget": 0.1,
+     "lead_calls": 12,
+     "crops": [
+      {
+       "horizon_s": 0.5,
+       "crop_index": 69,
+       "crop_time_s": 20.25,
+       "serving_call_capture_index": 66,
+       "device_displayed": 0.5306966182635493,
+       "oracle_displayed": 0.5306966182635493,
+       "cloud_at_serving_capture": 0.23469111141839227
+      }
+     ],
+     "n_calls": 13,
+     "call_times_s": [
+      13.5,
+      14.0,
+      14.5,
+      15.0,
+      15.5,
+      16.0,
+      16.5,
+      17.0,
+      17.5,
+      18.0,
+      18.5,
+      19.0
+     ],
+     "arithmetic": "each crop instant i is served by the call captured at the largest decision instant at or below i - 2 grid steps, so its answer is readable exactly at or just before i; the lead calls precede the first needed call at the 0.5-s cadence"
+    }
+   },
+   "step4_controls": {
+    "oracle_label_correlation": {
+     "control": "the SAME perfect timing applied to every clip's crop instant instead of to the positives only, which holds the timing fixed and removes the label correlation of the spending",
+     "per_budget": [
+      {
+       "budget": 0.05,
+       "oracle_positives_only": 0.5579663908335695,
+       "oracle_every_crop": 0.5372485418506765,
+       "device_only": 0.49514106674719255,
+       "always_cloud": 0.5467703021409163,
+       "label_correlation_positives_only": {
+        "positive": {
+         "n_clips": 120,
+         "n_calls": 857,
+         "call_fraction": 0.09776408852384212
+        },
+        "negative": {
+         "n_clips": 120,
+         "n_calls": 0,
+         "call_fraction": 0.0
+        },
+        "positive_over_negative_rate_ratio": null
+       },
+       "label_correlation_every_crop": {
+        "positive": {
+         "n_clips": 120,
+         "n_calls": 377,
+         "call_fraction": 0.04300707278120009
+        },
+        "negative": {
+         "n_clips": 120,
+         "n_calls": 479,
+         "call_fraction": 0.058982883881295405
+        },
+        "positive_over_negative_rate_ratio": 0.7291449646265677
+       }
+      },
+      {
+       "budget": 0.1,
+       "oracle_positives_only": 0.5579663908335695,
+       "oracle_every_crop": 0.5454448959375853,
+       "device_only": 0.49514106674719255,
+       "always_cloud": 0.5467703021409163,
+       "label_correlation_positives_only": {
+        "positive": {
+         "n_clips": 120,
+         "n_calls": 1688,
+         "call_fraction": 0.19256217202829112
+        },
+        "negative": {
+         "n_clips": 120,
+         "n_calls": 0,
+         "call_fraction": 0.0
+        },
+        "positive_over_negative_rate_ratio": null
+       },
+       "label_correlation_every_crop": {
+        "positive": {
+         "n_clips": 120,
+         "n_calls": 857,
+         "call_fraction": 0.09776408852384212
+        },
+        "negative": {
+         "n_clips": 120,
+         "n_calls": 947,
+         "call_fraction": 0.11661125477157985
+        },
+        "positive_over_negative_rate_ratio": 0.8383760959895691
+       }
+      },
+      {
+       "budget": 0.2,
+       "oracle_positives_only": 0.5579663908335695,
+       "oracle_every_crop": 0.5442018615274428,
+       "device_only": 0.49514106674719255,
+       "always_cloud": 0.5467703021409163,
+       "label_correlation_positives_only": {
+        "positive": {
+         "n_clips": 120,
+         "n_calls": 3378,
+         "call_fraction": 0.38535249828884327
+        },
+        "negative": {
+         "n_clips": 120,
+         "n_calls": 0,
+         "call_fraction": 0.0
+        },
+        "positive_over_negative_rate_ratio": null
+       },
+       "label_correlation_every_crop": {
+        "positive": {
+         "n_clips": 120,
+         "n_calls": 1688,
+         "call_fraction": 0.19256217202829112
+        },
+        "negative": {
+         "n_clips": 120,
+         "n_calls": 1721,
+         "call_fraction": 0.21191971432089643
+        },
+        "positive_over_negative_rate_ratio": 0.9086562458115934
+       }
+      },
+      {
+       "budget": 0.4,
+       "oracle_positives_only": 0.5579663908335695,
+       "oracle_every_crop": 0.5424657588538707,
+       "device_only": 0.49514106674719255,
+       "always_cloud": 0.5467703021409163,
+       "label_correlation_positives_only": {
+        "positive": {
+         "n_clips": 120,
+         "n_calls": 3873,
+         "call_fraction": 0.44182067077344284
+        },
+        "negative": {
+         "n_clips": 120,
+         "n_calls": 0,
+         "call_fraction": 0.0
+        },
+        "positive_over_negative_rate_ratio": null
+       },
+       "label_correlation_every_crop": {
+        "positive": {
+         "n_clips": 120,
+         "n_calls": 3486,
+         "call_fraction": 0.3976728268309377
+        },
+        "negative": {
+         "n_clips": 120,
+         "n_calls": 3216,
+         "call_fraction": 0.39601034355374953
+        },
+        "positive_over_negative_rate_ratio": 1.0041980804396906
+       }
+      }
+     ],
+     "reading": "if the positives-only oracle sits below device-only while the every-crop oracle sits above it, the metric is responding to WHICH clips were escalated and not to when; the two tiers' scores are on different scales, so a label-correlated escalation pattern biases a rank metric by itself. That is the mechanism this control isolates and it is the row's headline."
+    },
+    "oracle_no_cloud_advantage": {
+     "control": "the cloud score is replaced by the DEVICE's own score while the oracle's call pattern is unchanged, so perfect timing buys the cloud PATH and nothing else",
+     "per_budget": [
+      {
+       "budget": 0.05,
+       "oracle": 0.5579663908335695,
+       "control_device_scores_through_cloud_path": 0.49707443389936273,
+       "device_only": 0.49514106674719255,
+       "total_gain": 0.06282532408637692,
+       "gain_from_path_freshness": 0.0019333671521701845,
+       "gain_from_cloud_score_quality": 0.06089195693420674
+      },
+      {
+       "budget": 0.1,
+       "oracle": 0.5579663908335695,
+       "control_device_scores_through_cloud_path": 0.49707443389936273,
+       "device_only": 0.49514106674719255,
+       "total_gain": 0.06282532408637692,
+       "gain_from_path_freshness": 0.0019333671521701845,
+       "gain_from_cloud_score_quality": 0.06089195693420674
+      },
+      {
+       "budget": 0.2,
+       "oracle": 0.5579663908335695,
+       "control_device_scores_through_cloud_path": 0.49707443389936273,
+       "device_only": 0.49514106674719255,
+       "total_gain": 0.06282532408637692,
+       "gain_from_path_freshness": 0.0019333671521701845,
+       "gain_from_cloud_score_quality": 0.06089195693420674
+      },
+      {
+       "budget": 0.4,
+       "oracle": 0.5579663908335695,
+       "control_device_scores_through_cloud_path": 0.49707443389936273,
+       "device_only": 0.49514106674719255,
+       "total_gain": 0.06282532408637692,
+       "gain_from_path_freshness": 0.0019333671521701845,
+       "gain_from_cloud_score_quality": 0.06089195693420674
+      }
+     ],
+     "reading": "if the oracle's gain survives this control, perfect timing is worth no more than fresher delivery of the device's own score, which would mean the cloud's answer quality, not the trigger, is the binding resource"
+    },
+    "cloud_initiated_trigger_disabled": {
+     "control": "tau is set to +infinity so no episode ever opens: the arm becomes background sampling alone at the same cadence, which is the mechanism-off condition for the TRIGGER while holding the sampling fixed",
+     "per_budget": [
+      {
+       "budget": 0.05,
+       "cloud_initiated": 0.49908058305885006,
+       "background_only_no_trigger": 0.49908058305885006,
+       "device_only": 0.49514106674719255,
+       "gain_from_episodes": 0.0,
+       "gain_from_background_alone": 0.003939516311657509,
+       "background_only_call_fraction": 0.05418369159708652
+      },
+      {
+       "budget": 0.1,
+       "cloud_initiated": 0.5072989754688605,
+       "background_only_no_trigger": 0.5146510295291408,
+       "device_only": 0.49514106674719255,
+       "gain_from_episodes": -0.0073520540602802775,
+       "gain_from_background_alone": 0.01950996278194822,
+       "background_only_call_fraction": 0.06721146444010186
+      },
+      {
+       "budget": 0.2,
+       "cloud_initiated": 0.5096762239392816,
+       "background_only_no_trigger": 0.5146510295291408,
+       "device_only": 0.49514106674719255,
+       "gain_from_episodes": -0.004974805589859188,
+       "gain_from_background_alone": 0.01950996278194822,
+       "background_only_call_fraction": 0.06721146444010186
+      },
+      {
+       "budget": 0.4,
+       "cloud_initiated": 0.5108940848108494,
+       "background_only_no_trigger": 0.5146510295291408,
+       "device_only": 0.49514106674719255,
+       "gain_from_episodes": -0.003756944718291355,
+       "gain_from_background_alone": 0.01950996278194822,
+       "background_only_call_fraction": 0.06721146444010186
+      }
+     ],
+     "reading": "the difference between the two rows is everything the cloud-initiated TRIGGER contributes; the background-only row is what the cadence alone buys and is charged at a lower budget, which is stated with the number"
+    }
+   },
+   "step4_cell": {
+    "side": "TRAINING folds of fold 0",
+    "clips": 240,
+    "budgets": [
+     0.05,
+     0.1,
+     0.2,
+     0.4
+    ],
+    "setting": "measured@25"
+   },
+   "step5_alternative": "For the ORACLE the competing explanation is the same one StudyCTRL1 could not rule out: that any cloud call at all helps because the cloud PATH is fresher than the device's 0.75-s held samples, not because the call is well placed. The control in Step 4 separates them directly by running the oracle's own call pattern with the device's own scores. For the CLOUD-INITIATED arm the competing explanation is that its benefit is entirely the background sampling, which upgrades the display every c seconds whether or not an episode ever opens; the trigger-disabled control separates those two. A third explanation covers both arms and cannot be separated within this study: the challenge metric reads ONE crop per clip, so an arm that happens to deliver a cloud score at that one instant is credited with the whole clip, and 300 clips carry 300 such instants. That is a property of the committed metric, not of the arms, and it is why the oracle is reported as a bound on timing rather than as an achievable policy."
+  },
+  "learned_arms": {
+   "step1_causal_chain": {
+    "ceiling": "If the per-instant cloud gain is predictable from features a device already has, then a model fitted on the training folds predicts it on the held-out fold, escalating at the instants of highest predicted gain captures more of the always-cloud minus device-only gap than a rule that does not look at those features, and the capture fraction it reaches is a CEILING on what any trigger built from the same features could reach.",
+    "context_trickle": "If a cheap context signal marks streams whose cloud gain is higher, then spending the same budget at a doubled background cadence on those streams and the base cadence elsewhere captures more of the gap than a uniform cadence does."
+   },
+   "step2_links": [
+    {
+     "arm": "ceiling",
+     "link": "device-observable features -> the per-instant cloud gain",
+     "quantity": "training-fold fit of the signed gain target (B8)",
+     "value": {
+      "n_rows": 11054,
+      "gbt_r2": 0.01156384796452492,
+      "logistic_auc": 0.540028554312312,
+      "target_mean": 0.030602498889179052,
+      "target_sd": 0.4126444832605395,
+      "fraction_positive_gain": 0.5286774018454858
+     },
+     "varies": true,
+     "evidence": "the prediction varies across instants and tracks the target to the stated r2; a flat prediction would make the arm identical to random at the same budget"
+    },
+    {
+     "arm": "ceiling",
+     "link": "predicted gain -> episodes -> challenge mAP",
+     "quantity": "call fraction and training mAP as the learned threshold moves",
+     "value": [
+      {
+       "theta": -0.031482848062570554,
+       "call_fraction": 0.9511458518386925,
+       "train_mAP": 0.542064006439034
+      },
+      {
+       "theta": 0.012432400233641373,
+       "call_fraction": 0.8350210220879967,
+       "train_mAP": 0.5321497485004814
+      },
+      {
+       "theta": 0.05634764852985332,
+       "call_fraction": 0.39853141469769643,
+       "train_mAP": 0.5283352267422973
+      },
+      {
+       "theta": 0.10026289682606526,
+       "call_fraction": 0.02137739089240244,
+       "train_mAP": 0.5072020128907391
+      },
+      {
+       "theta": 0.14417814512227722,
+       "call_fraction": 0.0024871202700302007,
+       "train_mAP": 0.49514106674719255
+      }
+     ],
+     "varies": true,
+     "evidence": "the threshold is a live budget knob and the metric moves with it"
+    },
+    {
+     "arm": "context-trickle",
+     "link": "context signal -> background cadence",
+     "quantity": "clips whose cadence is halved by the chosen context feature",
+     "value": {
+      "feature": "light_dark",
+      "threshold": 0.5,
+      "n_clips_modulated": 6,
+      "n_clips": 240,
+      "gbt_importance": 0.1550691459799379,
+      "all_context_importance_zero": false
+     },
+     "varies": true,
+     "evidence": "the modulation fires on a proper subset of the clips, so the arm differs from arm (b) at both cadences"
+    }
+   ],
+   "step3_trace": {
+    "ceiling_top_features_gbt": [
+     [
+      "score_last",
+      0.5143926381061632
+     ],
+     [
+      "light_dark",
+      0.1550691459799379
+     ],
+     [
+      "window_iqr",
+      0.11015875302328036
+     ],
+     [
+      "z",
+      0.07020599819562243
+     ],
+     [
+      "window_median",
+      0.06205754973147388
+     ],
+     [
+      "window_range",
+      0.02458400854912245
+     ],
+     [
+      "scene_sub_urban",
+      0.024127972032219065
+     ],
+     [
+      "score_lag3",
+      0.01578461186869805
+     ]
+    ],
+    "ceiling_top_features_logistic": [
+     [
+      "scene_highway",
+      0.10153527115189259
+     ],
+     [
+      "score_lag1",
+      0.06865846396094959
+     ],
+     [
+      "score_last",
+      0.06622747141161299
+     ],
+     [
+      "scene_urban",
+      0.060278825742342466
+     ],
+     [
+      "window_median",
+      0.05599229771902194
+     ],
+     [
+      "score_lag3",
+      0.055886663889035605
+     ],
+     [
+      "light_dark",
+      0.054719918719964206
+     ],
+     [
+      "score_lag2",
+      0.053235051717299045
+     ]
+    ],
+    "features_not_available": {
+     "image_scene_change_magnitude": "THE FRAME STORE IS ABSENT on this machine (/home/pragya/data/dashcam/d14b_frames does not exist), so no inter-frame feature is computable and none is estimated",
+     "object_count": "no frames to detect on, and opencv is not installed either; no detector was installed because there is nothing for it to read",
+     "ego_speed": "DOES NOT EXIST in the committed Nexar clip table, whose columns are file_name, label, scene, light, weather, duration_s and split",
+     "elapsed_time_in_clip": "EXCLUDED BY DECISION: Nexar events sit at a characteristic position in each clip, so the clock would leak the dataset's event placement rather than provide a deployable signal"
+    },
+    "arithmetic": "the GBT importance is the share of total squared-error reduction per feature over all stumps; the logistic importance is the absolute standardized coefficient"
+   },
+   "step4_controls": {
+    "permuted_target": {
+     "control": "the SAME model class and the SAME budget, fitted on a PERMUTED target (seed 0), which destroys the feature-to-gain relation and nothing else",
+     "per_budget": [
+      {
+       "budget": 0.05,
+       "ceiling_real": 0.5078278930885965,
+       "ceiling_permuted_target": 0.48392379919736594,
+       "permuted_call_fraction": 0.056137857523538816,
+       "device_only": 0.49514106674719255,
+       "always_cloud": 0.5467703021409163,
+       "permuted_train_r2": 0.003210933048489406
+      },
+      {
+       "budget": 0.1,
+       "ceiling_real": 0.5033130678685868,
+       "ceiling_permuted_target": 0.4892149469988853,
+       "permuted_call_fraction": 0.10434061704269557,
+       "device_only": 0.49514106674719255,
+       "always_cloud": 0.5467703021409163,
+       "permuted_train_r2": 0.003210933048489406
+      },
+      {
+       "budget": 0.2,
+       "ceiling_real": 0.5176877595573479,
+       "ceiling_permuted_target": 0.5047897134736757,
+       "permuted_call_fraction": 0.1958311126902351,
+       "device_only": 0.49514106674719255,
+       "always_cloud": 0.5467703021409163,
+       "permuted_train_r2": 0.003210933048489406
+      },
+      {
+       "budget": 0.4,
+       "ceiling_real": 0.530816956874683,
+       "ceiling_permuted_target": 0.5275010609133223,
+       "permuted_call_fraction": 0.3998934091312844,
+       "device_only": 0.49514106674719255,
+       "always_cloud": 0.5467703021409163,
+       "permuted_train_r2": 0.003210933048489406
+      }
+     ],
+     "reading": "if the real ceiling does not beat the permuted-target ceiling, the features carry no usable signal and the arm is random escalation with extra steps"
+    }
+   },
+   "step4_cell": {
+    "side": "TRAINING folds of fold 0",
+    "clips": 240,
+    "budgets": [
+     0.05,
+     0.1,
+     0.2,
+     0.4
+    ]
+   },
+   "step5_alternative": "The ceiling's apparent gain could come from (a) the features genuinely predicting where the cloud helps [the claimed mechanism], or (b) the arm simply spending its budget in a different TEXTURE, for instance in many short episodes rather than few long ones, which changes freshness without any targeting. The permuted-target control separates these: it keeps the model class, the episode machinery and the budget and removes only the signal. The random-escalation arm at the same budget is the second comparator. A third explanation cannot be separated here and is stated with the number: the ceiling is fitted on a target DEFINED using the clip label's sign (B8), so it is an upper bound available to an oracle-signed objective and not a deployable policy, which is why the brief labels it a ceiling."
+  }
+ },
+ "_provenance": {
+  "git_commit": "ea4a6e8116ba0ed1b7746a792d36be43dc1f4009",
+  "script": "ctrl1c_crossfit.py --stage mechanism",
+  "model": null,
+  "timestamp": "2026-11-16T15:05:21.437822",
+  "device": "cpu",
+  "n": 240
+ }
+}

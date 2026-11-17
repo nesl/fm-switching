@@ -112,18 +112,35 @@ def prefix_items(fleet, risk: Dict[str, Any], state_rows: Sequence[Dict[str, Any
 
 
 def tier_assignment(candidates: Sequence[Dict[str, Any]], gpu_capacity_tokens: int,
-                    host_capacity_tokens: int) -> Dict[str, Any]:
-    """Spec 6.3: greedy promotion by state-value gain PER BYTE of the scarce tier, within
-    capacity. nu_tier is the gain per byte of the last promotion into a full tier.
+                    host_capacity_tokens: int, calibration: Optional[Any] = None,
+                    host_occupied_tokens: int = 0) -> Dict[str, Any]:
+    """Spec 6.3 with D56: greedy promotion by state-value gain PER BYTE of the scarce tier,
+    within BOTH BOUNDED warm capacities, and everything else DEMOTED TO COLD.
 
     A capacity of 0 means 'not supplied' and raises, because a silently wrong capacity changes
-    every allocation (see params.PROVENANCE)."""
+    every allocation (see params.PROVENANCE).
+
+    D56, three tiers and no deletion. A candidate that fits neither warm tier is COLD, not
+    denied: its raw frames remain and it is rebuilt by prefill at the committed cold rate. The
+    `cold` list is the D56 name; `denied` is kept as an alias so no existing reader silently
+    starts reading a different quantity. `host_occupied_tokens` is what the host tier already
+    holds, so the bound is the REMAINING host capacity rather than the whole tier.
+
+    D57, calibration. If any candidate carries a `score_tier`, its `value` is a tier score and
+    the ranking is a CROSS-TIER comparison, so `calibration.require_calibrated` runs first and
+    raises when there is no calibration between the tiers involved."""
     if gpu_capacity_tokens <= 0 or host_capacity_tokens <= 0:
         raise ValueError("GPU and host KV capacities must be supplied (tokens > 0); "
                          "params.Params leaves them at 0 deliberately")
-    ranked = sorted(candidates, key=lambda c: -(c["value"] / max(c["tokens"], 1)))
-    gpu_used = host_used = 0
-    gpu, host, denied = [], [], []
+    cands = list(candidates)
+    scored_tiers = [c.get("score_tier") for c in cands if c.get("score_tier") is not None]
+    if scored_tiers:
+        from .calibration import require_calibrated
+        require_calibrated(calibration, scored_tiers, "spec 6.3 tier assignment")
+    ranked = sorted(cands, key=lambda c: -(c["value"] / max(c["tokens"], 1)))
+    gpu_used = 0
+    host_used = max(int(host_occupied_tokens), 0)
+    gpu, host, cold = [], [], []
     nu = {"GPU": 0.0, "HOST": 0.0}
     for c in ranked:
         dens = c["value"] / max(c["tokens"], 1)
@@ -136,11 +153,16 @@ def tier_assignment(candidates: Sequence[Dict[str, Any]], gpu_capacity_tokens: i
             host_used += c["tokens"]
             nu["HOST"] = dens
         else:
-            denied.append(c)
-    return dict(gpu=gpu, host=host, denied=denied, gpu_tokens_used=gpu_used,
-                host_tokens_used=host_used, nu_tier=nu,
+            cold.append(c)
+    return dict(gpu=gpu, host=host, cold=cold, denied=cold, gpu_tokens_used=gpu_used,
+                host_tokens_used=host_used - max(int(host_occupied_tokens), 0),
+                host_tokens_total=host_used,
+                host_tokens_preoccupied=max(int(host_occupied_tokens), 0),
+                nu_tier=nu,
                 note="an approximation of a multiple-choice knapsack (spec 6.3); the evaluation "
-                     "compares it against a stronger offline allocation on recorded traces")
+                     "compares it against a stronger offline allocation on recorded traces. "
+                     "D56: both warm tiers are bounded and the remainder is COLD, which is a "
+                     "demotion and not a deletion; 'denied' is an alias of 'cold'")
 
 
 def state_actions(device: Device, rep: str, flags, target: Optional[str] = None

@@ -121,7 +121,60 @@ SPEC_MAP: List[Dict[str, str]] = [
          note="non-learned keyword and temporal-reference rules"),
     dict(section="v3.1 A1 Ghat inside DeltaJ_H", code="rollout.Rollout._rc_utility",
          note="the rollout uses the request's own Ghat when the basis has already estimated it"),
+    dict(section="D56 three tiers, both warm tiers bounded, evidence never deleted",
+         code="tiers.HostPool, tiers.TieredStore, rollout.Rollout._build_store",
+         note="GPU and host sizes are INPUTS (params.H100NVL_KV_POOL_TOKENS is a named constant, "
+              "never a default); a prefix that leaves both warm tiers is COLD, not lost"),
+    dict(section="D56 P_host as a function of host occupancy",
+         code="tiers.p_host_from_occupancy, params.Params.p_host_for",
+         note="StudyENG1b's measured 0.999 with room; the host eviction rule's kept fraction "
+              "when the host tier is full; 0.0 with no host tier (StudyENG1b's E0 server)"),
+    dict(section="D56 host eviction rule, pluggable, default LRU",
+         code="tiers.lru_rule, tiers.largest_first_rule, params.Params.host_eviction_callable",
+         note="ASSUMPTION until StudyENG1c measures it (tiers.EVICTION_RULE_ASSUMPTION)"),
+    dict(section="D56 bounded capacity in the memory decision",
+         code="readiness.tier_assignment",
+         note="both warm tiers bounded, the remainder demoted to COLD; 'denied' kept as an "
+              "alias of 'cold' so no reader silently changes quantity"),
+    dict(section="D57 per-tier score calibration",
+         code="calibration.TierCalibration, calibration.MonotoneMap, calibration.load",
+         note="monotone raw score to probability, loaded from a file, fitted on DEV by "
+              "StudyCTRL1c; identity is the default and is NOT a calibration"),
+    dict(section="D57 loud failure on an uncalibrated cross-tier comparison",
+         code="calibration.require_calibrated, calibration.rank_across_tiers",
+         note="raises unless a calibration exists or the caller is a test using "
+              "calibration.identity_for_tests"),
+    dict(section="D57 the cloud upgrading the device's answer",
+         code="calibration.upgrade_decision, coordinator.Coordinator.upgrade_device_answer",
+         note="compared on the common calibrated probability scale, never on raw scores"),
+    dict(section="StudyENG1b mechanistic prefix loss, tail first",
+         code="kvpool.PrefixEntry.head_tokens, kvpool.KVPool.make_room, kvpool.KVPool.allocate",
+         note="the surviving part is the prefix's HEAD; allocation is the only thing that "
+              "evicts, which is StudyENG1b's verdict"),
+    dict(section="StudyENG1b staircase as the A6 point 2 long-gap fallback ONLY",
+         code="kvpool.eng1b_long_gap_curve, kvpool.ENG1B_STAIRCASE",
+         note="not used by predict_loss and not used by T0, whose question is whether the "
+              "bookkeeping reproduces the staircase"),
+    dict(section="StudyENG1b queueing behind running work at resume",
+         code="rollout.Rollout._prefix_risk",
+         note="resume_queue_s is read off the rollout's own engine timeline, not a constant"),
+    dict(section="spec 8 mu estimator chosen explicitly",
+         code="params.Params.mu_estimator, coordinator.Coordinator._update_mu",
+         note="'none' by default, which holds mu at the PLACEHOLDER 0 and says so; the spec "
+              "does not determine an estimator"),
     dict(section="11 approval tests T0", code="t0_harness.T0Harness"),
+    dict(section="11 approval tests T0, the measured engine model",
+         code="eng1_engine.Eng1Engine, eng1_engine.StepModel",
+         note="StudyENG1's committed step model, front-end serialization and admission stall; "
+              "no coefficient is refitted here"),
+    dict(section="11 approval tests T0, one-shot holdout mode",
+         code="t0_harness.T0Harness.run_holdout_once, t0_harness.FrozenState",
+         note="requires the frozen hashes, logs timestamp and hashes, and refuses a second run "
+              "once a result file exists"),
+    dict(section="11 approval tests T0, trace replay of the recorded trials",
+         code="trace_replay.load_part_c_trials, trace_replay.predict_trial, "
+              "trace_replay.predict_eng1b_trial",
+         note="the trial's ACTUAL recorded arrivals, sizes and timing are replayed"),
     dict(section="12 evaluation implications", code="m4.measure_decision_time",
          note="this row measures M4 only; the two evaluation tracks belong to the live study"),
 ]
@@ -271,14 +324,18 @@ AMBIGUITIES: List[Dict[str, Any]] = [
              "literal reading as untenable.",
          reversible_at="rollout.Rollout._terminal"),
     dict(id="A20", where="v3.1 A2 as revised (the user's message of 2026-11-15)",
-         question="The addendum FILE still carries the superseded 'METADATA escalation request' "
-                  "wording for queries; the revision exists only in the user's instruction.",
+         question="At the time of StudyPOL2-build, did the addendum file carry the superseded "
+                  "'METADATA escalation request' wording for queries?",
          choice="The code implements the revision: queries complete by default, question-first "
-                "as an exception, and this is stated in the report and the EXPERIMENTS row.",
+                "as an exception. RESOLVED 2026-11-16 by StudyPOL3-update: the committed "
+                "research/POLICY_SPEC_v3_1_ADDENDUM.md carries the CURRENT A2 (a query is sent "
+                "COMPLETE by default) and A6 titled Partial-prefix survival, so the file and "
+                "the code AGREE and the POL2 report's claim of a live discrepancy was stale. "
+                "The entry is kept as the record of how the revision reached the code.",
          why="The user confirmed the pasted file is the latest and directed the change "
-             "explicitly after being shown that the file and the instruction disagree. The "
-             "discrepancy is recorded rather than silently resolved so the next reader is not "
-             "misled by the file.",
+             "explicitly. Keeping the entry rather than deleting it preserves the provenance of "
+             "the choice; the stale sentence in reports/study_pol2_build.md was corrected in "
+             "place and says what it used to say.",
          reversible_at="coordinator.Coordinator.escalate and escalation.choose_path"),
     dict(id="A21", where="v3.1 A2 as revised, ordering",
          question="The path choice needs Ghat (to judge 'higher-value traffic') and Ghat's "
@@ -362,6 +419,75 @@ AMBIGUITIES: List[Dict[str, Any]] = [
          why="Spec 7.4 says measured sizes plus whole-job and that the closed form is not a "
              "foundational claim; SLICE1 Parts A-D measured exactly those two sizes.",
          reversible_at="params.Params.piece_sizes_tokens"),
+    dict(id="A30", where="D56 P_host when the host tier is FULL",
+         question="StudyENG1b measured P_host = 0.999 WITH room on the host tier and says "
+                  "nothing about a full one. What is P_host at full occupancy?",
+         choice="P_host = 0.999 times the fraction the HOST EVICTION RULE keeps, and the result "
+                "is flagged measured = false.",
+         why="The 0.999 is a property of the write-through connector, which is unaffected by "
+             "occupancy; what occupancy changes is how much the host tier can still hold. "
+             "Splitting it that way keeps the measured part measured and puts the unmeasured "
+             "part behind the eviction rule, where StudyENG1c will replace it.",
+         reversible_at="tiers.p_host_from_occupancy"),
+    dict(id="A31", where="D56 host eviction order",
+         question="In what order does the offloading connector's host tier evict?",
+         choice="LRU, labelled ASSUMPTION in code and in the report.",
+         why="StudyENG1 Part D found vLLM 0.31.0 exposes eviction only as sampled lifetime and "
+             "idle histograms and no counter for cached-but-unreferenced blocks, so the order "
+             "was never observed. LRU mirrors the GPU pool's own free-block order, which is the "
+             "one order this engine is known to use. D56 assigns the measurement to StudyENG1c "
+             "and the rule is a pluggable callable.",
+         reversible_at="params.Params.host_eviction_rule"),
+    dict(id="A32", where="D57 what the default calibration should be",
+         question="With StudyCTRL1c's maps not yet delivered, should the default identity map "
+                  "be permitted for a cross-tier comparison?",
+         choice="NO. A cross-tier comparison under identity maps RAISES "
+                "(calibration.CalibrationMissing); a comparison inside one tier is allowed; a "
+                "test opts in explicitly through calibration.identity_for_tests.",
+         why="The brief says to fail loudly outside tests, and StudyCTRL1b measured that the "
+             "two tiers' raw scores are on different scales (ambiguity A12). An identity map is "
+             "the ABSENCE of a calibration, and a silent absence is the failure mode this "
+             "repository's record is made of. A single-tier comparison needs no calibration "
+             "because a monotone map preserves order.",
+         reversible_at="calibration.require_calibrated"),
+    dict(id="A33", where="spec 8 'update mu', revisited for StudyPOL3-update",
+         question="The brief asks for the estimator THE SPEC DEFINES. Does spec v3 define one?",
+         choice="NO. Spec 8 says only 'update mu', spec 3.5 and 5.3 define what mu PRICES, spec "
+                "7.7 defines what mu is MULTIPLIED BY, and spec 9's parameter table does not "
+                "list mu at all. So mu stays at the PLACEHOLDER 0 and the ESTIMATOR IS NOW AN "
+                "EXPLICIT PARAMETER (Params.mu_estimator, default 'none'), with the options and "
+                "their consequences written out in reports/study_pol3_update.md.",
+         why="POL2's ambiguity A3 implemented an EWMA and left it running, so mu would have "
+             "drifted off its placeholder without anyone choosing it. The brief forbids "
+             "choosing silently in either direction, so the choice is now a named parameter "
+             "whose default does nothing and says so.",
+         reversible_at="params.Params.mu_estimator"),
+    dict(id="A34", where="StudyENG1b's staircase versus A6 point 2's 'survival curve'",
+         question="A6 point 2 extends P_loss with a measured survival curve for gaps the "
+                  "rollout does not reach. StudyENG1b's verdict is that survival is a step "
+                  "function of ALLOCATED KV and that gap LENGTH matters only through "
+                  "allocation. Is the curve a function of seconds or of allocation?",
+         choice="OF ALLOCATION, as a fraction of the free pool "
+                "(kvpool.eng1b_long_gap_curve), and a caller with a long gap converts the gap "
+                "to predicted allocation itself. It is NOT the default and is NOT used in T0.",
+         why="A curve in seconds would be a curve in the wrong variable: StudyENG1b's "
+             "episodic-only loads never evicted the prefix at gaps up to 20 s, while f >= 1.0 "
+             "loads lost it at 10 s. Keeping it out of predict_loss is what makes T0 a test of "
+             "the bookkeeping rather than a test of the curve against itself.",
+         reversible_at="params.Params.survival_curve and kvpool.eng1b_long_gap_curve"),
+    dict(id="A35", where="T0's unit of comparison",
+         question="StudyENG1 Part C measures the imposed delay as a DIFFERENCE between a paired "
+                  "with-run and without-run. Should T0 predict absolute TTFTs or the paired "
+                  "difference?",
+         choice="THE PAIRED DIFFERENCE, simulated the same way the measurement was taken: the "
+                "same recorded arrival schedule is replayed twice, once with the action and "
+                "once without, and the predicted imposed delay is the difference of the two "
+                "simulated TTFT sums.",
+         why="That is literally the measured quantity, and any error common to both arms "
+             "cancels in exactly the way it cancels in the measurement. Predicting absolute "
+             "TTFTs and differencing afterwards would be a different and harder quantity that "
+             "StudyENG1 did not report.",
+         reversible_at="trace_replay.predict_trial"),
 ]
 
 

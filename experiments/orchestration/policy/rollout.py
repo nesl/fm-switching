@@ -21,6 +21,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from .continuation import continuation_value, expected_remaining_work
 from .kvpool import KVPool, prefix_id_for, survival_p_loss
+from .tiers import HostPool, TieredStore, p_host_from_occupancy
 from .engine import EngineModel, Request
 from .profiles import MissingEvidence, Profiles
 from .state import Fleet, PendingItem
@@ -82,7 +83,8 @@ class Rollout:
                           if p.item_id not in set(release_now) and p.item_id not in set(exclude)])
         queue = forced + rest
 
-        pool = self._build_pool(f)
+        store = self._build_store(f)
+        pool = store.gpu if store is not None else None
         free_at = t0
         busy = 0.0
         in_sample = True
@@ -109,9 +111,8 @@ class Rollout:
             free_at = finish
             if pool is not None:
                 pid = prefix_id_for(p.job_id) if p.job_id else "transient:%s" % p.item_id
-                pool.make_room(max(p.tokens, 1), start)
-                pool.put(pid, max(p.tokens, 0), start, referenced=True,
-                         owner_job=p.job_id, owner_device=p.device)
+                pool.allocate(pid, max(p.tokens, 0), start, owner_job=p.job_id,
+                              owner_device=p.device, store=store)
                 pool.reference(pid, finish, held=False)
                 demand_tokens += max(p.tokens, 0)
             dev = f.devices.get(p.device)
@@ -128,14 +129,15 @@ class Rollout:
         u_hat, opps = self._opportunity_utility(f, t0, end, deliveries)
         u_hat += self._rc_utility(f, jobs_progress, deliveries, ghat_by_job)
         z_term = self._z_term(f, opps)
-        risk = self._prefix_risk(f, pool, deliveries, jobs_progress, end, demand_tokens)
+        risk = self._prefix_risk(f, store, deliveries, jobs_progress, end, demand_tokens,
+                                 busy_until=free_at)
         terminal, tdetail = self._terminal(f, end, jobs_progress, busy, risk)
         residual = max(busy - H, 0.0)
         return RolloutResult(
             u_hat=u_hat, z_term=z_term, terminal=terminal, total=u_hat + z_term + terminal,
             deliveries=deliveries, opportunities=opps, engine_busy_s=busy,
             residual_backlog_s=residual, in_sample=in_sample,
-            kv=(pool.describe() if pool is not None else dict(enabled=False)),
+            kv=(store.describe() if store is not None else dict(enabled=False)),
             detail=dict(terminal=tdetail, n_queue=len(queue), horizon_s=H,
                         released=[d["item_id"] for d in deliveries], prefix_risk=risk))
 
@@ -162,14 +164,47 @@ class Rollout:
                              referenced=False, owner_device=did, rep=rep)
         return pool
 
-    def _prefix_risk(self, f: Fleet, pool: Optional[KVPool], deliveries: Sequence[Dict[str, Any]],
-                     progress: Dict[str, int], end: float,
-                     demand_tokens: int) -> Dict[str, Any]:
-        """A6.1 and A6.2: P_loss per in-progress job, read from the pool's predicted eviction
-        over the gap to that job's next piece, plus the restore work it implies."""
-        out: Dict[str, Any] = {}
+    def _build_host(self, f: Fleet) -> Optional[HostPool]:
+        """D56: the host-warm tier, BOUNDED, seeded from what the fleet believes it holds there.
+
+        A capacity of 0 means NO HOST TIER, which is StudyENG1b's E0 server: evicted blocks are
+        recomputed and P_host is 0 by construction."""
+        cap = int(getattr(self.params, "host_kv_capacity_tokens", 0) or 0)
+        if cap <= 0:
+            return None
+        host = HostPool(capacity_tokens=cap,
+                        eviction_rule=self.params.host_eviction_callable(),
+                        rule_name=str(getattr(self.params, "host_eviction_rule", "lru")),
+                        t=f.t)
+        for did, dev in f.devices.items():
+            for rep, b in dev.history.items():
+                if b.probs.get("HOST", 0.0) > 0.5 and b.size_tokens > 0:
+                    host.accept("history:%s:%s" % (did, rep), b.size_tokens, f.t,
+                                owner_device=did, rep=rep)
+        return host
+
+    def _build_store(self, f: Fleet) -> Optional[TieredStore]:
+        """D56's three tiers as one object: GPU pool, bounded host pool, and cold beneath both.
+        Nothing is ever deleted; a prefix that leaves both warm tiers is COLD."""
+        pool = self._build_pool(f)
         if pool is None:
+            return None
+        return TieredStore(gpu=pool, host=self._build_host(f))
+
+    def _prefix_risk(self, f: Fleet, store: Optional[TieredStore],
+                     deliveries: Sequence[Dict[str, Any]],
+                     progress: Dict[str, int], end: float,
+                     demand_tokens: int, busy_until: float = 0.0) -> Dict[str, Any]:
+        """A6.1 and A6.2: P_loss per in-progress job, read from the pool's predicted eviction
+        over the gap to that job's next piece, plus the restore work it implies.
+
+        D56: P_host is read from the BOUNDED host tier's occupancy at the moment of the predicted
+        eviction, not from a constant, so a full host tier makes deferral more expensive exactly
+        as it physically is."""
+        out: Dict[str, Any] = {}
+        if store is None or store.gpu is None:
             return out
+        pool = store.gpu
         for jid, job in f.jobs.items():
             built = (job.pieces_done + progress.get(jid, 0)) * job.tokens_per_piece
             if job.answered or built <= 0 or job.pieces_left() - progress.get(jid, 0) <= 0:
@@ -187,12 +222,21 @@ class Rollout:
             pred = pool.predict_loss(pid, exposed_demand, end)
             beyond = survival_p_loss(getattr(self.params, "survival_curve", None), gap)
             p_loss = min(1.0, pred["p_loss"] + (1.0 - pred["p_loss"]) * beyond["p_loss"])
+            ph = self.params.p_host_for(store.host, int(round(p_loss * built)), prefix_id=pid,
+                                        t=end)
+            # StudyENG1b section 5: the LARGER cost of deferring under pressure is not the loss
+            # but the QUEUE. A resume issued while another history build is still prefilling
+            # waited 6 to 10 s whether or not the prefix survived. That is not a constant here:
+            # it is read off this rollout's own engine timeline, as the work pi_0 still has in
+            # flight at the moment the resume would be issued.
+            resume_queue = max(float(busy_until) - end, 0.0)
             rw = expected_remaining_work(
                 job, self.engine, self.pf, p_loss=p_loss,
-                p_host=float(getattr(self.params, "p_host", 0.0)), prefix_tokens=built,
+                p_host=float(ph["p_host"]), prefix_tokens=built,
                 beyond_horizon_unmeasured=not beyond["available"])
             out[jid] = dict(p_loss=p_loss, gap_s=gap, exposed_demand_tokens=exposed_demand,
                             exposure_starts_at=last, in_horizon=pred, beyond_horizon=beyond,
+                            p_host=ph, resume_queue_s=resume_queue,
                             extra_work_s=rw.extra_s, w_left_s=rw.w_left_s,
                             total_work_s=rw.total_s, built_prefix_tokens=built,
                             beyond_horizon_unmeasured=rw.beyond_horizon_unmeasured)
@@ -360,7 +404,9 @@ class Rollout:
         built = job.pieces_done * job.tokens_per_piece
         from .continuation import restore_costs_s
         w_reload, w_rebuild = restore_costs_s(built, self.pf)
-        p_host = float(getattr(self.params, "p_host", 0.0))
+        ph = self.params.p_host_for(self._build_host(f), built,
+                                    prefix_id=prefix_id_for(job_id), t=f.t)
+        p_host = float(ph["p_host"])
         lost_extra = p_host * w_reload + (1.0 - p_host) * w_rebuild
         kw = dict(omega_rc=self.pf.omega("RC"), acc_cloud=acc_c, acc_device=acc_d,
                   z=dev.z_of("RC"), p_reachable=dev.link.p_reachable_within_hs,
@@ -369,7 +415,7 @@ class Rollout:
         lost = continuation_value(job, f.t, self.engine, 0.0, False, extra_work_s=lost_extra,
                                   **kw)
         return dict(value_at_risk=float(safe - lost), safe=float(safe), if_lost=float(lost),
-                    restore_work_s=lost_extra, built_prefix_tokens=built)
+                    restore_work_s=lost_extra, built_prefix_tokens=built, p_host=ph)
 
     # ---------------------------------------------------------------- 5.5 fallback
     def closed_form(self, fleet: Fleet, item: PendingItem) -> float:

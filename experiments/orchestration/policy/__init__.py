@@ -19,6 +19,12 @@ from .demand import Demand
 from .telemetry import ResidencyBelief, TelemetrySnapshot
 from .continuation import classify, continuation_value, FEASIBLE, PRIORITY, INFEASIBLE
 from .readiness import state_value, tier_assignment, state_actions
+from .kvpool import KVPool, PrefixEntry, eng1b_long_gap_curve, survival_p_loss, prefix_id_for
+from .tiers import (HostPool, TieredStore, lru_rule, largest_first_rule,
+                    p_host_from_occupancy, P_HOST_WITH_ROOM, EVICTION_RULE_ASSUMPTION)
+from .calibration import (TierCalibration, MonotoneMap, CalibrationMissing, CalibrationInvalid,
+                          require_calibrated, rank_across_tiers, upgrade_decision,
+                          identity_for_tests)
 from .controller import DeviceController, ControllerState
 from .rollout import Rollout, RolloutResult, delta_j
 from .coordinator import Coordinator, Decision
@@ -31,4 +37,9 @@ __all__ = [
     "continuation_value", "FEASIBLE", "PRIORITY", "INFEASIBLE", "state_value",
     "tier_assignment", "state_actions", "DeviceController", "ControllerState", "Rollout",
     "RolloutResult", "delta_j", "Coordinator", "Decision",
+    "KVPool", "PrefixEntry", "eng1b_long_gap_curve", "survival_p_loss", "prefix_id_for",
+    "HostPool", "TieredStore", "lru_rule", "largest_first_rule", "p_host_from_occupancy",
+    "P_HOST_WITH_ROOM", "EVICTION_RULE_ASSUMPTION", "TierCalibration", "MonotoneMap",
+    "CalibrationMissing", "CalibrationInvalid", "require_calibrated", "rank_across_tiers",
+    "upgrade_decision", "identity_for_tests",
 ]

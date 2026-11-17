@@ -1,0 +1,7647 @@
+{
+ "by_budget": {
+  "0.05": {
+   "target_budget": 0.05,
+   "capture_table": [
+    {
+     "arm": "escalation-only",
+     "label": "device filter (spec 7.7)",
+     "streaming_ap": 0.010192759568648442,
+     "streaming_ap_ci": [
+      0.008459130712216227,
+      0.016055111804138652
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.013216470572807027,
+       "ci": [
+        0.010579991471470802,
+        0.02134785465445397
+       ]
+      },
+      "0.5": {
+       "ap": 0.01021060100161001,
+       "ci": [
+        0.00853092591992629,
+        0.013040875849819831
+       ]
+      },
+      "1.0": {
+       "ap": 0.009850543940309472,
+       "ci": [
+        0.008161170028877613,
+        0.012642158365833295
+       ]
+      },
+      "1.5": {
+       "ap": 0.010517133764025844,
+       "ci": [
+        0.00783969378721337,
+        0.025795368478998208
+       ]
+      }
+     },
+     "streaming_capture": 0.17611302335463558,
+     "streaming_capture_ci": [
+      -0.13962559034413402,
+      1.8811210283713045
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": 0.1586730578469019,
+     "beats_random_streaming_ci": [
+      -0.14683800346158413,
+      1.8623290502042855
+     ],
+     "challenge_mAP": 0.484850111730222,
+     "challenge_mAP_ci": [
+      0.4355944183615764,
+      0.5635324381618062
+     ],
+     "challenge_capture": 0.1645360308757462,
+     "challenge_capture_ci": [
+      -0.005912560961000566,
+      0.4219292824529372
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.002231462971430842,
+     "beats_random_challenge_ci": [
+      -0.013888918872534704,
+      0.020666214066090097
+     ],
+     "call_fraction": 0.05336998767655702,
+     "open_time_fraction": 0.062431570428904654,
+     "n_episodes": 405,
+     "positive_over_negative_call_rate": 1.0160686328870334,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "oracle-trigger",
+     "label": "oracle trigger, positives only (NON-CAUSAL)",
+     "streaming_ap": 0.027318130055405194,
+     "streaming_ap_ci": [
+      0.016293550599648654,
+      0.04057907917037469
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.019600895032800707,
+       "ci": [
+        0.010868798002985767,
+        0.03604766003295829
+       ]
+      },
+      "0.5": {
+       "ap": 0.027191638916151083,
+       "ci": [
+        0.011551915612233557,
+        0.051114991089005336
+       ]
+      },
+      "1.0": {
+       "ap": 0.03880706599078091,
+       "ci": [
+        0.01604281660539413,
+        0.0690055432004617
+       ]
+      },
+      "1.5": {
+       "ap": 0.015955685259283592,
+       "ci": [
+        0.00795223030866687,
+        0.030641873334854138
+       ]
+      }
+     },
+     "streaming_capture": 5.444375847987878,
+     "streaming_capture_ci": [
+      2.280662968816514,
+      13.431135581282353
+     ],
+     "beats_random_streaming": true,
+     "beats_random_streaming_difference": 5.426935882480144,
+     "beats_random_streaming_ci": [
+      2.255383351090141,
+      13.452240960481175
+     ],
+     "challenge_mAP": 0.49410803568375644,
+     "challenge_mAP_ci": [
+      0.44124797235813745,
+      0.5690392672976458
+     ],
+     "challenge_capture": 0.2590532188683998,
+     "challenge_capture_ci": [
+      -0.13794723421855432,
+      0.5389258195969505
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.011489386924965261,
+     "beats_random_challenge_ci": [
+      -0.023919495760336508,
+      0.04348735048283007
+     ],
+     "call_fraction": 0.05081050336524789,
+     "open_time_fraction": 0.05460084733660209,
+     "n_episodes": 150,
+     "positive_over_negative_call_rate": null,
+     "learned": false,
+     "non_causal": true
+    },
+    {
+     "arm": "oracle-timing-bound",
+     "label": "oracle timing bound, every crop (NON-CAUSAL)",
+     "streaming_ap": 0.01495943744212457,
+     "streaming_ap_ci": [
+      0.010815595952886094,
+      0.032208118323285066
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.01390228927549106,
+       "ci": [
+        0.010906778374856414,
+        0.028269877821701896
+       ]
+      },
+      "0.5": {
+       "ap": 0.016288563789690808,
+       "ci": [
+        0.011401474542967251,
+        0.03962894743172598
+       ]
+      },
+      "1.0": {
+       "ap": 0.01868406523643009,
+       "ci": [
+        0.010465657385916175,
+        0.05133507612569553
+       ]
+      },
+      "1.5": {
+       "ap": 0.00990568330025281,
+       "ci": [
+        0.007568731454717758,
+        0.021856241394266313
+       ]
+      }
+     },
+     "streaming_capture": 1.6424819908029962,
+     "streaming_capture_ci": [
+      0.6769892772725558,
+      7.856261004046545
+     ],
+     "beats_random_streaming": true,
+     "beats_random_streaming_difference": 1.6250420252952624,
+     "beats_random_streaming_ci": [
+      0.6451926302898939,
+      7.900345005433452
+     ],
+     "challenge_mAP": 0.5497941657033057,
+     "challenge_mAP_ci": [
+      0.4943624841238277,
+      0.6269784573973616
+     ],
+     "challenge_capture": 0.827571219886513,
+     "challenge_capture_ci": [
+      0.6135418616448506,
+      0.9766952115486663
+     ],
+     "beats_random_challenge": true,
+     "beats_random_challenge_difference": 0.06717551694451457,
+     "beats_random_challenge_ci": [
+      0.019072038685701433,
+      0.1150707535071975
+     ],
+     "call_fraction": 0.05076310550763106,
+     "open_time_fraction": 0.05812348264864093,
+     "n_episodes": 300,
+     "positive_over_negative_call_rate": 0.748366150712636,
+     "learned": false,
+     "non_causal": true
+    },
+    {
+     "arm": "cloud-initiated",
+     "label": "cloud trickle",
+     "streaming_ap": 0.009628806058720395,
+     "streaming_ap_ci": [
+      0.008150611334259478,
+      0.0120323235456626
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.012195452288140075,
+       "ci": [
+        0.01002106674470404,
+        0.01571846002204284
+       ]
+      },
+      "0.5": {
+       "ap": 0.010017835218649122,
+       "ci": [
+        0.008348574124793848,
+        0.012656460002684876
+       ]
+      },
+      "1.0": {
+       "ap": 0.009903225232331924,
+       "ci": [
+        0.008237867370059352,
+        0.012894455037430815
+       ]
+      },
+      "1.5": {
+       "ap": 0.008965357725180137,
+       "ci": [
+        0.007630057091767775,
+        0.011002732342510205
+       ]
+      }
+     },
+     "streaming_capture": 0.002624495706552624,
+     "streaming_capture_ci": [
+      -0.07746029695104888,
+      0.019729491276896976
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": -0.014815469801181064,
+     "beats_random_streaming_ci": [
+      -0.11350783540536379,
+      0.0675049406487167
+     ],
+     "challenge_mAP": 0.47090681659233996,
+     "challenge_mAP_ci": [
+      0.4242901899415079,
+      0.5474576879525481
+     ],
+     "challenge_capture": 0.022184348749309874,
+     "challenge_capture_ci": [
+      -0.028830796119230902,
+      0.08689581698528609
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.01171183216645122,
+     "beats_random_challenge_ci": [
+      -0.030606975162562028,
+      0.004362153809256833
+     ],
+     "call_fraction": 0.05417575125604323,
+     "open_time_fraction": 0.0,
+     "n_episodes": 0,
+     "positive_over_negative_call_rate": 0.9922017729059591,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "context-trickle",
+     "label": "context-modulated trickle",
+     "streaming_ap": 0.009602883668517396,
+     "streaming_ap_ci": [
+      0.008126362165518923,
+      0.012068697779151183
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.012167961373320052,
+       "ci": [
+        0.00998129003503889,
+        0.015706667920882916
+       ]
+      },
+      "0.5": {
+       "ap": 0.009990440919840079,
+       "ci": [
+        0.008320220153331243,
+        0.012650477018146904
+       ]
+      },
+      "1.0": {
+       "ap": 0.009915849549768574,
+       "ci": [
+        0.00821447449850189,
+        0.012993979179989791
+       ]
+      },
+      "1.5": {
+       "ap": 0.00890236053594354,
+       "ci": [
+        0.007570227678227643,
+        0.010937348353819636
+       ]
+      }
+     },
+     "streaming_capture": -0.005349986640425353,
+     "streaming_capture_ci": [
+      -0.04910905350607786,
+      0.006596860753695604
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": -0.02278995214815904,
+     "beats_random_streaming_ci": [
+      -0.11137763602234575,
+      0.064052646489016
+     ],
+     "challenge_mAP": 0.4689517796617602,
+     "challenge_mAP_ci": [
+      0.4223301086577311,
+      0.5454002044381903
+     ],
+     "challenge_capture": 0.0022247342582402308,
+     "challenge_capture_ci": [
+      -0.012598748937416977,
+      0.019121578754150777
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.013666869097030965,
+     "beats_random_challenge_ci": [
+      -0.031713224443364954,
+      0.0012752435744248741
+     ],
+     "call_fraction": 0.022324390937529623,
+     "open_time_fraction": 0.0,
+     "n_episodes": 0,
+     "positive_over_negative_call_rate": 0.9951491262962917,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "ceiling-gbt",
+     "label": "predictability ceiling, boosted trees (LEARNED)",
+     "streaming_ap": 0.009734740605855064,
+     "streaming_ap_ci": [
+      0.008230674600489657,
+      0.01236150111685612
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.013535398038741693,
+       "ci": [
+        0.010509277822904003,
+        0.03058326766450367
+       ]
+      },
+      "0.5": {
+       "ap": 0.010613659632377296,
+       "ci": [
+        0.00876498553954371,
+        0.014088385759289593
+       ]
+      },
+      "1.0": {
+       "ap": 0.009812261573089308,
+       "ci": [
+        0.00814520962946823,
+        0.012759021978309457
+       ]
+      },
+      "1.5": {
+       "ap": 0.008778300612098592,
+       "ci": [
+        0.007522300592522523,
+        0.010791626797546548
+       ]
+      }
+     },
+     "streaming_capture": 0.03521304828388314,
+     "streaming_capture_ci": [
+      -0.1424512023363322,
+      0.26086370731172553
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": 0.017773082776149456,
+     "beats_random_streaming_ci": [
+      -0.15176303123944856,
+      0.2506711947461977
+     ],
+     "challenge_mAP": 0.47118089249394074,
+     "challenge_mAP_ci": [
+      0.4231582219167345,
+      0.5475646726966256
+     ],
+     "challenge_capture": 0.024982479695931776,
+     "challenge_capture_ci": [
+      -0.17280798884373127,
+      0.15485724680495377
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.01143775626485044,
+     "beats_random_challenge_ci": [
+      -0.03417059863704492,
+      0.007340385521805005
+     ],
+     "call_fraction": 0.03938761967959048,
+     "open_time_fraction": 0.04243823487408959,
+     "n_episodes": 165,
+     "positive_over_negative_call_rate": 1.1548684964421034,
+     "learned": true,
+     "non_causal": false
+    },
+    {
+     "arm": "ceiling-logistic",
+     "label": "predictability ceiling, logistic (LEARNED)",
+     "streaming_ap": 0.009558142401362305,
+     "streaming_ap_ci": [
+      0.00814171922811701,
+      0.011917502578854999
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.01292762848859476,
+       "ci": [
+        0.01041250396465355,
+        0.020991390938489132
+       ]
+      },
+      "0.5": {
+       "ap": 0.010267006175112614,
+       "ci": [
+        0.008586292855078496,
+        0.013197748514913194
+       ]
+      },
+      "1.0": {
+       "ap": 0.009534217319402264,
+       "ci": [
+        0.007948716779152487,
+        0.01220828109209997
+       ]
+      },
+      "1.5": {
+       "ap": 0.008873203709572036,
+       "ci": [
+        0.007547676929212147,
+        0.010876965316259443
+       ]
+      }
+     },
+     "streaming_capture": -0.019113703732702252,
+     "streaming_capture_ci": [
+      -0.2621305322420601,
+      0.0937760893212421
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": -0.03655366924043594,
+     "beats_random_streaming_ci": [
+      -0.272116650956063,
+      0.0995438037616013
+     ],
+     "challenge_mAP": 0.4643102550074592,
+     "challenge_mAP_ci": [
+      0.41812187554668956,
+      0.5409344319125892
+     ],
+     "challenge_capture": -0.0451621162413926,
+     "challenge_capture_ci": [
+      -0.3060934806088294,
+      0.07462657262201998
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.018308393751331975,
+     "beats_random_challenge_ci": [
+      -0.04002119100155248,
+      0.0007998048223103384
+     ],
+     "call_fraction": 0.040145985401459854,
+     "open_time_fraction": 0.04262864759365926,
+     "n_episodes": 138,
+     "positive_over_negative_call_rate": 0.8104894506730471,
+     "learned": true,
+     "non_causal": false
+    },
+    {
+     "arm": "absolute-confidence",
+     "label": "absolute-confidence trigger",
+     "streaming_ap": 0.009795349901475443,
+     "streaming_ap_ci": [
+      0.00825572984306596,
+      0.012533513550422077
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.012830800292972531,
+       "ci": [
+        0.010369653639405601,
+        0.017525154304539978
+       ]
+      },
+      "0.5": {
+       "ap": 0.010516852788093028,
+       "ci": [
+        0.008672630721781744,
+        0.014207564172794375
+       ]
+      },
+      "1.0": {
+       "ap": 0.009959134915280315,
+       "ci": [
+        0.008244580157428745,
+        0.013031283185048237
+       ]
+      },
+      "1.5": {
+       "ap": 0.008910062001052987,
+       "ci": [
+        0.007605796724897014,
+        0.010901440404757346
+       ]
+      }
+     },
+     "streaming_capture": 0.053858233168552906,
+     "streaming_capture_ci": [
+      -0.0812008202134598,
+      0.2711042969763462
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": 0.036418267660819216,
+     "beats_random_streaming_ci": [
+      -0.09730632538520693,
+      0.2887682271124345
+     ],
+     "challenge_mAP": 0.4856943419331316,
+     "challenge_mAP_ci": [
+      0.4339080607721274,
+      0.558546302255129
+     ],
+     "challenge_capture": 0.1731550544492783,
+     "challenge_capture_ci": [
+      -0.11811133614707685,
+      0.4329809845509136
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.0030756931743404214,
+     "beats_random_challenge_ci": [
+      -0.018239688106856344,
+      0.02174594954458176
+     ],
+     "call_fraction": 0.052990804815622336,
+     "open_time_fraction": 0.058456704907887846,
+     "n_episodes": 290,
+     "positive_over_negative_call_rate": 1.4417032779938241,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "random-escalation",
+     "label": "random escalation",
+     "streaming_ap": 0.009676966224172703,
+     "streaming_ap_ci": [
+      0.00820416300993224,
+      0.012106426790175706
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.012832049225518933,
+       "ci": [
+        0.010375267662384011,
+        0.016782858618120712
+       ]
+      },
+      "0.5": {
+       "ap": 0.01016511463085354,
+       "ci": [
+        0.008490023049088326,
+        0.01297493661587966
+       ]
+      },
+      "1.0": {
+       "ap": 0.009910822044996655,
+       "ci": [
+        0.008215008618393268,
+        0.012861117554086346
+       ]
+      },
+      "1.5": {
+       "ap": 0.008954961996667914,
+       "ci": [
+        0.007608710354319502,
+        0.010991379210341568
+       ]
+      }
+     },
+     "streaming_capture": 0.017439965507733687,
+     "streaming_capture_ci": [
+      -0.09230985560114319,
+      0.09646406322179751
+     ],
+     "beats_random_streaming": null,
+     "beats_random_streaming_difference": null,
+     "beats_random_streaming_ci": null,
+     "challenge_mAP": 0.4826186487587912,
+     "challenge_mAP_ci": [
+      0.4321478234737919,
+      0.5575528882916216
+     ],
+     "challenge_capture": 0.14175429209414234,
+     "challenge_capture_ci": [
+      -0.016692198939722683,
+      0.3579042486010599
+     ],
+     "beats_random_challenge": null,
+     "beats_random_challenge_difference": null,
+     "beats_random_challenge_ci": null,
+     "call_fraction": 0.054270546971276895,
+     "open_time_fraction": 0.06462131670395582,
+     "n_episodes": 482,
+     "positive_over_negative_call_rate": 1.3838302410707521,
+     "learned": false,
+     "non_causal": false
+    }
+   ],
+   "realized": {
+    "device-only": {
+     "call_fraction": 0.0,
+     "open_time_fraction": 0.0
+    },
+    "always-cloud": {
+     "call_fraction": 1.0,
+     "open_time_fraction": 1.0
+    },
+    "escalation-only": {
+     "call_fraction": 0.05336998767655702,
+     "open_time_fraction": 0.062431570428904654,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 582,
+       "call_fraction": 0.053784308289437206
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 544,
+       "call_fraction": 0.05293373552593169
+      },
+      "positive_over_negative_rate_ratio": 1.0160686328870334
+     },
+     "n_calls": 1126,
+     "n_episodes": 405,
+     "n_background": 0
+    },
+    "oracle-trigger": {
+     "call_fraction": 0.05081050336524789,
+     "open_time_fraction": 0.05460084733660209,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 1072,
+       "call_fraction": 0.09906662970150633
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 0,
+       "call_fraction": 0.0
+      },
+      "positive_over_negative_rate_ratio": null
+     },
+     "n_calls": 1072,
+     "n_episodes": 150,
+     "n_background": 0
+    },
+    "oracle-timing-bound": {
+     "call_fraction": 0.05076310550763106,
+     "open_time_fraction": 0.05812348264864093,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 472,
+       "call_fraction": 0.04361888919693189
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 599,
+       "call_fraction": 0.05828549187506082
+      },
+      "positive_over_negative_rate_ratio": 0.748366150712636
+     },
+     "n_calls": 1071,
+     "n_episodes": 300,
+     "n_background": 0
+    },
+    "cloud-initiated": {
+     "call_fraction": 0.05417575125604323,
+     "open_time_fraction": 0.0,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 584,
+       "call_fraction": 0.05396913409111912
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 559,
+       "call_fraction": 0.05439330543933055
+      },
+      "positive_over_negative_rate_ratio": 0.9922017729059591
+     },
+     "n_calls": 1143,
+     "n_episodes": 0,
+     "n_background": 1143
+    },
+    "context-trickle": {
+     "call_fraction": 0.022324390937529623,
+     "open_time_fraction": 0.0,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 241,
+       "call_fraction": 0.02227150910267073
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 230,
+       "call_fraction": 0.022380072005449062
+      },
+      "positive_over_negative_rate_ratio": 0.9951491262962917
+     },
+     "n_calls": 471,
+     "n_episodes": 0,
+     "n_background": 471
+    },
+    "ceiling-gbt": {
+     "call_fraction": 0.03938761967959048,
+     "open_time_fraction": 0.04243823487408959,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 456,
+       "call_fraction": 0.042140282783476576
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 375,
+       "call_fraction": 0.036489247834971296
+      },
+      "positive_over_negative_rate_ratio": 1.1548684964421034
+     },
+     "n_calls": 831,
+     "n_episodes": 165,
+     "n_background": 0
+    },
+    "ceiling-logistic": {
+     "call_fraction": 0.040145985401459854,
+     "open_time_fraction": 0.04262864759365926,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 390,
+       "call_fraction": 0.036041031327973386
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 457,
+       "call_fraction": 0.04446823002821835
+      },
+      "positive_over_negative_rate_ratio": 0.8104894506730471
+     },
+     "n_calls": 847,
+     "n_episodes": 138,
+     "n_background": 0
+    },
+    "absolute-confidence": {
+     "call_fraction": 0.052990804815622336,
+     "open_time_fraction": 0.058456704907887846,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 674,
+       "call_fraction": 0.06228629516680528
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 444,
+       "call_fraction": 0.04320326943660601
+      },
+      "positive_over_negative_rate_ratio": 1.4417032779938241
+     },
+     "n_calls": 1118,
+     "n_episodes": 290,
+     "n_background": 0
+    },
+    "random-escalation": {
+     "call_fraction": 0.054270546971276895,
+     "open_time_fraction": 0.06462131670395582,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 679,
+       "call_fraction": 0.06274835967101007
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 466,
+       "call_fraction": 0.04534397197625766
+      },
+      "positive_over_negative_rate_ratio": 1.3838302410707521
+     },
+     "n_calls": 1145,
+     "n_episodes": 482,
+     "n_background": 0
+    }
+   },
+   "streaming_ap": {
+    "device-only": {
+     "ap": 0.00962027469595211,
+     "ci": [
+      0.008149928336477529,
+      0.012107112329485404
+     ]
+    },
+    "always-cloud": {
+     "ap": 0.012870942146839768,
+     "ci": [
+      0.010567366060054692,
+      0.016533711495473207
+     ]
+    },
+    "escalation-only": {
+     "ap": 0.010192759568648442,
+     "ci": [
+      0.008459130712216227,
+      0.016055111804138652
+     ]
+    },
+    "oracle-trigger": {
+     "ap": 0.027318130055405194,
+     "ci": [
+      0.016293550599648654,
+      0.04057907917037469
+     ]
+    },
+    "oracle-timing-bound": {
+     "ap": 0.01495943744212457,
+     "ci": [
+      0.010815595952886094,
+      0.032208118323285066
+     ]
+    },
+    "cloud-initiated": {
+     "ap": 0.009628806058720395,
+     "ci": [
+      0.008150611334259478,
+      0.0120323235456626
+     ]
+    },
+    "context-trickle": {
+     "ap": 0.009602883668517396,
+     "ci": [
+      0.008126362165518923,
+      0.012068697779151183
+     ]
+    },
+    "ceiling-gbt": {
+     "ap": 0.009734740605855064,
+     "ci": [
+      0.008230674600489657,
+      0.01236150111685612
+     ]
+    },
+    "ceiling-logistic": {
+     "ap": 0.009558142401362305,
+     "ci": [
+      0.00814171922811701,
+      0.011917502578854999
+     ]
+    },
+    "absolute-confidence": {
+     "ap": 0.009795349901475443,
+     "ci": [
+      0.00825572984306596,
+      0.012533513550422077
+     ]
+    },
+    "random-escalation": {
+     "ap": 0.009676966224172703,
+     "ci": [
+      0.00820416300993224,
+      0.012106426790175706
+     ]
+    }
+   },
+   "streaming_ap_by_horizon": {
+    "device-only": {
+     "0.0": {
+      "ap": 0.012176147267364686,
+      "ci": [
+       0.009994112899169147,
+       0.01579768827687947
+      ]
+     },
+     "0.5": {
+      "ap": 0.009994155206857609,
+      "ci": [
+       0.008328588733363737,
+       0.012701349237758796
+      ]
+     },
+     "1.0": {
+      "ap": 0.009932005285186367,
+      "ci": [
+       0.008223013999935257,
+       0.013066194009002434
+      ]
+     },
+     "1.5": {
+      "ap": 0.008934663595812357,
+      "ci": [
+       0.007601719302751456,
+       0.010973157867652999
+      ]
+     }
+    },
+    "always-cloud": {
+     "0.0": {
+      "ap": 0.024772187851227118,
+      "ci": [
+       0.018213528844996184,
+       0.03672525812670145
+      ]
+     },
+     "0.5": {
+      "ap": 0.015372606092708671,
+      "ci": [
+       0.01230578064476821,
+       0.020128712783768276
+      ]
+     },
+     "1.0": {
+      "ap": 0.012210617861378744,
+      "ci": [
+       0.009873006614885188,
+       0.015725332457918635
+      ]
+     },
+     "1.5": {
+      "ap": 0.01102960248643189,
+      "ci": [
+       0.009087197434884398,
+       0.014229908716308535
+      ]
+     }
+    },
+    "escalation-only": {
+     "0.0": {
+      "ap": 0.013216470572807027,
+      "ci": [
+       0.010579991471470802,
+       0.02134785465445397
+      ]
+     },
+     "0.5": {
+      "ap": 0.01021060100161001,
+      "ci": [
+       0.00853092591992629,
+       0.013040875849819831
+      ]
+     },
+     "1.0": {
+      "ap": 0.009850543940309472,
+      "ci": [
+       0.008161170028877613,
+       0.012642158365833295
+      ]
+     },
+     "1.5": {
+      "ap": 0.010517133764025844,
+      "ci": [
+       0.00783969378721337,
+       0.025795368478998208
+      ]
+     }
+    },
+    "oracle-trigger": {
+     "0.0": {
+      "ap": 0.019600895032800707,
+      "ci": [
+       0.010868798002985767,
+       0.03604766003295829
+      ]
+     },
+     "0.5": {
+      "ap": 0.027191638916151083,
+      "ci": [
+       0.011551915612233557,
+       0.051114991089005336
+      ]
+     },
+     "1.0": {
+      "ap": 0.03880706599078091,
+      "ci": [
+       0.01604281660539413,
+       0.0690055432004617
+      ]
+     },
+     "1.5": {
+      "ap": 0.015955685259283592,
+      "ci": [
+       0.00795223030866687,
+       0.030641873334854138
+      ]
+     }
+    },
+    "oracle-timing-bound": {
+     "0.0": {
+      "ap": 0.01390228927549106,
+      "ci": [
+       0.010906778374856414,
+       0.028269877821701896
+      ]
+     },
+     "0.5": {
+      "ap": 0.016288563789690808,
+      "ci": [
+       0.011401474542967251,
+       0.03962894743172598
+      ]
+     },
+     "1.0": {
+      "ap": 0.01868406523643009,
+      "ci": [
+       0.010465657385916175,
+       0.05133507612569553
+      ]
+     },
+     "1.5": {
+      "ap": 0.00990568330025281,
+      "ci": [
+       0.007568731454717758,
+       0.021856241394266313
+      ]
+     }
+    },
+    "cloud-initiated": {
+     "0.0": {
+      "ap": 0.012195452288140075,
+      "ci": [
+       0.01002106674470404,
+       0.01571846002204284
+      ]
+     },
+     "0.5": {
+      "ap": 0.010017835218649122,
+      "ci": [
+       0.008348574124793848,
+       0.012656460002684876
+      ]
+     },
+     "1.0": {
+      "ap": 0.009903225232331924,
+      "ci": [
+       0.008237867370059352,
+       0.012894455037430815
+      ]
+     },
+     "1.5": {
+      "ap": 0.008965357725180137,
+      "ci": [
+       0.007630057091767775,
+       0.011002732342510205
+      ]
+     }
+    },
+    "context-trickle": {
+     "0.0": {
+      "ap": 0.012167961373320052,
+      "ci": [
+       0.00998129003503889,
+       0.015706667920882916
+      ]
+     },
+     "0.5": {
+      "ap": 0.009990440919840079,
+      "ci": [
+       0.008320220153331243,
+       0.012650477018146904
+      ]
+     },
+     "1.0": {
+      "ap": 0.009915849549768574,
+      "ci": [
+       0.00821447449850189,
+       0.012993979179989791
+      ]
+     },
+     "1.5": {
+      "ap": 0.00890236053594354,
+      "ci": [
+       0.007570227678227643,
+       0.010937348353819636
+      ]
+     }
+    },
+    "ceiling-gbt": {
+     "0.0": {
+      "ap": 0.013535398038741693,
+      "ci": [
+       0.010509277822904003,
+       0.03058326766450367
+      ]
+     },
+     "0.5": {
+      "ap": 0.010613659632377296,
+      "ci": [
+       0.00876498553954371,
+       0.014088385759289593
+      ]
+     },
+     "1.0": {
+      "ap": 0.009812261573089308,
+      "ci": [
+       0.00814520962946823,
+       0.012759021978309457
+      ]
+     },
+     "1.5": {
+      "ap": 0.008778300612098592,
+      "ci": [
+       0.007522300592522523,
+       0.010791626797546548
+      ]
+     }
+    },
+    "ceiling-logistic": {
+     "0.0": {
+      "ap": 0.01292762848859476,
+      "ci": [
+       0.01041250396465355,
+       0.020991390938489132
+      ]
+     },
+     "0.5": {
+      "ap": 0.010267006175112614,
+      "ci": [
+       0.008586292855078496,
+       0.013197748514913194
+      ]
+     },
+     "1.0": {
+      "ap": 0.009534217319402264,
+      "ci": [
+       0.007948716779152487,
+       0.01220828109209997
+      ]
+     },
+     "1.5": {
+      "ap": 0.008873203709572036,
+      "ci": [
+       0.007547676929212147,
+       0.010876965316259443
+      ]
+     }
+    },
+    "absolute-confidence": {
+     "0.0": {
+      "ap": 0.012830800292972531,
+      "ci": [
+       0.010369653639405601,
+       0.017525154304539978
+      ]
+     },
+     "0.5": {
+      "ap": 0.010516852788093028,
+      "ci": [
+       0.008672630721781744,
+       0.014207564172794375
+      ]
+     },
+     "1.0": {
+      "ap": 0.009959134915280315,
+      "ci": [
+       0.008244580157428745,
+       0.013031283185048237
+      ]
+     },
+     "1.5": {
+      "ap": 0.008910062001052987,
+      "ci": [
+       0.007605796724897014,
+       0.010901440404757346
+      ]
+     }
+    },
+    "random-escalation": {
+     "0.0": {
+      "ap": 0.012832049225518933,
+      "ci": [
+       0.010375267662384011,
+       0.016782858618120712
+      ]
+     },
+     "0.5": {
+      "ap": 0.01016511463085354,
+      "ci": [
+       0.008490023049088326,
+       0.01297493661587966
+      ]
+     },
+     "1.0": {
+      "ap": 0.009910822044996655,
+      "ci": [
+       0.008215008618393268,
+       0.012861117554086346
+      ]
+     },
+     "1.5": {
+      "ap": 0.008954961996667914,
+      "ci": [
+       0.007608710354319502,
+       0.010991379210341568
+      ]
+     }
+    }
+   },
+   "challenge_mAP": {
+    "device-only": 0.46873386775581977,
+    "always-cloud": 0.5666835015753743,
+    "escalation-only": 0.484850111730222,
+    "oracle-trigger": 0.49410803568375644,
+    "oracle-timing-bound": 0.5497941657033057,
+    "cloud-initiated": 0.47090681659233996,
+    "context-trickle": 0.4689517796617602,
+    "ceiling-gbt": 0.47118089249394074,
+    "ceiling-logistic": 0.4643102550074592,
+    "absolute-confidence": 0.4856943419331316,
+    "random-escalation": 0.4826186487587912
+   },
+   "challenge_mAP_ci": {
+    "device-only": [
+     0.4221890639435476,
+     0.5450510947116644
+    ],
+    "always-cloud": [
+     0.509157921163436,
+     0.6483408097734604
+    ],
+    "escalation-only": [
+     0.4355944183615764,
+     0.5635324381618062
+    ],
+    "oracle-trigger": [
+     0.44124797235813745,
+     0.5690392672976458
+    ],
+    "oracle-timing-bound": [
+     0.4943624841238277,
+     0.6269784573973616
+    ],
+    "cloud-initiated": [
+     0.4242901899415079,
+     0.5474576879525481
+    ],
+    "context-trickle": [
+     0.4223301086577311,
+     0.5454002044381903
+    ],
+    "ceiling-gbt": [
+     0.4231582219167345,
+     0.5475646726966256
+    ],
+    "ceiling-logistic": [
+     0.41812187554668956,
+     0.5409344319125892
+    ],
+    "absolute-confidence": [
+     0.4339080607721274,
+     0.558546302255129
+    ],
+    "random-escalation": [
+     0.4321478234737919,
+     0.5575528882916216
+    ]
+   },
+   "cloud_initiated_feasible_by_fold": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true
+   },
+   "cloud_initiated_trigger_degenerate_by_fold": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true
+   },
+   "references": {
+    "device_only_streaming": 0.00962027469595211,
+    "always_cloud_streaming": 0.012870942146839768,
+    "device_only_challenge": 0.46873386775581977,
+    "always_cloud_challenge": 0.5666835015753743,
+    "gap_streaming": 0.0032506674508876576,
+    "gap_challenge": 0.09794963381955452,
+    "gap_streaming_ci": [
+     0.0013191893864540906,
+     0.0059339954682126154
+    ],
+    "gap_challenge_ci": [
+     0.04108398016437672,
+     0.15895712315807944
+    ]
+   },
+   "settings_by_fold": {
+    "0": {
+     "controller": {
+      "w_c": 3.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 1,
+      "budget": 0.05,
+      "theta": 3.0000009536743164,
+      "train_call_fraction": 0.04950553680345828,
+      "train_streaming_ap": 0.012622279311518205,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -2.8207064833365756,
+      "train_call_fraction": 0.05217030852134778,
+      "k_c": 1,
+      "search_range": [
+       -5.281048985519967,
+       -2.6520302353218095
+      ],
+      "hit_budget": true
+     },
+     "random": {
+      "p_open": 0.025466442108154297,
+      "calls_per_episode": 2,
+      "seed": 0,
+      "train_call_fraction": 0.05009770829632262
+     },
+     "oracle": {
+      "lead_calls": 5,
+      "lead_s": 2.5,
+      "train_call_fraction": 0.05074909693847338,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 1,
+       "lead_s": 0.5,
+       "train_call_fraction": 0.050689879789186945,
+       "hit_budget": true,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 10.0,
+      "background_floor": 0.05,
+      "feasible": true,
+      "tau": -2.505774673635238,
+      "train_call_fraction": 0.05418369159708652,
+      "train_streaming_ap": 0.011757701727310332,
+      "k_c": 1,
+      "search_range": [
+       -5.1207439325781845,
+       -2.505774673635238
+      ],
+      "hit_budget": false,
+      "n_episodes": 0,
+      "n_background": 915,
+      "trigger_degenerate": true,
+      "episode_budget_headroom": 0.0
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 10.0,
+      "tau": -2.505774673635238,
+      "k_c": 1,
+      "train_call_fraction": 0.05548646888138805,
+      "feasible": true,
+      "train_streaming_ap": 0.011762365812503431,
+      "mean_background_floor": 0.05125000000000001,
+      "n_episodes": 0,
+      "trigger_degenerate": true,
+      "n_clips_modulated": 6,
+      "search_range": [
+       -5.1207439325781845,
+       -2.505774673635238
+      ],
+      "hit_budget": false
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.07858813639922183,
+       "train_call_fraction": 0.04992005684846332,
+       "k_c": 4,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.6020429389221454,
+       "train_call_fraction": 0.04992005684846332,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    },
+    "1": {
+     "controller": {
+      "w_c": 6.0,
+      "delta": 1.5,
+      "n_c": 4,
+      "mode": "var",
+      "k_c": 1,
+      "budget": 0.05,
+      "theta": 2.857123851776123,
+      "train_call_fraction": 0.04989666371420136,
+      "train_streaming_ap": 0.010220381396160652,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -3.040984157648029,
+      "train_call_fraction": 0.04771183938588722,
+      "k_c": 1,
+      "search_range": [
+       -4.899415525534104,
+       -2.9119382832170966
+      ],
+      "hit_budget": true
+     },
+     "random": {
+      "p_open": 0.02532339096069336,
+      "calls_per_episode": 2,
+      "seed": 0,
+      "train_call_fraction": 0.04989666371420136
+     },
+     "oracle": {
+      "lead_calls": 5,
+      "lead_s": 2.5,
+      "train_call_fraction": 0.05031000885739593,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 1,
+       "lead_s": 0.5,
+       "train_call_fraction": 0.05025095955122527,
+       "hit_budget": true,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 10.0,
+      "background_floor": 0.05,
+      "feasible": true,
+      "tau": -2.65069485981997,
+      "train_call_fraction": 0.05420726306465899,
+      "train_streaming_ap": 0.008878381031780012,
+      "k_c": 1,
+      "search_range": [
+       -5.0133594814192,
+       -2.65069485981997
+      ],
+      "hit_budget": false,
+      "n_episodes": 0,
+      "n_background": 918,
+      "trigger_degenerate": true,
+      "episode_budget_headroom": 0.0
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 10.0,
+      "tau": -2.65069485981997,
+      "k_c": 1,
+      "train_call_fraction": 0.05562444641275465,
+      "feasible": true,
+      "train_streaming_ap": 0.00886871550192052,
+      "mean_background_floor": 0.05145833333333334,
+      "n_episodes": 0,
+      "trigger_degenerate": true,
+      "n_clips_modulated": 7,
+      "search_range": [
+       -5.0133594814192,
+       -2.65069485981997
+      ],
+      "hit_budget": false
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.11647268829162863,
+       "train_call_fraction": 0.04948331857100679,
+       "k_c": 1,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.6144745338415224,
+       "train_call_fraction": 0.050073811632713315,
+       "k_c": 1,
+       "hit_budget": true
+      }
+     }
+    },
+    "2": {
+     "controller": {
+      "w_c": 6.0,
+      "delta": 0.75,
+      "n_c": 3,
+      "mode": "var",
+      "k_c": 1,
+      "budget": 0.05,
+      "theta": 2.7947425842285156,
+      "train_call_fraction": 0.050032837781360084,
+      "train_streaming_ap": 0.014610787548068807,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -2.882921253410787,
+      "train_call_fraction": 0.048838736640993495,
+      "k_c": 1,
+      "search_range": [
+       -5.150442834304049,
+       -2.6781457167753464
+      ],
+      "hit_budget": true
+     },
+     "random": {
+      "p_open": 0.017670154571533203,
+      "calls_per_episode": 3,
+      "seed": 0,
+      "train_call_fraction": 0.049853722610305094
+     },
+     "oracle": {
+      "lead_calls": 5,
+      "lead_s": 2.5,
+      "train_call_fraction": 0.051644874320854975,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 1,
+       "lead_s": 0.5,
+       "train_call_fraction": 0.051644874320854975,
+       "hit_budget": true,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 10.0,
+      "background_floor": 0.05,
+      "feasible": true,
+      "tau": -2.49345880823447,
+      "train_call_fraction": 0.05427189682966147,
+      "train_streaming_ap": 0.010513031276597612,
+      "k_c": 1,
+      "search_range": [
+       -5.121053375745013,
+       -2.49345880823447
+      ],
+      "hit_budget": false,
+      "n_episodes": 0,
+      "n_background": 909,
+      "trigger_degenerate": true,
+      "episode_budget_headroom": 0.0
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": null,
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.10298418386019097,
+       "train_call_fraction": 0.04680876470237029,
+       "k_c": 4,
+       "hit_budget": false
+      },
+      "ceiling-logistic": {
+       "theta": 0.6075732882154659,
+       "train_call_fraction": 0.050032837781360084,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    },
+    "3": {
+     "controller": {
+      "w_c": 3.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 1,
+      "budget": 0.05,
+      "theta": 3.0000009536743164,
+      "train_call_fraction": 0.04997348105368613,
+      "train_streaming_ap": 0.011306266560365796,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -2.806165240597479,
+      "train_call_fraction": 0.05197713477517826,
+      "k_c": 1,
+      "search_range": [
+       -5.357469364626301,
+       -2.6312528425049866
+      ],
+      "hit_budget": true
+     },
+     "random": {
+      "p_open": 0.02532339096069336,
+      "calls_per_episode": 2,
+      "seed": 0,
+      "train_call_fraction": 0.04991455006187754
+     },
+     "oracle": {
+      "lead_calls": 5,
+      "lead_s": 2.5,
+      "train_call_fraction": 0.05091637692262361,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 1,
+       "lead_s": 0.5,
+       "train_call_fraction": 0.050857445930815016,
+       "hit_budget": true,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 10.0,
+      "background_floor": 0.05,
+      "feasible": true,
+      "tau": -2.2864748413249445,
+      "train_call_fraction": 0.054098650480287586,
+      "train_streaming_ap": 0.010274649410091936,
+      "k_c": 1,
+      "search_range": [
+       -5.446639889786238,
+       -2.2864748413249445
+      ],
+      "hit_budget": false,
+      "n_episodes": 0,
+      "n_background": 918,
+      "trigger_degenerate": true,
+      "episode_budget_headroom": 0.0
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": null,
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.14949696254228567,
+       "train_call_fraction": 0.0502092050209205,
+       "k_c": 4,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.5960629552575722,
+       "train_call_fraction": 0.050032412045494724,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    },
+    "4": {
+     "controller": {
+      "w_c": 6.0,
+      "delta": 0.75,
+      "n_c": 3,
+      "mode": "var",
+      "k_c": 2,
+      "budget": 0.05,
+      "theta": 3.322174549102783,
+      "train_call_fraction": 0.05002373605506765,
+      "train_streaming_ap": 0.010649512660589259,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -2.9168042711905677,
+      "train_call_fraction": 0.05239734156183242,
+      "k_c": 2,
+      "search_range": [
+       -4.997073703594343,
+       -2.828497823688329
+      ],
+      "hit_budget": true
+     },
+     "random": {
+      "p_open": 0.013683795928955078,
+      "calls_per_episode": 4,
+      "seed": 0,
+      "train_call_fraction": 0.05008307619273677
+     },
+     "oracle": {
+      "lead_calls": 5,
+      "lead_s": 2.5,
+      "train_call_fraction": 0.050439117018751485,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 1,
+       "lead_s": 0.5,
+       "train_call_fraction": 0.05037977688108236,
+       "hit_budget": true,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 10.0,
+      "background_floor": 0.05,
+      "feasible": true,
+      "tau": -2.5443207596870754,
+      "train_call_fraction": 0.05411820555423689,
+      "train_streaming_ap": 0.009125900136116537,
+      "k_c": 2,
+      "search_range": [
+       -5.117107966692485,
+       -2.5443207596870754
+      ],
+      "hit_budget": false,
+      "n_episodes": 0,
+      "n_background": 912,
+      "trigger_degenerate": true,
+      "episode_budget_headroom": 0.0
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": null,
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.13793837150297628,
+       "train_call_fraction": 0.050142416330405885,
+       "k_c": 4,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.6063810801737468,
+       "train_call_fraction": 0.050201756468075,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    }
+   }
+  },
+  "0.1": {
+   "target_budget": 0.1,
+   "capture_table": [
+    {
+     "arm": "escalation-only",
+     "label": "device filter (spec 7.7)",
+     "streaming_ap": 0.010118051182133722,
+     "streaming_ap_ci": [
+      0.008499075503319818,
+      0.012931825635480383
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.01632155611639987,
+       "ci": [
+        0.011853367851174645,
+        0.03478057959367579
+       ]
+      },
+      "0.5": {
+       "ap": 0.010627977977373757,
+       "ci": [
+        0.0088023832807906,
+        0.013627766361266416
+       ]
+      },
+      "1.0": {
+       "ap": 0.010438961156410829,
+       "ci": [
+        0.008447577328566965,
+        0.01436131547015389
+       ]
+      },
+      "1.5": {
+       "ap": 0.00928721441261658,
+       "ci": [
+        0.007867614177854481,
+        0.01155503321702616
+       ]
+      }
+     },
+     "streaming_capture": 0.15313054740363705,
+     "streaming_capture_ci": [
+      0.009631089026256734,
+      0.46416748467814334
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": 0.08307648275237728,
+     "beats_random_streaming_ci": [
+      -0.215241870666513,
+      0.46614687232676094
+     ],
+     "challenge_mAP": 0.48726002740418145,
+     "challenge_mAP_ci": [
+      0.43849905787837606,
+      0.5660987739451154
+     ],
+     "challenge_capture": 0.1891396519408238,
+     "challenge_capture_ci": [
+      -0.09042150893463145,
+      0.5001331509813456
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.007839015743946576,
+     "beats_random_challenge_ci": [
+      -0.022358709066176836,
+      0.043458210372896475
+     ],
+     "call_fraction": 0.10309034031661769,
+     "open_time_fraction": 0.11234350454610367,
+     "n_episodes": 436,
+     "positive_over_negative_call_rate": 1.0345733440180755,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "oracle-trigger",
+     "label": "oracle trigger, positives only (NON-CAUSAL)",
+     "streaming_ap": 0.027318130055405194,
+     "streaming_ap_ci": [
+      0.016293550599648654,
+      0.04057907917037469
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.019600895032800707,
+       "ci": [
+        0.010868798002985767,
+        0.03604766003295829
+       ]
+      },
+      "0.5": {
+       "ap": 0.027191638916151083,
+       "ci": [
+        0.011551915612233557,
+        0.051114991089005336
+       ]
+      },
+      "1.0": {
+       "ap": 0.03880706599078091,
+       "ci": [
+        0.01604281660539413,
+        0.0690055432004617
+       ]
+      },
+      "1.5": {
+       "ap": 0.015955685259283592,
+       "ci": [
+        0.00795223030866687,
+        0.030641873334854138
+       ]
+      }
+     },
+     "streaming_capture": 5.444375847987878,
+     "streaming_capture_ci": [
+      2.280662968816514,
+      13.431135581282353
+     ],
+     "beats_random_streaming": true,
+     "beats_random_streaming_difference": 5.374321783336618,
+     "beats_random_streaming_ci": [
+      2.2213692879864455,
+      13.401924661706927
+     ],
+     "challenge_mAP": 0.49410803568375644,
+     "challenge_mAP_ci": [
+      0.44124797235813745,
+      0.5690392672976458
+     ],
+     "challenge_capture": 0.2590532188683998,
+     "challenge_capture_ci": [
+      -0.13794723421855432,
+      0.5389258195969505
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.014687024023521567,
+     "beats_random_challenge_ci": [
+      -0.017029531650645174,
+      0.045616027350670635
+     ],
+     "call_fraction": 0.09972509242582235,
+     "open_time_fraction": 0.10372732898557624,
+     "n_episodes": 150,
+     "positive_over_negative_call_rate": null,
+     "learned": false,
+     "non_causal": true
+    },
+    {
+     "arm": "oracle-timing-bound",
+     "label": "oracle timing bound, every crop (NON-CAUSAL)",
+     "streaming_ap": 0.013025749921524825,
+     "streaming_ap_ci": [
+      0.010276630255608411,
+      0.019990305526133945
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.013519996038731469,
+       "ci": [
+        0.010891325970985865,
+        0.01890220631083507
+       ]
+      },
+      "0.5": {
+       "ap": 0.01478623136568444,
+       "ci": [
+        0.011218328058127952,
+        0.02384467855877549
+       ]
+      },
+      "1.0": {
+       "ap": 0.014210127819652172,
+       "ci": [
+        0.009920913093640191,
+        0.02586222765790127
+       ]
+      },
+      "1.5": {
+       "ap": 0.010080890579237863,
+       "ci": [
+        0.008127223567918345,
+        0.017502750824577386
+       ]
+      }
+     },
+     "streaming_capture": 1.0476233810514157,
+     "streaming_capture_ci": [
+      0.5679931832311285,
+      3.049289882691275
+     ],
+     "beats_random_streaming": true,
+     "beats_random_streaming_difference": 0.977569316400156,
+     "beats_random_streaming_ci": [
+      0.4803917600510941,
+      2.9543399428963437
+     ],
+     "challenge_mAP": 0.5497941657033057,
+     "challenge_mAP_ci": [
+      0.4943624841238277,
+      0.6269784573973616
+     ],
+     "challenge_capture": 0.827571219886513,
+     "challenge_capture_ci": [
+      0.6135418616448506,
+      0.9766952115486663
+     ],
+     "beats_random_challenge": true,
+     "beats_random_challenge_difference": 0.07037315404307087,
+     "beats_random_challenge_ci": [
+      0.021043765089869184,
+      0.11854434188127898
+     ],
+     "call_fraction": 0.10427528675703858,
+     "open_time_fraction": 0.11186747274717951,
+     "n_episodes": 300,
+     "positive_over_negative_call_rate": 0.8545906148394689,
+     "learned": false,
+     "non_causal": true
+    },
+    {
+     "arm": "cloud-initiated",
+     "label": "cloud trickle",
+     "streaming_ap": 0.010341975311674453,
+     "streaming_ap_ci": [
+      0.008674001489290227,
+      0.015065391239164231
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.016105519703449474,
+       "ci": [
+        0.012272491517727874,
+        0.025366122947044687
+       ]
+      },
+      "0.5": {
+       "ap": 0.011454790767747603,
+       "ci": [
+        0.009317333958218293,
+        0.015541062224885025
+       ]
+      },
+      "1.0": {
+       "ap": 0.010173028075447009,
+       "ci": [
+        0.008405675302097973,
+        0.013409667692869599
+       ]
+      },
+      "1.5": {
+       "ap": 0.009398107091828749,
+       "ci": [
+        0.00787693598963586,
+        0.02150642045607131
+       ]
+      }
+     },
+     "streaming_capture": 0.22201613257156436,
+     "streaming_capture_ci": [
+      0.01259879365694013,
+      1.2321343277881842
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": 0.1519620679203046,
+     "beats_random_streaming_ci": [
+      -0.21325476557313724,
+      1.1588046447582103
+     ],
+     "challenge_mAP": 0.48002521189885544,
+     "challenge_mAP_ci": [
+      0.43123842300821646,
+      0.558227358412343
+     ],
+     "challenge_capture": 0.11527704293246156,
+     "challenge_capture_ci": [
+      -0.11266726214516028,
+      0.3366987534313902
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.0006042002386205669,
+     "beats_random_challenge_ci": [
+      -0.020305219037328747,
+      0.024290625045981503
+     ],
+     "call_fraction": 0.09963029671058868,
+     "open_time_fraction": 0.034559908601894604,
+     "n_episodes": 98,
+     "positive_over_negative_call_rate": 1.3851579476986216,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "context-trickle",
+     "label": "context-modulated trickle",
+     "streaming_ap": 0.010393974152381911,
+     "streaming_ap_ci": [
+      0.008707486748255373,
+      0.013412401196304158
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.01537998017331633,
+       "ci": [
+        0.011897236404675528,
+        0.023871151680332325
+       ]
+      },
+      "0.5": {
+       "ap": 0.010810216521063124,
+       "ci": [
+        0.008943497436016464,
+        0.013990143927051134
+       ]
+      },
+      "1.0": {
+       "ap": 0.01103307715422475,
+       "ci": [
+        0.008709351950775561,
+        0.016236062070639955
+       ]
+      },
+      "1.5": {
+       "ap": 0.009338628781857856,
+       "ci": [
+        0.00786340328760097,
+        0.01145835207120761
+       ]
+      }
+     },
+     "streaming_capture": 0.2380124907020334,
+     "streaming_capture_ci": [
+      0.052269555725755576,
+      0.6711895768004276
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": 0.1679584260507736,
+     "beats_random_streaming_ci": [
+      -0.16024787104250263,
+      0.6593994086038817
+     ],
+     "challenge_mAP": 0.48829536567947435,
+     "challenge_mAP_ci": [
+      0.43901200555820774,
+      0.5642462703109379
+     ],
+     "challenge_capture": 0.1997097606275007,
+     "challenge_capture_ci": [
+      0.018033299113011162,
+      0.45493118864669524
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.008874354019239472,
+     "beats_random_challenge_ci": [
+      -0.013172206419912189,
+      0.030864533915211687
+     ],
+     "call_fraction": 0.10185799601857996,
+     "open_time_fraction": 0.01313847765030704,
+     "n_episodes": 45,
+     "positive_over_negative_call_rate": 1.1652613681035675,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "ceiling-gbt",
+     "label": "predictability ceiling, boosted trees (LEARNED)",
+     "streaming_ap": 0.00992723442913381,
+     "streaming_ap_ci": [
+      0.00830227260803726,
+      0.01286536981743078
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.013272398728471664,
+       "ci": [
+        0.010693483881836554,
+        0.01957092939370002
+       ]
+      },
+      "0.5": {
+       "ap": 0.010598908363363217,
+       "ci": [
+        0.00875151579154138,
+        0.014054403959217752
+       ]
+      },
+      "1.0": {
+       "ap": 0.010153136630060046,
+       "ci": [
+        0.00833867536086194,
+        0.014132758248393731
+       ]
+      },
+      "1.5": {
+       "ap": 0.009029658293978162,
+       "ci": [
+        0.007660925768404977,
+        0.011142703003099764
+       ]
+      }
+     },
+     "streaming_capture": 0.09442975567921562,
+     "streaming_capture_ci": [
+      -0.124913375963619,
+      0.4281726553550691
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": 0.024375691027955837,
+     "beats_random_streaming_ci": [
+      -0.34894031789121227,
+      0.4402008045968002
+     ],
+     "challenge_mAP": 0.48257686524429255,
+     "challenge_mAP_ci": [
+      0.4325510098463774,
+      0.5614949143010669
+     ],
+     "challenge_capture": 0.14132771046367293,
+     "challenge_capture_ci": [
+      -0.08983457939304249,
+      0.3991291734119364
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.0031558535840576774,
+     "beats_random_challenge_ci": [
+      -0.021917321047085308,
+      0.02767513831240161
+     ],
+     "call_fraction": 0.07825386292539577,
+     "open_time_fraction": 0.08344837435140667,
+     "n_episodes": 290,
+     "positive_over_negative_call_rate": 0.8629892742275377,
+     "learned": true,
+     "non_causal": false
+    },
+    {
+     "arm": "ceiling-logistic",
+     "label": "predictability ceiling, logistic (LEARNED)",
+     "streaming_ap": 0.009777728727610126,
+     "streaming_ap_ci": [
+      0.008240116721654561,
+      0.012254047571217376
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.0128336809961778,
+       "ci": [
+        0.010530801968390052,
+        0.01808856718479961
+       ]
+      },
+      "0.5": {
+       "ap": 0.010487922375762111,
+       "ci": [
+        0.008731771870173818,
+        0.013422629412891003
+       ]
+      },
+      "1.0": {
+       "ap": 0.009942813359942378,
+       "ci": [
+        0.00821344190520707,
+        0.013198074428078008
+       ]
+      },
+      "1.5": {
+       "ap": 0.008902450447125888,
+       "ci": [
+        0.0075942254074137135,
+        0.010917971529733051
+       ]
+      }
+     },
+     "streaming_capture": 0.04843744678189711,
+     "streaming_capture_ci": [
+      -0.1392535101038837,
+      0.22400739928213914
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": -0.02161661786936266,
+     "beats_random_streaming_ci": [
+      -0.3819891278214649,
+      0.23574133894390542
+     ],
+     "challenge_mAP": 0.4832471401723229,
+     "challenge_mAP_ci": [
+      0.4342044241337754,
+      0.5610152758199897
+     ],
+     "challenge_capture": 0.14817076747055408,
+     "challenge_capture_ci": [
+      -0.08221070350332407,
+      0.3740534410584561
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.003826128512088023,
+     "beats_random_challenge_ci": [
+      -0.017648091230460947,
+      0.026564861013858077
+     ],
+     "call_fraction": 0.082804057256612,
+     "open_time_fraction": 0.08789927167134765,
+     "n_episodes": 285,
+     "positive_over_negative_call_rate": 0.8856417953291412,
+     "learned": true,
+     "non_causal": false
+    },
+    {
+     "arm": "absolute-confidence",
+     "label": "absolute-confidence trigger",
+     "streaming_ap": 0.010111197614036924,
+     "streaming_ap_ci": [
+      0.008481991968750751,
+      0.013002714999235278
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.013150372566531827,
+       "ci": [
+        0.010556960326298397,
+        0.017735500102985746
+       ]
+      },
+      "0.5": {
+       "ap": 0.010611752339675653,
+       "ci": [
+        0.0087477022098734,
+        0.014004783896910181
+       ]
+      },
+      "1.0": {
+       "ap": 0.010466652865602945,
+       "ci": [
+        0.008575578741355465,
+        0.014225190471179547
+       ]
+      },
+      "1.5": {
+       "ap": 0.009255187636832175,
+       "ci": [
+        0.007853263343587383,
+        0.011339715099166835
+       ]
+      }
+     },
+     "streaming_capture": 0.15102219021227728,
+     "streaming_capture_ci": [
+      -0.0074234144458522194,
+      0.46415700921788344
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": 0.0809681255610175,
+     "beats_random_streaming_ci": [
+      -0.22806314521789947,
+      0.4633211764260815
+     ],
+     "challenge_mAP": 0.4837529415639365,
+     "challenge_mAP_ci": [
+      0.4333726224900001,
+      0.5590653385081774
+     ],
+     "challenge_capture": 0.15333466009464905,
+     "challenge_capture_ci": [
+      -0.20540380876830175,
+      0.41644006180040516
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.004331929903701626,
+     "beats_random_challenge_ci": [
+      -0.024704171312932583,
+      0.0336393211180329
+     ],
+     "call_fraction": 0.09963029671058868,
+     "open_time_fraction": 0.10529823392202599,
+     "n_episodes": 312,
+     "positive_over_negative_call_rate": 1.2708810238897115,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "random-escalation",
+     "label": "random escalation",
+     "streaming_ap": 0.00984799716371634,
+     "streaming_ap_ci": [
+      0.008363745798654927,
+      0.012436748410845307
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.015598546420905822,
+       "ci": [
+        0.01134270770980002,
+        0.029933068594435994
+       ]
+      },
+      "0.5": {
+       "ap": 0.009933444485133638,
+       "ci": [
+        0.00834836191851679,
+        0.012433369794784816
+       ]
+      },
+      "1.0": {
+       "ap": 0.010546438686582324,
+       "ci": [
+        0.00858749341087212,
+        0.014486306974867157
+       ]
+      },
+      "1.5": {
+       "ap": 0.009064108319433058,
+       "ci": [
+        0.007728265559174568,
+        0.011093429058012666
+       ]
+      }
+     },
+     "streaming_capture": 0.07005406465125978,
+     "streaming_capture_ci": [
+      -0.12528470123423677,
+      0.347934667065898
+     ],
+     "beats_random_streaming": null,
+     "beats_random_streaming_difference": null,
+     "beats_random_streaming_ci": null,
+     "challenge_mAP": 0.4794210116602349,
+     "challenge_mAP_ci": [
+      0.4316878057766491,
+      0.555128767216382
+     ],
+     "challenge_capture": 0.1091085641433153,
+     "challenge_capture_ci": [
+      -0.06877510879544686,
+      0.3092543532024381
+     ],
+     "beats_random_challenge": null,
+     "beats_random_challenge_difference": null,
+     "beats_random_challenge_ci": null,
+     "call_fraction": 0.11209593326381648,
+     "open_time_fraction": 0.12284000571238159,
+     "n_episodes": 516,
+     "positive_over_negative_call_rate": 1.3899655954471246,
+     "learned": false,
+     "non_causal": false
+    }
+   ],
+   "realized": {
+    "device-only": {
+     "call_fraction": 0.0,
+     "open_time_fraction": 0.0
+    },
+    "always-cloud": {
+     "call_fraction": 1.0,
+     "open_time_fraction": 1.0
+    },
+    "escalation-only": {
+     "call_fraction": 0.10309034031661769,
+     "open_time_fraction": 0.11234350454610367,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 1134,
+       "call_fraction": 0.10479622955364569
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 1041,
+       "call_fraction": 0.10129415198988032
+      },
+      "positive_over_negative_rate_ratio": 1.0345733440180755
+     },
+     "n_calls": 2175,
+     "n_episodes": 436,
+     "n_background": 0
+    },
+    "oracle-trigger": {
+     "call_fraction": 0.09972509242582235,
+     "open_time_fraction": 0.10372732898557624,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 2104,
+       "call_fraction": 0.19443674336937436
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 0,
+       "call_fraction": 0.0
+      },
+      "positive_over_negative_rate_ratio": null
+     },
+     "n_calls": 2104,
+     "n_episodes": 150,
+     "n_background": 0
+    },
+    "oracle-timing-bound": {
+     "call_fraction": 0.10427528675703858,
+     "open_time_fraction": 0.11186747274717951,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 1042,
+       "call_fraction": 0.0962942426762776
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 1158,
+       "call_fraction": 0.11267879731439136
+      },
+      "positive_over_negative_rate_ratio": 0.8545906148394689
+     },
+     "n_calls": 2200,
+     "n_episodes": 300,
+     "n_background": 0
+    },
+    "cloud-initiated": {
+     "call_fraction": 0.09963029671058868,
+     "open_time_fraction": 0.034559908601894604,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 1247,
+       "call_fraction": 0.11523888734867388
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 855,
+       "call_fraction": 0.08319548506373456
+      },
+      "positive_over_negative_rate_ratio": 1.3851579476986216
+     },
+     "n_calls": 2102,
+     "n_episodes": 98,
+     "n_background": 1418
+    },
+    "context-trickle": {
+     "call_fraction": 0.10185799601857996,
+     "open_time_fraction": 0.01313847765030704,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 1184,
+       "call_fraction": 0.10941687459569356
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 965,
+       "call_fraction": 0.0938989977619928
+      },
+      "positive_over_negative_rate_ratio": 1.1652613681035675
+     },
+     "n_calls": 2149,
+     "n_episodes": 45,
+     "n_background": 1894
+    },
+    "ceiling-gbt": {
+     "call_fraction": 0.07825386292539577,
+     "open_time_fraction": 0.08344837435140667,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 786,
+       "call_fraction": 0.07263654006099252
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 865,
+       "call_fraction": 0.08416853167266712
+      },
+      "positive_over_negative_rate_ratio": 0.8629892742275377
+     },
+     "n_calls": 1651,
+     "n_episodes": 290,
+     "n_background": 0
+    },
+    "ceiling-logistic": {
+     "call_fraction": 0.082804057256612,
+     "open_time_fraction": 0.08789927167134765,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 843,
+       "call_fraction": 0.07790407540892709
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 904,
+       "call_fraction": 0.08796341344750414
+      },
+      "positive_over_negative_rate_ratio": 0.8856417953291412
+     },
+     "n_calls": 1747,
+     "n_episodes": 285,
+     "n_background": 0
+    },
+    "absolute-confidence": {
+     "call_fraction": 0.09963029671058868,
+     "open_time_fraction": 0.10529823392202599,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 1203,
+       "call_fraction": 0.11117271971167175
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 899,
+       "call_fraction": 0.08747689014303785
+      },
+      "positive_over_negative_rate_ratio": 1.2708810238897115
+     },
+     "n_calls": 2102,
+     "n_episodes": 312,
+     "n_background": 0
+    },
+    "random-escalation": {
+     "call_fraction": 0.11209593326381648,
+     "open_time_fraction": 0.12284000571238159,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 1405,
+       "call_fraction": 0.12984012568154515
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 960,
+       "call_fraction": 0.09341247445752651
+      },
+      "positive_over_negative_rate_ratio": 1.3899655954471246
+     },
+     "n_calls": 2365,
+     "n_episodes": 516,
+     "n_background": 0
+    }
+   },
+   "streaming_ap": {
+    "device-only": {
+     "ap": 0.00962027469595211,
+     "ci": [
+      0.008149928336477529,
+      0.012107112329485404
+     ]
+    },
+    "always-cloud": {
+     "ap": 0.012870942146839768,
+     "ci": [
+      0.010567366060054692,
+      0.016533711495473207
+     ]
+    },
+    "escalation-only": {
+     "ap": 0.010118051182133722,
+     "ci": [
+      0.008499075503319818,
+      0.012931825635480383
+     ]
+    },
+    "oracle-trigger": {
+     "ap": 0.027318130055405194,
+     "ci": [
+      0.016293550599648654,
+      0.04057907917037469
+     ]
+    },
+    "oracle-timing-bound": {
+     "ap": 0.013025749921524825,
+     "ci": [
+      0.010276630255608411,
+      0.019990305526133945
+     ]
+    },
+    "cloud-initiated": {
+     "ap": 0.010341975311674453,
+     "ci": [
+      0.008674001489290227,
+      0.015065391239164231
+     ]
+    },
+    "context-trickle": {
+     "ap": 0.010393974152381911,
+     "ci": [
+      0.008707486748255373,
+      0.013412401196304158
+     ]
+    },
+    "ceiling-gbt": {
+     "ap": 0.00992723442913381,
+     "ci": [
+      0.00830227260803726,
+      0.01286536981743078
+     ]
+    },
+    "ceiling-logistic": {
+     "ap": 0.009777728727610126,
+     "ci": [
+      0.008240116721654561,
+      0.012254047571217376
+     ]
+    },
+    "absolute-confidence": {
+     "ap": 0.010111197614036924,
+     "ci": [
+      0.008481991968750751,
+      0.013002714999235278
+     ]
+    },
+    "random-escalation": {
+     "ap": 0.00984799716371634,
+     "ci": [
+      0.008363745798654927,
+      0.012436748410845307
+     ]
+    }
+   },
+   "streaming_ap_by_horizon": {
+    "device-only": {
+     "0.0": {
+      "ap": 0.012176147267364686,
+      "ci": [
+       0.009994112899169147,
+       0.01579768827687947
+      ]
+     },
+     "0.5": {
+      "ap": 0.009994155206857609,
+      "ci": [
+       0.008328588733363737,
+       0.012701349237758796
+      ]
+     },
+     "1.0": {
+      "ap": 0.009932005285186367,
+      "ci": [
+       0.008223013999935257,
+       0.013066194009002434
+      ]
+     },
+     "1.5": {
+      "ap": 0.008934663595812357,
+      "ci": [
+       0.007601719302751456,
+       0.010973157867652999
+      ]
+     }
+    },
+    "always-cloud": {
+     "0.0": {
+      "ap": 0.024772187851227118,
+      "ci": [
+       0.018213528844996184,
+       0.03672525812670145
+      ]
+     },
+     "0.5": {
+      "ap": 0.015372606092708671,
+      "ci": [
+       0.01230578064476821,
+       0.020128712783768276
+      ]
+     },
+     "1.0": {
+      "ap": 0.012210617861378744,
+      "ci": [
+       0.009873006614885188,
+       0.015725332457918635
+      ]
+     },
+     "1.5": {
+      "ap": 0.01102960248643189,
+      "ci": [
+       0.009087197434884398,
+       0.014229908716308535
+      ]
+     }
+    },
+    "escalation-only": {
+     "0.0": {
+      "ap": 0.01632155611639987,
+      "ci": [
+       0.011853367851174645,
+       0.03478057959367579
+      ]
+     },
+     "0.5": {
+      "ap": 0.010627977977373757,
+      "ci": [
+       0.0088023832807906,
+       0.013627766361266416
+      ]
+     },
+     "1.0": {
+      "ap": 0.010438961156410829,
+      "ci": [
+       0.008447577328566965,
+       0.01436131547015389
+      ]
+     },
+     "1.5": {
+      "ap": 0.00928721441261658,
+      "ci": [
+       0.007867614177854481,
+       0.01155503321702616
+      ]
+     }
+    },
+    "oracle-trigger": {
+     "0.0": {
+      "ap": 0.019600895032800707,
+      "ci": [
+       0.010868798002985767,
+       0.03604766003295829
+      ]
+     },
+     "0.5": {
+      "ap": 0.027191638916151083,
+      "ci": [
+       0.011551915612233557,
+       0.051114991089005336
+      ]
+     },
+     "1.0": {
+      "ap": 0.03880706599078091,
+      "ci": [
+       0.01604281660539413,
+       0.0690055432004617
+      ]
+     },
+     "1.5": {
+      "ap": 0.015955685259283592,
+      "ci": [
+       0.00795223030866687,
+       0.030641873334854138
+      ]
+     }
+    },
+    "oracle-timing-bound": {
+     "0.0": {
+      "ap": 0.013519996038731469,
+      "ci": [
+       0.010891325970985865,
+       0.01890220631083507
+      ]
+     },
+     "0.5": {
+      "ap": 0.01478623136568444,
+      "ci": [
+       0.011218328058127952,
+       0.02384467855877549
+      ]
+     },
+     "1.0": {
+      "ap": 0.014210127819652172,
+      "ci": [
+       0.009920913093640191,
+       0.02586222765790127
+      ]
+     },
+     "1.5": {
+      "ap": 0.010080890579237863,
+      "ci": [
+       0.008127223567918345,
+       0.017502750824577386
+      ]
+     }
+    },
+    "cloud-initiated": {
+     "0.0": {
+      "ap": 0.016105519703449474,
+      "ci": [
+       0.012272491517727874,
+       0.025366122947044687
+      ]
+     },
+     "0.5": {
+      "ap": 0.011454790767747603,
+      "ci": [
+       0.009317333958218293,
+       0.015541062224885025
+      ]
+     },
+     "1.0": {
+      "ap": 0.010173028075447009,
+      "ci": [
+       0.008405675302097973,
+       0.013409667692869599
+      ]
+     },
+     "1.5": {
+      "ap": 0.009398107091828749,
+      "ci": [
+       0.00787693598963586,
+       0.02150642045607131
+      ]
+     }
+    },
+    "context-trickle": {
+     "0.0": {
+      "ap": 0.01537998017331633,
+      "ci": [
+       0.011897236404675528,
+       0.023871151680332325
+      ]
+     },
+     "0.5": {
+      "ap": 0.010810216521063124,
+      "ci": [
+       0.008943497436016464,
+       0.013990143927051134
+      ]
+     },
+     "1.0": {
+      "ap": 0.01103307715422475,
+      "ci": [
+       0.008709351950775561,
+       0.016236062070639955
+      ]
+     },
+     "1.5": {
+      "ap": 0.009338628781857856,
+      "ci": [
+       0.00786340328760097,
+       0.01145835207120761
+      ]
+     }
+    },
+    "ceiling-gbt": {
+     "0.0": {
+      "ap": 0.013272398728471664,
+      "ci": [
+       0.010693483881836554,
+       0.01957092939370002
+      ]
+     },
+     "0.5": {
+      "ap": 0.010598908363363217,
+      "ci": [
+       0.00875151579154138,
+       0.014054403959217752
+      ]
+     },
+     "1.0": {
+      "ap": 0.010153136630060046,
+      "ci": [
+       0.00833867536086194,
+       0.014132758248393731
+      ]
+     },
+     "1.5": {
+      "ap": 0.009029658293978162,
+      "ci": [
+       0.007660925768404977,
+       0.011142703003099764
+      ]
+     }
+    },
+    "ceiling-logistic": {
+     "0.0": {
+      "ap": 0.0128336809961778,
+      "ci": [
+       0.010530801968390052,
+       0.01808856718479961
+      ]
+     },
+     "0.5": {
+      "ap": 0.010487922375762111,
+      "ci": [
+       0.008731771870173818,
+       0.013422629412891003
+      ]
+     },
+     "1.0": {
+      "ap": 0.009942813359942378,
+      "ci": [
+       0.00821344190520707,
+       0.013198074428078008
+      ]
+     },
+     "1.5": {
+      "ap": 0.008902450447125888,
+      "ci": [
+       0.0075942254074137135,
+       0.010917971529733051
+      ]
+     }
+    },
+    "absolute-confidence": {
+     "0.0": {
+      "ap": 0.013150372566531827,
+      "ci": [
+       0.010556960326298397,
+       0.017735500102985746
+      ]
+     },
+     "0.5": {
+      "ap": 0.010611752339675653,
+      "ci": [
+       0.0087477022098734,
+       0.014004783896910181
+      ]
+     },
+     "1.0": {
+      "ap": 0.010466652865602945,
+      "ci": [
+       0.008575578741355465,
+       0.014225190471179547
+      ]
+     },
+     "1.5": {
+      "ap": 0.009255187636832175,
+      "ci": [
+       0.007853263343587383,
+       0.011339715099166835
+      ]
+     }
+    },
+    "random-escalation": {
+     "0.0": {
+      "ap": 0.015598546420905822,
+      "ci": [
+       0.01134270770980002,
+       0.029933068594435994
+      ]
+     },
+     "0.5": {
+      "ap": 0.009933444485133638,
+      "ci": [
+       0.00834836191851679,
+       0.012433369794784816
+      ]
+     },
+     "1.0": {
+      "ap": 0.010546438686582324,
+      "ci": [
+       0.00858749341087212,
+       0.014486306974867157
+      ]
+     },
+     "1.5": {
+      "ap": 0.009064108319433058,
+      "ci": [
+       0.007728265559174568,
+       0.011093429058012666
+      ]
+     }
+    }
+   },
+   "challenge_mAP": {
+    "device-only": 0.46873386775581977,
+    "always-cloud": 0.5666835015753743,
+    "escalation-only": 0.48726002740418145,
+    "oracle-trigger": 0.49410803568375644,
+    "oracle-timing-bound": 0.5497941657033057,
+    "cloud-initiated": 0.48002521189885544,
+    "context-trickle": 0.48829536567947435,
+    "ceiling-gbt": 0.48257686524429255,
+    "ceiling-logistic": 0.4832471401723229,
+    "absolute-confidence": 0.4837529415639365,
+    "random-escalation": 0.4794210116602349
+   },
+   "challenge_mAP_ci": {
+    "device-only": [
+     0.4221890639435476,
+     0.5450510947116644
+    ],
+    "always-cloud": [
+     0.509157921163436,
+     0.6483408097734604
+    ],
+    "escalation-only": [
+     0.43849905787837606,
+     0.5660987739451154
+    ],
+    "oracle-trigger": [
+     0.44124797235813745,
+     0.5690392672976458
+    ],
+    "oracle-timing-bound": [
+     0.4943624841238277,
+     0.6269784573973616
+    ],
+    "cloud-initiated": [
+     0.43123842300821646,
+     0.558227358412343
+    ],
+    "context-trickle": [
+     0.43901200555820774,
+     0.5642462703109379
+    ],
+    "ceiling-gbt": [
+     0.4325510098463774,
+     0.5614949143010669
+    ],
+    "ceiling-logistic": [
+     0.4342044241337754,
+     0.5610152758199897
+    ],
+    "absolute-confidence": [
+     0.4333726224900001,
+     0.5590653385081774
+    ],
+    "random-escalation": [
+     0.4316878057766491,
+     0.555128767216382
+    ]
+   },
+   "cloud_initiated_feasible_by_fold": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true
+   },
+   "cloud_initiated_trigger_degenerate_by_fold": {
+    "0": false,
+    "1": false,
+    "2": false,
+    "3": false,
+    "4": false
+   },
+   "references": {
+    "device_only_streaming": 0.00962027469595211,
+    "always_cloud_streaming": 0.012870942146839768,
+    "device_only_challenge": 0.46873386775581977,
+    "always_cloud_challenge": 0.5666835015753743,
+    "gap_streaming": 0.0032506674508876576,
+    "gap_challenge": 0.09794963381955452,
+    "gap_streaming_ci": [
+     0.0013191893864540906,
+     0.0059339954682126154
+    ],
+    "gap_challenge_ci": [
+     0.04108398016437672,
+     0.15895712315807944
+    ]
+   },
+   "settings_by_fold": {
+    "0": {
+     "controller": {
+      "w_c": 3.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 4,
+      "budget": 0.1,
+      "theta": 3.1860265731811523,
+      "train_call_fraction": 0.0999585479954995,
+      "train_streaming_ap": 0.0133278000602665,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -2.869786718383443,
+      "train_call_fraction": 0.09581334754544917,
+      "k_c": 4,
+      "search_range": [
+       -5.281048985519967,
+       -2.6520302353218095
+      ],
+      "hit_budget": false
+     },
+     "random": {
+      "p_open": 0.01605081558227539,
+      "calls_per_episode": 7,
+      "seed": 0,
+      "train_call_fraction": 0.0999585479954995
+     },
+     "oracle": {
+      "lead_calls": 12,
+      "lead_s": 6.0,
+      "train_call_fraction": 0.0999585479954995,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 5,
+       "lead_s": 2.5,
+       "train_call_fraction": 0.10682773731272577,
+       "hit_budget": false,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 8.0,
+      "background_floor": 0.0625,
+      "feasible": true,
+      "tau": -2.876642586039065,
+      "train_call_fraction": 0.0999585479954995,
+      "train_streaming_ap": 0.016139728051569255,
+      "k_c": 4,
+      "search_range": [
+       -5.1207439325781845,
+       -2.505774673635238
+      ],
+      "hit_budget": true,
+      "n_episodes": 69,
+      "n_background": 1135,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.037500000000000006
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 8.0,
+      "tau": -2.864382299117299,
+      "k_c": 4,
+      "train_call_fraction": 0.09984011369692664,
+      "feasible": true,
+      "train_streaming_ap": 0.016129488440882314,
+      "mean_background_floor": 0.0640625,
+      "n_episodes": 65,
+      "trigger_degenerate": false,
+      "n_clips_modulated": 6,
+      "search_range": [
+       -5.1207439325781845,
+       -2.505774673635238
+      ],
+      "hit_budget": true
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.07221302775842953,
+       "train_call_fraction": 0.10072837093622312,
+       "k_c": 4,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.582339007918641,
+       "train_call_fraction": 0.10007698229407236,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    },
+    "1": {
+     "controller": {
+      "w_c": 3.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 1,
+      "budget": 0.1,
+      "theta": 2.4444408416748047,
+      "train_call_fraction": 0.10008857395925598,
+      "train_streaming_ap": 0.010153660303094827,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -3.208888698196976,
+      "train_call_fraction": 0.09678181281369944,
+      "k_c": 1,
+      "search_range": [
+       -4.899415525534104,
+       -2.9119382832170966
+      ],
+      "hit_budget": false
+     },
+     "random": {
+      "p_open": 0.052442073822021484,
+      "calls_per_episode": 2,
+      "seed": 0,
+      "train_call_fraction": 0.09997047534691468
+     },
+     "oracle": {
+      "lead_calls": 12,
+      "lead_s": 6.0,
+      "train_call_fraction": 0.09890758783584293,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 5,
+       "lead_s": 2.5,
+       "train_call_fraction": 0.10634780041334514,
+       "hit_budget": false,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 8.0,
+      "background_floor": 0.0625,
+      "feasible": true,
+      "tau": -3.143280362048478,
+      "train_call_fraction": 0.10020667257159728,
+      "train_streaming_ap": 0.00953259324276354,
+      "k_c": 1,
+      "search_range": [
+       -5.0133594814192,
+       -2.65069485981997
+      ],
+      "hit_budget": true,
+      "n_episodes": 116,
+      "n_background": 1139,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.037500000000000006
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 8.0,
+      "tau": -3.131944449619369,
+      "k_c": 1,
+      "train_call_fraction": 0.09991142604074402,
+      "feasible": true,
+      "train_streaming_ap": 0.009582880411793303,
+      "mean_background_floor": 0.06432291666666666,
+      "n_episodes": 112,
+      "trigger_degenerate": false,
+      "n_clips_modulated": 7,
+      "search_range": [
+       -5.0133594814192,
+       -2.65069485981997
+      ],
+      "hit_budget": true
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.11246678991518036,
+       "train_call_fraction": 0.10026572187776793,
+       "k_c": 1,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.601711835139384,
+       "train_call_fraction": 0.10002952465308533,
+       "k_c": 1,
+       "hit_budget": true
+      }
+     }
+    },
+    "2": {
+     "controller": {
+      "w_c": 3.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 4,
+      "budget": 0.1,
+      "theta": 3.1993346214294434,
+      "train_call_fraction": 0.10006567556272017,
+      "train_streaming_ap": 0.012536918630135898,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -2.907750889931836,
+      "train_call_fraction": 0.09666248731267538,
+      "k_c": 4,
+      "search_range": [
+       -5.150442834304049,
+       -2.6781457167753464
+      ],
+      "hit_budget": false
+     },
+     "random": {
+      "p_open": 0.016197681427001953,
+      "calls_per_episode": 7,
+      "seed": 0,
+      "train_call_fraction": 0.1001253806197385
+     },
+     "oracle": {
+      "lead_calls": 12,
+      "lead_s": 6.0,
+      "train_call_fraction": 0.10084184130395844,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 4,
+       "lead_s": 2.0,
+       "train_call_fraction": 0.09439369514597887,
+       "hit_budget": false,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 8.0,
+      "background_floor": 0.0625,
+      "feasible": true,
+      "tau": -2.841525954653175,
+      "train_call_fraction": 0.10024479073377515,
+      "train_streaming_ap": 0.015345557009007823,
+      "k_c": 4,
+      "search_range": [
+       -5.121053375745013,
+       -2.49345880823447
+      ],
+      "hit_budget": true,
+      "n_episodes": 70,
+      "n_background": 1127,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.037500000000000006
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 8.0,
+      "tau": -2.49345880823447,
+      "k_c": 4,
+      "train_call_fraction": 0.10454355483909487,
+      "feasible": true,
+      "train_streaming_ap": 0.015141819799209248,
+      "mean_background_floor": 0.09609375,
+      "n_episodes": 0,
+      "trigger_degenerate": true,
+      "n_clips_modulated": 129,
+      "search_range": [
+       -5.121053375745013,
+       -2.49345880823447
+      ],
+      "hit_budget": false
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.09461695713007771,
+       "train_call_fraction": 0.10024479073377515,
+       "k_c": 4,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.5921029839126848,
+       "train_call_fraction": 0.09988656039166517,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    },
+    "3": {
+     "controller": {
+      "w_c": 3.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 4,
+      "budget": 0.1,
+      "theta": 3.194638252258301,
+      "train_call_fraction": 0.09982910012375508,
+      "train_streaming_ap": 0.012562099335085128,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -2.857060026982811,
+      "train_call_fraction": 0.09770758441864577,
+      "k_c": 4,
+      "search_range": [
+       -5.357469364626301,
+       -2.6312528425049866
+      ],
+      "hit_budget": true
+     },
+     "random": {
+      "p_open": 0.016075611114501953,
+      "calls_per_episode": 7,
+      "seed": 0,
+      "train_call_fraction": 0.09959337615652071
+     },
+     "oracle": {
+      "lead_calls": 12,
+      "lead_s": 6.0,
+      "train_call_fraction": 0.09959337615652071,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 5,
+       "lead_s": 2.5,
+       "train_call_fraction": 0.10690081914078614,
+       "hit_budget": false,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 8.0,
+      "background_floor": 0.0625,
+      "feasible": true,
+      "tau": -2.736819216006915,
+      "train_call_fraction": 0.09977016913194649,
+      "train_streaming_ap": 0.014581490915402078,
+      "k_c": 4,
+      "search_range": [
+       -5.446639889786238,
+       -2.2864748413249445
+      ],
+      "hit_budget": true,
+      "n_episodes": 74,
+      "n_background": 1140,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.037500000000000006
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 10.0,
+      "tau": -2.2864748413249445,
+      "k_c": 4,
+      "train_call_fraction": 0.10171489186163003,
+      "feasible": true,
+      "train_streaming_ap": 0.010581999527480507,
+      "mean_background_floor": 0.09416666666666668,
+      "n_episodes": 0,
+      "trigger_degenerate": true,
+      "n_clips_modulated": 212,
+      "search_range": [
+       -5.446639889786238,
+       -2.2864748413249445
+      ],
+      "hit_budget": true
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.12719625207216667,
+       "train_call_fraction": 0.10018268607460663,
+       "k_c": 4,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.5820289463596009,
+       "train_call_fraction": 0.10018268607460663,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    },
+    "4": {
+     "controller": {
+      "w_c": 3.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 4,
+      "budget": 0.1,
+      "theta": 3.1999754905700684,
+      "train_call_fraction": 0.09981011155945882,
+      "train_streaming_ap": 0.012774607877196515,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -3.0081167240194993,
+      "train_call_fraction": 0.09909802990742939,
+      "k_c": 4,
+      "search_range": [
+       -4.997073703594343,
+       -2.828497823688329
+      ],
+      "hit_budget": true
+     },
+     "random": {
+      "p_open": 0.016491413116455078,
+      "calls_per_episode": 7,
+      "seed": 0,
+      "train_call_fraction": 0.09981011155945882
+     },
+     "oracle": {
+      "lead_calls": 12,
+      "lead_s": 6.0,
+      "train_call_fraction": 0.09933539045810587,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 5,
+       "lead_s": 2.5,
+       "train_call_fraction": 0.10681224780441491,
+       "hit_budget": false,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 8.0,
+      "background_floor": 0.0625,
+      "feasible": true,
+      "tau": -2.873159123952215,
+      "train_call_fraction": 0.1000474721101353,
+      "train_streaming_ap": 0.013150990469141569,
+      "k_c": 4,
+      "search_range": [
+       -5.117107966692485,
+       -2.5443207596870754
+      ],
+      "hit_budget": true,
+      "n_episodes": 71,
+      "n_background": 1131,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.037500000000000006
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 10.0,
+      "tau": -2.5443207596870754,
+      "k_c": 4,
+      "train_call_fraction": 0.101887016377878,
+      "feasible": true,
+      "train_streaming_ap": 0.009189617813871724,
+      "mean_background_floor": 0.09395833333333335,
+      "n_episodes": 0,
+      "trigger_degenerate": true,
+      "n_clips_modulated": 211,
+      "search_range": [
+       -5.117107966692485,
+       -2.5443207596870754
+      ],
+      "hit_budget": true
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.12046662570233682,
+       "train_call_fraction": 0.10010681224780442,
+       "k_c": 4,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.5940374263283894,
+       "train_call_fraction": 0.09998813197246617,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    }
+   }
+  },
+  "0.2": {
+   "target_budget": 0.2,
+   "capture_table": [
+    {
+     "arm": "escalation-only",
+     "label": "device filter (spec 7.7)",
+     "streaming_ap": 0.010457307559402468,
+     "streaming_ap_ci": [
+      0.008742786294691364,
+      0.014117945827456752
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.017041157515195363,
+       "ci": [
+        0.012613027508285076,
+        0.030275650249069173
+       ]
+      },
+      "0.5": {
+       "ap": 0.011437801459304788,
+       "ci": [
+        0.00935559581837823,
+        0.015135266665456415
+       ]
+      },
+      "1.0": {
+       "ap": 0.010160883593427922,
+       "ci": [
+        0.008359150405220766,
+        0.01340551408827589
+       ]
+      },
+      "1.5": {
+       "ap": 0.009773237625474697,
+       "ci": [
+        0.008077873846669055,
+        0.016312633705562504
+       ]
+      }
+     },
+     "streaming_capture": 0.25749569160690056,
+     "streaming_capture_ci": [
+      0.03417094536079649,
+      0.9173550031184557
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": 0.09603330875094972,
+     "beats_random_streaming_ci": [
+      -0.3582974292243768,
+      0.8176520068704413
+     ],
+     "challenge_mAP": 0.4894002112184513,
+     "challenge_mAP_ci": [
+      0.44119112533358945,
+      0.5648052354469845
+     ],
+     "challenge_capture": 0.21098949181069548,
+     "challenge_capture_ci": [
+      -0.11361695677548406,
+      0.498822854766951
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.003799451896763617,
+     "beats_random_challenge_ci": [
+      -0.03167386161091768,
+      0.024762964715149594
+     ],
+     "call_fraction": 0.20177267987486966,
+     "open_time_fraction": 0.22159280239920026,
+     "n_episodes": 947,
+     "positive_over_negative_call_rate": 0.9194309467349214,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "oracle-trigger",
+     "label": "oracle trigger, positives only (NON-CAUSAL)",
+     "streaming_ap": 0.027318130055405194,
+     "streaming_ap_ci": [
+      0.016293550599648654,
+      0.04057907917037469
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.019600895032800707,
+       "ci": [
+        0.010868798002985767,
+        0.03604766003295829
+       ]
+      },
+      "0.5": {
+       "ap": 0.027191638916151083,
+       "ci": [
+        0.011551915612233557,
+        0.051114991089005336
+       ]
+      },
+      "1.0": {
+       "ap": 0.03880706599078091,
+       "ci": [
+        0.01604281660539413,
+        0.0690055432004617
+       ]
+      },
+      "1.5": {
+       "ap": 0.015955685259283592,
+       "ci": [
+        0.00795223030866687,
+        0.030641873334854138
+       ]
+      }
+     },
+     "streaming_capture": 5.444375847987878,
+     "streaming_capture_ci": [
+      2.280662968816514,
+      13.431135581282353
+     ],
+     "beats_random_streaming": true,
+     "beats_random_streaming_difference": 5.282913465131927,
+     "beats_random_streaming_ci": [
+      2.10967869065751,
+      12.993579636183563
+     ],
+     "challenge_mAP": 0.49410803568375644,
+     "challenge_mAP_ci": [
+      0.44124797235813745,
+      0.5690392672976458
+     ],
+     "challenge_capture": 0.2590532188683998,
+     "challenge_capture_ci": [
+      -0.13794723421855432,
+      0.5389258195969505
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.0009083725685415378,
+     "beats_random_challenge_ci": [
+      -0.037260719373694726,
+      0.03559963641468467
+     ],
+     "call_fraction": 0.1994501848516447,
+     "open_time_fraction": 0.2038844194792212,
+     "n_episodes": 150,
+     "positive_over_negative_call_rate": null,
+     "learned": false,
+     "non_causal": true
+    },
+    {
+     "arm": "oracle-timing-bound",
+     "label": "oracle timing bound, every crop (NON-CAUSAL)",
+     "streaming_ap": 0.012991373421568428,
+     "streaming_ap_ci": [
+      0.01036196228344752,
+      0.019813185940846474
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.013693686614958714,
+       "ci": [
+        0.011083618016453887,
+        0.01894700234505639
+       ]
+      },
+      "0.5": {
+       "ap": 0.014855184408421564,
+       "ci": [
+        0.011344434628191442,
+        0.023752096034728738
+       ]
+      },
+      "1.0": {
+       "ap": 0.013966900718282063,
+       "ci": [
+        0.009930949728745836,
+        0.02482816337788851
+       ]
+      },
+      "1.5": {
+       "ap": 0.010152035138001662,
+       "ci": [
+        0.008233432125535525,
+        0.017298710379951072
+       ]
+      }
+     },
+     "streaming_capture": 1.037048168275649,
+     "streaming_capture_ci": [
+      0.5979897372180969,
+      2.8932309088774044
+     ],
+     "beats_random_streaming": true,
+     "beats_random_streaming_difference": 0.8755857854196981,
+     "beats_random_streaming_ci": [
+      0.3806477944211793,
+      2.6544069531253243
+     ],
+     "challenge_mAP": 0.5497941657033057,
+     "challenge_mAP_ci": [
+      0.4943624841238277,
+      0.6269784573973616
+     ],
+     "challenge_capture": 0.827571219886513,
+     "challenge_capture_ci": [
+      0.6135418616448506,
+      0.9766952115486663
+     ],
+     "beats_random_challenge": true,
+     "beats_random_challenge_difference": 0.056594502588090845,
+     "beats_random_challenge_ci": [
+      0.01091879453592281,
+      0.10199755750486825
+     ],
+     "call_fraction": 0.20219926059342117,
+     "open_time_fraction": 0.21021564240491264,
+     "n_episodes": 300,
+     "positive_over_negative_call_rate": 0.9242490340458188,
+     "learned": false,
+     "non_causal": true
+    },
+    {
+     "arm": "cloud-initiated",
+     "label": "cloud trickle",
+     "streaming_ap": 0.010740797703840772,
+     "streaming_ap_ci": [
+      0.008901375767218696,
+      0.013972069365978479
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.017397017080132686,
+       "ci": [
+        0.012960928113777918,
+        0.025603196914850714
+       ]
+      },
+      "0.5": {
+       "ap": 0.012107848278119763,
+       "ci": [
+        0.009777830636754274,
+        0.016112503773867845
+       ]
+      },
+      "1.0": {
+       "ap": 0.01044952581808618,
+       "ci": [
+        0.008584397960700697,
+        0.013718154426115221
+       ]
+      },
+      "1.5": {
+       "ap": 0.00966501901531637,
+       "ci": [
+        0.008056439662930312,
+        0.013426597848890217
+       ]
+      }
+     },
+     "streaming_capture": 0.3447055181183426,
+     "streaming_capture_ci": [
+      0.12778214564082704,
+      0.8066613339566051
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": 0.18324313526239175,
+     "beats_random_streaming_ci": [
+      -0.18309984537088342,
+      0.6725032298315268
+     ],
+     "challenge_mAP": 0.48875268166242525,
+     "challenge_mAP_ci": [
+      0.44070617092917524,
+      0.5631769827748522
+     ],
+     "challenge_capture": 0.20437864978122008,
+     "challenge_capture_ci": [
+      -0.1563509028139193,
+      0.4484583434440796
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.004446981452789656,
+     "beats_random_challenge_ci": [
+      -0.032797091163477704,
+      0.023426329248502197
+     ],
+     "call_fraction": 0.20400037918286093,
+     "open_time_fraction": 0.10722616270766887,
+     "n_episodes": 318,
+     "positive_over_negative_call_rate": 1.3820619231804714,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "context-trickle",
+     "label": "context-modulated trickle",
+     "streaming_ap": 0.010821583961381177,
+     "streaming_ap_ci": [
+      0.009006464587231313,
+      0.014481245486436617
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.017192831395086927,
+       "ci": [
+        0.01292049205835314,
+        0.025784211059741758
+       ]
+      },
+      "0.5": {
+       "ap": 0.012002809653842959,
+       "ci": [
+        0.009742991056405649,
+        0.016151771151875896
+       ]
+      },
+      "1.0": {
+       "ap": 0.010694208474252141,
+       "ci": [
+        0.008656935314808087,
+        0.014683753794633854
+       ]
+      },
+      "1.5": {
+       "ap": 0.009767733756048431,
+       "ci": [
+        0.008155182186558103,
+        0.014183408141572006
+       ]
+      }
+     },
+     "streaming_capture": 0.36955772424553185,
+     "streaming_capture_ci": [
+      0.1521509836683239,
+      0.9562457638094858
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": 0.20809534138958105,
+     "beats_random_streaming_ci": [
+      -0.13288736816287647,
+      0.8169437490020542
+     ],
+     "challenge_mAP": 0.48413277126703624,
+     "challenge_mAP_ci": [
+      0.4363126948880274,
+      0.5570181742132583
+     ],
+     "challenge_capture": 0.1572124663537258,
+     "challenge_capture_ci": [
+      -0.1507369892047382,
+      0.34419740902864077
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.00906689184817866,
+     "beats_random_challenge_ci": [
+      -0.043141896763787914,
+      0.020613894204364346
+     ],
+     "call_fraction": 0.20494833633519766,
+     "open_time_fraction": 0.08102061217689342,
+     "n_episodes": 256,
+     "positive_over_negative_call_rate": 1.380931641621302,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "ceiling-gbt",
+     "label": "predictability ceiling, boosted trees (LEARNED)",
+     "streaming_ap": 0.009945766796015963,
+     "streaming_ap_ci": [
+      0.008339837352822059,
+      0.012594472666092857
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.01498065561145994,
+       "ci": [
+        0.01172349883612062,
+        0.023446141014144287
+       ]
+      },
+      "0.5": {
+       "ap": 0.011036076690410901,
+       "ci": [
+        0.009006673730478247,
+        0.014779176938107715
+       ]
+      },
+      "1.0": {
+       "ap": 0.009828739193699941,
+       "ci": [
+        0.00810147584030855,
+        0.012895432347102574
+       ]
+      },
+      "1.5": {
+       "ap": 0.008972484503937048,
+       "ci": [
+        0.00764308213144758,
+        0.011095124792638812
+       ]
+      }
+     },
+     "streaming_capture": 0.1001308515809488,
+     "streaming_capture_ci": [
+      -0.2210801122177861,
+      0.36050282703109504
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": -0.06133153127500204,
+     "beats_random_streaming_ci": [
+      -0.5853265954836728,
+      0.2506017882062812
+     ],
+     "challenge_mAP": 0.49899210063347926,
+     "challenge_mAP_ci": [
+      0.4485072906248171,
+      0.574395715432784
+     ],
+     "challenge_capture": 0.30891624294790154,
+     "challenge_capture_ci": [
+      -0.03661134604166526,
+      0.6143645582937911
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.0057924375182643595,
+     "beats_random_challenge_ci": [
+      -0.025668707377420285,
+      0.03649248514508728
+     ],
+     "call_fraction": 0.1796852782254242,
+     "open_time_fraction": 0.19072214023896797,
+     "n_episodes": 596,
+     "positive_over_negative_call_rate": 0.9402550353509664,
+     "learned": true,
+     "non_causal": false
+    },
+    {
+     "arm": "ceiling-logistic",
+     "label": "predictability ceiling, logistic (LEARNED)",
+     "streaming_ap": 0.009937342693090398,
+     "streaming_ap_ci": [
+      0.008398174489742704,
+      0.012534517415616266
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.014800472976050557,
+       "ci": [
+        0.011300339028740539,
+        0.024984311420828135
+       ]
+      },
+      "0.5": {
+       "ap": 0.01073858847384035,
+       "ci": [
+        0.008871216561212304,
+        0.013941383933860364
+       ]
+      },
+      "1.0": {
+       "ap": 0.009908294849410838,
+       "ci": [
+        0.008188919475725066,
+        0.013259839853760733
+       ]
+      },
+      "1.5": {
+       "ap": 0.009165144756020004,
+       "ci": [
+        0.00782137409429121,
+        0.011353957903468466
+       ]
+      }
+     },
+     "streaming_capture": 0.0975393521265013,
+     "streaming_capture_ci": [
+      -0.17908687497202383,
+      0.36260845391585456
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": -0.06392303072944952,
+     "beats_random_streaming_ci": [
+      -0.5803324106889377,
+      0.2644984672425166
+     ],
+     "challenge_mAP": 0.48371028982014225,
+     "challenge_mAP_ci": [
+      0.4328363425083517,
+      0.5592850081146609
+     ],
+     "challenge_capture": 0.15289921442598198,
+     "challenge_capture_ci": [
+      -0.2730062005932674,
+      0.4341089706650515
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.009489373295072656,
+     "beats_random_challenge_ci": [
+      -0.04061769688940534,
+      0.01755590637598425
+     ],
+     "call_fraction": 0.18461465541757513,
+     "open_time_fraction": 0.19557766458799447,
+     "n_episodes": 601,
+     "positive_over_negative_call_rate": 1.0221213135085,
+     "learned": true,
+     "non_causal": false
+    },
+    {
+     "arm": "absolute-confidence",
+     "label": "absolute-confidence trigger",
+     "streaming_ap": 0.010150213035480258,
+     "streaming_ap_ci": [
+      0.008543292604097872,
+      0.012871194508861572
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.01614097146969798,
+       "ci": [
+        0.012405306855194842,
+        0.02505055280720762
+       ]
+      },
+      "0.5": {
+       "ap": 0.010962264213662433,
+       "ci": [
+        0.009053714356520798,
+        0.014241043743954646
+       ]
+      },
+      "1.0": {
+       "ap": 0.01046680117988847,
+       "ci": [
+        0.008554363187957499,
+        0.013715249135089388
+       ]
+      },
+      "1.5": {
+       "ap": 0.009021573712889867,
+       "ci": [
+        0.00765509659271199,
+        0.011123583382045776
+       ]
+      }
+     },
+     "streaming_capture": 0.16302447036944295,
+     "streaming_capture_ci": [
+      -0.11224626254900043,
+      0.41908289719606645
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": 0.0015620875134921143,
+     "beats_random_streaming_ci": [
+      -0.45924570641900564,
+      0.31667404523425186
+     ],
+     "challenge_mAP": 0.4890126081741865,
+     "challenge_mAP_ci": [
+      0.4393620169091102,
+      0.5652203818037663
+     ],
+     "challenge_capture": 0.2070323249571795,
+     "challenge_capture_ci": [
+      -0.2773755294640384,
+      0.47032470562329093
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.00418705494102839,
+     "beats_random_challenge_ci": [
+      -0.03486238048876223,
+      0.025596807716192424
+     ],
+     "call_fraction": 0.19911839984832685,
+     "open_time_fraction": 0.2103584519445899,
+     "n_episodes": 703,
+     "positive_over_negative_call_rate": 1.240066652931533,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "random-escalation",
+     "label": "random escalation",
+     "streaming_ap": 0.01014513520844471,
+     "streaming_ap_ci": [
+      0.008501413120100504,
+      0.013082226864116695
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.01910064728358023,
+       "ci": [
+        0.012732113959639153,
+        0.03982062173386277
+       ]
+      },
+      "0.5": {
+       "ap": 0.01060603831348133,
+       "ci": [
+        0.008831143473076243,
+        0.013748970573061623
+       ]
+      },
+      "1.0": {
+       "ap": 0.010624998212865477,
+       "ci": [
+        0.008578977826834295,
+        0.014952087232800866
+       ]
+      },
+      "1.5": {
+       "ap": 0.009204369098987322,
+       "ci": [
+        0.007806717754948204,
+        0.011348735169720505
+       ]
+      }
+     },
+     "streaming_capture": 0.16146238285595083,
+     "streaming_capture_ci": [
+      -0.07720849504421791,
+      0.5665626127066395
+     ],
+     "beats_random_streaming": null,
+     "beats_random_streaming_difference": null,
+     "beats_random_streaming_ci": null,
+     "challenge_mAP": 0.4931996631152149,
+     "challenge_mAP_ci": [
+      0.44276259845180477,
+      0.5691748888292187
+     ],
+     "challenge_capture": 0.24977934480558336,
+     "challenge_capture_ci": [
+      -0.011867763511716664,
+      0.5743960415483765
+     ],
+     "beats_random_challenge": null,
+     "beats_random_challenge_difference": null,
+     "beats_random_challenge_ci": null,
+     "call_fraction": 0.20480614276234715,
+     "open_time_fraction": 0.22487742181177703,
+     "n_episodes": 960,
+     "positive_over_negative_call_rate": 1.1451026422400359,
+     "learned": false,
+     "non_causal": false
+    }
+   ],
+   "realized": {
+    "device-only": {
+     "call_fraction": 0.0,
+     "open_time_fraction": 0.0
+    },
+    "always-cloud": {
+     "call_fraction": 1.0,
+     "open_time_fraction": 1.0
+    },
+    "escalation-only": {
+     "call_fraction": 0.20177267987486966,
+     "open_time_fraction": 0.22159280239920026,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 2094,
+       "call_fraction": 0.19351261436096479
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 2163,
+       "call_fraction": 0.21046998151211443
+      },
+      "positive_over_negative_rate_ratio": 0.9194309467349214
+     },
+     "n_calls": 4257,
+     "n_episodes": 947,
+     "n_background": 0
+    },
+    "oracle-trigger": {
+     "call_fraction": 0.1994501848516447,
+     "open_time_fraction": 0.2038844194792212,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 4208,
+       "call_fraction": 0.3888734867387487
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 0,
+       "call_fraction": 0.0
+      },
+      "positive_over_negative_rate_ratio": null
+     },
+     "n_calls": 4208,
+     "n_episodes": 150,
+     "n_background": 0
+    },
+    "oracle-timing-bound": {
+     "call_fraction": 0.20219926059342117,
+     "open_time_fraction": 0.21021564240491264,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 2104,
+       "call_fraction": 0.19443674336937436
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 2162,
+       "call_fraction": 0.21037267685122119
+      },
+      "positive_over_negative_rate_ratio": 0.9242490340458188
+     },
+     "n_calls": 4266,
+     "n_episodes": 300,
+     "n_background": 0
+    },
+    "cloud-initiated": {
+     "call_fraction": 0.20400037918286093,
+     "open_time_fraction": 0.10722616270766887,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 2551,
+       "call_fraction": 0.23574531004528232
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 1753,
+       "call_fraction": 0.17057507054587914
+      },
+      "positive_over_negative_rate_ratio": 1.3820619231804714
+     },
+     "n_calls": 4304,
+     "n_episodes": 318,
+     "n_background": 2185
+    },
+    "context-trickle": {
+     "call_fraction": 0.20494833633519766,
+     "open_time_fraction": 0.08102061217689342,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 2562,
+       "call_fraction": 0.23676185195453286
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 1762,
+       "call_fraction": 0.17145081249391847
+      },
+      "positive_over_negative_rate_ratio": 1.380931641621302
+     },
+     "n_calls": 4324,
+     "n_episodes": 256,
+     "n_background": 2731
+    },
+    "ceiling-gbt": {
+     "call_fraction": 0.1796852782254242,
+     "open_time_fraction": 0.19072214023896797,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 1886,
+       "call_fraction": 0.17429073098604564
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 1905,
+       "call_fraction": 0.18536537900165417
+      },
+      "positive_over_negative_rate_ratio": 0.9402550353509664
+     },
+     "n_calls": 3791,
+     "n_episodes": 596,
+     "n_background": 0
+    },
+    "ceiling-logistic": {
+     "call_fraction": 0.18461465541757513,
+     "open_time_fraction": 0.19557766458799447,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 2019,
+       "call_fraction": 0.186581646797893
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 1876,
+       "call_fraction": 0.18254354383574972
+      },
+      "positive_over_negative_rate_ratio": 1.0221213135085
+     },
+     "n_calls": 3895,
+     "n_episodes": 601,
+     "n_background": 0
+    },
+    "absolute-confidence": {
+     "call_fraction": 0.19911839984832685,
+     "open_time_fraction": 0.2103584519445899,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 2379,
+       "call_fraction": 0.21985029110063764
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 1822,
+       "call_fraction": 0.17728909214751387
+      },
+      "positive_over_negative_rate_ratio": 1.240066652931533
+     },
+     "n_calls": 4201,
+     "n_episodes": 703,
+     "n_background": 0
+    },
+    "random-escalation": {
+     "call_fraction": 0.20480614276234715,
+     "open_time_fraction": 0.22487742181177703,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 2362,
+       "call_fraction": 0.21827927178634138
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 1959,
+       "call_fraction": 0.19061983068989005
+      },
+      "positive_over_negative_rate_ratio": 1.1451026422400359
+     },
+     "n_calls": 4321,
+     "n_episodes": 960,
+     "n_background": 0
+    }
+   },
+   "streaming_ap": {
+    "device-only": {
+     "ap": 0.00962027469595211,
+     "ci": [
+      0.008149928336477529,
+      0.012107112329485404
+     ]
+    },
+    "always-cloud": {
+     "ap": 0.012870942146839768,
+     "ci": [
+      0.010567366060054692,
+      0.016533711495473207
+     ]
+    },
+    "escalation-only": {
+     "ap": 0.010457307559402468,
+     "ci": [
+      0.008742786294691364,
+      0.014117945827456752
+     ]
+    },
+    "oracle-trigger": {
+     "ap": 0.027318130055405194,
+     "ci": [
+      0.016293550599648654,
+      0.04057907917037469
+     ]
+    },
+    "oracle-timing-bound": {
+     "ap": 0.012991373421568428,
+     "ci": [
+      0.01036196228344752,
+      0.019813185940846474
+     ]
+    },
+    "cloud-initiated": {
+     "ap": 0.010740797703840772,
+     "ci": [
+      0.008901375767218696,
+      0.013972069365978479
+     ]
+    },
+    "context-trickle": {
+     "ap": 0.010821583961381177,
+     "ci": [
+      0.009006464587231313,
+      0.014481245486436617
+     ]
+    },
+    "ceiling-gbt": {
+     "ap": 0.009945766796015963,
+     "ci": [
+      0.008339837352822059,
+      0.012594472666092857
+     ]
+    },
+    "ceiling-logistic": {
+     "ap": 0.009937342693090398,
+     "ci": [
+      0.008398174489742704,
+      0.012534517415616266
+     ]
+    },
+    "absolute-confidence": {
+     "ap": 0.010150213035480258,
+     "ci": [
+      0.008543292604097872,
+      0.012871194508861572
+     ]
+    },
+    "random-escalation": {
+     "ap": 0.01014513520844471,
+     "ci": [
+      0.008501413120100504,
+      0.013082226864116695
+     ]
+    }
+   },
+   "streaming_ap_by_horizon": {
+    "device-only": {
+     "0.0": {
+      "ap": 0.012176147267364686,
+      "ci": [
+       0.009994112899169147,
+       0.01579768827687947
+      ]
+     },
+     "0.5": {
+      "ap": 0.009994155206857609,
+      "ci": [
+       0.008328588733363737,
+       0.012701349237758796
+      ]
+     },
+     "1.0": {
+      "ap": 0.009932005285186367,
+      "ci": [
+       0.008223013999935257,
+       0.013066194009002434
+      ]
+     },
+     "1.5": {
+      "ap": 0.008934663595812357,
+      "ci": [
+       0.007601719302751456,
+       0.010973157867652999
+      ]
+     }
+    },
+    "always-cloud": {
+     "0.0": {
+      "ap": 0.024772187851227118,
+      "ci": [
+       0.018213528844996184,
+       0.03672525812670145
+      ]
+     },
+     "0.5": {
+      "ap": 0.015372606092708671,
+      "ci": [
+       0.01230578064476821,
+       0.020128712783768276
+      ]
+     },
+     "1.0": {
+      "ap": 0.012210617861378744,
+      "ci": [
+       0.009873006614885188,
+       0.015725332457918635
+      ]
+     },
+     "1.5": {
+      "ap": 0.01102960248643189,
+      "ci": [
+       0.009087197434884398,
+       0.014229908716308535
+      ]
+     }
+    },
+    "escalation-only": {
+     "0.0": {
+      "ap": 0.017041157515195363,
+      "ci": [
+       0.012613027508285076,
+       0.030275650249069173
+      ]
+     },
+     "0.5": {
+      "ap": 0.011437801459304788,
+      "ci": [
+       0.00935559581837823,
+       0.015135266665456415
+      ]
+     },
+     "1.0": {
+      "ap": 0.010160883593427922,
+      "ci": [
+       0.008359150405220766,
+       0.01340551408827589
+      ]
+     },
+     "1.5": {
+      "ap": 0.009773237625474697,
+      "ci": [
+       0.008077873846669055,
+       0.016312633705562504
+      ]
+     }
+    },
+    "oracle-trigger": {
+     "0.0": {
+      "ap": 0.019600895032800707,
+      "ci": [
+       0.010868798002985767,
+       0.03604766003295829
+      ]
+     },
+     "0.5": {
+      "ap": 0.027191638916151083,
+      "ci": [
+       0.011551915612233557,
+       0.051114991089005336
+      ]
+     },
+     "1.0": {
+      "ap": 0.03880706599078091,
+      "ci": [
+       0.01604281660539413,
+       0.0690055432004617
+      ]
+     },
+     "1.5": {
+      "ap": 0.015955685259283592,
+      "ci": [
+       0.00795223030866687,
+       0.030641873334854138
+      ]
+     }
+    },
+    "oracle-timing-bound": {
+     "0.0": {
+      "ap": 0.013693686614958714,
+      "ci": [
+       0.011083618016453887,
+       0.01894700234505639
+      ]
+     },
+     "0.5": {
+      "ap": 0.014855184408421564,
+      "ci": [
+       0.011344434628191442,
+       0.023752096034728738
+      ]
+     },
+     "1.0": {
+      "ap": 0.013966900718282063,
+      "ci": [
+       0.009930949728745836,
+       0.02482816337788851
+      ]
+     },
+     "1.5": {
+      "ap": 0.010152035138001662,
+      "ci": [
+       0.008233432125535525,
+       0.017298710379951072
+      ]
+     }
+    },
+    "cloud-initiated": {
+     "0.0": {
+      "ap": 0.017397017080132686,
+      "ci": [
+       0.012960928113777918,
+       0.025603196914850714
+      ]
+     },
+     "0.5": {
+      "ap": 0.012107848278119763,
+      "ci": [
+       0.009777830636754274,
+       0.016112503773867845
+      ]
+     },
+     "1.0": {
+      "ap": 0.01044952581808618,
+      "ci": [
+       0.008584397960700697,
+       0.013718154426115221
+      ]
+     },
+     "1.5": {
+      "ap": 0.00966501901531637,
+      "ci": [
+       0.008056439662930312,
+       0.013426597848890217
+      ]
+     }
+    },
+    "context-trickle": {
+     "0.0": {
+      "ap": 0.017192831395086927,
+      "ci": [
+       0.01292049205835314,
+       0.025784211059741758
+      ]
+     },
+     "0.5": {
+      "ap": 0.012002809653842959,
+      "ci": [
+       0.009742991056405649,
+       0.016151771151875896
+      ]
+     },
+     "1.0": {
+      "ap": 0.010694208474252141,
+      "ci": [
+       0.008656935314808087,
+       0.014683753794633854
+      ]
+     },
+     "1.5": {
+      "ap": 0.009767733756048431,
+      "ci": [
+       0.008155182186558103,
+       0.014183408141572006
+      ]
+     }
+    },
+    "ceiling-gbt": {
+     "0.0": {
+      "ap": 0.01498065561145994,
+      "ci": [
+       0.01172349883612062,
+       0.023446141014144287
+      ]
+     },
+     "0.5": {
+      "ap": 0.011036076690410901,
+      "ci": [
+       0.009006673730478247,
+       0.014779176938107715
+      ]
+     },
+     "1.0": {
+      "ap": 0.009828739193699941,
+      "ci": [
+       0.00810147584030855,
+       0.012895432347102574
+      ]
+     },
+     "1.5": {
+      "ap": 0.008972484503937048,
+      "ci": [
+       0.00764308213144758,
+       0.011095124792638812
+      ]
+     }
+    },
+    "ceiling-logistic": {
+     "0.0": {
+      "ap": 0.014800472976050557,
+      "ci": [
+       0.011300339028740539,
+       0.024984311420828135
+      ]
+     },
+     "0.5": {
+      "ap": 0.01073858847384035,
+      "ci": [
+       0.008871216561212304,
+       0.013941383933860364
+      ]
+     },
+     "1.0": {
+      "ap": 0.009908294849410838,
+      "ci": [
+       0.008188919475725066,
+       0.013259839853760733
+      ]
+     },
+     "1.5": {
+      "ap": 0.009165144756020004,
+      "ci": [
+       0.00782137409429121,
+       0.011353957903468466
+      ]
+     }
+    },
+    "absolute-confidence": {
+     "0.0": {
+      "ap": 0.01614097146969798,
+      "ci": [
+       0.012405306855194842,
+       0.02505055280720762
+      ]
+     },
+     "0.5": {
+      "ap": 0.010962264213662433,
+      "ci": [
+       0.009053714356520798,
+       0.014241043743954646
+      ]
+     },
+     "1.0": {
+      "ap": 0.01046680117988847,
+      "ci": [
+       0.008554363187957499,
+       0.013715249135089388
+      ]
+     },
+     "1.5": {
+      "ap": 0.009021573712889867,
+      "ci": [
+       0.00765509659271199,
+       0.011123583382045776
+      ]
+     }
+    },
+    "random-escalation": {
+     "0.0": {
+      "ap": 0.01910064728358023,
+      "ci": [
+       0.012732113959639153,
+       0.03982062173386277
+      ]
+     },
+     "0.5": {
+      "ap": 0.01060603831348133,
+      "ci": [
+       0.008831143473076243,
+       0.013748970573061623
+      ]
+     },
+     "1.0": {
+      "ap": 0.010624998212865477,
+      "ci": [
+       0.008578977826834295,
+       0.014952087232800866
+      ]
+     },
+     "1.5": {
+      "ap": 0.009204369098987322,
+      "ci": [
+       0.007806717754948204,
+       0.011348735169720505
+      ]
+     }
+    }
+   },
+   "challenge_mAP": {
+    "device-only": 0.46873386775581977,
+    "always-cloud": 0.5666835015753743,
+    "escalation-only": 0.4894002112184513,
+    "oracle-trigger": 0.49410803568375644,
+    "oracle-timing-bound": 0.5497941657033057,
+    "cloud-initiated": 0.48875268166242525,
+    "context-trickle": 0.48413277126703624,
+    "ceiling-gbt": 0.49899210063347926,
+    "ceiling-logistic": 0.48371028982014225,
+    "absolute-confidence": 0.4890126081741865,
+    "random-escalation": 0.4931996631152149
+   },
+   "challenge_mAP_ci": {
+    "device-only": [
+     0.4221890639435476,
+     0.5450510947116644
+    ],
+    "always-cloud": [
+     0.509157921163436,
+     0.6483408097734604
+    ],
+    "escalation-only": [
+     0.44119112533358945,
+     0.5648052354469845
+    ],
+    "oracle-trigger": [
+     0.44124797235813745,
+     0.5690392672976458
+    ],
+    "oracle-timing-bound": [
+     0.4943624841238277,
+     0.6269784573973616
+    ],
+    "cloud-initiated": [
+     0.44070617092917524,
+     0.5631769827748522
+    ],
+    "context-trickle": [
+     0.4363126948880274,
+     0.5570181742132583
+    ],
+    "ceiling-gbt": [
+     0.4485072906248171,
+     0.574395715432784
+    ],
+    "ceiling-logistic": [
+     0.4328363425083517,
+     0.5592850081146609
+    ],
+    "absolute-confidence": [
+     0.4393620169091102,
+     0.5652203818037663
+    ],
+    "random-escalation": [
+     0.44276259845180477,
+     0.5691748888292187
+    ]
+   },
+   "cloud_initiated_feasible_by_fold": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true
+   },
+   "cloud_initiated_trigger_degenerate_by_fold": {
+    "0": false,
+    "1": false,
+    "2": false,
+    "3": false,
+    "4": false
+   },
+   "references": {
+    "device_only_streaming": 0.00962027469595211,
+    "always_cloud_streaming": 0.012870942146839768,
+    "device_only_challenge": 0.46873386775581977,
+    "always_cloud_challenge": 0.5666835015753743,
+    "gap_streaming": 0.0032506674508876576,
+    "gap_challenge": 0.09794963381955452,
+    "gap_streaming_ci": [
+     0.0013191893864540906,
+     0.0059339954682126154
+    ],
+    "gap_challenge_ci": [
+     0.04108398016437672,
+     0.15895712315807944
+    ]
+   },
+   "settings_by_fold": {
+    "0": {
+     "controller": {
+      "w_c": 1.5,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 1,
+      "budget": 0.2,
+      "theta": 3.999997138977051,
+      "train_call_fraction": 0.20039083318529047,
+      "train_streaming_ap": 0.013502594330142498,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -3.3506228389059443,
+      "train_call_fraction": 0.19340320956949134,
+      "k_c": 1,
+      "search_range": [
+       -5.281048985519967,
+       -2.6520302353218095
+      ],
+      "hit_budget": false
+     },
+     "random": {
+      "p_open": 0.07727956771850586,
+      "calls_per_episode": 3,
+      "seed": 0,
+      "train_call_fraction": 0.19997631314028544
+     },
+     "oracle": {
+      "lead_calls": 27,
+      "lead_s": 13.5,
+      "train_call_fraction": 0.20003553028957186,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 12,
+       "lead_s": 6.0,
+       "train_call_fraction": 0.2018712619174513,
+       "hit_budget": true,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 8.0,
+      "background_floor": 0.0625,
+      "feasible": true,
+      "tau": -3.8321662678252215,
+      "train_call_fraction": 0.20056848463314977,
+      "train_streaming_ap": 0.013816876278498485,
+      "k_c": 1,
+      "search_range": [
+       -5.1207439325781845,
+       -2.505774673635238
+      ],
+      "hit_budget": true,
+      "n_episodes": 383,
+      "n_background": 1135,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.1375
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 8.0,
+      "tau": -3.8195587152123576,
+      "k_c": 1,
+      "train_call_fraction": 0.20068691893172264,
+      "feasible": true,
+      "train_streaming_ap": 0.013810647465838955,
+      "mean_background_floor": 0.0640625,
+      "n_episodes": 378,
+      "trigger_degenerate": false,
+      "n_clips_modulated": 6,
+      "search_range": [
+       -5.1207439325781845,
+       -2.505774673635238
+      ],
+      "hit_budget": true
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.062196682033255936,
+       "train_call_fraction": 0.20074613608100905,
+       "k_c": 4,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.5609152842760363,
+       "train_call_fraction": 0.20003553028957186,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    },
+    "1": {
+     "controller": {
+      "w_c": 3.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 4,
+      "budget": 0.2,
+      "theta": 2.6666688919067383,
+      "train_call_fraction": 0.19769707705934456,
+      "train_streaming_ap": 0.010735844882401042,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -3.27900450466824,
+      "train_call_fraction": 0.19834661942722173,
+      "k_c": 4,
+      "search_range": [
+       -4.899415525534104,
+       -2.9119382832170966
+      ],
+      "hit_budget": true
+     },
+     "random": {
+      "p_open": 0.0369114875793457,
+      "calls_per_episode": 7,
+      "seed": 0,
+      "train_call_fraction": 0.20005904930617066
+     },
+     "oracle": {
+      "lead_calls": 28,
+      "lead_s": 14.0,
+      "train_call_fraction": 0.20194862710363154,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 12,
+       "lead_s": 6.0,
+       "train_call_fraction": 0.2017124298789489,
+       "hit_budget": true,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 4.0,
+      "background_floor": 0.125,
+      "feasible": true,
+      "tau": -3.0979874096148183,
+      "train_call_fraction": 0.19994095069382936,
+      "train_streaming_ap": 0.00971923405047228,
+      "k_c": 4,
+      "search_range": [
+       -5.0133594814192,
+       -2.65069485981997
+      ],
+      "hit_budget": true,
+      "n_episodes": 168,
+      "n_background": 2176,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.07500000000000001
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 4.0,
+      "tau": -3.075401206834181,
+      "k_c": 4,
+      "train_call_fraction": 0.19970475346914673,
+      "feasible": true,
+      "train_streaming_ap": 0.009883090745267926,
+      "mean_background_floor": 0.12864583333333332,
+      "n_episodes": 159,
+      "trigger_degenerate": false,
+      "n_clips_modulated": 7,
+      "search_range": [
+       -5.0133594814192,
+       -2.65069485981997
+      ],
+      "hit_budget": true
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.10091521811010773,
+       "train_call_fraction": 0.19805137289636845,
+       "k_c": 1,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.5891594454905917,
+       "train_call_fraction": 0.2,
+       "k_c": 1,
+       "hit_budget": true
+      }
+     }
+    },
+    "2": {
+     "controller": {
+      "w_c": 6.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "flips",
+      "k_c": 4,
+      "budget": 0.2,
+      "theta": 2.2579445838928223,
+      "train_call_fraction": 0.20007164606842198,
+      "train_streaming_ap": 0.015039015155497158,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -3.158402663639567,
+      "train_call_fraction": 0.19463848587975402,
+      "k_c": 4,
+      "search_range": [
+       -5.150442834304049,
+       -2.6781457167753464
+      ],
+      "hit_budget": false
+     },
+     "random": {
+      "p_open": 0.0369114875793457,
+      "calls_per_episode": 7,
+      "seed": 0,
+      "train_call_fraction": 0.20013135112544034
+     },
+     "oracle": {
+      "lead_calls": 27,
+      "lead_s": 13.5,
+      "train_call_fraction": 0.19977312078333034,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 12,
+       "lead_s": 6.0,
+       "train_call_fraction": 0.2041315899456684,
+       "hit_budget": false,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 4.0,
+      "background_floor": 0.125,
+      "feasible": true,
+      "tau": -3.016075423736156,
+      "train_call_fraction": 0.20013135112544034,
+      "train_streaming_ap": 0.013540406395921792,
+      "k_c": 4,
+      "search_range": [
+       -5.121053375745013,
+       -2.49345880823447
+      ],
+      "hit_budget": true,
+      "n_episodes": 164,
+      "n_background": 2155,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.07500000000000001
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 4.0,
+      "tau": -2.49345880823447,
+      "k_c": 4,
+      "train_call_fraction": 0.20138515732282525,
+      "feasible": true,
+      "train_streaming_ap": 0.01396710367841976,
+      "mean_background_floor": 0.1921875,
+      "n_episodes": 0,
+      "trigger_degenerate": true,
+      "n_clips_modulated": 129,
+      "search_range": [
+       -5.121053375745013,
+       -2.49345880823447
+      ],
+      "hit_budget": true
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.08552615234140618,
+       "train_call_fraction": 0.19995223595438533,
+       "k_c": 4,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.5737202352033237,
+       "train_call_fraction": 0.19983282584034867,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    },
+    "3": {
+     "controller": {
+      "w_c": 3.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 4,
+      "budget": 0.2,
+      "theta": 2.6666688919067383,
+      "train_call_fraction": 0.19818492545229535,
+      "train_streaming_ap": 0.013240430274872499,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -3.128723347695791,
+      "train_call_fraction": 0.20814426306794742,
+      "k_c": 4,
+      "search_range": [
+       -5.357469364626301,
+       -2.6312528425049866
+      ],
+      "hit_budget": false
+     },
+     "random": {
+      "p_open": 0.0369114875793457,
+      "calls_per_episode": 7,
+      "seed": 0,
+      "train_call_fraction": 0.20024751016559608
+     },
+     "oracle": {
+      "lead_calls": 27,
+      "lead_s": 13.5,
+      "train_call_fraction": 0.19806706346867817,
+      "hit_budget": true,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 12,
+       "lead_s": 6.0,
+       "train_call_fraction": 0.20148506099357652,
+       "hit_budget": true,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 4.0,
+      "background_floor": 0.125,
+      "feasible": true,
+      "tau": -2.933270945440631,
+      "train_call_fraction": 0.19989392421474453,
+      "train_streaming_ap": 0.012005387071371429,
+      "k_c": 4,
+      "search_range": [
+       -5.446639889786238,
+       -2.2864748413249445
+      ],
+      "hit_budget": true,
+      "n_episodes": 168,
+      "n_background": 2184,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.07500000000000001
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 8.0,
+      "tau": -3.0247945663075937,
+      "k_c": 4,
+      "train_call_fraction": 0.2001885791737875,
+      "feasible": true,
+      "train_streaming_ap": 0.01178728566289644,
+      "mean_background_floor": 0.11770833333333333,
+      "n_episodes": 188,
+      "trigger_degenerate": false,
+      "n_clips_modulated": 212,
+      "search_range": [
+       -5.446639889786238,
+       -2.2864748413249445
+      ],
+      "hit_budget": true
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.09725965982447916,
+       "train_call_fraction": 0.20048323413283045,
+       "k_c": 4,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.5686836166611591,
+       "train_call_fraction": 0.19989392421474453,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    },
+    "4": {
+     "controller": {
+      "w_c": 6.0,
+      "delta": 3.0,
+      "n_c": 2,
+      "mode": "flips",
+      "k_c": 1,
+      "budget": 0.2,
+      "theta": 1.5,
+      "train_call_fraction": 0.2008070258723,
+      "train_streaming_ap": 0.013179765872439226,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -3.4047398417032677,
+      "train_call_fraction": 0.19481367196771895,
+      "k_c": 1,
+      "search_range": [
+       -4.997073703594343,
+       -2.828497823688329
+      ],
+      "hit_budget": false
+     },
+     "random": {
+      "p_open": 0.07788705825805664,
+      "calls_per_episode": 3,
+      "seed": 0,
+      "train_call_fraction": 0.1998575836695941
+     },
+     "oracle": {
+      "lead_calls": 27,
+      "lead_s": 13.5,
+      "train_call_fraction": 0.19689057678613814,
+      "hit_budget": false,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 12,
+       "lead_s": 6.0,
+       "train_call_fraction": 0.20181580821267506,
+       "hit_budget": true,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 8.0,
+      "background_floor": 0.0625,
+      "feasible": true,
+      "tau": -3.7996990053263984,
+      "train_call_fraction": 0.199798243531925,
+      "train_streaming_ap": 0.010688962663888505,
+      "k_c": 1,
+      "search_range": [
+       -5.117107966692485,
+       -2.5443207596870754
+      ],
+      "hit_budget": true,
+      "n_episodes": 383,
+      "n_background": 1131,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.1375
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 8.0,
+      "tau": -3.340777459154932,
+      "k_c": 1,
+      "train_call_fraction": 0.19938286256824117,
+      "feasible": true,
+      "train_streaming_ap": 0.010607846039029867,
+      "mean_background_floor": 0.11744791666666667,
+      "n_episodes": 311,
+      "trigger_degenerate": false,
+      "n_clips_modulated": 211,
+      "search_range": [
+       -5.117107966692485,
+       -2.5443207596870754
+      ],
+      "hit_budget": true
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.11070115855917298,
+       "train_call_fraction": 0.19659387609779255,
+       "k_c": 4,
+       "hit_budget": false
+      },
+      "ceiling-logistic": {
+       "theta": 0.5796737717305447,
+       "train_call_fraction": 0.2000949442202706,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    }
+   }
+  },
+  "0.4": {
+   "target_budget": 0.4,
+   "capture_table": [
+    {
+     "arm": "escalation-only",
+     "label": "device filter (spec 7.7)",
+     "streaming_ap": 0.011069124683290417,
+     "streaming_ap_ci": [
+      0.009265070780592723,
+      0.014885022741706307
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.019160639049945784,
+       "ci": [
+        0.01361283907950686,
+        0.03190576328017489
+       ]
+      },
+      "0.5": {
+       "ap": 0.012720337912168145,
+       "ci": [
+        0.010226378894227466,
+        0.0173907130017232
+       ]
+      },
+      "1.0": {
+       "ap": 0.010661019640468181,
+       "ci": [
+        0.008677400662500763,
+        0.014328926479979869
+       ]
+      },
+      "1.5": {
+       "ap": 0.009826016497234927,
+       "ci": [
+        0.008209684673219706,
+        0.015561684415718148
+       ]
+      }
+     },
+     "streaming_capture": 0.44570846117854057,
+     "streaming_capture_ci": [
+      0.21270567638664328,
+      1.0413351503944488
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": -0.1250583945444902,
+     "beats_random_streaming_ci": [
+      -0.663409287417505,
+      0.22479790321296161
+     ],
+     "challenge_mAP": 0.5174263358423943,
+     "challenge_mAP_ci": [
+      0.4648086837724502,
+      0.5948025178808788
+     ],
+     "challenge_capture": 0.49711740807808535,
+     "challenge_capture_ci": [
+      0.1909419031958876,
+      0.828671400759813
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.0019029205740990207,
+     "beats_random_challenge_ci": [
+      -0.038077984563371386,
+      0.037086115165840816
+     ],
+     "call_fraction": 0.4009858754384302,
+     "open_time_fraction": 0.4260722616270767,
+     "n_episodes": 1248,
+     "positive_over_negative_call_rate": 0.9664886092889886,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "oracle-trigger",
+     "label": "oracle trigger, positives only (NON-CAUSAL)",
+     "streaming_ap": 0.027318130055405194,
+     "streaming_ap_ci": [
+      0.016293550599648654,
+      0.04057907917037469
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.019600895032800707,
+       "ci": [
+        0.010868798002985767,
+        0.03604766003295829
+       ]
+      },
+      "0.5": {
+       "ap": 0.027191638916151083,
+       "ci": [
+        0.011551915612233557,
+        0.051114991089005336
+       ]
+      },
+      "1.0": {
+       "ap": 0.03880706599078091,
+       "ci": [
+        0.01604281660539413,
+        0.0690055432004617
+       ]
+      },
+      "1.5": {
+       "ap": 0.015955685259283592,
+       "ci": [
+        0.00795223030866687,
+        0.030641873334854138
+       ]
+      }
+     },
+     "streaming_capture": 5.444375847987878,
+     "streaming_capture_ci": [
+      2.280662968816514,
+      13.431135581282353
+     ],
+     "beats_random_streaming": true,
+     "beats_random_streaming_difference": 4.873608992264846,
+     "beats_random_streaming_ci": [
+      1.7787104401314078,
+      12.356124573330735
+     ],
+     "challenge_mAP": 0.49410803568375644,
+     "challenge_mAP_ci": [
+      0.44124797235813745,
+      0.5690392672976458
+     ],
+     "challenge_capture": 0.2590532188683998,
+     "challenge_capture_ci": [
+      -0.13794723421855432,
+      0.5389258195969505
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.02522122073273686,
+     "beats_random_challenge_ci": [
+      -0.056237426775451,
+      0.003261872226505588
+     ],
+     "call_fraction": 0.22461844724618446,
+     "open_time_fraction": 0.22916170800209454,
+     "n_episodes": 150,
+     "positive_over_negative_call_rate": null,
+     "learned": false,
+     "non_causal": true
+    },
+    {
+     "arm": "oracle-timing-bound",
+     "label": "oracle timing bound, every crop (NON-CAUSAL)",
+     "streaming_ap": 0.012662532927498546,
+     "streaming_ap_ci": [
+      0.01023937743067965,
+      0.017791194716361963
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.013823705270390896,
+       "ci": [
+        0.011182945278970818,
+        0.018326460845518217
+       ]
+      },
+      "0.5": {
+       "ap": 0.014612393707028147,
+       "ci": [
+        0.011343507612915778,
+        0.02097240997252997
+       ]
+      },
+      "1.0": {
+       "ap": 0.01301903179567606,
+       "ci": [
+        0.009794532008790427,
+        0.019947444675133204
+       ]
+      },
+      "1.5": {
+       "ap": 0.010356173279791431,
+       "ci": [
+        0.00840459516597599,
+        0.01757161568132117
+       ]
+      }
+     },
+     "streaming_capture": 0.935887253159559,
+     "streaming_capture_ci": [
+      0.600605142288645,
+      2.134905880525162
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": 0.3651203974365283,
+     "beats_random_streaming_ci": [
+      -0.08523802960713792,
+      1.2410299530801359
+     ],
+     "challenge_mAP": 0.5497941657033057,
+     "challenge_mAP_ci": [
+      0.4943624841238277,
+      0.6269784573973616
+     ],
+     "challenge_capture": 0.827571219886513,
+     "challenge_capture_ci": [
+      0.6135418616448506,
+      0.9766952115486663
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.030464909286812447,
+     "beats_random_challenge_ci": [
+      -0.01012093587220897,
+      0.07159760097398263
+     ],
+     "call_fraction": 0.3995639397099251,
+     "open_time_fraction": 0.40843528347693625,
+     "n_episodes": 300,
+     "positive_over_negative_call_rate": 1.0164322029728632,
+     "learned": false,
+     "non_causal": true
+    },
+    {
+     "arm": "cloud-initiated",
+     "label": "cloud trickle",
+     "streaming_ap": 0.010746467094144735,
+     "streaming_ap_ci": [
+      0.009027335531851702,
+      0.013641981549482814
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.019664693760240087,
+       "ci": [
+        0.014470765354599983,
+        0.029053496257226103
+       ]
+      },
+      "0.5": {
+       "ap": 0.012526243748135603,
+       "ci": [
+        0.010107520560339742,
+        0.016635421634324937
+       ]
+      },
+      "1.0": {
+       "ap": 0.010342200858281874,
+       "ci": [
+        0.00863558403109954,
+        0.013142112038270702
+       ]
+      },
+      "1.5": {
+       "ap": 0.009370956676016721,
+       "ci": [
+        0.008035225982190636,
+        0.012015341187821455
+       ]
+      }
+     },
+     "streaming_capture": 0.34644958772546725,
+     "streaming_capture_ci": [
+      0.1086281794656896,
+      0.6619486322973954
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": -0.22431726799756352,
+     "beats_random_streaming_ci": [
+      -0.9214324199733859,
+      0.07459531385667575
+     ],
+     "challenge_mAP": 0.4925579431684593,
+     "challenge_mAP_ci": [
+      0.4450724994778446,
+      0.5713534544692965
+     ],
+     "challenge_capture": 0.24322781498631119,
+     "challenge_capture_ci": [
+      -0.061765879388907194,
+      0.5196725827806983
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.026771313248034,
+     "beats_random_challenge_ci": [
+      -0.054237849216093106,
+      0.003960517216549458
+     ],
+     "call_fraction": 0.403640155464973,
+     "open_time_fraction": 0.30968248679011756,
+     "n_episodes": 729,
+     "positive_over_negative_call_rate": 1.282643135480195,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "context-trickle",
+     "label": "context-modulated trickle",
+     "streaming_ap": 0.01105056255170593,
+     "streaming_ap_ci": [
+      0.009218682690267273,
+      0.014142253752963593
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.018787299467332184,
+       "ci": [
+        0.013931404012413981,
+        0.02752451207571811
+       ]
+      },
+      "0.5": {
+       "ap": 0.012562993953027901,
+       "ci": [
+        0.010100285776151229,
+        0.01671378516680084
+       ]
+      },
+      "1.0": {
+       "ap": 0.010834847707882084,
+       "ci": [
+        0.008948336156015944,
+        0.013919109407408968
+       ]
+      },
+      "1.5": {
+       "ap": 0.009753845994207809,
+       "ci": [
+        0.00828508474912702,
+        0.01259906411269974
+       ]
+      }
+     },
+     "streaming_capture": 0.43999820878732243,
+     "streaming_capture_ci": [
+      0.19746280008579173,
+      0.8293258371856801
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": -0.1307686469357083,
+     "beats_random_streaming_ci": [
+      -0.8150047257254612,
+      0.21281811463665845
+     ],
+     "challenge_mAP": 0.506838730038833,
+     "challenge_mAP_ci": [
+      0.45673553260675054,
+      0.5904009195966432
+     ],
+     "challenge_capture": 0.3890250611167266,
+     "challenge_capture_ci": [
+      0.12383344190989094,
+      0.7607476533579984
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.01249052637766035,
+     "beats_random_challenge_ci": [
+      -0.041972315767826965,
+      0.02041225849222697
+     ],
+     "call_fraction": 0.40714759692861885,
+     "open_time_fraction": 0.3270576474508497,
+     "n_episodes": 787,
+     "positive_over_negative_call_rate": 1.318948427536413,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "ceiling-gbt",
+     "label": "predictability ceiling, boosted trees (LEARNED)",
+     "streaming_ap": 0.010897104563276245,
+     "streaming_ap_ci": [
+      0.008980765403240672,
+      0.013952367059317686
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.01752759971201991,
+       "ci": [
+        0.0130947353234513,
+        0.027207114408349865
+       ]
+      },
+      "0.5": {
+       "ap": 0.012440260496329056,
+       "ci": [
+        0.009928175653245816,
+        0.016770983833152838
+       ]
+      },
+      "1.0": {
+       "ap": 0.010897955519980691,
+       "ci": [
+        0.008757128751652011,
+        0.014557805313776212
+       ]
+      },
+      "1.5": {
+       "ap": 0.009353097673518992,
+       "ci": [
+        0.007891654370955441,
+        0.011543987015406529
+       ]
+      }
+     },
+     "streaming_capture": 0.3927900613074006,
+     "streaming_capture_ci": [
+      0.1187247988547988,
+      0.8212433558074665
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": -0.1779767944156302,
+     "beats_random_streaming_ci": [
+      -1.0002674590100566,
+      0.24312961176026798
+     ],
+     "challenge_mAP": 0.5347752181923725,
+     "challenge_mAP_ci": [
+      0.4794496193757034,
+      0.6177665938566416
+     ],
+     "challenge_capture": 0.6742378492013141,
+     "challenge_capture_ci": [
+      0.3694342987417047,
+      1.085804298367547
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": 0.015445961775879202,
+     "beats_random_challenge_ci": [
+      -0.020523819746300274,
+      0.05854213042247022
+     ],
+     "call_fraction": 0.3783296994975827,
+     "open_time_fraction": 0.39701052030275624,
+     "n_episodes": 1106,
+     "positive_over_negative_call_rate": 1.0902952129619985,
+     "learned": true,
+     "non_causal": false
+    },
+    {
+     "arm": "ceiling-logistic",
+     "label": "predictability ceiling, logistic (LEARNED)",
+     "streaming_ap": 0.010536931291894092,
+     "streaming_ap_ci": [
+      0.008856937068879408,
+      0.014271066662456602
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.02015955407837506,
+       "ci": [
+        0.014242840919419885,
+        0.033388105736080344
+       ]
+      },
+      "0.5": {
+       "ap": 0.012027965002327985,
+       "ci": [
+        0.009784698654185426,
+        0.015755703801715332
+       ]
+      },
+      "1.0": {
+       "ap": 0.009926696100873008,
+       "ci": [
+        0.008215956549242277,
+        0.012772796430118749
+       ]
+      },
+      "1.5": {
+       "ap": 0.00965613277248128,
+       "ci": [
+        0.008019700232569957,
+        0.01639076736245146
+       ]
+      }
+     },
+     "streaming_capture": 0.28199027116467135,
+     "streaming_capture_ci": [
+      -0.03629214983225787,
+      0.9597098574042325
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": -0.2887765845583594,
+     "beats_random_streaming_ci": [
+      -0.988257057042681,
+      0.19120029047733447
+     ],
+     "challenge_mAP": 0.5144032304114502,
+     "challenge_mAP_ci": [
+      0.46098143795245805,
+      0.5936806384518226
+     ],
+     "challenge_capture": 0.4662535312767353,
+     "challenge_capture_ci": [
+      0.1143845671977253,
+      0.7773678070678908
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.004926026005043105,
+     "beats_random_challenge_ci": [
+      -0.043356259388318955,
+      0.0348655937281407
+     ],
+     "call_fraction": 0.3859607545738933,
+     "open_time_fraction": 0.40360356071785597,
+     "n_episodes": 1130,
+     "positive_over_negative_call_rate": 1.0231374321283824,
+     "learned": true,
+     "non_causal": false
+    },
+    {
+     "arm": "absolute-confidence",
+     "label": "absolute-confidence trigger",
+     "streaming_ap": 0.010988354340814627,
+     "streaming_ap_ci": [
+      0.009171334573068676,
+      0.014151903089987625
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.019447356801961496,
+       "ci": [
+        0.01445335999545788,
+        0.029834985512886582
+       ]
+      },
+      "0.5": {
+       "ap": 0.012333304320139788,
+       "ci": [
+        0.01002749390149809,
+        0.015952521877991538
+       ]
+      },
+      "1.0": {
+       "ap": 0.010720315721036584,
+       "ci": [
+        0.008735086348524037,
+        0.0139544158311593
+       ]
+      },
+      "1.5": {
+       "ap": 0.009911442981267515,
+       "ci": [
+        0.008291646464404211,
+        0.013252448260486887
+       ]
+      }
+     },
+     "streaming_capture": 0.42086115098883353,
+     "streaming_capture_ci": [
+      0.1354319881408324,
+      0.7896608458512111
+     ],
+     "beats_random_streaming": false,
+     "beats_random_streaming_difference": -0.14990570473419723,
+     "beats_random_streaming_ci": [
+      -0.9308531459679159,
+      0.195636628022027
+     ],
+     "challenge_mAP": 0.5103700644773045,
+     "challenge_mAP_ci": [
+      0.45816896397737367,
+      0.5886349755814865
+     ],
+     "challenge_capture": 0.4250776148708024,
+     "challenge_capture_ci": [
+      0.009069487733076066,
+      0.6839975330338652
+     ],
+     "beats_random_challenge": false,
+     "beats_random_challenge_difference": -0.008959191939188815,
+     "beats_random_challenge_ci": [
+      -0.04617001594342438,
+      0.029551814367352665
+     ],
+     "call_fraction": 0.4044459190444592,
+     "open_time_fraction": 0.4169800542676251,
+     "n_episodes": 1030,
+     "positive_over_negative_call_rate": 1.249464951874446,
+     "learned": false,
+     "non_causal": false
+    },
+    {
+     "arm": "random-escalation",
+     "label": "random escalation",
+     "streaming_ap": 0.011475647935896458,
+     "streaming_ap_ci": [
+      0.009542915135990194,
+      0.015196659507116952
+     ],
+     "streaming_ap_by_horizon": {
+      "0.0": {
+       "ap": 0.019222871381140382,
+       "ci": [
+        0.014465917348009975,
+        0.0289184109501761
+       ]
+      },
+      "0.5": {
+       "ap": 0.011973128533494718,
+       "ci": [
+        0.009849958064665376,
+        0.01569574827092229
+       ]
+      },
+      "1.0": {
+       "ap": 0.01236724252905623,
+       "ci": [
+        0.009790496491356212,
+        0.017009800824600848
+       ]
+      },
+      "1.5": {
+       "ap": 0.010086572745138422,
+       "ci": [
+        0.008351459095318621,
+        0.016056772835163755
+       ]
+      }
+     },
+     "streaming_capture": 0.5707668557230308,
+     "streaming_capture_ci": [
+      0.32348777385092214,
+      1.2906697454831089
+     ],
+     "beats_random_streaming": null,
+     "beats_random_streaming_difference": null,
+     "beats_random_streaming_ci": null,
+     "challenge_mAP": 0.5193292564164933,
+     "challenge_mAP_ci": [
+      0.46703642864808365,
+      0.5978002689318935
+     ],
+     "challenge_capture": 0.5165449495592984,
+     "challenge_capture_ci": [
+      0.2794139035094789,
+      0.9499206743974238
+     ],
+     "beats_random_challenge": null,
+     "beats_random_challenge_difference": null,
+     "beats_random_challenge_ci": null,
+     "call_fraction": 0.40558346762726327,
+     "open_time_fraction": 0.4330223258913695,
+     "n_episodes": 1422,
+     "positive_over_negative_call_rate": 1.0165966459505698,
+     "learned": false,
+     "non_causal": false
+    }
+   ],
+   "realized": {
+    "device-only": {
+     "call_fraction": 0.0,
+     "open_time_fraction": 0.0
+    },
+    "always-cloud": {
+     "call_fraction": 1.0,
+     "open_time_fraction": 1.0
+    },
+    "escalation-only": {
+     "call_fraction": 0.4009858754384302,
+     "open_time_fraction": 0.4260722616270767,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 4267,
+       "call_fraction": 0.3943258478883652
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 4193,
+       "call_fraction": 0.4079984431254257
+      },
+      "positive_over_negative_rate_ratio": 0.9664886092889886
+     },
+     "n_calls": 8460,
+     "n_episodes": 1248,
+     "n_background": 0
+    },
+    "oracle-trigger": {
+     "call_fraction": 0.22461844724618446,
+     "open_time_fraction": 0.22916170800209454,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 4739,
+       "call_fraction": 0.43794473708529713
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 0,
+       "call_fraction": 0.0
+      },
+      "positive_over_negative_rate_ratio": null
+     },
+     "n_calls": 4739,
+     "n_episodes": 150,
+     "n_background": 0
+    },
+    "oracle-timing-bound": {
+     "call_fraction": 0.3995639397099251,
+     "open_time_fraction": 0.40843528347693625,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 4358,
+       "call_fraction": 0.40273542186489236
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 4072,
+       "call_fraction": 0.39622457915734166
+      },
+      "positive_over_negative_rate_ratio": 1.0164322029728632
+     },
+     "n_calls": 8430,
+     "n_episodes": 300,
+     "n_background": 0
+    },
+    "cloud-initiated": {
+     "call_fraction": 0.403640155464973,
+     "open_time_fraction": 0.30968248679011756,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 4893,
+       "call_fraction": 0.45217632381480455
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 3623,
+       "call_fraction": 0.35253478641626934
+      },
+      "positive_over_negative_rate_ratio": 1.282643135480195
+     },
+     "n_calls": 8516,
+     "n_episodes": 729,
+     "n_background": 2307
+    },
+    "context-trickle": {
+     "call_fraction": 0.40714759692861885,
+     "open_time_fraction": 0.3270576474508497,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 4994,
+       "call_fraction": 0.46151002679974124
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 3596,
+       "call_fraction": 0.3499075605721514
+      },
+      "positive_over_negative_rate_ratio": 1.318948427536413
+     },
+     "n_calls": 8590,
+     "n_episodes": 787,
+     "n_background": 2032
+    },
+    "ceiling-gbt": {
+     "call_fraction": 0.3783296994975827,
+     "open_time_fraction": 0.39701052030275624,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 4266,
+       "call_fraction": 0.3942334349875243
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 3716,
+       "call_fraction": 0.36158411987934225
+      },
+      "positive_over_negative_rate_ratio": 1.0902952129619985
+     },
+     "n_calls": 7982,
+     "n_episodes": 1106,
+     "n_background": 0
+    },
+    "ceiling-logistic": {
+     "call_fraction": 0.3859607545738933,
+     "open_time_fraction": 0.40360356071785597,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 4223,
+       "call_fraction": 0.3902596802513631
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 3920,
+       "call_fraction": 0.3814342707015666
+      },
+      "positive_over_negative_rate_ratio": 1.0231374321283824
+     },
+     "n_calls": 8143,
+     "n_episodes": 1130,
+     "n_background": 0
+    },
+    "absolute-confidence": {
+     "call_fraction": 0.4044459190444592,
+     "open_time_fraction": 0.4169800542676251,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 4848,
+       "call_fraction": 0.4480177432769615
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 3685,
+       "call_fraction": 0.35856767539165124
+      },
+      "positive_over_negative_rate_ratio": 1.249464951874446
+     },
+     "n_calls": 8533,
+     "n_episodes": 1030,
+     "n_background": 0
+    },
+    "random-escalation": {
+     "call_fraction": 0.40558346762726327,
+     "open_time_fraction": 0.4330223258913695,
+     "label_correlation": {
+      "positive": {
+       "n_clips": 150,
+       "n_calls": 4424,
+       "call_fraction": 0.4088346733203955
+      },
+      "negative": {
+       "n_clips": 150,
+       "n_calls": 4133,
+       "call_fraction": 0.4021601634718303
+      },
+      "positive_over_negative_rate_ratio": 1.0165966459505698
+     },
+     "n_calls": 8557,
+     "n_episodes": 1422,
+     "n_background": 0
+    }
+   },
+   "streaming_ap": {
+    "device-only": {
+     "ap": 0.00962027469595211,
+     "ci": [
+      0.008149928336477529,
+      0.012107112329485404
+     ]
+    },
+    "always-cloud": {
+     "ap": 0.012870942146839768,
+     "ci": [
+      0.010567366060054692,
+      0.016533711495473207
+     ]
+    },
+    "escalation-only": {
+     "ap": 0.011069124683290417,
+     "ci": [
+      0.009265070780592723,
+      0.014885022741706307
+     ]
+    },
+    "oracle-trigger": {
+     "ap": 0.027318130055405194,
+     "ci": [
+      0.016293550599648654,
+      0.04057907917037469
+     ]
+    },
+    "oracle-timing-bound": {
+     "ap": 0.012662532927498546,
+     "ci": [
+      0.01023937743067965,
+      0.017791194716361963
+     ]
+    },
+    "cloud-initiated": {
+     "ap": 0.010746467094144735,
+     "ci": [
+      0.009027335531851702,
+      0.013641981549482814
+     ]
+    },
+    "context-trickle": {
+     "ap": 0.01105056255170593,
+     "ci": [
+      0.009218682690267273,
+      0.014142253752963593
+     ]
+    },
+    "ceiling-gbt": {
+     "ap": 0.010897104563276245,
+     "ci": [
+      0.008980765403240672,
+      0.013952367059317686
+     ]
+    },
+    "ceiling-logistic": {
+     "ap": 0.010536931291894092,
+     "ci": [
+      0.008856937068879408,
+      0.014271066662456602
+     ]
+    },
+    "absolute-confidence": {
+     "ap": 0.010988354340814627,
+     "ci": [
+      0.009171334573068676,
+      0.014151903089987625
+     ]
+    },
+    "random-escalation": {
+     "ap": 0.011475647935896458,
+     "ci": [
+      0.009542915135990194,
+      0.015196659507116952
+     ]
+    }
+   },
+   "streaming_ap_by_horizon": {
+    "device-only": {
+     "0.0": {
+      "ap": 0.012176147267364686,
+      "ci": [
+       0.009994112899169147,
+       0.01579768827687947
+      ]
+     },
+     "0.5": {
+      "ap": 0.009994155206857609,
+      "ci": [
+       0.008328588733363737,
+       0.012701349237758796
+      ]
+     },
+     "1.0": {
+      "ap": 0.009932005285186367,
+      "ci": [
+       0.008223013999935257,
+       0.013066194009002434
+      ]
+     },
+     "1.5": {
+      "ap": 0.008934663595812357,
+      "ci": [
+       0.007601719302751456,
+       0.010973157867652999
+      ]
+     }
+    },
+    "always-cloud": {
+     "0.0": {
+      "ap": 0.024772187851227118,
+      "ci": [
+       0.018213528844996184,
+       0.03672525812670145
+      ]
+     },
+     "0.5": {
+      "ap": 0.015372606092708671,
+      "ci": [
+       0.01230578064476821,
+       0.020128712783768276
+      ]
+     },
+     "1.0": {
+      "ap": 0.012210617861378744,
+      "ci": [
+       0.009873006614885188,
+       0.015725332457918635
+      ]
+     },
+     "1.5": {
+      "ap": 0.01102960248643189,
+      "ci": [
+       0.009087197434884398,
+       0.014229908716308535
+      ]
+     }
+    },
+    "escalation-only": {
+     "0.0": {
+      "ap": 0.019160639049945784,
+      "ci": [
+       0.01361283907950686,
+       0.03190576328017489
+      ]
+     },
+     "0.5": {
+      "ap": 0.012720337912168145,
+      "ci": [
+       0.010226378894227466,
+       0.0173907130017232
+      ]
+     },
+     "1.0": {
+      "ap": 0.010661019640468181,
+      "ci": [
+       0.008677400662500763,
+       0.014328926479979869
+      ]
+     },
+     "1.5": {
+      "ap": 0.009826016497234927,
+      "ci": [
+       0.008209684673219706,
+       0.015561684415718148
+      ]
+     }
+    },
+    "oracle-trigger": {
+     "0.0": {
+      "ap": 0.019600895032800707,
+      "ci": [
+       0.010868798002985767,
+       0.03604766003295829
+      ]
+     },
+     "0.5": {
+      "ap": 0.027191638916151083,
+      "ci": [
+       0.011551915612233557,
+       0.051114991089005336
+      ]
+     },
+     "1.0": {
+      "ap": 0.03880706599078091,
+      "ci": [
+       0.01604281660539413,
+       0.0690055432004617
+      ]
+     },
+     "1.5": {
+      "ap": 0.015955685259283592,
+      "ci": [
+       0.00795223030866687,
+       0.030641873334854138
+      ]
+     }
+    },
+    "oracle-timing-bound": {
+     "0.0": {
+      "ap": 0.013823705270390896,
+      "ci": [
+       0.011182945278970818,
+       0.018326460845518217
+      ]
+     },
+     "0.5": {
+      "ap": 0.014612393707028147,
+      "ci": [
+       0.011343507612915778,
+       0.02097240997252997
+      ]
+     },
+     "1.0": {
+      "ap": 0.01301903179567606,
+      "ci": [
+       0.009794532008790427,
+       0.019947444675133204
+      ]
+     },
+     "1.5": {
+      "ap": 0.010356173279791431,
+      "ci": [
+       0.00840459516597599,
+       0.01757161568132117
+      ]
+     }
+    },
+    "cloud-initiated": {
+     "0.0": {
+      "ap": 0.019664693760240087,
+      "ci": [
+       0.014470765354599983,
+       0.029053496257226103
+      ]
+     },
+     "0.5": {
+      "ap": 0.012526243748135603,
+      "ci": [
+       0.010107520560339742,
+       0.016635421634324937
+      ]
+     },
+     "1.0": {
+      "ap": 0.010342200858281874,
+      "ci": [
+       0.00863558403109954,
+       0.013142112038270702
+      ]
+     },
+     "1.5": {
+      "ap": 0.009370956676016721,
+      "ci": [
+       0.008035225982190636,
+       0.012015341187821455
+      ]
+     }
+    },
+    "context-trickle": {
+     "0.0": {
+      "ap": 0.018787299467332184,
+      "ci": [
+       0.013931404012413981,
+       0.02752451207571811
+      ]
+     },
+     "0.5": {
+      "ap": 0.012562993953027901,
+      "ci": [
+       0.010100285776151229,
+       0.01671378516680084
+      ]
+     },
+     "1.0": {
+      "ap": 0.010834847707882084,
+      "ci": [
+       0.008948336156015944,
+       0.013919109407408968
+      ]
+     },
+     "1.5": {
+      "ap": 0.009753845994207809,
+      "ci": [
+       0.00828508474912702,
+       0.01259906411269974
+      ]
+     }
+    },
+    "ceiling-gbt": {
+     "0.0": {
+      "ap": 0.01752759971201991,
+      "ci": [
+       0.0130947353234513,
+       0.027207114408349865
+      ]
+     },
+     "0.5": {
+      "ap": 0.012440260496329056,
+      "ci": [
+       0.009928175653245816,
+       0.016770983833152838
+      ]
+     },
+     "1.0": {
+      "ap": 0.010897955519980691,
+      "ci": [
+       0.008757128751652011,
+       0.014557805313776212
+      ]
+     },
+     "1.5": {
+      "ap": 0.009353097673518992,
+      "ci": [
+       0.007891654370955441,
+       0.011543987015406529
+      ]
+     }
+    },
+    "ceiling-logistic": {
+     "0.0": {
+      "ap": 0.02015955407837506,
+      "ci": [
+       0.014242840919419885,
+       0.033388105736080344
+      ]
+     },
+     "0.5": {
+      "ap": 0.012027965002327985,
+      "ci": [
+       0.009784698654185426,
+       0.015755703801715332
+      ]
+     },
+     "1.0": {
+      "ap": 0.009926696100873008,
+      "ci": [
+       0.008215956549242277,
+       0.012772796430118749
+      ]
+     },
+     "1.5": {
+      "ap": 0.00965613277248128,
+      "ci": [
+       0.008019700232569957,
+       0.01639076736245146
+      ]
+     }
+    },
+    "absolute-confidence": {
+     "0.0": {
+      "ap": 0.019447356801961496,
+      "ci": [
+       0.01445335999545788,
+       0.029834985512886582
+      ]
+     },
+     "0.5": {
+      "ap": 0.012333304320139788,
+      "ci": [
+       0.01002749390149809,
+       0.015952521877991538
+      ]
+     },
+     "1.0": {
+      "ap": 0.010720315721036584,
+      "ci": [
+       0.008735086348524037,
+       0.0139544158311593
+      ]
+     },
+     "1.5": {
+      "ap": 0.009911442981267515,
+      "ci": [
+       0.008291646464404211,
+       0.013252448260486887
+      ]
+     }
+    },
+    "random-escalation": {
+     "0.0": {
+      "ap": 0.019222871381140382,
+      "ci": [
+       0.014465917348009975,
+       0.0289184109501761
+      ]
+     },
+     "0.5": {
+      "ap": 0.011973128533494718,
+      "ci": [
+       0.009849958064665376,
+       0.01569574827092229
+      ]
+     },
+     "1.0": {
+      "ap": 0.01236724252905623,
+      "ci": [
+       0.009790496491356212,
+       0.017009800824600848
+      ]
+     },
+     "1.5": {
+      "ap": 0.010086572745138422,
+      "ci": [
+       0.008351459095318621,
+       0.016056772835163755
+      ]
+     }
+    }
+   },
+   "challenge_mAP": {
+    "device-only": 0.46873386775581977,
+    "always-cloud": 0.5666835015753743,
+    "escalation-only": 0.5174263358423943,
+    "oracle-trigger": 0.49410803568375644,
+    "oracle-timing-bound": 0.5497941657033057,
+    "cloud-initiated": 0.4925579431684593,
+    "context-trickle": 0.506838730038833,
+    "ceiling-gbt": 0.5347752181923725,
+    "ceiling-logistic": 0.5144032304114502,
+    "absolute-confidence": 0.5103700644773045,
+    "random-escalation": 0.5193292564164933
+   },
+   "challenge_mAP_ci": {
+    "device-only": [
+     0.4221890639435476,
+     0.5450510947116644
+    ],
+    "always-cloud": [
+     0.509157921163436,
+     0.6483408097734604
+    ],
+    "escalation-only": [
+     0.4648086837724502,
+     0.5948025178808788
+    ],
+    "oracle-trigger": [
+     0.44124797235813745,
+     0.5690392672976458
+    ],
+    "oracle-timing-bound": [
+     0.4943624841238277,
+     0.6269784573973616
+    ],
+    "cloud-initiated": [
+     0.4450724994778446,
+     0.5713534544692965
+    ],
+    "context-trickle": [
+     0.45673553260675054,
+     0.5904009195966432
+    ],
+    "ceiling-gbt": [
+     0.4794496193757034,
+     0.6177665938566416
+    ],
+    "ceiling-logistic": [
+     0.46098143795245805,
+     0.5936806384518226
+    ],
+    "absolute-confidence": [
+     0.45816896397737367,
+     0.5886349755814865
+    ],
+    "random-escalation": [
+     0.46703642864808365,
+     0.5978002689318935
+    ]
+   },
+   "cloud_initiated_feasible_by_fold": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true
+   },
+   "cloud_initiated_trigger_degenerate_by_fold": {
+    "0": false,
+    "1": false,
+    "2": false,
+    "3": false,
+    "4": false
+   },
+   "references": {
+    "device_only_streaming": 0.00962027469595211,
+    "always_cloud_streaming": 0.012870942146839768,
+    "device_only_challenge": 0.46873386775581977,
+    "always_cloud_challenge": 0.5666835015753743,
+    "gap_streaming": 0.0032506674508876576,
+    "gap_challenge": 0.09794963381955452,
+    "gap_streaming_ci": [
+     0.0013191893864540906,
+     0.0059339954682126154
+    ],
+    "gap_challenge_ci": [
+     0.04108398016437672,
+     0.15895712315807944
+    ]
+   },
+   "settings_by_fold": {
+    "0": {
+     "controller": {
+      "w_c": 6.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 4,
+      "budget": 0.4,
+      "theta": 1.6000256538391113,
+      "train_call_fraction": 0.3999526262805709,
+      "train_streaming_ap": 0.015135144741985384,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -3.5714788821615286,
+      "train_call_fraction": 0.39480073429265117,
+      "k_c": 4,
+      "search_range": [
+       -5.281048985519967,
+       -2.6520302353218095
+      ],
+      "hit_budget": false
+     },
+     "random": {
+      "p_open": 0.07973051071166992,
+      "calls_per_episode": 8,
+      "seed": 0,
+      "train_call_fraction": 0.4001894948777166
+     },
+     "oracle": {
+      "lead_calls": 104,
+      "lead_s": 52.0,
+      "train_call_fraction": 0.22934801918635636,
+      "hit_budget": false,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 28,
+       "lead_s": 14.0,
+       "train_call_fraction": 0.3968733345176763,
+       "hit_budget": false,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 8.0,
+      "background_floor": 0.0625,
+      "feasible": true,
+      "tau": -4.185177117528147,
+      "train_call_fraction": 0.403387220939184,
+      "train_streaming_ap": 0.013940356192089595,
+      "k_c": 4,
+      "search_range": [
+       -5.1207439325781845,
+       -2.505774673635238
+      ],
+      "hit_budget": false,
+      "n_episodes": 613,
+      "n_background": 1135,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.3375
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 8.0,
+      "tau": -4.185176494070891,
+      "k_c": 4,
+      "train_call_fraction": 0.39740628886125423,
+      "feasible": true,
+      "train_streaming_ap": 0.013969376176289863,
+      "mean_background_floor": 0.0640625,
+      "n_episodes": 605,
+      "trigger_degenerate": false,
+      "n_clips_modulated": 6,
+      "search_range": [
+       -5.1207439325781845,
+       -2.505774673635238
+      ],
+      "hit_budget": false
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.054916978446258174,
+       "train_call_fraction": 0.3963403801740984,
+       "k_c": 4,
+       "hit_budget": false
+      },
+      "ceiling-logistic": {
+       "theta": 0.5335946024111867,
+       "train_call_fraction": 0.4000118434298573,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    },
+    "1": {
+     "controller": {
+      "w_c": 3.0,
+      "delta": 0.75,
+      "n_c": 4,
+      "mode": "var",
+      "k_c": 2,
+      "budget": 0.4,
+      "theta": 1.6027827262878418,
+      "train_call_fraction": 0.4,
+      "train_streaming_ap": 0.01112282615892854,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -3.663824994125501,
+      "train_call_fraction": 0.40531443755535873,
+      "k_c": 2,
+      "search_range": [
+       -4.899415525534104,
+       -2.9119382832170966
+      ],
+      "hit_budget": false
+     },
+     "random": {
+      "p_open": 0.14559602737426758,
+      "calls_per_episode": 4,
+      "seed": 0,
+      "train_call_fraction": 0.39994095069382934
+     },
+     "oracle": {
+      "lead_calls": 104,
+      "lead_s": 52.0,
+      "train_call_fraction": 0.22491880720401536,
+      "hit_budget": false,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 28,
+       "lead_s": 14.0,
+       "train_call_fraction": 0.39545320342485973,
+       "hit_budget": false,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 2.0,
+      "background_floor": 0.25,
+      "feasible": true,
+      "tau": -3.439046619864561,
+      "train_call_fraction": 0.40041334514319454,
+      "train_streaming_ap": 0.010364305939362313,
+      "k_c": 2,
+      "search_range": [
+       -5.0133594814192,
+       -2.65069485981997
+      ],
+      "hit_budget": true,
+      "n_episodes": 514,
+      "n_background": 3819,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.15000000000000002
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 4.0,
+      "tau": -3.9858021687411167,
+      "k_c": 2,
+      "train_call_fraction": 0.3984056687333924,
+      "feasible": true,
+      "train_streaming_ap": 0.010603242298936479,
+      "mean_background_floor": 0.12864583333333332,
+      "n_episodes": 693,
+      "trigger_degenerate": false,
+      "n_clips_modulated": 7,
+      "search_range": [
+       -5.0133594814192,
+       -2.65069485981997
+      ],
+      "hit_budget": true
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.08538260783921464,
+       "train_call_fraction": 0.4007676409802185,
+       "k_c": 1,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.5752435027776147,
+       "train_call_fraction": 0.4,
+       "k_c": 1,
+       "hit_budget": true
+      }
+     }
+    },
+    "2": {
+     "controller": {
+      "w_c": 6.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 4,
+      "budget": 0.4,
+      "theta": 1.5999855995178223,
+      "train_call_fraction": 0.4000238820228073,
+      "train_streaming_ap": 0.015819271053337112,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -3.5427845820474557,
+      "train_call_fraction": 0.40814376977730016,
+      "k_c": 4,
+      "search_range": [
+       -5.150442834304049,
+       -2.6781457167753464
+      ],
+      "hit_budget": false
+     },
+     "random": {
+      "p_open": 0.08855867385864258,
+      "calls_per_episode": 7,
+      "seed": 0,
+      "train_call_fraction": 0.400322407307899
+     },
+     "oracle": {
+      "lead_calls": 90,
+      "lead_s": 45.0,
+      "train_call_fraction": 0.2235954385336438,
+      "hit_budget": false,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 28,
+       "lead_s": 14.0,
+       "train_call_fraction": 0.3972177443429458,
+       "hit_budget": false,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 8.0,
+      "background_floor": 0.0625,
+      "feasible": true,
+      "tau": -4.155632086818525,
+      "train_call_fraction": 0.3990088960534957,
+      "train_streaming_ap": 0.013329644287527503,
+      "k_c": 4,
+      "search_range": [
+       -5.121053375745013,
+       -2.49345880823447
+      ],
+      "hit_budget": true,
+      "n_episodes": 603,
+      "n_background": 1127,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.3375
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 8.0,
+      "tau": -4.0669537521496935,
+      "k_c": 4,
+      "train_call_fraction": 0.40265090453161384,
+      "feasible": true,
+      "train_streaming_ap": 0.01333302331284407,
+      "mean_background_floor": 0.09609375,
+      "n_episodes": 613,
+      "trigger_degenerate": false,
+      "n_clips_modulated": 129,
+      "search_range": [
+       -5.121053375745013,
+       -2.49345880823447
+      ],
+      "hit_budget": false
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.06714745214533843,
+       "train_call_fraction": 0.3993074213385874,
+       "k_c": 4,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.5520694294502264,
+       "train_call_fraction": 0.40008358707982566,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    },
+    "3": {
+     "controller": {
+      "w_c": 6.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 4,
+      "budget": 0.4,
+      "theta": 1.599998950958252,
+      "train_call_fraction": 0.4018504331427898,
+      "train_streaming_ap": 0.014816095383421893,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -3.5519413611611284,
+      "train_call_fraction": 0.4070363604219459,
+      "k_c": 4,
+      "search_range": [
+       -5.357469364626301,
+       -2.6312528425049866
+      ],
+      "hit_budget": false
+     },
+     "random": {
+      "p_open": 0.0879664421081543,
+      "calls_per_episode": 7,
+      "seed": 0,
+      "train_call_fraction": 0.4002003653721492
+     },
+     "oracle": {
+      "lead_calls": 104,
+      "lead_s": 52.0,
+      "train_call_fraction": 0.22629500854499382,
+      "hit_budget": false,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 29,
+       "lead_s": 14.5,
+       "train_call_fraction": 0.4042076728151335,
+       "hit_budget": false,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 8.0,
+      "background_floor": 0.0625,
+      "feasible": true,
+      "tau": -4.279919790136027,
+      "train_call_fraction": 0.39896281454416876,
+      "train_streaming_ap": 0.01262654385112909,
+      "k_c": 4,
+      "search_range": [
+       -5.446639889786238,
+       -2.2864748413249445
+      ],
+      "hit_budget": true,
+      "n_episodes": 612,
+      "n_background": 1140,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.3375
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 8.0,
+      "tau": -4.065578332415885,
+      "k_c": 4,
+      "train_call_fraction": 0.3979609876834227,
+      "feasible": true,
+      "train_streaming_ap": 0.012646649572192631,
+      "mean_background_floor": 0.11770833333333333,
+      "n_episodes": 594,
+      "trigger_degenerate": false,
+      "n_clips_modulated": 212,
+      "search_range": [
+       -5.446639889786238,
+       -2.2864748413249445
+      ],
+      "hit_budget": true
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.08471855038699007,
+       "train_call_fraction": 0.3966055748718251,
+       "k_c": 4,
+       "hit_budget": false
+      },
+      "ceiling-logistic": {
+       "theta": 0.5535268870513502,
+       "train_call_fraction": 0.39996464140491483,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    },
+    "4": {
+     "controller": {
+      "w_c": 6.0,
+      "delta": 1.5,
+      "n_c": 2,
+      "mode": "var",
+      "k_c": 4,
+      "budget": 0.4,
+      "theta": 1.6000022888183594,
+      "train_call_fraction": 0.39983384761452645,
+      "train_streaming_ap": 0.015268376691870473,
+      "hit_budget": true
+     },
+     "absolute": {
+      "tau": -3.5608618521003264,
+      "train_call_fraction": 0.40748872537384284,
+      "k_c": 4,
+      "search_range": [
+       -4.997073703594343,
+       -2.828497823688329
+      ],
+      "hit_budget": false
+     },
+     "random": {
+      "p_open": 0.08837080001831055,
+      "calls_per_episode": 7,
+      "seed": 0,
+      "train_call_fraction": 0.39989318775219557
+     },
+     "oracle": {
+      "lead_calls": 104,
+      "lead_s": 52.0,
+      "train_call_fraction": 0.2222288155708521,
+      "hit_budget": false,
+      "non_causal": true,
+      "timing_bound": {
+       "lead_calls": 29,
+       "lead_s": 14.5,
+       "train_call_fraction": 0.4038689769760266,
+       "hit_budget": false,
+       "non_causal": true
+      }
+     },
+     "cloud_initiated": {
+      "cadence_s": 4.0,
+      "background_floor": 0.125,
+      "feasible": true,
+      "tau": -3.923741421371549,
+      "train_call_fraction": 0.4007832898172324,
+      "train_streaming_ap": 0.011133675284778204,
+      "k_c": 4,
+      "search_range": [
+       -5.117107966692485,
+       -2.5443207596870754
+      ],
+      "hit_budget": true,
+      "n_episodes": 600,
+      "n_background": 1834,
+      "trigger_degenerate": false,
+      "episode_budget_headroom": 0.275
+     },
+     "cloud_initiated_infeasible": null,
+     "context_trickle": {
+      "cadence_s": 8.0,
+      "tau": -3.9609533487647433,
+      "k_c": 4,
+      "train_call_fraction": 0.3999525278898647,
+      "feasible": true,
+      "train_streaming_ap": 0.011260828250132984,
+      "mean_background_floor": 0.11744791666666667,
+      "n_episodes": 603,
+      "trigger_degenerate": false,
+      "n_clips_modulated": 211,
+      "search_range": [
+       -5.117107966692485,
+       -2.5443207596870754
+      ],
+      "hit_budget": true
+     },
+     "learned_thresholds": {
+      "ceiling-gbt": {
+       "theta": 0.09706078710686006,
+       "train_call_fraction": 0.4014953714692618,
+       "k_c": 4,
+       "hit_budget": true
+      },
+      "ceiling-logistic": {
+       "theta": 0.5642249705814306,
+       "train_call_fraction": 0.40013054830287204,
+       "k_c": 4,
+       "hit_budget": true
+      }
+     }
+    }
+   }
+  }
+ },
+ "per_fold": {
+  "0": {
+   "0.05": {
+    "device-only": 0.006209319824668498,
+    "always-cloud": 0.012117569207739797,
+    "escalation-only": 0.006504117724059737,
+    "oracle-trigger": 0.04246204791317868,
+    "oracle-timing-bound": 0.03549780790989034,
+    "cloud-initiated": 0.006206147686438363,
+    "context-trickle": 0.006180445277440399,
+    "ceiling-gbt": 0.0069402959875008675,
+    "ceiling-logistic": 0.006992029127942428,
+    "absolute-confidence": 0.006336094116434329,
+    "random-escalation": 0.006486548800684801
+   },
+   "0.1": {
+    "device-only": 0.006209319824668498,
+    "always-cloud": 0.012117569207739797,
+    "escalation-only": 0.009310208816581332,
+    "oracle-trigger": 0.04246204791317868,
+    "oracle-timing-bound": 0.014862085895897714,
+    "cloud-initiated": 0.007443961493154551,
+    "context-trickle": 0.007451652343494,
+    "ceiling-gbt": 0.010467762088541095,
+    "ceiling-logistic": 0.00914596854870352,
+    "absolute-confidence": 0.00748821757970589,
+    "random-escalation": 0.009001332012395008
+   },
+   "0.2": {
+    "device-only": 0.006209319824668498,
+    "always-cloud": 0.012117569207739797,
+    "escalation-only": 0.007257269779820978,
+    "oracle-trigger": 0.04246204791317868,
+    "oracle-timing-bound": 0.01526279650854393,
+    "cloud-initiated": 0.008293280353750895,
+    "context-trickle": 0.00828917843085763,
+    "ceiling-gbt": 0.01210730863257446,
+    "ceiling-logistic": 0.008162118195481372,
+    "absolute-confidence": 0.006847185702383601,
+    "random-escalation": 0.0068737294170098774
+   },
+   "0.4": {
+    "device-only": 0.006209319824668498,
+    "always-cloud": 0.012117569207739797,
+    "escalation-only": 0.012409784683196666,
+    "oracle-trigger": 0.04246204791317868,
+    "oracle-timing-bound": 0.012074309862222294,
+    "cloud-initiated": 0.008534257776960999,
+    "context-trickle": 0.00849187418593453,
+    "ceiling-gbt": 0.01041268537716482,
+    "ceiling-logistic": 0.007844901728866533,
+    "absolute-confidence": 0.007719145756002282,
+    "random-escalation": 0.009688164818695418
+   }
+  },
+  "1": {
+   "0.05": {
+    "device-only": 0.022359253972976532,
+    "always-cloud": 0.03313936058397833,
+    "escalation-only": 0.021258782308314655,
+    "oracle-trigger": 0.0847193878704575,
+    "oracle-timing-bound": 0.04535844598950078,
+    "cloud-initiated": 0.0218829705199705,
+    "context-trickle": 0.02193452385731674,
+    "ceiling-gbt": 0.03658540811417732,
+    "ceiling-logistic": 0.020936052690815943,
+    "absolute-confidence": 0.03276242086194726,
+    "random-escalation": 0.02247271259360965
+   },
+   "0.1": {
+    "device-only": 0.022359253972976532,
+    "always-cloud": 0.03313936058397833,
+    "escalation-only": 0.023339769179789402,
+    "oracle-trigger": 0.0847193878704575,
+    "oracle-timing-bound": 0.0481204864528669,
+    "cloud-initiated": 0.04634153195580232,
+    "context-trickle": 0.04647020987557613,
+    "ceiling-gbt": 0.03617925957614813,
+    "ceiling-logistic": 0.020540236182599227,
+    "absolute-confidence": 0.03457514611554239,
+    "random-escalation": 0.021860458464436374
+   },
+   "0.2": {
+    "device-only": 0.022359253972976532,
+    "always-cloud": 0.03313936058397833,
+    "escalation-only": 0.03203731124862145,
+    "oracle-trigger": 0.0847193878704575,
+    "oracle-timing-bound": 0.04562757502380497,
+    "cloud-initiated": 0.04514003518839151,
+    "context-trickle": 0.045268999694563765,
+    "ceiling-gbt": 0.03240955182654337,
+    "ceiling-logistic": 0.03171422854646769,
+    "absolute-confidence": 0.030557279109095326,
+    "random-escalation": 0.0321870991579603
+   },
+   "0.4": {
+    "device-only": 0.022359253972976532,
+    "always-cloud": 0.03313936058397833,
+    "escalation-only": 0.022282980629953753,
+    "oracle-trigger": 0.0847193878704575,
+    "oracle-timing-bound": 0.04462753536511568,
+    "cloud-initiated": 0.03269728227703502,
+    "context-trickle": 0.04576261720021819,
+    "ceiling-gbt": 0.03784090860118425,
+    "ceiling-logistic": 0.030391977398368807,
+    "absolute-confidence": 0.031225583306323707,
+    "random-escalation": 0.02388328467123822
+   }
+  },
+  "2": {
+   "0.05": {
+    "device-only": 0.009408326811820243,
+    "always-cloud": 0.012789625830558421,
+    "escalation-only": 0.009158875150293086,
+    "oracle-trigger": 0.009365972830636587,
+    "oracle-timing-bound": 0.009339764545174281,
+    "cloud-initiated": 0.009400807099916192,
+    "context-trickle": 0.009408326811820243,
+    "ceiling-gbt": 0.0091992253935886,
+    "ceiling-logistic": 0.008698276708836114,
+    "absolute-confidence": 0.009279715391521679,
+    "random-escalation": 0.009057621373643123
+   },
+   "0.1": {
+    "device-only": 0.009408326811820243,
+    "always-cloud": 0.012789625830558421,
+    "escalation-only": 0.009458798462318582,
+    "oracle-trigger": 0.009365972830636587,
+    "oracle-timing-bound": 0.009586621742793532,
+    "cloud-initiated": 0.009255873552131701,
+    "context-trickle": 0.009238848903470633,
+    "ceiling-gbt": 0.009451995413563084,
+    "ceiling-logistic": 0.009186719160389207,
+    "absolute-confidence": 0.009489077113935193,
+    "random-escalation": 0.008988973154016817
+   },
+   "0.2": {
+    "device-only": 0.009408326811820243,
+    "always-cloud": 0.012789625830558421,
+    "escalation-only": 0.009696635432682649,
+    "oracle-trigger": 0.009365972830636587,
+    "oracle-timing-bound": 0.009805554659554018,
+    "cloud-initiated": 0.009228043289520302,
+    "context-trickle": 0.00947546175790625,
+    "ceiling-gbt": 0.009484281094043895,
+    "ceiling-logistic": 0.008732621912213485,
+    "absolute-confidence": 0.009555214757340448,
+    "random-escalation": 0.00905515900572972
+   },
+   "0.4": {
+    "device-only": 0.009408326811820243,
+    "always-cloud": 0.012789625830558421,
+    "escalation-only": 0.009670301913697348,
+    "oracle-trigger": 0.009365972830636587,
+    "oracle-timing-bound": 0.010019599174596978,
+    "cloud-initiated": 0.010203093398953336,
+    "context-trickle": 0.010361077554489721,
+    "ceiling-gbt": 0.009986212810902948,
+    "ceiling-logistic": 0.009314643906806178,
+    "absolute-confidence": 0.01039435205741132,
+    "random-escalation": 0.010076564828595857
+   }
+  },
+  "3": {
+   "0.05": {
+    "device-only": 0.009925494449612007,
+    "always-cloud": 0.010964258792832316,
+    "escalation-only": 0.013080620592870226,
+    "oracle-trigger": 0.04400963470198385,
+    "oracle-timing-bound": 0.014956731251714794,
+    "cloud-initiated": 0.009901830681480019,
+    "context-trickle": 0.009925494449612007,
+    "ceiling-gbt": 0.009594555376623862,
+    "ceiling-logistic": 0.00976631395904527,
+    "absolute-confidence": 0.009976311100330886,
+    "random-escalation": 0.009947498377812131
+   },
+   "0.1": {
+    "device-only": 0.009925494449612007,
+    "always-cloud": 0.010964258792832316,
+    "escalation-only": 0.010410626104366707,
+    "oracle-trigger": 0.04400963470198385,
+    "oracle-timing-bound": 0.01302311621125874,
+    "cloud-initiated": 0.01099764560362239,
+    "context-trickle": 0.010234577795148674,
+    "ceiling-gbt": 0.009643058880269456,
+    "ceiling-logistic": 0.009891353446014,
+    "absolute-confidence": 0.009757012138651223,
+    "random-escalation": 0.009563641213781143
+   },
+   "0.2": {
+    "device-only": 0.009925494449612007,
+    "always-cloud": 0.010964258792832316,
+    "escalation-only": 0.011771337336947801,
+    "oracle-trigger": 0.04400963470198385,
+    "oracle-timing-bound": 0.012604788910557411,
+    "cloud-initiated": 0.01168451430317769,
+    "context-trickle": 0.011518479493742387,
+    "ceiling-gbt": 0.009446533036938131,
+    "ceiling-logistic": 0.00984507125284624,
+    "absolute-confidence": 0.010682022397162335,
+    "random-escalation": 0.011908948918852177
+   },
+   "0.4": {
+    "device-only": 0.009925494449612007,
+    "always-cloud": 0.010964258792832316,
+    "escalation-only": 0.011182494332016358,
+    "oracle-trigger": 0.04400963470198385,
+    "oracle-timing-bound": 0.012428121006440614,
+    "cloud-initiated": 0.01086799089446707,
+    "context-trickle": 0.010864745522984179,
+    "ceiling-gbt": 0.009707517609851373,
+    "ceiling-logistic": 0.010880038670052538,
+    "absolute-confidence": 0.010734696916039482,
+    "random-escalation": 0.011485353727309041
+   }
+  },
+  "4": {
+   "0.05": {
+    "device-only": 0.018981783923623246,
+    "always-cloud": 0.027790398368474106,
+    "escalation-only": 0.01791342981177109,
+    "oracle-trigger": 0.0877848200986585,
+    "oracle-timing-bound": 0.08803149918206321,
+    "cloud-initiated": 0.01897611280440415,
+    "context-trickle": 0.018981783923623246,
+    "ceiling-gbt": 0.018048520345696376,
+    "ceiling-logistic": 0.019232280176359567,
+    "absolute-confidence": 0.030389592428913426,
+    "random-escalation": 0.019670883784746893
+   },
+   "0.1": {
+    "device-only": 0.018981783923623246,
+    "always-cloud": 0.027790398368474106,
+    "escalation-only": 0.02379369683494656,
+    "oracle-trigger": 0.0877848200986585,
+    "oracle-timing-bound": 0.049968300364602314,
+    "cloud-initiated": 0.04153501206911789,
+    "context-trickle": 0.023242810746086206,
+    "ceiling-gbt": 0.02940071272033215,
+    "ceiling-logistic": 0.01817502091985232,
+    "absolute-confidence": 0.04705480791084745,
+    "random-escalation": 0.020100791904313412
+   },
+   "0.2": {
+    "device-only": 0.018981783923623246,
+    "always-cloud": 0.027790398368474106,
+    "escalation-only": 0.019502222865273585,
+    "oracle-trigger": 0.0877848200986585,
+    "oracle-timing-bound": 0.05000788338742302,
+    "cloud-initiated": 0.025315380677314498,
+    "context-trickle": 0.028009309977562485,
+    "ceiling-gbt": 0.020867446211891735,
+    "ceiling-logistic": 0.021903820880381463,
+    "absolute-confidence": 0.02947411982136743,
+    "random-escalation": 0.021864622110187058
+   },
+   "0.4": {
+    "device-only": 0.018981783923623246,
+    "always-cloud": 0.027790398368474106,
+    "escalation-only": 0.02341708689245885,
+    "oracle-trigger": 0.0877848200986585,
+    "oracle-timing-bound": 0.03944008283463823,
+    "cloud-initiated": 0.02214973500292026,
+    "context-trickle": 0.022394301183292466,
+    "ceiling-gbt": 0.02543922202615406,
+    "ceiling-logistic": 0.022932496218986003,
+    "absolute-confidence": 0.0316904591042578,
+    "random-escalation": 0.037482128612452516
+   }
+  }
+ },
+ "calibration_kind": "platt_instant",
+ "metric": {
+  "primary": "StudyE9b streaming AP (metrics.streaming_ap / ApEngine, definition unchanged), averaged over horizons 0.5 / 1.0 / 1.5 s; each horizon and h = 0 reported",
+  "secondary": "StudyE9c challenge mAP through StudyE9d's Challenge (metrics.challenge_map)",
+  "budget": "call fraction: total cloud calls / decision instants on the 0.5-s cadence (B1)",
+  "bootstrap": "2,000 paired clip resamples, seed 0, shared across arms within each metric"
+ },
+ "sanity": {
+  "check_a_references_unchanged": {
+   "what_must_match": "always-cloud and device-only deliver scores from ONE tier only, and a single per-tier monotone map cannot reorder values within a tier, so their challenge mAP must equal StudyE9c's committed 0.5675307471627266 and 0.4776042449177038 and their streaming AP must equal StudyE9b's committed device-only|measured@25|far5 and always-cloud/32BI_N1|measured@25|cad50|far5 at every horizon.",
+   "single_map": {
+    "challenge": {
+     "device_only": 0.4776042449177038,
+     "always_cloud": 0.5675307471627266,
+     "committed_device_only": 0.4776042449177038,
+     "committed_always_cloud": 0.5675307471627266,
+     "diff_device": 0.0,
+     "diff_cloud": 0.0
+    },
+    "streaming": {
+     "device_only": {
+      "0.0": 0.012609464078258116,
+      "0.5": 0.010432228773958817,
+      "1.0": 0.010234064738894304,
+      "1.5": 0.009205423707173536
+     },
+     "always_cloud": {
+      "0.0": 0.03839743719436792,
+      "0.5": 0.016134322654738787,
+      "1.0": 0.012664104287615184,
+      "1.5": 0.01102569796004142
+     },
+     "committed_device_only": {
+      "0.0": 0.012609464078258114,
+      "0.25": 0.01152882458136679,
+      "0.5": 0.010432228773958819,
+      "0.75": 0.009830232882059182,
+      "1.0": 0.010234064738894304,
+      "1.5": 0.00920541474359243
+     },
+     "committed_always_cloud": {
+      "0.0": 0.03839743719436791,
+      "0.25": 0.019481764937706817,
+      "0.5": 0.01613432265473879,
+      "0.75": 0.014493408116157704,
+      "1.0": 0.012664104287615182,
+      "1.5": 0.01102569796004142
+     },
+     "max_abs_diff_device": 8.963581106524732e-09,
+     "max_abs_diff_cloud": 6.938893903907228e-18
+    },
+    "pass_": false
+   },
+   "cross_fitted": {
+    "challenge": {
+     "device_only": 0.46873386775581977,
+     "always_cloud": 0.5666835015753743,
+     "diff_device": -0.008870377161884047,
+     "diff_cloud": -0.0008472455873522744
+    },
+    "streaming": {
+     "device_only": {
+      "0.0": 0.012176147267364686,
+      "0.5": 0.009994155206857609,
+      "1.0": 0.009932005285186367,
+      "1.5": 0.008934663595812357
+     },
+     "always_cloud": {
+      "0.0": 0.024772187851227118,
+      "0.5": 0.015372606092708671,
+      "1.0": 0.012210617861378744,
+      "1.5": 0.01102960248643189
+     },
+     "max_abs_diff_device": 0.00043807356710121037,
+     "max_abs_diff_cloud": 0.013625249343140793
+    },
+    "pass_": false
+   },
+   "raw_reproduction": {
+    "challenge": {
+     "device_only": 0.4776042449177038,
+     "always_cloud": 0.5675307471627266,
+     "diff_device": 0.0,
+     "diff_cloud": 0.0
+    },
+    "streaming_max_abs_diff": {
+     "device": 1.734723475976807e-18,
+     "cloud": 6.938893903907228e-18
+    }
+   },
+   "explanation": "the invariance holds EXACTLY for one map per tier and CANNOT hold for the cross-fitted application, because five folds carry five different affine maps and both metrics rank ACROSS clips: a value from fold 0 and a value from fold 1 are no longer on one scale. This is a property of cross-fitting a calibration under a cross-clip rank metric, not of the calibration, and it is reported with its size rather than absorbed."
+  },
+  "check_b_positives_only_oracle": {
+   "requirement": "the positives-only oracle must score at or above device-only on challenge mAP; if it does not, STOP and report",
+   "per_scale": {
+    "raw": {
+     "oracle_positives_only": 0.3910784585444523,
+     "oracle_every_crop": 0.5494724278746909,
+     "device_only": 0.4776042449177038,
+     "always_cloud": 0.5675307471627266,
+     "oracle_at_or_above_device_only": false,
+     "margin": -0.08652578637325153
+    },
+    "calibrated_crossfit": {
+     "oracle_positives_only": 0.49410803568375644,
+     "oracle_every_crop": 0.5497941657033057,
+     "device_only": 0.46873386775581977,
+     "always_cloud": 0.5666835015753743,
+     "oracle_at_or_above_device_only": true,
+     "margin": 0.025374167927936675
+    },
+    "calibrated_one_map": {
+     "oracle_positives_only": 0.5041530906446182,
+     "oracle_every_crop": 0.5476108989343952,
+     "device_only": 0.4776042449177038,
+     "always_cloud": 0.5675307471627266,
+     "oracle_at_or_above_device_only": true,
+     "margin": 0.026548845726914405
+    }
+   },
+   "pass_": true,
+   "pass_on_one_map": true
+  },
+  "check_c_no_leakage": {
+   "per_fold": [
+    {
+     "fold": 0,
+     "n_train": 240,
+     "n_held": 60,
+     "overlap": 0,
+     "calibration_fitted_on_n_clips": 240
+    },
+    {
+     "fold": 1,
+     "n_train": 240,
+     "n_held": 60,
+     "overlap": 0,
+     "calibration_fitted_on_n_clips": 240
+    },
+    {
+     "fold": 2,
+     "n_train": 240,
+     "n_held": 60,
+     "overlap": 0,
+     "calibration_fitted_on_n_clips": 240
+    },
+    {
+     "fold": 3,
+     "n_train": 240,
+     "n_held": 60,
+     "overlap": 0,
+     "calibration_fitted_on_n_clips": 240
+    },
+    {
+     "fold": 4,
+     "n_train": 240,
+     "n_held": 60,
+     "overlap": 0,
+     "calibration_fitted_on_n_clips": 240
+    }
+   ],
+   "pass_": true,
+   "asserted": "every calibration and every tunable is fitted on exactly the 240 training clips of its fold; train and held-out overlap is 0 in all 5 folds"
+  },
+  "check_metric_engine": {
+   "worst_abs_difference": 0.0,
+   "per_horizon": {
+    "0.0": 0.012176147267364686,
+    "0.5": 0.009994155206857609,
+    "1.0": 0.009932005285186367,
+    "1.5": 0.008934663595812357
+   },
+   "note": "the primary is StudyE9b's ApEngine through metrics.streaming_ap's own construction; only the average over horizons 0.5 / 1.0 / 1.5 s is added"
+  }
+ },
+ "_provenance": {
+  "git_commit": "ea4a6e8116ba0ed1b7746a792d36be43dc1f4009",
+  "script": "ctrl1c_crossfit.py --stage sens",
+  "model": null,
+  "timestamp": "2026-11-16T15:05:59.429161",
+  "device": "cpu",
+  "n": 300
+ }
+}

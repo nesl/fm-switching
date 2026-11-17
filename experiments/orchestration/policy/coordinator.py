@@ -408,8 +408,12 @@ class Coordinator:
         if not cands:
             return out
         try:
+            host_pool = self.rollout._build_host(fleet)
             alloc = tier_assignment(cands, self.params.gpu_kv_capacity_tokens,
-                                    self.params.host_kv_capacity_tokens)
+                                    self.params.host_kv_capacity_tokens,
+                                    calibration=getattr(self.params, "tier_calibration", None),
+                                    host_occupied_tokens=(host_pool.occupancy()
+                                                          if host_pool is not None else 0))
         except ValueError as e:
             return [Decision(fleet.t, "tier_assignment", "-", None, False, str(e))]
         for c in alloc["gpu"]:
@@ -445,7 +449,8 @@ class Coordinator:
         if self.params.allow_whole_job_piece:
             cands = cands + [total_tokens]
         rows = []
-        pool = self.rollout._build_pool(fleet)
+        store = self.rollout._build_store(fleet)
+        pool = store.gpu if store is not None else None
         for size in sorted(set(int(c) for c in cands if c > 0)):
             n_pieces = max(1, -(-total_tokens // size))
             gaps = max(n_pieces - 1, 0)
@@ -457,13 +462,15 @@ class Coordinator:
             else:
                 pred = pool.predict_loss(prefix_id_for(job.job_id), size, fleet.t)
                 p_loss = pred["p_loss"]
+            ph = self.params.p_host_for(store.host if store is not None else None,
+                                        int(round(p_loss * size)),
+                                        prefix_id=prefix_id_for(job.job_id), t=fleet.t)
             rw = expected_remaining_work(probe, self.engine, self.pf, p_loss=p_loss,
-                                         p_host=float(self.params.p_host),
-                                         prefix_tokens=size)
+                                         p_host=float(ph["p_host"]), prefix_tokens=size)
             exposure = gaps * rw.extra_s
             rows.append(dict(size_tokens=size, n_pieces=n_pieces, gaps=gaps,
-                             work_s=rw.w_left_s, p_loss=p_loss,
-                             expected_restore_s=exposure,
+                             work_s=rw.w_left_s, p_loss=p_loss, p_host=ph["p_host"],
+                             p_host_basis=ph["basis"], expected_restore_s=exposure,
                              expected_total_s=rw.w_left_s + exposure))
         rows.sort(key=lambda r: (r["expected_total_s"], r["size_tokens"]))
         return dict(chosen=rows[0], candidates=rows,
@@ -480,7 +487,8 @@ class Coordinator:
         job = fleet.jobs.get(item.job_id)
         if job is None:
             return dict(checked=False, reason="no such job")
-        pool = self.rollout._build_pool(fleet)
+        store = self.rollout._build_store(fleet)
+        pool = store.gpu if store is not None else None
         pid = prefix_id_for(job.job_id)
         built = job.pieces_done * job.tokens_per_piece
         observed_loss = False
@@ -500,7 +508,11 @@ class Coordinator:
                    demand_tokens=demand, competing_tokens=competing, replanned=False)
         if built > 0 and (observed_loss or likely):
             w_reload, w_rebuild = restore_costs_s(built, self.pf)
-            p_host = float(self.params.p_host)
+            ph = self.params.p_host_for(store.host if store is not None else None,
+                                        int(round(max(p_loss, 1.0 if observed_loss else 0.0)
+                                                  * built)),
+                                        prefix_id=pid, t=fleet.t)
+            p_host = float(ph["p_host"])
             restore_s = (w_reload if (observed_loss and p_host >= 0.5)
                          else (p_host * w_reload + (1.0 - p_host) * w_rebuild))
             restore = PendingItem(
@@ -518,7 +530,7 @@ class Coordinator:
                 resolution_s=self.params.continuation_resolution_s,
                 extra_work_s=restore_s)
             ev = dict(t=fleet.t, job_id=job.job_id, built_prefix_tokens=built, p_loss=p_loss,
-                      observed_loss=observed_loss, restore_work_s=restore_s,
+                      p_host=ph, observed_loss=observed_loss, restore_work_s=restore_s,
                       restore_item=restore.item_id, new_pieces_total=job.pieces_total,
                       feasibility_after=job.feasibility,
                       requested_continuation_vs_observed_loss=(
@@ -615,6 +627,21 @@ class Coordinator:
     def _update_mu(self, fleet: Fleet) -> None:
         """Spec 8 says 'update mu' and gives no rule; ambiguity A3 records the choice: an EWMA of
         the realized marginal utility per GPU-second of the last released item, floored at 0."""
+        est = str(getattr(self.params, "mu_estimator", "none"))
+        if est == "none":
+            self.mu_note = (
+                "mu is held at its PLACEHOLDER 0 because Params.mu_estimator is 'none'. Spec 8 "
+                "says only 'update mu' and spec 9 does not list mu, so the SPEC DOES NOT "
+                "DETERMINE AN ESTIMATOR. The options and their consequences are written out in "
+                "reports/study_pol3_update.md; selecting one is an explicit choice, not a "
+                "default. With mu at 0 the terminal backlog channel of spec 5.3 is SILENT, so "
+                "A6's expected restore work reaches a decision only through the feasibility "
+                "class and the memory decision (ambiguity A26)")
+            return
+        if est != "ewma_marginal_utility":
+            raise ValueError("unknown mu estimator %r; 'none' (default, mu stays at the "
+                             "PLACEHOLDER 0) and 'ewma_marginal_utility' (ambiguity A3) are the "
+                             "only ones implemented" % est)
         if not fleet.in_flight:
             return
         a = self.params.mu_ewma_alpha
@@ -624,6 +651,16 @@ class Coordinator:
             return
         realized = max(getattr(self, "_last_delta_j", 0.0), 0.0) / pr.gpu_s
         self.params.mu = (1 - a) * float(self.params.mu) + a * realized
+
+    def upgrade_device_answer(self, cloud: Dict[str, Any], device: Dict[str, Any],
+                             margin: float = 0.0) -> Dict[str, Any]:
+        """D57: the cloud upgrades the device's answer ONLY on the common calibrated probability
+        scale. Both raw scores are mapped by their tier's DEV-fitted monotone map first, and the
+        call RAISES when no calibration exists between the two tiers, rather than comparing two
+        scales that StudyCTRL1b measured to be different."""
+        from .calibration import upgrade_decision
+        return upgrade_decision(getattr(self.params, "tier_calibration", None), cloud, device,
+                                margin=margin)
 
     def price(self, fleet: Fleet, typical_first_call_gpu_s: float) -> float:
         """Spec 7.7's pi(t) = mu x (GPU-seconds of a typical first call). Broadcast only when the

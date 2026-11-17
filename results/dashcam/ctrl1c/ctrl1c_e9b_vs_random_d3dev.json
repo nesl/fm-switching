@@ -1,0 +1,160 @@
+{
+ "calibration_kind": "d3dev",
+ "cell": {
+  "setting": "measured@25",
+  "cadence_s": 0.5,
+  "far": 0.05,
+  "resolver": "32BI_N1",
+  "k": 2,
+  "q": 0.75,
+  "lmax": 10,
+  "cooldown": 0,
+  "horizon": 0.0,
+  "committed_capture": {
+   "0.05": 0.03048,
+   "0.10": 0.13311,
+   "0.20": 0.12742,
+   "0.40": 0.17753
+  }
+ },
+ "references": {
+  "device_only_primary": 0.00995723608548185,
+  "always_cloud_primary": 0.013274708300798464,
+  "gap": 0.0033174722153166136,
+  "note": "StudyE9b's own device-only and always-cloud/32BI_N1 cad50 streams, which this row reproduces bit-identically on the raw scale"
+ },
+ "total_decision_instants": 21098,
+ "random_arm_by_budget": {
+  "0.05": {
+   "primary_ap": 0.010344555363958416,
+   "capture": 0.11675132550872026,
+   "realized_call_fraction": 0.054270546971276895
+  },
+  "0.1": {
+   "primary_ap": 0.010296113280991386,
+   "capture": 0.10214921889773639,
+   "realized_call_fraction": 0.10958384681012419
+  },
+  "0.2": {
+   "primary_ap": 0.011413786746727668,
+   "capture": 0.4390543663096835,
+   "realized_call_fraction": 0.20627547634846904
+  },
+  "0.4": {
+   "primary_ap": 0.012240634618171577,
+   "capture": 0.688294696831938,
+   "realized_call_fraction": 0.40558346762726327
+  }
+ },
+ "by_trigger_rate": {
+  "0.05": {
+   "trigger_rate": 0.05,
+   "invocations": 2269,
+   "realized_call_fraction": 0.10754573893260025,
+   "escalation_primary_ap": 0.011030644832317629,
+   "escalation_capture": 0.3235622417212421,
+   "escalation_capture_ci": [
+    0.05744111460038655,
+    1.3608187907035396
+   ],
+   "matched_random_budget": 0.1,
+   "matched_random_realized_call_fraction": 0.10958384681012419,
+   "budget_axis_note": "StudyE9b's trigger rate is a quantile on negatives, not a call fraction; the match is on realized cloud work",
+   "random_capture": 0.10214921889773639,
+   "difference_vs_random": {
+    "difference": 0.22141302282350572,
+    "ci": [
+     -0.2777951341752906,
+     1.3249661260351624
+    ],
+    "excludes_zero": false,
+    "bootstrap_sd": 0.5320832993242051,
+    "ci_half_width": 0.8013806301052265,
+    "mde_80pct_power_alpha05": 1.490676706191471,
+    "excludes_above_10_points": false,
+    "rule2_power_label": "inconclusive (underpowered)"
+   }
+  },
+  "0.10": {
+   "trigger_rate": 0.1,
+   "invocations": 4419,
+   "realized_call_fraction": 0.20945113280879704,
+   "escalation_primary_ap": 0.010264321742178796,
+   "escalation_capture": 0.09256615783521724,
+   "escalation_capture_ci": [
+    -0.3592877368822281,
+    0.3728729473983139
+   ],
+   "matched_random_budget": 0.2,
+   "matched_random_realized_call_fraction": 0.20627547634846904,
+   "budget_axis_note": "StudyE9b's trigger rate is a quantile on negatives, not a call fraction; the match is on realized cloud work",
+   "random_capture": 0.4390543663096835,
+   "difference_vs_random": {
+    "difference": -0.34648820847446626,
+    "ci": [
+     -2.335476922130659,
+     0.24050989502375558
+    ],
+    "excludes_zero": false,
+    "bootstrap_sd": 1.0906549508439733,
+    "ci_half_width": 1.2879934085772071,
+    "mde_80pct_power_alpha05": 3.0555627883462018,
+    "excludes_above_10_points": false,
+    "rule2_power_label": "inconclusive (underpowered)"
+   }
+  },
+  "0.20": {
+   "trigger_rate": 0.2,
+   "invocations": 7562,
+   "realized_call_fraction": 0.3584225992985117,
+   "escalation_primary_ap": 0.01143224309689761,
+   "escalation_capture": 0.4446177437766385,
+   "escalation_capture_ci": [
+    -0.000308485670555109,
+    1.332212545006191
+   ],
+   "matched_random_budget": 0.4,
+   "matched_random_realized_call_fraction": 0.40558346762726327,
+   "budget_axis_note": "StudyE9b's trigger rate is a quantile on negatives, not a call fraction; the match is on realized cloud work",
+   "random_capture": 0.688294696831938,
+   "difference_vs_random": {
+    "difference": -0.24367695305529952,
+    "ci": [
+     -1.2686703303635716,
+     0.7931783350994001
+    ],
+    "excludes_zero": false,
+    "bootstrap_sd": 1.8767663391254952,
+    "ci_half_width": 1.0309243327314859,
+    "mde_80pct_power_alpha05": 5.2579208335459775,
+    "excludes_above_10_points": false,
+    "rule2_power_label": "inconclusive (underpowered)"
+   }
+  },
+  "0.40": {
+   "trigger_rate": 0.4,
+   "invocations": 12785,
+   "realized_call_fraction": 0.6059816096312447,
+   "escalation_primary_ap": 0.012346849482157723,
+   "escalation_capture": 0.7203115027288368,
+   "escalation_capture_ci": [
+    0.3483888251914791,
+    1.5413460729139876
+   ],
+   "matched_random_budget": null,
+   "matched_random_realized_call_fraction": null,
+   "budget_axis_note": "StudyE9b's trigger rate is a quantile on negatives, not a call fraction; the match is on realized cloud work",
+   "random_capture": null,
+   "difference_vs_random": null,
+   "unmatched_reason": "no pre-registered budget has a realized call fraction within 0.15 of 0.6060; the grid stops at 40 %, whose random arm realizes 0.4056"
+  }
+ },
+ "_provenance": {
+  "git_commit": "ea4a6e8116ba0ed1b7746a792d36be43dc1f4009",
+  "script": "ctrl1c_crossfit.py --stage e9brandom",
+  "model": null,
+  "timestamp": "2026-11-16T17:05:10.967993",
+  "device": "cpu",
+  "n": 300
+ }
+}

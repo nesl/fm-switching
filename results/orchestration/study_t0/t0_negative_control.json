@@ -1,0 +1,130 @@
+{
+ "n": 14,
+ "control_cell": [
+  "P40|piece2048|0",
+  "P40|piece2048|1",
+  "P40|piece2048|2",
+  "P40|piece2048|4",
+  "P40|piece2048|5",
+  "P40|piece2048|6",
+  "P40|piece2048|7",
+  "P40|piece2048|8",
+  "P40|piece2048|9",
+  "P40|piece2048|10",
+  "P40|piece2048|12",
+  "P40|piece2048|13",
+  "P40|piece2048|16",
+  "P40|piece2048|17"
+ ],
+ "predicted_with_action": {
+  "n": 14,
+  "min": 0.040042440545721814,
+  "p10": 0.46901390594780523,
+  "p50": 1.1321534359924728,
+  "p90": 3.441878579313982,
+  "max": 6.204154097523096,
+  "mean": 1.6400117105388934
+ },
+ "predicted_action_removed": {
+  "n": 14,
+  "min": -0.24531043997663637,
+  "p10": -0.06508461766609566,
+  "p50": -0.00022661685943603516,
+  "p90": 0.03527095317840579,
+  "max": 0.1246332965246082,
+  "mean": -0.010518127802877197
+ },
+ "median_abs_with_action_s": 1.1321534359924728,
+ "median_abs_residual_s": 0.007363796234130859,
+ "ratio_median_residual_to_median_effect": 0.006504238736576884,
+ "collapsed": true,
+ "exactly_zero": false,
+ "note": "the action is the only thing the two arms differ in by DESIGN, but the two arms are separate live runs, so their recorded submit instants differ by the dispatch jitter StudyENG1 measured (<= 3.3 ms). With the action removed the replay therefore leaves that jitter floor rather than exactly zero, and the control asks whether the floor is negligible against the effect, not whether it is bit-zero",
+ "rows": [
+  {
+   "key": "P40|piece2048|0",
+   "with_action_s": 3.667870527346298,
+   "action_removed_s": -0.0021920204162597656
+  },
+  {
+   "key": "P40|piece2048|1",
+   "with_action_s": 0.040042440545721814,
+   "action_removed_s": 0.012200355529785156
+  },
+  {
+   "key": "P40|piece2048|2",
+   "with_action_s": 2.914564033905242,
+   "action_removed_s": 0.015471935272216797
+  },
+  {
+   "key": "P40|piece2048|4",
+   "with_action_s": 0.49129731574989854,
+   "action_removed_s": -0.08950913709074282
+  },
+  {
+   "key": "P40|piece2048|5",
+   "with_action_s": 0.4675654122233581,
+   "action_removed_s": 0.1246332965246082
+  },
+  {
+   "key": "P40|piece2048|6",
+   "with_action_s": 1.8342005193951203,
+   "action_removed_s": -0.00249481201171875
+  },
+  {
+   "key": "P40|piece2048|7",
+   "with_action_s": 1.891911036957595,
+   "action_removed_s": -0.004341840744018555
+  },
+  {
+   "key": "P40|piece2048|8",
+   "with_action_s": 1.14770599417252,
+   "action_removed_s": -0.008094072341918945
+  },
+  {
+   "key": "P40|piece2048|9",
+   "with_action_s": 1.6433565915042312,
+   "action_removed_s": 0.04375624656677246
+  },
+  {
+   "key": "P40|piece2048|10",
+   "with_action_s": 1.1166008778124255,
+   "action_removed_s": 0.0017387866973876953
+  },
+  {
+   "key": "P40|piece2048|12",
+   "with_action_s": 6.204154097523096,
+   "action_removed_s": 0.0066335201263427734
+  },
+  {
+   "key": "P40|piece2048|13",
+   "with_action_s": 0.4892284817190502,
+   "action_removed_s": -0.0030045509338378906
+  },
+  {
+   "key": "P40|piece2048|16",
+   "with_action_s": 0.47239372463818174,
+   "action_removed_s": 0.003258943557739258
+  },
+  {
+   "key": "P40|piece2048|17",
+   "with_action_s": 0.5792728940517713,
+   "action_removed_s": -0.24531043997663637
+  }
+ ],
+ "cell": "P40 | piece2048, FIT trials only",
+ "_provenance": {
+  "git_commit": "ea4a6e8116ba0ed1b7746a792d36be43dc1f4009",
+  "script": "policy/run_t0.py --mode control",
+  "model": null,
+  "timestamp": "2026-11-16T15:00:26.613418",
+  "device": "cpu",
+  "n": 14,
+  "args": {
+   "mode": "control",
+   "out_dir": "results/orchestration/study_t0",
+   "authorization": "",
+   "pressure_field": "alloc_before_sched"
+  }
+ }
+}

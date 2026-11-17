@@ -1,0 +1,62 @@
+{
+ "label": "DERIVED from the committed ENG1 step model; NOT measured in this row",
+ "source": "results/cost/study_eng1/eng1_step_model.json",
+ "prompt_tokens_n1": 378,
+ "prompt_tokens_source": "StudyD3 / D4 / D14 PROMPT_TOK[1]",
+ "step_ms_per_call": 69.46554288726583,
+ "admission_stall_ms_per_call": 13.888777761818139,
+ "decision_cadence_s": 0.5,
+ "cloud_latency_s": 0.395,
+ "calls_per_second_per_device": {
+  "0.05": 0.1,
+  "0.1": 0.2,
+  "0.2": 0.4,
+  "0.4": 0.8
+ },
+ "rows": [
+  {
+   "budget": 0.05,
+   "calls_per_second_per_device": 0.1,
+   "devices_step_only": 143.95626355686574,
+   "devices_with_admission_stall": 119.96978587467976,
+   "in_flight_requests_at_0395s_latency": 0.03950000000000001
+  },
+  {
+   "budget": 0.1,
+   "calls_per_second_per_device": 0.2,
+   "devices_step_only": 71.97813177843287,
+   "devices_with_admission_stall": 59.98489293733988,
+   "in_flight_requests_at_0395s_latency": 0.07900000000000001
+  },
+  {
+   "budget": 0.2,
+   "calls_per_second_per_device": 0.4,
+   "devices_step_only": 35.989065889216434,
+   "devices_with_admission_stall": 29.99244646866994,
+   "in_flight_requests_at_0395s_latency": 0.15800000000000003
+  },
+  {
+   "budget": 0.4,
+   "calls_per_second_per_device": 0.8,
+   "devices_step_only": 17.994532944608217,
+   "devices_with_admission_stall": 14.99622323433497,
+   "in_flight_requests_at_0395s_latency": 0.31600000000000006
+  }
+ ],
+ "assumptions": [
+  "one escalation call is one N1 Nexar request of 378 prompt tokens with one image, entering the engine as a single prefill request in its own step",
+  "the step model is evaluated at tok = 378, images_in_step = 1, prefill_reqs = 1, decode_reqs = 0 and ctx = tok, which is the isolated-call reading of a model fitted on BUSY intervals; the ENG1 report measured the engine to be SUB-LINEAR in batched small prefills (16-batch / 16 x single = 0.51 at N = 1), so a batched fleet would fit MORE devices than this column states and the column is a LOWER bound in that respect",
+  "the device count is a pure throughput bound at 100 % accelerator utilization: queueing is ignored, so the 0.395 s cloud latency is NOT guaranteed at the stated count. The in-flight column is Little's law at that arrival rate and is what the latency budget would have to accommodate",
+  "the admission-stall column charges each call the measured multimodal admission stall (12.7 ms + 1.1 ms per image) as if no two calls shared a step, which is the pessimistic end",
+  "every device is assumed to run the same workload at the same budget, with no correlation between devices' escalation times; correlated escalation bursts would reduce the count",
+  "the ENG1 step model was fitted on the H100 NVL (sn4622120321) and on Part A and Part B E0 steps only; Part C and the HOLDOUT were not used in the fit"
+ ],
+ "interpretation": "the budget is a TEST VARIABLE standing for cloud spare capacity (D58). Read as load: 5 % of the call rate is about 144 devices per H100 and 40 % about 18, so the budget axis is a fleet-size axis, and the cells at 5 to 20 % are the ones a shared H100 could actually serve.",
+ "_provenance": {
+  "git_commit": "ea4a6e8116ba0ed1b7746a792d36be43dc1f4009",
+  "script": "ctrl1c_crossfit.py --stage load",
+  "model": null,
+  "timestamp": "2026-11-16T17:05:12.071237",
+  "device": "cpu"
+ }
+}
