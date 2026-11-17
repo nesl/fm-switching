@@ -1,0 +1,548 @@
+{
+ "step1_causal_chain": "A device history is reusable only while its blocks are still in a cache tier (FORMULATION.md: the physical component of context inertia, where reconstruction cost grows with context length). Under write-through every block computed on GPU is also stored on host, so the only thing that removes a history is eviction, and eviction is least-recency-first on each tier independently. Therefore the tokens written to each tier since a history's last refresh, together with the refresh rule (which StudyENG1c Part A identified), decide whether the next request for that history is served from GPU, from host, or recomputed. All of those inputs are things a scheduler knows when it issues the requests, so the claim under test is that bookkeeping alone predicts the tier.",
+ "step2_instantiation": [
+  {
+   "causal_link": "other work is written to both tiers and displaces a history",
+   "implementing_quantity": "prompt tokens written per server segment",
+   "value_range": "608330 to 26824488 tokens per segment",
+   "varies": "yes",
+   "evidence": "16 segments, 5 caps"
+  },
+  {
+   "causal_link": "the host tier adds room only beyond the GPU pool",
+   "implementing_quantity": "host capacity minus the GPU pool",
+   "value_range": "{'12': -13792, '27': 47648, '38': 92704, '60': 182816, '256': 985632}",
+   "varies": "yes",
+   "evidence": "12 GiB is NEGATIVE (-13,792 tokens), which is why ENG1c measured nothing from the host tier there"
+  },
+  {
+   "causal_link": "recency decides which history survives",
+   "implementing_quantity": "evicted blocks per tier in the replay",
+   "value_range": "gpu 31025 to 1547404, host 31887 to 1515610 blocks",
+   "varies": "yes",
+   "evidence": "per segment in the JSON"
+  },
+  {
+   "causal_link": "the tier at arrival shows up as the request's own hit pattern",
+   "implementing_quantity": "measured classes on the scored set",
+   "value_range": "{'COLD': 951, 'GPU': 1316, 'HOST': 262, 'PARTIAL': 44}",
+   "varies": "yes",
+   "evidence": "all four classes occur"
+  }
+ ],
+ "step2_verdict": "PASS: no link is ABSENT or CONSTANT",
+ "step3_unit_trace": {
+  "server": "C_c27",
+  "cap_gib": 27.0,
+  "target_rid": "Cq7664x260c",
+  "events": [
+   {
+    "step": "other work written to both tiers",
+    "rid": "b7649x260c",
+    "prompt_tokens": 11024,
+    "role": "future_cold",
+    "cumulative_written_since_target": 11024
+   },
+   {
+    "step": "other work written to both tiers",
+    "rid": "b7651x260c",
+    "prompt_tokens": 11024,
+    "role": "future_cold",
+    "cumulative_written_since_target": 22048
+   },
+   {
+    "step": "other work written to both tiers",
+    "rid": "b7653x260c",
+    "prompt_tokens": 27044,
+    "role": "filler",
+    "cumulative_written_since_target": 49092
+   },
+   {
+    "step": "other work written to both tiers",
+    "rid": "b7655x260c",
+    "prompt_tokens": 27044,
+    "role": "filler",
+    "cumulative_written_since_target": 76136
+   },
+   {
+    "step": "other work written to both tiers",
+    "rid": "b7657x260c",
+    "prompt_tokens": 27044,
+    "role": "filler",
+    "cumulative_written_since_target": 103180
+   },
+   {
+    "step": "other work written to both tiers",
+    "rid": "b7659x260c",
+    "prompt_tokens": 27044,
+    "role": "filler",
+    "cumulative_written_since_target": 130224
+   },
+   {
+    "step": "other work written to both tiers",
+    "rid": "b7661x260c",
+    "prompt_tokens": 12464,
+    "role": "filler",
+    "cumulative_written_since_target": 142688
+   },
+   {
+    "step": "the target's own build",
+    "rid": "b7663x260c",
+    "prompt_tokens": 11024
+   },
+   {
+    "step": "PREDICT the target",
+    "rid": "Cq7664x260c",
+    "hid": "C7662x260c",
+    "hist_tokens": 11024,
+    "prompt_tokens": 11164,
+    "gpu_chunks_present": 689,
+    "host_chunks_present": 0,
+    "hit_tokens": 11024,
+    "recomputed_prefix_tokens": 0,
+    "predicted": "GPU",
+    "measured": "GPU",
+    "measured_route": "round external total is zero",
+    "tokens_written_since_its_build": 0,
+    "gpu_capacity": 62944,
+    "host_capacity": 110592,
+    "gpu_tokens_now": 62944,
+    "host_tokens_now": 110592
+   }
+  ],
+  "bound_by": "tier capacity and recency only; no accelerator or KV budget enters a residency prediction",
+  "reading": "the prediction is a lookup of contiguous chunks from index 0, first on GPU and then on host, so the arithmetic above is the whole decision"
+ },
+ "step4_negative_control": {
+  "what": "shuffle request order within each trial, keeping the same arrival times",
+  "accuracy_rule_normal": 0.9945588806840264,
+  "accuracy_rule_shuffled": 0.6167897396035756,
+  "accuracy_occupancy_baseline": 0.41624562767197826,
+  "n": 2573,
+  "fell_toward_baseline": true,
+  "drop": 0.3777691410804508
+ },
+ "step5_alternative_explanation": "The headline could be produced by (a) the identified rule's detail (write-through plus the asymmetric host refresh plus tail-first eviction) [the claimed mechanism], or (b) something much cruder that happens to agree: tier fullness alone, FIFO, or LRU without the host-path asymmetry. That is exactly what R2 tests, and the four comparison predictors share every line of the machinery except the policy switch, so a difference between them is the policy. A third alternative is that the streams are so lopsided (most arrivals cold at the small caps) that a predictor saying COLD always would score well; the per-class confusion matrices and the measured class mix are reported so that can be read off, and a constant-COLD baseline is included.",
+ "model_states": {
+  "A_c12": {
+   "policy": "rule",
+   "cap_gib": 12.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 49152,
+   "host_capacity": 49152,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 31025,
+   "host_evicted_blocks": 31887,
+   "n_histories": 25,
+   "n_predictions": 35
+  },
+  "A_c27": {
+   "policy": "rule",
+   "cap_gib": 27.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 110592,
+   "host_capacity": 110592,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 312657,
+   "host_evicted_blocks": 248045,
+   "n_histories": 222,
+   "n_predictions": 297
+  },
+  "A_c38": {
+   "policy": "rule",
+   "cap_gib": 38.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 155648,
+   "host_capacity": 155648,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 383032,
+   "host_evicted_blocks": 316987,
+   "n_histories": 254,
+   "n_predictions": 329
+  },
+  "A_c60": {
+   "policy": "rule",
+   "cap_gib": 60.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 245760,
+   "host_capacity": 245760,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 523955,
+   "host_evicted_blocks": 449384,
+   "n_histories": 328,
+   "n_predictions": 403
+  },
+  "B_c12": {
+   "policy": "rule",
+   "cap_gib": 12.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 49152,
+   "host_capacity": 49152,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 181222,
+   "host_evicted_blocks": 182084,
+   "n_histories": 2502,
+   "n_predictions": 2602
+  },
+  "B_c256": {
+   "policy": "rule",
+   "cap_gib": 256.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 1048576,
+   "host_capacity": 1048576,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 188004,
+   "host_evicted_blocks": 113402,
+   "n_histories": 2474,
+   "n_predictions": 2624
+  },
+  "B_c27": {
+   "policy": "rule",
+   "cap_gib": 27.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 110592,
+   "host_capacity": 110592,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 1050381,
+   "host_evicted_blocks": 1047403,
+   "n_histories": 10535,
+   "n_predictions": 10935
+  },
+  "B_c38": {
+   "policy": "rule",
+   "cap_gib": 38.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 155648,
+   "host_capacity": 155648,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 1547404,
+   "host_evicted_blocks": 1515610,
+   "n_histories": 13750,
+   "n_predictions": 14250
+  },
+  "B_c60": {
+   "policy": "rule",
+   "cap_gib": 60.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 245760,
+   "host_capacity": 245760,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 1481117,
+   "host_evicted_blocks": 1450781,
+   "n_histories": 11472,
+   "n_predictions": 11872
+  },
+  "C_c27": {
+   "policy": "rule",
+   "cap_gib": 27.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 110592,
+   "host_capacity": 110592,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 402390,
+   "host_evicted_blocks": 371239,
+   "n_histories": 349,
+   "n_predictions": 517
+  },
+  "C_c38": {
+   "policy": "rule",
+   "cap_gib": 38.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 155648,
+   "host_capacity": 155648,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 385059,
+   "host_evicted_blocks": 339010,
+   "n_histories": 347,
+   "n_predictions": 514
+  },
+  "C_c60": {
+   "policy": "rule",
+   "cap_gib": 60.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 245760,
+   "host_capacity": 245760,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 404840,
+   "host_evicted_blocks": 353201,
+   "n_histories": 344,
+   "n_predictions": 509
+  },
+  "DE_c256": {
+   "policy": "rule",
+   "cap_gib": 256.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 1048576,
+   "host_capacity": 1048576,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 446914,
+   "host_evicted_blocks": 273894,
+   "n_histories": 10878,
+   "n_predictions": 11287
+  },
+  "DE_c27": {
+   "policy": "rule",
+   "cap_gib": 27.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 110592,
+   "host_capacity": 110592,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 423243,
+   "host_evicted_blocks": 404520,
+   "n_histories": 10907,
+   "n_predictions": 11654
+  },
+  "DE_c38": {
+   "policy": "rule",
+   "cap_gib": 38.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 155648,
+   "host_capacity": 155648,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 428104,
+   "host_evicted_blocks": 405811,
+   "n_histories": 10915,
+   "n_predictions": 11684
+  },
+  "DE_c60": {
+   "policy": "rule",
+   "cap_gib": 60.0,
+   "gpu_tokens": 62944,
+   "gpu_capacity": 62944,
+   "gpu_usage": 1.0,
+   "host_tokens": 245760,
+   "host_capacity": 245760,
+   "host_usage": 1.0,
+   "gpu_evicted_blocks": 443739,
+   "host_evicted_blocks": 405685,
+   "n_histories": 10905,
+   "n_predictions": 11612
+  }
+ },
+ "note": "recorded before any TEST verdict was written",
+ "stream_audit": {
+  "n_requests": 91124,
+  "n_servers": 16,
+  "per_server": {
+   "A_c12": {
+    "n": 35,
+    "cap_gib": 12.0,
+    "parts": [
+     "A"
+    ],
+    "n_reuse": 10,
+    "n_holdout": 0
+   },
+   "A_c27": {
+    "n": 297,
+    "cap_gib": 27.0,
+    "parts": [
+     "A"
+    ],
+    "n_reuse": 75,
+    "n_holdout": 0
+   },
+   "A_c38": {
+    "n": 329,
+    "cap_gib": 38.0,
+    "parts": [
+     "A"
+    ],
+    "n_reuse": 75,
+    "n_holdout": 0
+   },
+   "A_c60": {
+    "n": 403,
+    "cap_gib": 60.0,
+    "parts": [
+     "A"
+    ],
+    "n_reuse": 75,
+    "n_holdout": 0
+   },
+   "B_c12": {
+    "n": 2602,
+    "cap_gib": 12.0,
+    "parts": [
+     "B"
+    ],
+    "n_reuse": 100,
+    "n_holdout": 0
+   },
+   "B_c256": {
+    "n": 2624,
+    "cap_gib": 256.0,
+    "parts": [
+     "B"
+    ],
+    "n_reuse": 150,
+    "n_holdout": 0
+   },
+   "B_c27": {
+    "n": 10935,
+    "cap_gib": 27.0,
+    "parts": [
+     "B"
+    ],
+    "n_reuse": 400,
+    "n_holdout": 0
+   },
+   "B_c38": {
+    "n": 14250,
+    "cap_gib": 38.0,
+    "parts": [
+     "B"
+    ],
+    "n_reuse": 500,
+    "n_holdout": 0
+   },
+   "B_c60": {
+    "n": 11872,
+    "cap_gib": 60.0,
+    "parts": [
+     "B"
+    ],
+    "n_reuse": 400,
+    "n_holdout": 0
+   },
+   "C_c27": {
+    "n": 517,
+    "cap_gib": 27.0,
+    "parts": [
+     "C"
+    ],
+    "n_reuse": 170,
+    "n_holdout": 0
+   },
+   "C_c38": {
+    "n": 514,
+    "cap_gib": 38.0,
+    "parts": [
+     "C"
+    ],
+    "n_reuse": 170,
+    "n_holdout": 0
+   },
+   "C_c60": {
+    "n": 509,
+    "cap_gib": 60.0,
+    "parts": [
+     "C"
+    ],
+    "n_reuse": 170,
+    "n_holdout": 0
+   },
+   "DE_c256": {
+    "n": 11287,
+    "cap_gib": 256.0,
+    "parts": [
+     "D",
+     "E"
+    ],
+    "n_reuse": 409,
+    "n_holdout": 2526
+   },
+   "DE_c27": {
+    "n": 11654,
+    "cap_gib": 27.0,
+    "parts": [
+     "D",
+     "E"
+    ],
+    "n_reuse": 747,
+    "n_holdout": 2604
+   },
+   "DE_c38": {
+    "n": 11684,
+    "cap_gib": 38.0,
+    "parts": [
+     "D",
+     "E"
+    ],
+    "n_reuse": 769,
+    "n_holdout": 2549
+   },
+   "DE_c60": {
+    "n": 11612,
+    "cap_gib": 60.0,
+    "parts": [
+     "D",
+     "E"
+    ],
+    "n_reuse": 707,
+    "n_holdout": 2546
+   }
+  },
+  "per_part": {
+   "A": {
+    "n": 1064,
+    "n_reuse": 235
+   },
+   "B": {
+    "n": 42283,
+    "n_reuse": 1550
+   },
+   "C": {
+    "n": 1540,
+    "n_reuse": 510
+   },
+   "D": {
+    "n": 43181,
+    "n_reuse": 2632
+   },
+   "E": {
+    "n": 3056,
+    "n_reuse": 0
+   }
+  },
+  "time_offset_s": 28801.1993213892,
+  "note": "server segments come from eng1c_run_meta flags; the epoch offset is recovered from the frontend log, which carries both the server label and the request's epoch time"
+ },
+ "holdout_fence": {
+  "n_holdout_requests_in_stream": 10225,
+  "n_holdout_in_any_scored_set": 0,
+  "n_truth_rows_for_holdout": 0,
+  "rule": "holdout pairs are replayed for capacity and excluded from every scored set; measured_class is never computed for them"
+ },
+ "_provenance": {
+  "git_commit": "b8c04e7743e72a1cc6e4f20a7a08d54e61749f46",
+  "script": "orchestration/run_res1.py",
+  "model": null,
+  "timestamp": "2026-11-17T09:35:53.204559",
+  "n": 2573,
+  "args": {
+   "draws": 10000,
+   "out_dir": null
+  }
+ }
+}

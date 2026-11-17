@@ -1,0 +1,2594 @@
+{
+ "study": "StudyRES1-residency",
+ "frozen_row_md5": "91f3c3fe2c72fb089e9fcb1aac43cbbd",
+ "frozen_row_utc": "2026-11-17T16:59:11Z",
+ "predeclaration_md5": "1248b640ef7ca7847953e0f9332096ea",
+ "scope": "R1 to R3 on TEST requests whose 4-class tier is MEASURED; a labelled 2-class secondary over every TEST reuse request",
+ "counts": {
+  "test_reuse": 4135,
+  "test_measured": 2573,
+  "test_unmeasured": 1562,
+  "in_sample_part_a": 235,
+  "measured_classes": {
+   "COLD": 951,
+   "GPU": 1316,
+   "HOST": 262,
+   "PARTIAL": 44
+  }
+ },
+ "R1": {
+  "criterion": "R1: 4-class tier accuracy at least 0.90 pooled and 0.85 in every cap",
+  "n": 2573,
+  "pooled": 0.9945588806840264,
+  "per_cap": {
+   "12": 1.0,
+   "256": 1.0,
+   "27": 0.9935649935649936,
+   "38": 0.9936224489795918,
+   "60": 0.9944903581267218
+  },
+  "threshold_pooled": 0.9,
+  "threshold_per_cap": 0.85,
+  "verdict": "PASS"
+ },
+ "R2": {
+  "criterion": "R2: the rule beats every comparison predictor, paired bootstrap CI (by trial) excluding 0",
+  "rule_accuracy": 0.9945588806840264,
+  "comparisons": {
+   "fifo": {
+    "accuracy": 0.9762922658375437,
+    "bootstrap": {
+     "n_trials": 816,
+     "n_requests": 2573,
+     "diff": 0.018266614846482704,
+     "ci": [
+      0.012128816394813885,
+      0.02524190155658393
+     ],
+     "excludes_zero": true,
+     "favours_rule": true,
+     "draws": 10000,
+     "resample_unit": "trial"
+    }
+   },
+   "lru_any": {
+    "accuracy": 0.994170229304314,
+    "bootstrap": {
+     "n_trials": 816,
+     "n_requests": 2573,
+     "diff": 0.000388651379712398,
+     "ci": [
+      0.0,
+      0.0011732499022291747
+     ],
+     "excludes_zero": false,
+     "favours_rule": true,
+     "draws": 10000,
+     "resample_unit": "trial"
+    }
+   },
+   "lru_host": {
+    "accuracy": 0.9898950641274776,
+    "bootstrap": {
+     "n_trials": 816,
+     "n_requests": 2573,
+     "diff": 0.004663816556548776,
+     "ci": [
+      0.00216076058772688,
+      0.007471049682480389
+     ],
+     "excludes_zero": true,
+     "favours_rule": true,
+     "draws": 10000,
+     "resample_unit": "trial"
+    }
+   },
+   "occupancy": {
+    "accuracy": 0.41624562767197826,
+    "bootstrap": {
+     "n_trials": 816,
+     "n_requests": 2573,
+     "diff": 0.5783132530120482,
+     "ci": [
+      0.5447025135221126,
+      0.6118659420289855
+     ],
+     "excludes_zero": true,
+     "favours_rule": true,
+     "draws": 10000,
+     "resample_unit": "trial"
+    }
+   },
+   "always_cold": {
+    "accuracy": 0.3696074621064905,
+    "bootstrap": {
+     "n_trials": 816,
+     "n_requests": 2573,
+     "diff": 0.624951418577536,
+     "ci": [
+      0.5427533839551006,
+      0.7045149754135003
+     ],
+     "excludes_zero": true,
+     "favours_rule": true,
+     "draws": 10000,
+     "resample_unit": "trial"
+    }
+   }
+  },
+  "beats_all": false,
+  "beats_including_constant_cold": false,
+  "per_predictor": {
+   "fifo": true,
+   "lru_any": false,
+   "lru_host": true,
+   "occupancy": true,
+   "always_cold": true
+  },
+  "verdict": "FAIL"
+ },
+ "R3": {
+  "n": 32,
+  "mae": 0.29620125446418066,
+  "threshold": 0.1,
+  "verdict": "FAIL",
+  "median_abs_error": 0.29093707908408695,
+  "measured_fraction": {
+   "min": 0.026168943621319992,
+   "max": 0.9821050606118915
+  },
+  "per_part": {
+   "B": 13,
+   "C": 14,
+   "D": 5
+  },
+  "criterion": "R3: MAE of the predicted fraction on host at most 0.10 on PARTIAL cases"
+ },
+ "secondary_2class": {
+  "all_test": {
+   "n": 4135,
+   "accuracy": 0.9958887545344619,
+   "per_policy": {
+    "rule": 0.9958887545344619,
+    "fifo": 0.9830713422007256,
+    "lru_any": 0.9958887545344619,
+    "lru_host": 0.992261185006046,
+    "occupancy": 0.40483675937122127
+   }
+  },
+  "excluding_part_b_pieces": {
+   "n": 2895,
+   "accuracy": 0.9941278065630397,
+   "per_policy": {
+    "rule": 0.9941278065630397,
+    "fifo": 0.9758203799654577,
+    "lru_any": 0.9941278065630397,
+    "lru_host": 0.9889464594127807,
+    "occupancy": 0.5333333333333333
+   }
+  },
+  "note": "pre-declared analysis 1: the Part B piece-chain requests are warm by construction, so any predictor that says warm is right about them for free"
+ },
+ "confusion": {
+  "rule": {
+   "COLD->COLD": 951,
+   "GPU->GPU": 1316,
+   "HOST->HOST": 255,
+   "HOST->PARTIAL": 7,
+   "PARTIAL->COLD": 7,
+   "PARTIAL->PARTIAL": 37
+  },
+  "fifo": {
+   "COLD->COLD": 949,
+   "COLD->PARTIAL": 2,
+   "GPU->COLD": 2,
+   "GPU->GPU": 1307,
+   "GPU->HOST": 5,
+   "GPU->PARTIAL": 2,
+   "HOST->COLD": 16,
+   "HOST->GPU": 8,
+   "HOST->HOST": 233,
+   "HOST->PARTIAL": 5,
+   "PARTIAL->COLD": 16,
+   "PARTIAL->HOST": 5,
+   "PARTIAL->PARTIAL": 23
+  },
+  "lru_any": {
+   "COLD->COLD": 951,
+   "GPU->GPU": 1316,
+   "HOST->HOST": 255,
+   "HOST->PARTIAL": 7,
+   "PARTIAL->COLD": 7,
+   "PARTIAL->HOST": 1,
+   "PARTIAL->PARTIAL": 36
+  },
+  "lru_host": {
+   "COLD->COLD": 951,
+   "GPU->GPU": 1316,
+   "HOST->COLD": 2,
+   "HOST->HOST": 254,
+   "HOST->PARTIAL": 6,
+   "PARTIAL->COLD": 17,
+   "PARTIAL->HOST": 1,
+   "PARTIAL->PARTIAL": 26
+  },
+  "occupancy": {
+   "COLD->COLD": 598,
+   "COLD->GPU": 166,
+   "COLD->HOST": 187,
+   "GPU->COLD": 660,
+   "GPU->GPU": 387,
+   "GPU->HOST": 269,
+   "HOST->COLD": 152,
+   "HOST->GPU": 24,
+   "HOST->HOST": 86,
+   "PARTIAL->COLD": 10,
+   "PARTIAL->GPU": 4,
+   "PARTIAL->HOST": 30
+  }
+ },
+ "per_cut": {
+  "per_cap": {
+   "12": {
+    "n": 20,
+    "accuracy": 1.0,
+    "measured": {
+     "COLD": 20
+    },
+    "predicted": {
+     "COLD": 20
+    }
+   },
+   "256": {
+    "n": 266,
+    "accuracy": 1.0,
+    "measured": {
+     "COLD": 59,
+     "GPU": 126,
+     "HOST": 81
+    },
+    "predicted": {
+     "COLD": 59,
+     "GPU": 126,
+     "HOST": 81
+    }
+   },
+   "27": {
+    "n": 777,
+    "accuracy": 0.9935649935649936,
+    "measured": {
+     "COLD": 328,
+     "GPU": 396,
+     "HOST": 35,
+     "PARTIAL": 18
+    },
+    "predicted": {
+     "COLD": 330,
+     "GPU": 396,
+     "HOST": 32,
+     "PARTIAL": 19
+    }
+   },
+   "38": {
+    "n": 784,
+    "accuracy": 0.9936224489795918,
+    "measured": {
+     "COLD": 275,
+     "GPU": 422,
+     "HOST": 77,
+     "PARTIAL": 10
+    },
+    "predicted": {
+     "COLD": 276,
+     "GPU": 422,
+     "HOST": 73,
+     "PARTIAL": 13
+    }
+   },
+   "60": {
+    "n": 726,
+    "accuracy": 0.9944903581267218,
+    "measured": {
+     "COLD": 269,
+     "GPU": 372,
+     "HOST": 69,
+     "PARTIAL": 16
+    },
+    "predicted": {
+     "COLD": 273,
+     "GPU": 372,
+     "HOST": 69,
+     "PARTIAL": 12
+    }
+   }
+  },
+  "per_part": {
+   "B": {
+    "n": 310,
+    "accuracy": 0.9935483870967742,
+    "measured": {
+     "COLD": 204,
+     "GPU": 10,
+     "HOST": 83,
+     "PARTIAL": 13
+    },
+    "predicted": {
+     "COLD": 206,
+     "GPU": 10,
+     "HOST": 83,
+     "PARTIAL": 11
+    }
+   },
+   "C": {
+    "n": 363,
+    "accuracy": 0.9862258953168044,
+    "measured": {
+     "COLD": 196,
+     "GPU": 55,
+     "HOST": 94,
+     "PARTIAL": 18
+    },
+    "predicted": {
+     "COLD": 196,
+     "GPU": 55,
+     "HOST": 89,
+     "PARTIAL": 23
+    }
+   },
+   "D": {
+    "n": 1900,
+    "accuracy": 0.9963157894736843,
+    "measured": {
+     "COLD": 551,
+     "GPU": 1251,
+     "HOST": 85,
+     "PARTIAL": 13
+    },
+    "predicted": {
+     "COLD": 556,
+     "GPU": 1251,
+     "HOST": 83,
+     "PARTIAL": 10
+    }
+   }
+  },
+  "per_conc": {
+   "1": {
+    "n": 80,
+    "accuracy": 1.0,
+    "measured": {
+     "COLD": 25,
+     "GPU": 28,
+     "HOST": 27
+    },
+    "predicted": {
+     "COLD": 25,
+     "GPU": 28,
+     "HOST": 27
+    }
+   },
+   "4": {
+    "n": 124,
+    "accuracy": 0.9838709677419355,
+    "measured": {
+     "COLD": 60,
+     "GPU": 18,
+     "HOST": 35,
+     "PARTIAL": 11
+    },
+    "predicted": {
+     "COLD": 60,
+     "GPU": 18,
+     "HOST": 33,
+     "PARTIAL": 13
+    }
+   },
+   "8": {
+    "n": 159,
+    "accuracy": 0.9811320754716981,
+    "measured": {
+     "COLD": 111,
+     "GPU": 9,
+     "HOST": 32,
+     "PARTIAL": 7
+    },
+    "predicted": {
+     "COLD": 111,
+     "GPU": 9,
+     "HOST": 29,
+     "PARTIAL": 10
+    }
+   },
+   "None": {
+    "n": 2210,
+    "accuracy": 0.9959276018099548,
+    "measured": {
+     "COLD": 755,
+     "GPU": 1261,
+     "HOST": 168,
+     "PARTIAL": 26
+    },
+    "predicted": {
+     "COLD": 762,
+     "GPU": 1261,
+     "HOST": 166,
+     "PARTIAL": 21
+    }
+   }
+  },
+  "per_role": {
+   "churn": {
+    "n": 323,
+    "accuracy": 0.9969040247678018,
+    "measured": {
+     "COLD": 316,
+     "PARTIAL": 7
+    },
+    "predicted": {
+     "COLD": 317,
+     "PARTIAL": 6
+    }
+   },
+   "inject": {
+    "n": 1577,
+    "accuracy": 0.9961953075459734,
+    "measured": {
+     "COLD": 235,
+     "GPU": 1251,
+     "HOST": 85,
+     "PARTIAL": 6
+    },
+    "predicted": {
+     "COLD": 239,
+     "GPU": 1251,
+     "HOST": 83,
+     "PARTIAL": 4
+    }
+   },
+   "query": {
+    "n": 363,
+    "accuracy": 0.9862258953168044,
+    "measured": {
+     "COLD": 196,
+     "GPU": 55,
+     "HOST": 94,
+     "PARTIAL": 18
+    },
+    "predicted": {
+     "COLD": 196,
+     "GPU": 55,
+     "HOST": 89,
+     "PARTIAL": 23
+    }
+   },
+   "resume": {
+    "n": 310,
+    "accuracy": 0.9935483870967742,
+    "measured": {
+     "COLD": 204,
+     "GPU": 10,
+     "HOST": 83,
+     "PARTIAL": 13
+    },
+    "predicted": {
+     "COLD": 206,
+     "GPU": 10,
+     "HOST": 83,
+     "PARTIAL": 11
+    }
+   }
+  },
+  "per_part_cap": {
+   "B|12": {
+    "n": 20,
+    "accuracy": 1.0,
+    "measured": {
+     "COLD": 20
+    },
+    "predicted": {
+     "COLD": 20
+    }
+   },
+   "B|256": {
+    "n": 30,
+    "accuracy": 1.0,
+    "measured": {
+     "GPU": 10,
+     "HOST": 20
+    },
+    "predicted": {
+     "GPU": 10,
+     "HOST": 20
+    }
+   },
+   "B|27": {
+    "n": 80,
+    "accuracy": 1.0,
+    "measured": {
+     "COLD": 80
+    },
+    "predicted": {
+     "COLD": 80
+    }
+   },
+   "B|38": {
+    "n": 100,
+    "accuracy": 1.0,
+    "measured": {
+     "COLD": 60,
+     "HOST": 40
+    },
+    "predicted": {
+     "COLD": 60,
+     "HOST": 40
+    }
+   },
+   "B|60": {
+    "n": 80,
+    "accuracy": 0.975,
+    "measured": {
+     "COLD": 44,
+     "HOST": 23,
+     "PARTIAL": 13
+    },
+    "predicted": {
+     "COLD": 46,
+     "HOST": 23,
+     "PARTIAL": 11
+    }
+   },
+   "C|27": {
+    "n": 139,
+    "accuracy": 0.9856115107913669,
+    "measured": {
+     "COLD": 82,
+     "GPU": 16,
+     "HOST": 28,
+     "PARTIAL": 13
+    },
+    "predicted": {
+     "COLD": 82,
+     "GPU": 16,
+     "HOST": 26,
+     "PARTIAL": 15
+    }
+   },
+   "C|38": {
+    "n": 108,
+    "accuracy": 0.9722222222222222,
+    "measured": {
+     "COLD": 50,
+     "GPU": 23,
+     "HOST": 30,
+     "PARTIAL": 5
+    },
+    "predicted": {
+     "COLD": 50,
+     "GPU": 23,
+     "HOST": 27,
+     "PARTIAL": 8
+    }
+   },
+   "C|60": {
+    "n": 116,
+    "accuracy": 1.0,
+    "measured": {
+     "COLD": 64,
+     "GPU": 16,
+     "HOST": 36
+    },
+    "predicted": {
+     "COLD": 64,
+     "GPU": 16,
+     "HOST": 36
+    }
+   },
+   "D|256": {
+    "n": 236,
+    "accuracy": 1.0,
+    "measured": {
+     "COLD": 59,
+     "GPU": 116,
+     "HOST": 61
+    },
+    "predicted": {
+     "COLD": 59,
+     "GPU": 116,
+     "HOST": 61
+    }
+   },
+   "D|27": {
+    "n": 558,
+    "accuracy": 0.9946236559139785,
+    "measured": {
+     "COLD": 166,
+     "GPU": 380,
+     "HOST": 7,
+     "PARTIAL": 5
+    },
+    "predicted": {
+     "COLD": 168,
+     "GPU": 380,
+     "HOST": 6,
+     "PARTIAL": 4
+    }
+   },
+   "D|38": {
+    "n": 576,
+    "accuracy": 0.9965277777777778,
+    "measured": {
+     "COLD": 165,
+     "GPU": 399,
+     "HOST": 7,
+     "PARTIAL": 5
+    },
+    "predicted": {
+     "COLD": 166,
+     "GPU": 399,
+     "HOST": 6,
+     "PARTIAL": 5
+    }
+   },
+   "D|60": {
+    "n": 530,
+    "accuracy": 0.9962264150943396,
+    "measured": {
+     "COLD": 161,
+     "GPU": 356,
+     "HOST": 10,
+     "PARTIAL": 3
+    },
+    "predicted": {
+     "COLD": 163,
+     "GPU": 356,
+     "HOST": 10,
+     "PARTIAL": 1
+    }
+   }
+  }
+ },
+ "per_cut_per_policy": {
+  "rule": {
+   "per_cap": {
+    "12": {
+     "n": 20,
+     "accuracy": 1.0,
+     "measured": {
+      "COLD": 20
+     },
+     "predicted": {
+      "COLD": 20
+     }
+    },
+    "256": {
+     "n": 266,
+     "accuracy": 1.0,
+     "measured": {
+      "COLD": 59,
+      "GPU": 126,
+      "HOST": 81
+     },
+     "predicted": {
+      "COLD": 59,
+      "GPU": 126,
+      "HOST": 81
+     }
+    },
+    "27": {
+     "n": 777,
+     "accuracy": 0.9935649935649936,
+     "measured": {
+      "COLD": 328,
+      "GPU": 396,
+      "HOST": 35,
+      "PARTIAL": 18
+     },
+     "predicted": {
+      "COLD": 330,
+      "GPU": 396,
+      "HOST": 32,
+      "PARTIAL": 19
+     }
+    },
+    "38": {
+     "n": 784,
+     "accuracy": 0.9936224489795918,
+     "measured": {
+      "COLD": 275,
+      "GPU": 422,
+      "HOST": 77,
+      "PARTIAL": 10
+     },
+     "predicted": {
+      "COLD": 276,
+      "GPU": 422,
+      "HOST": 73,
+      "PARTIAL": 13
+     }
+    },
+    "60": {
+     "n": 726,
+     "accuracy": 0.9944903581267218,
+     "measured": {
+      "COLD": 269,
+      "GPU": 372,
+      "HOST": 69,
+      "PARTIAL": 16
+     },
+     "predicted": {
+      "COLD": 273,
+      "GPU": 372,
+      "HOST": 69,
+      "PARTIAL": 12
+     }
+    }
+   },
+   "per_part": {
+    "B": {
+     "n": 310,
+     "accuracy": 0.9935483870967742,
+     "measured": {
+      "COLD": 204,
+      "GPU": 10,
+      "HOST": 83,
+      "PARTIAL": 13
+     },
+     "predicted": {
+      "COLD": 206,
+      "GPU": 10,
+      "HOST": 83,
+      "PARTIAL": 11
+     }
+    },
+    "C": {
+     "n": 363,
+     "accuracy": 0.9862258953168044,
+     "measured": {
+      "COLD": 196,
+      "GPU": 55,
+      "HOST": 94,
+      "PARTIAL": 18
+     },
+     "predicted": {
+      "COLD": 196,
+      "GPU": 55,
+      "HOST": 89,
+      "PARTIAL": 23
+     }
+    },
+    "D": {
+     "n": 1900,
+     "accuracy": 0.9963157894736843,
+     "measured": {
+      "COLD": 551,
+      "GPU": 1251,
+      "HOST": 85,
+      "PARTIAL": 13
+     },
+     "predicted": {
+      "COLD": 556,
+      "GPU": 1251,
+      "HOST": 83,
+      "PARTIAL": 10
+     }
+    }
+   }
+  },
+  "fifo": {
+   "per_cap": {
+    "12": {
+     "n": 20,
+     "accuracy": 1.0,
+     "measured": {
+      "COLD": 20
+     },
+     "predicted": {
+      "COLD": 20
+     }
+    },
+    "256": {
+     "n": 266,
+     "accuracy": 0.9360902255639098,
+     "measured": {
+      "COLD": 59,
+      "GPU": 126,
+      "HOST": 81
+     },
+     "predicted": {
+      "COLD": 73,
+      "GPU": 124,
+      "HOST": 68,
+      "PARTIAL": 1
+     }
+    },
+    "27": {
+     "n": 777,
+     "accuracy": 0.9858429858429858,
+     "measured": {
+      "COLD": 328,
+      "GPU": 396,
+      "HOST": 35,
+      "PARTIAL": 18
+     },
+     "predicted": {
+      "COLD": 331,
+      "GPU": 395,
+      "HOST": 35,
+      "PARTIAL": 16
+     }
+    },
+    "38": {
+     "n": 784,
+     "accuracy": 0.9872448979591837,
+     "measured": {
+      "COLD": 275,
+      "GPU": 422,
+      "HOST": 77,
+      "PARTIAL": 10
+     },
+     "predicted": {
+      "COLD": 280,
+      "GPU": 425,
+      "HOST": 72,
+      "PARTIAL": 7
+     }
+    },
+    "60": {
+     "n": 726,
+     "accuracy": 0.9683195592286501,
+     "measured": {
+      "COLD": 269,
+      "GPU": 372,
+      "HOST": 69,
+      "PARTIAL": 16
+     },
+     "predicted": {
+      "COLD": 279,
+      "GPU": 371,
+      "HOST": 68,
+      "PARTIAL": 8
+     }
+    }
+   },
+   "per_part": {
+    "B": {
+     "n": 310,
+     "accuracy": 0.967741935483871,
+     "measured": {
+      "COLD": 204,
+      "GPU": 10,
+      "HOST": 83,
+      "PARTIAL": 13
+     },
+     "predicted": {
+      "COLD": 214,
+      "GPU": 10,
+      "HOST": 83,
+      "PARTIAL": 3
+     }
+    },
+    "C": {
+     "n": 363,
+     "accuracy": 0.9641873278236914,
+     "measured": {
+      "COLD": 196,
+      "GPU": 55,
+      "HOST": 94,
+      "PARTIAL": 18
+     },
+     "predicted": {
+      "COLD": 196,
+      "GPU": 63,
+      "HOST": 85,
+      "PARTIAL": 19
+     }
+    },
+    "D": {
+     "n": 1900,
+     "accuracy": 0.98,
+     "measured": {
+      "COLD": 551,
+      "GPU": 1251,
+      "HOST": 85,
+      "PARTIAL": 13
+     },
+     "predicted": {
+      "COLD": 573,
+      "GPU": 1242,
+      "HOST": 75,
+      "PARTIAL": 10
+     }
+    }
+   }
+  },
+  "lru_any": {
+   "per_cap": {
+    "12": {
+     "n": 20,
+     "accuracy": 1.0,
+     "measured": {
+      "COLD": 20
+     },
+     "predicted": {
+      "COLD": 20
+     }
+    },
+    "256": {
+     "n": 266,
+     "accuracy": 1.0,
+     "measured": {
+      "COLD": 59,
+      "GPU": 126,
+      "HOST": 81
+     },
+     "predicted": {
+      "COLD": 59,
+      "GPU": 126,
+      "HOST": 81
+     }
+    },
+    "27": {
+     "n": 777,
+     "accuracy": 0.9935649935649936,
+     "measured": {
+      "COLD": 328,
+      "GPU": 396,
+      "HOST": 35,
+      "PARTIAL": 18
+     },
+     "predicted": {
+      "COLD": 330,
+      "GPU": 396,
+      "HOST": 32,
+      "PARTIAL": 19
+     }
+    },
+    "38": {
+     "n": 784,
+     "accuracy": 0.9923469387755102,
+     "measured": {
+      "COLD": 275,
+      "GPU": 422,
+      "HOST": 77,
+      "PARTIAL": 10
+     },
+     "predicted": {
+      "COLD": 276,
+      "GPU": 422,
+      "HOST": 74,
+      "PARTIAL": 12
+     }
+    },
+    "60": {
+     "n": 726,
+     "accuracy": 0.9944903581267218,
+     "measured": {
+      "COLD": 269,
+      "GPU": 372,
+      "HOST": 69,
+      "PARTIAL": 16
+     },
+     "predicted": {
+      "COLD": 273,
+      "GPU": 372,
+      "HOST": 69,
+      "PARTIAL": 12
+     }
+    }
+   },
+   "per_part": {
+    "B": {
+     "n": 310,
+     "accuracy": 0.9935483870967742,
+     "measured": {
+      "COLD": 204,
+      "GPU": 10,
+      "HOST": 83,
+      "PARTIAL": 13
+     },
+     "predicted": {
+      "COLD": 206,
+      "GPU": 10,
+      "HOST": 83,
+      "PARTIAL": 11
+     }
+    },
+    "C": {
+     "n": 363,
+     "accuracy": 0.9862258953168044,
+     "measured": {
+      "COLD": 196,
+      "GPU": 55,
+      "HOST": 94,
+      "PARTIAL": 18
+     },
+     "predicted": {
+      "COLD": 196,
+      "GPU": 55,
+      "HOST": 89,
+      "PARTIAL": 23
+     }
+    },
+    "D": {
+     "n": 1900,
+     "accuracy": 0.9957894736842106,
+     "measured": {
+      "COLD": 551,
+      "GPU": 1251,
+      "HOST": 85,
+      "PARTIAL": 13
+     },
+     "predicted": {
+      "COLD": 556,
+      "GPU": 1251,
+      "HOST": 84,
+      "PARTIAL": 9
+     }
+    }
+   }
+  },
+  "lru_host": {
+   "per_cap": {
+    "12": {
+     "n": 20,
+     "accuracy": 1.0,
+     "measured": {
+      "COLD": 20
+     },
+     "predicted": {
+      "COLD": 20
+     }
+    },
+    "256": {
+     "n": 266,
+     "accuracy": 1.0,
+     "measured": {
+      "COLD": 59,
+      "GPU": 126,
+      "HOST": 81
+     },
+     "predicted": {
+      "COLD": 59,
+      "GPU": 126,
+      "HOST": 81
+     }
+    },
+    "27": {
+     "n": 777,
+     "accuracy": 0.990990990990991,
+     "measured": {
+      "COLD": 328,
+      "GPU": 396,
+      "HOST": 35,
+      "PARTIAL": 18
+     },
+     "predicted": {
+      "COLD": 331,
+      "GPU": 396,
+      "HOST": 33,
+      "PARTIAL": 17
+     }
+    },
+    "38": {
+     "n": 784,
+     "accuracy": 0.9910714285714286,
+     "measured": {
+      "COLD": 275,
+      "GPU": 422,
+      "HOST": 77,
+      "PARTIAL": 10
+     },
+     "predicted": {
+      "COLD": 279,
+      "GPU": 422,
+      "HOST": 72,
+      "PARTIAL": 11
+     }
+    },
+    "60": {
+     "n": 726,
+     "accuracy": 0.9834710743801653,
+     "measured": {
+      "COLD": 269,
+      "GPU": 372,
+      "HOST": 69,
+      "PARTIAL": 16
+     },
+     "predicted": {
+      "COLD": 281,
+      "GPU": 372,
+      "HOST": 69,
+      "PARTIAL": 4
+     }
+    }
+   },
+   "per_part": {
+    "B": {
+     "n": 310,
+     "accuracy": 0.967741935483871,
+     "measured": {
+      "COLD": 204,
+      "GPU": 10,
+      "HOST": 83,
+      "PARTIAL": 13
+     },
+     "predicted": {
+      "COLD": 214,
+      "GPU": 10,
+      "HOST": 83,
+      "PARTIAL": 3
+     }
+    },
+    "C": {
+     "n": 363,
+     "accuracy": 0.9862258953168044,
+     "measured": {
+      "COLD": 196,
+      "GPU": 55,
+      "HOST": 94,
+      "PARTIAL": 18
+     },
+     "predicted": {
+      "COLD": 196,
+      "GPU": 55,
+      "HOST": 89,
+      "PARTIAL": 23
+     }
+    },
+    "D": {
+     "n": 1900,
+     "accuracy": 0.9942105263157894,
+     "measured": {
+      "COLD": 551,
+      "GPU": 1251,
+      "HOST": 85,
+      "PARTIAL": 13
+     },
+     "predicted": {
+      "COLD": 560,
+      "GPU": 1251,
+      "HOST": 83,
+      "PARTIAL": 6
+     }
+    }
+   }
+  },
+  "occupancy": {
+   "per_cap": {
+    "12": {
+     "n": 20,
+     "accuracy": 1.0,
+     "measured": {
+      "COLD": 20
+     },
+     "predicted": {
+      "COLD": 20
+     }
+    },
+    "256": {
+     "n": 266,
+     "accuracy": 0.33458646616541354,
+     "measured": {
+      "COLD": 59,
+      "GPU": 126,
+      "HOST": 81
+     },
+     "predicted": {
+      "COLD": 139,
+      "GPU": 70,
+      "HOST": 57
+     }
+    },
+    "27": {
+     "n": 777,
+     "accuracy": 0.40797940797940796,
+     "measured": {
+      "COLD": 328,
+      "GPU": 396,
+      "HOST": 35,
+      "PARTIAL": 18
+     },
+     "predicted": {
+      "COLD": 438,
+      "GPU": 149,
+      "HOST": 190
+     }
+    },
+    "38": {
+     "n": 784,
+     "accuracy": 0.44387755102040816,
+     "measured": {
+      "COLD": 275,
+      "GPU": 422,
+      "HOST": 77,
+      "PARTIAL": 10
+     },
+     "predicted": {
+      "COLD": 443,
+      "GPU": 198,
+      "HOST": 143
+     }
+    },
+    "60": {
+     "n": 726,
+     "accuracy": 0.4090909090909091,
+     "measured": {
+      "COLD": 269,
+      "GPU": 372,
+      "HOST": 69,
+      "PARTIAL": 16
+     },
+     "predicted": {
+      "COLD": 380,
+      "GPU": 164,
+      "HOST": 182
+     }
+    }
+   },
+   "per_part": {
+    "B": {
+     "n": 310,
+     "accuracy": 0.7096774193548387,
+     "measured": {
+      "COLD": 204,
+      "GPU": 10,
+      "HOST": 83,
+      "PARTIAL": 13
+     },
+     "predicted": {
+      "COLD": 280,
+      "GPU": 1,
+      "HOST": 29
+     }
+    },
+    "C": {
+     "n": 363,
+     "accuracy": 0.418732782369146,
+     "measured": {
+      "COLD": 196,
+      "GPU": 55,
+      "HOST": 94,
+      "PARTIAL": 18
+     },
+     "predicted": {
+      "COLD": 172,
+      "HOST": 191
+     }
+    },
+    "D": {
+     "n": 1900,
+     "accuracy": 0.3678947368421053,
+     "measured": {
+      "COLD": 551,
+      "GPU": 1251,
+      "HOST": 85,
+      "PARTIAL": 13
+     },
+     "predicted": {
+      "COLD": 968,
+      "GPU": 580,
+      "HOST": 352
+     }
+    }
+   }
+  }
+ },
+ "selection_check": {
+  "per_part": {
+   "B": {
+    "measured": {
+     "n": 310,
+     "share": {
+      "COLD": 0.6645,
+      "GPU": 0.0323,
+      "HOST": 0.2677,
+      "PARTIAL": 0.0355
+     },
+     "counts": {
+      "COLD": 206,
+      "GPU": 10,
+      "HOST": 83,
+      "PARTIAL": 11
+     }
+    },
+    "unmeasured": {
+     "n": 1240,
+     "share": {
+      "GPU": 1.0
+     },
+     "counts": {
+      "GPU": 1240
+     }
+    }
+   },
+   "C": {
+    "measured": {
+     "n": 363,
+     "share": {
+      "COLD": 0.5399,
+      "GPU": 0.1515,
+      "HOST": 0.2452,
+      "PARTIAL": 0.0634
+     },
+     "counts": {
+      "COLD": 196,
+      "GPU": 55,
+      "HOST": 89,
+      "PARTIAL": 23
+     }
+    },
+    "unmeasured": {
+     "n": 147,
+     "share": {
+      "COLD": 0.068,
+      "GPU": 0.483,
+      "HOST": 0.4422,
+      "PARTIAL": 0.0068
+     },
+     "counts": {
+      "COLD": 10,
+      "GPU": 71,
+      "HOST": 65,
+      "PARTIAL": 1
+     }
+    }
+   },
+   "D": {
+    "measured": {
+     "n": 1900,
+     "share": {
+      "COLD": 0.2926,
+      "GPU": 0.6584,
+      "HOST": 0.0437,
+      "PARTIAL": 0.0053
+     },
+     "counts": {
+      "COLD": 556,
+      "GPU": 1251,
+      "HOST": 83,
+      "PARTIAL": 10
+     }
+    },
+    "unmeasured": {
+     "n": 175,
+     "share": {
+      "GPU": 0.1943,
+      "HOST": 0.7943,
+      "PARTIAL": 0.0114
+     },
+     "counts": {
+      "GPU": 34,
+      "HOST": 139,
+      "PARTIAL": 2
+     }
+    }
+   }
+  },
+  "per_conc": {
+   "1": {
+    "measured": {
+     "n": 80,
+     "share": {
+      "COLD": 0.3125,
+      "GPU": 0.35,
+      "HOST": 0.3375
+     },
+     "counts": {
+      "COLD": 25,
+      "GPU": 28,
+      "HOST": 27
+     }
+    },
+    "unmeasured": {
+     "n": 10,
+     "share": {
+      "COLD": 1.0
+     },
+     "counts": {
+      "COLD": 10
+     }
+    }
+   },
+   "4": {
+    "measured": {
+     "n": 124,
+     "share": {
+      "COLD": 0.4839,
+      "GPU": 0.1452,
+      "HOST": 0.2661,
+      "PARTIAL": 0.1048
+     },
+     "counts": {
+      "COLD": 60,
+      "GPU": 18,
+      "HOST": 33,
+      "PARTIAL": 13
+     }
+    },
+    "unmeasured": {
+     "n": 56,
+     "share": {
+      "GPU": 0.75,
+      "HOST": 0.25
+     },
+     "counts": {
+      "GPU": 42,
+      "HOST": 14
+     }
+    }
+   },
+   "8": {
+    "measured": {
+     "n": 159,
+     "share": {
+      "COLD": 0.6981,
+      "GPU": 0.0566,
+      "HOST": 0.1824,
+      "PARTIAL": 0.0629
+     },
+     "counts": {
+      "COLD": 111,
+      "GPU": 9,
+      "HOST": 29,
+      "PARTIAL": 10
+     }
+    },
+    "unmeasured": {
+     "n": 81,
+     "share": {
+      "GPU": 0.358,
+      "HOST": 0.6296,
+      "PARTIAL": 0.0123
+     },
+     "counts": {
+      "GPU": 29,
+      "HOST": 51,
+      "PARTIAL": 1
+     }
+    }
+   },
+   "None": {
+    "measured": {
+     "n": 2210,
+     "share": {
+      "COLD": 0.3448,
+      "GPU": 0.5706,
+      "HOST": 0.0751,
+      "PARTIAL": 0.0095
+     },
+     "counts": {
+      "COLD": 762,
+      "GPU": 1261,
+      "HOST": 166,
+      "PARTIAL": 21
+     }
+    },
+    "unmeasured": {
+     "n": 1415,
+     "share": {
+      "GPU": 0.9004,
+      "HOST": 0.0982,
+      "PARTIAL": 0.0014
+     },
+     "counts": {
+      "GPU": 1274,
+      "HOST": 139,
+      "PARTIAL": 2
+     }
+    }
+   }
+  },
+  "per_part_conc": {
+   "B|None": {
+    "measured": {
+     "n": 310,
+     "share": {
+      "COLD": 0.6645,
+      "GPU": 0.0323,
+      "HOST": 0.2677,
+      "PARTIAL": 0.0355
+     },
+     "counts": {
+      "COLD": 206,
+      "GPU": 10,
+      "HOST": 83,
+      "PARTIAL": 11
+     }
+    },
+    "unmeasured": {
+     "n": 1240,
+     "share": {
+      "GPU": 1.0
+     },
+     "counts": {
+      "GPU": 1240
+     }
+    }
+   },
+   "C|1": {
+    "measured": {
+     "n": 80,
+     "share": {
+      "COLD": 0.3125,
+      "GPU": 0.35,
+      "HOST": 0.3375
+     },
+     "counts": {
+      "COLD": 25,
+      "GPU": 28,
+      "HOST": 27
+     }
+    },
+    "unmeasured": {
+     "n": 10,
+     "share": {
+      "COLD": 1.0
+     },
+     "counts": {
+      "COLD": 10
+     }
+    }
+   },
+   "C|4": {
+    "measured": {
+     "n": 124,
+     "share": {
+      "COLD": 0.4839,
+      "GPU": 0.1452,
+      "HOST": 0.2661,
+      "PARTIAL": 0.1048
+     },
+     "counts": {
+      "COLD": 60,
+      "GPU": 18,
+      "HOST": 33,
+      "PARTIAL": 13
+     }
+    },
+    "unmeasured": {
+     "n": 56,
+     "share": {
+      "GPU": 0.75,
+      "HOST": 0.25
+     },
+     "counts": {
+      "GPU": 42,
+      "HOST": 14
+     }
+    }
+   },
+   "C|8": {
+    "measured": {
+     "n": 159,
+     "share": {
+      "COLD": 0.6981,
+      "GPU": 0.0566,
+      "HOST": 0.1824,
+      "PARTIAL": 0.0629
+     },
+     "counts": {
+      "COLD": 111,
+      "GPU": 9,
+      "HOST": 29,
+      "PARTIAL": 10
+     }
+    },
+    "unmeasured": {
+     "n": 81,
+     "share": {
+      "GPU": 0.358,
+      "HOST": 0.6296,
+      "PARTIAL": 0.0123
+     },
+     "counts": {
+      "GPU": 29,
+      "HOST": 51,
+      "PARTIAL": 1
+     }
+    }
+   },
+   "D|None": {
+    "measured": {
+     "n": 1900,
+     "share": {
+      "COLD": 0.2926,
+      "GPU": 0.6584,
+      "HOST": 0.0437,
+      "PARTIAL": 0.0053
+     },
+     "counts": {
+      "COLD": 556,
+      "GPU": 1251,
+      "HOST": 83,
+      "PARTIAL": 10
+     }
+    },
+    "unmeasured": {
+     "n": 175,
+     "share": {
+      "GPU": 0.1943,
+      "HOST": 0.7943,
+      "PARTIAL": 0.0114
+     },
+     "counts": {
+      "GPU": 34,
+      "HOST": 139,
+      "PARTIAL": 2
+     }
+    }
+   }
+  },
+  "per_role": {
+   "churn": {
+    "measured": {
+     "n": 323,
+     "share": {
+      "COLD": 0.9814,
+      "PARTIAL": 0.0186
+     },
+     "counts": {
+      "COLD": 317,
+      "PARTIAL": 6
+     }
+    },
+    "unmeasured": {
+     "n": 157,
+     "share": {
+      "GPU": 0.1847,
+      "HOST": 0.8025,
+      "PARTIAL": 0.0127
+     },
+     "counts": {
+      "GPU": 29,
+      "HOST": 126,
+      "PARTIAL": 2
+     }
+    }
+   },
+   "inject": {
+    "measured": {
+     "n": 1577,
+     "share": {
+      "COLD": 0.1516,
+      "GPU": 0.7933,
+      "HOST": 0.0526,
+      "PARTIAL": 0.0025
+     },
+     "counts": {
+      "COLD": 239,
+      "GPU": 1251,
+      "HOST": 83,
+      "PARTIAL": 4
+     }
+    },
+    "unmeasured": {
+     "n": 18,
+     "share": {
+      "GPU": 0.2778,
+      "HOST": 0.7222
+     },
+     "counts": {
+      "GPU": 5,
+      "HOST": 13
+     }
+    }
+   },
+   "piece2": {
+    "measured": {
+     "n": 0,
+     "share": {},
+     "counts": {}
+    },
+    "unmeasured": {
+     "n": 310,
+     "share": {
+      "GPU": 1.0
+     },
+     "counts": {
+      "GPU": 310
+     }
+    }
+   },
+   "piece3": {
+    "measured": {
+     "n": 0,
+     "share": {},
+     "counts": {}
+    },
+    "unmeasured": {
+     "n": 310,
+     "share": {
+      "GPU": 1.0
+     },
+     "counts": {
+      "GPU": 310
+     }
+    }
+   },
+   "piece4": {
+    "measured": {
+     "n": 0,
+     "share": {},
+     "counts": {}
+    },
+    "unmeasured": {
+     "n": 310,
+     "share": {
+      "GPU": 1.0
+     },
+     "counts": {
+      "GPU": 310
+     }
+    }
+   },
+   "piece5": {
+    "measured": {
+     "n": 0,
+     "share": {},
+     "counts": {}
+    },
+    "unmeasured": {
+     "n": 310,
+     "share": {
+      "GPU": 1.0
+     },
+     "counts": {
+      "GPU": 310
+     }
+    }
+   },
+   "query": {
+    "measured": {
+     "n": 363,
+     "share": {
+      "COLD": 0.5399,
+      "GPU": 0.1515,
+      "HOST": 0.2452,
+      "PARTIAL": 0.0634
+     },
+     "counts": {
+      "COLD": 196,
+      "GPU": 55,
+      "HOST": 89,
+      "PARTIAL": 23
+     }
+    },
+    "unmeasured": {
+     "n": 147,
+     "share": {
+      "COLD": 0.068,
+      "GPU": 0.483,
+      "HOST": 0.4422,
+      "PARTIAL": 0.0068
+     },
+     "counts": {
+      "COLD": 10,
+      "GPU": 71,
+      "HOST": 65,
+      "PARTIAL": 1
+     }
+    }
+   },
+   "resume": {
+    "measured": {
+     "n": 310,
+     "share": {
+      "COLD": 0.6645,
+      "GPU": 0.0323,
+      "HOST": 0.2677,
+      "PARTIAL": 0.0355
+     },
+     "counts": {
+      "COLD": 206,
+      "GPU": 10,
+      "HOST": 83,
+      "PARTIAL": 11
+     }
+    },
+    "unmeasured": {
+     "n": 0,
+     "share": {},
+     "counts": {}
+    }
+   }
+  },
+  "pooled": {
+   "measured": {
+    "n": 2573,
+    "share": {
+     "COLD": 0.3723,
+     "GPU": 0.5115,
+     "HOST": 0.0991,
+     "PARTIAL": 0.0171
+    },
+    "counts": {
+     "COLD": 958,
+     "GPU": 1316,
+     "HOST": 255,
+     "PARTIAL": 44
+    }
+   },
+   "unmeasured": {
+    "n": 1562,
+    "share": {
+     "COLD": 0.0064,
+     "GPU": 0.8611,
+     "HOST": 0.1306,
+     "PARTIAL": 0.0019
+    },
+    "counts": {
+     "COLD": 10,
+     "GPU": 1345,
+     "HOST": 204,
+     "PARTIAL": 3
+    }
+   }
+  },
+  "statement": "R1, R2 and R3 do not cover the GPU-versus-host split under concurrency 4 and 8: of the 1562 unmeasured warm requests, 137 are Part C queries at concurrency 4 or 8 and 157 are Part D churn arrivals."
+ },
+ "telemetry_belief": {
+  "n": 88,
+  "evaluation_set": "Part C queries at concurrency 4 and 8 whose measured class came from a round-level route, so telemetry attribution is not circular",
+  "accuracy": {
+   "telemetry_alone": 0.8636363636363636,
+   "bookkeeping": 1.0,
+   "corrected": 0.9886363636363636
+  },
+  "measured": {
+   "COLD": 56,
+   "GPU": 14,
+   "HOST": 16,
+   "PARTIAL": 2
+  },
+  "n_telemetry_isolated": 10,
+  "rows": [
+   {
+    "rid": "Cq7900x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq7901x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "HOST",
+    "telemetry_alone": "HOST",
+    "bookkeeping": "HOST",
+    "corrected": "HOST",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq7902x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "HOST",
+    "telemetry_alone": "GPU",
+    "bookkeeping": "HOST",
+    "corrected": "HOST",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq7903x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq7968x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq7969x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq7970x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq7971x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8052x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "HOST",
+    "telemetry_alone": "GPU",
+    "bookkeeping": "HOST",
+    "corrected": "HOST",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8053x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "HOST",
+    "telemetry_alone": "GPU",
+    "bookkeeping": "HOST",
+    "corrected": "HOST",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8054x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8055x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8132x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8133x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8134x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "HOST",
+    "telemetry_alone": "HOST",
+    "bookkeeping": "HOST",
+    "corrected": "HOST",
+    "telemetry_isolated": true
+   },
+   {
+    "rid": "Cq8135x260c",
+    "cap": 27.0,
+    "conc": 4,
+    "measured": "PARTIAL",
+    "telemetry_alone": "HOST",
+    "bookkeeping": "PARTIAL",
+    "corrected": "HOST",
+    "telemetry_isolated": true
+   },
+   {
+    "rid": "Cq8220x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "GPU",
+    "telemetry_alone": "GPU",
+    "bookkeeping": "GPU",
+    "corrected": "GPU",
+    "telemetry_isolated": true
+   },
+   {
+    "rid": "Cq8221x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8222x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "GPU",
+    "telemetry_alone": "GPU",
+    "bookkeeping": "GPU",
+    "corrected": "GPU",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8223x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8224x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "GPU",
+    "telemetry_alone": "GPU",
+    "bookkeeping": "GPU",
+    "corrected": "GPU",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8225x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": true
+   },
+   {
+    "rid": "Cq8226x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8227x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8344x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8345x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8346x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8347x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8348x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "GPU",
+    "telemetry_alone": "GPU",
+    "bookkeeping": "GPU",
+    "corrected": "GPU",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8349x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8350x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8351x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8430x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "HOST",
+    "telemetry_alone": "GPU",
+    "bookkeeping": "HOST",
+    "corrected": "HOST",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8431x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8432x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8433x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "PARTIAL",
+    "telemetry_alone": "GPU",
+    "bookkeeping": "PARTIAL",
+    "corrected": "PARTIAL",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8434x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8435x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": true
+   },
+   {
+    "rid": "Cq8436x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": false
+   },
+   {
+    "rid": "Cq8437x260c",
+    "cap": 27.0,
+    "conc": 8,
+    "measured": "COLD",
+    "telemetry_alone": "COLD",
+    "bookkeeping": "COLD",
+    "corrected": "COLD",
+    "telemetry_isolated": true
+   }
+  ],
+  "note": "telemetry_alone reads the per-request window delta as if it were attributable, which is what a scheduler trusting the counters would do"
+ },
+ "concurrency_host_warm": {
+  "per_cell": {
+   "cap 27, conc 1": {
+    "n_predicted_host": 11,
+    "n_measured_host": 11,
+    "n_lost_to_cold": 0,
+    "n_lost_to_partial": 0,
+    "host_window_beyond_gpu_tokens": 47648,
+    "precision": 1.0
+   },
+   "cap 27, conc 4": {
+    "n_predicted_host": 6,
+    "n_measured_host": 6,
+    "n_lost_to_cold": 0,
+    "n_lost_to_partial": 0,
+    "host_window_beyond_gpu_tokens": 47648,
+    "precision": 1.0
+   },
+   "cap 27, conc 8": {
+    "n_predicted_host": 9,
+    "n_measured_host": 9,
+    "n_lost_to_cold": 0,
+    "n_lost_to_partial": 0,
+    "host_window_beyond_gpu_tokens": 47648,
+    "precision": 1.0
+   },
+   "cap 38, conc 1": {
+    "n_predicted_host": 9,
+    "n_measured_host": 9,
+    "n_lost_to_cold": 0,
+    "n_lost_to_partial": 0,
+    "host_window_beyond_gpu_tokens": 92704,
+    "precision": 1.0
+   },
+   "cap 38, conc 4": {
+    "n_predicted_host": 12,
+    "n_measured_host": 12,
+    "n_lost_to_cold": 0,
+    "n_lost_to_partial": 0,
+    "host_window_beyond_gpu_tokens": 92704,
+    "precision": 1.0
+   },
+   "cap 38, conc 8": {
+    "n_predicted_host": 6,
+    "n_measured_host": 6,
+    "n_lost_to_cold": 0,
+    "n_lost_to_partial": 0,
+    "host_window_beyond_gpu_tokens": 92704,
+    "precision": 1.0
+   },
+   "cap 60, conc 1": {
+    "n_predicted_host": 7,
+    "n_measured_host": 7,
+    "n_lost_to_cold": 0,
+    "n_lost_to_partial": 0,
+    "host_window_beyond_gpu_tokens": 182816,
+    "precision": 1.0
+   },
+   "cap 60, conc 4": {
+    "n_predicted_host": 15,
+    "n_measured_host": 15,
+    "n_lost_to_cold": 0,
+    "n_lost_to_partial": 0,
+    "host_window_beyond_gpu_tokens": 182816,
+    "precision": 1.0
+   },
+   "cap 60, conc 8": {
+    "n_predicted_host": 14,
+    "n_measured_host": 14,
+    "n_lost_to_cold": 0,
+    "n_lost_to_partial": 0,
+    "host_window_beyond_gpu_tokens": 182816,
+    "precision": 1.0
+   }
+  },
+  "reading": "precision is the share of host-warm predictions that the engine still served from host at scheduling"
+ },
+ "part_a_in_sample": {
+  "label": "IN-SAMPLE: the rule was finalized after seeing Part A, so this is reproduction and not a test",
+  "n": 235,
+  "accuracy": 0.9872340425531915,
+  "confusion": {
+   "COLD->COLD": 38,
+   "GPU->GPU": 12,
+   "GPU->HOST": 3,
+   "HOST->HOST": 162,
+   "PARTIAL->PARTIAL": 20
+  },
+  "block_aligned": {
+   "n": 16,
+   "accuracy": 0.8125,
+   "n_forced_last_block": 9,
+   "n_predicted_host": 9,
+   "n_measured_host": 6
+  },
+  "by_role": {
+   "probe|": {
+    "n": 190,
+    "accuracy": 1.0
+   },
+   "touch|": {
+    "n": 45,
+    "accuracy": 0.9333333333333333
+   }
+  }
+ },
+ "part_a_per_policy": {
+  "rule": 0.9872340425531915,
+  "fifo": 0.8723404255319149,
+  "lru_any": 0.9106382978723404,
+  "lru_host": 0.9361702127659575,
+  "occupancy": 0.18723404255319148
+ },
+ "eng1c_sim_agreement": {
+  "n": 347,
+  "agreement": 0.9538904899135446,
+  "confusion": {
+   "COLD->COLD": 227,
+   "COLD->PARTIAL": 1,
+   "GPU->GPU": 21,
+   "GPU->HOST": 2,
+   "HOST->COLD": 1,
+   "HOST->HOST": 83,
+   "HOST->PARTIAL": 5,
+   "PARTIAL->COLD": 7
+  },
+  "note": "StudyENG1c's simulator is NOT ground truth here; this is the separate agreement check the brief asks for"
+ },
+ "errors": {
+  "n": 14,
+  "classes": {
+   "HOST->PARTIAL": 7,
+   "PARTIAL->COLD": 7
+  },
+  "by_part": {
+   "B": 2,
+   "C": 5,
+   "D": 7
+  },
+  "by_cap": {
+   "27": 5,
+   "38": 5,
+   "60": 4
+  },
+  "by_role": {
+   "churn": 1,
+   "inject": 6,
+   "query": 5,
+   "resume": 2
+  }
+ },
+ "holdout_fence": {
+  "n_holdout_requests_in_stream": 10225,
+  "n_holdout_in_any_scored_set": 0,
+  "n_truth_rows_for_holdout": 0,
+  "rule": "holdout pairs are replayed for capacity and excluded from every scored set; measured_class is never computed for them"
+ },
+ "stream_audit": {
+  "n_requests": 91124,
+  "n_servers": 16,
+  "per_server": {
+   "A_c12": {
+    "n": 35,
+    "cap_gib": 12.0,
+    "parts": [
+     "A"
+    ],
+    "n_reuse": 10,
+    "n_holdout": 0
+   },
+   "A_c27": {
+    "n": 297,
+    "cap_gib": 27.0,
+    "parts": [
+     "A"
+    ],
+    "n_reuse": 75,
+    "n_holdout": 0
+   },
+   "A_c38": {
+    "n": 329,
+    "cap_gib": 38.0,
+    "parts": [
+     "A"
+    ],
+    "n_reuse": 75,
+    "n_holdout": 0
+   },
+   "A_c60": {
+    "n": 403,
+    "cap_gib": 60.0,
+    "parts": [
+     "A"
+    ],
+    "n_reuse": 75,
+    "n_holdout": 0
+   },
+   "B_c12": {
+    "n": 2602,
+    "cap_gib": 12.0,
+    "parts": [
+     "B"
+    ],
+    "n_reuse": 100,
+    "n_holdout": 0
+   },
+   "B_c256": {
+    "n": 2624,
+    "cap_gib": 256.0,
+    "parts": [
+     "B"
+    ],
+    "n_reuse": 150,
+    "n_holdout": 0
+   },
+   "B_c27": {
+    "n": 10935,
+    "cap_gib": 27.0,
+    "parts": [
+     "B"
+    ],
+    "n_reuse": 400,
+    "n_holdout": 0
+   },
+   "B_c38": {
+    "n": 14250,
+    "cap_gib": 38.0,
+    "parts": [
+     "B"
+    ],
+    "n_reuse": 500,
+    "n_holdout": 0
+   },
+   "B_c60": {
+    "n": 11872,
+    "cap_gib": 60.0,
+    "parts": [
+     "B"
+    ],
+    "n_reuse": 400,
+    "n_holdout": 0
+   },
+   "C_c27": {
+    "n": 517,
+    "cap_gib": 27.0,
+    "parts": [
+     "C"
+    ],
+    "n_reuse": 170,
+    "n_holdout": 0
+   },
+   "C_c38": {
+    "n": 514,
+    "cap_gib": 38.0,
+    "parts": [
+     "C"
+    ],
+    "n_reuse": 170,
+    "n_holdout": 0
+   },
+   "C_c60": {
+    "n": 509,
+    "cap_gib": 60.0,
+    "parts": [
+     "C"
+    ],
+    "n_reuse": 170,
+    "n_holdout": 0
+   },
+   "DE_c256": {
+    "n": 11287,
+    "cap_gib": 256.0,
+    "parts": [
+     "D",
+     "E"
+    ],
+    "n_reuse": 409,
+    "n_holdout": 2526
+   },
+   "DE_c27": {
+    "n": 11654,
+    "cap_gib": 27.0,
+    "parts": [
+     "D",
+     "E"
+    ],
+    "n_reuse": 747,
+    "n_holdout": 2604
+   },
+   "DE_c38": {
+    "n": 11684,
+    "cap_gib": 38.0,
+    "parts": [
+     "D",
+     "E"
+    ],
+    "n_reuse": 769,
+    "n_holdout": 2549
+   },
+   "DE_c60": {
+    "n": 11612,
+    "cap_gib": 60.0,
+    "parts": [
+     "D",
+     "E"
+    ],
+    "n_reuse": 707,
+    "n_holdout": 2546
+   }
+  },
+  "per_part": {
+   "A": {
+    "n": 1064,
+    "n_reuse": 235
+   },
+   "B": {
+    "n": 42283,
+    "n_reuse": 1550
+   },
+   "C": {
+    "n": 1540,
+    "n_reuse": 510
+   },
+   "D": {
+    "n": 43181,
+    "n_reuse": 2632
+   },
+   "E": {
+    "n": 3056,
+    "n_reuse": 0
+   }
+  },
+  "time_offset_s": 28801.1993213892,
+  "note": "server segments come from eng1c_run_meta flags; the epoch offset is recovered from the frontend log, which carries both the server label and the request's epoch time"
+ },
+ "_provenance": {
+  "git_commit": "b8c04e7743e72a1cc6e4f20a7a08d54e61749f46",
+  "script": "orchestration/run_res1.py",
+  "model": null,
+  "timestamp": "2026-11-17T09:35:54.094072",
+  "n": 2573,
+  "args": {
+   "draws": 10000,
+   "out_dir": null
+  }
+ }
+}
