@@ -1,0 +1,489 @@
+{
+ "done": [],
+ "stack": {
+  "venv": "/home/pragya/.venvs/fm-switching-vllm",
+  "vllm": "0.31.0",
+  "torch": "2.13.0+cu129",
+  "gpu": "h100nvl GPU 2",
+  "gpu_uuid": "GPU-4f1d7e47-e769-a289-4860-e71c0d97267c",
+  "kv_flags": [
+   "--limit-mm-per-prompt",
+   "{\"image\": 640, \"video\": 1}",
+   "--mm-processor-kwargs",
+   "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}",
+   "--trust-request-mm-kwargs",
+   "--host",
+   "127.0.0.1",
+   "--enable-prefix-caching",
+   "--enable-prompt-tokens-details",
+   "--mm-processor-cache-gb",
+   "128"
+  ],
+  "log_flags": [
+   "--enable-log-requests"
+  ],
+  "plugin": "/home/pragya/Desktop/fm-switching/experiments/cost/eng1_statlog",
+  "eng1_ref_server": "C_P40_E0",
+  "design": {
+   "LOADS": [
+    "P40",
+    "S4",
+    "P25",
+    "S2"
+   ],
+   "ACTIONS": [
+    "mono11k",
+    "piece2048",
+    "piece1024"
+   ],
+   "NTR": 20,
+   "NHOLD": 5,
+   "NREP": 3,
+   "SEED_OFF": 900000,
+   "CTRL_LONG": [
+    "mono11k",
+    "piece2048"
+   ],
+   "CTRL_OFFS": [
+    0.25,
+    0.5,
+    0.75
+   ],
+   "CTRL_REPS": 5,
+   "CTRL_SOLO": 5,
+   "TRACE_S": 10.0,
+   "TINJ0": 3.0,
+   "RUN_GAP": 1.0,
+   "ENG1_B": "{('mono11k', 0.25): (0.9556, 1.0167), ('mono11k', 0.5): (0.959, 1.077), ('mono11k', 0.75): (0.9194, 1.0723), ('piece2048', 0.25): (0.8413, 0.9078), ('piece2048', 0.5): (0.7794, 0.8731), ('piece2048', 0.75): (0.59, 0.7893)}",
+   "WIDEN": 0.05,
+   "XCHECK": [
+    "P40",
+    "mono11k",
+    22.5,
+    64.4
+   ],
+   "CPU_FLAG": 80.0,
+   "HOST_MARGIN_GIB": 192
+  },
+  "monitor_user_exempt": [
+   "sftp-server",
+   "sftp",
+   "scp",
+   "rsync",
+   "tar ",
+   "split ",
+   "gzip",
+   "pigz",
+   "zstd",
+   "xz ",
+   "cp ",
+   "mv ",
+   "rm ",
+   "cat "
+  ],
+  "caching": "prefix caching ON (ENG1 E0); every background image and every mono11k history carries a per-run uuid namespace, so background requests and mono11k are cold; pieces run on their own prefix built in the setup of the same run (GPU-cached)"
+ },
+ "smoke": true,
+ "servers": [
+  {
+   "label": "SMK_E0",
+   "started": "2026-11-17T08:00:32.485095",
+   "flags": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 1}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}",
+    "--trust-request-mm-kwargs",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--mm-processor-cache-gb",
+    "128",
+    "--enable-log-requests",
+    "--enable-logging-iteration-details"
+   ],
+   "key": "32BI",
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "server_cmd": [
+    "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+    "serve",
+    "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+    "--served-model-name",
+    "32BI",
+    "--port",
+    "8031",
+    "--max-model-len",
+    "32768",
+    "--gpu-memory-utilization",
+    "0.9",
+    "--tensor-parallel-size",
+    "1",
+    "--no-enable-prefix-caching",
+    "--limit-mm-per-prompt",
+    "{\"image\": 16}",
+    "--dtype",
+    "bfloat16",
+    "--seed",
+    "0",
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 1}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}",
+    "--trust-request-mm-kwargs",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--mm-processor-cache-gb",
+    "128",
+    "--enable-log-requests",
+    "--enable-logging-iteration-details"
+   ],
+   "startup_s": 60.6,
+   "log": "logs/study_x_server_32BI_1117_075931.log",
+   "max_model_len": 32768,
+   "gpu_memory_utilization": 0.9,
+   "tensor_parallel_size": 1,
+   "prefix_caching": false,
+   "kv_cache_tokens": 62944,
+   "max_concurrency_at_max_len": 1.92,
+   "available_kv_gib": "15.37",
+   "model_weights_gib": "62.66",
+   "attention_backend_lines": [
+    "(EngineCore pid=1153668) INFO 2026-11-17 07:59:48.279 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention",
+    "(EngineCore pid=1153668) INFO 2026-11-17 07:59:48.280 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.",
+    "(EngineCore pid=1153668) INFO 2026-11-17 07:59:48.761 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].",
+    "(EngineCore pid=1153668) INFO 2026-11-17 07:59:48.762 [flash_attn.py:1167] Using FlashAttention version 3",
+    "(EngineCore pid=1153668) INFO 2026-11-17 07:59:59.941 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."
+   ],
+   "cuda_graphs": true,
+   "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)",
+   "extra_server_args": [
+    "--limit-mm-per-prompt",
+    "{\"image\": 640, \"video\": 1}",
+    "--mm-processor-kwargs",
+    "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}",
+    "--trust-request-mm-kwargs",
+    "--host",
+    "127.0.0.1",
+    "--enable-prefix-caching",
+    "--enable-prompt-tokens-details",
+    "--mm-processor-cache-gb",
+    "128",
+    "--enable-log-requests",
+    "--enable-logging-iteration-details"
+   ],
+   "flash_attention_version": "3",
+   "session_check": {
+    "my_sid": 1153101,
+    "my_pgid": 1153101,
+    "gpu3": [
+     {
+      "pid": 1153668,
+      "sid": 1153101,
+      "pgid": 1153101,
+      "cmd": "VLLM::EngineCore                                                                                                        "
+     }
+    ],
+    "all_same_session": true,
+    "all_same_pgid": true
+   },
+   "kv_config": "KVGPU",
+   "engine": "E0",
+   "instrumented": true,
+   "kv_cache_metrics": false,
+   "extra_flags": [
+    "--enable-logging-iteration-details"
+   ],
+   "non_default_args": "{'model_tag': '/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb', 'trust_request_mm_kwargs': True, 'enable_prompt_tokens_details': True, 'host': '127.0.0.1', 'port': 8031, 'model': '/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb', 'dtype': 'bfloat16', 'max_model_len': 32768, 'served_model_name': ['32BI'], 'gpu_memory_utilization': 0.9, 'enable_prefix_caching': True, 'limit_mm_per_prompt': {'image': 640, 'video': 1}, 'mm_processor_kwargs': {'size': {'shortest_edge': 4096, 'longest_edge': 16777216}, 'fps': 1.0, 'do_sample_frames': False}, 'mm_processor_cache_gb': 128.0, 'enable_logging_iteration_details': True, 'enable_log_requests': True}",
+   "flags_verified": true,
+   "unexpected": [],
+   "missing": [],
+   "plugin_loaded": true,
+   "steps_file": "/home/pragya/Desktop/fm-switching/results/cost/study_eng1d/eng1d_smoke_steps/SMK_E0.jsonl.gz",
+   "async_scheduling_log": null,
+   "host_mem": {
+    "server_tree_rss_gib": 5.4638671875,
+    "host_mem_available_gib": 1459.7104568481445
+   },
+   "flags_diff_vs_eng1_e0": [],
+   "eng1_ref_server": "C_P40_E0",
+   "machine_at_start": {
+    "t": 1794931171.294,
+    "gpus": [
+     {
+      "index": 0,
+      "uuid": "GPU-e2fb2f31-eb8e-be11-d0d9-2060e9c932fd",
+      "util": 100.0,
+      "mem_mib": 77120.0,
+      "power_w": 397.62
+     },
+     {
+      "index": 1,
+      "uuid": "GPU-235c6d2d-40df-9060-e2f8-6524c4928d2d",
+      "util": 100.0,
+      "mem_mib": 76702.0,
+      "power_w": 399.07
+     },
+     {
+      "index": 2,
+      "uuid": "GPU-4f1d7e47-e769-a289-4860-e71c0d97267c",
+      "util": 0.0,
+      "mem_mib": 4.0,
+      "power_w": 68.27
+     },
+     {
+      "index": 3,
+      "uuid": "GPU-b3c6399e-00c9-2ba7-8bd4-88570c884250",
+      "util": 100.0,
+      "mem_mib": 79872.0,
+      "power_w": 358.29
+     }
+    ],
+    "mem_gib": {
+     "MemFree": 531.24,
+     "MemAvailable": 1464.29,
+     "Cached": 823.57,
+     "Shmem": 3.11
+    },
+    "load": [
+     8.85,
+     4.79,
+     3.41
+    ],
+    "cpu_total": 11.3,
+    "cpu_cores": [
+     45.2,
+     67.0,
+     4.1,
+     3.1,
+     0.0,
+     0.5,
+     20.7,
+     3.1,
+     0.0,
+     2.6,
+     72.8,
+     0.0,
+     75.1,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     1.0,
+     61.1,
+     0.5,
+     2.1,
+     0.0,
+     4.7,
+     0.0,
+     0.0,
+     62.9,
+     0.0,
+     26.8,
+     2.1,
+     0.5,
+     20.1,
+     1.5,
+     74.2,
+     2.6,
+     2.1,
+     30.3,
+     34.4,
+     66.5,
+     0.0,
+     0.0,
+     1.0,
+     2.1,
+     0.0,
+     0.0,
+     25.3,
+     100.0,
+     0.0,
+     77.2,
+     2.1,
+     0.0,
+     0.0,
+     62.4,
+     1.5,
+     3.1,
+     2.1,
+     66.3,
+     7.7,
+     0.5,
+     0.0,
+     0.0,
+     72.0,
+     6.2,
+     0.0,
+     3.1,
+     2.6,
+     2.6,
+     2.1,
+     4.1,
+     0.0,
+     0.0,
+     0.0,
+     0.5,
+     11.6,
+     0.5,
+     2.6,
+     0.0,
+     2.1,
+     0.0,
+     0.0,
+     0.5,
+     0.0,
+     1.0,
+     6.2,
+     75.6,
+     0.5,
+     0.0,
+     2.6,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.5,
+     0.0,
+     2.6,
+     0.5,
+     0.0,
+     0.0,
+     75.3,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     73.6,
+     39.4,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     2.1,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     8.8,
+     0.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "stage": null
+   }
+  }
+ ],
+ "gate_control_smoke": {
+  "solo_ep": 0.13492500000000002,
+  "D_L": {
+   "mono11k": 2.70322,
+   "piece2048": 0.54677
+  },
+  "cells": {
+   "mono11k_off25": {
+    "n": 1,
+    "rho_median": 0.9417,
+    "band": [
+     0.9056,
+     1.0667
+    ],
+    "within": true,
+    "gated": true
+   },
+   "mono11k_off50": {
+    "n": 1,
+    "rho_median": 0.9288,
+    "band": [
+     0.909,
+     1.127
+    ],
+    "within": true,
+    "gated": true
+   },
+   "mono11k_off75": {
+    "n": 1,
+    "rho_median": 0.8471,
+    "band": [
+     0.8694,
+     1.1223
+    ],
+    "within": false,
+    "gated": true
+   },
+   "piece2048_off25": {
+    "n": 1,
+    "rho_median": 0.8393,
+    "band": [
+     0.7913,
+     0.9578
+    ],
+    "within": true,
+    "gated": true
+   },
+   "piece2048_off50": {
+    "n": 1,
+    "rho_median": 0.8116,
+    "band": [
+     0.7294,
+     0.9231
+    ],
+    "within": true,
+    "gated": false
+   },
+   "piece2048_off75": {
+    "n": 1,
+    "rho_median": 0.5788,
+    "band": [
+     0.54,
+     0.8393
+    ],
+    "within": true,
+    "gated": false
+   }
+  },
+  "passed": false,
+  "at": "2026-11-17T08:01:02.688460"
+ },
+ "stages_done": [
+  {
+   "label": "SMK_E0",
+   "at": "2026-11-17T08:03:04.773799",
+   "elapsed_h": -0.0
+  }
+ ],
+ "void": false,
+ "pair_cached_mismatch": {
+  "mismatch": 0,
+  "compared": 176
+ },
+ "ended": "2026-11-17T08:03:05.552684",
+ "_provenance": [
+  {
+   "git_commit": "8b51be89a901704e659a68b9466cb2f996f6b488",
+   "script": "study_eng1d_loadedblock.py",
+   "model": "qwen3vl-32b-instruct",
+   "timestamp": "2026-11-17T08:03:05.556390",
+   "device": "h100nvl_gpu2",
+   "args": {
+    "smoke": true,
+    "split_only": false,
+    "only": null
+   }
+  }
+ ]
+}
