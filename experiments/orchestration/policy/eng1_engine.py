@@ -51,6 +51,17 @@ there is no sub-linear batching of concurrent prefills, because prefill is seria
 per-request front-end cost is modelled as the committed two-regime fit and not per request type;
 and the step model's admission residual (median 27.9 ms over 1,907 admission steps) is left as
 it is. Nothing here is corrected against Part C.
+
+StudyPOL4-engine (2026-11-17) ADDS THREE NAMED TERMS BEHIND A FLAG, and changes nothing when the
+flag is off. `EngineSim(step=...)` and `Eng1Engine(step=...)` with `pol4=None` are the model
+StudyT0-fidelity froze, bit for bit; `pol4=Pol4Terms.load()` is the revised model. The three
+terms are (a) `host_reload_ms`, the host-KV transfer StudyT0 found entirely absent, (b)
+`long_prefill_scale`, a correction to the own-block prediction of a prefill that needs more than
+one step, and (c) `batch_prefill_gain`, the measured gain when several short prefills share a
+step. EVERY COEFFICIENT OF ALL THREE IS READ FROM
+`results/orchestration/study_pol4/pol4_terms.json`, fitted by `fit_pol4_terms.py` on StudyENG1
+Parts A, B and D and StudyENG1b; nothing is typed here, which a test asserts for the new terms
+as it already did for the step model.
 """
 from __future__ import annotations
 
@@ -75,6 +86,15 @@ FE_BUSY_PER_MB_MS = 17.7
 TOKENS_PER_FRAME = 90
 
 STEP_MODEL_PATH = ("results/cost/study_eng1/eng1_step_model.json")
+POL4_TERMS_PATH = ("results/orchestration/study_pol4/pol4_terms.json")
+
+# The selectable engine models. "eng1" is the model StudyT0-fidelity froze and tested on the
+# now-spent holdout; "pol4" is that model plus StudyPOL4-engine's three terms at their fitted
+# values; "pol4_nobatch" is "pol4" with term (c) at its NEUTRAL value, which is a FLAG SETTING
+# and not a refit (the coefficient is still the one in the committed JSON, it is simply switched
+# off). D60's bias ablation needs all three, so all three stay reachable and all three are
+# tested.
+ENGINE_MODELS = ("eng1", "pol4", "pol4_nobatch")
 
 
 def _repo_root() -> Path:
@@ -123,6 +143,104 @@ class StepModel:
                     knots=list(self.knots))
 
 
+POL4_COEF_NAMES = ("host_kv_bytes_per_token", "host_kv_transfer_gb_per_s",
+                   "host_kv_lookup_fixed_ms", "long_prefill_scale_intercept",
+                   "long_prefill_scale_per_1k_tokens", "batch_prefill_gain_exponent")
+
+
+@dataclass
+class Pol4Terms:
+    """StudyPOL4-engine's three terms, read from the committed JSON and never refitted here.
+
+    `for_probe` exists only so the fitting script and the tests can evaluate ONE term at a
+    time; it builds a terms object whose other coefficients are NEUTRAL (no transfer, scale
+    1.0, exponent 0.0), so a probe can never smuggle a fitted value into this module."""
+
+    coef: Dict[str, float]
+    path: str
+    raw: Dict[str, Any] = field(default_factory=dict)
+
+    NEUTRAL: Dict[str, float] = None
+
+    @classmethod
+    def load(cls, path: Any = None) -> "Pol4Terms":
+        p = Path(path) if path is not None else (_repo_root() / POL4_TERMS_PATH)
+        raw = json.loads(Path(p).read_text())
+        if int(raw.get("holdout_trials_used", -1)) != 0:
+            raise ValueError("%s does not state that it used zero HOLDOUT trials; refusing to "
+                             "use terms whose fit data is unstated" % p)
+        missing = [n for n in POL4_COEF_NAMES if n not in raw.get("coef", {})]
+        if missing:
+            raise ValueError("%s is missing the coefficients %s" % (p, missing))
+        return cls(coef={n: float(raw["coef"][n]) for n in POL4_COEF_NAMES}, path=str(p),
+                   raw=raw)
+
+    @classmethod
+    def load_for_model(cls, engine_model: str, path: Any = None) -> Optional["Pol4Terms"]:
+        if engine_model not in ENGINE_MODELS:
+            raise ValueError("engine_model must be one of %s, got %r" % (ENGINE_MODELS,
+                                                                         engine_model))
+        if engine_model == "eng1":
+            return None
+        t = cls.load(path)
+        if engine_model == "pol4_nobatch":
+            coef = dict(t.coef)
+            coef["batch_prefill_gain_exponent"] = cls.NEUTRAL["batch_prefill_gain_exponent"]
+            return cls(coef=coef, path="%s [term (c) switched off]" % t.path, raw=t.raw)
+        return t
+
+    @classmethod
+    def for_probe(cls, **overrides: float) -> "Pol4Terms":
+        coef = dict(cls.NEUTRAL)
+        for k, v in overrides.items():
+            if k not in POL4_COEF_NAMES:
+                raise KeyError("unknown POL4 coefficient %r" % k)
+            coef[k] = float(v)
+        return cls(coef=coef, path="(probe: neutral except %s)" % sorted(overrides),
+                   raw=dict(probe=True))
+
+    # --- (a) host-KV transfer, StudyENG1 Part D's measured bytes and rate
+    def host_reload_ms(self, external_tokens: int) -> float:
+        tok = max(int(external_tokens), 0)
+        if tok <= 0:
+            return 0.0
+        by = self.coef["host_kv_bytes_per_token"] * tok
+        rate = self.coef["host_kv_transfer_gb_per_s"] * 1e9
+        if rate <= 0:
+            return 0.0
+        return self.coef["host_kv_lookup_fixed_ms"] + 1000.0 * by / rate
+
+    # --- (b) the own-block correction for a prefill that needs more than one step
+    def long_prefill_scale(self, total_new_tokens: int, chunk_tokens: int) -> float:
+        if int(total_new_tokens) <= int(chunk_tokens):
+            return 1.0
+        s = (self.coef["long_prefill_scale_intercept"]
+             + self.coef["long_prefill_scale_per_1k_tokens"] * total_new_tokens / 1000.0)
+        return max(s, 0.0)
+
+    # --- (c) the measured gain when several short prefills share a step
+    def batch_prefill_gain(self, n_prefill_reqs: int) -> float:
+        m = max(int(n_prefill_reqs), 0)
+        if m <= 1:
+            return 1.0
+        return float(m) ** (-self.coef["batch_prefill_gain_exponent"])
+
+    def describe(self) -> Dict[str, Any]:
+        return dict(path=self.path, coef=dict(self.coef),
+                    fit_data=self.raw.get("holdout_exclusion"),
+                    terms=dict(
+                        host_kv_transfer=(self.raw.get("host_kv_transfer") or {}).get("fit_data"),
+                        long_cold_prefill=(self.raw.get("long_cold_prefill")
+                                           or {}).get("fit_data"),
+                        sub_linear_batching=(self.raw.get("sub_linear_batching")
+                                             or {}).get("fit_data")))
+
+
+Pol4Terms.NEUTRAL = dict(host_kv_bytes_per_token=0.0, host_kv_transfer_gb_per_s=1.0,
+                         host_kv_lookup_fixed_ms=0.0, long_prefill_scale_intercept=1.0,
+                         long_prefill_scale_per_1k_tokens=0.0, batch_prefill_gain_exponent=0.0)
+
+
 def frontend_service_s(body_mb: float, front_end_was_busy: bool) -> float:
     """StudyENG1 section 7. The busy regime is NOT the idle regime plus a queue: the measured
     busy fit has a smaller fixed term because about 23 ms of the per-request cost overlaps with
@@ -145,6 +263,14 @@ class SimRequest:
     n_images: int = 0
     out_tokens: int = 1
     tag: str = ""
+    # RECORDED INPUT, not a model choice: how many of this request's cached tokens came from
+    # the host tier rather than the GPU, as the engine's own
+    # `prompt_tokens_by_source|external_kv_transfer` counter reports them. Zero everywhere the
+    # record says the hit was local, which is every Part C action except hostreload.
+    external_cached_tokens: int = 0
+
+    def external_tokens(self) -> int:
+        return min(max(int(self.external_cached_tokens), 0), max(int(self.cached_tokens), 0))
 
     def new_tokens(self) -> int:
         return max(int(self.prompt_tokens) - max(int(self.cached_tokens), 0), 0)
@@ -166,6 +292,7 @@ class _Live:
     t_end: Optional[float] = None
     step_take: int = 0
     step_images: int = 0
+    ext_left: int = 0          # host-KV tokens not yet charged; charged once, on the first step
 
 
 @dataclass
@@ -181,6 +308,14 @@ class EngineSim:
     step: StepModel
     chunk_tokens: int = CHUNK_TOKENS
     max_steps: int = 2_000_000
+    pol4: Optional[Pol4Terms] = None     # None is the model StudyT0-fidelity froze
+
+    def model_name(self) -> str:
+        if self.pol4 is None:
+            return "eng1"
+        if "switched off" in self.pol4.path:
+            return "pol4_nobatch"
+        return "pol4"
 
     def run(self, requests: Sequence[SimRequest]) -> Dict[str, Any]:
         reqs = sorted(requests, key=lambda r: (r.t_submit, r.rid))
@@ -195,7 +330,8 @@ class EngineSim:
             fe_free = t_added
             live.append(_Live(req=r, t_added=t_added, remaining_new=r.new_tokens(),
                               images_left=max(int(r.n_images), 0),
-                              out_left=max(int(r.out_tokens), 1)))
+                              out_left=max(int(r.out_tokens), 1),
+                              ext_left=r.external_tokens()))
         # --- engine, StudyENG1 sections 5, 6 and 8
         waiting = sorted(live, key=lambda x: (x.t_added, x.req.rid))
         idx = 0
@@ -267,12 +403,39 @@ class EngineSim:
                     peek += 1
                     if c.remaining_new > self.chunk_tokens:
                         break
-            dur = self.step.step_ms(
+            nxt_images = sum(c.req.n_images for c in nxt)
+            nxt_enc = sum(c.req.encoder_tokens() for c in nxt)
+            ms = self.step.step_ms(
                 new_tokens=tok, images_in_step=imgs, decode_reqs=len(decoding),
                 prefill_reqs=len(batch), cached_ctx_tokens=ctx,
-                next_images=sum(c.req.n_images for c in nxt),
-                next_encoder_tokens=sum(c.req.encoder_tokens() for c in nxt),
-            ) / 1000.0
+                next_images=nxt_images, next_encoder_tokens=nxt_enc)
+            pol4_charge: Dict[str, Any] = {}
+            if self.pol4 is not None:
+                # The PREFILL cost of this step: the step as scheduled minus the same step with
+                # no prefill work in it. Terms (b) and (c) scale this and nothing else, so a
+                # decode-only step and the step model's admission terms are untouched.
+                base_ms = self.step.step_ms(
+                    new_tokens=0, images_in_step=0, decode_reqs=len(decoding), prefill_reqs=0,
+                    cached_ctx_tokens=0, next_images=nxt_images, next_encoder_tokens=nxt_enc)
+                prefill_ms = max(ms - base_ms, 0.0)
+                scale = 1.0
+                if len(batch) == 1 and batch[0].req.new_tokens() > self.chunk_tokens:
+                    scale = self.pol4.long_prefill_scale(batch[0].req.new_tokens(),
+                                                         self.chunk_tokens)
+                    pol4_charge["long_prefill_scale"] = scale
+                elif len(batch) > 1:
+                    scale = self.pol4.batch_prefill_gain(len(batch))
+                    pol4_charge["batch_prefill_gain"] = scale
+                ms = base_ms + prefill_ms * scale
+                reload_ms = 0.0
+                for b in batch:
+                    if b.ext_left > 0:
+                        reload_ms += self.pol4.host_reload_ms(b.ext_left)
+                        b.ext_left = 0
+                if reload_ms > 0.0:
+                    ms += reload_ms
+                    pol4_charge["host_reload_ms"] = reload_ms
+            dur = max(ms, 0.0) / 1000.0
             t0 = t
             t += dur
             steps += 1
@@ -280,7 +443,8 @@ class EngineSim:
                                  images=imgs, decode_reqs=len(decoding),
                                  prefill_reqs=len(batch),
                                  prefilling=[b.req.rid for b in batch],
-                                 admitting_next=[c.req.rid for c in nxt]))
+                                 admitting_next=[c.req.rid for c in nxt],
+                                 pol4=pol4_charge))
             done_decode = []
             for d in decoding:
                 d.out_left -= 1
@@ -310,6 +474,7 @@ class EngineSim:
                                   new_tokens=x.req.new_tokens(),
                                   cached_tokens=int(x.req.cached_tokens))
         return dict(per_request=out, n_steps=steps, steps=step_log,
+                    engine_model=self.model_name(),
                     unfinished=[x.req.rid for x in live if x.t_first is None])
 
 
@@ -327,26 +492,46 @@ class Eng1Engine:
     host_kv_tokens: int = 0
     profiles: Any = None
     chunk_tokens: int = CHUNK_TOKENS
+    pol4: Optional[Pol4Terms] = None     # None is the model StudyT0-fidelity froze
+
+    def model_name(self) -> str:
+        if self.pol4 is None:
+            return "eng1"
+        if "switched off" in self.pol4.path:
+            return "pol4_nobatch"
+        return "pol4"
 
     @classmethod
     def load(cls, gpu_kv_tokens: int = 0, host_kv_tokens: int = 0, profiles: Any = None,
-             path: Any = None) -> "Eng1Engine":
+             path: Any = None, engine_model: str = "eng1",
+             pol4_path: Any = None) -> "Eng1Engine":
+        if engine_model not in ENGINE_MODELS:
+            raise ValueError("engine_model must be one of %s" % (ENGINE_MODELS,))
         return cls(step=StepModel.load(path), gpu_kv_tokens=gpu_kv_tokens,
-                   host_kv_tokens=host_kv_tokens, profiles=profiles)
+                   host_kv_tokens=host_kv_tokens, profiles=profiles,
+                   pol4=Pol4Terms.load_for_model(engine_model, pol4_path))
 
     def _solo_prefill_s(self, new_tokens: int, n_images: int, cached_ctx: int,
-                        decode_reqs: int) -> float:
+                        decode_reqs: int, external_tokens: int = 0) -> float:
         left = max(int(new_tokens), 0)
         imgs_left = max(int(n_images), 0)
         total = max(left, 1)
         s = 0.0
+        scale = (1.0 if self.pol4 is None
+                 else self.pol4.long_prefill_scale(left, self.chunk_tokens))
         while left > 0:
             tok = min(left, self.chunk_tokens)
             imgs = (imgs_left if tok >= left else int(round(n_images * tok / total)))
             imgs = min(imgs, imgs_left)
-            s += self.step.step_ms(tok, imgs, decode_reqs, 1, cached_ctx) / 1000.0
+            ms = self.step.step_ms(tok, imgs, decode_reqs, 1, cached_ctx)
+            if self.pol4 is not None:
+                base = self.step.step_ms(0, 0, decode_reqs, 0, 0)
+                ms = base + max(ms - base, 0.0) * scale
+            s += ms / 1000.0
             left -= tok
             imgs_left -= imgs
+        if self.pol4 is not None and external_tokens > 0:
+            s += self.pol4.host_reload_ms(int(external_tokens)) / 1000.0
         if s == 0.0:
             s = self.step.step_ms(0, 0, decode_reqs, 0, 0) / 1000.0
         return s
@@ -375,7 +560,16 @@ class Eng1Engine:
             in_sample = False
             basis.append("NOT IN SAMPLE: StudyENG1's largest measured single prefill piece was "
                          "8,231 tokens; %d new tokens is an extrapolation" % new_tokens)
-        gpu = self._solo_prefill_s(new_tokens, frames, cached, decode_reqs=0)
+        external = (max(int(req.meta.get("external_cached_tokens", 0)), 0)
+                    if self.pol4 is not None else 0)
+        external = min(external, cached)
+        if external > 0:
+            basis.append("StudyPOL4-engine term (a): %d cached tokens are charged a host-KV "
+                         "reload" % external)
+        if self.pol4 is not None:
+            basis.append("StudyPOL4-engine terms from %s" % Path(self.pol4.path).name)
+        gpu = self._solo_prefill_s(new_tokens, frames, cached, decode_reqs=0,
+                                   external_tokens=external)
         # Section 6: a request arriving behind concurrent work waits for that work, it does not
         # share a step. The caller's `concurrent` is other requests in flight, so their remaining
         # work is ahead of this one; without their sizes the only honest statement is that the
@@ -394,8 +588,11 @@ class Eng1Engine:
     def describe(self) -> Dict[str, Any]:
         return dict(
             name="Eng1Engine",
+            engine_model=self.model_name(),
             replaces="PlaceholderEngine, once T0 says the measurement may be relied on",
             step_model=self.step.describe(),
+            pol4_terms=(self.pol4.describe() if self.pol4 is not None else
+                        "OFF: this is the model StudyT0-fidelity froze and tested"),
             chunk_tokens=self.chunk_tokens,
             structure=dict(
                 prefill="SERIAL at the request level (StudyENG1 section 6, H-admit verdict a)",
@@ -412,3 +609,14 @@ class Eng1Engine:
                           "the step model's admission residual, median 27.9 ms, left as it is"],
             fitted_here="NOTHING: no coefficient in this module was fitted, and no Part C or "
                         "HOLDOUT datum entered any number it uses")
+
+
+def make_sim(engine_model: str = "eng1", step_path: Any = None,
+             pol4_path: Any = None, **kw: Any) -> EngineSim:
+    """The one place a caller chooses between the two models. `eng1` is StudyT0-fidelity's
+    frozen model; `pol4` adds StudyPOL4-engine's three terms."""
+    if engine_model not in ENGINE_MODELS:
+        raise ValueError("engine_model must be one of %s, got %r" % (ENGINE_MODELS,
+                                                                     engine_model))
+    return EngineSim(step=StepModel.load(step_path),
+                     pol4=Pol4Terms.load_for_model(engine_model, pol4_path), **kw)

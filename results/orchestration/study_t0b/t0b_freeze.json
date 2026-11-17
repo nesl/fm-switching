@@ -1,0 +1,139 @@
+{
+ "study": "StudyPOL4-engine (freeze) for StudyT0b-fidelity",
+ "frozen_model": "pol4",
+ "flag_settings": {
+  "selector": "policy.eng1_engine.make_sim(engine_model=...) and Eng1Engine.load(engine_model=...)",
+  "engine_models": [
+   "eng1",
+   "pol4",
+   "pol4_nobatch"
+  ],
+  "frozen": "pol4",
+  "configurations": {
+   "eng1": {
+    "engine_model_flag": "eng1",
+    "model_name": "eng1",
+    "pol4_terms": "OFF",
+    "chunk_tokens": 8192
+   },
+   "pol4": {
+    "engine_model_flag": "pol4",
+    "model_name": "pol4",
+    "pol4_terms": {
+     "host_kv_bytes_per_token": 262144.0,
+     "host_kv_transfer_gb_per_s": 50.137676069293306,
+     "host_kv_lookup_fixed_ms": 0.8845,
+     "long_prefill_scale_intercept": 0.7891186909894499,
+     "long_prefill_scale_per_1k_tokens": 0.009228028622738832,
+     "batch_prefill_gain_exponent": -0.03
+    },
+    "chunk_tokens": 8192
+   },
+   "pol4_nobatch": {
+    "engine_model_flag": "pol4_nobatch",
+    "model_name": "pol4_nobatch",
+    "pol4_terms": {
+     "host_kv_bytes_per_token": 262144.0,
+     "host_kv_transfer_gb_per_s": 50.137676069293306,
+     "host_kv_lookup_fixed_ms": 0.8845,
+     "long_prefill_scale_intercept": 0.7891186909894499,
+     "long_prefill_scale_per_1k_tokens": 0.009228028622738832,
+     "batch_prefill_gain_exponent": 0.0
+    },
+    "chunk_tokens": 8192
+   }
+  },
+  "why_this_one": "pol4 carries all three StudyPOL4 terms at their FITTED values and is the only configuration that passes the brief's regression gate on the FIT trials: criteria (ii) and (iii) improve and (iv) is unchanged. pol4_nobatch scores criterion (i) higher on FIT data but makes criterion (ii) WORSE than the old model (0.9500 against 0.9667), which is exactly the trade the brief forbids, so it is NOT frozen and is kept only as D60's term-(c) ablation. eng1 is the model StudyT0-fidelity froze and tested on the now-spent holdout, kept reachable for D60's bias ablation."
+ },
+ "step_model": {
+  "path": "/home/pragya/Desktop/FM-switching/results/cost/study_eng1/eng1_step_model.json",
+  "n_fit_steps": 5974,
+  "r2": 0.9845517041726302,
+  "fit_data": "Part A (A_E0) and Part B E0 (B_E0) steps; Part C (incl. HOLDOUT) not used",
+  "coef": {
+   "intercept_ms": 28.69451533217085,
+   "per_tok_ms": 0.07403882654657767,
+   "per_tok_above_512_ms": 0.019023001786639154,
+   "per_tok_above_2048_ms": -0.007830007328201336,
+   "per_tok_above_4096_ms": 0.09249914968752022,
+   "per_encoder_input_ms": 8.621865151417994,
+   "per_decode_req_ms": -0.5711150811457119,
+   "per_prefill_req_ms": 3.884497411910981,
+   "per_tok_x_ctx_per_1e6_ms": 1.9455541359398874,
+   "admission_per_image_ms": -1.2492171229127111,
+   "admission_per_1k_encoder_tokens_ms": 18.14846848957969
+  },
+  "knots": [
+   512,
+   2048,
+   4096
+  ]
+ },
+ "pol4_terms": {
+  "path": "/home/pragya/Desktop/FM-switching/results/orchestration/study_pol4/pol4_terms.json",
+  "coef": {
+   "host_kv_bytes_per_token": 262144.0,
+   "host_kv_transfer_gb_per_s": 50.137676069293306,
+   "host_kv_lookup_fixed_ms": 0.8845,
+   "long_prefill_scale_intercept": 0.7891186909894499,
+   "long_prefill_scale_per_1k_tokens": 0.009228028622738832,
+   "batch_prefill_gain_exponent": -0.03
+  },
+  "fit_data": "results/cost/study_eng1/eng1_holdout_split.json was loaded ONLY to exclude its 174 triples. Terms (a), (b) and (c) were fitted on StudyENG1 Parts A, B and D only, which contain no Part C trial at all; the only Part C rows this script reads are the FIT hostreload run summaries used as an OUT-OF-SAMPLE cross-check, and every holdout key encountered there was skipped and counted.",
+  "terms": {
+   "host_kv_transfer": "StudyENG1 Part D, concurrency-1 query rows in state host: the engine's own kv_offload_load_{bytes,time}_total counters and the lookup sync delay. Part C and the HOLDOUT did not enter this fit.",
+   "long_cold_prefill": "StudyENG1 Part A (A2 piece rows with j = 0, A2mono mono rows) and Part B solo_long rows, cell medians, restricted to new tokens > 8192. Part C and the HOLDOUT did not enter this fit.",
+   "sub_linear_batching": "StudyENG1 Part A A1 batch rows, k in 1, 2, 4, 8, 16 at N = 1 and N = 3, 30 batches per cell, batch completion = the batch's last first token. Part C and the HOLDOUT did not enter this fit."
+  }
+ },
+ "git": {
+  "head": "35825d5ceec12646f341cb40fd23f51e2c3e59ce",
+  "branch": "main",
+  "porcelain": "M experiments/orchestration/policy/eng1_engine.py\n M experiments/orchestration/policy/trace_replay.py\n?? experiments/orchestration/policy/fit_pol4_terms.py\n?? experiments/orchestration/policy/freeze_t0b.py\n?? experiments/orchestration/policy/run_pol4.py\n?? experiments/orchestration/policy/tests/test_pol4_engine.py\n?? results/orchestration/study_pol4/\n?? results/orchestration/study_t0b/",
+  "clean": false
+ },
+ "files": {
+  "experiments/orchestration/policy/eng1_engine.py": "7e8779ceaeecdb055ff37bde4b3893c1",
+  "experiments/orchestration/policy/fit_pol4_terms.py": "33bf0f4f6c646965a00a032d934de84c",
+  "experiments/orchestration/policy/freeze_t0b.py": "f465266c313738f8b628b8c3577a3450",
+  "experiments/orchestration/policy/kvpool.py": "69e2622e9e49e5503a3a9a8a09651f61",
+  "experiments/orchestration/policy/params.py": "abbbca7ae904e41851ca4b99fae73345",
+  "experiments/orchestration/policy/run_pol4.py": "02a68eec82a7953390897ae63a5af114",
+  "experiments/orchestration/policy/run_t0.py": "3f7d2edfc193e7d21e2ae0bc162c91e6",
+  "experiments/orchestration/policy/t0_harness.py": "2c41bdef137d79f3ca816ae190da9a42",
+  "experiments/orchestration/policy/tiers.py": "b4607d14d0897eaed4a02d55f75cdb51",
+  "experiments/orchestration/policy/trace_replay.py": "c8590fd16b12adceeb1ba672d4ef4396",
+  "results/cost/study_eng1/eng1_step_model.json": "7da0a984bca4ba4f0ff81d5cee54d18c",
+  "results/orchestration/study_pol4/pol4_terms.json": "150c22189af0412cb150b8205bc2382a"
+ },
+ "frozen_at": "2026-11-17T04:11:34.701952+00:00",
+ "note": "StudyPOL4-engine: the revised cost model StudyT0b is to score. After this freeze the model may not change for T0b; a change is visible in git.",
+ "binding": "StudyT0b must be evaluated on FRESH held-out data only. The 174 StudyENG1 Part C HOLDOUT triples are SPENT and were not read, predicted or evaluated by StudyPOL4-engine; the 406 Part C FIT trials are also not a held-out sample for this model, because they informed which three terms were added.",
+ "verify_at_freeze": {
+  "ok": true,
+  "changed": [],
+  "git_frozen": {
+   "head": "35825d5ceec12646f341cb40fd23f51e2c3e59ce",
+   "branch": "main",
+   "porcelain": "M experiments/orchestration/policy/eng1_engine.py\n M experiments/orchestration/policy/trace_replay.py\n?? experiments/orchestration/policy/fit_pol4_terms.py\n?? experiments/orchestration/policy/freeze_t0b.py\n?? experiments/orchestration/policy/run_pol4.py\n?? experiments/orchestration/policy/tests/test_pol4_engine.py\n?? results/orchestration/study_pol4/\n?? results/orchestration/study_t0b/",
+   "clean": false
+  },
+  "git_now": {
+   "head": "35825d5ceec12646f341cb40fd23f51e2c3e59ce",
+   "branch": "main",
+   "porcelain": "M experiments/orchestration/policy/eng1_engine.py\n M experiments/orchestration/policy/trace_replay.py\n?? experiments/orchestration/policy/fit_pol4_terms.py\n?? experiments/orchestration/policy/freeze_t0b.py\n?? experiments/orchestration/policy/run_pol4.py\n?? experiments/orchestration/policy/tests/test_pol4_engine.py\n?? results/orchestration/study_pol4/\n?? results/orchestration/study_t0b/",
+   "clean": false
+  }
+ },
+ "_provenance": {
+  "git_commit": "35825d5ceec12646f341cb40fd23f51e2c3e59ce",
+  "script": "policy/freeze_t0b.py",
+  "model": null,
+  "timestamp": "2026-11-16T20:11:34.721153",
+  "device": "cpu",
+  "n": 12,
+  "args": {
+   "out": "results/orchestration/study_t0b/t0b_freeze.json"
+  }
+ }
+}

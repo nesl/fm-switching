@@ -12,6 +12,7 @@ both arms cancels in the prediction exactly as it cancels in the measurement.
 
 Nothing is fitted here and nothing is read from a Part C or HOLDOUT measurement except the
 INPUTS: who arrived when, how big the body was, how many prompt tokens, how many were cached,
+how many of those came from the HOST tier (StudyPOL4-engine, see EXTERNAL_TOKENS_COUNTER below),
 and how many output tokens were produced. The measured TTFTs are read only to be compared
 against.
 
@@ -91,6 +92,9 @@ class Trial:
     holdout: bool
     t_inj_rel: float
     arms: Dict[str, Arm] = field(default_factory=dict)
+    # per arm, the run's external_kv_transfer tokens that could NOT be attributed to the action
+    # (the W25 cells, where the 8 warm sessions produce host hits of their own in both arms)
+    external_unattributed: Dict[str, int] = field(default_factory=dict)
 
     def cell(self) -> str:
         return "%s|%s" % (self.load, self.action)
@@ -119,7 +123,29 @@ def _sim_request(row: Dict[str, Any], t0: float, tag: str) -> SimRequest:
         body_mb=float(row.get("body_mb", 0.0) or 0.0),
         n_images=_n_images(row),
         out_tokens=max(int(row.get("completion_tokens", 1) or 1), 1),
+        external_cached_tokens=int(row.get("_external_cached_tokens", 0) or 0),
         tag=tag)
+
+
+# StudyPOL4-engine term (a) needs to know how many of a request's cached tokens came from the
+# HOST tier rather than the GPU. That is RECORDED, not inferred: each Part C run's summary row
+# carries the engine's own `prompt_tokens_by_source|external_kv_transfer` counter over the run.
+#
+# The counter is PER RUN, not per request, so it may only be attributed to the action where
+# nothing else in the trace could have produced it. Two conditions must BOTH hold, and they are
+# checked per trial rather than assumed:
+#   (1) the arm's counter equals the arm's action rows' cached tokens, within the 32-token
+#       prefix-chaining tolerance StudyENG1 used throughout, and
+#   (2) the OTHER arm's counter is zero, so no background or warm request reloads from host.
+# On the committed record that selects the hostreload cells and nothing else: outside them the
+# counter is zero everywhere except the five W25 cells, where it is the 8 warm sessions' OWN
+# host hits (19k to 50k tokens, present in both arms and present even where the action has no
+# cached tokens at all). Those trials are therefore left UNATTRIBUTED and charged nothing, which
+# is recorded as a limitation: the warm sessions' reloads are real engine work in BOTH arms of a
+# W25 pair, so they largely cancel in the paired difference the criterion is computed on, but
+# the model does not charge them.
+EXTERNAL_TOKENS_COUNTER = "prompt_tokens_by_source_total|external_kv_transfer"
+EXTERNAL_TOLERANCE_TOKENS = 32
 
 
 def load_part_c_trials(path: Any = None) -> List[Trial]:
@@ -127,11 +153,18 @@ def load_part_c_trials(path: Any = None) -> List[Trial]:
     at any measured TTFT; selecting the split is the caller's job and the harness guards it."""
     p = Path(path) if path is not None else (_repo_root() / PART_C_PATH)
     buckets: Dict[Tuple[str, str, int], Trial] = {}
+    external: Dict[Tuple[str, str, int, str], int] = {}
     with open(p) as fh:
         for line in fh:
             row = json.loads(line)
             kind = row.get("kind")
-            if kind in ("run_summary", "pair_check"):
+            if kind == "run_summary":
+                md = row.get("metrics_delta") or {}
+                if row.get("mode") in ("with", "without"):
+                    external[(row["load"], row["action"], int(row["trial"]),
+                              row["mode"])] = int(md.get(EXTERNAL_TOKENS_COUNTER, 0) or 0)
+                continue
+            if kind == "pair_check":
                 continue
             mode = row.get("mode")
             if mode not in ("with", "without"):
@@ -155,6 +188,24 @@ def load_part_c_trials(path: Any = None) -> List[Trial]:
                 arm.action.append(row)
             elif kind in BACKGROUND_KINDS:
                 arm.background.append(row)
+    for (load, action, trial, mode), ext in sorted(external.items()):
+        trial_obj = buckets.get((load, action, trial))
+        if trial_obj is None or mode not in trial_obj.arms or ext <= 0:
+            continue
+        other = "without" if mode == "with" else "with"
+        if external.get((load, action, trial, other), 0) != 0:
+            trial_obj.external_unattributed[mode] = ext
+            continue
+        rows = sorted(trial_obj.arms[mode].action, key=lambda r: (r.get("idx") or 0))
+        cached = sum(int(r.get("cached_tokens", 0) or 0) for r in rows)
+        if abs(cached - ext) > EXTERNAL_TOLERANCE_TOKENS:
+            trial_obj.external_unattributed[mode] = ext
+            continue
+        left = ext
+        for row in rows:
+            take = min(left, int(row.get("cached_tokens", 0) or 0))
+            row["_external_cached_tokens"] = take
+            left -= take
     return [buckets[k] for k in sorted(buckets)]
 
 
