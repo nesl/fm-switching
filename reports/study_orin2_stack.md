@@ -98,12 +98,13 @@ the intercept is higher by 0.0335, absorbing the device's stack-induced score of
 
 The map was applied to the 42,014 StudyORIN1 Orin dense scores (mean calibrated log-odds
 -0.0814). The 601 DEV clips and the 300 dense-evaluation clips are disjoint (overlap 0;
-confirms no leakage from fit to evaluation). Residual tier offset: on D3 DEV (the only set
-where both tiers were run), the calibrated Orin 4B minus the calibrated 32B is -0.0171
-log-odds (n = 6,010), tighter than StudyCTRL1c's H100 4B residual of -0.1197. After
-device-specific calibration the Orin 4B is essentially tier-aligned with the 32B. The 42,014
-dense requests have no 32B scores (32B was never run on the StudyD14b dense set), so the tier
-residual is necessarily measured on D3 DEV, not the dense set.
+confirms no leakage from fit to evaluation). Residual tier offset (calibrated Orin 4B minus
+calibrated 32B), measured on both sets where both tiers were run: -0.0171 log-odds on D3 DEV
+(n = 6,010), and -0.0155 log-odds on the 300 dense-evaluation clips (n = 42,014; StudyD14b
+holds 32BI N=1 dense 0.25-s traces for all 300 clips in results/dashcam/study_d14b/, used by
+StudyCTRL1/1b/1c). Both are far tighter than StudyCTRL1c's H100 4B residual of -0.1197. After
+device-specific calibration the Orin 4B is essentially tier-aligned with the 32B, and the D3
+DEV fit set and the dense evaluation set agree on this residual to within 0.002 log-odds.
 
 The map is saved as results/dashcam/study_orin2/orin2_calibration.json in StudyCTRL1c's JSON
 format.
@@ -300,8 +301,9 @@ device; it is reported as a limitation, not used to make the device look faster.
 
 ## Limitations
 
-- The Orin 4B tier residual is measured on the D3 DEV fit set (the only set where both the Orin 4B
-  and the 32B were run); the dense evaluation set has no 32B scores.
+- The Orin 4B tier residual is reported on both the D3 DEV fit set (-0.0171) and the 300-clip dense
+  evaluation set (-0.0155), where StudyD14b holds 32BI N=1 dense traces; the two agree to within
+  0.002 log-odds.
 - The equivalence-gate logprob tolerance was changed post-hoc from 0.05 to 0.15 nats after seeing
   the data (reported in full under Part 2 Step 3).
 - The harness evaluates a median of 15 extra question tokens per call (the cache/eval boundary),
