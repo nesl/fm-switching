@@ -50,6 +50,16 @@ class Rollout:
     flags: Any
     engine: EngineModel
     load_pct: int = 25
+    # StudyPOL5 Part 3: StudyRES1's measured residency model, used in place of
+    # `Params.p_host_for` (which derives residency from host occupancy under
+    # `tiers.EVICTION_RULE_ASSUMPTION`) when the caller supplies one. None keeps the old path,
+    # so nothing frozen changes and no existing result moves.
+    residency_belief: Any = None
+
+    def _p_host_for(self, host_pool: Any, evicted_tokens: int, prefix_id: Optional[str] = None,
+                    t: float = 0.0) -> Dict[str, Any]:
+        src = self.residency_belief if self.residency_belief is not None else self.params
+        return src.p_host_for(host_pool, evicted_tokens, prefix_id=prefix_id, t=t)
 
     # ---------------------------------------------------------------- pi_0
     def _edf(self, items: Sequence[PendingItem]) -> List[PendingItem]:
@@ -222,8 +232,7 @@ class Rollout:
             pred = pool.predict_loss(pid, exposed_demand, end)
             beyond = survival_p_loss(getattr(self.params, "survival_curve", None), gap)
             p_loss = min(1.0, pred["p_loss"] + (1.0 - pred["p_loss"]) * beyond["p_loss"])
-            ph = self.params.p_host_for(store.host, int(round(p_loss * built)), prefix_id=pid,
-                                        t=end)
+            ph = self._p_host_for(store.host, int(round(p_loss * built)), prefix_id=pid, t=end)
             # StudyENG1b section 5: the LARGER cost of deferring under pressure is not the loss
             # but the QUEUE. A resume issued while another history build is still prefilling
             # waited 6 to 10 s whether or not the prefix survived. That is not a constant here:
@@ -404,7 +413,7 @@ class Rollout:
         built = job.pieces_done * job.tokens_per_piece
         from .continuation import restore_costs_s
         w_reload, w_rebuild = restore_costs_s(built, self.pf)
-        ph = self.params.p_host_for(self._build_host(f), built,
+        ph = self._p_host_for(self._build_host(f), built,
                                     prefix_id=prefix_id_for(job_id), t=f.t)
         p_host = float(ph["p_host"])
         lost_extra = p_host * w_reload + (1.0 - p_host) * w_rebuild

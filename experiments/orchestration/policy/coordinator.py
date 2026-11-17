@@ -42,6 +42,8 @@ class Coordinator:
     flags: Flags
     engine: EngineModel
     rollout: Rollout = None
+    # StudyPOL5 Part 3: see Rollout.residency_belief. None keeps the pre-POL5 path.
+    residency_belief: Any = None
     decisions: List[Decision] = field(default_factory=list)
     scoring_calls: int = 0
     tables: GhatTables = None
@@ -51,7 +53,10 @@ class Coordinator:
 
     def __post_init__(self) -> None:
         if self.rollout is None:
-            self.rollout = Rollout(self.pf, self.params, self.flags, self.engine)
+            self.rollout = Rollout(self.pf, self.params, self.flags, self.engine,
+                                   residency_belief=self.residency_belief)
+        elif self.residency_belief is not None and self.rollout.residency_belief is None:
+            self.rollout.residency_belief = self.residency_belief
         if self.tables is None:
             self.tables = GhatTables(pf=self.pf)
         if self.sh_trigger is None:
@@ -462,7 +467,8 @@ class Coordinator:
             else:
                 pred = pool.predict_loss(prefix_id_for(job.job_id), size, fleet.t)
                 p_loss = pred["p_loss"]
-            ph = self.params.p_host_for(store.host if store is not None else None,
+            src = (self.residency_belief if self.residency_belief is not None else self.params)
+            ph = src.p_host_for(store.host if store is not None else None,
                                         int(round(p_loss * size)),
                                         prefix_id=prefix_id_for(job.job_id), t=fleet.t)
             rw = expected_remaining_work(probe, self.engine, self.pf, p_loss=p_loss,
@@ -508,7 +514,8 @@ class Coordinator:
                    demand_tokens=demand, competing_tokens=competing, replanned=False)
         if built > 0 and (observed_loss or likely):
             w_reload, w_rebuild = restore_costs_s(built, self.pf)
-            ph = self.params.p_host_for(store.host if store is not None else None,
+            src = (self.residency_belief if self.residency_belief is not None else self.params)
+            ph = src.p_host_for(store.host if store is not None else None,
                                         int(round(max(p_loss, 1.0 if observed_loss else 0.0)
                                                   * built)),
                                         prefix_id=pid, t=fleet.t)

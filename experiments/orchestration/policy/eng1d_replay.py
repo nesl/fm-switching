@@ -77,7 +77,7 @@ def load_trials(split: str = "fit", authorization: str = "") -> Tuple[List[tr.Tr
         if kind in ("pair_check",):
             continue
         mode = row.get("mode")
-        if mode not in ("with", "without"):
+        if mode not in ("with", "without", "repeat"):
             continue
         hold = bool(row.get("holdout"))
         (seen["holdout_pairs"] if hold else seen["pairs"]).add(row.get("pair"))
@@ -116,6 +116,12 @@ def load_trials(split: str = "fit", authorization: str = "") -> Tuple[List[tr.Tr
         "the record flags %d holdout pairs, the split file lists %d"
         % (len(seen["holdout_pairs"]), len(keys)))
     return trials, audit
+
+
+def ceiling_arms(trials: Sequence[tr.Trial]) -> int:
+    """How many trials carry StudyENG1d's independent repeat of the without run, which is what
+    criterion (i-b)'s denominator is computed on (3 per cell on the first FIT trials)."""
+    return sum(1 for t in trials if "repeat" in t.arms)
 
 
 def measured_arrivals(fence: bool = True) -> Dict[Tuple[str, str, int, int], Dict[str, Any]]:

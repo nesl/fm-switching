@@ -355,6 +355,86 @@ transfer rate; the 14 unattributable counters).
   remain unspent. StudyENG1d (H100, loaded-arrival blocking, running at the time of writing) measures the missing
   quantity directly, and the one-shot run waits for it.
 
+## 8A. THE ONE-SHOT RESULT: both holdouts, scored separately (2026-11-17)
+
+**The holdouts are now spent.** On the user's ruling of 2026-11-17 the registered one-shot ran once per source
+against the frozen **pol4** model, through `t0_harness.T0Harness.run_holdout_once`, which re-verified all 12 frozen
+md5s (0 changed), appended a log line to `t0b_one_shot.log` and will refuse a second run. The amended row was
+frozen BEFORE either holdout was read: md5 **`927813b86a3c9b618b915e232ce44671`** at **2026-11-17T19:06:23Z**.
+
+| source | n | criterion | ceiling | model | (i-b) ratio | bar | verdict |
+|---|---|---|---|---|---|---|---|
+| **ENG1c Part D HOLDOUT** | 120 pairs | (i-b), latency, PRIMARY | 0.8889 | 0.5417 | **0.6094** | 0.90 | **FAIL** |
+| ENG1c Part D HOLDOUT | 120 | (i-b), TTFT, secondary | 0.9167 | 0.6000 | 0.6545 | 0.90 | FAIL |
+| **ENG1d HOLDOUT** | 60 pairs | (i-b), latency, PRIMARY | 1.0000 | 0.8167 | **0.8167** | 0.90 | **FAIL** |
+| ENG1d HOLDOUT | 60 | (i-b), TTFT, secondary | 0.9722 | 0.8833 | **0.9086** | 0.90 | **PASS** |
+
+| source | (ii) ranking | (iii) completion, median ARE | (iv) |
+|---|---|---|---|
+| ENG1c Part D HOLDOUT | **0.9500 PASS** | **0.0429 PASS** | not applicable on this data |
+| ENG1d HOLDOUT | **1.0000 PASS** | **0.0744 PASS** | not applicable on this data |
+
+(iv) is not scorable on either held-out set, since neither is an ENG1b-style prefix-loss collection; StudyT0's
+registered 0.9718 stands, as the amendment says.
+
+**The dry run predicted the holdout closely.** ENG1c FIT gave (i-b) 0.6188 and the holdout gives 0.6094, a
+difference of 0.009; (iii) was 0.0496 on FIT and 0.0429 on the holdout. Nothing about the held-out sample is a
+surprise relative to what was reported before it was read, which is the main thing a one-shot can establish.
+
+### 8A.1 Per cut, with the direction of the error (positive is over-prediction)
+
+StudyENG1c Part D HOLDOUT, primary definition:
+
+| cut | n | pass fraction | measured median | predicted median | median signed | share over-predicted |
+|---|---|---|---|---|---|---|
+| mono11k | 40 | **0.900** | 13.815 | 16.208 | +1.417 | 0.82 |
+| piece2048 | 40 | 0.525 | 5.267 | 7.780 | +2.490 | 0.82 |
+| piece1024 | 40 | **0.200** | 2.804 | 5.290 | +2.349 | 0.90 |
+| load P25 | 60 | 0.600 | 2.674 | 5.046 | +1.355 | 0.82 |
+| load S2 | 60 | 0.483 | 4.297 | 6.591 | +2.296 | 0.88 |
+| cap 27 GiB | 30 | 0.567 | 5.458 | 7.159 | +2.364 | 0.93 |
+| cap 38 GiB | 30 | 0.433 | 5.079 | 7.907 | +2.395 | 0.93 |
+| cap 60 GiB | 30 | 0.600 | 4.884 | 7.077 | +1.797 | 0.97 |
+| cap 256 GiB | 30 | 0.567 | 0.083 | 0.039 | +0.057 | 0.57 |
+
+Pooled: over-predicted in **102 of 120** trials, median signed error **+2.09 s**, and **53 of the 55 failures are
+over-predictions**.
+
+StudyENG1d HOLDOUT, primary definition:
+
+| cut | n | pass fraction | measured median | predicted median | median signed | share over-predicted |
+|---|---|---|---|---|---|---|
+| mono11k | 20 | **1.000** | 26.460 | 29.823 | +1.407 | 0.70 |
+| piece2048 | 20 | 0.900 | 1.289 | 1.719 | +0.051 | 0.55 |
+| piece1024 | 20 | 0.550 | 0.284 | 0.368 | +0.073 | 0.65 |
+| load P25 | 15 | 0.933 | 0.362 | 0.339 | +0.002 | 0.53 |
+| load P40 | 15 | 0.800 | 2.503 | 3.167 | +0.477 | 0.80 |
+| load S2 | 15 | 0.733 | 0.626 | 0.582 | +0.101 | 0.53 |
+| load S4 | 15 | 0.800 | 3.097 | 3.315 | +0.345 | 0.67 |
+
+Pooled: over-predicted in **38 of 60** trials, median signed error **+0.147 s**, 10 of the 11 failures over.
+
+### 8A.2 Interpretation, separate from the result
+
+Three things follow, and the first two are the same thing seen from two sides.
+
+**The model's accuracy depends on the SHAPE of the action, not on the holdout.** On StudyENG1d, where every action
+is a single request, (i-b) reaches 0.8167 on the primary definition and PASSES at 0.9086 on the secondary, and
+mono11k passes 20 of 20. On StudyENG1c, where piece actions are chained rebuilds of 6 or 11 requests, piece1024
+passes 8 of 40. That is StudyPOL5's Part 1 diagnosis arriving intact on held-out data: the residual lives in
+chained rebuilds, and a one-shot on fresh pairs did not move it.
+
+**The bias runs against pieces, which is the useful direction.** Over-prediction dominates (102 of 120 and 38 of
+60) and is largest for the piece actions, so pol4 over-states the harm of a piece-wise rebuild more than that of a
+monolithic one. A live policy that still prefers pieces is therefore not being flattered by its cost model. The
+converse remains open, as StudyPOL5 section 3A records.
+
+**What the model is good enough for, on this evidence.** (ii) and (iii) PASS on both held-out sets: the model ranks
+actions correctly (0.95 and 1.00) and predicts an action's own completion time to 4 to 7 per cent. What it cannot
+be trusted to within the measurement's own repeatability is the SIZE of the delay a chained rebuild imposes on
+others, which is criterion (i-b) and which fails on both. A policy that uses the model to CHOOSE between actions is
+on measured ground; one that uses the predicted delay as an absolute SLO input is not.
+
 ## 9. What comes next: StudyPOL5-engine, on the user's plan of 2026-11-17
 
 Not started, and not to be started until the StudyENG1d report exists and the user says go. Recorded here so the

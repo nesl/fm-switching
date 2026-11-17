@@ -120,12 +120,73 @@ to **1.95**, piece2048 1.66 to **1.88**); on StudyENG1d FIT the two are within 0
 3. The front-end fit (2.1) and the host reconciliation (2.4) stand on their own and can be adopted in a later row
    once something is known about 1 and 2, since neither explains the residual.
 
+## 3A. Interpretation and the ruling of 2026-11-17 (separate from the measurements)
+
+**The ruling: stop iterating the engine model for now. pol4 stays the frozen model and is the one the live policy
+will use.** The rationale is in the shape of the residual rather than its size.
+
+**What the residual's shape buys, and it resolves the D60 caveat.** The over-prediction is concentrated in CHAINED
+piece rebuilds: in-window ratios of **1.62 for piece2048 and 1.83 for piece1024 against 1.13 for mono11k** on
+StudyENG1c Part D FIT. pol4 therefore OVER-STATES the harm a piece-wise rebuild does to other requests more than it
+over-states a monolithic one. The policy's choice between them is made on exactly that comparison, so the bias runs
+AGAINST pieces: any live finding that the policy prefers pieces cannot be an artifact of the cost model, because the
+model is charging pieces too much and the policy prefers them anyway. The D60 caveat, that the piece-versus-monolithic
+preference might be a modelling artifact, is resolved in that direction. The converse does not hold: a live finding
+that the policy prefers MONOLITHIC rebuilds would still be open to the artifact reading, and should be treated that
+way until the residual is closed.
+
+**An untested hypothesis, recorded as such and NOT a finding.** Between consecutive pieces of a chain the next piece
+re-enters the front end (StudyPOL5 section 2.1 measures that window at about 78 ms for a piece1024 body and 140 ms
+for piece2048), and during that gap the engine may serve queued background requests. A model that treats the chain as
+a contiguous occupancy would then over-charge exactly the arrivals that the engine drains in those gaps, which is
+where this study's residual sits. **Nothing here tests it.** It is consistent with the two facts in section 1 (the
+step model is accurate given the engine's own composition, and the defect appears only for chains), but it was not
+measured, and the measurement that would test it is the per-step request membership named in section 3.
+
+## 3B. Part 3, residency integration (done 2026-11-17 on the ruling)
+
+StudyRES1's measured model is now the controller's residency belief, in place of
+`tiers.p_host_from_occupancy` and the assumption it carried (`tiers.EVICTION_RULE_ASSUMPTION`:
+"the host tier's eviction order is modelled as LRU ... StudyENG1c is the measurement that replaces
+this"). StudyENG1c measured it and StudyRES1 tested it at **0.9946** four-class accuracy with no
+GPU-versus-host confusion, so the assumption is retired.
+
+**Wired without touching anything frozen.** `params.py` and `tiers.py` are both named in the
+StudyT0b freeze, so the belief is a new module, `policy/residency_belief.py`, exposing the same
+`p_host_for(host_pool, evicted_tokens, prefix_id, t)` entry point the controller already calls. It
+is reached through an optional `residency_belief` field on `Rollout` and `Coordinator`, which are
+not frozen; **None keeps the old path**, so no existing result moves. All 12 StudyT0b freeze md5s
+verify, and a test asserts both that fact and that the belief is not inside a frozen file.
+
+**Which rule.** `residency.ResidencyModel(policy="rule")`, the RES1 rule as implemented, per the
+ruling. RES1's R2 found LRU-by-any-access statistically indistinguishable from it (2 differing
+predictions in 2,573), and that policy remains selectable behind the same flag.
+
+**The boundary rule, and the margin's sources.** A history whose tokens written since its last
+refresh are within a margin of the host cap is treated as POSSIBLY COLD: the belief returns a
+SPLIT (`p_host` falling linearly from 1 to 0 across the margin) rather than a point prediction,
+with `boundary: true`, `measured: false` and the reason in `basis`. The margin is
+**(3,064 + 816) / 245,760 = 1.58 % of the cap**, which is **3,880 tokens at 60 GiB** and scales
+with the cap rather than being a constant:
+
+| component | tokens | source |
+|---|---|---|
+| RES1's median cumulative write-accounting error | 3,064 (1.37 % of the 245,760-token cap at 60 GiB) | `reports/study_res1_residency.md` section 3.2 |
+| of which block rounding, kept in the margin because the fix is untested | 816 | same section |
+
+RES1 measured that inside this band a 1.37 % accounting error becomes a **0.29** error in the
+surviving fraction, which is exactly why a point prediction is the wrong output there.
+
+**The block-rounding fix, disclosed.** The engine caches whole 16-token blocks and does not store
+a trailing partial block; RES1's model charged the ceiling. `blocks_written` charges the floor.
+**StudyRES1 was NOT re-scored on its TEST set with this fix**, which would be fitting on TEST; it
+is recorded as pre-registerable for a later row, and until it is tested its 816 tokens stay inside
+the margin.
+
 ## 4. What was NOT done, and why
 
-- **Part 3 (residency integration) was not started.** The regression stop fired in Part 2 and the brief says to
-  stop and report. Part 3 does not depend on the engine model, so it can be done next on its own; the margin it
-  needs is available (StudyRES1's median accounting error of 3,064 tokens, 1.37 % of the 245,760-token cap at
-  60 GiB, of which 816 tokens is block rounding).
+- **Part 3 (residency integration) was not started when this report was first written**, because the regression
+  stop fired in Part 2. It was then done on the user's ruling of 2026-11-17 and is section 3B.
 - **Part 4's freeze and the StudyT0b row amendment were not done**, because freezing a model that regresses on FIT
   would put the regression into the next one-shot test.
 - **The serving model was left untouched.** During Part 2 the flag lived in `eng1_engine.py`; when the gate fired
@@ -147,4 +208,7 @@ to **1.95**, piece2048 1.66 to **1.88**); on StudyENG1d FIT the two are within 0
 | `experiments/orchestration/policy/eng1_engine.py` | UNCHANGED, byte-identical to the committed version, so the StudyT0b freeze still verifies. The pol5 work was developed in it, measured, and then taken back out when the regression gate fired |
 | `results/orchestration/study_pol5/pol5_terms.json` | the fitted terms, both rejections, and the fit sets |
 | `results/orchestration/study_pol5/pol5_diagnosis.json` | every number in section 1.2 and the bin counts |
+| `experiments/orchestration/policy/residency_belief.py` | NEW, Part 3. The belief, the boundary rule and its margin, and the disclosed block-rounding fix |
+| `experiments/orchestration/policy/{rollout,coordinator}.py` | the optional `residency_belief` field; None keeps the pre-POL5 path |
+| `experiments/orchestration/policy/tests/test_residency_belief.py` | NEW, Part 3. 17 tests: the margin's sources, the boundary split, the rounding fix, the drop-in shape and the frozen-file check |
 | `reports/study_pol4_engine.md` | the erratum in section 2A.6: StudyPOL4's rho values are biased low by its denominator, and its reading 2 is withdrawn |

@@ -714,7 +714,10 @@ def evaluate(trials: Sequence[tr.Trial], sim: EngineSim, metric: str) -> Dict[st
         pc = pr["predicted_completion_s"]
         rows.append(dict(
             key=t.key(), load=t.load, action=t.action, trial=t.trial, cell=t.cell(),
-            cap=t.load.split("_", 1)[0], bg_load=t.load.split("_", 1)[1],
+            # StudyENG1c encodes the cap in the condition ("27_P25"); StudyENG1d has no host
+            # tier and its condition is the load alone ("P25"), so the cap is absent there.
+            cap=(t.load.split("_", 1)[0] if "_" in t.load else None),
+            bg_load=(t.load.split("_", 1)[1] if "_" in t.load else t.load),
             reconstructible=bool(m and m["n_matched"] > 0),
             n_matched_measured=(m["n_matched"] if m else 0), n_matched_predicted=pr["n_matched"],
             measured_delay_s=(m["total_s"] if m else None),
