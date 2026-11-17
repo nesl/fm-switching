@@ -1,0 +1,155 @@
+{
+ "_provenance": {
+  "data": "StudyENG1c Part D FIT pairs only (240 pairs in the record, 360 trials built)",
+  "derived": "DERIVED and FIT. Per-request step membership is not recorded by StudyENG1c; every per-piece engine time here is derived by StudyENG1d's attribution method (first scheduled time = client first-token time minus the plugin's prefill_time; prefill end = the last step row at or before the client first-token time). StudyENG1e-chain measures the membership directly. All pairs are StudyENG1c Part D FIT pairs; no HOLDOUT pair is read.",
+  "script": "diagnose_pol6_gap.py",
+  "source": "results/orchestration/study_pol6/pol6_partA_gap.json"
+ },
+ "awaiting_eng1e": {
+  "encoder_budget_per_step": "Whether the extra step per piece is forced by an encoder or multimodal input budget rather than the token budget. Part A cannot separate the two.",
+  "in_step_merge_rule": "Whether, and under what admission condition, a background prefill joins a step a piece is already prefilling in. Part A shows the engine does co-schedule (median 3,780 and 3,402 other prefill tokens inside the pieces' own steps, max ctx_req 2), but the per-step composition is DERIVED by subtraction, not measured per request.",
+  "step_granularity_tokens_per_step": "How many NEW tokens of a multimodal piece the engine actually puts in one step. Part A derives 1.75 steps per piece for piece1024 and 1.92 for piece2048 against pol4's 1.0, but the derivation cannot say WHICH tokens went in which step. StudyENG1e's per-step request membership measures it."
+ },
+ "coef": {},
+ "coef_note": "EMPTY BY DESIGN. Part A fitted nothing. pol6's only active numbers are StudyPOL5's already-fitted front-end coefficients, which pol6 loads from pol5_terms.json by reference rather than copying, so there is one source for them.",
+ "flags": {
+  "in_step_merge": {
+   "default": false,
+   "why_off": "no measured parameter yet; awaiting StudyENG1e"
+  },
+  "piece_gap_scheduling": {
+   "default": false,
+   "why_off": "Part A pre-check: pol4 ALREADY reproduces most of the measured inter-piece gap (0.284 s of 0.513 s for piece1024, 0.217 s of 0.312 s for piece2048) and already schedules background requests inside its own simulated gaps, so turning this on cannot account for the over-prediction. See partA_verdict."
+  },
+  "step_granularity": {
+   "default": false,
+   "why_off": "no measured parameter yet; awaiting StudyENG1e"
+  }
+ },
+ "holdout_exclusion": "StudyENG1 Part C HOLDOUT, StudyENG1c Part D HOLDOUT, StudyENG1d HOLDOUT and StudyENG1e HOLDOUT are all excluded by the loaders and none was read. StudyENG1c Part D's HOLDOUT was spent once by StudyT0b's one-shot and is not read again.",
+ "holdout_trials_used": 0,
+ "inherits": {
+  "coefficients": [
+   "front_end_fixed_ms",
+   "front_end_per_mb_ms",
+   "front_end_per_image_ms",
+   "front_end_busy_factor"
+  ],
+  "from": "results/orchestration/study_pol5/pol5_terms.json",
+  "why": "StudyPOL5 section 2 fitted the image-aware front end on 58,085 idle and 12,261 busy measured windows from StudyENG1d FIT and StudyENG1 Part C FIT rows, R^2 0.985. The brief authorises its use for the piece gap representation."
+ },
+ "model": "pol6 (NOT adopted, NOT frozen; pol4 remains the frozen and default model)",
+ "partA_verdict": {
+  "but_pol4_already_has_them": {
+   "pol4_places_more_background_in_gaps_than_measured": true,
+   "reading": "pol4 prices a front-end window per request from body size, so its own simulation already contains inter-piece gaps and already schedules background work inside them. It does not treat the chain as contiguous."
+  },
+  "gaps_are_real": {
+   "client_turnaround_s_median": 0.0006,
+   "engine_tail_s_median": 0.00291,
+   "frontend_window_s_median": 0.04236,
+   "gap_s_iqr": [
+    0.03274,
+    0.07366
+   ],
+   "gap_s_median": 0.0457,
+   "n_gaps": 1235,
+   "n_gaps_with_any_step": 841,
+   "n_gaps_with_other_work": 841,
+   "reading": "the gap is real and is almost entirely the NEXT piece's front-end window; every gap that contains a step boundary at all carries other work, so the engine does serve background requests in the gaps"
+  },
+  "hypothesis": "H-gap: a model that treats a chain as contiguous occupancy over-charges background requests for blocking that did not happen in the inter-piece gaps.",
+  "leading_alternative": {
+   "fit_evidence_piece1024": {
+    "gap_attributable_share_ttft_median": 0.07696,
+    "imposed_delay_ratio_latency_median": 1.82662,
+    "imposed_delay_ratio_ttft_median": 1.91713,
+    "max_ctx_req_in_piece_steps_median": 2,
+    "measured_chain_span_s_median": 3.3318,
+    "measured_gap_total_s_median": 0.51267,
+    "n_piece_steps_median": 20,
+    "n_piece_steps_sharing_median": 17,
+    "n_trials": 79,
+    "other_prefill_tokens_in_piece_steps_median": 3780,
+    "piece_step_duration_measured_median_s": 0.15686,
+    "piece_step_duration_pol4_median_s": 0.27069,
+    "pol4_chain_span_s_median": 3.31819,
+    "pol4_gap_total_s_median": 0.28402,
+    "steps_per_piece_measured_median": 1.75,
+    "steps_per_piece_pol4_median": 1.0
+   },
+   "fit_evidence_piece2048": {
+    "gap_attributable_share_ttft_median": 0.03655,
+    "imposed_delay_ratio_latency_median": 1.59324,
+    "imposed_delay_ratio_ttft_median": 1.69442,
+    "max_ctx_req_in_piece_steps_median": 2.0,
+    "measured_chain_span_s_median": 2.92531,
+    "measured_gap_total_s_median": 0.3122,
+    "n_piece_steps_median": 11.5,
+    "n_piece_steps_sharing_median": 10.5,
+    "n_trials": 82,
+    "other_prefill_tokens_in_piece_steps_median": 3402.0,
+    "piece_step_duration_measured_median_s": 0.16979,
+    "piece_step_duration_pol4_median_s": 0.47919,
+    "pol4_chain_span_s_median": 2.94579,
+    "pol4_gap_total_s_median": 0.21709,
+    "steps_per_piece_measured_median": 1.91667,
+    "steps_per_piece_pol4_median": 1.0
+   },
+   "name": "H-granularity with H-merge",
+   "negative_control_mono11k": {
+    "imposed_delay_ratio_latency_median": 1.12581,
+    "imposed_delay_ratio_ttft_median": 1.12549,
+    "max_ctx_req_in_piece_steps_median": 1.0,
+    "measured_gap_total_s_median": 0.0,
+    "n_trials": 120,
+    "other_prefill_tokens_in_piece_steps_median": 0.0,
+    "reading": "a monolithic 11k rebuild exceeds the step budget, so it runs ALONE (zero other prefill tokens in its steps, max ctx_req 1) and pol4 gets its step count right (2.0 against 2.0). Its over-prediction ratio is 1.13, the smallest of the three actions. The mechanism that is absent for mono is exactly the one Part A names for the pieces.",
+    "steps_per_piece_measured_median": 2.0,
+    "steps_per_piece_pol4_median": 2.0
+   },
+   "statement": "pol4 gets a chain's total wall-clock span right and its step structure wrong. It models a piece as ONE long step; the engine really spreads a piece over about 1.8 shorter steps and co-batches background prefill into them. A background request arriving mid-prefill therefore waits in pol4 for the end of one long step instead of the end of one short step, and can never be merged into the piece's own step.",
+   "what_would_settle_it": "StudyENG1e's per-step request membership: it names which requests were in each step, so the step count per piece and the merge rule are measured rather than derived by subtraction."
+  },
+  "verdict": "CONTRADICTED on StudyENG1c Part D FIT as an explanation of the over-prediction",
+  "where_the_over_prediction_is": {
+   "by_position_of_the_background_first_token": {
+    "busy": {
+     "err_with_s": 265.1119,
+     "err_without_s": -5.3499,
+     "measured_delta_s": 288.5237,
+     "n": 1468.0,
+     "over_s": 270.4618,
+     "predicted_delta_s": 558.9855
+    },
+    "gap": {
+     "err_with_s": 29.4381,
+     "err_without_s": -1.9069,
+     "measured_delta_s": 113.8653,
+     "n": 374.0,
+     "over_s": 31.3451,
+     "predicted_delta_s": 145.2103
+    },
+    "post_chain": {
+     "err_with_s": -5.8421,
+     "err_without_s": -7.8576,
+     "measured_delta_s": 31.4077,
+     "n": 2306.0,
+     "over_s": 2.0155,
+     "predicted_delta_s": 33.4232
+    },
+    "pre_chain": {
+     "err_with_s": -6.4481,
+     "err_without_s": -6.5262,
+     "measured_delta_s": -0.1177,
+     "n": 2073.0,
+     "over_s": 0.0781,
+     "predicted_delta_s": -0.0396
+    }
+   },
+   "reading": "89 % of the over-prediction (270.5 s of 303.9 s) is carried by background requests whose first token lands while the engine IS prefilling a piece, not in a gap (31.3 s, 10 %). The error is in the with-arm prediction (+265.1 s) and not the without-arm (-5.4 s).",
+   "unit": "TTFT-sum seconds, summed over all 161 chained FIT trials"
+  }
+ },
+ "study": "StudyPOL6-chain Part A"
+}
