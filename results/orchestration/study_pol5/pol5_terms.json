@@ -1,0 +1,141 @@
+{
+ "study": "StudyPOL5-engine",
+ "holdout_trials_used": 0,
+ "holdout_exclusion": "StudyENG1 Part C HOLDOUT, StudyENG1c Part D HOLDOUT and StudyENG1d HOLDOUT are all excluded by the loaders and none was read",
+ "coef": {
+  "host_kv_bytes_per_token": 262144.0,
+  "host_kv_transfer_gb_per_s": 50.137676069293306,
+  "host_kv_lookup_fixed_ms": 0.8845,
+  "long_prefill_scale_intercept": 0.7891186909894499,
+  "long_prefill_scale_per_1k_tokens": 0.009228028622738832,
+  "batch_prefill_gain_exponent": 0.1,
+  "front_end_fixed_ms": 24.095763891978155,
+  "front_end_per_mb_ms": 4.158308864017968,
+  "front_end_per_image_ms": 3.098618301256414,
+  "front_end_busy_factor": 1.0698770790589804,
+  "host_kv_transfer_gb_per_s_capped": 44.693876767775194,
+  "host_kv_reload_overhead_ms_capped": 53.26849999999996,
+  "async_schedule_lag_steps": 0.0,
+  "serial_prefill_admission": 0.0
+ },
+ "front_end": {
+  "coef": {
+   "front_end_fixed_ms": 24.095763891978155,
+   "front_end_per_mb_ms": 4.158308864017968,
+   "front_end_per_image_ms": 3.098618301256414,
+   "front_end_busy_factor": 1.0698770790589804
+  },
+  "n_idle": 58085,
+  "n_busy": 12261,
+  "r2_idle": 0.985146376281579,
+  "busy_factor_n": 12261,
+  "by_class": {
+   "episodic": {
+    "n": 68325,
+    "measured_median_ms": 38.97595405578613,
+    "predicted_median_ms": 38.42717736586338,
+    "body_mb_median": 0.4658,
+    "images_median": 4
+   },
+   "inject": {
+    "n": 796,
+    "measured_median_ms": 80.71756362915039,
+    "predicted_median_ms": 44.54368832518084,
+    "body_mb_median": 1.1657,
+    "images_median": 5.0
+   },
+   "build": {
+    "n": 1225,
+    "measured_median_ms": 534.7111225128174,
+    "predicted_median_ms": 505.1990895552072,
+    "body_mb_median": 26.0632,
+    "images_median": 122
+   }
+  },
+  "fit_data": "per-request front-end windows (client submit to engine hand-off) from StudyENG1d FIT rows and StudyENG1 Part C FIT rows; no holdout row is read. The idle rows fit the three coefficients and the busy rows give the factor.",
+  "note": "StudyPOL4's model had body size only (29.6 ms + 20.2 ms per MB, busy 6.9 + 17.7), which under-prices a many-image body: StudyENG1d measures 0.554 s for a 124-image 22.8 MB action against 0.489 s from that formula."
+ },
+ "host_kv_transfer": {
+  "reload_overhead": {
+   "n_resident": 10,
+   "resident_ttft_median_s": 0.662355,
+   "n_host_loads": 96,
+   "overhead_ms_median": 53.26849999999996,
+   "overhead_ms_p10": -55.429000000000016,
+   "overhead_ms_p90": 1237.318,
+   "fit_data": "StudyENG1c Part B non-holdout resumes: host-load TTFT minus the resident median minus the counter's own transfer time",
+   "caveat": "the spread is wide (p10 to p90 spans a second) because the host-load resumes include partial loads at the capacity boundary; the median is the estimate and the spread is reported rather than hidden"
+  },
+  "eng1c_capped_host": {
+   "n": 96,
+   "gb_per_s_median": 44.693876767775194,
+   "gb_per_s_p10": 36.51575263595632,
+   "gb_per_s_p90": 55.328427325758646,
+   "bytes_median": 2722103296.0,
+   "seconds_median": 0.058272500000000005,
+   "by_cap": {
+    "38": {
+     "n": 40,
+     "gb_per_s": 44.91146445054899
+    },
+    "60": {
+     "n": 36,
+     "gb_per_s": 44.46943621108077
+    },
+    "256": {
+     "n": 20,
+     "gb_per_s": 45.13671469564352
+    }
+   },
+   "fit_data": "StudyENG1c Part B resume windows (non-holdout), per-resume kv_offload_load bytes and seconds"
+  },
+  "eng1c_part_d_runs": {
+   "n": 104,
+   "gb_per_s_median": 48.9430102689499,
+   "fit_data": "StudyENG1c Part D FIT run windows (non-holdout)"
+  },
+  "pol4_eng1_part_d": {
+   "gb_per_s": 50.137676069293306,
+   "fit_data": "StudyPOL4 term (a), fitted on StudyENG1 Part D with a roomy host tier"
+  },
+  "applies_to": "The roomy-tier rate applies where the host tier is far from full and nothing else is being written through it, which is StudyENG1 Part D and StudyENG1b. The capped rate applies where the host tier is at its cap and write-through eviction runs with every load, which is StudyENG1c and anything the policy schedules under a host cap. pol5 uses the capped rate by default because a policy that manages placement runs in the capped regime by construction."
+ },
+ "serial_prefill_admission": {
+  "coef_name": "serial_prefill_admission",
+  "value": 0.0,
+  "status": "TESTED ON FIT AND REJECTED",
+  "rejection": "one prefill per step raised the piece1024 imposed-delay ratio from 1.74 to 3.25 and mono11k from 1.12 to 1.68 on StudyENG1c Part D FIT. The step-log field the rule was inferred from, `it[1]`, is not a prefill count (it reads 1 on steps that ENG1d shows carrying several prefills), so the inference was unsound as well as wrong",
+  "kind": "STRUCTURAL RULE, not a fitted number",
+  "evidence": "StudyPOL5 Part 1, measured inside the action window of StudyENG1c Part D FIT at cap 27 GiB: the ENGINE's median requests per step is 1.0 for all three actions and it runs 27 steps where pol4 runs 13.5 (piece1024) and 16 where pol4 runs 7 (piece2048), over the same prefill tokens. The step model is accurate on the engine's own composition (ratio 0.85 to 0.97), so the error is which requests share a step, not what a step costs. StudyENG1d section 6 measured the same rule from the other side: an action's token share of 1.000 and 0 of 248 in-window arrivals joining a piece's step."
+ },
+ "async_scheduling": {
+  "coef_name": "async_schedule_lag_steps",
+  "value": 0.0,
+  "status": "TESTED ON FIT AND REJECTED",
+  "rejection": "the one-step lag alone raised the piece1024 imposed-delay ratio from 1.74 to 2.42 on StudyENG1c Part D FIT, because it delayed eligibility without preventing the merge; it is recorded here at 0 so the attempt and its result stay on the record",
+  "kind": "STRUCTURAL RULE, not a fitted number",
+  "evidence": "StudyENG1d section 6: asynchronous scheduling prepares the next step while the current one runs, so a request handed over during a step cannot join it. Measured: 0 of 248 in-window arrivals joined a piece's step, and a mono11k second chunk carries only requests that were already waiting when it was scheduled. StudyPOL5 Part 1 found that pol4 merges background prefills into the action's own step in 54 to 66 per cent of piece steps on StudyENG1c Part D, and that 513 of 513 such merges involved a request handed over AFTER the previous step had started, which is exactly what this rule forbids."
+ },
+ "inherited_from_pol4": {
+  "path": "results/orchestration/study_pol4/pol4_terms.json",
+  "terms": [
+   "host_kv_bytes_per_token",
+   "host_kv_transfer_gb_per_s",
+   "host_kv_lookup_fixed_ms",
+   "long_prefill_scale_intercept",
+   "long_prefill_scale_per_1k_tokens",
+   "batch_prefill_gain_exponent"
+  ]
+ },
+ "label": "StudyENG1d FIT informed the front-end fit and the scheduling rule, so any score on StudyENG1d FIT is IN-SAMPLE for those. StudyENG1c Part D FIT informed the host rate and the Part 1 diagnosis.",
+ "_provenance": {
+  "git_commit": "68567d014a5f4c7e60ec1b85dfb71e34759ea205",
+  "script": "policy/fit_pol5_terms.py",
+  "model": null,
+  "timestamp": "2026-11-17T10:44:49.503480",
+  "n": 70346,
+  "args": {
+   "out_dir": null
+  }
+ }
+}

@@ -487,6 +487,30 @@ Two readings, both worth recording and neither acted on:
 2. **Behind the short actions, blocking is well below 1** (0.49 to 0.70), consistent with an
    arrival joining the running batch rather than waiting it out.
 
+**ERRATUM (StudyPOL5-engine, 2026-11-17): reading 2 is WITHDRAWN and the rho values here are
+biased low.** StudyENG1d measured loaded-arrival blocking directly on fresh traces and found
+rho_b = 0.82 to 1.44 behind piece actions, with **0 of 248 in-window arrivals joining a piece's
+step**, against the 0.49 to 0.70 and the "joins the running batch" reading above. Reading 1 (that
+blocking behind a monolithic prefill exceeds the action's own remaining work) is CONFIRMED:
+StudyENG1d measures rho_b 1.17 to 1.43 for mono11k, rising with load.
+
+**The cause of the bias is identified.** This section's rho divides by the time from the arrival
+to the action's FIRST TOKEN, measured from the action's SUBMISSION, so its denominator includes
+the action's front-end window: the 0.66 to 0.71 s that StudyENG1d measures for mono11k under load,
+0.16 to 0.19 s for piece2048 and about 0.10 s for piece1024. An arrival inside that window is
+charged a denominator it never waited on the engine for, which pushes rho down, and it pushes it
+down hardest for the short actions, where the front-end window is the largest share of the span.
+StudyENG1d's rho_b divides by the time from the arrival to the end of the action's last prefill
+STEP, measured from SCHEDULING, which excludes that window. Applying this section's own definition
+to StudyENG1d's data gives mono11k 1.262, piece2048 1.084 and piece1024 0.839 (StudyENG1d section
+8), which reproduces the direction and the ordering of the numbers above and confirms that the
+definition, not the engine, is what differs. The remaining gap is consistent with this section
+pooling W25, the lightest load.
+
+**What stands.** The table's ordering across actions is right, its use (reported, not modelled) was
+right, and the decision not to fit a blocking coefficient to these FIT trials was right. The
+absolute values should be read as a lower bound, and StudyENG1d's rho_b is the measurement.
+
 **Nothing here enters the model.** These numbers come from the same FIT trials criterion (i) is
 scored on, so fitting a blocking coefficient to them and re-scoring would be circular. StudyENG1d,
 a loaded-arrival measurement on the H100 after StudyENG1c, is the way to pin it; the user has
