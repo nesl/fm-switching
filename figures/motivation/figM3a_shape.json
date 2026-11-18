@@ -1,0 +1,74 @@
+{
+  "figure": "M3a",
+  "message": "Rebuilding a cold history as small pieces instead of one request cuts the delay it imposes on others several-fold, for about one extra second of the job's own TTFT.",
+  "subset": "StudyENG1c Part D, cold-tier arrivals, capped (host-full) servers 27/38/60 GiB, both loads",
+  "error_bars": "95% bootstrap CI of the median, 2000 resamples seed 0, unit = trial",
+  "points": {
+    "mono": {
+      "n": 65,
+      "job_ttft_median_s": 2.251,
+      "imposed_median_s": 14.177,
+      "ttft_ci": [
+        2.241,
+        2.258
+      ],
+      "imposed_ci": [
+        13.579,
+        14.604
+      ]
+    },
+    "piece2048": {
+      "n": 72,
+      "job_ttft_median_s": 2.963,
+      "imposed_median_s": 5.742,
+      "ttft_ci": [
+        2.933,
+        2.993
+      ],
+      "imposed_ci": [
+        5.321,
+        6.158
+      ]
+    },
+    "piece1024": {
+      "n": 70,
+      "job_ttft_median_s": 3.354,
+      "imposed_median_s": 3.096,
+      "ttft_ci": [
+        3.303,
+        3.383
+      ],
+      "imposed_ci": [
+        3.004,
+        3.197
+      ]
+    }
+  },
+  "reduction_factor_mono_over_1024": 4.58,
+  "ttft_cost_mono_to_1024_s": 1.103,
+  "report": "reports/study_eng1c_hostfull.md section 6, verdict D, implication 5",
+  "report_values": {
+    "cold_job_ttft_mono": "2.24-2.32",
+    "cold_job_ttft_2048": "2.8-3.0",
+    "cold_job_ttft_1024": "3.3-3.4",
+    "cold_imposed_mono": "14.0-16.5",
+    "cold_imposed_2048": "3.8-6.2",
+    "cold_imposed_1024": "2.9-3.6",
+    "reduction_factor": "4 to 5x",
+    "ttft_cost": "+0.7 to +1.1 s"
+  },
+  "checks": {
+    "mono_ttft_in_range": true,
+    "piece2048_ttft_in_range": true,
+    "piece1024_ttft_in_range": true,
+    "mono_imp_in_range": true,
+    "piece2048_imp_in_range": true,
+    "piece1024_imp_in_range": true,
+    "reduction_in_4to5": true,
+    "ttft_cost_in_range": true
+  },
+  "outputs": {
+    "pdf": "/home/nesl/fm-switching/figures/motivation/figM3a_shape.pdf",
+    "png": "/home/nesl/fm-switching/figures/motivation/figM3a_shape.png"
+  }
+}

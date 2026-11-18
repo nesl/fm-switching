@@ -1,0 +1,106 @@
+{
+  "figure": "M4",
+  "message": "A host- or disk-warm restore is far cheaper than a cold rebuild and imposes almost nothing on others, but concurrent disk restores serialize on disk bandwidth.",
+  "source_file": "results/cost/study_eng1f/eng1f_results.json (Parts 1-3, FIT only)",
+  "report": "reports/study_eng1f_disk.md sections 5 (Part 1), 6 (Part 2), 7 (Part 3)",
+  "panel_a_restore_ttft_11k_s": {
+    "cold": {
+      "median": 2.6866,
+      "p10": 2.6499,
+      "p90": 2.7822
+    },
+    "host": {
+      "median": 0.2026,
+      "p10": 0.1778,
+      "p90": 0.2161
+    },
+    "disk": {
+      "median": 1.1489,
+      "p10": 1.1231,
+      "p90": 1.213
+    }
+  },
+  "panel_a_report": {
+    "cold": 2.687,
+    "host": 0.203,
+    "disk": 1.149
+  },
+  "panel_b_imposed_P40_s": {
+    "cold": {
+      "median": 36.54,
+      "p10": 19.7496,
+      "p90": 57.2208,
+      "ci95": [
+        21.9595,
+        46.1125
+      ]
+    },
+    "host": {
+      "median": 0.1382,
+      "p10": -0.0382,
+      "p90": 0.4891,
+      "ci95": [
+        0.0374,
+        0.2294
+      ]
+    },
+    "disk": {
+      "median": 0.1039,
+      "p10": -0.0457,
+      "p90": 0.2875,
+      "ci95": [
+        -0.0181,
+        0.204
+      ]
+    }
+  },
+  "panel_b_report": {
+    "cold": 36.54,
+    "host": 0.14,
+    "disk": 0.1
+  },
+  "panel_c_per_load_ttft_s": {
+    "k1": {
+      "median": 1.121,
+      "p10": 1.1005,
+      "p90": 1.2051
+    },
+    "k2": {
+      "median": 1.8584,
+      "p10": 1.7995,
+      "p90": 1.9233
+    },
+    "k4": {
+      "median": 3.5299,
+      "p10": 3.2547,
+      "p90": 3.6344
+    }
+  },
+  "panel_c_report": {
+    "k1": 1.121,
+    "k2": 1.858,
+    "k4": 3.53,
+    "cold_solo_dashed": 2.687
+  },
+  "annotations": {
+    "restore_11k_disk_over_cold_frac": 0.43,
+    "restore_11k_disk_over_cold_report": 0.43,
+    "imposed_cold_over_disk": 352.0
+  },
+  "checks": {
+    "a_cold": 0.9999,
+    "a_host": 0.998,
+    "a_disk": 0.9999,
+    "b_cold": 1.0,
+    "b_host": 0.9871,
+    "b_disk": 1.039,
+    "c_k1": 1.0,
+    "c_k2": 1.0002,
+    "c_k4": 1.0,
+    "c_dashed": 0.9999
+  },
+  "outputs": {
+    "pdf": "/home/nesl/fm-switching/figures/motivation/figM4_tiers.pdf",
+    "png": "/home/nesl/fm-switching/figures/motivation/figM4_tiers.png"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "figure": "M3b",
+  "message": "A one-go rebuild holds the engine for one long span; a chained rebuild runs each piece in a single step and leaves real gaps between pieces, in which the engine serves queued background requests.",
+  "selection_rule": "mode A, load P40; the trial whose latency-sum imposed delay is closest to the cell median",
+  "mono": {
+    "trial": 4,
+    "n_steps_drawn": 11,
+    "span_s": 3.511,
+    "n_inject": 1
+  },
+  "chain1024": {
+    "trial": 2,
+    "n_steps_drawn": 41,
+    "span_s": 4.485,
+    "n_pieces": 12,
+    "steps_per_piece_median": 1.0
+  },
+  "inter_piece_gap": {
+    "n_gaps": 11,
+    "median_gap_s": 0.158,
+    "annotated_gap_ms": 158.4
+  },
+  "report": "reports/study_eng1e_chain.md sections 5, 6 (1 step per piece), 7 (gap A chain1024 P40 median 0.173 s)",
+  "report_values": {
+    "steps_per_piece": 1,
+    "chain1024_P40_gap_median_s": 0.173,
+    "mono_steps": 2
+  },
+  "checks": {
+    "mono_steps_per_piece_is_2": true,
+    "chain_steps_per_piece_median_is_1": true,
+    "gap_median_near_report_0p173": true,
+    "n_pieces_chain1024": 12
+  },
+  "outputs": {
+    "pdf": "/home/nesl/fm-switching/figures/motivation/figM3b_pieces.pdf",
+    "png": "/home/nesl/fm-switching/figures/motivation/figM3b_pieces.png"
+  }
+}

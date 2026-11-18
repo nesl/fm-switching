@@ -1,0 +1,78 @@
+{
+  "figure": "M1",
+  "message": "The cloud helps most when the evidence has fallen out of the device's recent window; on the monitoring task the cloud tier is also more accurate.",
+  "panel_a": {
+    "source_file": "results/sember/study_r1/study_r1_requests_h100nvl.jsonl.gz (K1=32B-I RICH), results/sember/study_o/study_o_q4_trials_fa2.jsonl (4B-I RECENT)",
+    "split": "StudyR1 evidence_covered from the RECENT construction; outside=False (misses), inside=True (covers)",
+    "error_bars": "95% bootstrap CI, 2000 resamples seed 0, unit = question",
+    "values": {
+      "Evidence outside window": {
+        "n_questions": 97,
+        "device_4B_RECENT_acc_pct": 20.6,
+        "cloud_32B_RICH_acc_pct": 42.3,
+        "gain_pp": 21.699999999999996
+      },
+      "Evidence inside window": {
+        "n_questions": 748,
+        "device_4B_RECENT_acc_pct": 34.4,
+        "cloud_32B_RICH_acc_pct": 39.2,
+        "gain_pp": 4.800000000000004
+      }
+    },
+    "report": "reports/study_r1_cloud32b_sember.md Accuracy table",
+    "report_values": {
+      "cloud_32B_RICH_misses_pct": 42.3,
+      "cloud_32B_RICH_covers_pct": 39.2,
+      "device_4B_RECENT_misses_pct": 20.6,
+      "device_4B_RECENT_covers_pct": 34.4,
+      "n_misses": 97,
+      "n_covers": 748
+    },
+    "checks": {
+      "cloud_misses_ratio": 1.0,
+      "cloud_covers_ratio": 1.0,
+      "device_misses_ratio": 1.0,
+      "device_covers_ratio": 1.0,
+      "n_misses_match": true,
+      "n_covers_match": true
+    }
+  },
+  "panel_b": {
+    "source_file": "results/dashcam/ctrl1b/ctrl1b_crossfit.json (by_budget 0.2, cross-fitted, all 300 clips held out)",
+    "error_bars": "committed 95% CI, 2000 paired clip resamples seed 0",
+    "device_only_mAP": 0.4776042449177038,
+    "always_cloud_mAP": 0.5675307471627266,
+    "device_only_ci": [
+      0.42763903424116667,
+      0.5554257446830765
+    ],
+    "always_cloud_ci": [
+      0.5077997668160066,
+      0.6489513838289576
+    ],
+    "gap": 0.08992650224502274,
+    "gap_ci": [
+      0.03570350672850983,
+      0.14968930921686388
+    ],
+    "report": "reports/study_ctrl1b_crossfit.md sections 3, 3.1",
+    "report_values": {
+      "device_only": 0.4776,
+      "always_cloud": 0.5675,
+      "gap": 0.0899,
+      "gap_ci": [
+        0.0357,
+        0.1497
+      ]
+    },
+    "checks": {
+      "device_ratio": 1.0,
+      "cloud_ratio": 1.0001,
+      "gap_ratio": 1.0003
+    }
+  },
+  "outputs": {
+    "pdf": "/home/nesl/fm-switching/figures/motivation/figM1_cloud_value.pdf",
+    "png": "/home/nesl/fm-switching/figures/motivation/figM1_cloud_value.png"
+  }
+}

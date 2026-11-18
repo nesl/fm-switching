@@ -1,5 +1,7 @@
 # FM-switching — Project Status
 
+Last updated: 2026-11-18 (later 4) (**StudyFIG1-motivation COMPLETE: paper motivation figures M1-M6 (7 files) built from committed results only, no GPU/model/new measurement; every annotated number cross-checked against its source report (per-figure JSON, all ratios ~1.000). Report `reports/study_fig1_motivation.md`, scripts `plots/motivation/`, outputs `figures/motivation/`.**)
+
 Last updated: 2026-11-18 (later 3) (**StudyMOT1-dayinlife STOPPED AT N SELECTION: at a 0.5 s monitoring cadence even 8 dashcam streams (16 requests/s) exceed the 32B's 15.1 requests/s one-frame peak, so no grid point was >= 99 % on time (N = 8: 11.7 %). A feasible fleet size or cadence is the user's decision. Report reports/study_mot1_dayinlife.md.**)
 
 Last updated: 2026-11-18 (later 2) (**StudyLIVE2-pilot STOPPED AT STEP 1: the first real-server cell (edf, 8 devices) failed the harness lateness requirement (emulator p99 511.6 ms > 50 ms) while passing every other end-to-end check; the request path blocks the single-process emulator loop. Needs a harness fix on flash before the pilot can run. Report reports/study_live2_pilot.md.**)

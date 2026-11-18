@@ -1,0 +1,33 @@
+{
+  "figure": "M6",
+  "message": "On the real robot workload a held history is routinely 10k-30k tokens, so a cold rebuild costs several seconds; keeping it warm is what the paper is about.",
+  "source_file": "results/sember/study_e7/e7_requests_h100nvl.jsonl (StudyE7 Job A, D2, answered real questions: grey=False, infeasible=False)",
+  "n_questions": 839,
+  "median_tokens": 10584,
+  "min_tokens": 511,
+  "max_tokens": 30701,
+  "report": "reports/study_e7_d2_4b.md section 1 (prompt tokens 511-30,701, p50 10,584)",
+  "report_values": {
+    "n": 839,
+    "min": 511,
+    "max": 30701,
+    "p50": 10584
+  },
+  "cold_rebuild_anchors_s": {
+    "11k": 2.6866,
+    "28k": 7.5716
+  },
+  "cold_rebuild_source": "reports/study_eng1f_disk.md section 5 Part 1 (cold recompute 11k 2.687 s, 28k 7.572 s); ENG1 Part B monolithic 11k 2.755 s cross-check",
+  "checks": {
+    "n_ratio": 1.0,
+    "median_ratio": 1.0,
+    "min_match": true,
+    "max_match": true,
+    "cold_11k_ratio": 0.9999,
+    "cold_28k_ratio": 0.9999
+  },
+  "outputs": {
+    "pdf": "/home/nesl/fm-switching/figures/motivation/figM6_workload.pdf",
+    "png": "/home/nesl/fm-switching/figures/motivation/figM6_workload.png"
+  }
+}

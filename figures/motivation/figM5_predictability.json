@@ -1,0 +1,48 @@
+{
+  "figure": "M5",
+  "message": "The cost model tracks the measured imposed delay and ranks actions correctly, but systematically over-predicts the delay of chained piece rebuilds (points above y=x).",
+  "n_points": 180,
+  "category_counts": {
+    "onego": 46,
+    "warm": 38,
+    "pieces": 96
+  },
+  "floor_s": 0.02,
+  "floor_note": "warm / near-zero (and the few negative) delays clamped to the log-axis floor",
+  "sources": [
+    "results/orchestration/study_t0b/t0b_holdout_eng1c.json (120 pairs)",
+    "results/orchestration/study_t0b/t0b_holdout_eng1d.json (60 pairs)"
+  ],
+  "ranking_agreement": {
+    "ENG1c": "19/20",
+    "ENG1d": "12/12",
+    "ENG1c_fraction": 0.95,
+    "ENG1d_fraction": 1.0
+  },
+  "chain_overprediction_eng1c_holdout": {
+    "piece2048": 1.477,
+    "piece1024": 1.887
+  },
+  "report": "reports/study_t0b_fidelity.md section 8A.1",
+  "report_values": {
+    "ranking_ENG1c": 0.95,
+    "ranking_ENG1d": 1.0,
+    "holdout_piece2048_meas_med": 5.267,
+    "holdout_piece2048_pred_med": 7.78,
+    "holdout_piece1024_meas_med": 2.804,
+    "holdout_piece1024_pred_med": 5.29,
+    "holdout_piece2048_ratio": 1.477,
+    "holdout_piece1024_ratio": 1.887,
+    "POL5_chain_overprediction": "1.6 to 1.8x"
+  },
+  "checks": {
+    "ranking_ENG1c": 1.0,
+    "ranking_ENG1d": 1.0,
+    "piece2048_ratio_vs_report": 1.0,
+    "piece1024_ratio_vs_report": 1.0001
+  },
+  "outputs": {
+    "pdf": "/home/nesl/fm-switching/figures/motivation/figM5_predictability.pdf",
+    "png": "/home/nesl/fm-switching/figures/motivation/figM5_predictability.png"
+  }
+}
