@@ -53,6 +53,7 @@ import bodies as B                                                      # noqa: 
 import cachekeys as CK                                                  # noqa: E402
 import cstate as CS                                                     # noqa: E402
 import schema as SC                                                     # noqa: E402
+import scores as S2                                                     # noqa: E402
 from backend import (Live2Backend, Live2Submission, cached_tokens_of,    # noqa: E402
                      output_tokens_of, prompt_tokens_of)
 
@@ -423,7 +424,8 @@ class Live2Coordinator:
         frames = [dict(frame_ref=o.frame_ref, path=self._path(o.frame_ref))]
         self._submit(kind="monitor", device_id=device_id, session_id=None,
                      opportunity_id=o.opp_id, decision_id=did, frames=frames,
-                     est_tokens=378, question=None, options=(), max_tokens=4, t=t, mix=mix)
+                     est_tokens=378, question=B.SH_QUERY, options=(),
+                     max_tokens=B.SH_GEN["max_tokens"], t=t, mix=mix)
 
     def _advance_build(self, s, target_tokens: Optional[int], slice_tokens: Optional[int],
                        t: float, dt_ms: float, preds, mix) -> Optional[str]:
@@ -489,7 +491,7 @@ class Live2Coordinator:
         self._submit(kind="recall", device_id=o.device_id, session_id=o.session_id,
                      opportunity_id=o.opp_id, decision_id=did, frames=frames,
                      est_tokens=tokens, question=o.question, options=o.options,
-                     max_tokens=4, t=t, mix=mix)
+                     max_tokens=B.RECALL_GEN["max_tokens"], t=t, mix=mix)
 
     def _path(self, frame_ref: Optional[str]) -> Optional[Path]:
         if frame_ref is None:
@@ -579,12 +581,24 @@ class Live2Coordinator:
                     cache_path=path, request_id=sub.request_id,
                     prompt_tokens=(pt if pt is not None else sub.est_tokens),
                     cached_tokens=ct))
-            self._settle(sub, first_s, done_s, path, t, ct)
+            self._settle(sub, first_s, done_s, path, t, ct, self._score_of(sub, r))
             self.counts["completed_" + sub.kind] += 1
         self.futures[:] = still
 
+    def _score_of(self, sub: Live2Submission, r: Dict[str, Any]) -> Dict[str, Any]:
+        """The committed extraction on this answer (live2/scores.py), or {} for a build piece.
+
+        A dry run sends no HTTP and so carries no logprobs and no text; the score is then None,
+        which the scorer reads as UNKNOWN and refuses AP on, rather than a fabricated number.
+        """
+        if sub.kind == "monitor":
+            return S2.sh_score(S2.first_token_logprobs(r.get("chunks") or ()))
+        if sub.kind == "recall":
+            return S2.recall_letter(r.get("text") or "")
+        return {}
+
     def _settle(self, sub: Live2Submission, first_s, done_s: float, path, t: float,
-                cached_tokens=None) -> None:
+                cached_tokens=None, scored: Optional[Dict[str, Any]] = None) -> None:
         if sub.kind in ("piece", "whole") and sub.request_id in self.builds:
             b = self.builds.pop(sub.request_id)
             s = self.st.sessions.get(b["session_id"])
@@ -634,7 +648,10 @@ class Live2Coordinator:
             "cloud_answer", device_id=o.device_id, opportunity_id=o.opp_id,
             t_done=round(delivered, 6),
             payload=dict(request_id=sub.request_id, kind=o.kind, cache_path=path,
-                         on_time=bool(ontime))))
+                         on_time=bool(ontime),
+                         cloud_score=(scored or {}).get("cloud_score"),
+                         cloud_letter=(scored or {}).get("cloud_letter"),
+                         p_yes=(scored or {}).get("p_yes"))))
 
     def _expire(self, t: float) -> None:
         for oid in self.st.order:

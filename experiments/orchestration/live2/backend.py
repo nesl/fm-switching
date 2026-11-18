@@ -79,22 +79,36 @@ class Live2Backend(HttpBackend):
         usage: Dict[str, Any] = {}
         status: Optional[int] = None
         err = None
+        chunks: List[Dict[str, Any]] = []
+        text_parts: List[str] = []
         try:
             with urllib.request.urlopen(req, timeout=600) as r:
                 status = r.status
                 for raw in r:
                     if raw.strip() and ttft is None:
                         ttft = time.time() - t0
-                    u = _usage_from_line(raw)
-                    if u:
+                    d = _json_from_line(raw)
+                    if not d:
+                        continue
+                    u = d.get("usage")
+                    if isinstance(u, dict):
                         usage = u
+                    # the answer text and the FIRST token's top-20 are what the committed score
+                    # extractors read (live2/scores.py); without them no cloud_score exists
+                    for ch in d.get("choices") or ():
+                        delta = ch.get("delta") or ch.get("message") or {}
+                        piece = delta.get("content") or delta.get("reasoning_content") or ""
+                        if piece:
+                            text_parts.append(piece)
+                        if ch.get("logprobs"):
+                            chunks.append(dict(logprobs=ch["logprobs"]))
         except Exception as e:                                        # noqa: BLE001
             err = f"{type(e).__name__}: {e}"
             status = getattr(e, "code", None)
         total = time.time() - t0
         return dict(request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s,
                     ttft_s=ttft, total_s=total, http_status=status, error=err,
-                    usage=usage, sub=sub)
+                    usage=usage, text="".join(text_parts), chunks=chunks, sub=sub)
 
     def submit_live2(self, sub: Live2Submission):
         return self.pool.submit(self.post_live2, sub)
@@ -106,7 +120,7 @@ class Live2Backend(HttpBackend):
                            "cache_salt and no mm uuids, which D84 requires. Use post_live2.")
 
 
-def _usage_from_line(raw: bytes) -> Dict[str, Any]:
+def _json_from_line(raw: bytes) -> Dict[str, Any]:
     s = raw.decode(errors="replace").strip()
     if not s:
         return {}
@@ -118,7 +132,11 @@ def _usage_from_line(raw: bytes) -> Dict[str, Any]:
         d = json.loads(s)
     except ValueError:
         return {}
-    u = d.get("usage")
+    return d if isinstance(d, dict) else {}
+
+
+def _usage_from_line(raw: bytes) -> Dict[str, Any]:
+    u = _json_from_line(raw).get("usage")
     return u if isinstance(u, dict) else {}
 
 

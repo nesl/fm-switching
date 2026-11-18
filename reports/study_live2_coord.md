@@ -1342,3 +1342,193 @@ upload through `traces.pull_responder`, and the real fleet replaces it before bl
 mode-B number in this section is therefore about the coordinator's own loop, not about a pulled
 path's delivered delay.
 
+
+---
+
+# StudyLIVE2-fix2: the scored bodies, so the calibration and the dashcam AP can run
+
+StudyLIVE2-pre section 3 stopped the dense calibration refit (D86, D105) and left the scorer's
+dashcam AP uncomputable, because the live monitoring request carried no question and no
+`logprobs` and nothing in the coordinator recorded `cloud_score`. This section closes that. CPU
+only on flash, no GPU, no server, nothing measured: every number below is a test outcome or a
+citation.
+
+## G1. The bodies are the committed bodies, not a copy of them
+
+The rule applied throughout: no expected value is stated in our own words. The question text and
+the generation parameters are READ OUT of the committed scripts at import time
+(`experiments/orchestration/live2/scores.py::committed_constant`), so a body that drifts from the
+study that produced the scores cannot be built.
+
+| what the live body needs | committed source | value |
+|---|---|---|
+| SH question | `experiments/dashcam/d3_infer_vllm.py:43-44` (`QUERY`) | "Is a collision or near-collision involving the camera vehicle happening or about to happen? Answer only Yes or No." |
+| SH generation | `d3_infer_vllm.py:45` (`GEN`) | `temperature 0.0, max_tokens 8, seed 0, logprobs true, top_logprobs 20` |
+| SH body shape | `d3_infer_vllm.py:76-93` (`body`) | `[header] + 1 image + [query]` |
+| SH header at N = 1 | `d3_infer_vllm.py:72-74` (`grey_header`) | "The following is 1 dashcam frame." (the string the committed D14b N = 1 manifest also carries) |
+| SH score | `d3_infer_vllm.py:96-102` (`yes_no`), then `ctrl1c_calibrate.py:276-277,298` | `log(p_yes)`, `p_yes = mass(Yes) / (mass(Yes) + mass(No))` over the first token's top 20 |
+| recall question text | `experiments/sember/study_o_q4.py:158-168` (`build_messages`), the text StudyR1 stores per row (`study_r1_inputs.py:80`) | "Watch the video carefully, ... Reply with only the letter of the correct answer (A, B, C, D, or E)." |
+| recall generation | `experiments/sember/study_r1_vllm.py:58` (`CELLS["K1"]`) and `:61` (`SEED`) | `temperature 0.0, max_tokens 512, seed 42` |
+| recall answer parse | `study_r1_vllm.py:101-110` (`score`) | last `\b[A-E]\b` in the last 300 characters, else "X" |
+
+**NO STOP CONDITION FIRED on (a).** StudyD14b reuses StudyD3's body unchanged
+(`d14b_infer_vllm.py:26-35` rebinds only the paths), StudyCTRL1c sends no request at all - it is
+a CPU fit over the committed StudyD3 and StudyD14b traces - and StudyORIN1-dense goes through
+`study_d15_orin_nexar.py::score_request` (`:118-124`), which carries the same question, the same
+`max_tokens = 8` and the same `logprobs` / `top_logprobs = 20`. The four fields the prompt names
+(question text, one frame per call, logprobs setting, max_tokens) are identical in all three.
+
+**THE EXEMPTIONS ARE EXACTLY THREE, and the test enumerates them rather than trusting them.**
+
+1. the image bytes and their media type: round 1 sends the stored JPEGs (D70, D91), the committed
+   SH studies sent PNG;
+2. the D84 cache keys: the top-level `cache_salt` and the per-image client `uuid`, both of which
+   post-date StudyD3;
+3. `stream` and `stream_options`. **This is a declared deviation, not an exemption the prompt
+   granted.** StudyD3 and StudyD14b send `stream = false`; live2 must time the first token, which
+   is the quantity the whole study measures. It is recorded here rather than resolved silently
+   because it is the one field where the live body is not the committed body. Two things reduce
+   it to a transport difference: StudyORIN1-dense and StudyD15 stream the SAME scored request and
+   read the score out of the stream (`study_d15_orin_nexar.py:119-120`, "capture the FIRST
+   generated token's top_logprobs"), and the extraction reads element 0 of `logprobs.content`
+   either way, which is what `scores.first_token_logprobs` asserts. StudyR1 streams, so the
+   recall body carries no deviation at all.
+
+`test_the_exemptions_are_exactly_the_three_declared_ones` asserts the extra top-level keys are
+exactly `{cache_salt, stream_options}`, that no committed key is missing, and that the only
+`image_url` part carries a `uuid`; `test_the_body_is_byte_identical_under_the_declared_exemptions`
+then serializes both bodies with `sort_keys=True` and requires equality.
+
+## G2. What changed in the coordinator
+
+| file | change |
+|---|---|
+| `live2/scores.py` (new) | `load_committed` / `committed_constant` execute ONE function or constant out of a committed script by AST, so StudyD3's `yes_no` and StudyR1's `score` are the functions that run, not copies. StudyD3's module body starts a server path and imports `httpx`, so it is never imported. |
+| `live2/bodies.py` | the SH and recall contracts. `kind="monitor"` forces the committed header, the committed question and `SH_GEN`, refuses more than one frame, and refuses a caller-supplied question; `kind="recall"` builds StudyR1's question text and applies `RECALL_GEN`. |
+| `live2/backend.py` | the stream reader kept only `usage` and threw the answer away. It now accumulates the answer text and the first token's `logprobs`, which are what the extractors read; `_usage_from_line` is now a thin wrapper over `_json_from_line`. |
+| `live2/coordinator.py` | `_score_of` runs the committed extraction per completed request and `_settle` carries `cloud_score`, `cloud_letter` and `p_yes` into the `cloud_answer` payload, which the emulator already copies into `Outcome.cloud_payload` (`fleet/emulator.py:420`) and the scorer already reads (`scorer/score.py:479`). The two call sites now take `max_tokens` from the committed constants instead of the literal 4. |
+| `live2/fleet/emulator.py` | `StubCoordinator` no longer hands the scorer `cloud_score=None`. It emits a DETERMINISTIC function of the opportunity id in the range the calibration grid covers, tagged `stub=True`, and `stub_scores=False` restores the old behaviour. No stub score may enter a measured result. |
+
+**A dry run still records no score**, and that is deliberate: it sends no HTTP, so there are no
+logprobs, and a fabricated number would be read by the scorer as a real cloud score. The scorer's
+existing refusal (AP is not computed when any instant lacks a score) is the correct outcome there,
+and `test_a_dry_run_records_no_score_rather_than_a_fabricated_one` pins it.
+
+**One latency-relevant parameter changed and it is flagged.** The recall body's `max_tokens` goes
+from 4 to StudyR1's 512. It is required by (c): with 4 tokens no answer letter can be parsed, so
+the robot accuracy the scorer computes would have no input. It affects total service time, not
+TTFT, and the recall opportunity is judged on first-token delivery
+(`coordinator.py::_settle`, `delivered = first_s if first_s is not None else done_s`), so no
+deadline rule changes. It is named here because it is a generation parameter, not a bug fix.
+
+## G3. The robot recall audit (c), difference by difference
+
+| field | StudyR1 cell K1 | live2 before | now |
+|---|---|---|---|
+| question text | StudyO's `build_messages` text, stored per row | `question + "\n" + options` | StudyR1's text, built by StudyO's own function |
+| options | inside that text | appended separately | inside that text |
+| answer parsing | `score()`, last A-E in the last 300 chars | none recorded | StudyR1's `score()` through `scores.recall_letter` |
+| temperature / max_tokens / seed | 0.0 / 512 / 42 | 0.0 / 4 / absent | 0.0 / 512 / 42 |
+| frames | ONE `video_url` part, `data:video/jpeg;base64,` with per-frame base64 comma-joined, plus `media_io_kwargs` | per-frame `image_url` parts with D84 uuids | unchanged, and REPORTED not fixed |
+
+**The frame encoding difference is reported, not fixed, and it is the one open item from (c).**
+StudyR1 sends a session's frames as a single comma-joined `video_url` with `media_io_kwargs`
+pinning `frames_indices` and `fps`. Live2 cannot: the prefix-chained append that the whole study
+exists to measure (StudyRH7 / StudySLICE1 / StudyENG1c, cited in `bodies.py`) requires per-image
+parts so an already-sent frame can go as a uuid-only reference and hit the engine's multimodal
+and prefix caches. Changing it would delete the mechanism under test, and keeping StudyR1's form
+would make every history append re-upload every frame. This is a methodological difference
+between the accuracy study and the live harness, so it is surfaced for a ruling rather than
+decided here. Its consequence: a live recall answer is not guaranteed to equal StudyR1's answer
+on the same question even with an identical question text and identical sampling, because the
+processor sees images rather than a video. The committed per-token budget already differs for the
+same reason (D2 at 90 tokens per image, StudyRH4).
+
+## G4. The two encode parsers (e)
+
+Both parsers in `live2/data/encode_jpeg.py` were written on flash without the data and neither
+matched the frame host. They now match the layouts StudyLIVE2-pre section 2 recorded, so the
+committed script reproduces the stored JPEGs. **Nothing was re-encoded**: this is a source change
+only, and no byte of JPEG was produced on flash.
+
+1. **Nexar.** The frames are stored `<src>/<clip>/<pts_ms>.png` (`d14b_prepare.py:84-87,156`), not
+   `<clip>_t<seconds>.png`; run as written, every frame would have been stored UNPARSED.
+   `iter_nexar` now reads the committed D14b N = 1 request manifest, takes `frame_keys[0]` (the
+   latest frame with pts <= t), verifies `small_sha256[0]` on every frame read, and accepts
+   several frame roots separated by `os.pathsep` because StudyD14b hard-links what it shares with
+   StudyD14. A sha mismatch or a missing frame is a hard exit, never a substitution.
+2. **S-EMBER D2.** D2 is not an `r1_inputs` construction - that cache holds only RICH and RECENT
+   npz - so there was no CHW array to transpose. `iter_sember_d2` now walks the committed EVAL
+   sessions, indexes frames with `study_rh3_inputs.frames_index`, takes the committed 2-s D2
+   stride up to each session's last question time, and loads with
+   `study_rh3_inputs.load(path, (352, 256))`, which is the loader E10a used
+   (`study_e10a_sizes.py:84-85`) and which returns a PIL image already at the final size, oriented
+   by its own rule. `jpeg_bytes_from_image` is E10a's `enc(im, "jpeg", q)` (`:41-49`).
+   `iter_sember` is kept unchanged for RICH and RECENT.
+
+The frame references are unchanged, and the test asserts that against `fleet/trace.py` itself
+rather than against a remembered format: `<clip>.mp4|t<tttt.tt>` (`trace.py:295`) and
+`<session>|f<ffffff.ff>` (`trace.py:357,390`).
+
+## G5. Tests (d)
+
+`experiments/orchestration/live2/tests/test_live2_fix2.py`, 22 tests, all passing.
+
+| test group | what it establishes |
+|---|---|
+| the SH body (5) | byte-identical to the body StudyD3's own `body()` builds under the three declared exemptions; the question, generation parameters and N = 1 header come from the committed script; one frame per call is enforced; a caller may not substitute the question |
+| the extraction (4) | the loaded `yes_no` has the same code constants as the committed function; the score is `log(p_yes)` with `p_yes = y / (y + n)`; neither-Yes-nor-No is None and never a number; the first token is taken correctly out of a stream |
+| the recall body (4) | `recall_question_text` reproduces the `text` of EVERY committed StudyR1 manifest row whose question is in the committed MCQ file, byte for byte (1,690 rows compared, 1,690 identical); the generation parameters equal `CELLS["K1"]` plus `SEED`; the live body carries both; the parser is StudyR1's |
+| the coordinator (3) | every monitor answer carries a `cloud_score` equal to `log(p_yes)`; every recall answer carries a letter in A-E or X; a dry run records None rather than a fabricated score |
+| end to end (1) | a real-pool trace (seed 11, 8 devices, 25:75, 600 s, mode A) through the fleet emulator, the bridge, the real coordinator and a scoring fixture server, then `scorer/score.py`: `n_missing_cloud_score == 0` and the play-indexed AP is computed, every value a probability. No score in this path is written by the test |
+| the stub (2) | the emulator stub passes a deterministic, reproducible, `stub=True`-tagged score through, and can be switched off |
+| the parsers (3) | the Nexar parser reads the clip/pts layout, stores only N = 1 instants, and exits on a sha mismatch; the frame-reference formats are checked against `fleet/trace.py`'s source; the D2 parser applies the 2-s stride, stops at the last question, and uses the committed loader's own orientation rule |
+
+The fixture server is a test-only `ThreadingHTTPServer` that answers with `logprobs`, which the
+committed LIVE1 stub does not. `experiments/orchestration/live/fake_server.py` was NOT modified:
+it belongs to StudyLIVE1 and every existing test still runs against it unchanged.
+
+## G6. Mechanism verification and results consistency
+
+**Not applicable, and that is the honest answer.** This section reports no measurement, tests no
+causal claim and produces no result file. Mechanism verification Steps 1 to 5 and the six
+consistency checks are owed by the round-1 measured runs, as section 12 and F9 already record. The
+checks that DO apply here are checks of identity rather than of a quantity, and they are the tests
+in G5: the body is the committed body, the extractor is the committed function, the question text
+is the committed text, and the frame references are the ones the trace generator emits.
+
+What this section changes for the pending work: StudyLIVE2-pre's Part 2 STOP ("there is no
+coordinator score to extract") no longer holds, so the D86 / D105 dense calibration refit can be
+re-run on the same server configuration, and the scorer's dashcam AP has an input. Neither is run
+here: both are H100 work.
+
+## G7. Files created or changed by StudyLIVE2-fix2
+
+| file | status |
+|---|---|
+| `experiments/orchestration/live2/scores.py` | NEW: the committed extractors, loaded from the committed scripts |
+| `experiments/orchestration/live2/bodies.py` | the SH and recall body contracts |
+| `experiments/orchestration/live2/backend.py` | the stream reader keeps the answer text and the first token's logprobs |
+| `experiments/orchestration/live2/coordinator.py` | `_score_of`, the score in the `cloud_answer` payload, committed `max_tokens` at both call sites |
+| `experiments/orchestration/live2/fleet/emulator.py` | `StubCoordinator` passes a deterministic tagged score through |
+| `experiments/orchestration/live2/data/encode_jpeg.py` | both input parsers match the stores the H100 used |
+| `experiments/orchestration/live2/tests/test_live2_fix2.py` | NEW: 22 tests |
+| `research/EXPERIMENTS.md`, `reports/study_live2_coord.md` | the row and this section |
+
+## G8. Open issues (StudyLIVE2-fix2)
+
+1. **The recall frame encoding differs from StudyR1 and cannot be made to match** (G3). Needs a
+   ruling: either accept that the live recall answer is not StudyR1's answer on the same question
+   and say so wherever the two are compared, or add a non-chaining recall arm that sends
+   StudyR1's `video_url` form so one arm is directly comparable.
+2. **The SH body streams and StudyD3's does not** (G1, deviation 3). The score is read from the
+   same element either way and StudyD15 does exactly this, but no committed measurement proves
+   that a streamed and a non-streamed request return identical first-token top-20 logprobs on
+   the same input. A one-cell check on the H100 would close it; StudyORIN2-warm ran the
+   equivalent check across harnesses and is the precedent for the form it should take.
+3. **The stub score is a fabricated number by construction** (G2). It is deterministic and
+   tagged, and no measured run uses the stub, but if a stub run ever reached a report the AP would
+   be meaningless. The scorer refuses on `server_kind` already ("s5 the scorer treats both 'stub'
+   and 'fake' as non-measurement servers"), so this is a note, not a gap.
+4. **`max_tokens` 4 to 512 on recall** (G2) is a generation-parameter change made to satisfy (c).
+   Flagged for the record.

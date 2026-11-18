@@ -26,8 +26,10 @@ S-EMBER, quality 88 (`experiments/cost/study_e10a_parity_vllm.py` lines 133-144)
     Image.fromarray(np.ascontiguousarray(fr.transpose(1, 2, 0))).save(buf, format="JPEG",
                                                                       quality=88)
 
-Input is the already-final-size frames of StudyR1's npz (CHW uint8, transposed to HWC), so RICH
-and D2 are 352x256 and RECENT is 512x384. The wire form for S-EMBER is ONE
+Input for RICH and RECENT is the already-final-size frames of StudyR1's npz (CHW uint8,
+transposed to HWC), 352x256 and 512x384. D2 is NOT an r1_inputs construction: E10a built it from
+the raw `sember_frames` cache with `study_rh3_inputs.load(path, (352, 256))`, which is what
+`iter_sember_d2` does, so a D2 frame is portrait-or-landscape 352x256 as that loader orients it. The wire form for S-EMBER is ONE
 `data:video/jpeg;base64,` URL whose per-frame base64 strings are COMMA-JOINED; that is part of
 the recipe and `--emit-request-sizes` reproduces it so the per-request base64 size can be checked
 against E10a's committed `request_bytes`.
@@ -47,10 +49,11 @@ reproduction.
 
 USAGE (on the frame host)
 
-  python3 encode_jpeg.py --dataset nexar  --src ~/data/dashcam/d14_frames/small \\
-                         --out ~/data/live2/jpeg/nexar_q90
+  python3 encode_jpeg.py --dataset nexar \\
+      --src ~/data/dashcam/d14b_frames/small:~/data/dashcam/d14_frames/small \\
+      --out ~/data/live2/jpeg/nexar_q90
   python3 encode_jpeg.py --dataset sember --construction D2 \\
-                         --src ~/.cache/fm-switching/r1_inputs \\
+                         --src ~/.cache/fm-switching/sember_frames \\
                          --out ~/data/live2/jpeg/sember_d2_q88
   python3 build_manifest.py --store ~/data/live2/jpeg/nexar_q90 --dataset nexar
 """
@@ -58,13 +61,16 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import io
 import json
+import os
 import platform
 import sys
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional, Sequence, Tuple
 
+REPO = Path(__file__).resolve().parents[4]
 NEXAR_QUALITY = 90          # E10a Job A
 SEMBER_QUALITY = 88         # E10a Job A / E10a-full
 NEXAR_EXPECT_SIZE = (768, 432)
@@ -119,37 +125,89 @@ def jpeg_bytes_from_chw(fr, quality: int = SEMBER_QUALITY,
 
 
 # ---------------------------------------------------------------- sources
-def iter_nexar(src: Path) -> Iterator[Tuple[str, bytes]]:
-    """(frame_ref, png_bytes) over a StudyD14 / D14b SMALL frame directory.
+# THE STORE LAYOUTS THE H100 ACTUALLY USED (StudyLIVE2-pre section 2, OVERNIGHT DECISIONS 1-2).
+# Both parsers were written on flash without the data and neither matched the frame host:
+#
+#   1. Nexar frames are stored `<src>/<clip>/<pts_ms>.png` (`experiments/dashcam/d14b_prepare.py`
+#      lines 84-87 and 156), not `<clip>_t<seconds>.png`; run as written, every frame would have
+#      been stored UNPARSED. The frame for instant (clip, t) is the one the committed D14b N = 1
+#      request used: `results/dashcam/study_d14b/d14b_requests_manifest.jsonl.gz`, `frame_keys[0]`
+#      (the latest frame with pts <= t), with `small_sha256[0]` verified on every frame read.
+#
+#   2. S-EMBER D2 is not an `r1_inputs` construction - that cache holds only RICH and RECENT npz -
+#      so there is no CHW array to transpose. E10a built D2 from the raw `sember_frames` cache
+#      with `study_rh3_inputs.load(path, (352, 256))` (`experiments/cost/study_e10a_sizes.py`
+#      lines 84-85), which returns a PIL image already at the final size; the stride is the
+#      committed D2 stride of 2 s (StudyRH4 / RH6).
+#
+# The frame references are unchanged: `fleet/trace.py:295` and `:357,390` put
+# `<clip>.mp4|t<tttt.tt>` and `<session>|f<ffffff.ff>` on the wire, and that is what is stored.
+D14B_MANIFEST = REPO / "results/dashcam/study_d14b/d14b_requests_manifest.jsonl.gz"
+D2_STRIDE_S = 2.0
+D2_SIZE_HW = (352, 256)
 
-    frame_ref is `<clip>.mp4|t<tttt.tt>`, matching what `fleet/trace.py` puts on the wire. The
-    filename convention of the committed frame pools is `<clip>_t<seconds>.png`; anything this
-    cannot parse is reported and skipped, never guessed at.
+
+def iter_nexar(src: Path) -> Iterator[Tuple[str, bytes]]:
+    """(frame_ref, png_bytes) for every dense instant, via the committed D14b N = 1 manifest.
+
+    `src` may be several frame roots separated by `os.pathsep`, because StudyD14b hard-links the
+    frames it shares with StudyD14 and the two pools are separate directories.
     """
-    for p in sorted(src.rglob("*.png")):
-        stem = p.stem
-        if "_t" not in stem:
-            yield f"UNPARSED|{p.name}", p.read_bytes()
+    import gzip
+    roots = [Path(x).expanduser() for x in str(src).split(os.pathsep) if x]
+    if not D14B_MANIFEST.exists():
+        raise SystemExit(f"MISSING: {D14B_MANIFEST}; the Nexar parser reads the committed D14b "
+                         f"N = 1 request manifest, it does not glob the frame directory")
+    seen: Dict[Tuple[str, str], bytes] = {}
+    for ln in gzip.open(D14B_MANIFEST, "rt"):
+        r = json.loads(ln)
+        if int(r["n"]) != 1:
             continue
-        clip, t = stem.rsplit("_t", 1)
-        try:
-            tv = float(t.replace("_", "."))
-        except ValueError:
-            yield f"UNPARSED|{p.name}", p.read_bytes()
-            continue
-        yield f"{clip}.mp4|t{tv:07.2f}", p.read_bytes()
+        clip, key = str(r["file_name"]), str(r["frame_keys"][0])
+        want = str(r["small_sha256"][0])
+        cached = seen.get((clip, key))
+        if cached is None:
+            stem = clip.replace(".mp4", "")
+            paths = [root / stem / f"{key}.png" for root in roots]
+            hit = next((q for q in paths if q.exists()), None)
+            if hit is None:
+                raise SystemExit(f"MISSING frame {stem}/{key}.png under "
+                                 f"{[str(x) for x in roots]}; nothing is substituted")
+            cached = hit.read_bytes()
+            got = hashlib.sha256(cached).hexdigest()
+            if got != want:
+                raise SystemExit(f"{hit}: sha256 {got} != the manifest's {want}")
+            seen[(clip, key)] = cached
+        yield f"{clip}|t{float(r['t']):07.2f}", cached
+
+
+def iter_sember_d2(src: Path) -> Iterator[Tuple[str, Any]]:
+    """(frame_ref, PIL image) for the D2 frames of every committed EVAL session.
+
+    E10a's own D2 loader is used (`study_rh3_inputs.load`), so no resize is reinvented here.
+    """
+    sys.path.insert(0, str(REPO / "experiments/sember"))
+    sys.path.insert(0, str(REPO / "experiments/orchestration/live2/fleet"))
+    import data_sources as DS
+    import study_rh3_inputs as B3
+    B3.FRAMES = Path(src).expanduser()
+    for sid, meta in sorted(DS.eval_sessions().items()):
+        idx = B3.frames_index(sid)
+        last_q = max(q.t_ask for q in meta.questions)
+        ts = sorted(t for t in idx if t % D2_STRIDE_S == 0 and t <= last_q + 1e-9)
+        for t in ts:
+            yield f"{sid}|f{float(t):08.2f}", B3.load(idx[t], D2_SIZE_HW)
 
 
 def iter_sember(src: Path, construction: str) -> Iterator[Tuple[str, Any]]:
-    """(frame_ref, CHW uint8 frame) over StudyR1's per-request npz inputs."""
+    """(frame_ref, CHW uint8 frame) over StudyR1's per-request npz inputs.
+
+    Only RICH and RECENT live in `r1_inputs`; D2 goes through `iter_sember_d2` instead.
+    """
     import numpy as np
-    for p in sorted(src.rglob("*.npz")):
+    for p in sorted(Path(src).expanduser().rglob("*.npz")):
         z = np.load(p)
-        key = None
-        for k in ("frames", "images", "arr_0"):
-            if k in z.files:
-                key = k
-                break
+        key = next((k for k in ("frames", "images", "arr_0") if k in z.files), None)
         if key is None:
             raise ValueError(f"{p}: no frames array (files={z.files}); inspect before encoding")
         arr = z[key]
@@ -158,6 +216,13 @@ def iter_sember(src: Path, construction: str) -> Iterator[Tuple[str, Any]]:
         for i, fr in enumerate(arr):
             t = float(ts[i]) if i < len(ts) else float(i)
             yield f"{vid}|{construction}|f{t:08.2f}", fr
+
+
+def jpeg_bytes_from_image(im, quality: int = SEMBER_QUALITY) -> bytes:
+    """E10a's `enc(im, "jpeg", q)` (`experiments/cost/study_e10a_sizes.py` lines 41-49)."""
+    buf = io.BytesIO()
+    im.save(buf, format="JPEG", quality=quality)
+    return buf.getvalue()
 
 
 # ---------------------------------------------------------------- driver
@@ -172,11 +237,17 @@ def encode(dataset: str, src: Path, out: Path, construction: str = "D2",
     sizes: List[int] = []
     per_request: Dict[str, int] = {}
     with open(log, "w") as fh:
-        it = iter_nexar(src) if dataset == "nexar" \
-            else iter_sember(src, construction)
+        if dataset == "nexar":
+            it: Iterator[Tuple[str, Any]] = iter_nexar(src)
+        elif construction == "D2":
+            it = iter_sember_d2(src)
+        else:
+            it = iter_sember(src, construction)
         for ref, payload in it:
             if dataset == "nexar":
                 jb = jpeg_bytes_from_png(payload, quality)
+            elif construction == "D2":
+                jb = jpeg_bytes_from_image(payload, quality)
             else:
                 jb = jpeg_bytes_from_chw(payload, quality,
                                          SEMBER_EXPECT_SIZE.get(construction))

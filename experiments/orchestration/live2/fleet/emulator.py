@@ -93,7 +93,13 @@ class StubCoordinator:
 
     def __init__(self, capacity_per_s: float = 8.0, service_s: float = 0.25,
                  pull_all: bool = True, answer_correct: bool = True,
-                 cache_path_cycle: Sequence[str] = ("WARM", "COLD")) -> None:
+                 cache_path_cycle: Sequence[str] = ("WARM", "COLD"),
+                 stub_scores: bool = True) -> None:
+        # D86 / D105: a cloud answer with no score makes the scorer refuse AP, so the stub
+        # carries one. It is a DETERMINISTIC FUNCTION OF THE OPPORTUNITY ID, never a model
+        # output, and every payload it produces is tagged `stub=True`; no stub score may enter a
+        # measured result.
+        self.stub_scores = bool(stub_scores)
         self.capacity_per_s = float(capacity_per_s)
         self.service_s = float(service_s)
         self.pull_all = pull_all
@@ -132,11 +138,26 @@ class StubCoordinator:
                                   t_submit=t, t_done=t_done, cache_path=path,
                                   cached_tokens=(1 if path == "WARM" else 0),
                                   prompt_tokens=378, cache_salt=event["device_id"]))
-        payload = dict(kind=("monitor" if k == "monitor_frame" else "recall"),
-                       cloud_score=None, cloud_letter=None, cache_path=path,
-                       stub=True)
+        kind = "monitor" if k == "monitor_frame" else "recall"
+        payload = dict(kind=kind, cache_path=path, stub=True,
+                       cloud_score=(self._stub_score(opp) if self.stub_scores
+                                    and kind == "monitor" else None),
+                       cloud_letter=(self._stub_letter(event) if self.stub_scores
+                                     and kind == "recall" else None))
         return (EV.make("cloud_answer", device_id=event["device_id"], opportunity_id=opp,
                         t_done=t_done, payload=payload),)
+
+    def _stub_score(self, opp: str) -> float:
+        """A reproducible log p_yes in [-14, 0), the range live2/calib.py's grid covers."""
+        h = int(hashlib.sha256(opp.encode()).hexdigest()[:8], 16)
+        return -14.0 + 14.0 * (h / 0xFFFFFFFF)
+
+    def _stub_letter(self, event: Dict[str, Any]) -> str:
+        opts = event.get("options") or ()
+        gold = event.get("gold_letter") or "A"
+        if self.answer_correct or not opts:
+            return str(gold)
+        return "ABCDE"[(("ABCDE".index(str(gold)[0]) if str(gold)[0] in "ABCDE" else 0) + 1) % 5]
 
     def tick(self, t: float) -> Sequence[Dict[str, Any]]:
         return ()

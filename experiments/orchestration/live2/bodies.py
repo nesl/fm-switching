@@ -28,8 +28,55 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 from cachekeys import mm_uuid
+from scores import D3_SCRIPT, O_Q4_SCRIPT, R1_SCRIPT, committed_constant, load_committed
 
 MODEL_DEFAULT = "32BI"
+
+# ---------------------------------------------------------------- the committed scored bodies
+# StudyLIVE2-fix2. The SH monitoring body and the robot recall body are the bodies that produced
+# the committed scores the calibration (live2/calib.py) and the scorer (live2/scorer/score.py)
+# consume, so neither is retyped here: the question text and the generation parameters are read
+# out of the committed scripts.
+#
+# SH (dashcam), StudyD3 / StudyD14b / StudyORIN1-dense:
+#   question                experiments/dashcam/d3_infer_vllm.py:43-44   (QUERY)
+#   generation parameters   experiments/dashcam/d3_infer_vllm.py:45      (GEN)
+#   body shape              experiments/dashcam/d3_infer_vllm.py:76-93   (body)
+#   N = 1 header            experiments/dashcam/d3_infer_vllm.py:72-74   (grey_header), the same
+#                           string the committed D14b N = 1 manifest carries
+#   reused unchanged by     experiments/dashcam/d14b_infer_vllm.py:26-35
+#   device side             experiments/device/study_d15_orin_nexar.py:118-124, same question,
+#                           max_tokens and logprobs settings
+#
+# ROBOT RECALL, StudyR1 cell K1 (32B-I x RICH):
+#   question text           experiments/sember/study_o_q4.py:158-168 (build_messages), which is
+#                           the text StudyR1 stores per row (study_r1_inputs.py:80)
+#   generation parameters   experiments/sember/study_r1_vllm.py:58 (CELLS["K1"]) and :61 (SEED)
+#
+# TWO EXEMPTIONS, and only two, over the committed bodies:
+#   * the image bytes and their media type: round 1 sends the stored JPEGs (D70, D91), the
+#     committed studies sent PNG (SH) or a comma-joined data:video/jpeg URL (recall);
+#   * the D84 cache keys: `cache_salt` and the per-image client `uuid`, which post-date both.
+# `stream` is a THIRD, declared deviation on the SH body: StudyD3 and StudyD14b send
+# stream=False, while live2 must time the first token, and StudyORIN1-dense / StudyD15 stream the
+# same scored request. StudyR1 streams, so the recall body has no deviation here.
+SH_QUERY = committed_constant(D3_SCRIPT, "QUERY")
+SH_GEN = committed_constant(D3_SCRIPT, "GEN")
+SH_HEADER = "The following is 1 dashcam frame."          # d3 grey_header(1); D14b N=1 manifest
+RECALL_GEN = dict(committed_constant(R1_SCRIPT, "CELLS")["K1"][2],
+                  seed=committed_constant(R1_SCRIPT, "SEED"))
+_build_messages = load_committed(O_Q4_SCRIPT, "build_messages")
+
+SCORED_KINDS = ("monitor", "recall")
+
+
+def recall_question_text(question: str, options: Sequence[str]) -> str:
+    """StudyR1's stored question text, built by StudyO's own `build_messages`.
+
+    StudyR1 took exactly this element (`study_r1_inputs.py:80`), so no second wording exists.
+    """
+    msgs = _build_messages(dict(question=question, options=list(options)), [])
+    return msgs[0]["content"][1]["text"]
 
 
 def _data_url(path: Path) -> str:
@@ -55,6 +102,20 @@ def build_body(*, kind: str, device_id: str, session_id: Optional[str], run_tag:
     `frames` is a list of {"frame_ref": str, "path": Path or None}; `path` None means send the
     uuid-only reference because this device already sent those bytes.
     """
+    gen: Dict[str, Any] = dict(temperature=0.0, max_tokens=int(max_tokens))
+    if kind == "monitor":
+        # the committed SH body: its header, one frame, its question, its generation parameters
+        if question not in (None, "", SH_QUERY):
+            raise ValueError("the SH monitoring body carries StudyD3's committed question; a "
+                             "caller may not substitute one")
+        if len(frames) != 1:
+            raise ValueError(f"the committed SH body is one frame per call, got {len(frames)}")
+        header, question, options = SH_HEADER, SH_QUERY, ()
+        gen = dict(SH_GEN)
+    elif kind == "recall":
+        if question:
+            question, options = recall_question_text(question, options), ()
+        gen = dict(RECALL_GEN)
     content: List[Dict[str, Any]] = [{"type": "text", "text": header}]
     uuids: List[str] = []
     for f in frames:
@@ -65,9 +126,9 @@ def build_body(*, kind: str, device_id: str, session_id: Optional[str], run_tag:
         q = question if not options else (question + "\n" + "\n".join(options))
         content.append({"type": "text", "text": q})
     body: Dict[str, Any] = dict(
-        model=model, temperature=0.0, max_tokens=int(max_tokens), stream=bool(stream),
+        model=model, stream=bool(stream),
         messages=[dict(role="user", content=content)],
-        cache_salt=salt,
+        cache_salt=salt, **gen,
     )
     if stream:
         body["stream_options"] = {"include_usage": True}
