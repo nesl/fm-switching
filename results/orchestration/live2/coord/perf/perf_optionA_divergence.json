@@ -1,0 +1,2285 @@
+{
+ "check": "option_a_offline_divergence",
+ "is_measurement": false,
+ "label": "offline divergence study on committed dry-run fixtures; no arm was changed and Option A is not implemented",
+ "configuration": {
+  "window_s": 180.0,
+  "seed": 1,
+  "H_s": 1.0,
+  "mu_mode": "none",
+  "option_0": "on",
+  "sh_cost": "rollout"
+ },
+ "rows": [
+  {
+   "n_devices": 8,
+   "window_s": 180.0,
+   "seed": 1,
+   "H_s": 1.0,
+   "mu_mode": "none",
+   "n_periods_with_sh_candidates": 725,
+   "overall": {
+    "n_periods": 725,
+    "n_candidates": {
+     "n": 725,
+     "median": 2.0,
+     "p90": 2.0,
+     "min": 1.0,
+     "max": 2.0,
+     "sum": 1440.0
+    },
+    "fraction_per_candidate_not_a_prefix": 0.0,
+    "n_per_candidate_not_a_prefix": 0,
+    "fraction_best_prefix_differs": 0.001379,
+    "n_best_prefix_differs": 1,
+    "loss_best_prefix": {
+     "n": 725,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": -0.046265754,
+     "max": 0.0,
+     "sum": -0.046265754
+    },
+    "loss_doubling": {
+     "n": 725,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": -0.046265754,
+     "max": 0.0,
+     "sum": -0.046265754
+    },
+    "quantisation_cost": {
+     "n": 725,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0.0,
+     "max": 0.0,
+     "sum": 0.0
+    },
+    "total_delta_j_per_candidate": 89.454145731,
+    "loss_sum_fraction_of_total": -0.000517,
+    "loss_sum_fraction_of_total_doubling": -0.000517,
+    "loss_where_already_a_prefix": {
+     "n": 725,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": -0.046265754,
+     "max": 0.0,
+     "sum": -0.046265754
+    },
+    "loss_where_not_a_prefix": {
+     "n": 0
+    },
+    "rollouts": {
+     "per_candidate": {
+      "n": 725,
+      "median": 4.0,
+      "p90": 4.0,
+      "min": 2.0,
+      "max": 4.0,
+      "sum": 2880.0
+     },
+     "exhaustive": {
+      "n": 725,
+      "median": 4.0,
+      "p90": 4.0,
+      "min": 3.0,
+      "max": 4.0,
+      "sum": 2890.0
+     },
+     "doubling": {
+      "n": 725,
+      "median": 4.0,
+      "p90": 4.0,
+      "min": 3.0,
+      "max": 4.0,
+      "sum": 2890.0
+     }
+    }
+   },
+   "by_backlog_tercile_queued_tokens": {
+    "edges": {
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n_periods": 672,
+      "n_candidates": {
+       "n": 672,
+       "median": 2.0,
+       "p90": 2.0,
+       "min": 1.0,
+       "max": 2.0,
+       "sum": 1334.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.0,
+      "n_per_candidate_not_a_prefix": 0,
+      "fraction_best_prefix_differs": 0.0,
+      "n_best_prefix_differs": 0,
+      "loss_best_prefix": {
+       "n": 672,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "loss_doubling": {
+       "n": 672,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "quantisation_cost": {
+       "n": 672,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 85.442577008,
+      "loss_sum_fraction_of_total": 0.0,
+      "loss_sum_fraction_of_total_doubling": 0.0,
+      "loss_where_already_a_prefix": {
+       "n": 672,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "loss_where_not_a_prefix": {
+       "n": 0
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 672,
+        "median": 4.0,
+        "p90": 4.0,
+        "min": 2.0,
+        "max": 4.0,
+        "sum": 2668.0
+       },
+       "exhaustive": {
+        "n": 672,
+        "median": 4.0,
+        "p90": 4.0,
+        "min": 3.0,
+        "max": 4.0,
+        "sum": 2678.0
+       },
+       "doubling": {
+        "n": 672,
+        "median": 4.0,
+        "p90": 4.0,
+        "min": 3.0,
+        "max": 4.0,
+        "sum": 2678.0
+       }
+      }
+     },
+     "T2_mid": {
+      "n_periods": 0
+     },
+     "T3_high": {
+      "n_periods": 53,
+      "n_candidates": {
+       "n": 53,
+       "median": 2.0,
+       "p90": 2.0,
+       "min": 2.0,
+       "max": 2.0,
+       "sum": 106.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.0,
+      "n_per_candidate_not_a_prefix": 0,
+      "fraction_best_prefix_differs": 0.018868,
+      "n_best_prefix_differs": 1,
+      "loss_best_prefix": {
+       "n": 53,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": -0.046265754,
+       "max": 0.0,
+       "sum": -0.046265754
+      },
+      "loss_doubling": {
+       "n": 53,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": -0.046265754,
+       "max": 0.0,
+       "sum": -0.046265754
+      },
+      "quantisation_cost": {
+       "n": 53,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 4.011568723,
+      "loss_sum_fraction_of_total": -0.011533,
+      "loss_sum_fraction_of_total_doubling": -0.011533,
+      "loss_where_already_a_prefix": {
+       "n": 53,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": -0.046265754,
+       "max": 0.0,
+       "sum": -0.046265754
+      },
+      "loss_where_not_a_prefix": {
+       "n": 0
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 53,
+        "median": 4.0,
+        "p90": 4.0,
+        "min": 4.0,
+        "max": 4.0,
+        "sum": 212.0
+       },
+       "exhaustive": {
+        "n": 53,
+        "median": 4.0,
+        "p90": 4.0,
+        "min": 4.0,
+        "max": 4.0,
+        "sum": 212.0
+       },
+       "doubling": {
+        "n": 53,
+        "median": 4.0,
+        "p90": 4.0,
+        "min": 4.0,
+        "max": 4.0,
+        "sum": 212.0
+       }
+      }
+     }
+    }
+   },
+   "by_backlog_tercile_running_requests": {
+    "edges": {
+     "lo": 2.0,
+     "hi": 2.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n_periods": 708,
+      "n_candidates": {
+       "n": 708,
+       "median": 2.0,
+       "p90": 2.0,
+       "min": 1.0,
+       "max": 2.0,
+       "sum": 1413.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.0,
+      "n_per_candidate_not_a_prefix": 0,
+      "fraction_best_prefix_differs": 0.001412,
+      "n_best_prefix_differs": 1,
+      "loss_best_prefix": {
+       "n": 708,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": -0.046265754,
+       "max": 0.0,
+       "sum": -0.046265754
+      },
+      "loss_doubling": {
+       "n": 708,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": -0.046265754,
+       "max": 0.0,
+       "sum": -0.046265754
+      },
+      "quantisation_cost": {
+       "n": 708,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 87.969598216,
+      "loss_sum_fraction_of_total": -0.000526,
+      "loss_sum_fraction_of_total_doubling": -0.000526,
+      "loss_where_already_a_prefix": {
+       "n": 708,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": -0.046265754,
+       "max": 0.0,
+       "sum": -0.046265754
+      },
+      "loss_where_not_a_prefix": {
+       "n": 0
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 708,
+        "median": 4.0,
+        "p90": 4.0,
+        "min": 2.0,
+        "max": 4.0,
+        "sum": 2826.0
+       },
+       "exhaustive": {
+        "n": 708,
+        "median": 4.0,
+        "p90": 4.0,
+        "min": 3.0,
+        "max": 4.0,
+        "sum": 2829.0
+       },
+       "doubling": {
+        "n": 708,
+        "median": 4.0,
+        "p90": 4.0,
+        "min": 3.0,
+        "max": 4.0,
+        "sum": 2829.0
+       }
+      }
+     },
+     "T2_mid": {
+      "n_periods": 0
+     },
+     "T3_high": {
+      "n_periods": 17,
+      "n_candidates": {
+       "n": 17,
+       "median": 2.0,
+       "p90": 2.0,
+       "min": 1.0,
+       "max": 2.0,
+       "sum": 27.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.0,
+      "n_per_candidate_not_a_prefix": 0,
+      "fraction_best_prefix_differs": 0.0,
+      "n_best_prefix_differs": 0,
+      "loss_best_prefix": {
+       "n": 17,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "loss_doubling": {
+       "n": 17,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "quantisation_cost": {
+       "n": 17,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 1.484547515,
+      "loss_sum_fraction_of_total": 0.0,
+      "loss_sum_fraction_of_total_doubling": 0.0,
+      "loss_where_already_a_prefix": {
+       "n": 17,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "loss_where_not_a_prefix": {
+       "n": 0
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 17,
+        "median": 4.0,
+        "p90": 4.0,
+        "min": 2.0,
+        "max": 4.0,
+        "sum": 54.0
+       },
+       "exhaustive": {
+        "n": 17,
+        "median": 4.0,
+        "p90": 4.0,
+        "min": 3.0,
+        "max": 4.0,
+        "sum": 61.0
+       },
+       "doubling": {
+        "n": 17,
+        "median": 4.0,
+        "p90": 4.0,
+        "min": 3.0,
+        "max": 4.0,
+        "sum": 61.0
+       }
+      }
+     }
+    }
+   },
+   "projection": {
+    "is_projection": true,
+    "method": "live decision latency scaled by (doubling rollouts / per-candidate rollouts); assumes decision time is rollout-dominated and linear in rollout count, so it is OPTIMISTIC for the cheaper method because non-rollout work does not shrink",
+    "measured_per_rollout_ms": 0.102016,
+    "rollout_ratio_doubling_over_per_candidate": {
+     "median": 1.0,
+     "dist": {
+      "n": 725,
+      "median": 1.0,
+      "p90": 1.0,
+      "min": 1.0,
+      "max": 1.5,
+      "sum": 730.0
+     }
+    },
+    "live_decision_latency_ms": {
+     "p50": 1.8736,
+     "p99": 8.459,
+     "max": 9.5249,
+     "n": 1801
+    },
+    "projected_doubling_p50_ms": 1.8736,
+    "projected_doubling_p99_ms": 8.459
+   },
+   "worked_example": null,
+   "sanity_single_candidate": {
+    "n_periods_with_one_candidate": 10,
+    "n_disagreeing": 0,
+    "agree": true,
+    "note": "with n = 1 the prefixes are the empty set and the single candidate, so an exhaustive search and a doubling ladder both contain the per-candidate answer; a disagreement here would mean the three DeltaJ definitions are not the same function of the admitted set",
+    "first_disagreement": null
+   },
+   "live_decision_latency_ms": {
+    "p50": 1.8736,
+    "p99": 8.459,
+    "max": 9.5249,
+    "n": 1801
+   },
+   "study_wall_s": 5.32
+  },
+  {
+   "n_devices": 32,
+   "window_s": 180.0,
+   "seed": 1,
+   "H_s": 1.0,
+   "mu_mode": "none",
+   "n_periods_with_sh_candidates": 1797,
+   "overall": {
+    "n_periods": 1797,
+    "n_candidates": {
+     "n": 1797,
+     "median": 3.0,
+     "p90": 5.0,
+     "min": 1.0,
+     "max": 7.0,
+     "sum": 5744.0
+    },
+    "fraction_per_candidate_not_a_prefix": 0.367279,
+    "n_per_candidate_not_a_prefix": 660,
+    "fraction_best_prefix_differs": 0.371731,
+    "n_best_prefix_differs": 668,
+    "loss_best_prefix": {
+     "n": 1797,
+     "median": 0.0,
+     "p90": 0.055439057,
+     "min": -0.102647483,
+     "max": 0.133923618,
+     "sum": 37.675736815
+    },
+    "loss_doubling": {
+     "n": 1797,
+     "median": 0.0,
+     "p90": 0.055439057,
+     "min": -0.102647483,
+     "max": 0.133923618,
+     "sum": 37.71113676
+    },
+    "quantisation_cost": {
+     "n": 1797,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0.0,
+     "max": 0.035399945,
+     "sum": 0.035399945
+    },
+    "total_delta_j_per_candidate": 149.977345385,
+    "loss_sum_fraction_of_total": 0.25121,
+    "loss_sum_fraction_of_total_doubling": 0.251446,
+    "loss_where_already_a_prefix": {
+     "n": 1137,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": -0.102647483,
+     "max": 0.0,
+     "sum": -0.495807845
+    },
+    "loss_where_not_a_prefix": {
+     "n": 660,
+     "median": 0.054869096,
+     "p90": 0.102873251,
+     "min": 0.00327949,
+     "max": 0.133923618,
+     "sum": 38.17154466
+    },
+    "rollouts": {
+     "per_candidate": {
+      "n": 1797,
+      "median": 6.0,
+      "p90": 10.0,
+      "min": 2.0,
+      "max": 14.0,
+      "sum": 11488.0
+     },
+     "exhaustive": {
+      "n": 1797,
+      "median": 5.0,
+      "p90": 7.0,
+      "min": 3.0,
+      "max": 9.0,
+      "sum": 9338.0
+     },
+     "doubling": {
+      "n": 1797,
+      "median": 5.0,
+      "p90": 6.0,
+      "min": 3.0,
+      "max": 6.0,
+      "sum": 8583.0
+     }
+    }
+   },
+   "by_backlog_tercile_queued_tokens": {
+    "edges": {
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n_periods": 1660,
+      "n_candidates": {
+       "n": 1660,
+       "median": 3.0,
+       "p90": 5.0,
+       "min": 1.0,
+       "max": 7.0,
+       "sum": 5321.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.374699,
+      "n_per_candidate_not_a_prefix": 622,
+      "fraction_best_prefix_differs": 0.374699,
+      "n_best_prefix_differs": 622,
+      "loss_best_prefix": {
+       "n": 1660,
+       "median": 0.0,
+       "p90": 0.055439057,
+       "min": 0.0,
+       "max": 0.133923618,
+       "sum": 37.474527473
+      },
+      "loss_doubling": {
+       "n": 1660,
+       "median": 0.0,
+       "p90": 0.055439057,
+       "min": 0.0,
+       "max": 0.133923618,
+       "sum": 37.474527473
+      },
+      "quantisation_cost": {
+       "n": 1660,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 143.776276593,
+      "loss_sum_fraction_of_total": 0.260645,
+      "loss_sum_fraction_of_total_doubling": 0.260645,
+      "loss_where_already_a_prefix": {
+       "n": 1038,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "loss_where_not_a_prefix": {
+       "n": 622,
+       "median": 0.054869096,
+       "p90": 0.102873251,
+       "min": 0.00327949,
+       "max": 0.133923618,
+       "sum": 37.474527473
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 1660,
+        "median": 6.0,
+        "p90": 10.0,
+        "min": 2.0,
+        "max": 14.0,
+        "sum": 10642.0
+       },
+       "exhaustive": {
+        "n": 1660,
+        "median": 5.0,
+        "p90": 7.0,
+        "min": 3.0,
+        "max": 9.0,
+        "sum": 8641.0
+       },
+       "doubling": {
+        "n": 1660,
+        "median": 5.0,
+        "p90": 6.0,
+        "min": 3.0,
+        "max": 6.0,
+        "sum": 7936.0
+       }
+      }
+     },
+     "T2_mid": {
+      "n_periods": 0
+     },
+     "T3_high": {
+      "n_periods": 137,
+      "n_candidates": {
+       "n": 137,
+       "median": 3.0,
+       "p90": 5.0,
+       "min": 1.0,
+       "max": 7.0,
+       "sum": 423.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.277372,
+      "n_per_candidate_not_a_prefix": 38,
+      "fraction_best_prefix_differs": 0.335766,
+      "n_best_prefix_differs": 46,
+      "loss_best_prefix": {
+       "n": 137,
+       "median": 0.0,
+       "p90": 0.010532343,
+       "min": -0.102647483,
+       "max": 0.099491827,
+       "sum": 0.201209343
+      },
+      "loss_doubling": {
+       "n": 137,
+       "median": 0.0,
+       "p90": 0.010532343,
+       "min": -0.102647483,
+       "max": 0.099491827,
+       "sum": 0.236609287
+      },
+      "quantisation_cost": {
+       "n": 137,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.035399945,
+       "sum": 0.035399945
+      },
+      "total_delta_j_per_candidate": 6.201068793,
+      "loss_sum_fraction_of_total": 0.032448,
+      "loss_sum_fraction_of_total_doubling": 0.038156,
+      "loss_where_already_a_prefix": {
+       "n": 99,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": -0.102647483,
+       "max": 0.0,
+       "sum": -0.495807845
+      },
+      "loss_where_not_a_prefix": {
+       "n": 38,
+       "median": 0.009201259,
+       "p90": 0.054235604,
+       "min": 0.005917272,
+       "max": 0.099491827,
+       "sum": 0.697017188
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 137,
+        "median": 6.0,
+        "p90": 10.0,
+        "min": 2.0,
+        "max": 14.0,
+        "sum": 846.0
+       },
+       "exhaustive": {
+        "n": 137,
+        "median": 5.0,
+        "p90": 7.0,
+        "min": 3.0,
+        "max": 9.0,
+        "sum": 697.0
+       },
+       "doubling": {
+        "n": 137,
+        "median": 5.0,
+        "p90": 6.0,
+        "min": 3.0,
+        "max": 6.0,
+        "sum": 647.0
+       }
+      }
+     }
+    }
+   },
+   "by_backlog_tercile_running_requests": {
+    "edges": {
+     "lo": 6.0,
+     "hi": 8.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n_periods": 674,
+      "n_candidates": {
+       "n": 674,
+       "median": 4.0,
+       "p90": 5.0,
+       "min": 1.0,
+       "max": 7.0,
+       "sum": 2294.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.148368,
+      "n_per_candidate_not_a_prefix": 100,
+      "fraction_best_prefix_differs": 0.15727,
+      "n_best_prefix_differs": 106,
+      "loss_best_prefix": {
+       "n": 674,
+       "median": 0.0,
+       "p90": 0.04260513,
+       "min": -0.095453105,
+       "max": 0.104192456,
+       "sum": 3.493154467
+      },
+      "loss_doubling": {
+       "n": 674,
+       "median": 0.0,
+       "p90": 0.04260513,
+       "min": -0.095453105,
+       "max": 0.104192456,
+       "sum": 3.528554412
+      },
+      "quantisation_cost": {
+       "n": 674,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.035399945,
+       "sum": 0.035399945
+      },
+      "total_delta_j_per_candidate": 60.030333561,
+      "loss_sum_fraction_of_total": 0.05819,
+      "loss_sum_fraction_of_total_doubling": 0.05878,
+      "loss_where_already_a_prefix": {
+       "n": 574,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": -0.095453105,
+       "max": 0.0,
+       "sum": -0.334374276
+      },
+      "loss_where_not_a_prefix": {
+       "n": 100,
+       "median": 0.04260513,
+       "p90": 0.053518363,
+       "min": 0.00327949,
+       "max": 0.104192456,
+       "sum": 3.827528743
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 674,
+        "median": 8.0,
+        "p90": 10.0,
+        "min": 2.0,
+        "max": 14.0,
+        "sum": 4588.0
+       },
+       "exhaustive": {
+        "n": 674,
+        "median": 6.0,
+        "p90": 7.0,
+        "min": 3.0,
+        "max": 9.0,
+        "sum": 3642.0
+       },
+       "doubling": {
+        "n": 674,
+        "median": 5.0,
+        "p90": 6.0,
+        "min": 3.0,
+        "max": 6.0,
+        "sum": 3291.0
+       }
+      }
+     },
+     "T2_mid": {
+      "n_periods": 819,
+      "n_candidates": {
+       "n": 819,
+       "median": 3.0,
+       "p90": 4.0,
+       "min": 1.0,
+       "max": 5.0,
+       "sum": 2549.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.605617,
+      "n_per_candidate_not_a_prefix": 496,
+      "fraction_best_prefix_differs": 0.608059,
+      "n_best_prefix_differs": 498,
+      "loss_best_prefix": {
+       "n": 819,
+       "median": 0.043861396,
+       "p90": 0.102873251,
+       "min": -0.102647483,
+       "max": 0.133923618,
+       "sum": 31.15218169
+      },
+      "loss_doubling": {
+       "n": 819,
+       "median": 0.043861396,
+       "p90": 0.102873251,
+       "min": -0.102647483,
+       "max": 0.133923618,
+       "sum": 31.15218169
+      },
+      "quantisation_cost": {
+       "n": 819,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 86.576247363,
+      "loss_sum_fraction_of_total": 0.359824,
+      "loss_sum_fraction_of_total_doubling": 0.359824,
+      "loss_where_already_a_prefix": {
+       "n": 323,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": -0.102647483,
+       "max": 0.0,
+       "sum": -0.161433569
+      },
+      "loss_where_not_a_prefix": {
+       "n": 496,
+       "median": 0.05525161,
+       "p90": 0.102873251,
+       "min": 0.006087996,
+       "max": 0.133923618,
+       "sum": 31.313615259
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 819,
+        "median": 6.0,
+        "p90": 8.0,
+        "min": 2.0,
+        "max": 10.0,
+        "sum": 5098.0
+       },
+       "exhaustive": {
+        "n": 819,
+        "median": 5.0,
+        "p90": 6.0,
+        "min": 3.0,
+        "max": 7.0,
+        "sum": 4187.0
+       },
+       "doubling": {
+        "n": 819,
+        "median": 5.0,
+        "p90": 5.0,
+        "min": 3.0,
+        "max": 6.0,
+        "sum": 3959.0
+       }
+      }
+     },
+     "T3_high": {
+      "n_periods": 304,
+      "n_candidates": {
+       "n": 304,
+       "median": 4.0,
+       "p90": 5.0,
+       "min": 1.0,
+       "max": 6.0,
+       "sum": 901.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.210526,
+      "n_per_candidate_not_a_prefix": 64,
+      "fraction_best_prefix_differs": 0.210526,
+      "n_best_prefix_differs": 64,
+      "loss_best_prefix": {
+       "n": 304,
+       "median": 0.0,
+       "p90": 0.053098504,
+       "min": 0.0,
+       "max": 0.053178358,
+       "sum": 3.030400658
+      },
+      "loss_doubling": {
+       "n": 304,
+       "median": 0.0,
+       "p90": 0.053098504,
+       "min": 0.0,
+       "max": 0.053178358,
+       "sum": 3.030400658
+      },
+      "quantisation_cost": {
+       "n": 304,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 3.370764462,
+      "loss_sum_fraction_of_total": 0.899025,
+      "loss_sum_fraction_of_total_doubling": 0.899025,
+      "loss_where_already_a_prefix": {
+       "n": 240,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "loss_where_not_a_prefix": {
+       "n": 64,
+       "median": 0.053098504,
+       "p90": 0.053178358,
+       "min": 0.005917272,
+       "max": 0.053178358,
+       "sum": 3.030400658
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 304,
+        "median": 8.0,
+        "p90": 10.0,
+        "min": 2.0,
+        "max": 12.0,
+        "sum": 1802.0
+       },
+       "exhaustive": {
+        "n": 304,
+        "median": 6.0,
+        "p90": 7.0,
+        "min": 3.0,
+        "max": 8.0,
+        "sum": 1509.0
+       },
+       "doubling": {
+        "n": 304,
+        "median": 5.0,
+        "p90": 6.0,
+        "min": 3.0,
+        "max": 6.0,
+        "sum": 1333.0
+       }
+      }
+     }
+    }
+   },
+   "projection": {
+    "is_projection": true,
+    "method": "live decision latency scaled by (doubling rollouts / per-candidate rollouts); assumes decision time is rollout-dominated and linear in rollout count, so it is OPTIMISTIC for the cheaper method because non-rollout work does not shrink",
+    "measured_per_rollout_ms": 0.314674,
+    "rollout_ratio_doubling_over_per_candidate": {
+     "median": 0.833333,
+     "dist": {
+      "n": 1797,
+      "median": 0.833333333,
+      "p90": 1.5,
+      "min": 0.428571429,
+      "max": 1.5,
+      "sum": 1521.96547619
+     }
+    },
+    "live_decision_latency_ms": {
+     "p50": 19.8262,
+     "p99": 99.0597,
+     "max": 157.1685,
+     "n": 1801
+    },
+    "projected_doubling_p50_ms": 16.5218,
+    "projected_doubling_p99_ms": 82.5498
+   },
+   "worked_example": {
+    "t": 50.6,
+    "n_candidates": 5,
+    "admitted_indices_in_deadline_order": [
+     2,
+     4,
+     5
+    ],
+    "why_no_prefix_can_express_it": "the admitted indices are [2, 4, 5], which is not 1..3, so a later-deadline candidate was admitted while an earlier one was declined and no k reproduces the set",
+    "delta_j_per_candidate": 0.13392361785171958,
+    "delta_j_best_prefix": 0.0,
+    "k_star": 0,
+    "loss_best_prefix": 0.13392361785171958,
+    "backlog_queued_tokens": 0,
+    "backlog_running_requests": 7
+   },
+   "sanity_single_candidate": {
+    "n_periods_with_one_candidate": 223,
+    "n_disagreeing": 0,
+    "agree": true,
+    "note": "with n = 1 the prefixes are the empty set and the single candidate, so an exhaustive search and a doubling ladder both contain the per-candidate answer; a disagreement here would mean the three DeltaJ definitions are not the same function of the admitted set",
+    "first_disagreement": null
+   },
+   "live_decision_latency_ms": {
+    "p50": 19.8262,
+    "p99": 99.0597,
+    "max": 157.1685,
+    "n": 1801
+   },
+   "study_wall_s": 42.35
+  },
+  {
+   "n_devices": 64,
+   "window_s": 180.0,
+   "seed": 1,
+   "H_s": 1.0,
+   "mu_mode": "none",
+   "n_periods_with_sh_candidates": 1800,
+   "overall": {
+    "n_periods": 1800,
+    "n_candidates": {
+     "n": 1800,
+     "median": 7.0,
+     "p90": 8.0,
+     "min": 1.0,
+     "max": 12.0,
+     "sum": 11488.0
+    },
+    "fraction_per_candidate_not_a_prefix": 0.737222,
+    "n_per_candidate_not_a_prefix": 1327,
+    "fraction_best_prefix_differs": 0.741667,
+    "n_best_prefix_differs": 1335,
+    "loss_best_prefix": {
+     "n": 1800,
+     "median": 0.10133085,
+     "p90": 0.104514294,
+     "min": -0.072067686,
+     "max": 0.151170273,
+     "sum": 121.645970862
+    },
+    "loss_doubling": {
+     "n": 1800,
+     "median": 0.10133085,
+     "p90": 0.104514294,
+     "min": -0.072067686,
+     "max": 0.151170273,
+     "sum": 121.645970862
+    },
+    "quantisation_cost": {
+     "n": 1800,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0.0,
+     "max": 0.0,
+     "sum": 0.0
+    },
+    "total_delta_j_per_candidate": 153.572781082,
+    "loss_sum_fraction_of_total": 0.792106,
+    "loss_sum_fraction_of_total_doubling": 0.792106,
+    "loss_where_already_a_prefix": {
+     "n": 473,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": -0.072067686,
+     "max": 0.0,
+     "sum": -0.223764011
+    },
+    "loss_where_not_a_prefix": {
+     "n": 1327,
+     "median": 0.102111625,
+     "p90": 0.104514294,
+     "min": 0.006062794,
+     "max": 0.151170273,
+     "sum": 121.869734873
+    },
+    "rollouts": {
+     "per_candidate": {
+      "n": 1800,
+      "median": 14.0,
+      "p90": 16.0,
+      "min": 2.0,
+      "max": 24.0,
+      "sum": 22976.0
+     },
+     "exhaustive": {
+      "n": 1800,
+      "median": 9.0,
+      "p90": 10.0,
+      "min": 3.0,
+      "max": 14.0,
+      "sum": 15088.0
+     },
+     "doubling": {
+      "n": 1800,
+      "median": 6.0,
+      "p90": 6.0,
+      "min": 3.0,
+      "max": 7.0,
+      "sum": 10697.0
+     }
+    }
+   },
+   "by_backlog_tercile_queued_tokens": {
+    "edges": {
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n_periods": 1661,
+      "n_candidates": {
+       "n": 1661,
+       "median": 7.0,
+       "p90": 8.0,
+       "min": 1.0,
+       "max": 12.0,
+       "sum": 10619.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.737508,
+      "n_per_candidate_not_a_prefix": 1225,
+      "fraction_best_prefix_differs": 0.737508,
+      "n_best_prefix_differs": 1225,
+      "loss_best_prefix": {
+       "n": 1661,
+       "median": 0.10133085,
+       "p90": 0.104514294,
+       "min": 0.0,
+       "max": 0.151170273,
+       "sum": 116.583663082
+      },
+      "loss_doubling": {
+       "n": 1661,
+       "median": 0.10133085,
+       "p90": 0.104514294,
+       "min": 0.0,
+       "max": 0.151170273,
+       "sum": 116.583663082
+      },
+      "quantisation_cost": {
+       "n": 1661,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 147.032142932,
+      "loss_sum_fraction_of_total": 0.792913,
+      "loss_sum_fraction_of_total_doubling": 0.792913,
+      "loss_where_already_a_prefix": {
+       "n": 436,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "loss_where_not_a_prefix": {
+       "n": 1225,
+       "median": 0.102262404,
+       "p90": 0.104514294,
+       "min": 0.006062794,
+       "max": 0.151170273,
+       "sum": 116.583663082
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 1661,
+        "median": 14.0,
+        "p90": 16.0,
+        "min": 2.0,
+        "max": 24.0,
+        "sum": 21238.0
+       },
+       "exhaustive": {
+        "n": 1661,
+        "median": 9.0,
+        "p90": 10.0,
+        "min": 3.0,
+        "max": 14.0,
+        "sum": 13941.0
+       },
+       "doubling": {
+        "n": 1661,
+        "median": 6.0,
+        "p90": 6.0,
+        "min": 3.0,
+        "max": 7.0,
+        "sum": 9880.0
+       }
+      }
+     },
+     "T2_mid": {
+      "n_periods": 0
+     },
+     "T3_high": {
+      "n_periods": 139,
+      "n_candidates": {
+       "n": 139,
+       "median": 7.0,
+       "p90": 8.0,
+       "min": 1.0,
+       "max": 9.0,
+       "sum": 869.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.733813,
+      "n_per_candidate_not_a_prefix": 102,
+      "fraction_best_prefix_differs": 0.791367,
+      "n_best_prefix_differs": 110,
+      "loss_best_prefix": {
+       "n": 139,
+       "median": 0.054930392,
+       "p90": 0.057333061,
+       "min": -0.072067686,
+       "max": 0.057333061,
+       "sum": 5.06230778
+      },
+      "loss_doubling": {
+       "n": 139,
+       "median": 0.054930392,
+       "p90": 0.057333061,
+       "min": -0.072067686,
+       "max": 0.057333061,
+       "sum": 5.06230778
+      },
+      "quantisation_cost": {
+       "n": 139,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 6.54063815,
+      "loss_sum_fraction_of_total": 0.773978,
+      "loss_sum_fraction_of_total_doubling": 0.773978,
+      "loss_where_already_a_prefix": {
+       "n": 37,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": -0.072067686,
+       "max": 0.0,
+       "sum": -0.223764011
+      },
+      "loss_where_not_a_prefix": {
+       "n": 102,
+       "median": 0.055081171,
+       "p90": 0.057333061,
+       "min": 0.006918198,
+       "max": 0.057333061,
+       "sum": 5.28607179
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 139,
+        "median": 14.0,
+        "p90": 16.0,
+        "min": 2.0,
+        "max": 18.0,
+        "sum": 1738.0
+       },
+       "exhaustive": {
+        "n": 139,
+        "median": 9.0,
+        "p90": 10.0,
+        "min": 3.0,
+        "max": 11.0,
+        "sum": 1147.0
+       },
+       "doubling": {
+        "n": 139,
+        "median": 6.0,
+        "p90": 6.0,
+        "min": 3.0,
+        "max": 7.0,
+        "sum": 817.0
+       }
+      }
+     }
+    }
+   },
+   "by_backlog_tercile_running_requests": {
+    "edges": {
+     "lo": 7.0,
+     "hi": 8.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n_periods": 647,
+      "n_candidates": {
+       "n": 647,
+       "median": 7.0,
+       "p90": 8.0,
+       "min": 1.0,
+       "max": 12.0,
+       "sum": 3948.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.333849,
+      "n_per_candidate_not_a_prefix": 216,
+      "fraction_best_prefix_differs": 0.346213,
+      "n_best_prefix_differs": 224,
+      "loss_best_prefix": {
+       "n": 647,
+       "median": 0.0,
+       "p90": 0.106512956,
+       "min": -0.072067686,
+       "max": 0.151170273,
+       "sum": 17.804552772
+      },
+      "loss_doubling": {
+       "n": 647,
+       "median": 0.0,
+       "p90": 0.106512956,
+       "min": -0.072067686,
+       "max": 0.151170273,
+       "sum": 17.804552772
+      },
+      "quantisation_cost": {
+       "n": 647,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 48.944255939,
+      "loss_sum_fraction_of_total": 0.363772,
+      "loss_sum_fraction_of_total_doubling": 0.363772,
+      "loss_where_already_a_prefix": {
+       "n": 431,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": -0.072067686,
+       "max": 0.0,
+       "sum": -0.223764011
+      },
+      "loss_where_not_a_prefix": {
+       "n": 216,
+       "median": 0.09302425,
+       "p90": 0.138292815,
+       "min": 0.006062794,
+       "max": 0.151170273,
+       "sum": 18.028316782
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 647,
+        "median": 14.0,
+        "p90": 16.0,
+        "min": 2.0,
+        "max": 24.0,
+        "sum": 7896.0
+       },
+       "exhaustive": {
+        "n": 647,
+        "median": 9.0,
+        "p90": 10.0,
+        "min": 3.0,
+        "max": 14.0,
+        "sum": 5242.0
+       },
+       "doubling": {
+        "n": 647,
+        "median": 6.0,
+        "p90": 6.0,
+        "min": 3.0,
+        "max": 7.0,
+        "sum": 3809.0
+       }
+      }
+     },
+     "T2_mid": {
+      "n_periods": 1008,
+      "n_candidates": {
+       "n": 1008,
+       "median": 7.0,
+       "p90": 8.0,
+       "min": 2.0,
+       "max": 10.0,
+       "sum": 6573.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.987103,
+      "n_per_candidate_not_a_prefix": 995,
+      "fraction_best_prefix_differs": 0.987103,
+      "n_best_prefix_differs": 995,
+      "loss_best_prefix": {
+       "n": 1008,
+       "median": 0.102262404,
+       "p90": 0.104514294,
+       "min": 0.0,
+       "max": 0.10501397,
+       "sum": 96.656121071
+      },
+      "loss_doubling": {
+       "n": 1008,
+       "median": 0.102262404,
+       "p90": 0.104514294,
+       "min": 0.0,
+       "max": 0.10501397,
+       "sum": 96.656121071
+      },
+      "quantisation_cost": {
+       "n": 1008,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 97.085471689,
+      "loss_sum_fraction_of_total": 0.995578,
+      "loss_sum_fraction_of_total_doubling": 0.995578,
+      "loss_where_already_a_prefix": {
+       "n": 13,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "loss_where_not_a_prefix": {
+       "n": 995,
+       "median": 0.102262404,
+       "p90": 0.104514294,
+       "min": 0.047398425,
+       "max": 0.10501397,
+       "sum": 96.656121071
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 1008,
+        "median": 14.0,
+        "p90": 16.0,
+        "min": 4.0,
+        "max": 20.0,
+        "sum": 13146.0
+       },
+       "exhaustive": {
+        "n": 1008,
+        "median": 9.0,
+        "p90": 10.0,
+        "min": 4.0,
+        "max": 12.0,
+        "sum": 8589.0
+       },
+       "doubling": {
+        "n": 1008,
+        "median": 6.0,
+        "p90": 6.0,
+        "min": 4.0,
+        "max": 7.0,
+        "sum": 6042.0
+       }
+      }
+     },
+     "T3_high": {
+      "n_periods": 145,
+      "n_candidates": {
+       "n": 145,
+       "median": 7.0,
+       "p90": 8.0,
+       "min": 1.0,
+       "max": 9.0,
+       "sum": 967.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.8,
+      "n_per_candidate_not_a_prefix": 116,
+      "fraction_best_prefix_differs": 0.8,
+      "n_best_prefix_differs": 116,
+      "loss_best_prefix": {
+       "n": 145,
+       "median": 0.053851608,
+       "p90": 0.099340368,
+       "min": 0.0,
+       "max": 0.101592259,
+       "sum": 7.185297019
+      },
+      "loss_doubling": {
+       "n": 145,
+       "median": 0.053851608,
+       "p90": 0.099340368,
+       "min": 0.0,
+       "max": 0.101592259,
+       "sum": 7.185297019
+      },
+      "quantisation_cost": {
+       "n": 145,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 7.543053454,
+      "loss_sum_fraction_of_total": 0.952571,
+      "loss_sum_fraction_of_total_doubling": 0.952571,
+      "loss_where_already_a_prefix": {
+       "n": 29,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "loss_where_not_a_prefix": {
+       "n": 116,
+       "median": 0.05409943,
+       "p90": 0.099340368,
+       "min": 0.006918198,
+       "max": 0.101592259,
+       "sum": 7.185297019
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 145,
+        "median": 14.0,
+        "p90": 16.0,
+        "min": 2.0,
+        "max": 18.0,
+        "sum": 1934.0
+       },
+       "exhaustive": {
+        "n": 145,
+        "median": 9.0,
+        "p90": 10.0,
+        "min": 3.0,
+        "max": 11.0,
+        "sum": 1257.0
+       },
+       "doubling": {
+        "n": 145,
+        "median": 6.0,
+        "p90": 6.0,
+        "min": 3.0,
+        "max": 7.0,
+        "sum": 846.0
+       }
+      }
+     }
+    }
+   },
+   "projection": {
+    "is_projection": true,
+    "method": "live decision latency scaled by (doubling rollouts / per-candidate rollouts); assumes decision time is rollout-dominated and linear in rollout count, so it is OPTIMISTIC for the cheaper method because non-rollout work does not shrink",
+    "measured_per_rollout_ms": 0.627073,
+    "rollout_ratio_doubling_over_per_candidate": {
+     "median": 0.428571,
+     "dist": {
+      "n": 1800,
+      "median": 0.428571429,
+      "p90": 0.6,
+      "min": 0.291666667,
+      "max": 1.5,
+      "sum": 889.636507937
+     }
+    },
+    "live_decision_latency_ms": {
+     "p50": 49.7327,
+     "p99": 247.4477,
+     "max": 345.9634,
+     "n": 1801
+    },
+    "projected_doubling_p50_ms": 21.314,
+    "projected_doubling_p99_ms": 106.049
+   },
+   "worked_example": {
+    "t": 83.8,
+    "n_candidates": 6,
+    "admitted_indices_in_deadline_order": [
+     4,
+     5,
+     6
+    ],
+    "why_no_prefix_can_express_it": "the admitted indices are [4, 5, 6], which is not 1..3, so a later-deadline candidate was admitted while an earlier one was declined and no k reproduces the set",
+    "delta_j_per_candidate": 0.15117027333392552,
+    "delta_j_best_prefix": 0.0,
+    "k_star": 0,
+    "loss_best_prefix": 0.15117027333392552,
+    "backlog_queued_tokens": 0,
+    "backlog_running_requests": 7
+   },
+   "sanity_single_candidate": {
+    "n_periods_with_one_candidate": 3,
+    "n_disagreeing": 0,
+    "agree": true,
+    "note": "with n = 1 the prefixes are the empty set and the single candidate, so an exhaustive search and a doubling ladder both contain the per-candidate answer; a disagreement here would mean the three DeltaJ definitions are not the same function of the admitted set",
+    "first_disagreement": null
+   },
+   "live_decision_latency_ms": {
+    "p50": 49.7327,
+    "p99": 247.4477,
+    "max": 345.9634,
+    "n": 1801
+   },
+   "study_wall_s": 106.16
+  },
+  {
+   "n_devices": 128,
+   "window_s": 180.0,
+   "seed": 1,
+   "H_s": 1.0,
+   "mu_mode": "none",
+   "n_periods_with_sh_candidates": 1800,
+   "overall": {
+    "n_periods": 1800,
+    "n_candidates": {
+     "n": 1800,
+     "median": 12.0,
+     "p90": 15.0,
+     "min": 1.0,
+     "max": 19.0,
+     "sum": 22976.0
+    },
+    "fraction_per_candidate_not_a_prefix": 0.775556,
+    "n_per_candidate_not_a_prefix": 1396,
+    "fraction_best_prefix_differs": 0.779444,
+    "n_best_prefix_differs": 1403,
+    "loss_best_prefix": {
+     "n": 1800,
+     "median": 0.089798699,
+     "p90": 0.103290846,
+     "min": -0.112139714,
+     "max": 0.155391113,
+     "sum": 122.7643423
+    },
+    "loss_doubling": {
+     "n": 1800,
+     "median": 0.089798699,
+     "p90": 0.103290846,
+     "min": -0.112139714,
+     "max": 0.155391113,
+     "sum": 122.80680066
+    },
+    "quantisation_cost": {
+     "n": 1800,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": 0.0,
+     "max": 0.042458361,
+     "sum": 0.042458361
+    },
+    "total_delta_j_per_candidate": 146.649355559,
+    "loss_sum_fraction_of_total": 0.837128,
+    "loss_sum_fraction_of_total_doubling": 0.837418,
+    "loss_where_already_a_prefix": {
+     "n": 404,
+     "median": 0.0,
+     "p90": 0.0,
+     "min": -0.112139714,
+     "max": 0.0,
+     "sum": -0.315586624
+    },
+    "loss_where_not_a_prefix": {
+     "n": 1396,
+     "median": 0.090114594,
+     "p90": 0.103467255,
+     "min": 0.000261141,
+     "max": 0.155391113,
+     "sum": 123.079928924
+    },
+    "rollouts": {
+     "per_candidate": {
+      "n": 1800,
+      "median": 24.0,
+      "p90": 30.0,
+      "min": 2.0,
+      "max": 38.0,
+      "sum": 45952.0
+     },
+     "exhaustive": {
+      "n": 1800,
+      "median": 14.0,
+      "p90": 17.0,
+      "min": 3.0,
+      "max": 21.0,
+      "sum": 26576.0
+     },
+     "doubling": {
+      "n": 1800,
+      "median": 7.0,
+      "p90": 7.0,
+      "min": 3.0,
+      "max": 8.0,
+      "sum": 12654.0
+     }
+    }
+   },
+   "by_backlog_tercile_queued_tokens": {
+    "edges": {
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n_periods": 1661,
+      "n_candidates": {
+       "n": 1661,
+       "median": 12.0,
+       "p90": 15.0,
+       "min": 1.0,
+       "max": 19.0,
+       "sum": 21217.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.781457,
+      "n_per_candidate_not_a_prefix": 1298,
+      "fraction_best_prefix_differs": 0.781457,
+      "n_best_prefix_differs": 1298,
+      "loss_best_prefix": {
+       "n": 1661,
+       "median": 0.089827417,
+       "p90": 0.103290846,
+       "min": 0.0,
+       "max": 0.155391113,
+       "sum": 118.540350171
+      },
+      "loss_doubling": {
+       "n": 1661,
+       "median": 0.089827417,
+       "p90": 0.103290846,
+       "min": 0.0,
+       "max": 0.155391113,
+       "sum": 118.540350171
+      },
+      "quantisation_cost": {
+       "n": 1661,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 141.068732107,
+      "loss_sum_fraction_of_total": 0.840302,
+      "loss_sum_fraction_of_total_doubling": 0.840302,
+      "loss_where_already_a_prefix": {
+       "n": 363,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "loss_where_not_a_prefix": {
+       "n": 1298,
+       "median": 0.090143312,
+       "p90": 0.103715287,
+       "min": 0.042256496,
+       "max": 0.155391113,
+       "sum": 118.540350171
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 1661,
+        "median": 24.0,
+        "p90": 30.0,
+        "min": 2.0,
+        "max": 38.0,
+        "sum": 42434.0
+       },
+       "exhaustive": {
+        "n": 1661,
+        "median": 14.0,
+        "p90": 17.0,
+        "min": 3.0,
+        "max": 21.0,
+        "sum": 24539.0
+       },
+       "doubling": {
+        "n": 1661,
+        "median": 7.0,
+        "p90": 7.0,
+        "min": 3.0,
+        "max": 8.0,
+        "sum": 11674.0
+       }
+      }
+     },
+     "T2_mid": {
+      "n_periods": 0
+     },
+     "T3_high": {
+      "n_periods": 139,
+      "n_candidates": {
+       "n": 139,
+       "median": 12.0,
+       "p90": 16.0,
+       "min": 7.0,
+       "max": 18.0,
+       "sum": 1759.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.705036,
+      "n_per_candidate_not_a_prefix": 98,
+      "fraction_best_prefix_differs": 0.755396,
+      "n_best_prefix_differs": 105,
+      "loss_best_prefix": {
+       "n": 139,
+       "median": 0.011958588,
+       "p90": 0.088231605,
+       "min": -0.112139714,
+       "max": 0.099103142,
+       "sum": 4.223992129
+      },
+      "loss_doubling": {
+       "n": 139,
+       "median": 0.028371797,
+       "p90": 0.088231605,
+       "min": -0.112139714,
+       "max": 0.099103142,
+       "sum": 4.26645049
+      },
+      "quantisation_cost": {
+       "n": 139,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.042458361,
+       "sum": 0.042458361
+      },
+      "total_delta_j_per_candidate": 5.580623451,
+      "loss_sum_fraction_of_total": 0.756903,
+      "loss_sum_fraction_of_total_doubling": 0.764511,
+      "loss_where_already_a_prefix": {
+       "n": 41,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": -0.112139714,
+       "max": 0.0,
+       "sum": -0.315586624
+      },
+      "loss_where_not_a_prefix": {
+       "n": 98,
+       "median": 0.054266964,
+       "p90": 0.088444936,
+       "min": 0.000261141,
+       "max": 0.099103142,
+       "sum": 4.539578753
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 139,
+        "median": 24.0,
+        "p90": 32.0,
+        "min": 14.0,
+        "max": 36.0,
+        "sum": 3518.0
+       },
+       "exhaustive": {
+        "n": 139,
+        "median": 14.0,
+        "p90": 18.0,
+        "min": 9.0,
+        "max": 20.0,
+        "sum": 2037.0
+       },
+       "doubling": {
+        "n": 139,
+        "median": 7.0,
+        "p90": 7.0,
+        "min": 6.0,
+        "max": 8.0,
+        "sum": 980.0
+       }
+      }
+     }
+    }
+   },
+   "by_backlog_tercile_running_requests": {
+    "edges": {
+     "lo": 7.0,
+     "hi": 8.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n_periods": 675,
+      "n_candidates": {
+       "n": 675,
+       "median": 12.0,
+       "p90": 16.0,
+       "min": 3.0,
+       "max": 19.0,
+       "sum": 8504.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.422222,
+      "n_per_candidate_not_a_prefix": 285,
+      "fraction_best_prefix_differs": 0.432593,
+      "n_best_prefix_differs": 292,
+      "loss_best_prefix": {
+       "n": 675,
+       "median": 0.0,
+       "p90": 0.135626169,
+       "min": -0.112139714,
+       "max": 0.155391113,
+       "sum": 25.714110025
+      },
+      "loss_doubling": {
+       "n": 675,
+       "median": 0.0,
+       "p90": 0.135626169,
+       "min": -0.112139714,
+       "max": 0.155391113,
+       "sum": 25.756568386
+      },
+      "quantisation_cost": {
+       "n": 675,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.042458361,
+       "sum": 0.042458361
+      },
+      "total_delta_j_per_candidate": 49.006209436,
+      "loss_sum_fraction_of_total": 0.524711,
+      "loss_sum_fraction_of_total_doubling": 0.525578,
+      "loss_where_already_a_prefix": {
+       "n": 390,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": -0.112139714,
+       "max": 0.0,
+       "sum": -0.315586624
+      },
+      "loss_where_not_a_prefix": {
+       "n": 285,
+       "median": 0.092888866,
+       "p90": 0.13635642,
+       "min": 0.000261141,
+       "max": 0.155391113,
+       "sum": 26.02969665
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 675,
+        "median": 24.0,
+        "p90": 32.0,
+        "min": 6.0,
+        "max": 38.0,
+        "sum": 17008.0
+       },
+       "exhaustive": {
+        "n": 675,
+        "median": 14.0,
+        "p90": 18.0,
+        "min": 5.0,
+        "max": 21.0,
+        "sum": 9854.0
+       },
+       "doubling": {
+        "n": 675,
+        "median": 7.0,
+        "p90": 7.0,
+        "min": 5.0,
+        "max": 8.0,
+        "sum": 4725.0
+       }
+      }
+     },
+     "T2_mid": {
+      "n_periods": 952,
+      "n_candidates": {
+       "n": 952,
+       "median": 13.0,
+       "p90": 15.0,
+       "min": 2.0,
+       "max": 19.0,
+       "sum": 12212.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.994748,
+      "n_per_candidate_not_a_prefix": 947,
+      "fraction_best_prefix_differs": 0.994748,
+      "n_best_prefix_differs": 947,
+      "loss_best_prefix": {
+       "n": 952,
+       "median": 0.090114594,
+       "p90": 0.103213913,
+       "min": 0.0,
+       "max": 0.104057898,
+       "sum": 85.639470505
+      },
+      "loss_doubling": {
+       "n": 952,
+       "median": 0.090114594,
+       "p90": 0.103213913,
+       "min": 0.0,
+       "max": 0.104057898,
+       "sum": 85.639470505
+      },
+      "quantisation_cost": {
+       "n": 952,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 85.982655267,
+      "loss_sum_fraction_of_total": 0.996009,
+      "loss_sum_fraction_of_total_doubling": 0.996009,
+      "loss_where_already_a_prefix": {
+       "n": 5,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "loss_where_not_a_prefix": {
+       "n": 947,
+       "median": 0.090114594,
+       "p90": 0.103213913,
+       "min": 0.006827514,
+       "max": 0.104057898,
+       "sum": 85.639470505
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 952,
+        "median": 26.0,
+        "p90": 30.0,
+        "min": 4.0,
+        "max": 38.0,
+        "sum": 24424.0
+       },
+       "exhaustive": {
+        "n": 952,
+        "median": 15.0,
+        "p90": 17.0,
+        "min": 4.0,
+        "max": 21.0,
+        "sum": 14116.0
+       },
+       "doubling": {
+        "n": 952,
+        "median": 7.0,
+        "p90": 7.0,
+        "min": 4.0,
+        "max": 8.0,
+        "sum": 6716.0
+       }
+      }
+     },
+     "T3_high": {
+      "n_periods": 173,
+      "n_candidates": {
+       "n": 173,
+       "median": 12.0,
+       "p90": 15.0,
+       "min": 1.0,
+       "max": 18.0,
+       "sum": 2260.0
+      },
+      "fraction_per_candidate_not_a_prefix": 0.947977,
+      "n_per_candidate_not_a_prefix": 164,
+      "fraction_best_prefix_differs": 0.947977,
+      "n_best_prefix_differs": 164,
+      "loss_best_prefix": {
+       "n": 173,
+       "median": 0.05409943,
+       "p90": 0.100435745,
+       "min": 0.0,
+       "max": 0.102046569,
+       "sum": 11.410761769
+      },
+      "loss_doubling": {
+       "n": 173,
+       "median": 0.05409943,
+       "p90": 0.100435745,
+       "min": 0.0,
+       "max": 0.102046569,
+       "sum": 11.410761769
+      },
+      "quantisation_cost": {
+       "n": 173,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "total_delta_j_per_candidate": 11.660490855,
+      "loss_sum_fraction_of_total": 0.978583,
+      "loss_sum_fraction_of_total_doubling": 0.978583,
+      "loss_where_already_a_prefix": {
+       "n": 9,
+       "median": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0,
+       "sum": 0.0
+      },
+      "loss_where_not_a_prefix": {
+       "n": 164,
+       "median": 0.05409943,
+       "p90": 0.100435745,
+       "min": 0.006289005,
+       "max": 0.102046569,
+       "sum": 11.410761769
+      },
+      "rollouts": {
+       "per_candidate": {
+        "n": 173,
+        "median": 24.0,
+        "p90": 30.0,
+        "min": 2.0,
+        "max": 36.0,
+        "sum": 4520.0
+       },
+       "exhaustive": {
+        "n": 173,
+        "median": 14.0,
+        "p90": 17.0,
+        "min": 3.0,
+        "max": 20.0,
+        "sum": 2606.0
+       },
+       "doubling": {
+        "n": 173,
+        "median": 7.0,
+        "p90": 7.0,
+        "min": 3.0,
+        "max": 8.0,
+        "sum": 1213.0
+       }
+      }
+     }
+    }
+   },
+   "projection": {
+    "is_projection": true,
+    "method": "live decision latency scaled by (doubling rollouts / per-candidate rollouts); assumes decision time is rollout-dominated and linear in rollout count, so it is OPTIMISTIC for the cheaper method because non-rollout work does not shrink",
+    "measured_per_rollout_ms": 1.282129,
+    "rollout_ratio_doubling_over_per_candidate": {
+     "median": 0.291667,
+     "dist": {
+      "n": 1800,
+      "median": 0.291666667,
+      "p90": 0.318181818,
+      "min": 0.210526316,
+      "max": 1.5,
+      "sum": 507.337001307
+     }
+    },
+    "live_decision_latency_ms": {
+     "p50": 121.5545,
+     "p99": 1081.2002,
+     "max": 1573.9156,
+     "n": 1801
+    },
+    "projected_doubling_p50_ms": 35.4534,
+    "projected_doubling_p99_ms": 315.3501
+   },
+   "worked_example": {
+    "t": 110.9,
+    "n_candidates": 15,
+    "admitted_indices_in_deadline_order": [
+     13,
+     14,
+     15
+    ],
+    "why_no_prefix_can_express_it": "the admitted indices are [13, 14, 15], which is not 1..3, so a later-deadline candidate was admitted while an earlier one was declined and no k reproduces the set",
+    "delta_j_per_candidate": 0.1553911126931996,
+    "delta_j_best_prefix": 0.0,
+    "k_star": 0,
+    "loss_best_prefix": 0.1553911126931996,
+    "backlog_queued_tokens": 0,
+    "backlog_running_requests": 2
+   },
+   "sanity_single_candidate": {
+    "n_periods_with_one_candidate": 1,
+    "n_disagreeing": 0,
+    "agree": true,
+    "note": "with n = 1 the prefixes are the empty set and the single candidate, so an exhaustive search and a doubling ladder both contain the per-candidate answer; a disagreement here would mean the three DeltaJ definitions are not the same function of the admitted set",
+    "first_disagreement": null
+   },
+   "live_decision_latency_ms": {
+    "p50": 121.5545,
+    "p99": 1081.2002,
+    "max": 1573.9156,
+    "n": 1801
+   },
+   "study_wall_s": 302.66
+  }
+ ],
+ "sanity_fixture_one_candidate_per_period": {
+  "n_devices": 2,
+  "n_periods": 360,
+  "candidates_per_period": {
+   "n": 360,
+   "median": 1.0,
+   "p90": 1.0,
+   "min": 1.0,
+   "max": 1.0,
+   "sum": 360.0
+  },
+  "check": {
+   "n_periods_with_one_candidate": 360,
+   "n_disagreeing": 0,
+   "agree": true,
+   "note": "with n = 1 the prefixes are the empty set and the single candidate, so an exhaustive search and a doubling ladder both contain the per-candidate answer; a disagreement here would mean the three DeltaJ definitions are not the same function of the admitted set",
+   "first_disagreement": null
+  },
+  "loss_best_prefix": {
+   "n": 360,
+   "median": 0.0,
+   "p90": 0.0,
+   "min": 0.0,
+   "max": 0.0,
+   "sum": 0.0
+  },
+  "loss_doubling": {
+   "n": 360,
+   "median": 0.0,
+   "p90": 0.0,
+   "min": 0.0,
+   "max": 0.0,
+   "sum": 0.0
+  }
+ },
+ "_provenance": {
+  "git_commit": "3ebbf1fe47219d9e7b5c0164b3957a48da82437f",
+  "script": "measure_option_a.py",
+  "model": "none",
+  "timestamp": "2026-11-18T14:50:26.712655",
+  "device": "flash_cpu",
+  "n": 6122,
+  "args": {
+   "sizes": "8,32,64,128",
+   "window_s": 180.0,
+   "seed": 1,
+   "h": 1.0,
+   "mu": "none",
+   "out": "/home/pragya/Desktop/FM-switching/results/orchestration/live2/coord/perf/perf_optionA_divergence.json"
+  }
+ }
+}
