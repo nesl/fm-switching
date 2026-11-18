@@ -43,7 +43,7 @@ CELLS = {
     "heavy_roomy": dict(title="heavy load, roomy host memory", sub="20 dashcams, 10 requests/s (66% of peak)",
                         verdict="only a warm history serves both"),
 }
-XLO, XHI, YLO, YHI = 0.0, 8.5, 0.0, 80.0
+XLO, XHI, YLO, YHI = 0.0, 8.5, -4.0, 80.0
 TARGET = 5.0        # robot deadline, D71
 EXPECT = {k: v["verdict"] for k, v in CELLS.items()}
 
@@ -105,18 +105,15 @@ def draw_panel(ax, cell, show_region_text=False):
                     fmt=mk, color=c, mfc=mfc, mec=c, ecolor=c,
                     elinewidth=0.8, capsize=2, markersize=6,
                     markeredgewidth=1.0 if hollow else 0.5, alpha=alpha, zorder=3)
-        # bold ring for an action in the good region
+        # bold ring for an action in the good region (small, so adjacent rings do not touch)
         if y == 0 and x < TARGET:
-            ax.scatter([x], [y], s=150, facecolors="none", edgecolors="black",
-                       linewidths=1.2, zorder=5, alpha=alpha)
+            ax.scatter([x], [y], s=95, facecolors="none", edgecolors="black",
+                       linewidths=1.1, zorder=5, alpha=alpha)
         # label a flushed host-warm point directly, to its left (hollow => answered cold)
         if hollow:
             ax.text(x - 0.35, y, "flushed", ha="right", va="center", fontsize=5.4,
                     color=c, zorder=4)
         plotted.append((act, round(x, 4), y, hollow, borrowed))
-    # verdict, top right
-    ax.text(0.96, 0.95, CELLS[cell]["verdict"], transform=ax.transAxes, ha="right", va="top",
-            fontsize=6.6, fontweight="bold", zorder=6)
     # borrowed / not-measured notes
     notes = []
     if any(G[cell][act].get("measured_directly") is False for act, _, _, _ in ACT
@@ -127,13 +124,17 @@ def draw_panel(ax, cell, show_region_text=False):
     for i, nt in enumerate(notes):
         ax.text(0.96, 0.80 - 0.09 * i, nt, transform=ax.transAxes, ha="right", va="top",
                 fontsize=5.4, color="#666666", style="italic", zorder=6)
-    # title (main, then smaller sub line above the axes)
-    ax.text(0.5, 1.13, CELLS[cell]["title"], transform=ax.transAxes, ha="center", va="bottom",
+    # title block above the axes: main, smaller sub line, then the verdict (bold),
+    # so the verdict never overlaps data, whiskers or the deadline line.
+    ax.text(0.5, 1.27, CELLS[cell]["title"], transform=ax.transAxes, ha="center", va="bottom",
             fontsize=8, fontweight="bold")
-    ax.text(0.5, 1.02, CELLS[cell]["sub"], transform=ax.transAxes, ha="center", va="bottom",
+    ax.text(0.5, 1.16, CELLS[cell]["sub"], transform=ax.transAxes, ha="center", va="bottom",
             fontsize=6.2, color="#444444")
+    ax.text(0.5, 1.03, CELLS[cell]["verdict"], transform=ax.transAxes, ha="center", va="bottom",
+            fontsize=7, fontweight="bold")
     ax.set_xlim(XLO, XHI)
     ax.set_ylim(YLO, YHI)
+    ax.set_yticks(list(range(0, 81, 10)))
     return plotted
 
 
@@ -185,7 +186,7 @@ fig.supylabel("Extra missed dashcam deadlines", fontsize=8)
 fig.text(0.5, 0.105, "Robot answer time from question (s)", ha="center", fontsize=8)
 fig.legend(handles=legend_handles(), loc="lower center", ncol=6, fontsize=6.2,
            frameon=False, handletextpad=0.3, columnspacing=1.0, bbox_to_anchor=(0.5, 0.01))
-fig.subplots_adjust(left=0.085, right=0.985, top=0.9, bottom=0.185, wspace=0.12, hspace=0.42)
+fig.subplots_adjust(left=0.085, right=0.985, top=0.865, bottom=0.185, wspace=0.12, hspace=0.66)
 pdf, png = F.save(fig, "figM7b_grid")
 
 # ---------- 1 x 3 measured-only variant -------------------------------------
@@ -196,7 +197,7 @@ fig2.supylabel("Extra missed\ndashcam deadlines", fontsize=8)
 fig2.text(0.54, 0.145, "Robot answer time from question (s)", ha="center", fontsize=8)
 fig2.legend(handles=legend_handles(), loc="lower center", ncol=6, fontsize=5.8,
             frameon=False, handletextpad=0.3, columnspacing=0.9, bbox_to_anchor=(0.5, 0.0))
-fig2.subplots_adjust(left=0.105, right=0.99, top=0.78, bottom=0.30, wspace=0.12)
+fig2.subplots_adjust(left=0.105, right=0.99, top=0.70, bottom=0.30, wspace=0.12)
 pdf2, png2 = F.save(fig2, "figM7b_grid_measured")
 
 # ---------- JSON ------------------------------------------------------------
@@ -205,7 +206,7 @@ payload = {
     "message": "The best way to serve a robot's cold-history question changes with fleet load and host memory, so no fixed rule works.",
     "source": "results/motivation/mot1/mot1_figdata_amend3.json block grid_2x2 (values used exactly, not recomputed)",
     "axes": {"x": "robot answer time from the question (s), shared 0 to 8.5",
-             "y": "extra missed dashcam deadlines vs the no-question control, shared 0 to 80"},
+             "y": "extra missed dashcam deadlines vs the no-question control, shared ylim -4 to 80, ticks 0 to 80"},
     "load": {"light": "8 dashcams, 4 requests/s (26% of peak)",
              "heavy": "20 dashcams, 10 requests/s (66% of peak)"},
     "host": {"tight": "27 GiB", "roomy": "256 GiB"},
