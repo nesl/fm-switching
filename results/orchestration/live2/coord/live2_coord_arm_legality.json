@@ -1,0 +1,266 @@
+{
+ "_provenance": {
+  "device": "flash_cpu",
+  "git_commit": "31ede8045d700a7e1027dd77d89203dcc9dba702",
+  "model": "none",
+  "n": 8,
+  "script": "run_live2_cell.py",
+  "seed": 1,
+  "timestamp": "2026-11-17T18:57:12.712142"
+ },
+ "arms": [
+  {
+   "arm": "policy-core",
+   "arm_version": "live2-arm-1.0",
+   "calibration_label": "INTERIM",
+   "cloud_answers": 446,
+   "cost_model_id": "pol4",
+   "counts": {
+    "session_MATERIALIZE": 6,
+    "submitted_monitor": 440,
+    "submitted_recall": 6,
+    "submitted_whole": 6
+   },
+   "decision_latency_ms": {
+    "max": 18.7989,
+    "n": 486,
+    "p50": 7.6777,
+    "p99": 13.172
+   },
+   "decisions": 452,
+   "errors": 0,
+   "fairness_digest": "4fb71a27a98c2576bc08ab1448d70febed6613c6b473e5c0bbe44820d3afff82",
+   "h_s": 1.0,
+   "mu_mode": "none",
+   "mu_value": 0.0,
+   "on_time": 446,
+   "opportunities": 486,
+   "predicted_vs_actual_rows": 452,
+   "requests": 452,
+   "tick_s": 1.0
+  },
+  {
+   "arm": "device-only",
+   "arm_version": "live2-arm-1.0",
+   "calibration_label": "INTERIM",
+   "cloud_answers": 0,
+   "cost_model_id": "none",
+   "counts": {},
+   "decision_latency_ms": {
+    "max": 0.1563,
+    "n": 2401,
+    "p50": 0.042,
+    "p99": 0.0568
+   },
+   "decisions": 6,
+   "errors": 0,
+   "fairness_digest": "4fb71a27a98c2576bc08ab1448d70febed6613c6b473e5c0bbe44820d3afff82",
+   "h_s": null,
+   "mu_mode": "none",
+   "mu_value": null,
+   "on_time": 0,
+   "opportunities": 486,
+   "predicted_vs_actual_rows": 0,
+   "requests": 0,
+   "tick_s": 0.05
+  },
+  {
+   "arm": "always-cloud-fcfs",
+   "arm_version": "live2-arm-1.0",
+   "calibration_label": "INTERIM",
+   "cloud_answers": 486,
+   "cost_model_id": "none",
+   "counts": {
+    "submitted_monitor": 480,
+    "submitted_recall": 6
+   },
+   "decision_latency_ms": {
+    "max": 0.1447,
+    "n": 2401,
+    "p50": 0.0435,
+    "p99": 0.0479
+   },
+   "decisions": 486,
+   "errors": 0,
+   "fairness_digest": "4fb71a27a98c2576bc08ab1448d70febed6613c6b473e5c0bbe44820d3afff82",
+   "h_s": null,
+   "mu_mode": "none",
+   "mu_value": null,
+   "on_time": 486,
+   "opportunities": 486,
+   "predicted_vs_actual_rows": 486,
+   "requests": 486,
+   "tick_s": 0.05
+  },
+  {
+   "arm": "edf",
+   "arm_version": "live2-arm-1.0",
+   "calibration_label": "INTERIM",
+   "cloud_answers": 485,
+   "cost_model_id": "none",
+   "counts": {
+    "session_MATERIALIZE": 2,
+    "submitted_monitor": 479,
+    "submitted_recall": 6,
+    "submitted_whole": 2
+   },
+   "decision_latency_ms": {
+    "max": 0.1266,
+    "n": 2401,
+    "p50": 0.0468,
+    "p99": 0.0678
+   },
+   "decisions": 922,
+   "errors": 0,
+   "fairness_digest": "4fb71a27a98c2576bc08ab1448d70febed6613c6b473e5c0bbe44820d3afff82",
+   "h_s": null,
+   "mu_mode": "none",
+   "mu_value": null,
+   "on_time": 485,
+   "opportunities": 486,
+   "predicted_vs_actual_rows": 487,
+   "requests": 487,
+   "tick_s": 0.05
+  },
+  {
+   "arm": "edf-piece1024",
+   "arm_version": "live2-arm-1.0",
+   "calibration_label": "INTERIM",
+   "cloud_answers": 485,
+   "cost_model_id": "none",
+   "counts": {
+    "session_MATERIALIZE": 4,
+    "submitted_monitor": 479,
+    "submitted_piece": 4,
+    "submitted_recall": 6
+   },
+   "decision_latency_ms": {
+    "max": 0.1151,
+    "n": 2401,
+    "p50": 0.0466,
+    "p99": 0.0669
+   },
+   "decisions": 924,
+   "errors": 0,
+   "fairness_digest": "4fb71a27a98c2576bc08ab1448d70febed6613c6b473e5c0bbe44820d3afff82",
+   "h_s": null,
+   "mu_mode": "none",
+   "mu_value": null,
+   "on_time": 485,
+   "opportunities": 486,
+   "predicted_vs_actual_rows": 489,
+   "requests": 489,
+   "tick_s": 0.05
+  },
+  {
+   "arm": "edf-piece2048",
+   "arm_version": "live2-arm-1.0",
+   "calibration_label": "INTERIM",
+   "cloud_answers": 485,
+   "cost_model_id": "none",
+   "counts": {
+    "session_MATERIALIZE": 2,
+    "submitted_monitor": 479,
+    "submitted_piece": 2,
+    "submitted_recall": 6
+   },
+   "decision_latency_ms": {
+    "max": 0.162,
+    "n": 2401,
+    "p50": 0.0468,
+    "p99": 0.0666
+   },
+   "decisions": 922,
+   "errors": 0,
+   "fairness_digest": "4fb71a27a98c2576bc08ab1448d70febed6613c6b473e5c0bbe44820d3afff82",
+   "h_s": null,
+   "mu_mode": "none",
+   "mu_value": null,
+   "on_time": 485,
+   "opportunities": 486,
+   "predicted_vs_actual_rows": 487,
+   "requests": 487,
+   "tick_s": 0.05
+  },
+  {
+   "arm": "utility-per-cost",
+   "arm_version": "live2-arm-1.0",
+   "calibration_label": "INTERIM",
+   "cloud_answers": 486,
+   "cost_model_id": "none",
+   "counts": {
+    "submitted_monitor": 480,
+    "submitted_recall": 6
+   },
+   "decision_latency_ms": {
+    "max": 0.2471,
+    "n": 2401,
+    "p50": 0.0483,
+    "p99": 0.0546
+   },
+   "decisions": 486,
+   "errors": 0,
+   "fairness_digest": "4fb71a27a98c2576bc08ab1448d70febed6613c6b473e5c0bbe44820d3afff82",
+   "h_s": null,
+   "mu_mode": "none",
+   "mu_value": null,
+   "on_time": 486,
+   "opportunities": 486,
+   "predicted_vs_actual_rows": 486,
+   "requests": 486,
+   "tick_s": 0.05
+  },
+  {
+   "arm": "b9",
+   "arm_version": "live2-arm-1.0",
+   "calibration_label": "INTERIM",
+   "cloud_answers": 476,
+   "cost_model_id": "none",
+   "counts": {
+    "session_KEEP_GPU_WARM": 6,
+    "submitted_monitor": 470,
+    "submitted_recall": 6
+   },
+   "decision_latency_ms": {
+    "max": 1.1091,
+    "n": 2401,
+    "p50": 0.0878,
+    "p99": 0.1022
+   },
+   "decisions": 476,
+   "errors": 0,
+   "fairness_digest": "4fb71a27a98c2576bc08ab1448d70febed6613c6b473e5c0bbe44820d3afff82",
+   "h_s": null,
+   "mu_mode": "none",
+   "mu_value": null,
+   "on_time": 476,
+   "opportunities": 486,
+   "predicted_vs_actual_rows": 476,
+   "requests": 476,
+   "tick_s": 0.05
+  }
+ ],
+ "d96": "opportunity_id assigned by the trace generator and copied unchanged into cloud_answer and both logs; fairness_digest is the fleet's canonical order-independent 64-hex sha256",
+ "fairness_digests": [
+  "4fb71a27a98c2576bc08ab1448d70febed6613c6b473e5c0bbe44820d3afff82"
+ ],
+ "identical_fairness_digest": true,
+ "is_measurement": false,
+ "live1_trace_digests": [
+  "dc0cd68ab706460a8ea4a6696dd25ced"
+ ],
+ "not_a_measurement_because": "no model server, no GPU, SYNTHETIC trace with placeholder frame bytes; the only meaningful figures are the coordinator's own decision latency and the legality of each arm's actions.",
+ "targets": {
+  "dashcam": {
+   "L_s": 1.0,
+   "p": 0.25,
+   "scope": "per_device"
+  },
+  "robot": {
+   "L_s": 5.0,
+   "p": 0.9,
+   "scope": "pooled"
+  }
+ },
+ "what": "StudyLIVE2-coord legality and behaviour sweep: all 8 round-1 arms on ONE frozen SYNTHETIC trace, 2 dashcam + 2 robot devices, 120 s window plus 15 s drain, tight memory (gpu_kv_tokens 62944, host_tier_gib 27), mode A, seed 1, --dry-run (no server, virtual clock, the committed cost curve as the service time)."
+}
