@@ -28,6 +28,25 @@ from .state import Fleet, PendingItem
 from .utility import u_sh_cloud, u_sh_device
 
 
+def _shallow(obj):
+    """`copy.copy` without the reduce protocol. StudyLIVE2-perf.
+
+    Every object the rollout clone copies is a plain dataclass with no `__slots__`, no
+    `__copy__` and no `__reduce_ex__` of its own, so `copy.copy` ends up in
+    `copy._reconstruct` via `__reduce_ex__` for each of 3.7 million calls in a 64-device cell.
+    Building the same new object and copying its `__dict__` is what that machinery produces, so
+    the result is identical field for field; anything without a `__dict__` falls back to
+    `copy.copy` rather than being handled wrongly.
+    """
+    try:
+        d = obj.__dict__
+    except AttributeError:
+        return copy.copy(obj)
+    new = object.__new__(type(obj))
+    new.__dict__.update(d)
+    return new
+
+
 def clone_for_rollout(f: Fleet) -> Fleet:
     """D99 (2): the rollout's working copy of the fleet, WITHOUT a full `copy.deepcopy`.
 
@@ -48,20 +67,20 @@ def clone_for_rollout(f: Fleet) -> Fleet:
     """
     g = Fleet(t=f.t, gpu_backlog_s=f.gpu_backlog_s)
     for did, d in f.devices.items():
-        nd = copy.copy(d)
+        nd = _shallow(d)
         nd.history = {}
         for rep, b in d.history.items():
-            nb = copy.copy(b)
+            nb = _shallow(b)
             nb.probs = dict(b.probs)
             nd.history[rep] = nb
         nd.z = dict(d.z)
         nd.lambda_rc = dict(d.lambda_rc)
         nd.episodes = list(d.episodes)
         g.devices[did] = nd
-    g.jobs = {jid: copy.copy(j) for jid, j in f.jobs.items()}
+    g.jobs = {jid: _shallow(j) for jid, j in f.jobs.items()}
     for lst, src in ((g.pending, f.pending), (g.in_flight, f.in_flight)):
         for p in src:
-            np_ = copy.copy(p)
+            np_ = _shallow(p)
             np_.meta = dict(p.meta)
             lst.append(np_)
     return g
@@ -490,7 +509,7 @@ class Rollout:
         cont_detail = []
         valued_jobs = set()
         for jid, job in f.jobs.items():
-            j = copy.copy(job)
+            j = _shallow(job)
             j.pieces_done = min(job.pieces_done + progress.get(jid, 0), job.pieces_total)
             if j.answered or j.pieces_left() == 0:
                 continue

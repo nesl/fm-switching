@@ -7,7 +7,7 @@ raises `MissingEvidence` rather than returning a plausible number.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -19,6 +19,20 @@ def _nearest(tokens: int, tab: Dict[int, Any]) -> int:
     return min(tab, key=lambda s: abs(s - tokens))
 
 
+# StudyLIVE2-perf. These three lookups are PURE functions of the committed profile and their
+# arguments, and the rollout calls them about 10.3 million times in a 64-device cell: 5.1 M
+# `rc_accuracy`, 2.9 M `recall_ttft_s`, 2.3 M `seconds_per_token`. Each one used to rebuild a
+# derived table (a dict comprehension, a sorted set of sizes, or a five-entry name map) on EVERY
+# call. The tables are now built once per `Profiles` instance and the results memoised on the
+# arguments, so each call returns the value it returned before, not a recomputation of it. The
+# profile is loaded once and never mutated during a run, which is what makes this safe; a cache
+# lives on its own instance, so two differently loaded profiles cannot share one.
+_RC_TABLE_NAME = {("cloud", "RICH"): "32B-RICH", ("cloud", "RECENT"): "32B-RECENT",
+                  ("cloud", "D2"): "32B-D2", ("device", "D2"): "4B-D2",
+                  ("device", "N1"): "device-N1-orin"}
+_SPT_FAMILY = {"rebuild": "cold_rebuild_per_token", "reload": "host_reload_per_token"}
+
+
 class MissingEvidence(KeyError):
     """Raised when the policy asks for a quantity no committed study provides."""
 
@@ -27,6 +41,7 @@ class MissingEvidence(KeyError):
 class Profiles:
     raw: Dict[str, Any]
     path: str
+    _memo: Dict[Any, Any] = field(default_factory=dict, repr=False, compare=False)
 
     # ---- spec 4.1
     def u_sh_device(self, mapping: str = "identity") -> float:
@@ -50,16 +65,21 @@ class Profiles:
 
     # ---- spec 4.3 and 6
     def rc_accuracy(self, qtype: str, rep: str, tier: str = "cloud") -> float:
-        name = {("cloud", "RICH"): "32B-RICH", ("cloud", "RECENT"): "32B-RECENT",
-                ("cloud", "D2"): "32B-D2", ("device", "D2"): "4B-D2",
-                ("device", "N1"): "device-N1-orin"}.get((tier, rep))
+        memo = self._memo
+        ck = ("rc", qtype, rep, tier)
+        hit = memo.get(ck)
+        if hit is not None:
+            return hit
+        name = _RC_TABLE_NAME.get((tier, rep))
         if name is None:
             raise MissingEvidence("no committed RC table for tier %r representation %r"
                                   % (tier, rep))
         tab = self.raw["RC"]["tables"][name]["by_category"]
         if qtype not in tab:
             raise MissingEvidence("question type %r is not in the %s table" % (qtype, name))
-        return float(tab[qtype]["accuracy"])
+        hit = float(tab[qtype]["accuracy"])
+        memo[ck] = hit
+        return hit
 
     def representation_for(self, qtype: str) -> str:
         m = self.raw["RC"]["question_type_to_representation"]
@@ -84,15 +104,29 @@ class Profiles:
             raise MissingEvidence("no committed duration family %r" % name)
         return d[name]
 
+    def _spt_table(self, kind: str) -> Dict[int, float]:
+        ck = ("spt_tab", kind)
+        tab = self._memo.get(ck)
+        if tab is None:
+            fam = _SPT_FAMILY[kind]
+            tab = {int(k): float(v)
+                   for k, v in self.duration(fam)["seconds_per_token"].items()}
+            self._memo[ck] = tab
+        return tab
+
     def seconds_per_token(self, kind: str, tokens: int = 11000) -> float:
         """The committed per-token rate at the NEAREST measured history size.
 
         StudyRH5 measured 11k and 28k only. Spec 4.3 needs a rate at arbitrary sizes, so the
         interpolation rule the profile itself states is applied and nothing is extrapolated
         outside the two measured sizes (see spec_map.AMBIGUITIES A6)."""
-        fam = {"rebuild": "cold_rebuild_per_token", "reload": "host_reload_per_token"}[kind]
-        tab = {int(k): float(v) for k, v in self.duration(fam)["seconds_per_token"].items()}
-        return tab[_nearest(tokens, tab)]
+        ck = ("spt", kind, tokens)
+        hit = self._memo.get(ck)
+        if hit is None:
+            tab = self._spt_table(kind)
+            hit = tab[_nearest(tokens, tab)]
+            self._memo[ck] = hit
+        return hit
 
     def catchup_per_frame_s(self, model: str = "32BI") -> float:
         v = self.duration("catchup_per_frame")["seconds_per_frame"]
@@ -102,12 +136,22 @@ class Profiles:
 
     def recall_ttft_s(self, readiness: str, tokens: int = 11000) -> float:
         """Committed recall TTFT. `readiness` is COLD, GPU-WARM or HOST-WARM (spec 6 tiers)."""
+        ck = ("rttft", readiness, tokens)
+        hit = self._memo.get(ck)
+        if hit is not None:
+            return hit
         v = self.duration("recall_ttft_by_readiness")["values_s"]
-        sizes = sorted({int(k.split("|")[0]) for k in v})
-        key = "%d|%s" % (_nearest(tokens, {s: s for s in sizes}), readiness.upper())
+        sk = ("rttft_sizes",)
+        sizes = self._memo.get(sk)
+        if sizes is None:
+            sizes = {s: s for s in sorted({int(k.split("|")[0]) for k in v})}
+            self._memo[sk] = sizes
+        key = "%d|%s" % (_nearest(tokens, sizes), readiness.upper())
         if key not in v:
             raise MissingEvidence("no committed recall TTFT for %r" % key)
-        return float(v[key])
+        hit = float(v[key])
+        self._memo[ck] = hit
+        return hit
 
     def episodic_ttft_s(self, model: str, n: int, load_pct: int) -> float:
         v = self.duration("episodic_ttft_by_n")["values_s"]

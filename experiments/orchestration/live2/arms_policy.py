@@ -121,6 +121,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
             raise ValueError("mu mode 'fixed' needs --mu-fixed VALUE, whose value D88 sets to "
                              "x0.5 and x2 of the EWMA estimator's time-averaged value over the "
                              "pilot runs; no committed DEV value exists")
+        self._reset_sh_audit()
 
     # ---------------------------------------------------------------- setup
     def live2_configure(self, *, gpu_kv_tokens: int, host_tier_gib: float,
@@ -189,6 +190,17 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         self._seen: set = set()
         self._ready = True
 
+    def _reset_sh_audit(self) -> None:
+        """F-4 and F-5 bookkeeping, both per run."""
+        # F-4: the opportunity ids this arm actually SCORED and admitted, so a monitor request
+        # the coordinator serves can be checked against them.
+        self._sh_scored: set = set()
+        self._sh_admitted: set = set()
+        # F-5: per device, the SH instant that was declined and not yet followed by an admit.
+        self._sh_pending_decline: Dict[str, float] = {}
+        self._sh_decline_delays_s: List[float] = []
+        self._sh_declines_followed_by_admit = 0
+
     def reset(self, seed: int = 0) -> None:
         self.last_predictions = {}
         self.mu_samples = []
@@ -196,7 +208,9 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                           prefix_loss_replans=0, jobs_infeasible=0,
                           sh_escalated=0, sh_admitted=0, sh_declined=0,
                           sh_cap_bound_periods=0, sh_cap_skipped=0,
+                          sh_served_not_scored=0,
                           release_cap_k=self.cap_k)
+        self._reset_sh_audit()
 
     def _apply_partial_readiness(self) -> None:
         """D100 (a): cost a later reconstruction piece as A PIECE ON A WARM PREFIX.
@@ -329,6 +343,19 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                     live.append(ep)
             d.episodes = live
 
+    def live2_sh_audit(self) -> Dict[str, Any]:
+        """F-4 / F-5 as reported numbers, not inferences."""
+        d = sorted(self._sh_decline_delays_s)
+        def g(pp):
+            return round(d[min(int(pp * len(d)), len(d) - 1)], 6) if d else None
+        return dict(
+            sh_scored=len(self._sh_scored), sh_admitted=len(self._sh_admitted),
+            sh_served_not_scored=int(self.stats.get("sh_served_not_scored", 0)),
+            sh_declines_followed_by_an_admit=self._sh_declines_followed_by_admit,
+            sh_decline_delay_s=(dict(n=len(d), p50=g(0.5), p90=g(0.9), p99=g(0.99),
+                                     max=round(d[-1], 6), mean=round(sum(d) / len(d), 6))
+                                if d else dict(n=0)))
+
     def live2_completed(self, info: Dict[str, Any]) -> None:
         """The engine finished a request this arm released: the item leaves `in_flight`.
 
@@ -336,6 +363,21 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         in release order, which is the order the engine served them in.
         """
         want = "episode_call" if info["kind"] == "monitor" else "rc_piece"
+        # F-4: THE INSTANT THE POLICY SCORED IS THE INSTANT THE COORDINATOR SERVES. The arm
+        # scores the instant the D100 hook names and keys it by that opportunity_id; if the
+        # coordinator ever served a different one, every DeltaJ this arm computed would be about
+        # an instant that was not the one answered, and no later check would notice.
+        opp = info.get("opportunity_id")
+        if info["kind"] == "monitor" and opp is not None:
+            if opp not in self._sh_admitted:
+                self.stats["sh_served_not_scored"] = (
+                    self.stats.get("sh_served_not_scored", 0) + 1)
+                raise AssertionError(
+                    "F-4: the coordinator served SH instant %r, which this arm never scored and "
+                    "admitted (scored %d, admitted %d). The arm scored the instant the D100 hook "
+                    "named; serving a different one would make every DeltaJ refer to an instant "
+                    "that was not answered." % (opp, len(self._sh_scored),
+                                                len(self._sh_admitted)))
         # RES1 bookkeeping: a completed build restarts that history's own clock and ages every
         # other history by what was written; any other completed request is just a write.
         tok = int(info.get("prompt_tokens") or 0)
@@ -419,6 +461,10 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
             cands = cands[:int(self.cap_k)]
         for deadline, _did, s, capture, key in cands:
             self._seen.add(key)
+            opp_id = (str(instants[s.stream_id]["opportunity_id"])
+                      if instants.get(s.stream_id) is not None else None)
+            if opp_id is not None:
+                self._sh_scored.add(opp_id)
             req = EscalationRequest(device=s.stream_id, task="SH", t=obs.now_s,
                                     deadline=deadline, capture_at=capture,
                                     frames=int(s.frame_count),
@@ -438,6 +484,18 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                     continue
                 side = "sh_admitted" if d.taken else "sh_declined"
                 self.stats[side] = self.stats.get(side, 0) + 1
+                if d.taken and opp_id is not None:
+                    self._sh_admitted.add(opp_id)
+                # F-5: a declined instant costs this device its next cloud look. The decline is
+                # held until the device's NEXT admit, and the gap between the two is the delay
+                # that decline imposed on that device's escalation.
+                if d.taken:
+                    t_dec = self._sh_pending_decline.pop(s.stream_id, None)
+                    if t_dec is not None:
+                        self._sh_declines_followed_by_admit += 1
+                        self._sh_decline_delays_s.append(max(0.0, float(obs.now_s) - t_dec))
+                else:
+                    self._sh_pending_decline.setdefault(s.stream_id, float(obs.now_s))
                 if d.delta_j is not None:
                     key = "sh_delta_j_admit" if d.taken else "sh_delta_j_decline"
                     self.stats.setdefault(key, []).append(float(d.delta_j))
@@ -587,6 +645,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         self.stats["release_cap_bound_passes"] = int(getattr(self.co, "cap_bound_passes", 0))
         self.stats["release_cap_skipped_items"] = int(getattr(self.co, "cap_skipped_items", 0))
         self.stats["scoring_calls"] = int(getattr(self.co, "scoring_calls", 0))
+        self.stats.update(self.live2_sh_audit())
 
     def _update_mu_samples(self) -> None:
         if self.params.mu_estimator == "ewma_marginal_utility":

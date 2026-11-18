@@ -44,10 +44,22 @@ def state_value(pf, device: Device, rep: str, demand, h_s: float, qtype: str, li
     in-progress job this prefix is already carrying, so the assertion can check it."""
     b = device.history[rep]
     p_need = demand.p_need_within(rep, h_s, in_episode)
-    here = b.expected({t: _u_rc_from_tier(pf, qtype, rep, t, b.size_tokens, b.staleness_s, link,
-                                          deadline_s) for t in TIERS})
-    nxt = b.expected({t: _u_rc_from_tier(pf, qtype, rep, colder(t), b.size_tokens, b.staleness_s,
-                                         link, deadline_s) for t in TIERS})
+    # StudyLIVE2-perf: `colder` maps TIERS into TIERS, so the six calls below cover only three
+    # DISTINCT tiers (with three tiers, `nxt` asks for HOST, COLD and COLD again, all of which
+    # `here` already computed). Everything but `tier` is the same variable in both expressions,
+    # so one dict keyed by tier returns the same value each time instead of recomputing it.
+    _u: Dict[str, float] = {}
+
+    def u_of(tier: str) -> float:
+        got = _u.get(tier)
+        if got is None:
+            got = _u_rc_from_tier(pf, qtype, rep, tier, b.size_tokens, b.staleness_s, link,
+                                  deadline_s)
+            _u[tier] = got
+        return got
+
+    here = b.expected({t: u_of(t) for t in TIERS})
+    nxt = b.expected({t: u_of(colder(t)) for t in TIERS})
     dev = pf.rc_accuracy(qtype, "D2", "device")
     value = p_need * omega_rc * (here - max(nxt, dev))
     if not credit_allowed:

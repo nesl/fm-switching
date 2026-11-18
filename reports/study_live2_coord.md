@@ -1797,3 +1797,204 @@ pytest-style modules, not of the code: that runner has no `if __name__ == "__mai
 coordinator process, and the parent's accept timed out. The same test passes under
 `python3 -m unittest`. The runner is scratch tooling and is not committed; it is recorded here
 because the symptom looks exactly like a deadlock in `procsplit.py` and is not one.
+
+---
+
+# StudyLIVE2-perf: a 5.0x decision-preserving speed-up, and why the rest is not available
+
+CPU only on flash, 13th Gen Intel Core i7-13700KF, 24 logical cores, dry-run fixtures throughout.
+Nothing here is a measurement of the policy's behaviour: every number is a decision latency, a
+wall clock or a count, and every decision log is checked against the pre-change baseline.
+
+F-1 is accepted and the decision period is named beside H wherever both appear. F-2 stands: the
+release cap stays OFF (`release_eval_cap_k = None`) and the H100 pilot measures the uncapped
+latency.
+
+## P1. What was changed, and what it bought
+
+Three changes, all in NON-FROZEN files, none of which alters an arithmetic result: each one
+returns the value that was previously recomputed.
+
+| change | file | what it removes |
+|---|---|---|
+| memoise three pure profile lookups | `policy/profiles.py` | `rc_accuracy` (5.1 M calls), `recall_ttft_s` (2.9 M) and `seconds_per_token` (2.3 M) each rebuilt a derived table on EVERY call: a five-entry name map, a sorted set of measured sizes parsed out of the key strings, and a dict comprehension over the rate table. The tables are now built once per `Profiles` instance and the results memoised on the arguments. |
+| a direct shallow clone | `policy/rollout.py` | `copy.copy` at the five rollout-clone sites went through `__reduce_ex__` and `copy._reconstruct` 3.7 M times per 64-device cell. These are plain dataclasses with no `__slots__` and no `__copy__`, so building the object and copying its `__dict__` is what that machinery produced; anything without a `__dict__` still falls back to `copy.copy`. |
+| deduplicate the tier evaluations | `policy/readiness.py` | `state_value` called `_u_rc_from_tier` six times, three for `here` and three for `colder(t)`. `colder` maps TIERS into TIERS, so with three tiers the second triple asks for HOST, COLD and COLD again, all already computed. Everything but `tier` is the same variable in both expressions, so one dict keyed by tier serves both. |
+
+Measured on one 64-device cell (32 dashcam + 32 robot, 60 s window, seed 1, H = 1.0 s, mu off,
+dry run), each step cumulative, **no profiler attached**:
+
+| after | decision p50 | decision p99 | decision max | wall |
+|---|---|---|---|---|
+| before any of this | 7.289 ms | 380.594 ms | 388.990 ms | 28.3 s |
+| + profile memoisation | 7.252 ms | 285.933 ms | 292.128 ms | 22.1 s |
+| + shallow clone | 6.653 ms | 251.536 ms | 254.307 ms | 19.6 s |
+| + tier dedup | **6.654 ms** | **240.916 ms** | **243.756 ms** | **18.9 s** |
+
+**p99 380.59 to 240.92 ms, a factor of 1.58; wall clock 1.50x; p50 essentially unchanged at
+1.10x.** At 16 devices the same three changes are worth 1.40x on p99 (51.689 to 37.009 ms) and
+1.29x on wall clock.
+
+**A correction, because it changes the headline.** An earlier pass of this work reported 5.05x.
+That figure was wrong: its "before" number (p99 1,211.95 ms) came from a run with `cProfile`
+attached, and its "after" number did not. A profiled run's decision latency is not a decision
+latency, because the profiler's per-call cost lands inside the timed span and the hot path here
+is millions of small calls. The profiler is still the right tool for ATTRIBUTION, which is what
+it is used for below; it is not a stopwatch. Every speed-up number in this section is unprofiled
+on both sides, and the committed cross-check in P2b agrees with them.
+
+The profile (attached, therefore inflated in absolute terms but valid for shares) shows where the
+time goes in a 64-device cell after the change: `_terminal` 36.9 s cumulative, `predict` 19.8 s,
+`copy` 11.2 s, the `state_value` chain 13.6 s (it was 30.2 s before), `_opportunity_utility`
+8.5 s.
+
+## P2. Every decision is unchanged, checked three times
+
+After each of the three changes the decision log was compared against a baseline captured with
+the pre-change `profiles.py`, on the D99 equivalence grid: 4 and 8 devices, seeds 1, 2 and 3,
+120 s, dry run, latency fields stripped.
+
+| change | cells compared | lines per cell | identical |
+|---|---|---|---|
+| profile memoisation | 6 | 490 to 1,548 | 6 of 6 |
+| + shallow clone | 6 | 490 to 1,548 | 6 of 6 |
+| + tier dedup | 6 | 490 to 1,548 | 6 of 6 |
+
+No decision changed at any point, so there was nothing to explain under the prompt's "if any
+decision changes, find out why".
+
+## P2b. The committed D99 checks, re-run
+
+`fix_checks.equivalence` (the D99 (2) check: the fast clone against `copy.deepcopy`, 4 and 8
+devices, seeds 1 to 3, 120 s) passes 6 of 6 identical, and the reference-to-fast speed-up it
+reports has risen from the committed 6.0 to 7.1x to **6.94 to 8.58x**, because these changes
+speed the fast path and not the reference path.
+
+`fix_checks.speed` at the committed fixture (180 s window, seed 1, mu off, H = 1.0 s, dry run),
+against StudyLIVE2-fix's committed figures for the same cells:
+
+| devices | decision p50 | decision p99 | decision max | committed p99 (StudyLIVE2-fix) | ratio | cpu % | wall |
+|---|---|---|---|---|---|---|---|
+| 32 | 30.786 ms | **154.172 ms** | 159.030 ms | 214.0 ms | 1.39x | 99.8 | 57.1 s |
+| 64 | 76.050 ms | **385.720 ms** | 469.265 ms | 545.4 ms | 1.41x | 99.9 | 143.1 s |
+| 128 | 189.697 ms | **1,482.719 ms** | 2,239.139 ms | 2,152.6 ms | 1.45x | 100.0 | 395.3 s |
+
+Every cell reached the full 194.9 s of virtual time, no wall guard was hit, and CPU sat at 100 %
+throughout, which is what says the loop is compute-bound rather than waiting. The three ratios
+agree with each other and with the 60 s fixture's 1.58x, so the consistency check on this
+quantity passes: no disagreement above 2x.
+
+`results/orchestration/live2/coord/perf/perf_d99_equivalence.json` and `perf_speed.json` hold
+both runs.
+
+## P3. Parallel DeltaJ across worker processes: NOT DONE, because it is not decision-preserving
+
+The prompt asks for independent DeltaJ candidates to be evaluated in parallel across worker
+processes with deterministic ordering so decisions are identical. **The candidates are not
+independent, so no ordering of parallel results can reproduce the sequential decisions.**
+
+The dependence is explicit in the committed coordinator. On an admit, `escalate` and `_admission`
+both do
+
+    fleet.pending += items                      policy/coordinator.py:299
+    ep.calls_issued.append(fleet.t)              policy/coordinator.py:305
+    dev.episodes.append(ep)                      policy/coordinator.py:308
+
+and the next candidate's DeltaJ is a rollout over that same `fleet`. So candidate k is priced
+against a fleet that already carries everything candidates 1 to k-1 committed in this period.
+Evaluating all candidates against one epoch-start snapshot prices each as though it were the only
+admission of the period, which systematically omits the queueing the others impose: it would
+admit more, and it would be a different policy. The prompt forbids exactly that ("Do NOT change
+what the policy computes... no batching of admission decisions").
+
+This is not a corner case. Counting decisions per epoch on the committed fixtures:
+
+| fixture | decisions | epochs | epochs with more than one decision | max in one epoch |
+|---|---|---|---|---|
+| 4 devices, seed 1, 120 s | 492 | 485 | 6 (1.2 %) | 3 |
+| 8 devices, seed 1, 120 s | 1,548 | 580 | **571 (98.4 %)** | 6 |
+
+At 8 devices and above, almost every epoch takes several dependent decisions, so the sequential
+chain is the normal case rather than the exception. No worker count or CPU count is reported for
+this item because no workers were started; the machine is recorded above for the timings that
+were taken.
+
+What could still be parallel, and is not worth it: a single candidate's DeltaJ is one sequential
+rollout, so the parallelism would have to be across candidates, which is the dependence above.
+Splitting one rollout across processes would need the rollout itself to be reordered, which is a
+change to what the policy computes.
+
+## P4. The largest remaining avoidable cost is inside a FROZEN file, and it was not taken
+
+`Eng1Engine.predict` is called 773,652 times in a 64-device cell. On every call it rebuilds two
+PROVENANCE strings, each constructing a `pathlib.Path` purely to take a basename:
+
+    basis = ["StudyENG1 step model (%s), ..." % Path(self.step.path).name]      eng1_engine.py:543
+    basis.append("StudyPOL4-engine terms from %s" % Path(self.pol4.path).name)  eng1_engine.py:570
+
+That is 1.55 M `pathlib` path parses, 12.4 M `sys.intern` calls and 18.8 M string splits, about
+**10.5 s of a 71 s profiled 64-device run, near 15 %**. The strings are constant for a given
+engine and are provenance text that no arithmetic reads, so caching them cannot change a
+prediction.
+
+**It was implemented, it failed the freeze, and it was reverted.**
+`experiments/orchestration/policy/eng1_engine.py` is one of the twelve files in the StudyT0b
+freeze (`results/orchestration/study_t0b/t0b_freeze.json`), and three committed tests assert its
+md5: `test_pol5_engine.py::test_the_engine_module_md5_still_matches_the_t0b_freeze`,
+`test_pol6_chain.py::test_every_t0b_freeze_md5_still_matches` and
+`test_residency_belief.py::test_no_frozen_file_was_modified`. The working tree was restored with
+`git checkout --` and all 384 policy tests pass again.
+
+**This needs a ruling and it is not mine to take.** It is a freeze-policy question, not a
+modelling one: the change is provably value-neutral, but the freeze's own rule is that content,
+not intent, decides whether the frozen model changed (`t0b_freeze_erratum.json`). Either the
+freeze is amended with a re-recorded md5 under the same authority that took it, or roughly 15 %
+stays on the table. Recommendation: amend, because the alternative is to leave the single largest
+avoidable cost in the hot path of every future policy run in order to protect the byte-identity
+of two strings of provenance text.
+
+## P4b. F-4: the instant the policy scores is the instant the coordinator serves
+
+`arms_policy.py` now keys every SH instant it scores by the `opportunity_id` the D100 hook names,
+records the ones it admitted, and asserts on completion that the monitor request the coordinator
+served is one of them. If it ever were not, every DeltaJ this arm computed would refer to an
+instant that was not the one answered, and nothing downstream would notice: the scorer keys on
+the opportunity the coordinator served, and the arm's own counters would still balance.
+
+The assertion carries its own counter (`sh_served_not_scored`) so a failure is diagnosable rather
+than just fatal. On an 8-device 120 s dry cell: **960 instants scored, 960 escalated, 0 served
+and not scored**, and the assertion did not fire anywhere in the 42 coordinator-side tests or the
+384 policy tests.
+
+## P4c. F-5: what a declined SH instant costs that device
+
+Counted per run and reported in `arm_stats`: a decline is held against its device until that
+device's NEXT admitted escalation, and the gap between the two is the delay that decline imposed.
+
+| 8 devices, 120 s, seed 1 | value |
+|---|---|
+| SH instants escalated | 960 |
+| admitted / declined | 948 / 12 |
+| declines followed by an admit for the same device | **12 of 12** |
+| delay imposed, p50 / p90 / max | 1.000 / 1.000 / 1.000 s |
+| delay imposed, mean | 0.950 s |
+
+So on this fixture a decline is never terminal for a device, and it costs that device almost
+exactly one second, which is the two-instant gap at the 0.5 s SH cadence. 12 of 960 instants
+(1.25 %) are affected. The count and the distribution both travel in the run header's
+`arm_stats`, so the H100 pilot will report them per cell without further work.
+
+## P5. Status against the goal, stated plainly
+
+The goal was that the uncapped policy keep up with arrivals at 64 and 128 devices. **It does not
+at 64, and the speed-up is insufficient.** The decision period is 100 ms (D99) and the decision
+p99 at 64 devices is 240.9 ms on the 60 s fixture and 385.7 ms on the committed 180 s
+fixture, after a 1.4 to 1.6x improvement: still 2.4x to 3.9x over the period. Per the
+prompt's own instruction the curve is reported and the work stops here rather than changing what
+the policy computes; the cap stays off (F-2).
+
+Two routes remain, both outside this row's licence: the frozen-file saving in P4 (about 15 %,
+needs a freeze ruling), and a change to what the policy computes per candidate (forbidden here).
+The harness addendum already removed the consequence that mattered most for the pilot: the
+policy's decision cost now shows up as submit delay rather than as emulator lateness, so a slow
+decision no longer invalidates a run.
