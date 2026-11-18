@@ -4,6 +4,12 @@ Takeaway first, then the setup, then n and the error-bar definition. Plain words
 no em dashes. Every number here is cross-checked against its source report in the
 per-figure JSON. Caching conditions are stated wherever a latency is shown.
 
+Palette (Okabe-Ito, colour-blind-safe; the same colour means the same thing across
+figures, and each series also carries a distinct marker or hatch): cold / one go =
+vermillion #D55E00; host-warm = bluish green #009E73 (the host tier's colour); GPU-warm
+= orange #E69F00; 2,048-token pieces = sky blue #56B4E9; 1,024-token pieces = dark blue
+#0072B2.
+
 ## M1 (figM1_cloud_value)
 The cloud tier earns its keep where the device's recent window has dropped the
 evidence. (a) On S-EMBER recall, device versus cloud (a bigger model plus the full
@@ -95,20 +101,21 @@ counts are input sizes with no latency; the cold-rebuild anchors are prefix-cach
 cold recompute measurements on the 32B serving stack.
 
 ## M7 (figM7_dayinlife)
-With a cold history, one robot question disrupts the fleet when it is answered in one go
-and only small pieces spare the fleet, but the pieces push the robot past its own
-deadline; a warm history avoids both. (a) Cumulative extra dashcam deadlines missed (the
-action's misses above the paired no-question control, each counted at its 0.916 s
-deadline) against time since the robot's question: answering in one go accrues a median
-of 59 extra misses in a burst that ends by about 7 s, 2,048-token pieces 28, while
-1,024-token pieces and the host-warm recall add 0. (b) But the robot's own answer time is
-3.56 s in one go, host-warm 0.69 s, and 6.10 s (2,048) and 6.87 s (1,024) for the pieces,
-the last two past the robot's 5 s deadline (dashed, D71). With a tight 27 GiB host the
-warmed history had been flushed by question time in 5 of 5 runs and cost the fleet what a
-cold one-go rebuild costs; only the 256 GiB host kept it warm. Caching: prefix caching
-on; one go and the pieces rebuild the robot's ~11k history from cold, while host-warm is
-a host reload (measured on the host tier in 5 of 5 Part B runs); the dashcams run the
-live one-request-per-two-seconds cloud service share. n = 20 dashcams over 5
-repetitions; in (a) the thick line is the median across repetitions at each time and the
-band is the minimum to maximum across them; in (b) the bar is the median and the whisker
-the minimum to maximum across the 5 repetitions.
+Only a warm history answers the robot on time and leaves the fleet unharmed: a cold
+history answered in one go harms the fleet, and cutting it into pieces only trades that
+harm for a robot that misses its own deadline, so one point in a thousand lands in the
+good corner. The setting is 20 dashcams monitored on the cloud at one request every two
+seconds (66 percent of the 32B one-frame peak) when a single robot question arrives
+needing its ~11k-token history, on a roomy 256 GiB host, over 5 paired repetitions; each
+point is one action at the median robot answer time from the question (x) and the median
+extra dashcam deadlines missed over the no-question control (y), and only host-warm, at
+0.69 s and 0 extra misses, sits in the shaded good region (robot under its 5 s deadline,
+dashed, D71, and the fleet unharmed), whereas one go is on time but adds 59 misses, and
+the 2,048- and 1,024-token pieces spare more of the fleet (28 and 0) only by answering
+late (6.10 s and 6.87 s). With a tight 27 GiB host the warmed history had instead been
+flushed by question time in 5 of 5 runs and cost the fleet what a cold one-go rebuild
+costs. Caching: prefix caching on; one go and the pieces rebuild the ~11k history from
+cold, while host-warm is a host reload (measured on the host tier in 5 of 5 Part B runs);
+the dashcams run the live one-request-per-two-seconds cloud service share. n = 20 dashcams
+over 5 repetitions; the whiskers are the minimum to maximum across the repetitions in
+both directions.

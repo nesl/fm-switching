@@ -32,6 +32,15 @@ time, computed from the raw per-instant request records (not the 0.5 s bin fract
 with a median line and a min-to-max band over the 5 repetitions; panel (b) adds the
 host-warm bar. See the M7 section.
 
+**Revision 4 (2026-11-18).** Global palette pinned (see Style and palette): 1,024-token
+pieces moved from green to dark blue so host-warm takes the host tier's green, and the
+palette is recorded in `CAPTIONS.md`. M3a and M4 were regenerated (M4's colours were
+already compliant, so its pixels are unchanged). M7 was redone as a single trade-off
+panel in the M3a style: one point per action at (robot answer time, extra missed
+deadlines) with min-to-max whiskers both ways, a 5 s robot-deadline line and a shaded
+"robot on time, fleet unharmed" region; the time-series panel is removed and its
+computation retained in the JSON. Numbers are unchanged. See the M7 section.
+
 ## Style and palette (shared, `plots/motivation/figstyle.py`)
 
 ACM sigconf sizing: single column 3.33 in, double column 7.0 in (M3b and M4 only),
@@ -44,8 +53,12 @@ or a hatch, so no series is distinguished by colour alone.
 
 Two colour families recur, and the same colour means the same thing within each:
 
-- Readiness / rebuild shape (M3a, M3b, M5, M4): one-go / cold = vermillion; 2,048-piece
-  = sky blue; 1,024-piece / host = green; disk = blue; gpu-warm / reload = orange.
+- Readiness / rebuild shape (M3a, M3b, M5, M4): one-go / cold = vermillion #D55E00;
+  2,048-piece = sky blue #56B4E9; 1,024-piece = dark blue #0072B2; host / host-warm =
+  bluish green #009E73; gpu-warm / reload = orange #E69F00. (Revision 4 moved the
+  1,024-piece from green to dark blue so the host-warm action could take the host tier's
+  green in M7; M5's "pieces as one class" and "reload / warm" keep their own green and
+  orange and were not in revision 4's scope.)
 - Device vs cloud (M1 only): device = blue, cloud = vermillion.
 
 The device/cloud pair (M1) is a separate axis of the paper from the tier/shape family
@@ -254,42 +267,48 @@ committed anchor points, since only those two sizes have a committed cold-rebuil
 
 ---
 
-## M7 (figM7_dayinlife): day in the life (revision 3)
+## M7 (figM7_dayinlife): day in the life (revision 4)
 
 **Data.** StudyMOT1-dayinlife amendment 2 Part B only (roomy 256 GiB host, all five
-actions paired within a repetition). Panel (a) is computed from the raw per-instant
-records `results/motivation/mot1/mot1_requests.jsonl.gz` (the Part B runs labelled
-A2BR1..A2BR5, `kind="monitor"`); panel (b)'s robot TTFT comes from
-`results/motivation/mot1/mot1_figdata_amend2.json`. (a) cumulative extra missed dashcam
-deadlines over time since the question: for each action and repetition, each dashcam
-instant is a miss when its submit-to-last-token latency exceeds 0.916 s, and the extra
-count is the action's misses minus the paired NONE control's, accumulated by each
-instant's deadline time (`t_submit + 0.916 - (t0 + 20)`); the thick line is the median
-over the 5 repetitions at each time and the band is the min to max over them, for one go,
-2,048 pieces, 1,024 pieces and host-warm. (b) the robot's own answer time per action:
-median bar with the min-to-max whisker over the 5 repetitions.
+actions paired within a repetition). One trade-off panel in the M3a style: x = the
+robot's own answer time from the question (s), y = extra dashcam deadlines missed over
+the paired no-question control (count). Extra-missed counts are computed from the raw
+per-instant records `results/motivation/mot1/mot1_requests.jsonl.gz` (the Part B runs
+labelled A2BR1..A2BR5, `kind="monitor"`): each dashcam instant is a miss when its
+submit-to-last-token latency exceeds 0.916 s, and the count is the action's misses minus
+the paired NONE control's; the robot answer times come from
+`results/motivation/mot1/mot1_figdata_amend2.json`. Each action is one point at the
+median over the 5 repetitions, with min-to-max whiskers over the repetitions in both
+directions. A dashed vertical line marks the robot's 5 s deadline (D71); the shaded box
+(x below 5 s, y about 0 to 3) is the only good region, robot on time and fleet unharmed.
+Linear axes, y from about -4 so the zero-valued points are off the frame. The former
+time-series computation is retained in the JSON (`timeseries_for_record`) but no longer
+plotted.
 
 **Selection rule.** Amendment 2 Part B, not Part A (Part A is the tight 27 GiB host, a
-caption block only). The HOST-WARM gate was checked before plotting: Part B host-warm was
-measured on the host tier in 5 of 5 repetitions (the STOP condition did not fire). The
+caption sentence only). The HOST-WARM gate was checked before plotting: Part B host-warm
+was measured on the host tier in 5 of 5 repetitions (the STOP condition did not fire). The
 first design and the HOLDOUT are not used.
 
-**Checks (against `study_mot1_dayinlife.md` sections 10.2 and 10.3).** Cumulative extra
-missed instants reproduced from the raw records exactly match the figdata per-repetition
-totals: one go [66, 74, 57, 59, 57] median 59; 2,048 pieces [28, 41, 28, 27, 27] median
-28; 1,024 pieces and host-warm 0 in all 5 (NONE controls 0 missed in all 5). Robot TTFT
-from the question (median over 5 reps): 3.56 / 6.10 / 6.87 / 0.69 s (ratios 0.999 /
-1.001 / 1.000 / 0.994 against the report's rounded values). Part A: measured COLD in 5 of
-5, as predicted. N = 20, deadline 0.916 s, question at 20 s, all reproduced.
+**Checks (against `study_mot1_dayinlife.md` sections 10.2 and 10.3).** Numbers are
+unchanged from revision 3. Extra missed instants reproduced from the raw records exactly
+match the figdata per-repetition totals: one go [66, 74, 57, 59, 57] median 59; 2,048
+pieces [28, 41, 28, 27, 27] median 28; 1,024 pieces and host-warm 0 in all 5 (NONE
+controls 0 missed in all 5). Robot TTFT from the question (median over 5 reps): 3.56 /
+6.10 / 6.87 / 0.69 s (ratios 0.999 / 1.001 / 1.000 / 0.994 against the report's rounded
+values). Part A: measured COLD in 5 of 5, as predicted. N = 20, deadline 0.916 s,
+question at 20 s, all reproduced.
 
-**Judgement.** Panel (a) is not a single representative repetition any more: it is the
-median-and-range over all 5 Part B repetitions, built from the raw per-instant misses, so
-the plateau of each curve equals that action's per-repetition extra-miss median (59 / 28
-/ 0 / 0). The two zero curves (1,024 pieces, host-warm) coincide at y = 0; their data are
-not offset, only their end labels. The dashed line is the robot's 5 s deadline (D71). The
-caption carries one Part A sentence (flushed in 5 of 5 under the 27 GiB host). Caching is
-stated: one go and the pieces rebuild from cold, host-warm is a host reload measured on
-the host tier.
+**Judgement.** The single panel makes the trade-off the point: only host-warm (0.69 s, 0
+extra misses) lands in the shaded good region; one go is on time but adds 59 misses, and
+the 2,048- and 1,024-token pieces spare the fleet (28, 0) only by answering past the 5 s
+deadline (6.10 s, 6.87 s). The two zero-y points (1,024 pieces, host-warm) sit at y = 0,
+off the frame bottom by the chosen ylim, and are separated on x (late vs on time), so
+neither data nor labels overlap. Palette per revision 4: one go vermillion, 2,048 pieces
+sky blue, 1,024 pieces dark blue, host-warm green, each with a distinct marker (circle,
+square, triangle, diamond). The caption carries one Part A sentence (flushed in 5 of 5
+under the 27 GiB host). Caching is stated: one go and the pieces rebuild from cold,
+host-warm is a host reload measured on the host tier.
 
 ---
 

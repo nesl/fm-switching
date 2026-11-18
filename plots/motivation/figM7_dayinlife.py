@@ -1,33 +1,35 @@
-"""M7 Day in the life (revision 3, amendment 2 Part B, roomy 256 GiB host).
+"""M7 Day in the life (revision 4): one trade-off panel in the style of M3a.
 
-One robot question served four ways against a fleet of 20 dashcams monitored on the
-cloud. (a) the CUMULATIVE count of extra missed dashcam deadlines (the action's misses
-minus the paired no-question NONE control's, counted per instant at its 0.916 s
-deadline), versus time since the robot's question; one curve per action (one go, 2,048
-pieces, 1,024 pieces, host-warm), thick line = median over the 5 repetitions at each
-time, light band = min to max over the repetitions, each curve tagged at its right end
-with its final median count. (b) the robot's own answer time per action, bar = median,
-whiskers = min to max over the 5 repetitions, dashed line at the robot's 5 s deadline
-(D71).
+One point per action served against a fleet of 20 dashcams monitored on the cloud,
+with one robot question needing its ~11k-token history:
+  x = the robot's own answer time from the question (s)
+  y = extra dashcam deadlines missed over the no-question control (count)
+Median over the 5 paired Part B repetitions, with min-to-max whiskers in both
+directions. A dashed vertical line marks the robot's 5 s deadline; the shaded box is
+the only good region (robot on time and the fleet unharmed). Only the host-warm recall
+lands in it: one go harms the fleet, and the pieces only trade the harm for a late robot.
 
-Message: with a cold history, one go disrupts the fleet and small pieces make the robot
-late; a warm history avoids both.
+Message: only a warm history answers the robot on time and leaves the fleet unharmed;
+a cold history in one go harms the fleet, and cutting it into pieces only trades that
+harm for a late robot.
 
-Source (read-only): results/motivation/mot1/mot1_requests.jsonl.gz (raw per-instant
-records, Part B runs labelled A2BR1..A2BR5, each action paired to its own-repetition
-NONE control) and results/motivation/mot1/mot1_figdata_amend2.json (per-repetition robot
-TTFT and the summary medians). Report reproduced: reports/study_mot1_dayinlife.md
-section 10.3 (extra missed median 59 / 28 / 0 / 0; robot TTFT from the question 3.56 /
-6.10 / 6.87 / 0.69 s; N = 20, deadline 0.916 s, question at 20 s, HOST in 5 of 5 for
-host-warm) and section 10.2 (Part A tight host).
-Caching: prefix caching ON; the 256 GiB host holds the warmed history so host-warm is a
-host reload (measured HOST in 5 of 5), while one go and the pieces rebuild from cold; the
-dashcam monitoring is the live one-request-per-2 s-per-stream service load.
+Sources (read-only): results/motivation/mot1/mot1_requests.jsonl.gz (raw per-instant
+records, Part B runs A2BR1..A2BR5, each action paired to its own-repetition NONE control)
+for the extra-missed counts, and results/motivation/mot1/mot1_figdata_amend2.json for the
+robot answer times. Report: reports/study_mot1_dayinlife.md sections 10.2 and 10.3 (extra
+missed median 59 / 28 / 0 / 0; robot TTFT from the question 3.56 / 6.10 / 6.87 / 0.69 s;
+HOST in 5 of 5 for host-warm; Part A tight host flushed COLD in 5 of 5). N = 20, deadline
+0.916 s, question at 20 s.
+Caching: prefix caching ON; one go and the pieces rebuild the ~11k history from cold,
+host-warm is a host reload (measured on the host tier in 5 of 5 Part B runs); the dashcams
+run the live one-request-per-two-seconds (66 % of the one-frame peak) service load.
+The cumulative-over-time computation of the old panel (a) is retained in the JSON record.
 """
 import gzip
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 import figstyle as F
 
 F.apply_style()
@@ -36,10 +38,13 @@ DL = 0.916          # dashcam deadline, submit-to-last-token, server side
 Q_AT = 20.0         # the robot question lands at t0 + 20 s in every run
 REPS = range(1, 6)
 
-# ---- (a) cumulative extra missed from the raw per-instant records ----------
-# For each Part B run, collect each missed monitor instant's deadline time relative
-# to the robot question (t_submit + 0.916 - (t0 + 20)).
-miss = {}            # (rep, action) -> sorted array of miss deadline-times
+acts = [("ONE-GO", "one go", F.C_ONEGO, F.MARK["onego"]),
+        ("P2048", "2,048 pieces", F.C_PIECE2048, F.MARK["piece2048"]),
+        ("P1024", "1,024 pieces", F.C_PIECE1024, F.MARK["piece1024"]),
+        ("HOST-WARM", "host-warm", F.C_HOSTWARM, F.MARK["hostwarm"])]
+
+# ---- extra missed from the raw per-instant records (also the time series) --
+miss = {}            # (rep, action) -> sorted array of miss deadline-times vs question
 with gzip.open(ROOT / "results/motivation/mot1/mot1_requests.jsonl.gz", "rt") as fh:
     for line in fh:
         r = json.loads(line)
@@ -51,115 +56,99 @@ with gzip.open(ROOT / "results/motivation/mot1/mot1_requests.jsonl.gz", "rt") as
             miss.setdefault(key, []).append(r["t_submit"] + DL - (r["t0"] + Q_AT))
 miss = {k: np.array(sorted(v)) for k, v in miss.items()}
 
-XLO, XHI = -2.0, 15.0
-grid = np.arange(XLO, XHI + 1e-9, 0.05)
-acts = [("ONE-GO", "one go", F.C_ONEGO, "-"),
-        ("P2048", "2,048 pieces", F.C_PIECE2048, "--"),
-        ("P1024", "1,024 pieces", F.C_PIECE1024, ":"),
-        ("HOST-WARM", "host-warm", F.C_WARM, "-.")]
+grid = np.arange(-2.0, 15.0001, 0.05)      # kept only for the JSON record
 
 
 def cum(times):
     return np.searchsorted(times, grid, side="right") if len(times) else np.zeros_like(grid, dtype=int)
 
 
-curve = {}           # action -> (median, lo, hi) over reps, and final median
+extra = {}           # action -> per-rep final counts + median/min/max; plus time series
+timeseries = {}
 for a, _, _, _ in acts:
     stack = []
     for rep in REPS:
-        extra = cum(miss.get((rep, a), np.array([]))) - cum(miss.get((rep, "NONE"), np.array([])))
-        stack.append(extra)
+        e = cum(miss.get((rep, a), np.array([]))) - cum(miss.get((rep, "NONE"), np.array([])))
+        stack.append(e)
     M = np.array(stack)
-    curve[a] = dict(median=np.median(M, axis=0), lo=M.min(0), hi=M.max(0),
-                    final_median=float(np.median(M[:, -1])),
-                    final_per_rep=[int(x) for x in M[:, -1]])
+    finals = [int(x) for x in M[:, -1]]
+    extra[a] = dict(median=float(np.median(finals)), lo=min(finals), hi=max(finals), per_rep=finals)
+    # retain the cumulative-over-time computation (downsampled to 0.25 s) for the record
+    step = 5                                # 0.05 s grid -> 0.25 s
+    timeseries[a] = dict(t=[round(float(x), 2) for x in grid[::step]],
+                         median=[int(x) for x in np.median(M, axis=0)[::step]],
+                         min=[int(x) for x in M.min(0)[::step]],
+                         max=[int(x) for x in M.max(0)[::step]])
 
-# ---- (b) robot answer time per action, from the figure data ----------------
+# ---- robot answer time per action, from the figure data --------------------
 fd = json.load(open(ROOT / "results/motivation/mot1/mot1_figdata_amend2.json"))
 rob = {}
 for a, _, _, _ in acts:
     reps = fd["robot_ttft_s"][a]["per_rep"]
-    rob[a] = dict(median=float(np.median(reps)), lo=float(min(reps)), hi=float(max(reps)),
-                  per_rep=reps)
+    rob[a] = dict(median=float(np.median(reps)), lo=float(min(reps)), hi=float(max(reps)), per_rep=reps)
 TARGET = 5.0         # robot answer-time deadline, D71
 
-# Part A tight-host flush count (caption block, not a plotted line)
 partA = fd["partA_tight_host"]["runs"]
 k_flushed = sum(1 for r in partA if r["measured_tier"] != "HOST")
 
-# ---- figure ----------------------------------------------------------------
-fig = plt.figure(figsize=(F.COL1, 2.2))
-gs = fig.add_gridspec(1, 2, wspace=0.52, width_ratios=[1.22, 1.25])
-axa = fig.add_subplot(gs[0, 0])
-axb = fig.add_subplot(gs[0, 1])
+# ---- figure: one panel, M3a style ------------------------------------------
+fig, ax = plt.subplots(figsize=(F.COL1, 2.15))
+XLO, XHI, YLO, YHI = 0.0, 8.7, -4.0, 80.0
 
-# (a) cumulative curves: band, then median step, with direct curve labels
-XR = 16.0                                   # right edge, leaving room for end counts
-for a, lab, c, ls in acts:
-    cv = curve[a]
-    axa.fill_between(grid, cv["lo"], cv["hi"], step="post", color=c, alpha=0.16, linewidth=0)
-for a, lab, c, ls in acts:
-    cv = curve[a]
-    axa.step(grid, cv["median"], where="post", color=c, lw=1.6, ls=ls)
-axa.axvline(0, color="black", lw=0.8, ls=":")
-axa.text(-0.4, 40, "question", fontsize=6.2, color="black", rotation=90, va="center", ha="right")
-axa.set_xlabel("Time since robot question (s)")
-axa.set_ylabel("Cumulative extra\nmissed deadlines")
-axa.set_xlim(XLO, XR)
-axa.set_ylim(-4, 82)
-axa.set_xticks([0, 5, 10, 15])
-# direct curve labels (name riding the plateau) + final median count at the right end.
-# The 1,024-pieces and host-warm curves coincide at y = 0; both lines are kept, but their
-# two end labels are replaced by one neutral-grey label just above the zero line.
-name_pos = {"ONE-GO": (9.0, 63), "P2048": (6.2, 32)}
-cnt_y = {"ONE-GO": 59, "P2048": 28}
-for a, lab, c, ls in acts:
-    if a not in name_pos:
-        continue
-    axa.text(*name_pos[a], lab, fontsize=5.8, color=c, va="center", ha="left", fontweight="bold")
-    axa.text(15.4, cnt_y[a], f"{int(curve[a]['final_median'])}", fontsize=6.6, color=c,
-             va="center", ha="left", fontweight="bold")
-axa.text(15.6, 4.0, "1,024 pieces, host-warm: 0", fontsize=5.6, color="#404040",
-         va="center", ha="right", fontweight="bold")
-axa.text(0.02, 0.97, "(a)", transform=axa.transAxes, fontsize=8, va="top", fontweight="bold")
+# the only good region: robot on time (x < 5) and fleet unharmed (y near 0)
+ax.add_patch(Rectangle((XLO, 0), TARGET - XLO, 3.0, facecolor=F.OI["grey"], alpha=0.16,
+                       edgecolor="none", zorder=0))
+ax.text(2.5, 1.5, "robot on time,\nfleet unharmed", ha="center", va="center",
+        fontsize=5.6, color="#555555", zorder=1)
+ax.axvline(TARGET, color="black", lw=0.9, ls="--")
+ax.text(4.86, 40, "robot deadline", rotation=90, ha="right", va="center", fontsize=6.2)
 
-# (b) robot answer time per action
-xb = np.arange(len(acts))
-for i, (a, lab, c, ls) in enumerate(acts):
-    m = rob[a]["median"]
-    axb.bar(i, m, 0.68, color=c, edgecolor="white", linewidth=0.4)
-    axb.errorbar(i, m, yerr=[[m - rob[a]["lo"]], [rob[a]["hi"] - m]], fmt="none",
-                 ecolor="black", elinewidth=0.7, capsize=1.8)
-axb.axhline(TARGET, ls="--", lw=0.9, color="black")
-axb.text(-0.55, TARGET + 0.15, "robot deadline 5 s", ha="left", va="bottom", fontsize=5.8)
-axb.set_xticks(xb)
-axb.set_xticklabels(["one\ngo", "2,048\npieces", "1,024\npieces", "host-\nwarm"], fontsize=4.9)
-axb.set_ylabel("Robot answer time (s)")
-axb.set_ylim(0, 9)
-axb.set_xlim(-0.65, len(acts) - 0.35)
-axb.text(0.04, 0.97, "(b)", transform=axb.transAxes, fontsize=8, va="top", fontweight="bold")
+for a, lab, c, mk in acts:
+    x, y = rob[a]["median"], extra[a]["median"]
+    ax.errorbar(x, y, xerr=[[x - rob[a]["lo"]], [rob[a]["hi"] - x]],
+                yerr=[[y - extra[a]["lo"]], [extra[a]["hi"] - y]],
+                fmt=mk, color=c, ecolor=c, elinewidth=0.8, capsize=2,
+                markersize=6, markeredgecolor="white", markeredgewidth=0.5, zorder=3)
+
+# direct point labels (no legend box)
+lab_pos = {"ONE-GO": (3.56, 77, "center", "bottom"),
+           "P2048": (6.10, 44, "center", "bottom"),
+           "P1024": (6.87, 6.5, "center", "bottom"),
+           "HOST-WARM": (0.69, -2.6, "center", "top")}
+for a, lab, c, mk in acts:
+    px, py, ha, va = lab_pos[a]
+    ax.text(px, py, lab, color=c, fontsize=6.2, fontweight="bold", ha=ha, va=va, zorder=4)
+
+ax.set_xlabel("Robot answer time from question (s)")
+ax.set_ylabel("Extra missed dashcam deadlines")
+ax.set_xlim(XLO, XHI)
+ax.set_ylim(YLO, YHI)
 
 pdf, png = F.save(fig, "figM7_dayinlife")
 
 # ---- JSON record -----------------------------------------------------------
 payload = {
     "figure": "M7",
-    "revision": 3,
-    "message": "With a cold history, one go disrupts the fleet and small pieces make the robot late; a warm history avoids both.",
-    "design": "amendment 2 Part B only (roomy 256 GiB host, all five actions, one consistent paired set); panel (a) computed from the raw per-instant records, not from the 0.5 s bin fractions.",
+    "revision": 4,
+    "message": "Only a warm history answers the robot on time and leaves the fleet unharmed; a cold history in one go harms the fleet, and cutting it into pieces only trades the harm for a late robot.",
+    "design": "amendment 2 Part B only (roomy 256 GiB host, five actions, one paired set); single trade-off panel in the M3a style (x = robot answer time, y = extra missed deadlines); the old time-series panel is removed but its computation is kept below.",
     "sources": {
-        "panel_a_raw": "results/motivation/mot1/mot1_requests.jsonl.gz (kind=monitor, label A2BR1..A2BR5; each action paired to its own-repetition NONE control)",
-        "panel_b": "results/motivation/mot1/mot1_figdata_amend2.json robot_ttft_s per_rep",
+        "extra_missed_raw": "results/motivation/mot1/mot1_requests.jsonl.gz (kind=monitor, label A2BR1..A2BR5; each action paired to its own-repetition NONE control)",
+        "robot_ttft": "results/motivation/mot1/mot1_figdata_amend2.json robot_ttft_s per_rep",
     },
     "N_dashcams": fd["N"], "deadline_s": fd["deadline_s"], "question_at_s": Q_AT,
-    "panel_a_definition": "cumulative (action missed instants minus paired NONE missed instants) ordered by each instant's deadline time = t_submit + 0.916 - (t0 + 20); thick line = median over 5 reps at each time, band = min to max over reps",
-    "panel_a_final_extra_missed": {a: {"median": int(curve[a]["final_median"]),
-                                       "per_rep": curve[a]["final_per_rep"],
-                                       "min": int(min(curve[a]["final_per_rep"])),
-                                       "max": int(max(curve[a]["final_per_rep"]))} for a, _, _, _ in acts},
-    "panel_b_robot_ttft_s": {a: {"median": round(rob[a]["median"], 4), "per_rep": rob[a]["per_rep"],
-                                 "min": round(rob[a]["lo"], 4), "max": round(rob[a]["hi"], 4)} for a, _, _, _ in acts},
     "robot_deadline_s": TARGET,
+    "palette": {"cold / one go": "#D55E00", "host-warm": "#009E73", "GPU-warm": "#E69F00",
+                "2,048-token pieces": "#56B4E9", "1,024-token pieces": "#0072B2"},
+    "point_definition": "x = median robot answer time from the question, y = median extra missed dashcam deadlines (action minus paired NONE), each over the 5 Part B repetitions; whiskers = min to max over the repetitions in both directions.",
+    "points": {a: {"robot_ttft_s": {"median": round(rob[a]["median"], 4), "min": round(rob[a]["lo"], 4),
+                                    "max": round(rob[a]["hi"], 4), "per_rep": rob[a]["per_rep"]},
+                   "extra_missed": {"median": int(extra[a]["median"]), "min": extra[a]["lo"],
+                                    "max": extra[a]["hi"], "per_rep": extra[a]["per_rep"]}}
+               for a, _, _, _ in acts},
+    "timeseries_for_record": {
+        "definition": "cumulative extra missed deadlines vs time since the question (t = t_submit + 0.916 - (t0 + 20)); median/min/max over 5 reps, downsampled to 0.25 s. Computed but no longer plotted.",
+        "series": timeseries},
     "hostwarm_measured_tier_partB": [t["tier"] for t in fd["hostwarm_measured_tiers"]],
     "partA_tight_host": {"measured_tier": [r["measured_tier"] for r in partA],
                          "k_flushed_of_5": k_flushed,
@@ -170,10 +159,10 @@ payload = {
                       "N": 20, "deadline_s": 0.916, "question_at_s": 20,
                       "hostwarm_tier": "HOST in 5 of 5", "partA_flushed": "COLD in 5 of 5"},
     "checks": {
-        "extra_onego": int(curve["ONE-GO"]["final_median"]) == 59,
-        "extra_2048": int(curve["P2048"]["final_median"]) == 28,
-        "extra_1024": int(curve["P1024"]["final_median"]) == 0,
-        "extra_hostwarm": int(curve["HOST-WARM"]["final_median"]) == 0,
+        "extra_onego": int(extra["ONE-GO"]["median"]) == 59,
+        "extra_2048": int(extra["P2048"]["median"]) == 28,
+        "extra_1024": int(extra["P1024"]["median"]) == 0,
+        "extra_hostwarm": int(extra["HOST-WARM"]["median"]) == 0,
         "robot_onego": F.ratio(rob["ONE-GO"]["median"], 3.56),
         "robot_2048": F.ratio(rob["P2048"]["median"], 6.10),
         "robot_1024": F.ratio(rob["P1024"]["median"], 6.87),
@@ -184,8 +173,6 @@ payload = {
     "outputs": {"pdf": pdf, "png": png},
 }
 print(F.dump_json("figM7_dayinlife", payload))
-print("M7 rev3 done. extra_median",
-      {a: int(curve[a]["final_median"]) for a, _, _, _ in acts},
-      "robot_median", {a: round(rob[a]["median"], 2) for a, _, _, _ in acts},
-      "hostwarm_tiers", [t["tier"] for t in fd["hostwarm_measured_tiers"]],
-      "partA_flushed", k_flushed)
+print("M7 rev4 done. points",
+      {a: (round(rob[a]["median"], 2), int(extra[a]["median"])) for a, _, _, _ in acts},
+      "hostwarm", [t["tier"] for t in fd["hostwarm_measured_tiers"]], "partA_flushed", k_flushed)
