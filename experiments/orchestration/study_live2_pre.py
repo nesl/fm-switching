@@ -24,9 +24,11 @@ Frame refs are the ones fleet/trace.py puts on the wire: `<file_name>|t<tttt.tt>
 Source frames are only read, never modified, moved or deleted.
 """
 import argparse
+import asyncio
 import gzip
 import hashlib
 import io
+import math
 import json
 import os
 import sys
@@ -367,14 +369,207 @@ def part3():
     log(f"PART 3 {verdict}: {rule}")
 
 
+# ------------------------------------------------------------------------------------------------ part 2
+# User ruling 2026-11-18: run Part 2 now with the committed StudyD3 body that StudyLIVE2-fix2 copies into the live
+# coordinator: experiments/dashcam/d3_infer_vllm.py body() (QUERY lines 43-44, N = 1 header, GEN = temperature 0.0,
+# max_tokens 8, seed 0, logprobs True, top_logprobs 20) with ONE change, stream=True; image = the stored q90 JPEG of
+# each dense instant; plus a per-request cache_salt (the user's instruction) so no request reuses another's cache.
+# Score: d3_infer_vllm.yes_no() on the first token's top-20, then log(p_yes) (ctrl1c_calibrate.py 276-277, 298).
+# The calibration file is labelled PENDING-BODY-CHECK until the fix2 body check passes.
+P2_CONC = 8
+P2_HDR = "The following is 1 dashcam frame."
+
+
+def p2_body(jpeg: bytes, salt: str):
+    sys.path.insert(0, str(REPO / "experiments/dashcam"))
+    import d3_infer_vllm as D3
+    import base64
+    content = [{"type": "text", "text": P2_HDR},
+               {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + base64.b64encode(jpeg).decode()}},
+               {"type": "text", "text": D3.QUERY}]
+    bd = dict(model="32BI", messages=[{"role": "user", "content": content}], stream=True, **D3.GEN)
+    bd["cache_salt"] = salt
+    return bd
+
+
+async def p2_one(c, row, sem, attempt):
+    import httpx  # noqa: F401
+    sys.path.insert(0, str(REPO / "experiments/dashcam"))
+    import d3_infer_vllm as D3
+    jpeg = (STORE / "nexar_q90/frames" / row["file"]).read_bytes()
+    salt = hashlib.sha256(f"live2pre-p2|{row['frame_ref']}|{attempt}".encode()).hexdigest()[:43]
+    b = p2_body(jpeg, salt)
+    async with sem:
+        t0 = time.time()
+        lp, text, err, rid, first = [], "", None, None, None
+        try:
+            async with c.stream("POST", "http://127.0.0.1:8031/v1/chat/completions", json=b) as r:
+                if r.status_code != 200:
+                    err = f"HTTP {r.status_code}: {(await r.aread())[:300]!r}"
+                else:
+                    async for line in r.aiter_lines():
+                        if not line.startswith("data: ") or line == "data: [DONE]":
+                            continue
+                        j = json.loads(line[6:])
+                        rid = rid or j.get("id")
+                        for ch in j.get("choices", []):
+                            d = (ch.get("delta") or {}).get("content")
+                            if d:
+                                text += d
+                                first = first or time.time()
+                            lp += ((ch.get("logprobs") or {}).get("content") or [])
+        except Exception as e:  # noqa: BLE001
+            err = f"{type(e).__name__}: {e}"
+        p, y, n = D3.yes_no(lp)
+        import math
+        return dict(frame_ref=row["frame_ref"], file=row["file"], attempt=attempt, server_id=rid, cache_salt=salt,
+                    text=text, first_token=lp[0]["token"] if lp else None, p_yes=p, mass_yes=y, mass_no=n,
+                    score=(math.log(p) if p else None), neither=(p is None and err is None), error=err,
+                    latency_s=round(time.time() - t0, 4), ttft_s=round(first - t0, 4) if first else None,
+                    t_submit=round(t0, 6))
+
+
+async def p2_requests(rows):
+    import httpx
+    sem = asyncio.Semaphore(P2_CONC)
+    out_p = OUT / "live2_pre_part2_requests.jsonl"
+    done = {}
+    async with httpx.AsyncClient(timeout=None, limits=httpx.Limits(max_connections=None)) as c:
+        for i in range(0, len(rows), 400):
+            res = await asyncio.gather(*(p2_one(c, r, sem, 1) for r in rows[i:i + 400]))
+            with open(out_p, "a") as f:
+                for x in res:
+                    f.write(json.dumps(x) + "\n")
+                    done[x["frame_ref"]] = x
+            if (i // 400) % 10 == 0:
+                log(f"part2: {min(i + 400, len(rows))}/{len(rows)} sent; errors so far "
+                    f"{sum(1 for v in done.values() if v['error'] or v['p_yes'] is None)}")
+        bad = [r for r in rows if done[r["frame_ref"]]["error"] or done[r["frame_ref"]]["p_yes"] is None]
+        if bad:
+            log(f"part2: retrying {len(bad)} failed / unscored requests once")
+            res = await asyncio.gather(*(p2_one(c, r, sem, 2) for r in bad))
+            with open(out_p, "a") as f:
+                for x in res:
+                    f.write(json.dumps(x) + "\n")
+                    done[x["frame_ref"]] = x
+    return done
+
+
+def ap_labels():
+    """Per-instant labels of the scorer's streaming AP (StudyE9b grid via the fleet scorer's loader): a positive
+    clip's instant is positive iff it is the clip's AP target for some horizon in scorer.AP_HORIZONS (grid point
+    nearest event - h on E9b's absolute 0.25-s grid, clamped); every instant of a negative clip is negative; any other
+    instant of a positive clip has no label under that definition (counted and reported)."""
+    import data_sources as DS
+    sys.path.insert(0, str(REPO / "experiments/dashcam"))
+    sys.path.insert(0, str(LIVE2 / "scorer"))
+    import study_e9b_dense as B9
+    import score as SC
+    clips = DS.nexar_clip_meta()
+    lab = {}
+    for clip, cm in clips.items():
+        G = len([1 for _ in range(int(round((cm.duration_s - B9.T0) / 0.25)) + 1)])
+        meta = {clip: dict(event=cm.event_s, G=G)}
+        tg = set()
+        if cm.label == "positive" and cm.event_s is not None:
+            for h in SC.AP_HORIZONS:
+                i = B9.target_index(meta, clip, h, 0.25)
+                tg.add(round(B9.T0 + 0.25 * i, 6))
+        lab[clip] = (cm.label, tg)
+    return lab, tuple(SC.AP_HORIZONS)
+
+
+def part2():
+    import numpy as np
+    sys.path.insert(0, str(REPO / "experiments/dashcam"))
+    import ctrl1c_calibrate as CC
+    import data_sources as DS
+    enc = [json.loads(l) for l in open(STORE / "nexar_q90/encode_log.jsonl")]
+    dense = DS.orin_dense_scores()
+    rows = [r for r in enc if (r["frame_ref"].split("|")[0], round(float(r["frame_ref"].split("|t")[1]), 6)) in dense]
+    if len(rows) != 42014:
+        raise SystemExit(f"part2: {len(rows)} stored frames match the dense set, expected 42,014: STOP")
+    rows.sort(key=lambda r: r["frame_ref"])
+    srv, M, meta = start_server27()
+    try:
+        done = asyncio.run(p2_requests(rows))
+    finally:
+        srv.stop()
+    # ---- fit (server down)
+    lab, horizons = ap_labels()
+    folds = json.loads((REPO / "results/dashcam/ctrl1c/ctrl1c_calibration.json").read_text())
+    assign, fold_rule = folds["assignment"], folds["fold_rule"]
+    recs = []
+    unl = 0
+    for r in rows:
+        fn, t = r["frame_ref"].split("|")[0], round(float(r["frame_ref"].split("|t")[1]), 6)
+        x = done[r["frame_ref"]]
+        lb, tg = lab[fn]
+        y_ap = (1.0 if t in tg else None) if lb == "positive" else 0.0
+        unl += y_ap is None
+        recs.append(dict(fn=fn, t=t, fold=assign[fn], s32=x["score"], sorin=dense[(fn, t)]["score"],
+                         y_ap=y_ap, y_clip=1.0 if lb == "positive" else 0.0))
+    missing = [r for r in recs if r["s32"] is None]
+    res = dict(label="PENDING-BODY-CHECK", fit_sample="dense", n_instants=len(recs), n_unscored_32b=len(missing),
+               labels=dict(primary="streaming-AP per-instant labels (scorer.AP_HORIZONS %s): positive = a positive "
+                                   "clip's AP target instant; negative = every instant of a negative clip; other "
+                                   "positive-clip instants unlabelled" % (horizons,),
+                           n_unlabelled=unl, n_pos=sum(1 for r in recs if r["y_ap"] == 1.0),
+                           n_neg=sum(1 for r in recs if r["y_ap"] == 0.0),
+                           secondary="clip-level label on every instant (StudyCTRL1c / ORIN2 convention)"),
+               fold_rule=fold_rule, clip_to_fold=assign, request_body=dict(
+                   source="experiments/dashcam/d3_infer_vllm.py body() with stream=True; per-request cache_salt",
+                   sha256_template=hashlib.sha256(json.dumps(p2_body(b"", "SALT"), sort_keys=True).encode()).hexdigest(),
+                   concurrency=P2_CONC),
+               jpeg_manifest_sha256=hashlib.sha256((OUT / "manifests/nexar_q90_manifest.jsonl.gz").read_bytes()).hexdigest(),
+               server=meta, fits={})
+    for lname, key in (("primary_ap_labels", "y_ap"), ("secondary_clip_labels", "y_clip")):
+        for tier, sk in (("h100_32b", "s32"), ("orin_4b", "sorin")):
+            per, oof = {}, []
+            for k in range(5):
+                tr = [r for r in recs if r["fold"] != k and r[key] is not None and r[sk] is not None]
+                te = [r for r in recs if r["fold"] == k and r[key] is not None and r[sk] is not None]
+                f = CC.fit_platt(np.array([r[sk] for r in tr]), np.array([r[key] for r in tr]))
+                per[k] = dict(a=f["a"], b=f["b"], n_train=len(tr), n_test=len(te))
+                for r in te:
+                    z = f["a"] * r[sk] + f["b"]
+                    oof.append((1.0 / (1.0 + math.exp(-z)), r[key]))
+            pr = np.array([p for p, _ in oof])
+            yy = np.array([y for _, y in oof])
+            ll = float(-np.mean(yy * np.log(np.clip(pr, 1e-15, 1)) + (1 - yy) * np.log(np.clip(1 - pr, 1e-15, 1))))
+            base = float(yy.mean())
+            llb = float(-(base * math.log(base) + (1 - base) * math.log(1 - base))) if 0 < base < 1 else None
+            bins = np.linspace(0, 1, 11)
+            rel = []
+            for lo_, hi_ in zip(bins[:-1], bins[1:]):
+                m = (pr >= lo_) & (pr < hi_ if hi_ < 1 else pr <= hi_)
+                if m.any():
+                    rel.append(dict(bin=[round(lo_, 1), round(hi_, 1)], n=int(m.sum()), mean_pred=float(pr[m].mean()),
+                                    frac_pos=float(yy[m].mean())))
+            a_s = [v["a"] for v in per.values()]
+            res["fits"].setdefault(lname, {})[tier] = dict(
+                per_fold=per, a_mean=float(np.mean(a_s)), a_spread=[float(min(a_s)), float(max(a_s))],
+                b_mean=float(np.mean([v["b"] for v in per.values()])), oof_log_loss=ll, base_rate_log_loss=llb,
+                oof_reliability=rel, n=len(oof))
+    import math as _m  # noqa: F401
+    (REPO / "results/orchestration/live2/calibration").mkdir(parents=True, exist_ok=True)
+    outp = REPO / "results/orchestration/live2/calibration/live2_calibration_dense_jpeg.json"
+    outp.write_text(json.dumps(res, indent=1, default=float) + "\n")
+    log(f"PART 2 written ({res['label']}): unscored {len(missing)}, unlabelled {unl}; "
+        + "; ".join(f"{ln} {t} a {v['a_mean']:.4f} [{v['a_spread'][0]:.4f}, {v['a_spread'][1]:.4f}] b {v['b_mean']:.3f} "
+                    f"ll {v['oof_log_loss']:.4f}" for ln, d in res["fits"].items() for t, v in d.items()))
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("part", choices=("part1", "part3"))
+    ap.add_argument("part", choices=("part1", "part2", "part3"))
     ap.add_argument("--procs", type=int, default=32)
     a = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     if a.part == "part1":
         part1(a.procs)
+    elif a.part == "part2":
+        part2()
     else:
         part3()
 

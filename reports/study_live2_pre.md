@@ -10,7 +10,7 @@ text is the specification used.
 
 | part | what | verdict |
 |---|---|---|
-| 1 | encode and store the round-1 JPEGs once (D91), manifests, E10a distributional check | **PASS** (full coverage; no quartile flagged), PROVISIONAL on two OVERNIGHT DECISIONS about input parsing (section 2) |
+| 1 | encode and store the round-1 JPEGs once (D91), manifests, E10a distributional check | **PASS** (full coverage; no quartile flagged); the two OVERNIGHT input-parsing decisions (section 2) were CONFIRMED by the user on 2026-11-18 |
 | 2 | dense calibration refit (D86, D105) | **STOP, NOT RUN**: the live coordinator's monitoring body produces no score the calibration can use (section 3) |
 | 3 | cache isolation on the real engine (D84) | **PASS** under the pre-registered rule (section 4) |
 
@@ -42,7 +42,7 @@ sessions). Against the row sets:
 | the 300-clip set the dashcams play (`nexar_clip_meta`, D14b trace) | 300 | 300 (all in the dense set; no dense clip outside it) | 0 |
 | S-EMBER EVAL sessions (`eval_sessions`, committed split) | 164 sessions | 164; 32,142 D2 frames at the 2-s stride, reaching every session's last question | 0 |
 
-**OVERNIGHT DECISIONS (Part 1, PROVISIONAL until the user confirms).** `experiments/orchestration/live2/data/
+**OVERNIGHT DECISIONS (Part 1), CONFIRMED by the user on 2026-11-18 (decisions 1 and 2 accepted).** `experiments/orchestration/live2/data/
 encode_jpeg.py` was written on flash without the data, and its two input parsers do not match the stores on this host:
 
 1. Nexar frames are stored as `<clip>/<pts_ms>.png` (StudyD14 / D14b `d14b_prepare.py`), not `<clip>_t<seconds>.png`;
@@ -135,8 +135,8 @@ uuids. Server version: vLLM 0.31.0, command as in section 1.
 
 - Part 2 blocked on the coordinator: a monitoring body that elicits a scored Yes / No answer (question plus
   `logprobs`) and a function that turns the answer into `log p_yes` and stores it as `cloud_payload.cloud_score`.
-- The two Part 1 input-parsing decisions (section 2) should be confirmed, and flash's `encode_jpeg.py` parsers aligned
-  with the stores, so the next encode needs no wrapper.
+- The two Part 1 input-parsing decisions (section 2) were confirmed by the user on 2026-11-18; flash's `encode_jpeg.py`
+  parsers should still be aligned with the stores so the next encode needs no wrapper.
 - The pilot's precondition P2 (StudyLIVE2-fix on origin, design log rows D98 to D105) does not hold on this HEAD.
 
 ## 7. Files
