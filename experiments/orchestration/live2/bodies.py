@@ -31,6 +31,8 @@ from cachekeys import mm_uuid
 from scores import D3_SCRIPT, O_Q4_SCRIPT, R1_SCRIPT, committed_constant, load_committed
 
 MODEL_DEFAULT = "32BI"
+DEFERRED = "<pending>"          # never reaches the wire; `materialize` replaces it
+_PENDING = "_fm_pending"        # the deferred part's own bookkeeping, stripped on materialize
 
 # ---------------------------------------------------------------- the committed scored bodies
 # StudyLIVE2-fix2. The SH monitoring body and the robot recall body are the bodies that produced
@@ -83,12 +85,47 @@ def _data_url(path: Path) -> str:
     return "data:image/jpeg;base64," + base64.b64encode(path.read_bytes()).decode()
 
 
-def image_part(uuid: str, path: Optional[Path]) -> Dict[str, Any]:
+def image_part(uuid: str, path: Optional[Path], frame_ref: Optional[str] = None,
+               defer: bool = False) -> Dict[str, Any]:
     """Bytes plus uuid when the engine has not seen this frame, a uuid-only reference when it
-    has (StudyRH7 `frag_bytes` / `frag_ref`)."""
+    has (StudyRH7 `frag_bytes` / `frag_ref`).
+
+    With `defer`, the part is returned with a PLACEHOLDER in place of the data URL and
+    `materialize` fills it in later, off the decision loop (StudyLIVE2-harness). The resulting
+    wire part is identical either way; only the moment the base64 is computed differs.
+    """
     if path is None:
         return {"type": "image_url", "image_url": None, "uuid": uuid}
+    if defer:
+        return {"type": "image_url", "image_url": DEFERRED,
+                "uuid": uuid, _PENDING: dict(frame_ref=frame_ref, path=str(path))}
     return {"type": "image_url", "image_url": {"url": _data_url(Path(path))}, "uuid": uuid}
+
+
+def materialize(body: Dict[str, Any], cache: Any = None) -> Dict[str, Any]:
+    """Turn every deferred image part into the part `image_part` would have built.
+
+    Called off the decision loop (the backend's own worker). Mutates and returns `body`. A frame
+    that cannot be resolved raises, because sending a body with a placeholder in it would put a
+    literal "<pending>" where an image belongs.
+    """
+    for part in body.get("messages", [{}])[0].get("content", ()):
+        pend = part.pop(_PENDING, None) if isinstance(part, dict) else None
+        if pend is None:
+            continue
+        ref, path = pend.get("frame_ref"), pend.get("path")
+        url = (cache.data_url(ref, Path(path)) if cache is not None
+               else _data_url(Path(path)))
+        if url is None:
+            raise FileNotFoundError(f"frame {ref!r} at {path!r} cannot be read; a deferred image "
+                                    f"part must never be sent unmaterialized")
+        part["image_url"] = {"url": url}
+    return body
+
+
+def is_materialized(body: Dict[str, Any]) -> bool:
+    return not any(isinstance(p, dict) and _PENDING in p
+                   for p in body.get("messages", [{}])[0].get("content", ()))
 
 
 def build_body(*, kind: str, device_id: str, session_id: Optional[str], run_tag: str,
@@ -96,7 +133,7 @@ def build_body(*, kind: str, device_id: str, session_id: Optional[str], run_tag:
                question: Optional[str] = None, options: Sequence[str] = (),
                max_tokens: int = 1, model: str = MODEL_DEFAULT, stream: bool = True,
                est_tokens: int = 0, retain: bool = True,
-               time_scale: float = 1.0) -> Dict[str, Any]:
+               time_scale: float = 1.0, defer_images: bool = False) -> Dict[str, Any]:
     """One chat-completions body.
 
     `frames` is a list of {"frame_ref": str, "path": Path or None}; `path` None means send the
@@ -121,7 +158,7 @@ def build_body(*, kind: str, device_id: str, session_id: Optional[str], run_tag:
     for f in frames:
         u = mm_uuid(run_tag, device_id, session_id, f["frame_ref"])
         uuids.append(u)
-        content.append(image_part(u, f.get("path")))
+        content.append(image_part(u, f.get("path"), f.get("frame_ref"), defer_images))
     if question:
         q = question if not options else (question + "\n" + "\n".join(options))
         content.append({"type": "text", "text": q})

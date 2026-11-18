@@ -97,7 +97,8 @@ class Live2Coordinator:
                  frames_root: Optional[Path] = None, dry_run: bool = False,
                  targets: Optional[Dict[str, Any]] = None, on_pull=None,
                  gpu_budget_s: Optional[float] = None,
-                 max_wall_s: Optional[float] = None) -> None:
+                 max_wall_s: Optional[float] = None,
+                 frame_cache: Any = None, defer_images: bool = False) -> None:
         self.arm = arm
         self.be = backend
         self.events = sorted(events, key=lambda e: (_sched(e), e.get("kind", "")))
@@ -109,6 +110,11 @@ class Live2Coordinator:
         self.logs = logs
         self.run_tag = run_tag
         self.frames_root = Path(frames_root) if frames_root else None
+        # StudyLIVE2-harness: with a frame cache the loop never reads a frame or base64-encodes
+        # one; `defer_images` leaves the image payloads to the backend's own thread. Both are
+        # OFF by default, so an unconfigured run behaves exactly as the pilot's did.
+        self.frame_cache = frame_cache
+        self.defer_images = bool(defer_images)
         self.dry_run = bool(dry_run)
         # mode B (D69): the fleet answers a pull. Without a live fleet process the caller may
         # supply a responder that returns the monitor_frame the pull would produce, with the pull
@@ -496,6 +502,8 @@ class Live2Coordinator:
     def _path(self, frame_ref: Optional[str]) -> Optional[Path]:
         if frame_ref is None:
             return None
+        if self.frame_cache is not None:
+            return self.frame_cache.path_of(frame_ref)
         p = Path(frame_ref)
         if not p.is_absolute() and self.frames_root is not None:
             p = self.frames_root / frame_ref
@@ -512,7 +520,8 @@ class Live2Coordinator:
         body = B.build_body(kind=kind, device_id=device_id, session_id=session_id,
                             run_tag=self.run_tag, salt=d.salt, header=HEADER_TEXT,
                             frames=frames, question=question, options=options,
-                            max_tokens=max_tokens, est_tokens=est_tokens)
+                            max_tokens=max_tokens, est_tokens=est_tokens,
+                            defer_images=self.defer_images)
         sub = Live2Submission(request_id=rid, decision_id=decision_id, kind=kind,
                               device_id=device_id, session_id=session_id,
                               opportunity_id=opportunity_id, body=body,

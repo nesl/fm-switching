@@ -170,9 +170,14 @@ class StubCoordinator:
 @dataclass
 class Lateness:
     samples: List[float] = field(default_factory=list)
+    # StudyLIVE2-harness: optional per-action detail, so a late action can be attributed to its
+    # own due instant and kind. Off unless `detail` is a list; the statistics are unaffected.
+    detail: Optional[List[Any]] = None
 
-    def add(self, v: float) -> None:
+    def add(self, v: float, due: Optional[float] = None, what: Optional[str] = None) -> None:
         self.samples.append(v)
+        if self.detail is not None:
+            self.detail.append((round(float(due or 0.0), 6), what, round(1000 * v, 4)))
 
     def stats(self) -> Dict[str, Any]:
         s = sorted(self.samples)
@@ -362,17 +367,48 @@ class FleetEmulator:
             t, _seq, what, payload = heapq.heappop(self._heap)
             if t > horizon:
                 break
+            if self.realtime:
+                # REAL-TIME TICKING (StudyLIVE2-harness). The ticks used to be caught up in a
+                # burst BEFORE the sleep, so the coordinator was not driven at all while the
+                # loop waited for the next action. A request that finished inside a wait was
+                # therefore not collected until the next action popped, and its `cloud_answer`
+                # arrived carrying a `t_done` already in the past, which the emulator then
+                # scheduled behind its own clock. That notice delay WAS the pilot's lateness:
+                # in the flash reproduction every late action was an `answer_delivered`
+                # (p50 18.4 ms, p99 289.0 ms) while every other kind sat at p99 0.28 ms.
+                # Ticking on the wall clock while waiting collects a completion within one
+                # `tick_s`. A reply handled during the wait can schedule an action EARLIER than
+                # the one in hand, so the popped action goes back on the heap and the loop
+                # re-pops, keeping strict time order.
+                due = t0 + t
+                requeued = False
+                while True:
+                    now = time.monotonic()
+                    if now >= due:
+                        break
+                    elapsed = now - t0
+                    if next_tick <= elapsed:
+                        for reply in (self.coord.tick(next_tick) or ()):
+                            self._handle_reply(reply, next_tick)
+                        next_tick += self.tick_s
+                        if self._heap and self._heap[0][0] < t:
+                            heapq.heappush(self._heap, (t, _seq, what, payload))
+                            requeued = True
+                            break
+                        continue
+                    time.sleep(max(0.0, min(due, t0 + next_tick) - now))
+                if requeued:
+                    continue
+                now = time.monotonic()
+                self.lateness.add(max(0.0, now - due), t, what)
+            # Every tick up to this action's instant has been issued before the action is
+            # delivered, exactly as before. In a real-time run the wait above has already
+            # issued almost all of them; in a non-real-time run this IS the tick loop and its
+            # behaviour is unchanged, which is what keeps the existing suites identical.
             while next_tick <= t:
                 for reply in (self.coord.tick(next_tick) or ()):
                     self._handle_reply(reply, next_tick)
                 next_tick += self.tick_s
-            if self.realtime:
-                due = t0 + t
-                now = time.monotonic()
-                if now < due:
-                    time.sleep(due - now)
-                    now = time.monotonic()
-                self.lateness.add(max(0.0, now - due))
             if what == "register":
                 self.presented.append(payload)
                 self._to_coord(EV.make("device_register", device_id=payload["device_id"],

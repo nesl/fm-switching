@@ -1,0 +1,294 @@
+#!/usr/bin/env python3
+"""One REAL-SERVER live2 cell per invocation, every input a flag. CPU side only.
+
+StudyLIVE2-harness, fix (c). This is `experiments/orchestration/study_live2_pilot.py` turned into
+a committed runner: the pilot's behaviour is kept (the same trace generation, the same arm and
+coordinator construction as `run_live2_cell.py`, the same header fields, the real-time
+`FleetEmulator` through `bridge.EmulatorBridge`, the same run_meta annotation, then
+`scorer/score.py`), with three differences, all of them the harness fix this row is about:
+
+  1. THE COORDINATOR RUNS IN ITS OWN PROCESS by default (`procsplit.py`), so the emulator's
+     clock, and therefore the lateness this run is judged by, is measured in a process that does
+     no HTTP. `--no-split` keeps the pilot's single-process wiring for comparison.
+  2. The HTTP is one async streaming client and the frame base64 is computed once
+     (`asyncbackend.py`, `framecache.py`).
+  3. The emulator ticks the coordinator on the WALL CLOCK while it waits, which is what actually
+     fixed the pilot's lateness; see the StudyLIVE2-harness report section.
+
+The pilot's own adapters are kept and still recorded: `--frames-root` is a directory resolved as
+`frames_root / frame_ref` (a tree of symlinks named by frame_ref is how the pilot built it), the
+bridge carries `--server-kind` so the emulator's run_meta records what served the run, and a run
+with no `--server` sends nothing (the device-only arm).
+
+STARTING THE ENGINE IS NOT THIS SCRIPT'S JOB unless `--start-server` is given: the flag exists so
+the H100 can keep the pilot's restart-per-run behaviour, and it imports the H100-only modules
+lazily so this file stays runnable on flash. Without it, `--server URL` points at a server the
+caller already started.
+
+NOTHING HERE IS A MEASUREMENT BY ITSELF: `is_measurement` is False in every header this writes,
+and a run against anything but a real engine carries that `server_kind`.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+import time
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+HERE = Path(__file__).resolve().parent
+REPO = HERE.parents[2]
+for _p in (str(HERE), str(HERE / "fleet"), str(HERE / "scorer"),
+           str(REPO / "experiments/orchestration/live"),
+           str(REPO / "experiments/orchestration/baselines"),
+           str(REPO / "experiments/orchestration/sim"), str(REPO / "experiments/lib")):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+
+def build_parser() -> argparse.ArgumentParser:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--arm", required=True)
+    ap.add_argument("--out", required=True, help="the run directory for this ONE cell")
+    ap.add_argument("--trace-dir", default=None,
+                    help="an existing trace; generated under --work when absent")
+    ap.add_argument("--work", default=None, help="where generated traces are kept")
+    ap.add_argument("--n-devices", type=int, default=8)
+    ap.add_argument("--ratio", default="50:50")
+    ap.add_argument("--run-s", type=float, default=600.0)
+    ap.add_argument("--mode", default="A", choices=("A", "B"))
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--frame-manifest", default=None)
+    ap.add_argument("--frames-root", default=None)
+    ap.add_argument("--server", default=None, help="OpenAI-compatible base URL; omit to send nothing")
+    ap.add_argument("--server-kind", default="vllm")
+    ap.add_argument("--model", default="32BI")
+    ap.add_argument("--gpu-kv-tokens", type=int, default=62944)
+    ap.add_argument("--host-tier-gib", type=float, default=27.0)
+    ap.add_argument("--host-tier-tokens", type=int, default=None)
+    ap.add_argument("--calibration", default=None)
+    ap.add_argument("--cost-model", default="pol4")
+    ap.add_argument("--h-s", type=float, default=0.5)
+    ap.add_argument("--mu-mode", default="ewma")
+    ap.add_argument("--mu-fixed", type=float, default=None)
+    ap.add_argument("--impl", default="fast")
+    ap.add_argument("--cap-k", type=int, default=None)
+    ap.add_argument("--decision-period-s", type=float, default=0.1)
+    ap.add_argument("--gpu-budget-s", type=float, default=None)
+    ap.add_argument("--drain-s", type=float, default=20.0)
+    ap.add_argument("--tick-s", type=float, default=None)
+    ap.add_argument("--self-tick-s", type=float, default=0.005)
+    ap.add_argument("--http-limit", type=int, default=16384)
+    ap.add_argument("--cache-cap-bytes", type=int, default=None)
+    ap.add_argument("--no-split", dest="split", action="store_false",
+                    help="the pilot's single-process wiring, for comparison only")
+    ap.add_argument("--no-warm-cache", dest="warm_cache", action="store_false")
+    ap.add_argument("--no-score", dest="score", action="store_false")
+    ap.add_argument("--memory-setting", default=None)
+    ap.add_argument("--label", default="")
+    ap.add_argument("--start-server", action="store_true",
+                    help="H100 only: restart the round-1 server for this cell, as the pilot did")
+    ap.set_defaults(split=True, warm_cache=True, score=True)
+    return ap
+
+
+def _arm_kwargs(a) -> Dict[str, Any]:
+    if a.arm != "policy-core":
+        return {}
+    return dict(cost_model=a.cost_model, h_s=a.h_s, mu_mode=a.mu_mode, mu_fixed=a.mu_fixed,
+                impl=a.impl, cap_k=a.cap_k)
+
+
+def _trace(a, work: Path) -> Path:
+    import trace as TR
+    if a.trace_dir:
+        return Path(a.trace_dir)
+    tdir = work / "traces" / f"seed{a.seed}_n{a.n_devices}_{int(a.run_s)}s_{a.mode}"
+    if not (tdir / "trace.jsonl").exists():
+        TR.write_trace(tdir, TR.generate_trace(
+            a.seed, a.n_devices, a.ratio, a.run_s, a.mode,
+            frame_manifest=(Path(a.frame_manifest) if a.frame_manifest else None)))
+    return tdir
+
+
+def run(a) -> Dict[str, Any]:
+    import arms as A
+    import cachekeys as CK
+    import calib as CALIB
+    import cstate as CS
+    import emulator as EM
+    import run_live2_cell as RC
+
+    rdir = Path(a.out)
+    rdir.mkdir(parents=True, exist_ok=True)
+    work = Path(a.work) if a.work else (rdir.parent / "work")
+    work.mkdir(parents=True, exist_ok=True)
+    tdir = _trace(a, work)
+    tmeta = json.loads((tdir / "trace_meta.json").read_text())
+    htok = int(a.host_tier_tokens or RC.host_tokens(a.host_tier_gib))
+    sends = bool(a.server)
+
+    srv = None
+    sinfo: Optional[Dict[str, Any]] = None
+    if a.start_server:
+        srv, sinfo = _start_server(a)
+
+    arm = A.make_arm(a.arm, **_arm_kwargs(a))
+    conf = dict(gpu_kv_tokens=a.gpu_kv_tokens, host_tier_gib=a.host_tier_gib,
+                host_tier_tokens=htok, targets=CS.TARGETS)
+    cal: Dict[str, Any] = {}
+    knots = None
+    if a.calibration:
+        cal = CALIB.load_map(Path(a.calibration))
+        CALIB.require_runnable(cal, a.server_kind)
+        knots = CALIB.write_knots(cal, rdir / "calibration_knots.json")
+        if a.arm == "policy-core":
+            conf["calibration_knots_path"] = knots
+    arm.live2_configure(**conf)
+
+    header = dict(
+        label=a.label or "StudyLIVE2 real-server cell", git_commit=RC.git_commit(),
+        arm=arm.name, arm_version=getattr(arm, "arm_version", None),
+        flags=(arm.flags.as_dict() if hasattr(arm, "flags") else {}),
+        gpu_kv_tokens=a.gpu_kv_tokens, host_tier_gib=a.host_tier_gib, host_tier_tokens=htok,
+        cost_model=(a.cost_model if a.arm == "policy-core" else None),
+        calibration_file=(str(a.calibration) if a.calibration else None),
+        calibration_label=cal.get("label"),
+        fairness_digest=tmeta.get(f"fairness_digest_{a.mode}"),
+        live1_trace_digest=tmeta.get("live1_trace_digest"),
+        seed=a.seed, targets=CS.TARGETS, upload_mode=a.mode,
+        mu_mode=(a.mu_mode if a.arm == "policy-core" else None),
+        H=(a.h_s if a.arm == "policy-core" else None),
+        decision_period_s=a.decision_period_s, ratio=a.ratio, n_devices=a.n_devices,
+        run_s=a.run_s, memory_setting=RC.memory_setting(a.host_tier_gib, a.memory_setting),
+        server=sinfo, server_url=(a.server or "none"), server_kind=a.server_kind,
+        model=a.model, split_processes=bool(a.split), is_measurement=False)
+    (rdir / "header.json").write_text(json.dumps(header, indent=1, default=str) + "\n")
+
+    cfg = dict(run_dir=str(rdir), arm=a.arm, arm_kwargs=_arm_kwargs(a), mode=a.mode,
+               run_s=a.run_s, drain_s=a.drain_s, decision_period_s=a.decision_period_s,
+               gpu_kv_tokens=a.gpu_kv_tokens, host_tier_gib=a.host_tier_gib,
+               host_tier_tokens=htok, seed=a.seed,
+               run_tag=CK.run_tag(a.seed, a.arm), frames_root=a.frames_root,
+               server_url=a.server, model=a.model,
+               strip_hints=(a.server_kind != "fake"), defer_images=True,
+               calibration_knots_path=(str(knots) if knots else None),
+               gpu_budget_s=a.gpu_budget_s, http_limit=a.http_limit,
+               cache_cap_bytes=a.cache_cap_bytes, self_tick_s=a.self_tick_s)
+
+    err = None
+    t0 = time.time()
+    if a.split:
+        import harness_fixture as HF
+        import procsplit as PS
+        if a.warm_cache and a.frames_root:
+            cfg["warm_refs"] = HF.refs_in_trace(tdir)
+        sr = PS.SplitRun(cfg, kind=a.server_kind)
+        br = sr.__enter__()
+        try:
+            em = _emulator(EM, tdir, br, a)
+            em.run(rdir)
+        except Exception as e:                                        # noqa: BLE001
+            err = f"{type(e).__name__}: {e}"
+        finally:
+            sr.__exit__()
+        res = dict(br.stats())
+    else:
+        res, err = _inprocess(a, tdir, rdir, cfg, htok, arm, EM)
+    wall = time.time() - t0
+    if srv is not None:
+        srv.stop()
+
+    rm = (json.loads((rdir / "run_meta.json").read_text())
+          if (rdir / "run_meta.json").exists() else {})
+    rm.update(memory_setting=RC.memory_setting(a.host_tier_gib, a.memory_setting),
+              split_processes=bool(a.split), label=header["label"])
+    (rdir / "run_meta.json").write_text(json.dumps(rm, indent=2, sort_keys=True) + "\n")
+    (rdir / "coordinator_result.json").write_text(
+        json.dumps(res, indent=1, default=str) + "\n")
+    out = dict(arm=a.arm, n_devices=a.n_devices, mode=a.mode, run_s=a.run_s, seed=a.seed,
+               split=bool(a.split), err=err, wall_s=round(wall, 3),
+               run_dir=str(rdir), trace_dir=str(tdir),
+               lateness=rm.get("lateness"), run_valid=rm.get("run_valid"),
+               digests_equal=rm.get("digests_equal"),
+               n_requests=res.get("n_requests"), n_errors=res.get("n_errors"),
+               server_kind=a.server_kind, is_measurement=False)
+    if a.score and a.calibration:
+        out["score"] = _score(tdir, rdir, Path(a.calibration), a.arm)
+    (rdir / "cell.json").write_text(json.dumps(out, indent=1, default=str) + "\n")
+    return out
+
+
+def _emulator(EM, tdir: Path, br, a):
+    kw = {}
+    if a.tick_s is not None:
+        kw["tick_s"] = a.tick_s
+    return EM.FleetEmulator(tdir, br, a.mode, realtime=True, drain_s=a.drain_s, **kw)
+
+
+def _inprocess(a, tdir: Path, rdir: Path, cfg, htok, arm, EM):
+    """The pilot's single-process wiring, kept for comparison (`--no-split`)."""
+    import framecache as FC
+    from bridge import EmulatorBridge
+    from coordinator import Live2Coordinator, Logs
+    cache = FC.FrameCache(Path(a.frames_root)) if a.frames_root else None
+    be = None
+    if a.server:
+        from asyncbackend import AsyncLive2Backend
+        be = AsyncLive2Backend(a.server, model=a.model,
+                               strip_hints=(a.server_kind != "fake"), cache=cache,
+                               limit=a.http_limit)
+    logs = Logs(rdir).open()
+    co = Live2Coordinator(arm, be, [], gpu_kv_tokens=a.gpu_kv_tokens,
+                          host_tier_gib=a.host_tier_gib, host_tier_tokens=htok,
+                          upload_mode=a.mode, window_s=a.run_s, drain_s=a.drain_s,
+                          decision_period_s=a.decision_period_s, seed=a.seed, logs=logs,
+                          run_tag=cfg["run_tag"],
+                          frames_root=(Path(a.frames_root) if a.frames_root else None),
+                          frame_cache=cache, defer_images=True,
+                          dry_run=not bool(a.server), gpu_budget_s=a.gpu_budget_s,
+                          targets=cfg.get("targets"))
+    br = EmulatorBridge(co)
+    br.kind = a.server_kind
+    import time as _t
+    cpu0 = _t.process_time()
+    t0 = _t.time()
+    err = None
+    try:
+        _emulator(EM, tdir, br, a).run(rdir)
+    except Exception as e:                                            # noqa: BLE001
+        err = f"{type(e).__name__}: {e}"
+    res = co._result(cpu0, _t.time() - t0)
+    logs.close()
+    if be is not None:
+        res["backend"] = be.metrics() if hasattr(be, "metrics") else None
+        be.close()
+    return res, err
+
+
+def _score(tdir: Path, rdir: Path, cal: Path, arm: str) -> Dict[str, Any]:
+    import score as SC
+    try:
+        return dict(ok=True, score=SC.score_run(tdir, rdir, cal, arm))
+    except Exception as e:                                            # noqa: BLE001
+        return dict(ok=False, error=f"{type(e).__name__}: {e}")
+
+
+def _start_server(a):
+    """The pilot's restart-per-run, imported lazily because it is H100-only."""
+    sys.path.insert(0, str(REPO / "experiments/orchestration"))
+    import study_live2_pilot as P
+    srv, sinfo, _M = P.start_server(a.host_tier_gib)
+    return srv, sinfo
+
+
+def main(argv=None) -> int:
+    a = build_parser().parse_args(argv)
+    out = run(a)
+    print(json.dumps(out, indent=1, default=str))
+    return 0 if not out.get("err") else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

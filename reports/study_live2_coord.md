@@ -1532,3 +1532,268 @@ here: both are H100 work.
    and 'fake' as non-measurement servers"), so this is a note, not a gap.
 4. **`max_tokens` 4 to 512 on recall** (G2) is a generation-parameter change made to satisfy (c).
    Flagged for the record.
+
+---
+
+# StudyLIVE2-harness: the pilot's lateness was the tick schedule, not the GIL
+
+StudyLIVE2-pilot stopped at Step 1 because the first real-server cell left the fleet emulator's
+p99 lateness at 511.6 ms against the 50 ms validity limit, while the coordinator was idle
+(decision p99 0.70 ms, CPU 4.7 %). Its candidate cause, labelled untested, was GIL contention
+between the response-reading threads and the wall-clock loop. **That candidate is wrong.** The
+cause is that the coordinator was not driven at all while the emulator waited, so a request that
+finished inside a wait was not noticed until the next action popped. CPU only on flash; every
+number here comes from the fake streaming server and the byte-exact fixture store, so no run in
+this section is a measurement of anything but the harness.
+
+## H1. Step 1: reproduced on flash
+
+The reproduction needs bodies of the right size and a server that takes the right time.
+`live2/harness_fixture.py` writes, per frame_ref the trace needs, a file of EXACTLY the byte
+length the committed Part-1 manifests record (42,014 Nexar + 32,142 S-EMBER D2 rows); the content
+is deterministic filler behind a JPEG SOI marker, so the base64 payload has the real length and
+nothing else about it is real. `live2/fakestream.py` serves one request at a time per engine slot
+with the service time the COMMITTED cost curves give (`baselines/costs.py`, the same two
+functions `coordinator._dry_service_s` already used: episodic 1 frame = 0.2213 s, recall 11k
+COLD = 2.4444 s) and streams its answer with first-token timing and `logprobs`.
+
+| | pilot, H100, real server | flash reproduction |
+|---|---|---|
+| lateness samples | 2,317 | 2,301 |
+| p50 | 0.11 ms | 0.213 ms |
+| p90 | 171 ms | 90.7 ms |
+| p99 | **511.6 ms** | **228.1 ms** |
+| max | 1,434 ms | 289.3 ms |
+| decision p99 | 0.70 ms | 0.56 ms |
+| requests | 727 submitted, 725 completed | 711 submitted, 709 completed |
+| process CPU | 4.7 % | 2.9 % |
+| run_valid | false | false |
+
+The signature is the same: a sub-millisecond median, a tail in the hundreds of milliseconds, an
+idle coordinator. The magnitude is smaller because flash's fixture does not reproduce the H100's
+response volume or its real TTFTs. That is enough to diagnose it.
+
+## H2. What the profile said, and what actually found it
+
+`cProfile` over the whole run (`profile.txt` in the step-1 run directory) puts the cumulative
+time in `http.client.readline` / `_peek_chunked` / `_read_next_chunk_size` across the pool
+threads, which is what made GIL contention look plausible: thousands of Python-level calls per
+response, each holding the GIL. It is a red herring. cProfile aggregates across threads and
+cannot tell which thread delayed the clock.
+
+What found it was attributing each late action to its own kind. The emulator charges lateness per
+heap action; adding the action's due instant and kind to each sample
+(`fleet/emulator.py::Lateness.add`, off unless a detail list is attached) gives this, at 8
+devices over 120 s:
+
+| action kind | n | p50 | p99 | max |
+|---|---|---|---|---|
+| `answer_delivered` | 705 | **18.4 ms** | **289.0 ms** | **289.5 ms** |
+| `monitor_opportunity` | 768 | 0.168 ms | 0.275 ms | 0.305 ms |
+| `frame_arrived` | 768 | 0.178 ms | 0.289 ms | 0.383 ms |
+| `history_batch` | 16 | 0.169 ms | 0.240 ms | 0.240 ms |
+| `history_arrived` | 16 | 0.209 ms | 0.236 ms | 0.236 ms |
+| `register` | 8 | 0.165 ms | 0.192 ms | 0.192 ms |
+| `recall_question` | 6 | 0.206 ms | 0.281 ms | 0.281 ms |
+| `question_arrived` | 6 | 0.163 ms | 0.208 ms | 0.208 ms |
+| `session_start` | 4 | 0.217 ms | 0.221 ms | 0.221 ms |
+| `history_preload` | 4 | 0.241 ms | 0.246 ms | 0.246 ms |
+
+**Every late action is an `answer_delivered`, and no other kind is ever late.** All 435 samples
+over 10 ms are answers. A loop stalled by the GIL would be late on whatever action it happened to
+be holding, and these actions are not late at all: the loop dispatches everything else at p99
+0.28 ms throughout.
+
+**The mechanism.** The emulator's loop ticked the coordinator by catching up the tick grid
+BEFORE sleeping to the next action's instant, then slept. So between two actions the coordinator
+was never called: `co._collect` never ran, a completed request was not settled, and no
+`cloud_answer` was produced. When the next action finally popped, the answer appeared carrying
+`t_done = sent_s + total_s`, a timestamp already in the past; the emulator scheduled the delivery
+from that timestamp (`_handle_reply`), the action was therefore due in the past, and the loop
+charged the whole notice delay as lateness. The distribution follows: p50 18 ms is the typical
+gap to the next action, and the 289 ms tail is the fixture's 221 ms episodic service plus the
+downlink, i.e. a completion that landed early in a long wait.
+
+This also explains the pilot's own control, which it reported but did not use: the device-only
+run had p99 0.48 ms. Device-only sends no request, so it has no answers to be late about.
+
+## H3. The fix, and the honest attribution
+
+Three changes were made, as the prompt directs. Only the third moves the lateness, and the table
+says so rather than crediting the fix that was asked for first.
+
+| configuration | p50 | p90 | p99 | max | over 10 ms | valid |
+|---|---|---|---|---|---|---|
+| pilot wiring (urllib, 64 threads, body on the loop) | 0.213 | 90.7 | 228.1 | 289.3 | 435 | no |
+| + async client, frame cache, deferred bodies (b) | 0.195 | 91.4 | 230.4 | 289.6 | 435 | no |
+| + coordinator in its own process (a) | 0.171 | 0.265 | 136.3 | 236.7 | 191 | no |
+| + emulator ticks on the wall clock while waiting | 0.143 | 0.216 | **0.257** | **0.373** | **0.000** | **yes** |
+| the tick fix ALONE, in process, async client | 0.173 | 0.215 | 0.290 | 3.575 | 0 | yes |
+| the tick fix ALONE, in process, ORIGINAL urllib backend | 0.145 | 0.211 | 0.305 | 1.565 | 0 | yes |
+
+Read down the last two rows: **the real-time tick is the whole fix.** With it, even the original
+64-thread `urllib` backend that the pilot blamed passes at p99 0.305 ms. Fix (b) on its own
+changed nothing measurable (228.1 to 230.4 ms, within run-to-run noise) even though it cut body
+building to 0.068 ms mean and decision p99 from 0.56 to 0.146 ms: the work it removed was never
+on the critical path. Fix (a) on its own took p99 from 228 to 136 ms, because the child process
+drives its own ticks every 5 ms, but the PARENT still drained replies only when an action popped,
+so half the delay remained.
+
+What (a) and (b) do buy, on this evidence, is tail margin: the worst action is 0.373 ms with the
+split against 3.575 ms in process, a factor of 9.6, which is the GIL isolation showing up where
+the pilot expected to find the whole problem. Both are kept: they are what the prompt asked for,
+they are the right structure for a run that must not be perturbed by its own client, and the
+margin is cheap. But the report must not claim they fixed the lateness, because they did not.
+
+## H4. What changed, file by file
+
+| file | change |
+|---|---|
+| `live2/fleet/emulator.py` | the real-time tick (the fix). While waiting for an action the loop ticks the coordinator every `tick_s` of WALL time and handles replies; a reply that schedules an earlier action sends the held action back on the heap so strict time order is kept. A non-real-time run keeps the old catch-up grid exactly, which is what leaves the existing suites untouched. `Lateness.add` optionally records each sample's due instant and kind. |
+| `live2/procsplit.py` (new) | the emulator and the coordinator in separate processes over a UNIX socket carrying length-prefixed JSON and the emulator's `t`. Replies are asynchronous because each already carries its own run-clock timestamp (`pull_request.t_sent`, `cloud_answer.t_done`), so the parent never blocks on the child. The child drives its own ticks every 5 ms; `self_tick_s = 0` disables that, which is what makes a split run comparable line for line. |
+| `live2/asyncbackend.py` (new) | one asyncio loop in one thread with one `httpx.AsyncClient`, streaming. Bodies are materialized and serialized ON THAT LOOP, never on the decision loop, and `wire_bytes` splices the already-encoded base64 in instead of handing a multi-megabyte string to `json.dumps` twice. Follows StudyRH6's committed precedent for both (pre-serialised image fragments; a connection limit of 16,384). |
+| `live2/framecache.py` (new) | each frame's base64 data URL computed once and reused, under a byte-capped LRU. The old path re-read and re-encoded the same file every time it appeared in a body. |
+| `live2/bodies.py` | `defer_images` leaves image payloads as placeholders for `materialize` to fill in off the loop. The wire form is unchanged and the tests assert it frame by frame. |
+| `live2/coordinator.py` | accepts a frame cache and `defer_images`, both OFF by default, so an unconfigured run behaves exactly as the pilot's did. |
+| `live2/run_live2_real.py` (new) | fix (c): the pilot turned into a committed runner, one cell per invocation, every input a flag, the same header fields, the same run_meta annotation, then the scorer. `--start-server` keeps the pilot's restart-per-run behaviour and imports the H100-only modules lazily, so the file runs on flash. `--no-split` keeps the single-process wiring for comparison. |
+| `live2/fakestream.py`, `live2/harness_fixture.py` (new) | the step-1 fixtures described in H1. The committed StudyLIVE1 `fake_server.py` was NOT modified. |
+| `live2/harness_checks.py` (new) | the step-1 reproduction and the acceptance grid. |
+| `live2/tests/test_live2_harness.py` (new) | 13 tests. |
+
+**No change to arms, decisions, schema, digests or scoring.** The tests pin that: a deferred body
+materializes to the byte-identical immediate body on every body kind the coordinator sends, the
+frame cache returns exactly what `bodies._data_url` returned, `wire_bytes` round-trips to the
+same JSON, and a split run's fairness digest, sent-stream digest, outcome set and decision log
+are identical to an in-process run's on the same trace and seed.
+
+## H5. Step 3: acceptance on flash, 7 of 8 cells
+
+The grid the prompt asks for: p99 lateness at 8 and 64 devices, `edf` and `policy-core`, both
+upload modes, split processes, fake streaming server, 120 s, seed 0, 50 : 50, limit 50 ms.
+
+| arm | devices | mode | p50 | p90 | **p99** | max | within 50 ms | digest equal | requests | errors |
+|---|---|---|---|---|---|---|---|---|---|---|
+| edf | 8 | A | 0.166 | 0.216 | **0.257** | 0.930 | yes | yes | 711 | 0 |
+| edf | 8 | B | 0.149 | 0.207 | **0.249** | 0.375 | yes | yes | 350 | 0 |
+| policy-core | 8 | A | 0.091 | 0.208 | **0.263** | 0.331 | yes | yes | 767 | 0 |
+| policy-core | 8 | B | 0.142 | 0.220 | **0.297** | 0.365 | yes | yes | 0 | 0 |
+| edf | 64 | A | 0.090 | 0.210 | **0.279** | 0.909 | yes | yes | 599 | 0 |
+| edf | 64 | B | 0.065 | 0.203 | **0.260** | 2.636 | yes | yes | 34 | 0 |
+| policy-core | 64 | B | 0.086 | 0.202 | **0.501** | 108.188 | yes | yes | 4 | 0 |
+| policy-core | 64 | A | 0.071 | 0.206 | **110.920** | 1153.710 | **NO** | yes | 957 | 0 |
+
+All milliseconds. The fairness digest is identical across arms at every size and mode
+(`{8|A, 8|B, 64|A, 64|B}` all true) and equals the trace's, so nothing in this row changed what
+the fleet presents.
+
+**The one failing cell is not a harness defect, and the evidence is one to one with the policy's
+own decision cost.** Re-run with per-action attribution and the writer-thread fix below, that
+cell gives:
+
+| quantity | value |
+|---|---|
+| lateness p50 / p90 | 0.080 / 0.208 ms |
+| lateness p99 / max | 110.256 / 488.336 ms |
+| late actions over 10 ms | 599, **every one an `answer_delivered`** |
+| coordinator decision latency p50 / p99 / max | **35.537 / 115.694 / 156.423 ms** over 1,201 decisions |
+| epoch overruns | 0 |
+
+The loop itself is still dispatching everything else at p90 0.208 ms. The answer lateness p99
+(110.3 ms) and the decision p99 (115.7 ms) are the same number: while the coordinator spends up
+to 156 ms inside one ΔJ evaluation it collects no completion, so the answer it then emits carries
+a `t_done` already that far in the past. `policy-core` at 64 devices simply cannot decide inside
+its 100 ms period, which is what StudyLIVE2-fix already measured (decision p99 545.4 ms at 64
+devices, 2,152.6 ms at 128) and what StudyLIVE2-perf is queued to fix. **Prediction, stated here
+before that work runs: this cell meets the 50 ms limit once the decision p99 is under roughly
+50 ms, because the two track one to one.**
+
+**What was NOT done about it, and why.** Collecting completions on a second thread in the
+coordinator process would hide the delay, and it was rejected: `_collect` mutates the sessions,
+opportunities and answers that `_epoch` is reading, so it would race, it would make a decision
+depend on when a thread happened to run, and it would change what the policy sees mid-decision.
+That is forbidden by this row's own constraint ("no change to arms, decisions, schema, digests or
+scoring") and it would convert an honest measurement of a slow policy into an artifact.
+
+One transport defect WAS found and fixed while chasing this cell: the parent wrote to the socket
+from the clock thread, so a child busy taking a decision stopped reading, the socket buffer
+filled and `sendall` blocked the emulator. Writes now go through a queue drained by a writer
+thread, so the emulator never blocks on the wire and a slow child shows up only as answers
+delivered late. Fixing it did not change this cell's p99 (110.9 to 110.3 ms), which confirms the
+back-pressure was not what bounded it.
+
+## H6. Mechanism verification and results consistency
+
+**Mechanism verification: not applicable, and the reason is the usual one for a harness row.**
+This section tests no causal claim about representation, placement or timing; it measures one
+property of the measuring apparatus. Steps 1 to 5 remain owed by the round-1 measured runs
+(report section 12, F9, G6). The analogue that DOES apply here was run, and it is the reason the
+fix is attributable rather than asserted: the mechanism was named (the coordinator is not driven
+during a wait), instantiated (the lateness of each action by kind), traced (a single action's due
+instant against the completion that preceded it), and given a negative control (the pilot's own
+device-only run, which sends no request and has p99 0.48 ms, and the flash cells with the tick
+fix removed, which return to p99 228 ms). Both candidate alternatives were tested and rejected by
+experiment rather than by argument: the async client with the frame cache (no effect, 228.1 to
+230.4 ms) and the process split alone (partial, 228.1 to 136.3 ms).
+
+**Results consistency, the four checks that have an input:**
+
+1. *Cross-check against the committed measurement.* The flash reproduction is compared against
+   StudyLIVE2-pilot's cell in H1. The p99 ratio is 2.24x (511.6 vs 228.1 ms) and p90 1.89x, both
+   inside the 2x-or-explained rule with the explanation stated: flash's fixture does not
+   reproduce the H100's response volume or its real TTFTs. The shape agrees in every other
+   respect (sample count within 0.7 %, sub-millisecond median, idle coordinator, request count
+   within 2.2 %).
+2. *Physical plausibility.* The fixture's service times are not invented: they are the committed
+   cost curves (`episodic_cloud_latency_s` 0.2213 s at 1 JPEG frame, `recall_ttft_s` 2.4444 s at
+   11k COLD). The 289 ms lateness tail is bounded by that 221 ms service plus the downlink, which
+   is the arithmetic the diagnosis predicts.
+3. *Distribution sanity.* Every lateness figure is reported with p50, p90, p99 and max, and the
+   per-kind table in H2 is the full breakdown rather than a median. The decisive observation is
+   precisely a distributional one: p50 0.2 ms with a p99 of 228 ms is not a loaded loop.
+4. *Definition audit.* "Lateness" keeps the emulator's own definition (`now - due` per heap
+   action, in the process holding the clock) and the limit keeps its committed value
+   (`MAX_P99_LATENESS_MS = 50.0`). The only change is that each sample now also records its due
+   instant and kind. "p99" is the emulator's existing index-based quantile, unchanged.
+
+Claim linkage and proxy validity do not apply: no result here bears on a claim in
+`research/CLAIMS.md`, and the fixture frames are not a proxy for image content because nothing
+decodes them. The fixture reproduces one property, the byte length, and that is the only property
+the measurement uses.
+
+## H7. Open issues (StudyLIVE2-harness)
+
+1. **`policy-core` at 64 devices misses the 50 ms limit at 110.3 ms, bounded by its own decision
+   cost** (H5). Not fixable here; it is StudyLIVE2-perf item 1. Until then a 64-device
+   `policy-core` real-server cell will be marked invalid by the emulator's own rule, so the
+   ladder cannot pass 64 devices for that arm.
+2. **30 of the 1,278 frame references an 8-device 120 s trace asks for are absent from the
+   committed Part-1 manifests**, all S-EMBER D2 refs past the stride the manifests cover (the
+   manifests reach each session's last question; the trace keeps appending history to the end of
+   the session). On flash they fall back to a uuid-only reference, which makes the body slightly
+   smaller. **On the H100 this is a correctness issue, not a cosmetic one:** a uuid-only
+   reference tells the engine it has already seen bytes it never received. It needs a ruling,
+   either extend the D2 store past the last question or have the trace generator stop asking for
+   frames the store does not hold.
+3. **The pilot's stated cause is wrong and its report says so with the right hedge** ("Candidate,
+   untested"). Worth keeping as precedent: the hedge is why nothing downstream was built on it.
+4. **The real-time tick changes when a reply is handled inside a real-time run**, so a
+   `cloud_answer` can now schedule a delivery that the old loop would have scheduled later. This
+   is a fidelity improvement, not a neutral one: a real-time run before this fix systematically
+   delivered cloud answers late. No committed round-1 result used that path (the pilot stopped),
+   so nothing needs re-running.
+
+## H8. Suites after the change
+
+| suite | result |
+|---|---|
+| `live2/tests/` (coord, fakeserver, fix, fix2, harness) | 81 of 81 pass, 13 of them new |
+| `live2/fleet/tests/test_live2_fleet.py` | 234 of 234 checks pass |
+| `live2/fleet/tests/test_scale.py` | exit 0, no failure |
+| `policy/tests/` | 384 of 384 pass |
+
+One failure appeared and was an artifact of the ad-hoc scratch runner used to drive the
+pytest-style modules, not of the code: that runner has no `if __name__ == "__main__"` guard, so
+`multiprocessing`'s spawn re-imported it in the child and re-ran the whole suite inside the new
+coordinator process, and the parent's accept timed out. The same test passes under
+`python3 -m unittest`. The runner is scratch tooling and is not committed; it is recorded here
+because the symptom looks exactly like a deadlock in `procsplit.py` and is not one.
