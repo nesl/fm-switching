@@ -396,3 +396,16 @@ ONE-GO extra misses 0.19x (11 vs 57), scaling roughly with the request rate behi
 requests/s vs the committed cold 11k recall TTFT 2.44 s (`recall_ttft_s`, unloaded): 1.2x to 1.5x, inside 2x and
 slower, as a loaded engine should be. Definition audit: tiers, extra misses, burst and robot TTFT are computed by the
 same code as amendments 1 and 2 (`mot1_analyse.analyse`). No disagreement unexplained.
+
+## 12. Amendment 4: light load, roomy host, HOST-WARM only (recorded 2026-11-18, BEFORE any amendment-4 run)
+
+User request (optional filler while waiting for StudyLIVE2's D114 build). Fills the 2 x 2's light / roomy HOST-WARM cell,
+which amendment 3 left "not measured". Design: identical to amendment 3 except the host tier (256 GiB, the amendment 2
+Part B server, host filled to 1.5x its capacity at server start) and the action set (HOST-WARM only, 5 repetitions,
+amendment 3's first-8-stream plans and robot sessions, the same preparation: cold prefill, whole-history filler of at
+least 70,000 tokens, window 0.5 s later). Prediction: **HOST in 5 of 5** (writes after the history's last use about
+80,886 + 30,240 = 111,126 tokens, an order of magnitude under the 1,048,576-token host). Measures: robot TTFT from the
+question, measured tier (cached tokens and the external-KV-transfer counter delta), missed instants, and extra missed
+instants against amendment 3's NONE of the same repetition (a cross-run reference, not a paired difference, as in
+amendment 2 Part A). Sanity: 0 HTTP errors. If StudyLIVE2's D114 commit lands mid-run, the current repetition finishes,
+what is done is committed, and the remainder is recorded as not run.
