@@ -1,0 +1,65 @@
+{
+ "command": [
+  "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+  "serve",
+  "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+  "--served-model-name",
+  "32BI",
+  "--port",
+  "8031",
+  "--max-model-len",
+  "32768",
+  "--gpu-memory-utilization",
+  "0.9",
+  "--tensor-parallel-size",
+  "1",
+  "--no-enable-prefix-caching",
+  "--limit-mm-per-prompt",
+  "{\"image\": 16}",
+  "--dtype",
+  "bfloat16",
+  "--seed",
+  "0",
+  "--limit-mm-per-prompt",
+  "{\"image\": 640, \"video\": 1}",
+  "--mm-processor-kwargs",
+  "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}",
+  "--trust-request-mm-kwargs",
+  "--host",
+  "127.0.0.1",
+  "--enable-prefix-caching",
+  "--enable-prompt-tokens-details",
+  "--mm-processor-cache-gb",
+  "128",
+  "--kv-offloading-backend",
+  "native",
+  "--kv-offloading-size",
+  "27",
+  "--enable-log-requests",
+  "--enable-logging-iteration-details"
+ ],
+ "flag_diff": [
+  [
+   "38",
+   "27"
+  ]
+ ],
+ "restart_started": 1795035009.1538334,
+ "up_at": 1795035076.2817616,
+ "startup_s": 66.8,
+ "log": "logs/study_x_server_32BI_1118_125009.log",
+ "host_gib": 27.0,
+ "checkout": {
+  "head": "6048b9938a0457153ab38bd9bc9402ddeeacd4ca",
+  "working_tree_diff_sha256": "5d320e6ef54403b7418f02de8fcb8f47a18bb75131bc9157ed357a65408da3c2",
+  "dirty_files": [
+   "experiments/motivation/study_mot1_dayinlife.py",
+   "experiments/orchestration/live2/asyncbackend.py",
+   "experiments/orchestration/live2/bridge.py",
+   "experiments/orchestration/live2/coordinator.py",
+   "experiments/orchestration/live2/procsplit.py",
+   "experiments/orchestration/live2/run_live2_real.py",
+   "results/orchestration/live2/pilot/pilot_monitor.jsonl"
+  ]
+ }
+}

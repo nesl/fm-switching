@@ -233,6 +233,114 @@ def main_amend2():
     print("ratios", ratios)
 
 
+def _mm(v):
+    v = [x for x in v if x is not None]
+    return dict(median=(median(v) if v else None), min=(min(v) if v else None), max=(max(v) if v else None),
+                per_rep=v)
+
+
+def _cell_from(res, actions, source, measured=True):
+    out = {}
+    for a in actions:
+        reps = [r for r in sorted(res["per_rep"]) if a in res["per_rep"][r]]
+        if not reps:
+            continue
+        rows = [res["per_rep"][r][a] for r in reps]
+        out[a] = dict(extra_missed=_mm([x["extra_missed"] for x in rows]),
+                      robot_ttft_s=_mm([x["robot_ttft_s"] for x in rows]),
+                      measured_tiers=[x.get("robot_tier") for x in rows], reps=reps,
+                      source=source, measured_directly=measured)
+    return out
+
+
+def main_amend3():
+    """Amendment 3 (light load, N = 8, 27 GiB host, all five actions) and the 2 x 2 grid."""
+    runs, summ = load()
+    meta = json.loads((OUT / "mot1_amend3_runs.json").read_text())
+    r3 = analyse("A3R", ACTIONS5)
+    a1 = analyse("A1R", ACTIONS)
+    a2 = json.loads((OUT / "mot1_amend2_results.json").read_text())
+    resB = a2["partB"]
+    # sanity
+    a3s = [s for k, s in summ.items() if k[0].startswith("A3R")]
+    invalid = [dict(label=s["label"], rep=s["rep"], on_time_frac=s["on_time_frac"]) for s in a3s
+               if s["action"] == "NONE" and s["on_time_frac"] < 0.99]
+    cold_first = [dict(rep=s["rep"], action=s["action"], first_cached=s.get("robot_first_cached")) for s in a3s
+                  if s["action"] in ("ONE-GO", "P2048", "P1024")]
+    sanity = dict(none_on_time=[(s["rep"], s["on_time_frac"]) for s in a3s if s["action"] == "NONE"],
+                  invalid_controls=invalid, http_errors=sum(s["http_errors"] for s in a3s),
+                  cold_first_cached_max=max((x["first_cached"] or 0) for x in cold_first) if cold_first else None,
+                  cold_first_cached_le16=all((x["first_cached"] or 0) <= 16 for x in cold_first),
+                  n_runs=len(a3s))
+    hw = [dict(rep=r, predicted_tier="HOST", measured_tier=v["HOST-WARM"]["robot_tier"],
+               cached=v["HOST-WARM"]["robot_cached_tokens"], prompt=v["HOST-WARM"]["robot_prompt_tokens"],
+               delta=v["HOST-WARM"]["robot_tier_delta"], robot_ttft_s=v["HOST-WARM"]["robot_ttft_s"],
+               extra_missed=v["HOST-WARM"]["extra_missed"])
+          for r, v in sorted(r3["per_rep"].items()) if "HOST-WARM" in v]
+    preps = [dict(rep=s["rep"], prep=s.get("prep")) for s in a3s if s["action"] == "HOST-WARM"]
+    n_host = sum(1 for x in hw if x["measured_tier"] == "HOST")
+    cold = ("ONE-GO", "P2048", "P1024")
+    ratios = [dict(action=a, measure=k, light=r3["summary"][a][k]["median"], heavy_amend1=a1["summary"][a][k]["median"],
+                   ratio=(round(r3["summary"][a][k]["median"] / a1["summary"][a][k]["median"], 4)
+                          if r3["summary"][a][k]["median"] and a1["summary"][a][k]["median"] else None))
+              for a in cold for k in ("extra_missed", "robot_ttft_s", "burst_s")]
+    # the 2 x 2 grid
+    light_tight = _cell_from(r3, ACTIONS5[1:], "amendment 3 (N = 8, 27 GiB)")
+    heavy_tight = _cell_from(a1, ACTIONS[1:], "amendment 1 (N = 20, 27 GiB), cold actions")
+    pa = a2["partA"]
+    heavy_tight["HOST-WARM"] = dict(
+        extra_missed=_mm([x["extra_missed_vs_amend1_none"] for x in pa]),
+        robot_ttft_s=_mm([x["robot_ttft_s"] for x in pa]),
+        measured_tiers=[x["measured_tier"] for x in pa], reps=[x["rep"] for x in pa],
+        source="amendment 2 Part A (N = 20, 27 GiB), HOST-WARM only; extra misses vs amendment 1's NONE of the "
+               "same repetition (another server instance: a cross-run reference, not a paired difference)",
+        measured_directly=True)
+    heavy_roomy = _cell_from(resB, ACTIONS5[1:], "amendment 2 Part B (N = 20, 256 GiB)")
+    light_roomy = {a: dict(v, source="BORROWED from amendment 3's light/tight cold action: host size does not change "
+                                     "cold actions (StudyENG1c Part E; amendment 2's 1.01x to 1.17x check)",
+                           measured_directly=False)
+                   for a, v in _cell_from(r3, cold, "").items()}
+    if n_host == len(hw) and hw:
+        light_roomy["HOST-WARM"] = dict(light_tight["HOST-WARM"], measured_directly=False,
+                                        source="BORROWED from amendment 3's light/tight HOST-WARM, which measured HOST in "
+                                               "every repetition: a roomier host can only keep the history at least as "
+                                               "warm")
+    else:
+        light_roomy["HOST-WARM"] = dict(status="not measured", measured_directly=False,
+                                        source=f"amendment 3's light/tight HOST-WARM measured HOST in {n_host} of "
+                                               f"{len(hw)} repetitions, so it is not borrowed")
+    grid = dict(note="rows: load (light N = 8, 4 requests/s; heavy N = 20, 10 requests/s); columns: host tier "
+                     "(tight 27 GiB; roomy 256 GiB). Values per action: extra missed dashcam instants vs the paired "
+                     "NONE and robot TTFT from the question, median with min and max over 5 repetitions.",
+                light_tight=light_tight, heavy_tight=heavy_tight, heavy_roomy=heavy_roomy, light_roomy=light_roomy,
+                measured_directly=dict(light_tight="all actions", heavy_tight="all actions (two amendments)",
+                                       heavy_roomy="all actions",
+                                       light_roomy="none: cold actions borrowed; HOST-WARM borrowed only if light/"
+                                                   "tight measured HOST in every repetition"))
+    out = dict(amend3=r3, sanity=sanity, hostwarm=hw, hostwarm_preps=preps, light_vs_heavy=ratios,
+               fill=meta.get("fill"), checkout=meta.get("checkout"), stop=meta.get("stop"))
+    (OUT / "mot1_amend3_results.json").write_text(json.dumps(out, indent=1) + "\n")
+    rep = r3["representative_rep"]
+    pr = r3["per_rep"][rep]
+    fd = dict(label="StudyMOT1-dayinlife amendment 3 figure data (light load, N = 8, 27 GiB host, five actions)",
+              N=8, host_gib=27, deadline_s=DEADLINE_S, bin_s=BIN_S, window_s=WINDOW_S, question_at_s=Q_AT_S,
+              representative_rep=rep,
+              representative_rule="the repetition whose ONE-GO extra-miss count is the median of the 5",
+              per_action={a: dict(extra_missed=light_tight[a]["extra_missed"], robot_ttft_s=light_tight[a]["robot_ttft_s"],
+                                  measured_tiers=light_tight[a]["measured_tiers"]) for a in light_tight},
+              frac_streams_missing_per_bin={a: (pr["none"]["frac_bins"] if a == "NONE" else pr[a]["frac_bins"])
+                                            for a in ACTIONS5 if a == "NONE" or a in pr},
+              summary=r3["summary"], hostwarm_measured=hw, grid_2x2=grid)
+    (OUT / "mot1_figdata_amend3.json").write_text(json.dumps(fd, indent=1) + "\n")
+    plot(dict(fd, robot_ttft_s={a: pr[a]["robot_ttft_s"] for a in ACTIONS5[1:] if a in pr}), "mot1_amend3_check.png")
+    print("sanity", sanity)
+    for a, v in r3["summary"].items():
+        print("A3", a, {k: (x["median"], x["per_rep"]) for k, x in v.items()})
+    print("hostwarm", hw)
+    print("light vs heavy", ratios)
+
+
 if __name__ == "__main__":
     import sys
-    main_amend2() if (len(sys.argv) > 1 and sys.argv[1] == "amend2") else main()
+    w = sys.argv[1] if len(sys.argv) > 1 else ""
+    main_amend2() if w == "amend2" else (main_amend3() if w == "amend3" else main())

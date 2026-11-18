@@ -1,5 +1,7 @@
 # FM-switching — Project Status
 
+Last updated: 2026-11-18 (later 7) (**StudyMOT1-dayinlife AMENDMENT 3 COMPLETE: at light load (8 dashcams) chunked rebuilds serve both the fleet and the robot, so the best way to serve the robot's question differs in each cell of the light/heavy x tight/roomy grid; the tight-host host-warm prediction failed (PARTIAL or COLD in 5 of 5). Figure data results/motivation/mot1/mot1_figdata_amend3.json.**)
+
 Last updated: 2026-11-18 (later 6) (**StudyLIVE2-pre Part 1 extension: the S-EMBER D2 JPEG store now covers every EVAL session to its end (6,437 new frames, 38,579 total; source re-extraction byte-identical on the overlap; E10a check unflagged). Next: StudyLIVE2-pilot rerun from Step 1 once flash's harness addendum is on origin.**)
 
 Last updated: 2026-11-18 (later 5) (**StudyMOT1-dayinlife AMENDMENT 2 COMPLETE: with a roomy 256 GiB host a host-warm robot history costs the 20-dashcam fleet nothing and the robot answers in 0.69 s (cold one go: 59 missed instants, 3.56 s; 1,024 pieces: 0 missed, 6.87 s); with the tight 27 GiB host the prepared history is already cold by the question (5 of 5, as predicted). Figure data results/motivation/mot1/mot1_figdata_amend2.json.**)

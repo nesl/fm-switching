@@ -1,6 +1,6 @@
 # StudyMOT1-dayinlife: one robot rebuild in a monitored dashcam fleet (motivation, claim 6)
 
-Status: amendment 1 COMPLETE 2026-11-18 09:58; **amendment 2 COMPLETE 11:04 (section 10): a history prepared host-warm
+Status: amendment 1 COMPLETE 2026-11-18 09:58; **amendment 3 COMPLETE 13:21 (section 11): at light load chunked rebuilds serve both the fleet and the robot; the best action differs in each cell of the 2 x 2; the host-warm HOST prediction at the tight host failed (PARTIAL 4, COLD 1).** **Amendment 2 COMPLETE 11:04 (section 10): a history prepared host-warm
 is served from the host with a roomy (256 GiB) host tier, costs the fleet nothing and answers in 0.69 s, but with the
 tight 27 GiB host it is already cold by the question (5 of 5 runs, as predicted).** First design STOPPED AT N SELECTION (09:20); amended by the user
 (section 0) and rerun 09:30 to 09:58. **One cold 11k rebuild done in one go makes all 20 monitored dashcams miss
@@ -302,3 +302,97 @@ measured HOST, else "not measured"), each cell stating whether it is measured di
 Checkout: HEAD d7acaf7 (origin had nothing newer); the working tree carries the uncommitted StudyLIVE2-harness
 addendum edits under `experiments/orchestration/live2/` (asyncbackend, bridge, coordinator, procsplit,
 run_live2_real, preflight), none of which this study's request path uses; their diff hash is recorded with the run.
+
+### 11.1 Amendment 3 run record
+
+Server: 27 GiB host (flag diff vs DE_c38 `[('38', '27')]`), restarted 12:50:09, up in 66.8 s, host filled to 189,488
+tokens (1.7x the 110,592-token capacity, 7 fresh histories); 25 runs 12:53 to 13:21; server stopped 13:21. Checkout:
+HEAD 6048b99 with uncommitted edits (diff sha256 5d320e6e...; this study's runner `study_mot1_dayinlife.py` plus the
+StudyLIVE2-harness addendum files under `experiments/orchestration/live2/`, which this study's request path does not
+import), recorded in `mot1_amend3_server.json` and `mot1_amend3_runs.json`. N = 8 (first 8 streams of amendment 1's
+plans, same robot sessions: verified for all 5 repetitions before the run). HOST-WARM preparation, every repetition:
+prefill 10,001 to 11,711 prompt tokens with 0 cached (cold, as intended), then 80,886 filler tokens (the same three
+whole p28 histories as amendment 2), window 0.5 s after.
+
+PROTOCOL DEVIATION (no effect on any measurement): twice during the run, host Python ran outside the request-harness
+client while the server was up: a `py_compile` syntax check of `mot1_analyse.py` (12:52) and a short `python3` text
+edit of `research/EXPERIMENTS.md` (about 12:53, the StudyMOT2 row). Both were CPU-only, sub-second, touched neither GPU
+2 nor the server, and neither ran a request; reported as the standing rule requires.
+
+### 11.2 Light load (N = 8), tight host (27 GiB), all five actions (paired within a repetition)
+
+| action | extra missed instants, median (per repetition 1..5) | longest burst > 50 % missing, s | last extra miss after the question, s | streams hit | robot TTFT from the question, s (per repetition) | measured tier |
+|---|---|---|---|---|---|---|
+| ONE-GO | **11** (11, 14, 11, 11, 9) | 2.5 (1.5, 3.0, 2.5, 2.5, 1.0) | 2.5 | 100 % | **3.00** (3.42, 3.57, 2.85, 3.00, 2.83) | COLD in 5 of 5 |
+| PIECES 2048 | **0** (0 in all 5) | 0 | none | 0 % | **3.37** (3.44, 3.67, 2.95, 3.37, 2.88) | cold first piece |
+| PIECES 1024 | **0** (0 in all 5) | 0 | none | 0 % | **3.96** (3.96, 4.14, 3.52, 4.21, 3.49) | cold first piece |
+| HOST-WARM | **8** (8, 8, 7, 8, 5) | 1.5 (1.5, 2.0, 1.5, 2.0, 1.0) | 2.0 | 100 % (62.5 to 100) | **2.28** (2.40, 2.63, 2.28, 2.27, 2.17) | **PARTIAL in 4, COLD in 1** |
+
+NONE controls 240 / 240 on time in all 5 repetitions (no INVALID run); 0 HTTP errors in 25 runs; every cold action's
+first request had 0 cached tokens (rule <= 16).
+
+**Expectations vs measured.** (1) ONE-GO still causes misses at light load, fewer than heavy load: YES, 11 vs 57
+(amendment 1) and 59 (amendment 2 Part B), robot 3.00 s. (2) 1,024-token pieces serve BOTH: YES, 0 extra misses in 5 of
+5 and the robot at 3.49 to 4.21 s, under its 5 s target; so do 2,048-token pieces (0 misses, 2.88 to 3.67 s), which at
+heavy load cost 24 misses and 5.90 s. (3) HOST-WARM predicted HOST: **NOT CONFIRMED; measured PARTIAL in 4 and COLD in
+1 of 5.**
+
+### 11.3 Tier verification and why the HOST prediction failed
+
+| repetition | predicted | measured | cached / prompt tokens | counter delta: local / external / computed | robot TTFT, s |
+|---|---|---|---|---|---|
+| 1 | HOST | PARTIAL | 336 / 11,367 | 0 / 336 / 14,055 | 2.40 |
+| 2 | HOST | COLD | 0 / 11,831 | 0 / 0 / 14,855 | 2.63 |
+| 3 | HOST | PARTIAL | 336 / 10,160 | 0 / 336 / 12,848 | 2.28 |
+| 4 | HOST | PARTIAL | 336 / 10,743 | 0 / 336 / 13,431 | 2.27 |
+| 5 | HOST | PARTIAL | 336 / 10,159 | 0 / 336 / 12,469 | 2.17 |
+
+PARTIAL here means only 336 tokens (21 blocks of 16, about 3 % of the history) came back from the host; the robot's
+history was in effect cold in all five repetitions. The arithmetic the prediction rested on assumed about 70,000 filler
+tokens. The pre-registered preparation (whole p28 histories, the smallest total >= 70,000, as in amendment 2) gives
+80,886, so the writes after the history's last use are 80,886 + about 30,240 of monitoring before the question (8
+streams x 0.5 requests/s x 20 s x 378 tokens) = about 111,126 tokens, 534 tokens MORE than the 110,592-token host. By
+the ENG1c host-residency rule (tokens written since last use > host capacity means evicted) that predicts eviction,
+which is what was measured; the section-11 record already gave the range "about 100,000 to 111,000" and placed the
+upper end at the capacity. This is the boundary StudyRES1 R3 warned about; reported as a failed prediction, not
+re-run with a smaller filler (that would be a design change). Which 21 blocks survived (probably blocks written latest
+or shared with another prompt) is a candidate, NOT tested.
+
+Why HOST-WARM's robot TTFT (2.28 s) is below ONE-GO's (3.00 s) although both recompute the history: candidate, NOT
+tested: the preparation prefill sent the same images with the same multimodal uuids about 25 s earlier, so the
+engine's multimodal caches may still hold their processed inputs and the question skips that part of the work; the
+smaller fleet impact (8 vs 11 misses) is consistent with that shorter prefill.
+
+### 11.4 The 2 x 2 (figure data `mot1_figdata_amend3.json`, block `grid_2x2`)
+
+Medians over 5 repetitions: extra missed dashcam instants / robot TTFT from the question.
+
+| cell | ONE-GO | PIECES 2048 | PIECES 1024 | HOST-WARM | serves both (0 extra misses, robot < 5 s) |
+|---|---|---|---|---|---|
+| light load, tight host (this amendment, measured) | 11 / 3.00 s | **0 / 3.37 s** | **0 / 3.96 s** | 8 / 2.28 s (PARTIAL or COLD) | **PIECES 2048, PIECES 1024** |
+| heavy load, tight host (amendment 1 cold actions; amendment 2 Part A host-warm, measured) | 57 / 3.47 s | 24 / 5.90 s | 0 / 6.79 s | 44 / 2.62 s (COLD, cross-run misses) | **none** |
+| heavy load, roomy host (amendment 2 Part B, measured) | 59 / 3.56 s | 28 / 6.10 s | 0 / 6.87 s | **0 / 0.69 s (HOST)** | **HOST-WARM** |
+| light load, roomy host (cold actions BORROWED from light/tight; host-warm NOT MEASURED) | 11 / 3.00 s | **0 / 3.37 s** | **0 / 3.96 s** | not measured | **PIECES 2048, PIECES 1024** (borrowed) |
+
+The best action changes by cell: chunked rebuilding at light load, nothing at heavy load with a tight host, keeping the
+history warm in a roomy host at heavy load. Borrowing rule: host size does not change cold actions (StudyENG1c Part E;
+amendment 2 Part B vs amendment 1, 1.01x to 1.17x); HOST-WARM is not borrowed into light/roomy because light/tight did
+not measure HOST (0 of 5). The JSON states for every cell and action whether it is measured directly or borrowed.
+
+### 11.5 Sanity and consistency checks (amendment 3)
+
+| check | result |
+|---|---|
+| NONE controls >= 99 % on time | 100 % in 5 of 5 |
+| 0 HTTP errors | 0 in 25 runs |
+| cold actions' first request cached tokens <= 16 | max 0 |
+| robot session and first 8 streams identical to amendments 1 and 2 | verified for 5 of 5 repetitions |
+| HOST-WARM measured tier vs prediction | 0 of 5 HOST (PARTIAL 4, COLD 1): prediction failed, explained in 11.3 |
+
+Cross-check against the committed measurements (light vs heavy, amendment 1): ONE-GO robot TTFT 3.00 vs 3.47 s (0.87x)
+and P2048 / P1024 robot TTFT 0.57x / 0.58x, all faster at light load as expected (less traffic queued between pieces);
+ONE-GO extra misses 0.19x (11 vs 57), scaling roughly with the request rate behind the rebuild (4 vs 10 requests/s,
+0.4x) and the shorter burst (2.5 vs 5.5 s). Physical plausibility: a cold ~11k rebuild at 2.8 to 3.6 s under 4
+requests/s vs the committed cold 11k recall TTFT 2.44 s (`recall_ttft_s`, unloaded): 1.2x to 1.5x, inside 2x and
+slower, as a loaded engine should be. Definition audit: tiers, extra misses, burst and robot TTFT are computed by the
+same code as amendments 1 and 2 (`mot1_analyse.analyse`). No disagreement unexplained.

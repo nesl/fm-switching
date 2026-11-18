@@ -391,15 +391,78 @@ def run_amend2():
     log("amend2 experiment done")
 
 
+N_LIGHT = 8                 # AMENDMENT 3: light load, fixed (not selected)
+
+
+def plan_light(r):
+    """Amendment 1's plan for repetition r (N = 20) truncated to its FIRST 8 streams: the same clips, instants and
+    phase offsets as amendments 1 and 2's first 8 streams, and the SAME robot session (plan(..., 8) would draw fewer
+    offsets from the generator and so select a different robot)."""
+    pl = plan(f"rep{r}", 20)
+    return dict(pl, n=N_LIGHT, streams=pl["streams"][:N_LIGHT])
+
+
+async def experiment_amend3(M):
+    import httpx
+    res = dict(amendment=3, host_gib=float(HOST_GIB), n=N_LIGHT, runs=[])
+    async with httpx.AsyncClient(timeout=None, limits=httpx.Limits(max_connections=None,
+                                                                   max_keepalive_connections=None)) as c:
+        res["fill"] = await fill(c, M, float(HOST_GIB))
+        acts5 = ("NONE", "ONE-GO", "P2048", "P1024", "HOST-WARM")
+        for r in range(1, N_REP + 1):
+            pl = plan_light(r)
+            order = list(acts5) if r % 2 == 1 else list(reversed(acts5))
+            for a in order:
+                s = await run_once(c, f"A3R{r}", pl, a, r)
+                if a == "NONE" and s["on_time_frac"] < ON_TIME_MIN:
+                    log(f"A3 rep {r}: NONE below 99 % ({s['on_time_frac']}): INVALID, rerun once")
+                    s["invalid"] = True
+                    res["runs"].append(s)
+                    s = await run_once(c, f"A3R{r}rerun", pl, a, r)
+                    if s["on_time_frac"] < ON_TIME_MIN:
+                        res["stop"] = f"two INVALID control runs in repetition {r}"
+                        return res
+                res["runs"].append(s)
+    return res
+
+
+def run_amend3():
+    global MH
+    import hashlib
+    import subprocess
+    import study_live2_pilot as PL
+    PL.OUT = OUT
+    PL.WORK = Path.home() / "data/live2/mot1"
+    PL.WORK.mkdir(parents=True, exist_ok=True)
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
+    diff = subprocess.run(["git", "diff", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout
+    state = dict(head=head, working_tree_diff_sha256=hashlib.sha256(diff.encode()).hexdigest(),
+                 dirty_files=sorted({l[6:] for l in diff.splitlines() if l.startswith("+++ b/")}))
+    log(f"amend3: checkout {json.dumps(state)}")
+    srv, sinfo, M = PL.start_server(float(HOST_GIB))
+    MH = M
+    log(f"amend3: server up {json.dumps({k: v for k, v in sinfo.items() if k != 'command'})}")
+    (OUT / "mot1_amend3_server.json").write_text(json.dumps(dict(sinfo, checkout=state), indent=1, default=str) + "\n")
+    try:
+        out = asyncio.run(experiment_amend3(M))
+    finally:
+        srv.stop()
+    out["checkout"] = state
+    (OUT / "mot1_amend3_runs.json").write_text(json.dumps(out, indent=1, default=str) + "\n")
+    log(f"amend3 experiment done: {out.get('stop') or 'complete'}")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("what", choices=("all", "analyse", "amend2"))
+    ap.add_argument("what", choices=("all", "analyse", "amend2", "amend3"))
     a = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     if a.what == "all":
         run_all()
     elif a.what == "amend2":
         run_amend2()
+    elif a.what == "amend3":
+        run_amend3()
     else:
         import mot1_analyse as AN
         AN.main()
