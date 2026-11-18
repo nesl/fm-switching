@@ -123,9 +123,19 @@ class Pol6Config:
     piece_gap_scheduling: bool = False
     step_granularity: bool = False
     in_step_merge: bool = False
+    # REJECTED BY THE REGRESSION GATE (StudyPOL6 Part B). Switching it on replaces pol4's
+    # body-size front end for a chained piece with the window StudyENG1e MEASURED, which moves
+    # criterion (i) on ENG1e FIT from 0.5944 to 0.8472 on latency and 0.8139 to 0.9083 on TTFT,
+    # but moves criterion (iii), the action's own completion, from 0.0209 to 0.1460. pol4 is
+    # right about a chain's own span only because two errors cancel in it: its piece step is
+    # 1.06 to 1.62x too LONG and its hand-over window is 3 to 13x too SHORT. Correcting one
+    # alone breaks the span, and correcting the other means re-fitting the FROZEN step model,
+    # which is outside Part B. Kept so the scored comparison is reproducible; OFF by default.
+    measured_handover: bool = False
 
     def any_on(self) -> bool:
-        return bool(self.piece_gap_scheduling or self.step_granularity or self.in_step_merge)
+        return bool(self.piece_gap_scheduling or self.step_granularity or self.in_step_merge
+                    or self.measured_handover)
 
     def unimplemented_on(self) -> List[str]:
         """Flags that are on but have no measured parameter behind them. Turning one on is a
@@ -159,8 +169,9 @@ class Pol6Terms:
             raise ValueError("%s does not state that it used zero HOLDOUT trials" % p)
         if raw.get("coef"):
             raise ValueError(
-                "%s carries fitted coefficients of its own; StudyPOL6 Part A fitted nothing and "
-                "Part B must not be anticipated here" % p)
+                "%s carries fitted coefficients of its own. Neither Part A nor Part B adopted "
+                "one: Part B's hand-over window is recorded under `partB` as a MEASUREMENT that "
+                "was REJECTED by the regression gate, not as a live coefficient." % p)
         missing = [n for n in INHERITED_COEF_NAMES
                    if n not in (raw.get("inherits") or {}).get("coefficients", [])]
         if missing:
@@ -191,6 +202,47 @@ class Pol6Terms:
         the report says so rather than a clamp hiding it."""
         return (self.piece_front_end_s(body_mb, n_images, busy=busy)
                 - pol4_frontend_service_s(body_mb, busy))
+
+    # ---------------------------------------------------------------- Part B, D98-independent
+    #
+    # THE ONE FITTED TERM pol6 CARRIES. StudyENG1e-chain measures, per injection mode and piece
+    # size, the window between a piece completing and the NEXT piece's first engine step
+    # (`gaps.fe_next_s`): the client turnaround (7 to 14 ms), the API front end (under 10 ms for
+    # uuid references, 50 to 120 ms for bytes) and the wait for dispatch behind whatever the
+    # engine runs meanwhile. pol4 charges only its body-size front end, which for a chained
+    # piece of uuid references is 29.9 ms against a measured 99 to 231 ms, so pol4 hands the
+    # next piece to the engine far too early and the background work the engine would have
+    # served in that gap is instead charged the piece's step.
+    #
+    # The term is a SHIFT on later pieces' submission, computable at decision time from the
+    # request itself (its body size and its new tokens) and never from a cell label.
+    HANDOVER_IN_SAMPLE_TOKENS = (1024, 2048)
+    BYTES_BODY_MB = 0.5          # above this a piece carries image bytes, below it uuid refs
+
+    def handover_shift_s(self, body_mb: float, new_tokens: int) -> float:
+        """The measured hand-over window minus what pol4's front end already charges."""
+        coef = (((self.raw.get("partB") or {}).get("measured_handover_window") or {})
+                .get("piece_handover_s") or {})
+        if not coef:
+            raise NotImplementedError(
+                "pol6's terms file records no measured hand-over window; fit it on StudyENG1e "
+                "FIT with fit_pol6_terms.py before switching `measured_handover` on")
+        kind = "bytes" if float(body_mb) > self.BYTES_BODY_MB else "refs"
+        table = coef[kind]
+        toks = sorted(int(k) for k in table)
+        n = int(new_tokens)
+        lo = max([x for x in toks if x <= n], default=toks[0])
+        hi = min([x for x in toks if x >= n], default=toks[-1])
+        if lo == hi:
+            measured = float(table[str(lo)])
+        else:
+            f = (n - lo) / float(hi - lo)
+            measured = float(table[str(lo)]) * (1 - f) + float(table[str(hi)]) * f
+        return measured - pol4_frontend_service_s(body_mb, False)
+
+    def handover_in_sample(self, new_tokens: int) -> bool:
+        """StudyENG1e measured two piece sizes. Outside them the shift is interpolated."""
+        return int(new_tokens) in self.HANDOVER_IN_SAMPLE_TOKENS
 
     def awaiting(self) -> Dict[str, str]:
         return dict(AWAITING_ENG1E)
@@ -223,7 +275,7 @@ def apply_piece_gaps(requests: Sequence[SimRequest], terms: Pol6Terms,
 
     The first piece is NOT shifted: its submission is the action's arrival, which the trial fixes.
     With the flag off this is the identity, so nothing can move unless the flag is set."""
-    if not terms.config.piece_gap_scheduling:
+    if not (terms.config.piece_gap_scheduling or terms.config.measured_handover):
         return list(requests)
     bad = terms.config.unimplemented_on()
     if bad:
@@ -236,6 +288,61 @@ def apply_piece_gaps(requests: Sequence[SimRequest], terms: Pol6Terms,
     shifted: Dict[str, SimRequest] = {}
     for i, r in enumerate(order):
         if i > 0:
-            shift += terms.gap_shift_s(r.body_mb, r.n_images)
+            if terms.config.measured_handover:
+                shift += terms.handover_shift_s(r.body_mb, r.new_tokens())
+            else:
+                shift += terms.gap_shift_s(r.body_mb, r.n_images)
             shifted[r.rid] = replace(r, t_submit=r.t_submit + shift)
     return [shifted.get(r.rid, r) for r in requests]
+
+
+# --------------------------------------------------------------------------- the pol6 model
+@dataclass
+class Pol6Sim:
+    """pol6 = the frozen pol4 engine, with a chain's later pieces handed over at the window
+    StudyENG1e MEASURED instead of the one pol4's body-size front end implies.
+
+    It WRAPS the frozen simulator rather than reimplementing it: `eng1_engine.py` is one of the
+    twelve files StudyT0b froze, and a Part B that re-derived the scheduler would be scoring a
+    different program. With every flag off `run` delegates unchanged, which a test asserts
+    output-for-output against `EngineSim` so pol6 cannot drift from pol4 silently.
+
+    What pol6 does NOT change, because StudyENG1e measured pol4 to be right about it:
+      * step granularity. Every piece runs in exactly ONE engine step, median and max 1.0 in all
+        16 chain cells, which is what pol4 already does. StudyPOL6 Part A's derived 1.75 and 1.92
+        steps per piece were an artifact of deriving composition by subtraction on StudyENG1c.
+      * the chain's own cost. pol4 predicts a chain's span to within 3 to 13 per cent.
+      * in-step merging as a RULE. Forbidding a piece to share its step with background prefill
+        was implemented and REJECTED on FIT (it moved the chain ratio from 1.636 to 1.897).
+    """
+
+    sim: Any                       # the frozen EngineSim
+    terms: Pol6Terms
+    action_tag: str = "action"
+
+    def model_name(self) -> str:
+        return "pol6" if self.terms.config.any_on() else self.sim.model_name()
+
+    @property
+    def step(self) -> Any:
+        return self.sim.step
+
+    @property
+    def chunk_tokens(self) -> int:
+        return self.sim.chunk_tokens
+
+    def run(self, requests: Sequence[SimRequest]) -> Dict[str, Any]:
+        reqs = apply_piece_gaps(requests, self.terms, action_tag=self.action_tag)
+        out = self.sim.run(reqs)
+        out = dict(out)
+        out["engine_model"] = self.model_name()
+        out["pol6_config"] = vars(self.terms.config)
+        return out
+
+
+def make_pol6_sim(sim: Any, terms_path: Any = None, **flags: bool) -> Pol6Sim:
+    """The one place a caller switches pol6 on. Default: every flag off, so pol4 behaviour."""
+    terms = Pol6Terms.load(terms_path)
+    if flags:
+        terms = terms.with_config(**flags)
+    return Pol6Sim(sim=sim, terms=terms)

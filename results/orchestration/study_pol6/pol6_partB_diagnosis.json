@@ -1,0 +1,1325 @@
+{
+ "study": "StudyPOL6-chain Part B diagnosis",
+ "is_measurement": false,
+ "inputs": [
+  {
+   "path": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/eng1e_b80b3b9/results/cost/study_eng1e/eng1e_results.json",
+   "exists": true,
+   "bytes": 369151,
+   "md5": "ef303aaeb6158b66b41b39edc6b6373e"
+  },
+  {
+   "path": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/eng1e_b80b3b9/results/cost/study_eng1e/eng1e_requests_h100nvl.jsonl.gz",
+   "exists": true,
+   "bytes": 3881475,
+   "md5": "b6955922d77cbc09c97cffb890d79658"
+  }
+ ],
+ "eng1e_label": "add-on failed unloaded overhead gate; passed at P40",
+ "fit_set": "StudyENG1e FIT only, 360 trials; 0 HOLDOUT trials constructed",
+ "per_cell": {
+  "A|P25|chain1024": {
+   "mode": "A",
+   "load": "P25",
+   "action": "chain1024",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.0,
+    "measured_frac_piece_steps_with_other_prefill": 0.1686,
+    "measured_prefills_per_step_median": 1.0,
+    "measured_prefills_per_step_max": 4.0,
+    "pol4_prefills_per_step_median": 1.0,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 11.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 2.0737,
+    "measured_ttft_median_s": 1.8246,
+    "rho_b_chain_median": 0.0583,
+    "rho_b_piece_median": 0.6971
+   },
+   "gaps": {
+    "frac_serving": 0.7707,
+    "dur_s_median": 0.1538,
+    "fe_next_s_median": 0.1457,
+    "frac_first_gap": 0.8246
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "PARTIAL",
+    "gap_frac_serving": 0.7707,
+    "frac_first_gap": 0.8246,
+    "rho_b_chain_median": 0.0583,
+    "frac_first_piece": 0.1517,
+    "other_share_minus_mono": -0.0528,
+    "other_share_diff_ci95": [
+     -0.1052,
+     -0.0528
+    ],
+    "chain_over_mono_imposed_lat": 0.0765
+   }
+  },
+  "A|P25|chain2048": {
+   "mode": "A",
+   "load": "P25",
+   "action": "chain2048",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.0,
+    "measured_frac_piece_steps_with_other_prefill": 0.2222,
+    "measured_prefills_per_step_median": 1.0,
+    "measured_prefills_per_step_max": 3.0,
+    "pol4_prefills_per_step_median": 1.0,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 23.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 4.0894,
+    "measured_ttft_median_s": 3.3292,
+    "rho_b_chain_median": 0.1527,
+    "rho_b_piece_median": 1.141
+   },
+   "gaps": {
+    "frac_serving": 0.9067,
+    "dur_s_median": 0.2053,
+    "fe_next_s_median": 0.1946,
+    "frac_first_gap": 0.8305
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "PARTIAL",
+    "gap_frac_serving": 0.9067,
+    "frac_first_gap": 0.8305,
+    "rho_b_chain_median": 0.1527,
+    "frac_first_piece": 0.1299,
+    "other_share_minus_mono": -0.0533,
+    "other_share_diff_ci95": [
+     -0.1058,
+     -0.0528
+    ],
+    "chain_over_mono_imposed_lat": 0.1509
+   }
+  },
+  "A|P25|mono": {
+   "mode": "A",
+   "load": "P25",
+   "action": "mono",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 2.0,
+    "measured_max": 2.0,
+    "pol4_median": 2,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": null,
+    "measured_frac_piece_steps_with_other_prefill": null,
+    "measured_prefills_per_step_median": null,
+    "measured_prefills_per_step_max": null,
+    "pol4_prefills_per_step_median": 1.0,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 63.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 27.1039,
+    "measured_ttft_median_s": 24.5998,
+    "rho_b_chain_median": 0.9467,
+    "rho_b_piece_median": 1.1979
+   },
+   "gaps": {
+    "frac_serving": null,
+    "dur_s_median": null,
+    "fe_next_s_median": null,
+    "frac_first_gap": 0.0
+   },
+   "eng1e_verdict": null
+  },
+  "A|P40|chain1024": {
+   "mode": "A",
+   "load": "P40",
+   "action": "chain1024",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.0,
+    "measured_frac_piece_steps_with_other_prefill": 0.2865,
+    "measured_prefills_per_step_median": 1.0,
+    "measured_prefills_per_step_max": 5.0,
+    "pol4_prefills_per_step_median": 1,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 11,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 5.4234,
+    "measured_ttft_median_s": 4.3148,
+    "rho_b_chain_median": 0.0782,
+    "rho_b_piece_median": 1.0095
+   },
+   "gaps": {
+    "frac_serving": 0.8526,
+    "dur_s_median": 0.1734,
+    "fe_next_s_median": 0.1648,
+    "frac_first_gap": 0.7585
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "PARTIAL",
+    "gap_frac_serving": 0.8526,
+    "frac_first_gap": 0.7585,
+    "rho_b_chain_median": 0.0782,
+    "frac_first_piece": 0.2229,
+    "other_share_minus_mono": 0.001,
+    "other_share_diff_ci95": [
+     -0.1612,
+     0.002
+    ],
+    "chain_over_mono_imposed_lat": 0.137
+   }
+  },
+  "A|P40|chain2048": {
+   "mode": "A",
+   "load": "P40",
+   "action": "chain2048",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.0,
+    "measured_frac_piece_steps_with_other_prefill": 0.4667,
+    "measured_prefills_per_step_median": 1.0,
+    "measured_prefills_per_step_max": 5.0,
+    "pol4_prefills_per_step_median": 2.0,
+    "verdict": "pol4 merges MORE in the typical step"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 23.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 9.588,
+    "measured_ttft_median_s": 7.7135,
+    "rho_b_chain_median": 0.1935,
+    "rho_b_piece_median": 1.3985
+   },
+   "gaps": {
+    "frac_serving": 1.0,
+    "dur_s_median": 0.2488,
+    "fe_next_s_median": 0.2399,
+    "frac_first_gap": 0.7179
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "PARTIAL",
+    "gap_frac_serving": 1.0,
+    "frac_first_gap": 0.7179,
+    "rho_b_chain_median": 0.1935,
+    "frac_first_piece": 0.2115,
+    "other_share_minus_mono": 0.0047,
+    "other_share_diff_ci95": [
+     -0.1537,
+     0.1537
+    ],
+    "chain_over_mono_imposed_lat": 0.2422
+   }
+  },
+  "A|P40|mono": {
+   "mode": "A",
+   "load": "P40",
+   "action": "mono",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 2.0,
+    "measured_max": 2.0,
+    "pol4_median": 2,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": null,
+    "measured_frac_piece_steps_with_other_prefill": null,
+    "measured_prefills_per_step_median": null,
+    "measured_prefills_per_step_max": null,
+    "pol4_prefills_per_step_median": 1.0,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 63.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 39.5904,
+    "measured_ttft_median_s": 35.7459,
+    "rho_b_chain_median": 0.9386,
+    "rho_b_piece_median": 1.2543
+   },
+   "gaps": {
+    "frac_serving": null,
+    "dur_s_median": null,
+    "fe_next_s_median": null,
+    "frac_first_gap": 0.0
+   },
+   "eng1e_verdict": null
+  },
+  "A|S2|chain1024": {
+   "mode": "A",
+   "load": "S2",
+   "action": "chain1024",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.0,
+    "measured_frac_piece_steps_with_other_prefill": 0.1228,
+    "measured_prefills_per_step_median": 1.0,
+    "measured_prefills_per_step_max": 2.0,
+    "pol4_prefills_per_step_median": 1,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 11,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 2.1548,
+    "measured_ttft_median_s": 1.7888,
+    "rho_b_chain_median": 0.056,
+    "rho_b_piece_median": 0.6877
+   },
+   "gaps": {
+    "frac_serving": 0.9423,
+    "dur_s_median": 0.1644,
+    "fe_next_s_median": 0.1567,
+    "frac_first_gap": 0.8591
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "REJECTED",
+    "gap_frac_serving": 0.9423,
+    "frac_first_gap": 0.8591,
+    "rho_b_chain_median": 0.056,
+    "frac_first_piece": 0.0955,
+    "other_share_minus_mono": -0.1041,
+    "other_share_diff_ci95": [
+     -0.1324,
+     -0.1041
+    ],
+    "chain_over_mono_imposed_lat": 0.0923
+   }
+  },
+  "A|S2|chain2048": {
+   "mode": "A",
+   "load": "S2",
+   "action": "chain2048",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.0,
+    "measured_frac_piece_steps_with_other_prefill": 0.2333,
+    "measured_prefills_per_step_median": 1.0,
+    "measured_prefills_per_step_max": 2.0,
+    "pol4_prefills_per_step_median": 2.0,
+    "verdict": "pol4 merges MORE in the typical step"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 23.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 3.6817,
+    "measured_ttft_median_s": 3.3621,
+    "rho_b_chain_median": 0.1698,
+    "rho_b_piece_median": 1.015
+   },
+   "gaps": {
+    "frac_serving": 1.0,
+    "dur_s_median": 0.2119,
+    "fe_next_s_median": 0.2027,
+    "frac_first_gap": 0.8342
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "PARTIAL",
+    "gap_frac_serving": 1.0,
+    "frac_first_gap": 0.8342,
+    "rho_b_chain_median": 0.1698,
+    "frac_first_piece": 0.1123,
+    "other_share_minus_mono": -0.1041,
+    "other_share_diff_ci95": [
+     -0.1325,
+     -0.1041
+    ],
+    "chain_over_mono_imposed_lat": 0.1577
+   }
+  },
+  "A|S2|mono": {
+   "mode": "A",
+   "load": "S2",
+   "action": "mono",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 2.0,
+    "measured_max": 2.0,
+    "pol4_median": 2,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": null,
+    "measured_frac_piece_steps_with_other_prefill": null,
+    "measured_prefills_per_step_median": null,
+    "measured_prefills_per_step_max": null,
+    "pol4_prefills_per_step_median": 1.0,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 64.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 23.3516,
+    "measured_ttft_median_s": 21.222,
+    "rho_b_chain_median": 0.9507,
+    "rho_b_piece_median": 1.1707
+   },
+   "gaps": {
+    "frac_serving": null,
+    "dur_s_median": null,
+    "fe_next_s_median": null,
+    "frac_first_gap": 0.0
+   },
+   "eng1e_verdict": null
+  },
+  "A|S4|chain1024": {
+   "mode": "A",
+   "load": "S4",
+   "action": "chain1024",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.2729,
+    "measured_frac_piece_steps_with_other_prefill": 0.6994,
+    "measured_prefills_per_step_median": 2.0,
+    "measured_prefills_per_step_max": 3.0,
+    "pol4_prefills_per_step_median": 2,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 15,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 11.0775,
+    "measured_ttft_median_s": 9.6471,
+    "rho_b_chain_median": 0.0804,
+    "rho_b_piece_median": 1.3047
+   },
+   "gaps": {
+    "frac_serving": 1.0,
+    "dur_s_median": 0.2524,
+    "fe_next_s_median": 0.2407,
+    "frac_first_gap": 0.7206
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "PARTIAL",
+    "gap_frac_serving": 1.0,
+    "frac_first_gap": 0.7206,
+    "rho_b_chain_median": 0.0804,
+    "frac_first_piece": 0.2476,
+    "other_share_minus_mono": 0.1147,
+    "other_share_diff_ci95": [
+     0.053,
+     0.1149
+    ],
+    "chain_over_mono_imposed_lat": 0.126
+   }
+  },
+  "A|S4|chain2048": {
+   "mode": "A",
+   "load": "S4",
+   "action": "chain2048",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.2657,
+    "measured_frac_piece_steps_with_other_prefill": 0.7889,
+    "measured_prefills_per_step_median": 3.0,
+    "measured_prefills_per_step_max": 5.0,
+    "pol4_prefills_per_step_median": 3.0,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 31.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 21.558,
+    "measured_ttft_median_s": 17.8145,
+    "rho_b_chain_median": 0.2078,
+    "rho_b_piece_median": 1.6218
+   },
+   "gaps": {
+    "frac_serving": 1.0,
+    "dur_s_median": 0.3976,
+    "fe_next_s_median": 0.3829,
+    "frac_first_gap": 0.6511
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "SUPPORTED",
+    "gap_frac_serving": 1.0,
+    "frac_first_gap": 0.6511,
+    "rho_b_chain_median": 0.2078,
+    "frac_first_piece": 0.2806,
+    "other_share_minus_mono": 0.1069,
+    "other_share_diff_ci95": [
+     0.0499,
+     0.1296
+    ],
+    "chain_over_mono_imposed_lat": 0.2453
+   }
+  },
+  "A|S4|mono": {
+   "mode": "A",
+   "load": "S4",
+   "action": "mono",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 2.0,
+    "measured_max": 2.0,
+    "pol4_median": 2,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": null,
+    "measured_frac_piece_steps_with_other_prefill": null,
+    "measured_prefills_per_step_median": null,
+    "measured_prefills_per_step_max": null,
+    "pol4_prefills_per_step_median": 1.0,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 64.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 87.8922,
+    "measured_ttft_median_s": 72.7973,
+    "rho_b_chain_median": 0.9499,
+    "rho_b_piece_median": 1.4275
+   },
+   "gaps": {
+    "frac_serving": null,
+    "dur_s_median": null,
+    "fe_next_s_median": null,
+    "frac_first_gap": 0.0
+   },
+   "eng1e_verdict": null
+  },
+  "B|P25|chain1024": {
+   "mode": "B",
+   "load": "P25",
+   "action": "chain1024",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.0,
+    "measured_frac_piece_steps_with_other_prefill": 0.1337,
+    "measured_prefills_per_step_median": 1.0,
+    "measured_prefills_per_step_max": 3.0,
+    "pol4_prefills_per_step_median": 1.0,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 11.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 3.6576,
+    "measured_ttft_median_s": 2.3235,
+    "rho_b_chain_median": 0.0799,
+    "rho_b_piece_median": 0.9226
+   },
+   "gaps": {
+    "frac_serving": 0.8217,
+    "dur_s_median": 0.1066,
+    "fe_next_s_median": 0.0991,
+    "frac_first_gap": 0.8492
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "PARTIAL",
+    "gap_frac_serving": 0.8217,
+    "frac_first_gap": 0.8492,
+    "rho_b_chain_median": 0.0799,
+    "frac_first_piece": 0.1229,
+    "other_share_minus_mono": 0.0009,
+    "other_share_diff_ci95": [
+     -0.0222,
+     0.001
+    ],
+    "chain_over_mono_imposed_lat": 0.2222
+   }
+  },
+  "B|P25|chain2048": {
+   "mode": "B",
+   "load": "P25",
+   "action": "chain2048",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.0,
+    "measured_frac_piece_steps_with_other_prefill": 0.1556,
+    "measured_prefills_per_step_median": 1.0,
+    "measured_prefills_per_step_max": 2.0,
+    "pol4_prefills_per_step_median": 2.0,
+    "verdict": "pol4 merges MORE in the typical step"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 27.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 6.1484,
+    "measured_ttft_median_s": 3.6204,
+    "rho_b_chain_median": 0.1972,
+    "rho_b_piece_median": 1.2996
+   },
+   "gaps": {
+    "frac_serving": 0.9333,
+    "dur_s_median": 0.1786,
+    "fe_next_s_median": 0.1711,
+    "frac_first_gap": 0.8987
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "REJECTED",
+    "gap_frac_serving": 0.9333,
+    "frac_first_gap": 0.8987,
+    "rho_b_chain_median": 0.1972,
+    "frac_first_piece": 0.0823,
+    "other_share_minus_mono": 0.0008,
+    "other_share_diff_ci95": [
+     -0.0222,
+     0.0013
+    ],
+    "chain_over_mono_imposed_lat": 0.3735
+   }
+  },
+  "B|P25|mono": {
+   "mode": "B",
+   "load": "P25",
+   "action": "mono",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 2.0,
+    "measured_max": 2.0,
+    "pol4_median": 2,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": null,
+    "measured_frac_piece_steps_with_other_prefill": null,
+    "measured_prefills_per_step_median": null,
+    "measured_prefills_per_step_max": null,
+    "pol4_prefills_per_step_median": 1.0,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 63.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 16.4636,
+    "measured_ttft_median_s": 15.1334,
+    "rho_b_chain_median": 0.9406,
+    "rho_b_piece_median": 1.2041
+   },
+   "gaps": {
+    "frac_serving": null,
+    "dur_s_median": null,
+    "fe_next_s_median": null,
+    "frac_first_gap": 0.0
+   },
+   "eng1e_verdict": null
+  },
+  "B|P40|chain1024": {
+   "mode": "B",
+   "load": "P40",
+   "action": "chain1024",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.0,
+    "measured_frac_piece_steps_with_other_prefill": 0.2105,
+    "measured_prefills_per_step_median": 1.0,
+    "measured_prefills_per_step_max": 3.0,
+    "pol4_prefills_per_step_median": 2,
+    "verdict": "pol4 merges MORE in the typical step"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 15,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 5.3864,
+    "measured_ttft_median_s": 4.0158,
+    "rho_b_chain_median": 0.0923,
+    "rho_b_piece_median": 1.1731
+   },
+   "gaps": {
+    "frac_serving": 0.8846,
+    "dur_s_median": 0.1222,
+    "fe_next_s_median": 0.1127,
+    "frac_first_gap": 0.8082
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "PARTIAL",
+    "gap_frac_serving": 0.8846,
+    "frac_first_gap": 0.8082,
+    "rho_b_chain_median": 0.0923,
+    "frac_first_piece": 0.1438,
+    "other_share_minus_mono": 0.0017,
+    "other_share_diff_ci95": [
+     -0.0215,
+     0.0019
+    ],
+    "chain_over_mono_imposed_lat": 0.2221
+   }
+  },
+  "B|P40|chain2048": {
+   "mode": "B",
+   "load": "P40",
+   "action": "chain2048",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.0,
+    "measured_frac_piece_steps_with_other_prefill": 0.2444,
+    "measured_prefills_per_step_median": 1.0,
+    "measured_prefills_per_step_max": 5.0,
+    "pol4_prefills_per_step_median": 2.0,
+    "verdict": "pol4 merges MORE in the typical step"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 27.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 12.5927,
+    "measured_ttft_median_s": 8.3914,
+    "rho_b_chain_median": 0.2367,
+    "rho_b_piece_median": 1.6909
+   },
+   "gaps": {
+    "frac_serving": 1.0,
+    "dur_s_median": 0.2376,
+    "fe_next_s_median": 0.2314,
+    "frac_first_gap": 0.8022
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "REJECTED",
+    "gap_frac_serving": 1.0,
+    "frac_first_gap": 0.8022,
+    "rho_b_chain_median": 0.2367,
+    "frac_first_piece": 0.0916,
+    "other_share_minus_mono": 0.0017,
+    "other_share_diff_ci95": [
+     -0.0216,
+     0.0023
+    ],
+    "chain_over_mono_imposed_lat": 0.5193
+   }
+  },
+  "B|P40|mono": {
+   "mode": "B",
+   "load": "P40",
+   "action": "mono",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 2.0,
+    "measured_max": 2.0,
+    "pol4_median": 2,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": null,
+    "measured_frac_piece_steps_with_other_prefill": null,
+    "measured_prefills_per_step_median": null,
+    "measured_prefills_per_step_max": null,
+    "pol4_prefills_per_step_median": 1.0,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 63.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 24.2503,
+    "measured_ttft_median_s": 21.6981,
+    "rho_b_chain_median": 0.9265,
+    "rho_b_piece_median": 1.39
+   },
+   "gaps": {
+    "frac_serving": null,
+    "dur_s_median": null,
+    "fe_next_s_median": null,
+    "frac_first_gap": 0.0
+   },
+   "eng1e_verdict": null
+  },
+  "B|S2|chain1024": {
+   "mode": "B",
+   "load": "S2",
+   "action": "chain1024",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.0,
+    "measured_frac_piece_steps_with_other_prefill": 0.1345,
+    "measured_prefills_per_step_median": 1.0,
+    "measured_prefills_per_step_max": 2.0,
+    "pol4_prefills_per_step_median": 2,
+    "verdict": "pol4 merges MORE in the typical step"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 15,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 3.185,
+    "measured_ttft_median_s": 1.9301,
+    "rho_b_chain_median": 0.0791,
+    "rho_b_piece_median": 0.7933
+   },
+   "gaps": {
+    "frac_serving": 0.9936,
+    "dur_s_median": 0.1114,
+    "fe_next_s_median": 0.1042,
+    "frac_first_gap": 0.8505
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "PARTIAL",
+    "gap_frac_serving": 0.9936,
+    "frac_first_gap": 0.8505,
+    "rho_b_chain_median": 0.0791,
+    "frac_first_piece": 0.1134,
+    "other_share_minus_mono": 0.0009,
+    "other_share_diff_ci95": [
+     0.0007,
+     0.001
+    ],
+    "chain_over_mono_imposed_lat": 0.2254
+   }
+  },
+  "B|S2|chain2048": {
+   "mode": "B",
+   "load": "S2",
+   "action": "chain2048",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.0,
+    "measured_frac_piece_steps_with_other_prefill": 0.1667,
+    "measured_prefills_per_step_median": 1.0,
+    "measured_prefills_per_step_max": 3.0,
+    "pol4_prefills_per_step_median": 3.0,
+    "verdict": "pol4 merges MORE in the typical step"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 27.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 6.208,
+    "measured_ttft_median_s": 3.4246,
+    "rho_b_chain_median": 0.2084,
+    "rho_b_piece_median": 1.2043
+   },
+   "gaps": {
+    "frac_serving": 1.0,
+    "dur_s_median": 0.1859,
+    "fe_next_s_median": 0.1768,
+    "frac_first_gap": 0.8462
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "REJECTED",
+    "gap_frac_serving": 1.0,
+    "frac_first_gap": 0.8462,
+    "rho_b_chain_median": 0.2084,
+    "frac_first_piece": 0.0888,
+    "other_share_minus_mono": 0.0008,
+    "other_share_diff_ci95": [
+     0.0007,
+     0.001
+    ],
+    "chain_over_mono_imposed_lat": 0.4393
+   }
+  },
+  "B|S2|mono": {
+   "mode": "B",
+   "load": "S2",
+   "action": "mono",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 2.0,
+    "measured_max": 2.0,
+    "pol4_median": 2,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": null,
+    "measured_frac_piece_steps_with_other_prefill": null,
+    "measured_prefills_per_step_median": null,
+    "measured_prefills_per_step_max": null,
+    "pol4_prefills_per_step_median": 1.0,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 64.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 14.1303,
+    "measured_ttft_median_s": 12.7988,
+    "rho_b_chain_median": 0.9411,
+    "rho_b_piece_median": 1.2004
+   },
+   "gaps": {
+    "frac_serving": null,
+    "dur_s_median": null,
+    "fe_next_s_median": null,
+    "frac_first_gap": 0.0
+   },
+   "eng1e_verdict": null
+  },
+  "B|S4|chain1024": {
+   "mode": "B",
+   "load": "S4",
+   "action": "chain1024",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.0,
+    "measured_frac_piece_steps_with_other_prefill": 0.4277,
+    "measured_prefills_per_step_median": 1.0,
+    "measured_prefills_per_step_max": 3.0,
+    "pol4_prefills_per_step_median": 3,
+    "verdict": "pol4 merges MORE in the typical step"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 19,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 14.543,
+    "measured_ttft_median_s": 9.9421,
+    "rho_b_chain_median": 0.1018,
+    "rho_b_piece_median": 1.6679
+   },
+   "gaps": {
+    "frac_serving": 1.0,
+    "dur_s_median": 0.2239,
+    "fe_next_s_median": 0.2144,
+    "frac_first_gap": 0.8206
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "PARTIAL",
+    "gap_frac_serving": 1.0,
+    "frac_first_gap": 0.8206,
+    "rho_b_chain_median": 0.1018,
+    "frac_first_piece": 0.1368,
+    "other_share_minus_mono": -0.0423,
+    "other_share_diff_ci95": [
+     -0.0702,
+     0.2221
+    ],
+    "chain_over_mono_imposed_lat": 0.2629
+   }
+  },
+  "B|S4|chain2048": {
+   "mode": "B",
+   "load": "S4",
+   "action": "chain2048",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 1.0,
+    "measured_max": 1.0,
+    "pol4_median": 1.0,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": 0.1529,
+    "measured_frac_piece_steps_with_other_prefill": 0.5889,
+    "measured_prefills_per_step_median": 2.0,
+    "measured_prefills_per_step_max": 5.0,
+    "pol4_prefills_per_step_median": 4.0,
+    "verdict": "pol4 merges MORE in the typical step"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 35.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 27.0009,
+    "measured_ttft_median_s": 18.4799,
+    "rho_b_chain_median": 0.264,
+    "rho_b_piece_median": 2.1152
+   },
+   "gaps": {
+    "frac_serving": 1.0,
+    "dur_s_median": 0.3937,
+    "fe_next_s_median": 0.3812,
+    "frac_first_gap": 0.7695
+   },
+   "eng1e_verdict": {
+    "H_gap": "SUPPORTED",
+    "H_merge": "PARTIAL",
+    "gap_frac_serving": 1.0,
+    "frac_first_gap": 0.7695,
+    "rho_b_chain_median": 0.264,
+    "frac_first_piece": 0.1423,
+    "other_share_minus_mono": 0.1087,
+    "other_share_diff_ci95": [
+     0.0808,
+     0.109
+    ],
+    "chain_over_mono_imposed_lat": 0.4882
+   }
+  },
+  "B|S4|mono": {
+   "mode": "B",
+   "load": "S4",
+   "action": "mono",
+   "n_trials": 15,
+   "a_step_granularity": {
+    "measured_median": 2.0,
+    "measured_max": 2.0,
+    "pol4_median": 2,
+    "verdict": "pol4 is RIGHT"
+   },
+   "b_in_step_merging": {
+    "measured_other_prefill_share_median": null,
+    "measured_frac_piece_steps_with_other_prefill": null,
+    "measured_prefills_per_step_median": null,
+    "measured_prefills_per_step_max": null,
+    "pol4_prefills_per_step_median": 1.0,
+    "verdict": "comparable"
+   },
+   "c_encoder_budget": {
+    "measured_encoder_check": 15,
+    "pol4_images_per_action_step_median": 64.0,
+    "note": "StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush, so there is no mismatch for a term to correct"
+   },
+   "imposed_delay": {
+    "measured_latency_median_s": 55.3095,
+    "measured_ttft_median_s": 45.4585,
+    "rho_b_chain_median": 0.9268,
+    "rho_b_piece_median": 1.4797
+   },
+   "gaps": {
+    "frac_serving": null,
+    "dur_s_median": null,
+    "fe_next_s_median": null,
+    "frac_first_gap": 0.0
+   },
+   "eng1e_verdict": null
+  }
+ },
+ "mode_comparison": {
+  "handover_window_s": {
+   "B": {
+    "median": 0.1739,
+    "min": 0.0991,
+    "max": 0.3812,
+    "n_cells": 8
+   },
+   "A": {
+    "median": 0.1986,
+    "min": 0.1457,
+    "max": 0.3829,
+    "n_cells": 8
+   }
+  },
+  "gap_s": {
+   "B": {
+    "median": 0.1823,
+    "min": 0.1066,
+    "max": 0.3937,
+    "n_cells": 8
+   },
+   "A": {
+    "median": 0.2086,
+    "min": 0.1538,
+    "max": 0.3976,
+    "n_cells": 8
+   }
+  },
+  "steps_per_piece": {
+   "B": {
+    "median": 1.0,
+    "min": 1.0,
+    "max": 1.0,
+    "n_cells": 8
+   },
+   "A": {
+    "median": 1.0,
+    "min": 1.0,
+    "max": 1.0,
+    "n_cells": 8
+   }
+  },
+  "other_prefill_share": {
+   "B": {
+    "median": 0.0,
+    "min": 0.0,
+    "max": 0.1529,
+    "n_cells": 8
+   },
+   "A": {
+    "median": 0.0,
+    "min": 0.0,
+    "max": 0.2729,
+    "n_cells": 8
+   }
+  },
+  "frac_piece_steps_with_other_prefill": {
+   "B": {
+    "median": 0.1886,
+    "min": 0.1337,
+    "max": 0.5889,
+    "n_cells": 8
+   },
+   "A": {
+    "median": 0.2599,
+    "min": 0.1228,
+    "max": 0.7889,
+    "n_cells": 8
+   }
+  },
+  "rho_b_chain": {
+   "B": {
+    "median": 0.1495,
+    "min": 0.0791,
+    "max": 0.264,
+    "n_cells": 8
+   },
+   "A": {
+    "median": 0.1166,
+    "min": 0.056,
+    "max": 0.2078,
+    "n_cells": 8
+   }
+  },
+  "rho_b_piece": {
+   "B": {
+    "median": 1.2519,
+    "min": 0.7933,
+    "max": 2.1152,
+    "n_cells": 8
+   },
+   "A": {
+    "median": 1.078,
+    "min": 0.6877,
+    "max": 1.6218,
+    "n_cells": 8
+   }
+  },
+  "frac_first_gap": {
+   "B": {
+    "median": 0.8334,
+    "min": 0.7695,
+    "max": 0.8987,
+    "n_cells": 8
+   },
+   "A": {
+    "median": 0.7915,
+    "min": 0.6511,
+    "max": 0.8591,
+    "n_cells": 8
+   }
+  },
+  "reading": "The injection mode changes the HAND-OVER WINDOW and nothing structural. Mode A's window is about 1.5x mode B's (bytes pass a slower API front end), which lengthens mode A's gaps, but step granularity is 1 step per piece in BOTH, and in-step merging is near zero in the typical piece step of BOTH. So bytes versus cached references is a front-end effect, not a scheduling effect."
+ },
+ "eng1c_vs_eng1d": {
+  "question": "StudyPOL6 Part A derived 40 to 48 % of ENG1c piece steps carrying other prefill tokens, while StudyENG1d measured 0 of 248 in-window arrivals admitted into a piece's step. Which is right, and does bytes versus cached references explain it?",
+  "answer": "NEITHER derivation was measuring what Part A thought. On StudyENG1e's direct membership the engine's piece steps carry other PREFILL in 12 to 79 % of cases, and the typical piece step carries none (median other-prefill share 0.000 in 13 of 16 chain cells). The figure rises with background load, not with the injection mode: it is 12 to 29 % at P25, P40 and S2 and 43 to 79 % at S4, in BOTH modes. So Part A's derived 40 to 48 % was an artifact of attributing every unexplained token in a step to a co-scheduled prefill, and StudyENG1d's 0 of 248 is consistent with a low-load cell of this same picture.",
+  "bytes_vs_refs": "not the reason: merging is load-driven and present in both modes",
+  "part_a_claim_status": "SUPERSEDED by measurement, together with Part A's derived 1.75 and 1.92 steps per piece, which StudyENG1e measures as exactly 1.0"
+ },
+ "rejected_rule": {
+  "rule": "a step does not mix an action piece with background prefill; strict FCFS by hand-off, one class per step",
+  "measured_support": "the engine's median other-prefill share inside a piece step is 0.000 in 13 of 16 chain cells",
+  "result_on_fit": {
+   "chain_ratio_pol4": 1.636,
+   "chain_ratio_with_rule": 1.897,
+   "mono_ratio_unchanged": 1.099
+  },
+  "verdict": "REJECTED ON FIT",
+  "why": "refusing to batch lengthens the chain (a piece can no longer share its step), so everything queued behind it is delayed more; the rule moves the chain ratio the WRONG way. The same failure mode as StudyPOL5's two structural rules.",
+  "equivalence_check": "with the rule off the re-implementation reproduced the frozen EngineSim's predicted delay on 40 trials with 0 mismatches, so the comparison is of the rule and not of a second implementation"
+ },
+ "which_drives_it": {
+  "a_step_granularity": "NOT the driver: measured 1.0 steps per piece (median AND max) in all 16 chain cells, which is what pol4 already does. Part A's derived 1.75 and 1.92 were a subtraction artifact.",
+  "b_in_step_merging": "NOT the driver: real but load-driven, and the structural rule it suggests makes FIT worse (1.636 to 1.897).",
+  "c_encoder_budget": "NOT the driver: StudyENG1e's encoder check passed in every cell.",
+  "what_is": "the HAND-OVER WINDOW and the PIECE STEP, which are wrong in opposite directions and cancel in the chain's own span: pol4's piece step is 1.06 to 1.62x too long and its hand-over window is 3 to 13x too short. Neither cancels in the delay charged to others."
+ },
+ "loader_audit": {
+  "split": "fit",
+  "n_trials": 360,
+  "source": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/eng1e_b80b3b9/results/cost/study_eng1e/eng1e_requests_h100nvl.jsonl.gz",
+  "n_fit_trials_in_record": 360,
+  "n_holdout_trials_in_record": 120,
+  "n_holdout_trials_in_split_file": 120,
+  "holdout_trials_built": 0,
+  "rows_read": 62012,
+  "kinds": {
+   "episodic": 56036,
+   "inject": 2952,
+   "job": 480,
+   "pair_check": 480,
+   "run_summary": 1032,
+   "setup_flush": 516,
+   "setup_hist": 516
+  },
+  "arms": {
+   "repeat": 3860,
+   "with": 22142,
+   "without": 19568
+  },
+  "authorization": "",
+  "provenance": [
+   {
+    "path": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/eng1e_b80b3b9/results/cost/study_eng1e/eng1e_requests_h100nvl.jsonl.gz",
+    "exists": true,
+    "bytes": 3881475,
+    "md5": "b6955922d77cbc09c97cffb890d79658"
+   },
+   {
+    "path": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/eng1e_b80b3b9/results/cost/study_eng1e/eng1e_holdout_split.json",
+    "exists": true,
+    "bytes": 8457,
+    "md5": "2511645548dcdd3d6862e0c1123d99e1"
+   }
+  ],
+  "assertions": [
+   "the record's holdout flag selects exactly the split file's trial count, counted over both injection modes",
+   "no trial of the other split is constructed at all",
+   "every scored trial carries a with arm and a without arm"
+  ]
+ }
+}

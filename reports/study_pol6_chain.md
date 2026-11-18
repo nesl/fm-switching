@@ -515,3 +515,245 @@ Modified: `research/EXPERIMENTS.md`, `research/STATUS.md`, `results/INDEX.md` (o
 plus one amendment row for the addendum); `reports/study_pol6_chain.md`,
 `experiments/orchestration/policy/pol6_engine.py` and
 `results/orchestration/study_pol6/pol6_terms.json` carry the section 11 erratum.
+
+---
+
+# PART B: the in-step residual, on StudyENG1e's measured per-step membership
+
+Run 2026-11-17 on flash, CPU only, under the user's overnight autonomy rules. **Nothing in Part B
+is a measurement**: every measurement it uses is StudyENG1e-chain's, taken on h100nvl GPU 2 and
+labelled by that study as "add-on failed unloaded overhead gate; passed at P40" (its D93 label,
+carried into every output here).
+
+## 13. Outcome
+
+**THE REGRESSION STOP FIRES. pol6 IS NOT FROZEN. pol4 REMAINS THE FROZEN AND DEFAULT MODEL. THE
+ENG1e HOLDOUT IS NOT READ.**
+
+All three candidates Part A left open are settled, and **none of them is the driver**:
+
+| candidate | what StudyENG1e measures | verdict |
+|---|---|---|
+| (a) step granularity | the engine runs every piece in exactly ONE step, median AND max 1.0 in all 16 chain cells; pol4 also uses one | **NOT the driver. pol4 is right.** Part A's derived 1.75 and 1.92 steps per piece were an artifact of deriving step composition by subtraction. |
+| (b) in-step merging | median other-prefill share inside a piece step is 0.000 in 13 of 16 cells; 12 to 29 % of piece steps carry other prefill at P25, P40 and S2, 43 to 79 % at S4, in BOTH modes | **NOT the driver.** Real, but load-driven, and the structural rule it suggests was implemented and REJECTED on FIT. |
+| (c) encoder budget | StudyENG1e's own encoder check passed in every cell: every piece's encoder inputs equal its new frames after the setup flush | **NOT the driver.** No mismatch exists for a term to correct. |
+
+What the residual actually is: **two errors that cancel in the chain's own span and do not cancel
+in the delay charged to others.** pol4's piece STEP is **1.06 to 1.62x too long** (median 1.23x)
+and its hand-over WINDOW is **3 to 13x too short** (ratio 0.078 to 0.581, median 0.296). Their
+product leaves the chain's own span right to 1.03 to 1.13, which is why Part A found pol4
+reproducing the chain span to within 1 % and still over-predicting what the chain costs everyone
+else by 1.6x.
+
+Correcting the window alone, which is the only one of the two that Part B may touch, does exactly
+what that diagnosis predicts: it fixes criterion (i) and breaks criterion (iii).
+
+| model | metric | (i) | (i-b) vs ceiling 1.0000 | (ii) ranking | (iii) completion |
+|---|---|---|---|---|---|
+| pol4 | latency (primary) | 0.5944 | 0.5944 FAIL | 1.0000 PASS | 0.0209 PASS |
+| pol4 | TTFT (secondary) | 0.8139 | 0.8139 FAIL | 1.0000 PASS | 0.0209 PASS |
+| pol6 | latency (primary) | **0.8472** | 0.8472 FAIL | 1.0000 PASS | **0.1460** PASS |
+| pol6 | TTFT (secondary) | **0.9083** | **0.9083 PASS** | 1.0000 PASS | **0.1460** PASS |
+
+Criterion (iii) stays inside its 0.20 bar, so pol6 does not fail the test outright, but it is
+**seven times worse than pol4** on it. The brief's gate is "worse than pol4 on (ii) or (iii)",
+not "fails", so the gate fires and the freeze does not happen.
+
+## 14. Mechanism verification, Steps 1 to 5, recorded before the conclusions above
+
+**Step 1, the causal chain.** FORMULATION.md's serving-feasibility constraint makes every
+request's latency binding, and the policy's rollout charges an action the delay it imposes on
+others. If the frozen model mis-states how a chained rebuild occupies the engine, it mis-states
+that delay, and the policy becomes too cautious with recall jobs (StudyT0b: 8 of 40 piece1024
+trials within tolerance). Part A localized 89 % of the error to background requests whose first
+token lands while a piece is prefilling. The link that decides it is, per step, WHICH requests
+were scheduled: exactly what StudyENG1e's add-on records and what StudyENG1c could not.
+
+**Step 2, instantiating each link.**
+
+| causal link | implementing quantity | value / range on ENG1e FIT | varies as expected? | evidence |
+|---|---|---|---|---|
+| a piece occupies the engine for its own steps | steps per piece | 1.0 median and 1.0 max, all 16 chain cells | NO, and that is the finding: it does not vary, and pol4 already matches it | `pol6_partB_diagnosis.json` per_cell a_step_granularity |
+| background shares a piece's step | other-prefill share in a piece step | median 0.000 in 13 of 16 cells; frac of piece steps with other prefill 0.123 to 0.789 | yes, with LOAD (0.12 to 0.29 at P25/P40/S2, 0.43 to 0.79 at S4), not with mode | same, b_in_step_merging |
+| the encoder is on the critical path | encoder inputs per step | ENG1e's encoder check passed in every cell | no: constant and correct | same, c_encoder_budget |
+| the next piece is handed over after a window | `gaps.fe_next_s` | 0.0991 to 0.3829 s; pol4 charges 0.0298 to 0.1172 s | yes, with mode AND load | `two_compensating_errors` |
+| a piece's step duration | add-on `el_ms` vs pol4's simulated action step | measured 182.7 to 473.5 ms, pol4 223.3 to 554.6 ms | yes, and pol4 is high in every one of the 16 cells | same |
+| an arrival waits for the current piece, not the chain | rho_b against chain end vs piece end | chain 0.056 to 0.264, piece 0.688 to 2.115 | yes, by two orders of magnitude | ENG1e cells |
+
+No link is ABSENT or CONSTANT in the sense the protocol forbids. Two links are constant and that
+is the result rather than a design failure: steps per piece is 1.0 everywhere, and the encoder
+check passes everywhere, so neither can be the error.
+
+**Step 3, one traced unit.** StudyENG1e's own report traces mode B, P40, chain1024, trial 0 by
+hand (its section 1.1, Step 3): piece 0 submitted 0.000, first step 0.142 to 0.304 with 1,031
+tokens, 11 images and 3 background decodes; gap 0 from 0.304 to 0.455 holding two steps, each
+one background prefill of 378 tokens; piece 1 submitted 0.309 (client turnaround 5 ms), first
+step 0.455 to 0.616 with 997 new tokens and 1,024 cached, so the prefix chain works. Background
+request 21 arrives at 0.964 inside gap 2, is first scheduled at 1.205 (it waited out piece 3),
+TTFT 0.319 s with against 0.131 s without. Part B does not re-trace it: the same arithmetic is
+reproduced here from the same rows, and the quantity Part B adds is the comparison with pol4 on
+the same trial, which is in `two_compensating_errors.per_cell`.
+
+**Step 4, negative controls.** Two, and both behave as the absence of the mechanism predicts.
+**mono** is the control for chain structure: it has no pieces, no gaps and no hand-over windows,
+its steps per piece is 2.0 measured and 2.0 in pol4, and pol4's imposed-delay ratio on it is
+0.980 to 1.242 against 1.080 to 2.467 for chains. Switching pol6's term on leaves every mono
+cell **bit-identical** (ratio 1.099 both models), because the term only re-times later pieces
+and mono has none. **The flag off** is the second control: pol6 with every flag off reproduced
+the frozen `EngineSim`'s predicted delay on 40 trials with 0 mismatches, so the comparison is of
+the rule and not of a second implementation.
+
+**Step 5, alternative explanations.** (a) The chain imposes less simply because it is spread over
+a longer span at lower intensity, with no gap service: ruled out by StudyENG1e directly, which
+finds 77 to 100 % of gaps serving background and 65 to 90 % of during-chain arrivals first
+scheduled in a gap. (b) The cost is concentrated in the first piece: ruled out, the error is
+spread over the pieces and `by_bin` puts 55 % on piece-bin arrivals and 40 % on gap-bin arrivals
+in the representative cell. (c) Bytes versus cached references: ruled out as a SCHEDULING
+explanation, see section 16. (d) CPU-side step blocking: ENG1e reports it per action and the
+`cells_cpu_ok` set used here excludes the affected pairs. The remaining explanation, the two
+compensating errors, is the one the data supports, and section 17 states what would distinguish
+it further.
+
+## 15. The structural rule that was implemented and rejected
+
+The measurement suggests a rule: if the engine's typical piece step carries no other prefill,
+then a piece should not share its step with background prefill. That rule was implemented as a
+strict FCFS, one-class-per-step scheduler, with an equivalence check proving the flag-off path
+reproduces the frozen engine exactly, and then **rejected on FIT**:
+
+| | chain ratio (latency, median over cells) | mono |
+|---|---|---|
+| pol4 | 1.636 | 1.099 |
+| with the no-mixed-class rule | **1.897** | 1.099 |
+
+It moves the error the wrong way, and the reason is mechanical: refusing to batch lengthens the
+chain, because a piece can no longer share its step, so everything queued behind the chain is
+delayed more. This is the same failure mode as StudyPOL5's two structural rules, and it is the
+second time a rule that looks right from a per-step summary has made the prediction worse.
+
+## 16. Mode A against mode B, and the question Part A left open
+
+| quantity | mode B (uuid references, encoder flushed) | mode A (image bytes) |
+|---|---|---|
+| hand-over window, median over chain cells | 0.1739 s | 0.1986 s |
+| gap duration, median | 0.1823 s | 0.2086 s |
+| steps per piece | 1.0 | 1.0 |
+| other-prefill share in a piece step | 0.0000 | 0.0000 |
+| rho_b against the chain end | 0.145 | 0.117 |
+
+**The injection mode changes the hand-over window and nothing structural.** Mode A's window is
+about 1.14x mode B's over the pooled medians and up to 1.5x at low load, because bytes pass a
+slower API front end, and that lengthens mode A's gaps. Step granularity is one step per piece in
+both. In-step merging is zero in the typical piece step of both. So bytes against cached
+references is a front-end effect, not a scheduling effect.
+
+**The ENG1c-versus-ENG1d puzzle is answered, and neither side was measuring what Part A thought.**
+Part A derived 40 to 48 % of ENG1c piece steps carrying other prefill tokens; StudyENG1d measured
+0 of 248 in-window arrivals admitted into a piece's step. On StudyENG1e's direct membership the
+engine's piece steps carry other prefill in 12 to 79 % of cases, **rising with background load and
+not with the injection mode**: 12 to 29 % at P25, P40 and S2 and 43 to 79 % at S4, in both modes.
+Part A's 40 to 48 % was an artifact of attributing every unexplained token in a step to a
+co-scheduled prefill, and StudyENG1d's 0 of 248 is consistent with a low-load cell of the same
+picture. **Part A's derived step count (1.75 and 1.92) and its derived merge share are both
+SUPERSEDED by measurement**, which is the third correction this report has had to make to its own
+Part A and the clearest argument yet for not treating a derived composition as a measurement.
+
+## 17. Results consistency check, six checks
+
+**1. Cross-check against committed measurements.** pol4's chain over-prediction reproduces on a
+collection it has never seen: chain latency ratio median 1.636, range 1.080 to 2.467, against
+StudyT0b's 1.6 to 1.8 on the ENG1c Part D HOLDOUT and StudyPOL5's 1.62 and 1.83 in-window on
+ENG1d. mono reproduces too (0.980 to 1.242 against T0b's 0.900 passing). Nothing disagrees by
+more than 1.5x. ENG1e's own mono cross-check against ENG1c and ENG1d passed all six gated cells,
+which is an independent check of the same stack.
+
+**2. Physical plausibility.** The implied piece prefill rate is 1,024 tokens in 182.7 to 230.5 ms
+(4,443 to 5,604 tok/s) and 2,048 in 357.8 to 473.5 ms (4,325 to 5,724 tok/s), both within the
+band this stack's committed rates give (StudyENG1's 11k monolithic prefill and Part A's 4,080 to
+4,943 tok/s). No rate here is faster than a committed one.
+
+**3. Distribution sanity.** Every median in sections 13 to 16 is reported with its range over
+cells, and the fitted window carries its spread over loads (`spread_over_loads`: refs 1024 ranges
+0.0991 to 0.2144 against a fitted median of 0.1084, a 2.2x spread that the fitted constant
+deliberately ignores, see the limitation in section 18). The one suspicious constant,
+`fe_later_s` equal to `fe_next_s` to the last digit in all 16 cells, was chased: they are the same
+quantity under two names in StudyENG1e's results file, not two agreeing measurements, and section
+18 records that this is why the window could not be decomposed into a fixed and an endogenous
+part.
+
+**4. Definition audit.** "Steps per piece" is the add-on's own count of steps in which a piece was
+prefilling, not Part A's derived quantity, and the two are reported separately wherever they are
+compared. A step's duration is `t0 + el` minus `max(ts, previous end)` per StudyENG1e's report,
+NOT `el` alone: its own smoke found a mono first step whose `el` was 0.025 ms after a 1.64 s
+execute_model call, which is the same trap Part A hit with `elapsed_ms` on ENG1c, and a test pins
+it. "Imposed delay" is reported on both definitions, latency primary and TTFT secondary, as T0b
+fixed. "FIT" is 15 of 20 trials per cell in both modes; the HOLDOUT 5 are never constructed.
+
+**5. Claim linkage.** C4, the claim that the cost model's pricing of a reconstruction is
+trustworthy enough to schedule on, narrows again: the model's pricing of a chain's OWN cost
+stands (span right to 1.03 to 1.13), its pricing of the delay a chain imposes on others does not,
+and Part B localizes that to two compensating errors rather than to any of Part A's three
+candidates. C5 and C6 are not tested. Nothing measured here is scoped out by FORMULATION.md.
+
+**6. Proxy validity.** Part B removes Part A's one proxy. Per-step composition is now MEASURED,
+not derived by subtraction, which is why two of Part A's conclusions had to be superseded. One
+proxy remains and is labelled: pol4's own simulated step log is used as the comparison object for
+"what pol4 does", which is exact for a deterministic program but is a model's behaviour and not a
+measurement of the engine.
+
+## 18. Rule 2 classification, and the limitations that go with it
+
+**REAL NEGATIVE, not inconclusive.** The mechanism under test was present, instrumented and
+varying (Step 2), the negative controls changed the result in the predicted direction (Step 4),
+and the candidate term was implemented, scored and rejected by a pre-registered gate. Part B did
+not fail to test the claim; it tested it and the claim did not survive.
+
+Three limitations, each recorded rather than worked around:
+
+1. **The fitted window is load-dependent and a load-independent median was fitted on purpose.**
+   The measured window spans 2.2x across loads for refs at 1024 tokens. A per-load coefficient
+   would encode a background arrival rate the policy does not know when it decides, so it would
+   not be a usable term even if it fitted better. This is recorded in `coef_note`.
+2. **The window could not be decomposed.** StudyENG1e reports the submit-to-engine-added window
+   as a single quantity (`fe_next_s` and `fe_later_s` are the same number), so the part that is a
+   fixed cost and the part that is congestion in the front-end path cannot be separated from its
+   committed outputs. Only the fixed part belongs in a front-end term; the rest should emerge from
+   the simulator. Separating them needs a measurement StudyENG1e did not take.
+3. **The other half of the error is in the FROZEN step model.** pol4's piece step is 1.06 to 1.62x
+   too long. Correcting it means re-fitting the step model that StudyT0b froze and that mono,
+   where pol4 is already right, shares. That is a D60-class change, outside Part B, and it is the
+   single thing a future pol6 most needs.
+
+## 19. Part B's OVERNIGHT DECISIONS
+
+1. **Inputs read from a scratch root.** StudyENG1e is committed upstream but this branch holds an
+   unpushed commit and could not be fast-forwarded, and the night's rules forbid resolving the
+   rebase conflict. The ENG1e artifacts were therefore read from `origin/main` blobs at
+   **b80b3b9**, extracted read-only to a scratch root, and the md5 of every file read is recorded
+   in `pol6_partB_diagnosis.json.inputs` and `pol6_partB_fit_score.json`. Nothing was written
+   there and no repo file was taken from it.
+2. **`cells_cpu_ok` is the cell set used.** StudyENG1e's `cells_unflagged` is empty by
+   construction (every sweep output carries its D93 label), so excluding "flagged" cells would
+   have excluded the whole study. All sweep cells are LOADED, which is what D93's exclusion is
+   about, and `cells_cpu_ok` additionally drops the pairs its CPU-blocking check flags. The
+   unloaded gate cells are not used for anything.
+3. **The measured window is recorded, not adopted.** Rather than delete a rejected term, it is
+   kept under `partB.measured_handover_window` with its rejection, and its flag is left
+   implemented and OFF, so the scored comparison is reproducible. `coef` stays empty, so pol6
+   still carries no active coefficient of its own.
+4. **No pre-registration row was written.** The brief's order is freeze, then pre-register. The
+   gate forbade the freeze, so pre-registering a one-shot for a model that does not exist would
+   have put a commitment on the record with nothing behind it.
+
+## 20. What Part B did not do
+
+The **ENG1e HOLDOUT was not read, not scored and not estimated.** 5 of 20 trials per (load,
+action) in both modes, 120 trials in all, remain unspent; the loader refuses them without an
+authorization string and a test proves it against the committed split file. pol6 is **not frozen**,
+carries **no fitted coefficient**, has **every flag off by default**, and is **not the serving
+model**. pol4 remains frozen and default, and all 12 StudyT0b freeze md5s verify. 384 policy
+tests pass, 20 of them new for Part B.
+
+StudyENG1e's own split file describes its holdout as "reserved_for: later T0 extension; recorded,
+NOT analysed", which is a different framing from a pol6 one-shot. It is unspent either way, and
+which study may spend it is a user decision that this report does not take.

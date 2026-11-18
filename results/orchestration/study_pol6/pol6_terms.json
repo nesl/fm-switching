@@ -10,8 +10,7 @@
   "in_step_merge_rule": "Whether, and under what admission condition, a background prefill joins a step a piece is already prefilling in. Part A shows the engine does co-schedule (median 3,780 and 3,402 other prefill tokens inside the pieces' own steps, max ctx_req 2), but the per-step composition is DERIVED by subtraction, not measured per request.",
   "step_granularity_tokens_per_step": "How many NEW tokens of a multimodal piece the engine actually puts in one step. Part A derives 1.75 steps per piece for piece1024 and 1.92 for piece2048 against pol4's 1.0, but the derivation cannot say WHICH tokens went in which step. StudyENG1e's per-step request membership measures it."
  },
- "coef": {},
- "coef_note": "EMPTY BY DESIGN. Part A fitted nothing. pol6's only active numbers are StudyPOL5's already-fitted front-end coefficients, which pol6 loads from pol5_terms.json by reference rather than copying, so there is one source for them.",
+ "coef_note": "EMPTY BY DESIGN, after Part B as well as after Part A. Part B fitted ONE candidate term, the measured piece hand-over window, and the regression gate REJECTED it: see partB.measured_handover_window and partB.regression_stop. pol6 therefore still carries no active coefficient and pol4 remains the frozen and default model.",
  "flags": {
   "in_step_merge": {
    "default": false,
@@ -158,5 +157,275 @@
    "unit": "TTFT-sum seconds, summed over all 161 chained FIT trials"
   }
  },
- "study": "StudyPOL6-chain Part A"
+ "study": "StudyPOL6-chain Part A",
+ "partB": {
+  "study": "StudyPOL6-chain Part B",
+  "fit_set": "StudyENG1e FIT only, 15 of 20 trials per cell, both injection modes",
+  "holdout_trials_used": 0,
+  "rejected_on_fit": [
+   {
+    "rule": "step_granularity",
+    "reason": "not an error: the engine runs every piece in ONE step, median and max 1.0 in all 16 chain cells, which is what pol4 already does"
+   },
+   {
+    "rule": "in_step_merge",
+    "reason": "implemented and rejected: forbidding a piece to share its step with background prefill moved the chain ratio from 1.636 to 1.897 on FIT"
+   },
+   {
+    "rule": "encoder_budget",
+    "reason": "not an error: StudyENG1e's encoder check passed in every cell"
+   }
+  ],
+  "fit": {
+   "piece_handover_s": {
+    "bytes": {
+     "1024": 0.16075,
+     "2048": 0.2213
+    },
+    "refs": {
+     "1024": 0.10845,
+     "2048": 0.2041
+    }
+   },
+   "per_cell": [
+    {
+     "cell": "A|P25|chain1024",
+     "kind": "bytes",
+     "piece_tokens": 1024,
+     "load": "P25",
+     "fe_next_s_median": 0.1457,
+     "n_gaps": 157,
+     "turnaround_s_median": 0.009,
+     "gap_s_median": 0.1538
+    },
+    {
+     "cell": "A|P25|chain2048",
+     "kind": "bytes",
+     "piece_tokens": 2048,
+     "load": "P25",
+     "fe_next_s_median": 0.1946,
+     "n_gaps": 75,
+     "turnaround_s_median": 0.0111,
+     "gap_s_median": 0.2053
+    },
+    {
+     "cell": "A|P40|chain1024",
+     "kind": "bytes",
+     "piece_tokens": 1024,
+     "load": "P40",
+     "fe_next_s_median": 0.1648,
+     "n_gaps": 156,
+     "turnaround_s_median": 0.0089,
+     "gap_s_median": 0.1734
+    },
+    {
+     "cell": "A|P40|chain2048",
+     "kind": "bytes",
+     "piece_tokens": 2048,
+     "load": "P40",
+     "fe_next_s_median": 0.2399,
+     "n_gaps": 75,
+     "turnaround_s_median": 0.0111,
+     "gap_s_median": 0.2488
+    },
+    {
+     "cell": "A|S2|chain1024",
+     "kind": "bytes",
+     "piece_tokens": 1024,
+     "load": "S2",
+     "fe_next_s_median": 0.1567,
+     "n_gaps": 156,
+     "turnaround_s_median": 0.0085,
+     "gap_s_median": 0.1644
+    },
+    {
+     "cell": "A|S2|chain2048",
+     "kind": "bytes",
+     "piece_tokens": 2048,
+     "load": "S2",
+     "fe_next_s_median": 0.2027,
+     "n_gaps": 75,
+     "turnaround_s_median": 0.0106,
+     "gap_s_median": 0.2119
+    },
+    {
+     "cell": "A|S4|chain1024",
+     "kind": "bytes",
+     "piece_tokens": 1024,
+     "load": "S4",
+     "fe_next_s_median": 0.2407,
+     "n_gaps": 158,
+     "turnaround_s_median": 0.0108,
+     "gap_s_median": 0.2524
+    },
+    {
+     "cell": "A|S4|chain2048",
+     "kind": "bytes",
+     "piece_tokens": 2048,
+     "load": "S4",
+     "fe_next_s_median": 0.3829,
+     "n_gaps": 75,
+     "turnaround_s_median": 0.0139,
+     "gap_s_median": 0.3976
+    },
+    {
+     "cell": "B|P25|chain1024",
+     "kind": "refs",
+     "piece_tokens": 1024,
+     "load": "P25",
+     "fe_next_s_median": 0.0991,
+     "n_gaps": 157,
+     "turnaround_s_median": 0.0074,
+     "gap_s_median": 0.1066
+    },
+    {
+     "cell": "B|P25|chain2048",
+     "kind": "refs",
+     "piece_tokens": 2048,
+     "load": "P25",
+     "fe_next_s_median": 0.1711,
+     "n_gaps": 75,
+     "turnaround_s_median": 0.0088,
+     "gap_s_median": 0.1786
+    },
+    {
+     "cell": "B|P40|chain1024",
+     "kind": "refs",
+     "piece_tokens": 1024,
+     "load": "P40",
+     "fe_next_s_median": 0.1127,
+     "n_gaps": 156,
+     "turnaround_s_median": 0.0078,
+     "gap_s_median": 0.1222
+    },
+    {
+     "cell": "B|P40|chain2048",
+     "kind": "refs",
+     "piece_tokens": 2048,
+     "load": "P40",
+     "fe_next_s_median": 0.2314,
+     "n_gaps": 75,
+     "turnaround_s_median": 0.0101,
+     "gap_s_median": 0.2376
+    },
+    {
+     "cell": "B|S2|chain1024",
+     "kind": "refs",
+     "piece_tokens": 1024,
+     "load": "S2",
+     "fe_next_s_median": 0.1042,
+     "n_gaps": 156,
+     "turnaround_s_median": 0.0076,
+     "gap_s_median": 0.1114
+    },
+    {
+     "cell": "B|S2|chain2048",
+     "kind": "refs",
+     "piece_tokens": 2048,
+     "load": "S2",
+     "fe_next_s_median": 0.1768,
+     "n_gaps": 75,
+     "turnaround_s_median": 0.0092,
+     "gap_s_median": 0.1859
+    },
+    {
+     "cell": "B|S4|chain1024",
+     "kind": "refs",
+     "piece_tokens": 1024,
+     "load": "S4",
+     "fe_next_s_median": 0.2144,
+     "n_gaps": 158,
+     "turnaround_s_median": 0.0099,
+     "gap_s_median": 0.2239
+    },
+    {
+     "cell": "B|S4|chain2048",
+     "kind": "refs",
+     "piece_tokens": 2048,
+     "load": "S4",
+     "fe_next_s_median": 0.3812,
+     "n_gaps": 75,
+     "turnaround_s_median": 0.0113,
+     "gap_s_median": 0.3937
+    }
+   ],
+   "spread_over_loads": {
+    "bytes|1024": {
+     "min": 0.1457,
+     "max": 0.2407,
+     "median": 0.16075,
+     "n_loads": 4
+    },
+    "bytes|2048": {
+     "min": 0.1946,
+     "max": 0.3829,
+     "median": 0.2213,
+     "n_loads": 4
+    },
+    "refs|1024": {
+     "min": 0.0991,
+     "max": 0.2144,
+     "median": 0.10845,
+     "n_loads": 4
+    },
+    "refs|2048": {
+     "min": 0.1711,
+     "max": 0.3812,
+     "median": 0.2041,
+     "n_loads": 4
+    }
+   },
+   "source": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/eng1e_b80b3b9/results/cost/study_eng1e/eng1e_results.json",
+   "provenance": [
+    {
+     "path": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/eng1e_b80b3b9/results/cost/study_eng1e/eng1e_results.json",
+     "exists": true,
+     "bytes": 369151,
+     "md5": "ef303aaeb6158b66b41b39edc6b6373e"
+    }
+   ]
+  },
+  "measured_handover_window": {
+   "piece_handover_s": {
+    "bytes": {
+     "1024": 0.16075,
+     "2048": 0.2213
+    },
+    "refs": {
+     "1024": 0.10845,
+     "2048": 0.2041
+    }
+   },
+   "status": "MEASURED on StudyENG1e FIT, REJECTED by the regression gate, NOT adopted",
+   "what_it_is": "the window from a piece completing to the next piece being added to the engine (StudyENG1e gaps.fe_next_s, which equals its fe_later_s exactly), per body kind and measured piece size",
+   "why_rejected": "it corrects criterion (i) (latency 0.5944 to 0.8472, TTFT 0.8139 to 0.9083) but worsens criterion (iii) from 0.0209 to 0.1460, because pol4 reproduces a chain's own span only through two errors that cancel in it: the piece step is 1.06 to 1.62x too long and the hand-over window is 3 to 13x too short",
+   "spread_over_loads": {
+    "bytes|1024": {
+     "min": 0.1457,
+     "max": 0.2407,
+     "median": 0.16075,
+     "n_loads": 4
+    },
+    "bytes|2048": {
+     "min": 0.1946,
+     "max": 0.3829,
+     "median": 0.2213,
+     "n_loads": 4
+    },
+    "refs|1024": {
+     "min": 0.0991,
+     "max": 0.2144,
+     "median": 0.10845,
+     "n_loads": 4
+    },
+    "refs|2048": {
+     "min": 0.1711,
+     "max": 0.3812,
+     "median": 0.2041,
+     "n_loads": 4
+    }
+   }
+  }
+ },
+ "coef": {}
 }

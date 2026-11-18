@@ -379,5 +379,172 @@ class TestFrozenFilesUntouched(unittest.TestCase):
         self.assertEqual(len(raw["files"]), 12)
 
 
+ENG1E_SCRATCH = Path("/tmp/claude-1001/-home-pragya-Desktop-FM-switching/"
+                     "8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/eng1e_b80b3b9")
+PARTB_SCORE = "results/orchestration/study_pol6/pol6_partB_fit_score.json"
+PARTB_DIAG = "results/orchestration/study_pol6/pol6_partB_diagnosis.json"
+
+
+def _repo() -> Path:
+    return Path(__file__).resolve().parents[4]
+
+
+class TestPartBCommittedSchema(unittest.TestCase):
+    """StudyENG1e's schema is fixed by its report section 1.1; the adapter must follow it."""
+
+    ROW = dict(i=7, t0=100.0, el=50.0, t1=100.06, ts=99.5, tr=99.9,
+               r=[["chatcmpl-abc-0011aabb", 1024, "p", 0, 11],
+                  ["chatcmpl-bg9-0022ccdd", 1, "d", 378, 0]])
+
+    def test_the_committed_field_list_is_recorded_so_a_rename_is_caught(self):
+        self.assertEqual(e1e.COMMITTED_STEP_FIELDS, ("i", "t0", "el", "t1", "ts", "tr", "r"))
+        self.assertEqual(e1e.COMMITTED_MEMBER_POSITIONS[0], "rid")
+
+    def test_a_row_missing_a_committed_field_is_refused_not_guessed(self):
+        bad = {k: v for k, v in self.ROW.items() if k != "ts"}
+        with self.assertRaises(ValueError):
+            e1e.adapt_step_row(bad)
+
+    def test_step_end_is_t0_plus_el_and_start_is_dispatch_or_the_previous_end(self):
+        """The report measured a mono first step whose el was 0.025 ms after a 1.64 s
+        execute_model call, so el alone does NOT bound a step. Same trap as Part A's
+        elapsed_ms."""
+        a = e1e.adapt_step_row(self.ROW)
+        self.assertAlmostEqual(a["t_end"], 100.0 + 0.050, places=9)
+        self.assertAlmostEqual(a["t"], 99.5, places=9)          # ts, no previous step
+        b = e1e.adapt_step_row(self.ROW, prev_end=99.8)
+        self.assertAlmostEqual(b["t"], 99.8, places=9)          # clipped to the previous end
+        self.assertGreater(a["dur_s"], b["dur_s"])
+
+    def test_the_phase_flag_separates_prefill_from_decode(self):
+        a = e1e.adapt_step_row(self.ROW)
+        pre = [m for m in a["members"] if not m["decoding"]]
+        dec = [m for m in a["members"] if m["decoding"]]
+        self.assertEqual(len(pre), 1)
+        self.assertEqual(len(dec), 1)
+        self.assertEqual(pre[0]["new_tokens"], 1024)
+        self.assertEqual(pre[0]["enc_inputs"], 11)
+
+
+@unittest.skipUnless(ENG1E_SCRATCH.exists(), "StudyENG1e inputs not extracted")
+class TestPartBHoldoutFenceOnTheRealSplit(unittest.TestCase):
+    """The fence must hold on the COMMITTED split file, not only on a synthetic example."""
+
+    def setUp(self):
+        self._old = e1e.ENG1E_ROOT
+        e1e.ENG1E_ROOT = ENG1E_SCRATCH
+
+    def tearDown(self):
+        e1e.ENG1E_ROOT = self._old
+
+    def test_the_real_split_reserves_five_trials_per_cell(self):
+        sp = e1e.holdout_split()
+        self.assertEqual(sp["n_cells"], 12)
+        self.assertEqual(sp["n_holdout_trials"], 60)
+        self.assertTrue(all(len(v) == 5 for v in sp["holdout"].values()))
+
+    def test_loading_the_holdout_without_authorization_raises(self):
+        with self.assertRaises(e1e.HoldoutFenced):
+            e1e.load_eng1e_trials("holdout")
+
+    def test_the_fit_load_builds_no_holdout_trial_and_matches_the_split_file(self):
+        trials, audit = e1e.load_eng1e_trials("fit")
+        self.assertEqual(audit["holdout_trials_built"], 0)
+        self.assertFalse(any(t.holdout for t in trials))
+        self.assertEqual(audit["n_holdout_trials_in_record"],
+                         audit["n_holdout_trials_in_split_file"])
+        self.assertEqual(len(trials), 360)
+
+
+class TestPartBLeavesPol6Unadopted(unittest.TestCase):
+    """The regression gate fired, so nothing may be frozen or switched on."""
+
+    def test_the_terms_file_still_carries_no_fitted_coefficient(self):
+        raw = json.loads((_repo() / "results/orchestration/study_pol6/pol6_terms.json")
+                         .read_text())
+        self.assertEqual(raw["coef"], {})
+        self.assertEqual(int(raw["holdout_trials_used"]), 0)
+
+    def test_the_measured_window_is_recorded_as_rejected_not_as_a_coefficient(self):
+        raw = json.loads((_repo() / "results/orchestration/study_pol6/pol6_terms.json")
+                         .read_text())
+        w = raw["partB"]["measured_handover_window"]
+        self.assertIn("REJECTED", w["status"])
+        self.assertTrue(w["piece_handover_s"])
+
+    def test_every_flag_including_the_new_one_is_off_by_default(self):
+        c = Pol6Config()
+        self.assertFalse(c.any_on())
+        self.assertFalse(c.measured_handover)
+
+    def test_the_new_flag_is_counted_as_on_when_set(self):
+        self.assertTrue(Pol6Config(measured_handover=True).any_on())
+
+
+@unittest.skipUnless((Path(__file__).resolve().parents[4] / PARTB_SCORE).exists(),
+                     "Part B score not produced")
+class TestPartBRegressionStop(unittest.TestCase):
+
+    def setUp(self):
+        self.d = json.loads((_repo() / PARTB_SCORE).read_text())
+
+    def test_the_regression_stop_is_recorded_as_fired(self):
+        self.assertTrue(self.d["regression_stop"]["fired"])
+        self.assertIn("NOT frozen", self.d["regression_stop"]["consequence"])
+
+    def test_it_fired_on_criterion_iii_and_not_on_ranking(self):
+        g = self.d["regression_stop"]["detail"]["latency"]
+        self.assertTrue(g["criterion_iii"]["worse"])
+        self.assertFalse(g["criterion_ii"]["worse"])
+
+    def test_criterion_i_improved_which_is_why_the_term_is_recorded_at_all(self):
+        a = self.d["models"]["pol4"]["latency"]["criterion_i"]["fraction"]
+        b = self.d["models"]["pol6"]["latency"]["criterion_i"]["fraction"]
+        self.assertGreater(b, a)
+
+    def test_no_holdout_trial_was_scored(self):
+        self.assertEqual(self.d["loader_audit"]["holdout_trials_built"], 0)
+        self.assertEqual(self.d["loader_audit"]["split"], "fit")
+
+
+@unittest.skipUnless((Path(__file__).resolve().parents[4] / PARTB_DIAG).exists(),
+                     "Part B diagnosis not produced")
+class TestPartBDiagnosisSupersedesPartA(unittest.TestCase):
+
+    def setUp(self):
+        self.d = json.loads((_repo() / PARTB_DIAG).read_text())
+
+    def test_the_engine_runs_every_piece_in_one_step_and_pol4_already_does(self):
+        """Part A derived 1.75 and 1.92 steps per piece by subtraction. It is 1.0, measured."""
+        chains = [v for v in self.d["per_cell"].values() if v["action"] != "mono"]
+        self.assertEqual(len(chains), 16)
+        for v in chains:
+            self.assertEqual(v["a_step_granularity"]["measured_median"], 1.0)
+            self.assertEqual(v["a_step_granularity"]["measured_max"], 1.0)
+            self.assertEqual(v["a_step_granularity"]["pol4_median"], 1.0)
+
+    def test_part_a_s_derived_merge_figure_is_marked_superseded(self):
+        self.assertIn("SUPERSEDED", self.d["eng1c_vs_eng1d"]["part_a_claim_status"])
+
+    def test_the_structural_rule_is_recorded_as_rejected_on_fit(self):
+        r = self.d["rejected_rule"]
+        self.assertEqual(r["verdict"], "REJECTED ON FIT")
+        self.assertGreater(r["result_on_fit"]["chain_ratio_with_rule"],
+                           r["result_on_fit"]["chain_ratio_pol4"])
+
+    def test_none_of_the_three_candidates_is_the_driver(self):
+        w = self.d["which_drives_it"]
+        for k in ("a_step_granularity", "b_in_step_merging", "c_encoder_budget"):
+            self.assertTrue(w[k].startswith("NOT the driver"))
+        self.assertIn("HAND-OVER WINDOW", w["what_is"])
+
+    def test_the_mode_difference_is_the_front_end_and_not_the_scheduling(self):
+        mc = self.d["mode_comparison"]
+        self.assertEqual(mc["steps_per_piece"]["B"]["median"], 1.0)
+        self.assertEqual(mc["steps_per_piece"]["A"]["median"], 1.0)
+        self.assertGreater(mc["handover_window_s"]["A"]["median"],
+                           mc["handover_window_s"]["B"]["median"])
+
+
 if __name__ == "__main__":
     unittest.main()
