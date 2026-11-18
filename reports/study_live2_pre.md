@@ -220,3 +220,10 @@ offset is therefore about 4 raw log units under every definition, so the D57 per
 
 Consistency: the JPEG scores are on the same definition as StudyD14b's committed `score` (log p_yes); fold map, fit
 function and label engine are the committed ones; no result marked INVALID was used.
+
+Schema note (2026-11-18, after the FINAL relabel, no number changed): the calibration file also carries the keys the
+live scorer's loader reads (`live2/fleet/data_sources.calibration()`): top-level `a` / `b` (pooled Orin map), 
+`compare.h100_32b` (pooled 32B map), and `folds = {n_folds 5, by clip, assignment, maps[k]}` where `maps[k]` restates
+the primary fit with fold k held out. The pooled maps are fitted on all 21,067 labelled instants (Orin a 0.1320,
+b -2.214; 32B a 0.1377, b -1.678); the scorer never uses them for a clip the fold assignment places, so every clip is
+scored out of fold. The loader reads the file as FINAL with 5 folds over 300 clips.
