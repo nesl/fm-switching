@@ -143,7 +143,10 @@ def analyse_run(w, wo, sl, mach):
         oth = sum(x[1] for x in rr if short(x[0]) not in piece_rids)
         oth_p = sum(x[1] for x in rr if short(x[0]) not in piece_rids and x[2] == "p")
         srows.append(dict(tok=tot, other=oth, other_prefill=oth_p, share=oth / tot if tot else 0.0,
-                          n_other=sum(1 for x in rr if short(x[0]) not in piece_rids), el=float(sl.el[k])))
+                          n_other=sum(1 for x in rr if short(x[0]) not in piece_rids), el=float(sl.el[k]),
+                          n_prefill=sum(1 for x in rr if x[2] == "p"),
+                          n_other_prefill=sum(1 for x in rr if x[2] == "p" and short(x[0]) not in piece_rids),
+                          enc=sum(x[4] for x in rr)))
     busy = float(sum(sl.el[k] for k in piece_steps))
     # background requests
     ew = {r["idx"]: r for r in w if r.get("kind") == "episodic"}
@@ -180,7 +183,8 @@ def analyse_run(w, wo, sl, mach):
                 enc_ok=all((p["enc"] or 0) >= (p["new_frames"] or 0) for p in pcs),
                 first_cold=(pcs[0]["cached"] or 0) <= 16, first_ttft=pcs[0]["ttft"],
                 first_idle_before=pcs[0]["idle_before"], n_after_idle=sum(p["after_idle"] for p in pcs),
-                later_ttft=[p["ttft"] for p in pcs[1:]], **machine_flags(mach, t0, t1))
+                later_ttft=[p["ttft"] for p in pcs[1:]], steps_per_piece=[p["n_steps"] for p in pcs],
+                **machine_flags(mach, t0, t1))
     return trow, req, grows, srows
 
 
@@ -240,7 +244,15 @@ def summarise(cells, flag_filter=None):
                  piece_steps=dict(n=len(S), other_share=stats([s["share"] for _, s in S]),
                                   frac_with_other=round(sum(1 for _, s in S if s["other"] > 0) / len(S), 4) if S else None,
                                   frac_with_other_prefill=round(sum(1 for _, s in S if s["other_prefill"] > 0) / len(S), 4)
-                                  if S else None, el_ms=stats([s["el"] * 1000 for _, s in S])),
+                                  if S else None, el_ms=stats([s["el"] * 1000 for _, s in S]),
+                                  # StudyPOL6 section 11.4 targets (reported, not part of the verdict rules)
+                                  other_prefill_share=stats([s["other_prefill"] / s["tok"] if s["tok"] else 0.0
+                                                             for _, s in S]),
+                                  prefills_per_step=stats([s["n_prefill"] for _, s in S]),
+                                  max_prefills_per_step=max((s["n_prefill"] for _, s in S), default=None),
+                                  other_prefills_per_step=stats([s["n_other_prefill"] for _, s in S]),
+                                  encoder_inputs_per_step=stats([s["enc"] for _, s in S])),
+                 steps_per_piece=stats([n for _, tr in T for n in tr["steps_per_piece"]]),
                  occupancy=stats([tr["occupancy"] for _, tr in T]), chain_span_s=stats([tr["chain_span"] for _, tr in T]),
                  fe_first_s=stats([tr["fe"][0] for _, tr in T]),
                  fe_later_s=stats([f for _, tr in T for f in tr["fe"][1:]]),
@@ -295,8 +307,11 @@ def summarise(cells, flag_filter=None):
 
 
 def load_all(pre):
-    rows = jl(OUT / f"{pre}_requests_h100nvl.jsonl")
-    mach = [m for m in jl(OUT / f"{pre}_machine_h100nvl.jsonl") if "gpus" in m]
+    def pick(name):                                   # committed copies of the large files are gzipped (< 5 MB)
+        p = OUT / name
+        return p if p.exists() else Path(str(p) + ".gz")
+    rows = jl(pick(f"{pre}_requests_h100nvl.jsonl"))
+    mach = [m for m in jl(pick(f"{pre}_machine_h100nvl.jsonl")) if "gpus" in m]
     runs = defaultdict(lambda: defaultdict(list))
     for r in rows:
         if "pair" in r and "arm" in r and r.get("kind") not in ("pair_check",):
