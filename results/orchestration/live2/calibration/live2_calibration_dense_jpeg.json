@@ -1,5 +1,5 @@
 {
- "label": "PENDING-BODY-CHECK",
+ "label": "FINAL",
  "fit_sample": "dense",
  "n_instants": 42014,
  "n_unscored_32b": 0,
@@ -704,5 +704,17 @@
     "n": 42014
    }
   }
- }
+ },
+ "the_map": {
+  "labels": "primary_ap_labels",
+  "note": "the round-1 calibration is the primary fit (per-instant streaming-AP labels, the prompt's 2c definition), 5-fold cross-fitted by clip with the committed StudyCTRL1c fold map; the clip-label fit is kept as the reference to the INTERIM / CTRL1c convention"
+ },
+ "body_check": {
+  "passed": true,
+  "head": "6eb9a6f3d426a3603806d9cd341ef08dc44b688c",
+  "file": "results/orchestration/live2/pre/live2_pre_part2_bodycheck.json",
+  "rule": "live coordinator body (StudyLIVE2-fix2, bodies.build_body kind=monitor) vs StudyLIVE2-pre Part 2 body: identical except image bytes, the D84 cache keys (cache_salt, per-image uuid) and stream (stream, stream_options)",
+  "result": "5 of 5 instants byte-identical (sha256 equal) after removing cache_salt, the per-image uuid, stream and stream_options (fix2's declared stream exemption groups stream with stream_options); image bytes identical"
+ },
+ "relabelled_final_at": "2026-11-18T08:36:02 after the fix2 body check"
 }

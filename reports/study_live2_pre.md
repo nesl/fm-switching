@@ -147,3 +147,76 @@ New: `experiments/orchestration/study_live2_pre.py`, `reports/study_live2_pre.md
 `live2_pre_monitor_h100nvl.jsonl`, `live2_pre_statlog.jsonl`, `live2_pre.log`).
 Changed: `research/EXPERIMENTS.md` (pre-registration row, verdict in place), `results/INDEX.md`, `research/STATUS.md`.
 Not committed: the JPEG stores under `~/data/live2/jpeg/`.
+
+## 8. Part 2 re-run (2026-11-18): dense calibration, FINAL
+
+User ruling 2026-11-18: run Part 2 now with the committed StudyD3 scored body that StudyLIVE2-fix2 copies into the live
+coordinator, then confirm the live body once fix2 is on origin.
+
+**2a Server.** The same round-1 configuration as Part 3 (vLLM 0.31.0, 32B @0cfaf481, GPU 2, prefix caching ON, GPU
+pool 62,944, host offload 27 GiB; flag diff vs ENG1c DE_c38 `[('38', '27')]`), started 07:39, stopped 08:33.
+
+**2b Requests.** For each of the 42,014 dense instants: `experiments/dashcam/d3_infer_vllm.py` `body()` (header "The
+following is 1 dashcam frame.", the committed QUERY of lines 43-44, GEN = temperature 0.0, max_tokens 8, seed 0,
+logprobs True, top_logprobs 20) with ONE change, `stream=True`, the instant's stored q90 JPEG from Part 1, and a
+per-request `cache_salt` (sha256 of "live2pre-p2|frame_ref|attempt", so no request can reuse another's cache entries).
+Concurrency 8. Score = `d3_infer_vllm.yes_no()` on the first generated token's top-20 log-probabilities, then
+log(p_yes) (as `ctrl1c_calibrate.py` lines 276-277 and 298). Result: 42,014 of 42,014 HTTP 200, 0 retries needed,
+0 unscored (every first token was Yes or No: 41,096 "No", 918 "Yes"); median TTFT 0.553 s; 32B raw score median
+-15.63 (p10 -21.75, p90 -5.26). Per-request rows: `results/orchestration/live2/pre/live2_pre_part2_requests.jsonl.gz`.
+
+**Body check (after fix2 landed on origin, HEAD 5f6d01f + this study's commits).** Five instants (00005.mp4 t3.00,
+00463.mp4 t14.25, 00846.mp4 t16.25, 01348.mp4 t35.25, 02137.mp4 t39.25) were rebuilt with the live coordinator's
+`bodies.build_body(kind="monitor")`: after removing the D84 cache keys (`cache_salt`, the per-image `uuid`) and the
+stream fields, the two bodies are BYTE-IDENTICAL (equal sha256 of the sort_keys serialization) for all five, and the
+image data URLs are identical as well. The only asymmetry is `stream_options`, which the live body adds; fix2 declares
+`stream` and `stream_options` as one transport exemption, and it is counted under the user's "stream" exemption here
+(it changes usage reporting only, not generation). Fix2's extraction runs StudyD3's own `yes_no` (by AST), the function
+used here. **Check PASSED; the calibration file is relabelled FINAL** (`live2_pre_part2_bodycheck.json`).
+
+**2c Labels.** The per-instant labels of the scorer's streaming AP (`scorer/score.py` AP_HORIZONS 0.0 / 0.5 / 1.0 /
+1.5 s; StudyE9b `target_index` on its absolute 0.25-s grid from t = 3.0): a positive clip's instant is positive iff it
+is that clip's AP target for some horizon (600 instants: 4 per positive clip, all on the 0.5-s dense cadence); every
+instant of a negative clip is negative (20,467). The other 20,947 instants of positive clips have NO label under that
+definition and are not in the primary fit (rule: the AP never scores them). A secondary fit with the clip-level label
+on every instant (the StudyCTRL1c / ORIN2 convention, 42,014 instants) is reported for the comparisons below.
+
+**2d Fit.** Platt maps (`ctrl1c_calibrate.fit_platt`, unregularised IRLS) for both tiers (32B on the new JPEG scores,
+Orin on the committed StudyORIN1-dense scores), 5-fold cross-fitted BY CLIP with the committed StudyCTRL1c fold map
+(within each label stratum, order by sha256(file_name), fold = rank mod 5; 60 clips per fold). Output
+`results/orchestration/live2/calibration/live2_calibration_dense_jpeg.json`: label FINAL, fit_sample dense, the
+clip-to-fold map, per-fold (a, b) and n for each tier and label set, the request-body template hash, the JPEG manifest
+hash, the server record and the body check.
+
+**2e Results.**
+
+| labels | tier | per-fold a (folds 0..4) | a mean [min, max] | b mean | OOF log loss | base-rate log loss | n |
+|---|---|---|---|---|---|---|---|
+| primary (AP) | 32B | 0.136, 0.129, 0.142, 0.155, 0.128 | 0.1381 [0.1280, 0.1548] | -1.674 | 0.1193 | 0.1294 | 21,067 |
+| primary (AP) | Orin | 0.147, 0.110, 0.143, 0.147, 0.116 | 0.1326 [0.1103, 0.1474] | -2.209 | 0.1240 | 0.1294 | 21,067 |
+| secondary (clip) | 32B | 0.082, 0.079, 0.079, 0.077, 0.075 | 0.0785 [0.0751, 0.0819] | 1.206 | 0.6671 | 0.6928 | 42,014 |
+| secondary (clip) | Orin | 0.084, 0.054, 0.077, 0.063, 0.054 | 0.0665 [0.0536, 0.0844] | 0.781 | 0.6845 | 0.6928 | 42,014 |
+
+Out-of-fold reliability (primary): 32B, bins [0, 0.1) n = 20,121 predicted 0.024 observed 0.024, [0.1, 0.2) n = 946
+predicted 0.132 observed 0.118; Orin [0, 0.1) n = 20,646 predicted 0.028 observed 0.028, [0.1, 0.2) n = 421 predicted
+0.108 observed 0.040 (the Orin's upper bin is over-confident). Secondary reliability per decile is in the file.
+
+Comparison of slope a (32B / Orin):
+
+| map | 32B a | Orin a | ratio this / that (32B, Orin) |
+|---|---|---|---|
+| this run, primary (AP labels) | 0.1381 | 0.1326 | |
+| INTERIM (32B pre-JPEG D3-DEV; Orin ORIN2) | 0.1295 | 0.1149 | 1.07, 1.15 |
+| CTRL1c 16.2 dense D14b-DEV-90 (clip labels) | 0.0500 | 0.0381 | **2.76, 3.48** |
+| this run, secondary (clip labels) vs D14b-DEV | 0.0785 | 0.0665 | 1.57, 1.74 |
+
+The two differences over 2x (primary vs D14b-DEV) are a label-definition effect, not a disagreement in the scores: the
+AP labels make only near-event instants positive (the AP targets lie 0 to 1.5 s before the event), which sharpens the
+map exactly as CTRL1c section 16.2 found for its event-anchored D3 sample (2.6 to 3.0x steeper than D14b-DEV); with the
+clip-level label on the same instants the dense fit is within 1.8x of D14b-DEV. Tier offset (raw log p_yes at p = 0.5,
+32B minus Orin, as in CTRL1c 16.2): primary -4.54 (both crossings are extrapolated above 0 because the AP base rate is
+2.8 %), secondary -3.61; CTRL1c: -4.32 (D3) and -3.86 (D14b-DEV). The out-of-fold calibrated Orin minus calibrated 32B
+offset is therefore about 4 raw log units under every definition, so the D57 per-tier calibration remains necessary.
+
+Consistency: the JPEG scores are on the same definition as StudyD14b's committed `score` (log p_yes); fold map, fit
+function and label engine are the committed ones; no result marked INVALID was used.
