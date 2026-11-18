@@ -252,3 +252,53 @@ background and the ONE-GO body re-sending all 121 to 130 frames' bytes through t
 references did not); imposed delay of a host-warm recall 0 extra misses, consistent with ENG1f's 0.07 / 0.14 s imposed
 latency; Part A's COLD outcome matches the ENG1c host-residency rule (tokens written since last use > host capacity).
 No disagreement unexplained.
+
+## 11. Amendment 3: light load (recorded 2026-11-18, BEFORE any amendment-3 run)
+
+User request. Goal: show that the best way to serve the robot's question CHANGES with load. Amendments 1 and 2
+measured a heavy-load fleet (N = 20, 10 requests/s, about 66 % of the committed 15.1 requests/s one-frame peak,
+StudyD7b). This amendment measures the same scene at LIGHT load, so the figure can show a 2 x 2 (light / heavy load
+x tight / roomy host).
+
+Design (only N differs from amendments 1 and 2):
+
+- Server: the round-1 configuration, 27 GiB host offload (tight), the same command as amendment 1 and amendment 2
+  Part A, restarted at the start; host filled to 1.5x capacity at server start as before.
+- Load: N = 8 dashcams, FIXED (not selected), one request per 2 s each (4 requests/s, about 26 % of the 15.1 requests/s
+  peak), deadline 0.916 s server-side, the same body, frames and per-stream cache_salt as before. Stream plan:
+  each repetition's amendment-1 plan (seed `mot1a1|rep{r}`, N = 20) truncated to its FIRST 8 streams, so the 8
+  streams (clips, instants and phase offsets in [0, 2) s) are exactly amendments 1 and 2's first 8, and the robot
+  session is the same as theirs (generating the plan with N = 8 would draw fewer offsets and select a different
+  robot session).
+- Robot: question at t = 20 s of a 60 s window, about 11k D2 history, the same five repetitions' sessions as
+  amendments 1 and 2 (paired across amendments on the robot side).
+- Actions per repetition: NONE, ONE-GO, PIECES 2048, PIECES 1024, HOST-WARM (prepared exactly as in amendment 2:
+  history prefill, then fresh filler of whole p28 histories until at least 70,000 tokens, exact count recorded, then
+  the window 0.5 s later). 5 repetitions, order balanced (forward in odd, reversed in even repetitions), fresh
+  namespaces per run.
+- Tier at the question MEASURED for every run (cached tokens and the external-KV-transfer counter delta, as in
+  amendment 2); every run labelled by measured tier.
+- Sanity: NONE >= 99 % on time (else INVALID, rerun once; twice INVALID in one repetition: STOP); 0 HTTP errors; cold
+  actions' first request cached tokens <= 16.
+
+Expectations (written down, not constraints; any outcome is reported):
+
+1. ONE-GO still causes some misses at light load (requests arriving during the ~2.7 s rebuild wait behind it), but
+   fewer than the 59 (median) at heavy load.
+2. PIECES 1024 may serve BOTH: 0 misses and the robot under its 5 s target, because less monitoring traffic queues
+   between pieces.
+3. HOST-WARM prediction, tight host: writes after the history's last use by the question = filler (about 70,000 to
+   81,000; amendment 2 used 80,886) + 8 streams x 0.5 requests/s x 20 s x 378 tokens (30,240) = about 100,000 to
+   111,000 tokens vs the 27 GiB host capacity of 110,592. **Predicted HOST**, but at the boundary, where StudyRES1
+   found the tier not reliably predictable (R3), so PARTIAL or COLD are possible and will be reported as measured.
+
+Measures as amendments 1 and 2. Figure data: `results/motivation/mot1/mot1_figdata_amend3.json` with per action the
+median and min-max of extra missed instants and robot TTFT, the measured tiers, and a `grid_2x2` block assembling
+light/tight (this amendment), heavy/tight (amendment 1 cold actions plus amendment 2 Part A host-warm), heavy/roomy
+(amendment 2 Part B) and light/roomy (this amendment's cold actions, borrowed because host size does not change cold
+actions, StudyENG1c Part E and amendment 2's 1.01x to 1.17x check, plus this amendment's HOST-WARM only if it
+measured HOST, else "not measured"), each cell stating whether it is measured directly or borrowed.
+
+Checkout: HEAD d7acaf7 (origin had nothing newer); the working tree carries the uncommitted StudyLIVE2-harness
+addendum edits under `experiments/orchestration/live2/` (asyncbackend, bridge, coordinator, procsplit,
+run_live2_real, preflight), none of which this study's request path uses; their diff hash is recorded with the run.
