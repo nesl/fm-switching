@@ -103,6 +103,8 @@ class RemoteCoordinator:
         self._recv = 0
         self._write_errors = 0
         self._max_backlog = 0
+        self._recv_gaps_ms: List[float] = []
+        self._origin: Optional[float] = None
         self._reader = threading.Thread(target=self._read_loop, name="live2-proxy-rx",
                                         daemon=True)
         self._reader.start()
@@ -151,6 +153,9 @@ class RemoteCoordinator:
             if op == "replies":
                 out += list(msg.get("replies") or ())
                 self._recv += len(msg.get("replies") or ())
+                now = time.time()
+                for v in (msg.get("stream_end_wall") or {}).values():
+                    self._recv_gaps_ms.append(1000.0 * (now - float(v)))
             elif op == "result":
                 self._stats = msg.get("result") or {}
             elif op in ("eof", "closed"):
@@ -159,13 +164,23 @@ class RemoteCoordinator:
                 raise RuntimeError(f"coordinator process failed: {msg.get('error')}")
         return out
 
+    def _origin_of(self, t: float) -> Optional[float]:
+        """The emulator's clock origin on CLOCK_MONOTONIC (system-wide on Linux, so the child can
+        read the same run clock). The emulator calls in at or just after each instant `t`, so
+        `monotonic() - t` is the origin plus that call's lateness; the minimum over calls is the
+        origin to within the smallest lateness (about 0.1 ms)."""
+        o = time.monotonic() - float(t)
+        if self._origin is None or o < self._origin:
+            self._origin = o
+        return self._origin
+
     def on_event(self, event: Dict[str, Any], t: float) -> Sequence[Dict[str, Any]]:
-        self._put({"op": "event", "event": event, "t": float(t)})
+        self._put({"op": "event", "event": event, "t": float(t), "mono_origin": self._origin_of(t)})
         self._sent += 1
         return self._drain()
 
     def tick(self, t: float) -> Sequence[Dict[str, Any]]:
-        self._put({"op": "tick", "t": float(t)})
+        self._put({"op": "tick", "t": float(t), "mono_origin": self._origin_of(t)})
         return self._drain()
 
     def close(self) -> None:
@@ -195,7 +210,18 @@ class RemoteCoordinator:
     def stats(self) -> Dict[str, Any]:
         return dict(self._stats, wire_events_sent=self._sent, wire_replies_received=self._recv,
                     wire_write_errors=self._write_errors,
-                    wire_max_send_backlog=self._max_backlog)
+                    wire_max_send_backlog=self._max_backlog,
+                    completion_to_emulator_ms=_qstats(self._recv_gaps_ms))
+
+
+def _qstats(v: List[float]) -> Dict[str, Any]:
+    """p50 / p90 / p99 / max in ms, with the emulator's own index-based quantile."""
+    s = sorted(v)
+    if not s:
+        return dict(n=0)
+    def q(p: float) -> float:
+        return round(s[min(len(s) - 1, int(p * len(s)))], 4)
+    return dict(n=len(s), p50_ms=q(0.5), p90_ms=q(0.9), p99_ms=q(0.99), max_ms=round(s[-1], 4))
 
 
 # ---------------------------------------------------------------- the child
@@ -302,6 +328,77 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
     def _now_t() -> float:
         return last_t + (time.monotonic() - last_mono)
 
+    # StudyLIVE2-harness addendum (instrumentation): for every cloud_answer, the wall gap from
+    # the end of its HTTP response stream to the moment this process writes it to the fleet.
+    fwd_gaps_ms: List[float] = []
+    send_lock = threading.Lock()          # the I/O thread and the decision thread both write
+
+    def _send_replies(replies) -> None:
+        ends = getattr(be, "end_wall", None) or {}
+        stamp: Dict[str, float] = {}
+        for r in replies:
+            if r.get("kind") == "cloud_answer":
+                rid = (r.get("payload") or {}).get("request_id")
+                if rid in ends:
+                    stamp[rid] = ends[rid]
+        now = time.time()
+        for v in stamp.values():
+            fwd_gaps_ms.append(1000.0 * (now - v))
+        with send_lock:
+            send_msg(sock, {"op": "replies", "replies": list(replies), "sent_wall": now,
+                            "stream_end_wall": stamp})
+
+    # "Ready" is the instant the answer's content exists: its first content token under ruling
+    # Option 1, or its stream end on the fallback path. Both gaps land in the same statistic
+    # (`completion_to_forward_ms`); `first_token_to_forward_ms` isolates the Option 1 path.
+    ft_gaps_ms: List[float] = []
+
+    def _send_first(replies, ready_wall) -> None:
+        now = time.time()
+        stamp: Dict[str, float] = {}
+        if ready_wall is not None:
+            for r in replies:
+                stamp[(r.get("payload") or {}).get("request_id")] = float(ready_wall)
+            g = 1000.0 * (now - float(ready_wall))
+            fwd_gaps_ms.append(g)
+            ft_gaps_ms.append(g)
+        with send_lock:
+            send_msg(sock, {"op": "replies", "replies": list(replies), "sent_wall": now,
+                            "stream_end_wall": stamp})
+
+    # StudyLIVE2-harness addendum (THE FIX): each cloud answer goes to the fleet from the I/O
+    # thread the moment its content exists (first content token, ruling Option 1; stream end as
+    # the fallback when no content token arrived), with the delivery time the decision thread
+    # would give it. Nothing waits for a tick, an event or an epoch; the decision thread records
+    # the same event later and the bridge does not resend it. `forward_on_completion: False`
+    # restores the 22808d0 behaviour, for the diagnosis comparison.
+    def _on_complete(r) -> None:
+        ev = co.answer_on_completion(r)
+        if ev is not None:
+            _send_replies([ev])
+
+    def _on_first(r) -> None:
+        ev = co.answer_on_first(r)
+        if ev is not None:
+            _send_first([ev], r.get("t_first_content_wall"))
+
+    # THE WIRE-TIME SUBMISSION STAMP (addendum, H100): the emulator's own run clock, read in this
+    # process when a request actually goes on the wire. An epoch that starts late because events
+    # queued behind a slow decision would otherwise stamp its requests with a run time already
+    # in the past, and every answer derived from that stamp would reach the fleet behind its clock.
+    origin: List[Optional[float]] = [None]
+
+    def _run_clock() -> Optional[float]:
+        return (time.monotonic() - origin[0]) if origin[0] is not None else None
+
+    if be is not None:
+        be.run_clock = _run_clock
+
+    if be is not None and cfg.get("forward_on_completion", True):
+        be.on_complete = _on_complete
+        if cfg.get("forward_at_first_token", True):
+            be.on_first = _on_first
+
     while True:
         if self_tick_s <= 0.0:
             msg = inbox.get()
@@ -312,13 +409,16 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
                 n_self_ticks += 1
                 replies = br.tick(_now_t()) or ()
                 if replies:
-                    send_msg(sock, {"op": "replies", "replies": list(replies)})
+                    _send_replies(replies)
                 continue
         if msg is None:
             break
         op = msg.get("op")
         if op in ("event", "tick"):
             last_t, last_mono = float(msg["t"]), time.monotonic()
+            mo = msg.get("mono_origin")
+            if mo is not None and (origin[0] is None or mo < origin[0]):
+                origin[0] = float(mo)
         if op == "event":
             replies = br.on_event(msg["event"], float(msg["t"])) or ()
         elif op == "tick":
@@ -333,18 +433,21 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
             res["cache"] = cache.stats() if cache is not None else None
             res["pid"] = os.getpid()
             res["cpu_s_child"] = round(time.process_time() - cpu0, 4)
+            res["completion_to_forward_ms"] = _qstats(fwd_gaps_ms)
+            res["first_token_to_forward_ms"] = _qstats(ft_gaps_ms)
             logs.close()
             if be is not None:
                 be.close()
             (rdir / "coordinator_result.json").write_text(
                 json.dumps(res, indent=1, default=str) + "\n")
-            send_msg(sock, {"op": "result", "result": res})
-            send_msg(sock, {"op": "closed"})
+            with send_lock:
+                send_msg(sock, {"op": "result", "result": res})
+                send_msg(sock, {"op": "closed"})
             return
         else:
             continue
         if replies:
-            send_msg(sock, {"op": "replies", "replies": list(replies)})
+            _send_replies(replies)
 
 
 # ---------------------------------------------------------------- starting the pair

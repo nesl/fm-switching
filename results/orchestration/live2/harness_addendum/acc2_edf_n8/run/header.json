@@ -1,0 +1,120 @@
+{
+ "label": "StudyLIVE2-harness addendum acc2_edf_n8 (harness check, not a result)",
+ "git_commit": "86efbf95729d338171d6af0aa101b265d4e7d218",
+ "arm": "edf",
+ "arm_version": "live2-arm-1.0",
+ "flags": {},
+ "gpu_kv_tokens": 62944,
+ "host_tier_gib": 27.0,
+ "host_tier_tokens": 110630,
+ "cost_model": null,
+ "calibration_file": "results/orchestration/live2/calibration/live2_calibration_dense_jpeg.json",
+ "calibration_label": "FINAL",
+ "fairness_digest": "85251b9b8ce7115bc28851c5d7edf074de77a25dc71bc6a7090cc0488cdb7fdf",
+ "live1_trace_digest": null,
+ "seed": 0,
+ "targets": {
+  "dashcam": {
+   "L_s": 1.0,
+   "p": 0.25,
+   "scope": "per_device",
+   "min_opportunities": 200
+  },
+  "robot": {
+   "L_s": 5.0,
+   "p": 0.9,
+   "scope": "pooled",
+   "min_opportunities": 20
+  }
+ },
+ "upload_mode": "A",
+ "mu_mode": null,
+ "H": null,
+ "decision_period_s": 0.1,
+ "ratio": "50:50",
+ "n_devices": 8,
+ "run_s": 120.0,
+ "memory_setting": "tight",
+ "server": {
+  "command": [
+   "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+   "serve",
+   "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "--served-model-name",
+   "32BI",
+   "--port",
+   "8031",
+   "--max-model-len",
+   "32768",
+   "--gpu-memory-utilization",
+   "0.9",
+   "--tensor-parallel-size",
+   "1",
+   "--no-enable-prefix-caching",
+   "--limit-mm-per-prompt",
+   "{\"image\": 16}",
+   "--dtype",
+   "bfloat16",
+   "--seed",
+   "0",
+   "--limit-mm-per-prompt",
+   "{\"image\": 640, \"video\": 1}",
+   "--mm-processor-kwargs",
+   "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}",
+   "--trust-request-mm-kwargs",
+   "--host",
+   "127.0.0.1",
+   "--enable-prefix-caching",
+   "--enable-prompt-tokens-details",
+   "--mm-processor-cache-gb",
+   "128",
+   "--kv-offloading-backend",
+   "native",
+   "--kv-offloading-size",
+   "27",
+   "--enable-log-requests",
+   "--enable-logging-iteration-details"
+  ],
+  "flag_diff": [
+   [
+    "38",
+    "27"
+   ]
+  ],
+  "restart_started": 1795038368.1494744,
+  "up_at": 1795038438.3539617,
+  "startup_s": 69.8,
+  "log": "logs/study_x_server_32BI_1118_134608.log",
+  "host_gib": 27.0
+ },
+ "server_url": "http://127.0.0.1:8031",
+ "server_kind": "vllm",
+ "frames_preflight": {
+  "trace_dir": "/home/pragya/data/live2/pilot2/work/traces/seed0_n8_120s_A",
+  "frames_root": "/home/pragya/data/live2/frames_by_ref",
+  "n_refs": 1278,
+  "n_missing": 0,
+  "n_empty": 0,
+  "missing": [],
+  "empty": [],
+  "ok": true,
+  "server_kind": "vllm",
+  "enforced": true
+ },
+ "git_working_tree": {
+  "head": "86efbf95729d338171d6af0aa101b265d4e7d218",
+  "dirty": true,
+  "diff_sha256": "9a7e4c88544d240c372a9b949663706edf957830ee1fef41b13f4d3c2847d00a",
+  "dirty_files": [
+   "experiments/orchestration/live2/asyncbackend.py",
+   "experiments/orchestration/live2/bridge.py",
+   "experiments/orchestration/live2/coordinator.py",
+   "experiments/orchestration/live2/procsplit.py",
+   "experiments/orchestration/live2/run_live2_real.py",
+   "experiments/orchestration/live2/tests/test_live2_harness.py"
+  ]
+ },
+ "model": "32BI",
+ "split_processes": true,
+ "is_measurement": false
+}

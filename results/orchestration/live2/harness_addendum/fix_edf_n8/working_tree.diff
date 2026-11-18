@@ -1,0 +1,373 @@
+diff --git a/experiments/orchestration/live2/asyncbackend.py b/experiments/orchestration/live2/asyncbackend.py
+index d98d41d..150bf83 100644
+--- a/experiments/orchestration/live2/asyncbackend.py
++++ b/experiments/orchestration/live2/asyncbackend.py
+@@ -107,6 +107,9 @@ class AsyncLive2Backend:
+         self._client = httpx.AsyncClient(timeout=httpx.Timeout(timeout_s), limits=limits)
+         self.build_s = 0.0
+         self.n_built = 0
++        self.end_wall: Dict[str, float] = {}
++        self.on_complete: Any = None
++        self.callback_errors: List[str] = []
+ 
+     # ---- the loop thread
+     def _serve(self) -> None:
+@@ -128,7 +131,8 @@ class AsyncLive2Backend:
+         self._thread.join(10.0)
+ 
+     def metrics(self) -> Dict[str, Any]:
+-        return dict(n_built=self.n_built,
++        return dict(n_built=self.n_built, callback_errors=self.callback_errors[:5],
++                    n_callback_errors=len(self.callback_errors),
+                     build_ms_total=round(self.build_s * 1000.0, 3),
+                     build_ms_mean=(round(self.build_s * 1000.0 / self.n_built, 4)
+                                    if self.n_built else None),
+@@ -187,10 +191,25 @@ class AsyncLive2Backend:
+                                 chunks.append(dict(logprobs=ch["logprobs"]))
+         except Exception as e:                                        # noqa: BLE001
+             err = f"{type(e).__name__}: {e}"
+-        total = time.time() - t0
+-        return dict(request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s,
+-                    ttft_s=ttft, total_s=total, http_status=status, error=err,
+-                    usage=usage, text="".join(text_parts), chunks=chunks, sub=sub)
++        t_end = time.time()
++        total = t_end - t0
++        # StudyLIVE2-harness addendum (instrumentation): the wall instant the response stream
++        # ENDED, so the coordinator process can report the completion-to-forward gap. Harness
++        # timing only; nothing in the coordinator's decisions or records reads it.
++        self.end_wall[sub.request_id] = t_end
++        res = dict(request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s,
++                   ttft_s=ttft, total_s=total, http_status=status, error=err,
++                   usage=usage, text="".join(text_parts), chunks=chunks, sub=sub,
++                   t_end_wall=t_end)
++        # StudyLIVE2-harness addendum: the completion callback runs HERE, on the I/O loop, the
++        # moment the stream ends and BEFORE the future resolves, so the decision thread never
++        # sees a finished request whose answer has not been forwarded yet.
++        if self.on_complete is not None:
++            try:
++                self.on_complete(res)
++            except Exception as e:                                    # noqa: BLE001
++                self.callback_errors.append(f"{type(e).__name__}: {e}")
++        return res
+ 
+ 
+ def _sha16(data: bytes) -> str:
+diff --git a/experiments/orchestration/live2/bridge.py b/experiments/orchestration/live2/bridge.py
+index c16da70..27b2fe4 100644
+--- a/experiments/orchestration/live2/bridge.py
++++ b/experiments/orchestration/live2/bridge.py
+@@ -32,6 +32,7 @@ class EmulatorBridge:
+         self.n_events = 0
+         self.n_ticks = 0
+         self.n_decisions = 0
++        self.n_skipped_forwarded = 0
+         # D99 (1): ONE DECISION PER PERIOD, the same period for every arm, with that period's
+         # events batched. The bridge enforces it on the EMULATOR's clock, so it holds whatever
+         # the emulator's own tick_s is (it must be no coarser than the period, or a period would
+@@ -83,11 +84,21 @@ class EmulatorBridge:
+             out += list(self.co.pulls[self._pulls:])
+             self._pulls = len(self.co.pulls)
+         if len(self.co.cloud_answers) > self._sent:
+-            out += list(self.co.cloud_answers[self._sent:])
++            # StudyLIVE2-harness addendum: an answer the I/O layer already forwarded at stream
++            # end is recorded but not sent again.
++            fwd = getattr(self.co, "forwarded", None) or {}
++            for ev in self.co.cloud_answers[self._sent:]:
++                if (ev.get("payload") or {}).get("request_id") in fwd:
++                    self.n_skipped_forwarded += 1
++                else:
++                    out.append(ev)
+             self._sent = len(self.co.cloud_answers)
+         return out
+ 
+     def describe(self) -> Dict[str, Any]:
+         return dict(arm=self.co.arm.name, n_events=self.n_events, n_ticks=self.n_ticks,
+                     n_pulls=self._pulls, n_cloud_answers=self._sent,
+-                    n_decisions=self.n_decisions, decision_period_s=self._period)
++                    n_decisions=self.n_decisions, decision_period_s=self._period,
++                    n_forwarded_on_completion=len(getattr(self.co, "forwarded", None) or {}),
++                    n_skipped_forwarded=self.n_skipped_forwarded,
++                    n_forward_mismatch=getattr(self.co, "n_forward_mismatch", 0))
+diff --git a/experiments/orchestration/live2/coordinator.py b/experiments/orchestration/live2/coordinator.py
+index bb9daa3..eca4ae1 100644
+--- a/experiments/orchestration/live2/coordinator.py
++++ b/experiments/orchestration/live2/coordinator.py
+@@ -151,6 +151,9 @@ class Live2Coordinator:
+         self.answers: List[Dict[str, Any]] = []
+         self.pulls: List[Dict[str, Any]] = []
+         self.cloud_answers: List[Dict[str, Any]] = []
++        # StudyLIVE2-harness addendum: answers the I/O layer forwarded at stream end, by request
++        self.forwarded: Dict[str, Dict[str, Any]] = {}
++        self.n_forward_mismatch = 0
+         self.decision_latencies_ms: List[float] = []
+         self.errors: List[str] = []
+         self.counts: Dict[str, int] = defaultdict(int)
+@@ -642,6 +645,7 @@ class Live2Coordinator:
+         o.served_at = delivered
+         o.cache_path = path
+         ontime = delivered <= o.deadline_abs() + 1e-9
++        ev = self._cloud_answer(sub, o, delivered, path, scored)
+         o.state = "answered" if ontime else "late"
+         if o.kind == "monitor":
+             self.st.devices[o.device_id].delivered.append((delivered, 0.0))
+@@ -652,15 +656,51 @@ class Live2Coordinator:
+                                  on_time=bool(ontime), cache_path=path,
+                                  request_id=sub.request_id))
+         # the coordinator's one output to the fleet: the cloud answer, delivered at t_done. The
+-        # DEVICE's own answer never passes through here (CONTRACT.md).
+-        self.cloud_answers.append(SC.make(
++        # DEVICE's own answer never passes through here (CONTRACT.md). When the I/O layer has
++        # already forwarded it (StudyLIVE2-harness addendum), it is still recorded here, and the
++        # bridge does not send it a second time; the two must be the same event.
++        early = self.forwarded.get(sub.request_id)
++        if early is not None and early != ev:
++            self.n_forward_mismatch += 1
++        self.cloud_answers.append(ev)
++
++    def _cloud_answer(self, sub: Live2Submission, o, delivered: float, path,
++                      scored: Optional[Dict[str, Any]]) -> Dict[str, Any]:
++        ontime = delivered <= o.deadline_abs() + 1e-9
++        return SC.make(
+             "cloud_answer", device_id=o.device_id, opportunity_id=o.opp_id,
+             t_done=round(delivered, 6),
+             payload=dict(request_id=sub.request_id, kind=o.kind, cache_path=path,
+                          on_time=bool(ontime),
+                          cloud_score=(scored or {}).get("cloud_score"),
+                          cloud_letter=(scored or {}).get("cloud_letter"),
+-                         p_yes=(scored or {}).get("p_yes"))))
++                         p_yes=(scored or {}).get("p_yes")))
++
++    def answer_on_completion(self, r: Dict[str, Any]) -> Optional[Dict[str, Any]]:
++        """StudyLIVE2-harness addendum: the cloud_answer for a finished response, built the
++        moment its stream ends, on the I/O thread, without waiting for a tick or an epoch.
++
++        It reads only the submission, the response and the opportunity's deadline (fixed when
++        the opportunity was created), and builds the event with the same `_cloud_answer` the
++        decision thread uses, so the event is identical to the one `_settle` will record (any
++        difference is counted in `n_forward_mismatch`). It changes no coordinator state except
++        `forwarded`; the arm still learns of the completion in `_collect`, at its next epoch.
++        Build pieces carry no answer and return None.
++        """
++        sub = r.get("sub")
++        if sub is None or sub.kind in ("piece", "whole") or not sub.opportunity_id:
++            return None
++        o = self.st.opps.get(sub.opportunity_id)
++        if o is None:
++            return None
++        usage = r.get("usage") or {}
++        path, _frac = SC.cache_path_of(cached_tokens_of(usage), prompt_tokens_of(usage))
++        done_s = sub.sent_s + (r["total_s"] * self.speed if r.get("total_s") else 0.0)
++        first_s = (sub.sent_s + r["ttft_s"] * self.speed) if r.get("ttft_s") else None
++        delivered = first_s if first_s is not None else done_s
++        ev = self._cloud_answer(sub, o, delivered, path, self._score_of(sub, r))
++        self.forwarded[sub.request_id] = ev
++        return ev
+ 
+     def _expire(self, t: float) -> None:
+         for oid in self.st.order:
+diff --git a/experiments/orchestration/live2/procsplit.py b/experiments/orchestration/live2/procsplit.py
+index 035e47c..fbfd9f5 100644
+--- a/experiments/orchestration/live2/procsplit.py
++++ b/experiments/orchestration/live2/procsplit.py
+@@ -103,6 +103,7 @@ class RemoteCoordinator:
+         self._recv = 0
+         self._write_errors = 0
+         self._max_backlog = 0
++        self._recv_gaps_ms: List[float] = []
+         self._reader = threading.Thread(target=self._read_loop, name="live2-proxy-rx",
+                                         daemon=True)
+         self._reader.start()
+@@ -151,6 +152,9 @@ class RemoteCoordinator:
+             if op == "replies":
+                 out += list(msg.get("replies") or ())
+                 self._recv += len(msg.get("replies") or ())
++                now = time.time()
++                for v in (msg.get("stream_end_wall") or {}).values():
++                    self._recv_gaps_ms.append(1000.0 * (now - float(v)))
+             elif op == "result":
+                 self._stats = msg.get("result") or {}
+             elif op in ("eof", "closed"):
+@@ -195,7 +199,18 @@ class RemoteCoordinator:
+     def stats(self) -> Dict[str, Any]:
+         return dict(self._stats, wire_events_sent=self._sent, wire_replies_received=self._recv,
+                     wire_write_errors=self._write_errors,
+-                    wire_max_send_backlog=self._max_backlog)
++                    wire_max_send_backlog=self._max_backlog,
++                    completion_to_emulator_ms=_qstats(self._recv_gaps_ms))
++
++
++def _qstats(v: List[float]) -> Dict[str, Any]:
++    """p50 / p90 / p99 / max in ms, with the emulator's own index-based quantile."""
++    s = sorted(v)
++    if not s:
++        return dict(n=0)
++    def q(p: float) -> float:
++        return round(s[min(len(s) - 1, int(p * len(s)))], 4)
++    return dict(n=len(s), p50_ms=q(0.5), p90_ms=q(0.9), p99_ms=q(0.99), max_ms=round(s[-1], 4))
+ 
+ 
+ # ---------------------------------------------------------------- the child
+@@ -302,6 +317,39 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
+     def _now_t() -> float:
+         return last_t + (time.monotonic() - last_mono)
+ 
++    # StudyLIVE2-harness addendum (instrumentation): for every cloud_answer, the wall gap from
++    # the end of its HTTP response stream to the moment this process writes it to the fleet.
++    fwd_gaps_ms: List[float] = []
++    send_lock = threading.Lock()          # the I/O thread and the decision thread both write
++
++    def _send_replies(replies) -> None:
++        ends = getattr(be, "end_wall", None) or {}
++        stamp: Dict[str, float] = {}
++        for r in replies:
++            if r.get("kind") == "cloud_answer":
++                rid = (r.get("payload") or {}).get("request_id")
++                if rid in ends:
++                    stamp[rid] = ends[rid]
++        now = time.time()
++        for v in stamp.values():
++            fwd_gaps_ms.append(1000.0 * (now - v))
++        with send_lock:
++            send_msg(sock, {"op": "replies", "replies": list(replies), "sent_wall": now,
++                            "stream_end_wall": stamp})
++
++    # StudyLIVE2-harness addendum (THE FIX): each cloud answer goes to the fleet the moment its
++    # response stream ends, from the I/O thread, with the delivery time the decision thread would
++    # have given it. Nothing waits for a tick, an event or an epoch; the decision thread records
++    # the same event later and the bridge does not resend it. `forward_on_completion: False`
++    # restores the 22808d0 behaviour, for the diagnosis comparison.
++    def _on_complete(r) -> None:
++        ev = co.answer_on_completion(r)
++        if ev is not None:
++            _send_replies([ev])
++
++    if be is not None and cfg.get("forward_on_completion", True):
++        be.on_complete = _on_complete
++
+     while True:
+         if self_tick_s <= 0.0:
+             msg = inbox.get()
+@@ -312,7 +360,7 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
+                 n_self_ticks += 1
+                 replies = br.tick(_now_t()) or ()
+                 if replies:
+-                    send_msg(sock, {"op": "replies", "replies": list(replies)})
++                    _send_replies(replies)
+                 continue
+         if msg is None:
+             break
+@@ -333,18 +381,20 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
+             res["cache"] = cache.stats() if cache is not None else None
+             res["pid"] = os.getpid()
+             res["cpu_s_child"] = round(time.process_time() - cpu0, 4)
++            res["completion_to_forward_ms"] = _qstats(fwd_gaps_ms)
+             logs.close()
+             if be is not None:
+                 be.close()
+             (rdir / "coordinator_result.json").write_text(
+                 json.dumps(res, indent=1, default=str) + "\n")
+-            send_msg(sock, {"op": "result", "result": res})
+-            send_msg(sock, {"op": "closed"})
++            with send_lock:
++                send_msg(sock, {"op": "result", "result": res})
++                send_msg(sock, {"op": "closed"})
+             return
+         else:
+             continue
+         if replies:
+-            send_msg(sock, {"op": "replies", "replies": list(replies)})
++            _send_replies(replies)
+ 
+ 
+ # ---------------------------------------------------------------- starting the pair
+diff --git a/experiments/orchestration/live2/run_live2_real.py b/experiments/orchestration/live2/run_live2_real.py
+index 72a1cbb..8f02db1 100644
+--- a/experiments/orchestration/live2/run_live2_real.py
++++ b/experiments/orchestration/live2/run_live2_real.py
+@@ -84,12 +84,15 @@ def build_parser() -> argparse.ArgumentParser:
+     ap.add_argument("--no-split", dest="split", action="store_false",
+                     help="the pilot's single-process wiring, for comparison only")
+     ap.add_argument("--no-warm-cache", dest="warm_cache", action="store_false")
++    ap.add_argument("--no-forward-on-completion", dest="forward_on_completion",
++                    action="store_false",
++                    help="StudyLIVE2-harness addendum off: answers wait for the decision thread")
+     ap.add_argument("--no-score", dest="score", action="store_false")
+     ap.add_argument("--memory-setting", default=None)
+     ap.add_argument("--label", default="")
+     ap.add_argument("--start-server", action="store_true",
+                     help="H100 only: restart the round-1 server for this cell, as the pilot did")
+-    ap.set_defaults(split=True, warm_cache=True, score=True)
++    ap.set_defaults(split=True, warm_cache=True, score=True, forward_on_completion=True)
+     return ap
+ 
+ 
+@@ -175,9 +178,11 @@ def run(a) -> Dict[str, Any]:
+                strip_hints=(a.server_kind != "fake"), defer_images=True,
+                calibration_knots_path=(str(knots) if knots else None),
+                gpu_budget_s=a.gpu_budget_s, http_limit=a.http_limit,
+-               cache_cap_bytes=a.cache_cap_bytes, self_tick_s=a.self_tick_s)
++               cache_cap_bytes=a.cache_cap_bytes, self_tick_s=a.self_tick_s,
++               forward_on_completion=bool(a.forward_on_completion))
+ 
+     err = None
++    em = None
+     t0 = time.time()
+     if a.split:
+         import harness_fixture as HF
+@@ -188,6 +193,7 @@ def run(a) -> Dict[str, Any]:
+         br = sr.__enter__()
+         try:
+             em = _emulator(EM, tdir, br, a)
++            em.lateness.detail = []          # per-action kind, for the addendum's instrumentation
+             em.run(rdir)
+         except Exception as e:                                        # noqa: BLE001
+             err = f"{type(e).__name__}: {e}"
+@@ -203,7 +209,18 @@ def run(a) -> Dict[str, Any]:
+     rm = (json.loads((rdir / "run_meta.json").read_text())
+           if (rdir / "run_meta.json").exists() else {})
+     rm.update(memory_setting=RC.memory_setting(a.host_tier_gib, a.memory_setting),
+-              split_processes=bool(a.split), label=header["label"])
++              split_processes=bool(a.split), label=header["label"], git_commit=header["git_commit"])
++    # StudyLIVE2-harness addendum (instrumentation): lateness per action kind, and the gap from
++    # each cloud answer's response-stream end to its forwarding (child) and receipt (emulator).
++    if a.split and em is not None and em.lateness.detail is not None:
++        rm["lateness_by_kind"] = _by_kind(em.lateness.detail)
++        _write_detail(rdir, em.lateness.detail)
++    rm["completion_to_forward_ms"] = res.get("completion_to_forward_ms")
++    rm["completion_to_emulator_ms"] = res.get("completion_to_emulator_ms")
++    rm["forward_on_completion"] = bool(a.split and a.forward_on_completion)
++    rm["forwarding"] = {k: (res.get("bridge") or {}).get(k) for k in
++                        ("n_forwarded_on_completion", "n_skipped_forwarded", "n_forward_mismatch")}
++    rm["callback_errors"] = (res.get("backend") or {}).get("n_callback_errors")
+     (rdir / "run_meta.json").write_text(json.dumps(rm, indent=2, sort_keys=True) + "\n")
+     (rdir / "coordinator_result.json").write_text(
+         json.dumps(res, indent=1, default=str) + "\n")
+@@ -220,6 +237,28 @@ def run(a) -> Dict[str, Any]:
+     return out
+ 
+ 
++def _by_kind(detail) -> Dict[str, Any]:
++    from collections import defaultdict
++    g: Dict[str, list] = defaultdict(list)
++    for _due, what, ms in detail:
++        g[str(what)].append(float(ms))
++    out = {}
++    for k, v in sorted(g.items()):
++        v.sort()
++        def q(p, v=v):
++            return round(v[min(len(v) - 1, int(p * len(v)))], 4)
++        out[k] = dict(n=len(v), p50_ms=q(0.5), p90_ms=q(0.9), p99_ms=q(0.99), max_ms=round(v[-1], 4),
++                      n_over_50ms=sum(1 for x in v if x > 50.0))
++    return out
++
++
++def _write_detail(rdir: Path, detail) -> None:
++    import gzip
++    with gzip.open(rdir / "lateness_detail.jsonl.gz", "wt") as f:
++        for due, what, ms in detail:
++            f.write(json.dumps(dict(due_t=due, kind=what, lateness_ms=ms)) + "\n")
++
++
+ def _emulator(EM, tdir: Path, br, a):
+     kw = {}
+     if a.tick_s is not None:

@@ -1,0 +1,873 @@
+diff --git a/experiments/orchestration/live2/asyncbackend.py b/experiments/orchestration/live2/asyncbackend.py
+index d98d41d..046282f 100644
+--- a/experiments/orchestration/live2/asyncbackend.py
++++ b/experiments/orchestration/live2/asyncbackend.py
+@@ -107,6 +107,11 @@ class AsyncLive2Backend:
+         self._client = httpx.AsyncClient(timeout=httpx.Timeout(timeout_s), limits=limits)
+         self.build_s = 0.0
+         self.n_built = 0
++        self.end_wall: Dict[str, float] = {}
++        self.on_complete: Any = None
++        self.on_first: Any = None
++        self.first_gap_ms: List[float] = []      # first SSE line -> first content token
++        self.callback_errors: List[str] = []
+ 
+     # ---- the loop thread
+     def _serve(self) -> None:
+@@ -128,7 +133,13 @@ class AsyncLive2Backend:
+         self._thread.join(10.0)
+ 
+     def metrics(self) -> Dict[str, Any]:
+-        return dict(n_built=self.n_built,
++        g = sorted(self.first_gap_ms)
++        return dict(n_built=self.n_built, callback_errors=self.callback_errors[:5],
++                    first_line_to_first_content_ms=(dict(
++                        n=len(g), p50=round(g[len(g) // 2], 4),
++                        p99=round(g[min(len(g) - 1, int(0.99 * len(g)))], 4),
++                        max=round(g[-1], 4)) if g else dict(n=0)),
++                    n_callback_errors=len(self.callback_errors),
+                     build_ms_total=round(self.build_s * 1000.0, 3),
+                     build_ms_mean=(round(self.build_s * 1000.0 / self.n_built, 4)
+                                    if self.n_built else None),
+@@ -158,6 +169,7 @@ class AsyncLive2Backend:
+         err = None
+         chunks: List[Dict[str, Any]] = []
+         text_parts: List[str] = []
++        first_wall: Optional[float] = None
+         try:
+             async with self._client.stream(
+                     "POST", self.base_url + "/v1/chat/completions", content=data,
+@@ -185,12 +197,43 @@ class AsyncLive2Backend:
+                                 text_parts.append(piece)
+                             if ch.get("logprobs"):
+                                 chunks.append(dict(logprobs=ch["logprobs"]))
++                        # StudyLIVE2-harness addendum, ruling Option 1: the answer leaves at its
++                        # FIRST CONTENT TOKEN. `ttft_s` keeps its existing definition (the first
++                        # SSE line), so the answer's t_done is unchanged; the first content
++                        # token's own instant is recorded to show the two coincide.
++                        if (first_wall is None and self.on_first is not None
++                                and (text_parts or chunks)):
++                            first_wall = time.time()
++                            self.first_gap_ms.append(1000.0 * (first_wall - t0 - ttft))
++                            try:
++                                self.on_first(dict(
++                                    request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s,
++                                    ttft_s=ttft, total_s=None, http_status=status, error=None,
++                                    usage={}, text="".join(text_parts), chunks=list(chunks),
++                                    sub=sub, t_first_content_wall=first_wall))
++                            except Exception as e:                    # noqa: BLE001
++                                self.callback_errors.append(f"{type(e).__name__}: {e}")
+         except Exception as e:                                        # noqa: BLE001
+             err = f"{type(e).__name__}: {e}"
+-        total = time.time() - t0
+-        return dict(request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s,
+-                    ttft_s=ttft, total_s=total, http_status=status, error=err,
+-                    usage=usage, text="".join(text_parts), chunks=chunks, sub=sub)
++        t_end = time.time()
++        total = t_end - t0
++        # StudyLIVE2-harness addendum (instrumentation): the wall instant the response stream
++        # ENDED, so the coordinator process can report the completion-to-forward gap. Harness
++        # timing only; nothing in the coordinator's decisions or records reads it.
++        self.end_wall[sub.request_id] = t_end
++        res = dict(request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s,
++                   ttft_s=ttft, total_s=total, http_status=status, error=err,
++                   usage=usage, text="".join(text_parts), chunks=chunks, sub=sub,
++                   t_end_wall=t_end)
++        # StudyLIVE2-harness addendum: the completion callback runs HERE, on the I/O loop, the
++        # moment the stream ends and BEFORE the future resolves, so the decision thread never
++        # sees a finished request whose answer has not been forwarded yet.
++        if self.on_complete is not None:
++            try:
++                self.on_complete(res)
++            except Exception as e:                                    # noqa: BLE001
++                self.callback_errors.append(f"{type(e).__name__}: {e}")
++        return res
+ 
+ 
+ def _sha16(data: bytes) -> str:
+diff --git a/experiments/orchestration/live2/bridge.py b/experiments/orchestration/live2/bridge.py
+index c16da70..6bd24ae 100644
+--- a/experiments/orchestration/live2/bridge.py
++++ b/experiments/orchestration/live2/bridge.py
+@@ -32,6 +32,7 @@ class EmulatorBridge:
+         self.n_events = 0
+         self.n_ticks = 0
+         self.n_decisions = 0
++        self.n_skipped_forwarded = 0
+         # D99 (1): ONE DECISION PER PERIOD, the same period for every arm, with that period's
+         # events batched. The bridge enforces it on the EMULATOR's clock, so it holds whatever
+         # the emulator's own tick_s is (it must be no coarser than the period, or a period would
+@@ -83,11 +84,25 @@ class EmulatorBridge:
+             out += list(self.co.pulls[self._pulls:])
+             self._pulls = len(self.co.pulls)
+         if len(self.co.cloud_answers) > self._sent:
+-            out += list(self.co.cloud_answers[self._sent:])
++            # StudyLIVE2-harness addendum: an answer the I/O layer already forwarded at stream
++            # end is recorded but not sent again.
++            fwd = getattr(self.co, "forwarded", None) or {}
++            for ev in self.co.cloud_answers[self._sent:]:
++                if (ev.get("payload") or {}).get("request_id") in fwd:
++                    self.n_skipped_forwarded += 1
++                else:
++                    out.append(ev)
+             self._sent = len(self.co.cloud_answers)
+         return out
+ 
+     def describe(self) -> Dict[str, Any]:
+         return dict(arm=self.co.arm.name, n_events=self.n_events, n_ticks=self.n_ticks,
+                     n_pulls=self._pulls, n_cloud_answers=self._sent,
+-                    n_decisions=self.n_decisions, decision_period_s=self._period)
++                    n_decisions=self.n_decisions, decision_period_s=self._period,
++                    n_forwarded_on_completion=len(getattr(self.co, "forwarded", None) or {}),
++                    n_skipped_forwarded=self.n_skipped_forwarded,
++                    n_forward_mismatch=getattr(self.co, "n_forward_mismatch", 0),
++                    n_recall_first_token=getattr(self.co, "n_recall_first_token", 0),
++                    n_recall_letter_differs=getattr(self.co, "n_recall_letter_differs", 0),
++                    recall_letter_diffs=list(getattr(self.co, "recall_letter_diffs", []))[:50],
++                    n_monitor_score_differs=getattr(self.co, "n_monitor_score_differs", 0))
+diff --git a/experiments/orchestration/live2/coordinator.py b/experiments/orchestration/live2/coordinator.py
+index bb9daa3..1e3a52f 100644
+--- a/experiments/orchestration/live2/coordinator.py
++++ b/experiments/orchestration/live2/coordinator.py
+@@ -151,6 +151,16 @@ class Live2Coordinator:
+         self.answers: List[Dict[str, Any]] = []
+         self.pulls: List[Dict[str, Any]] = []
+         self.cloud_answers: List[Dict[str, Any]] = []
++        # StudyLIVE2-harness addendum: answers the I/O layer forwarded at stream end, by request
++        self.forwarded: Dict[str, Dict[str, Any]] = {}
++        self.n_forward_mismatch = 0
++        # what a slow decision costs: epoch start -> the request going on the wire (addendum (a))
++        self.submit_delays_ms: List[float] = []
++        self._epoch_wall0: Optional[float] = None
++        self.n_recall_first_token = 0
++        self.n_recall_letter_differs = 0
++        self.recall_letter_diffs: List[Dict[str, Any]] = []
++        self.n_monitor_score_differs = 0
+         self.decision_latencies_ms: List[float] = []
+         self.errors: List[str] = []
+         self.counts: Dict[str, int] = defaultdict(int)
+@@ -229,10 +239,16 @@ class Live2Coordinator:
+         self._roster(t)
+         obs = self.st.observation(t, epoch if epoch in _EPOCHS else "tick")
+         t0 = time.perf_counter()
+-        act = self.arm(obs)                      # scrub + validate_action + apply_defaults
+-        dt_ms = (time.perf_counter() - t0) * 1000.0
+-        self.decision_latencies_ms.append(dt_ms)
+-        self._enact(act, t, dt_ms)
++        self._epoch_wall0 = t0
++        try:
++            act = self.arm(obs)                  # scrub + validate_action + apply_defaults
++            dt_ms = (time.perf_counter() - t0) * 1000.0
++            self.decision_latencies_ms.append(dt_ms)
++            self._enact(act, t, dt_ms)
++        finally:
++            # a submission made OUTSIDE an epoch (a chained recall released by a completion in
++            # `_settle`) is stamped at the instant it is made, not charged this epoch's delay
++            self._epoch_wall0 = None
+ 
+     # ---------------------------------------------------------------- fleet events
+     def _ingest(self, ev: Dict[str, Any], t: float) -> Optional[str]:
+@@ -517,6 +533,18 @@ class Live2Coordinator:
+         self.n_req += 1
+         rid = f"r{self.n_req}"
+         d = self.st.devices[device_id]
++        # THE TRUE SUBMISSION STAMP (StudyLIVE2-harness addendum (a), from flash's branch). A
++        # decision that takes 100 ms puts its requests on the wire 100 ms after the epoch it
++        # belongs to; stamping them with the epoch's nominal instant would understate every time
++        # derived from them by that delay. The delay is recorded per request and IS what a slow
++        # decision costs: later submissions, not held answers. A dry run has no wall clock and
++        # keeps the nominal instant, so its logs stay deterministic. Unlike the branch, the
++        # delay is charged only inside an epoch (`_epoch_wall0` is cleared when it ends).
++        delay_s = 0.0
++        if not self.dry_run and self._epoch_wall0 is not None:
++            delay_s = max(0.0, time.perf_counter() - self._epoch_wall0)
++            self.submit_delays_ms.append(delay_s * 1000.0)
++        t = t + delay_s
+         body = B.build_body(kind=kind, device_id=device_id, session_id=session_id,
+                             run_tag=self.run_tag, salt=d.salt, header=HEADER_TEXT,
+                             frames=frames, question=question, options=options,
+@@ -642,6 +670,7 @@ class Live2Coordinator:
+         o.served_at = delivered
+         o.cache_path = path
+         ontime = delivered <= o.deadline_abs() + 1e-9
++        ev = self._cloud_answer(sub, o, delivered, path, scored)
+         o.state = "answered" if ontime else "late"
+         if o.kind == "monitor":
+             self.st.devices[o.device_id].delivered.append((delivered, 0.0))
+@@ -652,15 +681,83 @@ class Live2Coordinator:
+                                  on_time=bool(ontime), cache_path=path,
+                                  request_id=sub.request_id))
+         # the coordinator's one output to the fleet: the cloud answer, delivered at t_done. The
+-        # DEVICE's own answer never passes through here (CONTRACT.md).
+-        self.cloud_answers.append(SC.make(
++        # DEVICE's own answer never passes through here (CONTRACT.md). When the I/O layer has
++        # already forwarded it (StudyLIVE2-harness addendum), it is still recorded here, and the
++        # bridge does not send it a second time; the two must be the same event.
++        early = self.forwarded.get(sub.request_id)
++        if early is not None and _comparable(early) != _comparable(ev):
++            self.n_forward_mismatch += 1
++        self.cloud_answers.append(ev)
++
++    def _cloud_answer(self, sub: Live2Submission, o, delivered: float, path,
++                      scored: Optional[Dict[str, Any]]) -> Dict[str, Any]:
++        ontime = delivered <= o.deadline_abs() + 1e-9
++        return SC.make(
+             "cloud_answer", device_id=o.device_id, opportunity_id=o.opp_id,
+             t_done=round(delivered, 6),
+             payload=dict(request_id=sub.request_id, kind=o.kind, cache_path=path,
+                          on_time=bool(ontime),
+                          cloud_score=(scored or {}).get("cloud_score"),
+                          cloud_letter=(scored or {}).get("cloud_letter"),
+-                         p_yes=(scored or {}).get("p_yes"))))
++                         p_yes=(scored or {}).get("p_yes")))
++
++    def answer_on_completion(self, r: Dict[str, Any]) -> Optional[Dict[str, Any]]:
++        """StudyLIVE2-harness addendum: the cloud_answer for a finished response, built the
++        moment its stream ends, on the I/O thread, without waiting for a tick or an epoch.
++
++        It reads only the submission, the response and the opportunity's deadline (fixed when
++        the opportunity was created), and builds the event with the same `_cloud_answer` the
++        decision thread uses, so the event is identical to the one `_settle` will record (any
++        difference is counted in `n_forward_mismatch`). It changes no coordinator state except
++        `forwarded`; the arm still learns of the completion in `_collect`, at its next epoch.
++        Build pieces carry no answer and return None.
++        """
++        sub = r.get("sub")
++        if sub is None or sub.kind in ("piece", "whole") or not sub.opportunity_id:
++            return None
++        o = self.st.opps.get(sub.opportunity_id)
++        if o is None:
++            return None
++        usage = r.get("usage") or {}
++        path, _frac = SC.cache_path_of(cached_tokens_of(usage), prompt_tokens_of(usage))
++        done_s = sub.sent_s + (r["total_s"] * self.speed if r.get("total_s") else 0.0)
++        first_s = (sub.sent_s + r["ttft_s"] * self.speed) if r.get("ttft_s") else None
++        delivered = first_s if first_s is not None else done_s
++        ev = self._cloud_answer(sub, o, delivered, path, self._score_of(sub, r))
++        early = self.forwarded.get(sub.request_id)
++        if early is not None:
++            # Already sent at its first content token (ruling Option 1): compare what the fleet
++            # received with what the full response gives, and count the differences.
++            pe, pf = early.get("payload") or {}, ev.get("payload") or {}
++            if sub.kind == "recall":
++                self.n_recall_first_token += 1
++                if pe.get("cloud_letter") != pf.get("cloud_letter"):
++                    self.n_recall_letter_differs += 1
++                    self.recall_letter_diffs.append(dict(
++                        request_id=sub.request_id, first_token=pe.get("cloud_letter"),
++                        full_text=pf.get("cloud_letter")))
++            elif pe.get("cloud_score") != pf.get("cloud_score"):
++                self.n_monitor_score_differs += 1
++            return None
++        self.forwarded[sub.request_id] = ev
++        return ev
++
++    def answer_on_first(self, r: Dict[str, Any]) -> Optional[Dict[str, Any]]:
++        """StudyLIVE2-harness addendum, ruling Option 1: the cloud_answer at the FIRST CONTENT
++        TOKEN. t_done is the existing first-token time (unchanged), the monitor score comes from
++        the first token's logprobs and the recall letter from the text so far (the first token).
++        `cache_path` is not known until the usage block at stream end, so the payload carries
++        None; the scorer takes cache_path from request.jsonl. Returns None for build pieces."""
++        sub = r.get("sub")
++        if sub is None or sub.kind in ("piece", "whole") or not sub.opportunity_id:
++            return None
++        o = self.st.opps.get(sub.opportunity_id)
++        if o is None or r.get("ttft_s") is None:
++            return None
++        delivered = sub.sent_s + r["ttft_s"] * self.speed
++        ev = self._cloud_answer(sub, o, delivered, None, self._score_of(sub, r))
++        self.forwarded[sub.request_id] = ev
++        return ev
+ 
+     def _expire(self, t: float) -> None:
+         for oid in self.st.order:
+@@ -721,6 +818,7 @@ class Live2Coordinator:
+             counts=dict(sorted(self.counts.items())),
+             n_monitor_answers=len(mon), n_recall_answers=len(rec),
+             n_on_time=sum(1 for a in self.answers if a.get("on_time")),
++            submit_delay_ms=_pct(self.submit_delays_ms),
+             n_pulls=len(self.pulls), n_cloud_answers=len(self.cloud_answers),
+             decision_latency_ms=dict(p50=q(0.5), p99=q(0.99),
+                                      max=(round(lat[-1], 4) if lat else None), n=len(lat)),
+@@ -744,6 +842,24 @@ _EPOCHS = ("stream_arrival", "stream_departure", "recall_arrival", "request_comp
+            "connectivity_change", "tick")
+ 
+ 
++def _pct(xs) -> Dict[str, Any]:
++    v = sorted(xs)
++    if not v:
++        return dict(n=0)
++    def g(p):
++        return round(v[min(int(p * len(v)), len(v) - 1)], 4)
++    return dict(n=len(v), p50=g(0.5), p90=g(0.9), p99=g(0.99), max=round(v[-1], 4))
++
++
++def _comparable(ev: Dict[str, Any]) -> Dict[str, Any]:
++    """A cloud_answer without the two fields Option 1 lets differ: cache_path (unknown at the
++    first token) and the recall letter (counted separately)."""
++    p = dict(ev.get("payload") or {})
++    p.pop("cache_path", None)
++    p.pop("cloud_letter", None)
++    return dict(ev, payload=p)
++
++
+ def _sched(ev: Dict[str, Any]) -> float:
+     for k in ("t_arrive", "t_capture", "start_t", "t", "t_ask"):
+         if ev.get(k) is not None:
+diff --git a/experiments/orchestration/live2/procsplit.py b/experiments/orchestration/live2/procsplit.py
+index 035e47c..2f78191 100644
+--- a/experiments/orchestration/live2/procsplit.py
++++ b/experiments/orchestration/live2/procsplit.py
+@@ -103,6 +103,7 @@ class RemoteCoordinator:
+         self._recv = 0
+         self._write_errors = 0
+         self._max_backlog = 0
++        self._recv_gaps_ms: List[float] = []
+         self._reader = threading.Thread(target=self._read_loop, name="live2-proxy-rx",
+                                         daemon=True)
+         self._reader.start()
+@@ -151,6 +152,9 @@ class RemoteCoordinator:
+             if op == "replies":
+                 out += list(msg.get("replies") or ())
+                 self._recv += len(msg.get("replies") or ())
++                now = time.time()
++                for v in (msg.get("stream_end_wall") or {}).values():
++                    self._recv_gaps_ms.append(1000.0 * (now - float(v)))
+             elif op == "result":
+                 self._stats = msg.get("result") or {}
+             elif op in ("eof", "closed"):
+@@ -195,7 +199,18 @@ class RemoteCoordinator:
+     def stats(self) -> Dict[str, Any]:
+         return dict(self._stats, wire_events_sent=self._sent, wire_replies_received=self._recv,
+                     wire_write_errors=self._write_errors,
+-                    wire_max_send_backlog=self._max_backlog)
++                    wire_max_send_backlog=self._max_backlog,
++                    completion_to_emulator_ms=_qstats(self._recv_gaps_ms))
++
++
++def _qstats(v: List[float]) -> Dict[str, Any]:
++    """p50 / p90 / p99 / max in ms, with the emulator's own index-based quantile."""
++    s = sorted(v)
++    if not s:
++        return dict(n=0)
++    def q(p: float) -> float:
++        return round(s[min(len(s) - 1, int(p * len(s)))], 4)
++    return dict(n=len(s), p50_ms=q(0.5), p90_ms=q(0.9), p99_ms=q(0.99), max_ms=round(s[-1], 4))
+ 
+ 
+ # ---------------------------------------------------------------- the child
+@@ -302,6 +317,65 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
+     def _now_t() -> float:
+         return last_t + (time.monotonic() - last_mono)
+ 
++    # StudyLIVE2-harness addendum (instrumentation): for every cloud_answer, the wall gap from
++    # the end of its HTTP response stream to the moment this process writes it to the fleet.
++    fwd_gaps_ms: List[float] = []
++    send_lock = threading.Lock()          # the I/O thread and the decision thread both write
++
++    def _send_replies(replies) -> None:
++        ends = getattr(be, "end_wall", None) or {}
++        stamp: Dict[str, float] = {}
++        for r in replies:
++            if r.get("kind") == "cloud_answer":
++                rid = (r.get("payload") or {}).get("request_id")
++                if rid in ends:
++                    stamp[rid] = ends[rid]
++        now = time.time()
++        for v in stamp.values():
++            fwd_gaps_ms.append(1000.0 * (now - v))
++        with send_lock:
++            send_msg(sock, {"op": "replies", "replies": list(replies), "sent_wall": now,
++                            "stream_end_wall": stamp})
++
++    # "Ready" is the instant the answer's content exists: its first content token under ruling
++    # Option 1, or its stream end on the fallback path. Both gaps land in the same statistic
++    # (`completion_to_forward_ms`); `first_token_to_forward_ms` isolates the Option 1 path.
++    ft_gaps_ms: List[float] = []
++
++    def _send_first(replies, ready_wall) -> None:
++        now = time.time()
++        stamp: Dict[str, float] = {}
++        if ready_wall is not None:
++            for r in replies:
++                stamp[(r.get("payload") or {}).get("request_id")] = float(ready_wall)
++            g = 1000.0 * (now - float(ready_wall))
++            fwd_gaps_ms.append(g)
++            ft_gaps_ms.append(g)
++        with send_lock:
++            send_msg(sock, {"op": "replies", "replies": list(replies), "sent_wall": now,
++                            "stream_end_wall": stamp})
++
++    # StudyLIVE2-harness addendum (THE FIX): each cloud answer goes to the fleet from the I/O
++    # thread the moment its content exists (first content token, ruling Option 1; stream end as
++    # the fallback when no content token arrived), with the delivery time the decision thread
++    # would give it. Nothing waits for a tick, an event or an epoch; the decision thread records
++    # the same event later and the bridge does not resend it. `forward_on_completion: False`
++    # restores the 22808d0 behaviour, for the diagnosis comparison.
++    def _on_complete(r) -> None:
++        ev = co.answer_on_completion(r)
++        if ev is not None:
++            _send_replies([ev])
++
++    def _on_first(r) -> None:
++        ev = co.answer_on_first(r)
++        if ev is not None:
++            _send_first([ev], r.get("t_first_content_wall"))
++
++    if be is not None and cfg.get("forward_on_completion", True):
++        be.on_complete = _on_complete
++        if cfg.get("forward_at_first_token", True):
++            be.on_first = _on_first
++
+     while True:
+         if self_tick_s <= 0.0:
+             msg = inbox.get()
+@@ -312,7 +386,7 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
+                 n_self_ticks += 1
+                 replies = br.tick(_now_t()) or ()
+                 if replies:
+-                    send_msg(sock, {"op": "replies", "replies": list(replies)})
++                    _send_replies(replies)
+                 continue
+         if msg is None:
+             break
+@@ -333,18 +407,21 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
+             res["cache"] = cache.stats() if cache is not None else None
+             res["pid"] = os.getpid()
+             res["cpu_s_child"] = round(time.process_time() - cpu0, 4)
++            res["completion_to_forward_ms"] = _qstats(fwd_gaps_ms)
++            res["first_token_to_forward_ms"] = _qstats(ft_gaps_ms)
+             logs.close()
+             if be is not None:
+                 be.close()
+             (rdir / "coordinator_result.json").write_text(
+                 json.dumps(res, indent=1, default=str) + "\n")
+-            send_msg(sock, {"op": "result", "result": res})
+-            send_msg(sock, {"op": "closed"})
++            with send_lock:
++                send_msg(sock, {"op": "result", "result": res})
++                send_msg(sock, {"op": "closed"})
+             return
+         else:
+             continue
+         if replies:
+-            send_msg(sock, {"op": "replies", "replies": list(replies)})
++            _send_replies(replies)
+ 
+ 
+ # ---------------------------------------------------------------- starting the pair
+diff --git a/experiments/orchestration/live2/run_live2_real.py b/experiments/orchestration/live2/run_live2_real.py
+index 72a1cbb..bcb675e 100644
+--- a/experiments/orchestration/live2/run_live2_real.py
++++ b/experiments/orchestration/live2/run_live2_real.py
+@@ -84,12 +84,17 @@ def build_parser() -> argparse.ArgumentParser:
+     ap.add_argument("--no-split", dest="split", action="store_false",
+                     help="the pilot's single-process wiring, for comparison only")
+     ap.add_argument("--no-warm-cache", dest="warm_cache", action="store_false")
++    ap.add_argument("--forward-at", default="first", choices=("first", "end"),
++                    help="addendum: forward answers at the first content token (ruling Option 1) or at stream end")
++    ap.add_argument("--no-forward-on-completion", dest="forward_on_completion",
++                    action="store_false",
++                    help="StudyLIVE2-harness addendum off: answers wait for the decision thread")
+     ap.add_argument("--no-score", dest="score", action="store_false")
+     ap.add_argument("--memory-setting", default=None)
+     ap.add_argument("--label", default="")
+     ap.add_argument("--start-server", action="store_true",
+                     help="H100 only: restart the round-1 server for this cell, as the pilot did")
+-    ap.set_defaults(split=True, warm_cache=True, score=True)
++    ap.set_defaults(split=True, warm_cache=True, score=True, forward_on_completion=True)
+     return ap
+ 
+ 
+@@ -129,6 +134,14 @@ def run(a) -> Dict[str, Any]:
+     htok = int(a.host_tier_tokens or RC.host_tokens(a.host_tier_gib))
+     sends = bool(a.server)
+ 
++    # StudyLIVE2-harness addendum (2), from flash's branch: a real-server run refuses to start
++    # with a frame it cannot send (checked BEFORE the server starts, so nothing is half-run)
++    import preflight as PF
++    frames_report = PF.require_frames(tdir, (Path(a.frames_root) if a.frames_root else None),
++                                      a.server_kind if sends else "device-only-no-server")
++    (rdir / "frames_preflight.json").write_text(
++        json.dumps(frames_report, indent=1, default=str) + "\n")
++
+     srv = None
+     sinfo: Optional[Dict[str, Any]] = None
+     if a.start_server:
+@@ -163,6 +176,7 @@ def run(a) -> Dict[str, Any]:
+         decision_period_s=a.decision_period_s, ratio=a.ratio, n_devices=a.n_devices,
+         run_s=a.run_s, memory_setting=RC.memory_setting(a.host_tier_gib, a.memory_setting),
+         server=sinfo, server_url=(a.server or "none"), server_kind=a.server_kind,
++        frames_preflight=frames_report, git_working_tree=_tree_state(),
+         model=a.model, split_processes=bool(a.split), is_measurement=False)
+     (rdir / "header.json").write_text(json.dumps(header, indent=1, default=str) + "\n")
+ 
+@@ -175,9 +189,12 @@ def run(a) -> Dict[str, Any]:
+                strip_hints=(a.server_kind != "fake"), defer_images=True,
+                calibration_knots_path=(str(knots) if knots else None),
+                gpu_budget_s=a.gpu_budget_s, http_limit=a.http_limit,
+-               cache_cap_bytes=a.cache_cap_bytes, self_tick_s=a.self_tick_s)
++               cache_cap_bytes=a.cache_cap_bytes, self_tick_s=a.self_tick_s,
++               forward_on_completion=bool(a.forward_on_completion),
++               forward_at_first_token=(a.forward_at == "first"))
+ 
+     err = None
++    em = None
+     t0 = time.time()
+     if a.split:
+         import harness_fixture as HF
+@@ -188,6 +205,7 @@ def run(a) -> Dict[str, Any]:
+         br = sr.__enter__()
+         try:
+             em = _emulator(EM, tdir, br, a)
++            em.lateness.detail = []          # per-action kind, for the addendum's instrumentation
+             em.run(rdir)
+         except Exception as e:                                        # noqa: BLE001
+             err = f"{type(e).__name__}: {e}"
+@@ -203,7 +221,25 @@ def run(a) -> Dict[str, Any]:
+     rm = (json.loads((rdir / "run_meta.json").read_text())
+           if (rdir / "run_meta.json").exists() else {})
+     rm.update(memory_setting=RC.memory_setting(a.host_tier_gib, a.memory_setting),
+-              split_processes=bool(a.split), label=header["label"])
++              split_processes=bool(a.split), label=header["label"], git_commit=header["git_commit"])
++    # StudyLIVE2-harness addendum (instrumentation): lateness per action kind, and the gap from
++    # each cloud answer's response-stream end to its forwarding (child) and receipt (emulator).
++    if a.split and em is not None and em.lateness.detail is not None:
++        rm["lateness_by_kind"] = _by_kind(em.lateness.detail)
++        _write_detail(rdir, em.lateness.detail)
++    rm["completion_to_forward_ms"] = res.get("completion_to_forward_ms")
++    rm["completion_to_emulator_ms"] = res.get("completion_to_emulator_ms")
++    rm["forward_on_completion"] = bool(a.split and a.forward_on_completion)
++    rm["submit_delay_ms"] = res.get("submit_delay_ms")
++    rm["decision_latency_ms"] = res.get("decision_latency_ms")
++    rm["forward_at"] = a.forward_at if (a.split and a.forward_on_completion) else "decision-thread"
++    rm["first_token_to_forward_ms"] = res.get("first_token_to_forward_ms")
++    rm["first_line_to_first_content_ms"] = (res.get("backend") or {}).get("first_line_to_first_content_ms")
++    rm["forwarding"] = {k: (res.get("bridge") or {}).get(k) for k in
++                        ("n_forwarded_on_completion", "n_skipped_forwarded", "n_forward_mismatch",
++                         "n_recall_first_token", "n_recall_letter_differs", "recall_letter_diffs",
++                         "n_monitor_score_differs")}
++    rm["callback_errors"] = (res.get("backend") or {}).get("n_callback_errors")
+     (rdir / "run_meta.json").write_text(json.dumps(rm, indent=2, sort_keys=True) + "\n")
+     (rdir / "coordinator_result.json").write_text(
+         json.dumps(res, indent=1, default=str) + "\n")
+@@ -220,6 +256,40 @@ def run(a) -> Dict[str, Any]:
+     return out
+ 
+ 
++def _tree_state() -> Dict[str, Any]:
++    """HEAD plus whether, and how, the working tree differs from it (a run's exact code)."""
++    import hashlib
++    import subprocess
++    def g(*args):
++        return subprocess.run(["git", *args], cwd=REPO, capture_output=True, text=True).stdout
++    diff = g("diff", "HEAD", "--", "experiments")
++    return dict(head=g("rev-parse", "HEAD").strip(), dirty=bool(diff),
++                diff_sha256=(hashlib.sha256(diff.encode()).hexdigest() if diff else None),
++                dirty_files=sorted({l[6:] for l in diff.splitlines() if l.startswith("+++ b/")}))
++
++
++def _by_kind(detail) -> Dict[str, Any]:
++    from collections import defaultdict
++    g: Dict[str, list] = defaultdict(list)
++    for _due, what, ms in detail:
++        g[str(what)].append(float(ms))
++    out = {}
++    for k, v in sorted(g.items()):
++        v.sort()
++        def q(p, v=v):
++            return round(v[min(len(v) - 1, int(p * len(v)))], 4)
++        out[k] = dict(n=len(v), p50_ms=q(0.5), p90_ms=q(0.9), p99_ms=q(0.99), max_ms=round(v[-1], 4),
++                      n_over_50ms=sum(1 for x in v if x > 50.0))
++    return out
++
++
++def _write_detail(rdir: Path, detail) -> None:
++    import gzip
++    with gzip.open(rdir / "lateness_detail.jsonl.gz", "wt") as f:
++        for due, what, ms in detail:
++            f.write(json.dumps(dict(due_t=due, kind=what, lateness_ms=ms)) + "\n")
++
++
+ def _emulator(EM, tdir: Path, br, a):
+     kw = {}
+     if a.tick_s is not None:
+diff --git a/experiments/orchestration/live2/tests/test_live2_harness.py b/experiments/orchestration/live2/tests/test_live2_harness.py
+index 67954d8..1234437 100644
+--- a/experiments/orchestration/live2/tests/test_live2_harness.py
++++ b/experiments/orchestration/live2/tests/test_live2_harness.py
+@@ -148,7 +148,11 @@ class TestTheFixtureStore(unittest.TestCase):
+                 self.assertEqual(sizes[r["frame_ref"]], int(r["bytes"]))
+                 n += 1
+         self.assertEqual(n, len(sizes))
+-        self.assertEqual(n, 74156)
++        # derived from the committed manifests' own metadata, not hardcoded (user ruling
++        # 2026-11-18: the S-EMBER D2 store was extended, 74,156 -> 80,593 frames)
++        expect = sum(json.loads((HF.MANIFESTS / f"{name}_manifest_meta.json").read_text())["n_frames"]
++                     for name in HF.NAMES)
++        self.assertEqual(n, expect)
+ 
+     def test_the_fixture_is_reproducible_from_the_frame_ref(self):
+         with tempfile.TemporaryDirectory() as a, tempfile.TemporaryDirectory() as b:
+@@ -286,5 +290,261 @@ class TestTheProcessSplit(unittest.TestCase):
+         self.assertLess(len(p.encode()), 100, p)
+ 
+ 
++# ------------------------------------------------------------------ StudyLIVE2-harness addendum
++class TestAnswersLeaveAtTheFirstContentToken(unittest.TestCase):
++    """Addendum, ruling Option 1 (H100 implementation): the I/O thread forwards each cloud
++    answer at its first content token; the decision thread records the same event later and the
++    bridge does not resend it."""
++
++    def test_a_split_run_forwards_every_answer_once_from_the_io_thread(self):
++        import emulator as EM
++        import fakestream as FS
++        import procsplit as PS
++        import trace as TR
++        from test_live2_coord import GPU_KV, HOST_GIB, HOST_TOK
++        with tempfile.TemporaryDirectory() as d:
++            d = Path(d)
++            tdir = d / "trace"
++            TR.write_trace(tdir, TR.generate_trace(5, 4, "50:50", 15.0, "A"))
++            rdir = d / "split"
++            with FS.serve(0, concurrency=4) as url:
++                cfg = dict(run_dir=str(rdir), arm="edf", arm_kwargs={}, mode="A", run_s=15.0,
++                           drain_s=5.0, decision_period_s=0.1, gpu_kv_tokens=GPU_KV,
++                           host_tier_gib=HOST_GIB, host_tier_tokens=HOST_TOK, seed=5,
++                           run_tag="rt", frames_root=None, server_url=url, strip_hints=False,
++                           defer_images=True, self_tick_s=0.005)
++                with PS.SplitRun(cfg, kind="fake") as remote:
++                    EM.FleetEmulator(tdir, remote, "A", realtime=True, drain_s=5.0).run(rdir)
++                st = remote.stats()
++            res = json.loads((rdir / "coordinator_result.json").read_text())
++        b = res["bridge"]
++        self.assertGreater(b["n_forwarded_on_completion"], 0)
++        # every answer the decision thread settled had already left from the I/O thread ...
++        self.assertEqual(b["n_skipped_forwarded"], b["n_forwarded_on_completion"])
++        # ... as the same event (cache_path and the recall letter excepted, counted separately)
++        self.assertEqual(b["n_forward_mismatch"], 0)
++        self.assertEqual(b["n_monitor_score_differs"], 0)
++        # the fleet received each answer exactly once (mode A sends no pull)
++        self.assertEqual(st["wire_replies_received"], b["n_forwarded_on_completion"])
++        # and at the first token: the Option 1 path carried every forward
++        self.assertEqual(res["first_token_to_forward_ms"]["n"], b["n_forwarded_on_completion"])
++        self.assertEqual(res["backend"]["n_callback_errors"], 0)
++
++    def _co(self):
++        from coordinator import Live2Coordinator
++        from test_live2_coord import GPU_KV, HOST_GIB, HOST_TOK, _arm
++        return Live2Coordinator(_arm("edf"), None, [], gpu_kv_tokens=GPU_KV,
++                                host_tier_gib=HOST_GIB, host_tier_tokens=HOST_TOK,
++                                upload_mode="A", window_s=10.0, drain_s=1.0, seed=1,
++                                run_tag="rt", dry_run=True)
++
++    def _sub(self, kind, rid="r1", opp="opp1"):
++        from backend import Live2Submission
++        return Live2Submission(request_id=rid, decision_id="d1", kind=kind, device_id="dev1",
++                               session_id=("s1" if kind == "recall" else None),
++                               opportunity_id=opp, body={}, est_tokens=10, sent_s=1.0,
++                               cache_salt="x", mm_uuids=[], traffic_mix={})
++
++    class _Opp:
++        def __init__(self, kind):
++            self.device_id, self.opp_id, self.kind = "dev1", "opp1", kind
++
++        def deadline_abs(self):
++            return 5.0
++
++    def test_a_recall_letter_that_changes_after_the_first_token_is_counted(self):
++        co = self._co()
++        co.st.opps["opp1"] = self._Opp("recall")
++        sub = self._sub("recall")
++        first = co.answer_on_first(dict(sub=sub, ttft_s=0.5, text="B", chunks=[], usage={}))
++        self.assertEqual(first["payload"]["cloud_letter"], "B")
++        self.assertIsNone(first["payload"]["cache_path"])
++        self.assertEqual(first["t_done"], 1.5)          # t_done is the first-token time
++        again = co.answer_on_completion(dict(sub=sub, ttft_s=0.5, total_s=0.9, text="B\nC",
++                                             chunks=[], usage={}))
++        self.assertIsNone(again, "an answer already forwarded must not be forwarded again")
++        self.assertEqual((co.n_recall_first_token, co.n_recall_letter_differs), (1, 1))
++        self.assertEqual(co.recall_letter_diffs[0]["full_text"], "C")
++
++    def test_an_unchanged_recall_letter_is_not_counted(self):
++        co = self._co()
++        co.st.opps["opp1"] = self._Opp("recall")
++        sub = self._sub("recall")
++        co.answer_on_first(dict(sub=sub, ttft_s=0.5, text="D", chunks=[], usage={}))
++        co.answer_on_completion(dict(sub=sub, ttft_s=0.5, total_s=0.9, text="D", chunks=[],
++                                     usage={}))
++        self.assertEqual((co.n_recall_first_token, co.n_recall_letter_differs), (1, 0))
++
++    def test_a_stream_with_no_content_token_falls_back_to_stream_end(self):
++        co = self._co()
++        co.st.opps["opp1"] = self._Opp("monitor")
++        sub = self._sub("monitor")
++        ev = co.answer_on_completion(dict(sub=sub, ttft_s=None, total_s=0.9, text="",
++                                          chunks=[], usage={}))
++        self.assertIsNotNone(ev)
++        self.assertEqual(ev["t_done"], 1.9)            # no first token: delivered at done
++
++    def test_build_pieces_carry_no_answer(self):
++        co = self._co()
++        sub = self._sub("piece", opp=None)
++        self.assertIsNone(co.answer_on_first(dict(sub=sub, ttft_s=0.5, text="x", chunks=[])))
++        self.assertIsNone(co.answer_on_completion(dict(sub=sub, ttft_s=0.5, total_s=1.0)))
++
++
++class TestTheTrueSubmissionStamp(unittest.TestCase):
++    """Addendum (a), from flash's branch: requests are stamped when they go on the wire."""
++
++    def test_the_submit_delay_a_decision_causes_is_logged(self):
++        import cachekeys as CK
++        import emulator as EM
++        import fakestream as FS
++        import trace as TR
++        from backend import Live2Backend
++        from bridge import EmulatorBridge
++        from coordinator import Live2Coordinator, Logs
++        from test_live2_coord import GPU_KV, HOST_GIB, HOST_TOK, _arm
++        with tempfile.TemporaryDirectory() as d:
++            out = Path(d)
++            tdir = out / "trace"
++            TR.write_trace(tdir, TR.generate_trace(5, 4, "50:50", 20.0, "A"))
++            rdir = out / "run"
++            with FS.serve(0, concurrency=4) as url:
++                logs = Logs(rdir).open()
++                be = Live2Backend(url, workers=8, model="32BI", strip_hints=True)
++                co = Live2Coordinator(_arm("edf"), be, [], gpu_kv_tokens=GPU_KV,
++                                      host_tier_gib=HOST_GIB, host_tier_tokens=HOST_TOK,
++                                      upload_mode="A", window_s=20.0, drain_s=5.0, seed=5,
++                                      logs=logs, run_tag=CK.run_tag(5, "edf"))
++                br = EmulatorBridge(co)
++                br.kind = "fake"
++                EM.FleetEmulator(tdir, br, "A", realtime=True, drain_s=5.0).run(rdir)
++                logs.close()
++                be.close()
++        res = co._result(0.0, 1.0)
++        sd = res["submit_delay_ms"]
++        self.assertGreater(co.n_req, 0)
++        # every submission made inside an epoch carries a delay; edf submits only from epochs
++        self.assertEqual(sd["n"], co.n_req, "every submission must carry a submit delay")
++        for k in ("p50", "p90", "p99", "max"):
++            self.assertGreaterEqual(sd[k], 0.0)
++        self.assertIsNone(co._epoch_wall0, "the epoch stamp must be cleared after the epoch")
++
++    def test_a_dry_run_decides_exactly_as_before_and_forwards_nothing(self):
++        import cachekeys as CK
++        import emulator as EM
++        import trace as TR
++        from bridge import EmulatorBridge
++        from coordinator import Live2Coordinator, Logs
++        from test_live2_coord import GPU_KV, HOST_GIB, HOST_TOK, _arm
++        logs_by_run = []
++        with tempfile.TemporaryDirectory() as d:
++            d = Path(d)
++            tdir = d / "trace"
++            TR.write_trace(tdir, TR.generate_trace(7, 4, "50:50", 30.0, "A"))
++            for i in (0, 1):
++                rdir = d / f"run{i}"
++                logs = Logs(rdir).open()
++                co = Live2Coordinator(_arm("edf"), None, [], gpu_kv_tokens=GPU_KV,
++                                      host_tier_gib=HOST_GIB, host_tier_tokens=HOST_TOK,
++                                      upload_mode="A", window_s=30.0, drain_s=5.0, seed=7,
++                                      logs=logs, run_tag=CK.run_tag(7, "edf"), dry_run=True)
++                br = EmulatorBridge(co)
++                br.kind = "stub"
++                EM.FleetEmulator(tdir, br, "A", realtime=False, drain_s=5.0).run(rdir)
++                logs.close()
++                logs_by_run.append([json.loads(l) for l in open(rdir / "decision.jsonl")])
++                # a dry run has no I/O thread: every answer comes from the settle path
++                self.assertEqual(co.forwarded, {})
++                self.assertGreater(len(co.cloud_answers), 0)
++                self.assertEqual(co.submit_delays_ms, [])
++        a, b = logs_by_run
++        strip = ("decision_latency_ms",)
++        self.assertEqual([{k: v for k, v in x.items() if k not in strip} for x in a],
++                         [{k: v for k, v in x.items() if k not in strip} for x in b])
++
++
++class TestTheMissingFrameGate(unittest.TestCase):
++    """Addendum (b), flash's preflight: no uuid-only fallback outside fake-server tests."""
++
++    def _trace(self, d: Path, refs=None) -> Path:
++        sizes = HF.manifest_bytes()
++        refs = list(refs) if refs is not None else list(sizes)[:8]
++        tdir = d / "trace"
++        tdir.mkdir(parents=True, exist_ok=True)
++        with open(tdir / "trace.jsonl", "w") as fh:
++            for r in refs[:4]:
++                fh.write(json.dumps(dict(kind="monitor_opportunity", frame_ref=r)) + "\n")
++            fh.write(json.dumps(dict(kind="history_batch",
++                                     frame_refs=list(refs[4:]))) + "\n")
++        return tdir
++
++    def test_a_real_server_run_refuses_to_start_with_an_unstored_frame(self):
++        import preflight as PF
++        with tempfile.TemporaryDirectory() as d:
++            d = Path(d)
++            tdir = self._trace(d)
++            refs = PF.trace_frame_refs(tdir)
++            self.assertGreater(len(refs), 0)
++            store = d / "store"
++            HF.build_store(store, refs[:-1], HF.manifest_bytes())   # one frame deliberately absent
++            with self.assertRaises(PF.MissingFrames) as cm:
++                PF.require_frames(tdir, store, "vllm")
++            self.assertIn("REFUSING TO START", str(cm.exception))
++
++    def test_a_fake_server_run_is_exempt_and_says_so(self):
++        import preflight as PF
++        with tempfile.TemporaryDirectory() as d:
++            d = Path(d)
++            tdir = self._trace(d)
++            rep = PF.require_frames(tdir, d / "nothing-here", "fake")
++            self.assertFalse(rep["enforced"])
++            self.assertGreater(rep["n_missing"], 0)
++
++    def test_a_complete_store_passes_the_gate(self):
++        import preflight as PF
++        with tempfile.TemporaryDirectory() as d:
++            d = Path(d)
++            tdir = self._trace(d)
++            refs = PF.trace_frame_refs(tdir)
++            sizes = HF.manifest_bytes()
++            have = [r for r in refs if r in sizes]
++            store = d / "store"
++            HF.build_store(store, have, sizes)
++            rep = PF.require_frames(tdir, store, "vllm", refs=have)
++            self.assertTrue(rep["ok"])
++            self.assertEqual(rep["n_missing"], 0)
++
++    def test_an_empty_frame_file_is_refused_too(self):
++        import preflight as PF
++        with tempfile.TemporaryDirectory() as d:
++            d = Path(d)
++            tdir = self._trace(d)
++            refs = PF.trace_frame_refs(tdir)
++            sizes = HF.manifest_bytes()
++            have = [r for r in refs if r in sizes]
++            store = d / "store"
++            HF.build_store(store, have, sizes)
++            (store / have[0]).write_bytes(b"")
++            with self.assertRaises(PF.MissingFrames):
++                PF.require_frames(tdir, store, "vllm", refs=have)
++
++    def test_the_committed_manifests_cover_every_frame_the_measured_trace_asks_for(self):
++        """Flash's pinned (30, 1278) finding, re-derived from the committed manifests (user
++        ruling 2026-11-18). The S-EMBER D2 store now reaches every EVAL session's end, so the
++        count of absent references is derived, not pinned, and must be zero."""
++        import preflight as PF
++        import trace as TR
++        with tempfile.TemporaryDirectory() as d:
++            # the configuration StudyLIVE2-harness measured: seed 0, 8 devices, 120 s, mode A
++            tdir = Path(d) / "trace"
++            TR.write_trace(tdir, TR.generate_trace(0, 8, "50:50", 120.0, "A"))
++            refs = PF.trace_frame_refs(tdir)
++        sizes = HF.manifest_bytes()
++        absent = [r for r in refs if r not in sizes]
++        self.assertGreater(len(refs), 0)
++        self.assertEqual(absent, [], f"{len(absent)} of {len(refs)} trace frame references "
++                                     f"have no committed manifest row: {absent[:3]}")
++
++
+ if __name__ == "__main__":
+     unittest.main(verbosity=2)

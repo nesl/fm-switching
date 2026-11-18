@@ -2045,3 +2045,116 @@ therefore does not change: the uncapped policy does not keep up at 64 and 128 de
 is reported, and the cap stays off. The remaining options are a design question, not an
 implementation one, and they are written up in `reports/study_live2_perf.md` under "Bounding
 decision cost: options" as a design note with no code.
+
+# StudyLIVE2-harness addendum (H100): answers leave at their first token, requests are stamped at the wire
+
+Built on the H100 after the user reassigned the addendum (2026-11-18); flash continued StudyLIVE2-perf. File ownership
+for this work: the coordinator's I/O path (`asyncbackend.py`, which replaced `backend.py` on that path, `procsplit.py`,
+`bridge.py`, `run_live2_real.py`, the completion-handling parts of `coordinator.py`); nothing under
+`experiments/orchestration/policy/` or `live2/arms_policy.py` was edited. Run outputs:
+`results/orchestration/live2/harness_addendum/`. Not a measurement: every header says `is_measurement: false`.
+
+## HA1. Diagnosis on the real 32B: the late actions are answers, and the cause is the stamp, not the forwarding
+
+Cell: 22808d0's runner with per-kind instrumentation only, edf, 8 devices, 120 s, mode A, seed 0, round-1 server
+restarted (`diag_edf_n8`; PROVISIONAL: its coordinator process loaded `coordinator.py` and `bridge.py` from a mid-edit
+working tree, but forwarding behaved as in 22808d0 because nothing registered the new path).
+
+| measure | p50 | p99 | max |
+|---|---|---|---|
+| lateness, `answer_delivered` (140 of 718 over 50 ms) | 27.4 ms | **1,159.1 ms** | 1,211.0 ms |
+| lateness, every other action kind (frame_arrived, monitor_opportunity, ...) | <= 0.10 ms | <= 0.37 ms | 0.37 ms |
+| first SSE token to stream end, per request (request.jsonl) | 40.0 ms | **1,162.9 ms** | 1,216.9 ms |
+| stream end to the coordinator forwarding the answer | 2.6 ms | 11.5 ms | 24.8 ms |
+| stream end to the emulator receiving it | 8.9 ms | 16.6 ms | 27.6 ms |
+
+A cloud answer carries `t_done` = its first-token time (the scorer's definition of delivery), but it could only be
+forwarded when its stream ended; the monitor and recall answers are 1 to 2 output tokens and under load the last token
+waits behind other requests' prefill for up to 1.2 s, so the answer reached the emulator that far behind its own
+`t_done`. Forwarding at stream end, as first prescribed, was then built and run (`fix_edf_n8`): stream end to forward
+fell to p99 0.12 ms (716 answers forwarded, 0 mismatches) and `answer_delivered` lateness was unchanged at p99
+1,152.9 ms, which is the NEGATIVE CONTROL for the diagnosis: removing the forwarding delay does not touch the lateness.
+
+## HA2. The ruling and the fix
+
+User ruling, Option 1: forward each cloud answer at its FIRST CONTENT TOKEN, `t_done` unchanged (first-token time),
+monitor score from the first token's logprobs, recall letter from the first token, any recall letter that differs from
+the full-text letter counted per run, `cache_path` taken from `request.jsonl` (the payload carries None at that
+instant). Implementation:
+
+1. `asyncbackend.py`: the I/O loop calls `on_first` at the first chunk carrying content or logprobs, and `on_complete`
+   when the stream ends, before the future resolves. The time between the first SSE line (`ttft_s`'s existing
+   definition) and the first content token is recorded per request.
+2. `coordinator.py`: `answer_on_first` builds the cloud answer on the I/O thread from the submission, the partial
+   response and the opportunity's deadline (fixed at creation); `answer_on_completion` is the fallback for a stream
+   with no content token, and for an already-forwarded answer it compares the first-token letter / score with the full
+   response's. `_settle` builds the same event through the same `_cloud_answer` and still records it;
+   `n_forward_mismatch` counts any difference outside the two fields Option 1 lets differ.
+3. `bridge.py`: an answer already forwarded is recorded but not sent again.
+4. `procsplit.py`: the child registers both callbacks and writes the answer to the fleet under a send lock shared with
+   the decision thread. The arm still learns of every completion in `_collect` at its next epoch, exactly as before.
+5. From flash's branch `flash-harness-addendum` (not merged wholesale): (a) the TRUE SUBMISSION STAMP (epoch start to
+   submit call added to the request's run time), corrected so a submission outside an epoch (a chained recall released
+   by a completion) is not charged the last epoch's delay; (b) `preflight.py` (refuses a real-server run with any
+   unstored or empty frame), called before the server starts; (c) the two count tests derived from the committed
+   manifests (user ruling; authorized for these two tests only).
+6. THE WIRE-TIME STAMP (added after the first acceptance round, HA3). Flash's stamp measures only from the epoch's
+   start; at 64 devices policy-core's events queue in the coordinator process behind 100 to 170 ms decisions, so the
+   epoch itself begins with a run time already in the past. The parent now recovers the emulator's clock origin on
+   CLOCK_MONOTONIC (the minimum of `monotonic() - t` over its calls, within about 0.1 ms; unit-tested) and sends it to
+   the child, and the I/O loop stamps each request with that run clock as it goes on the wire, never earlier than the
+   coordinator's own stamp. The total from the epoch's nominal instant to the wire is reported as
+   `submit_delay_total_ms`. Arms, decisions, schema, digests and scoring are unchanged; the request's `t_submit` is now
+   its true wire time.
+7. `run_live2_real.py`: lateness per action kind (and the per-action detail, gzipped), first-token / completion to
+   forward gaps, receipt gap, forwarding counters, recall-letter differences, submit delays, decision latency, the
+   preflight report, and `git_working_tree` (HEAD, dirty files, diff sha256) in every run's header and meta.
+
+## HA3. Acceptance on the real 32B (round-1 server restarted per cell, mode A, 120 s, seed 0)
+
+Round 1 (`acc_*`, before item 6): edf 8 and 64 and policy-core 8 passed; **policy-core 64 FAILED**: `answer_delivered`
+p99 767.1 ms (130 over 50 ms; run p99 45.8 ms), forward p99 0.11 ms, epoch-start submit delay p99 143 ms, decision
+latency p50 45.0 / p99 132.8 ms. Item 6 was added and ALL FOUR cells rerun on the final code (`acc2_*`):
+
+| cell | lateness p99, all actions (max) | `answer_delivered` p99 (max) | kinds with any sample > 50 ms | first token to forward p99 | submit delay to the wire p50 / p99 (max) | decision latency p50 / p99 | requests / HTTP errors | digests equal | scored |
+|---|---|---|---|---|---|---|---|---|---|
+| edf, 8 | 0.110 ms (0.42) | 0.11 ms | none | 0.10 ms | 3.0 / 7.3 ms (16.4) | 0.5 / 0.7 ms (round 1) | 720 / 0 | yes | yes |
+| edf, 64 | 0.159 ms (27.4) | below 1 ms | none | 0.11 ms | 9.2 / 24.0 ms (58.7) | 3.7 / 4.5 ms (round 1) | 624 / 0 | yes | yes |
+| policy-core, 8 | 0.104 ms (0.17) | 0.10 ms | none | 0.10 ms | 9.4 / 14.9 ms (44.6) | 4.1 / 11.1 ms | 767 / 0 | yes | yes |
+| **policy-core, 64** | 0.168 ms (38.2) | **0.105 ms (38.2)** | **none** | 0.11 ms | **61.0 / 1,503.3 ms (1,572.0)** | 47.3 / 138.2 ms | 929 / 0 | yes | yes |
+
+Every action kind is within the 50 ms rule in every cell. Policy-core's decision cost at 64 devices now appears where
+the ruling puts it: as submit delay (p90 860 ms, p99 1.50 s from the epoch's instant to the wire, the queue behind
+decisions that take longer than the 100 ms period), not as held answers or an invalid run. Forwarding: 0 mismatches
+in every cell; recall answers forwarded at the first token 6, 5, 0 and 1, with **0 letters differing from the full
+text (rate 0 of 12)**; 0 monitor scores differing; 0 callback errors. Preflight: every frame reference stored
+(10,038 of 10,038 at 64 devices). End-of-run truncation, as before the addendum: requests submitted in the last instants
+before the coordinator closes are not built or completed (edf 64: 624 submitted, 623 built, 621 completed; round 1:
+598 / 594), which no answer or lateness figure includes.
+
+## HA4. Mechanism verification and results consistency
+
+The causal claim is about the apparatus (an answer reaches the fleet when its content exists, stamped with the run
+time its request really had). Named mechanism: answers stamped at the first token but forwarded at stream end (HA1),
+and requests stamped earlier than their wire time (HA3 round 1). Instantiated: per-kind lateness, first-token to
+stream-end gap, forward gap, submit delay. Traced: every late action in `diag_edf_n8` is an `answer_delivered`, and
+its lateness tracks the request's first-token to stream-end gap (p99 1,159 vs 1,163 ms). Negative controls: forwarding
+at stream end (`fix_edf_n8`, p99 1,153 ms: the forwarding gap was not the cause), and first-token forwarding without
+the wire stamp (`acc_pc_n64`, p99 767 ms at 64 devices while edf 64 passed: the stamp was the remaining cause).
+Alternative explained away: GIL or emulator load (the emulator used 1.9 % CPU and every non-answer kind stayed at
+p99 <= 1 ms throughout). Results consistency: the round-1 and round-2 cells agree where nothing changed (edf 8 p99
+0.107 vs 0.110 ms; policy-core 8 0.110 vs 0.104 ms); the policy-core decision latency at 64 devices (p99 132.8 /
+138.2 ms here) sits inside the committed flash range: 115.7 ms in the harness H5 cell (ratio 1.19x) but StudyLIVE2-perf's speed table gives 385.7 ms at 64 devices (a 2.8x
+DISAGREEMENT, beyond the 2x rule; candidate, not tested: that table times decisions on flash's CPU over its own
+replay, not the live H100 coordinator; FLAGGED to StudyLIVE2-perf; no acceptance result depends on the decision
+latency's value, only on the lateness, which is measured directly); request counts per cell match round 1 within 4 %.
+
+## HA5. Suites
+
+| suite | result |
+|---|---|
+| `live2/tests/` (coord, fakeserver, fix, fix2, harness) | 94 of 94 pass (harness 26, of which 13 new or adopted: first-token forwarding through a real split run on the fake streaming server, recall-letter counting, the stream-end fallback, build pieces, the clock-origin estimate, the submission stamp, dry-run determinism, flash's four preflight tests, the two derived count tests) |
+| `live2/fleet/tests/test_live2_fleet.py` | 234 of 234 checks pass |
+
+Open issue left to StudyLIVE2-perf: policy-core's decision latency at 64 devices (p99 138 ms) exceeds its 100 ms
+period, so its requests queue (submit delay p99 1.5 s); that is now a measured cost of the policy, not a harness defect.

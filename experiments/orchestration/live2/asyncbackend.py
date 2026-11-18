@@ -107,6 +107,14 @@ class AsyncLive2Backend:
         self._client = httpx.AsyncClient(timeout=httpx.Timeout(timeout_s), limits=limits)
         self.build_s = 0.0
         self.n_built = 0
+        self.end_wall: Dict[str, float] = {}
+        self.on_complete: Any = None
+        self.on_first: Any = None
+        self.run_clock: Any = None
+        self.wire_extra_ms: List[float] = []
+        self.submit_total_ms: List[float] = []
+        self.first_gap_ms: List[float] = []      # first SSE line -> first content token
+        self.callback_errors: List[str] = []
 
     # ---- the loop thread
     def _serve(self) -> None:
@@ -128,7 +136,21 @@ class AsyncLive2Backend:
         self._thread.join(10.0)
 
     def metrics(self) -> Dict[str, Any]:
-        return dict(n_built=self.n_built,
+        g = sorted(self.first_gap_ms)
+        def _st(v):
+            v = sorted(v)
+            if not v:
+                return dict(n=0)
+            return dict(n=len(v), p50=round(v[len(v) // 2], 4), p90=round(v[int(0.9 * len(v))], 4),
+                        p99=round(v[min(len(v) - 1, int(0.99 * len(v)))], 4), max=round(v[-1], 4))
+        return dict(n_built=self.n_built, callback_errors=self.callback_errors[:5],
+                    wire_extra_delay_ms=_st(self.wire_extra_ms),
+                    submit_delay_total_ms=_st(self.submit_total_ms),
+                    first_line_to_first_content_ms=(dict(
+                        n=len(g), p50=round(g[len(g) // 2], 4),
+                        p99=round(g[min(len(g) - 1, int(0.99 * len(g)))], 4),
+                        max=round(g[-1], 4)) if g else dict(n=0)),
+                    n_callback_errors=len(self.callback_errors),
                     build_ms_total=round(self.build_s * 1000.0, 3),
                     build_ms_mean=(round(self.build_s * 1000.0 / self.n_built, 4)
                                    if self.n_built else None),
@@ -151,6 +173,18 @@ class AsyncLive2Backend:
                                       cache_salt=wire.get("cache_salt"),
                                       mm_uuids=list(sub.mm_uuids),
                                       wire_sha256_16=_sha16(data), bytes=len(data)))
+        # THE WIRE-TIME STAMP (StudyLIVE2-harness addendum): the request's run time is the run
+        # clock's reading NOW, as it goes on the wire, never earlier than the coordinator's own
+        # stamp. The total from the epoch's nominal instant is the submit delay a slow decision
+        # (or a queue behind one) causes.
+        rc = self.run_clock() if self.run_clock is not None else None
+        if rc is not None:
+            extra = max(0.0, rc - sub.sent_s)
+            sub.sent_s = sub.sent_s + extra
+            self.wire_extra_ms.append(1000.0 * extra)
+            nominal = (sub.meta or {}).get("nominal_t")
+            if nominal is not None:
+                self.submit_total_ms.append(1000.0 * (sub.sent_s - float(nominal)))
         t0 = time.time()
         ttft = None
         usage: Dict[str, Any] = {}
@@ -158,6 +192,7 @@ class AsyncLive2Backend:
         err = None
         chunks: List[Dict[str, Any]] = []
         text_parts: List[str] = []
+        first_wall: Optional[float] = None
         try:
             async with self._client.stream(
                     "POST", self.base_url + "/v1/chat/completions", content=data,
@@ -185,12 +220,43 @@ class AsyncLive2Backend:
                                 text_parts.append(piece)
                             if ch.get("logprobs"):
                                 chunks.append(dict(logprobs=ch["logprobs"]))
+                        # StudyLIVE2-harness addendum, ruling Option 1: the answer leaves at its
+                        # FIRST CONTENT TOKEN. `ttft_s` keeps its existing definition (the first
+                        # SSE line), so the answer's t_done is unchanged; the first content
+                        # token's own instant is recorded to show the two coincide.
+                        if (first_wall is None and self.on_first is not None
+                                and (text_parts or chunks)):
+                            first_wall = time.time()
+                            self.first_gap_ms.append(1000.0 * (first_wall - t0 - ttft))
+                            try:
+                                self.on_first(dict(
+                                    request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s,
+                                    ttft_s=ttft, total_s=None, http_status=status, error=None,
+                                    usage={}, text="".join(text_parts), chunks=list(chunks),
+                                    sub=sub, t_first_content_wall=first_wall))
+                            except Exception as e:                    # noqa: BLE001
+                                self.callback_errors.append(f"{type(e).__name__}: {e}")
         except Exception as e:                                        # noqa: BLE001
             err = f"{type(e).__name__}: {e}"
-        total = time.time() - t0
-        return dict(request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s,
-                    ttft_s=ttft, total_s=total, http_status=status, error=err,
-                    usage=usage, text="".join(text_parts), chunks=chunks, sub=sub)
+        t_end = time.time()
+        total = t_end - t0
+        # StudyLIVE2-harness addendum (instrumentation): the wall instant the response stream
+        # ENDED, so the coordinator process can report the completion-to-forward gap. Harness
+        # timing only; nothing in the coordinator's decisions or records reads it.
+        self.end_wall[sub.request_id] = t_end
+        res = dict(request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s,
+                   ttft_s=ttft, total_s=total, http_status=status, error=err,
+                   usage=usage, text="".join(text_parts), chunks=chunks, sub=sub,
+                   t_end_wall=t_end)
+        # StudyLIVE2-harness addendum: the completion callback runs HERE, on the I/O loop, the
+        # moment the stream ends and BEFORE the future resolves, so the decision thread never
+        # sees a finished request whose answer has not been forwarded yet.
+        if self.on_complete is not None:
+            try:
+                self.on_complete(res)
+            except Exception as e:                                    # noqa: BLE001
+                self.callback_errors.append(f"{type(e).__name__}: {e}")
+        return res
 
 
 def _sha16(data: bytes) -> str:

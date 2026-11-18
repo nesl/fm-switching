@@ -1,0 +1,189 @@
+diff --git a/experiments/orchestration/live2/asyncbackend.py b/experiments/orchestration/live2/asyncbackend.py
+index d98d41d..f9a1c0c 100644
+--- a/experiments/orchestration/live2/asyncbackend.py
++++ b/experiments/orchestration/live2/asyncbackend.py
+@@ -107,6 +107,7 @@ class AsyncLive2Backend:
+         self._client = httpx.AsyncClient(timeout=httpx.Timeout(timeout_s), limits=limits)
+         self.build_s = 0.0
+         self.n_built = 0
++        self.end_wall: Dict[str, float] = {}
+ 
+     # ---- the loop thread
+     def _serve(self) -> None:
+@@ -187,10 +188,16 @@ class AsyncLive2Backend:
+                                 chunks.append(dict(logprobs=ch["logprobs"]))
+         except Exception as e:                                        # noqa: BLE001
+             err = f"{type(e).__name__}: {e}"
+-        total = time.time() - t0
++        t_end = time.time()
++        total = t_end - t0
++        # StudyLIVE2-harness addendum (instrumentation): the wall instant the response stream
++        # ENDED, so the coordinator process can report the completion-to-forward gap. Harness
++        # timing only; nothing in the coordinator's decisions or records reads it.
++        self.end_wall[sub.request_id] = t_end
+         return dict(request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s,
+                     ttft_s=ttft, total_s=total, http_status=status, error=err,
+-                    usage=usage, text="".join(text_parts), chunks=chunks, sub=sub)
++                    usage=usage, text="".join(text_parts), chunks=chunks, sub=sub,
++                    t_end_wall=t_end)
+ 
+ 
+ def _sha16(data: bytes) -> str:
+diff --git a/experiments/orchestration/live2/procsplit.py b/experiments/orchestration/live2/procsplit.py
+index 035e47c..d0be9d1 100644
+--- a/experiments/orchestration/live2/procsplit.py
++++ b/experiments/orchestration/live2/procsplit.py
+@@ -103,6 +103,7 @@ class RemoteCoordinator:
+         self._recv = 0
+         self._write_errors = 0
+         self._max_backlog = 0
++        self._recv_gaps_ms: List[float] = []
+         self._reader = threading.Thread(target=self._read_loop, name="live2-proxy-rx",
+                                         daemon=True)
+         self._reader.start()
+@@ -151,6 +152,9 @@ class RemoteCoordinator:
+             if op == "replies":
+                 out += list(msg.get("replies") or ())
+                 self._recv += len(msg.get("replies") or ())
++                now = time.time()
++                for v in (msg.get("stream_end_wall") or {}).values():
++                    self._recv_gaps_ms.append(1000.0 * (now - float(v)))
+             elif op == "result":
+                 self._stats = msg.get("result") or {}
+             elif op in ("eof", "closed"):
+@@ -195,7 +199,18 @@ class RemoteCoordinator:
+     def stats(self) -> Dict[str, Any]:
+         return dict(self._stats, wire_events_sent=self._sent, wire_replies_received=self._recv,
+                     wire_write_errors=self._write_errors,
+-                    wire_max_send_backlog=self._max_backlog)
++                    wire_max_send_backlog=self._max_backlog,
++                    completion_to_emulator_ms=_qstats(self._recv_gaps_ms))
++
++
++def _qstats(v: List[float]) -> Dict[str, Any]:
++    """p50 / p90 / p99 / max in ms, with the emulator's own index-based quantile."""
++    s = sorted(v)
++    if not s:
++        return dict(n=0)
++    def q(p: float) -> float:
++        return round(s[min(len(s) - 1, int(p * len(s)))], 4)
++    return dict(n=len(s), p50_ms=q(0.5), p90_ms=q(0.9), p99_ms=q(0.99), max_ms=round(s[-1], 4))
+ 
+ 
+ # ---------------------------------------------------------------- the child
+@@ -302,6 +317,24 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
+     def _now_t() -> float:
+         return last_t + (time.monotonic() - last_mono)
+ 
++    # StudyLIVE2-harness addendum (instrumentation): for every cloud_answer, the wall gap from
++    # the end of its HTTP response stream to the moment this process writes it to the fleet.
++    fwd_gaps_ms: List[float] = []
++
++    def _send_replies(replies) -> None:
++        ends = getattr(be, "end_wall", None) or {}
++        stamp: Dict[str, float] = {}
++        for r in replies:
++            if r.get("kind") == "cloud_answer":
++                rid = (r.get("payload") or {}).get("request_id")
++                if rid in ends:
++                    stamp[rid] = ends[rid]
++        now = time.time()
++        for v in stamp.values():
++            fwd_gaps_ms.append(1000.0 * (now - v))
++        send_msg(sock, {"op": "replies", "replies": list(replies), "sent_wall": now,
++                        "stream_end_wall": stamp})
++
+     while True:
+         if self_tick_s <= 0.0:
+             msg = inbox.get()
+@@ -312,7 +345,7 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
+                 n_self_ticks += 1
+                 replies = br.tick(_now_t()) or ()
+                 if replies:
+-                    send_msg(sock, {"op": "replies", "replies": list(replies)})
++                    _send_replies(replies)
+                 continue
+         if msg is None:
+             break
+@@ -333,6 +366,7 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
+             res["cache"] = cache.stats() if cache is not None else None
+             res["pid"] = os.getpid()
+             res["cpu_s_child"] = round(time.process_time() - cpu0, 4)
++            res["completion_to_forward_ms"] = _qstats(fwd_gaps_ms)
+             logs.close()
+             if be is not None:
+                 be.close()
+@@ -344,7 +378,7 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
+         else:
+             continue
+         if replies:
+-            send_msg(sock, {"op": "replies", "replies": list(replies)})
++            _send_replies(replies)
+ 
+ 
+ # ---------------------------------------------------------------- starting the pair
+diff --git a/experiments/orchestration/live2/run_live2_real.py b/experiments/orchestration/live2/run_live2_real.py
+index 72a1cbb..f71af7c 100644
+--- a/experiments/orchestration/live2/run_live2_real.py
++++ b/experiments/orchestration/live2/run_live2_real.py
+@@ -178,6 +178,7 @@ def run(a) -> Dict[str, Any]:
+                cache_cap_bytes=a.cache_cap_bytes, self_tick_s=a.self_tick_s)
+ 
+     err = None
++    em = None
+     t0 = time.time()
+     if a.split:
+         import harness_fixture as HF
+@@ -188,6 +189,7 @@ def run(a) -> Dict[str, Any]:
+         br = sr.__enter__()
+         try:
+             em = _emulator(EM, tdir, br, a)
++            em.lateness.detail = []          # per-action kind, for the addendum's instrumentation
+             em.run(rdir)
+         except Exception as e:                                        # noqa: BLE001
+             err = f"{type(e).__name__}: {e}"
+@@ -203,7 +205,14 @@ def run(a) -> Dict[str, Any]:
+     rm = (json.loads((rdir / "run_meta.json").read_text())
+           if (rdir / "run_meta.json").exists() else {})
+     rm.update(memory_setting=RC.memory_setting(a.host_tier_gib, a.memory_setting),
+-              split_processes=bool(a.split), label=header["label"])
++              split_processes=bool(a.split), label=header["label"], git_commit=header["git_commit"])
++    # StudyLIVE2-harness addendum (instrumentation): lateness per action kind, and the gap from
++    # each cloud answer's response-stream end to its forwarding (child) and receipt (emulator).
++    if a.split and em is not None and em.lateness.detail is not None:
++        rm["lateness_by_kind"] = _by_kind(em.lateness.detail)
++        _write_detail(rdir, em.lateness.detail)
++    rm["completion_to_forward_ms"] = res.get("completion_to_forward_ms")
++    rm["completion_to_emulator_ms"] = res.get("completion_to_emulator_ms")
+     (rdir / "run_meta.json").write_text(json.dumps(rm, indent=2, sort_keys=True) + "\n")
+     (rdir / "coordinator_result.json").write_text(
+         json.dumps(res, indent=1, default=str) + "\n")
+@@ -220,6 +229,28 @@ def run(a) -> Dict[str, Any]:
+     return out
+ 
+ 
++def _by_kind(detail) -> Dict[str, Any]:
++    from collections import defaultdict
++    g: Dict[str, list] = defaultdict(list)
++    for _due, what, ms in detail:
++        g[str(what)].append(float(ms))
++    out = {}
++    for k, v in sorted(g.items()):
++        v.sort()
++        def q(p, v=v):
++            return round(v[min(len(v) - 1, int(p * len(v)))], 4)
++        out[k] = dict(n=len(v), p50_ms=q(0.5), p90_ms=q(0.9), p99_ms=q(0.99), max_ms=round(v[-1], 4),
++                      n_over_50ms=sum(1 for x in v if x > 50.0))
++    return out
++
++
++def _write_detail(rdir: Path, detail) -> None:
++    import gzip
++    with gzip.open(rdir / "lateness_detail.jsonl.gz", "wt") as f:
++        for due, what, ms in detail:
++            f.write(json.dumps(dict(due_t=due, kind=what, lateness_ms=ms)) + "\n")
++
++
+ def _emulator(EM, tdir: Path, br, a):
+     kw = {}
+     if a.tick_s is not None:

@@ -151,6 +151,16 @@ class Live2Coordinator:
         self.answers: List[Dict[str, Any]] = []
         self.pulls: List[Dict[str, Any]] = []
         self.cloud_answers: List[Dict[str, Any]] = []
+        # StudyLIVE2-harness addendum: answers the I/O layer forwarded at stream end, by request
+        self.forwarded: Dict[str, Dict[str, Any]] = {}
+        self.n_forward_mismatch = 0
+        # what a slow decision costs: epoch start -> the request going on the wire (addendum (a))
+        self.submit_delays_ms: List[float] = []
+        self._epoch_wall0: Optional[float] = None
+        self.n_recall_first_token = 0
+        self.n_recall_letter_differs = 0
+        self.recall_letter_diffs: List[Dict[str, Any]] = []
+        self.n_monitor_score_differs = 0
         self.decision_latencies_ms: List[float] = []
         self.errors: List[str] = []
         self.counts: Dict[str, int] = defaultdict(int)
@@ -229,10 +239,16 @@ class Live2Coordinator:
         self._roster(t)
         obs = self.st.observation(t, epoch if epoch in _EPOCHS else "tick")
         t0 = time.perf_counter()
-        act = self.arm(obs)                      # scrub + validate_action + apply_defaults
-        dt_ms = (time.perf_counter() - t0) * 1000.0
-        self.decision_latencies_ms.append(dt_ms)
-        self._enact(act, t, dt_ms)
+        self._epoch_wall0 = t0
+        try:
+            act = self.arm(obs)                  # scrub + validate_action + apply_defaults
+            dt_ms = (time.perf_counter() - t0) * 1000.0
+            self.decision_latencies_ms.append(dt_ms)
+            self._enact(act, t, dt_ms)
+        finally:
+            # a submission made OUTSIDE an epoch (a chained recall released by a completion in
+            # `_settle`) is stamped at the instant it is made, not charged this epoch's delay
+            self._epoch_wall0 = None
 
     # ---------------------------------------------------------------- fleet events
     def _ingest(self, ev: Dict[str, Any], t: float) -> Optional[str]:
@@ -517,6 +533,18 @@ class Live2Coordinator:
         self.n_req += 1
         rid = f"r{self.n_req}"
         d = self.st.devices[device_id]
+        # THE TRUE SUBMISSION STAMP (StudyLIVE2-harness addendum (a), from flash's branch). A
+        # decision that takes 100 ms puts its requests on the wire 100 ms after the epoch it
+        # belongs to; stamping them with the epoch's nominal instant would understate every time
+        # derived from them by that delay. The delay is recorded per request and IS what a slow
+        # decision costs: later submissions, not held answers. A dry run has no wall clock and
+        # keeps the nominal instant, so its logs stay deterministic. Unlike the branch, the
+        # delay is charged only inside an epoch (`_epoch_wall0` is cleared when it ends).
+        delay_s = 0.0
+        if not self.dry_run and self._epoch_wall0 is not None:
+            delay_s = max(0.0, time.perf_counter() - self._epoch_wall0)
+            self.submit_delays_ms.append(delay_s * 1000.0)
+        t = t + delay_s
         body = B.build_body(kind=kind, device_id=device_id, session_id=session_id,
                             run_tag=self.run_tag, salt=d.salt, header=HEADER_TEXT,
                             frames=frames, question=question, options=options,
@@ -526,7 +554,8 @@ class Live2Coordinator:
                               device_id=device_id, session_id=session_id,
                               opportunity_id=opportunity_id, body=body,
                               est_tokens=int(est_tokens), sent_s=t, cache_salt=d.salt,
-                              mm_uuids=list(body["_live2"]["mm_uuids"]), traffic_mix=dict(mix))
+                              mm_uuids=list(body["_live2"]["mm_uuids"]), traffic_mix=dict(mix),
+                              meta=dict(nominal_t=t - delay_s, decision_delay_s=delay_s))
         self.st.in_flight[kind] += 1
         self.counts["submitted_" + kind] += 1
         if session_id is not None:
@@ -642,6 +671,7 @@ class Live2Coordinator:
         o.served_at = delivered
         o.cache_path = path
         ontime = delivered <= o.deadline_abs() + 1e-9
+        ev = self._cloud_answer(sub, o, delivered, path, scored)
         o.state = "answered" if ontime else "late"
         if o.kind == "monitor":
             self.st.devices[o.device_id].delivered.append((delivered, 0.0))
@@ -652,15 +682,83 @@ class Live2Coordinator:
                                  on_time=bool(ontime), cache_path=path,
                                  request_id=sub.request_id))
         # the coordinator's one output to the fleet: the cloud answer, delivered at t_done. The
-        # DEVICE's own answer never passes through here (CONTRACT.md).
-        self.cloud_answers.append(SC.make(
+        # DEVICE's own answer never passes through here (CONTRACT.md). When the I/O layer has
+        # already forwarded it (StudyLIVE2-harness addendum), it is still recorded here, and the
+        # bridge does not send it a second time; the two must be the same event.
+        early = self.forwarded.get(sub.request_id)
+        if early is not None and _comparable(early) != _comparable(ev):
+            self.n_forward_mismatch += 1
+        self.cloud_answers.append(ev)
+
+    def _cloud_answer(self, sub: Live2Submission, o, delivered: float, path,
+                      scored: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        ontime = delivered <= o.deadline_abs() + 1e-9
+        return SC.make(
             "cloud_answer", device_id=o.device_id, opportunity_id=o.opp_id,
             t_done=round(delivered, 6),
             payload=dict(request_id=sub.request_id, kind=o.kind, cache_path=path,
                          on_time=bool(ontime),
                          cloud_score=(scored or {}).get("cloud_score"),
                          cloud_letter=(scored or {}).get("cloud_letter"),
-                         p_yes=(scored or {}).get("p_yes"))))
+                         p_yes=(scored or {}).get("p_yes")))
+
+    def answer_on_completion(self, r: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """StudyLIVE2-harness addendum: the cloud_answer for a finished response, built the
+        moment its stream ends, on the I/O thread, without waiting for a tick or an epoch.
+
+        It reads only the submission, the response and the opportunity's deadline (fixed when
+        the opportunity was created), and builds the event with the same `_cloud_answer` the
+        decision thread uses, so the event is identical to the one `_settle` will record (any
+        difference is counted in `n_forward_mismatch`). It changes no coordinator state except
+        `forwarded`; the arm still learns of the completion in `_collect`, at its next epoch.
+        Build pieces carry no answer and return None.
+        """
+        sub = r.get("sub")
+        if sub is None or sub.kind in ("piece", "whole") or not sub.opportunity_id:
+            return None
+        o = self.st.opps.get(sub.opportunity_id)
+        if o is None:
+            return None
+        usage = r.get("usage") or {}
+        path, _frac = SC.cache_path_of(cached_tokens_of(usage), prompt_tokens_of(usage))
+        done_s = sub.sent_s + (r["total_s"] * self.speed if r.get("total_s") else 0.0)
+        first_s = (sub.sent_s + r["ttft_s"] * self.speed) if r.get("ttft_s") else None
+        delivered = first_s if first_s is not None else done_s
+        ev = self._cloud_answer(sub, o, delivered, path, self._score_of(sub, r))
+        early = self.forwarded.get(sub.request_id)
+        if early is not None:
+            # Already sent at its first content token (ruling Option 1): compare what the fleet
+            # received with what the full response gives, and count the differences.
+            pe, pf = early.get("payload") or {}, ev.get("payload") or {}
+            if sub.kind == "recall":
+                self.n_recall_first_token += 1
+                if pe.get("cloud_letter") != pf.get("cloud_letter"):
+                    self.n_recall_letter_differs += 1
+                    self.recall_letter_diffs.append(dict(
+                        request_id=sub.request_id, first_token=pe.get("cloud_letter"),
+                        full_text=pf.get("cloud_letter")))
+            elif pe.get("cloud_score") != pf.get("cloud_score"):
+                self.n_monitor_score_differs += 1
+            return None
+        self.forwarded[sub.request_id] = ev
+        return ev
+
+    def answer_on_first(self, r: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """StudyLIVE2-harness addendum, ruling Option 1: the cloud_answer at the FIRST CONTENT
+        TOKEN. t_done is the existing first-token time (unchanged), the monitor score comes from
+        the first token's logprobs and the recall letter from the text so far (the first token).
+        `cache_path` is not known until the usage block at stream end, so the payload carries
+        None; the scorer takes cache_path from request.jsonl. Returns None for build pieces."""
+        sub = r.get("sub")
+        if sub is None or sub.kind in ("piece", "whole") or not sub.opportunity_id:
+            return None
+        o = self.st.opps.get(sub.opportunity_id)
+        if o is None or r.get("ttft_s") is None:
+            return None
+        delivered = sub.sent_s + r["ttft_s"] * self.speed
+        ev = self._cloud_answer(sub, o, delivered, None, self._score_of(sub, r))
+        self.forwarded[sub.request_id] = ev
+        return ev
 
     def _expire(self, t: float) -> None:
         for oid in self.st.order:
@@ -721,6 +819,7 @@ class Live2Coordinator:
             counts=dict(sorted(self.counts.items())),
             n_monitor_answers=len(mon), n_recall_answers=len(rec),
             n_on_time=sum(1 for a in self.answers if a.get("on_time")),
+            submit_delay_ms=_pct(self.submit_delays_ms),
             n_pulls=len(self.pulls), n_cloud_answers=len(self.cloud_answers),
             decision_latency_ms=dict(p50=q(0.5), p99=q(0.99),
                                      max=(round(lat[-1], 4) if lat else None), n=len(lat)),
@@ -742,6 +841,24 @@ class Live2Coordinator:
 
 _EPOCHS = ("stream_arrival", "stream_departure", "recall_arrival", "request_completion",
            "connectivity_change", "tick")
+
+
+def _pct(xs) -> Dict[str, Any]:
+    v = sorted(xs)
+    if not v:
+        return dict(n=0)
+    def g(p):
+        return round(v[min(int(p * len(v)), len(v) - 1)], 4)
+    return dict(n=len(v), p50=g(0.5), p90=g(0.9), p99=g(0.99), max=round(v[-1], 4))
+
+
+def _comparable(ev: Dict[str, Any]) -> Dict[str, Any]:
+    """A cloud_answer without the two fields Option 1 lets differ: cache_path (unknown at the
+    first token) and the recall letter (counted separately)."""
+    p = dict(ev.get("payload") or {})
+    p.pop("cache_path", None)
+    p.pop("cloud_letter", None)
+    return dict(ev, payload=p)
 
 
 def _sched(ev: Dict[str, Any]) -> float:

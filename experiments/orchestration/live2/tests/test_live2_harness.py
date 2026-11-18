@@ -148,7 +148,11 @@ class TestTheFixtureStore(unittest.TestCase):
                 self.assertEqual(sizes[r["frame_ref"]], int(r["bytes"]))
                 n += 1
         self.assertEqual(n, len(sizes))
-        self.assertEqual(n, 74156)
+        # derived from the committed manifests' own metadata, not hardcoded (user ruling
+        # 2026-11-18: the S-EMBER D2 store was extended, 74,156 -> 80,593 frames)
+        expect = sum(json.loads((HF.MANIFESTS / f"{name}_manifest_meta.json").read_text())["n_frames"]
+                     for name in HF.NAMES)
+        self.assertEqual(n, expect)
 
     def test_the_fixture_is_reproducible_from_the_frame_ref(self):
         with tempfile.TemporaryDirectory() as a, tempfile.TemporaryDirectory() as b:
@@ -284,6 +288,283 @@ class TestTheProcessSplit(unittest.TestCase):
         import procsplit as PS
         p = PS.SplitRun._short_sock()
         self.assertLess(len(p.encode()), 100, p)
+
+
+# ------------------------------------------------------------------ StudyLIVE2-harness addendum
+class TestAnswersLeaveAtTheFirstContentToken(unittest.TestCase):
+    """Addendum, ruling Option 1 (H100 implementation): the I/O thread forwards each cloud
+    answer at its first content token; the decision thread records the same event later and the
+    bridge does not resend it."""
+
+    def test_a_split_run_forwards_every_answer_once_from_the_io_thread(self):
+        import emulator as EM
+        import fakestream as FS
+        import procsplit as PS
+        import trace as TR
+        from test_live2_coord import GPU_KV, HOST_GIB, HOST_TOK
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            tdir = d / "trace"
+            TR.write_trace(tdir, TR.generate_trace(5, 4, "50:50", 15.0, "A"))
+            rdir = d / "split"
+            with FS.serve(0, concurrency=4) as url:
+                cfg = dict(run_dir=str(rdir), arm="edf", arm_kwargs={}, mode="A", run_s=15.0,
+                           drain_s=5.0, decision_period_s=0.1, gpu_kv_tokens=GPU_KV,
+                           host_tier_gib=HOST_GIB, host_tier_tokens=HOST_TOK, seed=5,
+                           run_tag="rt", frames_root=None, server_url=url, strip_hints=False,
+                           defer_images=True, self_tick_s=0.005)
+                with PS.SplitRun(cfg, kind="fake") as remote:
+                    EM.FleetEmulator(tdir, remote, "A", realtime=True, drain_s=5.0).run(rdir)
+                st = remote.stats()
+            res = json.loads((rdir / "coordinator_result.json").read_text())
+        b = res["bridge"]
+        self.assertGreater(b["n_forwarded_on_completion"], 0)
+        # every answer the decision thread settled had already left from the I/O thread ...
+        self.assertEqual(b["n_skipped_forwarded"], b["n_forwarded_on_completion"])
+        # ... as the same event (cache_path and the recall letter excepted, counted separately)
+        self.assertEqual(b["n_forward_mismatch"], 0)
+        self.assertEqual(b["n_monitor_score_differs"], 0)
+        # the fleet received each answer exactly once (mode A sends no pull)
+        self.assertEqual(st["wire_replies_received"], b["n_forwarded_on_completion"])
+        # and at the first token: the Option 1 path carried every forward
+        self.assertEqual(res["first_token_to_forward_ms"]["n"], b["n_forwarded_on_completion"])
+        self.assertEqual(res["backend"]["n_callback_errors"], 0)
+        # every request went on the wire with a run-clock stamp no earlier than its epoch's
+        sd = res["backend"]["submit_delay_total_ms"]
+        self.assertEqual(sd["n"], res["backend"]["n_built"])
+        self.assertGreaterEqual(min(sd["p50"], sd["max"]), 0.0)
+
+    def test_the_parent_recovers_the_emulators_clock_origin(self):
+        import socket
+        import time as _t
+        import procsplit as PS
+        a, b = socket.socketpair()
+        try:
+            rc = PS.RemoteCoordinator(a, kind="stub")
+            origin = _t.monotonic() - 10.0          # an emulator that started 10 s ago
+            for late in (0.030, 0.0002, 0.004):     # calls arrive slightly after their instants
+                t = _t.monotonic() - origin - late
+                got = rc._origin_of(t)
+            self.assertAlmostEqual(got, origin, delta=0.0005)
+            self.assertLessEqual(origin - 1e-6, got)   # never earlier than the true origin
+        finally:
+            a.close()
+            b.close()
+
+    def _co(self):
+        from coordinator import Live2Coordinator
+        from test_live2_coord import GPU_KV, HOST_GIB, HOST_TOK, _arm
+        return Live2Coordinator(_arm("edf"), None, [], gpu_kv_tokens=GPU_KV,
+                                host_tier_gib=HOST_GIB, host_tier_tokens=HOST_TOK,
+                                upload_mode="A", window_s=10.0, drain_s=1.0, seed=1,
+                                run_tag="rt", dry_run=True)
+
+    def _sub(self, kind, rid="r1", opp="opp1"):
+        from backend import Live2Submission
+        return Live2Submission(request_id=rid, decision_id="d1", kind=kind, device_id="dev1",
+                               session_id=("s1" if kind == "recall" else None),
+                               opportunity_id=opp, body={}, est_tokens=10, sent_s=1.0,
+                               cache_salt="x", mm_uuids=[], traffic_mix={})
+
+    class _Opp:
+        def __init__(self, kind):
+            self.device_id, self.opp_id, self.kind = "dev1", "opp1", kind
+
+        def deadline_abs(self):
+            return 5.0
+
+    def test_a_recall_letter_that_changes_after_the_first_token_is_counted(self):
+        co = self._co()
+        co.st.opps["opp1"] = self._Opp("recall")
+        sub = self._sub("recall")
+        first = co.answer_on_first(dict(sub=sub, ttft_s=0.5, text="B", chunks=[], usage={}))
+        self.assertEqual(first["payload"]["cloud_letter"], "B")
+        self.assertIsNone(first["payload"]["cache_path"])
+        self.assertEqual(first["t_done"], 1.5)          # t_done is the first-token time
+        again = co.answer_on_completion(dict(sub=sub, ttft_s=0.5, total_s=0.9, text="B\nC",
+                                             chunks=[], usage={}))
+        self.assertIsNone(again, "an answer already forwarded must not be forwarded again")
+        self.assertEqual((co.n_recall_first_token, co.n_recall_letter_differs), (1, 1))
+        self.assertEqual(co.recall_letter_diffs[0]["full_text"], "C")
+
+    def test_an_unchanged_recall_letter_is_not_counted(self):
+        co = self._co()
+        co.st.opps["opp1"] = self._Opp("recall")
+        sub = self._sub("recall")
+        co.answer_on_first(dict(sub=sub, ttft_s=0.5, text="D", chunks=[], usage={}))
+        co.answer_on_completion(dict(sub=sub, ttft_s=0.5, total_s=0.9, text="D", chunks=[],
+                                     usage={}))
+        self.assertEqual((co.n_recall_first_token, co.n_recall_letter_differs), (1, 0))
+
+    def test_a_stream_with_no_content_token_falls_back_to_stream_end(self):
+        co = self._co()
+        co.st.opps["opp1"] = self._Opp("monitor")
+        sub = self._sub("monitor")
+        ev = co.answer_on_completion(dict(sub=sub, ttft_s=None, total_s=0.9, text="",
+                                          chunks=[], usage={}))
+        self.assertIsNotNone(ev)
+        self.assertEqual(ev["t_done"], 1.9)            # no first token: delivered at done
+
+    def test_build_pieces_carry_no_answer(self):
+        co = self._co()
+        sub = self._sub("piece", opp=None)
+        self.assertIsNone(co.answer_on_first(dict(sub=sub, ttft_s=0.5, text="x", chunks=[])))
+        self.assertIsNone(co.answer_on_completion(dict(sub=sub, ttft_s=0.5, total_s=1.0)))
+
+
+class TestTheTrueSubmissionStamp(unittest.TestCase):
+    """Addendum (a), from flash's branch: requests are stamped when they go on the wire."""
+
+    def test_the_submit_delay_a_decision_causes_is_logged(self):
+        import cachekeys as CK
+        import emulator as EM
+        import fakestream as FS
+        import trace as TR
+        from backend import Live2Backend
+        from bridge import EmulatorBridge
+        from coordinator import Live2Coordinator, Logs
+        from test_live2_coord import GPU_KV, HOST_GIB, HOST_TOK, _arm
+        with tempfile.TemporaryDirectory() as d:
+            out = Path(d)
+            tdir = out / "trace"
+            TR.write_trace(tdir, TR.generate_trace(5, 4, "50:50", 20.0, "A"))
+            rdir = out / "run"
+            with FS.serve(0, concurrency=4) as url:
+                logs = Logs(rdir).open()
+                be = Live2Backend(url, workers=8, model="32BI", strip_hints=True)
+                co = Live2Coordinator(_arm("edf"), be, [], gpu_kv_tokens=GPU_KV,
+                                      host_tier_gib=HOST_GIB, host_tier_tokens=HOST_TOK,
+                                      upload_mode="A", window_s=20.0, drain_s=5.0, seed=5,
+                                      logs=logs, run_tag=CK.run_tag(5, "edf"))
+                br = EmulatorBridge(co)
+                br.kind = "fake"
+                EM.FleetEmulator(tdir, br, "A", realtime=True, drain_s=5.0).run(rdir)
+                logs.close()
+                be.close()
+        res = co._result(0.0, 1.0)
+        sd = res["submit_delay_ms"]
+        self.assertGreater(co.n_req, 0)
+        # every submission made inside an epoch carries a delay; edf submits only from epochs
+        self.assertEqual(sd["n"], co.n_req, "every submission must carry a submit delay")
+        for k in ("p50", "p90", "p99", "max"):
+            self.assertGreaterEqual(sd[k], 0.0)
+        self.assertIsNone(co._epoch_wall0, "the epoch stamp must be cleared after the epoch")
+
+    def test_a_dry_run_decides_exactly_as_before_and_forwards_nothing(self):
+        import cachekeys as CK
+        import emulator as EM
+        import trace as TR
+        from bridge import EmulatorBridge
+        from coordinator import Live2Coordinator, Logs
+        from test_live2_coord import GPU_KV, HOST_GIB, HOST_TOK, _arm
+        logs_by_run = []
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            tdir = d / "trace"
+            TR.write_trace(tdir, TR.generate_trace(7, 4, "50:50", 30.0, "A"))
+            for i in (0, 1):
+                rdir = d / f"run{i}"
+                logs = Logs(rdir).open()
+                co = Live2Coordinator(_arm("edf"), None, [], gpu_kv_tokens=GPU_KV,
+                                      host_tier_gib=HOST_GIB, host_tier_tokens=HOST_TOK,
+                                      upload_mode="A", window_s=30.0, drain_s=5.0, seed=7,
+                                      logs=logs, run_tag=CK.run_tag(7, "edf"), dry_run=True)
+                br = EmulatorBridge(co)
+                br.kind = "stub"
+                EM.FleetEmulator(tdir, br, "A", realtime=False, drain_s=5.0).run(rdir)
+                logs.close()
+                logs_by_run.append([json.loads(l) for l in open(rdir / "decision.jsonl")])
+                # a dry run has no I/O thread: every answer comes from the settle path
+                self.assertEqual(co.forwarded, {})
+                self.assertGreater(len(co.cloud_answers), 0)
+                self.assertEqual(co.submit_delays_ms, [])
+        a, b = logs_by_run
+        strip = ("decision_latency_ms",)
+        self.assertEqual([{k: v for k, v in x.items() if k not in strip} for x in a],
+                         [{k: v for k, v in x.items() if k not in strip} for x in b])
+
+
+class TestTheMissingFrameGate(unittest.TestCase):
+    """Addendum (b), flash's preflight: no uuid-only fallback outside fake-server tests."""
+
+    def _trace(self, d: Path, refs=None) -> Path:
+        sizes = HF.manifest_bytes()
+        refs = list(refs) if refs is not None else list(sizes)[:8]
+        tdir = d / "trace"
+        tdir.mkdir(parents=True, exist_ok=True)
+        with open(tdir / "trace.jsonl", "w") as fh:
+            for r in refs[:4]:
+                fh.write(json.dumps(dict(kind="monitor_opportunity", frame_ref=r)) + "\n")
+            fh.write(json.dumps(dict(kind="history_batch",
+                                     frame_refs=list(refs[4:]))) + "\n")
+        return tdir
+
+    def test_a_real_server_run_refuses_to_start_with_an_unstored_frame(self):
+        import preflight as PF
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            tdir = self._trace(d)
+            refs = PF.trace_frame_refs(tdir)
+            self.assertGreater(len(refs), 0)
+            store = d / "store"
+            HF.build_store(store, refs[:-1], HF.manifest_bytes())   # one frame deliberately absent
+            with self.assertRaises(PF.MissingFrames) as cm:
+                PF.require_frames(tdir, store, "vllm")
+            self.assertIn("REFUSING TO START", str(cm.exception))
+
+    def test_a_fake_server_run_is_exempt_and_says_so(self):
+        import preflight as PF
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            tdir = self._trace(d)
+            rep = PF.require_frames(tdir, d / "nothing-here", "fake")
+            self.assertFalse(rep["enforced"])
+            self.assertGreater(rep["n_missing"], 0)
+
+    def test_a_complete_store_passes_the_gate(self):
+        import preflight as PF
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            tdir = self._trace(d)
+            refs = PF.trace_frame_refs(tdir)
+            sizes = HF.manifest_bytes()
+            have = [r for r in refs if r in sizes]
+            store = d / "store"
+            HF.build_store(store, have, sizes)
+            rep = PF.require_frames(tdir, store, "vllm", refs=have)
+            self.assertTrue(rep["ok"])
+            self.assertEqual(rep["n_missing"], 0)
+
+    def test_an_empty_frame_file_is_refused_too(self):
+        import preflight as PF
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            tdir = self._trace(d)
+            refs = PF.trace_frame_refs(tdir)
+            sizes = HF.manifest_bytes()
+            have = [r for r in refs if r in sizes]
+            store = d / "store"
+            HF.build_store(store, have, sizes)
+            (store / have[0]).write_bytes(b"")
+            with self.assertRaises(PF.MissingFrames):
+                PF.require_frames(tdir, store, "vllm", refs=have)
+
+    def test_the_committed_manifests_cover_every_frame_the_measured_trace_asks_for(self):
+        """Flash's pinned (30, 1278) finding, re-derived from the committed manifests (user
+        ruling 2026-11-18). The S-EMBER D2 store now reaches every EVAL session's end, so the
+        count of absent references is derived, not pinned, and must be zero."""
+        import preflight as PF
+        import trace as TR
+        with tempfile.TemporaryDirectory() as d:
+            # the configuration StudyLIVE2-harness measured: seed 0, 8 devices, 120 s, mode A
+            tdir = Path(d) / "trace"
+            TR.write_trace(tdir, TR.generate_trace(0, 8, "50:50", 120.0, "A"))
+            refs = PF.trace_frame_refs(tdir)
+        sizes = HF.manifest_bytes()
+        absent = [r for r in refs if r not in sizes]
+        self.assertGreater(len(refs), 0)
+        self.assertEqual(absent, [], f"{len(absent)} of {len(refs)} trace frame references "
+                                     f"have no committed manifest row: {absent[:3]}")
 
 
 if __name__ == "__main__":

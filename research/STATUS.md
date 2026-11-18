@@ -1,5 +1,7 @@
 # FM-switching — Project Status
 
+Last updated: 2026-11-18 (later 8) (**StudyLIVE2-harness ADDENDUM ACCEPTED on the real 32B: answers leave at their first token and requests are stamped at the wire, so emulator lateness p99 <= 0.17 ms in edf 8 / 64 and policy-core 8 / 64 and policy-core's slowness shows as submit delay. Next: StudyMOT2-dayinlife, then the StudyLIVE2-pilot rerun from Step 1.**)
+
 Last updated: 2026-11-18 (later 7) (**StudyMOT1-dayinlife AMENDMENT 3 COMPLETE: at light load (8 dashcams) chunked rebuilds serve both the fleet and the robot, so the best way to serve the robot's question differs in each cell of the light/heavy x tight/roomy grid; the tight-host host-warm prediction failed (PARTIAL or COLD in 5 of 5). Figure data results/motivation/mot1/mot1_figdata_amend3.json.**)
 
 Last updated: 2026-11-18 (later 6) (**StudyLIVE2-pre Part 1 extension: the S-EMBER D2 JPEG store now covers every EVAL session to its end (6,437 new frames, 38,579 total; source re-extraction byte-identical on the overlap; E10a check unflagged). Next: StudyLIVE2-pilot rerun from Step 1 once flash's harness addendum is on origin.**)

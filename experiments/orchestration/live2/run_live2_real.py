@@ -84,12 +84,17 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--no-split", dest="split", action="store_false",
                     help="the pilot's single-process wiring, for comparison only")
     ap.add_argument("--no-warm-cache", dest="warm_cache", action="store_false")
+    ap.add_argument("--forward-at", default="first", choices=("first", "end"),
+                    help="addendum: forward answers at the first content token (ruling Option 1) or at stream end")
+    ap.add_argument("--no-forward-on-completion", dest="forward_on_completion",
+                    action="store_false",
+                    help="StudyLIVE2-harness addendum off: answers wait for the decision thread")
     ap.add_argument("--no-score", dest="score", action="store_false")
     ap.add_argument("--memory-setting", default=None)
     ap.add_argument("--label", default="")
     ap.add_argument("--start-server", action="store_true",
                     help="H100 only: restart the round-1 server for this cell, as the pilot did")
-    ap.set_defaults(split=True, warm_cache=True, score=True)
+    ap.set_defaults(split=True, warm_cache=True, score=True, forward_on_completion=True)
     return ap
 
 
@@ -129,6 +134,14 @@ def run(a) -> Dict[str, Any]:
     htok = int(a.host_tier_tokens or RC.host_tokens(a.host_tier_gib))
     sends = bool(a.server)
 
+    # StudyLIVE2-harness addendum (2), from flash's branch: a real-server run refuses to start
+    # with a frame it cannot send (checked BEFORE the server starts, so nothing is half-run)
+    import preflight as PF
+    frames_report = PF.require_frames(tdir, (Path(a.frames_root) if a.frames_root else None),
+                                      a.server_kind if sends else "device-only-no-server")
+    (rdir / "frames_preflight.json").write_text(
+        json.dumps(frames_report, indent=1, default=str) + "\n")
+
     srv = None
     sinfo: Optional[Dict[str, Any]] = None
     if a.start_server:
@@ -163,6 +176,7 @@ def run(a) -> Dict[str, Any]:
         decision_period_s=a.decision_period_s, ratio=a.ratio, n_devices=a.n_devices,
         run_s=a.run_s, memory_setting=RC.memory_setting(a.host_tier_gib, a.memory_setting),
         server=sinfo, server_url=(a.server or "none"), server_kind=a.server_kind,
+        frames_preflight=frames_report, git_working_tree=_tree_state(),
         model=a.model, split_processes=bool(a.split), is_measurement=False)
     (rdir / "header.json").write_text(json.dumps(header, indent=1, default=str) + "\n")
 
@@ -175,9 +189,12 @@ def run(a) -> Dict[str, Any]:
                strip_hints=(a.server_kind != "fake"), defer_images=True,
                calibration_knots_path=(str(knots) if knots else None),
                gpu_budget_s=a.gpu_budget_s, http_limit=a.http_limit,
-               cache_cap_bytes=a.cache_cap_bytes, self_tick_s=a.self_tick_s)
+               cache_cap_bytes=a.cache_cap_bytes, self_tick_s=a.self_tick_s,
+               forward_on_completion=bool(a.forward_on_completion),
+               forward_at_first_token=(a.forward_at == "first"))
 
     err = None
+    em = None
     t0 = time.time()
     if a.split:
         import harness_fixture as HF
@@ -188,6 +205,7 @@ def run(a) -> Dict[str, Any]:
         br = sr.__enter__()
         try:
             em = _emulator(EM, tdir, br, a)
+            em.lateness.detail = []          # per-action kind, for the addendum's instrumentation
             em.run(rdir)
         except Exception as e:                                        # noqa: BLE001
             err = f"{type(e).__name__}: {e}"
@@ -203,7 +221,27 @@ def run(a) -> Dict[str, Any]:
     rm = (json.loads((rdir / "run_meta.json").read_text())
           if (rdir / "run_meta.json").exists() else {})
     rm.update(memory_setting=RC.memory_setting(a.host_tier_gib, a.memory_setting),
-              split_processes=bool(a.split), label=header["label"])
+              split_processes=bool(a.split), label=header["label"], git_commit=header["git_commit"])
+    # StudyLIVE2-harness addendum (instrumentation): lateness per action kind, and the gap from
+    # each cloud answer's response-stream end to its forwarding (child) and receipt (emulator).
+    if a.split and em is not None and em.lateness.detail is not None:
+        rm["lateness_by_kind"] = _by_kind(em.lateness.detail)
+        _write_detail(rdir, em.lateness.detail)
+    rm["completion_to_forward_ms"] = res.get("completion_to_forward_ms")
+    rm["completion_to_emulator_ms"] = res.get("completion_to_emulator_ms")
+    rm["forward_on_completion"] = bool(a.split and a.forward_on_completion)
+    rm["submit_delay_ms"] = res.get("submit_delay_ms")          # epoch start -> submit call
+    rm["submit_delay_total_ms"] = (res.get("backend") or {}).get("submit_delay_total_ms")  # epoch nominal t -> wire
+    rm["wire_extra_delay_ms"] = (res.get("backend") or {}).get("wire_extra_delay_ms")
+    rm["decision_latency_ms"] = res.get("decision_latency_ms")
+    rm["forward_at"] = a.forward_at if (a.split and a.forward_on_completion) else "decision-thread"
+    rm["first_token_to_forward_ms"] = res.get("first_token_to_forward_ms")
+    rm["first_line_to_first_content_ms"] = (res.get("backend") or {}).get("first_line_to_first_content_ms")
+    rm["forwarding"] = {k: (res.get("bridge") or {}).get(k) for k in
+                        ("n_forwarded_on_completion", "n_skipped_forwarded", "n_forward_mismatch",
+                         "n_recall_first_token", "n_recall_letter_differs", "recall_letter_diffs",
+                         "n_monitor_score_differs")}
+    rm["callback_errors"] = (res.get("backend") or {}).get("n_callback_errors")
     (rdir / "run_meta.json").write_text(json.dumps(rm, indent=2, sort_keys=True) + "\n")
     (rdir / "coordinator_result.json").write_text(
         json.dumps(res, indent=1, default=str) + "\n")
@@ -218,6 +256,40 @@ def run(a) -> Dict[str, Any]:
         out["score"] = _score(tdir, rdir, Path(a.calibration), a.arm)
     (rdir / "cell.json").write_text(json.dumps(out, indent=1, default=str) + "\n")
     return out
+
+
+def _tree_state() -> Dict[str, Any]:
+    """HEAD plus whether, and how, the working tree differs from it (a run's exact code)."""
+    import hashlib
+    import subprocess
+    def g(*args):
+        return subprocess.run(["git", *args], cwd=REPO, capture_output=True, text=True).stdout
+    diff = g("diff", "HEAD", "--", "experiments")
+    return dict(head=g("rev-parse", "HEAD").strip(), dirty=bool(diff),
+                diff_sha256=(hashlib.sha256(diff.encode()).hexdigest() if diff else None),
+                dirty_files=sorted({l[6:] for l in diff.splitlines() if l.startswith("+++ b/")}))
+
+
+def _by_kind(detail) -> Dict[str, Any]:
+    from collections import defaultdict
+    g: Dict[str, list] = defaultdict(list)
+    for _due, what, ms in detail:
+        g[str(what)].append(float(ms))
+    out = {}
+    for k, v in sorted(g.items()):
+        v.sort()
+        def q(p, v=v):
+            return round(v[min(len(v) - 1, int(p * len(v)))], 4)
+        out[k] = dict(n=len(v), p50_ms=q(0.5), p90_ms=q(0.9), p99_ms=q(0.99), max_ms=round(v[-1], 4),
+                      n_over_50ms=sum(1 for x in v if x > 50.0))
+    return out
+
+
+def _write_detail(rdir: Path, detail) -> None:
+    import gzip
+    with gzip.open(rdir / "lateness_detail.jsonl.gz", "wt") as f:
+        for due, what, ms in detail:
+            f.write(json.dumps(dict(due_t=due, kind=what, lateness_ms=ms)) + "\n")
 
 
 def _emulator(EM, tdir: Path, br, a):

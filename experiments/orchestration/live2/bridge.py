@@ -32,6 +32,7 @@ class EmulatorBridge:
         self.n_events = 0
         self.n_ticks = 0
         self.n_decisions = 0
+        self.n_skipped_forwarded = 0
         # D99 (1): ONE DECISION PER PERIOD, the same period for every arm, with that period's
         # events batched. The bridge enforces it on the EMULATOR's clock, so it holds whatever
         # the emulator's own tick_s is (it must be no coarser than the period, or a period would
@@ -83,11 +84,25 @@ class EmulatorBridge:
             out += list(self.co.pulls[self._pulls:])
             self._pulls = len(self.co.pulls)
         if len(self.co.cloud_answers) > self._sent:
-            out += list(self.co.cloud_answers[self._sent:])
+            # StudyLIVE2-harness addendum: an answer the I/O layer already forwarded at stream
+            # end is recorded but not sent again.
+            fwd = getattr(self.co, "forwarded", None) or {}
+            for ev in self.co.cloud_answers[self._sent:]:
+                if (ev.get("payload") or {}).get("request_id") in fwd:
+                    self.n_skipped_forwarded += 1
+                else:
+                    out.append(ev)
             self._sent = len(self.co.cloud_answers)
         return out
 
     def describe(self) -> Dict[str, Any]:
         return dict(arm=self.co.arm.name, n_events=self.n_events, n_ticks=self.n_ticks,
                     n_pulls=self._pulls, n_cloud_answers=self._sent,
-                    n_decisions=self.n_decisions, decision_period_s=self._period)
+                    n_decisions=self.n_decisions, decision_period_s=self._period,
+                    n_forwarded_on_completion=len(getattr(self.co, "forwarded", None) or {}),
+                    n_skipped_forwarded=self.n_skipped_forwarded,
+                    n_forward_mismatch=getattr(self.co, "n_forward_mismatch", 0),
+                    n_recall_first_token=getattr(self.co, "n_recall_first_token", 0),
+                    n_recall_letter_differs=getattr(self.co, "n_recall_letter_differs", 0),
+                    recall_letter_diffs=list(getattr(self.co, "recall_letter_diffs", []))[:50],
+                    n_monitor_score_differs=getattr(self.co, "n_monitor_score_differs", 0))
