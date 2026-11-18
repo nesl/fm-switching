@@ -109,13 +109,18 @@ axa.set_xlim(XLO, XR)
 axa.set_ylim(-4, 82)
 axa.set_xticks([0, 5, 10, 15])
 # direct curve labels (name riding the plateau) + final median count at the right end.
-# The two zero curves overlap at y = 0, so their labels are offset vertically, not the data.
-name_pos = {"ONE-GO": (9.0, 63), "P2048": (6.2, 32), "P1024": (5.6, 7.5), "HOST-WARM": (8.6, -2.5)}
-cnt_y = {"ONE-GO": 59, "P2048": 28, "P1024": 6.5, "HOST-WARM": -3.0}
+# The 1,024-pieces and host-warm curves coincide at y = 0; both lines are kept, but their
+# two end labels are replaced by one neutral-grey label just above the zero line.
+name_pos = {"ONE-GO": (9.0, 63), "P2048": (6.2, 32)}
+cnt_y = {"ONE-GO": 59, "P2048": 28}
 for a, lab, c, ls in acts:
+    if a not in name_pos:
+        continue
     axa.text(*name_pos[a], lab, fontsize=5.8, color=c, va="center", ha="left", fontweight="bold")
     axa.text(15.4, cnt_y[a], f"{int(curve[a]['final_median'])}", fontsize=6.6, color=c,
              va="center", ha="left", fontweight="bold")
+axa.text(15.6, 4.0, "1,024 pieces, host-warm: 0", fontsize=5.6, color="#404040",
+         va="center", ha="right", fontweight="bold")
 axa.text(0.02, 0.97, "(a)", transform=axa.transAxes, fontsize=8, va="top", fontweight="bold")
 
 # (b) robot answer time per action
@@ -126,7 +131,7 @@ for i, (a, lab, c, ls) in enumerate(acts):
     axb.errorbar(i, m, yerr=[[m - rob[a]["lo"]], [rob[a]["hi"] - m]], fmt="none",
                  ecolor="black", elinewidth=0.7, capsize=1.8)
 axb.axhline(TARGET, ls="--", lw=0.9, color="black")
-axb.text(len(acts) - 0.5, TARGET + 0.15, "robot deadline 5 s", ha="right", va="bottom", fontsize=5.8)
+axb.text(-0.55, TARGET + 0.15, "robot deadline 5 s", ha="left", va="bottom", fontsize=5.8)
 axb.set_xticks(xb)
 axb.set_xticklabels(["one\ngo", "2,048\npieces", "1,024\npieces", "host-\nwarm"], fontsize=4.9)
 axb.set_ylabel("Robot answer time (s)")
