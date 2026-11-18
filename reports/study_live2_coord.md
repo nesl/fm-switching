@@ -2245,3 +2245,13 @@ devices. The measured median is 60, the p90 is 172 and the worst period runs 344
 makes the candidates factor larger than assumed, which strengthens the case for the options that
 attack it (A and B) and weakens nothing above, since Option 0 attacks the other factor. The note
 has been updated.
+
+## HA6. Robot outcomes of the addendum's cells are INVALID (user ruling 2026-11-18)
+
+Found by StudyMOT2's seed 10 diagnosis: the live coordinator's per-session history size is not cumulative
+(`cstate.history_append` keeps `max(batch est_tokens, current)`; the emulator forwards the per-batch `est_tokens`, not
+the trace's `cum_tokens`), so every robot history looked many times smaller to the arms and edf's "whole" rebuilds
+built only a prefix. Every ROBOT outcome in this addendum's cells (`diag_edf_n8`, `fix_edf_n8`, `acc_*`, `acc2_*`) is
+therefore INVALID and must not be cited; each run directory carries `INVALID_ROBOT_OUTCOMES.txt`. The HARNESS criteria
+the addendum was accepted on (emulator lateness per action kind, forwarding gaps and counters, digests, HTTP errors)
+do not depend on history sizes and stand. Fix owned by flash.
