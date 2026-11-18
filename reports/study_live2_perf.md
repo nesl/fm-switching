@@ -228,3 +228,125 @@ If none of them closes the gap, the honest outcome is the one this row already r
 uncapped policy does not keep up at 64 and 128 devices on flash CPU, that is a property of the
 policy and the machine rather than of the harness, and the round-1 comparison should say so
 rather than quietly capping the work the policy is allowed to do.
+
+---
+
+## Option B: the closed-form SH admission estimate (PRE-REGISTRATION, written before any code)
+
+**User decision 2026-11-18: build Option B as schedule insurance, OFF BY DEFAULT.** Nothing in
+the pilot, round 1 or any other run uses it until the user approves it after the pilot. This
+entry is the pre-registration: the exact closed form, the load-factor definition, and the
+falsifiable prediction, all recorded and committed BEFORE the implementation and before any
+measurement. The planner logs the decision in the design log; this row records it.
+
+Spec v4 section 6.5, which is what is being built: "When a full rollout is too expensive (M4),
+the closed-form channel approximation may be used (direct delay of overlapping requests from the
+step model times a load factor), with the backlog term applied only outside channel 1 and
+continuation value retained. The fallback must pass T0 itself." It applies to SH (monitoring)
+admission candidates ONLY; piece release and recall jobs keep the full rollout, unchanged.
+
+### B.1 What the full rollout computes, so the closed form prices the same thing
+
+For an admit, `delta_j` runs two rollouts and takes `a.total - b.total`, where
+`total = u_hat + z_term + terminal` (`rollout.py:276-277`). The engine model in the rollout is a
+SINGLE SERIAL SERVER in EDF order: `start_j = max(free_{j-1}, due_at_j)`,
+`finish_j = start_j + predict(...).service_s`, `free_j = finish_j` (`rollout.py:203-219`). That
+is why a closed form is possible at all: inserting one request shifts every later request in the
+queue by exactly its service time, which is arithmetic rather than simulation.
+
+The SH credit is PER INSTANT (D98, `rollout.py::_opportunity_utility`): each instant `c` of each
+device is credited `omega_SH * (u_sh_cloud(delivered - c) - u_sh_device)` when the call captured
+at `c` is delivered by `c + L_SH`, and exactly 0 otherwise, since a device-served instant
+contributes `omega * (u_dev - u_dev)`.
+
+### B.2 The closed form, term by term
+
+At the decision instant: `t0 = f.t`, `H = params.H`, `end = t0 + H`. In-flight work frees the
+engine at `free0 = max_p (t0 + predict(p, concurrent=|in_flight|-1).service_s)`. The EDF queue is
+`Q = _edf(f.pending)`, served serially as above. Candidate `c` is an `episode_call` inserted at
+its EDF position `k`, with `S_c = predict(c, concurrent=|in_flight|, load_pct).service_s`,
+`start_c = max(free_{k-1}, due_at_c)`, `delivered_c = start_c + S_c + down_s(dev_c)`.
+
+    DeltaJ_cf(admit c) = G - L + DeltaCV - mu * B + DeltaZ
+
+| term | definition | frozen-engine quantity it comes from |
+|---|---|---|
+| **G** own gain | `omega_SH * (u_sh_cloud(delivered_c - capture_c) - u_sh_device)` if `delivered_c <= capture_c + L_SH`, else 0 | `Eng1Engine.predict().service_s` for the timing; `utility.u_sh_cloud` / `profiles.u_sh_device` for the value, both committed and unchanged |
+| **L** imposed loss | `shift = LF * S_c`. For every queued `episode_call` at EDF position >= k that still starts inside the horizon, its credit recomputed at `delivered_j + shift`, dropping to 0 if that passes `capture_j + L_SH`. `L = sum(credit_before - credit_after) >= 0` | the same `service_s` arithmetic and the same committed `u_sh_cloud` |
+| **DeltaCV** continuation value, RETAINED | for every job whose pieces are delayed, `continuation_value(job, t, engine, extra_work_s=shift) - continuation_value(job, t, engine, extra_work_s=0)` | the committed `continuation.continuation_value`, called exactly as the rollout calls it |
+| **B** backlog, OUTSIDE CHANNEL 1 ONLY | `gpu_c` if `start_c > due_at_c` (the candidate had to queue, so its work sits behind the serving request and is outside channel 1), else 0. Charged as `-mu * B` | `predict().gpu_s`; `mu` from `params.mu`, the arm's own estimator |
+| **DeltaZ** deficit term | for each device whose instant outcomes change, `z_of("SH") * (ok_after/n_after - ok_before/n_before)`, the same expression as `rollout.py::_z_term` | `Device.z_of`, committed |
+
+**Channel 1** is the single serial server the frozen model describes (section 6: a request
+arriving behind concurrent work waits for that work, it does not share a step). Work in channel 1
+is the request being served; work outside it is queued. That is the reading of "the backlog term
+applied only outside channel 1" this implements.
+
+### B.3 The load factor: ONE definition, NO fitted parameter
+
+    LF = step_ms(tok_c, img_c, decode_reqs = R_d, prefill_reqs = R_p, cached_ctx_tokens = C)
+         / step_ms(tok_c, img_c, 0, 0, 0)
+
+both sides evaluated on the frozen step model (`StepModel.step_ms`, read through
+`eng1_engine_fast`), with `R_d` the in-flight requests, `R_p` the queued prefills ahead of the
+candidate, and `C` the cached context tokens the policy believes the engine holds. It is a pure
+ratio of the frozen model to itself, so **nothing is fitted, no HOLDOUT is touched, and no
+cross-fitting is needed.** It uses exactly the step model's own per-request and
+per-token-times-context terms, which is what the prompt's "using the step model's per-token /
+per-request terms" asks for.
+
+**One property of it is stated in advance because it is awkward.** The frozen step model's fitted
+coefficients are not all positive: `per_decode_req_ms = -0.5711`, `admission_per_image_ms =
+-1.2492` and `per_tok_above_2048_ms = -0.0078` (`results/cost/study_eng1/eng1_step_model.json`).
+So LF is NOT guaranteed to be at or above 1, and on a decode-heavy engine the frozen model
+predicts a SHORTER step. **No term is dropped and no clamp is applied**, because dropping a term
+whose fitted sign is inconvenient would be choosing the answer, and clamping would substitute my
+judgement for the frozen model's. The empirical distribution of LF is reported with the
+measurements. If LF falls below 1 it DEFLATES the imposed delay, which adds to the
+over-admission predicted below rather than cutting against it.
+
+### B.4 What the closed form does NOT price, declared in advance
+
+1. **Cascade effects.** The shift can push work out of the horizon entirely, change how much work
+   is simulated, and change `busy`. The closed form prices only the FIRST-ORDER shift of the
+   requests already queued.
+2. **The KV pool and prefix-risk term.** The rollout allocates a transient prefix for an episode
+   call and prices prefix-loss risk (A6.2); the closed form omits it.
+3. **Cadence-calendar instants** other than those served by queued or in-flight calls.
+4. **The terminal STATE-VALUE sum is omitted, and that omission is EXACT, not an
+   approximation:** an `episode_call` builds no history, so no device belief changes and the term
+   cancels identically in `a.total - b.total`.
+
+Items 1 to 3 are approximations and all of them are omissions of COST, which is the mechanism
+behind the prediction.
+
+### B.5 PRE-REGISTERED PREDICTION, in the design note's own words
+
+From Option B above, unchanged: "the closed form prices the delay this request imposes on
+overlapping requests but applies the backlog term only outside channel 1, so it will tend to
+UNDERSTATE the cost of admitting into an already-backlogged engine, which is exactly the
+condition at 64 and 128 devices. That biases towards over-admission at the sizes where the
+problem bites."
+
+As falsifiable statements, to be answered with the numbers and not reworded:
+
+- **P-B1 (sign).** `sign(closed-form admits - rollout admits) > 0` on the committed fixtures:
+  over-admissions (closed form admits, rollout declines) exceed under-admissions (closed form
+  declines, rollout admits).
+- **P-B2 (trend with backlog).** The over-admission rate rises monotonically across backlog
+  terciles, lowest in the first tercile and highest in the third.
+- **P-B3 (trend with fleet size).** The over-admission rate rises with device count from 8 to
+  128.
+- **P-B4 (direction of the DeltaJ error).** The median of `DeltaJ_cf - DeltaJ_rollout` is
+  positive, and rises with backlog tercile.
+
+Each of P-B1 to P-B4 can come out held, not held, or mixed, and all four are reported that way.
+A negative or zero sign on P-B1 falsifies the mechanism this fallback's risk assessment rests on,
+which would be a more interesting result than confirmation.
+
+### B.6 Acceptance is not decided here
+
+M-B1 reports the spec's four T0 criteria for the fallback and for the full frozen model side by
+side against the spec's pre-registered bars. **No pass or fail beyond the numbers against those
+bars is declared, and the fallback is not enabled anywhere.** Acceptance is the user's call after
+the H100 pilot shows what decision delay above 32 devices actually costs.
