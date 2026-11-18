@@ -1,0 +1,125 @@
+{
+ "check": "d110_speed_this_host",
+ "is_measurement": false,
+ "command": "experiments/orchestration/live2/fix_checks.py speed --window-s 180 --sizes 32,64,128 (and --window-s 60 --sizes 64), as committed, output to a scratch directory",
+ "fixture": "SYNTHETIC 50 : 50, mode A, tight memory (gpu_kv_tokens = 62944, host_tier_gib = 27), 180 s, mu = 0, H = 1.0 s, dry run with the committed cost curve (pol4)",
+ "option0": "on (built into policy/readiness.py)",
+ "sh_cost": "rollout (default)",
+ "host_cpu": "AMD EPYC 9354 32-Core Processor, 2 sockets x 32 cores x 2 threads = 128 logical CPUs, max 3.799 GHz (flash: Intel Core i7-13700KF, 16 cores / 24 threads, up to 5.4 GHz)",
+ "python": "3.10.12",
+ "affinity": "none (no taskset); single-threaded process",
+ "other_load": "shared host: other users' processes running throughout (at start: two python processes at about 100 % CPU each, a vLLM engine at 27 %, on other cores; 1-min load average 2.7 to 11.8 during the runs; GPU 2 idle, no server up); snapshot in the report",
+ "rows": [
+  {
+   "n_devices": 32,
+   "fixture_s": 180,
+   "this_host": {
+    "max": 245.0137,
+    "n": 1801,
+    "p50": 43.8441,
+    "p99": 222.1231
+   },
+   "flash": {
+    "p50": 20.1832,
+    "p99": 100.5899,
+    "max": 104.3396,
+    "n": 1801
+   },
+   "ratio_p50": 2.172,
+   "ratio_p99": 2.208,
+   "wall_s": 85.609,
+   "cpu_percent": 100.0,
+   "epoch_overruns": 0,
+   "scoring_calls": 37216
+  },
+  {
+   "n_devices": 64,
+   "fixture_s": 180,
+   "this_host": {
+    "max": 692.7913,
+    "n": 1801,
+    "p50": 112.2622,
+    "p99": 584.87
+   },
+   "flash": {
+    "p50": 50.7032,
+    "p99": 252.5418,
+    "max": 310.3826,
+    "n": 1801
+   },
+   "ratio_p50": 2.214,
+   "ratio_p99": 2.316,
+   "wall_s": 220.638,
+   "cpu_percent": 100.0,
+   "epoch_overruns": 0,
+   "scoring_calls": 56063
+  },
+  {
+   "n_devices": 128,
+   "fixture_s": 180,
+   "this_host": {
+    "max": 3337.1719,
+    "n": 1801,
+    "p50": 278.3517,
+    "p99": 2220.3894
+   },
+   "flash": {
+    "p50": 121.605,
+    "p99": 994.7885,
+    "max": 1477.6206,
+    "n": 1801
+   },
+   "ratio_p50": 2.289,
+   "ratio_p99": 2.232,
+   "wall_s": 604.739,
+   "cpu_percent": 100.0,
+   "epoch_overruns": 0,
+   "scoring_calls": 82126
+  },
+  {
+   "n_devices": 64,
+   "fixture_s": 60,
+   "this_host": {
+    "max": 351.161,
+    "n": 601,
+    "p50": 11.0379,
+    "p99": 338.2392
+   },
+   "flash_reported_p99_ms": 240.9,
+   "flash_note": "StudyLIVE2-perf section P5: 240.9 ms on the 60 s fixture, BEFORE Option 0 (no committed Option 0 60 s file found)",
+   "ratio_p99": 1.404,
+   "wall_s": 28.347
+  }
+ ],
+ "diagnostic_h05": {
+  "label": "DIAGNOSTIC, approved 2026-11-18, not the committed benchmark: fix_checks._cell unchanged except h = 0.5 (the live pilot's H), 64 devices, 180 s fixture",
+  "decision_latency_ms": {
+   "p50": 102.8441,
+   "p99": 575.8541,
+   "max": 710.0058,
+   "n": 1801
+  },
+  "wall_measured_s": 210.575,
+  "cpu_percent": 100.0,
+  "epoch_overruns": 0,
+  "n_decisions": 7417,
+  "n_opportunities": 11616,
+  "virtual_t_reached_s": 194.9,
+  "scoring_calls": 56605
+ },
+ "in_run_acceptance": {
+  "source": "results/orchestration/live2/harness_addendum/acc2_pc_n64 (policy-core, 64 devices, real trace seed 0, 120 s, H = 0.5, mu EWMA, live 32B)",
+  "decision_latency_ms": {
+   "p50": 47.3201,
+   "p99": 138.2442,
+   "max": 171.8679
+  },
+  "scoring_calls": 26189
+ },
+ "_provenance": {
+  "git_commit": "6fa766cde5d8a2df0252c270f7ad90f3aa00bfcd",
+  "script": "experiments/orchestration/live2/fix_checks.py",
+  "device": "h100nvl host CPU",
+  "timestamp": "2026-11-18T15:16:07"
+ }
+}

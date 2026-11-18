@@ -614,3 +614,35 @@ It does not implement Option A, add a switch, or touch any arm's decision path. 
 periods a normal dry run produces and recomputes DeltaJ for the alternative sets offline. The
 speed figure it produces is a PROJECTION from rollout counts and the measured per-rollout cost,
 labelled as such, and is not a measured arm.
+
+## D110 (H100 host, 2026-11-18): the decision-speed benchmark on this host's CPU
+
+User ruling D110 (2): run the committed benchmark on the H100 host's CPU, because the in-run decision latency of
+policy-core at 64 devices in the harness addendum's acceptance cell (p99 138.2 ms) disagreed by more than 2x with this
+report's fixture figures. Run exactly as committed: `experiments/orchestration/live2/fix_checks.py speed`, 180 s fixture
+(the one behind `perf_speed_option0.json`), 32 / 64 / 128 devices, Option 0 on (built into `policy/readiness.py`),
+`sh_cost = rollout` (default), same repetitions and percentile method; plus the 60 s fixture at 64 devices. No policy
+code was modified. Host: AMD EPYC 9354, 2 x 32 cores, 128 logical CPUs, max 3.80 GHz; Python 3.10.12; no affinity
+(single-threaded process). The host is SHARED: other users' processes ran throughout (at start two python processes at
+about 100 % CPU each and a vLLM engine at 27 %, on other cores; snapshot `perf_speed_h100host_ps.txt`, user names
+anonymised); GPU 2 idle, no server up. Output: `results/orchestration/live2/coord/perf/perf_speed_h100host.json`.
+
+| devices | fixture | this host p50 / p99 | flash p50 / p99 | ratio p50 / p99 |
+|---|---|---|---|---|
+| 32 | 180 s | 43.8 / 222.1 ms | 20.2 / 100.6 ms | 2.17x / 2.21x |
+| 64 | 180 s | 112.3 / 584.9 ms | 50.7 / 252.5 ms | 2.21x / 2.32x |
+| 128 | 180 s | 278.4 / 2,220.4 ms | 121.6 / 994.8 ms | 2.29x / 2.23x |
+| 64 | 60 s | 11.0 / 338.2 ms | p99 240.9 ms (section P5, before Option 0) | p99 1.40x |
+| 64 | 180 s, DIAGNOSTIC H = 0.5 s | 102.8 / 575.9 ms | n/a | vs H = 1.0 on this host: 0.92x / 0.98x |
+| 64 | in-run, acceptance cell `acc2_pc_n64` (real trace seed 0, 120 s, H = 0.5, mu EWMA, live 32B) | 47.3 / 138.2 ms | n/a | n/a |
+
+**This host's CPU is about 2.2x SLOWER than flash's on identical work**, consistently at every size (single-thread
+speed: a 3.8 GHz server core against a 5.4 GHz desktop core). So the in-run 138 ms is NOT explained by a faster CPU;
+on this CPU the fixture costs 585 ms at the same size. The DIAGNOSTIC cell (approved, labelled, committed fixture
+function unchanged except h = 0.5) rules out the H difference: 575.9 vs 584.9 ms. The two measurement points also
+differ in trace (synthetic vs the real seed-0 trace), mu (0 vs EWMA), window (180 vs 120 s) and in what the live
+coordinator tells the arm about history sizes: candidate, NOT tested, see the StudyMOT2 finding that the live
+coordinator's per-session token estimate is not cumulative (`cstate.history_append` keeps the max of one batch and
+the current value), which makes every live recall item look many times smaller than it is and could make its rollouts
+cheaper. The live and fixture figures should not be compared until that is resolved. The live pilot measures decision
+latency in-run on this CPU, which is the figure that bears on the 100 ms period.
