@@ -1,0 +1,142 @@
+{
+ "paths": [
+  "efficient (prefix caching ON)",
+  "resend (prefix caching OFF)"
+ ],
+ "logprob_tol_nats": 0.05,
+ "by_target": {
+  "11000": {
+   "n_frames": 122,
+   "prompt_tokens": 11215,
+   "efficient": {
+    "ttft_s": {
+     "n": 20,
+     "p50": 0.6566,
+     "p90": 0.672,
+     "min": 0.6476,
+     "max": 0.6966,
+     "mean": 0.6602
+    },
+    "total_s": {
+     "n": 20,
+     "p50": 0.7187,
+     "p90": 0.7339,
+     "min": 0.7088,
+     "max": 0.945,
+     "mean": 0.7313
+    },
+    "prefix_cache_hit_tokens_min": 11104,
+    "prefix_cache_hit_tokens_median": 11144.0
+   },
+   "resend": {
+    "ttft_s": {
+     "n": 20,
+     "p50": 5.8611,
+     "p90": 5.9033,
+     "min": 5.8093,
+     "max": 5.9143,
+     "mean": 5.8568
+    },
+    "total_s": {
+     "n": 20,
+     "p50": 5.9222,
+     "p90": 5.9638,
+     "min": 5.8699,
+     "max": 6.1595,
+     "mean": 5.9267
+    },
+    "prefix_cache_hit_tokens_median": 0.0
+   },
+   "ttft_p50_ratio_resend_over_efficient": 8.93,
+   "answer_mismatch_eff_vs_resend": 1,
+   "clock_pinned_all": true
+  },
+  "28000": {
+   "n_frames": 311,
+   "prompt_tokens": 28225,
+   "efficient": {
+    "ttft_s": {
+     "n": 20,
+     "p50": 1.596,
+     "p90": 1.6377,
+     "min": 1.5867,
+     "max": 1.7502,
+     "mean": 1.6128
+    },
+    "total_s": {
+     "n": 20,
+     "p50": 1.6559,
+     "p90": 1.6975,
+     "min": 1.6473,
+     "max": 1.8099,
+     "mean": 1.6727
+    },
+    "prefix_cache_hit_tokens_min": 28112,
+    "prefix_cache_hit_tokens_median": 28160.0
+   },
+   "resend": {
+    "ttft_s": {
+     "n": 20,
+     "p50": 23.9166,
+     "p90": 24.0027,
+     "min": 23.8579,
+     "max": 24.0385,
+     "mean": 23.9136
+    },
+    "total_s": {
+     "n": 20,
+     "p50": 23.9881,
+     "p90": 24.0742,
+     "min": 23.9296,
+     "max": 24.1105,
+     "mean": 23.9854
+    },
+    "prefix_cache_hit_tokens_median": 0.0
+   },
+   "ttft_p50_ratio_resend_over_efficient": 14.99,
+   "answer_mismatch_eff_vs_resend": 0,
+   "clock_pinned_all": true
+  }
+ },
+ "equivalence_gate": {
+  "n": 3,
+  "rows": [
+   {
+    "question_id": "13a2c7e709fa8cb676dff1556276fd52540157dd5c187f1efbf24ccbc23c3a07",
+    "ans_eff": "C",
+    "ans_resend": "C",
+    "same_answer": true,
+    "same_top20_set": true,
+    "max_logprob_diff": 0.2117
+   },
+   {
+    "question_id": "15c9fa98b7acf913a9bb728b42efe0d72945cf2d85bfd62d6acc4a9f45bc5a98",
+    "ans_eff": "A",
+    "ans_resend": "A",
+    "same_answer": true,
+    "same_top20_set": false,
+    "max_logprob_diff": 0.2154
+   },
+   {
+    "question_id": "28fc07ed3f77a545d0adcf4ccd959a5bc0fb65834966e9847d423a27ec091504",
+    "ans_eff": "B",
+    "ans_resend": "B",
+    "same_answer": true,
+    "same_top20_set": false,
+    "max_logprob_diff": 0.1283
+   }
+  ],
+  "passed": false
+ },
+ "studyorin2_llamacpp": {
+  "harness_ttft_p50_s": {
+   "11000": 0.146,
+   "28000": 0.225
+  },
+  "server_ttft_p50_s": {
+   "11000": 1.416,
+   "28000": 3.433
+  },
+  "note": "ORIN2 in-process harness vs llama.cpp server (image re-send); design D61"
+ }
+}

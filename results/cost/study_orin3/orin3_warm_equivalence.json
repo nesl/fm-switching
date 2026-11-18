@@ -1,0 +1,44 @@
+{
+ "gate": "PRE-REGISTERED FAILURE (threshold 0.05 nats, not changed)",
+ "purpose": "confirm the efficient (prefix-cache) warm-recall path is output-identical to full recompute",
+ "verdict": "FAILED and real: vLLM's prefix-cache path is not output-identical to recompute. The first-token logprobs drift ~0.25 nats; the answer (argmax) is stable in 39/40.",
+ "full_run_40_questions": {
+  "answer_agreement": "39/40",
+  "answer_flip": {
+   "target": 11000,
+   "efficient": "D",
+   "resend": "A"
+  },
+  "top20_set_identical": "31/40",
+  "first_token_max_logprob_diff_nats": {
+   "p50": 0.222,
+   "p90": 0.372,
+   "max": 0.451,
+   "min": 0.071,
+   "gt_0.05": "40/40",
+   "gt_0.15": "27/40"
+  }
+ },
+ "isolating_tests": {
+  "self_jitter_same_server_same_question_twice": {
+   "max_logprob_diff_nats": 0.0,
+   "same_answer": true,
+   "top20_set_identical": true,
+   "server": "caching-OFF",
+   "conclusion": "within a launch the engine is bit-deterministic"
+  },
+  "within_launch_cold_vs_warm_same_server_same_question": {
+   "server": "caching-ON (single launch)",
+   "cold_cache_hit_tokens": 0,
+   "warm_cache_hit_tokens": 11136,
+   "cold_ttft_s": 8.496,
+   "warm_ttft_s": 0.6664,
+   "same_answer": true,
+   "top20_set_identical": false,
+   "max_logprob_diff_nats": 0.2513,
+   "conclusion": "the drift is intrinsic to the prefix-cache path (cache-hit reuses stored KV in a different reduction order than a fresh prefill under bf16 + FLASH_ATTN + chunked prefill); it is NOT cross-launch nondeterminism (self-jitter 0.0)"
+  }
+ },
+ "contrast_studyorin2": "StudyORIN2's in-process llama.cpp harness was output-equivalent to the server within 0.15 nats with identical answers + top-20 and server self-jitter 0.0; vLLM's efficient path is not output-identical to recompute",
+ "follow_up_open": "not investigated now (user deferred): whether a different vLLM attention backend (TRITON_ATTN / FLASHINFER), disabling chunked prefill, or fp32 logits yields a numerically exact cache path"
+}

@@ -1,0 +1,58 @@
+{
+ "stage1": "COMPLETE",
+ "timestamp": "2026-11-17T23:47:10.228562Z",
+ "host": "jetson_orin",
+ "jetpack": "6.2.2",
+ "l4t": "R36.5.0",
+ "cuda": "12.6",
+ "python": "3.10.12",
+ "venv": "/home/nesl/orin3_vllm_venv",
+ "route": "A (official jetson-ai-lab jp6/cu126 wheels)",
+ "stack": {
+  "vllm": "0.20.0+cu126",
+  "torch": "2.11.0 (jetson cu126)",
+  "torchvision": "0.26.0 (jetson)",
+  "transformers": "5.20.2",
+  "tokenizers": "0.23.3",
+  "xgrammar": "0.1.32 (jetson)",
+  "apache_tvm_ffi": "0.1.9",
+  "flashinfer_python": "0.6.15.post1",
+  "flashinfer_cubin": "0.6.13",
+  "triton": "3.8.0",
+  "nvidia_cudss_cu12": "0.8.0.10"
+ },
+ "install_fixes": [
+  "swapped PyPI torch 2.14.1+cu130 for jetson torch 2.11.0+cu126 (driver is CUDA 12.6)",
+  "symlinked libcudss.so.0 (nvidia-cudss-cu12 0.8.0.10) into torch/lib",
+  "xgrammar 0.1.32 from jetson index (0.2.9 from PyPI needs apache-tvm-ffi>=0.1.11, conflicts vllm pin ==0.1.9)",
+  "torchvision 0.26.0 from jetson index (required by Qwen3-VL image processor)",
+  "FLASHINFER_DISABLE_VERSION_CHECK=1 (cubin 0.6.13 vs python 0.6.15.post1; FLASH_ATTN is the active backend anyway)"
+ ],
+ "model": {
+  "repo": "Qwen/Qwen3-VL-4B-Instruct",
+  "revision": "ebb281ec70b05090aa6165b016eac8ec08e71b17 (matches H100 4BI StudyD3)",
+  "dtype": "bfloat16",
+  "weights_location": "/dev/shm (RAM, 8.3 GB)"
+ },
+ "server_flags": "--max-num-seqs 1 --enable-prefix-caching --dtype bfloat16 --max-model-len 32768 --limit-mm-per-prompt {image:9,video:0} --gpu-memory-utilization 0.4 --enforce-eager --seed 0 --host 127.0.0.1 --port 8000",
+ "attention_backend": "FLASH_ATTN (chosen from FLASH_ATTN, FLASHINFER, TRITON_ATTN, FLEX_ATTENTION)",
+ "engine_init_s": 26.32,
+ "smoke": {
+  "n1": {
+   "text": "No",
+   "first_token": "No",
+   "p_yes": 2.902311982921861e-06,
+   "top_k": 20,
+   "prompt_tokens": 378,
+   "note": "prompt_tokens 378 matches StudyD15 N=1 contract exactly"
+  },
+  "multi3": {
+   "text": "No",
+   "first_token": "No",
+   "p_yes": 2.2603251041963556e-06,
+   "top_k": 20,
+   "prompt_tokens": 1062
+  },
+  "result": "PASS"
+ }
+}

@@ -1,0 +1,130 @@
+{
+ "set": "d3dev",
+ "n_scores": 6010,
+ "sanity": {
+  "n_null": 0,
+  "n_neither": 0,
+  "n_error": 0,
+  "clock_pinned_all_1.3005GHz": true,
+  "prompt_tokens_distinct": [
+   378
+  ],
+  "prompt_tokens_matches_d15_378": true,
+  "cached_tokens_nonnull": 0,
+  "cached_tokens_note": "vLLM returned no prompt_tokens_details.cached_tokens for one-frame requests: the shared header prefix is shorter than one 16-token KV block, so no block is cacheable before the differing image"
+ },
+ "agreement_vs_llamacpp_orin": {
+  "n_matched": 6010,
+  "pearson": 0.9417,
+  "mean_signed_vllm_minus_other": 0.2619,
+  "median_abs_diff": 1.0307
+ },
+ "agreement_vs_h100_4b": {
+  "n_matched": 6010,
+  "pearson": 0.9962,
+  "mean_signed_vllm_minus_other": 0.0043,
+  "median_abs_diff": 0.25
+ },
+ "platt_validation": {
+  "routine": "ctrl1c_calibrate.fit_platt (Newton/IRLS, committed)",
+  "h100_4b_reproduction": {
+   "a": 0.114603,
+   "b": 1.140751,
+   "target_a": 0.114603,
+   "target_b": 1.140751,
+   "reproduces": true
+  }
+ },
+ "vllm_orin_4b_map": {
+  "a": 0.114703,
+  "b": 1.141292,
+  "raw_logpyes_at_p0.5": -9.949997,
+  "n_fit": 6010,
+  "n_clips": 601,
+  "feature": "log_pyes",
+  "form": "log_odds = a*log(p_yes) + b"
+ },
+ "compare_maps": {
+  "vllm_orin_4b": {
+   "a": 0.114703,
+   "b": 1.141292
+  },
+  "llamacpp_orin_4b": {
+   "a": 0.114932,
+   "b": 1.174287
+  },
+  "h100_4b": {
+   "a": 0.114603,
+   "b": 1.140751
+  },
+  "h100_32b": {
+   "a": 0.129472,
+   "b": 1.848187
+  }
+ },
+ "tier_residual": {
+  "set": "d3dev (both tiers present)",
+  "n": 6010,
+  "vllm4b_minus_cal32b_logodds": -0.017775,
+  "llamacpp_orin_ref_orin2": -0.0171,
+  "h100_4b_ref_ctrl1c": -0.1197
+ },
+ "latency_warm_header": {
+  "vllm_ttft_s": {
+   "n": 6010,
+   "p50": 0.2546,
+   "p90": 0.2601,
+   "min": 0.238,
+   "max": 0.2909,
+   "mean": 0.2548
+  },
+  "vllm_total_s": {
+   "n": 6010,
+   "p50": 0.3149,
+   "p90": 0.3207,
+   "min": 0.298,
+   "max": 0.3509,
+   "mean": 0.3151
+  },
+  "llamacpp_orin_ttft_s": {
+   "n": 6010,
+   "p50": 0.4708,
+   "p90": 0.4768,
+   "min": 0.4498,
+   "max": 0.5518,
+   "mean": 0.4706
+  },
+  "llamacpp_orin_total_s": {
+   "n": 6010,
+   "p50": 0.526,
+   "p90": 0.532,
+   "min": 0.5051,
+   "max": 0.6071,
+   "mean": 0.5258
+  },
+  "note": "vLLM prefix caching ON (warm header); StudyORIN2 llama.cpp cache_prompt=False (cold)"
+ },
+ "coldcheck": {
+  "n": 200,
+  "seed": 0,
+  "warm_ttft_s": {
+   "n": 200,
+   "p50": 0.254,
+   "p90": 0.2597,
+   "min": 0.2449,
+   "max": 0.2909,
+   "mean": 0.2546
+  },
+  "cold_ttft_s": {
+   "n": 200,
+   "p50": 0.2498,
+   "p90": 0.2544,
+   "min": 0.2374,
+   "max": 1.1343,
+   "mean": 0.2541
+  },
+  "cold_minus_warm_p50_pct": -1.65,
+  "exceeds_5pct": false,
+  "verdict": "header caching does not affect the comparison (<=5% at p50)"
+ }
+}

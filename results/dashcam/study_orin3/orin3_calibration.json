@@ -1,0 +1,37 @@
+{
+ "model": "4bi_bf16_orin_vllm",
+ "stack": "vLLM 0.20.0+cu126",
+ "feature": "log_pyes",
+ "form": "log_odds = a*log(p_yes) + b",
+ "a": 0.114703,
+ "b": 1.141292,
+ "raw_logpyes_at_p0.5": -9.949997,
+ "fit_split": "StudyD3 DEV (601 clips x 10 offsets = 6010 N=1)",
+ "clip_level_label": true,
+ "seed": 0,
+ "compare": {
+  "llamacpp_orin_4b": {
+   "a": 0.114932,
+   "b": 1.174287
+  },
+  "h100_4b": {
+   "a": 0.114603,
+   "b": 1.140751
+  },
+  "h100_32b": {
+   "a": 0.129472,
+   "b": 1.848187
+  }
+ },
+ "_provenance": {
+  "git_commit": "57ff424e4880b7b3f95975e117915d76322ac959",
+  "script": "study_orin3_analyse.py",
+  "model": "qwenvl4b",
+  "timestamp": "2026-11-17T16:44:46.904729",
+  "device": "jetson_orin",
+  "n": 6010,
+  "args": {
+   "part": 1
+  }
+ }
+}

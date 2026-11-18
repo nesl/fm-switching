@@ -1,0 +1,26 @@
+{
+ "path": "efficient",
+ "vid": "9902221866524366_start_0.0_end_1199.959",
+ "n_dev": 20,
+ "calibration": {
+  "per_frame_tokens": 90.0,
+  "fixed_tokens": 43.0,
+  "max_frames": 578,
+  "counts": {
+   "11000": 122,
+   "28000": 311
+  },
+  "probe_prompt_tokens": {
+   "20": 1843,
+   "40": 3643
+  }
+ },
+ "exclusivity": {
+  "gpu_processes": [
+   "882993 /home/nesl/orin3_vllm_venv/bin/python3.10 /home/nesl/orin3_vllm_venv/bin/vllm serve /dev/shm/hf_home/hub/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec70b05090aa6165b016eac8ec08e71b17 --served-model-name qwen3vl4b --max-num-seqs 1 --enable-prefix-caching --dtype bfloat16 --max-model-len 32768 --limit-mm-per-prompt {\"image\":600,\"video\":0} --gpu-memory-utilization 0.5 --enforce-eager --seed 0 --host 127.0.0.1 --port 8000",
+   "883114 /home/nesl/orin3_vllm_venv/bin/python3.10 -c from multiprocessing.resource_tracker import main;main(36)",
+   "883954 python experiments/device/study_orin3_vllm_warm.py --path efficient"
+  ],
+  "n": 3
+ }
+}
