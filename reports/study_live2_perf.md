@@ -614,3 +614,178 @@ It does not implement Option A, add a switch, or touch any arm's decision path. 
 periods a normal dry run produces and recomputes DeltaJ for the alternative sets offline. The
 speed figure it produces is a PROJECTION from rollout counts and the measured per-rollout cost,
 labelled as such, and is not a measured arm.
+
+### A.5 Option A study: the outcome
+
+Committed 180 s dry-run fixtures at 8 / 32 / 64 / 128 devices, seed 1, H = 1.0 s, Option 0 on,
+`sh_cost = "rollout"`, the same configuration as `perf_speed_option0.json` as the prompt
+specifies, which means `mu` is at its placeholder zero and the backlog term is silent. **No arm
+was changed, no switch was added, and Option A is not implemented.** 6,122 periods with at least
+one SH candidate were scored, plus 360 more on the sanity fixture.
+
+#### The divergence
+
+| devices | periods | candidates per period, median | per-candidate set is NOT a prefix | best prefix differs | DeltaJ lost, median | max | **lost as a fraction of the run's total SH DeltaJ** |
+|---|---|---|---|---|---|---|---|
+| 8 | 725 | 2 | 0.0000 | 0.0014 | 0 | 0 | **-0.000517** |
+| 32 | 1,797 | 3 | 0.3673 | 0.3717 | 0 | 0.1339 | **0.2512** |
+| 64 | 1,800 | 7 | 0.7372 | 0.7417 | 0.1013 | 0.1512 | **0.7921** |
+| 128 | 1,800 | 12 | 0.7756 | 0.7794 | 0.0898 | 0.1554 | **0.8371** |
+
+**That last column is the result.** Restricting SH admission to deadline-order prefixes costs
+**79 % of the run's total SH DeltaJ at 64 devices and 84 % at 128.** It is not a small price for
+a speed-up; it is most of the value the SH admission decision produces.
+
+At 8 devices the fraction is slightly NEGATIVE (-0.000517), which is the case the
+pre-registration recorded in advance: the per-candidate rule is greedy and sequential and does
+not maximise `DeltaJ(S)`, so the best prefix can beat it. It does, by 0.05 % of one run's total,
+on one period in 725. That is a note about the greedy rule having a little slack inside its own
+action space, not a point in Option A's favour.
+
+#### The quantisation cost of the doubling ladder is nearly nothing
+
+| devices | loss, doubling, median | max | quantisation cost (exhaustive minus doubling), median | max |
+|---|---|---|---|---|
+| 8 | 0 | 0 | 0 | 0 |
+| 32 | 0 | 0.1339 | 0 | 0.0354 |
+| 64 | 0.1013 | 0.1512 | 0 | 0 |
+| 128 | 0.0898 | 0.1554 | 0 | 0.0425 |
+
+The doubling ladder is as good as the exhaustive prefix search in the median at every size, and
+its worst case costs 0.035 to 0.043 extra. **If the prefix restriction were ever accepted, the
+cheap search would be the right one;** the expensive part of Option A is the restriction, not the
+search over k.
+
+#### The expectations, answered without rewording them
+
+- **E-A1, "divergence rises with fleet size": HELD, strongly.** The fraction of periods whose
+  per-candidate set is not a prefix goes 0.0000, 0.3673, 0.7372, 0.7756 across 8, 32, 64 and 128
+  devices, and the DeltaJ lost as a fraction of the total goes -0.0005, 0.2512, 0.7921, 0.8371.
+- **E-A2, "divergence rises with backlog": NOT HELD, and mildly reversed.** By backlog tercile
+  over queued tokens the not-a-prefix fraction is 0.3747 low against 0.2774 high at 32 devices,
+  0.7375 against 0.7338 at 64, and 0.7815 against 0.7050 at 128; the median loss is likewise
+  LOWER in the high tercile (0.1013 against 0.0549 at 64, 0.0898 against 0.0120 at 128). Two
+  caveats on this one, both structural: the tercile edges are `lo = hi = 0` at every size, so the
+  middle bucket is empty and the backlog distribution is bimodal exactly as it was for Option B;
+  and this configuration runs at mu = 0, so the backlog term is silent and the only route by
+  which backlog can act is through the queue's effect on delivery times.
+- **E-A3, "the DeltaJ lost is small where the per-candidate set already is a prefix": HELD
+  exactly.** On every already-a-prefix period at every size the loss is identically 0, median and
+  maximum alike (725, 1,137, 473 and 404 such periods). That is not approximately small, it is
+  zero by construction: when the per-candidate set is a prefix, it IS one of the prefixes the
+  exhaustive search tries.
+
+#### The worked example: what no prefix can express
+
+64 devices, period t = 83.8, 6 SH candidates in deadline order, 7 requests running, queued tokens
+0.
+
+* The policy admits candidates **4, 5 and 6**, the three LATEST deadlines, and declines 1, 2
+  and 3.
+* No k reproduces that: the admitted indices are not `1..3`.
+* The best prefix is **k\* = 0, admit nothing**, with DeltaJ 0.0 against the per-candidate set's
+  0.15117. The whole of that period's SH value is lost.
+
+The behaviour being destroyed is sensible, which is the point. The earliest-deadline instants
+cannot be delivered inside their own `c_i + L_SH` given the work already running, so admitting
+them buys nothing, while the later-deadline instants still can be. The policy declines the ones
+it cannot serve and admits the ones it can. **A deadline-order prefix rule can only ever do the
+opposite**, taking the most urgent first, and in this period the most urgent are precisely the
+hopeless ones. This is not a corner case: it is 74 % of periods at 64 devices and 78 % at 128.
+
+#### The speed it would buy, as a projection and labelled as one
+
+Median rollouts per period, which is what the projection scales:
+
+| devices | per-candidate (today) | exhaustive prefix | doubling |
+|---|---|---|---|
+| 8 | 4 | 4 | 4 |
+| 32 | 6 | 5 | 5 |
+| 64 | 14 | 9 | 6 |
+| 128 | 24 | 14 | 7 |
+
+**PROJECTION, NOT A MEASURED ARM.** Method: the live decision latency scaled by the median ratio
+of doubling rollouts to per-candidate rollouts, which assumes decision time is rollout-dominated
+and linear in rollout count. It is therefore OPTIMISTIC for the cheaper method, because a
+period's non-rollout work does not shrink.
+
+| devices | measured cost per rollout | rollout ratio | live p50 / p99 | **projected p50 / p99 under doubling** |
+|---|---|---|---|---|
+| 8 | 0.1020 ms | 1.000 | 1.87 / 8.46 ms | 1.87 / 8.46 ms |
+| 32 | 0.3147 ms | 0.833 | 19.83 / 99.06 ms | 16.52 / 82.55 ms |
+| 64 | 0.6271 ms | 0.429 | 49.73 / 247.45 ms | 21.31 / 106.05 ms |
+| 128 | 1.2821 ms | 0.292 | 121.55 / 1,081.20 ms | 35.45 / 315.35 ms |
+
+At 8 devices there is no saving at all, because a two-candidate period needs the same four
+rollouts either way. At 128 devices the projection is a 3.4x cut, and **even then the projected
+p99 of 315 ms is still 3.2x over the 100 ms decision period**, while 64 devices lands at 106 ms,
+just over it.
+
+#### The trade, stated plainly
+
+Option A would buy an optimistically projected 3.4x on the decision-time tail at 128 devices,
+still short of the period, in exchange for **84 % of the run's total SH DeltaJ**. At 64 devices it
+buys 2.3x, lands at 106 ms, and costs 79 %. At 8 and 32 devices it buys nothing worth having. On
+these fixtures Option A is not a good trade at any size measured, and the reason is structural
+rather than a matter of tuning: in most periods at scale the policy's admit set is not a
+deadline-order prefix, because the instants with the nearest deadlines are often the ones it
+cannot serve.
+
+The study does not decide. These are fixtures, not a live run, and the decision is the user's.
+
+#### A.6 Sanity check
+
+On a dedicated fixture with a single dashcam, every one of 360 periods raises **exactly one** SH
+candidate, and the per-candidate set, the best prefix and the doubling search agree **exactly on
+all 360** (0 disagreeing). With n = 1 the prefixes are the empty set and the single candidate, so
+both searches contain the per-candidate answer; a disagreement would have meant the three DeltaJ
+definitions were not the same function of the admitted set. The main fixtures could not provide
+this check: at 8 devices and above no period has only one candidate, so it was run separately
+rather than left vacuous.
+
+#### A.7 Six-check consistency protocol
+
+1. **Cross-check against committed measurements.** The live decision latencies this study
+   observes (p99 99.06 / 247.45 / 1,081.20 ms at 32 / 64 / 128) sit against
+   `perf_speed_option0.json`'s committed 100.59 / 252.54 / 994.79 ms on the same fixture and
+   configuration: ratios 0.98, 0.98 and 1.09, all inside the 2x rule. The 9 % at 128 devices is
+   the observation wrapper's own cost, which records a fleet clone once per period.
+2. **Physical plausibility.** The measured per-rollout cost rises 0.102, 0.315, 0.627, 1.282 ms
+   across the four sizes, close to linear in device count, which is what an O(devices) terminal
+   sum predicts; nothing here is faster than the committed curves because nothing here is a
+   latency measurement of the engine.
+3. **Distribution sanity.** Every loss and cost figure carries median, p90, min, max and sum. The
+   medians of exactly 0 at 8 and 32 devices are explained rather than left bare: the per-candidate
+   set is already a prefix in 100 % and 63 % of those periods, where the loss is zero by
+   construction. The empty middle tercile is reported as empty.
+4. **Definition audit.** `DeltaJ(S)` is `delta_j`'s own admit reference (spec 3.5), one rollout
+   pair per set from the period's starting state, identical for all three methods, as
+   pre-registered in A.1. "Deadline order" is `arms_policy._admit_monitoring`'s own
+   `(deadline, stream_id)` sort (D99 (4)), not a re-derived order. "Prefix" means the admitted
+   indices are `1..m` with no gap.
+5. **Claim linkage.** Nothing here bears on a claim in `research/CLAIMS.md`: it is an
+   apparatus-cost study. It bears on whether Option A should become a round-1 arm.
+6. **Proxy validity.** Two proxies, both labelled. The projected decision time is a proxy for a
+   measured arm and is explicitly optimistic, since non-rollout work does not shrink with the
+   rollout count. The fixture's total SH DeltaJ is a proxy for the value at stake in a live run
+   and is not a scored J; it is a sum of the same `DeltaJ(S)` the policy itself optimises, which
+   is the right denominator for a loss expressed as a fraction, and no fixture-level J is claimed.
+
+#### A.8 Limitations
+
+1. Fixtures, not live. The periods come from dry runs against the committed cost model, and what
+   the policy would admit against a real engine may differ.
+2. `mu = 0` in this configuration, chosen to match `perf_speed_option0.json` as instructed, so
+   the backlog term is silent. E-A2's answer is therefore about backlog acting only through
+   delivery times, and a run with mu estimated could give a different answer on that one
+   expectation.
+3. The backlog terciles are bimodal with an empty middle bucket, so the backlog trend rests on
+   two points.
+4. One seed (1) at each size.
+5. The speed figure is a projection from rollout counts. A measured Option A arm could differ in
+   either direction, and building one was explicitly out of scope.
+6. The study measures the prefix restriction in DEADLINE order only, because that is what the
+   design note's Option A proposes and what pi_0 already uses. A prefix in some other order, for
+   example by DeltaJ or by predicted feasibility, is a different option and was not measured; the
+   worked example suggests feasibility order would fare better, which is a hypothesis this study
+   does not test.
