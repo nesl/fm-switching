@@ -17,9 +17,18 @@ FLEET -> COORDINATOR
                     frame_bytes}                                            mode B only
   monitor_frame    {device_id, opportunity_id, instant_id, t_capture, t_arrive, deadline_s,
                     frame_ref, frame_bytes}            mode A pushed; mode B after a pull
+  history_preload  {device_id, session_id, frame_refs[], est_tokens, t}      robots (D101)
   history_append   {device_id, session_id, batch_id, t_arrive, frame_refs[], est_tokens}
   recall_question  {device_id, opportunity_id, session_id, question_id, t_ask, t_arrive,
                     deadline_s, question, options[]}
+
+D101: a robot joins its first session PART-WAY, and at t = 0 the cloud already holds that
+session's earlier frames as COLD history. `history_preload` is how the fleet declares them. No
+uplink time is charged for a preload (the frames are already on cloud-side disk at run start);
+the coordinator stores them as cold history exactly like an ingested batch (D56: frames on
+disk, NO KV), so a later question still pays the cold rebuild. It carries no `batch_id` and no
+`t_arrive`, because it is not a batch that arrived during the run; `t` is the run-clock instant
+at which the holding is declared, which is 0.0 for a join-point preload.
 
 D96: EVERY OPPORTUNITY CARRIES AN opportunity_id, UNIQUE WITHIN THE RUN AND ASSIGNED BY THE
 TRACE GENERATOR. It is echoed unchanged into cloud_answer and into every log. THE COORDINATOR
@@ -56,6 +65,7 @@ FLEET_TO_COORD = (
     "device_register",
     "session_start",
     "session_end",
+    "history_preload",
     "monitor_offer",
     "monitor_frame",
     "history_append",
@@ -71,6 +81,7 @@ FIELDS: Dict[str, tuple] = {
                       "frame_bytes"),
     "monitor_frame": ("device_id", "opportunity_id", "instant_id", "t_capture", "t_arrive",
                       "deadline_s", "frame_ref", "frame_bytes"),
+    "history_preload": ("device_id", "session_id", "frame_refs", "est_tokens", "t"),
     "history_append": ("device_id", "session_id", "batch_id", "t_arrive", "frame_refs",
                        "est_tokens"),
     "recall_question": ("device_id", "opportunity_id", "session_id", "question_id", "t_ask",
@@ -130,6 +141,20 @@ class MonitorFrame:
 
 
 @dataclass
+class HistoryPreload:
+    """D101: frames the cloud ALREADY HOLDS as cold history at run start.
+
+    No uplink time is charged; the coordinator stores the frames on disk as cold history
+    exactly like an ingested batch (D56), with NO KV.
+    """
+    device_id: str
+    session_id: str
+    frame_refs: List[str]
+    est_tokens: int
+    t: float
+
+
+@dataclass
 class HistoryAppend:
     device_id: str
     session_id: str
@@ -173,6 +198,7 @@ EVENT_CLASSES = {
     "session_end": SessionEnd,
     "monitor_offer": MonitorOffer,
     "monitor_frame": MonitorFrame,
+    "history_preload": HistoryPreload,
     "history_append": HistoryAppend,
     "recall_question": RecallQuestion,
     "pull_request": PullRequest,
@@ -342,6 +368,20 @@ class RunHeader:
     mu_value: Optional[float]
     H: Optional[float]
     tick_s: float
+    # D99 (1): the ONE decision period every arm decides on (100 ms in round 1), separate from
+    # H, which is the rollout horizon only. `tick_s` is the same number under its old name.
+    decision_period_s: float
+    # D102: the GPU budget INPUT, identical for every arm; the default is one GPU's time over
+    # the run (window_s x 1.0), which is the physical capacity and so never binds artificially.
+    gpu_budget_s: float
+    # D103 (f): the three fields the SCORER needs to label a comparison PRIMARY rather than
+    # EXPLORATORY. They must be present under exactly these names: the memory SETTING as its
+    # tight / roomy label (the GiB number is `host_tier_gib` alongside), the device ratio as a
+    # "dashcam:robot" string, and the upload mode (`upload_mode` carries the same value under
+    # its own name). A missing one silently makes every block-1 comparison exploratory.
+    memory_setting: str
+    ratio: str
+    mode: str
     server_url: str
     server_kind: str
     model: str = "fake-32BI"

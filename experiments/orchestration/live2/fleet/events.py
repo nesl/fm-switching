@@ -22,6 +22,7 @@ FLEET -> COORDINATOR
                                                                       mode B only
   monitor_frame    {device_id, opportunity_id, instant_id, t_capture, t_arrive, deadline_s,
                     frame_ref, frame_bytes}                 mode A pushed; mode B after a pull
+  history_preload  {device_id, session_id, frame_refs[], est_tokens, t}      robots (D101)
   history_append   {device_id, session_id, batch_id, t_arrive, frame_refs[], est_tokens}
   recall_question  {device_id, opportunity_id, session_id, question_id, t_ask, t_arrive,
                     deadline_s, question, options[]}
@@ -49,6 +50,10 @@ FIELDS: Dict[str, tuple] = {
                       "frame_bytes"),
     "monitor_frame": ("device_id", "opportunity_id", "instant_id", "t_capture", "t_arrive",
                       "deadline_s", "frame_ref", "frame_bytes"),
+    # D101: the frames the cloud ALREADY HOLDS at t = 0 for a session joined part-way. NO
+    # batch_id and NO t_arrive, because nothing arrived during the run, and NO UPLINK TIME is
+    # charged for it.
+    "history_preload": ("device_id", "session_id", "frame_refs", "est_tokens", "t"),
     "history_append": ("device_id", "session_id", "batch_id", "t_arrive", "frame_refs",
                        "est_tokens"),
     "recall_question": ("device_id", "opportunity_id", "session_id", "question_id", "t_ask",

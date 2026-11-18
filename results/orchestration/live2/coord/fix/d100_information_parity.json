@@ -1,0 +1,68 @@
+{
+ "_provenance": {
+  "args": {
+   "cap_k": null,
+   "check": "parity",
+   "ks": "1,2,4,8",
+   "max_wall_s": null,
+   "out": "/home/pragya/Desktop/FM-switching/results/orchestration/live2/coord/fix",
+   "sizes": "32,64,128",
+   "window_s": 180.0
+  },
+  "device": "flash_cpu",
+  "git_commit": "80fe1199d1778d5ce1038d65e637cc03eab1ea3f",
+  "model": "none",
+  "n": 0,
+  "script": "fix_checks.py",
+  "timestamp": "2026-11-17T21:18:16.228023"
+ },
+ "check": "d100_information_parity",
+ "decision_period_s": 0.1,
+ "is_measurement": false,
+ "partial_readiness": {
+  "built_prefix_tokens": 10160,
+  "cold_rebuild_of_the_same_tokens_s": 1.264232,
+  "cost_model": "pol4 (frozen)",
+  "history_tokens": 11184,
+  "piece_is_cheaper": true,
+  "piece_on_warm_prefix_s": 0.138376,
+  "piece_tokens": 1024,
+  "warm_basis": "readiness GPU-WARM with cached_tokens = the built prefix, which is exactly what the arm sets on the item (D100 (a))"
+ },
+ "starvation": {
+  "fixture": "SYNTHETIC 2 dashcams, 0 robots, 60 s, mode A, dry run",
+  "note": "Before D100 pi_0 had no per-instant deadline, every stream tied on now + L, and the tie-break by item_id served one dashcam 240 times and the other none.",
+  "rows": [
+   {
+    "arm": "edf",
+    "both_devices_served": true,
+    "monitor_answers_by_device": {
+     "dash000": 120,
+     "dash001": 120
+    },
+    "n_devices_served": 2,
+    "n_requests": 240
+   },
+   {
+    "arm": "edf-piece1024",
+    "both_devices_served": true,
+    "monitor_answers_by_device": {
+     "dash000": 120,
+     "dash001": 120
+    },
+    "n_devices_served": 2,
+    "n_requests": 240
+   },
+   {
+    "arm": "edf-piece2048",
+    "both_devices_served": true,
+    "monitor_answers_by_device": {
+     "dash000": 120,
+     "dash001": 120
+    },
+    "n_devices_served": 2,
+    "n_requests": 240
+   }
+  ]
+ }
+}

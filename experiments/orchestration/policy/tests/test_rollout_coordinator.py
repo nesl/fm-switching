@@ -31,7 +31,10 @@ class TestRollout(unittest.TestCase):
         r = ro.run(f)
         self.assertEqual(len(r.opportunities), 2 * int(1.0 / ro.params.T_k["SH"]))
 
-    def test_releasing_a_fresh_cloud_call_is_positive_and_a_stale_one_is_not(self):
+    def test_releasing_a_cloud_call_is_positive_wherever_its_instant_falls(self):
+        """CHANGED FOR D98: per-instant SH value makes a call worth its OWN instant's value, so a
+        late-in-the-horizon capture is no longer worth less than an early one (the old assertion
+        `late < good` tested the retired display-freshness rule, not the claim)."""
         ro = rollout(p=params(H=1.0))
         f = fleet(1)
         f.pending.append(call_item("d0", 0.0))
@@ -40,7 +43,100 @@ class TestRollout(unittest.TestCase):
         far = copy.deepcopy(f)
         far.pending = [call_item("d0", 0.95, "late")]
         late = delta_j(ro, far, dict(kind="dispatch", item_id="late"))
-        self.assertLess(late["delta_j"], good["delta_j"])
+        self.assertGreater(late["delta_j"], 0.0)
+        self.assertAlmostEqual(late["delta_j"], good["delta_j"], places=12)
+
+
+class TestD98PerInstantSH(unittest.TestCase):
+    """D98: each SH instant is credited at its own deadline c_i + L_SH, even past t0 + H.
+
+    Spec 5.1 and 6.3 as amended. The retired rule credited only the cadence points inside
+    [t0, t0 + H), which made a monitoring call's marginal value structurally zero whenever
+    H <= T_k (StudyLIVE2-coord open issue 1).
+    """
+
+    def _busy_fleet(self, tokens: int):
+        """One device, one SH instant captured at t0, and an in-flight RC piece that keeps the
+        engine busy for about `tokens` / 4,500 s, so the call's delivery is pushed past the
+        horizon by a controllable amount."""
+        f = fleet(1)
+        f.in_flight.append(piece_item("d0", 0.0, "big", deadline=100.0, tokens=tokens,
+                                      job_id="jbig"))
+        f.jobs["jbig"] = job(pieces=1, done=0)
+        f.pending.append(call_item("d0", 0.0, "c0"))
+        return f
+
+    def test_sh_admission_is_not_structurally_zero_at_h_equal_to_the_cadence(self):
+        ro = rollout(p=params(H=0.5))
+        self.assertEqual(ro.params.H, ro.params.T_k["SH"])
+        f = fleet(1)
+        f.pending.append(call_item("d0", 0.0, "c0"))
+        self.assertGreater(delta_j(ro, f, dict(kind="dispatch", item_id="c0"))["delta_j"], 0.0)
+
+    def test_a_delivery_after_its_own_deadline_is_not_worth_admitting(self):
+        """b: predicted delivery 1.770 s against a deadline of 0.0 + 1.5 s, so the instant takes
+        the DEVICE value and DeltaJ(admit) <= 0."""
+        ro = rollout(p=params(H=0.5))
+        f = self._busy_fleet(7000)
+        r = ro.run(f, release_now=["c0"])
+        self.assertEqual(r.detail["sh_tail_simulated"], 1)
+        o = [x for x in r.opportunities if x["t"] == 0.0][0]
+        self.assertEqual(o["served_by"], "device")
+        self.assertGreater(r.deliveries[0]["delivered_at"], o["deadline"])
+        self.assertLessEqual(delta_j(ro, f, dict(kind="dispatch", item_id="c0"))["delta_j"], 0.0)
+
+    def test_a_delivery_in_time_but_past_the_horizon_is_worth_admitting(self):
+        """c: predicted delivery 0.881 s, past t0 + H = 0.5 s but inside the deadline 1.5 s, so
+        the instant takes the CLOUD value and DeltaJ(admit) > 0 (spec 6.3: never worth zero
+        merely because it lands after the horizon)."""
+        ro = rollout(p=params(H=0.5))
+        f = self._busy_fleet(3000)
+        r = ro.run(f, release_now=["c0"])
+        o = [x for x in r.opportunities if x["t"] == 0.0][0]
+        self.assertEqual(o["served_by"], "cloud")
+        self.assertGreater(r.deliveries[0]["delivered_at"], 0.5)
+        self.assertLessEqual(r.deliveries[0]["delivered_at"], o["deadline"])
+        self.assertTrue(o["beyond_horizon"])
+        self.assertGreater(delta_j(ro, f, dict(kind="dispatch", item_id="c0"))["delta_j"], 0.0)
+
+    def test_an_sh_call_in_flight_at_t0_is_credited_at_its_own_deadline(self):
+        ro = rollout(p=params(H=0.5))
+        f = fleet(1)
+        f.in_flight.append(call_item("d0", 0.0, "inflight"))
+        r = ro.run(f)
+        self.assertTrue(any(d["item_id"] == "inflight" and d.get("in_flight_at_t0")
+                            for d in r.deliveries))
+        self.assertEqual([x["served_by"] for x in r.opportunities if x["t"] == 0.0], ["cloud"])
+
+    def test_the_opportunity_list_keeps_one_entry_per_credited_instant(self):
+        ro = rollout(p=params(H=1.0))
+        f = fleet(2)
+        f.pending.append(call_item("d0", 0.25, "off_grid"))
+        r = ro.run(f)
+        self.assertEqual(len(r.opportunities), 2 * int(1.0 / ro.params.T_k["SH"]) + 1)
+        self.assertEqual(len({(o["device"], o["t"]) for o in r.opportunities}),
+                         len(r.opportunities))
+
+    def test_a_device_served_instant_contributes_exactly_zero_to_u_hat(self):
+        """Why the instant SET may differ between the two branches of an admit without biasing
+        DeltaJ: spec 3.2's scale is a GAIN against the device answer (ambiguity A2)."""
+        ro = rollout(p=params(H=1.0))
+        a = ro.run(fleet(1))
+        f = fleet(1)
+        f.pending.append(call_item("d0", 0.25, "off_grid"))
+        b = ro.run(f, exclude=["off_grid"])
+        self.assertEqual(len(b.opportunities), len(a.opportunities) + 1)
+        self.assertAlmostEqual(a.u_hat, b.u_hat, places=12)
+
+    def test_the_tail_pass_charges_nothing_to_the_horizons_own_accounting(self):
+        ro = rollout(p=params(H=0.5))
+        f = self._busy_fleet(3000)
+        with_call = ro.run(f, release_now=["c0"])
+        without = ro.run(f, exclude=["c0"])
+        self.assertEqual(with_call.detail["sh_tail_simulated"], 1)
+        self.assertAlmostEqual(with_call.engine_busy_s, without.engine_busy_s, places=12)
+        self.assertAlmostEqual(with_call.residual_backlog_s, without.residual_backlog_s,
+                               places=12)
 
     def test_delta_j_is_deterministic(self):
         ro = rollout()

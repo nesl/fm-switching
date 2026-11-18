@@ -1,6 +1,6 @@
 # Scheduling policy: full specification v4
 
-Status: v4, 2026-11-16. SUPERSEDES v3 (`claude/policy_spec.md`) and the v3.1 addendum (`claude/policy_spec_v3_1_addendum.md`); both are kept for history only. Decision record: `claude/policy_design_log.md` (D1-D59, approval tests T0-T4 and T0b, measurements M1-M6, hypotheses H1-H2, open question Q11, pinned items P1-P13). Where this document and the log disagree, the log is the record and this document must be corrected.
+Status: v4, 2026-11-16; AMENDED 2026-11-17 by D98 (per-instant SH value, sections 5.1 and 6.3), D99 (decision period separate from H, sections 6.1 and 9) and D100 (information available to the policy, section 2.1). SUPERSEDES v3 (`claude/policy_spec.md`) and the v3.1 addendum (`claude/policy_spec_v3_1_addendum.md`); both are kept for history only. Decision record: `claude/policy_design_log.md` (D1-D59, approval tests T0-T4 and T0b, measurements M1-M6, hypotheses H1-H2, open question Q11, pinned items P1-P13). Where this document and the log disagree, the log is the record and this document must be corrected.
 
 Scope: the entire policy, excluding only pinned items (D36). Nothing is cut. Mechanisms whose benefit is not yet established are fully specified with an explicit ENABLING CONDITION (D38) and are evaluated on and off.
 
@@ -81,7 +81,8 @@ The device answers every opportunity locally and immediately; a cloud answer, wh
 
 - Link estimate: bandwidth b_i (constant ASSUMPTION until P6), RTT_i, reachable flag, short-term trend.
 - Controller state per active SH task (8.7).
-- Active episodes: task type, cadence T_k, phase (if enabled), calls issued, start time.
+- Active episodes: task type, cadence T_k, phase (if enabled), calls issued, start time. (Under D62 SH is per instant; episodes are inert bookkeeping for SH.)
+- Causal facts known at arrival (D100), available to the policy and, where they apply, to the EDF-based arms: each SH instant's own deadline c_i + L_SH, and the size of each history's already-built prefix (partial readiness), so a later reconstruction piece is costed as a piece, not as a cold rebuild.
 - Cloud-side history per representation rep in {RICH, SUMMARY (if enabled)}:
   - desired tier (from 7.4);
   - BELIEVED tier distribution over {GPU, HOST, COLD} (7.6);
@@ -203,6 +204,8 @@ Delivered delay (D30): t_up = payload_bytes / b_i + RTT_i / 2, t_down = RTT_i / 
 
 u_SH(cloud, d, m) from DEV curves on the calibrated scale (m frames; m > 1 only for a merged call, 8.9); u_SH(device). Per-call utility is a surrogate for Nexar challenge mAP; validation is T1 (P7). A call not answered in time is a device-only outcome.
 
+PER-INSTANT VALUE (D98, amends the display-freshness model). Under D62 every SH decision instant i (capture time c_i) is its own opportunity with deadline c_i + L_SH. In the rollout, instant i is credited omega_SH x u_SH(cloud) if its cloud answer is predicted delivered by c_i + L_SH, and omega_SH x u_SH(device) otherwise, evaluated at ITS OWN DEADLINE even when that falls after t + H. Instants pending, in flight, or predicted to arrive within the horizon are all credited this way. The earlier rule (credit only at cadence points inside [t, t + H), served by the newest delivery already landed) is retired for SH: it made a monitoring call's value structurally zero whenever H <= T_k (StudyLIVE2-coord open issue 1) and did not match the measured outcome (D71, D85).
+
 ### 5.2 SS
 
 u_SS(cloud, d) = acc_SS^cloud if d <= L_SS, else the device's answer is used.
@@ -220,7 +223,7 @@ t_restore by tier (StudyENG1, 11,184-token history, time to first token): GPU 0.
 
 ### 6.1 Horizon rollout
 
-Jhat_H is computed by rolling the engine forward over H (about 0.5-1 s, swept):
+Jhat_H is computed by rolling the engine forward over H (about 0.5-1 s, swept). H is how far ahead the rollout looks for interference; it is NOT the decision period. Decisions are taken on a fixed decision period (100 ms in round 1, the same for every arm), with the events of each period batched (D99). The coordinator's own decision latency is part of delivered delay and is reported (M4).
 - the candidate (or reference) action at t, then pi_0 for every later decision;
 - requests in flight, calendar arrivals, expected unknown arrivals at estimated rates;
 - engine model (M1, StudyENG1): step time = intercept 28.7 ms + about 0.074 ms per new token (up to 512) + 8.6 ms per image + 1.95 ms per (new tokens x cached context tokens)/1e6 + further fitted terms (results/cost/study_eng1/eng1_step_model.json; R^2 0.985); serial admission behind a running long prefill; front-end serialization (4.3); per-image admission stall (50 / 66 / 158 ms for 1 / 23 / 91 images); sub-linear batching;
@@ -233,7 +236,7 @@ Decisions rely on the rollout only to the extent T0 supports. Current status: se
 
 ### 6.3 Terminal value: one rule
 
-Each item left at the horizon is valued exactly once: unfinished RC jobs by continuation value (6.4); per-device readiness by state value for FUTURE questions (7.1), excluding a question whose job is valued in 6.4; residual GPU backlog not covered by any job's continuation value, subtracted at mu per GPU-second.
+Each item left at the horizon is valued exactly once: SH instants by their per-instant value at their own deadline (5.1, D98), so an SH call in flight at t + H is never worth zero merely because it lands after the horizon; unfinished RC jobs by continuation value (6.4); per-device readiness by state value for FUTURE questions (7.1), excluding a question whose job is valued in 6.4; residual GPU backlog not covered by any job's continuation value, subtracted at mu per GPU-second.
 
 ### 6.4 Job-level continuation value with prefix-loss risk (D45, D55)
 
@@ -400,6 +403,7 @@ Batch upload when P_i^rep(need within H_up) >= theta_up, or the link is expected
 ## 9. Main loop (pseudocode)
 
 ```
+# D99: events are batched per decision period (100 ms in round 1, same for all arms); the loop below runs once per period over that period's events
 on event e at time t:
     update links, reachability, durations, demand rates (rc per rep, esc)
     update KV-pool and host-tier bookkeeping; correct believed tiers from telemetry; confirm or reject requested transitions

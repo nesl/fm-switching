@@ -663,3 +663,682 @@ CHANGED: nothing. No tracked file was modified by this session. In particular
 `experiments/orchestration/live/*` harness and every earlier result are untouched;
 `research/EXPERIMENTS.md`, `research/STATUS.md` and `results/INDEX.md` belong to the parent
 session, and `live2/fleet/`, `live2/scorer/` and `live2/data/` belong to StudyLIVE2-fleet.
+
+---
+
+# StudyLIVE2-fix: D98 to D105 applied to the coordinator and the policy side
+
+Status: ENGINEERING TASK, built and tested on flash (CPU only), 2026-11-17.
+Pre-registration: `research/EXPERIMENTS.md` row `StudyLIVE2-fix`.
+Authority: `research/policy_design_log.md` D98-D105 and the amended `research/policy_spec_v4.md`
+(header, 2.1, 5.1, 6.1, 6.3, 9).
+
+**NOTHING IN THIS SECTION IS A MEASUREMENT.** Every number comes from a `--dry-run` with no
+server at all, on a SYNTHETIC trace, with the committed `pol4` cost curve as the service time.
+Every result file carries `is_measurement: false`. The quantities that mean anything are the
+coordinator's OWN (decision latency, CPU, decisions) and the policy's own arithmetic (admit and
+decline counts, DeltaJ, predicted cost).
+
+Flash CPU, for every timing below: **13th Gen Intel Core i7-13700KF, 16 cores / 24 threads**.
+The H100 host's CPU differs, so the pilot (D95) re-measures decision latency there; nothing in
+this section fixes a latency budget for that host.
+
+## F1. What changed, by decision
+
+| decision | what it asked for | where it landed |
+|---|---|---|
+| D101 | a `history_preload` event: frames the cloud ALREADY HOLDS as cold history at run start | `live2/schema.py`, `live2/CONTRACT.md`, `live2/cstate.py`, `live2/coordinator.py`, `live2/traces.py` (digest) |
+| D98 | SH value PER INSTANT, credited at c_i + L_SH even past t + H | `policy/rollout.py` (`_opportunity_utility`, the in-flight and tail deliveries), `policy/coordinator.py` + `policy/escalation.py` (the instant's capture and deadline reach the planned call), `live2/arms_policy.py` |
+| D99 (1) | ONE 100 ms decision period for every arm, events batched | `live2/coordinator.py`, `live2/bridge.py`, `live2/schema.py` (header), `live2/run_live2_cell.py` |
+| D99 (2) | the policy sped up WITHOUT changing decisions, with an equivalence test | `policy/rollout.py` (`clone_for_rollout`, `clone_impl`), `live2/arms_policy.py` (`impl`), `--policy-impl reference` |
+| D99 (3) | decision time at 32 / 64 / 128 devices | `live2/fix_checks.py speed` |
+| D99 (4) | a cap K, only if (2) misses the target | `policy/coordinator.py` (`release_eval_cap_k`), `live2/arms_policy.py` (`cap_k`), `--release-cap-k` |
+| D100 | the information-parity hook: built prefix size, per-instant SH deadline | `live2/coordinator.py` (`_roster`), `live2/arms_policy.py`, `live2/arms.py` (pi_0) |
+| D102 | `--gpu-budget-s`, default window_s x 1.0, in the header | `live2/coordinator.py`, `live2/run_live2_cell.py`, `live2/schema.py` |
+| D104 | the bridge accepts `history_preload`; mode B still uses the pull responder | `live2/bridge.py`, tests |
+
+## F2. Part 0, D101: the `history_preload` event
+
+```
+history_preload {device_id, session_id, frame_refs[], est_tokens, t}      robots, t = 0
+```
+
+It declares the frames the cloud ALREADY HOLDS as cold history at run start, which is what makes
+a robot's part-way join (D101) exercise the cold-rebuild pressure round 1 exists to test. **No
+uplink time is charged** and the coordinator never recomputes one: the frames were on cloud-side
+disk before the clock started. `CoordState.history_preload` stores them exactly as an ingested
+batch does (D56: frames on disk, NO KV), leaves the belief at cold and `built_tokens` at 0, and
+records `preloaded_tokens`, so the first question on a joined-into session still pays a cold
+rebuild of the joined prefix. It carries no `batch_id` and no `t_arrive`, because it is not a
+batch that arrived during the run.
+
+FAIRNESS DIGEST COVERAGE is the D96 list plus `history_preload` (the join point decides which
+questions count, so two streams with different preloads are different experiments and must not
+share a digest). The row is the fleet's canonical six-field tuple with the SESSION as the key,
+since there is no `batch_id`:
+
+```
+(device_id, "history_preload", "%.6f" % t, session_id, str(int(est_tokens)), "")
+```
+
+This is byte-identical to subagent B's `fleet/trace.py::_digest_tuple`, which has landed and
+carries the same row with the same comment. The byte-equality test in
+`tests/test_live2_coord.py` now digests a stream that INCLUDES a preload, in both modes, so the
+new event's row shape is cross-checked against the fleet's rather than assumed.
+
+One implementation fix fell out of it: a `history_preload` and a `session_start` both carry
+t = 0 for a joined session, and the loop batches a period's events, so the preload can be
+ingested first. `CoordState.session_start` therefore no longer wipes a session that already
+carries a declared cold history; it only re-opens it. Without that the preloaded frames were
+silently dropped (the test `test_the_coordinator_stores_it_as_cold_history_with_no_kv` caught
+it).
+
+Also corrected in `CONTRACT.md`: the fairness-digest ROW SHAPE table was stale (it listed a
+five-field row in a different field order from the one `traces.py` and `fleet/trace.py` both
+emit). It now states the canonical six-field tuple `(device_id, wire_kind, t, key, extra,
+deadline)` per kind. Documentation only; no code read that table.
+
+## F3. Part 1, D98: per-instant SH value in the rollout
+
+### What was replaced
+
+`policy/rollout.py::_opportunity_utility` credited SH value at DISPLAY-FRESHNESS points: the
+cadence grid `o = t0, t0 + T_k, ...` inside `[t0, t0 + H)`, each point served by the newest
+delivery already landed by it. With T_k = 0.5 s and H = 0.5 s that grid held exactly one point,
+`o = t0`, which no action taken at t0 can serve, so the marginal value of admitting a monitoring
+call was structurally zero (open issue 1).
+
+It now implements spec 5.1 as amended: every SH instant i has its own capture c_i and its own
+deadline c_i + L_SH, and is credited
+
+```
+omega_SH * u_SH(cloud, delivered_at - c_i)   if delivered_at <= c_i + L_SH
+omega_SH * u_SH(device)                      otherwise
+```
+
+at ITS OWN DEADLINE, even when that falls after t0 + H. The instant set per device is the cadence
+calendar inside the horizon (the existing demand model, unchanged) plus the capture of every SH
+item pending or in flight. `u_SH`, its calibration, omega and the deficit-counter term are
+untouched; the returned opportunity list keeps ONE ENTRY PER CREDITED INSTANT, so `_z_term` and
+the live2 joiner read it exactly as before (two keys are added: `deadline` and `delivered_at`).
+
+### How released SH items are simulated through to delivery, and what it costs
+
+Two additions to `Rollout.run`:
+
+1. An SH call ALREADY IN FLIGHT at t0 now produces a delivery record (previously in-flight items
+   only advanced `free_at` and `busy`), so spec 6.3's "never worth zero merely because it lands
+   after the horizon" is true of an in-flight call too. An episode call carries no `job_id`, so
+   no RC accounting (`_rc_utility`, `_prefix_risk`) can see these rows.
+2. A **tail pass**: an SH call that cannot START inside `[t0, t0 + H)` is no longer dropped. It
+   is simulated forward from where the horizon left the engine, in the same pi_0 order, until the
+   last deadline any credited instant can have (`max(end, latest pending SH capture) + L_SH`),
+   which bounds the pass. COST: at most **one extra `engine.predict` per SH call that could not
+   start inside H**, and nothing else: the tail charges nothing to `busy`, the KV pool,
+   `demand_tokens` or `jobs_progress`, so the horizon's own accounting is unchanged and only the
+   SH credit and `in_sample` see these deliveries. A test asserts `engine_busy_s` and
+   `residual_backlog_s` are identical with and without the tail.
+
+`RolloutResult.detail` gains `sh_tail_simulated` and `sh_tail_pending` so the pass is visible.
+
+No extrapolation is introduced: StudyE9d's u_SH grid runs to a 3.0 s delivered delay and
+L_SH is 1.0 s in round 1 (1.5 s in the library default), so every credited delay is inside the
+measured range and `within_measured_delay` stays true.
+
+### The instant's capture and deadline now reach the planned call (D98 with D100)
+
+The per-instant rule needs c_i on the item. `EscalationRequest` gained an OPT-IN `capture_at`;
+when it is supplied, `Coordinator._plan` gives the planned call `due_at = c_i` and
+`deadline = c_i + L_SH`, and when it is not, the call is planned exactly as before (`due_at =
+fleet.t`, no deadline), so no existing caller moves. Three consequences in live2: the rollout
+credits the instant the call actually serves; pi_0 inside the rollout orders SH calls by their
+own deadlines; and `arms_policy._prune` (which keys on `deadline is not None`) now actually
+retires a monitoring call whose window has passed, which also bounds the pending set.
+
+### Part 1 test table
+
+`results/orchestration/live2/coord/fix/d98_sh_admission.json`. Fixture: SYNTHETIC 2 dashcams +
+1 robot, 60 s, mu = 0, mode A, tight memory (gpu_kv_tokens 62,944, host_tier_gib 27), seed 1,
+dry run, 100 ms decision period. This is the open-issue-1 fixture.
+
+(a) SH ADMISSION IS NO LONGER STRUCTURALLY ZERO:
+
+| H | SH escalated | admitted | declined | DeltaJ of admits (min / med / max) | DeltaJ of declines (min / med / max) | requests | monitor answers | on time |
+|---|---|---|---|---|---|---|---|---|
+| 0.5 s | 479 | 240 | 239 | 0.0586 / 0.0778 / 0.0871 | -0.0111 / -0.0043 / 0.0 | 242 | 240 | 241 |
+| 1.0 s | 479 | 240 | 239 | 0.0586 / 0.0778 / 0.0871 | -0.0111 / -0.0043 / 0.0 | 242 | 240 | 241 |
+
+Before D98, H = 0.5 s admitted **0 of 240** with DeltaJ exactly 0.0 on every one, and H = 1.0 s
+admitted 240 of 240. Two things to read off the table:
+
+* **H = 0.5 s and H = 1.0 s are now IDENTICAL**, which is the point of the per-instant rule: an
+  SH instant's value no longer depends on where it falls relative to the horizon, so H is purely
+  how far ahead the rollout looks for interference (spec 6.1 as amended). D95 part 4's pilot at
+  H = 0.5 s is therefore no longer a degenerate cell.
+* Both ADMITS AND DECLINES now exist with the expected signs. The escalation count rose from 240
+  to 479 because the D100 hook offers each instant until it is decided, so the second instant of
+  a device inside one period is escalated too; it is declined (DeltaJ <= 0) because the first one
+  already occupies the engine for that window. The declines are small and negative, the admits
+  clearly positive, and nothing is exactly 0.0 by construction any more.
+
+Unit cases, in `policy/tests/test_rollout_coordinator.py::TestD98PerInstantSH` (new) and
+`live2/tests/test_live2_fix.py::TestD98`:
+
+| test | construction | result |
+|---|---|---|
+| (b) delivery AFTER its own deadline | H = 0.5 s, one SH instant at c = 0, an in-flight 7,000-token RC piece keeping the engine busy to 1.556 s; the call is simulated in the tail and delivered at **1.770 s** against a deadline of 1.5 s | the instant takes the DEVICE value and **DeltaJ(admit) = 0.0 <= 0** |
+| (c) delivery past the HORIZON but inside the deadline | H = 0.5 s, same instant, a 3,000-token in-flight piece; delivered at **0.881 s**, past t0 + H = 0.5 s, inside the deadline 1.5 s | the instant takes the CLOUD value and **DeltaJ(admit) = +0.0471 > 0** |
+| in-flight at t0 | an SH call in `fleet.in_flight` at t0 | its instant is credited `cloud`, from a delivery row marked `in_flight_at_t0` |
+| one entry per credited instant | 2 devices, H = 1.0 s, plus one off-grid pending capture | `len(opportunities) == 2 * H/T_k + 1`, all `(device, t)` distinct |
+| a device-served instant is worth exactly zero | the same fleet with and without an extra off-grid instant | `u_hat` identical to 12 decimal places (spec 3.2's gain scale, ambiguity A2) |
+| the tail charges nothing to the horizon | with and without the tail pass | `engine_busy_s` and `residual_backlog_s` identical to 12 decimal places |
+
+(d) PREVIOUSLY PASSING LIBRARY TESTS. The whole policy suite (16 modules) passes. Two tests were
+changed, each for one reason tied to D98:
+
+| test | change | reason |
+|---|---|---|
+| `test_rollout_coordinator.py::test_releasing_a_fresh_cloud_call_is_positive_and_a_stale_one_is_not` -> `..._is_positive_wherever_its_instant_falls` | `assertLess(late, good)` became `assertAlmostEqual(late, good)`, both still > 0 | D98 makes a call worth its OWN instant's value, so a late-in-the-horizon capture is no longer worth less than an early one; the old assertion tested the retired display-freshness rule |
+| `test_scenario.py::test_a_held_call_with_merging_off_is_a_device_outcome` | the far-future call is now `dispatch`; the hold-is-a-device-outcome branch is asserted on a call that CANNOT be delivered by c_i + L_SH | D98 credits a pending instant at its own deadline, so "outside t + H" is no longer a reason to hold; spec 7.9's device-only outcome is reached by a missed deadline, which is what it describes |
+
+`policy/spec_map.py`'s "1.2 eligible opportunities" row now names D98 and v4 5.1 / 6.3.
+
+No committed interface in `baselines/` had to change: the per-instant rule is entirely inside
+`policy/rollout.py` plus the opt-in `capture_at`, and `interface.Policy`, `Action`,
+`Observation`, `validate_action` and `scrub` are untouched.
+
+## F4. Part 2, D99: one decision period, and the speed work
+
+### (1) ONE DECISION PERIOD FOR EVERY ARM: 100 ms
+
+The 50 ms event grid and the per-arm H tick are gone. The loop now advances on one 100 ms
+period, ingests that period's events, and takes EXACTLY ONE decision over the batch; H is the
+rollout horizon only (spec 6.1, 9 as amended). `decision_period_s` is in the run header and in
+every `result.json`, `tick_s` survives as the same number under its old name, and
+`--decision-period-s` sets it.
+
+Why it matters beyond speed: under the old rule the arm was called on every event AND on its own
+tick, so at 64 devices an event landed in nearly every 50 ms step and an H = 1 s arm was in fact
+invoked about 20 times a virtual second (open issue 10a). The decision RATE was therefore an arm
+property, and a comparison between arms was partly a comparison of how often each was asked. It
+is now the same for all eight. A test asserts that `edf`, `always-cloud-fcfs` and `b9` all take
+exactly `window_s / 0.1 + 1` decisions on the same trace.
+
+The bridge enforces the same period on the EMULATOR's clock (`_maybe_decide`), so a live run is
+period-correct whatever the emulator's own `tick_s` is, as long as it is no coarser than the
+period; `decide_on_every_event` is gone.
+
+### (2) The speed work: what was profiled, what was fixed, and the equivalence test
+
+PROFILE BEFORE (cProfile, one 60 s dry run at 16 devices, 9,736 rollouts): **152.7 of 162.9 s,
+94 %, was `copy.deepcopy`** -- 135 million `deepcopy` calls, about 14,000 per rollout. The cost
+was not the engine model, the KV bookkeeping or the opportunity arithmetic; it was that
+`Rollout.run` began with `copy.deepcopy(fleet)`, which walks every device's link, demand model,
+controller and episode list on every one of the two rollouts of every DeltaJ evaluation, and the
+episode list grows with the run.
+
+FIX. `policy/rollout.py::clone_for_rollout` gives independent containers for everything a
+rollout or the release loop can write to -- the pending and in-flight lists AND their items (with
+their `meta` dicts), the jobs, each device, each history belief (with its tier probabilities),
+the per-device deficit counters, the demand rates and the episode LIST -- and shares only the
+objects nothing mutates (`Link`, `Demand`, the controller, each `Episode`). `Rollout.run` mutates
+only `f.pending` and `f.jobs`, and `_terminal` copies each job before touching it, which is what
+makes the clone exact rather than approximate. The per-epoch `copy.deepcopy(self.fleet)` that
+`arms_policy` took for the D63 prediction snapshot uses the same clone.
+
+It is SELECTABLE: `Rollout.clone_impl` is `"fast"` or `"reference"` (the unoptimized
+`copy.deepcopy`), and `--policy-impl reference` runs the whole arm that way.
+
+EQUIVALENCE TEST (`results/orchestration/live2/coord/fix/d99_equivalence.json`): 4 and 8 devices
+x seeds 1, 2, 3 x 120 s, 50 : 50, mode A, tight memory, mu = 0, H = 1.0 s, dry run. The two
+implementations' decision logs are compared line by line with `decision_latency_ms` removed (the
+only wall-clock field in the record; `decision_id` is a counter, so everything else is
+deterministic).
+
+| devices | seed | decision-log lines | identical? | reference p50 (ms) | fast p50 (ms) | wall reference / fast (s) | speedup |
+|---|---|---|---|---|---|---|---|
+| 4 | 1 | 492 | **yes** | 2.528 | 0.474 | 5.31 / 0.87 | 6.1x |
+| 4 | 2 | 490 | **yes** | 1.273 | 0.215 | 5.73 / 0.91 | 6.3x |
+| 4 | 3 | 492 | **yes** | 2.525 | 0.482 | 5.34 / 0.89 | 6.0x |
+| 8 | 1 | 1,548 | **yes** | 21.395 | 2.675 | 32.97 / 4.65 | 7.1x |
+| 8 | 2 | 1,540 | **yes** | 21.275 | 2.709 | 33.36 / 4.74 | 7.0x |
+| 8 | 3 | 1,546 | **yes** | 21.466 | 2.974 | 32.15 / 4.58 | 7.0x |
+
+All six cells are IDENTICAL line for line, with identical decision and request counts (492 / 492,
+1,548 / 948 and so on), at 6.0x to 7.1x less wall clock. `all_identical: true` is in the result
+file.
+
+PROFILE AFTER, the same 60 s dry run at 16 devices: **12.5 s of wall clock instead of 163 s**
+(p50 per decision 8.3 ms instead of 159 ms), over 10,886 rollouts. The remaining cost is spread
+across the spec's own terms rather than concentrated in one artifact: `_terminal` 4.5 s (of which
+`state_value` 2.6 s and the continuation value 1.3 s), `engine.predict` 3.4 s over 128,447 calls,
+`_opportunity_utility` 1.8 s, and `clone_for_rollout` 1.3 s -- 10 % of the run, where
+`copy.deepcopy` had been 94 %. There is no second order-of-magnitude target left in the loop:
+memoizing `state_value` across the rollouts of one period, the next-largest idea, addresses about
+a fifth of the remaining time and cannot close the gap the cap table below shows, so it was NOT
+done rather than done unverified.
+
+Three further checks on the same claim: a library test asserts that `fast` and `reference`
+produce identical `RolloutResult` totals and identical `DeltaJ` on a fleet with episodes, jobs,
+deficit counters and in-flight work, and that the caller's fleet is byte-identical afterwards
+under both (`repr` compare against a `deepcopy` snapshot); the whole 16-module policy suite
+passes unchanged; and the live2 determinism test (same trace, arm and seed give an identical
+decision log) still passes.
+
+### (3) The speed table
+
+`results/orchestration/live2/coord/fix/d99_speed.json`. SYNTHETIC 50 : 50, mode A, tight memory
+(gpu_kv_tokens 62,944, host_tier_gib 27), 180 s window plus a 15 s drain, mu = 0, H = 1.0 s,
+seed 1, dry run with the committed `pol4` cost curve as the service time, 100 ms decision period,
+NO CAP. One process, nothing else running. A cell that cannot keep up with its own period is
+stopped by a 240 s WALL GUARD and says so, with the virtual time it reached.
+
+| devices | opportunities | decisions | requests | decision p50 / p99 / max (ms) | CPU | wall (s) | virtual time reached | wall guard | DeltaJ evaluations | p99 target |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 32 | 5,808 | 1,801 | 2,666 | 43.3 / 214.0 / 222.2 | 100 % | 79.3 | 194.9 of 195 s | no | 37,216 | **missed** |
+| 64 | 11,616 | 1,801 | 2,666 | 109.5 / 545.4 / 671.8 | 100 % | 206.3 | 194.9 of 195 s | no | 56,063 | **missed** |
+| 128 | 11,436 (run cut short) | 885 | 1,712 | 18.5 / 2,152.6 / 2,654.1 | 100 % | 240.2 | **88.4 of 195 s** | HIT | 45,103 | **missed** |
+
+WHAT THE TABLE SAYS.
+
+* The copy fix is a large, real speedup: at 16 devices over 60 s the same run went from p50
+  159 ms / p99 1,004 ms (and 163 s of wall) to p50 2.6 ms / p99 19.8 ms (3.3 s of wall), a 9x
+  wall-clock factor, with an identical decision log.
+* 32 and 64 devices now run the whole 195 s of virtual time, where the pre-fix 64-device cell hit
+  its wall guard at 90.6 s and served 129 of 5,861 opportunities. The two are not directly
+  comparable (the old cell ran against the CPU stub over HTTP, this one is a dry run), but the
+  direction is not in doubt: the same 64-device cell now serves 11,520 monitoring opportunities
+  instead of 129.
+* **The target is nevertheless MISSED at every size**, including 128 devices, which is the
+  condition D99 (4) attaches the cap to. p50 is not monotone in fleet size, because the
+  128-device cell is stopped by the guard a third of the way through its load ramp, so its median
+  is taken over the early, cheap decisions; the p99 and the max are the honest columns there.
+* The remaining cost is the release loop's structure, not the copy: an admission DeltaJ per
+  escalated instant plus one DeltaJ per due pending item per pass, each DeltaJ being two
+  rollouts. `scoring_calls` (the library's own count of DeltaJ evaluations) is 37,216 at 32
+  devices and 45,103 in the 88 s the 128-device cell reached, so the per-period work grows with
+  the fleet exactly as the quadratic structure predicts.
+
+### (4) The cap K
+
+(2) misses the target at 128 devices (and at 32 and 64), so D99 (4) applies.
+
+WHAT THE CAP IS. `release_eval_cap_k = K` bounds how many pending items get a FULL DeltaJ
+evaluation per DECISION PERIOD, on both full-DeltaJ paths:
+
+* the release loop evaluates at most K items in the whole call, the budget SHARED ACROSS THE
+  PASSES of the loop (capping per pass leaves the per-period cost unbounded, because the loop
+  makes up to 32 passes; the first attempt capped per pass and K = 1 still missed the target,
+  which is how the distinction was found);
+* `_admit_monitoring` escalates at most K instants per period, in pi_0 order by their own
+  deadlines, so the instants closest to missing are the ones evaluated;
+* the STATE pass (spec 7.3 / 8.2: one DeltaJ per promotion the tier assignment proposes, which
+  is O(devices) per period) evaluates at most K candidates per period, in the tier assignment's
+  own order, so the promotions worth the most are the ones scored;
+* the D63 PREDICTION LOG, which is two extra rollouts per logged release and is pure logging, is
+  limited to K logged releases per period (at a 100 ms period, still 10 x K
+  predicted-versus-actual samples a second).
+
+THE CAP HAD TO COVER MORE THAN THE RELEASE LOOP, and that is a measured finding rather than a
+design choice: with the cap on the release loop and SH admission only, **K = 1 at 128 devices
+still missed the p99 target**, because the state pass scores one promotion per device per period
+and the prediction log spends eight rollouts per period regardless of K. Both are now inside the
+same per-period budget.
+
+In every place the rest WAIT IN pi_0 ORDER (or the tier assignment's order) for the next
+period; nothing is dropped, because an instant stays visible until its own deadline and a pending item stays pending. The cap is
+reported as a SETTING in the run header (`placeholders` row `release_eval_cap_k`, `tuned:
+false`) and its binding is counted (`arm_stats.sh_cap_bound_periods`, `sh_cap_skipped`,
+`release_cap_bound_passes`, `release_cap_skipped_items`).
+
+It is NOT a declared `Params` field, because `policy/params.py` is a StudyPOL4 frozen file; it
+is set on the Params instance and read with `getattr`, so an unset cap is exactly the old code
+path.
+
+The curve, the binding counts and what the cap does to the work the policy gets done are below.
+### Capped speed table (K = 1)
+
+`results/orchestration/live2/coord/fix_k1/d99_speed.json`, the same three cells with the cap set:
+
+| devices | decision p50 / p99 / max (ms) | wall (s) | virtual time reached | guard | requests | p99 target |
+|---|---|---|---|---|---|---|
+| 32 | 4.6 / 8.0 / 39.2 | 8.1 | 194.9 of 195 s | no | **10** | met |
+| 64 | 8.8 / 16.1 / 138.3 | 16.4 | 194.9 of 195 s | no | **8** | met |
+| 128 | 17.5 / 32.7 / 530.4 | 34.0 | 194.9 of 195 s | no | **7** | met |
+
+Read the request column before the latency columns. At K = 1 the policy issues 7 to 10 requests
+per RUN, against 2,666 uncapped at 32 and 64 devices: the cap meets the latency target by not
+deciding. The decision-kind histogram at 128 devices says it plainly: 7 `release_monitor` and
+9,600 `defer` with the cap, against 1,712 `release_monitor` and 6,400 `defer` without it.
+
+WHY, and it is a property of the cap as D99 (4) specifies it rather than a bug: the release loop
+evaluates the first K DUE items in pi_0 order and STOPS at the first non-positive DeltaJ
+(spec 8.2 step 3). Under overload the earliest-deadline item is the item closest to being lost,
+so with K = 1 the single evaluation per period is spent on an instant that can no longer be
+delivered in time, its DeltaJ is <= 0, the loop breaks, and nothing is released -- every period.
+The uncapped loop goes on to the hundreds of other due items and finds one worth releasing. At
+8 devices the same cap is harmless (945 requests capped against 948 uncapped, and 99.7 % of the
+(kind, opportunity_ids) actions in common), because there the earliest-deadline item is usually
+still servable.
+
+SO K CANNOT BE CHOSEN ON LATENCY ALONE, and this is the one place where the prompt's recipe
+("the smallest K that meets the target at 128 devices") does not by itself give a usable
+setting. The full curve is measured and reported so the choice is the user's:
+
+`results/orchestration/live2/coord/fix/d99_cap_k.json`, 128 devices, 50 : 50, mode A, tight
+memory, 180 s plus a 15 s drain, mu = 0, H = 1.0 s, seed 1, dry run, 100 ms period. The LAST TWO
+COLUMNS are the ones that decide whether a K is usable:
+
+| K | p50 / p99 / max (ms) | wall (s) | virtual time reached | guard | p99 target | requests | requests per virtual s |
+|---|---|---|---|---|---|---|---|
+| 1 | 17.4 / 32.5 / 512.1 | 33.8 | 194.9 of 195 s | no | **met** | 7 | 0.04 |
+| 2 | 30.4 / 58.2 / 535.6 | 54.2 | 194.9 of 195 s | no | **met** | 4 | 0.02 |
+| 4 | 55.6 / 107.2 / 577.7 | 94.2 | 194.9 of 195 s | no | missed | 6 | 0.03 |
+| 8 | 106.3 / 207.3 / 688.8 | 174.5 | 194.9 of 195 s | no | missed | 27 | 0.14 |
+| 16 | 193.6 / 415.6 / 881.6 | 240.0 | 135.6 of 195 s | HIT | missed | 2,426 | 17.89 |
+| 32 | 256.8 / 565.6 / 1,049.6 | 240.0 | 117.1 of 195 s | HIT | missed | 2,155 | 18.40 |
+| unlimited | 18.5 / 2,152.6 / 2,654.1 | 240.0 | 88.4 of 195 s | HIT | missed | 1,712 | 19.37 |
+
+**THERE IS NO K THAT BOTH MEETS THE p99 TARGET AND KEEPS THE POLICY WORKING.** K <= 2 meets the
+target and does essentially nothing; K >= 16 does the work (about 18 requests per virtual second,
+the same rate as the uncapped policy) and misses the target by four to six times. The jump is
+between K = 8 and K = 16, and the SH-skip column says why: the fixture offers about 119
+monitoring instants a second, the period is 10 a second, so the policy must escalate about 12
+instants PER PERIOD merely to keep up with arrivals. At K = 16 the escalation cap almost stops
+binding (417 instants skipped over the run, against 99,984 at K = 8) and the policy behaves like
+the uncapped one; below that it starves by construction.
+
+So the two constraints -- p99 under 100 ms, and keeping up with the instant arrival rate -- cross
+between K = 8 and K = 16 on this CPU, and D99 (3)'s target is NOT reachable by capping alone at
+128 devices on flash.
+
+**THE CAP IS THEREFORE IMPLEMENTED, MEASURED AND LEFT OFF.** `release_eval_cap_k` defaults to
+None (unlimited), which is the behaviour every committed result was produced under, and the
+result file carries the warning that `chosen_K` is the smallest K meeting the LATENCY target and
+nothing else. Setting a default from this curve would be choosing a number that meets a target
+by not deciding, which is the failure mode the mechanism-verification protocol exists to catch.
+What K should be, or whether 128 devices belongs in round 1 at a 100 ms period at all, is a
+USER DECISION; the curve above is what it needs.
+
+HOW OFTEN THE CAP BINDS, at 128 devices, K = 1: it bound in all 1,800 periods on the SH
+admission path (113,228 instants skipped) and in 30,439 release-loop passes (39,057 item
+evaluations skipped). At 8 devices it bound in 493 periods and 2,389 passes.
+
+DECISIONS CHANGED BY THE CAP on the 8-device fixture (120 s, seed 1, K = 1 against unlimited):
+
+| metric | value |
+|---|---|
+| decision-log lines, unlimited / capped | 1,548 / 1,545 |
+| lines differing, POSITIONALLY | 1,488 (96.1 %) |
+| (kind, opportunity_ids) actions in common | 1,543 of 1,548 (**99.7 %**) |
+| requests, unlimited / capped | 948 / 945 |
+
+The positional figure overstates the change, because one skipped evaluation renumbers every
+later `decision_id`; the multiset comparison is what says whether the two policies DID different
+things, and at 8 devices they almost did not. At 128 devices they clearly do, which is the point
+above. Either way a capped arm is a DIFFERENT ARM from an uncapped one (open issue F-2), unlike
+the Part 2 (2) work, which is bit-identical.
+
+## F5. Part 3, D100: the information-parity hook
+
+The hook is the existing arm-side one (`live2_roster`), which carries CAUSAL FACTS KNOWN AT
+ARRIVAL and never goes through the scrubbed `Observation`. It is now refreshed once per decision
+period, immediately before the observation is built, so the facts and the observation describe
+the same state; the refresh is O(devices + sessions) per period. Registry arms (FCFS, B8, B9)
+declare no `live2_roster` and receive nothing, so they are unchanged by D100.
+
+**(a) The built prefix size, and a later piece costed as a piece.** The roster carries
+`built_tokens_by_session`. `arms_policy._apply_partial_readiness` puts it on every pending or
+in-flight `rc_piece` as `cached_tokens` with a warm readiness (`HOST-WARM` plus
+`external_cached_tokens` when the belief says the prefix is on the host, so the host-KV reload is
+charged, StudyPOL4-engine term (a); `GPU-WARM` otherwise). `cached_tokens` is exactly the input
+the committed cost model already reads, so nothing in the frozen model changed. Before this, the
+believed tier became `gpu` only at `built_tokens >= est_tokens` (the issue-3b fix), so every
+later piece was charged `cached = 0`, a cold rebuild, although the already-sent frames travel as
+uuid references.
+
+At StudyENG1's 11,184-token D2 history with 1,024-token pieces, the LAST piece (built prefix
+10,160 tokens), under the frozen `pol4` model:
+
+| quantity | value |
+|---|---|
+| piece k > 1 on a warm prefix (1,024 new tokens, cached 10,160) | **0.1384 s** |
+| cold rebuild of the same 11,184 tokens | **1.2642 s** |
+| ratio | 9.1x cheaper |
+
+**(b) The per-instant SH deadline, and the starvation check.** The roster carries `sh_instant`
+per device: the opportunity_id, capture and ABSOLUTE deadline c_i + L_SH of the instant that
+device's stream currently stands for, chosen by exactly the rule `CoordState.observation` uses
+(first visible, undecided, un-deferred, not-late, in arrival order), which is also the instant
+`_serve_monitor` will serve (it takes the earliest deadline). So the arm now scores, orders and
+serves the SAME instant.
+
+* `Pi0Edf` (arms 4, 5, 6) orders monitoring calls by that deadline. The "next call due after the
+  last answer the application received, plus the monitoring bound" workaround is gone; the
+  fallback survives only for the case where no hook is supplied at all.
+* `arms_policy._admit_monitoring` escalates that instant, with `capture_at = c_i` and
+  `deadline = c_i + L_SH` from the wire, and keys its seen-set on the opportunity_id instead of a
+  rounded capture time. The `monitor_answer_window_s` placeholder is now only the fallback.
+
+TWO-DASHCAM STARVATION CHECK re-run (SYNTHETIC 2 dashcams, 0 robots, 60 s, mode A, dry run):
+
+| arm | monitor answers by device | both served |
+|---|---|---|
+| `edf` | dash000: 120, dash001: 120 | yes |
+| `edf-piece1024` | dash000: 120, dash001: 120 | yes |
+| `edf-piece2048` | dash000: 120, dash001: 120 | yes |
+
+Before D100 one dashcam was served 240 times and the other none.
+
+## F6. Part 4, D102: the GPU budget is an input
+
+`--gpu-budget-s`, default `window_s x 1.0` (one GPU's time over the run), identical for every
+arm, passed to `interface.Budget` and recorded in the run header as `gpu_budget_s`. It replaces
+the harness constant (open issue 8). It is the PHYSICAL CAPACITY, so it never binds artificially
+(D58: round 1 has no fixed budget; "budget %" is only a test variable), and B8, B9 and
+`edf-service-time`, which admit by a utility-per-GPU-second ratio against a remaining budget,
+now read an input rather than a constant buried in the loop. A test asserts the four
+budget-reading arms all see the same value and that an explicit value is honoured.
+
+## F6b. The three header fields the scorer reads (D103 (f), parent relay)
+
+B's scorer labels a comparison PRIMARY only if the run header carries the memory SETTING, the
+device RATIO and the upload MODE; a missing one silently degrades every block-1 comparison to
+EXPLORATORY. All three are now in the header under exactly those names:
+
+| field | value | where it comes from |
+|---|---|---|
+| `memory_setting` | `tight` / `roomy` / `custom_<n>gib` | DERIVED from `--host-tier-gib` against D76's two values, so the label and the capacity input cannot disagree; `--memory-setting` overrides |
+| `ratio` | e.g. `50:50` | the fleet trace's own meta when present, else computed from the device counts (`traces.ratio_label`); `--ratio` overrides |
+| `mode` | `A` / `B` | the same value as `upload_mode`, under the name the scorer expects |
+
+A capacity that is neither of D76's two values is reported as `custom_<n>gib` rather than being
+rounded to the nearer label, so a roomy-check run cannot be mislabelled tight. Verified on a
+dry-run cell: `memory_setting: tight, ratio: "50:50", mode: "A", host_tier_gib: 27.0`.
+The break sizes are the scorer's own input from the pilot and are not in the header.
+
+## F7. Part 5, D104 housekeeping and the re-run of every earlier test
+
+* The bridge accepts `history_preload` (it parses on-schema and `_ingest` has a handler); a test
+  drives it through the Protocol.
+* Mode B still uses `traces.pull_responder`. The real fleet replaces it before block 6, not now.
+* The bridge no longer decides on every event: it enforces the ONE 100 ms decision period on the
+  emulator's own clock, so the period holds whatever the emulator's `tick_s` is (it must be no
+  coarser than the period, which `fleet/emulator.py`'s `--tick-s` default of 10 ms satisfies).
+  `describe()` now reports `n_decisions` and `decision_period_s` in place of
+  `decide_on_every_event`.
+
+EVERY EARLIER live2 TEST WAS RE-RUN AFTER THE CHANGES:
+
+| suite | result |
+|---|---|
+| `live2/tests/test_live2_coord.py` (legality, fairness digest in both modes, scrub, parity, determinism, cache-isolation fields, DEFER, INTERIM refusal, chaining, bridge) | **26 tests, OK** (4.1 s, was 11 s) |
+| `live2/tests/test_live2_fakeserver.py` (the CPU stub) | **4 tests, OK** (70 s) |
+| `live2/tests/test_live2_fix.py` (new: D98, D99, D100, D101, D102) | **16 tests, OK** |
+| `policy/tests/*` (16 modules) | **all OK**, including the frozen-file md5 check |
+
+Two of those suites needed an edit, both mechanical: the run-header fixture gained
+`decision_period_s` and `gpu_budget_s`, and the fleet digest byte-equality test now includes a
+`history_preload` in the stream (and builds the pull-mode stream separately, because push and
+pull carry different monitor kinds).
+
+**`policy/params.py` was NOT modified.** It is one of the StudyPOL4 FROZEN FILES
+(`freeze_t0b.FROZEN_FILES`, md5-checked by `policy/tests/test_residency_belief.py`). The D99 (4)
+cap was first added there as a declared field; the frozen-file test caught it immediately, the
+edit was reverted (the file is back to its frozen md5 `abbbca7ae904e41851ca4b99fae73345`) and the
+cap now lives as a runtime attribute on the `Params` INSTANCE, which the library reads with
+`getattr(self.params, "release_eval_cap_k", None)`. An unset cap is therefore exactly the old
+behaviour, and no frozen byte moved.
+
+## F8. Files created or changed by StudyLIVE2-fix
+
+CREATED:
+
+```
+experiments/orchestration/live2/fix_checks.py            the D98 / D99 / D100 checks, one CLI
+experiments/orchestration/live2/tests/test_live2_fix.py  16 tests (D98, D99, D100, D101, D102)
+results/orchestration/live2/coord/fix/d98_sh_admission.json        Part 1 (a)
+results/orchestration/live2/coord/fix/d99_equivalence.json         Part 2 (2)
+results/orchestration/live2/coord/fix/d99_speed.json               Part 2 (3), no cap
+results/orchestration/live2/coord/fix/d99_cap_k.json               Part 2 (4), the K curve
+results/orchestration/live2/coord/fix/d100_information_parity.json Part 3
+results/orchestration/live2/coord/fix_k1/d99_speed.json            Part 2 (3) with K = 1
+results/orchestration/live2/coord/fix/<check>/<cell>/              per-cell logs
+results/orchestration/live2/coord/fix_k1/speed/<cell>/
+```
+
+Every result file carries `is_measurement: false` and a `_provenance` stamp at commit 80fe119.
+The per-cell JSONL streams of the large cells ran to 213 MB of CPU-dry-run fixture log, so any
+stream over 256 KB is kept as its first three lines (`*.jsonl.head`) beside a `*.jsonl.trimmed`
+note giving the original line count, its size and the command that regenerates it; nothing
+analytical depends on them, and the small streams are kept whole.
+
+CHANGED:
+
+```
+experiments/orchestration/live2/schema.py           history_preload; decision_period_s and
+                                                    gpu_budget_s in the run header
+experiments/orchestration/live2/CONTRACT.md         history_preload; digest coverage and the
+                                                    corrected canonical row-shape table
+experiments/orchestration/live2/cstate.py           history_preload -> cold history, no KV;
+                                                    preloaded_tokens; session_start no longer
+                                                    wipes a preloaded session
+experiments/orchestration/live2/traces.py           history_preload in the fairness digest
+experiments/orchestration/live2/coordinator.py      one 100 ms decision period; the D100 roster
+                                                    facts, refreshed per period; D102 budget
+experiments/orchestration/live2/bridge.py           one decision per period on the emulator's
+                                                    clock; history_preload accepted
+experiments/orchestration/live2/arms.py             pi_0 orders SH by the real instant deadline
+experiments/orchestration/live2/arms_policy.py      impl / cap_k; the D100 instant and partial
+                                                    readiness; SH admit / decline counters
+experiments/orchestration/live2/run_live2_cell.py   --decision-period-s, --gpu-budget-s,
+                                                    --policy-impl, --release-cap-k
+experiments/orchestration/live2/scale_smoke.py      reports decision_period_s
+experiments/orchestration/live2/tests/test_live2_coord.py  header fixture; preload in the
+                                                    fleet digest byte-equality test
+experiments/orchestration/policy/rollout.py         D98 per-instant SH, in-flight and tail
+                                                    deliveries; clone_for_rollout / clone_impl
+experiments/orchestration/policy/coordinator.py     capture_at reaches the planned SH call;
+                                                    release_eval_cap_k; cap counters
+experiments/orchestration/policy/escalation.py      EscalationRequest.capture_at (opt-in)
+experiments/orchestration/policy/spec_map.py        the 1.2 row names D98
+experiments/orchestration/policy/tests/test_rollout_coordinator.py  1 test changed, 8 added
+experiments/orchestration/policy/tests/test_scenario.py             1 test changed
+reports/study_live2_coord.md                        this section
+```
+
+NOT TOUCHED: `baselines/` (`interface.py`, `constructed.py`, `naive.py`, `registry.yaml`), the
+frozen pol4 cost model and every file in `freeze_t0b.FROZEN_FILES` (including
+`policy/params.py`), `live2/fleet/`, `live2/scorer/`, `live2/data/`,
+`results/orchestration/live2/ANALYSIS_PLAN.md`, every earlier result,
+`research/policy_design_log.md`, `research/policy_spec_v4.md`,
+`research/policy_ablations.md`, `research/EXPERIMENTS.md`, `research/STATUS.md` and
+`results/INDEX.md`.
+
+## F9. Mechanism verification and results consistency
+
+This row is an ENGINEERING TASK with NO MEASUREMENT, so neither CLAUDE.md protocol is run on it,
+and that is a statement about this row only.
+
+* **Mechanism verification** applies to an experiment that tests a causal claim before its sweep
+  runs. This work tests no causal claim, produces no sweep and no finding: it changes the policy
+  and the harness as D98 to D105 direct, and then checks that each change does what the decision
+  says, on a CPU fixture. The protocol belongs to the round-1 measured runs. One thing it is
+  worth saying here, because it is exactly the failure mode the protocol exists to catch: the
+  pre-D98 harness would have run the whole pilot with the SH channel's marginal value
+  **correctly and consistently zero** at H = 0.5 s, and every consistency check would have
+  passed. D98's fix is what makes "SH admission" a quantity that can vary at all, which is
+  Step 2's requirement for any round-1 claim about monitoring.
+* **Results consistency check** applies to an experiment that produces numbers. Every number in
+  this section is a dry-run fixture output on a SYNTHETIC trace, labelled `is_measurement: false`
+  in its own result file. None is committed as a measurement of any quantity. The committed
+  values this work READS are read through the existing loaders and not recomputed: the frozen
+  `pol4` cost model (the 0.1384 s / 1.2642 s piece-versus-cold-rebuild pair), StudyENG1's
+  11,184-token D2 history, StudyE9d's u_SH grid, D76's capacities, D71 / D82's targets, D89's
+  omegas. The one cross-check worth recording is the definition audit on `history_preload`: its
+  field list and its digest row are byte-identical to the fleet side's, asserted by a test, so
+  the same name cannot mean two things across the two sides.
+
+## F10. Open issues (StudyLIVE2-fix)
+
+**F-1. The 100 ms decision period is now a FAIRNESS parameter, and it bounds what any arm can
+do.** D99 (1) makes every arm decide 10 times a second, so an arm can serve at most one
+monitoring instant per device per period through the stream action, and a 0.5 s cadence gives
+5 periods of slack per instant. That is fine at the round-1 cadence, but it means the period is
+part of the experimental design and not an implementation detail: a cadence faster than 100 ms,
+or a monitoring bound below about 200 ms, would be shaped by the period rather than by the
+policy. It is in the header; it should be named in the round-1 report beside H.
+
+**F-2. NO CAP K BOTH MEETS THE p99 TARGET AND KEEPS THE POLICY WORKING AT 128 DEVICES. USER
+DECISION NEEDED.** The measured curve (F4 (4)) has K <= 2 meeting the target while issuing 4 to
+7 requests per RUN, and K >= 16 doing the work at about 18 requests per virtual second while
+missing the target by four to six times; the crossing is at the arrival rate, about 12 instants
+per period. The cap is implemented, measured and LEFT OFF (`release_eval_cap_k` default None).
+Three ways out, all of them decisions rather than build work: raise the target at 128 devices
+and report the coordinator's latency as part of the result; shorten the period or cap only the
+paths that do not gate admission; or drop 128 devices from round 1 and let D95's pilot fix the
+largest size from the H100's own numbers. A second, smaller point: a capped policy is a DIFFERENT
+ARM from an uncapped one (unlike the Part 2 (2) work, which is bit-identical), so if a cap is ever
+set the value belongs in the arm's name, not only in its header.
+
+**F-3. The policy's decision latency is still the largest fleet's binding constraint, and it is
+a FLASH number.** The speed table is one CPU, one process, a synthetic trace and the committed
+cost curve as the service time. The H100 host's CPU differs, the real trace has different
+arrival patterns, and under real HTTP the loop also collects completions. D95's pilot is where
+the break size is measured; nothing here fixes a latency budget for it.
+
+**F-4. The SH instant the policy scores is the one the coordinator will serve, but only because
+both use the same tie-break.** `_serve_monitor` takes the earliest-deadline eligible instant and
+the D100 hook offers the first visible one in arrival order; these agree because a monitoring
+deadline is capture plus a constant. If a future workload gives two instants of one device
+different bounds, the two rules can disagree, and then the arm would score one instant and the
+coordinator would serve another. Worth a single assertion in the harness before round 1.
+
+**F-5. An SH instant the policy declines is never re-offered to it, by design, but the
+opportunity stays visible to the coordinator until its deadline.** `_seen` is keyed by
+opportunity_id, so a declined instant is a device-only outcome (spec 7.9, D62) and the policy
+does not reconsider it. Because the coordinator still lists it as visible, it is also the
+instant the D100 hook offers for that device until its window passes, so a device that declines
+one instant does not escalate its next capture until the declined one expires (at most L_SH).
+On the fixtures here that costs nothing (every instant was admitted), but under congestion it is
+a second-order coupling between a decline and the next instant's escalation, and it is the kind
+of thing that should be a counted quantity in the pilot rather than an inference.
+
+**F-6. `history_preload` is wired on the coordinator side and cross-checked against the fleet's
+row, but no END-TO-END run has yet carried one.** The fleet's generator (subagent B) emits it;
+the tests here drive it through `_ingest` and through the bridge on hand-built events and assert
+the digest row matches `fleet/trace.py` byte for byte. What has NOT happened is one cell per arm
+on a real fleet trace that contains preloads, with both sides' digests agreeing. That is the
+D104 pre-pilot item and it belongs to the parent.
+
+**F-7. `policy/params.py` is frozen, so the cap setting lives on the Params INSTANCE.** The
+library reads it with `getattr`, which is robust, but it means the setting is not discoverable
+from the dataclass and does not appear in `Params.placeholders()`. It is reported through the
+arm's own placeholder table instead. If the cap survives round 1 it should be declared as a
+field the next time the pol4 freeze is re-cut, not before.
+
+**F-8. The mode-B pull responder is still a stand-in** (D104): mode B charges RTT/2 plus the
+upload through `traces.pull_responder`, and the real fleet replaces it before block 6. Every
+mode-B number in this section is therefore about the coordinator's own loop, not about a pulled
+path's delivered delay.
+

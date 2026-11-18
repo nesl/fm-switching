@@ -12,7 +12,9 @@ from typing import Any, Dict, List
 
 SPEC_MAP: List[Dict[str, str]] = [
     dict(section="1.2 eligible opportunities", code="rollout.Rollout._opportunity_utility",
-         note="every decision instant on the task cadence is scored, escalated or not"),
+         note="every decision instant on the task cadence is scored, escalated or not; D98 "
+              "credits each SH instant at its OWN deadline c_i + L_SH (v4 5.1, 6.3), retiring "
+              "the display-freshness rule"),
     dict(section="2.1 per-device state", code="state.Device, state.HistoryBelief, state.Link",
          note="the believed tier is a DISTRIBUTION, not a tier"),
     dict(section="2.2 cloud state", code="state.Fleet", note="pending set, jobs, calendar"),

@@ -36,8 +36,8 @@ UPLOAD MODES (D69)
 
 FAIRNESS (D69, D79, D96 (2)). The emulator never changes the opportunity stream. Its sent-stream
 digest is the CANONICAL fairness digest: `trace.fairness_digest` over the events it actually
-presented, covering device_register, session_start, session_end, history_append,
-recall_question, and monitor_offer in PULL mode or monitor_frame in PUSH mode. A pulled frame is
+presented, covering device_register, session_start, session_end, history_preload (D101),
+history_append, recall_question, and monitor_offer in PULL mode or monitor_frame in PUSH mode. A pulled frame is
 not digested, because which frames exist depends on the arm's pulls. The digest must equal the
 trace's digest FOR THIS MODE; a mismatch is a stop condition and `run()` raises.
 
@@ -217,6 +217,7 @@ class FleetEmulator:
         self.presented: List[Dict[str, Any]] = []
         self.wire_sent = 0
         self.wire_received = 0
+        self.n_preload = 0
         self._seq = 0
         self._heap: List[Tuple[float, int, str, Dict[str, Any]]] = []
 
@@ -243,6 +244,8 @@ class FleetEmulator:
                 self._push(0.0, "register", r)
             elif k in ("session_start", "session_end"):
                 self._push(r["t"], k, r)
+            elif k == "history_preload":
+                self._push(r["t"], "history_preload", r)
             elif k == "history_batch":
                 self._push(r["t"], "history_batch", r)
             elif k == "monitor_opportunity":
@@ -360,6 +363,17 @@ class FleetEmulator:
                 self.presented.append(payload)
                 self._to_coord(EV.make(what, device_id=payload["device_id"],
                                        session_id=payload["session_id"], t=payload["t"]), t)
+            elif what == "history_preload":
+                # D101: NO UPLINK TIME. The frames were on cloud-side disk before the clock
+                # started, so the preload neither occupies the device's uplink nor queues
+                # behind anything; it is handed to the coordinator at its own run-clock time.
+                self.presented.append(payload)
+                self.n_preload += 1
+                self._to_coord(EV.make("history_preload", device_id=payload["device_id"],
+                                       session_id=payload["session_id"],
+                                       frame_refs=payload["frame_refs"],
+                                       est_tokens=int(payload["est_tokens"]),
+                                       t=float(payload["t"])), t)
             elif what == "history_batch":
                 self.presented.append(payload)
                 tr = self._upload(payload, "history_batch", payload["batch_id"],
@@ -438,6 +452,11 @@ class FleetEmulator:
             fairness_digest=sent_digest, trace_fairness_digest=trace_digest,
             fairness_digest_definition=self.meta.get("fairness_digest_definition"),
             digests_equal=(sent_digest == trace_digest),
+            n_history_preload=self.n_preload,
+            history_preload_uplink_bytes_charged=0,
+            history_preload_note=("D101: a history_preload charges NO uplink time and occupies "
+                                  "no uplink slot, so it never queues ahead of a frame; the "
+                                  "frames were on cloud-side disk before the run clock started."),
             n_opportunities=len(self.outcomes),
             n_served=sum(1 for o in self.outcomes.values() if o.t_delivered is not None),
             n_within_L=sum(1 for o in self.outcomes.values() if o.within_L),

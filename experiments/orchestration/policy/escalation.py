@@ -82,6 +82,11 @@ class EscalationRequest:
     unsent_history_bytes: int = 0
     path: Optional[str] = None
     payload_delivered: bool = False
+    # D98 / D100: the SH instant's OWN capture time c_i. Supplied, the planned call carries it
+    # as its `due_at` and `deadline` = c_i + L_SH, so the per-instant rule (spec 5.1 as amended)
+    # credits the instant the call actually serves. Omitted, the call is planned exactly as
+    # before, at `fleet.t` with no deadline, so no existing caller changes behaviour.
+    capture_at: Optional[float] = None
 
 
 @dataclass

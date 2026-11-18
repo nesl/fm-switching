@@ -50,12 +50,14 @@ class SyntheticTraceRefused(RuntimeError):
 
 # D96 part 2: the CANONICAL FAIRNESS DIGEST. Order-independent sha256 over SORTED event tuples,
 # the full 64 hex characters, never a prefix taken in iteration order. Coverage:
-#   device_register, session_start, session_end, history_append, recall_question,
-#   and monitor_offer in PULL mode (B) or monitor_frame in PUSH mode (A).
+#   device_register, session_start, session_end, history_preload, history_append,
+#   recall_question, and monitor_offer in PULL mode (B) or monitor_frame in PUSH mode (A).
+# history_preload (D101) is covered because the join point decides which questions count, so a
+# stream with a different preload IS a different experiment and must not share a digest.
 # In pull mode the frames are EXCLUDED, because which frames exist depends on the arm's own
 # pulls and so cannot be a fairness invariant (D69, D96).
-FAIRNESS_KINDS_COMMON = ("device_register", "session_start", "session_end", "history_append",
-                         "recall_question")
+FAIRNESS_KINDS_COMMON = ("device_register", "session_start", "session_end", "history_preload",
+                         "history_append", "recall_question")
 
 
 def fairness_kinds(upload_mode: str) -> tuple:
@@ -71,7 +73,7 @@ def _fairness_row(e: Dict[str, Any]) -> tuple:
     function reproduces it field for field so the two sides' digests are comparable. The wire
     events carry the time under its own name, and the mapping onto the fleet's single `t` is:
     `start_t` for a registration, `t` for a session boundary, `t_arrive` for a history batch,
-    `t_ask` for a question and `t_capture` for a monitoring instant.
+    `t` for a history preload, `t_ask` for a question and `t_capture` for a monitoring instant.
     """
     k = e["kind"]
     dev = str(e["device_id"])
@@ -79,6 +81,10 @@ def _fairness_row(e: Dict[str, Any]) -> tuple:
         return (dev, "device_register", "%.6f" % float(e["start_t"]), "", "", "")
     if k in ("session_start", "session_end"):
         return (dev, k, "%.6f" % float(e["t"]), str(e["session_id"]), "", "")
+    if k == "history_preload":
+        # D101: no batch_id, so the session is the key; the holding's size is the extra field.
+        return (dev, "history_preload", "%.6f" % float(e["t"]), str(e["session_id"]),
+                str(int(e["est_tokens"])), "")
     if k == "history_append":
         return (dev, "history_append", "%.6f" % float(e["t_arrive"]), str(e["batch_id"]),
                 str(int(e["est_tokens"])), "")
@@ -115,6 +121,15 @@ def live1_trace_digest(events: List[Dict[str, Any]]) -> str:
             h.update(repr(("reg", e["device_id"], e["type"],
                            round(float(e["start_t"]), 4))).encode())
     return h.hexdigest()[:32]
+
+
+def ratio_label(n_dashcam: int, n_robot: int) -> str:
+    """The dashcam : robot mix as the string the scorer reads (D103 (f)), e.g. "50:50"."""
+    total = int(n_dashcam) + int(n_robot)
+    if total <= 0:
+        return "0:0"
+    d = int(round(100.0 * int(n_dashcam) / total))
+    return "%d:%d" % (d, 100 - d)
 
 
 def upload_s(nbytes: int, uplink_mbps: float = UPLINK_MBPS, rtt_ms: float = RTT_MS) -> float:
@@ -211,7 +226,7 @@ def synthetic(*, n_dashcam: int = 2, n_robot: int = 2, duration_s: float = 60.0,
             offset = 0.0
 
     ev.sort(key=lambda e: (_sched(e), e["kind"]))
-    return dict(label="SYNTHETIC", events=ev,
+    return dict(label="SYNTHETIC", events=ev, ratio=ratio_label(n_dashcam, n_robot),
                 fairness_digest=fairness_digest(ev, upload_mode),
                 live1_trace_digest=live1_trace_digest(ev), seed=seed,
                 frames_by_instant=frames_by_instant,
@@ -264,6 +279,11 @@ def load(path: Any) -> Dict[str, Any]:
                 seed=(head[0].get("seed") if head else meta.get("seed")),
                 upload_mode=mode,
                 fleet_opportunity_digest=meta.get("opportunity_digest"),
+                # D103 (f): the scorer labels a comparison PRIMARY only if the run header carries
+                # the memory setting, the device RATIO and the upload mode, so the ratio has to
+                # travel from the trace that fixed it.
+                ratio=meta.get("ratio"),
+                n_dashcam=meta.get("n_dashcam"), n_robot=meta.get("n_robot"),
                 frames_by_instant=frames, meta=meta or None, path=str(p))
 
 

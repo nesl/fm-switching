@@ -1,0 +1,142 @@
+{
+ "_provenance": {
+  "args": {
+   "cap_k": null,
+   "check": "sh-admission",
+   "ks": "1,2,4,8",
+   "max_wall_s": null,
+   "out": "/home/pragya/Desktop/FM-switching/results/orchestration/live2/coord/fix",
+   "sizes": "32,64,128",
+   "window_s": 180.0
+  },
+  "device": "flash_cpu",
+  "git_commit": "80fe1199d1778d5ce1038d65e637cc03eab1ea3f",
+  "model": "none",
+  "n": 4,
+  "script": "fix_checks.py",
+  "timestamp": "2026-11-17T20:52:10.320691"
+ },
+ "check": "d98_sh_admission",
+ "decision_period_s": 0.1,
+ "fixture": "SYNTHETIC, 60 s, mu = 0, mode A, tight memory, seed 1, dry run. The first two rows are the StudyLIVE2-coord open issue 1 fixture (2 dashcam + 1 robot); the last two are a congested variant (8 dashcam + 2 robot), which is where declines appear at all.",
+ "is_measurement": false,
+ "note": "Before D98, H = 0.5 s admitted 0 of 240 instants with DeltaJ exactly 0.0 on every one, while H = 1.0 s admitted 240 of 240.",
+ "rows": [
+  {
+   "H": 0.5,
+   "delta_j_admits": {
+    "max": 0.077807,
+    "mean": 0.071441,
+    "median": 0.071521,
+    "min": 0.055809,
+    "n": 240,
+    "p25": 0.068429,
+    "p75": 0.074612
+   },
+   "delta_j_declines": {
+    "n": 0
+   },
+   "fairness_digest": "d0990bf8fbb626b3c1fc0d23bd6a0bf6202e6558abdcc76c7a939ec1b1057901",
+   "fixture": "issue-1 fixture",
+   "n_dashcam": 2,
+   "n_decisions": 242,
+   "n_monitor_answers": 240,
+   "n_on_time": 241,
+   "n_requests": 242,
+   "n_robot": 1,
+   "sh_admitted": 240,
+   "sh_declined": 0,
+   "sh_escalated": 240
+  },
+  {
+   "H": 1.0,
+   "delta_j_admits": {
+    "max": 0.077807,
+    "mean": 0.071441,
+    "median": 0.071521,
+    "min": 0.055809,
+    "n": 240,
+    "p25": 0.068429,
+    "p75": 0.074612
+   },
+   "delta_j_declines": {
+    "n": 0
+   },
+   "fairness_digest": "d0990bf8fbb626b3c1fc0d23bd6a0bf6202e6558abdcc76c7a939ec1b1057901",
+   "fixture": "issue-1 fixture",
+   "n_dashcam": 2,
+   "n_decisions": 242,
+   "n_monitor_answers": 240,
+   "n_on_time": 241,
+   "n_requests": 242,
+   "n_robot": 1,
+   "sh_admitted": 240,
+   "sh_declined": 0,
+   "sh_escalated": 240
+  },
+  {
+   "H": 0.5,
+   "delta_j_admits": {
+    "max": 0.079845,
+    "mean": 0.053176,
+    "median": 0.054512,
+    "min": 0.006366,
+    "n": 922,
+    "p25": 0.053548,
+    "p75": 0.055677
+   },
+   "delta_j_declines": {
+    "max": 0.0,
+    "mean": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 30,
+    "p25": 0.0,
+    "p75": 0.0
+   },
+   "fairness_digest": "5aa3bf75c6a23f7335f2e750885f8ef6c6b13658aeb22996da8090216ccfbfcb",
+   "fixture": "congested: 10 devices on one modelled GPU",
+   "n_dashcam": 8,
+   "n_decisions": 988,
+   "n_monitor_answers": 960,
+   "n_on_time": 888,
+   "n_requests": 888,
+   "n_robot": 2,
+   "sh_admitted": 922,
+   "sh_declined": 30,
+   "sh_escalated": 952
+  },
+  {
+   "H": 1.0,
+   "delta_j_admits": {
+    "max": 0.079845,
+    "mean": 0.054088,
+    "median": 0.054057,
+    "min": 0.043208,
+    "n": 934,
+    "p25": 0.053548,
+    "p75": 0.055487
+   },
+   "delta_j_declines": {
+    "max": 0.0,
+    "mean": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 18,
+    "p25": 0.0,
+    "p75": 0.0
+   },
+   "fairness_digest": "5aa3bf75c6a23f7335f2e750885f8ef6c6b13658aeb22996da8090216ccfbfcb",
+   "fixture": "congested: 10 devices on one modelled GPU",
+   "n_dashcam": 8,
+   "n_decisions": 882,
+   "n_monitor_answers": 960,
+   "n_on_time": 880,
+   "n_requests": 882,
+   "n_robot": 2,
+   "sh_admitted": 934,
+   "sh_declined": 18,
+   "sh_escalated": 952
+  }
+ ]
+}

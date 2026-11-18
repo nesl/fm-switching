@@ -37,6 +37,7 @@ Authority: `research/policy_design_log.md` (D56, D63, D69, D70, D81, D83, D84),
 | `session_end` | `device_id, session_id, t` | robots, when a session play ends. |
 | `monitor_offer` | `device_id, opportunity_id, instant_id, t_capture, deadline_s, frame_bytes` | mode B only (D69): the device announces a decision instant and waits for a pull. |
 | `monitor_frame` | `device_id, opportunity_id, instant_id, t_capture, t_arrive, deadline_s, frame_ref, frame_bytes` | mode A: pushed for every instant. Mode B: sent after a `pull_request`. |
+| `history_preload` | `device_id, session_id, frame_refs, est_tokens, t` | once per robot session that is JOINED PART-WAY (D101), at `t = 0`: the frames the cloud ALREADY HOLDS as cold history at run start. |
 | `history_append` | `device_id, session_id, batch_id, t_arrive, frame_refs, est_tokens` | every 30 s per robot session (D68); pushed in BOTH upload modes. |
 | `recall_question` | `device_id, opportunity_id, session_id, question_id, t_ask, t_arrive, deadline_s, question, options` | at the question's real time (D68). |
 
@@ -50,6 +51,15 @@ only reads events still sees the bound.
 
 `est_tokens` is the fleet's token estimate for the batch, used for planning only. The actual
 prompt token count is whatever the engine reports.
+
+`history_preload` (D101) carries NO `batch_id` and NO `t_arrive`, because it is not a batch that
+arrived during the run: its frames were on cloud-side disk before the clock started. **No uplink
+time is charged for a preload**, and the coordinator must never recompute one. It stores the
+frames as COLD history exactly as it stores an ingested batch (D56: frames on disk, NO KV), so
+the first question on a joined-into session still pays a cold rebuild of the joined prefix; that
+cold-rebuild pressure is the reason D101 exists. `t` is the run-clock instant at which the
+holding is declared, 0.0 for a join-point preload. Only questions after the join point are on
+the wire at all, so the coordinator needs no join-point field: the trace already omits them.
 
 ## Coordinator to fleet
 
@@ -114,33 +124,57 @@ It is recorded as `fairness_digest` in every run header and is what the fairness
 across arms. The StudyLIVE1-port digest may appear ONLY under the name `live1_trace_digest`, and
 a run header must never present one as the other.
 
-COVERAGE: `device_register`, `session_start`, `session_end`, `history_append`,
-`recall_question`, and `monitor_offer` in PULL mode (B) or `monitor_frame` in PUSH mode (A). In
-pull mode the frames are EXCLUDED, because which frames exist depends on the arm's own pulls and
-so cannot be a fairness invariant.
+COVERAGE: `device_register`, `session_start`, `session_end`, `history_preload`,
+`history_append`, `recall_question`, and `monitor_offer` in PULL mode (B) or `monitor_frame` in
+PUSH mode (A). In pull mode the frames are EXCLUDED, because which frames exist depends on the
+arm's own pulls and so cannot be a fairness invariant. `history_preload` is covered (D96 list
+plus `history_preload`) because the D101 join point decides which questions count, so two
+streams with different preloads are different experiments and must not share a digest.
 
-ROW SHAPE, one row per covered event, following the fleet's committed convention in
-`fleet/trace.py::opportunity_digest` (device first, the event's own key second, the kind, the
-defining time to six decimals, then one kind-specific field), joined with `|` and a trailing
-newline, the rows sorted before hashing:
+ROW SHAPE, one row per covered event, exactly the fleet's canonical six-field tuple
+`fleet/trace.py::_digest_tuple` -> `(device_id, wire_kind, t, key, extra, deadline)`, with every
+time formatted to six decimals and every field a string, joined with `|` and a trailing newline,
+the rows sorted before hashing:
 
 | kind | row |
 |---|---|
-| `device_register` | `device_id, "", kind, start_t, type` |
-| `session_start` / `session_end` | `device_id, session_id, kind, t, ""` |
-| `history_append` | `device_id, batch_id, kind, t_arrive, est_tokens` |
-| `recall_question` | `device_id, opportunity_id, kind, t_ask, deadline_s` |
-| `monitor_offer` / `monitor_frame` | `device_id, opportunity_id, kind, t_capture, deadline_s` |
+| `device_register` | `device_id, "device_register", start_t, "", "", ""` |
+| `session_start` / `session_end` | `device_id, kind, t, session_id, "", ""` |
+| `history_preload` | `device_id, "history_preload", t, session_id, est_tokens, ""` |
+| `history_append` | `device_id, "history_append", t_arrive, batch_id, est_tokens, ""` |
+| `recall_question` | `device_id, "recall_question", t_ask, opportunity_id, session_id, deadline_s` |
+| `monitor_offer` / `monitor_frame` | `device_id, kind, t_capture, opportunity_id, "", deadline_s` |
 
-D96 fixes the rule and the coverage; the per-kind row above is this implementation's reading of
-it and must agree with the fleet's, which is the canonical one.
+D96 fixes the rule and the coverage; the per-kind row above is the FLEET's, which is canonical,
+and `traces.py::_fairness_row` reproduces it field for field. A test asserts byte equality
+between `traces.fairness_digest` and `fleet/trace.py::fairness_digest` on one stream in both
+modes, so a change on either side fails loudly instead of letting two digests diverge. The
+`history_preload` row has no `batch_id`, so the SESSION is its key and the holding's
+`est_tokens` is its extra field.
 
 ## Run header (`header.json`)
 
 `git_commit, arm, arm_version, flags, gpu_kv_tokens, host_tier_gib, host_tier_tokens,
 cost_model_id, cost_model_hash, calibration_file, calibration_label, fairness_digest,
-trace_label, seed, targets, upload_mode, mu_mode, mu_value, H, tick_s, server_url, server_kind,
-model, live1_trace_digest, placeholders, schema_version, is_measurement, note`.
+trace_label, seed, targets, upload_mode, mu_mode, mu_value, H, tick_s, decision_period_s,
+gpu_budget_s, memory_setting, ratio, mode, server_url, server_kind, model, live1_trace_digest,
+placeholders, schema_version, is_measurement, note`.
+
+`decision_period_s` (D99 (1)) is the ONE decision period every arm decides on, 100 ms in round
+1, with that period's events batched. It is NOT H: `H` is the rollout horizon only, and an arm
+without a horizon carries `H: null`. `tick_s` is the same number as `decision_period_s` under
+its old name.
+
+`gpu_budget_s` (D102) is the GPU budget INPUT, identical for every arm; the default is one GPU's
+time over the run (`window_s` x 1.0), which is the physical capacity and so never binds
+artificially (D58).
+
+`memory_setting`, `ratio` and `mode` (D103 (f)) are what the SCORER reads to label a comparison
+PRIMARY rather than EXPLORATORY, and a missing one silently degrades every block-1 comparison:
+`memory_setting` is D76's `tight` or `roomy` LABEL (derived from `host_tier_gib`, so the two
+cannot disagree), `ratio` is the dashcam : robot mix as a string such as `50:50` (from the fleet
+trace's own meta, or from the device counts), and `mode` is `A` or `B` (the same value as
+`upload_mode`, under the name the scorer expects).
 
 `server_kind` is `fake` or `vllm`. A run against the fake server is NEVER a measurement:
 `is_measurement` is false and the report must say so. `calibration_label` carries the

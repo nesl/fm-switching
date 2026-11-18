@@ -96,7 +96,8 @@ def main(argv=None) -> int:
                      ("cell", "n_devices", "n_opportunities", "n_requests", "n_decisions",
                       "decision_latency_ms", "cpu_s", "wall_s", "cpu_percent",
                       "request_rate_per_s", "epoch_overruns", "max_epoch_lag_s", "n_errors",
-                      "tick_s", "n_pulls", "wall_guard_hit", "virtual_t_reached_s")})
+                      "decision_period_s", "n_pulls", "wall_guard_hit",
+                      "virtual_t_reached_s")})
         print(json.dumps(rows[-1], default=str), flush=True)
     from _provenance import stamp
     (root / "scale_smoke.json").write_text(json.dumps(

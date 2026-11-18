@@ -25,13 +25,21 @@ import schema as SC
 class EmulatorBridge:
     """The live2 coordinator as the fleet emulator's `Coordinator`."""
 
-    def __init__(self, co, decide_on_every_event: bool = True) -> None:
+    def __init__(self, co) -> None:
         self.co = co
-        self.decide_on_every_event = bool(decide_on_every_event)
         self._sent = 0
         self._pulls = 0
         self.n_events = 0
         self.n_ticks = 0
+        self.n_decisions = 0
+        # D99 (1): ONE DECISION PER PERIOD, the same period for every arm, with that period's
+        # events batched. The bridge enforces it on the EMULATOR's clock, so it holds whatever
+        # the emulator's own tick_s is (it must be no coarser than the period, or a period would
+        # pass without a decision); the old `decide_on_every_event` rule is gone, because it made
+        # the decision rate a function of the event rate (open issue 10a).
+        self._period = float(getattr(co, "decision_period_s", 0.1))
+        self._next_decision = 0.0
+        self._pending_epoch = "tick"
 
     # ---- the Protocol
     def on_event(self, event: Dict[str, Any], t: float) -> Sequence[Dict[str, Any]]:
@@ -40,8 +48,9 @@ class EmulatorBridge:
         self.co.st.now = float(t)
         self.co._collect(float(t))
         epoch = self.co._ingest(event, float(t)) or "tick"
-        if self.decide_on_every_event:
-            self.co._epoch(float(t), epoch)
+        if epoch != "tick":
+            self._pending_epoch = epoch
+        self._maybe_decide(float(t))
         self.co._expire(float(t))
         return self._drain()
 
@@ -49,9 +58,17 @@ class EmulatorBridge:
         self.n_ticks += 1
         self.co.st.now = float(t)
         self.co._collect(float(t))
-        self.co._epoch(float(t), "tick")
+        self._maybe_decide(float(t))
         self.co._expire(float(t))
         return self._drain()
+
+    def _maybe_decide(self, t: float) -> None:
+        if t + 1e-9 < self._next_decision:
+            return
+        self.co._epoch(t, self._pending_epoch)
+        self.n_decisions += 1
+        self._pending_epoch = "tick"
+        self._next_decision = round(t + self._period, 9)
 
     def close(self) -> None:
         if getattr(self.co, "be", None) is not None:
@@ -73,4 +90,4 @@ class EmulatorBridge:
     def describe(self) -> Dict[str, Any]:
         return dict(arm=self.co.arm.name, n_events=self.n_events, n_ticks=self.n_ticks,
                     n_pulls=self._pulls, n_cloud_answers=self._sent,
-                    decide_on_every_event=self.decide_on_every_event)
+                    n_decisions=self.n_decisions, decision_period_s=self._period)

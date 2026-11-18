@@ -84,6 +84,7 @@ class SessionRec:
     frames: List[str] = field(default_factory=list)       # every frame_ref on cloud-side disk
     sent_bytes_for: set = field(default_factory=set)      # frames whose BYTES the engine saw
     est_tokens: int = 0
+    preloaded_tokens: int = 0     # D101: tokens the cloud already held, cold, at run start
     open: bool = True
     built_tokens: int = 0
     belief: Dict[str, float] = field(default_factory=lambda: {"gpu": 0.0, "host": 0.0,
@@ -157,6 +158,15 @@ class CoordState:
         return d
 
     def session_start(self, ev: Dict[str, Any]) -> SessionRec:
+        # D101: a robot joins its first session PART-WAY, and the `history_preload` that declares
+        # the frames the cloud already holds can be ingested before the `session_start` that
+        # marks the join (both carry t = 0, and the loop batches a period's events). A
+        # session_start must therefore not wipe a cold history already declared for the same
+        # session; it only re-opens it.
+        prev = self.sessions.get(ev["session_id"])
+        if prev is not None and prev.preloaded_tokens > 0:
+            prev.open = True
+            return prev
         s = SessionRec(session_id=ev["session_id"], device_id=ev["device_id"])
         self.sessions[s.session_id] = s
         self.devices[ev["device_id"]].sessions.append(s.session_id)
@@ -170,6 +180,24 @@ class CoordState:
         # D56: the KV may be released, the FRAMES STAY. "cold" is rebuild-from-frames, not delete.
         s.belief = {"gpu": 0.0, "host": 0.0, "cold": 1.0}
         s.built_tokens = 0
+
+    def history_preload(self, ev: Dict[str, Any]) -> SessionRec:
+        """D101: frames the cloud ALREADY HOLDS as cold history at run start.
+
+        Identical to an ingested batch on the coordinator side (D56: frames on disk, no KV), so
+        the first question on this session still pays a cold rebuild of the joined-into prefix.
+        No uplink time is charged: the holding predates the run clock.
+        """
+        s = self.sessions.get(ev["session_id"])
+        if s is None:
+            s = self.session_start(dict(device_id=ev["device_id"],
+                                        session_id=ev["session_id"], t=float(ev["t"])))
+        s.frames.extend(ev["frame_refs"])
+        s.est_tokens = max(int(ev["est_tokens"]), s.est_tokens)
+        s.preloaded_tokens = int(ev["est_tokens"])
+        s.belief = {"gpu": 0.0, "host": 0.0, "cold": 1.0}
+        s.built_tokens = 0
+        return s
 
     def history_append(self, ev: Dict[str, Any]) -> SessionRec:
         s = self.sessions.get(ev["session_id"])

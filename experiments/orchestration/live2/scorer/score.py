@@ -51,6 +51,24 @@ TASK VALUE
             `cache_path` (D81).
   device-only   computed from the recordings alone, with no run at all.
 
+WHAT D99, D101, D103 AND D105 ADD
+
+  D101   robots join their first session part-way, so a `history_preload` declares what the
+         cloud already held at t = 0 and the questions before the join point do not exist. The
+         preload is never an opportunity and is never scored; it is REPORTED (`history_preload`),
+         and a run whose preload count differs from its trace is refused, because a different
+         holding at t = 0 is a different experiment.
+  D103   (e) the AP-difference bootstrap is n = 1,000; (f) every comparison is labelled PRIMARY
+         or EXPLORATORY against the pre-registered primary family, with the break sizes passed
+         IN so the family cannot be chosen after the result; (h) the committed E10a median frame
+         size is for flash tests only, and a MEASURED run whose `frame_bytes_source` is not the
+         Part-2 encode manifest (D91) is REFUSED.
+  D105   each clip is scored with the map from the folds that EXCLUDE it, the fold assignment
+         taken from the calibration file. A FINAL map with no fold assignment is REFUSED rather
+         than applied pooled.
+  D99    the decision period (100 ms, one for every arm) and the coordinator's own latency are
+         recorded settings and stay in the diagnostics.
+
 CALIBRATION MAPS ARE INPUT FILES, AND AN INTERIM MAP CANNOT SCORE A MEASUREMENT (D86)
 
 The dense refit of both tiers is an H100 task. Until it exists, `orin2_calibration.json`'s maps
@@ -59,7 +77,7 @@ dense trajectory, with the D3-fitted device slope 3.007x steeper than a dense D1
 scorer therefore REFUSES to score a run whose server is not a stub when the map is INTERIM. A
 stub run is scored, and every output says `is_measurement: false`.
 
-ROBOT MEASURABILITY (D97, user ruling 2026-11-17, row pending)
+ROBOT MEASURABILITY (D97)
 
 Robot-pool eligibility (at least 20 pooled questions per run, D82) is a property of the TRACE, so
 it is fixed from traces before any GPU run. A fleet size enters a main-sweep comparison only if
@@ -104,8 +122,30 @@ ROB_L_S = DS.ROBOT_DEADLINE_S           # 5.0 (D71)
 ROB_P = 0.90                            # D71
 ROB_MIN_QUESTIONS = 20                  # D82, POOLED over the run
 N_BOOT = 2000
-N_BOOT_AP = 200                         # AP is recomputed per resample; see the docstring
+N_BOOT_AP = 1000                        # D103 (e): raised from 200. AP is recomputed per resample
 AP_HORIZONS = (0.0, 0.5, 1.0, 1.5)
+
+# D103 (f): THE PRIMARY FAMILY, fixed in advance. No multiplicity correction is applied and none
+# is claimed; what D103 fixes is WHICH comparisons are primary, so the family cannot be chosen
+# after seeing a result. Everything outside it is EXPLORATORY and is labelled so in every output.
+PRIMARY_MEMORY = "tight"
+PRIMARY_RATIO = "50:50"
+PRIMARY_MODE = "A"                      # push-all
+PRIMARY_FAMILY_RULE = (
+    "D103 (f): the PRIMARY family is policy vs each of the 7 GPU baselines at the two break "
+    "sizes, tight memory, 50:50, push-all (block 1). Every other comparison is EXPLORATORY. No "
+    "multiplicity correction is applied and none is claimed; the intervals are descriptive "
+    "(D64). The break sizes are an INPUT to the labelling: they come from the pilot (block 0) "
+    "and are passed in, so the family is fixed before the comparison is read.")
+EXPLORATORY = "EXPLORATORY"
+PRIMARY = "PRIMARY"
+POLICY_ARM = "policy-core"
+# The seven non-policy arms of the round-1 arm list (D65 as corrected by D90), copied from
+# `live2/arms.py::ARM_NAMES` rather than imported, so the scorer pulls in no coordinator code.
+# `device-only` is among the seven although D65 scores it from the recordings with no run at all;
+# see the report's open issues for the one reading of "GPU baselines" this leaves open.
+GPU_BASELINES = ("device-only", "always-cloud-fcfs", "edf", "edf-piece1024", "edf-piece2048",
+                 "utility-per-cost", "b9")
 
 
 class ScoringRefused(RuntimeError):
@@ -166,9 +206,51 @@ def load(trace_dir: Path, run_dir: Path) -> Loaded:
 NON_MEASUREMENT_SERVERS = ("stub", "fake")     # live2/CONTRACT.md calls it "fake"
 
 
+def is_measured_run(run_meta: Dict[str, Any], cal: Dict[str, Any]) -> bool:
+    """A run is a MEASUREMENT only if a real server produced it and the map is FINAL."""
+    return (run_meta.get("server_kind") not in NON_MEASUREMENT_SERVERS
+            and cal.get("label") == "FINAL")
+
+
+def check_frame_bytes_source(meta: Dict[str, Any], run_meta: Dict[str, Any],
+                             cal: Dict[str, Any]) -> None:
+    """D103 (h): the E10a median frame size is for FLASH TESTS ONLY.
+
+    A measured run must charge per-frame bytes from the Part-2 encode manifest (D91). The trace
+    records which source it used in `frame_bytes_source`; the scorer refuses a measured run whose
+    source is not the manifest, rather than reporting uplink timings computed from a median that
+    stands in for a distribution.
+    """
+    if not is_measured_run(run_meta, cal):
+        return
+    src = str(meta.get("frame_bytes_source") or "")
+    if not src.startswith("Part-2 manifest"):
+        raise ScoringRefused(
+            "SCORING REFUSED: this is a MEASURED run but its trace charged frame bytes from "
+            f"{src!r}. D103 (h) allows the committed E10a median for flash tests ONLY; a "
+            "measured run must read per-frame bytes from the Part-2 JPEG encode manifest (D91). "
+            "Regenerate the trace with --frame-manifest.")
+
+
 def check_calibration(cal: Dict[str, Any], run_meta: Dict[str, Any]) -> None:
-    """D86 / ruling 10-11: an INTERIM map may score a fake / stub run and nothing else."""
+    """D86 / ruling 10-11: an INTERIM map may score a fake / stub run and nothing else.
+
+    D105 adds a second condition on a FINAL map: it must carry its 5-fold cross-fitting BY CLIP,
+    because each clip is scored with the map from the folds that exclude it and the scorer takes
+    the fold assignment FROM THE FILE. A FINAL map with no fold assignment cannot be used
+    out-of-fold, so it is refused rather than applied pooled.
+    """
     is_stub = run_meta.get("server_kind") in NON_MEASUREMENT_SERVERS
+    if cal["label"] == "FINAL":
+        folds = cal.get("folds")
+        if not folds or not folds.get("assignment") or not folds.get("maps"):
+            raise ScoringRefused(
+                "SCORING REFUSED: the calibration map declares label FINAL but carries no fold "
+                "assignment and per-fold maps. D105 requires both maps to be Platt-fitted with "
+                "5-fold cross-fitting BY CLIP (D6) and each clip to be scored with the map from "
+                "the folds that EXCLUDE it, with the fold assignment taken from this file. A "
+                f"pooled FINAL map would score every clip in-fold. Map: {cal['path']} sha256 "
+                f"{cal['sha256'][:16]}")
     if cal["label"] != "FINAL" and not is_stub:
         raise ScoringRefused(
             "SCORING REFUSED: the calibration map is INTERIM and this run's server is "
@@ -319,6 +401,47 @@ def robot_value(lo: Loaded, L_rob: float = ROB_L_S) -> Dict[str, Any]:
     return out
 
 
+def map_for(cal: Dict[str, Any], key: str, clip: str) -> Dict[str, float]:
+    """The map to score ONE CLIP with (D105): out-of-fold when the file carries folds.
+
+    `folds.maps[k]` is the map fitted with fold k held out, and the clip's own fold comes from
+    the file's assignment, so a clip is never scored with a map its own data trained. A file with
+    no folds is the INTERIM case, which D86 confines to flash builds and tests; there the single
+    pooled map is used and the output says so.
+    """
+    folds = cal.get("folds")
+    if not folds:
+        return cal["maps"][key]
+    k = folds["assignment"].get(str(clip))
+    if k is None:
+        raise ScoringRefused(
+            f"the calibration file places no fold on clip {clip!r}, so it cannot be scored "
+            f"out-of-fold (D105). The scorer takes the fold assignment FROM THE FILE and never "
+            f"invents one, and it does not fall back to the pooled map for a measured run.")
+    m = (folds["maps"].get(str(k)) or {}).get(key)
+    if m is None:
+        raise ScoringRefused(
+            f"the calibration file has no {key!r} map for fold {k!r}, which clip {clip!r} is "
+            f"assigned to (D105)")
+    return m
+
+
+def calibration_use(cal: Dict[str, Any]) -> Dict[str, Any]:
+    """What the output header says about HOW the maps were applied (D86, D105)."""
+    folds = cal.get("folds")
+    return dict(path=cal["path"], sha256=cal["sha256"], label=cal["label"],
+                note=cal.get("note"),
+                fold_fitted=bool(folds),
+                n_folds=(folds.get("n_folds") if folds else None),
+                folds_by=(folds.get("by") if folds else None),
+                n_clips_assigned=(len(folds["assignment"]) if folds else 0),
+                application=("D105: each clip is scored with the map from the folds that EXCLUDE "
+                             "it, the fold assignment taken from the calibration file"
+                             if folds else
+                             "a single pooled map, with no cross-fitting: INTERIM only, flash "
+                             "builds and tests (D86)"))
+
+
 def _ap_streams(lo: Loaded, cal: Dict[str, Any], L_dash: float,
                 device_map_key: str = "device_4b_orin",
                 cloud_map_key: str = "h100_32b") -> Tuple[Dict[str, Any], Dict[str, Any]]:
@@ -331,7 +454,6 @@ def _ap_streams(lo: Loaded, cal: Dict[str, Any], L_dash: float,
     import numpy as np
     import study_e9b_dense as B
     clips = DS.nexar_clip_meta()
-    dm, cm = cal["maps"][device_map_key], cal["maps"][cloud_map_key]
     rec_by_play: Dict[str, List[Dict[str, Any]]] = {}
     completed: Dict[str, bool] = {}
     for r in lo.records:
@@ -346,6 +468,8 @@ def _ap_streams(lo: Loaded, cal: Dict[str, Any], L_dash: float,
         if not completed[play]:
             continue                       # D85: plays cut by the run end, excluded for all arms
         clip = recs[0]["clip"]
+        # D105: the out-of-fold maps for THIS clip.
+        dm, cm = map_for(cal, device_map_key, clip), map_for(cal, cloud_map_key, clip)
         G = clips[clip].grid_points
         arr = np.full(G, B.MISSING, dtype=np.float64)
         for r in sorted(recs, key=lambda x: x["t_local"]):
@@ -410,7 +534,6 @@ def device_only_value(lo: Loaded, cal: Dict[str, Any]) -> Dict[str, Any]:
     import metrics
     import study_e9b_dense as B
     clips = DS.nexar_clip_meta()
-    dm = cal["maps"]["device_4b_orin"]
     rec_by_play: Dict[str, List[Dict[str, Any]]] = {}
     completed: Dict[str, bool] = {}
     for r in lo.records:
@@ -422,6 +545,7 @@ def device_only_value(lo: Loaded, cal: Dict[str, Any]) -> Dict[str, Any]:
         if not completed[play]:
             continue
         clip = recs[0]["clip"]
+        dm = map_for(cal, "device_4b_orin", clip)       # D105, out of fold
         G = clips[clip].grid_points
         arr = np.full(G, B.MISSING, dtype=np.float64)
         for r in sorted(recs, key=lambda x: x["t_local"]):
@@ -578,7 +702,7 @@ def d97_sweep_sizes(table: Dict[str, Dict[int, Dict[int, bool]]], ratio: str,
     return dict(ratio=str(ratio), reported_seeds=list(seeds), per_size=per,
                 included_sizes=inc, entry_point=entry,
                 non_monotone_sizes_above_entry=above, monotone=(not above),
-                rule=("D97 (user ruling 2026-11-17, row pending): included only if the robot "
+                rule=("D97: included only if the robot "
                       "pool is eligible at EVERY reported seed; a size is never made measurable "
                       "by averaging or borrowing across seeds. Eligibility is checked for each "
                       "size actually chosen and never assumed from the entry point upward."))
@@ -604,6 +728,41 @@ def d97_pilot_labels(table: Dict[str, Dict[int, Dict[int, bool]]], ratio: str,
 
 
 # ---------------------------------------------------------------- diagnostics (D64)
+def history_preload(lo: Loaded) -> Dict[str, Any]:
+    """D101: what the cloud already held at t = 0, and the join that put it there.
+
+    The preload is NOT an opportunity and is never scored: it changes which questions exist and
+    what a first answer has to rebuild. The scorer reports it so that a run's robot pool can be
+    read next to the join that produced it, and refuses a run whose preloads do not match the
+    trace, because a different holding at t = 0 is a different experiment (D96 (2) coverage).
+    """
+    pre = [r for r in lo.records if r["kind"] == "history_preload"]
+    tok = sorted(int(r["est_tokens"]) for r in pre)
+    join = lo.meta.get("robot_join") or {}
+    offs = sorted(float(v["join_offset_s"]) for v in join.values())
+    n_run = lo.run_meta.get("n_history_preload")
+    if n_run is not None and int(n_run) != len(pre):
+        raise ScoringRefused(
+            f"the run presented {n_run} history_preload events and the trace holds {len(pre)}; "
+            f"a different holding at t = 0 is a different experiment (D101), so this run is not "
+            f"comparable with the others")
+    return dict(
+        n_preloads=len(pre), n_robots_with_join=len(join),
+        all_at_t_zero=all(float(r["t"]) == 0.0 for r in pre),
+        uplink_charged=False,
+        est_tokens=dict(min=(tok[0] if tok else None),
+                        median=(tok[len(tok) // 2] if tok else None),
+                        max=(tok[-1] if tok else None), total=sum(tok)),
+        join_offset_s=dict(min=(round(offs[0], 3) if offs else None),
+                           median=(round(offs[len(offs) // 2], 3) if offs else None),
+                           max=(round(offs[-1], 3) if offs else None)),
+        join_frac_max=lo.meta.get("robot_join_frac_max"),
+        rule=lo.meta.get("robot_join_rule"),
+        note=("D101: questions before a join point are not emitted and not counted, so the "
+              "robot pool of a run under D101 is NOT the pool the pre-D101 traces produced; the "
+              "D97 entry points were recomputed from traces for this reason."))
+
+
 def diagnostics(lo: Loaded) -> Dict[str, Any]:
     """D64's always-reported diagnostics, from the coordinator's own logs where they exist."""
     out: Dict[str, Any] = dict(
@@ -614,6 +773,16 @@ def diagnostics(lo: Loaded) -> Dict[str, Any]:
                       run_valid=lo.run_meta.get("run_valid"),
                       maxrss_kb=lo.run_meta.get("maxrss_kb")),
         uplink_queue=dict(p99_s_median=lo.run_meta.get("uplink_queue_p99_s_median")),
+        # D99: the decision period is the same 100 ms for every arm and is a RECORDED setting,
+        # separate from the horizon H; the coordinator's own latency stays in the results (M4).
+        decision_period=dict(
+            period_ms=lo.run_meta.get("decision_period_ms"),
+            full_eval_cap_K=lo.run_meta.get("decision_full_eval_cap_k"),
+            rule=("D99: one fixed 100-ms decision period for every arm, events batched per "
+                  "period, separate from H; a cap K on full DeltaJ evaluations per period is "
+                  "reported as a setting if one was used; the coordinator's own latency is "
+                  "counted and reported, never netted out"),
+            recorded=(lo.run_meta.get("decision_period_ms") is not None)),
         decision_log_present=bool(lo.decisions),
         request_log_present=bool(lo.requests))
     if lo.decisions:
@@ -670,6 +839,7 @@ def score_run(trace_dir: Path, run_dir: Path, calibration: Path, arm: str,
     lo = load(trace_dir, run_dir)
     cal = DS.calibration(Path(calibration))
     check_calibration(cal, lo.run_meta)
+    check_frame_bytes_source(lo.meta, lo.run_meta, cal)
     sweep = []
     for Ld in L_dash_grid:
         for pd in p_dash_grid:
@@ -684,11 +854,12 @@ def score_run(trace_dir: Path, run_dir: Path, calibration: Path, arm: str,
                 seed=lo.meta["seed"], n_devices=lo.meta["n_devices"], ratio=lo.meta["ratio"],
                 run_s=lo.meta["run_s"], mode=lo.run_meta.get("mode"),
                 server_kind=lo.run_meta.get("server_kind"),
-                is_measurement=(lo.run_meta.get("server_kind")
-                                not in NON_MEASUREMENT_SERVERS
-                                and cal["label"] == "FINAL"),
-                calibration=dict(path=cal["path"], sha256=cal["sha256"], label=cal["label"],
-                                 note=cal["note"]),
+                memory=(lo.run_meta.get("memory") or lo.run_meta.get("memory_setting")
+                        or lo.run_meta.get("kv_memory") or lo.run_meta.get("memory_label")),
+                is_measurement=is_measured_run(lo.run_meta, cal),
+                frame_bytes_source=lo.meta.get("frame_bytes_source"),
+                calibration=calibration_use(cal),
+                history_preload=history_preload(lo),
                 targets_are_inputs=("D71: targets are INPUTS. Every setting in the sweep is "
                                     "reported. The scorer never selects one."),
                 target_defaults=dict(L_dash=DASH_L_S, p_dash=DASH_P,
@@ -735,14 +906,63 @@ def capacity(scores: Sequence[Dict[str, Any]], setting_index: int = 0) -> Dict[s
     return out
 
 
+def classify_family(policy: Dict[str, Any], baseline: Dict[str, Any],
+                    break_sizes: Optional[Sequence[int]] = None) -> Dict[str, Any]:
+    """D103 (f): is this comparison in the PRIMARY family, or is it EXPLORATORY?
+
+    The family is fixed in advance: policy vs each of the 7 GPU baselines at the two break
+    sizes, tight memory, 50:50, push-all (block 1). `break_sizes` is an INPUT, taken from the
+    pilot, so the family cannot be chosen after the comparison is read; with no break sizes
+    given, nothing can be PRIMARY and the result says why.
+
+    Anything the run header does not record cannot be claimed, so a missing memory setting makes
+    the comparison EXPLORATORY and names the missing field. The labelling never changes a
+    number: it only says which family the comparison belongs to.
+    """
+    mem = None
+    for k in ("memory", "memory_setting", "kv_memory", "memory_label"):
+        if policy.get(k) is not None or (policy.get("run_meta") or {}).get(k) is not None:
+            mem = policy.get(k) or (policy.get("run_meta") or {}).get(k)
+            break
+    reasons: List[str] = []
+    if policy.get("arm") != POLICY_ARM:
+        reasons.append(f"the first arm is {policy.get('arm')!r}, not {POLICY_ARM!r}")
+    if baseline.get("arm") not in GPU_BASELINES:
+        reasons.append(f"{baseline.get('arm')!r} is not one of the 7 round-1 baselines")
+    if policy.get("n_devices") != baseline.get("n_devices"):
+        reasons.append("the two arms are at different fleet sizes")
+    if not break_sizes:
+        reasons.append("no break sizes were supplied, so no size can be claimed PRIMARY")
+    elif int(policy.get("n_devices") or -1) not in [int(x) for x in break_sizes]:
+        reasons.append(f"fleet size {policy.get('n_devices')} is not one of the break sizes "
+                       f"{list(break_sizes)}")
+    if policy.get("ratio") != PRIMARY_RATIO:
+        reasons.append(f"ratio {policy.get('ratio')!r} is not {PRIMARY_RATIO}")
+    if policy.get("mode") != PRIMARY_MODE:
+        reasons.append(f"mode {policy.get('mode')!r} is not push-all ({PRIMARY_MODE})")
+    if mem is None:
+        reasons.append("the run header records no memory setting, so tight memory cannot be "
+                       "confirmed (looked for memory / memory_setting / kv_memory / "
+                       "memory_label)")
+    elif str(mem) != PRIMARY_MEMORY:
+        reasons.append(f"memory setting {mem!r} is not {PRIMARY_MEMORY!r}")
+    return dict(family=(PRIMARY if not reasons else EXPLORATORY),
+                why=("every condition of the pre-registered primary family holds"
+                     if not reasons else "; ".join(reasons)),
+                break_sizes=(list(break_sizes) if break_sizes else None),
+                rule=PRIMARY_FAMILY_RULE)
+
+
 def compare(policy: Dict[str, Any], baseline: Dict[str, Any],
-            setting_index: int = 0, seed: int = 0) -> Dict[str, Any]:
+            setting_index: int = 0, seed: int = 0,
+            break_sizes: Optional[Sequence[int]] = None) -> Dict[str, Any]:
     """Paired policy-minus-baseline differences within one run (D64: intervals, no margins)."""
     pc = policy["sweep"][setting_index]
     bc = baseline["sweep"][setting_index]
     dash_units = sorted(set(pc["dashcam_per_device"]) & set(bc["dashcam_per_device"]))
     out: Dict[str, Any] = dict(policy=policy["arm"], baseline=baseline["arm"],
                                setting={k: pc[k] for k in ("L_dash", "p_dash", "L_rob", "p_rob")})
+    out["family"] = classify_family(policy, baseline, break_sizes)
     out["dashcam_attainment"] = paired_bootstrap(
         dash_units,
         lambda d: float(pc["dashcam_per_device"][d]["fraction"] or 0.0),

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """The live round-1 COORDINATOR: one process in front of one OpenAI-compatible server. CPU only.
 
-StudyLIVE2-coord. It consumes fleet events, keeps per-device state, calls the active arm on
-every event and on a tick, submits through the existing `HttpBackend`, and emits `cloud_answer`.
+StudyLIVE2-coord. It consumes fleet events, keeps per-device state, calls the active arm once per
+100 ms DECISION PERIOD over that period's batched events (D99), submits through the existing `HttpBackend`, and emits `cloud_answer`.
 It is a pure HTTP client of the server (request-harness pattern) and scrapes `/metrics`; nothing
 in this process opens an engine.
 
@@ -57,7 +57,12 @@ from backend import (Live2Backend, Live2Submission, cached_tokens_of,    # noqa:
                      output_tokens_of, prompt_tokens_of)
 
 DEVICE_ANSWER_CHARGE_S = C.DEV_LAT_S         # StudyD8's 0.567 s RULE (D87, amendment 2 item 3)
-DEFAULT_TICK_S = 0.05                        # arms without H; reported in the run header
+# D99 (1): ONE DECISION PERIOD FOR EVERY ARM, 100 ms, with the events of each period batched.
+# It replaces the 50 ms event grid AND the per-arm H tick: H is now the rollout horizon only
+# (spec 6.1, 9 as amended). Every arm therefore decides at the same rate, which is what makes
+# the decision rate stop being an arm property, and it is recorded in the run header.
+DECISION_PERIOD_S = 0.1
+DEFAULT_TICK_S = DECISION_PERIOD_S           # kept as the old name; same value for every arm
 HEADER_TEXT = "D2 history"                   # the committed D2 header text, 31 tokens (StudyRH4)
 
 
@@ -85,10 +90,12 @@ class Live2Coordinator:
     def __init__(self, arm, backend: Optional[Live2Backend], events: List[Dict[str, Any]],
                  *, gpu_kv_tokens: int, host_tier_gib: float, host_tier_tokens: int,
                  upload_mode: str = "A", window_s: float = 180.0, drain_s: float = 20.0,
-                 tick_s: Optional[float] = None, seed: int = 0, speed: float = 1.0,
+                 tick_s: Optional[float] = None, decision_period_s: Optional[float] = None,
+                 seed: int = 0, speed: float = 1.0,
                  logs: Optional[Logs] = None, run_tag: str = "live2",
                  frames_root: Optional[Path] = None, dry_run: bool = False,
                  targets: Optional[Dict[str, Any]] = None, on_pull=None,
+                 gpu_budget_s: Optional[float] = None,
                  max_wall_s: Optional[float] = None) -> None:
         self.arm = arm
         self.be = backend
@@ -108,19 +115,29 @@ class Live2Coordinator:
         self.on_pull = on_pull
         self.injected: List[Dict[str, Any]] = []
         self.h_s = getattr(arm, "h_s", None) if getattr(arm, "uses_h", False) else None
-        self.tick_s = float(tick_s if tick_s is not None
-                            else (self.h_s if self.h_s else DEFAULT_TICK_S))
-        # The arm is called ON EVERY EVENT and on its own tick. Events are ingested on a fine
-        # grid so that an arm whose tick is H = 1 s still decides about an instant that arrived
-        # 40 ms ago; without this an H = 1 s arm would miss a 1.0 s monitoring deadline by
-        # construction rather than by choice.
-        self.event_grid_s = min(self.tick_s, DEFAULT_TICK_S)
+        # D99 (1): the decision period is the SAME for every arm and is NOT the arm's H. The
+        # period is the grid: each period's events are ingested and then ONE decision is taken
+        # over the batch. `tick_s` survives as the old name for the same number so existing
+        # callers keep working; it can no longer differ from the period.
+        period = decision_period_s if decision_period_s is not None else tick_s
+        self.decision_period_s = float(period if period is not None else DECISION_PERIOD_S)
+        self.tick_s = self.decision_period_s
+        self.event_grid_s = self.decision_period_s
         self.st = CS.CoordState(gpu_kv_tokens=int(gpu_kv_tokens),
                                 host_tier_gib=float(host_tier_gib),
                                 host_tier_tokens=int(host_tier_tokens),
                                 upload_mode=upload_mode,
                                 targets=dict(targets or CS.TARGETS))
-        self.st.budget = Budget(gpu_seconds=self.window_s * 1.0)
+        # D102: the GPU budget is an explicit INPUT, equal by default to one GPU's time over
+        # the run (window length x 1 GPU-second per second), identical for every arm and
+        # recorded in the header. It is the PHYSICAL CAPACITY, so it never binds artificially
+        # (D58: round 1 has no fixed budget; "budget %" is only a test variable). B8, B9 and
+        # edf-service-time admit by a utility-per-GPU-second ratio against a remaining budget
+        # and need a finite one, which is why it exists at all. It replaces the harness constant
+        # (StudyLIVE2-coord open issue 8).
+        self.gpu_budget_s = float(gpu_budget_s if gpu_budget_s is not None
+                                  else self.window_s * 1.0)
+        self.st.budget = Budget(gpu_seconds=self.gpu_budget_s)
         self.n_dec = 0
         self.n_req = 0
         self.futures: List[Tuple[Any, Live2Submission]] = []
@@ -152,7 +169,6 @@ class Live2Coordinator:
         wall0 = time.time()
         cpu0 = _cpu_s()
         t = 0.0
-        next_tick = 0.0
         end = self.window_s + self.drain_s
         while t < end:
             if not self.dry_run:
@@ -173,11 +189,13 @@ class Live2Coordinator:
             self.st.now = t
             if not self.dry_run and self.be is not None:
                 self.st.metrics = self.be.metrics()
-            due_tick = t + 1e-9 >= next_tick
-            if t <= self.window_s and (due_tick or epoch != "tick"):
+            # D99 (1): exactly ONE decision per period, over that period's batched events.
+            # The old rule (one decision per arm tick PLUS one on every event) made the
+            # policy arm's decision rate a function of the event rate: at 64 devices an event
+            # landed in nearly every 50 ms step, so an H = 1 s arm was in fact invoked about 20
+            # times a virtual second (StudyLIVE2-coord open issue 10a).
+            if t <= self.window_s:
                 self._epoch(t, epoch)
-            if due_tick:
-                next_tick = round(next_tick + self.tick_s, 9)
             self._expire(t)
             self.t_reached = t
             t = round(t + self.event_grid_s, 9)
@@ -198,6 +216,10 @@ class Live2Coordinator:
         return self._result(cpu0, time.time() - wall0)
 
     def _epoch(self, t: float, epoch: str) -> None:
+        # D100: the hook is refreshed once per decision period, immediately before the
+        # observation, so the instant deadline and the built-prefix size the arm reads describe
+        # the same state the observation does. It is O(devices + sessions) per period.
+        self._roster(t)
         obs = self.st.observation(t, epoch if epoch in _EPOCHS else "tick")
         t0 = time.perf_counter()
         act = self.arm(obs)                      # scrub + validate_action + apply_defaults
@@ -218,6 +240,9 @@ class Live2Coordinator:
         if k == "session_end":
             self.st.session_end(ev)
             self._log_residency(t, ev["session_id"])
+            return None
+        if k == "history_preload":
+            self.st.history_preload(ev)
             return None
         if k == "history_append":
             self.st.history_append(ev)
@@ -249,15 +274,46 @@ class Live2Coordinator:
             return
         d.delivered.append((o.t_event, 0.0))
 
-    def _roster(self) -> None:
+    def _roster(self, now: Optional[float] = None) -> None:
+        """The arm-side hook (D100): CAUSAL FACTS KNOWN AT ARRIVAL, never the future, and never
+        through the scrubbed `Observation`.
+
+        Two D100 facts are added to the device roster:
+
+        * `sh_instant`, per device: the opportunity_id, capture time and ABSOLUTE DEADLINE
+          c_i + L_SH of the monitoring instant that device's stream currently stands for. It is
+          chosen by exactly the rule `CoordState.observation` uses (the first visible, undecided,
+          un-deferred, not-yet-late instant in arrival order), so an arm ordering by this
+          deadline is ordering the instant the coordinator will actually act on. It replaces the
+          "next call due after the last answer the application received" workaround, under which
+          every stream tied on `now + L` and pi_0's tie-break by item_id starved every device but
+          the first (StudyLIVE2-coord open issue 9).
+        * `built_tokens_by_session`: how much of each history the cloud has ALREADY BUILT
+          (partial readiness), so a later reconstruction piece is costed as a piece on a warm
+          prefix instead of a cold rebuild (open issue 3b).
+
+        Registry arms (FCFS, B8, B9) declare no `live2_roster` and so receive nothing: they are
+        unchanged by D100.
+        """
         if not hasattr(self.arm, "live2_roster"):
             return
+        now = self.st.now if now is None else float(now)
+        mon, _rec = self.st.visible(now)
+        first: Dict[str, Any] = {}
+        for o in mon:
+            first.setdefault(o.device_id, o)
         self.arm.live2_roster(dict(
             devices={d.device_id: dict(type=d.type, uplink_mbps=d.uplink_mbps,
                                        rtt_ms=d.rtt_ms) for d in self.st.devices.values()},
             session_device={s.session_id: s.device_id for s in self.st.sessions.values()},
             frame_bytes={d.device_id: d.frame_bytes for d in self.st.devices.values()
                          if d.frame_bytes},
+            sh_instant={did: dict(opportunity_id=o.opp_id, t_capture=round(o.t_event, 6),
+                                  deadline_abs=round(o.deadline_abs(), 6))
+                        for did, o in first.items()},
+            built_tokens_by_session={sid: int(s.built_tokens)
+                                     for sid, s in self.st.sessions.items()
+                                     if s.built_tokens > 0},
         ))
 
     # ---------------------------------------------------------------- enactment
@@ -631,7 +687,8 @@ class Live2Coordinator:
         return dict(
             arm=self.arm.name, arm_version=getattr(self.arm, "arm_version", "unversioned"),
             is_measurement=False,
-            tick_s=self.tick_s, h_s=self.h_s, upload_mode=self.upload_mode,
+            tick_s=self.tick_s, decision_period_s=self.decision_period_s, h_s=self.h_s,
+            upload_mode=self.upload_mode,
             window_s=self.window_s, n_devices=len(self.st.devices),
             n_sessions=len(self.st.sessions), n_opportunities=len(self.st.opps),
             n_requests=self.n_req, n_decisions=self.n_dec,

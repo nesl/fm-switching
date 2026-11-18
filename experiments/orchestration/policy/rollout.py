@@ -28,6 +28,45 @@ from .state import Fleet, PendingItem
 from .utility import u_sh_cloud, u_sh_device
 
 
+def clone_for_rollout(f: Fleet) -> Fleet:
+    """D99 (2): the rollout's working copy of the fleet, WITHOUT a full `copy.deepcopy`.
+
+    `Rollout.run` mutates only `f.pending` and `f.jobs`, and `_terminal` copies each job before
+    touching it; every other field is read. A `copy.deepcopy` of the fleet nevertheless walks
+    every device's link, demand model, controller and episode list on EVERY rollout, which at 16
+    devices was 94 % of the coordinator's whole CPU time (135 M `deepcopy` calls, 152.7 of
+    162.9 s in a cProfile of one 60 s dry run). This clone gives independent containers for
+    everything a rollout or the release loop can write to -- the pending and in-flight lists and
+    their items, the jobs, each device and its history beliefs, the per-device deficit counters
+    and demand rates, the episode LIST -- and shares only the objects nothing mutates (Link,
+    Demand, the controller, each Episode).
+
+    IT IS NOT AN APPROXIMATION. `Rollout.clone_impl = "reference"` restores `copy.deepcopy`, and
+    the equivalence tests assert that the two give identical `RolloutResult`s and identical
+    decision logs; `test_the_fast_clone_does_not_let_a_rollout_touch_the_callers_fleet` asserts
+    the caller's fleet is unchanged after a rollout under both.
+    """
+    g = Fleet(t=f.t, gpu_backlog_s=f.gpu_backlog_s)
+    for did, d in f.devices.items():
+        nd = copy.copy(d)
+        nd.history = {}
+        for rep, b in d.history.items():
+            nb = copy.copy(b)
+            nb.probs = dict(b.probs)
+            nd.history[rep] = nb
+        nd.z = dict(d.z)
+        nd.lambda_rc = dict(d.lambda_rc)
+        nd.episodes = list(d.episodes)
+        g.devices[did] = nd
+    g.jobs = {jid: copy.copy(j) for jid, j in f.jobs.items()}
+    for lst, src in ((g.pending, f.pending), (g.in_flight, f.in_flight)):
+        for p in src:
+            np_ = copy.copy(p)
+            np_.meta = dict(p.meta)
+            lst.append(np_)
+    return g
+
+
 @dataclass
 class RolloutResult:
     u_hat: float
@@ -55,6 +94,17 @@ class Rollout:
     # `tiers.EVICTION_RULE_ASSUMPTION`) when the caller supplies one. None keeps the old path,
     # so nothing frozen changes and no existing result moves.
     residency_belief: Any = None
+    # D99 (2): "fast" is `clone_for_rollout`; "reference" is the unoptimized `copy.deepcopy`,
+    # kept selectable so the equivalence test has something to compare against.
+    clone_impl: str = "fast"
+
+    def _clone(self, fleet: Fleet) -> Fleet:
+        if self.clone_impl == "reference":
+            return copy.deepcopy(fleet)
+        if self.clone_impl != "fast":
+            raise ValueError("clone_impl must be 'fast' or 'reference', got %r"
+                             % (self.clone_impl,))
+        return clone_for_rollout(fleet)
 
     def _p_host_for(self, host_pool: Any, evicted_tokens: int, prefix_id: Optional[str] = None,
                     t: float = 0.0) -> Dict[str, Any]:
@@ -78,7 +128,7 @@ class Rollout:
         caller's fleet. Admission must be able to value the job it is deciding about, and a
         declined query must leave nothing behind (addendum A2 as revised), so the candidate lives
         only inside this copy."""
-        f = copy.deepcopy(fleet)
+        f = self._clone(fleet)
         t0, H = f.t, float(self.params.H)
         end = t0 + H
         for p in extra_pending:
@@ -107,11 +157,30 @@ class Rollout:
             in_sample = in_sample and pr.in_sample
             free_at = max(free_at, t0 + pr.service_s)
             busy += pr.gpu_s
+            if p.kind == "episode_call":
+                # D98: an SH call ALREADY IN FLIGHT is credited at its own instant's deadline
+                # (spec 6.3: "never worth zero merely because it lands after the horizon"), so
+                # its predicted delivery has to be visible to the SH credit even though the call
+                # was released before t0. An episode call carries no job_id, so no RC accounting
+                # (`_rc_utility`, `_prefix_risk`) can see these rows.
+                dv = f.devices.get(p.device)
+                deliveries.append(dict(
+                    item_id=p.item_id, kind=p.kind, device=p.device, capture_at=p.due_at,
+                    start=t0, delivered_at=t0 + pr.service_s + (dv.link.down_s() if dv else 0.0),
+                    job_id=p.job_id, tokens=int(p.tokens), in_sample=pr.in_sample,
+                    in_flight_at_t0=True))
 
         concurrent = len(f.in_flight)
+        sh_tail: List[PendingItem] = []
         for p in queue:
             start = max(free_at, p.due_at)
             if start > end:
+                # D98: an SH call that cannot START inside the horizon is NOT automatically
+                # device-valued any more, because its own deadline may lie past t0 + H. It is
+                # simulated through to delivery in the tail pass below. Every other kind keeps
+                # the old behaviour: work that cannot start inside the horizon is not simulated.
+                if p.kind == "episode_call":
+                    sh_tail.append(p)
                 continue
             pr = self.engine.predict(self._request(p), concurrent=concurrent,
                                      load_pct=self.load_pct)
@@ -134,6 +203,37 @@ class Rollout:
             if p.job_id:
                 jobs_progress[p.job_id] = jobs_progress.get(p.job_id, 0) + 1
 
+        n_tail_simulated = 0
+        if sh_tail:
+            # D98 TAIL. Spec 5.1 and 6.3 as amended credit each SH instant at ITS OWN deadline,
+            # so a released call has to be simulated through to delivery even when that delivery
+            # lands after t0 + H. The pass continues the engine from where the horizon left it
+            # and stops at the LAST deadline any credited instant can have, so it is bounded.
+            # COST: at most one extra engine.predict per SH call that could not start inside H.
+            # Nothing here is charged to `busy`, the KV pool, `demand_tokens` or `jobs_progress`:
+            # the horizon's own accounting is byte-for-byte what it was, and only the SH credit
+            # and `in_sample` see these deliveries.
+            latest = max([end]
+                         + [float(p.due_at) for p in f.pending if p.kind == "episode_call"]
+                         + [float(p.due_at) for p in f.in_flight if p.kind == "episode_call"]
+                         ) + float(self.params.L_k["SH"])
+            tail_free = free_at
+            for p in sh_tail:
+                start = max(tail_free, p.due_at)
+                if start > latest:
+                    break
+                pr = self.engine.predict(self._request(p), concurrent=concurrent,
+                                         load_pct=self.load_pct)
+                in_sample = in_sample and pr.in_sample
+                tail_free = start + pr.service_s
+                n_tail_simulated += 1
+                dv = f.devices.get(p.device)
+                deliveries.append(dict(
+                    item_id=p.item_id, kind=p.kind, device=p.device, capture_at=p.due_at,
+                    start=start, delivered_at=tail_free + (dv.link.down_s() if dv else 0.0),
+                    job_id=p.job_id, tokens=int(p.tokens), in_sample=pr.in_sample,
+                    beyond_horizon=True))
+
         ghat_by_job = {p.job_id: p.meta["ghat"] for p in queue
                        if p.job_id and isinstance(p.meta.get("ghat"), (int, float))}
         u_hat, opps = self._opportunity_utility(f, t0, end, deliveries)
@@ -149,7 +249,8 @@ class Rollout:
             residual_backlog_s=residual, in_sample=in_sample,
             kv=(store.describe() if store is not None else dict(enabled=False)),
             detail=dict(terminal=tdetail, n_queue=len(queue), horizon_s=H,
-                        released=[d["item_id"] for d in deliveries], prefix_risk=risk))
+                        released=[d["item_id"] for d in deliveries], prefix_risk=risk,
+                        sh_tail_simulated=n_tail_simulated, sh_tail_pending=len(sh_tail)))
 
     # ---------------------------------------------------------------- A6: the KV pool
     def _build_pool(self, f: Fleet) -> Optional[KVPool]:
@@ -254,41 +355,88 @@ class Rollout:
     # ---------------------------------------------------------------- SH opportunities
     def _opportunity_utility(self, f: Fleet, t0: float, end: float,
                              deliveries: Sequence[Dict[str, Any]]) -> Tuple[float, List[Dict]]:
-        """Spec 1.2: every decision instant on the task's cadence is an eligible opportunity,
-        escalated or not. The display is sample-and-hold over cloud deliveries, so an opportunity
-        is served by the NEWEST delivery already landed and its delivered delay is measured from
-        that answer's CAPTURE time."""
+        """Spec 5.1 and 6.3 AS AMENDED BY D98: SH VALUE IS PER INSTANT.
+
+        Under D62 every SH decision instant i is its own opportunity, with its own capture c_i
+        and its own deadline c_i + L_SH. Instant i is credited
+
+            omega_SH * u_SH(cloud, delivered_at - c_i)   if delivered_at <= c_i + L_SH
+            omega_SH * u_SH(device)                      otherwise
+
+        AT ITS OWN DEADLINE, even when that deadline falls after t0 + H. Instants that are
+        pending, in flight, or predicted to arrive inside the horizon by the cadence calendar are
+        all credited the same way; the released calls whose delivery lands past the horizon are
+        simulated through to delivery by the tail pass in `run`.
+
+        THIS RETIRES the display-freshness rule, which credited only the cadence points inside
+        [t0, t0 + H), each served by the newest delivery already landed by that point. With
+        T_k = 0.5 s and H = 0.5 s that grid held exactly ONE point, o = t0, which no action taken
+        at t0 can ever serve, so the marginal value of admitting a monitoring call was
+        structurally zero whenever H <= T_k (StudyLIVE2-coord open issue 1: 0 of 240 instants
+        admitted at H = 0.5 s, DeltaJ exactly 0.0 on every one), and it did not match the
+        measured outcome (D71, D85).
+
+        u_SH itself, its calibration, omega and the deficit-counter term are UNCHANGED: what
+        changed is which instant a delivery is credited to, and at what time that instant is
+        valued. The returned list keeps ONE ENTRY PER CREDITED INSTANT, so the deficit counters
+        (`_z_term`) and the live2 joiner read it exactly as before.
+        """
         cad = float(self.params.T_k["SH"])
+        l_sh = float(self.params.L_k["SH"])
         u_dev = u_sh_device(self.pf)
         w = self.params.omega["SH"]
         total = 0.0
         out: List[Dict[str, Any]] = []
-        per_dev = {}
+        calls_by_dev: Dict[str, List[Dict[str, Any]]] = {}
         for d in deliveries:
             if d["kind"] == "episode_call":
-                per_dev.setdefault(d["device"], []).append(d)
+                calls_by_dev.setdefault(d["device"], []).append(d)
         for did, dev in f.devices.items():
-            ds = sorted(per_dev.get(did, []), key=lambda x: x["delivered_at"])
-            n = 0
+            # The instants of this device: the cadence calendar inside the horizon (the existing
+            # demand model, unchanged), plus the capture of every SH item pending or in flight,
+            # whose deadline may lie outside it. `f.pending` is the same in both branches of a
+            # release / defer / dispatch comparison (`exclude` filters the QUEUE, not the fleet),
+            # so the instant SET cancels in DeltaJ there; for an admit it can differ by the
+            # candidate's own instant, which contributes exactly zero when device-served because
+            # spec 3.2's scale is a GAIN against the device answer (ambiguity A2).
+            instants: List[float] = []
             o = t0
             while o < end - 1e-12:
+                instants.append(o)
+                o += cad
+            for p in list(f.pending) + list(f.in_flight):
+                if p.kind == "episode_call" and p.device == did:
+                    instants.append(float(p.due_at))
+            served_ids: set = set()
+            for c in sorted({round(x, 9) for x in instants}):
+                deadline = c + l_sh
+                # D62: the call that can serve instant i is the one CAPTURED AT c_i. Nothing
+                # else serves it, which is what makes the value per instant rather than per
+                # display refresh.
+                cand = [d for d in calls_by_dev.get(did, ())
+                        if abs(float(d["capture_at"]) - c) < 1e-6
+                        and d["item_id"] not in served_ids]
                 served = None
-                for d in ds:
-                    if d["delivered_at"] <= o + 1e-12:
+                for d in sorted(cand, key=lambda x: float(x["delivered_at"])):
+                    if float(d["delivered_at"]) <= deadline + 1e-12:
                         served = d
+                        break
                 if served is None:
                     u, inrange = u_dev, True
                     kind = "device"
                 else:
-                    u, inrange = u_sh_cloud(self.pf, max(o - served["capture_at"], 0.0),
+                    served_ids.add(served["item_id"])
+                    u, inrange = u_sh_cloud(self.pf,
+                                            max(float(served["delivered_at"]) - c, 0.0),
                                             1, cad, allow_m_gt_1=self.flags.merging)
                     kind = "cloud"
                 total += w * (u - u_dev)
-                out.append(dict(device=did, task="SH", t=o, served_by=kind, utility=u,
+                out.append(dict(device=did, task="SH", t=c, served_by=kind, utility=u,
                                 device_utility=u_dev, within_measured_delay=inrange,
-                                met_slo=bool(kind == "cloud" or u_dev >= self.params.q_k["SH"])))
-                o += cad
-                n += 1
+                                met_slo=bool(kind == "cloud" or u_dev >= self.params.q_k["SH"]),
+                                deadline=deadline,
+                                delivered_at=(float(served["delivered_at"]) if served else None),
+                                beyond_horizon=bool(deadline > end + 1e-12)))
         return total, out
 
     # ---------------------------------------------------------------- RC inside the horizon

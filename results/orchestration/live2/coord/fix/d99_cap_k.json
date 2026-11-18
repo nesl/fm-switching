@@ -1,0 +1,224 @@
+{
+ "_provenance": {
+  "args": {
+   "cap_k": null,
+   "check": "cap",
+   "ks": "1,2,4,8,16,32",
+   "max_wall_s": 240.0,
+   "out": "/home/pragya/Desktop/FM-switching/results/orchestration/live2/coord/fix",
+   "sizes": "128",
+   "window_s": 180.0
+  },
+  "device": "flash_cpu",
+  "git_commit": "80fe1199d1778d5ce1038d65e637cc03eab1ea3f",
+  "model": "none",
+  "n": 6,
+  "script": "fix_checks.py",
+  "timestamp": "2026-11-17T21:35:40.543767"
+ },
+ "check": "d99_cap_k",
+ "chosen_K": 1,
+ "decision_period_s": 0.1,
+ "decisions_changed_on_the_8_device_fixture": {
+  "K": 1,
+  "actions_capped": 1545,
+  "actions_in_common": 1543,
+  "actions_in_common_fraction": 0.9968,
+  "actions_unlimited": 1548,
+  "cap_bound": {
+   "release_passes": 2389,
+   "sh_periods": 493
+  },
+  "fixture": "SYNTHETIC 8 devices (4 + 4), 120 s, seed 1, mode A, dry run",
+  "fraction_differing": 0.9612,
+  "lines_capped": 1545,
+  "lines_differing": 1488,
+  "lines_unlimited": 1548,
+  "n_requests": {
+   "capped": 945,
+   "unlimited": 948
+  },
+  "note": "`lines_differing` is a POSITIONAL compare and overstates the change: one skipped evaluation renumbers every later decision_id. `actions_in_common_fraction` compares the multiset of (kind, opportunity_ids), which is what the two policies actually did."
+ },
+ "fixture": "SYNTHETIC 50 : 50, mode A, tight memory, 180 s, mu = 0, H = 1.0 s, dry run",
+ "is_measurement": false,
+ "rows": [
+  {
+   "K": 1,
+   "cap_bound": {
+    "release_passes": 30439,
+    "release_skipped": 39057,
+    "sh_periods": 1800,
+    "sh_skipped": 113228
+   },
+   "cpu_percent": 100.0,
+   "decision_latency_ms": {
+    "max": 512.089,
+    "n": 1801,
+    "p50": 17.4277,
+    "p99": 32.481
+   },
+   "epoch_overruns": 0,
+   "n_cloud_answers": 7,
+   "n_devices": 128,
+   "n_monitor_answers": 23040,
+   "n_on_time": 6,
+   "n_opportunities": 23232,
+   "n_recall_answers": 192,
+   "n_requests": 7,
+   "requests_per_virtual_s": 0.036,
+   "target_p99_under_100ms": true,
+   "virtual_t_reached_s": 194.9,
+   "wall_guard_hit": false,
+   "wall_s": 33.805
+  },
+  {
+   "K": 2,
+   "cap_bound": {
+    "release_passes": 29098,
+    "release_skipped": 37581,
+    "sh_periods": 1800,
+    "sh_skipped": 111363
+   },
+   "cpu_percent": 100.0,
+   "decision_latency_ms": {
+    "max": 535.6475,
+    "n": 1801,
+    "p50": 30.398,
+    "p99": 58.1813
+   },
+   "epoch_overruns": 0,
+   "n_cloud_answers": 4,
+   "n_devices": 128,
+   "n_monitor_answers": 23040,
+   "n_on_time": 4,
+   "n_opportunities": 23232,
+   "n_recall_answers": 192,
+   "n_requests": 4,
+   "requests_per_virtual_s": 0.021,
+   "target_p99_under_100ms": true,
+   "virtual_t_reached_s": 194.9,
+   "wall_guard_hit": false,
+   "wall_s": 54.247
+  },
+  {
+   "K": 4,
+   "cap_bound": {
+    "release_passes": 26394,
+    "release_skipped": 34598,
+    "sh_periods": 1800,
+    "sh_skipped": 107628
+   },
+   "cpu_percent": 100.0,
+   "decision_latency_ms": {
+    "max": 577.729,
+    "n": 1801,
+    "p50": 55.637,
+    "p99": 107.1599
+   },
+   "epoch_overruns": 0,
+   "n_cloud_answers": 6,
+   "n_devices": 128,
+   "n_monitor_answers": 23040,
+   "n_on_time": 4,
+   "n_opportunities": 23232,
+   "n_recall_answers": 192,
+   "n_requests": 6,
+   "requests_per_virtual_s": 0.031,
+   "target_p99_under_100ms": false,
+   "virtual_t_reached_s": 194.9,
+   "wall_guard_hit": false,
+   "wall_s": 94.213
+  },
+  {
+   "K": 8,
+   "cap_bound": {
+    "release_passes": 20993,
+    "release_skipped": 28648,
+    "sh_periods": 1797,
+    "sh_skipped": 99984
+   },
+   "cpu_percent": 100.0,
+   "decision_latency_ms": {
+    "max": 688.8111,
+    "n": 1801,
+    "p50": 106.3218,
+    "p99": 207.2779
+   },
+   "epoch_overruns": 0,
+   "n_cloud_answers": 27,
+   "n_devices": 128,
+   "n_monitor_answers": 23040,
+   "n_on_time": 20,
+   "n_opportunities": 23232,
+   "n_recall_answers": 192,
+   "n_requests": 27,
+   "requests_per_virtual_s": 0.139,
+   "target_p99_under_100ms": false,
+   "virtual_t_reached_s": 194.9,
+   "wall_guard_hit": false,
+   "wall_s": 174.497
+  },
+  {
+   "K": 16,
+   "cap_bound": {
+    "release_passes": 10945,
+    "release_skipped": 17961,
+    "sh_periods": 234,
+    "sh_skipped": 417
+   },
+   "cpu_percent": 99.9,
+   "decision_latency_ms": {
+    "max": 881.5956,
+    "n": 1357,
+    "p50": 193.648,
+    "p99": 415.5637
+   },
+   "epoch_overruns": 0,
+   "n_cloud_answers": 2423,
+   "n_devices": 128,
+   "n_monitor_answers": 17243,
+   "n_on_time": 2396,
+   "n_opportunities": 17543,
+   "n_recall_answers": 192,
+   "n_requests": 2426,
+   "requests_per_virtual_s": 17.891,
+   "target_p99_under_100ms": false,
+   "virtual_t_reached_s": 135.6,
+   "wall_guard_hit": true,
+   "wall_s": 240.013
+  },
+  {
+   "K": 32,
+   "cap_bound": {
+    "release_passes": 4040,
+    "release_skipped": 8836,
+    "sh_periods": 0,
+    "sh_skipped": 0
+   },
+   "cpu_percent": 99.9,
+   "decision_latency_ms": {
+    "max": 1049.6093,
+    "n": 1172,
+    "p50": 256.8279,
+    "p99": 565.6253
+   },
+   "epoch_overruns": 0,
+   "n_cloud_answers": 2154,
+   "n_devices": 128,
+   "n_monitor_answers": 14877,
+   "n_on_time": 2123,
+   "n_opportunities": 15175,
+   "n_recall_answers": 192,
+   "n_requests": 2155,
+   "requests_per_virtual_s": 18.403,
+   "target_p99_under_100ms": false,
+   "virtual_t_reached_s": 117.1,
+   "wall_guard_hit": true,
+   "wall_s": 240.009
+  }
+ ],
+ "smallest_K_meeting_the_latency_target": 1,
+ "target": "p99 decision time under 100 ms at 128 devices",
+ "warning": "`chosen_K` is the smallest K that meets the LATENCY target and nothing else. A cap can meet that target by not deciding: compare each row's n_requests and requests_per_virtual_s against the uncapped cell in d99_speed.json before using it as a setting."
+}

@@ -391,8 +391,26 @@ def calibration(path: Path = ORIN_CALIBRATION) -> Dict[str, Any]:
     maps = {"device_4b_orin": dict(a=float(d["a"]), b=float(d["b"]))}
     for k, v in (d.get("compare") or {}).items():
         maps[k] = dict(a=float(v["a"]), b=float(v["b"]))
+    # D105: a dense refit is Platt-fitted with 5-fold CROSS-FITTING BY CLIP (D6), and each clip
+    # is scored with the map from the folds that EXCLUDE it. `folds.maps[k]` is therefore the map
+    # fitted with fold k held out, and a clip assigned to fold k is scored with it. The fold
+    # assignment comes from the FILE: the scorer never invents one, and never falls back to the
+    # pooled map for a clip the file does not place in a fold.
+    folds = None
+    fo = d.get("folds")
+    if isinstance(fo, dict):
+        fm: Dict[str, Dict[str, Dict[str, float]]] = {}
+        for k, mv in (fo.get("maps") or {}).items():
+            fm[str(k)] = {mk: dict(a=float(v["a"]), b=float(v["b"])) for mk, v in mv.items()}
+        folds = dict(n_folds=int(fo.get("n_folds") or len(fm)),
+                     by=str(fo.get("by") or "clip"),
+                     assignment={str(c): str(f) for c, f in
+                                 (fo.get("assignment") or {}).items()},
+                     maps=fm,
+                     note=("D105: maps[k] is fitted with fold k HELD OUT, so a clip in fold k "
+                           "is scored out-of-fold with maps[k]."))
     return dict(path=str(path), sha256=sha256_of(Path(path)), label=label, maps=maps,
-                fit_split=d.get("fit_split"),
+                folds=folds, fit_split=d.get("fit_split"),
                 note=("D86: fitted on an event-anchored sample, not a dense trajectory; the "
                       "D3-fitted device slope is 3.007x steeper than a D14b-DEV dense fit "
                       "(+0.114603 vs +0.038113). The dense refit for both tiers is an H100 task."

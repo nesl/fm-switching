@@ -1106,3 +1106,339 @@ Open issues 3 to 11 of section 13 stand exactly as delivered and were not action
 seed-dependence CHOICE of amendment 1 is closed by D97 and was not re-opened. No measurement was
 made: the eligibility table is arithmetic over committed traces, and nothing in it is a finding
 about the system.
+
+---
+
+## 16. StudyLIVE2-fix: D101 (the part-way join), D103 (the analysis-plan rulings), D105 and D99
+
+**Authority: D98 to D105, committed in `research/policy_design_log.md` at 80fe119 and the
+amendment the parent made tonight.** Four items, bounded: (1) implement D101 in the fleet;
+(2) recompute the D97 eligibility table under D101, trace-only; (3) apply the D103 rulings to
+`ANALYSIS_PLAN.md` and add D99 and D105 to it; (4) implement the scorer side of D103 (e), (f) and
+(h), D105's out-of-fold maps and the D101 preload, then re-run every test and the 64-device scale
+check. Flash only, CPU only, stub coordinator only. **Nothing in this section is a measurement**:
+every number is arithmetic over committed traces, or this host's own harness timing.
+
+The design log, `research/policy_spec_v4.md`, `research/policy_ablations.md`,
+`research/EXPERIMENTS.md`, `research/STATUS.md` and `results/INDEX.md` were **not** edited;
+`live2/schema.py` and `live2/CONTRACT.md` are subagent A's and were not written. Read-only git
+only.
+
+### 16.1 D101: robots join their first session part-way
+
+| item | what the fleet now does |
+|---|---|
+| the join draw | `join_frac` ~ U[0, 0.5), seeded on its own RNG stream (`"<seed>|join"`), drawn per robot in a fixed device order; the OFFSET is that fraction of the device's own first session duration. The draw is recorded per device in `trace_meta.json` under `robot_join` (`join_frac`, `join_offset_s`, `first_session`, `first_session_duration_s`) |
+| questions | a question whose session time is before the join point is **not emitted and not counted**; the count of what was dropped is in the trace stats as `robot_questions_before_join` |
+| the preload | one `history_preload` per joined session at `t = 0`, holding exactly the D2 frames in (0, join] with StudyRH4's accounting (90 tok/img plus the 31-tok header once, which the preload carries because it is the session's first holding). **No uplink time is charged**: the emulator hands it to the coordinator at t = 0 without touching the device's uplink queue, so it never delays a frame behind it |
+| batches after t = 0 | the same 30-s session-local grid as before. A batch carries only the frames the preload did not, so no frame is held twice and none is dropped, and a batch after a preload does not carry a second header. A window entirely before the join point produces no batch |
+| later sessions | start from zero, exactly as D83 says; they have no preload and `joined_part_way` is false |
+| dashcam | unchanged: the run-time stagger in [0, 30 s) and the complete-play rule (D85) |
+| the digest | D96 (2)'s coverage **plus `history_preload`**, with the row `(device_id, "history_preload", "%.6f" % t, session_id, str(int(est_tokens)), "")` |
+
+**One reading D101 does not spell out, recorded here.** D101 says the preload is at `t = 0`, so a
+robot device **registers at t = 0 and no longer takes a run-time stagger offset**: a device that
+has not yet registered cannot declare a preload. The join draw decorrelates batch boundaries and
+question phases across robots in the stagger's place, and the dashcam stagger of a given seed is
+unchanged, because the robot draw is still taken from the stagger stream and only ignored. If the
+user meant a robot to carry **both** a run-time offset and a join point, that is a one-line change
+to `trace.py` and the eligibility table has to be recomputed again.
+
+**Schema agreement with subagent A: byte for byte.** After the parent's word,
+`events.check_against_schema()` returns `note = "field lists identical"`, `d96_pending = false`,
+over all ten events including `history_preload = (device_id, session_id, frame_refs, est_tokens,
+t)`. The digest row was also compared against A's own `traces.py::_fairness_row` on the same
+event and the two tuples are identical. **No schema mismatch, so no stop condition.**
+
+### 16.2 The D97 eligibility table, recomputed under D101
+
+`results/orchestration/live2/fleet/eligibility_join/robot_eligibility_4_to_128.csv` (1,500 rows)
+and `robot_eligibility_summary.json`. Sizes 4 to 128, all three ratios, 600-s runs, seeds 1, 2
+and 3 plus seed 0 for reference. The pre-D101 table is left in place at `.../fleet/eligibility/`
+so the two can be compared. **These entry points are recomputed under D101; design-log row pending (planner will log as D107).** Each row also carries `questions_before_join`,
+`preloads_emitted`, `preload_tokens_min / median / max / total` and
+`join_offset_min / median / max_s`.
+
+| ratio | entry point (seeds 1, 2, 3) | pooled questions there (s1 / s2 / s3) | last ineligible size below | per-seed entry (s1 / s2 / s3) | seed-0 entry (reference) | non-monotone sizes above entry | sizes eligible at all three seeds |
+|---|---|---|---|---|---|---|---|
+| 25:75 | **5** | 23 / 23 / 23 | 4 (14 / 15 / 20) | 5 / 5 / 4 | 5 | none | 124 of 125 |
+| 50:50 | **8** | 23 / 23 / 23 | 7 (14 / 15 / 20) | 8 / 8 / 5 | 8 | none | 121 of 125 |
+| 75:25 | **14** | 23 / 23 / 23 | 13 (14 / 15 / 20) | 14 / 14 / 11 | 14 | none | 115 of 125 |
+
+**The entry points did not move: 5 / 8 / 14, the same as before D101.** The join removes the
+questions ahead of it and brings every later session in the chain forward by the same offset, and
+over a 600-s run those two effects very nearly cancel. What did change:
+
+1. **Which seed binds.** Seed 3 now enters earlier at every ratio (4 / 5 / 11 against 5 / 8 / 14),
+   so the all-seeds entry point is set by seeds 1 and 2.
+2. **Seed 0 is no longer the strictest seed.** Its entry points were 7 / 12 / 20 before D101 and
+   are 5 / 8 / 14 now, the same sizes as the reported seeds. The rule is untouched - the pilot
+   seed still never sets an entry point (D95 (7), D97) - but amendment 2's observation that the
+   pilot seed "would have excluded sizes every reported seed finds measurable" **no longer holds
+   and must not be repeated**.
+3. **Session repeats start earlier.** A joined first session ends sooner, so the chain consumes
+   more of the 164-session pool: sessions now repeat from **73 devices at 25:75 and 109 at 50:50**
+   (before: only at 25:75, from 111), and never at 75:25 inside the table. Clip-play repeats are
+   unchanged, from 23 / 34 / 67 devices at 75:25 / 50:50 / 25:75.
+
+**The pooled counts over the pilot ladder** (bold = first cell at or above D82's 20; "enters
+from" is over every integer size, not only the ladder):
+
+| ratio | seed | 4 | 8 | 16 | 32 | 64 | enters from |
+|---|---|---|---|---|---|---|---|
+| 50:50 | 1 | 7 | **23** | 44 | 80 | 153 | 8 |
+| 50:50 | 2 | 11 | **23** | 43 | 75 | 154 | 8 |
+| 50:50 | 3 | 11 | **23** | 34 | 73 | 148 | 5 |
+| 50:50 | 0 | 9 | **20** | 35 | 72 | 165 | 8 |
+| 75:25 | 1 | 5 | 7 | **23** | 44 | 80 | 14 |
+| 75:25 | 2 | 4 | 11 | **23** | 43 | 75 | 14 |
+| 75:25 | 3 | 5 | 11 | **23** | 34 | 73 | 11 |
+| 75:25 | 0 | 2 | 9 | **20** | 35 | 72 | 14 |
+| 25:75 | 1 | 14 | **30** | 62 | 122 | 235 | 5 |
+| 25:75 | 2 | 15 | **30** | 58 | 111 | 218 | 5 |
+| 25:75 | 3 | **20** | 28 | 55 | 108 | 226 | 4 |
+| 25:75 | 0 | 13 | **27** | 57 | 121 | 248 | 5 |
+
+**The preload sizes, which are the point of D101.** At each ratio's entry point the four robot
+devices arrive holding 0 to 11,101 D2 tokens each (median 3,271 / 6,061 / 4,081 at seeds 2 / 1 /
+3; 15,303 to 20,464 tokens in total across the four). At 64 devices and seed 1 the per-device
+maximum is 11,101 tokens at 50:50 and 75:25 and 11,641 at 25:75, with join offsets spread from
+1.3 s to 258.4 s. Over the whole table the preload runs from **0 to 21,721 tokens** per device,
+and in **941 of the 1,500 cells** at least one robot joined inside the first 2-s D2 stride and so
+held nothing: that is the bottom of the intended spread, not a fault. The join removed **36,648
+questions** in total that the pre-D101 traces would have asked before the join point.
+
+The **dashcam** minimum still never binds: the smallest per-device instant count over all 1,500
+cells is **996** against D71's 200, and **0 of 1,500** cells has a dashcam device below it.
+
+### 16.3 The analysis plan
+
+`results/orchestration/live2/ANALYSIS_PLAN.md`, header changed from **DRAFT FOR USER APPROVAL**
+to **APPROVED 2026-11-17 (D103), user may revisit**, with a change log at the end.
+
+| item | what the plan now says |
+|---|---|
+| (a) | the sweep grid is kept and labelled **SENSITIVITY**; the **headline** is the D71 / D82 starting values (L_dash 1.0 s, p_dash 0.25, L_rob 5.0 s, p_rob 0.90) |
+| (b), (c), (d) | accepted as written, each now citing D103: sample-and-hold onto the 0.25-s AP grid; linear interpolation of the device recall cost, DERIVED and unexercised; dashcam AP and robot accuracy never summed |
+| (e) | AP-difference bootstrap **n = 1,000**, with the measured cost beside it |
+| (f) | no multiplicity correction and none claimed, with the **PRIMARY family** fixed in advance: policy vs each of the 7 GPU baselines at the two break sizes, tight memory, 50:50, push-all (block 1). Everything else is **EXPLORATORY** |
+| (g) | replaced by **D101**: the robot join, the preload, the dashcam stagger, and the recomputed entry points |
+| (h) | the E10a median is for **flash tests only**; a measured run reads per-frame bytes from the Part-2 manifest (D91) and is **refused** otherwise |
+| D99 | one fixed 100-ms decision period for every arm, the cap K reported as a setting if used, and the coordinator's own latency counted and never netted out; added to the diagnostics list |
+| D105 | both maps 5-fold cross-fitted **by clip**, each clip scored with the map from the folds that **exclude** it, the fold assignment taken from the calibration file, and a FINAL map without one refused; added to the index, section 4.1, the exclusion rules and the output caveats |
+
+**(e), timed as D103 asks.** One AP difference through `ap_diff_bootstrap`, on this host, CPU
+only, over the completed plays of a 600-s 50:50 trace:
+
+| completed plays | positive / negative | n = 200 | n = 1,000 |
+|---|---|---|---|
+| 120 (16 devices) | 61 / 59 | 0.026 s | **0.129 s** |
+| 237 (32 devices) | 127 / 110 | 0.048 s | **0.239 s** |
+
+So n = 1,000 costs about **0.13 to 0.24 s of CPU per AP difference**, and the whole primary family
+of differences is seconds of work. The old n = 200 was not buying anything.
+
+### 16.4 The scorer
+
+| change | what it does |
+|---|---|
+| D103 (e) | `N_BOOT_AP = 1000` |
+| D103 (f) | `classify_family(policy, baseline, break_sizes)` labels every comparison **PRIMARY** or **EXPLORATORY** and gives the reason; `compare()` carries the label. The break sizes are an INPUT, so the family cannot be chosen after the result. A run header that does not record its memory setting cannot be claimed as tight memory, so the comparison is EXPLORATORY and the output names the missing field |
+| D103 (h) | `check_frame_bytes_source` refuses a measured run whose `frame_bytes_source` is not the Part-2 manifest; `is_measured_run` is the single definition of "measured" (a non-stub server AND a FINAL map), and `score_run` calls the check |
+| D105 | `DS.calibration` parses `folds` (`n_folds`, `by`, `assignment`, one map per held-out fold); `map_for(cal, key, clip)` returns the out-of-fold map, refuses a clip the file places in no fold and refuses a missing per-fold map; both AP paths (served and device-only) now look the map up per clip; `check_calibration` **refuses a FINAL map with no fold assignment** rather than applying it pooled; `calibration_use` puts the fold state in every output header |
+| D101 | `history_preload(lo)` reports the preload count, whether all are at t = 0, the token spread, the join-offset spread and the rule, in every score header; a run whose preload count differs from its trace's is **refused** |
+| D99 | the diagnostics carry the decision period, the cap K and whether the run header recorded either |
+| D97 | the "row pending" wording is dropped now that D97 is committed |
+
+### 16.5 Tests
+
+`experiments/orchestration/live2/fleet/tests/test_live2_fleet.py`: **234 of 234 checks pass**
+(was 147 after the D96 amendment; 87 new or rewritten). Stub coordinator, CPU only, INTERIM map.
+
+| group | what it establishes |
+|---|---|
+| **d101 a-v** (62 checks, most of them per robot device) | every robot's first session starts at t = 0 and is joined part-way; the join point is in [0, 0.5 x duration); the draw is recorded per device in `trace_meta`; later sessions start from zero; no emitted question lies before the join point and **exactly** the questions at or after it are emitted; the preload holds exactly the pre-join D2 frames with the right accounting, at t = 0, flagged not uplink-charged; no frame is held twice and none is dropped between the preload and the batches; the skipped questions are counted; the preload sizes are reported; **dashcam devices keep the run-time stagger** and robots register at t = 0; the join draw is deterministic in the seed and the k-th robot's fraction does not depend on the ratio; **the fairness digest covers the preload**; every preload reaches the coordinator at t = 0 in A's exact field form; **a preload occupies no uplink slot and queues nothing**; the run still reproduces the trace digest; the scorer reports the preload, never scores it as an opportunity, and refuses a run whose preload count differs from its trace's |
+| **d105 a-h** (8) | a pooled FINAL map is refused for a real server AND for a stub; a folded FINAL map passes; the assignment comes from the file; two clips in different folds get **different** maps; a clip in no fold is refused rather than scored pooled; a missing per-fold map is refused; an INTERIM map has no folds and the header says it was applied pooled |
+| **d103h 1-5** (5) | the E10a median is allowed for a stub run and **refused** for a measured one; a manifest source is accepted; `is_measured_run` is true only for a non-stub server with a FINAL map; the frame-bytes source is in every score header |
+| **d103f 1-10** (12) | the primary family holds only for policy vs one of the seven at a break size, tight, 50:50, push-all; a size outside the break sizes, a missing break-size list, another ratio, pull mode, roomy memory, an unrecorded memory setting, a baseline-versus-baseline pair and an arm outside the seven are each EXPLORATORY; the label travels with every comparison; `N_BOOT_AP == 1000` |
+| **a11** (rewritten) | the digest covers exactly the D96 (2) set **plus `history_preload`**, and the preload row is the exact tuple A specified |
+| **e4, e5, e6, e6b** (rewritten) | the first session is joined part-way; the session's **first holding** carries the D2 header once, whether that holding is a preload or a first batch; holdings accumulate monotonically; a batch after a preload carries no second header |
+
+**Check (g), the 64-device scale run under D101, both modes.**
+`results/orchestration/live2/fleet/scale_64_join/scale_summary.json`. 32 dashcam plus 32 robot
+devices, 50:50, seed 1, 180 s, stub coordinator at 32 requests per second, real time. The
+trace is `trace_sha256 = c737d67fc65a182e...`, `fairness_digest_A = a0de356f8c9cf64a...`,
+`fairness_digest_B = 52436fcfe872d7be...`; 31 of the 32 robots carry a preload (one joined inside
+the first 2-s stride), the fleet holds 57 pooled robot questions and the join dropped 25.
+
+| mode | opportunities | scheduled actions | lateness p50 | p90 | p99 | max | emulator CPU | CPU fraction | max RSS | wall | digest == trace | valid |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| A (push) | 9,704 | 25,307 | 0.130 ms | 0.143 ms | **0.169 ms** | 2.657 ms | 0.98 s | 0.55 % | 78 MiB | 180.33 s | yes | yes |
+| B (pull) | 9,704 | 44,603 | 0.077 ms | 0.139 ms | **0.163 ms** | 3.689 ms | 1.60 s | 0.89 % | 96 MiB | 180.37 s | yes | yes |
+
+p99 lateness is **296x and 307x** under the 50 ms validity limit and the emulator uses under 1 %
+of one core, so adding the preload path changed nothing about whether the emulator can keep time
+at 64 devices on this host. **Condition to state explicitly:** the 1,500-cell trace sweep of
+section 16.2 was running on one other core of this 24-core box during both runs, so these
+numbers carry that much contention; at 300x margin it cannot change the verdict, and they are
+not comparable with the pre-D101 run at any finer precision (section 10.1 said the same of box
+noise).
+
+### 16.6 Mechanism verification (CLAUDE.md), for this amendment
+
+**Not applicable as a causal test, and nothing here may be read as one.** No sweep was run, no
+policy was compared to a baseline, and nothing in this section tests a causal claim: the work
+builds the instrument. The protocol attaches to the measured H100 runs and is **not discharged**
+by anything here. What this amendment does do is restore the mechanism D101 exists to create -
+**cold-rebuild pressure, from a prefix the arm did not watch being built** - which before D101 was
+**ABSENT** from every round-1 trace, because every history started at zero. Section 16.2 shows the
+quantity that implements it is now non-zero and varies: the preload runs from 0 to 21,721 D2
+tokens per device with join offsets from 1.3 s to 258.4 s. Whether it binds on any budget is a
+question for the measured runs, and it must be instantiated there under Step 2 before any sweep.
+
+### 16.7 Results consistency check (CLAUDE.md), six checks
+
+**1. Cross-check against committed measurements.**
+
+| quantity | this run | prior run | source of prior | ratio | agree |
+|---|---|---|---|---|---|
+| D97 entry points (25:75 / 50:50 / 75:25) | 5 / 8 / 14 | 5 / 8 / 14 | `research/EXPERIMENTS.md` D97 row, report section 15.2 | 1.00 | agree |
+| pooled robot questions, worst-changed cell of 1,500 | 9 | 6 | `.../fleet/eligibility/robot_eligibility_4_to_128.csv` (75:25, seed 0, 9 devices) | **1.50** | agree, under the 2x bar; D101 removes pre-join questions and brings later sessions forward, so a cell can move either way |
+| pooled questions at the entry point | 23 / 23 / 23 | 22 / 21 / 22 and 22 / 22 / 23 | report section 15.2 | 1.00 to 1.10 | agree |
+| smallest dashcam instant count over all cells | 996 | 996 | report section 15.1 | 1.00 | agree |
+| cells with a dashcam device under 200 instants | 0 of 1,500 | 0 of 1,500 | report section 15.1 | - | agree |
+| first size with clip-play repeats | 23 / 34 / 67 | 23 / 34 / 67 | report section 15.2 | 1.00 | agree |
+| first size with session repeats | 73 (25:75), 109 (50:50) | 111 (25:75), none | report section 15.2 | **0.66** | **explained, not a discrepancy**: a joined first session ends sooner, so the chain consumes more of the 164-session pool. It is a consequence of D101 and is reported in both the plan and section 16.2 |
+| D2 batch accounting | 90 tok/img + 31 header once | 90 tok/img + 31 header once | StudyRH4, `data_sources.d2_batch_tokens` | 1.00 | agree; the preload uses the same function and carries the header as the session's first holding |
+| emulator p99 lateness at 64 devices, mode A / B | 0.169 / 0.163 ms | 0.216 / 0.165 ms | report section 10.1 | 0.78 / 0.99 | agree |
+| emulator CPU fraction at 64 devices, A / B | 0.55 % / 0.89 % | 0.7 % / 0.9 % | report section 10.1 | 0.79 / 0.99 | agree |
+
+No disagreement above 2x anywhere.
+
+**2. Physical plausibility.** Nothing here measures model latency or throughput, so no rate can be
+faster than a committed curve. The only rates are the harness's own: 25,307 and 44,603 scheduled
+actions in 180 s at under 1 % of a core, which is 0.04 ms of emulator CPU per action, in line with
+the committed 10.1 run; and 0.13 to 0.24 s of CPU per AP difference at n = 1,000, which is 0.13 to
+0.24 ms per bootstrap replicate over 120 to 237 plays. The **preload charges no uplink time by
+decision (D101)**, so it must not be read as a transfer that happened implausibly fast: the frames
+were on cloud-side disk before the clock started, and the emulator asserts the preload never
+enters an uplink queue.
+
+**3. Distribution sanity.** Spreads are reported next to every median: preload tokens 0 to 21,721
+per device; join offsets 1.3 s to 258.4 s; pooled counts per seed differ at nearly every size
+(for example 50:50 at 16 devices: 44 / 43 / 34 over seeds 1 / 2 / 3). **One constant was chased
+down:** the pooled count at the entry point is exactly 23 at all three reported seeds and at all
+three ratios. Two different causes, both checked: across **ratios** it is exact by construction -
+the robot side depends only on the seed and the robot index, never on the ratio, so a fleet with 4
+robot devices is the same robot experiment at 25:75, 50:50 and 75:25 - and across **seeds** it is
+a coincidence of the total, not a short circuit, because the per-device breakdown differs
+(7 / 3 / 5 / 8 at seed 1, 6 / 4 / 6 / 7 at seed 2, 5 / 7 / 7 / 4 at seed 3, over 10 / 10 / 8
+session plays). Seed 0 gives 20 on the same sizes.
+
+**4. Definition audit.** Three definitions to flag, one of them a genuine name reuse:
+
+- **"pooled robot questions per run" now means something different, by decision.** Before D101 it
+  was every annotated question in the chained sessions inside the run; under D101 it excludes the
+  questions before the join point. Same name, new definition, authority D101. Any comparison of a
+  pre-D101 count with a post-D101 count must say which it is, which is why both tables are kept on
+  disk and the recomputed one is labelled.
+- **"the first holding of a session"**: the object that carries the D2 header once. For a joined
+  first session that is the **preload**; for every later session it is the **first batch**. The
+  tests assert this rather than assuming it.
+- unchanged: win-10 and sum-80 do not appear here; a "turn" is still the 0.5-s decision instant
+  (StudyCTRL1c); 20 pooled questions (D82) and 200 dashcam instants (D71) are the same minima.
+
+**5. Claim linkage.** Nothing here bears evidence on any claim. The instrument bears on **C5**
+(joint representation x placement x timing beats decomposed policies under a quality SLO), which
+round 1 is an early check of, and D101's purpose connects to **C4** (physical inertia, warm-append
+versus cold re-prefill): without a part-way join no arm ever faced a prefix it had not watched
+being built, so the cost C4 is about could not enter a policy comparison. **Measuring that is the
+H100 runs' job, not this section's**, and no number here supports or weakens either claim. Nothing
+measured here is scoped out by `research/FORMULATION.md`.
+
+**6. Proxy validity.** Two proxies, both pre-existing and both still labelled: the **E10a median
+frame size** stands in for a distribution, which D103 (h) now confines to flash tests and the
+scorer refuses for a measured run; and the **D87 device answers** were produced by the 4B on the
+A6000 / H100, not the Orin, so they are valid for ordering and first-order value only. One new
+object is **not** a proxy and should not be read as one: the preload's `est_tokens` is the fleet's
+own D2 accounting of the frames before the join, the same accounting as every batch, and the
+engine's actual prompt token count is whatever it reports.
+
+### 16.8 Open issues
+
+1. **The robot run-time stagger is gone, and D101 does not say so in those words.** D101 puts the
+   preload at `t = 0`, which a device that has not yet registered cannot send, so robots now
+   register and start their first session at t = 0 and the join draw is their only per-device
+   offset. Dashcam devices keep the run-time stagger (D101 says so explicitly). If the user meant
+   robots to carry both offsets, it is a one-line change and the eligibility table has to be
+   recomputed again.
+2. **"The 7 GPU baselines" of D103 (f) is read as the seven non-policy arms of D65 as corrected by
+   D90** - `device-only`, `always-cloud-fcfs`, `edf`, `edf-piece1024`, `edf-piece2048`,
+   `utility-per-cost`, `b9` - which is the count the plan's own multiplicity paragraph uses. One of
+   the seven, `device-only`, sends nothing and is scored from the recordings with no GPU run at all
+   (D65), so a stricter reading of "GPU baselines" would make the family six comparisons wide. The
+   scorer's `GPU_BASELINES` carries the seven-arm reading; changing it is one line.
+3. **The PRIMARY label depends on fields no fleet-side code writes.** `classify_family` needs the
+   run header to record the memory setting (it looks for `memory`, `memory_setting`, `kv_memory`,
+   `memory_label`), the ratio and the mode, and the two **break sizes** must be passed in from the
+   pilot. With any of them missing the comparison is EXPLORATORY and the output says which field
+   was absent. The coordinator session owns the run header, so the field name has to be agreed
+   before block 1 or every comparison will be labelled exploratory.
+4. **D105's file format is this scorer's reading, not a committed schema.** The scorer expects
+   `folds = {n_folds, by, assignment: {clip: fold}, maps: {fold: {tier: {a, b}}}}`, where
+   `maps[k]` is the map fitted with fold k **held out**, so a clip in fold k is scored with
+   `maps[k]`. D105 fixes the protocol, not the field names. Whoever produces the refit on the H100
+   must write this shape, or the scorer will refuse the file - which is the intended failure, but
+   it should be agreed first rather than discovered then.
+5. **The D97 entry points are unchanged at 5 / 8 / 14, but the seed that binds has changed**, and
+   seed 0's entry points now coincide with the reported seeds'. Amendment 2's claim that the pilot
+   seed is systematically the strictest is **no longer true** and is corrected in section 16.2; the
+   rule itself is untouched. These entry points are recomputed under D101; design-log row pending (planner will log as D107).
+6. **Session repeats now begin at 73 devices at 25:75 and 109 at 50:50**, earlier than before D101,
+   because a joined first session ends sooner. D84 says repeats are allowed but are not independent
+   samples; at the top of the ladder this is now a slightly larger caveat than amendment 2 recorded.
+7. **The coordinator must store a preload as cold history for the fairness digest to mean
+   anything.** A's `coordinator.py` and `cstate.py` already carry `history_preload` ingestion and
+   A's digest coverage matches mine, but no end-to-end cell has been run against the real
+   coordinator with a D101 trace; that is the pre-pilot H100 order of D104, not flash work.
+8. **Open issues 3 to 11 of section 13 and 15.6's statement stand**, except where this section
+   corrects them: amendment 1's open issue 3 (the run-time reading of the stagger) is **closed by
+   D101** for robots and kept for dashcams, and open issue 8 (the two CHOICE items) is **closed by
+   D103**. The rest - the interpolated device recall latency, the missing dense calibration refit,
+   Part 2 not having run, the median frame size, multiplicity, the session pool at 25:75 - are
+   unchanged.
+9. **Nothing in this section is a finding, and no sweep was run.** The live mechanism verification
+   and the live consistency check belong to the H100 runs; section 16.6 and 16.7 are the
+   flash-scope instances and do not discharge them.
+
+### 16.9 Files created or changed in StudyLIVE2-fix
+
+Created:
+
+- `results/orchestration/live2/fleet/eligibility_join/robot_eligibility_4_to_128.csv` (1,500 rows)
+- `results/orchestration/live2/fleet/eligibility_join/robot_eligibility_summary.json`
+- `results/orchestration/live2/fleet/scale_64_join/` (trace, both mode runs, `scale_summary.json`)
+
+Changed:
+
+- `experiments/orchestration/live2/fleet/trace.py` (D101: the join draw, the preload, the batch
+  grid, the question filter, the stats, the digest row, `JOIN_FRAC_MAX`, the docstring)
+- `experiments/orchestration/live2/fleet/events.py` (`history_preload` in `FIELDS`)
+- `experiments/orchestration/live2/fleet/emulator.py` (the preload path, charging no uplink, the
+  run-header counters, the digest docstring)
+- `experiments/orchestration/live2/fleet/eligibility.py` (the D101 columns and the per-ratio
+  preload summary; the "row pending" wording dropped)
+- `experiments/orchestration/live2/fleet/data_sources.py` (`calibration()` parses D105 folds)
+- `experiments/orchestration/live2/scorer/score.py` (D103 (e), (f), (h); D105 `map_for` and the
+  FINAL-map refusal; D101 `history_preload`; D99 diagnostics; `is_measured_run`,
+  `calibration_use`; the docstring)
+- `experiments/orchestration/live2/fleet/tests/test_live2_fleet.py` (234 checks)
+- `results/orchestration/live2/ANALYSIS_PLAN.md` (header APPROVED; the D103 rulings through the
+  index, the eight-item prose, sections 2, 3, 3.1, 4.1, 5, 7, 9, 10; D99 and D105 added; the
+  recomputed tables; the change log)
+- `reports/study_live2_fleet.md` (this section)
+
+Not touched: `live2/schema.py`, `live2/CONTRACT.md` and everything else on the coordinator side;
+`research/policy_design_log.md`, `research/policy_spec_v4.md`, `research/policy_ablations.md`,
+`research/EXPERIMENTS.md`, `research/STATUS.md`, `results/INDEX.md`. Read-only git only; no H100,
+no GPU, no model download; the StudyD15 frames were neither moved nor deleted.

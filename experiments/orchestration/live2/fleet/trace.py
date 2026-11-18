@@ -21,7 +21,15 @@ RULINGS IMPLEMENTED HERE
   D67       ratio dashcam : robot in {50:50, 75:25, 25:75}; no device mixes datasets.
   D83       each robot device plays a SEEDED SEQUENCE of EVAL sessions back to back; a new
             session is a new task and its history starts from zero; `session_start` /
-            `session_end` are emitted; the first session starts at a staggered seeded offset.
+            `session_end` are emitted.
+  D101      ROBOT DEVICES JOIN THEIR FIRST SESSION PART-WAY. Each robot's first session is
+            joined at a seeded point drawn uniformly in [0, 0.5 x session duration]; the draw is
+            recorded per device in `trace_meta.json`. Questions before the join point are NOT
+            emitted and NOT counted. At t = 0 the cloud already holds that session's earlier
+            frames as cold history, declared by a `history_preload` event with D2 token
+            accounting and NO uplink time charged. Batches after t = 0 continue on the same 30-s
+            session-local grid, carrying only the frames the preload did not. LATER sessions in
+            the chain start from zero (D83). D101 replaces CHOICE g of the analysis plan.
   D84/D85   distinct clips and sessions are assigned FIRST and repeat only when the pool is
             exhausted; every play gets its own play id; repeat counts are reported and repeats
             are not independent samples.
@@ -42,17 +50,26 @@ RULINGS IMPLEMENTED HERE
             PUSH mode. In pull mode frames are excluded, because which frames exist depends on
             the arm's pulls.
 
-THE STAGGERED OFFSET, AND THE ONE READING THAT HAD TO BE CHOSEN
+THE STAGGER, AS D101 SETTLED IT
 
-D83 says "the first session starts at a staggered seeded offset" and part 3 says dashcam clips
-run "back to back at the CTRL1c cadence from a seeded offset". Both are implemented as an offset
-in RUN TIME: a device registers at t = 0 and begins its first clip or session at
-`start_t` ~ U[0, stagger_s), seeded. The alternative reading - starting part-way INTO the first
-clip or session - was rejected for two reasons, both recorded in the report: D83 states that a
-new session's history starts from zero, which a mid-session join contradicts, and D85 excludes
-"plays cut by the run end", which presupposes whole plays. `stagger_s` defaults to the 30-s
-history-batch period so batch boundaries and instant phases are decorrelated across devices
-rather than fleet-synchronous; it is a parameter and is reported with its value.
+An earlier build read D83's "staggered seeded offset" as an offset in RUN TIME for both device
+classes, and recorded the alternative reading - starting part-way INTO the first clip or session
+- as an open issue. D101 settled it, and the two classes now differ:
+
+  DASHCAM   keeps the run-time stagger and the complete-play rule (D85). A dashcam device
+            registers at t = 0 and begins its first clip at `start_t` ~ U[0, stagger_s), seeded,
+            so `stagger_s` still decorrelates instant phases across devices. Plays are never
+            joined part-way, which is what D85's "plays cut by the run end are excluded"
+            presupposes.
+  ROBOT     starts its first session AT t = 0 and joins it part-way, at `join_frac` ~ U[0, 0.5)
+            of that session's duration, seeded (D101). The run-time offset is therefore NOT
+            applied to a robot: D101 puts the preload at t = 0, which a device that has not yet
+            registered cannot send, and the join draw decorrelates batch boundaries and question
+            phases across robots in its place. The draw is reported per device in
+            `trace_meta.json` under `robot_join`, and `join_frac_max` is a reported setting.
+
+The reason D101 exists is cold-rebuild pressure: starting every history at zero meant no arm
+ever had to rebuild a prefix it did not watch being built, which is the cost round 1 is for.
 
 FRAME BYTES
 
@@ -78,19 +95,20 @@ RATIOS = {"50:50": (50, 50), "75:25": (75, 25), "25:75": (25, 75)}
 MODES = ("A", "B")
 
 OPPORTUNITY_KINDS = ("monitor_opportunity", "recall_question")
-TRACE_KINDS = ("device_register", "session_start", "session_end", "history_batch",
-               "monitor_opportunity", "recall_question")
+TRACE_KINDS = ("device_register", "session_start", "history_preload", "session_end",
+               "history_batch", "monitor_opportunity", "recall_question")
 
 # D96 (2): what the canonical fairness digest covers, and the wire kind each trace record maps to.
 # `monitor_opportunity` becomes `monitor_frame` in push mode and `monitor_offer` in pull mode;
 # monitor_frame in PULL mode is deliberately absent, because the arm's pulls decide which frames
 # exist at all.
-DIGEST_KINDS = ("device_register", "session_start", "session_end", "history_batch",
-                "recall_question", "monitor_opportunity")
+DIGEST_KINDS = ("device_register", "session_start", "session_end", "history_preload",
+                "history_batch", "recall_question", "monitor_opportunity")
 MONITOR_WIRE_KIND = {"A": "monitor_frame", "B": "monitor_offer"}
 
 DEFAULT_STAGGER_S = DS.HISTORY_BATCH_S      # 30 s, the D68 history-batch period
 ANSWER_PAYLOAD_B = 300                      # a cloud answer body; see links.deliver_s
+JOIN_FRAC_MAX = 0.5                         # D101: join ~ U[0, 0.5 x session duration)
 
 
 # ---------------------------------------------------------------- deterministic dealing
@@ -143,6 +161,12 @@ class TraceStats:
     robot_sessions_started: int = 0
     robot_sessions_completed: int = 0
     robot_history_batches: int = 0
+    # D101: the join draw and what the cloud already holds at t = 0, per robot device.
+    robot_join_offset_s: Dict[str, float] = field(default_factory=dict)
+    robot_preload_frames: Dict[str, int] = field(default_factory=dict)
+    robot_preload_tokens: Dict[str, int] = field(default_factory=dict)
+    robot_preloads_emitted: int = 0
+    robot_questions_before_join: int = 0
     clip_play_counts: Dict[str, int] = field(default_factory=dict)
     session_play_counts: Dict[str, int] = field(default_factory=dict)
     clip_repeats: int = 0
@@ -153,6 +177,11 @@ class TraceStats:
         d["dashcam_min_instants"] = min(self.dashcam_instants.values()) if self.dashcam_instants \
             else None
         d["robot_pool_meets_20"] = self.robot_questions_total >= 20
+        tok = sorted(self.robot_preload_tokens.values())
+        d["robot_preload_tokens_min"] = tok[0] if tok else None
+        d["robot_preload_tokens_median"] = tok[len(tok) // 2] if tok else None
+        d["robot_preload_tokens_max"] = tok[-1] if tok else None
+        d["robot_preload_tokens_total"] = sum(tok) if tok else 0
         return d
 
 
@@ -197,6 +226,7 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
     rng_clip = random.Random(f"{seed}|clips")
     rng_sess = random.Random(f"{seed}|sessions")
     rng_stag = random.Random(f"{seed}|stagger")
+    rng_join = random.Random(f"{seed}|join")      # D101, its own stream
 
     dash_ids = [f"dash{i:03d}" for i in range(n_dash)]
     rob_ids = [f"robo{i:03d}" for i in range(n_rob)]
@@ -215,7 +245,25 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
     st = TraceStats(n_devices=n_devices, n_dashcam=n_dash, n_robot=n_rob)
 
     # start_t is drawn in a FIXED device order so the draw does not depend on the ratio split.
+    # D101: only the DASHCAM draw is used. The robot draw is still taken, so the dashcam
+    # stagger of a given seed is unchanged by D101 and the two builds' dashcam streams stay
+    # comparable; a robot's own offset is its join point instead (see below).
     start_t = {did: rng_stag.uniform(0.0, stagger_s) for did in dash_ids + rob_ids}
+    for did in rob_ids:
+        start_t[did] = 0.0
+
+    # D101: the join FRACTION is drawn per robot in a fixed device order, so the k-th robot gets
+    # the same draw at every ratio; the OFFSET is that fraction of its own first session.
+    join_frac = {did: rng_join.uniform(0.0, JOIN_FRAC_MAX) for did in rob_ids}
+    join_offset: Dict[str, float] = {}
+    join_meta: Dict[str, Dict[str, Any]] = {}
+    for i, did in enumerate(rob_ids):
+        first = sess_plan[i][0]
+        dur0 = sessions[first].duration_s
+        join_offset[did] = join_frac[did] * dur0
+        join_meta[did] = dict(join_frac=round(join_frac[did], 9),
+                              join_offset_s=round(join_offset[did], 6),
+                              first_session=first, first_session_duration_s=round(dur0, 6))
 
     for did in dash_ids:
         if not count_only:
@@ -279,22 +327,51 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
             play_id = f"{did}|s{k:03d}|{sid}"
             st.robot_sessions_started += 1
             st.session_play_counts[sid] = st.session_play_counts.get(sid, 0) + 1
+            # D101: the FIRST session of a robot is joined `join` seconds in; every later
+            # session in the chain starts from zero (D83). `t0` is the session's virtual origin
+            # on the run clock, so for a joined first session t0 = -join.
+            join = join_offset[did] if k == 0 else 0.0
+            t0 = t - join
             if not count_only:
                 records.append(dict(kind="session_start", device_id=did, session_id=play_id,
                                     t=round(t, 6), source_session=sid,
-                                    duration_s=round(sm.duration_s, 6)))
+                                    duration_s=round(sm.duration_s, 6),
+                                    join_offset_s=round(join, 6),
+                                    joined_part_way=bool(join > 0.0)))
             # D83: a new session is a new task, so history restarts from zero here.
             b = 0
             emitted = 0
             tokens_sent = 0
+            # D101: what the cloud ALREADY HOLDS at t = 0 for a joined session. No uplink time
+            # is charged for it (the frames were on cloud-side disk before the clock started),
+            # and it is the session's FIRST holding, so it carries the D2 header once.
+            pre_fr = DS.d2_frames_in(0.0, join) if join > 0.0 else []
+            if pre_fr:
+                pre_tok = DS.d2_batch_tokens(len(pre_fr), first_batch=True)
+                emitted = 1
+                tokens_sent = pre_tok
+                st.robot_preloads_emitted += 1
+                if not count_only:
+                    records.append(dict(kind="history_preload", device_id=did,
+                                        session_id=play_id, t=0.0,
+                                        frame_refs=[f"{sid}|f{x:08.2f}" for x in pre_fr],
+                                        est_tokens=pre_tok, cum_tokens=pre_tok,
+                                        join_offset_s=round(join, 6), uplink_charged=False))
+            if k == 0:
+                st.robot_join_offset_s[did] = round(join, 6)
+                st.robot_preload_frames[did] = len(pre_fr)
+                st.robot_preload_tokens[did] = tokens_sent
             while True:
                 b += 1
                 w_from = (b - 1) * DS.HISTORY_BATCH_S
                 w_to = min(b * DS.HISTORY_BATCH_S, sm.duration_s)
                 if w_from >= sm.duration_s - 1e-9:
                     break
-                fr = DS.d2_frames_in(w_from, w_to)
-                t_offer = t + w_to
+                # D101: the batch grid is the session's own 30-s grid and is unchanged by the
+                # join; a batch carries only the frames the preload did not already hold, so no
+                # frame is ever counted twice and none is dropped.
+                fr = DS.d2_frames_in(max(w_from, join), w_to)
+                t_offer = t0 + w_to
                 if t_offer > run_s + 1e-9:
                     break
                 if not fr:
@@ -319,7 +396,11 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
             for q in sm.questions:
                 if q.t_ask > sm.duration_s + 1e-9:
                     continue
-                t_run = t + q.t_ask
+                # D101: a question before the join point is NOT emitted and NOT counted.
+                if q.t_ask < join - 1e-9:
+                    st.robot_questions_before_join += 1
+                    continue
+                t_run = t0 + q.t_ask
                 if t_run > run_s + 1e-9:
                     continue
                 if not count_only:
@@ -345,7 +426,7 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                                         device_latency_s=DS.device_recall_latency_s(hist_tok),
                                         history_tokens=hist_tok))
                 nq += 1
-            t_end = t + sm.duration_s
+            t_end = t0 + sm.duration_s
             if t_end <= run_s + 1e-9:
                 if not count_only:
                     records.append(dict(kind="session_end", device_id=did,
@@ -382,6 +463,15 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                 dashcam_deadline_s=DS.NEXAR_DEADLINE_S,
                 robot_deadline_s=DS.ROBOT_DEADLINE_S,
                 history_batch_s=DS.HISTORY_BATCH_S,
+                robot_join_frac_max=JOIN_FRAC_MAX,
+                robot_join=join_meta,
+                robot_join_rule=(
+                    "D101: each robot joins its FIRST session at a seeded point drawn uniformly "
+                    "in [0, 0.5 x session duration); questions before the join point are not "
+                    "emitted and not counted; at t = 0 a history_preload declares the frames "
+                    "the cloud already holds, with NO uplink time charged; later sessions in "
+                    "the chain start from zero (D83). Dashcam devices keep the run-time "
+                    "stagger and the complete-play rule (D85)."),
                 frame_bytes_source=frame_bytes_source, count_only=count_only,
                 answer_payload_bytes=ANSWER_PAYLOAD_B,
                 trace_label="NOT A MEASUREMENT: a deterministic device script",
@@ -405,6 +495,11 @@ def _digest_tuple(r: Dict[str, Any], mode: str) -> Optional[Tuple[str, ...]]:
         return (dev, "device_register", f"{float(r['start_t']):.6f}", "", "", "")
     if k in ("session_start", "session_end"):
         return (dev, k, f"{float(r['t']):.6f}", str(r["session_id"]), "", "")
+    if k == "history_preload":
+        # D101: no batch_id, so the SESSION is the key and the holding's size is the extra
+        # field. Byte-identical to the coordinator side's row (live2/traces.py).
+        return (dev, "history_preload", f"{float(r['t']):.6f}", str(r["session_id"]),
+                str(int(r["est_tokens"])), "")
     if k == "history_batch":
         return (dev, "history_append", f"{float(r['t']):.6f}", str(r["batch_id"]),
                 str(int(r["est_tokens"])), "")

@@ -94,7 +94,9 @@ class TestA_SchemaAndLegality(unittest.TestCase):
                          calibration_label="INTERIM", fairness_digest="d" * 64,
                          live1_trace_digest="l" * 32, trace_label="SYNTHETIC",
                          seed=1, targets=CS.TARGETS, upload_mode="A", mu_mode="none",
-                         mu_value=0.0, H=1.0, tick_s=0.05, server_url="u", server_kind="fake")
+                         mu_value=0.0, H=1.0, tick_s=0.1, decision_period_s=0.1,
+                         gpu_budget_s=60.0, memory_setting="tight", ratio="50:50", mode="A",
+                         server_url="u", server_kind="fake")
         with tempfile.TemporaryDirectory() as d:
             p = SC.write_header(Path(d) / "header.json", h)
             back = SC.read_header(p)
@@ -141,11 +143,21 @@ class TestB_Fairness(unittest.TestCase):
         sys.path.insert(0, str(LIVE2 / "fleet"))
         import trace as FT                                           # noqa: E402
         tr = _trace(duration=90.0)
-        recs = [_fleet_record(e) for e in tr["events"]]
+        # D101: the stream carries a history_preload too, so the row shape of the NEW event is
+        # cross-checked against the fleet's and not only the six older kinds.
+        ev = list(tr["events"]) + [SC.make("history_preload", device_id="r0",
+                                           session_id="r0/s0", frame_refs=["f1", "f2"],
+                                           est_tokens=5000, t=0.0)]
+        self.assertIn("history_preload", T.fairness_kinds("A"))
+        recs = [_fleet_record(e) for e in ev]
         recs = [r for r in recs if r is not None]
-        self.assertEqual(tr["fairness_digest"], FT.fairness_digest(recs, "A"))
-        pull = _trace(duration=90.0, mode="B")
-        self.assertEqual(pull["fairness_digest"], FT.fairness_digest(recs, "B"))
+        self.assertEqual(T.fairness_digest(ev, "A"), FT.fairness_digest(recs, "A"))
+        # In PULL mode the wire stream carries monitor_offer where push carries monitor_frame,
+        # so the pull side is built from the pull trace; the fleet record is the same
+        # `monitor_opportunity` either way and the digest differs only in the label.
+        pull = list(_trace(duration=90.0, mode="B")["events"]) + [ev[-1]]
+        precs = [r for r in (_fleet_record(e) for e in pull) if r is not None]
+        self.assertEqual(T.fairness_digest(pull, "B"), FT.fairness_digest(precs, "B"))
 
     def test_identical_opportunity_stream_digest(self):
         """The per-arm check on the stream the coordinator actually built."""
@@ -463,6 +475,9 @@ def _fleet_record(e):
         return dict(kind=k, device_id=e["device_id"], start_t=e["start_t"])
     if k in ("session_start", "session_end"):
         return dict(kind=k, device_id=e["device_id"], t=e["t"], session_id=e["session_id"])
+    if k == "history_preload":
+        return dict(kind="history_preload", device_id=e["device_id"], t=e["t"],
+                    session_id=e["session_id"], est_tokens=e["est_tokens"])
     if k == "history_append":
         return dict(kind="history_batch", device_id=e["device_id"], t=e["t_arrive"],
                     batch_id=e["batch_id"], est_tokens=e["est_tokens"])

@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
 """The D97 robot-measurability table: which fleet sizes are eligible, at which seeds.
 
-StudyLIVE2-fleet, amendment 2. CPU only; no server, no GPU, no model. Every number here is a
-property of the TRACE, which is why D97 can fix eligibility before any GPU run happens.
+StudyLIVE2-fleet, amendments 2 and 3. CPU only; no server, no GPU, no model. Every number here
+is a property of the TRACE, which is why D97 can fix eligibility before any GPU run happens.
 
-D97 (user ruling 2026-11-17, row pending). Robot-pool eligibility (at least 20 pooled questions
+RECOMPUTED UNDER D101 (amendment 3). D101 makes each robot join its first session part-way, so
+the questions before the join point are no longer emitted and the pooled robot count per run
+CHANGES. D101 orders the D97 entry points recomputed from traces before any GPU run, which is
+what this module now produces. The table also carries, per cell, what the join removed
+(`questions_before_join`) and what the cloud already holds at t = 0 (`preloads_emitted`,
+`preload_tokens_*`, `join_offset_*`), because the preload is the cold-rebuild pressure D101
+exists to create.
+
+D97. Robot-pool eligibility (at least 20 pooled questions
 per run, D82) is a property of the trace, so it is fixed from traces before any GPU run. A fleet
 size enters a main-sweep comparison only if its robot pool is eligible at EVERY seed that will be
 reported for that comparison: seeds 1, 2 and 3. The pilot (seed 0) only reports which of its
@@ -48,14 +56,28 @@ FIELDS = ("ratio", "seed", "n_devices", "n_dashcam", "n_robot", "robot_questions
           "robot_eligible", "dashcam_min_instants", "dashcam_meeting_200",
           "clip_plays_started", "clip_plays_distinct", "clip_repeats", "clip_pool",
           "sessions_started", "sessions_distinct", "session_repeats", "session_pool",
-          "sessions_completed", "history_batches", "n_opportunities")
+          "sessions_completed", "history_batches", "n_opportunities",
+          # D101: the part-way join. `questions_before_join` is what the join point removed.
+          "questions_before_join", "preloads_emitted", "preload_tokens_min",
+          "preload_tokens_median", "preload_tokens_max", "preload_tokens_total",
+          "join_offset_min_s", "join_offset_median_s", "join_offset_max_s")
 
 
 def cell(seed: int, n_devices: int, ratio: str, run_s: float = MAIN_RUN_S) -> Dict[str, Any]:
     st = TR.generate_trace(seed, n_devices, ratio, run_s, "A", count_only=True)["stats"]
     nq = int(st["robot_questions_total"])
     inst = st["dashcam_instants"]
+    off = sorted(st["robot_join_offset_s"].values())
     return dict(ratio=ratio, seed=seed, n_devices=n_devices,
+                questions_before_join=int(st["robot_questions_before_join"]),
+                preloads_emitted=int(st["robot_preloads_emitted"]),
+                preload_tokens_min=st["robot_preload_tokens_min"],
+                preload_tokens_median=st["robot_preload_tokens_median"],
+                preload_tokens_max=st["robot_preload_tokens_max"],
+                preload_tokens_total=st["robot_preload_tokens_total"],
+                join_offset_min_s=(round(off[0], 3) if off else None),
+                join_offset_median_s=(round(off[len(off) // 2], 3) if off else None),
+                join_offset_max_s=(round(off[-1], 3) if off else None),
                 n_dashcam=int(st["n_dashcam"]), n_robot=int(st["n_robot"]),
                 robot_questions=nq, robot_eligible=int(nq >= ROB_MIN),
                 dashcam_min_instants=(min(inst.values()) if inst else None),
@@ -103,6 +125,17 @@ def summarise(rows: Sequence[Dict[str, Any]],
                                           default=None)) for s in seeds},
             pilot_seed_measurable={n: bool(sizes[n][PILOT_SEED]["robot_eligible"])
                                    for n in sorted(sizes) if PILOT_SEED in sizes[n]},
+            # D101: what the cloud already holds at t = 0 at the entry point, per reported seed.
+            preload_at_entry=({s: dict(
+                tokens_min=sizes[entry][s]["preload_tokens_min"],
+                tokens_median=sizes[entry][s]["preload_tokens_median"],
+                tokens_max=sizes[entry][s]["preload_tokens_max"],
+                tokens_total=sizes[entry][s]["preload_tokens_total"],
+                preloads_emitted=sizes[entry][s]["preloads_emitted"],
+                questions_before_join=sizes[entry][s]["questions_before_join"],
+                robot_questions=sizes[entry][s]["robot_questions"])
+                for s in seeds if entry is not None and s in sizes.get(entry, {})}
+                if entry is not None else {}),
             dashcam_min_instants_over_all_cells=min(
                 (r["dashcam_min_instants"] for n in sizes for r in sizes[n].values()
                  if r["dashcam_min_instants"] is not None), default=None),
@@ -142,11 +175,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for r in rows:
             w.writerow(r)
     summary = dict(
-        rule=("D97 (user ruling 2026-11-17, row pending): a fleet size enters a main-sweep "
+        rule=("D97: a fleet size enters a main-sweep "
               "comparison only if its robot pool is eligible (>= 20 pooled questions per run, "
               "D82) at EVERY reported seed. The pilot seed 0 only reports which of its sizes "
               "were measurable at seed 0 and never sets an entry point. A size is never made "
               "measurable by averaging or borrowing across seeds."),
+        provenance=("recomputed under D101; design-log row pending (planner will log as D107). "
+                    "Robots join their first session part-way, so the questions before the join "
+                    "point are not emitted and not counted and the pooled count per run is NOT "
+                    "the pre-D101 count."),
         run_s=a.run_s, robot_min_questions=ROB_MIN, dashcam_min_instants=DASH_MIN_INSTANTS,
         reported_seeds=list(REPORTED_SEEDS), pilot_seed=PILOT_SEED,
         sizes=[a.min_devices, a.max_devices], ratios=list(a.ratios),

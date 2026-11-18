@@ -50,6 +50,10 @@ class Coordinator:
     sh_trigger: TriggerFamily = None
     ghat_calls: int = 0
     prefix_loss_events: List[Dict[str, Any]] = field(default_factory=list)
+    # D99 (4): how often the release-loop evaluation cap actually BOUND, and how many item
+    # evaluations it skipped. Both are reported; an unset cap leaves them at zero.
+    cap_bound_passes: int = 0
+    cap_skipped_items: int = 0
 
     def __post_init__(self) -> None:
         if self.rollout is None:
@@ -208,7 +212,7 @@ class Coordinator:
                                 deadline=req.deadline))]
         items = self._plan(fleet, dict(kind="escalation", task=req.task, device=req.device,
                                        qtype=req.qtype, payload_bytes=req.payload_bytes,
-                                       deadline=req.deadline),
+                                       deadline=req.deadline, capture_at=req.capture_at),
                            ghat=g["ghat"])
         jobs = dict(getattr(self, "_planned_jobs", {}))
         self._planned_jobs = {}
@@ -314,8 +318,17 @@ class Coordinator:
         did = event["device"]
         dev = fleet.device(did)
         if event.get("task") == "SH":
-            return [PendingItem(item_id="%s:call:%.3f" % (did, fleet.t), kind="episode_call",
-                                device=did, due_at=fleet.t, frames=1,
+            # D98 / D100: when the caller supplies the instant's own capture time, the call
+            # carries c_i as its `due_at` and c_i + L_SH as its deadline, so spec 5.1's
+            # per-instant rule credits the instant this call actually serves and pi_0 orders it
+            # by its own deadline. Omitted, both fall back to the pre-D98 behaviour
+            # (`due_at = fleet.t`, no deadline), so no existing caller moves.
+            cap = event.get("capture_at")
+            due = float(cap) if cap is not None else fleet.t
+            dl = event.get("deadline") if cap is not None else None
+            return [PendingItem(item_id="%s:call:%.3f" % (did, due), kind="episode_call",
+                                device=did, due_at=due,
+                                deadline=(float(dl) if dl is not None else None), frames=1,
                                 payload_bytes=event.get("payload_bytes", 0),
                                 meta=dict(ghat=ghat) if ghat is not None else {})]
         if event.get("task") == "SS":
@@ -421,10 +434,27 @@ class Coordinator:
                                                           if host_pool is not None else 0))
         except ValueError as e:
             return [Decision(fleet.t, "tier_assignment", "-", None, False, str(e))]
+        # D99 (4): the STATE pass is a full-DeltaJ path too -- one evaluation per state action
+        # the tier assignment proposes, which is O(devices) per decision period -- so the cap
+        # has to cover it. With the cap on the release loop and SH admission only, K = 1 at 128
+        # devices still missed the p99 target, and this pass is why. The candidates are taken in
+        # the tier assignment's own order (highest nu_tier first), so the cap keeps the
+        # promotions worth the most, and the rest are reconsidered next period.
+        budget = getattr(self.params, "release_eval_cap_k", None)
+        budget = int(budget) if budget else None
         for c in alloc["gpu"]:
+            if budget is not None and budget <= 0:
+                self.cap_bound_passes += 1
+                self.cap_skipped_items += 1
+                continue
             dev = fleet.device(c["device"])
             acts = state_actions(dev, c["rep"], self.flags, target="GPU")
             for a in acts:
+                if budget is not None:
+                    if budget <= 0:
+                        self.cap_skipped_items += 1
+                        continue
+                    budget -= 1
                 item = PendingItem(item_id="%s:%s:%s:%.3f" % (a.device, a.rep, a.kind, fleet.t),
                                    kind="state_action", device=a.device, due_at=fleet.t,
                                    tokens=a.tokens,
@@ -551,11 +581,26 @@ class Coordinator:
     # ---------------------------------------------------------------- 7.2 release loop
     def _release_loop(self, fleet: Fleet, max_releases: int = 32) -> List[Decision]:
         out: List[Decision] = []
+        # D99 (4): with `release_eval_cap_k` set, AT MOST K pending items get a full DeltaJ
+        # evaluation in this whole call, i.e. in this decision period, SHARED ACROSS THE PASSES
+        # of the loop; the rest wait for the next period, still in pi_0 order. Capping per PASS
+        # instead would leave the per-period cost unbounded, because the loop makes up to
+        # `max_releases` passes. None (the default) is UNLIMITED, which is the behaviour every
+        # committed result was produced under.
+        budget = getattr(self.params, "release_eval_cap_k", None)
+        budget = int(budget) if budget else None
         for _ in range(max_releases):
+            if budget is not None and budget <= 0:
+                break
             best = None
-            for p in fleet.pending:
-                if p.due_at > fleet.t + 1e-12:
-                    continue
+            due = [p for p in fleet.pending if p.due_at <= fleet.t + 1e-12]
+            if budget is not None:
+                if len(due) > budget:
+                    self.cap_bound_passes += 1
+                    self.cap_skipped_items += len(due) - budget
+                due = self.rollout._edf(due)[:budget]
+                budget -= len(due)
+            for p in due:
                 res = delta_j(self.rollout, fleet,
                               dict(kind="dispatch" if p.kind == "episode_call" else "release",
                                    item_id=p.item_id))

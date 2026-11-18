@@ -1,0 +1,115 @@
+{
+ "_provenance": {
+  "args": {
+   "cap_k": null,
+   "check": "speed",
+   "ks": "1,2,4,8",
+   "max_wall_s": 240.0,
+   "out": "/home/pragya/Desktop/FM-switching/results/orchestration/live2/coord/fix",
+   "sizes": "32,64,128",
+   "window_s": 180.0
+  },
+  "device": "flash_cpu",
+  "git_commit": "80fe1199d1778d5ce1038d65e637cc03eab1ea3f",
+  "model": "none",
+  "n": 3,
+  "script": "fix_checks.py",
+  "timestamp": "2026-11-17T21:03:19.113428"
+ },
+ "check": "d99_speed",
+ "decision_period_s": 0.1,
+ "fixture": "SYNTHETIC 50 : 50, mode A, tight memory (gpu_kv_tokens = 62944, host_tier_gib = 27), 180 s, mu = 0, H = 1.0 s, dry run with the committed cost curve (pol4)",
+ "host_cpu": "13th Gen Intel Core i7-13700KF, 16 cores / 24 threads (flash). The H100 host's CPU differs and the pilot re-measures there.",
+ "is_measurement": false,
+ "release_cap_k": null,
+ "rows": [
+  {
+   "cap_bound": {
+    "release_passes": 0,
+    "release_skipped": 0,
+    "sh_periods": 0,
+    "sh_skipped": 0
+   },
+   "cpu_percent": 99.9,
+   "cpu_s": 79.178,
+   "decision_latency_ms": {
+    "max": 222.1872,
+    "n": 1801,
+    "p50": 43.3329,
+    "p99": 213.9576
+   },
+   "epoch_overruns": 0,
+   "n_decisions": 5066,
+   "n_devices": 32,
+   "n_monitor_answers": 5760,
+   "n_opportunities": 5808,
+   "n_recall_answers": 48,
+   "n_requests": 2666,
+   "release_cap_k": null,
+   "scoring_calls": 37216,
+   "target_p99_under_100ms": false,
+   "virtual_t_reached_s": 194.9,
+   "wall_guard_hit": false,
+   "wall_s": 79.268
+  },
+  {
+   "cap_bound": {
+    "release_passes": 0,
+    "release_skipped": 0,
+    "sh_periods": 0,
+    "sh_skipped": 0
+   },
+   "cpu_percent": 99.9,
+   "cpu_s": 206.127,
+   "decision_latency_ms": {
+    "max": 671.775,
+    "n": 1801,
+    "p50": 109.4933,
+    "p99": 545.4208
+   },
+   "epoch_overruns": 0,
+   "n_decisions": 7466,
+   "n_devices": 64,
+   "n_monitor_answers": 11520,
+   "n_opportunities": 11616,
+   "n_recall_answers": 96,
+   "n_requests": 2666,
+   "release_cap_k": null,
+   "scoring_calls": 56063,
+   "target_p99_under_100ms": false,
+   "virtual_t_reached_s": 194.9,
+   "wall_guard_hit": false,
+   "wall_s": 206.279
+  },
+  {
+   "cap_bound": {
+    "release_passes": 0,
+    "release_skipped": 0,
+    "sh_periods": 0,
+    "sh_skipped": 0
+   },
+   "cpu_percent": 100.0,
+   "cpu_s": 240.101,
+   "decision_latency_ms": {
+    "max": 2654.0692,
+    "n": 885,
+    "p50": 18.5255,
+    "p99": 2152.6015
+   },
+   "epoch_overruns": 0,
+   "n_decisions": 8112,
+   "n_devices": 128,
+   "n_monitor_answers": 11203,
+   "n_opportunities": 11436,
+   "n_recall_answers": 128,
+   "n_requests": 1712,
+   "release_cap_k": null,
+   "scoring_calls": 45103,
+   "target_p99_under_100ms": false,
+   "virtual_t_reached_s": 88.4,
+   "wall_guard_hit": true,
+   "wall_s": 240.17
+  }
+ ],
+ "target": "p99 decision time under 100 ms at 128 devices (D99 (3))"
+}

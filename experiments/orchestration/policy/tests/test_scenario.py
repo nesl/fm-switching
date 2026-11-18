@@ -72,12 +72,26 @@ class TestScenario(unittest.TestCase):
         self.assertTrue(any(d.kind == "admission" for d in trace))
 
     def test_a_held_call_with_merging_off_is_a_device_outcome(self):
+        """CHANGED FOR D98: a far-future call is now DISPATCHED, because its instant is credited
+        at its own deadline rather than being worth zero for falling outside t0 + H; the
+        hold-is-a-device-outcome branch is now reached by a call that cannot be delivered by
+        c_i + L_SH, which is what spec 7.9 actually describes."""
         co = coordinator(p=params(H=0.75))
         f = fleet(1)
         it = call_item("d0", 10.0, "far_future")
         f.pending.append(it)
-        r = co.hold_or_merge(f, it, next_due_at=10.5)
+        self.assertEqual(co.hold_or_merge(f, it, next_due_at=10.5)["action"], "dispatch")
+
+        co2 = coordinator(p=params(H=0.5))
+        g = fleet(1)
+        g.in_flight.append(piece_item("d0", 0.0, "big", deadline=100.0, tokens=7000,
+                                      job_id="jbig"))
+        g.jobs["jbig"] = job(pieces=1, done=0)
+        late = call_item("d0", 0.0, "late")
+        g.pending.append(late)
+        r = co2.hold_or_merge(g, late, next_due_at=0.5)
         self.assertEqual(r["action"], "hold_then_device_outcome")
+        self.assertIn("device-only outcome", r["note"])
 
     def test_scoring_calls_are_counted_for_m4(self):
         co, f, trace = self._run()

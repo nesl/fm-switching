@@ -128,21 +128,35 @@ class Pi0Edf(Live2ArmMixin, Policy):
     def reset(self, seed: int = 0) -> None:
         pass
 
+    def live2_roster(self, roster: Dict[str, Any]) -> None:
+        """D100: the arm-side hook. pi_0 reads ONE thing from it, each SH instant's own
+        deadline c_i + L_SH, which is a causal fact known at the instant's arrival."""
+        self._live2_roster = roster
+
     def decide(self, obs: Observation) -> Action:
         items: List[PendingItem] = []
         tgt = getattr(self, "_targets", None)
         mon_l_s = float(tgt["dashcam"]["L_s"]) if tgt else 1.0
+        instants = (getattr(self, "_live2_roster", None) or {}).get("sh_instant", {})
         for s in obs.streams:
-            # The interface's stream abstraction carries no per-instant deadline, so pi_0's
-            # deadline for a monitoring call is the one an arm CAN observe: the next call due
-            # after the last answer the application received, plus the monitoring bound. Without
-            # this, every stream would tie on `now + L` and the tie-break by item_id would starve
-            # every device but the first.
-            last = s.delivered_times_s[-1] if s.delivered_times_s else obs.now_s - s.cadence_s
-            due = last + s.cadence_s
+            # D100: pi_0 orders a monitoring call by the TRUE per-instant deadline
+            # c_i + L_SH of the instant this stream stands for, taken from the arm-side hook.
+            # It replaces the "next call due after the last answer the application received"
+            # workaround (open issue 9), under which every stream tied on `now + L` and the
+            # tie-break by item_id served one dashcam 240 times and the other none. The
+            # fallback below applies only when no hook is supplied at all.
+            inst = instants.get(s.stream_id)
+            if inst is not None:
+                due = float(inst["t_capture"])
+                dl = float(inst["deadline_abs"])
+            else:
+                last = (s.delivered_times_s[-1] if s.delivered_times_s
+                        else obs.now_s - s.cadence_s)
+                due = last + s.cadence_s
+                dl = due + mon_l_s
             items.append(PendingItem(item_id="mon:" + s.stream_id, kind="episode_call",
                                      device=s.stream_id, due_at=due,
-                                     deadline=due + mon_l_s, frames=1))
+                                     deadline=dl, frames=1))
         for q in obs.recall:
             items.append(PendingItem(item_id="rc:" + q.query_id, kind="rc_piece",
                                      device=q.session_id, due_at=q.arrival_s,

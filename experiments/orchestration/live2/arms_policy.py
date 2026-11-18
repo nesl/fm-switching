@@ -48,7 +48,7 @@ from policy.params import Params                                        # noqa: 
 from policy.profiles import load_profiles                               # noqa: E402
 from policy.kvpool import prefix_id_for                                 # noqa: E402
 from policy.residency_belief import ResidencyBelief                     # noqa: E402
-from policy.rollout import Rollout                                      # noqa: E402
+from policy.rollout import Rollout, clone_for_rollout            # noqa: E402
 from policy.state import Device, Fleet, HistoryBelief, Link             # noqa: E402
 
 # D73: round-1 placeholder settings, every one reported with "not tuned".
@@ -79,6 +79,18 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     mu_mode: str = "none"
     mu_fixed: Optional[float] = None
     predict_log_max: int = 4
+    # D99 (2): "fast" is the optimized path; "reference" is the unoptimized post-D98 policy,
+    # selectable so the equivalence test has something to compare against. The two must produce
+    # IDENTICAL decision logs, which is what the test asserts.
+    impl: str = "fast"
+    # D99 (4): the cap on how many pending items get a full DeltaJ evaluation per decision
+    # period, applied to BOTH full-DeltaJ paths (the release loop and SH admission); the rest
+    # wait in pi_0 order for the next period. None is UNLIMITED. It is set on the Params
+    # INSTANCE rather than declared as a field, because `policy/params.py` is one of the
+    # StudyPOL4 FROZEN FILES (freeze_t0b.FROZEN_FILES, md5-checked by
+    # policy/tests/test_residency_belief.py) and may not be edited; the library reads it with
+    # `getattr(self.params, "release_eval_cap_k", None)`, so an unset cap is the old behaviour.
+    cap_k: Optional[int] = None
 
     name: str = "policy-core"
     case: str = "own"
@@ -101,6 +113,10 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                              f"got {self.cost_model!r} (D74)")
         if self.mu_mode not in MU_MODES:
             raise ValueError(f"mu mode must be one of {MU_MODES}")
+        if self.cap_k is not None and int(self.cap_k) <= 0:
+            raise ValueError("--release-cap-k must be a positive integer or unset (unlimited)")
+        if self.impl not in ("fast", "reference"):
+            raise ValueError("--policy-impl must be 'fast' or 'reference', got %r" % self.impl)
         if self.mu_mode == "fixed" and self.mu_fixed is None:
             raise ValueError("mu mode 'fixed' needs --mu-fixed VALUE, whose value D88 sets to "
                              "x0.5 and x2 of the EWMA estimator's time-averaged value over the "
@@ -155,6 +171,15 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                                          gpu_pool_tokens=int(gpu_kv_tokens))
         self.rollout = Rollout(self.pf, p, self.flags, self.engine,
                                residency_belief=self.residency)
+        if self.cap_k is not None:
+            p.release_eval_cap_k = int(self.cap_k)
+            # D99 (4): the D63 PREDICTION LOG is two extra rollouts per logged release and is
+            # pure logging, so a capped run must not spend more of the period on predictions
+            # than on decisions. It is limited to K logged releases per period; at a 100 ms
+            # period that is still 10 x K predicted-versus-actual samples a second.
+            self.predict_log_max = min(int(self.predict_log_max), int(self.cap_k))
+        self._clone_impl = "reference" if self.impl == "reference" else "fast"
+        self.rollout.clone_impl = self._clone_impl
         self.co = Coordinator(self.pf, p, self.flags, self.engine, self.rollout,
                               residency_belief=self.residency)
         self.fleet = Fleet(t=0.0)
@@ -168,7 +193,45 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         self.last_predictions = {}
         self.mu_samples = []
         self.stats = dict(escalations=0, admitted=0, declined=0, released=0, held=0,
-                          prefix_loss_replans=0, jobs_infeasible=0)
+                          prefix_loss_replans=0, jobs_infeasible=0,
+                          sh_escalated=0, sh_admitted=0, sh_declined=0,
+                          sh_cap_bound_periods=0, sh_cap_skipped=0,
+                          release_cap_k=self.cap_k)
+
+    def _apply_partial_readiness(self) -> None:
+        """D100 (a): cost a later reconstruction piece as A PIECE ON A WARM PREFIX.
+
+        The arm-side hook carries how much of each history the cloud has ALREADY BUILT. Without
+        it the item's readiness stayed COLD until the whole chain finished (the believed tier
+        becomes `gpu` only at `built_tokens >= est_tokens`), so `Eng1Engine.predict` charged
+        every later piece `cached = 0` -- a cold rebuild -- even though the already-sent frames
+        travel as uuid REFERENCES and the prefix is on the GPU (StudyLIVE2-coord open issue 3b).
+        The built prefix is set as `cached_tokens` on the item, which is exactly the input the
+        committed cost model reads; nothing in `policy/` is changed. A prefix believed to be on
+        the HOST additionally carries `external_cached_tokens`, so the host-KV reload is charged
+        (StudyPOL4-engine term (a)) rather than silently treated as GPU-warm.
+        """
+        built = (self._roster or {}).get("built_tokens_by_session", {})
+        if not built:
+            return
+        for p in list(self.fleet.pending) + list(self.fleet.in_flight):
+            if p.kind != "rc_piece" or not p.job_id:
+                continue
+            sid = self._session_of_job.get(p.job_id)
+            b = int(built.get(sid, 0)) if sid else 0
+            if b <= 0:
+                continue
+            job = self.fleet.jobs.get(p.job_id)
+            dev = self.fleet.devices.get(job.device) if job is not None else None
+            bel = dev.history.get("RICH") if dev is not None else None
+            tier = bel.most_likely() if bel is not None else "GPU"
+            if tier == "HOST":
+                p.readiness = "HOST-WARM"
+                p.meta["external_cached_tokens"] = b
+            else:
+                p.readiness = "GPU-WARM"
+                p.meta.pop("external_cached_tokens", None)
+            p.meta["cached_tokens"] = b
 
     def live2_roster(self, roster: Dict[str, Any]) -> None:
         """The device roster and session ownership, which EVERY arm could know: who registered,
@@ -183,16 +246,23 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
             raise RuntimeError("live2_configure must run before the policy arm decides")
         self._sync(obs)
         self._prune(float(obs.now_s))
+        self._apply_partial_readiness()
         decs: List[Any] = []
         decs += self._admit_monitoring(obs)
         decs += self._admit_recall(obs)
         # The snapshot is taken HERE, after admission and before the release loop, because
         # spec 3.5's counterfactual for a release is "release now vs defer to the next candidate
         # slot" from the state the release loop actually sees.
-        before = copy.deepcopy(self.fleet) if self.predict_log_max > 0 else None
+        # D99 (2): the SAME clone the rollout uses, instead of a full deepcopy of the fleet
+        # once per epoch. It gives independent pending / in-flight lists, items, jobs, devices
+        # and histories, which is everything the release loop writes to between here and the
+        # prediction; the prediction log is the only consumer and no decision reads it.
+        before = (copy.deepcopy(self.fleet) if self._clone_impl == "reference"
+                  else clone_for_rollout(self.fleet)) if self.predict_log_max > 0 else None
         decs += self.co.on_event(self.fleet, dict(kind="timer"))
         self._feed_mu_estimator(decs)
         self._update_mu_samples()
+        self._collect_cap_stats()
         return self._to_action(obs, decs, before)
 
     # ---- fleet mirror
@@ -301,25 +371,76 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
 
     # ---- admission
     def _admit_monitoring(self, obs: Observation) -> List[Any]:
-        """D62: every instant is a candidate; admission (8.1) and the release loop (8.2) decide."""
+        """D62: every instant is a candidate; admission (8.1) and the release loop (8.2) decide.
+
+        D100: the instant and ITS OWN DEADLINE c_i + L_SH come from the arm-side hook, which
+        carries the very instant the coordinator will serve for this device (the earliest-
+        deadline eligible one). The old reading -- "the newest delivered time IS the newest
+        instant", with the deadline reconstructed from a placeholder window -- both guessed the
+        instant and could guess a different one from the one that gets served.
+        """
         out: List[Any] = []
         window = float(PLACEHOLDERS["monitor_answer_window_s"]["value"])
+        # The hook is authoritative WHEN PRESENT, and an empty `sh_instant` means "this device
+        # has no undecided instant right now", NOT "fall back to guessing". Falling back there
+        # re-escalated the instant that had just been admitted (its newest delivered time is the
+        # instant now in flight), under a different seen-key, which doubled the escalation count
+        # and produced one dead decline per served instant.
+        roster = self._roster or {}
+        has_hook = "sh_instant" in roster
+        instants = roster.get("sh_instant", {})
+        cands = []
         for s in obs.streams:
-            if not s.network.connected or not s.delivered_times_s:
+            if not s.network.connected:
                 continue
-            # ONE escalation per DECISION INSTANT (D62), not one per epoch. The instant is
-            # observable: the application-visible stream carries the device's own answer from
-            # each capture, so its newest delivered time IS the newest instant.
-            capture = float(s.delivered_times_s[-1])
-            key = ("SH", s.stream_id, round(capture, 4))
+            inst = instants.get(s.stream_id)
+            if inst is not None:
+                capture, deadline = float(inst["t_capture"]), float(inst["deadline_abs"])
+                key = ("SH", str(inst["opportunity_id"]))
+            elif has_hook:
+                continue
+            else:
+                if not s.delivered_times_s:
+                    continue
+                capture = float(s.delivered_times_s[-1])
+                deadline = capture + window
+                key = ("SH", s.stream_id, round(capture, 4))
             if key in self._seen:
                 continue
+            cands.append((deadline, s.stream_id, s, capture, key))
+        # D99 (4): pi_0 order is by deadline, so the cap keeps the instants that are closest to
+        # missing and leaves the rest to the next period (they are still visible until their own
+        # deadline, so nothing is silently dropped).
+        cands.sort(key=lambda c: (c[0], c[1]))
+        if self.cap_k and len(cands) > int(self.cap_k):
+            self.stats["sh_cap_bound_periods"] = self.stats.get("sh_cap_bound_periods", 0) + 1
+            self.stats["sh_cap_skipped"] = (self.stats.get("sh_cap_skipped", 0)
+                                            + len(cands) - int(self.cap_k))
+            cands = cands[:int(self.cap_k)]
+        for deadline, _did, s, capture, key in cands:
             self._seen.add(key)
             req = EscalationRequest(device=s.stream_id, task="SH", t=obs.now_s,
-                                    deadline=capture + window, frames=int(s.frame_count),
+                                    deadline=deadline, capture_at=capture,
+                                    frames=int(s.frame_count),
                                     payload_bytes=self._frame_bytes(s.stream_id))
             self.stats["escalations"] = self.stats.get("escalations", 0) + 1
-            out += self.co.escalate(self.fleet, req)
+            self.stats["sh_escalated"] = self.stats.get("sh_escalated", 0) + 1
+            ds = self.co.escalate(self.fleet, req)
+            out += ds
+            # D98 needs the SH admission decisions readable on their own: before the per-instant
+            # rule, every one of these was a decline with DeltaJ exactly 0 at H <= T_k
+            # (StudyLIVE2-coord open issue 1), and that is only visible if admits and declines
+            # are counted per TASK rather than pooled.
+            for d in ds:
+                # `Coordinator.escalate` labels its verdict "escalation"; `_admission` labels
+                # the same verdict "admission". Both are the admit-or-decline decision.
+                if d.kind not in ("escalation", "admission"):
+                    continue
+                side = "sh_admitted" if d.taken else "sh_declined"
+                self.stats[side] = self.stats.get(side, 0) + 1
+                if d.delta_j is not None:
+                    key = "sh_delta_j_admit" if d.taken else "sh_delta_j_decline"
+                    self.stats.setdefault(key, []).append(float(d.delta_j))
         return out
 
     def _admit_recall(self, obs: Observation) -> List[Any]:
@@ -460,6 +581,13 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         if taken:
             self.co._last_delta_j = float(taken[-1].delta_j)
 
+    def _collect_cap_stats(self) -> None:
+        """D99 (4): the release loop's own cap counters, so "how often does it bind" is a
+        reported number rather than an inference."""
+        self.stats["release_cap_bound_passes"] = int(getattr(self.co, "cap_bound_passes", 0))
+        self.stats["release_cap_skipped_items"] = int(getattr(self.co, "cap_skipped_items", 0))
+        self.stats["scoring_calls"] = int(getattr(self.co, "scoring_calls", 0))
+
     def _update_mu_samples(self) -> None:
         if self.params.mu_estimator == "ewma_marginal_utility":
             self.mu_samples.append(float(self.params.mu))
@@ -482,6 +610,11 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         for k in sorted(self.params.placeholders()):
             rows.append(dict(parameter="params." + k, value=getattr(self.params, k, None),
                              tuned=False, note="params.PROVENANCE marks this a PLACEHOLDER"))
+        rows.append(dict(parameter="release_eval_cap_k", value=self.cap_k, tuned=False,
+                         note="D99 (4) SETTING: how many pending items get a full DeltaJ "
+                              "evaluation per decision period, in the release loop and in SH "
+                              "admission. None is unlimited. Reported with how often it bound "
+                              "(arm_stats.sh_cap_bound_periods, release_cap_bound_passes)."))
         return rows
 
     def live2_describe(self) -> Dict[str, Any]:
