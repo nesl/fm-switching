@@ -38,11 +38,12 @@ C_CLOUD = OI["vermillion"]
 # Family B, rebuild shape (M3a, M3b, M5):
 C_ONEGO = OI["vermillion"]      # one-go / mono / cold rebuild
 C_PIECE2048 = OI["skyblue"]
-C_PIECE1024 = OI["green"]
+C_PIECE1024 = OI["blue"]        # 1,024-token pieces = dark blue (revision 4)
 C_PIECES = OI["green"]          # pieces as one class (M5)
 # Family C, readiness tier (M4, M5):
 C_COLD = OI["vermillion"]       # a cold rebuild is the one-go/mono action
 C_HOST = OI["green"]
+C_HOSTWARM = OI["green"]        # host-warm recall = bluish green (revision 4); same as the host tier
 C_DISK = OI["blue"]
 C_GPUWARM = OI["orange"]
 C_WARM = OI["orange"]           # reload / warm as one class (M5)
@@ -59,7 +60,7 @@ C_WORKLOAD = OI["blue"]
 MARK = {
     "onego": "o", "piece2048": "s", "piece1024": "^", "pieces": "s",
     "cold": "o", "host": "^", "disk": "s", "gpuwarm": "D", "warm": "D",
-    "device": "o", "cloud": "s",
+    "hostwarm": "D", "device": "o", "cloud": "s",
 }
 HATCH = {
     "onego": "//", "piece2048": "..", "piece1024": "xx", "pieces": "..",
