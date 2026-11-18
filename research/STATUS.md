@@ -1,5 +1,7 @@
 # FM-switching — Project Status
 
+Last updated: 2026-11-18 (later 3) (**StudyMOT1-dayinlife STOPPED AT N SELECTION: at a 0.5 s monitoring cadence even 8 dashcam streams (16 requests/s) exceed the 32B's 15.1 requests/s one-frame peak, so no grid point was >= 99 % on time (N = 8: 11.7 %). A feasible fleet size or cadence is the user's decision. Report reports/study_mot1_dayinlife.md.**)
+
 Last updated: 2026-11-18 (later 2) (**StudyLIVE2-pilot STOPPED AT STEP 1: the first real-server cell (edf, 8 devices) failed the harness lateness requirement (emulator p99 511.6 ms > 50 ms) while passing every other end-to-end check; the request path blocks the single-process emulator loop. Needs a harness fix on flash before the pilot can run. Report reports/study_live2_pilot.md.**)
 
 Last updated: 2026-11-18 (later) (**StudyLIVE2-pre Part 2 COMPLETE: dense calibration re-run on the committed StudyD3 scored body (42,014 of 42,014 scored) and confirmed byte-identical to the live coordinator's body after StudyLIVE2-fix2; calibration FINAL (32B a 0.138, Orin a 0.133, 5-fold by clip). The pilot's preconditions are checked next.**)
