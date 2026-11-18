@@ -1,0 +1,152 @@
+{
+ "chunk_tokens": 8192,
+ "definition": "An ACTION STEP is a simulated step in which at least one action request is prefilling. It is SHARED if a background request is prefilling in the same step. Decodes are counted separately and are NOT a merge of prefills.",
+ "eng1c_chained": {
+  "by_action": {
+   "piece1024": {
+    "max_prefilling_in_an_action_step": 6,
+    "max_prefilling_in_any_step": 6,
+    "n_action_steps": 904,
+    "n_action_steps_with_decodes": 554,
+    "n_shared_action_steps": 497,
+    "n_steps_with_two_or_more_prefills": 630,
+    "n_trials": 79,
+    "shared_fraction": 0.5497787610619469,
+    "unknown_rids_seen": 0
+   },
+   "piece2048": {
+    "max_prefilling_in_an_action_step": 8,
+    "max_prefilling_in_any_step": 8,
+    "n_action_steps": 492,
+    "n_action_steps_with_decodes": 348,
+    "n_shared_action_steps": 341,
+    "n_steps_with_two_or_more_prefills": 503,
+    "n_trials": 82,
+    "shared_fraction": 0.693089430894309,
+    "unknown_rids_seen": 0
+   }
+  },
+  "label": "StudyENG1c Part D FIT, CHAINED (n_parts > 1)"
+ },
+ "eng1c_single_request": {
+  "by_action": {
+   "mono11k": {
+    "max_prefilling_in_an_action_step": 2,
+    "max_prefilling_in_any_step": 14,
+    "n_action_steps": 195,
+    "n_action_steps_with_decodes": 42,
+    "n_shared_action_steps": 4,
+    "n_steps_with_two_or_more_prefills": 242,
+    "n_trials": 120,
+    "shared_fraction": 0.020512820512820513,
+    "unknown_rids_seen": 0
+   },
+   "piece1024": {
+    "max_prefilling_in_an_action_step": 2,
+    "max_prefilling_in_any_step": 8,
+    "n_action_steps": 43,
+    "n_action_steps_with_decodes": 19,
+    "n_shared_action_steps": 3,
+    "n_steps_with_two_or_more_prefills": 48,
+    "n_trials": 41,
+    "shared_fraction": 0.06976744186046512,
+    "unknown_rids_seen": 0
+   },
+   "piece2048": {
+    "max_prefilling_in_an_action_step": 2,
+    "max_prefilling_in_any_step": 8,
+    "n_action_steps": 39,
+    "n_action_steps_with_decodes": 17,
+    "n_shared_action_steps": 6,
+    "n_steps_with_two_or_more_prefills": 38,
+    "n_trials": 38,
+    "shared_fraction": 0.15384615384615385,
+    "unknown_rids_seen": 0
+   }
+  },
+  "label": "StudyENG1c Part D FIT, single-request (n_parts == 1)"
+ },
+ "eng1d": {
+  "by_action": {
+   "mono11k": {
+    "max_prefilling_in_an_action_step": 1,
+    "max_prefilling_in_any_step": 21,
+    "n_action_steps": 120,
+    "n_action_steps_with_decodes": 0,
+    "n_shared_action_steps": 0,
+    "n_steps_with_two_or_more_prefills": 313,
+    "n_trials": 60,
+    "shared_fraction": 0.0,
+    "unknown_rids_seen": 0
+   },
+   "piece1024": {
+    "max_prefilling_in_an_action_step": 4,
+    "max_prefilling_in_any_step": 5,
+    "n_action_steps": 60,
+    "n_action_steps_with_decodes": 26,
+    "n_shared_action_steps": 10,
+    "n_steps_with_two_or_more_prefills": 309,
+    "n_trials": 60,
+    "shared_fraction": 0.16666666666666666,
+    "unknown_rids_seen": 0
+   },
+   "piece2048": {
+    "max_prefilling_in_an_action_step": 3,
+    "max_prefilling_in_any_step": 8,
+    "n_action_steps": 60,
+    "n_action_steps_with_decodes": 16,
+    "n_shared_action_steps": 7,
+    "n_steps_with_two_or_more_prefills": 335,
+    "n_trials": 60,
+    "shared_fraction": 0.11666666666666667,
+    "unknown_rids_seen": 0
+   }
+  },
+  "label": "StudyENG1d FIT (single-request pieces, images as bytes)"
+ },
+ "holdout_audit": {
+  "eng1c": {
+   "assertions": [
+    "the record's holdout flag selects exactly the split file's pair count",
+    "no trial of the other split is constructed at all",
+    "every scored trial carries a with arm and a without arm"
+   ],
+   "authorization": "",
+   "holdout_pairs_built": 0,
+   "holdout_trials_used": 0,
+   "kinds": {
+    "build": 136,
+    "churn": 480,
+    "episodic": 40413,
+    "inject": 2152,
+    "job": 480,
+    "pair_check": 480,
+    "run_summary": 1032
+   },
+   "n_fit_pairs_in_record": 360,
+   "n_holdout_pairs_in_record": 120,
+   "n_holdout_pairs_in_split_file": 120,
+   "n_trials": 360,
+   "rows_read": 45173,
+   "split": "fit",
+   "split_file": "results/cost/study_eng1c/eng1c_holdout_split.json"
+  },
+  "eng1d": {
+   "assertions": [
+    "no scored trial's (load, action, trial) is in the split file",
+    "the record's holdout flag selects exactly the split file's cells"
+   ],
+   "holdout_trials_used": 0,
+   "n_fit_pairs": 180,
+   "n_holdout_in_split_file": 60,
+   "n_holdout_pairs": 60,
+   "n_trials": 180,
+   "rows_read": 29648,
+   "split": "fit",
+   "split_file": "results/cost/study_eng1d/eng1d_holdout_split.json"
+  }
+ },
+ "model": "pol4 (frozen), deterministic",
+ "question": "StudyPOL5 section 1.5 says pol4 merges background prefills into a piece's own step in 54 % and 66 % of piece steps on StudyENG1c Part D FIT; StudyPOL6 Part A section 6 says it never does. Measured here from pol4's own step log.",
+ "study": "StudyPOL6-chain Part A addendum: pol4's simulated step composition"
+}

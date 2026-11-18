@@ -5,6 +5,12 @@ Machine: flash, CPU only. Model under test: **pol4, the frozen model**, unchange
 chained). No HOLDOUT pair of StudyENG1 Part C, StudyENG1c Part D, StudyENG1d or StudyENG1e was
 read. Nothing was fitted and nothing was frozen.
 
+**ERRATUM INDEX.** One claim in this report was wrong and is corrected in **section 11**: that
+pol4 never merges a background prefill into a piece's own step. It does, and more often than the
+engine does. StudyPOL5 section 1.5 was right. Every place the claim appears is marked ERRATUM
+inline. The gap findings (sections 3 to 5), the position decomposition and the granularity
+findings are unaffected.
+
 ## 0. Outcome in one paragraph
 
 The brief's hypothesis was **H-gap**: that between consecutive pieces of a chained rebuild the
@@ -19,8 +25,10 @@ while background requests whose first token lands **while the engine is actually
 piece** carry **270.5 s (89 %)**. So H-gap is **contradicted as an explanation** of the residual,
 and the brief's STOP AND ASK condition fires. What the data points at instead is a step-structure
 error, named here **H-granularity with H-merge**: pol4 gets each piece's prefill *duration* right
-to within 5 % to 12 % but puts it in **one** step where the engine really uses about **1.8**, and
-it never lets a background prefill share a piece's step, which the engine does on most of them.
+to within 5 % to 12 % but puts it in **one** step where the engine really uses about **1.8**
+[ERRATUM, section 11: the clause that followed here, that pol4 never lets a background prefill
+share a piece's step, was wrong; pol4 merges more often than the engine does, and the mechanism is
+restated as H-overmerge].
 That alternative cannot be turned into parameters from this data, because StudyENG1c does not
 record which requests were in which step; Part A's per-step composition is derived by
 subtraction. StudyENG1e-chain measures it.
@@ -126,9 +134,13 @@ pieces and are distinguished as follows.
   pol4's single steps of 0.271 s and 0.479 s, so the **total is right to 5 to 12 % and the
   granularity is wrong by about 1.8x**.
 - **H-merge**: the engine admits a background prefill into a step a piece is already prefilling
-  in, and the model never does. *Distinguished by* per-step composition. Supported: of a
-  piece1024 chain's 20 steps, 17 share with other work (8 with other prefill tokens, 12 with
-  decodes), median 3,780 other prefill tokens inside the pieces' own steps, `max ctx_req` 2.
+  in, and the model never does. *Distinguished by* per-step composition. The engine's half is
+  supported: of a piece1024 chain's 20 steps, 17 share with other work (8 with other prefill
+  tokens, 12 with decodes), median 3,780 other prefill tokens inside the pieces' own steps,
+  `max ctx_req` 2. **ERRATUM, section 11: the model's half is wrong.** pol4 was never measured
+  here and does merge, on 54.98 % and 69.31 % of chained piece steps, more often than the engine.
+  The surviving form of this alternative is **H-overmerge**: pol4 admits too many prefills into
+  one over-long step and charges that step's duration to all of them.
 
 H-granularity and H-merge are **not** distinguished from each other by this data, and they are
 not independent: both would shorten a mid-prefill arrival's wait, and the derived composition
@@ -241,16 +253,22 @@ different collection (see consistency check 1).
 | per-piece prefill wall time pol4 charges | 0.271 s | 0.479 s | - |
 | median step duration, measured | 0.157 s | 0.170 s | 0.610 s |
 | median step duration, pol4 | 0.271 s | 0.479 s | 1.103 s |
-| steps a piece shares with other work | 17 of 20 | 10.5 of 11.5 | 1 of 2 |
+| steps a piece shares with other work, **engine** | 17 of 20 | 10.5 of 11.5 | 1 of 2 |
+| steps a piece shares with a background prefill, **pol4** (ERRATUM, section 11) | 54.98 % | 69.31 % | 2.05 % |
 | other prefill tokens inside the piece's own steps | 3,780 | 3,402 | **0** |
 | max `ctx_req` in a piece's steps | 2 | 2 | **1** |
 | implied prefill rate | 4,080 tok/s | 4,130 tok/s | 4,943 tok/s |
 
 A background request arriving mid-prefill waits, in pol4, for the end of **one** step of 0.271 s
-or 0.479 s; really it waits for the end of one of about 1.8 steps of 0.157 s or 0.170 s, and may
-instead be merged into the piece's own step. The ratio of expected waits under a uniform arrival
-is roughly 1.7 to 2.8, which brackets the observed over-prediction ratios of 1.92 and 1.69. For
-mono the mechanism is absent on both counts, and the ratio is 1.13.
+or 0.479 s; really it waits for the end of one of about 1.8 steps of 0.157 s or 0.170 s. The ratio
+of expected waits under a uniform arrival is roughly 1.7 to 2.8, which brackets the observed
+over-prediction ratios of 1.92 and 1.69. For mono the mechanism is absent, and the ratio is 1.13.
+
+**ERRATUM, section 11.** An earlier version of this paragraph added "and may instead be merged
+into the piece's own step", implying pol4 does not merge. It does, more often than the engine, and
+that makes the granularity error worse rather than offsetting it: a merged background request is
+charged the whole of pol4's over-long step. Corrected mechanism: **H-granularity with
+H-overmerge**.
 
 This is a **hypothesis with FIT evidence, not a finding**: the per-step composition is derived by
 subtracting the action's own computed tokens from each step's first-output tokens, which cannot
@@ -377,7 +395,106 @@ or merge, or their interaction with the encoder budget, carries the 89 %. Fittin
 would mean choosing a structural parameter from a derived proxy, which is the second STOP AND ASK
 clause. Nothing is frozen and the ENG1e HOLDOUT is untouched.
 
-## 11. Files
+## 11. Addendum: who merges, and the erratum against this report
+
+Asked before Part B, and settled by measurement rather than by reading either report. pol4 is
+deterministic and its own step log names the requests prefilling in each step
+(`EngineSim.run` -> `steps[i]["prefilling"]`), so the question is checkable.
+`experiments/orchestration/policy/diagnose_pol6_merge.py` counts, on FIT pairs of both
+collections, every simulated step in which an **action** request is prefilling and asks whether a
+**background** request is prefilling in the same step. Decodes are counted separately and are not
+a merge of prefills. Output: `results/orchestration/study_pol6/pol6_partA_merge_addendum.json`.
+
+### 11.1 The verdict: StudyPOL5 section 1.5 is right, this report's section 6 was wrong
+
+| input | action | action steps | shared with a background prefill | fraction | max prefills in one action step |
+|---|---|---|---|---|---|
+| ENG1c Part D FIT, **chained** | piece1024 | 904 | 497 | **0.5498** | 6 |
+| ENG1c Part D FIT, **chained** | piece2048 | 492 | 341 | **0.6931** | 8 |
+| ENG1c Part D FIT, n_parts = 1 | mono11k | 195 | 4 | 0.0205 | 2 |
+| ENG1c Part D FIT, n_parts = 1 | piece1024 | 43 | 3 | 0.0698 | 2 |
+| ENG1c Part D FIT, n_parts = 1 | piece2048 | 39 | 6 | 0.1538 | 2 |
+| **ENG1d FIT** (bytes-carrying) | mono11k | 120 | 0 | **0.0000** | 1 (21 in any step) |
+| **ENG1d FIT** (bytes-carrying) | piece1024 | 60 | 10 | 0.1667 | 4 |
+| **ENG1d FIT** (bytes-carrying) | piece2048 | 60 | 7 | 0.1167 | 3 |
+
+**StudyPOL5 section 1.5 reproduces.** It reported 54 % for piece1024 and 66 % for piece2048 on
+ENG1c Part D FIT, with 4 % for mono11k. The chained measurement here is **54.98 %** and
+**69.31 %**; pooling the `n_parts == 1` trials of the same variant gives 52.80 % and 65.35 %.
+StudyPOL5's 54 % and 66 % therefore sit inside the range the two plausible denominators span, and
+its mono figure (4 %) is within two points of the 2.05 % measured here. The exact denominator
+cannot be recovered because those three figures were typed into StudyPOL5's report and are **not
+present in its committed `pol5_diagnosis.json`**; that is a provenance weakness in StudyPOL5, now
+closed by committing the measurement here. Its substantive claim stands, and no erratum is raised
+against it.
+
+**ERRATUM AGAINST THIS REPORT.** Section 6's clause that pol4 "never lets a background prefill
+share a piece's step" is **false**. It was inferred from reading `EngineSim._schedulable`, which
+admits strictly FCFS at step boundaries, and was never measured; I stated an inference as a
+measurement. pol4 merges on 55 % and 69 % of chained piece steps, which is **more often** than
+the engine does (a derived 8 of 20 and 5.5 of 11.5 piece steps carry other prefill tokens, 40 %
+and 48 %), and it admits up to 6, 8 and 21 prefills into a single step against the engine's
+observed maximum `ctx_req` of **2**. Every occurrence is marked inline; the corrected statement is
+in `pol6_terms.json` under `partA_verdict.leading_alternative`, with the superseded wording kept
+in `statement_erratum`.
+
+### 11.2 Why this strengthens rather than weakens Part A's conclusion
+
+The correction does not touch any measured quantity in sections 3 to 5: the gaps, pol4's own
+simulated gap time, the chain-span agreement and the position decomposition (89 % busy, 10 % gap)
+all stand. What changes is the *name* of the in-step mechanism.
+
+A missing merge would have been a reason pol4 waits too long. The opposite is true, and it is
+worse: pol4 pours many background prefills into a piece's single over-long step and then charges
+**that step's duration to every one of them**. A request merged into pol4's 0.271 s or 0.479 s
+step reaches its first token at the end of it; the same request in the engine joins one of about
+1.8 steps of 0.157 s or 0.170 s, with at most one other request beside the piece. Over-merging
+into an over-long step therefore *amplifies* the granularity error rather than offsetting it,
+which is consistent with the direction of the residual (over-prediction, +265.1 s on the with-arm
+of the busy position). The mechanism is restated as **H-granularity with H-overmerge**, and the
+`in_step_merge` flag's description is corrected accordingly: what Part B must fit is not whether
+to merge but **how many prefills a step may hold and how long that step then takes**.
+
+### 11.3 The ENG1c versus ENG1d puzzle, stated and left open
+
+The two collections disagree about the **engine**, not only about the model.
+
+| | ENG1c Part D chains (uuid references) | ENG1d pieces (images as bytes) |
+|---|---|---|
+| engine merges background prefill into a piece's step | yes, a derived 40 % and 48 % of piece steps | **no: 0 of 248 in-window arrivals admitted** (StudyENG1d section 6) |
+| pol4 merges, measured here | 54.98 % and 69.31 % | 16.67 % and 11.67 % |
+| action shape | 6 to 12 chained requests, 1,024 or 2,048 new tokens each | one request |
+| measured front-end window | 34.9 ms and 44.1 ms | 0.1 to 0.2 s for pieces, 0.7 s for mono11k under load |
+
+So pol4 over-merges on **both** inputs, by a larger margin on the ENG1c chains. But the engine's
+own behaviour differs between the two, and that difference is not explained by anything measured
+in either study. Two candidate reasons, neither tested: the ENG1c pieces carry **uuid references**
+to images already in the processor cache, so their front-end window is tens of milliseconds and
+the encoder may be flushed, while the ENG1d pieces carry **image bytes**, so their window is
+hundreds of milliseconds and the encoder is loaded on the critical path; and the ENG1c chain
+presents a new request every ~45 ms, which keeps a queue standing at each step boundary in a way a
+single ENG1d piece does not.
+
+This is exactly the comparison **StudyENG1e-chain mode A against mode B** is collecting (mode B
+ENG1c-exact with cached uuid references and the encoder flushed; mode A bytes, as in ENG1d), so
+Part A does not choose between them. One caveat on the table's first row, which matters for how
+much weight it can carry: ENG1c's figure is **DERIVED by subtraction** and ENG1d's is from its own
+per-request analysis, so the two are a proxy and a measurement, not two measurements. ENG1e's
+per-step membership makes both sides measured.
+
+### 11.4 What Part B should fit, re-scoped
+
+On ENG1e FIT, per injection mode, with the true membership:
+
+1. **step granularity**: engine steps per piece, and what bounds them;
+2. **in-step merging**: how many prefills a step holds and whose tokens they are, against pol4's
+   up-to-6, 8 and 21;
+3. **encoder budget**: encoder inputs per step, as the candidate that separates mode A from mode B.
+
+The target is the **89 %** in-step residual, not H-gap. Nothing is fitted until ENG1e is
+committed.
+
+## 12. Files
 
 New:
 
@@ -389,4 +506,12 @@ New:
 - `results/orchestration/study_pol6/pol6_terms.json`
 - `reports/study_pol6_chain.md`
 
-Modified: `research/EXPERIMENTS.md`, `research/STATUS.md`, `results/INDEX.md` (one insertion each).
+Added by the section 11 addendum:
+
+- `experiments/orchestration/policy/diagnose_pol6_merge.py`
+- `results/orchestration/study_pol6/pol6_partA_merge_addendum.json`
+
+Modified: `research/EXPERIMENTS.md`, `research/STATUS.md`, `results/INDEX.md` (one insertion each,
+plus one amendment row for the addendum); `reports/study_pol6_chain.md`,
+`experiments/orchestration/policy/pol6_engine.py` and
+`results/orchestration/study_pol6/pol6_terms.json` carry the section 11 erratum.

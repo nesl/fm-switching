@@ -301,6 +301,69 @@ class TestEng1eLoader(unittest.TestCase):
             e1e.load_membership(split="holdout", path=p)
 
 
+# --------------------------------------------------------------------- the merge addendum
+class TestMergeAddendum(unittest.TestCase):
+    """StudyPOL6 Part A section 11: pol4 DOES merge background prefills into a piece's step, more
+    often than the engine does. These pin the corrected claim so the wrong one cannot return."""
+
+    def setUp(self):
+        self.d = json.loads(
+            (_root() / "results/orchestration/study_pol6/pol6_partA_merge_addendum.json")
+            .read_text())
+
+    def test_pol4_merges_on_most_chained_piece_steps(self):
+        by = self.d["eng1c_chained"]["by_action"]
+        self.assertGreater(by["piece1024"]["shared_fraction"], 0.5)
+        self.assertGreater(by["piece2048"]["shared_fraction"], 0.6)
+
+    def test_pol4_merges_more_often_than_the_engine_does(self):
+        """The engine's derived figures from the Part A diagnosis: 8 of 20 piece1024 steps and
+        5.5 of 11.5 piece2048 steps carry other prefill tokens."""
+        a = json.loads((_root() / "results/orchestration/study_pol6/pol6_partA_gap.json")
+                       .read_text())["chained"]["by_action"]
+        by = self.d["eng1c_chained"]["by_action"]
+        for act in ("piece1024", "piece2048"):
+            engine = (a[act]["n_piece_steps_other_prefill"]["median"]
+                      / a[act]["n_piece_steps"]["median"])
+            self.assertGreater(by[act]["shared_fraction"], engine)
+
+    def test_pol4_admits_a_wider_batch_than_the_engine_was_ever_seen_to(self):
+        a = json.loads((_root() / "results/orchestration/study_pol6/pol6_partA_gap.json")
+                       .read_text())["chained"]["by_action"]
+        by = self.d["eng1c_chained"]["by_action"]
+        for act in ("piece1024", "piece2048"):
+            self.assertGreater(by[act]["max_prefilling_in_an_action_step"],
+                               a[act]["max_ctx_req_in_piece_steps"]["median"])
+
+    def test_the_addendum_read_no_holdout_of_either_collection(self):
+        self.assertEqual(self.d["holdout_audit"]["eng1c"]["split"], "fit")
+        self.assertEqual(self.d["holdout_audit"]["eng1c"]["holdout_trials_used"], 0)
+        self.assertEqual(self.d["holdout_audit"]["eng1d"]["split"], "fit")
+
+    def test_the_superseded_wording_is_kept_rather_than_erased(self):
+        raw = json.loads((_root() / "results/orchestration/study_pol6/pol6_terms.json")
+                         .read_text())
+        la = raw["partA_verdict"]["leading_alternative"]
+        self.assertIn("never be merged", la["statement_erratum"]["was"])
+        self.assertNotIn("never be merged", la["statement"])
+        self.assertIn("H-overmerge", la["name"])
+        self.assertIn("ERRATUM", raw["partA_verdict"]["erratum"])
+
+    def test_the_wrong_claim_is_not_left_uncorrected_anywhere(self):
+        for rel in ("reports/study_pol6_chain.md",
+                    "experiments/orchestration/policy/pol6_engine.py"):
+            text = (_root() / rel).read_text()
+            if "never lets a background prefill" in text or "never be merged" in text:
+                self.assertIn("ERRATUM", text, "%s states the wrong claim unmarked" % rel)
+
+    def test_the_eng1d_input_is_reported_separately_and_differs(self):
+        """ENG1d's bytes-carrying mono11k never merges in pol4 either, so the two inputs are not
+        interchangeable and the ENG1c-versus-ENG1d puzzle is a real one."""
+        self.assertEqual(self.d["eng1d"]["by_action"]["mono11k"]["shared_fraction"], 0.0)
+        self.assertLess(self.d["eng1d"]["by_action"]["piece1024"]["shared_fraction"],
+                        self.d["eng1c_chained"]["by_action"]["piece1024"]["shared_fraction"])
+
+
 # --------------------------------------------------------------------- the freeze is intact
 class TestFrozenFilesUntouched(unittest.TestCase):
     def test_every_t0b_freeze_md5_still_matches(self):

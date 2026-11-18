@@ -35,8 +35,18 @@ models a piece as ONE step; the engine really spreads a piece over about 1.8 sho
 (measured median step 0.157 s against pol4's 0.271 s) and co-batches background prefill into
 them (median 3,780 other prefill tokens inside the pieces' own steps, max ctx_req 2). A
 background request arriving mid-prefill therefore waits, in pol4, for the end of one long step
-instead of the end of one short step, and can never be merged into the piece's own step. The
-negative control is mono11k: it exceeds the step budget, runs alone (zero other prefill tokens,
+instead of the end of one short step.
+
+ERRATUM 2026-11-17. An earlier draft of this docstring ended that sentence with "and can never be
+merged into the piece's own step". That clause was WRONG: it was inferred from reading
+`_schedulable`, not measured. pol4 does merge, and MORE often than the engine does, sharing
+54.98 % of chained piece1024 steps and 69.31 % of piece2048 steps with a background prefill and
+admitting up to 6, 8 and 21 prefills into a single step against the engine's observed maximum of
+2 (`pol6_partA_merge_addendum.json`; report section 11). The mechanism is therefore H-overmerge,
+not a missing merge: pol4 pours too many prefills into one over-long step and charges that step's
+duration to all of them. The granularity and step-duration findings are unchanged.
+
+The negative control is mono11k: it exceeds the step budget, runs alone (zero other prefill tokens,
 max ctx_req 1), pol4 gets its step count right, and its over-prediction ratio is only 1.13.
 
 That alternative cannot be turned into model parameters from this data, because ENG1c does not

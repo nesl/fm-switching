@@ -63,6 +63,21 @@ in **54 % of piece1024 steps and 66 % of piece2048 steps** on StudyENG1c Part D 
 the engine not doing that for its pieces: action token share 1.000 and 0 of 248 in-window arrivals admitted into a
 piece's step.
 
+**1.5a Provenance note added 2026-11-17 (StudyPOL6-chain Part A addendum). The three figures in 1.5 are CONFIRMED,
+and their provenance is now closed.** StudyPOL6 Part A section 6 asserted the opposite of 1.5, that pol4 never
+merges a background prefill into a piece's step; that assertion was an inference from reading `_schedulable` and was
+WRONG, and the erratum is in StudyPOL6's report, not here. Re-measured from pol4's own deterministic step log
+(`experiments/orchestration/policy/diagnose_pol6_merge.py`,
+`results/orchestration/study_pol6/pol6_partA_merge_addendum.json`): on StudyENG1c Part D FIT, pol4 shares a piece's
+step with a background prefill in **54.98 %** of chained piece1024 steps (497 of 904) and **69.31 %** of piece2048
+steps (341 of 492), against **2.05 %** for mono11k (4 of 195). Pooling each variant's `n_parts == 1` trials gives
+52.80 % and 65.35 %. 1.5's 54 % and 66 % lie inside the range those two denominators span and its 4 % for mono11k is
+within two points, so the claim reproduces. The one weakness worth recording: these three figures were typed into
+this report and are NOT present in the committed `pol5_diagnosis.json`, so the exact denominator 1.5 used cannot be
+recovered; the measurement is now committed as a result file. StudyPOL6 also measured what 1.5 did not, the batch
+WIDTH: pol4 admits up to 6, 8 and 21 prefills into a single step, against the engine's observed maximum `ctx_req`
+of 2, which makes the discrepancy over-merging rather than a merge timing error alone.
+
 ## 2. Part 2, the model update, and why it was rejected
 
 Three changes were implemented and measured behind a `pol5` flag, every coefficient loaded from

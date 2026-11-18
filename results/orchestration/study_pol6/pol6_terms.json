@@ -44,6 +44,7 @@
    "pol4_places_more_background_in_gaps_than_measured": true,
    "reading": "pol4 prices a front-end window per request from body size, so its own simulation already contains inter-piece gaps and already schedules background work inside them. It does not treat the chain as contiguous."
   },
+  "erratum": "ERRATUM 2026-11-17 (addendum, section 11): the clause that pol4 never merges a background prefill into a piece's step is WRONG. It was inferred from reading `_schedulable` and never measured. Measured from pol4's own step log, pol4 shares 54.98 % of chained piece1024 steps and 69.31 % of piece2048 steps with a background prefill, MORE often than the engine does, and admits up to 6, 8 and 21 prefills into one step against the engine's observed maximum of 2. StudyPOL5 section 1.5 was right. The granularity and step-duration findings are unaffected and the mechanism is restated as H-overmerge.",
   "gaps_are_real": {
    "client_turnaround_s_median": 0.0006,
    "engine_tail_s_median": 0.00291,
@@ -96,7 +97,7 @@
     "steps_per_piece_measured_median": 1.91667,
     "steps_per_piece_pol4_median": 1.0
    },
-   "name": "H-granularity with H-merge",
+   "name": "H-granularity with H-overmerge",
    "negative_control_mono11k": {
     "imposed_delay_ratio_latency_median": 1.12581,
     "imposed_delay_ratio_ttft_median": 1.12549,
@@ -108,7 +109,13 @@
     "steps_per_piece_measured_median": 2.0,
     "steps_per_piece_pol4_median": 2.0
    },
-   "statement": "pol4 gets a chain's total wall-clock span right and its step structure wrong. It models a piece as ONE long step; the engine really spreads a piece over about 1.8 shorter steps and co-batches background prefill into them. A background request arriving mid-prefill therefore waits in pol4 for the end of one long step instead of the end of one short step, and can never be merged into the piece's own step.",
+   "statement": "pol4 gets a chain's total wall-clock span right and its step structure wrong. It models a piece as ONE long step; the engine really spreads a piece over about 1.8 shorter steps. pol4 also merges background prefills into a piece's step MORE often than the engine does (54.98 % and 69.31 % of piece steps against a derived 40 % and 48 %) and admits up to 6, 8 and 21 prefills into one step against the engine's observed maximum of 2, so every merged request is charged that over-long step's duration. The error is therefore over-merging into an over-long step, not a missing merge.",
+   "statement_erratum": {
+    "corrected_on": "2026-11-17",
+    "measured_in": "results/orchestration/study_pol6/pol6_partA_merge_addendum.json",
+    "was": "pol4 gets a chain's total wall-clock span right and its step structure wrong. It models a piece as ONE long step; the engine really spreads a piece over about 1.8 shorter steps and co-batches background prefill into them. A background request arriving mid-prefill therefore waits in pol4 for the end of one long step instead of the end of one short step, and can never be merged into the piece's own step.",
+    "why": "the clause that a background request can never be merged into the piece's own step was inferred from reading `_schedulable` and never measured. pol4 merges on 54.98 % of chained piece1024 steps and 69.31 % of piece2048 steps, more often than the engine does. StudyPOL5 section 1.5 was right."
+   },
    "what_would_settle_it": "StudyENG1e's per-step request membership: it names which requests were in each step, so the step count per piece and the merge rule are measured rather than derived by subtraction."
   },
   "verdict": "CONTRADICTED on StudyENG1c Part D FIT as an explanation of the over-prediction",
