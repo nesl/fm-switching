@@ -1,10 +1,23 @@
 # StudyMOT1-dayinlife: one robot rebuild in a monitored dashcam fleet (motivation, claim 6)
 
-Status: **STOPPED AT N SELECTION (2026-11-18 09:20).** The pre-registered rule (largest N in {8, 16, 24, 32} whose
+Status: first design **STOPPED AT N SELECTION (2026-11-18 09:20)**; AMENDED by the user the same morning (section 0) and rerun. The pre-registered rule (largest N in {8, 16, 24, 32} whose
 NONE run is >= 99 % on time; STOP if N = 8 is below 99 %) fired: N = 8 was 11.7 % on time. No main run was made; there
 is no figure data. Pre-registered in research/EXPERIMENTS.md (StudyMOT1-dayinlife) before any run.
 
-## 1. Design as run
+## 0. Amendment 1 (recorded 2026-11-18 ~09:30, BEFORE the rerun)
+
+Reason: the first design sent one request per 0.5 s per stream, which at every N in the grid (8 to 32) exceeded the
+32B's committed one-frame closed-loop peak of 15.1 requests/s (StudyD7b): a planner design error, not a property of
+the question. User ruling: capacity-based monitoring (D62, D71). Each dashcam's decision instants stay on the 0.5 s
+CTRL1c grid, and the cloud is sent EVERY 4TH INSTANT of each dashcam (one request per 2 s per stream, the 25 %
+per-device service share of D71); the deadline is unchanged (0.916 s, submit to last token, server side); stream send
+phases are staggered uniformly over the 2 s period (seeded). New N grid: 8, 12, 16, 20 streams (4, 6, 8, 10
+requests/s). The N-selection rule is unchanged: the largest N whose NONE control is >= 99 % on time; STOP if N = 8
+fails. Everything else (actions, repetitions, pairing, measures, sanity, figure data) is as pre-registered; the 0.5 s
+bins now hold the sent instants that fall in them, and a bin's fraction is missed / sent. The failed first-design N
+selection stays below as the first section of results.
+
+## 1. Design as run (first design)
 
 Server: the StudyLIVE2-pre Part 2 round-1 command (vLLM 0.31.0, 32B @0cfaf481, prefix caching ON, GPU pool 62,944, host
 offload 27 GiB; flag diff vs ENG1c DE_c38 `[('38', '27')]`), started 09:07:44 (startup 63.8 s), stopped after the N
@@ -17,7 +30,7 @@ namespace per run. Deadline: ON TIME if submit-to-last-token <= 0.916 s (the 1.0
 allowance: about 0.040 s frame upload at 13.6 Mbit/s plus 0.044 s RTT). Runner `experiments/motivation/
 study_mot1_dayinlife.py` (request-harness client, asyncio + httpx).
 
-## 2. N selection (NONE, 60 s, one run each)
+## 2. Results, first design: N selection (NONE, 60 s, one run each)
 
 | N | offered load (requests/s) | on time | e2e p10 / median / p90 (s) | HTTP errors | max client dispatch lag (s) |
 |---|---|---|---|---|---|
