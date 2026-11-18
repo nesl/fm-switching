@@ -2255,3 +2255,257 @@ built only a prefix. Every ROBOT outcome in this addendum's cells (`diag_edf_n8`
 therefore INVALID and must not be cited; each run directory carries `INVALID_ROBOT_OUTCOMES.txt`. The HARNESS criteria
 the addendum was accepted on (emulator lateness per action kind, forwarding gaps and counters, digests, HTTP errors)
 do not depend on history sizes and stand. Fix owned by flash.
+
+---
+
+# History-size accounting fix, and a release-rate audit of every arm
+
+Found by the H100 on StudyMOT2 seed 10, 2026-11-18. Part 1 is an implementation fix, applied and
+reported here. Part 2 is a REPORT ONLY: it changes nothing and proposes a methodological change
+for the planner and user to rule on.
+
+## H1. The defect: both sides of one wire
+
+**Both sides are wrong, and each alone would have been enough.** The trace is correct and carries
+both quantities on every history record (`fleet/trace.py:384-392`): `est_tokens=tok`, that
+batch's own increment, and `cum_tokens=tokens_sent`, the session's running total, which resets at
+`session_start` (D83, `trace.py:343`) and already includes the D101 preload (`trace.py:352`).
+
+**Producer, `fleet/emulator.py`.** It forwarded the increment and threw the total away:
+
+    est_tokens=int(r["est_tokens"])                      # the PER-BATCH increment
+
+**Consumer, `cstate.py:208`.** It then kept a maximum, which on a stream of increments settles on
+the largest single batch and never on the total:
+
+    s.est_tokens = max(int(ev["est_tokens"]), s.est_tokens) if ev.get("est_tokens") \
+        else len(s.frames) * D2_TOK_PER_IMG + D2_HEADER_TOK
+
+The `else` branch is the tell: the fallback, used when the field is absent, computes a CUMULATIVE
+total from the frames accumulated so far. The fallback was right and the primary path was wrong.
+`cstate.py:196`, the preload, had the same `max(...)` and was harmless only because a preload is
+a session's first holding.
+
+**Measured on the trace the H100 used** (seed 10, 12 devices, 600 s), reproduced exactly:
+
+| device, session | batches | largest single batch | true cumulative | understatement |
+|---|---|---|---|---|
+| robo002, s001 | 13 | 1,381 | **17,581** | **12.7x** |
+| robo000, s001 | 12 | 1,381 | 16,231 | 11.8x |
+| robo001, s001 | 9 | 1,381 | 12,181 | 8.8x |
+| robo002, s000 | 9 | 4,621 | 13,801 | 3.0x |
+| robo000, s000 | 9 | 8,401 | 18,301 | 2.2x |
+| robo001, s000 | 12 | 13,351 | 27,031 | 2.0x |
+
+All 12 sessions in that trace were understated, by 2.0x to 12.7x.
+
+**Why the frames went missing too, which is one defect and not two.**
+`coordinator._advance_build` derives the FRAME COUNT from the token budget:
+
+    target = min(int(target_tokens or s.est_tokens), max(int(s.est_tokens), 1))
+    piece = left if slice_tokens is None else min(int(slice_tokens), left)
+    n_new = max(1, int(round(piece / float(CS.D2_TOK_PER_IMG))))
+    new_refs = s.frames[already:already + n_new]
+
+With the belief understated 12.7x, `n_new` is 12.7x too small, so a "whole" rebuild carried about
+a twelfth of the history. That is the H100's 2,171-token prompt for a 24,838-token history, and
+it is why the real cold prefill then happened inside the recall request and why 24.3k and 14.9k
+rebuilds appeared to take 0.53 s and 0.36 s. One root cause, three symptoms.
+
+**Why the dry-run fixtures never caught it.** `traces.py:210`, the synthetic producer, already
+emitted the cumulative value (`D2_HEADER_TOK + frames_so_far * D2_TOK_PER_IMG`), and for a
+monotonically increasing sequence `max(cum, so_far) == cum`, so the old consumer was accidentally
+correct there. The defect existed only on the fleet-trace path, which is the path the pilot and
+MOT2 use.
+
+## H2. The fix: one semantics, stated in CONTRACT.md
+
+`est_tokens` ON THE WIRE is the session's CUMULATIVE history tokens after this event, and the
+coordinator's belief is the LATEST value received, not a sum and not a maximum. All three
+producers now agree, and `traces.py` already did.
+
+| file | change |
+|---|---|
+| `fleet/emulator.py` | both producers send `_cumulative_tokens(rec)`, which returns the record's `cum_tokens` and RAISES on a record that lacks it rather than silently reading an increment as a total |
+| `cstate.py` | `history_append` and `history_preload` set the belief to the value received; the `max(...)` is gone from both. The absent-field fallback is unchanged and was already cumulative |
+| `CONTRACT.md` | a "History size" section fixing the semantics, the producer table, the defect it replaces, and a note that the FAIRNESS DIGEST deliberately keeps the trace record's `est_tokens` (the increment) so no digest byte moves |
+
+**Resetting on a new session (D83) and the preload (D101) set the same quantity**, which falls
+out of using `cum_tokens`: it restarts at 0 per session and includes the preload.
+
+**No H100-owned file was touched.** The fix is in the emulator and `cstate.py`, both ours.
+
+## H3. Every consumer of history size, checked
+
+`s.est_tokens` is the single source, so every consumer is corrected by correcting it. Traced for
+every arm:
+
+| consumer | where | how it was wrong |
+|---|---|---|
+| MATERIALIZE whole and piece sizing, and the FRAME COUNT each build carries | `coordinator._advance_build`, `target` / `piece` / `n_new` | sent about a twelfth of the frames for an understated history |
+| `readiness_tokens` on every recall opportunity, which every arm reads | `cstate.py:318`, `tok = max(int(s.est_tokens), 1)` | the arms' `PendingItem.tokens`, so EDF ordering, B8's cost and B9's allocation all priced a 1,381-token rebuild |
+| prefix-built size (D100) and the built / total comparison | `coordinator._settle`, `s.built_tokens >= s.est_tokens` | a session was declared fully built after one piece |
+| residency and host-tier bookkeeping | `cstate.py:351`, `used = sum(s.est_tokens ...)` | host-tier occupancy understated, so the believed tier was wrong |
+| the cost model's rebuild and harm inputs | `C.recall_gpu_s(max(piece, 1), "COLD")` and `recall_ttft_s` through the arms | rebuild time and the harm it imposes both understated |
+| feasibility and the policy's own job sizing | `arms_policy` through `q.readiness_tokens` | jobs looked feasible that were not |
+| B8 and B9 inputs | `constructed.py`, `C.recall_gpu_s(max(q.readiness_tokens, 1), ...)` | both baselines' admission arithmetic |
+
+## H4. Tests, and that they fail on the old code
+
+`live2/tests/test_live2_history_size.py`, 9 tests on the real seed-10 12-device fleet trace.
+**Six of the nine FAIL on the pre-fix code**, verified by reverting both files and re-running:
+
+| test | pre-fix |
+|---|---|
+| the believed history equals the trace's cumulative total at every append | FAIL |
+| it holds across session chaining (D83) | FAIL |
+| it holds for a preloaded session (D101) | FAIL |
+| a whole MATERIALIZE carries every frame the history held at that moment | FAIL |
+| the frame count resolves to the history size (`round(tokens / 90) == N`) | FAIL |
+| a record without `cum_tokens` is refused | FAIL (the guard did not exist) |
+| the defect is present in the committed trace | passes either way, by design: it reads the trace alone |
+| pieces partition the history with no gap and no overlap | passes either way, and that is worth stating: the partition property was never broken, only the COVERAGE was |
+| prompt accounting scales with history size through the fake server | passes either way on this fixture |
+
+The two build tests needed two corrections of my own making, both recorded because each would
+have made the test pass for the wrong reason: a dry run with no `frames_root` sends every frame
+as a uuid reference, so `sent_bytes_for` stays empty and progress cannot be observed at all (the
+tests now build a frame store); and a build can only carry the frames that had ARRIVED by then,
+so comparing against the session's final frame list fails on a correct build (the tests now
+capture the history as it stood at each submit).
+
+## H5. Decisions changed, which is expected and is not a failure
+
+| fixture | arm | decisions before | after | **changed** |
+|---|---|---|---|---|
+| synthetic D99 grid, 6 cells (4 and 8 devices x seeds 1 to 3) | policy-core | 490 to 1,548 | identical | **0 of 6 cells differ** |
+| fleet trace, seed 10, 12 devices, 600 s | edf | 6,520 | 6,520 | **1,174 (18.0 %)** |
+| fleet trace, seed 10, 12 devices, 600 s | policy-core | 6,638 | 5,305 | **6,464** |
+
+The synthetic grid is unchanged for the reason in H1: those fixtures were already cumulative, so
+the old `max(...)` was accidentally right there. On the fleet trace, where the belief was wrong by
+2.0x to 12.7x, 18 % of edf's decisions move and policy-core's decision count falls by 1,333
+(20 %), because a correctly priced rebuild is far more expensive and far fewer are worth starting.
+**The old decisions were computed on wrong inputs; these are not regressions.**
+
+The D99 equivalence grid (reference clone against fast clone) is unaffected and still identical,
+and no fairness digest moved, by the deliberate choice recorded in CONTRACT.md.
+
+## H6. Part 2: the release-rate audit. REPORT ONLY, nothing changed
+
+**The finding is confirmed and it is worse than a tie.** On seed 10, 12 devices, the trace offers
+**10.82 dashcam instants per second** and 10.87 units per second in total, against `edf`'s hard
+ceiling of **10.00 per second**. The backlog is permanent by construction, and because EDF orders
+by deadline and a dashcam instant's deadline (0.5 s) is always nearer than a robot question's, the
+questions sit behind the instants and starve.
+
+| arm | max units released per 100 ms period | effective ceiling | quoted rule |
+|---|---|---|---|
+| `device-only` | 0 | 0, sends nothing | `arms.py:87` DeviceOnlyArm, "Sends nothing" |
+| `edf` | **1** | **10 /s** | `arms.py:179-181`: `order = Rollout._edf(None, items)`, `first = order[0]`, then `on = first is not None and first.item_id == "mon:" + s.stream_id`. ONE unit per epoch across monitoring and recall COMBINED. `releases_one_per_epoch = True` (`arms.py:116`) |
+| `edf-piece1024` | **1** | **10 /s** | the same class, `Pi0Edf`, with `piece_tokens` set |
+| `edf-piece2048` | **1** | **10 /s** | the same class |
+| `always-cloud-fcfs` | every stream and every recall | engine capacity | `naive.py:56-57`: `streams=[StreamAction(s.stream_id, "cloud") for s in obs.streams]`, `recall=[RecallAction(q.query_id, "CLOUD") for q in obs.recall]`. No count cap at all |
+| `utility-per-cost` (B8) | unbounded by count | the GPU budget | `constructed.py:235-255`: a greedy pass over ALL candidates sorted by utility over cost, taking each while `cost <= left`, `left` being `obs.budget_remaining_gpu_s` |
+| `b9` | unbounded by count | the GPU-rate cap | `constructed.py:358-363`: `cap = budget_remaining_gpu_s / horizon_s` then `V.allocate_discrete(qs, cap, horizon_s, "maxmin")` across all live streams |
+| `policy-core` | unbounded by count (`release_eval_cap_k` is None, F-2) | the GPU budget and its own DeltaJ test | the release loop in `arms_policy._to_action`; D99 (4)'s cap bounds how many items get a full DeltaJ EVALUATION, not how many are released, and it is off |
+
+**Measured, not assumed.** On the seed-10 fleet replay, releases per decision period:
+
+| arm | median | p90 | max | periods with a release |
+|---|---|---|---|---|
+| `edf` | 1 | 1 | **1** | 5,106 |
+| `policy-core` | 1 | 2 | **3** | 3,322 |
+
+So the asymmetry is real but narrower than "several against one": both sit at a median of 1, and
+the difference is in the ceiling, 3 against a hard 1. `edf` cannot exceed 1 however much capacity
+is free; `policy-core` can and does, up to 3 on this fixture, and the two uncapped baselines
+(`always-cloud-fcfs`, B8, B9) can go far higher.
+
+**Does the policy's ROLLOUT model pi_0 as one release per epoch? No.** `Rollout.run` builds
+`queue = forced + rest` and serves the whole queue serially, limited only by the horizon
+(`rollout.py:203-219`): `start = max(free_at, p.due_at)`, and an item is skipped only when
+`start > end`. There is no per-epoch release limit anywhere in the rollout, and
+`releases_one_per_epoch` appears only in `arms.py` as a DECLARATION in `live2_describe`, never as
+a constraint the rollout honours. **So the policy's predicted futures assume a WORK-CONSERVING
+scheduler, which is faster than the `edf` arm actually is and consistent with the live engine.**
+The policy is not pessimistic about itself; the EDF baselines are crippled relative both to the
+engine and to the continuation the policy assumes for them.
+
+**B9's ordering and release rule**, for the record: component (iii) owns `order`, using EDF
+ordering among the admitted, with admission by a max-min discrete allocation against a GPU-rate
+cap derived from the remaining budget, and refusals on budget (component iii) and on causal reuse
+(component iv). It is not count-capped.
+
+### H7. Proposal, NOT implemented: a work-conserving release for the EDF family
+
+This is a methodological change, so it is proposed and not applied.
+
+**The minimal change.** In `Pi0Edf.decide`, replace the single `first = order[0]` with a prefix of
+`order` admitted until a stated capacity bound is reached, keeping EDF order and keeping the
+"pi_0 does not decline" rule for everything beyond the bound (it still DEFERs with `defer_s=0.0`
+and is re-decided next epoch). One line becomes a loop; nothing else in the arm changes.
+
+**The bound has to be stated, and there are three honest candidates.** It must not be a free
+parameter chosen to make a baseline look good.
+
+1. *In-flight bound.* Release while the coordinator's `in_flight` count is below a stated limit,
+   which is what a work-conserving scheduler in front of a single-server engine would do. The
+   limit is observable (`st.in_flight`) and needs no new evidence.
+2. *GPU-budget bound.* Release while the period's share of `budget_remaining_gpu_s` is unspent,
+   which is exactly the bound B8 and B9 already use, so the EDF family would be bounded the same
+   way as the constructed baselines and the comparison becomes like-for-like.
+3. *Offered-load bound.* Release up to the number of units offered in the period, which makes the
+   arm exactly work-conserving and caps nothing but the queue.
+
+**Recommendation: candidate 2**, because it is the bound two other baselines already use, it
+introduces no new quantity, and it makes the release rule uniform across every arm that is not
+`device-only`. Candidate 1 is the closest to "the engine's capacity" as the prompt puts it, but
+the in-flight limit would itself be a new number.
+
+**What it would cost.** Every committed `edf`, `edf-piece1024` and `edf-piece2048` number becomes
+a number about a different arm, so they would have to be re-run, and the fix in Part 1 already
+requires that. It is also a change to a BASELINE, which is the direction that most needs
+pre-registration: a baseline that is quietly strengthened after the fact is worse than one that
+is quietly weak, and this one is currently weak in a way that flatters `policy-core`.
+
+**What it would not fix.** The engine still peaks near 15 requests per second against 10.87
+offered, so a work-conserving `edf` would clear the backlog; but `policy-core`'s advantage on
+seed 10 is currently measured against a baseline that cannot keep up at all, and nobody should
+read the existing gap as the policy's merit until this is ruled on.
+
+## H8. Six-check consistency protocol
+
+1. **Cross-check against committed measurements.** The understatement reproduces the H100's
+   report exactly: robo002's second session at 1,381 believed against 17,581 true, which is the
+   number its notes give. The offered rate reproduces its 10.8 instants per second at 10.82, and
+   `edf`'s 10 per second ceiling follows from the quoted rule rather than from a measurement.
+2. **Physical plausibility.** The identity the sizing rule rests on is checked directly: a D2
+   history of N frames is `N * 90 + 31` tokens, so `round(tokens / 90) == N`, which is asserted
+   for every built session. The pre-fix "rebuilds" of 24.3k and 14.9k histories in 0.53 s and
+   0.36 s were physically impossible against the committed cold-prefill rate, which is what
+   makes them evidence of the defect rather than a finding.
+3. **Distribution sanity.** The understatement is reported per session for all 12, not as a
+   single ratio, and it ranges 2.0x to 12.7x. The release counts are reported as median, p90 and
+   max rather than as a mean.
+4. **Definition audit.** `est_tokens` had two meanings on one name and now has one on the wire,
+   fixed in CONTRACT.md, with the fairness digest's use of the trace record's field called out
+   explicitly so the two cannot be conflated again. "One unit per epoch" is quoted from the code
+   rather than from the docstring that asserts it.
+5. **Claim linkage.** The fix bears on no claim directly; it bears on every round-1 number that
+   depends on history size, which is all of them for the recall path. Part 2 bears on whether the
+   policy-against-baseline comparison is fair, which is the central comparison of the study.
+6. **Proxy validity.** One proxy is used and labelled: the tests run against a frame store of
+   1-byte files, because `coordinator._path` only tests existence and a dry run never reads the
+   bytes. It is valid for frame COUNT and coverage, which is what the tests assert, and invalid
+   for anything about image content or request size, which they do not.
+
+## H9. Limitations
+
+1. The decision-change counts are on one fleet trace (seed 10, 12 devices, 600 s) and two arms.
+   Other seeds and the other six arms will also change and were not counted.
+2. The tests assert the belief against the trace's own `cum_tokens`. If the trace's accounting
+   were itself wrong, these tests would not catch it; what they establish is that the coordinator
+   now believes what the trace says.
+3. Part 2 is an audit of the code's release rules plus one replay. It does not measure what a
+   work-conserving `edf` would score, because that arm does not exist.

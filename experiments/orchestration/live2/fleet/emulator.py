@@ -220,6 +220,26 @@ class Outcome:
         return d
 
 
+def _cumulative_tokens(rec: Dict[str, Any]) -> int:
+    """The session's CUMULATIVE history tokens after this record, which is what goes on the wire.
+
+    THE ONE SEMANTICS (CONTRACT.md "history size"). The trace carries both quantities on every
+    history record: `est_tokens` is that batch's own increment and `cum_tokens` is the session's
+    running total, which resets at `session_start` (D83) and includes the `history_preload`
+    (D101). The wire and the coordinator's belief use the CUMULATIVE one. A record without
+    `cum_tokens` is refused rather than silently read as an increment, because that silent
+    reading is the defect this function exists to close.
+    """
+    if "cum_tokens" not in rec:
+        raise KeyError(
+            "history record %r carries no `cum_tokens`: the wire's `est_tokens` is the "
+            "session's CUMULATIVE history tokens (CONTRACT.md), and reading a per-batch "
+            "increment as a total is the 2026-11-18 defect. Regenerate the trace with a "
+            "`fleet/trace.py` that emits `cum_tokens`."
+            % ({k: rec.get(k) for k in ("kind", "device_id", "session_id", "batch_id")},))
+    return int(rec["cum_tokens"])
+
+
 class FleetEmulator:
     def __init__(self, trace_dir: Path, coordinator: Coordinator, mode: str,
                  link_by_device: Optional[Dict[str, LK.LinkSpec]] = None,
@@ -426,10 +446,14 @@ class FleetEmulator:
                 # behind anything; it is handed to the coordinator at its own run-clock time.
                 self.presented.append(payload)
                 self.n_preload += 1
+                # `est_tokens` on the wire is the session's CUMULATIVE history tokens after
+                # this event (CONTRACT.md "history size"). For a preload the two are equal, the
+                # preload being the session's first holding, but `cum_tokens` is forwarded
+                # anyway so there is ONE rule at both producers.
                 self._to_coord(EV.make("history_preload", device_id=payload["device_id"],
                                        session_id=payload["session_id"],
                                        frame_refs=payload["frame_refs"],
-                                       est_tokens=int(payload["est_tokens"]),
+                                       est_tokens=_cumulative_tokens(payload),
                                        t=float(payload["t"])), t)
             elif what == "history_batch":
                 self.presented.append(payload)
@@ -439,11 +463,21 @@ class FleetEmulator:
                                                                 t_arrive=tr.t_arrive))
             elif what == "history_arrived":
                 r = payload["rec"]
+                # THE FIX (2026-11-18). This forwarded the PER-BATCH increment
+                # (`r["est_tokens"]`, which `trace.py:391` sets to that batch's `tok`) and threw
+                # away the cumulative total the trace carries beside it (`cum_tokens`, the
+                # session's running `tokens_sent`). The coordinator then had no way to know the
+                # history's size: on the seed-10 12-device trace the per-batch increments of
+                # robo002's second session peak at 1,381 tokens while the session really holds
+                # 17,581, a 12.7x understatement, and every session in that trace is understated
+                # by 2.0x to 12.7x. `cum_tokens` already resets per session (D83,
+                # `trace.py:343`) and already includes the D101 preload
+                # (`trace.py:352`), so it is exactly the quantity the belief needs.
                 self._to_coord(EV.make("history_append", device_id=r["device_id"],
                                        session_id=r["session_id"], batch_id=r["batch_id"],
                                        t_arrive=payload["t_arrive"],
                                        frame_refs=r["frame_refs"],
-                                       est_tokens=int(r["est_tokens"])), t)
+                                       est_tokens=_cumulative_tokens(r)), t)
             elif what == "monitor_opportunity":
                 self._on_monitor_opportunity(payload, t)
             elif what == "offer_arrived":

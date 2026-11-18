@@ -193,7 +193,10 @@ class CoordState:
             s = self.session_start(dict(device_id=ev["device_id"],
                                         session_id=ev["session_id"], t=float(ev["t"])))
         s.frames.extend(ev["frame_refs"])
-        s.est_tokens = max(int(ev["est_tokens"]), s.est_tokens)
+        # `est_tokens` is the session's CUMULATIVE history tokens after this event, so the
+        # belief IS that value. The old `max(...)` was harmless here only because a preload is
+        # the session's first holding; it is removed so one rule covers both producers.
+        s.est_tokens = int(ev["est_tokens"])
         s.preloaded_tokens = int(ev["est_tokens"])
         s.belief = {"gpu": 0.0, "host": 0.0, "cold": 1.0}
         s.built_tokens = 0
@@ -205,7 +208,14 @@ class CoordState:
             s = self.session_start(dict(device_id=ev["device_id"],
                                         session_id=ev["session_id"], t=ev["t_arrive"]))
         s.frames.extend(ev["frame_refs"])
-        s.est_tokens = max(int(ev["est_tokens"]), s.est_tokens) if ev.get("est_tokens") \
+        # THE FIX (2026-11-18). This kept `max(batch, so_far)`, which on a stream of per-batch
+        # increments leaves the belief at the LARGEST SINGLE BATCH rather than the running
+        # total: 1,381 tokens for robo002's 17,581-token second session on the seed-10 trace.
+        # `est_tokens` is now the session's CUMULATIVE total after this append (CONTRACT.md
+        # "history size"), so the belief is that value, not a maximum and not a sum. The
+        # fallback when the field is absent is unchanged and was already cumulative, being
+        # derived from the frames accumulated so far.
+        s.est_tokens = int(ev["est_tokens"]) if ev.get("est_tokens") \
             else len(s.frames) * D2_TOK_PER_IMG + D2_HEADER_TOK
         return s
 

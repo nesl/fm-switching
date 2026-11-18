@@ -37,8 +37,8 @@ Authority: `research/policy_design_log.md` (D56, D63, D69, D70, D81, D83, D84),
 | `session_end` | `device_id, session_id, t` | robots, when a session play ends. |
 | `monitor_offer` | `device_id, opportunity_id, instant_id, t_capture, deadline_s, frame_bytes` | mode B only (D69): the device announces a decision instant and waits for a pull. |
 | `monitor_frame` | `device_id, opportunity_id, instant_id, t_capture, t_arrive, deadline_s, frame_ref, frame_bytes` | mode A: pushed for every instant. Mode B: sent after a `pull_request`. |
-| `history_preload` | `device_id, session_id, frame_refs, est_tokens, t` | once per robot session that is JOINED PART-WAY (D101), at `t = 0`: the frames the cloud ALREADY HOLDS as cold history at run start. |
-| `history_append` | `device_id, session_id, batch_id, t_arrive, frame_refs, est_tokens` | every 30 s per robot session (D68); pushed in BOTH upload modes. |
+| `history_preload` | `device_id, session_id, frame_refs, est_tokens, t` | once per robot session that is JOINED PART-WAY (D101), at `t = 0`: the frames the cloud ALREADY HOLDS as cold history at run start. `est_tokens` is CUMULATIVE, see "History size". |
+| `history_append` | `device_id, session_id, batch_id, t_arrive, frame_refs, est_tokens` | every 30 s per robot session (D68); pushed in BOTH upload modes. `est_tokens` is the session's CUMULATIVE total after this batch, see "History size". |
 | `recall_question` | `device_id, opportunity_id, session_id, question_id, t_ask, t_arrive, deadline_s, question, options` | at the question's real time (D68). |
 
 `t_capture` is when the device captured the frame; `t_arrive` is when the payload finished
@@ -49,8 +49,32 @@ coordinator never recomputes uplink time for data already marked arrived.
 `t_ask` (recall): dashcam 1.0 s, robot 5.0 s (D71, D82). It is on the wire so that an arm that
 only reads events still sees the bound.
 
-`est_tokens` is the fleet's token estimate for the batch, used for planning only. The actual
-prompt token count is whatever the engine reports.
+### HISTORY SIZE: `est_tokens` IS CUMULATIVE (fixed 2026-11-18)
+
+**On the wire, `est_tokens` is the session's CUMULATIVE history tokens AFTER this event, not the
+increment this event adds.** The coordinator's belief for a session is therefore the LATEST value
+it received, not a sum and not a maximum. One rule covers all three producers:
+
+| producer | what it sends |
+|---|---|
+| `history_append` | the session's running total after this batch (`trace.py`'s `cum_tokens`, which resets at `session_start` per D83 and already includes the preload) |
+| `history_preload` (D101) | the same quantity; the preload is the session's first holding, so for it the increment and the total coincide |
+| `traces.py::synthetic` (the dry-run fixtures) | already cumulative (`D2_HEADER_TOK + frames_so_far * D2_TOK_PER_IMG`), which is why the fixtures never exposed the defect below |
+
+A record that carries no `cum_tokens` is REFUSED by `emulator._cumulative_tokens` rather than read
+as an increment, because that silent reading is the defect this rule closes.
+
+THE DEFECT THIS REPLACES, recorded so it cannot come back. `fleet/emulator.py` forwarded the
+PER-BATCH increment and discarded the `cum_tokens` the trace carries beside it, and `cstate.py`
+then kept `max(batch, so_far)`, which on a stream of increments leaves the belief at the LARGEST
+SINGLE BATCH. On the seed-10 12-device trace robo002's second session was believed at 1,381
+tokens against a true 17,581, and every session in that trace was understated by 2.0x to 12.7x.
+Because `coordinator._advance_build` derives the FRAME COUNT from the token budget
+(`n_new = round(piece / D2_TOK_PER_IMG)`), the understatement also sent a fraction of the frames,
+which is how a 24,838-token history went out as a 2,171-token prompt.
+
+`est_tokens` is the fleet's token estimate, used for planning only. The actual prompt token count
+is whatever the engine reports.
 
 `history_preload` (D101) carries NO `batch_id` and NO `t_arrive`, because it is not a batch that
 arrived during the run: its frames were on cloud-side disk before the clock started. **No uplink
@@ -142,6 +166,14 @@ the rows sorted before hashing:
 | `session_start` / `session_end` | `device_id, kind, t, session_id, "", ""` |
 | `history_preload` | `device_id, "history_preload", t, session_id, est_tokens, ""` |
 | `history_append` | `device_id, "history_append", t_arrive, batch_id, est_tokens, ""` |
+
+**The digest's `est_tokens` is the TRACE RECORD's field, which is the PER-BATCH INCREMENT, and it
+is deliberately not the cumulative value the wire carries.** The digest is computed over
+`FleetEmulator.presented`, which holds the trace's own records, so it is a property of the TRACE
+and not of what any coordinator was told. Changing it to the cumulative value would change every
+committed fairness digest for no gain, so the two fields keep their own meanings: `cum_tokens` on
+the wire and in the belief, `est_tokens` of the record in the digest. The 2026-11-18 history-size
+fix deliberately left every digest byte-identical.
 | `recall_question` | `device_id, "recall_question", t_ask, opportunity_id, session_id, deadline_s` |
 | `monitor_offer` / `monitor_frame` | `device_id, kind, t_capture, opportunity_id, "", deadline_s` |
 
