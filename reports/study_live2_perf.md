@@ -536,3 +536,81 @@ no definition behind it. The on-time fraction is the closest the fixture defines
    them.
 5. Nothing here tests the fallback at 256 devices or above, or with the release loop also on a
    closed form, which is a different option and was not built.
+
+---
+
+## Option A study: definitions and expectations (PRE-REGISTRATION, written before any measurement)
+
+**User decision 2026-11-18, design log D110. OFFLINE DIVERGENCE STUDY ONLY.** No arm changes, no
+new switch, nothing enabled. Option B is closed (D109); Option 0 stays on. Option A is the
+design note's "price a period's SH admissions as a batch, one rollout per admit count k", and the
+whole point of measuring it first is that **it is an ACTION-SPACE RESTRICTION, not a speed-up**:
+the policy could only ever admit the first k SH candidates in deadline order. If it is worth
+building it becomes a separate arm in round 1 and is never described as a speed-up alone.
+
+### A.1 The three methods, defined exactly
+
+The candidates of a period are the SH (monitoring) admission candidates the arm raises, in the
+order it raises them, which is already **deadline order**: `arms_policy._admit_monitoring` sorts
+by `(deadline, stream_id)` (D99 (4), pi_0's order) and calls `Coordinator.escalate` once per
+candidate. Write them `c_1 .. c_n` in that order, and `P_k = {c_1 .. c_k}` for the
+deadline-order prefix of length k, with `P_0` the empty set.
+
+**How a period's DeltaJ is compared across the three, which is the one modelling decision here
+and is fixed now.** For ANY set S of candidates, the period's DeltaJ is defined by ONE rollout
+pair from the period's STARTING fleet state, before any admit of that period:
+
+    DeltaJ(S) = ro.run(start, extra_pending = items(S)).total - ro.run(start).total
+
+That is `delta_j`'s own "admit" reference (spec 3.5: extra pending against nothing added),
+evaluated once for the whole set rather than once per candidate. It is the SAME function of S for
+all three methods, which is what makes them comparable, and it is computed by the CURRENT
+rollout with Option 0 on and `sh_cost = "rollout"`, so no second model enters.
+
+| method | the set it chooses | how |
+|---|---|---|
+| **per-candidate decision set** `S_pc` | the admits the current policy actually makes in that period | recorded from the real run: candidate `c_i` is admitted when the sequential rule's own `DeltaJ > 0`, each evaluated against the state left by the admits of `c_1 .. c_{i-1}` |
+| **best prefix** `P_k*` | `argmax over k in 0..n of DeltaJ(P_k)` | exhaustive search over all n + 1 prefixes |
+| **doubling search** `P_kd` | `argmax over k in {0, 1, 2, 4, 8, ...} union {n} of DeltaJ(P_k)`, the best k actually tried | the same, over the doubling ladder only |
+
+**A consequence that is recorded in advance rather than discovered later.** `S_pc` is produced by
+a GREEDY SEQUENTIAL rule and does not maximise `DeltaJ(S)`. So `DeltaJ(P_k*)` can come out ABOVE
+`DeltaJ(S_pc)`, and the "DeltaJ lost" by the prefix rule can be NEGATIVE, meaning the restricted
+method scores better on this measure than the policy does. That would not make Option A free: it
+would mean the greedy rule is leaving value on the table within its own action space, which is a
+separate finding about the current policy and must be reported as such rather than as a point in
+Option A's favour.
+
+**Rollout accounting**, so the speed projection has a stated basis. The reference rollout
+`ro.run(start)` is the same for every k, so it is counted once per period:
+
+| method | rollouts per period |
+|---|---|
+| per-candidate (what runs today) | `2n` (each candidate is its own action-and-reference pair) |
+| exhaustive prefix | `n + 2` (one per prefix, plus the one shared reference) |
+| doubling | `(number of k tried) + 1`, which is `floor(log2(n)) + 3` at most |
+
+### A.2 What cannot be represented as a prefix, counted separately
+
+A per-candidate set can contain an admit a prefix cannot express: a later-deadline candidate
+admitted while an earlier-deadline one is declined. `S_pc` is a prefix exactly when the admitted
+indices are `1 .. |S_pc|` with no gap. Periods where it is not are counted separately and one is
+shown worked through, because they are the cases where Option A could not reproduce the current
+policy's choice at any k.
+
+### A.3 Written expectations, which are NOT constraints
+
+Stated in advance so the outcome can contradict them:
+
+- **E-A1.** Divergence between the per-candidate set and the best prefix rises with fleet size.
+- **E-A2.** Divergence rises with backlog.
+- **E-A3.** The DeltaJ lost is small where the per-candidate set already is a prefix.
+
+Each is reported as held, not held, or mixed, in those words, and none of them gates anything.
+
+### A.4 What this study does not do
+
+It does not implement Option A, add a switch, or touch any arm's decision path. It reads the
+periods a normal dry run produces and recomputes DeltaJ for the alternative sets offline. The
+speed figure it produces is a PROJECTION from rollout counts and the measured per-rollout cost,
+labelled as such, and is not a measured arm.
