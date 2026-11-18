@@ -1,0 +1,435 @@
+{
+  "figure": "M7b",
+  "message": "The best way to serve a robot's cold-history question changes with fleet load and host memory, so no fixed rule works.",
+  "source": "results/motivation/mot1/mot1_figdata_amend3.json block grid_2x2 (values used exactly, not recomputed)",
+  "axes": {
+    "x": "robot answer time from the question (s), shared 0 to 8.5",
+    "y": "extra missed dashcam deadlines vs the no-question control, shared ylim -4 to 80, ticks 0 to 80"
+  },
+  "load": {
+    "light": "8 dashcams, 4 requests/s (26% of peak)",
+    "heavy": "20 dashcams, 10 requests/s (66% of peak)"
+  },
+  "host": {
+    "tight": "27 GiB",
+    "roomy": "256 GiB"
+  },
+  "robot_deadline_s": 5.0,
+  "palette": {
+    "one go": "#D55E00",
+    "2,048 pieces": "#56B4E9",
+    "1,024 pieces": "#0072B2",
+    "host-warm": "#009E73"
+  },
+  "verdict_rule": "an action is in the good region iff extra_missed median == 0 AND robot_ttft_s median < 5 s; pieces-only -> 'pieces serve both', host-warm-only -> 'only a warm history serves both', none -> 'nothing serves both'",
+  "n": "5 paired repetitions per cell; whiskers min to max in both directions",
+  "styling_rules": {
+    "hollow": "HOST-WARM whose measured tier was not HOST in every repetition (flushed, answered cold)",
+    "borrowed": "measured_directly == false, drawn at 50% alpha (light/roomy cold actions)",
+    "not_measured": "light/roomy HOST-WARM: no point, 'host-warm: not measured' note"
+  },
+  "panels": {
+    "light_tight": {
+      "ONE-GO": {
+        "x_robot_ttft_s_median": 3.0037,
+        "y_extra_missed_median": 11,
+        "x_min_max": [
+          2.831,
+          3.5674
+        ],
+        "y_min_max": [
+          9,
+          14
+        ],
+        "hollow_flushed": false,
+        "borrowed": false,
+        "in_good_region": false,
+        "measured_tiers": [
+          "COLD",
+          "COLD",
+          "COLD",
+          "COLD",
+          "COLD"
+        ],
+        "source": "amendment 3 (N = 8, 27 GiB)"
+      },
+      "P2048": {
+        "x_robot_ttft_s_median": 3.3739,
+        "y_extra_missed_median": 0,
+        "x_min_max": [
+          2.8848,
+          3.666
+        ],
+        "y_min_max": [
+          0,
+          0
+        ],
+        "hollow_flushed": false,
+        "borrowed": false,
+        "in_good_region": true,
+        "measured_tiers": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "source": "amendment 3 (N = 8, 27 GiB)"
+      },
+      "P1024": {
+        "x_robot_ttft_s_median": 3.9576,
+        "y_extra_missed_median": 0,
+        "x_min_max": [
+          3.4933,
+          4.2087
+        ],
+        "y_min_max": [
+          0,
+          0
+        ],
+        "hollow_flushed": false,
+        "borrowed": false,
+        "in_good_region": true,
+        "measured_tiers": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "source": "amendment 3 (N = 8, 27 GiB)"
+      },
+      "HOST-WARM": {
+        "x_robot_ttft_s_median": 2.2834,
+        "y_extra_missed_median": 8,
+        "x_min_max": [
+          2.1672,
+          2.6277
+        ],
+        "y_min_max": [
+          5,
+          8
+        ],
+        "hollow_flushed": true,
+        "borrowed": false,
+        "in_good_region": false,
+        "measured_tiers": [
+          "PARTIAL",
+          "COLD",
+          "PARTIAL",
+          "PARTIAL",
+          "PARTIAL"
+        ],
+        "source": "amendment 3 (N = 8, 27 GiB)"
+      },
+      "_verdict": {
+        "computed": "pieces serve both",
+        "expected": "pieces serve both",
+        "good_region_actions": [
+          "P2048",
+          "P1024"
+        ]
+      }
+    },
+    "light_roomy": {
+      "ONE-GO": {
+        "x_robot_ttft_s_median": 3.0037,
+        "y_extra_missed_median": 11,
+        "x_min_max": [
+          2.831,
+          3.5674
+        ],
+        "y_min_max": [
+          9,
+          14
+        ],
+        "hollow_flushed": false,
+        "borrowed": true,
+        "in_good_region": false,
+        "measured_tiers": [
+          "COLD",
+          "COLD",
+          "COLD",
+          "COLD",
+          "COLD"
+        ],
+        "source": "BORROWED from amendment 3's light/tight cold action: host size does not change cold actions (StudyENG1c Part E; amendment 2's 1.01x to 1.17x check)"
+      },
+      "P2048": {
+        "x_robot_ttft_s_median": 3.3739,
+        "y_extra_missed_median": 0,
+        "x_min_max": [
+          2.8848,
+          3.666
+        ],
+        "y_min_max": [
+          0,
+          0
+        ],
+        "hollow_flushed": false,
+        "borrowed": true,
+        "in_good_region": true,
+        "measured_tiers": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "source": "BORROWED from amendment 3's light/tight cold action: host size does not change cold actions (StudyENG1c Part E; amendment 2's 1.01x to 1.17x check)"
+      },
+      "P1024": {
+        "x_robot_ttft_s_median": 3.9576,
+        "y_extra_missed_median": 0,
+        "x_min_max": [
+          3.4933,
+          4.2087
+        ],
+        "y_min_max": [
+          0,
+          0
+        ],
+        "hollow_flushed": false,
+        "borrowed": true,
+        "in_good_region": true,
+        "measured_tiers": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "source": "BORROWED from amendment 3's light/tight cold action: host size does not change cold actions (StudyENG1c Part E; amendment 2's 1.01x to 1.17x check)"
+      },
+      "HOST-WARM": {
+        "status": "not measured",
+        "plotted": false,
+        "source": "amendment 3's light/tight HOST-WARM measured HOST in 0 of 5 repetitions, so it is not borrowed"
+      },
+      "_verdict": {
+        "computed": "pieces serve both",
+        "expected": "pieces serve both",
+        "good_region_actions": [
+          "P2048",
+          "P1024"
+        ]
+      }
+    },
+    "heavy_tight": {
+      "ONE-GO": {
+        "x_robot_ttft_s_median": 3.4655,
+        "y_extra_missed_median": 57,
+        "x_min_max": [
+          3.2383,
+          4.9784
+        ],
+        "y_min_max": [
+          53,
+          63
+        ],
+        "hollow_flushed": false,
+        "borrowed": false,
+        "in_good_region": false,
+        "measured_tiers": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "source": "amendment 1 (N = 20, 27 GiB), cold actions"
+      },
+      "P2048": {
+        "x_robot_ttft_s_median": 5.9036,
+        "y_extra_missed_median": 24,
+        "x_min_max": [
+          5.2375,
+          6.3556
+        ],
+        "y_min_max": [
+          19,
+          27
+        ],
+        "hollow_flushed": false,
+        "borrowed": false,
+        "in_good_region": false,
+        "measured_tiers": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "source": "amendment 1 (N = 20, 27 GiB), cold actions"
+      },
+      "P1024": {
+        "x_robot_ttft_s_median": 6.7854,
+        "y_extra_missed_median": 0,
+        "x_min_max": [
+          6.4527,
+          7.2455
+        ],
+        "y_min_max": [
+          0,
+          0
+        ],
+        "hollow_flushed": false,
+        "borrowed": false,
+        "in_good_region": false,
+        "measured_tiers": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "source": "amendment 1 (N = 20, 27 GiB), cold actions"
+      },
+      "HOST-WARM": {
+        "x_robot_ttft_s_median": 2.6158,
+        "y_extra_missed_median": 44,
+        "x_min_max": [
+          2.5363,
+          3.5752
+        ],
+        "y_min_max": [
+          40,
+          55
+        ],
+        "hollow_flushed": true,
+        "borrowed": false,
+        "in_good_region": false,
+        "measured_tiers": [
+          "COLD",
+          "COLD",
+          "COLD",
+          "COLD",
+          "COLD"
+        ],
+        "source": "amendment 2 Part A (N = 20, 27 GiB), HOST-WARM only; extra misses vs amendment 1's NONE of the same repetition (another server instance: a cross-run reference, not a paired difference)"
+      },
+      "_verdict": {
+        "computed": "nothing serves both",
+        "expected": "nothing serves both",
+        "good_region_actions": []
+      }
+    },
+    "heavy_roomy": {
+      "ONE-GO": {
+        "x_robot_ttft_s_median": 3.5575,
+        "y_extra_missed_median": 59,
+        "x_min_max": [
+          3.2859,
+          4.9556
+        ],
+        "y_min_max": [
+          57,
+          74
+        ],
+        "hollow_flushed": false,
+        "borrowed": false,
+        "in_good_region": false,
+        "measured_tiers": [
+          "COLD",
+          "COLD",
+          "COLD",
+          "COLD",
+          "COLD"
+        ],
+        "source": "amendment 2 Part B (N = 20, 256 GiB)"
+      },
+      "P2048": {
+        "x_robot_ttft_s_median": 6.1044,
+        "y_extra_missed_median": 28,
+        "x_min_max": [
+          4.9903,
+          6.4646
+        ],
+        "y_min_max": [
+          27,
+          41
+        ],
+        "hollow_flushed": false,
+        "borrowed": false,
+        "in_good_region": false,
+        "measured_tiers": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "source": "amendment 2 Part B (N = 20, 256 GiB)"
+      },
+      "P1024": {
+        "x_robot_ttft_s_median": 6.8721,
+        "y_extra_missed_median": 0,
+        "x_min_max": [
+          6.5102,
+          7.9341
+        ],
+        "y_min_max": [
+          0,
+          0
+        ],
+        "hollow_flushed": false,
+        "borrowed": false,
+        "in_good_region": false,
+        "measured_tiers": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "source": "amendment 2 Part B (N = 20, 256 GiB)"
+      },
+      "HOST-WARM": {
+        "x_robot_ttft_s_median": 0.6857,
+        "y_extra_missed_median": 0,
+        "x_min_max": [
+          0.3615,
+          0.7905
+        ],
+        "y_min_max": [
+          0,
+          0
+        ],
+        "hollow_flushed": false,
+        "borrowed": false,
+        "in_good_region": true,
+        "measured_tiers": [
+          "HOST",
+          "HOST",
+          "HOST",
+          "HOST",
+          "HOST"
+        ],
+        "source": "amendment 2 Part B (N = 20, 256 GiB)"
+      },
+      "_verdict": {
+        "computed": "only a warm history serves both",
+        "expected": "only a warm history serves both",
+        "good_region_actions": [
+          "HOST-WARM"
+        ]
+      }
+    }
+  },
+  "layout_2x2": "rows light(top)/heavy(bottom), cols tight(left)/roomy(right)",
+  "layout_1x3_measured": [
+    "light_tight",
+    "heavy_tight",
+    "heavy_roomy"
+  ],
+  "outputs": {
+    "grid_2x2": {
+      "pdf": "/home/nesl/fm-switching/figures/motivation/figM7b_grid.pdf",
+      "png": "/home/nesl/fm-switching/figures/motivation/figM7b_grid.png"
+    },
+    "grid_1x3_measured": {
+      "pdf": "/home/nesl/fm-switching/figures/motivation/figM7b_grid_measured.pdf",
+      "png": "/home/nesl/fm-switching/figures/motivation/figM7b_grid_measured.png"
+    }
+  }
+}

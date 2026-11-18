@@ -116,6 +116,17 @@ class Rollout:
     # D99 (2): "fast" is `clone_for_rollout`; "reference" is the unoptimized `copy.deepcopy`,
     # kept selectable so the equivalence test has something to compare against.
     clone_impl: str = "fast"
+    # StudyLIVE2-perf Option 0: the terminal state-value sum is memoised within one decision
+    # period. "off" is the pre-Option-0 path, byte for byte; "shadow" computes both on every
+    # call and raises if they differ. The owner of the period (`arms_policy.decide`) clears it.
+    sv_cache_impl: str = "on"
+    sv_cache: Any = None
+
+    def state_value_cache(self):
+        from .readiness import StateValueCache
+        if self.sv_cache is None or self.sv_cache.mode != self.sv_cache_impl:
+            self.sv_cache = StateValueCache(mode=self.sv_cache_impl)
+        return self.sv_cache
 
     def _clone(self, fleet: Fleet) -> Fleet:
         if self.clone_impl == "reference":
@@ -543,7 +554,8 @@ class Rollout:
                 r = state_value(self.pf, dev, rep, dmd, self.params.H_s, dev.qtype, dev.link,
                                 self.params.L_k["RC"], self.pf.omega("RC"),
                                 in_episode=bool(dev.episodes),
-                                exclude_job=(in_progress[0] if in_progress else None))
+                                exclude_job=(in_progress[0] if in_progress else None),
+                                cache=self.state_value_cache())
                 sv += r["value"]
                 sv_detail.append(dict(r, device=did, counts_question=("future", rep)))
         assert_single_counting(cont_detail, sv_detail)
