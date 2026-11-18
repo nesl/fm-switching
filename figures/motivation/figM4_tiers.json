@@ -1,103 +1,110 @@
 {
   "figure": "M4",
-  "message": "A host- or disk-warm restore is far cheaper than a cold rebuild and imposes almost nothing on others, but concurrent disk restores serialize on disk bandwidth.",
-  "source_file": "results/cost/study_eng1f/eng1f_results.json (Parts 1-3, FIT only)",
-  "report": "reports/study_eng1f_disk.md sections 5 (Part 1), 6 (Part 2), 7 (Part 3)",
-  "panel_a_restore_ttft_11k_s": {
-    "cold": {
-      "median": 2.6866,
-      "p10": 2.6499,
-      "p90": 2.7822
+  "message": "Faster tiers are far cheaper for everyone but hold only a handful of histories; cold is unbounded but slow and disruptive.",
+  "note": "Disk is NOT a tier yet (design log D78, Q12); the disk panel of the prior version was removed. StudyENG1f disk data kept for a later figure.",
+  "panel_a": {
+    "source": "results/cost/study_eng1/eng1_partD_requests_h100nvl.jsonl (kind=query, conc=1, role=None); results/cost/study_eng1/eng1_results.json D.conc1",
+    "restore_ttft_11k_s": {
+      "gpu": {
+        "n": 30,
+        "median": 0.10007,
+        "p10": 0.0875,
+        "p90": 0.1294
+      },
+      "host": {
+        "n": 30,
+        "median": 0.16711,
+        "p10": 0.1468,
+        "p90": 0.1881
+      },
+      "cold": {
+        "n": 30,
+        "median": 2.74287,
+        "p10": 2.6599,
+        "p90": 2.858
+      }
     },
-    "host": {
-      "median": 0.2026,
-      "p10": 0.1778,
-      "p90": 0.2161
+    "report": "spec v4 section 5.3 / reports/study_eng1_steptime.md Part D (0.10 / 0.17 / 2.74 s)",
+    "report_values": {
+      "gpu": 0.1,
+      "host": 0.17,
+      "cold": 2.74
     },
-    "disk": {
-      "median": 1.1489,
-      "p10": 1.1231,
-      "p90": 1.213
+    "checks": {
+      "gpu": 1.0007,
+      "host": 0.983,
+      "cold": 1.001
     }
   },
-  "panel_a_report": {
-    "cold": 2.687,
-    "host": 0.203,
-    "disk": 1.149
-  },
-  "panel_b_imposed_P40_s": {
-    "cold": {
-      "median": 36.54,
-      "p10": 19.7496,
-      "p90": 57.2208,
-      "ci95": [
-        21.9595,
-        46.1125
-      ]
+  "panel_b": {
+    "source": "results/cost/study_eng1c/eng1c_results.json D.trials (variant=mono, caps 27/38/60, by tier at arrival)",
+    "error_bars": "95% bootstrap CI of the median, 2000 resamples seed 0, unit = trial",
+    "imposed_under_load_s": {
+      "gpu": {
+        "n": 11,
+        "median": -0.016,
+        "ci": [
+          -0.07,
+          0.104
+        ]
+      },
+      "host": {
+        "n": 11,
+        "median": 0.041,
+        "ci": [
+          0.01,
+          0.982
+        ]
+      },
+      "cold": {
+        "n": 65,
+        "median": 14.177,
+        "ci": [
+          13.579,
+          14.604
+        ]
+      }
     },
-    "host": {
-      "median": 0.1382,
-      "p10": -0.0382,
-      "p90": 0.4891,
-      "ci95": [
-        0.0374,
-        0.2294
-      ]
+    "report": "reports/study_eng1c_hostfull.md section 6 (cold mono imposed 14.0-16.5 s; host-warm ~0 s; GPU-warm imposed -0.3 to 0.2 s)",
+    "report_values": {
+      "cold_mono": "14.0-16.5",
+      "host": "~0",
+      "gpu": "-0.3 to 0.2"
     },
-    "disk": {
-      "median": 0.1039,
-      "p10": -0.0457,
-      "p90": 0.2875,
-      "ci95": [
-        -0.0181,
-        0.204
-      ]
+    "checks": {
+      "cold_in_range": true,
+      "gpu_near_zero": true,
+      "host_near_zero": true,
+      "all_three_measured_under_load": true
     }
   },
-  "panel_b_report": {
-    "cold": 36.54,
-    "host": 0.14,
-    "disk": 0.1
-  },
-  "panel_c_per_load_ttft_s": {
-    "k1": {
-      "median": 1.121,
-      "p10": 1.1005,
-      "p90": 1.2051
+  "panel_c": {
+    "history_tokens": 11184,
+    "arithmetic": {
+      "GPU pool": {
+        "tokens": 62944,
+        "histories": 5.63,
+        "calc": "62944/11184",
+        "note": "working space for in-flight requests reduces this in practice"
+      },
+      "host +27 GiB beyond GPU pool": {
+        "tokens": 47648,
+        "histories": 4.26,
+        "calc": "(110592-62944)/11184 = 47648/11184"
+      },
+      "host +256 GiB beyond GPU pool": {
+        "tokens": 985632,
+        "histories": 88.13,
+        "calc": "(1048576-62944)/11184 = 985632/11184"
+      },
+      "cold": "unbounded"
     },
-    "k2": {
-      "median": 1.8584,
-      "p10": 1.7995,
-      "p90": 1.9233
-    },
-    "k4": {
-      "median": 3.5299,
-      "p10": 3.2547,
-      "p90": 3.6344
+    "report": "reports/study_eng1c_hostfull.md section 1 cap table (GPU pool 62,944; 27 GiB beyond 47,648; 256 GiB beyond 985,632); D76 round-1 capacities",
+    "checks": {
+      "gpu_hist": 1.0,
+      "host27_hist": 1.0,
+      "host256_hist": 1.0
     }
-  },
-  "panel_c_report": {
-    "k1": 1.121,
-    "k2": 1.858,
-    "k4": 3.53,
-    "cold_solo_dashed": 2.687
-  },
-  "annotations": {
-    "restore_11k_disk_over_cold_frac": 0.43,
-    "restore_11k_disk_over_cold_report": 0.43,
-    "imposed_cold_over_disk": 352.0
-  },
-  "checks": {
-    "a_cold": 0.9999,
-    "a_host": 0.998,
-    "a_disk": 0.9999,
-    "b_cold": 1.0,
-    "b_host": 0.9871,
-    "b_disk": 1.039,
-    "c_k1": 1.0,
-    "c_k2": 1.0002,
-    "c_k4": 1.0,
-    "c_dashed": 0.9999
   },
   "outputs": {
     "pdf": "/home/nesl/fm-switching/figures/motivation/figM4_tiers.pdf",

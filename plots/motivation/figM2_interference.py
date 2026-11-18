@@ -55,8 +55,10 @@ ax.axvspan(inj_t, inj_t + action_span, color=F.C_COLD, alpha=0.12, lw=0)
 cx = [a for a, _ in with_ep.values()]; cy = [t for _, t in with_ep.values()]
 wx = [with_ep[k][0] for k in without_tt if k in with_ep]
 wy = [without_tt[k] for k in without_tt if k in with_ep]
-ax.text(inj_t + action_span / 2, max(cy) * 1.1, "cold 11k\nrebuild", ha="center",
-        va="top", fontsize=6.2, color=F.C_COLD)
+# label inside the shaded band at mid-height, clear of the legend and the
+# top-right imposed-delay annotation
+ax.text(inj_t + action_span / 2, max(cy) * 0.50, "cold 11k\nrebuild", ha="center",
+        va="center", fontsize=6.2, color=F.C_COLD)
 ax.scatter(wx, wy, s=10, color=F.C_WITHOUT, marker="o", edgecolor="none", alpha=0.85,
            label="without rebuild")
 ax.scatter(cx, cy, s=12, color=F.C_WITH, marker="^", edgecolor="white", linewidth=0.3,

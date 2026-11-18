@@ -44,6 +44,10 @@ for key, label, color, marker in shapes:
                 fmt=marker, color=color, ecolor=color, elinewidth=0.8, capsize=2,
                 markersize=6, markeredgecolor="white", markeredgewidth=0.5, label=label)
 ax.set_yscale("log")
+from matplotlib.ticker import FixedLocator, FixedFormatter, NullLocator
+ax.yaxis.set_major_locator(FixedLocator([3, 6, 10, 20]))
+ax.yaxis.set_major_formatter(FixedFormatter(["3", "6", "10", "20"]))
+ax.yaxis.set_minor_locator(NullLocator())
 ax.set_xlabel("Job's own TTFT (s)")
 ax.set_ylabel("Delay imposed on others (s, log)")
 ax.set_xlim(2.0, 3.7)

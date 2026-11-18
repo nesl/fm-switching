@@ -140,7 +140,7 @@ ax.set_ylim(-0.6, 1.6)
 ax.spines["left"].set_visible(False)
 ax.tick_params(axis="y", length=0)
 
-# annotate one inter-piece gap
+# annotate one inter-piece gap (chain row)
 if rep:
     _, gdur, gst, gen = rep
     ymid = rows_y["chain"] + H / 2 + 0.06
@@ -149,11 +149,27 @@ if rep:
     ax.text((gst + gen) / 2, ymid + 0.12, f"gap {gdur*1000:.0f} ms\nothers served",
             ha="center", va="bottom", fontsize=6.2)
 
+# label the first idle gap of the one-go row (engine idle while the action's
+# 22.7 MB body is preprocessed on the CPU front end before any engine step runs)
+mb = sorted(mono_blocks, key=lambda d: d["start"])
+mono_idle = None
+for u, v in zip(mb, mb[1:]):
+    if v["start"] - u["end"] > 0.1:
+        mono_idle = (u["end"], v["start"]); break
+if mono_idle:
+    gy = rows_y["mono"] + H / 2 + 0.05
+    ax.annotate("", xy=(mono_idle[1], gy), xytext=(mono_idle[0], gy),
+                arrowprops=dict(arrowstyle="<->", lw=0.7, color="black"))
+    ax.text(sum(mono_idle) / 2, gy + 0.12, "image preprocessing\n(engine idle)",
+            ha="center", va="bottom", fontsize=6.0)
+
 legend = [Patch(facecolor=F.C_SERVED_ACTION, label="rebuild / its piece"),
           Patch(facecolor=F.C_SERVED_BG, label="background requests"),
-          Patch(facecolor=F.C_SERVED_BOTH, label="both")]
-ax.legend(handles=legend, loc="upper right", ncol=3, handlelength=1.0, columnspacing=0.8,
-          borderaxespad=0.1, fontsize=6.5)
+          Patch(facecolor=F.C_SERVED_BOTH, label="both"),
+          Patch(facecolor="white", edgecolor="0.5", linewidth=0.5, label="idle (engine)")]
+ax.legend(handles=legend, loc="upper right", ncol=4, handlelength=1.0, columnspacing=0.7,
+          borderaxespad=0.1, fontsize=6.3)
+ax.set_ylim(-0.6, 1.9)
 
 pdf, png = F.save(fig, "figM3b_pieces")
 
@@ -168,6 +184,8 @@ payload = {
                   "steps_per_piece_median": round(statistics.median([len(v) for v in piece_steps.values()]), 2) if piece_steps else None},
     "inter_piece_gap": {"n_gaps": len(gaps), "median_gap_s": round(gap_median, 3),
                         "annotated_gap_ms": round(rep[1] * 1000, 1) if rep else None},
+    "mono_first_idle_gap_s": round(mono_idle[1] - mono_idle[0], 3) if mono_idle else None,
+    "mono_idle_note": "the one-go row's first blank gap is the engine idle while the action's 22.7 MB body is preprocessed on the front end (StudyENG1e section 7: mode A mono API front end 567.9 ms)",
     "report": "reports/study_eng1e_chain.md sections 5, 6 (1 step per piece), 7 (gap A chain1024 P40 median 0.173 s)",
     "report_values": {"steps_per_piece": 1, "chain1024_P40_gap_median_s": 0.173, "mono_steps": 2},
     "checks": {"mono_steps_per_piece_is_2": any(True for _ in [0]),  # mono has 2 prefill steps (see report)

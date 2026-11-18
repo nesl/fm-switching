@@ -102,7 +102,7 @@ axa.set_ylabel("Recall accuracy (%)")
 axa.set_ylim(0, 58)
 axa.legend(loc="lower center", bbox_to_anchor=(0.5, 1.0), ncol=2, handlelength=1.0,
            columnspacing=1.0, borderaxespad=0.0, fontsize=6.6)
-axa.text(0.015, 0.03, "(a)", transform=axa.transAxes, fontsize=8, va="bottom", fontweight="bold")
+axa.text(0.015, 0.97, "(a)", transform=axa.transAxes, fontsize=8, va="top", fontweight="bold")
 
 # panel b
 xb = np.arange(2)
@@ -115,7 +115,7 @@ axb.set_ylabel("Challenge mAP")
 axb.set_ylim(0, 0.78)
 axb.annotate(f"+{gap:.3f}", (0.5, mcloud_ci[1] + 0.015), ha="center", va="bottom",
              fontsize=7, fontweight="bold", color=F.C_CLOUD)
-axb.text(0.04, 0.03, "(b)", transform=axb.transAxes, fontsize=8, va="bottom", fontweight="bold")
+axb.text(0.05, 0.97, "(b)", transform=axb.transAxes, fontsize=8, va="top", fontweight="bold")
 
 pdf, png = F.save(fig, "figM1_cloud_value")
 

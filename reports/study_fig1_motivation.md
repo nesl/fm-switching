@@ -9,6 +9,17 @@ ratio this run / report. Scripts live in `plots/motivation/`; outputs (PDF vecto
 300 dpi PNG) in `figures/motivation/`. No em dashes anywhere; every figure checked for
 Type-3 fonts (none) and TrueType embedding (present).
 
+**Revision 1 (2026-11-18).** M4 was redone around the three readiness tiers of the
+problem setting (GPU-warm / host / cold), with disk removed (not a tier yet; D78, Q12);
+see the M4 section. Small fixes: M1 panel letters moved off the bars and the caption now
+frames it as device vs cloud (bigger model plus full history) and adds the history-only
+contrast (+17.5 pp, same 32B, StudyR1 K1 minus K3 on outside-window questions); M2's
+"cold 11k rebuild" label moved inside the shaded band clear of the legend, and its
+caption notes that its 44.9 s (ENG1d P40) and M4's 36.5 s cold value (ENG1c P40) come
+from different studies; M3a uses plain-number y ticks (3, 6, 10, 20); M3b adds "idle"
+(white) to the legend, labels the one-go row's first idle gap "image preprocessing
+(engine idle)", and the caption explains the pink (both) steps after the long block.
+
 ## Style and palette (shared, `plots/motivation/figstyle.py`)
 
 ACM sigconf sizing: single column 3.33 in, double column 7.0 in (M3b and M4 only),
@@ -142,25 +153,44 @@ unaffected (stated in the caption).
 
 ---
 
-## M4 (figM4_tiers): storage tiers
+## M4 (figM4_tiers): readiness tiers (revision 1, disk removed)
 
-**Data.** StudyENG1f-disk `eng1f_results.json`, Parts 1-3 (FIT only). (a) part1
-`11k|{cold,host,disk}` ttft_s; (b) part2_P40 `{cold,host,disk}` imposed_lat_s;
-(c) part3 `unloaded|{k1,k2,k4}` per_load_ttft_s, with the dashed line at part1 11k cold
-median.
+**Revision 1.** The disk panel was removed: disk is not a tier in the problem setting
+yet (design log D78, open question Q12). The three tiers shown are GPU-warm, host and
+cold. StudyENG1f's disk data is untouched and kept for a separate later figure.
 
-**Selection rule.** None; the committed Part 1-3 aggregates are plotted directly.
+**Data.** (a) restore TTFT at the 11,184-token history, StudyENG1 Part D concurrency 1,
+from `results/cost/study_eng1/eng1_partD_requests_h100nvl.jsonl` (kind query, conc 1,
+role None: 30 probes per tier), cross-checked against `eng1_results.json` D.conc1
+`ttft_median`. (b) delay imposed on others under load, from the one study that measured
+all three tiers under a single load, StudyENG1c Part D
+(`eng1c_results.json` D.trials, variant mono, host-full capped servers 27/38/60 GiB, by
+tier at arrival). (c) capacity, computed from the committed D76 round-1 capacities and
+the ENG1c cap table.
 
-**Checks (all ratios this run / report = 1.00, `study_eng1f_disk.md` sections 5-7).**
-(a) 2.69 / 0.20 / 1.15 s (report 2.687 / 0.203 / 1.149). (b) 36.54 / 0.14 / 0.10 s
-(report 36.54 / 0.14 / 0.10). (c) 1.12 / 1.86 / 3.53 s (report 1.121 / 1.858 / 3.530);
-dashed cold solo 2.69 s. Annotated disk 0.43x cold (report "0.43x"); cold imposes 352x
-more than disk.
+**Selection rule.** (a) the conc-1 probe queries (30 per tier). (b) mono-action trials
+on the capped servers, grouped by the measured tier at arrival. (c) none (arithmetic).
 
-**Judgement.** Panel (b) is log-scaled; the host and disk bars (medians about 0.10 to
-0.14 s, with p10 slightly negative) are drawn from a small positive floor with an
-upward whisker to p90, and the committed CIs are in the JSON. Panels (a) and (c) use
-p10 to p90 whiskers; panel (b) carries the committed 95 percent CI.
+**Checks.** (a) GPU-warm 0.10007 s, host 0.16711 s, cold 2.74287 s (n = 30 each),
+reproducing spec v4 section 5.3 and `eng1_results.json` D.conc1 exactly (ratios 1.000).
+(b) cold 14.18 s (n = 65) inside the report's cold-mono range 14.0-16.5 s; GPU-warm
+-0.02 s (n = 11) inside the report's -0.3 to 0.2 s; host 0.04 s (n = 11), about 0
+(`study_eng1c_hostfull.md` section 6). All three tiers are measured under load, so no
+"not measured" bar is needed. (c) GPU pool 62,944 / 11,184 = 5.63 histories; host beyond
+the GPU pool 47,648 / 11,184 = 4.26 at 27 GiB and 985,632 / 11,184 = 88.13 at 256 GiB;
+cold unbounded. The token counts (62,944; 47,648 = 110,592 - 62,944; 985,632 =
+1,048,576 - 62,944) are the committed ENG1c cap table (`study_eng1c_hostfull.md`
+section 1); the full arithmetic is in the figure JSON.
+
+**Judgement.** For GPU-warm under load (panel b), ENG1c Part D did measure a
+GPU-resident history served under load (11 mono trials, imposed about 0 s), so that bar
+carries a real value rather than a "not measured" hatch; no substitute action (such as
+warm append) was used. Panel (b) is linear; the GPU-warm and host medians are about 0
+(GPU-warm is -0.02 s, within noise) and are labelled "~0". Panel (c) is log-scaled with
+cold drawn as an unbounded up-arrow. The GPU-pool capacity is annotated as reduced in
+practice by the working space in-flight requests need (noted in the JSON). Panel (a)
+uses p10 to p90 whiskers; panel (b) uses the 95 percent bootstrap CI of the median
+(resampling trials).
 
 ---
 
