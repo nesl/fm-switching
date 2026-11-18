@@ -1,6 +1,8 @@
 # StudyMOT1-dayinlife: one robot rebuild in a monitored dashcam fleet (motivation, claim 6)
 
-Status: amendment 1 COMPLETE 2026-11-18 09:58; amendment 2 (section 10) in progress. First design STOPPED AT N SELECTION (09:20); amended by the user
+Status: amendment 1 COMPLETE 2026-11-18 09:58; **amendment 2 COMPLETE 11:04 (section 10): a history prepared host-warm
+is served from the host with a roomy (256 GiB) host tier, costs the fleet nothing and answers in 0.69 s, but with the
+tight 27 GiB host it is already cold by the question (5 of 5 runs, as predicted).** First design STOPPED AT N SELECTION (09:20); amended by the user
 (section 0) and rerun 09:30 to 09:58. **One cold 11k rebuild done in one go makes all 20 monitored dashcams miss
 deadlines: a median 57 extra missed instants and a 5.5 s burst in which more than half the fleet misses; 2,048-token
 pieces cut that to 24 and 1.0 s; 1,024-token pieces remove it entirely (0 extra misses in 5 of 5 repetitions); the
@@ -181,3 +183,72 @@ convention). Measures as amendment 1 plus the measured tier and the robot reques
 `results/motivation/mot1/mot1_figdata_amend2.json` (Part B, all five actions, the representative repetition = the
 one whose ONE-GO extra-miss count is the median of B's 5; Part A's per-run measured tier and outcome as a separate
 block).
+
+### 10.1 Amendment 2 run record
+
+Part A: server 27 GiB (flag diff vs DE_c38 `[('38', '27')]`), started 10:13:39, host filled to 189,488 tokens (1.7x the
+110,592-token capacity), runs 10:15 to 10:23. Part B: server 256 GiB (only `--kv-offloading-size` changed: diff
+`[('38', '256')]`), started 10:23:30 (startup 160.8 s), host filled to 1,572,965 tokens (1.5x the 1,048,576-token
+capacity, 59 fresh histories, 8 min), runs 10:35 to 11:04. N = 20 (amendment 1), amendment 1's seeds, clips and robot
+sessions. 0 HTTP errors in all 30 runs; every Part B NONE control 600 / 600 on time (no INVALID run).
+
+HOST-WARM preparation, every run: history prefill 10,001 to 11,711 prompt tokens with 0 cached (cold, as intended),
+then 80,886 tokens of fresh filler (three ~27k histories, the smallest whole-history total above 70,000), finished 0.5 s
+before the window opened.
+
+### 10.2 Part A: tight host (27 GiB), HOST-WARM only
+
+Writes after the history's last use by the question: 80,886 (filler) + 20 s of dashcam traffic (about 75,600) = about
+156,500 tokens > 110,592.
+
+| repetition | predicted tier | measured tier | robot cached / prompt tokens | robot TTFT (s) | missed instants | vs amendment 1's NONE of the same repetition |
+|---|---|---|---|---|---|---|
+| 1 | COLD | **COLD** | 0 / 11,367 | 3.58 | 45 | +45 |
+| 2 | COLD | **COLD** | 0 / 11,831 | 2.91 | 55 | +55 |
+| 3 | COLD | **COLD** | 0 / 10,160 | 2.58 | 43 | +43 |
+| 4 | COLD | **COLD** | 0 / 10,743 | 2.62 | 44 | +44 |
+| 5 | COLD | **COLD** | 0 / 10,159 | 2.54 | 40 | +40 |
+
+The prediction held in 5 of 5: under this traffic a history prepared host-warm does not survive the 20 s to the
+question when the host tier is 27 GiB, and the question then costs what a cold one-go rebuild costs (the last column
+compares with a NONE run on another server instance, amendment 1's, and is a reference, not a paired difference).
+
+### 10.3 Part B: roomy host (256 GiB), all five actions (paired within a repetition)
+
+| action | extra missed instants, median (per repetition 1..5) | longest burst > 50 % missing, s | last extra miss after the question, s | streams hit | robot TTFT from the question, s (per repetition) | measured tier |
+|---|---|---|---|---|---|---|
+| ONE-GO | **59** (66, 74, 57, 59, 57) | **6.0** (6.5, 7.5, 5.5, 6.0, 6.0) | 6.0 | 100 % | **3.56** (4.96, 4.02, 3.29, 3.50, 3.56) | COLD in 5 of 5 |
+| PIECES 2048 | **28** (28, 41, 28, 27, 27) | 1.5 (1.0, 1.5, 2.0, 1.0, 2.5) | 5.5 | 90 % | **6.10** (6.11, 6.46, 5.12, 6.10, 4.99) | cold first piece |
+| PIECES 1024 | **0** (0 in all 5) | 0 | none | 0 % | **6.87** (7.34, 7.93, 6.87, 6.51, 6.67) | cold first piece |
+| HOST-WARM | **0** (0 in all 5) | 0 | none | 0 % | **0.69** (0.36, 0.79, 0.76, 0.63, 0.69) | **HOST in 5 of 5** |
+
+Tier verification, HOST-WARM in Part B: cached tokens 9,984 to 11,696 of 10,159 to 11,831 prompt tokens, and in every
+repetition the server's external-KV-transfer counter rose by exactly the cached tokens over the request (local cache hits
+0), so every cached token was loaded from the host tier (5 of 5 HOST; the STOP condition did not fire).
+
+Consistency with amendment 1 (host size should not matter for cold actions, StudyENG1c Part E): ONE-GO extra misses
+1.04x, robot TTFT 1.03x, burst 1.09x; P2048 1.17x, 1.03x and 1.50x; P1024 0 vs 0 misses, TTFT 1.01x. All inside 0.8x to
+1.25x except the P2048 burst length, 1.5 s vs 1.0 s, which is ONE 0.5 s bin at the resolution of that measure
+(per-repetition values 0.5 to 2.5 s in both amendments); not a host-size effect.
+
+Representative Part B repetition: 4 (its ONE-GO extra-miss count, 59, is the median). Figure data:
+`results/motivation/mot1/mot1_figdata_amend2.json` (Part B only, five actions, per 0.5 s bin fraction missing,
+question time, each action's robot TTFT with per-repetition values, the summary table; Part A's per-run measured tier
+and outcome as a separate caption block). Check plot: `results/motivation/mot1/mot1_amend2_check.png`.
+
+### 10.4 Sanity and consistency checks (amendment 2)
+
+| check | result |
+|---|---|
+| Part B NONE controls >= 99 % on time | 100 % in 5 of 5 |
+| 0 HTTP errors | 0 in 30 runs |
+| HOST-WARM measured HOST in Part B | 5 of 5 |
+| Part A measured tier vs prediction | COLD in 5 of 5, as predicted |
+| B cold actions vs amendment 1 | 1.01x to 1.17x on extra misses and robot TTFT; burst lengths explained above |
+
+Results consistency: host-warm recall TTFT 0.36 to 0.79 s under 10 requests/s of monitoring traffic vs StudyENG1's 0.17 s
+unloaded host reload and ENG1f's host-warm 0.26 / 0.34 s under P25 / P40 (2.0x to 2.7x, explained by the heavier
+background and the ONE-GO body re-sending all 121 to 130 frames' bytes through the front end, which ENG1f's uuid
+references did not); imposed delay of a host-warm recall 0 extra misses, consistent with ENG1f's 0.07 / 0.14 s imposed
+latency; Part A's COLD outcome matches the ENG1c host-residency rule (tokens written since last use > host capacity).
+No disagreement unexplained.

@@ -166,7 +166,8 @@ async def robot_task(c, t0, tag, robot, action, rows):
     dev, sid = "robot000", robot["sid"]
     salt = K.cache_salt(tag, dev)
     fr = robot["frames"]
-    cuts = [len(fr)] if action == "ONE-GO" else list(range(NFR[action], len(fr), NFR[action])) + [len(fr)]
+    single = action in ("ONE-GO", "HOST-WARM")
+    cuts = [len(fr)] if single else list(range(NFR[action], len(fr), NFR[action])) + [len(fr)]
     out, prev = [], 0
     for j, e in enumerate(cuts):
         last = j == len(cuts) - 1
@@ -178,15 +179,69 @@ async def robot_task(c, t0, tag, robot, action, rows):
         else:
             b = B.build_body(kind="piece", device_id=dev, session_id=sid, run_tag=tag, salt=salt, header=HEADER_TEXT,
                              frames=frames, question=None, options=(), max_tokens=1)
+        m0 = await MH.metrics(c) if (single and MH is not None) else None
         r = await post(c, B.strip_internal(b, strip_hints=True), kind="robot", part_i=j, n_parts=len(cuts),
                        new_frames=e - prev, t_question=round(tq, 6))
+        if m0 is not None:
+            d = MH.mdelta(m0, await MH.metrics(c))
+            r.update(tier_delta=dict(local=d.get("prompt_tokens_by_source_total|local_cache_hit", 0.0),
+                                     external=d.get("prompt_tokens_by_source_total|external_kv_transfer", 0.0),
+                                     compute=d.get("prompt_tokens_by_source_total|local_compute", 0.0)),
+                     tier=classify_tier(r, d))
         out.append(r)
         prev = e
     rows.extend(out)
 
 
+def classify_tier(r, d):
+    """Measured tier of the robot request (amendment 2): GPU if local prefix hits cover >= half the prompt; HOST if
+    external (host connector) transfers cover >= 90 % of the cached tokens and the cached tokens cover >= half the
+    prompt; PARTIAL if external transfers exceed 64 tokens otherwise; COLD otherwise."""
+    pt, ct = r.get("prompt_tokens") or 0, r.get("cached_tokens") or 0
+    loc = d.get("prompt_tokens_by_source_total|local_cache_hit", 0.0)
+    ext = d.get("prompt_tokens_by_source_total|external_kv_transfer", 0.0)
+    if pt and loc >= 0.5 * pt:
+        return "GPU"
+    if pt and ct >= 0.5 * pt and ext >= 0.9 * ct:
+        return "HOST"
+    if ext > 64:
+        return "PARTIAL"
+    return "COLD"
+
+
+MH = None                    # the ENG1 harness module (metrics, Hist, post), set by run_all*
+
+
+async def host_warm_prep(c, tag, robot):
+    """Amendment 2 preparation, BEFORE the window: (1) prefill the history in the run namespace (ONE-GO's frames,
+    header, salt and uuids; no question; max_tokens 1); (2) fresh filler of about 70,000 prompt tokens."""
+    import bodies as B
+    import cachekeys as K
+    from coordinator import HEADER_TEXT
+    dev, sid = "robot000", robot["sid"]
+    frames = [dict(frame_ref=r, path=FRAMES / r) for r in robot["frames"]]
+    b = B.build_body(kind="piece", device_id=dev, session_id=sid, run_tag=tag, salt=K.cache_salt(tag, dev),
+                     header=HEADER_TEXT, frames=frames, question=None, options=(), max_tokens=1)
+    pre = await post(c, B.strip_internal(b, strip_hints=True), kind="prep_history")
+    done, k, fill = 0, 0, []
+    while done < 70000:
+        p = MH.SESS["p28"][(k + 5) % len(MH.SESS["p28"])]
+        h = MH.Hist(p["frames"], f"{tag}F{k}")
+        rid = f"{tag}fl{k}"
+        r = await MH.post(c, h.body(rid=rid), rid, "prep_filler")
+        if r["error"]:
+            raise SystemExit(f"prep filler error {r['error']}: STOP")
+        done += r["prompt_tokens"] or 0
+        fill.append(dict(prompt_tokens=r["prompt_tokens"], cached_tokens=r["cached_tokens"], t_end=r["t_end"]))
+        k += 1
+    return dict(prefill=dict(prompt_tokens=pre["prompt_tokens"], cached_tokens=pre["cached_tokens"],
+                             error=pre["error"], t_end=pre["t_end"]),
+                filler_tokens=done, filler=fill, t_prep_end=round(time.time(), 6))
+
+
 async def run_once(c, label, pl, action, rep):
     tag = f"mot1{label}x{int(time.time() * 1000) % 10 ** 9}"
+    prep = await host_warm_prep(c, tag, pl["robot"]) if action == "HOST-WARM" else None
     t0 = time.time() + 0.5
     pending, robot_rows = [], []
     tasks = [stream_task(c, t0, tag, st, pending) for st in pl["streams"]]
@@ -202,22 +257,27 @@ async def run_once(c, label, pl, action, rep):
                 robot_first_cached=(robot_rows[0]["cached_tokens"] if robot_rows else None),
                 robot_ttft_from_q=(round(robot_rows[-1]["t_first"] - robot_rows[-1]["t_question"], 4)
                                    if robot_rows and robot_rows[-1]["t_first"] else None),
-                late_dispatch_max_s=round(max(r["t_submit"] - r["t_sched"] for r in mon), 4))
+                late_dispatch_max_s=round(max(r["t_submit"] - r["t_sched"] for r in mon), 4),
+                robot_tier=(robot_rows[-1].get("tier") if robot_rows else None),
+                robot_tier_delta=(robot_rows[-1].get("tier_delta") if robot_rows else None),
+                robot_prompt_tokens=(robot_rows[-1]["prompt_tokens"] if robot_rows else None),
+                robot_cached_tokens=(robot_rows[-1]["cached_tokens"] if robot_rows else None), prep=prep)
     with open(OUT / "mot1_requests.jsonl", "a") as f:
         for r in rows + [summ]:
             f.write(json.dumps(r, default=str) + "\n")
     log(f"{label} {action} rep {rep} N={pl['n']}: on-time {on}/{len(mon)} ({summ['on_time_frac']:.4f}); errors "
         f"{summ['http_errors']}; robot ttft {summ['robot_ttft_from_q']} first cached {summ['robot_first_cached']}; "
-        f"dispatch lag max {summ['late_dispatch_max_s']} s")
+        f"dispatch lag max {summ['late_dispatch_max_s']} s; tier {summ['robot_tier']} cached {summ['robot_cached_tokens']}"
+        f"/{summ['robot_prompt_tokens']}")
     await asyncio.sleep(3.0)
     return summ
 
 
-async def fill(c, M):
+async def fill(c, M, host_gib=HOST_GIB):
     """Host steady state at server start (ENG1c / ENG1e convention): fresh ~26k p28 histories, max_tokens 1, until
     1.5 x the 27 GiB host capacity in tokens was written."""
     M.load_sessions(warm=False)
-    target, done, k = int(FILL_X * HOST_GIB * TOK_PER_GIB), 0, 0
+    target, done, k = int(FILL_X * host_gib * TOK_PER_GIB), 0, 0
     while done < target:
         p = M.SESS["p28"][k % len(M.SESS["p28"])]
         h = M.Hist(p["frames"], f"MOTF{k}x{int(time.time()) % 10 ** 6}")
@@ -227,8 +287,8 @@ async def fill(c, M):
             raise SystemExit(f"fill error {r['error']}: STOP")
         done += r["prompt_tokens"] or 0
         k += 1
-    log(f"host fill: {done} tokens in {k} fresh histories (cap {HOST_GIB * TOK_PER_GIB}; 1.5x target {target})")
-    return dict(tokens=done, n=k, cap_tokens=HOST_GIB * TOK_PER_GIB)
+    log(f"host fill: {done} tokens in {k} fresh histories (cap {host_gib * TOK_PER_GIB}; 1.5x target {target})")
+    return dict(tokens=done, n=k, cap_tokens=host_gib * TOK_PER_GIB)
 
 
 async def experiment(M):
@@ -281,13 +341,65 @@ def run_all():
     log(f"experiment done: {res.get('stop') or 'complete'}")
 
 
+async def experiment_amend2(M, part, host_gib):
+    import httpx
+    res = dict(part=part, host_gib=host_gib, runs=[])
+    async with httpx.AsyncClient(timeout=None, limits=httpx.Limits(max_connections=None,
+                                                                   max_keepalive_connections=None)) as c:
+        res["fill"] = await fill(c, M, host_gib)
+        acts5 = ("NONE", "ONE-GO", "P2048", "P1024", "HOST-WARM")
+        for r in range(1, N_REP + 1):
+            pl = plan(f"rep{r}", 20)                    # amendment 1's seeds, clips and robot sessions (N = 20)
+            order = ["HOST-WARM"] if part == "A" else (list(acts5) if r % 2 == 1 else list(reversed(acts5)))
+            for a in order:
+                s = await run_once(c, f"A2{part}R{r}", pl, a, r)
+                if a == "NONE" and s["on_time_frac"] < ON_TIME_MIN:
+                    log(f"A2{part} rep {r}: NONE below 99 % ({s['on_time_frac']}): INVALID, rerun once")
+                    s = await run_once(c, f"A2{part}R{r}rerun", pl, a, r)
+                    if s["on_time_frac"] < ON_TIME_MIN:
+                        res["stop"] = f"two INVALID control runs in repetition {r}"
+                        return res
+                res["runs"].append(s)
+    return res
+
+
+def run_amend2():
+    global MH
+    import study_live2_pilot as PL
+    PL.OUT = OUT
+    PL.WORK = Path.home() / "data/live2/mot1"
+    PL.WORK.mkdir(parents=True, exist_ok=True)
+    out = {}
+    for part, host in (("A", 27.0), ("B", 256.0)):
+        srv, sinfo, M = PL.start_server(host)
+        MH = M
+        log(f"amend2 part {part}: server up {json.dumps({k: v for k, v in sinfo.items() if k != 'command'})}")
+        (OUT / f"mot1_amend2_server_{part}.json").write_text(json.dumps(sinfo, indent=1, default=str) + "\n")
+        try:
+            out[part] = asyncio.run(experiment_amend2(M, part, host))
+        finally:
+            srv.stop()
+        (OUT / "mot1_amend2_runs.json").write_text(json.dumps(out, indent=1, default=str) + "\n")
+        if out[part].get("stop"):
+            log(f"amend2 part {part}: {out[part]['stop']}: STOP")
+            return
+        if part == "B":
+            hw = [s for s in out[part]["runs"] if s["action"] == "HOST-WARM"]
+            bad = sum(1 for s in hw if s["robot_tier"] != "HOST")
+            if bad >= 2:
+                log(f"amend2 part B: HOST-WARM measured non-HOST in {bad} repetitions: STOP before figure data")
+    log("amend2 experiment done")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("what", choices=("all", "analyse"))
+    ap.add_argument("what", choices=("all", "analyse", "amend2"))
     a = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     if a.what == "all":
         run_all()
+    elif a.what == "amend2":
+        run_amend2()
     else:
         import mot1_analyse as AN
         AN.main()
