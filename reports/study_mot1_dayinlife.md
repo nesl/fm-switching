@@ -1,6 +1,11 @@
 # StudyMOT1-dayinlife: one robot rebuild in a monitored dashcam fleet (motivation, claim 6)
 
-Status: first design **STOPPED AT N SELECTION (2026-11-18 09:20)**; AMENDED by the user the same morning (section 0) and rerun. The pre-registered rule (largest N in {8, 16, 24, 32} whose
+Status: COMPLETE 2026-11-18 09:58 (amended design). First design STOPPED AT N SELECTION (09:20); amended by the user
+(section 0) and rerun 09:30 to 09:58. **One cold 11k rebuild done in one go makes all 20 monitored dashcams miss
+deadlines: a median 57 extra missed instants and a 5.5 s burst in which more than half the fleet misses; 2,048-token
+pieces cut that to 24 and 1.0 s; 1,024-token pieces remove it entirely (0 extra misses in 5 of 5 repetitions); the
+robot pays for it: its answer arrives 3.5 s after the question in one go, 5.9 s with 2,048 pieces, 6.8 s with 1,024
+pieces.** The pre-registered rule (largest N in {8, 16, 24, 32} whose
 NONE run is >= 99 % on time; STOP if N = 8 is below 99 %) fired: N = 8 was 11.7 % on time. No main run was made; there
 is no figure data. Pre-registered in research/EXPERIMENTS.md (StudyMOT1-dayinlife) before any run.
 
@@ -60,9 +65,81 @@ methodological change and is the user's decision.
 no robot request was sent (N selection precedes the main runs). Cross-check: the 15.1 requests/s peak (StudyD7b) and
 ENG1's episodic TTFT at P25 / P40 are consistent with the overload observed; no INVALID result was used.
 
-## 5. Files
+## 6. Results, amended design (one cloud request per 2 s per stream)
 
-New: `experiments/motivation/study_mot1_dayinlife.py`, `experiments/motivation/mot1_analyse.py` (written for the main
-runs, not run), `reports/study_mot1_dayinlife.md`, `results/motivation/mot1/` (`mot1_requests.jsonl.gz`,
-`mot1_runs.json`, `mot1_server.json`, `mot1.log`). Changed: `research/EXPERIMENTS.md`, `results/INDEX.md`,
+Server started 09:30:02 (startup 66.8 s), host filled to 189,488 tokens (1.7x the 110,592-token capacity), stopped
+09:57:52. Runs 09:32 to 09:57; 0 HTTP errors in every run; maximum client dispatch lag 0.04 s.
+
+**N selection (NONE, 60 s):**
+
+| N | requests/s | on time |
+|---|---|---|
+| 8 | 4 | 240 / 240 = 100 % |
+| 12 | 6 | 360 / 360 = 100 % |
+| 16 | 8 | 480 / 480 = 100 % |
+| 20 | 10 | 600 / 600 = 100 % |
+
+Rule: the largest N with >= 99 % on time, **N = 20** (10 requests/s, 66 % of the 15.1 requests/s peak).
+
+**Main runs, N = 20, 5 repetitions x 4 actions, paired within a repetition.** Every NONE control was 600 / 600 on time
+(no INVALID repetition). Robot histories (one EVAL question per repetition, seeded): 11,367 / 11,831 / 10,160 / 10,743 /
+10,159 prompt tokens; the robot's first request was cold in every run (0 cached tokens).
+
+| action | extra missed instants, median (per repetition 1..5) | longest burst with > 50 % of streams missing, s | last extra miss after the question, s | streams with >= 1 extra miss | robot TTFT from the question, s |
+|---|---|---|---|---|---|
+| ONE-GO | **57** (63, 62, 57, 55, 53) | **5.5** (6.5, 6.0, 5.5, 5.5, 5.0) | 6.5 (7.0, 7.0, 6.5, 5.5, 6.0) | **100 %** (all 5) | **3.47** (4.98, 3.65, 3.47, 3.24, 3.29) |
+| PIECES 2048 | **24** (26, 27, 24, 20, 19) | **1.0** (1.5, 1.0, 1.5, 1.0, 0.5) | 5.5 (6.0, 6.0, 5.0, 5.5, 5.0) | 75 % (95, 75, 85, 65, 50) | **5.90** (5.90, 6.36, 5.41, 5.96, 5.24) |
+| PIECES 1024 | **0** (0 in all 5) | **0** | none | **0 %** | **6.79** (6.90, 7.25, 6.79, 6.46, 6.45) |
+
+Pieces: 5 to 6 pieces of 23 frames (2048) and 11 to 12 pieces of 11 frames (1024); each piece's own TTFT 0.50 to 0.59 s
+(first 2048 piece) and 0.26 to 0.40 s (first 1024 piece); the last piece (with the question) was submitted 4.0 to 5.2 s
+(2048) and 5.7 to 6.5 s (1024) after the question. In other words the robot's answer time with pieces is the sum of
+the per-piece round trips, each waiting behind the monitoring traffic, which is why it rises by 2.4 to 3.3 s rather
+than the expected 0.5 to 1 s.
+
+Representative repetition for the figure: repetition 3 (its ONE-GO extra-miss count, 57, is the median of the 5).
+Figure data: `results/motivation/mot1/mot1_figdata.json` (per 0.5 s bin, the fraction of sent instants that missed, for
+each action over the 60 s window; question at 20 s; each action's robot TTFT; the summary with per-repetition values).
+Check plot (report only): `results/motivation/mot1/mot1_check.png`. Misses begin in the 19.5 to 20 s bin because
+instants sent just before the question still have their 0.916 s deadline running when the rebuild occupies the engine.
+
+## 7. Sanity checks
+
+| check | result |
+|---|---|
+| NONE on time >= 99 % in every repetition | 100 % in 5 of 5 |
+| 0 HTTP errors | 0 in all 24 amended runs |
+| robot first request cold (cached <= 16) | 0 cached in all 15 action runs |
+| ONE-GO robot TTFT within 0.8x to 1.25x of ENG1f's cold 11k under load (2.88 to 2.95 s at P25 / P40) | median 3.47 s = 1.19x: inside; repetition 1 alone is 4.98 s (1.70x): it was the first long request this server ever served (repetition 1 runs NONE then ONE-GO first), which is the first-long-request warm-up StudyENG1c Part E documented; the other four are 3.24 to 3.65 s |
+
+## 8. Results consistency check
+
+1. Cross-check: ONE-GO robot TTFT 3.47 s vs ENG1f cold 11k under P25 / P40 2.88 / 2.95 s (1.18 to 1.20x; the background
+   here is 10 requests/s against 3.8 / 6.0) and vs ENG1 unloaded cold 2.74 s (1.27x); P2048 / ONE-GO extra misses 0.42,
+   in line with ENG1e's chain2048 / mono imposed-delay ratios (0.15 to 0.52); P1024 0 extra misses where ENG1e's
+   chain1024 imposed 8 to 26 % of mono's latency sum: a deadline miss needs > 0.916 s, and the delay a 1,024-token piece
+   adds to a neighbour (one step of about 0.2 s, ENG1e) stays below the margin; P1024 rebuild 6.5 to 7.2 s vs ENG1e mode
+   A chain1024 job completion 3.9 to 5.5 s (1.2 to 1.8x; heavier background here). No disagreement over 2x.
+2. Physical plausibility: 11k tokens in about 3.3 s under load is about 3,400 tokens/s, below ENG1's unloaded prefill
+   rate; nothing faster than committed curves.
+3. Distribution sanity: all five per-repetition values reported for every measure.
+4. Definition audit: deadline 0.916 s submit-to-last-token (section 0); pieces by ENG1c's d_job rule; bins of 0.5 s on
+   the send time with fraction = missed / sent.
+5. Claim linkage: motivation claim 6 (a cold history rebuild on the shared accelerator costs other devices their
+   deadlines, and execution granularity trades that against the requester's own latency): supported by measurement.
+6. Proxy validity: "on time" is measured server-side (submit to last token) with the network allowance subtracted from
+   the target, not emulated per link; stated as such.
+
+## 9. Files
+
+New: `experiments/motivation/study_mot1_dayinlife.py`, `experiments/motivation/mot1_analyse.py`,
+`reports/study_mot1_dayinlife.md`, `results/motivation/mot1/` (`mot1_requests.jsonl.gz` (both designs; labels NSEL* /
+first design, A1* / amended), `mot1_runs_design1.json`, `mot1_runs.json` (amended), `mot1_results.json`,
+`mot1_figdata.json`, `mot1_check.png`, `mot1_server.json`, `mot1.log`). Changed: `research/EXPERIMENTS.md`, `results/INDEX.md`,
 `research/STATUS.md`.
+
+Implementation note found while preparing the rerun (no effect on the first design's verdict): the dense Orin instant
+set is on a 0.25 s grid (StudyD14b), so the first design sent consecutive 0.25 s instants every 0.5 s of run time
+(each clip played at half speed). That changes which frame a request carries, not the offered load, which is what
+failed. The amended runner takes the CTRL1c 0.5 s grid (t a multiple of 0.5 s) and sends every 4th instant, so a
+stream's clip time advances 2 s per request, in step with run time.

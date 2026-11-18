@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""StudyMOT1-dayinlife analysis (CPU only; run after the server is stopped).
+"""StudyMOT1-dayinlife analysis (CPU only; run after the server is stopped). Amendment 1 runs only (labels A1*).
+A 0.5 s bin holds the instants SENT in it (each stream sends one per 2 s); its fraction is missed / sent.
 
 Per repetition, each action run is paired with that repetition's NONE run (same clips, offsets, robot):
   missed instant      submit-to-last-token > 0.916 s, or an error, or no token
@@ -62,7 +63,7 @@ def analyse():
     valid = {}
     for key, s in summ.items():
         label, action, tag = key
-        if label.startswith("NSEL"):
+        if "NSEL" in label or not label.startswith("A1"):     # amended design only; N-selection runs apart
             continue
         rep = s["rep"]
         # an INVALID control (on-time < 99 %) is superseded by its rerun (label R<r>rerun)

@@ -1,5 +1,7 @@
 # FM-switching — Project Status
 
+Last updated: 2026-11-18 (later 4) (**StudyMOT1-dayinlife COMPLETE (amended design): with 20 dashcams monitored at one request per 2 s each, one cold 11k robot rebuild done in one go costs a median 57 missed dashcam instants in a 5.5 s burst across the whole fleet; 2,048-token pieces cut it to 24, 1,024-token pieces to 0, and the robot's answer moves from 3.5 s to 5.9 / 6.8 s. Figure data for the Orin in results/motivation/mot1/mot1_figdata.json. Report reports/study_mot1_dayinlife.md.**)
+
 Last updated: 2026-11-18 (later 4) (**StudyFIG1-motivation COMPLETE: paper motivation figures M1-M6 (7 files) built from committed results only, no GPU/model/new measurement; every annotated number cross-checked against its source report (per-figure JSON, all ratios ~1.000). Report `reports/study_fig1_motivation.md`, scripts `plots/motivation/`, outputs `figures/motivation/`.**)
 
 Last updated: 2026-11-18 (later 3) (**StudyMOT1-dayinlife STOPPED AT N SELECTION: at a 0.5 s monitoring cadence even 8 dashcam streams (16 requests/s) exceed the 32B's 15.1 requests/s one-frame peak, so no grid point was >= 99 % on time (N = 8: 11.7 %). A feasible fleet size or cadence is the user's decision. Report reports/study_mot1_dayinlife.md.**)

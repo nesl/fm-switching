@@ -31,8 +31,10 @@ FRAMES = Path.home() / "data/live2/frames_by_ref"
 STORE = Path.home() / "data/live2/jpeg"
 URL = "http://127.0.0.1:8031/v1/chat/completions"
 WINDOW_S, CADENCE_S, Q_AT_S = 60.0, 0.5, 20.0
+EVERY = 4                   # AMENDMENT 1: the cloud gets every 4th 0.5 s instant of a dashcam (one request per 2 s)
+SEND_PERIOD_S = EVERY * CADENCE_S
 DEADLINE_S = 0.916          # 1.0 s target minus the D75 allowance (0.040 s upload at 13.6 Mbit/s + 0.044 s RTT)
-N_GRID = (8, 16, 24, 32)
+N_GRID = (8, 12, 16, 20)    # AMENDMENT 1 (first design: 8, 16, 24, 32 at one request per 0.5 s per stream)
 ON_TIME_MIN = 0.99
 N_REP = 5
 ACTIONS = ("NONE", "ONE-GO", "P2048", "P1024")
@@ -80,11 +82,11 @@ def robot_candidates():
 
 
 def plan(seed_key, n):
-    rng = random.Random(f"mot1|{seed_key}")
+    rng = random.Random(f"mot1a1|{seed_key}")
     dense = dense_by_clip()
     clips = sorted(dense)
     rng.shuffle(clips)
-    n_inst = int(WINDOW_S / CADENCE_S)
+    n_inst = int(WINDOW_S / SEND_PERIOD_S)
     streams = []
     pool = iter(clips)
     for s in range(n):
@@ -92,8 +94,9 @@ def plan(seed_key, n):
         while len(insts) < n_inst:
             c = next(pool)
             seq.append(c)
-            insts += [(c, t) for t in dense[c]]
-        streams.append(dict(stream=s, offset=round(rng.uniform(0, CADENCE_S), 4), clips=seq, instants=insts[:n_inst]))
+            grid = [t for t in dense[c] if abs(2 * t - round(2 * t)) < 1e-6]   # the CTRL1c 0.5 s grid (dense set is 0.25 s)
+            insts += [(c, t) for t in grid[::EVERY]]           # every 4th decision instant: clip time advances 2 s
+        streams.append(dict(stream=s, offset=round(rng.uniform(0, SEND_PERIOD_S), 4), clips=seq, instants=insts[:n_inst]))
     cands = robot_candidates()
     robot = cands[rng.randrange(len(cands))]
     return dict(seed_key=seed_key, n=n, streams=streams, robot=robot, n_candidates=len(cands))
@@ -143,7 +146,7 @@ def mon_body(tag, stream, frame_ref):
 
 async def stream_task(c, t0, tag, st, rows):
     for k, (clip, t) in enumerate(st["instants"]):
-        at = t0 + st["offset"] + k * CADENCE_S
+        at = t0 + st["offset"] + k * SEND_PERIOD_S
         d = at - time.time()
         if d > 0:
             await asyncio.sleep(d)
@@ -235,7 +238,7 @@ async def experiment(M):
                                                                    max_keepalive_connections=None)) as c:
         res["fill"] = await fill(c, M)
         for n in N_GRID:
-            res["n_selection"].append(await run_once(c, f"NSEL{n}", plan(f"nsel{n}", n), "NONE", 0))
+            res["n_selection"].append(await run_once(c, f"A1NSEL{n}", plan(f"nsel{n}", n), "NONE", 0))
         ok = [s["n"] for s in res["n_selection"] if s["on_time_frac"] >= ON_TIME_MIN]
         if not ok or 8 not in ok:
             log("N SELECTION FAILED: N = 8 below 99 % on time: STOP")
@@ -249,11 +252,11 @@ async def experiment(M):
             order = list(ACTIONS) if r % 2 == 1 else list(reversed(ACTIONS))
             invalid = 0
             for a in order:
-                s = await run_once(c, f"R{r}", pl, a, r)
+                s = await run_once(c, f"A1R{r}", pl, a, r)
                 if a == "NONE" and s["on_time_frac"] < ON_TIME_MIN:
                     invalid += 1
                     log(f"rep {r}: NONE below 99 % ({s['on_time_frac']}): INVALID, rerun once")
-                    s = await run_once(c, f"R{r}rerun", pl, a, r)
+                    s = await run_once(c, f"A1R{r}rerun", pl, a, r)
                     if s["on_time_frac"] < ON_TIME_MIN:
                         res["stop"] = f"two INVALID control runs in repetition {r}"
                         log(f"rep {r}: control INVALID twice: STOP")
