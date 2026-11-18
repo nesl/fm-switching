@@ -95,15 +95,20 @@ counts are input sizes with no latency; the cold-rebuild anchors are prefix-cach
 cold recompute measurements on the 32B serving stack.
 
 ## M7 (figM7_dayinlife)
-One robot question disrupts the whole dashcam fleet when it is answered in one go, and
-small pieces remove the disruption only by pushing the robot past its own deadline, so
-no single shape serves both. (a) The fraction of 20 dashcams missing their 0.916 s
-monitoring deadline per 0.5 s bin around the robot's question: one go adds 57 missed
-instants in a burst that lasts about 5.5 s, 2,048-token pieces add 24, 1,024-token
-pieces add 0 (the no-question control stays at zero). (b) But the robot's own answer
-time rises from 3.47 s in one go to 5.90 s (2,048) and 6.79 s (1,024), the last two past
-the 5 s target (dashed, D71). n = 20 dashcams; the representative repetition is number 3
-(its one-go extra-miss count, 57, is the median of 5); panel (a) is that repetition and
-panel (b) shows the median with the range over all 5 repetitions. Caching: prefix
-caching on; the robot's ~11k history is a cold rebuild in every run, and the dashcams
-run the live 25 percent-per-device cloud service share.
+With a cold history, one robot question disrupts the fleet when it is answered in one go
+and only small pieces spare the fleet, but the pieces push the robot past its own
+deadline; a warm history avoids both. (a) Cumulative extra dashcam deadlines missed (the
+action's misses above the paired no-question control, each counted at its 0.916 s
+deadline) against time since the robot's question: answering in one go accrues a median
+of 59 extra misses in a burst that ends by about 7 s, 2,048-token pieces 28, while
+1,024-token pieces and the host-warm recall add 0. (b) But the robot's own answer time is
+3.56 s in one go, host-warm 0.69 s, and 6.10 s (2,048) and 6.87 s (1,024) for the pieces,
+the last two past the robot's 5 s deadline (dashed, D71). With a tight 27 GiB host the
+warmed history had been flushed by question time in 5 of 5 runs and cost the fleet what a
+cold one-go rebuild costs; only the 256 GiB host kept it warm. Caching: prefix caching
+on; one go and the pieces rebuild the robot's ~11k history from cold, while host-warm is
+a host reload (measured on the host tier in 5 of 5 Part B runs); the dashcams run the
+live one-request-per-two-seconds cloud service share. n = 20 dashcams over 5
+repetitions; in (a) the thick line is the median across repetitions at each time and the
+band is the minimum to maximum across them; in (b) the bar is the median and the whisker
+the minimum to maximum across the 5 repetitions.

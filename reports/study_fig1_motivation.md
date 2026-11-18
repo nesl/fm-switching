@@ -25,6 +25,13 @@ from different studies; M3a uses plain-number y ticks (3, 6, 10, 20); M3b adds "
 5.63 whole histories that fit the pool; 5.63 and the working-space note are kept in the
 JSON), and the "2.74" and "~0" value labels were moved off the error bars.
 
+**Revision 3 (2026-11-18).** M7 was redone from StudyMOT1-dayinlife amendment 2 Part B
+(the roomy 256 GiB host run with all five actions, one paired set), which adds the
+host-warm action. Panel (a) is now the cumulative count of extra missed deadlines over
+time, computed from the raw per-instant request records (not the 0.5 s bin fractions),
+with a median line and a min-to-max band over the 5 repetitions; panel (b) adds the
+host-warm bar. See the M7 section.
+
 ## Style and palette (shared, `plots/motivation/figstyle.py`)
 
 ACM sigconf sizing: single column 3.33 in, double column 7.0 in (M3b and M4 only),
@@ -247,29 +254,42 @@ committed anchor points, since only those two sizes have a committed cold-rebuil
 
 ---
 
-## M7 (figM7_dayinlife): day in the life (revision 2, new)
+## M7 (figM7_dayinlife): day in the life (revision 3)
 
-**Data.** StudyMOT1-dayinlife `results/motivation/mot1/mot1_figdata.json`. (a) per 0.5 s
-bin, the fraction of the 20 dashcams missing their 0.916 s deadline, for the no-question
-control and the three question shapes (one go, 2,048 pieces, 1,024 pieces), over the
-window around the question (question at 20 s; shown from 10 s before to 15 s after).
-(b) the robot's own answer time per shape: median with the range over all 5 repetitions.
+**Data.** StudyMOT1-dayinlife amendment 2 Part B only (roomy 256 GiB host, all five
+actions paired within a repetition). Panel (a) is computed from the raw per-instant
+records `results/motivation/mot1/mot1_requests.jsonl.gz` (the Part B runs labelled
+A2BR1..A2BR5, `kind="monitor"`); panel (b)'s robot TTFT comes from
+`results/motivation/mot1/mot1_figdata_amend2.json`. (a) cumulative extra missed dashcam
+deadlines over time since the question: for each action and repetition, each dashcam
+instant is a miss when its submit-to-last-token latency exceeds 0.916 s, and the extra
+count is the action's misses minus the paired NONE control's, accumulated by each
+instant's deadline time (`t_submit + 0.916 - (t0 + 20)`); the thick line is the median
+over the 5 repetitions at each time and the band is the min to max over them, for one go,
+2,048 pieces, 1,024 pieces and host-warm. (b) the robot's own answer time per action:
+median bar with the min-to-max whisker over the 5 repetitions.
 
-**Selection rule.** Representative repetition 3, the repetition whose one-go extra-miss
-count (57) is the median of the 5 (the figdata's own `representative_rule`). Never the
-HOLDOUT or the failed first design (the first design, which exceeded the 32B one-frame
-peak at every N, is StudyMOT1 sections 1-4 and is not used).
+**Selection rule.** Amendment 2 Part B, not Part A (Part A is the tight 27 GiB host, a
+caption block only). The HOST-WARM gate was checked before plotting: Part B host-warm was
+measured on the host tier in 5 of 5 repetitions (the STOP condition did not fire). The
+first design and the HOLDOUT are not used.
 
-**Checks (against `study_mot1_dayinlife.md` section 6).** Extra missed instants (median):
-one go 57, 2,048 pieces 24, 1,024 pieces 0, exact. Robot TTFT from the question (median
-over 5 reps): 3.47 / 5.90 / 6.79 s (ratios 0.999 / 1.001 / 0.999). N = 20, deadline
-0.916 s, question at 20 s, representative rep 3, all reproduced.
+**Checks (against `study_mot1_dayinlife.md` sections 10.2 and 10.3).** Cumulative extra
+missed instants reproduced from the raw records exactly match the figdata per-repetition
+totals: one go [66, 74, 57, 59, 57] median 59; 2,048 pieces [28, 41, 28, 27, 27] median
+28; 1,024 pieces and host-warm 0 in all 5 (NONE controls 0 missed in all 5). Robot TTFT
+from the question (median over 5 reps): 3.56 / 6.10 / 6.87 / 0.69 s (ratios 0.999 /
+1.001 / 1.000 / 0.994 against the report's rounded values). Part A: measured COLD in 5 of
+5, as predicted. N = 20, deadline 0.916 s, question at 20 s, all reproduced.
 
-**Judgement.** Panel (a) is the single representative repetition (per the figdata rule),
-so its curves are that run's actual per-bin miss fractions; panel (b) carries the
-5-repetition median and range, as the brief asked. The dashed line is the robot's 5 s
-answer-time target (D71). Only the two allowed annotations are drawn: the per-action
-extra-miss counts in (a) and the target line in (b).
+**Judgement.** Panel (a) is not a single representative repetition any more: it is the
+median-and-range over all 5 Part B repetitions, built from the raw per-instant misses, so
+the plateau of each curve equals that action's per-repetition extra-miss median (59 / 28
+/ 0 / 0). The two zero curves (1,024 pieces, host-warm) coincide at y = 0; their data are
+not offset, only their end labels. The dashed line is the robot's 5 s deadline (D71). The
+caption carries one Part A sentence (flushed in 5 of 5 under the 27 GiB host). Caching is
+stated: one go and the pieces rebuild from cold, host-warm is a host reload measured on
+the host tier.
 
 ---
 

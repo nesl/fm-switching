@@ -1,81 +1,166 @@
 {
   "figure": "M7",
-  "message": "One robot question in one go disrupts the whole fleet; small pieces remove that but push the robot past its own deadline; no fixed shape serves both.",
-  "source_file": "results/motivation/mot1/mot1_figdata.json (representative repetition 3)",
-  "representative_rep": 3,
-  "representative_rule": "the repetition whose ONE-GO extra-miss count is the median of the 5",
+  "revision": 3,
+  "message": "With a cold history, one go disrupts the fleet and small pieces make the robot late; a warm history avoids both.",
+  "design": "amendment 2 Part B only (roomy 256 GiB host, all five actions, one consistent paired set); panel (a) computed from the raw per-instant records, not from the 0.5 s bin fractions.",
+  "sources": {
+    "panel_a_raw": "results/motivation/mot1/mot1_requests.jsonl.gz (kind=monitor, label A2BR1..A2BR5; each action paired to its own-repetition NONE control)",
+    "panel_b": "results/motivation/mot1/mot1_figdata_amend2.json robot_ttft_s per_rep"
+  },
   "N_dashcams": 20,
   "deadline_s": 0.916,
-  "bin_s": 0.5,
   "question_at_s": 20.0,
-  "panel_a_extra_missed_median": {
-    "ONE-GO": 57,
-    "P2048": 24,
-    "P1024": 0
+  "panel_a_definition": "cumulative (action missed instants minus paired NONE missed instants) ordered by each instant's deadline time = t_submit + 0.916 - (t0 + 20); thick line = median over 5 reps at each time, band = min to max over reps",
+  "panel_a_final_extra_missed": {
+    "ONE-GO": {
+      "median": 59,
+      "per_rep": [
+        66,
+        74,
+        57,
+        59,
+        57
+      ],
+      "min": 57,
+      "max": 74
+    },
+    "P2048": {
+      "median": 28,
+      "per_rep": [
+        28,
+        41,
+        28,
+        27,
+        27
+      ],
+      "min": 27,
+      "max": 41
+    },
+    "P1024": {
+      "median": 0,
+      "per_rep": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "min": 0,
+      "max": 0
+    },
+    "HOST-WARM": {
+      "median": 0,
+      "per_rep": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "min": 0,
+      "max": 0
+    }
   },
   "panel_b_robot_ttft_s": {
     "ONE-GO": {
-      "median": 3.466,
+      "median": 3.5575,
       "per_rep": [
-        4.9784,
-        3.6517,
-        3.4655,
-        3.2383,
-        3.2937
+        4.9556,
+        4.018,
+        3.2859,
+        3.4973,
+        3.5575
       ],
-      "min": 3.2383,
-      "max": 4.9784
+      "min": 3.2859,
+      "max": 4.9556
     },
     "P2048": {
-      "median": 5.904,
+      "median": 6.1044,
       "per_rep": [
-        5.9036,
-        6.3556,
-        5.4053,
-        5.9616,
-        5.2375
+        6.1125,
+        6.4646,
+        5.1158,
+        6.1044,
+        4.9903
       ],
-      "min": 5.2375,
-      "max": 6.3556
+      "min": 4.9903,
+      "max": 6.4646
     },
     "P1024": {
-      "median": 6.785,
+      "median": 6.8721,
       "per_rep": [
-        6.895,
-        7.2455,
-        6.7854,
-        6.4605,
-        6.4527
+        7.3368,
+        7.9341,
+        6.8721,
+        6.5102,
+        6.6658
       ],
-      "min": 6.4527,
-      "max": 7.2455
+      "min": 6.5102,
+      "max": 7.9341
+    },
+    "HOST-WARM": {
+      "median": 0.6857,
+      "per_rep": [
+        0.3615,
+        0.7905,
+        0.7599,
+        0.6345,
+        0.6857
+      ],
+      "min": 0.3615,
+      "max": 0.7905
     }
   },
-  "robot_target_s": 5.0,
-  "report": "reports/study_mot1_dayinlife.md section 6",
+  "robot_deadline_s": 5.0,
+  "hostwarm_measured_tier_partB": [
+    "HOST",
+    "HOST",
+    "HOST",
+    "HOST",
+    "HOST"
+  ],
+  "partA_tight_host": {
+    "measured_tier": [
+      "COLD",
+      "COLD",
+      "COLD",
+      "COLD",
+      "COLD"
+    ],
+    "k_flushed_of_5": 5,
+    "caption_sentence": "With tight host memory (27 GiB), the warmed history had been flushed by question time in 5 of 5 runs."
+  },
+  "report": "reports/study_mot1_dayinlife.md sections 10.2 and 10.3",
   "report_values": {
-    "extra_missed": {
-      "ONE-GO": 57,
-      "P2048": 24,
-      "P1024": 0
+    "extra_missed_median": {
+      "ONE-GO": 59,
+      "P2048": 28,
+      "P1024": 0,
+      "HOST-WARM": 0
     },
     "robot_ttft_from_question": {
-      "ONE-GO": 3.47,
-      "P2048": 5.9,
-      "P1024": 6.79
+      "ONE-GO": 3.56,
+      "P2048": 6.1,
+      "P1024": 6.87,
+      "HOST-WARM": 0.69
     },
     "N": 20,
     "deadline_s": 0.916,
-    "question_at_s": 20
+    "question_at_s": 20,
+    "hostwarm_tier": "HOST in 5 of 5",
+    "partA_flushed": "COLD in 5 of 5"
   },
   "checks": {
     "extra_onego": true,
     "extra_2048": true,
     "extra_1024": true,
-    "robot_onego": 0.9987,
-    "robot_2048": 1.0006,
-    "robot_1024": 0.9993,
-    "rep_is_3": true,
+    "extra_hostwarm": true,
+    "robot_onego": 0.9993,
+    "robot_2048": 1.0007,
+    "robot_1024": 1.0003,
+    "robot_hostwarm": 0.9938,
+    "hostwarm_all_HOST": true,
+    "partA_all_flushed": true,
     "N_is_20": true
   },
   "outputs": {
