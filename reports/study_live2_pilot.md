@@ -65,7 +65,7 @@ were not produced. The cache-isolation result is LIVE2-pre's Part 3 (PASS). Bloc
 
 New: `experiments/orchestration/study_live2_pilot.py`, `reports/study_live2_pilot.md`,
 `results/orchestration/live2/pilot/` (`pilot_runs.jsonl`, `pilot.log`, `runs/device-only_n8_tight/`,
-`runs/edf_n8_tight/` with header, run_meta, outcomes, request / decision / residency logs, coordinator result). Traces
+`runs/edf_n8_tight/` with header, run_meta, outcomes, request / decision / residency logs, coordinator result; `runs/policy-core_n8_tight/` holds only what was written before the stop interrupted its server start, no requests and no data). Traces
 and frame symlinks under `~/data/live2/` (regenerable: `fleet/trace.py --seed 0 --devices 8 --ratio 50:50 --run-s 120
 --mode A --frame-manifest ~/data/live2/jpeg/combined_manifest.jsonl`). Changed: `research/EXPERIMENTS.md`,
 `results/INDEX.md`, `research/STATUS.md`.
