@@ -19,6 +19,7 @@ from .engine import EngineModel
 from .flags import Flags
 from .profiles import MissingEvidence, Profiles
 from .readiness import state_actions, state_value, tier_assignment
+from . import closed_form as CF
 from .rollout import Rollout, delta_j
 from .state import Episode, Fleet, Job, PendingItem
 from .utility import t_ready_s
@@ -46,6 +47,12 @@ class Coordinator:
     residency_belief: Any = None
     decisions: List[Decision] = field(default_factory=list)
     scoring_calls: int = 0
+    # StudyLIVE2-perf Option B (spec 6.5), OFF BY DEFAULT and enabled nowhere. "rollout" is the
+    # path every committed run takes; "closed_form" prices SH admission by the closed form;
+    # "shadow" computes both, decides with the rollout, and logs the pair.
+    sh_cost: str = "rollout"
+    sh_shadow: List[Dict[str, Any]] = field(default_factory=list)
+    sh_closed_form_calls: int = 0
     tables: GhatTables = None
     sh_trigger: TriggerFamily = None
     ghat_calls: int = 0
@@ -161,6 +168,42 @@ class Coordinator:
                 rival.append(dict(item_id=it.item_id, kind=it.kind, ghat=None))
         return dict(any=bool(rival), items=rival[:8], n=len(rival))
 
+    def _admit_score(self, fleet: Fleet, req, items, jobs) -> Dict[str, Any]:
+        """StudyLIVE2-perf Option B, OFF BY DEFAULT. The narrow hook for spec 6.5.
+
+        With `sh_cost = "rollout"`, which is the default and the only mode any committed run
+        uses, this is the call it replaced, argument for argument, so the default path is
+        untouched. "closed_form" prices an SH admission by `closed_form.sh_admit_delta_j`.
+        "shadow" computes BOTH and DECIDES WITH THE ROLLOUT, logging the pair for the divergence
+        study, so it cannot change a decision.
+
+        Piece release and recall jobs never reach the closed form: only `task == "SH"` is
+        routed, this hook sits only in `escalate` and not in `_admission`, and
+        `sh_admit_delta_j` itself refuses anything but one lone episode call.
+        """
+        mode = getattr(self, "sh_cost", "rollout")
+        if mode not in CF.SH_COST_MODES:
+            raise ValueError("sh_cost must be one of %s, got %r" % (CF.SH_COST_MODES, mode))
+        action = dict(kind="admit", items=items, jobs=jobs)
+        if mode == "rollout" or getattr(req, "task", None) != "SH":
+            return delta_j(self.rollout, fleet, action)
+        if mode == "closed_form":
+            self.sh_closed_form_calls += 1
+            return CF.sh_admit_delta_j(self.rollout, fleet, items, jobs)
+        roll = delta_j(self.rollout, fleet, action)
+        cf = CF.sh_admit_delta_j(self.rollout, fleet, items, jobs)
+        self.sh_shadow.append(dict(
+            t=float(fleet.t), device=str(req.device),
+            delta_j_rollout=float(roll["delta_j"]), delta_j_closed_form=float(cf["delta_j"]),
+            admit_rollout=bool(roll["delta_j"] > 0),
+            admit_closed_form=bool(cf["delta_j"] > 0),
+            n_devices=len(fleet.devices),
+            backlog_queued_tokens=sum(max(int(p.tokens), 0) for p in fleet.pending),
+            backlog_running_requests=len(fleet.in_flight),
+            backlog_queued_requests=len(fleet.pending),
+            load_factor=float(cf["load_factor"]["lf"]), terms=cf["terms"]))
+        return roll
+
     def escalate(self, fleet: Fleet, req: EscalationRequest) -> List[Decision]:
         """Addendum A2 as revised: a QUERY IS SENT COMPLETE BY DEFAULT, question plus whatever
         payload the cloud lacks, and the cloud runs admission on arrival and DISCARDS it if
@@ -222,7 +265,7 @@ class Coordinator:
                              "no feasible plan for this request",
                              detail=dict(basis="ghat", ghat=g["ghat"], terms=g["terms"],
                                          path=req.path, path_choice=path_detail))]
-        res = delta_j(self.rollout, fleet, dict(kind="admit", items=items, jobs=jobs))
+        res = self._admit_score(fleet, req, items, jobs)
         self.scoring_calls += 1
         take = res["delta_j"] > 0
         if take:

@@ -1,0 +1,114 @@
+{
+ "check": "option_b_m_b3_speed",
+ "is_measurement": false,
+ "label": "dry-run committed fixtures, Option 0 on, mu estimated",
+ "window_s": 60.0,
+ "seed": 1,
+ "H_s": 1.0,
+ "rows": [
+  {
+   "n_devices": 32,
+   "sh_cost": "rollout",
+   "decision_latency_ms": {
+    "p50": 3.0092,
+    "p99": 53.4168,
+    "max": 64.4962,
+    "n": 601
+   },
+   "n_decisions": 1688,
+   "n_requests": 888,
+   "cpu_s": 4.944,
+   "wall_s": 4.944,
+   "sh_closed_form_calls": 0,
+   "scoring_calls": null
+  },
+  {
+   "n_devices": 32,
+   "sh_cost": "closed_form",
+   "decision_latency_ms": {
+    "p50": 2.2179,
+    "p99": 51.9668,
+    "max": 77.9236,
+    "n": 601
+   },
+   "n_decisions": 1688,
+   "n_requests": 888,
+   "cpu_s": 4.342,
+   "wall_s": 4.342,
+   "sh_closed_form_calls": 1904,
+   "scoring_calls": null
+  },
+  {
+   "n_devices": 64,
+   "sh_cost": "rollout",
+   "decision_latency_ms": {
+    "p50": 5.7472,
+    "p99": 158.3812,
+    "max": 164.265,
+    "n": 601
+   },
+   "n_decisions": 2488,
+   "n_requests": 888,
+   "cpu_s": 13.176,
+   "wall_s": 13.178,
+   "sh_closed_form_calls": 0,
+   "scoring_calls": null
+  },
+  {
+   "n_devices": 64,
+   "sh_cost": "closed_form",
+   "decision_latency_ms": {
+    "p50": 3.2558,
+    "p99": 156.9719,
+    "max": 197.7486,
+    "n": 601
+   },
+   "n_decisions": 2488,
+   "n_requests": 888,
+   "cpu_s": 11.37,
+   "wall_s": 11.38,
+   "sh_closed_form_calls": 3808,
+   "scoring_calls": null
+  },
+  {
+   "n_devices": 128,
+   "sh_cost": "rollout",
+   "decision_latency_ms": {
+    "p50": 12.0869,
+    "p99": 460.7308,
+    "max": 784.0821,
+    "n": 601
+   },
+   "n_decisions": 4088,
+   "n_requests": 888,
+   "cpu_s": 39.997,
+   "wall_s": 40.009,
+   "sh_closed_form_calls": 0,
+   "scoring_calls": null
+  },
+  {
+   "n_devices": 128,
+   "sh_cost": "closed_form",
+   "decision_latency_ms": {
+    "p50": 5.1263,
+    "p99": 601.3047,
+    "max": 1771.2793,
+    "n": 601
+   },
+   "n_decisions": 4020,
+   "n_requests": 888,
+   "cpu_s": 44.734,
+   "wall_s": 44.755,
+   "sh_closed_form_calls": 7616,
+   "scoring_calls": null
+  }
+ ],
+ "_provenance": {
+  "git_commit": "53b825266483117803c74260877c865a5331bfcf",
+  "script": "measure_option_b.py::m_b3",
+  "model": "none",
+  "timestamp": "2026-11-18T13:51:08.088298",
+  "device": "flash_cpu",
+  "n": 6
+ }
+}

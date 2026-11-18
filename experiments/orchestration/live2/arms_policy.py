@@ -41,6 +41,7 @@ from arms import Live2ArmMixin                                          # noqa: 
 from policy import calibration as CAL                                   # noqa: E402
 from policy.coordinator import Coordinator                              # noqa: E402
 from policy.demand import Demand                                        # noqa: E402
+from policy import closed_form as CF                                    # noqa: E402
 from policy.eng1_engine import ENGINE_MODELS
 from policy.eng1_engine_fast import Eng1Engine   # StudyLIVE2-perf: the live path, see its docstring                # noqa: E402
 from policy.escalation import EscalationRequest                         # noqa: E402
@@ -84,6 +85,11 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     # selectable so the equivalence test has something to compare against. The two must produce
     # IDENTICAL decision logs, which is what the test asserts.
     impl: str = "fast"
+    # StudyLIVE2-perf Option B (spec 6.5), BUILT OFF. "rollout" is the default and the only
+    # value any committed run uses; the other two exist so the fallback can be measured without
+    # being enabled. A config switch and nothing else: this arm's behaviour at the default is
+    # byte for byte what it was.
+    sh_cost: str = "rollout"
     # D99 (4): the cap on how many pending items get a full DeltaJ evaluation per decision
     # period, applied to BOTH full-DeltaJ paths (the release loop and SH admission); the rest
     # wait in pi_0 order for the next period. None is UNLIMITED. It is set on the Params
@@ -184,6 +190,10 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         self.rollout.clone_impl = self._clone_impl
         self.co = Coordinator(self.pf, p, self.flags, self.engine, self.rollout,
                               residency_belief=self.residency)
+        if self.sh_cost not in CF.SH_COST_MODES:
+            raise ValueError("--sh-cost must be one of %s, got %r"
+                             % (CF.SH_COST_MODES, self.sh_cost))
+        self.co.sh_cost = self.sh_cost
         self.fleet = Fleet(t=0.0)
         self._roster: Dict[str, Any] = dict(devices={}, session_device={})
         self._jobs_by_q: Dict[str, str] = {}
