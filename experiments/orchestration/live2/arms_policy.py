@@ -259,6 +259,12 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     def decide(self, obs: Observation) -> Action:
         if not self._ready:
             raise RuntimeError("live2_configure must run before the policy arm decides")
+        # StudyLIVE2-perf Option 0: the terminal state-value memo is scoped to ONE decision
+        # period. Clearing it here is what makes that true, and it bounds any key error to a
+        # single period rather than a whole run.
+        ro = getattr(self.co, "rollout", None)
+        if ro is not None and hasattr(ro, "state_value_cache"):
+            ro.state_value_cache().clear()
         self._sync(obs)
         self._prune(float(obs.now_s))
         self._apply_partial_readiness()
@@ -646,6 +652,9 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         self.stats["release_cap_bound_passes"] = int(getattr(self.co, "cap_bound_passes", 0))
         self.stats["release_cap_skipped_items"] = int(getattr(self.co, "cap_skipped_items", 0))
         self.stats["scoring_calls"] = int(getattr(self.co, "scoring_calls", 0))
+        ro = getattr(self.co, "rollout", None)
+        if ro is not None and hasattr(ro, "state_value_cache"):
+            self.stats["state_value_cache"] = ro.state_value_cache().stats()
         self.stats.update(self.live2_sh_audit())
 
     def _update_mu_samples(self) -> None:

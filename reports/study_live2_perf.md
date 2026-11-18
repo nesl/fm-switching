@@ -17,24 +17,27 @@ on the committed 180 s dry fixture, after the 1.4 to 1.6x speed-up this row deli
 
 | devices | decision p50 | decision p99 | over the 100 ms period |
 |---|---|---|---|
-| 32 | 22.5 ms | 111.7 ms | 1.1x |
-| 64 | 55.9 ms | 280.7 ms | 2.8x |
-| 128 | 139.4 ms | 1,149.7 ms | 11.5x |
+| 32 | 20.2 ms | 100.6 ms | 1.01x |
+| 64 | 50.7 ms | 252.5 ms | 2.5x |
+| 128 | 121.6 ms | 994.8 ms | 9.9x |
 
-The cost is superlinear in fleet size: 111.7 to 280.7 is 2.51x for a doubling, and 280.7 to
-1,149.7 is 4.10x, so the empirical exponent runs from about 1.3 to 2.0. The reason is visible in
+(Updated after Option 0 was implemented; see `study_live2_coord.md` section P7.) The cost is
+superlinear in fleet size: 100.6 to 252.5 is 2.51x for a doubling, and 252.5 to 994.8 is 3.94x,
+so the empirical exponent runs from about 1.3 to 2.0. The reason is visible in
 the profile and in the code, and it is a product of two factors:
 
 * **candidates per period.** Every undecided SH instant is a candidate (D62), and each is priced
-  by its own rollout. At 8 devices, 571 of 580 epochs already take more than one decision and the
-  worst takes 6; the count grows with the fleet.
+  by its own rollout. MEASURED (`policy/measure_rollout_reuse.py`, 120 s fixtures): the median
+  period runs 14 rollouts at 8 devices, 40 at 32 and **60 at 64**, with a p90 of 172 and a worst
+  period of 344 at 64 devices. An earlier draft of this note estimated "around 30" at 64 devices;
+  the real number is twice that at the median and far worse in the tail.
 * **devices per rollout.** `Rollout._terminal` sums a state value over every device and every
   representation it holds (`policy/rollout.py`, the loop over `f.devices` calling
   `readiness.state_value`), so one rollout is O(devices). It is 36.9 s of a 71.3 s profiled
   64-device cell.
 
-Only 32 devices is now within reach of the period (1.1x over). The gap to close is 2.8x at 64
-and 11.5x at 128.
+32 devices now MEETS the period (1.01x, inside run-to-run variation). The gap left to close is
+2.5x at 64 and 9.9x at 128.
 
 So the per-period cost is roughly O(candidates x devices), which at a fixed ratio of candidates
 to devices is O(devices^2). **Any option that does not attack one of those two factors cannot
@@ -69,6 +72,11 @@ candidates and each admit touches one device, the terminal sum goes from O(k x d
 O(devices + k). On the profile that is most of the 36.9 s `_terminal` share, so a 64-device cell
 would plausibly land near or under 100 ms at p99. It does not help the first rollout of a period,
 only the second onward, so it is worth least at k = 1 and most where the problem is worst.
+
+**IMPLEMENTED 2026-11-18 and reported in `study_live2_coord.md` section P7.** The premise held:
+the memo serves 98.9 % of calls at 64 devices. The gain was smaller than the hit rate suggests
+(1.11 to 1.16x on the 180 s fixture, 1.52x on a 60 s one) because the terminal sum is a large
+share of a rollout but not all of it. 32 devices now meets the period; 64 and 128 do not.
 
 *Fidelity risk.* Zero in principle, and entirely concentrated in one engineering question: is the
 key complete? A missing field means a stale value and a silently different decision. The
@@ -173,6 +181,14 @@ decision-preserving in principle, which makes it the most attractive and the har
 on how much of a rollout is shared between successive candidates, which is not yet measured and
 is the first thing to find out: if the admit perturbs the schedule early, little is reusable.
 
+*MEASURED 2026-11-18, and the measurement closes the option: see `study_live2_coord.md` section
+P8.* The inputs of consecutive candidates are nearly identical (the median pair shares every
+device and every job), but the trajectory diverges at 7.6 % of the horizon at 8 devices and
+22.1 % at 64, and only about a third of the opportunity rows form a reusable prefix. The ceiling
+on what an incremental rollout could save is therefore roughly a fifth to a quarter of each
+rollout body, about 1.3x, against a 2.5x gap at 64 devices. Option 0 already beat that ceiling by
+exploiting the input sharing instead. **Not worth building.**
+
 *Fidelity risk.* Low in principle and high in practice, for a specific reason: it replaces a
 property that currently holds by construction with one that has to be maintained by hand. Today
 each rollout starts from a fresh clone (`clone_for_rollout`), so cross-contamination between
@@ -199,6 +215,14 @@ measurement is cheap and either kills the option or justifies it; then **Option 
 divergence study**, because it quantifies a fidelity cost from logs we already have. Option B
 last, not because it is worst but because it is the only one whose precondition is a full T0 run,
 and it should not be reached for before the two decision-preserving routes have been exhausted.
+
+**STATUS 2026-11-18.** Option 0 is implemented and 32 devices now meets the period. Option C is
+measured and closed: the reuse ceiling is about 1.3x, below what Option 0 already delivered.
+Options A and B are NOT implemented and are not to be, pending what the H100 pilot shows about
+what the policy's decision delay actually costs it; with the submission-stamp fix in place that
+delay is paid as submit delay rather than as emulator lateness, so the pilot can now measure its
+price instead of being invalidated by it. Both decision-preserving routes are now exhausted,
+which is the condition this note set for reaching for Option B.
 
 If none of them closes the gap, the honest outcome is the one this row already reported: the
 uncapped policy does not keep up at 64 and 128 devices on flash CPU, that is a property of the

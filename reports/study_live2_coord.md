@@ -2045,3 +2045,90 @@ therefore does not change: the uncapped policy does not keep up at 64 and 128 de
 is reported, and the cap stays off. The remaining options are a design question, not an
 implementation one, and they are written up in `reports/study_live2_perf.md` under "Bounding
 decision cost: options" as a design note with no code.
+
+## P7. Option 0 implemented: the terminal state-value memo
+
+The design note's Option 0, which is the only one that cannot change a decision.
+`readiness.StateValueCache` memoises `state_value` WITHIN one decision period;
+`arms_policy.decide` clears it at the start of every period, which is what makes the scope real
+and bounds any key error to one period instead of a run. All three paths are kept: `on`, `off`
+(the pre-Option-0 path) and `shadow`.
+
+**The key is held to its claim, not asserted.** `readiness.state_value_key` names every input the
+returned dict depends on, derived term by term from the body: the belief's probabilities, size
+and staleness; `demand.rate_rc(rep, in_episode)` and `conditional_rate_enabled`; `link.down_s()`,
+which is the only link quantity reached (`_u_rc_from_tier` always passes `unsent_frames = 0`, so
+`up_s` is never called); `h_s`, `deadline_s`, `omega_rc`, `rep`, `qtype`, `exclude_job`,
+`credit_allowed`; and the profile's identity. `policy/tests/test_readiness_state_value_cache.py`,
+14 tests, checks it three ways:
+
+| test group | what it establishes |
+|---|---|
+| per field (8 tests) | perturb each named input, then ask the cache again: the key must change AND the answer must equal a fresh uncached computation. A key that missed a field would serve the stale value and fail. Whether a field moves the value is reported, not required, because a value can sit on a plateau where it genuinely does not matter. |
+| shadow mode on a real cell | 8 + 8 devices over 60 s with both values computed on every call: **44,065 shadow checks, zero mismatches**. A shorter cell is useless here because no robot has built a history yet and the terminal loop never runs, which is itself worth knowing. |
+| the negative control | the key is deliberately broken (the belief dropped) and shadow mode is required to RAISE. Without this, the test above could pass because the machinery never fires. |
+| period scope | the cache is cleared exactly once per decision period, counted against the decision-latency sample count rather than the logged-decision count, and the entries alive at the end belong to the last period only |
+| a hit is a copy | a caller that mutates a returned dict cannot poison later hits |
+
+**The premise holds and the hit rate says so.** On the 120 s fixtures the memo serves
+93.6 % of calls at 8 devices, 98.3 % at 32 and **98.9 % at 64** (2,409,856 calls, 32 live entries
+at any time). That is the quantitative version of the design note's claim that successive
+candidates in a period differ only in the devices the earlier admits touched.
+
+**Decision latency, committed 180 s fixture:**
+
+| devices | p50 | p99 | max | p99 before Option 0 | committed baseline | total for the row |
+|---|---|---|---|---|---|---|
+| 32 | 20.183 ms | **100.590 ms** | 104.340 ms | 111.652 ms | 214.0 ms | **2.13x** |
+| 64 | 50.703 ms | **252.542 ms** | 310.383 ms | 280.731 ms | 545.4 ms | **2.16x** |
+| 128 | 121.605 ms | **994.789 ms** | 1,477.621 ms | 1,149.689 ms | 2,152.6 ms | **2.16x** |
+
+D99 equivalence 6 of 6 byte-identical, reference-to-fast now **7.89 to 11.20x** (committed 6.0 to
+7.1x). Option 0 is worth 1.11 / 1.11 / 1.16x on this fixture; it is worth more on a shorter one
+(1.52x at 64 devices over 60 s), because the hit rate is the same but the per-period candidate
+count differs.
+
+**32 devices now meets the period**, at 100.590 ms against 100 ms, which is 1.006x and inside
+run-to-run variation. 64 is 2.5x over and 128 is 9.9x over, so the row's verdict still stands for
+those two sizes.
+
+## P8. Option C measured, and the measurement kills it
+
+Measurement only, no implementation, exactly as the design note proposed: find out how much is
+reusable BEFORE building anything. `policy/measure_rollout_reuse.py` wraps `Rollout.run` from
+outside, fingerprints what each call was given and what it returned, and compares consecutive
+candidates within a period. Dry-run fixtures, 120 s, seed 1.
+
+| | 8 devices | 32 devices | 64 devices |
+|---|---|---|---|
+| rollouts | 14,538 | 52,326 | 85,576 |
+| periods / with more than one rollout | 930 / 930 | 1,200 / 1,200 | 1,200 / 1,200 |
+| rollouts per period, median / p90 / max | 14 / 22 / 46 | 40 / 70 / 216 | **60 / 172 / 344** |
+| INPUT: devices identical, median / min | 1.000 / 0.500 | 1.000 / 0.750 | 1.000 / 0.857 |
+| INPUT: jobs identical, median | 1.000 | 1.000 | 1.000 |
+| INPUT: pending list identical | 85.7 % | 92.1 % | 95.0 % |
+| INPUT: in-flight list identical | 92.8 % | 96.2 % | 97.7 % |
+| OUTPUT: delivery rows identical, median | 0.500 | 0.714 | 0.727 |
+| OUTPUT: opportunity rows, reusable PREFIX, median | 0.300 | 0.300 | 0.333 |
+| OUTPUT: **first divergence, as a fraction of H** | **0.076** | **0.199** | **0.221** |
+| OUTPUT: rollout totals identical | 29.3 % | 21.9 % | 24.2 % |
+
+**The finding, and it is a clean negative for Option C.** The INPUTS of consecutive candidates
+are nearly identical, which is exactly why Option 0 works: the median pair shares every device
+and every job, and shares the pending list outright 85 to 95 % of the time. But the TRAJECTORY
+diverges almost immediately: the first differing row appears at **7.6 % of the horizon at 8
+devices and 22.1 % at 64**, and only about a third of the opportunity rows are a reusable prefix.
+An incremental rollout can only carry forward the prefix before the first difference, so the
+ceiling on what it could save is roughly a fifth to a quarter of each rollout body, about 1.3x at
+best, against a 2.5x gap at 64 devices. Option 0, which exploits the INPUT sharing the same
+measurement shows is near-total, already beat that ceiling.
+
+**So Option C is not worth building, and the measurement cost one script to establish rather than
+an implementation to abandon.** That is the outcome the design note hoped for when it put the
+measurement first.
+
+**One correction to the design note.** It estimated "around 30 candidates" per period at 64
+devices. The measured median is 60, the p90 is 172 and the worst period runs 344 rollouts. That
+makes the candidates factor larger than assumed, which strengthens the case for the options that
+attack it (A and B) and weakens nothing above, since Option 0 attacks the other factor. The note
+has been updated.

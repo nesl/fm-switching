@@ -6,7 +6,7 @@ counted twice.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from .state import TIERS, Device, colder
@@ -32,9 +32,82 @@ def _u_rc_from_tier(pf, qtype: str, rep: str, tier: str, size_tokens: int, stale
     return u_rc(pf, qtype, rep, tr["total"], t_queue, link, deadline_s)[0]
 
 
+@dataclass
+class StateValueCache:
+    """StudyLIVE2-perf Option 0: the terminal state-value sum, memoised WITHIN one period.
+
+    WHY IT IS SAFE. `state_value` is a pure function of its arguments, and `Rollout._terminal`
+    recomputes it for EVERY device and representation on every candidate's rollout, while the
+    candidates of one period differ only in the devices the earlier admits touched. The value a
+    hit returns is the value that would have been computed, so no decision changes.
+
+    WHY IT IS SCOPED TO A PERIOD. Nothing here notices a change the key does not name, so the
+    cache is cleared at the start of every decision period (`arms_policy.decide`). That bounds
+    any key error to one period instead of a whole run, and it is also the only window in which
+    the entries are worth keeping.
+
+    THE THREE MODES, all kept:
+      "on"      use the cache
+      "off"     ignore it and compute, which is the pre-Option-0 path, byte for byte
+      "shadow"  compute BOTH on every call and raise if they differ, which is how the key's
+                completeness is tested rather than asserted
+
+    A hit returns a COPY. The computed dict is handed to callers that put it in their own detail
+    rows, and one caller mutating a shared dict would poison every later hit.
+    """
+
+    mode: str = "on"
+    values: Dict[Any, Dict[str, Any]] = field(default_factory=dict)
+    hits: int = 0
+    misses: int = 0
+    shadow_checks: int = 0
+    clears: int = 0
+
+    def __post_init__(self) -> None:
+        if self.mode not in ("on", "off", "shadow"):
+            raise ValueError("StateValueCache.mode must be on, off or shadow, got %r"
+                             % (self.mode,))
+
+    def clear(self) -> None:
+        self.values.clear()
+        self.clears += 1
+
+    def stats(self) -> Dict[str, Any]:
+        n = self.hits + self.misses
+        return dict(mode=self.mode, hits=self.hits, misses=self.misses, clears=self.clears,
+                    shadow_checks=self.shadow_checks, n_calls=n,
+                    hit_fraction=(round(self.hits / n, 6) if n else None),
+                    live_entries=len(self.values))
+
+
+def state_value_key(pf, device: Device, rep: str, demand, h_s: float, qtype: str, link,
+                    deadline_s: float, omega_rc: float, in_episode: bool,
+                    exclude_job: Optional[str], credit_allowed: bool):
+    """EVERY input the returned dict depends on, and nothing else.
+
+    Derived from the body of `state_value` term by term: `p_need` is
+    `demand.rate_rc(rep, in_episode)` through `h_s`; `u_here` and `u_next_colder` come from the
+    belief's probabilities, size and staleness through `_u_rc_from_tier`, which reads the link
+    only as `link.down_s()` (its `unsent_frames` is always 0 here, so `up_s` is never called);
+    `u_device` and the tier accuracies are pure in `pf`; and `rep`, `exclude_job`,
+    `credit_allowed` and `conditional_rate_used` appear in the output directly.
+    `test_readiness_state_value_cache.py` holds this list to that claim by perturbing each entry
+    in turn and requiring the value to follow.
+    """
+    b = device.history[rep]
+    return (id(pf), rep, qtype, float(h_s), float(deadline_s), float(omega_rc),
+            bool(in_episode), bool(credit_allowed), exclude_job,
+            int(b.size_tokens), float(b.staleness_s),
+            tuple(sorted((str(t), float(pp)) for t, pp in b.probs.items())),
+            float(demand.rate_rc(rep, in_episode)),
+            bool(demand.conditional_rate_enabled),
+            float(link.down_s()))
+
+
 def state_value(pf, device: Device, rep: str, demand, h_s: float, qtype: str, link,
                 deadline_s: float, omega_rc: float, in_episode: bool = False,
-                exclude_job: Optional[str] = None, credit_allowed: bool = True) -> Dict[str, Any]:
+                exclude_job: Optional[str] = None, credit_allowed: bool = True,
+                cache: Optional[StateValueCache] = None) -> Dict[str, Any]:
     """Spec 6.1, with addendum A6.3's single-counting rule made explicit.
 
     This value is for FUTURE ARRIVALS only: it is P(a question arrives within H_s) times the gain
@@ -42,6 +115,34 @@ def state_value(pf, device: Device, rep: str, demand, h_s: float, qtype: str, li
     continuation value (5.4) and never here, so the two can both be counted for the same prefix
     without double counting, which is exactly what A6.3 asks for. `exclude_job` records which
     in-progress job this prefix is already carrying, so the assertion can check it."""
+    if cache is not None and cache.mode != "off":
+        key = state_value_key(pf, device, rep, demand, h_s, qtype, link, deadline_s, omega_rc,
+                              in_episode, exclude_job, credit_allowed)
+        hit = cache.values.get(key)
+        if hit is not None and cache.mode == "on":
+            cache.hits += 1
+            return dict(hit)
+        got = _state_value(pf, device, rep, demand, h_s, qtype, link, deadline_s, omega_rc,
+                           in_episode, exclude_job, credit_allowed)
+        if hit is not None:
+            cache.shadow_checks += 1
+            if hit != got:
+                raise AssertionError(
+                    "StateValueCache shadow mode: the cached value is not the computed value, "
+                    "so the key is incomplete.\n  key      %r\n  cached   %r\n  computed %r"
+                    % (key, hit, got))
+            cache.hits += 1
+        else:
+            cache.misses += 1
+            cache.values[key] = dict(got)
+        return got
+    return _state_value(pf, device, rep, demand, h_s, qtype, link, deadline_s, omega_rc,
+                        in_episode, exclude_job, credit_allowed)
+
+
+def _state_value(pf, device: Device, rep: str, demand, h_s: float, qtype: str, link,
+                 deadline_s: float, omega_rc: float, in_episode: bool,
+                 exclude_job: Optional[str], credit_allowed: bool) -> Dict[str, Any]:
     b = device.history[rep]
     p_need = demand.p_need_within(rep, h_s, in_episode)
     # StudyLIVE2-perf: `colder` maps TIERS into TIERS, so the six calls below cover only three
