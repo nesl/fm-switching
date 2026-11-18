@@ -41,7 +41,8 @@ from arms import Live2ArmMixin                                          # noqa: 
 from policy import calibration as CAL                                   # noqa: E402
 from policy.coordinator import Coordinator                              # noqa: E402
 from policy.demand import Demand                                        # noqa: E402
-from policy.eng1_engine import ENGINE_MODELS, Eng1Engine                # noqa: E402
+from policy.eng1_engine import ENGINE_MODELS
+from policy.eng1_engine_fast import Eng1Engine   # StudyLIVE2-perf: the live path, see its docstring                # noqa: E402
 from policy.escalation import EscalationRequest                         # noqa: E402
 from policy.flags import Flags                                          # noqa: E402
 from policy.params import Params                                        # noqa: E402

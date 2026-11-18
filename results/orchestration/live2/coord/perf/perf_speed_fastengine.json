@@ -1,0 +1,104 @@
+{
+ "check": "d99_speed",
+ "is_measurement": false,
+ "fixture": "SYNTHETIC 50 : 50, mode A, tight memory (gpu_kv_tokens = 62944, host_tier_gib = 27), 180 s, mu = 0, H = 1.0 s, dry run with the committed cost curve (pol4)",
+ "decision_period_s": 0.1,
+ "target": "p99 decision time under 100 ms at 128 devices (D99 (3))",
+ "release_cap_k": null,
+ "host_cpu": "13th Gen Intel Core i7-13700KF, 16 cores / 24 threads (flash). The H100 host's CPU differs and the pilot re-measures there.",
+ "rows": [
+  {
+   "n_devices": 32,
+   "n_opportunities": 5808,
+   "n_decisions": 5066,
+   "n_requests": 2666,
+   "n_monitor_answers": 5760,
+   "n_recall_answers": 48,
+   "release_cap_k": null,
+   "n_cloud_answers": 2666,
+   "n_on_time": 2665,
+   "cap_bound": {
+    "sh_periods": 0,
+    "sh_skipped": 0,
+    "release_passes": 0,
+    "release_skipped": 0
+   },
+   "scoring_calls": 37216,
+   "decision_latency_ms": {
+    "p50": 22.4693,
+    "p99": 111.6516,
+    "max": 116.2833,
+    "n": 1801
+   },
+   "cpu_s": 43.048,
+   "cpu_percent": 99.9,
+   "wall_s": 43.076,
+   "epoch_overruns": 0,
+   "virtual_t_reached_s": 194.9,
+   "wall_guard_hit": false,
+   "target_p99_under_100ms": false
+  },
+  {
+   "n_devices": 64,
+   "n_opportunities": 11616,
+   "n_decisions": 7466,
+   "n_requests": 2666,
+   "n_monitor_answers": 11520,
+   "n_recall_answers": 96,
+   "release_cap_k": null,
+   "n_cloud_answers": 2666,
+   "n_on_time": 2666,
+   "cap_bound": {
+    "sh_periods": 0,
+    "sh_skipped": 0,
+    "release_passes": 0,
+    "release_skipped": 0
+   },
+   "scoring_calls": 56063,
+   "decision_latency_ms": {
+    "p50": 55.8569,
+    "p99": 280.7309,
+    "max": 344.0734,
+    "n": 1801
+   },
+   "cpu_s": 107.946,
+   "cpu_percent": 99.9,
+   "wall_s": 108.025,
+   "epoch_overruns": 0,
+   "virtual_t_reached_s": 194.9,
+   "wall_guard_hit": false,
+   "target_p99_under_100ms": false
+  },
+  {
+   "n_devices": 128,
+   "n_opportunities": 23232,
+   "n_decisions": 12266,
+   "n_requests": 2666,
+   "n_monitor_answers": 23040,
+   "n_recall_answers": 192,
+   "release_cap_k": null,
+   "n_cloud_answers": 2666,
+   "n_on_time": 2656,
+   "cap_bound": {
+    "sh_periods": 0,
+    "sh_skipped": 0,
+    "release_passes": 0,
+    "release_skipped": 0
+   },
+   "scoring_calls": 82126,
+   "decision_latency_ms": {
+    "p50": 139.3825,
+    "p99": 1149.6893,
+    "max": 1669.8587,
+    "n": 1801
+   },
+   "cpu_s": 304.489,
+   "cpu_percent": 100.0,
+   "wall_s": 304.604,
+   "epoch_overruns": 0,
+   "virtual_t_reached_s": 194.9,
+   "wall_guard_hit": false,
+   "target_p99_under_100ms": false
+  }
+ ]
+}

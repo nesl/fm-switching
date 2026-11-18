@@ -1998,3 +1998,50 @@ needs a freeze ruling), and a change to what the policy computes per candidate (
 The harness addendum already removed the consequence that mattered most for the pilot: the
 policy's decision cost now shows up as submit delay rather than as emulator lateness, so a slow
 decision no longer invalidates a run.
+
+## P6. The freeze ruling applied: `eng1_engine_fast.py`
+
+P4 reported a saving locked inside a T0b-frozen file and asked for a ruling. **The ruling
+(2026-11-18) is: never edit a frozen file.** So the frozen file is untouched and the live policy
+path loads a copy.
+
+`experiments/orchestration/policy/eng1_engine_fast.py` is `eng1_engine.py` copied, carrying ONE
+change: the two provenance strings `Eng1Engine.predict` used to rebuild on each of about 774,000
+calls per 64-device cell, each constructing a `pathlib.Path` only to take a basename, are built
+once per engine. `live2/arms_policy.py` loads this copy; every replay, fit and scoring path keeps
+importing the frozen module, so nothing that produced a committed number changes its import.
+
+**The copy is held to byte-identity, not to good intentions.**
+`policy/tests/test_eng1_engine_fast.py`, 8 tests:
+
+| test | what it establishes |
+|---|---|
+| the two files differ only where the copy says | every function in both files is compared as a parsed syntax tree with docstrings stripped: the copy may add exactly `_basis_step` and `_basis_pol4`, may change exactly `Eng1Engine.predict`, and may differ nowhere else. A drift anywhere in the other several hundred lines fails. |
+| the frozen module is what the freeze recorded | its md5 against `t0b_freeze.json`, so a copy can never become an excuse to edit the original |
+| StudyENG1 / StudyENG1c Part C FIT trials | 406 FIT trials, 43,752 recorded rows turned into `Request`s in their own kind, tokens and cached tokens; both engines' `predict` compared field for field including `basis`, at two concurrency values. The 174 HOLDOUT trials are filtered out and never built. |
+| StudyENG1d FIT trials | the committed `eng1d_replay.load_trials("fit")`, 180 trials, same comparison; the 60 HOLDOUT pairs are never built |
+| the token range including out of sample | a sweep across 0 to 100,000 tokens, all four request kinds and all three readiness values, because `in_sample` and its basis line are part of the output and the out-of-sample branches must match too |
+| every call the policy really makes | every `predict` call a dry 8-device cell makes is recorded (5,612 of them), de-duplicated, and replayed through both engines. The recorded `meta` is asserted to be scalar-valued so the replayed call is exactly the call the policy made, not a lossy copy of it. |
+| the live path loads the copy | `arms_policy.Eng1Engine is eng1_engine_fast.Eng1Engine`, and is not the frozen class |
+
+All 8 pass; 392 policy tests pass, the three frozen-md5 tests among them.
+
+**New decision latency, committed 180 s fixture, 32 / 64 / 128 devices:**
+
+| devices | p50 | p99 | max | p99 before this row (StudyLIVE2-fix) | p99 after P1 | p99 now | total |
+|---|---|---|---|---|---|---|---|
+| 32 | 22.469 ms | **111.652 ms** | 116.283 ms | 214.0 ms | 154.172 ms | 111.652 ms | **1.92x** |
+| 64 | 55.857 ms | **280.731 ms** | 344.073 ms | 545.4 ms | 385.720 ms | 280.731 ms | **1.94x** |
+| 128 | 139.383 ms | **1,149.689 ms** | 1,669.859 ms | 2,152.6 ms | 1,482.719 ms | 1,149.689 ms | **1.87x** |
+
+Every cell reached the full 194.9 s of virtual time at 100 % CPU with no wall guard hit. The
+fast engine alone is worth 1.38 / 1.37 / 1.29x on top of P1's three changes. The D99 equivalence
+grid is 6 of 6 byte-identical with the fast engine in place, and its reference-to-fast speed-up
+has now risen from the committed 6.0 to 7.1x to **7.60 to 10.47x**.
+
+**Where that leaves the goal.** 32 devices is now 1.12x over the 100 ms period, near enough that
+it would meet it on a quieter machine; 64 is 2.8x over and 128 is 11.5x over. The row's verdict
+therefore does not change: the uncapped policy does not keep up at 64 and 128 devices, the curve
+is reported, and the cap stays off. The remaining options are a design question, not an
+implementation one, and they are written up in `reports/study_live2_perf.md` under "Bounding
+decision cost: options" as a design note with no code.
