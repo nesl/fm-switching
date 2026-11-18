@@ -236,8 +236,12 @@ class TestEng1eLoader(unittest.TestCase):
         self.assertEqual(e1e.REQUIRED_STEP_FIELDS, ("t", "step", "members"))
         self.assertEqual(e1e.REQUIRED_MEMBER_FIELDS, ("rid", "new_tokens"))
 
-    def test_eng1e_is_not_committed_yet_so_the_default_path_refuses_to_guess(self):
-        self.assertFalse(e1e.eng1e_is_committed())
+    def test_the_default_path_refuses_to_guess_whether_or_not_eng1e_is_committed(self):
+        # StudyENG1e landed on origin/main after this test was written, so the uncommitted
+        # branch is exercised against an empty root instead of the repo's own state.
+        with tempfile.TemporaryDirectory() as empty:
+            self.assertFalse(e1e.eng1e_is_committed(Path(empty)))
+        self.assertTrue(e1e.eng1e_is_committed())
         with self.assertRaises(e1e.SchemaNotCommitted):
             e1e.load_membership()
 
