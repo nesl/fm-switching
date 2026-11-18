@@ -1,0 +1,70 @@
+{
+  "any_flagged": false,
+  "byte_exactness_to_e10a": false,
+  "bytes": {
+    "max": 126179.0,
+    "mean": 62670.120459846716,
+    "median": 62471.5,
+    "min": 8699.0,
+    "n": 42014,
+    "p25": 47844.0,
+    "p75": 75486.0
+  },
+  "dataset": "nexar",
+  "e10a_checks": {
+    "nexar jpeg90 768x432": {
+      "any_flagged": false,
+      "rows": [
+        {
+          "e10a": 49810.25,
+          "flagged": false,
+          "ratio": 0.96053,
+          "stat": "p25",
+          "this_run": 47844.0
+        },
+        {
+          "e10a": 63897.5,
+          "flagged": false,
+          "ratio": 0.97768,
+          "stat": "median",
+          "this_run": 62471.5
+        },
+        {
+          "e10a": 75682.25,
+          "flagged": false,
+          "ratio": 0.99741,
+          "stat": "p75",
+          "this_run": 75486.0
+        },
+        {
+          "e10a": 63318.972,
+          "flagged": false,
+          "ratio": 0.98975,
+          "stat": "mean",
+          "this_run": 62670.12
+        }
+      ]
+    }
+  },
+  "e10a_source": "results/cost/study_e10/e10a_sizes.json",
+  "n_frames": 42014,
+  "note": "A flagged quartile means the encoder's byte behaviour differs from E10a's by more than the tolerance. D91 does not claim byte-exactness, so a flag is a REPORTABLE difference, not a script failure; it must be reported before these JPEGs feed the 32B refit (D86) or the live run.",
+  "quality": 90,
+  "recipe": "Nexar: Image.open(png).convert('RGB').save(JPEG, quality=90)",
+  "store": "/home/pragya/data/live2/jpeg/nexar_q90",
+  "tol": 0.1,
+  "versions": {
+    "features_pilinfo": {
+      "jpg": true,
+      "jpg_2000": true,
+      "zlib": true
+    },
+    "jpeg_codec": "6.2",
+    "libjpeg": "6.2",
+    "libjpeg_turbo": "6.2",
+    "numpy": "2.2.6",
+    "pillow": "12.3.0",
+    "platform": "Linux-5.15.0-102-generic-x86_64-with-glibc2.35",
+    "python": "3.10.12"
+  }
+}

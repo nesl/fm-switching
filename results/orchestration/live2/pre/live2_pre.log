@@ -1,0 +1,15 @@
+[22:12:28] coverage: nexar dense 42014 planned 42014 missing {}; clip set 300 (not in dense 0); sember sessions 164 frames 32142 missing {}
+[22:12:39] encoded nexar_q90: 42014 frames in 11.2 s; sizes {(768, 432): 42014}
+[22:12:43] manifest nexar_q90: exit 0, any_flagged False, bytes {'max': 126179.0, 'mean': 62670.120459846716, 'median': 62471.5, 'min': 8699.0, 'n': 42014, 'p25': 47844.0, 'p75': 75486.0}
+[22:12:51] encoded sember_d2_q88: 32142 frames in 8.5 s; sizes {(256, 352): 30610, (352, 256): 1532}
+[22:12:53] manifest sember_d2_q88: exit 0, any_flagged False, bytes {'max': 49579.0, 'mean': 24642.063437247216, 'median': 24199.5, 'min': 2361.0, 'n': 32142, 'p25': 19870.0, 'p75': 28940.25}
+[22:12:53] PART 1 PASS
+[22:15:43] server up: vLLM 0.31.0 (v0.31.0), pool 62944, mmap 28.99 GB, flag diff vs DE_c38 [('38', '27')]
+[22:15:44] step 2 A: nexar first send: prompt 5419 cached 0 (ok)
+[22:15:46] step 3 B: nexar same clip, device B first send: prompt 5419 cached 0 (ok)
+[22:15:46] step 4 A: nexar device A repeat, unchanged: prompt 5419 cached 5408 (ok)
+[22:15:47] step 5a A: sember history H0 (60 s), first send: prompt 2711 cached 0 (ok)
+[22:15:48] step 5b A: sember 30 s append: refs for H0 + bytes for new: prompt 4061 cached 2704 (ok)
+[22:15:50] step 5c B: sember same content, device B first send: prompt 4061 cached 0 (ok)
+[22:15:50] step 5d A: sember device A repeat of its append, unchanged: prompt 4061 cached 4048 (ok)
+[22:15:56] PART 3 PASS: {'step3_B_first_zero': True, 'step5c_B_first_zero': True, 'step4_A_repeat_positive': True, 'step5d_A_repeat_positive': True}

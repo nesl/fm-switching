@@ -1,0 +1,103 @@
+{
+  "any_flagged": false,
+  "byte_exactness_to_e10a": false,
+  "bytes": {
+    "max": 49579.0,
+    "mean": 24642.063437247216,
+    "median": 24199.5,
+    "min": 2361.0,
+    "n": 32142,
+    "p25": 19870.0,
+    "p75": 28940.25
+  },
+  "dataset": "sember",
+  "e10a_checks": {
+    "sember jpeg88 D2|256x352": {
+      "any_flagged": false,
+      "rows": [
+        {
+          "e10a": 21482.75,
+          "flagged": false,
+          "ratio": 0.92493,
+          "stat": "p25",
+          "this_run": 19870.0
+        },
+        {
+          "e10a": 25596.5,
+          "flagged": false,
+          "ratio": 0.94542,
+          "stat": "median",
+          "this_run": 24199.5
+        },
+        {
+          "e10a": 30613.75,
+          "flagged": false,
+          "ratio": 0.94534,
+          "stat": "p75",
+          "this_run": 28940.25
+        },
+        {
+          "e10a": 25759.5,
+          "flagged": false,
+          "ratio": 0.95662,
+          "stat": "mean",
+          "this_run": 24642.06
+        }
+      ]
+    },
+    "sember jpeg88 D2|352x256": {
+      "any_flagged": false,
+      "rows": [
+        {
+          "e10a": 19941.0,
+          "flagged": false,
+          "ratio": 0.99644,
+          "stat": "p25",
+          "this_run": 19870.0
+        },
+        {
+          "e10a": 24570.0,
+          "flagged": false,
+          "ratio": 0.98492,
+          "stat": "median",
+          "this_run": 24199.5
+        },
+        {
+          "e10a": 29459.0,
+          "flagged": false,
+          "ratio": 0.98239,
+          "stat": "p75",
+          "this_run": 28940.25
+        },
+        {
+          "e10a": 24596.28888888889,
+          "flagged": false,
+          "ratio": 1.00186,
+          "stat": "mean",
+          "this_run": 24642.06
+        }
+      ]
+    }
+  },
+  "e10a_source": "results/cost/study_e10/e10a_sizes.json",
+  "n_frames": 32142,
+  "note": "A flagged quartile means the encoder's byte behaviour differs from E10a's by more than the tolerance. D91 does not claim byte-exactness, so a flag is a REPORTABLE difference, not a script failure; it must be reported before these JPEGs feed the 32B refit (D86) or the live run.",
+  "quality": 88,
+  "recipe": "S-EMBER D2: study_rh3_inputs.load(path, (352, 256)) then save(JPEG, quality=88)",
+  "store": "/home/pragya/data/live2/jpeg/sember_d2_q88",
+  "tol": 0.1,
+  "versions": {
+    "features_pilinfo": {
+      "jpg": true,
+      "jpg_2000": true,
+      "zlib": true
+    },
+    "jpeg_codec": "6.2",
+    "libjpeg": "6.2",
+    "libjpeg_turbo": "6.2",
+    "numpy": "2.2.6",
+    "pillow": "12.3.0",
+    "platform": "Linux-5.15.0-102-generic-x86_64-with-glibc2.35",
+    "python": "3.10.12"
+  }
+}
