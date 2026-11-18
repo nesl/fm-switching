@@ -1,0 +1,108 @@
+{
+ "labels": [
+  "G_OFF1",
+  "G_ON1",
+  "G_ON2",
+  "G_OFF2"
+ ],
+ "kinds": {
+  "unloaded": {
+   "median_step_ms": {
+    "ratio_on_off": 0.99744,
+    "ci95": [
+     0.97684,
+     1.00754
+    ],
+    "on": 147.752,
+    "off": 148.131,
+    "passed": true,
+    "n_traces": 10
+   },
+   "median_ttft_s": {
+    "ratio_on_off": 1.00638,
+    "ci95": [
+     0.97363,
+     1.02755
+    ],
+    "on": 0.24766,
+    "off": 0.24609,
+    "passed": true,
+    "n_traces": 10
+   },
+   "instance_variation": {
+    "OFF_median_step_ms": {
+     "inst1": 148.131,
+     "inst2": 148.315,
+     "ratio": 1.0012421437781422,
+     "within_tol": true
+    },
+    "OFF_median_ttft_per_prompt_token": {
+     "inst1": 4.609122401847575e-05,
+     "inst2": 4.769201167210926e-05,
+     "ratio": 1.0347308557696762,
+     "within_tol": false
+    },
+    "ON_median_step_ms": {
+     "inst1": 145.363,
+     "inst2": 147.864,
+     "ratio": 1.0172052035249686,
+     "within_tol": false
+    },
+    "ON_median_ttft_per_prompt_token": {
+     "inst1": 4.7755003849114704e-05,
+     "inst2": 4.703069373616858e-05,
+     "ratio": 0.9848327912351419,
+     "within_tol": false
+    }
+   }
+  },
+  "P40": {
+   "median_step_ms": {
+    "ratio_on_off": 0.99453,
+    "ci95": [
+     0.98788,
+     0.9983
+    ],
+    "on": 22.8295,
+    "off": 22.955,
+    "passed": true,
+    "n_traces": 10
+   },
+   "median_ttft_s": {
+    "ratio_on_off": 1.02895,
+    "ci95": [
+     0.98932,
+     1.05836
+    ],
+    "on": 0.26657,
+    "off": 0.25907,
+    "passed": false,
+    "n_traces": 10
+   },
+   "instance_variation": {}
+  }
+ },
+ "membership": {
+  "G_ON1": {
+   "joined": 1341,
+   "equal": 1341,
+   "addon_rows": 1341,
+   "with_dispatch_ts": 1341,
+   "plugin_it_rows": 1343,
+   "examples_bad": [],
+   "passed": true
+  },
+  "G_ON2": {
+   "joined": 1295,
+   "equal": 1295,
+   "addon_rows": 1295,
+   "with_dispatch_ts": 1295,
+   "plugin_it_rows": 1306,
+   "examples_bad": [],
+   "passed": true
+  }
+ },
+ "instance_variation_ok": false,
+ "passed": false,
+ "at": "2026-11-17T15:56:43.447988"
+}
