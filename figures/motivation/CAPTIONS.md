@@ -66,7 +66,7 @@ Restoring an 11,184-token history costs 0.10 s GPU-warm, 0.17 s from host and 2.
 cold (all StudyENG1 Part D, concurrency 1). (b) Under a background load the GPU-warm and
 host restores impose about 0 s on other requests while a cold rebuild imposes about 14 s
 (StudyENG1c Part D, by tier at arrival; all three tiers measured under one load). (c)
-But the GPU pool holds only about 6 such histories and the host about 4 (at 27 GiB) to
+But the GPU pool holds only about 5 such histories and the host about 4 (at 27 GiB) to
 88 (at 256 GiB) beyond the GPU pool, while cold is unbounded. n = 30 probes per tier
 (a), 11 / 11 / 65 trials per tier (b), capacity arithmetic in the JSON (c); whiskers are
 p10 to p90 in (a) and the 95 percent bootstrap CI of the median in (b). Caching: cold
@@ -93,3 +93,17 @@ size in tokens, played from the start of each session; the dotted line is the me
 rebuild time at each (2.7 s and 7.6 s). n = 839 answered questions. Caching: the token
 counts are input sizes with no latency; the cold-rebuild anchors are prefix-caching-off
 cold recompute measurements on the 32B serving stack.
+
+## M7 (figM7_dayinlife)
+One robot question disrupts the whole dashcam fleet when it is answered in one go, and
+small pieces remove the disruption only by pushing the robot past its own deadline, so
+no single shape serves both. (a) The fraction of 20 dashcams missing their 0.916 s
+monitoring deadline per 0.5 s bin around the robot's question: one go adds 57 missed
+instants in a burst that lasts about 5.5 s, 2,048-token pieces add 24, 1,024-token
+pieces add 0 (the no-question control stays at zero). (b) But the robot's own answer
+time rises from 3.47 s in one go to 5.90 s (2,048) and 6.79 s (1,024), the last two past
+the 5 s target (dashed, D71). n = 20 dashcams; the representative repetition is number 3
+(its one-go extra-miss count, 57, is the median of 5); panel (a) is that repetition and
+panel (b) shows the median with the range over all 5 repetitions. Caching: prefix
+caching on; the robot's ~11k history is a cold rebuild in every run, and the dashcams
+run the live 25 percent-per-device cloud service share.

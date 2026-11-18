@@ -74,7 +74,7 @@ for i, st in enumerate(order):
     axa.bar(i, m, 0.62, color=col[st], hatch=hatch[st], edgecolor="white", linewidth=0.4)
     axa.errorbar(i, m, yerr=[[m - a[st]["p10"]], [a[st]["p90"] - m]], fmt="none",
                  ecolor="black", elinewidth=0.7, capsize=1.8)
-    axa.text(i, m + 0.06, f"{m:.2f}", ha="center", va="bottom", fontsize=6.5)
+    axa.text(i, a[st]["p90"] + 0.08, f"{m:.2f}", ha="center", va="bottom", fontsize=6.5)
 axa.set_xticks(range(3)); axa.set_xticklabels([labels[s] for s in order])
 axa.set_ylabel("Restore TTFT at 11k (s)")
 axa.set_ylim(0, 3.1)
@@ -87,7 +87,8 @@ for i, st in enumerate(order):
     axb.errorbar(i, m, yerr=[[max(m - b[st]["ci"][0], 0)], [max(b[st]["ci"][1] - m, 0)]],
                  fmt="none", ecolor="black", elinewidth=0.7, capsize=1.8)
     tag = f"{m:.1f}" if m > 1 else "~0"
-    axb.text(i, m + 0.4, tag, ha="center", va="bottom", fontsize=6.5)
+    ytxt = max(b[st]["ci"][1], m) + 0.7
+    axb.text(i, ytxt, tag, ha="center", va="bottom", fontsize=6.5)
 axb.set_xticks(range(3)); axb.set_xticklabels([labels[s] for s in order])
 axb.set_ylabel("Delay imposed on\nothers under load (s)")
 axb.set_ylim(0, 17)
@@ -100,7 +101,8 @@ ccol = [F.C_GPUWARM, F.C_HOST, F.C_HOST]
 chatch = [F.HATCH["gpuwarm"], F.HATCH["host"], F.HATCH["host"]]
 for i, (k, v) in enumerate(zip(cx, cv)):
     axc.bar(i, v, 0.6, color=ccol[i], hatch=chatch[i], edgecolor="white", linewidth=0.4)
-    axc.text(i, v * 1.12, f"{v:.0f}", ha="center", va="bottom", fontsize=6.5)
+    # label with the floor (whole histories that fit), e.g. GPU pool 5.63 -> 5
+    axc.text(i, v * 1.12, f"{int(v)}", ha="center", va="bottom", fontsize=6.5)
 # cold unbounded
 axc.annotate("", xy=(3, 300), xytext=(3, 30),
              arrowprops=dict(arrowstyle="->", lw=1.2, color=F.C_COLD))

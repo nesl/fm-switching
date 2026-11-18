@@ -20,6 +20,11 @@ from different studies; M3a uses plain-number y ticks (3, 6, 10, 20); M3b adds "
 (white) to the legend, labels the one-go row's first idle gap "image preprocessing
 (engine idle)", and the caption explains the pink (both) steps after the long block.
 
+**Revision 2 (2026-11-18).** Added figure M7 (figM7_dayinlife) from StudyMOT1-dayinlife
+(see the M7 section). M4 fix: panel (c) GPU-pool bar is now labelled 5 (the floor of
+5.63 whole histories that fit the pool; 5.63 and the working-space note are kept in the
+JSON), and the "2.74" and "~0" value labels were moved off the error bars.
+
 ## Style and palette (shared, `plots/motivation/figstyle.py`)
 
 ACM sigconf sizing: single column 3.33 in, double column 7.0 in (M3b and M4 only),
@@ -242,12 +247,38 @@ committed anchor points, since only those two sizes have a committed cold-rebuil
 
 ---
 
+## M7 (figM7_dayinlife): day in the life (revision 2, new)
+
+**Data.** StudyMOT1-dayinlife `results/motivation/mot1/mot1_figdata.json`. (a) per 0.5 s
+bin, the fraction of the 20 dashcams missing their 0.916 s deadline, for the no-question
+control and the three question shapes (one go, 2,048 pieces, 1,024 pieces), over the
+window around the question (question at 20 s; shown from 10 s before to 15 s after).
+(b) the robot's own answer time per shape: median with the range over all 5 repetitions.
+
+**Selection rule.** Representative repetition 3, the repetition whose one-go extra-miss
+count (57) is the median of the 5 (the figdata's own `representative_rule`). Never the
+HOLDOUT or the failed first design (the first design, which exceeded the 32B one-frame
+peak at every N, is StudyMOT1 sections 1-4 and is not used).
+
+**Checks (against `study_mot1_dayinlife.md` section 6).** Extra missed instants (median):
+one go 57, 2,048 pieces 24, 1,024 pieces 0, exact. Robot TTFT from the question (median
+over 5 reps): 3.47 / 5.90 / 6.79 s (ratios 0.999 / 1.001 / 0.999). N = 20, deadline
+0.916 s, question at 20 s, representative rep 3, all reproduced.
+
+**Judgement.** Panel (a) is the single representative repetition (per the figdata rule),
+so its curves are that run's actual per-bin miss fractions; panel (b) carries the
+5-repetition median and range, as the brief asked. The dashed line is the robot's 5 s
+answer-time target (D71). Only the two allowed annotations are drawn: the per-action
+extra-miss counts in (a) and the target line in (b).
+
+---
+
 ## Files
 
-- Scripts: `plots/motivation/figstyle.py`, `plots/motivation/figM{1,2,3a,3b,4,5,6}_*.py`.
+- Scripts: `plots/motivation/figstyle.py`, `plots/motivation/figM{1,2,3a,3b,4,5,6,7}_*.py`.
 - Figures: `figures/motivation/figM1_cloud_value`, `figM2_interference`, `figM3a_shape`,
-  `figM3b_pieces`, `figM4_tiers`, `figM5_predictability`, `figM6_workload` (each `.pdf`,
-  `.png`, `.json`).
+  `figM3b_pieces`, `figM4_tiers`, `figM5_predictability`, `figM6_workload`,
+  `figM7_dayinlife` (each `.pdf`, `.png`, `.json`).
 - Captions: `figures/motivation/CAPTIONS.md`.
 - This report: `reports/study_fig1_motivation.md`.
 - Registry: `research/EXPERIMENTS.md` (StudyFIG1-motivation row). Index: `results/INDEX.md`.

@@ -1,0 +1,85 @@
+{
+  "figure": "M7",
+  "message": "One robot question in one go disrupts the whole fleet; small pieces remove that but push the robot past its own deadline; no fixed shape serves both.",
+  "source_file": "results/motivation/mot1/mot1_figdata.json (representative repetition 3)",
+  "representative_rep": 3,
+  "representative_rule": "the repetition whose ONE-GO extra-miss count is the median of the 5",
+  "N_dashcams": 20,
+  "deadline_s": 0.916,
+  "bin_s": 0.5,
+  "question_at_s": 20.0,
+  "panel_a_extra_missed_median": {
+    "ONE-GO": 57,
+    "P2048": 24,
+    "P1024": 0
+  },
+  "panel_b_robot_ttft_s": {
+    "ONE-GO": {
+      "median": 3.466,
+      "per_rep": [
+        4.9784,
+        3.6517,
+        3.4655,
+        3.2383,
+        3.2937
+      ],
+      "min": 3.2383,
+      "max": 4.9784
+    },
+    "P2048": {
+      "median": 5.904,
+      "per_rep": [
+        5.9036,
+        6.3556,
+        5.4053,
+        5.9616,
+        5.2375
+      ],
+      "min": 5.2375,
+      "max": 6.3556
+    },
+    "P1024": {
+      "median": 6.785,
+      "per_rep": [
+        6.895,
+        7.2455,
+        6.7854,
+        6.4605,
+        6.4527
+      ],
+      "min": 6.4527,
+      "max": 7.2455
+    }
+  },
+  "robot_target_s": 5.0,
+  "report": "reports/study_mot1_dayinlife.md section 6",
+  "report_values": {
+    "extra_missed": {
+      "ONE-GO": 57,
+      "P2048": 24,
+      "P1024": 0
+    },
+    "robot_ttft_from_question": {
+      "ONE-GO": 3.47,
+      "P2048": 5.9,
+      "P1024": 6.79
+    },
+    "N": 20,
+    "deadline_s": 0.916,
+    "question_at_s": 20
+  },
+  "checks": {
+    "extra_onego": true,
+    "extra_2048": true,
+    "extra_1024": true,
+    "robot_onego": 0.9987,
+    "robot_2048": 1.0006,
+    "robot_1024": 0.9993,
+    "rep_is_3": true,
+    "N_is_20": true
+  },
+  "outputs": {
+    "pdf": "/home/nesl/fm-switching/figures/motivation/figM7_dayinlife.pdf",
+    "png": "/home/nesl/fm-switching/figures/motivation/figM7_dayinlife.png"
+  }
+}
