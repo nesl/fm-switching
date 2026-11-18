@@ -1,0 +1,863 @@
+{
+ "check": "option_b_m_b2_shadow_divergence",
+ "is_measurement": false,
+ "label": "dry-run committed fixtures, mu estimated (ewma); not a live result",
+ "window_s": 60.0,
+ "seed": 1,
+ "H_s": 1.0,
+ "sizes": [
+  8,
+  32,
+  64,
+  128
+ ],
+ "pooled": {
+  "n": 13808,
+  "n_exact_match": 12793,
+  "exact_match_fraction": 0.926492,
+  "sign_disagreements": 364,
+  "sign_disagreement_rate": 0.026362,
+  "over_admissions": 356,
+  "over_admission_rate": 0.025782,
+  "under_admissions": 8,
+  "under_admission_rate": 0.000579,
+  "admits_closed_form": 3989,
+  "admits_rollout": 3641,
+  "delta_j_difference": {
+   "n": 13808,
+   "median": 0.0,
+   "p10": 0.0,
+   "p90": 0.0,
+   "min": -0.216825405,
+   "max": 0.129144757
+  },
+  "load_factor": {
+   "n": 13808,
+   "median": 0.877562599,
+   "p10": 0.877562599,
+   "p90": 1.085755213,
+   "min": 0.785734548,
+   "max": 7.959147917
+  }
+ },
+ "by_size": {
+  "8": {
+   "overall": {
+    "n": 480,
+    "n_exact_match": 422,
+    "exact_match_fraction": 0.879167,
+    "sign_disagreements": 2,
+    "sign_disagreement_rate": 0.004167,
+    "over_admissions": 2,
+    "over_admission_rate": 0.004167,
+    "under_admissions": 0,
+    "under_admission_rate": 0.0,
+    "admits_closed_form": 478,
+    "admits_rollout": 476,
+    "delta_j_difference": {
+     "n": 480,
+     "median": 0.0,
+     "p10": 0.0,
+     "p90": 0.0,
+     "min": -0.0,
+     "max": 0.040949768
+    },
+    "load_factor": {
+     "n": 480,
+     "median": 1.073486957,
+     "p10": 0.96939065,
+     "p90": 1.073486957,
+     "min": 0.892867274,
+     "max": 1.489872186
+    }
+   },
+   "by_backlog_tercile_queued_tokens": {
+    "edges": {
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n": 446,
+      "n_exact_match": 405,
+      "exact_match_fraction": 0.908072,
+      "sign_disagreements": 0,
+      "sign_disagreement_rate": 0.0,
+      "over_admissions": 0,
+      "over_admission_rate": 0.0,
+      "under_admissions": 0,
+      "under_admission_rate": 0.0,
+      "admits_closed_form": 446,
+      "admits_rollout": 446,
+      "delta_j_difference": {
+       "n": 446,
+       "median": 0.0,
+       "p10": 0.0,
+       "p90": 0.0,
+       "min": -0.0,
+       "max": 0.0
+      },
+      "load_factor": {
+       "n": 446,
+       "median": 1.0,
+       "p10": 0.96939065,
+       "p90": 1.073486957,
+       "min": 0.892867274,
+       "max": 1.104096307
+      }
+     },
+     "T2_mid": {
+      "n": 0
+     },
+     "T3_high": {
+      "n": 34,
+      "n_exact_match": 17,
+      "exact_match_fraction": 0.5,
+      "sign_disagreements": 2,
+      "sign_disagreement_rate": 0.058824,
+      "over_admissions": 2,
+      "over_admission_rate": 0.058824,
+      "under_admissions": 0,
+      "under_admission_rate": 0.0,
+      "admits_closed_form": 32,
+      "admits_rollout": 30,
+      "delta_j_difference": {
+       "n": 34,
+       "median": 0.00277403,
+       "p10": 0.0,
+       "p90": 0.005563844,
+       "min": 0.0,
+       "max": 0.040949768
+      },
+      "load_factor": {
+       "n": 34,
+       "median": 1.401080554,
+       "p10": 1.385775879,
+       "p90": 1.489872186,
+       "min": 1.385775879,
+       "max": 1.489872186
+      }
+     }
+    }
+   },
+   "by_backlog_tercile_running_requests": {
+    "edges": {
+     "lo": 2.0,
+     "hi": 2.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n": 471,
+      "n_exact_match": 416,
+      "exact_match_fraction": 0.883227,
+      "sign_disagreements": 2,
+      "sign_disagreement_rate": 0.004246,
+      "over_admissions": 2,
+      "over_admission_rate": 0.004246,
+      "under_admissions": 0,
+      "under_admission_rate": 0.0,
+      "admits_closed_form": 469,
+      "admits_rollout": 467,
+      "delta_j_difference": {
+       "n": 471,
+       "median": 0.0,
+       "p10": 0.0,
+       "p90": 0.0,
+       "min": -0.0,
+       "max": 0.040949768
+      },
+      "load_factor": {
+       "n": 471,
+       "median": 1.073486957,
+       "p10": 0.96939065,
+       "p90": 1.073486957,
+       "min": 0.96939065,
+       "max": 1.489872186
+      }
+     },
+     "T2_mid": {
+      "n": 0
+     },
+     "T3_high": {
+      "n": 9,
+      "n_exact_match": 6,
+      "exact_match_fraction": 0.666667,
+      "sign_disagreements": 0,
+      "sign_disagreement_rate": 0.0,
+      "over_admissions": 0,
+      "over_admission_rate": 0.0,
+      "under_admissions": 0,
+      "under_admission_rate": 0.0,
+      "admits_closed_form": 9,
+      "admits_rollout": 9,
+      "delta_j_difference": {
+       "n": 9,
+       "median": 0.0,
+       "p10": -0.0,
+       "p90": 0.0,
+       "min": -0.0,
+       "max": 0.0
+      },
+      "load_factor": {
+       "n": 9,
+       "median": 0.954085975,
+       "p10": 0.892867274,
+       "p90": 1.058182282,
+       "min": 0.892867274,
+       "max": 1.058182282
+      }
+     }
+    }
+   },
+   "decision_latency_ms": {
+    "p50": 1.3117,
+    "p99": 7.4508,
+    "max": 7.6506,
+    "n": 601
+   },
+   "mu_seen": [
+    0.0,
+    0.271631,
+    0.480644,
+    0.704691,
+    0.819953,
+    0.952048
+   ]
+  },
+  "32": {
+   "overall": {
+    "n": 1904,
+    "n_exact_match": 1785,
+    "exact_match_fraction": 0.9375,
+    "sign_disagreements": 48,
+    "sign_disagreement_rate": 0.02521,
+    "over_admissions": 47,
+    "over_admission_rate": 0.024685,
+    "under_admissions": 1,
+    "under_admission_rate": 0.000525,
+    "admits_closed_form": 1079,
+    "admits_rollout": 1033,
+    "delta_j_difference": {
+     "n": 1904,
+     "median": 0.0,
+     "p10": 0.0,
+     "p90": 0.0,
+     "min": -0.036352448,
+     "max": 0.082567157
+    },
+    "load_factor": {
+     "n": 1904,
+     "median": 0.892867274,
+     "p10": 0.877562599,
+     "p90": 1.085755213,
+     "min": 0.846953248,
+     "max": 2.947220489
+    }
+   },
+   "by_backlog_tercile_queued_tokens": {
+    "edges": {
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n": 1762,
+      "n_exact_match": 1762,
+      "exact_match_fraction": 1.0,
+      "sign_disagreements": 0,
+      "sign_disagreement_rate": 0.0,
+      "over_admissions": 0,
+      "over_admission_rate": 0.0,
+      "under_admissions": 0,
+      "under_admission_rate": 0.0,
+      "admits_closed_form": 985,
+      "admits_rollout": 985,
+      "delta_j_difference": {
+       "n": 1762,
+       "median": 0.0,
+       "p10": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0
+      },
+      "load_factor": {
+       "n": 1762,
+       "median": 0.892867274,
+       "p10": 0.877562599,
+       "p90": 1.027572932,
+       "min": 0.846953248,
+       "max": 1.416385229
+      }
+     },
+     "T2_mid": {
+      "n": 0
+     },
+     "T3_high": {
+      "n": 142,
+      "n_exact_match": 23,
+      "exact_match_fraction": 0.161972,
+      "sign_disagreements": 48,
+      "sign_disagreement_rate": 0.338028,
+      "over_admissions": 47,
+      "over_admission_rate": 0.330986,
+      "under_admissions": 1,
+      "under_admission_rate": 0.007042,
+      "admits_closed_form": 94,
+      "admits_rollout": 48,
+      "delta_j_difference": {
+       "n": 142,
+       "median": 0.035622849,
+       "p10": -0.009064212,
+       "p90": 0.047181232,
+       "min": -0.036352448,
+       "max": 0.082567157
+      },
+      "load_factor": {
+       "n": 142,
+       "median": 2.589017542,
+       "p10": 2.558408191,
+       "p90": 2.739027875,
+       "min": 2.543103516,
+       "max": 2.947220489
+      }
+     }
+    }
+   },
+   "by_backlog_tercile_running_requests": {
+    "edges": {
+     "lo": 7.0,
+     "hi": 8.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n": 995,
+      "n_exact_match": 878,
+      "exact_match_fraction": 0.882412,
+      "sign_disagreements": 48,
+      "sign_disagreement_rate": 0.048241,
+      "over_admissions": 47,
+      "over_admission_rate": 0.047236,
+      "under_admissions": 1,
+      "under_admission_rate": 0.001005,
+      "admits_closed_form": 573,
+      "admits_rollout": 527,
+      "delta_j_difference": {
+       "n": 995,
+       "median": 0.0,
+       "p10": 0.0,
+       "p90": 0.0,
+       "min": -0.036352448,
+       "max": 0.082567157
+      },
+      "load_factor": {
+       "n": 995,
+       "median": 0.996963581,
+       "p10": 0.892867274,
+       "p90": 2.573712867,
+       "min": 0.892867274,
+       "max": 2.947220489
+      }
+     },
+     "T2_mid": {
+      "n": 898,
+      "n_exact_match": 896,
+      "exact_match_fraction": 0.997773,
+      "sign_disagreements": 0,
+      "sign_disagreement_rate": 0.0,
+      "over_admissions": 0,
+      "over_admission_rate": 0.0,
+      "under_admissions": 0,
+      "under_admission_rate": 0.0,
+      "admits_closed_form": 500,
+      "admits_rollout": 500,
+      "delta_j_difference": {
+       "n": 898,
+       "median": 0.0,
+       "p10": 0.0,
+       "p90": 0.0,
+       "min": -0.0,
+       "max": 0.047181232
+      },
+      "load_factor": {
+       "n": 898,
+       "median": 0.877562599,
+       "p10": 0.877562599,
+       "p90": 0.981658906,
+       "min": 0.877562599,
+       "max": 2.647199824
+      }
+     },
+     "T3_high": {
+      "n": 11,
+      "n_exact_match": 11,
+      "exact_match_fraction": 1.0,
+      "sign_disagreements": 0,
+      "sign_disagreement_rate": 0.0,
+      "over_admissions": 0,
+      "over_admission_rate": 0.0,
+      "under_admissions": 0,
+      "under_admission_rate": 0.0,
+      "admits_closed_form": 6,
+      "admits_rollout": 6,
+      "delta_j_difference": {
+       "n": 11,
+       "median": 0.0,
+       "p10": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0
+      },
+      "load_factor": {
+       "n": 11,
+       "median": 0.966354231,
+       "p10": 0.846953248,
+       "p90": 1.055145863,
+       "min": 0.846953248,
+       "max": 1.070450538
+      }
+     }
+    }
+   },
+   "decision_latency_ms": {
+    "p50": 3.2265,
+    "p99": 53.8555,
+    "max": 64.5938,
+    "n": 601
+   },
+   "mu_seen": [
+    0.0,
+    0.148144,
+    0.255185,
+    0.259213,
+    0.267395,
+    0.269436
+   ]
+  },
+  "64": {
+   "overall": {
+    "n": 3808,
+    "n_exact_match": 3530,
+    "exact_match_fraction": 0.926996,
+    "sign_disagreements": 118,
+    "sign_disagreement_rate": 0.030987,
+    "over_admissions": 118,
+    "over_admission_rate": 0.030987,
+    "under_admissions": 0,
+    "under_admission_rate": 0.0,
+    "admits_closed_form": 1181,
+    "admits_rollout": 1063,
+    "delta_j_difference": {
+     "n": 3808,
+     "median": 0.0,
+     "p10": 0.0,
+     "p90": 0.0,
+     "min": -0.046577601,
+     "max": 0.129144757
+    },
+    "load_factor": {
+     "n": 3808,
+     "median": 0.877562599,
+     "p10": 0.877562599,
+     "p90": 1.042877607,
+     "min": 0.801039223,
+     "max": 4.493360424
+    }
+   },
+   "by_backlog_tercile_queued_tokens": {
+    "edges": {
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n": 3505,
+      "n_exact_match": 3502,
+      "exact_match_fraction": 0.999144,
+      "sign_disagreements": 0,
+      "sign_disagreement_rate": 0.0,
+      "over_admissions": 0,
+      "over_admission_rate": 0.0,
+      "under_admissions": 0,
+      "under_admission_rate": 0.0,
+      "admits_closed_form": 1024,
+      "admits_rollout": 1024,
+      "delta_j_difference": {
+       "n": 3505,
+       "median": 0.0,
+       "p10": 0.0,
+       "p90": 0.0,
+       "min": -0.0,
+       "max": 0.0
+      },
+      "load_factor": {
+       "n": 3505,
+       "median": 0.877562599,
+       "p10": 0.877562599,
+       "p90": 1.027572932,
+       "min": 0.801039223,
+       "max": 1.416385229
+      }
+     },
+     "T2_mid": {
+      "n": 0
+     },
+     "T3_high": {
+      "n": 303,
+      "n_exact_match": 28,
+      "exact_match_fraction": 0.092409,
+      "sign_disagreements": 118,
+      "sign_disagreement_rate": 0.389439,
+      "over_admissions": 118,
+      "over_admission_rate": 0.389439,
+      "under_admissions": 0,
+      "under_admission_rate": 0.0,
+      "admits_closed_form": 157,
+      "admits_rollout": 39,
+      "delta_j_difference": {
+       "n": 303,
+       "median": 0.047181232,
+       "p10": -0.023590616,
+       "p90": 0.051669191,
+       "min": -0.046577601,
+       "max": 0.129144757
+      },
+      "load_factor": {
+       "n": 303,
+       "median": 4.358654767,
+       "p10": 4.254558459,
+       "p90": 4.373959442,
+       "min": 4.208644434,
+       "max": 4.493360424
+      }
+     }
+    }
+   },
+   "by_backlog_tercile_running_requests": {
+    "edges": {
+     "lo": 8.0,
+     "hi": 8.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n": 3718,
+      "n_exact_match": 3440,
+      "exact_match_fraction": 0.925229,
+      "sign_disagreements": 118,
+      "sign_disagreement_rate": 0.031737,
+      "over_admissions": 118,
+      "over_admission_rate": 0.031737,
+      "under_admissions": 0,
+      "under_admission_rate": 0.0,
+      "admits_closed_form": 1159,
+      "admits_rollout": 1041,
+      "delta_j_difference": {
+       "n": 3718,
+       "median": 0.0,
+       "p10": 0.0,
+       "p90": 0.0,
+       "min": -0.046577601,
+       "max": 0.129144757
+      },
+      "load_factor": {
+       "n": 3718,
+       "median": 0.877562599,
+       "p10": 0.877562599,
+       "p90": 1.042877607,
+       "min": 0.877562599,
+       "max": 4.493360424
+      }
+     },
+     "T2_mid": {
+      "n": 0
+     },
+     "T3_high": {
+      "n": 90,
+      "n_exact_match": 90,
+      "exact_match_fraction": 1.0,
+      "sign_disagreements": 0,
+      "sign_disagreement_rate": 0.0,
+      "over_admissions": 0,
+      "over_admission_rate": 0.0,
+      "under_admissions": 0,
+      "under_admission_rate": 0.0,
+      "admits_closed_form": 22,
+      "admits_rollout": 22,
+      "delta_j_difference": {
+       "n": 90,
+       "median": 0.0,
+       "p10": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0
+      },
+      "load_factor": {
+       "n": 90,
+       "median": 0.862257924,
+       "p10": 0.846953248,
+       "p90": 1.070450538,
+       "min": 0.801039223,
+       "max": 1.070450538
+      }
+     }
+    }
+   },
+   "decision_latency_ms": {
+    "p50": 6.2073,
+    "p99": 160.0698,
+    "max": 162.3643,
+    "n": 601
+   },
+   "mu_seen": [
+    0.0,
+    0.128256,
+    0.230091,
+    0.319638,
+    0.398733,
+    0.464593
+   ]
+  },
+  "128": {
+   "overall": {
+    "n": 7616,
+    "n_exact_match": 7056,
+    "exact_match_fraction": 0.926471,
+    "sign_disagreements": 196,
+    "sign_disagreement_rate": 0.025735,
+    "over_admissions": 189,
+    "over_admission_rate": 0.024816,
+    "under_admissions": 7,
+    "under_admission_rate": 0.000919,
+    "admits_closed_form": 1251,
+    "admits_rollout": 1069,
+    "delta_j_difference": {
+     "n": 7616,
+     "median": 0.0,
+     "p10": 0.0,
+     "p90": 0.0,
+     "min": -0.216825405,
+     "max": 0.082567157
+    },
+    "load_factor": {
+     "n": 7616,
+     "median": 0.877562599,
+     "p10": 0.877562599,
+     "p90": 1.101059889,
+     "min": 0.785734548,
+     "max": 7.959147917
+    }
+   },
+   "by_backlog_tercile_queued_tokens": {
+    "edges": {
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n": 7012,
+      "n_exact_match": 7012,
+      "exact_match_fraction": 1.0,
+      "sign_disagreements": 0,
+      "sign_disagreement_rate": 0.0,
+      "over_admissions": 0,
+      "over_admission_rate": 0.0,
+      "under_admissions": 0,
+      "under_admission_rate": 0.0,
+      "admits_closed_form": 1027,
+      "admits_rollout": 1027,
+      "delta_j_difference": {
+       "n": 7012,
+       "median": 0.0,
+       "p10": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0
+      },
+      "load_factor": {
+       "n": 7012,
+       "median": 0.877562599,
+       "p10": 0.877562599,
+       "p90": 1.027572932,
+       "min": 0.785734548,
+       "max": 1.624577844
+      }
+     },
+     "T2_mid": {
+      "n": 0
+     },
+     "T3_high": {
+      "n": 604,
+      "n_exact_match": 44,
+      "exact_match_fraction": 0.072848,
+      "sign_disagreements": 196,
+      "sign_disagreement_rate": 0.324503,
+      "over_admissions": 189,
+      "over_admission_rate": 0.312914,
+      "under_admissions": 7,
+      "under_admission_rate": 0.011589,
+      "admits_closed_form": 224,
+      "admits_rollout": 42,
+      "delta_j_difference": {
+       "n": 604,
+       "median": 0.047181232,
+       "p10": -0.032007931,
+       "p90": 0.047181232,
+       "min": -0.216825405,
+       "max": 0.082567157
+      },
+      "load_factor": {
+       "n": 604,
+       "median": 7.705041277,
+       "p10": 7.585640294,
+       "p90": 7.750955302,
+       "min": 7.555030944,
+       "max": 7.959147917
+      }
+     }
+    }
+   },
+   "by_backlog_tercile_running_requests": {
+    "edges": {
+     "lo": 8.0,
+     "hi": 8.0
+    },
+    "buckets": {
+     "T1_low": {
+      "n": 7145,
+      "n_exact_match": 6585,
+      "exact_match_fraction": 0.921624,
+      "sign_disagreements": 196,
+      "sign_disagreement_rate": 0.027432,
+      "over_admissions": 189,
+      "over_admission_rate": 0.026452,
+      "under_admissions": 7,
+      "under_admission_rate": 0.00098,
+      "admits_closed_form": 1180,
+      "admits_rollout": 998,
+      "delta_j_difference": {
+       "n": 7145,
+       "median": 0.0,
+       "p10": 0.0,
+       "p90": 0.0,
+       "min": -0.216825405,
+       "max": 0.082567157
+      },
+      "load_factor": {
+       "n": 7145,
+       "median": 0.877562599,
+       "p10": 0.877562599,
+       "p90": 1.146973914,
+       "min": 0.877562599,
+       "max": 7.959147917
+      }
+     },
+     "T2_mid": {
+      "n": 0
+     },
+     "T3_high": {
+      "n": 471,
+      "n_exact_match": 471,
+      "exact_match_fraction": 1.0,
+      "sign_disagreements": 0,
+      "sign_disagreement_rate": 0.0,
+      "over_admissions": 0,
+      "over_admission_rate": 0.0,
+      "under_admissions": 0,
+      "under_admission_rate": 0.0,
+      "admits_closed_form": 71,
+      "admits_rollout": 71,
+      "delta_j_difference": {
+       "n": 471,
+       "median": 0.0,
+       "p10": 0.0,
+       "p90": 0.0,
+       "min": 0.0,
+       "max": 0.0
+      },
+      "load_factor": {
+       "n": 471,
+       "median": 0.862257924,
+       "p10": 0.862257924,
+       "p90": 0.920440206,
+       "min": 0.785734548,
+       "max": 1.055145863
+      }
+     }
+    }
+   },
+   "decision_latency_ms": {
+    "p50": 13.124,
+    "p99": 471.4782,
+    "max": 808.8934,
+    "n": 601
+   },
+   "mu_seen": [
+    0.0,
+    0.11713,
+    0.218326,
+    0.306348,
+    0.386237,
+    0.450176
+   ]
+  }
+ },
+ "prediction_inputs": {
+  "over_admission_rate_by_size": {
+   "8": 0.004167,
+   "32": 0.024685,
+   "64": 0.030987,
+   "128": 0.024816
+  },
+  "over_admission_rate_by_backlog_tercile": {
+   "8": {
+    "T1_low": 0.0,
+    "T2_mid": null,
+    "T3_high": 0.058824
+   },
+   "32": {
+    "T1_low": 0.0,
+    "T2_mid": null,
+    "T3_high": 0.330986
+   },
+   "64": {
+    "T1_low": 0.0,
+    "T2_mid": null,
+    "T3_high": 0.389439
+   },
+   "128": {
+    "T1_low": 0.0,
+    "T2_mid": null,
+    "T3_high": 0.312914
+   }
+  },
+  "delta_j_difference_median_by_backlog_tercile": {
+   "8": {
+    "T1_low": 0.0,
+    "T2_mid": null,
+    "T3_high": 0.00277403
+   },
+   "32": {
+    "T1_low": 0.0,
+    "T2_mid": null,
+    "T3_high": 0.035622849
+   },
+   "64": {
+    "T1_low": 0.0,
+    "T2_mid": null,
+    "T3_high": 0.047181232
+   },
+   "128": {
+    "T1_low": 0.0,
+    "T2_mid": null,
+    "T3_high": 0.047181232
+   }
+  }
+ },
+ "_provenance": {
+  "git_commit": "53b825266483117803c74260877c865a5331bfcf",
+  "script": "measure_option_b.py::m_b2",
+  "model": "none",
+  "timestamp": "2026-11-18T13:47:44.199921",
+  "device": "flash_cpu",
+  "n": 13808
+ }
+}

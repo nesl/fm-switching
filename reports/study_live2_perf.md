@@ -350,3 +350,189 @@ M-B1 reports the spec's four T0 criteria for the fallback and for the full froze
 side against the spec's pre-registered bars. **No pass or fail beyond the numbers against those
 bars is declared, and the fallback is not enabled anywhere.** Acceptance is the user's call after
 the H100 pilot shows what decision delay above 32 devices actually costs.
+
+### B.7 Option B as built: the outcome
+
+Built, tested, measured, **and left OFF**. `sh_cost` defaults to "rollout" everywhere and the
+fallback is enabled in no run. Everything below is CPU only on committed dry-run fixtures, and
+M-B2 / M-B3 / M-B4 run with mu ESTIMATED (`mu="ewma"`), not at its placeholder zero, because the
+prediction is about the backlog term and at mu = 0 that term is silent in both models alike.
+
+**Two errata to the pre-registration, both found by shadow mode and both recorded rather than
+quietly corrected.** B.2 is the committed text; these are the corrections and the reasons.
+
+1. *The channel-1 condition.* B.2 wrote it as `start_c > due_at_c`. That is not "outside
+   channel 1": an instant CAPTURED BEFORE the decision instant satisfies it on a completely IDLE
+   engine, so it fired with nothing ahead of the candidate. The condition used is the work ahead
+   of the candidate when it could first run, `work_ahead_s = max(0, free_at_k - max(t0,
+   due_at_c))`, which is 0 on an idle engine whatever the capture time.
+2. *The backlog term's shape.* B.2 wrote `-mu * gpu_c` whenever the candidate queued. That is
+   not the rollout's backlog term: the rollout charges `-mu * max(busy - H, 0)`, leftover work AT
+   THE HORIZON, so an admission whose work still fits inside H costs nothing in backlog. The
+   first shadow run showed the consequence immediately, and it is worth recording as a worked
+   example of why shadow mode exists: on an 8 + 8 60 s fixture the error was a near-constant
+   -0.055 on 949 of 952 candidates, it accounted for the ENTIRE difference from the rollout (the
+   rollout's own `d_terminal` was 0 while this file's `own_gain` matched its `d_u_hat` exactly),
+   and it inverted the measured direction so that the closed form appeared to UNDER-admit 411 to
+   3. Reading that as a falsification of P-B1 would have been wrong. The term is now
+   `max(busy_before + gpu_outside_channel_1 - H, 0) - max(busy_before - H, 0)`, which keeps the
+   rollout's structure and applies the channel-1 restriction to which work enters it.
+
+#### M-B1: T0 criteria on the fallback, FIT trials only
+
+The scope is narrow and it is the first finding. The fallback is only ever applied to an SH
+admission: one 378-token single-frame episode call. The committed trials inject actions of their
+own size, and the distribution is nothing like that. Part C FIT runs 378 to 13,275 prompt tokens
+with a median of 11,058; **ENG1d FIT runs 10,925 to 13,273 and contains not one trial at or below
+600 tokens.** So only 70 of the 406 Part C FIT trials are the size this fallback ever prices, and
+ENG1d cannot speak to it at all. All three groups are reported; the SH-sized subset is the one to
+read.
+
+| group | n | model | criterion (i) fraction | spec bar | ratio median | criterion (ii) |
+|---|---|---|---|---|---|---|
+| Part C FIT, **SH-sized actions only** | 70 | full frozen | 0.7143 | 0.90 | 1.401 | not computable |
+| Part C FIT, **SH-sized actions only** | 70 | **closed form** | **0.2429** | 0.90 | **16.851** | not computable |
+| Part C FIT, all actions (out of scope) | 406 | full frozen | 0.7562 | 0.90 | 1.275 | 0.9833 |
+| Part C FIT, all actions (out of scope) | 406 | **closed form** | **0.0419** | 0.90 | **15.254** | **0.5333** |
+| ENG1d FIT (no SH-sized trial exists) | 180 | full frozen | 0.9000 | 0.90 | 1.107 | 1.0000 |
+| ENG1d FIT (no SH-sized trial exists) | 180 | **closed form** | **0.0000** | 0.90 | **9.380** | **0.3333** |
+
+Criterion (ii) is NOT COMPUTABLE on the SH-sized subset: all 70 trials share one action size, so
+no pair of actions within a condition differs by more than the 2x ranking rule requires.
+Criteria (iii) and (iv) DO NOT APPLY, with the reasons recorded in the JSON: the closed form
+predicts no completion time, and it omits the KV pool and the A6.2 prefix-risk term outright
+(declared in advance at B.4), so it has no prefix-loss class.
+
+**It is not the load factor.** The load factor's median is 1.000 on the SH-sized subset (max
+1.127), and forcing it to exactly 1 leaves criterion (i) unchanged at 0.2429 with the ratio
+median moving from 16.851 to 17.186. The over-prediction is the SERIAL-SHIFT ASSUMPTION
+underneath it: the closed form charges every overlapping request the full residual of the
+action's service time, and the real engine does not serialise that way.
+
+**No pass or fail is declared.** The numbers are against the spec's pre-registered bars and
+against the full frozen model, and the decision is the user's after the pilot. What the numbers
+say plainly is that the spec's own precondition for this fallback, "the fallback must pass T0
+itself", is not met as things stand on criterion (i), and that the trials needed to test it in
+its own regime barely exist.
+
+#### M-B2: shadow divergence, 13,808 SH candidates
+
+| devices | candidates | exact match | over-admissions | under-admissions | DeltaJ difference median |
+|---|---|---|---|---|---|
+| 8 | 480 | 0.8792 | 2 | 0 | 0.000 |
+| 32 | 1,904 | 0.9375 | 47 | 1 | 0.000 |
+| 64 | 3,808 | 0.9270 | 118 | 0 | 0.000 |
+| 128 | 7,616 | 0.9265 | 189 | 7 | 0.000 |
+| **pooled** | **13,808** | **0.9265** | **356 (2.58 %)** | **8 (0.06 %)** | **0.000** (p10 0, p90 0, min -0.217, max +0.129) |
+
+Over-admission rate by backlog tercile over queued tokens:
+
+| devices | T1 low | T2 mid | T3 high |
+|---|---|---|---|
+| 8 | 0.000 | empty | 0.0588 |
+| 32 | 0.000 | empty | 0.3310 |
+| 64 | 0.000 | empty | 0.3894 |
+| 128 | 0.000 | empty | 0.3129 |
+
+DeltaJ difference median in the high tercile: 0.00277, 0.03562, 0.04718, 0.04718 at 8 / 32 / 64 /
+128. **The middle tercile is empty at every size** because the backlog distribution is bimodal:
+most candidates arrive at an idle engine, where the closed form is EXACT, and the rest arrive
+behind work. That is reported rather than smoothed, and it makes P-B2 a two-point comparison.
+
+**The pre-registered prediction, answered without rewording it:**
+
+- **P-B1 (over-admissions exceed under-admissions): HELD.** 356 against 8, a ratio of 44 to 1.
+- **P-B2 (the over-admission rate rises monotonically across backlog terciles): HELD in
+  direction, on two points rather than three.** It is 0.000 in the low tercile at every size and
+  0.313 to 0.389 in the high tercile. The middle tercile is empty, so "monotonic across three
+  terciles" is not testable on this fixture.
+- **P-B3 (the rate rises with device count from 8 to 128): NOT HELD.** It rises 8 to 64
+  (0.0042, 0.0247, 0.0310 overall; 0.059, 0.331, 0.389 in the high tercile) and then FALLS at 128
+  (0.0248 overall, 0.313 high). The prediction said "increasingly with fleet size" and it stops
+  increasing at the largest size measured.
+- **P-B4 (the DeltaJ difference median is positive and rises with backlog tercile): MIXED.** The
+  pooled median is 0.000, not positive, because the closed form is exactly right on 92.65 % of
+  candidates. Within the high-backlog tercile the median IS positive and does rise with size,
+  0.00277 to 0.04718, flattening between 64 and 128.
+
+So the MECHANISM is confirmed and its claimed TREND is not. Where the closed form differs it
+over-admits, by a wide margin, and the divergence concentrates exactly where predicted, in the
+high-backlog tercile. The "increasingly with fleet size" half of the prediction fails at 128.
+
+#### M-B3: speed, closed_form against rollout, Option 0 on
+
+Committed 180 s fixture, seed 1, mu estimated. (These p99 figures are not comparable to
+`perf_speed_option0.json`, which ran at mu = 0; the comparison that matters here is mode against
+mode on identical fixtures.)
+
+| devices | p50 rollout | p50 closed form | p99 rollout | p99 closed form | wall rollout | wall closed form |
+|---|---|---|---|---|---|---|
+| 32 | 16.993 ms | 14.872 ms | 51.481 ms | 51.768 ms | 30.3 s | 27.7 s |
+| 64 | 163.240 ms | 139.894 ms | 211.362 ms | **325.237 ms** | 206.5 s | 278.7 s |
+| 128 | 345.655 ms | **122.552 ms** | 781.088 ms | **2,227.083 ms** | 476.6 s | 494.4 s |
+
+**This is the decisive result for Option B, and it is a negative one.** The closed form does what
+it was meant to do to the MEDIAN, cutting it 2.8x at 128 devices, and the opposite of what it was
+meant to do to the TAIL: p99 is 1.54x WORSE at 64 devices and **2.85x worse at 128**. The
+mechanism is the over-admission M-B2 measured: each extra admission creates downstream work that
+the release loop then prices with a full rollout, so the period that was already worst becomes
+worse. A fallback whose entire purpose is to bound the p99 inside the 100 ms period makes the p99
+worse at the two sizes that need it. The 60 s fixture shows the same shape and is kept alongside
+in `perf_optionB_m_b3_window60.json`.
+
+#### M-B4: closed-loop effect, FIXTURE REPLAY, NOT A LIVE RESULT
+
+| devices | SH admitted, rollout | SH admitted, closed form | delta | released delta | on-time delta |
+|---|---|---|---|---|---|
+| 8 | 476 | 476 | 0 | 0 | 0 |
+| 32 | 1,033 | 1,034 | +1 | 0 | -1 |
+| 64 | 1,063 | 1,069 | +6 | 0 | 0 |
+
+The extra admissions are ABSORBED: `released` is identical at every size, so the release loop,
+which still uses the full rollout, declines downstream what the closed form let in. At 8 devices
+the two arms are identical in every counted quantity. **No fixture-level J is reported and the
+reason is in the JSON rather than a zero being printed:** a dry-run fixture produces no scored J,
+the decision log carries no per-decision J to sum, and inventing a proxy would be a number with
+no definition behind it. The on-time fraction is the closest the fixture defines: 1.0000 against
+0.9989 at 32 devices, 1.0000 against 1.0000 at 8 and 64.
+
+#### B.8 Six-check consistency protocol
+
+1. **Cross-check against committed measurements.** The full frozen model's criterion (i) is
+   reproduced here at 0.7562 on Part C FIT and 0.9000 on ENG1d FIT with the committed
+   `delay_pass` and the committed trials, which is the same scoring the T0b work reports; no
+   quantity moved. The closed form has no prior committed value to disagree with, this being its
+   first measurement.
+2. **Physical plausibility.** The closed form's imposed delay is a sum of residuals of the frozen
+   `predict().service_s`, so it cannot exceed the number of overlapping requests times that
+   service time; the 16.9x ratio against measured is an OVER-prediction, which is the direction a
+   serial model must err in against a batching engine, not a rate faster than the committed
+   curves.
+3. **Distribution sanity.** Every divergence figure is reported with its median, p10, p90, min
+   and max, and the pooled median of exactly 0.000 is explained rather than left to look like a
+   missing number: 92.65 % of candidates match bit for bit. The empty middle tercile is reported
+   as empty.
+4. **Definition audit.** "Imposed delay" keeps the committed TTFT-sum definition
+   (`score_t0b.METRIC_FIELD["ttft"]`, StudyENG1 Part C's and StudyT0's own); criterion (i) uses
+   the committed `run_t0.delay_pass` (1.5x or 0.1 s) and criterion (ii) the committed
+   `run_t0.RANK_RATIO` of 2.0 and `MIN_FRACTION` bar of 0.90. Only the PREDICTOR differs.
+5. **Claim linkage.** Nothing here bears on a claim in `research/CLAIMS.md`: this is an
+   apparatus-cost study. It bears on spec 6.5's own precondition, which it does not meet.
+6. **Proxy validity.** Two proxies are used and both are labelled. The SH-sized Part C subset is
+   a proxy for SH-admission conditions, valid in action size and NOT in anything else: those
+   trials' background load is ENG1c's, not a 64-device fleet's. The on-time fraction in M-B4 is a
+   proxy for J and is not J; it is reported as a count, and no fixture-level J is claimed.
+
+#### B.9 Limitations
+
+1. The fallback does not meet the spec's criterion (i) bar in any scoping, and the trials that
+   could test it in its own regime are 70 Part C trials with one action size, which cannot
+   support criterion (ii) at all.
+2. M-B2's backlog terciles are bimodal, so the trend across backlog rests on two points.
+3. M-B3 and M-B4 are dry-run fixtures. The over-admission that drives the p99 blow-up depends on
+   how much downstream work an admission really creates, which only a measured run settles.
+4. The two errata above mean the committed pre-registration's B.2 is not the implemented form in
+   two places. The errata are recorded here; the design log entry the planner writes should carry
+   them.
+5. Nothing here tests the fallback at 256 devices or above, or with the release loop also on a
+   closed form, which is a different option and was not built.
