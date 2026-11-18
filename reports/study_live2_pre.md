@@ -246,3 +246,50 @@ session now reaches its last decodable frame (16 sessions end 1.00 to 1.03 s bef
 `results/orchestration/live2/pre/manifests/sember_d2_q88_{manifest.jsonl.gz, manifest_meta.json, encode_meta.json}`
 (replaced), `results/orchestration/live2/pre/live2_pre_part1_extension.json` (per-session record). The pilot's
 combined manifest and frame-ref symlinks under `~/data/live2/` were refreshed to include the new frames.
+
+## 10. D111 (2026-11-18): end-of-session frames, and a correction to section 9
+
+**Correction to section 9.** Section 9 says every session now reaches its last decodable frame. That is true, but it is
+not the same as covering every instant a trace can ask for. The boundary convention is: **trace end INCLUSIVE, frame
+store EXCLUSIVE.** The trace generator's 2-s history grid includes t = 2 x floor(duration / 2) <= duration, while the
+1 fps store ends at its last decodable frame, up to about 1 s before the end (for example a 300.000 s session's last
+1 fps frame is 299.0 s, and its grid asks for 300.0 s). StudyMOT2 seed 9's preflight (`live2/preflight.py`) found the
+first such reference and refused to start, which is what the preflight exists for.
+
+**Enumeration (D111 step 1).** `experiments/orchestration/study_live2_d111_endframes.py enumerate` built every trace a
+planned run uses, with the runner's exact `generate_trace` call and the combined manifest, and ran the preflight's
+every-ref check on each: MOT2 seeds 9 and 10 (12 devices, 600 s); the pilot at seed 0 (the 8-device 120 s Step 1 trace
+and every ladder size 4, 8, ..., 512 at 600 s); round 1 at seeds 1, 2, 3, every size 4 to 128, all three ratios (600 s,
+mode A; mode B's records are the same, only the digest's view differs). 1,136 traces. **25 distinct references were
+missing**, every one an S-EMBER D2 end-of-session instant (24 sessions at 300.0 / 322 / 326 / 336 / 422 / 600 s ends,
+listed with the traces using each in `results/orchestration/live2/pre/d111_enumeration_before.json`), used by 970 of
+the 1,136 traces (MOT2: seed 9 only, 1 ref; pilot ladder: 6 traces; round 1: 963); the largest share of any single
+trace's references was 0.053 % (STOP threshold 1 %). One more session (1200.004 s) has the same gap but no planned trace
+reaches its end. The generation was checked against a real run: MOT2 seed 10's regenerated trace has the same four
+hashes as the trace that run used.
+
+**Substitutes (D111 step 2).** All 25 by the PREFERRED method (a): the source video's last native-rate frame at or
+before the requested instant, decoded from the same `~/.cache/fm-switching/sember_videos/<session>.mp4` the D2
+extraction used, through the extractor's own steps (`frame.to_image()` saved as JPEG q88) and the same D2 recipe
+(`study_rh3_inputs.load(path, (352, 256))`, JPEG q88). The videos are 12 fps, so every substitute's capture time is
+0.0833 s before its requested instant (offset 0.083333 s in all 25; within the 0.1 s rule); no fallback (b) was
+needed. Each is marked in the encode log and, through a three-field additive change to `build_manifest.py` that only
+substitute rows exercise, in the manifest: `substitute_of` (`<session>.mp4@pts<capture time>`), `method`
+(`native_last_frame`), `offset_s`, and `sha256`. No existing JPEG was touched (D91); store now 38,604 frames.
+
+**Checks (D111 step 3).**
+
+| check | result |
+|---|---|
+| preflight every-ref check on all 1,136 traces after the fill | 0 missing, all pass |
+| traces unchanged (trace_sha256, device_answers_sha256, fairness_digest_A, fairness_digest_B) | 0 of 1,136 changed (robot history bytes come from the committed default, not the manifest) |
+| E10a byte quartiles, whole store, committed 10 % rule | unflagged (256x352: 0.921 / 0.941 / 0.940 / 0.951; 352x256: 0.992 / 0.980 / 0.977 / 0.996) |
+| E10a byte quartiles, the 25 NEW frames only, committed 10 % rule | **FLAGGED on small samples**: 256x352 (n = 15) p25 0.736, median 1.031, p75 1.078, mean 1.009; 352x256 (n = 10) p25 0.884, median 1.113, p75 1.017, mean 1.006. Means within 1 %; quartiles of 10 to 15 frames are noisy |
+| each substitute vs its own session's previous stored frame (bytes ratio) | median 1.002, range 0.591 to 1.136 (two near 0.6, candidate: end-of-recording scene change or fade, not tested) |
+
+The small-sample quartile flag is reported, not acted on: D111's STOP conditions (a ref unfillable, more than 1 % of
+a run's refs substituted, any trace or digest change) were not met, and the substitutes are the true last frames of
+their videos by the committed recipe. Outputs: `results/orchestration/live2/pre/manifests/sember_d2_q88_{manifest.jsonl.gz,
+manifest_meta.json, encode_meta.json, encode_log.jsonl.gz}`, `results/orchestration/live2/pre/d111_{enumeration_before,
+enumeration_after, fill, verify}.json`. The combined manifest and frame-ref symlinks under `~/data/live2/` were
+refreshed (25 new links).

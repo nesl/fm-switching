@@ -9,9 +9,19 @@
       "reason": "extend every EVAL session to its END (user request 2026-11-18), not only to its last question",
       "source": "/home/pragya/.cache/fm-switching/sember_frames_full",
       "source_extractor": "experiments/sember/study_o_q4.py::cache_video run unchanged (AST) with max_qt = duration; frames shared with the existing source directory byte-identical"
+    },
+    {
+      "added": 25,
+      "at": "2026-11-18T14:43:47",
+      "decision": "D111",
+      "methods": {
+        "native_last_frame": 25,
+        "prev_stored_frame": 0
+      },
+      "reason": "end-of-session instants a planned trace asks for past the 1 fps store's last frame (trace end inclusive, frame store exclusive)"
     }
   ],
-  "n_frames": 38579,
+  "n_frames": 38604,
   "overnight_decision": "input parsing through the committed D14b instant-to-frame manifest (Nexar) and E10a's D2 loader on sember_frames (S-EMBER); same recipe as encode_jpeg.py",
   "quality": 88,
   "recipe": "S-EMBER D2: study_rh3_inputs.load(path, (352, 256)) then save(JPEG, quality=88)",

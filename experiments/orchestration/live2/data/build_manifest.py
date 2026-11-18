@@ -85,13 +85,16 @@ def build(store: Path, dataset: str, tol: float, root: Path) -> Dict[str, Any]:
     if not frames.exists():
         raise SystemExit(f"MISSING: {frames}; run encode_jpeg.py first, on the frame host")
     enc_meta = json.loads((store / "encode_meta.json").read_text())
-    log = {r["file"]: r["frame_ref"]
-           for r in (json.loads(l) for l in open(store / "encode_log.jsonl"))}
+    log_rows = [json.loads(l) for l in open(store / "encode_log.jsonl")]
+    log = {r["file"]: r["frame_ref"] for r in log_rows}
+    # D111: a substitute frame carries its marks into the manifest; every other row is unchanged
+    subs = {r["file"]: {k: r[k] for k in ("substitute_of", "method", "offset_s") if k in r}
+            for r in log_rows if r.get("substitute")}
     rows: List[Dict[str, Any]] = []
     for p in sorted(frames.rglob("*.jpg")):
         rel = str(p.relative_to(frames))
         rows.append(dict(frame_ref=log.get(rel, rel), path=str(p), bytes=p.stat().st_size,
-                         sha256=sha256_of(p)))
+                         sha256=sha256_of(p), **subs.get(rel, {})))
     with open(store / "manifest.jsonl", "w") as fh:
         for r in rows:
             fh.write(json.dumps(r, sort_keys=True) + "\n")
