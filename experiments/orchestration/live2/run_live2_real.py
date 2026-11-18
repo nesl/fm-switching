@@ -129,6 +129,13 @@ def run(a) -> Dict[str, Any]:
     htok = int(a.host_tier_tokens or RC.host_tokens(a.host_tier_gib))
     sends = bool(a.server)
 
+    # (2) a real-server run refuses to start with a frame it cannot send
+    import preflight as PF
+    frames_report = PF.require_frames(tdir, (Path(a.frames_root) if a.frames_root else None),
+                                      a.server_kind if sends else "device-only-no-server")
+    (rdir / "frames_preflight.json").write_text(
+        json.dumps(frames_report, indent=1, default=str) + "\n")
+
     srv = None
     sinfo: Optional[Dict[str, Any]] = None
     if a.start_server:
@@ -163,6 +170,7 @@ def run(a) -> Dict[str, Any]:
         decision_period_s=a.decision_period_s, ratio=a.ratio, n_devices=a.n_devices,
         run_s=a.run_s, memory_setting=RC.memory_setting(a.host_tier_gib, a.memory_setting),
         server=sinfo, server_url=(a.server or "none"), server_kind=a.server_kind,
+        frames_preflight=frames_report,
         model=a.model, split_processes=bool(a.split), is_measurement=False)
     (rdir / "header.json").write_text(json.dumps(header, indent=1, default=str) + "\n")
 

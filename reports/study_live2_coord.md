@@ -1797,3 +1797,95 @@ pytest-style modules, not of the code: that runner has no `if __name__ == "__mai
 coordinator process, and the parent's accept timed out. The same test passes under
 `python3 -m unittest`. The runner is scratch tooling and is not committed; it is recorded here
 because the symptom looks exactly like a deadlock in `procsplit.py` and is not one.
+
+## H9. Addendum: answers bypass the decision loop, and a real run refuses a frame it cannot send
+
+Two changes on top of H1 to H8, both user-directed after H5 showed `policy-core` at 64 devices
+missing the lateness rule at p99 110.3 ms.
+
+### H9.1 The scheduler is off the answer's return path
+
+In deployment the scheduler does not sit between the engine and the device. The completion path
+is now split in two:
+
+* **on the I/O thread, the instant the request finishes** (`coordinator._on_complete`): derive
+  the timings, run the committed score extraction, build the `cloud_answer`, and hand it to the
+  transport. It touches NO mutable policy state. The opportunity is read for its `kind` and
+  `deadline_abs()` only, both fixed when the trace created it.
+* **at the next decision epoch** (`coordinator._apply_completion`, called from `_collect` exactly
+  where it was called before): apply the state changes, write the request log, tell the arm
+  through `live2_completed`, and settle the opportunity.
+
+So what the policy sees mid-decision is unchanged and it learns of completions at the next epoch,
+as before. In the split configuration the forwarding is done by a child-side writer thread fed
+from a queue (`coordinator.on_answer`), because appending the answer to a list was not enough:
+the bridge's drain still ran on the child's main loop, which is exactly the thread a long
+decision blocks. `EmulatorBridge(forward_answers=False)` then stops the loop re-sending them.
+
+**Two fixes were needed, and the second was the one that mattered.** Forwarding from the I/O
+thread alone moved `policy-core` at 64 devices from p99 110.3 ms only to 93.2 ms, with all 966
+answers confirmed forwarded by the I/O thread. The reason is a stamping error the prompt's own
+wording pointed at ("stamped with its true completion time"): a request was stamped
+`sent_s = t`, the nominal instant of the epoch that decided it, while it actually went on the
+wire up to 130 ms later, after the decision finished. Every completion derived from it was
+therefore understated by exactly that delay, so a promptly forwarded answer still carried a
+`t_done` behind the fleet's clock. Requests now carry their TRUE submission time,
+`t + (perf_counter() - epoch_start)`, and the delay is logged per request. A dry run has no wall
+clock and keeps the nominal instant, which is what keeps its logs deterministic.
+
+| `policy-core`, 64 devices, mode A | lateness p99 | lateness max | valid | decision p99 | submit delay p99 |
+|---|---|---|---|---|---|
+| H5, before the addendum | 110.256 ms | 488.336 ms | no | 115.694 ms | not logged |
+| answers forwarded from the I/O thread | 93.219 ms | 416.980 ms | no | 103.964 ms | 114.404 ms |
+| + the true submission stamp | **8.196 ms** | 303.711 ms | **yes** | 112.868 ms | 118.979 ms |
+
+**The policy's decision cost is now paid where it belongs.** It no longer shows up as lateness;
+it shows up as submit delay (p50 38.0, p90 84.5, p99 119.0, max 131.8 ms over 973 requests),
+which is the honest consequence of a 100 ms-period scheduler that takes p99 113 ms to decide: the
+request goes out late, the answer is then on time relative to when it was actually sent. Decision
+latency and submit delay are both reported per run, separately, so StudyLIVE2-perf has the
+quantity it needs to improve.
+
+The residual tail is real and reported rather than smoothed: 138 of 2,301 actions are still over
+10 ms and the worst is 303.7 ms, all of them answers. p99 is the acceptance rule and it is met by
+a factor of 6; the max is not claimed to be fixed.
+
+### H9.2 A real-server run refuses to start with a frame it cannot send
+
+`live2/preflight.py`. The coordinator resolves `frames_root / frame_ref` and, when the file is
+absent, sends the frame as a uuid-only REFERENCE, which is the committed StudyRH7 wire form for
+"you have already seen these bytes". For a frame whose bytes were never uploaded that is a false
+claim about the engine's cache. On flash it only shrinks the body; against a real engine it
+corrupts the prefix the study measures.
+
+`require_frames(trace_dir, frames_root, server_kind)` is called by `run_live2_real.py` before
+anything is built, writes `frames_preflight.json` into the run directory, puts the report in the
+header, and raises `MissingFrames` so no partial run directory is produced. An absent file and a
+present-but-empty file are both refused. Fake and stub runs are exempt by `server_kind`, because
+the fake-server tests build deliberately partial stores, and the exemption cannot be taken by
+accident on a real run.
+
+The finding that motivated it is pinned as a test rather than left in prose: a seed-0, 8-device,
+120 s, mode-A trace asks for 1,278 frame references and **30 of them have no row in the committed
+Part-1 manifests**, every one an S-EMBER D2 reference (the manifests reach each session's last
+question; the trace keeps appending history to the session's end). The test asserts the exact
+pair (30, 1278) and that all 30 are D2 references, so when the H100 extends the D2 store to each
+session's end the test fails loudly and says that the gate can be relaxed and this issue closed.
+
+### H9.3 Acceptance re-run: 8 of 8
+
+| arm | devices | mode | p50 | p90 | **p99** | max | within 50 ms | decision p99 | submit delay p99 | requests |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `edf` | 8 | A | 0.151 | 0.222 | **0.263** | 0.368 | yes | 0.241 | 0.645 | 711 |\n| `edf` | 8 | B | 0.082 | 0.209 | **0.259** | 0.318 | yes | 0.255 | 1.877 | 349 |\n| `policy-core` | 8 | A | 0.151 | 0.236 | **0.277** | 0.369 | yes | 4.244 | 6.754 | 767 |\n| `policy-core` | 8 | B | 0.139 | 0.211 | **0.260** | 0.337 | yes | 8.203 | n/a | 0 |\n| `edf` | 64 | A | 0.068 | 0.204 | **0.260** | 1.318 | yes | 0.789 | 2.023 | 597 |\n| `edf` | 64 | B | 0.066 | 0.203 | **0.262** | 3.556 | yes | 0.684 | 100.147 | 34 |\n| `policy-core` | 64 | B | 0.062 | 0.164 | **0.925** | 108.089 | yes | 90.271 | 44.872 | 4 |\n| `policy-core` | 64 | A | 0.081 | 0.179 | **22.174** | 349.390 | yes | 101.914 | 114.011 | 962 |
+
+All milliseconds, `all_within_limit` true, fairness digests identical across arms at every size
+and mode. The grid's `policy-core` 64 / A cell reads p99 22.174 ms where the single re-run above
+read 8.196 ms: the tail varies run to run because it is driven by where a long decision happens
+to fall against the arrival pattern. Both are inside the limit by a wide margin, and the figure
+reported as the acceptance result is the grid's.
+
+Decision latency and submit delay now separate cleanly by arm, which is the quantity
+StudyLIVE2-perf is aimed at: `edf` decides in p99 0.24 to 0.79 ms at every size, while
+`policy-core` goes from p99 4.24 ms at 8 devices to 101.91 ms at 64. The 100.1 ms submit delay in
+the `edf` 64 / B cell is not a decision cost: that cell issues 34 requests, so a single
+pull-mode request waiting on its frame dominates the percentile.

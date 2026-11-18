@@ -31,6 +31,7 @@ NOTHING A RUN AGAINST THE CPU STUB PRODUCES IS A MEASUREMENT.
 """
 import resource
 import sys
+import threading
 import time
 from collections import defaultdict
 from dataclasses import dataclass
@@ -98,7 +99,8 @@ class Live2Coordinator:
                  targets: Optional[Dict[str, Any]] = None, on_pull=None,
                  gpu_budget_s: Optional[float] = None,
                  max_wall_s: Optional[float] = None,
-                 frame_cache: Any = None, defer_images: bool = False) -> None:
+                 frame_cache: Any = None, defer_images: bool = False,
+                 on_answer=None) -> None:
         self.arm = arm
         self.be = backend
         self.events = sorted(events, key=lambda e: (_sched(e), e.get("kind", "")))
@@ -151,6 +153,19 @@ class Live2Coordinator:
         self.answers: List[Dict[str, Any]] = []
         self.pulls: List[Dict[str, Any]] = []
         self.cloud_answers: List[Dict[str, Any]] = []
+        # the I/O thread appends answers and completion notices under this lock; the decision
+        # loop drains the notices at its epochs (harness addendum)
+        self._io_lock = threading.Lock()
+        self._notices: List[Any] = []
+        self.n_answers_forwarded_by_io = 0
+        # Set by a transport that can reach the fleet WITHOUT the decision loop (procsplit's
+        # child writer). Called on the I/O thread the instant the answer exists, so a decision
+        # in progress cannot hold an answer back. It must not block and must not touch state.
+        self.on_answer = on_answer
+        # what a slow decision actually costs: the delay between the epoch that decided a
+        # request and the moment it went on the wire
+        self.submit_delays_ms: List[float] = []
+        self._epoch_wall0: Optional[float] = None
         self.decision_latencies_ms: List[float] = []
         self.errors: List[str] = []
         self.counts: Dict[str, int] = defaultdict(int)
@@ -229,6 +244,7 @@ class Live2Coordinator:
         self._roster(t)
         obs = self.st.observation(t, epoch if epoch in _EPOCHS else "tick")
         t0 = time.perf_counter()
+        self._epoch_wall0 = t0
         act = self.arm(obs)                      # scrub + validate_action + apply_defaults
         dt_ms = (time.perf_counter() - t0) * 1000.0
         self.decision_latencies_ms.append(dt_ms)
@@ -517,6 +533,18 @@ class Live2Coordinator:
         self.n_req += 1
         rid = f"r{self.n_req}"
         d = self.st.devices[device_id]
+        # THE TRUE SUBMISSION TIME (harness addendum 1). A decision that takes 100 ms puts its
+        # requests on the wire 100 ms after the epoch it belongs to, so stamping them with the
+        # epoch's nominal instant understates every completion derived from them by exactly that
+        # delay - which is what made a promptly forwarded answer still arrive behind the fleet's
+        # clock. The delay is recorded per request and IS the cost of a slow decision: later
+        # submissions, not held answers. A dry run has no wall clock and keeps the nominal
+        # instant, so its logs stay deterministic.
+        delay_s = 0.0
+        if not self.dry_run and self._epoch_wall0 is not None:
+            delay_s = max(0.0, time.perf_counter() - self._epoch_wall0)
+            self.submit_delays_ms.append(delay_s * 1000.0)
+        t = t + delay_s
         body = B.build_body(kind=kind, device_id=device_id, session_id=session_id,
                             run_tag=self.run_tag, salt=d.salt, header=HEADER_TEXT,
                             frames=frames, question=question, options=options,
@@ -538,7 +566,10 @@ class Live2Coordinator:
             self.futures.append((_DryFuture(sub, self._dry_service_s(sub), t,
                                             lambda: self.st.now), sub))
         else:
-            self.futures.append((self.be.submit_live2(sub), sub))
+            fut = self.be.submit_live2(sub)
+            self.futures.append((fut, sub))
+            # the answer leaves for the fleet from the I/O thread, not from a decision epoch
+            fut.add_done_callback(lambda f, _s=sub: self._on_complete(_s, f))
         return rid
 
     def _dry_service_s(self, sub: Live2Submission) -> float:
@@ -552,47 +583,115 @@ class Live2Coordinator:
             return float(C.episodic_cloud_latency_s("32BI", 1, 25))
         return float(C.recall_ttft_s(max(sub.est_tokens, 1), "COLD"))
 
+    # ------------------------------------------------------------ completion, in two halves
+    # D-harness addendum: IN DEPLOYMENT THE SCHEDULER IS NOT ON THE ANSWER'S RETURN PATH. The
+    # answer therefore leaves for the fleet the moment the request completes, on the I/O thread,
+    # stamped with its true completion time and touching NO policy state. All the I/O thread
+    # leaves behind is a completion notice; the arm consumes those notices at its next decision
+    # epoch, exactly where it consumed them before, so what the policy sees mid-decision is
+    # unchanged and a slow decision costs the policy LATER SUBMISSIONS instead of held answers.
+    def _timings_of(self, sub: Live2Submission, r: Dict[str, Any]) -> Dict[str, Any]:
+        """Everything derivable from a finished request. Pure: reads no mutable policy state."""
+        usage = r.get("usage") or {}
+        ct = cached_tokens_of(usage)
+        pt = prompt_tokens_of(usage)
+        path, frac = SC.cache_path_of(ct, pt)
+        done_s = sub.sent_s + (r["total_s"] * self.speed if r.get("total_s") else 0.0)
+        first_s = (sub.sent_s + r["ttft_s"] * self.speed) if r.get("ttft_s") else None
+        return dict(usage=usage, ct=ct, pt=pt, path=path, frac=frac, done_s=done_s,
+                    first_s=first_s, scored=self._score_of(sub, r))
+
+    def _answer_of(self, sub: Live2Submission, info: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """The `cloud_answer` for a finished request, or None when it answers no opportunity.
+
+        The opportunity is read, never written: `kind` and `deadline_abs()` are fixed when the
+        trace creates it, so this is safe to call off the decision loop.
+        """
+        if not sub.opportunity_id:
+            return None
+        o = self.st.opps.get(sub.opportunity_id)
+        if o is None:
+            return None
+        delivered = info["first_s"] if info["first_s"] is not None else info["done_s"]
+        ontime = delivered <= o.deadline_abs() + 1e-9
+        scored = info["scored"] or {}
+        return SC.make("cloud_answer", device_id=o.device_id, opportunity_id=o.opp_id,
+                       t_done=round(delivered, 6),
+                       payload=dict(request_id=sub.request_id, kind=o.kind,
+                                    cache_path=info["path"], on_time=bool(ontime),
+                                    cloud_score=scored.get("cloud_score"),
+                                    cloud_letter=scored.get("cloud_letter"),
+                                    p_yes=scored.get("p_yes")))
+
+    def _on_complete(self, sub: Live2Submission, fut) -> None:
+        """Runs on the I/O thread the instant the request finishes. NO POLICY STATE IS TOUCHED."""
+        try:
+            r = fut.result()
+        except Exception as e:                                        # noqa: BLE001
+            r = dict(request_id=sub.request_id, kind=sub.kind, sent_s=sub.sent_s, usage={},
+                     total_s=None, ttft_s=None, http_status=None,
+                     error=f"{type(e).__name__}: {e}", text="", chunks=[], sub=sub)
+        info = self._timings_of(sub, r)
+        ans = self._answer_of(sub, info)
+        with self._io_lock:
+            if ans is not None:
+                self.cloud_answers.append(ans)
+                self.n_answers_forwarded_by_io += 1
+            self._notices.append((sub, r, info))
+        if ans is not None and self.on_answer is not None:
+            self.on_answer(ans)
+
     def _collect(self, t: float) -> None:
+        if not self.dry_run:
+            with self._io_lock:
+                notices = self._notices
+                self._notices = []
+            for sub, r, info in notices:
+                self._apply_completion(sub, r, info, t, emit=False)
+            return
         still = []
         for fut, sub in self.futures:
             if not fut.done():
                 still.append((fut, sub))
                 continue
-            r = fut.result()
-            self.st.in_flight[sub.kind] = max(self.st.in_flight[sub.kind] - 1, 0)
-            if r.get("error"):
-                self.errors.append(r["error"])
-            usage = r.get("usage") or {}
-            ct = cached_tokens_of(usage)
-            pt = prompt_tokens_of(usage)
-            path, frac = SC.cache_path_of(ct, pt)
-            done_s = sub.sent_s + (r["total_s"] * self.speed if r.get("total_s") else 0.0)
-            first_s = (sub.sent_s + r["ttft_s"] * self.speed) if r.get("ttft_s") else None
-            if self.logs is not None:
-                self.logs.request.write(SC.RequestRecord(
-                    request_id=sub.request_id, decision_id=sub.decision_id,
-                    device_id=sub.device_id, t_submit=round(sub.sent_s, 6),
-                    t_first_token=(round(first_s, 6) if first_s is not None else None),
-                    t_done=round(done_s, 6), prompt_tokens=pt, cached_tokens=ct,
-                    cache_path=path, cached_fraction=frac,
-                    output_tokens=output_tokens_of(usage), http_status=r.get("http_status"),
-                    cache_salt=sub.cache_salt, session_id=sub.session_id,
-                    opportunity_id=sub.opportunity_id, mm_uuids=list(sub.mm_uuids),
-                    traffic_mix=dict(sub.traffic_mix)))
-            self.st.ewma("episodic" if sub.kind == "monitor" else "recall", r.get("ttft_s"))
-            if hasattr(self.arm, "live2_completed"):
-                # An arm that keeps its own model of what the engine is running must be told
-                # when a request finishes, or its model never empties.
-                self.arm.live2_completed(dict(
-                    kind=sub.kind, device_id=sub.device_id, session_id=sub.session_id,
-                    opportunity_id=sub.opportunity_id, decision_id=sub.decision_id,
-                    t_submit=sub.sent_s, t_first_token=first_s, t_done=done_s,
-                    cache_path=path, request_id=sub.request_id,
-                    prompt_tokens=(pt if pt is not None else sub.est_tokens),
-                    cached_tokens=ct))
-            self._settle(sub, first_s, done_s, path, t, ct, self._score_of(sub, r))
-            self.counts["completed_" + sub.kind] += 1
+            self._apply_completion(sub, fut.result(), None, t, emit=True)
         self.futures[:] = still
+
+    def _apply_completion(self, sub: Live2Submission, r: Dict[str, Any],
+                          info: Optional[Dict[str, Any]], t: float, emit: bool) -> None:
+        """The half that DOES touch policy state, at the epoch where it always happened."""
+        if info is None:
+            info = self._timings_of(sub, r)
+        ct, pt, path = info["ct"], info["pt"], info["path"]
+        frac, done_s, first_s = info["frac"], info["done_s"], info["first_s"]
+        usage = info["usage"]
+        self.st.in_flight[sub.kind] = max(self.st.in_flight[sub.kind] - 1, 0)
+        if r.get("error"):
+            self.errors.append(r["error"])
+        if self.logs is not None:
+            self.logs.request.write(SC.RequestRecord(
+                request_id=sub.request_id, decision_id=sub.decision_id,
+                device_id=sub.device_id, t_submit=round(sub.sent_s, 6),
+                t_first_token=(round(first_s, 6) if first_s is not None else None),
+                t_done=round(done_s, 6), prompt_tokens=pt, cached_tokens=ct,
+                cache_path=path, cached_fraction=frac,
+                output_tokens=output_tokens_of(usage), http_status=r.get("http_status"),
+                cache_salt=sub.cache_salt, session_id=sub.session_id,
+                opportunity_id=sub.opportunity_id, mm_uuids=list(sub.mm_uuids),
+                traffic_mix=dict(sub.traffic_mix)))
+        self.st.ewma("episodic" if sub.kind == "monitor" else "recall", r.get("ttft_s"))
+        if hasattr(self.arm, "live2_completed"):
+            # An arm that keeps its own model of what the engine is running must be told
+            # when a request finishes, or its model never empties.
+            self.arm.live2_completed(dict(
+                kind=sub.kind, device_id=sub.device_id, session_id=sub.session_id,
+                opportunity_id=sub.opportunity_id, decision_id=sub.decision_id,
+                t_submit=sub.sent_s, t_first_token=first_s, t_done=done_s,
+                cache_path=path, request_id=sub.request_id,
+                prompt_tokens=(pt if pt is not None else sub.est_tokens),
+                cached_tokens=ct))
+        self._settle(sub, first_s, done_s, path, t, ct, info["scored"], emit=emit)
+        self.counts["completed_" + sub.kind] += 1
 
     def _score_of(self, sub: Live2Submission, r: Dict[str, Any]) -> Dict[str, Any]:
         """The committed extraction on this answer (live2/scores.py), or {} for a build piece.
@@ -607,7 +706,8 @@ class Live2Coordinator:
         return {}
 
     def _settle(self, sub: Live2Submission, first_s, done_s: float, path, t: float,
-                cached_tokens=None, scored: Optional[Dict[str, Any]] = None) -> None:
+                cached_tokens=None, scored: Optional[Dict[str, Any]] = None,
+                emit: bool = True) -> None:
         if sub.kind in ("piece", "whole") and sub.request_id in self.builds:
             b = self.builds.pop(sub.request_id)
             s = self.st.sessions.get(b["session_id"])
@@ -652,15 +752,18 @@ class Live2Coordinator:
                                  on_time=bool(ontime), cache_path=path,
                                  request_id=sub.request_id))
         # the coordinator's one output to the fleet: the cloud answer, delivered at t_done. The
-        # DEVICE's own answer never passes through here (CONTRACT.md).
-        self.cloud_answers.append(SC.make(
-            "cloud_answer", device_id=o.device_id, opportunity_id=o.opp_id,
-            t_done=round(delivered, 6),
-            payload=dict(request_id=sub.request_id, kind=o.kind, cache_path=path,
-                         on_time=bool(ontime),
-                         cloud_score=(scored or {}).get("cloud_score"),
-                         cloud_letter=(scored or {}).get("cloud_letter"),
-                         p_yes=(scored or {}).get("p_yes"))))
+        # DEVICE's own answer never passes through here (CONTRACT.md). On a real run the I/O
+        # thread has already forwarded it (`_on_complete`), so it is not emitted twice; `emit`
+        # is True only on the dry-run path, which has no I/O thread to forward from.
+        if emit:
+            self.cloud_answers.append(SC.make(
+                "cloud_answer", device_id=o.device_id, opportunity_id=o.opp_id,
+                t_done=round(delivered, 6),
+                payload=dict(request_id=sub.request_id, kind=o.kind, cache_path=path,
+                             on_time=bool(ontime),
+                             cloud_score=(scored or {}).get("cloud_score"),
+                             cloud_letter=(scored or {}).get("cloud_letter"),
+                             p_yes=(scored or {}).get("p_yes"))))
 
     def _expire(self, t: float) -> None:
         for oid in self.st.order:
@@ -708,6 +811,14 @@ class Live2Coordinator:
         lat = sorted(self.decision_latencies_ms)
         def q(p):
             return round(lat[min(int(p * len(lat)), len(lat) - 1)], 4) if lat else None
+
+        def pct(xs):
+            v = sorted(xs)
+            if not v:
+                return dict(n=0)
+            def g(p):
+                return round(v[min(int(p * len(v)), len(v) - 1)], 4)
+            return dict(n=len(v), p50=g(0.5), p90=g(0.9), p99=g(0.99), max=round(v[-1], 4))
         mon = [a for a in self.answers if a["kind"] == "monitor"]
         rec = [a for a in self.answers if a["kind"] == "recall"]
         return dict(
@@ -721,6 +832,8 @@ class Live2Coordinator:
             counts=dict(sorted(self.counts.items())),
             n_monitor_answers=len(mon), n_recall_answers=len(rec),
             n_on_time=sum(1 for a in self.answers if a.get("on_time")),
+            n_answers_forwarded_by_io=self.n_answers_forwarded_by_io,
+            submit_delay_ms=pct(self.submit_delays_ms),
             n_pulls=len(self.pulls), n_cloud_answers=len(self.cloud_answers),
             decision_latency_ms=dict(p50=q(0.5), p99=q(0.99),
                                      max=(round(lat[-1], 4) if lat else None), n=len(lat)),

@@ -117,7 +117,7 @@ class RemoteCoordinator:
                 if msg is None:
                     break
                 self._in.put(msg)
-        except OSError:
+        except (OSError, ValueError):
             pass
         finally:
             self._alive = False
@@ -257,6 +257,22 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
                                strip_hints=bool(cfg.get("strip_hints", True)), cache=cache,
                                limit=int(cfg.get("http_limit") or 16384))
     logs = Logs(rdir).open()
+    # The child writes to the socket from ONE thread, fed by a queue, so the I/O thread can
+    # forward an answer while the main thread is inside a decision, and neither can interleave
+    # a half-written frame with the other.
+    outbox: "queue.Queue[Any]" = queue.Queue()
+
+    def _tx() -> None:
+        while True:
+            obj = outbox.get()
+            if obj is None:
+                return
+            try:
+                send_msg(sock, obj)
+            except OSError:
+                return
+
+    threading.Thread(target=_tx, name="live2-coord-tx", daemon=True).start()
     co = Live2Coordinator(arm, be, [], upload_mode=cfg["mode"],
                           window_s=float(cfg["run_s"]), drain_s=float(cfg.get("drain_s") or 10.0),
                           decision_period_s=float(cfg.get("decision_period_s") or 0.1),
@@ -269,7 +285,11 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
                           defer_images=bool(cfg.get("defer_images", True)),
                           dry_run=not bool(cfg.get("server_url")),
                           gpu_budget_s=cfg.get("gpu_budget_s"), targets=CS.TARGETS)
-    br = EmulatorBridge(co)
+    # ANSWERS BYPASS THE DECISION LOOP (harness addendum 1): the answer goes on the wire from
+    # the I/O thread the instant the request completes, stamped with its true completion time,
+    # so a decision in progress cannot hold it. The bridge then forwards pulls only.
+    co.on_answer = lambda ans: outbox.put({"op": "replies", "replies": [ans]})
+    br = EmulatorBridge(co, forward_answers=False)
     cpu0 = time.process_time()
     t_start = time.time()
     # 0 disables self-ticking, which is what makes a split run comparable line for line with an
@@ -289,8 +309,13 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
     inbox: "queue.Queue[Any]" = queue.Queue()
 
     def _rx() -> None:
+        # the parent closing the socket at teardown is the normal end of this thread
         while True:
-            m = recv_msg(sock)
+            try:
+                m = recv_msg(sock)
+            except (OSError, ValueError):
+                inbox.put(None)
+                return
             inbox.put(m)
             if m is None:
                 return
@@ -338,13 +363,20 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
                 be.close()
             (rdir / "coordinator_result.json").write_text(
                 json.dumps(res, indent=1, default=str) + "\n")
-            send_msg(sock, {"op": "result", "result": res})
-            send_msg(sock, {"op": "closed"})
+            outbox.put({"op": "result", "result": res})
+            outbox.put({"op": "closed"})
+            outbox.put(None)
+            # let the writer finish before the socket closes under it
+            for _ in range(300):
+                if outbox.empty():
+                    break
+                time.sleep(0.01)
+            time.sleep(0.05)
             return
         else:
             continue
         if replies:
-            send_msg(sock, {"op": "replies", "replies": list(replies)})
+            outbox.put({"op": "replies", "replies": list(replies)})
 
 
 # ---------------------------------------------------------------- starting the pair

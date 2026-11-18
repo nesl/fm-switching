@@ -25,8 +25,12 @@ import schema as SC
 class EmulatorBridge:
     """The live2 coordinator as the fleet emulator's `Coordinator`."""
 
-    def __init__(self, co) -> None:
+    def __init__(self, co, forward_answers: bool = True) -> None:
         self.co = co
+        # When the transport forwards answers straight from the I/O thread
+        # (`coordinator.on_answer`, used by procsplit), the bridge must not send them a second
+        # time from the decision loop; it still forwards pulls, which only a decision produces.
+        self.forward_answers = bool(forward_answers)
         self._sent = 0
         self._pulls = 0
         self.n_events = 0
@@ -82,8 +86,11 @@ class EmulatorBridge:
         if len(self.co.pulls) > self._pulls:
             out += list(self.co.pulls[self._pulls:])
             self._pulls = len(self.co.pulls)
-        if len(self.co.cloud_answers) > self._sent:
-            out += list(self.co.cloud_answers[self._sent:])
+        if self.forward_answers:
+            if len(self.co.cloud_answers) > self._sent:
+                out += list(self.co.cloud_answers[self._sent:])
+                self._sent = len(self.co.cloud_answers)
+        else:
             self._sent = len(self.co.cloud_answers)
         return out
 
