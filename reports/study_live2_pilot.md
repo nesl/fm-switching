@@ -69,3 +69,27 @@ New: `experiments/orchestration/study_live2_pilot.py`, `reports/study_live2_pilo
 and frame symlinks under `~/data/live2/` (regenerable: `fleet/trace.py --seed 0 --devices 8 --ratio 50:50 --run-s 120
 --mode A --frame-manifest ~/data/live2/jpeg/combined_manifest.jsonl`). Changed: `research/EXPERIMENTS.md`,
 `results/INDEX.md`, `research/STATUS.md`.
+
+## 6. Rerun 2026-11-18 with flash's run_live2_real.py: STOPPED AT STEP 1 AGAIN
+
+User ruling 2026-11-18: rerun the pilot now with `experiments/orchestration/live2/run_live2_real.py` (StudyLIVE2-harness,
+22808d0: coordinator in its own process, async streaming client, frame cache, emulator ticking the coordinator on the
+wall clock), preconditions as before (all held: calibration FINAL with the scorer's fold schema, cache isolation PASS,
+StudyLIVE2-fix and fix2 with tests passing, design log md5 b885ab9f..., GPU 2 idle; the S-EMBER D2 store now reaches
+every session's end, closing the harness report's open issue 2), server restarted before every run, git HEAD aa3a2d8
+recorded in every header. Driver `experiments/orchestration/study_live2_pilot2_driver.sh`; outputs `results/orchestration/live2/pilot/runs2/`.
+
+| cell | lateness p50 / p90 / p99 / max (ms) | requests | HTTP errors | digest equal | scored | Step 1 |
+|---|---|---|---|---|---|---|
+| device-only, 8 devices, 120 s (no server) | 0.10 / 0.10 / 0.11 / 0.13 | 0 | 0 | yes | yes (no refusal) | pass |
+| edf, 8 devices, 120 s | 0.10 / 32.8 / **728.1** / 1,464.8 | 720 | 0 | yes | yes (no refusal) | **FAIL (p99 > 50 ms)** |
+
+The driver stopped at the first failing cell, as Step 1 requires; policy-core and the other five arms did not run, and
+the ladder did not start. Facts: the emulator process used 1.9 % CPU over the 120 s (the same as the device-only run,
+2.0 %); the coordinator process's decision latency was p50 0.53 ms, p99 0.74 ms, max 2.8 ms, with 0 epoch overruns and
+9.3 % CPU; frame-cache hit fraction 0.48. So neither process was busy, and the lateness appears only when real requests
+flow. Candidate (NOT tested): the emulator waits for the coordinator process's reply to each event, and the
+coordinator's single event loop is intermittently held by the real streaming responses; flash's fake streaming server
+(p99 0.26 ms on flash) does not reproduce the H100's response volume or timing. The run_meta of this runner does not
+record the per-kind lateness the harness report used, so the late actions cannot be attributed from these outputs.
+Pilot results remain PILOT, NOT ROUND-1 RESULTS.
