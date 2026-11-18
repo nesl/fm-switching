@@ -1,6 +1,6 @@
 # StudyMOT1-dayinlife: one robot rebuild in a monitored dashcam fleet (motivation, claim 6)
 
-Status: COMPLETE 2026-11-18 09:58 (amended design). First design STOPPED AT N SELECTION (09:20); amended by the user
+Status: amendment 1 COMPLETE 2026-11-18 09:58; amendment 2 (section 10) in progress. First design STOPPED AT N SELECTION (09:20); amended by the user
 (section 0) and rerun 09:30 to 09:58. **One cold 11k rebuild done in one go makes all 20 monitored dashcams miss
 deadlines: a median 57 extra missed instants and a 5.5 s burst in which more than half the fleet misses; 2,048-token
 pieces cut that to 24 and 1.0 s; 1,024-token pieces remove it entirely (0 extra misses in 5 of 5 repetitions); the
@@ -143,3 +143,41 @@ set is on a 0.25 s grid (StudyD14b), so the first design sent consecutive 0.25 s
 (each clip played at half speed). That changes which frame a request carries, not the offered load, which is what
 failed. The amended runner takes the CTRL1c 0.5 s grid (t a multiple of 0.5 s) and sends every 4th instant, so a
 stream's clip time advances 2 s per request, in step with run time.
+
+## 10. Amendment 2: warm history (recorded 2026-11-18, BEFORE any amendment-2 run)
+
+User prompt of 2026-11-18. Purpose: add the LOCATION dimension. Same scene as amendment 1 (20 dashcams, one cloud
+request per 2 s each, deadline 0.916 s submit-to-last-token, server side; one robot question at t = 20 s needing its
+~11k D2 history). Expected from StudyENG1 / ENG1c (not a constraint): a host-warm recall imposes almost nothing on the
+dashcams and the robot answers in about 0.2 to 0.4 s.
+
+**New action HOST-WARM.** Before the 60 s window starts (so no setup traffic falls inside it): (1) prefill the robot's
+history in its run namespace: one request, max_tokens 1, the same frames, header, cache salt and uuids as the ONE-GO
+body, without the question (a history prefill; the question part is then computed at the question, as for a real
+recall); (2) fresh filler (new image namespace, ~26k-token D2 histories) totalling about 70,000 prompt tokens, more than
+the 62,944-token GPU pool, so the history's blocks leave the GPU but, by the ENG1c rule (host-warm iff tokens written
+since last use < host capacity), stay in the host tier; (3) at t = 20 s the full history plus the question is re-sent
+as ONE request, the ONE-GO body, so any cached prefix is reused. The tier actually served is MEASURED at the question:
+the request's cached tokens and the server's prompt-token-by-source counters (local cache hit vs external KV transfer)
+read immediately before and after it (the ENG1c Part C / ENG1f method; the dashcam requests in flight use fresh images,
+so they add no cache hits to those counters). Each run is labelled by the measured tier, never by intention: GPU if
+local hits cover at least half the prompt; HOST if external transfers cover at least 90 % of the cached tokens and the
+cached tokens cover at least half the prompt; PARTIAL if external transfers exceed 64 tokens otherwise; COLD otherwise.
+
+**PART A: tight host (27 GiB, amendment 1's server exactly), 5 repetitions (amendment 1's seeds, clips and robot
+sessions), HOST-WARM only.** PREDICTION, fixed now: writes after the history's last use by question time = filler
+(~70k) + 20 s of dashcam traffic (20 streams x 0.5 requests/s x 20 s x 378 tokens = 75,600) = about 146k tokens, above
+the 27 GiB host capacity (110,592 tokens), so the history is predicted COLD at the question in every run despite the
+preparation. Measured tier vs prediction is reported per run.
+
+**PART B: roomy host (256 GiB; the same server command with only --kv-offloading-size changed), 5 repetitions (same
+seeds), actions NONE, ONE-GO, PIECES 2048, PIECES 1024, HOST-WARM**, order balanced within a repetition (odd r: NONE,
+ONE-GO, P2048, P1024, HOST-WARM; even r: reversed), fresh namespaces per run (HOST-WARM's history namespace is fresh
+too; only its preparation warms it). Checks: B's NONE controls >= 99 % on time (else INVALID, rerun once); B's ONE-GO /
+PIECES medians within 0.8x to 1.25x of amendment 1's (host size should not matter for cold actions, StudyENG1c Part E),
+ratios reported and anything outside investigated. STOP if B's HOST-WARM measures anything but HOST in 2 or more
+repetitions, before writing figure data. Host tier filled at each server start to 1.5x its capacity (the amendment-1
+convention). Measures as amendment 1 plus the measured tier and the robot request's cached tokens. Figure data:
+`results/motivation/mot1/mot1_figdata_amend2.json` (Part B, all five actions, the representative repetition = the
+one whose ONE-GO extra-miss count is the median of B's 5; Part A's per-run measured tier and outcome as a separate
+block).
