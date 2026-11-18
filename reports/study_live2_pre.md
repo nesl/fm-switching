@@ -227,3 +227,22 @@ live scorer's loader reads (`live2/fleet/data_sources.calibration()`): top-level
 the primary fit with fold k held out. The pooled maps are fitted on all 21,067 labelled instants (Orin a 0.1320,
 b -2.214; 32B a 0.1377, b -1.678); the scorer never uses them for a clip the fold assignment places, so every clip is
 scored out of fold. The loader reads the file as FINAL with 5 folds over 300 clips.
+
+## 9. Part 1 extension (2026-11-18): S-EMBER D2 store to the END of every EVAL session
+
+User request. The committed 1 fps source frames (`~/.cache/fm-switching/sember_frames`, written by
+`experiments/sember/study_o_q4.py::cache_video`) stop one frame after each session's last question (`max_qt` + 1 s), so
+Part 1's D2 store ended there too. `experiments/orchestration/study_live2_pre_ext.py` runs THE COMMITTED `cache_video`
+(executed unchanged from the file by AST: PyAV decode at 1 fps, PIL JPEG q88) with `max_qt` = the session's duration,
+from the cached session videos (`~/.cache/fm-switching/sember_videos`), into a NEW directory
+(`~/.cache/fm-switching/sember_frames_full/`); the existing source frames were not modified. Check: every one of the
+64,208 frames the new extraction shares with the existing directory is BYTE-IDENTICAL (sha256), in all 164 sessions.
+Then the same D2 recipe as Part 1 (`study_rh3_inputs.load(path, (352, 256))`, JPEG q88) encoded ONLY the 2-s-stride
+instants the store did not hold: **6,437 new D2 frames, store now 38,579 frames** (existing JPEGs untouched, D91), and
+the UNCHANGED `build_manifest.py` rebuilt the manifest with the E10a check: **no quartile flagged** (vs D2 256x352:
+p25 / median / p75 / mean ratios 0.921 / 0.941 / 0.940 / 0.951; vs D2 352x256: 0.992 / 0.980 / 0.977 / 0.996). Every
+session now reaches its last decodable frame (16 sessions end 1.00 to 1.03 s before their fractional end, e.g. last frame
+599.0 s for an end of 600.011 s, because the 1 fps decoder has no frame past it). Outputs:
+`results/orchestration/live2/pre/manifests/sember_d2_q88_{manifest.jsonl.gz, manifest_meta.json, encode_meta.json}`
+(replaced), `results/orchestration/live2/pre/live2_pre_part1_extension.json` (per-session record). The pilot's
+combined manifest and frame-ref symlinks under `~/data/live2/` were refreshed to include the new frames.
