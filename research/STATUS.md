@@ -1,5 +1,7 @@
 # FM-switching — Project Status
 
+Last updated: 2026-11-18 (later 2) (**StudyLIVE2-pilot STOPPED AT STEP 1: the first real-server cell (edf, 8 devices) failed the harness lateness requirement (emulator p99 511.6 ms > 50 ms) while passing every other end-to-end check; the request path blocks the single-process emulator loop. Needs a harness fix on flash before the pilot can run. Report reports/study_live2_pilot.md.**)
+
 Last updated: 2026-11-18 (later) (**StudyLIVE2-pre Part 2 COMPLETE: dense calibration re-run on the committed StudyD3 scored body (42,014 of 42,014 scored) and confirmed byte-identical to the live coordinator's body after StudyLIVE2-fix2; calibration FINAL (32B a 0.138, Orin a 0.133, 5-fold by clip). The pilot's preconditions are checked next.**)
 
 Last updated: 2026-11-18 (**StudyENG1f-disk COMPLETE (h100nvl, overnight): a disk tier for computed KV works on vLLM 0.31.0 with the in-tree fs tier and is numerically equivalent; a disk reload costs 0.36x to 0.43x of a recompute and imposes almost nothing on others under load, but concurrent disk loads are bandwidth-bound (4 at once: 3.53 s each, slower than one recompute) and the write-through raises ordinary TTFT by 18.8 % at P40; verdict D2 by the pre-registered concurrency rule. StudyLIVE2-pilot did NOT run: its preconditions (StudyLIVE2-fix, design-log D98 to D105, LIVE2-pre Part 2 calibration) were never met overnight. Report reports/study_eng1f_disk.md.**)

@@ -1,0 +1,90 @@
+{
+ "label": "PILOT, NOT A ROUND-1 RESULT",
+ "git_commit": "4e6de567860fd82d9b31ecb1e5580d6b36a7dac1",
+ "arm": "edf",
+ "arm_version": "live2-arm-1.0",
+ "flags": {},
+ "gpu_kv_tokens": 62944,
+ "host_tier_gib": 27.0,
+ "host_tier_tokens": 110630,
+ "cost_model": null,
+ "calibration_file": "/home/pragya/Desktop/fm-switching/results/orchestration/live2/calibration/live2_calibration_dense_jpeg.json",
+ "calibration_label": "FINAL",
+ "fairness_digest": "85251b9b8ce7115bc28851c5d7edf074de77a25dc71bc6a7090cc0488cdb7fdf",
+ "seed": 0,
+ "targets": {
+  "dashcam": {
+   "L_s": 1.0,
+   "p": 0.25,
+   "scope": "per_device",
+   "min_opportunities": 200
+  },
+  "robot": {
+   "L_s": 5.0,
+   "p": 0.9,
+   "scope": "pooled",
+   "min_opportunities": 20
+  }
+ },
+ "upload_mode": "A",
+ "mu_mode": null,
+ "H": null,
+ "decision_period_s": 0.1,
+ "ratio": "50:50",
+ "n_devices": 8,
+ "run_s": 120.0,
+ "memory_setting": "tight",
+ "server": {
+  "command": [
+   "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+   "serve",
+   "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "--served-model-name",
+   "32BI",
+   "--port",
+   "8031",
+   "--max-model-len",
+   "32768",
+   "--gpu-memory-utilization",
+   "0.9",
+   "--tensor-parallel-size",
+   "1",
+   "--no-enable-prefix-caching",
+   "--limit-mm-per-prompt",
+   "{\"image\": 16}",
+   "--dtype",
+   "bfloat16",
+   "--seed",
+   "0",
+   "--limit-mm-per-prompt",
+   "{\"image\": 640, \"video\": 1}",
+   "--mm-processor-kwargs",
+   "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}",
+   "--trust-request-mm-kwargs",
+   "--host",
+   "127.0.0.1",
+   "--enable-prefix-caching",
+   "--enable-prompt-tokens-details",
+   "--mm-processor-cache-gb",
+   "128",
+   "--kv-offloading-backend",
+   "native",
+   "--kv-offloading-size",
+   "27",
+   "--enable-log-requests",
+   "--enable-logging-iteration-details"
+  ],
+  "flag_diff": [
+   [
+    "38",
+    "27"
+   ]
+  ],
+  "restart_started": 1795020118.4127212,
+  "up_at": 1795020182.5105288,
+  "startup_s": 63.7,
+  "log": "logs/study_x_server_32BI_1118_084158.log",
+  "host_gib": 27.0
+ },
+ "is_measurement": false
+}
