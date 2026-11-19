@@ -1,0 +1,94 @@
+{
+ "check": "d119_profile",
+ "is_measurement": false,
+ "label": "SAMPLING PROFILE, shares only. py-spy added about 23 percent wall overhead, so the absolute latencies here are NOT speed figures.",
+ "profiler": {
+  "tool": "py-spy",
+  "version": "0.4.3",
+  "rate_hz": 200,
+  "samples": 24014,
+  "errors": 0,
+  "out_of_process": true
+ },
+ "fixture": "fix_checks.speed cell: synthetic 50:50, mode A, tight memory, seed 1, H=1.0 s, 180 s, dry run, pol4 frozen",
+ "n_devices": 64,
+ "buckets_pct": {
+  "rollout inner loop (step model, queue, KV/host bookkeeping, deadline credit)": 51.78,
+  "state cloning / copying per candidate": 9.57,
+  "terminal / state value (after Option 0)": 19.29,
+  "release-loop bookkeeping": 2.67,
+  "profile table lookups": 4.11,
+  "everything else (object overhead, allocation, interpreter, misc)": 12.59
+ },
+ "candidates": {
+  "n_devices": 64,
+  "periods_with_candidates": 1800,
+  "total_admit_score_calls": 56063,
+  "candidates_per_period": {
+   "median": 24,
+   "p90": 43,
+   "max": 170,
+   "mean": 31.1
+  },
+  "per_candidate_ms": {
+   "median": 1.5314,
+   "p90": 1.9397,
+   "p99": 2.1252,
+   "max": 35.3543,
+   "mean": 1.4826
+  },
+  "scoring_calls": 56063,
+  "rollouts_per_period": {
+   "median": 50,
+   "p90": 90,
+   "max": 344,
+   "total": 118480
+  },
+  "rollouts_per_candidate": 2.113
+ },
+ "cell_under_profiler": {
+  "cpu_s": 105.93,
+  "decision_latency_ms": {
+   "max": 383.4296,
+   "n": 1801,
+   "p50": 61.9009,
+   "p99": 316.4453
+  },
+  "n_decisions": 7466,
+  "n_devices": 64,
+  "scoring_calls": 56063,
+  "wall_s": 119.704,
+  "window_s": 180.0
+ },
+ "committed_baseline_for_contrast": {
+  "p50_ms": 50.7032,
+  "p99_ms": 252.5418,
+  "wall_s": 96.954,
+  "source": "results/orchestration/live2/coord/perf/perf_speed_option0.json"
+ },
+ "dependence": {
+  "candidates_independent_within_a_period": false,
+  "evidence": [
+   "live2/arms_policy.py:479 iterates candidates calling co.escalate(self.fleet, req)",
+   "policy/coordinator.py:279 fleet.pending += items on admit",
+   "policy/coordinator.py:272 fleet.jobs.update(jobs)",
+   "policy/coordinator.py:285 dev.episodes.append(ep)",
+   "policy/coordinator.py:342 and :351 the _admission path does the same"
+  ],
+  "consequence": "parallel candidate evaluation would change what is computed, so it is unavailable under D108"
+ },
+ "toolchain": {
+  "py_spy": true,
+  "numba": false,
+  "cython": false,
+  "gcc": "11.4.0"
+ },
+ "_provenance": {
+  "git_commit": "f2344dd6dc62054a64da5cf4cfc3a07e062d56bf",
+  "script": "experiments/orchestration/policy/profile_d119.py",
+  "model": "none (pol4 cost curve, frozen)",
+  "device": "flash CPU only, 13th Gen Intel Core i7-13700KF",
+  "n": "64 devices, 180 s, seed 1",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}

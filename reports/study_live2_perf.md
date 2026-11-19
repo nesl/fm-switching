@@ -833,3 +833,119 @@ are not a contention measurement. Under D115, a NORMALISED DECISION LATENCY (H10
 factor) may later be reported as a labelled derived quantity; RUN OUTCOMES are never rescaled. From the pilot on,
 every run logs per decision the wall time, the deciding thread's CPU time (`time.thread_time()`) and the candidates
 priced, plus a 1 s host-load sampler (`decision_time.jsonl.gz`, `host_load.jsonl.gz`, summaries in `run_meta.json`).
+
+---
+
+# D119 Step 1: Profile
+
+Flash, CPU only, 2026-11-18. The fixture is the committed one (`fix_checks.speed`: synthetic
+50 : 50, mode A, tight memory, seed 1, H = 1.0 s, 180 s, dry run on the frozen pol4 cost curve)
+at **64 devices**, with Option 0 on, which is the current default build.
+
+**Sampling, not cProfile.** `py-spy 0.4.3` at 200 Hz, out of process, 24,014 samples and 0
+errors. cProfile is what inflated the withdrawn 5.05x claim in StudyLIVE2-perf, so it is not used
+here even as a cross-check. **One caveat that matters: sampling cost this run about 23 % of its
+wall time** (119.7 s against the committed 97.0 s, and p99 316 ms against the committed 252 ms).
+**So the SHARES below are the result; the absolute latencies in this section are not speed
+figures.** The Step 3 table re-measures without a profiler attached.
+
+## P1. Where the decision time goes, 64 devices
+
+| bucket | share of sampled time |
+|---|---|
+| rollout inner loop (step model, queue updates, KV and host bookkeeping, deadline crediting) | **51.8 %** |
+| terminal / state value, after Option 0 | **19.3 %** |
+| everything else (dataclass construction, allocation, interpreter overhead, misc) | 12.6 % |
+| state cloning and copying per candidate | 9.6 % |
+| profile table lookups | 4.1 % |
+| release-loop bookkeeping | 2.7 % |
+
+By function, self time, top of the list:
+
+| share | function |
+|---|---|
+| 16.88 % | `Rollout._opportunity_utility` |
+| 13.60 % | `Rollout._terminal` |
+| 11.19 % | `StepModel.step_ms` (frozen engine, via the fast copy) |
+| 6.21 % | `_shallow` |
+| 5.25 % | `Eng1Engine.predict` |
+| 4.76 % | `continuation_schedule` |
+| 3.37 % | `Eng1Engine._solo_prefill_s` |
+| 2.86 % | `clone_for_rollout` |
+| 2.52 % | `Rollout._z_term` |
+| 2.41 % | `Profiles.u_sh_grid` |
+| 2.14 % | `Rollout.run` |
+| 2.09 % | dataclass `__init__` (`<string>`, generated) |
+
+**The profile is FLAT.** No single frame exceeds 17 %, and the arithmetic of the frozen step
+model plus `predict` plus `_solo_prefill_s` is about 20 % in total. There is no hot spot whose
+removal would transform the figure, which is itself the most important finding: the win has to
+come from doing FEWER candidate evaluations, not from making one faster.
+
+## P2. Per-candidate cost, and how many candidates there are
+
+Measured by wrapping both bindings of `rollout.delta_j`, the one the coordinator imported and the
+one in the rollout module, and by counting `Rollout.run`.
+
+| quantity | value at 64 devices |
+|---|---|
+| candidate evaluations (`delta_j` calls) | **56,063** over 1,800 periods |
+| candidates per period | median **24**, p90 43, max **170**, mean 31.1 |
+| rollouts per period | median **50**, p90 90, max **344** |
+| rollouts per candidate | **2.113** (the counterfactual pair, with and against the action) |
+| per-candidate cost | median **1.53 ms**, mean 1.48, p90 1.94, p99 2.13, max 35.4 |
+
+**This reconciles against the committed figures and against the task's own numbers.** The
+`delta_j` count of 56,063 equals the coordinator's own `scoring_calls`, and the measured maximum
+of 344 rollouts per period is exactly the 344 the task states. An earlier count of 11,584 was
+rejected rather than reported: it had patched only `Coordinator._admit_score`, which is the
+`escalate` path alone and misses `_admission`, the larger of the two.
+
+**The arithmetic that sets the strategy:** 56,063 candidates times 1.48 ms is about **83 s of the
+roughly 106 s of CPU the run consumes**. Candidate evaluation IS the decision time. Everything
+else is noise by comparison.
+
+## P3. Shared versus per-candidate state
+
+Within one period the policy holds one fleet state. Per candidate, `clone_for_rollout` plus
+`_shallow` copy the parts a rollout writes, which is 9.6 % of time. The read-only majority, the
+profile tables, the frozen step model coefficients, the calibration knots and the device roster,
+is already shared by reference and is not copied; Option 0 additionally memoises the terminal
+state-value sum within a period. So the copying that remains is the mutable queue and job
+bookkeeping, and it is a tenth of the cost, not a half: **cheaper clones are worth having but
+cannot be the main win.**
+
+## P4. The dependence structure, re-verified
+
+**Candidates within a period are NOT independent, and this is confirmed at current line
+numbers.** The SH loop at `live2/arms_policy.py:479` iterates its sorted candidates and calls
+`self.co.escalate(self.fleet, req)` for each. On an admit, `escalate` MUTATES the shared fleet:
+`policy/coordinator.py:279` `fleet.pending += items`, with `fleet.jobs.update(jobs)` and
+`dev.episodes.append(ep)` at `:272` and `:285`. The `_admission` path does the same at `:342`
+and `:351`. So candidate k + 1 is scored against the state that candidate k's admission left
+behind: the loop is a **sequential greedy, not a round of independent candidates.**
+
+This restates, at today's line numbers, the sequential-dependence finding the user accepted in
+StudyLIVE2-perf. Its consequence for D119 item (a) is direct: **evaluating candidates in parallel
+would change what is computed, so it is not available under D108.** It is not a matter of
+engineering effort. What remains available is parallelism over work that is genuinely independent
+given the round's state, which the bound computation of D120 is, and which costs no rollout at
+all, so processes would cost more than they save.
+
+## P5. Ranked optimisations, with the gain each one can give
+
+Derived from P1 to P4 before anything is implemented, as Step 1 requires.
+
+| rank | optimisation | expected gain, and where the number comes from |
+|---|---|---|
+| **1** | **D120 exact pruning (item 0)** | Candidate evaluation is about 78 % of CPU (83 s of 106 s). Pruning removes candidates outright, so it scales the dominant term directly: skipping a fraction f of candidates saves about 0.78 f. It is the only lever that attacks the candidate COUNT rather than the per-candidate cost, and the profile's flatness is exactly why it ranks first. |
+| 2 | terminal / state value, 19.3 % | Option 0 memoised the terminal SUM across candidates within a period, yet `_terminal` is still 13.6 % of self time. Worth inspecting for a per-candidate recomputation that is invariant within the period, which is Option 0's own pattern applied once more. |
+| 3 | compiled hot loop (item b) | `StepModel.step_ms` 11.19 % plus `Eng1Engine.predict` 5.25 % plus `_solo_prefill_s` 3.37 % is about 20 % of self time and is pure float arithmetic, the natural compile target. **BUT: numba and Cython are not installed on flash (gcc 11.4 is), and D119 requires BITWISE-equal DeltaJ.** Hand-written C would have to reproduce the Python operation order exactly with contraction disabled. High risk against a 20 % ceiling, so it is ranked below the two cheaper wins and is attempted only if they fall short. |
+| 4 | cheaper state copies (item c), 9.6 % | `_shallow` 6.21 % plus `clone_for_rollout` 2.86 %. Copy-on-write could remove much of it, with the isolation test named in the task. A tenth of the time, bounded. |
+| 5 | `Profiles.u_sh_grid` memoisation (item d), 2.41 % | It rebuilds and re-sorts a list of curve points on EVERY call, over a profile that is loaded once and never mutated. Its three siblings were already memoised for exactly this reason; this one was missed. A pure function of `(m, cadence_s, mapping)`, so memoising it is provably value-identical and nearly all of the 2.41 % is recoverable. The cheapest win on the list. |
+| 6 | allocation and dataclass construction, about 2.1 % | Generated `__init__` for the per-candidate dataclasses. Only worth attacking after the candidate count falls, since pruning removes these allocations too. |
+| **blocked** | **parallel candidates (item a)** | **Not available under D108**, by P4: candidate ΔJ is sequentially dependent through `fleet.pending`. Reported, not attempted. |
+
+**The plan therefore is: D120 exact pruning first, then the terminal recomputation, then the
+cheap `u_sh_grid` memoisation, then clones, and the compiled path only if those leave the target
+out of reach.** Every item sits behind its own switch, default OFF.
