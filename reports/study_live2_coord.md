@@ -5318,3 +5318,46 @@ FIRST, before any margin sweep, because every other claim rests on it.
 but the base is SELECTABLE and the choice is not hard-coded pending session 2's mooncake/b7 identity
 check, since those two arms report identical numbers (34 of 41, 79.5 recall gpu_s, 37 events) and
 may not be distinct policies.
+
+### SECOND PRE-REGISTERED PREDICTION: which deviation KINDS can fire at all
+
+Added before any margin is swept. The first prediction assumed deviations fire and asked which
+margin wins; this one asks which kinds are capable of firing, and they are different questions.
+
+**The argument, from the geometry result above.** Any quantity whose effect lands outside the
+H = 0.5 s dispatch window cancels in the dispatch counterfactual, because action and reference
+produce the identical outcome inside the window. v2's alternative set is decline, admit, piece
+size, reload against rebuild, start-now against latest-start, and keep-warm. **A rebuild takes
+seconds, a recall answer lands 1 to 5 s out, and start-now against latest-start is purely a
+question about an outcome beyond the window.** So the prediction is that **RC-class deviations
+evaluate to `DeltaJ(alternative) - DeltaJ(base) = 0` and cannot exceed any margin, including
+margin = 0**, and the margin sweep returns the base everywhere.
+
+**If that holds it is INCONCLUSIVE under Rule 2, not a real negative**, and it would be the fourth
+null in this project from a mechanism that could not reach a decision. It must not be reported as
+"COVEX has nothing to add".
+
+**ONE REFINEMENT to the argument, which is why this is measured rather than assumed.** The
+14,721-call instrumentation measured the Z TERM difference, not DeltaJ total. DeltaJ can also move
+through `u_hat` and `terminal`. **So an RC admit decision may still score even though its DEFICIT
+contribution cancels**, and the reachability test is therefore run on **DeltaJ total per kind**, not
+on the z term. Predicting cancellation from the z result alone would overreach.
+
+**STOP CONDITION, alongside the byte-identity proof.** Each alternative kind is classified
+REACHABLE or CANCELLED-BY-GEOMETRY on one cell before any margin is swept, and a kind that is
+structurally zero is reported as such rather than swept.
+
+**A SECOND WAY A DEVIATION CAN FIRE AND CHANGE NOTHING**, recorded so the two are not confused:
+`live2/coordinator.py` never reads the action `order` field, so a deviation expressed only as a
+reordering is a no-op by construction. Every alternative in v2 therefore changes
+`RecallAction.decision` or a `StreamAction`, both of which the coordinator reads. **My own v1.4
+conversion mechanism was checked against this and is NOT order-only**: it expresses through
+`stream_on`, which becomes `StreamAction(cloud/local)`. So if `rc_priority_epochs` turns out never
+to fire, that is a gating-logic question and not an expressibility one.
+
+**HARNESS LIMITATION FOR THE PAPER.** Any two adapted arms whose scheduling discipline is expressed
+only through `order` are indistinguishable in live2 by construction. That is a harness
+expressiveness gap, not a porting artefact, and belongs in the limitations of whatever is said about
+the published field. Cardinality claims must state the size they were measured at: at seed 4 and
+8 devices the twelve in-scope arms supply eleven independent behaviours, with ekya and videostorm
+diverging again at 16 devices, and `eco-llm` is a singleton in every grouping at both sizes.

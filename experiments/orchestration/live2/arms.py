@@ -611,6 +611,9 @@ V13_RELEASE = dict(cost_model="pol4", h_s=0.5, impl="fast",
 
 
 def make_arm(name: str, **kw: Any) -> Policy:
+    if name in ("covex-v2", "covex-v2-fast"):
+        from arms_covex_v2 import CovexV2Arm
+        return CovexV2Arm(**kw)
     if name in ("covex-v13", "policy-core-v13"):
         from arms_policy import PolicyCoreArm
         cfg = dict(V13_RELEASE)
