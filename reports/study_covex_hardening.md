@@ -195,6 +195,16 @@ advantage created by a default rather than by a design decision**, confounding e
 cell, robot on-time figure and GPU-seconds comparison between the two families. The grid waits for
 the user's decision on it.
 
+## THE DASHCAM METRIC IS SETTLED: per-device fraction, no age-of-information correction
+
+StudyAOI (`c76d4d0`) measured that **spacing does NOT matter for Nexar AP**. So dashcams keep the
+**per-device on-time fraction** target and **there is no age-of-information model**.
+
+**This confirms the metric every `D+` in this report already uses, and it was worth measuring
+rather than assuming:** the natural expectation for a streaming workload is that *when* frames
+land matters, not only how many. It has now been measured not to, so the capacity conjunct's
+dashcam half needs no AoI correction and section 20's "dashcam is solved" stands as stated.
+
 ## TWO CAVEATS THAT QUALIFY EVERY NUMBER BELOW, on the bar and not in a footnote
 
 **1. EVERY DRY RESULT IN THIS REPORT WAS PRODUCED WITH NO MEMORY LIMIT.** `gpu_kv_tokens` is handed

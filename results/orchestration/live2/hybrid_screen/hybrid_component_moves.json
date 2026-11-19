@@ -1,0 +1,512 @@
+{
+ "check": "hybrid_component_moves",
+ "is_measurement": false,
+ "label": "D138 P1 gate. Each hybrid component must MOVE A DECISION before any cell is scored. Decision-log diff plus emitted-action observables.",
+ "regime": "Regime 3: DEFAULTS['representation'] = D2 restored at a0bcb51, so the b7 base takes the FULL HISTORY and any RECENT share is a component CHOOSING it rather than a default supplying it.",
+ "unexercised_by_design": {
+  "C4": "INERT until memory pressure exists; placeholder emits no session action",
+  "C6": "OFF until the chooser lands"
+ },
+ "seed": 0,
+ "run_s": 600.0,
+ "pairs": [
+  {
+   "component": "C1",
+   "n_devices": 12,
+   "base": "hybrid-base",
+   "test": "hybrid-c1",
+   "decisions": [
+    6569,
+    6569
+   ],
+   "digests": [
+    "41787ba4154c7544",
+    "41787ba4154c7544"
+   ],
+   "decision_rows_differing": 0,
+   "representation_differing": 0,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 25
+    },
+    {
+     "D2": 25
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 27
+    },
+    {
+     "INJECTED": 27
+    }
+   ],
+   "MOVED": false,
+   "verdict": "DID NOT MOVE ANY DECISION at this size: UNEXERCISED (category 4), not a negative. Scope the verdict by SIZE."
+  },
+  {
+   "component": "C5",
+   "n_devices": 12,
+   "base": "hybrid-base",
+   "test": "hybrid-c5",
+   "decisions": [
+    6569,
+    7008
+   ],
+   "digests": [
+    "41787ba4154c7544",
+    "25cb8208fc4aa591"
+   ],
+   "decision_rows_differing": 6339,
+   "representation_differing": 14,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 25
+    },
+    {
+     "D2": 11
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 27
+    },
+    {
+     "INJECTED": 27
+    }
+   ],
+   "MOVED": true,
+   "verdict": "fires"
+  },
+  {
+   "component": "C1 under the C5 cap",
+   "n_devices": 12,
+   "base": "hybrid-c5",
+   "test": "hybrid-c1c5",
+   "decisions": [
+    7008,
+    6938
+   ],
+   "digests": [
+    "25cb8208fc4aa591",
+    "71845b92a9e8af16"
+   ],
+   "decision_rows_differing": 6262,
+   "representation_differing": 12,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 11
+    },
+    {
+     "D2": 23
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 27
+    },
+    {
+     "INJECTED": 27
+    }
+   ],
+   "MOVED": true,
+   "verdict": "fires"
+  },
+  {
+   "component": "C2 (k_r 1.0)",
+   "n_devices": 12,
+   "base": "hybrid-c1",
+   "test": "hybrid-c1c2k1",
+   "decisions": [
+    6569,
+    6569
+   ],
+   "digests": [
+    "41787ba4154c7544",
+    "5aa3ed5c1c5d940e"
+   ],
+   "decision_rows_differing": 66,
+   "representation_differing": 0,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 25
+    },
+    {
+     "D2": 25
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 27
+    },
+    {
+     "INJECTED": 27
+    }
+   ],
+   "MOVED": true,
+   "verdict": "fires"
+  },
+  {
+   "component": "C2 (k_r 2.0)",
+   "n_devices": 12,
+   "base": "hybrid-c1",
+   "test": "hybrid-c1c2k2",
+   "decisions": [
+    6569,
+    6569
+   ],
+   "digests": [
+    "41787ba4154c7544",
+    "5aa3ed5c1c5d940e"
+   ],
+   "decision_rows_differing": 66,
+   "representation_differing": 0,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 25
+    },
+    {
+     "D2": 25
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 27
+    },
+    {
+     "INJECTED": 27
+    }
+   ],
+   "MOVED": true,
+   "verdict": "fires"
+  },
+  {
+   "component": "C3 (k_r 1.0)",
+   "n_devices": 12,
+   "base": "hybrid-c1c2k1",
+   "test": "hybrid-c1c2k1c3",
+   "decisions": [
+    6569,
+    6569
+   ],
+   "digests": [
+    "5aa3ed5c1c5d940e",
+    "4925d59dc82d2d74"
+   ],
+   "decision_rows_differing": 3,
+   "representation_differing": 2,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 25
+    },
+    {
+     "D2": 25,
+     "RECENT": 2
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 27
+    },
+    {
+     "INJECTED": 25,
+     "CHOSEN": 2
+    }
+   ],
+   "MOVED": true,
+   "verdict": "fires"
+  },
+  {
+   "component": "C3 (k_r 2.0)",
+   "n_devices": 12,
+   "base": "hybrid-c1c2k2",
+   "test": "hybrid-c1c2k2c3",
+   "decisions": [
+    6569,
+    6569
+   ],
+   "digests": [
+    "5aa3ed5c1c5d940e",
+    "4925d59dc82d2d74"
+   ],
+   "decision_rows_differing": 3,
+   "representation_differing": 2,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 25
+    },
+    {
+     "D2": 25,
+     "RECENT": 2
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 27
+    },
+    {
+     "INJECTED": 25,
+     "CHOSEN": 2
+    }
+   ],
+   "MOVED": true,
+   "verdict": "fires"
+  },
+  {
+   "component": "C1",
+   "n_devices": 16,
+   "base": "hybrid-base",
+   "test": "hybrid-c1",
+   "decisions": [
+    8090,
+    8090
+   ],
+   "digests": [
+    "580414993e735539",
+    "580414993e735539"
+   ],
+   "decision_rows_differing": 0,
+   "representation_differing": 0,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 33
+    },
+    {
+     "D2": 33
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 35
+    },
+    {
+     "INJECTED": 35
+    }
+   ],
+   "MOVED": false,
+   "verdict": "DID NOT MOVE ANY DECISION at this size: UNEXERCISED (category 4), not a negative. Scope the verdict by SIZE."
+  },
+  {
+   "component": "C5",
+   "n_devices": 16,
+   "base": "hybrid-base",
+   "test": "hybrid-c5",
+   "decisions": [
+    8090,
+    7994
+   ],
+   "digests": [
+    "580414993e735539",
+    "eedfb02c0573e36a"
+   ],
+   "decision_rows_differing": 7931,
+   "representation_differing": 28,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 33
+    },
+    {
+     "D2": 5
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 35
+    },
+    {
+     "INJECTED": 35
+    }
+   ],
+   "MOVED": true,
+   "verdict": "fires"
+  },
+  {
+   "component": "C1 under the C5 cap",
+   "n_devices": 16,
+   "base": "hybrid-c5",
+   "test": "hybrid-c1c5",
+   "decisions": [
+    7994,
+    7870
+   ],
+   "digests": [
+    "eedfb02c0573e36a",
+    "2cb0bccb53840ab9"
+   ],
+   "decision_rows_differing": 7434,
+   "representation_differing": 22,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 5
+    },
+    {
+     "D2": 27
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 35
+    },
+    {
+     "INJECTED": 35
+    }
+   ],
+   "MOVED": true,
+   "verdict": "fires"
+  },
+  {
+   "component": "C2 (k_r 1.0)",
+   "n_devices": 16,
+   "base": "hybrid-c1",
+   "test": "hybrid-c1c2k1",
+   "decisions": [
+    8090,
+    8090
+   ],
+   "digests": [
+    "580414993e735539",
+    "e47a14a1bc108807"
+   ],
+   "decision_rows_differing": 121,
+   "representation_differing": 0,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 33
+    },
+    {
+     "D2": 33
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 35
+    },
+    {
+     "INJECTED": 35
+    }
+   ],
+   "MOVED": true,
+   "verdict": "fires"
+  },
+  {
+   "component": "C2 (k_r 2.0)",
+   "n_devices": 16,
+   "base": "hybrid-c1",
+   "test": "hybrid-c1c2k2",
+   "decisions": [
+    8090,
+    8090
+   ],
+   "digests": [
+    "580414993e735539",
+    "e47a14a1bc108807"
+   ],
+   "decision_rows_differing": 121,
+   "representation_differing": 0,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 33
+    },
+    {
+     "D2": 33
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 35
+    },
+    {
+     "INJECTED": 35
+    }
+   ],
+   "MOVED": true,
+   "verdict": "fires"
+  },
+  {
+   "component": "C3 (k_r 1.0)",
+   "n_devices": 16,
+   "base": "hybrid-c1c2k1",
+   "test": "hybrid-c1c2k1c3",
+   "decisions": [
+    8090,
+    8087
+   ],
+   "digests": [
+    "e47a14a1bc108807",
+    "4077e1241a33bfcd"
+   ],
+   "decision_rows_differing": 6,
+   "representation_differing": 2,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 33
+    },
+    {
+     "D2": 33,
+     "RECENT": 2
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 35
+    },
+    {
+     "INJECTED": 33,
+     "CHOSEN": 2
+    }
+   ],
+   "MOVED": true,
+   "verdict": "fires"
+  },
+  {
+   "component": "C3 (k_r 2.0)",
+   "n_devices": 16,
+   "base": "hybrid-c1c2k2",
+   "test": "hybrid-c1c2k2c3",
+   "decisions": [
+    8090,
+    8087
+   ],
+   "digests": [
+    "e47a14a1bc108807",
+    "4077e1241a33bfcd"
+   ],
+   "decision_rows_differing": 6,
+   "representation_differing": 2,
+   "session_actions_differ": false,
+   "representation": [
+    {
+     "D2": 33
+    },
+    {
+     "D2": 33,
+     "RECENT": 2
+    }
+   ],
+   "credit": [
+    {
+     "INJECTED": 35
+    },
+    {
+     "INJECTED": 33,
+     "CHOSEN": 2
+    }
+   ],
+   "MOVED": true,
+   "verdict": "fires"
+  }
+ ]
+}
