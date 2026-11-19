@@ -3340,3 +3340,169 @@ the pilot (D79) and the user decides.
 3. The inverted counterfactual in G3 was captured on 12 state-action evaluations, not on all
    7,539.
 4. No scored outcome is claimed: these are release counts and decision values, not quality.
+
+---
+
+# Policy v1.1 (D122), Step 1: VERIFICATION. STOPPED, the hypotheses do not hold
+
+Flash, read-only, 2026-11-18. No code was changed. **All three findings contradict or sharply
+refine the planner's hypotheses, which the task makes a stop condition, so Step 2 was not
+started.**
+
+## V1. Issue B: Z is zero because the deficit counter is NEVER UPDATED
+
+**Planner hypothesis:** the update uses the policy's own predicted success, so an admitted
+question predicted FEASIBLE gives `S_hat` about 1, Z never rises, and the realised miss is never
+fed back.
+
+**REFUTED. There is no update at all.** The call chain is three links and the last one is empty:
+
+| link | fact |
+|---|---|
+| `Device.z` is written | in exactly ONE place, `state.py:156`, inside `bump_z` |
+| `bump_z` is called | from exactly ONE place, `coordinator.update_deficit` (`coordinator.py:719`) |
+| `update_deficit` is called | **from NOTHING in production.** Its only callers in the whole repo are three lines of `policy/tests/test_rollout_coordinator.py` |
+
+So `Device.z` keeps its `field(default_factory=dict)` value forever and `z_of(task)` returns
+`0.0` for every device and every task, on every path. Meanwhile **`z_of` is READ in five
+production sites**: the rollout's `_z_term` (`rollout.py:512`), the continuation value
+(`rollout.py:533` and `:600`) and the closed form (`closed_form.py:202`, `:319`).
+
+**Spec 3.3's deficit mechanism is ABSENT from the implementation, not miscalibrated.** It is read
+by the objective in five places and written in none.
+
+**`Z(i, SH)` is zero for the same reason**, which answers the task's sub-question directly: it is
+not that SH targets are met. No task's counter is ever updated.
+
+**This also corrects something I wrote earlier tonight.** The D120 section says the `z` term was
+never positive "but only because this fixture runs `mu = 0`". That attribution was wrong: `z` is
+identically zero because the counter is never updated, independently of `mu`. The D120 conclusion
+is unaffected, but the reason given there is not.
+
+Consequence for Step 2's item B: the pre-registered work was "if 1a confirms the hypothesis,
+update each device's counter from the REALISED on-time outcome". The hypothesis is refuted, but
+the remedy survives and is now larger in scope: **the update has to be introduced, not corrected**,
+and a first caller has to be placed on a path that sees the realised outcome at `c + L`. Where
+that call belongs is a design choice the task did not cover, so it is not mine to pick.
+
+## V2. Issue A3: the promotion is implemented, fires, and is INERT
+
+**Planner question:** is spec 8.3's promotion implemented, and why did it never fire?
+
+**It IS implemented**, as spec 7.3's bounded-waiting check: `continuation.bounded_waiting_breach`
+is called from `coordinator._update_jobs` (`coordinator.py:440`) and sets
+`job.feasibility = PRIORITY` with a `Decision` row (`:443`).
+
+**But promotion cannot cause a release, because the label is never read.** Searching every use of
+`feasibility` and `PRIORITY`:
+
+- `PRIORITY` is only ever ASSIGNED (`coordinator.py:443`) or RETURNED by `classify`
+  (`continuation.py:137`). **Nothing anywhere branches on `job.feasibility == PRIORITY`.**
+- The release path does not consult it: a release still needs `delta_j > 0`.
+- **The rollout does not even let it change the value: `rollout.py:531` calls
+  `continuation_value(..., priority=False, ...)` with `priority` hard-coded False**, so a promoted
+  job is valued exactly as an unpromoted one.
+
+So the honest answer to "why did it never fire for the deferred robot jobs" is that **firing is
+not the issue: firing has no effect.** A separate mismatch, reported but not acted on: the trigger
+passes `interval_s = self.params.H` (0.5 s) rather than one scheduling interval (the 100 ms
+decision period), which makes it look further ahead and therefore fire EARLIER, not later.
+
+This is neither "not implemented" nor "already correct", so it does not match either branch of
+the task's stop condition cleanly. It changes what Step 2's A3 should do: not repair a trigger,
+but give the label an effect.
+
+## V3. Issue A1: the defer reference is sound, and the zero comes from a SATURATED INDICATOR
+
+**Planner hypothesis:** the defer reference lets pi_0 progress the deferred job, which is why
+`cont_delta` is 0 in 7,526 of 7,539 cases.
+
+**Refuted for the release candidates, and the real mechanism is sharper.**
+
+First, `exclude` is stronger than one period. In `Rollout.run`,
+
+    rest = self._edf([p for p in f.pending
+                      if p.item_id not in set(release_now) and p.item_id not in set(exclude)])
+
+so the reference branch removes the item from the queue **for the whole horizon**, which is
+already more pessimistic than the "no progress for one 100 ms period" that A1 proposes. Applying
+A1 to a release candidate would make its reference MORE generous than today, pushing `delta_j`
+DOWN, which is the opposite of the intended direction.
+
+Second, the rollout models the release correctly. Instrumenting both branches of 558 rc_piece
+release candidates:
+
+| | result |
+|---|---|
+| candidates with `delta_j` exactly 0 | 410 |
+| of those, the target WAS served in the ACTION branch | **410 of 410** |
+| of those, the target was served in the REFERENCE branch | **0 of 410** |
+
+**The piece is served in one branch and not the other, and the totals are still identical.** So
+serving a rebuild piece changes nothing in the objective, and the earlier guess that the item
+could not start inside the horizon is wrong: it started and ran.
+
+Third, here is why. `continuation_value` multiplies by `p_finish`, and `p_finish` is a hard
+INDICATOR, not a probability (`continuation.py:124`): `1.0 if s.finish_at is not None else 0.0`.
+Measured on a fresh four-piece job of 2,048 tokens:
+
+| pieces_done | the job finishes only if the deadline is at least |
+|---|---|
+| 0 | 1.00 s |
+| 1 | 0.75 s |
+| 2 | 0.50 s |
+| 3 | 0.25 s |
+
+Progress DOES move the feasibility cliff. But `continuation_value` reads only the indicator, so
+while any slack remains the indicator is 1 before and 1 after, and the value is the SAME constant
+`0.035385924` for `pieces_done` 0, 1, 2 and 3 and for every deadline from 5.00 s down to 1.00 s.
+That constant is exactly `omega_RC x (acc_cloud - acc_device) = 0.4246 x 0.0833 = 0.035386`, which
+is the `+0.03539` measured in the diagnosis.
+
+**So the trap is a saturated indicator.** A robot question has a 5 s deadline and about 1.0 s of
+scheduled work, so about 4 s of slack. While slack remains, building earns exactly zero credit,
+`delta_j` is exactly 0, and the strict `> 0` test declines the release. The incentive to build
+appears only in the last 1.0 s, when there is no longer time to build.
+
+**This is why A1 as written cannot fix Mode B.** Deferring one 100 ms period reduces slack by
+0.1 s; a saturated indicator does not move for that, so `delta_j` stays exactly 0 for about 39 of
+the 40 periods before the cliff. A1 would change the decision only in the last period or two.
+What Mode B needs is a continuation value with a GRADIENT in slack rather than an indicator,
+which is a different change from the one pre-registered, and spec 5.4's own text calls the
+indicator a deliberate simplification with sampled scenarios recorded as ambiguity A4.
+
+## V4. Why this is a STOP
+
+The task says to stop after Step 1 if any finding contradicts the hypotheses. Three do:
+
+| issue | hypothesis | finding |
+|---|---|---|
+| B | the update runs with `S_hat` about 1 | **the update never runs; `update_deficit` has no production caller** |
+| A3 | implemented but never fires, or already correct | **implemented and fires, but inert: `PRIORITY` is never read and the rollout hard-codes `priority=False`** |
+| A1 | the defer reference lets pi_0 progress the job | **the reference excludes it for the whole horizon; the zero comes from a saturated `p_finish` indicator, and A1 would not move it** |
+
+Each changes what the corresponding fix should be, and two of them (where to place the first
+deficit update; replacing an indicator with a gradient) are design choices the task's
+pre-registration did not cover. Per the stop rule and the standing rule that methodological
+changes are proposed and not applied, **I implemented nothing and am reporting instead.**
+
+## V5. What I would pre-register, if you want these three
+
+Offered as proposals only, each tied to the mechanism actually found.
+
+1. **B, introduce the update.** Call `update_deficit` at the opportunity's deadline with the
+   REALISED on-time outcome, which is observable online and needs no ground truth. The open choice
+   the task did not cover is WHERE: the coordinator sees completions, but the natural site for
+   "the deadline passed and nothing arrived" is the expiry path. The scaling formula in the task
+   can then be derived as specified, with SH scale pinned at 1.
+2. **A3, give the label an effect.** The minimal honest version is to pass the job's own
+   `feasibility` into `continuation_value` instead of the hard-coded `priority=False`, so a
+   promoted job is valued under the priority schedule it was promoted to. That alone changes a
+   value, not an ordering, and is testable on a hand-built near-infeasible job.
+3. **A1 plus the gradient.** Honest deferral is worth having for its own sake, but on its own it
+   does not address Mode B. Pairing it with a slack-sensitive `p_finish` (ambiguity A4's sampled
+   scenarios, or a soft indicator) is what would make progress earn credit while slack remains.
+   This is the largest of the three and the one most clearly a policy-version change under D79.
+
+**Nothing above is implemented.** Step 2, Step 3 and Step 4 (including the D121 speed work and the
+v1.1-fast release) are not started, and D121 remains paused at `fa50dfc`.

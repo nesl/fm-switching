@@ -1,0 +1,76 @@
+{
+ "check": "policy_v11_step1_verification",
+ "is_measurement": false,
+ "label": "READ-ONLY VERIFICATION. No code changed. All three findings contradict or sharply refine the planner hypotheses, which is a stop condition, so Step 2 was not started.",
+ "issue_B": {
+  "hypothesis": "the update uses predicted success so S_hat is about 1 and Z never rises",
+  "verdict": "REFUTED: there is no update at all",
+  "chain": [
+   "Device.z written only at state.py:156 inside bump_z",
+   "bump_z called only from coordinator.update_deficit at coordinator.py:719",
+   "update_deficit has NO production caller; its only callers are 3 lines of policy/tests/test_rollout_coordinator.py"
+  ],
+  "z_of_read_in_production": [
+   "rollout.py:512 _z_term",
+   "rollout.py:533 continuation_value",
+   "rollout.py:600",
+   "closed_form.py:202",
+   "closed_form.py:319"
+  ],
+  "conclusion": "spec 3.3 deficit mechanism is ABSENT, not miscalibrated: read in five places, written in none",
+  "z_sh": "zero for the same reason, not because SH targets are met",
+  "self_correction": "the D120 section attributed the zero z term to mu=0; that attribution was wrong, z is zero because the counter is never updated"
+ },
+ "issue_A3": {
+  "hypothesis": "not implemented, or never fires",
+  "verdict": "REFINED: implemented, fires, and is INERT",
+  "implemented_at": "continuation.bounded_waiting_breach called from coordinator._update_jobs at coordinator.py:440, sets job.feasibility=PRIORITY at :443",
+  "why_no_effect": [
+   "PRIORITY is only assigned or returned by classify; nothing branches on job.feasibility == PRIORITY",
+   "the release path still requires delta_j > 0",
+   "rollout.py:531 calls continuation_value(..., priority=False, ...) with priority HARD-CODED False, so a promoted job is valued identically"
+  ],
+  "separate_mismatch": "the trigger passes interval_s = params.H (0.5 s) rather than the 100 ms decision period, which makes it fire earlier, not later"
+ },
+ "issue_A1": {
+  "hypothesis": "the defer reference lets pi_0 progress the deferred job",
+  "verdict": "REFUTED for release candidates; the real mechanism is a saturated indicator",
+  "exclude_semantics": "Rollout.run removes an excluded item from the EDF queue for the WHOLE horizon, which is already more pessimistic than one 100 ms period, so applying A1 to a release candidate would make its reference MORE generous and push delta_j DOWN",
+  "branch_evidence": {
+   "rc_piece_release_candidates": 558,
+   "exactly_zero": 410,
+   "target_served_in_action": 410,
+   "target_served_in_reference": 0,
+   "reading": "the piece is served in one branch and not the other and the totals are still identical, so serving it changes nothing in the objective"
+  },
+  "p_finish": "a hard INDICATOR at continuation.py:124, 1.0 if the schedule finishes else 0.0, not a probability",
+  "cliff_by_progress": {
+   "0": 1.0,
+   "1": 0.75,
+   "2": 0.5,
+   "3": 0.25
+  },
+  "constant_value": 0.035385924,
+  "constant_derivation": "omega_RC 0.4246 x (acc_cloud 0.2500 - acc_device 0.1667) = 0.035386, which is the +0.03539 measured in the diagnosis",
+  "invariance": "identical for pieces_done 0,1,2,3 and for every deadline from 5.00 s down to 1.00 s",
+  "conclusion": "a robot question has about 4 s of slack against about 1.0 s of scheduled work, so while slack remains building earns exactly zero, delta_j is exactly 0 and the strict > 0 test declines; the incentive appears only in the last 1.0 s when it is too late",
+  "why_A1_insufficient": "deferring one 100 ms period reduces slack by 0.1 s and a saturated indicator does not move, so A1 would change the decision only in the last period or two; Mode B needs a GRADIENT in slack, a different change, and spec 5.4 records the indicator as a deliberate simplification with sampled scenarios as ambiguity A4"
+ },
+ "step2_started": false,
+ "step3_started": false,
+ "step4_started": false,
+ "d121_paused_at": "fa50dfc",
+ "proposals_not_applied": [
+  "B: call update_deficit at the opportunity deadline with the realised on-time outcome; the placement is an open choice the task did not cover",
+  "A3: pass the job own feasibility into continuation_value instead of the hard-coded priority=False",
+  "A1 plus a slack-sensitive p_finish; A1 alone does not address Mode B"
+ ],
+ "_provenance": {
+  "git_commit": "bbab7fcdb044589bcc9103a69c08b68311cc8d8d",
+  "script": "read-only inspection plus wrappers over committed code; no repo code changed",
+  "model": "none (pol4 cost curve, frozen)",
+  "device": "flash CPU only",
+  "n": "seed 0, 4 devices, 300 s for the branch instrumentation",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}
