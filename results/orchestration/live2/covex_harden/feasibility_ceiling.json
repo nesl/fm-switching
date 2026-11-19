@@ -1,0 +1,501 @@
+{
+ "check": "covex_harden_feasibility_ceiling",
+ "is_measurement": false,
+ "label": "D132 item 1. The IDLE-GPU ceiling on robot delivery. Derived from the COMMITTED cost curve; no new measurement and no fitted quantity.",
+ "terms": {
+  "cold": "costs.recall_ttft_s(history_tokens, 'COLD')",
+  "answer": "costs.recall_ttft_s(history_tokens, 'GPU-WARM')",
+  "link_s": 0.044,
+  "link_source": "traces.RTT_MS / 1000, question up and answer down",
+  "deadline_s": "from each question's own record"
+ },
+ "committed_worked_numbers": {
+  "17581": {
+   "cold": 3.9069,
+   "warm_answer": 0.5725,
+   "cold_plus_warm": 4.4794,
+   "expected": 4.48
+  },
+  "20101": {
+   "cold": 5.2897,
+   "warm_answer": 0.6454,
+   "cold_plus_warm": 5.9351,
+   "expected": 5.29
+  }
+ },
+ "overall_feasible_fraction": 0.90393,
+ "min_cell_feasible_fraction": 0.822785,
+ "by_size": {
+  "4": {
+   "n_questions": 41,
+   "n_feasible": 37,
+   "seeds": {
+    "0": 0.888889,
+    "4": 1.0,
+    "5": 0.909091,
+    "6": 0.846154
+   },
+   "feasible_fraction": 0.902439
+  },
+  "8": {
+   "n_questions": 75,
+   "n_feasible": 69,
+   "seeds": {
+    "0": 0.95,
+    "4": 0.904762,
+    "5": 0.941176,
+    "6": 0.882353
+   },
+   "feasible_fraction": 0.92
+  },
+  "10": {
+   "n_questions": 92,
+   "n_feasible": 85,
+   "seeds": {
+    "0": 0.904762,
+    "4": 0.925926,
+    "5": 0.962963,
+    "6": 0.882353
+   },
+   "feasible_fraction": 0.923913
+  },
+  "12": {
+   "n_questions": 108,
+   "n_feasible": 99,
+   "seeds": {
+    "0": 0.888889,
+    "4": 0.931034,
+    "5": 0.96875,
+    "6": 0.85
+   },
+   "feasible_fraction": 0.916667
+  },
+  "14": {
+   "n_questions": 136,
+   "n_feasible": 124,
+   "seeds": {
+    "0": 0.911765,
+    "4": 0.948718,
+    "5": 0.882353,
+    "6": 0.896552
+   },
+   "feasible_fraction": 0.911765
+  },
+  "16": {
+   "n_questions": 154,
+   "n_feasible": 139,
+   "seeds": {
+    "0": 0.914286,
+    "4": 0.902439,
+    "5": 0.878049,
+    "6": 0.918919
+   },
+   "feasible_fraction": 0.902597
+  },
+  "32": {
+   "n_questions": 310,
+   "n_feasible": 275,
+   "seeds": {
+    "0": 0.916667,
+    "4": 0.880952,
+    "5": 0.822785,
+    "6": 0.933333
+   },
+   "feasible_fraction": 0.887097
+  }
+ },
+ "cells": [
+  {
+   "seed": 0,
+   "n_devices": 4,
+   "n_questions": 9,
+   "n_feasible": 8,
+   "feasible_fraction": 0.888889,
+   "history_tokens": {
+    "min": 5341,
+    "p50": 9211,
+    "max": 20101
+   },
+   "infeasible_min_history": 20101,
+   "feasible_max_history": 12091
+  },
+  {
+   "seed": 0,
+   "n_devices": 8,
+   "n_questions": 20,
+   "n_feasible": 19,
+   "feasible_fraction": 0.95,
+   "history_tokens": {
+    "min": 5611,
+    "p50": 10291,
+    "max": 20101
+   },
+   "infeasible_min_history": 20101,
+   "feasible_max_history": 17401
+  },
+  {
+   "seed": 0,
+   "n_devices": 10,
+   "n_questions": 21,
+   "n_feasible": 19,
+   "feasible_fraction": 0.904762,
+   "history_tokens": {
+    "min": 5431,
+    "p50": 10291,
+    "max": 26581
+   },
+   "infeasible_min_history": 20101,
+   "feasible_max_history": 15781
+  },
+  {
+   "seed": 0,
+   "n_devices": 12,
+   "n_questions": 27,
+   "n_feasible": 24,
+   "feasible_fraction": 0.888889,
+   "history_tokens": {
+    "min": 3001,
+    "p50": 10291,
+    "max": 26671
+   },
+   "infeasible_min_history": 20101,
+   "feasible_max_history": 15781
+  },
+  {
+   "seed": 0,
+   "n_devices": 14,
+   "n_questions": 34,
+   "n_feasible": 31,
+   "feasible_fraction": 0.911765,
+   "history_tokens": {
+    "min": 3001,
+    "p50": 10291,
+    "max": 26671
+   },
+   "infeasible_min_history": 20101,
+   "feasible_max_history": 15781
+  },
+  {
+   "seed": 0,
+   "n_devices": 16,
+   "n_questions": 35,
+   "n_feasible": 32,
+   "feasible_fraction": 0.914286,
+   "history_tokens": {
+    "min": 2011,
+    "p50": 10111,
+    "max": 26671
+   },
+   "infeasible_min_history": 20101,
+   "feasible_max_history": 17401
+  },
+  {
+   "seed": 0,
+   "n_devices": 32,
+   "n_questions": 72,
+   "n_feasible": 66,
+   "feasible_fraction": 0.916667,
+   "history_tokens": {
+    "min": 1561,
+    "p50": 9571,
+    "max": 26671
+   },
+   "infeasible_min_history": 20101,
+   "feasible_max_history": 18211
+  },
+  {
+   "seed": 4,
+   "n_devices": 4,
+   "n_questions": 8,
+   "n_feasible": 8,
+   "feasible_fraction": 1.0,
+   "history_tokens": {
+    "min": 3181,
+    "p50": 9211,
+    "max": 12451
+   },
+   "infeasible_min_history": null,
+   "feasible_max_history": 12451
+  },
+  {
+   "seed": 4,
+   "n_devices": 8,
+   "n_questions": 21,
+   "n_feasible": 19,
+   "feasible_fraction": 0.904762,
+   "history_tokens": {
+    "min": 3181,
+    "p50": 9661,
+    "max": 25681
+   },
+   "infeasible_min_history": 22441,
+   "feasible_max_history": 18391
+  },
+  {
+   "seed": 4,
+   "n_devices": 10,
+   "n_questions": 27,
+   "n_feasible": 25,
+   "feasible_fraction": 0.925926,
+   "history_tokens": {
+    "min": 3181,
+    "p50": 11101,
+    "max": 25681
+   },
+   "infeasible_min_history": 22441,
+   "feasible_max_history": 19381
+  },
+  {
+   "seed": 4,
+   "n_devices": 12,
+   "n_questions": 29,
+   "n_feasible": 27,
+   "feasible_fraction": 0.931034,
+   "history_tokens": {
+    "min": 3181,
+    "p50": 10651,
+    "max": 25681
+   },
+   "infeasible_min_history": 22441,
+   "feasible_max_history": 19381
+  },
+  {
+   "seed": 4,
+   "n_devices": 14,
+   "n_questions": 39,
+   "n_feasible": 37,
+   "feasible_fraction": 0.948718,
+   "history_tokens": {
+    "min": 1651,
+    "p50": 11191,
+    "max": 25681
+   },
+   "infeasible_min_history": 22441,
+   "feasible_max_history": 19381
+  },
+  {
+   "seed": 4,
+   "n_devices": 16,
+   "n_questions": 41,
+   "n_feasible": 37,
+   "feasible_fraction": 0.902439,
+   "history_tokens": {
+    "min": 2191,
+    "p50": 11101,
+    "max": 26941
+   },
+   "infeasible_min_history": 22171,
+   "feasible_max_history": 19381
+  },
+  {
+   "seed": 4,
+   "n_devices": 32,
+   "n_questions": 84,
+   "n_feasible": 74,
+   "feasible_fraction": 0.880952,
+   "history_tokens": {
+    "min": 1381,
+    "p50": 10651,
+    "max": 26941
+   },
+   "infeasible_min_history": 20101,
+   "feasible_max_history": 19381
+  },
+  {
+   "seed": 5,
+   "n_devices": 4,
+   "n_questions": 11,
+   "n_feasible": 10,
+   "feasible_fraction": 0.909091,
+   "history_tokens": {
+    "min": 3451,
+    "p50": 5881,
+    "max": 25321
+   },
+   "infeasible_min_history": 25321,
+   "feasible_max_history": 14341
+  },
+  {
+   "seed": 5,
+   "n_devices": 8,
+   "n_questions": 17,
+   "n_feasible": 16,
+   "feasible_fraction": 0.941176,
+   "history_tokens": {
+    "min": 3451,
+    "p50": 10381,
+    "max": 25321
+   },
+   "infeasible_min_history": 25321,
+   "feasible_max_history": 14341
+  },
+  {
+   "seed": 5,
+   "n_devices": 10,
+   "n_questions": 27,
+   "n_feasible": 26,
+   "feasible_fraction": 0.962963,
+   "history_tokens": {
+    "min": 661,
+    "p50": 6511,
+    "max": 25321
+   },
+   "infeasible_min_history": 25321,
+   "feasible_max_history": 14341
+  },
+  {
+   "seed": 5,
+   "n_devices": 12,
+   "n_questions": 32,
+   "n_feasible": 31,
+   "feasible_fraction": 0.96875,
+   "history_tokens": {
+    "min": 661,
+    "p50": 9031,
+    "max": 25321
+   },
+   "infeasible_min_history": 25321,
+   "feasible_max_history": 18121
+  },
+  {
+   "seed": 5,
+   "n_devices": 14,
+   "n_questions": 34,
+   "n_feasible": 30,
+   "feasible_fraction": 0.882353,
+   "history_tokens": {
+    "min": 661,
+    "p50": 11641,
+    "max": 25321
+   },
+   "infeasible_min_history": 20821,
+   "feasible_max_history": 18121
+  },
+  {
+   "seed": 5,
+   "n_devices": 16,
+   "n_questions": 41,
+   "n_feasible": 36,
+   "feasible_fraction": 0.878049,
+   "history_tokens": {
+    "min": 661,
+    "p50": 9301,
+    "max": 27031
+   },
+   "infeasible_min_history": 20821,
+   "feasible_max_history": 18751
+  },
+  {
+   "seed": 5,
+   "n_devices": 32,
+   "n_questions": 79,
+   "n_feasible": 65,
+   "feasible_fraction": 0.822785,
+   "history_tokens": {
+    "min": 931,
+    "p50": 11191,
+    "max": 27031
+   },
+   "infeasible_min_history": 20011,
+   "feasible_max_history": 18751
+  },
+  {
+   "seed": 6,
+   "n_devices": 4,
+   "n_questions": 13,
+   "n_feasible": 11,
+   "feasible_fraction": 0.846154,
+   "history_tokens": {
+    "min": 661,
+    "p50": 7411,
+    "max": 25681
+   },
+   "infeasible_min_history": 20551,
+   "feasible_max_history": 18931
+  },
+  {
+   "seed": 6,
+   "n_devices": 8,
+   "n_questions": 17,
+   "n_feasible": 15,
+   "feasible_fraction": 0.882353,
+   "history_tokens": {
+    "min": 3541,
+    "p50": 9931,
+    "max": 25681
+   },
+   "infeasible_min_history": 20551,
+   "feasible_max_history": 18931
+  },
+  {
+   "seed": 6,
+   "n_devices": 10,
+   "n_questions": 17,
+   "n_feasible": 15,
+   "feasible_fraction": 0.882353,
+   "history_tokens": {
+    "min": 3541,
+    "p50": 10381,
+    "max": 25681
+   },
+   "infeasible_min_history": 20551,
+   "feasible_max_history": 18931
+  },
+  {
+   "seed": 6,
+   "n_devices": 12,
+   "n_questions": 20,
+   "n_feasible": 17,
+   "feasible_fraction": 0.85,
+   "history_tokens": {
+    "min": 2191,
+    "p50": 9661,
+    "max": 25681
+   },
+   "infeasible_min_history": 20551,
+   "feasible_max_history": 18931
+  },
+  {
+   "seed": 6,
+   "n_devices": 14,
+   "n_questions": 29,
+   "n_feasible": 26,
+   "feasible_fraction": 0.896552,
+   "history_tokens": {
+    "min": 2011,
+    "p50": 9121,
+    "max": 25681
+   },
+   "infeasible_min_history": 20551,
+   "feasible_max_history": 18931
+  },
+  {
+   "seed": 6,
+   "n_devices": 16,
+   "n_questions": 37,
+   "n_feasible": 34,
+   "feasible_fraction": 0.918919,
+   "history_tokens": {
+    "min": 1831,
+    "p50": 8941,
+    "max": 25681
+   },
+   "infeasible_min_history": 20551,
+   "feasible_max_history": 18931
+  },
+  {
+   "seed": 6,
+   "n_devices": 32,
+   "n_questions": 75,
+   "n_feasible": 70,
+   "feasible_fraction": 0.933333,
+   "history_tokens": {
+    "min": 1831,
+    "p50": 9391,
+    "max": 26131
+   },
+   "infeasible_min_history": 20551,
+   "feasible_max_history": 18931
+  }
+ ]
+}

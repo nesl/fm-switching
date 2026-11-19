@@ -1869,3 +1869,84 @@ For COVEX that is not the available win. Its gap is 0.34 to 0.83, and the queuei
 section 18 says the lever is release ordering rather than budget. The honest framing for v1.4 is
 that the first target is to stop losing to llf at 10 devices, where llf is at 0.81 to 0.89 and
 COVEX at 0.35 to 0.56, not to reach 0.90.
+
+# 21. D132 ITEM 1: THE IDLE-GPU FEASIBILITY CEILING, and the headline definition it fixes
+
+**Committed before any v1.4 result exists and before item 2 is scored**, so the definition
+visibly precedes the results it governs. Derived entirely from the COMMITTED cost curve; nothing
+is measured or fitted here. Output: `feasibility_ceiling.json`.
+
+**The sum, per robot question**, with the history AS OF THE QUESTION'S ARRIVAL from the
+`recall_question` record's `history_tokens`, never the session's final size:
+
+```
+cold rebuild   costs.recall_ttft_s(h, "COLD")        = h / COLD_PREFILL_TOK_S[nearest]
+answer TTFT    costs.recall_ttft_s(h, "GPU-WARM")
+link           RTT_MS / 1000 = 0.044 s               question up, answer down
+                                                      against each question's own L = 5 s
+```
+
+No COLD answer term is added. `recall_ttft_s(h, "COLD")` IS the prefill on its own, so a second
+COLD term would charge the prefill twice.
+
+**The committed worked numbers reproduce exactly**, which is why the function is trusted on real
+data:
+
+| tokens | cold | answer | cold + answer | expected from the D118 derivation |
+|---|---|---|---|---|
+| 17,581 | 3.9069 | 0.5725 | **4.4794** | 4.48, feasible but barely |
+| 20,101 | **5.2897** | 0.6454 | 5.9351 | 5.29 from the curve alone, infeasible |
+
+## 21.1 THE CEILING
+
+Feasible fraction on an idle engine, per seed and per size:
+
+| n | seed 0 | seed 4 | seed 5 | seed 6 | **pooled** |
+|---|---|---|---|---|---|
+| 4 | 0.8889 | 1.0000 | 0.9091 | 0.8462 | 0.9024 |
+| 8 | 0.9500 | 0.9048 | 0.9412 | 0.8824 | 0.9200 |
+| 10 | 0.9048 | 0.9259 | 0.9630 | 0.8824 | 0.9239 |
+| 12 | 0.8889 | 0.9310 | 0.9688 | 0.8500 | 0.9167 |
+| 14 | 0.9118 | 0.9487 | 0.8824 | 0.8966 | 0.9118 |
+| 16 | 0.9143 | 0.9024 | 0.8780 | 0.9189 | 0.9026 |
+| **32** | 0.9167 | 0.8810 | 0.8228 | 0.9333 | **0.8871** |
+
+Overall **0.9039**. Lowest single cell **0.8228** (seed 5 at 32 devices). **11 of 28 cells are
+below 0.90.**
+
+**The breakeven is sharp and sits in a narrow band:** the largest feasible history anywhere is
+**19,381 tokens** and the smallest infeasible one is **20,011**. Above roughly 19.4k tokens a
+robot question cannot be answered in 5 s on an idle GPU, by any scheduler, ever.
+
+## 21.2 THE RULE FIRES. The headline robot target is p = 0.90 over FEASIBLE QUESTIONS
+
+D132: *if the ceiling is below 0.90 at any size, the headline robot target is p = 0.90 over
+feasible questions; otherwise over all questions.*
+
+**The ceiling is 0.8871 at 32 devices, which is below 0.90, so the first branch fires.** It is
+also below 0.90 in 11 of 28 individual cells including at 4, 8, 10, 12, 14 and 16 devices, so the
+branch does not depend on the 32-device row alone.
+
+**HEADLINE, FIXED FROM HERE: robot capacity is p = 0.90 over FEASIBLE questions.** The full p
+curve at 0.50, 0.75 and 0.90 over BOTH denominators is reported regardless, per the ruling.
+
+## 21.3 What this is likely to change, flagged as INDICATIVE until item 2 computes it exactly
+
+About **9.6 percent of robot questions are physically undeliverable** on an idle GPU. Every
+all-questions robot number in this report, mine and everyone's, has therefore been scored partly
+against work no arm could ever do.
+
+The cell I would watch first is eco-llm at 12 devices on seed 4, which missed capacity by
+**0.0034** at 0.8966. The ceiling in that exact cell is 0.9310. If its misses are concentrated in
+infeasible questions, the feasible-only figure would clear 0.90 comfortably and **that miss was
+arithmetic rather than scheduling**.
+
+**I am NOT claiming that yet.** Dividing a fraction by the ceiling is not the feasible-only
+measure; the correct numerator is on-time among the feasible questions specifically, matched by
+question id, which is exactly what D132 item 2 computes. The indicative direction is clear and
+the exact number is not, so it is flagged here and will be resolved by measurement, not by
+arithmetic on a mean.
+
+**What it will not change:** COVEX's gap. At 12 devices on seed 4 it is at 0.414 against a ceiling
+of 0.9310, so even a perfect feasible-only correction leaves it near 0.44. The ceiling reshapes the
+published arms' near-misses; it does not close COVEX's deficit.
