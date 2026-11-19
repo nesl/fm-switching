@@ -4684,3 +4684,48 @@ expectation.
 Recorded so a later reader does not read it as an oversight: **F5c has no switch, on purpose.** It
 routes the deficit update through `Coordinator.update_deficit` with provably identical behaviour,
 **0 of 1,157 decisions differing** with B1 on, so a switch over it would be dead by construction.
+
+### V27.8 AMENDMENT to the pre-registration, before any planner code
+
+Three corrections arrived after V27 was committed. V27 stands as written and these are recorded as
+an amendment rather than an edit, so the pre-registration cannot be read as having been adjusted
+after the fact.
+
+**(a) The gate metric is DELIVERY, not dispatch, and my edf reading was the correct one.** Both
+readings were arithmetically right on the same run: `released_before_deadline` is a dispatch
+decision, while `outcomes.jsonl` with `t_delivered <= t_opportunity + deadline_s` is service. D82
+is a service metric, so delivery governs. Corrected baselines, answered ON TIME:
+
+| n | policy-core (v1.0) | `edf` | `llf` |
+|---|---|---|---|
+| 4 | **1** | 8 | 7 |
+| 8 | **0** | **0** | 4 |
+| 16 | **0** | **0** | 0 |
+
+**(b) The dashcam deficit is at EIGHT devices only, and is REVERSED at sixteen.** Delivered
+fraction:
+
+| n | policy-core | `edf` | `llf` |
+|---|---|---|---|
+| 4 | 0.9991 | 0.9991 | 0.9991 |
+| 8 | **0.4871** | 0.9854 | 0.9942 |
+| 16 | **0.0747** | 0.0172 | 0.0294 |
+
+At sixteen devices `edf` and `llf` dispatch 5,453 and 5,728 instants and only 150 and 256 arrive in
+time, while policy-core dispatches 657 and delivers 651. **So COVEX is the best of the three at
+sixteen devices** and the earlier "COVEX is worse on dashcams" driver is withdrawn except at eight.
+**I will not design the planner to chase a sixteen-device dashcam problem, because there is not
+one.** The relevant target is eight devices, where admitting only what scores positive costs COVEX
+and the same conservatism protects it at sixteen. That tension is what the planner's reservation
+aggressiveness has to navigate, and it is a reason to reserve carefully rather than greedily.
+
+**(c) A zero-against-zero cell is NOT a success in my reporting.** At sixteen devices every arm
+delivers zero robot answers, so a relative bar there is vacuous. I will report ABSOLUTE delivered
+on-time counts throughout and leave the gate arithmetic to session 2, per the caveat the user is
+being asked to rule on.
+
+**Expected effects, restated in delivered-on-time absolute counts against v1.0:** more than 1 at
+four devices, more than 0 at eight, more than 0 at sixteen, with the delivered dashcam fraction not
+falling below v1.0's 0.9991, 0.4871 and 0.0747. The eight-device dashcam figure is the one with
+room to improve and the sixteen-device one is already the best of the three, so it must be
+protected rather than traded.
