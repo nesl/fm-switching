@@ -97,10 +97,12 @@ class BuilderArm(Live2ArmMixin, Policy):
                              "S5 unexpressible and S3 reload unreachable, see slot_precheck.json"
                              % (s1, s2, s3, s4, s6))
         self.stats: Dict[str, Any] = dict(
-            arm=self.name, s1=s1, s2=s2, s3=s3, s4=s4, s6=s6, c_inflight=self.c_inflight,
+            arm=self.name, s1=s1, s2=s2, s3=s3, s4=s4, s6=s6, s7=s7,
+            c_inflight=self.c_inflight,
             sh_admitted=0, sh_held=0, rc_cloud=0, rc_defer=0, rc_reject=0, rc_device=0,
             materialize=0, inflight_bound_periods=0, lateness_throttle_periods=0,
-            fairshare_held=0, whatif_chose_pieces=0, whatif_chose_onego=0)
+            fairshare_held=0, whatif_chose_pieces=0, whatif_chose_onego=0,
+            s7_recent=0, s7_degraded=0, s7_degrade_still_infeasible=0)
         self._delivered: Dict[str, int] = {}
         self._offered: Dict[str, int] = {}
 

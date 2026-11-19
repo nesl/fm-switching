@@ -1,0 +1,58 @@
+{
+ "check": "builder_S7_evidence_slot_move_proofs",
+ "is_measurement": true,
+ "label": "D135 item 2, requirement 2 for the S7 evidence slot. Seed 4, 300 s, sizes 8, 12, 16, 32, dry. Emitted-action observable, NOT the decision log: see the instrument finding below.",
+ "instrument_finding": {
+  "what": "the standard move proof diffs decision.jsonl rows and reported 0 DIFFERING for builder-s7-always-recent at 16 devices, while the arm had emitted RECENT on all 21 recalls.",
+  "cause": "decision.jsonl carries no `representation` field. Its release_recall rows hold H, arm, belief, cost_model_id, decision_id, defer_s, kind, mu, note, opportunity_ids, piece_tokens, predicted and traffic_mix, and nothing that records which evidence was asked for.",
+  "consequence": "the requirement-2 instrument is STRUCTURALLY BLIND to any slot whose entire effect is carried in a field the decision log omits. Reporting that result unexamined would have classified a mechanism that fires on every single recall as inert.",
+  "generalisation": "this is not specific to S7. Any future slot acting through a field absent from decision.jsonl needs the emitted-action observable instead, and the placement slot would have the same blindness if desired_tier is likewise unlogged.",
+  "remedy": "experiments/orchestration/live2/s7_evidence_moves.py tallies the EMITTED RecallAction decision and representation from the arm itself."
+ },
+ "results": {
+  "builder-s7-always-recent": {
+   "verdict": "ELIGIBLE AT EVERY SIZE TESTED",
+   "emitted": {
+    "8": "CLOUD/RECENT x9",
+    "12": "CLOUD/RECENT x17",
+    "16": "CLOUD/RECENT x21",
+    "32": "CLOUD/RECENT x42"
+   },
+   "baseline": "CLOUD/None at every size",
+   "note": "the reference arm behaves as designed: RECENT on every robot recall, bounding the timing benefit above and accuracy below."
+  },
+  "builder-s7-degrade": {
+   "verdict": "UNEXERCISED AT EVERY SIZE TESTED, and the reason is the workload, not the gate",
+   "counters_all_zero": [
+    "s7_recent",
+    "s7_degraded",
+    "s7_degrade_still_infeasible"
+   ],
+   "why": "_at_risk requires readiness COLD AND est > slack. The second term never holds: builder-default emits CLOUD on 9, 17, 21 and 42 of 42 recalls at the four sizes, meaning EVERY recall is feasible under the default and nothing is ever about to be declined, rejected or delivered late.",
+   "classification": "UNEXERCISED, not unexpressible and not a failed gate. The mechanism asks a well-posed and observable question; this workload never presents the situation in which it would be asked."
+  }
+ },
+ "shared_cause_across_four_mechanisms": {
+  "finding": "s2-all, s2-value, s6-decline and now s7-degrade are ALL inert for ONE shared reason: no recall is ever infeasible on the dry screen.",
+  "implication": "the recall axis of the dry screen is unloaded, so no mechanism that acts on recall RISK can be screened on it at all. This is a property of the cell, not of the four mechanisms, and it means their nulls are a statement about the screen rather than about the policies.",
+  "where_they_could_be_screened": "a cell where recalls actually fail, i.e. the capacity cells, which is also where the published arms were reported to separate."
+ },
+ "expectation_recorded_before_scoring": {
+  "source": "the directive",
+  "expectation": "degrade should land between always-recent and the baseline on both axes; if it does not, the fault is in the gating rather than the lever.",
+  "status": "NOT YET TESTABLE. The gate never fires here, so there is nothing between the bounds to measure. Recorded now so the expectation is pre-registered rather than fitted afterwards."
+ },
+ "measurement_scope": {
+  "reportable": "emitted-action counts and representation selections, which is what this file contains.",
+  "held": "anything in GPU-seconds or served-recall counts, which flow through the readiness argument under correction in e924005.",
+  "note": "the S7 effect is on the TOKENS side (which evidence is asked for), orthogonal to the readiness fault, the same split that applies to the eco-llm reconciliation."
+ },
+ "_provenance": {
+  "git_commit": "22c8a4f149148b06479ab0c347a07d665668aa14",
+  "script": "s7_evidence_moves.py",
+  "model": "none (dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4; sizes 8, 12, 16, 32; 300 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
