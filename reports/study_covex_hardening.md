@@ -1,7 +1,27 @@
 # ONE PAGE FOR THE MORNING (D129), written by session 2
 
-**Read this first. The most important thing here is that the dry-run screen is NOT uniformly
-optimistic for COVEX, and at 8 devices it inverts the ranking against edf.**
+**Read this first.**
+
+## OPEN QUESTION that makes every covex row below PROVISIONAL
+
+The H100 **refused `d944361` and ran nothing**: it failed
+`test_pieces_partition_the_history_with_no_gap_and_no_overlap` at C_inflight 8, because a
+piece-rebuilt history is sent OUT OF ORDER, and that affects **`covex-v13` itself**, not only the
+edf piece arms. There is no live v1.3 data and there never will be.
+
+**Whether this changes DRY-RUN delivery is undetermined and session 1 is answering it.** In a dry
+run nothing actually prefills, so out-of-order pieces may leave delivery counts untouched while
+still being a real defect on hardware. Until that answer lands:
+
+- **every covex row in this report is PROVISIONAL**, including the 16-device table in section 13
+  that reproduced session 1's figures exactly (0.8164 / 14, 0.8751 / 13, 0.8422 / 17);
+- nothing is being re-run pre-emptively and nothing is discarded;
+- the BASELINE and PUBLISHED rows are unaffected, since those arms are not policy-core.
+
+A reader should not treat the covex numbers as settled while this is open.
+
+**Also still true: the dry-run screen is NOT uniformly optimistic for COVEX, and at 8 devices it
+inverts the ranking against edf.**
 
 ## The headline: the screen is calibrated now, and it was misleading us at 8 devices
 

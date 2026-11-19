@@ -22,6 +22,43 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import _harness as H                                                   # noqa: E402
 
 
+# D131: the CAPACITY CONJUNCT. D71/D82 targets are not restated here; the committed scorer's own
+# `attainment` is called, which reads only `lo.outcomes`, so a shim carrying the outcomes is
+# enough. Reimplementing p_dash = 0.25 or p_rob = 0.90 locally is exactly the "same name, two
+# definitions" failure the consistency check exists to catch.
+class _OutcomeShim(object):
+    def __init__(self, outcomes):
+        self.outcomes = outcomes
+
+
+def capacity(run_dir: Path) -> Dict[str, Any]:
+    H.setup_paths()
+    import importlib
+    sc = importlib.import_module("scorer.score")
+    p = Path(run_dir) / "outcomes.jsonl"
+    if not p.exists():
+        return dict(capacity_met=None, note="no outcomes.jsonl")
+    out = {}
+    for line in open(p):
+        try:
+            r = json.loads(line)
+        except Exception:                                              # noqa: BLE001
+            continue
+        if r.get("opportunity_id") is not None:
+            out[r["opportunity_id"]] = r
+    a = sc.attainment(_OutcomeShim(out))
+    return dict(
+        capacity_met=bool(a.dashcam_all_meet and a.robot_pool_meets),
+        dashcam_all_meet=bool(a.dashcam_all_meet),
+        robot_pool_meets=bool(a.robot_pool_meets),
+        robot_pool_fraction=a.robot_pool_fraction,
+        robot_pool_eligible=bool(a.robot_pool_eligible),
+        dashcam_eligible_n=len(a.dashcam_eligible),
+        dashcam_excluded_n=len(a.dashcam_excluded),
+        targets=dict(p_dash=sc.DASH_P, L_dash=sc.DASH_L_S, p_rob=sc.ROB_P, L_rob=sc.ROB_L_S,
+                     min_dash_instants=sc.DASH_MIN_INSTANTS, min_rob_questions=sc.ROB_MIN_QUESTIONS))
+
+
 def _digest(outdir: Path) -> Any:
     for name in ("run_meta.json", "header.json"):
         p = Path(outdir) / "run" / name
@@ -117,7 +154,23 @@ def main(argv=None) -> int:
                                # DIFFERENT digest is a porting defect, not a result, and is
                                # flagged to session 3 rather than scored.
                                fairness_digest=_digest(Path(res["outdir"])),
-                               gating=bool(not label.startswith("published:")))
+                               # D131: the published field is now part of the comparison the
+                               # goal is stated against, so it GATES. Session 3's cost check
+                               # verified the arms are charged at least as much accelerator time
+                               # as llf, which is what made this defensible.
+                               gating=True)
+                    row["capacity"] = capacity(Path(res["outdir"]) / "run")
+                    # D131/E6: the calibration correction travels WITH the table, not in a
+                    # separate section a reader may not reach.
+                    row["dashcam_screen_reliable"] = bool(n != 8)
+                    row["calibration_note"] = (
+                        "8 devices: the dry screen UNDERSTATES COVEX dashcam by 0.461 and INVERTS "
+                        "the ranking against edf (E6, section 10). No 8-device dashcam ranking is "
+                        "claimable without a live cell. Robot rows are unaffected."
+                        if n == 8 else
+                        "16 devices: dry and live agree to within 0.003, usable as is."
+                        if n == 16 else
+                        "no live cell at this size; dashcam ranking is UNCALIBRATED.")
                 except Exception as e:                                  # noqa: BLE001
                     row = dict(seed=seed, n_devices=n, arm=label,
                                error="%s: %s" % (type(e).__name__, str(e)[:160]))
