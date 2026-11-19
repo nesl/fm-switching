@@ -1,0 +1,78 @@
+{
+ "check": "partB_evidence_selection_expressibility_precheck",
+ "is_measurement": false,
+ "label": "STATIC PRE-CHECK run BEFORE porting any Part B arm, as the directive requires: does an evidence-selection mechanism reach a decision in live2.",
+ "question": "several Part B arms choose WHICH EVIDENCE to send, recent frames against full history, rather than how to schedule. Is that expressible.",
+ "dashcam_side": {
+  "verdict": "EXPRESSIBLE",
+  "evidence": [
+   "StreamAction.cadence_s and .frame_count ARE read at coordinator.py:409-410 and written onto the device",
+   "frame_count then reaches cost at coordinator.py:495 via episodic_gpu_s(\"32BI\", frame_count)"
+  ],
+  "consequence": "an arm that chooses how many frames per call, and how often, acts on both behaviour and charged cost."
+ },
+ "recall_side": {
+  "verdict": "UNEXPRESSIBLE. This is a FOURTH dead channel, after order, desired_tier and host readiness.",
+  "evidence": [
+   "RecallAction.representation is NEVER READ: grep across live2 and fleet returns only places where arms WRITE it (arms.py:240, :370, arms_policy.py:730) and `decides` / `defaults_used` declarations",
+   "_submit_recall charges and sends max(int(s.est_tokens), 1), the FULL believed history, regardless of any representation the arm asked for",
+   "so the evidence actually sent does not depend on the arm choice"
+  ],
+  "consequence": "an arm whose defining mechanism is choosing RECENT against full history ports cleanly, runs cleanly and measures nothing."
+ },
+ "arms_gated": {
+  "simplestream": {
+   "decides": [
+    "recall_decision",
+    "representation",
+    "episodic_mode"
+   ],
+   "emits": "RecallAction(q, \"CLOUD\", representation=\"RECENT\")",
+   "verdict": "DEFINING MECHANISM UNEXPRESSIBLE. Answering from recent frames only IS SimpleStream. Ported as-is it would behave as always-CLOUD and score as a timeliness result that its real design would not earn."
+  },
+  "streamscout": {
+   "decides": [
+    "recall_decision",
+    "representation",
+    "episodic_mode"
+   ],
+   "emits": "RecallAction(q, \"CLOUD\", representation=rep) and DEVICE",
+   "verdict": "PARTLY EXPRESSIBLE. Its CLOUD against DEVICE choice acts; its representation choice does not."
+  },
+  "covstream": {
+   "decides": [
+    "recall_decision",
+    "representation",
+    "session_action",
+    "episodic_mode"
+   ],
+   "verdict": "PARTLY EXPRESSIBLE. recall_decision and MATERIALIZE act; representation does not, and KEEP_GPU_WARM does not either per the earlier S5 pre-check."
+  },
+  "thinking_qwenvl": {
+   "decides": [
+    "recall_decision",
+    "defer_s",
+    "episodic_mode"
+   ],
+   "verdict": "EXPRESSIBLE. It uses no representation; DEFER is honoured by the run loop under D90."
+  }
+ },
+ "consequence_for_part_C": {
+  "warning": "session 2 is adding accuracy scoring because answering from recent frames is cheaper, timelier and about 17.5 pp less accurate.",
+  "problem": "live2 never varies what it sends, so a RECENT-choosing arm receives FULL-history accuracy AND full-history cost. The accuracy column cannot separate RECENT from full history until the recall evidence path reads the arm choice.",
+  "note": "this is reported now so Part C is not built on a column that cannot move."
+ },
+ "default_decisions_provisional": [
+  "SimpleStream: SKIP the port and document in its card, rather than ship a shell that scores a timeliness win its mechanism never produced.",
+  "StreamScout and CoVStream: PORT, with the inert representation choice recorded in each card so no row is read as evidence about evidence selection.",
+  "Thinking-QwenVL: PORT the decision component it contributes, the recall admit-or-defer rule, and state that its episodic component is what the card scopes out."
+ ],
+ "_provenance": {
+  "git_commit": "263b091f164b81fb41d70f37d35384169b1f0b60",
+  "script": "static inspection of live2 coordinator, fleet and arms; nothing run, no code changed",
+  "model": "n/a",
+  "device": "flash CPU only",
+  "n": "static",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
