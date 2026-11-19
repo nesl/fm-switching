@@ -1,0 +1,184 @@
+{
+ "arm": "vllm-priority",
+ "arm_version": "live2-arm-1.0",
+ "is_measurement": false,
+ "tick_s": 0.1,
+ "decision_period_s": 0.1,
+ "h_s": null,
+ "upload_mode": "A",
+ "window_s": 120.0,
+ "n_devices": 8,
+ "n_sessions": 4,
+ "n_opportunities": 774,
+ "n_requests": 773,
+ "n_decisions": 773,
+ "counts": {
+  "completed_monitor": 765,
+  "completed_recall": 6,
+  "recall_CLOUD": 6,
+  "submitted_monitor": 767,
+  "submitted_recall": 6
+ },
+ "n_monitor_answers": 765,
+ "n_recall_answers": 6,
+ "n_on_time": 650,
+ "submit_delay_ms": {
+  "n": 773,
+  "p50": 1.5523,
+  "p90": 2.4489,
+  "p99": 4.2355,
+  "max": 8.2454
+ },
+ "decision_time": {
+  "n": 1200,
+  "cpu_clock": "time.thread_time() of the deciding thread",
+  "wall_ms": {
+   "n": 1200,
+   "p50": 0.5866,
+   "p90": 0.6088,
+   "p99": 0.9442,
+   "max": 1.0243
+  },
+  "cpu_ms": {
+   "n": 1200,
+   "p50": 0.5804,
+   "p90": 0.6021,
+   "p99": 0.9378,
+   "max": 1.0177
+  },
+  "wall_over_cpu": {
+   "n": 1200,
+   "p50": 1.0111,
+   "p90": 1.0227,
+   "p99": 1.0363,
+   "max": 1.0397
+  },
+  "candidates": {
+   "n": 1200,
+   "p50": 4,
+   "p90": 4,
+   "p99": 4,
+   "max": 5
+  },
+  "candidates_source": "pending items ordered"
+ },
+ "n_pulls": 0,
+ "n_cloud_answers": 771,
+ "decision_latency_ms": {
+  "p50": 0.5866,
+  "p99": 0.9442,
+  "max": 1.0243,
+  "n": 1200
+ },
+ "cpu_s": 12.39,
+ "wall_s": 119.59,
+ "cpu_percent": 10.4,
+ "request_rate_per_s": 6.46,
+ "budget_gpu_s": 120.0,
+ "budget_spent_gpu_s": 64.11,
+ "epoch_overruns": 0,
+ "max_epoch_lag_s": 0.0,
+ "wall_guard_hit": false,
+ "wall_guard_s": null,
+ "virtual_t_reached_s": 0.0,
+ "n_errors": 0,
+ "first_errors": [],
+ "mu_time_average": null,
+ "arm_stats": {
+  "arm": "vllm-priority",
+  "requires_server_mode": "priority",
+  "server_scheduling_policy": "priority",
+  "server_mode_undeclared": false,
+  "priorities_emitted": 4802
+ },
+ "bridge": {
+  "arm": "vllm-priority",
+  "n_events": 806,
+  "n_ticks": 23891,
+  "n_pulls": 0,
+  "n_cloud_answers": 771,
+  "n_decisions": 1200,
+  "decision_period_s": 0.1,
+  "n_forwarded_on_completion": 771,
+  "n_skipped_forwarded": 771,
+  "n_forward_mismatch": 0,
+  "n_recall_first_token": 6,
+  "n_recall_letter_differs": 0,
+  "recall_letter_diffs": [],
+  "n_monitor_score_differs": 0
+ },
+ "self_ticks": 11897,
+ "self_tick_s": 0.005,
+ "backend": {
+  "n_built": 773,
+  "callback_errors": [],
+  "wire_extra_delay_ms": {
+   "n": 772,
+   "p50": 2.2481,
+   "p90": 2.876,
+   "p99": 6.7947,
+   "max": 13.0063
+  },
+  "submit_delay_total_ms": {
+   "n": 772,
+   "p50": 3.8602,
+   "p90": 5.2288,
+   "p99": 8.9444,
+   "max": 20.0327
+  },
+  "first_line_to_first_content_ms": {
+   "n": 771,
+   "p50": 0.4478,
+   "p99": 2.3057,
+   "max": 3.1664
+  },
+  "n_callback_errors": 0,
+  "build_ms_total": 210.833,
+  "build_ms_mean": 0.2727,
+  "cache": {
+   "n_cached": 1278,
+   "held_bytes": 68103382,
+   "cap_bytes": 1500000000,
+   "hits": 1382,
+   "misses": 1278,
+   "encoded_bytes": 68103382,
+   "hit_fraction": 0.519549
+  }
+ },
+ "cache": {
+  "n_cached": 1278,
+  "held_bytes": 68103382,
+  "cap_bytes": 1500000000,
+  "hits": 1382,
+  "misses": 1278,
+  "encoded_bytes": 68103382,
+  "hit_fraction": 0.519549
+ },
+ "pid": 1265760,
+ "cpu_s_child": 12.3908,
+ "completion_to_forward_ms": {
+  "n": 771,
+  "p50_ms": 0.0691,
+  "p90_ms": 0.0837,
+  "p99_ms": 0.0937,
+  "max_ms": 0.1571
+ },
+ "first_token_to_forward_ms": {
+  "n": 771,
+  "p50_ms": 0.0691,
+  "p90_ms": 0.0837,
+  "p99_ms": 0.0937,
+  "max_ms": 0.1571
+ },
+ "wire_events_sent": 806,
+ "wire_replies_received": 771,
+ "wire_write_errors": 1,
+ "wire_max_send_backlog": 17,
+ "completion_to_emulator_ms": {
+  "n": 771,
+  "p50_ms": 5.6777,
+  "p90_ms": 9.1026,
+  "p99_ms": 10.0925,
+  "max_ms": 10.2658
+ }
+}
