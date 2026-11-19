@@ -67,3 +67,41 @@ docstring said "episodic streams take the documented default"; the code emitted 
 device-only challenge mAP 0.4776 at every fleet size. With the fix its challenge mAP on the
 representative cell is 0.5169 (ALL questions) and 0.5163 (EVAL), and its window selection, which
 was always its point, is unchanged and still fitted on StudyD3's development clips.
+
+## D133 live2 port note, added 2026-11-19: DEFERRED PENDING PART A, NOT SKIPPED
+
+SimpleStream is **not ported to live2 yet**, and the reason is a gap in live2 rather than anything
+about the baseline. Its mechanism is **unexpressible in the live2 action space as that space stands
+today**, so a port made now would run cleanly and measure nothing.
+
+**What it decides in our setting.** SimpleStream does not schedule. It chooses **which evidence to
+send**: the most recent N frames instead of the full session history, with N fitted on StudyD3's
+development split as recorded above. In live2 that choice is carried by
+`RecallAction(q.query_id, "CLOUD", representation="RECENT")`.
+
+**Why that cannot act today.** `RecallAction.representation` is **never read**. Every occurrence
+across `live2/` and `live2/fleet/` is either an arm WRITING it (`arms.py:240`, `arms.py:370`,
+`arms_policy.py:730`) or a `decides` / `defaults_used` declaration. Nothing consumes it. Worse,
+`_submit_recall` sends and charges `max(int(s.est_tokens), 1)`, the **full believed history**,
+whatever representation the arm asked for. So the evidence actually sent does not depend on the
+arm's choice at all.
+
+**The contrast that makes this a gap and not a design.** Dashcam-side evidence selection *is*
+wired: `StreamAction.cadence_s` and `.frame_count` are read at `coordinator.py:409-410` and written
+onto the device, and `frame_count` then reaches charged cost at `coordinator.py:495` through
+`episodic_gpu_s("32BI", frame_count)`. An arm choosing how many frames per call, and how often,
+acts on both behaviour and cost. The recall side has the same kind of lever and no reader. One half
+of evidence selection is enacted and the other is inert, which is what identifies this as an
+unfinished path rather than a deliberate restriction.
+
+**Consequence if it were ported today.** With `representation` ignored, SimpleStream collapses to
+always-CLOUD on full history: it would receive full-history latency AND full-history cost, and
+score as a timeliness result that its actual design never produced. That is the shape of null this
+study has been burned by before, and it is avoidable by waiting.
+
+**Blocker.** Part A, extended to cover `RecallAction.representation` alongside `desired_tier`.
+Session 1 owns it and will report when it lands. Port the moment it does; the card's adaptation,
+including the fitted window, needs no change.
+
+**Related.** QueryStream's Query-Aware Differential Pruning is blocked on the same path, and its
+Proactive Response half is not. See `querystream.md`.

@@ -49,7 +49,7 @@
    "12": 3181,
    "14": 3691,
    "16": 4226,
-   "32": null
+   "32": 4181
   },
   "builder-s4-llf": {
    "8": 0,
@@ -65,7 +65,7 @@
    "12": 160,
    "14": 1631,
    "16": 3721,
-   "32": null
+   "32": 3922
   },
   "builder-s4-adaptive": {
    "8": 0,
@@ -73,7 +73,7 @@
    "12": 0,
    "14": 9,
    "16": 173,
-   "32": null
+   "32": 3876
   },
   "builder-s6-decline": {
    "8": 0,
@@ -97,18 +97,21 @@
    10,
    12,
    14,
-   16
+   16,
+   32
   ],
   "builder-s4-llf": [],
   "builder-s4-reserve": [
    10,
    12,
    14,
-   16
+   16,
+   32
   ],
   "builder-s4-adaptive": [
    14,
-   16
+   16,
+   32
   ],
   "builder-s6-decline": []
  },
@@ -125,10 +128,11 @@
   "TWO mechanisms have a SIZE THRESHOLD INSIDE THE CROSSOVER BAND, which the two-size test would have mischaracterised. s4-reserve is inert at 8, barely alive at 10 (3 decisions), climbing through 12 (160) and 14 (1,631) to 16 (3,721). Read only at 16 it looks simply eligible; in fact it switches on exactly where session 2 found the baselines collapse at n=12.",
   "s4-adaptive is inert until 14 (9 decisions) and only clearly live at 16 (173).",
   "s1-lateness is dead at 8 through 16 and live only at 32, the single mechanism whose eligibility the original two-size test established correctly only by luck of including 32.",
-  "s3-whatif is live at every size tested and grows monotonically with load, 2,120 at 8 to 4,226 at 16."
+  "s3-whatif is live at every size tested and grows monotonically with load, 2,120 at 8 to 4,226 at 16.",
+  "n=32 filled: s3-whatif 4,181, s4-reserve 3,922, s4-adaptive 3,876. All three remain eligible at the largest size, and s4-adaptive shows the sharpest threshold of any mechanism, 0, 0, 0, 9, 173, 3,876 across the six sizes."
  ],
  "untested_cells": {
-  "note": "s3-whatif, s4-reserve and s4-adaptive were not run at n=32, since the 32-device batch covered only the then-suspected non-movers. Their 32 column is UNTESTED, not zero."
+  "note": "NONE. Every cell of the ten-by-six matrix is now measured; the three n=32 cells flagged in the first pass have been filled."
  },
  "classified_nulls": {
   "builder-s1-feasible": "UNEXERCISED at every size. Counters fire, 8,039 streams held at 32, while zero decisions differ: every held stream had no instant due, and a local StreamAction only matters when one is pending.",
@@ -148,7 +152,7 @@
   "upgrade": "it is STRUCTURALLY UNEXPRESSIBLE, nearer unexpressible than unexercised. Enumerating every belief write in live2: cstate.py:181 and :201 set cold, coordinator.py:420 sets cold on EVICT, coordinator.py:711 sets gpu. NONE sets host, so HOST-WARM is unreachable.",
   "why_it_matters": "the workload did not happen to exercise it invites someone to try another workload; no code path sets host readiness does not."
  },
- "scoring_scope": "Only the eligible cells may be scored, at the sizes where they are eligible: s3-whatif at 8 to 16, s4-reserve at 10 to 16, s4-adaptive at 14 to 16, s1-lateness at 32.",
+ "scoring_scope": "Only the eligible cells may be scored, at the sizes where they are eligible: s3-whatif at all six, s4-reserve at 10 through 32, s4-adaptive at 14 through 32, s1-lateness at 32 only.",
  "combination_round": "NOT RUN, per the directive, pending user review of this screen.",
  "_provenance": {
   "git_commit": "fde3c610a0448d1d4240d355c986265c3d019bf8",
