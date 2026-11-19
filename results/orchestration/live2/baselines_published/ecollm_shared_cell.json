@@ -1,0 +1,52 @@
+{
+ "check": "ecollm_reconciliation_shared_cell_resolution",
+ "is_measurement": true,
+ "label": "Directed re-run at the SHARED CELL: 8 devices, seed 4, 600 s, current origin/main, through the REGISTERED arm (A.make_arm(\"eco-llm\")).",
+ "shared_cell_result": {
+  "n_dev": 8,
+  "seed": 4,
+  "run_s": 600,
+  "PRE": {
+   "D2": 19,
+   "RECENT": 2
+  },
+  "POST": {
+   "D2": 19,
+   "RECENT": 2
+  },
+  "decisions_differ": 0,
+  "step2b": "INERT",
+  "verdict": "EXACT MATCH with session 2: D2 19 / RECENT 2, unchanged. I reproduce its result precisely at its cell."
+ },
+ "what_the_disagreement_actually_was": {
+  "not_the_wrapper": "my probe used A.make_arm(\"eco-llm\"), the REGISTERED arm, not ECOLLMAdapted directly. That candidate is ruled out: line 32 of the probe.",
+  "the_actual_difference": "THE CELL. My earlier Step 2b ran at 16 DEVICES, 600 s, not 8. Session 2 measured 8 devices. We were measuring different cells, not disagreeing about one.",
+  "status_of_my_earlier_number": "NOT YET WITHDRAWN. Whether 3 -> 6 reproduces at 16 devices on the current tree is a separate question and is running. If it does, both results are correct and the effect is size dependent; if it does not, my number was a tree-state artefact and I withdraw it."
+ },
+ "geometry_confirmed_independently": {
+  "claim": "REP_QUALITY D2 = 1.0 against RECENT = 0.6 decides the selection, so making RECENT cheaper cannot change a choice never made on price.",
+  "my_verification": "read ecollm.py::select at baselines/reconstructed/ecollm.py:90. It is best = max(feas, key=lambda c: (c.quality, -c.cost_gpu_s)). QUALITY FIRST, COST ONLY AS A TIE-BREAK, and the qualities never tie at 1.0 against 0.6. Confirmed.",
+  "the_precise_condition": "price can therefore change the selection ONLY when D2 is SLO-INFEASIBLE while RECENT is feasible, since `feas` would then contain RECENT alone. That requires latency or budget pressure. In the all-infeasible branch, min(violation, -quality, cost) can also favour the cheaper option.",
+  "consequence": "this PREDICTS the cell dependence rather than merely accommodating it: at a cell where the budget never binds and every D2 fits its deadline, the reconciliation MUST be inert, which is exactly what 8 devices shows.",
+  "classification": "CANCELLED BY GEOMETRY at this cell, not a real negative, and the geometry is the quality-first selection rule rather than anything about cost."
+ },
+ "consequence_for_the_evidence_selection_ports": {
+  "warning": "eco-llm will not select RECENT until the budget binds, and since the quality gap is a fixed 0.4 while price is only a tie-break, NO price advantage the harness can offer will ever change a selection among SLO-feasible options.",
+  "affected": "every arm whose mechanism is a COST-DRIVEN representation choice. For eco-llm specifically the harness does not let price matter at all except through feasibility.",
+  "not_affected": "arms that choose representation by a rule other than price. simplestream names RECENT unconditionally from a fitted window; builder-s7-always-recent names it unconditionally; cascade-routing scores quality MINUS lambda times cost, so price enters its objective directly rather than as a tie-break.",
+  "to_record": "a line in the cards of cost-driven evidence-selection arms that the harness may not let price matter."
+ },
+ "unquotable_until_resolved": [
+  "the 3 -> 6 figure",
+  "the claim that the bar rises",
+  "any magnitude attributed to the reconciliation"
+ ],
+ "_provenance": {
+  "git_commit": "d8da722d4d16bf4642c469be850643ef904f1a37",
+  "script": "ecollm_recon.py through A.make_arm",
+  "model": "none (dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4, 8 devices, 600 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
