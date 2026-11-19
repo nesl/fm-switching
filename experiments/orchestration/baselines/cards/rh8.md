@@ -80,3 +80,38 @@ and fairness rule 3 all still bind).
 for every cell with fewer than two sessions, so RH8's own HIGH_FRAC kept nothing warm by
 construction; `ceil` keeps at least one session warm whenever there is one. Measured consequence
 on the representative cell: challenge mAP 0.5135 -> 0.5169 (ALL) for both arms.
+
+## D134 item 5, added 2026-11-19: ported, and what Part A did and did not resolve
+
+**Part A did not resolve the conflict above.** That conflict is about **labels**, and the card's
+resolution stands unchanged: both readings ship, `RH8OracleDemand` as an upper bound and
+`RH8CausalDemand` as deployable but carrying no RH8 number.
+
+**What Part A resolved is a different blocker that was never written down, because nobody had
+looked.** RH8 decides **only** `session_action`. Before Part A, `desired_tier` was written at
+`coordinator.py` and read nowhere, so **RH8's entire mechanism was inert**: it could express its
+decision and the system did nothing with it. Placement now reaches execution, so the arm acts.
+
+**RH8 is the first arm whose correctness depends on a code path no previous arm exercised**, and
+that is why the residency-costing defect survived undetected until Part A made placement live. A
+path with no caller cannot be wrong in any way that shows. Worth stating because it predicts where
+the next such defect will be: whichever live2 path is first exercised by a newly-unblocked arm.
+
+> Corroborating census: covex-v13 emits **only `MATERIALIZE`**, never `KEEP_GPU_WARM` or
+> `OFFLOAD_TO_HOST`. So the placement slot is **unexercised** for the incumbent, category 4,
+> established before the placement slot is ever screened rather than after.
+
+**Representation side, both readings: CHEAP and INJECTED.** Measured at 8 devices, seed 4, both
+emit `CLOUD/None` on all 9 recalls and **enact** `CLOUD/RECENT`, because `apply_defaults` injects
+`DEFAULTS["representation"] = "RECENT"`. On the two-axis rule that is: comparable with any arm
+whose **effective** representation is RECENT, and entitled to **no credit** for the resulting
+11.6x to 55x evidence discount, which neither reading requested. Neither may be compared against a
+D2-effective arm such as the COVEX family.
+
+**`RH8OracleDemand` cannot run in a scored cell.** It declares `reads_future = True` and live2
+**refuses** such an arm (`coordinator.py:13`, `:184`). It is registered for completeness and is an
+upper bound on paper only.
+
+**`DEFAULTS["session_action"]` is never injected** — `apply_defaults` touches streams, recall,
+`order` and `engine_config`, and contains no reference to `action.sessions`. Checked directly. So
+RH8's placement behaviour is entirely its own and nothing is issuing offloads it did not request.

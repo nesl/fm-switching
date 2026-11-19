@@ -1,0 +1,32 @@
+{
+ "check": "two_route_cross_check_after_the_logging_landed",
+ "is_measurement": true,
+ "label": "Directed cross-check on the one arm whose answer is already known. Seed 4, 8 devices, 300 s.",
+ "setup": "builder-s7-always-recent against builder-default, measured by BOTH routes.",
+ "results": {
+  "emitted_action_route": {
+   "observation": "always-recent emits CLOUD/RECENT x9; builder-default emits CLOUD/None x9",
+   "verdict": "DIFFERS"
+  },
+  "decision_log_route": {
+   "observation": "decision.jsonl now carries `representation` (confirmed present on all 9 release_recall rows of both arms) and BOTH arms log RECENT",
+   "verdict": "IDENTICAL, 0 differing rows"
+  }
+ },
+ "interpretation": "THE TWO ROUTES DISAGREE IN APPEARANCE AND AGREE IN SUBSTANCE, and that is the validation rather than a failure. The log records the EFFECTIVE representation, after apply_defaults has injected RECENT into the baseline. The emitted-action observable records what the arm ASKED FOR, before injection. They are measuring the two different axes.",
+ "mapping_to_the_two_axis_rule": {
+  "comparability": "the decision-log route, post-default, which is also where _submit_recall reads. always-recent and builder-default are IDENTICAL here, which is exactly the corrected verdict: the mechanism is absorbed by the default.",
+  "credit": "the emitted-action route, pre-default. always-recent CHOSE RECENT; builder-default was GIVEN it. Different claims about the same 467 tokens."
+ },
+ "why_both_must_be_kept": "the stated reason was regression insurance, that the log route would silently regress if a field were dropped again. That holds, but it understates it: the log route CANNOT express the credit axis at all, because by the time a row is written the injection has already happened. Keeping the emitted observable is not redundancy, it measures a quantity the log cannot.",
+ "confirms": "my corrected verdict that builder-s7-always-recent moves the emitted action and not the enacted one. Two independent instruments now agree on it.",
+ "state_action_rows": "0 for both arms, as expected: neither issues placement actions.",
+ "_provenance": {
+  "git_commit": "974b760c341f22b9b800426004d0920645c7c81c",
+  "script": "s3_moves.py (log route) and effective_representation.py (emitted route)",
+  "model": "none (dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4, 8 devices, 300 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}

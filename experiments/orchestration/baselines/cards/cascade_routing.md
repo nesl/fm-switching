@@ -63,3 +63,30 @@ Our model set is two: **device 4B-I** and **cloud 32B**, cost-ordered. The super
   skip-or-cascade choice, which two models do express.
 - **Estimate variance is not ported**, so the gamma tie-breaking between cheapest and most
   expensive tied options is unused.
+
+## D134 item 7, added 2026-11-19: it can NAME RICH but cannot RECEIVE it
+
+Measured at 8 devices, seed 4: the arm emits `CLOUD/RICH` on one query and `CLOUD/RECENT` on eight,
+and **enacts exactly that**.
+
+**But RICH is not a representation live2 can deliver.** `cstate` builds only two evidence items,
+`EvidenceItem("RECENT", ...)` and `EvidenceItem("D2", ...)` (`cstate.py:481-483`), and
+`tokens_for_representation` branches on the single literal `"RECENT"` and returns the whole history
+for everything else (`cstate.py:130-132`). So this arm's RICH request is **charged as full history
+and served D2 content**. Session 2's accuracy join normalises anything not literally RECENT to D2
+and **refuses rather than keying to K1**, since no per-question D2 cell exists.
+
+**Its mixed representation is its MECHANISM, not a confound.** Cascade routing selects evidence by
+a quality-against-cost tradeoff; an arm that emits one representation for one query and another for
+the next is doing the thing the paper describes. This is the only arm in the field for which a
+mixed representation is the result rather than an artefact of injected defaults.
+
+**Therefore a single effective-representation label for this arm is wrong by construction**, and it
+cannot be placed on either side of the cross-group line. It may not be compared cleanly against a
+pure-side arm: part of any difference would be its scheduling and part the evidence discount, and
+nothing in the comparison separates them.
+
+**One consequence for reading its results.** Because RICH collapses to D2 in both cost and content,
+the arm's three-way choice is effectively two-way on this tree. Its selection rule is intact; its
+option set is smaller than the card's mapping table implies, and that narrowing is the harness's,
+not the paper's.
