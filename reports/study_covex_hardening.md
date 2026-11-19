@@ -138,6 +138,31 @@ branches. Section 14 reconciles all three disputed readings; the short version i
 is a caching wrapper whose cache hides 94 percent of calls, and the two call sites bind it
 differently so a patch on one module silently misses the other.
 
+## A FINDING ABOUT THE PROJECT'S PREMISE: representation quality is NOT MONOTONE IN COST
+
+The committed 32B per-category tables say something the formulation does not. **D2 is cheaper than
+RICH and BETTER on four of eight question categories**, and worse on three:
+
+| D2 beats RICH | D2 loses to RICH |
+|---|---|
+| location_trace **+17.2 pp**, time_duration +5.1, spatial_aware_reasoning +4.0, sequential_action +3.7 | visual_detail_recall **-7.9 pp**, temporal_ordering -3.0, counting_objects_events -2.8 |
+
+FM-switching is built on representations trading fidelity for cost, with cheaper ones discarding
+task-relevant information in a workload-dependent way. **A cheaper representation that beats the
+richer one on half the categories is a sharper claim than "workload-dependent": at the category
+level there is NO ORDERING AT ALL**, not a lossy ordering with a varying penalty.
+
+**Set beside the committed fidelity work the project now has a representation axis that is
+strongly ordered on one workload and unordered on another:** LoCoMo gives full 34.0 percent against
+sum-80 9.9 percent, a -24.1 pp gap with 92.3 percent of failures from compression omission, while
+this robot workload gives D2 against RICH running both ways with a spread of -7.9 to +17.2 pp.
+
+**The aggregate hides it, which is the methodological point.** Trace-weighted over the 41 questions
+actually asked, D2 is 0.4260 against RICH's 0.4246, **+0.14 pp: nearly unbiased BY CANCELLATION,
+NOT BY CORRECTNESS**, and it would not cancel on a different question mix. A reader who sees only
+the aggregate concludes the representations are equivalent; a reader who sees the categories
+concludes they are incomparable. **The second is true and the first is an artefact of this mix.**
+
 ## TWO CAVEATS THAT QUALIFY EVERY NUMBER BELOW, on the bar and not in a footnote
 
 **1. EVERY DRY RESULT IN THIS REPORT WAS PRODUCED WITH NO MEMORY LIMIT.** `gpu_kv_tokens` is handed
@@ -2627,6 +2652,7 @@ auditor told to watch for one will pass the other two.
 | **an exact zero in a high field** | one arm at 0.0000 where every other reads 0.87 to 0.999 | a BROKEN MEASUREMENT, not a weak arm: b10 served no monitors at all | section 16.2, and I missed it first time by recording it as a result |
 | **an impossible SUCCESS or FAILURE of a control** | a known-good arm failing a check | the CHECK is broken, not the arm: session 3's legality check failed the committed b7 control | the positive-control form of the row above |
 
+| **a REVIEWER'S PRIOR formed from one unit** | a confident expectation about a column's direction | as capable of passing a wrong column as a broken check is: a single-category delta read as a direction, a flat-column prediction that missed an artefact spread, a broken aggregate read as a trend | section 33.3; three times in two days, each caught by measuring the FULL set |
 | **a planner's price diverging from the CHARGED price** | nothing: every arm is compared against the same bar | the COMPARATOR is mis-set, so all comparisons shift together | section 32; invisible to every arm-versus-arm check by construction |
 
 **An impossible failure and an impossible success are equally diagnostic**, and a reviewer watching
