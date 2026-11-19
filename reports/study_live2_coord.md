@@ -5799,3 +5799,52 @@ rollout, where in the DISPATCH path it cancelled in 14,720 of 14,721 counterfact
 exactly what the geometry result predicts: the planner's window extends past the answer's arrival,
 so the two branches DO differ in RC outcomes and the deficit survives. The same term is alive in
 one geometry and dead in the other, which is the clearest confirmation of that mechanism yet.
+
+### Fidelity test: the objective CAN see fidelity. The claim is narrowed, not widened.
+
+The question was whether `u_hat` is blind to fidelity, which would mean the policy cannot perceive
+the tradeoff FM-switching exists to study. **It is not blind. The claim is narrowed accordingly.**
+
+Same decision, same plan, re-scored at each representation. Job qtype `counting_objects_events`:
+
+| rep | committed accuracy | `u_hat` | `z_term` | TOTAL |
+|---|---|---|---|---|
+| RICH | 0.250000 | 0.286555187 | 0.450000000 | 0.764203208 |
+| RECENT | 0.250000 | 0.286555187 | 0.450000000 | 0.764203208 |
+| D2 | **0.222222** | **0.274759879** | 0.450000000 | 0.752407900 |
+
+**RICH and RECENT are identical because their committed accuracies for THIS question type are
+identical, to six decimal places. That is correct behaviour, not a defect.** D2, whose accuracy is
+genuinely lower, scores a lower `u_hat`. So the rollout propagates fidelity into value.
+
+Checking the whole table rather than this one row: RICH and RECENT differ for **5 of 8** question
+types (by 0.08 to 0.14) and are identical for 3, of which `counting_objects_events` is one. Had the
+traced job been `location_trace`, where they differ by 0.1379, an identical `u_hat` would have been
+a genuine defect. **It was necessary to check which question type the traced job had before reading
+anything into the equality** — the same error as inferring the offset from its magnitude.
+
+**SO MY EARLIER SENTENCE IS TOO STRONG AND IS CORRECTED HERE.** I wrote that the objective sees
+"NOT the answer's value, since `u_hat` contributes the same 0.035386 for a 10,831-token recall as
+for any other". The correct, narrower statement is:
+
+- **`u_hat` DOES vary with FIDELITY** — 0.286555187 at RICH against 0.274759879 at D2 for the same plan, tracking the committed accuracy difference.
+- **`u_hat` is FLAT across recall SIZE** — the `u_hat` delta is 0.035385924 in both traces, at different decisions with different histories.
+
+**The headline is unchanged and still stands on its own evidence: the objective cannot see COST.**
+A 12 to 25 per cent GPU-second spread moves DeltaJ by exactly nothing, measured twice by hand. What
+is withdrawn is only the stronger reading that it cannot see an answer's value at all. **It can see
+fidelity; it cannot see cost; and across recall size its value signal is flat.**
+
+### The geometry resolution, stated precisely because both halves are true
+
+**The prediction as made is REFUTED and stands refuted**: RC deviations on the dispatch horizon
+were predicted to be uniformly zero and they are not.
+
+**The underlying MECHANISM is CONFIRMED, by a cleaner demonstration than the one predicted**: the
+SAME `z_term` is alive at 0.450000000 in the planner's long-window rollout and cancels in 14,720 of
+14,721 counterfactual calls in the dispatch path. One term, two geometries, alive where the window
+extends past the answer's arrival and dead where it does not. That is a controlled comparison and
+better evidence than the within-dispatch pattern originally predicted.
+
+**It must not collapse into either "the prediction was right" or "the geometry claim failed."**
+Neither is accurate.
