@@ -57,3 +57,55 @@ for the read-path check *before* the port rather than after.
   half alone, never as "QueryStream", until QDP is unblocked and ported.
 - **The sufficiency proxy is an adaptation**, not the paper's signal, and is the kind of proxy
   consistency check 6 requires be declared. It may not carry a headline conclusion on its own.
+
+
+## D134 item 6, added 2026-11-19: the Proactive Response half is ported, QDP is not
+
+**Ported:** `querystream_adapted.py::QueryStreamProactiveAdapted`, registered as
+`querystream-proactive`. What it decides in our setting: for each robot question, whether the
+evidence in hand is already enough to answer, or whether to DEFER and let the stream supply more
+first - never deferring past the point where the answer can still land inside its deadline.
+
+**Both required proofs pass** at 8 devices, seed 4, 300 s: **0 illegal actions** across 3,001
+epochs, and the fairness digest `00f32b45...` matches the committed `b7-edf-feasibility` control.
+The mechanism **fires**: 9 `defer` decisions alongside 9 `release_recall`.
+
+### A first version of the sufficiency proxy was INERT, and it is recorded rather than replaced quietly
+
+The first proxy compared `max(e.tokens for e in q.evidence)` against `readiness_tokens`. **It can
+never fire.** `cstate` always offers a `D2` evidence item whose size **is** the whole believed
+history, so the ratio is always 1.0 and every query reads as sufficient. The arm produced **zero**
+DEFER decisions and was identical to `b7` on decision kinds, while passing legality and the digest
+check perfectly.
+
+**The inventory describes what COULD be sent, not what has arrived.** That is the same confusion,
+one level down, as the `representation` channel being written by arms and read by nothing: a field
+that looks like a measurement and is a declaration.
+
+It was caught by checking the **decision kinds** rather than the pass/fail of the two required
+proofs - which both passed. A port can satisfy every stated check and still have its mechanism
+never execute.
+
+**The working proxy** uses the quantity that actually moves as the stream runs: the session's
+believed history, `readiness_tokens`. The arm waits while the evidence is still growing and answers
+once it has settled, or once the deadline forces it. A warm session is sufficient by definition.
+Still an **ADAPTATION**, and still not the paper's query-token relevance score, so it may not carry
+a headline conclusion on its own.
+
+### QDP remains unported: channel live, signal absent
+
+Part A made `RecallAction.representation` reach execution, so the **channel** is live. The
+**signal** is not: QDP prunes on semantic relevance and temporal novelty, and `RecallQuery` exposes
+`query_id`, `session_id`, `category`, `arrival_s`, `deadline_s`, `evidence`, `readiness`,
+`readiness_tokens` and `device_answer_confidence` - no token- or frame-level relevance anywhere.
+The only query-side feature is `category`, which two independent routes have shown is noise and
+harmful to act on, so porting QDP onto it would mean implementing a published method on top of a
+predictor measured to be destructive.
+
+**This is a distinct class from the dead channels** (`order`, `desired_tier`, `engine_config`),
+where the harness cannot carry what the arm decides. Here the harness can carry it and has nothing
+to decide with.
+
+**Two-axis label.** This arm leaves `representation` unset, so it is **CHEAP-INJECTED**: comparable
+with any RECENT-effective arm, and entitled to **no credit** for the resulting evidence discount,
+which it never requested.

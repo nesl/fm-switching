@@ -1,0 +1,50 @@
+{
+ "check": "querystream_proactive_port",
+ "is_measurement": true,
+ "label": "D134 item 6. Seed 4, 8 devices, 300 s, dry.",
+ "ported": "the Proactive Response half only, as querystream-proactive",
+ "proofs": {
+  "legal_actions": {
+   "illegal": 0,
+   "epochs": 3001,
+   "method": "validate_action(apply_defaults(act), obs) on every action"
+  },
+  "fairness_digest": {
+   "value": "00f32b459e9fd4b2c0434414cabdb19cbadf2f2e6690561f762430e6d1b118bd",
+   "matches": "the committed b7-edf-feasibility control"
+  }
+ },
+ "mechanism_fires": {
+  "decision_kinds": {
+   "defer": 9,
+   "release_recall": 9,
+   "release_monitor": 2105
+  },
+  "note": "9 DEFER decisions, so the proactive-response rule executes rather than being carried as a shell."
+ },
+ "inert_first_proxy": {
+  "what": "the first sufficiency proxy compared max(e.tokens for e in q.evidence) against readiness_tokens.",
+  "why_it_could_never_fire": "cstate always offers a D2 evidence item whose size IS the whole believed history, so the ratio is always 1.0 and every query reads as sufficient.",
+  "symptom": "ZERO defer decisions; decision kinds identical to b7; BOTH REQUIRED PROOFS PASSED PERFECTLY.",
+  "how_caught": "by inspecting the decision KINDS, not the pass/fail of the required checks. A port can satisfy every stated check and still have its mechanism never execute.",
+  "family": "the inventory describes what COULD be sent, not what has arrived. The same confusion one level down as a field that looks like a measurement and is a declaration.",
+  "fix": "use readiness_tokens, the quantity that actually moves as the stream runs: wait while the evidence is still growing, answer once it has settled or the deadline forces it."
+ },
+ "qdp_not_ported": {
+  "classification": "CHANNEL LIVE, SIGNAL ABSENT",
+  "distinct_from": "the dead channels order, desired_tier and engine_config, where the harness cannot carry what the arm decides. Here the harness can carry it and there is nothing to decide with.",
+  "detail": "RecallQuery exposes no token- or frame-level relevance; the only query-side feature is category, which two independent routes have shown is noise and harmful to act on."
+ },
+ "two_axis": {
+  "effective_representation": "RECENT, by injection",
+  "chosen_or_injected": "INJECTED, so no credit for the discount"
+ },
+ "_provenance": {
+  "git_commit": "104fbd20f5e9df252bda3ba79cee42cd431702db",
+  "script": "partb_proof.py",
+  "model": "none (dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4, 8 devices, 300 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}

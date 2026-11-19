@@ -49,6 +49,7 @@ import thinking_qwenvl_adapted as TQ                                    # noqa: 
 import cascade_routing_adapted as CR                                    # noqa: E402
 import simplestream_adapted as SMS                                      # noqa: E402
 import rh8_adapted as RH8                                               # noqa: E402
+import querystream_adapted as QS                                        # noqa: E402
 import attentionstore_adapted as _attentionstore                        # noqa: E402
 import cascade_adapted as _cascade                                      # noqa: E402
 import clockwork_adapted as _clockwork                                  # noqa: E402
@@ -233,6 +234,15 @@ CoVStreamArm = _wrap("CoVStreamArm", CVS.CoVStreamAdapted,
 # N frames instead of the full history, carried by RecallAction.representation, which
 # _submit_recall now reads at coordinator.py:552 through cstate.tokens_for_representation. Its
 # fitted window needs no predictor, which is why it ports where QueryStream's QDP half cannot.
+# D134 item 6, the PROACTIVE RESPONSE half only. What it decides here: for each robot question,
+# whether the evidence in hand is already enough to answer, or whether to DEFER and let the stream
+# supply more first, never deferring past the point where the answer can still land in time.
+# QDP, the other half, is NOT ported: its channel is live since Part A but its SIGNAL is absent,
+# RecallQuery carrying no token- or frame-level relevance. See cards/querystream.md.
+QueryStreamProactiveArm = _wrap("QueryStreamProactiveArm", QS.QueryStreamProactiveAdapted,
+                                "querystream-proactive", "querystream.md",
+                                "baselines/querystream_adapted.py::QueryStreamProactiveAdapted")
+
 # D134 item 5, UNBLOCKED by Part A's PLACEMENT half. RH8 decides ONLY `session_action`, so before
 # Part A it was wholly inert: desired_tier was written at coordinator.py:423/:425 and read nowhere,
 # which the S5 pre-check established. Placement now reaches execution, so its mechanism acts.
@@ -271,6 +281,7 @@ PUBLISHED_ARMS: Dict[str, Any] = {
     "simplestream": SimpleStreamArm,
     "rh8-demand-aware-oracle": RH8OracleArm,
     "rh8-demand-aware-causal": RH8CausalArm,
+    "querystream-proactive": QueryStreamProactiveArm,
     "clockwork": ClockworkArm,
     "videostorm": VideoStormArm,
     "r3-streaming": R3StreamingArm,
