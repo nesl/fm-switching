@@ -263,6 +263,7 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
 
     rdir = Path(cfg["run_dir"])
     rdir.mkdir(parents=True, exist_ok=True)
+    import hybrid  # noqa: F401  (registers the hybrid-* arms; D138)
     arm = A.make_arm(cfg["arm"], **(cfg.get("arm_kwargs") or {}))
     if cfg.get("c_inflight") is not None:              # D114 sensitivity (runner flag --c-inflight)
         arm.c_inflight = int(cfg["c_inflight"])

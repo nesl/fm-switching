@@ -158,6 +158,7 @@ def run(a) -> Dict[str, Any]:
     if a.start_server:
         srv, sinfo = _start_server(a)
 
+    import hybrid  # noqa: F401  (registers the hybrid-* arms; D138)
     arm = A.make_arm(a.arm, **_arm_kwargs(a))
     if a.c_inflight is not None:
         if not hasattr(arm, "c_inflight"):
