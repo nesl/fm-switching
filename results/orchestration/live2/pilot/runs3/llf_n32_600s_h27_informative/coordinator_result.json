@@ -1,0 +1,192 @@
+{
+ "arm": "llf",
+ "arm_version": "live2-arm-1.0",
+ "is_measurement": false,
+ "tick_s": 0.1,
+ "decision_period_s": 0.1,
+ "h_s": null,
+ "upload_mode": "A",
+ "window_s": 600.0,
+ "n_devices": 32,
+ "n_sessions": 33,
+ "n_opportunities": 17422,
+ "n_requests": 6317,
+ "n_decisions": 8498,
+ "counts": {
+  "completed_monitor": 6280,
+  "completed_recall": 19,
+  "completed_whole": 14,
+  "recall_CLOUD": 19,
+  "recall_DEFER": 2128,
+  "recall_DEVICE": 53,
+  "session_MATERIALIZE": 14,
+  "submitted_monitor": 6284,
+  "submitted_recall": 19,
+  "submitted_whole": 14
+ },
+ "n_monitor_answers": 17319,
+ "n_recall_answers": 72,
+ "n_on_time": 1228,
+ "submit_delay_ms": {
+  "n": 6303,
+  "p50": 6.1507,
+  "p90": 10.5562,
+  "p99": 15.3087,
+  "max": 26.7284
+ },
+ "decision_time": {
+  "n": 6001,
+  "cpu_clock": "time.thread_time() of the deciding thread",
+  "wall_ms": {
+   "n": 6001,
+   "p50": 1.3348,
+   "p90": 2.2688,
+   "p99": 2.4612,
+   "max": 36.2566
+  },
+  "cpu_ms": {
+   "n": 6001,
+   "p50": 1.327,
+   "p90": 2.258,
+   "p99": 2.434,
+   "max": 36.1276
+  },
+  "wall_over_cpu": {
+   "n": 6001,
+   "p50": 1.0043,
+   "p90": 1.0061,
+   "p99": 1.0474,
+   "max": 1.6872
+  },
+  "candidates": {
+   "n": 6001,
+   "p50": 16,
+   "p90": 17,
+   "p99": 18,
+   "max": 20
+  },
+  "candidates_source": "pending items ordered"
+ },
+ "n_pulls": 0,
+ "n_cloud_answers": 6299,
+ "decision_latency_ms": {
+  "p50": 1.3348,
+  "p99": 2.4612,
+  "max": 36.2566,
+  "n": 6001
+ },
+ "cpu_s": 284.8,
+ "wall_s": 597.548,
+ "cpu_percent": 47.7,
+ "request_rate_per_s": 10.57,
+ "budget_gpu_s": 600.0,
+ "budget_spent_gpu_s": 457.27,
+ "epoch_overruns": 0,
+ "max_epoch_lag_s": 0.0,
+ "wall_guard_hit": false,
+ "wall_guard_s": null,
+ "virtual_t_reached_s": 0.0,
+ "n_errors": 0,
+ "first_errors": [],
+ "mu_time_average": null,
+ "arm_stats": {
+  "arm": "llf",
+  "c_inflight": 4,
+  "skips_by_kind": {
+   "episode_call": 20780,
+   "rc_piece": 53
+  },
+  "skipped_total": 20833,
+  "s_hat_source": "baselines/costs.py"
+ },
+ "bridge": {
+  "arm": "llf",
+  "n_events": 17843,
+  "n_ticks": 105147,
+  "n_pulls": 0,
+  "n_cloud_answers": 6299,
+  "n_decisions": 6001,
+  "decision_period_s": 0.1,
+  "n_forwarded_on_completion": 6299,
+  "n_skipped_forwarded": 6299,
+  "n_forward_mismatch": 0,
+  "n_recall_first_token": 19,
+  "n_recall_letter_differs": 0,
+  "recall_letter_diffs": [],
+  "n_monitor_score_differs": 0
+ },
+ "self_ticks": 45143,
+ "self_tick_s": 0.005,
+ "backend": {
+  "n_built": 6316,
+  "callback_errors": [],
+  "wire_extra_delay_ms": {
+   "n": 6316,
+   "p50": 10.413,
+   "p90": 16.8722,
+   "p99": 24.2527,
+   "max": 37.3524
+  },
+  "submit_delay_total_ms": {
+   "n": 6316,
+   "p50": 17.331,
+   "p90": 26.4222,
+   "p99": 36.3012,
+   "max": 46.607
+  },
+  "first_line_to_first_content_ms": {
+   "n": 6313,
+   "p50": 0.1872,
+   "p99": 4.3314,
+   "max": 30.2002
+  },
+  "n_callback_errors": 0,
+  "build_ms_total": 2040.31,
+  "build_ms_mean": 0.323,
+  "cache": {
+   "n_cached": 21042,
+   "held_bytes": 1499940162,
+   "cap_bytes": 1500000000,
+   "hits": 6540,
+   "misses": 24504,
+   "encoded_bytes": 1693362136,
+   "hit_fraction": 0.210669
+  }
+ },
+ "cache": {
+  "n_cached": 21042,
+  "held_bytes": 1499940162,
+  "cap_bytes": 1500000000,
+  "hits": 6540,
+  "misses": 24504,
+  "encoded_bytes": 1693362136,
+  "hit_fraction": 0.210669
+ },
+ "pid": 1257118,
+ "cpu_s_child": 284.8024,
+ "completion_to_forward_ms": {
+  "n": 6299,
+  "p50_ms": 0.0563,
+  "p90_ms": 0.0863,
+  "p99_ms": 0.104,
+  "max_ms": 1.565
+ },
+ "first_token_to_forward_ms": {
+  "n": 6299,
+  "p50_ms": 0.0563,
+  "p90_ms": 0.0863,
+  "p99_ms": 0.104,
+  "max_ms": 1.565
+ },
+ "wire_events_sent": 17843,
+ "wire_replies_received": 6299,
+ "wire_write_errors": 1,
+ "wire_max_send_backlog": 65,
+ "completion_to_emulator_ms": {
+  "n": 6299,
+  "p50_ms": 4.802,
+  "p90_ms": 8.8794,
+  "p99_ms": 10.1235,
+  "max_ms": 10.3939
+ }
+}
