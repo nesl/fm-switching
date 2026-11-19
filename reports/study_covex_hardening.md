@@ -3436,3 +3436,69 @@ holding the moment pressure moves the baseline below the target. **A reader shou
 reconciliation is worth nothing" forward**: it is worth three robot answers in one cell of four
 today, with the mechanism that produces them gated on exactly the condition the pressure work
 manufactures.
+
+# 39. THE MEASURED-QUALITY CHANGE IS INERT BY CONSTRUCTION, probed before it lands
+
+D137 asks for a re-score after session 3 replaces the hard-coded `REP_QUALITY` with the committed
+measured table. **The outcome is predictable from the selection rule and I measured it rather than
+waiting.** Labelled a **PROBE**: I patched the constant myself in a pinned worktree, so this
+predicts the re-score rather than replacing it.
+
+| seed, 16 devices | POST, hard-coded quality | PROBE, measured quality | on time | capacity |
+|---|---|---|---|---|
+| 0 | D2 32 / RECENT 3 | D2 32 / RECENT 3 | 35 / 35 | True / True |
+| 4 | D2 35 / RECENT 6 | D2 35 / RECENT 6 | 41 / 41 | True / True |
+| 5 | D2 36 / RECENT 5 | D2 36 / RECENT 5 | 41 / 41 | True / True |
+| 6 | D2 34 / RECENT 3 | D2 34 / RECENT 3 | 37 / 37 | True / True |
+
+**0 of 4 seeds differ** on selections, on-time or capacity.
+
+## 39.1 This is the third outcome: the lever is unavailable BY CONSTRUCTION
+
+`reconstructed/ecollm.py` selects with
+`max(feas, key=lambda c: (c.quality, -c.cost_gpu_s))` - a **lexicographic tuple comparison, so
+cost is consulted ONLY when quality is exactly equal.**
+
+| | D2 | RECENT | gap | D2 wins? |
+|---|---|---|---|---|
+| hard-coded | 1.0000 | 0.6000 | 0.4000 | yes |
+| **measured** | **0.4286** | **0.3963** | **0.0323** | **yes** |
+
+**The gap shrinks 12.4-fold and the ORDERING is preserved, and ordering is the only thing a
+lexicographic rule uses.** Quality does not enter feasibility, so the feasible set is unchanged
+too. **The change cannot move a selection at any gap size short of an exact tie**, and two
+independently measured per-category accuracies will essentially never be exactly equal.
+
+**So this is a finding rather than a null: eco-llm's adaptation cannot trade quality against cost
+at all.** Cost is a tie-break on a continuous quantity, which is a tie-break that never fires.
+
+## 39.2 Why this matters beyond eco-llm
+
+**eco-llm is the current bar.** The arm every COVEX result is measured against **cannot respond to
+a cost signal**, so no amount of making a representation cheaper will change what it selects.
+That bounds what the pressure work can show on this arm specifically: **pressure can change which
+options are FEASIBLE for it, and that is the only channel through which price reaches its
+decision** - which is exactly the gating mechanism section 38 measured at 16 devices.
+
+**It also means the two reconciliations compose to almost nothing on selections and for the same
+structural reason.** The price reconciliation corrected the cost term by 8x and moved 3 decisions
+in 1 cell of 4, all through feasibility; the quality table corrects the quality term by 12.4x and
+moves none, because ordering is preserved. **Neither touched the comparison that decides.**
+
+**Session 3 is checking the paper's own formulation**, which may score quality and cost jointly
+rather than lexicographically. If it does, the adaptation diverges from the paper on exactly the
+axis this project cares about, and that is a porting question rather than a result.
+
+## 39.3 PROVENANCE: what each label on an eco-llm row marks
+
+Three labels now attach to this arm's rows, so the sequence is recorded explicitly:
+
+| label | marks | effect measured |
+|---|---|---|
+| **pre-reconciliation** | before `_rep_tokens` read the offered evidence; RECENT priced at `readiness_tokens x 0.35` instead of 467 | **3 decisions and 3 robots at 16 devices on 1 seed of 4; no capacity cell** (sections 37, 38) |
+| **pre-measured-quality** | before `REP_QUALITY` was replaced by the committed measured table | **none, by construction** (this section, probed) |
+| **Regime 1** | before `e924005`; representation inert, every arm charged the whole history | the whole report's leaderboards (regime table at the top) |
+
+**The first two are changes to eco-llm itself; the third is a change to the harness underneath it.**
+A row carrying all three is pre-`e924005`, pre-reconciliation and pre-measured-quality, which is
+every eco-llm row in sections 13 through 31.
