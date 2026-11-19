@@ -5428,3 +5428,55 @@ zero references and is visibly dead; `desired_tier` passes a reference check and
 DeltaJ only for dashcam targets. Its `delta_j` keys were all `dashNNN:` with not one `rc:` key.
 The scorer is now configured with the v1.3 switch set. **A pass that scores nothing confirms
 nothing**, and reporting its zeros as cancellation would have been the B2 error one level up.
+
+### The reachability classification is BLOCKED, and the cause is a FOURTH failure category
+
+The classification is still owed. It cannot be produced yet, and the reason is neither geometry nor
+expressibility but a design flaw in my own v2 evaluator.
+
+**Measured, 10 devices, seed 0, 2,999 epochs, scorer verified configured** (`planner_rc` True on
+both the arm and its `flags`, checked on the constructed object per the standing rule):
+
+| quantity | value |
+|---|---|
+| epochs | 2,999 |
+| epochs where `obs.recall` is non-empty | 10 |
+| scorer `_jobs_by_q` max size over the run | **0** |
+| scorer `delta_j` keys | `dash000:` to `dash004:` only, **not one `rc:` key** |
+| recall alternatives scored | **0 of 10** (all UNSCORED) |
+
+**So the scorer never builds RC job state at all**, even in the epochs where it sees recall
+queries. `_jobs_by_q` stays empty for the whole run, so no RC decision is ever produced, so no
+`rc:` DeltaJ is ever emitted, so every recall alternative comes back unscored.
+
+**The cause is structural in how I built the evaluator.** The scorer is a separate policy-core arm
+whose `decide` is called for its DeltaJ machinery while the BASE's actions are the ones executed.
+Its internal bookkeeping therefore tracks a trajectory that never happened: it never admits a
+recall, so it never creates a job, so it never has an RC decision to score. **An evaluator whose
+state does not track the executed trajectory cannot score alternatives to it.**
+
+**This is a FOURTH category of non-firing deviation and must be kept separate from the other
+three**, because all four look identical from the outside:
+
+| category | meaning |
+|---|---|
+| CANCELLED-BY-GEOMETRY | effect lands outside H, so the counterfactual pair is identical |
+| UNEXPRESSIBLE | fires, and the harness ignores the field (`order`, `desired_tier`) |
+| fired-and-did-not-help | a real negative |
+| **UNSCORABLE** | **the evaluator's state does not track the executed trajectory, so no value is produced to compare** |
+
+**I am NOT classifying `recall:CLOUD->DEVICE` as cancelled-by-geometry.** That verdict would match
+the standing prediction and is therefore the one most at risk of being believed too easily, and the
+evidence does not support it: a zero from an unscored channel is not a zero from a cancelled one.
+The geometry prediction remains untested for RC deviations.
+
+**PROPOSED FIX, stated rather than implemented silently, since it is a design decision.** The
+evaluator must be advanced on the BASE's executed actions, not on its own. Two shapes:
+
+1. **Feed the base's action back into the scorer each period** so its bookkeeping follows the executed trajectory, then ask it for DeltaJ. Cheapest, and keeps one evaluator.
+2. **Evaluate alternatives on the PLANNER's horizon** rather than the dispatcher's, which is the remedy the geometry result already implies for RC-class deviations, and which would also sidestep the state-tracking problem because the planner constructs its own candidate jobs rather than relying on accumulated state.
+
+Option 2 is also the answer to the geometry cancellation if it turns out to be real, so it may do
+both jobs at once. **The D98 RC tail is the existing precedent for crediting outcomes beyond H and
+may be cheaper than a long rollout.** Neither is implemented; the margin sweep does not start until
+one is, because a sweep over unscorable alternatives measures nothing.
