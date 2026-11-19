@@ -598,7 +598,7 @@ class TestTheCInflightRunnerFlag(unittest.TestCase):
         a = RL.build_parser().parse_args(["--arm", "edf", "--out", "x", "--c-inflight", "8"])
         self.assertEqual(a.c_inflight, 8)
         arm = A.make_arm("edf")
-        self.assertEqual(arm.c_inflight, 4)              # D114 default
+        self.assertEqual(arm.c_inflight, A.Pi0Edf.C_INFLIGHT_DEFAULT)   # the arm's committed default (D128: 8)
         arm.c_inflight = a.c_inflight
         self.assertEqual(arm.c_inflight, 8)
         self.assertIsNone(RL.build_parser().parse_args(["--arm", "edf", "--out", "x"]).c_inflight)

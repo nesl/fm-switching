@@ -22,6 +22,8 @@ diskfree_gb() { df -BG --output=avail $HOME | tail -1 | tr -dc 0-9; }
 release_check() {
   git fetch -q 2>/dev/null
   local h=$(git log origin/main --format="%h %s" -80 | grep -m1 " v1.3-fast release")
+  # PRIORITY 0 fires only for a release NEWER than the one already handled (POLICY_RELEASE_HANDLED)
+  [ -n "$h" ] && [ "$h" = "$(cat $OUT/POLICY_RELEASE_HANDLED 2>/dev/null)" ] && h=""
   if [ -n "$h" ]; then log "PRIORITY 0: release found: $h; queue paused after the current run"; echo "$h" > $OUT/POLICY_RELEASE; exit 0; fi
 }
 # cell ARM N SEED HOST TAG [extra flags]
@@ -120,6 +122,13 @@ if [ $START_ITEM -le 2 ]; then for n in 10 12 14; do
 # D130 tuned-engine: always-cloud-fcfs on the P1 server at 8 and 16 (ahead of items 5-9)
 if [ $START_ITEM -le 2 ]; then for n in 8 16; do cellv always-cloud-fcfs $n 0 27 _tuned-engine "$TUNED" >/dev/null; done
   item_done "D130 tuned-engine (--long-prefill-token-threshold 1024) as always-cloud-fcfs at 8, 16"; fi
+# PRIORITY 0 follow-up: the released policy at the item-2 break sizes
+POLICY_ARM=${POLICY_ARM:-covex-v13}
+if [ -f $OUT/POLICY_RELEASE_HANDLED ] && [ -f $OUT/POLICY_RUNS_OK ]; then
+  BRK2=$(item2_breaks)
+  for n in $BRK2; do cellv $POLICY_ARM $n 0 27 _release >/dev/null; done
+  [ -n "$BRK2" ] && item_done "$POLICY_ARM at the item-2 break sizes $BRK2"
+fi
 d130_published
 if [ $START_ITEM -le 3 ]; then for n in 4 8 16 32; do cellv b9 $n 0 27 "" >/dev/null; done; item_done "item 3, b9 at 4, 8, 16, 32"; fi
 d130_published
@@ -129,7 +138,7 @@ if [ $START_ITEM -le 5 ]; then for n in 16 32 64; do cellv always-cloud-fcfs $n 
 d130_published
 if [ $START_ITEM -le 6 ]; then for n in 4 8 16 32; do cellv vllm-priority $n 0 27 _prio --scheduling-policy priority >/dev/null; done; item_done "item 6, vllm-priority in priority mode at 4, 8, 16, 32"; fi
 d130_published
-if [ $START_ITEM -le 7 ]; then for a in edf-piece1024 edf-piece2048; do for n in 8 16; do cellv $a $n 0 27 $(lt) $(lf) >/dev/null; done; done; item_done "item 7, edf-piece1024 and edf-piece2048 at 8, 16"; fi
+if [ -f $OUT/SKIP_ITEM7 ]; then log "item 7 SKIPPED: $(cat $OUT/SKIP_ITEM7)"; elif [ $START_ITEM -le 7 ]; then for a in edf-piece1024 edf-piece2048; do for n in 8 16; do cellv $a $n 0 27 $(lt) $(lf) >/dev/null; done; done; item_done "item 7, edf-piece1024 and edf-piece2048 at 8, 16"; fi
 d130_published
 if [ $START_ITEM -le 8 ]; then for n in 8 16; do
     cellv always-cloud-fcfs $n 0 256 "" >/dev/null; cellv edf $n 0 256 _c8 $C8 >/dev/null; cellv llf $n 0 256 $(lt) $(lf) >/dev/null; cellv b9 $n 0 256 "" >/dev/null
