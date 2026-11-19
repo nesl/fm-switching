@@ -84,6 +84,8 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--no-split", dest="split", action="store_false",
                     help="the pilot's single-process wiring, for comparison only")
     ap.add_argument("--no-warm-cache", dest="warm_cache", action="store_false")
+    ap.add_argument("--server-extra-flags", default=None,
+                    help="D130 tuned-engine: extra vLLM flags, only '--long-prefill-token-threshold 1024' accepted")
     ap.add_argument("--scheduling-policy", default="fcfs", choices=("fcfs", "priority"),
                     help="vllm-priority wiring: start the server with --scheduling-policy priority and "
                          "send each request's priority; default fcfs (the round-1 server)")
@@ -194,6 +196,7 @@ def run(a) -> Dict[str, Any]:
         frames_preflight=frames_report, git_working_tree=_tree_state(),
         c_inflight=getattr(arm, "c_inflight", None),
         scheduling_policy=(a.scheduling_policy if sends else None),
+        server_extra_flags=(a.server_extra_flags if sends else None),
         c_inflight_set_by_runner=(a.c_inflight is not None),
         model=a.model, split_processes=bool(a.split), is_measurement=False)
     (rdir / "header.json").write_text(json.dumps(header, indent=1, default=str) + "\n")
@@ -375,7 +378,8 @@ def _start_server(a):
     """The pilot's restart-per-run, imported lazily because it is H100-only."""
     sys.path.insert(0, str(REPO / "experiments/orchestration"))
     import study_live2_pilot as P
-    srv, sinfo, _M = P.start_server(a.host_tier_gib, scheduling_policy=a.scheduling_policy)
+    srv, sinfo, _M = P.start_server(a.host_tier_gib, scheduling_policy=a.scheduling_policy,
+                                    extra_flags=(a.server_extra_flags.split() if a.server_extra_flags else None))
     return srv, sinfo
 
 

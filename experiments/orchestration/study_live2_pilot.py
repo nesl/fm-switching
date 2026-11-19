@@ -63,7 +63,7 @@ def prep():
     log(f"prep: {n} frame symlinks under {FRAMES}; manifest {MANIFEST}")
 
 
-def start_server(host_gib, scheduling_policy=None):
+def start_server(host_gib, scheduling_policy=None, extra_flags=None):
     sys.path.insert(0, str(REPO / "experiments/cost"))
     import study_live2_pre as LP
     import study_eng1_steptime as M
@@ -88,6 +88,11 @@ def start_server(host_gib, scheduling_policy=None):
         raise SystemExit(f"unknown scheduling policy {scheduling_policy!r}: STOP")
     if scheduling_policy == "priority":
         flags = flags + ["--scheduling-policy", "priority"]
+    # D130 tuned-engine (cards/tuned_engine.md P1): only this flag is accepted, appended after the DE_c38 check
+    if extra_flags:
+        if list(extra_flags) != ["--long-prefill-token-threshold", "1024"]:
+            raise SystemExit(f"unsupported extra server flags {extra_flags!r}: STOP")
+        flags = flags + list(extra_flags)
     os.environ["PYTHONPATH"] = str(M.PLUGIN_DIR)
     os.environ["ENG1_STATLOG_PATH"] = str(WORK / f"statlog_{int(time.time())}.jsonl")
     t0 = time.time()
@@ -99,7 +104,8 @@ def start_server(host_gib, scheduling_policy=None):
         raise SystemExit(f"GPU pool {info.get('kv_cache_tokens')}: STOP")
     return srv, dict(command=info.get("server_cmd"), flag_diff=diff, restart_started=t0, up_at=time.time(),
                      startup_s=info.get("startup_s"), log=str(srv.logpath), host_gib=host_gib,
-                     scheduling_policy=(scheduling_policy or "fcfs")), M
+                     scheduling_policy=(scheduling_policy or "fcfs"),
+                     extra_flags=list(extra_flags or [])), M
 
 
 def run_cell(arm_name, n_dev, run_s, host_gib=HOST_TIGHT, tag="", drain_s=20.0):
