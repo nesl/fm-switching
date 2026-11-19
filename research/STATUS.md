@@ -1,8 +1,23 @@
 # FM-switching — Project Status
 
-Last updated: 2026-11-19 (**StudyLIVE2-pilot MORNING REPORT (section 8): overnight baselines on seed 0 break between 8 and 10 devices for every arm that passes at 8; no policy runs (v1.3-fast failed its own piece test, v1.4-fast not released); transport ReadErrors at 16 devices for always-send arms need a ruling. STOPPED for review.**)
-
-Last updated: 2026-11-18 (later 9) (**StudyLIVE2-pilot INTERIM report on the D114 build (section 7): baselines done; edf's 8-device break comes from D114's C_inflight 4 (C_inflight 8 passes like always-cloud FCFS); policy-core v1.0 superseded; waiting for v1.2-fast release (D125). Pilot results are never round-1 results.**)
+Last updated: 2026-11-19 (**StudyCOVEX-harden, session 2, D124 to D134. THE CROSSOVER IS LOCATED
+AT 10 TO 12 DEVICES and is sharp, with all four dev seeds transitioning together: llf falls 0.81
+to 0.41 and edf C=8 0.86 to 0.17 on robot on-time, while COVEX is flat and has no collapse. On the
+D131 bar, which includes the ported published arms, COVEX LOSES AT EVERY SIZE on both axes and
+meets the D71/D82 capacity conjunct in 0 of 28 cells against eco-llm's 10. The IDLE-GPU
+FEASIBILITY CEILING is 0.8871 at 32 devices and below 0.90 in 11 of 28 cells, so under D132 the
+headline robot target is p = 0.90 over FEASIBLE questions; that correction nearly doubles every
+baseline's capacity passes and moves COVEX 0 to 0, so its gap is scheduling and not arithmetic.
+The robot axis is a QUEUEING problem: identical 38 recall requests at identical ~2.4 s service
+differ only in delay against a 5.0 s deadline, 2.34 s for eco-llm against 5.81 s for llf. SIX DEAD
+OR ABSENT CHANNELS catalogued: the action `order` field, `desired_tier` (written twice, never
+read, so live2 models KV OCCUPANCY but not KV PLACEMENT), `RecallAction.representation` (now fixed
+at e924005), B2's z[RC], RCprio, and state value which cancels exactly between branches in 12,898
+of 12,898 candidates. TWO CAVEATS ON EVERY DRY ROW: no memory limit was enforced, and this robot
+workload is HISTORY-INSENSITIVE (recent_covers_frac 0.8852, full history worth +1.18 pp overall
+with a CI including zero), the opposite of LoCoMo's -24.1 pp. Report
+`reports/study_covex_hardening.md`. Next: the eco-llm bar check across e924005, Part D refresh,
+and the EXPERIMENTS.md verdicts, which are DRAFTED FOR THE USER AND NOT SET.**)
 
 Last updated: 2026-11-18 (later 9) (**D114: the EDF family is now WORK-CONSERVING, releasing from the head of the same EDF order while in-flight cloud requests are below c_inflight = 4, pre-registered before the code as a BASELINE change, so every committed edf, edf-piece1024 and edf-piece2048 number is superseded. The 10/s ceiling is gone (per-period max 1 to 4) but requirement 3 is a NEGATIVE: robot questions released before their deadline fell from 11 to 9 of 29, because D114 removes the release ceiling and not EDF's deadline order, so the freed capacity goes to dashcam instants; a per-class share or slack order is named and NOT applied, for the planner to rule. Spec 3.5 still reads "one unit at a time", so arm and rollout now agree and both differ from the text: an amendment or recorded deviation is owed. All five non-EDF arms byte-identical over 30 of 30 grid cells and 5 of 5 replays; D97's entry points under D101 are UNCHANGED at 5 / 8 / 14. Next: the H100's acceptance rerun and the pilot.**)
 
