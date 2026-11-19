@@ -4923,12 +4923,20 @@ and kappa derived. The H100 can ask for it by that one name.
 **IT DOES NOT MEET THE D129 GOAL.** The goal was to beat the best scheduling baseline on BOTH
 dashcam and robot delivery at 4, 8, 16 and 32 devices. v1.3 does not. At 16 devices, 600 s:
 
-| seed | v1.3 (mu=0, af8) | edf C=8 | llf |
+**THE BAR IS llf AT C=8, NOT edf.** `LlfArm` subclasses `Pi0Edf`, so llf INHERITED the D128
+default change at `700f248`, and llf at C=8 beats edf at C=8 on both axes. The comparison below is
+therefore stated against llf, which is the number a reviewer will use. My own seed run already
+built llf through the fixed `make_arm`, so these llf rows are C=8 rows.
+
+| seed | v1.3 (mu=0, af8) | llf C=8 (the bar) | edf C=8 |
 |---|---|---|---|
-| 0 | **14 of 35**, 0.8164 | 4 of 35, **0.9508** | 6 of 35, **0.9633** |
-| 4 | **13 of 41**, 0.8751 | 3 of 41, **0.9609** | pending |
+| 0 | **14 of 35**, 0.8164 | 6 of 35, **0.9633** | 4 of 35, 0.9508 |
+| 4 | **13 of 41**, 0.8751 | 9 of 41, **0.9730** | 3 of 41, 0.9609 |
 
 At 8 devices it loses BOTH axes: 8 of 20 and 0.9330 against edf-at-8's 19 of 20 and 0.9991.
+
+The crossover SURVIVES against the stronger baseline, with a smaller robot margin than against edf:
+roughly 2.3x and 1.4x rather than 3.5x and 4.3x.
 
 **What is nonetheless true and worth carrying into round 1.** At 16 devices v1.3 delivers **three
 to four times the robot answers of the best baseline** while giving up about 0.13 of dashcam. That
@@ -4946,3 +4954,26 @@ fail to be byte-identical, so the byte-identity question does not arise for it.
 an exact null and the admission floor is near-null there. It is structural in the counterfactual,
 which charges a served opportunity the harm it does to others and so refuses under contention even
 where serving more is better overall. That is the thing to redesign, not another threshold.
+
+### The structural finding, recorded in full for the morning
+
+**Claim.** COVEX's remaining gap at 8 devices is NOT a threshold that can be loosened. It is
+structural in the counterfactual objective, which charges a served opportunity the harm it does to
+every other opportunity, and therefore refuses work under contention even where serving more is
+better overall.
+
+**Evidence, in the order it was obtained.**
+
+1. **Removing the price is not enough.** mu = 0 lifts 8-device robot delivery from 1 of 20 to 8 of 20 and dashcam from 0.7998 to 0.9330, but llf and edf at C=8 both reach 18 and 19 of 20 with 0.9991. A large gap survives the price going to zero, so the price is not the whole cause.
+2. **The release gate is an EXACT null.** `release_floor_c` at 0, 4, 8 and 16 gives byte-identical outcomes at 8 devices: 8 of 20 and 0.9330 at every setting. Forcing held candidates out is not merely insufficient, it changes nothing, which means held-at-release is not where the work is being lost.
+3. **The admission gate is near-null at 8 devices.** `admit_floor_c` at 4, 8 and 16 moves dashcam 0.9330 to 0.9344, 0.9346, 0.9346 and robot not at all. It does help at 16 devices (13 of 35 to 14 of 35, and 0.7268 to 0.8164), so the floor is implemented and live; it simply does not reach the 8-device deficit.
+4. **The price axis is effectively BINARY, which localises the cause in the objective.** Session 2 measured that a tenfold price cut buys ZERO additional robot deliveries, while removal buys 8 of 20. Both hold at once because a 2.41 GPU-second cold rebuild charged at any nonzero price exceeds the maximum available credit of about 1.835. **At the objective's current exchange rate no nonzero price admits a cold rebuild.** That is a statement about omega_RC and the accuracy gain, not about the price form.
+
+**What this rules out.** Tuning mu, the floors, H, or any admission threshold cannot close the
+8-device gap, because two of those are measured nulls and the third is binary.
+
+**Where the next redesign goes.** The exchange rate between an RC answer's credit and the GPU-second
+cost of producing it, which is omega_RC against the accuracy gain in the objective, not the
+estimator that prices the GPU-second. A counterfactual that charges full harm-to-others is correct
+for a saturated engine and systematically over-conservative for one with slack, which is exactly the
+8-versus-16-device crossover the leaderboard shows.
