@@ -281,6 +281,18 @@ class BuilderArm(Live2ArmMixin, Policy):
 
         Both terms are observable at decision time from the observation alone, which is exactly
         what the StudyEVNEED signals were not.
+
+        ON ITS NULL, AND WHY IT IS A DIFFERENT KIND FROM S7's. This mechanism is UNEXERCISED for a
+        WORKLOAD reason: `est > slack` never holds, because `builder-default` emits CLOUD on every
+        recall at 8, 12, 16 and 32 devices, so no question is ever about to be declined, rejected
+        or delivered late. That verdict rests on the arm's OWN condition and its own counters, all
+        three of which read zero, not on a diff of the decision log.
+
+        That distinction matters because the results table would otherwise show it identically to
+        `builder-s7-always-recent`'s first result, which was a null for an INSTRUMENT reason: the
+        arm fired on every recall and `decision.jsonl` carries no `representation` column to show
+        it. One is a statement about the workload and one was a statement about the log. Only the
+        first is evidence about the mechanism.
         """
         return str(q.readiness).upper() == "COLD" and est > slack
 

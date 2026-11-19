@@ -1,0 +1,65 @@
+{
+ "check": "six_inert_verdicts_confirmed_against_my_own_mechanism_list",
+ "is_measurement": true,
+ "label": "Checked rather than accepted, as asked. Seed 4, sizes 16 and 32, 300 s, dry.",
+ "inference_tested": "that none of the six earlier inert verdicts is affected by the representation/placement logging gap, because all six act through stream admission, robot admission, ordering or declining.",
+ "verdict": "THE INFERENCE HOLDS FOR ALL SIX, but for s6-decline it holds for a DIFFERENT REASON than the one given, and that difference is a live warning for the pressure run.",
+ "per_mechanism": {
+  "builder-s1-feasible": {
+   "channel": "act.streams, which reaches _serve_monitor and logs as release_monitor rows",
+   "visible": true
+  },
+  "builder-s1-fairshare": {
+   "channel": "same as s1-feasible",
+   "visible": true
+  },
+  "builder-s2-all": {
+   "channel": "RecallAction.decision CLOUD against DEVICE/DEFER; CLOUD logs release_recall, DEVICE/REJECT log decline, DEFER logs defer",
+   "visible": true
+  },
+  "builder-s2-value": {
+   "channel": "same as s2-all",
+   "visible": true
+  },
+  "builder-s4-llf": {
+   "channel": "CHECKED SPECIFICALLY because Action.order is itself a dead channel. It is not acting through order: arms_builder.py:186-189 builds candidates with key (dl - svc) for llf against dl for edf and SORTS THE RELEASE LIST, a live path. Its null is therefore genuinely cancelled-by-geometry, not an instrument null. It does also set the dead order label at :164, but the live sort is what carries the mechanism.",
+   "visible": true
+  },
+  "builder-s6-decline": {
+   "channel": "RecallAction REJECT against DEVICE",
+   "visible": false,
+   "blindness": "coordinator.py:446-455 puts DEVICE and REJECT in the SAME BRANCH: same state, same served_at, same answer record, and both log _log_decision(t, \"decline\", ...). decision.jsonl cannot tell them apart. outcomes.jsonl does record `decision`, so the question is settleable today.",
+   "why_the_verdict_still_stands": "the branch is never reached. The arm emits CLOUD on EVERY recall at both sizes, 21 of 21 at n=16 and 42 of 42 at n=32, identically for builder-default and builder-s6-decline, so no DEVICE or REJECT is ever emitted and there is nothing for the log to be blind to.",
+   "latent_risk": "THE BLINDNESS IS LATENT, NOT ABSENT. If the pressure work loads the recall axis as intended, s6-decline will begin emitting DEVICE and REJECT, and at that moment a decision-row diff becomes blind to it. The emitted-action or outcomes.jsonl observable must be used for s6-decline in any pressured cell."
+  }
+ },
+ "shared_cause_reconfirmed": "s2-all, s2-value, s6-decline and s7-degrade are inert for ONE reason, now confirmed directly: every recall is feasible, so the arm emits CLOUD on all of them and no admission, declining or degradation branch is ever reached.",
+ "two_kinds_of_null_now_both_observed": {
+  "workload_null": "s7-degrade and s6-decline. The arm own condition never holds and its own counters read zero. Evidence about the workload.",
+  "instrument_null": "builder-s7-always-recent first result. The arm fired on every recall and decision.jsonl has no representation column. Evidence about the log.",
+  "why_it_matters": "the two look identical in a results table and only the first is evidence about the mechanism. One of each has now been found, which is why they are labelled separately rather than both as \"inert\"."
+ },
+ "control_construction": {
+  "rule": "a control must be CONSTRUCTED by disabling the change, not by APPROXIMATING its absence.",
+  "compliance_of_my_own_work": [
+   "builder-s7-degrade and builder-s7-always-recent against builder-default: a single s7 slot flag gates the whole mechanism and every other slot is identical through the same _mk constructor. Constructed, not approximated.",
+   "the eco-llm reconciliation: the BEFORE arm had the new _rep_tokens REPLACED at runtime by the exact prior function, so the control is the change switched off rather than a configuration believed equivalent to its absence."
+  ],
+  "note": "recorded affirmatively rather than assumed, since the rule arrived from a case where a control was a third condition belonging to neither arm."
+ },
+ "per_category_note": "Two independent routes now agree that per-category effects on this workload are noise and that acting on them is actively harmful rather than merely unhelpful: the statistical collapse on DEV to EVAL, and per-category lookups serving 0 of 35 at n = 16 to 39. This is recorded here because RecallQuery.category (interface.py:112) is the ONLY query-side signal our observation exposes, which bears directly on QueryStream QDP below.",
+ "querystream_qdp_status": {
+  "channel": "LIVE since Part A: RecallAction.representation is read by _submit_recall at coordinator.py:552 through cstate.tokens_for_representation.",
+  "signal": "ABSENT. QDP prunes tokens by semantic relevance to the query and temporal novelty. RecallQuery exposes query_id, session_id, category, arrival_s, deadline_s, evidence, readiness, readiness_tokens and device_answer_confidence. There is no token-level or frame-level relevance signal, and the only query-side feature is `category`.",
+  "consequence": "porting QDP would mean building its selection on `category`, the one signal now shown by two independent routes to be noise and harmful to act on. The blocker has therefore MOVED rather than cleared: it is no longer \"the action cannot be taken\" but \"the decision cannot be made\".",
+  "distinction": "channel live, signal absent. That is a different class from the three dead channels and should be labelled as such rather than as a port that is merely pending."
+ },
+ "_provenance": {
+  "git_commit": "9f3a56183f4c603339217e142f583879553083ce",
+  "script": "s6_recheck.py plus static reading of coordinator.py:446-455 and arms_builder.py:186-189",
+  "model": "none (dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4; sizes 16 and 32; 300 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
