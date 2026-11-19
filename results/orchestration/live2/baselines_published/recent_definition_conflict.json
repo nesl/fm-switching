@@ -1,0 +1,45 @@
+{
+ "check": "RECENT_definition_conflict",
+ "is_measurement": false,
+ "label": "D134: CLAUDE.md consistency check 4, one name with two definitions, raised before SimpleStream and QDP are ported. Static reading of committed code; nothing re-run.",
+ "decision_posted": {
+  "status": "PROVISIONAL under the 30-minute default rule",
+  "default": "SimpleStream and QueryStream QDP are charged by the COMMITTED CHARGING DEFINITION, RECENT_WINDOW_TOKENS = 467 (cstate.py:50), which tokens_for_representation applies as max(min(467, whole_history), 1).",
+  "reason": "SimpleStream card window is ABSOLUTE, not proportional. simplestream_adapted.py:33 states \"A window is expressed as the number of 0.25-s grid steps of history\", with candidates {4, 12, 20, 40} steps and 4 fitted on the StudyD3 development split. An absolute window is the same FAMILY as a fixed token count and a different family from a fraction of history, so 467 is the right shape for this arm and 0.35 x history is not."
+ },
+ "but_the_framing_needs_correcting": {
+  "claim_examined": "that RECENT has two COMMITTED DEFINITIONS competing for the charging path.",
+  "finding": "it does not. There is ONE charging definition and ONE arm internal estimate, and they occupy different roles.",
+  "evidence": [
+   "RECENT_WINDOW_TOKENS = 467 is the charging definition, read by cstate.tokens_for_representation and through it by coordinator._submit_recall at :552.",
+   "REP_TOKEN_SCALE[\"RECENT\"] = 0.35 occurs in ecollm_adapted.py ONLY. A grep for REP_TOKEN_SCALE and for \"* 0.35\" across all of baselines/*.py returns no other file. It is used at ecollm_adapted.py:84 inside eco-llm own planner to price candidate representations against each other, and it reaches no charging path."
+  ],
+  "consequence": "the risk is NOT that SimpleStream gets charged the wrong number. Its card implies an absolute window and the charging definition is absolute."
+ },
+ "the_real_defect_is_elsewhere_and_is_worse": {
+  "what": "eco-llm now PLANS against 0.35 x history while being CHARGED min(467, history). Its optimiser prices RECENT wrongly against every alternative.",
+  "crossover_tokens": 1334.3,
+  "direction": "below a history of about 1334 tokens eco-llm UNDER-estimates the cost of RECENT; above it, it OVER-estimates. The Part A measurement puts real histories at 5,431 to 14,881 tokens, far above the crossover, so in practice eco-llm over-estimates RECENT cost by up to about 9x and therefore UNDER-SELECTS RECENT exactly where RECENT is cheapest.",
+  "why_it_matters": "eco-llm is the comparator, and it emits RECENT about once in twenty recalls. A comparator that mis-prices the cheap option against itself will understate what a correctly-priced version of the same policy achieves, so the bar it sets is too low in a direction that flatters everything measured against it.",
+  "class_of_fault": "an arm internal estimate diverging from the quantity actually charged. Same class as my own S2 estimator fault, where the admission estimate was LlfArm S_hat rather than B7 and the proof passed only by regime coincidence. There the divergence was masked; here it is live in the comparator.",
+  "recommended": "NOT resolved here, per the instruction to flag rather than resolve silently. Either eco-llm estimate is reconciled to the charging definition, or the divergence is declared as part of its card and its results labelled as planned-under-different-prices."
+ },
+ "residual_conflict_that_remains_real": {
+  "what": "467 is StudyF4 Part A median input size at N = 1. SimpleStream own fitted window is 4 grid steps of 0.25 s, i.e. 1 s of history. These are not the same quantity.",
+  "status": "the SHAPE is right and the VALUE is an approximation. The port is charged a committed absolute window rather than this arm own fitted one.",
+  "flagged_not_resolved": "changing the charged value to SimpleStream fitted window would be a methodological change, which CLAUDE.md requires be discussed before application, so it is raised and left."
+ },
+ "static_method_correction": {
+  "what": "my earlier channel sweeps used grep for representation= and concluded no arm emits RECENT.",
+  "correction": "eco-llm selects from REPS = (\"RECENT\", \"D2\", \"RICH\") at RUNTIME, so a static grep cannot see it. eco-llm does emit RECENT, reportedly about once in twenty.",
+  "significance": "substance unchanged, roughly one emission in 240 is still a rarely-exercised channel, but this is the first time a static read gave the WRONG ANSWER about how live a channel was. Recorded beside the order, desired_tier, representation and reads_device_answer checks so the method limit travels with the results it produced."
+ },
+ "_provenance": {
+  "git_commit": "ebb22ec980661d4b29d0fd00b7906806fa3fab1b",
+  "script": "static reading of cstate.py, coordinator.py, ecollm_adapted.py, simplestream_adapted.py; nothing run",
+  "model": "n/a",
+  "device": "n/a",
+  "n": "static",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
