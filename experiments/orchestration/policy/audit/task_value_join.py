@@ -45,7 +45,16 @@ CELL = re.compile(r"^s(\d+)_(.+)_n(\d+)$")
 # Arm vocabulary -> StudyR1 cell. Today every arm emits "D2" and live2 sends the full believed
 # history regardless (`_submit_recall` uses `est_tokens`), so what is SENT is RICH. The mapping is
 # stated rather than implied so it is one line to change when Part A lands.
-REPRESENTATION_TO_CELL = {"RICH": "K1", "RECENT": "K3"}
+# KEY ON WHAT WAS RECEIVED, NOT ON WHAT WAS NAMED. `cstate` builds only RECENT and D2 evidence
+# items and `tokens_for_representation` branches only on "RECENT", so an arm naming RICH is
+# charged the whole history and RECEIVES D2 CONTENT. Keying RICH to K1 would credit it with RICH
+# accuracy for content it never got; the committed per-category tables put D2 and RICH -7.9 to
+# +17.2 pp apart in BOTH directions, so that is neither a small nor a consistently signed error.
+# RICH is therefore NOT in this map: it is normalised to D2 by `effective_representation` first,
+# and D2 resolves against the per-category 32B-D2 table rather than any StudyR1 cell.
+REPRESENTATION_TO_CELL = {"RECENT": "K3"}
+RICH_IS_NOT_RECEIVABLE = ("live2 builds no RICH evidence item; an arm naming RICH receives D2. "
+                          "See cstate.py:455-458 and tokens_for_representation.")
 
 
 def studyr1_index(root: Path) -> Dict[str, Dict[str, Any]]:
@@ -83,7 +92,15 @@ def main(argv=None) -> int:
     import importlib
     sc = importlib.import_module("scorer.score")
     idx = studyr1_index(H.ROOT)
-    cell_key = REPRESENTATION_TO_CELL[a.representation]
+    eff = H.effective_representation(a.representation)
+    if eff not in REPRESENTATION_TO_CELL:
+        # D2: no StudyR1 per-question cell exists. The caller must use the per-category 32B-D2
+        # table (section 33.3), and this join refuses rather than keying to the wrong cell.
+        print("REFUSED: effective representation %r has NO StudyR1 per-question cell. %s"
+              % (eff, RICH_IS_NOT_RECEIVABLE))
+        print("Use the committed per-category 32B-D2 table instead; see report section 33.3.")
+        return 2
+    cell_key = REPRESENTATION_TO_CELL[eff]
 
     rows: List[Dict[str, Any]] = []
     for root in a.roots.split(","):

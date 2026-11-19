@@ -3200,3 +3200,64 @@ name one, on the first run, with no code change in any arm.** The same question 
 `desired_tier`. **Check both defaults before either channel is wired** - with six dead channels
 catalogued, this is a predictable repeat rather than a hypothetical, and two harmless checks out
 of three is the argument for checking rather than against it.
+
+# 36. TWO AXES, NOT ONE: effective representation governs COMPARABILITY, chosen-against-injected governs CREDIT
+
+Settled before `cascade-routing` is scored, since it is the first arm to name RICH.
+
+## 36.1 Naming RICH does not get you RICH, and I verified the path
+
+`cstate.py:455-458` builds exactly two evidence items, **RECENT** and **D2**, and `RICH` appears
+zero times in that file. `tokens_for_representation` branches on **one** string:
+
+```
+whole = max(int(self.est_tokens), 1)
+if str(rep or "").upper() == "RECENT":
+    return max(min(int(RECENT_WINDOW_TOKENS), whole), 1)
+return whole
+```
+
+So **named-RICH and named-D2 are indistinguishable at the charging path**, both get the whole
+history, and both **receive D2 content**, because D2 is what `cstate` actually built. An arm can
+name RICH; it cannot receive it.
+
+**Consequence for the join, now implemented:** it keys on the representation **RECEIVED**, not
+named. `effective_representation()` normalises anything that is not literally `RECENT` to **D2**,
+and because **no StudyR1 per-question cell exists for D2**, the join now **REFUSES** rather than
+keying to K1, directing the caller to the committed per-category `32B-D2` table.
+
+**Keying on the name would have credited a RICH-naming arm with K1 accuracy for content it never
+received**, and the committed tables put D2 and RICH **-7.9 to +17.2 pp apart in both
+directions**, so that error is neither small nor consistently signed.
+
+## 36.2 The second axis, which the first does not capture
+
+| | effective representation | chosen or injected |
+|---|---|---|
+| governs | **comparability** | **credit** |
+| `simplestream` | RECENT, 467 tokens | **CHOSE** it |
+| `b7-edf-feasibility` | RECENT, 467 tokens | **named nothing; was GIVEN it** by `apply_defaults` |
+| `covex-v13` | D2, whole history | **CHOSE** D2 |
+
+**`simplestream` and `b7` are identical at the charging path and must not be read the same way on
+merit.** One made a decision its card can defend; the other received an 11.6x to 55x discount it
+never asked for. **Cost comparisons between them are valid; merit comparisons are not.**
+
+My harness now captures both: the post-default value at `_submit_recall` (comparability) and the
+**pre-default** value emitted by `Policy.decide` (credit), so an injected RECENT is distinguishable
+from a chosen one. **Leaderboard rows carry both columns.**
+
+## 36.3 Two arms sit outside the partition, and one correction to 35.4a
+
+- **`streamscout` sends no cloud recall at all** (DEVICE x9), so a cost comparison against either
+  group measures its routing and says nothing about representation.
+- **`cascade-routing` straddles the line within itself**, RICH x1 and RECENT x8. That is its
+  **mechanism**, not a confound: choosing evidence by a quality-against-cost tradeoff is what
+  cascade routing does. It is the one arm for which a single representation label is wrong by
+  construction.
+
+**Correction to section 35.4a:** `order` is not the only dormant default. **`engine_config` is
+also read nowhere** - zero references in both `coordinator.py` and `cstate.py`, every occurrence
+under live2 being an arm writing it or a declaration - and `apply_defaults` sets it
+unconditionally on every action alongside `order`. **The forward-looking risk is two dormant
+defaults, not one**, and the principle in 35.4 stands unchanged.

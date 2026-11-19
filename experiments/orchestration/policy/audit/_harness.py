@@ -418,6 +418,18 @@ def capture_sent_representation(sink: Dict[str, Any]):
         CO.Live2Coordinator._submit_recall = orig
 
 
+# D134: what an arm NAMES and what it RECEIVES are different quantities, and the difference is
+# not small. `cstate` builds exactly two evidence items, RECENT and D2, and
+# `tokens_for_representation` branches ONLY on "RECENT", returning the whole history for anything
+# else. So an arm naming RICH is charged the full history and RECEIVES D2 CONTENT, because D2 is
+# what cstate actually built. Keying accuracy on the NAME would credit such an arm with RICH
+# accuracy; the committed per-category tables put D2 and RICH -7.9 to +17.2 pp apart in BOTH
+# directions, so that error is neither small nor consistently signed.
+def effective_representation(named: Optional[str]) -> str:
+    """What was actually RECEIVED, given what was named. RECENT or D2; never RICH."""
+    return "RECENT" if str(named or "").upper() == "RECENT" else "D2"
+
+
 @contextlib.contextmanager
 def capture_emitted_actions(sink: Dict[str, Any]):
     """Record action fields the DECISION LOG DOES NOT CARRY, so a diff of it cannot see them.
@@ -435,6 +447,9 @@ def capture_emitted_actions(sink: Dict[str, Any]):
     orig_apply = CO.Live2Coordinator._enact
 
     def sub(self, o, s, t, dt_ms, preds, mix, whole):
+        # NOTE: this reads the representation AFTER `apply_defaults` has run, so a value here does
+        # not mean the arm chose it. `pre_default_representation` below records what the arm
+        # itself emitted, which is the CREDIT axis; this one is the COMPARABILITY axis.
         rep = getattr(o, "requested_representation", None)
         try:
             tok = s.tokens_for_representation(rep)
@@ -450,10 +465,27 @@ def capture_emitted_actions(sink: Dict[str, Any]):
                                             str(getattr(xa, "action", ""))))
         return orig_apply(self, act, *a, **k)
 
+    # The CREDIT axis: what the ARM emitted, before `apply_defaults` filled anything in. An arm
+    # that named nothing and was GIVEN "RECENT" is identical at the charging path to one that
+    # CHOSE it, and must not be read the same way on merit.
+    sink.setdefault("pre_default_representation", {})
+    import interface as IF
+    orig_call = IF.Policy.__call__
+
+    def call(self, obs):
+        act = self.decide(IF.scrub(obs))
+        for ra in getattr(act, "recall", None) or []:
+            sink["pre_default_representation"][getattr(ra, "query_id", None)] = (
+                None if getattr(ra, "representation", None) is None
+                else str(ra.representation))
+        return IF.validate_action(IF.apply_defaults(act), obs)
+
     CO.Live2Coordinator._submit_recall = sub
     CO.Live2Coordinator._enact = enact
+    IF.Policy.__call__ = call
     try:
         yield sink
     finally:
         CO.Live2Coordinator._submit_recall = orig_sub
         CO.Live2Coordinator._enact = orig_apply
+        IF.Policy.__call__ = orig_call
