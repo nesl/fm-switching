@@ -1,5 +1,22 @@
 # FM-switching — Project Status
 
+Last updated: 2026-11-19 (later 2) (**StudyAOI-spacing COMPLETE (Jetson Orin, CPU only, offline,
+committed data only): THE SPACING OF CLOUD CHECKS DOES NOT MATTER at a fixed cloud-served budget on
+the Nexar metric, so the per-instant opportunity model needs no age-of-information spacing term. At
+each budget f in {0.10, 0.25, 0.50, 0.75} the three event-agnostic patterns (EVEN, CLUSTERED k in
+{2,4,8}, RANDOM; 100 seeds) are indistinguishable on streaming AP and challenge mAP at every
+horizon: the largest paired difference is 0.006 challenge mAP against a 0.104 device-to-cloud gap
+(streaming AP differences at most 0.0003), almost every paired clip-bootstrap CI includes zero, and
+the one resolvable loser (CLUSTERED_k8 at f=0.25, -0.006) is confounded by a 0.207 achieved budget.
+REAL NEGATIVE (Rule 2): the cloud==device negative control collapses every schedule onto
+device-only exactly, and FRONT-loading at f=0.5 reaches challenge mAP 0.602 against BACK-loading's
+0.507, so PHASE relative to the event matters by about 0.10 mAP while the pattern does not, and no
+event-agnostic rule can exploit phase without a runtime event signal. The cloud-minus-device gain
+autocorrelation is 0.44 at 0.5 s, 0.30 at 1.0 s and 0 by 6 s, a redundancy timescale of about 0.5
+to 1.0 s. Scorers imported unchanged (StudyE9b ApEngine, StudyE9c/E9d Challenge); scores calibrated
+per tier out of fold with the D105 FINAL maps; zero-latency reference arms reproduce StudyE9c within
+5 percent. Report `reports/study_aoi_spacing.md`; data `results/dashcam/study_aoi/aoi_spacing_results.json`.**)
+
 Last updated: 2026-11-19 (later 1) (**MOTIVATION CORRECTION, D135, recorded here so it is not
 re-quoted: the +17.5 pp history benefit holds ONLY for questions whose evidence lies outside the
 recent window, about 12 percent of them. Across all questions history HELPS 8.05 percent and HURTS
