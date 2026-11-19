@@ -99,8 +99,14 @@ run_arm() {
   echo "$a$tag" >> $DONE_ARMS
   item_done "$a$tag at 8, 10, 12, 14 (16 only if it passed 14)"
 }
+D139_FLAG=$OUT/D139_FOUND   # StudySS1 kit (Orin), "StudyOEQA kit ready" (flash), "lh-req ready" (flash), by hash
 d134_watch() {
   git fetch -q 2>/dev/null
+  # D139: the benchmarks (and later LH-REQ) pre-empt the baselines; a kit is code from another box, so the queue
+  # stops at this run boundary for the operator to read the runner and run it, then resumes (finished runs reused)
+  local k=$(git log origin/main --format="%h %s" -300 | grep -E "^[0-9a-f]+ (StudySS1|StudyOEQA kit ready|lh-req ready)" | while read hh rest; do
+      grep -q "^$hh" $D139_FLAG 2>/dev/null || { echo "$hh $rest"; break; }; done)
+  if [ -n "$k" ]; then echo "$k" >> $D139_FLAG; log "D139: $k landed; queue paused for the operator (benchmark / LH-REQ first)"; exit 0; fi
   # (3) placement enacted: pause for the operator to apply the H100 wiring with its test
   local pl=$(git log origin/main --format="%h %s" -120 | grep -E "^[0-9a-f]+ placement" | while read hh rest; do
       git log -1 --format=%B $hh | grep -qi "enact" && { grep -q "^$hh" $PLACE_FLAG 2>/dev/null || { echo "$hh $rest"; break; }; }; done)
@@ -121,6 +127,7 @@ d134_watch() {
 }
 # D138 follow-up: the hybrid C6 cells run first once hybrid screening is done (each cell reuses a finished run)
 if grep -q SCREENING_DONE results/orchestration/live2/hybrid/live_runs/STATUS 2>/dev/null && ! grep -q C6_DONE results/orchestration/live2/hybrid/live_runs/STATUS; then bash experiments/orchestration/study_hybrid_c6_cells.sh; fi
+d134_watch   # D139: a kit that landed during screening pre-empts the baselines before the first baseline run
 log "pilot5b driver start (D134): watchers in the main shell, robust pre-pull add"
 # (3) operator-applied placement: the five memory arms at 10 and 12, labelled with-placement
 if [ -f $OUT/PLACEMENT_APPLIED ] && ! grep -qx placement-reruns $DONE_ARMS 2>/dev/null; then
