@@ -405,6 +405,16 @@ class CoordState:
         on the GPU.
         """
         counts = {"offloaded": 0, "kept_warm": 0, "evicted": 0, "resident": 0}
+        # D134 item 2 instrumentation. A PEAK and a SUSTAINED overage read identically in a table
+        # and have opposite implications: a 120 per cent spike lasting one epoch means LRU evicts
+        # and the history is re-materialised almost immediately, which is THRASHING and shows up
+        # as cost without changing admission; a 105 per cent plateau lasting half the run means
+        # histories genuinely stay cold. So the epoch count above cap and the duration of each
+        # over-cap interval are recorded, not only the maximum.
+        self.pressure = getattr(self, "pressure", None) or {
+            "epochs": 0, "epochs_over_cap": 0, "peak_tokens": 0, "intervals": [],
+            "_open": 0, "host_peak_tokens": 0, "host_epochs_over_cap": 0,
+        }
         live = [x for x in self.sessions.values() if x.open and x.built_tokens > 0]
         # RESIDENCY IS NOT THE BELIEF, and this is the distinction decision PA-5 turns on. The
         # only write of `gpu` in live2 is in the coordinator's completion handling and requires a
@@ -436,9 +446,28 @@ class CoordState:
                 # this session as recently wanted. It does NOT make it unevictable.
                 x.last_touch_s = float(now)
                 counts["kept_warm"] += 1
+        # Residency is recorded EVERY epoch, whether or not enforcement is on, so the
+        # time-above-cap series exists for the unenforced regime too and the two are comparable.
+        on_gpu_all = [x for x in live if x.measured_tier == "gpu"]
+        used_all = sum(int(x.built_tokens) for x in on_gpu_all)
+        on_host = [x for x in live if x.measured_tier == "host"]
+        host_used = sum(int(x.built_tokens) for x in on_host)
+        p = self.pressure
+        p["epochs"] += 1
+        p["peak_tokens"] = max(p["peak_tokens"], used_all)
+        p["host_peak_tokens"] = max(p["host_peak_tokens"], host_used)
+        if int(self.host_tier_tokens) > 0 and host_used > int(self.host_tier_tokens):
+            p["host_epochs_over_cap"] += 1
+        over = int(self.gpu_kv_tokens) > 0 and used_all > int(self.gpu_kv_tokens)
+        if over:
+            p["epochs_over_cap"] += 1
+            p["_open"] += 1
+        elif p["_open"]:
+            p["intervals"].append(p["_open"])
+            p["_open"] = 0
         if self.kv_capacity_enforced and int(self.gpu_kv_tokens) > 0:
-            on_gpu = [x for x in live if x.measured_tier == "gpu"]
-            used = sum(int(x.built_tokens) for x in on_gpu)
+            on_gpu = on_gpu_all
+            used = used_all
             cap = int(self.gpu_kv_tokens)
             if used > cap:
                 # EVICTION ORDER, which is the third steering mechanism the cards describe.

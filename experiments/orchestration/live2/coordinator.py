@@ -444,7 +444,14 @@ class Live2Coordinator:
             # `decides`, and READ NOWHERE, so a RECENT-choosing arm paid full-history cost and
             # received full-history evidence. It is carried to the submit path here.
             o.requested_representation = ra.representation
-            o.representation_defaulted = bool(getattr(ra, "representation_defaulted", False))
+            # PLAIN ATTRIBUTE ACCESS, deliberately. `getattr(..., False)` is the idiom that
+            # produced four confirmed defects in this codebase: budget_total_gpu_s returning 0.0
+            # and pinning cascade-routing's lambda, RecallQuery.category carrying "recall",
+            # desired_tier written and never read, and a sufficiency proxy that could never fire.
+            # An action object lacking this field would be silently recorded as CHOSEN when it was
+            # INJECTED, and the credit axis is the only thing distinguishing an arm that decided
+            # from one that declined to. A missing field should raise, not default.
+            o.representation_defaulted = bool(ra.representation_defaulted)
             self.counts["recall_" + ra.decision] += 1
             if ra.decision == "DEFER":
                 o.defer_until = t + max(float(ra.defer_s or 0.0), 0.0)
