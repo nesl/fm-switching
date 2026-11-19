@@ -308,3 +308,52 @@ when history matters (item 2: none exists, and the category that might have serv
 **The highest-value single experiment this study identifies** is therefore not a policy change: it
 is a per-question accuracy measurement for long histories and for D2, which would close both gaps
 at once.
+
+---
+
+## 4. StudyACC2 COMPATIBILITY, checked against the committed plan BEFORE the run finishes
+
+Applying "ask what would invalidate this run before it finishes" to someone else's run. Checked
+against `results/sember/study_acc2/acc2_plan.json` at `74ef9ac`: 1,819 plan rows, 129 of them
+long-history, 845 distinct question ids.
+
+**One real mismatch, and it would have been silent.**
+
+| check | finding | verdict |
+|---|---|---|
+| representation labels | `rep` is **`"D2"` (845), `"RECENT"` (845), `"D2-LIVE-TRACE"` (129)** | **MISMATCH** |
+| question-id uniqueness | **up to 3 rows per question id**, distinguished by `source` | **MISMATCH** |
+| split field | `split` is `DEV` (486) / `EVAL` (1,333), present on every row | OK |
+
+### 4.1 `D2-LIVE-TRACE` must not be normalised to `D2`
+
+My `effective_representation()` normalises anything not literally `"RECENT"` to `D2`, which is
+correct for live2 arms. **Applied to StudyACC2 it would silently merge two different
+measurements**: the `r1-instant` D2 rows use StudyR1's history, and the `D2-LIVE-TRACE` rows use
+**the history the live traces hold at question arrival**. Both are D2 *content*; they are
+different *history lengths*.
+
+**Merging them would answer the long-history question with short-history data and never error.**
+Those 129 rows are precisely the evidence section 1.3 reported as absent, so collapsing them would
+destroy the only measurement that closes that gap.
+
+### 4.2 The join key must be three-part
+
+`(question_id, rep)` is not unique: **up to 3 rows share a question id.** A two-part key does not
+fan out, it **silently keeps whichever row is read last**, which is the worse failure of the two.
+The key is now `(question_id, rep, source)` and `acc2_index()` builds it.
+
+### 4.3 Two things to note about scope when the run lands
+
+- The long-history rows come from **seeds 0, 4, 5, 6 at 64 devices** (`trace seed <s> n64`), while
+  every leaderboard cell in this project is 4 to 32 devices. **The long-history accuracy will be
+  measured in a heavier regime than anything scored**, which is the right choice for exercising
+  long histories and worth stating when the two are read together.
+- Only **129** questions carry a long-history row, against 845 at StudyR1 length, so the stratum
+  that closes section 1.3's gap is **about a seventh the size** of the main set and its
+  per-category splits will be thin.
+
+**With the key fixed, the refusal branch of the join stops firing**: a per-question D2 cell will
+exist for the first time, so section 33.3's Option C fallback to the per-category `32B-D2` table
+becomes unnecessary for the 845 r1-instant questions, and remains the only source for anything
+StudyACC2 does not cover.

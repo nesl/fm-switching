@@ -56,6 +56,28 @@ REPRESENTATION_TO_CELL = {"RECENT": "K3"}
 RICH_IS_NOT_RECEIVABLE = ("live2 builds no RICH evidence item; an arm naming RICH receives D2. "
                           "See cstate.py:455-458 and tokens_for_representation.")
 
+# StudyACC2 COMPATIBILITY, checked against the committed plan at 74ef9ac BEFORE the run finished.
+# Its rows carry `rep` in {"D2", "RECENT", "D2-LIVE-TRACE"} and a `source` in {"r1-instant",
+# "trace seed <s> n64"}, with up to THREE rows per question_id. Two consequences:
+#
+#  1. `D2-LIVE-TRACE` must NOT be normalised to `D2`. Both are D2 CONTENT, but at different
+#     HISTORY LENGTHS: the r1-instant rows use StudyR1's history and the trace rows use the
+#     history the live traces hold at question arrival. Collapsing them would answer the
+#     long-history question with short-history data without erroring.
+#  2. The join key must be (question_id, rep, source), NOT (question_id, rep). A two-part key
+#     silently keeps whichever row is read last.
+ACC2_REPS = ("D2", "RECENT", "D2-LIVE-TRACE")
+ACC2_KEY = ("question_id", "rep", "source")
+
+
+def acc2_index(path: Path) -> Dict[Any, Dict[str, Any]]:
+    """StudyACC2 rows keyed by (question_id, rep, source). See ACC2_KEY for why all three."""
+    out: Dict[Any, Dict[str, Any]] = {}
+    d = json.loads(Path(path).read_text())
+    for r in d.get("plan", []):
+        out[(r.get("question_id"), r.get("rep"), r.get("source"))] = r
+    return out
+
 
 def studyr1_index(root: Path) -> Dict[str, Dict[str, Any]]:
     """question_id -> {cell: correct, 'evidence_covered': bool}."""
