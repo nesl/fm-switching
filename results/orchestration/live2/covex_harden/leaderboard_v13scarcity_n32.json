@@ -1,0 +1,191 @@
+{
+ "check": "covex_harden_leaderboard",
+ "is_measurement": false,
+ "label": "SCREEN on DELIVERY. Read with the live calibration in section 10: at 8 devices the dry dashcam axis cannot rank COVEX against edf.",
+ "git_commit": "700f2485b5db6e49d80a649c9fca7171574439e7",
+ "candidate": "v1.3",
+ "candidate_switches": [
+  "deficit_update",
+  "mu_mode",
+  "plan_latest",
+  "planner_rc",
+  "realistic_competing",
+  "replan",
+  "write_staleness"
+ ],
+ "gating_baselines": [
+  "edf",
+  "llf"
+ ],
+ "non_gating": [
+  "always-cloud-fcfs"
+ ],
+ "seeds": "4,5,6",
+ "sizes": "32",
+ "rows": [
+  {
+   "seed": 4,
+   "n_devices": 32,
+   "arm": "v1.3",
+   "dashcam_delivered": 0.3459,
+   "dashcam_offered": 17351,
+   "robot_delivered_on_time": 2,
+   "robot_total": 84,
+   "robot_fraction": 0.0238,
+   "wall_s": 113.1,
+   "fairness_digest": "d04ed0746d8b56db6a98d4705dff91f2099747f1d546a1cb4f2ac1a1801b5273",
+   "gating": true
+  },
+  {
+   "seed": 4,
+   "n_devices": 32,
+   "arm": "edf C=8",
+   "dashcam_delivered": 0.0169,
+   "dashcam_offered": 17351,
+   "robot_delivered_on_time": 0,
+   "robot_total": 84,
+   "robot_fraction": 0.0,
+   "wall_s": 95.8,
+   "fairness_digest": "d04ed0746d8b56db6a98d4705dff91f2099747f1d546a1cb4f2ac1a1801b5273",
+   "gating": true
+  },
+  {
+   "seed": 4,
+   "n_devices": 32,
+   "arm": "edf C=4",
+   "dashcam_delivered": 0.0029,
+   "dashcam_offered": 17351,
+   "robot_delivered_on_time": 0,
+   "robot_total": 84,
+   "robot_fraction": 0.0,
+   "wall_s": 80.1,
+   "fairness_digest": "d04ed0746d8b56db6a98d4705dff91f2099747f1d546a1cb4f2ac1a1801b5273",
+   "gating": true
+  },
+  {
+   "seed": 4,
+   "n_devices": 32,
+   "arm": "llf",
+   "dashcam_delivered": 0.0157,
+   "dashcam_offered": 17351,
+   "robot_delivered_on_time": 2,
+   "robot_total": 84,
+   "robot_fraction": 0.0238,
+   "wall_s": 110.4,
+   "fairness_digest": "d04ed0746d8b56db6a98d4705dff91f2099747f1d546a1cb4f2ac1a1801b5273",
+   "gating": true
+  },
+  {
+   "seed": 5,
+   "n_devices": 32,
+   "arm": "v1.3",
+   "dashcam_delivered": 0.1243,
+   "dashcam_offered": 17396,
+   "robot_delivered_on_time": 3,
+   "robot_total": 79,
+   "robot_fraction": 0.038,
+   "wall_s": 130.0,
+   "fairness_digest": "a6fd798300fb11793521e148e0c54d607ec2dc24978f8b88aad575f3b539804a",
+   "gating": true
+  },
+  {
+   "seed": 5,
+   "n_devices": 32,
+   "arm": "edf C=8",
+   "dashcam_delivered": 0.0147,
+   "dashcam_offered": 17396,
+   "robot_delivered_on_time": 2,
+   "robot_total": 79,
+   "robot_fraction": 0.0253,
+   "wall_s": 92.5,
+   "fairness_digest": "a6fd798300fb11793521e148e0c54d607ec2dc24978f8b88aad575f3b539804a",
+   "gating": true
+  },
+  {
+   "seed": 5,
+   "n_devices": 32,
+   "arm": "edf C=4",
+   "dashcam_delivered": 0.0035,
+   "dashcam_offered": 17396,
+   "robot_delivered_on_time": 0,
+   "robot_total": 79,
+   "robot_fraction": 0.0,
+   "wall_s": 72.4,
+   "fairness_digest": "a6fd798300fb11793521e148e0c54d607ec2dc24978f8b88aad575f3b539804a",
+   "gating": true
+  },
+  {
+   "seed": 5,
+   "n_devices": 32,
+   "arm": "llf",
+   "dashcam_delivered": 0.015,
+   "dashcam_offered": 17396,
+   "robot_delivered_on_time": 1,
+   "robot_total": 79,
+   "robot_fraction": 0.0127,
+   "wall_s": 108.3,
+   "fairness_digest": "a6fd798300fb11793521e148e0c54d607ec2dc24978f8b88aad575f3b539804a",
+   "gating": true
+  },
+  {
+   "seed": 6,
+   "n_devices": 32,
+   "arm": "v1.3",
+   "dashcam_delivered": 0.1571,
+   "dashcam_offered": 17393,
+   "robot_delivered_on_time": 0,
+   "robot_total": 75,
+   "robot_fraction": 0.0,
+   "wall_s": 120.3,
+   "fairness_digest": "b4edd10702957efc95fbb0fef33ac78ade6ead4c6807ecaef49c2c436c010bc6",
+   "gating": true
+  },
+  {
+   "seed": 6,
+   "n_devices": 32,
+   "arm": "edf C=8",
+   "dashcam_delivered": 0.0123,
+   "dashcam_offered": 17393,
+   "robot_delivered_on_time": 0,
+   "robot_total": 75,
+   "robot_fraction": 0.0,
+   "wall_s": 125.3,
+   "fairness_digest": "b4edd10702957efc95fbb0fef33ac78ade6ead4c6807ecaef49c2c436c010bc6",
+   "gating": true
+  },
+  {
+   "seed": 6,
+   "n_devices": 32,
+   "arm": "edf C=4",
+   "dashcam_delivered": 0.0021,
+   "dashcam_offered": 17393,
+   "robot_delivered_on_time": 0,
+   "robot_total": 75,
+   "robot_fraction": 0.0,
+   "wall_s": 75.6,
+   "fairness_digest": "b4edd10702957efc95fbb0fef33ac78ade6ead4c6807ecaef49c2c436c010bc6",
+   "gating": true
+  },
+  {
+   "seed": 6,
+   "n_devices": 32,
+   "arm": "llf",
+   "dashcam_delivered": 0.0122,
+   "dashcam_offered": 17393,
+   "robot_delivered_on_time": 0,
+   "robot_total": 75,
+   "robot_fraction": 0.0,
+   "wall_s": 106.0,
+   "fairness_digest": "b4edd10702957efc95fbb0fef33ac78ade6ead4c6807ecaef49c2c436c010bc6",
+   "gating": true
+  }
+ ],
+ "_provenance": {
+  "git_commit": "700f2485b5db6e49d80a649c9fca7171574439e7",
+  "script": "policy/audit/leaderboard.py",
+  "model": "none (pol4 frozen)",
+  "device": "flash CPU only",
+  "n": "seeds 4,5,6 at 32 devices for 600 s",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}

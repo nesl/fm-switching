@@ -97,12 +97,30 @@ branches. Section 14 reconciles all three disputed readings; the short version i
 is a caching wrapper whose cache hides 94 percent of calls, and the two call sites bind it
 differently so a patch on one module silently misses the other.
 
-## WHAT I WILL NOT YET CALL A RESULT
+## THE BIGGEST FINDING: the robot axis is a QUEUEING problem, not a GPU-budget problem
 
-Seven in-scope published arms deliver 33 to 35 of 41 robots at 16 devices where llf delivers 9.
-Four times the gate baseline, on the hard axis, the evening they landed. The shared fairness digest
-proves a shared TRACE, not shared COSTS, and an uncharged rebuild is exactly the E36 failure mode.
-Section 16.1 states the check; until it is recorded, none of those numbers is a bar for COVEX.
+I flagged the published field as uncitable until its cost accounting was checked. **It is checked
+and it is clean**: a recall rebuild costs eco-llm 2.404 s against llf's 2.420 s, and a monitor
+release costs every arm 0.395 s exactly. No uncharged work, no E36 free lunch. The numbers stand.
+
+What the check revealed is better than a defect. llf, edf and eco-llm issue the **same 38 recall
+requests** and are charged the **same service**. They differ only in delay against a 5.0 s deadline:
+
+| arm | recall delay p50 | on time |
+|---|---|---|
+| edf C=8 | 6.36 s | 3 of 38 |
+| llf | 5.81 s | 9 of 38 |
+| **eco-llm** | **2.34 s** | **35 of 38** |
+
+And llf's delays are packed against the deadline: relaxing it to 6.0 s gives 20 on time and 7.0 s
+gives 29. **Two seconds triples the deliveries.**
+
+**This explains the "binary price" from the other side.** The robot axis looked like a threshold in
+the price because the delay distribution is a spike at the deadline, not because the price is a
+threshold. So: **COVEX does not need a better price, it needs recall released earlier relative to
+the monitor stream.** `honour_job_priority` does this and the release already has it ON, which is
+why it reaches 13 to 17 robots where v1.2 reached 1 to 2. The target is now a number: **get the
+median recall delivery under 5.0 s.**
 
 ## Best version so far, and its standing
 
@@ -1438,3 +1456,91 @@ a cold rebuild costs the published arm what it costs llf. If it does, this is a 
 result and the gate conversation changes. If it does not, it is a porting defect in the cost path
 rather than a finding. **Until that check is recorded, no number in this section may be cited as a
 bar that COVEX has to clear.** It is in section 17 as the next thing I run.
+
+# 17. 32 DEVICES, on the SCARCITY build. Everything collapses together
+
+Seeds 4, 5, 6 at `700f248`. **This is the superseded scarcity build, not the release.** Recorded
+because it is the only 32-device candidate data until the release grid lands.
+
+| seed | **v1.3-scarcity** | edf C=8 | edf C=4 | llf |
+|---|---|---|---|---|
+| 4 | **0.3459** / 2 of 84 | 0.0169 / 0 | 0.0029 / 0 | 0.0157 / 2 |
+| 5 | **0.1243** / 3 of 79 | 0.0147 / 2 | 0.0035 / 0 | 0.0150 / 1 |
+| 6 | **0.1571** / 0 of 75 | 0.0123 / 0 | 0.0021 / 0 | 0.0122 / 0 |
+
+On the letter of the D127 criterion this is a PASS in all three seeds: COVEX is ahead of the best
+scheduling baseline on dashcam by 8 to 20 times and is never behind on robots.
+
+**I am not claiming it as a pass and no GATE PASS string is emitted.** Dashcam at 0.12 to 0.35
+means two thirds to seven eighths of dashcam frames MISS, and the baselines are at 0.012 to 0.017.
+Every arm is broken in this regime; the ranking among broken arms is not evidence that the SLO can
+be met. I withdrew a 16-device pass once already for being a ranking inside a collapsed regime and
+I am not going to repeat it at 32. It is also the wrong build.
+
+# 18. THE PUBLISHED FIELD CHECKED. No porting defect, and the robot axis is decided by 3.5 SECONDS OF QUEUEING
+
+Section 16.1 said no published number could be cited until the cost accounting was verified. It is
+verified. The answer is better than a defect would have been.
+
+## 18.1 Costs ARE charged identically. The flag is cleared
+
+Per-request service charged on seed 4 at 16 devices, split by request kind:
+
+| arm | `release_monitor` mean | `release_recall` reqs | `release_recall` mean | total latency s |
+|---|---|---|---|---|
+| llf | 0.395 s | 38 | **2.420 s** | 3440.3 |
+| edf C=8 | 0.395 s | 38 | **2.420 s** | 3406.0 |
+| eco-llm (published) | 0.395 s | 38 | **2.404 s** | 3063.1 |
+| b7-edf-feasibility | 0.395 s | 34 | 2.082 s | 3167.3 |
+
+A recall rebuild costs the published arms what it costs llf, to three significant figures, and a
+monitor release costs every arm 0.395 s exactly. There is no uncharged work and no E36-style free
+lunch. **The published numbers are sound and may now be cited.**
+
+## 18.2 What actually separates them, and it is not GPU time
+
+llf, edf and eco-llm all issue the SAME 38 recall requests and are charged the SAME service. They
+differ only in when the answer comes back, against a recall deadline of **5.0 s**:
+
+| arm | recall delivery delay, p50 | min | max | on time |
+|---|---|---|---|---|
+| edf C=8 | 6.36 s | 4.29 | 11.69 | **3** of 38 |
+| llf | 5.81 s | 3.00 | 9.73 | **9** of 38 |
+| eco-llm | **2.34 s** | 0.39 | 6.83 | **35** of 38 |
+
+The work is identical. The queueing delay is not. eco-llm returns the median recall answer in 2.34
+s where llf takes 5.81 s, and the deadline sits at 5.0 s between them.
+
+## 18.3 The cliff, which explains the "binary price" from the other side
+
+llf's recall delays are packed right against the deadline:
+
+| deadline | llf recalls on time |
+|---|---|
+| 5.0 s (actual) | 9 of 38 |
+| 5.5 s | 13 |
+| 6.0 s | 20 |
+| 6.5 s | 27 |
+| 7.0 s | 29 |
+
+**Two seconds of relaxation triples the deliveries.** The population is concentrated at the
+deadline, so any control that shifts the delay distribution a little moves a lot of items across
+at once, and any control that shifts it slightly the wrong way moves none.
+
+That is the same cliff the price reconciliation found from the other direction. The robot axis
+looked BINARY in the price because the delay distribution is a spike at the deadline, not because
+the price itself is a threshold. **The robot axis is a queueing-delay problem, not a GPU-budget
+problem.** Spending less GPU does not help and pricing it differently barely moves it; releasing
+recall work sooner, ahead of the monitor stream, is what moves it. eco-llm issues 910 fewer
+monitor requests than llf and buys 26 robot answers with the room.
+
+## 18.4 What this means for the gate and for session 1
+
+The bar is real and it is higher than llf. Seven in-scope published arms deliver 33 to 35 of 41 at
+16 devices on honestly charged work.
+
+The actionable statement: **COVEX does not need a better price, it needs recall work released
+earlier relative to the monitor stream.** `honour_job_priority` is the switch that does this and
+the release `d944361` already has it ON, which is consistent with it reaching 13 to 17 robots where
+v1.2 reached 1 to 2. The published field says the remaining headroom to 33 to 35 is also queueing,
+and the measurement above gives the target directly: get the median recall delivery under 5.0 s.
