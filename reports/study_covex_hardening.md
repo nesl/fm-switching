@@ -1,3 +1,73 @@
+# ONE PAGE FOR THE MORNING (D129), written by session 2
+
+**Read this first. The most important thing here is that the dry-run screen is NOT uniformly
+optimistic for COVEX, and at 8 devices it inverts the ranking against edf.**
+
+## The headline: the screen is calibrated now, and it was misleading us at 8 devices
+
+Applying the SAME delivery definition to the committed LIVE H100 pilot cells and to my dry runs,
+seed 0, 600 s, tight memory:
+
+| arm | n | dashcam dry to LIVE | robot dry to LIVE | the dry run |
+|---|---|---|---|---|
+| edf | 4 | 0.9991 to **0.9821** | 0.889 to **1.000** | OVERSTATES dashcam by 0.017 |
+| edf | 8 | 0.9854 to **0.9267** | 0.000 to **0.100** | OVERSTATES dashcam by 0.059 |
+| edf | 16 | 0.0172 to **0.0663** | 0.000 to 0.000 | UNDERSTATES by 0.049 |
+| policy-core | 4 | 0.9991 to **0.9991** | 0.111 to 0.111 | matches exactly |
+| **policy-core** | **8** | **0.4871 to 0.9478** | 0.000 to 0.000 | **UNDERSTATES by 0.461** |
+| policy-core | 16 | 0.0747 to **0.0723** | 0.000 to 0.000 | matches |
+
+**The ranking test at 8 devices, dashcam delivery:**
+
+- **DRY: edf 0.9854 against policy-core 0.4871, edf ahead by 0.498.**
+- **LIVE: edf 0.9267 against policy-core 0.9478, POLICY-CORE AHEAD by 0.021.**
+
+**So the dry screen's dashcam verdict at 8 devices is an artefact.** It is pessimistic for
+policy-core by 0.46 absolute and optimistic for edf by 0.06, and the two errors point in opposite
+directions, which is what flips the order. **Every dashcam conclusion I drew at 8 devices from the
+dry run, including my own F-A7 headline, does not survive this calibration.** The likely reason is
+consistent with F-A9: COVEX's admission conditions on PREDICTED congestion, the dry engine is
+slower than the real one, so COVEX sees congestion that is not there and refuses work. edf does not
+condition on congestion, so it is barely affected.
+
+**What this does NOT excuse.** The ROBOT gap is real and confirmed live: at 4 devices live edf
+answers **9 of 9** robot questions on time and live policy-core answers **1 of 9**. At 8 devices
+live edf answers 2 of 20 and policy-core 0 of 20. **The robot axis is a genuine failure, measured
+on the H100, not a screen artefact.**
+
+## Best version so far, and its standing
+
+**v1.2** (planner_rc + plan_latest + replan + B1 + F2 + F3; F1 and F4 off), at `9fd423a`.
+
+| n | robot delivered, v1.2 / edf / llf | dashcam delivered, v1.2 / edf / llf | gate |
+|---|---|---|---|
+| 4 | 2 of 9 / 8 of 9 / 7 of 9 | 0.9977 / 0.9991 / 0.9991 | FAIL both |
+| 8 | 1 of 20 / 0 of 20 / 4 of 20 | 0.7998 / 0.9854 / 0.9942 | FAIL both, **dashcam unreliable per the calibration** |
+| 16 | 1 of 35 / 0 of 35 / 0 of 35 | 0.3687 / 0.0172 / 0.0294 | **PASS both** |
+
+**What changed to get there:** the two-timescale planner decides once at admission over the job
+lifetime instead of re-scoring each piece every period. Its measured benefit comes mainly from what
+it REFUSES: declining cold rebuilds outright lowers engine occupancy, which lowers the queue
+backlog charge on every monitoring candidate, which raised SH admission from 0.4871 to 0.8003 at 8
+devices. That is a queueing effect expressed through the admission test.
+
+**What still fails:** the robot axis at every size, live and dry. Every cold-rebuild plan scores
+between -0.598 and -2.521 and is declined, so the exchange rate is the binding constraint. mu is
+the mechanism: it rises 6.8 times from 4 to 16 devices while engine occupancy FALLS threefold, so
+refusing work raises the price of work (F-A9).
+
+**Release commit:** none. **Neither gate round passes and no `harden GATE PASS v1.2` string has
+been emitted.**
+
+## What is NOT yet done, stated plainly
+
+The D129 leaderboard on seeds 4, 5 and 6 and at 32 devices is NOT built. No session-1 candidate had
+landed when this was written, so I spent the time on the calibration instead, which D129 ranks
+highest and which turned out to invalidate a dry-run conclusion. Seeds 4, 5 and 6 remain the next
+job.
+
+---
+
 # StudyCOVEX-harden: audits, behaviour tests and an offline comparison (D124)
 
 Flash, CPU only, 2026-11-18. **Session 2 of two.** Session 1 edits policy code; this study writes
@@ -872,3 +942,66 @@ calls `rollout.run(fleet, horizon_s=..., rc_rows=True)`, so every planner evalua
 unchanged. **This is the second time my instrumentation, rather than the policy, produced the
 anomaly**, after E1's regex, and both are recorded rather than quietly fixed. It is also why the
 v1.2 audit in 9.7 is late rather than missing.
+
+
+---
+
+# 10. CALIBRATION OF THE SCREEN AGAINST THE LIVE H100 (D129 item 4)
+
+Read-only over the committed live pilot cells in
+`results/orchestration/live2/pilot/runs3/`, which their own study labels PILOT and not round-1
+results; nothing here changes that label. The SAME delivery definition is applied to both sides,
+so the two are comparable: `t_delivered` set and `t_delivered <= t_opportunity + deadline_s`.
+
+## 10.1 Every live cell, measured
+
+| cell | n | window | dashcam delivered | robot delivered |
+|---|---|---|---|---|
+| edf | 4 | 600 s | 0.9821 | 9 of 9 |
+| edf | 8 | 600 s | 0.9267 | 2 of 20 |
+| edf | 16 | 600 s | 0.0663 | 0 of 35 |
+| policy-core | 4 | 600 s | 0.9991 | 1 of 9 |
+| policy-core | 8 | 600 s | 0.9478 | 0 of 20 |
+| policy-core | 16 | 600 s | 0.0723 | 0 of 35 |
+| always-cloud-fcfs | 8 | 120 s | 0.8320 | 6 of 6 |
+| b9 | 8 | 120 s | 0.8477 | 5 of 6 |
+| utility-per-cost | 8 | 120 s | 0.8294 | 6 of 6 |
+| edf | 8 | 120 s | 0.8698 | 0 of 6 |
+| edf-piece1024 | 8 | 120 s | 0.9792 | 0 of 6 |
+| edf-piece2048 | 8 | 120 s | 0.9622 | 0 of 6 |
+| policy-core | 8 | 120 s | 0.9961 | 0 of 6 |
+| device-only | 8 | 120 s | 0.0 | 0 of 6 |
+
+The 120 s step-1 cells are a different window and are not compared against my 600 s dry runs, but
+they corroborate the direction: at 8 devices over 120 s live policy-core delivers 0.9961 of
+instants against live edf's 0.8698.
+
+## 10.2 The correction factor to apply when reading the leaderboard
+
+| axis and size | dry error | how to read a dry result |
+|---|---|---|
+| dashcam, n = 4 | dry overstates by about 0.017 for edf, exact for policy-core | a dry win under 0.02 is not a win |
+| **dashcam, n = 8** | **dry understates policy-core by 0.461 and overstates edf by 0.059** | **the dry run cannot rank COVEX against edf at this size at all** |
+| dashcam, n = 16 | dry understates edf by 0.049, matches policy-core | a dry edf figure here is pessimistic |
+| robot, n = 4 | dry understates edf by 0.111, exact for policy-core | dry is pessimistic for edf |
+| robot, n = 8 | dry understates edf by 0.100, exact for policy-core | dry is pessimistic for edf |
+| robot, n = 16 | exact for both | usable |
+
+**The single rule for reading the leaderboard: at 8 devices, treat the dashcam axis as
+uninformative about the COVEX-against-edf ordering until a live cell confirms it.** The errors at
+that size are large and of opposite sign for the two arms.
+
+## 10.3 ERRATUM E6: the direction of the screen's bias was assumed, not measured, and the
+assumption was wrong at the size that mattered
+
+Every version of this report, following the brief, carried the label that the screen is
+"OPTIMISTIC FOR COVEX" because the dry run prices the engine from the same curves COVEX's model
+uses. **That reasoning is sound for the VALUE a candidate can claim, and it is wrong for the
+SERVICE it actually delivers.** The dry engine is slower than the live one, so a policy whose
+admission conditions on predicted congestion refuses work it would have served live. The label
+stays on the value side and is corrected here on the service side.
+
+This is the fourth erratum against my own work tonight and the most consequential, because it was
+carried through every earlier gate verdict at 8 devices. **It does not change the 16-device
+results, where dry and live agree to within 0.003 for policy-core, nor the robot axis, which live
+confirms.**

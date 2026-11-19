@@ -1,0 +1,402 @@
+{
+ "check": "covex_harden_live_calibration",
+ "is_measurement": false,
+ "label": "READ-ONLY over the committed LIVE H100 pilot results. The SAME delivery definition as the dry-run screen is applied, so the two are comparable. Live pilot cells are labelled PILOT, not round-1 results, by their own study; nothing here changes that.",
+ "definition": "t_delivered is set and t_delivered <= t_opportunity + deadline_s",
+ "source": "results/orchestration/live2/pilot/runs3",
+ "cells": [
+  {
+   "cell": "always-cloud-fcfs_n8_120s_h27_step1",
+   "arm": "always-cloud-fcfs",
+   "n": 8,
+   "window_s": 120,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 768,
+     "delivered_any": 765,
+     "on_time": 639,
+     "fraction": 0.832
+    },
+    "recall": {
+     "offered": 6,
+     "delivered_any": 6,
+     "on_time": 6,
+     "fraction": 1.0
+    }
+   }
+  },
+  {
+   "cell": "b9_n8_120s_h27_step1",
+   "arm": "b9",
+   "n": 8,
+   "window_s": 120,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 768,
+     "delivered_any": 745,
+     "on_time": 651,
+     "fraction": 0.8477
+    },
+    "recall": {
+     "offered": 6,
+     "delivered_any": 5,
+     "on_time": 5,
+     "fraction": 0.8333
+    }
+   }
+  },
+  {
+   "cell": "device-only_n8_120s_h27_step1",
+   "arm": "device-only",
+   "n": 8,
+   "window_s": 120,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 768,
+     "delivered_any": 0,
+     "on_time": 0,
+     "fraction": 0.0
+    },
+    "recall": {
+     "offered": 6,
+     "delivered_any": 0,
+     "on_time": 0,
+     "fraction": 0.0
+    }
+   }
+  },
+  {
+   "cell": "edf-piece1024_n8_120s_h27_step1",
+   "arm": "edf-piece1024",
+   "n": 8,
+   "window_s": 120,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 768,
+     "delivered_any": 764,
+     "on_time": 752,
+     "fraction": 0.9792
+    },
+    "recall": {
+     "offered": 6,
+     "delivered_any": 0,
+     "on_time": 0,
+     "fraction": 0.0
+    }
+   }
+  },
+  {
+   "cell": "edf-piece2048_n8_120s_h27_step1",
+   "arm": "edf-piece2048",
+   "n": 8,
+   "window_s": 120,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 768,
+     "delivered_any": 762,
+     "on_time": 739,
+     "fraction": 0.9622
+    },
+    "recall": {
+     "offered": 6,
+     "delivered_any": 0,
+     "on_time": 0,
+     "fraction": 0.0
+    }
+   }
+  },
+  {
+   "cell": "edf_n16_600s_h27",
+   "arm": "edf",
+   "n": 16,
+   "window_s": 600,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 8716,
+     "delivered_any": 5989,
+     "on_time": 578,
+     "fraction": 0.0663
+    },
+    "recall": {
+     "offered": 35,
+     "delivered_any": 21,
+     "on_time": 0,
+     "fraction": 0.0
+    }
+   }
+  },
+  {
+   "cell": "edf_n4_600s_h27",
+   "arm": "edf",
+   "n": 4,
+   "window_s": 600,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 2176,
+     "delivered_any": 2157,
+     "on_time": 2137,
+     "fraction": 0.9821
+    },
+    "recall": {
+     "offered": 9,
+     "delivered_any": 9,
+     "on_time": 9,
+     "fraction": 1.0
+    }
+   }
+  },
+  {
+   "cell": "edf_n8_120s_h27_step1",
+   "arm": "edf",
+   "n": 8,
+   "window_s": 120,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 768,
+     "delivered_any": 700,
+     "on_time": 668,
+     "fraction": 0.8698
+    },
+    "recall": {
+     "offered": 6,
+     "delivered_any": 5,
+     "on_time": 0,
+     "fraction": 0.0
+    }
+   }
+  },
+  {
+   "cell": "edf_n8_600s_h27",
+   "arm": "edf",
+   "n": 8,
+   "window_s": 600,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 4326,
+     "delivered_any": 4136,
+     "on_time": 4009,
+     "fraction": 0.9267
+    },
+    "recall": {
+     "offered": 20,
+     "delivered_any": 18,
+     "on_time": 2,
+     "fraction": 0.1
+    }
+   }
+  },
+  {
+   "cell": "policy-core_n16_600s_h27",
+   "arm": "policy-core",
+   "n": 16,
+   "window_s": 600,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 8716,
+     "delivered_any": 659,
+     "on_time": 630,
+     "fraction": 0.0723
+    },
+    "recall": {
+     "offered": 35,
+     "delivered_any": 0,
+     "on_time": 0,
+     "fraction": 0.0
+    }
+   }
+  },
+  {
+   "cell": "policy-core_n4_600s_h27",
+   "arm": "policy-core",
+   "n": 4,
+   "window_s": 600,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 2176,
+     "delivered_any": 2174,
+     "on_time": 2174,
+     "fraction": 0.9991
+    },
+    "recall": {
+     "offered": 9,
+     "delivered_any": 1,
+     "on_time": 1,
+     "fraction": 0.1111
+    }
+   }
+  },
+  {
+   "cell": "policy-core_n8_120s_h27_step1",
+   "arm": "policy-core",
+   "n": 8,
+   "window_s": 120,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 768,
+     "delivered_any": 765,
+     "on_time": 765,
+     "fraction": 0.9961
+    },
+    "recall": {
+     "offered": 6,
+     "delivered_any": 0,
+     "on_time": 0,
+     "fraction": 0.0
+    }
+   }
+  },
+  {
+   "cell": "policy-core_n8_600s_h27",
+   "arm": "policy-core",
+   "n": 8,
+   "window_s": 600,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 4326,
+     "delivered_any": 4100,
+     "on_time": 4100,
+     "fraction": 0.9478
+    },
+    "recall": {
+     "offered": 20,
+     "delivered_any": 0,
+     "on_time": 0,
+     "fraction": 0.0
+    }
+   }
+  },
+  {
+   "cell": "utility-per-cost_n8_120s_h27_step1",
+   "arm": "utility-per-cost",
+   "n": 8,
+   "window_s": 120,
+   "seed": 0,
+   "memory": "tight",
+   "live": {
+    "monitor": {
+     "offered": 768,
+     "delivered_any": 765,
+     "on_time": 637,
+     "fraction": 0.8294
+    },
+    "recall": {
+     "offered": 6,
+     "delivered_any": 6,
+     "on_time": 6,
+     "fraction": 1.0
+    }
+   }
+  }
+ ],
+ "_provenance": {
+  "script": "policy/audit/calibrate_live.py",
+  "model": "live 32B on the H100 for the LIVE side; none for the dry side",
+  "device": "read-only on flash",
+  "n": "all committed runs3 cells",
+  "timestamp": "2026-11-18T00:00:00"
+ },
+ "dry_vs_live": {
+  "note": "SAME delivery definition both sides; dry runs are mine at seed 0, 600 s, tight; live cells are the committed H100 pilot at seed 0, 600 s, h27",
+  "dashcam": {
+   "edf": {
+    "4": [
+     0.9991,
+     0.9821
+    ],
+    "8": [
+     0.9854,
+     0.9267
+    ],
+    "16": [
+     0.0172,
+     0.0663
+    ]
+   },
+   "policy-core": {
+    "4": [
+     0.9991,
+     0.9991
+    ],
+    "8": [
+     0.4871,
+     0.9478
+    ],
+    "16": [
+     0.0747,
+     0.0723
+    ]
+   }
+  },
+  "robot": {
+   "edf": {
+    "4": [
+     0.889,
+     1.0
+    ],
+    "8": [
+     0.0,
+     0.1
+    ],
+    "16": [
+     0.0,
+     0.0
+    ]
+   },
+   "policy-core": {
+    "4": [
+     0.111,
+     0.111
+    ],
+    "8": [
+     0.0,
+     0.0
+    ],
+    "16": [
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "ranking_inversion_n8_dashcam": {
+   "dry": {
+    "edf": 0.9854,
+    "policy_core": 0.4871,
+    "edf_ahead_by": 0.4983
+   },
+   "live": {
+    "edf": 0.9267,
+    "policy_core": 0.9478,
+    "policy_core_ahead_by": 0.0211
+   },
+   "verdict": "the dry screen cannot rank COVEX against edf on the dashcam axis at 8 devices"
+  },
+  "robot_gap_is_real": "confirmed live: at 4 devices edf answers 9 of 9 and policy-core 1 of 9; at 8 devices edf 2 of 20 and policy-core 0 of 20",
+  "erratum_E6": "the screen was labelled optimistic for COVEX by assumption; that holds for the VALUE a candidate can claim and is wrong for the SERVICE it delivers, because the dry engine is slower than the live one and COVEX refuses work it would have served live"
+ }
+}
