@@ -115,3 +115,35 @@ upper bound on paper only.
 **`DEFAULTS["session_action"]` is never injected** — `apply_defaults` touches streams, recall,
 `order` and `engine_config`, and contains no reference to `action.sessions`. Checked directly. So
 RH8's placement behaviour is entirely its own and nothing is issuing offloads it did not request.
+
+### The oracle registration turned the live2 suite red, and what that exposed
+
+Registering `rh8-demand-aware-oracle` in `ARM_NAMES` broke three tests in
+`live2/tests/test_live2_coord.py` — `test_every_arm_emits_only_legal_actions`,
+`test_identical_opportunity_stream_digest` and
+`test_the_canonical_fairness_digest_is_identical_for_every_arm` — because all three iterate **every
+registered arm**, and the coordinator **refuses** an arm declaring `reads_future` under fairness
+rule 5 (`coordinator.py:13`, `:184`).
+
+**The port was not wrong, and the natural misreading is that it was.** An oracle upper bound is a
+proper object; this card requires one, and it ships deliberately. What the registration exposed is
+that **registering an arm currently means two things at once**: "this exists and is documented",
+and "this is a candidate for live scoring". There is no way to ask for the first without the
+second, so an arm that is documented-but-never-scored can only be made available by also declaring
+it runnable, which it is not.
+
+**The fix is session 1's, not this session's.** It owns the live2 test tree and was blocked on the
+same red, so the repair and its D137 work land together; this session stood down rather than have
+two sessions edit `test_live2_coord.py` at once. The agreed shape is a **generic skip** of any arm
+declaring `reads_future`, rather than excluding this arm by name, so that the next oracle or
+ablation arm needs no further change.
+
+**Flagged, not fixed: the registry has no vocabulary for "documented, not scored".** A
+`live_eligible` flag or a separate upper-bound registry would resolve it at source, but that is a
+change to the **registration contract** and therefore methodological, so it belongs to the user
+rather than being folded into an urgent red-tree fix. It will recur: oracle and ablation arms are
+natural things to want for several of the remaining ports.
+
+This is the same class as several findings of 2026-11-19 — **a premise held by code and never
+written down.** `ARM_NAMES` also serves as the `--arm` choices in `run_live2_cell.py:207`, so the
+registry has in practice meant "runnable" all along without ever saying so.

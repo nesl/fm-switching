@@ -90,3 +90,24 @@ nothing in the comparison separates them.
 the arm's three-way choice is effectively two-way on this tree. Its selection rule is intact; its
 option set is smaller than the card's mapping table implies, and that narrowing is the harness's,
 not the paper's.
+
+### RICH is not a separate case, established from three independent directions
+
+The note above records that this arm can **name** RICH but cannot **receive** it. That now rests on
+three routes that agree, which is a stronger warrant than any one of them:
+
+1. **Static.** `cstate` builds exactly two evidence items, `RECENT` and `D2`
+   (`cstate.py:481-483`), and `tokens_for_representation` branches on the single literal
+   `"RECENT"` (`cstate.py:130-132`).
+2. **Runtime.** A census across twelve arms found **zero** RICH emissions.
+3. **The live request format.** StudyACC2's design note states that **RICH = D2 in the live request
+   format** — the live body carries exactly the D2 history — **so only one of them is run.**
+
+**Consequence: RICH is dropped from the analysis rather than carried as a third representation.**
+For this arm specifically that means its three-way choice is **two-way on this tree**, and that is
+a fact about the evidence the harness can deliver rather than about the method. The selection rule
+is intact; the option set is smaller than this card's mapping table implies.
+
+This also disposes of the one place the D137 item 3 quality substitution could have changed a
+decision: the ordinal table ties D2 and RICH at 1.0 while the measured table separates them, and
+that tie is unreachable precisely because RICH is never offered.
