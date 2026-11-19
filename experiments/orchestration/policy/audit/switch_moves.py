@@ -29,6 +29,14 @@ import _harness as H  # noqa: E402
 # Fields that differ for bookkeeping reasons and say nothing about the decision taken.
 IGNORE = {"decision_latency_ms", "t"}
 
+# NINTH SIGNATURE, and it is a property of THIS TOOL rather than of any arm. `decision.jsonl`
+# carries NEITHER `representation` NOR the session action, so a diff of decision rows reports any
+# mechanism acting through those fields as an ABSENT LINK however often it fires. Session 3 hit
+# this exactly: its move proof returned 0 differing rows for an arm that emitted RECENT on all 21
+# of its recalls. Those fields are therefore captured from the emitted actions and compared
+# alongside the decision rows, and the limitation is stated here rather than discovered again.
+UNLOGGED_OBSERVABLES = ("recall representation and tokens sent", "session actions (placement)")
+
 
 def _decisions(run_dir: Path) -> List[Dict[str, Any]]:
     p = Path(run_dir) / "decision.jsonl"
@@ -41,6 +49,14 @@ def _decisions(run_dir: Path) -> List[Dict[str, Any]]:
     return out
 
 
+def _counts(d: Dict[str, Any]) -> Dict[str, int]:
+    c: Dict[str, int] = {}
+    for v in d.values():
+        k = str(v[0]) if isinstance(v, tuple) else str(v)
+        c[k] = c.get(k, 0) + 1
+    return c
+
+
 def _key(d: Dict[str, Any]) -> Tuple:
     return tuple(sorted((k, json.dumps(v, sort_keys=True, default=str))
                         for k, v in d.items() if k not in IGNORE))
@@ -50,9 +66,14 @@ def compare(a_sw: Dict[str, Any], b_sw: Dict[str, Any], n: int, seed: int, run_s
             arm: str) -> Dict[str, Any]:
     tmp = Path(tempfile.mkdtemp(prefix="covex_moves_"))
     res = {}
+    emitted = {}
     for label, sw in (("A", a_sw), ("B", b_sw)):
-        r = H.run_fleet_cell(tmp / label, n, run_s=run_s, seed=seed, arm_name=arm, switches=sw)
+        sink: Dict[str, Any] = {}
+        with H.capture_emitted_actions(sink):
+            r = H.run_fleet_cell(tmp / label, n, run_s=run_s, seed=seed, arm_name=arm,
+                                 switches=sw)
         res[label] = r
+        emitted[label] = sink
     da, db = _decisions(Path(res["A"]["outdir"]) / "run"), _decisions(Path(res["B"]["outdir"]) / "run")
 
     n_diff = 0
@@ -72,13 +93,31 @@ def compare(a_sw: Dict[str, Any], b_sw: Dict[str, Any], n: int, seed: int, run_s
                    json.dumps(db[i].get(k), sort_keys=True, default=str):
                     fields[k] = fields.get(k, 0) + 1
 
-    moved = bool(n_diff or len(da) != len(db))
+    # The unlogged observables, compared separately because the decision rows cannot carry them.
+    ea, eb = emitted["A"], emitted["B"]
+    rep_a = {k: v for k, v in ea["recall_representation"].items()}
+    rep_b = {k: v for k, v in eb["recall_representation"].items()}
+    rep_diff = sum(1 for k in set(rep_a) | set(rep_b) if rep_a.get(k) != rep_b.get(k))
+    sess_a, sess_b = sorted(ea["session_actions"]), sorted(eb["session_actions"])
+    sess_diff = (sess_a != sess_b)
+    unlogged = dict(
+        recall_representation_differs=rep_diff,
+        A_representation_counts=_counts(rep_a), B_representation_counts=_counts(rep_b),
+        session_actions_differ=bool(sess_diff),
+        A_session_action_counts=_counts({i: (v,) for i, v in enumerate(x[1] for x in sess_a)}),
+        B_session_action_counts=_counts({i: (v,) for i, v in enumerate(x[1] for x in sess_b)}))
+
+    moved = bool(n_diff or len(da) != len(db) or rep_diff or sess_diff)
     return dict(
         n_decisions=dict(A=len(da), B=len(db)),
         decisions_differing=n_diff,
         differing_fields=dict(sorted(fields.items(), key=lambda x: -x[1])),
         first_difference=first,
         SWITCH_MOVED=moved,
+        unlogged_observables=unlogged,
+        instrument_note="decision.jsonl carries neither `representation` nor the session action, "
+                        "so those are captured from the emitted actions; a tool that diffs only "
+                        "decision rows reports mechanisms acting through them as ABSENT.",
         verdict=("the switch reaches at least one decision; an A-vs-B comparison is meaningful"
                  if moved else
                  "ABSENT LINK. The decision logs are IDENTICAL, so the switch never reaches a "

@@ -2992,3 +2992,47 @@ it is valid.
 32B x D2 measurement, a StudyR1 extension, does not exist. The per-category table lets the column
 be honest; it does not make it as sharp as the RICH and RECENT rows, and the category spread from
 -7.9 to +17.2 pp shows how much resolution is being given up.
+
+# 34. B2 AND RCprio RE-VERIFIED with the augmented instrument. Both verdicts STAND
+
+`switch_moves.py` diffed `decision.jsonl` only, and that log carries **neither `representation`
+nor the session action**, so a mechanism acting through either read as an absent link however
+often it fired. Session 3 hit this exactly: 0 differing rows for an arm that emitted RECENT on all
+21 of its recalls. **My instrument had the same fault**, and I knew the logging gap already,
+having built `capture_sent_representation` around it for the eco-llm census. The tool is now
+ORed with an emitted-action observable over `_submit_recall` and `_enact`.
+
+Re-run at 16 devices, seed 0, `covex-v13`:
+
+| pair | decision rows differing | representation differs | session actions differ | **SWITCH_MOVED** |
+|---|---|---|---|---|
+| base vs B2, gain 1.0 | 0 of 8,120 | **0** | **False** | **False** |
+| base vs RCprio, slack 5.0 s | 0 of 8,120 | **0** | **False** | **False** |
+
+**Both absent-link verdicts stand**, now on three channels rather than one.
+
+## 34.1 The instrument passes its own positive control, which is the point
+
+A zero difference is only meaningful if the observable is live. It is:
+
+| observable | A | B |
+|---|---|---|
+| recall representation | `D2` x 20 | `D2` x 20 |
+| session actions | `MATERIALIZE` x 22 | `MATERIALIZE` x 22 |
+
+**The new channels report non-zero, populated values in both conditions**, so the zeros above are
+genuine equality rather than a blind channel. That is exactly the positive control
+`PROBE_HAZARDS.md` now requires before any null is trusted, and it is the check that the previous
+version of this tool could not have passed.
+
+## 34.2 Two things the census shows in passing
+
+**`covex-v13` emits `D2` on all 20 recalls and never RECENT**, so the representation channel is
+exercised but CONSTANT for this arm. **It emits only `MATERIALIZE` and never `KEEP_GPU_WARM` or
+`OFFLOAD_TO_HOST`, so the placement slot is UNEXERCISED for it** — category 4, and now visible
+before S5 is screened rather than after.
+
+**Scope, stated because I was asked to re-examine verdicts I did not produce:** the six inert
+builder mechanisms (`s1-feasible`, `s1-fairshare`, `s2-all`, `s2-value`, `s4-llf`, `s6-decline`)
+are session 3's, from `arms_builder.py` and the `builder:` commits. They are not re-verified here.
+The augmented tool is in a shared path and takes one cell per mechanism.

@@ -416,3 +416,44 @@ def capture_sent_representation(sink: Dict[str, Any]):
         yield sink
     finally:
         CO.Live2Coordinator._submit_recall = orig
+
+
+@contextlib.contextmanager
+def capture_emitted_actions(sink: Dict[str, Any]):
+    """Record action fields the DECISION LOG DOES NOT CARRY, so a diff of it cannot see them.
+
+    `decision.jsonl` rows hold H, arm, arm_version, belief, cost_model_id, decision_id, defer_s,
+    kind, mu, note, opportunity_ids, piece_tokens, predicted, t and traffic_mix. They carry
+    NEITHER `representation` NOR the session action, so a mechanism acting through either is
+    invisible to any instrument that diffs decision rows, however often it fires.
+    """
+    setup_paths()
+    import coordinator as CO
+    sink.setdefault("recall_representation", {})
+    sink.setdefault("session_actions", [])
+    orig_sub = CO.Live2Coordinator._submit_recall
+    orig_apply = CO.Live2Coordinator._enact
+
+    def sub(self, o, s, t, dt_ms, preds, mix, whole):
+        rep = getattr(o, "requested_representation", None)
+        try:
+            tok = s.tokens_for_representation(rep)
+        except Exception:                                              # noqa: BLE001
+            tok = None
+        sink["recall_representation"][getattr(o, "opp_id", None)] = (
+            None if rep is None else str(rep), None if tok is None else int(tok))
+        return orig_sub(self, o, s, t, dt_ms, preds, mix, whole)
+
+    def enact(self, act, *a, **k):
+        for xa in getattr(act, "sessions", None) or []:
+            sink["session_actions"].append((str(getattr(xa, "session_id", "")),
+                                            str(getattr(xa, "action", ""))))
+        return orig_apply(self, act, *a, **k)
+
+    CO.Live2Coordinator._submit_recall = sub
+    CO.Live2Coordinator._enact = enact
+    try:
+        yield sink
+    finally:
+        CO.Live2Coordinator._submit_recall = orig_sub
+        CO.Live2Coordinator._enact = orig_apply
