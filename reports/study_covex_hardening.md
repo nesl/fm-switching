@@ -2625,6 +2625,11 @@ auditor told to watch for one will pass the other two.
 | **plausible spread** | arms differ by a credible margin | pure artefact, here tracking on-time count against a placeholder answer | section 27, checking what the values MEAN before trusting the spread |
 | **averaged into undetectability** | a ~1 pp spread, below the noise floor | a REAL mechanism of +17.5 pp diluted by a 88.5 percent stratum where it does not operate | section 28, cross-checking the premise against the committed measurement |
 | **an exact zero in a high field** | one arm at 0.0000 where every other reads 0.87 to 0.999 | a BROKEN MEASUREMENT, not a weak arm: b10 served no monitors at all | section 16.2, and I missed it first time by recording it as a result |
+| **an impossible SUCCESS or FAILURE of a control** | a known-good arm failing a check | the CHECK is broken, not the arm: session 3's legality check failed the committed b7 control | the positive-control form of the row above |
+
+**An impossible failure and an impossible success are equally diagnostic**, and a reviewer watching
+only for implausible RESULTS will catch neither, because both appear in the machinery rather than
+in the headline.
 
 Only the first is visibly suspicious. **The second looks like a result and the third looks like an
 equivalence**, and the third is the most dangerous because the natural conclusion, "the arms do not
@@ -2688,3 +2693,90 @@ correctly RICH for every row. **The accuracy column is therefore not wrong today
 unexercised** — while the cost column has been charging RECENT-choosing arms for history they
 never asked for. That distinction matters for how each column is captioned, and I am captioning
 them differently rather than putting one caveat across both.
+
+# 31. THE STRATIFIED TASK-VALUE COLUMN, BUILT AND POPULATED. The stratification earns its place
+
+196 cells, `task_value_join.py`, labelled **"dry, committed-answer lookup"**. Live H100 cells
+remain the confirmation, not the source. Output: `task_value_join.json`.
+
+**The join key was tested before anything was built on it: 41 of 41 trace questions are present in
+StudyR1's 845. `n_missing_from_studyr1` is 0 in every cell**, so nothing is imputed and nothing is
+dropped.
+
+**Check 6, asserted per side rather than defaulted:** cloud correctness is StudyR1
+**Qwen3-VL-32B-I**; device correctness is the trace's own `device_correct`, which is **4B-I x
+RECENT** per D87. Mixing the tiers would reproduce section 27's inversion by another route.
+
+## 31.1 The result, 10 to 16 devices
+
+| arm | accuracy, ALL | accuracy, RECENT-MISSES | accuracy, RECENT-COVERS | coverage fraction |
+|---|---|---|---|---|
+| **eco-llm** | **0.4265** | **0.3412** | 0.4357 | 0.9215 |
+| llf | 0.4034 | 0.1418 | 0.4254 | 0.9215 |
+| edf C=8 | 0.3906 | 0.1418 | 0.4113 | 0.9215 |
+| v1.3-fast | 0.3531 | **0.0392** | 0.3770 | 0.9215 |
+
+**The inversion of section 27 is gone.** The ranking now tracks service quality, which is what a
+correctly-keyed lookup should produce: eco-llm, the best-serving arm, is also the most accurate.
+Nothing is scored against a placeholder because the lookup never consults `cloud_letter`.
+
+## 31.2 The stratification is not a formality. It separates FOUR TIMES harder
+
+| stratum | spread across these four arms |
+|---|---|
+| all questions | 0.3531 to 0.4265, **7.3 pp** |
+| **recent-misses** | 0.0392 to 0.3412, **30.2 pp** |
+| recent-covers | 0.3770 to 0.4357, 5.9 pp |
+
+**On the 7.9 percent of questions where the RECENT window misses the evidence, the arms differ by
+30 pp; on everything else they differ by 6.** This is section 28's argument confirmed by
+measurement rather than by reasoning: a population-average column would have compressed a 30 pp
+effect into 7, and v1.3-fast's genuinely poor result on the hard stratum, **0.0392**, would have
+been invisible behind an all-questions figure of 0.3531.
+
+**Coverage fraction is 0.9215 in every cell today**, slightly above StudyR1's pooled 0.8852
+because these traces draw a subset. It is reported per row because it will begin to vary once arms
+differ in which questions they serve from cloud, and it is the weight that sets the mixture.
+
+## 31.3 DECISION POSTED, with a default, marked PROVISIONAL
+
+**The vocabulary question (consistency check 4).** Arms emit `representation="D2"`. StudyR1's
+committed keys are K1 (32B RICH) and K3 (32B RECENT). Session 1's fidelity trace shows a committed
+D2 accuracy exists and differs from both: RICH 0.250000, RECENT 0.250000, **D2 0.222222** on
+`counting_objects_events`. So D2 is a **third** representation the addendum's RICH/RECENT framing
+does not cover.
+
+**My resolution, and it differs from the offered default for a reason that makes the column valid
+today.** The directive specifies keying on **the representation ACTUALLY SENT**, not the one
+requested. Because live2 ignores `RecallAction.representation` and `_submit_recall` sends the full
+believed history, **what is actually sent today is RICH regardless of any arm asking for D2.** So
+the column is correctly keyed on K1 right now, and the D2 mapping question **does not bite until
+gate 1 lands**. At that moment what is sent becomes what was asked, D2 starts being sent, and a
+committed D2 row is required.
+
+**Default taken, marked PROVISIONAL:** key on what is sent (K1/RICH today); when Part A lands, key
+on the arm's own value and report **MISSING** where StudyR1 has no row for it, never coercing D2
+to RICH or RECENT. The 30-minute clock applies; this is recorded rather than silently resolved.
+
+## 31.4 THE THREE GATES, each with a different owner. NONE holds today
+
+| gate | state | owner |
+|---|---|---|
+| 1. the patch visible on origin | **NOT MET**, `_submit_recall:549-550` unchanged | session 1 |
+| 2. at least one scored arm emitting a non-default representation | **NOT MET**, all emit `"D2"` or nothing | session 3 |
+| 3. a stated mapping from live2's vocabulary to StudyR1's keys | **PROVISIONAL**, 31.3 | me |
+
+A reader should not assume one fix unblocks the column. **Gate 1 was checked independently by
+three of us against a single relayed claim, and the relayed claim was wrong.**
+
+## 31.5 CORRECTION to my own caption in section 30.3
+
+I wrote that the cost column "has been charging RECENT-choosing arms for history they never asked
+for". **That overstates it: by my own table in 30.2, no arm emits RECENT, so nothing has been
+mischarged yet.** The cost fault is **real but LATENT**, and it would bite the moment a
+RECENT-emitting arm exists, which is what session 3's `SimpleStream` and QueryStream-QDP ports are.
+
+**The accurate caption for both columns: currently UNEXERCISED with respect to representation, and
+differently consequential once exercised.** The accuracy column will begin separating on a narrow
+stratum; the cost column will stop overcharging. That statement survives the ports landing, which
+neither of my earlier two did.
