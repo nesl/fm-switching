@@ -2652,6 +2652,7 @@ auditor told to watch for one will pass the other two.
 | **an exact zero in a high field** | one arm at 0.0000 where every other reads 0.87 to 0.999 | a BROKEN MEASUREMENT, not a weak arm: b10 served no monitors at all | section 16.2, and I missed it first time by recording it as a result |
 | **an impossible SUCCESS or FAILURE of a control** | a known-good arm failing a check | the CHECK is broken, not the arm: session 3's legality check failed the committed b7 control | the positive-control form of the row above |
 
+| **a field documented correctly and filled with a CONSTANT OF THE WRONG KIND** | nothing: the field is read, non-empty, and present | `RecallQuery.category` is documented "S-EMBER question category" and cstate passes the literal string `"recall"` into it, so `arms_policy.py` pinned `QTYPE` as a reasonable workaround | StudyEVNEED 2.3-2.4; **only reading the value against its own docstring catches it** |
 | **a REVIEWER'S PRIOR formed from one unit** | a confident expectation about a column's direction | as capable of passing a wrong column as a broken check is: a single-category delta read as a direction, a flat-column prediction that missed an artefact spread, a broken aggregate read as a trend | section 33.3; three times in two days, each caught by measuring the FULL set |
 | **a planner's price diverging from the CHARGED price** | nothing: every arm is compared against the same bar | the COMPARATOR is mis-set, so all comparisons shift together | section 32; invisible to every arm-versus-arm check by construction |
 

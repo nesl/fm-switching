@@ -1,0 +1,47 @@
+{
+ "check": "evidence_need_item3_timing",
+ "is_measurement": false,
+ "label": "StudyEVNEED item 3, TIMING HALF ONLY. GPU-seconds saved by sending RECENT instead of full history, and infeasible questions rescued, on the 10/12/14 crossover band.",
+ "caveat": "EVERY ROW IS PRE-PRESSURE: gpu_kv_tokens was handed to arms and never enforced and there was no automatic eviction. The accuracy half is NOT computed: 0 of 845 StudyR1 questions exceed the 19,381-token breakeven, so the rescued questions have NO committed accuracy measurement. That is an EVIDENCE GAP, not an analysis limitation.",
+ "construction": "history_tokens AT QUESTION ARRIVAL, as in the D132 ceiling, never the session final size",
+ "recent_window_tokens": 467,
+ "feasibility_breakeven_tokens": 19381,
+ "by_size": {
+  "10": {
+   "questions": 92,
+   "full_gpu_s": 249.8,
+   "recent_gpu_s": 11.04,
+   "saved_gpu_s": 238.7,
+   "saved_pct": 95.6,
+   "infeasible": 7,
+   "rescued": 7
+  },
+  "12": {
+   "questions": 108,
+   "full_gpu_s": 302.4,
+   "recent_gpu_s": 12.96,
+   "saved_gpu_s": 289.5,
+   "saved_pct": 95.7,
+   "infeasible": 9,
+   "rescued": 9
+  },
+  "14": {
+   "questions": 136,
+   "full_gpu_s": 385.5,
+   "recent_gpu_s": 16.32,
+   "saved_gpu_s": 369.2,
+   "saved_pct": 95.8,
+   "infeasible": 12,
+   "rescued": 12
+  }
+ },
+ "headline": "95.6 to 95.8 percent of recall GPU time saved; 28 of 28 infeasible questions rescued. At 14 devices recall rebuilds cost 385.5 GPU-s over a 600 s run, about 64 percent of one GPU, and RECENT would cut that to 2.7 percent.",
+ "_provenance": {
+  "git_commit": "0a98ab48de1d848cd9cc314c18b06330fb6d870d",
+  "script": "reports/study_evidence_need.md section 3",
+  "model": "n/a (committed cost curve only)",
+  "device": "flash CPU only, no GPU",
+  "n": 336,
+  "timestamp": "2026-11-19"
+ }
+}

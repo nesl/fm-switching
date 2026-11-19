@@ -192,3 +192,65 @@ admission behaviour seen throughout this report.
 3. **S-EMBER only**, one workload, 845 questions, 234 videos. The LoCoMo contrast in the
    orchestration report shows the representation axis behaves oppositely on another workload.
 4. The committed JPEG and cache-path caveats (D70, D81) apply to the underlying StudyR1 records.
+
+---
+
+## 3. THE LEVER, timing half. 95.7 percent of recall GPU time, and every infeasible question rescued
+
+Seeds 0, 4, 5 and 6 at **10, 12 and 14 devices**, the crossover band. History size taken **at
+question arrival** from the trace's `history_tokens`, the same construction as the D132 ceiling,
+never the session's final size. Cost from the committed curve: `recall_gpu_s(h, "COLD")` plus
+`recall_gpu_s(h, "GPU-WARM")`. RECENT is the committed `RECENT_WINDOW_TOKENS = 467`.
+
+**EVERY ROW BELOW CARRIES THE NO-MEMORY-LIMIT CAVEAT:** these traces are pre-pressure,
+`gpu_kv_tokens` was handed to arms and never enforced, and there was no automatic eviction.
+
+| n | questions | full-history GPU-s | RECENT GPU-s | saved | infeasible | **rescued** |
+|---|---|---|---|---|---|---|
+| 10 | 92 | 249.8 | 11.04 | **238.7 (95.6 %)** | 7 | **7 of 7** |
+| 12 | 108 | 302.4 | 12.96 | **289.5 (95.7 %)** | 9 | **9 of 9** |
+| 14 | 136 | 385.5 | 16.32 | **369.2 (95.8 %)** | 12 | **12 of 12** |
+
+Per seed the saving is 94.5 to 96.1 percent, with no cell outside that range.
+
+### 3.1 The size of it, in terms the queueing result can use
+
+At 14 devices, recall rebuilds cost **385.5 GPU-seconds over a 600 s run: roughly 64 percent of
+one GPU, spent entirely on reconstructing history.** Sending RECENT instead would cut that to
+**16.3 GPU-s, about 2.7 percent.**
+
+**This is the same quantity the queueing account of the hardening report is about.** The robot axis
+is bound by delay against a 5.0 s deadline, and recall rebuilds are what saturate the engine and
+create that delay. **Removing 95.7 percent of recall GPU time is the largest single lever measured
+anywhere in this work**, and it acts directly on the binding constraint rather than on the price of
+it.
+
+### 3.2 Every infeasible question is rescued, and that is arithmetic rather than luck
+
+All 28 questions above the 19,381-token feasibility breakeven across the band become feasible under
+RECENT: **7 of 7, 9 of 9 and 12 of 12.** The rescue rate is 100 percent by construction, because
+467 tokens sits two orders of magnitude below the breakeven, so no question sent as RECENT can be
+infeasible on an idle engine.
+
+### 3.3 THE CATCH, and it is the whole study in one line
+
+**The accuracy cost of this lever is unmeasured exactly where the lever is largest.**
+
+- On the questions that HAVE committed accuracy data, RECENT costs **+1.18 pp net** with a CI
+  including zero, which is small; but that net is the residue of **8.05 percent helped and 6.86
+  percent harmed** (item 1), and **nothing in the candidate set predicts the harmed flow**
+  (item 2).
+- On the questions this lever *rescues*, the ones above the breakeven, **there is no committed
+  accuracy measurement at all**: 0 of 845 StudyR1 questions reach that length (item 1.3). They are
+  currently undeliverable, so today they are answered on-device or not at all; whether a 467-token
+  RECENT answer beats that is **unknown and unmeasurable from committed data**.
+
+**So the recommendation this study supports is narrow and I am stating it as such:** the timing
+lever is real, large and acts on the binding constraint. **It cannot yet be converted into a
+deployable policy**, because the two things a policy needs are both missing: a runtime signal for
+when history matters (item 2: none exists, and the category that might have served is dropped in
+`cstate`), and an accuracy measurement in the regime where the lever pays most (item 1.3: absent).
+
+**The highest-value single experiment this study identifies** is therefore not a policy change: it
+is a per-question accuracy measurement for long histories and for D2, which would close both gaps
+at once.
