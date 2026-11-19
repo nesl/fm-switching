@@ -1,5 +1,11 @@
 # StudyOEQA — OpenEQA feasibility gates
 
+> **UPDATE, 2026-11-19, after the ruling to proceed: THE SANCTIONED ROUTE IS DEAD.**
+> The HM3D Option 1 tarball **no longer exists**, verified directly. Every documented route to
+> OpenEQA's episode frames is now closed, and the one surviving mirror **cannot be verified against
+> the published md5 by construction**. Details in "The download attempt" below. **Nothing was
+> computed; the ruling's own precondition — record *and verify* the md5 — is unsatisfiable.**
+
 **Status: STOPPED AT THE GATES, BEFORE ANY DOWNLOAD.** Nothing has been fetched. One of the two
 corpora is blocked on a licence we have not signed, and the same corpus independently exceeds the
 free disk. The other clears both gates. This report is the decision request.
@@ -129,3 +135,93 @@ to question. So before the gate is trusted on the rest:
 
 If the gate does not sort those two correctly, its verdict on the remaining questions means
 nothing and the run is void rather than negative.
+
+
+---
+
+## The download attempt, 2026-11-19
+
+The ruling was to proceed with HM3D Option 1, recording the source URL and md5 and labelling every
+result "HM3D via third-party mirror". I checked headroom (51 GB free, unchanged), fetched the exact
+URL from the repository, and downloaded.
+
+**Source URL, as published:**
+`https://www.dropbox.com/scl/fi/t79gsjqlan8dneg7o63sw/open-eqa-hm3d-frames-v0.tgz?rlkey=1iuukwy2g3f5t06q4a3mxqobm`
+**Published md5:** `286aa5d2fda99f4ed1567ae212998370`
+
+### What arrived was not the tarball
+
+`curl` exited **0**. It wrote a file with the **correct name**. Nothing in the command's own signals
+indicated a problem. The file was **230 KB**, and:
+
+- `file` reports **HTML document**, not gzip.
+- md5 of what arrived: **`2e5a0bdac63a966fa5b808ad91c993ba`** against the published
+  **`286aa5d2fda99f4ed1567ae212998370`**.
+- Its `<title>` is **"Dropbox - Link Expired"**.
+
+**The md5 check did exactly the job it was required to do**, and it is worth being precise about
+what it caught: a **success signal that was not one**. Exit code 0, right filename, no error. Only
+the hash and the size revealed it. Recording the hash without verifying it would have left a 230 KB
+HTML file named `.tgz` to be discovered at extraction, or later, as a result.
+
+### Confirmed dead, not a redirect artefact
+
+Three variants, none returning the archive:
+
+| variant | result |
+|---|---|
+| `...&dl=1` | HTTP 200, `content-type: text/html` |
+| `...&dl=0` | HTTP 200, `content-type: text/html` |
+| `dl.dropboxusercontent.com/...` | **HTTP 403**, content-length 0 |
+
+Independently corroborated: open issues on third-party repositories report the same expiry for both
+the frames archive (filed ~209 days ago) and the states archive, and the request to re-upload the
+states archive is **still open**.
+
+### All three documented routes are now closed
+
+| route | status |
+|---|---|
+| ScanNet | **blocked** — unsigned Terms of Use, and 62 GB extraction against 51 GB free |
+| HM3D Option 2 (render from Habitat) | **blocked** — the trajectory-states archive is also expired |
+| HM3D Option 1 (frames tarball) | **DEAD** — link expired, verified above |
+
+### The surviving mirror cannot satisfy the ruling's own condition
+
+A Hugging Face mirror (`AIGeeksGroup/OpenEQA`, MIT, ungated) carries HM3D RGB frames **as 63
+per-scene `.tar` files**, reported elsewhere as 12,563,097,600 bytes. Two problems, and the first is
+disqualifying on its own terms:
+
+1. **Byte identity to the original is unverifiable by construction.** The published md5 covers a
+   **single `.tgz`** that no longer exists in that form. Sixty-three separate tars cannot be hashed
+   against one archive's checksum. A third party that pinned this mirror states plainly that the
+   original Dropbox byte identity is **unverified**. So the one integrity link to the benchmark's
+   actual frames is gone, and the ruling's instruction to *verify* the md5 cannot be followed.
+2. **Size.** The dataset page reports a total of **87 GB**, well beyond 51 GB free, though a
+   HM3D-only subset might fit.
+
+### The accurate reproducibility claim, strengthened again
+
+The earlier framing was "not independently reproducible from source". That is now too weak. The
+accurate statement is:
+
+> **OpenEQA's episode frames are not obtainable by any documented route, and the only surviving
+> mirror cannot be verified against the published checksum.**
+
+The annotations remain available and MIT-licensed; the **frames** are the problem. This is not a
+scientific limitation of the benchmark, it is an availability one, and it would have become visible
+only at extraction had the hash not been checked first.
+
+### Decision requested
+
+Proceeding would mean computing on frames **we cannot show are the benchmark's frames**. Given that
+every downstream number would inherit that, I have stopped. Options:
+
+1. **Accept the unverifiable mirror**, labelled "HM3D via unverifiable third-party mirror, byte
+   identity to the original NOT established", and fetch only the HM3D subset if it fits.
+2. **Sign the ScanNet Terms of Use and free ~70 GB**, making the larger and *verifiable* subset
+   available.
+3. **Close OpenEQA in `research/GRAVEYARD.md`** as unobtainable, with this report as the record.
+
+Option 3 is a real candidate. The GRAVEYARD already closes eight datasets, and "the data cannot be
+obtained or verified" is a cleaner closure reason than most of them.
