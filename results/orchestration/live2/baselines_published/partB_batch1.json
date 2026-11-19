@@ -1,0 +1,68 @@
+{
+ "check": "partB_batch1_port_proofs",
+ "is_measurement": true,
+ "label": "D134 Part B batch 1: StreamScout, CoVStream, Thinking-QwenVL. Seed 4, 8 devices, 300 s, dry.",
+ "proofs": {
+  "legal_actions": {
+   "method": "validate_action(apply_defaults(act), obs) on EVERY action of EVERY epoch, with b7-edf-feasibility as a known-good control.",
+   "result": {
+    "streamscout": 0,
+    "covstream": 0,
+    "thinking-qwenvl-atdm": 0,
+    "b7-edf-feasibility": 0
+   },
+   "note": "0 illegal actions out of 3,001 epochs each."
+  },
+  "fairness_digest": {
+   "value": "00f32b459e9fd4b2c0434414cabdb19cbadf2f2e6690561f762430e6d1b118bd",
+   "identical_across": [
+    "streamscout",
+    "covstream",
+    "thinking-qwenvl-atdm",
+    "b7-edf-feasibility"
+   ],
+   "note": "identical across all four arms on this trace, including the committed control, which is the D96 property. This is this cell trace digest and is NOT the same value as another cell."
+  }
+ },
+ "harness_fault_found_and_fixed": {
+  "what": "the first legality pass reported 2,834 to 3,000 illegal actions for EVERY arm, including b7-edf-feasibility.",
+  "cause": "I called validate_action on the RAW action. interface.apply_defaults fills cadence_s, frame_count and representation when the arm leaves them None, and validate_action checks the filled domain; unfilled None fails it.",
+  "how_caught": "by including a known-good committed arm as a control. b7 cannot be illegal, so a check that fails b7 is a broken check, not a broken arm.",
+  "lesson": "third proof this week that needed its internals read rather than its verdict: this one FAILED for the wrong reason, where the earlier two PASSED for the wrong reason."
+ },
+ "what_each_arm_decides": {
+  "streamscout": {
+   "acts": "recall CLOUD against DEVICE per query",
+   "inert": "its representation choice, until Part A lands",
+   "observed": "at 8 devices it answered all 9 recalls on DEVICE: decision kinds were decline 9 and release_monitor 2,101, with zero release_recall. Its routing half is live and is currently routing everything to the device."
+  },
+  "covstream": {
+   "acts": "recall CLOUD against DEVICE, and MATERIALIZE",
+   "inert": "its representation choice, and KEEP_GPU_WARM per the S5 pre-check",
+   "observed": "release_recall 9, release_monitor 2,105, matching b7 exactly on kind counts at this cell."
+  },
+  "thinking_qwenvl": {
+   "acts": "recall admit-or-DEFER and the defer quantum; FULLY expressible, it uses no representation and DEFER is honoured under D90",
+   "observed": "release_recall 9, release_monitor 2,061.",
+   "component_note": "D134 item 4: the card says \"component\", so what is ported is the decision component it contributes, the ATDM adaptive admit-or-defer rule. Its episodic-side contribution is what the card scopes out."
+  }
+ },
+ "part_A_status": {
+  "checked_at": "e60ff7f",
+  "finding": "NOT PRESENT ON origin/main AT THE TIME OF THIS COMMIT. representation has zero reads anywhere under live2: every occurrence is an arm WRITING it or a decides/defaults_used declaration. desired_tier is still written at coordinator.py:423 and :425 and read nowhere. The most recent commits touching coordinator.py and cstate.py are the vllm-priority wiring and the history-size fix, neither of which touches either path.",
+  "consequence": "SimpleStream and QueryStream QDP remain deferred, and StreamScout and CoVStream are ported with their representation half still inert. Re-run this check and the identity check when Part A actually lands."
+ },
+ "device_answer_channel": {
+  "verdict": "LIVE, unlike order, desired_tier and representation",
+  "evidence": "reads_device_answer is declared on the policy (interface.py:370), read at coordinator.py:171 into self.reads_device, and passed into cstate.observation(..., reads_device_answer=...) at cstate.py:298; device_answer_confidence (interface.py:118) is supplied only when declared, and _device_answer exists at coordinator.py:339.",
+  "why_it_matters": "this is the channel the ETH cascade-routing method needs for its post-hoc quality update, so that arm is fully expressible. Checked BEFORE writing its card."
+ },
+ "_provenance": {
+  "git_commit": "e60ff7f6779c4004eb444f75831212759f36d798",
+  "script": "scratch proof harness over live2 arms; arms_published.py is the only shared file changed",
+  "model": "none (dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4, 8 devices, 300 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}

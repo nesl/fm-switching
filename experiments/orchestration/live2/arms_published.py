@@ -43,6 +43,9 @@ from interface import Policy, StreamAction                             # noqa: E
 from arms import Live2ArmMixin                                          # noqa: E402
 
 import constructed as CONS                                              # noqa: E402
+import streamscout_adapted as SS                                        # noqa: E402
+import covstream_adapted as CVS                                         # noqa: E402
+import thinking_qwenvl_adapted as TQ                                    # noqa: E402
 import attentionstore_adapted as _attentionstore                        # noqa: E402
 import cascade_adapted as _cascade                                      # noqa: E402
 import clockwork_adapted as _clockwork                                  # noqa: E402
@@ -200,9 +203,35 @@ UniScaleArm = _wrap("UniScaleArm", _uniscale.UniScaleAdapted, "uniscale", "unisc
                     "baselines/uniscale_adapted.py::UniScaleAdapted")
 
 
+# ---------------------------------------------------------------- D134 Part B: streaming/edge
+# Ported here because their mechanisms reach a decision live2 actually enacts. The three that
+# choose RECALL-SIDE evidence (SimpleStream, and QueryStream's QDP half) are NOT here: see
+# `partB_precheck.json` and `cards/simplestream.md`. Each arm below has a WHAT IT DECIDES line,
+# which D134 requires in place of a bare "ported".
+#
+#   streamscout        -- decides recall CLOUD against DEVICE per query (ACTS), plus a
+#                         representation choice that is INERT until Part A lands.
+#   covstream          -- decides recall CLOUD against DEVICE and MATERIALIZE (both ACT), plus a
+#                         representation choice and KEEP_GPU_WARM that are INERT today.
+#   thinking-qwenvl    -- decides recall admit-or-DEFER and the defer quantum. FULLY expressible:
+#                         it uses no representation at all, and DEFER is honoured under D90.
+StreamScoutArm = _wrap("StreamScoutArm", SS.StreamScoutAdapted,
+                       "streamscout", "streamscout.md",
+                       "baselines/streamscout_adapted.py::StreamScoutAdapted")
+CoVStreamArm = _wrap("CoVStreamArm", CVS.CoVStreamAdapted,
+                     "covstream", "covstream.md",
+                     "baselines/covstream_adapted.py::CoVStreamAdapted")
+ThinkingQwenVLArm = _wrap("ThinkingQwenVLArm", TQ.ThinkingQwenVLAdapted,
+                          "thinking-qwenvl-atdm", "thinking_qwenvl.md",
+                          "baselines/thinking_qwenvl_adapted.py::ThinkingQwenVLAdapted")
+
+
 PUBLISHED_ARMS: Dict[str, Any] = {
     "b7-edf-feasibility": B7EdfFeasibilityArm,
     "b10-blocking-aware": B10BlockingAwareArm,
+    "streamscout": StreamScoutArm,
+    "covstream": CoVStreamArm,
+    "thinking-qwenvl-atdm": ThinkingQwenVLArm,
     "clockwork": ClockworkArm,
     "videostorm": VideoStormArm,
     "r3-streaming": R3StreamingArm,
