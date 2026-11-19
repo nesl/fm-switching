@@ -5848,3 +5848,45 @@ better evidence than the within-dispatch pattern originally predicted.
 
 **It must not collapse into either "the prediction was right" or "the geometry claim failed."**
 Neither is accurate.
+
+### Delivery risk: priced as a CLIFF, and the cliff is in the wrong place
+
+Same decision, same plan shape, history size varied:
+
+| tokens | `u_hat` | `z_term` | TOTAL |
+|---|---|---|---|
+| 2,048 | 0.286555187 | 0.450000000 | 0.764203208 |
+| 10,831 | 0.286555187 | 0.450000000 | 0.764203208 |
+| 18,000 | 0.286555187 | 0.450000000 | 0.764203208 |
+| **25,000** | **0.286555187** | **0.450000000** | **0.764203208** |
+| 40,000 | 0.251169263 | 0.000000000 | 0.278817284 |
+
+**So something DOES price delivery, but as a hard binary cliff somewhere between 25,000 and 40,000
+tokens, and everything below it is valued identically.** A **25,000-token** recall, which is beyond
+the D132 feasible breakeven of 19,381 and cannot be delivered inside 5 s on an idle engine by any
+scheduler, is valued **exactly the same** as a 2,048-token one, to nine decimal places. At 40,000
+the plan collapses to the reference: `z_term` goes to zero and the total equals Jhat(pi_0), meaning
+the plan is worth nothing at all.
+
+**The correction to the framing is that it is not "nothing prices delivery risk".** `u_rc` does
+check the deadline, returning device accuracy when `delivered > deadline_s`, so timeliness is
+priced. But it is priced **deterministically and as a step**, not as `P(delivered on time)`, and
+the step sits far beyond the physical limit. **Between 2,048 and 25,000 tokens there is no gradient
+at all**, which is the entire range where scheduling decisions actually differ.
+
+**THIS RECONCILES WITH THE EARLIER INFEASIBLE-QUESTION RESULT and sharpens both.** COVEX declined
+both questions above the breakeven (21,631 and 25,681 tokens, 0 of 2 admitted) while admitting 23
+of 27 feasible ones. That decline comes from the **feasibility classifier**, which runs the
+continuation schedule at `competing_s = 0`, and NOT from the objective's value. **So the system
+relies on a separate gate to reject the impossible, while its value function cannot tell an
+impossible recall from a trivial one.**
+
+**THE COMPANION TO THE HEADLINE, stated together.** Within the range where decisions actually
+differ, the objective cannot see **cost** (a 12 to 25 per cent GPU-second spread moves DeltaJ by
+nothing) and cannot see **delivery risk** (2,048 against 25,000 tokens moves DeltaJ by nothing).
+It can see **fidelity**, and it can see a device's **deficit bookkeeping**. A policy that cannot
+price what a recall costs, nor whether it will arrive in time, **has no basis on which to schedule
+one**, and that is a complete account of the robot axis.
+
+*(Bracketed, not located: the cliff is somewhere in (25,000, 40,000]. Pinning it exactly was not
+done and is not needed for the claim, which rests on the flatness below it.)*
