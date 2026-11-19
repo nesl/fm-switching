@@ -401,7 +401,8 @@ class Coordinator:
             cls = classify(job, fleet.t, self.engine,
                            competing_s=self.rollout.competing_gpu_s(fleet, job, fleet.t),
                            threshold=self.params.feasibility_threshold,
-                           resolution_s=self.params.continuation_resolution_s)
+                           resolution_s=self.params.continuation_resolution_s,
+                           rel_sigma=self.rollout.rel_sigma_for(job))
             if cls == INFEASIBLE:
                 continue
             try:
@@ -444,7 +445,8 @@ class Coordinator:
             comp = self.rollout.competing_gpu_s(fleet, job, fleet.t)
             job.feasibility = classify(job, fleet.t, self.engine, competing_s=comp,
                                        threshold=self.params.feasibility_threshold,
-                                       resolution_s=self.params.continuation_resolution_s)
+                                       resolution_s=self.params.continuation_resolution_s,
+                                       rel_sigma=self.rollout.rel_sigma_for(job))
             if job.feasibility == FEASIBLE and bounded_waiting_breach(
                     job, fleet.t, self.engine, comp, self.params.feasibility_threshold,
                     self.params.H, self.params.continuation_resolution_s):

@@ -1,0 +1,445 @@
+{
+ "check": "policy_v11_f3_f4_items_and_f5_verification",
+ "is_measurement": false,
+ "label": "DRY RUN, SCREENING. Seed 0 and dev fixtures only; never seeds 1 to 3. Outcomes read from outcomes.jsonl.",
+ "f1_followup": {
+  "source": "V11",
+  "deficit_now_visible": true,
+  "admit_nonzero": {
+   "4": "7 of 9",
+   "8": "16 of 20"
+  },
+  "release_nonzero": {
+   "4": "22 of 461",
+   "8": "100 of 1686"
+  },
+  "state_nonzero": {
+   "4": "0 of 7539",
+   "8": "3 of 15038 and negative"
+  },
+  "b2_recommendation": "DO NOT SCALE, keep w = 1: the unscaled deficit already reaches 1.800 against a backlog charge of 0.7 to 2.06, while w = 201.3 would reach about 362",
+  "b2_status": "SHELVED, ruling OUTSTANDING"
+ },
+ "f3": {
+  "switch": "Flags.realistic_competing",
+  "default_off": true,
+  "priority_reachable_before": 0,
+  "priority_reachable_after": {
+   "4": 1,
+   "8": 14
+  },
+  "robot_on_time_change": "none: 1 and 2 before and after",
+  "verdict": "did what it was built for and almost nothing else; kept per the stop rule, not reworked"
+ },
+ "f4": {
+  "switch": "Flags.prob_p_finish",
+  "default_off": true,
+  "implemented": true,
+  "fit_source": "results/cost/study_eng1/eng1_step_model.json residual_bands",
+  "fit_data": "Part A (A_E0) and Part B E0 (B_E0) steps; Part C (incl. HOLDOUT) not used",
+  "n": 5974,
+  "r2": 0.9845517041726302,
+  "form": "T = T_hat * exp(eps), eps ~ N(0, sigma_band^2); sigma = median_rel_res / 0.6744897501960817",
+  "sigma_by_band": {
+   "tok_0_1": 0.171391,
+   "tok_1_512": 0.162284,
+   "tok_512_2048": 0.082926,
+   "tok_2048_4096": 0.075033,
+   "tok_4096_8193": 0.104748
+  },
+  "caveat": "per-STEP residuals used for a completion time that sums many steps, so sigma is an UPPER BOUND",
+  "outcome": "INERT: robot 2/1 and 3/2 unchanged, dashcam slightly down at 8 devices",
+  "status": "left OFF per D125; v1.2 supersedes it"
+ },
+ "item1_attribution": {
+  "source": "V16",
+  "dashcam_served_n8": {
+   "v1.0": 2107,
+   "cursor only": 4090,
+   "zrows only": 3841,
+   "both": 4006
+  },
+  "robot_on_time_n8": {
+   "v1.0": 0,
+   "cursor only": 0,
+   "zrows only": 1,
+   "both": 2
+  },
+  "robot_on_time_n4": {
+   "v1.0": 1,
+   "cursor only": 1,
+   "zrows only": 2,
+   "both": 1
+  },
+  "finding": "neither cause alone explains it and they are NOT additive; robot service needs BOTH; at 4 devices the cursor COSTS one on-time answer",
+  "extra_releases_are_on_time": "4005 of 4006 at 8 devices"
+ },
+ "item2_tail_cost": {
+  "synthetic_180s": "INVALID AS A TAIL COST: 0 beyond-horizon rc_piece deliveries",
+  "fleet_traces": [
+   {
+    "n_devices": 16,
+    "rc_tail": false,
+    "run_s": 300.0,
+    "decisions": 852,
+    "periods": 419,
+    "p50_ms": 4.066,
+    "p99_ms": 19.254,
+    "max_ms": 47.316,
+    "rollouts": 27664,
+    "rollouts_per_decision": 32.47,
+    "beyond_horizon_rc": 0,
+    "beyond_horizon_rc_per_period": 0.0,
+    "beyond_horizon_sh": 695
+   },
+   {
+    "n_devices": 16,
+    "rc_tail": true,
+    "run_s": 300.0,
+    "decisions": 3920,
+    "periods": 2036,
+    "p50_ms": 6.54,
+    "p99_ms": 36.048,
+    "max_ms": 439.916,
+    "rollouts": 44898,
+    "rollouts_per_decision": 11.45,
+    "beyond_horizon_rc": 27619,
+    "beyond_horizon_rc_per_period": 13.57,
+    "beyond_horizon_sh": 10222
+   },
+   {
+    "n_devices": 32,
+    "rc_tail": false,
+    "run_s": 300.0,
+    "decisions": 3265,
+    "periods": 1851,
+    "p50_ms": 8.595,
+    "p99_ms": 161.17,
+    "max_ms": 557.219,
+    "rollouts": 51548,
+    "rollouts_per_decision": 15.79,
+    "beyond_horizon_rc": 0,
+    "beyond_horizon_rc_per_period": 0.0,
+    "beyond_horizon_sh": 30358
+   },
+   {
+    "n_devices": 32,
+    "rc_tail": true,
+    "run_s": 300.0,
+    "decisions": 2617,
+    "periods": 1897,
+    "p50_ms": 98.035,
+    "p99_ms": 1741.502,
+    "max_ms": 5082.252,
+    "rollouts": 191522,
+    "rollouts_per_decision": 73.18,
+    "beyond_horizon_rc": 369833,
+    "beyond_horizon_rc_per_period": 194.96,
+    "beyond_horizon_sh": 66353
+   },
+   {
+    "n_devices": 64,
+    "rc_tail": false,
+    "run_s": 300.0,
+    "decisions": 6209,
+    "periods": 2768,
+    "p50_ms": 23.983,
+    "p99_ms": 97.147,
+    "max_ms": 1583.224,
+    "rollouts": 106418,
+    "rollouts_per_decision": 17.14,
+    "beyond_horizon_rc": 0,
+    "beyond_horizon_rc_per_period": 0.0,
+    "beyond_horizon_sh": 60304
+   },
+   {
+    "n_devices": 64,
+    "rc_tail": true,
+    "run_s": 300.0,
+    "decisions": 3186,
+    "periods": 2182,
+    "p50_ms": 62.291,
+    "p99_ms": 1719.889,
+    "max_ms": 3170.869,
+    "rollouts": 152846,
+    "rollouts_per_decision": 47.97,
+    "beyond_horizon_rc": 419857,
+    "beyond_horizon_rc_per_period": 192.42,
+    "beyond_horizon_sh": 93639
+   }
+  ],
+  "paired": false,
+  "paired_note": "decision counts differ in both directions, so NOT like-for-like",
+  "headline": "at 32 devices p50 goes 8.6 to 98.0 ms and p99 161 to 1742 ms against a 100 ms period; n=64 did not finish and no figure is reported"
+ },
+ "final_step3": [
+  {
+   "n": 4,
+   "variant": "v1.0",
+   "robot_q": 9,
+   "robot_served": 1,
+   "robot_on_time": 1,
+   "mon_offered": 2176,
+   "mon_served": 2174,
+   "mon_on_time": 2174,
+   "z_rc_max": 0.0,
+   "decisions": 2380,
+   "zero_dj": {
+    "admit": "0/9 (0%)",
+    "release": "699/968 (72%)",
+    "state": "180/7539 (2%)"
+   },
+   "priority": 0,
+   "feasible": 2307,
+   "infeasible": 11632
+  },
+  {
+   "n": 4,
+   "variant": "tail+stale+B1+A3",
+   "robot_q": 9,
+   "robot_served": 2,
+   "robot_on_time": 1,
+   "mon_offered": 2176,
+   "mon_served": 2128,
+   "mon_on_time": 2128,
+   "z_rc_max": 4.5,
+   "decisions": 2297,
+   "zero_dj": {
+    "admit": "0/9 (0%)",
+    "release": "231/461 (50%)",
+    "state": "419/5048 (8%)"
+   },
+   "priority": 0,
+   "feasible": 7649,
+   "infeasible": 7392
+  },
+  {
+   "n": 4,
+   "variant": "+F3",
+   "robot_q": 9,
+   "robot_served": 2,
+   "robot_on_time": 1,
+   "mon_offered": 2176,
+   "mon_served": 2128,
+   "mon_on_time": 2128,
+   "z_rc_max": 4.5,
+   "decisions": 2297,
+   "zero_dj": {
+    "admit": "0/9 (0%)",
+    "release": "231/460 (50%)",
+    "state": "419/5048 (8%)"
+   },
+   "priority": 1,
+   "feasible": 7648,
+   "infeasible": 7392
+  },
+  {
+   "n": 4,
+   "variant": "+F4 (ALL v1.1)",
+   "robot_q": 9,
+   "robot_served": 2,
+   "robot_on_time": 1,
+   "mon_offered": 2176,
+   "mon_served": 2128,
+   "mon_on_time": 2128,
+   "z_rc_max": 4.5,
+   "decisions": 2297,
+   "zero_dj": {
+    "admit": "0/9 (0%)",
+    "release": "231/461 (50%)",
+    "state": "419/5048 (8%)"
+   },
+   "priority": 3,
+   "feasible": 259,
+   "infeasible": 14779
+  },
+  {
+   "n": 4,
+   "variant": "edf",
+   "robot_q": 9,
+   "robot_served": 9,
+   "robot_on_time": 8,
+   "mon_offered": 2176,
+   "mon_served": 2174,
+   "mon_on_time": 2174,
+   "z_rc_max": 0.0,
+   "decisions": 2190,
+   "zero_dj": {},
+   "priority": 0,
+   "feasible": 0,
+   "infeasible": 0
+  },
+  {
+   "n": 4,
+   "variant": "llf",
+   "robot_q": 9,
+   "robot_served": 7,
+   "robot_on_time": 7,
+   "mon_offered": 2176,
+   "mon_served": 2174,
+   "mon_on_time": 2174,
+   "z_rc_max": 0.0,
+   "decisions": 2190,
+   "zero_dj": {},
+   "priority": 0,
+   "feasible": 0,
+   "infeasible": 0
+  },
+  {
+   "n": 8,
+   "variant": "v1.0",
+   "robot_q": 20,
+   "robot_served": 0,
+   "robot_on_time": 0,
+   "mon_offered": 4326,
+   "mon_served": 2107,
+   "mon_on_time": 2107,
+   "z_rc_max": 0.0,
+   "decisions": 2220,
+   "zero_dj": {
+    "admit": "0/20 (0%)",
+    "release": "268/3395 (8%)",
+    "state": "3393/17231 (20%)"
+   },
+   "priority": 0,
+   "feasible": 89,
+   "infeasible": 6086
+  },
+  {
+   "n": 8,
+   "variant": "tail+stale+B1+A3",
+   "robot_q": 20,
+   "robot_served": 3,
+   "robot_on_time": 2,
+   "mon_offered": 4326,
+   "mon_served": 4006,
+   "mon_on_time": 4005,
+   "z_rc_max": 5.3,
+   "decisions": 4383,
+   "zero_dj": {
+    "admit": "0/20 (0%)",
+    "release": "1267/1686 (75%)",
+    "state": "0/4357 (0%)"
+   },
+   "priority": 0,
+   "feasible": 1878,
+   "infeasible": 21322
+  },
+  {
+   "n": 8,
+   "variant": "+F3",
+   "robot_q": 20,
+   "robot_served": 3,
+   "robot_on_time": 2,
+   "mon_offered": 4326,
+   "mon_served": 4006,
+   "mon_on_time": 4005,
+   "z_rc_max": 5.3,
+   "decisions": 4383,
+   "zero_dj": {
+    "admit": "0/20 (0%)",
+    "release": "1267/1684 (75%)",
+    "state": "0/4357 (0%)"
+   },
+   "priority": 14,
+   "feasible": 1864,
+   "infeasible": 21322
+  },
+  {
+   "n": 8,
+   "variant": "+F4 (ALL v1.1)",
+   "robot_q": 20,
+   "robot_served": 3,
+   "robot_on_time": 2,
+   "mon_offered": 4326,
+   "mon_served": 4002,
+   "mon_on_time": 4001,
+   "z_rc_max": 5.3,
+   "decisions": 4361,
+   "zero_dj": {
+    "admit": "0/20 (0%)",
+    "release": "1266/1671 (76%)",
+    "state": "0/4357 (0%)"
+   },
+   "priority": 16,
+   "feasible": 501,
+   "infeasible": 22683
+  },
+  {
+   "n": 8,
+   "variant": "edf",
+   "robot_q": 20,
+   "robot_served": 19,
+   "robot_on_time": 0,
+   "mon_offered": 4326,
+   "mon_served": 4320,
+   "mon_on_time": 4266,
+   "z_rc_max": 0.0,
+   "decisions": 5127,
+   "zero_dj": {},
+   "priority": 0,
+   "feasible": 0,
+   "infeasible": 0
+  },
+  {
+   "n": 8,
+   "variant": "llf",
+   "robot_q": 20,
+   "robot_served": 18,
+   "robot_on_time": 4,
+   "mon_offered": 4326,
+   "mon_served": 4322,
+   "mon_on_time": 4304,
+   "z_rc_max": 0.0,
+   "decisions": 4864,
+   "zero_dj": {},
+   "priority": 0,
+   "feasible": 0,
+   "infeasible": 0
+  }
+ ],
+ "f5a_verification": {
+  "hypothesis": "the backlog term compares GPU-seconds against a wall-clock horizon in a way the spec did not intend",
+  "verdict": "REFUTED",
+  "spec_lines": [
+   "policy_spec_v4.md:147",
+   "policy_spec_v4.md:151",
+   "policy_spec_v4.md:239"
+  ],
+  "spec_says": "mu is in utility units per GPU-second; residual GPU backlog subtracted at mu per GPU-second",
+  "implementation": "residual = max(busy - H, 0) in GPU-seconds, mu = delta_j / pr.gpu_s per GPU-second",
+  "dimensionally_consistent": true,
+  "changed_nothing": true,
+  "reason": "adopting max(free_at - end, 0) would be the third definition D126 forbids",
+  "term_almost_never_fires": {
+   "rollouts": 5016,
+   "residual_nonzero": 6,
+   "frac": 0.001
+  },
+  "where_the_charge_comes_from": "a6_backlog, the A6 expected restore work in WALL-CLOCK seconds, added to a GPU-second quantity and priced per GPU-second; that addition is where the units genuinely disagree",
+  "a6_implied": "about 0.72 s at mu 1.5 to produce session 2 median 1.084; an ARITHMETIC IMPLICATION, not a measurement",
+  "smaller_real_defect": "busy charges in-flight requests their FULL gpu_s (rollout.py:251) though the spec asks for backlog AT t+H; in-flight is median 66.7 percent of busy, p90 100 percent"
+ },
+ "f5b_verification": {
+  "terminal_evaluations": 5016,
+  "state_value_rows_median": 2,
+  "sum_exactly_zero": "5016 of 5016, 100 percent",
+  "loop_runs": true,
+  "device_demand_set_at": "arms_policy.py:550",
+  "finding": "STRONGER than session 2: the sum is absolutely zero per branch, not merely equal across branches, so readiness.state_value returns 0 for every device and representation here",
+  "v12_consequence": "v1.2 counts state value at T_r and defines ABANDON as keeping the state value of what is built; BOTH are inert today, and F5b as written may not suffice because the zero originates inside state_value itself"
+ },
+ "v12_status": "design note committed verbatim at 3978a15; implementation NOT started, paused per D126 behind F5a, F5b, F5c",
+ "gates": {
+  "policy_suite": "467/467",
+  "frozen_md5s": "12/12 green"
+ },
+ "_provenance": {
+  "git_commit": "d77c7d838abd17d26e029df468ac8f901b445e4c",
+  "script": "policy/rollout.py, policy/coordinator.py, policy/continuation.py, policy/completion_error.py, live2/arms_policy.py behind default-off flags",
+  "model": "none (pol4 frozen)",
+  "device": "flash CPU only",
+  "n": "seed 0 at 4, 8, 16 and 32 devices",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}

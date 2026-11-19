@@ -117,6 +117,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     realistic_competing: bool = False
     rc_tail_cursor: bool = False
     rc_tail_zrows: bool = False
+    prob_p_finish: bool = False
 
     name: str = "policy-core"
     case: str = "own"
@@ -189,7 +190,8 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                            write_staleness=bool(self.write_staleness),
                            realistic_competing=bool(self.realistic_competing),
                            rc_tail_cursor=bool(self.rc_tail_cursor),
-                           rc_tail_zrows=bool(self.rc_tail_zrows))
+                           rc_tail_zrows=bool(self.rc_tail_zrows),
+                           prob_p_finish=bool(self.prob_p_finish))
         if self.flags.conditional_any_on():
             raise RuntimeError("D66: round 1 runs the CORE only and every conditional flag must "
                                "be off; one is on")

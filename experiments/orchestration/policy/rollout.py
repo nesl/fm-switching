@@ -146,6 +146,16 @@ class Rollout:
         return sorted(items, key=lambda p: (p.deadline if p.deadline is not None else 1e18,
                                             p.due_at, p.item_id))
 
+    def rel_sigma_for(self, job: Any) -> Optional[float]:
+        """D122 v1.1 F4: the committed relative-error sigma for this job's piece size.
+
+        None with the flag off, which keeps `p_finish` the 0/1 indicator byte-for-byte.
+        """
+        if not self.flags.prob_p_finish:
+            return None
+        from .completion_error import sigma_for_tokens
+        return float(sigma_for_tokens(int(getattr(job, "tokens_per_piece", 0) or 0)))
+
     def competing_gpu_s(self, f: Fleet, job: Any, t: float) -> float:
         """D122 v1.1 F3: the engine-seconds pi_0 would serve BEFORE this job's pieces.
 
@@ -178,6 +188,25 @@ class Rollout:
                 total += float(self._gpu_s_of(p))
         return max(total, 0.0)
 
+    @staticmethod
+    def occupancy_of(pr: Any) -> float:
+        """THE single expression for how much engine one request occupies.
+
+        D127: F3's `competing_s` and spec 3.5's backlog term must not disagree about what the
+        engine is doing, so both read this one function. Today it is the step model's `gpu_s`,
+        which is what spec 3.5 asks for (`policy_spec_v4.md:151`, "mu is in utility units per
+        GPU-second"). If F5a rules that spec 3.5 means remaining WALL-CLOCK occupancy instead,
+        the correction belongs HERE and propagates to both readers at once; `pr.service_s` is the
+        wall-clock alternative.
+
+        KNOWN DIVERGENCE, recorded for F5a rather than silently reconciled: the two readers pass
+        different `concurrent` values to `engine.predict`. The horizon loop passes the live
+        concurrency, while `competing_gpu_s` passes 0 so that a job's competing work does not
+        depend on the order in which candidates are scored. Whether those should agree is F5a's
+        question, not something to settle by inlining a third choice here.
+        """
+        return float(pr.gpu_s)
+
     def _gpu_s_of(self, p: PendingItem) -> float:
         """The step model's gpu_s for one item, memoised on the request signature.
 
@@ -194,7 +223,7 @@ class Rollout:
               meta)
         hit = memo.get(ck)
         if hit is None:
-            hit = float(self.engine.predict(self._request(p), concurrent=0).gpu_s)
+            hit = self.occupancy_of(self.engine.predict(self._request(p), concurrent=0))
             memo[ck] = hit
         return hit
 
@@ -238,7 +267,7 @@ class Rollout:
                                      load_pct=self.load_pct)
             in_sample = in_sample and pr.in_sample
             free_at = max(free_at, t0 + pr.service_s)
-            busy += pr.gpu_s
+            busy += self.occupancy_of(pr)
             if p.kind == "episode_call":
                 # D98: an SH call ALREADY IN FLIGHT is credited at its own instant's deadline
                 # (spec 6.3: "never worth zero merely because it lands after the horizon"), so
@@ -274,7 +303,7 @@ class Rollout:
                                      load_pct=self.load_pct)
             in_sample = in_sample and pr.in_sample
             finish = start + pr.service_s
-            busy += pr.gpu_s
+            busy += self.occupancy_of(pr)
             free_at = finish
             if pool is not None:
                 pid = prefix_id_for(p.job_id) if p.job_id else "transient:%s" % p.item_id
@@ -649,6 +678,7 @@ class Rollout:
             prio = bool(self.flags.honour_job_priority and j.feasibility == PRIORITY)
             comp = self.competing_gpu_s(f, j, end)
             v = continuation_value(j, end, self.engine, competing_s=comp, priority=prio,
+                                   rel_sigma=self.rel_sigma_for(j),
                                    omega_rc=self.pf.omega("RC"), acc_cloud=acc_c,
                                    acc_device=acc_d, z=dev.z_of("RC"), d_p_success=0.0,
                                    p_reachable=dev.link.p_reachable_within_hs,
@@ -720,9 +750,11 @@ class Rollout:
                   z=dev.z_of("RC"), p_reachable=dev.link.p_reachable_within_hs,
                   resolution_s=self.params.continuation_resolution_s)
         comp = self.competing_gpu_s(f, job, f.t)
-        safe = continuation_value(job, f.t, self.engine, comp, False, extra_work_s=0.0, **kw)
+        rs = self.rel_sigma_for(job)
+        safe = continuation_value(job, f.t, self.engine, comp, False, extra_work_s=0.0,
+                                  rel_sigma=rs, **kw)
         lost = continuation_value(job, f.t, self.engine, comp, False, extra_work_s=lost_extra,
-                                  **kw)
+                                  rel_sigma=rs, **kw)
         return dict(value_at_risk=float(safe - lost), safe=float(safe), if_lost=float(lost),
                     restore_work_s=lost_extra, built_prefix_tokens=built, p_host=ph)
 

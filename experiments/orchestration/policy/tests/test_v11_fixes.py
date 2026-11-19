@@ -359,9 +359,28 @@ class TestF3RealisticCompetingWork(unittest.TestCase):
         import inspect
         from policy import rollout as RO
         src = inspect.getsource(RO.Rollout._gpu_s_of)
-        self.assertIn("self.engine.predict(self._request(p), concurrent=0).gpu_s", src)
+        self.assertIn("self.engine.predict(self._request(p), concurrent=0)", src)
+        self.assertIn("self.occupancy_of(", src, "it must read the single occupancy expression")
         for banned in ("0.5", "1.5", "factor", "scale", "tune"):
             self.assertNotIn(banned, src, "F3 must introduce no parameter")
+
+    def test_the_occupancy_quantity_lives_in_exactly_one_place(self):
+        """D127: competing_s and the backlog term must not disagree about the engine.
+
+        Both read `Rollout.occupancy_of`, so F5a's correction propagates to both at once rather
+        than needing a second, divergent fix.
+        """
+        import inspect
+        from policy import rollout as RO
+        self.assertTrue(hasattr(RO.Rollout, "occupancy_of"))
+        occ = inspect.getsource(RO.Rollout.occupancy_of)
+        self.assertIn("return float(pr.gpu_s)", occ)
+        run = inspect.getsource(RO.Rollout.run)
+        self.assertEqual(run.count("busy += self.occupancy_of(pr)"), 2,
+                         "both backlog accumulation sites must read the one expression")
+        self.assertNotIn("busy += pr.gpu_s", run,
+                         "no site may inline the occupancy expression any more")
+        self.assertIn("self.occupancy_of(", inspect.getsource(RO.Rollout._gpu_s_of))
 
     def test_priority_becomes_reachable_once_competing_work_is_non_zero(self):
         """The direct test of what F3 is for: classify can return PRIORITY."""
@@ -390,3 +409,83 @@ class TestF3RealisticCompetingWork(unittest.TestCase):
         src = inspect.getsource(RO.Rollout.competing_gpu_s)
         self.assertIn("if k < key:", src)
         self.assertIn("p.due_at, p.item_id", src, "the pi_0 EDF key, as _edf uses it")
+
+
+class TestF4ProbabilisticPFinish(unittest.TestCase):
+    """D122 v1.1 F4: p_finish becomes P(finish <= D_r) under the MEASURED completion error."""
+
+    def test_the_flag_defaults_off(self):
+        self.assertFalse(Flags().prob_p_finish)
+
+    def test_the_fit_source_is_committed_and_fit_only(self):
+        from policy import completion_error as CE
+        d = CE.describe()
+        self.assertEqual(d["source"], "results/cost/study_eng1/eng1_step_model.json")
+        self.assertIn("HOLDOUT) not used", str(d["fit_data"]),
+                      "the fit data must state the HOLDOUT was excluded")
+        self.assertEqual(d["n"], 5974)
+
+    def test_it_refuses_a_source_that_does_not_state_the_holdout_was_excluded(self):
+        """A guard, so this can never be calibrated on something unstated."""
+        import json
+        import tempfile
+        from pathlib import Path
+        from policy import completion_error as CE
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "bad.json"
+            p.write_text(json.dumps(dict(fit_data="everything, including the holdout",
+                                         residual_bands={"tok_0_1": {"median_rel_res": 0.1}})))
+            with self.assertRaises(ValueError):
+                CE.load_sigmas(p)
+
+    def test_sigma_comes_from_the_committed_medians_with_no_free_parameter(self):
+        import json
+        from pathlib import Path
+        from policy import completion_error as CE
+        root = Path(__file__).resolve().parents[4]
+        raw = json.loads((root / CE.STEP_MODEL_PATH).read_text())
+        for band, rec in raw["residual_bands"].items():
+            if "median_rel_res" not in rec:
+                continue
+            want = float(rec["median_rel_res"]) / CE.HALF_NORMAL_MEDIAN
+            self.assertAlmostEqual(CE.load_sigmas()[band], want, places=12)
+
+    def test_the_probability_is_a_gradient_where_the_indicator_is_a_step(self):
+        """The whole point of F4: progress and slack must stop being invisible."""
+        from policy.continuation import p_finish
+        e = Eng1Engine.load()
+        ind, prob = [], []
+        for deadline in (5.0, 2.0, 1.2, 1.0, 0.9, 0.5):
+            j = _job(deadline)
+            ind.append(p_finish(j, 0.0, e, 0.0, False, 0.25, 0.0, None))
+            prob.append(p_finish(j, 0.0, e, 0.0, False, 0.25, 0.0, 0.0829))
+        self.assertEqual(set(ind), {0.0, 1.0}, "the indicator takes only two values")
+        self.assertGreater(len(set(round(x, 3) for x in prob)), 3,
+                           "the probability must vary, not step: got %r" % (prob,))
+        self.assertTrue(all(a >= b - 1e-12 for a, b in zip(prob, prob[1:])),
+                        "it must be monotone in slack: %r" % (prob,))
+
+    def test_rel_sigma_none_keeps_the_indicator_byte_for_byte(self):
+        from policy.continuation import p_finish
+        e = Eng1Engine.load()
+        for deadline in (5.0, 1.0, 0.9, 0.5):
+            j = _job(deadline)
+            v = p_finish(j, 0.0, e, 0.0, False, 0.25, 0.0, None)
+            self.assertIn(v, (0.0, 1.0))
+
+    def test_the_schedule_now_reports_a_prediction_even_on_an_overrun(self):
+        """`finish_at` keeps its meaning so no existing reader changes."""
+        from policy.continuation import continuation_schedule
+        e = Eng1Engine.load()
+        j = _job(0.5)
+        s = continuation_schedule(j, 0.0, e, 0.0, False, 0.25, 0.0, full_estimate=True)
+        self.assertIsNone(s.finish_at, "an overrun must still report finish_at None")
+        self.assertIsNotNone(s.finish_estimate)
+        self.assertGreater(s.finish_estimate, j.deadline)
+
+    def test_the_rollout_passes_none_with_the_flag_off(self):
+        import inspect
+        from policy import rollout as RO
+        src = inspect.getsource(RO.Rollout.rel_sigma_for)
+        self.assertIn("if not self.flags.prob_p_finish:", src)
+        self.assertIn("return None", src)

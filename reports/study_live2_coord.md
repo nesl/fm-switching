@@ -4310,3 +4310,176 @@ inventing them.
 3. Robot questions released and on time should rise above the 2 of 9 and 3 of 20 the tail reached.
 4. Because `classify` thresholds on `p_finish`, the FEASIBLE / PRIORITY / INFEASIBLE split will
    move; I will report it rather than predict a direction.
+
+## V18. ITEM 2 REDONE: the tail's cost where it fires, and it is large
+
+The 180 s synthetic table in V10.2 is **INVALID AS A TAIL COST** and labelled so there: the tail
+produced 0 beyond-horizon `rc_piece` deliveries on that fixture. Redone on the seed-0 FLEET traces,
+300 s, dry run, every switch of v1.1 on except the tail itself being toggled.
+
+| n | tail | decisions | p50 | p99 | max | rollouts per decision | beyond-horizon `rc_piece` per period |
+|---|---|---|---|---|---|---|---|
+| 16 | OFF | 852 | 4.07 ms | 19.25 ms | 47.3 ms | 32.5 | **0** |
+| 16 | **ON** | 3,920 | **6.54 ms** | **36.05 ms** | 439.9 ms | 11.5 | **13.6** |
+| 32 | OFF | 3,265 | 8.60 ms | 161.17 ms | 557.2 ms | 15.8 | **0** |
+| 32 | **ON** | 2,617 | **98.04 ms** | **1,741.50 ms** | 5,082.3 ms | 73.2 | **195.0** |
+
+**The tail fires properly here**, 13.6 and 195.0 beyond-horizon `rc_piece` deliveries per period
+against 0 with it off, so this is attributable to work the tail actually did.
+
+**NOT PAIRED, and it matters.** Decision counts differ in both directions (852 against 3,920 at
+16, 3,265 against 2,617 at 32), because the tail changes how many decisions a run makes. These are
+therefore NOT like-for-like comparisons of the same decisions, and the p50/p99 columns must be
+read with that in mind.
+
+**The cost at 32 devices is severe and I am reporting it rather than softening it: p50 goes 8.6 to
+98.0 ms and p99 goes 161 to 1,742 ms, against a 100 ms decision period.** At 16 devices it is
+modest (+61 per cent p50, +87 per cent p99). The 64-device cell did not finish inside the time I
+had, and I am not reporting a figure for it.
+
+## V19. FINAL Step 3 for v1.1, with F4, and F4 adds nothing
+
+Dry run, screening. Seed 0, 600 s, mu EWMA, H = 0.5 s, tight. Outcomes from `outcomes.jsonl`.
+
+| n | variant | robot served / on time of | dashcam served / on time of | z[RC] max | PRIORITY | decisions vs v1.0 |
+|---|---|---|---|---|---|---|
+| 4 | v1.0 | 1 / 1 of 9 | 2,174 / 2,174 of 2,176 | 0.00 | 0 | reference |
+| 4 | tail+stale+B1+A3 | 2 / 1 | 2,128 / 2,128 | 4.50 | 0 | 2,193 of 2,380 |
+| 4 | +F3 | 2 / 1 | 2,128 / 2,128 | 4.50 | **1** | 2,193 |
+| 4 | +F4, all v1.1 | 2 / 1 | 2,128 / 2,128 | 4.50 | 3 | 2,193 |
+| 4 | `edf` | **9 / 8** | 2,174 / 2,174 | n/a | n/a | n/a |
+| 4 | `llf` | **7 / 7** | 2,174 / 2,174 | n/a | n/a | n/a |
+| 8 | v1.0 | 0 / 0 of 20 | 2,107 / 2,107 of 4,326 | 0.00 | 0 | reference |
+| 8 | tail+stale+B1+A3 | 3 / 2 | 4,006 / 4,005 | 5.30 | 0 | 3,326 of 2,220 |
+| 8 | +F3 | 3 / 2 | 4,006 / 4,005 | 5.30 | **14** | 3,326 |
+| 8 | +F4, all v1.1 | 3 / 2 | 4,002 / 4,001 | 5.30 | 16 | 3,304 |
+| 8 | `edf` | 19 / **0** | 4,320 / 4,266 | n/a | n/a | n/a |
+| 8 | `llf` | 18 / **4** | 4,322 / 4,304 | n/a | n/a | n/a |
+
+**F4 is inert in outcome terms**: robot 2 / 1 and 3 / 2 unchanged, PRIORITY 1 to 3 and 14 to 16,
+dashcam slightly DOWN at eight devices (4,006 to 4,002). Per D125 its switch stays OFF and v1.2
+supersedes it. It is implemented and tested, so it costs nothing to leave off.
+
+**The dashcam axis confirms session 2's finding.** policy-core serves 2,128 of 2,176 at four
+devices and 4,006 of 4,326 at eight, against `edf` at 2,174 and 4,320. So COVEX is behind on
+dashcams too, and this is not a robots-against-dashcams trade.
+
+## V20. F5a VERIFIED: the backlog units are ALREADY what the spec says. Hypothesis REFUTED
+
+D126 asked me to verify before correcting, and to read spec 3.5 rather than invent a third
+definition. The spec is explicit:
+
+- `policy_spec_v4.md:147`: `- mu * (GPU backlog at t + H not already in any job's continuation
+  value)`
+- `policy_spec_v4.md:151`: "**mu is in utility units per GPU-second.**"
+- `policy_spec_v4.md:239`: "residual GPU backlog ... **subtracted at mu per GPU-second**."
+
+And the implementation matches on both sides:
+
+| side | implementation | unit |
+|---|---|---|
+| the quantity | `residual = max(busy - H, 0.0)`, `busy` summing `pr.gpu_s` | GPU-seconds |
+| the price | `_update_mu`: `realized = delta_j / pr.gpu_s` | utility per GPU-second |
+
+**mu [utility per GPU-second] times backlog [GPU-seconds] is utility, so the product is
+dimensionally consistent and it is the spec's own choice.** The hypothesis that the term compares
+GPU-seconds against a wall-clock horizon in a way the spec did not intend is **refuted**: the spec
+asks for GPU-seconds. Adopting `max(free_at - end, 0.0)` would be the third definition D126
+forbids, so **I did not change it.**
+
+### V20.1 And the term almost never fires, so it cannot be the dashcam explanation
+
+Measured over 5,016 rollouts at eight devices on the seed-0 fleet trace:
+
+| quantity | value |
+|---|---|
+| `busy` (GPU-seconds) | median 0.144, max 1.514 |
+| **`residual = max(busy - H, 0)` non-zero** | **6 of 5,016 rollouts, 0.1 per cent** |
+| `residual` median / p90 / max | 0.000 / 0.000 / 1.014 |
+
+**So the GPU-overflow backlog channel is silent in 99.9 per cent of rollouts and cannot explain
+COVEX's dashcam deficit.**
+
+### V20.2 Where the backlog charge session 2 measured actually comes from
+
+`mu_term = -mu * (max(busy - H, 0.0) + a6_backlog)`, and `a6_backlog` is
+`sum(extra_work_s for v in risk.values())`, the A6 expected RESTORE work in seconds from the
+prefix-risk dict. Since the GPU-overflow part is zero in 99.9 per cent of cases, the charge session
+2 measured at a median of 1.084 must come almost entirely from `a6_backlog`. At the measured mu of
+about 1.5 that implies an `a6_backlog` of roughly 0.72 s. **That is an arithmetic implication of my
+measurement and session 2's, not a direct measurement, and it should be confirmed before anyone
+acts on it.**
+
+This matters for the ruling: `a6_backlog` is restore work in WALL-CLOCK seconds added to a
+GPU-second quantity and multiplied by a per-GPU-second price. **That addition is where the units
+genuinely do not agree**, and it is a different defect from the one the hypothesis named. I am
+reporting it rather than changing it, because choosing how to reconcile A6 restore work with the
+GPU-second backlog is a methodological choice, not a units typo, and D126 did not authorise it.
+
+### V20.3 A smaller real defect, measured
+
+`busy` charges every IN-FLIGHT request its FULL predicted `pr.gpu_s` (`rollout.py:251`), including
+work already spent before `t0`, while the spec asks for backlog **at t + H**. In-flight items are
+**median 66.7 per cent of `busy`, p90 100 per cent**, so the overstatement is large in relative
+terms. Because `residual` fires in only 0.1 per cent of rollouts it has almost no effect today, so
+I did not change it either; it is recorded as the thing to fix if the backlog channel is ever made
+active.
+
+## V21. F5b VERIFIED, and it is WORSE than session 2 found
+
+Session 2 reported state value exactly zero for every candidate because both branches compute the
+same sum. Measured over 5,016 terminal evaluations at eight devices:
+
+| quantity | value |
+|---|---|
+| state-value rows produced per evaluation | median 2, max 4 |
+| loop-eligible (device, rep) pairs | median 2 |
+| **`sum(state_value)` exactly zero** | **5,016 of 5,016, 100 per cent** |
+
+**The loop DOES run**, and `Device.demand` IS set (`arms_policy.py:550`), so the rows exist. But
+each row's `value` is zero, so **the sum is absolutely zero per branch, not merely equal across
+branches.** That is a stronger statement than "both branches agree": there is no state value
+anywhere to differ.
+
+**This directly affects v1.2's design and the user asked me to check it early rather than rely on
+it.** The design note counts "state value at T_r" in the plan's Jhat and defines ABANDON as
+"decline the remainder, keep the state value of what is built". **Both are inert today**, and F5b
+as written ("wire the KV and host-tier bookkeeping into the terminal state value") may not be
+sufficient on its own, because the zero originates inside `readiness.state_value` returning 0 for
+every device and representation in this setting, not only in the absence of a branch difference.
+Locating that is the first step of F5b and it was not part of my queue.
+
+## V22. D127 point 2: the occupancy quantity now lives in ONE place
+
+The user asked that F3's `competing_s` and spec 3.5's backlog term not disagree about what the
+engine is doing, and that if I had already inlined the quantity in two places I factor it before
+starting F5a and say so. **I had.** `competing_gpu_s` read `predict(...).gpu_s` directly while the
+horizon loop accumulated `busy += pr.gpu_s`, so the expression existed twice.
+
+Both now read `Rollout.occupancy_of(pr)`, a single function whose body is `float(pr.gpu_s)`, which
+is what spec 3.5 asks for. **If F5a rules that spec 3.5 means remaining wall-clock occupancy, the
+correction belongs in that one function and propagates to both readers at once**, with
+`pr.service_s` as the wall-clock alternative.
+
+**One divergence is recorded rather than silently reconciled**, because settling it is F5a's job
+and not something to decide by inlining a third choice: the two readers pass different
+`concurrent` values to `engine.predict`. The horizon loop passes the live concurrency;
+`competing_gpu_s` passes 0, so that a job's competing work does not depend on the order in which
+candidates happen to be scored. A test asserts the single-source property and that no site inlines
+the expression any more.
+
+## V23. Where v1.1 stands against the D127 gate
+
+The gate is now edf AND llf on BOTH axes at every size, with `always-cloud-fcfs` reported but not
+gating. Current standing from V19, dry run screening:
+
+| axis | n | v1.1 (all fixes) | `edf` | `llf` | gate met? |
+|---|---|---|---|---|---|
+| robot on time | 4 | 1 of 9 | 8 | 7 | **NO** |
+| robot on time | 8 | 2 of 20 | 0 | 4 | no (beats edf, below llf) |
+| dashcam on time | 4 | 2,128 of 2,176 | 2,174 | 2,174 | **NO** |
+| dashcam on time | 8 | 4,005 of 4,326 | 4,266 | 4,304 | **NO** |
+
+**v1.1 does not meet the D127 gate on either axis at either size**, except that it beats `edf` on
+robots at eight devices where `edf` gets none on time. That is the bar v1.2 has to clear, and it
+is demanding on both axes exactly as the amendment says.

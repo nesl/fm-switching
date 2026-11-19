@@ -52,6 +52,10 @@ class Flags:
     # `rc_tail` alone turns both on and is byte-identical to the build before this split.
     rc_tail_cursor: bool = False
     rc_tail_zrows: bool = False
+    # D122 v1.1 F4 (spec Phat): p_finish stops being a 0/1 indicator and becomes
+    # P(predicted finish <= D_r) under the cost model's MEASURED completion-time error,
+    # calibrated from committed FIT-only residuals. DEFAULT OFF.
+    prob_p_finish: bool = False
 
     def tail_cursor_on(self) -> bool:
         return bool(self.rc_tail or self.rc_tail_cursor)
