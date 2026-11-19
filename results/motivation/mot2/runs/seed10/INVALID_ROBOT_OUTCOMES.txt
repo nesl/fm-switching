@@ -1,0 +1,6 @@
+INVALID (user ruling 2026-11-18): every ROBOT outcome in this run (recall answers, their timing, readiness, rebuild
+behaviour and anything scored from them) is INVALID because of the live coordinator's history-size bug:
+cstate.history_append keeps max(batch est_tokens, current) instead of the cumulative history size, so every robot
+history looked many times smaller to the arm and edf's "whole" rebuilds built only a prefix. Do not cite or recompute
+robot results from this run. The HARNESS criteria (emulator lateness, forwarding, digests, HTTP errors) stand.
+Files kept unchanged.
