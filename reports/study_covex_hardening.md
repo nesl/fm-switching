@@ -2627,6 +2627,8 @@ auditor told to watch for one will pass the other two.
 | **an exact zero in a high field** | one arm at 0.0000 where every other reads 0.87 to 0.999 | a BROKEN MEASUREMENT, not a weak arm: b10 served no monitors at all | section 16.2, and I missed it first time by recording it as a result |
 | **an impossible SUCCESS or FAILURE of a control** | a known-good arm failing a check | the CHECK is broken, not the arm: session 3's legality check failed the committed b7 control | the positive-control form of the row above |
 
+| **a planner's price diverging from the CHARGED price** | nothing: every arm is compared against the same bar | the COMPARATOR is mis-set, so all comparisons shift together | section 32; invisible to every arm-versus-arm check by construction |
+
 **An impossible failure and an impossible success are equally diagnostic**, and a reviewer watching
 only for implausible RESULTS will catch neither, because both appear in the machinery rather than
 in the headline.
@@ -2780,3 +2782,70 @@ RECENT-emitting arm exists, which is what session 3's `SimpleStream` and QuerySt
 differently consequential once exercised.** The accuracy column will begin separating on a narrow
 stratum; the cost column will stop overcharging. That statement survives the ports landing, which
 neither of my earlier two did.
+
+# 32. THE BAR MOVED. eco-llm improves in EVERY cell on the patched tree, and even that understates it
+
+`e924005` makes `representation` read and charged. eco-llm selects from `REPS = ("RECENT", "D2",
+"RICH")` at RUNTIME, which my static sweep could not see, so its roughly 1-in-20 RECENT recalls are
+now charged 467 tokens instead of the full believed history. **I ran eco-llm before and after,
+same seeds, same sizes, 600 s.** Outputs: `bar_check_before_e924005.json`,
+`bar_check_after_e924005.json`.
+
+| cell | robot before | robot after | fraction before | fraction after | p=0.90 before | p=0.90 after |
+|---|---|---|---|---|---|---|
+| s0 n=10 | 20/21 | **21/21** | 0.9524 | **1.0000** | pass | pass |
+| s0 n=16 | 32/35 | **35/35** | 0.9143 | **1.0000** | pass | pass |
+| s4 n=10 | 25/27 | **27/27** | 0.9259 | **1.0000** | pass | pass |
+| **s4 n=16** | 35/41 | **38/41** | 0.8537 | **0.9268** | **FAIL** | **PASS** |
+
+**Every decision hash differs. Every cell improved on robots. Three of four now deliver every
+robot question on time.** Monitors improved too at 16 devices, s0 7,881 to 7,978 and s4 7,524 to
+7,787, and the decision counts grew, 7,914 to 8,013 and 7,565 to 7,828.
+
+**s4 n=16 flips the capacity conjunct from FAIL to PASS.** That is a capacity cell gained by the
+bar on a code change unrelated to any mechanism under test.
+
+## 32.1 Consequences, stated plainly
+
+**Every comparison in this report measured COVEX against a bar that has since risen.** The D131
+grid, the crossover, the capacity counts (eco-llm 10 of 28) and section 31's accuracy column were
+all produced on the pre-patch tree. **None of the COVEX-loses conclusions is weakened** — the bar
+moving UP makes them stronger — but the margins are understated and the capacity counts for the
+published arms are too low.
+
+**The one-page summary now states which tree its bar came from.** This is the third baseline drift
+caught this week, after piece serialisation moved edf 4 to 5 robots and the placement-off
+residency bug moved attentionstore 8/10 to 9/10. **In all three the comparator moved for reasons
+unrelated to the mechanism under test**, which is an argument for re-running the bar on every tree
+change rather than on suspicion.
+
+## 32.2 EVEN THE IMPROVED FIGURE UNDERSTATES THE BAR
+
+Session 3 resolved what I had reported as two competing RECENT definitions. **It is not two
+charging definitions. It is one charging definition and one arm's internal estimate:**
+
+| quantity | value | reaches charging? |
+|---|---|---|
+| `RECENT_WINDOW_TOKENS` (`cstate.py:50`) | 467 | **YES**, via `tokens_for_representation` into `_submit_recall` |
+| `REP_TOKEN_SCALE["RECENT"]` (`ecollm_adapted.py:36`, used at `:84`) | 0.35 x history | **NO**, eco-llm's own planner only |
+
+**So eco-llm PLANS against 0.35 x history while being CHARGED min(467, history).** The two agree
+only near a history of about 1,334 tokens; real histories under Part A are **5,431 to 14,881**,
+far above that crossover. **eco-llm over-prices its cheapest option by up to ninefold and
+under-selects RECENT exactly where it is cheapest.**
+
+**Therefore both the before and the after figures above are UNDERSTATEMENTS of the bar**, and the
+bar is wrong in the direction that flatters everything measured against it, COVEX included. Until
+the user settles whether to reconcile eco-llm's estimate to the charging definition (raising the
+bar, making every comparison look worse but honest) or to leave the divergence and label it on the
+card, **eco-llm's figures are not described as "the bar" in this report without that qualifier.**
+
+## 32.3 A correction that strengthens the channel work rather than weakening it
+
+My static sweep missed eco-llm's RECENT emissions because `REPS` is selected at runtime. **That
+limit applies to detecting WRITERS, not READERS.** The three dead channels, `order`,
+`desired_tier` and pre-`e924005` `representation`, were each established by **the absence of any
+reader**, and a runtime-selected value cannot create a reader that is not in the source. **Those
+findings stand unqualified.** What the miss does qualify is my category-2 claim in section 30.2
+that no scored arm emits RECENT: eco-llm does, at roughly 1 in 240 recalls. Too few to populate a
+column, enough to move the bar, which is exactly what it did.
