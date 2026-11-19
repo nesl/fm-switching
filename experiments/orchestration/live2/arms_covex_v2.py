@@ -194,13 +194,39 @@ class CovexV2Arm(Policy):
         #
         # A recall query carries `session_id`, which is the device, so the RC work for a query is
         # the set of target keys under that device prefix. The value of ADMITTING is their sum.
+        # AGGREGATION, corrected. Summing EVERY target key under a device concentrated hundreds
+        # of per-decision values into a near-constant: four queries whose histories spanned 5,431
+        # to 10,831 tokens produced 0.054041, 0.054350, 0.054351 and 0.054991, agreeing to three
+        # significant figures. That is CLAUDE.md check 3, a constant where a distribution is
+        # expected, and it was MY estimator rather than saturation in the policy: the underlying
+        # per-decision values discriminate perfectly well, with 186 distinct admit values and 388
+        # distinct dispatch values over one cell.
+        #
+        # So take the PLAN decision for this device, which is the decision actually being
+        # considered, rather than a sum over everything the device touched. `decisions` carries
+        # the kind alongside the target, which the flat `delta_j` map does not.
+        decs = pred.get("decisions") or []
         by_device: Dict[str, float] = {}
-        for k, v in dj.items():
-            key = str(k)
-            dev = key.split(":", 1)[0]
-            if ":" not in key:
+        for d in decs:
+            # The RC decision is logged with kind "plan", not "admit": over one cell the kinds
+            # are escalation 2,647 (dashcam), release 2,878, state_action 8,174, feasibility 57,
+            # and plan 10 - exactly the number of recall queries in the cell.
+            if str(d.get("kind")) != "plan":
                 continue
-            by_device[dev] = by_device.get(dev, 0.0) + float(v)
+            v = d.get("delta_j")
+            if v is None:
+                continue
+            # A PLAN target is the bare device (`robo002`), with NO colon. An earlier filter
+            # required one and silently skipped every plan decision, which is a fourth way this
+            # estimator produced UNSCORED where a value existed.
+            key = str(d.get("target") or "")
+            if not key:
+                continue
+            dev = key.split(":", 1)[0]
+            # Keep the LARGEST-magnitude admit value for the device, which is the one that would
+            # drive the decision, rather than a sum that averages distinct decisions together.
+            if dev not in by_device or abs(float(v)) > abs(by_device[dev]):
+                by_device[dev] = float(v)
         out: Dict[str, float] = {}
         for r in act.recall:
             sid = None

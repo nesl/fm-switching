@@ -5568,3 +5568,63 @@ implemented.
 outcomes beyond H: the D98 RC tail. If the tail already credits a long recall's delivery, extending
 the counterfactual to include it may make these decisions scorable without moving the whole
 evaluation to the planner's horizon.
+
+### RETRACTION: the blindness finding is WITHDRAWN. It was an estimator artifact.
+
+**The result reported above — that the six zeros were the long-latency recalls, and that COVEX is
+blind exactly where it most needs to act — is WRONG and is withdrawn.** It rested on the
+device-sum estimator, and with the estimator corrected there are no zeros at all: **10 of 10 recall
+alternatives score non-zero.** The tokens-versus-gain relationship that carried the claim does not
+survive the correction.
+
+Corrected, 10 devices, seed 0:
+
+| query | tokens | gain |
+|---|---|---|
+| opp0002578 | 5,431 | -0.635386 |
+| opp0000483 | 6,781 | -0.035386 |
+| opp0000234 | 8,131 | -0.035386 |
+| opp0000361 | 8,131 | -0.035386 |
+| opp0000746 | 10,831 | -0.485386 |
+| opp0000765 | 10,831 | -0.485386 |
+| opp0000856 | 10,831 | -0.035386 |
+| opp0000379 | 13,531 | -0.035386 |
+| opp0001715 | 14,881 | -0.635386 |
+| opp0002507 | 18,931 | -0.485386 |
+
+**There is no monotone relationship with history size.** The smallest history (5,431) and the
+second-largest (14,881) both score -0.635386; the largest (18,931) scores -0.485386; three middling
+histories score the bare constant. The previous claim read a pattern out of a broken aggregate.
+
+**What the corrected data does say, and it is a check-3 result of a different kind.** The gain takes
+exactly **THREE distinct values across ten queries** spanning a 3.5x range of history size:
+
+    -0.035386     -0.485386     -0.635386
+
+and each is `0.035386` plus one of `0`, `0.45`, `0.60`. **`0.035386` is the saturated continuation
+value** identified in the original robot diagnosis, and it appears here as a bare additive offset.
+So the RC plan value is a small set of discrete levels with a saturated constant underneath, and it
+**does not vary with the input it must depend on**. By the decisive test used all week — does the
+value move with an input it must depend on — **it does not**. The quantity is non-zero and takes
+more than one value, so it is REACHABLE in the literal sense, and it is **not a calibrated
+discriminator of recall value**.
+
+**All ten gains are NEGATIVE, so no deviation clears margin 0.** At every margin, v2 returns the
+base. That is a real property of this estimator rather than an absent link: the alternatives are
+scored, they vary, and flipping the base's choice never scores better.
+
+**FOUR SEPARATE DEFECTS IN MY ESTIMATOR produced four different wrong answers**, and the sequence is
+worth recording because each looked like a finding:
+
+| defect | symptom | wrong conclusion it supported |
+|---|---|---|
+| roster clobbered with `{}` | `_jobs_by_q` = 0 for 2,999 epochs | UNSCORABLE |
+| key `"rc:" + query_id` | no key matched | UNSCORABLE |
+| device from full `session_id` | no key matched | UNSCORABLE |
+| summed ALL device keys | near-constant 0.054 on 4 of 10, zeros on 6 | "REACHABLE, and blind to long histories" |
+| required `":"` in the target | plan targets are bare `robo002` | UNSCORABLE again |
+
+**I reported the fourth as the finding of the exercise. It was an artifact and I withdraw it.** The
+lesson is the one that keeps recurring and that I failed to apply to my own aggregate: a quantity
+assembled by summing many things is not the quantity the decision uses, and it should have been
+checked against a single decision's value before any pattern was read out of it.
