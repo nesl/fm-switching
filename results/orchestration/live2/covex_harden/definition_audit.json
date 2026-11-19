@@ -1,0 +1,226 @@
+{
+ "check": "covex_harden_definition_audit",
+ "is_measurement": false,
+ "label": "DEFINITION AUDIT. Both readings computed from the SAME dry run, so the difference cannot be a fixture, device mix or HEAD difference.",
+ "git_commit": "58a1abbc9dfd1c7958bf53d87316c3a65204995a",
+ "seed": 0,
+ "run_s": 600.0,
+ "v11_switches": [
+  "deficit_update",
+  "honour_job_priority",
+  "realistic_competing",
+  "write_staleness"
+ ],
+ "definitions": {
+  "dispatch": "a release decision carries the question's opportunity_id before its own deadline; work DISPATCHED in time, not an answer delivered",
+  "delivery": "outcomes.jsonl: t_delivered set and t_delivered <= t_opportunity + deadline_s; SERVICE, an answer reached the application in time"
+ },
+ "rows": [
+  {
+   "n_devices": 4,
+   "arm": "policy-core",
+   "total": 9,
+   "dispatch_released": 1,
+   "dispatch_before_deadline": 1,
+   "dispatch_fraction": 0.1111,
+   "delivery_present": true,
+   "delivery_recall_outcomes": 9,
+   "delivery_answered_any": 1,
+   "delivery_answered_on_time": 1,
+   "delivery_cloud_done_on_time": 1,
+   "delivery_kinds": [
+    "monitor",
+    "recall"
+   ],
+   "delivery_fraction": 0.1111
+  },
+  {
+   "n_devices": 4,
+   "arm": "edf",
+   "total": 9,
+   "dispatch_released": 9,
+   "dispatch_before_deadline": 8,
+   "dispatch_fraction": 0.8889,
+   "delivery_present": true,
+   "delivery_recall_outcomes": 9,
+   "delivery_answered_any": 9,
+   "delivery_answered_on_time": 8,
+   "delivery_cloud_done_on_time": 8,
+   "delivery_kinds": [
+    "monitor",
+    "recall"
+   ],
+   "delivery_fraction": 0.8889
+  },
+  {
+   "n_devices": 4,
+   "arm": "llf",
+   "total": 9,
+   "dispatch_released": 7,
+   "dispatch_before_deadline": 7,
+   "dispatch_fraction": 0.7778,
+   "delivery_present": true,
+   "delivery_recall_outcomes": 9,
+   "delivery_answered_any": 7,
+   "delivery_answered_on_time": 7,
+   "delivery_cloud_done_on_time": 7,
+   "delivery_kinds": [
+    "monitor",
+    "recall"
+   ],
+   "delivery_fraction": 0.7778
+  },
+  {
+   "n_devices": 8,
+   "arm": "policy-core",
+   "total": 20,
+   "dispatch_released": 0,
+   "dispatch_before_deadline": 0,
+   "dispatch_fraction": 0.0,
+   "delivery_present": true,
+   "delivery_recall_outcomes": 20,
+   "delivery_answered_any": 0,
+   "delivery_answered_on_time": 0,
+   "delivery_cloud_done_on_time": 0,
+   "delivery_kinds": [
+    "monitor",
+    "recall"
+   ],
+   "delivery_fraction": 0.0
+  },
+  {
+   "n_devices": 8,
+   "arm": "edf",
+   "total": 20,
+   "dispatch_released": 19,
+   "dispatch_before_deadline": 11,
+   "dispatch_fraction": 0.55,
+   "delivery_present": true,
+   "delivery_recall_outcomes": 20,
+   "delivery_answered_any": 19,
+   "delivery_answered_on_time": 0,
+   "delivery_cloud_done_on_time": 0,
+   "delivery_kinds": [
+    "monitor",
+    "recall"
+   ],
+   "delivery_fraction": 0.0
+  },
+  {
+   "n_devices": 8,
+   "arm": "llf",
+   "total": 20,
+   "dispatch_released": 18,
+   "dispatch_before_deadline": 18,
+   "dispatch_fraction": 0.9,
+   "delivery_present": true,
+   "delivery_recall_outcomes": 20,
+   "delivery_answered_any": 18,
+   "delivery_answered_on_time": 4,
+   "delivery_cloud_done_on_time": 4,
+   "delivery_kinds": [
+    "monitor",
+    "recall"
+   ],
+   "delivery_fraction": 0.2
+  },
+  {
+   "n_devices": 16,
+   "arm": "policy-core",
+   "total": 35,
+   "dispatch_released": 0,
+   "dispatch_before_deadline": 0,
+   "dispatch_fraction": 0.0,
+   "delivery_present": true,
+   "delivery_recall_outcomes": 35,
+   "delivery_answered_any": 0,
+   "delivery_answered_on_time": 0,
+   "delivery_cloud_done_on_time": 0,
+   "delivery_kinds": [
+    "monitor",
+    "recall"
+   ],
+   "delivery_fraction": 0.0
+  },
+  {
+   "n_devices": 16,
+   "arm": "edf",
+   "total": 35,
+   "dispatch_released": 19,
+   "dispatch_before_deadline": 8,
+   "dispatch_fraction": 0.2286,
+   "delivery_present": true,
+   "delivery_recall_outcomes": 35,
+   "delivery_answered_any": 19,
+   "delivery_answered_on_time": 0,
+   "delivery_cloud_done_on_time": 0,
+   "delivery_kinds": [
+    "monitor",
+    "recall"
+   ],
+   "delivery_fraction": 0.0
+  },
+  {
+   "n_devices": 16,
+   "arm": "llf",
+   "total": 35,
+   "dispatch_released": 21,
+   "dispatch_before_deadline": 21,
+   "dispatch_fraction": 0.6,
+   "delivery_present": true,
+   "delivery_recall_outcomes": 35,
+   "delivery_answered_any": 21,
+   "delivery_answered_on_time": 0,
+   "delivery_cloud_done_on_time": 0,
+   "delivery_kinds": [
+    "monitor",
+    "recall"
+   ],
+   "delivery_fraction": 0.0
+  }
+ ],
+ "_provenance": {
+  "git_commit": "58a1abbc9dfd1c7958bf53d87316c3a65204995a",
+  "script": "policy/audit/definition_audit.py",
+  "model": "none (pol4 frozen)",
+  "device": "flash CPU only",
+  "n": "seed 0 at 4,8,16 devices for 600 s",
+  "timestamp": "2026-11-18T00:00:00"
+ },
+ "monitor_delivery_fraction": {
+  "4": {
+   "policy-core": 0.9991,
+   "edf": 0.9991,
+   "llf": 0.9991
+  },
+  "8": {
+   "policy-core": 0.4871,
+   "edf": 0.9854,
+   "llf": 0.9942
+  },
+  "16": {
+   "policy-core": 0.0747,
+   "edf": 0.0172,
+   "llf": 0.0294
+  }
+ },
+ "resolution": {
+  "answer": "(a) the two numbers measure different things and both are arithmetically correct",
+  "dispatch": "a release decision before the deadline; work dispatched in time",
+  "delivery": "t_delivered <= t_opportunity + deadline_s; an answer reached the application in time",
+  "gate_should_use": "delivery, because the gate asks whether COVEX serves the workload and D82 is a service metric; stated before scoring and not chosen to favour any arm, since delivery is worse for COVEX at 8 devices on dashcams and better at 16"
+ },
+ "errata": {
+  "E2": "my gate and comparison tables were headed robot on time and dashcam fraction while reporting DISPATCH counts; the JSON carried the proxy caveat but the headings overstated it",
+  "E3": "F-A7 is REVERSED at 16 devices under delivery: policy-core delivers 0.0747 of instants against edf 0.0172 and llf 0.0294, because edf and llf dispatch 5,453 and 5,728 but only 150 and 256 arrive in time; F-A7 stands at 8 devices and is withdrawn at 16"
+ },
+ "flagged": {
+  "edf_robot_zero_on_time": {
+   "n8": 0,
+   "n16": 0,
+   "dispatched_n8": 19,
+   "note": "edf delivers ZERO robot answers on time at 8 and 16 devices while dispatching 19 of 20, and llf delivers zero at 16, so the robot half of the D127 gate is a bar of 0.20 at 8 and 0.0 at 16"
+  },
+  "recommendation": "a gate passable by delivering zero because the baseline delivers zero is not measuring what it is meant to; the robot axis may need an absolute floor such as D82 pooled target rather than only a relative test. PROPOSED, NOT APPLIED"
+ }
+}

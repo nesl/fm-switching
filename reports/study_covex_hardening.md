@@ -480,3 +480,105 @@ consistent and F-A7 has another cause", which F-A8 now names; for G1b, "the exch
 as measured and v1.2 long-window structure is the only remaining route". **These are not errata:
 the expectations were conditional and their falsifiers fired.** G1c, G1d and G1e remain open and
 testable when F5b and F5c land.
+
+
+---
+
+# 7. DEFINITION AUDIT: DISPATCH against DELIVERY. The contradiction resolved, and two errata against me
+
+HEAD **`58a1abb`**, isolated worktree. Both readings computed from the SAME dry run, so the
+difference cannot be a fixture, a device mix or a HEAD difference. **The answer is (a): the two
+numbers measure different things, and both are arithmetically correct.**
+
+## 7.1 The two definitions
+
+| name | definition | what it says |
+|---|---|---|
+| **dispatch** | a RELEASE decision carries the question's `opportunity_id` before its own deadline (`_harness.released_before_deadline`) | work was DISPATCHED in time |
+| **delivery** | `outcomes.jsonl`: `t_delivered` is set and `t_delivered <= t_opportunity + deadline_s` | SERVICE: an answer reached the application in time |
+
+My offline comparison reported **dispatch**. Session 1 read **delivery**. A release at 4.9 s
+against a 5 s deadline counts as dispatch-on-time even though the rebuild then takes seconds and
+the answer lands late, which is exactly what happens.
+
+## 7.2 Both numbers, side by side, same runs
+
+Robot questions:
+
+| n | arm | dispatched | dispatch before deadline | answered at all | **ANSWERED ON TIME** |
+|---|---|---|---|---|---|
+| 4 | policy-core | 1 | 1 | 1 | **1** |
+| 4 | edf | 9 | 8 | 9 | **8** |
+| 4 | llf | 7 | 7 | 7 | **7** |
+| 8 | policy-core | 0 | 0 | 0 | **0** |
+| 8 | **edf** | **19** | **11** | **19** | **0** |
+| 8 | llf | 18 | 18 | 18 | **4** |
+| 16 | policy-core | 0 | 0 | 0 | **0** |
+| 16 | **edf** | 19 | 8 | 19 | **0** |
+| 16 | **llf** | 21 | 21 | 21 | **0** |
+
+**Session 1 is right, and my 0.550 for edf at 8 devices was a dispatch count.** 11 of 20 were
+dispatched before their deadlines and **none of the 19 answered arrived in time.** Session 1's llf
+figure of 4 reproduces exactly.
+
+Dashcam instants, the same distinction applied, which I had not done before:
+
+| n | policy-core | edf | llf |
+|---|---|---|---|
+| 4 | 0.9991 | 0.9991 | 0.9991 |
+| 8 | **0.4871** | 0.9854 | 0.9942 |
+| 16 | **0.0747** | **0.0172** | **0.0294** |
+
+## 7.3 ERRATUM E2, against my own labelling
+
+**My gate and comparison tables are headed "robot on time" and "dashcam fraction" while reporting
+DISPATCH counts.** The JSON carried the caveat ("RELEASE counts, a proxy for service, not scored
+outcomes"), but the table headings overstated what was measured, and the gate was scored on them.
+The pre-registered expectations are untouched; this is a labelling error in how I reported the
+measurement, and the corrected figures are in 7.2.
+
+## 7.4 ERRATUM E3: F-A7 is REVERSED at 16 devices under delivery
+
+I reported F-A7 as the most serious finding in this study: that COVEX is also worse on dashcams.
+**Under the delivery metric that is true at 8 devices and FALSE at 16 devices.** At 16 devices
+policy-core delivers **0.0747** of instants on time against edf's **0.0172** and llf's **0.0294**,
+so it is ahead by a factor of four. The reason is visible in the same table: edf and llf dispatch
+5,453 and 5,728 instants but only 150 and 256 arrive in time, because they flood an engine that
+cannot keep up, while policy-core dispatches 657 and delivers 651 of them.
+
+**F-A7 stands at 8 devices (0.487 against 0.985 and 0.994) and is withdrawn at 16 devices.** F-A8's
+mechanism is unchanged and now explains both directions: COVEX admits only what scores positive,
+which costs it at 8 devices and protects it at 16.
+
+## 7.5 Which metric the gate should be judged on
+
+**Delivery, and not dispatch.** The gate asks whether COVEX serves the workload, D82's pooled
+robot metric is a service metric, and a dispatch that misses its deadline is not service. My own
+JSON already called dispatch a proxy. **I state this before scoring, and I am not choosing the
+reading that favours any arm**: delivery is worse for COVEX at 8 devices on dashcams and better at
+16, and it lowers the robot bar for COVEX at 8 and 16 while raising it at 4.
+
+## 7.6 The consequence D127's gate now has to carry, flagged explicitly
+
+**edf delivers ZERO robot answers on time at 8 AND 16 devices, and llf delivers zero at 16.** So
+"at least as good as the best scheduling baseline" on the robot axis is a bar of **0.20 at 8
+devices (llf's 4 of 20) and 0.0 at 16 devices**. Against a baseline scoring zero, that half of the
+gate is satisfied by scoring zero.
+
+The gate under the delivery metric, as it stands today on the F3 set:
+
+| n | robot: policy / best scheduling | verdict | dashcam: policy / best scheduling | verdict |
+|---|---|---|---|---|
+| 4 | 0.111 / **0.889** (edf) | **FAIL** | 0.9991 / 0.9991 | PASS (equal) |
+| 8 | 0.000 / **0.200** (llf) | **FAIL** | 0.4871 / 0.9942 | **FAIL** |
+| 16 | 0.000 / 0.000 (both) | PASS, trivially, both are zero | 0.0747 / 0.0294 | **PASS** |
+
+**Overall: still FAIL**, because D127 requires both axes at every size and 4 and 8 fail. But the
+shape is different from what I reported: COVEX is behind at the small and middle sizes and ahead
+on dashcams at the largest, and the robot bar at 8 and 16 is near zero because the baselines
+themselves deliver almost nothing.
+
+**A recommendation I owe the user, given 7.6.** A gate that can be passed by delivering zero
+because the baseline delivers zero is not measuring what it is meant to measure. The robot axis
+may need an absolute floor, for example D82's own pooled target, rather than only a
+relative-to-baseline test. That is a methodological change, so it is proposed and NOT applied.
