@@ -3247,6 +3247,27 @@ My harness now captures both: the post-default value at `_submit_recall` (compar
 **pre-default** value emitted by `Policy.decide` (credit), so an injected RECENT is distinguishable
 from a chosen one. **Leaderboard rows carry both columns.**
 
+### Why TWO capture points are structurally necessary, not a convenience
+
+This is the detail most likely to be lost between this report and a reimplementation, so it is
+stated explicitly: **one capture point cannot produce both columns.**
+
+| capture point | sees | can it give comparability? | can it give credit? |
+|---|---|---|---|
+| `_submit_recall` (post-default) | the representation actually sent and charged | **yes, and it is the only place that can** | **NO** |
+| `Policy.__call__` wrapping `decide` (pre-default) | what the ARM itself emitted, `None` included | no | **yes** |
+
+`Policy.__call__` runs `validate_action(apply_defaults(self.decide(scrub(obs))), obs)`. **By the
+time `_submit_recall` sees `o.requested_representation`, `apply_defaults` has already run**, so a
+value there is indistinguishable between an arm that named RECENT and one that named nothing and
+was given it. The `None` that marks an injected default **exists only before `apply_defaults`**
+and is destroyed by it.
+
+**Anyone implementing this from the two-column description alone would capture once, at the
+charging path, and get credit silently wrong for every non-naming arm** - which is the whole
+published-baseline family. The second capture point is not redundancy; it is the only access to a
+value that no longer exists downstream.
+
 ## 36.3 Two arms sit outside the partition, and one correction to 35.4a
 
 - **`streamscout` sends no cloud recall at all** (DEVICE x9), so a cost comparison against either
