@@ -73,12 +73,18 @@ def _arm_kwargs(switches: Dict[str, bool]) -> Dict[str, Any]:
     arm_fields = {f.name for f in dc_fields(AP.PolicyCoreArm)}
     out = dict(cost_model="pol4", h_s=0.5, mu_mode="ewma", mu_fixed=None, impl="fast",
                cap_k=None)
+    # v1.3 selects the SCARCITY price through the estimator rather than a flag, so `mu_mode` has
+    # to be overridable or every v1.3 run would silently be scored with the old EWMA price.
+    if "mu_mode" in (switches or {}):
+        out["mu_mode"] = str(switches["mu_mode"])
     types = {f.name: f.type for f in dc_fields(AP.PolicyCoreArm)}
     for k, v in (switches or {}).items():
         if k not in arm_fields:
             continue
         # v1.2's `kappa` is a FLOAT, not a flag, so a blanket bool() would turn 1.0 into True and
         # silently change the setting under test.
+        if k == "mu_mode":
+            continue
         out[k] = float(v) if "float" in str(types.get(k, "")).lower() else bool(v)
     return out
 

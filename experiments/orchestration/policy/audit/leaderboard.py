@@ -63,7 +63,21 @@ def main(argv=None) -> int:
                     help="comma-separated PUBLISHED arm names from session 3 to add as an "
                          "additional, clearly-labelled field. They are NOT gating under D127.")
     a = ap.parse_args(argv)
-    cand = {s: True for s in a.candidate.split(",") if s.strip()}
+    # `k=v` as well as bare flags: v1.3 selects the scarcity price through `mu_mode=scarcity`,
+    # and parsing that as a bare flag would silently score v1.3 with the OLD EWMA price.
+    cand = {}
+    for item in a.candidate.split(","):
+        item = item.strip()
+        if not item:
+            continue
+        if "=" in item:
+            k, v = item.split("=", 1)
+            try:
+                cand[k] = float(v)
+            except ValueError:
+                cand[k] = v
+        else:
+            cand[item] = True
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(H.ROOT),
                            capture_output=True, text=True).stdout.strip()
     tmp = Path(tempfile.mkdtemp(prefix="covex_lb_"))

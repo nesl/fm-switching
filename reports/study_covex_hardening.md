@@ -35,6 +35,20 @@ answers **9 of 9** robot questions on time and live policy-core answers **1 of 9
 live edf answers 2 of 20 and policy-core 0 of 20. **The robot axis is a genuine failure, measured
 on the H100, not a screen artefact.**
 
+## VERSION KEY, so the tables below are not read against the wrong code
+
+Session 1 has moved faster than my scoring. Every table in this report carries the version it was
+measured on, and they are not interchangeable:
+
+| label | switch set | commit scored | where |
+|---|---|---|---|
+| v1.0 / v1.1 | pre-planner | `7dbb448` and earlier | sections 2 to 7 |
+| **v1.2** | planner_rc + plan_latest + replan + B1 + F2 + F3 | `9fd423a` | sections 8 to 11, **including the leaderboard** |
+| **v1.3** | v1.2 + `mu_mode="scarcity"`, derived kappa, edf default 8 | `ed8ef56`, re-based to `700f248` | section 12 |
+
+**Everything headed "policy-core" or "v1.2" below section 8 is v1.2.** It is NOT a verdict on
+v1.3, which section 12 scores separately.
+
 ## Best version so far, and its standing
 
 **v1.2** (planner_rc + plan_latest + replan + B1 + F2 + F3; F1 and F4 off), at `9fd423a`.
@@ -1034,7 +1048,16 @@ confirms.**
 # 11. LEADERBOARD, seeds 4, 5 and 6 (D129). edf at C_inflight 8 WINS EVERY CELL
 
 HEAD **`554fe95`**, pinned worktree. Delivery, 600 s, tight, 8 and 16 devices. Seeds 1, 2 and 3
-are reserved for round 1 and the harness refuses them by name.
+are reserved for round 1 and the harness refuses them by name. **The candidate column is v1.2**,
+not v1.3; see the version key at the top and section 12.
+
+**Why these edf columns are trustworthy, and session 1's own may not have been.** Session 1's
+`700f248` records that before that commit `make_arm` silently DISCARDED kwargs for every
+non-policy arm, so `make_arm("edf", c_inflight=8)` quietly returned the DEFAULT arm. My harness
+does not go through `make_arm` for these columns: it constructs `A.Pi0Edf(None, c_inflight=N)`
+directly (`_harness.py:155`), which is why the C=8 against C=4 separation below is a real
+measurement and not an artefact. Any edf-with-C_inflight number produced through `make_arm`
+before `700f248` is a default-arm number wearing a C_inflight label.
 
 **dashcam delivered / robot delivered on time:**
 
