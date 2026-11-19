@@ -452,9 +452,53 @@ def run_amend3():
     log(f"amend3 experiment done: {out.get('stop') or 'complete'}")
 
 
+async def experiment_amend4(M, host_gib):
+    import httpx
+    res = dict(amendment=4, host_gib=host_gib, n=N_LIGHT, runs=[])
+    stop_flag = OUT / "mot1_amend4_STOP_AFTER_REP"          # created by the operator if D114 lands mid-run
+    async with httpx.AsyncClient(timeout=None, limits=httpx.Limits(max_connections=None,
+                                                                   max_keepalive_connections=None)) as c:
+        res["fill"] = await fill(c, M, host_gib)
+        for r in range(1, N_REP + 1):
+            s = await run_once(c, f"A4R{r}", plan_light(r), "HOST-WARM", r)
+            res["runs"].append(s)
+            (OUT / "mot1_amend4_runs.json").write_text(json.dumps(res, indent=1, default=str) + "\n")
+            if stop_flag.exists():
+                res["stopped_after_rep"] = r
+                log(f"amend4: stop flag found after repetition {r}: remaining repetitions NOT RUN")
+                break
+    return res
+
+
+def run_amend4():
+    global MH
+    import hashlib
+    import subprocess
+    import study_live2_pilot as PL
+    PL.OUT = OUT
+    PL.WORK = Path.home() / "data/live2/mot1"
+    PL.WORK.mkdir(parents=True, exist_ok=True)
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
+    diff = subprocess.run(["git", "diff", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout
+    state = dict(head=head, working_tree_diff_sha256=hashlib.sha256(diff.encode()).hexdigest(),
+                 dirty_files=sorted({l[6:] for l in diff.splitlines() if l.startswith("+++ b/")}))
+    log(f"amend4: checkout {json.dumps(state)}")
+    srv, sinfo, M = PL.start_server(256.0)
+    MH = M
+    log(f"amend4: server up {json.dumps({k: v for k, v in sinfo.items() if k != 'command'})}")
+    (OUT / "mot1_amend4_server.json").write_text(json.dumps(dict(sinfo, checkout=state), indent=1, default=str) + "\n")
+    try:
+        out = asyncio.run(experiment_amend4(M, 256.0))
+    finally:
+        srv.stop()
+    out["checkout"] = state
+    (OUT / "mot1_amend4_runs.json").write_text(json.dumps(out, indent=1, default=str) + "\n")
+    log(f"amend4 experiment done: {out.get('stop') or 'complete'}")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("what", choices=("all", "analyse", "amend2", "amend3"))
+    ap.add_argument("what", choices=("all", "analyse", "amend2", "amend3", "amend4"))
     a = ap.parse_args()
     OUT.mkdir(parents=True, exist_ok=True)
     if a.what == "all":
@@ -463,6 +507,8 @@ def main():
         run_amend2()
     elif a.what == "amend3":
         run_amend3()
+    elif a.what == "amend4":
+        run_amend4()
     else:
         import mot1_analyse as AN
         AN.main()

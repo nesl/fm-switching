@@ -1686,16 +1686,54 @@
     "measured_directly": false
    },
    "HOST-WARM": {
-    "status": "not measured",
-    "measured_directly": false,
-    "source": "amendment 3's light/tight HOST-WARM measured HOST in 0 of 5 repetitions, so it is not borrowed"
+    "extra_missed": {
+     "median": 0,
+     "min": 0,
+     "max": 0,
+     "per_rep": [
+      0,
+      0,
+      0,
+      0,
+      0
+     ]
+    },
+    "robot_ttft_s": {
+     "median": 0.5755,
+     "min": 0.4256,
+     "max": 0.8885,
+     "per_rep": [
+      0.8885,
+      0.6745,
+      0.5755,
+      0.4256,
+      0.4776
+     ]
+    },
+    "measured_tiers": [
+     "HOST",
+     "HOST",
+     "HOST",
+     "HOST",
+     "HOST"
+    ],
+    "reps": [
+     1,
+     2,
+     3,
+     4,
+     5
+    ],
+    "measured_directly": true,
+    "source": "amendment 4 (N = 8, 256 GiB, HOST-WARM only); extra misses vs amendment 3's NONE of the same repetition (another server instance: a cross-run reference, not a paired difference)"
    }
   },
   "measured_directly": {
    "light_tight": "all actions",
    "heavy_tight": "all actions (two amendments)",
    "heavy_roomy": "all actions",
-   "light_roomy": "none: cold actions borrowed; HOST-WARM borrowed only if light/tight measured HOST in every repetition"
+   "light_roomy": "HOST-WARM measured directly (amendment 4); cold actions borrowed from light/tight (host size does not change cold actions)"
   }
- }
+ },
+ "grid_2x2_updated": "2026-11-18: light_roomy HOST-WARM filled by amendment 4 (was 'not measured')"
 }

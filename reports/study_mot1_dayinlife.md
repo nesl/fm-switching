@@ -409,3 +409,25 @@ question, measured tier (cached tokens and the external-KV-transfer counter delt
 instants against amendment 3's NONE of the same repetition (a cross-run reference, not a paired difference, as in
 amendment 2 Part A). Sanity: 0 HTTP errors. If StudyLIVE2's D114 commit lands mid-run, the current repetition finishes,
 what is done is committed, and the remainder is recorded as not run.
+
+### 12.1 Amendment 4 results
+
+Server 256 GiB (flag diff `[('38', '256')]`), restarted 15:59:53, up in 124.4 s, host filled to 1,572,965 tokens (1.5x
+the 1,048,576-token capacity, 59 fresh histories); 5 runs 16:10 to 16:18; server stopped 16:18. Checkout HEAD f8de3bf
+plus this study's runner edit (diff hash in `mot1_amend4_server.json`). Preparation in every repetition: prefill
+10,001 to 11,711 tokens with 0 cached, filler 80,886 tokens.
+
+| repetition | predicted | measured | cached / prompt tokens | counter delta local / external / computed | robot TTFT, s | missed instants | extra vs amendment 3's NONE (cross-run) |
+|---|---|---|---|---|---|---|---|
+| 1 | HOST | **HOST** | 11,152 / 11,367 | 0 / 11,152 / 971 | 0.89 | 0 | 0 |
+| 2 | HOST | **HOST** | 11,696 / 11,831 | 0 / 11,696 / 891 | 0.67 | 0 | 0 |
+| 3 | HOST | **HOST** | 9,984 / 10,160 | 0 / 9,984 / 1,310 | 0.58 | 0 | 0 |
+| 4 | HOST | **HOST** | 10,528 / 10,743 | 0 / 10,528 / 215 | 0.43 | 0 | 0 |
+| 5 | HOST | **HOST** | 9,984 / 10,159 | 0 / 9,984 / 931 | 0.48 | 0 | 0 |
+
+Prediction confirmed 5 of 5; 0 HTTP errors; 240 / 240 instants on time in every run. The 2 x 2's light / roomy HOST-WARM
+cell is now MEASURED (`mot1_figdata_amend3.json`, `grid_2x2.light_roomy["HOST-WARM"]`, `measured_directly: true`): 0
+extra misses, robot TTFT median 0.58 s (0.43 to 0.89). Consistency: heavy-load roomy host-warm (amendment 2 Part B)
+0.69 s median (0.36 to 0.79), 0 extra misses; light load is within 0.84x, as expected with less traffic behind the
+reload. The 2 x 2 now reads: light load, either host: pieces serve both (and with a roomy host, host-warm serves both
+and fastest, 0.58 s); heavy load, tight host: nothing serves both; heavy load, roomy host: host-warm.
