@@ -204,3 +204,15 @@ summary: 46 runs -> results/orchestration/live2/pilot/pilot4_summary.json
 [2026-11-19 05:48:38] skip eco-llm_n10_s0_600s_h27_published: already run
 [2026-11-19 05:48:39] skip eco-llm_n16_s0_600s_h27_published: already run
 summary: 46 runs -> results/orchestration/live2/pilot/pilot4_summary.json
+[2026-11-19 05:48:46] ITEM DONE: D130 published baseline eco-llm at 8, 16 and the item-2 breaks (bee8ff5); origin bee8ff5
+[2026-11-19 05:48:46] skip ekya_n8_s0_600s_h27_published_validity120: already run
+[2026-11-19 05:48:46] D130 validity ekya: {"valid":true,"err":null,"n_errors":0,"lat_p99":0.1295}
+[2026-11-19 05:48:46] skip ekya_n8_s0_600s_h27_published: already run
+[2026-11-19 05:48:47] start ekya_n10_s0_600s_h27_published HEAD bee8ff5
+[2026-11-19 06:00:03] end ekya_n10_s0_600s_h27_published {"err":null,"run_valid":true,"digests_equal":true,"n_requests":5458,"n_errors":0,"lat_p99":0.1144,"scored":true,"dash":true,"rob_elig":true,"rob_meets":false,"rob_on":17,"rob_n":21,"name":"ekya_n10_s0_600s_h27_published","rc":0,"valid":true,"pass":false}
+[2026-11-19 06:00:04] v1.4 piece-serialisation commit found: d97f50b v1.4 piece serialisation, B2 deficit scaling, and arm-side deadline-aware RC release; rerunning edf-piece1024 / 2048 at 8 and 16
+[2026-11-19 06:00:05] start edf-piece1024_n8_s0_600s_h27_c8_piecefix_d97f50b HEAD bee8ff5
+[2026-11-19 06:11:17] end edf-piece1024_n8_s0_600s_h27_c8_piecefix_d97f50b {"err":null,"run_valid":true,"digests_equal":true,"n_requests":4292,"n_errors":0,"lat_p99":0.1112,"scored":true,"dash":true,"rob_elig":true,"rob_meets":false,"rob_on":17,"rob_n":20,"name":"edf-piece1024_n8_s0_600s_h27_c8_piecefix_d97f50b","rc":0,"valid":true,"pass":false}
+[2026-11-19 06:11:20] HANDOFF (operator): pilot4d's piece-fix pull failed silently (dirty tracked logs); edf-piece1024_n8_s0_600s_h27_c8_piecefix_d97f50b ran on old code bee8ff5 and is renamed _OLDCODE_mislabelled; pilot4e (verified pull + piece test) takes over
+[2026-11-19 06:11:20] pilot4e driver start (START_ITEM=1): v1.4 watchers with a verified pull; v1.3-fast never run
+[2026-11-19 06:11:21] v1.4 piece-serialisation commit found: d97f50b v1.4 piece serialisation, B2 deficit scaling, and arm-side deadline-aware RC release; rerunning edf-piece1024 / 2048 at 8 and 16
