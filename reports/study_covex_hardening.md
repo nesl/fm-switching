@@ -2,23 +2,44 @@
 
 **Read this first.**
 
-## OPEN QUESTION that makes every covex row below PROVISIONAL
+## THE PROVISIONAL FLAG MOVED, AND THEN CAME OFF. The trail, so the correction is visible
 
-The H100 **refused `d944361` and ran nothing**: it failed
-`test_pieces_partition_the_history_with_no_gap_and_no_overlap` at C_inflight 8, because a
-piece-rebuilt history is sent OUT OF ORDER, and that affects **`covex-v13` itself**, not only the
-edf piece arms. There is no live v1.3 data and there never will be.
+**What I first wrote, and it was wrong.** The H100 refused `d944361` and ran nothing, failing
+`test_pieces_partition_the_history_with_no_gap_and_no_overlap` at C_inflight 8, and its report said
+the defect affects `covex-v13` itself. On that basis I flagged **every covex row** in this report
+as provisional.
 
-**Whether this changes DRY-RUN delivery is undetermined and session 1 is answering it.** In a dry
-run nothing actually prefills, so out-of-order pieces may leave delivery counts untouched while
-still being a real defect on hardware. Until that answer lands:
+**First correction, from session 1's direct test.** `covex-v13` does NOT have the defect: 5
+sessions checked, 0 out of order, 0 overlapping. I verified the mechanism rather than taking the
+result on trust. `PolicyCoreArm.decide` builds its session list as
+`sorted(mat.items())` (`arms_policy.py:800`), one materialize per session per epoch, while the
+piece machinery (`piece_tokens`) lives in `Pi0Edf`, which `LlfArm` subclasses. So the defect is
+structurally in the **Pi0Edf family, which is my BASELINE set**, the opposite of what the H100
+report said and of what I had flagged.
 
-- **every covex row in this report is PROVISIONAL**, including the 16-device table in section 13
-  that reproduced session 1's figures exactly (0.8164 / 14, 0.8751 / 13, 0.8422 / 17);
-- nothing is being re-run pre-emptively and nothing is discarded;
-- the BASELINE and PUBLISHED rows are unaffected, since those arms are not policy-core.
+**Second correction, which is mine and goes further.** Moving the flag onto llf and edf would also
+have been wrong. The arms I actually score are `edf`, `edf@8`, `edf@4` and `llf`, all of which run
+with `piece_tokens = None` and therefore rebuild WHOLE. Measured on seed 4 at 16 devices, their
+decision logs contain:
 
-A reader should not treat the covex numbers as settled while this is open.
+| arm | `release_whole` | `release_piece` |
+|---|---|---|
+| llf | 13 | **0** |
+| edf C=8 | 14 | **0** |
+| edf C=4 | 11 | **0** |
+
+Not one piece decision in any of them. A whole rebuild is a single-element partition and cannot be
+out of order with itself, so **the assertion that fails for `edf-piece1024` and `edf-piece2048`
+cannot be exercised by any arm in my tables.** I have never scored a piece arm.
+
+**So the flag comes off, candidate and baselines alike.** The 16-device table in section 13 that
+reproduced session 1's figures exactly stands as measured. The authoritative confirmation is still
+session 1's serialisation delta run, and if it shows dry-run numbers moving for the piece arms that
+does not reach my rows, because my rows contain no pieces.
+
+**What WOULD have been at risk if the first correction had stood**, and it is worth recording:
+llf is the comparator the D127 gate is stated against and the arm that took seed 6 on both axes at
+16 devices. A baseline re-run would have moved the gate itself, not just a column.
 
 **Also still true: the dry-run screen is NOT uniformly optimistic for COVEX, and at 8 devices it
 inverts the ranking against edf.**
