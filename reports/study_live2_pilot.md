@@ -338,3 +338,46 @@ always-send arms is lost until then.
   earlier in the day, the items already reported); neither touched the GPU or a server.
 
 STOPPED at 06:58 for review. Pilot results are never round-1 results.
+
+## 9. INTERIM: D134 (every ported published arm live), 2026-11-19 09:06 to 10:29, PAUSED for StudyACC2. PILOT, NOT ROUND-1 RESULTS
+
+Settings as pilot4 (seed 0, 600 s, 50 : 50, push-all, uniform links, 27 GiB, server restarted per run, preflight,
+D115 logging). Outputs `results/orchestration/live2/pilot/runs5/`, log `pilot5.log`; drivers
+`experiments/orchestration/study_live2_pilot5{,b}_driver.sh`.
+
+| run | valid | verdict | robot on time / pooled | dashcams all meet | requests | HEAD |
+|---|---|---|---|---|---|---|
+| hybrid-llm 120 s validity, 8 devices | yes | | 6 / 6 | no | 6 | 263b091 |
+| hybrid-llm, 8 | yes | fail | 20 / 20 | no | 20 | 263b091 |
+| hybrid-llm, 10 | yes | fail | 21 / 21 | no | 21 | 263b091 |
+| hybrid-llm, 14 | yes | fail | 33 / 34 | no | 34 | 227a30a (includes placement e924005) |
+| mooncake, 10, WITH PLACEMENT | yes | fail | 17 / 21 | yes | 5,457 | f939ae7 |
+| mooncake, 12, WITH PLACEMENT | yes | fail | 22 / 27 | yes | 6,567 | f939ae7 |
+| kvflow, 10, WITH PLACEMENT | yes | fail | 18 / 21 | yes | 5,459 | f939ae7 |
+
+hybrid-llm sends ONLY the robot questions to the cloud (no dashcam traffic at all), so it meets the robot target at
+every size and fails on the dashcams; flagged for flash (routing design vs port). hybrid-llm at 12 devices is still
+owed (see below), and its 8 / 10 runs and its 14 run straddle the placement commit (per-run HEAD above).
+
+**Placement (D134 item 3).** flash's `e924005` ("placement: desired_tier and representation are READ and enacted")
+already applies both coordinator lines its "H100 wiring for placement" section lists (verified in
+`coordinator.py`). No test was committed with it (its two-part tests were monkeypatched measurements), so the H100
+added `TestThePlacementWiring` (`live2/tests/test_live2_harness.py`): the arm's requested representation reaches the
+opportunity, and a RECENT recall sends and charges the recent window, not the whole history. It passes 2 / 2, with the
+core live2 suites green, commit f939ae7. The five memory arms then started their "with placement" reruns at 10 and
+12 devices (three done above; kvflow at 12, lmcache, pensieve, attentionstore still to run).
+
+**New published arms.** `97d8347` ("baselines-published ready: streamscout, covstream, thinking-qwenvl-atdm") landed
+at 09:32; queued to run next (not yet run).
+
+**Driver incidents (mine).** (1) The release / placement watchers ran inside a subshell, so the placement pause did
+not pause and silently skipped hybrid-llm at 12 devices; (2) the pre-pull `git add` named a not-yet-existing summary
+file, so the pull for `97d8347` failed and its arms were marked handled without running. Both fixed in the pilot5b
+driver (watchers in the main shell; add only existing paths); hybrid-llm re-opened for its 12-device run; `97d8347`
+re-queued. GPU 2 was idle about 11 minutes for the stop, the suites and the placement test.
+
+**Pause.** At 10:29 the queue was paused for StudyACC2 (user priority); kvflow at 12 devices with placement had just
+started and was stopped (not published; it will be rerun). Resume order: the remaining placement reruns, the three
+new arms, hybrid-llm at 12, the remaining ported arms (routellm, perllm, r3-streaming, videostorm, inar-vl, uniscale,
+preble, kvflow, lmcache, pensieve, mooncake), then b9 and utility-per-cost. Expected finish about 05:00 to 06:00
+tomorrow.
