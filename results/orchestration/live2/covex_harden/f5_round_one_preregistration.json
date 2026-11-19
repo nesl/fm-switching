@@ -65,5 +65,44 @@
   "device": "flash CPU only",
   "n": "development data only, seed 0",
   "timestamp": "2026-11-18T00:00:00"
+ },
+ "falsifier_outcomes": {
+  "G1a_dashcam_axis": {
+   "status": "FALSIFIER FIRED, premise refuted upstream",
+   "evidence": "session 1 V20 refutes the units hypothesis from the spec side (mu is utility per GPU-second, busy sums pr.gpu_s); independently, my F3 before-ground drove the promote-rebuild backlog p50 from 1.084 to 0.0 with NO change in the dashcam fraction (0.487 and 0.075 unchanged)",
+   "conclusion": "F-A7 has another cause, named in F-A8: the SH admission test"
+  },
+  "G1b_backlog_magnitude": {
+   "status": "FALSIFIER FIRED",
+   "conclusion": "the exchange rate stands as measured; v1.2 long-window structure is the only remaining route for recall, and nothing queued addresses SH"
+  },
+  "G1c_state_value_zero_fraction": {
+   "status": "OPEN, testable when F5b lands"
+  },
+  "G1d_blind_spot_F_A1": {
+   "status": "OPEN, testable when F5a and F5b land"
+  },
+  "G1e_deficit_routing_identical": {
+   "status": "OPEN, testable when F5c lands"
+  },
+  "G1f_robot_axis": {
+   "status": "REPORTED, no threshold pre-registered for round one"
+  }
+ },
+ "F_A8": {
+  "finding": "the measured cause of F-A7 is the SH admission test, not the backlog units",
+  "sh_admit_positive_fraction": {
+   "4": 1.0,
+   "8": 0.488,
+   "16": 0.075
+  },
+  "measured_dashcam_released_fraction": {
+   "4": 0.9991,
+   "8": 0.4871,
+   "16": 0.0754
+  },
+  "agreement": "exact to three digits at every size, identical with all switches off and with the F3 set on",
+  "why": "sh_admit own gain p50 0.055 against a backlog charge p50 0.205, so one instant gain is about a quarter of the price its own work is charged",
+  "gate_consequence": "nothing currently queued addresses SH admission: F5a refuted, F5b unrelated, F5c byte-identical by intent, v1.2 RC-only with SH unchanged, and F-A6 not adopted; so the dashcam half of the D127 gate cannot pass at 8, 16 or 32 devices on current plans"
  }
 }

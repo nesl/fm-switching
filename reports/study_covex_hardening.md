@@ -434,3 +434,49 @@ ten scenarios are pre-registered in `v12_scenario_preregistration.json`.
 
 **No `harden GATE PASS v1.2` commit has been or will be emitted on this evidence.** Nothing has
 passed; the F3 set fails both axes at every size.
+
+
+## 6.5 F-A8 (HIGH, NEW): the measured cause of F-A7 is the SH ADMISSION TEST, not the backlog units
+
+D126 asked for the cause of the dashcam deficit and judged a units mismatch the likely
+explanation. **Session 1's V20 refutes that hypothesis from the spec side** (`mu` is utility per
+GPU-second at `policy_spec_v4.md:151` and `busy` sums `pr.gpu_s`, so the product is already
+utility). **My before-ground refutes it independently from the measurement side**, and that is
+worth stating because the two arguments are separate: F3 drove the promote-rebuild backlog charge
+from a median 1.084 to **0.0** and the dashcam fraction did not move at all, staying at 0.487 and
+0.075. **Varying the backlog magnitude by its whole median left the dashcam axis untouched.**
+
+The actual cause is arithmetical and exact. Every instant is evaluated as an `sh_admit` candidate,
+and the fraction admitted equals the fraction released:
+
+| n | `sh_admit` candidates | with DeltaJ > 0 | admitted fraction | **measured dashcam released fraction** |
+|---|---|---|---|---|
+| 4 | 2,174 | 2,174 | **1.000** | 0.999 |
+| 8 | 4,322 | 2,107 | **0.488** | **0.487** |
+| 16 | 8,709 | 657 | **0.075** | **0.075** |
+
+The agreement is exact to the three digits reported, and it holds identically with every switch
+off and with the F3 set on. **So the dashcam deficit IS the SH admission test: COVEX admits
+exactly those instants whose DeltaJ is positive, and as load rises that is 48.8 percent of them
+at 8 devices and 7.5 percent at 16.** edf releases essentially all of them.
+
+**Why they score non-positive is the exchange rate on the SH side.** From the scale table,
+`sh_admit` carries an own gain of p50 **0.055** against a backlog charge of p50 **0.205**, so a
+single instant's calibrated gain is about a quarter of the price its own work is charged. This is
+F-A6's mechanism appearing on the monitoring path rather than the recall path.
+
+**The consequence for the gate, stated before round one is scored.** Nothing currently queued
+addresses this. F5a is refuted, F5b wires the state value (a channel dead for other reasons and
+unrelated to SH), F5c is a routing change intended to be byte-identical, and **v1.2 is RC-only
+with SH monitoring explicitly unchanged**. F-A6, the exchange rate itself, is NOT ADOPTED per
+D126. **So on current plans the dashcam half of the D127 gate cannot be passed at 8, 16 or 32
+devices**, and since D127 requires BOTH axes at EVERY size, the gate cannot pass on either round
+unless something addresses SH admission. I report this rather than wait to discover it twice.
+
+**Status of my pre-registered F5 expectations, with no expectation altered.** G1a and G1b were
+written conditional on the F5a fix landing, and each carried an explicit falsifier. The premise
+has been refuted upstream, so the falsifiers apply as written: for G1a, "the units were already
+consistent and F-A7 has another cause", which F-A8 now names; for G1b, "the exchange rate stands
+as measured and v1.2 long-window structure is the only remaining route". **These are not errata:
+the expectations were conditional and their falsifiers fired.** G1c, G1d and G1e remain open and
+testable when F5b and F5c land.
