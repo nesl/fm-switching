@@ -563,3 +563,11 @@ def make_arm(name: str, **kw: Any) -> Policy:
 ROUND1_ARM_NAMES = ("policy-core", "device-only", "always-cloud-fcfs", "edf", "edf-piece1024",
                     "edf-piece2048", "utility-per-cost", "b9")
 ARM_NAMES = ROUND1_ARM_NAMES + ("llf", "vllm-priority")
+
+# D130: the StudyB published-system baselines, ported in `arms_published.py`. They are EXTRA
+# buildable arms, not round-1 arms: `ROUND1_ARM_NAMES` and the scorer's seven-arm
+# `GPU_BASELINES` are both untouched. Imported at the bottom so `arms_published` can import
+# `Live2ArmMixin` from here without a cycle.
+from arms_published import PUBLISHED_ARMS                               # noqa: E402
+ARMS.update(PUBLISHED_ARMS)
+ARM_NAMES = ARM_NAMES + tuple(sorted(PUBLISHED_ARMS))
