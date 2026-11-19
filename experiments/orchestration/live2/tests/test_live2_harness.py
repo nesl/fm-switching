@@ -589,6 +589,59 @@ class TestTheVllmPriorityWiring(unittest.TestCase):
                         "edf on a priority-mode server must fail the vllm-priority assertion")
 
 
+class TestThePlacementWiring(unittest.TestCase):
+    """D134 item 3: flash's "H100 wiring for placement" (e924005), the two coordinator lines.
+    (1) the arm's RecallAction.representation is recorded on the opportunity; (2) _submit_recall
+    sends and charges tokens_for_representation (RECENT = the recent window) and costs from
+    residency_readiness."""
+
+    def _dry(self):
+        import cachekeys as CK
+        import emulator as EM
+        import trace as TR
+        from bridge import EmulatorBridge
+        from coordinator import Live2Coordinator, Logs
+        from test_live2_coord import GPU_KV, HOST_GIB, HOST_TOK, _arm
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            tdir = d / "trace"
+            TR.write_trace(tdir, TR.generate_trace(7, 8, "50:50", 120.0, "A"))
+            logs = Logs(d / "run").open()
+            co = Live2Coordinator(_arm("edf"), None, [], gpu_kv_tokens=GPU_KV,
+                                  host_tier_gib=HOST_GIB, host_tier_tokens=HOST_TOK,
+                                  upload_mode="A", window_s=120.0, drain_s=5.0, seed=7,
+                                  logs=logs, run_tag=CK.run_tag(7, "edf"), dry_run=True)
+            br = EmulatorBridge(co)
+            br.kind = "stub"
+            EM.FleetEmulator(tdir, br, "A", realtime=False, drain_s=5.0).run(d / "run")
+            logs.close()
+        return co
+
+    def test_the_requested_representation_reaches_the_opportunity(self):
+        co = self._dry()
+        reps = [getattr(o, "requested_representation", None) for o in co.st.opps.values()
+                if o.kind == "recall" and getattr(o, "requested_representation", None) is not None]
+        self.assertGreater(len(reps), 0, "no recall carried the arm's representation")
+        self.assertTrue(all(r == "D2" for r in reps), reps)        # edf asks for D2
+
+    def test_a_recent_recall_sends_and_charges_the_recent_window(self):
+        import cstate as CS
+        co = self._dry()
+        recall = [o for o in co.st.opps.values() if o.kind == "recall" and o.session_id in co.st.sessions
+                  and co.st.sessions[o.session_id].est_tokens > CS.RECENT_WINDOW_TOKENS]
+        self.assertGreater(len(recall), 0)
+        o = recall[0]
+        s = co.st.sessions[o.session_id]
+        co.logs = None                     # the dry run's logs are closed; this check needs none
+        for rep, want in (("RECENT", min(int(CS.RECENT_WINDOW_TOKENS), int(s.est_tokens))),
+                          (None, max(int(s.est_tokens), 1))):
+            o.requested_representation = rep
+            n0 = len(co.futures)
+            co._submit_recall(o, s, co.st.now, 0.0, {}, co.st.traffic_mix(), whole=False)
+            self.assertEqual(len(co.futures), n0 + 1, rep)
+            self.assertEqual(co.futures[-1][1].est_tokens, want, rep)
+
+
 class TestTheCInflightRunnerFlag(unittest.TestCase):
     """D114 sensitivity: the runner sets the arm's OWN c_inflight on the constructed instance."""
 
