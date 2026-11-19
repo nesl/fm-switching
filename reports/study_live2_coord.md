@@ -4525,3 +4525,69 @@ production caller for the first time and is no longer dead code.
 
 That is the pre-registered expectation met exactly: the routing carries no behavioural content,
 and the equivalence is shown rather than asserted.
+
+## V26. F5b: I MUST CORRECT MY OWN EARLIER FINDING. State value is not structurally zero, and F2 is what zeroes it
+
+**Retraction first.** In V21 I reported that the terminal state value is "exactly zero in 5,016 of
+5,016 terminal evaluations, absolutely zero PER BRANCH, with the zero originating inside
+`readiness.state_value`". **That is wrong, and rulings were taken on it.** The correct measurement
+is below.
+
+### V26.1 `readiness.state_value` works
+
+Instrumenting `_state_value` directly on a seed-0 four-device dry run, 1,365 calls:
+
+| factor | value, identical on every call |
+|---|---|
+| `value` | **0.009216** |
+| `p_need` | 0.260443 |
+| `u_here` | 0.250000 |
+| `u_next_colder` | 0.166667 |
+| `u_device` | 0.166667 |
+| `omega_RC` | 0.424631 |
+| `credit_allowed` | True on all 1,365 |
+
+`0.260443 x 0.424631 x (0.25 - 0.166667) = 0.009216`. **Nothing is zero, and nothing is
+degenerate.** The function computes what spec 6.1 asks for.
+
+### V26.2 The zero comes from F2, the staleness fix I shipped
+
+Same harness, same trace, same switches except one:
+
+| switches | `_terminal` state-value sum | exactly zero |
+|---|---|---|
+| `deficit_update` + `realistic_competing` | median **0.009216**, max 0.018432 | 1,196 of 4,254, **28.1 per cent** |
+| the same **plus `write_staleness`** | median **0.000000**, max 0.000000 | **2,890 of 2,890, 100 per cent** |
+
+**So F2 turns a term that is live in 71.9 per cent of evaluations into one that is zero in 100 per
+cent.** My V21 run had `write_staleness` ON, which is why I saw 100 per cent and wrongly blamed
+`state_value`.
+
+The magnitude F2 writes is large: for the 6,781-token history in this trace,
+`(6781 / 90) x 2.0 = 150.7 s` of staleness, against an RC deadline of 10 s.
+
+**I could not isolate the internal route in a standalone reproduction**: calling
+`_u_rc_from_tier` directly at 6,781 tokens returned 0.25 for both GPU and STORED at every
+staleness from 0 to 150.7 s, which does not by itself produce the collapse. So the empirical fact
+is established and the internal mechanism is NOT, and I am reporting it that way rather than
+asserting a route I have not confirmed.
+
+### V26.3 What this means for F5b and for v1.2, and why I stopped
+
+**F5b's premise has changed.** D126 asked me to wire KV and host-tier bookkeeping into the terminal
+state value because it was zero for every candidate. It is not: it is live in 71.9 per cent of
+evaluations with F2 off, and the thing that kills it is F2's staleness magnitude.
+
+Curing it means changing the quantity F2 FEEDS `state_value`, and that quantity's definition
+("frames received minus frames built, in seconds of history") is the user's own F2 instruction, not
+mine. **Changing a user-specified definition is methodological, so I stopped that branch and did
+not touch it**, per the standing rule and D126's own stop condition.
+
+**For v1.2:** with F2 ON as D125 requires, "state value at T_r" and the ABANDON option are indeed
+inert, so the planner's value would come only from the SH term, the RC answer term, the deficit
+term and the backlog. **But the cause is F2, not a broken state value**, so the remedy is a ruling
+on F2's staleness magnitude rather than new wiring. That is a decision for the morning and v1.2
+should not be built on top of either reading until it is made.
+
+**Decisions this changes, flagged rather than built upon:** D126's F5b as written, and the part of
+the v1.2 design note that counts state value at T_r and defines ABANDON by it.
