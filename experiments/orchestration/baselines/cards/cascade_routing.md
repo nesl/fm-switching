@@ -1,0 +1,65 @@
+<!-- StudyB-baselines (D134 addendum). FAITHFUL = unchanged from the original; ADAPTATION = changed, with its reason. Fairness rules 1-6 of the addendum hold for this baseline and are checked by `interface.check_fairness` and the smoke harness. -->
+# Cascade routing — Dekoninck, Baader, Vechev — case D, D134 item 7
+
+**Paper.** J. Dekoninck, M. Baader, M. Vechev, "A Unified Approach to Routing and Cascading for
+LLMs", **ICML 2025**, PMLR 267:12987-13010 (arXiv:2410.10347, v1 14 Oct 2024, last revised
+22 May 2025). **Code.** `https://github.com/eth-sri/cascade-routing`, cited in the paper's own
+footnote. **Located, not cloned**; this card and the adapted policy are written from the paper.
+Licence not yet checked, flagged for the user as with Ekya and SimpleStream.
+
+**Files.** `cascade_routing_adapted.py`. **Experiment:** C-mixed.
+
+## IT IS NOT A DUPLICATE OF `confidence-cascade`, AND THAT WAS CHECKED FIRST
+
+D134 item 7 asked whether `confidence-cascade` already implements this method. It does not, and the
+distinction is the paper's entire contribution.
+
+| arm | what it does | can it skip the small model? | can it escalate after seeing an answer? |
+|---|---|---|---|
+| `confidence-cascade` (FrugalGPT + AutoMix) | fixed cascade ORDER, stop at the first answer a scorer trusts | **no** | yes |
+| `routellm`, `hybrid-llm` | one-shot ROUTE to a single model | yes | **no** |
+| **`cascade-routing` (this card)** | re-decides at each step over ordered model sets | **yes** | **yes** |
+
+Routing chooses one model per query; cascading runs increasingly larger models until an answer is
+good enough. The paper proves these are both special cases of one strategy and that the unified
+rule is optimal under its formulation.
+
+## The paper's algorithm
+
+At step *j*, with the first *j-1* models already run, consider every **supermodel** (an ordered set
+of models) containing those already run. Pick the supermodel maximising **expected quality minus
+lambda times expected cost**, with lambda set so an expected cost budget B is met. If the chosen
+supermodel adds no unrun model, **stop** and return the answer in hand; otherwise **run the
+cheapest unrun model in it**. Supermodel quality is the expected quality of its best member, its
+cost the sum of its members'. Quality estimates are **ex-ante** from small trained classifiers and
+**post-hoc** updated after each model's output, so a low-confidence first answer can lower the
+estimated quality and raise the estimated cost of continuing. Supermodels containing a model with
+negative marginal gain are pruned. Reported gains: 1-4 % AUC over baselines on RouterBench, up to
+14 % on SWE-Bench.
+
+## Mapping, step by step
+
+Our model set is two: **device 4B-I** and **cloud 32B**, cost-ordered. The supermodels are
+`{device}`, `{cloud}` and `{device, cloud}`.
+
+| paper | our code | note |
+|---|---|---|
+| supermodels over the model set | `{device}`, `{cloud}`, `{device, cloud}` | FAITHFUL, with the set we have |
+| run the cheapest unrun model in the chosen supermodel | `RecallAction(decision="DEVICE")`, then `"CLOUD"` on a later epoch | FAITHFUL in mechanism |
+| chosen supermodel adds nothing unrun, so stop | keep the device answer, emit no cloud recall | FAITHFUL |
+| **post-hoc quality update after the first model** | `q.device_answer_confidence`, the StudyD13 logprob | **FAITHFUL in channel.** This is a LIVE channel, checked before the arm was written: `reads_device_answer` is declared at `interface.py:370`, read at `coordinator.py:171` into `self.reads_device`, and passed into `cstate.observation(...)`; the field is supplied only to arms that declare it. |
+| ex-ante quality from trained classifiers | the committed ordinal `REP_QUALITY`-style priors plus readiness | **ADAPTATION.** Training a quality classifier needs a GPU and a labelled split we do not hold for this purpose. We keep the paper's DECISION RULE and substitute committed priors for its learned estimator. **Consequence: this tests the paper's selection rule, not its estimator** - and the paper's own conclusion is that estimator quality is the critical factor, so this limitation is material and is restated below. |
+| cost estimates from tokens and latency | `costs.recall_gpu_s` and `costs.recall_ttft_s` on the committed curves | FAITHFUL |
+| lambda set so the budget is met | derived from `obs.budget_remaining_gpu_s` against the window | **ADAPTATION**, the natural reading of "lambda set so budget B is met" with a live budget |
+| variance of each estimate, measured on a validation set | **not ported** | we have no validation split for it; the rule degenerates to the expectation, which the paper's own formulation allows |
+
+## Limitations, stated
+
+- **This tests the selection rule, not the estimator.** The paper says good quality estimators are
+  the critical factor; ours are committed ordinal priors, not trained classifiers. A weak result
+  here is evidence about the rule under our estimators and **not** evidence against the paper.
+- **Two models, not a ladder.** With `|M| = 2` the supermodel set has three members, so the
+  pruning and search machinery is exercised only trivially. The mechanism under test is the
+  skip-or-cascade choice, which two models do express.
+- **Estimate variance is not ported**, so the gamma tie-breaking between cheapest and most
+  expensive tied options is unused.

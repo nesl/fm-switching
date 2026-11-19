@@ -46,6 +46,7 @@ import constructed as CONS                                              # noqa: 
 import streamscout_adapted as SS                                        # noqa: E402
 import covstream_adapted as CVS                                         # noqa: E402
 import thinking_qwenvl_adapted as TQ                                    # noqa: E402
+import cascade_routing_adapted as CR                                    # noqa: E402
 import attentionstore_adapted as _attentionstore                        # noqa: E402
 import cascade_adapted as _cascade                                      # noqa: E402
 import clockwork_adapted as _clockwork                                  # noqa: E402
@@ -221,6 +222,14 @@ StreamScoutArm = _wrap("StreamScoutArm", SS.StreamScoutAdapted,
 CoVStreamArm = _wrap("CoVStreamArm", CVS.CoVStreamAdapted,
                      "covstream", "covstream.md",
                      "baselines/covstream_adapted.py::CoVStreamAdapted")
+# D134 item 7. NOT a duplicate of confidence-cascade (FrugalGPT + AutoMix, fixed order, cannot
+# skip the small model) nor of routellm/hybrid-llm (route once, cannot escalate). What it decides
+# here: per robot query, whether to answer on the device, go straight to the cloud, or run the
+# device first and escalate on its confidence. Its post-hoc channel, device_answer_confidence, was
+# verified LIVE before the arm was written.
+CascadeRoutingArm = _wrap("CascadeRoutingArm", CR.CascadeRoutingAdapted,
+                          "cascade-routing", "cascade_routing.md",
+                          "baselines/cascade_routing_adapted.py::CascadeRoutingAdapted")
 ThinkingQwenVLArm = _wrap("ThinkingQwenVLArm", TQ.ThinkingQwenVLAdapted,
                           "thinking-qwenvl-atdm", "thinking_qwenvl.md",
                           "baselines/thinking_qwenvl_adapted.py::ThinkingQwenVLAdapted")
@@ -232,6 +241,7 @@ PUBLISHED_ARMS: Dict[str, Any] = {
     "streamscout": StreamScoutArm,
     "covstream": CoVStreamArm,
     "thinking-qwenvl-atdm": ThinkingQwenVLArm,
+    "cascade-routing": CascadeRoutingArm,
     "clockwork": ClockworkArm,
     "videostorm": VideoStormArm,
     "r3-streaming": R3StreamingArm,

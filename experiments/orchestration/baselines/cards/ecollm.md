@@ -95,8 +95,17 @@ coincidence. There the divergence was masked; here it was live in the comparator
 produced before this fix were planned under different prices and are to be relabelled
 **pre-reconciliation**; re-scoring and the capacity-cell movement belong to session 2.
 
-> **MEASUREMENT HELD.** The magnitudes above beyond the decision-move proof are not reported,
-> because a suspected regression in recall costing (`e924005`, `_submit_recall` charging on
-> `residency_readiness()` rather than `readiness()`) was under isolation at the time of writing.
-> The move proof itself is a before/after on the **same tree**, so it isolates the planner change
-> and is unaffected; any "saves X GPU-seconds" or "serves N recalls" claim is not.
+> **MEASUREMENT SCOPE, amended 2026-11-19.** A suspected regression in recall costing (`e924005`)
+> was under isolation when this was written, so everything here was held. The fault is now located
+> and is **orthogonal to this fix**: it is in the `readiness` argument of
+> `cost = C.recall_gpu_s(tokens, readiness)`, while this reconciliation is entirely on the
+> `tokens` side and never touches readiness. So the **selection** results above stand as reported:
+> 3 decisions differ and cloud-RECENT selections rise 3 to 6.
+>
+> What remains held is anything expressed in **GPU-seconds** or in **served-recall counts**, since
+> both flow through the broken readiness argument. No such number is quoted on this card.
+>
+> *Noted because it is the same failure mode as the one that produced this amendment:* my original
+> note said "MEASUREMENT HELD", which was true of what I had measured and implied more scope than
+> the hold actually needed. A correct sentence that implies more than it covers is harder to catch
+> than a wrong one, and a card is exactly where that happens.
