@@ -3379,3 +3379,60 @@ Worth recording because it bounds how far 37.2 generalises across the field:
 **eco-llm is the arm where the harness genuinely does not let price matter except through
 feasibility.** A conclusion about price sensitivity drawn from it does not transfer to an arm whose
 objective is linear in cost.
+
+# 38. 16 DEVICES MEASURED. Three moved decisions ARE three delivered robots, and NO capacity cell moves
+
+The question 37.3 left open, answered. Both legs at `origin/main` with only
+`baselines/ecollm_adapted.py` reverted in one worktree; control verified before launch
+(`_rep_tokens` 0 in PRE, 2 in POST). Seeds 0, 4, 5, 6 at 16 devices.
+
+| seed | selections PRE | selections POST | recall on time | robot fraction | capacity |
+|---|---|---|---|---|---|
+| 0 | D2 32 / RECENT 3 | D2 32 / RECENT 3 | 35 / 35 | 1.0000 / 1.0000 | True / True |
+| **4** | D2 35 / **RECENT 3** | D2 35 / **RECENT 6** | **38 / 41** | **0.9268 / 1.0000** | **True / True** |
+| 5 | D2 36 / RECENT 5 | D2 36 / RECENT 5 | 41 / 41 | 1.0000 / 1.0000 | True / True |
+| 6 | D2 34 / RECENT 3 | D2 34 / RECENT 3 | 37 / 37 | 1.0000 / 1.0000 | True / True |
+
+| quantity | seeds differing |
+|---|---|
+| selections | **1 of 4** |
+| recall on time | **1 of 4** |
+| **capacity cells** | **0 of 4** |
+
+## 38.1 Both halves of the answer, and they point different ways
+
+**Session 3's cell reproduces exactly** - RECENT 3 to 6 on seed 4 - and **the three moved
+decisions did become three delivered robots**: 38 of 41 on time becomes **41 of 41**, and the
+robot fraction goes 0.9268 to a perfect **1.0000**. So in this cell, three decisions differing
+*was* three robots delivered. That was not guaranteed and it is the better of the two possible
+answers.
+
+**And no capacity cell moved, so the bar did not rise on the gate metric.** Seed 4 was already
+passing at 0.9268 against the 0.90 target, so a gain from 0.9268 to 1.0000 is real service and
+**zero capacity**. The other three seeds were already at 1.0000 and had nothing to gain.
+
+**The precise statement, which is narrower than either "it changed nothing" or "the bar rose":
+the reconciliation delivers three extra robot answers at 16 devices on one seed of four, and
+changes no capacity cell anywhere.**
+
+## 38.2 It is a feasibility flip, confirmed from my own numbers
+
+**D2 stays at 35 in both legs while cloud selections rise 38 to 41, and recalls served stays 41.**
+So the three moved queries were not taken from D2: they were **not going to cloud at all** before,
+and now go as cloud RECENT and arrive on time. Session 3's reading is confirmed on an independent
+run - a feasibility flip, not a preference shift between representations.
+
+**This is the gating mechanism of 37.2 operating exactly as predicted.** `max(feas, key=(quality,
+-cost))` can only let price matter where D2 is infeasible and RECENT is feasible. At 16 devices,
+on one seed, three queries meet that condition; at 10 to 14 none do. **The threshold is between 14
+and 16 devices**, and pressure should widen it.
+
+## 38.3 What this fixes in my own reporting
+
+My "the bar did not rise" in `d8da722` was unscoped, and the scoped version is now also measured
+rather than inferred: **it does not rise at 10, 12 or 14, and it does not rise at 16 either** -
+but at 16 that is because the cell was already passing, which is a different reason and could stop
+holding the moment pressure moves the baseline below the target. **A reader should not carry "the
+reconciliation is worth nothing" forward**: it is worth three robot answers in one cell of four
+today, with the mechanism that produces them gated on exactly the condition the pressure work
+manufactures.
