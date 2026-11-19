@@ -1,0 +1,36 @@
+{
+ "check": "scorer_input_domain_audit",
+ "is_measurement": true,
+ "label": "D134: verify a scorer INPUT is a measurement before reading its OUTPUT. Run on my own b10 port at 16 devices, seed 4, 600 s, dry, 8,709 outcome rows.",
+ "independently_reproduced": {
+  "cloud_letter": "present on only 38 of 8,709 rows and takes exactly ONE distinct value, \"X\", against an expected domain of A to E. Session 2 report confirmed on my own run.",
+  "cloud_score": "present as a KEY on all 8,371 cloud payloads but NEVER POPULATED: zero non-None values. This is a second placeholder field and was not in the original report."
+ },
+ "the_sharper_lesson": {
+  "what_would_have_missed_it": "the predicted symptom was a FLAT column, which is consistency check 3. The column was not flat: it spread 0.0289 to 0.2143, because the spread tracked how many questions each arm delivered on time, each scored against a guaranteed-wrong placeholder.",
+  "principle": "a flat column advertises that something is broken; a spread looks like a result. Checking the output cannot catch this; checking the input domain does.",
+  "relation_to_my_read_path_checks": "same discipline one layer later. The read-path checks on order, desired_tier and representation verify that a mechanism OUTPUT reaches a decision. This verifies that a scorer INPUT is a measurement."
+ },
+ "consequence_for_my_ports": {
+  "scorable_on_the_dry_screen": [
+   "cloud_payload.on_time",
+   "within_L"
+  ],
+  "refused": [
+   "cloud_payload.cloud_letter",
+   "cloud_payload.cloud_score"
+  ],
+  "reading": "NEITHER accuracy column can be produced from a dry-run cell, robot or dashcam. cloud_score is null on every dry payload, so dashcam AP is equally unavailable here; the difference is only in what unblocks each (dashcam AP needs live cells, robot accuracy needs live cells AND Part A).",
+  "rule": "until both move, a dry-screen comparison of my ports is TIMELINESS ONLY, and per the directive a timeliness-only comparison must not be read as a verdict on an evidence-selection arm. That asymmetry is exactly what the accuracy column was added to remove and it is not yet removed."
+ },
+ "guard": "experiments/orchestration/live2/published_scoring_inputs.py, exit 1 when any consumed field has no value in its expected domain. Run before scoring any ported arm.",
+ "single_size_note": "16 devices only, flagged under the standing single-size rule.",
+ "_provenance": {
+  "git_commit": "c8c3c75fc01c1fef29b65206a7d74d8019e80560",
+  "script": "published_scoring_inputs.py",
+  "model": "none (dry run)",
+  "device": "flash CPU only",
+  "n": "8,709 outcome rows, seed 4, 16 devices, 600 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
