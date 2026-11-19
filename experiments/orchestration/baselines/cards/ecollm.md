@@ -61,3 +61,42 @@ of its evaluation; its hardware-platform comparison.
 | SLO budget | the remaining GPU-seconds divided across live streams | our budget, not the paper's |
 | recall SLO | the query's own deadline | the observation |
 | `REP_QUALITY` | 0.6 / 1.0 / 1.0 | ordinal, from StudyRH4 (A3) |
+
+## D135 item 1, added 2026-11-19: the planner now prices RECENT at what it is charged
+
+**The defect.** eco-llm read `q.evidence` for **availability** (`have`) but ignored the `tokens`
+field on the very items it was handed, pricing every representation at
+`readiness_tokens * REP_TOKEN_SCALE[rep]` instead. The committed RECENT `EvidenceItem` carries
+`RECENT_WINDOW_TOKENS = 467` in all three harnesses (`live/adapter.py:65`, `sim/run.py:81`,
+`live2/cstate.py:50`), and since Part A live2 **charges** `min(467, history)` through
+`cstate.tokens_for_representation`.
+
+So the planner priced the cheap option at `0.35 x history` while paying `467`. The two agree only
+near a history of **1,334 tokens**; measured histories in the verification run were min 1,381,
+median 10,831, max 25,681, so **essentially every query sat above the crossover** and RECENT was
+over-priced in eco-llm's own view by up to about 9x. It therefore under-selected RECENT exactly
+where RECENT is cheapest.
+
+**The fix.** `_rep_tokens(q, rep, ev_tok)` takes the token count from the evidence the harness
+offered, falling back to the old scale when no sized item is supplied, so any harness that offers
+no evidence behaves exactly as before.
+
+**Step 2b, the move proof.** Same trace, same seed, same size, only the planner's price changed:
+**3 decisions differ**, first at index 7,825, and cloud-RECENT selections rise **3 to 6**. The
+direction was stated before the measurement and matched: priced correctly, eco-llm selects RECENT
+about twice as often.
+
+**Class of fault.** An arm's internal estimate diverging from the quantity actually charged. The
+same class as the S2 admission-estimate fault recorded under the builder work, where the estimate
+was `LlfArm`'s `S_hat` rather than B7's and the byte-identity proof passed only by regime
+coincidence. There the divergence was masked; here it was live in the comparator.
+
+**Consequence for prior numbers.** eco-llm is the comparator for the published-arm field. Rows
+produced before this fix were planned under different prices and are to be relabelled
+**pre-reconciliation**; re-scoring and the capacity-cell movement belong to session 2.
+
+> **MEASUREMENT HELD.** The magnitudes above beyond the decision-move proof are not reported,
+> because a suspected regression in recall costing (`e924005`, `_submit_recall` charging on
+> `residency_readiness()` rather than `readiness()`) was under isolation at the time of writing.
+> The move proof itself is a before/after on the **same tree**, so it isolates the planner change
+> and is unaffected; any "saves X GPU-seconds" or "serves N recalls" claim is not.

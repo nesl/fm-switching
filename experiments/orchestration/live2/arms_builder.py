@@ -50,6 +50,10 @@ from arms import Live2ArmMixin                                          # noqa: 
 
 S1_CHOICES = ("all", "feasible", "fairshare", "lateness")
 S2_CHOICES = ("all", "feasible", "value")
+# D135 item 2. S7 is the EVIDENCE slot, live only since Part A made RecallAction.representation
+# reach execution (coordinator.py:552 -> cstate.tokens_for_representation).
+S7_CHOICES = ("full", "degrade", "always-recent")
+from cstate import RECENT_WINDOW_TOKENS                                  # noqa: E402
 S3_CHOICES = ("fixed", "whatif")
 S4_CHOICES = ("edf", "llf", "reserve", "adaptive")
 S6_CHOICES = ("none", "decline")
@@ -66,18 +70,20 @@ class BuilderArm(Live2ArmMixin, Policy):
     defaults_used = ("cadence_s", "frame_count", "representation", "engine_config")
     restricts_action_space = None
 
-    def __init__(self, s1: str = "all", s2: str = "feasible", s3: str = "fixed",
+    def __init__(self, s7: str = "full",
+                 s1: str = "all", s2: str = "feasible", s3: str = "fixed",
                  s4: str = "edf", s6: str = "none", *, defer_s: float = 0.5,
                  c_inflight: int = 8, reserve_frac: float = 0.25, fair_target: float = 0.25,
                  piece_tokens: Optional[int] = None, name: Optional[str] = None,
                  order_label: str = "EDF", engine_config: Optional[str] = None,
                  emit_defaults_for_recall: bool = False) -> None:
-        for v, choices, slot in ((s1, S1_CHOICES, "S1"), (s2, S2_CHOICES, "S2"),
+        for v, choices, slot in ((s7, S7_CHOICES, "S7"), (s1, S1_CHOICES, "S1"), (s2, S2_CHOICES, "S2"),
                                  (s3, S3_CHOICES, "S3"), (s4, S4_CHOICES, "S4"),
                                  (s6, S6_CHOICES, "S6")):
             if v not in choices:
                 raise ValueError("%s=%r not in %r" % (slot, v, choices))
         self.s1, self.s2, self.s3, self.s4, self.s6 = s1, s2, s3, s4, s6
+        self.s7 = s7
         self.defer_s = float(defer_s)
         self.c_inflight = int(c_inflight)
         self.reserve_frac = float(reserve_frac)
@@ -215,6 +221,11 @@ class BuilderArm(Live2ArmMixin, Policy):
             if self._emit_defaults_for_recall:
                 rec.append(RecallAction(q.query_id, DEFAULTS["recall_decision"]))
                 continue
+            if self.s7 == "always-recent":
+                # the REFERENCE arm: upper bound on the timing benefit, lower bound on accuracy.
+                rec.append(RecallAction(q.query_id, "CLOUD", representation="RECENT"))
+                self.stats["rc_cloud"] += 1; self.stats["s7_recent"] += 1
+                continue
             if self.s2 == "all":
                 rec.append(RecallAction(q.query_id, "CLOUD")); self.stats["rc_cloud"] += 1
                 continue
@@ -229,6 +240,19 @@ class BuilderArm(Live2ArmMixin, Policy):
                     sa = self._execution_mode(q, est, slack, known)
                     if sa is not None:
                         sessions.append(sa); self.stats["materialize"] += 1
+            elif self.s7 == "degrade" and self._at_risk(q, est, slack):
+                # EVIDENCE DEGRADATION. Fires on RISK, not on NEED: see _at_risk.
+                tok = max(min(int(RECENT_WINDOW_TOKENS), int(q.readiness_tokens)), 1)
+                est_recent = self._rc_service_s(tok, q.readiness)
+                if est_recent <= slack:
+                    rec.append(RecallAction(q.query_id, "CLOUD", representation="RECENT"))
+                    self.stats["rc_cloud"] += 1; self.stats["s7_degraded"] += 1
+                else:
+                    self.stats["s7_degrade_still_infeasible"] += 1
+                    if self.s6 == "decline":
+                        rec.append(RecallAction(q.query_id, "DEVICE")); self.stats["rc_device"] += 1
+                    else:
+                        rec.append(RecallAction(q.query_id, "REJECT")); self.stats["rc_reject"] += 1
             elif est <= slack + self.defer_s:
                 rec.append(RecallAction(q.query_id, "DEFER", defer_s=self.defer_s))
                 self.stats["rc_defer"] += 1
@@ -238,6 +262,25 @@ class BuilderArm(Live2ArmMixin, Policy):
                 else:
                     rec.append(RecallAction(q.query_id, "REJECT")); self.stats["rc_reject"] += 1
         return rec, sessions
+
+    @staticmethod
+    def _at_risk(q, est: float, slack: float) -> bool:
+        """RISK, not NEED. This is the whole design argument and it belongs in the code.
+
+        StudyEVNEED established that NOTHING PREDICTS when history helps or hurts: coverage scores
+        BELOW base rate on the hurts flow, the category rule scores exactly chance, and neither
+        signal is available at decision time anyway. A mechanism that fires on "this question needs
+        full history" is therefore undeployable.
+
+        This rule never asks that question. It asks a different and directly observable one:
+        the history is COLD (a full answer means a cold rebuild) and the full answer does NOT FIT
+        the remaining slack, so this question is already about to be declined, rejected or
+        delivered late. Given that, is a degraded answer better than none?
+
+        Both terms are observable at decision time from the observation alone, which is exactly
+        what the StudyEVNEED signals were not.
+        """
+        return str(q.readiness).upper() == "COLD" and est > slack
 
     def _value_justified(self, q, est: float, slack: float) -> bool:
         """S2 value. PRE-REGISTERED AS EXPECTED-WEAK: the DeltaJ objective this imitates is blind
@@ -284,4 +327,7 @@ BUILDER_ARMS: Dict[str, Any] = {
     "builder-s4-reserve": _mk(s1="feasible", s4="reserve", name="builder-s4-reserve"),
     "builder-s4-adaptive": _mk(s1="feasible", s4="adaptive", name="builder-s4-adaptive"),
     "builder-s6-decline": _mk(s6="decline", name="builder-s6-decline"),
+    # ---- D135 item 2, PREPARE ONLY. Both read the representation field Part A made live.
+    "builder-s7-degrade": _mk(s7="degrade", name="builder-s7-degrade"),
+    "builder-s7-always-recent": _mk(s7="always-recent", name="builder-s7-always-recent"),
 }

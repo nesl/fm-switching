@@ -59,6 +59,30 @@ class ECOLLMAdapted(Policy):
             next(x for x in self.rows if x["name"] == name)
         return (r["quality"], r["demand_gpu_s_per_s"] * self.horizon_s, r["lag_s"])
 
+    @staticmethod
+    def _rep_tokens(q, rep, ev_tok) -> int:
+        """Planning token count for `rep`, taken from the evidence the harness OFFERED.
+
+        D135 item 1, the reconciliation ruling. eco-llm already read `q.evidence` for
+        AVAILABILITY (`have`) but ignored the `tokens` field on the very items it was handed,
+        pricing every representation at `readiness_tokens * REP_TOKEN_SCALE[rep]` instead.
+
+        That mattered because the committed RECENT EvidenceItem carries `RECENT_WINDOW_TOKENS`
+        = 467 in all three harnesses (`live/adapter.py:65`, `sim/run.py:81`, `live2/cstate.py:50`),
+        and live2 now CHARGES `min(467, history)` through `cstate.tokens_for_representation`. So
+        the planner priced the cheap option at 0.35 x history while paying 467: the two agree only
+        near a history of 1,334 tokens, and real histories are 5,431 to 14,881, so RECENT was
+        over-priced in eco-llm's own view by up to about 9x and under-selected exactly where it is
+        cheapest. An arm's internal estimate diverging from the quantity actually charged.
+
+        Fall back to the old scale when the harness offers no sized item, so any harness that
+        supplies no evidence behaves exactly as before.
+        """
+        t = ev_tok.get(rep)
+        if t is not None and int(t) > 0:
+            return max(int(t), 1)
+        return max(int(q.readiness_tokens * REP_TOKEN_SCALE[rep]), 1)
+
     def decide(self, obs: Observation) -> Action:
         # ---- episodic: one joint configuration selection under the budget SLO
         slo_ep = SLO(max_cost_gpu_s=max(obs.budget_remaining_gpu_s, 0.0)
@@ -77,11 +101,12 @@ class ECOLLMAdapted(Policy):
         left = obs.budget_remaining_gpu_s
         for q in sorted(obs.recall, key=lambda x: x.deadline_s):
             have = {e.representation for e in q.evidence} or {"RECENT"}
+            ev_tok = {e.representation: int(e.tokens) for e in q.evidence}
             space, tab = [], {}
             for rep in REPS:
                 if rep not in have:
                     continue
-                tok = max(int(q.readiness_tokens * REP_TOKEN_SCALE[rep]), 1)
+                tok = self._rep_tokens(q, rep, ev_tok)
                 lat = C.recall_ttft_s(tok, q.readiness)
                 tab[("cloud", rep)] = (REP_QUALITY[rep], C.recall_gpu_s(tok, q.readiness), lat)
                 space.append(dict(tier="cloud", rep=rep))
