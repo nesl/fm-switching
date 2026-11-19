@@ -125,9 +125,30 @@ median recall delivery under 5.0 s.**
 ## Best version so far, and its standing
 
 **The release is `d944361`, "v1.3-fast": the v1.2 planner with the price of GPU time set to ZERO,
-`honour_job_priority` on, `write_staleness` OFF and `admit_floor_c` 8.** Scoring on all four dev
-seeds and all four sizes is in section 13. Session 1 states it does not beat the baselines
-everywhere and released it as the best found.
+`honour_job_priority` on, `write_staleness` OFF and `admit_floor_c` 8.** Scored on all four dev
+seeds and all four sizes in section 13, pinned and scored BY NAME. Session 1's 16-device table
+**reproduces exactly**, to four decimal places on dashcam and exactly on robot counts, for the
+candidate and both baselines.
+
+| n | gate verdict, D127, on delivery |
+|---|---|
+| 4 | **FAIL** both axes, four seeds |
+| 8 | **FAIL** both axes (dashcam here is UNRELIABLE per my own calibration, E6) |
+| 16 | **FAIL**. Dashcam loses in all four seeds; robots win 3 of 4 and LOSE seed 6 |
+| 32 | **PASS** on the letter, both axes, all four seeds, by a wide margin |
+
+**No GATE PASS string is emitted: the release fails at three of four sizes.**
+
+**Two things to carry into the morning.** First, **seed 6 breaks the pattern at 16 devices**: llf
+wins it outright on both axes, 10 robots to 9 and 0.9792 dashcam to 0.9085. "Robots double the
+baseline on every seed" is 3 of 4, not 4 of 4, and the spread 14, 13, 17, 9 is wider than three
+seeds showed. That is the second time tonight that adding seed 6 changed a conclusion.
+
+Second, **at 32 devices the release wins both axes in all four seeds by a wide margin**, dashcam 25
+to 35 times the baselines and 12 to 21 robots against 0 to 2. I am not calling it a pass, because
+the majority of dashcam frames still miss and the baselines are collapsed. What it establishes is
+that **COVEX's value appears under heavy overload, where work-conserving schedulers collapse** -
+which is exactly what the queueing account above predicts.
 
 The two tables below this line are OLDER OBJECTS, kept for the audit trail:
 **v1.2** (planner_rc + plan_latest + replan + B1 + F2 + F3; F1 and F4 off), at `9fd423a`.
@@ -1544,3 +1565,84 @@ earlier relative to the monitor stream.** `honour_job_priority` is the switch th
 the release `d944361` already has it ON, which is consistent with it reaching 13 to 17 robots where
 v1.2 reached 1 to 2. The published field says the remaining headroom to 33 to 35 is also queueing,
 and the measurement above gives the target directly: get the median recall delivery under 5.0 s.
+
+# 13. THE RELEASE `d944361` SCORED, all four dev seeds, all four sizes. INDEPENDENT REPRODUCTION
+
+Pinned worktree at **`d944361`**, candidate scored BY NAME as `covex-v13` from its own
+`V13_RELEASE` block rather than by reconstructing switches. Delivery, 600 s, tight. Seeds 0, 4, 5,
+6. No cell errored. Output: `leaderboard_v13fast_release.json`.
+
+**dashcam delivered / robot delivered on time:**
+
+| n | seed | **v1.3-fast** | llf (C=8) | edf C=8 | edf C=4 |
+|---|---|---|---|---|---|
+| 4 | 0 | 0.9812 / 4 of 9 | 0.9991 / 7 | 0.9991 / 8 | 0.9991 / 8 |
+| 4 | 4 | 0.9860 / 2 of 8 | 0.9991 / 8 | 0.9991 / 8 | 0.9991 / 8 |
+| 4 | 5 | 0.9950 / 4 of 11 | 0.9991 / 8 | 0.9991 / 8 | 0.9991 / 8 |
+| 4 | 6 | 0.9936 / 4 of 13 | 0.9991 / 11 | 0.9991 / 11 | 0.9991 / 11 |
+| 8 | 0 | 0.9346 / 8 of 20 | 0.9991 / 18 | 0.9991 / 19 | 0.9854 / 0 |
+| 8 | 4 | 0.9506 / 9 of 21 | 0.9993 / 18 | 0.9993 / 18 | 0.9986 / 1 |
+| 8 | 5 | 0.9794 / 7 of 17 | 0.9993 / 15 | 0.9993 / 15 | 0.9867 / 2 |
+| 8 | 6 | 0.9667 / 6 of 17 | 0.9991 / 15 | 0.9991 / 15 | 0.9844 / 0 |
+| 16 | 0 | 0.8164 / **14** of 35 | 0.9633 / 6 | 0.9508 / 4 | 0.0172 / 0 |
+| 16 | 4 | 0.8751 / **13** of 41 | 0.9730 / 9 | 0.9609 / 3 | 0.0128 / 0 |
+| 16 | 5 | 0.8422 / **17** of 41 | 0.9684 / 9 | 0.9558 / 8 | 0.0130 / 1 |
+| 16 | 6 | 0.9085 / 9 of 37 | 0.9792 / **10** | 0.9654 / 4 | 0.0105 / 0 |
+| 32 | 0 | **0.4588 / 13** of 72 | 0.0130 / 0 | 0.0127 / 0 | 0.0055 / 0 |
+| 32 | 4 | **0.4323 / 17** of 84 | 0.0157 / 2 | 0.0169 / 0 | 0.0029 / 0 |
+| 32 | 5 | **0.4227 / 21** of 79 | 0.0150 / 1 | 0.0147 / 2 | 0.0035 / 0 |
+| 32 | 6 | **0.4713 / 12** of 75 | 0.0122 / 0 | 0.0123 / 0 | 0.0021 / 0 |
+
+## 13.1 Session 1's table REPRODUCES EXACTLY
+
+Session 1 reported 16-device seeds 0, 4 and 5. Every figure matches mine to four decimal places and
+every robot count matches exactly, for the candidate AND for both baselines: 0.8164 / 14, 0.8751 /
+13, 0.8422 / 17, with llf at 6, 9, 9 and edf C=8 at 4, 3, 8. Two independent harnesses, one pinned
+and scoring by name. **No disagreement to report.**
+
+## 13.2 SEED 6 BREAKS THE PATTERN, and session 1's three seeds could not show it
+
+"Robots roughly double the best baseline on every seed" holds on 0, 4 and 5. **It fails on seed 6,
+where llf delivers 10 and v1.3-fast delivers 9, and llf also wins dashcam 0.9792 to 0.9085.** llf
+wins seed 6 outright on both axes at 16 devices.
+
+So the 16-device robot advantage is three seeds out of four, not four out of four. The spread
+across seeds, 14, 13, 17, 9, is wider than three seeds suggested. This is exactly why the
+leaderboard runs four seeds, and it is the second time this session that adding seed 6 changed a
+conclusion.
+
+## 13.3 GATE, D127 criterion, on delivery
+
+| n | verdict |
+|---|---|
+| 4 | **FAIL** both axes, all four seeds |
+| 8 | **FAIL** both axes, all four seeds (dashcam ranking here is UNRELIABLE, see below) |
+| 16 | **FAIL**. Dashcam loses in all four seeds. Robots win 3 of 4 and LOSE seed 6 |
+| 32 | **PASS** on the letter, both axes, all four seeds, by a wide margin |
+
+**No `harden GATE PASS` string is emitted.** The release fails at three of four sizes.
+
+**The 8-device dashcam rows carry my own calibration warning (E6, section 10).** Applying the
+delivery definition to the committed live H100 cells showed the dry screen UNDERSTATES COVEX's
+dashcam by 0.461 at 8 devices and inverts its ranking against edf. **No 8-device dashcam ranking
+against edf in the table above may be claimed without a live cell.** The robot rows at 8 devices
+are not subject to that warning.
+
+## 13.4 The 32-device result is the real one, and it is consistent with section 18
+
+At 32 devices v1.3-fast leads dashcam by 25 to 35 times (0.42 to 0.47 against 0.012 to 0.017) and
+delivers 12 to 21 robots against 0 to 2, in all four seeds. That is a large, consistent,
+four-seed win on both axes.
+
+I am stating it more strongly than the scarcity build's 32-device rows in section 17, and the
+reason is that those sat at 0.12 to 0.35 dashcam while these sit at 0.42 to 0.47, and the robot
+margin is 12 to 21 against 0 to 2 rather than 0 to 3 against 0 to 2. The baselines are still
+collapsed, so this remains a ranking in a regime where the SLO is missed by the majority of
+dashcam frames, and I am not calling it a gate pass. **What it does establish is that COVEX's
+value appears under heavy overload, where work-conserving schedulers collapse entirely.**
+
+This is the same mechanism as section 18 seen from the other end. At 32 devices the monitor stream
+saturates the engine, so llf's recall answers queue behind it and arrive after the 5.0 s deadline,
+giving 0 to 2. v1.3-fast releases recall ahead of that stream via `honour_job_priority` and gets 12
+to 21. The queueing account predicts exactly this crossover: the baselines win where there is
+slack and lose where there is not.
