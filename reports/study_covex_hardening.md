@@ -3283,7 +3283,13 @@ under live2 being an arm writing it or a declaration - and `apply_defaults` sets
 unconditionally on every action alongside `order`. **The forward-looking risk is two dormant
 defaults, not one**, and the principle in 35.4 stands unchanged.
 
-# 37. THE eco-llm RECONCILIATION IS CORRECT AND CURRENTLY INERT. 0 of 12 cells move
+# 37. THE eco-llm RECONCILIATION IS GATED ON FEASIBILITY PRESSURE. Inert at 10 to 14, it FIRES at 16
+
+**SCOPE, added after the fact and it matters: everything in 37.1 and 37.2 holds AT 10, 12 AND 14
+DEVICES and does NOT generalise.** Session 3 has a 16-device cell where the reconciliation moves
+three decisions, reproduced twice. My sweep and its moving cell never overlapped: mine was
+10/12/14, its was 16. **The two results compose; there was never a discrepancy**, and its 8-device
+leg matches mine exactly (D2 19 / RECENT 2, 0 differing).
 
 Re-scored with the GPU-seconds hold lifted. **The reconciliation was isolated rather than compared
 across trees:** both legs sit at `origin/main`, so Part A, the residency fix and the defaults are
@@ -3328,9 +3334,16 @@ it changes nothing.
 1.0 against 0.6 regardless of what RECENT costs.** Making the cheap option cheaper cannot change a
 choice that was never made on price.
 
-**So the reconciliation is correct and currently dormant**, and this is a **cancelled-by-geometry**
-null in the Rule 2 taxonomy rather than a real negative: the mechanism operates, the quantity moves
-eightfold, and it reaches a comparison where another term dominates.
+**So the reconciliation is correct and dormant BELOW A THRESHOLD.** Session 3 verified the
+diagnosis by reading rather than agreeing, and sharpened it into something testable:
+`ecollm.py:90` selects `max(feas, key=(c.quality, -c.cost_gpu_s))` - **quality first, cost only a
+tie-break, and 1.0 against 0.6 never ties.** So price can change a selection **only where D2 is
+SLO-infeasible and RECENT is feasible, leaving RECENT alone in `feas`. That requires pressure.**
+
+**CLASSIFICATION CORRECTED.** I filed this as **cancelled-by-geometry**; that is wrong. The
+mechanism is not cancelled, it is **GATED ON FEASIBILITY PRESSURE**, which is closer to category 4,
+**unexercised below threshold**. Eight to fourteen devices supply no pressure, so the null there is
+**predicted rather than merely observed**; at 16 devices it fires.
 
 **The prediction, which the pending pressure work tests directly: under memory pressure the GPU
 budget becomes binding, price starts to matter, and the reconciliation should activate then.** If
@@ -3341,11 +3354,28 @@ advantage the harness can offer, and eco-llm will never select RECENT by design.
 **Either way the bar has not risen yet**, and the expectation that it would should be held until
 pressure lands rather than carried into the grid's assumptions.
 
-## 37.3 A disagreement to resolve, stated rather than reconciled quietly
+## 37.3 At 16 devices it is a FEASIBILITY FLIP, not a reshuffle between representations
 
-Session 3 reported the reconciliation moving **3 decisions, with cloud-RECENT selections 3 to 6**.
-At its own cell, 8 devices seed 4, I measure **D2 19 / RECENT 2 on the POST tree**, and no change
-against PRE. The two measurements are of different objects or different configurations: mine runs
-the live2 arm end to end through `run_fleet_cell`, and the counts do not match on either side.
-**I am not treating either as wrong**; the discrepancy needs one shared cell before the
-reconciliation's effect is quoted anywhere.
+Session 3's 16-device numbers show the mechanism directly: **D2 stays at 35 in BOTH legs while
+total cloud recalls rise 38 to 41, and RECENT goes 3 to 6.** The three moved queries did not switch
+from D2 to RECENT; **they previously went elsewhere and now go to cloud RECENT.** That is a
+feasibility flip, and it is a different and better story than "the planner now prefers RECENT".
+
+**What is quotable: 3 decisions moved, RECENT 3 to 6, at 16 devices. What is NOT quotable: that
+the bar rises.** Three decisions differing is not three robots delivered, and whether the moved
+selections improve the SCORED outcome is a separate question. I am measuring that at 16 devices
+across all four seeds; until it reports, no claim about the bar is supported in either direction.
+
+## 37.4 The geometry bites COST-DRIVEN choosers only
+
+Worth recording because it bounds how far 37.2 generalises across the field:
+
+| arm | how it chooses | does the quality-dominates-price geometry apply? |
+|---|---|---|
+| **eco-llm** | `max(feas, key=(quality, -cost))` | **yes** - price enters only through feasibility |
+| `simplestream`, `builder-s7-always-recent` | name RECENT unconditionally | no - price is irrelevant to them |
+| `cascade-routing` | scores **quality minus lambda x cost** | no - price enters its objective **directly** |
+
+**eco-llm is the arm where the harness genuinely does not let price matter except through
+feasibility.** A conclusion about price sensitivity drawn from it does not transfer to an arm whose
+objective is linear in cost.
