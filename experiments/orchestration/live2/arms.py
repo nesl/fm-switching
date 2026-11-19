@@ -651,3 +651,9 @@ ARM_NAMES = ROUND1_ARM_NAMES + ("llf", "vllm-priority")
 from arms_published import PUBLISHED_ARMS                               # noqa: E402
 ARMS.update(PUBLISHED_ARMS)
 ARM_NAMES = ARM_NAMES + tuple(sorted(PUBLISHED_ARMS))
+
+# D133: the modular builder's screen conditions, one explicit name per condition so the
+# existing audit harness can select them by `arm_name` without name parsing.
+from arms_builder import BUILDER_ARMS                                   # noqa: E402
+ARMS.update(BUILDER_ARMS)
+ARM_NAMES = ARM_NAMES + tuple(sorted(BUILDER_ARMS))

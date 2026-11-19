@@ -1,0 +1,186 @@
+{
+ "check": "builder_requirement2_mechanism_moves",
+ "is_measurement": true,
+ "label": "Requirement 2: every mechanism must be SHOWN to change at least one decision BEFORE it is scored. Seed 4, 300 s, 50:50, dry run, against builder-default.",
+ "byte_identity": {
+  "requirement": "requirement 1, default assembly is b7-equivalent",
+  "result": "BYTE-IDENTICAL against TWO bases at TWO sizes",
+  "pairs": {
+   "builder-default vs b7-edf-feasibility": "0 differing of 2114 rows at n=8 and 0 of 3939 at n=16",
+   "builder-acfcfs vs always-cloud-fcfs": "0 differing of 2114 rows at n=8 and 0 of 3939 at n=16"
+  },
+  "attributes_mirrored": [
+   "uses_h",
+   "h_s",
+   "releases_one_per_epoch",
+   "sends_requests",
+   "piece_tokens",
+   "needs_capacities",
+   "reads_device_answer",
+   "arm_version",
+   "restricts_action_space"
+  ],
+  "uses_h_trap": "uses_h and h_s were compared explicitly and the coordinator-derived h_s was compared too, since coordinator.py:124 reads h_s only when uses_h is true and a getattr default can make a one-base proof pass by coincidence",
+  "identity_fields_excluded": [
+   "arm",
+   "arm_version",
+   "decision_latency_ms"
+  ],
+  "note": "the arm name is recorded on every decision row, so comparing it would report every row as differing; excluding it is a reader correction, not a relaxation"
+ },
+ "eligibility": {
+  "builder-s1-feasible": {
+   "differing_n16": 0,
+   "differing_n32": 0,
+   "counters_n16": {
+    "sh_admitted": 22825,
+    "sh_held": 1175
+   },
+   "counters_n32": {
+    "sh_admitted": 39961,
+    "sh_held": 8039
+   },
+   "moves_a_decision": false,
+   "eligible_to_score": false
+  },
+  "builder-s1-fairshare": {
+   "differing_n16": 0,
+   "differing_n32": 0,
+   "counters_n16": {
+    "sh_admitted": 22825,
+    "sh_held": 1175,
+    "fairshare_held": 1175
+   },
+   "counters_n32": {
+    "sh_admitted": 39961,
+    "sh_held": 8039,
+    "fairshare_held": 8039
+   },
+   "moves_a_decision": false,
+   "eligible_to_score": false
+  },
+  "builder-s1-lateness": {
+   "differing_n16": 0,
+   "differing_n32": 3473,
+   "counters_n16": {},
+   "counters_n32": {
+    "sh_admitted": 35408,
+    "sh_held": 12592,
+    "lateness_throttle_periods": 787
+   },
+   "moves_a_decision": true,
+   "eligible_to_score": true
+  },
+  "builder-s2-all": {
+   "differing_n16": 0,
+   "differing_n32": 0,
+   "counters_n16": {},
+   "counters_n32": {},
+   "moves_a_decision": false,
+   "eligible_to_score": false
+  },
+  "builder-s2-value": {
+   "differing_n16": 0,
+   "differing_n32": 0,
+   "counters_n16": {},
+   "counters_n32": {},
+   "moves_a_decision": false,
+   "eligible_to_score": false
+  },
+  "builder-s3-whatif": {
+   "differing_n16": 4226,
+   "differing_n32": null,
+   "counters_n16": {
+    "rc_cloud": 22,
+    "rc_defer": 1,
+    "rc_reject": 1,
+    "materialize": 9,
+    "whatif_chose_pieces": 2,
+    "whatif_chose_onego": 7
+   },
+   "counters_n32": null,
+   "moves_a_decision": true,
+   "eligible_to_score": true
+  },
+  "builder-s4-llf": {
+   "differing_n16": 0,
+   "differing_n32": 0,
+   "counters_n16": {
+    "sh_admitted": 22825,
+    "sh_held": 1175
+   },
+   "counters_n32": {
+    "sh_admitted": 39961,
+    "sh_held": 8039
+   },
+   "moves_a_decision": false,
+   "eligible_to_score": false
+  },
+  "builder-s4-reserve": {
+   "differing_n16": 3721,
+   "differing_n32": null,
+   "counters_n16": {
+    "sh_admitted": 5906,
+    "sh_held": 18094
+   },
+   "counters_n32": null,
+   "moves_a_decision": true,
+   "eligible_to_score": true
+  },
+  "builder-s4-adaptive": {
+   "differing_n16": 173,
+   "differing_n32": null,
+   "counters_n16": {
+    "sh_admitted": 11431,
+    "sh_held": 12569,
+    "inflight_bound_periods": 2725
+   },
+   "counters_n32": null,
+   "moves_a_decision": true,
+   "eligible_to_score": true
+  },
+  "builder-s6-decline": {
+   "differing_n16": 0,
+   "differing_n32": 0,
+   "counters_n16": {},
+   "counters_n32": {},
+   "moves_a_decision": false,
+   "eligible_to_score": false
+  }
+ },
+ "eligible_to_score": [
+  "builder-s1-lateness",
+  "builder-s3-whatif",
+  "builder-s4-reserve",
+  "builder-s4-adaptive"
+ ],
+ "not_scoreable": [
+  "builder-s1-feasible",
+  "builder-s1-fairshare",
+  "builder-s2-all",
+  "builder-s2-value",
+  "builder-s4-llf",
+  "builder-s6-decline"
+ ],
+ "null_classification": {
+  "builder-s1-feasible": "UNEXERCISED. Counters fire (8,039 streams held at n=32) yet no decision differs, so every held stream had no instant due; a local StreamAction only matters when an instant is pending.",
+  "builder-s1-fairshare": "UNEXERCISED, same as above, with fairshare_held equal to sh_held so the fair-share test never excluded a stream that would otherwise have been released.",
+  "builder-s2-all": "UNEXERCISED. Every recall is already feasible under the default, so admitting all coincides with admitting the feasible.",
+  "builder-s2-value": "UNEXERCISED, and this MATCHES THE PRE-REGISTERED EXPECTATION that a value test imitating a cost-blind and risk-blind objective would admit everything and behave like all.",
+  "builder-s4-llf": "CANCELLED BY GEOMETRY. Laxity changes the ORDER of candidates, and with no binding release budget nothing is truncated, so order cannot change which streams are released.",
+  "builder-s6-decline": "UNEXERCISED. No REJECT arises under the default at these cells, so the branch that would turn it into DEVICE never executes."
+ },
+ "size_dependence": {
+  "finding": "builder-s1-lateness is INERT at 16 devices and MOVES at 32 (3,473 decisions, 787 throttle periods)",
+  "consequence": "mechanism eligibility is size dependent, so a screen must establish it per size rather than once"
+ },
+ "scope_note": "Requirement 3 scoring can legitimately cover only the eligible set. Scoring an inert mechanism would report an ABSENT LINK as a negative, which CLAUDE.md Step 2 forbids.",
+ "_provenance": {
+  "git_commit": "883bbd360e8e5c29333d6f2f0065c0daa93728a3",
+  "script": "live2/arms_builder.py plus scratch harnesses; no existing policy or arm code changed",
+  "model": "none (committed curves, dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4, 16 and 32 devices, 300 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
