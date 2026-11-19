@@ -106,13 +106,24 @@ class SessionRec:
         return max(self.belief, key=lambda k: self.belief[k])
 
     def residency_readiness(self) -> str:
-        """Readiness from WHERE THE KV IS, for costing, as distinct from what the policy believes.
+        """Readiness for COSTING: the committed belief, OVERRIDDEN only where placement moved the KV.
 
-        `readiness()` reads `belief`, which is the policy's view and only promotes on a complete
-        build. Cost should follow residency: an offloaded history is a host reload whatever the
-        policy thinks. D133 Part A.
+        D133 Part A. The first version read `measured_tier` directly, which LAGS the belief in one
+        path and made recalls more expensive rather than less. `built_tokens` is increased in
+        completion handling, and `_submit_recall` is also called from that same completion path,
+        so a chained recall is costed BEFORE the next `observation()` has run `enact_placement`.
+        There `measured_tier` is still "cold" while the belief has already promoted to GPU-WARM,
+        and the recall was charged a full cold rebuild instead of a warm answer. Measured: 0 of 35
+        recalls served and dashcam 0.0821 at 16 devices seed 0, against a committed 14 of 35 and
+        0.8164.
+
+        So residency OVERRIDES the belief only where a placement action actually moved the KV down
+        to host. Everywhere else the committed belief-based readiness stands, which keeps the
+        baseline exact while still charging offload and eviction for the first time.
         """
-        return {"gpu": "GPU-WARM", "host": "HOST-WARM", "cold": "COLD"}[self.measured_tier]
+        if self.measured_tier == "host":
+            return "HOST-WARM"
+        return self.readiness()
 
     def tokens_for_representation(self, rep: Optional[str]) -> int:
         """How many tokens a recall actually sends for representation `rep`.
@@ -189,6 +200,11 @@ class Opportunity:
     # sets this when it processes the action; `_submit_recall` reads it. See the report section
     # "H100 wiring for placement" for the exact two-line change.
     requested_representation: Optional[str] = None
+    # The S-EMBER question category, carried from the trace. It was emitted by
+    # `fleet/trace.py:421` as `category=q.category` all along and DROPPED here, which is why
+    # `arms_policy` pinned a single type: the field the observation offers was documented as the
+    # question category and filled with the literal "recall", so it carried no information.
+    qtype: Optional[str] = None
 
     def deadline_abs(self) -> float:
         return self.t_event + self.deadline_s
@@ -315,7 +331,8 @@ class CoordState:
                         t_event=float(ev["t_ask"]), deadline_s=float(ev["deadline_s"]),
                         t_arrive=float(ev["t_arrive"]), session_id=ev["session_id"],
                         question=ev["question"], options=list(ev["options"] or []),
-                        state="arrived", question_id=ev["question_id"])
+                        state="arrived", question_id=ev["question_id"],
+                        qtype=ev.get("category"))
         self._add(o)
         return o
 
@@ -368,6 +385,15 @@ class CoordState:
     # once, so it is OFF by default and is decision PA-4.
     placement_enacted: bool = True
     kv_capacity_enforced: bool = False
+    # D134: the SINGLE SWITCH for the question-category change, at the one boundary where the
+    # value is populated. Off, every consumer downstream sees the literal "recall" exactly as
+    # before; on, every consumer sees the real category. This exists because the change is NOT
+    # confined to the policy: `baselines/constructed.py:96` branches on `cat in self.LONG` /
+    # `cat in self.SHORT` and `baselines/naive.py:166` reads `class_share.get(q.category, ...)`,
+    # so b7, b10 and the naive arms change behaviour too. Gating it per consumer would be
+    # RECONSTRUCTING the before-state, which is what produced two invalid controls today; gating
+    # it once here disables the whole change.
+    category_enabled: bool = True
 
     def enact_placement(self, now: float) -> Dict[str, int]:
         """Read `desired_tier` and enact it. The one shared steering path (D133 Part A).
@@ -457,7 +483,11 @@ class CoordState:
                   EvidenceItem("D2", "gpu" if ready == "GPU-WARM" else
                                ("host" if ready == "HOST-WARM" else "device"), tok, tok * 4))
             queries.append(RecallQuery(
-                query_id=o.opp_id, session_id=o.session_id, category="recall",
+                query_id=o.opp_id, session_id=o.session_id,
+                # `RecallQuery.category` is documented as the S-EMBER question category. It was
+                # populated with the literal "recall", the OPPORTUNITY KIND, so the field was
+                # correctly named, correctly documented, non-empty, and of the wrong kind.
+                category=((o.qtype or "recall") if self.category_enabled else "recall"),
                 arrival_s=round(o.t_arrive if o.t_arrive is not None else o.t_event, 3),
                 deadline_s=round(o.deadline_abs(), 3), evidence=ev, readiness=ready,
                 readiness_tokens=tok,

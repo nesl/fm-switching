@@ -70,7 +70,75 @@ PLACEHOLDERS = {
 }
 
 MU_MODES = ("none", "ewma", "fixed", "scarcity")
-QTYPE = "counting_objects_events"     # the one committed RC question type (P9)
+QTYPE = "counting_objects_events"     # FALLBACK ONLY, when the observation carries no category
+# The policy formerly used QTYPE for EVERY rc_accuracy lookup, because `RecallQuery.category` was
+# filled with the literal "recall" rather than the question's S-EMBER category. That pinned the
+# whole quality model to one category which is 9.7 per cent of trace questions and among the
+# hardest, so the policy UNDER-VALUED every representation: measured over seeds 0, 4, 5 and 6 at
+# 16 devices, RICH by 17.5 pp, D2 by 20.6 pp and RECENT by 14.6 pp. It also inverted the ranking,
+# seeing D2 as worse than RICH (0.2222 against 0.2500) where on the real mix D2 is BETTER (0.4286
+# against 0.4255). The category is now carried through, and QTYPE remains only as the fallback.
+
+
+def _qtype_of(q: Any, enabled: bool = True) -> str:
+    """The question's own category, falling back to QTYPE.
+
+    `enabled=False` reproduces the PRE-FIX behaviour exactly, pinning QTYPE regardless of what the
+    observation carries. That is what a control condition for this change needs: with the category
+    plumbing live, a control that merely swapped the profiles was still reading PER-CATEGORY
+    values, which is a THIRD condition and not the committed baseline.
+    """
+    if not enabled:
+        return QTYPE
+    c = str(getattr(q, "category", "") or "")
+    return c if c and c != "recall" else QTYPE
+
+
+# TRACE-MIX WEIGHTS, from the committed generator over the development seeds at 16 devices. The
+# policy's quality model is weighted by these rather than read PER CATEGORY, and the reason is
+# evidential, not convenient.
+#
+# The bias being fixed is an AGGREGATE mis-specification of 17.5 to 20.6 pp, and a trace-weighted
+# value removes all of it while adding no variance. A per-category lookup would remove the same
+# bias AND make the representation choice depend on within-category differences that rest on
+# n = 16 to 36 in the committed RC tables (`object_comparison` n=16, `location_trace` n=29,
+# `counting_objects_events` n=36). Session 2's per-category lever scored 1.19x on HELPS and 1.00x
+# on HURTS on EVAL after looking compelling on the full sample, so acting on those differences
+# would be optimising noise. **Nothing in the evidence justifies category-level discrimination.**
+#
+# The category still flows through the observation, because the accuracy COLUMN needs it and
+# because any future per-category work needs the plumbing; it is simply not used to discriminate.
+TRACE_MIX = {
+    "visual_detail_recall": 0.227, "time_duration": 0.169, "object_comparison": 0.143,
+    "sequential_action": 0.110, "temporal_ordering_recognition": 0.097,
+    "spatial_aware_reasoning": 0.097, "counting_objects_events": 0.097,
+    "location_trace": 0.058,
+}
+
+
+class _MixWeightedProfiles:
+    """`Profiles` with `rc_accuracy` weighted over the trace mix instead of read per category.
+
+    Everything else delegates unchanged. `MissingEvidence` still propagates, because every weight
+    is looked up in the committed table and a missing category raises there as before.
+    """
+
+    def __init__(self, pf: Any) -> None:
+        self._pf = pf
+        self._memo: Dict[tuple, float] = {}
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._pf, name)
+
+    def rc_accuracy(self, qtype: str, rep: str, tier: str = "cloud") -> float:
+        key = (rep, tier)
+        hit = self._memo.get(key)
+        if hit is not None:
+            return hit
+        tot = sum(TRACE_MIX.values())
+        v = sum(w * self._pf.rc_accuracy(c, rep, tier) for c, w in TRACE_MIX.items()) / tot
+        self._memo[key] = v
+        return v
 
 
 @dataclass
@@ -133,6 +201,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     rc_priority_slack_s: float = 0.0   # D131 item 2: urgent-recall slack threshold, 0 = off
     rc_priority_keep_monitors: int = 0 # how many monitor releases survive an urgent epoch
     rc_z_dispatch: bool = False     # D131: RC deficit rows reach the dispatch z term
+    mix_weighted_quality: bool = True  # D134: trace-mix quality model, False pins QTYPE
 
     name: str = "policy-core"
     case: str = "own"
@@ -174,7 +243,14 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         if gpu_kv_tokens <= 0 or host_tier_tokens <= 0:
             raise ValueError("D56: GPU and host capacities are INPUTS and must be supplied as "
                              "positive token counts; the policy refuses to guess one")
-        self.pf = load_profiles()
+        # D134: the quality model is trace-mix weighted, not pinned to one category. The choice
+        # is made HERE, before the engine, rollout and coordinator are built from `self.pf`, so
+        # that every derived object sees the same profiles. Swapping `pf` after this point leaves
+        # a hybrid: measured once, that produced dashcam 0.0821 and 0 recalls served at 16
+        # devices against a true baseline of 0.8164 and 14 of 35, which is not the pre-fix policy
+        # but a broken one.
+        self.pf = (_MixWeightedProfiles(load_profiles()) if self.mix_weighted_quality
+                   else load_profiles())
         p = Params()
         p.gpu_kv_capacity_tokens = int(gpu_kv_tokens)
         p.host_kv_capacity_tokens = int(host_tier_tokens)
@@ -479,7 +555,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                 else:
                     b.staleness_s = ((unbuilt / float(D2_TOK_PER_IMG))
                                      * float(self._d2_stride_s()))
-            d.qtype = QTYPE
+            d.qtype = _qtype_of(q, self.mix_weighted_quality)
 
     @staticmethod
     def _known_sessions(obs: Observation) -> set:
@@ -697,7 +773,8 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
             self._seen.add(("RC", q.query_id))
             did = self._roster["session_device"].get(q.session_id, q.session_id)
             req = EscalationRequest(device=did, task="RC", t=obs.now_s,
-                                    deadline=q.deadline_s, qtype=QTYPE,
+                                    deadline=q.deadline_s,
+                                    qtype=_qtype_of(q, self.mix_weighted_quality),
                                     temporal_reference_s=float(self.params.H_s),
                                     device_window_s=2.0, payload_bytes=0, frames=0)
             ds = self.co.escalate(self.fleet, req)

@@ -84,8 +84,11 @@ FIELDS: Dict[str, tuple] = {
     "history_preload": ("device_id", "session_id", "frame_refs", "est_tokens", "t"),
     "history_append": ("device_id", "session_id", "batch_id", "t_arrive", "frame_refs",
                        "est_tokens"),
+    # `category` is the S-EMBER question category from the trace generator, added so the
+    # coordinator can see which kind of question it is deciding about. Without it the policy
+    # pinned one category for every accuracy lookup.
     "recall_question": ("device_id", "opportunity_id", "session_id", "question_id", "t_ask",
-                        "t_arrive", "deadline_s", "question", "options"),
+                        "t_arrive", "deadline_s", "question", "options", "category"),
     "pull_request": ("device_id", "instant_id", "t_sent"),
     "cloud_answer": ("device_id", "opportunity_id", "t_done", "payload"),
 }
@@ -175,6 +178,7 @@ class RecallQuestion:
     deadline_s: float
     question: str
     options: List[str]
+    category: Optional[str] = None
 
 
 @dataclass
@@ -212,12 +216,20 @@ for _k, _c in EVENT_CLASSES.items():
 del _k, _c, _want
 
 
+# Fields a caller MAY omit. `category` was added to `recall_question` for D134 and every
+# pre-existing caller predates it, so requiring it would break them for a field that is
+# genuinely optional: an event without a category simply carries None, which is what the
+# coordinator saw before the field existed.
+OPTIONAL_FIELDS: Dict[str, tuple] = {"recall_question": ("category",)}
+
+
 def make(kind: str, **kw: Any) -> Dict[str, Any]:
     """Build one wire event, rejecting a missing or unknown field outright."""
     want = FIELDS.get(kind)
     if want is None:
         raise KeyError(f"unknown event kind {kind!r}")
-    missing = [f for f in want if f not in kw]
+    opt = OPTIONAL_FIELDS.get(kind, ())
+    missing = [f for f in want if f not in kw and f not in opt]
     extra = [f for f in kw if f not in want]
     if missing or extra:
         raise ValueError(f"{kind}: missing={missing} extra={extra}")
@@ -235,7 +247,8 @@ def parse(rec: Mapping[str, Any]):
         raise KeyError(f"unknown event kind {kind!r}")
     body = {k: v for k, v in rec.items() if k != "kind"}
     want = FIELDS[kind]
-    missing = [f for f in want if f not in body]
+    opt = OPTIONAL_FIELDS.get(kind, ())
+    missing = [f for f in want if f not in body and f not in opt]
     extra = [f for f in body if f not in want]
     if missing or extra:
         raise ValueError(f"{kind}: missing={missing} extra={extra}")
@@ -296,6 +309,13 @@ class DecisionRecord:
     decision_latency_ms: Optional[float] = None
     traffic_mix: Dict[str, int] = field(default_factory=dict)
     defer_s: Optional[float] = None
+    # D133/D134. Both are POLICY CHOICES that change what is sent and what is charged, and
+    # neither was logged, so any proof that diffs decision rows was BLIND to them: an arm that
+    # emitted RECENT on all 21 of its recalls showed 0 differing rows, and a placement mechanism
+    # would read as inert however often it fired. `outcomes.jsonl` already carries the
+    # representation; the decision log is where move-proofs look.
+    representation: Optional[str] = None
+    desired_tier: Optional[str] = None
     note: Optional[str] = None
 
 

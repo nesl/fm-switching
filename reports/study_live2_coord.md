@@ -6388,3 +6388,150 @@ Both values were already in scope, `o` carrying the request and `sub` what was a
 later reader cannot reconstruct why two runs differ and every analysis has to wrap `_submit_recall`
 to recover it. Verified in `outcomes.jsonl`: eco-llm at 16 devices, seed 0, 19 recall rows carrying
 `representation=D2` with `tokens_charged` from 2,731 to 18,931.
+
+## D134: the pinned question category, and what it was costing
+
+### The defect, corrected to FOUR links after my three-link version was relayed
+
+`arms_policy.py:73` pinned `QTYPE = "counting_objects_events"` for every `rc_accuracy` lookup. The
+pin was a reasonable workaround, not a shortcut, because the field it would otherwise read carried
+no information. The chain, corrected:
+
+1. **The trace emits it.** `fleet/trace.py:421` puts `category=q.category` on every `recall_question` record.
+2. **`fleet/emulator.py:499` DROPPED it**, building the coordinator event without the field. **This is the actual drop point; my first diagnosis blamed `cstate`, which was innocent.**
+3. **Two schemas rejected it as an extra field**, `fleet/events.py` and `live2/schema.py`, so it could not simply be added at the call site.
+4. **`cstate` then filled `RecallQuery.category`** — documented as "StudyE6 / S-EMBER question category" — **with the literal `"recall"`**, the opportunity KIND. Correctly named, correctly documented, non-empty, and of the wrong kind.
+
+**Fixed at all four links.** The category now flows trace to emulator to schema to cstate to
+`RecallQuery.category`.
+
+### What the pin cost, measured over seeds 0, 4, 5, 6 at 16 devices, n = 154 questions
+
+| rep | pinned (counting) | trace-weighted | policy error |
+|---|---|---|---|
+| RICH | 0.2500 | 0.4255 | **-17.5 pp** |
+| D2 | 0.2222 | **0.4286** | **-20.6 pp** |
+| RECENT | 0.2500 | 0.3963 | **-14.6 pp** |
+
+**And it inverted the ranking: pinned, D2 looks WORSE than RICH; on the real mix D2 is BETTER.**
+`counting_objects_events` is 9.7 per cent of trace questions and among the hardest, against
+`visual_detail_recall` at 22.7 per cent and roughly 2.4x more accurate. **The policy was reading
+the whole workload through its hardest tenth**, and under-valuing every recall by 14 to 21 pp is
+exactly the direction that produces the admission deficit documented all week.
+
+### The design decision: fix the PIPE, do not act on what it carries
+
+**The plumbing is wired end to end** because the accuracy column needs it and any future
+per-category work needs it. **The quality model is TRACE-MIX WEIGHTED, not per-category**, because
+the evidence does not support category-level discrimination.
+
+**TWO DIFFERENT "PER-CATEGORY n" ARE IN PLAY AND THEY MUST NOT BE CONFLATED. This is check 4.**
+
+| table | what it is | per-category n | total |
+|---|---|---|---|
+| committed `rc_accuracy` cells | **StudyRH4**, scored on the **S-EMBER DEV split only** | **16 to 39** | **243 questions** |
+| StudyR1 | session 2's DEV/EVAL fit set | 90 to 143 | 845 questions |
+
+**The accuracy table is thinner because it is a DEV-split measurement**: `dev_rule` records
+"S-EMBER DEV videos ... 70 videos, 243 questions", and `n_dev_questions: 243` against
+`n_rows_seen: 844`. **So the policy's entire quality model rests on 243 DEV questions**, with its
+smallest category at **n = 16** (`object_comparison`). Discriminating RICH against D2 within a
+category on 16 questions would be optimising noise, which settles the choice on the table's own
+terms without needing session 2's EVAL result. Session 2's per-category lever, on the 4x larger
+table, scored 1.19x on HELPS and 1.00x on HURTS on EVAL after looking compelling on the full
+sample.
+
+**Consistency check on the weighting:** the committed `32B-D2` overall accuracy is 0.4198 and the
+trace-mix weighted value is 0.4286, which agree to within 0.9 pp. The difference is the trace mix
+differing from the DEV mix, which is the expected direction and magnitude.
+
+### PRE-REGISTERED before the pressure work: the pool may be a symptom, not the cause
+
+**If recall rebuilds are what saturate the engine, memory pressure should bind through REBUILD
+COST rather than through the KV pool.** StudyEVNEED measures recall rebuilds at **385.5 GPU-s over
+a 600 s run at 14 devices, about 64 per cent of one GPU**, which sending RECENT would cut to 2.7
+per cent. A cold history forces exactly that rebuild. **So the testable prediction is: if the pool
+binds at 116 to 121 per cent but outcomes move only where rebuilds cluster, the pool is a SYMPTOM
+and rebuild cost is the cause.**
+
+That gives the time-above-cap distribution a second use: **a brief over-cap spike that forces a
+rebuild is more expensive than a sustained plateau that does not**, so what each over-cap interval
+EVICTS matters more than how long it lasts.
+
+### LIMITATION, standalone: the quality model rests on 243 DEV questions and has never seen EVAL
+
+Recorded independently of the category fix, because it applies to **every representation value
+COVEX has ever used**, not only to the ones this fix corrects.
+
+`rc_accuracy` resolves through the committed `RC.tables`, whose provenance is **StudyRH4 scored on
+the S-EMBER DEV split**: `dev_rule` records "S-EMBER DEV videos from StudyB-baselines amendment 2
+(sember_split.py): 70 videos, 243 questions", and `32B-D2` carries `n_dev_questions: 243` against
+`n_rows_seen: 844`. Per-category cells run **n = 16 to 39**, smallest `object_comparison` at 16.
+
+**The implication, named: the policy's quality model is calibrated on 243 DEV questions and has
+never been validated on EVAL, so its ABSOLUTE LEVELS carry unquantified DEV-specific error.** The
+D6 split exists exactly so that what is designed on DEV is checked on EVAL. The table is a lookup
+rather than a fitted rule, so this is not a leak in the usual sense, **but the values can still be
+DEV-specific, and at n = 16 to 39 per cell there is real room for them to be.** Session 2 has just
+shown what that split does to this workload: a per-category lever that looked compelling on the
+full sample collapsed to 1.19x on HELPS and 1.00x on HURTS on EVAL.
+
+This strengthens the StudyR1 extension already with the user: a per-question 32B x D2 measurement
+would be worth running **across both splits**, not DEV alone.
+
+**Cross-check, both numbers recorded so a reader can see the weighting was validated rather than
+merely reasonable:** the committed `32B-D2` overall accuracy is **0.4198** and the trace-mix
+weighted value is **0.4286**. Two routes from the same table, agreeing within **0.9 pp**, with the
+residual being trace mix against DEV mix, which is the expected direction and magnitude.
+
+### Pattern, recorded once rather than as three errata: switches and `live2_configure`
+
+**In this codebase a switch set at construction may be overwritten by `live2_configure`, so an
+override must be applied AFTER it and asserted on the constructed object.** Three instances of the
+same shape:
+
+| switch | how it failed |
+|---|---|
+| `Pi0Edf.C_INFLIGHT_DEFAULT` | a dataclass field default baked into `__init__`, so a class-attribute patch never reached instances and both conditions silently ran at 8 |
+| `CoordState.placement_enacted` | the same dataclass shape, caught before it was relied on |
+| `PolicyCoreArm.pf` | assigned inside `live2_configure`, so an override applied at construction was discarded |
+
+| `PolicyCoreArm.pf`-DERIVED | the switch MOVED and the assertion CONFIRMED it, and the run was still wrong: the engine, rollout and coordinator read `self.pf` at configure time, so overriding it afterwards left them holding one object while `arm.pf` held another |
+
+**The rule needs TWO clauses, because the fourth instance defeated the defence built for the first
+three:**
+
+1. **assert the switch moved, on the thing that will run**; and
+2. **assert that everything DERIVED from it moved too, or set it before anything derives.**
+
+**Setting it before anything derives is structurally stronger than asserting afterwards that
+everything derived correctly**, because the first cannot be defeated by a new derived object
+appearing later and the second can. The fix is a constructor flag applied inside `live2_configure`
+ahead of the engine, rollout and coordinator.
+
+**The cost gradient is NOT monotone and that is worth saying honestly:** `C_INFLIGHT_DEFAULT` cost
+a wrong conclusion that reached the user; `placement_enacted` cost nothing; `pf` cost minutes;
+`pf`-derived cost a full 16-cell bar run. **The defence improved and the defect found a way around
+it.** That is the normal shape of this work rather than a regression: each layer catches the
+previous failure and the next one arrives through the gap it left.
+
+### Separate and larger: VALIDATE THE BEFORE CONDITION AGAINST COMMITTED VALUES
+
+**The assertion did not catch the fourth instance. The committed baseline did.** The corrupted
+BEFORE column reported **dashcam 0.0821 with 0 recalls served at 16 devices**, against a committed
+`covex-v13` baseline of **0.8164 and 14 of 35**. **A "before" condition that destroys the arm is
+not a before condition.**
+
+**The counterfactual is the point: had the corrupted baseline been merely PLAUSIBLE rather than
+catastrophic, a spectacular improvement would have been reported from a broken comparator.** It was
+caught by the MAGNITUDE, not by the method.
+
+**Consistency check 1 cross-checks RESULTS against prior committed measurements. Nothing in the
+protocol says to run it on the CONTROL ARM of a comparison.** A broken before-condition produces a
+large apparent effect that passes every check applied to the after-condition, because the
+after-condition is fine. **It is invisible to every arm-versus-arm check by construction**, the
+same structural blindness as eco-llm planning at one price and being charged another.
+
+**Adopted here and offered as a candidate amendment: before reporting any before/after comparison,
+the BEFORE column must reproduce the committed baseline.** That gate is more important than the
+result it guards.

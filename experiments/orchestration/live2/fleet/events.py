@@ -25,7 +25,7 @@ FLEET -> COORDINATOR
   history_preload  {device_id, session_id, frame_refs[], est_tokens, t}      robots (D101)
   history_append   {device_id, session_id, batch_id, t_arrive, frame_refs[], est_tokens}
   recall_question  {device_id, opportunity_id, session_id, question_id, t_ask, t_arrive,
-                    deadline_s, question, options[]}
+                    deadline_s, question, options[], category}
 
 COORDINATOR -> FLEET
   pull_request     {device_id, instant_id, t_sent}
@@ -56,11 +56,22 @@ FIELDS: Dict[str, tuple] = {
     "history_preload": ("device_id", "session_id", "frame_refs", "est_tokens", "t"),
     "history_append": ("device_id", "session_id", "batch_id", "t_arrive", "frame_refs",
                        "est_tokens"),
+    # `category` is the S-EMBER question category, carried from the trace generator. It was
+    # absent from this schema, so the emulator could not pass it and the coordinator never saw
+    # it, which is why `RecallQuery.category` was filled with the literal "recall" and the policy
+    # pinned a single question type for every accuracy lookup.
     "recall_question": ("device_id", "opportunity_id", "session_id", "question_id", "t_ask",
-                        "t_arrive", "deadline_s", "question", "options"),
+                        "t_arrive", "deadline_s", "question", "options", "category"),
     "pull_request": ("device_id", "instant_id", "t_sent"),
     "cloud_answer": ("device_id", "opportunity_id", "t_done", "payload"),
 }
+
+
+# Fields a caller MAY omit. `category` was added to `recall_question` for D134 and every
+# pre-existing caller predates it, so requiring it would break them for a field that is
+# genuinely optional: an event without a category simply carries None, which is what the
+# coordinator saw before the field existed.
+OPTIONAL_FIELDS: Dict[str, tuple] = {"recall_question": ("category",)}
 
 
 def make(kind: str, **kw: Any) -> Dict[str, Any]:
@@ -68,7 +79,8 @@ def make(kind: str, **kw: Any) -> Dict[str, Any]:
     want = FIELDS.get(kind)
     if want is None:
         raise KeyError(f"unknown event kind {kind!r}")
-    missing = [f for f in want if f not in kw]
+    opt = OPTIONAL_FIELDS.get(kind, ())
+    missing = [f for f in want if f not in kw and f not in opt]
     extra = [f for f in kw if f not in want]
     if missing or extra:
         raise ValueError(f"{kind}: missing={missing} extra={extra}")

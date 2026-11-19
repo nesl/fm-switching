@@ -502,6 +502,12 @@ class FleetEmulator:
                                        question_id=r["question_id"], t_ask=r["t"],
                                        t_arrive=payload["t_arrive"],
                                        deadline_s=r["deadline_s"], question=r["question"],
+                                       # The S-EMBER question category. The trace emits it on
+                                       # every recall record and it was DROPPED here, so the
+                                       # coordinator never saw it and `RecallQuery.category` was
+                                       # filled with the literal "recall" instead. That is why
+                                       # the policy pinned a single question type.
+                                       category=r.get("category"),
                                        options=r["options"]), t)
             elif what == "answer_delivered":
                 opp = self._resolve_opportunity(payload)

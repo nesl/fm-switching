@@ -415,6 +415,14 @@ class Live2Coordinator:
             if s is None:
                 continue
             self.counts["session_" + xa.action] += 1
+            if xa.action in ("KEEP_GPU_WARM", "OFFLOAD_TO_HOST", "EVICT"):
+                # A PLACEMENT choice is a decision and belongs in the decision log, or a move
+                # proof that diffs decision rows reads a firing mechanism as inert.
+                self._log_decision(t, "state_action", [], latency_ms=dt_ms, preds=preds, mix=mix,
+                                   session_id=xa.session_id,
+                                   desired_tier={"KEEP_GPU_WARM": "gpu",
+                                                 "OFFLOAD_TO_HOST": "host",
+                                                 "EVICT": "cold"}[xa.action])
             if xa.action == "EVICT":
                 # D56: demote to cold. The frames stay on disk; nothing is deleted.
                 s.belief = {"gpu": 0.0, "host": 0.0, "cold": 1.0}
@@ -569,7 +577,8 @@ class Live2Coordinator:
         o.state = "in_flight"
         did = self._log_decision(t, "release_recall", [o.opp_id], latency_ms=dt_ms, preds=preds,
                                  mix=mix, key="rc:" + (o.session_id or ""),
-                                 session_id=o.session_id)
+                                 session_id=o.session_id,
+                                 representation=getattr(o, "requested_representation", None))
         sent = len(s.sent_bytes_for)
         if whole:
             frames = [dict(frame_ref=r, path=self._path(r)) for r in s.frames]
@@ -849,7 +858,9 @@ class Live2Coordinator:
     # ---------------------------------------------------------------- logging
     def _log_decision(self, t: float, kind: str, opp_ids: List[str], *, piece_tokens=None,
                       defer_s=None, latency_ms: float = 0.0, preds=None, mix=None,
-                      key: Optional[str] = None, session_id: Optional[str] = None) -> str:
+                      key: Optional[str] = None, session_id: Optional[str] = None,
+                      representation: Optional[str] = None,
+                      desired_tier: Optional[str] = None) -> str:
         self.n_dec += 1
         did = f"d{self.n_dec}"
         preds = preds or {}
@@ -863,6 +874,7 @@ class Live2Coordinator:
             belief=(preds.get("belief") or SC.asdict(SC.Belief())),
             decision_latency_ms=round(float(latency_ms), 4),
             traffic_mix=dict(mix or {}), defer_s=defer_s,
+            representation=representation, desired_tier=desired_tier,
             note=(f"session={session_id}" if session_id else None))
         if self.logs is not None:
             self.logs.decision.write(rec)
