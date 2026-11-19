@@ -3502,3 +3502,59 @@ Three labels now attach to this arm's rows, so the sequence is recorded explicit
 **The first two are changes to eco-llm itself; the third is a change to the harness underneath it.**
 A row carrying all three is pre-`e924005`, pre-reconciliation and pre-measured-quality, which is
 every eco-llm row in sections 13 through 31.
+
+# 40. THE DEFAULT REVERT LANDED (`a0bcb51`) AND I MEASURED IT. The cross-group prohibition dissolves
+
+Applying the standing rule to re-run the bar on every tree change rather than on suspicion.
+`DEFAULTS["representation"]` is now **`"D2"`** (`interface.py:72`), the status quo.
+
+Measured at 16 devices, seed 4, with the two-axis capture:
+
+| arm | effective representation (comparability) | credit axis | tokens sent |
+|---|---|---|---|
+| `b7-edf-feasibility` | **D2 x 37** | **UNSET x 41** - named nothing | **1,381 to 18,931**, median 9,481 |
+| `eco-llm` | D2 x 35, RECENT x 6 | **NAMED** D2 x 35, NAMED RECENT x 6 | 467 to 18,931, median 8,131 |
+
+**b7 now receives the whole history where it previously received 467 tokens.** The 11.6x to 55x
+discount is gone, and it was never a design decision: b7 names nothing and the default changed
+underneath it.
+
+## 40.1 What this unblocks
+
+**Naming and non-naming arms are back on the same footing, so the cross-group prohibition
+dissolves and the published-arms-against-COVEX comparison is re-examinable.** The asymmetry that
+made it unsafe is removed at source rather than corrected for.
+
+**The two axes stay, and they now carry the whole distinction.** b7 and eco-llm both send D2 for
+most recalls and are charged identically for it, so **they compare validly on cost**. But b7's
+column reads **INJECTED** and eco-llm's reads **NAMED**, which is the only remaining record that
+one arm decided and the other did not. **After this revert the decision log alone cannot tell them
+apart** - every non-naming arm logs D2 exactly like a naming one - so the pre-default capture at
+`Policy.__call__` is now the sole source of the credit axis rather than a convenience.
+
+## 40.2 Regime 3, and why it is not a third label on old rows
+
+| regime | representation | what a non-naming arm gets |
+|---|---|---|
+| **1** (pre-`e924005`) | inert | whole history |
+| **2** (`e924005` to `a0bcb51`) | read and charged | **467 tokens** |
+| **3** (current) | read and charged | **whole history** |
+
+**Regime 3 restores Regime 1's charging outcome by a different route**, so a Regime 1 row and a
+Regime 3 row are comparable on what a non-naming arm was charged, while a Regime 2 row is not.
+**No row in this report is Regime 2**: the regime existed only between those two commits and I
+scored nothing in it except the eco-llm reconciliation legs, which named their representation
+explicitly and were therefore unaffected by the default either way.
+
+## 40.3 Hybrid screening: NOT STARTED, and why
+
+`live2/hybrid/` does not exist on origin. **No component has been pushed, so there is nothing to
+screen**, and I am not generating cells against a module that does not exist. When components
+land, the base is now stable: the revert that would have shifted b7 underneath a screen has
+already happened, so a screen started now and one started later are comparable.
+
+**Two things recorded for when it starts:** each component's **characteristic decision count**
+must be recorded, not merely its presence in the configuration, because well-formedness and
+fairness proofs establish neither that a mechanism ran nor that it could. And **RECENT share needs
+both axes**, since raising it by choosing RECENT and raising it by leaving the field unset are
+different claims and, after this revert, indistinguishable in the log.
