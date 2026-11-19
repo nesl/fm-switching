@@ -4483,3 +4483,30 @@ gating. Current standing from V19, dry run screening:
 **v1.1 does not meet the D127 gate on either axis at either size**, except that it beats `edf` on
 robots at eight devices where `edf` gets none on time. That is the bar v1.2 has to clear, and it
 is demanding on both axes exactly as the amendment says.
+
+## V24. F5c PRE-REGISTRATION: route the deficit update through its spec entry point
+
+Own switch is NOT needed and would be wrong here: this is a pure routing change with no
+behavioural content, and adding a switch would imply there is something to turn off. Instead the
+claim is that behaviour is IDENTICAL, and that is what the test and the byte-identity check
+assert.
+
+**The defect.** B1 wired the arm straight to `Device.bump_z`, so
+`Coordinator.update_deficit`, which `spec_map.py` names as the implementation of spec 3.3 and
+spec 7.6, became dead code. The spec entry point is therefore documented as live while nothing
+calls it, which is the same failure class as the absent mechanisms this effort exists to remove.
+
+**The change.** `arms_policy._z_resolve` calls
+`self.co.update_deficit(self.fleet, rec["device"], rec["task"], success)` in place of
+`dev.bump_z(rec["task"], float(self.params.p_k[rec["task"]]), success)`.
+
+**Why it is exactly equivalent**, checked rather than assumed:
+
+| step | before | after |
+|---|---|---|
+| the counter | `dev.bump_z(task, p_k[task], success)` | `update_deficit` does `fleet.device(did).bump_z(task, self.params.p_k[task], success_hat)` |
+| the params | the arm's `self.params` | the coordinator is built as `Coordinator(self.pf, p, ...)` with the SAME `p` object, so `p_k` is the same dict |
+| a missing device | the arm's `if dev is not None` guard skips it | `fleet.device(did)` is `self.devices[did]` and does NOT create, so the guard is KEPT to preserve that |
+
+**Expected effect: none.** Decisions must be byte-identical with B1 on, before and after, and that
+is the reported result rather than an assumption.
