@@ -74,9 +74,9 @@ class TestTheDefaultPathIsUntouched(unittest.TestCase):
         from policy.rollout import delta_j as real_delta_j
         seen = []
 
-        def spy(ro, fleet, action):
+        def spy(ro, fleet, action, **kw):
             seen.append(dict(action))
-            return real_delta_j(ro, fleet, action)
+            return real_delta_j(ro, fleet, action, **kw)
 
         CO.delta_j = spy
         try:

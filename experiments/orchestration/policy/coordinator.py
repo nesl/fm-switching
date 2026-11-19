@@ -186,11 +186,11 @@ class Coordinator:
             raise ValueError("sh_cost must be one of %s, got %r" % (CF.SH_COST_MODES, mode))
         action = dict(kind="admit", items=items, jobs=jobs)
         if mode == "rollout" or getattr(req, "task", None) != "SH":
-            return delta_j(self.rollout, fleet, action)
+            return delta_j(self.rollout, fleet, action, rc_rows=self._rc_z())
         if mode == "closed_form":
             self.sh_closed_form_calls += 1
             return CF.sh_admit_delta_j(self.rollout, fleet, items, jobs)
-        roll = delta_j(self.rollout, fleet, action)
+        roll = delta_j(self.rollout, fleet, action, rc_rows=self._rc_z())
         cf = CF.sh_admit_delta_j(self.rollout, fleet, items, jobs)
         self.sh_shadow.append(dict(
             t=float(fleet.t), device=str(req.device),
@@ -350,7 +350,8 @@ class Coordinator:
                              "no feasible plan")]
         jobs = dict(getattr(self, "_planned_jobs", {}))
         self._planned_jobs = {}
-        res = delta_j(self.rollout, fleet, dict(kind="admit", items=items, jobs=jobs))
+        res = delta_j(self.rollout, fleet, dict(kind="admit", items=items, jobs=jobs),
+                      rc_rows=self._rc_z())
         self.scoring_calls += 1
         take = res["delta_j"] > 0
         if not take:
@@ -818,6 +819,10 @@ class Coordinator:
     # questions would be served essentially unconditionally. D131 authorises B2 and says to tune
     # the gain rather than stop, so the weight carries an explicit `deficit_gain` multiplier and
     # the gain is SWEPT rather than assumed.
+    def _rc_z(self) -> bool:
+        """D131: route RC rows into the dispatch path's z term, so B2 can reach a decision."""
+        return bool(getattr(self.params, "rc_z_dispatch", False))
+
     def _b2_weight(self, task: str) -> float:
         if not bool(getattr(self.params, "deficit_scaling", False)):
             return 1.0

@@ -5204,7 +5204,23 @@ For the piece arms the fix does change dry-run numbers, as it should, since it c
 is issued: `edf-piece1024` at 16 devices goes from 3 of 35 robots at dashcam 0.9911 to 5 at 0.9057
 on seed 0, and from 2 of 41 at 0.9962 to 4 at 0.8709 on seed 4.
 
-### On the D71 / D82 capacity conjunct
+### On the D71 / D82 capacity conjunct (CORRECTED)
+
+**The paragraph below is WRONG and is kept only so the correction is legible.** It rested on a
+single cell. Session 2's full grid refutes it: **30 of 196 cells PASS the capacity conjunct**, the
+published arms pass 12 of 28 each and are the only arms passing above 8 devices, and nobody passes
+at n=4 because the robot pool is INELIGIBLE under D82's 20-question minimum rather than because the
+target is missed. **v1.3-fast passes 0 of 28.** So capacity is a real and reachable bar that
+published systems clear and COVEX never does, and it is a TARGET again, not something to flag
+around. The earlier reading came from the coordinator and was withdrawn by them.
+
+**Also withdrawn: the 32-device win.** It was measured against edf and llf only. With the published
+arms in the bar, mooncake matches COVEX on dashcam, 0.4527 against 0.4463, and more than doubles it
+on robots, 0.454 against 0.202, while eco-llm leads robots by 2.6x. **The published field leads
+COVEX on robots at every size.** The honest position under D131 is that COVEX does not beat the best
+baseline at any size on either axis and meets capacity nowhere.
+
+### SUPERSEDED: the earlier capacity reading
 
 Session 2 measures llf at 16 devices seed 4 with `capacity_met` FALSE on a robot pool of 0.2195
 against a 0.90 target, and the strongest published arm at 34 of 41 reaches only 0.829. **I am
@@ -5214,3 +5230,45 @@ clear 0.90, a pass is probably unavailable to any arm in this configuration and 
 chasing a property of the target. I report the conjunct honestly beside every delivery number and
 optimise against the delivery comparison and the release gate. **Treating "best among arms that all
 miss capacity" as the realistic target is a working assumption pending the user's ruling.**
+
+### B2 and the RC deficit: the link is absent STRUCTURALLY, and routing does not open it
+
+The dispatch-path routing is implemented: `delta_j` now takes `rc_rows` and passes it to every
+`ro.run` branch, and the coordinator passes `rc_z_dispatch` through from the arm. **It does not
+change a single outcome**, and instrumenting the counterfactual says why.
+
+Over one cell at 10 devices with `rc_z_dispatch` and B2 both on, 14,721 `delta_j` calls:
+
+| quantity | value |
+|---|---|
+| calls | 14,721 (admit 2,647, dispatch 4,279, state 6,423, release 1,372) |
+| calls with `rc_rows` routed | 2,647 |
+| calls where `a.z_term - b.z_term` is non-zero | **1** |
+| max abs difference where it did differ | 90.60 |
+
+**So the RC deficit CANCELS between the two branches of the counterfactual in 14,720 of 14,721
+calls.** This is the same structural cancellation F-A2 established for the state value, and the
+same root cause the project has hit from the start: a recall answer lands 1 to 5 s after the
+decision, outside the H = 0.5 s dispatch horizon, so the action and its reference produce the
+IDENTICAL RC outcome within the window and the deficit contributes an identical constant to both
+sides.
+
+**Consequences, stated precisely.**
+
+1. **B2 remains INCONCLUSIVE under Rule 2 at every gain, and routing does not rescue it.** The quantity is present and large, `_b2_weight('RC')` = 201.33 and `z[RC]` reaching 543.58, and it reaches a decision in 1 call out of 14,721. Session 2's decision-side result, 0 of 8,120 decisions differing, is the same finding from the other side.
+2. **The fix is NOT another weight or another routing flag.** For the RC deficit to reach a dispatch decision, the counterfactual pair must differ in RC outcomes, which means the evaluation window must extend past the answer's arrival. That is exactly what the v1.2 planner does with its long window, and it is why the planner, not the dispatcher, is where RC value has ever been visible.
+3. **The 1 call that did differ, at 90.60, shows the channel is not dead**, only unreachable in the dispatch geometry. That distinguishes this from a wiring fault.
+
+### The infeasible-question check: COVEX already declines them
+
+D132's ceiling puts the breakeven at 19,381 tokens feasible and 20,011 infeasible. At 12 devices,
+seed 4, 29 robot questions: **2 are above the breakeven (21,631 and 25,681 tokens) and COVEX admits
+NEITHER**, while admitting 23 of the 27 feasible ones. The prediction holds: `classify` and
+`p_finish` run the continuation schedule at `competing_s = 0`, the same idle-engine assumption the
+ceiling uses, so an infeasible history is refused without any change. **There is no free capacity
+here**, and the mechanism is confirmed working rather than assumed.
+
+*(The first run of this check reported "ADMITTED 0" for the FEASIBLE questions too, which was my
+detector reading a non-existent field: `RecallAction` carries `decision`, not `mode` or `action`. A
+detector that reads zero everywhere confirms nothing, so the number above is from the corrected
+run, where 23 of 27 feasible admissions are visible.)*

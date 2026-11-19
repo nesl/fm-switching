@@ -779,7 +779,8 @@ class Rollout:
         return -float(self.params.mu) * pr.gpu_s * load
 
 
-def delta_j(ro: Rollout, fleet: Fleet, action: Dict[str, Any]) -> Dict[str, Any]:
+def delta_j(ro: Rollout, fleet: Fleet, action: Dict[str, Any],
+            rc_rows: bool = False) -> Dict[str, Any]:
     """DeltaJ_H(a) = Jhat(action) - Jhat(reference), both under pi_0 (spec 3.5).
 
     The four reference pairs of spec 3.5 are the only ones accepted:
@@ -788,24 +789,31 @@ def delta_j(ro: Rollout, fleet: Fleet, action: Dict[str, Any]) -> Dict[str, Any]
       admit      extra pending      vs decline (nothing added)
       state      a state action     vs no change
       dispatch   an episode call    vs hold to the next slot
+
+    D131: `rc_rows` routes the RC opportunity rows into `_z_term` for the DISPATCH path too.
+    Without it only the planner routed them, so `z[RC]` was computed and never reached an
+    admission decision: measured at n=12, `update_deficit` fires for RC and z[RC] reaches 543.58,
+    yet every B2 gain gave byte-identical outcomes because the term had no path to a decision.
+    That is an ABSENT link by the Step 2 standard, not a weak one.
     """
     kind = action["kind"]
     if kind == "release":
-        a = ro.run(fleet, release_now=[action["item_id"]])
-        b = ro.run(fleet, exclude=[action["item_id"]])
+        a = ro.run(fleet, release_now=[action["item_id"]], rc_rows=rc_rows)
+        b = ro.run(fleet, exclude=[action["item_id"]], rc_rows=rc_rows)
     elif kind == "admit":
-        a = ro.run(fleet, extra_pending=action["items"], extra_jobs=action.get("jobs"))
-        b = ro.run(fleet)
+        a = ro.run(fleet, extra_pending=action["items"], extra_jobs=action.get("jobs"),
+                   rc_rows=rc_rows)
+        b = ro.run(fleet, rc_rows=rc_rows)
     elif kind == "defer":
-        a = ro.run(fleet, exclude=[action["item_id"]])
-        b = ro.run(fleet, release_now=[action["item_id"]])
+        a = ro.run(fleet, exclude=[action["item_id"]], rc_rows=rc_rows)
+        b = ro.run(fleet, release_now=[action["item_id"]], rc_rows=rc_rows)
     elif kind == "state":
         a = ro.run(fleet, extra_pending=action["items"], release_now=[i.item_id for i
-                                                                     in action["items"]])
-        b = ro.run(fleet)
+                                                                     in action["items"]], rc_rows=rc_rows)
+        b = ro.run(fleet, rc_rows=rc_rows)
     elif kind == "dispatch":
-        a = ro.run(fleet, release_now=[action["item_id"]])
-        b = ro.run(fleet, exclude=[action["item_id"]])
+        a = ro.run(fleet, release_now=[action["item_id"]], rc_rows=rc_rows)
+        b = ro.run(fleet, exclude=[action["item_id"]], rc_rows=rc_rows)
     else:
         raise ValueError("unknown action kind %r; spec 3.5 fixes the reference actions" % kind)
     return dict(delta_j=a.total - b.total, action=a.total, reference=b.total,

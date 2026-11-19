@@ -132,6 +132,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     deficit_gain: float = 1.0       # D131: explicit gain on B2's w_RC
     rc_priority_slack_s: float = 0.0   # D131 item 2: urgent-recall slack threshold, 0 = off
     rc_priority_keep_monitors: int = 0 # how many monitor releases survive an urgent epoch
+    rc_z_dispatch: bool = False     # D131: RC deficit rows reach the dispatch z term
 
     name: str = "policy-core"
     case: str = "own"
@@ -205,6 +206,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         p.plan_only = str(self.plan_only)
         p.deficit_scaling = bool(self.deficit_scaling)
         p.deficit_gain = float(self.deficit_gain)
+        p.rc_z_dispatch = bool(self.rc_z_dispatch)
         self.params = p
         # D122: a v1.1 defect fix travels on `Flags` so the rollout can read it, but it is NOT
         # one of spec 7.0's conditional mechanisms, so the D66 guard asks `conditional_any_on`.
