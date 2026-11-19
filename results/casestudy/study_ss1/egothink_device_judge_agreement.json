@@ -1,0 +1,344 @@
+{
+ "study": "StudySS1",
+ "pass_": "judge_vs_containment_agreement",
+ "source_judge_file": "results/casestudy/study_ss1/egothink_device_judge.json",
+ "judge_model": "mistral7b",
+ "source_run": "results/casestudy/study_ss1/egothink_device.json",
+ "n": 682,
+ "n_unparsed": 18,
+ "overall": {
+  "agree": 432,
+  "agreement": 0.6334310850439883,
+  "ci95": [
+   0.5966,
+   0.6688
+  ],
+  "judge_mean": 0.7353372434017595,
+  "containment_mean": 0.4838709677419355
+ },
+ "by_dimension": {
+  "Activity": {
+   "n": 98,
+   "agree": 41,
+   "agreement": 0.41836734693877553,
+   "ci95": [
+    0.3256,
+    0.5173
+   ],
+   "judge_mean": 0.7806,
+   "containment_mean": 0.3265,
+   "judge_minus_containment": 0.4541
+  },
+  "Forecasting": {
+   "n": 100,
+   "agree": 66,
+   "agreement": 0.66,
+   "ci95": [
+    0.5628,
+    0.7454
+   ],
+   "judge_mean": 0.67,
+   "containment_mean": 0.45,
+   "judge_minus_containment": 0.22
+  },
+  "Localization_location": {
+   "n": 48,
+   "agree": 39,
+   "agreement": 0.8125,
+   "ci95": [
+    0.6806,
+    0.8981
+   ],
+   "judge_mean": 0.9583,
+   "containment_mean": 0.7917,
+   "judge_minus_containment": 0.1667
+  },
+  "Localization_spatial": {
+   "n": 49,
+   "agree": 43,
+   "agreement": 0.8775510204081632,
+   "ci95": [
+    0.7576,
+    0.9427
+   ],
+   "judge_mean": 0.7959,
+   "containment_mean": 0.7551,
+   "judge_minus_containment": 0.0408
+  },
+  "Object_affordance": {
+   "n": 45,
+   "agree": 29,
+   "agreement": 0.6444444444444445,
+   "ci95": [
+    0.4984,
+    0.7678
+   ],
+   "judge_mean": 0.7778,
+   "containment_mean": 0.4889,
+   "judge_minus_containment": 0.2889
+  },
+  "Object_attribute": {
+   "n": 48,
+   "agree": 42,
+   "agreement": 0.875,
+   "ci95": [
+    0.753,
+    0.9414
+   ],
+   "judge_mean": 0.8542,
+   "containment_mean": 0.7917,
+   "judge_minus_containment": 0.0625
+  },
+  "Object_existence": {
+   "n": 49,
+   "agree": 38,
+   "agreement": 0.7755102040816326,
+   "ci95": [
+    0.6412,
+    0.8698
+   ],
+   "judge_mean": 0.8878,
+   "containment_mean": 0.7347,
+   "judge_minus_containment": 0.1531
+  },
+  "Planning_assistance": {
+   "n": 50,
+   "agree": 9,
+   "agreement": 0.18,
+   "ci95": [
+    0.0977,
+    0.308
+   ],
+   "judge_mean": 0.55,
+   "containment_mean": 0.06,
+   "judge_minus_containment": 0.49
+  },
+  "Planning_navigation": {
+   "n": 49,
+   "agree": 19,
+   "agreement": 0.3877551020408163,
+   "ci95": [
+    0.2643,
+    0.5275
+   ],
+   "judge_mean": 0.4592,
+   "containment_mean": 0.1224,
+   "judge_minus_containment": 0.3367
+  },
+  "Reasoning_comparing": {
+   "n": 50,
+   "agree": 46,
+   "agreement": 0.92,
+   "ci95": [
+    0.8116,
+    0.9685
+   ],
+   "judge_mean": 0.63,
+   "containment_mean": 0.62,
+   "judge_minus_containment": 0.01
+  },
+  "Reasoning_counting": {
+   "n": 46,
+   "agree": 18,
+   "agreement": 0.391304347826087,
+   "ci95": [
+    0.2639,
+    0.5354
+   ],
+   "judge_mean": 0.663,
+   "containment_mean": 0.1522,
+   "judge_minus_containment": 0.5109
+  },
+  "Reasoning_situated": {
+   "n": 50,
+   "agree": 42,
+   "agreement": 0.84,
+   "ci95": [
+    0.7149,
+    0.9166
+   ],
+   "judge_mean": 0.83,
+   "containment_mean": 0.7,
+   "judge_minus_containment": 0.13
+  }
+ },
+ "disagreements": {
+  "judge_correct_containment_zero": 245,
+  "containment_correct_judge_zero": 5,
+  "note": "direction matters: the first is containment missing a correct answer whose wording differs from the reference, the second is the judge rejecting an answer that literally contains the reference.",
+  "sample_judge_yes_containment_no": [
+   {
+    "qid": "egothink/Activity/001",
+    "dimension": "Activity",
+    "question": "What am I doing?",
+    "reference": "cultivating plants",
+    "answer": "Planting flowers",
+    "judge_rating": 0.5,
+    "containment": 0.0,
+    "judge_raw": " Rating: [0.5]\n\nExplanation: The assistant's answer is similar to the reference answer as both involve growing plants. However, the assistant's answer is more specific to flowers while the reference answer is more general to plants. Therefore, the assistant's answer is not an exact match but is still helpful and correct in the context of the given question."
+   },
+   {
+    "qid": "egothink/Activity/093",
+    "dimension": "Activity",
+    "question": "What am I doing?",
+    "reference": "Choosing clothes.",
+    "answer": "Shopping",
+    "judge_rating": 0.5,
+    "containment": 0.0,
+    "judge_raw": " Rating: 0.5\n\nExplanation: The assistant's answer is not an exact match to the reference answer, but it is similar. Both answers refer to the act of acquiring clothes, so the assistant's answer is partially correct. However, the reference answer specifically states \"Choosing clothes,\" while the assistant's answer states \"Shopping.\" While shopping can involve choosing clothes, it is not limited to "
+   },
+   {
+    "qid": "egothink/Planning_assistance/046",
+    "dimension": "Planning_assistance",
+    "question": "How to clean dust off a wooden handrail with the thing holding in my left hand?",
+    "reference": "Sweep it along the handrail's surface, ensuring you clean crevices and grooves to remove all the dust.",
+    "answer": "Use brush in left hand to sweep dust off handrail.",
+    "judge_rating": 1.0,
+    "containment": 0.0,
+    "judge_raw": " Rating: [[1.0]]\n\nExplanation:\nThe assistant's answer is similar to the reference answer as both suggest using a brush to clean the handrail. The assistant's answer is more specific by mentioning using the left hand to hold the brush. Therefore, the assistant's answer is correct and helpful."
+   },
+   {
+    "qid": "egothink/Forecasting/041",
+    "dimension": "Forecasting",
+    "question": "What am I going to do?",
+    "reference": "Peel the onion.",
+    "answer": "Peel onion",
+    "judge_rating": 1.0,
+    "containment": 0.0,
+    "judge_raw": " Rating: [[1.0]]\n\nThe assistant's answer is identical to the reference answer, with only a slight variation in wording. Both answers instruct the user to peel an onion."
+   },
+   {
+    "qid": "egothink/Activity/089",
+    "dimension": "Activity",
+    "question": "What am I doing?",
+    "reference": "Cleaning handrail.",
+    "answer": "Wiping staircase railing",
+    "judge_rating": 1.0,
+    "containment": 0.0,
+    "judge_raw": " Rating: [1.0]\n\nExplanation: The assistant's answer is similar to the reference answer as both answers describe an action related to a railing or handrail. The assistant's answer is more specific, mentioning a staircase railing, but the reference answer is more general, mentioning a handrail. Therefore, the assistant's answer is considered correct and helpful."
+   },
+   {
+    "qid": "egothink/Reasoning_counting/005",
+    "dimension": "Reasoning_counting",
+    "question": "How many bricks that I am holding?",
+    "reference": "Two.",
+    "answer": "1",
+    "judge_rating": 0.5,
+    "containment": 0.0,
+    "judge_raw": " Rating: 0.5.\n\nThe assistant's answer is not exactly the same as the reference answer, but it is close. The assistant's answer of \"1\" is incorrect because the question asks about the number of bricks the user is holding, not just one brick. However, the assistant's answer of \"1\" implies that the assistant understands the question is asking about a quantity, which is a positive step towards providi"
+   },
+   {
+    "qid": "egothink/Reasoning_counting/026",
+    "dimension": "Reasoning_counting",
+    "question": "How many pots are there on my right?",
+    "reference": "One.",
+    "answer": "1",
+    "judge_rating": 1.0,
+    "containment": 0.0,
+    "judge_raw": " Rating: [[1.0]]\n\nExplanation: The assistant's answer is identical to the reference answer, indicating that it is both correct and helpful. The assistant correctly identified that there is one pot on the right based on the user's question."
+   },
+   {
+    "qid": "egothink/Reasoning_counting/025",
+    "dimension": "Reasoning_counting",
+    "question": "How many pots of flowers are there to my right?",
+    "reference": "One.",
+    "answer": "1",
+    "judge_rating": 1.0,
+    "containment": 0.0,
+    "judge_raw": " Rating: [[1.0]]\n\nThe assistant's answer is identical to the reference answer, indicating that it is both correct and helpful."
+   },
+   {
+    "qid": "egothink/Activity/077",
+    "dimension": "Activity",
+    "question": "What am I doing?",
+    "reference": "walking the dog.",
+    "answer": "Walking a dog",
+    "judge_rating": 1.0,
+    "containment": 0.0,
+    "judge_raw": " Rating: [[1.0]]\n\nThe assistant's answer is identical to the reference answer, except for the capitalization of \"Walking\" in the assistant's answer. This minor difference does not affect the overall correctness and helpfulness of the assistant's response."
+   },
+   {
+    "qid": "egothink/Planning_navigation/004",
+    "dimension": "Planning_navigation",
+    "question": "How to walk to the curtains?",
+    "reference": "Stand up, turn right, walk forward until you get to the curtains.",
+    "answer": "Turn right and walk to the right.",
+    "judge_rating": 0.5,
+    "containment": 0.0,
+    "judge_raw": " Rating: 0.5\n\nExplanation:\n\nThe assistant's answer is not an exact match to the reference answer, but it is similar. The assistant's answer suggests turning right and walking to the right, which is consistent with the reference answer's instruction to turn right. However, the assistant's answer does not specify walking forward until reaching the curtains, which is an important part of the referenc"
+   },
+   {
+    "qid": "egothink/Forecasting/001",
+    "dimension": "Forecasting",
+    "question": "What will I do?",
+    "reference": "Cut the grass.",
+    "answer": "Trim bushes",
+    "judge_rating": 0.5,
+    "containment": 0.0,
+    "judge_raw": " Rating: 0.5\n\nExplanation: The assistant's answer is not an exact match to the reference answer, but it is related to the task of maintaining a lawn or garden. The assistant suggests \"trimming bushes,\" which is similar to the reference answer's \"cutting the grass.\" However, the reference answer specifically mentions \"cutting the grass,\" so the assistant's answer is not a perfect match. Nonetheless"
+   },
+   {
+    "qid": "egothink/Forecasting/029",
+    "dimension": "Forecasting",
+    "question": "How will the pepper in my hands be cut?",
+    "reference": "Into two pieces.",
+    "answer": "with knife",
+    "judge_rating": 0.5,
+    "containment": 0.0,
+    "judge_raw": " Rating: 0.5. The assistant's answer is not exactly the same as the reference answer, but it is helpful as it implies that the pepper will be cut using a knife. However, the reference answer is more specific and states that the pepper will be cut into two pieces."
+   }
+  ],
+  "sample_containment_yes_judge_no": [
+   {
+    "qid": "egothink/Object_attribute/048",
+    "dimension": "Object_attribute",
+    "question": "Is the object that I am holding flat or not?",
+    "reference": "it is not flat",
+    "answer": "flat",
+    "judge_rating": 0.0,
+    "containment": 1.0,
+    "judge_raw": " Rating: 0.\n\nExplanation: The assistant's answer is in direct contradiction to the reference answer. The assistant's answer is not helpful as it provides incorrect information. The user asked if the object they are holding is flat or not, and the assistant answered \"flat,\" which is incorrect according to the reference answer. Therefore, the assistant's answer is not acceptable."
+   },
+   {
+    "qid": "egothink/Planning_assistance/023",
+    "dimension": "Planning_assistance",
+    "question": "Is the glass closer to me or the phone? How do I pick up the thing that's closer to me?",
+    "reference": "The glass. Find the location of the glass on the table, and pick it up.",
+    "answer": "glass",
+    "judge_rating": 0.0,
+    "containment": 1.0,
+    "judge_raw": " Rating: 0. The assistant's answer does not provide enough information to be considered a correct or helpful response. The user asked for information about the relative location of the glass and the phone, and whether they should pick up the closer object. The assistant only identified the object (the glass) without providing any information about its location or suggesting a way to pick it up. Th"
+   },
+   {
+    "qid": "egothink/Reasoning_counting/036",
+    "dimension": "Reasoning_counting",
+    "question": "Are there more planks on the left side of my left hand or on the right side?",
+    "reference": "There are more planks on the left side of my left hand.",
+    "answer": "left",
+    "judge_rating": 0.0,
+    "containment": 1.0,
+    "judge_raw": " Rating: 0. The assistant's answer does not provide any information about the number of planks on the left and right sides of a hand. The reference answer states that there are more planks on the left side of a left hand. The assistant's answer does not come close to providing a correct or helpful response to the user's question."
+   },
+   {
+    "qid": "egothink/Reasoning_comparing/041",
+    "dimension": "Reasoning_comparing",
+    "question": "Are there less mats holding in my hands or on the ground?",
+    "reference": "There are less mats holding in my hands.",
+    "answer": "hands",
+    "judge_rating": 0.0,
+    "containment": 1.0,
+    "judge_raw": " Based on the provided question and answers, the assistant's answer is incomplete and unhelpful. The reference answer states that there are fewer mats holding in the hands, but the assistant only mentions the location of the mats without providing any information about the number of mats. Therefore, the assistant's answer is not correct or helpful in answering the user's question.\n\nRating: [[0]]"
+   },
+   {
+    "qid": "egothink/Planning_navigation/020",
+    "dimension": "Planning_navigation",
+    "question": "How do I get to the blue sofa?",
+    "reference": "Stand up first, then turn left and walk to the edge of the table. Turn right and walk straight to the blue sofa.",
+    "answer": "turn right",
+    "judge_rating": 0.0,
+    "containment": 1.0,
+    "judge_raw": " Based on the information provided in the question and the reference answer, the assistant's answer is incomplete and unhelpful. The reference answer specifies several steps to get to the blue sofa, while the assistant's answer only mentions turning right. It is not clear from the context of the question or the assistant's answer which direction the user should turn or how many turns they should m"
+   }
+  ]
+ }
+}
