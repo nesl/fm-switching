@@ -2370,3 +2370,74 @@ cancelled-by-geometry, **unexpressible** (`order` and `desired_tier`), unscorabl
 (RELOAD is offered only at HOST-WARM and no recall reached HOST-WARM across seeds 0 and 4 at 16
 devices over 600 s, which is the E36 pattern caught BEFORE the sweep rather than after), and
 fired-and-did-not-help.
+
+# 27. D134 PART C: ROBOT TASK VALUE IS NOT COMPUTABLE ON THE DRY SCREEN, and shipping it would have INVERTED the leaderboard
+
+Part C is implemented against the committed scorer and **deliberately refuses to populate**. This
+section records why, because the failure is the finding.
+
+## 27.1 What I implemented
+
+`robot_denominators.py` now calls the committed `scorer.score.robot_value(lo, ROB_L_S)`, whose
+`_standing` picks the cloud answer when `_within(o, L)` and the device answer otherwise. That is
+the same rule `u_rc` applies, so the two agree **by construction rather than by coincidence**,
+which is what the directive asked me to check.
+
+## 27.2 What the numbers came out as, before I checked them
+
+| arm | standing accuracy | device-only accuracy | "premium" | on-time (all) |
+|---|---|---|---|---|
+| eco-llm | **0.0289** | 0.3511 | **-32.2 pp** | **0.906** |
+| mooncake | 0.0322 | 0.3511 | -31.9 pp | 0.893 |
+| llf | 0.1745 | 0.3511 | -17.7 pp | 0.463 |
+| edf C=8 | 0.2143 | 0.3511 | -13.7 pp | 0.356 |
+| v1.3-fast | 0.1893 | 0.3501 | -16.1 pp | 0.350 |
+
+**The ranking is exactly inverted: the best-serving arm has the worst accuracy, and every arm
+scores worse than answering on-device and never using the cloud at all.** The directive expected
+full history to be worth about **+17.5 pp**; I measured between **-13.7 and -32.2 pp**.
+
+## 27.3 Why: the dry screen's cloud answers are PLACEHOLDERS
+
+In every dry cell, `cloud_payload.cloud_letter` is **`"X"`** for all 38 served recalls, while gold
+letters are drawn from **A to E**. `cloud_correct` is therefore `("X" == gold)`, which is **always
+False**.
+
+So standing accuracy on the dry screen reduces to *(fraction answered on device) x device
+accuracy*. **It penalises on-time delivery.** The better an arm is at getting cloud answers back
+inside the deadline, the more of its questions are scored against a guaranteed-wrong answer, and
+the lower its measured accuracy. That is the entire explanation for 27.2, and it is an artefact of
+the fake server, not a property of any arm.
+
+**This is consistency check 6, proxy validity.** `cloud_letter` in a dry run is not a model answer;
+it is a placeholder standing in for one. It is not valid for any accuracy claim.
+
+## 27.4 What I did instead of reporting it
+
+The post-processor now **guards before computing**: it intersects the observed `cloud_letter`
+values with the observed gold letters and refuses the column outright when they do not meet,
+naming the reason in the row. All 196 cells now return
+`robot_task_value.available = false` with that reason recorded, rather than a plausible-looking
+number.
+
+**Had Part C shipped populated, the leaderboard would have ranked every arm backwards**, and the
+arm the directive is trying to protect against, a cheap timely one that answers from recent frames,
+would have scored BEST on the very column added to catch it, because it would have delivered
+fewest cloud answers.
+
+## 27.5 What Part C needs, and what it does not change
+
+**Robot task value requires a LIVE run with a real model server.** The quantity is well defined
+and the scorer computes it correctly; the dry screen simply has no real answers to score. The
+column is in place and will populate the moment it is fed live cells.
+
+**Dashcam streaming AP** is likewise not computed here: `scorer.dashcam_value` requires a D57
+calibration map, which the dry screen does not supply. Reported as unavailable with that reason
+rather than approximated.
+
+**None of this weakens the service and capacity results.** On-time delivery, the capacity
+conjunct, the feasibility ceiling and both denominators are all computed from timing and from the
+committed cost curve, none of which depends on answer content. **What it does mean is that the
+leaderboard cannot yet tell a timely-and-wrong arm from a timely-and-right one**, which is exactly
+the gap the directive identified, and it will stay open until live cells exist. I am flagging that
+as a limitation on the bar rather than filling it with a number I cannot defend.
