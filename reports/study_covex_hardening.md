@@ -79,6 +79,37 @@ Two scenarios carry a stated realisability caveat, recorded now rather than afte
 - **S9** likewise depends on eviction actually occurring. If no eviction happens under the
   pressure applied, it is reported as NOT REALISABLE.
 
+## 1b. GATE AMENDMENT, RULING D127, 2026-11-18
+
+**Recorded here, ABOVE the results, and committed BEFORE round one was scored.** The ordering is
+the point: a bar moved after a result is indistinguishable from fitting the bar to the outcome,
+which is the failure this study's pre-registration discipline exists to prevent. This amendment
+was ruled before any F5 or v1.2 result existed.
+
+**The amendment.** In the offline screen, COVEX must be at least as good as the best SCHEDULING
+baseline, meaning **edf and llf**, on BOTH the dashcam and the robot measure at EVERY size.
+**`always-cloud-fcfs` remains REPORTED in every table but is NOT GATING.**
+
+**The reason, as ruled.** The dry-run engine prices from the same committed curves COVEX's own
+model uses, and it shows `always-cloud-fcfs` at 1.000 robot service where live contention is
+expected. A comparison against an arm with no admission control is therefore not informative in a
+screen of this kind. **COVEX against `always-cloud-fcfs` is judged only on live H100 runs.**
+
+**What this does NOT change.** The **v1.1 gate result in section 5 stands exactly as it was
+reported** under the criterion in force at the time, and is not re-scored or re-worded. For a
+reader who wants the comparison, here is what v1.1 would have been under the amended criterion,
+presented as a SEPARATE line and not as a revision:
+
+| n | gating best, robot (edf, llf) | v1.1 robot | gating best, dashcam | v1.1 dashcam | amended verdict |
+|---|---|---|---|---|---|
+| 4 | 0.889 (edf) | 0.222 | 0.999 | 0.978 | still FAIL on both |
+| 8 | 0.900 (llf) | 0.150 | 1.000 (llf) | 0.927 | still FAIL on both |
+| 16 | 0.600 (llf) | 0.200 | 0.658 (llf) | 0.449 | still FAIL on both |
+
+So the amendment does not soften the bar on current evidence: the robot axis is now judged against
+llf's 0.778, 0.900 and 0.600 rather than always-cloud's 1.000, and v1.1 fails both axes at every
+size either way.
+
 ## 2. Part 1 AUDITS
 
 Run in an ISOLATED GIT WORKTREE pinned to commit `b2dbff2`, whose parent is session 1's

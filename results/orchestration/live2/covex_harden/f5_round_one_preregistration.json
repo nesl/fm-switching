@@ -1,0 +1,69 @@
+{
+ "check": "covex_harden_f5_round_one_preregistration",
+ "is_measurement": false,
+ "label": "PRE-REGISTERED expectations for GATE ROUND ONE on the F5 set (F5a backlog units, F5b state value, F5c deficit routing, with B1, F2 and F3 on), committed BEFORE any F5 commit was run against them. Existing Part 2 and v1.2 expectations are untouched.",
+ "ruling": "D126",
+ "expectations": {
+  "G1a_dashcam_axis": {
+   "target": "F5a backlog units",
+   "expect": "dashcam_fraction_at_or_above_edf",
+   "expect_detail": "after F5a, policy-core releases a dashcam-instant fraction at or above edf at EVERY size in 4, 8, 16, 32. The before-ground I measured is the number this is judged against",
+   "justification": "the user judges a units mismatch between accumulated GPU-seconds and a wall-clock horizon the likely explanation of F-A7 and S2; if that is right, correcting the units should remove the dashcam deficit, since nothing else about the dashcam path changes",
+   "falsifier": "if the dashcam fraction does not move at all, the units were already consistent and F-A7 has another cause"
+  },
+  "G1b_backlog_magnitude": {
+   "target": "F5a backlog units",
+   "expect": "backlog_term_magnitude_falls",
+   "expect_detail": "the p50 absolute backlog charge on state_promote_rebuild falls below the 1.084 I measured, and the ratio of that charge to the largest available benefit (0.035 continuation, 0.083 RC utility) falls below the 31x and 13x I measured",
+   "justification": "if the term was comparing GPU-seconds against a wall-clock horizon it was inflated by the batching factor; correcting the units should shrink it. F-A6 is NOT adopted as a tuning change, so this ratio may only move through the units fix",
+   "falsifier": "the ratio is unchanged, in which case the exchange rate stands as measured and v1.2 long-window structure is the only remaining route"
+  },
+  "G1c_state_value_zero_fraction": {
+   "target": "F5b state value",
+   "expect": "state_value_zero_fraction_falls_below_1",
+   "expect_detail": "the exactly-zero fraction of the state-value channel falls strictly below 1.0 for at least piece_release and state_promote_rebuild, measured over the SAME candidate population as my F-A2 baseline of 1.0 across all 124,354 candidates",
+   "justification": "F5b wires the KV and host-tier bookkeeping into the terminal state value so a candidate that evicts or keeps a history changes its value; if the fraction stays at exactly 1.0 the wiring did not reach the term",
+   "falsifier": "the fraction stays 1.0, which would mean F5b did not land in the path the audit measures"
+  },
+  "G1d_blind_spot_F_A1": {
+   "target": "F5a and F5b together",
+   "expect": "at_least_one_benefit_channel_alive_for_piece_release",
+   "expect_detail": "for piece_release and state_promote_rebuild, at least one of the benefit channels (rc_util, cont, z, sv) has an exactly-zero fraction strictly below 0.99, against my baseline where all four were at or above 0.999",
+   "justification": "F-A1 is the finding that every benefit channel was dead while both cost channels were live; this is its direct re-test on identical ground",
+   "falsifier": "all four remain at or above 0.99, so the decision is still assembled from live costs and dead benefits"
+  },
+  "G1e_deficit_routing_identical": {
+   "target": "F5c deficit routing",
+   "expect": "byte_identical_with_B1_on",
+   "expect_detail": "decisions are byte-identical before and after F5c with B1 on, since the ruling states behaviour should be unchanged",
+   "justification": "F5c is a routing change through Coordinator.update_deficit, the entry point spec_map.py names; it is not meant to change any value",
+   "falsifier": "any decision differs, which would mean the routing changed behaviour and not only the call path"
+  },
+  "G1f_robot_axis": {
+   "target": "the F5 set as a whole",
+   "expect": "reported_not_asserted",
+   "expect_detail": "the robot measure is REPORTED against the best baseline at every size. No threshold is pre-registered for round one, because D126 states explicitly that F5 may repair the dashcam axis while robots still fail, and that this is worth reporting either way",
+   "justification": "pre-registering a robot threshold for round one would invent a bar the ruling does not set; v1.2 long window is the intended structural answer for robots"
+  }
+ },
+ "before_ground": {
+  "note": "the audit is re-run on the SAME candidate population so before and after sit on identical ground, as D126 requires",
+  "F_A1": "for piece_release and state_promote_rebuild, exactly-zero fractions were rc_util 0.999 and 1.000, cont 0.999 and 0.999, z 1.0 and 1.0, sv 1.0 and 1.0, while backlog moved in 88 and 80 percent of candidates",
+  "F_A2": "state value exactly zero in 1.0 of candidates for every kind, across 124,354 candidates at 4, 8 and 16 fleet devices and the 32-device synthetic fixture",
+  "F_A6": "p50 absolute backlog charge on state_promote_rebuild 1.084, p90 2.071, against a largest continuation credit of 0.035 and a largest RC utility of 0.083, so 31x and 13x",
+  "F_A7": "dashcam released fraction, policy-core v1.0 0.999, 0.487, 0.075 at 4, 8, 16 against edf 0.999, 0.999, 0.626; v1.1 0.978, 0.927, 0.449"
+ },
+ "gate_rounds": {
+  "round_one": "the F5 set: pass/fail per scenario plus the comparison at 4, 8, 16 and 32 on BOTH axes",
+  "round_two": "v1.2 and the six ablations, with the v1.2 scenarios already pre-registered in v12_scenario_preregistration.json"
+ },
+ "pass_string_discipline": "the commit message starting \"harden GATE PASS v1.2\" is emitted ONLY if a round passes BOTH halves, never for a partial pass such as the dashcam axis alone",
+ "f_a6_status": "NOT ADOPTED per D126; the exchange rate stays as it is, so the 31x and 13x ratios may only move through the F5a units correction, and are judged on measurement",
+ "_provenance": {
+  "script": "policy/audit/ and policy/tests/hardening/",
+  "model": "none (pol4 frozen)",
+  "device": "flash CPU only",
+  "n": "development data only, seed 0",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}
