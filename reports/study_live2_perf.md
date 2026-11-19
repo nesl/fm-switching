@@ -821,3 +821,15 @@ coordinator's per-session token estimate is not cumulative (`cstate.history_appe
 the current value), which makes every live recall item look many times smaller than it is and could make its rollouts
 cheaper. The live and fixture figures should not be compared until that is resolved. The live pilot measures decision
 latency in-run on this CPU, which is the figure that bears on the 100 ms period.
+
+### D110 / D115: the H100 host machine factor (2026-11-18)
+
+Measured machine factor on the committed benchmark (`fix_checks.py speed`, 180 s fixture, Option 0 on, rollout):
+**the H100 host's CPU takes about 2.2x as long as flash's** (p50 2.16x to 2.29x, p99 2.19x to 2.32x at 32, 64 and
+128 devices). Pinned to an idle physical core (cpu 50, sibling idle) the result equals the unpinned run within 1 %
+(`perf_speed_h100host_pinned.json`: 0.994 to 0.998 at p99), so the factor is the CPU, not contention from other
+users. The shared-core cells could not hold contention (the other users' unpinned processes moved off the core) and
+are not a contention measurement. Under D115, a NORMALISED DECISION LATENCY (H100 in-run latency divided by this
+factor) may later be reported as a labelled derived quantity; RUN OUTCOMES are never rescaled. From the pilot on,
+every run logs per decision the wall time, the deciding thread's CPU time (`time.thread_time()`) and the candidates
+priced, plus a 1 s host-load sampler (`decision_time.jsonl.gz`, `host_load.jsonl.gz`, summaries in `run_meta.json`).

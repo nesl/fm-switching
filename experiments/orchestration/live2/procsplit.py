@@ -435,6 +435,7 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
             res["cpu_s_child"] = round(time.process_time() - cpu0, 4)
             res["completion_to_forward_ms"] = _qstats(fwd_gaps_ms)
             res["first_token_to_forward_ms"] = _qstats(ft_gaps_ms)
+            co.write_decision_times(rdir / "decision_time.jsonl.gz")      # D115
             logs.close()
             if be is not None:
                 be.close()

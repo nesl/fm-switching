@@ -144,6 +144,9 @@ def run(a) -> Dict[str, Any]:
 
     srv = None
     sinfo: Optional[Dict[str, Any]] = None
+    # D115: 1 s host-load sampler over the whole run (server start to server stop)
+    import hostload as HL
+    hl = HL.HostLoadSampler(rdir / "host_load.jsonl.gz").start()
     if a.start_server:
         srv, sinfo = _start_server(a)
 
@@ -217,6 +220,7 @@ def run(a) -> Dict[str, Any]:
     wall = time.time() - t0
     if srv is not None:
         srv.stop()
+    host_load = hl.stop()
 
     rm = (json.loads((rdir / "run_meta.json").read_text())
           if (rdir / "run_meta.json").exists() else {})
@@ -231,6 +235,8 @@ def run(a) -> Dict[str, Any]:
     rm["completion_to_emulator_ms"] = res.get("completion_to_emulator_ms")
     rm["forward_on_completion"] = bool(a.split and a.forward_on_completion)
     rm["submit_delay_ms"] = res.get("submit_delay_ms")          # epoch start -> submit call
+    rm["decision_time"] = res.get("decision_time")              # D115: wall, CPU, ratio, candidates
+    rm["host_load"] = host_load                                  # D115: 1 s sampler percentiles
     rm["submit_delay_total_ms"] = (res.get("backend") or {}).get("submit_delay_total_ms")  # epoch nominal t -> wire
     rm["wire_extra_delay_ms"] = (res.get("backend") or {}).get("wire_extra_delay_ms")
     rm["decision_latency_ms"] = res.get("decision_latency_ms")
@@ -332,6 +338,7 @@ def _inprocess(a, tdir: Path, rdir: Path, cfg, htok, arm, EM):
     except Exception as e:                                            # noqa: BLE001
         err = f"{type(e).__name__}: {e}"
     res = co._result(cpu0, _t.time() - t0)
+    co.write_decision_times(rdir / "decision_time.jsonl.gz")          # D115
     logs.close()
     if be is not None:
         res["backend"] = be.metrics() if hasattr(be, "metrics") else None

@@ -162,6 +162,8 @@ class Live2Coordinator:
         self.recall_letter_diffs: List[Dict[str, Any]] = []
         self.n_monitor_score_differs = 0
         self.decision_latencies_ms: List[float] = []
+        # D115: per decision (t, wall_ms, cpu_ms, candidates)
+        self.decision_times: List[Tuple[float, float, float, int]] = []
         self.errors: List[str] = []
         self.counts: Dict[str, int] = defaultdict(int)
         self.builds: Dict[str, Dict[str, Any]] = {}
@@ -238,17 +240,56 @@ class Live2Coordinator:
         # the same state the observation does. It is O(devices + sessions) per period.
         self._roster(t)
         obs = self.st.observation(t, epoch if epoch in _EPOCHS else "tick")
+        k0 = self._candidates_counter()
         t0 = time.perf_counter()
+        c0 = time.thread_time()
         self._epoch_wall0 = t0
         try:
             act = self.arm(obs)                  # scrub + validate_action + apply_defaults
+            # D115: the DECIDING THREAD's CPU time over the same call (time.thread_time, so the
+            # I/O loop's thread in the same process is not counted), read INSIDE the wall interval
+            # so cpu <= wall by construction; and the candidates priced: the delta of the arm's own
+            # scoring counter where it keeps one (policy-core's rollout scorings), else the number
+            # of pending items the arm ordered (EDF family, which prices nothing).
+            cpu_ms = (time.thread_time() - c0) * 1000.0
             dt_ms = (time.perf_counter() - t0) * 1000.0
+            k1 = self._candidates_counter()
+            cand = (k1 - k0) if (k0 is not None and k1 is not None) else \
+                (len(getattr(obs, "streams", ()) or ()) + len(getattr(obs, "recall", ()) or ()))
             self.decision_latencies_ms.append(dt_ms)
+            self.decision_times.append((round(t, 4), round(dt_ms, 4), round(cpu_ms, 4), int(cand)))
             self._enact(act, t, dt_ms)
         finally:
             # a submission made OUTSIDE an epoch (a chained recall released by a completion in
             # `_settle`) is stamped at the instant it is made, not charged this epoch's delay
             self._epoch_wall0 = None
+
+    def _candidates_counter(self) -> Optional[int]:
+        """D115: the arm's own count of candidates priced so far, read only (never written)."""
+        co = getattr(self.arm, "co", None)
+        v = getattr(co, "scoring_calls", None) if co is not None else None
+        return int(v) if isinstance(v, (int, float)) else None
+
+    def decision_time_summary(self) -> Dict[str, Any]:
+        """D115: decision wall and CPU time, their ratio (contention indicator) and candidates."""
+        rows = self.decision_times
+        wall = [r[1] for r in rows]
+        cpu = [r[2] for r in rows]
+        ratio = [r[1] / r[2] for r in rows if r[2] > 0]
+        cand = [r[3] for r in rows]
+        return dict(n=len(rows), cpu_clock="time.thread_time() of the deciding thread",
+                    wall_ms=_pct(wall), cpu_ms=_pct(cpu), wall_over_cpu=_pct(ratio),
+                    candidates=_pct(cand),
+                    candidates_source=("arm scoring counter delta"
+                                       if self._candidates_counter() is not None
+                                       else "pending items ordered"))
+
+    def write_decision_times(self, path: Path) -> None:
+        import gzip
+        import json
+        with gzip.open(path, "wt") as f:
+            for t, w, c, k in self.decision_times:
+                f.write(json.dumps(dict(t=t, wall_ms=w, cpu_ms=c, candidates=k)) + "\n")
 
     # ---------------------------------------------------------------- fleet events
     def _ingest(self, ev: Dict[str, Any], t: float) -> Optional[str]:
@@ -820,6 +861,7 @@ class Live2Coordinator:
             n_monitor_answers=len(mon), n_recall_answers=len(rec),
             n_on_time=sum(1 for a in self.answers if a.get("on_time")),
             submit_delay_ms=_pct(self.submit_delays_ms),
+            decision_time=self.decision_time_summary(),
             n_pulls=len(self.pulls), n_cloud_answers=len(self.cloud_answers),
             decision_latency_ms=dict(p50=q(0.5), p99=q(0.99),
                                      max=(round(lat[-1], 4) if lat else None), n=len(lat)),

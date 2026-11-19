@@ -484,6 +484,68 @@ class TestTheTrueSubmissionStamp(unittest.TestCase):
                          [{k: v for k, v in x.items() if k not in strip} for x in b])
 
 
+class TestDecisionTimeInstrumentation(unittest.TestCase):
+    """D115: every decision carries wall time, the deciding thread's CPU time and candidates."""
+
+    def _run(self, arm_name):
+        import cachekeys as CK
+        import emulator as EM
+        import trace as TR
+        from bridge import EmulatorBridge
+        from coordinator import Live2Coordinator, Logs
+        from test_live2_coord import GPU_KV, HOST_GIB, HOST_TOK, _arm
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            tdir = d / "trace"
+            TR.write_trace(tdir, TR.generate_trace(7, 4, "50:50", 20.0, "A"))
+            logs = Logs(d / "run").open()
+            co = Live2Coordinator(_arm(arm_name), None, [], gpu_kv_tokens=GPU_KV,
+                                  host_tier_gib=HOST_GIB, host_tier_tokens=HOST_TOK,
+                                  upload_mode="A", window_s=20.0, drain_s=2.0, seed=7,
+                                  logs=logs, run_tag=CK.run_tag(7, arm_name), dry_run=True)
+            br = EmulatorBridge(co)
+            br.kind = "stub"
+            EM.FleetEmulator(tdir, br, "A", realtime=False, drain_s=2.0).run(d / "run")
+            logs.close()
+            co.write_decision_times(d / "dt.jsonl.gz")
+            rows = [json.loads(l) for l in gzip.open(d / "dt.jsonl.gz", "rt")]
+        return co, rows
+
+    def test_every_decision_has_wall_cpu_and_candidates_and_cpu_never_exceeds_wall(self):
+        for arm in ("edf", "policy-core"):
+            co, rows = self._run(arm)
+            self.assertGreater(len(rows), 0, arm)
+            self.assertEqual(len(rows), len(co.decision_latencies_ms), arm)
+            for r in rows:
+                for k in ("t", "wall_ms", "cpu_ms", "candidates"):
+                    self.assertIn(k, r)
+                self.assertGreaterEqual(r["cpu_ms"], 0.0)
+                self.assertLessEqual(r["cpu_ms"], r["wall_ms"] + 1e-3, (arm, r))
+                self.assertGreaterEqual(r["candidates"], 0)
+            s = co._result(0.0, 1.0)["decision_time"]
+            for k in ("wall_ms", "cpu_ms", "wall_over_cpu", "candidates", "cpu_clock",
+                      "candidates_source"):
+                self.assertIn(k, s)
+            self.assertEqual(s["candidates_source"],
+                             "arm scoring counter delta" if arm == "policy-core"
+                             else "pending items ordered")
+
+    def test_the_host_load_sampler_reports_and_anonymises(self):
+        import time as _t
+        import hostload as HL
+        with tempfile.TemporaryDirectory() as d:
+            hl = HL.HostLoadSampler(Path(d) / "hl.jsonl.gz", period_s=0.2).start()
+            _t.sleep(1.0)
+            s = hl.stop()
+            rows = [json.loads(l) for l in gzip.open(Path(d) / "hl.jsonl.gz", "rt")]
+        self.assertGreaterEqual(s["n"], 3)
+        for k in ("loadavg_1m", "host_busy_frac", "other_cpu_cores"):
+            self.assertIn(k, s)
+        for r in rows:
+            for name, _c in r["other_top"]:
+                self.assertTrue(name in ("this-user", "root") or name.startswith("other-user-"), name)
+
+
 class TestTheMissingFrameGate(unittest.TestCase):
     """Addendum (b), flash's preflight: no uuid-only fallback outside fake-server tests."""
 
