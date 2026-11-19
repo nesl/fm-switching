@@ -2493,3 +2493,79 @@ Together with RELOAD being unexercised at 16 devices (section 26.4), **size-depe
 is now demonstrated twice from independent directions.** Standing consequence for this report:
 **any mechanism scored at a single size must say so**, because a single-size null may be a
 mechanism that had not switched on yet and a single-size saturation may hide where it began.
+
+# 28. D134 ADDENDUM ITEM 1: VALIDATION CHECK 1 FAILS. The +17.5 pp premium is a SUBSET quantity
+
+I ran the two required validation checks against the committed StudyR1 results
+(`results/sember/study_r1/study_r1_results_h100nvl.json`) **before building the join**. Check 1
+fails, and it fails in a way that changes what the column should report.
+
+## 28.1 The check, and what it returned
+
+The directive's premise: full history is worth about **+17.5 pp**, and the StudyR1 RICH minus
+RECENT gap should land near it.
+
+| committed cell | accuracy | Wilson 95 |
+|---|---|---|
+| K1, 32B-I x RICH | 0.3953 | [0.3628, 0.4286] |
+| K3, 32B-I x RECENT | 0.3834 | [0.3512, 0.4167] |
+| 4B-I x RECENT (device, D87) | 0.3278 | StudyO |
+
+**RICH minus RECENT at 32B is +1.18 pp, not +17.5 pp**, and StudyR1's own test says
+`K1_minus_K3` has CI **[-0.0152, +0.0389]**, which **does not exclude zero**. No pair of committed
+cells gives +17.5: the candidates are +1.18 (RICH vs RECENT), +6.75 (32B RICH vs device 4B-I
+RECENT), +8.64 (vs 4B-T RICH) and +3.31 (vs 8B-I RICH). The nearest is off by 2.6x and the
+headline one by **14.8x**, both past the 2x rule.
+
+## 28.2 Where +17.5 pp actually comes from, and it is a DEFINITION failure
+
+StudyR1's own test block contains it exactly:
+
+| test | estimate | CI | excludes 0 |
+|---|---|---|---|
+| `K1_minus_K3` (all questions) | **+0.0118** | [-0.0152, 0.0389] | **no** |
+| `K1_minus_K3_recent_misses` | **+0.1753** | [0.0714, 0.2813] | **yes** |
+| `K1_minus_K3_recent_covers` | -0.0094 | [-0.0356, 0.0164] | no |
+| `history_gates_DiD` | +0.1846 | [0.0802, 0.2936] | yes |
+
+with **`recent_covers_frac` = 0.8852**.
+
+**The +17.5 pp is conditional on the 11.5 percent of questions where the RECENT window MISSES the
+evidence.** On the 88.5 percent it covers, full history is worth nothing (-0.94 pp, not
+significant). The population gap is the mixture: 0.115 x 17.5 = 2.0 pp, against the +1.18 pp
+measured. **This is consistency check 4, a definition audit: one number, two populations.**
+
+## 28.3 What this changes about Part C, concretely
+
+**The column's stated rationale is overstated by about 15x on the full question set.** "On-time
+service alone would reward recent-frame arms because they are about 17.5 pp less accurate" is true
+only on an 11.5 percent subset. Averaged over all questions a RECENT-choosing arm gives up
+**1.18 pp, which StudyR1 cannot distinguish from zero.**
+
+**So a population-average accuracy column would separate almost nothing, and would be below its own
+noise floor.** Had I built it to the stated spec and seen a ~1 pp spread, the natural reading would
+have been "the arms are equivalent on accuracy", which is wrong twice over: it is not equivalence,
+and the mechanism that does exist is concentrated and invisible in the mean.
+
+**The column must be STRATIFIED**, and I will build it that way:
+
+1. accuracy over **all** questions, the honest population figure, expected spread about 1 pp;
+2. accuracy over the **recent-misses** stratum, where the effect is +17.5 pp and significant;
+3. the **coverage fraction** itself, since it is what determines the mixture and may vary by arm
+   and by size.
+
+Reporting only (1) would hide the mechanism; reporting only (2) would overstate it. Both, with the
+mixing weight, is the only honest presentation.
+
+## 28.4 Check 6, proxy validity, stated before any join is published
+
+The committed correctness is a measurement of **a specific model at a specific representation on a
+specific question**: K1/K3 are **Qwen3-VL-32B-Instruct**, cloud tier; the device row is
+**4B-I x RECENT** per D87. The join must use **32B for the cloud answer and 4B-I for the device
+answer**. Mixing the tiers would reproduce the inversion of section 27 by a different route, so
+the join will assert the model per side rather than take it from a default.
+
+**Status: the join is NOT yet published.** The validation check that was meant to confirm it
+instead invalidated the premise it was to be checked against, so the design changed before the
+build. `4B-I x RICH` is recorded in StudyR1 as **"NOT AVAILABLE (no StudyO run exists)"**, so any
+question requiring it will be reported **MISSING and never imputed**, per the honesty clause.
