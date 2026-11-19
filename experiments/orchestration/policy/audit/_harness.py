@@ -18,7 +18,11 @@ POLICY_DIR = AUDIT_DIR.parent
 ROOT = POLICY_DIR.parents[2]
 LIVE2 = ROOT / "experiments/orchestration/live2"
 
-DEV_SEEDS = (0,)          # D124: seed 0 only. 1, 2 and 3 are round-1 and are never touched.
+# D129 widens development data to seeds 0, 4, 5 and 6, so a candidate that wins only on seed 0 is
+# visible as such. **Seeds 1, 2 and 3 remain RESERVED FOR ROUND 1 and are refused here**, and the
+# refusal names them explicitly so the guardrail cannot be relaxed by accident.
+DEV_SEEDS = (0, 4, 5, 6)
+RESERVED_ROUND1_SEEDS = (1, 2, 3)
 
 
 def setup_paths() -> None:
@@ -37,11 +41,16 @@ def setup_paths() -> None:
 
 
 def assert_dev_seed(seed: int) -> int:
-    if int(seed) not in DEV_SEEDS:
+    """Refuse anything but a development seed, and name a round-1 seed when one is passed."""
+    s = int(seed)
+    if s in RESERVED_ROUND1_SEEDS:
         raise ValueError(
-            "D124 allows development data only: seed %r is not in %r. Round-1 seeds 1, 2 and 3 "
-            "must never be generated, run or inspected by this study." % (seed, DEV_SEEDS))
-    return int(seed)
+            "REFUSED: seed %d is RESERVED FOR ROUND 1 (D124, D129). Seeds 1, 2 and 3 must never "
+            "be generated, run or inspected by this study." % s)
+    if s not in DEV_SEEDS:
+        raise ValueError(
+            "development data only: seed %r is not in %r." % (seed, DEV_SEEDS))
+    return s
 
 
 def available_switches() -> List[str]:
@@ -134,6 +143,12 @@ def run_fleet_cell(outdir: Path, n_dev: int, run_s: float = 600.0, seed: int = 0
 
     if arm_name == "policy-core":
         arm = A.make_arm("policy-core", **_arm_kwargs(switches or {}))
+    elif arm_name.startswith("edf@"):
+        # D128 makes C_inflight = 8 edf's default, but the committed code still declares 4, so
+        # the variant is constructed explicitly rather than assumed.
+        arm = A.Pi0Edf(None, c_inflight=int(arm_name.split("@", 1)[1]))
+    elif arm_name.startswith("llf@"):
+        arm = A.LlfArm(None, c_inflight=int(arm_name.split("@", 1)[1]))
     else:
         arm = A.make_arm(arm_name)
     arm.live2_configure(gpu_kv_tokens=gpu_kv, host_tier_gib=gib, host_tier_tokens=htok,

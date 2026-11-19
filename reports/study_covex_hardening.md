@@ -59,12 +59,34 @@ refusing work raises the price of work (F-A9).
 **Release commit:** none. **Neither gate round passes and no `harden GATE PASS v1.2` string has
 been emitted.**
 
+## THE SECOND HEADLINE: raising edf's release bound beats the entire planner
+
+Leaderboard on seeds 4, 5 and 6 (section 11). **edf at C_inflight = 8, which D128 makes its
+default, beats v1.2 in EVERY cell on BOTH axes**: dashcam 0.999 against 0.49 to 0.92 at 8 devices
+and 0.96 against 0.06 to 0.59 at 16, robot 15 to 18 of about 19 against v1.2's 1 to 4.
+
+**This withdraws my own earlier verdict.** The "v1.2 passes both axes at 16 devices" result was
+measured against edf at C_inflight = 4, which collapses to 0.0105 to 0.0130 dashcam delivery at 16
+devices where the same scheduler at C_inflight = 8 delivers 0.9558 to 0.9654. **The release bound,
+not the policy, dominated that comparison.**
+
+**And v1.2 is far less stable.** Across seeds 4, 5 and 6 its 16-device dashcam delivery ranges
+0.062 to 0.590, a tenfold spread, while edf C=8 ranges 0.9558 to 0.9654. **A candidate this
+seed-sensitive cannot be judged on seed 0 alone.**
+
+**The actionable line for session 1: a one-parameter change to a trivial scheduler outperforms the
+two-timescale planner everywhere tested.** Before more structure goes into COVEX, it is worth
+measuring COVEX at a larger release bound, since F-A8 and F-A9 both say its problem is refusing
+work under predicted congestion and C_inflight is the other lever on work in flight.
+
 ## What is NOT yet done, stated plainly
 
-The D129 leaderboard on seeds 4, 5 and 6 and at 32 devices is NOT built. No session-1 candidate had
+The D129 leaderboard now covers seeds 4, 5 and 6 at 8 and 16 devices (section 11). Seed 0 at
+32 devices, and the published-system field from session 3 (D130), are NOT built. No session-1 candidate had
 landed when this was written, so I spent the time on the calibration instead, which D129 ranks
-highest and which turned out to invalidate a dry-run conclusion. Seeds 4, 5 and 6 remain the next
-job.
+highest and which turned out to invalidate a dry-run conclusion. No session-1 candidate had landed all night, so the time went to the calibration and the
+seed sweep. No `baselines-published ready:` commit from session 3 had landed either, so the
+published field is empty rather than missing.
 
 ---
 
@@ -1005,3 +1027,54 @@ This is the fourth erratum against my own work tonight and the most consequentia
 carried through every earlier gate verdict at 8 devices. **It does not change the 16-device
 results, where dry and live agree to within 0.003 for policy-core, nor the robot axis, which live
 confirms.**
+
+
+---
+
+# 11. LEADERBOARD, seeds 4, 5 and 6 (D129). edf at C_inflight 8 WINS EVERY CELL
+
+HEAD **`554fe95`**, pinned worktree. Delivery, 600 s, tight, 8 and 16 devices. Seeds 1, 2 and 3
+are reserved for round 1 and the harness refuses them by name.
+
+**dashcam delivered / robot delivered on time:**
+
+| seed | n | **v1.2** | **edf C=8** | edf C=4 | llf |
+|---|---|---|---|---|---|
+| 4 | 8 | 0.586 / 1 of 21 | **0.9993 / 18 of 21** | 0.9986 / 1 | 0.9977 / 4 |
+| 5 | 8 | 0.9219 / 4 of 17 | **0.9993 / 15 of 17** | 0.9867 / 2 | 0.9842 / 5 |
+| 6 | 8 | 0.4853 / 1 of 17 | **0.9991 / 15 of 17** | 0.9844 / 0 | 0.9920 / 2 |
+| 4 | 16 | 0.5904 / 1 of 41 | **0.9609 / 3 of 41** | 0.0128 / 0 | 0.0189 / 1 |
+| 5 | 16 | 0.1230 / 1 of 41 | **0.9558 / 8 of 41** | 0.0130 / 1 | 0.0203 / 0 |
+| 6 | 16 | 0.0624 / 2 of 37 | **0.9654 / 4 of 37** | 0.0105 / 0 | pending |
+
+## 11.1 Three findings, and the second one invalidates an earlier verdict of mine
+
+**1. edf at C_inflight = 8 beats v1.2 in EVERY cell on BOTH axes.** Not narrowly: 0.999 against
+0.49 to 0.92 on dashcams at 8 devices, and 0.96 against 0.06 to 0.59 at 16. On robots, 15 to 18 of
+17 to 21 against v1.2's 1 to 4.
+
+**2. The earlier "v1.2 passes both axes at 16 devices" was measured against a CRIPPLED baseline.**
+edf at C_inflight = 4 collapses to 0.0105 to 0.0130 dashcam delivery at 16 devices, while the same
+scheduler at C_inflight = 8 delivers 0.9558 to 0.9654. **The release bound, not the policy, was
+the dominant factor in that comparison.** D128 makes 8 the default, so the correct baseline is the
+one v1.2 loses to everywhere. **I withdraw the 16-device pass**: it stands only against edf C=4 on
+seed 0, and that is not the gating baseline any more.
+
+**3. v1.2 is far less STABLE than edf, which only the extra seeds could show.** Across seeds 4, 5
+and 6, v1.2's dashcam delivery ranges 0.485 to 0.922 at 8 devices and **0.062 to 0.590 at 16**,
+a tenfold spread. edf C=8 ranges 0.9991 to 0.9993 and 0.9558 to 0.9654. **A candidate this
+seed-sensitive cannot be evaluated on seed 0 alone**, which is exactly what D129 asked these seeds
+to reveal.
+
+## 11.2 The most actionable thing I can tell session 1 tonight
+
+**Raising the in-flight release bound from 4 to 8 outperforms the entire two-timescale planner, on
+both axes, at every size and seed tested.** edf C=8 is a one-parameter change to a trivial
+scheduler. Before more structure is added to COVEX, it is worth knowing what COVEX does at a
+larger release bound, since F-A8 and F-A9 both say its problem is that it refuses work under
+predicted congestion, and C_inflight is the other lever that governs how much work is in flight.
+
+**Caveat, stated so it is not over-read:** these are dry-run numbers, and section 10 showed the dry
+screen misranks COVEX against edf on the dashcam axis at 8 devices specifically. The 16-device
+column is the trustworthy one (dry and live agree to within 0.003 for policy-core there), and that
+is where the gap is widest.
