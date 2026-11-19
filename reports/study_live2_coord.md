@@ -3506,3 +3506,70 @@ Offered as proposals only, each tied to the mechanism actually found.
 
 **Nothing above is implemented.** Step 2, Step 3 and Step 4 (including the D121 speed work and the
 v1.1-fast release) are not started, and D121 remains paused at `fa50dfc`.
+
+## V6. v1.1 fix A3 shipped, and it is a NO-OP today. Plus the static audit
+
+### V6.1 A3 as ruled, with its own flag
+
+`Flags.honour_job_priority`, DEFAULT OFF (D38). `Rollout._terminal` previously called
+`continuation_value(..., priority=False, ...)` with the value hard coded, so spec 7.3's
+promotion could not reach the value it was assigned for. It now passes
+`self.flags.honour_job_priority and j.feasibility == PRIORITY`.
+
+**It cannot change any decision in today's build, and that is measured rather than assumed.**
+`continuation_schedule` uses the flag in exactly one place,
+`cursor = t + (0.0 if priority else competing_s)`, and the rollout passes `competing_s = 0.0`. So:
+
+| competing_s | priority False | priority True | differ? |
+|---|---|---|---|
+| **0.0, what the rollout passes** | 0.035385924 | 0.035385924 | **no, at every deadline from 5.0 s to 0.9 s** |
+| 3.0, if competing work were modelled | 0.0 at a 3.0 s deadline | 0.035385924 | **yes** |
+
+A second consequence of the same zero: **the PRIORITY class is unreachable from `classify`.** Both
+of its branches are evaluated with `competing_s = 0`, so they agree; over 100 deadlines `classify`
+returned only FEASIBLE (81) and INFEASIBLE (19), never PRIORITY. The label can only be set by the
+bounded-waiting assignment at `coordinator.py:443`.
+
+**So the real lever is `competing_s = 0.0`, not the priority flag.** Passing zero means the
+continuation schedule assumes the job has the engine entirely to itself, which is why a 1.0 s
+rebuild against a 5 s deadline always "fits" and `p_finish` is pinned at 1. That is the same
+saturation V3 identified, seen from the other side. Changing `competing_s` is a methodological
+change and is NOT applied; it is the natural companion to the `p_finish` gradient already
+proposed.
+
+A3 is shipped anyway because the label should not be silently discarded, and because it becomes
+live the moment competing work is modelled.
+
+**Tests** (`policy/tests/test_v11_fixes.py`, 6 tests). Honest note on the task's "fails on v1.0,
+passes on v1.1" requirement: **a behavioural test that fails on v1.0 is impossible here**, because
+the two paths are provably identical at `competing_s = 0`. The tests that fail on v1.0 are
+therefore structural, asserting the rollout reads the job's own class and no longer hard-codes
+`priority=False`, plus a behavioural test at `competing_s = 3.0` showing the promoted job is worth
+0 without priority and its full value with it, which is the case v1.0 could never express.
+
+**Equivalence:** 48 of 48 D99 grid cells byte-identical with the flag off, policy suite 433 of 433
+(6 new), 12 frozen md5s green.
+
+### V6.2 A1 DROPPED, as ruled
+
+Recorded per the ruling: release references are already more pessimistic than A1 proposes
+(`exclude` removes the item for the whole horizon), and A1 cannot move a saturated indicator. No
+A1 code was written.
+
+### V6.3 Static audit: state the policy reads in production but never writes
+
+Method: every field declared on the `state.py` dataclasses, counted across all production files
+in `policy/` and `live2/` with tests excluded, for attribute writes, constructor keywords and
+in-place mutation. A field is flagged only if it has reads and NONE of the three.
+
+| class.field | declaration | reads | verdict |
+|---|---|---|---|
+| **`HistoryBelief.staleness_s`** | `float = 0.0` | 5 | **READ, NEVER WRITTEN, and it matters.** It feeds `utility.t_ready_s`, where `frames = staleness_s / d2_stride_s` converts it into catch-up frames, and reaches `readiness._u_rc_from_tier` and `coordinator.py:129`. Pinned at 0.0 means **the policy believes no history is ever stale and never charges catch-up work**, so every history looks readier and cheaper than it is |
+| **`Device.z`** | `Dict[str, float]` | 5 read sites | **effectively READ-NEVER-WRITTEN.** Written only at `state.py:156` inside `bump_z`, whose only caller `update_deficit` has no production caller (V1). This is issue B |
+| `Device.controller` | `Any = None` | 1 | read-never-written; the single read is a presence check, so the effect is that no controller is ever attached |
+| `HistoryBelief.unsent_frames` | `int = 0` | 1 | read-never-written |
+| `Job.p_finish` | `float = 1.0` | 2 | a DEAD field: both occurrences are documentation strings in `spec_map.py`, so nothing reads it in logic. Worth deleting or wiring, not a behaviour bug |
+
+Everything else is written, set at construction, or mutated in place. **Report only; nothing was
+changed.** The two that deserve a ruling are `staleness_s`, which silently removes a cost the
+spec charges, and `Device.z`, which is issue B.

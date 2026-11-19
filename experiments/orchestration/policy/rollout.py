@@ -19,7 +19,7 @@ import copy
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from .continuation import continuation_value, expected_remaining_work
+from .continuation import PRIORITY, continuation_value, expected_remaining_work
 from .kvpool import KVPool, prefix_id_for, survival_p_loss
 from .tiers import HostPool, TieredStore, p_host_from_occupancy
 from .engine import EngineModel, Request
@@ -528,7 +528,16 @@ class Rollout:
             acc_c = self.pf.rc_accuracy(j.qtype, j.rep, "cloud")
             acc_d = self.pf.rc_accuracy(j.qtype, "D2", "device")
             extra = float((risk or {}).get(jid, {}).get("extra_work_s", 0.0))
-            v = continuation_value(j, end, self.engine, competing_s=0.0, priority=False,
+            # D122 fix A3: value a promoted job under the class it was promoted TO. `_update_jobs`
+            # sets `job.feasibility = PRIORITY` by spec 7.3's bounded-waiting check, and before
+            # this flag that label could not reach the value it was assigned for. NOTE, measured
+            # and reported: with `competing_s = 0.0`, which is what this call passes, `priority`
+            # has no effect at all, because `continuation_schedule` uses it only as
+            # `cursor = t + (0.0 if priority else competing_s)`. So this is a no-op TODAY and
+            # becomes live the moment competing work is modelled. It is wired anyway so the label
+            # is not silently discarded.
+            prio = bool(self.flags.honour_job_priority and j.feasibility == PRIORITY)
+            v = continuation_value(j, end, self.engine, competing_s=0.0, priority=prio,
                                    omega_rc=self.pf.omega("RC"), acc_cloud=acc_c,
                                    acc_device=acc_d, z=dev.z_of("RC"), d_p_success=0.0,
                                    p_reachable=dev.link.p_reachable_within_hs,

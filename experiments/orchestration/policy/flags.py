@@ -15,6 +15,12 @@ class Flags:
     conditional_recall_rate: bool = False
     sampled_scenarios: bool = False
     closed_form_fallback: bool = False
+    # D122 v1.1 fix A3. Spec 7.3 promotes a job that would become infeasible within the next
+    # interval to the PRIORITY class, and `coordinator._update_jobs` does set
+    # `job.feasibility = PRIORITY`. But the rollout valued every job with `priority=False` hard
+    # coded, so the label could not change the value it was assigned for. With this flag the
+    # job's OWN class is passed through. DEFAULT OFF (D38).
+    honour_job_priority: bool = False
 
     ENABLING_CONDITION: Dict[str, str] = None
 
