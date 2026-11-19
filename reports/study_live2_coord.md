@@ -5628,3 +5628,69 @@ worth recording because each looked like a finding:
 lesson is the one that keeps recurring and that I failed to apply to my own aggregate: a quantity
 assembled by summing many things is not the quantity the decision uses, and it should have been
 checked against a single decision's value before any pattern was read out of it.
+
+### Step 3: one RC plan decision traced, and the estimator VALIDATED
+
+Five estimators produced plausible aggregates and all five were wrong, so the sixth is traced
+rather than trusted. One decision, every term, checkable by hand.
+
+```
+INPUTS
+  t (fleet clock)            = 39.300 s
+  deadline_abs               = 44.224 s
+  horizon_s (T_r - t)        =  5.024 s
+  decision_period_s          =  0.100 s
+  reference_total Jhat(pi_0) =  0.305918181
+
+CANDIDATE PLANS
+  plan                      gpu_s     Jhat(plan)       DeltaJ
+  ONE-GO-NOW               1.1138    0.341304105  0.035385924
+  PIECES-NOW(1024)         1.0141    0.341304105  0.035385924
+  PIECES-LATEST(1024)      1.0141    0.305918181  0.000000000
+  PIECES-NOW(2048)         0.8882    0.341304105  0.035385924
+  PIECES-LATEST(2048)      0.8882    0.305918181  0.000000000
+
+DECISION   admitted=True, chosen=PIECES-NOW(2048), DeltaJ=0.035385924270157
+
+HAND CHECK
+  Jhat(chosen) - Jhat(reference) = 0.341304105 - 0.305918181 = 0.035385924270157
+  v2 gain for CLOUD->DEVICE      = -DeltaJ                   = -0.035385924270157
+```
+
+**The arithmetic reproduces exactly, so estimator version 6 is VALIDATED for this decision.** The
+gain the v2 wrapper reports is the planner's own DeltaJ negated, with nothing assembled or summed
+in between.
+
+**AND THE TRACE CONTAINS THE RESULT DIRECTLY. Three structurally different plans score IDENTICALLY
+to nine decimal places:**
+
+| plan | gpu_s | Jhat |
+|---|---|---|
+| ONE-GO-NOW | 1.1138 | 0.341304105 |
+| PIECES-NOW(1024) | 1.0141 | 0.341304105 |
+| PIECES-NOW(2048) | **0.8882** | 0.341304105 |
+
+**A 25 per cent spread in GPU cost produces no difference in value whatsoever**, and the two
+PIECES-LATEST plans score exactly the reference, 0.000000000, so they are indistinguishable from
+not acting. **The objective cannot discriminate between RC plans.** Every "do it now" plan is worth
+the same 0.035386, and the choice among them falls entirely to the documented gpu_s tie-break,
+which is why `PIECES-NOW(2048)` wins: it is the cheapest, not the most valuable.
+
+**This corroborates the saturation found at the very start of this work from an independent
+direction.** `0.035386` is the saturated continuation value from the original robot diagnosis, and
+it is here as the entire value of admitting a recall, identical across plans and across queries. It
+is a finding about the POLICY MACHINERY, not about the harness: the planner enumerates a real
+candidate set, prices each one, and receives the same number back for all of them.
+
+### v2: REPORT, not release
+
+All ten recall gains are negative, so no deviation clears margin 0 and **v2 returns the base at
+every margin**. Under the directive the release condition is "at least as good as the base
+everywhere and better somewhere": v2 is at least as good everywhere **trivially, because it IS the
+base**, and better nowhere. **So this is reported, not released.** Shipping a release byte-identical
+to eco-llm under a COVEX name would misrepresent it.
+
+**What stands independent of the estimator:** the margin = infinity byte-identity proof, the
+four-category taxonomy, and the `deadline_s` definition hazard. **What is withdrawn:** the blindness
+finding, and with it my reversal on option 2, so the planner-horizon question is undecided rather
+than justified.
