@@ -4591,3 +4591,96 @@ should not be built on top of either reading until it is made.
 
 **Decisions this changes, flagged rather than built upon:** D126's F5b as written, and the part of
 the v1.2 design note that counts state value at T_r and defines ABANDON by it.
+
+## V27. v1.2 PRE-REGISTRATION (D125), written before the planner code
+
+### V27.1 Switches
+
+| switch | meaning | default |
+|---|---|---|
+| `Flags.planner_rc` | master: recall questions are planned, not scored per piece | OFF |
+| `Flags.plan_latest` | the PIECES(b)-LATEST plans are in the candidate set | OFF |
+| `Flags.replan` | the re-plan triggers are armed | OFF |
+| `PolicyCoreArm.kappa` | the safety factor on predicted completion | **1.0, PROVISIONAL** |
+
+v1.2 = `planner_rc` + `plan_latest` + `replan` ON, with B1, F2 and F3 ON and F1 and F4 OFF.
+
+### V27.2 kappa has NO committed source, so it is 1.0 and PROVISIONAL
+
+The note defines kappa as "the q90 ratio of measured to predicted job COMPLETION time on committed
+FIT/DEV data". **No such quantity exists in committed form.** The search is the same one F4 used:
+`eng1_step_model.json` carries per-STEP residual bands (`median_rel_res`, `p90_abs_res_ms`) over
+n = 5,974 FIT-only steps, which are step-time residuals, not predicted-against-actual JOB
+completion pairs. No HOLDOUT was touched.
+
+Per the instruction, **kappa = 1.0, labelled PROVISIONAL**, and `t_ls(b)` therefore equals the
+uninflated latest safe start. This is reported, not hidden, and the `kappa = 1` ablation in the
+note's section 3 is consequently the same as the default until a source exists.
+
+### V27.3 The plan set, the window, reservation and re-planning
+
+Plans per the note: DECLINE (the reference), WARM, RELOAD, ONE-GO-NOW, PIECES(1024)-NOW,
+PIECES(2048)-NOW, and with `plan_latest` the two LATEST variants. Only plans whose readiness
+preconditions hold are enumerated; piece sizes are the measured D17 ones.
+
+**Window.** `T_r = max(D_r, predicted plan completion) + one decision period`, so the rollout is
+run with `horizon_s = T_r - t0` instead of H.
+
+**Reservation.** A plan's units enter the evaluation as pending items carrying their planned
+release time in `due_at`. The rollout already starts an item at `max(free_at, p.due_at)`, so
+"executed at their planned times, subject to the engine" is the existing machinery rather than a
+new mechanism.
+
+**Jhat** over that window counts the SH per-instant values (D98), the recall answer's
+`omega_RC x u_RC` at `D_r`, the per-device deficit term, the state value at `T_r`, and the backlog
+at `T_r` priced by mu. `DeltaJ(plan) = Jhat(plan) - Jhat(DECLINE)`; argmax over feasible plans;
+admit only if `DeltaJ > 0`; ties keep the cheaper plan in GPU-seconds.
+
+**Re-plan** triggers (a) a unit completing later than planned so that predicted completion with
+kappa now exceeds `D_r`, (b) prefix loss on verify-on-resume, (c) a believed-readiness tier
+change. ABANDON is one option and every re-plan is logged with its cause.
+
+### V27.4 The deficit term must be routed by the planner itself
+
+F1 is OFF in v1.2 and its `_rc_opportunities` was the ONLY route that ever put RC rows into
+`_z_term`, which aggregates over `opps` and whose `_opportunity_utility` emits `task="SH"` rows
+only. **So the planner's long-window evaluation emits its own RC opportunity rows**, carrying
+`met_slo` judged at the question's own deadline. Without that the note's stated deficit term would
+read as implemented while contributing nothing, which is the failure class this whole effort
+exists to remove. A test asserts the contribution is non-zero for a planned RC job on a device
+carrying non-zero z. Measured range when routed: **0.267 to 1.800**, against a backlog charge of
+0.7 to 2.06, so it is the live channel the planner most depends on.
+
+### V27.5 OVERNIGHT DECISIONS, PROVISIONAL
+
+1. **"State value at T_r" is wired exactly as the note specifies and is INERT whenever F2 is on.**
+   Evidence: the terminal state-value sum is zero in **100 per cent** of evaluations with
+   `write_staleness` on against **28.1 per cent** with it off (V26). The term is NOT dropped and
+   NOT worked around, per the instruction. F2 is escalated for a morning ruling.
+2. **ABANDON keeps its note definition**, and its "keep the state value of what is built" basis is
+   PROVISIONAL pending that ruling. **Where the state value is inert, ABANDON reduces to declining
+   the remainder**, and it is reported that way rather than being allowed to look valued.
+3. **kappa = 1.0** as above.
+
+### V27.6 Expected effects, against the v1.0 column in absolute counts
+
+Pre-registered against v1.0 and not against edf or llf, since those figures are being reconciled.
+v1.0, dry run screening, seed 0:
+
+| n | robot questions on time | v1.2 expectation |
+|---|---|---|
+| 4 | **1 of 9** | more than 1 |
+| 8 | **0 of 20** | more than 0 |
+| 16 | 0 | more than 0 |
+| 32 | about 0.014 pooled | above it |
+
+Dashcam service must not fall below v1.0's at any size. With F1 off, v1.1 equals v1.0 on both axes
+at every size, so the planner must deliver the whole improvement itself. If robot on-time counts do
+not rise above the v1.0 column, v1.2 has not worked and I will report that rather than adjust the
+expectation.
+
+### V27.7 F5c's deliberate departure from the one-switch-per-fix rule
+
+Recorded so a later reader does not read it as an oversight: **F5c has no switch, on purpose.** It
+routes the deficit update through `Coordinator.update_deficit` with provably identical behaviour,
+**0 of 1,157 decisions differing** with B1 on, so a switch over it would be dead by construction.
