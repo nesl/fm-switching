@@ -1,0 +1,148 @@
+[
+ {
+  "proof": "base identical to b7 (seed 0, 12 devices, 600 s)",
+  "identical": true,
+  "decisions": 6569
+ },
+ {
+  "proof": "fix 1: laxity at-risk (k_r 0.5, no cap) old vs new",
+  "a": "hybrid-c1c2k05",
+  "b": "hybrid2-c1c2k05",
+  "differing": 0,
+  "absent_link": true,
+  "first": null,
+  "stats_b": {
+   "decisions": 6001
+  }
+ },
+ {
+  "proof": "fix 1: laxity at-risk (k_r 1.5, no cap) old vs new",
+  "a": "hybrid-c1c2k15",
+  "b": "hybrid2-c1c2k15",
+  "differing": 0,
+  "absent_link": true,
+  "first": null,
+  "stats_b": {
+   "decisions": 6001
+  }
+ },
+ {
+  "proof": "fix 2: dashcam-only cap old vs new",
+  "a": "hybrid-c5",
+  "b": "hybrid2-c5",
+  "differing": 6797,
+  "absent_link": false,
+  "first": {
+   "index": 303,
+   "t": 39.3,
+   "old": "defer",
+   "new": "release_recall"
+  },
+  "stats_b": {
+   "c5_dash_held": 8067,
+   "decisions": 6001
+  }
+ },
+ {
+  "proof": "v2 C2 k 0.5 under the cap",
+  "a": "hybrid2-c1c5",
+  "b": "hybrid2-c1c2k05c5",
+  "differing": 36,
+  "absent_link": false,
+  "first": {
+   "index": 131,
+   "t": 24.6,
+   "old": "release_monitor",
+   "new": "release_monitor"
+  },
+  "stats_b": {
+   "c5_dash_held": 8067,
+   "decisions": 6001
+  }
+ },
+ {
+  "proof": "v2 k_r 0.5 vs 1.5",
+  "a": "hybrid2-c1c2k05c5",
+  "b": "hybrid2-c1c2k15c5",
+  "differing": 0,
+  "absent_link": true,
+  "first": null,
+  "stats_b": {
+   "c5_dash_held": 8067,
+   "decisions": 6001
+  }
+ },
+ {
+  "proof": "v2 C3 (k 0.5)",
+  "a": "hybrid2-c1c2k05c5",
+  "b": "hybrid2-c1c2k05c3c5",
+  "differing": 3,
+  "absent_link": false,
+  "first": {
+   "index": 3461,
+   "t": 322.2,
+   "old": "decline",
+   "new": "release_recall"
+  },
+  "stats_b": {
+   "c5_dash_held": 8067,
+   "decisions": 6001,
+   "c3_recent": 2
+  }
+ },
+ {
+  "proof": "v2 C3 (k 1.5)",
+  "a": "hybrid2-c1c2k15c5",
+  "b": "hybrid2-c1c2k15c3c5",
+  "differing": 3,
+  "absent_link": false,
+  "first": {
+   "index": 3461,
+   "t": 322.2,
+   "old": "decline",
+   "new": "release_recall"
+  },
+  "stats_b": {
+   "c5_dash_held": 8067,
+   "decisions": 6001,
+   "c3_recent": 2
+  }
+ },
+ {
+  "proof": "v2 all-on vs c1c2c3c5 (C4 inert)",
+  "a": "hybrid2-c1c2k05c3c5",
+  "b": "hybrid2-all-k05",
+  "differing": 0,
+  "absent_link": true,
+  "first": null,
+  "stats_b": {
+   "c5_dash_held": 8067,
+   "decisions": 6001,
+   "c3_recent": 2
+  }
+ },
+ {
+  "proof": "v2 reserve switch (ablation)",
+  "a": "hybrid2-c1c2k05c5",
+  "b": "hybrid2-c1c2k05c5-reserve",
+  "differing": 0,
+  "absent_link": true,
+  "first": null,
+  "stats_b": {
+   "c5_dash_held": 8067,
+   "decisions": 6001
+  }
+ },
+ {
+  "proof": "v2 C1 under the dashcam cap",
+  "a": "hybrid2-c5",
+  "b": "hybrid2-c1c5",
+  "differing": 0,
+  "absent_link": true,
+  "first": null,
+  "stats_b": {
+   "c5_dash_held": 8067,
+   "decisions": 6001
+  }
+ }
+]
