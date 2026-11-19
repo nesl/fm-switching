@@ -73,11 +73,16 @@ cellv() {
   echo "$v"
 }
 commit_stage() {
-  git add $OUT $LOG experiments/orchestration/study_live2_pilot3_driver.sh 2>/dev/null
+  # the pilot's exclusivity-monitor log is appended by every server start; it is committed with the pilot so the
+  # working tree is clean and the rebase of unpushed commits can run (D116: no stash, reset or force-push)
+  git add $OUT $LOG experiments/orchestration/study_live2_pilot3_driver.sh \
+    results/orchestration/live2/pilot/pilot_monitor.jsonl 2>/dev/null
   git commit -q -m "$1" 2>&1 | tail -1
-  git pull --rebase -q 2>&1 | tail -2
-  git push -q 2>&1 | tail -1
-  log "commit: $1 ($(git rev-parse --short HEAD))"
+  local rb=$(git pull --rebase -q 2>&1 | tail -2)
+  [ -n "$rb" ] && log "rebase note: $rb"
+  local ps=$(git push -q 2>&1 | tail -1)
+  [ -n "$ps" ] && log "PUSH NOT DONE (will retry at the next stage): $ps"
+  log "commit: $1 ($(git rev-parse --short HEAD)); origin $(git rev-parse --short origin/main)"
 }
 STOPF=$OUT/STATUS
 
