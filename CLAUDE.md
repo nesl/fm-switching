@@ -44,7 +44,21 @@ For each link, fill in this table:
 
 A link whose quantity is zero, constant, or absent from the simulation means the experiment cannot test that part of the claim. Mark such a link **ABSENT** or **CONSTANT**. Any ABSENT or CONSTANT entry is a stopping condition: do not proceed to the sweep.
 
+For every link, name the **read** that consumes the implementing quantity, not merely the place it is set. Give the file and line of the code that *uses* the value to change a decision. A quantity that is written and never read is **ABSENT**, and is a stopping condition exactly as a zero or a constant is.
+
+*Motivating failure (the write-only field):* `desired_tier` was set by two actions that were dispatched by name, counted in `self.counts`, and handled by a named branch in the coordinator, so every surface sign said the mechanism was live. Across all of live2 it had three references: one declaration and two writes, and no read. `RecallAction.representation` had the same shape until `e924005`. A write-only field is non-zero, varies by arm and by condition, and is instrumentable, so it satisfies Step 2 as written while implementing no causal link at all; the Step 4 negative control also passes, because disabling the writes correctly collapses to the null.
+
 *Motivating failure (E36, E36b, E36c):* The causal chain required that refresh cost vary by representation and be charged to the accelerator budget on each turn. `EDGE_SUM200_UPDATE_MS = 5822` was defined, but `refresh_ms(fidelity, workload)` returned 0.0 for all fidelities except sum200, and sum200 was never admissible for LoCoMo (the primary workload) because `Q(sum200, locomo) = 0.12 < q_min = 0.20`. As a result the accelerator budget was never the binding resource in any LoCoMo run. The causal link "maintenance cost → accelerator constraint → admission decision" was absent. The consistency protocol never saw this because the zero was correctly and consistently zero.
+
+---
+
+**Step 2b — Confirm the switch reaches a decision.**
+
+Before scoring any A-versus-B comparison, run both conditions on one cell and diff the decision logs. Report the number of differing decisions and the first one. If the logs are identical, the comparison has not been run: the result is an **ABSENT LINK**, never a negative. Confirm also that each switch arrived at the object under test with its declared type and value, not merely that it was passed.
+
+This costs one cell and is run **before** the sweep, not after a suspicious null.
+
+*Motivating failure (five plumbing faults in three nights), every one found only after a null had been produced and nearly written up:* a `--candidate` parser turned `mu_mode=scarcity` into a literal key; `make_arm` silently discarded kwargs so `c_inflight=8` returned the default arm; a field declared `int` was coerced to `bool`, turning 2 into 1; B2's `z[RC]` reached 543.58 and no decision; RCprio never fired even at a slack threshold equal to the entire deadline.
 
 ---
 
@@ -90,7 +104,12 @@ State at least one alternative mechanism that would produce the same headline re
 **Rule 2 — Null results must be classified.** When an experiment produces a null, the report must state explicitly which of the following applies:
 
 - **Real negative:** the mechanism was present (Step 2 passed for all links, Step 4 showed the control changed the result), it operated as specified, and it did not produce the claimed effect. This is a settled finding.
-- **Inconclusive:** the mechanism was absent, unexercised, degenerate (Step 2 found an ABSENT or CONSTANT link), or outside the tested range (q_min excluded the representations that activate the mechanism). The experiment has not tested the claim. This is not a settled finding; it is a design failure.
+- **Inconclusive:** the mechanism did not operate as specified. The experiment has not tested the claim; this is not a settled finding, it is a design failure. State **which** of the following applies, because the diagnostic and the remedy differ and only the last is a finding about the policy:
+  - **cancelled by geometry** — the quantity is alive and cancels between the compared branches, so it cannot affect the difference. *(B2's deficit; spec 5.3 state value, non-zero in 96.6 percent of branches and exactly equal across them in 12,898 of 12,898 candidates.)*
+  - **unexpressible** — the mechanism fires but the harness discards the channel it acts through. *(the action `order` field; `desired_tier`.)*
+  - **unscorable** — the objective cannot see the quantity the mechanism changes. *(a 12 to 25 percent GPU-second spread moving ΔJ by zero to nine decimal places.)*
+  - **unexercised** — the mechanism is reachable but no condition in the run reaches it. *(RELOAD is offered only at HOST-WARM and no recall reached HOST-WARM; **E36, E36b and E36c were this case**.)*
+  - **fired and did not help** — the mechanism operated and produced no effect. **This is the only one that is evidence about the policy**, and it is still not a settled negative unless Step 4 showed the control changed the result.
 
 These two outcomes are not the same and must not be reported the same way.
 
@@ -113,6 +132,13 @@ For every latency, throughput, or size measurement, state the implied rate (toke
 **3. Distribution sanity.**
 Where a median is reported over multiple items, also report the spread (min, max, IQR, or all per-item values). Flag any case where values agree to more precision than the inputs vary — e.g., medians across sessions of different lengths that agree to three decimal places. Constants appearing where distributions are expected indicate short-circuiting or caching. *(Motivating failure: E32 sum200 full-regen = 8.766 s identical to three decimal places across ten conversations of differing lengths at every N.)*
 
+A constant where a distribution is expected is only the most visible of three shapes. Also flag:
+
+- **an artefact spread** — values that differ across arms by a credible margin while deriving from a quantity that cannot carry the meaning claimed. Before trusting a spread, state what the values *are* and confirm they can mean what the column says.
+- **a real effect averaged into undetectability** — a population mean below its own noise floor that conceals a large effect on a stratum. Where an effect is expected to be concentrated, report the stratum and the mixing weight beside the mean.
+
+**A constant advertises breakage; a plausible spread does not**, and an averaged-out effect reads as an equivalence, which is wrong in both directions at once. *(Motivating failures: an accuracy column spread 0.0289 to 0.2143 across arms while every cloud answer was a placeholder `"X"` that never matched a gold letter, so the spread tracked only how many questions each arm delivered on time and ranked the arms backwards; and a +1.18 pp population gap with a CI including zero concealed +17.5 pp on the 11.5 percent stratum where the recent window misses the evidence.)*
+
 **4. Definition audit.**
 For every named object the experiment uses (win-10, sum-200, full, a "turn", a "session", reachability), state the concrete definition used in this run — token counts, unit of measurement, threshold values — and verify it matches the definition used in prior committed experiments. Report any name used with two different definitions across experiments. *(Motivating failure: E30 defined win-10 as 400 tokens; E32 measured win-10 as 7,117 tokens — same name, 17× different token counts, no reconciliation.)*
 
@@ -121,6 +147,9 @@ State which claim in `research/CLAIMS.md` and `research/FORMULATION.md` each hea
 
 **6. Proxy validity.**
 Where a signal is used as a proxy for something else (an application state used as a network state, a caption count used as a turn count), state the proxy explicitly, state what it actually measures, and state whether it is valid for the claim. If the proxy is known to be questionable, it may not be used for a headline conclusion; report it as a limitation and mark the affected analysis as unvalidated. *(Motivating failure: E31 Part C derived reachability from State=D/I, an application download-activity flag, not a radio link state; the report noted the proxy was questionable and used it anyway for the headline predictability analysis.)*
+
+**7. Validate the control, not only the result.**
+In any before/after or arm-versus-baseline comparison, cross-check the **control** arm's own numbers against its committed values before reading the comparison. A broken control passes every check applied to the treatment, because the treatment is fine. Include a **positive control**: a known-good committed arm must pass the check being applied. If it fails, **the check is broken, not the arm**. An impossible failure and an impossible success are equally diagnostic, and a reviewer watching only for implausible *results* will catch neither. *(Motivating failures: a before-condition gave dashcam 0.0821 and 0 recalls against that arm's committed 0.8164 and 14 of 35 — a "before" condition that destroys the arm is not a before condition — and it was caught by the magnitude, not the method, so a subtler break would have passed; and a legality pass reported 2,834 to 3,000 illegal actions for every arm including the committed `b7` control, which cannot be illegal.)* **The general shape:** a comparator planning at one price while charged another, and a broken control arm, are the same blindness — a side of the comparison that is never audited. Arm-versus-arm checking cannot see either, because every arm is compared against the same unexamined bar.
 
 ---
 
@@ -241,6 +270,8 @@ Existing JSONs written before this convention was adopted carry `"git_commit": "
 ---
 
 ## Citing results
+
+- **Mark the register at the point of use**, not only where a number is derived: **observed count** against **constructed bound**; **applied locally** against **pushed and verified on origin**; **one traced unit** against **a full table**. A number in the wrong register is not a wrong computation and will survive every arithmetic check. *(Motivating failures: a worst-case construction reported as a census; "committed to `coordinator.py`" meaning written into the file and read as git-committed and pushed, which unblocked a session against a change that was not on origin; and a single category's delta generalised to a direction, when across all eight categories the cheaper representation was better on four, led by `location_trace` at +17.2 pp.)*
 
 - **Before citing any result, check its status in `research/EXPERIMENTS.md`.**
 - **Never cite or recompute from a result marked INVALID.**
