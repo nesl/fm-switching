@@ -1,5 +1,20 @@
 # FM-switching — Project Status
 
+Last updated: 2026-11-19 (later 4) (**StudySS1 DEVICE PASS COMPLETE (Jetson Orin, Qwen3-VL-4B under
+vLLM, StudyORIN3 config, real inference; D136): the single-shot dataset-selection benchmark kit is
+built and the device 4B side is measured on both full sets, 0 errors on 5,019 questions. VizWiz-VQA
+val (4,319) VQA accuracy 0.659 [0.645, 0.672] (answerable-only 0.575; unanswerable 0.837, yes/no
+0.813, number 0.654, other 0.556); EgoThink (700) containment match 0.471 [0.434, 0.507]
+(Localization 0.75, Object 0.64, Reasoning 0.49, Forecasting 0.45, Activity 0.32, Planning 0.09, the
+last a strict-match floor on long answers). TTFT p50 0.86 s (VizWiz) / 1.47 s (EgoThink); full run
+113 min, under the 6 h gate. Licences cleared (VizWiz CC BY 4.0, EgoThink Apache-2.0). Per the user
+disk ruling Mistral-7B was NOT downloaded: the EgoThink open-judge (scorer a) is DEFERRED to flash
+(Mistral judge on EgoThink plus OpenEQA), and the H100 runs the identical kit with the 32B so the
+device-vs-cloud gap and the SS qualification verdict are decided later; NO dataset is qualified yet.
+Serve deviations recorded (gpu_mem_util 0.22, max_model_len 8192 after clearing a 29 GiB orphaned
+engine core; FLASHINFER_DISABLE_VERSION_CHECK=1 with FLASH_ATTN). Free disk flat (no download).
+Report `reports/study_ss1.md`; kit `experiments/casestudy/ss1_*.py`; data `results/casestudy/study_ss1/`.**)
+
 Last updated: 2026-11-19 (later 3) (**StudyACC2 COMPLETE (H100): history help not detectable above 19.4k tokens; committed RECENT and D2 quality tables overstate live2's formats, reports/study_acc2.md.** **StudyAOI-spacing COMPLETE (Jetson Orin, CPU only, offline,
 committed data only): THE SPACING OF CLOUD CHECKS DOES NOT MATTER at a fixed cloud-served budget on
 the Nexar metric, so the per-instant opportunity model needs no age-of-information spacing term. At

@@ -1,0 +1,71 @@
+{
+ "study": "StudySS1",
+ "built_by": "experiments/casestudy/ss1_build_manifests.py",
+ "seed": 0,
+ "data_root_runtime": "/dev/shm/ss1_data",
+ "licences": {
+  "vizwiz_vqa": "CC BY 4.0 (Gurari et al., CVPR 2018)",
+  "egothink": "Apache-2.0 (Cheng et al., CVPR 2024); images bundled in the HF dataset EgoThink/EgoThink, sourced from Ego4D (acknowledged)"
+ },
+ "vizwiz": {
+  "n": 4319,
+  "by_answer_type": {
+   "unanswerable": 1385,
+   "other": 2691,
+   "yes/no": 195,
+   "number": 48
+  },
+  "n_answerable": 2934
+ },
+ "egothink": {
+  "n": 700,
+  "by_dimension": {
+   "Activity": 100,
+   "Forecasting": 100,
+   "Localization_location": 50,
+   "Localization_spatial": 50,
+   "Object_affordance": 50,
+   "Object_attribute": 50,
+   "Object_existence": 50,
+   "Planning_assistance": 50,
+   "Planning_navigation": 50,
+   "Reasoning_comparing": 50,
+   "Reasoning_counting": 50,
+   "Reasoning_situated": 50
+  },
+  "by_area": {
+   "Activity": 100,
+   "Forecasting": 100,
+   "Localization": 100,
+   "Object": 150,
+   "Planning": 100,
+   "Reasoning": 150
+  },
+  "n_multi_image_or_temporal_excluded": 0
+ },
+ "vizwiz_val_size_note": "official VQA 2020 val split = 4,319 image/question pairs; the StudySS1 prompt's 3,173 is the 2018 paper split and is a corrected discrepancy (user ruling 2026-11-19)",
+ "vizwiz_quality_flags": "the VQA val release carries answer_type and answerable only; the blur/framing/obstruction image-quality flags live in the separate VizWiz image-quality dataset and are NOT joined here (PROVISIONAL: pilot stratified by answer_type; quality-flag stratification deferred as the join is a separate download with uncertain overlap)",
+ "pilot": {
+  "n": 300,
+  "vizwiz_allocation": {
+   "number": 3,
+   "other": 187,
+   "unanswerable": 96,
+   "yes/no": 14
+  },
+  "egothink_allocation": {
+   "Activity": 43,
+   "Forecasting": 43,
+   "Localization_location": 22,
+   "Localization_spatial": 22,
+   "Object_affordance": 22,
+   "Object_attribute": 22,
+   "Object_existence": 21,
+   "Planning_assistance": 21,
+   "Planning_navigation": 21,
+   "Reasoning_comparing": 21,
+   "Reasoning_counting": 21,
+   "Reasoning_situated": 21
+  }
+ }
+}

@@ -1,0 +1,238 @@
+{
+ "study": "StudySS1",
+ "dataset": "egothink",
+ "tier": "device",
+ "model": "qwen3vl4b",
+ "n": 700,
+ "n_scored": 700,
+ "n_errors": 0,
+ "caching": "vLLM prefix caching on; distinct image+question per request so no warm reuse; per-request cache_salt=qid; cold single-shot",
+ "decoding": "greedy temperature=0 seed=0 one-at-a-time",
+ "timing": {
+  "ttft_s": {
+   "p50": 1.4689101888798177,
+   "p90": 1.9897225421853364,
+   "mean": 1.4838543715434416
+  },
+  "total_s": {
+   "p50": 1.531413844320923,
+   "p90": 2.21658920571208
+  },
+  "prompt_tokens_mean": 2110.1,
+  "completion_tokens_mean": 3.3985714285714286
+ },
+ "overall": {
+  "containment": {
+   "n": 700,
+   "mean": 0.4714285714285714,
+   "ci": [
+    0.4342857142857143,
+    0.5071428571428571
+   ]
+  }
+ },
+ "by_stratum": {
+  "dimension": {
+   "Activity": {
+    "containment": {
+     "n": 100,
+     "mean": 0.32,
+     "ci": [
+      0.23,
+      0.41
+     ]
+    },
+    "judge_rating": null
+   },
+   "Forecasting": {
+    "containment": {
+     "n": 100,
+     "mean": 0.45,
+     "ci": [
+      0.36,
+      0.55
+     ]
+    },
+    "judge_rating": null
+   },
+   "Localization_location": {
+    "containment": {
+     "n": 50,
+     "mean": 0.76,
+     "ci": [
+      0.64,
+      0.86
+     ]
+    },
+    "judge_rating": null
+   },
+   "Localization_spatial": {
+    "containment": {
+     "n": 50,
+     "mean": 0.74,
+     "ci": [
+      0.62,
+      0.86
+     ]
+    },
+    "judge_rating": null
+   },
+   "Object_affordance": {
+    "containment": {
+     "n": 50,
+     "mean": 0.44,
+     "ci": [
+      0.3,
+      0.58
+     ]
+    },
+    "judge_rating": null
+   },
+   "Object_attribute": {
+    "containment": {
+     "n": 50,
+     "mean": 0.76,
+     "ci": [
+      0.64,
+      0.88
+     ]
+    },
+    "judge_rating": null
+   },
+   "Object_existence": {
+    "containment": {
+     "n": 50,
+     "mean": 0.72,
+     "ci": [
+      0.6,
+      0.84
+     ]
+    },
+    "judge_rating": null
+   },
+   "Planning_assistance": {
+    "containment": {
+     "n": 50,
+     "mean": 0.06,
+     "ci": [
+      0.0,
+      0.14
+     ]
+    },
+    "judge_rating": null
+   },
+   "Planning_navigation": {
+    "containment": {
+     "n": 50,
+     "mean": 0.12,
+     "ci": [
+      0.04,
+      0.22
+     ]
+    },
+    "judge_rating": null
+   },
+   "Reasoning_comparing": {
+    "containment": {
+     "n": 50,
+     "mean": 0.62,
+     "ci": [
+      0.48,
+      0.76
+     ]
+    },
+    "judge_rating": null
+   },
+   "Reasoning_counting": {
+    "containment": {
+     "n": 50,
+     "mean": 0.14,
+     "ci": [
+      0.06,
+      0.24
+     ]
+    },
+    "judge_rating": null
+   },
+   "Reasoning_situated": {
+    "containment": {
+     "n": 50,
+     "mean": 0.7,
+     "ci": [
+      0.58,
+      0.82
+     ]
+    },
+    "judge_rating": null
+   }
+  },
+  "area": {
+   "Activity": {
+    "containment": {
+     "n": 100,
+     "mean": 0.32,
+     "ci": [
+      0.23,
+      0.41
+     ]
+    },
+    "judge_rating": null
+   },
+   "Forecasting": {
+    "containment": {
+     "n": 100,
+     "mean": 0.45,
+     "ci": [
+      0.36,
+      0.55
+     ]
+    },
+    "judge_rating": null
+   },
+   "Localization": {
+    "containment": {
+     "n": 100,
+     "mean": 0.75,
+     "ci": [
+      0.66,
+      0.83
+     ]
+    },
+    "judge_rating": null
+   },
+   "Object": {
+    "containment": {
+     "n": 150,
+     "mean": 0.64,
+     "ci": [
+      0.5666666666666667,
+      0.7133333333333334
+     ]
+    },
+    "judge_rating": null
+   },
+   "Planning": {
+    "containment": {
+     "n": 100,
+     "mean": 0.09,
+     "ci": [
+      0.04,
+      0.15
+     ]
+    },
+    "judge_rating": null
+   },
+   "Reasoning": {
+    "containment": {
+     "n": 150,
+     "mean": 0.4866666666666667,
+     "ci": [
+      0.4066666666666667,
+      0.5666666666666667
+     ]
+    },
+    "judge_rating": null
+   }
+  }
+ }
+}

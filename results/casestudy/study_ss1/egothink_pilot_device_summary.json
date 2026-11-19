@@ -1,0 +1,238 @@
+{
+ "study": "StudySS1",
+ "dataset": "egothink",
+ "tier": "device",
+ "model": "qwen3vl4b",
+ "n": 300,
+ "n_scored": 300,
+ "n_errors": 0,
+ "caching": "vLLM prefix caching on; distinct image+question per request so no warm reuse; per-request cache_salt=qid; cold single-shot",
+ "decoding": "greedy temperature=0 seed=0 one-at-a-time",
+ "timing": {
+  "ttft_s": {
+   "p50": 1.475699586328119,
+   "p90": 1.9972615509293974,
+   "mean": 1.52862946273759
+  },
+  "total_s": {
+   "p50": 1.5939146848395467,
+   "p90": 2.226491891220212
+  },
+  "prompt_tokens_mean": 2159.8166666666666,
+  "completion_tokens_mean": 3.4833333333333334
+ },
+ "overall": {
+  "containment": {
+   "n": 300,
+   "mean": 0.4166666666666667,
+   "ci": [
+    0.36,
+    0.47333333333333333
+   ]
+  }
+ },
+ "by_stratum": {
+  "dimension": {
+   "Activity": {
+    "containment": {
+     "n": 43,
+     "mean": 0.23255813953488372,
+     "ci": [
+      0.11627906976744186,
+      0.37209302325581395
+     ]
+    },
+    "judge_rating": null
+   },
+   "Forecasting": {
+    "containment": {
+     "n": 43,
+     "mean": 0.3953488372093023,
+     "ci": [
+      0.2558139534883721,
+      0.5348837209302325
+     ]
+    },
+    "judge_rating": null
+   },
+   "Localization_location": {
+    "containment": {
+     "n": 22,
+     "mean": 0.7272727272727273,
+     "ci": [
+      0.5454545454545454,
+      0.9090909090909091
+     ]
+    },
+    "judge_rating": null
+   },
+   "Localization_spatial": {
+    "containment": {
+     "n": 22,
+     "mean": 0.7727272727272727,
+     "ci": [
+      0.5909090909090909,
+      0.9545454545454546
+     ]
+    },
+    "judge_rating": null
+   },
+   "Object_affordance": {
+    "containment": {
+     "n": 22,
+     "mean": 0.4090909090909091,
+     "ci": [
+      0.22727272727272727,
+      0.6363636363636364
+     ]
+    },
+    "judge_rating": null
+   },
+   "Object_attribute": {
+    "containment": {
+     "n": 22,
+     "mean": 0.5909090909090909,
+     "ci": [
+      0.36363636363636365,
+      0.7727272727272727
+     ]
+    },
+    "judge_rating": null
+   },
+   "Object_existence": {
+    "containment": {
+     "n": 21,
+     "mean": 0.6666666666666666,
+     "ci": [
+      0.47619047619047616,
+      0.8571428571428571
+     ]
+    },
+    "judge_rating": null
+   },
+   "Planning_assistance": {
+    "containment": {
+     "n": 21,
+     "mean": 0.0,
+     "ci": [
+      0.0,
+      0.0
+     ]
+    },
+    "judge_rating": null
+   },
+   "Planning_navigation": {
+    "containment": {
+     "n": 21,
+     "mean": 0.09523809523809523,
+     "ci": [
+      0.0,
+      0.23809523809523808
+     ]
+    },
+    "judge_rating": null
+   },
+   "Reasoning_comparing": {
+    "containment": {
+     "n": 21,
+     "mean": 0.5714285714285714,
+     "ci": [
+      0.3797619047619048,
+      0.7619047619047619
+     ]
+    },
+    "judge_rating": null
+   },
+   "Reasoning_counting": {
+    "containment": {
+     "n": 21,
+     "mean": 0.09523809523809523,
+     "ci": [
+      0.0,
+      0.23809523809523808
+     ]
+    },
+    "judge_rating": null
+   },
+   "Reasoning_situated": {
+    "containment": {
+     "n": 21,
+     "mean": 0.6190476190476191,
+     "ci": [
+      0.4273809523809524,
+      0.8095238095238095
+     ]
+    },
+    "judge_rating": null
+   }
+  },
+  "area": {
+   "Activity": {
+    "containment": {
+     "n": 43,
+     "mean": 0.23255813953488372,
+     "ci": [
+      0.11627906976744186,
+      0.37209302325581395
+     ]
+    },
+    "judge_rating": null
+   },
+   "Forecasting": {
+    "containment": {
+     "n": 43,
+     "mean": 0.3953488372093023,
+     "ci": [
+      0.2558139534883721,
+      0.5348837209302325
+     ]
+    },
+    "judge_rating": null
+   },
+   "Localization": {
+    "containment": {
+     "n": 44,
+     "mean": 0.75,
+     "ci": [
+      0.6363636363636364,
+      0.8636363636363636
+     ]
+    },
+    "judge_rating": null
+   },
+   "Object": {
+    "containment": {
+     "n": 65,
+     "mean": 0.5538461538461539,
+     "ci": [
+      0.4457692307692308,
+      0.676923076923077
+     ]
+    },
+    "judge_rating": null
+   },
+   "Planning": {
+    "containment": {
+     "n": 42,
+     "mean": 0.047619047619047616,
+     "ci": [
+      0.0,
+      0.11904761904761904
+     ]
+    },
+    "judge_rating": null
+   },
+   "Reasoning": {
+    "containment": {
+     "n": 63,
+     "mean": 0.42857142857142855,
+     "ci": [
+      0.31706349206349205,
+      0.5396825396825397
+     ]
+    },
+    "judge_rating": null
+   }
+  }
+ }
+}

@@ -1,0 +1,78 @@
+{
+ "study": "StudySS1",
+ "dataset": "vizwiz",
+ "tier": "device",
+ "model": "qwen3vl4b",
+ "n": 300,
+ "n_scored": 300,
+ "n_errors": 0,
+ "caching": "vLLM prefix caching on; distinct image+question per request so no warm reuse; per-request cache_salt=qid; cold single-shot",
+ "decoding": "greedy temperature=0 seed=0 one-at-a-time",
+ "timing": {
+  "ttft_s": {
+   "p50": 1.394789723213762,
+   "p90": 1.429136527888477,
+   "mean": 1.1288834746927023
+  },
+  "total_s": {
+   "p50": 1.462460108101368,
+   "p90": 1.7642933414317683
+  },
+  "prompt_tokens_mean": 1598.91,
+  "completion_tokens_mean": 3.9433333333333334
+ },
+ "overall": {
+  "vqa_accuracy": {
+   "n": 300,
+   "mean": 0.639,
+   "ci": [
+    0.5886583333333334,
+    0.6886666666666665
+   ]
+  },
+  "vqa_accuracy_answerable_only": {
+   "n": 204,
+   "mean": 0.5593137254901961,
+   "ci": [
+    0.5044117647058823,
+    0.6196323529411764
+   ]
+  }
+ },
+ "by_stratum": {
+  "answer_type": {
+   "number": {
+    "n": 3,
+    "mean": 0.6666666666666666,
+    "ci": [
+     0.0,
+     1.0
+    ]
+   },
+   "other": {
+    "n": 187,
+    "mean": 0.5363636363636364,
+    "ci": [
+     0.4770053475935828,
+     0.5973395721925132
+    ]
+   },
+   "unanswerable": {
+    "n": 96,
+    "mean": 0.8083333333333332,
+    "ci": [
+     0.7302083333333332,
+     0.8833333333333333
+    ]
+   },
+   "yes/no": {
+    "n": 14,
+    "mean": 0.8428571428571429,
+    "ci": [
+     0.6571428571428571,
+     0.9928571428571429
+    ]
+   }
+  }
+ }
+}
