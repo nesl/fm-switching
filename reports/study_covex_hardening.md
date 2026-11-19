@@ -2006,7 +2006,35 @@ bookkeeping fields (`arm`, `arm_version`, `note`, `mu`, `belief`, `predicted`,
 `decision_latency_ms`) removed, so two arms land in one class only if they took the same decisions
 in the same order. Seed 4, from the already-measured D131 and published runs.
 
-## 23.1 The collapse is REAL, LARGER THAN TWO ARMS, and SIZE-DEPENDENT
+## 23.0 RECONCILED WITH SESSION 3 (`b163a3e`), and the reconciliation is the real finding
+
+Session 3 hashed each arm's **canonical decision objects** and found mooncake and b7 **genuinely
+distinct** at both sizes. I hashed the **logged** decisions and found them identical. Both are
+correct and they do not conflict, because of what session 3 also found: **`live2/coordinator.py`
+contains ZERO references to the action `order` field**, and `order` is not present in
+`decision.jsonl` either (I checked: the record's fields are H, arm, arm_version, belief,
+cost_model_id, decision_id, decision_latency_ms, defer_s, kind, mu, note, opportunity_ids,
+piece_tokens, predicted, t, traffic_mix).
+
+So the two arms differ in what they INTEND and not in what the harness EXECUTES. Mine is the
+operative reading for every delivery number in this report; session 3's is the operative reading
+for what the two published systems actually are.
+
+**The harness gap, stated plainly because it bounds the whole published comparison: any two
+adapted arms whose scheduling discipline is expressed only through `order` are indistinguishable
+in live2 BY CONSTRUCTION.** That is an expressiveness limitation of our harness, not a porting
+artefact, and it caps what the published-field bar can ever demonstrate. It also means a covex-v2
+deviation class expressible only through `order` would fire and change nothing, which would read
+as a weak mechanism when it is an unexpressible one. That distinction is now in my deviation audit.
+
+**My 23.1 classes below are therefore classes of EXECUTED behaviour.** Session 3's cardinality is
+the one to quote for independence of the published systems: at seed 4 and 8 devices, excluding
+`order`, 20 arms give 16 distinct sequences, and **the twelve in-scope arms supply ELEVEN
+independent behaviours at that cell**. The collapses are regime-dependent, so a cardinality
+without a size attached is meaningless. `eco-llm` is a singleton in every grouping at both sizes,
+so my section 23.3 recommendation rests on an independent arm.
+
+## 23.1 The collapse in EXECUTED behaviour is LARGER THAN TWO ARMS, and SIZE-DEPENDENT
 
 **At 16 devices, 19 published arms reduce to 14 distinct behaviours:**
 
@@ -2052,7 +2080,9 @@ mooncake lead it only on dashcam, and section 20 established that dashcam is `D+
 every size in the band, so **dashcam does not affect the conjunct at all**. Choosing a base on
 dashcam would be optimising the half of the objective that is already satisfied.
 
-**Recommendation: covex-v2's base should be `eco-llm`.** Two caveats stated honestly:
+**Recommendation: covex-v2's base should be `eco-llm`.** Session 3's independent grouping
+strengthens this: eco-llm is a SINGLETON at both sizes, so the recommendation does not rest on an
+arm that duplicates another. Two caveats stated honestly:
 
 1. **The margin is small**, 10 cells against 9, and the robot gaps are 0.047 at 16 devices and
    0.063 at 32. It is a consistent direction rather than a decisive one.
@@ -2064,3 +2094,29 @@ If session 1 prefers b7 for a reason outside these numbers, the cost is about on
 and roughly 0.05 of robot fraction above 14 devices, and it should pick it knowing that rather
 than on the assumption that b7 and eco-llm are equivalent. **They are not equivalent at 16 devices;
 they are only equivalent at 8.**
+
+# 24. RCprio IS AN ABSENT LINK, re-run with the E7 cast fixed
+
+Session 1 is waiting on this before reporting any conversion comparison, so it is reported on its
+own. 16 devices, seed 0, `covex-v13`, base against RCprio, after the E7 fix that stopped
+`rc_priority_keep_monitors` being coerced from 2 to `True`.
+
+| pair | decisions A | decisions B | differing | switch moved |
+|---|---|---|---|---|
+| base vs `rc_priority_slack_s=1.0, keep_monitors=2` | 8,120 | 8,120 | **0** | **False** |
+| base vs `rc_priority_slack_s=5.0, keep_monitors=0` | 8,120 | 8,120 | **0** | **False** |
+
+Both settings verified to reach the arm as real values after the fix: `rc_priority_slack_s = 1.0`
+as a float and `rc_priority_keep_monitors = 2` as an int. `rc_priority_epochs` never appears in
+either condition's `stats`, so the branch at `arms_policy.py:811` does not fire even with a slack
+threshold of 5.0 s, which is the entire recall deadline and should admit every urgent recall there
+is.
+
+**Classification: ABSENT LINK, not a negative.** Session 1's own suspicion that it could not
+confirm `RCprio` fires is confirmed from the decision side. **No base-against-RCprio comparison
+may be reported as a conversion result** until the branch is reached. A null here would be an
+artefact of the switch never moving.
+
+This is the second absent link of the night after B2 and the fifth switch-plumbing fault in three
+nights, counting my own E7. The pattern is consistent enough that `switch_moves.py` should run on
+every new switch before it is scored, not after a suspicious null.
