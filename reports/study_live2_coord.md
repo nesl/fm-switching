@@ -3152,3 +3152,191 @@ serving them late.
    engine behaviour in F3 is read from source, not measured. Whether priority scheduling helps or
    thrashes under preemption is open and needs the H100.
 4. Neither arm is in any run plan, so neither has a scored outcome of any kind.
+
+---
+
+# Robot service diagnosis: why policy-core does not serve robot questions
+
+Flash, CPU only, 2026-11-18, dry run. **Diagnosis only: no policy code was changed.** Everything
+was instrumented through wrappers installed for the length of one run and removed afterwards.
+
+## G1. Reproduction status: the dry run reproduces the pilot exactly
+
+| cell | H100 pilot, on time within 5 s | flash dry run, released before deadline |
+|---|---|---|
+| 4 devices, 9 robot questions | **1 of 9** | **1 of 9** |
+| 8 devices, 20 robot questions | **0 of 20** | **0 of 20** |
+
+Settings match the pilot: seed 0, 50 : 50, mode A, 600 s, D101 join, mu EWMA, H = 0.5 s, pol4,
+tight memory (`GPU_KV`, `HOST_GIB`), `cap_k` None. Because the dry run reproduces the pattern, the
+cause can be read off flash and no H100 log is needed.
+
+## G2. The arithmetic behind every failure
+
+**The only positive credit a robot question ever receives is a continuation value of exactly
+`+0.03539`**, and it is the SAME constant for a 5,341-token history and a 20,101-token one.
+Against it the backlog term charges `-mu x (busy increase)` with mu EWMA sitting at **1.44 to
+1.57** and a rebuild adding **0.44 to 1.37 s** of engine busy time, which is **-0.66 to -2.06**.
+
+The credit is one to two orders of magnitude too small to pay for the work. Two consequences
+follow, and every one of the 29 questions lands in one of them.
+
+### Failure mode A: declined at admission (4 of 9 at n = 4, 18 of 20 at n = 8)
+
+The admit's `delta_j` is at or below zero, so the question is never admitted at all. The observed
+admit values cluster at `-0.1027`, `-0.0555`, `-0.0848` and, for the larger histories, `-1.30`,
+`-1.34`, `-1.39`, `-3.07`. In every case `u_hat = 0` and `z = 0`, and the `+0.03539` continuation
+credit is swamped by the backlog term.
+
+**This is the dominant mode at 8 devices**, which is exactly why the pilot's break is at 8: more
+dashcams means more engine busy time, so the same constant credit buys less.
+
+### Failure mode B: admitted, then every release scores EXACTLY zero (4 of 9 at n = 4, 1 of 20 at n = 8)
+
+The question IS admitted, at `delta_j = +0.03539`, and then its rebuild pieces are offered for
+release 183 to 370 times and **every single evaluation returns `delta_j` exactly 0.0**, with
+`u_hat`, `z` and `terminal` all exactly zero. Release requires `delta_j > 0` strictly, so a
+candidate worth exactly 0 is declined, forever.
+
+| at 4 devices | rc_piece release candidates | `delta_j` exactly 0 | `< 0` | `> 0` |
+|---|---|---|---|---|
+| | 967 | **699 (72.3 %)** | 266 (27.5 %) | 2 (0.2 %) |
+| at 8 devices | 406 | **268 (66.0 %)** | 132 | 6 |
+
+**Why exactly zero.** With H = 0.5 s the rebuild piece cannot even START inside the horizon: the
+engine is occupied by dashcam instants, so in BOTH branches of the piece's own counterfactual the
+item is skipped for want of a start time, and the two rollouts are identical. `busy_delta` is
+non-zero in only 118 of 967 candidates, confirming the item was served in neither branch in the
+other 849. The result is a self-fulfilling prophecy: the piece is never released because the
+horizon is too short to see any effect of releasing it, and the horizon never advances it because
+it is never released.
+
+**This is NOT the mechanism the task hypothesised for C1.** C1 anticipated `delta_j < 0` because
+harm to many SH instants outweighs `omega_RC x gain`. What actually happens in mode B is
+`delta_j == 0` because the payoff lies entirely outside H, and the strict inequality then
+declines it. The distinction matters, because the remedies differ.
+
+## G3. One question worked fully: opp0000187, 4 devices
+
+| step | value |
+|---|---|
+| arrival | t = 66.11 s, deadline 71.11 s (5.0 s) |
+| history | 7,771 tokens, believed readiness COLD, built prefix 0 |
+| piece plan | 4 pieces of 2,048 tokens (`robo000:RICH:66.200:p0` to `p3`) |
+| predicted rebuild, policy model | 1.783 s, and the job is marked **FEASIBLE** |
+| predicted rebuild, committed curve | 1.727 s, so the model agrees to 1.03x and the question IS feasible in 5 s |
+| admit evaluation | `delta_j = +0.03539` = `u_hat 0` + `z 0` + `terminal +0.03539`, all of it continuation value. ADMITTED |
+| release evaluations | 208 of them, of which **160 returned exactly 0.0** and none was positive |
+| deficit in force | `Z(robo000, RC) = 0.0` at every evaluation |
+| mu in force | 1.503 |
+| outcome | never released; the device's own answer stands |
+
+A second trace from inside the same question shows the counterfactual inverted, which is the
+clearest single piece of evidence: for the `PROMOTE_REBUILD` state action, the ACTION branch
+recorded `progress = {}` while the REFERENCE branch recorded `progress = {robo000:RICH:66.200: 2}`.
+The explicit rebuild (6,781 tokens in one item, 0.43 s of busy) **displaces the two pieces that
+pi_0 would otherwise have served inside the horizon**, so the action looks strictly worse than
+doing nothing: action terminal `-0.589` against reference `+0.045`, giving `delta_j = -0.634`.
+**The reference branch assumes pi_0 continues the rebuild for free, while in the real run nothing
+ever releases those pieces.** The counterfactual is being scored against work the system will
+never actually do.
+
+## G4. Cause classification, with counts
+
+| cause | 4 devices | 8 devices | evidence |
+|---|---|---|---|
+| **C1, declined at admission** (continuation credit swamped by the backlog term) | 4 | 18 | admit `delta_j` from -0.0555 to -3.07 with `u_hat = z = 0` |
+| **C1-zero, admitted then every release scores exactly 0** | 4 | 1 | 699 of 967 and 268 of 406 release candidates at exactly 0.0 |
+| released but after the deadline | 0 | 1 | opp0002117: 36 release candidates, 6 positive, served late |
+| served on time | 1 | 0 | opp0001376, the only question whose admit carried `u_hat = +0.0826` rather than continuation value alone |
+| **C2, weak SLO pressure: CONFIRMED and absolute** | both | both | `Z(i, RC) = 0.000000` at **all 10,276 and 21,355 samples**, and `Z(i, SH) = 0` too |
+| **C3, cost-model over-prediction: RULED OUT** | both | both | the policy model agrees with the committed curve to **0.85x to 1.05x** across all nine histories and marks every one FEASIBLE within 5 s |
+| C4, granularity: ruled out | both | both | pieces of 2,048 tokens, a four-piece chain of about 1.8 s against a 5 s deadline |
+| C5, bug: none found | | | the recall path IS offered (one admit candidate per question), history tokens are post-fix correct, readiness and deadlines read correctly |
+
+**The one question served on time is the tell.** opp0001376 is the only one whose admit was
+justified by `u_hat = +0.0826`, real utility visible inside the horizon, rather than by the
+`+0.03539` continuation constant. Every question that depended on the continuation credit alone
+failed.
+
+### C3 ruled out with numbers
+
+| history tokens | policy model | committed curve | ratio | feasible in 5 s |
+|---|---|---|---|---|
+| 5,341 | 1.118 s | 1.187 s | 0.94x | both yes |
+| 7,771 | 1.783 s | 1.727 s | 1.03x | both yes |
+| 12,091 | 2.642 s | 2.687 s | 0.98x | both yes |
+| 20,101 | 4.510 s | 5.290 s | 0.85x | model yes, committed NO |
+
+There is no over-prediction here. If anything the model UNDER-predicts the largest history, which
+is the opposite of the D60 concern. Eight of the nine questions are feasible on the committed
+curve too, so feasibility is not what gave up.
+
+## G5. An instrumentation error I made and corrected
+
+My first pass found **zero** release candidates for robot devices and I was one step from
+reporting that the pieces are never offered for release, which would have been a fabricated C5
+bug. The cause was my own filter: a `release` action carries `item_id`, not `items`, so the
+device was invisible and every release candidate was silently excluded. After resolving the target
+through `fleet.pending` and `fleet.in_flight`, 968 release candidates appeared at 4 devices and
+406 at 8. **The absence was in my instrumentation, not in the policy.** It is recorded because an
+absence created by a filter looks exactly like a finding.
+
+## G6. Options. NOTHING WAS CHANGED
+
+For C1 and C2 the task says to list options and not act. Each is a policy-version change after
+the pilot (D79) and the user decides.
+
+1. **Pooled deficit counters, matching D82.** The robot target is POOLED across devices while
+   `Device.z` is PER DEVICE, and each robot device sees only about four questions in 600 s, so
+   `bump_z` never accumulates and `Z(i, RC)` stayed at exactly 0 for the entire run at both
+   sizes. A pooled counter would let robot misses build pressure across the fleet. This is the
+   most direct fit to the measured cause and it addresses C2 at its root.
+2. **Credit incremental rebuild progress inside the horizon.** Mode B exists because a piece that
+   cannot start within H = 0.5 s produces an identical rollout in both branches. Crediting
+   partial progress toward the continuation value, or scoring the rebuild chain as one unit
+   rather than per piece, would make the release visible to the objective. Note this interacts
+   with the inverted counterfactual in G3.
+3. **Lengthen H for recall candidates**, so a multi-second rebuild falls inside the horizon it is
+   judged in. H = 0.5 s is shorter than every rebuild in this trace (1.1 s to 4.5 s).
+4. **A calibrated `omega_RC`, or a continuation value that scales with the work.** The credit is
+   the same `+0.03539` for a 5,341-token and a 20,101-token history, so the objective cannot tell
+   a cheap rebuild from an expensive one.
+5. **Fix the reference branch so it does not assume pi_0 work the arm will never do** (G3). This
+   is the one that looks closest to a specification defect rather than a tuning choice, and it is
+   worth a separate ruling.
+6. **A feasibility margin** is NOT indicated: feasibility was never the binding constraint, since
+   every question was marked FEASIBLE and the model matched the committed curve.
+
+**No C5 bug was found, so there is no fix to propose under item 5 of the task.**
+
+## G7. Six-check consistency protocol
+
+1. **Cross-check against committed measurements.** The dry run reproduces the pilot's robot
+   counts exactly at both sizes, 1 of 9 and 0 of 20. The rebuild times reproduce the committed
+   curve to within 15 %.
+2. **Physical plausibility.** Every rebuild time is checked against `costs.recall_ttft_s`; none
+   is faster than the committed curve (ratios 0.85x to 1.05x).
+3. **Distribution sanity.** The `delta_j` figures are reported as full distributions per candidate
+   kind with the exact-zero count separated out, not as means, and the per-question table lists
+   all 29 questions rather than a summary.
+4. **Definition audit.** "Released before deadline" uses the same definition as sections E5 and
+   F6.3, so these counts are comparable with edf's. "Candidate" is one `delta_j` call. `Z` is
+   `Device.z_of(task)` sampled at every decision epoch.
+5. **Claim linkage.** This bears directly on the central comparison: at 4 devices plain `edf`
+   serves 9 of 9 robot questions and `policy-core` serves 1. **Until this is resolved, no round-1
+   result comparing policy-core against the baselines on the robot pool is interpretable.**
+6. **Proxy validity.** One proxy, labelled: the dry run prices the engine from the frozen cost
+   curve rather than serving a model, so the decisions are real but the service times are
+   modelled. It is valid here because the pattern reproduces the pilot's counts exactly, which is
+   the strongest available evidence that the modelled path and the live path agree on this.
+
+## G8. Limitations
+
+1. One seed (0) at two sizes. The pilot used the same seed, which is what makes the reproduction
+   exact, but the cause counts are not a distribution over seeds.
+2. `mu` is the EWMA, so its value moves during the run (1.44 to 1.57 at the medians, with one
+   excursion to 1,408 recorded in the state candidates). The arithmetic in G2 uses the medians.
+3. The inverted counterfactual in G3 was captured on 12 state-action evaluations, not on all
+   7,539.
+4. No scored outcome is claimed: these are release counts and decision values, not quality.

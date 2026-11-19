@@ -1,0 +1,600 @@
+{
+ "check": "robot_service_diagnosis",
+ "is_measurement": false,
+ "label": "DIAGNOSIS ONLY, dry run. No policy code changed; everything instrumented through wrappers. Release counts and decision values, NOT scored outcomes.",
+ "settings": {
+  "seed": 0,
+  "ratio": "50:50",
+  "mode": "A",
+  "run_s": 600.0,
+  "h_s": 0.5,
+  "mu_mode": "ewma",
+  "cost_model": "pol4",
+  "cap_k": null,
+  "memory": "tight (GPU_KV, HOST_GIB)",
+  "dry_run": true
+ },
+ "reproduction": {
+  "pilot": {
+   "n4": "1 of 9 on time",
+   "n8": "0 of 20 on time"
+  },
+  "flash_dry_run": {
+   "n4": "1 of 9 released before deadline",
+   "n8": "0 of 20 released before deadline"
+  },
+  "reproduces": true
+ },
+ "per_question": [
+  {
+   "n": 4,
+   "oid": "opp0000187",
+   "t": 66.11,
+   "dl": 71.11,
+   "tok": 7771,
+   "dev": "robo000",
+   "admit_dj": 0.03539,
+   "admit_cont": 0.03539,
+   "n_rel": 208,
+   "rel_zero": 160,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1-zero release dj==0"
+  },
+  {
+   "n": 4,
+   "oid": "opp0000337",
+   "t": 105.76,
+   "dl": 110.76,
+   "tok": 12091,
+   "dev": "robo001",
+   "admit_dj": -1.29997,
+   "admit_cont": 0,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 4,
+   "oid": "opp0001000",
+   "t": 283.76,
+   "dl": 288.76,
+   "tok": 20101,
+   "dev": "robo001",
+   "admit_dj": 0.03539,
+   "admit_cont": 0.03539,
+   "n_rel": 350,
+   "rel_zero": 250,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1-zero release dj==0"
+  },
+  {
+   "n": 4,
+   "oid": "opp0001376",
+   "t": 384.82,
+   "dl": 389.82,
+   "tok": 5341,
+   "dev": "robo000",
+   "admit_dj": 0.08257,
+   "admit_cont": 0,
+   "n_rel": 2,
+   "rel_zero": 0,
+   "rel_pos": 2,
+   "served": true,
+   "cause": "served"
+  },
+  {
+   "n": 4,
+   "oid": "opp0001487",
+   "t": 414.68,
+   "dl": 419.68,
+   "tok": 5881,
+   "dev": "robo001",
+   "admit_dj": 0.03539,
+   "admit_cont": 0.03539,
+   "n_rel": 183,
+   "rel_zero": 129,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1-zero release dj==0"
+  },
+  {
+   "n": 4,
+   "oid": "opp0001641",
+   "t": 456.82,
+   "dl": 461.82,
+   "tok": 8581,
+   "dev": "robo000",
+   "admit_dj": 0.03539,
+   "admit_cont": 0.03539,
+   "n_rel": 224,
+   "rel_zero": 160,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1-zero release dj==0"
+  },
+  {
+   "n": 4,
+   "oid": "opp0001764",
+   "t": 489.68,
+   "dl": 494.68,
+   "tok": 9211,
+   "dev": "robo001",
+   "admit_dj": -0.12666,
+   "admit_cont": 0.03539,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 4,
+   "oid": "opp0001859",
+   "t": 513.82,
+   "dl": 518.82,
+   "tok": 11191,
+   "dev": "robo000",
+   "admit_dj": -1.13584,
+   "admit_cont": 0,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 4,
+   "oid": "opp0001918",
+   "t": 530.68,
+   "dl": 535.68,
+   "tok": 11101,
+   "dev": "robo001",
+   "admit_dj": -1.10856,
+   "admit_cont": 0,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0000165",
+   "t": 39.22,
+   "dl": 44.22,
+   "tok": 8581,
+   "dev": "robo002",
+   "admit_dj": -0.15947,
+   "admit_cont": 0.03539,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0000270",
+   "t": 53.18,
+   "dl": 58.18,
+   "tok": 9211,
+   "dev": "robo003",
+   "admit_dj": -0.08762,
+   "admit_cont": 0.03539,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0000365",
+   "t": 66.11,
+   "dl": 71.11,
+   "tok": 7771,
+   "dev": "robo000",
+   "admit_dj": -0.08479,
+   "admit_cont": 0.03539,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0000577",
+   "t": 94.18,
+   "dl": 99.18,
+   "tok": 11101,
+   "dev": "robo003",
+   "admit_dj": -1.35802,
+   "admit_cont": 0,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0000593",
+   "t": 96.22,
+   "dl": 101.22,
+   "tok": 11191,
+   "dev": "robo002",
+   "admit_dj": -1.34443,
+   "admit_cont": 0,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0000662",
+   "t": 105.76,
+   "dl": 110.76,
+   "tok": 12091,
+   "dev": "robo001",
+   "admit_dj": -1.3915,
+   "admit_cont": 0,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0001354",
+   "t": 198.22,
+   "dl": 203.22,
+   "tok": 15781,
+   "dev": "robo002",
+   "admit_dj": -0.01877,
+   "admit_cont": 0.03539,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0001993",
+   "t": 283.76,
+   "dl": 288.76,
+   "tok": 20101,
+   "dev": "robo001",
+   "admit_dj": 0.03539,
+   "admit_cont": 0.03539,
+   "n_rel": 370,
+   "rel_zero": 250,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1-zero release dj==0"
+  },
+  {
+   "n": 8,
+   "oid": "opp0002117",
+   "t": 300.79,
+   "dl": 305.79,
+   "tok": 5791,
+   "dev": "robo003",
+   "admit_dj": 0.03539,
+   "admit_cont": 0.03539,
+   "n_rel": 36,
+   "rel_zero": 18,
+   "rel_pos": 6,
+   "served": false,
+   "cause": "other"
+  },
+  {
+   "n": 8,
+   "oid": "opp0002529",
+   "t": 356.71,
+   "dl": 361.71,
+   "tok": 5881,
+   "dev": "robo002",
+   "admit_dj": -0.05552,
+   "admit_cont": 0,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0002931",
+   "t": 409.68,
+   "dl": 414.68,
+   "tok": 5611,
+   "dev": "robo001",
+   "admit_dj": -0.05552,
+   "admit_cont": 0,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0002945",
+   "t": 411.71,
+   "dl": 416.71,
+   "tok": 8311,
+   "dev": "robo002",
+   "admit_dj": -0.1027,
+   "admit_cont": 0.03539,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0003078",
+   "t": 429.71,
+   "dl": 434.71,
+   "tok": 9121,
+   "dev": "robo002",
+   "admit_dj": -0.1027,
+   "admit_cont": 0.03539,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0003291",
+   "t": 458.82,
+   "dl": 463.82,
+   "tok": 8671,
+   "dev": "robo000",
+   "admit_dj": -0.1027,
+   "admit_cont": 0.03539,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0003455",
+   "t": 480.71,
+   "dl": 485.71,
+   "tok": 11461,
+   "dev": "robo002",
+   "admit_dj": -3.06967,
+   "admit_cont": 0,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0003466",
+   "t": 481.79,
+   "dl": 486.79,
+   "tok": 13981,
+   "dev": "robo003",
+   "admit_dj": -0.1027,
+   "admit_cont": 0.03539,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0003531",
+   "t": 489.82,
+   "dl": 494.82,
+   "tok": 10111,
+   "dev": "robo000",
+   "admit_dj": -0.1027,
+   "admit_cont": 0.03539,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0003700",
+   "t": 513.68,
+   "dl": 518.68,
+   "tok": 10291,
+   "dev": "robo001",
+   "admit_dj": -0.1027,
+   "admit_cont": 0.03539,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0004033",
+   "t": 557.79,
+   "dl": 562.79,
+   "tok": 17401,
+   "dev": "robo003",
+   "admit_dj": -0.1027,
+   "admit_cont": 0.03539,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  },
+  {
+   "n": 8,
+   "oid": "opp0004268",
+   "t": 589.82,
+   "dl": 594.82,
+   "tok": 14611,
+   "dev": "robo000",
+   "admit_dj": -0.1027,
+   "admit_cont": 0.03539,
+   "n_rel": 0,
+   "rel_zero": 0,
+   "rel_pos": 0,
+   "served": false,
+   "cause": "C1 declined at admit"
+  }
+ ],
+ "cause_counts": {
+  "4": {
+   "C1-zero release dj==0": 4,
+   "C1 declined at admit": 4,
+   "served": 1
+  },
+  "8": {
+   "C1 declined at admit": 18,
+   "C1-zero release dj==0": 1,
+   "other": 1
+  }
+ },
+ "key_arithmetic": {
+  "continuation_credit_constant": 0.03539,
+  "constant_across_histories": "identical for 5,341 and 20,101 token histories",
+  "mu_ewma_median_range": [
+   1.44,
+   1.57
+  ],
+  "rebuild_busy_increase_s": [
+   0.44,
+   1.37
+  ],
+  "backlog_penalty_range": [
+   -2.06,
+   -0.66
+  ],
+  "conclusion": "the only positive credit is one to two orders of magnitude smaller than the backlog term it must overcome"
+ },
+ "failure_modes": {
+  "A_declined_at_admit": {
+   "n4": 4,
+   "n8": 18,
+   "admit_delta_j_examples": [
+    -0.0555,
+    -0.0848,
+    -0.1027,
+    -1.3,
+    -1.34,
+    -1.39,
+    -3.07
+   ],
+   "u_hat": "0",
+   "z": "0"
+  },
+  "B_release_scores_exactly_zero": {
+   "n4": {
+    "candidates": 967,
+    "exactly_zero": 699,
+    "frac": 0.723,
+    "negative": 266,
+    "positive": 2
+   },
+   "n8": {
+    "candidates": 406,
+    "exactly_zero": 268,
+    "frac": 0.66,
+    "negative": 132,
+    "positive": 6
+   },
+   "why": "with H=0.5 s the piece cannot start inside the horizon, so both branches of its own counterfactual are identical; busy_delta non-zero in only 118 of 967",
+   "and_then": "release requires delta_j > 0 strictly, so a candidate worth exactly 0 is declined forever"
+  }
+ },
+ "C2_deficit": {
+  "z_rc_max": 0.0,
+  "z_sh_max": 0.0,
+  "samples": {
+   "n4": 10276,
+   "n8": 21355
+  },
+  "verdict": "CONFIRMED and absolute: identically zero for the whole run at both sizes",
+  "why": "the robot target is pooled (D82) while Device.z is per device, and each robot sees about four questions in 600 s"
+ },
+ "C3_cost_model": {
+  "verdict": "RULED OUT",
+  "ratios_model_over_committed": [
+   0.94,
+   0.97,
+   1.03,
+   1.05,
+   1.03,
+   1.0,
+   1.0,
+   0.98,
+   0.85
+  ],
+  "all_marked_feasible_in_5s": true,
+  "note": "the model slightly UNDER-predicts the largest history, the opposite of the D60 concern"
+ },
+ "C4_granularity": {
+  "verdict": "RULED OUT",
+  "piece_tokens": 2048,
+  "chain_s_vs_deadline": "about 1.8 s of rebuild against a 5 s deadline for the worked question"
+ },
+ "C5_bugs": {
+  "found": false,
+  "note": "the recall path IS offered as a candidate once per question; history tokens post-fix, readiness and deadlines read correctly"
+ },
+ "inverted_counterfactual": {
+  "observed_on": "12 state-action evaluations",
+  "action_branch_progress": {},
+  "reference_branch_progress": {
+   "robo000:RICH:66.200": 2
+  },
+  "action_terminal": -0.58931,
+  "reference_terminal": 0.0446,
+  "delta_j": -0.63391,
+  "reading": "the reference branch assumes pi_0 continues the rebuild for free while nothing in the real run ever releases those pieces, so the explicit action can only look like a cost"
+ },
+ "instrumentation_correction": {
+  "what": "my first filter found ZERO release candidates for robot devices",
+  "cause": "a release action carries item_id, not items, so the device was invisible and every release candidate was silently excluded",
+  "after_fix": {
+   "n4": 968,
+   "n8": 406
+  },
+  "note": "recorded because an absence created by a filter looks exactly like a finding"
+ },
+ "options_not_applied": [
+  "pooled deficit counters matching D82",
+  "credit incremental rebuild progress inside the horizon",
+  "lengthen H for recall candidates (every rebuild here is 1.1 to 4.5 s against H = 0.5 s)",
+  "a calibrated omega_RC or a continuation value that scales with the work",
+  "fix the reference branch so it does not assume pi_0 work the arm never does",
+  "a feasibility margin is NOT indicated: feasibility never bound"
+ ],
+ "_provenance": {
+  "git_commit": "fa50dfc6b0fc94219c4fed2b5baa0f0275393463",
+  "script": "diagnosis wrappers over committed live2/policy code; no repo code changed",
+  "model": "none (pol4 cost curve, frozen)",
+  "device": "flash CPU only",
+  "n": "seed 0, 4 and 8 devices, 600 s",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}
