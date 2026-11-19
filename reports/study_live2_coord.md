@@ -6042,3 +6042,291 @@ different actions.** The deficit, the price, the state value and the margin are 
 on a flat surface. That also explains, with no further experiment, why the byte-identity guarantee
 was the only thing that worked: **when deviation is worthless, reducing to the base is exactly
 right.**
+
+## D133/D134 Part A: placement. DECISIONS POSTED WITH DEFAULTS
+
+Posted with defaults and a 30-minute clock, per the directive. Unanswered means the defaults are
+used, marked PROVISIONAL, and work continues.
+
+| id | decision | DEFAULT taken | why |
+|---|---|---|---|
+| **PA-1** | where placement is enacted | **`CoordState.observation()`**, once per epoch, before the observation is built | it is already called once per epoch and lives in `cstate.py`, which is on my side of the ownership boundary, so NO coordinator edit is needed |
+| **PA-2** | offload semantics | `desired_tier == "host"` demotes a GPU-resident session's belief to **host**, making HOST-WARM reachable | the frames stay; this is KV placement, not deletion, consistent with D56. It is also what makes `RELOAD` fire at all, since nothing in live2 ever wrote `host` |
+| **PA-3** | keep-warm semantics | `desired_tier == "gpu"` **protects** a session in eviction order and refreshes its touch time; it does NOT command residency | D44: residency cannot be commanded in vLLM, only steered |
+| **PA-4** | capacity enforcement | **OFF by default**, behind `kv_capacity_enforced` | enforcing `gpu_kv_tokens` creates memory pressure for EVERY arm and would change every committed baseline number at once. That is a methodological change and is NOT taken silently |
+| **PA-5** | residency model | a per-session `measured_tier` maintained in `cstate` and exposed for the telemetry path | the second half of the required test is "changes the measured tier", which needs a measured quantity distinct from the belief |
+
+**UPDATE, D134 addendum.** PA-5's representation half is no longer provisional: the addendum makes
+reading and charging `RecallAction.representation` an explicit requirement rather than an inference
+from "must be expressible". **And PA-4 is superseded**: the addendum requires memory pressure to be
+ENFORCED, at a GPU KV pool of 62,944 tokens and a host tier of 27 GiB against 256 GiB, using the
+committed and validated StudyENG1c LRU plus write-through residency model with StudyRES1
+bookkeeping at 99.46 per cent tier agreement. So the conservative default below is replaced by a
+directive, and the eviction policy is NOT to be invented: the committed model is reused and cited.
+
+**PA-4 was the one that mattered most and the default was deliberately the conservative one.** With
+capacity enforcement off, placement changes outcomes only for arms that ISSUE placement actions,
+which is the directive's test and leaves every other arm byte-identical. With it on, every arm
+changes at once. **I am implementing both and defaulting the second to off**, so the switch exists
+and the decision is the user's.
+
+## D133/D134 Part A: results, and the H100 wiring
+
+### What was implemented, entirely on the cstate and arm side
+
+One shared steering path, not five. `mooncake`'s reuse-first retention, `kvflow`'s flow-aware
+residency, `lmcache`'s offload, `pensieve`'s eviction ordering and `attentionstore`'s keep-warm all
+steer through `SessionRec.set_tier` and `CoordState.enact_placement`, called once per epoch from
+`observation()` so no coordinator edit is needed (decision PA-1).
+
+- **`SessionRec.measured_tier`**, the RESIDENCY MODEL, distinct from `belief`. This distinction is the whole of PA-5 and it was necessary: the only `gpu` write in live2 is in the coordinator's completion handling and needs a COMPLETE build, so a partially built session reads `cold` to the policy forever while its prefill is in fact on the GPU. **Measured before the fix: every session `cold`, and mooncake's 10 `KEEP_GPU_WARM` actions had nothing to act on.**
+- **`SessionRec.set_tier`**, the one shared move. It always moves residency; it moves BELIEF only when the history is whole, because telling an arm a fragment is HOST-WARM would be a lie.
+- **`SessionRec.residency_readiness`**, readiness for COSTING, from where the KV is rather than what the policy believes.
+- **`SessionRec.tokens_for_representation`**, the second field: RECENT sends `RECENT_WINDOW_TOKENS` (467), anything else the whole history, capped so a short history is never inflated.
+- **`Opportunity.requested_representation`**, somewhere for the arm's choice to live between the action loop and the submit path.
+- **Switches**: `placement_enacted` (ON) and `kv_capacity_enforced` (OFF, decision PA-4).
+
+### The two-part test
+
+**REPRESENTATION: BOTH HALVES PASS.** llf at 10 devices, same seed, with the documented patch:
+
+| representation | robot on-time | budget spent | tokens sent and charged |
+|---|---|---|---|
+| D2 (full history) | **7 of 8** | 202.795 gpu_s | 5,431 to 14,881 |
+| RECENT | **8 of 8** | **192.781 gpu_s** | **467** |
+
+Half 1, an outcome changed: **yes**. Half 2, the tokens actually sent and charged changed:
+**yes**, by a factor of up to 32.
+
+**PLACEMENT: HALF 2 PASSES, HALF 1 DOES NOT, and the reason is measurable.** attentionstore at 10
+devices, placement off against on:
+
+| | robot on-time | budget spent | measured tiers | readiness CHARGED |
+|---|---|---|---|---|
+| off | 8 of 10 | 215.083 gpu_s | `{cold: 9}` | `[COLD]` |
+| on | 8 of 10 | **202.323 gpu_s** | `{host: 1, gpu: 5, cold: 3}` | **`[COLD, GPU-WARM]`** |
+
+The measured tier changes and **the charged cost changes with it, by 12.76 gpu_s**, so placement
+reaches execution. Delivery does not change **because the budget is not binding at this size**:
+202 gpu_s against a 600 gpu_s budget. So placement is live and its effect is currently on cost
+rather than on delivery.
+
+**CAPACITY ENFORCEMENT IS UNEXERCISED, category 4, and this is why PA-4's default costs nothing
+today.** `GPU_KV = 62,944` tokens; at most 3 sessions are ever GPU-resident in these cells and the
+largest history is 18,931 tokens, so the worst case resident is 56,793 and **the cap is never
+reached**. Turning it on changes nothing at 10 or 16 devices, measured. It is classified
+**unexercised**, not ineffective, and it needs a cell that reaches the cap before it can be tested.
+
+**BASELINES ARE BEHAVIOURALLY UNCHANGED.** llf issues no placement action and its outcomes are
+identical with placement on and off (robot 7 of 8 both ways). Only the new residency bookkeeping
+differs, which is new state rather than changed behaviour.
+
+**MOONCAKE'S PLACEMENT IS INERT FOR AN ARM-SIDE REASON, also category 4.** It issues 10
+`KEEP_GPU_WARM` and **no `MATERIALIZE` at all**, so nothing is ever resident for it to keep warm.
+That is a property of the mooncake adaptation, not of this mechanism.
+
+### H100 wiring for placement
+
+**Exactly two changes, both in `live2/coordinator.py`, which is not mine to edit. Both are proved
+to work: the patch below was applied by monkeypatch and produced the two-part test results above.**
+
+**Change 1**, in the recall action loop at `coordinator.py:431`, immediately after
+`o = self.st.opps.get(ra.query_id)` and its `None` guard, add one line:
+
+```python
+            o.requested_representation = ra.representation
+```
+
+**Change 2**, in `_submit_recall` at `coordinator.py:549-550`, replace these two lines:
+
+```python
+        tokens = max(int(s.est_tokens), 1)
+        cost = C.recall_gpu_s(tokens, s.readiness())
+```
+
+with:
+
+```python
+        tokens = s.tokens_for_representation(getattr(o, "requested_representation", None))
+        cost = C.recall_gpu_s(tokens, s.residency_readiness())
+```
+
+Both helpers are committed in `cstate.py`. Nothing else changes: the frame list, the decision log,
+the budget check and `_submit` are untouched, and `est_tokens=tokens` already flows from the local.
+
+### CORRECTION: the GPU pool DOES bind, and four published arms hold NO residency at all
+
+**My earlier claim that the 62,944-token pool is never reached is WRONG and is withdrawn.** It came
+from extrapolating "at most 3 sessions resident" out of a single attentionstore cell at 10 devices
+instead of measuring the census. Measured, peak GPU residency per arm, seed 0:
+
+| arm | n=10 peak | % of pool | n=16 peak | % of pool | MATERIALIZE at 16 |
+|---|---|---|---|---|---|
+| **edf** | 48,755 | 77.5% | **75,848** | **120.5%** | 12 |
+| **llf** | 47,405 | 75.3% | **73,148** | **116.2%** | 10 |
+| lmcache | 36,574 | 58.1% | 43,324 | 68.8% | 63 |
+| attentionstore | 41,974 | 66.7% | 43,324 | 68.8% | 13 |
+| **mooncake** | **0** | 0.0% | **0** | 0.0% | **0** |
+| **kvflow** | **0** | 0.0% | **0** | 0.0% | **0** |
+| **pensieve** | **0** | 0.0% | **0** | 0.0% | **0** |
+| **eco-llm** | **0** | 0.0% | **0** | 0.0% | **0** |
+
+**So the pool BINDS at 16 devices**, at 116 to 121 per cent for the two scheduler arms, and
+capacity enforcement is **EXERCISED**, not unexercised. The addendum's item 2 will do what it was
+written to do. My earlier reading was an estimate presented as a measurement, and the lesson is the
+one this week keeps teaching: the census cost one run.
+
+**FOUR OF THE PUBLISHED ARMS HOLD NO GPU RESIDENCY AT ALL**, because they issue no `MATERIALIZE`
+whatsoever. This generalises the mooncake finding well beyond mooncake, and it has a direct
+consequence for the identity re-run: **mooncake, kvflow, pensieve and eco-llm cannot be separated
+by placement under any pressure, because they have nothing resident to retain or evict.** Whatever
+their cards describe, as adapted they never build cloud-side state. Only `lmcache` and
+`attentionstore` among the published set hold residency, and both sit near 69 per cent of the pool
+at 16 devices.
+
+**That is a finding about the ADAPTATIONS, not about the mechanism**, and it should temper the
+prediction for the identity re-run before it is run: the arms that can plausibly separate under
+pressure are `lmcache` and `attentionstore`, and the separation to look for in the other four is
+not there to find.
+
+### Census basis, and a design rule
+
+**BASIS OF THE 116 TO 121 PER CENT FIGURE, stated because the number it replaces was an estimate
+presented as a measurement.** At every `enact_placement` call, which is once per epoch and so every
+100 ms decision period, the sum of `built_tokens` over sessions that are `open` and
+`measured_tier == "gpu"`. The reported value is the MAXIMUM over the run: **peak instantaneous
+OBSERVED residency**, over a 300 s dry run at seed 0 with the committed 50:50 mix, one cell per arm
+per size.
+
+**Three caveats travel with it.**
+
+1. **It is PEAK, not sustained.** 116 to 121 per cent means the pool is exceeded at least once, which is the right test for "can it bind" and says nothing about how often. **A pool exceeded in one epoch out of 3,000 would make item 2 technically exercised and practically inert**, so the time-above-cap fraction is measured as part of building pressure rather than assumed either way.
+2. **`measured_tier == "gpu"` is this report's residency MODEL, not an engine report.** It marks a session resident from its first built token until something offloads it. That is the modelling assumption the whole of Part A rests on; it is reasonable, because a prefill does put the KV on the GPU, and it is a model.
+3. **The quantity is `built_tokens`**, the coordinator's own count of cloud-side tokens built, not an engine-reported block count.
+
+The replaced figure was a WORST CASE CONSTRUCTED from an assumed session count, 3 x 18,931. The new
+one is the weaker claim, that the pool binds at least once, made on observed data.
+
+**DESIGN RULE, stated because getting it wrong produced silent drift within minutes of the patch
+landing: RESIDENCY IS PHYSICAL AND IS ALWAYS TRACKED; THE SWITCH GATES ONLY THE STEERING.** Gating
+the residency marking behind `placement_enacted` while the costing path read `measured_tier` meant
+a warm history was charged as a cold rebuild whenever placement was off, which surfaced as
+attentionstore moving 8 of 10 to 9 of 10 for a reason having nothing to do with placement. It is
+the same shape as the piece-serialisation drift of the first night: a switch that was supposed to
+isolate a mechanism instead changed the baseline.
+
+**NAMED BEFORE THE IDENTITY RE-RUN, so the result is interpretable either way: `mooncake`,
+`kvflow`, `pensieve` and `eco-llm` hold ZERO GPU residency and issue ZERO `MATERIALIZE`.** They
+cannot separate under placement however well placement works, and a null for those four is
+**category 4, arm-side unexercised**, not evidence about the mechanism. The arms that can
+plausibly separate under pressure are `lmcache` and `attentionstore`, both near 69 per cent of the
+pool at 16 devices.
+
+### PRE-REGISTERED before the re-score: pressure penalises the arms it was added to test
+
+**If the re-score shows `mooncake`, `kvflow`, `pensieve` and `eco-llm` GAINING ground under memory
+pressure, that is an ADAPTATION ARTEFACT and not evidence about retention.** Those four hold zero
+GPU residency and issue zero `MATERIALIZE`. An arm holding warm state pays an eviction and then a
+full rebuild; an arm that never materialised was already paying a cold rebuild every time and
+loses nothing new. **So pressure penalises exactly the arms whose mechanism the pressure was added
+to test**, and a relative gain for the zero-residency four is **category 4, arm-side unexercised**.
+
+It also bounds the identity re-run in advance: the arms that can separate under placement are a
+subset of those that materialise at all, and these four are outside that subset by construction.
+**Only `lmcache` and `attentionstore` are candidates**, both near 69 per cent of the pool at 16
+devices.
+
+### Instrumentation for item 2, specified before it is built
+
+**Peak alone is not enough and the two readings have opposite implications.** A 120 per cent peak
+lasting one epoch means LRU evicts and the history is re-materialised almost immediately, which is
+THRASHING: it shows up as cost without changing admission. A 105 per cent plateau lasting half the
+run means histories genuinely stay cold and the robot axis gets harder for everyone. **The same
+headline number covers both.** So item 2 reports:
+
+- the **fraction of epochs above cap**, not only the peak;
+- the **duration distribution of the over-cap intervals**;
+- the peak, kept, with its basis marked as before.
+
+**REGIME LABELLING: the regime goes ON THE ROW, not in a section header.** Every dry number
+produced before item 2 was measured with **no memory limit at all** — `gpu_kv_tokens` handed to
+arms and never enforced, no automatic eviction, `EVICT` demoting only the arm's own session. Rows
+get quoted out of context and this is the caveat most likely to be dropped when they are, so each
+row carries its own regime marker rather than relying on the reader having seen the heading.
+
+### Register convention, adopted
+
+A number is reported with its BASIS marked at the point of use. A constructed worst case is
+labelled as a construction, an observed count as a count. **The census failure was not that the
+estimate was wrong; it was that nothing in how it was stated distinguished it from a count**, so
+neither the writer nor the reader had a reason to check.
+
+### The representation channel is LIVE but barely VARYING, which is a different thing
+
+Session 2 asked whether any scored arm actually emits a non-default representation, on the correct
+principle that **a live channel and a varying one are not the same thing**. Measured, 16 devices,
+seed 0, representations emitted on CLOUD recalls:
+
+| arm | emitted |
+|---|---|
+| **eco-llm** | **D2 19, RECENT 1** |
+| llf | D2 20 |
+| edf | D2 19 |
+| covex-v13 | D2 15 |
+| mooncake, kvflow, lmcache, pensieve, attentionstore, preble, clockwork, videostorm | `None` only |
+
+**Only `eco-llm` ever emits RECENT, once in twenty.** Across twelve arms and roughly 240 CLOUD
+recalls there is a single RECENT emission. So after Part A the channel is **read, charged and
+correct**, and it is **almost unexercised by the arms that exist**: the accuracy and cost column
+would be populated and near-constant.
+
+**That is category 4, arm-side unexercised, and it is not a fault in the mechanism.** It is the
+same shape as the four zero-residency arms: the harness now expresses something the adaptations
+rarely use. `None` is the common case and is treated as the full history, which is the correct
+default and matches the pre-Part-A behaviour exactly.
+
+**Consequence for the cost claim, which is the one to make.** The dead channel was a **cost
+accounting fault**, not an accuracy fault: 467 tokens against 5,431 to 14,881 on cost, against a
+measured population accuracy gap of about +1.18 pp. Fixing it matters most where the budget BINDS,
+which is exactly the regime item 2's memory pressure creates, so the two halves of Part A compound
+rather than sit beside each other. **It does not deliver a varying accuracy column on its own**,
+and reporting one from these arms would show a single value dressed as a comparison.
+
+**For a port that does vary it, this is now ready:** `SimpleStream` emits RECENT by design, and
+with the channel read it will pay recent-window cost and latency instead of full-history cost,
+which is what it was deferred to avoid losing.
+
+### D2 is charged correctly, and RECENT has TWO committed definitions
+
+**The question was whether `tokens_for_representation` mischarges `D2`, which every current arm
+emits, by lumping it in with "send the whole history". It does not, confirmed from two independent
+committed sources:**
+
+| source | D2 | RICH | RECENT |
+|---|---|---|---|
+| `cstate` evidence items | `tok`, the full `readiness_tokens` | - | `RECENT_WINDOW_TOKENS` = **467** |
+| `ecollm_adapted.REP_TOKEN_SCALE` | **1.0** | **1.0** | **0.35** |
+
+**So D2 and RICH are full history by both definitions and the arms that actually run are charged
+correctly.** The implementation treats everything that is not RECENT as the whole history, which is
+right for D2, right for RICH, and right for `None`.
+
+**RECENT, however, has TWO COMMITTED DEFINITIONS that disagree by about ninefold**, and this is
+another instance of check 4:
+
+- `cstate.RECENT_WINDOW_TOKENS` is **467 tokens, FIXED**, documented as "StudyF4 Part A median input size at N = 1";
+- `ecollm_adapted.REP_TOKEN_SCALE["RECENT"]` is **0.35 of the history**, which on a 12,000-token history is 4,200.
+
+**I used the live2 one, 467 fixed**, because it is the harness's own committed constant and matches
+the `EvidenceItem` the observation already exposes to every arm, so the tokens charged equal the
+tokens the arm was offered. **That choice is recorded rather than buried**: an arm ported from a
+card whose own model is 0.35-of-history will be charged 467 instead, and for a long history those
+differ by a factor of nine. **This should be reconciled before any port that emits RECENT is
+scored**, which is `SimpleStream` and QueryStream-QDP.
+
+**One correction to the static sweep: `eco-llm` DOES emit RECENT.** Its `REPS` tuple is
+`("RECENT", "D2", "RICH")` and it selects from it at runtime, so a static grep for
+`representation=` does not see it. The runtime census caught 1 RECENT in 20 CLOUD recalls. The
+conclusion is unchanged in substance, since one emission in roughly 240 across twelve arms is
+still **category 4, arm-side unexercised**, but the channel is not quite as dead as a static read
+suggests.

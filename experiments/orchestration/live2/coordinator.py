@@ -432,6 +432,10 @@ class Live2Coordinator:
             o = self.st.opps.get(ra.query_id)
             if o is None or o.state not in ("arrived", "offered"):
                 continue
+            # D133/D134 Part A. `RecallAction.representation` was written by arms, declared in
+            # `decides`, and READ NOWHERE, so a RECENT-choosing arm paid full-history cost and
+            # received full-history evidence. It is carried to the submit path here.
+            o.requested_representation = ra.representation
             self.counts["recall_" + ra.decision] += 1
             if ra.decision == "DEFER":
                 o.defer_until = t + max(float(ra.defer_s or 0.0), 0.0)
@@ -546,8 +550,13 @@ class Live2Coordinator:
         return rid
 
     def _submit_recall(self, o, s, t: float, dt_ms: float, preds, mix, whole: bool) -> None:
-        tokens = max(int(s.est_tokens), 1)
-        cost = C.recall_gpu_s(tokens, s.readiness())
+        # D133/D134 Part A, the two reads that make the arm's choices reach execution.
+        # `tokens_for_representation` sends and charges what was ASKED for (RECENT is the recent
+        # window, 467 tokens, not the whole history), and `residency_readiness` costs from WHERE
+        # THE KV IS rather than from what the policy believes, so an offloaded history is charged
+        # as a host reload. Both helpers are committed in `cstate.py`.
+        tokens = s.tokens_for_representation(getattr(o, "requested_representation", None))
+        cost = C.recall_gpu_s(tokens, s.residency_readiness())
         if not self.st.budget.can_spend(cost):
             self.counts["budget_refusal"] += 1
             o.state = "declined"

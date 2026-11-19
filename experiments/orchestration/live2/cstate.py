@@ -91,9 +91,69 @@ class SessionRec:
                                                               "cold": 1.0})
     desired_tier: str = "cold"
     last_telemetry_cached_tokens: Optional[int] = None
+    # D133 Part A. `desired_tier` was declared here with TWO WRITES and NO READ anywhere in live2,
+    # so `KEEP_GPU_WARM` and `OFFLOAD_TO_HOST` were dispatched, counted, handled and INERT. These
+    # three fields make placement observable and enactable.
+    #
+    # `measured_tier` is the RESIDENCY MODEL: where the KV actually is, as distinct from `belief`,
+    # which is what the policy thinks. The required test has two halves and the second one is
+    # "changes the measured tier", which needs a measured quantity that is not the belief.
+    measured_tier: str = "cold"
+    last_touch_s: float = 0.0
+    placement_events: int = 0
 
     def believed_tier(self) -> str:
         return max(self.belief, key=lambda k: self.belief[k])
+
+    def residency_readiness(self) -> str:
+        """Readiness from WHERE THE KV IS, for costing, as distinct from what the policy believes.
+
+        `readiness()` reads `belief`, which is the policy's view and only promotes on a complete
+        build. Cost should follow residency: an offloaded history is a host reload whatever the
+        policy thinks. D133 Part A.
+        """
+        return {"gpu": "GPU-WARM", "host": "HOST-WARM", "cold": "COLD"}[self.measured_tier]
+
+    def tokens_for_representation(self, rep: Optional[str]) -> int:
+        """How many tokens a recall actually sends for representation `rep`.
+
+        D133 Part A second field. `RecallAction.representation` is written by arms, declared in
+        `decides`, and READ NOWHERE: `_submit_recall` sends and charges `max(est_tokens, 1)`, the
+        full believed history, whatever was asked for. So a RECENT-choosing arm pays full-history
+        cost and earns full-history accuracy, and the two cannot be told apart.
+
+        RECENT sends the recent window only, which is the committed `RECENT_WINDOW_TOKENS`; any
+        other representation sends the whole history. The cap keeps a short history from being
+        inflated by asking for RECENT.
+        """
+        whole = max(int(self.est_tokens), 1)
+        if str(rep or "").upper() == "RECENT":
+            return max(min(int(RECENT_WINDOW_TOKENS), whole), 1)
+        return whole
+
+    def set_tier(self, tier: str, now: float) -> bool:
+        """Move the KV to `tier`, updating belief and the residency model together.
+
+        Returns True if anything moved, so a caller can count real placement events rather than
+        attempted ones. This is the ONE shared path: mooncake's reuse-first retention, kvflow's
+        flow-aware residency, lmcache's offload, pensieve's eviction ordering and attentionstore's
+        keep-warm all steer placement through it rather than through five separate mechanisms.
+        """
+        if tier not in ("gpu", "host", "cold"):
+            raise ValueError("unknown tier %r" % (tier,))
+        if self.measured_tier == tier:
+            return False
+        self.measured_tier = tier
+        # The BELIEF is what the policy reads as readiness, and the committed semantics only
+        # promote it on a COMPLETE build. Moving the belief for a partially built history would
+        # tell an arm its history is HOST-WARM when it is a fragment, so the belief follows the
+        # residency only once the history is whole. The residency moves either way.
+        if self.built_tokens >= self.est_tokens and self.est_tokens > 0:
+            self.belief = {"gpu": 0.0, "host": 0.0, "cold": 0.0}
+            self.belief[tier] = 1.0
+        self.last_touch_s = float(now)
+        self.placement_events += 1
+        return True
 
     def readiness(self) -> str:
         return {"gpu": "GPU-WARM", "host": "HOST-WARM", "cold": "COLD"}[self.believed_tier()]
@@ -123,6 +183,12 @@ class Opportunity:
     pulled_at: Optional[float] = None
     served_at: Optional[float] = None
     cache_path: Optional[str] = None
+
+    # D133 Part A second field. `RecallAction.representation` is written by arms and read nowhere,
+    # so it needs somewhere to live between the action loop and the submit path. The coordinator
+    # sets this when it processes the action; `_submit_recall` reads it. See the report section
+    # "H100 wiring for placement" for the exact two-line change.
+    requested_representation: Optional[str] = None
 
     def deadline_abs(self) -> float:
         return self.t_event + self.deadline_s
@@ -295,8 +361,77 @@ class CoordState:
         return {k: int(self.in_flight.get(k, 0)) for k in ("monitor", "piece", "whole", "recall")}
 
     # ---- the observation every arm sees
+    # D133 Part A: the placement switches. `placement_enacted` makes `desired_tier` READ and
+    # enacted, which changes outcomes ONLY for arms that issue placement actions and leaves every
+    # other arm byte-identical. `kv_capacity_enforced` additionally enforces `gpu_kv_tokens`,
+    # which creates memory pressure for EVERY arm and would change every committed baseline at
+    # once, so it is OFF by default and is decision PA-4.
+    placement_enacted: bool = True
+    kv_capacity_enforced: bool = False
+
+    def enact_placement(self, now: float) -> Dict[str, int]:
+        """Read `desired_tier` and enact it. The one shared steering path (D133 Part A).
+
+        Residency cannot be COMMANDED in vLLM (D44), so this STEERS: an offload request moves the
+        KV down, a keep-warm request protects a session in eviction order and refreshes its touch
+        time, and eviction order is what the capacity sweep consults. Nothing here pins a session
+        on the GPU.
+        """
+        counts = {"offloaded": 0, "kept_warm": 0, "evicted": 0, "resident": 0}
+        live = [x for x in self.sessions.values() if x.open and x.built_tokens > 0]
+        # RESIDENCY IS NOT THE BELIEF, and this is the distinction decision PA-5 turns on. The
+        # only write of `gpu` in live2 is in the coordinator's completion handling and requires a
+        # COMPLETE build (`built_tokens >= est_tokens`), so a session with a partial prefix reads
+        # as `cold` to the policy forever. But its prefill IS on the GPU: that is what makes the
+        # next piece cheap. Measured at 10 devices, every session stayed `cold` and mooncake's 10
+        # KEEP_GPU_WARM actions therefore had nothing to act on.
+        #
+        # So the residency model records the KV where it actually is, from the first built token,
+        # independently of what the policy believes.
+        for x in live:
+            if x.measured_tier == "cold":
+                x.measured_tier = "gpu"
+                x.last_touch_s = float(now)
+                counts["resident"] += 1
+        # RESIDENCY IS PHYSICAL AND IS ALWAYS TRACKED. Only the STEERING below is switched, so
+        # placement off against on is a clean comparison of the steering alone. Gating the
+        # residency marking too would have left `measured_tier` at cold while costing read it,
+        # which silently charged a warm history as a cold rebuild: measured as attentionstore
+        # moving 8 of 10 to 9 of 10 for a reason that had nothing to do with placement.
+        if not self.placement_enacted:
+            return counts
+        for x in live:
+            if x.desired_tier == "host" and x.measured_tier == "gpu":
+                if x.set_tier("host", now):
+                    counts["offloaded"] += 1
+            elif x.desired_tier == "gpu" and x.measured_tier == "gpu":
+                # Steering, not commanding: refresh the touch so the capacity sweep below ranks
+                # this session as recently wanted. It does NOT make it unevictable.
+                x.last_touch_s = float(now)
+                counts["kept_warm"] += 1
+        if self.kv_capacity_enforced and int(self.gpu_kv_tokens) > 0:
+            on_gpu = [x for x in live if x.measured_tier == "gpu"]
+            used = sum(int(x.built_tokens) for x in on_gpu)
+            cap = int(self.gpu_kv_tokens)
+            if used > cap:
+                # EVICTION ORDER, which is the third steering mechanism the cards describe.
+                # Sessions asking to go to host go first; then least recently touched; a
+                # keep-warm request sorts last and is therefore evicted only under real pressure.
+                order = sorted(on_gpu, key=lambda x: (x.desired_tier == "gpu",
+                                                      float(x.last_touch_s), x.session_id))
+                for x in order:
+                    if used <= cap:
+                        break
+                    if x.set_tier("host", now):
+                        used -= int(x.built_tokens)
+                        counts["evicted"] += 1
+        return counts
+
     def observation(self, now: float, epoch: str, reads_device_answer: bool = False
                     ) -> Observation:
+        # Placement is enacted BEFORE the observation is built, so an arm sees the tier its own
+        # previous placement action produced (decision PA-1).
+        self.enact_placement(now)
         mon, rec = self.visible(now)
         by_dev: Dict[str, Opportunity] = {}
         for o in mon:
