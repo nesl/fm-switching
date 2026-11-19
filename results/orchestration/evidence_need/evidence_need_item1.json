@@ -1,0 +1,272 @@
+{
+ "check": "evidence_need_item1",
+ "is_measurement": false,
+ "label": "StudyEVNEED item 1: the 2x2 of RECENT against RICH correctness per question, from the COMMITTED StudyR1 per-question records. Offline, read-only, no new measurement.",
+ "source": "results/sember/study_r1/study_r1_requests_h100nvl.jsonl.gz (K1 = 32B-I x RICH, K3 = 32B-I x RECENT)",
+ "join_validation": {
+  "questions_with_both_cells": 845,
+  "total_question_ids": 845,
+  "missing": 0
+ },
+ "inventory": {
+  "per_question": {
+   "K1 (32B-I x RICH)": 845,
+   "K3 (32B-I x RECENT)": 845,
+   "K2 (32B-T x RICH)": 845
+  },
+  "per_category_tables": [
+   "32B-RICH",
+   "32B-RECENT",
+   "32B-D2",
+   "4B-D2",
+   "device-N1-orin"
+  ],
+  "aggregate_only": [
+   "4B-IxRECENT 0.3278",
+   "4B-TxRICH 0.3089",
+   "8B-IxRICH 0.3621"
+  ],
+  "absent": [
+   "4B-IxRICH (StudyR1 records: NOT AVAILABLE, no StudyO run exists)",
+   "32B x D2 PER-QUESTION (per-category table exists, per-question does not)"
+  ]
+ },
+ "overall": {
+  "n": 845,
+  "both_right": 266,
+  "both_wrong": 453,
+  "helps": 68,
+  "hurts": 58,
+  "helps_pct": 8.05,
+  "hurts_pct": 6.86,
+  "net_pct": 1.18
+ },
+ "overall_helps_ci": [
+  6.1538,
+  9.9408
+ ],
+ "overall_hurts_ci": [
+  5.2071,
+  8.6391
+ ],
+ "by_coverage": {
+  "recent_covers": {
+   "n": 748,
+   "both_right": 249,
+   "both_wrong": 404,
+   "helps": 44,
+   "hurts": 51,
+   "helps_pct": 5.88,
+   "hurts_pct": 6.82,
+   "net_pct": -0.94,
+   "helps_ci": [
+    4.2781,
+    7.4866
+   ],
+   "hurts_ci": [
+    5.0802,
+    8.5561
+   ]
+  },
+  "recent_misses": {
+   "n": 97,
+   "both_right": 17,
+   "both_wrong": 49,
+   "helps": 24,
+   "hurts": 7,
+   "helps_pct": 24.74,
+   "hurts_pct": 7.22,
+   "net_pct": 17.53,
+   "helps_ci": [
+    16.4948,
+    32.9897
+   ],
+   "hurts_ci": [
+    3.0928,
+    12.3711
+   ]
+  }
+ },
+ "by_category": {
+  "counting_objects_events": {
+   "n": 110,
+   "both_right": 22,
+   "both_wrong": 73,
+   "helps": 7,
+   "hurts": 8,
+   "helps_pct": 6.36,
+   "hurts_pct": 7.27,
+   "net_pct": -0.91,
+   "helps_ci": [
+    1.8182,
+    11.8182
+   ],
+   "hurts_ci": [
+    2.7273,
+    12.7273
+   ]
+  },
+  "location_trace": {
+   "n": 97,
+   "both_right": 22,
+   "both_wrong": 50,
+   "helps": 8,
+   "hurts": 17,
+   "helps_pct": 8.25,
+   "hurts_pct": 17.53,
+   "net_pct": -9.28,
+   "helps_ci": [
+    3.0928,
+    14.433
+   ],
+   "hurts_ci": [
+    10.3093,
+    25.7732
+   ]
+  },
+  "object_comparison": {
+   "n": 91,
+   "both_right": 29,
+   "both_wrong": 52,
+   "helps": 6,
+   "hurts": 4,
+   "helps_pct": 6.59,
+   "hurts_pct": 4.4,
+   "net_pct": 2.2,
+   "helps_ci": [
+    2.1978,
+    12.0879
+   ],
+   "hurts_ci": [
+    1.0989,
+    8.7912
+   ]
+  },
+  "sequential_action": {
+   "n": 102,
+   "both_right": 30,
+   "both_wrong": 47,
+   "helps": 16,
+   "hurts": 9,
+   "helps_pct": 15.69,
+   "hurts_pct": 8.82,
+   "net_pct": 6.86,
+   "helps_ci": [
+    8.8235,
+    22.549
+   ],
+   "hurts_ci": [
+    3.9216,
+    14.7059
+   ]
+  },
+  "spatial_aware_reasoning": {
+   "n": 91,
+   "both_right": 11,
+   "both_wrong": 74,
+   "helps": 3,
+   "hurts": 3,
+   "helps_pct": 3.3,
+   "hurts_pct": 3.3,
+   "net_pct": 0.0,
+   "helps_ci": [
+    0.0,
+    7.6923
+   ],
+   "hurts_ci": [
+    0.0,
+    7.6923
+   ]
+  },
+  "temporal_ordering_recognition": {
+   "n": 90,
+   "both_right": 28,
+   "both_wrong": 41,
+   "helps": 13,
+   "hurts": 8,
+   "helps_pct": 14.44,
+   "hurts_pct": 8.89,
+   "net_pct": 5.56,
+   "helps_ci": [
+    7.7778,
+    22.2222
+   ],
+   "hurts_ci": [
+    3.3333,
+    15.5556
+   ]
+  },
+  "time_duration": {
+   "n": 121,
+   "both_right": 51,
+   "both_wrong": 62,
+   "helps": 5,
+   "hurts": 3,
+   "helps_pct": 4.13,
+   "hurts_pct": 2.48,
+   "net_pct": 1.65,
+   "helps_ci": [
+    0.8264,
+    7.438
+   ],
+   "hurts_ci": [
+    0.0,
+    4.9587
+   ]
+  },
+  "visual_detail_recall": {
+   "n": 143,
+   "both_right": 73,
+   "both_wrong": 54,
+   "helps": 10,
+   "hurts": 6,
+   "helps_pct": 6.99,
+   "hurts_pct": 4.2,
+   "net_pct": 2.8,
+   "helps_ci": [
+    3.4965,
+    11.1888
+   ],
+   "hurts_ci": [
+    1.3986,
+    7.6923
+   ]
+  }
+ },
+ "by_history_size": {
+  "lt_5k": {
+   "n": 4,
+   "both_right": 3,
+   "both_wrong": 1,
+   "helps": 0,
+   "hurts": 0,
+   "helps_pct": 0.0,
+   "hurts_pct": 0.0,
+   "net_pct": 0.0
+  },
+  "5k_11k": {
+   "n": 18,
+   "both_right": 10,
+   "both_wrong": 8,
+   "helps": 0,
+   "hurts": 0,
+   "helps_pct": 0.0,
+   "hurts_pct": 0.0,
+   "net_pct": 0.0
+  },
+  "11k_to_19381": {
+   "n": 823,
+   "both_right": 253,
+   "both_wrong": 444,
+   "helps": 68,
+   "hurts": 58,
+   "helps_pct": 8.26,
+   "hurts_pct": 7.05,
+   "net_pct": 1.22
+  },
+  "above_19381_breakeven": {
+   "n": 0,
+   "note": "NO StudyR1 QUESTION falls in this bucket"
+  }
+ }
+}
