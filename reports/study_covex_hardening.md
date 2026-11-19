@@ -1950,3 +1950,44 @@ arithmetic on a mean.
 **What it will not change:** COVEX's gap. At 12 devices on seed 4 it is at 0.414 against a ceiling
 of 0.9310, so even a perfect feasible-only correction leaves it near 0.44. The ceiling reshapes the
 published arms' near-misses; it does not close COVEX's deficit.
+
+# 22. D132: the B2 ABSENT-LINK CONTROL, confirmed independently, and ERRATUM E7 against my harness
+
+One cell, not a sweep: 16 devices, seed 0, `covex-v13`, base against B2. Per the direction, no gain
+sweep was run. Output: `switch_moves_b2_rcprio.json`.
+
+## 22.1 B2 is an ABSENT LINK, confirmed independently
+
+| pair | decisions A | decisions B | decisions differing | switch moved |
+|---|---|---|---|---|
+| base vs `deficit_scaling`, gain 1.0 | 8,120 | 8,120 | **0** | **False** |
+| base vs `deficit_scaling`, gain 0.01 | 8,120 | 8,120 | **0** | **False** |
+
+**Zero of 8,120 decisions differ at either gain**, which reproduces session 1's byte-identical
+delivery from the decision side rather than the outcome side. I verified both switches actually
+reached the arm first: `deficit_scaling` arrives as `True` and `deficit_gain` as `1.0` and `0.01`
+on the constructed arm.
+
+**Classification, CLAUDE.md Rule 2: INCONCLUSIVE, not a real negative.** The quantity is present
+and large, session 1 measured `_b2_weight('RC')` at 201.33 and `z[RC]` reaching 543.58 across 11
+updates, and it reaches no decision because the dispatch path does not route RC rows into
+`_z_term` while the planner does so via `rc_rows=True`. The link from the deficit to admission is
+**ABSENT**. B2 may not be reported as a volume result at any gain until that routing lands, and
+the null above is an artefact of the experimental design, not evidence that deficit scaling does
+not work.
+
+## 22.2 ERRATUM E7, against my own harness, found by the same check
+
+`_arm_kwargs` cast every field whose declared type was not `float` with a blanket `bool()`. So
+`rc_priority_keep_monitors = 2`, declared `int`, arrived at the arm as `True`, which is 1.
+
+This is the same class of defect as my `mu_mode` hard-coding and is the fourth switch-plumbing
+fault in three nights. The cast now follows the DECLARED type for float, int, str and bool
+separately. **The B2 rows above are unaffected**, because `deficit_scaling` is a genuine bool and
+`deficit_gain` a genuine float, and I checked both on the constructed arm rather than assuming.
+
+**The RCprio comparison is therefore WITHHELD from this section.** Its first run showed 0 of 8,120
+decisions differing and `rc_priority_epochs` absent from both conditions, which would say the
+branch never fires; but it ran with `keep_monitors` silently reduced from 2 to 1, so I am not
+reporting it until it has been re-run with the cast fixed. The gating field `rc_priority_slack_s`
+did arrive correctly as `1.0`, so I expect the conclusion to hold, and expecting is not reporting.

@@ -85,7 +85,18 @@ def _arm_kwargs(switches: Dict[str, bool]) -> Dict[str, Any]:
         # silently change the setting under test.
         if k == "mu_mode":
             continue
-        out[k] = float(v) if "float" in str(types.get(k, "")).lower() else bool(v)
+        # Cast by the DECLARED type. A blanket bool() turned v1.2's float `kappa` into True and,
+        # later, D131's int `rc_priority_keep_monitors=2` into True, which is 1. Any field whose
+        # declared type is not bool must not be coerced to one.
+        t = str(types.get(k, "")).lower()
+        if "float" in t:
+            out[k] = float(v)
+        elif "int" in t and "bool" not in t:
+            out[k] = int(v)
+        elif "str" in t:
+            out[k] = str(v)
+        else:
+            out[k] = bool(v)
     return out
 
 
