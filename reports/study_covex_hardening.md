@@ -2034,6 +2034,57 @@ independent behaviours at that cell**. The collapses are regime-dependent, so a 
 without a size attached is meaningless. `eco-llm` is a singleton in every grouping at both sizes,
 so my section 23.3 recommendation rests on an independent arm.
 
+## 23.0b THE CANONICALISATION RULE, stated so the counts are reproducible
+
+My hash is over `decision.jsonl`, one record per logged decision, with these fields removed:
+
+| field | why removed |
+|---|---|
+| `decision_latency_ms`, `t` | wall-clock bookkeeping, not a decision |
+| `arm`, `arm_version` | the label being tested for equality; including it makes every arm unique |
+| `note` | free text |
+| `mu`, `belief`, `predicted` | internal estimator state, not the action taken |
+
+**Two action classes are absent from this hash entirely, and they are NOT fields I chose to
+strip: they are never logged.** The `decision.jsonl` record has no field for the action `order`
+and no field for SESSION actions, so `KEEP_GPU_WARM` could not have been in my hash whatever rule
+I used. That is the gap the coordinator asked me to justify, and the justification is below.
+
+## 23.0c `KEEP_GPU_WARM` IS INERT IN LIVE2, and this is a SECOND and worse expressiveness gap
+
+Session 3 reported mooncake emitting 9 `KEEP_GPU_WARM` session actions against b7's none. Applying
+the same test session 3 applied to `order` — does the coordinator read it, and can it change an
+outcome:
+
+**It IS read.** `coordinator.py:424` handles it, and `coordinator.py:416` increments
+`self.counts["session_KEEP_GPU_WARM"]`. On that evidence alone it looks live, and an auditor
+asking only "does the coordinator read this action" gets YES. I nearly stopped there.
+
+**But what it does is write a field that nothing ever reads.** `KEEP_GPU_WARM` sets
+`s.desired_tier = "gpu"` and `OFFLOAD_TO_HOST` sets `s.desired_tier = "host"`. Across the whole of
+live2 there are **exactly three references to `desired_tier`**: the declaration at
+`cstate.py:92` and those two writes. **There is no read.** The field is write-only, so neither
+action can change any outcome.
+
+**So the two sessions agree.** b7 and mooncake are distinct in INTENT and identical in EXECUTED
+behaviour, and my n=16 collapse is correct rather than one class too aggressive, because the only
+difference between them is provably inert.
+
+**Why this gap is worse than `order`.** `order` has zero references and is visibly ignored.
+`KEEP_GPU_WARM` is counted and dispatched, so it appears in `counts`, reads as handled, and
+produces no effect. A mechanism audit that checks for a reference rather than for a READ passes it.
+
+**The consequence for the published bar, and it is the sharpest limitation found in this study.**
+live2 cannot express TIER PLACEMENT at all. Tier placement is the entire contribution of the
+KV-cache and memory systems in the field: `kvflow`, `attentionstore`, `lmcache`, `pensieve` and
+`mooncake`. Those are exactly the arms that fall into collapsed classes below, which is consistent
+with their distinguishing mechanism being discarded and only their underlying scheduler surviving.
+**A KV-cache system cannot demonstrate a KV-cache benefit in this harness**, so their numbers here
+measure their scheduler, not their cache. Four of the five are already out of card scope for
+C-mixed; `mooncake` is not, and its in-scope result should be read as b7's scheduler.
+
+This bounds what the published-field comparison can claim, independently of how any arm scores.
+
 ## 23.1 The collapse in EXECUTED behaviour is LARGER THAN TWO ARMS, and SIZE-DEPENDENT
 
 **At 16 devices, 19 published arms reduce to 14 distinct behaviours:**
