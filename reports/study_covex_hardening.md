@@ -353,3 +353,77 @@ smaller than the costs they must overcome, which bounds what any further credit 
 achieve), **F-A1 and F-A2** (every benefit channel is dead for the robot-relevant kinds, and
 spec 5.3's state value is dead for all 27,589 candidates), and **F-A7** (the dashcam collapse at
 8 and 16 devices, which no previous report measured).
+
+
+---
+
+# 6. BEFORE-GROUND for D126 gate round one, measured on the F3 switch set
+
+HEAD **`6f7b784`**, isolated worktree, clean. Switch set **B1 + F2 + F3 + A3, with F1 (`rc_tail`)
+and F4 OFF**, which is the set D125 and D126 specify for v1.2. **This is NOT a gate round:** F5a,
+F5b, F5c and v1.2 had not landed when it was taken. It exists so that D126's before-and-after sits
+on identical candidate populations.
+
+## 6.1 The finding that matters most for v1.2's starting point
+
+**With F1 OFF, policy-core v1.1 is IDENTICAL to v1.0 at every size on both axes.**
+
+| n | policy-core v1.0 | policy-core v1.1 (F1 off) | edf | llf | always-cloud (REPORTED, NOT GATING) |
+|---|---|---|---|---|---|
+| 4 | 0.111 / 0.999 | **0.111 / 0.999** | 0.889 / 0.999 | 0.778 / 0.999 | 1.000 / 0.999 |
+| 8 | 0.000 / 0.487 | **0.000 / 0.487** | 0.550 / 0.999 | 0.900 / 1.000 | 1.000 / 1.000 |
+| 16 | 0.000 / 0.075 | **0.000 / 0.075** | 0.229 / 0.626 | 0.600 / 0.658 | 0.857 / 0.913 |
+| 32 | 0.014 / 0.134 | **0.014 / 0.134** | 0.069 / 0.284 | 0.222 / 0.332 | not finished |
+
+Each cell is robot pooled fraction / dashcam released fraction. The 32-device `always-cloud-fcfs`
+and `device-only` rows had not finished and are omitted rather than estimated.
+
+**So every gain I reported for v1.1 came from F1, the RC tail, and v1.2 turns F1 OFF.** The
+earlier v1.1 numbers (0.222, 0.150, 0.200 robot and 0.978, 0.927, 0.449 dashcam) were measured
+with `rc_tail` ON. Remove it and the arm returns exactly to v1.0. **F3 on its own moves neither
+axis at any size.**
+
+**Under the D127 criterion, this set fails both axes at every size**, against edf and llf as the
+gating baselines: robot 0.111 against 0.889, 0.000 against 0.900, 0.000 against 0.600, 0.014
+against 0.222; dashcam 0.999 against 0.999 (equal at n=4), 0.487 against 1.000, 0.075 against
+0.658, 0.134 against 0.332.
+
+## 6.2 What F3 did change, in the audit
+
+Fleet trace at 8 devices, same decomposition, identity self-checked to 8.1e-14.
+
+| kind | n, before F3 | n, with F3 | DeltaJ == 0, before | with F3 | backlog p50 abs, before | with F3 |
+|---|---|---|---|---|---|---|
+| `state_promote_rebuild` | 17,231 | **3,400** | 0.197 | **0.998** | **1.084** | **0.0** |
+| `piece_release` | 3,395 | 3,395 | 0.079 | 0.079 | unchanged | unchanged |
+
+F3 removes four fifths of the promote-rebuild candidates and drives almost all of the remainder to
+an exact zero tie: the backlog charge that dominated them is now zero at the median, but no benefit
+channel took its place, so the candidate became a no-op rather than a negative. **`piece_release`
+is untouched.**
+
+## 6.3 Two carried-forward facts that are STILL true, and both are gate-relevant for v1.2
+
+**F-A2 stands: the state value is still exactly zero for every candidate of every kind.** The
+`sv` column is 1.0 for all five kinds with F3 on. v1.2's Jhat counts "state value at T_r" and
+ABANDON is defined as keeping "the state value of what is built", so **both uses are inert until
+F5b lands.** P9 tests this explicitly in round two.
+
+**F-A3 stands, and it has a consequence for v1.2 that is worth flagging before the code is
+written.** The `z` column is 1.0 for all five kinds **even though B1 is ON here**: the deficit
+counter rises on the device but cannot reach `_z_term`, whose aggregation only sees the `opps`
+rows. The only mechanism that ever put RC rows into those is F1's `rc_tail_zrows`, and **D125
+turns F1 OFF for v1.2**. v1.2's evaluation is specified to count "every device's deficit term from
+the B1 realised-outcome counters credited at each opportunity's own deadline", so **unless v1.2
+adds its own RC-row routing, that term will be inert too.** Reported now rather than discovered in
+round two.
+
+## 6.4 Gate status
+
+**Round one (F5a, F5b, F5c) is NOT SCORED: those commits had not landed.** Its expectations and
+falsifiers are pre-registered in `f5_round_one_preregistration.json`, committed before any F5
+result existed. **Round two (v1.2 and its six ablations) is NOT SCORED** for the same reason; its
+ten scenarios are pre-registered in `v12_scenario_preregistration.json`.
+
+**No `harden GATE PASS v1.2` commit has been or will be emitted on this evidence.** Nothing has
+passed; the F3 set fails both axes at every size.
