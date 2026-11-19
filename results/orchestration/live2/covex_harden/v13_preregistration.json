@@ -1,0 +1,28 @@
+{
+  "_note": "Written BEFORE any v1.3 leaderboard number existed. Session 2, D129/D130.",
+  "written_at": "2026-11-18",
+  "scored_commit": "700f248 (v1.3 at ed8ef56 plus the work-conserving release floor)",
+  "switch_set": "planner_rc, plan_latest, replan, deficit_update, write_staleness, realistic_competing, mu_mode=scarcity",
+  "mechanism_under_test": "mu = mu_scale * min(1, busy_ahead / H), H = 0.5 s, mu_scale = 1.0",
+  "predictions": [
+    {
+      "id": "P1",
+      "claim": "mu is CONSTANT at 1.0 whenever anything is in flight, because a single in-flight request's predicted service exceeds H = 0.5 s, so busy_ahead / H >= 1 and the min saturates.",
+      "falsifier": "measured mu spread across decision periods shows a non-degenerate distribution strictly inside (0, 1) for a material fraction of periods",
+      "stopping_condition": "if mu is constant across every condition where the claim says the price should vary, the scarcity channel is CONSTANT under CLAUDE.md Step 2 and v1.3 cannot be credited with a scarcity mechanism"
+    },
+    {
+      "id": "P2",
+      "claim": "the new price is CAPPED at 1.0 while the measured EWMA price reached p50 9.835 at 16 devices, so the backlog charge on every candidate falls by roughly an order of magnitude at 16 devices and much less at 4.",
+      "consequence_if_true": "cold-rebuild plans that scored -0.598 to -2.521 under the EWMA price move toward admissible, so the ROBOT axis should improve most at 16 devices and least at 4.",
+      "falsifier": "robot delivery at 16 devices does not improve over v1.2"
+    },
+    {
+      "id": "P3",
+      "claim": "F-A9's positive feedback loop is broken in direction, because mu now rises with occupancy by construction instead of falling with it.",
+      "falsifier": "mu and occupancy still move in opposite directions across fleet sizes under v1.3"
+    }
+  ],
+  "gate_note": "D127: gating is against the best SCHEDULING baseline, edf and llf, on DELIVERY. edf C=8 is the standing bar and v1.2 lost every cell to it.",
+  "non_gating_note": "D130: session 3's 19 published arms are REPORTED, never gating."
+}
