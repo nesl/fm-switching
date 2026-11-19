@@ -1,0 +1,67 @@
+{
+ "check": "d118_llf_replay",
+ "is_measurement": false,
+ "label": "REPLAY, NOT AN OUTCOME. Dry run on the committed seed-10 12-device 600 s fleet trace.",
+ "arms_in_no_run": [
+  "llf",
+  "vllm-priority"
+ ],
+ "byte_identity": {
+  "grid_cells_identical": 48,
+  "grid_cells": 48,
+  "replay_arms_identical": 8,
+  "replay_arms": 8,
+  "baseline": "the D114 build capture (pre-D118), same files but arms.py"
+ },
+ "llf": {
+  "n_decisions": 6600,
+  "releases": 5648,
+  "periods_with_release": 3922,
+  "per_period_median": 1,
+  "per_period_p90": 2,
+  "per_period_max": 4,
+  "inflight_max": 4,
+  "inflight_mean": 2.915,
+  "recall_releases": 20,
+  "arm_stats": {
+   "arm": "llf",
+   "c_inflight": 4,
+   "skips_by_kind": {
+    "episode_call": 2204,
+    "rc_piece": 9
+   },
+   "skipped_total": 2213,
+   "s_hat_source": "baselines/costs.py"
+  },
+  "robot_questions_released_before_deadline": 20,
+  "robot_questions_total": 29
+ },
+ "edf_for_contrast": {
+  "n_decisions": 6861,
+  "releases": 5452,
+  "periods_with_release": 3843,
+  "per_period_median": 1,
+  "per_period_p90": 2,
+  "per_period_max": 4,
+  "inflight_max": 4,
+  "inflight_mean": 2.845,
+  "recall_releases": 19,
+  "arm_stats": {},
+  "robot_questions_released_before_deadline": 9,
+  "robot_questions_total": 29
+ },
+ "gates": {
+  "policy": "419/419",
+  "live2": "143/143",
+  "fleet": "234/234",
+  "frozen_md5s": "12/12 green"
+ },
+ "_provenance": {
+  "git_commit": "c4d62845a3b6cb58a798d84242551b01909323f7",
+  "script": "live2/arms.py LlfArm + tests/test_live2_d118.py",
+  "model": "none (cost model pol4, frozen)",
+  "device": "flash CPU only",
+  "n": "seed 10, 12 devices, 600 s",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}

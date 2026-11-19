@@ -182,7 +182,12 @@ class Pi0Edf(Live2ArmMixin, Policy):
         deadline c_i + L_SH, which is a causal fact known at the instant's arrival."""
         self._live2_roster = roster
 
-    def decide(self, obs: Observation) -> Action:
+    def _pending_items(self, obs: Observation) -> List[PendingItem]:
+        """The merged pending set: monitoring instants, then recall answers.
+
+        Moved out of `decide` verbatim so `LlfArm` (D118) can order the SAME set by a different
+        key. Byte-identical decisions for every existing arm are a committed test.
+        """
         items: List[PendingItem] = []
         tgt = getattr(self, "_targets", None)
         mon_l_s = float(tgt["dashcam"]["L_s"]) if tgt else 1.0
@@ -211,6 +216,10 @@ class Pi0Edf(Live2ArmMixin, Policy):
                                      device=q.session_id, due_at=q.arrival_s,
                                      deadline=q.deadline_s, tokens=q.readiness_tokens,
                                      job_id=q.query_id, readiness=q.readiness))
+        return items
+
+    def decide(self, obs: Observation) -> Action:
+        items = self._pending_items(obs)
         order = Rollout._edf(None, items)
         # D114: the head PREFIX, not the single head. Taking a prefix is what charges each
         # released unit against the bound within the period: the observation cannot see this
@@ -237,6 +246,264 @@ class Pi0Edf(Live2ArmMixin, Policy):
                 sessions.append(materialize(q.session_id, max(q.readiness_tokens, 1),
                                             self.piece_tokens))
         return Action(streams=streams, recall=recall, sessions=sessions, order="EDF")
+
+
+# ---------------------------------------------------------------- 9: D118, least laxity first
+class LlfArm(Pi0Edf):
+    """Arm 9 (D118, BUILT AND IN NO RUN until the user decides): least laxity first.
+
+    Why it exists. The D114 replay showed strict EDF starves robot questions: a dashcam
+    instant's deadline always sorts ahead of a question's, so the question reaches the head too
+    late for a multi-second cold rebuild. A reviewer will say "use least-laxity instead, and drop
+    what can no longer make it". This is that baseline, built so the answer is measured and not
+    argued.
+
+    It inherits `Pi0Edf` for the D114 release rule, the D100 roster hook and the pending set, and
+    changes exactly two things:
+
+      * the ORDER is ascending laxity, `deadline - now - S_hat(unit)`, rather than deadline;
+      * a unit whose laxity has gone NEGATIVE is skipped, not released, and falls to the device
+        exactly as an expired item does. Skips are counted per kind in `stats`.
+
+    There is no admission test beyond that skip rule, and no mu, deficit or utility anywhere.
+
+    S_HAT USES COMMITTED MEASURED CURVES ONLY. Every term comes from `baselines/costs.py`, the
+    same module `edf-service-time` reads (`naive.py`, `import costs as C`). The policy's cost
+    model, its engine model and its rollout are NEVER consulted (D74), and a test asserts the
+    source module.
+    """
+
+    case = "own"
+    experiments = ("C-mixed",)
+    decides = ("episodic_mode", "recall_decision", "session_action", "order")
+    defaults_used = ("cadence_s", "frame_count", "representation", "engine_config")
+    restricts_action_space = None
+
+    # The committed single-frame server TTFT: StudyD7 / D7b open-loop p50 at 25 % of peak.
+    SH_INSTANT_KEY = ("32BI", 1, 25)
+
+    def __init__(self, piece_tokens: Optional[int] = None,
+                 c_inflight: int = Pi0Edf.C_INFLIGHT_DEFAULT) -> None:
+        super().__init__(piece_tokens=piece_tokens, c_inflight=c_inflight)
+        # Only "llf" (whole) is named in ARM_NAMES; a piece variant is reachable by parameter.
+        self.name = ("llf" if self.piece_tokens is None
+                     else f"llf-piece{self.piece_tokens}")
+        self.live2_source = ("live2/arms.py::LlfArm (D118), laxity order over the Pi0Edf pending "
+                             "set, S_hat from baselines/costs.py only, "
+                             "D114 work-conserving release up to c_inflight=%d, " % self.c_inflight
+                             + ("whole rebuild" if self.piece_tokens is None
+                                else f"fixed {self.piece_tokens}-token pieces"))
+        self.stats: Dict[str, Any] = dict(arm=self.name, c_inflight=self.c_inflight,
+                                          skips_by_kind={}, skipped_total=0,
+                                          s_hat_source="baselines/costs.py")
+
+    # ---- S_hat, committed curves only
+    def s_hat_s(self, p: PendingItem) -> float:
+        """Estimated service time for one pending unit, from committed measurements only.
+
+        A monitoring instant is one frame, so its service time is the committed single-frame
+        TTFT. A recall whose history is already resident is its committed reload TTFT at that
+        readiness. A recall whose history is COLD pays the committed cold prefill rate for the
+        tokens not yet built, PLUS the answer TTFT at the warm state the history is in once that
+        rebuild lands.
+
+        The two cold terms do NOT double count: `costs.recall_ttft_s(t, "COLD")` returns
+        `t / COLD_PREFILL_TOK_S` and nothing else, so the prefill is charged exactly once and the
+        answer is priced warm. Charging a COLD answer term instead would count the prefill twice.
+
+        For a piece variant the remaining work is still the whole unbuilt history, because a
+        job's laxity must count ALL of its remaining work or a long rebuild never starts early.
+        """
+        import costs as C
+        if p.kind == "episode_call":
+            return float(C.CLOUD_TTFT[self.SH_INSTANT_KEY])
+        tok = max(int(getattr(p, "tokens", 0) or 0), 1)
+        ready = str(getattr(p, "readiness", None) or "COLD").upper()
+        if ready in ("GPU-WARM", "HOST-WARM"):
+            return float(C.recall_ttft_s(tok, ready))
+        # COLD. `unbuilt` is the whole history: a whole MATERIALIZE is one request, so a session
+        # is either un-built (COLD) or built (warm) and there is no partial state for the NAMED
+        # arm. For the unnamed piece variants this ignores partial progress, because the built
+        # prefix (D100) never reaches the arm: `cstate.observation` gives every recall the FULL
+        # believed history and varies only the tier. Recorded in the D118 pre-registration.
+        return float(C.recall_ttft_s(tok, "COLD") + C.recall_ttft_s(tok, "GPU-WARM"))
+
+    def laxity_s(self, p: PendingItem, now: float) -> float:
+        return float(p.deadline) - float(now) - self.s_hat_s(p)
+
+    def _count_skip(self, kind: str) -> None:
+        by = self.stats["skips_by_kind"]
+        by[kind] = int(by.get(kind, 0)) + 1
+        self.stats["skipped_total"] = int(self.stats["skipped_total"]) + 1
+
+    def decide(self, obs: Observation) -> Action:
+        items = self._pending_items(obs)
+        lax = {p.item_id: self.laxity_s(p, obs.now_s) for p in items}
+
+        # The skip rule, before any ordering: a unit that can no longer make its deadline is
+        # removed and falls to the device, as an expired item does now.
+        skipped = set()
+        for p in items:
+            if lax[p.item_id] < 0.0:
+                skipped.add(p.item_id)
+                self._count_skip(p.kind)
+        live = [p for p in items if p.item_id not in skipped]
+
+        # Ascending laxity. `item_id` breaks ties so the order is total and reproducible.
+        order = sorted(live, key=lambda p: (lax[p.item_id], p.item_id))
+        released = {p.item_id for p in order[:self._release_budget(obs)]}
+
+        streams, recall, sessions = [], [], []
+        for s in obs.streams:
+            on = ("mon:" + s.stream_id) in released
+            streams.append(StreamAction(s.stream_id, "cloud" if on else "local"))
+        for q in obs.recall:
+            key = "rc:" + q.query_id
+            if key in skipped:
+                # Past saving: it falls to the device rather than occupying the cloud.
+                recall.append(RecallAction(q.query_id, "DEVICE"))
+                continue
+            if key not in released:
+                # Not declined, only not now: re-decided at the next epoch, as pi_0 does.
+                recall.append(RecallAction(q.query_id, "DEFER", defer_s=0.0))
+                continue
+            recall.append(RecallAction(q.query_id, "CLOUD", representation="D2"))
+            if q.readiness != "GPU-WARM":
+                sessions.append(materialize(q.session_id, max(q.readiness_tokens, 1),
+                                            self.piece_tokens))
+        return Action(streams=streams, recall=recall, sessions=sessions, order="LLF")
+
+
+# ---------------------------------------------------------------- 10: D118, engine-native EDF
+class VllmPriorityArm(Live2ArmMixin, NAIVE.AlwaysCloudFCFS):
+    """Arm 10 (D118, BUILT AND IN NO RUN until the user decides): engine-native EDF.
+
+    Why it exists. A reviewer will ask "isn't this just vLLM with priority scheduling?". This arm
+    is that question made measurable: its RELEASE behaviour is identical to `always-cloud-fcfs`,
+    sending every opportunity immediately with no cap and no admission test, and the ONLY
+    difference is that every action carries a priority equal to its absolute deadline in integer
+    milliseconds. Any arm-side ordering would confound the answer, so there is none.
+
+    vLLM v0.31.0 serves the lower priority value first and breaks ties by arrival time
+    (`vllm/config/scheduler.py`: `SchedulerPolicy = Literal["fcfs", "priority"]`). IT ALSO
+    PREEMPTS: `v1/core/sched/scheduler.py` picks its victim as
+    `max(self.running, key=lambda r: (r.priority, r.arrival_time))` and `_preempt_request` frees
+    that request's blocks and sets `num_computed_tokens = 0` before putting it back at the front
+    of the waiting queue. So a preempted cold rebuild DISCARDS its prefill and recomputes it,
+    which is why engine-native priority is not automatically the stronger scheduler here.
+
+    The priority never reaches a request body from this file. It is published in
+    `Action.notes["priority_ms"]`, and the one-line backend change that copies it into the body is
+    written down in the report section "H100 wiring for vllm-priority" rather than applied, since
+    the backend is not ours to edit.
+    """
+
+    name = "vllm-priority"
+    case = "own"
+    experiments = ("C-mixed",)
+    decides = ("episodic_mode", "recall_decision", "order")
+    defaults_used = ("cadence_s", "frame_count", "representation", "session_action",
+                     "engine_config")
+    live2_source = ("baselines/naive.py::AlwaysCloudFCFS release behaviour AS COMMITTED, plus a "
+                    "per-action vLLM priority equal to the absolute deadline in integer ms "
+                    "(D118); requires --scheduling-policy priority")
+    requires_server_mode = "priority"
+
+    def __init__(self) -> None:
+        self._server_mode: Optional[str] = None
+        self._has_backend: bool = False
+        self.stats: Dict[str, Any] = dict(arm=self.name, requires_server_mode="priority",
+                                          server_scheduling_policy=None,
+                                          server_mode_undeclared=True, priorities_emitted=0)
+
+    def reset(self, seed: int = 0) -> None:
+        pass
+
+    def live2_configure(self, **kw: Any) -> None:
+        """Reads the declared server mode. `Live2ArmMixin.live2_configure` already takes **kw, so
+        a runner that knows nothing about priority scheduling passes nothing and changes."""
+        super().live2_configure(**kw)
+        mode = kw.get("server_scheduling_policy")
+        self._server_mode = str(mode) if mode is not None else None
+        self._has_backend = bool(kw.get("has_backend", False))
+        self.stats["server_scheduling_policy"] = self._server_mode
+        self.stats["server_mode_undeclared"] = self._server_mode is None
+
+    def live2_roster(self, roster: Dict[str, Any]) -> None:
+        self._live2_roster = roster
+
+    def live2_describe(self) -> Dict[str, Any]:
+        d = super().live2_describe()
+        d["requires_server_mode"] = self.requires_server_mode
+        d["server_scheduling_policy"] = self._server_mode
+        return d
+
+    def _check_server_mode(self) -> None:
+        """It must never silently run as plain FCFS and be reported as if the engine had ordered.
+
+        A declared mode that is not `priority` is refused outright. A run that declares nothing is
+        a dry run or a test, where no engine serves anything and FCFS is not a risk, so it
+        proceeds and is STAMPED `server_mode_undeclared` in the run header. The strict check
+        against a real server is the pre-send assertion in the report's H100 wiring section,
+        because the backend is not ours to edit.
+        """
+        if self._server_mode is not None and self._server_mode != "priority":
+            raise RuntimeError(
+                "vllm-priority refuses to run: the run declares the server scheduling policy as "
+                "%r, not 'priority'. Start the server with --scheduling-policy priority, or run "
+                "an arm that does not depend on engine-side ordering. Running as FCFS would "
+                "report engine-native EDF numbers that no engine ordered."
+                % (self._server_mode,))
+        if self._has_backend and self._server_mode is None:
+            raise RuntimeError(
+                "vllm-priority refuses to run: a backend is attached but no server scheduling "
+                "policy was declared, so it cannot be shown that the engine is in priority mode. "
+                "Pass server_scheduling_policy='priority' to live2_configure.")
+
+    @staticmethod
+    def _priority_ms(deadline_abs: float) -> int:
+        """vLLM takes an int64; lower is served first. The absolute deadline in ms from run
+        start IS the EDF key, so handing it to the engine is exactly 'let vLLM do EDF'."""
+        return int(round(float(deadline_abs) * 1000.0))
+
+    def decide(self, obs: Observation) -> Action:
+        self._check_server_mode()
+        act = super().decide(obs)
+
+        instants = (getattr(self, "_live2_roster", None) or {}).get("sh_instant", {})
+        tgt = getattr(self, "_targets", None)
+        mon_l_s = float(tgt["dashcam"]["L_s"]) if tgt else 1.0
+        pri: Dict[str, int] = {}
+        for s in obs.streams:
+            inst = instants.get(s.stream_id)
+            if inst is not None:
+                dl = float(inst["deadline_abs"])
+            else:
+                last = (s.delivered_times_s[-1] if s.delivered_times_s
+                        else obs.now_s - s.cadence_s)
+                dl = last + s.cadence_s + mon_l_s
+            pri["mon:" + s.stream_id] = self._priority_ms(dl)
+        by_session: Dict[str, int] = {}
+        for q in obs.recall:
+            p = self._priority_ms(q.deadline_s)
+            pri["rc:" + q.query_id] = p
+            # A rebuild needed by a recall carries THE RECALL'S deadline, so the engine does not
+            # defer the build behind the answer that depends on it. The nearest deadline wins if
+            # two questions share a session.
+            if q.session_id not in by_session or p < by_session[q.session_id]:
+                by_session[q.session_id] = p
+        for sa in act.sessions:
+            sid = getattr(sa, "session_id", None)
+            if sid in by_session:
+                pri["session:" + str(sid)] = by_session[sid]
+
+        notes = dict(act.notes or {})
+        notes["priority_ms"] = pri
+        notes["vllm_scheduling_policy"] = self._server_mode
+        notes["priority_semantics"] = "absolute deadline in ms from run start; lower served first"
+        self.stats["priorities_emitted"] = int(self.stats["priorities_emitted"]) + len(pri)
+        return Action(streams=act.streams, recall=act.recall, sessions=act.sessions,
+                      engine_config=act.engine_config, order="ENGINE-PRIORITY", notes=notes)
 
 
 # ---------------------------------------------------------------- 7, 8: the constructed arms
@@ -270,6 +537,13 @@ ARMS = {
     "edf-piece2048": lambda: Pi0Edf(2048),
     "utility-per-cost": UtilityPerCostArm,
     "b9": B9Arm,
+    # D118, BUILT AND IN NO RUN until the user decides. Registering them here does not put them
+    # in any run plan: `ARM_NAMES` is read only by the `--arm` CLI choices and by the three
+    # all-arm tests, no sweep driver reads it (the pilot drivers list their arms explicitly), and
+    # the scorer's `GPU_BASELINES` is a separate seven-tuple with a committed `len == 7` test.
+    # Only the WHOLE variant of llf is named; `llf-piece<n>` is reachable by parameter.
+    "llf": lambda: LlfArm(None),
+    "vllm-priority": VllmPriorityArm,
 }
 
 
@@ -283,5 +557,9 @@ def make_arm(name: str, **kw: Any) -> Policy:
     return f()
 
 
-ARM_NAMES = ("policy-core", "device-only", "always-cloud-fcfs", "edf", "edf-piece1024",
-             "edf-piece2048", "utility-per-cost", "b9")
+# The eight arms of the round-1 list (D65 as corrected by D90). D118's `llf` and
+# `vllm-priority` are BUILT AND IN NO RUN, so they are registered as buildable below but are NOT
+# part of this tuple's round-1 meaning; the scorer's own `GPU_BASELINES` is unchanged.
+ROUND1_ARM_NAMES = ("policy-core", "device-only", "always-cloud-fcfs", "edf", "edf-piece1024",
+                    "edf-piece2048", "utility-per-cost", "b9")
+ARM_NAMES = ROUND1_ARM_NAMES + ("llf", "vllm-priority")

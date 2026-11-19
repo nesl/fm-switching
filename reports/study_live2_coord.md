@@ -3045,3 +3045,110 @@ Posted up front under Step 0. All were taken at their default and are **PROVISIO
 4. **Monitoring `S_hat`** excludes RTT and upload, which are transport and not service time.
 5. **The unbuilt size** is readiness-derived, per F1: exact for the named arm, approximate for
    the unnamed piece variants.
+
+## F6. Implementation and the replay. D118 BUILT, IN NO RUN
+
+Step 2 of the D118 task. The pre-registration above was committed alone, before this code. Every
+decision in F5 was taken at its default and is **PROVISIONAL**.
+
+### F6.1 What was added, and the one refactor
+
+`live2/arms.py` only:
+
+| addition | note |
+|---|---|
+| `Pi0Edf._pending_items(obs)` | the merged pending set moved OUT of `Pi0Edf.decide` verbatim, so `LlfArm` orders the SAME set by a different key. This is the one change that touches an existing arm's code, which is why byte-identity is proven below rather than asserted |
+| `LlfArm(Pi0Edf)` | inherits the D114 release rule, the D100 roster hook and the pending set; overrides only the order and adds the skip rule |
+| `VllmPriorityArm(Live2ArmMixin, NAIVE.AlwaysCloudFCFS)` | inherits the release behaviour unchanged and adds priorities plus the refusal |
+| `ROUND1_ARM_NAMES` | the eight round-1 arms, named explicitly so `ARM_NAMES` can hold the buildable set without blurring what round 1 is |
+
+**No interface change was needed for the priorities.** `Action.notes` already exists, so
+`vllm-priority` publishes `notes["priority_ms"]` and the backend reads it, which is why F4 is a
+one-line change for the H100 rather than a schema change.
+
+### F6.2 Byte-identity: nothing existing moved
+
+Proven against the D114 build capture, which is the same tree with only `arms.py` differing.
+
+| fixture | result |
+|---|---|
+| D99 grid, 4 and 8 devices x seeds 1 to 3, all 8 existing arms | **48 of 48 cells IDENTICAL** |
+| seed-10 12-device 600 s replay, all 8 existing arms | **8 of 8 IDENTICAL** |
+
+Per arm on the replay, each byte-identical: `device-only` 29, `always-cloud-fcfs` 6,518,
+`utility-per-cost` 6,518, `b9` 6,488, `policy-core` 5,305, `edf` 6,861, `edf-piece1024` 7,037,
+`edf-piece2048` 7,024 decisions. **The `_pending_items` extraction changed nothing**, which is
+the claim that most needed proving.
+
+Gates: policy 419 of 419, live2 **143 of 143** including the 25 new D118 tests, fleet 234 of 234,
+all 12 frozen md5s green. The three all-arm tests now exercise both new arms, since `ARM_NAMES`
+carries them.
+
+### F6.3 llf on the seed-10 replay. REPLAY, NOT AN OUTCOME
+
+`results/orchestration/live2/coord/d118/d118_llf_replay.json`. A dry run on the committed trace:
+these are release counts, not scored outcomes, and no quality or latency claim is made.
+
+| quantity | `edf` (D114) | **`llf`** |
+|---|---|---|
+| decisions | 6,861 | 6,600 |
+| releases | 5,452 | 5,648 |
+| releases per period, med / p90 / max | 1 / 2 / 4 | 1 / 2 / 4 |
+| in-flight max | 4 | 4 |
+| **robot questions released before their deadline, of 29** | **9** | **20** |
+| units skipped as hopeless | n/a, no skip rule | **2,213** (2,204 instants, 9 recall pieces) |
+
+**Least laxity does what work-conserving release could not.** D114 removed the release ceiling
+and robot questions still fell from 11 to 9 of 29, because EDF's deadline order always puts a
+dashcam instant ahead of a question. Ordering by laxity instead takes that to **20 of 29**, which
+is the answer to reviewer question (a): the starvation was an artefact of the ordering key, not of
+capacity.
+
+**And the price is explicit.** llf sheds **2,204 of the roughly 6,490 offered dashcam instants**,
+about a third, by declaring them hopeless and letting them fall to the device. That is exactly the
+"drop requests that can no longer make it" the reviewer asks for, and it is a real cost, not a
+free win: those instants are served locally at lower quality. **Whether trading a third of the
+dashcam instants for eleven more robot questions is a good trade is an OUTCOME question that only
+the scorer can answer, and it is not answered here.** The 9 skipped recall pieces are the
+questions llf judged unreachable even with priority.
+
+The skip count is also a measurement of the workload, not just the arm: instants go hopeless
+because 10.82 are offered per second against a service capacity near 10, so a backlog forms and
+backlogged instants cross their own deadlines. llf is the first arm that reports this rather than
+serving them late.
+
+### F6.4 Six-check consistency protocol
+
+1. **Cross-check against committed measurements.** Every existing arm reproduces its D114 replay
+   figure exactly, which is the byte-identity result itself. `edf`'s 9 of 29 reproduces section
+   E5. The 29 robot questions and 10.82 instants per second reproduce H6 and E7.
+2. **Physical plausibility.** `S_hat` is quoted from committed curves, not fitted: 0.1422 s per
+   instant and 3.907 s of prefill for a 17,581-token history, the latter at the committed
+   4,500 tok/s for the nearest measured size. Nothing here implies a rate faster than the
+   committed curves, and llf's 5,648 releases over 600 s is 9.41 per second, still under the
+   10.87 offered.
+3. **Distribution sanity.** Releases per period are reported as median, p90 and max; skips are
+   broken out by kind rather than given as one total.
+4. **Definition audit.** "Laxity" is defined once as `deadline - now - S_hat` with each S_hat term
+   tied to its committed source line. "Released before deadline" uses the same definition as E5,
+   so the 9-against-20 comparison is like for like. "In flight" is Pi0Edf's definition, inherited
+   unchanged.
+5. **Claim linkage.** F6.3 bears on whether the policy's advantage survives a stronger baseline,
+   the study's central comparison. It WEAKENS any reading of the D114 gap as the policy's merit,
+   because a baseline that only changes its ordering key more than doubles the robot questions it
+   releases. That is the point of building these arms before round 1 rather than after.
+6. **Proxy validity.** Two proxies, both labelled. Release counts are a proxy for service and are
+   NOT outcomes; the scorer owns outcomes. And `unbuilt` is derived from readiness, exact for the
+   named whole arm and approximate for the unnamed piece variants, per F1.
+
+### F6.5 Limitations
+
+1. One trace, one seed, one fleet size, and a dry run whose service times come from the cost
+   model rather than a server.
+2. llf's skip rule is evaluated against committed MEDIAN curves. A unit whose true service time
+   exceeds the median may be released and still miss; a unit below it may be skipped
+   unnecessarily. No variance is modelled, because the committed curves are medians.
+3. `vllm-priority` was NOT run against a server. Its priorities are verified by test, and the
+   engine behaviour in F3 is read from source, not measured. Whether priority scheduling helps or
+   thrashes under preemption is open and needs the H100.
+4. Neither arm is in any run plan, so neither has a scored outcome of any kind.
