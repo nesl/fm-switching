@@ -77,7 +77,11 @@ def dead_writers() -> List[Dict[str, Any]]:
     for fn, writes in (("bump_z", "Device.z"), ("update_deficit", "Device.z via bump_z")):
         callers = []
         for p, t in text_by_file.items():
-            for m in re.finditer(r"(?<![\w.])%s\s*\(" % re.escape(fn), t):
+            # A METHOD call (`dev.bump_z(...)`) must match too. An earlier version of this check
+            # used a negative lookbehind on "." and so reported `bump_z` dead while the v1.1
+            # deficit update was calling it; that was a false negative of this tool, recorded as
+            # erratum E1 in the report.
+            for m in re.finditer(r"(?<![\w])%s\s*\(" % re.escape(fn), t):
                 line = t[:m.start()].count("\n") + 1
                 ctx = t.split("\n")[line - 1]
                 if ctx.strip().startswith("def "):

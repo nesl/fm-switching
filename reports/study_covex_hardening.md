@@ -81,7 +81,152 @@ Two scenarios carry a stated realisability caveat, recorded now rather than afte
 
 ## 2. Part 1 AUDITS
 
-Filled in below from `results/orchestration/live2/covex_harden/audits_v10.json`.
+Run in an ISOLATED GIT WORKTREE pinned to commit `b2dbff2`, whose parent is session 1's
+`13e357f`. **This matters: session 1 edits the same working tree, and my first audit pass ran
+while 78 lines of its uncommitted edits to `rollout.py`, `coordinator.py`, `flags.py` and
+`arms_policy.py` were present.** That pass was discarded and everything below was re-run against
+the pinned checkout, so no result here mixes in half-finished code. Every switch OFF.
+
+The channel decomposition is self-checked: `delta_j` equals the seven channels summed to within
+**4.4e-16 over 27,589 candidates**, so the split below is arithmetic and not an estimate.
+
+### 2.1 Blind-spot audit (1a). The fraction of candidates where a channel is EXACTLY zero
+
+Fleet trace, seed 0, 8 devices, 600 s. Reads: 1.0 means the channel is exactly zero for every
+candidate of that kind.
+
+| candidate kind | n | DeltaJ == 0 | sh_own | sh_harm | rc_util | **z** | cont | **sv** | backlog |
+|---|---|---|---|---|---|---|---|---|---|
+| `piece_release` | 3,395 | 0.079 | 1.0 | 0.961 | **0.999** | **1.0** | **0.999** | **1.0** | 0.118 |
+| `state_promote_rebuild` | 17,231 | 0.197 | 1.0 | 0.710 | **1.000** | **1.0** | **0.999** | **1.0** | 0.197 |
+| `recall_admit` | 20 | 0.0 | 1.0 | 1.0 | 0.700 | **1.0** | 0.300 | **1.0** | 0.100 |
+| `sh_admit` | 4,322 | 0.0 | 0.0 | 1.0 | 1.0 | **1.0** | 1.0 | **1.0** | 0.485 |
+| `sh_dispatch` | 2,621 | 0.0 | 0.0 | 0.627 | 1.0 | **1.0** | 1.0 | **1.0** | 0.991 |
+
+**F-A1 (HIGH). Every benefit channel is structurally dead for the robot-relevant kinds, while
+both cost channels are live.** For `piece_release` and `state_promote_rebuild`, which together
+are 20,626 of the 27,589 candidates, the deficit is exactly zero always, the state value is
+exactly zero always, and the RC utility and continuation value are exactly zero in 99.9 percent
+of candidates. The only channels that move are `sh_harm` and `backlog`, and both are COSTS.
+**A decision assembled from live costs and dead benefits can only come out zero or negative.**
+This is the whole robot failure in one table, and it is stronger than the per-term findings
+already in `study_live2_coord.md`.
+
+**F-A2 (HIGH). `sv_delta`, spec 5.3's state value, is exactly zero for EVERY candidate of EVERY
+kind, 27,589 of 27,589.** The state value never differs between the two branches of any
+counterfactual, so it cannot influence any decision at all. From the code: `_terminal` recomputes
+`state_value` from `dev.history` and the device's demand, and no candidate action modifies either
+within the horizon, so the two branches compute the same sum. Proposed fix for session 1: either
+make a candidate's effect on residency visible to `state_value`, or record in the spec map that
+5.3's state value is inert in round 1. **Not implemented here.**
+
+**F-A3 (HIGH). The deficit channel is exactly zero in 27,589 of 27,589 candidates**, confirming
+session 1's V1 and V8.1 at every candidate kind rather than only for recall. With B1 on, `z`
+rises on the device but `_z_term` aggregates only over the `opps` rows, and before the RC tail
+those rows carry `task="SH"` only, so `(device, "RC")` never enters the sum.
+
+### 2.2 Wiring and scale audit (1c)
+
+**Erratum E1, against my own tool.** The first version of the dead-writer check used a negative
+lookbehind on "." and therefore matched only bare calls, so it reported `bump_z` as having NO
+production caller while session 1's B1 was calling `dev.bump_z(...)` from `arms_policy.py:307`.
+The regex is corrected and the finding is restated below. The original wrong output is recorded
+here rather than quietly replaced.
+
+| writer | production callers | dead? |
+|---|---|---|
+| `Device.bump_z` | `live2/arms_policy.py:307` (B1), `policy/coordinator.py:719` | no |
+| **`Coordinator.update_deficit`** | **none** | **yes** |
+
+**F-A4 (medium). `Coordinator.update_deficit` is still dead.** `spec_map.py` names it as the code
+that implements spec 3.3 and 7.6, and B1 wired the arm straight to `bump_z` instead, so the
+documented entry point has no caller. Not a behaviour defect, since B1 does update the counter,
+but the spec map now points at dead code. Proposed fix: either route B1 through
+`update_deficit` or amend the spec map.
+
+Fields READ but never WRITTEN in production (extending session 1's list, with its two now
+resolved by F1 and B1):
+
+| field | declaration | reads | note |
+|---|---|---|---|
+| `Device.controller` | `Any = None` | 1 | no controller is ever attached |
+| `HistoryBelief.unsent_frames` | `int = 0` | 1 | pinned at zero |
+| `Job.p_finish` | `float = 1.0` | 2 | both occurrences are documentation strings in `spec_map.py`, so nothing reads it in logic: a DEAD FIELD |
+
+Fields WRITTEN but never READ:
+
+| field | writes | note |
+|---|---|---|
+| **`Link.reachable`** | 3 | **F-A5 (medium).** Written in three places and read nowhere; the policy reads `p_reachable_within_hs` instead. Either the write is pointless or the wrong field is being read |
+| `Opportunity.device_utility` | constructor only | set and never read |
+| `Opportunity.served_by` | constructor only | set and never read |
+
+**F-A6 (HIGH). Every DeltaJ term on one scale, which shows the benefits are dwarfed by one to
+two orders of magnitude.** Absolute values, fleet trace at 8 devices:
+
+| kind | term | p50 abs | p90 abs | max abs | range |
+|---|---|---|---|---|---|
+| `state_promote_rebuild` (17,231) | **backlog** | **1.084** | **2.071** | 2.596 | -2.596 to 0.078 |
+| | rc_util | 0.0 | 0.0 | 0.083 | -0.083 to 0.0 |
+| | cont | 0.0 | 0.0 | **0.035** | -0.035 to 0.035 |
+| | sh_harm | 0.0 | 0.069 | 0.203 | -0.203 to 0.0 |
+| | z, sv | 0.0 | 0.0 | **0.0** | dead |
+| `recall_admit` (20) | **backlog** | 0.138 | **1.474** | 3.152 | -3.152 to 0.0 |
+| | cont | **0.035** | 0.035 | 0.035 | 0 to 0.035 |
+| | rc_util | 0.0 | 0.083 | 0.083 | 0 to 0.083 |
+| `sh_admit` (4,322) | sh_own | **0.055** | 0.069 | 0.089 | 0.044 to 0.089 |
+| | backlog | 0.205 | 0.205 | 0.205 | -0.205 to 0.143 |
+
+**The median backlog charge on a rebuild promotion, 1.084, is 31 times the largest continuation
+credit that exists (0.035) and 13 times the largest RC utility (0.083).** No deficit scaling at
+these magnitudes can flip such a decision, which is the quantitative reason B1 changed nothing
+and the RC tail moved only two or three questions. By contrast `sh_admit` has its own gain
+(p50 0.055) within a factor of four of its backlog charge, and SH is served.
+
+### 2.3 Assumption-versus-reality audit (1b)
+
+| assumption in the model | reality | gap, where measurable |
+|---|---|---|
+| **`competing_s = 0`**: the continuation schedule assumes the job has the engine to itself | the engine is shared with up to 4,322 dashcam instants per 600 s | session 1 measured the consequence: `p_finish` is pinned at 1 and the PRIORITY class is unreachable, so A3 is inert. My S1-against-S2 pair bounds it: the SAME question is served on an idle engine and refused with 8 dashcams |
+| **pi_0 progresses deferred jobs** in the reference branch | nothing in the live arm releases those pieces | session 1's trace: action progress `{}` against reference progress `{job: 2}`, `delta_j = -0.634` |
+| the deficit reaches the objective | `_z_term` sums only over `opps` rows | zero in 27,589 of 27,589 candidates (F-A3) |
+| spec 5.3's state value discriminates | it is identical in both branches | zero in 27,589 of 27,589 (F-A2) |
+| `HistoryBelief.staleness_s` carries catch-up cost | it was never written before F2 | F2 now writes it; session 1 measured 316 and 353 decisions moving at 4 and 8 devices |
+| a history can be believed HOST-WARM | I could not drive one from the trace interface | **S6 NOT REALISABLE: observed readiness stayed COLD under 12 dashcams of pressure.** Either host offload does not occur in a dry run, or it needs a condition the trace cannot express |
+| eviction chooses between warm histories | no eviction occurred under my pressure | **S9 NOT REALISABLE** |
+
+## 3. Part 2 RESULTS
+
+Pass/fail against the expectations pre-registered in section 1, which were committed first and
+are not restated here. `n/a` is a scenario reported NOT REALISABLE under its pre-registered
+caveat, not a silent pass.
+
+| id | v1.0 | v1.1 (all four switches) | what happened |
+|---|---|---|---|
+| S1 | **PASS** | **PASS** | released at 42.7 s against a 45.0 s deadline, idle engine |
+| S2 | **FAIL** | **FAIL** | not served at all, AND dashcam releases are 888 against 888 in the paired run, so **the question cost nothing and gained nothing: it was simply invisible** |
+| S3 | PASS | PASS | declined, with 1 decline recorded. Passes on the DISJUNCTIVE branch "declined at admission", not by serving |
+| S4a | **FAIL** | **FAIL** | neither pieces nor a whole rebuild released, not served. MOT1 measured P2048 achieving 0 extra missed with the robot answered at 3.37 s |
+| S4b | PASS | PASS | not served, no admit-then-starve. The pre-registered expectation allows this, since MOT1 shows no option serves both |
+| S4c | **FAIL** | **FAIL** | roomy host (256 GiB), still not served and no session action taken. MOT1 measured HOST-WARM achieving 0 extra missed AND a 0.686 s answer |
+| S5 | **FAIL** | **PASS** | v1.0 starved both questions; v1.1 serves both at 42.7 s. **The only scenario the v1.1 switches fix** |
+| S6 | n/a | n/a | NOT REALISABLE: readiness stayed COLD |
+| S7 | PASS | PASS | 27,031-token history, no release, no GPU charged |
+| S8 | PASS | PASS | instants arriving after their own deadline: 0 of 120 sent |
+| S9 | n/a | n/a | NOT REALISABLE: no eviction occurred |
+| S10 | PASS | PASS | 40 dashcams and 3 robots: 830 decisions, 0 defers, no unbounded growth |
+| S11 | PASS | PASS | preloaded history, served |
+| S12 | PASS | PASS | deadline already passed, 0 releases |
+| **totals** | **8 of 12 scored** | **9 of 12 scored** | 2 not realisable in both |
+
+**The three remaining failures are all the same thing: a robot question is refused whenever
+dashcams are present, at loads MOT1 measured as serving both.** S1 against S2 isolates it to the
+load, not the history size, the deadline or the memory tier, since only the dashcam count differs
+between them. S4c shows a roomy host does not help either.
+
+**Two passes should be read narrowly.** S3 and S4b pass on the "declined at admission" branch of
+a disjunctive expectation, which the pre-registration permits precisely because MOT1 shows no
+option serves both at heavy load. They are not evidence of good service.
 
 ## 3. Part 2 RESULTS
 
@@ -89,8 +234,86 @@ Filled in below.
 
 ## 4. Part 3 OFFLINE COMPARISON
 
-Filled in below.
+**A SCREEN, NOT EVIDENCE, and it is OPTIMISTIC FOR COVEX.** The dry run prices the engine from
+the SAME committed cost curves COVEX's own model uses, so its predictions and the simulated world
+cannot disagree. No baseline that does not model the engine is given that advantage. Nothing here
+may be cited as a result.
+
+Seed 0, 600 s, tight memory, 50 : 50, pinned commit `b2dbff2`. The committed scorer RAN without
+refusing on these runs. Robot and dashcam figures below are RELEASE counts, a proxy for service.
+
+| n | arm | robot on time | of | robot fraction | dashcam fraction | dashcam released |
+|---|---|---|---|---|---|---|
+| 4 | **policy-core v1.0** | 1 | 9 | **0.111** | 0.999 | 2,174 |
+| 4 | **policy-core v1.1** | 2 | 9 | **0.222** | 0.978 | 2,128 |
+| 4 | edf | 8 | 9 | 0.889 | 0.999 | 2,174 |
+| 4 | llf | 7 | 9 | 0.778 | 0.999 | 2,174 |
+| 4 | always-cloud-fcfs | 9 | 9 | **1.000** | 0.999 | 2,174 |
+| 4 | device-only | 0 | 9 | 0.0 | 0.0 | 0 |
+| 8 | **policy-core v1.0** | 0 | 20 | **0.000** | **0.487** | 2,107 |
+| 8 | **policy-core v1.1** | 3 | 20 | **0.150** | 0.927 | 4,008 |
+| 8 | edf | 11 | 20 | 0.550 | 0.999 | 4,322 |
+| 8 | llf | 18 | 20 | 0.900 | 1.000 | 4,324 |
+| 8 | always-cloud-fcfs | 20 | 20 | **1.000** | 1.000 | 4,324 |
+| 16 | **policy-core v1.0** | 0 | 35 | **0.000** | **0.075** | 657 |
+| 16 | **policy-core v1.1** | 7 | 35 | **0.200** | 0.449 | 3,910 |
+| 16 | edf | 8 | 35 | 0.229 | 0.626 | 5,457 |
+| 16 | llf | 21 | 35 | 0.600 | 0.658 | 5,732 |
+| 16 | always-cloud-fcfs | 30 | 35 | **0.857** | 0.913 | 7,959 |
+| 16 | device-only | 0 | 35 | 0.0 | 0.0 | 0 |
+
+**F-A7 (HIGH, and the most serious finding in this study). policy-core is last among the cloud
+arms on robot service at EVERY size, and at 8 and 16 devices it is also worse than every cloud
+baseline on DASHCAMS.** v1.0 releases only 48.7 percent of dashcam instants at 8 devices and
+**7.5 percent at 16**, against edf's 99.9 and 62.6 percent. v1.1 repairs much of that, to 92.7
+and 44.9 percent, but remains below edf at both sizes. **So this is not a robots-against-dashcams
+trade-off: at 8 and 16 devices COVEX is behind on both axes at once.** The earlier diagnosis
+looked at robot service alone and so could not see this.
+
+`llf` is the strongest deadline-aware baseline here, at 0.778, 0.900 and 0.600 robot fraction
+while holding dashcams at or above edf.
+
+**A caution about the screen's own generosity.** `always-cloud-fcfs`, which has no admission
+control at all, comes out best or joint-best on both axes at every size. That is a property of
+the dry run rather than of the arm: the modelled engine absorbs everything sent to it, so an arm
+that sends everything cannot be punished. It is the clearest possible demonstration that this
+comparison is a screen. It does not rescue COVEX, though, because COVEX loses to arms that are
+disadvantaged in exactly the same way.
 
 ## 5. GATE (D124)
 
-Filled in below.
+**Both halves of the gate FAIL.**
+
+**Half one: are all behaviour tests passing for the latest v1.1 switch set? NO: 9 of 12 scored
+scenarios pass, 3 fail.**
+
+| scenario | v1.1 verdict |
+|---|---|
+| S1, S3, S4b, S5, S7, S8, S10, S11, S12 | PASS (9) |
+| **S2** | **FAIL**, one robot question with 8 dashcams: not served, and the dashcams lose nothing, so the question was invisible |
+| **S4a** | **FAIL**, MOT1 light_tight: no pieces released and not served, where MOT1 measured 0 extra missed with the robot answered at 3.37 s |
+| **S4c** | **FAIL**, MOT1 heavy_roomy: not served even with a 256 GiB host, where MOT1 measured HOST-WARM achieving 0 extra missed AND a 0.686 s answer |
+| S6, S9 | n/a, NOT REALISABLE under their pre-registered caveats |
+
+**Half two: is the offline comparison at least as good as the best baseline at every size? NO,
+at every size, on both axes.**
+
+| n | best baseline robot fraction | policy-core v1.1 | verdict | best baseline dashcam fraction | policy-core v1.1 | verdict |
+|---|---|---|---|---|---|---|
+| 4 | 1.000 (always-cloud-fcfs) | 0.222 | **FAIL** | 0.999 | 0.978 | **FAIL** |
+| 8 | 1.000 (always-cloud-fcfs) | 0.150 | **FAIL** | 1.000 | 0.927 | **FAIL** |
+| 16 | 0.857 (always-cloud-fcfs) | 0.200 | **FAIL** | 0.913 | 0.449 | **FAIL** |
+
+Against the strongest DEADLINE-AWARE baseline, `llf`, rather than the unconstrained one, the
+verdict is the same at every size: 0.778 against 0.222, 0.900 against 0.150, 0.600 against 0.200.
+
+**Recommendation to the user: v1.1-fast should not start.** Speed work preserves decisions by
+construction, and the decisions are what is failing. Two of the three failing scenarios are cases
+MOT1 MEASURED as serving both workloads, so they are not impossible trade-offs; and F-A7 shows
+dashcam service is also behind, so there is no axis on which the current policy is ahead.
+
+The findings I judge most urgent for session 1, in order: **F-A6** (benefits are 13 to 31 times
+smaller than the costs they must overcome, which bounds what any further credit channel can
+achieve), **F-A1 and F-A2** (every benefit channel is dead for the robot-relevant kinds, and
+spec 5.3's state value is dead for all 27,589 candidates), and **F-A7** (the dashcam collapse at
+8 and 16 devices, which no previous report measured).

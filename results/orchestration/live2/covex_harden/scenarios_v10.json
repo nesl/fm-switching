@@ -1,0 +1,293 @@
+{
+ "check": "covex_harden_scenarios",
+ "is_measurement": false,
+ "label": "DRY RUN, SCREENING. Crafted event lists through the committed coordinator with dry_run=True: no GPU, no model server, no engine. Expectations were pre-registered and committed before COVEX was run against them.",
+ "git_commit": "b2dbff25c223984942d642ef3509da902bc9215e",
+ "switch_label": "v1.0",
+ "switches_on": [],
+ "unsupported_switches": [],
+ "n_scored": 12,
+ "n_passed": 8,
+ "n_not_realisable": 2,
+ "scenarios": {
+  "S1": {
+   "pass_": true,
+   "note": "released at 42.7 against deadline 45.0",
+   "outcome": {
+    "opportunity_id": "rob000/s0/play0|q0",
+    "t_ask": 40.0,
+    "deadline_abs": 45.0,
+    "history_tokens": null,
+    "released_at": 42.7,
+    "release_kinds": [
+     "release_recall"
+    ],
+    "released_before_deadline": true,
+    "n_releases": 1,
+    "n_declines_in_run": 0
+   },
+   "expect": "released_before_deadline",
+   "expect_detail": "the single question is released before t_ask + 5 s",
+   "scenario": "one robot question, no dashcams, cold 11k history, 5 s deadline"
+  },
+  "S2": {
+   "pass_": false,
+   "note": "released=False at None; dashcam releases 888 against 888 paired, so 0 fewer",
+   "outcome": {
+    "opportunity_id": "rob000/s0/play0|q0",
+    "t_ask": 40.0,
+    "deadline_abs": 45.0,
+    "history_tokens": null,
+    "released_at": null,
+    "release_kinds": [],
+    "released_before_deadline": false,
+    "n_releases": 0,
+    "n_declines_in_run": 1
+   },
+   "dashcam_releases": 888,
+   "dashcam_releases_paired": 888,
+   "fewer": 0,
+   "expect": "released_before_deadline",
+   "expect_detail": "served, with few or no dashcam instants lost against the paired no-question run",
+   "scenario": "the same with 8 dashcams (light load)"
+  },
+  "S3": {
+   "pass_": true,
+   "note": "served=False, any release=False, declines=1. admit-then-starve=False",
+   "outcome": {
+    "opportunity_id": "rob000/s0/play0|q0",
+    "t_ask": 40.0,
+    "deadline_abs": 45.0,
+    "history_tokens": null,
+    "released_at": null,
+    "release_kinds": [],
+    "released_before_deadline": false,
+    "n_releases": 0,
+    "n_declines_in_run": 1
+   },
+   "admit_then_starve": false,
+   "expect": "served_or_declined_at_admission",
+   "expect_detail": "either served, or declined at admission; NEVER admitted then deferred past its deadline",
+   "scenario": "20 dashcams (heavy load), tight host"
+  },
+  "S4a": {
+   "pass_": false,
+   "note": "pieces=False whole=False served=False",
+   "outcome": {
+    "opportunity_id": "rob000/s0/play0|q0",
+    "t_ask": 40.0,
+    "deadline_abs": 45.0,
+    "history_tokens": null,
+    "released_at": null,
+    "release_kinds": [],
+    "released_before_deadline": false,
+    "n_releases": 0,
+    "n_declines_in_run": 1
+   },
+   "kinds": {
+    "release_monitor": 888,
+    "decline": 1
+   },
+   "pieces": false,
+   "whole": false,
+   "expect": "pieces_chosen",
+   "expect_detail": "a MATERIALIZE carrying a slice (pieces), the measured best at 0 extra missed",
+   "scenario": "MOT1 light_tight reproduced"
+  },
+  "S4b": {
+   "pass_": true,
+   "note": "no option serves both; served=False, admit-then-starve=False, dashcam releases=827",
+   "outcome": {
+    "opportunity_id": "rob000/s0/play0|q0",
+    "t_ask": 40.0,
+    "deadline_abs": 45.0,
+    "history_tokens": null,
+    "released_at": null,
+    "release_kinds": [],
+    "released_before_deadline": false,
+    "n_releases": 0,
+    "n_declines_in_run": 1
+   },
+   "kinds": {
+    "release_monitor": 827,
+    "decline": 1
+   },
+   "admit_then_starve": false,
+   "dashcam_releases": 827,
+   "expect": "knowing_tradeoff",
+   "expect_detail": "no option serves both; any outcome passes except admit-then-starve, and the trade-off is reported",
+   "scenario": "MOT1 heavy_tight reproduced"
+  },
+  "S4c": {
+   "pass_": false,
+   "note": "roomy host: served=False, session actions=0, pieces=False whole=False",
+   "outcome": {
+    "opportunity_id": "rob000/s0/play0|q0",
+    "t_ask": 40.0,
+    "deadline_abs": 45.0,
+    "history_tokens": null,
+    "released_at": null,
+    "release_kinds": [],
+    "released_before_deadline": false,
+    "n_releases": 0,
+    "n_declines_in_run": 1
+   },
+   "kinds": {
+    "release_monitor": 827,
+    "decline": 1
+   },
+   "session_actions": 0,
+   "expect": "reload_or_keep_warm",
+   "expect_detail": "keeps the history resident or reloads from host rather than rebuilding",
+   "scenario": "MOT1 heavy_roomy reproduced"
+  },
+  "S5": {
+   "pass_": false,
+   "note": "served 0 of 2; release times [None, None]",
+   "outcomes": [
+    {
+     "opportunity_id": "rob000/s0/play0|q0",
+     "t_ask": 40.0,
+     "deadline_abs": 45.0,
+     "history_tokens": null,
+     "released_at": null,
+     "release_kinds": [],
+     "released_before_deadline": false,
+     "n_releases": 0,
+     "n_declines_in_run": 0
+    },
+    {
+     "opportunity_id": "rob001/s0/play0|q0",
+     "t_ask": 40.0,
+     "deadline_abs": 45.0,
+     "history_tokens": null,
+     "released_at": null,
+     "release_kinds": [],
+     "released_before_deadline": false,
+     "n_releases": 0,
+     "n_declines_in_run": 0
+    }
+   ],
+   "served": 0,
+   "expect": "no_starvation",
+   "expect_detail": "both released before their deadlines, or one declined at admission with the other served",
+   "scenario": "two robot questions at once, both cold"
+  },
+  "S6": {
+   "pass_": null,
+   "realisable": false,
+   "note": "NOT REALISABLE from the trace interface: observed readiness {'rob000/s0/play0': 'COLD'}, never HOST-WARM, so the scenario is not scored (caveat pre-registered)",
+   "tiers": {
+    "rob000/s0/play0": "COLD"
+   },
+   "outcome": {
+    "opportunity_id": "rob000/s0/play0|q0",
+    "t_ask": 55.0,
+    "deadline_abs": 60.0,
+    "history_tokens": null,
+    "released_at": null,
+    "release_kinds": [],
+    "released_before_deadline": false,
+    "n_releases": 0,
+    "n_declines_in_run": 1
+   },
+   "expect": "reload_not_rebuild",
+   "expect_detail": "the released work is a host reload and the question is served",
+   "scenario": "a robot question whose history is host-warm"
+  },
+  "S7": {
+   "pass_": true,
+   "note": "infeasible history: releases=0, declines=0, served=False",
+   "outcome": {
+    "opportunity_id": "rob000/s0/play0|q0",
+    "t_ask": 40.0,
+    "deadline_abs": 45.0,
+    "history_tokens": null,
+    "released_at": null,
+    "release_kinds": [],
+    "released_before_deadline": false,
+    "n_releases": 0,
+    "n_declines_in_run": 0
+   },
+   "expect": "declined_at_admission",
+   "expect_detail": "declined at admission and no GPU work charged to it",
+   "scenario": "a robot question infeasible even on an idle engine (about 27k tokens)"
+  },
+  "S8": {
+   "pass_": true,
+   "note": "instants arriving after their own deadline: 0 sent",
+   "monitor_releases": 0,
+   "monitor_offered": 121,
+   "expect": "not_sent",
+   "expect_detail": "the instant is not sent to the cloud",
+   "scenario": "a dashcam instant with zero or negative calibrated gain"
+  },
+  "S9": {
+   "pass_": null,
+   "realisable": false,
+   "note": "NOT REALISABLE: no eviction occurred under this pressure, so the choice the scenario exists to test was never made (caveat pre-registered)",
+   "evictions": 0,
+   "expect": "keeps_higher_value",
+   "expect_detail": "keeps the higher expected value, with both numbers reported",
+   "scenario": "memory pressure where keeping one history warm evicts another"
+  },
+  "S10": {
+   "pass_": true,
+   "note": "overload: 830 decisions, 0 defers; queue growth reported rather than asserted",
+   "decisions": 830,
+   "defers": 0,
+   "expect": "bounded_queues",
+   "expect_detail": "the pending set does not grow without limit over the run",
+   "scenario": "sustained overload above engine capacity"
+  },
+  "S11": {
+   "pass_": true,
+   "note": "served=True, readiness at end {'rob000/s0/play0': 'COLD'}",
+   "outcome": {
+    "opportunity_id": "rob000/s0/play0|q0",
+    "t_ask": 50.0,
+    "deadline_abs": 55.0,
+    "history_tokens": null,
+    "released_at": 52.7,
+    "release_kinds": [
+     "release_recall"
+    ],
+    "released_before_deadline": true,
+    "n_releases": 1,
+    "n_declines_in_run": 0
+   },
+   "tiers": {
+    "rob000/s0/play0": "COLD"
+   },
+   "expect": "served_without_rebuild",
+   "expect_detail": "served, and no rebuild work released for it",
+   "scenario": "a question whose history is already fully built (GPU-warm)"
+  },
+  "S12": {
+   "pass_": true,
+   "note": "deadline already passed: releases=0",
+   "outcome": {
+    "opportunity_id": "rob000/s0/play0|q0",
+    "t_ask": 40.0,
+    "deadline_abs": 40.001,
+    "history_tokens": null,
+    "released_at": null,
+    "release_kinds": [],
+    "released_before_deadline": false,
+    "n_releases": 0,
+    "n_declines_in_run": 0
+   },
+   "expect": "not_released",
+   "expect_detail": "not released at all",
+   "scenario": "a question whose deadline has already passed when first seen"
+  }
+ },
+ "_provenance": {
+  "git_commit": "b2dbff25c223984942d642ef3509da902bc9215e",
+  "script": "policy/tests/hardening/run_scenarios.py",
+  "model": "none (pol4 cost curve, frozen)",
+  "device": "flash CPU only",
+  "n": "14 crafted scenarios, development data only",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}
