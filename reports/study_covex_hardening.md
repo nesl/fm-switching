@@ -1810,3 +1810,62 @@ members than its arm count suggests, so "seven in-scope arms at 33 to 35 robots"
 independent evidence behind the bar. It does not change the bar's height, since the value is
 reproduced by `eco-llm` independently. Flagged to session 3 as something to explain or collapse,
 not as a defect in my scoring.
+
+# 20. THE 10/12/14 BAND, capacity components. DASHCAM IS SOLVED, THE ROBOT POOL IS THE WHOLE GAP
+
+Re-read of the D131 grid in the band the crossover result identifies, split into the two halves of
+the D71/D82 conjunct. No new runs: this is the same 196 cells, broken out.
+
+`D+` means every eligible dashcam device meets its target; `R+` means the robot pool meets 0.90.
+
+| n | arm | seed 0 | seed 4 | seed 5 | seed 6 |
+|---|---|---|---|---|---|
+| 10 | v1.3-fast | D+ R- 0.429 | D+ R- 0.481 | D+ R- 0.556 | D+ R- 0.353 |
+| 10 | llf | D+ R- 0.810 | D+ R- 0.889 | D+ R- 0.889 | D+ R- 0.882 |
+| 10 | eco-llm | **D+ R+ 0.952** | **D+ R+ 0.926** | **D+ R+ 0.963** | D+ R- 0.882 |
+| 12 | v1.3-fast | D+ R- **0.074** | D+ R- 0.414 | D+ R- 0.375 | D+ R- 0.350 |
+| 12 | llf | D+ R- 0.481 | D+ R- 0.414 | D+ R- 0.563 | D+ R- 0.600 |
+| 12 | eco-llm | **D+ R+ 0.926** | D+ R- 0.897 | **D+ R+ 0.969** | D+ R- 0.850 |
+| 14 | v1.3-fast | D+ R- 0.382 | D+ R- 0.256 | D+ R- 0.353 | D+ R- 0.207 |
+| 14 | llf | D+ R- 0.206 | D+ R- 0.333 | D+ R- 0.294 | D+ R- 0.414 |
+| 14 | eco-llm | **D+ R+ 0.941** | **D+ R+ 0.949** | D+ R- 0.882 | D+ R- 0.897 |
+
+## 20.1 Three things session 1 can act on directly
+
+**1. DASHCAM IS SOLVED AND SHOULD NOT BE WORKED ON.** Every arm, every size, every seed in the band
+is `D+`. The conjunct is decided ENTIRELY by the robot pool. The dashcam target of 0.25 is met with
+room by arms whose dashcam fraction ranges from 0.84 to 0.999, so dashcam fraction differences
+between arms, which have consumed a lot of attention including mine, do not affect capacity at all
+in this band.
+
+**2. THE GAPS ARE OF COMPLETELY DIFFERENT SIZES, and that should set priorities.** Against the 0.90
+robot target:
+
+| arm | typical robot fraction in the band | gap to 0.90 |
+|---|---|---|
+| eco-llm | 0.85 to 0.97 | **0.00 to 0.05**, and it already passes 7 of 12 cells |
+| llf | 0.21 to 0.89 | 0.01 to 0.69, collapsing with size |
+| **v1.3-fast** | **0.07 to 0.56** | **0.34 to 0.83** |
+
+eco-llm misses by as little as **0.0034** (n=12 seed 4, 0.8966). COVEX needs to roughly DOUBLE its
+robot fraction to reach the target. These are not the same problem and a fix sized for one will not
+address the other.
+
+**3. A COVEX INSTABILITY WORTH DIAGNOSING: seed 0 at 12 devices is 0.074** against 0.414, 0.375 and
+0.350 on the other three seeds at the same size, a five-fold drop on one seed. Its neighbours in
+size on the same seed are 0.429 at n=10 and 0.382 at n=14, so it is not a trend, it is a single
+anomalous cell. That is the signature of a threshold being crossed rather than a gradual effect,
+and it is cheap to find because the cell is identified. It also means any v1.4 number quoted from
+seed 0 at 12 devices should be read with this in mind.
+
+## 20.2 What this says about where a v1.4 win is available
+
+The band is where the contest sits, and inside the band the published bar is NOT far away in
+absolute terms: eco-llm is within 0.05 of capacity in every cell it misses and already passes 7 of
+12. A policy that closed a 0.02 to 0.05 robot-pool gap would convert several band cells to capacity
+passes, which is a materially different claim from leading a fraction.
+
+For COVEX that is not the available win. Its gap is 0.34 to 0.83, and the queueing account of
+section 18 says the lever is release ordering rather than budget. The honest framing for v1.4 is
+that the first target is to stop losing to llf at 10 devices, where llf is at 0.81 to 0.89 and
+COVEX at 0.35 to 0.56, not to reach 0.90.
