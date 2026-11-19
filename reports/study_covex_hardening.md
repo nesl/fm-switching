@@ -163,6 +163,38 @@ NOT BY CORRECTNESS**, and it would not cancel on a different question mix. A rea
 the aggregate concludes the representations are equivalent; a reader who sees the categories
 concludes they are incomparable. **The second is true and the first is an artefact of this mix.**
 
+## REGIME LABEL: EVERY RESULT IN THIS REPORT IS REGIME 1. Do not compare it with Regime 2 numbers
+
+| | **Regime 1 (pre-`e924005`)** | **Regime 2 (current tree)** |
+|---|---|---|
+| `RecallAction.representation` | ignored; `_submit_recall` charged `est_tokens` | **read and charged** |
+| what an arm naming **no** representation gets | the whole history | **`min(467, history)`**, via `DEFAULTS["representation"] = "RECENT"` |
+| what an arm naming **D2** gets | the whole history | the whole history |
+| memory limit | **none enforced** | pending |
+
+**Everything in this report is Regime 1**, where representation was inert and **every arm received
+and was charged the whole history**. That is internally consistent, which is why the
+published-arms-beat-COVEX result and session 3's cost check (mooncake 79.5 recall GPU-s against
+llf's 31.6) stand: the asymmetry below did not exist when those comparisons were drawn.
+
+**On the current tree a DEFAULT splits the field.** `interface.py:59` sets
+`DEFAULTS["representation"] = "RECENT"`; `apply_defaults` fills it whenever a CLOUD decision names
+none; `Policy.__call__` runs it and `coordinator.py:249` calls the arm as a callable, so it is
+always applied. Measured: `builder-default` and `b7-edf-feasibility` emit CLOUD/None and **enact
+CLOUD/RECENT**, while `edf` emits and enacts CLOUD/D2.
+
+**The published baselines and builder arms are on one side of that line and the COVEX family is on
+the other**, because `arms.py:251`, `arms.py:411` and `arms_policy.py:843` name D2 explicitly.
+**My own census is the direct corroboration: `covex-v13` emits D2 on all 20 recalls and never
+RECENT** (section 34.2), which is the expensive side. Against histories of 5,431 to 14,881 with a
+maximum of 25,681, that is an **11.6x to 55x difference in evidence sent and charged, decided only
+by whether an arm names a representation.**
+
+**So a grid run on the current tree would hand the published arms a ten-to-fifty-fold cost
+advantage created by a default rather than by a design decision**, confounding every capacity
+cell, robot on-time figure and GPU-seconds comparison between the two families. The grid waits for
+the user's decision on it.
+
 ## TWO CAVEATS THAT QUALIFY EVERY NUMBER BELOW, on the bar and not in a footnote
 
 **1. EVERY DRY RESULT IN THIS REPORT WAS PRODUCED WITH NO MEMORY LIMIT.** `gpu_kv_tokens` is handed
@@ -3091,6 +3123,13 @@ arrives. That arm should be marked unmeasured.
 
 **The corrected list:** `naive` arms yes; **`b7` and `b10` no**, on this ground. `b10`'s rows stay
 INVALID for the separate and real reason in section 16.2, that it served zero monitors.
+
+**AMENDED after the default-representation finding:** `b7` IS unmeasured on the current tree, but
+for a different reason than the one I was given. It emits CLOUD naming **no** representation, so
+`apply_defaults` now enacts it as **RECENT at 467 tokens** where Regime 1 charged it the whole
+history. **The category plumbing does not touch it; the default does.** Getting the reason right
+matters, because a re-measure attributed to the category switch would show a large change and
+credit it to the wrong cause.
 
 **So the grid's dependency list does not grow by this item.** It remains the costing gate, memory
 pressure and the eco-llm reconciliation, plus the category switch for `naive` and for the policy's
