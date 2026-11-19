@@ -2171,3 +2171,64 @@ artefact of the switch never moving.
 This is the second absent link of the night after B2 and the fifth switch-plumbing fault in three
 nights, counting my own E7. The pattern is consistent enough that `switch_moves.py` should run on
 every new switch before it is scored, not after a suspicious null.
+
+# 25. D132 ITEM 2: BOTH DENOMINATORS. The eco-llm miss WAS arithmetic, and COVEX gains nothing
+
+242 cells, post-processed from runs already measured; no new runs. The feasible-only numerator is
+matched **by `opportunity_id`**, question by question, not derived by dividing a fraction by the
+ceiling. Output: `robot_denominators.json`.
+
+## 25.1 THE ECO-LLM 0.0034 MISS, answered by measurement
+
+At 12 devices, seed 4, the cell that missed capacity by 0.0034:
+
+| denominator | n | on time | fraction | capacity at p = 0.90 |
+|---|---|---|---|---|
+| all questions | 29 | 26 | 0.8966 | **FAIL** |
+| **feasible only** | **27** | **26** | **0.9630** | **PASS** |
+
+Two questions were physically undeliverable on an idle GPU, and eco-llm missed exactly those. Of
+the 27 feasible questions it delivered 26. **The miss was ARITHMETIC, not scheduling**, which is
+what I flagged as indicative in section 21.3 and declined to claim; it is now measured.
+
+## 25.2 Capacity cells met, ALL against FEASIBLE, at every p
+
+| arm | p=0.50 all / feas | p=0.75 all / feas | **p=0.90 all / feas** | cells |
+|---|---|---|---|---|
+| **eco-llm** | 23 / 23 | 19 / 19 | **11 / 19** | 30 |
+| mooncake | 19 / 21 | 19 / 19 | **10 / 18** | 30 |
+| llf | 8 / 9 | 6 / 6 | **1 / 5** | 30 |
+| edf C=8 | 7 / 7 | 6 / 6 | **1 / 5** | 30 |
+| **v1.3-fast** | 1 / 2 | 0 / 0 | **0 / 0** | 28 |
+
+At the headline p = 0.90, the correct denominator **nearly doubles every baseline's capacity
+passes**: eco-llm 11 to 19, mooncake 10 to 18, llf 1 to 5, edf 1 to 5.
+
+**v1.3-fast goes from 0 to 0.**
+
+## 25.3 The correction REMOVES COVEX's excuse rather than providing one
+
+COVEX's robot fraction under each denominator:
+
+| n | all | feasible | gain | infeasible excluded |
+|---|---|---|---|---|
+| 10 | 0.455 | 0.493 | +0.038 | 1.8 |
+| 12 | 0.303 | 0.332 | +0.028 | 2.2 |
+| 14 | 0.300 | 0.330 | +0.030 | 3.0 |
+| 16 | 0.344 | 0.381 | +0.038 | 3.8 |
+| 32 | 0.202 | 0.230 | +0.028 | 8.8 |
+
+The gain is **+0.03 everywhere**, which is what removing about 9.6 percent of impossible work from
+a denominator does to a fraction near 0.35. It leaves COVEX between 0.23 and 0.49 against a 0.90
+target.
+
+**So the feasible-only denominator settles a question that was genuinely open.** It was reasonable
+to suspect that COVEX's deficit was partly an artefact of being scored against undeliverable work,
+and that suspicion was the motivation for D132. It is not. **Every question COVEX fails to deliver
+beyond that +0.03 is schedulable work that another arm in the same cell delivers.** The gap is
+scheduling, not arithmetic, and the correction has made that conclusion stronger rather than
+weaker by removing the only alternative explanation.
+
+The honest summary of D132 as a whole: it rescued the published arms' near-misses, it roughly
+doubled the capacity pass counts for every scheduling baseline, and **it did not move COVEX at
+all.**
