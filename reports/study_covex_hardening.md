@@ -3117,11 +3117,23 @@ the first branch, not the cheapest-feasible fallback.
 
 ## 35.3 What IS affected, and what this changes
 
-**`naive.py` is genuinely affected.** `class_share.get(q.category, default)` returned the default
-for every query under the constant and will return per-category shares once a real category
-arrives. That arm should be marked unmeasured.
+**`naive.py` is NOT affected either, and I confirmed this myself after it was withdrawn.**
+`class_share` appears only inside `naive.py`: a constructor parameter defaulting to `None` and
+converted to `{}` at line 152. **No caller anywhere supplies it**, so
+`self.class_share.get(q.category, self.default_class_share)` at line 166 returns
+`default_class_share = 0.5` for every question, with or without a real category. The only other
+match in the tree is an unrelated `dominant_class_share` in the policy scorer.
 
-**The corrected list:** `naive` arms yes; **`b7` and `b10` no**, on this ground. `b10`'s rows stay
+**So the category plumbing changes NO BASELINE AT ALL.** Five claims relayed to me are withdrawn:
+that b7 and b10 change behaviour; that they never did what their cards describe; that
+`mooncake = b7` is reopened; that b7's base selection is compromised; and that `naive` changes
+behaviour. **What stands is the policy's own `QTYPE` pin**, which is StudyEVNEED section 2.4 and
+is mine.
+
+The cstate switch still lands and is the right construction, but its justification narrows to
+**a control for the policy's own change**, not "baselines need a control".
+
+**The corrected list:** none of them, on this ground. `b10`'s rows stay
 INVALID for the separate and real reason in section 16.2, that it served zero monitors.
 
 **AMENDED after the default-representation finding:** `b7` IS unmeasured on the current tree, but
@@ -3145,3 +3157,26 @@ B4's card describes a horizon-routing policy and live2 supplies question categor
 correctly written against a vocabulary the harness has never provided and the fix does not create.
 That is worth settling before B4 is scored, and it is the same class of defect as D2 against
 StudyR1's K1/K3 keys.
+
+## 35.4 THE DEFAULT IS A CLASS, NOT AN INSTANCE. A third member found
+
+`apply_defaults` fills **every** field a baseline leaves undecided, and three of those defaults are
+now known to be consequential rather than cosmetic:
+
+| default | value | consequence if applied |
+|---|---|---|
+| `representation` | **`"RECENT"`** | an arm naming none is charged `min(467, history)`; one naming D2 pays the whole history. **11.6x to 55x**, section 35.3 |
+| `REP_TOKEN_SCALE["D2"]` | **`1.0`** | naming D2 is indistinguishable from naming RICH **on cost**, so COVEX pays RICH prices for D2 content |
+| `session_action` | **`"OFFLOAD_TO_HOST"`** | non-naming arms issue offloads they never requested, setting `measured_tier` to `host` - the one condition where the unfixed residency path diverges, and offloads are exactly what pressure makes expensive |
+
+**Deciding these one at a time will not work.** Fixing the representation default alone leaves
+COVEX paying RICH prices for D2 content; fixing both of those leaves the session-action default
+injecting placement decisions under the pressure run that is meant to measure placement.
+
+**The general shape, and it is why this belongs beside the dead-channel catalogue:** a default is
+a decision taken on behalf of every arm that declines to take it. While a field is inert the
+default is invisible and costless; the moment the field is wired, **the default becomes policy for
+every arm that does not name the field**, and the arms that do name it are the ones that look
+expensive. **Wiring a dead channel does not only enable it: it activates every default that was
+dormant behind it.** That is worth checking for `order` and `desired_tier` before either is wired,
+since both have defaults in the same table.
