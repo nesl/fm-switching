@@ -104,6 +104,9 @@ class HybridArm:
         # feasible. Not a candidate default (judged on LH-REQ later).
         self.c3_always = bool(c3_always)
         self._risk_inflight: Dict[str, float] = {}       # query id -> deadline, released while at risk
+        # D140 C6 line: a robot for which the chooser picked "longer dashcam throttle" holds the throttle floor at 0
+        # until it completes or its deadline passes
+        self._long_throttle: Dict[str, float] = {}
         self._risk_seen: set = set()
         self.values = _quality_values() if any(self.sw.values()) else None
         self.cap, self._last_adj = 8, None
@@ -190,7 +193,7 @@ class HybridArm:
                     d = RecallAction(q.query_id, "CLOUD", representation="RECENT")
                     self.stats["c3_recent"] += 1
             if c6_live:
-                d = self._c6_one(q, d)
+                d = self._c6_one(q, d, at_risk=bool(self.defs == "v2" and risk))
             rec_dec[q.query_id] = d
             if self.defs == "v2" and self.sw["c2"] and risk:
                 pending_risk.append((q.query_id, float(q.deadline_s), d.decision == "CLOUD"))
@@ -262,7 +265,10 @@ class HybridArm:
         for qid, dl, released in pending_risk:
             if released:
                 self._risk_inflight[qid] = dl
-        on = bool(pending_risk) or bool(self._risk_inflight)
+        for qid, dl in list(self._long_throttle.items()):
+            if dl < now:
+                del self._long_throttle[qid]
+        on = bool(pending_risk) or bool(self._risk_inflight) or bool(self._long_throttle)
         if on:
             self.stats["c2_throttle_periods"] += 1
             for qid, _dl, _r in pending_risk:
@@ -274,10 +280,11 @@ class HybridArm:
     def live2_completed(self, info: Dict[str, Any]) -> None:
         """Only the v2 C2 throttle reads completions (a robot released at risk ends the throttle when it completes);
         b7 declares no live2_completed, so this cannot change the base's decisions (identity test)."""
-        if self._risk_inflight:
-            for k in (info.get("opportunity_id"), info.get("decision_id")):
-                if k in self._risk_inflight:
-                    del self._risk_inflight[k]
+        for store in (self._risk_inflight, self._long_throttle):
+            if store:
+                for k in (info.get("opportunity_id"), info.get("decision_id")):
+                    if k in store:
+                        del store[k]
 
     def _cap_dashcam_only(self, obs: Observation, items, throttle: bool = False, cap: Optional[int] = -1) -> set:
         """v2 C5: the cap counts and holds dashcam (episodic) traffic only; every robot item is kept. With the
@@ -287,7 +294,8 @@ class HybridArm:
         budget = max(cap_n - epi, 0)
         cap_budget = budget
         if throttle:
-            budget = min(budget, max(self.throttle_floor - epi, 0))
+            floor = 0 if self._long_throttle else self.throttle_floor
+            budget = min(budget, max(floor - epi, 0))
         if self.reserve and any(it["kind"] == "recall" and it["risk"] for it in items):
             budget = max(budget - 1, 0)
             self.stats["c5_reserve_applied"] += 1
@@ -321,7 +329,7 @@ class HybridArm:
             self._c6_last_error = repr(e)[:300]
             return False
 
-    def _c6_one(self, q, d: RecallAction) -> RecallAction:
+    def _c6_one(self, q, d: RecallAction, at_risk: bool = False) -> RecallAction:
         """Candidates for ONE robot question, proposed by the components: the C2/C3 choice is the default;
         the alternatives are send-now (full D2), hold (defer) and decline. Each is expressed in the mirror's
         own item ids as `Rollout.run` kwargs and simulated to the question's deadline by the chooser."""
@@ -339,7 +347,27 @@ class HybridArm:
         opts = dict(send=CH.Candidate(kind="send", rollout_kwargs=dict(release_now=ids), deadline_s=dl),
                     hold=CH.Candidate(kind="hold", rollout_kwargs=dict(exclude=ids), deadline_s=dl),
                     decline=CH.Candidate(kind="decline", rollout_kwargs=dict(drop=ids), deadline_s=dl))
-        mine = "send" if d.decision == "CLOUD" else ("hold" if d.decision == "DEFER" else "decline")
+        is_recent = d.decision == "CLOUD" and d.representation == "RECENT"
+        if at_risk or is_recent:
+            # D140 C6 line: an at-risk robot adds "RECENT now" and "longer dashcam throttle".
+            # RECENT now: in the rollout's own copy only, the question's job becomes a RECENT job (one piece of
+            # RECENT_TOKENS, valued by the profile's RECENT accuracy via job.rep), released now; its full-history
+            # pieces are dropped, so the question is counted once.
+            import copy as _copy
+            job = _copy.deepcopy(f.jobs[jid])
+            job.rep, job.pieces_total, job.pieces_done, job.tokens_per_piece = "RECENT", 1, 0, RECENT_TOKENS
+            first = next(p for p in f.pending if getattr(p, "job_id", None) == jid)
+            rp = _copy.deepcopy(first)
+            rp.item_id, rp.tokens, rp.readiness = "%s:RECENT-now" % jid, RECENT_TOKENS, "COLD"
+            opts["recent"] = CH.Candidate(kind="recent", deadline_s=dl, rollout_kwargs=dict(
+                drop=ids, extra_jobs={jid: job}, extra_pending=(rp,), release_now=(rp.item_id,)))
+            self.stats["c6_offered_recent_and_throttle"] += 1
+            # longer dashcam throttle: send the full rebuild now and hold every pending dashcam call in the rollout
+            dash = tuple(p.item_id for p in f.pending if p.kind == "episode_call")
+            opts["longer_throttle"] = CH.Candidate(kind="longer_throttle", deadline_s=dl,
+                                                   rollout_kwargs=dict(release_now=ids, exclude=dash))
+        mine = ("recent" if is_recent else "send" if d.decision == "CLOUD"
+                else ("hold" if d.decision == "DEFER" else "decline"))
         dflt = opts[mine]
         cands = [dflt] + [c for k, c in opts.items() if k != mine]
         st = CH.ChooserState(rollout=self._scorer.rollout, fleet=f, now_s=float(f.t))
@@ -349,6 +377,11 @@ class HybridArm:
             return d
         self.stats["c6_dev_%s_to_%s" % (mine, got.kind)] += 1
         if got.kind == "send":
+            return RecallAction(q.query_id, "CLOUD")
+        if got.kind == "recent":
+            return RecallAction(q.query_id, "CLOUD", representation="RECENT")
+        if got.kind == "longer_throttle":
+            self._long_throttle[q.query_id] = dl
             return RecallAction(q.query_id, "CLOUD")
         if got.kind == "hold":
             return RecallAction(q.query_id, "DEFER", defer_s=self._b7.defer_s)

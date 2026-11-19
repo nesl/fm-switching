@@ -1,0 +1,136 @@
+[
+ {
+  "proof": "base identical to b7 with the completion hook (seed 0, 12 devices, 600 s)",
+  "identical": true,
+  "decisions": 6569
+ },
+ {
+  "proof": "C2 throttle k_r 0.5 vs no C2 (under the dashcam cap)",
+  "a": "hybrid2-c1c5",
+  "b": "hybrid2-c1c2k05c5",
+  "differing": 44,
+  "absent_link": false,
+  "first": {
+   "index": 131,
+   "t": 24.6,
+   "a": "release_monitor",
+   "b": "release_monitor"
+  },
+  "stats_a": {
+   "c2_throttled_dash": 0,
+   "c5_dash_held": 8067,
+   "decisions": 6001
+  },
+  "stats_b": {
+   "c2_throttled_dash": 12,
+   "c5_dash_held": 8075,
+   "decisions": 6001,
+   "c2_throttle_periods": 2,
+   "c2_robots_at_risk_while_throttling": 2
+  }
+ },
+ {
+  "proof": "C2 throttle k_r 1.5 vs no C2",
+  "a": "hybrid2-c1c5",
+  "b": "hybrid2-c1c2k15c5",
+  "differing": 3570,
+  "absent_link": false,
+  "first": {
+   "index": 131,
+   "t": 24.6,
+   "a": "release_monitor",
+   "b": "release_monitor"
+  },
+  "stats_a": {
+   "c2_throttled_dash": 0,
+   "c5_dash_held": 8067,
+   "decisions": 6001
+  },
+  "stats_b": {
+   "c2_throttled_dash": 248,
+   "c5_dash_held": 8276,
+   "decisions": 6001,
+   "c2_throttle_periods": 45,
+   "c2_robots_at_risk_while_throttling": 3
+  }
+ },
+ {
+  "proof": "k_r 0.5 vs 1.5",
+  "a": "hybrid2-c1c2k05c5",
+  "b": "hybrid2-c1c2k15c5",
+  "differing": 3534,
+  "absent_link": false,
+  "first": {
+   "index": 3035,
+   "t": 283.9,
+   "a": "release_monitor",
+   "b": "release_monitor"
+  },
+  "stats_a": {
+   "c2_throttled_dash": 12,
+   "c5_dash_held": 8075,
+   "decisions": 6001,
+   "c2_throttle_periods": 2,
+   "c2_robots_at_risk_while_throttling": 2
+  },
+  "stats_b": {
+   "c2_throttled_dash": 248,
+   "c5_dash_held": 8276,
+   "decisions": 6001,
+   "c2_throttle_periods": 45,
+   "c2_robots_at_risk_while_throttling": 3
+  }
+ },
+ {
+  "proof": "C3 default (k 0.5)",
+  "a": "hybrid2-c1c2k05c5",
+  "b": "hybrid2-c1c2k05c3c5",
+  "differing": 11,
+  "absent_link": false,
+  "first": {
+   "index": 3460,
+   "t": 322.2,
+   "a": "decline",
+   "b": "release_recall"
+  },
+  "stats_a": {
+   "c2_throttled_dash": 12,
+   "c5_dash_held": 8075,
+   "decisions": 6001,
+   "c2_throttle_periods": 2,
+   "c2_robots_at_risk_while_throttling": 2
+  },
+  "stats_b": {
+   "c2_throttled_dash": 24,
+   "c5_dash_held": 8088,
+   "decisions": 6001,
+   "c3_recent": 2,
+   "c2_throttle_periods": 4,
+   "c2_robots_at_risk_while_throttling": 2
+  }
+ },
+ {
+  "proof": "C3-always ablation (k 0.5)",
+  "a": "hybrid2-c1c2k05c3c5",
+  "b": "hybrid2-c1c2k05c3c5-c3always",
+  "differing": 0,
+  "absent_link": true,
+  "first": null,
+  "stats_a": {
+   "c2_throttled_dash": 24,
+   "c5_dash_held": 8088,
+   "decisions": 6001,
+   "c3_recent": 2,
+   "c2_throttle_periods": 4,
+   "c2_robots_at_risk_while_throttling": 2
+  },
+  "stats_b": {
+   "c2_throttled_dash": 24,
+   "c5_dash_held": 8088,
+   "decisions": 6001,
+   "c3_recent": 2,
+   "c2_throttle_periods": 4,
+   "c2_robots_at_risk_while_throttling": 2
+  }
+ }
+]
