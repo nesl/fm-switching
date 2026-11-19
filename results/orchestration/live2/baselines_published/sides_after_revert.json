@@ -1,0 +1,92 @@
+{
+ "check": "port_sides_remeasured_after_the_default_revert",
+ "is_measurement": true,
+ "label": "Seed 4, 8 devices, 300 s, dry, on origin/main with a0bcb51. Effective representation captured AFTER Policy.__call__ applies defaults; emitted captured before.",
+ "measured": {
+  "simplestream": {
+   "emitted": "CLOUD/RECENT x9",
+   "effective": "CLOUD/RECENT x9",
+   "side": "RECENT",
+   "credit": "CHOSEN",
+   "moved": false
+  },
+  "builder-s7-always-recent": {
+   "emitted": "CLOUD/RECENT x9",
+   "effective": "CLOUD/RECENT x9",
+   "side": "RECENT",
+   "credit": "CHOSEN",
+   "moved": false
+  },
+  "cascade-routing": {
+   "emitted": "CLOUD/RICH x1, CLOUD/RECENT x8",
+   "effective": "same",
+   "side": "MIXED, mostly RECENT",
+   "credit": "CHOSEN",
+   "moved": false
+  },
+  "covstream": {
+   "emitted": "CLOUD/D2 x9",
+   "effective": "CLOUD/D2 x9",
+   "side": "D2",
+   "credit": "CHOSEN",
+   "moved": false
+  },
+  "thinking-qwenvl-atdm": {
+   "emitted": "CLOUD/None x9",
+   "effective": "CLOUD/D2 x9",
+   "side": "D2",
+   "credit": "INJECTED",
+   "moved": "YES: was RECENT-injected"
+  },
+  "querystream-proactive": {
+   "emitted": "DEFER/None x9, CLOUD/None x9",
+   "effective": "DEFER/None x9, CLOUD/D2 x9",
+   "side": "D2",
+   "credit": "INJECTED",
+   "moved": "YES: was RECENT-injected"
+  },
+  "rh8-demand-aware-causal": {
+   "emitted": "CLOUD/None x9",
+   "effective": "CLOUD/D2 x9",
+   "side": "D2",
+   "credit": "INJECTED",
+   "moved": "YES: was RECENT-injected"
+  },
+  "builder-default": {
+   "emitted": "CLOUD/None x9",
+   "effective": "CLOUD/D2 x9",
+   "side": "D2",
+   "credit": "INJECTED",
+   "moved": "YES: was RECENT-injected"
+  },
+  "streamscout": {
+   "emitted": "DEVICE/None x9",
+   "effective": "same",
+   "side": "NONE: it issues no cloud recall at all",
+   "credit": "n/a",
+   "moved": false
+  }
+ },
+ "four_arms_moved": "thinking-qwenvl-atdm, querystream-proactive, rh8-demand-aware-causal and builder-default were cheap-INJECTED and are now D2-effective INJECTED. They now receive the whole history like everyone else.",
+ "a_verdict_of_mine_is_REVERSED_by_the_revert": {
+  "what": "I classified builder-s7-always-recent as MOVES THE EMITTED ACTION, ABSORBED BY DEFAULTS, a fourth null class, because the baseline already resolved to RECENT and the two reached tokens_for_representation identically.",
+  "now": "the baseline resolves to D2 and always-recent names RECENT, so they NO LONGER reach the charging path identically. The mechanism now moves BOTH axes and the arm is ELIGIBLE on comparability as well as credit.",
+  "lesson": "that null class was REGIME-SPECIFIC, not structural. It was a true statement about the tree it was measured on and is false on this one. Absorbed-by-defaults is a property of the default, so any such verdict must name the regime it was taken under, the same way a single-size verdict must name its size.",
+  "same_applies_to": "simplestream, which was identical to the baseline in effect under the old default and is now distinct from it."
+ },
+ "a_correction_to_the_brief": {
+  "claim": "that after the revert the pre-default capture at Policy.__call__ is the ONLY surviving record that one arm decided and another declined to.",
+  "finding": "not quite, and session 1 has already closed it. RecallAction now carries representation_defaulted (interface.py:208), set in apply_defaults at interface.py:257, carried through coordinator.py:447 and :583-584 and :866 and :882, and present in the schema at schema.py:318. The decision log is self-sufficient on the credit axis.",
+  "consequence": "my emitted-action observable is now a CROSS-CHECK rather than the only evidence, which is the stronger position: two independent routes, the log-side one of which would regress silently if the flag were ever dropped.",
+  "one_caution": "coordinator.py:447 reads it as getattr(ra, \"representation_defaulted\", False). That is safe here because the dataclass guarantees the field, but it is the same idiom that pinned cascade-routing lambda, and a duck-typed action object lacking the field would be silently recorded as CHOSEN when it was injected."
+ },
+ "regimes": "Regime 3 restores Regime 1 charging outcome by a different route, so rows from both are comparable on what a non-naming arm was charged. No row of mine is Regime 2: the only things measured in that window were the eco-llm reconciliation legs, which named their representation explicitly and were unaffected either way.",
+ "_provenance": {
+  "git_commit": "70be641642138d21c25e3eb292abe85d724e2dd1",
+  "script": "live2/effective_representation.py",
+  "model": "none (dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4, 8 devices, 300 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
