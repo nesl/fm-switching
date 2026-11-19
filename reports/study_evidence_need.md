@@ -16,6 +16,53 @@ anything.
 
 ---
 
+## 0a. THE LEVER THIS STUDY MEASURES IS NOT THE LEVER live2 OFFERS, on the ACCURACY halves
+
+**Stated here rather than in limitations, because it qualifies the headline.**
+
+Items 1 and 2 characterise **RICH against RECENT**, which is the comparison StudyR1 measured per
+question and the one the directive specified. **live2 cannot make that choice.** `cstate` builds
+exactly two evidence items per query (`cstate.py:455-458`):
+
+```
+EvidenceItem("RECENT", "device", RECENT_WINDOW_TOKENS, RECENT_WINDOW_TOKENS * 4)
+EvidenceItem("D2", <tier>, tok, tok * 4)          # tok = max(int(s.est_tokens), 1)
+```
+
+There is **no RICH item, and `RICH` appears zero times in `cstate.py`**; a runtime census across
+twelve arms recorded zero RICH emissions. **The deployable lever is D2 against RECENT.**
+
+**And D2 is not RICH where it matters here.** My per-category tables put them **-7.9 to +17.2 pp
+apart**, with D2 better on four categories of eight. So the 2x2 flows, the HELPS/HURTS asymmetry
+and the rule evaluations in items 1 and 2 are **correct statements about a choice live2 cannot
+make**, and the deployable comparison has never been measured per question.
+
+### What this does NOT affect: item 3
+
+**Item 3's timing half was always measuring the deployable lever, and I confirmed this rather than
+assuming it.** D2 carries `tok = max(int(s.est_tokens), 1)` - **the full believed history** - so
+on cost D2 and RICH are the same object, and item 3's "full history" leg *is* D2's cost. The
+95.6 to 95.8 percent saving and the 28-of-28 rescue are **D2 against RECENT**, which is exactly
+what live2 offers. *(Construction note: item 3 sizes from the trace's `history_tokens` at arrival
+while cstate sizes from its own `est_tokens` belief; these track each other and the comparison is
+between the whole history and 467 tokens either way.)*
+
+### What it sharpens: the StudyACC2 request
+
+StudyACC2 covers per-question 32B accuracy by representation across DEV and EVAL. **If it includes
+a D2 cell it produces the deployable lever directly, and that is the single most valuable column in
+the run.** If it covers only RICH and RECENT, then the one choice live2 can actually make will
+still never have been measured per question, and items 1 and 2 will remain the best available
+proxy for a comparison they are known to differ from by up to 17.2 pp per category, in both
+directions.
+
+**One consequence worth recording:** keying the accuracy column to per-category `32B-D2` rather
+than to StudyR1's K1 was right for a second reason neither I nor the coordinator had at the time.
+**A live2 run can never produce a RICH row to key**, so the per-category D2 table is not merely
+the better-matched source, it is the only source that corresponds to anything live2 can send.
+
+---
+
 ## 0. DATA INVENTORY, and one gap that bounds item 3
 
 | resolution | pairs that exist | n |
