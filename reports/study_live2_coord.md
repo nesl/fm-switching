@@ -5517,3 +5517,54 @@ one outstanding question per device this is exact; with more than one it attribu
 device's RC value to each query. It is adequate for a REACHABLE / CANCELLED classification, which
 only asks whether the quantity is ever non-zero, and it is **not** adequate as a calibrated gain,
 so the margin sweep's absolute values should be read with it in mind.
+
+### COVEX is BLIND EXACTLY WHERE IT MOST NEEDS TO ACT
+
+The cheap follow-up asked whether the six zeros are the long-latency recalls. **They are.** History
+size drives rebuild time, so it proxies how far past H the answer lands. At 10 devices, seed 0:
+
+| query | tokens | gain |
+|---|---|---|
+| opp0002578 | 5,431 | 0.054350 |
+| opp0000483 | 6,781 | 0.054041 |
+| opp0000361 | 8,131 | **0** |
+| opp0000234 | 8,131 | 0.054351 |
+| opp0000765 | 10,831 | **0** |
+| opp0000856 | 10,831 | **0** |
+| opp0000746 | 10,831 | 0.054991 |
+| opp0000379 | 13,531 | **0** |
+| opp0001715 | 14,881 | **0** |
+| opp0002507 | 18,931 | **0** |
+
+| group | n | min | median | max |
+|---|---|---|---|---|
+| NON-ZERO | 4 | 5,431 | **7,456** | 10,831 |
+| ZERO | 6 | 8,131 | **12,181** | 18,931 |
+
+**Every query at or above 13,531 tokens scores exactly zero.** The two groups overlap at 8,131 and
+10,831, so this is a tendency rather than a clean threshold, but the direction is unambiguous and
+the three largest histories are all blind.
+
+**This is the sharpest finding of the exercise, and it is sharper than either the prediction or its
+refutation.** The geometry mechanism is real and operates on a SUBSET, and the subset is precisely
+**the long-latency recalls, which are the population that misses the 5 s robot deadline**. COVEX
+can see the value of admitting a short recall it was going to deliver anyway, and is blind to the
+long one whose delivery is actually in question. **The decisions the whole exercise is about are
+the ones its evaluator cannot score.**
+
+For scale, the D132 ceiling puts the feasible breakeven at 19,381 tokens, so the 18,931-token query
+is a feasible-but-marginal question: deliverable on an idle engine, and invisible to the policy
+that would have to schedule it.
+
+**THIS REVERSES MY OWN RECOMMENDATION ON OPTION 2, and I am flagging that rather than quietly
+changing position.** I argued to hold the planner-horizon change because RC deviations work on the
+dispatch horizon for 40 per cent of decisions. That remains true, but this evidence says the 60 per
+cent it cannot see are exactly the ones that matter for the robot axis. **Option 2 is therefore
+justified again, and now for a specific and measured reason rather than as a general remedy: to
+make LONG-LATENCY recalls scorable.** It is a methodological change and is flagged, not
+implemented.
+
+**A cheaper alternative worth weighing first**, since it is the existing precedent for crediting
+outcomes beyond H: the D98 RC tail. If the tail already credits a long recall's delivery, extending
+the counterfactual to include it may make these decisions scorable without moving the whole
+evaluation to the planner's horizon.
