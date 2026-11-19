@@ -47,6 +47,8 @@ import streamscout_adapted as SS                                        # noqa: 
 import covstream_adapted as CVS                                         # noqa: E402
 import thinking_qwenvl_adapted as TQ                                    # noqa: E402
 import cascade_routing_adapted as CR                                    # noqa: E402
+import simplestream_adapted as SMS                                      # noqa: E402
+import rh8_adapted as RH8                                               # noqa: E402
 import attentionstore_adapted as _attentionstore                        # noqa: E402
 import cascade_adapted as _cascade                                      # noqa: E402
 import clockwork_adapted as _clockwork                                  # noqa: E402
@@ -227,6 +229,30 @@ CoVStreamArm = _wrap("CoVStreamArm", CVS.CoVStreamAdapted,
 # here: per robot query, whether to answer on the device, go straight to the cloud, or run the
 # device first and escalate on its confidence. Its post-hoc channel, device_answer_confidence, was
 # verified LIVE before the arm was written.
+# D134 item 2, UNBLOCKED by Part A. What it decides here: WHICH EVIDENCE to send, the most recent
+# N frames instead of the full history, carried by RecallAction.representation, which
+# _submit_recall now reads at coordinator.py:552 through cstate.tokens_for_representation. Its
+# fitted window needs no predictor, which is why it ports where QueryStream's QDP half cannot.
+# D134 item 5, UNBLOCKED by Part A's PLACEMENT half. RH8 decides ONLY `session_action`, so before
+# Part A it was wholly inert: desired_tier was written at coordinator.py:423/:425 and read nowhere,
+# which the S5 pre-check established. Placement now reaches execution, so its mechanism acts.
+#
+# The card's INTERFACE CONFLICT is not resolved by Part A and is not resolved here either: it is a
+# LABELS conflict, and the card already ships both readings rather than inventing a hybrid.
+# RH8OracleDemand warms exactly the known high-demand set, which is the same draw that ASSIGNED the
+# demand, so it declares reads_future and is an UPPER BOUND, never a deployable baseline;
+# live2 REFUSES such an arm (coordinator.py:13, :184), so it is registered for completeness and
+# cannot be run in a scored cell. RH8CausalDemand predicts demand from each session's own observed
+# recall arrivals and is deployable, but is NOT what StudyRH8 measured and may carry no RH8 number.
+RH8OracleArm = _wrap("RH8OracleArm", RH8.RH8OracleDemand,
+                     "rh8-demand-aware-oracle", "rh8.md",
+                     "baselines/rh8_adapted.py::RH8OracleDemand")
+RH8CausalArm = _wrap("RH8CausalArm", RH8.RH8CausalDemand,
+                     "rh8-demand-aware-causal", "rh8.md",
+                     "baselines/rh8_adapted.py::RH8CausalDemand")
+SimpleStreamArm = _wrap("SimpleStreamArm", SMS.SimpleStreamAdapted,
+                        "simplestream", "simplestream.md",
+                        "baselines/simplestream_adapted.py::SimpleStreamAdapted")
 CascadeRoutingArm = _wrap("CascadeRoutingArm", CR.CascadeRoutingAdapted,
                           "cascade-routing", "cascade_routing.md",
                           "baselines/cascade_routing_adapted.py::CascadeRoutingAdapted")
@@ -242,6 +268,9 @@ PUBLISHED_ARMS: Dict[str, Any] = {
     "covstream": CoVStreamArm,
     "thinking-qwenvl-atdm": ThinkingQwenVLArm,
     "cascade-routing": CascadeRoutingArm,
+    "simplestream": SimpleStreamArm,
+    "rh8-demand-aware-oracle": RH8OracleArm,
+    "rh8-demand-aware-causal": RH8CausalArm,
     "clockwork": ClockworkArm,
     "videostorm": VideoStormArm,
     "r3-streaming": R3StreamingArm,

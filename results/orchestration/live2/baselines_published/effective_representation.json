@@ -1,0 +1,65 @@
+{
+ "check": "effective_representation_and_the_default_asymmetry",
+ "is_measurement": true,
+ "label": "Seed 4, 8 devices, 300 s, dry. Captures the action AFTER interface.Policy.__call__ applies defaults, which is what the coordinator enacts and what cstate.tokens_for_representation reads.",
+ "headline": "THE DEFAULT REPRESENTATION IS RECENT, AND LIVE2 APPLIES IT. So an arm that names no representation is charged the 467-token recent window, while an arm that explicitly names D2 is charged the whole history. The published field and the COVEX family sit on opposite sides of that line, and neither chose to.",
+ "how_the_defaults_reach_live2": "I previously reported that live2 never calls apply_defaults, having grepped only under live2/. That was wrong. interface.Policy.__call__ at interface.py:380 runs validate_action(apply_defaults(self.decide(scrub(obs))), obs), and coordinator.py:249 calls the arm as a CALLABLE, so defaults ARE applied before the coordinator sees the action. DEFAULTS[\"representation\"] is \"RECENT\".",
+ "measured": {
+  "builder-default": {
+   "emitted": "CLOUD/None x9",
+   "effective": "CLOUD/RECENT x9"
+  },
+  "b7-edf-feasibility": {
+   "emitted": "CLOUD/None x9",
+   "effective": "CLOUD/RECENT x9"
+  },
+  "simplestream": {
+   "emitted": "CLOUD/RECENT x9",
+   "effective": "CLOUD/RECENT x9"
+  },
+  "builder-s7-always-recent": {
+   "emitted": "CLOUD/RECENT x9",
+   "effective": "CLOUD/RECENT x9"
+  },
+  "edf": {
+   "emitted": "CLOUD/D2 x9, DEFER/None x2",
+   "effective": "CLOUD/D2 x9, DEFER/None x2"
+  }
+ },
+ "consequence_1_a_verdict_of_mine_is_WRONG": {
+  "what": "I reported builder-s7-always-recent as ELIGIBLE AT EVERY SIZE on the emitted-action observable.",
+  "correction": "it moves the EMITTED action and NOT the ENACTED one. The baseline already resolves to RECENT through the defaults, so always-recent and builder-default reach tokens_for_representation identically. The same applies to simplestream.",
+  "new_null_class": "MOVES THE EMITTED ACTION, ABSORBED BY DEFAULTS. This is a fourth class, distinct from the workload null and the instrument null, and distinct again from channel-live-signal-absent. The positive control DID validate the instrument; the instrument was simply measuring the wrong LAYER.",
+  "lesson": "a positive control proves the instrument can see the mechanism. It does not prove the instrument is watching the layer where the mechanism takes effect. For anything with a default, the observable must be taken AFTER defaults are applied."
+ },
+ "consequence_2_the_field_is_split_by_an_unchosen_line": {
+  "what": "arms that leave representation unset are charged min(467, history); arms that explicitly set D2 are charged the whole history.",
+  "who_is_on_each_side": {
+   "charged_467": "the published baselines and the builder arms, which leave it unset (b7, builder-default and the ports verified here)",
+   "charged_full_history": "the COVEX family, which sets representation=\"D2\" explicitly at arms.py:251 and :411 and arms_policy.py:843"
+  },
+  "size_of_the_asymmetry": "histories measured under Part A run 5,431 to 14,881 tokens with a maximum of 25,681, against a 467-token recent window. That is a 11.6x to 55x difference in tokens sent and charged, decided entirely by whether an arm names a representation.",
+  "bearing_on_the_headline_comparison": "this bears directly on the question I was originally given, why seven in-scope published arms deliver 33 to 35 of 41 robot questions where llf delivers 9 and COVEX v1.3-fast delivers 14. My earlier cost check attributed it to a single cold answer landing inside the deadline where a chain of piece builds does not. That check ran BEFORE Part A, when representation was dead and every arm got the whole history. On the current tree the two sides are charged different amounts of evidence for the same question, and that asymmetry did not exist when the comparison was first drawn.",
+  "status": "REPORTED, NOT RESOLVED. Whether the default should be RECENT, or whether the COVEX family should stop naming D2, or whether both sides should be pinned to one representation for the comparison, is a modelling decision and not mine to take silently."
+ },
+ "probe_contamination_found_and_fixed": {
+  "what": "my first SimpleStream probe reported the BASELINE emitting 9 RECENT recalls it never made.",
+  "cause": "apply_defaults MUTATES IN PLACE, and the probe called validate_action(apply_defaults(act), obs) BEFORE tallying the representation, so the tally read the filled default rather than the emitted value.",
+  "caught_by": "the probe own NEGATIVE control, builder-default, which must show None and did not. The POSITIVE control could not have caught it, since a contaminated instrument shows RECENT for the control too.",
+  "lesson": "a positive control proves the instrument can see a firing. A negative control proves it is not manufacturing one. Both are needed, and the hazard file entry should carry the pair rather than the positive alone."
+ },
+ "ports_registered": {
+  "simplestream": "legal, 0 illegal actions, digest 00f32b45 identical to the b7 control",
+  "rh8_oracle": "registered for completeness and CANNOT RUN in a scored cell: it declares reads_future and live2 REFUSES such an arm at coordinator.py:13 and :184. Upper bound only, per its card.",
+  "rh8_causal": "deployable, predicts demand from each session own observed recall arrivals, and may carry NO RH8 number since it is not what StudyRH8 measured."
+ },
+ "measurement_scope": "token counts and representation selections only. Nothing in GPU-seconds or served-recall counts, which remain held until the gate passes.",
+ "_provenance": {
+  "git_commit": "e446a1b9dee5ef05cd9f1b6bd2e9136e3cfda68d",
+  "script": "effective_representation.py and simplestream_probe.py",
+  "model": "none (dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4, 8 devices, 300 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
