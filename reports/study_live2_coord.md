@@ -3767,3 +3767,94 @@ the three. It is NOT implemented; it is the option I would put first for your ru
 | D99 grid, flags off | 48 of 48 byte-identical |
 | frozen md5s | 12 of 12 green |
 | baseline arms | untouched |
+
+## V9. PRE-REGISTRATION: the RC tail, and the staleness fix
+
+Written before the code, as ruled. Also recorded: **B2 is SHELVED, not dropped.** Its derivation
+stands at V7.2 and the reason it is shelved is V8.1, that `_z_term` multiplies `z` by a change in
+the met-SLO fraction which is zero for a rebuild piece. It is revisited once the deficit term is
+visible, which is what the RC tail is for.
+
+### V9.1 What D98's SH tail does, exactly, so the mirror is checkable
+
+| element | D98's SH tail (`rollout.py:204-265`) |
+|---|---|
+| selection | in the main queue loop, an item whose `start = max(free_at, p.due_at)` exceeds `end` is appended to `sh_tail` **only if `p.kind == "episode_call"`**; every other kind keeps the old behaviour of not being simulated |
+| bound | `latest = max(end, every episode_call `due_at` in `pending` and `in_flight`) + L_k["SH"]`, so the pass stops at the last deadline any credited instant can have |
+| continuation | `tail_free = free_at`, continuing the engine from where the horizon left it, then per item `start = max(tail_free, p.due_at)`, `break` if `start > latest`, one `engine.predict` at the SAME `concurrent` and `load_pct`, `tail_free = start + service_s` |
+| new arrivals | NONE. The pass iterates only `sh_tail`, which came from the existing queue |
+| accounting isolation | "Nothing here is charged to `busy`, the KV pool, `demand_tokens` or `jobs_progress`": only `deliveries` (marked `beyond_horizon=True`) and `in_sample` are touched |
+| cost | at most one extra `engine.predict` per SH call that could not start inside H |
+
+### V9.2 The RC tail, mirrored element by element
+
+Behind `Flags.rc_tail`, DEFAULT OFF.
+
+| element | the RC tail |
+|---|---|
+| selection | the SAME branch, extended: an `rc_piece` whose `start` exceeds `end` goes to the tail instead of being dropped |
+| bound | `latest_rc = max(end, every `rc_piece` `deadline` in `pending` and `in_flight`)`. RC items carry an absolute `deadline` already, so no `L_k` is added; this is the same rule as D98's, "the last deadline any credited question can have", read off the field that holds it |
+| continuation | the SAME single cursor. **One tail pass over both kinds in queue order**, not two passes, because the engine is serial and two cursors both starting at `free_at` would double-book it |
+| new arrivals | NONE, exactly as D98 |
+| accounting isolation | `busy`, the KV pool, `demand_tokens` and the `jobs_progress` that `_terminal` and `_prefix_risk` read are left byte-for-byte as they are. The tail's progress is kept in a SEPARATE view that only `_rc_utility` sees |
+| cost | at most one extra `engine.predict` per `rc_piece` that could not start inside H |
+
+**One consequence stated up front, because it means the switch is not SH-neutral.** Sharing the
+cursor means an SH delivery in the tail can be pushed later by an `rc_piece` ahead of it in queue
+order, so SH credit can change when the switch is ON. That is the price of modelling one serial
+engine, and it is why the switch exists rather than this being applied unconditionally.
+
+### V9.3 What the tail has to credit, and the second defect it exposes
+
+**omega_RC x u_RC: the machinery already exists and has never been reachable.**
+`_rc_utility` (`rollout.py:473-493`) already credits `omega_RC x (acc_cloud - acc_device)` for a
+job whose pieces are all done and whose last delivery satisfies `last <= job.deadline`, which IS
+"at the question's own deadline". It never fires because `done = job.pieces_done +
+progress.get(jid, 0)` counts only pieces served INSIDE the horizon, and four 2,048-token pieces
+need about 1.0 s against H = 0.5 s. Letting `_rc_utility` see the tail's progress is therefore the
+whole of the utility half.
+
+**The per-device deficit term needs more than a tail, and this is a NEW finding.**
+`_z_term` aggregates over the `opps` rows returned by `_opportunity_utility`, and
+`_opportunity_utility` emits rows with `task="SH"` ONLY. So `(device, "RC")` never appears in the
+aggregation and **`z_of("RC")` is never read by `_z_term` at all**, for any `z`. This is stronger
+than V8.1, which said the multiplier was zero: the term is not merely zero, it is absent. So the
+tail must also emit an RC opportunity row per question, carrying `met_slo` set from whether the
+answer was delivered by that question's own deadline, which is what makes the deficit reachable.
+
+### V9.4 Expected effect, pre-registered so it can be checked without rewording
+
+1. A robot question whose rebuild finishes after H but before its 5 s deadline will, for the first
+   time, show a positive `u_hat` contribution of `omega_RC x (acc_cloud - acc_device) = 0.0354` in
+   the branch that releases its pieces, against `0` in the branch that does not.
+2. With B1 also on, that question's device contributes `z_of("RC") x (ok/n)` to `_z_term`, so a
+   device carrying `z[RC] = 4.5` from earlier misses adds up to a further `+4.5` when the answer
+   lands in time.
+3. Together those are the first terms that can exceed the measured backlog charge of about 0.7 to
+   1.25, so **I expect release decisions to change and robot questions released before deadline to
+   rise above the 1 of 9 and 0 of 20 of v1.0.** If they do not, the tail is insufficient and the
+   next lever is the one the ruling holds back.
+4. Decision cost rises by at most one `engine.predict` per tailed item, so I expect a measurable
+   but modest p99 increase, reported at 8, 32 and 64 devices with and without the tail.
+
+### V9.5 The staleness fix, as an implementation fix
+
+`HistoryBelief.staleness_s` is read in production and written nowhere (V6.3), so it is pinned at
+`0.0` while feeding `utility.t_ready_s`, where `frames = staleness_s / d2_stride_s` turns it into
+catch-up frames. The policy therefore believes no history is ever stale and never charges
+catch-up work.
+
+Written from coordinator state at the one site that builds the belief
+(`arms_policy._sync`, where `b.size_tokens` and `b.probs` are already set from the observation):
+
+    unbuilt_tokens = max(size_tokens - built_tokens(session), 0)
+    staleness_s    = (unbuilt_tokens / D2_TOK_PER_IMG) * d2_stride_s
+
+`built_tokens` comes from the roster's `built_tokens_by_session`, which the coordinator already
+publishes and the arm already reads at `arms_policy.py:322`. `D2_TOK_PER_IMG = 90` (StudyRH4) and
+`d2_stride_s = 2.0` is the committed profile value, so the conversion is frames received minus
+frames built, expressed in the seconds unit the consumer expects. This is an implementation fix,
+not a new mechanism: it writes a field the spec already reads.
+
+It is behind `Flags.write_staleness` for the ablation, because it changes inputs to the readiness
+and recall-utility paths and the ruling asks for it as a separate arm of Step 3.
