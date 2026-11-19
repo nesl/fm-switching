@@ -2903,3 +2903,57 @@ really produce, and it is now stated rather than worked around.
 **What this does NOT change:** the RECENT questions, 3 of 35 here, key to K3 correctly and are
 charged 467 as the engine intends. The re-key is small, as expected, and section 31's
 recent-misses stratum is where a handful of questions can still move a figure.
+
+## 33.3 OPTION C IS AVAILABLE AND I AM TAKING IT. And it overturns my own "upper bound" label
+
+A committed **32B x D2** per-category table exists: `_RC_TABLE_NAME[("cloud", "D2")] = "32B-D2"`
+in `policy/profiles.py:31`, reached by `rc_accuracy(qtype, rep, tier)`, which raises
+`MissingEvidence` rather than imputing when a qtype is absent. That is the honesty clause already
+implemented in the committed code.
+
+**Coverage check first: all 8 question categories in the trace resolve for 32B-D2, 32B-RICH,
+32B-RECENT and 4B-D2. Zero MISSING lookups.** So option C is not merely preferable in principle,
+it is fully available.
+
+| category | 32B-D2 | 32B-RICH | D2 minus RICH |
+|---|---|---|---|
+| location_trace | 0.4828 | 0.3103 | **+17.2 pp** |
+| time_duration | 0.4359 | 0.3846 | +5.1 pp |
+| spatial_aware_reasoning | 0.2400 | 0.2000 | +4.0 pp |
+| sequential_action | 0.5556 | 0.5185 | +3.7 pp |
+| object_comparison | 0.3750 | 0.3750 | 0.0 |
+| counting_objects_events | 0.2222 | 0.2500 | -2.8 pp |
+| temporal_ordering_recognition | 0.4848 | 0.5152 | -3.0 pp |
+| visual_detail_recall | 0.5263 | 0.6053 | **-7.9 pp** |
+
+**D2 is BETTER than RICH on 4 categories, WORSE on 3 and equal on 1.** The single category both of
+us reasoned from, `counting_objects_events` at -2.8 pp, is **not representative**: the largest
+difference in the table runs the other way at +17.2 pp.
+
+**So my "UPPER BOUND" label in 33.1 was wrong, and so was the shared assumption behind it.** Keying
+D2 to RICH is not systematically optimistic. It is wrong in a **category-dependent direction**,
+which is a different and less tractable error than a known-signed bias.
+
+**Trace-weighted over the 41 questions actually asked:**
+
+| representation | trace-weighted accuracy |
+|---|---|
+| 32B D2 | **0.4260** |
+| 32B RICH | **0.4246** |
+| 32B RECENT | 0.3941 |
+
+**D2 minus RICH is +0.14 pp on this question mix.** So the substitution happened to be very nearly
+unbiased in aggregate here, by cancellation rather than by correctness, and would not be on a
+different mix. That is precisely why the correct object at lower resolution beats the wrong object
+at higher resolution.
+
+**DECISION, REVISED FROM B TO C.** For the 91.4 percent of recalls sent as D2, key accuracy to the
+committed **32B-D2 per-category** value; keep StudyR1's per-question K1 and K3 where the
+representation sent was RICH or RECENT; state the **mixed resolution on the row**. Nothing is
+attributed to the wrong representation any more, and the per-question resolution is retained where
+it is valid.
+
+**The standing request is unchanged and is strengthened by this:** a committed **per-question**
+32B x D2 measurement, a StudyR1 extension, does not exist. The per-category table lets the column
+be honest; it does not make it as sharp as the RICH and RECENT rows, and the category spread from
+-7.9 to +17.2 pp shows how much resolution is being given up.
