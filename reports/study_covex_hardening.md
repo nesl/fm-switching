@@ -373,10 +373,17 @@ on identical candidate populations.
 | 4 | 0.111 / 0.999 | **0.111 / 0.999** | 0.889 / 0.999 | 0.778 / 0.999 | 1.000 / 0.999 |
 | 8 | 0.000 / 0.487 | **0.000 / 0.487** | 0.550 / 0.999 | 0.900 / 1.000 | 1.000 / 1.000 |
 | 16 | 0.000 / 0.075 | **0.000 / 0.075** | 0.229 / 0.626 | 0.600 / 0.658 | 0.857 / 0.913 |
-| 32 | 0.014 / 0.134 | **0.014 / 0.134** | 0.069 / 0.284 | 0.222 / 0.332 | not finished |
+| 32 | 0.014 / 0.134 | **0.014 / 0.134** | 0.069 / 0.284 | 0.222 / 0.332 | 0.458 / 0.453 |
 
-Each cell is robot pooled fraction / dashcam released fraction. The 32-device `always-cloud-fcfs`
-and `device-only` rows had not finished and are omitted rather than estimated.
+Each cell is robot pooled fraction / dashcam released fraction. **Completed after the first
+commit of this section**, which recorded the two 32-device rows as unfinished: `always-cloud-fcfs`
+is 0.458 / 0.453 and `device-only` is 0.0 / 0.0. No verdict changes, since `always-cloud-fcfs` is
+not gating under D127 and `device-only` sends nothing.
+
+Worth one note in D127's favour: at 32 devices `always-cloud-fcfs` finally degrades, from 1.000
+robot service at 4 and 8 devices to 0.458, so the screen does begin to bite on the unconstrained
+arm at the largest size. That does not make it gating, and it does not help COVEX, which is behind
+edf and llf on both axes at 32 as well.
 
 **So every gain I reported for v1.1 came from F1, the RC tail, and v1.2 turns F1 OFF.** The
 earlier v1.1 numbers (0.222, 0.150, 0.200 robot and 0.978, 0.927, 0.449 dashcam) were measured
