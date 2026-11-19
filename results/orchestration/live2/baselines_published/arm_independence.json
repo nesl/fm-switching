@@ -1,0 +1,219 @@
+{
+ "check": "d130_published_arm_independence",
+ "is_measurement": true,
+ "label": "DRY RUN, development traces. Do ported published arms collapse onto one behaviour in live2, and what is the true cardinality of the published field.",
+ "question": "mooncake and b7-edf-feasibility are byte-identical in 28 of 28 leaderboard cells; are they one mechanism under two names",
+ "verdict": {
+  "mooncake_vs_b7": "GENUINELY DISTINCT. Their ACTION SEQUENCES differ at 8 devices (3c0c7ef4d6ea5464 against 46bc6652a79d5b04) AND at 16 devices (e7e87de8f49f6a18 against 04d3e84cd47d9675). They converge in OUTCOME, not in behaviour.",
+  "why_they_converge": "their only differences are Action.order (MOONCAKE-REUSE-FIRST against EDF) and session actions (mooncake emits 9 KEEP_GPU_WARM, b7 emits none). Action.order is NEVER READ by live2/coordinator.py, so that difference cannot reach a decision, and desired_tier did not bite in these cells.",
+  "the_wrapper_is_not_the_cause": "the D130 wrappers override nothing but the name; the collapse pressure comes from live2 ignoring Action.order, not from the port."
+ },
+ "action_order_is_dead": {
+  "finding": "live2/coordinator.py contains ZERO references to the action order field; the two `.order` hits are `self.st.order`, a different object",
+  "consequence": "any two adapted arms whose scheduling discipline is expressed only through Action.order are indistinguishable in live2 by construction",
+  "affected_claim": "the published fields apparent diversity is partly carried by a field the harness does not read"
+ },
+ "cardinality": {
+  "cell": "seed 4, 8 devices, 300 s, 50:50, mode A, 20 arms including llf",
+  "distinct_with_order_field": 19,
+  "distinct_excluding_order_field": 16,
+  "collapses_excluding_order": {
+   "f51bfc055cc0a1c9": [
+    "attentionstore",
+    "lmcache"
+   ],
+   "e9160c2a0192bb07": [
+    "ekya",
+    "inar-vl",
+    "videostorm"
+   ],
+   "3509fd32de4dfa71": [
+    "kvflow",
+    "pensieve"
+   ]
+  },
+  "in_scope_c_mixed_arms": 12,
+  "in_scope_distinct_excluding_order": 11,
+  "note": "excluding the ignored order field, ekya and inar-vl collapse onto one behaviour, so the twelve in-card-scope arms supply ELEVEN independent behaviours at this cell, not twelve."
+ },
+ "regime_dependence": {
+  "finding": "the collapses are REGIME DEPENDENT, not structural",
+  "evidence": "ekya and videostorm are action-identical at 8 devices and DIVERGE at 16 devices (1a67cac3ac552f95 against 22842b3b69998d21, 18 of 21 against 19 of 21 robots)",
+  "implication": "a cardinality measured at one size does not carry to another; the paper should state the size it was measured at"
+ },
+ "classes_8dev_with_order": {
+  "3212f4a484bbb0e5": [
+   "llf"
+  ],
+  "e755d7e01d917c57": [
+   "attentionstore"
+  ],
+  "f9b8d02425d4325f": [
+   "b10-blocking-aware"
+  ],
+  "46bc6652a79d5b04": [
+   "b7-edf-feasibility"
+  ],
+  "dd5fe8bc1b46140b": [
+   "clockwork"
+  ],
+  "db5382b94bed1cc7": [
+   "confidence-cascade"
+  ],
+  "eb2148ac170335af": [
+   "eco-llm"
+  ],
+  "4af62ab78d7769ab": [
+   "ekya",
+   "videostorm"
+  ],
+  "4d68dadabd3d294b": [
+   "hybrid-llm"
+  ],
+  "8f12ec9539f6ee8b": [
+   "inar-vl"
+  ],
+  "97aea5f7f642e8f5": [
+   "kvflow"
+  ],
+  "5ea5535e7cf828cb": [
+   "lmcache"
+  ],
+  "3c0c7ef4d6ea5464": [
+   "mooncake"
+  ],
+  "8159f57771b143d8": [
+   "pensieve"
+  ],
+  "48d14c34fec33c36": [
+   "perllm"
+  ],
+  "8bbee65d8181dc6a": [
+   "preble"
+  ],
+  "96cb16c580b528a6": [
+   "r3-streaming"
+  ],
+  "3704c85a212d5ac8": [
+   "routellm"
+  ],
+  "7fe245701bf96ec0": [
+   "uniscale"
+  ]
+ },
+ "classes_8dev_without_order": {
+  "54ceaaa8011cef08": [
+   "llf"
+  ],
+  "f51bfc055cc0a1c9": [
+   "attentionstore",
+   "lmcache"
+  ],
+  "bd5e6969e052bba0": [
+   "b10-blocking-aware"
+  ],
+  "0110f5914833e0ad": [
+   "b7-edf-feasibility"
+  ],
+  "9c34063504c7b88c": [
+   "clockwork"
+  ],
+  "602f7af0d475c3f2": [
+   "confidence-cascade"
+  ],
+  "c986b98f223517c7": [
+   "eco-llm"
+  ],
+  "e9160c2a0192bb07": [
+   "ekya",
+   "inar-vl",
+   "videostorm"
+  ],
+  "26abfa2ca4e4c54f": [
+   "hybrid-llm"
+  ],
+  "3509fd32de4dfa71": [
+   "kvflow",
+   "pensieve"
+  ],
+  "e7025ba7a734d3c4": [
+   "mooncake"
+  ],
+  "2b9539b9005f2d22": [
+   "perllm"
+  ],
+  "32468036fd8a9906": [
+   "preble"
+  ],
+  "1c9c9a4cc9d51cc1": [
+   "r3-streaming"
+  ],
+  "8e08ea4de6b038ff": [
+   "routellm"
+  ],
+  "da752a9c3f995f8c": [
+   "uniscale"
+  ]
+ },
+ "classes_16dev_with_order": {
+  "e7e87de8f49f6a18": [
+   "mooncake"
+  ],
+  "04d3e84cd47d9675": [
+   "b7-edf-feasibility"
+  ],
+  "4a5140133b48e653": [
+   "eco-llm"
+  ],
+  "1a67cac3ac552f95": [
+   "ekya"
+  ],
+  "22842b3b69998d21": [
+   "videostorm"
+  ],
+  "1d1521b85e4f6412": [
+   "clockwork"
+  ]
+ },
+ "outcomes_16dev": {
+  "mooncake": {
+   "robots_on_time": 18,
+   "robots": 21,
+   "monitor_on_time": 3921
+  },
+  "b7-edf-feasibility": {
+   "robots_on_time": 18,
+   "robots": 21,
+   "monitor_on_time": 3921
+  },
+  "eco-llm": {
+   "robots_on_time": 19,
+   "robots": 21,
+   "monitor_on_time": 3843
+  },
+  "ekya": {
+   "robots_on_time": 18,
+   "robots": 21,
+   "monitor_on_time": 3838
+  },
+  "videostorm": {
+   "robots_on_time": 19,
+   "robots": 21,
+   "monitor_on_time": 3848
+  },
+  "clockwork": {
+   "robots_on_time": 16,
+   "robots": 21,
+   "monitor_on_time": 4015
+  }
+ },
+ "not_fixed": true,
+ "_provenance": {
+  "git_commit": "83e51513d0b2c97fd3b9927ac9e2525d73f60d56",
+  "script": "scratchpad harness wrapping each arm decide() to hash its canonical action sequence; no repo code changed",
+  "model": "none (committed cost curves, dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4; 8 devices over 20 arms; 16 devices over 6 arms; 300 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}

@@ -234,3 +234,12 @@ after arrival; at a 1.0-s decision epoch the release lands at the next tick and 
 then finishes outside a 5-s deadline. StudySLICE1 ran P2 at a 10-s recall deadline. The hold is
 faithful; the deadline is not the one it was designed against, and this is reported rather than
 tuned.
+
+
+## D130 live2 port note, added 2026-11-19 (measurement, not a change to this adaptation)
+
+**`b7-edf-feasibility` and `mooncake` are GENUINELY DISTINCT in live2, and converge in OUTCOME.** Their action sequences differ at 8 devices and again at 16 devices, so they are not one mechanism under two names. They nonetheless produce identical outcomes across the leaderboard cells.
+
+The convergence is explained: their only behavioural differences are the `order` field (`MOONCAKE-REUSE-FIRST` against `EDF`) and session actions (mooncake emits KEEP_GPU_WARM, b7 emits none). The first cannot reach a decision at all, and the second did not change an outcome in these cells. A measured convergence of two distinct schedulers is a result about the regime, and it is recorded here rather than being read as duplication.
+
+`live2/coordinator.py` NEVER READS the action's `order` field: it contains zero references to it, and the two `.order` matches are `self.st.order`, a different object. Any part of this system's scheduling discipline expressed through `order` therefore CANNOT reach a decision in live2. This is a property of the live2 harness, not of the adaptation, and nothing in the adaptation was altered.

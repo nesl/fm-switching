@@ -72,3 +72,14 @@ change is what it is charged: the harness already billed the first promotion of 
 GPU-warm at the measured cold-prefill cost (fairness rule 3), and it bills `MATERIALIZE` on the
 same path. The re-run smoke record is identical field for field apart from the new
 `materialize_*` counters.
+
+
+## D130 live2 port note, added 2026-11-19 (measurement, not a change to this adaptation)
+
+**Behavioural collapse measured in live2.** On seed 4 at 8 devices over 300 s, once the ignored `order` field is excluded, this arm's ACTION SEQUENCE is byte-identical to: `kvflow`. The three arms emit the same streams, recall decisions and session actions at every one of 3,001 decision periods.
+
+**The collapse is REGIME DEPENDENT, not structural.** At 16 devices the same arms DIVERGE (ekya and videostorm give different action sequences and different robot delivery, 18 of 21 against 19 of 21), so this is convergence under a non-binding capacity rather than two names for one mechanism.
+
+**Consequence for any leaderboard.** Rows for these arms at a cell where they collapse are NOT independent witnesses, and counting them separately overstates the evidence. The measured count is in `results/orchestration/live2/baselines_published/arm_independence.json`.
+
+`live2/coordinator.py` NEVER READS the action's `order` field: it contains zero references to it, and the two `.order` matches are `self.st.order`, a different object. Any part of this system's scheduling discipline expressed through `order` therefore CANNOT reach a decision in live2. This is a property of the live2 harness, not of the adaptation, and nothing in the adaptation was altered.
