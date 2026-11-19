@@ -382,3 +382,37 @@ def channel_identity_error(rec: Dict[str, Any]) -> Optional[float]:
     s = (rec["sh_own_delta"] + rec["sh_harm_delta"] + rec["rc_util_delta"] + rec["z"]
          + rec["cont_delta"] + rec["sv_delta"] + rec["backlog_delta"])
     return abs(s - rec["delta_j"])
+
+
+@contextlib.contextmanager
+def capture_sent_representation(sink: Dict[str, Any]):
+    """Record, per recall opportunity, the representation ACTUALLY SENT and the tokens charged.
+
+    `e924005` sets `o.requested_representation` and sizes the request through
+    `s.tokens_for_representation(...)`, but writes NEITHER to `outcomes.jsonl` nor to
+    `request.jsonl`, so the run artifacts cannot say which questions were sent as RECENT. The
+    accuracy join needs exactly that to key a question to StudyR1's K3 rather than K1, so it is
+    captured here by wrapping the coordinator's own `_submit_recall` rather than by asking for a
+    logging change in a file this session does not own.
+    """
+    setup_paths()
+    import coordinator as CO
+    orig = CO.Live2Coordinator._submit_recall
+
+    def wrapped(self, o, s, t, dt_ms, preds, mix, whole):
+        rep = getattr(o, "requested_representation", None)
+        try:
+            tok = s.tokens_for_representation(rep)
+        except Exception:                                              # noqa: BLE001
+            tok = None
+        sink[getattr(o, "opp_id", None)] = dict(
+            representation=(None if rep is None else str(rep)),
+            tokens_sent=(None if tok is None else int(tok)),
+            est_tokens=int(getattr(s, "est_tokens", 0) or 0))
+        return orig(self, o, s, t, dt_ms, preds, mix, whole)
+
+    CO.Live2Coordinator._submit_recall = wrapped
+    try:
+        yield sink
+    finally:
+        CO.Live2Coordinator._submit_recall = orig

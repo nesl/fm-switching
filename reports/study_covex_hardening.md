@@ -2849,3 +2849,57 @@ reader**, and a runtime-selected value cannot create a reader that is not in the
 findings stand unqualified.** What the miss does qualify is my category-2 claim in section 30.2
 that no scored arm emits RECENT: eco-llm does, at roughly 1 in 240 recalls. Too few to populate a
 column, enough to move the bar, which is exactly what it did.
+
+# 33. WHAT eco-llm ACTUALLY SENDS, measured. And the D2 decision is now concrete, not hypothetical
+
+`e924005` sets `o.requested_representation` and sizes the request through
+`s.tokens_for_representation(...)`, but **writes neither to `outcomes.jsonl` nor to
+`request.jsonl`**, so the run artifacts cannot say which questions were sent as RECENT. I captured
+it by wrapping `Live2Coordinator._submit_recall` in my own harness rather than asking for a logging
+change in a file this session does not own. Output: `sent_representation_e924005.json`.
+
+**eco-llm, 16 devices, seed 0, 35 recall submissions on the patched tree:**
+
+| representation SENT | n | share | tokens charged |
+|---|---|---|---|
+| **D2** | **32** | **91.4 percent** | 1,381 to 18,931, median 8,131 (the FULL history) |
+| **RECENT** | **3** | 8.6 percent | **467 exactly**, every time |
+
+This confirms the charging definition directly: RECENT is charged a flat 467, and `D2` is charged
+the full history, consistent with `REP_TOKEN_SCALE["D2"] = 1.0`.
+
+## 33.1 The D2 question is now sharp, and it cuts against my own section 31
+
+**The dominant representation is D2, not RICH**, at 91.4 percent of recalls. Two committed facts
+about D2 point in opposite directions:
+
+- **On COST, D2 is identical to RICH**: scale 1.0, and the measured tokens are the full history.
+- **On ACCURACY, D2 is NOT RICH**: session 1's committed fidelity trace gives **D2 0.222222
+  against RICH 0.250000** on `counting_objects_events`. StudyR1 has **no D2 cell at all**.
+
+**So section 31's column, which keyed everything to K1, treated D2 as RICH for 91.4 percent of its
+rows. That is an UPPER BOUND on accuracy, not an exact value**, and I am relabelling it as such
+rather than leaving it to read as measured. The relative ordering across arms is unaffected,
+because every arm receives the same treatment, but the levels are optimistic.
+
+## 33.2 DECISION POSTED, default taken, marked PROVISIONAL
+
+**The question:** StudyR1 has K1 (RICH) and K3 (RECENT) and no D2 row, while 91.4 percent of
+recalls are sent as D2 whose committed accuracy differs from both.
+
+**Option A, strict honesty clause:** report every D2 question MISSING. This empties 91.4 percent
+of the column and the accuracy axis ceases to exist until a committed D2 accuracy row is produced.
+
+**Option B, default taken:** key D2 to K1, label the column **"D2 treated as RICH, UPPER BOUND"**,
+and report the share treated that way on every row so a reader can size the optimism. Arm-to-arm
+comparison stays valid because the treatment is uniform.
+
+**I have taken Option B and marked it PROVISIONAL**, because an empty column answers nothing while
+a labelled upper bound still supports the only use the column has today, which is ranking arms
+against each other. **The honest resolution is neither: it is a committed D2 accuracy measurement**,
+which does not exist and which I cannot manufacture. That is the request this decision should
+really produce, and it is now stated rather than worked around.
+
+**What this does NOT change:** the RECENT questions, 3 of 35 here, key to K3 correctly and are
+charged 467 as the engine intends. The re-key is small, as expected, and section 31's
+recent-misses stratum is where a handful of questions can still move a figure.
