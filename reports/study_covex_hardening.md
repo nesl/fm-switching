@@ -812,3 +812,51 @@ The honest summary for the morning: **v1.2 is a real improvement on the dashcam 
 devices and the first configuration to lead both scheduling baselines on both axes at any size,
 and it is still far behind them at 4 and 8.** The binding obstacle is the exchange rate, now
 measured to be self-reinforcing through mu (F-A9), which D124 and D126 put off limits.
+
+
+## 9.7 ERRATUM E4: F-A8's MECHANISM survives, its CONSEQUENCE claim is FALSIFIED
+
+I wrote in section 6.5 that because v1.2 is RC-only and SH is explicitly unchanged, "the dashcam
+half of the D127 gate cannot be passed at 8, 16 or 32 devices" on current plans. **The measurement
+falsifies that.** v1.2 raised dashcam delivery from 0.4871 to 0.7998 at 8 devices and from 0.0747
+to 0.3687 at 16, touching no SH code.
+
+**My error was an inference, not a measurement.** I reasoned that a change which edits no SH code
+cannot affect SH admission. That ignores the coupling through SHARED ENGINE OCCUPANCY: `busy` is
+fleet-wide, so RC work raises the queue backlog charge on every `sh_admit` candidate.
+
+**The mechanism half of F-A8 survives, and the arithmetic forces it.** F-A8's identity is that the
+dashcam delivered fraction EQUALS the `sh_admit` positive fraction, measured to three digits at 4,
+8 and 16 devices in two switch sets. An instant cannot be delivered unless it was admitted, so
+delivery is bounded above by admission. v1.2 delivers 0.7998 at 8 devices, therefore **its
+`sh_admit` positive fraction must be at least 0.7998 and cannot be the 0.488 of v1.0.** The
+coordinator's proposed test, "`sh_admit`'s positive fraction unchanged while delivery rises",
+describes a state that cannot exist: **admission necessarily rose, and it rose because the input
+to the test changed.**
+
+The route is the one section 8.3 already isolated. The queue part `-mu * max(busy - H, 0)` is the
+ENTIRE backlog charge on `sh_admit`, with `a6_backlog` contributing exactly nothing. v1.2 declines
+most cold rebuilds at admission instead of admitting them and dithering per piece, so less RC work
+reaches the engine, `busy` falls, `max(busy - H, 0)` falls, more instants score positive, and more
+are admitted and delivered. **That is a queueing effect expressed through the valuation, not a
+change in how instants are valued.**
+
+**The corrected statement of F-A8**, which I adopt and which matches the coordinator's reframing:
+*the SH admission test gates dashcam service, through the queue backlog charge; because that
+charge is fleet-wide, anything that reduces engine occupancy relieves it, including an RC-only
+change.* The exchange rate on the robot axis is untouched by this and remains the binding
+constraint there, with every cold-rebuild plan still scoring between -0.598 and -2.521.
+
+**Empirical confirmation is in flight and not yet reported.** A v1.2 audit at 8 devices that
+measures the `sh_admit` positive fraction and its backlog charge directly was still running when
+this was written; the arithmetic above does not depend on it, but the direct number should be
+recorded when it lands, and if it contradicts the bound it would be a finding in its own right.
+
+## 9.8 ERRATUM E5, against my own instrumentation again
+
+My `capture_delta_j` wrapper declared the v1.1 signature of `Rollout.run` by name. v1.2's planner
+calls `rollout.run(fleet, horizon_s=..., rc_rows=True)`, so every planner evaluation raised
+`TypeError` and the first v1.2 audit produced nothing. The wrapper now passes arguments through
+unchanged. **This is the second time my instrumentation, rather than the policy, produced the
+anomaly**, after E1's regex, and both are recorded rather than quietly fixed. It is also why the
+v1.2 audit in 9.7 is late rather than missing.

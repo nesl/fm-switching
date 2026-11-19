@@ -54,10 +54,8 @@ def collect(n: int, run_s: float, switches: Dict[str, bool], tmp: Path) -> Dict[
     rows: List[Dict[str, Any]] = []
     _run = PRO.Rollout.run
 
-    def run(self, fleet, release_now=(), exclude=(), extra_pending=(), drop=(),
-            extra_jobs=None):
-        r = _run(self, fleet, release_now=release_now, exclude=exclude,
-                 extra_pending=extra_pending, drop=drop, extra_jobs=extra_jobs)
+    def run(self, fleet, *a, **k):
+        r = _run(self, fleet, *a, **k)
         runs.append(r)
         return r
 

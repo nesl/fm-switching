@@ -191,10 +191,11 @@ def capture_delta_j(collect: List[Dict[str, Any]], want_devices: Optional[str] =
     runs: List[Any] = []
     _run = PRO.Rollout.run
 
-    def run(self, fleet, release_now=(), exclude=(), extra_pending=(), drop=(),
-            extra_jobs=None):
-        r = _run(self, fleet, release_now=release_now, exclude=exclude,
-                 extra_pending=extra_pending, drop=drop, extra_jobs=extra_jobs)
+    def run(self, fleet, *a, **k):
+        # PASSTHROUGH, not a fixed signature: v1.2's planner calls `rollout.run(fleet,
+        # horizon_s=..., rc_rows=True)`, and a wrapper that named the v1.1 arguments raised
+        # TypeError on every planner evaluation. Recorded as erratum E5.
+        r = _run(self, fleet, *a, **k)
         runs.append(r)
         return r
 
