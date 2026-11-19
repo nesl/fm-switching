@@ -1,0 +1,53 @@
+{
+ "check": "StudySS1_judge_parser_bug",
+ "is_measurement": true,
+ "label": "Found on the first full judge run over 700 device answers. URGENT for the H100, which runs the identical scorer on the 32B answers.",
+ "severity": "the first run reported judge_mean 0.1818 and agreement 0.5758. BOTH WERE COMPUTED OVER 33 ROWS OF 700, 4.7 percent. They are plausible-looking numbers from 4.7 percent of the data.",
+ "symptom": {
+  "n": 700,
+  "parsed": 33,
+  "unparsed": 667,
+  "unparsed_pct": 95.3
+ },
+ "cause": {
+  "pattern_before": "\\[\\[\\s*([01](?:\\.5)?|0?\\.5)\\s*\\]\\]",
+  "why": "it requires DOUBLE brackets and matches only the spellings 0, 1, 0.5 and .5. The judge emits its rating in three shapes and uses the .0 spellings.",
+  "breakdown_of_the_667": {
+   "correctly double-bracketed, rejected only because the value is written 1.0 or 0.0": 399,
+   "bare \"Rating: x\"": 176,
+   "single-bracketed \"[x]\"": 76,
+   "genuinely no rating token, prose only": 16
+  },
+  "sharpest_point": "the LARGEST single cause, 399 of 667, is the judge following the required [[x]] format correctly and the regex rejecting the VALUE. That is unambiguously a parser bug and not a format deviation by the model."
+ },
+ "recoverable": "684 of 700, 97.7 percent, carry a valid rating. The parser found 33.",
+ "not_forced": {
+  "what": "16 rows state a rating only in prose, e.g. \"I would rate the assistant answer as 0\", or emit none at all.",
+  "decision": "NOT extracted. A looser pattern able to catch those would risk capturing unrelated numbers, and 16 of 700 cannot change a conclusion. Reported as unparsed rather than recovered."
+ },
+ "fix": {
+  "where": "experiments/casestudy/ss1_kit.py::_RATING and parse_judge_rating",
+  "what": "accept [[x]], [x] and a bare \"Rating: x\", with or without the .0 spelling, while still admitting only the three legal values 0, 0.5 and 1, which parse_judge_rating enforces after the match.",
+  "verified_on": [
+   "Rating: 0.5 -> 0.5",
+   "Rating: [0.5] -> 0.5",
+   "Rating: [[1.0]] -> 1.0",
+   "[[1]] -> 1.0",
+   "[[0.0]] -> 0.0",
+   "Rating: 0.7 -> None (illegal value rejected)",
+   "no rating here -> None",
+   "I would rate it as 0 -> None (prose not forced)"
+  ]
+ },
+ "why_a_rerun_rather_than_a_repatch": "the saved judge_raw is truncated to 800 characters and 2 of the 16 unrecoverable rows sit exactly at that limit, so re-parsing stored text would carry a small truncation caveat. Re-running is 18 minutes, removes the caveat, and exercises the fixed path end to end, which is the path the H100 will use.",
+ "constancy_note": "this does NOT break the 4B against 32B constancy requirement, it preserves it. Constancy means both runs use the IDENTICAL scorer, not that a broken scorer is frozen. The H100 has not run yet, so it must pull this fix BEFORE running, and then both runs use the same corrected parser.",
+ "what_this_says_about_the_gpt4_deviation": "the deviation from EgoThink protocol bites at the PARSING layer before it bites at the quality layer. The parser encodes GPT-4 output conventions; a 7B judge produces sensible ratings in other shapes. That is a harness finding rather than a judge-quality finding, and the judge ratings themselves read as reasonable in the raw text.",
+ "_provenance": {
+  "git_commit": "9c1fde876e44490fa708311ff88807f83f274c77",
+  "script": "experiments/casestudy/ss1_judge.py with the ss1_kit parser fix",
+  "model": "mistralai/Mistral-7B-Instruct-v0.2",
+  "device": "nvidia_rtx_a6000",
+  "n": 700,
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}

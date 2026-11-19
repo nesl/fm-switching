@@ -188,7 +188,17 @@ EGOTHINK_JUDGE_TEMPLATE = (
     "Reference Answer]\n\n[The Start of Assistant's Answer]\n{answer}\n[The End of Assistant's "
     "Answer]")
 
-_RATING = re.compile(r"\[\[\s*([01](?:\.5)?|0?\.5)\s*\]\]")
+_RATING = re.compile(
+    # D139. The judge emits its rating in three observed shapes, and the original pattern
+    # accepted only one of them: `[[x]]`. Measured over 700 Mistral-7B judgements, 667 failed
+    # to parse, of which 399 were CORRECTLY double-bracketed and rejected only because the
+    # value was written `1.0` or `0.0`, which `[01](?:\.5)?` does not match; 176 were a bare
+    # `Rating: x` and 76 were single-bracketed `[x]`. Only 33 of 700 parsed. This accepts all
+    # three shapes and the `.0` spellings, and still admits only the three legal values
+    # 0, 0.5 and 1, which `parse_judge_rating` enforces after the match.
+    r"(?:\[\[\s*([0-9]*\.?[0-9]+)\s*\]\]"
+    r"|\[\s*([0-9]*\.?[0-9]+)\s*\]"
+    r"|[Rr]ating\s*[:=]\s*([0-9]*\.?[0-9]+))")
 
 
 def egothink_judge_prompt(question: str, reference: str, answer: str) -> str:
@@ -196,9 +206,21 @@ def egothink_judge_prompt(question: str, reference: str, answer: str) -> str:
 
 
 def parse_judge_rating(text: str) -> Optional[float]:
-    """Parse the last '[[rating]]' as 0, 0.5 or 1; None if the judge did not emit one."""
+    """Parse the last rating as 0, 0.5 or 1; None if the judge did not emit one.
+
+    Accepts `[[x]]`, `[x]` and a bare `Rating: x`, with or without a `.0`. Values outside
+    {0, 0.5, 1} are rejected, so a looser match cannot admit an illegal rating. A rating stated
+    only in prose ("I would rate it as 0") is deliberately NOT matched: extracting those would risk
+    capturing unrelated numbers, and they are 16 of 700.
+    """
     ms = _RATING.findall(text or "")
     if not ms:
         return None
-    v = float(ms[-1])
+    vals = [g for m in ms for g in (m if isinstance(m, tuple) else (m,)) if g]
+    if not vals:
+        return None
+    try:
+        v = float(vals[-1])
+    except ValueError:
+        return None
     return v if v in (0.0, 0.5, 1.0) else None
