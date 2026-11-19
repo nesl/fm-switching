@@ -63,7 +63,7 @@ def prep():
     log(f"prep: {n} frame symlinks under {FRAMES}; manifest {MANIFEST}")
 
 
-def start_server(host_gib):
+def start_server(host_gib, scheduling_policy=None):
     sys.path.insert(0, str(REPO / "experiments/cost"))
     import study_live2_pre as LP
     import study_eng1_steptime as M
@@ -82,6 +82,12 @@ def start_server(host_gib):
     diff = [(a, b) for a, b in zip(ref, flags) if a != b]
     if diff != [("38", f"{host_gib:g}")] or len(ref) != len(flags):
         raise SystemExit(f"flag diff vs DE_c38 {diff}: STOP")
+    # vllm-priority (flash's "H100 wiring for vllm-priority", step 1): the ONLY addition to the round-1
+    # command, appended after the DE_c38 equality check so every other flag is verified unchanged
+    if scheduling_policy not in (None, "fcfs", "priority"):
+        raise SystemExit(f"unknown scheduling policy {scheduling_policy!r}: STOP")
+    if scheduling_policy == "priority":
+        flags = flags + ["--scheduling-policy", "priority"]
     os.environ["PYTHONPATH"] = str(M.PLUGIN_DIR)
     os.environ["ENG1_STATLOG_PATH"] = str(WORK / f"statlog_{int(time.time())}.jsonl")
     t0 = time.time()
@@ -92,7 +98,8 @@ def start_server(host_gib):
         srv.stop()
         raise SystemExit(f"GPU pool {info.get('kv_cache_tokens')}: STOP")
     return srv, dict(command=info.get("server_cmd"), flag_diff=diff, restart_started=t0, up_at=time.time(),
-                     startup_s=info.get("startup_s"), log=str(srv.logpath), host_gib=host_gib), M
+                     startup_s=info.get("startup_s"), log=str(srv.logpath), host_gib=host_gib,
+                     scheduling_policy=(scheduling_policy or "fcfs")), M
 
 
 def run_cell(arm_name, n_dev, run_s, host_gib=HOST_TIGHT, tag="", drain_s=20.0):

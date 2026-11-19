@@ -546,6 +546,49 @@ class TestDecisionTimeInstrumentation(unittest.TestCase):
                 self.assertTrue(name in ("this-user", "root") or name.startswith("other-user-"), name)
 
 
+class TestTheVllmPriorityWiring(unittest.TestCase):
+    """flash's "H100 wiring for vllm-priority": priority at the body's top level, asserted per send."""
+
+    def _split(self, arm, policy):
+        import emulator as EM
+        import fakestream as FS
+        import procsplit as PS
+        import trace as TR
+        from test_live2_coord import GPU_KV, HOST_GIB, HOST_TOK
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            tdir = d / "trace"
+            TR.write_trace(tdir, TR.generate_trace(5, 4, "50:50", 25.0, "A"))
+            rdir = d / "run"
+            err = None
+            with FS.serve(0, concurrency=4) as url:
+                cfg = dict(run_dir=str(rdir), arm=arm, arm_kwargs={}, mode="A", run_s=25.0,
+                           drain_s=4.0, decision_period_s=0.1, gpu_kv_tokens=GPU_KV,
+                           host_tier_gib=HOST_GIB, host_tier_tokens=HOST_TOK, seed=5,
+                           run_tag="rt", frames_root=None, server_url=url, strip_hints=False,
+                           defer_images=True, self_tick_s=0.005, scheduling_policy=policy)
+                try:
+                    with PS.SplitRun(cfg, kind="fake") as remote:
+                        EM.FleetEmulator(tdir, remote, "A", realtime=True, drain_s=4.0).run(rdir)
+                except Exception as e:                                # noqa: BLE001
+                    err = f"{type(e).__name__}: {e}"
+            res = (json.loads((rdir / "coordinator_result.json").read_text())
+                   if (rdir / "coordinator_result.json").exists() else {})
+        return res, err
+
+    def test_vllm_priority_in_priority_mode_sends_a_priority_with_every_request(self):
+        res, err = self._split("vllm-priority", "priority")
+        self.assertIsNone(err)
+        self.assertGreater(res.get("n_requests", 0), 0)
+        self.assertEqual(res.get("n_errors"), 0, res.get("first_errors"))
+        # every send passed the assertion (a failed assertion surfaces as a request error)
+
+    def test_an_arm_without_priorities_on_a_priority_server_trips_the_assertion(self):
+        res, err = self._split("edf", "priority")
+        self.assertTrue(err is not None or res.get("n_errors", 0) > 0,
+                        "edf on a priority-mode server must fail the vllm-priority assertion")
+
+
 class TestTheCInflightRunnerFlag(unittest.TestCase):
     """D114 sensitivity: the runner sets the arm's OWN c_inflight on the constructed instance."""
 

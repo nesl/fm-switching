@@ -111,6 +111,7 @@ class AsyncLive2Backend:
         self.on_complete: Any = None
         self.on_first: Any = None
         self.run_clock: Any = None
+        self.scheduling_policy: str = "fcfs"
         self.wire_extra_ms: List[float] = []
         self.submit_total_ms: List[float] = []
         self.first_gap_ms: List[float] = []      # first SSE line -> first content token
@@ -163,6 +164,14 @@ class AsyncLive2Backend:
         wire = B.strip_internal(body, strip_hints=self.strip_hints)
         wire = dict(wire)
         wire["model"] = self.model
+        # vllm-priority (flash's wiring, steps 2 to 4): the arm's priority_ms, carried on the submission,
+        # goes to the TOP LEVEL of the body; the assertion refuses a priority sent to a non-priority
+        # server and a priority-mode server left without one.
+        pri = (sub.meta or {}).get("priority_ms")
+        if pri is not None and self.scheduling_policy == "priority":
+            wire["priority"] = int(pri)
+        assert (self.scheduling_policy == "priority") == ("priority" in wire), \
+            "vllm-priority: a priority was sent to a server that is not in priority mode, or the mode is on and no priority was set"
         data = wire_bytes(wire)
         self.build_s += time.perf_counter() - t_build
         self.n_built += 1

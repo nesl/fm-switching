@@ -164,6 +164,7 @@ class Live2Coordinator:
         self.decision_latencies_ms: List[float] = []
         # D115: per decision (t, wall_ms, cpu_ms, candidates)
         self.decision_times: List[Tuple[float, float, float, int]] = []
+        self._priority_latest: Dict[str, int] = {}          # vllm-priority, by item key
         self.errors: List[str] = []
         self.counts: Dict[str, int] = defaultdict(int)
         self.builds: Dict[str, Dict[str, Any]] = {}
@@ -263,6 +264,16 @@ class Live2Coordinator:
             # a submission made OUTSIDE an epoch (a chained recall released by a completion in
             # `_settle`) is stamped at the instant it is made, not charged this epoch's delay
             self._epoch_wall0 = None
+
+    def _priority_for(self, kind, device_id, session_id, opportunity_id) -> Dict[str, Any]:
+        """vllm-priority: the priority the arm set for this item, if any (monitor by stream, recall
+        by question, build by session); {} for every other arm, so nothing else changes."""
+        if not self._priority_latest:
+            return {}
+        key = ("mon:" + str(device_id) if kind == "monitor" else
+               "rc:" + str(opportunity_id) if kind == "recall" else "session:" + str(session_id))
+        v = self._priority_latest.get(key)
+        return {} if v is None else {"priority_ms": int(v)}
 
     def _candidates_counter(self) -> Optional[int]:
         """D115: the arm's own count of candidates priced so far, read only (never written)."""
@@ -382,6 +393,11 @@ class Live2Coordinator:
 
     # ---------------------------------------------------------------- enactment
     def _enact(self, act, t: float, dt_ms: float) -> None:
+        # vllm-priority: the arm's per-item priorities (Action.notes["priority_ms"]); kept by key so a
+        # submission released outside an epoch (a chained recall) still carries its item's priority
+        pri = ((getattr(act, "notes", None) or {}).get("priority_ms")) or {}
+        if pri:
+            self._priority_latest.update(pri)
         preds = getattr(self.arm, "last_predictions", {}) or {}
         mix = self.st.traffic_mix()
         for sa in act.streams:
@@ -596,7 +612,8 @@ class Live2Coordinator:
                               opportunity_id=opportunity_id, body=body,
                               est_tokens=int(est_tokens), sent_s=t, cache_salt=d.salt,
                               mm_uuids=list(body["_live2"]["mm_uuids"]), traffic_mix=dict(mix),
-                              meta=dict(nominal_t=t - delay_s, decision_delay_s=delay_s))
+                              meta=dict(nominal_t=t - delay_s, decision_delay_s=delay_s,
+                                        **self._priority_for(kind, device_id, session_id, opportunity_id)))
         self.st.in_flight[kind] += 1
         self.counts["submitted_" + kind] += 1
         if session_id is not None:

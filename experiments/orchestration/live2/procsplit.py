@@ -272,6 +272,8 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
                 targets=CS.TARGETS)
     if cfg.get("calibration_knots_path"):
         conf["calibration_knots_path"] = cfg["calibration_knots_path"]
+    if cfg.get("scheduling_policy") is not None:
+        conf.update(server_scheduling_policy=cfg["scheduling_policy"], has_backend=True)
     arm.live2_configure(**conf)
     store = cfg.get("frames_root")
     cache = FC.FrameCache(Path(store), int(cfg.get("cache_cap_bytes")
@@ -284,6 +286,7 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
         be = AsyncLive2Backend(cfg["server_url"], model=cfg.get("model") or "32BI",
                                strip_hints=bool(cfg.get("strip_hints", True)), cache=cache,
                                limit=int(cfg.get("http_limit") or 16384))
+        be.scheduling_policy = cfg.get("scheduling_policy") or "fcfs"
     logs = Logs(rdir).open()
     co = Live2Coordinator(arm, be, [], upload_mode=cfg["mode"],
                           window_s=float(cfg["run_s"]), drain_s=float(cfg.get("drain_s") or 10.0),

@@ -84,6 +84,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--no-split", dest="split", action="store_false",
                     help="the pilot's single-process wiring, for comparison only")
     ap.add_argument("--no-warm-cache", dest="warm_cache", action="store_false")
+    ap.add_argument("--scheduling-policy", default="fcfs", choices=("fcfs", "priority"),
+                    help="vllm-priority wiring: start the server with --scheduling-policy priority and "
+                         "send each request's priority; default fcfs (the round-1 server)")
     ap.add_argument("--c-inflight", type=int, default=None,
                     help="D114 sensitivity: set the EDF-family arm's own c_inflight on the constructed "
                          "instance (the factory passes no arguments to these arms); default = the arm's 4")
@@ -160,6 +163,8 @@ def run(a) -> Dict[str, Any]:
         arm.c_inflight = int(a.c_inflight)
     conf = dict(gpu_kv_tokens=a.gpu_kv_tokens, host_tier_gib=a.host_tier_gib,
                 host_tier_tokens=htok, targets=CS.TARGETS)
+    if sends:                                    # vllm-priority refuses an undeclared server mode
+        conf.update(server_scheduling_policy=a.scheduling_policy, has_backend=True)
     cal: Dict[str, Any] = {}
     knots = None
     if a.calibration:
@@ -188,6 +193,7 @@ def run(a) -> Dict[str, Any]:
         server=sinfo, server_url=(a.server or "none"), server_kind=a.server_kind,
         frames_preflight=frames_report, git_working_tree=_tree_state(),
         c_inflight=getattr(arm, "c_inflight", None),
+        scheduling_policy=(a.scheduling_policy if sends else None),
         c_inflight_set_by_runner=(a.c_inflight is not None),
         model=a.model, split_processes=bool(a.split), is_measurement=False)
     (rdir / "header.json").write_text(json.dumps(header, indent=1, default=str) + "\n")
@@ -204,6 +210,7 @@ def run(a) -> Dict[str, Any]:
                cache_cap_bytes=a.cache_cap_bytes, self_tick_s=a.self_tick_s,
                forward_on_completion=bool(a.forward_on_completion),
                c_inflight=a.c_inflight,
+               scheduling_policy=(a.scheduling_policy if sends else None),
                forward_at_first_token=(a.forward_at == "first"))
 
     err = None
@@ -368,7 +375,7 @@ def _start_server(a):
     """The pilot's restart-per-run, imported lazily because it is H100-only."""
     sys.path.insert(0, str(REPO / "experiments/orchestration"))
     import study_live2_pilot as P
-    srv, sinfo, _M = P.start_server(a.host_tier_gib)
+    srv, sinfo, _M = P.start_server(a.host_tier_gib, scheduling_policy=a.scheduling_policy)
     return srv, sinfo
 
 
