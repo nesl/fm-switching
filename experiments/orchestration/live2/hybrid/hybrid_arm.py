@@ -79,12 +79,21 @@ class HybridArm:
     SWITCHES = ("c1", "c2", "c3", "c4", "c5", "c6")
 
     def __init__(self, name: str = "hybrid-base", c1=False, c2=False, c3=False, c4=False, c5=False, c6=False,
-                 k_r: float = 1.0, m_d: float = 0.05) -> None:
+                 k_r: float = 1.0, m_d: float = 0.05, defs: str = "v1", reserve: Optional[bool] = None) -> None:
         from arms_published import B7EdfFeasibilityArm
         self._b7 = B7EdfFeasibilityArm()
         self.name = name
         self.sw = dict(c1=bool(c1), c2=bool(c2), c3=bool(c3), c4=bool(c4), c5=bool(c5), c6=bool(c6))
         self.k_r, self.m_d = float(k_r), float(m_d)
+        # D140 definition fixes. "v1" = the definitions screened first (labelled "old at-risk / old cap"):
+        #   robot at risk when slack < k_r or laxity < 0; C5's cap holds every kind; reserved slot = C2.
+        # "v2": robot at risk when LAXITY < k_r, laxity = deadline - now - predicted remaining work (committed
+        #   cost curve, including a cold rebuild of the believed un-built history); C5's cap holds DASHCAM traffic
+        #   only (robot recall / rebuild work is never held by it); the reserved slot is its own switch.
+        if defs not in ("v1", "v2"):
+            raise ValueError("defs must be v1 or v2")
+        self.defs = defs
+        self.reserve = (bool(c2) if reserve is None else bool(reserve)) if defs == "v1" else bool(reserve)
         self.values = _quality_values() if any(self.sw.values()) else None
         self.cap, self._last_adj = 8, None
         self.stats = Counter()
@@ -119,7 +128,8 @@ class HybridArm:
 
     def live2_describe(self) -> Dict[str, Any]:
         d = dict(self._b7.live2_describe()) if hasattr(self._b7, "live2_describe") else {}
-        d.update(hybrid=dict(self.sw, k_r=self.k_r, m_d=self.m_d), hybrid_name=self.name)
+        d.update(hybrid=dict(self.sw, k_r=self.k_r, m_d=self.m_d, defs=self.defs, reserve=self.reserve),
+                 hybrid_name=self.name)
         return d
 
     # ---- the decision ------------------------------------------------------------------------------------
@@ -146,7 +156,12 @@ class HybridArm:
             est = float(C.recall_ttft_s(max(q.readiness_tokens, 1), q.readiness))
             qs = q.slack_s(now)
             slack = qs - est
-            risk = self.sw["c2"] and (qs < self.k_r or slack < 0)
+            if self.defs == "v1":
+                risk = self.sw["c2"] and (qs < self.k_r or slack < 0)
+            else:
+                work = est + self._unbuilt_rebuild_s(q)
+                laxity = qs - work
+                risk = self.sw["c2"] and (laxity < self.k_r)
             if est <= qs:
                 d = RecallAction(q.query_id, "CLOUD")
             elif est <= qs + self._b7.defer_s:
@@ -175,9 +190,13 @@ class HybridArm:
         # cap (C5); without C5 the base has none, as b7
         if self.sw["c5"]:
             self._aimd(obs)
+            if self.defs == "v2":
+                keep = self._cap_dashcam_only(obs, items)
+            else:
+                keep = None
             budget = max(self.cap - in_flight, 0)
-            chosen, reserved = [], 1 if self.sw["c2"] else 0
-            for it in items:
+            chosen, reserved = [], 1 if self.reserve else 0
+            for it in (items if keep is None else ()):
                 if len(chosen) >= budget:
                     break
                 if reserved and it["kind"] != "recall" and len(chosen) >= budget - reserved \
@@ -185,7 +204,8 @@ class HybridArm:
                     if any(x["kind"] == "recall" and x["risk"] for x in items):
                         continue                           # keep the slot for at-risk recall work
                 chosen.append(it)
-            keep = {(it["kind"], it["id"]) for it in chosen}
+            if keep is None:
+                keep = {(it["kind"], it["id"]) for it in chosen}
         else:
             keep = {(it["kind"], it["id"]) for it in items}
         order = [it for it in items if (it["kind"], it["id"]) in keep]
@@ -202,6 +222,34 @@ class HybridArm:
                 recall.append(d)
         self.stats["decisions"] += 1
         return Action(streams=streams, recall=recall, order="EDF", notes={"hybrid": self.name})
+
+    def _unbuilt_rebuild_s(self, q) -> float:
+        """v2 laxity: the cold rebuild of the believed UN-BUILT part of the history. A COLD history's rebuild is
+        already the whole of `recall_ttft_s(tokens, COLD)`; for a warm one, the tokens the cloud has not built
+        (roster `built_tokens_by_session`) are charged at the committed cold curve."""
+        if q.readiness == "COLD":
+            return 0.0
+        built = int(((self._roster or {}).get("built_tokens_by_session") or {}).get(q.session_id, q.readiness_tokens))
+        unbuilt = max(int(q.readiness_tokens) - built, 0)
+        return float(C.recall_ttft_s(unbuilt, "COLD")) if unbuilt > 0 else 0.0
+
+    def _cap_dashcam_only(self, obs: Observation, items) -> set:
+        """v2 C5: the cap counts and holds dashcam (episodic) traffic only; every robot item is kept. With the
+        reserve switch on, one dashcam slot is withheld while an at-risk robot item is pending (ablation)."""
+        epi = int((obs.cloud.running_by_class or {}).get("episodic", 0))
+        budget = max(self.cap - epi, 0)
+        if self.reserve and any(it["kind"] == "recall" and it["risk"] for it in items):
+            budget = max(budget - 1, 0)
+            self.stats["c5_reserve_applied"] += 1
+        keep, n_d = set(), 0
+        for it in items:
+            if it["kind"] == "recall":
+                keep.add((it["kind"], it["id"]))
+            elif n_d < budget:
+                keep.add((it["kind"], it["id"]))
+                n_d += 1
+        self.stats["c5_dash_held"] += sum(1 for it in items if it["kind"] == "dash") - n_d
+        return keep
 
     # ---- C6: flash's counterfactual chooser, per robot question ----------------------------------------
     def _c6_prepare(self, obs: Observation) -> bool:
@@ -279,6 +327,25 @@ CONFIGS: Dict[str, Dict[str, Any]] = {
     "hybrid-all-k2": dict(c1=True, c2=True, c3=True, c5=True, k_r=2.0),
 }
 
+
+# D140 (v2 definitions). The v1 names above stay as screened ("old at-risk / old cap").
+CONFIGS.update({
+    "hybrid2-c5": dict(c5=True, defs="v2"),
+    "hybrid2-c1c5": dict(c1=True, c5=True, defs="v2"),
+    "hybrid2-c1c2k05c5": dict(c1=True, c2=True, c5=True, k_r=0.5, defs="v2"),
+    "hybrid2-c1c2k15c5": dict(c1=True, c2=True, c5=True, k_r=1.5, defs="v2"),
+    "hybrid2-c1c2k05c3c5": dict(c1=True, c2=True, c3=True, c5=True, k_r=0.5, defs="v2"),
+    "hybrid2-c1c2k15c3c5": dict(c1=True, c2=True, c3=True, c5=True, k_r=1.5, defs="v2"),
+    "hybrid2-all-k05": dict(c1=True, c2=True, c3=True, c4=True, c5=True, k_r=0.5, defs="v2"),
+    "hybrid2-all-k15": dict(c1=True, c2=True, c3=True, c4=True, c5=True, k_r=1.5, defs="v2"),
+    # proof-only (Step 2b): the at-risk change isolated from the cap change
+    "hybrid-c1c2k05": dict(c1=True, c2=True, k_r=0.5),
+    "hybrid2-c1c2k05": dict(c1=True, c2=True, k_r=0.5, defs="v2"),
+    "hybrid-c1c2k15": dict(c1=True, c2=True, k_r=1.5),
+    "hybrid2-c1c2k15": dict(c1=True, c2=True, k_r=1.5, defs="v2"),
+    "hybrid2-c1c2k05c5-reserve": dict(c1=True, c2=True, c5=True, k_r=0.5, defs="v2", reserve=True),
+    "hybrid2-c1c2k15c5-reserve": dict(c1=True, c2=True, c5=True, k_r=1.5, defs="v2", reserve=True),
+})
 
 # C6 variants of every configuration (D138 follow-up): screening adds "<best>-c6" at 10 and 12 devices.
 for _n, _k in list(CONFIGS.items()):
