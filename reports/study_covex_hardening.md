@@ -2689,7 +2689,13 @@ auditor told to watch for one will pass the other two.
 | **a planner's price diverging from the CHARGED price** | nothing: every arm is compared against the same bar | the COMPARATOR is mis-set, so all comparisons shift together | section 32; invisible to every arm-versus-arm check by construction |
 
 | **an INSTRUMENT that cannot see a field** | every mechanism using that field reads as inert, however often it fires | a property of the TOOL, not of any arm: `decision.jsonl` carries neither `representation` nor the session action | session 3's move proof returned 0 differing rows for an arm that emitted RECENT on **all 21** of its recalls |
+| **A VERDICT WITHOUT ITS SCOPE CONDITIONS** | a clean structural statement | a CONTINGENT finding read as a structural one. The two scopes that have bitten are **SIZE** and **REGIME** | `s4-reserve` inert at 8 and firing 3,721 times at 16; the eco-llm reconciliation inert at 10-14 and firing at 16; `builder-s7-always-recent` "absorbed by defaults" **only while the default was RECENT** |
 | **KNOWLEDGE THAT DOES NOT PROPAGATE** | nothing: the gap is already known, somewhere else | a **propagation** failure, not a detection one. Every signature above is about something being invisible; this one is about something VISIBLE IN ONE CONTEXT and not carried into another | I built `capture_sent_representation` precisely because the logs lack `representation`, and left `switch_moves.py` diffing those same logs to render absent-link verdicts |
+
+**A verdict's scope conditions are part of the verdict.** Three verdicts this week needed a scope
+rather than a correction, and in each case the unscoped version was a true statement that a reader
+would generalise wrongly. **Absorbed-by-defaults is a property of THE DEFAULT**, so such a verdict
+must name its regime exactly as a single-size verdict must name its size.
 
 **Every workaround built to get around a gap is evidence of a gap some other tool is still falling
 into.** That is the generalisable form of the tenth signature, and it is the one I would check
@@ -3558,3 +3564,41 @@ must be recorded, not merely its presence in the configuration, because well-for
 fairness proofs establish neither that a mechanism ran nor that it could. And **RECENT share needs
 both axes**, since raising it by choosing RECENT and raising it by leaving the field unset are
 different claims and, after this revert, indistinguishable in the log.
+
+# 41. THE TWO CREDIT ROUTES AGREE ON THE VERDICT AND DIFFER ON THE COUNT
+
+I was told twice that my pre-default capture was the **only** surviving record of the credit axis
+after the revert, and I repeated it. **It is not.** `RecallAction.representation_defaulted` is
+declared at `interface.py:208`, set inside `apply_defaults` at `:257`, read at
+`coordinator.py:447`, carried at `:583-584` and `:866`, and reaches `schema.py:318`. **The
+decision log is self-sufficient on credit**, and my capture is a **cross-check**, which is the
+stronger position.
+
+Both routes, 16 devices, seed 4:
+
+| arm | route A: capture at `Policy.__call__` | route B: `representation_defaulted` in the log |
+|---|---|---|
+| `b7-edf-feasibility` | **INJECTED x 41** | **INJECTED x 34** |
+| `eco-llm` | **CHOSEN x 41** | **CHOSEN x 41** |
+
+**The verdicts agree on both arms. The counts do not, and that is not a disagreement.** The two
+routes count **different populations**: route A records every recall action the arm *emits*, route
+B records logged `release_recall` rows, which exist only for recalls actually released to cloud.
+For `eco-llm` the two populations coincide; for `b7` they do not.
+
+**So only the VERDICT is the cross-check, not the count.** A reader comparing 41 against 34 would
+report a conflict where there is none, and this is the second time this week two correct
+measurements of differently-defined populations have looked like a contradiction - the first being
+the `state_value` entry points in section 14.
+
+## 41.1 The caution that makes agreement the thing to check
+
+`coordinator.py:447` reads the flag as `getattr(ra, "representation_defaulted", False)` - **the
+same idiom that pinned `cascade-routing`'s lambda at a constant.** The dataclass guarantees the
+field today, but **a duck-typed action object lacking it would be silently recorded as CHOSEN when
+it was injected**, which is the exact failure the credit axis exists to prevent.
+
+**Until that is hardened, agreement between the two routes is the check that matters rather than
+either alone** - which is what having two was for. Route A reads the arm's own emission and cannot
+be fooled by a missing attribute on the action object; route B survives a change to my harness.
+Neither is redundant.
