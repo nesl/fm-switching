@@ -4913,3 +4913,36 @@ That second run is a **REAL NEGATIVE** under Rule 2: the mechanism was present a
 | 16 | **13 of 35**, 0.7268 | 4 of 35, **0.9508** | 6 of 35, 0.9633 |
 
 At sixteen devices COVEX delivers three times the robot answers of the best baseline and loses dashcam; at eight it loses both. **It does not meet the D129 goal of beating the best baseline on both axes at every size**, and the honest leaderboard row says so.
+
+### v1.3-fast release: the leaderboard row, stated honestly
+
+Released as `covex-v13` in `live2/arms.py`, which is `policy-core` with the v1.1 defect fixes and
+the v1.2 two-timescale planner on, **the price of GPU time set to zero**, the admission floor at 8,
+and kappa derived. The H100 can ask for it by that one name.
+
+**IT DOES NOT MEET THE D129 GOAL.** The goal was to beat the best scheduling baseline on BOTH
+dashcam and robot delivery at 4, 8, 16 and 32 devices. v1.3 does not. At 16 devices, 600 s:
+
+| seed | v1.3 (mu=0, af8) | edf C=8 | llf |
+|---|---|---|---|
+| 0 | **14 of 35**, 0.8164 | 4 of 35, **0.9508** | 6 of 35, **0.9633** |
+| 4 | **13 of 41**, 0.8751 | 3 of 41, **0.9609** | pending |
+
+At 8 devices it loses BOTH axes: 8 of 20 and 0.9330 against edf-at-8's 19 of 20 and 0.9991.
+
+**What is nonetheless true and worth carrying into round 1.** At 16 devices v1.3 delivers **three
+to four times the robot answers of the best baseline** while giving up about 0.13 of dashcam. That
+is a real and repeated trade, not noise, and it is the first time COVEX has beaten a scheduling
+baseline on any axis at scale. **Seed stability is also much improved**: v1.2 ranged 0.062 to 0.590
+on dashcam across seeds, where v1.3 sits at 0.8164 and 0.8751. The crossover between 8 and 16
+devices is the honest headline: COVEX is worse than a trivial scheduler when the GPU is adequate
+and better on the deadline-bearing workload when it is not.
+
+**Speed-ups are OFF in this release.** None was implemented tonight; the night went to the price
+of GPU time, which the evidence kept pointing at. Nothing in this release is a speed-up that could
+fail to be byte-identical, so the byte-identity question does not arise for it.
+
+**The open item I would put first next.** The gap at 8 devices is not a gate: the release floor is
+an exact null and the admission floor is near-null there. It is structural in the counterfactual,
+which charges a served opportunity the harm it does to others and so refuses under contention even
+where serving more is better overall. That is the thing to redesign, not another threshold.

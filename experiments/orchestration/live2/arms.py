@@ -551,7 +551,34 @@ ARMS = {
 }
 
 
+# D129 v1.3-fast release. The configuration the night's evidence selected, named so the H100
+# driver can ask for it by one string instead of carrying ten keyword arguments. It is
+# `policy-core` with the v1.1 defect fixes and the v1.2 two-timescale planner on, the price of
+# GPU time set to ZERO, and the admission floor at 8.
+#
+# WHY mu = 0 and not a price. The directive's cheap diagnostic was decisive: at 8 devices mu = 0
+# gives 8 of 20 robot answers and 0.9330 dashcam against the EWMA's 1 of 20 and 0.7998, better on
+# BOTH axes. A graded scarcity price, verified to vary over 0.5 to 0.889 with nothing at a cap,
+# still gives 0 of 20 and 0.5803 at 16 devices. Pricing predicted backlog at all is worse than
+# not pricing it, which is a real negative and not an absent mechanism.
+#
+# THIS DOES NOT BEAT THE BASELINES EVERYWHERE and is released as the best found, per D129. At 16
+# devices it delivers 14 of 35 robot answers against edf-at-8's 4 and llf's 6, and loses dashcam,
+# 0.8164 against 0.9508 and 0.9633. At 8 devices it loses both. The leaderboard row says so.
+V13_RELEASE = dict(cost_model="pol4", h_s=0.5, impl="fast",
+                   mu_mode="none", mu_fixed=None,
+                   deficit_update=True, honour_job_priority=True, realistic_competing=True,
+                   planner_rc=True, plan_latest=True, replan=True,
+                   admit_floor_c=8, release_floor_c=0,
+                   kappa=None)
+
+
 def make_arm(name: str, **kw: Any) -> Policy:
+    if name in ("covex-v13", "policy-core-v13"):
+        from arms_policy import PolicyCoreArm
+        cfg = dict(V13_RELEASE)
+        cfg.update(kw)
+        return PolicyCoreArm(**cfg)
     if name == "policy-core":
         from arms_policy import PolicyCoreArm
         return PolicyCoreArm(**kw)
