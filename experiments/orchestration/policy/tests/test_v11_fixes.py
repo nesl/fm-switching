@@ -208,8 +208,8 @@ class TestRcTailMirrorsD98(unittest.TestCase):
         import inspect
         from policy import rollout as RO
         src = inspect.getsource(RO.Rollout.run)
-        self.assertIn('elif p.kind == "rc_piece" and self.flags.rc_tail:', src,
-                      "the selection branch must mirror D98's and be gated by the flag")
+        self.assertIn('elif p.kind == "rc_piece" and self.flags.tail_cursor_on():', src,
+                      "the selection branch must mirror D98's and be gated by the cursor switch")
         self.assertIn("sh_tail.append(p)", src)
 
     def test_the_bound_uses_the_rc_pieces_own_absolute_deadline(self):
@@ -228,6 +228,32 @@ class TestRcTailMirrorsD98(unittest.TestCase):
         self.assertIn("rc_progress = jobs_progress", src)
         self.assertIn("rc_progress = dict(jobs_progress)", src,
                       "the tail view must be a COPY, so jobs_progress is untouched")
+
+    def test_the_two_causes_are_independently_toggleable(self):
+        """User item 1: the SH side effect cannot be attributed unless each cause stands alone."""
+        f = Flags()
+        self.assertFalse(f.rc_tail_cursor)
+        self.assertFalse(f.rc_tail_zrows)
+        self.assertFalse(f.tail_cursor_on())
+        self.assertFalse(f.tail_zrows_on())
+        # the master turns both on, so the pre-split build is reproduced exactly
+        both = Flags(rc_tail=True)
+        self.assertTrue(both.tail_cursor_on())
+        self.assertTrue(both.tail_zrows_on())
+        # and each sub-switch isolates its own cause
+        cur = Flags(rc_tail_cursor=True)
+        self.assertTrue(cur.tail_cursor_on())
+        self.assertFalse(cur.tail_zrows_on())
+        zr = Flags(rc_tail_zrows=True)
+        self.assertFalse(zr.tail_cursor_on())
+        self.assertTrue(zr.tail_zrows_on())
+
+    def test_the_z_rows_are_gated_separately_from_the_cursor(self):
+        import inspect
+        from policy import rollout as RO
+        src = inspect.getsource(RO.Rollout.run)
+        self.assertIn("if self.flags.tail_zrows_on():", src)
+        self.assertIn("if self.flags.tail_cursor_on() and tail_progress:", src)
 
     def test_rc_opportunities_exist_so_the_deficit_can_be_credited(self):
         """v1.0 emitted task=SH rows only, so z_of('RC') was never read by _z_term."""
@@ -290,3 +316,77 @@ class TestStalenessIsWritten(unittest.TestCase):
             frames = unbuilt_tokens / tokens_per_img
             staleness_s = frames * stride
             self.assertAlmostEqual(staleness_s / stride, frames, places=9)
+
+
+class TestF3RealisticCompetingWork(unittest.TestCase):
+    """D122 v1.1 F3: competing_s comes from the rollout's own state, not a constant 0.
+
+    The v1.0-failing assertions are the source ones plus `competing_gpu_s` not existing at all.
+    """
+
+    def test_the_flag_defaults_off(self):
+        self.assertFalse(Flags().realistic_competing)
+
+    def test_the_helper_exists_and_returns_zero_with_the_flag_off(self):
+        from policy import rollout as RO
+        self.assertTrue(hasattr(RO.Rollout, "competing_gpu_s"),
+                        "v1.0 has no competing-work estimator at all")
+        import inspect
+        src = inspect.getsource(RO.Rollout.competing_gpu_s)
+        self.assertIn("if not self.flags.realistic_competing:", src)
+        self.assertIn("return 0.0", src)
+
+    def test_no_caller_passes_a_hard_coded_zero_any_more(self):
+        import inspect
+        from policy import rollout as RO
+        src = inspect.getsource(RO.Rollout._terminal)
+        self.assertIn("comp = self.competing_gpu_s(f, j, end)", src)
+        self.assertNotIn("competing_s=0.0", src,
+                         "the hard-coded zero is what v1.0 got wrong")
+        risk = inspect.getsource(RO.Rollout.continuation_value_at_risk)
+        self.assertIn("comp = self.competing_gpu_s(f, job, f.t)", risk,
+                      "the A6 safe/lost pair must use the same competing value on both sides")
+
+    def test_the_coordinator_classify_sites_use_it_so_priority_is_reachable(self):
+        import inspect
+        from policy import coordinator as CO
+        src = inspect.getsource(CO.Coordinator._update_jobs)
+        self.assertIn("comp = self.rollout.competing_gpu_s(fleet, job, fleet.t)", src)
+        self.assertIn("competing_s=comp", src)
+        self.assertNotIn("competing_s=0.0", src)
+
+    def test_it_uses_the_frozen_step_models_own_gpu_s_and_no_new_parameter(self):
+        import inspect
+        from policy import rollout as RO
+        src = inspect.getsource(RO.Rollout._gpu_s_of)
+        self.assertIn("self.engine.predict(self._request(p), concurrent=0).gpu_s", src)
+        for banned in ("0.5", "1.5", "factor", "scale", "tune"):
+            self.assertNotIn(banned, src, "F3 must introduce no parameter")
+
+    def test_priority_becomes_reachable_once_competing_work_is_non_zero(self):
+        """The direct test of what F3 is for: classify can return PRIORITY."""
+        from policy.continuation import FEASIBLE, INFEASIBLE, PRIORITY, classify
+        e = Eng1Engine.load()
+        seen_zero, seen_real = set(), set()
+        for i in range(1, 101):
+            j = _job(round(i * 0.05, 2))
+            seen_zero.add(classify(j, 0.0, e, 0.0, 0.5, 0.0, 0.25))
+            seen_real.add(classify(j, 0.0, e, 3.0, 0.5, 0.0, 0.25))
+        self.assertNotIn(PRIORITY, seen_zero,
+                         "with competing_s = 0 PRIORITY is unreachable, which is the v1.0 bug")
+        self.assertIn(PRIORITY, seen_real,
+                      "with real competing work PRIORITY must become reachable")
+
+    def test_in_flight_work_counts_unconditionally(self):
+        import inspect
+        from policy import rollout as RO
+        src = inspect.getsource(RO.Rollout.competing_gpu_s)
+        self.assertIn("for p in f.in_flight:", src)
+        self.assertIn("if p.job_id != jid:", src)
+
+    def test_pending_work_counts_only_when_it_sorts_ahead_under_pi_0(self):
+        import inspect
+        from policy import rollout as RO
+        src = inspect.getsource(RO.Rollout.competing_gpu_s)
+        self.assertIn("if k < key:", src)
+        self.assertIn("p.due_at, p.item_id", src, "the pi_0 EDF key, as _edf uses it")

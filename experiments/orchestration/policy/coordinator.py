@@ -396,7 +396,10 @@ class Coordinator:
             size = int(sizing["chosen"]["size_tokens"])
             n_pieces = int(sizing["chosen"]["n_pieces"])
             job.tokens_per_piece, job.pieces_total = size, n_pieces
-            cls = classify(job, fleet.t, self.engine, competing_s=0.0,
+            # D122 v1.1 F3: the competing engine-seconds pi_0 would serve first, from the
+            # rollout's own state. 0.0 with the flag off, which is the previous behaviour.
+            cls = classify(job, fleet.t, self.engine,
+                           competing_s=self.rollout.competing_gpu_s(fleet, job, fleet.t),
                            threshold=self.params.feasibility_threshold,
                            resolution_s=self.params.continuation_resolution_s)
             if cls == INFEASIBLE:
@@ -434,11 +437,16 @@ class Coordinator:
         for jid, job in fleet.jobs.items():
             if job.answered:
                 continue
-            job.feasibility = classify(job, fleet.t, self.engine, competing_s=0.0,
+            # D122 v1.1 F3. `classify` compares `competing_s` against
+            # `competing_s_with_priority`, which stays 0.0 as the existing convention for "only
+            # work whose own loss exceeds the job's value stays ahead". With a real competing_s
+            # PRIORITY becomes reachable, which is what makes A3 live.
+            comp = self.rollout.competing_gpu_s(fleet, job, fleet.t)
+            job.feasibility = classify(job, fleet.t, self.engine, competing_s=comp,
                                        threshold=self.params.feasibility_threshold,
                                        resolution_s=self.params.continuation_resolution_s)
             if job.feasibility == FEASIBLE and bounded_waiting_breach(
-                    job, fleet.t, self.engine, 0.0, self.params.feasibility_threshold,
+                    job, fleet.t, self.engine, comp, self.params.feasibility_threshold,
                     self.params.H, self.params.continuation_resolution_s):
                 job.feasibility = PRIORITY
                 out.append(Decision(fleet.t, "feasibility", jid, None, True,

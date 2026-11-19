@@ -114,6 +114,9 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     # D122 v1.1, both DEFAULT OFF, both travelling on `Flags` because the rollout reads them.
     rc_tail: bool = False
     write_staleness: bool = False
+    realistic_competing: bool = False
+    rc_tail_cursor: bool = False
+    rc_tail_zrows: bool = False
 
     name: str = "policy-core"
     case: str = "own"
@@ -183,7 +186,10 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         # one of spec 7.0's conditional mechanisms, so the D66 guard asks `conditional_any_on`.
         self.flags = Flags(honour_job_priority=bool(self.honour_job_priority),
                            rc_tail=bool(self.rc_tail),
-                           write_staleness=bool(self.write_staleness))
+                           write_staleness=bool(self.write_staleness),
+                           realistic_competing=bool(self.realistic_competing),
+                           rc_tail_cursor=bool(self.rc_tail_cursor),
+                           rc_tail_zrows=bool(self.rc_tail_zrows))
         if self.flags.conditional_any_on():
             raise RuntimeError("D66: round 1 runs the CORE only and every conditional flag must "
                                "be off; one is on")

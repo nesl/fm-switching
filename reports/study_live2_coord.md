@@ -4148,3 +4148,65 @@ ON against OFF, reporting per-decision p50 and p99, rollouts per decision, and b
 **Whether the comparison is paired is stated explicitly**: the tail changes how many decisions a
 run makes, so unless the decision counts match, the comparison is not like for like and is
 labelled as such.
+
+## V15. F3 measured, and a CORRECTION to my own earlier baseline numbers
+
+Dry run, screening. Seed 0, 4 and 8 devices, 600 s, mu EWMA, H = 0.5 s, tight. Robot and dashcam
+figures are now read from `outcomes.jsonl`, so they are SERVED and ON TIME, not release counts.
+
+| n | variant | robot served / on time, of | dashcam served / on time, of | classify: FEASIBLE / PRIORITY / INFEASIBLE |
+|---|---|---|---|---|
+| 4 | v1.0 | see V10 (1 released) | 2,174 / 2,174 of 2,176 | 7,648 / **0** / 7,392 |
+| 4 | A3+B1+tail+staleness | 2 / 1 of 9 | 2,128 / 2,128 of 2,176 | FEASIBLE 7,648, no PRIORITY |
+| 4 | **+F3 competing** | 2 / 1 of 9 | 2,128 / 2,128 of 2,176 | 7,648 / **1** / 7,392 |
+| 4 | `edf` | **9 / 8** of 9 | 2,174 / 2,174 of 2,176 | n/a |
+| 4 | `llf` | **7 / 7** of 9 | 2,174 / 2,174 of 2,176 | n/a |
+| 8 | v1.0 | 0 / 0 of 20 | 2,107 / 2,107 of 4,326 | 89 / **0** / 6,086 |
+| 8 | A3+B1+tail+staleness | 3 / 2 of 20 | 4,006 / 4,005 of 4,326 | 1,878 / **0** / 21,322 |
+| 8 | **+F3 competing** | 3 / 2 of 20 | 4,006 / 4,005 of 4,326 | 1,864 / **14** / 21,322 |
+| 8 | `edf` | **19 / 0** of 20 | 4,320 / 4,266 of 4,326 | n/a |
+| 8 | `llf` | **18 / 4** of 20 | 4,322 / 4,304 of 4,326 | n/a |
+
+### V15.1 F3 did what it was built for, and almost nothing else
+
+**PRIORITY is now reachable, which was the direct pre-registered test (V12.3 item 2).** `classify`
+returned `FEASIBLE_ONLY_WITH_PRIORITY` **1 time at four devices and 14 times at eight**, against
+**zero** in every run before F3. So A3 is no longer structurally inert and the three-way failure
+caused by `competing_s = 0` is broken at its root.
+
+**But the effect stops there.** Robot served and on time are unchanged at 2 / 1 and 3 / 2, and the
+dashcam figures are identical to the run without F3. PRIORITY fires in 14 of roughly 23,200
+classify calls, which is 0.06 per cent, so it is reachable but rare.
+
+**Per the stop rule I am reporting this and moving on rather than reworking F3 into something
+else.** It is kept because it removes a structural defect and because its own test now passes;
+it is not kept on the strength of an outcome improvement, because there is not one.
+
+### V15.2 CORRECTION: edf serves 19 of 20 robot questions at eight devices and ZERO arrive on time
+
+My earlier sections said `edf` "serves 8 of 9 and 11 of 20". **Those were RELEASED-before-deadline
+counts, not outcomes.** Read from `outcomes.jsonl`, the on-time picture is different and in one
+place reverses the comparison:
+
+| n | policy-core, all fixes | `edf` | `llf` |
+|---|---|---|---|
+| 4 | 1 on time | **8 on time** | 7 on time |
+| 8 | **2 on time** | **0 on time** (19 served) | 4 on time (18 served) |
+
+**At eight devices `edf` releases almost every robot question and none of them arrives in time**,
+so policy-core's 2 on time is better than `edf`'s 0 and worse than `llf`'s 4. At four devices
+policy-core is far behind both. This is the correction the user was right to demand: release
+counts and on-time outcomes are different quantities, and I had been quoting the first as though
+it settled the second.
+
+### V15.3 The extra dashcam releases from the tail DO arrive on time
+
+Also from outcomes rather than releases, which answers part of user item 1 directly. At eight
+devices the tail takes dashcam served from 2,107 to 4,006, and **4,005 of those 4,006 are on
+time**, against 2,107 of 2,107 for v1.0. So the near-doubling is not late work: it is roughly
+1,900 additional instants answered within their deadline. It also did not crowd out robot work,
+which went from 0 on time to 2.
+
+The honest qualification is that both baselines still do better on dashcams at eight devices
+(`edf` 4,266 on time, `llf` 4,304, policy 4,005), so the tail closes part of a gap rather than
+creating an advantage.

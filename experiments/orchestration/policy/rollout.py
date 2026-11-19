@@ -146,6 +146,58 @@ class Rollout:
         return sorted(items, key=lambda p: (p.deadline if p.deadline is not None else 1e18,
                                             p.due_at, p.item_id))
 
+    def competing_gpu_s(self, f: Fleet, job: Any, t: float) -> float:
+        """D122 v1.1 F3: the engine-seconds pi_0 would serve BEFORE this job's pieces.
+
+        Exactly what `continuation_schedule`'s own docstring asks for, and what every caller
+        passed 0.0 for. In-flight work counts unconditionally because it is already running;
+        pending work counts when its pi_0 EDF key sorts strictly ahead of this job's earliest
+        remaining piece. `pr.gpu_s` is the FROZEN step model's own prediction, so no new
+        estimator and no new parameter enters here.
+
+        Returns 0.0 with the flag off, which is byte-for-byte the previous behaviour.
+        """
+        if not self.flags.realistic_competing:
+            return 0.0
+        jid = getattr(job, "job_id", None)
+        mine = [p for p in f.pending if p.job_id == jid]
+        if mine:
+            key = min((p.deadline if p.deadline is not None else 1e18, p.due_at, p.item_id)
+                      for p in mine)
+        else:
+            key = (float(getattr(job, "deadline", 1e18)), float(t), "")
+        total = 0.0
+        for p in f.in_flight:
+            if p.job_id != jid:
+                total += float(self._gpu_s_of(p))
+        for p in f.pending:
+            if p.job_id == jid:
+                continue
+            k = (p.deadline if p.deadline is not None else 1e18, p.due_at, p.item_id)
+            if k < key:
+                total += float(self._gpu_s_of(p))
+        return max(total, 0.0)
+
+    def _gpu_s_of(self, p: PendingItem) -> float:
+        """The step model's gpu_s for one item, memoised on the request signature.
+
+        `engine.predict` is a pure function of the request, and the profile is loaded once and
+        never mutated during a run, so this is the Option 0 pattern: the value returned is the
+        value `predict` would have returned, not a recomputation of it.
+        """
+        memo = getattr(self, "_gpu_s_memo", None)
+        if memo is None:
+            memo = self._gpu_s_memo = {}
+        meta = tuple(sorted((k, v) for k, v in (p.meta or {}).items()
+                            if isinstance(v, (int, float, str, bool, type(None)))))
+        ck = (p.kind, p.device, int(p.tokens or 0), int(p.frames or 0), p.readiness, p.job_id,
+              meta)
+        hit = memo.get(ck)
+        if hit is None:
+            hit = float(self.engine.predict(self._request(p), concurrent=0).gpu_s)
+            memo[ck] = hit
+        return hit
+
     def _request(self, p: PendingItem) -> Request:
         return Request(kind=p.kind, device=p.device, tokens=p.tokens, frames=p.frames,
                        readiness=p.readiness, job_id=p.job_id, meta=dict(p.meta))
@@ -211,7 +263,7 @@ class Rollout:
                 # the old behaviour: work that cannot start inside the horizon is not simulated.
                 if p.kind == "episode_call":
                     sh_tail.append(p)
-                elif p.kind == "rc_piece" and self.flags.rc_tail:
+                elif p.kind == "rc_piece" and self.flags.tail_cursor_on():
                     # D122 v1.1: the same branch for RECALL. Without this an rc_piece that
                     # cannot start inside H is simply dropped, so a rebuild's payoff is worth
                     # zero merely because it lands after t0 + H, which is exactly the thing D98
@@ -254,7 +306,7 @@ class Rollout:
                          + [float(p.due_at) for p in f.pending if p.kind == "episode_call"]
                          + [float(p.due_at) for p in f.in_flight if p.kind == "episode_call"]
                          ) + float(self.params.L_k["SH"])
-            if self.flags.rc_tail:
+            if self.flags.tail_cursor_on():
                 # D122 v1.1: the same rule, "the last deadline any credited unit can have", read
                 # off the field that holds it. An rc_piece carries an ABSOLUTE deadline, so no
                 # L_k is added. ONE cursor is shared with the SH tail below, because the engine
@@ -293,12 +345,12 @@ class Rollout:
         # The tail's own progress is added HERE and nowhere else, so `_terminal` and
         # `_prefix_risk` keep the horizon's accounting unchanged.
         rc_progress = jobs_progress
-        if self.flags.rc_tail and tail_progress:
+        if self.flags.tail_cursor_on() and tail_progress:
             rc_progress = dict(jobs_progress)
             for jid, k in tail_progress.items():
                 rc_progress[jid] = rc_progress.get(jid, 0) + k
         u_hat += self._rc_utility(f, rc_progress, deliveries, ghat_by_job)
-        if self.flags.rc_tail:
+        if self.flags.tail_zrows_on():
             opps = list(opps) + self._rc_opportunities(f, rc_progress, deliveries)
         z_term = self._z_term(f, opps)
         risk = self._prefix_risk(f, store, deliveries, jobs_progress, end, demand_tokens,
@@ -595,7 +647,8 @@ class Rollout:
             # becomes live the moment competing work is modelled. It is wired anyway so the label
             # is not silently discarded.
             prio = bool(self.flags.honour_job_priority and j.feasibility == PRIORITY)
-            v = continuation_value(j, end, self.engine, competing_s=0.0, priority=prio,
+            comp = self.competing_gpu_s(f, j, end)
+            v = continuation_value(j, end, self.engine, competing_s=comp, priority=prio,
                                    omega_rc=self.pf.omega("RC"), acc_cloud=acc_c,
                                    acc_device=acc_d, z=dev.z_of("RC"), d_p_success=0.0,
                                    p_reachable=dev.link.p_reachable_within_hs,
@@ -666,8 +719,9 @@ class Rollout:
         kw = dict(omega_rc=self.pf.omega("RC"), acc_cloud=acc_c, acc_device=acc_d,
                   z=dev.z_of("RC"), p_reachable=dev.link.p_reachable_within_hs,
                   resolution_s=self.params.continuation_resolution_s)
-        safe = continuation_value(job, f.t, self.engine, 0.0, False, extra_work_s=0.0, **kw)
-        lost = continuation_value(job, f.t, self.engine, 0.0, False, extra_work_s=lost_extra,
+        comp = self.competing_gpu_s(f, job, f.t)
+        safe = continuation_value(job, f.t, self.engine, comp, False, extra_work_s=0.0, **kw)
+        lost = continuation_value(job, f.t, self.engine, comp, False, extra_work_s=lost_extra,
                                   **kw)
         return dict(value_at_risk=float(safe - lost), safe=float(safe), if_lost=float(lost),
                     restore_work_s=lost_extra, built_prefix_tokens=built, p_host=ph)

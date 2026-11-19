@@ -38,6 +38,26 @@ class Flags:
     # sat at 0.0 while feeding `utility.t_ready_s`, where it becomes catch-up frames. This writes
     # it from coordinator state. DEFAULT OFF.
     write_staleness: bool = False
+    # D122 v1.1 F3. `continuation_schedule` places a job's pieces at
+    # `cursor = t + (0.0 if priority else competing_s)`, and its own docstring calls competing_s
+    # "the engine-seconds of other work pi_0 would serve before this job's pieces", yet every
+    # production caller passed 0.0, so the schedule assumed the job had the engine to itself.
+    # That one zero pinned p_finish at 1, made PRIORITY unreachable from `classify` and left A3
+    # inert. This derives it from the rollout's own state. DEFAULT OFF.
+    realistic_competing: bool = False
+    # D122 v1.1, user item 1: the two causes inside `rc_tail`, independently toggleable so the
+    # SH side effect can be attributed. (a) the shared tail cursor, which simulates an rc_piece
+    # beyond H and lets `_rc_utility` see its progress; (b) the RC rows `_rc_opportunities`
+    # appends, which enter `_z_term`'s sum for EVERY candidate. `rc_tail` stays the master, so
+    # `rc_tail` alone turns both on and is byte-identical to the build before this split.
+    rc_tail_cursor: bool = False
+    rc_tail_zrows: bool = False
+
+    def tail_cursor_on(self) -> bool:
+        return bool(self.rc_tail or self.rc_tail_cursor)
+
+    def tail_zrows_on(self) -> bool:
+        return bool(self.rc_tail or self.rc_tail_zrows)
 
     ENABLING_CONDITION: Dict[str, str] = None
 
