@@ -155,3 +155,38 @@ changed cost, cost changed the budget constraint, and the constraint changed whi
 feasible. The two rulings therefore differ in kind. **D135 touched a constraint and was effective;
 D137 item 3 touches a quantity used only as an ordering and cannot be.** Both are correct as
 faithfulness fixes; only one can change a decision.
+
+## D138 ruling: the lexicographic rule STAYS, and the limitation is recorded here
+
+The user has accepted the reading of the paper recorded above — ECO-LLM selects per query so that
+user-defined SLOs are met while accuracy stays stable, which is **SLO-constrained accuracy
+maximisation with cost as a CONSTRAINT**, not a term traded against quality — and has **declined**
+the rule change that would have let price compete directly, because that would be a departure from
+the method. So `select` keeps `max(feas, key=(c.quality, -c.cost_gpu_s))`.
+
+**THE LIMITATION, in its strongest form.** This arm **cannot express a graded trade of price
+against quality**. Cost is a tie-break on a **continuous** quantity, and a tie-break on a
+continuous quantity **never fires**: `0.4286` and `0.3963` are not equal, so D2 wins whatever
+RECENT costs. Price reaches a decision only through **feasibility** — that is, only when D2 is
+SLO-infeasible and RECENT is not.
+
+**That is a statement about this harness's expressible range, not about this method**, and it is
+established from **two independent directions by two different mechanisms**:
+
+1. **Here.** The lexicographic rule above, confirmed inert under D137 item 3: substituting the
+   committed measured quality table for the ordinal constants moved **0 decisions at 8, 16 and 32
+   devices**, because the selection consumes only the ORDER of the quality values and both tables
+   share it.
+2. **`cascade-routing`.** A method whose objective **does** price quality against cost directly,
+   `quality - lambda * cost`, chooses the cheap option at **every** opportunity at its **minimum**
+   lambda. Its trade is expressible in principle and saturated in practice.
+
+**Two published arms, two entirely different selection mechanisms, neither able to express a graded
+price-quality trade in this harness.** Recorded in both cards, because a reader of either alone
+would reasonably attribute the flatness to that method.
+
+**What this means for reading any eco-llm result.** A result showing that cheapening a
+representation does not change eco-llm's selections is **not** evidence that price does not matter.
+It is evidence that this rule consults price only after quality has already decided. The
+D135 token reconciliation moved 3 decisions at 16 devices precisely because it changed
+**feasibility**, which is the one channel price has.

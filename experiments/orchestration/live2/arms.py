@@ -648,9 +648,14 @@ ARM_NAMES = ROUND1_ARM_NAMES + ("llf", "vllm-priority")
 # buildable arms, not round-1 arms: `ROUND1_ARM_NAMES` and the scorer's seven-arm
 # `GPU_BASELINES` are both untouched. Imported at the bottom so `arms_published` can import
 # `Live2ArmMixin` from here without a cycle.
-from arms_published import PUBLISHED_ARMS                               # noqa: E402
+from arms_published import PUBLISHED_ARMS, UPPER_BOUND_ARMS            # noqa: E402
 ARMS.update(PUBLISHED_ARMS)
 ARM_NAMES = ARM_NAMES + tuple(sorted(PUBLISHED_ARMS))
+# D138 user ruling. Constructible by name, deliberately NOT in ARM_NAMES: these declare
+# `reads_future` and the coordinator refuses them under fairness rule 5, so they are not runnable
+# and must appear neither as a `--arm` choice nor in the all-arm fairness tests. ARM_NAMES means
+# "arms live2 can run"; this registry means "documented, not scored". See `arms_published.py`.
+ARMS.update(UPPER_BOUND_ARMS)
 
 # D133: the modular builder's screen conditions, one explicit name per condition so the
 # existing audit harness can select them by `arm_name` without name parsing.

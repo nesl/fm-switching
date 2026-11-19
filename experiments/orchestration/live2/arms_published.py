@@ -279,7 +279,6 @@ PUBLISHED_ARMS: Dict[str, Any] = {
     "thinking-qwenvl-atdm": ThinkingQwenVLArm,
     "cascade-routing": CascadeRoutingArm,
     "simplestream": SimpleStreamArm,
-    "rh8-demand-aware-oracle": RH8OracleArm,
     "rh8-demand-aware-causal": RH8CausalArm,
     "querystream-proactive": QueryStreamProactiveArm,
     "clockwork": ClockworkArm,
@@ -316,3 +315,25 @@ OUT_OF_CARD_SCOPE: Tuple[str, ...] = (
 
 # name -> why it was not ported. Each reason is also written into the arm's card.
 SKIPPED: Dict[str, str] = {}
+
+# ---------------------------------------------------------------- NOT LIVE-RUNNABLE
+# D138 user ruling. `ARM_NAMES` has two consumers and both mean "arms live2 CAN RUN":
+# `run_live2_cell.py:207` uses it as the `--arm` CLI choices, and `tests/test_live2_coord.py`
+# iterates it to assert legal actions and an identical fairness digest for EVERY arm.
+#
+# An arm declaring `reads_future` is refused by the coordinator BY DESIGN under fairness rule 5
+# (`coordinator.py:13`, `:184`), so it can satisfy neither consumer. Listing the rh8 oracle in
+# `ARM_NAMES` is what turned three live2 tests red, and it would also have offered
+# `--arm rh8-demand-aware-oracle` as a choice that always raises.
+#
+# The underlying ambiguity, which this split resolves at source: registering an arm used to mean
+# TWO THINGS AT ONCE, "this exists and is documented" and "this is a candidate for live scoring",
+# with no way to ask for the first without the second. An ORACLE UPPER BOUND is a legitimate
+# object -- `cards/rh8.md` requires one -- and the registry had nowhere to put it.
+#
+# It stays in `ARMS`, so `make_arm("rh8-demand-aware-oracle")` still constructs it and it remains
+# available as the documented upper bound. It is simply not a thing you can run. Any future oracle
+# or ablation arm belongs here for the same reason and needs no further change.
+UPPER_BOUND_ARMS: Dict[str, Any] = {
+    "rh8-demand-aware-oracle": RH8OracleArm,
+}

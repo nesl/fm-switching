@@ -1,0 +1,43 @@
+{
+ "check": "upper_bound_registry_split_restored",
+ "is_measurement": true,
+ "label": "D138 user ruling. Restores the split built earlier, verified at 152 passed, and reverted when the registration contract was judged to belong to the user. It does, and they have ruled.",
+ "change": {
+  "what": "rh8-demand-aware-oracle removed from ARM_NAMES and placed in a new UPPER_BOUND_ARMS registry; it stays in ARMS so make_arm still constructs it.",
+  "files": [
+   "live2/arms_published.py",
+   "live2/arms.py"
+  ],
+  "why_at_source": "ARM_NAMES has TWO consumers and both mean \"arms live2 can run\": the all-arm tests, and the --arm CLI choices at run_live2_cell.py:207. An arm declaring reads_future is refused by the coordinator under fairness rule 5, so it can satisfy neither. The split resolves the ambiguity that registration meant both \"documented\" and \"candidate for live scoring\"."
+ },
+ "cli_footgun_verified": {
+  "method": "built the real parser via run_live2_cell.parser() and parsed --arm for three names, capturing stderr to distinguish WHY each was rejected.",
+  "result": {
+   "rh8-demand-aware-oracle": "rejected: INVALID CHOICE -- the footgun is closed",
+   "rh8-demand-aware-causal": "rejected only for missing required args, i.e. it IS a valid choice",
+   "b7-edf-feasibility": "rejected only for missing required args, i.e. it IS a valid choice"
+  },
+  "a_first_attempt_was_confounded": "my first check simply caught SystemExit, and ALL THREE names were rejected, because other arguments are required=True. That would have \"confirmed\" the footgun closed for entirely the wrong reason. Distinguishing invalid-choice from missing-required-args is what makes the check mean anything.",
+  "note": "this is the third time today a check of mine passed or failed for the wrong reason, and the second caught by inspecting the reason rather than the verdict."
+ },
+ "decision_on_session1_skip": {
+  "question": "session 1 generic reads_future skip, shipped at a0bcb51, becomes redundant once the oracle leaves ARM_NAMES. Keep or remove?",
+  "decision": "KEEP, as defence in depth, and I recommend session 1 annotate it rather than remove it.",
+  "reasoning": [
+   "the split removes the CAUSE: the registry no longer conflates documented with runnable, so no correctly-registered oracle reaches the tests.",
+   "the skip guards a different failure: a future arm being added to PUBLISHED_ARMS by MISTAKE. That is not hypothetical, it is exactly the error that turned the tree red, and I am the one who made it.",
+   "the two are not redundant so much as layered: one fixes the contract, the other tolerates a violation of it.",
+   "cost of keeping is one small function; the only real cost is a reader wondering which is load-bearing, which a single line resolves."
+  ],
+  "what_should_be_said_beside_it": "the split in arms_published.py is the primary fix and this skip is a backstop for an arm registered in ARM_NAMES by mistake. I am NOT editing that file, since session 1 owns it; this is a recommendation to it.",
+  "if_overridden": "removing it is also defensible, and in that case nothing else needs to change, because the split alone closes both consumers."
+ },
+ "_provenance": {
+  "git_commit": "2aff38f9140069b3703c1d4455c35b182cc13331",
+  "script": "static change plus a parser-level CLI check",
+  "model": "none",
+  "device": "flash CPU only",
+  "n": "n/a",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
