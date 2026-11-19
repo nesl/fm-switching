@@ -1,0 +1,291 @@
+{
+ "check": "d130_published_baselines_cost_charging",
+ "is_measurement": true,
+ "label": "DRY RUN on development traces. Does a ported published arm get charged accelerator time and KV bytes like llf does, or is its advantage a charging artefact of the E36 class.",
+ "question": "seven in-scope published arms deliver 33 to 35 of 41 robot questions at 16 devices where llf delivers 9; is that real or uncharged work",
+ "verdict": "REAL, NOT A CHARGING ARTEFACT. The published arms are charged MORE, not less, and all arms spend the identical capped budget.",
+ "method": {
+  "charging_is_coordinator_side": "costs.recall_gpu_s and costs.episodic_gpu_s are called by live2/coordinator.py at the build, recall and monitor submit paths and spend from one Budget; the ARM never charges anything, so no arm can bypass it",
+  "instrumentation": "both cost functions wrapped to record every charge with its tokens, readiness and resulting gpu_s; KV bytes derived as tokens x HOST_BYTES_PER_TOKEN",
+  "cells": "16 devices, 50:50, mode A, 600 s, seeds 0 and 4, dry run"
+ },
+ "arm_choice": {
+  "primary": [
+   "mooncake",
+   "b7-edf-feasibility"
+  ],
+  "also": [
+   "clockwork",
+   "preble"
+  ],
+  "reason": "all are IN CARD SCOPE for C-mixed; no OUT_OF_CARD_SCOPE arm was used, since its number would not be evidence about that system anyway"
+ },
+ "rows": {
+  "llf_s0": {
+   "arm": "llf",
+   "seed": 0,
+   "devices": 16,
+   "questions": 35,
+   "robots_on_time": 6,
+   "robots_served": 35,
+   "recall_gpu_s_total": 34.89,
+   "recall_events": 49,
+   "recall_gpu_s_median": 0.37613,
+   "recall_tokens_median": 8131.0,
+   "readiness_mix": {
+    "COLD": 16,
+    "GPU-WARM": 33
+   },
+   "monitor_gpu_s_total": 647.46,
+   "monitor_events": 9592,
+   "total_gpu_s_charged": 682.35,
+   "budget_total_gpu_s": 600.0,
+   "budget_spent_gpu_s": 599.951,
+   "gpu_s_spent_per_robot_delivered": 99.99
+  },
+  "preble_s0": {
+   "arm": "preble",
+   "seed": 0,
+   "devices": 16,
+   "questions": 35,
+   "robots_on_time": 6,
+   "robots_served": 35,
+   "recall_gpu_s_total": 9.941,
+   "recall_events": 6,
+   "recall_gpu_s_median": 1.65689,
+   "recall_tokens_median": 7456.0,
+   "readiness_mix": {
+    "COLD": 6
+   },
+   "monitor_gpu_s_total": 588.263,
+   "monitor_events": 8715,
+   "total_gpu_s_charged": 598.204,
+   "budget_total_gpu_s": 600.0,
+   "budget_spent_gpu_s": 598.204,
+   "gpu_s_spent_per_robot_delivered": 99.7
+  },
+  "clockwork_s0": {
+   "arm": "clockwork",
+   "seed": 0,
+   "devices": 16,
+   "questions": 35,
+   "robots_on_time": 27,
+   "robots_served": 35,
+   "recall_gpu_s_total": 46.693,
+   "recall_events": 28,
+   "recall_gpu_s_median": 1.80689,
+   "recall_tokens_median": 8131.0,
+   "readiness_mix": {
+    "COLD": 28
+   },
+   "monitor_gpu_s_total": 727.178,
+   "monitor_events": 10773,
+   "total_gpu_s_charged": 773.87,
+   "budget_total_gpu_s": 600.0,
+   "budget_spent_gpu_s": 599.991,
+   "gpu_s_spent_per_robot_delivered": 22.22
+  },
+  "mooncake_s0": {
+   "arm": "mooncake",
+   "seed": 0,
+   "devices": 16,
+   "questions": 35,
+   "robots_on_time": 29,
+   "robots_served": 35,
+   "recall_gpu_s_total": 63.827,
+   "recall_events": 33,
+   "recall_gpu_s_median": 1.80689,
+   "recall_tokens_median": 8131.0,
+   "readiness_mix": {
+    "COLD": 33
+   },
+   "monitor_gpu_s_total": 767.205,
+   "monitor_events": 11366,
+   "total_gpu_s_charged": 831.032,
+   "budget_total_gpu_s": 600.0,
+   "budget_spent_gpu_s": 599.982,
+   "gpu_s_spent_per_robot_delivered": 20.69
+  },
+  "b7-edf-feasibility_s0": {
+   "arm": "b7-edf-feasibility",
+   "seed": 0,
+   "devices": 16,
+   "questions": 35,
+   "robots_on_time": 29,
+   "robots_served": 35,
+   "recall_gpu_s_total": 63.827,
+   "recall_events": 33,
+   "recall_gpu_s_median": 1.80689,
+   "recall_tokens_median": 8131.0,
+   "readiness_mix": {
+    "COLD": 33
+   },
+   "monitor_gpu_s_total": 767.205,
+   "monitor_events": 11366,
+   "total_gpu_s_charged": 831.032,
+   "budget_total_gpu_s": 600.0,
+   "budget_spent_gpu_s": 599.982,
+   "gpu_s_spent_per_robot_delivered": 20.69
+  },
+  "llf_s4": {
+   "arm": "llf",
+   "seed": 4,
+   "devices": 16,
+   "questions": 41,
+   "robots_on_time": 9,
+   "robots_served": 41,
+   "recall_gpu_s_total": 31.632,
+   "recall_events": 53,
+   "recall_gpu_s_median": 0.41618,
+   "recall_tokens_median": 8131.0,
+   "readiness_mix": {
+    "COLD": 13,
+    "GPU-WARM": 40
+   },
+   "monitor_gpu_s_total": 622.418,
+   "monitor_events": 9221,
+   "total_gpu_s_charged": 654.05,
+   "budget_total_gpu_s": 600.0,
+   "budget_spent_gpu_s": 599.978,
+   "gpu_s_spent_per_robot_delivered": 66.66
+  },
+  "preble_s4": {
+   "arm": "preble",
+   "seed": 4,
+   "devices": 16,
+   "questions": 41,
+   "robots_on_time": 12,
+   "robots_served": 41,
+   "recall_gpu_s_total": 34.049,
+   "recall_events": 15,
+   "recall_gpu_s_median": 2.10689,
+   "recall_tokens_median": 9481.0,
+   "readiness_mix": {
+    "COLD": 15
+   },
+   "monitor_gpu_s_total": 636.525,
+   "monitor_events": 9430,
+   "total_gpu_s_charged": 670.574,
+   "budget_total_gpu_s": 600.0,
+   "budget_spent_gpu_s": 599.933,
+   "gpu_s_spent_per_robot_delivered": 49.99
+  },
+  "clockwork_s4": {
+   "arm": "clockwork",
+   "seed": 4,
+   "devices": 16,
+   "questions": 41,
+   "robots_on_time": 26,
+   "robots_served": 41,
+   "recall_gpu_s_total": 43.446,
+   "recall_events": 27,
+   "recall_gpu_s_median": 1.80689,
+   "recall_tokens_median": 8131.0,
+   "readiness_mix": {
+    "COLD": 27
+   },
+   "monitor_gpu_s_total": 688.635,
+   "monitor_events": 10202,
+   "total_gpu_s_charged": 732.081,
+   "budget_total_gpu_s": 600.0,
+   "budget_spent_gpu_s": 599.977,
+   "gpu_s_spent_per_robot_delivered": 23.08
+  },
+  "mooncake_s4": {
+   "arm": "mooncake",
+   "seed": 4,
+   "devices": 16,
+   "questions": 41,
+   "robots_on_time": 34,
+   "robots_served": 41,
+   "recall_gpu_s_total": 79.515,
+   "recall_events": 37,
+   "recall_gpu_s_median": 2.10689,
+   "recall_tokens_median": 9481.0,
+   "readiness_mix": {
+    "COLD": 37
+   },
+   "monitor_gpu_s_total": 811.013,
+   "monitor_events": 12015,
+   "total_gpu_s_charged": 890.527,
+   "budget_total_gpu_s": 600.0,
+   "budget_spent_gpu_s": 599.994,
+   "gpu_s_spent_per_robot_delivered": 17.65
+  },
+  "b7-edf-feasibility_s4": {
+   "arm": "b7-edf-feasibility",
+   "seed": 4,
+   "devices": 16,
+   "questions": 41,
+   "robots_on_time": 34,
+   "robots_served": 41,
+   "recall_gpu_s_total": 79.515,
+   "recall_events": 37,
+   "recall_gpu_s_median": 2.10689,
+   "recall_tokens_median": 9481.0,
+   "readiness_mix": {
+    "COLD": 37
+   },
+   "monitor_gpu_s_total": 811.013,
+   "monitor_events": 12015,
+   "total_gpu_s_charged": 890.527,
+   "budget_total_gpu_s": 600.0,
+   "budget_spent_gpu_s": 599.994,
+   "gpu_s_spent_per_robot_delivered": 17.65
+  }
+ },
+ "headline_seed4": {
+  "llf": {
+   "on_time": 9,
+   "recall_gpu_s": 31.6,
+   "total_charged": 654.0,
+   "spent": 600.0,
+   "per_robot": 66.7
+  },
+  "mooncake": {
+   "on_time": 34,
+   "recall_gpu_s": 79.5,
+   "total_charged": 890.5,
+   "spent": 600.0,
+   "per_robot": 17.6
+  },
+  "b7": {
+   "on_time": 34,
+   "recall_gpu_s": 79.5,
+   "total_charged": 890.5,
+   "spent": 600.0,
+   "per_robot": 17.6
+  },
+  "ratio": "mooncake delivers 3.8x llf robots on 2.52x the recall accelerator time and the identical 600.0 s spent budget"
+ },
+ "mechanism": {
+  "llf": "readiness mix COLD 13, GPU-WARM 40 over 53 recall events at median 0.4162 gpu_s: it chains small piece builds then answers warm",
+  "published": "readiness mix COLD 37 over 37 events at median 2.1069 gpu_s: one full cold request per question",
+  "reading": "the published arms pay about 5x per event and 2.5x in total for recall, and still deliver 3.8x the robots, because a single cold answer lands inside the 5 s deadline while a chain of piece builds does not"
+ },
+ "e36_class_check": {
+  "hypothesis": "a ported arm whose rebuilds are not charged accelerator time or KV bytes would deliver impossibly well and look perfectly legal",
+  "refuted": true,
+  "evidence": [
+   "every recall charge goes through the same costs.recall_gpu_s with the same COLD rate",
+   "published arms record MORE recall gpu_s than llf (79.5 against 31.6 at seed 4)",
+   "published arms request MORE total than llf (890.5 against 654.0) and are refused the excess",
+   "all arms spend the identical capped budget of 600.0 s, so delivery is compared at equal charged accelerator time"
+  ]
+ },
+ "erratum": {
+  "id": "S3-E1",
+  "what": "my first pass reported 0 robots on time for EVERY arm at both seeds",
+  "cause": "I read `on_time` at the top level of outcomes.jsonl, but it is nested inside `cloud_payload`; the top-level field is always None",
+  "effect": "the zeros were my own instrumentation artefact and would have hidden the real result entirely",
+  "corrected": "recomputed from cloud_payload.on_time, which also reproduces the reported llf figure of 9 of 41 at seed 4 exactly"
+ },
+ "_provenance": {
+  "git_commit": "d1d99cc9e240c55e940d8aaab08371bd0446651b",
+  "script": "scratchpad cost-check harness wrapping costs.*_gpu_s; no repo code changed",
+  "model": "none (committed cost curves, dry run)",
+  "device": "flash CPU only",
+  "n": "16 devices, seeds 0 and 4, 600 s, 5 arms",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
