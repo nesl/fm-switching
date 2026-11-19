@@ -847,10 +847,22 @@ charge is fleet-wide, anything that reduces engine occupancy relieves it, includ
 change.* The exchange rate on the robot axis is untouched by this and remains the binding
 constraint there, with every cold-rebuild plan still scoring between -0.598 and -2.521.
 
-**Empirical confirmation is in flight and not yet reported.** A v1.2 audit at 8 devices that
-measures the `sh_admit` positive fraction and its backlog charge directly was still running when
-this was written; the arithmetic above does not depend on it, but the direct number should be
-recorded when it lands, and if it contradicts the bound it would be a finding in its own right.
+**Empirical confirmation, now recorded.** The arithmetic bound required the `sh_admit` positive
+fraction under v1.2 at 8 devices to be at least 0.7998. Measured from the release counts on the
+same runs, where F-A8 established that the released-monitor count equals the `sh_admit` positive
+count exactly at every size:
+
+| n = 8 | monitor instants offered | released, hence ADMITTED | fraction |
+|---|---|---|---|
+| v1.0 | 4,326 | 2,107 | **0.4871** |
+| **v1.2** | 4,326 | **3,462** | **0.8003** |
+
+**0.8003 satisfies the bound of 0.7998, and admission rose by 1,355 instants.** So the direct
+number confirms the inference rather than contradicting it: **admission rose, and the dashcam gain
+is expressed THROUGH the SH admission test, not around it.** This is inferred from release counts
+under F-A8's identity rather than from a fresh candidate-level audit; that audit was stopped once
+the release counts gave the same quantity at a fraction of the cost, since the planner's
+long-window rollouts under capture were taking longer than the answer was worth.
 
 ## 9.8 ERRATUM E5, against my own instrumentation again
 
