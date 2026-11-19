@@ -198,3 +198,143 @@ superseded (D123); they run on v1.2-fast once its release commit lands (D125). M
 'robo008|s000|1150662047093052_start_0.0_end_330.256'` (the arm named a session the coordinator had not registered;
 reported to flash); its rerun was stopped at about one minute when D123 arrived (not published). Marked
 `SUPERSEDED_INVALID.txt`.
+
+## 8. MORNING REPORT: overnight baseline ladders (D127 to D130), 2026-11-18 21:22 to 2026-11-19 06:58. PILOT, NOT ROUND-1 RESULTS
+
+Settings as tonight's pilot: seed 0, 600 s, 50 : 50, push-all, uniform links, 27 GiB, server restarted before every
+run, preflight every-ref check before every run, scored after the server stopped, D115 timing and host-load logging,
+per-run HEAD in every header. D128: the EDF family (edf, llf, edf-piece1024 / 2048) runs at C_inflight 8 (user decision
+1). Outputs `results/orchestration/live2/pilot/runs4/`, summary `pilot4_summary.json` (52 runs), log `pilot4.log`.
+Drivers `experiments/orchestration/study_live2_pilot4{,b,c,d,e}_driver.sh` (see 8.5 for why there are five).
+
+### 8.1 Every arm, size by verdict ("pass" = every dashcam meets L = 1.0 s / p = 25 % AND the pooled robot target L = 5 s / p = 90 % where measurable at seed 0; robot pools are measurable at every size >= 8)
+
+| arm | size | verdict | robot on time / pooled | dashcams all meet | requests | note |
+|---|---|---|---|---|---|---|
+| always-cloud-fcfs | 8 | pass | 18/20 | True | 4344 | from the evening pilot (C8 sensitivity) |
+| always-cloud-fcfs | 10 | fail | 18/21 | True | 5459 |  |
+| always-cloud-fcfs | 12 | fail | 22/27 | True | 6569 |  |
+| always-cloud-fcfs | 14 | fail | 14/34 | True | 7678 |  |
+| edf (C8) | 4 | pass | 9/9 | True | 2178 |  |
+| edf (C8) | 8 | pass | 18/20 | True | 4208 | from the evening pilot (C8 sensitivity) |
+| edf (C8) | 10 | fail | 18/21 | True | 5232 |  |
+| edf (C8) | 12 | fail | 13/27 | True | 6151 |  |
+| edf (C8) | 14 | fail | 2/34 | True | 6901 |  |
+| edf (C8) | 16 | fail | 0/35 | False | 7124 |  |
+| edf (C8) | 32 | fail | 0/72 | False | 7048 |  |
+| edf (C8) | 64 | fail | 0/165 | False | 6561 |  |
+| llf (C8) | 10 | fail | 18/21 | True | 5196 |  |
+| llf (C8) | 12 | fail | 16/27 | True | 6071 |  |
+| llf (C8) | 14 | fail | 11/34 | True | 7119 |  |
+| tuned-engine (always-cloud-fcfs, --long-prefill-token-threshold 1024) | 8 | fail | 14/20 | True | 4344 |  |
+| tuned-engine (always-cloud-fcfs, --long-prefill-token-threshold 1024) | 16 | INVALID twice, skipped | 0/35 | False | 7989 |  |
+| edf-piece1024 (C8, v1.4 piece fix d97f50b) | 8 | pass | 18/20 | True | 4210 |  |
+| edf-piece1024 (C8, v1.4 piece fix d97f50b) | 16 | fail | 0/35 | False | 7234 |  |
+| edf-piece2048 (C8, v1.4 piece fix d97f50b) | 8 | pass | 18/20 | True | 4213 |  |
+| edf-piece2048 (C8, v1.4 piece fix d97f50b) | 16 | fail | 0/35 | False | 7181 |  |
+| attentionstore | 8 | fail | 17/20 | True | 4353 |  |
+| attentionstore | 10 | fail | 15/21 | True | 5470 |  |
+| attentionstore | 16 | INVALID twice, skipped | 0/35 | False | 8354 |  |
+| b10-blocking-aware | 8 | fail | 12/20 | False | 30 |  |
+| b10-blocking-aware | 10 | fail | 10/21 | False | 33 |  |
+| b10-blocking-aware | 16 | fail | 16/35 | False | 52 |  |
+| b7-edf-feasibility | 8 | pass | 18/20 | True | 4344 |  |
+| b7-edf-feasibility | 10 | fail | 18/21 | True | 5458 |  |
+| b7-edf-feasibility | 16 | INVALID twice, skipped | 2/35 | False | 8088 |  |
+| clockwork | 8 | fail | 14/20 | True | 4339 |  |
+| clockwork | 10 | fail | 12/21 | True | 5450 |  |
+| clockwork | 16 | fail | 1/35 | False | 8716 |  |
+| confidence-cascade | 8 | fail | 0/20 | True | 4320 |  |
+| confidence-cascade | 10 | fail | 0/21 | True | 5433 |  |
+| confidence-cascade | 16 | fail | 0/35 | False | 8707 |  |
+| eco-llm | 8 | pass | 18/20 | True | 4344 |  |
+| eco-llm | 10 | fail | 17/21 | True | 5459 |  |
+| eco-llm | 16 | fail | 3/35 | False | 7913 |  |
+| ekya | 8 | pass | 19/20 | True | 4344 |  |
+| ekya | 10 | fail | 17/21 | True | 5458 |  |
+
+FIRST FAILING SIZE per arm (valid runs only):
+- always-cloud-fcfs: 10 (sizes run: [8, 10, 12, 14])
+- edf (C8): 10 (sizes run: [4, 8, 10, 12, 14, 16, 32, 64])
+- llf (C8): 10 (sizes run: [10, 12, 14])
+- tuned-engine (always-cloud-fcfs, --long-prefill-token-threshold 1024): 8 (sizes run: [8, 16])
+- edf-piece1024 (C8, v1.4 piece fix d97f50b): 16 (sizes run: [8, 16])
+- edf-piece2048 (C8, v1.4 piece fix d97f50b): 16 (sizes run: [8, 16])
+- attentionstore: 8 (sizes run: [8, 10, 16])
+- b10-blocking-aware: 8 (sizes run: [8, 10, 16])
+- b7-edf-feasibility: 10 (sizes run: [8, 10, 16])
+- clockwork: 8 (sizes run: [8, 10, 16])
+- confidence-cascade: 8 (sizes run: [8, 10, 16])
+- eco-llm: 10 (sizes run: [8, 10, 16])
+- ekya: 10 (sizes run: [8, 10])
+
+The 8-device rows of always-cloud-fcfs and edf (C8) are the evening pilot's runs (section 7), same build family and
+settings, kept rather than rerun (up-front decision 2). Piece arms ran only at 8 and 16, so their break lies in
+(8, 16]. Every run here had all dashcams on target at <= 14 devices except the published arms that send little to the
+cloud (b10-blocking-aware) and tuned-engine; the robot pool decides every other verdict.
+
+### 8.2 The headline: the breaks between 8 and 16 (item 2)
+
+Every baseline that passes at 8 devices FAILS AT 10: always-cloud-fcfs, edf (C8), llf (C8), b7-edf-feasibility,
+eco-llm and ekya all answer 17 or 18 of 21 robot questions at 10 devices (target 90 %, i.e. 19 of 21), with every
+dashcam on target. Above 10 they separate: at 12 devices FCFS 22 / 27, llf 16 / 27, edf 13 / 27; at 14 devices FCFS
+14 / 34, llf 11 / 34, edf 2 / 34. So the capacity edge on seed 0 sits between 8 and 10 devices for every passing
+baseline, and FCFS degrades most gracefully above it while deadline-ordered EDF collapses fastest.
+
+### 8.3 Policy runs: NONE tonight
+
+`v1.3-fast release` (d944361, arm covex-v13) landed at 21:56. Its own suites failed: 12 tests assume the old
+C_inflight default 4 (stale), and ONE real failure, `test_pieces_partition_the_history_with_no_gap_and_no_overlap`
+(at C_inflight 8 a piece-built history went out of order). Under the approved default (suites fail -> no policy runs)
+covex-v13 and bench_d119 were NOT run, and the user then ruled at about 05:40: do NOT run v1.3-fast; poll for
+"v1.4-fast release" instead. It had NOT landed by 06:58, so there are no policy rows in this report.
+
+**Piece fix (v1.4, d97f50b)** landed at 06:00 ("v1.4 piece serialisation, B2 deficit scaling, and arm-side
+deadline-aware RC release"). After a verified pull, the piece-partition test passes on it (Ran 3 tests, OK), and
+edf-piece1024 / 2048 (C8) were rerun on it at 8 and 16: both PASS at 8 (18 / 20) and fail at 16 (0 / 35).
+
+### 8.4 Invalid or skipped runs (each rerun once, then skipped and recorded)
+
+| run | errors (first / rerun) | pattern |
+|---|---|---|
+| tuned-engine at 16 | 4 / 15 | dashcam calls dropped mid-stream, 464 to 565 s into the run, 5 to 41 s in flight |
+| attentionstore at 16 | 5 / 5 | same: late in the run, 3 to 37 s in flight |
+| b7-edf-feasibility at 16 | 15 / 3 | same |
+| attentionstore at 8 and at 10, first tries | 1 each | instant (3 to 7 ms after submit); both reruns VALID |
+
+**Transport finding for the user (not resolved overnight, harness unchanged):** from about 00:50, two kinds of HTTP
+`ReadError` with no response status and nothing in vLLM's log: (a) rare INSTANT failures (milliseconds after submit;
+candidate: an httpx / uvicorn keep-alive race on a reused pooled connection), absorbed by the rerun rule; (b) at 16
+devices, ARMS THAT SEND EVERYTHING TO THE CLOUD (tuned FCFS, attentionstore, b7) lose a few long-queued dashcam calls
+mid-stream late in the run, deterministically enough that each failed twice; edf (C8, bounded in-flight) ran 16 to 64
+devices with 0 errors. No code changed between the error-free and the erroring runs; host load was normal throughout
+(load average about 3 to 4, other users about 2.4 cores). Candidate (NOT tested): requests that wait tens of seconds in
+an over-full engine queue have their stream dropped. A harness change (for example a retry on a connection failure
+before any response byte) needs the user's ruling because it could resend accepted work; the 16-device comparison of
+always-send arms is lost until then.
+
+### 8.5 What did not run, and the night's operational record
+
+- **D130 published baselines: 7 of 19 arms run** (attentionstore, b10-blocking-aware, b7-edf-feasibility, clockwork,
+  confidence-cascade, eco-llm, ekya at 8 and 10; ekya at 16 not run). Not run: hybrid-llm, inar-vl, kvflow, lmcache,
+  mooncake, pensieve, perllm, preble, r3-streaming, routellm, uniscale, videostorm (12 arms). At about
+  38 minutes an arm, D130 alone needed about 12 h; it ran ahead of items 5 to 9 as instructed (and, by my placement,
+  ahead of items 3 and 4 too; asked at 01:05, no ruling).
+- **Items 3, 4, 5, 6, 8, 9 not run** (b9, utility-per-cost, always-cloud-fcfs at 16 to 64, vllm-priority ladder,
+  roomy 256 GiB checks, development seed 4). Item 7 (piece arms) was replaced by the v1.4 piece-fix reruns.
+- **b10-blocking-aware** sends almost nothing to the cloud (10 requests in its 120 s validity run, 30 / 33 / 52 in
+  600 s): flagged for flash (design or porting).
+- **Driver incidents (mine), all recorded in `pilot4.log`:**
+  1. 21:22 to 21:33: the running driver could not see an edited script (the Edit tool replaces the file); swapped at a
+     run boundary (pilot4 -> pilot4b), no run lost.
+  2. 22:14 to 22:37: **23 minutes idle**: my own commit message began "v1.3-fast release handled ...", which the
+     release check took for a new release. Fixed with a handled-hash list; never repeat that phrasing.
+  3. 06:00 to 06:11: the v1.4 piece-fix handler's `git pull` failed silently on the driver's own dirty tracked logs, so
+     one run (`edf-piece1024_n8_..._piecefix_d97f50b`) ran on OLD code bee8ff5 under a piece-fix label. It is kept,
+     renamed `_OLDCODE_mislabelled` with a README, and NOT used; the corrected driver (pilot4e) commits its logs, pulls,
+     VERIFIES the target commit is in HEAD before running anything, and runs the piece-partition test first. The same
+     fix protects the v1.4-fast release path.
+- **Rule slips:** two host-Python commands while a server was up (a no-op `python3 -c "print()"` at about 21:25 and,
+  earlier in the day, the items already reported); neither touched the GPU or a server.
+
+STOPPED at 06:58 for review. Pilot results are never round-1 results.
