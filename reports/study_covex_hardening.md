@@ -3158,25 +3158,45 @@ correctly written against a vocabulary the harness has never provided and the fi
 That is worth settling before B4 is scored, and it is the same class of defect as D2 against
 StudyR1's K1/K3 keys.
 
-## 35.4 THE DEFAULT IS A CLASS, NOT AN INSTANCE. A third member found
+## 35.4 A DEFAULT IS A DECISION TAKEN FOR EVERY ARM THAT DECLINES TO TAKE IT
 
-`apply_defaults` fills **every** field a baseline leaves undecided, and three of those defaults are
-now known to be consequential rather than cosmetic:
+**The rule first, because it survived while two of my three examples did not, and that is the rule
+working rather than evidence against it.**
 
-| default | value | consequence if applied |
-|---|---|---|
-| `representation` | **`"RECENT"`** | an arm naming none is charged `min(467, history)`; one naming D2 pays the whole history. **11.6x to 55x**, section 35.3 |
-| `REP_TOKEN_SCALE["D2"]` | **`1.0`** | naming D2 is indistinguishable from naming RICH **on cost**, so COVEX pays RICH prices for D2 content |
-| `session_action` | **`"OFFLOAD_TO_HOST"`** | non-naming arms issue offloads they never requested, setting `measured_tier` to `host` - the one condition where the unfixed residency path diverges, and offloads are exactly what pressure makes expensive |
+> While a field is inert, its default is invisible and costless. **The moment the field is wired,
+> the default becomes policy for every arm that does not name it, and the arms that DO name it are
+> the ones that look expensive.** Wiring a dead channel does not only enable it: it **activates
+> every default that was dormant behind it.**
 
-**Deciding these one at a time will not work.** Fixing the representation default alone leaves
-COVEX paying RICH prices for D2 content; fixing both of those leaves the session-action default
-injecting placement decisions under the pressure run that is meant to measure placement.
+**One confirmed case.** `DEFAULTS["representation"] = "RECENT"` (`interface.py:59`), filled at
+`interface.py:236-237` whenever a CLOUD decision names none. An arm naming nothing is charged
+`min(467, history)`; one naming D2 pays the whole history. Against histories of 5,431 to 14,881
+with a maximum of 25,681, that is an **11.6x to 55x split, decided only by whether an arm names a
+representation**, and it puts the published and builder arms on one side and the COVEX family on
+the other.
 
-**The general shape, and it is why this belongs beside the dead-channel catalogue:** a default is
-a decision taken on behalf of every arm that declines to take it. While a field is inert the
-default is invisible and costless; the moment the field is wired, **the default becomes policy for
-every arm that does not name the field**, and the arms that do name it are the ones that look
-expensive. **Wiring a dead channel does not only enable it: it activates every default that was
-dormant behind it.** That is worth checking for `order` and `desired_tier` before either is wired,
-since both have defaults in the same table.
+**Two checks that came back harmless, recorded because running them is the point.**
+
+- `REP_TOKEN_SCALE["D2"] = 1.0` is **not** a mispricing. `cstate.py:455-458` builds exactly two
+  evidence items, RECENT and D2, with D2 carrying `tok = max(int(s.est_tokens), 1)`, the full
+  believed history, and `RICH` appears zero times in `cstate.py`. **D2 IS the full history, so
+  pricing it as RICH is correct**; RICH is not on the menu at all.
+- `DEFAULTS["session_action"] = "OFFLOAD_TO_HOST"` is **never applied**. `apply_defaults` fills
+  exactly `cadence_s`, `frame_count`, `representation`, `defer_s`, `order` and `engine_config`;
+  session actions are not among them. No arm issues an unrequested offload, so the interaction
+  with the unfixed residency path does not arise.
+
+**So the user's decision is one question, not three: what should a non-naming arm receive**, at
+one line.
+
+### 35.4a The forward-looking case is already concrete
+
+`apply_defaults` sets **`action.order = DEFAULTS["order"]` unconditionally on every action**, and
+`order` is one of this report's dead channels: the coordinator has **zero** references to it. So
+the default is being written to every action right now and read by nothing.
+
+**The moment `order` is wired, `"FCFS"` becomes the ordering policy for every arm that does not
+name one, on the first run, with no code change in any arm.** The same question applies to
+`desired_tier`. **Check both defaults before either channel is wired** - with six dead channels
+catalogued, this is a predictable repeat rather than a hypothetical, and two harmless checks out
+of three is the argument for checking rather than against it.
