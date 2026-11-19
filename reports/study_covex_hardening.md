@@ -2288,3 +2288,85 @@ weaker by removing the only alternative explanation.
 The honest summary of D132 as a whole: it rescued the published arms' near-misses, it roughly
 doubled the capacity pass counts for every scheduling baseline, and **it did not move COVEX at
 all.**
+
+# 26. covex-v2 VERIFIED. The byte-identity proof holds, and it is CONDITIONAL on the base
+
+**No v2 column is added to any table: covex-v2 is byte-identical to `eco-llm` at every margin, so
+a column would duplicate one already there.** This section records why, and the independent check
+of the one load-bearing claim.
+
+## 26.1 Byte-identity at margin = infinity, INDEPENDENTLY CONFIRMED
+
+16 devices, seed 0, 600 s, at `8cc5e44`, hashing `decision.jsonl` with `arm`, `arm_version` and
+`decision_latency_ms` removed:
+
+| arm | SHA-256 | decisions |
+|---|---|---|
+| eco-llm | `d153e35f14cdfa65...` | 7,914 |
+| covex-v2, margin = inf | `d153e35f14cdfa65...` | 7,914 |
+
+**Identical.** This is a different and larger cell than session 1's 2,999-decision proof, so it is
+corroboration rather than a repeat.
+
+## 26.2 BUT THE MIRRORING IS INCOMPLETE, and the proof passes partly by coincidence
+
+The wrapper mirrors five attributes. The base declares three more that it does NOT mirror:
+
+| attribute | eco-llm | covex-v2 | read by the coordinator? |
+|---|---|---|---|
+| `reads_device_answer`, `multi_instance_adapted`, `releases_one_per_epoch`, `piece_tokens`, `c_inflight` | mirrored | mirrored | — |
+| `needs_capacities` | False | **absent** | no |
+| `sends_requests` | True | **absent** | no |
+| **`uses_h`** | **False** | **absent** | **YES**, `coordinator.py:124` |
+
+`coordinator.py:124` reads it as
+`self.h_s = getattr(arm, "h_s", None) if getattr(arm, "uses_h", False) else None`.
+
+**The wrapper has no `uses_h` at all, so the coordinator falls back to the default `False`, which
+happens to equal eco-llm's value.** The identity therefore holds for the right outcome but not
+wholly for the right reason: one attribute the coordinator actually reads is matched by a
+coincidence of defaults rather than by the mirroring.
+
+## 26.3 The fragility is concrete, not hypothetical
+
+`policy-core` declares `uses_h = True` with `h_s = 1.0`. A covex-v2 wrapping it would not mirror
+that, so the coordinator would set **`h_s = None` for the wrapper and `1.0` for the base**, and
+the two would diverge for a reason having nothing to do with the margin.
+
+**So "COVEX cannot do worse than the best baseline" is structural FOR `eco-llm` and conditional in
+general.** It would break silently the moment the base were changed to any arm with a planning
+horizon, which includes COVEX's own policy-core. **The fix is one line: add `uses_h` and `h_s` to
+the mirrored attribute list**, after which the guarantee holds for any base rather than for the
+one that was tested.
+
+## 26.4 The v2 findings folded in, with the taxonomy they produced
+
+Recorded from session 1's report, with my classification attached:
+
+- **It reduces to the base because all ten RC gains are NEGATIVE**, so nothing clears margin 0 and
+  flipping the base's choice never scores better. **This is a REAL PROPERTY OF THE ESTIMATOR, not
+  an absent link**, and it must not be filed with the B2 and RCprio rows. The alternatives are
+  scored and they do vary.
+- **The objective cannot see cost.** A 12 to 25 percent GPU-second spread moves ΔJ by exactly
+  nothing to nine decimal places at two separate decisions; the winner is chosen by the `gpu_s`
+  tie-break, so `PIECES-NOW(2048)` and `ONE-GO-NOW` each win for being **cheapest, not most
+  valuable**.
+- **It cannot see delivery risk in the range that matters.** `u_rc` does check the deadline but as
+  a deterministic STEP placed far beyond the physical limit: a 25,000-token recall, past my D132
+  breakeven of **19,381 tokens** and undeliverable in 5 s by any scheduler, is valued identically
+  to a 2,048-token one. **Misplaced, not missing**, with the cliff bracketed in (25,000, 40,000].
+  This dovetails with section 21: the objective's risk threshold and the physical feasibility
+  threshold are in different places, and the physical one is the lower.
+- **It CAN see fidelity**, `u_hat` 0.2866 at RICH against 0.2748 at D2, so the representation
+  tradeoff this project studies is perceived.
+- **The geometry prediction is REFUTED and its mechanism CONFIRMED.** RC deviations on the
+  dispatch horizon are not uniformly zero; but the same `z_term` is alive at 0.450000000 in the
+  planner's long-window rollout and cancels in **14,720 of 14,721** dispatch calls. That is the
+  cleaner demonstration of the same geometry, and it matches my own F-A2 result in form: a
+  quantity that is substantively alive and cancels between branches.
+
+**The deviation taxonomy now has five categories and only the last is a finding about COVEX:**
+cancelled-by-geometry, **unexpressible** (`order` and `desired_tier`), unscorable, **unexercised**
+(RELOAD is offered only at HOST-WARM and no recall reached HOST-WARM across seeds 0 and 4 at 16
+devices over 600 s, which is the E36 pattern caught BEFORE the sweep rather than after), and
+fired-and-did-not-help.
