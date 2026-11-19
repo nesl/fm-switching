@@ -4977,3 +4977,34 @@ cost of producing it, which is omega_RC against the accuracy gain in the objecti
 estimator that prices the GPU-second. A counterfactual that charges full harm-to-others is correct
 for a saturated engine and systematically over-conservative for one with slack, which is exactly the
 8-versus-16-device crossover the leaderboard shows.
+
+### F2 and the state value (D129 item 3): cause found and fixed
+
+**The cause of the F2 collapse is a DOUBLE CHARGE, and it is now fixed.** `write_staleness` set
+`staleness_s` from EVERY unbuilt token, but `utility.t_ready_s` already charges a STORED history
+`size_tokens * seconds_per_token("rebuild")` as `t_restore` for exactly those tokens. A cold
+history therefore paid for its own reconstruction twice, once as restore and once as catch-up.
+
+**Measured, not assumed.** A probe of `_u_rc_from_tier` at 8 devices on a 200 s run:
+
+| condition | staleness over 36k to 43k calls | robot delivered | dashcam |
+|---|---|---|---|
+| F2 on, before | min 90.0, p50 **240.7**, max 270.7 s; 0.0% zero | **0 of 7** | 0.9611 |
+| F2 off | all zero | 2 of 7 | 0.9347 |
+| **F2 on, fixed** | **99.7% zero**, max 90.0 s | **2 of 7** | 0.9347 |
+
+A p50 staleness of 240.7 s on a 200 s run is a whole run's worth of catch-up charged to a history
+that was never fresh to begin with, which is what made every representation infeasible and drove
+robot delivery to zero. With the fix, catch-up fires only where the restore does not already do the
+work, which is 0.3 per cent of calls at this size, and robot delivery returns to the F2-off level.
+
+**An honest limit on the state-value half.** The same probe recorded `readiness.state_value`
+returning zero in 100 per cent of calls in BOTH the F2-on and F2-off conditions. That does not match
+my earlier V21 and V26 reading, which put the F2-off rate at 28.1 per cent, and the two are
+measuring through different entry points, so I am NOT claiming the state value is explained. What is
+established is narrower: **the F2 delivery collapse is the double charge and is fixed**; whether the
+terminal state value is separately inert is an open item, and the ABANDON plan's basis stays
+PROVISIONAL until it is settled.
+
+**This does not change the release.** `write_staleness` is OFF in `covex-v13`, so the fix affects no
+released number; it makes F2 usable for whoever turns it on next.

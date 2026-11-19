@@ -452,7 +452,23 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                 built = int((self._roster or {}).get("built_tokens_by_session", {})
                             .get(q.session_id, 0))
                 unbuilt = max(int(q.readiness_tokens) - built, 0)
-                b.staleness_s = (unbuilt / float(D2_TOK_PER_IMG)) * float(self._d2_stride_s())
+                # D129 F2 FIX, double charge. The first form charged EVERY unbuilt token as
+                # catch-up frames, but `utility.t_ready_s` already charges a STORED history
+                # `size_tokens * seconds_per_token("rebuild")` as `t_restore` for exactly those
+                # tokens. A cold history therefore paid for its own reconstruction TWICE, once as
+                # restore and once as catch-up, and a probe showed the result: staleness ran 90 to
+                # 271 s on a 200 s run, p50 240.7 s, which is a whole run's worth of catch-up on
+                # a history that was never fresh to begin with.
+                #
+                # Catch-up is only the work the restore does NOT already do. Where the believed
+                # tier is STORED the restore rebuilds every token, so catch-up is zero; where it
+                # is GPU or HOST the restore covers the built prefix and the unbuilt remainder is
+                # genuine catch-up.
+                if q.readiness == "COLD":
+                    b.staleness_s = 0.0
+                else:
+                    b.staleness_s = ((unbuilt / float(D2_TOK_PER_IMG))
+                                     * float(self._d2_stride_s()))
             d.qtype = QTYPE
 
     @staticmethod
