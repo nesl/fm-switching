@@ -465,12 +465,28 @@ class Coordinator:
             deadline_abs=float(job.deadline), t=float(fleet.t),
             piece_sizes=tuple(self.params.piece_sizes_tokens),
             allow_latest=bool(self.flags.plan_latest), kappa=kappa, built_tokens=built)
+        # D129 ablation, pre-registered in the D125 design note section 3 as "a single fixed plan
+        # type, always ONE-GO-NOW". Session 3's cost check found the published arms issue ONE FULL
+        # COLD REQUEST PER QUESTION, 37 COLD events at median 2.1069 gpu_s, where llf CHAINS SMALL
+        # PIECE BUILDS, 53 events at median 0.4162, and the single cold answer lands inside the 5 s
+        # deadline while the chain does not. This restricts the plan set so that hypothesis can be
+        # tested directly rather than argued about.
+        only = str(getattr(self.params, "plan_only", "") or "")
+        if only:
+            allowed = set(x.strip() for x in only.split(",") if x.strip())
+            plans = [pl for pl in plans if pl.kind in allowed]
+        self._plan_choice_counts = getattr(self, "_plan_choice_counts", {})
+        for pl in plans:
+            k = "offered:" + pl.kind
+            self._plan_choice_counts[k] = self._plan_choice_counts.get(k, 0) + 1
         if not plans:
             return None
         out = PL.choose(self.rollout, fleet, plans, float(job.deadline),
                         decision_period_s=float(getattr(self.params, "decision_period_s", 0.1)))
         self.scoring_calls += len(out["plans"]) + 1
         chosen = out["chosen"]
+        k = "chosen:" + (chosen.kind if chosen is not None else "DECLINED")
+        self._plan_choice_counts[k] = self._plan_choice_counts.get(k, 0) + 1
         self.last_plan = dict(
             job_id=jid, admitted=bool(out["admitted"]), horizon_s=out["horizon_s"],
             chosen=(chosen.label() if chosen is not None else None),

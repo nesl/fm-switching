@@ -127,6 +127,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     mu_scale: float = 1.0           # D129: the scarcity price's scale
     release_floor_c: int = 0        # D129: work-conserving release floor, 0 = off
     admit_floor_c: int = 0          # D129: work-conserving ADMISSION floor, 0 = off
+    plan_only: str = ""             # D129 ablation: restrict the plan set to one kind
 
     name: str = "policy-core"
     case: str = "own"
@@ -197,6 +198,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
             p.tier_calibration = CAL.load(calibration_knots_path)
         p.kappa = (None if self.kappa is None else float(self.kappa))
         p.admit_floor_c = int(self.admit_floor_c)
+        p.plan_only = str(self.plan_only)
         self.params = p
         # D122: a v1.1 defect fix travels on `Flags` so the rollout can read it, but it is NOT
         # one of spec 7.0's conditional mechanisms, so the D66 guard asks `conditional_any_on`.

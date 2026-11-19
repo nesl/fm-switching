@@ -5113,3 +5113,62 @@ protection, not a demonstration that COVEX works at 32 devices.
 **The four-seed 16-device record also does not support a release 2.** v1.3 beats llf on robots on
 seeds 0, 4 and 5 and LOSES on seed 6, 9 of 37 against 10 of 37, and loses dashcam on all four. By
 the stability rule a three-of-four win is not a win. `d944361` stands as the release.
+
+### The ONE-GO-NOW ablation (D125 section 3): the hypothesis is REFUTED for COVEX
+
+Session 3's cost check showed the published arms issue ONE FULL COLD REQUEST PER QUESTION, 37 COLD
+events at median 2.1069 gpu_s, where llf CHAINS SMALL PIECE BUILDS, 53 events at median 0.4162, and
+suggested piece chaining may itself be the defect. The D125 ablation tests it directly.
+
+**Question 1: does the planner ever CHOOSE ONE-GO-NOW? Yes, routinely.** On the release's switch set
+at 16 devices, seed 0, the chosen-plan histogram is **WARM 14 (40%), ONE-GO-NOW 11 (31%), PIECES-NOW
+10 (29%), DECLINED 0**. Offered counts are PIECES-NOW 42, PIECES-LATEST 42, ONE-GO-NOW 21, WARM 14,
+so where ONE-GO-NOW is on the menu it WINS 11 of 21, while PIECES-NOW wins only 10 of 42. **COVEX
+already prefers the single cold rebuild when it is available.**
+
+**Question 2: forced to ONE-GO-NOW, what happens? It collapses.** Seed 0, 16 devices:
+
+| arm | recall served | robot on time | dashcam |
+|---|---|---|---|
+| release (full plan set) | 20 of 35 | **14** | **0.8164** |
+| ONE-GO-NOW only | **4** of 35 | 2 | 0.5078 |
+| no chaining (ONE-GO-NOW + WARM + RELOAD) | **4** of 35 | 2 | 0.5078 |
+| llf C=8 | 32 of 35 | 6 | 0.9633 |
+
+**Piece chaining is NOT COVEX's defect. Removing it costs 12 of 14 robot answers.** The two forced
+arms are identical, so WARM and RELOAD are not what the strict form was losing; the loss is entirely
+the pieces. The mechanism is admission volume again: a full cold rebuild costs about 2.4 gpu_s and
+COVEX's admission test will fund only **4** of them, where pieces let it fund 20.
+
+**What this eliminates and what it leaves.** The most promising hypothesis on the board is refuted,
+and it re-points at the same place everything else has: **COVEX's admission test refuses
+expensive-but-correct work.** The published arms simply issue the expensive request; COVEX's
+counterfactual charges a 2.4 gpu_s rebuild against the harm it does to other opportunities and
+declines it. The defect is the ADMISSION TEST, not the plan set, and the plan set is already
+choosing correctly within the budget the test allows it.
+
+### D128 breaks the piece arms at C_inflight 8, and this needs a decision
+
+The H100 reported at `b786c0c` that the suites fail on the release with "stale C_inflight-4 tests
+and a real piece-partition failure at C_inflight 8", and skipped the piece arms. Both halves check
+out, and the second is a real defect **caused by the D128 default change**:
+
+- **12 stale failures** in `test_live2_d114.py` and `test_live2_d118.py`, which assert the bound is 4. These are stale assertions, not defects.
+- **1 real failure**, `test_live2_history_size.py::test_pieces_partition_the_history_with_no_gap_and_no_overlap`. Verified by construction at both bounds: **C_inflight 4 PASSES, C_inflight 8 FAILS.**
+
+NO OVERLAP still holds, so no frame's bytes go out twice; what breaks is ORDER. At C=8 two pieces of
+the same session are in flight at once, so the second computes its new range against a built prefix
+the first has not yet updated, and the pieces cover the history out of sequence. For a
+prefix-structured KV cache that is a correctness defect, not a cosmetic one: a piece cannot be
+appended before its predecessor.
+
+**I have NOT fixed this.** The fix is to serialise pieces within a session, which is D104's
+one-piece-per-epoch rule, and that CHANGES BASELINE BEHAVIOUR and therefore committed baseline
+numbers. That is a methodological change and needs a ruling, not a quiet patch at 3 am. **It means
+D128's default of 8 is not safe for the piece arms as they stand**, which is worth knowing before
+any run uses them at that bound.
+
+*(A caution on my own method here: my first attempt to compare the two bounds patched
+`Pi0Edf.C_INFLIGHT_DEFAULT` on the class, which is a dataclass field default bound at class creation,
+so it did not reach the arm and BOTH conditions silently ran at 8. I read that as "pre-existing and
+not caused by D128" and was wrong. Verifying that the knob actually moved is what caught it.)*
