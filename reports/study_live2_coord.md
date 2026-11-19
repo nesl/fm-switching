@@ -4210,3 +4210,103 @@ which went from 0 on time to 2.
 The honest qualification is that both baselines still do better on dashcams at eight devices
 (`edf` 4,266 on time, `llf` 4,304, policy 4,005), so the tail closes part of a gap rather than
 creating an advantage.
+
+## V16. ITEM 1 ANSWERED: both causes produce the SH effect, and they are not additive
+
+Dry run, screening, seed 0, 600 s, outcomes from `outcomes.jsonl`. The two causes inside the tail
+are now independently toggleable (V13), so the effect can be attributed.
+
+| n | variant | dashcam served / on time | robot served / on time |
+|---|---|---|---|
+| 8 | v1.0 | 2,107 / 2,107 | 0 / 0 |
+| 8 | **cursor only** | **4,090 / 4,090** | 0 / 0 |
+| 8 | **zrows only** | **3,841 / 3,841** | 1 / 1 |
+| 8 | both (`rc_tail`) | 4,006 / 4,005 | **3 / 2** |
+| 8 | `edf` | 4,320 / 4,266 | 19 / **0** |
+| 8 | `llf` | 4,322 / 4,304 | 18 / **4** |
+| 4 | v1.0 | 2,174 / 2,174 | 1 / 1 |
+| 4 | cursor only | 2,138 / 2,138 | 2 / 1 |
+| 4 | **zrows only** | 2,036 / 2,036 | **2 / 2** |
+| 4 | both (`rc_tail`) | 2,128 / 2,128 | 2 / 1 |
+
+**Attribution, which is not what I guessed.** Neither cause is responsible on its own and they are
+NOT additive. At eight devices the cursor alone takes dashcam service from 2,107 to **4,090** and
+the z rows alone take it to **3,841**, while both together give **4,006**, which sits BETWEEN the
+two. So each mechanism independently unlocks most of the increase, and combining them slightly
+offsets rather than compounds.
+
+**Robot service needs BOTH.** Cursor alone gives 0 on time, z rows alone give 1, both give 2. That
+is the expected complementarity: the cursor makes the payoff visible through `_rc_utility`, the z
+rows make the deficit visible through `_z_term`, and the question needs both channels.
+
+**And one honest negative at four devices.** `zrows only` gets **2 of 9 on time** while `both` gets
+only 1, so the shared cursor COSTS one on-time robot answer there, and every tail variant reduces
+dashcam service slightly below v1.0 (2,036 to 2,138 against 2,174). So the cursor is not free: at
+four devices it is mildly harmful on both axes, and it earns its place only at eight.
+
+**The extra releases are not late**, which is the question I was asked to answer plainly: at eight
+devices 4,005 of 4,006 dashcam instants served are on time, against 2,107 of 2,107 for v1.0, so
+about 1,900 additional instants are answered within their deadline. They did not crowd out robot
+work either, which rose from 0 to 2. Both baselines still beat policy-core on dashcams at eight
+devices, so the tail narrows a gap rather than creating an advantage.
+
+## V17. F4 PRE-REGISTRATION: probabilistic p_finish, with the fit source named before fitting
+
+Own switch, `Flags.prob_p_finish`, DEFAULT OFF. Written before any fitting.
+
+### V17.1 The fit source, which is committed and FIT-only
+
+`results/cost/study_eng1/eng1_step_model.json` carries the step model's own residual summary,
+with `fit_data` stating **"Part A (A_E0) and Part B E0 (B_E0) steps; Part C (incl. HOLDOUT) not
+used"**. Total **n = 5,974**, `r2 = 0.9846`. The per-token-band relative residuals are:
+
+| band | n | median relative residual |
+|---|---|---|
+| `tok_0_1` | 2,485 | 0.11560 |
+| `tok_1_512` | 1,095 | 0.10946 |
+| `tok_512_2048` | 1,255 | 0.05593 |
+| `tok_2048_4096` | 677 | 0.05061 |
+| `tok_4096_8193` | 462 | 0.07065 |
+
+No HOLDOUT file is read: not ENG1 Part C, not ENG1c Part D, not ENG1d, not ENG1e. The frozen file
+is READ only and its md5 is unchanged.
+
+### V17.2 The form, fixed before looking at any outcome
+
+A multiplicative (relative) error on the predicted completion time:
+
+    T = T_hat * exp(eps),   eps ~ Normal(0, sigma_band^2)
+
+so the probability the job finishes by its deadline is
+
+    P_finish = Phi( ln(D_r - t) - ln(T_hat) ) / sigma_band )
+
+with `Phi` the standard normal CDF. `sigma_band` is calibrated from the committed median relative
+residual of the band matching the job's piece size, using the half-normal relation for a
+zero-median log error:
+
+    median|eps| = 0.6745 * sigma   =>   sigma_band = median_rel_res / 0.6745
+
+So `sigma` ranges from 0.0750 (`tok_2048_4096`) to 0.1714 (`tok_0_1`). **There is no free
+parameter and nothing is fitted to any outcome**: the only inputs are the committed median
+relative residuals and the normal quantile constant.
+
+### V17.3 The caveat that must travel with it
+
+**These are per-STEP residuals, and a completion time is a sum of many steps.** Independent
+per-step errors would partly average out, so using the per-step relative residual as the
+completion-time relative residual OVERSTATES the uncertainty. The form is therefore
+**conservative**, and `sigma_band` should be read as an upper bound rather than a calibrated
+completion-time sigma. A properly calibrated completion-time error would need committed
+predicted-against-actual completion pairs, which do not exist in committed form; I am not
+inventing them.
+
+### V17.4 Expected effect
+
+1. `p_finish` stops being a step function, so the continuation value gains a gradient in slack
+   and progress earns credit before the cliff, which is the saturation V3 identified.
+2. A job with slack well above its predicted work keeps `p_finish` near 1, so comfortable cases
+   are unchanged, and the gradient appears only near the deadline.
+3. Robot questions released and on time should rise above the 2 of 9 and 3 of 20 the tail reached.
+4. Because `classify` thresholds on `p_finish`, the FEASIBLE / PRIORITY / INFEASIBLE split will
+   move; I will report it rather than predict a direction.
