@@ -125,6 +125,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     replan: bool = False
     kappa: Optional[float] = None   # None derives it from committed FIT-only residuals (D129)
     mu_scale: float = 1.0           # D129: the scarcity price's scale
+    release_floor_c: int = 0        # D129: work-conserving release floor, 0 = off
 
     name: str = "policy-core"
     case: str = "own"
@@ -697,6 +698,30 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     def _to_action(self, obs: Observation, decs: List[Any], before: Any) -> Action:
         released = [d for d in decs if d.kind == "release" and d.taken]
         held = [d for d in decs if d.kind == "release" and not d.taken]
+        # D129: the WORK-CONSERVING RELEASE FLOOR, COVEX's analogue of edf's C_inflight.
+        #
+        # Session 2 measured that edf at C_inflight = 8 beats v1.2 on both axes in every cell,
+        # and F-A8 and F-A9 both say the same thing from different directions: COVEX REFUSES WORK
+        # UNDER PREDICTED CONGESTION. Removing the backlog price (mu = 0) recovered much of the
+        # gap but not all of it, because the counterfactual still charges harm to other
+        # opportunities, so a contended engine refuses even when serving more is better overall.
+        #
+        # This leaves the objective untouched and changes only the RELEASE GATE: while fewer than
+        # `release_floor_c` requests are in flight, the best HELD candidate is released even if
+        # its DeltaJ is not positive, because an idle engine serves nobody. Ordering is by DeltaJ
+        # descending, so the floor promotes the least-bad candidate first. 0 disables it.
+        floor = int(getattr(self, "release_floor_c", 0) or 0)
+        if floor > 0 and held:
+            n_live = len(self.fleet.in_flight) + len(released)
+            if n_live < floor:
+                promo = sorted(held, key=lambda d: (-(d.delta_j if d.delta_j is not None else 0.0),
+                                                    str(d.target)))
+                for d in promo[:max(floor - n_live, 0)]:
+                    d.taken = True
+                    released.append(d)
+                    held.remove(d)
+                    self.stats["floor_promotions"] = (
+                        self.stats.get("floor_promotions", 0) + 1)
         self.stats["released"] = self.stats.get("released", 0) + len(released)
         self.stats["held"] = self.stats.get("held", 0) + len(held)
         self.stats["prefix_loss_replans"] = (self.stats.get("prefix_loss_replans", 0)

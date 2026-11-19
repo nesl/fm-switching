@@ -536,9 +536,9 @@ class B9Arm(Live2ArmMixin, CONS.B9BestOfBreed):
 ARMS = {
     "device-only": DeviceOnlyArm,
     "always-cloud-fcfs": AlwaysCloudFcfsArm,
-    "edf": lambda: Pi0Edf(None),
-    "edf-piece1024": lambda: Pi0Edf(1024),
-    "edf-piece2048": lambda: Pi0Edf(2048),
+    "edf": lambda **kw: Pi0Edf(None, **kw),
+    "edf-piece1024": lambda **kw: Pi0Edf(1024, **kw),
+    "edf-piece2048": lambda **kw: Pi0Edf(2048, **kw),
     "utility-per-cost": UtilityPerCostArm,
     "b9": B9Arm,
     # D118, BUILT AND IN NO RUN until the user decides. Registering them here does not put them
@@ -546,7 +546,7 @@ ARMS = {
     # all-arm tests, no sweep driver reads it (the pilot drivers list their arms explicitly), and
     # the scorer's `GPU_BASELINES` is a separate seven-tuple with a committed `len == 7` test.
     # Only the WHOLE variant of llf is named; `llf-piece<n>` is reachable by parameter.
-    "llf": lambda: LlfArm(None),
+    "llf": lambda **kw: LlfArm(None, **kw),
     "vllm-priority": VllmPriorityArm,
 }
 
@@ -558,7 +558,16 @@ def make_arm(name: str, **kw: Any) -> Policy:
     f = ARMS.get(name)
     if f is None:
         raise KeyError(f"unknown arm {name!r}; known: {sorted(list(ARMS) + ['policy-core'])}")
-    return f()
+    # D128: parameters must reach the constructed arm, or "C_inflight = 4 stays reachable by
+    # parameter" is not true. Before this, kwargs were silently DISCARDED for every non-policy
+    # arm, so `make_arm("edf", c_inflight=4)` quietly returned the DEFAULT arm and any cell
+    # labelled c4 was really the default. Arms that take no parameters still work.
+    try:
+        return f(**kw) if kw else f()
+    except TypeError:
+        if kw:
+            raise TypeError("arm %r does not accept %s" % (name, sorted(kw)))
+        raise
 
 
 # The eight arms of the round-1 list (D65 as corrected by D90). D118's `llf` and
