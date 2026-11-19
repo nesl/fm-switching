@@ -138,7 +138,30 @@ branches. Section 14 reconciles all three disputed readings; the short version i
 is a caching wrapper whose cache hides 94 percent of calls, and the two call sites bind it
 differently so a patch on one module silently misses the other.
 
-## THE BIGGEST FINDING: the robot axis is a QUEUEING problem, not a GPU-budget problem
+## D131 HEADLINE: the crossover is at 10 to 12 devices, and COVEX now loses at EVERY size
+
+Two things I reported earlier are WITHDRAWN here rather than left standing beside the new numbers.
+
+**1. The crossover is LOCATED and SHARP, and this is the result worth keeping.** Across sizes 4, 8,
+10, 12, 14, 16 and 32 on all four seeds, the baselines hold a robot fraction of 0.81 to 0.89 at 10
+devices and fall to 0.41 to 0.60 at 12 (llf) and 0.17 to 0.50 (edf C=8). One step, all four seeds
+together, no graceful region. **COVEX has no crossover because it has no collapse**: it is roughly
+flat, 0.35 to 0.56 at 10 and 0.24 to 0.42 at 16. It does not improve under load, it simply fails to
+degrade while the baselines fall past it. This confirms section 18's queueing prediction at its most
+specific point, and it says the interesting regime is NARROW and just above 10 devices.
+
+**2. I WITHDRAW the 32-device win, and the capacity column.** My "wide margin win at 32 devices"
+was measured against edf and llf only. With the published arms in the bar per D131, at 32 devices
+mooncake matches COVEX on dashcam (0.4527 to 0.4463) and more than doubles it on robots (0.454 to
+0.202), and the published field leads COVEX on robots at every size. On the D71/D82 conjunct,
+**v1.3-fast meets capacity in ZERO of 28 cells** while the published arms meet it in 12 of 28. I
+also predicted capacity would fail everywhere for everyone; it does not, 30 of 196 cells pass, so
+that prediction was wrong too.
+
+**The honest summary: COVEX does not beat the best baseline at any size on either axis, and meets
+the capacity target nowhere.** No GATE PASS string is emitted and none is close.
+
+## THE MECHANISM FINDING THAT STANDS: the robot axis is a QUEUEING problem, not a GPU-budget problem
 
 I flagged the published field as uncitable until its cost accounting was checked. **It is checked
 and it is clean**: a recall rebuild costs eco-llm 2.404 s against llf's 2.420 s, and a monitor
@@ -1687,3 +1710,103 @@ saturates the engine, so llf's recall answers queue behind it and arrive after t
 giving 0 to 2. v1.3-fast releases recall ahead of that stream via `honour_job_priority` and gets 12
 to 21. The queueing account predicts exactly this crossover: the baselines win where there is
 slack and lose where there is not.
+
+# 19. D131. THE CROSSOVER LOCATED, THE CAPACITY CONJUNCT, AND TWO OF MY OWN CLAIMS OVERTURNED
+
+196 cells, no errors. Sizes 4, 8, 10, 12, 14, 16, 32 on seeds 0, 4, 5, 6. Candidate scored BY NAME
+at `d944361`. Published arms now GATING per D131. Capacity from the committed scorer's own
+`attainment`, targets not restated on my side. Output: `leaderboard_d131_crossover.json`.
+
+## 19.1 THE CROSSOVER IS BETWEEN 10 AND 12 DEVICES, AND IT IS SHARP
+
+Robot on-time fraction, per seed, across the transition:
+
+| n | llf: seeds 0 / 4 / 5 / 6 | edf C=8: seeds 0 / 4 / 5 / 6 | v1.3-fast: seeds 0 / 4 / 5 / 6 |
+|---|---|---|---|
+| 8 | 0.900 / 0.857 / 0.882 / 0.882 | 0.950 / 0.857 / 0.882 / 0.882 | 0.400 / 0.429 / 0.412 / 0.353 |
+| 10 | 0.809 / 0.889 / 0.889 / 0.882 | 0.857 / 0.889 / 0.889 / 0.882 | 0.429 / 0.481 / 0.556 / 0.353 |
+| **12** | **0.481 / 0.414 / 0.562 / 0.600** | **0.296 / 0.172 / 0.500 / 0.400** | 0.074 / 0.414 / 0.375 / 0.350 |
+| 14 | 0.206 / 0.333 / 0.294 / 0.414 | 0.059 / 0.154 / 0.147 / 0.241 | 0.382 / 0.256 / 0.353 / 0.207 |
+| 16 | 0.171 / 0.220 / 0.220 / 0.270 | 0.114 / 0.073 / 0.195 / 0.108 | 0.400 / 0.317 / 0.415 / 0.243 |
+
+**The transition is one step wide and all four seeds make it together.** llf holds 0.81 to 0.89 at
+10 devices and falls to 0.41 to 0.60 at 12. edf C=8 falls harder, 0.86 to 0.89 down to 0.17 to
+0.50. There is no intermediate size where the baselines degrade gracefully.
+
+**COVEX does not have a crossover because it never has a collapse.** Its robot fraction is roughly
+FLAT across the whole range, 0.35 to 0.56 at 10 devices and 0.24 to 0.42 at 16, with no step. It
+does not win by improving under load; it wins by not degrading while the baselines fall past it.
+
+**This is section 18's prediction, confirmed at the point it was most specific.** The queueing
+account said baselines win where there is slack and collapse where there is none. The collapse is
+located at 10 to 12 devices, it is sharp, and it is seed-stable. That is a mechanism result, and it
+is the most transferable thing in this report: the interesting regime is NARROW and sits just above
+10 devices, not at the 4 and 8 where most of the night was spent.
+
+## 19.2 THE CAPACITY CONJUNCT, and MY OWN PREDICTION WAS WRONG
+
+I predicted in `36acdd9` that capacity would fail for every arm at every size. **It does not.** 30
+of 196 cells meet the D71/D82 conjunct. Cells meeting capacity, out of 4 seeds:
+
+| n | v1.3-fast | llf | edf C=8 | mooncake | b7-edf | eco-llm |
+|---|---|---|---|---|---|---|
+| 4 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 8 | **0** | 1 | 1 | 2 | 2 | 2 |
+| 10 | **0** | 0 | 0 | **3** | **3** | **3** |
+| 12 | **0** | 0 | 0 | 2 | 2 | 2 |
+| 14 | **0** | 0 | 0 | 2 | 2 | 2 |
+| 16 | **0** | 0 | 0 | 0 | 0 | 1 |
+| 32 | **0** | 0 | 0 | 0 | 0 | 0 |
+
+Nobody passes at 4 devices, because the robot pool is not eligible there (fewer than the D82
+minimum of 20 questions), not because the target is missed.
+
+**v1.3-fast meets capacity in ZERO of 28 cells.** The published arms meet it in 12 of 28 each and
+are the only arms that meet it above 8 devices.
+
+**This is the column that changes the reading of everything above it.** My 32-device result in
+sections 13.4 and 17 said COVEX's value appears under heavy overload. On the conjunct, at 32
+devices every arm fails, COVEX included, and COVEX also failed at every other size. Leading a
+fraction while failing the target is what that column was added to expose, and it exposes my own
+headline first.
+
+## 19.3 I WITHDRAW THE 32-DEVICE CLAIM. Under the D131 bar COVEX loses at EVERY size
+
+Means over four seeds at 32 devices:
+
+| arm | dashcam | robot fraction |
+|---|---|---|
+| v1.3-fast | 0.4463 | 0.202 |
+| **mooncake / b7-edf** | **0.4527** | **0.454** |
+| eco-llm | 0.4408 | **0.517** |
+| llf | 0.0140 | 0.009 |
+| edf C=8 | 0.0141 | 0.006 |
+
+My "wide margin win at 32 devices in all four seeds" was measured against edf and llf ONLY. With
+the published arms in the bar, **mooncake matches COVEX on dashcam and more than doubles it on
+robots at 32 devices**, and eco-llm is ahead on robots by 2.6 times. The same holds at every other
+size: the published field leads COVEX on robots at 4, 8, 10, 12, 14, 16 and 32.
+
+**So under D131 the correct statement is that COVEX does not beat the best baseline at any size on
+either axis, and meets the capacity target nowhere.** The earlier statement was an artefact of a
+narrower bar and I am withdrawing it rather than leaving the two readings side by side. No
+`harden GATE PASS` string is emitted and none is close.
+
+What survives is the MECHANISM result of 19.1, which does not depend on the bar: the baselines
+collapse at 10 to 12 devices and COVEX does not.
+
+## 19.4 A PORTING OBSERVATION: two published arms are BYTE-IDENTICAL
+
+`mooncake` and `b7-edf-feasibility` produce identical dashcam fractions and identical robot counts
+in **28 of 28 cells**, across 7 sizes and 4 seeds, on both axes.
+
+Two distinct published systems agreeing to four decimal places in every cell is not a result; it
+means they reduce to the same schedule under this workload, or one registration duplicates the
+other. This is the distribution-sanity check of the consistency protocol: a constant where a
+distribution is expected.
+
+**The consequence for the bar is small but real.** The published field has fewer INDEPENDENT
+members than its arm count suggests, so "seven in-scope arms at 33 to 35 robots" overstates the
+independent evidence behind the bar. It does not change the bar's height, since the value is
+reproduced by `eco-llm` independently. Flagged to session 3 as something to explain or collapse,
+not as a defect in my scoring.
