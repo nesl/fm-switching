@@ -1,0 +1,88 @@
+{
+ "check": "representation_side_per_arm_and_a_second_decorative_field",
+ "is_measurement": true,
+ "label": "Seed 4, 8 devices, 300 s, dry. Effective representation captured AFTER Policy.__call__ applies defaults.",
+ "sides_measured": {
+  "cascade-routing": {
+   "effective": "CLOUD/RICH x1, CLOUD/RECENT x8",
+   "side": "STRADDLES THE LINE"
+  },
+  "streamscout": {
+   "effective": "DEVICE/None x9",
+   "side": "NEITHER: it sends no cloud recall at all"
+  },
+  "covstream": {
+   "effective": "CLOUD/D2 x9",
+   "side": "EXPENSIVE, and CHOSEN"
+  },
+  "thinking-qwenvl-atdm": {
+   "effective": "CLOUD/RECENT x9",
+   "side": "CHEAP, and INJECTED (it emits None)"
+  },
+  "rh8-demand-aware-causal": {
+   "effective": "CLOUD/RECENT x9",
+   "side": "CHEAP, and INJECTED"
+  },
+  "rh8-demand-aware-oracle": {
+   "effective": "CLOUD/RECENT x9",
+   "side": "CHEAP, and INJECTED; cannot run in a scored cell regardless, since it declares reads_future"
+  },
+  "simplestream": {
+   "effective": "CLOUD/RECENT x9",
+   "side": "CHEAP, and CHOSEN"
+  },
+  "builder-s7-always-recent": {
+   "effective": "CLOUD/RECENT x9",
+   "side": "CHEAP, and CHOSEN"
+  },
+  "builder-default": {
+   "effective": "CLOUD/RECENT x9",
+   "side": "CHEAP, and INJECTED"
+  },
+  "b7-edf-feasibility": {
+   "effective": "CLOUD/RECENT x9",
+   "side": "CHEAP, and INJECTED"
+  },
+  "edf / COVEX family": {
+   "effective": "CLOUD/D2",
+   "side": "EXPENSIVE, and CHOSEN"
+  }
+ },
+ "refinement_to_the_prohibition": {
+  "as_stated": "any comparison between an arm that NAMES a representation and one that does NOT is confounded; comparisons within either group are valid.",
+  "what_the_measurement_shows": "naming against not-naming is not the right partition, because it puts simplestream (which CHOSE RECENT) in a different group from b7 (which chose nothing and was GIVEN RECENT) while both send and are charged exactly 467 tokens. They are identical at the charging path.",
+  "proposed": "partition by EFFECTIVE representation, and record separately whether it was CHOSEN or INJECTED. Effective representation is what determines comparability; chosen-against-injected is what determines whether the arm deserves credit for it.",
+  "why_both_are_needed": "an arm that chose RECENT made a decision its card can defend. An arm that named nothing received a 11.6x to 55x discount it never requested. They compare validly on cost and must not be read the same way on merit."
+ },
+ "two_arms_that_do_not_fit_either_group": {
+  "cascade_routing": {
+   "what": "it emits RICH on one query and RECENT on eight, choosing per query.",
+   "status": "it STRADDLES the line WITHIN ITSELF, so it cannot be assigned a side. But this is its MECHANISM, not a confound: choosing evidence by a quality-against-cost tradeoff is what cascade routing does. It is the one arm for which a mixed representation is the result rather than an artefact.",
+   "constraint": "it still cannot be compared cleanly against a pure-side arm, since part of any difference is the evidence discount and part is its scheduling."
+  },
+  "streamscout": {
+   "what": "DEVICE on all 9 recalls, no cloud recall at all, consistent with the 9 decline rows seen at its port.",
+   "status": "outside the partition entirely. It incurs no cloud recall cost, so a cost comparison against either group measures its routing decision and nothing about representation."
+  }
+ },
+ "second_decorative_field_found": {
+  "claim_checked": "that of the six fields apply_defaults injects, only `order` is injected into a field the coordinator never reads.",
+  "finding": "NOT QUITE. The six are cadence_s, defer_s, engine_config, frame_count, order and representation. cadence_s and frame_count are read at coordinator.py:409-410, defer_s at coordinator.py:441, representation at :552 since Part A. `order` is read nowhere, and NEITHER IS `engine_config`: every occurrence under live2 is an arm WRITING it (arms.py:547, arms_builder.py:164) or a declaration. There are TWO decorative fields among the injected six, not one.",
+  "why_it_matters": "the substance of the point stands, only representation acquired NEW semantics from Part A. But the forward-looking risk is doubled: ANY injected default into a currently-dead field is a latent copy of the representation problem, waiting for someone to give that field teeth. There are two such fields, so there are two latent instances rather than none.",
+  "recommendation": "if engine_config is ever read, the injection must be reviewed at the same time, because every non-naming arm will silently acquire DEFAULTS[\"engine_config\"] = \"default\" exactly as they acquired RECENT."
+ },
+ "independently_confirmed": {
+  "what": "DEFAULTS[\"session_action\"] is never applied.",
+  "evidence": "apply_defaults (interface.py:227-243) iterates action.streams, action.recall, then sets order and engine_config. It contains NO reference to action.sessions. Checked directly rather than accepted.",
+  "consequence": "no arm issues offloads it did not request, so RH8 placement behaviour is its own."
+ },
+ "measurement_scope": "representation and token-side observations only. RH8 cost figures remain HELD pending the residency push; nothing in GPU-seconds is reported for any placement-acting arm.",
+ "_provenance": {
+  "git_commit": "75dca776110ad942c476f42c1a47359ec0736a65",
+  "script": "effective_representation.py",
+  "model": "none (dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4, 8 devices, 300 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
