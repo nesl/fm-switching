@@ -2886,3 +2886,162 @@ as measured, a scheduling outcome of the arms, not a harness criterion. Suites o
 flash's D114 and history-size tests), fleet 234 / 234, test_scale exit 0, policy 358 of 359 with one IMPORT error that
 is environmental (`test_pol6_chain.py` checks a hardcoded flash scratch path under another account's /tmp directory,
 permission denied on this host; not edited).
+
+---
+
+# D118: two stronger baselines, llf and vllm-priority. PRE-REGISTRATION
+
+Committed ALONE, before any code, per the user decision D118 of 2026-11-18. **Neither arm enters
+any run until the user decides.** They are built now so they are ready if round 1 adopts them
+after the pilot. No measurement appears in this section.
+
+Both exist to answer a reviewer: (a) "use least-laxity instead of EDF, and drop what cannot make
+it", and (b) "isn't this just vLLM with priority scheduling?". The D114 replay is why: strict EDF
+starves robot questions because a dashcam instant's deadline always sorts ahead of a question's,
+so the question reaches the head too late for a multi-second cold rebuild.
+
+## F1. Arm 9: `llf`, least laxity first
+
+Lives in `live2/arms.py` beside `Pi0Edf` and shares its machinery.
+
+- **Release: work-conserving exactly as D114.** Each 100 ms period, release from the head while
+  in-flight cloud requests are below `C_inflight = 4`, counted the same way `Pi0Edf` counts them,
+  namely `sum(obs.cloud.running_by_class.values())`, and charged within the period by taking a
+  prefix.
+- **Order: ascending laxity**, where `laxity = deadline - now - S_hat(unit)`.
+- **Skip rule:** a unit whose laxity is below 0 at decision time is NOT released. It is removed
+  and falls to the device, as an expired item does now. Skips are counted per kind.
+- **No admission test beyond the skip rule.** No mu, no deficits, no utility.
+- **Granularity:** a `piece_tokens` parameter, default None, meaning a whole rebuild as `edf`
+  does. **Only `llf` (whole) is registered in `ARM_NAMES`.** Piece variants are reachable by
+  parameter and are deliberately not named.
+
+### S_hat comes only from committed measured curves
+
+Every term is read from `baselines/costs.py`, the same module `edf-service-time` uses
+(`baselines/naive.py:203`, `import costs as C` then `C.recall_ttft_s(...)`). **The policy's cost
+model, its engine model and its rollout are never consulted (D74).** A test asserts the source
+module.
+
+| unit | formula | committed source |
+|---|---|---|
+| monitoring instant | `C.CLOUD_TTFT[("32BI", 1, 25)]` = **0.1422 s** | StudyD7 / D7b open-loop TTFT p50 at 25 % of peak, single frame (`costs.py:38`, `costs.py:150`) |
+| recall, GPU-WARM | `C.recall_ttft_s(tokens, "GPU-WARM")` | StudyRH5 Part A isolated reload, D2, TTFT medians (`costs.py:71`) |
+| recall, HOST-WARM | `C.recall_ttft_s(tokens, "HOST-WARM")` | the restore IS that committed curve |
+| recall, COLD | `C.recall_ttft_s(unbuilt, "COLD")` + `C.recall_ttft_s(tokens, "GPU-WARM")` | the first term is exactly `unbuilt / COLD_PREFILL_TOK_S` (`costs.py:106-120`), the committed cold prefill rate per token; the second is the answer TTFT |
+| rebuild piece | `C.recall_ttft_s(remaining, "COLD")` + `C.recall_ttft_s(tokens, "GPU-WARM")` | the job's laxity counts ALL of its remaining work, so a long rebuild starts early |
+
+**Why the two terms do not double count.** `C.recall_ttft_s(tokens, "COLD")` returns
+`tokens / rate` and nothing else: it IS the cold prefill, with no answer TTFT inside it
+(`costs.py:115-117`). So the cold case adds a prefill term for the unbuilt tokens and a separate
+warm answer term for the whole history, which is the state the history is in once the rebuild
+completes. Adding a COLD answer term instead would charge the prefill twice.
+
+Worked example, 17,581 tokens cold against a 5 s deadline: prefill 3.907 s plus answer 0.573 s
+gives `S_hat = 4.48 s` and laxity 0.52 s, while a dashcam instant one second out has
+`S_hat = 0.1422` and laxity about 0.86 s. **Under LLF the cold recall sorts FIRST; under EDF the
+instant does.** That inversion is the arm's whole point and is the hand-built ordering test.
+
+### The unbuilt size, and an honest limit
+
+`unbuilt` is derived from the believed readiness: COLD means nothing is built, so
+`unbuilt = readiness_tokens`; GPU-WARM and HOST-WARM mean the history is there, so there is no
+rebuild term. **This is EXACT for the named arm**, because a whole MATERIALIZE is a single
+request and a session is therefore either un-built (COLD) or built (warm); there is no partial
+state for it.
+
+It is APPROXIMATE for the unnamed piece variants, where a half-built session still prices as
+fully cold. The reason is that the built prefix is not observable: `cstate.observation` gives
+every recall an `EvidenceItem("D2", tier, tok, ...)` carrying the FULL believed history and
+varies only the tier (`cstate.py:319-323`), so D100's prefix size never reaches the arm.
+Exposing it would mean adding a field to `cstate.observation` and `baselines/interface.py`, the
+one path every arm's inputs flow through, on the night the H100 runs a pilot on this build.
+**Recommended if a piece variant is ever named; deliberately NOT applied tonight**, and recorded
+here so the limit is not discovered later as a surprise.
+
+## F2. Arm 10: `vllm-priority`, engine-native EDF
+
+- **Release: identical to `always-cloud-fcfs`.** Every opportunity is sent immediately, with no
+  cap and no admission test. That is the only honest way to ask "is the engine's own scheduler
+  enough", because any arm-side ordering would confound the answer.
+- **The only difference is that every action carries a priority**: the absolute deadline in
+  integer milliseconds from run start, `int(round(deadline_abs * 1000))`, int64-bounded. Lower is
+  served first, which matches vLLM. **A rebuild needed by a recall carries the recall's
+  deadline.**
+- **It refuses to run** unless the run declares the server in priority mode, so it can never
+  silently run as plain FCFS and be reported as if the engine had ordered anything.
+
+## F3. What the pinned vLLM actually supports, read from source
+
+Read from the **`v0.31.0`** tag of `vllm-project/vllm`, which is the version
+`reports/study_d7_capacity.md:23` pins. Note the layout moved in this version:
+`entrypoints/openai/protocol.py` is now split into per-endpoint packages, and the scheduler
+config moved to `vllm/config/scheduler.py`. **Priority scheduling is supported, so there is no
+STOP condition here.**
+
+| question | answer, from the v0.31.0 source |
+|---|---|
+| the server flag | **`--scheduling-policy`**, defined in `vllm/engine/arg_utils.py` as `scheduler_group.add_argument("--scheduling-policy", **scheduler_kwargs["policy"])` over the attribute `scheduling_policy: SchedulerPolicy = SchedulerConfig.policy` |
+| its values | `vllm/config/scheduler.py`: `SchedulerPolicy = Literal["fcfs", "priority"]`, field `policy: SchedulerPolicy = "fcfs"`. Its docstring: `"priority" means requests are handled based on given priority (lower value means earlier handling) and time of arrival deciding any ties)` |
+| the request field | `priority: int = 0` on `ChatCompletionRequest` in `vllm/entrypoints/openai/chat_completion/protocol.py`, bounded `ge=_INT64_MIN, le=_INT64_MAX`, described as `"The priority of the request (lower means earlier handling; default: 0)."` and raising an error for any non-zero priority if the served model does not use priority scheduling |
+| does it PREEMPT running requests? | **Yes.** `vllm/v1/core/sched/scheduler.py` selects the victim as `preempted_req = max(self.running, key=lambda r: (r.priority, r.arrival_time),)` under `if self.policy == SchedulingPolicy.PRIORITY:`, against `preempted_req = self.running[-1]` otherwise, with the comment `# Preempt the lowest-priority request.` |
+| what happens to a preempted request's KV? | `_preempt_request` calls `self._free_request_blocks(request)` and `self.encoder_cache_manager.free(request)`, then sets `request.status = RequestStatus.PREEMPTED` and **`request.num_computed_tokens = 0`**, and returns it with `self.waiting.prepend_request(request)`. Its docstring: `"""Preempt a request and put it back to the waiting queue.` |
+
+**The consequence that matters for our setting, and it is not favourable.**
+`num_computed_tokens = 0` means a preempted request's prefill is DISCARDED and recomputed from
+scratch. So a multi-second cold rebuild, exactly the unit D118 exists to protect, can be
+preempted by a nearer-deadline dashcam instant and lose all of its work, repeatedly. Engine-native
+priority is therefore not a strictly stronger scheduler for this workload: it reorders well and
+can thrash the long jobs. **This is the measurable difference between arm-side laxity ordering and
+engine-native priority**, and it is the reason both arms exist rather than one.
+
+Whether the recompute is cheap depends on prefix caching retaining the freed blocks. In V1 a
+free returns blocks to the pool (`self.kv_cache_manager.free(request)`, or a deferred free via
+`pop_blocks_for_free` into `self.deferred_frees`), and whether the subsequent recompute hits the
+prefix cache depends on prefix caching being enabled and those blocks not yet being evicted.
+**That recovery path was NOT verified line by line in 0.31.0 and must not be assumed.** Chunked
+prefill appears in the scheduler only incidentally (`# Ignore draft tokens for prefill chunks.`)
+with no priority-specific interaction found, and no host-offload interaction with priority was
+found. Any claim beyond the table above needs a measurement on the H100, not a reading.
+
+## F4. H100 wiring for vllm-priority
+
+Nothing in this task touches an H100-owned file. If and when the user adopts this arm, the H100
+must make exactly these changes; the arm is built so that nothing else is needed.
+
+1. **The server flag.** Start the round-1 server with `--scheduling-policy priority`. Without it
+   the engine silently serves FCFS and every non-zero `priority` in a request is rejected by the
+   OpenAI layer, so the run would fail loudly rather than mislead, which is the intended
+   behaviour.
+2. **The request field.** Add `"priority": <int>` at the TOP LEVEL of the chat-completions JSON
+   body, beside `model` and `messages`, as `int` within the int64 range. It is NOT a sampling
+   parameter and does not belong inside `extra_body` for the OpenAI-compatible endpoint.
+3. **Where it goes in the backend.** In `live2/backend.py` (and `asyncbackend.py`), where the
+   body is assembled, read the value the arm puts in the action's metadata under the key
+   `priority_ms` and copy it to the body's `priority`. The arm never builds a body itself, which
+   is why this one line is the whole integration.
+4. **The assertion to add.** In the backend, immediately before the send:
+   `assert (self.scheduling_policy == "priority") == ("priority" in body), "vllm-priority: a priority was sent to a server that is not in priority mode, or the mode is on and no priority was set"`
+   and record `scheduling_policy` in the run header so the scorer can see which mode produced the
+   numbers.
+
+## F5. Decisions and defaults
+
+Posted up front under Step 0. All were taken at their default and are **PROVISIONAL**.
+
+1. **`ARM_NAMES`.** Both arms are registered there. It is safe: `ARM_NAMES` is read only by the
+   `--arm` CLI choices and by three all-arm tests, no sweep driver reads it (the pilot drivers
+   list their arms explicitly), and the scorer's `GPU_BASELINES` is a separate hard-coded
+   seven-tuple with a committed `len == 7` test. **So registering them does not put either arm in
+   any run plan**, which is what D118 requires.
+2. **The priority-mode gate.** Strictly refusing on the run header would need an H100-owned file,
+   so the gate is: the arm refuses when a backend is declared and its policy is not `priority`;
+   a run that declares nothing, which is a dry run or a test, proceeds and is stamped
+   `server_scheduling_policy: null`. The strict assertion is in F4 item 4. This is the one place
+   where the implementation is weaker than the instruction's wording, and it is flagged rather
+   than glossed.
+3. **Skip-rule timing.** Laxity is recomputed every epoch; a unit skipped once may be skipped
+   again, and skips are counted per kind per run.
+4. **Monitoring `S_hat`** excludes RTT and upload, which are transport and not service time.
+5. **The unbuilt size** is readiness-derived, per F1: exact for the named arm, approximate for
+   the unnamed piece variants.
