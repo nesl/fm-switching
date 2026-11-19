@@ -1,0 +1,101 @@
+{
+ "check": "covex_harden_v12_scenario_preregistration",
+ "is_measurement": false,
+ "label": "PRE-REGISTERED v1.2 EXPECTATIONS (D125), committed BEFORE any v1.2 commit was run against them. The Part 2 expectations in scenario_preregistration.json stay EXACTLY as they were; nothing there is revised. A wrong expectation is recorded as an erratum with its reason, as E1 was.",
+ "v12_design_summary": "two timescales: dispatch unchanged at H = 0.5 s, and a per-RC-job PLAN chosen once at admission by fleet-wide DeltaJ against DECLINE over the job lifetime, with reserved release times and logged re-plans",
+ "scenarios": {
+  "P1": {
+   "scenario": "plan chosen at admission: one robot question, idle GPU, cold 11k history",
+   "expect": "plan_chosen_and_logged",
+   "expect_detail": "a job plan is chosen ONCE at admission, is logged, and is a member of the feasible plan set; it is not DECLINE, since S1 already shows this question is servable on an idle engine",
+   "justification": "v1.2 chooses a plan once at admission by fleet-wide DeltaJ against DECLINE; S1 passing on v1.0 and v1.1 establishes the question is servable, so DECLINE here would be a regression"
+  },
+  "P2": {
+   "scenario": "reservation semantics: an admitted plan on an otherwise quiet fleet",
+   "expect": "released_at_planned_time",
+   "expect_detail": "each reserved unit is released at its planned time within one decision period (0.1 s), OR earlier only where the short-horizon rollout scored the earlier release strictly better, which must be visible",
+   "justification": "D125 reservation rule: planned units are released AT their planned times, with earlier release on an idle GPU only if the short horizon scores it strictly better"
+  },
+  "P3": {
+   "scenario": "no silent deferral: every admitted plan over a 600 s seed-0 fleet run",
+   "expect": "no_silent_deferral",
+   "expect_detail": "ZERO planned units that are neither released nor accounted for by a logged re-plan. A unit that simply never happens, with no re-plan logged, is a failure",
+   "justification": "D125 states re-plan, never silent deferral, and requires every re-plan to be logged with its cause; silent deferral is the v1.0 failure mode this design exists to remove"
+  },
+  "P4": {
+   "scenario": "re-plan on late completion (cause a)",
+   "expect": "replan_logged_cause_a",
+   "expect_detail": "when a unit completes later than planned and predicted completion with kappa then exceeds D_r, a re-plan is logged with cause (a)",
+   "justification": "D125 trigger (a)"
+  },
+  "P5": {
+   "scenario": "re-plan on a believed readiness tier change (cause c)",
+   "expect": "replan_logged_cause_c",
+   "expect_detail": "a re-plan is logged with cause (c) when the believed tier of the question history changes",
+   "justification": "D125 trigger (c)",
+   "realisability": "my S6 showed I cannot drive a HOST-WARM belief from the trace interface, so a tier change may be undrivable; if no tier change occurs this is reported NOT REALISABLE and is not scored"
+  },
+  "P6": {
+   "scenario": "ABANDON is reachable: a question whose remainder cannot meet D_r after a late unit",
+   "expect": "abandon_chosen_and_prefix_value_kept",
+   "expect_detail": "ABANDON is chosen at the re-plan, the remainder is declined, and the state value of what is built is kept. BOTH halves are checked: that ABANDON is chosen, and that the retained state value is non-zero",
+   "justification": "D125 makes ABANDON one option at re-plan and defines it as keeping the state value of what is built; if that value is structurally zero the option is inert, which F-A2 makes a live risk"
+  },
+  "P7": {
+   "scenario": "plan_latest signature: a question with ample slack, switch ON against OFF",
+   "expect": "latest_start_is_later",
+   "expect_detail": "with plan_latest ON the first planned release is strictly later than with it OFF, for a question with slack; with it OFF the first piece starts now",
+   "justification": "PIECES(b)-LATEST places the first piece at t_ls(b), the latest safe start, so the switch must have an observable signature or it is a dead switch"
+  },
+  "P8": {
+   "scenario": "kappa monotonicity: the same question at kappa = 1 and kappa > 1",
+   "expect": "kappa_pulls_start_earlier",
+   "expect_detail": "the latest safe start with kappa > 1 is at or earlier than with kappa = 1, so a larger safety factor never starts later",
+   "justification": "kappa inflates predicted completion, so it can only tighten the latest safe start; the opposite would mean the safety factor is applied with the wrong sign"
+  },
+  "P9": {
+   "scenario": "state value at T_r: is the channel still structurally zero under v1.2",
+   "expect": "state_value_not_always_zero",
+   "expect_detail": "the state-value channel is NOT exactly zero for every planned RC candidate. If it is exactly zero everywhere, then v1.2 Jhat term \"state value at T_r\" and ABANDON keeping \"the state value of what is built\" are BOTH inert, which is a gate-relevant failure and must be reported as one",
+   "justification": "F-A2 measured state value exactly zero for all 124,354 candidates under v1.0 and v1.1; v1.2 depends on that term twice, so it has to be tested explicitly rather than assumed fixed"
+  },
+  "P10": {
+   "scenario": "two-timescale separation: zero-tie rate for planned RC units",
+   "expect": "zero_tie_rate_far_below_v11",
+   "expect_detail": "the fraction of planned RC release candidates whose DeltaJ is exactly zero is far below v1.1 measured 0.723 for rc_piece releases, because planned units are released at their planned times rather than re-scored every period",
+   "justification": "D125 states v1.1 per-piece release scoring, the source of the 72 percent zero ties, does NOT apply to planned RC units, so the tie rate is the direct observable of that claim"
+  }
+ },
+ "ablations_to_score": {
+  "v1.2": "planner_rc + plan_latest + replan ON, plus B1, F2, F3 ON, F1 and F4 OFF",
+  "planner_off": "v1.1 behaviour: planner_rc OFF, B1 + F2 + F3 ON",
+  "fixed_pieces1024_now": "always PIECES(1024)-NOW, no plan choice",
+  "fixed_onego_now": "always ONE-GO-NOW, no plan choice",
+  "no_latest": "planner_rc + replan ON, plan_latest OFF",
+  "no_replan": "planner_rc + plan_latest ON, replan OFF",
+  "kappa_1": "v1.2 with kappa = 1"
+ },
+ "gate_definition": {
+  "half_1": "every pre-registered behaviour scenario passes for v1.2",
+  "half_2": "the offline comparison is at least as good as the BEST baseline among edf, llf and always-cloud-fcfs at EVERY size in 4, 8, 16, 32 on BOTH the dashcam and the robot measure",
+  "label": "the comparison remains SCREENING and OPTIMISTIC FOR COVEX, since the dry run prices the engine from the same committed curves COVEX model uses"
+ },
+ "carried_forward": {
+  "F_A2": "state value exactly zero over 124,354 candidates; v1.2 depends on it twice, tested by P9",
+  "F_A7": "COVEX was also worse on dashcams, 48.7 and 7.5 percent of instants at 8 and 16 devices against edf 99.9 and 62.6, so the gate is judged on BOTH axes at EVERY size"
+ },
+ "decisions_provisional": [
+  "plan observability: if v1.2 does not log the chosen plan and its planned release times in the decision log or arm stats, the planner entry point is wrapped from inside policy/audit/ to record them; no v1.2 file is edited",
+  "P2 tolerance: one decision period, 0.1 s",
+  "P7 and P8 are comparative scenarios, run twice with the switch or kappa changed and compared, since neither has an absolute expected value",
+  "best baseline for half 2 is the maximum over edf, llf and always-cloud-fcfs per size and per axis, computed from the same run",
+  "ablations that need a plan type forced are run through the documented switches; if v1.2 exposes no such switch they are reported NOT RUNNABLE rather than approximated"
+ ],
+ "_provenance": {
+  "script": "policy/tests/hardening/",
+  "model": "none (pol4 frozen)",
+  "device": "flash CPU only",
+  "n": "crafted event lists, development data only, seed 0",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}
