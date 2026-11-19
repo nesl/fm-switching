@@ -5750,3 +5750,52 @@ INDISCRIMINATE**, because both are visible in these traces already. Piece size i
 PIECES-LATEST comparison, where LATEST scores exactly the reference in both. **Reload-against-
 rebuild is NOT yet visible** in either trace, since both decisions were COLD, so that one is a
 genuine open question.
+
+### Third trace: the offset is the DEFICIT, not outcome utility. My characterisation INVERTS.
+
+The round numbers were the tell. Every other quantity in these traces carries nine significant
+figures, and `0.45` and `0.60` do not. Decomposing a 0.485386 decision into its terms:
+
+| term | reference | chosen | difference |
+|---|---|---|---|
+| `u_hat` | 0.251169263 | 0.286555187 | **0.035385924** |
+| `z_term` | 0.000000000 | 0.450000000 | **0.450000000** |
+| `terminal` | 0.027648022 | 0.027648022 | 0.000000000 |
+| TOTAL | 0.278817284 | 0.764203208 | 0.485385924 |
+
+The extra delivery is `robo003:RICH:94.200:p0`, 10,831 tokens.
+
+**`u_hat` — the actual utility of delivering the answer — contributes EXACTLY the saturated
+constant `0.035385924`.** The whole of the variation is `z_term`, the DEFICIT. And the deficit's
+value is `z[RC] * delta(ok/n)` with `p_k["RC"] = 0.9`, so the ladder is `0.9` times a small
+rational from the device's question count:
+
+| n, ok | delta(ok/n) | z_term |
+|---|---|---|
+| n=2, 0 to 1 | 0.5000 | **0.4500** |
+| n=3, 0 to 2 | 0.6667 | **0.6000** |
+| n=1, 0 to 1 | 1.0000 | 0.9000 |
+
+**`0.45` and `0.60` are `0.9 x 1/2` and `0.9 x 2/3` exactly.**
+
+**SO THE SECOND HALF OF MY CHARACTERISATION WAS WRONG AND IS CORRECTED HERE.** I wrote that the
+objective "CAN see the outcome" because the offset varied. It does not. **The offset is the
+deficit's coarsely quantised bookkeeping, and `u_hat`, which is where an answer's actual value
+would live, is the saturated constant regardless of the question.** I had flagged that reading as
+inference from magnitudes rather than measurement, and the measurement reverses it.
+
+**THE CORRECTED AND STRONGER FINDING.** COVEX's objective sees:
+
+- **NOT cost** — a 12 to 25 per cent GPU-second spread moves DeltaJ by exactly nothing (traces 1 and 2).
+- **NOT the answer's value** — `u_hat` contributes the same `0.035386` for a 10,831-token recall as for any other.
+- **ONLY a ladder of constants** — `0.9` times a small rational, set by how many questions that device happens to have had, which is bookkeeping about the denominator rather than anything about this decision.
+
+**A policy whose entire discriminating signal is `p_target` times a small rational has nothing to
+optimise.** That is a simpler and much stronger statement than "it cannot see cost", and it is now
+measured end to end rather than inferred.
+
+**ONE CORROBORATION WORTH NOTING.** `z_term` is non-zero here (0.45) in the PLANNER's long-window
+rollout, where in the DISPATCH path it cancelled in 14,720 of 14,721 counterfactual calls. That is
+exactly what the geometry result predicts: the planner's window extends past the answer's arrival,
+so the two branches DO differ in RC outcomes and the deficit survives. The same term is alive in
+one geometry and dead in the other, which is the clearest confirmation of that mechanism yet.
