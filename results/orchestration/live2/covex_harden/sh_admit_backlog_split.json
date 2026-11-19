@@ -1,0 +1,184 @@
+{
+ "check": "covex_harden_sh_admit_backlog_split",
+ "is_measurement": false,
+ "label": "AUDIT of a dry run. Decomposes the sh_admit backlog charge into its queue part, -mu * max(busy - H, 0), and its A6 part, -mu * a6_backlog, per branch and as a delta.",
+ "git_commit": "4f91e8d859fac4c2d462febaefc936c21c31ca72",
+ "switches_on": [
+  "deficit_update",
+  "honour_job_priority",
+  "realistic_competing",
+  "write_staleness"
+ ],
+ "cells": [
+  {
+   "n_devices": 4,
+   "n_sh_admit": 2174,
+   "queue_delta": {
+    "n": 2174,
+    "nonzero": 55,
+    "nonzero_frac": 0.0253,
+    "p50_abs": 0.0,
+    "max_abs": 213.954012,
+    "min": -0.075146,
+    "max": 213.954012
+   },
+   "a6_delta": {
+    "n": 2174,
+    "nonzero": 0,
+    "nonzero_frac": 0.0,
+    "p50_abs": 0.0,
+    "max_abs": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "mu_term_delta": {
+    "n": 2174,
+    "nonzero": 55,
+    "nonzero_frac": 0.0253,
+    "p50_abs": 0.0,
+    "max_abs": 213.954012,
+    "min": -0.075146,
+    "max": 213.954012
+   },
+   "a6_cancels_frac": 1.0,
+   "a6_s_nonzero_frac": 0.0,
+   "max_identity_err": 0.0,
+   "mu_p50": 1.4439
+  },
+  {
+   "n_devices": 8,
+   "n_sh_admit": 4322,
+   "queue_delta": {
+    "n": 4322,
+    "nonzero": 2228,
+    "nonzero_frac": 0.5155,
+    "p50_abs": 0.204767,
+    "max_abs": 0.204767,
+    "min": -0.204767,
+    "max": 0.142754
+   },
+   "a6_delta": {
+    "n": 4322,
+    "nonzero": 0,
+    "nonzero_frac": 0.0,
+    "p50_abs": 0.0,
+    "max_abs": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "mu_term_delta": {
+    "n": 4322,
+    "nonzero": 2228,
+    "nonzero_frac": 0.5155,
+    "p50_abs": 0.204767,
+    "max_abs": 0.204767,
+    "min": -0.204767,
+    "max": 0.142754
+   },
+   "a6_cancels_frac": 1.0,
+   "a6_s_nonzero_frac": 0.0,
+   "max_identity_err": 0.0,
+   "mu_p50": 4.2781
+  },
+  {
+   "n_devices": 16,
+   "n_sh_admit": 8709,
+   "queue_delta": {
+    "n": 8709,
+    "nonzero": 8064,
+    "nonzero_frac": 0.9259,
+    "p50_abs": 0.470736,
+    "max_abs": 31.79332,
+    "min": -9.239508,
+    "max": 31.79332
+   },
+   "a6_delta": {
+    "n": 8709,
+    "nonzero": 0,
+    "nonzero_frac": 0.0,
+    "p50_abs": 0.0,
+    "max_abs": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "mu_term_delta": {
+    "n": 8709,
+    "nonzero": 8064,
+    "nonzero_frac": 0.9259,
+    "p50_abs": 0.470736,
+    "max_abs": 31.79332,
+    "min": -9.239508,
+    "max": 31.79332
+   },
+   "a6_cancels_frac": 1.0,
+   "a6_s_nonzero_frac": 0.0,
+   "max_identity_err": 0.0,
+   "mu_p50": 9.8348
+  }
+ ],
+ "_provenance": {
+  "git_commit": "4f91e8d859fac4c2d462febaefc936c21c31ca72",
+  "script": "policy/audit/backlog_split.py",
+  "model": "none (pol4 frozen)",
+  "device": "flash CPU only",
+  "n": "seed 0 at 4,8,16 devices for 600 s",
+  "timestamp": "2026-11-18T00:00:00"
+ },
+ "answer": {
+  "question": "what dominates the backlog charge on sh_admit, and does a6_backlog cancel",
+  "answer": "the QUEUE part is the entire charge; a6_backlog contributes nothing and is itself exactly ZERO in BOTH branches of every sh_admit candidate at every size, which is stronger than cancelling",
+  "a6_delta_nonzero_fraction": {
+   "4": 0.0,
+   "8": 0.0,
+   "16": 0.0
+  },
+  "a6_backlog_itself_nonzero_fraction": {
+   "4": 0.0,
+   "8": 0.0,
+   "16": 0.0
+  },
+  "why": "_prefix_risk produces restore work only for at-risk RC jobs, and an SH admission neither creates nor endangers one",
+  "consequence": "the escalated a6_backlog units defect cannot explain F-A8 and would NOT help the dashcam axis; it is worth attention for RECALL only",
+  "identity_error_max": 0.0
+ },
+ "f_a8_mechanism": {
+  "mu_p50": {
+   "4": 1.4439,
+   "8": 4.2781,
+   "16": 9.8348
+  },
+  "queue_charge_nonzero_fraction": {
+   "4": 0.0253,
+   "8": 0.5155,
+   "16": 0.9259
+  },
+  "queue_charge_p50_abs": {
+   "4": 0.0,
+   "8": 0.204767,
+   "16": 0.470736
+  },
+  "refused_fraction": {
+   "4": 0.0,
+   "8": 0.512,
+   "16": 0.925
+  },
+  "reading": "the fraction carrying a non-zero queue charge tracks the fraction refused to within 0.004 at every size, so a non-zero queue backlog charge is very nearly necessary and sufficient for refusal; and mu itself rises from 1.44 to 9.84 with load while the per-instant gain stays at p50 0.055, which is the amplifier"
+ },
+ "g1e": {
+  "commit": "fd3bcd7",
+  "parent": "7f83546",
+  "switches": "B1 on, 8 devices, seed 0, 600 s",
+  "decisions_differing": 0,
+  "of": 2220,
+  "z_updates": 4338,
+  "z_successes": 2107,
+  "z_misses": 2231,
+  "verdict": "PASS, byte-identical as pre-registered, verified independently of session 1"
+ },
+ "f5b_sv_synthesis": {
+  "session1": "the state-value SUM PER BRANCH is median 0.009216 with B1+F3 and exactly zero in 100 percent once F2 is added",
+  "mine": "sv_delta, the DIFFERENCE between branches, is exactly zero in 124,354 of 124,354 candidates, with F2 on AND with every switch off",
+  "synthesis": "both are right and they are different quantities; with F2 OFF the value is non-zero per branch and STILL CANCELS in DeltaJ, so making it non-zero per branch would not by itself let it influence any decision",
+  "p9_update": "P9 must test BOTH non-zero per branch AND a non-zero difference between branches, and the second is what decides whether the channel can affect anything"
+ }
+}

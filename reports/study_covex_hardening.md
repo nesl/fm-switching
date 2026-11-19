@@ -582,3 +582,113 @@ themselves deliver almost nothing.
 because the baseline delivers zero is not measuring what it is meant to measure. The robot axis
 may need an absolute floor, for example D82's own pooled target, rather than only a
 relative-to-baseline test. That is a methodological change, so it is proposed and NOT applied.
+
+
+---
+
+# 8. GATE ROUND ONE, scored on the F5 set that exists
+
+HEAD **`4f91e8d`** for the backlog decomposition, **`fd3bcd7`** and its parent **`7f83546`** for
+the F5c equivalence test. Isolated worktrees, clean.
+
+| item | state | my pre-registered expectation | verdict |
+|---|---|---|---|
+| **F5a** backlog units | **REFUTED, no change made.** Spec 3.5 puts both mu and the backlog in utility per GPU-second, and the term fires in 6 of 5,016 rollouts | G1a, G1b | **FALSIFIERS FIRED** (recorded at `58a1abb`, before this round) |
+| **F5b** state value | **NOT IMPLEMENTED and escalated.** Session 1 stopped it and retracted its own claim: `_state_value` returns 0.009216 on all 1,365 calls and is not broken; F2 is what zeroes the sum | G1c | **NOT TESTABLE as written**: there is no new wiring to test |
+| **F5c** deficit routing | **LANDED** at `fd3bcd7`; `_z_resolve` now calls `Coordinator.update_deficit`, so spec 3.3 and 7.6's named entry point has a production caller for the first time | G1e | **PASS**, verified independently |
+
+## 8.1 G1e verified independently, not accepted on report
+
+`fd3bcd7` against its parent `7f83546`, B1 on, 8 devices, seed 0, 600 s:
+
+| quantity | F5c | parent | |
+|---|---|---|---|
+| decisions differing | **0 of 2,220** | | **byte-identical** |
+| `z_updates` | 4,338 | 4,338 | identical |
+| `z_successes` | 2,107 | 2,107 | identical |
+| `z_misses` | 2,231 | 2,231 | identical |
+
+**G1e PASSES exactly as pre-registered.** Session 1's own figure was 0 of 1,157 on its fixture;
+mine is 0 of 2,220 on the seed-0 fleet trace, so the result holds on both. I note that F5c
+deliberately carries no switch, on the ground that a switch over provably identical behaviour
+would be dead by construction, and my measurement supports that reasoning.
+
+## 8.2 F-A2 and session 1's retraction are BOTH right, and the synthesis matters for F5b
+
+This needs stating carefully, because it looked like a contradiction and is not.
+
+- **Session 1 measures the state-value SUM PER BRANCH.** With B1 and F3 it is median 0.009216 and
+  exactly zero in 28.1 percent of evaluations; adding F2 makes it exactly zero in 100 percent.
+- **I measure `sv_delta`, the DIFFERENCE between the two branches of a candidate's own
+  counterfactual.** That is exactly zero in 124,354 of 124,354 candidates.
+
+Both are true because they are different quantities. **And the synthesis is the decision-relevant
+one: with F2 OFF the state value is non-zero per branch (0.009216) and STILL CANCELS in DeltaJ.**
+My v1.0 audit had every switch off, F2 included, and `sv_delta` was exactly zero for every kind
+there too.
+
+**So making the state value non-zero per branch would not, on its own, make it influence a single
+decision.** What a decision sees is the difference, and the difference is zero whether F2 is on or
+off. **P9's status is updated accordingly: it must test BOTH that the value is non-zero per branch
+AND that it DIFFERS between branches, and the second is the one that decides whether the channel
+can affect anything.** F5b as conceived targets the first.
+
+This also sharpens what F2's escalated semantics ruling is about. F2 zeroes a per-branch quantity
+that was already decision-irrelevant, so on my measurement the F2 question is about the
+correctness of the staleness figure (150.7 s of staleness for a 6,781-token history against a 10 s
+RC deadline) rather than about recovering a channel that could change decisions.
+
+## 8.3 THE DECISIVE QUESTION ANSWERED: `a6_backlog` contributes NOTHING to `sh_admit`
+
+`Rollout._terminal` (`rollout.py:712-713`) prices
+`mu_term = -mu * (max(busy - H, 0) + a6_backlog)`. Decomposed per branch and as a delta over every
+`sh_admit` candidate, with the two parts checked against `mu_term` to an identity error of
+**exactly 0.0**:
+
+| n | `sh_admit` | mu p50 | **queue delta** non-zero | queue delta p50 abs | **a6 delta** non-zero | a6 CANCELS | `a6_backlog` itself non-zero |
+|---|---|---|---|---|---|---|---|
+| 4 | 2,174 | 1.444 | 0.025 | 0.0 | **0.000** | **1.000** | **0.000** |
+| 8 | 4,322 | 4.278 | 0.516 | **0.205** | **0.000** | **1.000** | **0.000** |
+| 16 | 8,709 | 9.835 | 0.926 | **0.471** | **0.000** | **1.000** | **0.000** |
+
+**The queue part is the ENTIRE backlog charge on `sh_admit`. The A6 part contributes nothing, and
+it is stronger than cancelling: `a6_backlog` is itself exactly ZERO in BOTH branches of every
+`sh_admit` candidate at every size.** `_prefix_risk` produces restore work only for at-risk RC
+jobs, and an SH admission neither creates nor endangers one.
+
+**So the escalated `a6_backlog` units defect cannot explain F-A8 and would not help the dashcam
+axis at all. It is worth the user's attention for RECALL only.** That is the single number the
+coordinator asked for, and it settles the question against the more valuable of the two
+possibilities.
+
+## 8.4 What the decomposition adds to F-A8: mu grows with load, and that is the amplifier
+
+The same table shows the mechanism of F-A8 completely, and it was not visible before:
+
+| n | mu p50 | fraction of `sh_admit` with a non-zero queue charge | queue charge p50 abs | **fraction REFUSED** |
+|---|---|---|---|---|
+| 4 | 1.444 | 0.025 | 0.0 | 0.000 |
+| 8 | 4.278 | 0.516 | 0.205 | 0.512 |
+| 16 | 9.835 | 0.926 | 0.471 | 0.925 |
+
+**The fraction carrying a non-zero queue charge tracks the fraction refused to within 0.004 at
+every size.** A non-zero queue backlog charge is very nearly necessary and sufficient for refusal.
+And **the EWMA mu itself rises from 1.44 to 9.84 as load grows**, so the same queue excess is
+priced almost seven times higher at 16 devices than at 4, while the per-instant gain stays at
+p50 0.055. That is the amplifier: not one term being wrong, but mu rising with load while the gain
+per instant does not.
+
+**None of this is a defect I can point to**, which is worth saying plainly. The units are correct
+(F5a), A6 does not reach it (8.3), and mu's estimator is off limits under D124. On the measurement,
+the dashcam deficit at 8 devices is the designed objective working as specified, with the
+exchange rate F-A6 described and D126 declined to adopt.
+
+## 8.5 ROUND ONE VERDICT
+
+**FAIL, and not close on the gating axes at 4 and 8 devices.** F5c is byte-identical by design and
+changes nothing; F5a was refuted and changed nothing; F5b does not exist. **So round one's
+measured state is the F3 before-ground of section 6, scored on DELIVERY in section 7.6:** fail at 4
+on robots, fail at 8 on both, pass at 16 on both with the robot half passing only because every
+arm delivers zero.
+
+**No `harden GATE PASS v1.2` commit is emitted.**
