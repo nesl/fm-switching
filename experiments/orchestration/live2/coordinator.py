@@ -765,6 +765,15 @@ class Live2Coordinator:
             t_done=round(delivered, 6),
             payload=dict(request_id=sub.request_id, kind=o.kind, cache_path=path,
                          on_time=bool(ontime),
+                         # D133/D134 Part A. The representation is now a CHARGED quantity, and
+                         # anything that changes cost belongs in the record beside the cost or a
+                         # later reader cannot reconstruct why two runs differ. Without these the
+                         # artifacts cannot say which questions went as RECENT, and every
+                         # analysis has to wrap `_submit_recall` to recover it. Both values are
+                         # already in scope: `o` carries the request, `sub` carries what was
+                         # actually charged.
+                         representation=getattr(o, "requested_representation", None),
+                         tokens_charged=int(sub.est_tokens),
                          cloud_score=(scored or {}).get("cloud_score"),
                          cloud_letter=(scored or {}).get("cloud_letter"),
                          p_yes=(scored or {}).get("p_yes")))

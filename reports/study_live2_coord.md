@@ -6330,3 +6330,61 @@ scored**, which is `SimpleStream` and QueryStream-QDP.
 conclusion is unchanged in substance, since one emission in roughly 240 across twelve arms is
 still **category 4, arm-side unexercised**, but the channel is not quite as dead as a static read
 suggests.
+
+### CORRECTIONS from sessions 2 and 3, including one of mine that generalised from a single trace
+
+**1. "Drift" is the wrong word for eco-llm moving. It is a REGIME CHANGE.** Part A moved eco-llm
+in all four tested cells and flipped seed 4 at 16 devices from FAIL to PASS on the capacity
+conjunct. **eco-llm is the only arm emitting RECENT, so charging it 467 tokens instead of the full
+history is exactly what the fix was for, and it would be a FAILURE if its numbers had not moved.**
+That is categorically different from piece serialisation moving edf, or the placement-off residency
+bug moving attentionstore, where arms whose mechanism was not under test shifted incidentally.
+**The bookkeeping consequence is identical even though nothing went wrong: prior comparisons used a
+different bar and are not comparable to post-patch ones**, so the re-run rule applies regardless.
+
+**2. The RECENT "conflict" I reported is NOT two charging definitions, and my framing was wrong.**
+`RECENT_WINDOW_TOKENS = 467` is the charging definition. `REP_TOKEN_SCALE["RECENT"] = 0.35` exists
+only inside `ecollm_adapted.py`, in eco-llm's own planner, and **reaches no charging path at all**.
+And my specific worry about SimpleStream does not apply: **its window is ABSOLUTE, not
+proportional** (`simplestream_adapted.py:33`, a count of 0.25 s grid steps, candidates 4, 12, 20,
+40, with 4 fitted on the development split), which is the same family as a fixed token count.
+**Charging it 467 is right.**
+
+**The real problem is one I did not identify: eco-llm PLANS at 0.35 x history and is CHARGED 467.**
+Those agree only near 1,334 tokens, against real histories of 5,431 to 14,881, so **the comparator
+over-prices its own cheapest option by up to ninefold and under-selects it.** That is a genuine
+open decision and is with the user.
+
+**3. D2 is NOT uniformly worse than RICH, and my single-trace reading was not representative.** I
+traced one decision at `counting_objects_events`, where D2 is 0.222222 against RICH 0.250000, and
+reported the gap as though it characterised D2. Session 2 read the per-category table, reached
+through `rc_accuracy(qtype, rep, tier)` with `_RC_TABLE_NAME[("cloud","D2")] = "32B-D2"`:
+
+- **D2 is BETTER than RICH on four of eight categories**, led by `location_trace` at **+17.2 pp**;
+- its worst is `visual_detail_recall` at **-7.9 pp**;
+- trace-weighted the two differ by **+0.14 pp**, nearly unbiased **by cancellation rather than by correctness**.
+
+**So the accuracy column is defensible after all**, keyed to the right representation at
+per-category resolution, with `rc_accuracy` raising `MissingEvidence` rather than imputing and all
+eight trace categories resolving with zero missing lookups. **The `-2.8 pp` I traced is one cell of
+eight and should not have been generalised.**
+
+**The cost claim still leads, for a better reason than a weak accuracy column.** Cost is a 10x to
+30x measurement, unambiguous and hand-checkable, 467 against 5,431 to 14,881. Accuracy is sound but
+smaller and at lower resolution. **Lead with cost because it is the larger and cleaner result.**
+
+### Addition to "H100 wiring for placement": two logged keys
+
+Declared rather than left to be found in a diff. `_cloud_answer` now adds **two keys to the recall
+payload and changes nothing existing**:
+
+```python
+                         representation=getattr(o, "requested_representation", None),
+                         tokens_charged=int(sub.est_tokens),
+```
+
+Both values were already in scope, `o` carrying the request and `sub` what was actually charged.
+**The representation is now a CHARGED quantity, so it belongs in the record beside the cost**, or a
+later reader cannot reconstruct why two runs differ and every analysis has to wrap `_submit_recall`
+to recover it. Verified in `outcomes.jsonl`: eco-llm at 16 devices, seed 0, 19 recall rows carrying
+`representation=D2` with `tokens_charged` from 2,731 to 18,931.
