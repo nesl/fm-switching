@@ -1,0 +1,62 @@
+{
+ "check": "D138_P1_chooser_preregistration_and_first_proofs",
+ "is_measurement": true,
+ "label": "D138 P1. Written BEFORE the chooser is compared against anything, with the two predictions recorded SEPARATELY because their falsification conditions differ.",
+ "why_the_chooser_exists": "it is the first evaluator whose window is long enough for recall decisions to differ at all. Over 14,721 delta_j calls the RC z term differs in exactly 1, because a recall answer lands 1 to 5 s out while the dispatch horizon is H = 0.5 s, so action and reference give the identical RC outcome inside the window and every RC term cancels. Simulating to the candidate own deadline removes that cancellation BY CONSTRUCTION.",
+ "prediction_1": {
+  "subject": "start-now against latest-start",
+  "prior_status": "CANCELLED BY GEOMETRY. PIECES-LATEST scored EXACTLY the reference, 0.000000000, in both hand-checked traces: deferring was valued identically to not acting.",
+  "prediction": "a longer window SHOULD make these differ.",
+  "falsification": "if they still do not differ, THE HORIZON WAS NOT THE BINDING CONSTRAINT. That is a clean refutation and a bigger result than the chooser working.",
+  "status": "not yet tested"
+ },
+ "prediction_2": {
+  "subject": "reload against rebuild",
+  "prior_status": "UNEXERCISED, NOT CANCELLED. RELOAD requires HOST-WARM readiness, which never appeared across seeds 0 and 4 at 16 devices over 600 s.",
+  "prediction": "NONE OFFERED, deliberately. A null here is AMBIGUOUS between \"the chooser cannot separate them\" and \"the condition still never arises\", which is the uninterpretable-null shape identified in the QDP reclassification.",
+  "required_before_scoring": "A REACHABILITY CHECK. HOST-WARM was structurally unreachable before Part A: every belief write in live2 was enumerated, cstate.py:181 and :201 and coordinator.py:420 set cold, :711 sets gpu, and NONE set host. Part A made it reachable but only via an explicit OFFLOAD_TO_HOST, and no arm currently issues one; the census confirms covex-v13 emits only MATERIALIZE.",
+  "rule": "either arrange an offload in the test so the state occurs, or report the host-reload candidate as UNREACHABLE rather than evaluated. The same verdict as QDP, for the same reason.",
+  "status": "host_reload NOT scored; reachability not yet established"
+ },
+ "why_recorded_separately": "if start-now against latest-start moves and reload against rebuild does not, that is consistent with the horizon HAVING been binding and the second kind still being unexercised. That is a PARTIAL RESULT, not the chooser half-failing, and without this recorded in advance it would read as the latter.",
+ "proofs_so_far": {
+  "off_switch": {
+   "trials": 200,
+   "returned_default_by_identity": 200,
+   "rollouts_run": 0,
+   "verdict": "PASS",
+   "construction": "a single switch gating the whole change. With enabled=False, choose() returns the very object it was handed, so anything downstream is byte-identical BY IDENTITY rather than by comparison. Not a reconstruction of prior behaviour."
+  },
+  "deviation": {
+   "verdict": "PROVEN: the mechanism executes",
+   "deviations": 48,
+   "calls": 48,
+   "by_kind": {
+    "rebuild_now": 48
+   },
+   "caveat": "THIS DOES NOT SHOW THE CHOOSER DECIDES WELL. The candidates here are synthetic and rebuild_now wins every call at every size, which is very likely an artefact of its kwargs excluding competing work, trivially improving the rollout. It establishes that the mechanism runs, which is what requirement 3 asks, and nothing more. Real candidate construction belongs to the components proposing them."
+  }
+ },
+ "cost": {
+  "rollouts_per_call": {
+   "value": 5,
+   "note": "CONSTANT at every device count, equal to the candidate-list length. It does NOT grow with device count, which was the explicit question: the per-call rollout count is bounded by how many candidates a component proposes."
+  },
+  "latency_ms_per_call": {
+   "10": 0.939,
+   "12": 1.051,
+   "16": 1.273,
+   "32": 2.133
+  },
+  "latency_note": "median per call. It DOES grow with device count, about 2.3x from 10 to 32 devices, because each rollout simulates a larger fleet. So the binding cost scales with fleet size per rollout, not with rollout count.",
+  "deployability": "at 32 devices a call costs about 2.1 ms median over five candidates. Whether that is affordable depends on how often components invoke it, which is not yet measured."
+ },
+ "_provenance": {
+  "git_commit": "a0bcb51ebe89a0ee01d3a1c8165c822c5f977d8f",
+  "script": "policy/chooser.py and policy/chooser_probe.py, both NEW files",
+  "model": "none",
+  "device": "flash CPU only",
+  "n": "10, 12, 16 and 32 devices; 12 calls each",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}

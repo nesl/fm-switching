@@ -111,3 +111,42 @@ is intact; the option set is smaller than this card's mapping table implies.
 This also disposes of the one place the D137 item 3 quality substitution could have changed a
 decision: the ordinal table ties D2 and RICH at 1.0 while the measured table separates them, and
 that tie is unreachable precisely because RICH is never offered.
+
+### 2026-11-19: lambda was STRUCTURALLY PINNED, and the positive control caught it before the run
+
+`_lmbda` read `getattr(obs, "budget_total_gpu_s", 0.0)`. **That field does not exist** —
+`Observation` carries `budget_remaining_gpu_s` only. The `getattr` returned its default of `0.0`
+silently, the `total > 1e-9` guard failed, `frac_spent` was pinned at `0.0`, and **lambda collapsed
+to a constant `lambda_base = 0.0200` forever.** The arm was configured for price response
+(`LAMBDA_SQUEEZE = 8.0`) and structurally incapable of it.
+
+**Why this mattered more than a bug.** This arm was added to the pressure run *because* it is the
+only one whose objective prices representation directly — the only instrument able to distinguish
+"pressure does not move representation choice" from "no arm present could respond". Pinned, it
+would have passed every check and **guaranteed the null it was added to prevent**.
+
+**The error shape, which recurred four times this week: a DECLARATION read as an OBSERVATION.**
+`getattr` with a default is the most dangerous member of that family because it **manufactures the
+plausible value itself** — a plain attribute access would have raised. The others:
+`RecallQuery.category` carrying the literal `"recall"`, `desired_tier` written and never read, and
+a sufficiency proxy that could never fire.
+
+**The fix is option 2, confined to this file, and the paper is what decides it.** The paper
+calibrates lambda **offline** so expected cost meets a budget `B`; it does **not** read `B` at
+decision time, so `Observation` is not missing a field the method requires. The rising schedule
+here is the **adaptation this card already declares** — the online analogue of "lambda set so `B`
+is met", i.e. feedback on consumption. Adding `budget_total_gpu_s` to a schema every arm shares, in
+order to serve an adaptation rather than the paper's own formulation, would be scope creep on a
+shared surface.
+
+So the cap is **derived from what the arm has observed**: at the start of a window
+`budget_remaining_gpu_s` *is* the total, so the largest remaining ever seen converges to the total
+on the first epoch. That is a quantity the arm legitimately knows, not a constant smuggled in.
+
+**Stated limitation:** an arm joining mid-window under-estimates the total and so under-reacts.
+Declared rather than silent.
+
+**Verified by positive control**, the same instrument that found the fault: lambda now rises
+`0.0200 -> 0.0600 -> 0.1000 -> 0.1400 -> 0.1800` as remaining falls `600 -> 450 -> 300 -> 150 -> 0`.
+Legality and the fairness digest re-checked after the fix: **0 illegal actions** across 3,001
+epochs at 8 devices, digest unchanged.

@@ -48,21 +48,53 @@ class CascadeRoutingAdapted(Policy):
                  squeeze: float = LAMBDA_SQUEEZE) -> None:
         self.lambda_base = float(lambda_base)
         self.squeeze = float(squeeze)
+        self._budget_seen_max = 0.0
         self.stats: Dict[str, Any] = dict(
             arm=self.name, route_cloud_direct=0, route_device_stop=0,
             cascade_started=0, cascade_escalated=0, cascade_stopped_posthoc=0,
             cloud_infeasible=0)
 
     def reset(self, seed: int = 0) -> None:
+        self._budget_seen_max = 0.0
         for k in list(self.stats):
             if isinstance(self.stats[k], int):
                 self.stats[k] = 0
 
     # ---- lambda: "set so the expected cost budget B is met", read against the live budget
     def _lmbda(self, obs: Observation) -> float:
-        total = max(float(getattr(obs, "budget_total_gpu_s", 0.0) or 0.0), 1e-9)
-        left = max(float(getattr(obs, "budget_remaining_gpu_s", 0.0) or 0.0), 0.0)
-        frac_spent = 1.0 - min(left / total, 1.0) if total > 1e-9 else 0.0
+        """The cost weight, rising as the budget is consumed.
+
+        BUG FIXED 2026-11-19, found by a positive control before the pressure run rather than
+        after. This previously read `getattr(obs, "budget_total_gpu_s", 0.0)`. That field DOES NOT
+        EXIST on `Observation`, which carries `budget_remaining_gpu_s` only, so the getattr
+        returned its default of 0.0 silently, the `total > 1e-9` guard failed, `frac_spent` was
+        pinned at 0.0 and lambda collapsed to a constant `lambda_base` forever. The arm was
+        configured for price response (`LAMBDA_SQUEEZE = 8.0`) and structurally incapable of it.
+
+        The error shape is worth naming because it recurred four times this week: a DECLARATION
+        read as an OBSERVATION. `getattr` with a default is the most dangerous member of that
+        family, because it MANUFACTURES the plausible value itself -- a plain attribute access
+        would have raised immediately.
+
+        WHY THE TOTAL IS DERIVED RATHER THAN ADDED TO THE SCHEMA. The paper calibrates lambda
+        OFFLINE so that expected cost meets a budget B; it does not read B at decision time, so
+        `Observation` is not missing a field the method requires. The rising schedule here is the
+        ADAPTATION this card already declares -- the online analogue of "set lambda so B is met",
+        i.e. feedback on consumption -- and adding a shared field to serve an adaptation would be
+        scope creep on a surface every arm shares.
+
+        The cap is therefore taken from what the arm has OBSERVED: at the start of a window
+        `budget_remaining_gpu_s` IS the total, so the largest remaining ever seen converges to the
+        total on the first epoch. That is a quantity the arm legitimately knows, not a constant
+        smuggled in. An arm joining mid-window would under-estimate the total and so under-react;
+        that is a stated limitation rather than a silent one.
+        """
+        left = max(float(obs.budget_remaining_gpu_s), 0.0)
+        self._budget_seen_max = max(float(getattr(self, "_budget_seen_max", 0.0)), left)
+        total = self._budget_seen_max
+        if total <= 1e-9:
+            return self.lambda_base
+        frac_spent = 1.0 - min(left / total, 1.0)
         return self.lambda_base * (1.0 + self.squeeze * frac_spent)
 
     @staticmethod
