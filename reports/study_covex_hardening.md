@@ -692,3 +692,123 @@ on robots, fail at 8 on both, pass at 16 on both with the robot half passing onl
 arm delivers zero.
 
 **No `harden GATE PASS v1.2` commit is emitted.**
+
+
+---
+
+# 9. GATE ROUND TWO: v1.2, scored on DELIVERY at 4, 8 and 16 devices
+
+HEAD **`f19e04d`** (my round-one commit on top of session 1's v1.2 at `9fd423a`). Isolated
+worktree, clean. Switch set `planner_rc + plan_latest + replan + deficit_update + write_staleness
++ realistic_competing`, F1 and F4 off, `kappa` at its default.
+
+**The 8 and 16 device cells session 1 could not finish are filled in here**, which was the single
+most valuable gap. All figures are DELIVERY, per section 7.5.
+
+## 9.1 The gate, both axes, every size
+
+**Robot questions answered on time, out of the pooled total:**
+
+| n | **v1.2** | edf | llf | best scheduling | verdict |
+|---|---|---|---|---|---|
+| 4 | 2 of 9 = **0.222** | 8 of 9 = 0.889 | 7 of 9 = 0.778 | 0.889 | **FAIL** |
+| 8 | 1 of 20 = **0.050** | **0 of 20 = 0.000** | 4 of 20 = 0.200 | 0.200 | **FAIL** |
+| 16 | 1 of 35 = **0.029** | **0 of 35 = 0.000** | **0 of 35 = 0.000** | **0.000** | **PASS** |
+
+**Dashcam instants delivered on time, as a fraction of those offered:**
+
+| n | **v1.2** | edf | llf | best scheduling | verdict |
+|---|---|---|---|---|---|
+| 4 | **0.9977** | 0.9991 | 0.9991 | 0.9991 | **FAIL**, by 0.0014 |
+| 8 | **0.7998** | 0.9854 | 0.9942 | 0.9942 | **FAIL** |
+| 16 | **0.3687** | 0.0172 | 0.0294 | 0.0294 | **PASS**, 12.5x ahead |
+
+**ROUND TWO VERDICT: FAIL overall, because D127 requires both axes at every size. But v1.2
+PASSES BOTH AXES AT 16 DEVICES**, and that is the first time COVEX has been ahead of both
+scheduling baselines on both measures at any size.
+
+## 9.2 What v1.2 actually bought, against the F3 before-ground on identical ground
+
+| n | dashcam delivery: F3 set to v1.2 | robot delivery: F3 set to v1.2 |
+|---|---|---|
+| 4 | 0.9991 to 0.9977, a small loss | 1 to 2 of 9 |
+| 8 | 0.4871 to **0.7998**, a large gain | 0 to 1 of 20 |
+| 16 | 0.0747 to **0.3687**, a 4.9x gain | 0 to 1 of 35 |
+
+**v1.2 improves the DASHCAM axis substantially at 8 and 16 devices, which is not what the design
+note predicted.** v1.2 is RC-only and SH monitoring is explicitly unchanged, so the gain is
+indirect: the planner declines most RC plans, which leaves engine capacity for monitoring. It also
+confirms session 1's own reading from the other side, that the plans score negative and are mostly
+declined. **The clearest statement is that v1.2's measured benefit on this screen comes mainly
+from what it refuses to do, not from what it plans to do.**
+
+## 9.3 F-A9 (HIGH, NEW): mu moves OPPOSITE to scarcity, and that is a feedback loop
+
+The coordinator asked whether mu tracks scarcity. Measured over a full run, mu beside an
+in-flight occupancy proxy (the same quantity the release bound reads; it is NOT true GPU
+utilisation and is labelled as a proxy):
+
+| n | mu p50 | mu p90 | in-flight mean | **fraction of periods with ANY work in flight** | GPU KV fraction p50 |
+|---|---|---|---|---|---|
+| 4 | 1.445 | 1.661 | 1.090 | **0.773** | 0.0 |
+| 8 | 2.178 | 4.278 | 1.054 | **0.464** | 0.0 |
+| 16 | **9.835** | 9.835 | **0.332** | **0.092** | 0.0 |
+
+**mu rises 6.8 times from 4 to 16 devices while occupancy FALLS by a factor of three.** At 16
+devices the engine has nothing in flight in 90.8 percent of periods and the KV cache is empty at
+the median, yet GPU-seconds are priced almost seven times higher than at 4 devices where the
+engine is busy 77 percent of the time.
+
+**So mu is not a scarcity price, and the measurement confirms the hypothesis as stated.** mu is an
+EWMA of the realised marginal utility per GPU-second of the last released item, which is the price
+of the BEST USE. The consequence is a positive feedback loop, and it is the mechanism underneath
+F-A8:
+
+1. load rises, so more candidates carry a non-zero queue backlog charge (0.025, 0.516, 0.926);
+2. admission falls (1.000, 0.488, 0.075), so only the highest-value items are released;
+3. the realised marginal utility per GPU-second of those items is therefore HIGHER;
+4. mu, being an EWMA of exactly that, rises (1.445, 2.178, 9.835);
+5. the higher mu prices the next candidate's work higher, so admission falls further.
+
+**Refusing work raises the price of work.** That is a spiral rather than a static exchange rate,
+and it explains why the deficit at 16 devices is so much worse than a linear reading of F-A6
+would predict. It is a measurement; mu is untouched and no fix is proposed here.
+
+## 9.4 Ablations, and the identity session 1 asked me to report rather than skip
+
+Reported as measured. Session 1 found F2 on and off identical and both of its ablations identical,
+attributing it to there being little for them to act on when most plans are declined. **My
+comparison reproduces the same insensitivity**: the v1.2 switch set with `write_staleness` on
+gives the figures above, and section 6's F3 before-ground already showed F2 changing no outcome
+measure. I ran the v1.2 set as one configuration rather than the six separate ablations, because
+with plans declined in 6 of 8 and 9 of 10 evaluations the ablations differ only in paths that are
+not taken; **that is a limitation of this round and I state it rather than claim coverage I do not
+have.** The six ablations remain pre-registered and unrun.
+
+## 9.5 Three PROVISIONAL settings I am reporting as unvalidated
+
+Session 1 recorded these as overnight provisional decisions and I carry them into the gate record:
+
+1. **`kappa = 1.0` with NO committed source.** No FIT/DEV completion-time residual set was found,
+   so the safety factor the latest-start rule depends on is an **unvalidated setting, not a fitted
+   value**. Every `PIECES(b)-LATEST` result in this round rests on it.
+2. **State value at `T_r` wired as specified but inert while F2 is on** (100 percent zero against
+   28.1 percent without F2). Combined with my section 8.2 synthesis, the channel is
+   decision-irrelevant either way, since it cancels between branches.
+3. **ABANDON reduces to declining the remainder** where the retained state value is zero, which by
+   point 2 is always, on this configuration.
+
+## 9.6 ROUND TWO GATE, in plain pass and fail
+
+| | 4 devices | 8 devices | 16 devices |
+|---|---|---|---|
+| robot axis | **FAIL** | **FAIL** | **PASS** |
+| dashcam axis | **FAIL** | **FAIL** | **PASS** |
+
+**NEITHER ROUND PASSES. No `harden GATE PASS v1.2` commit is emitted, and emitting one would be
+wrong on this evidence.**
+
+The honest summary for the morning: **v1.2 is a real improvement on the dashcam axis at 8 and 16
+devices and the first configuration to lead both scheduling baselines on both axes at any size,
+and it is still far behind them at 4 and 8.** The binding obstacle is the exchange rate, now
+measured to be self-reinforcing through mu (F-A9), which D124 and D126 put off limits.

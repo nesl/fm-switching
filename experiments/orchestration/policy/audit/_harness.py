@@ -53,7 +53,8 @@ def available_switches() -> List[str]:
     arm_fields = {f.name for f in dc_fields(AP.PolicyCoreArm)}
     flag_fields = {f.name for f in dc_fields(Flags)}
     known = ("honour_job_priority", "deficit_update", "rc_tail", "write_staleness",
-             "realistic_competing", "probabilistic_p_finish", "prob_p_finish", "competing_s_real")
+             "realistic_competing", "prob_p_finish", "rc_tail_cursor", "rc_tail_zrows",
+             "planner_rc", "plan_latest", "replan", "kappa")
     return [s for s in known if s in arm_fields or s in flag_fields]
 
 
@@ -63,9 +64,13 @@ def _arm_kwargs(switches: Dict[str, bool]) -> Dict[str, Any]:
     arm_fields = {f.name for f in dc_fields(AP.PolicyCoreArm)}
     out = dict(cost_model="pol4", h_s=0.5, mu_mode="ewma", mu_fixed=None, impl="fast",
                cap_k=None)
+    types = {f.name: f.type for f in dc_fields(AP.PolicyCoreArm)}
     for k, v in (switches or {}).items():
-        if k in arm_fields:
-            out[k] = bool(v)
+        if k not in arm_fields:
+            continue
+        # v1.2's `kappa` is a FLOAT, not a flag, so a blanket bool() would turn 1.0 into True and
+        # silently change the setting under test.
+        out[k] = float(v) if "float" in str(types.get(k, "")).lower() else bool(v)
     return out
 
 

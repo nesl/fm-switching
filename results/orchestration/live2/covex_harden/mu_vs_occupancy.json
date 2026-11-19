@@ -1,0 +1,84 @@
+{
+ "check": "covex_harden_mu_vs_occupancy",
+ "is_measurement": false,
+ "label": "AUDIT of a dry run. mu beside an in-flight occupancy PROXY, to show whether mu tracks scarcity. mu is untouched; this is a measurement, not a fix.",
+ "git_commit": "f19e04d29bad56f57fe23d69a0e0ad08c71e0504",
+ "switches_on": {
+  "deficit_update": true,
+  "write_staleness": true,
+  "realistic_competing": true
+ },
+ "cells": [
+  {
+   "n_devices": 4,
+   "periods": 5999,
+   "mu": {
+    "p50": 1.4452,
+    "p90": 1.6605,
+    "min": 0.0,
+    "max": 1407.8105
+   },
+   "inflight": {
+    "mean": 1.0902,
+    "max": 2,
+    "periods_with_any": 4634,
+    "fraction_of_periods_busy": 0.7725
+   },
+   "gpu_kv_fraction": {
+    "p50": 0.0,
+    "max": 0.0
+   },
+   "reading": "mu is compared against an IN-FLIGHT OCCUPANCY PROXY, not true GPU utilisation"
+  },
+  {
+   "n_devices": 8,
+   "periods": 6001,
+   "mu": {
+    "p50": 2.1784,
+    "p90": 4.2781,
+    "min": 0.0,
+    "max": 4.2781
+   },
+   "inflight": {
+    "mean": 1.054,
+    "max": 4,
+    "periods_with_any": 2785,
+    "fraction_of_periods_busy": 0.4641
+   },
+   "gpu_kv_fraction": {
+    "p50": 0.0,
+    "max": 0.0
+   },
+   "reading": "mu is compared against an IN-FLIGHT OCCUPANCY PROXY, not true GPU utilisation"
+  },
+  {
+   "n_devices": 16,
+   "periods": 6001,
+   "mu": {
+    "p50": 9.8348,
+    "p90": 9.8348,
+    "min": 0.0,
+    "max": 240.1716
+   },
+   "inflight": {
+    "mean": 0.3319,
+    "max": 9,
+    "periods_with_any": 550,
+    "fraction_of_periods_busy": 0.0917
+   },
+   "gpu_kv_fraction": {
+    "p50": 0.0,
+    "max": 0.0
+   },
+   "reading": "mu is compared against an IN-FLIGHT OCCUPANCY PROXY, not true GPU utilisation"
+  }
+ ],
+ "_provenance": {
+  "git_commit": "f19e04d29bad56f57fe23d69a0e0ad08c71e0504",
+  "script": "policy/audit/mu_vs_occupancy.py",
+  "model": "none (pol4 frozen)",
+  "device": "flash CPU only",
+  "n": "seed 0 at 4,8,16 devices for 600 s",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}
