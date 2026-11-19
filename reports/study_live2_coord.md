@@ -5008,3 +5008,48 @@ PROVISIONAL until it is settled.
 
 **This does not change the release.** `write_staleness` is OFF in `covex-v13`, so the fix affects no
 released number; it makes F2 usable for whoever turns it on next.
+
+### Resolutions from session 2, recorded
+
+**F-A2, the state value: settled against my correction, and my newest reading was the anomaly.**
+Session 2 measured the between-branch difference as exactly zero in 12,898 of 12,898 candidates,
+max absolute difference 0.0, at both commits under both F2 settings, while the per-branch sum is
+only 3.4 per cent zero. The channel is substantively ALIVE and **cancels exactly**. My three
+readings were never three readings of one quantity:
+
+- `state_value` is a caching wrapper over `_state_value` whose shadow mode asserts they agree, so the two cannot differ in value.
+- `rollout.py:701` imports the name INSIDE the function, so a patch on `readiness` reaches it, while `coordinator.py:21` binds it at MODULE LEVEL, so the same patch does not. **Patching one module silently misses the other, which is what my probe did.**
+- The cache hides 94 per cent of traffic, 105,852 wrapper calls against 6,157 computations, so my count of 1,365 was a cache-MISS count and not a call count.
+
+My first reading reproduces at `700f248` and my 28.1 per cent sits beside session 2's 19.21 per cent
+(rollout) and 12.62 per cent (coordinator), the same two-valued distribution sampled differently. My
+100-per-cent-zero reading reproduces at neither commit and is the anomaly. **Leaving it open rather
+than tidying it was the right call, and the lesson for my own instrumentation is that a module-level
+`from x import y` makes monkey-patching the source module a silent no-op.**
+
+**The design consequence, which is the part that matters.** The cancellation is STRUCTURAL: state
+value is computed for future arrivals from `device.history[rep]`, which a dispatch action does not
+change, so both branches evaluate the identical prefix and the term is a constant offset on both
+sides. **v1.2 and v1.3 therefore both count state value inertly, and ABANDON does reduce to
+declining the remainder.** Anything that wants ABANDON to differ must make the RETAINED PREFIX
+DIFFER BETWEEN BRANCHES. That is the concrete requirement for any future memory-aware work, and it
+settles the provisional note in `planner_rc.abandon_note`.
+
+**One scalar cannot serve both axes, and my own floor sweep confirms it.** Session 2 falsified its
+earlier attribution with a control and concluded that the price is **GRADED on dashcam and BINARY on
+robots**. My admission-floor sweep at 16 devices independently saturates in exactly that shape:
+
+| seed | af8 | af16 | af32 | af64 |
+|---|---|---|---|---|
+| 0 | 14 of 35, 0.8164 | 14, 0.8215 | 14, **0.8215** | 14, **0.8215** |
+| 4 | 13 of 41, 0.8751 | 13, 0.8764 | - | - |
+
+Robot delivery does not move at all and dashcam gains 0.005 and then pins. **The floor is a second
+scalar and it fails the same way the price does.** Closing the dashcam gap while holding robots
+needs a term that separates the two axes, not another threshold value.
+
+**Not chased: the published arms.** Session 2's leaderboard shows seven in-scope published arms at
+33 to 35 of 41 robots at 16 devices against llf's 9. A shared fairness digest proves a shared TRACE
+and not shared COSTS, and a rebuild never charged to the accelerator budget is precisely the E36
+failure mode this project has precedent for. Those numbers are UNVERIFIED pending the
+accelerator-ms and KV-bytes-per-released-item check, and I did not let them redirect remaining time.
