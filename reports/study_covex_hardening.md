@@ -44,13 +44,45 @@ measured on, and they are not interchangeable:
 |---|---|---|---|
 | v1.0 / v1.1 | pre-planner | `7dbb448` and earlier | sections 2 to 7 |
 | **v1.2** | planner_rc + plan_latest + replan + B1 + F2 + F3 | `9fd423a` | sections 8 to 11, **including the leaderboard** |
-| **v1.3** | v1.2 + `mu_mode="scarcity"`, derived kappa, edf default 8 | `ed8ef56`, re-based to `700f248` | section 12 |
+| **v1.3-scarcity** | v1.2 + `mu_mode="scarcity"` (CLIPPED form), derived kappa, edf default 8 | `ed8ef56`, re-based to `700f248` | section 12, **INCONCLUSIVE** |
+| v1.3-regraded | the scarcity price normalised by measured service, verified to vary 0.5 to 0.889 | `0c2c22e` | session 1's, the real negative |
+| **v1.3-fast (RELEASE)** | v1.2 planner, **mu = 0**, `honour_job_priority` ON, `write_staleness` OFF, `admit_floor_c` 8 | **`d944361`** | **section 13** |
+
+Three different objects carry the name "v1.3" and they give different answers. Section 12 is NOT a
+verdict on the release.
 
 **Everything headed "policy-core" or "v1.2" below section 8 is v1.2.** It is NOT a verdict on
 v1.3, which section 12 scores separately.
 
+## THE RECONCILIATION: the robot axis is BINARY in the price
+
+Two results of mine and session 1's looked contradictory overnight. They are not, and together
+they say more than either does alone.
+
+- I measured that cutting the price roughly tenfold, from an EWMA whose p50 reached 9.835 to a cap
+  of 1.0, bought **ZERO** additional robot deliveries.
+- Session 1 measured that removing the price **to exactly 0** buys **8 of 20** robot answers at 8
+  devices, with dashcam 0.9330 against the EWMA's 1 of 20 and 0.7998. Better on BOTH axes.
+
+Both are right. At a price of 1.0 a 2.41 GPU-second rebuild is still charged about 2.41 against a
+maximum available credit near 1.835, so it still loses. At 0 it is free and clears. **The robot
+axis needs the charge at or near zero, and any plausible nonzero price blocks it.** It is not a
+graded tradeoff: it is a threshold. That is the exchange rate again, now triangulated from three
+independent directions, and it is why session 1's release sets mu = 0 rather than tuning a price.
+
+**What this does NOT license:** "pricing predicted backlog at all is worse than not pricing it" is
+established for the robot axis against THESE deadlines and THIS credit scale. It is not a general
+result about scarcity pricing, and the saturation episode is the reason to be careful: the first
+form's numbers looked like a verdict on pricing and were a verdict on a constant.
+
 ## Best version so far, and its standing
 
+**The release is `d944361`, "v1.3-fast": the v1.2 planner with the price of GPU time set to ZERO,
+`honour_job_priority` on, `write_staleness` OFF and `admit_floor_c` 8.** Scoring on all four dev
+seeds and all four sizes is in section 13. Session 1 states it does not beat the baselines
+everywhere and released it as the best found.
+
+The two tables below this line are OLDER OBJECTS, kept for the audit trail:
 **v1.2** (planner_rc + plan_latest + replan + B1 + F2 + F3; F1 and F4 off), at `9fd423a`.
 
 | n | robot delivered, v1.2 / edf / llf | dashcam delivered, v1.2 / edf / llf | gate |
@@ -1102,7 +1134,22 @@ screen misranks COVEX against edf on the dashcam axis at 8 devices specifically.
 column is the trustworthy one (dry and live agree to within 0.003 for policy-core there), and that
 is where the gap is widest.
 
-# 12. v1.3 SCORED (D129/D130). The dashcam axis moves a lot, the robot axis does not, and the gate still FAILS
+# 12. The v1.3 SCARCITY-PRICE build, scored. CLASSIFIED INCONCLUSIVE, not a negative
+
+**READ THE CLASSIFICATION FIRST.** This section scores the FIRST scarcity form, at `700f248`.
+Section 12.4 shows its price sat at its cap at the median and at p90 at 8 and 16 devices. Session
+1 probed the same thing directly and measured the cap in **92.9 percent of busy calls across five
+distinct values**, then relabelled that whole run **INCONCLUSIVE rather than a negative**, on the
+ground this section raises: a constant channel cannot test the claim, and these delivery numbers
+are confounded with the tenfold price cut that came with it.
+
+**So the delivery table below is NOT a settled verdict on pricing.** Under CLAUDE.md Rule 2 it is
+the Inconclusive case: a design failure, not evidence that the mechanism does not exist. The
+settled negative is session 1's REGRADED run, where mu was verified to vary over 0.5 to 0.889 with
+nothing at the cap and COVEX still delivered 0 of 20 at 16 devices. The RELEASE, `d944361`
+"v1.3-fast", is a third object again and is scored in section 13.
+
+## 12.0 What this section still establishes
 
 HEAD **`700f248`** (v1.3 at `ed8ef56` plus the work-conserving release floor), pinned worktree.
 Delivery, 600 s, tight, seeds 4, 5 and 6. Predictions for this run were pre-registered BLIND in

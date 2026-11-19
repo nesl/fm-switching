@@ -59,6 +59,9 @@ def main(argv=None) -> int:
     ap.add_argument("--candidate", default="planner_rc,plan_latest,replan,deficit_update,"
                                             "write_staleness,realistic_competing")
     ap.add_argument("--candidate-name", default="v1.2")
+    ap.add_argument("--candidate-arm", default="",
+                    help="score a REGISTERED arm name as the candidate (e.g. covex-v13) instead "
+                         "of building policy-core from --candidate switches")
     ap.add_argument("--published", default="",
                     help="comma-separated PUBLISHED arm names from session 3 to add as an "
                          "additional, clearly-labelled field. They are NOT gating under D127.")
@@ -81,7 +84,11 @@ def main(argv=None) -> int:
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(H.ROOT),
                            capture_output=True, text=True).stdout.strip()
     tmp = Path(tempfile.mkdtemp(prefix="covex_lb_"))
-    arms = [("policy-core", cand, a.candidate_name),
+    # The v1.3-fast RELEASE is registered under its own name with its own config block, which
+    # differs from the switch set I had been scoring: mu_mode="none", honour_job_priority on,
+    # write_staleness off, admit_floor_c 8. Scoring it by NAME avoids reconstructing that by hand
+    # and getting it wrong, which is how the superseded build got scored in the first place.
+    arms = [(a.candidate_arm or "policy-core", {} if a.candidate_arm else cand, a.candidate_name),
             ("edf@8", {}, "edf C=8"), ("edf@4", {}, "edf C=4"), ("llf", {}, "llf")]
     # D130: session 3's ported published systems are an ADDITIONAL comparison field, reported and
     # not gating, since D127 defines the gate against edf and llf. An explicit list is passed
