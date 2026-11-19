@@ -27,6 +27,12 @@ Earlier instances of the same failure: E31 measured KV-transfer payloads in a se
 
 ---
 
+**Step 0 — Ask what would invalidate this run, BEFORE starting it.**
+
+Before a run begins, write down what would make its result uninterpretable, and check each one. Is the comparator about to change? Is a default about to be restored? Does the output of a run you depend on key into your analysis? Does the mechanism have a reachable path at this size and in this regime? **It costs about a minute whether the answer is "nothing" or "wait", and the asymmetry is the point: a minute spent before, against a run re-done or a null explained after.**
+
+*Motivating failures, which run both ways:* a grep for whether `DEFAULTS["session_action"]` was ever applied came back **clean** and cost a minute. A sequencing question came back **"wait"** and saved a pressure run from straddling three separate changes to the bar. A positive control on `cascade-routing`, the only price-responsive arm in a run, found that it **was not price-responsive** - in time to fix it rather than in time to explain a null.
+
 **Step 1 — State the causal chain.**
 
 In one paragraph, in your own words, write the chain of cause and effect the experiment is testing, with each link traced to a specific claim in `research/FORMULATION.md`. Write the mechanism, not the hypothesis: not "maintenance_aware will outperform always_full" but "if maintenance costs are representation-dependent (FORMULATION.md §refresh), then a policy that accounts for those costs will prefer a cheaper representation when capacity is constrained, reducing evictions, and the resulting higher admission rate will increase the fraction of queries meeting both the latency and quality SLO." If you cannot write this chain with every link grounded in the formulation, stop and ask before proceeding.
@@ -270,6 +276,8 @@ Existing JSONs written before this convention was adopted carry `"git_commit": "
 ---
 
 ## Citing results
+
+- **A port's proofs must include that its characteristic decision occurs at least once.** Before a ported arm is scored, record the count of the decision kind that arm exists to make, and confirm it is non-zero. **The required well-formedness and fairness checks establish that an arm is legal and fairly treated; neither establishes that it does anything.** *(Motivating failure: a port passed BOTH required proofs perfectly - 0 illegal actions across 3,001 epochs and a fairness digest matching the committed control - while producing ZERO decisions of its characteristic kind, because its sufficiency proxy could never fire.)* **This is the port-side twin of Step 2b**, which requires the same of a switch: Step 2b asks whether a switch moved a decision, this asks whether an arm ever made its own. A reader meeting one should know the other exists.
 
 - **Mark the register at the point of use**, not only where a number is derived: **observed count** against **constructed bound**; **applied locally** against **pushed and verified on origin**; **one traced unit** against **a full table**. A number in the wrong register is not a wrong computation and will survive every arithmetic check. *(Motivating failures: a worst-case construction reported as a census; "committed to `coordinator.py`" meaning written into the file and read as git-committed and pushed, which unblocked a session against a change that was not on origin; and a single category's delta generalised to a direction, when across all eight categories the cheaper representation was better on four, led by `location_trace` at +17.2 pp.)*
 
