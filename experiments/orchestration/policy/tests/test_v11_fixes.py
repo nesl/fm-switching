@@ -121,3 +121,78 @@ class TestA3IsInertAtZeroCompetingWork(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestB1DeficitUpdate(unittest.TestCase):
+    """D122 fix B1: the deficit counter is updated from the REALISED on-time outcome.
+
+    These fail on v1.0 for the plainest possible reason: on v1.0 nothing in production ever calls
+    `bump_z`, so `z_of` stays 0.0 whatever happens.
+    """
+
+    def _device(self):
+        from policy.state import Device, Link
+        return Device(device_id="robo000", link=Link(bandwidth_bytes_s=1.7e6, rtt_s=0.05),
+                      qtype=QTYPE)
+
+    def test_a_realised_miss_raises_z_by_the_target(self):
+        dev = self._device()
+        self.assertEqual(dev.z_of("RC"), 0.0)
+        dev.bump_z("RC", 0.9, 0.0)
+        self.assertAlmostEqual(dev.z_of("RC"), 0.9, places=9)
+
+    def test_a_realised_success_lowers_it_and_the_floor_holds(self):
+        dev = self._device()
+        dev.bump_z("RC", 0.9, 1.0)
+        self.assertEqual(dev.z_of("RC"), 0.0, "the counter is floored at zero")
+        dev.bump_z("RC", 0.9, 0.0)
+        dev.bump_z("RC", 0.9, 1.0)
+        self.assertAlmostEqual(dev.z_of("RC"), 0.8, places=9, msg="0.9 then 0.9 - 1.0")
+
+    def test_sh_increments_are_unchanged_by_b1(self):
+        """The constraint: SH keeps scale 1, so its increment is the committed rule exactly."""
+        dev = self._device()
+        dev.bump_z("SH", 0.9, 0.0)
+        self.assertAlmostEqual(dev.z_of("SH"), 0.9, places=9)
+        dev.bump_z("SH", 0.9, 1.0)
+        self.assertAlmostEqual(dev.z_of("SH"), 0.8, places=9)
+
+    def test_the_arm_switch_defaults_off(self):
+        import sys
+        from pathlib import Path
+        live2 = Path(__file__).resolve().parents[2] / "live2"
+        for p in (str(live2), str(live2 / "fleet"), str(live2 / "scorer"),
+                  str(live2.parents[0] / "baselines")):
+            if p not in sys.path:
+                sys.path.insert(0, p)
+        import arms_policy as AP
+        self.assertFalse(AP.PolicyCoreArm().deficit_update,
+                         "D122 requires every v1.1 fix to default OFF")
+
+    def test_on_time_is_judged_at_the_first_token(self):
+        """The application sees an answer at its first token, so that is the comparison."""
+        import inspect
+        import sys
+        from pathlib import Path
+        live2 = Path(__file__).resolve().parents[2] / "live2"
+        if str(live2) not in sys.path:
+            sys.path.insert(0, str(live2))
+        import arms_policy as AP
+        src = inspect.getsource(AP.PolicyCoreArm._z_note_answer)
+        self.assertIn("t_first_token", src)
+        res = inspect.getsource(AP.PolicyCoreArm._z_resolve)
+        self.assertIn('rec["deadline_abs"]', res)
+        self.assertIn("bump_z", res)
+
+    def test_a_declined_opportunity_still_resolves_as_a_miss(self):
+        """Registering from the observation, not from admissions, is what makes this true."""
+        import inspect
+        import sys
+        from pathlib import Path
+        live2 = Path(__file__).resolve().parents[2] / "live2"
+        if str(live2) not in sys.path:
+            sys.path.insert(0, str(live2))
+        import arms_policy as AP
+        src = inspect.getsource(AP.PolicyCoreArm._z_register)
+        self.assertIn("obs.recall", src, "recall queries are registered from the observation")
+        self.assertIn("sh_instant", src, "SH instants are registered from the D100 roster")

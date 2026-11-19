@@ -5,6 +5,14 @@ from dataclasses import dataclass, asdict, replace
 from typing import Any, Dict
 
 
+# Spec 7.0's CONDITIONAL MECHANISMS, which D66 requires to be off for a round-1 core run. A
+# D122 v1.1 DEFECT FIX is not a conditional mechanism, so it is deliberately not in this tuple:
+# `any_on` still reports every flag, and `conditional_any_on` is what the D66 guard asks.
+SPEC_7_0_CONDITIONAL = ("escalation_price", "phase_assignment", "merging", "summaries",
+                        "predictive_upload", "conditional_recall_rate", "sampled_scenarios",
+                        "closed_form_fallback")
+
+
 @dataclass(frozen=True)
 class Flags:
     escalation_price: bool = False
@@ -34,6 +42,10 @@ class Flags:
 
     def any_on(self) -> bool:
         return any(self.as_dict().values())
+
+    def conditional_any_on(self) -> bool:
+        """D66's check: spec 7.0's conditional mechanisms only, not the v1.1 defect fixes."""
+        return any(bool(getattr(self, n)) for n in SPEC_7_0_CONDITIONAL)
 
 
 CONDITIONAL = {

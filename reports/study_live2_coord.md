@@ -3668,3 +3668,102 @@ a ruling.** Three forms, with my recommendation:
    "SH scale exactly 1" constraint, so it is listed only for completeness.
 
 Nothing from B2 is implemented.
+
+## V8. Step 3: v1.1 measured. B1 works and changes NOTHING. STOPPED per the ruling
+
+Dry run, not an outcome claim. Pilot-matching settings: seed 0, 4 and 8 devices, 600 s, mu EWMA,
+H = 0.5 s, pol4, tight memory. Four variants, the full ablation the ruling asked for.
+
+| n | variant | robot questions | **released before deadline** | monitor releases | `z[RC]` max | z updates | misses | admits > 0 | rc_piece releases with `delta_j == 0` |
+|---|---|---|---|---|---|---|---|---|---|
+| 4 | v1.0 | 9 | **1** | 2,174 | 0.0 | none | none | 5 of 9 | 699 of 967 |
+| 4 | A3 alone | 9 | **1** | 2,174 | 0.0 | none | none | 5 of 9 | 699 of 967 |
+| 4 | B alone | 9 | **1** | 2,174 | **4.5** | 2,183 | 8 | 5 of 9 | 699 of 967 |
+| 4 | A3+B (v1.1) | 9 | **1** | 2,174 | **4.5** | 2,183 | 8 | 5 of 9 | 699 of 967 |
+| 8 | v1.0 | 20 | **0** | 2,107 | 0.0 | none | none | 2 of 20 | 268 of 406 |
+| 8 | A3 alone | 20 | **0** | 2,107 | 0.0 | none | none | 2 of 20 | 268 of 406 |
+| 8 | B alone | 20 | **0** | 2,107 | **6.3** | 4,338 | 2,231 | 2 of 20 | 268 of 406 |
+| 8 | A3+B (v1.1) | 20 | **0** | 2,107 | **6.3** | 4,338 | 2,231 | 2 of 20 | 268 of 406 |
+
+**B1 does exactly what it was pre-registered to do.** The deficit counter is no longer
+structurally zero: `z[RC]` reaches 4.5 at four devices (five realised misses at `p_k = 0.9`) and
+6.3 at eight, over 2,183 and 4,338 resolved opportunities. Spec 3.3's mechanism is present for the
+first time.
+
+**And it changes not one decision.** Comparing decision logs against v1.0:
+
+| n | A3 alone | B alone | A3+B |
+|---|---|---|---|
+| 4 | **0 of 2,380 differ** | **0 of 2,380** | **0 of 2,380** |
+| 8 | **0 of 2,220 differ** | **0 of 2,220** | **0 of 2,220** |
+
+Dashcam cost is therefore exactly zero (2,174 and 2,107 monitor releases, unchanged), which is the
+one thing the ruling's constraint required and the only part of this that went to plan.
+
+### V8.1 Issue C: why the deficit cannot reach the decision
+
+The ruling asked whether the Z and continuation terms now outweigh the backlog charge, or whether
+robots would still be declined on the exchange rate alone. **Neither: the exchange rate never
+comes into it, because the multiplier is zero.**
+
+`z` reaches the objective only through `_z_term` (`rollout.py:512`):
+
+    total += f.devices[did].z_of(task) * (ok / n)
+
+where `ok` counts that device's in-horizon opportunities whose `met_slo` is true. A rebuild piece
+does not answer anything, so the robot question's `met_slo` is false in BOTH branches of the
+piece's counterfactual, `ok / n` is identical, and
+
+    Delta z_term = z x Delta(ok/n) = z x 0 = 0
+
+for any `z` whatsoever. A larger `z`, including B2's 181 per miss, multiplies the same zero. The
+deficit can only bite when serving the opportunity flips its SLO outcome INSIDE the horizon, and a
+robot answer never lands inside H = 0.5 s.
+
+**So B hits the same horizon wall as the continuation value in V3, by a different route.** Two
+independent credit channels, the continuation value and the deficit counter, are both pinned:
+one by a saturated indicator, the other by a zero multiplier. Both for the same underlying reason.
+This also settles B2 without needing it: **scaling the deficit by 201 would not change a single
+decision either**, because it scales a term that is multiplied by zero. I recommend B2 be dropped
+rather than ruled on.
+
+### V8.2 This is the ruling's stop point
+
+The ruling says: "If robot questions are still deferred past usefulness (Mode B), STOP and report:
+the next fix would be making `p_finish` a probability using the cost model's measured
+completion-time error fitted on FIT/DEV data only (spec Phat), and the user will rule."
+
+**Robot questions are still deferred past usefulness: 1 of 9 and 0 of 20, unchanged.** So I
+stopped. Step 4, the D121 speed work and the v1.1-fast release, is NOT started, and D121 remains
+paused at `fa50dfc`.
+
+One observation on the named next fix, offered because it bears on whether it would work. Making
+`p_finish` a probability would give the CONTINUATION channel a gradient, which addresses V3's
+saturation directly. It would not by itself fix the `_z_term` zero in V8.1, because that term
+depends on `met_slo` flipping inside H rather than on any probability. If the goal is for robot
+work to earn credit for progress, the horizon wall itself is the common cause of both, and the two
+candidate levers are the ones already named: a slack-sensitive `p_finish`, and crediting
+out-of-horizon completion (the SH side already does this for monitoring, via D98's tail, which
+credits a released call at its own deadline even when delivery lands after the horizon;
+`rollout.py` has no equivalent for RC).
+
+**That last point is the most useful thing in this section.** D98 already solved exactly this
+problem for SH: "a released call has to be simulated through to delivery even when that delivery
+lands after the horizon", because otherwise an instant is "worth zero merely because it lands
+after the horizon". **RC has no such tail.** A D98-equivalent tail for recall answers would make a
+rebuild's payoff visible without changing any value definition, and it is the narrowest change of
+the three. It is NOT implemented; it is the option I would put first for your ruling.
+
+### V8.3 v1.1 status and gates
+
+| item | state |
+|---|---|
+| A3 `honour_job_priority` | implemented, DEFAULT OFF, measured no-op (V6.1) |
+| A1 | DROPPED as ruled (V6.2) |
+| B1 `deficit_update` | implemented, DEFAULT OFF, works and changes no decision |
+| B2 scaling | pre-registered, NOT implemented, and V8.1 shows it cannot help |
+| C | unchanged, measured only |
+| policy suite | **439 of 439** (12 new v1.1 tests) |
+| D99 grid, flags off | 48 of 48 byte-identical |
+| frozen md5s | 12 of 12 green |
+| baseline arms | untouched |

@@ -1,0 +1,221 @@
+{
+ "check": "policy_v11_step3",
+ "is_measurement": false,
+ "label": "DRY RUN, NOT AN OUTCOME CLAIM. Pilot-matching settings: seed 0, 4 and 8 devices, 600 s, mu EWMA, H=0.5 s, tight memory, pol4.",
+ "variants": [
+  "v1.0",
+  "A3 alone",
+  "B alone",
+  "A3+B (v1.1)"
+ ],
+ "rows": [
+  {
+   "n": 4,
+   "variant": "v1.0",
+   "robot_questions": 9,
+   "robot_released_before_deadline": 1,
+   "monitor_releases": 2174,
+   "monitor_offered": 2176,
+   "z_rc_max": 0.0,
+   "z_sh_max": 0.0,
+   "z_updates": null,
+   "z_misses": null,
+   "z_successes": null,
+   "admits_positive": 5,
+   "admits": 9,
+   "rc_release_cands": 967,
+   "rc_release_dj_zero": 699,
+   "rc_release_dj_pos": 2
+  },
+  {
+   "n": 4,
+   "variant": "A3 alone",
+   "robot_questions": 9,
+   "robot_released_before_deadline": 1,
+   "monitor_releases": 2174,
+   "monitor_offered": 2176,
+   "z_rc_max": 0.0,
+   "z_sh_max": 0.0,
+   "z_updates": null,
+   "z_misses": null,
+   "z_successes": null,
+   "admits_positive": 5,
+   "admits": 9,
+   "rc_release_cands": 967,
+   "rc_release_dj_zero": 699,
+   "rc_release_dj_pos": 2
+  },
+  {
+   "n": 4,
+   "variant": "B alone",
+   "robot_questions": 9,
+   "robot_released_before_deadline": 1,
+   "monitor_releases": 2174,
+   "monitor_offered": 2176,
+   "z_rc_max": 4.5,
+   "z_sh_max": 0.0,
+   "z_updates": 2183,
+   "z_misses": 8,
+   "z_successes": 2175,
+   "admits_positive": 5,
+   "admits": 9,
+   "rc_release_cands": 967,
+   "rc_release_dj_zero": 699,
+   "rc_release_dj_pos": 2
+  },
+  {
+   "n": 4,
+   "variant": "A3+B (v1.1)",
+   "robot_questions": 9,
+   "robot_released_before_deadline": 1,
+   "monitor_releases": 2174,
+   "monitor_offered": 2176,
+   "z_rc_max": 4.5,
+   "z_sh_max": 0.0,
+   "z_updates": 2183,
+   "z_misses": 8,
+   "z_successes": 2175,
+   "admits_positive": 5,
+   "admits": 9,
+   "rc_release_cands": 967,
+   "rc_release_dj_zero": 699,
+   "rc_release_dj_pos": 2
+  },
+  {
+   "n": 8,
+   "variant": "v1.0",
+   "robot_questions": 20,
+   "robot_released_before_deadline": 0,
+   "monitor_releases": 2107,
+   "monitor_offered": 4326,
+   "z_rc_max": 0.0,
+   "z_sh_max": 0.0,
+   "z_updates": null,
+   "z_misses": null,
+   "z_successes": null,
+   "admits_positive": 2,
+   "admits": 20,
+   "rc_release_cands": 406,
+   "rc_release_dj_zero": 268,
+   "rc_release_dj_pos": 6
+  },
+  {
+   "n": 8,
+   "variant": "A3 alone",
+   "robot_questions": 20,
+   "robot_released_before_deadline": 0,
+   "monitor_releases": 2107,
+   "monitor_offered": 4326,
+   "z_rc_max": 0.0,
+   "z_sh_max": 0.0,
+   "z_updates": null,
+   "z_misses": null,
+   "z_successes": null,
+   "admits_positive": 2,
+   "admits": 20,
+   "rc_release_cands": 406,
+   "rc_release_dj_zero": 268,
+   "rc_release_dj_pos": 6
+  },
+  {
+   "n": 8,
+   "variant": "B alone",
+   "robot_questions": 20,
+   "robot_released_before_deadline": 0,
+   "monitor_releases": 2107,
+   "monitor_offered": 4326,
+   "z_rc_max": 6.3,
+   "z_sh_max": 0.0,
+   "z_updates": 4338,
+   "z_misses": 2231,
+   "z_successes": 2107,
+   "admits_positive": 2,
+   "admits": 20,
+   "rc_release_cands": 406,
+   "rc_release_dj_zero": 268,
+   "rc_release_dj_pos": 6
+  },
+  {
+   "n": 8,
+   "variant": "A3+B (v1.1)",
+   "robot_questions": 20,
+   "robot_released_before_deadline": 0,
+   "monitor_releases": 2107,
+   "monitor_offered": 4326,
+   "z_rc_max": 6.3,
+   "z_sh_max": 0.0,
+   "z_updates": 4338,
+   "z_misses": 2231,
+   "z_successes": 2107,
+   "admits_positive": 2,
+   "admits": 20,
+   "rc_release_cands": 406,
+   "rc_release_dj_zero": 268,
+   "rc_release_dj_pos": 6
+  }
+ ],
+ "decisions_differ_vs_v10": {
+  "4": {
+   "A3 alone": 0,
+   "B alone": 0,
+   "A3+B": 0,
+   "of": 2380
+  },
+  "8": {
+   "A3 alone": 0,
+   "B alone": 0,
+   "A3+B": 0,
+   "of": 2220
+  }
+ },
+ "b1_works": {
+  "z_rc_max": {
+   "4": 4.5,
+   "8": 6.3
+  },
+  "z_updates": {
+   "4": 2183,
+   "8": 4338
+  },
+  "misses": {
+   "4": 8,
+   "8": 2231
+  },
+  "note": "spec 3.3 deficit mechanism present for the first time"
+ },
+ "robot_service_unchanged": {
+  "n4": "1 of 9 in every variant",
+  "n8": "0 of 20 in every variant"
+ },
+ "dashcam_cost": {
+  "monitor_releases": {
+   "4": 2174,
+   "8": 2107
+  },
+  "change": "none"
+ },
+ "issue_C": {
+  "question": "do the Z and continuation terms now outweigh the backlog charge",
+  "answer": "the exchange rate never comes into it: the multiplier is zero",
+  "mechanism": "z reaches the objective only through _z_term as z_of(task) * (ok/n); a rebuild piece does not answer anything so met_slo is false in BOTH branches, ok/n is identical, and delta z_term = z * 0 = 0 for any z",
+  "implication": "B2 scaling by 201 would also change nothing, because it scales a term multiplied by zero; recommend dropping B2 rather than ruling on it"
+ },
+ "stop": {
+  "reason": "the ruling stop point: robot questions are still deferred past usefulness",
+  "step4_started": false,
+  "d121_paused_at": "fa50dfc"
+ },
+ "next_fix_note": {
+  "named_by_user": "make p_finish a probability from the cost model measured completion-time error, FIT/DEV only",
+  "assessment": "that gives the continuation channel a gradient and addresses the V3 saturation, but it does not fix the _z_term zero, which depends on met_slo flipping inside H rather than on any probability",
+  "recommended_first": "a D98-equivalent TAIL for RC. D98 already simulates a released SH call through to delivery beyond the horizon so an instant is not worth zero merely for landing late; rollout.py has no equivalent for recall, and adding one would make a rebuild payoff visible without changing any value definition"
+ },
+ "_provenance": {
+  "git_commit": "99d8f351770c117d753ce9ffe7abc605bb8d869c",
+  "script": "arm-side wrappers over committed code; fixes behind Flags.honour_job_priority and PolicyCoreArm.deficit_update, both default off",
+  "model": "none (pol4 frozen)",
+  "device": "flash CPU only",
+  "n": "seed 0, 4 and 8 devices, 600 s",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}

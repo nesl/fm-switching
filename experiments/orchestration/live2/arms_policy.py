@@ -98,6 +98,18 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     # policy/tests/test_residency_belief.py) and may not be edited; the library reads it with
     # `getattr(self.params, "release_eval_cap_k", None)`, so an unset cap is the old behaviour.
     cap_k: Optional[int] = None
+    # D122 v1.1 fix B1, DEFAULT OFF. Spec 3.3's deficit counters are READ in five production
+    # sites and were WRITTEN in none: `Device.bump_z` is reached only through
+    # `Coordinator.update_deficit`, which has no production caller, so `z_of(task)` returned 0.0
+    # for every device and task on every path (verification V1). This switch introduces the
+    # update arm-side, from the REALISED on-time outcome of each opportunity, which is the only
+    # thing observable online without ground truth. `w = 1` for every task here; the scaling
+    # (B2) is pre-registered in the report and NOT implemented.
+    deficit_update: bool = False
+    # D122 v1.1 fix A3, DEFAULT OFF. Travels on `Flags` because the rollout reads it there.
+    # Measured to be a NO-OP in today's build, since the rollout passes competing_s = 0.0 and
+    # `continuation_schedule` uses `priority` only as `t + (0.0 if priority else competing_s)`.
+    honour_job_priority: bool = False
 
     name: str = "policy-core"
     case: str = "own"
@@ -163,8 +175,10 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         if calibration_knots_path is not None:
             p.tier_calibration = CAL.load(calibration_knots_path)
         self.params = p
-        self.flags = Flags()
-        if self.flags.any_on():
+        # D122: a v1.1 defect fix travels on `Flags` so the rollout can read it, but it is NOT
+        # one of spec 7.0's conditional mechanisms, so the D66 guard asks `conditional_any_on`.
+        self.flags = Flags(honour_job_priority=bool(self.honour_job_priority))
+        if self.flags.conditional_any_on():
             raise RuntimeError("D66: round 1 runs the CORE only and every conditional flag must "
                                "be off; one is on")
         self.engine = Eng1Engine.load(gpu_kv_tokens=int(gpu_kv_tokens),
@@ -200,6 +214,10 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         self._session_of_job: Dict[str, str] = {}
         self._seen: set = set()
         self._ready = True
+        # D122 B1: `reset` also sets this, but `live2_configure` is the call every path makes
+        # before deciding, so the tracking dict is created here too rather than relying on reset.
+        if not hasattr(self, "_z_track"):
+            self._z_track: Dict[str, Dict[str, Any]] = {}
 
     def _reset_sh_audit(self) -> None:
         """F-4 and F-5 bookkeeping, both per run."""
@@ -220,8 +238,73 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                           sh_escalated=0, sh_admitted=0, sh_declined=0,
                           sh_cap_bound_periods=0, sh_cap_skipped=0,
                           sh_served_not_scored=0,
-                          release_cap_k=self.cap_k)
+                          release_cap_k=self.cap_k,
+                          deficit_update=bool(self.deficit_update),
+                          z_updates=0, z_misses=0, z_successes=0)
         self._reset_sh_audit()
+        # B1: opportunity_id -> {task, device, deadline_abs, answered_at}. Registered from the
+        # OBSERVATION, not from admissions, so a declined or never-admitted opportunity still
+        # resolves as a miss.
+        self._z_track: Dict[str, Dict[str, Any]] = {}
+
+    # ---------------------------------------------------------------- D122 fix B1
+    def _z_register(self, obs: Observation) -> None:
+        """Record every opportunity this period SHOWS the arm, so a decline counts as a miss.
+
+        Registering from admissions instead would make the counter blind to exactly the
+        opportunities the policy chose not to serve, which are the ones a deficit exists to
+        notice.
+        """
+        instants = (self._roster or {}).get("sh_instant", {})
+        for sid, inst in instants.items():
+            oid = inst.get("opportunity_id")
+            if oid is None or oid in self._z_track:
+                continue
+            self._z_track[str(oid)] = dict(task="SH", device=sid,
+                                           deadline_abs=float(inst["deadline_abs"]),
+                                           answered_at=None)
+        for q in obs.recall:
+            oid = str(q.query_id)
+            if oid in self._z_track:
+                continue
+            dev = (self._roster or {}).get("session_device", {}).get(q.session_id,
+                                                                       q.session_id)
+            self._z_track[oid] = dict(task="RC", device=dev,
+                                      deadline_abs=float(q.deadline_s), answered_at=None)
+
+    def _z_note_answer(self, opportunity_id: Any, t_first_token: Any) -> None:
+        """The application sees an answer at its FIRST TOKEN (harness addendum), so that is the
+        time on-time is judged against."""
+        if opportunity_id is None or t_first_token is None:
+            return
+        rec = self._z_track.get(str(opportunity_id))
+        if rec is not None and rec.get("answered_at") is None:
+            rec["answered_at"] = float(t_first_token)
+
+    def _z_resolve(self, now: float) -> None:
+        """Bump each opportunity's device ONCE, when its outcome is certain.
+
+        Certain means either an answer arrived, or the deadline has passed with nothing. The
+        one-period lag this leaves is accepted by the D122 ruling.
+        """
+        done = []
+        for oid, rec in self._z_track.items():
+            ans = rec.get("answered_at")
+            if ans is not None:
+                success = 1.0 if float(ans) <= rec["deadline_abs"] else 0.0
+            elif rec["deadline_abs"] < now:
+                success = 0.0
+            else:
+                continue
+            dev = self.fleet.devices.get(rec["device"])
+            if dev is not None:
+                dev.bump_z(rec["task"], float(self.params.p_k[rec["task"]]), success)
+                self.stats["z_updates"] = int(self.stats.get("z_updates", 0)) + 1
+                key = "z_successes" if success > 0 else "z_misses"
+                self.stats[key] = int(self.stats.get(key, 0)) + 1
+            done.append(oid)
+        for oid in done:
+            self._z_track.pop(oid, None)
 
     def _apply_partial_readiness(self) -> None:
         """D100 (a): cost a later reconstruction piece as A PIECE ON A WARM PREFIX.
@@ -277,6 +360,9 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
             ro.state_value_cache().clear()
         self._sync(obs)
         self._prune(float(obs.now_s))
+        if self.deficit_update:
+            self._z_register(obs)
+            self._z_resolve(float(obs.now_s))
         self._apply_partial_readiness()
         decs: List[Any] = []
         decs += self._admit_monitoring(obs)
@@ -397,6 +483,8 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                                                 len(self._sh_admitted)))
         # RES1 bookkeeping: a completed build restarts that history's own clock and ages every
         # other history by what was written; any other completed request is just a write.
+        if self.deficit_update:
+            self._z_note_answer(info.get("opportunity_id"), info.get("t_first_token"))
         tok = int(info.get("prompt_tokens") or 0)
         dev = info.get("device_id")
         if want == "rc_piece":
