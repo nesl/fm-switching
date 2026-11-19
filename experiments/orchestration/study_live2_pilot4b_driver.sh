@@ -23,7 +23,10 @@ release_check() {
   git fetch -q 2>/dev/null
   local h=$(git log origin/main --format="%h %s" -80 | grep -m1 " v1.3-fast release")
   # PRIORITY 0 fires only for a release NEWER than the one already handled (POLICY_RELEASE_HANDLED)
-  [ -n "$h" ] && [ "$h" = "$(cat $OUT/POLICY_RELEASE_HANDLED 2>/dev/null)" ] && h=""
+  # handled = any commit whose HASH is listed in POLICY_RELEASE_HANDLED (one per line); only the newest unlisted
+  # commit whose subject starts "v1.3-fast release" counts (an operator commit that merely mentions it is listed)
+  h=$(git log origin/main --format="%h %s" -80 | grep -E "^[0-9a-f]+ v1\.3-fast release" | while read hh rest; do
+        grep -q "^$hh" $OUT/POLICY_RELEASE_HANDLED 2>/dev/null || { echo "$hh $rest"; break; }; done)
   if [ -n "$h" ]; then log "PRIORITY 0: release found: $h; queue paused after the current run"; echo "$h" > $OUT/POLICY_RELEASE; exit 0; fi
 }
 # cell ARM N SEED HOST TAG [extra flags]
