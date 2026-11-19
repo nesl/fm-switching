@@ -6690,3 +6690,63 @@ busy with monitor work, monitor service should have risen there as it does at 10
 where the recall path is untouched and monitor service rises, and plans-differ cells where recalls
 are admitted and then indefinitely deferred — and no single mechanism has been shown to produce
 both. The headline is unaffected: the correction costs robot delivery in 8 of 8.
+
+## D134 item 2: memory pressure is LIVE and OUTCOME-INERT. The budget binds, not the pool.
+
+**This is a category 5 result — fired and did not help — which is the only one of the five that is
+a finding about the policy rather than about the harness.**
+
+### The mechanism unquestionably ran
+
+32 devices, seed 4, 600 s, at the committed 62,944-token pool with NO stress setting:
+
+| arm | peak residency off to ON | epochs over cap | longest over-cap interval |
+|---|---|---|---|
+| covex-v13 | 142,153 to **67,096** | 4,049 to **8** | 4,049 to **1** |
+| edf | 77,322 to 71,022 | 961 to **3** | 620 to **1** |
+| llf | 72,372 to 66,460 | 612 to **3** | 271 to **1** |
+
+Eviction halves covex-v13's residency and collapses a **sustained 4,049-epoch plateau to 8 isolated
+epochs**. This is the opposite of B2, RCprio and the four builder mechanisms: the switch moved AND
+the mechanism ran, which is what makes the null meaningful.
+
+### And not one outcome changes
+
+Robot delivery is identical in all six arms with enforcement off and on: **7/84, 0/84, 2/84, 40/84,
+37/84, 43/84.** Rebuild cost identical. Budget spend identical.
+
+**The reason is in the data rather than inferred: every cell spends 599.9 to 600.0 of 600 GPU-s.
+The accelerator budget is exhausted in BOTH legs.** Relieving the pool cannot help when the engine
+has already spent everything it had.
+
+**THE PRE-REGISTERED PREDICTION HOLDS.** It was recorded before the run: *if the pool binds at 116
+to 121 per cent but outcomes move only where rebuilds cluster, the pool is a SYMPTOM and rebuild
+cost is the cause.* It named its discriminator and the discriminator fired. **Five mechanisms were
+refuted this week; this is the first prediction to survive its own test.**
+
+### Both controls pass
+
+- **`eco-llm`**, zero residency and zero `MATERIALIZE`, is **byte-identical** under enforcement, so the mechanism is not reaching something it should not.
+- **`attentionstore` and `lmcache`** hold 38.8 to 49.5 per cent and **never exceed cap**, so enforcement is correctly a no-op for them.
+
+### Scope, stated because it closes a question rather than dodging it
+
+**Retention cannot be shown to pay here — not because it does not work, but because the two arms
+positioned to demonstrate it are never under pressure.** `attentionstore` and `lmcache` are the
+KV-cache systems whose entire contribution is retention policy; they hold state comfortably within
+cap while the budget runs out around them. That is a measured statement about this workload's
+capacity headroom, not an assumption.
+
+**What the memory-capacity axis measures is the COST OF HOLDING STATE, and it differentiates arms
+on whether they hold any rather than on how well they schedule.** covex-v13 issues `MATERIALIZE`
+and the leaders do not, so holding warm state is a policy choice and paying for it is not an
+artefact. The result is valid on that dimension and SILENT on scheduling quality. A reader who sees
+only an outcome delta will supply the scheduling explanation themselves, so the residency table
+belongs beside it.
+
+### The larger finding: the binding constraint is the ACCELERATOR BUDGET, not KV capacity
+
+Three independent lines now point at the same resource: this result, the queueing account of the
+robot axis, and StudyEVNEED's 385.5 GPU-s of rebuild cost at 14 devices — about 64 per cent of one
+GPU. The delivery-risk cliff sitting far beyond the physical limit is consistent with it. **KV
+capacity is not what this workload is short of.**
