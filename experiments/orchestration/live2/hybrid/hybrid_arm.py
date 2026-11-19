@@ -79,7 +79,8 @@ class HybridArm:
     SWITCHES = ("c1", "c2", "c3", "c4", "c5", "c6")
 
     def __init__(self, name: str = "hybrid-base", c1=False, c2=False, c3=False, c4=False, c5=False, c6=False,
-                 k_r: float = 1.0, m_d: float = 0.05, defs: str = "v1", reserve: Optional[bool] = None) -> None:
+                 k_r: float = 1.0, m_d: float = 0.05, defs: str = "v1", reserve: Optional[bool] = None,
+                 throttle_floor: int = 2, c3_always: bool = False) -> None:
         from arms_published import B7EdfFeasibilityArm
         self._b7 = B7EdfFeasibilityArm()
         self.name = name
@@ -94,6 +95,16 @@ class HybridArm:
             raise ValueError("defs must be v1 or v2")
         self.defs = defs
         self.reserve = (bool(c2) if reserve is None else bool(reserve)) if defs == "v1" else bool(reserve)
+        # D141 (user ruling): in v2 the CONSUMER of C2's robot at-risk flag is a DASHCAM THROTTLE: while any robot
+        # question has laxity < k_r (pending, or released while at risk and not yet completed / expired), no NEW
+        # dashcam frame is submitted beyond `throttle_floor` dashcam requests in flight; an at-risk dashcam device
+        # (running on-time < 0.25 + m_d) is exempt. Robots stay exempt from the cap.
+        self.throttle_floor = int(throttle_floor)
+        # D141 ablation "C3-always": degrade EVERY at-risk robot to RECENT, even when the rebuild is predicted
+        # feasible. Not a candidate default (judged on LH-REQ later).
+        self.c3_always = bool(c3_always)
+        self._risk_inflight: Dict[str, float] = {}       # query id -> deadline, released while at risk
+        self._risk_seen: set = set()
         self.values = _quality_values() if any(self.sw.values()) else None
         self.cap, self._last_adj = 8, None
         self.stats = Counter()
@@ -128,7 +139,8 @@ class HybridArm:
 
     def live2_describe(self) -> Dict[str, Any]:
         d = dict(self._b7.live2_describe()) if hasattr(self._b7, "live2_describe") else {}
-        d.update(hybrid=dict(self.sw, k_r=self.k_r, m_d=self.m_d, defs=self.defs, reserve=self.reserve),
+        d.update(hybrid=dict(self.sw, k_r=self.k_r, m_d=self.m_d, defs=self.defs, reserve=self.reserve,
+                             throttle_floor=self.throttle_floor, c3_always=self.c3_always),
                  hybrid_name=self.name)
         return d
 
@@ -151,6 +163,7 @@ class HybridArm:
             items.append(dict(kind="dash", id=s.stream_id, dl=dl, slack=slack, work=epi_s, risk=risk,
                               value=(self.values or {}).get("dashcam", 0.09)))
         rec_dec: Dict[str, RecallAction] = {}
+        pending_risk: List[Any] = []
         c6_live = self.sw["c6"] and self._scorer is not None and bool(obs.recall) and self._c6_prepare(obs)
         for q in sorted(obs.recall, key=lambda x: x.deadline_s):
             est = float(C.recall_ttft_s(max(q.readiness_tokens, 1), q.readiness))
@@ -168,6 +181,9 @@ class HybridArm:
                 d = RecallAction(q.query_id, "DEFER", defer_s=self._b7.defer_s)
             else:
                 d = RecallAction(q.query_id, "REJECT")
+            if self.sw["c3"] and self.c3_always and risk and d.decision == "CLOUD" and d.representation is None:
+                d = RecallAction(q.query_id, "CLOUD", representation="RECENT")
+                self.stats["c3_always_recent"] += 1
             if self.sw["c3"] and d.decision != "CLOUD":
                 est_r = float(C.recall_ttft_s(RECENT_TOKENS, "COLD"))
                 if est_r <= qs:
@@ -176,6 +192,8 @@ class HybridArm:
             if c6_live:
                 d = self._c6_one(q, d)
             rec_dec[q.query_id] = d
+            if self.defs == "v2" and self.sw["c2"] and risk:
+                pending_risk.append((q.query_id, float(q.deadline_s), d.decision == "CLOUD"))
             if d.decision == "CLOUD":
                 items.append(dict(kind="recall", id=q.query_id, dl=q.deadline_s, slack=slack, risk=risk,
                                   work=float(C.recall_gpu_s(max(q.readiness_tokens, 1), q.readiness)),
@@ -191,7 +209,7 @@ class HybridArm:
         if self.sw["c5"]:
             self._aimd(obs)
             if self.defs == "v2":
-                keep = self._cap_dashcam_only(obs, items)
+                keep = self._cap_dashcam_only(obs, items, self._throttle_on(now, pending_risk))
             else:
                 keep = None
             budget = max(self.cap - in_flight, 0)
@@ -206,6 +224,8 @@ class HybridArm:
                 chosen.append(it)
             if keep is None:
                 keep = {(it["kind"], it["id"]) for it in chosen}
+        elif self.defs == "v2" and self.sw["c2"]:
+            keep = self._cap_dashcam_only(obs, items, self._throttle_on(now, pending_risk), cap=None)
         else:
             keep = {(it["kind"], it["id"]) for it in items}
         order = [it for it in items if (it["kind"], it["id"]) in keep]
@@ -233,21 +253,58 @@ class HybridArm:
         unbuilt = max(int(q.readiness_tokens) - built, 0)
         return float(C.recall_ttft_s(unbuilt, "COLD")) if unbuilt > 0 else 0.0
 
-    def _cap_dashcam_only(self, obs: Observation, items) -> set:
+    def _throttle_on(self, now: float, pending_risk) -> bool:
+        """C2 (v2) robot channel: is any robot question at risk now? Pending at-risk questions count; one released
+        while at risk keeps the throttle on until it completes (live2_completed) or its deadline passes."""
+        for qid, dl in list(self._risk_inflight.items()):
+            if dl < now:
+                del self._risk_inflight[qid]
+        for qid, dl, released in pending_risk:
+            if released:
+                self._risk_inflight[qid] = dl
+        on = bool(pending_risk) or bool(self._risk_inflight)
+        if on:
+            self.stats["c2_throttle_periods"] += 1
+            for qid, _dl, _r in pending_risk:
+                if qid not in self._risk_seen:
+                    self._risk_seen.add(qid)
+                    self.stats["c2_robots_at_risk_while_throttling"] += 1
+        return on
+
+    def live2_completed(self, info: Dict[str, Any]) -> None:
+        """Only the v2 C2 throttle reads completions (a robot released at risk ends the throttle when it completes);
+        b7 declares no live2_completed, so this cannot change the base's decisions (identity test)."""
+        if self._risk_inflight:
+            for k in (info.get("opportunity_id"), info.get("decision_id")):
+                if k in self._risk_inflight:
+                    del self._risk_inflight[k]
+
+    def _cap_dashcam_only(self, obs: Observation, items, throttle: bool = False, cap: Optional[int] = -1) -> set:
         """v2 C5: the cap counts and holds dashcam (episodic) traffic only; every robot item is kept. With the
         reserve switch on, one dashcam slot is withheld while an at-risk robot item is pending (ablation)."""
         epi = int((obs.cloud.running_by_class or {}).get("episodic", 0))
-        budget = max(self.cap - epi, 0)
+        cap_n = self.cap if cap == -1 else (10 ** 9 if cap is None else int(cap))
+        budget = max(cap_n - epi, 0)
+        cap_budget = budget
+        if throttle:
+            budget = min(budget, max(self.throttle_floor - epi, 0))
         if self.reserve and any(it["kind"] == "recall" and it["risk"] for it in items):
             budget = max(budget - 1, 0)
             self.stats["c5_reserve_applied"] += 1
-        keep, n_d = set(), 0
+        keep, n_d, n_thr = set(), 0, 0
         for it in items:
             if it["kind"] == "recall":
                 keep.add((it["kind"], it["id"]))
             elif n_d < budget:
                 keep.add((it["kind"], it["id"]))
                 n_d += 1
+            elif throttle and it["risk"] and n_d < cap_budget:
+                keep.add((it["kind"], it["id"]))          # an at-risk dashcam device is exempt from the throttle
+                n_d += 1
+                self.stats["c2_throttle_exempt_dash"] += 1
+            elif throttle and n_d < cap_budget:
+                n_thr += 1
+        self.stats["c2_throttled_dash"] += n_thr
         self.stats["c5_dash_held"] += sum(1 for it in items if it["kind"] == "dash") - n_d
         return keep
 
@@ -338,6 +395,8 @@ CONFIGS.update({
     "hybrid2-c1c2k15c3c5": dict(c1=True, c2=True, c3=True, c5=True, k_r=1.5, defs="v2"),
     "hybrid2-all-k05": dict(c1=True, c2=True, c3=True, c4=True, c5=True, k_r=0.5, defs="v2"),
     "hybrid2-all-k15": dict(c1=True, c2=True, c3=True, c4=True, c5=True, k_r=1.5, defs="v2"),
+    "hybrid2-c1c2k05c3c5-c3always": dict(c1=True, c2=True, c3=True, c5=True, k_r=0.5, defs="v2", c3_always=True),
+    "hybrid2-c1c2k15c3c5-c3always": dict(c1=True, c2=True, c3=True, c5=True, k_r=1.5, defs="v2", c3_always=True),
     # proof-only (Step 2b): the at-risk change isolated from the cap change
     "hybrid-c1c2k05": dict(c1=True, c2=True, k_r=0.5),
     "hybrid2-c1c2k05": dict(c1=True, c2=True, k_r=0.5, defs="v2"),
