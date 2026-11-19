@@ -3984,3 +3984,124 @@ started, and D121 remains paused at `fa50dfc`.
 | frozen md5s | 12 of 12 green |
 | baseline arms | untouched; `edf` was run as a reference arm only |
 | every v1.1 switch | DEFAULT OFF: `honour_job_priority`, `deficit_update`, `rc_tail`, `write_staleness` |
+
+## V11. F1 follow-up: the deficit term IS now visible for robot candidates
+
+Dry run, screening. Seed 0, 4 and 8 devices, 600 s, mu EWMA, H = 0.5 s, tight, with `rc_tail`,
+`deficit_update` and `honour_job_priority` all on.
+
+Before F1 the RC deficit was not merely zero, it was ABSENT: `_opportunity_utility` emitted
+`task="SH"` rows only, so `(device, "RC")` never entered `_z_term`'s aggregation and
+`z_of("RC")` was never read by it at all. `_rc_opportunities` now emits an RC row per unanswered
+job, so the channel exists. Measured distribution of the `z` term over robot candidates:
+
+| n | candidate kind | candidates | `z` exactly zero | non-zero | non-zero range |
+|---|---|---|---|---|---|
+| 4 | admit | 9 | 2 (22.2 %) | **7 (77.8 %)** | 0.267 to 0.900 |
+| 4 | release | 461 | 439 (95.2 %) | 22 (4.8 %) | 0.267 to 0.900 |
+| 4 | state | 7,539 | 7,539 (100 %) | 0 | none |
+| 8 | admit | 20 | 4 (20.0 %) | **16 (80.0 %)** | 0.567 to 1.800 |
+| 8 | release | 1,686 | 1,586 (94.1 %) | 100 (5.9 %) | 0.567 to 1.800 |
+| 8 | state | 15,038 | 15,035 (100 %) | 3 | -1.800 (negative) |
+
+`z[RC]` max 4.5 at n=4 over 2,183 resolved opportunities with 54 misses, and 5.3 at n=8 over
+4,342 with 335 misses.
+
+**So the answer to F1's owed question is yes.** The deficit now reaches ADMIT decisions strongly,
+78 to 80 per cent of robot admits carry a non-zero deficit term of up to 1.8, and RELEASE
+decisions weakly, 5 to 6 per cent. It is still exactly zero for every `state` candidate, where
+the three non-zero cases at n=8 are NEGATIVE, so the PROMOTE_REBUILD path still gets no deficit
+credit.
+
+### V11.1 The B2 proposal, with numbers. RECOMMENDATION: DO NOT SCALE
+
+The derivation at V7.2 stands: the ruling's two constraints force `w = N_SH / N_RC`, which from
+committed quantities only (`T_k["SH"] = 0.5 s` giving 1,200 and D48's
+`lambda_rc = 0.009934 /s` giving 5.96 in a 600 s window) is **201.3**, window-independent.
+
+What is new is that the unscaled term is now MEASURABLE, so the comparison can be made on numbers
+rather than on a derivation:
+
+| quantity | magnitude |
+|---|---|
+| deficit term at `w = 1`, as measured above | up to **1.800** |
+| the backlog charge it must overcome, measured in the diagnosis | **0.7 to 2.06** |
+| continuation value of a robot question | 0.0354 |
+| deficit term at `w = 201.3`, one miss | 181.2, and the term would reach about **362** |
+
+**At `w = 1` the deficit is already the same order of magnitude as the cost it opposes**, which
+is the condition B2 was meant to create. At `w = 201.3` it would exceed that cost by more than
+two orders of magnitude and the policy would serve robot questions unconditionally after a single
+miss, which is indistinguishable from tuning until robots pass.
+
+**I therefore recommend B2 be settled as "do not scale", keeping `w = 1`.** B2 remains SHELVED
+and the ruling is OUTSTANDING; nothing was implemented, and I did not block on it.
+
+## V12. F3 PRE-REGISTRATION: realistic competing work
+
+Written before the code. One switch, `Flags.realistic_competing`, DEFAULT OFF, with an arm field
+to toggle it as `rc_tail` has.
+
+### V12.1 The defect
+
+`continuation_schedule` places a job's remaining pieces at
+`cursor = t + (0.0 if priority else competing_s) + max(extra_work_s, 0.0)`, and its own docstring
+says `competing_s` "is the engine-seconds of other work pi_0 would serve before this job's
+pieces". **Every production caller passes 0.0**: `rollout.py:598` (the continuation value),
+`rollout.py:669-670` (the A6 prefix-risk pair) and `coordinator.py:399` and `:437` (`classify`,
+with `bounded_waiting_breach` at `:440` passing 0.0 as well).
+
+So the schedule assumes the job has the engine entirely to itself. **That single zero causes
+three separate failures**, each measured earlier in this report:
+
+1. `p_finish` is pinned at 1, because a 1.0 s rebuild always "fits" a 5 s deadline on an idle
+   engine, so the continuation value is the constant 0.035385924 at every deadline from 5.0 s
+   down to 1.0 s and progress earns nothing (V3).
+2. `classify` can never return PRIORITY, because its two branches are computed with
+   `competing_s` and `competing_s_with_priority` both 0 and therefore agree. Measured: 81
+   FEASIBLE and 19 INFEASIBLE over 100 deadlines, never PRIORITY (V6.1).
+3. A3 is inert, because `priority` enters the schedule only as `(0.0 if priority else
+   competing_s)`, which is identical when `competing_s` is 0 (V6.1).
+
+### V12.2 The definition
+
+For a job `j` in fleet state `f` at time `t`:
+
+    competing_s(j, f, t) = sum of pr.gpu_s over
+        every item in f.in_flight whose job_id != j.job_id
+      + every item in f.pending whose job_id != j.job_id and whose pi_0 EDF key
+        (deadline, due_at, item_id) sorts strictly ahead of j's own earliest remaining piece
+
+`pr.gpu_s` is the frozen step model's own prediction for that item's request, so **no new
+estimator and no new parameter is introduced**: the quantity is the same `gpu_s` the rollout
+already sums into `busy`. In-flight work counts unconditionally because it is already running.
+A job with no pending piece uses its own deadline as the EDF key.
+
+`competing_s_with_priority` stays 0.0, which is the existing convention for "only work whose own
+loss exceeds the job's value stays ahead", so PRIORITY becomes reachable exactly when a job
+cannot finish behind the competing work but can finish ahead of it.
+
+Applied at `rollout.py:598`, at the `rollout.py:669-670` pair (both sides get the same value, so
+the A6 difference changes only through the feasibility cliff), and at the coordinator's two
+`classify` sites and `bounded_waiting_breach`, since otherwise PRIORITY stays unreachable and the
+ruling's own check cannot pass.
+
+**Cost note, pre-registered as a risk.** This adds one `engine.predict` per pending or in-flight
+item per evaluation. The predictions are a pure function of the request, so they are memoised on
+the rollout instance, the same pattern as Option 0 and `u_sh_grid`. I will measure and report the
+decision-time cost rather than assume it is small, and if it is large I will report that rather
+than optimise, since speed work is D121 and is not authorised tonight.
+
+### V12.3 Expected effect
+
+1. `p_finish` stops being pinned at 1 for a robot job under load, so the continuation value gains
+   a gradient in slack and progress starts earning credit.
+2. `classify` returns PRIORITY for some jobs, which is the direct test, and A3 stops being a
+   no-op.
+3. Robot questions released before deadline rise above the 2 of 9 and 3 of 20 that the RC tail
+   alone achieved.
+4. Dashcam cost rises, because competing work now suppresses some continuation value that
+   previously looked free; the size of that is the thing to watch.
+
+If 2 does not happen, the fix has not done what it was built for and I will report that rather
+than rework it.
