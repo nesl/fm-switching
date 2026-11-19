@@ -4105,3 +4105,46 @@ than optimise, since speed work is D121 and is not authorised tonight.
 
 If 2 does not happen, the fix has not done what it was built for and I will report that rather
 than rework it.
+
+## V13. PRE-REGISTRATION: splitting the RC tail into its two causes (user item 1)
+
+I reported that `rc_tail` moved monitor releases from 2,107 to 4,008 at eight devices, flagged it
+as larger than I expected, and did not separate the causes. The user asks for them separated, so
+each becomes independently toggleable.
+
+**The two candidate causes inside `rc_tail`, which the code makes distinct:**
+
+| cause | what it is | why it could move SH |
+|---|---|---|
+| (a) the SHARED TAIL CURSOR | an `rc_piece` that cannot start inside H joins the single tail pass and advances `tail_free`, and the tail's progress feeds `_rc_utility` so `omega_RC x u_RC` can be credited | an `rc_piece` ahead of an SH item in queue order pushes that SH delivery LATER, lowering its credit |
+| (b) the NEW RC ROWS in `_z_term` | `_rc_opportunities` appends one row per unanswered job, so `(device, "RC")` enters the aggregation | `_z_term` is a SUM over all (device, task) pairs, so adding RC rows changes the total for every candidate, including pure SH ones |
+
+**The switches**, both DEFAULT OFF, with `rc_tail` kept as the master so today's behaviour is
+unchanged:
+
+    effective cursor = rc_tail or rc_tail_cursor
+    effective z rows = rc_tail or rc_tail_zrows
+
+So `rc_tail` alone still turns both on and is byte-identical to the current build, while
+`rc_tail_cursor` alone and `rc_tail_zrows` alone isolate each component.
+
+**What I will report, and the correction the user is right to demand.** Release counts alone are
+what made my earlier report ambiguous. I will report DASHCAM OUTCOMES: instants served AND
+PREDICTED ON TIME, per device, against v1.0 and against `edf`, read from `outcomes.jsonl` rather
+than from release decisions. **If the extra releases arrive late, or if they crowd out robot work,
+I will say so plainly rather than presenting a near-doubling of monitor releases as an
+improvement.**
+
+## V14. ITEM 2: the tail's decision cost, measured where it fires
+
+**The 180 s synthetic table in V10.2 is labelled INVALID AS A TAIL COST wherever it appears**, and
+the reason is already recorded there: instrumentation showed **0 beyond-horizon `rc_piece`
+deliveries** on that fixture against 6,889 `episode_call` ones, so the tail never fires and the
+table is the cost of a switch that does nothing.
+
+Redone on the seed-0 FLEET traces, which contain robots, at 16, 32 and 64 devices, dry run, tail
+ON against OFF, reporting per-decision p50 and p99, rollouts per decision, and beyond-horizon
+`rc_piece` deliveries per period, so the cost is attributable to work the tail actually did.
+**Whether the comparison is paired is stated explicitly**: the tail changes how many decisions a
+run makes, so unless the decision counts match, the comparison is not like for like and is
+labelled as such.
