@@ -2509,3 +2509,109 @@ read the existing gap as the policy's merit until this is ruled on.
    now believes what the trace says.
 3. Part 2 is an audit of the code's release rules plus one replay. It does not measure what a
    work-conserving `edf` would score, because that arm does not exist.
+
+---
+
+# D114: the EDF family becomes work-conserving. PRE-REGISTRATION
+
+Committed ALONE, before any code, per the user ruling D114 of 2026-11-18. No measurement appears
+in this section. It exists so that the change to a baseline is on the record before the numbers
+that will be produced under it.
+
+## D1. The old rule
+
+`edf`, `edf-piece1024` and `edf-piece2048` released exactly ONE unit per 100 ms decision period,
+across monitoring and recall COMBINED. `Pi0Edf.decide` built the EDF order over the whole pending
+set and then acted only on its head:
+
+    order = Rollout._edf(None, items)
+    first = order[0] if order else None
+    ...
+    on = first is not None and first.item_id == "mon:" + s.stream_id
+
+Everything else was DEFERred with `defer_s=0.0`. The effective ceiling was 10 releases per second.
+
+## D2. The new rule
+
+Each 100 ms period, take the pending set in deadline order, with monitoring instants, rebuild
+pieces and recall answers merged exactly as they are merged now, and release units from the head
+while the number of in-flight cloud requests is below `C_inflight`. **In-flight means submitted
+and not yet completed, counted across all kinds.**
+
+`C_inflight = 4`, an arm parameter recorded in the run header. Its provenance is StudyD7b Part A
+(`reports/study_d7_capacity.md:180`): 32B-I at N = 1 reaches **100 % GPU utilisation at
+concurrency 4**, 12.73 req/s. The same report notes 99 to 100 % from concurrency 2 for 32B at
+N = 9, so 4 is Part A's figure and the conservative choice, not the minimum across every N.
+
+Kept unchanged:
+
+- **pi_0's no-decline rule.** Nothing is declined for not fitting. An item beyond the release
+  bound simply waits and is re-decided next period, and an item past its deadline falls to the
+  device exactly as now.
+- **One piece per MATERIALIZE** (D104 issue 6), and every piece size.
+
+Not changed, and tested to be byte-identical: `policy-core` and its rollout,
+`always-cloud-fcfs`, `utility-per-cost` (B8), `b9`, `device-only`.
+
+## D3. Why, from the audit
+
+Report section H6 measured the ceiling against the offered load. On seed 10 the trace offers
+**10.82 dashcam instants per second** and 10.87 units per second in total against the arm's hard
+**10.00 per second**, so the backlog was permanent BY CONSTRUCTION and not a scheduling outcome.
+Because EDF orders by deadline and a dashcam instant's 0.5 s deadline always precedes a robot
+question's, the questions sat behind the instants and starved.
+
+The same audit found that the policy's rollout **already** models pi_0's continuation as
+work-conserving: `Rollout.run` serves the whole EDF queue bounded only by the horizon, and
+`releases_one_per_epoch` is a declaration in `live2_describe` that the rollout never honours. So
+D114 brings the arm into line with the continuation the policy was already assuming for it. It
+does not change what the policy predicts, and it removes a mismatch rather than introducing one.
+
+## D4. That this is a baseline change, and what it costs
+
+**This is a change to a BASELINE, made before any round-1 run.** It is the direction that most
+needs pre-registration: a baseline quietly strengthened after the fact is worse than one quietly
+weak, and the weakness being removed here FLATTERED `policy-core`.
+
+**Every EDF-family number is re-run.** No committed `edf`, `edf-piece1024` or `edf-piece2048`
+figure may be compared against a post-D114 one; they are numbers about a different arm. The
+StudyLIVE2 history-size fix of the same date already forced a re-run of these cells, so D114 adds
+no re-run that was not already owed.
+
+The arms keep their names. The alternative, renaming to `edf-wc`, would break every existing
+reference for a change that the re-run already makes unambiguous, so the names stay and this
+entry is the record of what they mean from here.
+
+## D5. No H100-owned file is touched
+
+The in-flight count is already on the published interface: `obs.cloud.running_by_class`
+(`baselines/interface.py:127`), built by `cstate.observation` from `st.in_flight`, which the
+coordinator increments at submit (`coordinator.py:559`) and decrements at completion (`:591`).
+That is exactly "submitted and not yet completed, across all kinds", so the rule reads a quantity
+the arm is already given and the change is confined to `live2/arms.py`.
+
+## D6. Decisions and defaults
+
+Posted as up-front questions under Step 0. Any still unanswered when the code was written were
+taken at the default and are marked PROVISIONAL in the implementation section.
+
+1. **In-flight source.** Default, taken: sum `obs.cloud.running_by_class` over its classes. It
+   needs no new plumbing and no interface change.
+2. **Within-period accounting.** Default, taken: the arm counts the units it releases this period
+   against the bound, because the observation is a snapshot taken BEFORE any of this period's
+   submissions. Without this, a period that starts with 0 in flight would release the entire
+   pending set.
+3. **Snapshot staleness.** Default, taken: accept it. Completions during a period are not visible
+   until the next one, which makes the arm slightly conservative and never over-admitting.
+   Removing it would need coordinator plumbing.
+4. **One shared budget across kinds**, filled in deadline order, so a period may release four
+   instants, or three instants and one piece. This is what "counted across all kinds" requires.
+5. **A unit and a request are not always one to one.** A released recall item that is not
+   GPU-WARM emits both a recall answer and one MATERIALIZE piece, which is one head item but can
+   become two cloud requests. Default, taken: the bound counts HEAD ITEMS released this period,
+   and the coordinator's own `in_flight` reflects the true request count at the next epoch, so
+   the loop self-corrects within one period. This is the one place where the rule's "units" and
+   the engine's "requests" differ, and it is flagged rather than hidden.
+6. **Deferred items consume no slot**; only released units do.
+7. **`C_inflight` in the header.** Default, taken: an `__init__` parameter defaulting to 4,
+   published through `live2_describe` so every run header records it.
