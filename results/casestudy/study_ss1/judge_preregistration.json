@@ -1,0 +1,64 @@
+{
+ "check": "StudySS1_judge_preregistration",
+ "is_measurement": false,
+ "label": "Written and committed BEFORE the Mistral-7B judge is run, so the Planning expectation cannot be rationalised afterwards.",
+ "task": "run EgoThink LLM-judge (Mistral-7B-Instruct-v0.2, EgoThink single-math-v2 prompt, text-only per protocol) over the device run, and report agreement with the containment scorer overall and PER DIMENSION, with CIs.",
+ "run_under_test": {
+  "file": "results/casestudy/study_ss1/egothink_device.json",
+  "study": "StudySS1",
+  "dataset": "egothink",
+  "tier": "device",
+  "model": "qwen3vl4b",
+  "n": 700,
+  "n_scored": 700,
+  "n_errors": 0,
+  "decoding": "greedy temperature=0 seed=0 one-at-a-time",
+  "dimensions": 12
+ },
+ "provenance_gap": {
+  "what": "this result file carries NO _provenance block: git_commit, script, model, device and timestamp are all absent.",
+  "consequence": "I cannot confirm FROM THE FILE whether these answers were produced on the Jetson Orin or on the A6000 device-proxy. The brief calls them the Orin answers; the file records only tier=device.",
+  "action": "flagged rather than assumed. The judge result will be labelled with the same ambiguity until the producing host is confirmed, since CLAUDE.md requires the provenance block and it is missing."
+ },
+ "planning_expectation": {
+  "prediction": "AGREEMENT BETWEEN THE JUDGE AND CONTAINMENT WILL BE LOWEST ON THE TWO PLANNING DIMENSIONS.",
+  "reason": "containment matching rewards a literal substring of a reference. Planning answers are longer and more free-form, so a correct answer can easily contain none of the reference wording, which containment scores 0 and a judge should score 1.",
+  "premise_measured_before_the_run": {
+   "note": "the premise is not assumed, it is measured on the answers themselves, with no judge involved.",
+   "median_answer_words": {
+    "Planning_assistance": 5.5,
+    "Planning_navigation": 3.0,
+    "Activity": 2.0,
+    "Forecasting": 1.5,
+    "Localization_location": 1.0,
+    "Localization_spatial": 1.0,
+    "Object_affordance": 1.0,
+    "Object_attribute": 1.0,
+    "Object_existence": 1.0,
+    "Reasoning_comparing": 1.0,
+    "Reasoning_counting": 1.0,
+    "Reasoning_situated": 1.0
+   },
+   "reading": "Planning_assistance is the longest at 5.5 median words and Planning_navigation second at 3.0, against 1.0 to 2.0 everywhere else. So Planning answers are 3x to 5x longer, which is the mechanism the prediction rests on."
+  },
+  "falsification": "IF AGREEMENT IS HIGHEST ON PLANNING, something is wrong with one of the two scorers and the result must not be reported until that is resolved. Written down now so that outcome is recognised immediately rather than explained away."
+ },
+ "disagreements_are_the_result": {
+  "rule": "an agreement rate alone does not say which scorer is right. A judge agreeing everywhere is redundant; one disagreeing everywhere is broken; the interesting claim is in between and only inspection establishes it.",
+  "commitment": "a sample of disagreement cases will be inspected individually, and for each I will say which scorer I judge correct and why."
+ },
+ "constancy_requirement": {
+  "rule": "the judge and prompt are held EXACTLY constant between the 4B and the 32B runs.",
+  "why": "any prompt drift between them turns a model comparison into a scorer comparison, and that difference would be invisible in the numbers.",
+  "how": "the same ss1_judge.py at the same commit, the same K.EGOTHINK_JUDGE_SYSTEM, the same endpoint model name, greedy temperature=0 seed=0. The judge prompt hash will be recorded in both result files so drift is detectable rather than assumed absent."
+ },
+ "carried_over_from_the_openeqa_kit": "the two-scorer agreement specified for OpenEQA is this task on a different benchmark, and the reasoning is unchanged: two scorers disagreeing is a measurement problem to find before the numbers are used, not after.",
+ "_provenance": {
+  "git_commit": "5b0a2f1adcc95865ea0df5c201d283d3df27470b",
+  "script": "pre-registration only; nothing run",
+  "model": "n/a",
+  "device": "n/a",
+  "n": "n/a",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
