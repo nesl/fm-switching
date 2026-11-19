@@ -4729,3 +4729,101 @@ four devices, more than 0 at eight, more than 0 at sixteen, with the delivered d
 falling below v1.0's 0.9991, 0.4871 and 0.0747. The eight-device dashcam figure is the one with
 room to improve and the sixteen-device one is already the best of the three, so it must be
 protected rather than traded.
+
+## V28. v1.2 BUILT AND MEASURED. The planner works and the OBJECTIVE declines the plans
+
+Dry run, screening. Seed 0, 600 s, mu EWMA, tight. Robot and dashcam figures are DELIVERED on
+time, per the V27.8 amendment.
+
+### V28.1 What was built
+
+`policy/planner_rc.py` plus a long window and planner-routed RC rows in the rollout:
+
+| piece | where |
+|---|---|
+| the plan set (DECLINE, WARM, RELOAD, ONE-GO-NOW, PIECES(b)-NOW, PIECES(b)-LATEST) | `planner_rc.enumerate_plans`, preconditions enforced, D17 sizes only |
+| the long-window evaluation to `T_r` | `Rollout.run(horizon_s=...)`, None keeps the dispatch horizon so every existing caller is unchanged |
+| reserved units at planned times | the plan's units carry `due_at`, which the rollout already honours as `max(free_at, due_at)`, so no new mechanism |
+| the planner's OWN RC rows into `_z_term` | `Rollout.run(rc_rows=True)`, required because F1 is off and `_rc_opportunities` was the only route |
+| re-plan triggers and ABANDON | `planner_rc.replan_cause`, `planner_rc.abandon_note` |
+| switches | `planner_rc`, `plan_latest`, `replan`, all default OFF, plus `kappa` in the run header |
+
+Policy suite **481 of 481** (9 new v1.2 tests). 12 frozen md5s green.
+
+### V28.2 The planner fires, and declines most plans
+
+Instrumented at four devices: **2 of 2 RC escalations reached the planner** and it returned a
+decision for both, so the gate and the plan loop work. Over a full 600 s run at four devices the
+decision log shows **2 plans ADMITTED** (`release_whole` 2, `release_recall` 2) and **6 DECLINED**;
+at eight devices 1 admitted and 9 declined.
+
+### V28.3 The plan DeltaJ magnitudes, which is the finding
+
+Captured from three consecutive plan evaluations at four devices. `T_r` came out at 5.01 to 5.06 s,
+so the long window is working as specified.
+
+| evaluation | reference Jhat | best plan | its DeltaJ | its GPU-seconds |
+|---|---|---|---|---|
+| 1 | +0.074409 | ONE-GO-NOW | **-0.598529** | 0.8738 |
+| 2 | +0.141521 | PIECES-LATEST(1024) | **-1.053643** | 1.3943 |
+| 3 | +0.075265 | PIECES-NOW(2048) | **-1.585175** | 2.2205 |
+
+Every plan in every evaluation scored negative, from **-0.598 to -2.521**, and the magnitude tracks
+the plan's GPU cost at roughly **-0.7 per GPU-second**: -0.599 at 0.87 GPU-s and -1.854 at 2.41
+GPU-s.
+
+**So the long window did NOT change the exchange rate; it preserved it.** Against that cost the
+objective credits the answer `omega_RC x (acc_cloud - acc_device) = 0.0354` plus a deficit term
+measured at 0.267 to 1.800. Even a maxed deficit of 1.8 cannot cover the 1.85 charged for a
+2.41 GPU-second rebuild. **The planner is computing correctly and the objective is what declines
+the work.**
+
+This is the exchange-rate problem F-A6 named, which D124 forbids fixing by touching omega, mu,
+targets, H or thresholds. **I did not touch any of them.** v1.2 as designed cannot deliver robot
+service while that exchange rate stands, and that is the result rather than a bug in the planner.
+
+### V28.4 Outcomes, against the pre-registered v1.0 column
+
+| n | variant | robot delivered of | dashcam delivered fraction |
+|---|---|---|---|
+| 4 | v1.0 | **1** of 9 | 0.9991 |
+| 4 | **v1.2, F2 off** | **2** of 9 | 0.9977 |
+| 4 | **v1.2, F2 on** | **2** of 9 | 0.9977 |
+| 4 | ablation: no LATEST | 2 of 9 | 0.9977 |
+| 4 | ablation: no replan | 2 of 9 | 0.9977 |
+| 4 | `edf` | 8 of 9 | 0.9991 |
+| 4 | `llf` | 7 of 9 | 0.9991 |
+| 8 | v1.0 | 0 of 20 | 0.4871 |
+
+**Against the pre-registration:** robot delivered rose from 1 to 2 at four devices, which meets
+"more than 1". **The dashcam condition FAILED**: 0.9977 against v1.0's 0.9991, a loss of 3 instants.
+So v1.2 bought one robot answer for three dashcam answers at four devices, and it remains far below
+`edf`'s 8 and `llf`'s 7.
+
+**F2 ON and F2 OFF are IDENTICAL at four devices** (2 of 9 and 0.9977 both), so the state-value
+inertness that F2 causes did not change v1.2's outcome here. That is consistent with V28.3: the
+decision is dominated by the GPU cost term, not by the state value.
+
+**Both ablations are identical to v1.2**, so neither the LATEST start option nor re-planning changed
+any outcome at four devices. With the planner declining most plans, there is little for either to
+act on.
+
+The eight-device v1.2 cells did not finish inside the time I had. The decision log for the run that
+did execute shows 1 admit and 9 declines, and I report no outcome figure for that size rather than
+a partial one.
+
+### V28.5 The overnight decisions, as recorded
+
+1. **State value at T_r is wired exactly as the note specifies and is inert whenever F2 is on**
+   (100 per cent zero against 28.1 per cent with F2 off). Not dropped, not worked around.
+   **OVERNIGHT DECISION, PROVISIONAL.**
+2. **ABANDON keeps its note definition**, and `abandon_note()` states plainly that where the state
+   value is inert it reduces to declining the remainder. **OVERNIGHT DECISION, PROVISIONAL.**
+3. **kappa = 1.0**, no committed source. **OVERNIGHT DECISION, PROVISIONAL.**
+
+### V28.6 What I did not do, and why
+
+I did not adjust omega, mu, targets, H, thresholds, F2's formula, `a6_backlog` or the in-flight
+`busy` charge. V28.3 shows the planner's declines follow from the exchange rate those quantities
+set, so the natural next step touches one of them, and every one is either forbidden by D124 or
+already escalated. **That is a decision for the morning, and I stopped rather than take it.**

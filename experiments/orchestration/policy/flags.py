@@ -56,6 +56,11 @@ class Flags:
     # P(predicted finish <= D_r) under the cost model's MEASURED completion-time error,
     # calibrated from committed FIT-only residuals. DEFAULT OFF.
     prob_p_finish: bool = False
+    # D125 v1.2 two-timescale: recall questions are PLANNED over the job's lifetime instead of
+    # being scored per piece on the 0.5 s dispatch horizon. SH dispatch is unchanged.
+    planner_rc: bool = False
+    plan_latest: bool = False
+    replan: bool = False
 
     def tail_cursor_on(self) -> bool:
         return bool(self.rc_tail or self.rc_tail_cursor)

@@ -1,0 +1,102 @@
+{
+ "check": "policy_v12_planner",
+ "is_measurement": false,
+ "label": "DRY RUN, SCREENING. Seed 0, dev fixtures only. Robot and dashcam figures are DELIVERED on time.",
+ "built": {
+  "module": "experiments/orchestration/policy/planner_rc.py",
+  "rollout_additions": [
+   "horizon_s for the long window",
+   "rc_rows to route the planner RC rows"
+  ],
+  "switches": [
+   "planner_rc",
+   "plan_latest",
+   "replan"
+  ],
+  "kappa": 1.0,
+  "kappa_provisional": true,
+  "kappa_reason": "no committed FIT/DEV q90 ratio of measured to predicted JOB completion exists; the same search F4 used finds per-STEP residual bands only"
+ },
+ "planner_fires": {
+  "rc_escalations_reaching_planner": "2 of 2 at four devices",
+  "admits_vs_declines": {
+   "4": {
+    "admitted": 2,
+    "declined": 6
+   },
+   "8": {
+    "admitted": 1,
+    "declined": 9
+   }
+  }
+ },
+ "plan_delta_j": {
+  "window_s": [
+   5.01,
+   5.06,
+   5.06
+  ],
+  "reference_jhat": [
+   0.074409,
+   0.141521,
+   0.075265
+  ],
+  "best_plan_delta_j": [
+   -0.598529,
+   -1.053643,
+   -1.585175
+  ],
+  "best_plan_gpu_s": [
+   0.8738,
+   1.3943,
+   2.2205
+  ],
+  "range": "-0.598 to -2.521 across every plan in every evaluation",
+  "cost_rate": "about -0.7 per GPU-second",
+  "credits_available": {
+   "rc_answer": 0.0354,
+   "deficit_term": [
+    0.267,
+    1.8
+   ]
+  },
+  "finding": "the long window did NOT change the exchange rate; the planner computes correctly and the objective declines the work"
+ },
+ "outcomes": null,
+ "vs_preregistration": {
+  "robot": "MET: 1 to 2 delivered at four devices",
+  "dashcam": "FAILED: 0.9977 against v1.0 0.9991, a loss of three instants",
+  "summary": "v1.2 bought one robot answer for three dashcam answers at four devices and remains far below edf 8 and llf 7"
+ },
+ "f2_on_vs_off": "IDENTICAL at four devices (2 of 9 and 0.9977 both), consistent with the decision being dominated by the GPU cost term",
+ "ablations": "no LATEST and no replan are both identical to v1.2 at four devices",
+ "n8_status": "the v1.2 cells did not finish in the time available; 1 admit and 9 declines in the log, no outcome figure reported",
+ "overnight_decisions_provisional": [
+  "state value at T_r wired as specified and inert whenever F2 is on (100 percent zero against 28.1 percent)",
+  "ABANDON keeps its note definition and reduces to declining the remainder where the state value is inert",
+  "kappa = 1.0 with no committed source"
+ ],
+ "untouched_and_escalated": [
+  "omega",
+  "mu",
+  "targets",
+  "H",
+  "thresholds",
+  "F2 formula",
+  "a6_backlog",
+  "in-flight busy charge",
+  "B2 scaling"
+ ],
+ "gates": {
+  "policy_suite": "481/481",
+  "frozen_md5s": "12/12 green"
+ },
+ "_provenance": {
+  "git_commit": "4f91e8d859fac4c2d462febaefc936c21c31ca72",
+  "script": "policy/planner_rc.py with coordinator._plan_rc and rollout long-window support",
+  "model": "none (pol4 frozen)",
+  "device": "flash CPU only",
+  "n": "seed 0 at 4 and 8 devices, 600 s",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}

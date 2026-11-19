@@ -234,13 +234,16 @@ class Rollout:
     # ---------------------------------------------------------------- the rollout
     def run(self, fleet: Fleet, release_now: Sequence[str] = (), exclude: Sequence[str] = (),
             extra_pending: Sequence[PendingItem] = (), drop: Sequence[str] = (),
-            extra_jobs: Optional[Dict[str, Any]] = None) -> RolloutResult:
+            extra_jobs: Optional[Dict[str, Any]] = None,
+            horizon_s: Optional[float] = None, rc_rows: bool = False) -> RolloutResult:
         """`extra_jobs` carries a CANDIDATE job into the rollout without registering it on the
         caller's fleet. Admission must be able to value the job it is deciding about, and a
         declined query must leave nothing behind (addendum A2 as revised), so the candidate lives
         only inside this copy."""
         f = self._clone(fleet)
-        t0, H = f.t, float(self.params.H)
+        # D125 v1.2: the planner evaluates a plan over the JOB'S LIFETIME, not H. `horizon_s`
+        # None keeps the dispatch horizon, so every existing caller is unchanged.
+        t0, H = f.t, (float(self.params.H) if horizon_s is None else float(horizon_s))
         end = t0 + H
         for p in extra_pending:
             f.pending.append(copy.deepcopy(p))
@@ -374,12 +377,15 @@ class Rollout:
         # The tail's own progress is added HERE and nowhere else, so `_terminal` and
         # `_prefix_risk` keep the horizon's accounting unchanged.
         rc_progress = jobs_progress
-        if self.flags.tail_cursor_on() and tail_progress:
+        if (self.flags.tail_cursor_on() or rc_rows) and tail_progress:
             rc_progress = dict(jobs_progress)
             for jid, k in tail_progress.items():
                 rc_progress[jid] = rc_progress.get(jid, 0) + k
         u_hat += self._rc_utility(f, rc_progress, deliveries, ghat_by_job)
-        if self.flags.tail_zrows_on():
+        # D125 v1.2: F1 is OFF in v1.2 and its `_rc_opportunities` was the ONLY route that put RC
+        # rows into `_z_term`, so the planner routes its own. Without this the design note's
+        # deficit term would read as implemented while contributing nothing.
+        if self.flags.tail_zrows_on() or rc_rows:
             opps = list(opps) + self._rc_opportunities(f, rc_progress, deliveries)
         z_term = self._z_term(f, opps)
         risk = self._prefix_risk(f, store, deliveries, jobs_progress, end, demand_tokens,

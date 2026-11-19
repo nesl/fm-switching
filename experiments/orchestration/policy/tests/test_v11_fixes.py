@@ -252,8 +252,9 @@ class TestRcTailMirrorsD98(unittest.TestCase):
         import inspect
         from policy import rollout as RO
         src = inspect.getsource(RO.Rollout.run)
-        self.assertIn("if self.flags.tail_zrows_on():", src)
-        self.assertIn("if self.flags.tail_cursor_on() and tail_progress:", src)
+        self.assertIn("if self.flags.tail_zrows_on() or rc_rows:", src,
+                      "v1.2's planner routes its own RC rows through the same point")
+        self.assertIn("if (self.flags.tail_cursor_on() or rc_rows) and tail_progress:", src)
 
     def test_rc_opportunities_exist_so_the_deficit_can_be_credited(self):
         """v1.0 emitted task=SH rows only, so z_of('RC') was never read by _z_term."""
@@ -539,3 +540,104 @@ class TestF5cDeficitRouting(unittest.TestCase):
         other.bump_z("RC", 0.9, 0.0)
         self.assertAlmostEqual(direct, other.z_of("RC"), places=12,
                                msg="routing must not change the arithmetic")
+
+
+class TestV12Planner(unittest.TestCase):
+    """D125 v1.2: the RC job planner. These fail on v1.1, which has no planner at all."""
+
+    def setUp(self):
+        from policy import planner_rc as PL
+        self.PL = PL
+        self.e = Eng1Engine.load()
+
+    def test_the_switches_default_off(self):
+        f = Flags()
+        self.assertFalse(f.planner_rc)
+        self.assertFalse(f.plan_latest)
+        self.assertFalse(f.replan)
+
+    def test_the_plan_set_is_the_design_notes(self):
+        plans = self.PL.enumerate_plans(
+            engine=self.e, device="robo000", qtype=QTYPE, rep="RICH", size_tokens=11000,
+            readiness="COLD", deadline_abs=5.0, t=0.0, piece_sizes=(1024, 2048),
+            allow_latest=True, kappa=1.0)
+        labels = {p.label() for p in plans}
+        self.assertIn("ONE-GO-NOW", labels)
+        self.assertIn("PIECES-NOW(1024)", labels)
+        self.assertIn("PIECES-NOW(2048)", labels)
+        self.assertTrue(any(l.startswith("PIECES-LATEST") for l in labels),
+                        "plan_latest must add the LATEST variants: %r" % (labels,))
+
+    def test_readiness_preconditions_limit_the_set(self):
+        warm = self.PL.enumerate_plans(
+            engine=self.e, device="robo000", qtype=QTYPE, rep="RICH", size_tokens=11000,
+            readiness="GPU-WARM", deadline_abs=5.0, t=0.0, piece_sizes=(1024,),
+            allow_latest=False, kappa=1.0)
+        self.assertEqual({p.kind for p in warm}, {self.PL.WARM},
+                         "a GPU-warm history is answered, not rebuilt")
+        host = self.PL.enumerate_plans(
+            engine=self.e, device="robo000", qtype=QTYPE, rep="RICH", size_tokens=11000,
+            readiness="HOST-WARM", deadline_abs=5.0, t=0.0, piece_sizes=(1024,),
+            allow_latest=False, kappa=1.0)
+        self.assertIn(self.PL.RELOAD, {p.kind for p in host},
+                      "a host-warm history reloads rather than rebuilding")
+
+    def test_no_new_piece_size_is_invented(self):
+        plans = self.PL.enumerate_plans(
+            engine=self.e, device="robo000", qtype=QTYPE, rep="RICH", size_tokens=11000,
+            readiness="COLD", deadline_abs=5.0, t=0.0, piece_sizes=(1024, 2048),
+            allow_latest=True, kappa=1.0)
+        sizes = {p.piece_tokens for p in plans if p.piece_tokens}
+        self.assertTrue(sizes <= {1024, 2048}, "D17's measured sizes only, got %r" % (sizes,))
+
+    def test_a_reserved_unit_carries_its_planned_release_time(self):
+        plans = self.PL.enumerate_plans(
+            engine=self.e, device="robo000", qtype=QTYPE, rep="RICH", size_tokens=4096,
+            readiness="COLD", deadline_abs=20.0, t=0.0, piece_sizes=(1024,),
+            allow_latest=True, kappa=1.0)
+        latest = [p for p in plans if p.kind == self.PL.PIECES_LATEST]
+        self.assertTrue(latest, "a 20 s deadline leaves room for a LATEST plan")
+        p = latest[0]
+        self.assertGreater(p.first_start_s, 0.0, "LATEST must start later than now")
+        for u in p.units:
+            self.assertAlmostEqual(u.due_at, p.first_start_s, places=9,
+                                   msg="the planned time travels as due_at, which the rollout "
+                                       "honours as max(free_at, due_at)")
+            self.assertEqual(u.meta.get("plan"), self.PL.PIECES_LATEST)
+
+    def test_kappa_is_one_and_flagged_provisional(self):
+        """No committed FIT/DEV q90 of measured over predicted job completion exists."""
+        import inspect
+        src = inspect.getsource(self.PL)
+        self.assertIn("kappa IS 1.0 AND PROVISIONAL", src)
+
+    def test_abandon_says_plainly_when_it_is_not_valued(self):
+        inert = self.PL.abandon_note(True)
+        self.assertIn("DECLINING THE REMAINDER", inert)
+        self.assertIn("PROVISIONAL", inert)
+        live = self.PL.abandon_note(False)
+        self.assertIn("keeps the state value", live)
+
+    def test_the_replan_triggers_are_the_notes(self):
+        from policy.state import Job
+        j = Job(job_id="j", device="robo000", qtype=QTYPE, rep="RICH", deadline=5.0,
+                admitted_at=0.0, pieces_total=4, pieces_done=0, tokens_per_piece=1024)
+        self.assertIsNone(self.PL.replan_cause(job=j, now=0.0, predicted_completion_s=2.0,
+                                               kappa=1.0, prefix_lost=False,
+                                               readiness_changed=False))
+        self.assertIn("slipped", self.PL.replan_cause(
+            job=j, now=0.0, predicted_completion_s=6.0, kappa=1.0, prefix_lost=False,
+            readiness_changed=False))
+        self.assertIn("prefix loss", self.PL.replan_cause(
+            job=j, now=0.0, predicted_completion_s=1.0, kappa=1.0, prefix_lost=True,
+            readiness_changed=False))
+        self.assertIn("readiness", self.PL.replan_cause(
+            job=j, now=0.0, predicted_completion_s=1.0, kappa=1.0, prefix_lost=False,
+            readiness_changed=True))
+
+    def test_the_rollout_accepts_a_long_window_and_routes_rc_rows(self):
+        import inspect
+        from policy import rollout as RO
+        sig = inspect.signature(RO.Rollout.run)
+        self.assertIn("horizon_s", sig.parameters, "v1.1's run has no long window")
+        self.assertIn("rc_rows", sig.parameters, "v1.1 cannot route planner RC rows")

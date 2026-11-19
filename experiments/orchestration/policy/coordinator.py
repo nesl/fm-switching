@@ -265,6 +265,14 @@ class Coordinator:
                              "no feasible plan for this request",
                              detail=dict(basis="ghat", ghat=g["ghat"], terms=g["terms"],
                                          path=req.path, path_choice=path_detail))]
+        # D125 v1.2: for RC the per-piece short-horizon score is replaced by a JOB PLAN chosen
+        # over the job's lifetime. The plan's units carry their planned release time, so the
+        # pending set and the calendar see reservations rather than items to re-score each
+        # period. SH is untouched and still dispatches on the 100 ms horizon.
+        if self.flags.planner_rc and req.task != "SH":
+            pl = self._plan_rc(fleet, req, items, jobs, g)
+            if pl is not None:
+                return pl
         res = self._admit_score(fleet, req, items, jobs)
         self.scoring_calls += 1
         take = res["delta_j"] > 0
@@ -422,6 +430,56 @@ class Coordinator:
             self._planned_jobs = {}
             return []
         return list(best[1])
+
+    # ---------------------------------------------------------------- D125 v1.2
+    def _plan_rc(self, fleet: Fleet, req, items, jobs, g) -> Optional[List[Decision]]:
+        """Choose and reserve a job plan for one recall question (design note 2.2 to 2.4).
+
+        Returns the decisions, or None to fall back to the v1.1 path when the question carries no
+        job for the planner to plan (then nothing has been changed).
+        """
+        from . import planner_rc as PL
+        if not jobs:
+            return None
+        jid, job = sorted(jobs.items())[0]
+        dev = fleet.device(req.device)
+        b = dev.history.get(job.rep)
+        if b is None:
+            return None
+        built = int(getattr(self, "_built_tokens_by_job", {}).get(jid, 0))
+        kappa = float(getattr(self.params, "kappa", 1.0) or 1.0)
+        plans = PL.enumerate_plans(
+            engine=self.engine, device=req.device, qtype=job.qtype, rep=job.rep,
+            size_tokens=int(b.size_tokens), readiness=_readiness(b.most_likely()),
+            deadline_abs=float(job.deadline), t=float(fleet.t),
+            piece_sizes=tuple(self.params.piece_sizes_tokens),
+            allow_latest=bool(self.flags.plan_latest), kappa=kappa, built_tokens=built)
+        if not plans:
+            return None
+        out = PL.choose(self.rollout, fleet, plans, float(job.deadline),
+                        decision_period_s=float(getattr(self.params, "decision_period_s", 0.1)))
+        self.scoring_calls += len(out["plans"]) + 1
+        chosen = out["chosen"]
+        self.last_plan = dict(
+            job_id=jid, admitted=bool(out["admitted"]), horizon_s=out["horizon_s"],
+            chosen=(chosen.label() if chosen is not None else None),
+            delta_j=(chosen.delta_j if chosen is not None else None),
+            considered={p.label(): (None if p.delta_j is None else round(p.delta_j, 9))
+                        for p in out["plans"]},
+            kappa=kappa, kappa_provisional=True)
+        if chosen is None:
+            self._discard(fleet, items, jobs)
+            return [Decision(fleet.t, "plan", req.device, None, False,
+                             out["note"], detail=dict(plan=self.last_plan))]
+        # Reserve: the plan's own units replace the per-piece items, carrying planned times.
+        self._discard(fleet, items, jobs)
+        fleet.jobs[jid] = chosen.job
+        fleet.pending += list(chosen.units)
+        req.payload_delivered = True
+        for it in chosen.units:
+            it.meta["payload_arrived_with_request"] = True
+        return [Decision(fleet.t, "plan", req.device, chosen.delta_j, True,
+                         out["note"], detail=dict(plan=self.last_plan))]
 
     def _phase(self, fleet: Fleet, ep: Episode) -> float:
         """Spec 7.8: a phase that clusters this episode's follow-ups with others of the same

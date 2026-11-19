@@ -118,6 +118,12 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     rc_tail_cursor: bool = False
     rc_tail_zrows: bool = False
     prob_p_finish: bool = False
+    # D125 v1.2: the two-timescale planner. kappa is 1.0 and PROVISIONAL (no committed FIT/DEV
+    # q90 ratio of measured to predicted job completion exists), and it is recorded in the header.
+    planner_rc: bool = False
+    plan_latest: bool = False
+    replan: bool = False
+    kappa: float = 1.0
 
     name: str = "policy-core"
     case: str = "own"
@@ -182,6 +188,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
             p.mu, p.mu_estimator = 0.0, "ewma_marginal_utility"
         if calibration_knots_path is not None:
             p.tier_calibration = CAL.load(calibration_knots_path)
+        p.kappa = float(self.kappa)
         self.params = p
         # D122: a v1.1 defect fix travels on `Flags` so the rollout can read it, but it is NOT
         # one of spec 7.0's conditional mechanisms, so the D66 guard asks `conditional_any_on`.
@@ -191,7 +198,10 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                            realistic_competing=bool(self.realistic_competing),
                            rc_tail_cursor=bool(self.rc_tail_cursor),
                            rc_tail_zrows=bool(self.rc_tail_zrows),
-                           prob_p_finish=bool(self.prob_p_finish))
+                           prob_p_finish=bool(self.prob_p_finish),
+                           planner_rc=bool(self.planner_rc),
+                           plan_latest=bool(self.plan_latest),
+                           replan=bool(self.replan))
         if self.flags.conditional_any_on():
             raise RuntimeError("D66: round 1 runs the CORE only and every conditional flag must "
                                "be off; one is on")
@@ -833,6 +843,9 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
 
     def live2_describe(self) -> Dict[str, Any]:
         d = super().live2_describe()
+        d["v12"] = dict(planner_rc=bool(self.planner_rc), plan_latest=bool(self.plan_latest),
+                        replan=bool(self.replan), kappa=float(self.kappa),
+                        kappa_provisional=True)
         d.update(cost_model_id=self.engine.model_name() if self._ready else self.cost_model,
                  mu_mode=self.mu_mode, mu_fixed=self.mu_fixed, H=self.h_s,
                  flags=self.flags.as_dict() if self._ready else None,
