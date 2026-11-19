@@ -21,10 +21,10 @@ BUCKETS = [(0, 5000), (5000, 10000), (10000, 15000), (15000, 19400), (19400, 1e9
 def boot(xs, seed=0):
     if not xs:
         return dict(n=0)
-    rng = random.Random(seed)
-    n = len(xs)
-    m = [sum(xs[rng.randrange(n)] for _ in range(n)) / n for _ in range(B)]
-    m.sort()
+    import numpy as np                       # vectorised (same estimator: B resamples with replacement)
+    a = np.asarray(xs, dtype=float)
+    n = len(a)
+    m = np.sort(a[np.random.default_rng(seed).integers(0, n, size=(B, n))].mean(axis=1)).tolist()
     return dict(n=n, acc=round(sum(xs) / n, 4), ci95=[round(m[int(0.025 * B)], 4), round(m[int(0.975 * B)], 4)])
 
 
@@ -41,7 +41,17 @@ def flows(pairs):
     u = sum(1 for a, b in pairs if b and not a)
     return dict(n=n, helps=h, hurts=u, changes_pct=round(100 * (h + u) / n, 2) if n else None,
                 helps_pct=round(100 * h / n, 2) if n else None, hurts_pct=round(100 * u / n, 2) if n else None,
-                net_pp=round(100 * (h - u) / n, 2) if n else None)
+                net_pp=round(100 * (h - u) / n, 2) if n else None, net_pp_ci95=net_ci(pairs))
+
+
+def net_ci(pairs, seed=0):
+    """Paired bootstrap of the net (helps - hurts) / n, in pp: resample questions, keep each pair intact."""
+    import numpy as np
+    if not pairs:
+        return None
+    d = np.asarray([(1 if a and not b else 0) - (1 if b and not a else 0) for a, b in pairs], dtype=float)
+    m = np.sort(d[np.random.default_rng(seed).integers(0, len(d), size=(B, len(d)))].mean(axis=1))
+    return [round(100 * m[int(0.025 * B)], 2), round(100 * m[int(0.975 * B)], 2)]
 
 
 def main():

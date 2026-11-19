@@ -1,6 +1,6 @@
 # FM-switching — Project Status
 
-Last updated: 2026-11-19 (later 2) (**StudyAOI-spacing COMPLETE (Jetson Orin, CPU only, offline,
+Last updated: 2026-11-19 (later 3) (**StudyACC2 COMPLETE (H100): history help not detectable above 19.4k tokens; committed RECENT and D2 quality tables overstate live2's formats, reports/study_acc2.md.** **StudyAOI-spacing COMPLETE (Jetson Orin, CPU only, offline,
 committed data only): THE SPACING OF CLOUD CHECKS DOES NOT MATTER at a fixed cloud-served budget on
 the Nexar metric, so the per-instant opportunity model needs no age-of-information spacing term. At
 each budget f in {0.10, 0.25, 0.50, 0.75} the three event-agnostic patterns (EVEN, CLUSTERED k in

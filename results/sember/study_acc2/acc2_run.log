@@ -1,0 +1,43 @@
+[11:12:28] starting vLLM server: /home/pragya/.venvs/fm-switching-vllm/bin/vllm serve /home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb --served-model-name 32BI --port 8031 --max-model-len 32768 --gpu-memory-utilization 0.9 --tensor-parallel-size 1 --no-enable-prefix-caching --limit-mm-per-prompt {"image": 16} --dtype bfloat16 --seed 0 --limit-mm-per-prompt {"image": 640, "video": 1} --mm-processor-kwargs {"size": {"shortest_edge": 4096, "longest_edge": 16777216}, "fps": 1.0, "do_sample_frames": false} --trust-request-mm-kwargs --host 127.0.0.1 --enable-prefix-caching --enable-prompt-tokens-details --mm-processor-cache-gb 128 --kv-offloading-backend native --kv-offloading-size 27 --enable-log-requests --enable-logging-iteration-details
+[11:13:41] server up: {"key": "32BI", "repo": "Qwen/Qwen3-VL-32B-Instruct", "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb", "startup_s": 72.9, "log": "logs/study_x_server_32BI_1119_111228.log", "max_model_len": 32768, "gpu_memory_utilization": 0.9, "tensor_parallel_size": 1, "prefix_caching": false, "kv_cache_tokens": 62944, "max_concurrency_at_max_len": 1.92, "available_kv_gib": "15.37", "model_weights_gib": "62.66", "attention_backend_lines": ["(EngineCore pid=1655306) INFO 2026-11-19 11:12:45.333 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention", "(EngineCore pid=1655306) INFO 2026-11-19 11:12:45.334 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.", "(EngineCore pid=1655306) INFO 2026-11-19 11:12:45.814 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].", "(EngineCore pid=1655306) INFO 2026-11-19 11:12:45.814 [flash_attn.py:1167] Using FlashAttention version 3", "(EngineCore pid=1655306) INFO 2026-11-19 11:12:54.941 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."], "cuda_graphs": true, "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)", "extra_server_args": ["--limit-mm-per-prompt", "{\"image\": 640, \"video\": 1}", "--mm-processor-kwargs", "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}"
+server up; 1819 requests to run
+[11:13:42] 0/1819 D2 pt=2261 ct=0 ttft=0.4939 ok=False err=None
+[11:15:28] 50/1819 D2 pt=9192 ct=0 ttft=2.1967 ok=False err=None
+[11:17:16] 100/1819 D2 pt=9331 ct=0 ttft=2.274 ok=False err=None
+[11:18:49] 150/1819 D2 pt=4436 ct=0 ttft=0.9495 ok=False err=None
+[11:20:39] 200/1819 D2 pt=5989 ct=0 ttft=1.3176 ok=False err=None
+[11:22:08] 250/1819 D2 pt=9973 ct=0 ttft=2.374 ok=True err=None
+[11:23:57] 300/1819 D2 pt=13452 ct=0 ttft=3.3273 ok=True err=None
+[11:25:27] 350/1819 D2 pt=8421 ct=0 ttft=2.0367 ok=False err=None
+[11:27:10] 400/1819 D2 pt=10501 ct=0 ttft=2.5148 ok=False err=None
+[11:28:52] 450/1819 D2 pt=4837 ct=0 ttft=1.0161 ok=False err=None
+[11:30:41] 500/1819 D2 pt=10503 ct=0 ttft=2.6352 ok=True err=None
+[11:32:11] 550/1819 D2 pt=8664 ct=0 ttft=2.0865 ok=False err=None
+[11:33:47] 600/1819 D2 pt=7262 ct=0 ttft=1.6881 ok=False err=None
+[11:35:22] 650/1819 D2 pt=9701 ct=0 ttft=2.3429 ok=False err=None
+[11:37:05] 700/1819 D2 pt=10544 ct=0 ttft=2.5409 ok=False err=None
+[11:38:58] 750/1819 D2 pt=11523 ct=0 ttft=2.9628 ok=False err=None
+[11:40:34] 800/1819 D2 pt=14321 ct=0 ttft=3.5433 ok=False err=None
+[11:42:23] 850/1819 D2 pt=17652 ct=0 ttft=4.6167 ok=False err=None
+[11:44:02] 900/1819 D2 pt=4433 ct=0 ttft=0.953 ok=False err=None
+[11:45:47] 950/1819 D2 pt=4890 ct=0 ttft=1.0582 ok=False err=None
+[11:47:26] 1000/1819 D2 pt=4973 ct=0 ttft=1.0444 ok=True err=None
+[11:49:24] 1050/1819 D2 pt=10466 ct=0 ttft=2.5327 ok=True err=None
+[11:51:02] 1100/1819 D2 pt=18217 ct=0 ttft=4.6875 ok=False err=None
+[11:53:27] 1150/1819 D2 pt=25787 ct=0 ttft=7.2056 ok=True err=None
+[11:55:25] 1200/1819 D2 pt=1659 ct=0 ttft=0.3529 ok=False err=None
+[11:57:23] 1250/1819 D2 pt=4330 ct=0 ttft=0.9167 ok=True err=None
+[11:59:03] 1300/1819 D2 pt=14236 ct=0 ttft=3.5399 ok=False err=None
+[12:00:33] 1350/1819 D2 pt=8497 ct=0 ttft=2.0598 ok=True err=None
+[12:02:14] 1400/1819 D2 pt=14125 ct=0 ttft=3.5275 ok=False err=None
+[12:03:30] 1450/1819 D2 pt=7245 ct=0 ttft=1.6097 ok=False err=None
+[12:05:13] 1500/1819 D2 pt=10401 ct=0 ttft=2.5079 ok=False err=None
+[12:06:49] 1550/1819 D2 pt=2830 ct=0 ttft=0.5723 ok=False err=None
+[12:08:27] 1600/1819 D2 pt=7843 ct=0 ttft=1.7902 ok=True err=None
+[12:10:03] 1650/1819 D2 pt=8811 ct=0 ttft=2.1391 ok=False err=None
+[12:11:47] 1700/1819 D2-LIVE-TRACE pt=14965 ct=0 ttft=3.7209 ok=True err=None
+[12:15:48] 1750/1819 D2-LIVE-TRACE pt=13588 ct=0 ttft=3.3391 ok=False err=None
+[12:20:12] 1800/1819 D2-LIVE-TRACE pt=14990 ct=0 ttft=3.717 ok=False err=None
+[12:21:57] server 32BI stopped
+run done
+ACC2 RUN EXIT 0
