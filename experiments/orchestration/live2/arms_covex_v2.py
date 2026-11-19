@@ -72,6 +72,7 @@ class CovexV2Arm(Policy):
             mu_mode="none", admit_floor_c=8, deficit_update=True, honour_job_priority=True,
             realistic_competing=True, planner_rc=True, plan_latest=True, replan=True)
         self._scorer = None
+        self._roster: Dict[str, Any] = {}
         # Deviations BY KIND with their realised effect, which is the scientific output even if
         # the aggregate does not win.
         self.deviations: Dict[str, int] = {}
@@ -94,6 +95,10 @@ class CovexV2Arm(Policy):
         self.deviations, self.considered = {}, {}
 
     def live2_roster(self, roster: Dict[str, Any]) -> None:
+        # KEEP IT OURSELVES. The roster is the channel through which policy-core learns the
+        # EXECUTED state (built tokens per session, each SH instant's own deadline), so the
+        # evaluator must receive the real one every period.
+        self._roster = dict(roster or {})
         if hasattr(self.base, "live2_roster"):
             self.base.live2_roster(roster)
         if self._scorer is not None and hasattr(self._scorer, "live2_roster"):
@@ -165,8 +170,14 @@ class CovexV2Arm(Policy):
         as "no alternative scored" rather than as a zero gain, so an unscored decision is never
         mistaken for one that scored zero.
         """
+        # D131 option 1, THE EVALUATOR MUST FOLLOW THE EXECUTED TRAJECTORY. This previously read
+        # `getattr(self.base, "_live2_roster", None) or {}`, and `arms_published.py` defines no
+        # `live2_roster` at all, so the base never stored one and the scorer's REAL roster was
+        # overwritten with an empty dict every period. Measured consequence: `_jobs_by_q` stayed
+        # at size 0 for all 2,999 epochs, no `rc:` DeltaJ was ever emitted, and every recall
+        # alternative came back UNSCORED, which is not the same as scoring zero.
         try:
-            self._scorer.live2_roster(getattr(self.base, "_live2_roster", None) or {})
+            self._scorer.live2_roster(dict(self._roster))
         except Exception:
             pass
         try:
@@ -175,11 +186,34 @@ class CovexV2Arm(Policy):
             return {}
         pred = getattr(self._scorer, "last_predictions", None) or {}
         dj = pred.get("delta_j") or {}
+        # KEY FORMAT, established by inspecting the live keys rather than assuming. The scorer
+        # keys DeltaJ by the DECISION TARGET, which for RC work is the planner's item id,
+        # `<device>:<rep>:<t>:p<i>` (for example `robo002:RICH:39.300:p0`), and for state actions
+        # `<device>:<rep>:PROMOTE_REBUILD:<t>`. It is NOT keyed by query id, so the earlier lookup
+        # of `"rc:" + query_id` matched nothing and every alternative came back UNSCORED.
+        #
+        # A recall query carries `session_id`, which is the device, so the RC work for a query is
+        # the set of target keys under that device prefix. The value of ADMITTING is their sum.
+        by_device: Dict[str, float] = {}
+        for k, v in dj.items():
+            key = str(k)
+            dev = key.split(":", 1)[0]
+            if ":" not in key:
+                continue
+            by_device[dev] = by_device.get(dev, 0.0) + float(v)
         out: Dict[str, float] = {}
         for r in act.recall:
-            v = dj.get("rc:" + str(r.query_id))
-            if v is None:
+            sid = None
+            for q in getattr(obs, "recall", ()) or ():
+                if q.query_id == r.query_id:
+                    # A session id is `<device>|<slot>|<clip>`, for example
+                    # `robo002|s000|1813544496258929_start_0.0_end_307.914`, while a DeltaJ target
+                    # is keyed by the DEVICE alone. Matching the full session id found nothing.
+                    sid = str(q.session_id).split("|", 1)[0]
+                    break
+            if sid is None or sid not in by_device:
                 continue
+            v = by_device[sid]
             # The scorer's DeltaJ is the value of ADMITTING. A base CLOUD decision already takes
             # that value, so the gain from deviating to DEVICE is its negation.
             out[r.query_id] = (-float(v)) if r.decision == "CLOUD" else float(v)

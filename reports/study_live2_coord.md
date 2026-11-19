@@ -5480,3 +5480,40 @@ Option 2 is also the answer to the geometry cancellation if it turns out to be r
 both jobs at once. **The D98 RC tail is the existing precedent for crediting outcomes beyond H and
 may be cheaper than a long rollout.** Neither is implemented; the margin sweep does not start until
 one is, because a sweep over unscorable alternatives measures nothing.
+
+### The reachability classification, CORRECTED: RC deviations are REACHABLE
+
+**The geometry prediction is REFUTED for RC deviations on the dispatch horizon.** At 10 devices,
+seed 0:
+
+| alternative kind | considered | non-zero | max abs gain | verdict |
+|---|---|---|---|---|
+| `recall:CLOUD->DEVICE` | 10 | **4** | 0.0550 | **REACHABLE** |
+
+Four deviations fired at `margin = 0`, so the directive's "confirm at least one deviation fires"
+condition is met and the margin sweep is meaningful.
+
+**Six of the ten scored EXACTLY zero**, so the geometry cancellation is real for some decisions and
+not for others. The prediction was that RC-class deviations would be uniformly zero because a
+recall answer lands outside H; what the data shows is partial cancellation. **The hypothesis was
+worth testing and is now tested rather than assumed, which is why option 1 had to precede option 2:
+changing the horizon first would have confounded "we fixed scorability" with "we changed the
+horizon" and left the geometry claim untestable forever.**
+
+**THREE BUGS IN MY EVALUATOR had to be cleared to get here, and each produced a clean-looking zero.**
+
+1. **The roster was clobbered.** `_score_recall` reset the scorer's roster from `getattr(self.base, "_live2_roster", None) or {}`, and `arms_published.py` defines no `live2_roster` at all, so the real roster was overwritten with `{}` every period. Consequence: `_jobs_by_q` stayed at size 0 for all 2,999 epochs and no RC decision was ever produced. Fixed by keeping the roster on the wrapper.
+2. **The lookup key was wrong.** DeltaJ is keyed by DECISION TARGET, which for RC work is the planner's item id `<device>:<rep>:<t>:p<i>` (for example `robo002:RICH:39.300:p0`), never `"rc:" + query_id`. Established by printing the live keys rather than reasoning about them.
+3. **The device was wrong.** A session id is `<device>|<slot>|<clip>`, so matching the full `session_id` against a device-keyed target found nothing.
+
+**Every one of the three produced "0 non-zero out of 10", which reads exactly like
+cancelled-by-geometry.** Had any been left in place, the result would have confirmed the standing
+prediction for the wrong reason. This is the UNSCORABLE category of the taxonomy doing real work:
+four kinds of silence that are invisibly identical from outside.
+
+**LIMITATION, stated because it qualifies the number.** The value of admitting a query is taken as
+the SUM of the DeltaJ over that device's RC target keys, since no target is keyed by query id. With
+one outstanding question per device this is exact; with more than one it attributes the whole
+device's RC value to each query. It is adequate for a REACHABLE / CANCELLED classification, which
+only asks whether the quantity is ever non-zero, and it is **not** adequate as a calibrated gain,
+so the margin sweep's absolute values should be read with it in mind.
