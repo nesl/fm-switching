@@ -1,0 +1,342 @@
+{
+ "check": "policy_v11_rc_tail_and_staleness",
+ "is_measurement": false,
+ "label": "DRY RUN, NOT AN OUTCOME CLAIM. Seed 0, 4 and 8 devices, 600 s, mu EWMA, H=0.5 s, tight memory, pol4. edf run as a reference arm.",
+ "variants": [
+  "v1.0",
+  "A3+B1",
+  "+staleness",
+  "+RC tail",
+  "all",
+  "edf (reference)"
+ ],
+ "rows": [
+  {
+   "n": 4,
+   "variant": "v1.0",
+   "robots": 9,
+   "released_before_deadline": 1,
+   "monitor_releases": 2174,
+   "monitor_offered": 2176,
+   "z_rc_max": 0.0,
+   "z_updates": null,
+   "decisions": 2380,
+   "p50_ms": 1.101
+  },
+  {
+   "n": 4,
+   "variant": "A3+B1",
+   "robots": 9,
+   "released_before_deadline": 1,
+   "monitor_releases": 2174,
+   "monitor_offered": 2176,
+   "z_rc_max": 4.5,
+   "z_updates": 2183,
+   "decisions": 2380,
+   "p50_ms": 1.075
+  },
+  {
+   "n": 4,
+   "variant": "+staleness",
+   "robots": 9,
+   "released_before_deadline": 1,
+   "monitor_releases": 2174,
+   "monitor_offered": 2176,
+   "z_rc_max": 4.5,
+   "z_updates": 2183,
+   "decisions": 2380,
+   "p50_ms": 0.843
+  },
+  {
+   "n": 4,
+   "variant": "+RC tail",
+   "robots": 9,
+   "released_before_deadline": 2,
+   "monitor_releases": 2128,
+   "monitor_offered": 2176,
+   "z_rc_max": 4.5,
+   "z_updates": 2183,
+   "decisions": 2297,
+   "p50_ms": 1.26
+  },
+  {
+   "n": 4,
+   "variant": "all",
+   "robots": 9,
+   "released_before_deadline": 2,
+   "monitor_releases": 2128,
+   "monitor_offered": 2176,
+   "z_rc_max": 4.5,
+   "z_updates": 2183,
+   "decisions": 2297,
+   "p50_ms": 1.249
+  },
+  {
+   "n": 4,
+   "variant": "edf (reference)",
+   "robots": 9,
+   "released_before_deadline": 8,
+   "monitor_releases": 2174,
+   "monitor_offered": 2176,
+   "z_rc_max": 0.0,
+   "z_updates": null,
+   "decisions": 2190,
+   "p50_ms": 0.051
+  },
+  {
+   "n": 8,
+   "variant": "v1.0",
+   "robots": 20,
+   "released_before_deadline": 0,
+   "monitor_releases": 2107,
+   "monitor_offered": 4326,
+   "z_rc_max": 0.0,
+   "z_updates": null,
+   "decisions": 2220,
+   "p50_ms": 1.72
+  },
+  {
+   "n": 8,
+   "variant": "A3+B1",
+   "robots": 20,
+   "released_before_deadline": 0,
+   "monitor_releases": 2107,
+   "monitor_offered": 4326,
+   "z_rc_max": 6.3,
+   "z_updates": 4338,
+   "decisions": 2220,
+   "p50_ms": 1.722
+  },
+  {
+   "n": 8,
+   "variant": "+staleness",
+   "robots": 20,
+   "released_before_deadline": 0,
+   "monitor_releases": 2107,
+   "monitor_offered": 4326,
+   "z_rc_max": 6.3,
+   "z_updates": 4338,
+   "decisions": 2220,
+   "p50_ms": 0.906
+  },
+  {
+   "n": 8,
+   "variant": "+RC tail",
+   "robots": 20,
+   "released_before_deadline": 3,
+   "monitor_releases": 4008,
+   "monitor_offered": 4326,
+   "z_rc_max": 5.3,
+   "z_updates": 4342,
+   "decisions": 4383,
+   "p50_ms": 3.094
+  },
+  {
+   "n": 8,
+   "variant": "all",
+   "robots": 20,
+   "released_before_deadline": 3,
+   "monitor_releases": 4008,
+   "monitor_offered": 4326,
+   "z_rc_max": 5.3,
+   "z_updates": 4342,
+   "decisions": 4383,
+   "p50_ms": 2.323
+  },
+  {
+   "n": 8,
+   "variant": "edf (reference)",
+   "robots": 20,
+   "released_before_deadline": 11,
+   "monitor_releases": 4322,
+   "monitor_offered": 4326,
+   "z_rc_max": 0.0,
+   "z_updates": null,
+   "decisions": 5127,
+   "p50_ms": 0.091
+  }
+ ],
+ "decisions_differing_from_v10": {
+  "4": {
+   "A3+B1": 0,
+   "+staleness": 316,
+   "+RC tail": 2193,
+   "all": 2193,
+   "of": 2380
+  },
+  "8": {
+   "A3+B1": 0,
+   "+staleness": 353,
+   "+RC tail": 3029,
+   "all": 3326,
+   "of": 2220
+  }
+ },
+ "headline": {
+  "rc_tail_moves_robot_service": true,
+  "robot_released_before_deadline": {
+   "4": {
+    "v1.0": 1,
+    "all": 2,
+    "edf": 8
+   },
+   "8": {
+    "v1.0": 0,
+    "all": 3,
+    "edf": 11
+   }
+  },
+  "verdict": "the RC tail is the first change that moves robot service and it is NOT SUFFICIENT: edf still serves 8 of 9 and 11 of 20"
+ },
+ "staleness": {
+  "decisions_moved": {
+   "4": 316,
+   "8": 353
+  },
+  "robot_service_change": "none",
+  "kept_because": "it writes a field the spec already reads, not because it helped here"
+ },
+ "not_sh_neutral": {
+  "monitor_releases": {
+   "4": {
+    "v1.0": 2174,
+    "tail": 2128
+   },
+   "8": {
+    "v1.0": 2107,
+    "tail": 4008
+   }
+  },
+  "note": "pre-registered as a risk in V9.2; the magnitude at 8 devices is larger than expected and is reported rather than explained away",
+  "causes_not_separated": [
+   "the shared tail cursor",
+   "the new RC rows in _z_term"
+  ]
+ },
+ "cost_on_the_named_fixture": {
+  "rows": [
+   {
+    "rc_tail": false,
+    "n_devices": 8,
+    "p50_ms": 1.859,
+    "p99_ms": 8.4841,
+    "samples": 1801,
+    "wall_s": 4.692,
+    "thread_cpu_s": 4.685,
+    "scoring_calls": 9921
+   },
+   {
+    "rc_tail": false,
+    "n_devices": 32,
+    "p50_ms": 19.8162,
+    "p99_ms": 98.6875,
+    "samples": 1801,
+    "wall_s": 37.967,
+    "thread_cpu_s": 37.942,
+    "scoring_calls": 37216
+   },
+   {
+    "rc_tail": false,
+    "n_devices": 64,
+    "p50_ms": 49.5524,
+    "p99_ms": 247.4531,
+    "samples": 1801,
+    "wall_s": 94.263,
+    "thread_cpu_s": 94.147,
+    "scoring_calls": 56063
+   },
+   {
+    "rc_tail": true,
+    "n_devices": 8,
+    "p50_ms": 1.8618,
+    "p99_ms": 8.4004,
+    "samples": 1801,
+    "wall_s": 4.677,
+    "thread_cpu_s": 4.676,
+    "scoring_calls": 9921
+   },
+   {
+    "rc_tail": true,
+    "n_devices": 32,
+    "p50_ms": 19.6601,
+    "p99_ms": 99.6715,
+    "samples": 1801,
+    "wall_s": 38.11,
+    "thread_cpu_s": 38.088,
+    "scoring_calls": 37216
+   },
+   {
+    "rc_tail": true,
+    "n_devices": 64,
+    "p50_ms": 49.6187,
+    "p99_ms": 247.9534,
+    "samples": 1801,
+    "wall_s": 94.243,
+    "thread_cpu_s": 94.135,
+    "scoring_calls": 56063
+   }
+  ],
+  "INVALID_AS_A_TAIL_COST": true,
+  "why": "instrumentation shows 0 beyond-horizon rc_piece deliveries on the 32-device synthetic cell against 6,889 episode_call ones, so the RC tail NEVER FIRES there and this table is the cost of a switch that does nothing"
+ },
+ "cost_where_it_fires": {
+  "4_v1.0": {
+   "p50": 1.101,
+   "p99": 8.534,
+   "max": 114.872,
+   "n": 2379
+  },
+  "4_+RC tail": {
+   "p50": 1.26,
+   "p99": 4.142,
+   "max": 109.643,
+   "n": 2295
+  },
+  "8_v1.0": {
+   "p50": 1.72,
+   "p99": 9.435,
+   "max": 140.532,
+   "n": 2220
+  },
+  "8_+RC tail": {
+   "p50": 3.094,
+   "p99": 10.757,
+   "max": 433.783,
+   "n": 4380
+  }
+ },
+ "guard_the_tail_made_necessary": {
+  "symptom": "action names unknown session",
+  "cause": "with the tail a job stays valuable after its recall opportunity leaves the observation, and validate_action accepts only gpu-warm, host-warm or offered-this-period sessions",
+  "fix": "_to_action skips a build whose session is not in that set; the piece is re-decided when the session is offered again"
+ },
+ "proposal_since_the_tail_is_insufficient": [
+  "realistic competing_s FIRST: the rollout passes 0.0, which alone causes three failures (p_finish pinned at 1, the continuation value constant at 0.0354, and PRIORITY unreachable so A3 is inert); the quantity is already in the rollout as busy, so no new estimator is needed",
+  "probabilistic p_finish SECOND: downstream of the above, since with competing_s = 0 it would soften an indicator computed from the wrong occupancy; needs the measured completion-time error fitted on FIT/DEV only",
+  "NOT proposed: raising omega_RC or scaling the deficit, which V8.1 settled and which would be tuning until robots pass"
+ ],
+ "b2_status": "SHELVED, not dropped; derivation at V7.2, reason at V8.1",
+ "stop": {
+  "step4_started": false,
+  "d121_paused_at": "fa50dfc"
+ },
+ "gates": {
+  "policy": "449/449",
+  "frozen_md5s": "12/12 green",
+  "baselines": "untouched",
+  "switches_default_off": [
+   "honour_job_priority",
+   "deficit_update",
+   "rc_tail",
+   "write_staleness"
+  ]
+ },
+ "_provenance": {
+  "git_commit": "a3e10094bd2df226b664aad031b20c755772e83b",
+  "script": "policy/rollout.py RC tail, live2/arms_policy.py staleness and guard, both behind default-off flags",
+  "model": "none (pol4 frozen)",
+  "device": "flash CPU only",
+  "n": "seed 0, 4 and 8 devices, 600 s; cost at 8/32/64 devices on the 180 s fixture",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}

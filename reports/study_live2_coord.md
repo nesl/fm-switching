@@ -3858,3 +3858,129 @@ not a new mechanism: it writes a field the spec already reads.
 
 It is behind `Flags.write_staleness` for the ablation, because it changes inputs to the readiness
 and recall-utility paths and the ruling asks for it as a separate arm of Step 3.
+
+## V10. The RC tail and the staleness fix, measured. The tail WORKS and is NOT SUFFICIENT
+
+Dry run, not an outcome claim. Seed 0, 4 and 8 devices, 600 s, mu EWMA, H = 0.5 s, pol4, tight
+memory. `edf` on the same traces for reference.
+
+| n | variant | robot questions | **released before deadline** | monitor releases | `z[RC]` max | decisions | **decisions differing from v1.0** |
+|---|---|---|---|---|---|---|---|
+| 4 | v1.0 | 9 | 1 | 2,174 | 0.0 | 2,380 | reference |
+| 4 | A3+B1 | 9 | 1 | 2,174 | 4.5 | 2,380 | **0 of 2,380** |
+| 4 | +staleness | 9 | 1 | 2,174 | 4.5 | 2,380 | **316** |
+| 4 | **+RC tail** | 9 | **2** | 2,128 | 4.5 | 2,297 | **2,193** |
+| 4 | **all** | 9 | **2** | 2,128 | 4.5 | 2,297 | **2,193** |
+| 4 | `edf` reference | 9 | **8** | 2,174 | n/a | 2,190 | n/a |
+| 8 | v1.0 | 20 | 0 | 2,107 | 0.0 | 2,220 | reference |
+| 8 | A3+B1 | 20 | 0 | 2,107 | 6.3 | 2,220 | **0 of 2,220** |
+| 8 | +staleness | 20 | 0 | 2,107 | 6.3 | 2,220 | **353** |
+| 8 | **+RC tail** | 20 | **3** | 4,008 | 5.3 | 4,383 | **3,029** |
+| 8 | **all** | 20 | **3** | 4,008 | 5.3 | 4,383 | **3,326** |
+| 8 | `edf` reference | 20 | **11** | 4,322 | n/a | 5,127 | n/a |
+
+### V10.1 What each fix did
+
+**The RC tail is the first change in this whole sequence that moves robot service.** 1 of 9 to
+**2 of 9** at four devices, and 0 of 20 to **3 of 20** at eight. The pre-registered expectation at
+V9.4 was "release decisions change and robot questions released rise above 1 of 9 and 0 of 20",
+and that is what happened: 2,193 and 3,029 decisions move.
+
+**And it is NOT SUFFICIENT.** `edf` serves **8 of 9** and **11 of 20** on the same traces.
+policy-core with every v1.1 fix on reaches 2 and 3. The gap to the baseline is still large, and on
+the robot pool the policy is still much worse than plain EDF.
+
+**The staleness fix changes decisions but not robot service**: 316 and 353 decisions move, robot
+releases stay at 1 and 0. So the catch-up cost it restores is real and reaches the decisions, and
+it is not what was holding robots back. It is kept because it writes a field the spec reads
+(V9.5), not because it helped here.
+
+**A3+B1 remains byte-identical to v1.0**, confirming V8 on a second run.
+
+**The tail is not SH-neutral, as pre-registered.** At four devices monitor releases fall slightly,
+2,174 to 2,128. At eight they nearly DOUBLE, 2,107 to 4,008, and total decisions go 2,220 to
+4,383. The policy becomes much more active overall and ends up near `edf`'s 4,322 monitor
+releases. **I flagged the direction as a risk in V9.2 and the magnitude at eight devices is larger
+than I expected; it is reported rather than explained away.** The shared tail cursor and the new
+RC rows in `_z_term` both feed back into SH decisions, and separating those two causes was not
+part of this task.
+
+`z[RC]` max falls from 6.3 to 5.3 at eight devices under the tail, which is consistent with fewer
+realised misses once three questions are served.
+
+### V10.2 Decision cost, and why the fixture the ruling named cannot measure it
+
+The ruling asked for p50 and p99 at 8, 32 and 64 devices on the 180 s fixture, with and without
+the tail:
+
+| n | tail OFF p50 / p99 | tail ON p50 / p99 | p99 change | scoring calls |
+|---|---|---|---|---|
+| 8 | 1.86 / 8.48 ms | 1.86 / 8.40 ms | -1.0 % | 9,921, identical |
+| 32 | 19.82 / 98.69 ms | 19.66 / 99.67 ms | +1.0 % | 37,216, identical |
+| 64 | 49.55 / 247.45 ms | 49.62 / 247.95 ms | +0.2 % | 56,063, identical |
+
+**Those numbers do not measure the tail, and must not be read as its cost.** Instrumenting the
+same 32-device cell shows the RC tail produced **0 beyond-horizon `rc_piece` deliveries**, against
+6,889 `episode_call` ones from D98's SH tail. **The RC tail never fires on the synthetic fixture**,
+whose recall pieces can start inside the horizon, so the table above is the cost of a switch that
+does nothing there. Reported in full because the ruling asked for it, and labelled.
+
+The cost where the tail DOES fire, on the fleet trace:
+
+| n | variant | p50 | p99 | max | decision samples |
+|---|---|---|---|---|---|
+| 4 | v1.0 | 1.101 ms | 8.534 ms | 114.9 ms | 2,379 |
+| 4 | +RC tail | 1.260 ms | **4.142 ms** | 109.6 ms | 2,295 |
+| 8 | v1.0 | 1.720 ms | 9.435 ms | 140.5 ms | 2,220 |
+| 8 | +RC tail | 3.094 ms | **10.757 ms** | 433.8 ms | 4,380 |
+
+At four devices p50 rises 14 % while p99 FALLS, and at eight p50 rises 80 % and p99 14 %, with the
+maximum rising from 141 to 434 ms. Note the sample counts differ (2,220 against 4,380), because
+the tail changes how many decisions the run makes, so these are not paired comparisons of the same
+decisions. The honest summary: **the tail's own arithmetic is cheap, one extra `engine.predict` per
+tailed item, but it changes the run enough that the decision-time distribution is not comparable
+like for like.**
+
+### V10.3 One guard the tail made necessary
+
+With the tail on, a job stays valuable after its recall opportunity leaves the observation, so the
+arm tried to emit a MATERIALIZE for a session `interface.validate_action` no longer knows (it
+accepts gpu-warm, host-warm, or offered-this-period only) and the run aborted with
+`action names unknown session`. `_to_action` now skips a build whose session is not in that set;
+the piece is simply not materialised that period and is re-decided when the session is offered
+again. This is a consequence of the tail, not a pre-existing defect, and it is why the first
+`+RC tail` run failed.
+
+### V10.4 The tail is insufficient, so here is the proposal the ruling asked for
+
+The ruling held back probabilistic `p_finish` and realistic `competing_s` "unless the tail is
+insufficient; propose then". **It is insufficient: 2 of 9 and 3 of 20 against edf's 8 of 9 and 11
+of 20.** What the measurements now say about each:
+
+1. **Realistic `competing_s` is the one I would do next.** V6.1 showed the rollout passes
+   `competing_s = 0.0`, so the continuation schedule assumes the job has the engine entirely to
+   itself. That is why `p_finish` is pinned at 1 for a 1.0 s rebuild against a 5 s deadline, why
+   the continuation value is the constant 0.0354, AND why the PRIORITY class is unreachable so A3
+   is inert. **One zero causes three separate failures.** Passing the competing engine-seconds
+   pi_0 would serve first would make `p_finish` discriminate, give the continuation value a
+   gradient in slack, and make A3 live, without introducing any new estimator: the quantity is
+   already in the rollout as `busy`.
+2. **Probabilistic `p_finish` is the deeper fix but is downstream of the above.** With
+   `competing_s = 0` it would still be comparing against a schedule that assumes an idle engine,
+   so it would soften an indicator that is computed from the wrong occupancy. It is worth doing
+   after 1, and it needs the measured completion-time error fitted on FIT/DEV only, as the ruling
+   says.
+3. **Not proposed: anything that raises `omega_RC` or scales the deficit.** V8.1 settled the
+   deficit route, and raising `omega_RC` would be tuning until robots pass.
+
+**STOPPED here per the ruling.** Step 4, the D121 speed work and the v1.1-fast release are not
+started, and D121 remains paused at `fa50dfc`.
+
+### V10.5 Gates
+
+| item | state |
+|---|---|
+| policy suite | **449 of 449** (22 new v1.1 tests) |
+| frozen md5s | 12 of 12 green |
+| baseline arms | untouched; `edf` was run as a reference arm only |
+| every v1.1 switch | DEFAULT OFF: `honour_job_priority`, `deficit_update`, `rc_tail`, `write_staleness` |

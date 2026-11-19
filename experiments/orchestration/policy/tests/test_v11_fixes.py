@@ -196,3 +196,97 @@ class TestB1DeficitUpdate(unittest.TestCase):
         src = inspect.getsource(AP.PolicyCoreArm._z_register)
         self.assertIn("obs.recall", src, "recall queries are registered from the observation")
         self.assertIn("sh_instant", src, "SH instants are registered from the D100 roster")
+
+
+class TestRcTailMirrorsD98(unittest.TestCase):
+    """D122 v1.1: the D98-equivalent tail for recall, behind Flags.rc_tail, default off."""
+
+    def test_the_flag_defaults_off(self):
+        self.assertFalse(Flags().rc_tail)
+
+    def test_an_rc_piece_that_cannot_start_inside_h_is_tailed_only_with_the_flag(self):
+        import inspect
+        from policy import rollout as RO
+        src = inspect.getsource(RO.Rollout.run)
+        self.assertIn('elif p.kind == "rc_piece" and self.flags.rc_tail:', src,
+                      "the selection branch must mirror D98's and be gated by the flag")
+        self.assertIn("sh_tail.append(p)", src)
+
+    def test_the_bound_uses_the_rc_pieces_own_absolute_deadline(self):
+        """D98 adds L_k to an instant's capture; an rc_piece carries its deadline already."""
+        import inspect
+        from policy import rollout as RO
+        src = inspect.getsource(RO.Rollout.run)
+        self.assertIn('float(p.deadline) for p in f.pending if p.kind == "rc_piece"', src)
+
+    def test_the_horizon_accounting_stays_isolated_as_d98_requires(self):
+        """The tail's progress must NOT reach jobs_progress, which _terminal reads."""
+        import inspect
+        from policy import rollout as RO
+        src = inspect.getsource(RO.Rollout.run)
+        self.assertIn("tail_progress[p.job_id] = tail_progress.get(p.job_id, 0) + 1", src)
+        self.assertIn("rc_progress = jobs_progress", src)
+        self.assertIn("rc_progress = dict(jobs_progress)", src,
+                      "the tail view must be a COPY, so jobs_progress is untouched")
+
+    def test_rc_opportunities_exist_so_the_deficit_can_be_credited(self):
+        """v1.0 emitted task=SH rows only, so z_of('RC') was never read by _z_term."""
+        from policy import rollout as RO
+        self.assertTrue(hasattr(RO.Rollout, "_rc_opportunities"),
+                        "v1.0 has no RC opportunity rows at all, which is why a non-zero RC "
+                        "deficit could not change a decision")
+        import inspect
+        src = inspect.getsource(RO.Rollout._rc_opportunities)
+        self.assertIn('task="RC"', src)
+        self.assertIn("met_slo", src)
+        self.assertIn("last <= job.deadline", src,
+                      "met_slo must be judged at the question's OWN deadline, as D98 does")
+
+    def test_the_rc_rows_reach_the_deficit_term(self):
+        import inspect
+        from policy import rollout as RO
+        src = inspect.getsource(RO.Rollout.run)
+        self.assertIn("opps = list(opps) + self._rc_opportunities(", src)
+
+
+class TestStalenessIsWritten(unittest.TestCase):
+    """D122 v1.1: HistoryBelief.staleness_s was read in production and written nowhere."""
+
+    def test_the_flag_defaults_off(self):
+        self.assertFalse(Flags().write_staleness)
+
+    def test_the_field_is_now_written_from_coordinator_state(self):
+        import inspect
+        import sys
+        from pathlib import Path
+        live2 = Path(__file__).resolve().parents[2] / "live2"
+        if str(live2) not in sys.path:
+            sys.path.insert(0, str(live2))
+        import arms_policy as AP
+        src = inspect.getsource(AP.PolicyCoreArm._sync)
+        self.assertIn("b.staleness_s =", src,
+                      "v1.0 never assigns staleness_s anywhere in production")
+        self.assertIn("built_tokens_by_session", src, "it must come from coordinator state")
+        self.assertIn("D2_TOK_PER_IMG", src, "frames received minus frames built")
+
+    def test_the_stride_comes_from_the_committed_profile(self):
+        import inspect
+        import sys
+        from pathlib import Path
+        live2 = Path(__file__).resolve().parents[2] / "live2"
+        if str(live2) not in sys.path:
+            sys.path.insert(0, str(live2))
+        import arms_policy as AP
+        src = inspect.getsource(AP.PolicyCoreArm._d2_stride_s)
+        self.assertIn("d2_stride_s", src)
+        self.assertNotIn("2.0", src, "the stride must be read, not written as a literal")
+
+    def test_unbuilt_frames_convert_to_the_seconds_the_consumer_expects(self):
+        """utility.t_ready_s does frames = staleness_s / d2_stride_s, so the inverse must hold."""
+        from policy.profiles import load_profiles
+        stride = float(load_profiles().raw["durations"]["catchup_per_frame"]["d2_stride_s"])
+        tokens_per_img = 90
+        for unbuilt_tokens in (0, 90, 2048, 17581):
+            frames = unbuilt_tokens / tokens_per_img
+            staleness_s = frames * stride
+            self.assertAlmostEqual(staleness_s / stride, frames, places=9)

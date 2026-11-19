@@ -50,6 +50,7 @@ from policy.params import Params                                        # noqa: 
 from policy.profiles import load_profiles                               # noqa: E402
 from policy.kvpool import prefix_id_for                                 # noqa: E402
 from policy.residency_belief import ResidencyBelief                     # noqa: E402
+from cstate import D2_TOK_PER_IMG                                       # noqa: E402
 from policy.rollout import Rollout, clone_for_rollout            # noqa: E402
 from policy.state import Device, Fleet, HistoryBelief, Link             # noqa: E402
 
@@ -110,6 +111,9 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     # Measured to be a NO-OP in today's build, since the rollout passes competing_s = 0.0 and
     # `continuation_schedule` uses `priority` only as `t + (0.0 if priority else competing_s)`.
     honour_job_priority: bool = False
+    # D122 v1.1, both DEFAULT OFF, both travelling on `Flags` because the rollout reads them.
+    rc_tail: bool = False
+    write_staleness: bool = False
 
     name: str = "policy-core"
     case: str = "own"
@@ -177,7 +181,9 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         self.params = p
         # D122: a v1.1 defect fix travels on `Flags` so the rollout can read it, but it is NOT
         # one of spec 7.0's conditional mechanisms, so the D66 guard asks `conditional_any_on`.
-        self.flags = Flags(honour_job_priority=bool(self.honour_job_priority))
+        self.flags = Flags(honour_job_priority=bool(self.honour_job_priority),
+                           rc_tail=bool(self.rc_tail),
+                           write_staleness=bool(self.write_staleness))
         if self.flags.conditional_any_on():
             raise RuntimeError("D66: round 1 runs the CORE only and every conditional flag must "
                                "be off; one is on")
@@ -406,7 +412,27 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
             b.probs = {"GPU": 0.0, "HOST": 0.0, "STORED": 0.0}
             b.probs[{"GPU-WARM": "GPU", "HOST-WARM": "HOST", "COLD": "STORED"}[q.readiness]] = 1.0
             b.normalize()
+            # D122 v1.1: `staleness_s` is READ by `utility.t_ready_s`, where
+            # `frames = staleness_s / d2_stride_s` turns it into catch-up frames, and it was
+            # written NOWHERE in production, so every history looked perfectly fresh and no
+            # catch-up work was ever charged. It is the frames the cloud has received but not
+            # built, expressed in the seconds unit the consumer expects.
+            if self.flags.write_staleness:
+                built = int((self._roster or {}).get("built_tokens_by_session", {})
+                            .get(q.session_id, 0))
+                unbuilt = max(int(q.readiness_tokens) - built, 0)
+                b.staleness_s = (unbuilt / float(D2_TOK_PER_IMG)) * float(self._d2_stride_s())
             d.qtype = QTYPE
+
+    @staticmethod
+    def _known_sessions(obs: Observation) -> set:
+        """The sessions `interface.validate_action` accepts in a session action."""
+        return (set(obs.cloud.gpu_warm_sessions) | set(obs.cloud.host_warm_sessions)
+                | {q.session_id for q in obs.recall})
+
+    def _d2_stride_s(self) -> float:
+        """The committed D2 capture stride, from the profile rather than a literal."""
+        return float(self.pf.raw["durations"]["catchup_per_frame"]["d2_stride_s"])
 
     def _prune(self, now: float) -> None:
         """Spec 7.9 with merging OFF, and D62.
@@ -661,6 +687,14 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                 job = self.fleet.jobs.get(p.job_id)
                 sid = self._session_of_job.get(p.job_id)
                 if sid is None or job is None:
+                    continue
+                # D122 v1.1: a MATERIALIZE may only name a session the observation still knows
+                # (`interface.validate_action`: gpu-warm, host-warm, or offered this period).
+                # The RC tail makes a job valuable past its opportunity's visibility, so without
+                # this guard the arm emits a build for a session the coordinator is no longer
+                # offering and the action is rejected. The piece is simply not materialised this
+                # period; it is re-decided when the session is offered again.
+                if sid not in self._known_sessions(obs):
                     continue
                 mat[sid] = (int(job.pieces_total * job.tokens_per_piece),
                             None if job.pieces_total <= 1 else int(job.tokens_per_piece))

@@ -29,6 +29,15 @@ class Flags:
     # coded, so the label could not change the value it was assigned for. With this flag the
     # job's OWN class is passed through. DEFAULT OFF (D38).
     honour_job_priority: bool = False
+    # D122 v1.1. The D98-equivalent tail for RECALL: an rc_piece that cannot start inside the
+    # horizon is simulated through to the answer's predicted delivery, so a rebuild's payoff is
+    # not worth zero merely because it lands after t0 + H, and the question is credited at its
+    # OWN deadline exactly as D98 credits an SH instant. DEFAULT OFF.
+    rc_tail: bool = False
+    # D122 v1.1. `HistoryBelief.staleness_s` is read in production and was written nowhere, so it
+    # sat at 0.0 while feeding `utility.t_ready_s`, where it becomes catch-up frames. This writes
+    # it from coordinator state. DEFAULT OFF.
+    write_staleness: bool = False
 
     ENABLING_CONDITION: Dict[str, str] = None
 

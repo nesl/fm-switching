@@ -211,6 +211,12 @@ class Rollout:
                 # the old behaviour: work that cannot start inside the horizon is not simulated.
                 if p.kind == "episode_call":
                     sh_tail.append(p)
+                elif p.kind == "rc_piece" and self.flags.rc_tail:
+                    # D122 v1.1: the same branch for RECALL. Without this an rc_piece that
+                    # cannot start inside H is simply dropped, so a rebuild's payoff is worth
+                    # zero merely because it lands after t0 + H, which is exactly the thing D98
+                    # fixed for SH.
+                    sh_tail.append(p)
                 continue
             pr = self.engine.predict(self._request(p), concurrent=concurrent,
                                      load_pct=self.load_pct)
@@ -234,6 +240,7 @@ class Rollout:
                 jobs_progress[p.job_id] = jobs_progress.get(p.job_id, 0) + 1
 
         n_tail_simulated = 0
+        tail_progress: Dict[str, int] = {}
         if sh_tail:
             # D98 TAIL. Spec 5.1 and 6.3 as amended credit each SH instant at ITS OWN deadline,
             # so a released call has to be simulated through to delivery even when that delivery
@@ -247,6 +254,14 @@ class Rollout:
                          + [float(p.due_at) for p in f.pending if p.kind == "episode_call"]
                          + [float(p.due_at) for p in f.in_flight if p.kind == "episode_call"]
                          ) + float(self.params.L_k["SH"])
+            if self.flags.rc_tail:
+                # D122 v1.1: the same rule, "the last deadline any credited unit can have", read
+                # off the field that holds it. An rc_piece carries an ABSOLUTE deadline, so no
+                # L_k is added. ONE cursor is shared with the SH tail below, because the engine
+                # is serial and two cursors both starting at `free_at` would double-book it.
+                latest = max([latest]
+                             + [float(p.deadline) for p in f.pending if p.kind == "rc_piece"]
+                             + [float(p.deadline) for p in f.in_flight if p.kind == "rc_piece"])
             tail_free = free_at
             for p in sh_tail:
                 start = max(tail_free, p.due_at)
@@ -263,11 +278,28 @@ class Rollout:
                     start=start, delivered_at=tail_free + (dv.link.down_s() if dv else 0.0),
                     job_id=p.job_id, tokens=int(p.tokens), in_sample=pr.in_sample,
                     beyond_horizon=True))
+                # D122 v1.1: the tail's progress is kept in its OWN view. `jobs_progress` is what
+                # `_terminal` and `_prefix_risk` read, and D98's isolation rule keeps the
+                # horizon's accounting byte-for-byte, so only `_rc_utility` sees this.
+                if p.kind == "rc_piece" and p.job_id:
+                    tail_progress[p.job_id] = tail_progress.get(p.job_id, 0) + 1
 
         ghat_by_job = {p.job_id: p.meta["ghat"] for p in queue
                        if p.job_id and isinstance(p.meta.get("ghat"), (int, float))}
         u_hat, opps = self._opportunity_utility(f, t0, end, deliveries)
-        u_hat += self._rc_utility(f, jobs_progress, deliveries, ghat_by_job)
+        # D122 v1.1: `_rc_utility` already credits omega_RC x u_RC for a job whose pieces are all
+        # done and whose last delivery meets `job.deadline`, which IS "at the question's own
+        # deadline". It never fired because `jobs_progress` counts only pieces served inside H.
+        # The tail's own progress is added HERE and nowhere else, so `_terminal` and
+        # `_prefix_risk` keep the horizon's accounting unchanged.
+        rc_progress = jobs_progress
+        if self.flags.rc_tail and tail_progress:
+            rc_progress = dict(jobs_progress)
+            for jid, k in tail_progress.items():
+                rc_progress[jid] = rc_progress.get(jid, 0) + k
+        u_hat += self._rc_utility(f, rc_progress, deliveries, ghat_by_job)
+        if self.flags.rc_tail:
+            opps = list(opps) + self._rc_opportunities(f, rc_progress, deliveries)
         z_term = self._z_term(f, opps)
         risk = self._prefix_risk(f, store, deliveries, jobs_progress, end, demand_tokens,
                                  busy_until=free_at)
@@ -492,6 +524,32 @@ class Rollout:
                 g = self.pf.omega("RC") * (acc_c - acc_d)
             total += float(g)
         return total
+
+    def _rc_opportunities(self, f: Fleet, progress: Dict[str, int],
+                          deliveries: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """D122 v1.1: one row per unanswered RC job, so the per-device deficit can be credited.
+
+        `_opportunity_utility` emits rows with `task="SH"` ONLY, so `(device, "RC")` never reached
+        `_z_term`'s aggregation and `z_of("RC")` was never read by it AT ALL, for any z. That is
+        why a non-zero RC deficit could not change a decision. `met_slo` is set from whether the
+        answer is predicted to arrive by the question's OWN deadline, which is the same rule D98
+        applies to an SH instant.
+        """
+        out: List[Dict[str, Any]] = []
+        for jid, job in f.jobs.items():
+            if job.answered:
+                continue
+            done = job.pieces_done + progress.get(jid, 0)
+            last = max((d["delivered_at"] for d in deliveries if d["job_id"] == jid),
+                       default=None)
+            met = bool(done >= job.pieces_total and last is not None
+                       and last <= job.deadline)
+            out.append(dict(device=job.device, task="RC", t=float(job.deadline),
+                            served_by=("cloud" if met else "device"),
+                            met_slo=met, deadline=float(job.deadline),
+                            delivered_at=(float(last) if last is not None else None),
+                            counts_question=("job", jid)))
+        return out
 
     # ---------------------------------------------------------------- deficits
     def _z_term(self, f: Fleet, opps: Sequence[Dict[str, Any]]) -> float:
