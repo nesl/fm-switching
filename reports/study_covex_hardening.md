@@ -2624,8 +2624,67 @@ auditor told to watch for one will pass the other two.
 | **flat column** | every arm identical | a dead channel | check 3, constant where a distribution is expected |
 | **plausible spread** | arms differ by a credible margin | pure artefact, here tracking on-time count against a placeholder answer | section 27, checking what the values MEAN before trusting the spread |
 | **averaged into undetectability** | a ~1 pp spread, below the noise floor | a REAL mechanism of +17.5 pp diluted by a 88.5 percent stratum where it does not operate | section 28, cross-checking the premise against the committed measurement |
+| **an exact zero in a high field** | one arm at 0.0000 where every other reads 0.87 to 0.999 | a BROKEN MEASUREMENT, not a weak arm: b10 served no monitors at all | section 16.2, and I missed it first time by recording it as a result |
 
 Only the first is visibly suspicious. **The second looks like a result and the third looks like an
 equivalence**, and the third is the most dangerous because the natural conclusion, "the arms do not
 differ on accuracy", is wrong in both directions at once: it is not equivalence, and the mechanism
 that exists is concentrated where the mean cannot see it.
+
+# 30. THE RICH-AGAINST-RECENT COMPARISON IS STILL BLOCKED, for TWO reasons, and the first is not what I was told
+
+I was told the Part A two-line patch was applied and committed and that I could score RICH against
+RECENT. I checked origin before scoring, and it is not there.
+
+## 30.1 The patch is NOT on origin/main at `23f29df`
+
+`coordinator.py` contains **zero** references to `representation` at the current origin tip, and
+`_submit_recall` is unchanged:
+
+```
+548:    def _submit_recall(self, o, s, t, dt_ms, preds, mix, whole: bool) -> None:
+549:        tokens = max(int(s.est_tokens), 1)
+550:        cost = C.recall_gpu_s(tokens, s.readiness())
+```
+
+It still sends and charges the full believed history with no consultation of the action's
+representation. Across every `live2` and `fleet` module at that tip, `representation` appears only
+in arm files, a builder, a scoring-inputs module and one test. **The reported effect of llf at 10
+devices going 7/8 to 8/8 and the budget falling 202.795 to 192.781 GPU-s is therefore not
+reproducible from origin/main as it stands**, so the patch is presumably unpushed or local. I am
+not scoring against a change I cannot see.
+
+## 30.2 Even with the patch, NO SCORED ARM EMITS RECENT. This is category 4
+
+The emitted-representation check the directive asked for, run statically across every arm file at
+`23f29df`:
+
+| arm family | emits |
+|---|---|
+| `arms.py` (edf, llf, piece arms) | `representation="D2"` at lines 251 and 411 |
+| `arms_policy.py` (policy-core, covex-v13) | `representation="D2"` at line 843 |
+| `arms_covex_v2.py` | `"D2"` for CLOUD, `None` otherwise |
+| the 19 published arms | **set it nowhere**, so they take the default |
+
+**Not one scored arm emits a RECENT-like value, and the vocabulary is not even RICH/RECENT: it is
+`"D2"`.** So the join would need a stated mapping from the arm vocabulary to StudyR1's keys before
+it could run at all, and with every arm on one value the comparison would show a single
+representation everywhere.
+
+**That is category 4, UNEXERCISED, not category 2.** The channel would be live and nothing would
+exercise it. The arms designed to emit RECENT, session 3's `SimpleStream` and QueryStream-QDP, are
+still being built, which is why `SimpleStream` was deferred rather than skipped.
+
+**So the gate for this comparison is two conditions, not one:** the patch visible on origin, AND at
+least one scored arm emitting a non-default representation. Neither holds today.
+
+## 30.3 What I am proceeding with, and what session 3's reframing implies
+
+The **all-questions accuracy** and **coverage-fraction** parts are unaffected and I am building
+them. Session 3's `23f29df` reframes the representation dead channel as **a COST fault rather than
+an accuracy fault**, and that is consistent with section 28 from the other side: because live2
+sends full history regardless, a question's correctness keyed on **what was actually sent** is
+correctly RICH for every row. **The accuracy column is therefore not wrong today, it is
+unexercised** — while the cost column has been charging RECENT-choosing arms for history they
+never asked for. That distinction matters for how each column is captioned, and I am captioning
+them differently rather than putting one caveat across both.
