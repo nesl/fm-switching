@@ -77,7 +77,8 @@ class TestLlfLaxityOrdering(unittest.TestCase):
         arm = _arm()
         arm.live2_roster(_roster(["cam00"], NOW + 1.0))
         q = _recall("q1", BIG, "COLD", NOW + 5.0)
-        act = arm.decide(_obs([_stream()], [q], in_flight=3))   # exactly ONE slot
+        act = arm.decide(_obs([_stream()], [q],
+                      in_flight=A.Pi0Edf.C_INFLIGHT_DEFAULT - 1))  # exactly ONE slot
         on = [s.stream_id for s in act.streams if s.mode == "cloud"]
         took = [r.query_id for r in act.recall if r.decision == "CLOUD"]
         self.assertEqual(took, ["q1"], "the cold rebuild must take the only slot under LLF")
@@ -88,7 +89,8 @@ class TestLlfLaxityOrdering(unittest.TestCase):
         arm = _arm(A.Pi0Edf)
         arm.live2_roster(_roster(["cam00"], NOW + 1.0))
         q = _recall("q1", BIG, "COLD", NOW + 5.0)
-        act = arm.decide(_obs([_stream()], [q], in_flight=3))
+        act = arm.decide(_obs([_stream()], [q],
+                      in_flight=A.Pi0Edf.C_INFLIGHT_DEFAULT - 1))  # exactly ONE slot
         on = [s.stream_id for s in act.streams if s.mode == "cloud"]
         self.assertEqual(on, ["cam00"], "EDF must pick the nearer deadline, which is the instant")
 
@@ -155,7 +157,8 @@ class TestLlfSkipRule(unittest.TestCase):
         arm = _arm()
         arm.live2_roster(_roster(["cam00"], NOW - 1.0))
         q = _recall("q1", BIG, "GPU-WARM", NOW + 5.0)
-        act = arm.decide(_obs([_stream()], [q], in_flight=3))
+        act = arm.decide(_obs([_stream()], [q],
+                      in_flight=A.Pi0Edf.C_INFLIGHT_DEFAULT - 1))  # exactly ONE slot
         self.assertEqual([r.decision for r in act.recall], ["CLOUD"],
                          "the one slot must go to the feasible unit, not be eaten by the skip")
 
@@ -170,18 +173,30 @@ class TestLlfKeepsTheD114Bound(unittest.TestCase):
         act = arm.decide(_obs([_stream(i) for i in ids], [], in_flight=in_flight))
         return [s.stream_id for s in act.streams if s.mode == "cloud"]
 
-    def test_ten_pending_and_nothing_in_flight_releases_four(self):
-        self.assertEqual(len(self._many(10, 0)), 4)
+    # D128 moved the DEFAULT bound from 4 to 8, and `LlfArm` subclasses `Pi0Edf` so it INHERITED
+    # that change. These cells are written against the committed default, with the bound of 4
+    # kept under explicit parameterised coverage below. The D118 rule, that llf keeps the D114
+    # release bound, is what is being tested and it is unchanged.
+    C = A.Pi0Edf.C_INFLIGHT_DEFAULT
 
-    def test_three_in_flight_releases_one(self):
-        self.assertEqual(len(self._many(10, 3)), 1)
+    def test_nothing_in_flight_releases_exactly_c_inflight(self):
+        self.assertEqual(len(self._many(12, 0)), self.C)
 
-    def test_four_in_flight_releases_nothing(self):
-        self.assertEqual(self._many(10, 4), [])
+    def test_one_short_of_the_bound_releases_exactly_one(self):
+        self.assertEqual(len(self._many(12, self.C - 1)), 1)
+
+    def test_at_the_bound_releases_nothing(self):
+        self.assertEqual(self._many(12, self.C), [])
+
+    def test_the_old_bound_of_four_is_still_reachable_by_parameter(self):
+        arm = A.make_arm("llf", c_inflight=4)
+        self.assertEqual(arm.c_inflight, 4)
+        self.assertEqual(arm.live2_describe()["c_inflight"], 4)
+        self.assertEqual(arm.stats["c_inflight"], 4)
 
     def test_c_inflight_reaches_the_run_header(self):
-        self.assertEqual(A.make_arm("llf").live2_describe()["c_inflight"], 4)
-        self.assertEqual(A.make_arm("llf").stats["c_inflight"], 4)
+        self.assertEqual(A.make_arm("llf").live2_describe()["c_inflight"], self.C)
+        self.assertEqual(A.make_arm("llf").stats["c_inflight"], self.C)
 
 
 class TestLlfUsesCommittedCurvesOnly(unittest.TestCase):

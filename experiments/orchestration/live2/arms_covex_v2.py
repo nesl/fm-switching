@@ -21,6 +21,10 @@ The guarantee is the point:
 
     margin = infinity  =>  covex-v2 is BYTE-IDENTICAL to its base.
 
+This holds for ANY base, BY CONSTRUCTION, because every attribute the coordinator reads is
+mirrored onto the wrapper. That is a stronger claim than the one first proved, which held for
+eco-llm partly through a coincidence of defaults.
+
 That makes "COVEX cannot do worse than the best baseline" a STRUCTURAL property rather than an
 empirical hope, and it is proved before any margin is swept.
 
@@ -82,8 +86,17 @@ class CovexV2Arm(Policy):
         # MIRROR the base's declared policy attributes. The coordinator reads these, so a wrapper
         # that declared different ones would diverge from the base for reasons that have nothing
         # to do with the margin and would make the byte-identity proof meaningless.
+        # EVERY attribute the coordinator READS must be mirrored, or the wrapper diverges from the
+        # base for reasons unrelated to the margin. `uses_h` and `h_s` are read together at
+        # `coordinator.py:124`:
+        #     self.h_s = getattr(arm, "h_s", None) if getattr(arm, "uses_h", False) else None
+        # The wrapper originally had NEITHER, so the coordinator fell back to the default False,
+        # which happens to equal eco-llm's value. The byte-identity proof therefore passed partly
+        # BY COINCIDENCE of defaults. It would have broken silently the moment the base had a
+        # planning horizon: `policy-core` declares `uses_h = True` with `h_s = 1.0`, so a wrapper
+        # around it would have had h_s None against the base's 1.0.
         for attr in ("reads_device_answer", "multi_instance_adapted", "releases_one_per_epoch",
-                     "piece_tokens", "c_inflight"):
+                     "piece_tokens", "c_inflight", "uses_h", "h_s"):
             if hasattr(self.base, attr):
                 setattr(self, attr, getattr(self.base, attr))
 

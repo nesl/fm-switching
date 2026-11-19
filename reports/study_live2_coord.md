@@ -5890,3 +5890,155 @@ one**, and that is a complete account of the robot axis.
 
 *(Bracketed, not located: the cliff is somewhere in (25,000, 40,000]. Pinning it exactly was not
 done and is not needed for the claim, which rests on the flatness below it.)*
+
+### The alternative kinds, classified against the prediction recorded in advance
+
+The prediction was recorded before the classification and is reproduced here with its outcome.
+
+| kind | predicted | measured | evidence |
+|---|---|---|---|
+| piece size (1024 vs 2048) | INDISCRIMINATE | **INDISCRIMINATE, confirmed** | identical Jhat in both hand-checked traces: 0.341304105 at 1,024 and 2,048 in trace 1, 0.764203208 in trace 2 |
+| start-now vs latest-start | INDISCRIMINATE | **INDISCRIMINATE, confirmed** | PIECES-LATEST scores exactly the reference, DeltaJ 0.000000000, in both traces: deferring is valued identically to not acting |
+| admit vs decline | (not predicted) | **REACHABLE but coarse** | scored, non-zero, three discrete levels = `0.9` x a small rational |
+| reload vs rebuild | **genuinely OPEN** | **UNEXERCISED** | `RELOAD` requires HOST-WARM readiness and never appeared across seeds 0 and 4 at 16 devices over 600 s, so no decision in the workload contains both a reload and a rebuild option |
+| keep-warm | - | **UNEXPRESSIBLE** | `desired_tier` is written twice and read nowhere in live2 |
+
+**Both predictions confirmed, and the open one resolved in a fourth way.** Reload-against-rebuild is
+not indiscriminate and not cancelled: the comparison **never arises**, because `enumerate_plans`
+offers RELOAD only at HOST-WARM and this workload never puts a recall there. A sweep over it would
+have measured nothing, and that is the E36 pattern — a mechanism outside the tested range — caught
+before the sweep rather than after.
+
+**The honest scope of the plan-indiscrimination headline** is therefore: it is established for
+**piece size** and **start-now against latest-start**, both by direct hand-checked trace at two
+separate decisions; **admit against decline** carries a coarse three-level signal; **reload against
+rebuild is untested** because the workload does not exercise it; and **keep-warm cannot be tested**
+because the harness ignores the field.
+
+### Implication, recorded as an implication and NOT a proposal
+
+The delivery-risk defect has a shape, and the remedy follows from it: **the step is misplaced, not
+missing.** `u_rc` already checks the deadline; it simply does so deterministically, as a step, far
+beyond the physical limit. So the natural fix is to **place the step at the feasibility boundary, or
+replace it with `P(delivered on time)`, so that a gradient exists where decisions are actually
+made.** This is recorded as following from the measurement. **It is a methodological change, it
+belongs to the user, and it is not implemented.**
+
+## THE TAXONOMY OF NULLS: five causes behind one symptom
+
+**This is the most portable result of the week and belongs early in anything a future reader
+meets.** CLAUDE.md Rule 2 offers two outcomes for a null, **real negative** or **inconclusive**.
+This work resolved "inconclusive" into **five distinguishable causes**, each with its own
+diagnostic and its own remedy. **All five are invisibly identical from outside: every one presents
+as a null.**
+
+| # | cause | what it means | diagnostic | remedy |
+|---|---|---|---|---|
+| 1 | **cancelled-by-geometry** | scored, evaluates to exactly zero because the effect lands beyond the horizon | compare the same term across two horizons | extend the window |
+| 2 | **unexpressible** | fires, but routes through a field nothing reads (`order`, `desired_tier`) | check for a READ, not a reference | harness change |
+| 3 | **unscorable** | never evaluated at all, because the evaluator has no state for it | Step 3, one unit traced by hand | fix the evaluator |
+| 4 | **unexercised** | the condition never arises in the workload (RELOAD at HOST-WARM) | count occurrences BEFORE sweeping | a workload that reaches the state, or an explicit scope limit |
+| 5 | **fired-and-did-not-help** | the mechanism ran, varied, and did not produce the effect | Step 4 negative control | this is the finding |
+
+**Only #5 is a real negative under Rule 2. The other four are findings about the horizon, the
+harness, the evaluator and the workload respectively** — not about the policy. The reason this
+matters beyond this report is that **each of the four would be reported as "the mechanism does not
+help" by a process following the protocol as currently written.**
+
+**This project's own history maps onto it exactly:**
+
+- **E36, E36b, E36c** were category 4, unexercised: `refresh_ms` returned 0 for all fidelities except sum200, and sum200 was never admissible for LoCoMo. Three experiments, all marked NOT PERFORMED.
+- **B2** was category 1, cancelled-by-geometry: `z[RC]` reached 543.58 and differed between counterfactual branches in 1 of 14,721 calls.
+- **The five estimator defects** in this session were category 3, unscorable: each produced a clean "0 non-zero out of 10" that read exactly like category 1.
+- **RELOAD against rebuild** is category 4, and is **the first time in this project's history that the pattern was caught BEFORE the sweep rather than after.**
+
+**Recorded as a CANDIDATE AMENDMENT to Rule 2, not applied.** CLAUDE.md is the user's file and the
+user's call. Two further candidate amendments arose alongside it and are likewise recorded and not
+applied: **run `switch_moves` on every new switch before it is scored, not after a suspicious
+null**, and **Step 2 should ask whether a field is READ rather than whether it is REFERENCED**.
+
+### The byte-identity guarantee, corrected: it now holds BY CONSTRUCTION for any base
+
+**The original proof passed partly by COINCIDENCE, and independent verification on a larger cell
+found it.** The wrapper mirrored five of the base's declared attributes. The coordinator reads a
+sixth that was not mirrored, at `coordinator.py:124`:
+
+```
+self.h_s = getattr(arm, "h_s", None) if getattr(arm, "uses_h", False) else None
+```
+
+**The wrapper had no `uses_h` at all**, so the coordinator fell back to the default `False` — which
+happens to equal eco-llm's value. The proof therefore held for eco-llm through a coincidence of
+defaults rather than through the mirroring.
+
+**It would have broken SILENTLY the moment the base had a planning horizon.** `policy-core`
+declares `uses_h = True` with `h_s = 1.0`; a wrapper around it would have had `h_s = None` against
+the base's `1.0`, and the two would have diverged for a reason having nothing to do with the
+margin. Measured before the fix: wrapper `uses_h` ABSENT, `h_s` ABSENT; base `policy-core`
+`uses_h=True`, `h_s=1.0`.
+
+`uses_h` and `h_s` are now mirrored with the other five, and both bases check out:
+
+| base | wrapper `uses_h` / `h_s` | base `uses_h` / `h_s` | match |
+|---|---|---|---|
+| eco-llm | False / None | False / None | yes |
+| policy-core | **True / 1.0** | **True / 1.0** | yes |
+
+**So the guarantee is now stated accurately: `margin = infinity` gives byte-identity for ANY base,
+BY CONSTRUCTION, because every attribute the coordinator reads is mirrored.** Re-proved on the
+fixed wrapper: 2,999 decisions, identical sha256, 0 differing. Session 2 independently confirmed
+the original on a larger cell, 16 devices, seed 0, 600 s, 7,914 decisions, identical sha256.
+
+**This is the difference between a guarantee and a lucky result**, and it is the reason the second
+independent check was worth asking for. The byte-identity proof is the one load-bearing claim
+surviving from v2, and it should hold for the right reason.
+
+### The stale C_inflight tests, updated
+
+Twelve tests in `test_live2_d114.py` and `test_live2_d118.py` asserted the pre-D128 bound of 4 and
+failed against the committed default of 8. They are now written against `Pi0Edf.C_INFLIGHT_DEFAULT`
+so the ruling's cells keep their meaning if it moves again, **with the bound of 4 kept under
+explicit parameterised coverage** rather than dropped. One needed more than a constant swapped: the
+D118 laxity contrast used `in_flight=3` to create "exactly ONE slot", which is only true at a bound
+of 4, so it now derives the in-flight count from the committed default. `LlfArm` subclasses
+`Pi0Edf` and inherited D128's change, which is why the D118 bound tests moved with the D114 ones.
+
+## v1.4 / covex-v2: REPORTED, NOT RELEASED
+
+**Suite counts, all from this exact commit:**
+
+| suite | result |
+|---|---|
+| policy | **482 / 482** |
+| live2 | **150 / 150** |
+| fleet | **234 / 234** |
+
+*(The live2 count rose from 145 to 150 because the stale C_inflight tests were replaced by
+parameterised ones covering BOTH bounds. The fleet suite is a script with its own `main()`, not a
+pytest suite; running it under pytest reports 10 spurious errors from a missing `tmp` argument and
+is the wrong invocation.)*
+
+**v2 is not released, and the reason is not a failure.** `covex-v2` equals `eco-llm` exactly: all
+ten recall gains are negative, so no deviation clears `margin = 0` and the wrapper returns the base
+at every margin. The release condition is "at least as good as the base everywhere AND better
+somewhere". It is at least as good everywhere **trivially, because it IS the base**, and better
+nowhere. **Shipping a release byte-identical to eco-llm under a COVEX name would misrepresent what
+it is.** That all ten gains are negative is filed as a **real property of the estimator**, not as
+an absent link: the alternatives are scored, they vary, and flipping the base's choice never scores
+better.
+
+**What this work established, in order of how much it rests on:**
+
+1. **The byte-identity guarantee**, now BY CONSTRUCTION for any base. The one load-bearing claim surviving from v2.
+2. **The objective cannot see cost.** A 12 to 25 per cent GPU-second spread moves DeltaJ by exactly nothing, measured by hand at two separate decisions.
+3. **Delivery risk is priced as a misplaced step, not missing.** A 25,000-token recall, past the 19,381 feasible breakeven, is valued identically to a 2,048-token one. The objective's risk threshold and the physical feasibility threshold sit in different places, **and the physical one is lower**.
+4. **The five-category taxonomy of nulls**, of which only *fired-and-did-not-help* is a finding about COVEX.
+5. **The `deadline_s` definition hazard**: relative on `Opportunity`, absolute on `RecallQuery`.
+
+**The synthesis.** COVEX does not lose to simple heuristics because its rollout was too short, its
+price miscalibrated, or a switch failed to plumb through. Each of those was real and each was
+fixed, and it still lost. **It loses because its objective returns the same number for materially
+different actions.** The deficit, the price, the state value and the margin are machinery sitting
+on a flat surface. That also explains, with no further experiment, why the byte-identity guarantee
+was the only thing that worked: **when deviation is worthless, reducing to the base is exactly
+right.**

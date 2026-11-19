@@ -70,49 +70,75 @@ def _released_streams(arm, obs) -> list:
 class TestTheReleaseCount(unittest.TestCase):
     """Requirement 1 of the ruling, the three stated cells."""
 
-    def _arm(self, n_streams, now=100.0):
-        arm = A.Pi0Edf()
+    def _arm(self, n_streams, now=100.0, c_inflight=None):
+        arm = A.Pi0Edf() if c_inflight is None else A.Pi0Edf(c_inflight=c_inflight)
         arm.live2_roster(_roster(n_streams, now))
         arm._targets = {"dashcam": {"L_s": 0.5}}
         return arm
 
-    def test_ten_pending_and_nothing_in_flight_releases_exactly_four(self):
-        arm = self._arm(10)
-        got = _released_streams(arm, _obs(10, 0))
-        self.assertEqual(len(got), 4, "c_inflight=4 with 0 in flight must release 4, got %r" % got)
+    # D128 moved the DEFAULT bound from 4 to 8. These cells are therefore written against the
+    # arm's own committed default rather than a literal, so the ruling's three cells keep their
+    # meaning if it moves again, and the bound of 4 keeps EXPLICIT coverage in the paired tests
+    # below. The D114 ruling is about the RULE "release the head prefix up to c_inflight", which
+    # is unchanged; only the default value moved.
+    C = A.Pi0Edf.C_INFLIGHT_DEFAULT
 
-    def test_they_are_the_four_earliest_deadlines(self):
-        arm = self._arm(10)
-        got = _released_streams(arm, _obs(10, 0))
-        self.assertEqual(sorted(got), ["cam00", "cam01", "cam02", "cam03"],
+    def test_nothing_in_flight_releases_exactly_c_inflight(self):
+        arm = self._arm(12)
+        got = _released_streams(arm, _obs(12, 0))
+        self.assertEqual(len(got), self.C,
+                         "c_inflight=%d with 0 in flight must release %d, got %r"
+                         % (self.C, self.C, got))
+
+    def test_nothing_in_flight_releases_exactly_four_at_the_old_bound(self):
+        arm = self._arm(12, c_inflight=4)
+        got = _released_streams(arm, _obs(12, 0))
+        self.assertEqual(len(got), 4, "c_inflight=4 must still release 4, got %r" % got)
+
+    def test_they_are_the_earliest_deadlines(self):
+        arm = self._arm(12)
+        got = _released_streams(arm, _obs(12, 0))
+        self.assertEqual(sorted(got), ["cam%02d" % i for i in range(self.C)],
                          "the prefix must be the earliest deadlines, got %r" % got)
 
-    def test_three_in_flight_releases_exactly_one(self):
-        arm = self._arm(10)
-        got = _released_streams(arm, _obs(10, 3))
+    def test_one_short_of_the_bound_releases_exactly_one(self):
+        arm = self._arm(12)
+        got = _released_streams(arm, _obs(12, self.C - 1))
+        self.assertEqual(len(got), 1, "%d - %d = 1 release, got %r" % (self.C, self.C - 1, got))
+        self.assertEqual(got, ["cam00"], "and it must be the earliest deadline")
+
+    def test_one_short_of_the_old_bound_releases_exactly_one(self):
+        arm = self._arm(12, c_inflight=4)
+        got = _released_streams(arm, _obs(12, 3))
         self.assertEqual(len(got), 1, "4 - 3 = 1 release, got %r" % got)
         self.assertEqual(got, ["cam00"], "and it must be the earliest deadline")
 
-    def test_four_in_flight_releases_nothing(self):
-        arm = self._arm(10)
-        self.assertEqual(_released_streams(arm, _obs(10, 4)), [])
+    def test_at_the_bound_releases_nothing(self):
+        arm = self._arm(12)
+        self.assertEqual(_released_streams(arm, _obs(12, self.C)), [])
 
-    def test_more_than_four_in_flight_releases_nothing_rather_than_going_negative(self):
-        arm = self._arm(10)
-        self.assertEqual(_released_streams(arm, _obs(10, 9)), [])
-        self.assertEqual(arm._release_budget(_obs(10, 9)), 0)
+    def test_at_the_old_bound_releases_nothing(self):
+        arm = self._arm(12, c_inflight=4)
+        self.assertEqual(_released_streams(arm, _obs(12, 4)), [])
+
+    def test_more_than_the_bound_releases_nothing_rather_than_going_negative(self):
+        arm = self._arm(12)
+        over = self.C + 5
+        self.assertEqual(_released_streams(arm, _obs(12, over)), [])
+        self.assertEqual(arm._release_budget(_obs(12, over)), 0)
 
     def test_in_flight_is_counted_across_all_kinds(self):
         """The ruling says across all kinds, so the two classes must both be charged."""
-        arm = self._arm(10)
-        o = _obs(10, 0)
+        arm = self._arm(12)
+        o = _obs(12, 0)
         split = I.CloudState(queued_by_class=dict(recall=0, episodic=0),
                              running_by_class=dict(recall=2, episodic=1),
                              gpu_kv_fraction=0.0, host_kv_fraction=0.0, gpu_warm_sessions=(),
                              host_warm_sessions=(), latency_estimate_s={})
         o2 = I.Observation(now_s=o.now_s, epoch="tick", streams=o.streams, recall=(),
                            cloud=split, budget_remaining_gpu_s=1e9)
-        self.assertEqual(arm._release_budget(o2), 1, "recall 2 + episodic 1 must charge 3 slots")
+        self.assertEqual(arm._release_budget(o2), self.C - 3,
+                         "recall 2 + episodic 1 must charge 3 slots")
 
     def test_fewer_pending_than_the_budget_releases_only_what_is_pending(self):
         arm = self._arm(2)
@@ -122,12 +148,12 @@ class TestTheReleaseCount(unittest.TestCase):
         self.assertFalse(A.Pi0Edf().releases_one_per_epoch)
 
     def test_c_inflight_is_a_parameter_and_reaches_the_run_header(self):
-        self.assertEqual(A.Pi0Edf().c_inflight, 4)
-        self.assertEqual(A.Pi0Edf().live2_describe()["c_inflight"], 4)
+        self.assertEqual(A.Pi0Edf().c_inflight, self.C)
+        self.assertEqual(A.Pi0Edf().live2_describe()["c_inflight"], self.C)
         arm = A.Pi0Edf(c_inflight=2)
-        arm.live2_roster(_roster(10))
+        arm.live2_roster(_roster(12))
         arm._targets = {"dashcam": {"L_s": 0.5}}
-        self.assertEqual(len(_released_streams(arm, _obs(10, 0))), 2)
+        self.assertEqual(len(_released_streams(arm, _obs(12, 0))), 2)
         self.assertEqual(arm.live2_describe()["c_inflight"], 2)
         with self.assertRaises(ValueError):
             A.Pi0Edf(c_inflight=0)
@@ -135,9 +161,18 @@ class TestTheReleaseCount(unittest.TestCase):
     def test_the_piece_arms_carry_the_same_rule(self):
         for pt in (1024, 2048):
             arm = A.Pi0Edf(piece_tokens=pt)
-            arm.live2_roster(_roster(10))
+            arm.live2_roster(_roster(12))
             arm._targets = {"dashcam": {"L_s": 0.5}}
-            self.assertEqual(len(_released_streams(arm, _obs(10, 0))), 4, "edf-piece%d" % pt)
+            self.assertEqual(len(_released_streams(arm, _obs(12, 0))), self.C,
+                             "edf-piece%d must carry the committed default" % pt)
+            self.assertEqual(arm.piece_tokens, pt, "piece size must be unchanged")
+
+    def test_the_piece_arms_carry_the_same_rule_at_the_old_bound(self):
+        for pt in (1024, 2048):
+            arm = A.Pi0Edf(piece_tokens=pt, c_inflight=4)
+            arm.live2_roster(_roster(12))
+            arm._targets = {"dashcam": {"L_s": 0.5}}
+            self.assertEqual(len(_released_streams(arm, _obs(12, 0))), 4, "edf-piece%d" % pt)
             self.assertEqual(arm.piece_tokens, pt, "piece size must be unchanged")
 
 
