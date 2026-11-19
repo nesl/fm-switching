@@ -5694,3 +5694,59 @@ to eco-llm under a COVEX name would misrepresent it.
 four-category taxonomy, and the `deadline_s` definition hazard. **What is withdrawn:** the blindness
 finding, and with it my reversal on option 2, so the planner-horizon question is undecided rather
 than justified.
+
+### Second trace, at a HIGHER discrete level: the finding GENERALISES
+
+Chosen deliberately at a different offset rather than randomly, because the three levels are the
+entire discriminating capacity of this estimator.
+
+```
+INPUTS
+  t (fleet clock)            = 94.200 s      (first trace: 39.300 s)
+  deadline_abs               = 99.175 s
+  horizon_s                  =  5.075 s
+  reference_total Jhat(pi_0) =  0.278817284
+
+CANDIDATE PLANS
+  plan                      gpu_s     Jhat(plan)       DeltaJ
+  ONE-GO-NOW               1.2407    0.764203208  0.485385924
+  PIECES-NOW(1024)         1.3943    0.764203208  0.485385924
+  PIECES-LATEST(1024)      1.3943    0.278817284  0.000000000
+  PIECES-NOW(2048)         1.3323    0.764203208  0.485385924
+  PIECES-LATEST(2048)      1.3323    0.278817284  0.000000000
+
+DECISION   admitted=True, chosen=ONE-GO-NOW, DeltaJ=0.485385924270157
+
+HAND CHECK
+  0.764203208 - 0.278817284 = 0.485385924270157
+```
+
+**The arithmetic reproduces again, and the within-decision flatness holds at the higher level.**
+A **12 per cent** GPU-cost spread (1.2407, 1.3323, 1.3943) produces **no value difference at all**,
+and both PIECES-LATEST plans again score exactly the reference. So the plan-indiscrimination is a
+property of the OBJECTIVE, not of one decision. The tie-break decides again, and `ONE-GO-NOW` wins
+here for the same reason `PIECES-NOW(2048)` won there: it is the cheapest.
+
+**AND THE TWO TRACES TOGETHER SAY WHAT THE OBJECTIVE CAN AND CANNOT SEE.** The offset varies ACROSS
+decisions, 0, 0.45 and 0.60 over the three levels, while within every decision every "do it now"
+plan is identical regardless of cost:
+
+- **It CAN see the outcome**: whether and how well the answer lands differs across decisions and moves DeltaJ by up to 0.60.
+- **It CANNOT see the cost**: a 12 to 25 per cent spread in GPU-seconds moves DeltaJ by exactly nothing.
+
+**THE SYNTHESIS FOR THE WRITE-UP.** COVEX does not lose to simple heuristics because its rollout is
+too short, or its price miscalibrated, or a switch failed to plumb through. Each of those was real
+and each was fixed, and it still lost. **It loses because its objective returns the same number for
+materially different actions.** A value function that cannot separate a 1.11 GPU-second plan from a
+0.89 GPU-second plan has nothing to optimise, and the deficit, the price, the state value and the
+margin are all machinery sitting on a flat surface. It also explains, with no further experiment,
+why the byte-identity guarantee was the only thing that worked: **when deviation is worthless,
+reducing to the base is exactly right.**
+
+**A PREDICTION, MADE NOW AND BEFORE THE REMAINING KINDS ARE CLASSIFIED**, so that confirmation
+counts for something: **piece size and start-now-against-latest will both come back
+INDISCRIMINATE**, because both are visible in these traces already. Piece size is the 1024-against-
+2048 comparison, identical in both traces; start-now-against-latest is the PIECES-NOW against
+PIECES-LATEST comparison, where LATEST scores exactly the reference in both. **Reload-against-
+rebuild is NOT yet visible** in either trace, since both decisions were COLD, so that one is a
+genuine open question.
