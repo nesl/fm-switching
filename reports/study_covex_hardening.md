@@ -138,6 +138,29 @@ branches. Section 14 reconciles all three disputed readings; the short version i
 is a caching wrapper whose cache hides 94 percent of calls, and the two call sites bind it
 differently so a patch on one module silently misses the other.
 
+## TWO CAVEATS THAT QUALIFY EVERY NUMBER BELOW, on the bar and not in a footnote
+
+**1. EVERY DRY RESULT IN THIS REPORT WAS PRODUCED WITH NO MEMORY LIMIT.** `gpu_kv_tokens` is handed
+to arms and never enforced, and there is no automatic eviction. Session 1 is now enforcing the GPU
+KV pool at 62,944 tokens and the host tier at 27 GiB / 256 GiB on the validated StudyENG1c /
+StudyRES1 residency model, and will re-score. **So the crossover location, the eligibility work and
+every leaderboard row here are measured in an unconstrained-memory regime** and may move. This
+qualifies the headline finding of the week, including the 10-to-14 band.
+
+**2. THIS ROBOT WORKLOAD IS LARGELY INSENSITIVE TO HISTORY, which bounds the representation axis.**
+StudyR1 measures `recent_covers_frac = 0.8852`: the RECENT window already contains the evidence for
+**88.5 percent** of robot questions. Full history is worth **+1.18 pp overall, with a CI of
+[-0.0152, +0.0389] that does not exclude zero**, and **+17.5 pp only on the 11.5 percent stratum
+where RECENT misses**.
+
+**The contrast with this project's own fidelity work is sharp and belongs beside it.** On LoCoMo,
+full scored 34.0 percent against sum80 at 9.9 percent, a **-24.1 pp** gap with 92.3 percent of
+failures attributable to compression omission. **Same project, two workloads, opposite sensitivity
+to representation.** Any representation result in the orchestration study has to be read against
+that: on this robot axis there is very little for a representation policy to win, and the
+orchestration gains available here are overwhelmingly about TIMING, not about what is kept. That is
+consistent with section 18's queueing account being where the whole robot story turned out to live.
+
 ## D131 HEADLINE: the crossover is at 10 to 12 devices, and COVEX now loses at EVERY size
 
 Two things I reported earlier are WITHDRAWN here rather than left standing beside the new numbers.
@@ -1516,7 +1539,7 @@ different cell, so the two strings are not comparable and neither is evidence of
 | confidence-cascade | 0.0517 / 0 | 0.0695 / 0 | **no, A-episodic** |
 | hybrid-llm | 0.0000 / 19 | 0.0000 / 36 | zero monitor decisions BY DESIGN |
 | perllm | 0.0000 / 19 | 0.0000 / 36 | zero monitor decisions BY DESIGN |
-| b10-blocking-aware | 0.0000 / 0 | 0.0000 / 1 | yes |
+| ~~b10-blocking-aware~~ | **INVALID, DO NOT CITE** | **INVALID, DO NOT CITE** | see 16.2 |
 
 The two 0.0000 dashcam rows for `hybrid-llm` and `perllm` are the documented by-design behaviour
 and are NOT failures. The three near-zero rows are all out-of-card-scope arms being run outside the
@@ -2569,3 +2592,40 @@ the join will assert the model per side rather than take it from a default.
 instead invalidated the premise it was to be checked against, so the design changed before the
 build. `4B-I x RICH` is recorded in StudyR1 as **"NOT AVAILABLE (no StudyO run exists)"**, so any
 question requiring it will be reported **MISSING and never imputed**, per the honesty clause.
+
+## 16.2 b10-blocking-aware: PRIOR ROWS ARE INVALID AND MUST NOT BE CITED
+
+Session 3 found that `Action(streams=[], ...)` made `_serve_monitor` unreachable for
+`b10-blocking-aware`, so roughly half the workload was absent from every b10 cell.
+
+**Confirmed independently from my own decision logs**, seed 4 at 16 devices:
+
+| arm | `release_monitor` | `release_recall` | `release_whole` |
+|---|---|---|---|
+| b7-edf-feasibility | **7,840** | 34 | 0 |
+| b10-blocking-aware | **0** | 39 | 14 |
+
+Not a reduced count: **zero**. b10 never served a single monitor request, which is why its dashcam
+read 0.0000 in section 16 while every other arm read above 0.87. I recorded that number as a
+result rather than questioning it, and a dashcam fraction of exactly 0.0000 beside a field of
+0.87 to 0.999 should have prompted the check that session 3 ran.
+
+**All prior b10 live2 and dry rows in this report are INVALID and are marked as such rather than
+deleted**, so the error stays visible. b10 is excluded from every comparison, every cardinality
+count and the published bar until it is re-ported and re-run.
+
+# 29. THREE WAYS A COLUMN CAN MISLEAD, catalogued
+
+Part C produced three distinct failure shapes in one night. They are listed together because an
+auditor told to watch for one will pass the other two.
+
+| shape | what it looks like | what it is | how it was caught |
+|---|---|---|---|
+| **flat column** | every arm identical | a dead channel | check 3, constant where a distribution is expected |
+| **plausible spread** | arms differ by a credible margin | pure artefact, here tracking on-time count against a placeholder answer | section 27, checking what the values MEAN before trusting the spread |
+| **averaged into undetectability** | a ~1 pp spread, below the noise floor | a REAL mechanism of +17.5 pp diluted by a 88.5 percent stratum where it does not operate | section 28, cross-checking the premise against the committed measurement |
+
+Only the first is visibly suspicious. **The second looks like a result and the third looks like an
+equivalence**, and the third is the most dangerous because the natural conclusion, "the arms do not
+differ on accuracy", is wrong in both directions at once: it is not equivalence, and the mechanism
+that exists is concentrated where the mean cannot see it.
