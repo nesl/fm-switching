@@ -2021,8 +2021,12 @@ operative reading for every delivery number in this report; session 3's is the o
 for what the two published systems actually are.
 
 **The harness gap, stated plainly because it bounds the whole published comparison: any two
-adapted arms whose scheduling discipline is expressed only through `order` are indistinguishable
-in live2 BY CONSTRUCTION.** That is an expressiveness limitation of our harness, not a porting
+adapted arms whose scheduling discipline is expressed only through `order` OR `desired_tier` are
+indistinguishable in live2 BY CONSTRUCTION. A KV-CACHE SYSTEM CANNOT DEMONSTRATE A KV-CACHE
+BENEFIT IN THIS HARNESS**, so those rows measure scheduling only. Four of the five affected arms
+are already out of card scope; `mooncake` is in scope and its result should be read as b7's
+scheduler. This does not weaken the part that holds: `eco-llm` is a singleton at both sizes, so
+its lead over COVEX is not a cache artefact.** That is an expressiveness limitation of our harness, not a porting
 artefact, and it caps what the published-field bar can ever demonstrate. It also means a covex-v2
 deviation class expressible only through `order` would fire and change nothing, which would read
 as a weak mechanism when it is an unexpressible one. That distinction is now in my deviation audit.
@@ -2074,6 +2078,34 @@ difference between them is provably inert.
 `KEEP_GPU_WARM` is counted and dispatched, so it appears in `counts`, reads as handled, and
 produces no effect. A mechanism audit that checks for a reference rather than for a READ passes it.
 
+**IT IS NOT SCOPED OUT, AND THE FORMULATION ASKS FOR IT EXPLICITLY.** If tier placement were out
+of scope, a write-only field would be correct by design rather than a gap, so I checked
+`research/FORMULATION.md` directly rather than assuming. What is scoped out is CROSS-MODEL
+transfer only:
+
+> **KV portability.** Materialized state is architecture-bound; cross-model KV transfer is out of
+> scope. KV appears only as the ready materialization of a fidelity, with measured sizes.
+> (FORMULATION.md line 253)
+
+`desired_tier` is `"gpu"` against `"host"` for the SAME model on the same node. That is offload
+and retention, not cross-architecture portability, and the precedent CLAUDE.md cites, E31, is the
+same distinction: it measured KV payloads moving between HETEROGENEOUS tiers.
+
+The formulation goes further and asks for exactly this capability:
+
+> The two-level abstraction makes "store full text everywhere, materialize selectively" a
+> legitimate policy the optimizer can discover. (FORMULATION.md line 118)
+
+**Selective materialization is named as a policy the optimizer SHOULD be able to discover, and the
+channel through which an arm would express it is write-only.**
+
+**The precise statement: live2 models KV OCCUPANCY but not KV PLACEMENT.** The `kv_cap` budget
+makes a ready materialization consume capacity, which is just what "KV appears only as the ready
+materialization of a fidelity, with measured sizes" asks for. What is missing is the CHOICE of
+what to keep resident and what to release, the retention policy. This is a HARNESS GAP, not a
+scoping decision, and it is recorded as such so a later reader cannot resolve it the wrong way by
+pointing at the Scoping section without reading which transfer it excludes.
+
 **The consequence for the published bar, and it is the sharpest limitation found in this study.**
 live2 cannot express TIER PLACEMENT at all. Tier placement is the entire contribution of the
 KV-cache and memory systems in the field: `kvflow`, `attentionstore`, `lmcache`, `pensieve` and
@@ -2084,6 +2116,30 @@ measure their scheduler, not their cache. Four of the five are already out of ca
 C-mixed; `mooncake` is not, and its in-scope result should be read as b7's scheduler.
 
 This bounds what the published-field comparison can claim, independently of how any arm scores.
+
+## 23.0d THE GENERAL RULE: audit for a READ, not for a REFERENCE
+
+The two dead channels in this harness fail different tests, and only one test catches both.
+
+| channel | references | reads | caught by "is it referenced?" |
+|---|---|---|---|
+| action `order` | **0** | 0 | yes, trivially |
+| `desired_tier` | 3 (1 declaration, 2 writes) | **0** | **NO** |
+
+`desired_tier` is written by two actions that are dispatched, counted in `self.counts`, and
+handled by a named branch. Every surface sign says the mechanism is live. **An audit that asks
+"is this referenced" passes it; only one that asks "is this READ" catches it.**
+
+This is a gap in CLAUDE.md's mechanism protocol as written. Step 2 asks for a quantity that is
+non-zero and varies across the conditions where the claim says it should vary. **A write-only
+field satisfies Step 2 completely** — `desired_tier` is non-zero, it varies by arm and by
+condition, it is instrumentable — while implementing no causal link whatsoever, because nothing
+downstream consumes it. The Step 4 negative control would also pass, since disabling the writes
+changes nothing and the result would correctly collapse to the null.
+
+**Proposed addition to Step 2: for every quantity named as implementing a causal link, show the
+READ that consumes it, not merely that it is set.** A link whose quantity is written and never
+read is ABSENT in exactly the sense Step 2 is for, and is currently invisible to the protocol.
 
 ## 23.1 The collapse in EXECUTED behaviour is LARGER THAN TWO ARMS, and SIZE-DEPENDENT
 
