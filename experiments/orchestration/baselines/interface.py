@@ -57,7 +57,19 @@ DEFAULTS: Dict[str, Any] = dict(
     cadence_s=0.5,
     frame_count=1,
     recall_decision="CLOUD",
-    representation="RECENT",
+    # D137 item 1, STATUS QUO. Before Part A made the field live, `_submit_recall` computed
+    # `tokens = max(int(s.est_tokens), 1)` unconditionally (verified at e924005^), so every arm
+    # received the FULL HISTORY whatever it named or did not name. This default was decorative:
+    # nothing read it. Making representation live gave it cost semantics it was never chosen for,
+    # and the value it carried was the CHEAP one, so a non-naming arm was silently charged
+    # min(467, history) against a full history of 5,431 to 25,681 - between 11.6x and 55x less
+    # evidence than it used to receive.
+    #
+    # "D2" restores the status quo: it is in REPRESENTATIONS, so `validate_action` accepts it,
+    # and `tokens_for_representation` maps it to the whole history. Removing the default instead
+    # is cleaner but NOT viable: `validate_action` rejects a CLOUD action whose representation is
+    # not in the vocabulary, and None is not in it.
+    representation="D2",
     defer_s=0.0,
     session_action="OFFLOAD_TO_HOST",   # LRU-ordered by the harness
     order="FCFS",
@@ -187,6 +199,13 @@ class RecallAction:
     decision: str                            # in RECALL_ACTIONS
     representation: Optional[str] = None
     defer_s: Optional[float] = None
+    # D137 item 1. With the default restored to the status-quo "D2", an INJECTED representation is
+    # indistinguishable in the log from one the arm CHOSE: b7, mooncake, kvflow, attentionstore
+    # and the rest now log D2 alongside llf, edf and covex-v13, which named it. This records which
+    # it was, so the decision log is self-sufficient rather than depending on a capture point
+    # outside it. It is the same shape as the defect this work started from: a plausible value
+    # that looks like a real choice.
+    representation_defaulted: bool = False
 
 
 @dataclass
@@ -235,6 +254,7 @@ def apply_defaults(action: Action) -> Action:
     for r in action.recall:
         if r.decision == "CLOUD" and r.representation is None:
             r.representation = DEFAULTS["representation"]
+            r.representation_defaulted = True
         if r.decision == "DEFER" and r.defer_s is None:
             r.defer_s = DEFAULTS["defer_s"]
     if action.order is None:

@@ -200,6 +200,7 @@ class Opportunity:
     # sets this when it processes the action; `_submit_recall` reads it. See the report section
     # "H100 wiring for placement" for the exact two-line change.
     requested_representation: Optional[str] = None
+    representation_defaulted: bool = False
     # The S-EMBER question category, carried from the trace. It was emitted by
     # `fleet/trace.py:421` as `category=q.category` all along and DROPPED here, which is why
     # `arms_policy` pinned a single type: the field the observation offers was documented as the

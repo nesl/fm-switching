@@ -315,6 +315,7 @@ class DecisionRecord:
     # would read as inert however often it fired. `outcomes.jsonl` already carries the
     # representation; the decision log is where move-proofs look.
     representation: Optional[str] = None
+    representation_defaulted: bool = False
     desired_tier: Optional[str] = None
     note: Optional[str] = None
 

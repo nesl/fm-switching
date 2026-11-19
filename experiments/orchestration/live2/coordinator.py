@@ -444,6 +444,7 @@ class Live2Coordinator:
             # `decides`, and READ NOWHERE, so a RECENT-choosing arm paid full-history cost and
             # received full-history evidence. It is carried to the submit path here.
             o.requested_representation = ra.representation
+            o.representation_defaulted = bool(getattr(ra, "representation_defaulted", False))
             self.counts["recall_" + ra.decision] += 1
             if ra.decision == "DEFER":
                 o.defer_until = t + max(float(ra.defer_s or 0.0), 0.0)
@@ -578,7 +579,9 @@ class Live2Coordinator:
         did = self._log_decision(t, "release_recall", [o.opp_id], latency_ms=dt_ms, preds=preds,
                                  mix=mix, key="rc:" + (o.session_id or ""),
                                  session_id=o.session_id,
-                                 representation=getattr(o, "requested_representation", None))
+                                 representation=getattr(o, "requested_representation", None),
+                                 representation_defaulted=getattr(
+                                     o, "representation_defaulted", False))
         sent = len(s.sent_bytes_for)
         if whole:
             frames = [dict(frame_ref=r, path=self._path(r)) for r in s.frames]
@@ -860,6 +863,7 @@ class Live2Coordinator:
                       defer_s=None, latency_ms: float = 0.0, preds=None, mix=None,
                       key: Optional[str] = None, session_id: Optional[str] = None,
                       representation: Optional[str] = None,
+                      representation_defaulted: bool = False,
                       desired_tier: Optional[str] = None) -> str:
         self.n_dec += 1
         did = f"d{self.n_dec}"
@@ -875,6 +879,7 @@ class Live2Coordinator:
             decision_latency_ms=round(float(latency_ms), 4),
             traffic_mix=dict(mix or {}), defer_s=defer_s,
             representation=representation, desired_tier=desired_tier,
+            representation_defaulted=bool(representation_defaulted),
             note=(f"session={session_id}" if session_id else None))
         if self.logs is not None:
             self.logs.decision.write(rec)

@@ -6535,3 +6535,158 @@ same structural blindness as eco-llm planning at one price and being charged ano
 **Adopted here and offered as a candidate amendment: before reporting any before/after comparison,
 the BEFORE column must reproduce the committed baseline.** That gate is more important than the
 result it guards.
+
+## D134: the category fix costs robot delivery, and five mechanisms for it were refuted
+
+### The finding, which does not depend on knowing why
+
+**Four seeds, two sizes, single-switch control. Robot on-time delivery falls in 8 of 8 cells:**
+
+| n | seed | BEFORE on-time | AFTER on-time | served before/after | dashcam |
+|---|---|---|---|---|---|
+| 10 | 0 | 9 of 21 | **1** | 14 / 14 | 0.928 to 0.955 |
+| 10 | 4 | 13 of 27 | **2** | 21 / 16 | 0.888 to 0.848 |
+| 10 | 5 | 15 of 27 | **13** | 22 / 22 | 0.901 to 0.940 |
+| 10 | 6 | 6 of 17 | **2** | 9 / 6 | 0.947 to 0.638 |
+| 16 | 0 | 14 of 35 | **5** | 20 / 22 | 0.816 to 0.934 |
+| 16 | 4 | 13 of 41 | **5** | 28 / 23 | 0.875 to 0.826 |
+| 16 | 5 | 17 of 41 | **7** | 26 / 25 | 0.842 to 0.810 |
+| 16 | 6 | 9 of 37 | **4** | 15 / 20 | 0.909 to 0.956 |
+
+**The control is a genuine disabling of the change**, not a reconstruction: `category_enabled`
+False at the cstate boundary and `mix_weighted_quality` False on the arm, both asserted on the
+constructed objects. It reproduces the committed baseline exactly at 16 devices seed 0, 14 of 35
+and 0.8164, and the three-arm gate confirms llf and edf return too.
+
+**Three obvious explanations are ELIMINATED, which is what makes this better evidenced than a
+result with a story attached:**
+
+- **NOT volume.** Served recalls fall in 4 cells, rise in 2, unchanged in 2.
+- **NOT composition.** Median served-token profile is IDENTICAL in 7 of 8 cells; maxima are the same or LOWER.
+- **NOT per-recall cost from bigger work.** Token profiles are identical while GPU per recall rises slightly, so the same work costs more.
+
+**So: the same recalls, at the same sizes, in similar numbers, delivered late.** That is a finding
+about the correction and it does not require knowing the mechanism.
+
+**It is ALSO not a reason to keep the bias.** The pinned model is wrong by a measured 17.5 to 20.6
+pp and reads the whole workload through its hardest tenth. A policy that performs well only through
+a measurement error is not performing well, and keeping a known-wrong quality model because it
+produces better numbers would be tuning to the metric through a defect. **Whether to correct a
+measured bias and whether the correction helps are separable questions, and only the first is
+settled here.** The decision is the user's.
+
+**Scope: these cells use the TRACE-WEIGHTED model. The per-category variant was far worse in a
+single accidental cell and has never been measured properly; no number is reported for it.**
+
+### Five mechanisms, all refuted. The method result.
+
+| hypothesis | proposed by | verdict |
+|---|---|---|
+| eviction charging the cost | coordinator | refuted: enforcement off by default |
+| residency lag caused the catastrophe | me | refuted: real defect, wrong effect |
+| representation charging broken | both | refuted: three-arm gate |
+| admission brake removed | coordinator | refuted: served does not rise |
+| composition shifts to expensive recalls | me | refuted: median token profile identical |
+
+**Every one fit the result it was proposed for. That is what made them plausible and what made them
+useless.** The two things that produced knowledge were **a constructed control** and **targeted
+instrumentation**, neither of which required anyone to guess correctly.
+
+### CANDIDATE AMENDMENT, earned here: name the discriminator before proposing the mechanism
+
+**A mechanism proposed without a named discriminating measurement is not a hypothesis, it is a
+story that fits.**
+
+The code-reading rule already drafted catches hypotheses settleable by inspection. **It does not
+catch the four of today's five that needed measurement.** This one catches all five, and it is
+cheaper than either, because **it is a test applied to the PROPOSAL rather than to the result.**
+
+The admission-brake hypothesis is the demonstration in both directions: it was wrong, and it cost
+**one run** rather than a cycle of argument, **because it arrived with its own discriminator
+attached** — served count must rise. That is an argument for the rule, not for the hypothesis.
+
+### The cliff and the mapping: seven mechanisms eliminated, and one cell that removes every confound
+
+**The cliff hypothesis dies on its own discriminator.** Of the recalls served in POST but not PRE
+at 16 devices seed 0, the miss rate is **0.67 against a base rate of 0.77** — LOWER, not elevated.
+The newly admitted are not disproportionately undeliverable, so the objective is not admitting work
+it cannot see is undeliverable.
+
+**This is NOT the composition hypothesis retested, and the distinction matters.** Composition asked
+whether the newly admitted are LONGER, and was refuted by an identical median token profile. The
+cliff asked whether they are UNDELIVERABLE GIVEN CONTENTION, which length alone does not determine
+— a short recall arriving when the engine is busy misses too. Two different questions, two
+measurements, both negative.
+
+**The mapping comparison answers a question the histogram could not.** A histogram being identical
+is consistent with the same plans going to DIFFERENT queries, or to the same queries at DIFFERENT
+times. Comparing the plan assignment as a mapping:
+
+| cell | served | plan SEQUENCE | decision TIMES | on-time |
+|---|---|---|---|---|
+| **10 / 0** | **14 to 14, 0 new, 0 dropped** | **identical** | **identical** | **9 to 1** |
+| 16 / 0 | 20 to 22, 3 new, 1 dropped | identical | identical | 14 to 5 |
+| 16 / 4 | 28 to 23, 0 new, 5 dropped | differs | identical | 13 to 5 |
+| 10 / 4 | 21 to 16, 0 new, 5 dropped | differs | identical | 13 to 2 |
+
+**Decision times are identical in ALL FOUR cells**, so the quality change does not move when
+recalls are decided.
+
+**The 10 / 0 cell removes every confound at once: the same queries, the same plans, at the same
+instants, and on-time delivery falls from 9 of 21 to 1 of 21.** Nothing in the recall path changed.
+
+**SEVEN MECHANISMS ELIMINATED:** volume, composition, token profile, plan choice, plan sequence,
+decision timing, and the delivery-risk cliff. **What remains is what the engine was doing
+alongside**, and that is established by elimination rather than proposed — which is the distinction
+between a conclusion and an eighth story.
+
+**A caution that belongs with it even if the contention measurement confirms: this would explain
+the MECHANISM, not the MAGNITUDE.** A shift in monitor service accounting for a 9-to-1 collapse
+requires the engine to be near enough to saturation that marginal monitor work displaces most
+recall deliveries. That is plausible at a 0.93 base miss rate but it is part of the claim, not an
+assumption, and it predicts the effect should weaken where the engine has slack.
+
+### A gap, not a mistake: "registered but never scored" is a state the tests do not allow
+
+Three live2 tests fail on `origin/main`, and the cause is not this work: `rh8-demand-aware-oracle`
+declares `reads_future = True`, and the coordinator refuses such an arm in a live run by design
+under fairness rule 5. The three tests iterate EVERY registered arm, so registering a deliberately
+non-runnable oracle breaks them.
+
+**Session 3 did nothing wrong: it knew the oracle could not run, wrote exactly that, and registered
+it as a documented upper bound.** The defect is that **the all-arm tests encode an assumption that
+every registered arm is live-runnable, and that assumption is written nowhere.** It is the same
+shape as several findings this week — a premise held by code and not stated — which is harmless
+until someone does something legitimate that violates it.
+
+**I did not push into the red tree**, although the failures are orthogonal to this change and
+pre-existing. The gate exists so that "orthogonal and pre-existing" is not a judgement made on my
+own say-so, and twice today a change I was confident was orthogonal turned out not to be.
+
+### The dropped queries were DEFERRED, not declined
+
+The plans-differ cells each lost 5 served recalls. What happened to them:
+
+| cell | POST decision for the 5 | dropped median tokens | all-served median |
+|---|---|---|---|
+| 16 / 4 | **DEFER 4**, DEVICE 1 | 9,481 | 8,131 |
+| 10 / 4 | **DEFER 4**, CLOUD 1 | 10,831 | 10,831 |
+
+**Eight of ten became DEFER**, which means "not now, re-decide at the next epoch", and they were
+re-deferred until the run ended. **They are NOT systematically longer**, so this is not the length
+story in another form.
+
+**In `arms_policy` a query emits DEFER precisely when it is already in `_jobs_by_q`** — that is, a
+JOB WAS CREATED FOR IT and the RELEASE never fired. **So the planner did not stop choosing them:
+the policy admitted them as jobs and then never released the work.** That relocates the question
+from admission to release.
+
+**Whether this is the same phenomenon as the contention cells is a further measurement, not an
+inference**, and one observation argues against assuming it is: at 16/4 **monitor cloud-service
+FALLS**, 7,665 to 7,224, while recalls are being deferred. If deferral were simply the engine being
+busy with monitor work, monitor service should have risen there as it does at 10/0 and 16/0.
+
+**So the eight cells remain two populations with two measured behaviours** — plans-identical cells
+where the recall path is untouched and monitor service rises, and plans-differ cells where recalls
+are admitted and then indefinitely deferred — and no single mechanism has been shown to produce
+both. The headline is unaffected: the correction costs robot delivery in 8 of 8.

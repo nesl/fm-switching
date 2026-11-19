@@ -74,6 +74,36 @@ def _run(name, trace, out, *, seed=1, mode="A", window=WINDOW, frames=None, dry=
     return a, co, res
 
 
+def _live_runnable(name: str) -> bool:
+    """Arms these all-arm tests can assert on: the ones that can actually be RUN.
+
+    An arm declaring `reads_future` is REFUSED at runtime by fairness rule 5 (`coordinator.py`,
+    "an arm that reads the future is refused in a live run"), so a test that runs every registered
+    arm and asserts properties of the result cannot include one. The skip is GENERIC rather than
+    by name: `rh8-demand-aware-oracle` is the first such arm, not the last, and a name-based
+    exclusion would need re-patching for the next oracle.
+
+    THE RH8 PORT WAS NOT WRONG. An oracle upper bound is a proper object; it knew it could not run
+    and documented exactly that. The registry had nowhere to put it, and these tests encoded an
+    unstated premise that every registered arm is live-runnable.
+
+    THE REAL GAP, flagged and NOT fixed here because it changes the registration contract and
+    belongs to the user: `ARM_NAMES` is SIMULTANEOUSLY the population these tests iterate AND the
+    `--arm` choices at `run_live2_cell.py:207`. So this is not one consumer holding an unstated
+    premise, it is TWO consumers that both silently require runnability, and THIS SKIP FIXES ONLY
+    THE FIRST: `--arm rh8-demand-aware-oracle` remains an offered option that always raises under
+    fairness rule 5, a live footgun on the H100's own entry point.
+
+    The proper fix is a `live_eligible` flag, or a separate upper-bound registry keeping the arm
+    constructible via `make_arm` while removing it from both populations. That closes the CLI case
+    too. It is written and not applied here.
+    """
+    try:
+        return not bool(getattr(A.make_arm(name), "reads_future", False))
+    except Exception:
+        return True
+
+
 class TestA_SchemaAndLegality(unittest.TestCase):
     def test_schema_round_trip(self):
         for kind, fields in SC.FIELDS.items():
@@ -107,6 +137,8 @@ class TestA_SchemaAndLegality(unittest.TestCase):
         tr = _trace()
         with tempfile.TemporaryDirectory() as d:
             for name in A.ARM_NAMES:
+                if not _live_runnable(name):
+                    continue
                 a, co, res = _run(name, tr, Path(d) / name)
                 self.assertEqual(res["n_errors"], 0, name)
                 self.assertGreater(res["n_decisions"] + res["n_requests"], 0, name)
@@ -132,6 +164,8 @@ class TestB_Fairness(unittest.TestCase):
         seen = set()
         with tempfile.TemporaryDirectory() as d:
             for name in A.ARM_NAMES:
+                if not _live_runnable(name):
+                    continue
                 _a, co, _res = _run(name, tr, Path(d) / name)
                 seen.add(_opp_digest(co))
         self.assertEqual(len(seen), 1, f"arms saw different opportunity streams: {seen}")
@@ -165,6 +199,8 @@ class TestB_Fairness(unittest.TestCase):
         seen = set()
         with tempfile.TemporaryDirectory() as d:
             for name in A.ARM_NAMES:
+                if not _live_runnable(name):
+                    continue
                 _a, co, _res = _run(name, tr, Path(d) / name)
                 seen.add(_opp_digest(co))
         self.assertEqual(len(seen), 1, f"arms saw different opportunity streams: {seen}")
