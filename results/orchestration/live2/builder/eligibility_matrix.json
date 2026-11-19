@@ -1,0 +1,161 @@
+{
+ "check": "builder_eligibility_matrix_all_sizes",
+ "is_measurement": true,
+ "label": "Requirement 2 completed across ALL SIX screen sizes before any mechanism is written off, because eligibility was shown to be size dependent. Seed 4, 300 s, 50:50, dry run, decisions differing from builder-default.",
+ "matrix": {
+  "builder-s1-feasible": {
+   "8": 0,
+   "10": 0,
+   "12": 0,
+   "14": 0,
+   "16": 0,
+   "32": 0
+  },
+  "builder-s1-fairshare": {
+   "8": 0,
+   "10": 0,
+   "12": 0,
+   "14": 0,
+   "16": 0,
+   "32": 0
+  },
+  "builder-s1-lateness": {
+   "8": 0,
+   "10": 0,
+   "12": 0,
+   "14": 0,
+   "16": 0,
+   "32": 3473
+  },
+  "builder-s2-all": {
+   "8": 0,
+   "10": 0,
+   "12": 0,
+   "14": 0,
+   "16": 0,
+   "32": 0
+  },
+  "builder-s2-value": {
+   "8": 0,
+   "10": 0,
+   "12": 0,
+   "14": 0,
+   "16": 0,
+   "32": 0
+  },
+  "builder-s3-whatif": {
+   "8": 2120,
+   "10": 2671,
+   "12": 3181,
+   "14": 3691,
+   "16": 4226,
+   "32": null
+  },
+  "builder-s4-llf": {
+   "8": 0,
+   "10": 0,
+   "12": 0,
+   "14": 0,
+   "16": 0,
+   "32": 0
+  },
+  "builder-s4-reserve": {
+   "8": 0,
+   "10": 3,
+   "12": 160,
+   "14": 1631,
+   "16": 3721,
+   "32": null
+  },
+  "builder-s4-adaptive": {
+   "8": 0,
+   "10": 0,
+   "12": 0,
+   "14": 9,
+   "16": 173,
+   "32": null
+  },
+  "builder-s6-decline": {
+   "8": 0,
+   "10": 0,
+   "12": 0,
+   "14": 0,
+   "16": 0,
+   "32": 0
+  }
+ },
+ "eligible_sizes": {
+  "builder-s1-feasible": [],
+  "builder-s1-fairshare": [],
+  "builder-s1-lateness": [
+   32
+  ],
+  "builder-s2-all": [],
+  "builder-s2-value": [],
+  "builder-s3-whatif": [
+   8,
+   10,
+   12,
+   14,
+   16
+  ],
+  "builder-s4-llf": [],
+  "builder-s4-reserve": [
+   10,
+   12,
+   14,
+   16
+  ],
+  "builder-s4-adaptive": [
+   14,
+   16
+  ],
+  "builder-s6-decline": []
+ },
+ "dead_at_every_size": [
+  "builder-s1-feasible",
+  "builder-s1-fairshare",
+  "builder-s2-all",
+  "builder-s2-value",
+  "builder-s4-llf",
+  "builder-s6-decline"
+ ],
+ "findings": [
+  "SIX mechanisms are dead at ALL SIX sizes: s1-feasible, s1-fairshare, s2-all, s2-value, s4-llf, s6-decline. The extra sizes did not rescue any of them, so the write-offs stand on six sizes rather than two.",
+  "TWO mechanisms have a SIZE THRESHOLD INSIDE THE CROSSOVER BAND, which the two-size test would have mischaracterised. s4-reserve is inert at 8, barely alive at 10 (3 decisions), climbing through 12 (160) and 14 (1,631) to 16 (3,721). Read only at 16 it looks simply eligible; in fact it switches on exactly where session 2 found the baselines collapse at n=12.",
+  "s4-adaptive is inert until 14 (9 decisions) and only clearly live at 16 (173).",
+  "s1-lateness is dead at 8 through 16 and live only at 32, the single mechanism whose eligibility the original two-size test established correctly only by luck of including 32.",
+  "s3-whatif is live at every size tested and grows monotonically with load, 2,120 at 8 to 4,226 at 16."
+ ],
+ "untested_cells": {
+  "note": "s3-whatif, s4-reserve and s4-adaptive were not run at n=32, since the 32-device batch covered only the then-suspected non-movers. Their 32 column is UNTESTED, not zero."
+ },
+ "classified_nulls": {
+  "builder-s1-feasible": "UNEXERCISED at every size. Counters fire, 8,039 streams held at 32, while zero decisions differ: every held stream had no instant due, and a local StreamAction only matters when one is pending.",
+  "builder-s1-fairshare": "UNEXERCISED at every size, with fairshare_held equal to sh_held, so the fair-share test never excluded a stream that would otherwise have been released.",
+  "builder-s2-all": "UNEXERCISED at every size. Every recall is already feasible under the default, so admitting all coincides with admitting the feasible.",
+  "builder-s2-value": "UNEXERCISED at every size, MATCHING THE PRE-REGISTERED EXPECTATION recorded before the measurement.",
+  "builder-s4-llf": "CANCELLED BY GEOMETRY at every size. Laxity reorders candidates; with no binding release budget nothing is truncated, so order cannot change which streams are released.",
+  "builder-s6-decline": "UNEXERCISED at every size. No REJECT arises under the default, so the branch never executes."
+ },
+ "proofs_that_passed_for_the_wrong_reason": {
+  "note": "two in one night, recorded together because the lesson is the same: a byte-identity proof is evidence only when every input it depends on is compared explicitly, and both were caught by checking the proof internals rather than its verdict.",
+  "mine": "the S2 admission estimate was LlfArms S_hat rather than B7s, and the proof still passed because every query was feasible under either estimate. Equivalence by REGIME COINCIDENCE.",
+  "session1": "its wrapper omitted uses_h and the proof passed because False is the getattr default and happened to match the base. Equivalence by DEFAULT COINCIDENCE."
+ },
+ "taxonomy_upgrade": {
+  "what": "reload against rebuild was classified UNEXERCISED, the condition never arising across seeds 0 and 4 at 16 devices over 600 s.",
+  "upgrade": "it is STRUCTURALLY UNEXPRESSIBLE, nearer unexpressible than unexercised. Enumerating every belief write in live2: cstate.py:181 and :201 set cold, coordinator.py:420 sets cold on EVICT, coordinator.py:711 sets gpu. NONE sets host, so HOST-WARM is unreachable.",
+  "why_it_matters": "the workload did not happen to exercise it invites someone to try another workload; no code path sets host readiness does not."
+ },
+ "scoring_scope": "Only the eligible cells may be scored, at the sizes where they are eligible: s3-whatif at 8 to 16, s4-reserve at 10 to 16, s4-adaptive at 14 to 16, s1-lateness at 32.",
+ "combination_round": "NOT RUN, per the directive, pending user review of this screen.",
+ "_provenance": {
+  "git_commit": "fde3c610a0448d1d4240d355c986265c3d019bf8",
+  "script": "live2/arms_builder.py plus scratch harness; no existing policy or arm code changed",
+  "model": "none (committed curves, dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4; sizes 8, 10, 12, 14, 16, 32; 300 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
