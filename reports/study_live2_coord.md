@@ -5053,3 +5053,63 @@ needs a term that separates the two axes, not another threshold value.
 and not shared COSTS, and a rebuild never charged to the accelerator budget is precisely the E36
 failure mode this project has precedent for. Those numbers are UNVERIFIED pending the
 accelerator-ms and KV-bytes-per-released-item check, and I did not let them redirect remaining time.
+
+### The robot axis is queueing, and for COVEX the binding variable is VOLUME, not delay
+
+Session 2's cost check settled that the published arms are real: a recall rebuild costs eco-llm
+2.404 s against llf's 2.420 s and a monitor release costs every arm 0.395 s exactly, so there is no
+uncharged work and no E36 artefact. The robot axis is a queueing problem: the same 38 requests at
+the same service, differing only in WHEN the answer returns against a 5.0 s deadline.
+
+The suggested target was to get COVEX's median recall delivery under 5.0 s. **Measured on the
+release's own committed runs, it already is, in three of four seeds, and it beats llf in all four.**
+No new run was needed; the delays come from the `outcomes.jsonl` of the four-seed 16-device set.
+
+| cell | recall delay p50 | on time at 5s / 6s / 7s |
+|---|---|---|
+| edf C=8 (seeds 0,4,5,6) | 6.22, 6.36, 6.42, 6.21 | packed above the deadline |
+| llf C=8 | 5.72, 5.81, 5.41, 5.56 | 6/21/29, 9/20/29, 9/21/31, 10/23/29 |
+| **v1.3 (mu=0, af8)** | **4.01, 5.34, 4.36, 4.32** | 14/15/17, 13/15/19, 17/18/21, 9/11/13 |
+
+**So COVEX does not have llf's problem.** llf's delays are packed against the deadline, where two
+seconds of relaxation triples its deliveries; COVEX's are not, and relaxing the deadline buys it
+almost nothing (14 to 17, 13 to 19, 17 to 21). **The correction to the target is that for COVEX
+latency is already the wrong variable.**
+
+**The binding variable is admission VOLUME.** Over the same four seeds at 16 devices:
+
+| arm | recall served, of offered | conversion of served into on-time |
+|---|---|---|
+| llf C=8 | 32/35, 38/41, 38/41, 35/37 = **91 to 95%** | 6, 9, 9, 10 = **19 to 29%** |
+| edf C=8 | 83 to 93% | 10 to 21% |
+| **v1.3 (mu=0, af8)** | 20/35, 28/41, 26/41, 15/37 = **41 to 68%** | 14, 13, 17, 9 = **46 to 70%** |
+
+**COVEX schedules two to three times more efficiently per request it accepts and then accepts only
+half as many.** That is the whole shape of the result, and it explains every robot number of the
+night more directly than the price did: mu = 0 helped because it raised ADMISSION, and the
+admission floor helped at 16 devices for the same reason (volume 16 to 20, 20 to 28, 20 to 26).
+
+**The concrete target for the morning, with numbers.** eco-llm reaches 35 of 38 by combining about
+93 per cent volume with about 92 per cent conversion. COVEX has 41 to 68 per cent volume and 46 to
+70 per cent conversion, so **the gap is on BOTH factors and volume is the larger one**. Raising
+COVEX's admission to llf's rate at its current conversion would put it near 17 to 26 robots; closing
+the rest needs conversion too. The measured price of that trade for eco-llm is 910 fewer monitor
+requests.
+
+**One anomaly, flagged not smoothed.** On seed 6 the admission floor REDUCED volume, 23 served down
+to 15, and robots with it, 14 down to 9. The floor is not monotone in volume across seeds, which is
+the same seed-6 instability that breaks the robot win and should be understood before the floor is
+relied on.
+
+### Why no "v1.3-fast release 2"
+
+At 32 devices on seed 0, v1.3 holds 13 of 72 robots and 0.4588 dashcam while llf and edf both
+collapse to 0 robots and 0.0130 and 0.0127 dashcam. **I am not claiming that as a pass**, on the
+same standard session 2 applied when it declined one it could have claimed: every arm is broken at
+that size, 0.46 dashcam does not meet the SLO either, and a ranking among broken arms is not
+evidence the SLO can be met. It is a finding about fixed-in-flight schedulers having no overload
+protection, not a demonstration that COVEX works at 32 devices.
+
+**The four-seed 16-device record also does not support a release 2.** v1.3 beats llf on robots on
+seeds 0, 4 and 5 and LOSES on seed 6, 9 of 37 against 10 of 37, and loses dashcam on all four. By
+the stability rule a three-of-four win is not a win. `d944361` stands as the release.
