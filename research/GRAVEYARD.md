@@ -7,6 +7,42 @@ the evidence pointer. Do not reopen without a new argument that addresses the fa
 
 ## Closed datasets
 
+### OpenEQA — **CLOSED, REVERSIBLE**
+**Failure mode:** **Episode frames not obtainable by any documented route; the only surviving
+mirror cannot be verified against the published md5.** Not a judgement about the task class — an
+availability failure, and the first entry here that an **administrative act would undo** rather
+than new evidence.
+
+**Status of each documented route, checked 2026-11-19:**
+- **ScanNet subset** (1,079 questions, 89 scenes): blocked on the ScanNet **Terms of Use**, which
+  must be filled out and sent from an institutional address to `scannet@googlegroups.com`
+  (*"The data is released under the ScanNet Terms of Use"*, `github.com/ScanNet/ScanNet`). Blocked
+  independently on disk: RGB-only extraction is **62 GB** against 51 GB free.
+- **HM3D Option 2** (render from Habitat): the trajectory-states archive
+  `open-eqa-hm3d-states-v0.tgz` has **expired**; the re-upload request is still open
+  (`github.com/kaist-ami/SplatReasoner/issues/1`).
+- **HM3D Option 1** (pre-rendered frames, `open-eqa-hm3d-frames-v0.tgz`, published md5
+  `286aa5d2fda99f4ed1567ae212998370`): **link expired**, verified directly. Same expiry reported
+  independently (`github.com/intcomp/SegPruner/issues/1`, filed ~209 days before this check).
+- **Surviving mirror** (`huggingface.co/datasets/AIGeeksGroup/OpenEQA`, MIT): carries the HM3D
+  frames as **63 per-scene `.tar` files**. The published md5 covers a **single `.tgz` that no
+  longer exists in that form**, so the checksum cannot be applied to it; the party that pinned the
+  mirror states the original byte identity is **unverified**.
+
+**Why the closure is clean rather than speculative.** The download was attempted. **`curl` exited
+0 and wrote a file with the correct name**; the file was **230 KB of HTML** whose `<title>` is
+**"Dropbox - Link Expired"**, md5 `2e5a0bda…` against the published `286aa5d2…`. A success signal
+that was not one. **Without the requirement to verify the md5 rather than record it, that file
+would have reached extraction or, worse, a result.** Three URL variants confirmed the expiry
+(`dl=1` and `dl=0` both HTTP 200 `text/html`; `dl.dropboxusercontent.com` HTTP 403).
+
+**REVERSIBLE:** if the ScanNet Terms of Use are signed and ~70 GB of disk is freed, the ScanNet
+subset becomes available and **verifiable**, and this entry should be reopened. The annotations
+were never the problem — they remain available under MIT.
+
+**Evidence:** `reports/study_oeqa.md`.
+
+
 ### EgoLife
 **Failure mode:** No accessible QA benchmark that isolates context compression as the
 failure mode. Egocentric video + life-log, but the evaluation setup requires dense
