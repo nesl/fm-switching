@@ -1,0 +1,88 @@
+{
+ "check": "covex_harden_mu_vs_occupancy",
+ "is_measurement": false,
+ "label": "AUDIT of a dry run. mu beside an in-flight occupancy PROXY, to show whether mu tracks scarcity. mu is untouched; this is a measurement, not a fix.",
+ "git_commit": "700f2485b5db6e49d80a649c9fca7171574439e7",
+ "switches_on": {
+  "planner_rc": true,
+  "plan_latest": true,
+  "replan": true,
+  "deficit_update": true,
+  "write_staleness": true,
+  "realistic_competing": true,
+  "mu_mode": "scarcity"
+ },
+ "cells": [
+  {
+   "n_devices": 4,
+   "periods": 5999,
+   "mu": {
+    "p50": 0.304,
+    "p90": 1.0,
+    "min": 0.0,
+    "max": 1.0
+   },
+   "inflight": {
+    "mean": 1.0902,
+    "max": 2,
+    "periods_with_any": 4634,
+    "fraction_of_periods_busy": 0.7725
+   },
+   "gpu_kv_fraction": {
+    "p50": 0.0,
+    "max": 0.0
+   },
+   "reading": "mu is compared against an IN-FLIGHT OCCUPANCY PROXY, not true GPU utilisation"
+  },
+  {
+   "n_devices": 8,
+   "periods": 6001,
+   "mu": {
+    "p50": 1.0,
+    "p90": 1.0,
+    "min": 0.0,
+    "max": 1.0
+   },
+   "inflight": {
+    "mean": 1.8999,
+    "max": 5,
+    "periods_with_any": 5529,
+    "fraction_of_periods_busy": 0.9213
+   },
+   "gpu_kv_fraction": {
+    "p50": 0.0,
+    "max": 0.0
+   },
+   "reading": "mu is compared against an IN-FLIGHT OCCUPANCY PROXY, not true GPU utilisation"
+  },
+  {
+   "n_devices": 16,
+   "periods": 6001,
+   "mu": {
+    "p50": 1.0,
+    "p90": 1.0,
+    "min": 0.0,
+    "max": 1.0
+   },
+   "inflight": {
+    "mean": 2.6979,
+    "max": 10,
+    "periods_with_any": 5773,
+    "fraction_of_periods_busy": 0.962
+   },
+   "gpu_kv_fraction": {
+    "p50": 0.0,
+    "max": 0.0
+   },
+   "reading": "mu is compared against an IN-FLIGHT OCCUPANCY PROXY, not true GPU utilisation"
+  }
+ ],
+ "_provenance": {
+  "git_commit": "700f2485b5db6e49d80a649c9fca7171574439e7",
+  "script": "policy/audit/mu_vs_occupancy.py",
+  "model": "none (pol4 frozen)",
+  "device": "flash CPU only",
+  "n": "seed 0 at 4,8,16 devices for 600 s",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}

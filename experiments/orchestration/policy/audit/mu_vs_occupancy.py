@@ -78,7 +78,10 @@ def main(argv=None) -> int:
             continue
         if "=" in item:
             k, v = item.split("=", 1)
-            sw[k] = float(v)
+            try:
+                sw[k] = float(v)
+            except ValueError:
+                sw[k] = v   # v1.3 selects the scarcity price by NAME, mu_mode=scarcity
         else:
             sw[item] = True
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(H.ROOT),

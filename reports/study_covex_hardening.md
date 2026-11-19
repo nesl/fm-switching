@@ -1101,3 +1101,95 @@ predicted congestion, and C_inflight is the other lever that governs how much wo
 screen misranks COVEX against edf on the dashcam axis at 8 devices specifically. The 16-device
 column is the trustworthy one (dry and live agree to within 0.003 for policy-core there), and that
 is where the gap is widest.
+
+# 12. v1.3 SCORED (D129/D130). The dashcam axis moves a lot, the robot axis does not, and the gate still FAILS
+
+HEAD **`700f248`** (v1.3 at `ed8ef56` plus the work-conserving release floor), pinned worktree.
+Delivery, 600 s, tight, seeds 4, 5 and 6. Predictions for this run were pre-registered BLIND in
+`results/orchestration/live2/covex_harden/v13_preregistration.json`, committed at `edd5a0a`
+before the result file existed.
+
+**dashcam delivered / robot delivered on time:**
+
+| seed | n | **v1.3** | v1.2 (was, at `554fe95`) | **edf C=8** | **llf (now C=8)** | edf C=4 |
+|---|---|---|---|---|---|---|
+| 4 | 8 | 0.8424 / 0 of 21 | 0.5860 / 1 | **0.9993 / 18** | **0.9993 / 18** | 0.9986 / 1 |
+| 5 | 8 | 0.9803 / 4 of 17 | 0.9219 / 4 | **0.9993 / 15** | **0.9993 / 15** | 0.9867 / 2 |
+| 6 | 8 | 0.4729 / 1 of 17 | 0.4853 / 1 | **0.9991 / 15** | **0.9991 / 15** | 0.9844 / 0 |
+| 4 | 16 | 0.5907 / 1 of 41 | 0.5904 / 1 | 0.9609 / 3 | **0.9730 / 9** | 0.0128 / 0 |
+| 5 | 16 | 0.5857 / 2 of 41 | 0.1230 / 1 | 0.9558 / 8 | **0.9684 / 9** | 0.0130 / 1 |
+| 6 | 16 | 0.4943 / 1 of 37 | 0.0624 / 2 | 0.9654 / 4 | **0.9792 / 10** | 0.0105 / 0 |
+
+## 12.1 GATE VERDICT, D127 criterion: FAIL in every cell, on both axes
+
+v1.3 does not match the best scheduling baseline in any of the six cells. Dashcam: its best cell
+is 0.9803 against 0.9993. Robot: it delivers 0, 4, 1, 1, 2 and 1 where the best baseline delivers
+18, 15, 15, 9, 9 and 10. **No `harden GATE PASS` string is emitted.**
+
+## 12.2 The baseline bar MOVED between my two scorings, and the cause is my own finding
+
+`C_INFLIGHT_DEFAULT` changed from **4 to 8** at `700f248`, and `LlfArm` subclasses `Pi0Edf`, so it
+inherits the change. That single default is the whole of llf's move at 16 devices, from 0.0189 to
+0.9730 on seed 4. The `llf` column in section 11 is C=4 and the `llf` column above is C=8. Same
+name, two settings. They must not be read against each other, and I have labelled both.
+
+The honest consequence: **the gate got harder between v1.2 and v1.3 because session 1 adopted my
+C_inflight finding as the default.** llf at C=8 is now the strongest arm at 16 devices, beating
+edf C=8 on both axes in all three seeds. The bar v1.3 has to clear is higher than the bar v1.2
+was measured against, and that is a real effect, not a regression in v1.3.
+
+## 12.3 P2 is FALSIFIED, and it was my prediction
+
+I pre-registered that capping the price at 1.0, against an EWMA price whose p50 reached 9.835 at
+16 devices, is a roughly tenfold cut in the backlog charge, so cold rebuilds should move toward
+admissible and **the robot axis should improve most at 16 devices**.
+
+It did not. Robot at 16 devices went 1 to 1, 1 to 2, and 2 to 1. At 8 devices seed 4 went 1 to 0,
+which is the wrong direction. The tenfold price cut did not buy a single additional robot
+delivery. Whatever is binding the robot axis, it is not the magnitude of the backlog charge, and
+that rules out the mechanism I expected as well as the one the change was motivated by.
+
+**Where the gain actually landed:** the dashcam axis at 16 devices, on the two seeds that were
+collapsed. Seed 5 went 0.1230 to 0.5857 and seed 6 went 0.0624 to 0.4943. Seed 4, which was not
+collapsed, did not move at all, 0.5904 to 0.5907. That pattern is a floor being lifted, not a
+uniform improvement, and it is consistent with the work-conserving release floor in `700f248`
+rather than with the price change. Section 12.4 separates the two.
+
+## 12.4 P1 CONFIRMED. The scarcity price is CLIPPED TO ITS CEILING exactly where capacity binds
+
+Measured mu under `mu_mode="scarcity"` at `700f248`, 6,000 decision periods per size:
+
+| n | mu p50 | mu p90 | mu min | mu max | in-flight mean | periods busy |
+|---|---|---|---|---|---|---|
+| 4 | **0.304** | 1.0 | 0.0 | 1.0 | 1.090 | 0.772 |
+| 8 | **1.000** | 1.0 | 0.0 | 1.0 | 1.900 | 0.921 |
+| 16 | **1.000** | 1.0 | 0.0 | 1.0 | 2.698 | 0.962 |
+
+At 8 and 16 devices mu sits at its ceiling of 1.0 at the median AND at p90. The price is pinned.
+It varies only at 4 devices, where the engine is idle 23 percent of periods and a single in-flight
+request's predicted service is often under H = 0.5 s.
+
+**This is the CONSTANT stopping condition of CLAUDE.md Step 2, in the two sizes that matter.** The
+causal link "scarcity rises, so the price rises, so the policy declines less valuable work" cannot
+be exercised at 8 or 16 devices, because the price has no headroom left to rise into. v1.3 may
+NOT be credited with a scarcity MECHANISM at those sizes. The dashcam gain in 12.3 is real as a
+number, but it is not evidence for the mechanism the change was motivated by, and section 12.3
+already shows the gain has the signature of the release floor rather than the price.
+
+**P3 does NOT fire, and this part is a genuine repair.** Under the EWMA price I measured mu rising
+1.445, 2.178, 9.835 while occupancy FELL 1.090, 1.054, 0.332 (F-A9). Under the scarcity price mu
+is non-decreasing in occupancy by construction and occupancy now RISES 1.090, 1.900, 2.698. The
+positive feedback loop of F-A9, where refusing work raised the price of work, is broken. That is
+the real achievement of v1.3 and it should be stated as such.
+
+**The actionable defect, and it is one line.** `mu = mu_scale * min(1, busy_ahead / H)` divides by
+the DISPATCH period H = 0.5 s, while the quantity in the numerator is the predicted service of
+what is in flight, which is order 1 s for a single request. The ratio is therefore at or above 1
+whenever anything at all is outstanding, and the clip discards everything above that. The fix is
+not to raise `mu_scale`, which rescales a constant and leaves it constant. Either drop the clip,
+or divide by a horizon on the scale of the deadlines being protected rather than the scale of the
+dispatch period. As measured, in-flight mean reaches 2.698 at 16 devices, so an unclipped ratio
+would still carry a usable two-to-threefold range across the sizes.
+
+**Also dead here:** `gpu_kv_fraction` is p50 0.0 and max 0.0 at every size. KV is never a binding
+resource in any of these cells, so no KV-pressure channel is being exercised at all.
