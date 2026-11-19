@@ -119,6 +119,8 @@ d134_watch() {
     for a in $arms; do run_arm $a; done
   fi
 }
+# D138 follow-up: the hybrid C6 cells run first once hybrid screening is done (each cell reuses a finished run)
+if grep -q SCREENING_DONE results/orchestration/live2/hybrid/live_runs/STATUS 2>/dev/null && ! grep -q C6_DONE results/orchestration/live2/hybrid/live_runs/STATUS; then bash experiments/orchestration/study_hybrid_c6_cells.sh; fi
 log "pilot5b driver start (D134): watchers in the main shell, robust pre-pull add"
 # (3) operator-applied placement: the five memory arms at 10 and 12, labelled with-placement
 if [ -f $OUT/PLACEMENT_APPLIED ] && ! grep -qx placement-reruns $DONE_ARMS 2>/dev/null; then

@@ -1,0 +1,11 @@
+{
+ "chooser_commit": "70be641",
+ "off_identity": {"how": "c6 off: no mirror is built and the C6 code path never runs, so the decision is the one the components return (identity by construction); plus the base vs b7 decision-log diff after adding the roster hook", "cell": "seed 0, 10 devices, 120 s dry", "base_vs_b7_identical": true, "decisions": 991},
+ "c5_still_moves_after_roster_fix": {"cell": "seed 0, 10 devices, 120 s dry", "differing_vs_base": 847},
+ "on_moves": [
+  {"cell": "seed 0, 12 devices, 600 s dry", "off": "hybrid-c1c2k1c5", "on": "hybrid-c1c2k1c5-c6", "differing_decision_rows": 158, "chooser_calls": 346, "calls_without_mirror_pieces": 176, "deviations": {"decline_to_send": 2}, "first_diff": {"index": 3676, "t": 322.2, "off": "decline", "on": "release_recall D2", "opportunity": "opp0003461"}},
+  {"cell": "seed 0, 12 devices, 600 s dry", "off": "hybrid-all-k1", "on": "hybrid-all-k1-c6", "differing_decision_rows": 0, "chooser_calls": 344, "calls_without_mirror_pieces": 176, "deviations": {}, "verdict": "ABSENT LINK in this cell: C3 already turns the declines into RECENT sends and the chooser agrees with every send"},
+  {"cell": "seed 0, 10 devices, 120 s dry", "off": "hybrid-c1c2k1c5", "on": "hybrid-c1c2k1c5-c6", "differing_decision_rows": 0, "chooser_calls": 17, "note": "candidate scores tie at 14 of 17 calls (the RC terms cancel); where they differ the chooser agreed with the default"}
+ ],
+ "light_tests_during_live_cell": "run at nice 19 on cores 100-110 while hybrid-base_n10_s0 was live (host load is logged by the run)"
+}

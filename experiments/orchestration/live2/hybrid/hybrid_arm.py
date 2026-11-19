@@ -20,7 +20,10 @@ Components (flash code read-only: costs.py curves, b7's feasibility rule, the RC
   C5 AIMD in-flight  cap starts at 8, halves (floor 4) when the episodic latency estimate exceeds 0.8 x the
                      dashcam deadline, +1 per 5 s otherwise (ceiling 8); only the top `cap - in_flight` items are
                      released; the rest stay local (dashcam) or deferred (recall).
-  C6 chooser         OFF until flash's "chooser ready" commit (policy/ choose(candidates, state)).
+  C6 chooser         flash's policy/chooser.py (70be641), per robot question: candidates send (full D2) / hold /
+                     decline, the C2/C3 choice as default, each simulated to the question's deadline on a
+                     policy-core mirror whose own decisions are never executed (arms_covex_v2's evaluator pattern).
+                     Off = the code path never runs (no mirror is built), so off is identical by construction.
 """
 from __future__ import annotations
 
@@ -42,6 +45,16 @@ import costs as C                                                           # no
 from interface import Action, Observation, RecallAction, StreamAction       # noqa: E402
 
 DASH_DEADLINE_S = 1.0
+
+
+def _chooser_module():
+    """flash's committed policy/chooser.py (70be641), loaded read-only by path."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("policy_chooser", REPO / "experiments/orchestration/policy/chooser.py")
+    m = importlib.util.module_from_spec(spec)
+    sys.modules.setdefault("policy_chooser", m)
+    spec.loader.exec_module(m)
+    return m
 RECENT_TOKENS = 467          # live2's committed RECENT_WINDOW_TOKENS (cstate), the representation the coordinator charges
 
 
@@ -75,6 +88,9 @@ class HybridArm:
         self.values = _quality_values() if any(self.sw.values()) else None
         self.cap, self._last_adj = 8, None
         self.stats = Counter()
+        self._roster: Dict[str, Any] = {}
+        self._scorer = None                  # C6: a policy-core instance used ONLY as state mirror + rollout
+        self._chooser = None
 
     # ---- delegate every live2 hook to the committed b7 wrapper (the base) --------------------------------
     def __getattr__(self, k):
@@ -83,6 +99,23 @@ class HybridArm:
     def __call__(self, obs: Observation) -> Action:
         # identical entry path to b7's (Policy.__call__ scrubs, validates, applies defaults), with our decide
         return self._b7.__class__.__call__(self, obs) if hasattr(self._b7.__class__, "__call__") else self.decide(obs)
+
+    # The roster (each dashcam instant's own deadline, session ownership, built tokens) is what C1 / C2 read
+    # for dashcam deadlines, and what the C6 mirror needs. b7 declares no live2_roster and receives nothing,
+    # so storing it here cannot change the base's decisions (proved by the identity test).
+    def live2_roster(self, roster: Dict[str, Any]) -> None:
+        self._roster = dict(roster or {})
+        if self._scorer is not None:
+            self._scorer.live2_roster(dict(self._roster))
+
+    def live2_configure(self, **kw: Any) -> None:
+        self._b7.live2_configure(**kw)
+        if self.sw["c6"]:
+            import arms as A
+            CH = _chooser_module()
+            self._scorer = A.make_arm("policy-core")
+            self._scorer.live2_configure(**kw)
+            self._chooser = CH.Chooser(enabled=True, delta=0.0)
 
     def live2_describe(self) -> Dict[str, Any]:
         d = dict(self._b7.live2_describe()) if hasattr(self._b7, "live2_describe") else {}
@@ -95,7 +128,7 @@ class HybridArm:
             return self._b7.decide(obs)                        # THE BASE: b7 exactly
         now = obs.now_s
         in_flight = sum(int(v) for v in (obs.cloud.running_by_class or {}).values())
-        roster = (getattr(self._b7, "_live2_roster", None) or {}).get("sh_instant", {})
+        roster = (self._roster or {}).get("sh_instant", {})
         epi_s = float(C.episodic_cloud_latency_s("32BI", 1, 25))
         items = []
         for s in obs.streams:                                  # dashcam instants
@@ -108,6 +141,7 @@ class HybridArm:
             items.append(dict(kind="dash", id=s.stream_id, dl=dl, slack=slack, work=epi_s, risk=risk,
                               value=(self.values or {}).get("dashcam", 0.09)))
         rec_dec: Dict[str, RecallAction] = {}
+        c6_live = self.sw["c6"] and self._scorer is not None and bool(obs.recall) and self._c6_prepare(obs)
         for q in sorted(obs.recall, key=lambda x: x.deadline_s):
             est = float(C.recall_ttft_s(max(q.readiness_tokens, 1), q.readiness))
             qs = q.slack_s(now)
@@ -124,6 +158,8 @@ class HybridArm:
                 if est_r <= qs:
                     d = RecallAction(q.query_id, "CLOUD", representation="RECENT")
                     self.stats["c3_recent"] += 1
+            if c6_live:
+                d = self._c6_one(q, d)
             rec_dec[q.query_id] = d
             if d.decision == "CLOUD":
                 items.append(dict(kind="recall", id=q.query_id, dl=q.deadline_s, slack=slack, risk=risk,
@@ -167,6 +203,52 @@ class HybridArm:
         self.stats["decisions"] += 1
         return Action(streams=streams, recall=recall, order="EDF", notes={"hybrid": self.name})
 
+    # ---- C6: flash's counterfactual chooser, per robot question ----------------------------------------
+    def _c6_prepare(self, obs: Observation) -> bool:
+        """Advance the policy-core mirror to this period (its decisions are NEVER executed; the same
+        evaluator pattern as arms_covex_v2), so its fleet holds the question's job and pending pieces."""
+        try:
+            self._scorer.live2_roster(dict(self._roster))
+            self._scorer.decide(obs)
+            return True
+        except Exception as e:                                                  # noqa: BLE001
+            self.stats["c6_scorer_error"] += 1
+            self._c6_last_error = repr(e)[:300]
+            return False
+
+    def _c6_one(self, q, d: RecallAction) -> RecallAction:
+        """Candidates for ONE robot question, proposed by the components: the C2/C3 choice is the default;
+        the alternatives are send-now (full D2), hold (defer) and decline. Each is expressed in the mirror's
+        own item ids as `Rollout.run` kwargs and simulated to the question's deadline by the chooser."""
+        CH = sys.modules["policy_chooser"]
+        f = self._scorer.fleet
+        jid = getattr(self._scorer, "_jobs_by_q", {}).get(q.query_id)
+        if jid is None:
+            self.stats["c6_unmapped"] += 1
+            return d
+        ids = tuple(p.item_id for p in f.pending if getattr(p, "job_id", None) == jid)
+        if not ids:
+            self.stats["c6_no_pending"] += 1
+            return d
+        dl = float(q.deadline_s)
+        opts = dict(send=CH.Candidate(kind="send", rollout_kwargs=dict(release_now=ids), deadline_s=dl),
+                    hold=CH.Candidate(kind="hold", rollout_kwargs=dict(exclude=ids), deadline_s=dl),
+                    decline=CH.Candidate(kind="decline", rollout_kwargs=dict(drop=ids), deadline_s=dl))
+        mine = "send" if d.decision == "CLOUD" else ("hold" if d.decision == "DEFER" else "decline")
+        dflt = opts[mine]
+        cands = [dflt] + [c for k, c in opts.items() if k != mine]
+        st = CH.ChooserState(rollout=self._scorer.rollout, fleet=f, now_s=float(f.t))
+        self.stats["c6_calls"] += 1
+        got = self._chooser.choose(cands, st, default=dflt)
+        if got is dflt:
+            return d
+        self.stats["c6_dev_%s_to_%s" % (mine, got.kind)] += 1
+        if got.kind == "send":
+            return RecallAction(q.query_id, "CLOUD")
+        if got.kind == "hold":
+            return RecallAction(q.query_id, "DEFER", defer_s=self._b7.defer_s)
+        return RecallAction(q.query_id, "REJECT")
+
     def _aimd(self, obs: Observation) -> None:
         lat = (obs.cloud.latency_estimate_s or {}).get("episodic")
         now = obs.now_s
@@ -196,6 +278,11 @@ CONFIGS: Dict[str, Dict[str, Any]] = {
     "hybrid-all-k1": dict(c1=True, c2=True, c3=True, c5=True, k_r=1.0),
     "hybrid-all-k2": dict(c1=True, c2=True, c3=True, c5=True, k_r=2.0),
 }
+
+
+# C6 variants of every configuration (D138 follow-up): screening adds "<best>-c6" at 10 and 12 devices.
+for _n, _k in list(CONFIGS.items()):
+    CONFIGS[_n + "-c6"] = dict(_k, c6=True)
 
 
 def register() -> None:
