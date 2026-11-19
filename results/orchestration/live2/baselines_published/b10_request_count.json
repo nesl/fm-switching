@@ -1,0 +1,54 @@
+{
+ "check": "b10_request_count_design_or_bug",
+ "is_measurement": true,
+ "question": "D134 item 8: b10-blocking-aware sends only 10 to 52 requests in 600 s. Design or porting bug?",
+ "verdict": "PORTING BUG, in the episodic path, not the recall path. The recall admission rule was never the problem.",
+ "how_settled": "instrumented b10.decide() to tally which branch every recall took and what the gap rule read, at 16 devices, seed 4, 600 s, dry run, against b7-edf-feasibility on the same cell.",
+ "recall_path_is_healthy": {
+  "b10": {
+   "distinct_queries": 41,
+   "released_CLOUD_on_slack": 40,
+   "deferred_hold": 1425,
+   "deferred_queued": 23
+  },
+  "b7": {
+   "distinct_queries": 41,
+   "released_CLOUD": 37,
+   "rejected": 4
+  },
+  "reading": "b10 releases 40 of 41 recalls against b7 37 of 41. The recall request count is NOT low and never was; the cold_q lock and the gap rule behave exactly as the card specifies."
+ },
+ "the_actual_fault": {
+  "what": "B10BlockingAwareAdmission.decide returns Action(streams=[], ...) on every epoch, the only arm in baselines/*.py that does (one occurrence, constructed.py:625).",
+  "why_it_matters": "coordinator._serve_monitor, which serves an episodic request and charges episodic_gpu_s, is reachable ONLY from inside `for sa in act.streams:` and only when sa.mode == \"cloud\" (coordinator.py:405-411). An arm emitting no StreamAction has ZERO episodic requests served, ever.",
+  "measured_before": {
+   "release_monitor": 0,
+   "decision_rows": 1501,
+   "b7_release_monitor": 7840
+  },
+  "card_contradiction": "the card declares defaults_used = (\"episodic_mode\", \"cadence_s\", \"frame_count\", ...), i.e. B10 is documented as TAKING THE DOCUMENTED DEFAULT for episodic streaming and being judged only on its admission rule. The code emits nothing instead.",
+  "why_apply_defaults_does_not_rescue_it": "interface.apply_defaults fills fields on the stream actions that EXIST and never synthesises a missing one; live2 does not call it at all.",
+  "consequence": "roughly half the workload was silently absent from every b10 cell, so every committed b10 live2 number is measured on a fleet whose dashcam half was never served."
+ },
+ "fix": {
+  "where": "experiments/orchestration/live2/arms_published.py, class B10BlockingAwareArm, confined to the live2 port",
+  "what": "when the wrapped decide() returns no stream actions, emit the documented default StreamAction(sid, \"cloud\") for each connected stream, leaving cadence_s and frame_count None so the coordinator keeps each device own values.",
+  "not_touched": "baselines/constructed.py is deliberately NOT edited, because B10 is also scored by committed offline studies and changing it there would silently move their numbers.",
+  "measured_after": {
+   "release_monitor": 8333,
+   "decision_rows": 9790,
+   "b7_release_monitor": 7840
+  },
+  "proof_the_fix_is_surgical": "the recall branch is essentially unchanged: CLOUD on slack 40 before and 40 after, distinct queries 41 before and 41 after, deferred_hold 1425 before and 1382 after. The property under test, blocking-aware admission without slicing, is untouched; only the absent episodic workload was restored."
+ },
+ "same_family_as": "cards/simplestream.md records the mirror-image fault, where the docstring promised the documented default and the code emitted a literal StreamAction(sid, \"local\"). There it served the wrong thing; here it served nothing.",
+ "single_size_note": "measured at 16 devices only, and flagged as such under the standing rule that any mechanism scored at a single size must say so.",
+ "_provenance": {
+  "git_commit": "45b45f94d5b404d418208cf91f7ae70e43b8e815",
+  "script": "scratch instrumentation of arm.decide; no shared file changed",
+  "model": "none (dry run, committed curves)",
+  "device": "flash CPU only",
+  "n": "seed 4, 16 devices, 600 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}

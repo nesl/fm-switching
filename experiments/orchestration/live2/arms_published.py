@@ -9,6 +9,8 @@ overrides nothing but `name` and the provenance string.
 
 WHAT A WRAPPER MAY AND MAY NOT DO. It may give the arm its live2 name and record where it came
 from. It may NOT change `decide`, re-tune a constructor default, or widen an arm's action space,
+with ONE documented exception, `b10-blocking-aware`, whose shim is explained on its class and
+which RESTORES the behaviour its own card declares rather than changing it (D134 item 8),
 because the card is the committed record of the adaptation and the arm's behaviour is the thing
 under test.
 
@@ -37,7 +39,7 @@ for _p in (str(_ROOT / "experiments/orchestration/baselines"),
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from interface import Policy                                            # noqa: E402
+from interface import Policy, StreamAction                             # noqa: E402
 from arms import Live2ArmMixin                                          # noqa: E402
 
 import constructed as CONS                                              # noqa: E402
@@ -98,9 +100,61 @@ def _wrap(cls_name: str, base: type, live2_name: str, card: str, source: str) ->
 B7EdfFeasibilityArm = _wrap("B7EdfFeasibilityArm", CONS.B7EDFFeasibility,
                             "b7-edf-feasibility", "constructed.md",
                             "baselines/constructed.py::B7EDFFeasibility")
-B10BlockingAwareArm = _wrap("B10BlockingAwareArm", CONS.B10BlockingAwareAdmission,
-                            "b10-blocking-aware", "constructed.md",
-                            "baselines/constructed.py::B10BlockingAwareAdmission")
+_B10Base = _wrap("_B10Base", CONS.B10BlockingAwareAdmission,
+                 "b10-blocking-aware", "constructed.md",
+                 "baselines/constructed.py::B10BlockingAwareAdmission")
+
+
+class B10BlockingAwareArm(_B10Base):
+    """B10 with ONE live2 porting shim, and nothing else changed.
+
+    D134 item 8. `B10BlockingAwareAdmission.decide` returns `Action(streams=[], ...)` on every
+    epoch, while its own card declares `defaults_used = ("episodic_mode", "cadence_s",
+    "frame_count", ...)`, that is, it is documented as taking the DOCUMENTED DEFAULT for episodic
+    streaming and being judged only on its recall admission rule. The code and the card disagree.
+
+    In live2 that disagreement is not cosmetic. `coordinator._serve_monitor`, which serves an
+    episodic request and charges `episodic_gpu_s`, is reachable ONLY from inside
+    `for sa in act.streams:` and only when `sa.mode == "cloud"` (coordinator.py:405-411). An arm
+    that emits no StreamAction therefore has ZERO episodic requests served, ever. Measured at 16
+    devices, seed 4, 600 s: b10 logged 0 `release_monitor` against b7-edf-feasibility's 7,840, so
+    roughly half the workload was silently absent from every b10 cell. `interface.apply_defaults`
+    does not rescue it either: it fills fields on the stream actions that EXIST and never
+    synthesises a missing one, and live2 does not call it at all.
+
+    The shim restores exactly what the card declares and nothing more: when the wrapped `decide`
+    returns no stream actions, emit the documented default `StreamAction(sid, "cloud")` for each
+    connected stream, leaving `cadence_s` and `frame_count` as None so the coordinator keeps each
+    device's own values (`sa.cadence_s or d.cadence_s`). The recall admission rule, the cold_q
+    lock, the EDF order and the session management are untouched, so the property under test is
+    unchanged.
+
+    `baselines/constructed.py` is deliberately NOT edited: B10 is scored by committed offline
+    studies as well, and changing it there would silently move their numbers. The fix is confined
+    to the live2 port, which is the thing that was broken.
+
+    This is the same FAMILY of fault already recorded on `cards/simplestream.md`, where the
+    docstring promised the documented default and the code emitted a literal
+    `StreamAction(sid, "local")`. There it served the wrong thing; here it serves nothing.
+    """
+
+    live2_shim = ("D134 item 8: emit the card's documented default episodic StreamAction when the "
+                  "wrapped decide() emits none, because live2 serves episodic work only through "
+                  "act.streams")
+
+    def decide(self, obs):
+        act = super().decide(obs)
+        if not act.streams:
+            act.streams = [StreamAction(s.stream_id, "cloud")
+                           for s in obs.streams if s.network.connected]
+            self._shim_fired = getattr(self, "_shim_fired", 0) + 1
+        return act
+
+    def live2_describe(self):
+        d = super().live2_describe()
+        d["live2_shim"] = self.live2_shim
+        d["shim_epochs"] = getattr(self, "_shim_fired", 0)
+        return d
 
 # ---------------------------------------------------------------- 2
 ClockworkArm = _wrap("ClockworkArm", _clockwork.ClockworkAdapted, "clockwork", "clockwork.md",

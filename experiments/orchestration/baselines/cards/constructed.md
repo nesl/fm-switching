@@ -243,3 +243,36 @@ tuned.
 The convergence is explained: their only behavioural differences are the `order` field (`MOONCAKE-REUSE-FIRST` against `EDF`) and session actions (mooncake emits KEEP_GPU_WARM, b7 emits none). The first cannot reach a decision at all, and the second did not change an outcome in these cells. A measured convergence of two distinct schedulers is a result about the regime, and it is recorded here rather than being read as duplication.
 
 `live2/coordinator.py` NEVER READS the action's `order` field: it contains zero references to it, and the two `.order` matches are `self.st.order`, a different object. Any part of this system's scheduling discipline expressed through `order` therefore CANNOT reach a decision in live2. This is a property of the live2 harness, not of the adaptation, and nothing in the adaptation was altered.
+
+## D134 item 8, added 2026-11-19: B10's live2 episodic path was never served
+
+**Symptom.** `b10-blocking-aware` sent only 10 to 52 requests in 600 s.
+
+**It was not the admission rule.** Instrumented at 16 devices, seed 4, 600 s, B10 releases **40 of
+41** recalls (on slack), against `b7-edf-feasibility`'s 37 of 41. The cold_q lock and the gap rule
+behave exactly as specified; the recall request count was never low.
+
+**The fault is that `B10BlockingAwareAdmission.decide` returns `Action(streams=[], ...)`** on every
+epoch, the only arm in `baselines/*.py` that does. In live2, `coordinator._serve_monitor` (which
+serves an episodic request and charges `episodic_gpu_s`) is reachable **only** from inside
+`for sa in act.streams:` and only when `sa.mode == "cloud"` (`coordinator.py:405-411`). An arm that
+emits no `StreamAction` therefore has **zero** episodic requests served: measured `release_monitor`
+= 0 against b7's 7,840.
+
+**This contradicts this card.** B10 declares `defaults_used = ("episodic_mode", "cadence_s",
+"frame_count", ...)`, that is, it takes the documented default for episodic streaming and is judged
+only on its admission rule. `interface.apply_defaults` does not rescue it: it fills fields on the
+stream actions that *exist* and never synthesises a missing one, and live2 does not call it at all.
+
+**Fix, confined to the live2 port.** `arms_published.py::B10BlockingAwareArm` emits the documented
+default `StreamAction(sid, "cloud")` for each connected stream when the wrapped `decide` emits
+none, leaving `cadence_s` and `frame_count` as `None` so the coordinator keeps each device's own
+values. `constructed.py` is **not** edited, because B10 is also scored by committed offline studies
+and changing it there would silently move their numbers.
+
+**The fix is surgical.** After: `release_monitor` 8,333 (b7: 7,840). Recall essentially unchanged,
+CLOUD-on-slack 40 before and 40 after, 41 distinct queries before and after. The property under
+test, blocking-aware admission *without slicing*, is untouched.
+
+**Consequence for prior numbers.** Every b10 live2 cell measured before this fix was run on a fleet
+whose dashcam half was never served, and should not be cited.
