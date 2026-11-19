@@ -1,0 +1,132 @@
+{
+ "check": "covex_harden_state_value_entrypoints",
+ "is_measurement": false,
+ "label": "AUDIT. Which `state_value` entry point is authoritative, over ONE candidate population, in both F2 conditions. Nothing is fixed here; this only measures.",
+ "entry_point_note": "`state_value` is a caching wrapper over `_state_value` and shadow mode asserts they agree, so they cannot differ in VALUE. The reported disagreements are between CALL SITES and between three different quantities: per-call value, per-branch sum, between-branch difference.",
+ "conditions": {
+  "F2_off": {
+   "switches": {
+    "planner_rc": true,
+    "plan_latest": true,
+    "replan": true,
+    "deficit_update": true,
+    "realistic_competing": true,
+    "write_staleness": false
+   },
+   "n_devices": 8,
+   "seed": 0,
+   "run_s": 300.0,
+   "per_call": {
+    "total": 15516,
+    "by_site": {
+     "coordinator.py:_state": {
+      "calls": 9359,
+      "exactly_zero": 1181,
+      "fraction_exactly_zero": 0.1262,
+      "distinct_values": 2,
+      "example_values": [
+       0.0,
+       0.009216
+      ],
+      "credit_allowed_true": 9359,
+      "credit_allowed_false": 0,
+      "p_need_zero": 0,
+      "here_equals_floor": 1181
+     },
+     "rollout.py:_terminal": {
+      "calls": 6157,
+      "exactly_zero": 1183,
+      "fraction_exactly_zero": 0.1921,
+      "distinct_values": 2,
+      "example_values": [
+       0.0,
+       0.009216
+      ],
+      "credit_allowed_true": 6157,
+      "credit_allowed_false": 0,
+      "p_need_zero": 0,
+      "here_equals_floor": 1183
+     }
+    }
+   },
+   "wrapper_calls": {
+    "rollout.py:_terminal": 105852,
+    "coordinator.py:_state": 9359
+   },
+   "cache_hits": 99695,
+   "per_branch_sum": {
+    "n": 25796,
+    "exactly_zero": 878,
+    "fraction_exactly_zero": 0.034
+   },
+   "between_branch_difference": {
+    "n": 12898,
+    "exactly_zero": 12898,
+    "fraction_exactly_zero": 1.0,
+    "max_abs": 0.0
+   }
+  },
+  "F2_on": {
+   "switches": {
+    "planner_rc": true,
+    "plan_latest": true,
+    "replan": true,
+    "deficit_update": true,
+    "realistic_competing": true,
+    "write_staleness": true
+   },
+   "n_devices": 8,
+   "seed": 0,
+   "run_s": 300.0,
+   "per_call": {
+    "total": 15516,
+    "by_site": {
+     "coordinator.py:_state": {
+      "calls": 9359,
+      "exactly_zero": 1181,
+      "fraction_exactly_zero": 0.1262,
+      "distinct_values": 2,
+      "example_values": [
+       0.0,
+       0.009216
+      ],
+      "credit_allowed_true": 9359,
+      "credit_allowed_false": 0,
+      "p_need_zero": 0,
+      "here_equals_floor": 1181
+     },
+     "rollout.py:_terminal": {
+      "calls": 6157,
+      "exactly_zero": 1183,
+      "fraction_exactly_zero": 0.1921,
+      "distinct_values": 2,
+      "example_values": [
+       0.0,
+       0.009216
+      ],
+      "credit_allowed_true": 6157,
+      "credit_allowed_false": 0,
+      "p_need_zero": 0,
+      "here_equals_floor": 1183
+     }
+    }
+   },
+   "wrapper_calls": {
+    "rollout.py:_terminal": 105852,
+    "coordinator.py:_state": 9359
+   },
+   "cache_hits": 99695,
+   "per_branch_sum": {
+    "n": 25796,
+    "exactly_zero": 878,
+    "fraction_exactly_zero": 0.034
+   },
+   "between_branch_difference": {
+    "n": 12898,
+    "exactly_zero": 12898,
+    "fraction_exactly_zero": 1.0,
+    "max_abs": 0.0
+   }
+  }
+ }
+}

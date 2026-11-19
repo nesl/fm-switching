@@ -290,6 +290,9 @@ def _decompose(ro: Any, fleet: Any, action: Dict[str, Any], res: Dict[str, Any],
                    - sum(v for d, v in b["_sh_by_dev"].items() if d not in own))
         rec.update(
             cont_delta=a["cont"] - b["cont"], sv_delta=a["sv"] - b["sv"],
+            # F-A2 needs the PER-BRANCH sums as well as their difference: a sum that is nonzero
+            # per branch and still cancels is a different finding from a sum that is zero.
+            sv_branch_a=a["sv"], sv_branch_b=b["sv"],
             backlog_delta=a["mu_term"] - b["mu_term"],
             sh_own_delta=sh_own, sh_harm_delta=sh_harm,
             # whatever u_hat holds that the SH rows do not explain is the RC utility, which

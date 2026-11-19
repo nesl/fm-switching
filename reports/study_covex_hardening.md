@@ -54,7 +54,15 @@ verdict on the release.
 **Everything headed "policy-core" or "v1.2" below section 8 is v1.2.** It is NOT a verdict on
 v1.3, which section 12 scores separately.
 
-## THE RECONCILIATION: the robot axis is BINARY in the price
+## THE RECONCILIATION: the price is GRADED on dashcam and BINARY on robots
+
+**Updated by the control in section 15, which falsified my first attribution.** The same price cut
+that lifted 16-device dashcam from 0.1230 to 0.5857 and 0.0624 to 0.4943 bought **zero** extra
+robot deliveries. The code change at `700f248` contributes essentially nothing: five of six
+control cells are identical. So the price is a graded control on one axis and a threshold on the
+other, and **a single scalar price cannot be tuned for both**. That is the finding.
+
+## How the robot half of that works
 
 Two results of mine and session 1's looked contradictory overnight. They are not, and together
 they say more than either does alone.
@@ -74,6 +82,27 @@ independent directions, and it is why session 1's release sets mu = 0 rather tha
 established for the robot axis against THESE deadlines and THIS credit scale. It is not a general
 result about scarcity pricing, and the saturation episode is the reason to be careful: the first
 form's numbers looked like a verdict on pricing and were a verdict on a constant.
+
+## F-A2 IS SETTLED and it closes a v1.2/v1.3 design question
+
+The state-value channel is substantively non-zero in 96.6 percent of branches and **cancels
+EXACTLY between them**, 12,898 of 12,898 candidates, max absolute difference 0.0, at both commits
+and under both F2 settings. It contributes nothing to any decision. The cancellation is structural:
+state value is computed for FUTURE arrivals from `device.history[rep]`, which a dispatch action
+does not change, so both branches evaluate the identical prefix.
+
+**So v1.2 and v1.3 both count "state value at T_r" inertly, and ABANDON reduces to declining the
+remainder.** Anything that wants ABANDON to differ has to make the retained prefix differ BETWEEN
+branches. Section 14 reconciles all three disputed readings; the short version is that `state_value`
+is a caching wrapper whose cache hides 94 percent of calls, and the two call sites bind it
+differently so a patch on one module silently misses the other.
+
+## WHAT I WILL NOT YET CALL A RESULT
+
+Seven in-scope published arms deliver 33 to 35 of 41 robots at 16 devices where llf delivers 9.
+Four times the gate baseline, on the hard axis, the evening they landed. The shared fairness digest
+proves a shared TRACE, not shared COSTS, and an uncharged rebuild is exactly the E36 failure mode.
+Section 16.1 states the check; until it is recorded, none of those numbers is a bar for COVEX.
 
 ## Best version so far, and its standing
 
@@ -1240,3 +1269,172 @@ would still carry a usable two-to-threefold range across the sizes.
 
 **Also dead here:** `gpu_kv_fraction` is p50 0.0 and max 0.0 at every size. KV is never a binding
 resource in any of these cells, so no KV-pressure channel is being exercised at all.
+
+# 14. F-A2 SETTLED. My original finding is confirmed, and all three readings now reconcile
+
+Measured on ONE candidate population per condition, at two commits, with BOTH F2 settings, in
+`state_value_entrypoints.py`. Outputs: `sv_entrypoints_82f178a.json`, `sv_entrypoints_700f248.json`.
+
+**First, the three readings were never three readings of one quantity.** `state_value` is a
+CACHING WRAPPER over `_state_value`, and its shadow mode asserts the two agree, so they cannot
+differ in value. What differ are the call site and the quantity summarised:
+
+| call site | binding | does a patch on `readiness` reach it? |
+|---|---|---|
+| `rollout.py:701` inside `_terminal` | imported INSIDE the function | **yes**, resolved at call time |
+| `coordinator.py:21` used at `:544` | `from .readiness import state_value` at MODULE level | **no**, bound at import time |
+
+Patching one module catches one call site and silently misses the other. This is the same trap my
+`delta_j` capture already patches both bindings for.
+
+**Second, the cache hides 94 percent of calls.** At 8 devices over 300 s the wrapper is called
+105,852 times from the rollout and `_state_value` computes only 6,157 of them: **99,695 cache
+hits**. An instrument on `_state_value` sees six percent of the traffic. Any call count like 1,365
+is a cache-miss count, not a call count.
+
+## 14.1 The three quantities, side by side
+
+At `82f178a` (F2 fixed), identical in BOTH F2 conditions:
+
+| quantity | result |
+|---|---|
+| per-call value, rollout site | 6,157 calls, 19.21 percent exactly zero, **exactly two distinct values: 0.0 and 0.009216** |
+| per-call value, coordinator site | 9,359 calls, 12.62 percent exactly zero, same two values |
+| per-branch SUM | 25,796 branches, **3.4 percent** exactly zero, so the channel is substantively ALIVE per branch |
+| **between-branch DIFFERENCE** | **12,898 of 12,898 exactly zero, max absolute difference 0.0** |
+
+At `700f248` (before the F2 fix):
+
+| condition | per-call zero, rollout | per-branch SUM zero | between-branch DIFFERENCE zero |
+|---|---|---|---|
+| F2 off | 0.1921 | 0.034 | **1.0**, max abs 0.0 |
+| F2 on | **1.0** | **1.0** | **1.0**, max abs 0.0 |
+
+## 14.2 What this settles
+
+**F-A2 is CONFIRMED and session 1's correction of it was a correction of a different quantity.**
+The between-branch difference is exactly zero in every candidate at both commits in both F2
+conditions, max absolute difference 0.0. Nothing I reported under F-A2 needs withdrawing.
+
+**Session 1's FIRST reading reproduces, at the pre-fix commit only.** Its "100 percent zero with
+F2 on" is exactly what I measure at `700f248` with F2 on, for the per-call value AND the
+per-branch sum. Its "28.1 percent zero with F2 off" sits beside my 19.21 percent at the rollout
+site and 12.62 percent at the coordinator site: a different sampling of the same two-valued
+distribution, not a different phenomenon. The value 0.009216 it reported is the non-zero one of
+the two values I see.
+
+**Session 1's NEW reading does not reproduce at either commit.** I measure 19.21 and 12.62 percent
+zero at `82f178a` in both F2 conditions, not 100 percent. The likeliest cause is instrumentation,
+either a patched binding that the coordinator call site does not use, or a probe that saw only
+cache misses. It is the anomaly, and the question it left open is answered by the two tables above.
+
+**The F2 fix removed F2's effect on state value entirely.** At `700f248` turning F2 on drove every
+per-call value to zero; at `82f178a` the two F2 conditions are byte-identical in every number. So
+the earlier "F2 zeroes the sum" result was a symptom of the double charge that `82f178a` fixed.
+
+## 14.3 The consequence for v1.2 and v1.3, which is the point of asking
+
+**The state-value channel contributes EXACTLY NOTHING to any decision, at every commit tested,
+under both F2 settings.** It is not zero because it is broken: it is substantively non-zero in 96.6
+percent of branches and it CANCELS EXACTLY between them. The cancellation is structural, not a
+staleness artefact, which is why the F2 fix moved the per-call values and left the difference at
+exactly 0.0.
+
+The mechanism is visible in the function's own docstring: state value is computed for FUTURE
+ARRIVALS from `device.history[rep]`, and a dispatch action does not change that history, so both
+branches evaluate the identical prefix and the identical `p_need`. The term is a constant offset
+added to both sides of a comparison.
+
+**Therefore v1.2 and v1.3 both count "state value at T_r" inertly, and ABANDON, defined as "keep
+the state value of what is built", reduces to declining the remainder.** That is now measured
+rather than argued, and it holds whatever F2 is set to. Any design that wants ABANDON to differ
+from declining the remainder has to make the retained prefix differ BETWEEN branches; valuing it
+identically on both sides cannot do it.
+
+# 15. The v1.2 switch-set control, which FALSIFIES my own attribution in 12.3
+
+I speculated in 12.3 that the 16-device dashcam gain had "the signature of the release floor
+rather than the price". The control says otherwise and I withdraw the claim.
+
+v1.2's switch set run on v1.3's code at `700f248`, against v1.2 at `554fe95` and the scarcity run:
+
+| seed | n | v1.2 at `554fe95` | **v1.2 switches at `700f248`** | v1.3-scarcity at `700f248` |
+|---|---|---|---|---|
+| 4 | 8 | 0.5860 / 1 | 0.5860 / 1 | 0.8424 / 0 |
+| 5 | 8 | 0.9219 / 4 | 0.9219 / 4 | 0.9803 / 4 |
+| 6 | 8 | 0.4853 / 1 | 0.4853 / 1 | 0.4729 / 1 |
+| 4 | 16 | 0.5904 / 1 | 0.5904 / 1 | 0.5907 / 1 |
+| 5 | 16 | 0.1230 / 1 | 0.1230 / 1 | 0.5857 / 2 |
+| 6 | 16 | 0.0624 / 2 | 0.1937 / 1 | 0.4943 / 1 |
+
+Five of six cells are IDENTICAL between the two commits under the same switches. The code change
+at `700f248`, release floor included, contributes essentially nothing to the candidate. **The
+16-device dashcam gain is attributable to the SWITCH change, which is the price cut.**
+
+**This sharpens the binary-price finding rather than contradicting it.** The same price cut that
+bought 0.1230 to 0.5857 and 0.1937 to 0.4943 on the dashcam axis bought ZERO additional robot
+deliveries. So the price is **graded on the dashcam axis and binary on the robot axis**. The two
+axes do not respond to the same control in the same way, and a single scalar price cannot be tuned
+for both. That is a stronger statement than either my P2 falsification or the mu = 0 result alone,
+and it is the version that belongs in the morning page.
+
+# 16. THE PUBLISHED FIELD (D130), reported and NOT gating, and it needs checking before it is believed
+
+Seed 4, 8 and 16 devices, delivery, at `700f248`. All 19 ported arms resolve and NONE errored.
+
+**Fairness digest: no porting defect.** Twenty-three arms share one digest at 8 devices and the
+same twenty-three share a second digest at 16 devices. The digest groups by FLEET SIZE, which is
+correct because it is a property of the trace and the trace differs with fleet size. Within every
+cell all arms are on identical ground. (My digest is the full 64-hex `fairness_digest` from
+`run_meta.json`; the 16-character `85251b9b8ce7115b` quoted in D130 is a different rendering or a
+different cell, so the two strings are not comparable and neither is evidence of a defect.)
+
+**dashcam delivered / robot delivered on time, seed 4:**
+
+| arm | n=8 | n=16 | in card scope? |
+|---|---|---|---|
+| **llf (gating)** | 0.9993 / 18 of 21 | 0.9730 / 9 of 41 | gate baseline |
+| **edf C=8 (gating)** | 0.9993 / 18 of 21 | 0.9609 / 3 of 41 | gate baseline |
+| b7-edf-feasibility | 0.9993 / 19 | 0.9045 / **34** | yes |
+| eco-llm | 0.9993 / 19 | 0.8680 / **35** | yes |
+| mooncake | 0.9993 / 19 | 0.9045 / **34** | yes |
+| ekya | 0.9993 / 19 | 0.8982 / **33** | yes |
+| routellm | 0.9993 / 19 | 0.8770 / **33** | yes |
+| inar-vl | 0.9993 / 19 | 0.8770 / **33** | yes |
+| clockwork | 0.9993 / 16 | 0.9558 / **26** | yes |
+| preble | 0.9993 / 17 | 0.9780 / 12 | yes |
+| uniscale | 0.5477 / 19 | 0.5239 / 33 | yes |
+| attentionstore | 0.9993 / 18 | 0.9723 / 34 | **no, B-recall** |
+| lmcache | 0.9993 / 18 | 0.9723 / 34 | **no, B-recall** |
+| kvflow | 0.9993 / 19 | 0.8770 / 33 | **no, B-recall** |
+| pensieve | 0.9993 / 19 | 0.8770 / 33 | **no, B-recall** |
+| videostorm | 0.9993 / 19 | 0.8725 / 34 | **no, A-episodic** |
+| r3-streaming | 0.0175 / 0 | 0.0174 / 0 | **no, A-episodic** |
+| confidence-cascade | 0.0517 / 0 | 0.0695 / 0 | **no, A-episodic** |
+| hybrid-llm | 0.0000 / 19 | 0.0000 / 36 | zero monitor decisions BY DESIGN |
+| perllm | 0.0000 / 19 | 0.0000 / 36 | zero monitor decisions BY DESIGN |
+| b10-blocking-aware | 0.0000 / 0 | 0.0000 / 1 | yes |
+
+The two 0.0000 dashcam rows for `hybrid-llm` and `perllm` are the documented by-design behaviour
+and are NOT failures. The three near-zero rows are all out-of-card-scope arms being run outside the
+regime their card claims, which is what D130 said would happen.
+
+## 16.1 The thing I will NOT report as a result until it is checked
+
+**Seven in-scope published arms deliver 33 to 35 of 41 robot answers at 16 devices where the best
+gating baseline delivers 9 and COVEX v1.3-fast delivers 14.** That is roughly four times llf on the
+axis that has been the hard one all night, and it arrives the same evening the arms were ported.
+
+I am flagging it, not reporting it. An identical fairness digest proves the arms saw the identical
+TRACE. It does NOT prove they were charged the identical COSTS. The whole point of the mechanism
+protocol is that a quantity which is correctly and consistently zero passes every consistency
+check, and "the rebuild was never charged to the accelerator budget" is precisely the failure that
+E36, E36b and E36c are precedent for. A four-times jump on the axis where every COVEX variant has
+been stuck needs its cost accounting verified before anyone treats it as a bar.
+
+**The specific check**, and it is the same one I ran on COVEX: instrument the accelerator-ms and
+KV-bytes charged per released item for one of these arms and for llf on the same cell, and confirm
+a cold rebuild costs the published arm what it costs llf. If it does, this is a real and important
+result and the gate conversation changes. If it does not, it is a porting defect in the cost path
+rather than a finding. **Until that check is recorded, no number in this section may be cited as a
+bar that COVEX has to clear.** It is in section 17 as the next thing I run.
