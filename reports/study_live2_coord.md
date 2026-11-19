@@ -4827,3 +4827,43 @@ I did not adjust omega, mu, targets, H, thresholds, F2's formula, `a6_backlog` o
 `busy` charge. V28.3 shows the planner's declines follow from the exchange rate those quantities
 set, so the natural next step touches one of them, and every one is either forbidden by D124 or
 already escalated. **That is a decision for the morning, and I stopped rather than take it.**
+
+### V28.7 The eight-device cells DID finish, and they change the verdict
+
+V28.4 reported that the eight-device v1.2 cells did not finish in the time I had. They completed
+after I wrote that, so the figures are below and **V28.4's "no outcome figure for that size" is
+superseded.**
+
+| n = 8 | robot delivered of 20 | dashcam delivered fraction of 4,326 |
+|---|---|---|
+| v1.0 | **0** | **0.4871** |
+| **v1.2, F2 off** | **1** | **0.7998** |
+| **v1.2, F2 on** | **1** | **0.7998** |
+| ablation: no LATEST | 1 | 0.7980 |
+| ablation: no replan | 1 | 0.7998 |
+| `edf` | **0** (19 served) | 0.9854 |
+| `llf` | **4** (18 served) | 0.9942 |
+
+**Both pre-registered conditions are MET at eight devices**, and the dashcam one by a wide margin:
+
+- robot delivered 0 to **1**, so "more than 0" is met, and it BEATS `edf`, which delivers none of
+  the 19 it serves, while trailing `llf`'s 4;
+- dashcam delivered **0.4871 to 0.7998**, which is about **1,353 more instants answered in time**,
+  against the pre-registered condition of merely not falling below v1.0.
+
+**This is the opposite sign from four devices**, where dashcam fell 0.9991 to 0.9977. So v1.2
+costs three dashcam answers at four devices and gains about 1,353 at eight. **Eight devices is
+exactly where the user identified the real dashcam deficit**, and it is the size where v1.2 helps
+most, which was not visible when I wrote V28.4.
+
+It remains below both baselines on dashcams at eight devices (0.7998 against 0.9854 and 0.9942),
+so the gap is narrowed rather than closed, and robot service at 1 of 20 is still far from the 20.
+
+**One ablation now separates**, unlike at four devices: `no LATEST` gives 0.7980 against v1.2's
+0.7998, so the LATEST start option contributes a small dashcam gain at eight devices by deferring
+rebuild work out of the way. `no replan` remains identical.
+
+**Correction to my own summary.** I characterised v1.2 as "bought one robot answer for three
+dashcam answers". That holds at four devices only. At eight it buys one robot answer AND about
+1,353 dashcam answers, so the honest overall summary is that **v1.2 helps materially at eight
+devices and costs slightly at four**, while still trailing `llf` on both axes.
