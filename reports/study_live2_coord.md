@@ -2862,3 +2862,27 @@ builds.**
 3. E5's counts are replay release counts, not outcomes. Whether a released question is answered
    correctly or on time is a scored quantity and is not claimed here.
 4. E7 reports committed numbers; it did not re-run the 1,500 trace cells behind them.
+
+## HA7. Acceptance on the D114 build (530958f + D115 instrumentation, 284863a), real 32B, 2026-11-18 16:54 to 17:07
+
+Same harness criteria as the addendum (mode A, 120 s, seed 0, round-1 server restarted per cell, mu EWMA, H = 0.5):
+all four cells pass. `results/orchestration/live2/accept_d114/`.
+
+| cell | lateness p99 (max), all kinds | kinds with any sample > 50 ms | decision wall p99 / CPU p99 (wall / CPU p99) | submit delay to wire p50 / p99 | requests / HTTP errors | digests equal | robot questions / cloud-answered / on time |
+|---|---|---|---|---|---|---|---|
+| edf, 8 | 0.121 ms (1.07) | none | 0.75 / 0.74 ms (1.04) | n/a | 715 / 0 | yes | 6 / 5 / 0 |
+| edf, 64 | 0.180 ms (1.58) | none | 4.82 / 4.74 ms (1.04) | p99 28.9 ms | 1,016 / 0 | yes | 38 / 4 / 0 |
+| policy-core, 8 | 0.129 ms (0.43) | none | 18.27 / 18.25 ms (1.02) | n/a | 767 / 0 | yes | 6 / 0 / 0 |
+| policy-core, 64 | 0.218 ms (30.35) | none | 107.0 / 105.4 ms (1.06) | 46.3 / 266.6 ms | 1,015 / 0 | yes | 38 / 1 / 1 |
+
+D115 fields present in every cell (`decision_time.jsonl.gz`, `host_load.jsonl.gz`, summaries in `run_meta.json`;
+candidates from policy-core's own scoring counter, or the pending items ordered for edf). **History-size fix check
+(`live2/build_coverage.py`): every robot build covers its history**: edf whole rebuilds 10 of 10 (prompt / trace
+cumulative size 0.996 to 0.997; the same check on the pre-fix MOT2 seed 10 flagged 8 of 11), and policy-core's piece
+chain 2,081 -> 4,151 -> 5,411 tokens of a 5,431-token history (0.996), its recall then 5,392 of 5,583 tokens cached.
+Work-conserving EDF (D114) raised edf's requests at 64 devices from 624 (one release per epoch) to 1,016. Robot
+service in these 120 s cells is very low (edf 4 of 38 questions cloud-answered at 64 devices, none on time); reported
+as measured, a scheduling outcome of the arms, not a harness criterion. Suites on this build: live2 118 / 118 (incl.
+flash's D114 and history-size tests), fleet 234 / 234, test_scale exit 0, policy 358 of 359 with one IMPORT error that
+is environmental (`test_pol6_chain.py` checks a hardcoded flash scratch path under another account's /tmp directory,
+permission denied on this host; not edited).

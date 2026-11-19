@@ -1,0 +1,1062 @@
+[16:57:41] starting vLLM server: /home/pragya/.venvs/fm-switching-vllm/bin/vllm serve /home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb --served-model-name 32BI --port 8031 --max-model-len 32768 --gpu-memory-utilization 0.9 --tensor-parallel-size 1 --no-enable-prefix-caching --limit-mm-per-prompt {"image": 16} --dtype bfloat16 --seed 0 --limit-mm-per-prompt {"image": 640, "video": 1} --mm-processor-kwargs {"size": {"shortest_edge": 4096, "longest_edge": 16777216}, "fps": 1.0, "do_sample_frames": false} --trust-request-mm-kwargs --host 127.0.0.1 --enable-prefix-caching --enable-prompt-tokens-details --mm-processor-cache-gb 128 --kv-offloading-backend native --kv-offloading-size 27 --enable-log-requests --enable-logging-iteration-details
+[16:58:48] server up: {"key": "32BI", "repo": "Qwen/Qwen3-VL-32B-Instruct", "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb", "startup_s": 66.8, "log": "logs/study_x_server_32BI_1118_165741.log", "max_model_len": 32768, "gpu_memory_utilization": 0.9, "tensor_parallel_size": 1, "prefix_caching": false, "kv_cache_tokens": 62944, "max_concurrency_at_max_len": 1.92, "available_kv_gib": "15.37", "model_weights_gib": "62.66", "attention_backend_lines": ["(EngineCore pid=1143533) INFO 2026-11-18 16:57:57.862 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention", "(EngineCore pid=1143533) INFO 2026-11-18 16:57:57.863 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.", "(EngineCore pid=1143533) INFO 2026-11-18 16:57:58.344 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].", "(EngineCore pid=1143533) INFO 2026-11-18 16:57:58.344 [flash_attn.py:1167] Using FlashAttention version 3", "(EngineCore pid=1143533) INFO 2026-11-18 16:58:09.214 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."], "cuda_graphs": true, "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)", "extra_server_args": ["--limit-mm-per-prompt", "{\"image\": 640, \"video\": 1}", "--mm-processor-kwargs", "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}"
+[17:00:54] server 32BI stopped
+{
+ "arm": "edf",
+ "n_devices": 64,
+ "mode": "A",
+ "run_s": 120.0,
+ "seed": 0,
+ "split": true,
+ "err": null,
+ "wall_s": 120.313,
+ "run_dir": "results/orchestration/live2/accept_d114/edf_n64/run",
+ "trace_dir": "/home/pragya/data/live2/accept_d114/work/traces/seed0_n64_120s_A",
+ "lateness": {
+  "max_ms": 1.5799,
+  "mean_ms": 0.0905,
+  "n": 13864,
+  "p50_ms": 0.0787,
+  "p90_ms": 0.1046,
+  "p99_ms": 0.1795
+ },
+ "run_valid": true,
+ "digests_equal": true,
+ "n_requests": 1016,
+ "n_errors": 0,
+ "server_kind": "vllm",
+ "is_measurement": false,
+ "score": {
+  "ok": true,
+  "score": {
+   "arm": "edf",
+   "trace_dir": "/home/pragya/data/live2/accept_d114/work/traces/seed0_n64_120s_A",
+   "run_dir": "results/orchestration/live2/accept_d114/edf_n64/run",
+   "seed": 0,
+   "n_devices": 64,
+   "ratio": "50:50",
+   "run_s": 120.0,
+   "mode": "A",
+   "server_kind": "vllm",
+   "memory": "tight",
+   "is_measurement": true,
+   "frame_bytes_source": "Part-2 manifest /home/pragya/data/live2/jpeg/combined_manifest.jsonl",
+   "calibration": {
+    "path": "results/orchestration/live2/calibration/live2_calibration_dense_jpeg.json",
+    "sha256": "52f25b402d824ee3aa05c08406e6584d7878026431d65de618627fc0e1bb0f7f",
+    "label": "FINAL",
+    "note": null,
+    "fold_fitted": true,
+    "n_folds": 5,
+    "folds_by": "clip",
+    "n_clips_assigned": 300,
+    "application": "D105: each clip is scored with the map from the folds that EXCLUDE it, the fold assignment taken from the calibration file"
+   },
+   "history_preload": {
+    "n_preloads": 31,
+    "n_robots_with_join": 32,
+    "all_at_t_zero": true,
+    "uplink_charged": false,
+    "est_tokens": {
+     "min": 121,
+     "median": 5701,
+     "max": 12091,
+     "total": 191851
+    },
+    "join_offset_s": {
+     "min": 1.133,
+     "median": 126.304,
+     "max": 268.868
+    },
+    "join_frac_max": 0.5,
+    "rule": "D101: each robot joins its FIRST session at a seeded point drawn uniformly in [0, 0.5 x session duration); questions before the join point are not emitted and not counted; at t = 0 a history_preload declares the frames the cloud already holds, with NO uplink time charged; later sessions in the chain start from zero (D83). Dashcam devices keep the run-time stagger and the complete-play rule (D85).",
+    "note": "D101: questions before a join point are not emitted and not counted, so the robot pool of a run under D101 is NOT the pool the pre-D101 traces produced; the D97 entry points were recomputed from traces for this reason."
+   },
+   "targets_are_inputs": "D71: targets are INPUTS. Every setting in the sweep is reported. The scorer never selects one.",
+   "target_defaults": {
+    "L_dash": 1.0,
+    "p_dash": 0.25,
+    "min_dash_instants": 200,
+    "L_rob": 5.0,
+    "p_rob": 0.9,
+    "min_rob_questions_pooled": 20,
+    "source": "D71 as amended by D82"
+   },
+   "caveats": [
+    "D85: dashcam task value is streaming AP over the clip-PLAYS completed in the run, indexed by play id and paired across arms. It is NOT comparable to the committed 300-clip AP. D84: repeated clips or sessions across devices are separate plays and are NOT independent samples.",
+    "D87: robot device answers are the 4B-I x RECENT set of StudyO-Q4 (845 questions, 32.78 %), restricted to EVAL. They were produced by the 4B on the A6000 / H100, NOT on the Orin. StudyD15 Part A rejected the H100-for-Orin proxy as an exact numerical stand-in, so these answers are valid for ordering and first-order value, not as exact device numbers.",
+    "D70: the wire format is JPEG. S-EMBER q88 parity is NOT proven within the pre-registered +/- 2 pp rule (K3 +0.83 pp [-0.24, +2.01], K1 -0.6 pp with lower bound -2.14, about 6 % of letters change). S-EMBER cloud accuracy here is the cloud's actual answers on JPEG input.",
+    "D81: vLLM's prefix-cache path is not output-identical to recompute (StudyORIN3 Part 2: first-token drift p50 0.22, max 0.45 nats; 39 / 40 answers agree). Robot accuracy is reported split WARM / COLD from the request log's cache_path."
+   ],
+   "sweep": [
+    {
+     "L_dash": 1.0,
+     "p_dash": 0.25,
+     "L_rob": 5.0,
+     "p_rob": 0.9,
+     "dashcam_eligible": [
+      "dash001",
+      "dash003",
+      "dash004",
+      "dash005",
+      "dash006",
+      "dash016",
+      "dash019",
+      "dash020",
+      "dash021",
+      "dash026",
+      "dash030",
+      "dash031"
+     ],
+     "dashcam_excluded": [
+      "dash000",
+      "dash002",
+      "dash007",
+      "dash008",
+      "dash009",
+      "dash010",
+      "dash011",
+      "dash012",
+      "dash013",
+      "dash014",
+      "dash015",
+      "dash017",
+      "dash018",
+      "dash022",
+      "dash023",
+      "dash024",
+      "dash025",
+      "dash027",
+      "dash028",
+      "dash029"
+     ],
+     "dashcam_all_meet": false,
+     "robot_pool_n": 38,
+     "robot_pool_on_time": 0,
+     "robot_pool_fraction": 0.0,
+     "robot_pool_eligible": true,
+     "robot_pool_meets": false,
+     "robot_per_device": {
+      "robo000": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo001": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo002": {
+       "n_questions": 2,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo003": {
+       "n_questions": 2,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo004": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo005": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo006": {
+       "n_questions": 2,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo007": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo008": {
+       "n_questions": 2,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo010": {
+       "n_questions": 2,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo011": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo012": {
+       "n_questions": 2,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo013": {
+       "n_questions": 2,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo015": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo016": {
+       "n_questions": 2,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo017": {
+       "n_questions": 3,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo018": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo020": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo022": {
+       "n_questions": 2,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo023": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo024": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo025": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo026": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo027": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo028": {
+       "n_questions": 2,
+       "on_time": 0,
+       "fraction": 0.0
+      },
+      "robo031": {
+       "n_questions": 1,
+       "on_time": 0,
+       "fraction": 0.0
+      }
+     },
+     "robot_worst_device": "robo000",
+     "capacity_met": false,
+     "dashcam_per_device": {
+      "dash000": {
+       "n_instants": 173,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash001": {
+       "n_instants": 209,
+       "on_time": 8,
+       "fraction": 0.038278,
+       "eligible": true,
+       "meets": false
+      },
+      "dash002": {
+       "n_instants": 180,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash003": {
+       "n_instants": 200,
+       "on_time": 1,
+       "fraction": 0.005,
+       "eligible": true,
+       "meets": false
+      },
+      "dash004": {
+       "n_instants": 219,
+       "on_time": 3,
+       "fraction": 0.013699,
+       "eligible": true,
+       "meets": false
+      },
+      "dash005": {
+       "n_instants": 220,
+       "on_time": 3,
+       "fraction": 0.013636,
+       "eligible": true,
+       "meets": false
+      },
+      "dash006": {
+       "n_instants": 210,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": true,
+       "meets": false
+      },
+      "dash007": {
+       "n_instants": 187,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash008": {
+       "n_instants": 179,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash009": {
+       "n_instants": 199,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash010": {
+       "n_instants": 194,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash011": {
+       "n_instants": 190,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash012": {
+       "n_instants": 184,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash013": {
+       "n_instants": 191,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash014": {
+       "n_instants": 188,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash015": {
+       "n_instants": 182,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash016": {
+       "n_instants": 213,
+       "on_time": 2,
+       "fraction": 0.00939,
+       "eligible": true,
+       "meets": false
+      },
+      "dash017": {
+       "n_instants": 190,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash018": {
+       "n_instants": 173,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash019": {
+       "n_instants": 204,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": true,
+       "meets": false
+      },
+      "dash020": {
+       "n_instants": 210,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": true,
+       "meets": false
+      },
+      "dash021": {
+       "n_instants": 201,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": true,
+       "meets": false
+      },
+      "dash022": {
+       "n_instants": 192,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash023": {
+       "n_instants": 181,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash024": {
+       "n_instants": 165,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash025": {
+       "n_instants": 165,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash026": {
+       "n_instants": 201,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": true,
+       "meets": false
+      },
+      "dash027": {
+       "n_instants": 186,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash028": {
+       "n_instants": 186,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash029": {
+       "n_instants": 186,
+       "on_time": 0,
+       "fraction": 0.0,
+       "eligible": false,
+       "meets": false
+      },
+      "dash030": {
+       "n_instants": 221,
+       "on_time": 4,
+       "fraction": 0.0181,
+       "eligible": true,
+       "meets": false
+      },
+      "dash031": {
+       "n_instants": 219,
+       "on_time": 6,
+       "fraction": 0.027397,
+       "eligible": true,
+       "meets": false
+      }
+     }
+    }
+   ],
+   "diagnostics": {
+    "emulator": {
+     "cpu_s": 9.203902,
+     "cpu_fraction": 0.0767,
+     "wall_s": 120.048679,
+     "lateness": {
+      "max_ms": 1.5799,
+      "mean_ms": 0.0905,
+      "n": 13864,
+      "p50_ms": 0.0787,
+      "p90_ms": 0.1046,
+      "p99_ms": 0.1795
+     },
+     "run_valid": true,
+     "maxrss_kb": 109588
+    },
+    "uplink_queue": {
+     "p99_s_median": 0.0
+    },
+    "decision_period": {
+     "period_ms": null,
+     "full_eval_cap_K": null,
+     "rule": "D99: one fixed 100-ms decision period for every arm, events batched per period, separate from H; a cap K on full DeltaJ evaluations per period is reported as a setting if one was used; the coordinator's own latency is counted and reported, never netted out",
+     "recorded": false
+    },
+    "decision_log_present": true,
+    "request_log_present": false,
+    "decisions": {
+     "n": 2884,
+     "by_kind": {
+      "defer": 1868,
+      "release_whole": 5,
+      "release_monitor": 1007,
+      "release_recall": 4
+     },
+     "hold_or_decline": 1868,
+     "piece_tokens": {
+      "n": 5,
+      "p50": 8131,
+      "min": 5431,
+      "max": 13531
+     },
+     "decision_latency_ms": {
+      "n": 2884,
+      "p50": 3.8393,
+      "p99": 4.84
+     },
+     "predicted_vs_actual_rows": 0,
+     "predicted_vs_actual_note": "D63: the joiner that pairs these predictions with the measured outcomes is the coordinator session's; where it is absent the rows are carried through unjoined"
+    }
+   },
+   "robot_value": {
+    "n": 38,
+    "n_cloud_standing": 0,
+    "n_device_standing": 38,
+    "standing_accuracy": 0.421053,
+    "standing_accuracy_n": 38,
+    "device_only_accuracy": 0.421053,
+    "cloud_accuracy_on_served": null,
+    "cloud_answers_available": 0,
+    "warm_cold": {
+     "WARM": {
+      "n": 0,
+      "cloud_accuracy": null
+     },
+     "COLD": {
+      "n": 0,
+      "cloud_accuracy": null
+     },
+     "unknown": {
+      "n": 0,
+      "cloud_accuracy": null
+     }
+    }
+   },
+   "robot_rows": [
+    {
+     "opportunity_id": "opp0000000",
+     "device_id": "robo008",
+     "question_id": "89c3a891f814b8c7fa186e55511fa5dbeb0bf56788b24ec438b1ef310ff13a39",
+     "gold": "D",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": "E",
+     "cloud_correct": false,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0000001",
+     "device_id": "robo017",
+     "question_id": "0805BB6675A62BA956AFAE512343C6F41232BE1F772FA40A25682EBE5D151EFA",
+     "gold": "D",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": "D",
+     "cloud_correct": true,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0000012",
+     "device_id": "robo027",
+     "question_id": "5192AE8AA730610442B3286904C4FD39D3DD3BA1821335CFC3374F95EDA706FC",
+     "gold": "A",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0000213",
+     "device_id": "robo022",
+     "question_id": "a62d6bee251019c6814ff2e8049e77da36bf9e063d48bb8862780b2c4a0b2bdb",
+     "gold": "D",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0000426",
+     "device_id": "robo010",
+     "question_id": "b48cc221431792e45e1065a62f2ceb0c417adff2ccc9e0d27fa30f0c37c02dba",
+     "gold": "E",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0000492",
+     "device_id": "robo012",
+     "question_id": "D4918FA56BC4589B48924A6E15675D04E3613EE26ABD9D65B6844D73EA0EF4C1",
+     "gold": "A",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0001406",
+     "device_id": "robo002",
+     "question_id": "90ecd87bbb35eb366f9e406423df24e7eda92a56b32087ff870db7ba79a0df96",
+     "gold": "A",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0001629",
+     "device_id": "robo025",
+     "question_id": "3b03a5a9768b2b41025c85dcdd98486f0518d6c936c994dc0ece9c436c368e49",
+     "gold": "A",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0001653",
+     "device_id": "robo011",
+     "question_id": "5c72cca138425ecba1e547cc89cee8aabce10f859466d3ec8220c1b94ef02c68",
+     "gold": "D",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0001853",
+     "device_id": "robo007",
+     "question_id": "0584922F61A9A81DF78248FD8185A2DD42B7BDA8EB47E36E20E93555D1032CA4",
+     "gold": "D",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": "B",
+     "cloud_correct": false,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0002154",
+     "device_id": "robo018",
+     "question_id": "EACAA3CC1AA4A64312C3815DB946101D350C60FC5C67E152CFAA212F530858DF",
+     "gold": "D",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0002163",
+     "device_id": "robo026",
+     "question_id": "11eb2268ecc28dd500e99035f00d5fefcf24400f76f9cb09a398824de6a088dd",
+     "gold": "A",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0002245",
+     "device_id": "robo003",
+     "question_id": "06b9481aa7221d598c6b79679203437d96abd5a1dacaa01ef32aa9c84dbbf187",
+     "gold": "C",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0002315",
+     "device_id": "robo031",
+     "question_id": "5c9a5a0b5c5535543e09f3e2de6e985e0837aa26cdd120750eb5ed9c352a05e4",
+     "gold": "B",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0002337",
+     "device_id": "robo028",
+     "question_id": "849290ba193dfb76410f074794fd188d6ae7a18fc149f43d231365eff87874ad",
+     "gold": "C",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0002364",
+     "device_id": "robo004",
+     "question_id": "694ff7306b17acefb9e8709992fd65fadd5e17c653b087c7a6074715e5810a62",
+     "gold": "E",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0002621",
+     "device_id": "robo006",
+     "question_id": "1f7182c9a53332711ea5cb8d6fc44cacdecbd7052716e82405d643a5da65643c",
+     "gold": "B",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0002771",
+     "device_id": "robo016",
+     "question_id": "7fed18761fa206094dd1f6a38b818925d123adc51dc64ccf32b425135a94c294",
+     "gold": "C",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0002801",
+     "device_id": "robo022",
+     "question_id": "1d30ad41373fc464f6b2b69db1d062231e5a076041f6a311eec27b4de62deae4",
+     "gold": "B",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0002850",
+     "device_id": "robo010",
+     "question_id": "7e60d8df125420c99912de9fd8afd26a95b0b82358e814a958eeaa282e9ef994",
+     "gold": "A",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0002854",
+     "device_id": "robo015",
+     "question_id": "40555b82a1194c8fa5d8a9b9fc8c1269cea1b90ed991be6f1b3d2485d4203b28",
+     "gold": "C",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0002881",
+     "device_id": "robo017",
+     "question_id": "3CCFC46BF6F7B9B4413044EFA8A09A3B42DC1457CCB69FE64C8A3D3F8FB11DD1",
+     "gold": "B",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0002981",
+     "device_id": "robo000",
+     "question_id": "b488eccbef277ea2b5fa8dda5239eacb13cac98392b7eb2c7792f5e0232d7e43",
+     "gold": "B",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0003666",
+     "device_id": "robo012",
+     "question_id": "8C5C7938AEE1A5062332019B063445A8AC75EBCBD308A0568E04BE044075F444",
+     "gold": "C",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0003787",
+     "device_id": "robo023",
+     "question_id": "797F063FE4F148BF7BBFF3DA0E8F8E012C081DD21EA2B640D8E9B2BDE26FC600",
+     "gold": "D",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0004264",
+     "device_id": "robo017",
+     "question_id": "B3CDDE99E424B1BAA823A1489F21BFC449FAAAA18450B6B249763C395920763F",
+     "gold": "B",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0004271",
+     "device_id": "robo005",
+     "question_id": "2ed4cd8f26967859f8c79a24547f2cd5ed6dd9bde72dc1e4d654ee5ca782a52c",
+     "gold": "A",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0004359",
+     "device_id": "robo020",
+     "question_id": "ed77b2c1a4a1515bcbfc5e911e051ff362c36affe4c354d8b7958ba7c77ed89a",
+     "gold": "A",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0004457",
+     "device_id": "robo016",
+     "question_id": "5cd9ce1a74a19cc1c59ac3d876f08ac8c36890231b4d9a5f95851e1eb1e40374",
+     "gold": "E",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0004688",
+     "device_id": "robo003",
+     "question_id": "cbde5ca1b88d397890e5dacfa8951f1254e1576a82acf2437703ac51c45d5270",
+     "gold": "C",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0004757",
+     "device_id": "robo013",
+     "question_id": "E103C9931FB6349CC2C17AFB5084768CC6F984F623E171BBC017B3CE69E8EA81",
+     "gold": "E",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0004807",
+     "device_id": "robo002",
+     "question_id": "53ac5816ba402d8fd3fead6ca30562ca79350328ff3c67130e74286a9689f6e7",
+     "gold": "C",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0005003",
+     "device_id": "robo028",
+     "question_id": "6ef22f261b1bb082415061e87a1dff6d99ae0a56c1ae498dc4b650c70ea15bd8",
+     "gold": "D",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0005341",
+     "device_id": "robo001",
+     "question_id": "2834eae5c03a49e86aa198b297d70145f2a7bc83a88a7194a7d30ec4255f667a",
+     "gold": "B",
+     "source": "device",
+     "device_correct": false,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": false,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0005480",
+     "device_id": "robo024",
+     "question_id": "1726b35fa554b78dc3b742dd646dfb62d162df9200f96c222bb79f42b7c33ebf",
+     "gold": "B",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": "B",
+     "cloud_correct": true,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0005606",
+     "device_id": "robo008",
+     "question_id": "488bdbc98d95a4c60b2834bc308935271f11eb2d78c4681331d5714912f2c4d3",
+     "gold": "B",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0005809",
+     "device_id": "robo013",
+     "question_id": "A730338437152D4500AF5C5BC533D066C7BDB992DCE3A3033FE5D7017DB93FB4",
+     "gold": "C",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    },
+    {
+     "opportunity_id": "opp0005891",
+     "device_id": "robo006",
+     "question_id": "1ce1d1f9d13d7322603dfa384fa881f111d00c4dc31142bb9fe7f94df4158bb9",
+     "gold": "B",
+     "source": "device",
+     "device_correct": true,
+     "cloud_letter": null,
+     "cloud_correct": null,
+     "standing_correct": true,
+     "cache_path": null
+    }
+   ],
+   "dashcam_value": {
+    "n_plays": 70,
+    "n_pos_plays": 27,
+    "n_neg_plays": 43,
+    "n_missing_cloud_score": 0,
+    "caveat": "D85: dashcam task value is streaming AP over the clip-PLAYS completed in the run, indexed by play id and paired across arms. It is NOT comparable to the committed 300-clip AP. D84: repeated clips or sessions across devices are separate plays and are NOT independent samples.",
+    "ap": {
+     "0.0": 0.019427,
+     "0.5": 0.050224,
+     "1.0": 0.009022,
+     "1.5": 0.006984
+    },
+    "streams_digest_n": 70
+   },
+   "device_only": {
+    "dashcam_ap": {
+     "0.0": 0.019334,
+     "0.5": 0.050135,
+     "1.0": 0.008926,
+     "1.5": 0.006924
+    },
+    "n_plays": 70,
+    "robot_accuracy": 0.421053,
+    "robot_n": 38,
+    "caveat": "D87: robot device answers are the 4B-I x RECENT set of StudyO-Q4 (845 questions, 32.78 %), restricted to EVAL. They were produced by the 4B on the A6000 / H100, NOT on the Orin. StudyD15 Part A rejected the H100-for-Orin proxy as an exact numerical stand-in, so these answers are valid for ordering and first-order value, not as exact device numbers."
+   }
+  }
+ }
+}
