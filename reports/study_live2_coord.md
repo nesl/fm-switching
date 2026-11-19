@@ -5272,3 +5272,49 @@ here**, and the mechanism is confirmed working rather than assumed.
 detector reading a non-existent field: `RecallAction` carries `decision`, not `mode` or `action`. A
 detector that reads zero everywhere confirms nothing, so the number above is from the corrected
 run, where 23 of 27 feasible admissions are visible.)*
+
+## covex-v2: rollout over the strongest baseline
+
+### PRE-REGISTERED EXPECTATION, written before any v2 code runs
+
+Recorded first so the sweep is interpretable whichever way it falls.
+
+**Design.** The base policy's actions execute by default. At each decision point COVEX evaluates
+alternatives by rollout with the BASE as pi_0, and deviates only if
+`DeltaJ(alternative) - DeltaJ(base action) > margin`. At `margin = infinity` it must be
+BYTE-IDENTICAL to the base, which makes "COVEX cannot do worse than the best baseline" a structural
+property rather than an empirical hope.
+
+**What changes underneath, and it changes everything.** pi_0 becomes the base rather than EDF. Every
+DeltaJ in the system is a counterfactual against pi_0, so swapping pi_0 changes every number the
+policy computes. No calibration intuition from v1.x transfers and each will be re-verified rather
+than assumed.
+
+**THE PREDICTION.** Three nights of evidence say COVEX's DeltaJ machinery is unreliable in specific,
+documented ways:
+
+- the RC deficit reaches a decision in **1 of 14,721** counterfactual calls, cancelling structurally;
+- the state value cancels **exactly**, 12,898 of 12,898, for the same reason;
+- the price was mispriced (EWMA rose as occupancy fell), then saturated at its cap in 92.9 per cent of busy calls, and a correctly graded form was still worse than no price at all;
+- `p_finish` is a saturated indicator at `competing_s = 0`.
+
+**If DeltaJ is systematically wrong, deviating on it makes things WORSE than the base, and the
+margin is exactly the protection against that.** So the expected shape is:
+
+1. **margin = 0 UNDERPERFORMS the base**, because every unreliable DeltaJ becomes a deviation.
+2. **Larger margins converge to the base** monotonically, by construction.
+3. **The open question is whether ANY margin beats the base.**
+
+**How each outcome reads.** If the prediction holds, it says the model is not yet trustworthy enough
+to deviate on, which is a real finding and closes a line of work. If some margin beats the base,
+that is the stronger and more defensible claim: **COVEX improves on the best baseline where its
+model is reliable**, which is a better paper than "COVEX beats baselines" and does not depend on
+COVEX winning everywhere.
+
+**Stop condition.** Failure of the `margin = infinity` byte-identity proof halts the work. It is run
+FIRST, before any margin sweep, because every other claim rests on it.
+
+**Base selection.** `b7-edf-feasibility` is the presumptive base as the strongest simple heuristic,
+but the base is SELECTABLE and the choice is not hard-coded pending session 2's mooncake/b7 identity
+check, since those two arms report identical numbers (34 of 41, 79.5 recall gpu_s, 37 events) and
+may not be distinct policies.
