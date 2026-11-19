@@ -3282,3 +3282,70 @@ also read nowhere** - zero references in both `coordinator.py` and `cstate.py`, 
 under live2 being an arm writing it or a declaration - and `apply_defaults` sets it
 unconditionally on every action alongside `order`. **The forward-looking risk is two dormant
 defaults, not one**, and the principle in 35.4 stands unchanged.
+
+# 37. THE eco-llm RECONCILIATION IS CORRECT AND CURRENTLY INERT. 0 of 12 cells move
+
+Re-scored with the GPU-seconds hold lifted. **The reconciliation was isolated rather than compared
+across trees:** both legs sit at `origin/main`, so Part A, the residency fix and the defaults are
+present on both sides, and only `baselines/ecollm_adapted.py` is reverted in one worktree. The
+difference is the planner reconciliation and nothing else.
+
+Seeds 0, 4, 5, 6 at 10, 12 and 14 devices.
+
+| n | seed | selections, PRE | selections, POST | total latency s | capacity PRE / POST |
+|---|---|---|---|---|---|
+| 10 | 0 | D2 20, RECENT 1 | D2 20, RECENT 1 | 2189.1 / 2189.1 | True / True |
+| 10 | 6 | D2 15, RECENT 2 | D2 15, RECENT 2 | 2180.0 / 2180.0 | False / False |
+| 12 | 5 | D2 31, RECENT 1 | D2 31, RECENT 1 | 2628.2 / 2628.2 | True / True |
+| 14 | 4 | D2 37, RECENT 2 | D2 37, RECENT 2 | 3064.8 / 3064.8 | True / True |
+
+**0 of 12 cells differ** on selections, latency, capacity or recall on-time. Also 0 at 8 devices
+seed 4 (D2 19, RECENT 2). **No capacity cell moved. The bar did not rise.**
+
+## 37.1 The control is VALIDATED, which is why this is reportable as a null
+
+Per the new check 7, I checked the control before reading the comparison, and the first check
+failed:
+
+- The arm scored is `ECOLLMArm` from `live2/arms_published.py`, **not** `ECOLLMAdapted` directly.
+  It does wrap it (`_wrap("ECOLLMArm", _ecollm.ECOLLMAdapted, ...)`), so the revert reaches it.
+- **Both legs load the intended file**: `inspect.getfile` resolves to each worktree's own
+  `baselines/ecollm_adapted.py`, not the main repo's.
+- **The code genuinely differs**: `_rep_tokens` appears **0 times in PRE and 2 times in POST**.
+
+So the two conditions are different code, correctly loaded, and they produce identical behaviour.
+
+## 37.2 Why it is inert, and the prediction that follows
+
+`_rep_tokens` now reads the offered evidence, `ev_tok = {e.representation: int(e.tokens) ...}`,
+so live2's RECENT item prices at **467** instead of `readiness_tokens * 0.35`, which on these
+histories is roughly **3,800**. That is an eightfold correction to the planner's RECENT price, and
+it changes nothing.
+
+**The reason is that price is not the binding term.** `REP_QUALITY = {"RECENT": 0.6, "D2": 1.0,
+"RICH": 1.0}`. eco-llm selects over a quality-against-cost table subject to
+`budget_remaining_gpu_s`, and **while the budget is not binding, quality decides and D2 wins at
+1.0 against 0.6 regardless of what RECENT costs.** Making the cheap option cheaper cannot change a
+choice that was never made on price.
+
+**So the reconciliation is correct and currently dormant**, and this is a **cancelled-by-geometry**
+null in the Rule 2 taxonomy rather than a real negative: the mechanism operates, the quantity moves
+eightfold, and it reaches a comparison where another term dominates.
+
+**The prediction, which the pending pressure work tests directly: under memory pressure the GPU
+budget becomes binding, price starts to matter, and the reconciliation should activate then.** If
+RECENT selection rises under pressure on the POST tree and not on PRE, that confirms it; if it
+does not rise even under pressure, the quality gap of 0.4 is simply larger than any price
+advantage the harness can offer, and eco-llm will never select RECENT by design.
+
+**Either way the bar has not risen yet**, and the expectation that it would should be held until
+pressure lands rather than carried into the grid's assumptions.
+
+## 37.3 A disagreement to resolve, stated rather than reconciled quietly
+
+Session 3 reported the reconciliation moving **3 decisions, with cloud-RECENT selections 3 to 6**.
+At its own cell, 8 devices seed 4, I measure **D2 19 / RECENT 2 on the POST tree**, and no change
+against PRE. The two measurements are of different objects or different configurations: mine runs
+the live2 arm end to end through `run_fleet_cell`, and the counts do not match on either side.
+**I am not treating either as wrong**; the discrepancy needs one shared cell before the
+reconciliation's effect is quoted anywhere.
