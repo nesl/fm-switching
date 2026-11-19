@@ -3036,3 +3036,73 @@ before S5 is screened rather than after.
 builder mechanisms (`s1-feasible`, `s1-fairshare`, `s2-all`, `s2-value`, `s4-llf`, `s6-decline`)
 are session 3's, from `arms_builder.py` and the `builder:` commits. They are not re-verified here.
 The augmented tool is in a shared path and takes one cell per mechanism.
+
+# 35. A RELAYED CLAIM CHECKED: b7 and b10 do NOT branch on category, so the plumbing cannot move them
+
+I was asked to mark `b7-edf-feasibility`, `b10-blocking-aware` and the `naive` arms UNMEASURED on
+the current tree, on the stated ground that `constructed.py` (B7/B10) branches on
+`cat in self.LONG` / `cat in self.SHORT`, that `"recall"` is in neither, and that every question
+therefore fell through to the `else` branch. **Two parts of that do not hold.**
+
+## 35.1 The branching arm is B4, not B7 or B10
+
+Category references per class in `constructed.py` at origin:
+
+| class | `category` references |
+|---|---|
+| **B4QueryTypeRouting** | **2** |
+| B7EDFFeasibility | **0** |
+| B10BlockingAwareAdmission | **0** |
+| B9BestOfBreed | 0 |
+
+**`b7` and `b10` do not read the question category at all**, so plumbing it cannot change their
+behaviour, and neither needs marking unmeasured on this ground. The arm with the `LONG`/`SHORT`
+branch is **B4QueryTypeRouting**, which is not in my scored set.
+
+## 35.2 Even for B4, the fix will not reach the branch
+
+```
+LONG  = ("D2", "RICH", "long", "long-horizon")
+SHORT = ("RECENT", "short", "short-horizon")
+if cat in self.LONG or "D2" in have:   ...
+elif cat in self.SHORT:                ...
+else:                                  ...
+```
+
+**`LONG` and `SHORT` hold REPRESENTATION names and HORIZON labels, not question categories.** Not
+one of the eight S-EMBER categories (`counting_objects_events`, `location_trace`,
+`object_comparison`, `sequential_action`, `spatial_aware_reasoning`,
+`temporal_ordering_recognition`, `time_duration`, `visual_detail_recall`) appears in either set.
+
+So after the category switch lands, `cat in LONG` and `cat in SHORT` will **still both be False**,
+exactly as they were for the constant `"recall"`, and the branch will continue to be decided
+entirely by `"D2" in have`.
+
+**And the `else` branch was never the one taken.** The first condition is a disjunction: whenever
+`"D2"` is among the available representations it fires regardless of category. My own decision
+census corroborates this - `b7` at 16 devices logged **34 `release_recall` to cloud**, which is
+the first branch, not the cheapest-feasible fallback.
+
+## 35.3 What IS affected, and what this changes
+
+**`naive.py` is genuinely affected.** `class_share.get(q.category, default)` returned the default
+for every query under the constant and will return per-category shares once a real category
+arrives. That arm should be marked unmeasured.
+
+**The corrected list:** `naive` arms yes; **`b7` and `b10` no**, on this ground. `b10`'s rows stay
+INVALID for the separate and real reason in section 16.2, that it served zero monitors.
+
+**So the grid's dependency list does not grow by this item.** It remains the costing gate, memory
+pressure and the eco-llm reconciliation, plus the category switch for `naive` and for the policy's
+own `QTYPE` pin, which IS real and is section 2.4 of StudyEVNEED.
+
+**The `mooncake` = `b7` identity is NOT reopened by this.** It was measured on arms that never
+read the category, so the category plumbing cannot separate them. The cardinality hold stands for
+its original reason - placement being inert - and this is not a second reason.
+
+**The framing I would keep from the original claim, because it is right and general:** the cards
+were correct while the harness was not. **A vocabulary mismatch is the same shape one level up:**
+B4's card describes a horizon-routing policy and live2 supplies question categories, so the arm is
+correctly written against a vocabulary the harness has never provided and the fix does not create.
+That is worth settling before B4 is scored, and it is the same class of defect as D2 against
+StudyR1's K1/K3 keys.
