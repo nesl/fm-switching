@@ -1,0 +1,59 @@
+{
+ "check": "ecollm_reconciliation_resolved_size_dependent",
+ "is_measurement": true,
+ "label": "Both legs, seed 4, 600 s, current origin/main, through the registered arm. Supersedes the open question in ecollm_shared_cell.json.",
+ "resolution": "BOTH MEASUREMENTS ARE CORRECT. The reconciliation is INERT at 8 devices and MOVES DECISIONS at 16. It is size dependent, and the geometry predicts exactly that.",
+ "legs": {
+  "n=8": {
+   "PRE": {
+    "D2": 19,
+    "RECENT": 2
+   },
+   "POST": {
+    "D2": 19,
+    "RECENT": 2
+   },
+   "decisions_differ": 0,
+   "step2b": "INERT",
+   "note": "exact match with session 2"
+  },
+  "n=16": {
+   "PRE": {
+    "D2": 35,
+    "RECENT": 3
+   },
+   "POST": {
+    "D2": 35,
+    "RECENT": 6
+   },
+   "decisions_differ": 3,
+   "first_diff": 7825,
+   "step2b": "MOVES A DECISION",
+   "note": "reproduces my earlier figure EXACTLY, on a tree that has since taken Part A, the residency fix, the schema change and the decision-log fields. Tree state is ruled out as the explanation."
+  }
+ },
+ "my_earlier_number": "CONFIRMED AND SCOPED, not withdrawn. 3 -> 6 is correct AT 16 DEVICES. It was never a claim about 8.",
+ "why_this_was_predictable_rather_than_lucky": {
+  "mechanism": "ecollm.py:90 selects max(feas, key=(quality, -cost)): quality first, cost only as a tie-break, qualities never tying at 1.0 against 0.6. Price can only change a selection where D2 is SLO-INFEASIBLE and RECENT is feasible, leaving RECENT alone in `feas`.",
+  "consequence": "that requires latency or budget pressure. 8 devices supplies none, so the reconciliation MUST be inert there. 16 devices supplies some, so corrected pricing flips RECENT from infeasible to feasible on three queries.",
+  "evidence_in_the_numbers": "at n=16 D2 stays at 35 in both legs while total cloud recalls rise 38 to 41. The three moved queries are ones that previously went elsewhere and now go to cloud RECENT, which is the feasibility flip rather than a reshuffle between representations."
+ },
+ "qualification_required_on_a_committed_conclusion": {
+  "what": "commit d8da722 records \"the eco-llm reconciliation is CORRECT AND INERT, 0 of 12 cells move, and THE BAR DID NOT RISE\".",
+  "issue": "correct at the cells tested, but it does not generalise. I have a cell where it moves three decisions, reproduced twice on different trees. If those 12 cells did not include one where the budget binds, the sweep could not have observed the effect by construction.",
+  "what_to_check": "the device counts and run lengths of the 12 cells. If 16 devices at 600 s was among them and returned 0, there IS still a discrepancy and I would want to compare run configurations line by line. If the sweep was lighter cells, the two results compose and the conclusion needs the scope added.",
+  "my_standing_rule_applies": "this is the third time size dependence has been the resolution, after s4-reserve and s4-adaptive, and it is a direct instance of the rule already adopted: any mechanism scored at a single size must say so, because a single-size null may be a mechanism that had not switched on."
+ },
+ "what_is_now_quotable": {
+  "quotable": "the reconciliation moves 3 decisions and raises cloud-RECENT selections from 3 to 6 AT 16 DEVICES, seed 4, 600 s.",
+  "still_not_quotable": "any unscoped claim that the bar rises. Whether three more cloud-RECENT selections improve the scored outcome is a separate measurement and belongs to session 2."
+ },
+ "_provenance": {
+  "git_commit": "4fa21a11953acd580a070254a77c469968625352",
+  "script": "ecollm_recon.py through A.make_arm",
+  "model": "none (dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4; 8 and 16 devices; 600 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
