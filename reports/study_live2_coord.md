@@ -2783,6 +2783,23 @@ slightly and eligibility does not tighten. The preload also carries real cold hi
 6,061 tokens and up to 11,101 at this cell, which is the cold-rebuild pressure D101 exists to
 create.
 
+### E7a. The committed table was spot-checked at its boundaries, not merely cited
+
+Because E7 reports committed numbers instead of re-running 1,500 cells, six cells were recomputed
+fresh with `eligibility.cell(seed, n, ratio, 600.0)` and compared field by field. All matched
+(`robot_questions`, `sessions_started`, `questions_before_join`, `robot_eligible`), and the three
+chosen pairs straddle the entry points, which is what makes 5, 8 and 14 verified rather than
+quoted:
+
+| cell | pooled robot questions, fresh and committed | eligible at >= 20 |
+|---|---|---|
+| seed 1, n = 7, 50 : 50 | 14 and 14 | no |
+| seed 1, n = 8, 50 : 50 | 23 and 23 | **yes, so entry 8** |
+| seed 2, n = 8, 50 : 50 | 23 and 23 | yes |
+| seed 2, n = 13, 75 : 25 | 15 and 15 | no |
+| seed 2, n = 14, 75 : 25 | 23 and 23 | **yes, so entry 14** |
+| seed 1, n = 5, 25 : 75 | 23 and 23 | **yes, so entry 5** |
+
 ## E7b. One existing test's precondition was invalidated, and what that shows
 
 `test_live2_history_size.py::test_prompt_token_accounting_scales_with_history_size` FAILED under
