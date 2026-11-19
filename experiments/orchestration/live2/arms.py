@@ -141,7 +141,11 @@ class Pi0Edf(Live2ArmMixin, Policy):
     # Part A (reports/study_d7_capacity.md:180, 32B-I at N = 1, 12.73 req/s, 100 %). At N = 9 the
     # same report reaches 99-100 % from concurrency 2, so 4 is Part A's figure and the
     # conservative choice, not the minimum across every N.
-    C_INFLIGHT_DEFAULT = 4
+    # D128 (2026-11-18): edf's DEFAULT concurrency is 8. StudyD7b Part A's 4 was the smallest
+    # concurrency at which the 32B reaches 100 per cent GPU utilisation at N = 1, which bounds
+    # utilisation and not throughput; 8 is the baseline the comparison now uses. 4 stays
+    # reachable by parameter so the earlier cells remain reproducible.
+    C_INFLIGHT_DEFAULT = 8
 
     def __init__(self, piece_tokens: Optional[int] = None,
                  c_inflight: int = C_INFLIGHT_DEFAULT) -> None:

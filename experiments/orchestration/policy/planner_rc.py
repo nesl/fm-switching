@@ -11,10 +11,13 @@ WHAT IS NOT NEW HERE. The engine model, the KV and host bookkeeping, pi_0, the c
 value terms are the committed ones. The only new pieces are the plan set, the long-window
 evaluation, reserved units carrying their planned release time, and the re-plan hooks.
 
-kappa IS 1.0 AND PROVISIONAL (report section V27.2). The note defines it as the q90 ratio of
-measured to predicted job completion time on committed FIT/DEV data, and no such quantity exists
-in committed form: `eng1_step_model.json` carries per-STEP residual bands, not
-predicted-against-actual job completion pairs. No HOLDOUT was read.
+kappa IS NOW DERIVED (D129) from the committed FIT-only residual bands as
+`exp(z_0.90 * sigma_band)`, giving 1.10 to 1.14 by piece size. The note asks for a q90 ratio of
+measured to predicted JOB completion, and no such quantity exists in committed derived form:
+POL6's records carry cell-level aggregates, and the raw pairs live in files that MIX FIT and
+HOLDOUT trials. Rather than open a mixed file and rely on my own filtering, kappa comes from a
+source already verified FIT-only. Passing a float overrides it, so the kappa = 1 ablation stays
+reachable. No HOLDOUT was read.
 """
 from __future__ import annotations
 
@@ -54,6 +57,11 @@ class Plan:
         return self.kind
 
 
+def _kappa_for(tokens: int) -> float:
+    from .completion_error import kappa_for_tokens
+    return float(kappa_for_tokens(int(tokens)))
+
+
 def _service_s(engine, device: str, tokens: int, readiness: str, job_id: str,
                piece_index: int = 0) -> Tuple[float, float]:
     """(wall-clock service, gpu_s) for one unit, from the committed engine model."""
@@ -65,8 +73,8 @@ def _service_s(engine, device: str, tokens: int, readiness: str, job_id: str,
 
 def enumerate_plans(*, engine, device: str, qtype: str, rep: str, size_tokens: int,
                     readiness: str, deadline_abs: float, t: float,
-                    piece_sizes: Sequence[int], allow_latest: bool, kappa: float,
-                    built_tokens: int = 0) -> List[Plan]:
+                    piece_sizes: Sequence[int], allow_latest: bool,
+                    kappa: Optional[float], built_tokens: int = 0) -> List[Plan]:
     """The candidate set of design note 2.2, limited to plans whose preconditions hold.
 
     Piece sizes are the measured D17 ones passed in; no new size is invented here.
@@ -105,7 +113,11 @@ def enumerate_plans(*, engine, device: str, qtype: str, rep: str, size_tokens: i
             out.append(mk(PIECES_NOW, n, int(b), "COLD", t, int(b)))
             if allow_latest:
                 svc, _g = _service_s(engine, device, int(b), "COLD", jid)
-                work = svc * n * max(float(kappa), 1.0 if kappa <= 0 else float(kappa))
+                # D129: kappa None means DERIVE it from the committed FIT-only residual bands,
+                # which replaces tonight's unvalidated 1.0. A float overrides, so the note's
+                # kappa = 1 ablation stays reachable.
+                k = float(kappa) if kappa is not None else _kappa_for(int(b))
+                work = svc * n * max(k, 1.0)
                 t_ls = float(deadline_abs) - work
                 if t_ls > t:
                     out.append(mk(PIECES_LATEST, n, int(b), "COLD", t_ls, int(b)))

@@ -447,7 +447,8 @@ class Coordinator:
         if b is None:
             return None
         built = int(getattr(self, "_built_tokens_by_job", {}).get(jid, 0))
-        kappa = float(getattr(self.params, "kappa", 1.0) or 1.0)
+        kappa = getattr(self.params, "kappa", None)
+        kappa = None if kappa is None else float(kappa)
         plans = PL.enumerate_plans(
             engine=self.engine, device=req.device, qtype=job.qtype, rep=job.rep,
             size_tokens=int(b.size_tokens), readiness=_readiness(b.most_likely()),
@@ -466,7 +467,7 @@ class Coordinator:
             delta_j=(chosen.delta_j if chosen is not None else None),
             considered={p.label(): (None if p.delta_j is None else round(p.delta_j, 9))
                         for p in out["plans"]},
-            kappa=kappa, kappa_provisional=True)
+            kappa=("derived" if kappa is None else kappa), kappa_provisional=False)
         if chosen is None:
             self._discard(fleet, items, jobs)
             return [Decision(fleet.t, "plan", req.device, None, False,
@@ -800,6 +801,29 @@ class Coordinator:
                 "default. With mu at 0 the terminal backlog channel of spec 5.3 is SILENT, so "
                 "A6's expected restore work reaches a decision only through the feasibility "
                 "class and the memory decision (ambiguity A26)")
+            return
+        if est == "scarcity":
+            # D129: a SCARCITY price. The EWMA priced BEST USE, not scarcity: session 2's F-A9
+            # measured mu p50 rising 1.445, 2.178, 9.835 at 4, 8 and 16 devices while in-flight
+            # occupancy FELL 1.090, 1.054, 0.332, so refusing work raised the price of work and
+            # the loop reinforced itself. This prices the engine at what it is actually short of:
+            # near zero with spare capacity, rising with real predicted backlog.
+            #
+            #     mu = mu_scale * min(1, busy_ahead / H)
+            #
+            # `busy_ahead` is the predicted remaining service of what is already in flight, which
+            # is the same engine model the rollout uses, so no new estimator enters.
+            ahead = 0.0
+            for p_ in fleet.in_flight:
+                try:
+                    pr_ = self.engine.predict(self.rollout._request(p_),
+                                              concurrent=max(len(fleet.in_flight) - 1, 0))
+                    ahead += float(pr_.service_s)
+                except Exception:
+                    continue
+            h = max(float(self.params.H), 1e-9)
+            scale = float(getattr(self.params, "mu_scale", 1.0) or 1.0)
+            self.params.mu = scale * min(1.0, ahead / h)
             return
         if est != "ewma_marginal_utility":
             raise ValueError("unknown mu estimator %r; 'none' (default, mu stays at the "

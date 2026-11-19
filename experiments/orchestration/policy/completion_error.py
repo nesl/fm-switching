@@ -121,6 +121,33 @@ def p_finish_by(deadline_s: float, predicted_s: float, sigma: float) -> float:
     return 0.5 * (1.0 + math.erf(z / math.sqrt(2.0)))
 
 
+# The 0.90 quantile of a standard normal, for the q90 safety factor below.
+NORMAL_Q90 = 1.2815515655446004
+
+
+def kappa_for_tokens(tokens: int, path: Optional[Path] = None) -> float:
+    """D129: the q90 safety factor on predicted completion, from committed FIT-only residuals.
+
+    PROVENANCE, and the choice behind it. The design note asks for the q90 ratio of MEASURED to
+    PREDICTED JOB COMPLETION time on committed FIT/DEV data. No such quantity exists in committed
+    derived form: StudyPOL6's own records carry cell-level timing aggregates, not
+    predicted-against-actual completion pairs, and the raw pairs live in files that MIX FIT and
+    HOLDOUT trials (StudyENG1c Part D), which POL6 separated with a split manifest.
+
+    Opening a mixed file and relying on my own filtering is the one unrecoverable mistake
+    available here, so this derives kappa instead from a source already verified as FIT-only:
+    `eng1_step_model.json`, whose `fit_data` states Part C including the HOLDOUT was not used.
+    Under the same log-normal error model as `p_finish_by`,
+
+        kappa = exp(z_0.90 * sigma_band)
+
+    LIMITATION, carried with the number: these are per-STEP residuals and a completion sums many
+    steps, so independent errors would partly average out and this OVERSTATES the spread. kappa is
+    therefore conservative, which is the safe direction for a latest-start time.
+    """
+    return float(math.exp(NORMAL_Q90 * sigma_for_tokens(tokens, path)))
+
+
 def describe(path: Optional[Path] = None) -> Dict[str, object]:
     sig = load_sigmas(path)
     p = str(Path(path) if path is not None else (_repo_root() / STEP_MODEL_PATH))
@@ -129,5 +156,7 @@ def describe(path: Optional[Path] = None) -> Dict[str, object]:
                 r2=raw.get("r2"), form="T = T_hat * exp(eps), eps ~ N(0, sigma_band^2)",
                 calibration="sigma = median_rel_res / 0.6744897501960817",
                 sigma_by_band={k: round(v, 6) for k, v in sorted(sig.items())},
+                kappa_by_band={k: round(math.exp(NORMAL_Q90 * v), 6)
+                               for k, v in sorted(sig.items())},
                 caveat="per-STEP residuals used for a completion time that sums many steps, so "
                        "sigma is an UPPER BOUND and the form is conservative")

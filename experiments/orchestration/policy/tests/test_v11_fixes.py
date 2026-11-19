@@ -605,11 +605,32 @@ class TestV12Planner(unittest.TestCase):
                                        "honours as max(free_at, due_at)")
             self.assertEqual(u.meta.get("plan"), self.PL.PIECES_LATEST)
 
-    def test_kappa_is_one_and_flagged_provisional(self):
-        """No committed FIT/DEV q90 of measured over predicted job completion exists."""
+    def test_kappa_is_derived_from_committed_fit_only_residuals(self):
+        """D129: kappa is the q90 safety factor from a source verified FIT-only."""
         import inspect
+        from policy import completion_error as CE
         src = inspect.getsource(self.PL)
-        self.assertIn("kappa IS 1.0 AND PROVISIONAL", src)
+        self.assertIn("kappa IS NOW DERIVED (D129)", src)
+        self.assertIn("MIX FIT and", src, "the reason a mixed file was not opened must be stated")
+        for tok in (1024, 2048, 4096):
+            k = CE.kappa_for_tokens(tok)
+            self.assertGreater(k, 1.0, "a q90 safety factor must inflate the prediction")
+            self.assertLess(k, 1.5, "and must stay sane: got %r" % k)
+        self.assertIn("HOLDOUT) not used", str(CE.describe()["fit_data"]))
+
+    def test_a_fixed_kappa_still_overrides_so_the_ablation_is_reachable(self):
+        plans_derived = self.PL.enumerate_plans(
+            engine=self.e, device="robo000", qtype=QTYPE, rep="RICH", size_tokens=4096,
+            readiness="COLD", deadline_abs=20.0, t=0.0, piece_sizes=(1024,),
+            allow_latest=True, kappa=None)
+        plans_one = self.PL.enumerate_plans(
+            engine=self.e, device="robo000", qtype=QTYPE, rep="RICH", size_tokens=4096,
+            readiness="COLD", deadline_abs=20.0, t=0.0, piece_sizes=(1024,),
+            allow_latest=True, kappa=1.0)
+        d = [p for p in plans_derived if p.kind == self.PL.PIECES_LATEST][0]
+        o = [p for p in plans_one if p.kind == self.PL.PIECES_LATEST][0]
+        self.assertLess(d.first_start_s, o.first_start_s,
+                        "a kappa above 1 must start EARLIER than kappa = 1")
 
     def test_abandon_says_plainly_when_it_is_not_valued(self):
         inert = self.PL.abandon_note(True)

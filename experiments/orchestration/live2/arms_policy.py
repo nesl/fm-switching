@@ -69,7 +69,7 @@ PLACEHOLDERS = {
                           tuned=False),
 }
 
-MU_MODES = ("none", "ewma", "fixed")
+MU_MODES = ("none", "ewma", "fixed", "scarcity")
 QTYPE = "counting_objects_events"     # the one committed RC question type (P9)
 
 
@@ -123,7 +123,8 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     planner_rc: bool = False
     plan_latest: bool = False
     replan: bool = False
-    kappa: float = 1.0
+    kappa: Optional[float] = None   # None derives it from committed FIT-only residuals (D129)
+    mu_scale: float = 1.0           # D129: the scarcity price's scale
 
     name: str = "policy-core"
     case: str = "own"
@@ -180,7 +181,11 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                  "RC": float(targets["robot"]["L_s"])}
         p.p_k = {"SH": float(targets["dashcam"]["p"]), "SS": 0.9,
                  "RC": float(targets["robot"]["p"])}
-        if self.mu_mode == "none":
+        if self.mu_mode == "scarcity":
+            # D129: near zero with spare capacity, rising with real predicted backlog.
+            p.mu, p.mu_estimator = 0.0, "scarcity"
+            p.mu_scale = float(self.mu_scale)
+        elif self.mu_mode == "none":
             p.mu, p.mu_estimator = 0.0, "none"
         elif self.mu_mode == "fixed":
             p.mu, p.mu_estimator = float(self.mu_fixed), "none"
@@ -188,7 +193,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
             p.mu, p.mu_estimator = 0.0, "ewma_marginal_utility"
         if calibration_knots_path is not None:
             p.tier_calibration = CAL.load(calibration_knots_path)
-        p.kappa = float(self.kappa)
+        p.kappa = (None if self.kappa is None else float(self.kappa))
         self.params = p
         # D122: a v1.1 defect fix travels on `Flags` so the rollout can read it, but it is NOT
         # one of spec 7.0's conditional mechanisms, so the D66 guard asks `conditional_any_on`.
