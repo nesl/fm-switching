@@ -1,0 +1,82 @@
+{
+ "check": "D137_item3_measured_quality_substitution",
+ "is_measurement": true,
+ "label": "Seed 4, 600 s, sizes 8, 16 and 32, through the registered arm, single-switch control (_use_measured_quality=False disables the change itself).",
+ "prediction_stated_before_measuring": "INERT AT EVERY SIZE, on a structural argument, with the one order change unreachable.",
+ "result": {
+  "n8": {
+   "PRE": {
+    "D2": 19,
+    "RECENT": 2
+   },
+   "POST": {
+    "D2": 19,
+    "RECENT": 2
+   },
+   "differ": 0
+  },
+  "n16": {
+   "PRE": {
+    "D2": 35,
+    "RECENT": 6
+   },
+   "POST": {
+    "D2": 35,
+    "RECENT": 6
+   },
+   "differ": 0
+  },
+  "n32": {
+   "PRE": {
+    "D2": 42,
+    "RECENT": 1
+   },
+   "POST": {
+    "D2": 42,
+    "RECENT": 1
+   },
+   "differ": 0
+  },
+  "verdict": "INERT at all three sizes, 0 decisions differ. The prediction held."
+ },
+ "classification": {
+  "kind": "CANCELLED BY GEOMETRY, and specifically UNEXPRESSIBLE BY CONSTRUCTION",
+  "not_a_real_negative": "this is NOT evidence that measured quality does not matter. It is evidence that the selection rule cannot consume a quality MAGNITUDE at all.",
+  "why_size_testing_did_not_change_it": "tested at three sizes because size dependence has been the resolution three times. Here it could not have mattered, and that is itself informative: the argument is structural, so no cell could have shown a difference."
+ },
+ "the_structural_argument": [
+  "ecollm.select is max(feas, key=lambda c: (c.quality, -c.cost_gpu_s)), a TUPLE comparison, so cost is consulted ONLY when quality is exactly equal.",
+  "quality never enters feasibility: SLO.min_quality is left None here and SLO.violation adds a quality term only when it is set.",
+  "therefore the selection depends on the ORDER of the quality values and on nothing else, and any two tables sharing that order produce identical decisions whatever the magnitudes.",
+  "the gap shrinking twelvefold, 0.4 to about 0.032, is a magnitude change only. Against cost differences of 11.6x to 55x it still loses, because the comparison never reaches cost."
+ ],
+ "the_one_order_change_is_unreachable": {
+  "what": "the ordinal table TIES D2 and RICH at 1.0; the measured table separates them, 0.4286 against 0.4255. That tie is the only place the substitution could alter an outcome.",
+  "why_unreachable": "cstate builds only RECENT and D2 evidence items (cstate.py:481-483), so `have` never contains RICH and the tie never arises."
+ },
+ "paper_checked_not_assumed": {
+  "what_the_paper_says": "ECO-LLM dynamically selects resources per query so that user-defined SLOs are met while accuracy stays stable.",
+  "reading": "SLO-CONSTRAINED ACCURACY MAXIMISATION. Cost is a CONSTRAINT, not a term traded against quality.",
+  "consequence": "the lexicographic rule the card already labels FAITHFUL is a fair reading of the paper, and a joint quality-minus-lambda-cost score, which is what would let price compete directly, would ITSELF be a departure from the paper.",
+  "which_the_card_describes": "the card describes the lexicographic rule and labels both the selection and the cost tie-break FAITHFUL. It separately declares REP_QUALITY ORDINAL and not measured under adaptation A3, so the ruling premise about provenance is correct."
+ },
+ "the_tension_worth_putting_to_the_user": {
+  "finding": "price can reach this arm decisions ONLY through FEASIBILITY.",
+  "evidence": "that is exactly how the D135 token reconciliation moved decisions at 16 devices and not at 8: it changed cost, cost changed the budget constraint, and the constraint changed which options were feasible.",
+  "contrast": "D135 touched a CONSTRAINT and was effective. D137 item 3 touches a quantity used only as an ORDERING and cannot be. Both are correct faithfulness fixes; only one can change a decision.",
+  "what_would_be_needed": "if price is to compete with quality directly, the change required is to the selection RULE, not the table, and that carries a faithfulness cost which this card would have to record."
+ },
+ "invariance_to_the_pending_default_revert": "the INERT verdict does not depend on the representation default. It is an order-only argument, so session 1 item 1 revert cannot change it. The PRE and POST representation COUNTS above would change under the revert; the verdict would not.",
+ "two_axis_reporting": {
+  "effective_representation": "unchanged by this substitution at every size, so comparability is unaffected",
+  "chosen_or_injected": "unchanged; eco-llm names its representation explicitly and is CHOSEN on both legs"
+ },
+ "_provenance": {
+  "git_commit": "3c781addc560e04645e5c290e424bffd544e0b4a",
+  "script": "ecoq.py through A.make_arm",
+  "model": "none (dry run)",
+  "device": "flash CPU only",
+  "n": "seed 4; 8, 16 and 32 devices; 600 s",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}

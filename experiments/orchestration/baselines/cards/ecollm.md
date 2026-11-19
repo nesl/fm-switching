@@ -109,3 +109,49 @@ produced before this fix were planned under different prices and are to be relab
 > note said "MEASUREMENT HELD", which was true of what I had measured and implied more scope than
 > the hold actually needed. A correct sentence that implies more than it covers is harder to catch
 > than a wrong one, and a card is exactly where that happens.
+
+## D137 item 3, added 2026-11-19: measured quality substituted, and why it cannot move the selection
+
+**The change.** `REP_QUALITY` (ordinal: RECENT 0.6, D2 1.0, RICH 1.0) is replaced by the committed
+**trace-weighted** measured table, `REP_QUALITY_MEASURED` (RECENT 0.3963, D2 0.4286, RICH 0.4255).
+Trace-weighted rather than per-category per D137 item 2, and because per-category cells at
+n = 16 to 39 have twice been shown harmful to act on. A single switch,
+`_use_measured_quality = False`, disables the change itself rather than reconstructing the prior
+condition.
+
+**The ruling's premise is right about provenance.** The card declares `REP_QUALITY` **ORDINAL and
+not measured** under adaptation A3, while the paper profiles configurations offline and selects on
+those profiles. Hard-coded ordinal constants are therefore a departure, and replacing them is a
+correction to faithfulness on its own terms.
+
+**But it cannot produce the effect the ruling hopes for, and the reason is structural rather than a
+matter of calibration.**
+
+1. `ecollm.select` is `max(feas, key=lambda c: (c.quality, -c.cost_gpu_s))` — a **tuple**
+   comparison, so cost is consulted **only when quality is exactly equal**.
+2. Quality never enters feasibility: `SLO.min_quality` is left `None` here, and `SLO.violation`
+   adds a quality term only when it is set.
+3. Therefore the selection depends on the **order** of the quality values and on nothing else.
+   **Any two tables sharing that order produce identical decisions**, whatever the magnitudes.
+
+The gap shrinking twelvefold, 0.4 to about 0.032, is a change in magnitude only. Against cost
+differences of 11.6x to 55x it still loses, because the comparison never reaches cost.
+
+**The one order change is unreachable.** The ordinal table **ties** D2 and RICH at 1.0 while the
+measured table separates them (0.4286 against 0.4255). That tie is the only place the substitution
+could alter an outcome — and `cstate` builds only `RECENT` and `D2` evidence items
+(`cstate.py:481-483`), so `have` never contains RICH and the tie never arises.
+
+**What the paper says, checked rather than assumed.** ECO-LLM "dynamically select[s] optimal
+resource[s]" per query so that "user-defined SLOs are met while accuracy stays stable". That is
+**SLO-constrained accuracy maximisation**: cost is a **constraint**, not a term traded against
+quality. So the lexicographic rule this card already labels FAITHFUL is a fair reading, and a joint
+quality-minus-cost score — which is what would let price compete directly — would itself be a
+**departure** from the paper.
+
+**Consequence, stated plainly: price can only reach this arm's decisions through FEASIBILITY.**
+That is exactly how the D135 token reconciliation moved decisions at 16 devices and not at 8: it
+changed cost, cost changed the budget constraint, and the constraint changed which options were
+feasible. The two rulings therefore differ in kind. **D135 touched a constraint and was effective;
+D137 item 3 touches a quantity used only as an ordering and cannot be.** Both are correct as
+faithfulness fixes; only one can change a decision.

@@ -35,6 +35,13 @@ REPS = ("RECENT", "D2", "RICH")
 REP_QUALITY = {"RECENT": 0.6, "D2": 1.0, "RICH": 1.0}
 REP_TOKEN_SCALE = {"RECENT": 0.35, "D2": 1.0, "RICH": 1.0}
 
+# D137 item 3. The committed TRACE-WEIGHTED measured quality, replacing the ORDINAL constants the
+# card declares under adaptation A3. Values as recorded in the project: D2 0.4286 and RICH 0.4255
+# (`live2/arms_policy.py:79`), RECENT 0.3963 (D137). Trace-weighted rather than per-category per
+# D137 item 2, per-category cells at n = 16 to 39 having twice been shown harmful to act on.
+REP_QUALITY_MEASURED = {"RECENT": 0.3963, "D2": 0.4286, "RICH": 0.4255}
+USE_MEASURED_QUALITY = True        # the single switch; False reproduces the ordinal constants
+
 
 class ECOLLMAdapted(Policy):
     name = "eco-llm"
@@ -58,6 +65,30 @@ class ECOLLMAdapted(Policy):
         r = self._by_name[name] if hasattr(self, "_by_name") else \
             next(x for x in self.rows if x["name"] == name)
         return (r["quality"], r["demand_gpu_s_per_s"] * self.horizon_s, r["lag_s"])
+
+    def _quality(self, rep: str) -> float:
+        """Representation quality for the selection rule.
+
+        D137 item 3. The card declares `REP_QUALITY` ORDINAL and not measured (adaptation A3),
+        while eco-llm's method selects on PROFILED quality, so the ordinal constants are a
+        departure from the paper rather than a faithful adaptation. This reads the committed
+        trace-weighted measured table instead.
+
+        WHAT THIS CAN AND CANNOT CHANGE. `ecollm.select` is
+        `max(feas, key=lambda c: (c.quality, -c.cost_gpu_s))`, a TUPLE comparison, so cost is
+        consulted only when quality is EXACTLY equal. Quality also never enters feasibility here:
+        `SLO.min_quality` is left None and `SLO.violation` adds a quality term only when it is set.
+        So the selection depends on the ORDER of the quality values and on nothing else, and any
+        two tables sharing that order produce identical decisions.
+        """
+        tab = REP_QUALITY_MEASURED if self.use_measured_quality else REP_QUALITY
+        return float(tab[rep])
+
+    @property
+    def use_measured_quality(self) -> bool:
+        """Single switch. Setting `_use_measured_quality = False` on an instance disables the
+        change itself rather than reconstructing the prior condition."""
+        return bool(getattr(self, "_use_measured_quality", USE_MEASURED_QUALITY))
 
     @staticmethod
     def _rep_tokens(q, rep, ev_tok) -> int:
@@ -108,10 +139,10 @@ class ECOLLMAdapted(Policy):
                     continue
                 tok = self._rep_tokens(q, rep, ev_tok)
                 lat = C.recall_ttft_s(tok, q.readiness)
-                tab[("cloud", rep)] = (REP_QUALITY[rep], C.recall_gpu_s(tok, q.readiness), lat)
+                tab[("cloud", rep)] = (self._quality(rep), C.recall_gpu_s(tok, q.readiness), lat)
                 space.append(dict(tier="cloud", rep=rep))
             # the device option: no cloud cost, lower quality, and it is always feasible
-            tab[("device", "RECENT")] = (REP_QUALITY["RECENT"] * 0.5, 0.0, 0.0)
+            tab[("device", "RECENT")] = (self._quality("RECENT") * 0.5, 0.0, 0.0)
             space.append(dict(tier="device", rep="RECENT"))
             pts = explore(space, lambda cfg: tab[(cfg["tier"], cfg["rep"])])
             slo = SLO(max_latency_s=max(q.slack_s(obs.now_s), 0.0), max_cost_gpu_s=max(left, 0.0))
