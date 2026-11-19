@@ -3573,3 +3573,98 @@ in-place mutation. A field is flagged only if it has reads and NONE of the three
 Everything else is written, set at construction, or mutated in place. **Report only; nothing was
 changed.** The two that deserve a ruling are `staleness_s`, which silently removes a cost the
 spec charges, and `Device.z`, which is issue B.
+
+## V7. Fix B PRE-REGISTRATION: the deficit update, and a scaling that needs one ruling
+
+Written before the code, as ruled. B1 (the update) is unambiguous and is implemented. B2 (the
+scaling) is derived here and **NOT implemented**, because its forced magnitude is a choice the
+task did not cover.
+
+### V7.1 B1, the update rule, exactly
+
+For each opportunity `o` of device `i` and task `k`, **exactly once**, when its outcome becomes
+certain:
+
+    S(o) = 1  if a cloud answer for o arrived with t_first_token <= deadline_abs(o)
+    S(o) = 0  otherwise
+
+`S(o) = 0` therefore covers all of: delivered late, declined, never admitted, and
+expired-to-device, which is what the ruling asks for. Then
+
+    z_i[k]  <-  max( z_i[k] + w_{i,k} * (p_k - S(o)) , 0 )
+
+which is exactly the committed `Device.bump_z(task, p_target, success_hat)` with
+`success_hat = S(o)`, and `w = 1` in B1. With `p_k = 0.9` for every task (committed `Params.p_k`),
+a miss adds `+0.9` and a success adds `-0.1`, floored at 0.
+
+**Arm-side, no coordinator edit.** `t_first_token` is already on the payload the coordinator hands
+the arm at `coordinator.py:656`, and the application sees an answer at its first token (the
+harness addendum), so on-time is observable arm-side with no new plumbing and nothing
+H100-owned is touched.
+
+**Resolution, with the accepted one-period lag:**
+
+- every `decide(obs)` registers the opportunities it is shown: each SH instant from the D100
+  roster by its `opportunity_id` and `deadline_abs`, and each recall query by `query_id` and its
+  own absolute `deadline_s`. Registering from the OBSERVATION rather than from admissions is what
+  makes a declined or never-admitted opportunity count as a miss;
+- `live2_completed` records `answered_at = t_first_token` against that `opportunity_id`;
+- every `decide(obs)` at clock `now` then resolves each registered opportunity that is either
+  answered, or whose `deadline_abs < now`, bumps it once and stops tracking it.
+
+**Expected effect, pre-registered so it can be checked without rewording.** A robot miss raises
+that device's `z[RC]` by 0.9. `z` reaches the objective only through `_z_term`, as
+`z_of(task) x (ok/n)`, so for a robot with one in-horizon question serving it would gain about
+`+0.9` against a backlog charge of about 0.7 to 1.25 measured in the diagnosis. **So B1 alone is
+the same order of magnitude as the cost it must overcome, and it may or may not flip the
+decision. That is exactly what Step 3 measures.** Note `z` does NOT reach the continuation value:
+`rollout.py` passes `d_p_success=0.0`, so that term is `z x 0`.
+
+### V7.2 B2, the scaling, derived and NOT implemented
+
+The ruling asks that each update be weighted by the opportunity's share of that device's target
+window, with SH staying exactly at scale 1. Those two constraints together force one form:
+
+    w_{i,k} = N_SH / N_{i,k}
+
+where `N_{i,k}` is the expected count of task-k opportunities for device i in the window. From
+committed quantities only:
+
+| quantity | committed source | value in a 600 s window |
+|---|---|---|
+| `N_SH` | `Params.T_k["SH"] = 0.5 s` cadence | 600 / 0.5 = **1,200** |
+| `N_RC` | `profiles.lambda_rc_default() = 0.009934 /s` (D48) | 0.009934 x 600 = **5.96** |
+
+so `w_SH = 1` exactly, as constrained, and
+
+    w_RC = 1200 / 5.96 = 201.3
+
+**The window length cancels**, which is worth stating: `N_SH / N_RC = (W / 0.5) / (lambda W) =
+2 / lambda = 201.3` for any W, so the undefined "target window" turns out not to be a choice at
+all.
+
+### V7.3 The one ruling B2 needs
+
+**`w_RC = 201.3` means a single robot miss adds `201.3 x 0.9 = 181.2` to `z[RC]`.** For scale, in
+the same objective the continuation value of a robot question is `0.0354` and the backlog charge
+is about 1. Because `_z_term` contributes `z x Delta(ok/n)`, serving one robot question after a
+single prior miss would gain about `+181`, which dominates every other term by more than two
+orders of magnitude. The policy would then serve robot questions essentially unconditionally for
+the rest of the run.
+
+That is a 200x gain on robot SLO pressure arriving as a consequence of the normalisation rather
+than as a calibrated quantity, and shipping it would be hard to distinguish from tuning until
+robots pass, which the task's guiding rule forbids. **So B2 is pre-registered and stopped here for
+a ruling.** Three forms, with my recommendation:
+
+1. **Measure B1 first and decide B2 afterwards.** B1 is already the same order as the cost it
+   opposes, so the scaling may be unnecessary. **Recommended**, and it is what Step 3 now
+   measures.
+2. **Ship `w_RC = 201.3` as derived.** Faithful to the ruling's words, with the dominance above as
+   its known consequence.
+3. **Normalise per window instead of per opportunity**, `w_{i,k} = 1 / N_{i,k}`, so each device's
+   updates sum to its per-window deficit `p_k - achieved`. This is the cleanest statistical
+   reading and makes `z` comparable across devices, but it puts SH at `1/1200`, violating the
+   "SH scale exactly 1" constraint, so it is listed only for completeness.
+
+Nothing from B2 is implemented.
