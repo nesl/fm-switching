@@ -546,6 +546,21 @@ class TestDecisionTimeInstrumentation(unittest.TestCase):
                 self.assertTrue(name in ("this-user", "root") or name.startswith("other-user-"), name)
 
 
+class TestTheCInflightRunnerFlag(unittest.TestCase):
+    """D114 sensitivity: the runner sets the arm's OWN c_inflight on the constructed instance."""
+
+    def test_the_flag_parses_and_the_edf_arm_has_the_field(self):
+        import arms as A
+        import run_live2_real as RL
+        a = RL.build_parser().parse_args(["--arm", "edf", "--out", "x", "--c-inflight", "8"])
+        self.assertEqual(a.c_inflight, 8)
+        arm = A.make_arm("edf")
+        self.assertEqual(arm.c_inflight, 4)              # D114 default
+        arm.c_inflight = a.c_inflight
+        self.assertEqual(arm.c_inflight, 8)
+        self.assertIsNone(RL.build_parser().parse_args(["--arm", "edf", "--out", "x"]).c_inflight)
+
+
 class TestTheMissingFrameGate(unittest.TestCase):
     """Addendum (b), flash's preflight: no uuid-only fallback outside fake-server tests."""
 

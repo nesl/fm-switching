@@ -264,6 +264,8 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
     rdir = Path(cfg["run_dir"])
     rdir.mkdir(parents=True, exist_ok=True)
     arm = A.make_arm(cfg["arm"], **(cfg.get("arm_kwargs") or {}))
+    if cfg.get("c_inflight") is not None:              # D114 sensitivity (runner flag --c-inflight)
+        arm.c_inflight = int(cfg["c_inflight"])
     htok = int(cfg.get("host_tier_tokens") or RC.host_tokens(float(cfg["host_tier_gib"])))
     conf = dict(gpu_kv_tokens=int(cfg["gpu_kv_tokens"]),
                 host_tier_gib=float(cfg["host_tier_gib"]), host_tier_tokens=htok,
