@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 """covex-v2: rollout over the strongest baseline, with a margin that bounds the downside.
 
+THE BASE IS `eco-llm`. It leads capacity (10 of 28 against 9 and 9 for mooncake and
+b7-edf-feasibility) and leads the robot pool at every size where they differ (0.878 against 0.831
+at 16 devices, 0.517 against 0.454 at 32). The other two lead only on dashcam, which is `D+` for
+every arm at every size in the band and so does not affect the capacity conjunct at all: choosing a
+base on dashcam would optimise the half of the objective that is already satisfied. The margin is
+SMALL (10 cells against 9) and at 8 devices eco-llm is not a distinct policy, sitting in a
+six-member collapsed class, so the base choice only has content at 10 devices and above. A v2
+result at n=4 or n=8 is NOT a statement about beating eco-llm specifically.
+
 THE DESIGN AND WHY IT IS SHAPED THIS WAY. Three nights of evidence say COVEX's DeltaJ machinery is
 unreliable in specific, documented ways: the RC deficit reaches a decision in 1 of 14,721
 counterfactual calls, the state value cancels exactly, the price was mispriced and then saturated,
@@ -18,6 +27,17 @@ empirical hope, and it is proved before any margin is swept.
 WHAT pi_0 BECOMES. Every DeltaJ in this system is a counterfactual against pi_0, and here pi_0 is
 THE BASE rather than EDF. No calibration intuition from v1.x transfers.
 
+UNEXPRESSIBLE CHANNELS, which constrain the alternative set. Two fields cannot carry a deviation:
+
+  `order`         `live2/coordinator.py` has no reference to it at all.
+  `desired_tier`  three references in all of live2: one declaration and two WRITES, no READ. So
+                  `KEEP_GPU_WARM` and `OFFLOAD_TO_HOST` are dispatched, counted and handled, and
+                  change nothing. **keep-warm is therefore dropped from the alternative set.**
+
+The lesson generalises and is applied to the classification pass: check whether a field is READ,
+not whether it is REFERENCED. `order` has zero references and is visibly dead; `desired_tier`
+passes a reference check and fails a read check.
+
 EXPRESSIBILITY, which constrains the alternative set. `live2/coordinator.py` contains no reference
 to the action `order` field, so a deviation expressed solely as a REORDERING is a no-op by
 construction and would read as "deviation fired, nothing changed". Every alternative here therefore
@@ -27,24 +47,30 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from interface import Action, Observation, RecallAction
+from interface import Action, Observation, Policy, RecallAction
 
 INF = float("inf")
 
 
-class CovexV2Arm:
+class CovexV2Arm(Policy):
     """Executes `base` and deviates only where DeltaJ clears `margin`."""
 
     name = "covex-v2"
 
-    def __init__(self, base: str = "b7-edf-feasibility", margin: float = INF,
+    def __init__(self, base: str = "eco-llm", margin: float = INF,
                  base_kwargs: Optional[Dict[str, Any]] = None,
                  scorer_kwargs: Optional[Dict[str, Any]] = None) -> None:
         import arms as A
         self.base_name = str(base)
         self.base = A.make_arm(self.base_name, **(base_kwargs or {}))
         self.margin = float(margin)
-        self._scorer_kwargs = dict(scorer_kwargs or {})
+        # The scorer must be configured to PRODUCE RC decisions, or it emits DeltaJ only for
+        # dashcam targets and every recall alternative comes back UNSCORED. Measured: with default
+        # kwargs the scorer's delta_j keys were all `dashNNN:` and not one `rc:` key existed, so a
+        # reachability pass over it classified nothing. These are the v1.3 release switches.
+        self._scorer_kwargs = dict(scorer_kwargs) if scorer_kwargs else dict(
+            mu_mode="none", admit_floor_c=8, deficit_update=True, honour_job_priority=True,
+            realistic_competing=True, planner_rc=True, plan_latest=True, replan=True)
         self._scorer = None
         # Deviations BY KIND with their realised effect, which is the scientific output even if
         # the aggregate does not win.
@@ -52,6 +78,13 @@ class CovexV2Arm:
         self.considered: Dict[str, int] = {}
         self.stats: Dict[str, Any] = dict(arm=self.name, base=self.base_name,
                                           margin=self.margin)
+        # MIRROR the base's declared policy attributes. The coordinator reads these, so a wrapper
+        # that declared different ones would diverge from the base for reasons that have nothing
+        # to do with the margin and would make the byte-identity proof meaningless.
+        for attr in ("reads_device_answer", "multi_instance_adapted", "releases_one_per_epoch",
+                     "piece_tokens", "c_inflight"):
+            if hasattr(self.base, attr):
+                setattr(self, attr, getattr(self.base, attr))
 
     # ---------------------------------------------------------------- plumbing by delegation
     def reset(self, seed: int = 0) -> None:

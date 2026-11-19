@@ -5361,3 +5361,70 @@ expressiveness gap, not a porting artefact, and belongs in the limitations of wh
 the published field. Cardinality claims must state the size they were measured at: at seed 4 and
 8 devices the twelve in-scope arms supply eleven independent behaviours, with ekya and videostorm
 diverging again at 16 devices, and `eco-llm` is a singleton in every grouping at both sizes.
+
+### covex-v2: the margin = infinity byte-identity proof PASSES
+
+Base `eco-llm`, seed 0, 10 devices, 300 s, comparing canonical decision objects period by period:
+
+| | |
+|---|---|
+| decisions | base 2,999, covex-v2 2,999 |
+| base sha256 | `9e6d42f075c065396ce5de041141a0ae52ab2e4f3d76b089cf8376e127e81369` |
+| covex-v2 sha256 | `9e6d42f075c065396ce5de041141a0ae52ab2e4f3d76b089cf8376e127e81369` |
+| differing decisions | **0 of 2,999** |
+
+**So "COVEX cannot do worse than the best baseline" is a structural property of this design**, not an
+empirical hope. The stop condition is cleared. One construction detail was required to make the
+proof meaningful rather than accidental: the wrapper MIRRORS the base's declared policy attributes
+(`reads_device_answer`, `multi_instance_adapted`, `releases_one_per_epoch`, `piece_tokens`,
+`c_inflight`), because the coordinator reads them and a wrapper declaring different ones would
+diverge for reasons unrelated to the margin.
+
+### Why RCprio never fired: a DEFINITION HAZARD, and my own wrong "fix"
+
+Session 2 confirmed RCprio is an absent link: 0 of 8,120 decisions differ at `slack = 5.0` with
+`rc_priority_epochs` absent from both conditions. The cause, measured:
+
+**`deadline_s` means two different things on two objects of this codebase.**
+
+| object | meaning | source |
+|---|---|---|
+| `cstate.Opportunity.deadline_s` | RELATIVE, "the bound, measured from t_event" | `cstate.py:111` |
+| `cstate.RecallQuery.deadline_s` | **ABSOLUTE**, `round(o.deadline_abs(), 3)` | `cstate.py:327` |
+
+The guard reads a `RecallQuery`, so `deadline_s - now` IS the slack and my original form was right.
+**An earlier "fix" of mine added `arrival_s` on the theory that the field was relative**, which
+double-counted arrival and pushed every measured slack to **58 to 297 s**, so the guard could not
+fire at any threshold. Raw measurements that settled it: `now=56.900 arrival=55.155
+deadline_s=60.132`, where `deadline_s - arrival = 4.977`, the 5 s budget. Corrected.
+
+**But the mechanism was nearly unreachable even with the right formula**, which is the more useful
+finding: at 10 devices only **7 of 2,999 epochs have a CLOUD recall at the point the guard runs**.
+A guard that can act in 0.2 per cent of epochs cannot move an aggregate, and the reason it sees so
+few is COVEX's admission VOLUME, the same deficit everything else points at. So RCprio is not
+rescued by the formula fix and is **not reported as a result**.
+
+This is a check-4 definition failure of exactly the kind the consistency protocol exists to catch,
+and it is now recorded so the next reader of `deadline_s` does not repeat it.
+
+### The unexpressible-channel list, and a correction to my reachability pass
+
+Three distinct verdicts must be kept apart for any deviation: **CANCELLED-BY-GEOMETRY** (its effect
+lands outside H so the counterfactual pair is identical), **UNEXPRESSIBLE** (it fires and the
+harness ignores it), and **fired-and-did-not-help**.
+
+| channel | status | evidence |
+|---|---|---|
+| `order` | UNEXPRESSIBLE | no reference in `live2/coordinator.py`; the two `.order` matches are `self.st.order`, a different object |
+| `desired_tier` | UNEXPRESSIBLE | 3 references in all of live2: one declaration (`cstate.py:92`) and two WRITES (`coordinator.py:423,425`), **no read**. `KEEP_GPU_WARM` and `OFFLOAD_TO_HOST` are dispatched, counted and handled, and change nothing |
+
+**`keep-warm` is therefore DROPPED from v2's alternative set.** The general rule, now applied to the
+classification pass: **check whether a field is READ, not whether it is REFERENCED.** `order` has
+zero references and is visibly dead; `desired_tier` passes a reference check and fails a read check.
+
+**My first reachability pass was INVALID and classified nothing.** It reported
+`recall:CLOUD->DEVICE` as 0 non-zero out of 10, which looks like cancellation, but all 10 were
+**UNSCORED**: the scorer was built with default kwargs so `planner_rc` was off and it produced
+DeltaJ only for dashcam targets. Its `delta_j` keys were all `dashNNN:` with not one `rc:` key.
+The scorer is now configured with the v1.3 switch set. **A pass that scores nothing confirms
+nothing**, and reporting its zeros as cancellation would have been the B2 error one level up.

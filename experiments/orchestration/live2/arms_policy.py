@@ -814,12 +814,17 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
             now = float(obs.now_s)
             for qq in obs.recall:
                 if qq.query_id in cloud_q:
-                    # `deadline_s` is RELATIVE to the query's arrival, not absolute: the bench
-                    # and the scorer both compute the due time as t_opportunity + deadline_s. The
-                    # first form compared an absolute clock against a relative budget, so the
-                    # condition almost never fired (dashcam moved 0.8164 to 0.8165).
-                    if (float(qq.arrival_s) + float(qq.deadline_s) - now
-                            <= float(self.rc_priority_slack_s)):
+                    # DEFINITION HAZARD, measured and then confirmed at the source. `deadline_s`
+                    # means two different things on two objects of this codebase:
+                    #   cstate.Opportunity.deadline_s  is RELATIVE, "the bound, measured from
+                    #                                  t_event" (cstate.py:111)
+                    #   cstate.RecallQuery.deadline_s  is ABSOLUTE, round(o.deadline_abs(), 3)
+                    #                                  (cstate.py:327)
+                    # `qq` here is a RecallQuery, so it is ALREADY ABSOLUTE and `deadline_s - now`
+                    # is the slack. An earlier "fix" of mine added `arrival_s` on the theory that
+                    # it was relative, which double-counted arrival and pushed every measured
+                    # slack to 58 to 297 s so the guard could never fire at any threshold.
+                    if float(qq.deadline_s) - now <= float(self.rc_priority_slack_s):
                         urgent = True
                         break
         if urgent:
