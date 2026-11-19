@@ -1,0 +1,88 @@
+{
+ "check": "evidence_need_item2",
+ "is_measurement": false,
+ "label": "StudyEVNEED item 2: rules fitted on DEV ONLY and scored on EVAL ONLY, both flows reported separately.",
+ "split": {
+  "source": "experiments/orchestration/baselines/sember_split.py",
+  "rule": "split by video on sha256(video_id); lowest 30 percent of the digest order is DEV",
+  "n_dev": 243,
+  "n_eval": 602,
+  "overlap": 0
+ },
+ "eval_base_rates": {
+  "helps": 0.0814,
+  "hurts": 0.0714
+ },
+ "rules": {
+  "A_coverage": {
+   "deployable": false,
+   "why_not": "evidence-offset metadata is an ORACLE; it is not available at question time",
+   "predict_helps": {
+    "precision": 0.2174,
+    "recall": 0.3061,
+    "tp": 15,
+    "fp": 54,
+    "fn": 34
+   },
+   "predict_hurts": {
+    "precision": 0.0675,
+    "recall": 0.8372,
+    "tp": 36,
+    "fp": 497,
+    "fn": 7
+   }
+  },
+  "B_category_dev_fitted": {
+   "deployable": false,
+   "why_not": "arms_policy.py:73 pins QTYPE='counting_objects_events' and qtype appears ZERO times in coordinator.py and cstate.py, so the per-question category never reaches a decision",
+   "dev_selected_categories": [
+    "sequential_action",
+    "temporal_ordering_recognition",
+    "visual_detail_recall"
+   ],
+   "predict_helps": {
+    "precision": 0.097,
+    "recall": 0.4694,
+    "tp": 23,
+    "fp": 214,
+    "fn": 26
+   },
+   "predict_hurts": {
+    "precision": 0.0712,
+    "recall": 0.6047,
+    "tp": 26,
+    "fp": 339,
+    "fn": 17
+   }
+  }
+ },
+ "headline": "NOTHING IN THE CANDIDATE SET PREDICTS THE HURTS FLOW. Coverage scores 0.068 precision against a 0.0714 base rate, below chance; the DEV-fitted category rule scores 0.071, exactly chance. The achievable gain is capped at the HELPS side and neither rule is deployable.",
+ "policy_quality_model_defect": {
+  "note": "qtype pinned to one category mis-specifies every rc_accuracy lookup",
+  "counting_objects_events_share_of_trace": 0.122,
+  "policy_sees": {
+   "RICH": 0.25,
+   "RECENT": 0.25,
+   "D2": 0.2222
+  },
+  "trace_weighted_truth": {
+   "RICH": 0.4246,
+   "RECENT": 0.3941,
+   "D2": 0.426
+  },
+  "error_pp": {
+   "RICH": -17.5,
+   "RECENT": -14.4,
+   "D2": -20.4
+  },
+  "sign_inversion": "policy sees D2 < RICH; on the trace mix D2 > RICH"
+ },
+ "_provenance": {
+  "git_commit": "0a98ab48de1d848cd9cc314c18b06330fb6d870d",
+  "script": "ad hoc analysis committed in reports/study_evidence_need.md",
+  "model": "qwen3vl-32b (StudyR1 records)",
+  "device": "flash CPU only, no GPU",
+  "n": 845,
+  "timestamp": "2026-11-19"
+ }
+}

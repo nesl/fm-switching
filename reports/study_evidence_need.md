@@ -98,3 +98,97 @@ to answer, how many physically infeasible questions become answerable on time wi
 what accuracy, **cannot be answered from committed accuracy data at all**. The timing half is
 computable from the cost curve; the accuracy half has no evidence. This is stated as a gap rather
 than filled.
+
+---
+
+## 2. CAN IT BE PREDICTED AT QUESTION TIME? No, on both counts
+
+**DEV/EVAL discipline: the committed split is real and was applied, not assumed.**
+`experiments/orchestration/baselines/sember_split.py` exposes `is_dev(question_id)` and
+`is_eval(question_id)`; the committed `amend2_sember_split.json` states the rule as *"split by
+video on sha256(video_id); lowest 30 percent of the digest order is DEV"*. Applied here: **DEV
+243, EVAL 602, overlap 0.** Every rule below is fitted on DEV only and scored on EVAL only.
+
+**EVAL base rates: HELPS 8.14 percent, HURTS 7.14 percent.** A rule has signal only if its
+precision beats these.
+
+| rule | flow | precision | recall | lift over base |
+|---|---|---|---|---|
+| **A. coverage** *(ORACLE, NON-DEPLOYABLE)* | predict HELPS | **0.217** | 0.306 | **2.7x** |
+| **A. coverage** *(ORACLE, NON-DEPLOYABLE)* | predict HURTS | 0.068 | 0.837 | **0.95x, BELOW base rate** |
+| B. category, fitted on DEV | predict HELPS | 0.097 | 0.469 | 1.19x |
+| B. category, fitted on DEV | predict HURTS | 0.071 | 0.605 | **1.00x, exactly chance** |
+
+### 2.1 Nothing predicts the HURTS flow
+
+**This is the question that decides whether the lever is worth building, and the answer is no.**
+Coverage, which is the strongest signal available and is not even deployable, predicts HURTS at
+**0.068 against a base rate of 0.0714** — below chance. The DEV-fitted category rule predicts it at
+**exactly** the base rate.
+
+**So the achievable gain is capped at the HELPS side**, and roughly 7 percent of questions will
+continue to be actively harmed by whatever representation is sent, with nothing in the candidate
+set able to identify them in advance. That is a finding in its own right and it follows directly
+from item 1.1: the cost of history is independent of coverage, so coverage-like features cannot
+see it.
+
+### 2.2 The per-category lever does not survive DEV to EVAL
+
+The category net in item 1.2 ran from +6.86 to -9.28 and looked like the natural lever. **Fitted
+honestly on DEV and scored on EVAL it gives a lift of 1.19x on HELPS and 1.00x on HURTS.** The
+category table was reading sampling noise at n = 90 to 143 per category, and the DEV-selected set
+(`sequential_action`, `temporal_ordering_recognition`, `visual_detail_recall`) does not generalise.
+
+**I would have reported the per-category policy as the recommendation on the full-sample table.**
+The split is what prevented that.
+
+### 2.3 AND THE CATEGORY IS NOT AVAILABLE AT RUNTIME ANYWAY
+
+`arms_policy.py:73` sets **`QTYPE = "counting_objects_events"`**, described as *"the one committed
+RC question type (P9)"*, and `d.qtype = QTYPE` at line 433. **`qtype` appears ZERO times in
+`coordinator.py` and ZERO times in `cstate.py`.** The per-question category never reaches a
+decision.
+
+**So rule B is an oracle bound like rule A, and every per-category number in this report is
+descriptive rather than actionable.** Both candidate rules are labelled non-deployable in the table
+above.
+
+### 2.4 A CONSEQUENCE BEYOND THIS STUDY: the policy's quality model is mis-specified by 14 to 20 pp
+
+Because `qtype` is pinned to one category, every `rc_accuracy` lookup the policy makes is for
+`counting_objects_events`, which is **12.2 percent of trace questions** and one of the hardest:
+
+| representation | what the policy SEES | trace-weighted TRUTH | error |
+|---|---|---|---|
+| RICH | 0.2500 | 0.4246 | **-17.5 pp** |
+| RECENT | 0.2500 | 0.3941 | -14.4 pp |
+| D2 | 0.2222 | 0.4260 | **-20.4 pp** |
+
+**The policy systematically under-values every cloud representation by 14 to 20 pp, and the SIGN
+of the D2-against-RICH comparison is inverted**: it sees D2 as worse than RICH (0.2222 against
+0.2500) when on the trace mix D2 is better (0.4260 against 0.4246).
+
+This is a **seventh** entry for the channel catalogue, and it is a new shape: not dead, not absent,
+but **CONSTANT AND UNREPRESENTATIVE**. It passes every check that asks whether a quantity is
+non-zero and varies, because it is non-zero; it fails because it does not vary with the thing it
+names. It would make COVEX under-value recall service generally, which is consistent with the
+admission behaviour seen throughout this report.
+
+---
+
+## 3. LIMITATIONS, with implications named
+
+1. **No per-question measurement above the feasibility breakeven.** 0 of 845 StudyR1 questions
+   exceed 19,381 tokens, while the D132 ceiling found about **9.6 percent of TRACE questions above
+   it**, because trace histories accumulate across a run and StudyR1's per-question setup does not.
+   **The questions that matter most for feasibility are exactly the ones with no committed accuracy
+   measurement.** Item 3's timing half is computable; its accuracy half has no evidence. This is an
+   evidence gap, not an analysis limitation.
+2. **Only the ENDPOINTS of the representation ladder exist at per-question resolution.**
+   FM-switching's axis is graded, full / window / summary-80 / summary-200, and this workload has
+   per-question data for RICH and RECENT only, plus D2 at category resolution. **Anyone designing a
+   graded policy from this report should know the middle of the ladder has never been measured
+   here.**
+3. **S-EMBER only**, one workload, 845 questions, 234 videos. The LoCoMo contrast in the
+   orchestration report shows the representation axis behaves oppositely on another workload.
+4. The committed JPEG and cache-path caveats (D70, D81) apply to the underlying StudyR1 records.
