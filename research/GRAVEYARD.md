@@ -48,6 +48,25 @@ were never the problem — they remain available under MIT.
 failure mode. Egocentric video + life-log, but the evaluation setup requires dense
 annotation not available in the public release.
 
+**Re-checked 2026-11-19 for D139 (questions that need history), StudyEGOLIFE-feas, annotation
+only, no video. STAYS CLOSED, on a new and quantified ground.** The failure mode above was
+answering a different question (context compression) and is left standing as written. For D139 the
+**usable count is 3**: of the 500 published rows, 281 are same-day single-target, and applying
+gap > 2 min, D2 history <= 19,400 tokens, no `need_audio` and no `need_name` leaves 281 -> 20 -> 15
+-> 3. Against a threshold of 50 that is **offline corroboration only, not a trace-driven workload**,
+and the margin is not close: 4 if every excluded multi-target row were repaired most favourably, 5
+at a 32,768 budget. **`need_name` binds, not the token budget** - 197 of 281 need identity
+recognition and only 34 of 281 need neither audio nor names.
+
+Three further facts, for whoever looks next. **Licence is clear**: `lmms-lab/EgoLife` rev
+`143fb319` is MIT and ungated. **The QA is 1 of 6 participants**, 500 of the paper's 3,000
+questions, absent from GitHub too, while `EgoLifeCap/` dense captions and transcripts ARE public for
+all six. **Recurring failure mode 2 below is AGGRAVATED, not merely untested: that caption layer is
+Chinese-only** while the QA carries parallel English, which is the FindingDory failure exactly.
+Also: EgoLifeQA is a multi-hour benchmark, 207 of 281 gaps beyond 30 min, and over all 500 rows the
+median question would need 951,241 D2 tokens, 49x our budget.
+Report `reports/study_egolife_feas.md`; counts `results/datasets/egolife_feas.json`.
+
 ### SuperMemory-VQA
 **Failure mode:** The benchmark tests retrieval from a structured memory store, not
 from a compressed context representation. The failure mode when compression is applied
