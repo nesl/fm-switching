@@ -1,0 +1,53 @@
+{
+ "check": "builder_slot_expressibility_precheck",
+ "is_measurement": false,
+ "label": "STATIC PRE-CHECK of the six-slot builder, run BEFORE any slot was implemented, as the directive requires. Determines which slots can change a decision in live2 at all.",
+ "S5_memory": {
+  "verdict": "UNEXPRESSIBLE AS SPECIFIED. Do not build or score its three alternatives.",
+  "evidence": [
+   "live2 `desired_tier`: declared once at cstate.py:92 and WRITTEN twice at coordinator.py:423 and :425. There is NO READ anywhere in live2, so KEEP_GPU_WARM and OFFLOAD_TO_HOST cannot change any decision.",
+   "the `desired_tier` hits in policy/ are a DIFFERENT object on state.py:43 (HistoryBelief) read only by telemetry.py, which reports and does not decide.",
+   "`gpu_kv_tokens` is passed to ARMS through live2_configure and is NEVER enforced as a cap by the coordinator, so there is no KV pressure to manage.",
+   "there is no automatic eviction or demotion anywhere: the only eviction is an arm EVICT action.",
+   "EVICT (coordinator.py:418-421) only demotes the arm OWN session to cold and zeroes built_tokens, so it is self-harm with no contention to relieve."
+  ],
+  "consequence": "lru, value-aware keep-warm and protect-active-robot-sessions all express retention under pressure. live2 has no pressure, no read of the retention field, and no automatic eviction, so all three are inert by construction rather than weak.",
+  "classification": "UNEXPRESSIBLE, in the five-cause scheme"
+ },
+ "S3_reload_mode": {
+  "verdict": "UNEXERCISABLE BY CONSTRUCTION, not merely unobserved.",
+  "evidence": [
+   "every write to a session belief in live2: cstate.py:181 and :201 set COLD, coordinator.py:420 (EVICT) sets COLD, coordinator.py:711 sets GPU on a completed build.",
+   "NO write ever sets belief to host, so believed_tier() is in {cold, gpu} and readiness() is in {COLD, GPU-WARM}.",
+   "HOST-WARM is therefore unreachable in CoordState, which is why no recall reached it across seeds 0 and 4; the earlier empirical note has a structural cause.",
+   "OFFLOAD_TO_HOST sets desired_tier, which is never read, and does not touch belief."
+  ],
+  "consequence": "S3 host-to-reload can never be selected. S3 reduces to warm-to-answer and cold-to-one-go-or-pieces, a 2 or 3 mode slot rather than 3 to 4.",
+  "classification": "UNEXERCISED, with a structural rather than statistical cause"
+ },
+ "slots_still_worth_building": [
+  "S1 dashcam admission",
+  "S2 robot admission",
+  "S3 robot execution mode, minus the reload option",
+  "S4 dispatch",
+  "S6 overload"
+ ],
+ "preregistered_expectations": {
+  "note": "pre-registered BEFORE screening, per the directive, so a flat result is interpretable immediately",
+  "S2_value_justified": "expected WEAK or DEGENERATE: the DeltaJ objective was hand-checked to be blind to cost (a 12 to 25 percent GPU-second spread moves it by exactly nothing) and blind to delivery risk in the range that matters (a 25,000 token recall undeliverable in 5 s is valued identically to a 2,048 token one).",
+  "S3_local_what_if": "expected WEAK for the same reason, and further narrowed because the reload mode is unreachable.",
+  "S5_value_aware": "not screened at all, being unexpressible per above."
+ },
+ "not_built": [
+  "S5 all three alternatives",
+  "S3 reload mode"
+ ],
+ "_provenance": {
+  "git_commit": "201052501773d73069301a62200da0fddb30924e",
+  "script": "static inspection of live2/cstate.py and live2/coordinator.py; no code changed, nothing run",
+  "model": "n/a",
+  "device": "flash CPU only",
+  "n": "static",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
