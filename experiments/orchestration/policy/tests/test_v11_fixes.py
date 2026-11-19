@@ -489,3 +489,53 @@ class TestF4ProbabilisticPFinish(unittest.TestCase):
         src = inspect.getsource(RO.Rollout.rel_sigma_for)
         self.assertIn("if not self.flags.prob_p_finish:", src)
         self.assertIn("return None", src)
+
+
+class TestF5cDeficitRouting(unittest.TestCase):
+    """D126 F5c: the deficit update goes through its spec entry point, with no behaviour change."""
+
+    def _arm_mod(self):
+        import sys
+        from pathlib import Path
+        live2 = Path(__file__).resolve().parents[2] / "live2"
+        for p in (str(live2), str(live2 / "fleet"), str(live2 / "scorer")):
+            if p not in sys.path:
+                sys.path.insert(0, p)
+        import arms_policy as AP
+        return AP
+
+    def test_the_arm_no_longer_calls_bump_z_directly(self):
+        import inspect
+        AP = self._arm_mod()
+        src = inspect.getsource(AP.PolicyCoreArm._z_resolve)
+        self.assertNotIn("dev.bump_z(", src,
+                         "B1's direct call is what left the spec entry point dead")
+        self.assertIn("self.co.update_deficit(", src)
+
+    def test_the_spec_entry_point_is_no_longer_dead_code(self):
+        """`spec_map.py` names `coordinator.update_deficit` for spec 3.3 and 7.6."""
+        import inspect
+        AP = self._arm_mod()
+        from policy.coordinator import Coordinator
+        self.assertTrue(callable(Coordinator.update_deficit))
+        src = inspect.getsource(AP.PolicyCoreArm._z_resolve)
+        self.assertIn("update_deficit", src, "the entry point must have a production caller")
+
+    def test_the_missing_device_guard_is_kept(self):
+        """`fleet.device` indexes and would raise; the guard is what makes routing equivalent."""
+        import inspect
+        AP = self._arm_mod()
+        src = inspect.getsource(AP.PolicyCoreArm._z_resolve)
+        self.assertIn("if dev is not None:", src)
+
+    def test_update_deficit_applies_the_same_counter_update(self):
+        from policy.state import Device, Link
+        dev = Device(device_id="robo000", link=Link(bandwidth_bytes_s=1.7e6, rtt_s=0.05),
+                     qtype=QTYPE)
+        dev.bump_z("RC", 0.9, 0.0)
+        direct = dev.z_of("RC")
+        other = Device(device_id="robo001", link=Link(bandwidth_bytes_s=1.7e6, rtt_s=0.05),
+                       qtype=QTYPE)
+        other.bump_z("RC", 0.9, 0.0)
+        self.assertAlmostEqual(direct, other.z_of("RC"), places=12,
+                               msg="routing must not change the arithmetic")

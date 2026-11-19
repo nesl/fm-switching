@@ -4510,3 +4510,18 @@ calls it, which is the same failure class as the absent mechanisms this effort e
 
 **Expected effect: none.** Decisions must be byte-identical with B1 on, before and after, and that
 is the reported result rather than an assumption.
+
+## V25. F5c DONE, and behaviour is identical as pre-registered
+
+`arms_policy._z_resolve` now calls `self.co.update_deficit(self.fleet, device, task, success)`.
+`Coordinator.update_deficit`, which `spec_map.py` names for spec 3.3 and spec 7.6, therefore has a
+production caller for the first time and is no longer dead code.
+
+| check | result |
+|---|---|
+| decisions with B1 on, before against after, seed 0, 4 devices, 300 s | **0 of 1,157 differ, IDENTICAL** |
+| deficit counters over the same run | `z_updates` 1,058 and `z_misses` 3, unchanged |
+| policy suite | 472 of 472 (4 new F5c tests) |
+
+That is the pre-registered expectation met exactly: the routing carries no behavioural content,
+and the equivalence is shown rather than asserted.

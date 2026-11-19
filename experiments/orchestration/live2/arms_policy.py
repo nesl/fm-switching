@@ -312,7 +312,12 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
                 continue
             dev = self.fleet.devices.get(rec["device"])
             if dev is not None:
-                dev.bump_z(rec["task"], float(self.params.p_k[rec["task"]]), success)
+                # D126 F5c: route through the spec entry point rather than calling bump_z
+                # directly, so `Coordinator.update_deficit`, which spec_map.py names for spec 3.3
+                # and 7.6, is live rather than dead code. Exactly equivalent: the coordinator was
+                # built with the same params object, and the `dev is not None` guard is kept
+                # because `fleet.device` indexes rather than creates.
+                self.co.update_deficit(self.fleet, rec["device"], rec["task"], success)
                 self.stats["z_updates"] = int(self.stats.get("z_updates", 0)) + 1
                 key = "z_successes" if success > 0 else "z_misses"
                 self.stats[key] = int(self.stats.get(key, 0)) + 1
