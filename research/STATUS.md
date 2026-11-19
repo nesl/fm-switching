@@ -1,5 +1,18 @@
 # FM-switching — Project Status
 
+Last updated: 2026-11-19 (later 1) (**MOTIVATION CORRECTION, D135, recorded here so it is not
+re-quoted: the +17.5 pp history benefit holds ONLY for questions whose evidence lies outside the
+recent window, about 12 percent of them. Across all questions history HELPS 8.05 percent and HURTS
+6.86 percent, net +1.18 pp with a CI of [-1.42, +3.79] that does not exclude zero. That figure is
+what launched Part C's accuracy-column rationale. StudyEVNEED also finds that NOTHING in the
+candidate set predicts the HURTS flow (coverage scores 0.068 precision against a 0.0714 base rate,
+below chance), that the per-category lever dies on DEV-to-EVAL, and that sending RECENT instead of
+full history would save 95.6 to 95.8 percent of recall GPU time and rescue 28 of 28 infeasible
+questions on the 10/12/14 band - a lever that cannot yet be converted into a policy because both a
+runtime signal and a long-history accuracy measurement are missing. Report
+`reports/study_evidence_need.md`. The six protocol amendments this work earned were ACCEPTED under
+D135 and are now in CLAUDE.md.**)
+
 Last updated: 2026-11-19 (**StudyCOVEX-harden, session 2, D124 to D134. THE CROSSOVER IS LOCATED
 AT 10 TO 12 DEVICES and is sharp, with all four dev seeds transitioning together: llf falls 0.81
 to 0.41 and edf C=8 0.86 to 0.17 on robot on-time, while COVEX is flat and has no collapse. On the

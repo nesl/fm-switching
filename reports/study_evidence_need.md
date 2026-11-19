@@ -1,5 +1,12 @@
 # StudyEVNEED: how often does a robot question actually need history?
 
+> **MOTIVATION CORRECTION (D135).** The +17.5 pp history benefit that launched Part C's rationale
+> holds **only for questions whose evidence lies outside the recent window, about 12 percent of
+> them**. Across all questions, history **HELPS 8.05 percent and HURTS 6.86 percent, net +1.18 pp
+> with a CI of [-1.42, +3.79] that does not exclude zero.** The figure is real and it is
+> conditional; quoting it unconditioned overstates the effect on the full question set by about
+> fifteen times.
+
 Session 2, D134 follow-on. **Offline and read-only**: no policy code changed, no GPU used, every
 number from committed per-question records. Prefix `evidence-need`.
 
