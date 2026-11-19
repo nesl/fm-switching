@@ -1,0 +1,131 @@
+{
+ "check": "covex_harden_scenario_preregistration",
+ "is_measurement": false,
+ "label": "PRE-REGISTERED EXPECTATIONS, committed BEFORE COVEX was run against any of them. No expectation may be adjusted after seeing a result; a wrong one is recorded as an erratum with its reason and the original stays visible.",
+ "committed_constants": {
+  "DASHCAM_L_S": 1.0,
+  "ROBOT_L_S": 5.0,
+  "dashcam_cadence_s": 0.5,
+  "batch_period_s": 30.0,
+  "d2_tok_per_img": 90,
+  "d2_header_tok": 31,
+  "uplink_mbps": 13.6,
+  "rtt_ms": 44.0,
+  "gpu_kv_tight": 62944,
+  "host_tight_gib": 27.0,
+  "cold_curve_s": {
+   "5341": 1.187,
+   "11101": 2.467,
+   "20101": 5.29
+  }
+ },
+ "scenarios": {
+  "S1": {
+   "scenario": "one robot question, no dashcams, cold 11k history, 5 s deadline",
+   "expect": "released_before_deadline",
+   "expect_detail": "the single question is released before t_ask + 5 s"
+  },
+  "S2": {
+   "scenario": "the same with 8 dashcams (light load)",
+   "expect": "released_before_deadline",
+   "expect_detail": "served, with few or no dashcam instants lost against the paired no-question run"
+  },
+  "S3": {
+   "scenario": "20 dashcams (heavy load), tight host",
+   "expect": "served_or_declined_at_admission",
+   "expect_detail": "either served, or declined at admission; NEVER admitted then deferred past its deadline"
+  },
+  "S4a": {
+   "scenario": "MOT1 light_tight reproduced",
+   "expect": "pieces_chosen",
+   "expect_detail": "a MATERIALIZE carrying a slice (pieces), the measured best at 0 extra missed",
+   "mot1": {
+    "cell": "light_tight",
+    "best": "P2048",
+    "extra_missed": 0,
+    "robot_ttft_s": 3.3739
+   }
+  },
+  "S4b": {
+   "scenario": "MOT1 heavy_tight reproduced",
+   "expect": "knowing_tradeoff",
+   "expect_detail": "no option serves both; any outcome passes except admit-then-starve, and the trade-off is reported",
+   "mot1": {
+    "cell": "heavy_tight",
+    "p1024": {
+     "extra_missed": 0,
+     "robot_ttft_s": 6.7854
+    },
+    "one_go": {
+     "extra_missed": 57,
+     "robot_ttft_s": 3.4655
+    },
+    "host_warm": {
+     "extra_missed": 44,
+     "robot_ttft_s": 2.6158
+    }
+   }
+  },
+  "S4c": {
+   "scenario": "MOT1 heavy_roomy reproduced",
+   "expect": "reload_or_keep_warm",
+   "expect_detail": "keeps the history resident or reloads from host rather than rebuilding",
+   "mot1": {
+    "cell": "heavy_roomy",
+    "host_warm": {
+     "extra_missed": 0,
+     "robot_ttft_s": 0.6857
+    }
+   }
+  },
+  "S5": {
+   "scenario": "two robot questions at once, both cold",
+   "expect": "no_starvation",
+   "expect_detail": "both released before their deadlines, or one declined at admission with the other served"
+  },
+  "S6": {
+   "scenario": "a robot question whose history is host-warm",
+   "expect": "reload_not_rebuild",
+   "expect_detail": "the released work is a host reload and the question is served",
+   "realisability": "needs the coordinator to BELIEVE host-warm; if the observed readiness is not HOST-WARM the scenario is NOT REALISABLE and is not scored"
+  },
+  "S7": {
+   "scenario": "a robot question infeasible even on an idle engine (about 27k tokens)",
+   "expect": "declined_at_admission",
+   "expect_detail": "declined at admission and no GPU work charged to it"
+  },
+  "S8": {
+   "scenario": "a dashcam instant with zero or negative calibrated gain",
+   "expect": "not_sent",
+   "expect_detail": "the instant is not sent to the cloud"
+  },
+  "S9": {
+   "scenario": "memory pressure where keeping one history warm evicts another",
+   "expect": "keeps_higher_value",
+   "expect_detail": "keeps the higher expected value, with both numbers reported",
+   "realisability": "needs an eviction to occur; if none does the scenario is NOT REALISABLE"
+  },
+  "S10": {
+   "scenario": "sustained overload above engine capacity",
+   "expect": "bounded_queues",
+   "expect_detail": "the pending set does not grow without limit over the run"
+  },
+  "S11": {
+   "scenario": "a question whose history is already fully built (GPU-warm)",
+   "expect": "served_without_rebuild",
+   "expect_detail": "served, and no rebuild work released for it"
+  },
+  "S12": {
+   "scenario": "a question whose deadline has already passed when first seen",
+   "expect": "not_released",
+   "expect_detail": "not released at all"
+  }
+ },
+ "_provenance": {
+  "script": "policy/tests/hardening/",
+  "model": "none (pol4 frozen)",
+  "device": "flash CPU only",
+  "n": "crafted event lists, development data only",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}
