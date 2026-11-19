@@ -949,3 +949,241 @@ Derived from P1 to P4 before anything is implemented, as Step 1 requires.
 **The plan therefore is: D120 exact pruning first, then the terminal recomputation, then the
 cheap `u_sh_grid` memoisation, then clones, and the compiled path only if those leave the target
 out of reach.** Every item sits behind its own switch, default OFF.
+
+# D120 item 0: exact pruning. BOUND SOUNDNESS, measured before any pruning is enabled
+
+The addendum makes exact pruning the first thing implemented after the profile, and it attaches
+one condition: "Watch for any place where admitting can HELP others, such as sub-linear batching
+or a shared prefix. If such a place exists, the bound must include it or the pruning is not
+exact." That condition is examined here FIRST, because it decides whether item 0 can exist at
+all.
+
+## Q1. The prize is large, and measured
+
+Every candidate's realized `delta_j` was recorded over a full 64-device cell, 56,063 of them.
+
+| quantity | value |
+|---|---|
+| candidates | **56,063** |
+| of which `state` | 27,750 (49.5 %) |
+| of which `release` | 11,872 (21.2 %) |
+| of which `admit` | 11,584 (20.7 %) |
+| of which `dispatch` | 4,857 (8.7 %) |
+| **candidates with `delta_j` <= 0, which can never be released** | **48,049, or 85.71 %** |
+| candidates with `delta_j` > 0 | 8,014 |
+
+**85.71 % of all candidate evaluations end in a value that cannot be acted on.** Since candidate
+evaluation is about 78 % of decision CPU (P2), a pruning rule that skipped all of them would cut
+roughly two thirds of decision time. That is far larger than every other item on the P5 list
+combined, which is why the addendum ranks it first and why its soundness deserves this much care.
+
+Note also that `state` candidates are HALF of all candidates. Any pruning rule that works only
+on SH admissions leaves most of the prize untouched.
+
+## Q2. The property the bound needs, and why it does not hold
+
+The proposed bound is the candidate's own maximum calibrated gain plus its deficit credit plus
+its continuation-value increase, **assuming zero harm to others**. For that to be an UPPER bound
+on `delta_j`, admitting the candidate must never RAISE another opportunity's utility.
+
+**It can.** Two independent pieces of evidence:
+
+1. **Structural.** SH utility is accumulated per instant as `total += w * (u - u_dev)`
+   (`policy/rollout.py:464`), where `u` comes from `u_sh_cloud(delay)` and DECREASES with the
+   delivery delay. So anything that makes another device's call arrive sooner raises that
+   device's term. Serving earlier is worth more, by construction.
+2. **The frozen engine model is NOT monotone in admitted work.** Three of its eleven
+   coefficients are negative (`results/cost/study_eng1/eng1_step_model.json`):
+
+   | coefficient | value | what it means |
+   |---|---|---|
+   | `per_decode_req_ms` | **-0.571115** | each additional decode request in a step REDUCES the predicted step time |
+   | `admission_per_image_ms` | **-1.249217** | an image admitted to the next step reduces it too |
+   | `per_tok_above_2048_ms` | -0.007830 | the second token knot bends downward |
+
+   So adding work can make the engine's steps faster, which makes other calls arrive sooner,
+   which raises their utility. **"Admitting never helps others" is false in this model.**
+
+**Measured, not just argued:** of the 56,063 candidates, **5,802 (10.35 %) had a NEGATIVE
+`engine_busy_delta_s`**, meaning the action left the engine LESS busy than the reference did.
+The non-monotonicity is not a theoretical worry about the coefficients; it occurs in a tenth of
+the candidates actually evaluated.
+
+## Q3. What the bound did in practice, which is the opposite of what Q2 predicts
+
+The own-gain bound was computed for every candidate and compared against the realized `u_hat`
+term, which is the only term it claims to bound.
+
+| check | result over 56,063 candidates |
+|---|---|
+| `u_hat` exceeded the own-gain bound | **0 times** |
+| largest `u_hat` minus bound | **-0.027662**, so the realized term stayed at least 0.0277 BELOW the bound everywhere |
+| own-gain bound value, SH, one instant | 0.111025 = `omega_SH * (u_cloud(0) - u_device)` |
+| candidates whose `u_hat` was negative, i.e. net harm to others | 35,066 (62.5 %) |
+| candidates whose `terminal` term was positive | 2,992 (5.3 %) |
+| candidates whose `z` term was positive | **0** |
+
+So the bound held on every candidate, with margin. **But it held empirically, not provably**, and
+those are different things. Q2 shows the mechanism that would break it exists and fires in 10 %
+of candidates; it simply never fired hard enough, in this fixture, to push a candidate's own term
+above its own ceiling.
+
+## Q4. The honest conclusion, and what it costs
+
+**Exact pruning as the addendum specifies it cannot be certified by proof against the frozen
+engine model.** Following the addendum's own rule, the bound would have to INCLUDE the
+help-to-others effect to be exact. Bounding that effect requires capping the total utility other
+pending opportunities could gain from a faster engine, which is a global quantity over every
+other device, so any sound version of it is far too loose to prune anything. There is no cheap
+sound bound here.
+
+Two further findings sharpen what a bound would have to carry:
+
+- **The `terminal` term is positive in 5.3 % of candidates**, so a bound that ignores the
+  continuation value is unsound on its own terms, independent of Q2.
+- **The `z` term was never positive**, but only because this fixture runs `mu = 0`. The live
+  configuration uses the mu EWMA, so that zero is a property of the fixture and must not be
+  carried into a bound.
+
+**This is therefore reported rather than implemented, and no pruning switch was added.** The
+remaining honest options are a decision for the planner and user, not for me:
+
+1. **Accept empirical certification.** Implement the prune behind `prune_exact`, default OFF,
+   with the shadow assertion `delta_j <= U` live, and certify it by byte-identity on the D99
+   grid, the seed-10 replay and a 64-device fixture, exactly as D108 requires, while recording
+   that the bound is unproven because the engine model is non-monotone. The prize is about two
+   thirds of decision time. The risk is a fixture-specific guarantee.
+2. **Change the engine model** so added work cannot reduce predicted step time, for example by
+   clamping the negative coefficients. That makes the bound provable but changes what is
+   computed, so it is a methodological change to the frozen model and needs its own decision.
+3. **Drop exact pruning** and pursue only the per-candidate wins of P5, whose combined ceiling is
+   about a third of decision time and whose soundness is not in question.
+
+**My recommendation is option 1**, with the caveat recorded in the run header as well as the
+report, because D108's requirement is byte-identical decision logs and that is exactly what
+option 1 delivers and verifies. I did not implement it tonight because the addendum's wording
+makes a non-includable help-to-others term a STOP, and overriding that is the user's call rather
+than mine.
+
+## Q5. Why approximate screening (part B) was not started
+
+Part B is an offline study whose purpose is to measure what a decision-CHANGING screen would
+cost. It is downstream of item 0: the natural proxy score it would rank by IS the bound of part
+A, and Q2 to Q4 show that bound is not yet settled. Running B first would measure the cost of
+screening by a quantity we have not finished validating. It is left for after the user rules on
+Q4, and nothing from B would enter any arm in any case.
+
+# D119 Implementation, Equivalence and Speed
+
+## R1. Implementation: what was built
+
+One optimisation is implemented, behind its own switch, DEFAULT OFF, as D119 requires.
+
+**`memo_u_sh_grid` (`policy/profiles.py`).** `Profiles.u_sh_grid` rebuilt and re-sorted its list
+of u_SH curve points on EVERY call, over a profile that is loaded once and never mutated during a
+run. It was 2.41 % of sampled decision time at 64 devices. Its three siblings (`rc_accuracy`,
+`seconds_per_token`, `recall_ttft_s`) were memoised during StudyLIVE2-perf and this one was
+missed. The method is now a thin wrapper: with the switch off it calls
+`_u_sh_grid_uncached`, which is the previous body moved verbatim, so **the default path runs
+exactly the code it ran before**; with the switch on the result is cached on the instance.
+
+It is safe to return the cached list rather than a copy because every caller only reads it:
+`utility._interp` reads the pairs and builds its own list of x values, and the one test that
+touches it only indexes. The cache is keyed on `(m, cadence_s, mapping)` and lives on the
+instance, so two differently loaded profiles cannot share one.
+
+**Not implemented, with reasons given rather than omitted:**
+
+| item | why not |
+|---|---|
+| (a) parallel candidates | **Blocked under D108.** Candidate ΔJ is sequentially dependent: `live2/arms_policy.py:479` calls `co.escalate(self.fleet, req)` per candidate and `policy/coordinator.py:279` does `fleet.pending += items` on admit, so candidate k + 1 is scored against candidate k's admission. Parallel evaluation would change what is computed. See P4. |
+| D120 item 0, exact pruning | The bound cannot be certified against a non-monotone engine model. The prize is measured at 85.71 % of candidates and the soundness gap is set out in Q1 to Q4, with a recommendation and an explicit request for a ruling. |
+| (b) compiled hot loop | numba and Cython are not installed on flash; the remaining pure-arithmetic share is about 20 %, and D119 demands BITWISE-equal ΔJ, which hand-written C would have to deliver with contraction disabled. Not attempted while cheaper, certain wins and the much larger pruning question are open. |
+| (c) cheaper state copies | 9.6 % of time. Next in line after the pruning ruling; not started tonight. |
+
+## R2. Equivalence
+
+| check | result |
+|---|---|
+| switch OFF, D99 grid, all 8 arms | **48 of 48 cells byte-identical** against the pre-D119 build |
+| **switch ON, D99 grid, all 8 arms** | **48 of 48 cells byte-identical** |
+| scoring calls, ON against OFF, at 32 / 64 / 128 | identical at every size |
+| shadow equality, both paths per call | asserted by test over every available `(m, cadence, mapping)` |
+| negative control | a deliberately poisoned cache entry IS caught by the equality test, so that test can fail |
+| policy suite | **427 of 427** (8 new D119 tests) |
+| 12 frozen md5s | green |
+
+The negative control matters: without it, "both paths agree" could pass because the test never
+really compared anything.
+
+## R3. Speed
+
+Measured with the committed method (`fix_checks._cell`, synthetic 50 : 50, mode A, tight memory,
+seed 1, H = 1.0 s, 180 s, dry run), **no profiler attached**, OFF then ON back to back on an
+otherwise quiet flash.
+
+| devices | p50 OFF | p50 ON | p99 OFF | p99 ON | p99 change | wall change | thread CPU s, OFF to ON |
+|---|---|---|---|---|---|---|---|
+| 32 | 20.0 | 19.5 | 99.6 | 96.2 | **-3.4 %** | -3.6 % | 38.31 to 36.95 |
+| 64 | 50.1 | 49.0 | 252.5 | 244.9 | **-3.0 %** | -2.4 % | 95.33 to 93.01 |
+| 128 | 124.1 | 121.9 | 1,014.1 | 997.2 | **-1.7 %** | -1.6 % | 269.82 to 265.56 |
+
+**The OFF column reproduces the committed baseline**, which is the check that matters most here:
+the committed `perf_speed_option0.json` gives p99 100.59 / 252.54 / 994.79 against 99.6 / 252.5 /
+1,014.1 measured, so 64 devices agrees to 0.0 % and the other two to about 1 to 2 %.
+
+**This is a small, real win and it is reported as such.** The profile predicted 2.41 % and the
+measurement gives 1.7 to 3.4 %, so prediction and measurement agree. It does not move the p99
+target at 128 devices, and nothing here should be read as doing so. The large lever remains the
+candidate count, which is the D120 question.
+
+## R4. The H100-host benchmark, ready to run
+
+`experiments/orchestration/policy/bench_d119.py`, committed and smoke-tested on flash, NOT run on
+the H100 by me. It replays the committed dry-run fixture and times decisions only: no GPU, no
+model server, no engine, so it is safe on a shared host after the pilot. It sweeps every size, a
+baseline with all switches off, each switch alone, and all combined; it records thread CPU beside
+wall, the host's CPU model, the git commit and the scoring-call count; `--repeats` gives a spread
+rather than one sample. `--workers` is accepted and recorded but changes nothing today, and the
+script says so and states the sequential-dependence reason in its own output.
+
+## R5. Six-check consistency protocol
+
+1. **Cross-check against committed measurements.** The OFF baseline reproduces
+   `perf_speed_option0.json`: 64-device p99 252.5 against 252.54 committed, 32 within 1.0 %, 128
+   within 1.9 %. Candidate counts reproduce too: 56,063 `delta_j` calls equals the coordinator's
+   own `scoring_calls`, and 344 rollouts per period at maximum equals the figure the task states.
+2. **Physical plausibility.** No speed claim here is faster than its own baseline by more than
+   3.4 %, and the predicted share from the profile (2.41 %) brackets it. The profiled run is
+   EXCLUDED from every speed statement, because sampling cost it 23 % of wall time; that is
+   stated at the top of the Profile section rather than left to be discovered.
+3. **Distribution sanity.** p50 and p99 are reported at three sizes, with wall and thread CPU
+   beside them. The per-candidate cost is given as median, mean, p90, p99 and max (1.53, 1.48,
+   1.94, 2.13, 35.4 ms), so the long tail is visible rather than hidden in a mean.
+4. **Definition audit.** "Candidate" is one `delta_j` call, counted at both bindings of that
+   function, and is distinguished from "rollout", which is one `Rollout.run` call, at 2.113 per
+   candidate. An earlier count of 11,584 was rejected because it had patched only the `escalate`
+   path. "Decision latency" is the committed per-period sample (n = 1,801 at 64 devices), not the
+   per-row copy, which has a different median.
+5. **Claim linkage.** D119 bears on D108 and on whether the policy can decide inside its 100 ms
+   period on the H100 host CPU, which is 2.2x slower than flash (D110 / D115). The honest
+   position after tonight: the implemented win is about 3 %, so **the gap to the target is not
+   closed, and the thing that would close it is the pruning question in Q1 to Q4.**
+6. **Proxy validity.** Two proxies, labelled. The dry-run fixture is a proxy for a live run: it
+   prices the engine from the frozen cost curve, so decision TIME is real CPU but the workload it
+   decides over is modelled. And flash is a proxy for the H100 host, which is why R4 exists
+   instead of a projection.
+
+## R6. Limitations
+
+1. One repeat per cell in R3. The differences (1.7 to 3.4 %) are small enough that a spread would
+   be better evidence than a single sample; `bench_d119.py --repeats` exists for exactly that and
+   was not used tonight.
+2. The 128-device OFF p99 came out 1.9 % above the committed value, which is run-to-run variance
+   on a shared desktop, not a regression. It is reported rather than smoothed.
+3. Every number is flash. The H100 host is about 2.2x slower and re-measures with R4's script.
+4. `memo_u_sh_grid` is the only switch that exists, so "all combined" in R3 is the same column as
+   the switch alone.
+5. The D120 pruning prize (85.71 % of candidates non-positive) is measured on ONE fixture at one
+   size with `mu = 0`. The `z` term was never positive there, and that is a property of `mu = 0`,
+   not of the policy.

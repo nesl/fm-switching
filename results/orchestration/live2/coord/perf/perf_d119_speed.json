@@ -1,0 +1,145 @@
+{
+ "check": "d119_speed_and_d120_bound",
+ "is_measurement": false,
+ "label": "DECISION SPEED and BOUND SOUNDNESS. Dry run on the frozen pol4 curve; no GPU, no model server. No profiler attached to the speed rows.",
+ "fixture": "fix_checks._cell: synthetic 50:50, mode A, tight memory, seed 1, H=1.0 s, 180 s, dry run",
+ "switches": {
+  "memo_u_sh_grid": {
+   "default": false,
+   "implemented": true,
+   "what": "Profiles.u_sh_grid rebuilt and re-sorted its curve points on every call over an immutable profile"
+  }
+ },
+ "not_implemented": {
+  "parallel_candidates": "blocked under D108: candidate DeltaJ is sequentially dependent (arms_policy.py:479 with coordinator.py:279)",
+  "prune_exact": "bound not certifiable against a non-monotone engine model; see d120_bound",
+  "compiled_hot_loop": "numba and Cython absent on flash; bitwise-equal DeltaJ required",
+  "cheaper_clones": "9.6 percent of time, not started"
+ },
+ "speed_rows": [
+  {
+   "memo_u_sh_grid": false,
+   "n_devices": 32,
+   "p50_ms": 19.9778,
+   "p99_ms": 99.6076,
+   "n": 1801,
+   "wall_s": 38.357,
+   "thread_cpu_s": 38.311,
+   "cpu_s": 38.276,
+   "scoring_calls": 37216
+  },
+  {
+   "memo_u_sh_grid": false,
+   "n_devices": 64,
+   "p50_ms": 50.101,
+   "p99_ms": 252.5479,
+   "n": 1801,
+   "wall_s": 95.414,
+   "thread_cpu_s": 95.334,
+   "cpu_s": 95.277,
+   "scoring_calls": 56063
+  },
+  {
+   "memo_u_sh_grid": false,
+   "n_devices": 128,
+   "p50_ms": 124.1173,
+   "p99_ms": 1014.0687,
+   "n": 1801,
+   "wall_s": 269.923,
+   "thread_cpu_s": 269.824,
+   "cpu_s": 269.705,
+   "scoring_calls": 82126
+  },
+  {
+   "memo_u_sh_grid": true,
+   "n_devices": 32,
+   "p50_ms": 19.5221,
+   "p99_ms": 96.2422,
+   "n": 1801,
+   "wall_s": 36.989,
+   "thread_cpu_s": 36.949,
+   "cpu_s": 36.92,
+   "scoring_calls": 37216
+  },
+  {
+   "memo_u_sh_grid": true,
+   "n_devices": 64,
+   "p50_ms": 48.9846,
+   "p99_ms": 244.8663,
+   "n": 1801,
+   "wall_s": 93.085,
+   "thread_cpu_s": 93.012,
+   "cpu_s": 92.954,
+   "scoring_calls": 56063
+  },
+  {
+   "memo_u_sh_grid": true,
+   "n_devices": 128,
+   "p50_ms": 121.8849,
+   "p99_ms": 997.2378,
+   "n": 1801,
+   "wall_s": 265.692,
+   "thread_cpu_s": 265.557,
+   "cpu_s": 265.436,
+   "scoring_calls": 82126
+  }
+ ],
+ "committed_baseline": {
+  "p99_ms": {
+   "32": 100.5899,
+   "64": 252.5418,
+   "128": 994.7885
+  },
+  "source": "results/orchestration/live2/coord/perf/perf_speed_option0.json"
+ },
+ "equivalence": {
+  "grid_cells_switch_off_identical": 48,
+  "grid_cells_switch_on_identical": 48,
+  "grid_cells": 48,
+  "policy_tests": "427/427",
+  "frozen_md5s": "12/12 green",
+  "negative_control": "a poisoned cache entry is caught by the equality test"
+ },
+ "d120_bound": {
+  "summary": {
+   "n_devices": 64,
+   "candidates": 56063,
+   "by_kind": {
+    "admit": 11584,
+    "dispatch": 4857,
+    "state": 27750,
+    "release": 11872
+   },
+   "own_sh_bound": 0.11102474125037676,
+   "u_hat_gt_own_bound": 0,
+   "u_hat_gt_own_bound_frac": 0.0,
+   "max_excess": -0.027662,
+   "delta_j_le_zero": 48049,
+   "delta_j_le_zero_frac": 0.8571,
+   "delta_j_gt_zero": 8014,
+   "u_hat_negative": 35066,
+   "terminal_positive": 2992,
+   "z_positive": 0,
+   "busy_delta_negative": 5802,
+   "scoring_calls": 56063
+  },
+  "own_gain_bound_violations": 0,
+  "candidates_non_positive_frac": 0.8571,
+  "engine_model_monotone_in_work": false,
+  "negative_coefficients": {
+   "per_decode_req_ms": -0.571115,
+   "admission_per_image_ms": -1.249217,
+   "per_tok_above_2048_ms": -0.00783
+  },
+  "candidates_with_negative_busy_delta": 5802,
+  "conclusion": "the own-gain bound held on all 56,063 candidates but is NOT provable: the frozen step model can make added work reduce step time, so admitting can help others. Reported, not enabled."
+ },
+ "_provenance": {
+  "git_commit": "61cc7fafcbfff2e0021e1cbf95fe1e550cb1d3ab",
+  "script": "experiments/orchestration/policy/bench_d119.py and profile_d119.py",
+  "model": "none (pol4 cost curve, frozen)",
+  "device": "flash CPU only, 13th Gen Intel Core i7-13700KF",
+  "n": "32/64/128 devices, 180 s, seed 1",
+  "timestamp": "2026-11-18T00:00:00"
+ }
+}

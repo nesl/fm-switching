@@ -42,6 +42,12 @@ class Profiles:
     raw: Dict[str, Any]
     path: str
     _memo: Dict[Any, Any] = field(default_factory=dict, repr=False, compare=False)
+    # D119 (2026-11-18), its own switch, DEFAULT OFF. `u_sh_grid` is 2.41 % of sampled decision
+    # time at 64 devices because it rebuilds and re-sorts its list of curve points on EVERY call,
+    # over a profile that is loaded once and never mutated. Its three siblings were memoised in
+    # StudyLIVE2-perf and this one was missed. With the switch off the method runs exactly the
+    # code it ran before, so the default path is unchanged while the pilot runs.
+    memo_u_sh_grid: bool = False
 
     # ---- spec 4.1
     def u_sh_device(self, mapping: str = "identity") -> float:
@@ -50,6 +56,27 @@ class Profiles:
 
     def u_sh_grid(self, m: int, cadence_s: float = 0.5,
                   mapping: str = "identity") -> List[Tuple[float, float]]:
+        """The u_SH curve points for one (m, cadence, mapping), sorted by delay.
+
+        D119: with `memo_u_sh_grid` on, the result is cached on this instance. It is a PURE
+        function of its arguments and of `self.raw`, which is loaded once and never mutated
+        during a run, and every caller only READS the result (`utility._interp` reads it and
+        builds its own list of x values), so the cached list is returned as-is rather than
+        copied. A cache lives on its own instance, so two differently loaded profiles cannot
+        share one.
+        """
+        if self.memo_u_sh_grid:
+            ck = ("u_sh_grid", int(m), float(cadence_s), mapping)
+            hit = self._memo.get(ck)
+            if hit is not None:
+                return hit
+            out = self._u_sh_grid_uncached(m, cadence_s, mapping)
+            self._memo[ck] = out
+            return out
+        return self._u_sh_grid_uncached(m, cadence_s, mapping)
+
+    def _u_sh_grid_uncached(self, m: int, cadence_s: float = 0.5,
+                            mapping: str = "identity") -> List[Tuple[float, float]]:
         key = "u_identity" if mapping == "identity" else "u_affine_proposal"
         pts = []
         for k, v in self.raw["u_SH"]["cloud"].items():
