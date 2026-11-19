@@ -276,6 +276,16 @@ class Coordinator:
         res = self._admit_score(fleet, req, items, jobs)
         self.scoring_calls += 1
         take = res["delta_j"] > 0
+        # D129: the ADMISSION floor. The release floor changed nothing, which located the refusal
+        # HERE rather than at release: COVEX declines work at admission under predicted
+        # congestion, which is what F-A8, F-A9 and edf-at-C=8 all say from different directions.
+        # While fewer than `admit_floor_c` requests are in flight the engine has spare capacity,
+        # and an idle engine serves nobody, so a candidate that scores at or below zero is
+        # admitted anyway. The OBJECTIVE is untouched; only the admission gate moves.
+        floor = int(getattr(self.params, "admit_floor_c", 0) or 0)
+        if not take and floor > 0 and len(fleet.in_flight) < floor:
+            take = True
+            self.admit_floor_promotions = getattr(self, "admit_floor_promotions", 0) + 1
         if take:
             fleet.jobs.update(jobs)
             if req.path == QUESTION_FIRST:
@@ -821,9 +831,27 @@ class Coordinator:
                     ahead += float(pr_.service_s)
                 except Exception:
                     continue
-            h = max(float(self.params.H), 1e-9)
+            # The first form normalised by H = 0.5 s and clamped with a min. Session 2 predicted
+            # from the source that it would SATURATE, because one request services in about 1 s so
+            # the ratio is almost never below 1, and a direct probe confirmed it: at 16 devices mu
+            # sat at the cap in 92.9 per cent of busy calls with five distinct values. That is a
+            # binary "is anything in flight" indicator, not a graded price, and a CONSTANT channel
+            # cannot support a scarcity CLAIM whatever the delivery numbers say.
+            #
+            # So normalise by MEASURED service rather than by H, which makes x the effective
+            # number of requests in flight, and saturate SMOOTHLY instead of clamping:
+            #
+            #     x = busy_ahead / mean_predicted_service      mu = mu_scale * x / (1 + x)
+            #
+            # This is graded over the whole range and is never pinned at a cap.
             scale = float(getattr(self.params, "mu_scale", 1.0) or 1.0)
-            self.params.mu = scale * min(1.0, ahead / h)
+            n_live = max(len(fleet.in_flight), 0)
+            if n_live <= 0 or ahead <= 0.0:
+                self.params.mu = 0.0
+                return
+            s_ref = max(ahead / float(n_live), 1e-9)
+            x = ahead / s_ref
+            self.params.mu = scale * (x / (1.0 + x))
             return
         if est != "ewma_marginal_utility":
             raise ValueError("unknown mu estimator %r; 'none' (default, mu stays at the "

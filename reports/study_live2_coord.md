@@ -4867,3 +4867,49 @@ rebuild work out of the way. `no replan` remains identical.
 dashcam answers". That holds at four devices only. At eight it buys one robot answer AND about
 1,353 dashcam answers, so the honest overall summary is that **v1.2 helps materially at eight
 devices and costs slightly at four**, while still trailing `llf` on both axes.
+
+## v1.3 development log (D129)
+
+One line per change, each behind a switch or parameter, in the order made.
+
+- `completion_error.kappa_for_tokens`: kappa derived as `exp(z_0.90 * sigma_band)` from the committed FIT-only residual bands, 1.10 to 1.14 by piece size, replacing the unvalidated 1.0; a fixed value still overrides so the kappa = 1 ablation stays reachable.
+- `planner_rc.enumerate_plans(kappa=None)`: None now means DERIVE, and PIECES-LATEST starts earlier by the derived factor.
+- `coordinator._update_mu` estimator `"scarcity"`: first `mu_scale * min(1, busy_ahead / H)`, then, after a probe showed it pinned at the cap in 92.9 per cent of busy calls, regraded to `mu_scale * x / (1 + x)` with `x = busy_ahead / mean_predicted_service`; selected by arm field `mu_mode="scarcity"` with `mu_scale`.
+- `arms_policy` mu branch made a proper elif chain: the scarcity branch had been overwritten by the following else two lines later, so its first screen silently ran as EWMA and matched it to four decimals.
+- `arms.make_arm`: parameters now actually reach non-policy arms; kwargs had been silently discarded, so `make_arm("edf", c_inflight=4)` returned the default arm. D128 requires C_inflight 4 to stay reachable and it now is.
+- `arms_policy.release_floor_c` (default 0, off): work-conserving release floor; while fewer than C requests are in flight the best HELD candidate is released even at non-positive DeltaJ.
+- `coordinator.admit_floor_c` (default 0, off): the same floor at the ADMISSION gate, added after the release floor measured as an exact null.
+
+### What the night established
+
+**1. The price of GPU time was the binding constraint, and the fix is to remove it.** The diagnostic the directive asked for first is decisive at eight devices over 600 s on seed 0:
+
+| mu | robot delivered | dashcam |
+|---|---|---|
+| EWMA | 1 of 20 | 0.7998 |
+| **0** | **8 of 20** | **0.9330** |
+| 0.72 fixed | 0 of 20 | 0.1325 |
+| 2.89 fixed | 1 of 20 | 0.7016 |
+
+mu = 0 is better on BOTH axes than every priced variant. At four devices it gives 4 of 9 against the EWMA's 2. This is the COVEX analogue of raising C_inflight and it converges with F-A8, F-A9 and session 2's edf-at-C=8 result: COVEX was refusing work under predicted congestion.
+
+**2. The scarcity price did not beat mu = 0, and it took two forms to say that honestly.**
+
+The first form was `mu_scale * min(1, busy_ahead / H)`. Session 2 predicted from reading the source, BEFORE any v1.3 number existed, that it would SATURATE: H is 0.5 s and one request services in about 1 s, so the ratio is almost never below 1. A direct probe at 16 devices confirmed it exactly: **mu sat at the cap in 92.9 per cent of busy calls, with five distinct values**. That is a binary "is anything in flight" indicator, not a graded price. By the CLAUDE.md Step 2 standard the scarcity channel was **CONSTANT**, so that run is **INCONCLUSIVE**, not a negative result: it could not test the claim, and its delivery numbers are additionally confounded with a roughly tenfold cut in the backlog charge against the EWMA's p50 of 9.835 at 16 devices.
+
+The form was then fixed to normalise by MEASURED service rather than by H and to saturate smoothly rather than clamp, `x = busy_ahead / mean_predicted_service`, `mu = mu_scale * x / (1 + x)`. Re-probed on the same cell, **mu ranges 0.5 to 0.889 over eight distinct values with nothing at a cap**, so the channel now VARIES as the claim requires. With the graded price COVEX still delivers **0 of 20 robot answers and 0.5803 dashcam at 16 devices, against mu = 0's 13 of 35 and 0.7268**.
+
+That second run is a **REAL NEGATIVE** under Rule 2: the mechanism was present and varying, it operated as specified, and it did not produce the claimed effect. **Pricing predicted backlog at all makes COVEX worse than not pricing it**, and the graded price is worse than the saturated one, which is the direction that negative predicts.
+
+**3. The refusal is NOT at either gate, which is a null worth recording.** The release floor is an EXACT null at 8 devices: 8 of 20 and 0.9330 at every setting of 0, 4, 8 and 16. The admission floor moves dashcam from 0.9330 to 0.9346 and robot not at all. Neither locates the remaining gap, so the gap is structural in the counterfactual, which charges the harm a served opportunity does to others, and not a threshold that can be loosened.
+
+**4. D128's default change alone raised the bar a long way, and it corrects a number I reported.** At eight devices edf delivers 0 of 20 robot answers at C_inflight 4 and 19 of 20 at C_inflight 8, dashcam 0.9854 against 0.9991. My earlier reading that edf delivers 0 of 20 was edf at C = 4.
+
+**5. Where the candidate stands.** v1.3 = v1.2 with mu = 0, on seed 0 at 600 s:
+
+| size | v1.3 mu=0 | edf C=8 | llf |
+|---|---|---|---|
+| 8 | 8 of 20, 0.9330 | **19 of 20, 0.9991** | 18 of 20, 0.9991 |
+| 16 | **13 of 35**, 0.7268 | 4 of 35, **0.9508** | 6 of 35, 0.9633 |
+
+At sixteen devices COVEX delivers three times the robot answers of the best baseline and loses dashcam; at eight it loses both. **It does not meet the D129 goal of beating the best baseline on both axes at every size**, and the honest leaderboard row says so.

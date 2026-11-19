@@ -126,6 +126,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     kappa: Optional[float] = None   # None derives it from committed FIT-only residuals (D129)
     mu_scale: float = 1.0           # D129: the scarcity price's scale
     release_floor_c: int = 0        # D129: work-conserving release floor, 0 = off
+    admit_floor_c: int = 0          # D129: work-conserving ADMISSION floor, 0 = off
 
     name: str = "policy-core"
     case: str = "own"
@@ -195,6 +196,7 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         if calibration_knots_path is not None:
             p.tier_calibration = CAL.load(calibration_knots_path)
         p.kappa = (None if self.kappa is None else float(self.kappa))
+        p.admit_floor_c = int(self.admit_floor_c)
         self.params = p
         # D122: a v1.1 defect fix travels on `Flags` so the rollout can read it, but it is NOT
         # one of spec 7.0's conditional mechanisms, so the D66 guard asks `conditional_any_on`.
