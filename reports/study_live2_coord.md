@@ -2615,3 +2615,233 @@ taken at the default and are marked PROVISIONAL in the implementation section.
 6. **Deferred items consume no slot**; only released units do.
 7. **`C_inflight` in the header.** Default, taken: an `__init__` parameter defaulting to 4,
    published through `live2_describe` so every run header records it.
+
+---
+
+# D114 implementation, and the D97 entry points recomputed under D101
+
+Step 2 and Step 3 of the 2026-11-18 task. The pre-registration above was committed alone, before
+this code, as the ruling required. Every decision listed under D6 was taken at its stated
+default and is **PROVISIONAL**: no answer had arrived when the code was written, and D116 put
+tonight's run unattended.
+
+## E1. What changed
+
+`live2/arms.py` only, in `Pi0Edf`, which is the class behind `edf`, `edf-piece1024` and
+`edf-piece2048`:
+
+    order = Rollout._edf(None, items)
+    released = {p.item_id for p in order[:self._release_budget(obs)]}
+
+where `_release_budget` is `max(c_inflight - sum(obs.cloud.running_by_class.values()), 0)`.
+Taking a PREFIX is what charges each released unit against the bound inside the period: the
+observation is a snapshot from before this period's own submissions, so the arm counts the head
+items it releases itself. `c_inflight` is an `__init__` parameter defaulting to 4, rejected below
+1, and published through `live2_describe` so it lands in every run header.
+
+**No H100-owned file was touched**, and nothing outside `Pi0Edf` was touched.
+
+## E2. A deviation from spec 3.5 that the planner must rule on
+
+**Spec 3.5 of both `POLICY_SPEC_v3.md` and `policy_spec_v4.md` defines pi_0 as "deadline-ordered
+release, ONE UNIT AT A TIME".** That is the exact wording. So:
+
+- before D114 the ARM matched the spec text, and `Rollout.run` did NOT, because it serves the
+  whole deadline-ordered queue bounded only by the horizon;
+- after D114 the arm and the rollout agree with each other, and **both differ from the spec's
+  wording**.
+
+D114 is a user ruling and is implemented as ruled. But the spec text now needs either an
+amendment or a recorded deviation, and that is a planner decision which this task does not
+settle. The module docstring states the deviation rather than reciting the old claim; nothing in
+the code changes the spec. The previous docstring asserted that one-unit-per-epoch "is what spec
+3.5 defines pi_0 to be", which was true of the text and is why this is flagged rather than
+quietly rewritten.
+
+## E3. Release counts: the three cells of the ruling
+
+`live2/tests/test_live2_d114.py`, 12 tests, all passing. The instants are given strictly
+increasing deadlines through the D100 roster hook so that "in deadline order" is a real
+assertion and not a tie broken by `item_id`.
+
+| condition | required | measured |
+|---|---|---|
+| 10 pending, 0 in flight | exactly 4, in deadline order | 4, and they are `cam00` to `cam03` |
+| 10 pending, 3 in flight | exactly 1 | 1, and it is `cam00` |
+| 10 pending, 4 in flight | 0 | 0 |
+
+Also asserted: 9 in flight releases 0 rather than going negative; `recall 2 + episodic 1` charges
+3 slots, so in-flight is counted across all kinds as the ruling requires; 2 pending with a budget
+of 4 releases 2; `releases_one_per_epoch` is now False; `c_inflight` reaches `live2_describe`;
+`c_inflight=2` releases 2 and `c_inflight=0` raises; and both piece arms carry the same rule at
+unchanged piece sizes.
+
+## E4. The ceiling is gone, on the seed-10 12-device 600 s replay
+
+| arm | per-period releases med / p90 / max, BEFORE | AFTER | total releases | in-flight max |
+|---|---|---|---|---|
+| `edf` | 1 / 1 / **1** | 1 / 2 / **4** | 5,106 to 5,452 | 5 to **4** |
+| `edf-piece1024` | 1 / 1 / **1** | 1 / 2 / **3** | 5,095 to 5,639 | 4 to 4 |
+| `edf-piece2048` | 1 / 1 / **1** | 1 / 2 / **4** | 5,096 to 5,620 | 4 to **4** |
+
+The hard ceiling of one unit per period is gone, and **no period released more than
+`c_inflight = 4`**, which is the invariant the tests assert. In-flight never exceeds 4 after the
+change, where `edf` previously reached 5.
+
+**An honest qualification the headline does not carry.** 5,452 releases over 600 s is 9.09 per
+second, still BELOW the 10.87 units per second the trace offers. The arm is no longer limited by
+a per-period count rule, but at `c_inflight = 4` and this mix's modelled service times it still
+does not match the offered load, so a backlog remains. It is now a consequence of the concurrency
+bound and service time rather than of an arbitrary count, which is the difference D114 was asked
+to make, but it is not the same as "the backlog is gone".
+
+## E5. Robot questions are NOT un-starved. This is a negative result
+
+The ruling's requirement 3 expected that robot questions would no longer be starved by
+construction. **On the replay they got slightly worse, and the reason is structural.**
+
+| arm | robot questions released before their deadline, of 29 | before | after |
+|---|---|---|---|
+| `edf` | | **11** | **9** |
+| `edf-piece1024` | | 0 | 0 |
+| `edf-piece2048` | | 1 | 0 |
+
+Counted as a replay count and not an outcome claim, exactly as the ruling asks: a question counts
+when some `release_recall` decision carries its `opportunity_id` at a time before `t + 5.0 s`.
+
+**Why.** The H6 audit named two mechanisms, and D114 addresses only the first:
+
+1. the 10 per second release ceiling, which was below the offered load. **Removed by D114.**
+2. EDF's strict deadline order, under which a dashcam instant's 0.5 s deadline is always nearer
+   than a robot question's 5.0 s, so instants always sort ahead of questions. **Untouched by
+   D114**, and now the extra capacity D114 unlocks is spent on MORE instants, which crowds the
+   questions slightly further out.
+
+So work-conserving release did not fix the starvation; it made the first mechanism stop binding
+and left the second to act alone. Mechanism 2 is not a defect in the implementation: it is what
+EDF is. Removing it would mean giving pi_0 a per-class share or a slack-based order, at which
+point it is no longer pi_0 and no longer the common continuation policy of spec 3.5. **That is a
+methodological change, so it is named here and NOT applied**, and the planner and user rule.
+
+`edf-piece1024` sits at 0 both before and after because 1,024-token pieces never finish building
+a 17,581-token history inside the window, so it never reaches a recall release at all. That is
+the arms-5-and-6 behaviour those arms exist to exercise, not a D114 effect.
+
+## E6. Nothing else changed: byte-identical decisions for every non-EDF arm
+
+Captured by swapping only `arms.py` between the pre-D114 and D114 versions, with every other file
+fixed, so the comparison isolates this change.
+
+| arm | D99 grid, 4 and 8 devices x seeds 1 to 3 | seed-10 12-device 600 s replay |
+|---|---|---|
+| `device-only` | 6 of 6 IDENTICAL | IDENTICAL (29 decisions) |
+| `always-cloud-fcfs` | 6 of 6 IDENTICAL | IDENTICAL (6,518) |
+| `utility-per-cost` (B8) | 6 of 6 IDENTICAL | IDENTICAL (6,518) |
+| `b9` | 6 of 6 IDENTICAL | IDENTICAL (6,488) |
+| `policy-core` | 6 of 6 IDENTICAL | IDENTICAL (5,305) |
+
+**30 of 30 grid cells and 5 of 5 replays byte-identical.** The EDF arms changed in all 6 grid
+cells and in 6,826 of 6,861 replay decisions for `edf`, which is the intended effect.
+
+`policy-core`'s 5,305 replay decisions also match the post-history-fix figure recorded in section
+H5 exactly, which is an independent cross-check that the two changes compose as expected.
+
+## E7. Step 3: the D97 entry points under D101
+
+**The recompute was already committed**, by the StudyLIVE2-fix work of 2026-11-17 to 18:
+`fleet/eligibility.py` carries the D101 version and
+`results/orchestration/live2/fleet/eligibility_join/` holds its output at 600 s over seeds 0 to 3,
+all three ratios and sizes 4 to 128. Re-running it would reproduce committed numbers, so it is
+reported rather than recomputed, and both tables are read from the committed files.
+
+| ratio | OLD entry (pre-D101) | **entry under D101** | per-seed under D101 (1 / 2 / 3) | seed 0, smallest measurable: old to new |
+|---|---|---|---|---|
+| 25 : 75 | 5 | **5** | 5 / 5 / 4 | 7 to **5** |
+| 50 : 50 | 8 | **8** | 8 / 8 / 5 | 12 to **8** |
+| 75 : 25 | 14 | **14** | 14 / 14 / 11 | 20 to **14** |
+
+**The entry points do not move: still 5, 8 and 14.** Monotone above the entry at seeds 1 to 3 in
+both tables. Seed 3 becomes more permissive (4, 5 and 11), but D97 takes the smallest size
+eligible at EVERY reported seed, which is the maximum over seeds 1 to 3, and seeds 1 and 2 are
+unchanged and binding. Seed 0 improves from 7 / 12 / 20 to 5 / 8 / 14 and, per D97 and D95 (7),
+never sets an entry point.
+
+**Why removing questions did not raise the entry points**, checked rather than asserted. D101
+drops the questions before each robot's join point, which alone would reduce the pooled count.
+But joining part-way also advances the session chain, so more sessions fit in the same 600 s. At
+seed 1, size 8, ratio 50 : 50:
+
+| quantity | pre-D101 | under D101 |
+|---|---|---|
+| sessions started | 6 | **10** |
+| sessions completed | 2 | **6** |
+| questions dropped by the join | n/a | 4 |
+| **pooled robot questions** | **22** | **23** |
+
+The chain advancing more than offsets the four dropped questions, so the pooled count rises
+slightly and eligibility does not tighten. The preload also carries real cold history, median
+6,061 tokens and up to 11,101 at this cell, which is the cold-rebuild pressure D101 exists to
+create.
+
+## E7b. One existing test's precondition was invalidated, and what that shows
+
+`test_live2_history_size.py::test_prompt_token_accounting_scales_with_history_size` FAILED under
+D114 with "no build request was sent", having passed before it. The cause is E5's crowding-out,
+reaching a test fixture: that cell runs `edf` against the fake server on the 12-device trace, and
+with `c_inflight = 4` every slot goes to dashcam instants, so no MATERIALIZE is released inside
+the 240 s window and the fixture had nothing left to measure.
+
+The fixture now builds its arm as `Pi0Edf(None, c_inflight=64)`, with the reason stated in the
+test, because that test's subject is PROMPT ACCOUNTING against history size and not the release
+rule; the release rule is tested in `test_live2_d114.py`. The assertions themselves were not
+weakened. **This is reported rather than quietly fixed, because the failure is evidence for E5:
+D114 starves robot work on this trace strongly enough to empty a test that previously observed
+builds.**
+
+## E8. Gates
+
+| gate | result |
+|---|---|
+| policy suite | 419 of 419 |
+| live2 suites, including the 12 new D114 tests | all green |
+| fleet suite | 234 of 234 |
+| D99 equivalence grid (reference against fast clone) | 6 of 6 byte-identical |
+| 12 frozen md5s | all green |
+| non-EDF arms byte-identical | 30 of 30 grid cells, 5 of 5 replays |
+
+## E9. Six-check consistency protocol
+
+1. **Cross-check against committed measurements.** `policy-core` at 5,305 replay decisions
+   reproduces section H5's post-history-fix figure exactly. The offered load of 10.82 instants
+   per second reproduces H6. The pre-D101 entry points read from the committed
+   `eligibility/` summary are 5, 8 and 14, which is what D97 records in the design log.
+2. **Physical plausibility.** `c_inflight = 4` is quoted from StudyD7b Part A rather than chosen:
+   32B-I at N = 1, concurrency 4, 12.73 req/s, 100 % GPU utilisation. The replay's 9.09 releases
+   per second is BELOW that 12.73, so nothing here implies a rate faster than the committed
+   curves. Section E4 states the gap rather than reporting the ceiling as closed.
+3. **Distribution sanity.** Releases per period are reported as median, p90 and max, not as a
+   mean, and the per-cell changed-line counts are listed individually (547, 740, 541, 1,484,
+   1,480, 1,218) rather than summarised.
+4. **Definition audit.** "In flight" is defined once, as submitted and not yet completed across
+   all kinds, and tied to the exact quantity that implements it. "Unit" and "request" are
+   distinguished explicitly in pre-registration item D6.5, because a released recall item can
+   become two cloud requests. "Released before deadline" is defined as a release decision
+   carrying the question's `opportunity_id` before `t + 5.0 s`.
+5. **Claim linkage.** D114 bears on the fairness of the policy-against-baseline comparison, the
+   study's central comparison. E5 is the result that matters most and it WEAKENS the reading that
+   a work-conserving baseline would close the robot-question gap. E7 bears on D97 and D101 and
+   leaves both unchanged.
+6. **Proxy validity.** One proxy, labelled: in-flight is read from the arm's observation
+   snapshot, not from an engine-side counter, so a completion landing mid-period is invisible
+   until the next epoch. It is valid for the bound, which only needs to avoid over-admitting, and
+   it is NOT a measurement of true instantaneous concurrency.
+
+## E10. Limitations
+
+1. E4 and E5 are one trace, one seed, one fleet size and a dry run. The replay's service times
+   come from the cost model, not from a server, so the 9.09 per second is a model figure.
+2. `c_inflight = 4` is grounded in Part A's N = 1 column. The same report reaches 99 to 100 %
+   from concurrency 2 at N = 9, so 4 is conservative and no sweep over `c_inflight` was run.
+3. E5's counts are replay release counts, not outcomes. Whether a released question is answered
+   correctly or on time is a scored quantity and is not claimed here.
+4. E7 reports committed numbers; it did not re-run the 1,500 trace cells behind them.

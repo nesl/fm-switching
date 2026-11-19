@@ -321,7 +321,13 @@ class TestThroughTheFakeServer(unittest.TestCase):
             d = Path(d)
             tdir = _trace(d, run_s=240.0)
             rdir = d / "run"
-            arm = A.make_arm("edf")
+            # D114 made `edf` work-conserving up to c_inflight, and with the default 4 the
+            # slots go to dashcam monitoring instants, whose 0.5 s deadlines always sort ahead of
+            # a robot question's 5.0 s, so no build is released in the window and this fixture
+            # had nothing to measure. This test is about PROMPT ACCOUNTING against history size,
+            # not about the release rule, so the bound is lifted here to keep the two
+            # independent. The release rule itself is tested in test_live2_d114.py.
+            arm = A.Pi0Edf(None, c_inflight=64)
             htok = RC.host_tokens(HOST_GIB)
             arm.live2_configure(gpu_kv_tokens=GPU_KV, host_tier_gib=HOST_GIB,
                                 host_tier_tokens=htok, targets=CS.TARGETS)

@@ -26,7 +26,15 @@ different arm and is NOT one of the eight:
     piece (arms 5, 6).
   * `edf-service-time` orders only the recall queries and leaves streams at the documented
     default; pi_0 orders ONE merged pending set (monitoring calls, rebuild pieces, recall
-    answers) and releases ONE unit per decision epoch, which is what spec 3.5 defines pi_0 to be.
+    answers) and releases from the head of it.
+
+    D114 NOTE ON THE SPEC, 2026-11-18. Spec 3.5 of both POLICY_SPEC_v3 and policy_spec_v4 defines
+    pi_0 as "deadline-ordered release, ONE UNIT AT A TIME". Until D114 this arm matched that text
+    and `policy/rollout.py::Rollout.run`, which serves the whole deadline-ordered queue bounded
+    only by the horizon, did NOT. D114 makes the ARM work-conserving too, so the arm and the
+    rollout now agree with each other and BOTH differ from the spec's wording. That wording needs
+    either an amendment or a recorded deviation; it is a planner decision and is NOT settled here.
+    Nothing in this file changes the spec.
 
 DEFER is honoured by the run loop for EVERY arm (amendment 2, D90), including the arms that
 never emit it.
@@ -99,12 +107,25 @@ class AlwaysCloudFcfsArm(Live2ArmMixin, NAIVE.AlwaysCloudFCFS):
 
 # ---------------------------------------------------------------- 4, 5, 6: pi_0 standalone
 class Pi0Edf(Live2ArmMixin, Policy):
-    """pi_0 (spec 3.5 / 7.2): EDF over the pending set and calendar, ONE unit at a time.
+    """pi_0 (spec 3.5 / 7.2): EDF over the pending set and calendar, WORK-CONSERVING (D114).
 
     The ordering is not re-implemented: the pending items are sorted by
     `policy/rollout.py::Rollout._edf`, which is the library's own pi_0 order
     `(deadline, due_at, item_id)`. `_edf` does not touch `self`, so it is called unbound rather
     than constructing a Rollout, which would require a cost model pi_0 does not use.
+
+    D114 (user ruling 2026-11-18) replaced "release the head of the order" with "release from the
+    head while in-flight cloud requests are below `c_inflight`". The old rule released ONE unit
+    per 100 ms period across monitoring and recall combined, a ceiling of 10 releases per second,
+    against 10.82 dashcam instants per second offered on the seed-10 trace: the backlog was
+    permanent BY CONSTRUCTION, and because EDF orders by deadline and an instant's 0.5 s deadline
+    always precedes a robot question's, the questions starved behind the instants. The rollout
+    already modelled pi_0's continuation as work-conserving (`Rollout.run` serves the whole queue
+    bounded only by the horizon), so this removes a mismatch rather than introducing one.
+
+    What D114 did NOT change: pi_0 still declines nothing for not fitting, an item beyond the
+    bound waits and is re-decided next period, an item past its deadline falls to the device, and
+    MATERIALIZE still advances by ONE piece per epoch (D104 issue 6) at unchanged piece sizes.
 
     `piece_tokens = None` rebuilds WHOLE (arm 4); 1,024 and 2,048 are arms 5 and 6.
     """
@@ -113,17 +134,45 @@ class Pi0Edf(Live2ArmMixin, Policy):
     experiments = ("C-mixed",)
     decides = ("episodic_mode", "recall_decision", "session_action", "order")
     defaults_used = ("cadence_s", "frame_count", "representation", "engine_config")
-    releases_one_per_epoch = True
+    releases_one_per_epoch = False       # D114: work-conserving up to `c_inflight`
     restricts_action_space = None
 
-    def __init__(self, piece_tokens: Optional[int] = None) -> None:
+    # D114. The smallest concurrency at which the 32B reaches 100 % GPU utilisation in StudyD7b
+    # Part A (reports/study_d7_capacity.md:180, 32B-I at N = 1, 12.73 req/s, 100 %). At N = 9 the
+    # same report reaches 99-100 % from concurrency 2, so 4 is Part A's figure and the
+    # conservative choice, not the minimum across every N.
+    C_INFLIGHT_DEFAULT = 4
+
+    def __init__(self, piece_tokens: Optional[int] = None,
+                 c_inflight: int = C_INFLIGHT_DEFAULT) -> None:
         self.piece_tokens = int(piece_tokens) if piece_tokens else None
+        self.c_inflight = int(c_inflight)
+        if self.c_inflight < 1:
+            raise ValueError("c_inflight must be at least 1, got %r" % (c_inflight,))
         self.name = ("edf" if self.piece_tokens is None
                      else f"edf-piece{self.piece_tokens}")
         self.live2_source = ("policy/rollout.py::Rollout._edf (pi_0 ordering), "
-                             "release one unit per epoch, "
+                             "D114 work-conserving release up to c_inflight=%d, " % self.c_inflight
                              + ("whole rebuild" if self.piece_tokens is None
                                 else f"fixed {self.piece_tokens}-token pieces"))
+
+    def live2_describe(self) -> Dict[str, Any]:
+        d = super().live2_describe()
+        d["c_inflight"] = int(self.c_inflight)
+        return d
+
+    def _release_budget(self, obs: Observation) -> int:
+        """D114: how many units may be released this period.
+
+        In-flight means submitted and not yet completed, counted across ALL kinds.
+        `obs.cloud.running_by_class` is exactly that quantity: `cstate.observation` builds it from
+        `st.in_flight`, which the coordinator increments at submit and decrements at completion.
+        The snapshot is taken BEFORE any of this period's submissions, so completions that land
+        mid-period are not visible until the next epoch. That makes the arm slightly conservative
+        and never over-admitting, which is the documented D114 choice.
+        """
+        in_flight = sum(int(v) for v in (obs.cloud.running_by_class or {}).values())
+        return max(int(self.c_inflight) - in_flight, 0)
 
     def reset(self, seed: int = 0) -> None:
         pass
@@ -163,14 +212,17 @@ class Pi0Edf(Live2ArmMixin, Policy):
                                      deadline=q.deadline_s, tokens=q.readiness_tokens,
                                      job_id=q.query_id, readiness=q.readiness))
         order = Rollout._edf(None, items)
-        first = order[0] if order else None
+        # D114: the head PREFIX, not the single head. Taking a prefix is what charges each
+        # released unit against the bound within the period: the observation cannot see this
+        # period's own submissions, so the arm counts the head items it releases itself.
+        released = {p.item_id for p in order[:self._release_budget(obs)]}
 
         streams, recall, sessions = [], [], []
         for s in obs.streams:
-            on = first is not None and first.item_id == "mon:" + s.stream_id
+            on = ("mon:" + s.stream_id) in released
             streams.append(StreamAction(s.stream_id, "cloud" if on else "local"))
         for q in obs.recall:
-            take = first is not None and first.item_id == "rc:" + q.query_id
+            take = ("rc:" + q.query_id) in released
             if not take:
                 # pi_0 does not decline; the item simply waits for its slot. DEFER(0) means
                 # "not now, re-decide at the next epoch" and is honoured by the run loop.
