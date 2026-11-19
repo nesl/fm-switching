@@ -2441,3 +2441,55 @@ committed cost curve, none of which depends on answer content. **What it does me
 leaderboard cannot yet tell a timely-and-wrong arm from a timely-and-right one**, which is exactly
 the gap the directive identified, and it will stay open until live cells exist. I am flagging that
 as a limitation on the bar rather than filling it with a number I cannot defend.
+
+## 27.6 ADDENDUM: the two halves of Part C fail for DIFFERENT reasons, and only one needs Part A
+
+Session 3's Part B pre-check adds a **fifth dead channel**: `RecallAction.representation` is never
+read anywhere in live2 or fleet, and `_submit_recall` sends and charges
+`max(int(s.est_tokens), 1)`, the full believed history, whatever the arm asked for. So a
+RECENT-choosing arm receives full-history accuracy AND full-history cost, and no arm can currently
+answer from recent frames at all.
+
+**That compounds with 27.3 rather than duplicating it, and the combination is more dangerous than
+either alone:**
+
+| half | is the CHANNEL live? | is the SCORING INPUT present on the dry screen? | needs |
+|---|---|---|---|
+| robot accuracy | **NO** — `representation` never read | **NO** — `cloud_letter` is `"X"` | **Part A AND live cells** |
+| dashcam AP | **YES** — `cadence_s` and `frame_count` read at `coordinator.py:409-410`, `frame_count` charged at `:495` | **NO** — cloud answers carry no score | **live cells only** |
+
+**Dashcam AP will start working first**, as soon as live cells exist, without waiting for Part A.
+I attempted it with the committed `live2_calibration_dense_jpeg.json` map and **the scorer refused
+it itself**: 117 plays, 51 positive, 66 negative, and **8,319 instants with no cloud score**, with
+the refusal text *"one or more cloud answers carried no score, so the standing stream would mix a
+cloud DECISION with a DEVICE score"*. That is the committed scorer declining, not me.
+
+**One correction to the expected failure mode, and it matters for how the caveat is written.** The
+directive anticipated that robot accuracy would show *"every arm at full-history accuracy and
+separate nothing"* — a flat column, which is check 3's constant-where-a-distribution-is-expected.
+**On the dry screen it is not flat.** It ranges 0.0289 to 0.2143 across arms. That spread is pure
+artefact: it tracks how many questions each arm delivered on time, each of which is then scored
+against a guaranteed-wrong placeholder. **A flat column advertises that something is wrong; a
+spread looks like a result.** So the guard that refuses the column is doing more work than a
+flatness check would have, and a reviewer told to watch for flatness would have passed this.
+
+**Sequencing recorded: build now (done), caveat now (done), re-run when Part A lands.** Robot
+accuracy must not be used to rank arms until it moves, and if every row later shows the same figure
+that is the dead channel rather than an equivalence between arms.
+
+**Noted for the published field:** session 3 is deferring the SimpleStream port rather than
+skipping it, because ported today it would silently become always-CLOUD and earn a timeliness score
+its design never produced. If a cheap-and-timely arm appears in my leaderboard before the
+representation path is live, its numbers are suspect for exactly that reason.
+
+## 27.7 Size-dependent eligibility, now demonstrated twice
+
+Session 3's `s4-reserve` fires 0 times at 8 devices, 3 at 10, 160 at 12, 1,631 at 14 and 3,721 at
+16. It switches on **exactly where section 19.1 found llf fall from 0.81 to 0.41 and edf C=8 from
+0.86 to 0.17.** A mechanism measured only at 16 devices looks saturated; measured across the band
+it is seen switching on.
+
+Together with RELOAD being unexercised at 16 devices (section 26.4), **size-dependent eligibility
+is now demonstrated twice from independent directions.** Standing consequence for this report:
+**any mechanism scored at a single size must say so**, because a single-size null may be a
+mechanism that had not switched on yet and a single-size saturation may hide where it began.
