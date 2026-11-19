@@ -1,0 +1,33 @@
+{
+ "check": "representation_dead_channel_restated_after_StudyR1_validation",
+ "is_measurement": false,
+ "label": "Cross-session synthesis: session 2 validation of the +17.5 pp premium (commit b82df27) changes what my representation dead-channel finding implies. Static reasoning over two committed findings, nothing re-run.",
+ "what_session2_established": {
+  "population_gap": "32B-I RICH 0.3953 against RECENT 0.3834, a +1.18 pp gap with CI [-0.0152, +0.0389], which DOES NOT EXCLUDE ZERO.",
+  "where_17_5_lives": "conditional on the 11.5 percent of questions where the RECENT window MISSES the evidence (+17.53 pp, CI excludes 0). On the 88.5 percent it covers, full history is worth -0.94 pp, not significant.",
+  "reading": "one number, two populations."
+ },
+ "correction_to_my_earlier_framing": {
+  "what_I_said": "porting SimpleStream today would make it \"earn a timeliness score its design never produced\".",
+  "why_that_was_backwards": "with representation ignored, _submit_recall sends and charges the FULL believed history, so SimpleStream today pays full-history cost and full-history latency and receives full-history accuracy. It does not gain an unearned timeliness win; it LOSES the cost and timeliness advantage that is its entire point.",
+  "corrected": "porting SimpleStream today UNDERSTATES it. It would be scored as always-CLOUD on both axes. Deferring it remains right, but the reason is that the port would penalise the arm, not flatter it."
+ },
+ "restated_stakes_of_the_dead_channel": {
+  "on_accuracy": "SMALL. A RECENT-choosing arm forgoes, at population level, 1.18 pp that StudyR1 cannot distinguish from zero. The accuracy distortion from the dead channel is within noise on this workload, which session 2 separately characterises as history-insensitive.",
+  "on_cost": "LARGE AND CERTAIN. On the reported Part A measurement a RECENT request sends and is charged 467 tokens against a full history of 5,431 to 14,881, roughly a 12x to 32x reduction, with the budget moving 202.795 to 192.781 GPU-s.",
+  "conclusion": "the representation dead channel is primarily a COST-measurement fault, not an accuracy-measurement fault. That is the opposite emphasis from the one the +17.5 pp framing invited, and it REINFORCES rather than weakens the case for Part A, because the cost half is the half that is large and certain."
+ },
+ "consequence_for_scoring_my_ports": {
+  "population_average_column": "would separate almost nothing for an evidence-selection arm and would sit below its own noise floor, so it must not be used to rank StreamScout, CoVStream, SimpleStream or QueryStream QDP.",
+  "required_form": "stratified by whether the RECENT window covers the evidence, since that is the only split on which the effect exists.",
+  "interaction_with_my_guard": "published_scoring_inputs.py checks that a consumed field holds real values. It cannot check that a column has the statistical power to separate arms. These are two different failures and both need checking before a ranked table is written."
+ },
+ "_provenance": {
+  "git_commit": "97d83475d826d1dd540b00c49a6c89ee2558b5c2",
+  "script": "static synthesis of committed findings b82df27 and partB_precheck.json; nothing run",
+  "model": "n/a",
+  "device": "n/a",
+  "n": "static",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
