@@ -151,6 +151,11 @@ class Pi0Edf(Live2ArmMixin, Policy):
                  c_inflight: int = C_INFLIGHT_DEFAULT) -> None:
         self.piece_tokens = int(piece_tokens) if piece_tokens else None
         self.c_inflight = int(c_inflight)
+        # D131: one piece in flight per session, strictly in prefix order. ON by default; the
+        # switch exists so the dry-run delta against the old behaviour can be measured.
+        self.serialise_pieces = True
+        self._pieces_outstanding = set()
+        self._built_at_issue = {}
         if self.c_inflight < 1:
             raise ValueError("c_inflight must be at least 1, got %r" % (c_inflight,))
         self.name = ("edf" if self.piece_tokens is None
@@ -231,6 +236,8 @@ class Pi0Edf(Live2ArmMixin, Policy):
         released = {p.item_id for p in order[:self._release_budget(obs)]}
 
         streams, recall, sessions = [], [], []
+        piece_issued = (set(self._pieces_outstanding)
+                        if (self.serialise_pieces and self.piece_tokens is not None) else set())
         for s in obs.streams:
             on = ("mon:" + s.stream_id) in released
             streams.append(StreamAction(s.stream_id, "cloud" if on else "local"))
@@ -243,12 +250,42 @@ class Pi0Edf(Live2ArmMixin, Policy):
                 continue
             recall.append(RecallAction(q.query_id, "CLOUD", representation="D2"))
             if q.readiness != "GPU-WARM":
+                # D131 item 1, PIECE SERIALISATION. A session's history is a PREFIX: piece k+1 may
+                # only be built on piece k. At C_inflight 8 two recall queries on the SAME session
+                # can be released in one epoch, each issuing its own MATERIALIZE, so one session's
+                # pieces advance in parallel and the history is partitioned OUT OF ORDER. NO
+                # OVERLAP still holds, so no bytes go out twice, but a prefix-structured KV cache
+                # cannot accept ranges that arrive out of sequence. At most ONE piece per session
+                # is in flight: the second query still gets its CLOUD action and simply does not
+                # advance the build this epoch.
+                # SCOPE: pieces only. An arm with `piece_tokens is None` rebuilds WHOLE, and a
+                # whole rebuild is a single-element partition that cannot be out of order with
+                # itself, so the defect is unreachable for it. Gating those arms too would change
+                # the behaviour of edf and llf, which are the SCORED baselines and must stay
+                # byte-identical. Measured: gating them moved edf from 4 to 5 robot answers and
+                # dashcam 0.9508 to 0.9462 at 16 devices seed 0, which is exactly the kind of
+                # silent baseline drift that must not happen.
+                if (self.serialise_pieces and self.piece_tokens is not None
+                        and q.session_id in piece_issued):
+                    continue
+                if self.piece_tokens is not None:
+                    piece_issued.add(q.session_id)
                 # MATERIALIZE advances the build by ONE piece (CONTRACT.md), so a chained
                 # rebuild needs one per epoch until the history is built; the coordinator
                 # no-ops once it is. Issuing it once would build a single piece and leave the
                 # chain unfinished, which is what arms 5 and 6 exist to exercise.
                 sessions.append(materialize(q.session_id, max(q.readiness_tokens, 1),
                                             self.piece_tokens))
+        if self.serialise_pieces and self.piece_tokens is not None:
+            built = (getattr(self, "_live2_roster", None) or {}).get("built_tokens_by_session", {})
+            for sid in list(self._pieces_outstanding):
+                if int(built.get(sid, 0)) != int(self._built_at_issue.get(sid, -1)):
+                    self._pieces_outstanding.discard(sid)
+                    self._built_at_issue.pop(sid, None)
+            for sid in piece_issued:
+                if sid not in self._pieces_outstanding:
+                    self._pieces_outstanding.add(sid)
+                    self._built_at_issue[sid] = int(built.get(sid, 0))
         return Action(streams=streams, recall=recall, sessions=sessions, order="EDF")
 
 

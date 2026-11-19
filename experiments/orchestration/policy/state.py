@@ -152,8 +152,16 @@ class Device:
     def z_of(self, task: str) -> float:
         return float(self.z.get(task, 0.0))
 
-    def bump_z(self, task: str, p_target: float, success_hat: float) -> float:
-        self.z[task] = max(self.z_of(task) + p_target - success_hat, 0.0)
+    def bump_z(self, task: str, p_target: float, success_hat: float,
+               weight: float = 1.0) -> float:
+        """B1's update, with D131's B2 per-device scaling as an optional weight.
+
+        B2 weights each realised miss by the opportunity's share of that device's target window,
+        w_{i,k} = N_SH / N_{i,k}, which holds SH at exactly 1 as the ruling requires. The window
+        length cancels, so w_RC = 2 / lambda_rc = 201.3 from committed quantities. `weight` is 1.0
+        by default so B1's behaviour is unchanged when B2 is off.
+        """
+        self.z[task] = max(self.z_of(task) + float(weight) * (p_target - success_hat), 0.0)
         return self.z[task]
 
 

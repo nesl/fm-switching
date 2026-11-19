@@ -128,6 +128,10 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     release_floor_c: int = 0        # D129: work-conserving release floor, 0 = off
     admit_floor_c: int = 0          # D129: work-conserving ADMISSION floor, 0 = off
     plan_only: str = ""             # D129 ablation: restrict the plan set to one kind
+    deficit_scaling: bool = False   # D131 B2: per-device deficit scaling, SH stays 1
+    deficit_gain: float = 1.0       # D131: explicit gain on B2's w_RC
+    rc_priority_slack_s: float = 0.0   # D131 item 2: urgent-recall slack threshold, 0 = off
+    rc_priority_keep_monitors: int = 0 # how many monitor releases survive an urgent epoch
 
     name: str = "policy-core"
     case: str = "own"
@@ -199,6 +203,8 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         p.kappa = (None if self.kappa is None else float(self.kappa))
         p.admit_floor_c = int(self.admit_floor_c)
         p.plan_only = str(self.plan_only)
+        p.deficit_scaling = bool(self.deficit_scaling)
+        p.deficit_gain = float(self.deficit_gain)
         self.params = p
         # D122: a v1.1 defect fix travels on `Flags` so the rollout can read it, but it is NOT
         # one of spec 7.0's conditional mechanisms, so the D66 guard asks `conditional_any_on`.
@@ -787,6 +793,41 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
             decisions=[dict(kind=d.kind, target=d.target, taken=bool(d.taken),
                             delta_j=d.delta_j, reason=d.reason[:200]) for d in decs],
         )
+        # D131 item 2, CONVERSION: deadline-aware release of planned RC units.
+        #
+        # The goal is that a recall whose deadline is close goes AHEAD of queued monitor work.
+        # D118 records that vLLM priority PREEMPTS running requests and `_preempt_request` sets
+        # num_computed_tokens = 0, so routing recall ahead via ENGINE priority would discard the
+        # prefill of exactly the multi-second cold rebuilds we are trying to land. This is
+        # therefore done ARM-SIDE, which has no such hazard: when an urgent recall is in play the
+        # arm withholds monitor releases this epoch, so the engine capacity goes to the recall.
+        #
+        # PROXY, stated per the consistency check's proxy rule: slack is measured as
+        # `deadline - now` for the jobs released this epoch, NOT as deadline minus predicted
+        # remaining completion with kappa. It is a deadline-proximity proxy and it OVERSTATES
+        # slack for a job with a long rebuild still to run, so the threshold is swept rather than
+        # reasoned about. A kappa-aware slack is the better form and is not yet wired.
+        urgent = False
+        if self.rc_priority_slack_s > 0.0 and cloud_q:
+            now = float(obs.now_s)
+            for qq in obs.recall:
+                if qq.query_id in cloud_q:
+                    # `deadline_s` is RELATIVE to the query's arrival, not absolute: the bench
+                    # and the scorer both compute the due time as t_opportunity + deadline_s. The
+                    # first form compared an absolute clock against a relative budget, so the
+                    # condition almost never fired (dashcam moved 0.8164 to 0.8165).
+                    if (float(qq.arrival_s) + float(qq.deadline_s) - now
+                            <= float(self.rc_priority_slack_s)):
+                        urgent = True
+                        break
+        if urgent:
+            keep = max(int(self.rc_priority_keep_monitors), 0)
+            if keep <= 0:
+                stream_on = set()
+            else:
+                ordered = sorted(stream_on)
+                stream_on = set(ordered[:keep])
+            self.stats["rc_priority_epochs"] = self.stats.get("rc_priority_epochs", 0) + 1
         streams = [StreamAction(s.stream_id, "cloud" if s.stream_id in stream_on else "local")
                    for s in obs.streams]
         recall = []

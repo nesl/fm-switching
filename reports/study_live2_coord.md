@@ -5172,3 +5172,45 @@ any run uses them at that bound.
 `Pi0Edf.C_INFLIGHT_DEFAULT` on the class, which is a dataclass field default bound at class creation,
 so it did not reach the arm and BOTH conditions silently ran at 8. I read that as "pre-existing and
 not caused by D128" and was wrong. Verifying that the knob actually moved is what caught it.)*
+
+## v1.4 development log (D131)
+
+- `state.bump_z(weight=...)` and `coordinator._b2_weight`: D131 B2, per-device deficit scaling, `w_RC = 2 / lambda_rc = 201.3` derived in V7.2, SH held at exactly 1, behind `deficit_scaling` with an explicit `deficit_gain`. V7.3's warning stands, so the gain is SWEPT rather than assumed.
+- `arms_policy.rc_priority_slack_s` / `rc_priority_keep_monitors`: D131 item 2, deadline-aware RC release, done ARM-SIDE because D118 records that vLLM priority preempts and `_preempt_request` zeroes `num_computed_tokens`, which would discard the prefill of the cold rebuilds this is meant to land. **No server priority mode is required.**
+- `arms.Pi0Edf.serialise_pieces`: D131 item 1, one piece in flight per session in strict prefix order, scoped to arms with `piece_tokens is not None`.
+
+### Item 1 closed: piece serialisation, and the scoping that matters
+
+`test_pieces_partition_the_history_with_no_gap_and_no_overlap` passes at C_inflight 8 with the fix,
+and `test_live2_history_size.py` is green at 9 of 9. The cause is that at C=8 two recall queries on
+the SAME session are released in one epoch, each issuing its own MATERIALIZE, so one session's
+pieces advance in parallel and arrive out of sequence. NO OVERLAP still held throughout, so no bytes
+went out twice; only order broke, which a prefix-structured KV cache cannot accept.
+
+**`covex-v13` was never affected, measured not assumed.** Running it against the same partition
+assertion gives 5 sessions checked, 0 out of order, 0 overlapping, and that is its NATIVE behaviour
+since the fix lives in `Pi0Edf.decide` while covex uses `PolicyCoreArm.decide`, whose `materialize`
+list is already one per session per epoch.
+
+**A baseline-drift trap I walked into and backed out of.** My first fix gated the second
+`materialize` for ANY arm, including those that rebuild WHOLE. Measured at 16 devices seed 0, that
+moved **edf from 4 to 5 robot answers and dashcam from 0.9508 to 0.9462**, a silent change to a
+SCORED baseline. A whole rebuild is a single-element partition and cannot be out of order with
+itself, so the gate is now scoped to `piece_tokens is not None` and the whole-rebuild arms are
+byte-identical again. This is why the delta run was worth having even after it stopped gating
+anyone's leaderboard.
+
+For the piece arms the fix does change dry-run numbers, as it should, since it changes which work
+is issued: `edf-piece1024` at 16 devices goes from 3 of 35 robots at dashcam 0.9911 to 5 at 0.9057
+on seed 0, and from 2 of 41 at 0.9962 to 4 at 0.8709 on seed 4.
+
+### On the D71 / D82 capacity conjunct
+
+Session 2 measures llf at 16 devices seed 4 with `capacity_met` FALSE on a robot pool of 0.2195
+against a 0.90 target, and the strongest published arm at 34 of 41 reaches only 0.829. **I am
+therefore NOT optimising for a capacity pass**, and I am saying so rather than quietly
+reinterpreting the goal: if the best known system, charged more accelerator time than COVEX, cannot
+clear 0.90, a pass is probably unavailable to any arm in this configuration and chasing it would be
+chasing a property of the target. I report the conjunct honestly beside every delivery number and
+optimise against the delivery comparison and the release gate. **Treating "best among arms that all
+miss capacity" as the realistic target is a working assumption pending the user's ruling.**

@@ -809,9 +809,30 @@ class Coordinator:
                          % len(back))]
 
     # ---------------------------------------------------------------- 3.3, 7.6
+    # D131 B2. w_{i,k} = N_SH / N_{i,k}, SH exactly 1, derived in report section V7.2 from
+    # committed quantities only: N_SH = W / T_SH and N_RC = lambda_rc * W, so the window cancels
+    # and w_RC = 2 / lambda_rc. With the committed lambda_rc = 0.009934 that is 201.3.
+    #
+    # V7.3 FLAGGED THE CONSEQUENCE AND IT STANDS: at w_RC = 201.3 a single robot miss adds about
+    # 181 to z[RC], against a continuation value of 0.0354 and a backlog charge near 1, so robot
+    # questions would be served essentially unconditionally. D131 authorises B2 and says to tune
+    # the gain rather than stop, so the weight carries an explicit `deficit_gain` multiplier and
+    # the gain is SWEPT rather than assumed.
+    def _b2_weight(self, task: str) -> float:
+        if not bool(getattr(self.params, "deficit_scaling", False)):
+            return 1.0
+        if task == "SH":
+            return 1.0
+        lam = float(self.pf.lambda_rc_default())
+        if lam <= 0.0:
+            return 1.0
+        w = (2.0 / lam) if task == "RC" else 1.0
+        return w * float(getattr(self.params, "deficit_gain", 1.0) or 1.0)
+
     def update_deficit(self, fleet: Fleet, device_id: str, task: str,
                        success_hat: float) -> float:
-        return fleet.device(device_id).bump_z(task, self.params.p_k[task], success_hat)
+        return fleet.device(device_id).bump_z(task, self.params.p_k[task], success_hat,
+                                              weight=self._b2_weight(task))
 
     # ---------------------------------------------------------------- mu and the price
     def _update_mu(self, fleet: Fleet) -> None:
