@@ -1,0 +1,26 @@
+[18:41:47] starting vLLM server: /home/pragya/.venvs/fm-switching-vllm/bin/vllm serve /home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb --served-model-name 32BI --port 8031 --max-model-len 32768 --gpu-memory-utilization 0.9 --tensor-parallel-size 1 --no-enable-prefix-caching --limit-mm-per-prompt {"image": 16} --dtype bfloat16 --seed 0 --limit-mm-per-prompt {"image": 640, "video": 1} --mm-processor-kwargs {"size": {"shortest_edge": 4096, "longest_edge": 16777216}, "fps": 1.0, "do_sample_frames": false} --trust-request-mm-kwargs --host 127.0.0.1 --enable-prefix-caching --enable-prompt-tokens-details --mm-processor-cache-gb 128 --kv-offloading-backend native --kv-offloading-size 27 --enable-log-requests --enable-logging-iteration-details
+[18:42:54] server up: {"key": "32BI", "repo": "Qwen/Qwen3-VL-32B-Instruct", "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb", "startup_s": 66.8, "log": "logs/study_x_server_32BI_1118_184147.log", "max_model_len": 32768, "gpu_memory_utilization": 0.9, "tensor_parallel_size": 1, "prefix_caching": false, "kv_cache_tokens": 62944, "max_concurrency_at_max_len": 1.92, "available_kv_gib": "15.37", "model_weights_gib": "62.66", "attention_backend_lines": ["(EngineCore pid=1207718) INFO 2026-11-18 18:42:04.710 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention", "(EngineCore pid=1207718) INFO 2026-11-18 18:42:04.711 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.", "(EngineCore pid=1207718) INFO 2026-11-18 18:42:05.195 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].", "(EngineCore pid=1207718) INFO 2026-11-18 18:42:05.195 [flash_attn.py:1167] Using FlashAttention version 3", "(EngineCore pid=1207718) INFO 2026-11-18 18:42:16.266 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."], "cuda_graphs": true, "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)", "extra_server_args": ["--limit-mm-per-prompt", "{\"image\": 640, \"video\": 1}", "--mm-processor-kwargs", "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}"
+[18:43:03] server 32BI stopped
+{
+ "arm": "policy-core",
+ "n_devices": 32,
+ "mode": "A",
+ "run_s": 600.0,
+ "seed": 0,
+ "split": true,
+ "err": "RuntimeError: coordinator process failed: ValueError: action names unknown session 'robo008|s000|1150662047093052_start_0.0_end_330.256'",
+ "wall_s": 4.482,
+ "run_dir": "/home/pragya/data/live2/pilot3/runs/policy-core_n32_600s_h27",
+ "trace_dir": "/home/pragya/data/live2/pilot3/work/traces/seed0_n32_600s_A",
+ "lateness": null,
+ "run_valid": null,
+ "digests_equal": null,
+ "n_requests": null,
+ "n_errors": null,
+ "server_kind": "vllm",
+ "is_measurement": false,
+ "score": {
+  "ok": false,
+  "error": "FileNotFoundError: [Errno 2] No such file or directory: '/home/pragya/data/live2/pilot3/runs/policy-core_n32_600s_h27/outcomes.jsonl'"
+ }
+}
