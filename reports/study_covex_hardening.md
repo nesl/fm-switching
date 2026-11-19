@@ -1761,8 +1761,14 @@ of 196 cells meet the D71/D82 conjunct. Cells meeting capacity, out of 4 seeds:
 Nobody passes at 4 devices, because the robot pool is not eligible there (fewer than the D82
 minimum of 20 questions), not because the target is missed.
 
-**v1.3-fast meets capacity in ZERO of 28 cells.** The published arms meet it in 12 of 28 each and
-are the only arms that meet it above 8 devices.
+**v1.3-fast meets capacity in ZERO of 28 cells.** The published arms are the only arms that meet
+it above 8 devices: **eco-llm 10 of 28, mooncake 9, b7-edf-feasibility 9**, against edf C=8 at 1
+and llf at 1.
+
+*(ERRATUM E8, against myself: I first wrote "12 of 28 each" here and in commit `fe3d437`. The
+counted values are 10, 9 and 9. The error was an eyeball sum of the column above, not a
+measurement fault, and it does not change any ranking, but the figure was quoted onward and is
+corrected here.)*
 
 **This is the column that changes the reading of everything above it.** My 32-device result in
 sections 13.4 and 17 said COVEX's value appears under heavy overload. On the conjunct, at 32
@@ -1991,3 +1997,70 @@ decisions differing and `rc_priority_epochs` absent from both conditions, which 
 branch never fires; but it ran with `keep_monitors` silently reduced from 2 to 1, so I am not
 reporting it until it has been re-run with the cast fixed. The gating field `rc_priority_slack_s`
 did arrive correctly as `1.0`, so I expect the conclusion to hold, and expecting is not reporting.
+
+# 23. THE PUBLISHED-ARM IDENTITY CHECK (critical path for covex-v2's base)
+
+Session 3's answer had not landed on origin when I ran this, so I ran it rather than wait. This
+compares **ACTION SEQUENCES**, not outcome counts: every `decision.jsonl` is hashed with the
+bookkeeping fields (`arm`, `arm_version`, `note`, `mu`, `belief`, `predicted`,
+`decision_latency_ms`) removed, so two arms land in one class only if they took the same decisions
+in the same order. Seed 4, from the already-measured D131 and published runs.
+
+## 23.1 The collapse is REAL, LARGER THAN TWO ARMS, and SIZE-DEPENDENT
+
+**At 16 devices, 19 published arms reduce to 14 distinct behaviours:**
+
+| class | arms | decisions |
+|---|---|---|
+| **A** | **inar-vl, kvflow, pensieve, routellm** | 7,638 |
+| **B** | **attentionstore, lmcache** | 8,480 |
+| **C** | **b7-edf-feasibility, mooncake** | 7,878 |
+| singletons | b10-blocking-aware, clockwork, confidence-cascade, eco-llm, ekya, hybrid-llm, perllm, preble, r3-streaming, uniscale, videostorm | |
+
+**At 8 devices it is worse: 19 arms reduce to 11 behaviours**, and the largest class has SIX
+members: eco-llm, inar-vl, kvflow, pensieve, routellm and videostorm are all byte-identical in
+action sequence. b7-edf-feasibility, ekya and mooncake form a class of three.
+
+So the identity is not a mooncake / b7 curiosity. **Distinct published systems collapse onto one
+behaviour under light load and separate as load rises**, which is itself a sensible result: these
+systems differ in what they do when resources are scarce, and at 8 devices they are not scarce.
+
+## 23.2 A FINDING ABOUT MY OWN GATE BASELINES: edf C=8 and llf are IDENTICAL at 8 devices
+
+`edfC=8` and `llf` share one action-sequence hash at 8 devices (4,364 decisions) and are DISTINCT
+at 16. That explains the identical delivery I reported at 8 devices throughout this study
+(0.9993 / 18 for both on seed 4) and I had not looked into it.
+
+**Consequence for D127 gate reporting: at 8 devices "the best of edf and llf" was ONE arm wearing
+two names**, so the gate there was never the two-arm test it appeared to be. It does not change
+any verdict, since COVEX lost to that arm either way, but a reader comparing the two columns at 8
+devices should know they are one measurement.
+
+## 23.3 THE ANSWER SESSION 1 NEEDS: the true best base is `eco-llm`, not `b7-edf-feasibility`
+
+On the headline metric now fixed by D132 item 1, the capacity conjunct:
+
+| arm | capacity cells met | robot fraction, n=14 / 16 / 32 | dashcam, n=16 / 32 |
+|---|---|---|---|
+| **eco-llm** | **10 of 28** | 0.917 / **0.878** / **0.517** | 0.8809 / 0.4408 |
+| mooncake | 9 of 28 | 0.917 / 0.831 / 0.454 | 0.9185 / 0.4527 |
+| b7-edf-feasibility | 9 of 28 | 0.917 / 0.831 / 0.454 | 0.9185 / 0.4527 |
+| llf | 1 of 28 | 0.312 / 0.220 / 0.009 | 0.9710 / 0.0140 |
+
+**eco-llm leads on capacity and on the robot pool at every size where they differ.** b7 and
+mooncake lead it only on dashcam, and section 20 established that dashcam is `D+` for every arm at
+every size in the band, so **dashcam does not affect the conjunct at all**. Choosing a base on
+dashcam would be optimising the half of the objective that is already satisfied.
+
+**Recommendation: covex-v2's base should be `eco-llm`.** Two caveats stated honestly:
+
+1. **The margin is small**, 10 cells against 9, and the robot gaps are 0.047 at 16 devices and
+   0.063 at 32. It is a consistent direction rather than a decisive one.
+2. **At 8 devices eco-llm is not a distinct policy at all**, being one of a six-arm class, so the
+   choice only has content at 10 devices and above. In the band the crossover result identifies,
+   which is where the contest sits, it does have content.
+
+If session 1 prefers b7 for a reason outside these numbers, the cost is about one capacity cell
+and roughly 0.05 of robot fraction above 14 devices, and it should pick it knowing that rather
+than on the assumption that b7 and eco-llm are equivalent. **They are not equivalent at 16 devices;
+they are only equivalent at 8.**
