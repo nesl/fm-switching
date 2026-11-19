@@ -120,6 +120,11 @@ within the horizon, so the two branches compute the same sum. Proposed fix for s
 make a candidate's effect on residency visible to `state_value`, or record in the spec map that
 5.3's state value is inert in round 1. **Not implemented here.**
 
+**Corroborated at every size.** The two dead channels are not an artefact of one cell: `z` and
+`sv_delta` are exactly zero for EVERY kind in all four cells, fleet traces at 4, 8 and 16 devices
+and the 32-device synthetic fixture, which is **124,354 candidates in total** (13,175 + 27,589 +
+46,374 + 37,216).
+
 **F-A3 (HIGH). The deficit channel is exactly zero in 27,589 of 27,589 candidates**, confirming
 session 1's V1 and V8.1 at every candidate kind rather than only for recall. With B1 on, `z`
 rises on the device but `_z_term` aggregates only over the `opps` rows, and before the RC tail
