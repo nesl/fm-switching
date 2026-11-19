@@ -2656,6 +2656,14 @@ auditor told to watch for one will pass the other two.
 | **a REVIEWER'S PRIOR formed from one unit** | a confident expectation about a column's direction | as capable of passing a wrong column as a broken check is: a single-category delta read as a direction, a flat-column prediction that missed an artefact spread, a broken aggregate read as a trend | section 33.3; three times in two days, each caught by measuring the FULL set |
 | **a planner's price diverging from the CHARGED price** | nothing: every arm is compared against the same bar | the COMPARATOR is mis-set, so all comparisons shift together | section 32; invisible to every arm-versus-arm check by construction |
 
+| **an INSTRUMENT that cannot see a field** | every mechanism using that field reads as inert, however often it fires | a property of the TOOL, not of any arm: `decision.jsonl` carries neither `representation` nor the session action | session 3's move proof returned 0 differing rows for an arm that emitted RECENT on **all 21** of its recalls |
+| **KNOWLEDGE THAT DOES NOT PROPAGATE** | nothing: the gap is already known, somewhere else | a **propagation** failure, not a detection one. Every signature above is about something being invisible; this one is about something VISIBLE IN ONE CONTEXT and not carried into another | I built `capture_sent_representation` precisely because the logs lack `representation`, and left `switch_moves.py` diffing those same logs to render absent-link verdicts |
+
+**Every workaround built to get around a gap is evidence of a gap some other tool is still falling
+into.** That is the generalisable form of the tenth signature, and it is the one I would check
+first in future: not "what cannot be seen" but "what have I already had to work around, and what
+else trusts the thing I worked around".
+
 **An impossible failure and an impossible success are equally diagnostic**, and a reviewer watching
 only for implausible RESULTS will catch neither, because both appear in the machinery rather than
 in the headline.
