@@ -6750,3 +6750,200 @@ Three independent lines now point at the same resource: this result, the queuein
 robot axis, and StudyEVNEED's 385.5 GPU-s of rebuild cost at 14 devices — about 64 per cent of one
 GPU. The delivery-risk cliff sitting far beyond the physical limit is consistent with it. **KV
 capacity is not what this workload is short of.**
+
+## D136: the assistive device type
+
+A third device class: periodic **single-shot** questions, one image plus one question, **no
+history**, drawn from the StudySS1 pool with **VizWiz first and EgoThink second** (4,319 then 700,
+5,019 total). Arrival period is a parameter at 10 s with a **bursty** variant; `L_SS` is a parameter
+swept {1, 2, 3} s; mixes are `40:40:20` and `50:50:0`.
+
+### Two DESIGN properties, not test results
+
+These are stated as properties because a reader who sees only "the test passed" will not know the
+test cannot fail.
+
+**1. Item 4 is TRUE BY CONSTRUCTION.** An assistive question reuses the **committed record kinds**:
+`session_start`, one `history_batch` carrying the image, `recall_question` at `L_SS`,
+`session_end`. So the emulator, the coordinator and **every arm need no change at all** — the
+default rule, "treat as a single request with its deadline", is what the existing recall path
+already does. There are no new branches in the shared path to be byte-identical about. A new
+`assistive_question` kind was added first and then **removed**, because reuse is both the better
+engineering and the stronger gate.
+
+**2. `50:50` and `50:50:0` are identical because the two-class path DELEGATES.** `_split_fleet3`
+calls `_split_fleet` for any two-class ratio rather than reimplementing the arithmetic, so a
+two-class ratio cannot drift from its committed split.
+
+### The gate, at both levels
+
+| level | result |
+|---|---|
+| trace records and stats | **12 of 12 cells identical** (3 sizes x 4 seeds) |
+| fleet fairness digest | **6 of 6 identical** |
+| **arm decisions** | **6 of 6 arms identical**: llf, edf, covex-v13, eco-llm, b7-edf-feasibility, attentionstore |
+
+The arm-level half is the one that matters, because **trace identity and arm identity can come
+apart**: an arm could behave identically on identical input for a reason that breaks on different
+input. And the multi-arm form is what distinguishes a pass from a coincidence — one arm returning
+is consistent with a compensating second error, six returning simultaneously is not.
+
+**The control is assistive devices ABSENT BY A SINGLE SWITCH**, the ratio, rather than a
+configuration believed equivalent to their absence.
+
+### The bursty switch moves something
+
+**228 questions against 57** at the same size and seed. Recorded as two counts rather than as
+"bursty works", because a switch demonstrably changing the arrival count is a switch proved to
+move something — the standard four builder mechanisms failed this week.
+
+### Assistive consumes roughly TWICE its headcount share
+
+Aggregate recall token load at `40:40:20`, seed 4, 600 s:
+
+| n | class | devices | requests | tokens | share |
+|---|---|---|---|---|---|
+| 16 | robot | 7 | 39 | 426,639 | 60.0% |
+| 16 | **assistive** | **3** | **177** | **284,960** | **40.0%** |
+| 32 | robot | 13 | 63 | 710,613 | 55.7% |
+| 32 | **assistive** | **6** | **352** | **564,965** | **44.3%** |
+
+**20 per cent of the headcount consumes 40 to 44 per cent of the load**, because it issues **4.5x
+more requests** — 177 against 39 at 16 devices — and the share GROWS with fleet size. Per request
+it is two orders cheaper (median 1,246 VizWiz and 2,072 EgoThink prompt tokens against robot
+histories of 5,431 to 18,931); in aggregate it is the same order as the robot axis.
+
+**So any robot movement at `40:40:20` is DISPLACEMENT by a class consuming twice its headcount
+share, not dilution by headcount.** The `50:50:0` control separates assistive-present from absent;
+it cannot separate those two readings, which is why this measurement came first.
+
+### `L_SS` BINDS, measured through a run rather than asserted on the trace
+
+llf, 16 devices, seed 4, `40:40:20`:
+
+| `L_SS` | robot on-time | assistive on-time | gpu |
+|---|---|---|---|
+| 1 s | 20/39 = 0.513 | **116/177 = 0.655** | 544.5 |
+| 2 s | 20/39 = 0.513 | **176/177 = 0.994** | 544.5 |
+| 3 s | 19/39 = 0.487 | 176/177 = 0.994 | 544.0 |
+
+**A 34-point swing between 1 s and 2 s, saturating thereafter.** So the deadline BINDS at 1 s and
+is slack at 2 s and above. A parameter that sweeps cleanly in the generator has been shown to vary;
+this shows it reaches an OUTCOME, which is the distinction between "the deadline is configurable"
+and "the deadline binds".
+
+**Baseline-only scope: this is `llf`.** The policy arms cannot execute assistive questions at all
+(see the blocker below), so this establishes that the parameter binds IN THE HARNESS and says
+nothing about how a policy responds to it.
+
+### The dilution prediction was WRONG, and the mixes are not comparable
+
+Predicted: assistive consumes a large share of an exhausted budget, so adding it should DEPRESS
+robot numbers. Measured, llf at 16 devices, seed 4:
+
+| mix | robot on-time | gpu spent |
+|---|---|---|
+| `50:50:0` | 9/41 = **0.220** | **600.0** |
+| `40:40:20` | 20/39 = **0.513** | **544.5** |
+
+**Adding assistive MORE THAN DOUBLES robot delivery and REDUCES budget spend from exhausted to
+544.5.** The opposite of displacement.
+
+**The cause is a confound in the mix definitions: the two mixes differ on EVERY class at once.**
+
+| n | mix | dashcam | robot | assistive |
+|---|---|---|---|---|
+| 16 | `50:50:0` | 8 | 8 | 0 |
+| 16 | `40:40:20` | **6** | **7** | 3 |
+| 32 | `50:50:0` | 16 | 16 | 0 |
+| 32 | `40:40:20` | **13** | **13** | 6 |
+
+At 16 devices the comparison removes **two dashcams** — roughly 500 fewer monitor instants of
+engine load — along with one robot, while adding three assistive devices. **The robot improvement
+is attributable to reduced dashcam contention, not to assistive's presence.**
+
+**So `50:50:0` against `40:40:20` cannot isolate assistive's effect on any axis.** The aggregate
+token measurement above is correct and the inference drawn from it was not: 40 per cent of the
+OFFERED token load does not imply displacement when the same comparison also removes a quarter of
+the dashcam fleet. **Isolating assistive needs a mix that holds dashcam and robot counts fixed and
+adds assistive devices on top**, which neither committed mix does.
+
+### CONFOUND, stated rather than engineered around
+
+Assistive holds **zero residency by construction**, which makes it look like a clean control for
+whether warm state matters. **It is not clean: it changes two things at once**, holding no state
+AND consuming a large share of a budget already measured as exhausted at 599.9 of 600 GPU-s. So it
+tests "does warm state matter" while simultaneously changing "how much budget is left".
+
+The separation, recorded for if the contrast ever becomes load-bearing: **tune the assistive
+arrival period so total budget consumption at `40:40:20` matches `50:50:0`, then compare.** That
+holds the budget fixed and varies only the residency mix. Robot movement at matched budget
+implicates warm state; no movement means the whole effect was displacement. **Not run**, because
+the contrast is not something the paper currently leans on.
+
+### Device answers are UNCONFIRMED-HOST, and that is a property of the data
+
+The five StudySS1 artifacts carry **no `_provenance` block**, which CLAUDE.md requires. They record
+`tier=device` and `model=qwen3vl4b` with `endpoint: http://127.0.0.1:8000/v1` — localhost on
+whichever machine ran them. **So the brief's "Orin 4B answer" cannot be confirmed from the file,
+and Orin against an A6000 proxy is a different device tier.**
+
+Every row therefore carries `device_host="unconfirmed"`, and `trace_meta` carries
+`ss_device_answer_host="unconfirmed"` with the reason. **That makes the ambiguity a property of the
+data rather than a caveat in a commit message**, so anything derived from it carries it without
+depending on someone having read this.
+
+**The cloud answer does not exist yet**, so the type runs **timing only, labelled**, until the
+H100 runs the kit.
+
+### One substitution, CHECKED rather than accepted
+
+`image_bytes` uses the committed S-EMBER D2 median because StudySS1 records no per-image byte
+count. The images would be measurable — the H100 verified 700 EgoThink hash-matching and 4,319
+VizWiz present — but they stage at `/dev/shm/ss1_data`, which is **machine-local tmpfs and is empty
+on this host** (180K of 63G), so `stat` is not available from here. **The direction of error is
+unknown**: S-EMBER D2 frames are 352x256 JPEG q88 while VizWiz and EgoThink come from different
+sources at unknown resolutions. Measuring on a host where the staging is live would REMOVE the
+substitution rather than document it.
+
+### A blocker, and it is correct behaviour rather than a defect
+
+**Policy arms cannot yet run assistive devices.** `covex-v13` fails with
+`MissingEvidence: question type 'vizwiz' has no representation mapping`, raised by
+`profiles.representation_for` because the committed `question_type_to_representation` map covers
+only the eight S-EMBER categories.
+
+**That is the raise-rather-than-impute mechanism working as designed.** The policy is refusing to
+value a question type it has never measured, and **inventing a mapping for `vizwiz` would be
+fabricating a measurement**, which is precisely what `MissingEvidence` exists to prevent. Baseline
+arms run assistive fine because they do not consult the accuracy table.
+
+**The cost is the price of the guarantee, and that is the honest framing.** A system that imputed
+would have run and produced numbers. "The policy arms cannot execute the new type" reads as a
+limitation and is in fact the honesty clause doing its job: the price of refusing to guess is that
+a new question type is inexecutable until it has committed accuracy.
+
+It is the same vocabulary gap as B4's horizon labels against question categories, and D2 against
+StudyR1's keys — a policy written against a vocabulary the data does not supply.
+
+**THE DEPENDENCY IS TWO-PART, AND ITEM 2 ANTICIPATES ONLY THE FIRST HALF.** Item 2 reads as though
+the timing-only phase ends when the cloud answer exists. It does not:
+
+1. **The H100's kit produces the 32B answers.** On its critical path.
+2. **The VizWiz and EgoThink per-question accuracy is wired into the path the policy actually
+   reads**, `question_type_to_representation` and the `RC.tables` cells. **NOT on anyone's critical
+   path today.**
+
+**Until (2) happens the arms will still refuse, the answers will exist, and it will look as though
+the dependency was met.** Those are different things and only one of them is scheduled.
+
+When (2) is done it should get the same treatment as the device-answer host label: **if the
+accuracy source is unconfirmed or substituted, that belongs in `trace_meta` rather than in a commit
+message**, which is the pattern that made the host ambiguity a property of the data rather than a
+caveat someone has to have read.
+
+**And this bears on the contrast-class argument: the clean comparison needs the policy to RUN on
+assistive, and it cannot yet.** So that contrast is not merely confounded by budget displacement —
+it is **currently unmeasurable for the policy family at all**, baseline-only on both axes. That
+matters because the contrast was the reason this device type is interesting beyond covering a third
+application.

@@ -40,7 +40,8 @@ from typing import Any, Dict, List, Optional
 HERE = Path(__file__).resolve().parent
 LIVE2 = HERE.parent
 
-DEVICE_TYPES = ("dashcam", "robot")
+# D136: "assistive" is a SINGLE-SHOT type, one image plus question and NO HISTORY.
+DEVICE_TYPES = ("dashcam", "robot", "assistive")
 
 FIELDS: Dict[str, tuple] = {
     "device_register": ("device_id", "type", "uplink_mbps", "rtt_ms", "start_t"),

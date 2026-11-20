@@ -91,12 +91,32 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 import data_sources as DS
 
+# D136: the ratio may now name THREE classes, dashcam:robot:assistive. The two-class forms are
+# kept EXACTLY as they were and parse to zero assistive devices, which is what makes the
+# byte-identity gate possible: "50:50" is not a new spelling of "50:50:0", it is the same key.
 RATIOS = {"50:50": (50, 50), "75:25": (75, 25), "25:75": (25, 75)}
+RATIOS_3 = {"50:50:0": (50, 50, 0), "40:40:20": (40, 40, 20)}
 MODES = ("A", "B")
 
+# D136: an assistive question is a SINGLE SHOT. One image, one question, NO HISTORY, so the type
+# holds zero residency by construction and cannot exercise warm-state continuity at all. That
+# makes it a CONTRAST CLASS rather than a third workload: it is immune to capacity pressure for
+# the same structural reason the zero-residency arms are.
+# D136: an assistive question reuses the COMMITTED record kinds. It is a single-shot session
+# carrying ONE IMAGE as its evidence and one question at L_SS, with NO history_preload and NO
+# further batches, so it holds zero residency by construction. Reusing the kinds means the
+# emulator, the coordinator and every arm need NO change, which is both the default rule of item
+# 4 and what makes the byte-identity gate strong: there are no new branches in the shared path.
 OPPORTUNITY_KINDS = ("monitor_opportunity", "recall_question")
 TRACE_KINDS = ("device_register", "session_start", "history_preload", "session_end",
                "history_batch", "monitor_opportunity", "recall_question")
+
+# Deadline for a single-shot assistive question. A PARAMETER, swept {1, 2, 3} s per D136 item 3.
+DEFAULT_L_SS_S = 2.0
+# Arrival period, a parameter (D136 item 1), with a bursty variant switch.
+DEFAULT_SS_PERIOD_S = 10.0
+SS_BURST_N = 4               # questions per burst in the bursty variant
+SS_BURST_GAP_S = 0.5         # spacing inside a burst
 
 # D96 (2): what the canonical fairness digest covers, and the wire kind each trace record maps to.
 # `monitor_opportunity` becomes `monitor_frame` in push mode and `monitor_offer` in pull mode;
@@ -139,11 +159,30 @@ def _deal(pool: Sequence[str], want: Sequence[int], rng: random.Random) -> List[
 
 
 def _split_fleet(n_devices: int, ratio: str) -> Tuple[int, int]:
+    """The committed two-class split, UNCHANGED. D136's third class goes through `_split_fleet3`."""
     if ratio not in RATIOS:
         raise ValueError(f"ratio {ratio!r} not in {sorted(RATIOS)} (D67)")
     d, r = RATIOS[ratio]
     n_dash = int(round(n_devices * d / float(d + r)))
     return n_dash, n_devices - n_dash
+
+
+def _split_fleet3(n_devices: int, ratio: str) -> Tuple[int, int, int]:
+    """dashcam : robot : assistive. A two-class ratio yields zero assistive devices.
+
+    The two-class path DELEGATES to `_split_fleet` rather than reimplementing it, so a two-class
+    ratio cannot drift from its committed split. That is what the byte-identity gate rests on.
+    """
+    if ratio in RATIOS:
+        n_dash, n_rob = _split_fleet(n_devices, ratio)
+        return n_dash, n_rob, 0
+    if ratio not in RATIOS_3:
+        raise ValueError(f"ratio {ratio!r} not in {sorted(set(RATIOS) | set(RATIOS_3))}")
+    d, r, a = RATIOS_3[ratio]
+    tot = float(d + r + a)
+    n_dash = int(round(n_devices * d / tot))
+    n_ass = int(round(n_devices * a / tot))
+    return n_dash, n_devices - n_dash - n_ass, n_ass
 
 
 # ---------------------------------------------------------------- the generator
@@ -152,6 +191,9 @@ class TraceStats:
     n_devices: int = 0
     n_dashcam: int = 0
     n_robot: int = 0
+    n_assistive: int = 0                 # D136
+    assistive_questions_total: int = 0
+    assistive_questions_per_device: Dict[str, int] = field(default_factory=dict)
     dashcam_instants: Dict[str, int] = field(default_factory=dict)
     dashcam_meeting_200: int = 0
     dashcam_plays_started: int = 0
@@ -188,7 +230,10 @@ class TraceStats:
 def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: str,
                    stagger_s: float = DEFAULT_STAGGER_S,
                    frame_manifest: Optional[Path] = None,
-                   count_only: bool = False) -> Dict[str, Any]:
+                   count_only: bool = False,
+                   l_ss_s: float = DEFAULT_L_SS_S,
+                   ss_period_s: float = DEFAULT_SS_PERIOD_S,
+                   ss_bursty: bool = False) -> Dict[str, Any]:
     """Build one run's opportunity trace. Returns {records, device_answers, meta, stats}.
 
     Deterministic in `seed` alone given (n_devices, ratio, run_s, stagger_s): the same seed
@@ -205,7 +250,7 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
         raise ValueError(f"mode {mode!r} not in {MODES} (D69)")
     if run_s <= 0:
         raise ValueError("run_s must be positive")
-    n_dash, n_rob = _split_fleet(n_devices, ratio)
+    n_dash, n_rob, n_ass = _split_fleet3(n_devices, ratio)
 
     clips = DS.nexar_clip_meta()
     sessions = DS.eval_sessions()
@@ -230,6 +275,7 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
 
     dash_ids = [f"dash{i:03d}" for i in range(n_dash)]
     rob_ids = [f"robo{i:03d}" for i in range(n_rob)]
+    ass_ids = [f"asst{i:03d}" for i in range(n_ass)]
 
     mean_clip_s = (sum(c.duration_s for c in clips.values()) / len(clips)) if clips else 1.0
     mean_sess_s = (sum(s.duration_s for s in sessions.values()) / len(sessions)) if sessions \
@@ -248,7 +294,10 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
     # D101: only the DASHCAM draw is used. The robot draw is still taken, so the dashcam
     # stagger of a given seed is unchanged by D101 and the two builds' dashcam streams stay
     # comparable; a robot's own offset is its join point instead (see below).
-    start_t = {did: rng_stag.uniform(0.0, stagger_s) for did in dash_ids + rob_ids}
+    # D136: `ass_ids` is appended LAST so the dashcam and robot draws consume `rng_stag` in
+    # exactly the order they did before. For a two-class ratio `ass_ids` is empty and this
+    # expression is literally unchanged, which is what keeps the stagger byte-identical.
+    start_t = {did: rng_stag.uniform(0.0, stagger_s) for did in dash_ids + rob_ids + ass_ids}
     for did in rob_ids:
         start_t[did] = 0.0
 
@@ -312,6 +361,72 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
         st.dashcam_instants[did] = n_inst
     st.dashcam_meeting_200 = sum(1 for v in st.dashcam_instants.values() if v >= 200)
     st.clip_repeats = sum(v - 1 for v in st.clip_play_counts.values() if v > 1)
+
+    # ---------------------------------------------------------------- D136: assistive devices
+    # SINGLE SHOT. Each question is its own session: session_start, ONE history_batch carrying the
+    # single image, the question at L_SS, session_end. No preload and no further batches, so there
+    # is no accumulated history and the type holds ZERO RESIDENCY by construction.
+    #
+    # That makes it a CONTRAST CLASS rather than a third workload: it cannot exercise warm-state
+    # continuity at all, which is the cleanest available control for whether warm state is what
+    # matters. It is immune to capacity pressure for the same structural reason the zero-residency
+    # arms are.
+    #
+    # `history_batch` rather than `history_preload`: the image is captured AT QUESTION TIME, so it
+    # must be charged uplink. D101's preload is explicitly free because those frames were already
+    # on cloud-side disk before the clock started, which is not true here.
+    #
+    # The whole block is inside `if ass_ids`, EMPTY for every two-class ratio, so an existing
+    # trace takes not one new branch.
+    if ass_ids:
+        pool = [] if count_only else DS.ss1_questions()
+        for idx, did in enumerate(ass_ids):
+            if not count_only:
+                records.append(dict(kind="device_register", device_id=did, type="assistive",
+                                    uplink_mbps=None, rtt_ms=None,
+                                    start_t=round(start_t[did], 6)))
+            t = start_t[did]
+            cursor = 0
+            n_q = 0
+            while t < run_s:
+                times = ([t + b * SS_BURST_GAP_S for b in range(SS_BURST_N)]
+                         if ss_bursty else [t])
+                for tq in times:
+                    if tq >= run_s:
+                        break
+                    if not count_only:
+                        q = pool[(idx * 997 + cursor) % len(pool)]
+                        sid = f"{did}|ss{cursor:04d}"
+                        tok = int(q["prompt_tokens"])
+                        records.append(dict(kind="session_start", device_id=did, session_id=sid,
+                                            t=round(tq, 6), source_session=q["qid"],
+                                            duration_s=float(l_ss_s), join_offset_s=0.0,
+                                            joined_part_way=False))
+                        records.append(dict(kind="history_batch", device_id=did, session_id=sid,
+                                            batch_id=f"{sid}|b000", t=round(tq, 6),
+                                            frame_refs=[f"{q['qid']}|img"],
+                                            est_tokens=tok, cum_tokens=tok,
+                                            frame_bytes=int(q["image_bytes"])))
+                        records.append(dict(kind="recall_question", device_id=did, session_id=sid,
+                                            opportunity_key=sid, question_id=q["qid"],
+                                            t=round(tq, 6), t_ask_session=0.0,
+                                            deadline_s=float(l_ss_s), question=q["question"],
+                                            options=[], gold_letter=None,
+                                            category=q["dataset"], history_tokens=tok))
+                        records.append(dict(kind="session_end", device_id=did, session_id=sid,
+                                            t=round(min(tq + float(l_ss_s), run_s), 6)))
+                        answers.append(dict(opportunity_key=sid, device_id=did, kind="assistive",
+                                            question_id=q["qid"],
+                                            device_answer=q["device_answer"],
+                                            device_score=q["device_score"],
+                                            device_model=q["device_model"],
+                                            device_host=q["device_host"]))
+                    cursor += 1
+                    n_q += 1
+                t += float(ss_period_s)
+            st.assistive_questions_per_device[did] = n_q
+            st.assistive_questions_total += n_q
+    st.n_assistive = len(ass_ids)
 
     for did in rob_ids:
         if not count_only:
@@ -459,6 +574,10 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
 
     meta = dict(seed=seed, n_devices=n_devices, ratio=ratio, run_s=run_s, mode=mode,
                 stagger_s=stagger_s, n_dashcam=n_dash, n_robot=n_rob,
+                n_assistive=n_ass, l_ss_s=float(l_ss_s),
+                ss_period_s=float(ss_period_s), ss_bursty=bool(ss_bursty),
+                ss_device_answer_host="unconfirmed",
+                ss_device_answer_source=("StudySS1 8492e02; NO _provenance block in any of the five artifacts, endpoint is localhost, so the brief's Orin 4B attribution cannot be confirmed from the file and Orin against an A6000 proxy is a different device tier"),
                 cadence_s=DS.NEXAR_INSTANT_CADENCE_S,
                 dashcam_deadline_s=DS.NEXAR_DEADLINE_S,
                 robot_deadline_s=DS.ROBOT_DEADLINE_S,

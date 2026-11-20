@@ -55,7 +55,8 @@ from typing import Any, Dict, Iterable, Iterator, List, Mapping, Optional
 
 SCHEMA_VERSION = "live2-schema-1"
 
-DEVICE_TYPES = ("dashcam", "robot")
+# D136: "assistive" is a SINGLE-SHOT type, one image plus question and NO HISTORY.
+DEVICE_TYPES = ("dashcam", "robot", "assistive")
 UPLOAD_MODES = ("A", "B")
 TIERS = ("gpu", "host", "cold")
 CACHE_PATHS = ("WARM", "COLD")

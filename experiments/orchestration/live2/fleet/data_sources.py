@@ -300,6 +300,73 @@ def eval_sessions() -> Dict[str, SessionMeta]:
 _DEV_RECALL: Optional[Dict[str, Dict[str, Any]]] = None
 
 
+SS1_DIR = ROOT / "results" / "casestudy" / "study_ss1"
+# D136 item 1: VizWiz FIRST, EgoThink second. The order is the brief's and is load-bearing, since
+# a fleet smaller than the VizWiz pool never reaches EgoThink at all.
+SS1_SOURCES = (("vizwiz", SS1_DIR / "vizwiz_val_manifest.jsonl",
+                SS1_DIR / "vizwiz_val_device.json", 4319),
+               ("egothink", SS1_DIR / "egothink_manifest.jsonl",
+                SS1_DIR / "egothink_device.json", 700))
+_SS1 = None
+
+
+def ss1_questions(verify: bool = True) -> List[Dict[str, Any]]:
+    """The StudySS1 single-shot pool, VizWiz then EgoThink, each with its committed device answer.
+
+    PROVENANCE IS UNCONFIRMED AND THAT IS RECORDED RATHER THAN ASSUMED. These five artifacts carry
+    NO `_provenance` block, which CLAUDE.md requires. They record `tier=device` and
+    `model=qwen3vl4b` with `endpoint: http://127.0.0.1:8000/v1`, which is localhost on whichever
+    machine ran them. So the brief's "Orin 4B answer" cannot be confirmed from the file, and Orin
+    against an A6000 proxy is a DIFFERENT DEVICE TIER. Every row therefore carries
+    `device_host="unconfirmed"`, and anything derived from it must say so.
+
+    `verify=True` re-derives each file's own committed `n` before use, so a wrong or truncated file
+    stops the run instead of being scored.
+    """
+    global _SS1
+    if _SS1 is not None:
+        return _SS1
+    out: List[Dict[str, Any]] = []
+    for name, man, dev, n_expect in SS1_SOURCES:
+        require(man, f"StudySS1 {name} manifest (D136)")
+        require(dev, f"StudySS1 {name} device answers (D136)")
+        d = json.load(open(dev))
+        if verify and int(d.get("n", -1)) != n_expect:
+            raise MissingInput(
+                f"StudySS1 {name} device file does not reproduce its committed n: got "
+                f"{d.get('n')!r}, expected {n_expect}")
+        ans = {r["qid"]: r for r in d.get("rows", [])}
+        for ln in open(man):
+            r = json.loads(ln)
+            a = ans.get(r["qid"])
+            if a is None:
+                continue
+            out.append(dict(qid=r["qid"], dataset=name, question=r["question"],
+                            image=r.get("image"), image_sha16=r.get("image_sha16"),
+                            references=list(r.get("references") or []),
+                            prompt_tokens=int(a.get("prompt_tokens") or 1),
+                            # SUBSTITUTION, checked rather than accepted. StudySS1 records no
+                            # per-image byte count. The images themselves would be measurable, and
+                            # the H100 verified staging (700 EgoThink hash-matching, 4,319 VizWiz
+                            # present), but they live at /dev/shm/ss1_data per
+                            # `ss1_build_manifests.py`, which is MACHINE-LOCAL tmpfs and is empty
+                            # on this host, so `stat` is not available from here.
+                            #
+                            # So the committed S-EMBER D2 median stands in. The direction of error
+                            # is UNKNOWN and that matters: S-EMBER D2 frames are 352x256 JPEG q88
+                            # while VizWiz and EgoThink come from entirely different sources at
+                            # unknown resolutions, so assistive uplink cost may be over- or
+                            # understated. Measuring on a host where the staging is live would
+                            # REMOVE this substitution rather than document it.
+                            image_bytes=int(round(E10A_SEMBER_Q88_D2_MEDIAN_B)),
+                            device_answer=a.get("answer"),
+                            device_score=(a.get("score") or {}),
+                            device_model=d.get("model"), device_tier=d.get("tier"),
+                            device_host="unconfirmed"))
+    _SS1 = out
+    return out
+
+
 def device_recall_answers(verify: bool = True) -> Dict[str, Dict[str, Any]]:
     """D87's device comparator, restricted to EVAL. question_id -> {pred, correct, gold}.
 
