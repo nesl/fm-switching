@@ -213,12 +213,33 @@ class TraceStats:
     session_play_counts: Dict[str, int] = field(default_factory=dict)
     clip_repeats: int = 0
     session_repeats: int = 0
+    # D142 item 1: which robot question set this trace drew from, the pool it drew from, and how
+    # often a question was asked MORE THAN ONCE in the run. With the LH-REQ pool at 69 questions
+    # over 51 sessions against the EVAL pool's 602 over 164, repeats stop being a footnote: the
+    # same question reaching several devices is the normal case, and a pooled count that does not
+    # say how many DISTINCT questions it covers overstates what the run measured.
+    robot_question_set: str = "eval"
+    robot_question_pool_n: int = 0
+    robot_session_pool_n: int = 0
+    robot_question_ask_counts: Dict[str, int] = field(default_factory=dict)
+    robot_distinct_questions_asked: int = 0
+    robot_question_repeats: int = 0
 
     def as_dict(self) -> Dict[str, Any]:
         d = dict(self.__dict__)
         d["dashcam_min_instants"] = min(self.dashcam_instants.values()) if self.dashcam_instants \
             else None
         d["robot_pool_meets_20"] = self.robot_questions_total >= 20
+        # D82's minimum is POOLED, so it is reported against the pooled count. The distinct count
+        # is reported beside it because the two diverge sharply on LH-REQ and a reader comparing
+        # arms needs to know whether 20 pooled questions covered 20 questions or 8.
+        d["robot_distinct_meets_20"] = self.robot_distinct_questions_asked >= 20
+        d["robot_asks_per_distinct_question"] = (
+            round(self.robot_questions_total / self.robot_distinct_questions_asked, 4)
+            if self.robot_distinct_questions_asked else None)
+        d["robot_pool_coverage"] = (
+            round(self.robot_distinct_questions_asked / self.robot_question_pool_n, 4)
+            if self.robot_question_pool_n else None)
         tok = sorted(self.robot_preload_tokens.values())
         d["robot_preload_tokens_min"] = tok[0] if tok else None
         d["robot_preload_tokens_median"] = tok[len(tok) // 2] if tok else None
@@ -233,7 +254,8 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                    count_only: bool = False,
                    l_ss_s: float = DEFAULT_L_SS_S,
                    ss_period_s: float = DEFAULT_SS_PERIOD_S,
-                   ss_bursty: bool = False) -> Dict[str, Any]:
+                   ss_bursty: bool = False,
+                   robot_question_set: str = "eval") -> Dict[str, Any]:
     """Build one run's opportunity trace. Returns {records, device_answers, meta, stats}.
 
     Deterministic in `seed` alone given (n_devices, ratio, run_s, stagger_s): the same seed
@@ -253,7 +275,11 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
     n_dash, n_rob, n_ass = _split_fleet3(n_devices, ratio)
 
     clips = DS.nexar_clip_meta()
-    sessions = DS.eval_sessions()
+    # D142 item 1 / D143 ruling A: "eval" is the committed default and its trace is byte-identical
+    # to every run before this parameter existed. "lh_req" restricts robots to the long-horizon
+    # questions on the EVAL split and drops sessions that carry none, so the POOL changes too and
+    # the session-repeat counters below are the thing to read, not an afterthought.
+    sessions = DS.robot_sessions(robot_question_set)
     orin = {} if count_only else DS.orin_dense_scores()
     dev_answers = {} if count_only else DS.device_recall_answers()
 
@@ -540,6 +566,8 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                                         device_correct=da["correct"], gold_letter=da["gold"],
                                         device_latency_s=DS.device_recall_latency_s(hist_tok),
                                         history_tokens=hist_tok))
+                st.robot_question_ask_counts[q.question_id] = (
+                    st.robot_question_ask_counts.get(q.question_id, 0) + 1)
                 nq += 1
             t_end = t0 + sm.duration_s
             if t_end <= run_s + 1e-9:
@@ -550,6 +578,11 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
             t = t_end
         st.robot_questions_per_device[did] = nq
     st.robot_questions_total = sum(st.robot_questions_per_device.values())
+    st.robot_question_set = robot_question_set
+    st.robot_question_pool_n = sum(len(sm.questions) for sm in sessions.values())
+    st.robot_session_pool_n = len(sessions)
+    st.robot_distinct_questions_asked = len(st.robot_question_ask_counts)
+    st.robot_question_repeats = sum(v - 1 for v in st.robot_question_ask_counts.values() if v > 1)
     st.session_repeats = sum(v - 1 for v in st.session_play_counts.values() if v > 1)
 
     records.sort(key=lambda r: (round(float(r.get("t", 0.0)), 6),
@@ -572,7 +605,8 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
         a["opportunity_id"] = assigned[a.pop("opportunity_key")]
     answers.sort(key=lambda r: (r["device_id"], r["opportunity_id"]))
 
-    meta = dict(seed=seed, n_devices=n_devices, ratio=ratio, run_s=run_s, mode=mode,
+    meta = dict(robot_question_set=robot_question_set,
+                seed=seed, n_devices=n_devices, ratio=ratio, run_s=run_s, mode=mode,
                 stagger_s=stagger_s, n_dashcam=n_dash, n_robot=n_rob,
                 n_assistive=n_ass, l_ss_s=float(l_ss_s),
                 ss_period_s=float(ss_period_s), ss_bursty=bool(ss_bursty),

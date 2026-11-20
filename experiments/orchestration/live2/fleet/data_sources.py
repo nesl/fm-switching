@@ -253,7 +253,49 @@ def _eval_question_ids() -> set:
     return set(mod.split()["eval_questions"])
 
 
+# D142 item 1 / D143 ruling A: the LONG-HORIZON robot question set. Robots in a live policy run
+# draw ONLY from these questions, whose evidence lies outside the 120 s recent window, and ONLY
+# from the EVAL split. The ids come from the COMMITTED definition file, never re-derived here: two
+# independently written filters over the same 97 would differ somewhere and nothing would catch it.
+LH_REQ_DEFINITION = ROOT / "results/orchestration/live2/lh_req/lh_req_definition.json"
+
+ROBOT_QUESTION_SETS = ("eval", "lh_req")
+
+_LH_REQ: Optional[set] = None
+
+
+def lh_req_question_ids() -> set:
+    """The committed LH-REQ ids, case-folded, intersected with the EVAL split.
+
+    CASE IS THE TRAP HERE and it has caught two sessions. Both id collections are mixed case: the
+    split module's eval set is 444 lower and 158 upper, LH-REQ is 63 lower and 34 upper. Folding
+    ONE side and calling the split module's plain set membership returns EVAL 43 / DEV 20 with 34
+    unmatched, and 34 is exactly the count of upper-case LH-REQ ids, so the wrong answer looks
+    plausible. The committed per_split totals are the only thing that catches it, which is why the
+    assertion below reads them from the file rather than trusting this function.
+    """
+    global _LH_REQ
+    if _LH_REQ is None:
+        require(LH_REQ_DEFINITION, "the committed LH-REQ question-set definition (D142 item 1)")
+        d = json.loads(LH_REQ_DEFINITION.read_text())
+        allids = {q.lower() for q in d["lh_req_question_ids"]}
+        if len(allids) != int(d["n"]):
+            raise MissingInput("LH-REQ ids collide under case folding: %d distinct of %d"
+                               % (len(allids), int(d["n"])))
+        ev = {q.lower() for q in _eval_question_ids()}
+        keep = allids & ev
+        want = int(d["per_split"]["EVAL"])
+        if len(keep) != want:
+            raise MissingInput(
+                "LH-REQ x EVAL is %d but the committed definition says per_split EVAL = %d. This "
+                "is the case-folding control, not a cosmetic check: fold both sides."
+                % (len(keep), want))
+        _LH_REQ = keep
+    return _LH_REQ
+
+
 _SESSIONS: Optional[Dict[str, SessionMeta]] = None
+_LH_REQ_SESSIONS: Optional[Dict[str, SessionMeta]] = None
 
 
 def eval_sessions() -> Dict[str, SessionMeta]:
@@ -294,6 +336,41 @@ def eval_sessions() -> Dict[str, SessionMeta]:
             raise MissingInput("the EVAL split selected no S-EMBER question")
         _SESSIONS = out
     return _SESSIONS
+
+
+def lh_req_sessions() -> Dict[str, SessionMeta]:
+    """EVAL sessions carrying at least one LH-REQ question, with ONLY those questions kept.
+
+    Sessions with no LH-REQ question are dropped from the pool entirely. Keeping them would have a
+    robot play a session that can never ask anything, which does not change the question count but
+    does change how many sessions the chain gets through, so the two are not interchangeable.
+
+    Session durations, question times, options and gold are untouched: this is a filter on the
+    question list, not a new workload.
+    """
+    global _LH_REQ_SESSIONS
+    if _LH_REQ_SESSIONS is None:
+        keep = lh_req_question_ids()
+        out: Dict[str, SessionMeta] = {}
+        for vid, sm in eval_sessions().items():
+            qs = [q for q in sm.questions if q.question_id.lower() in keep]
+            if qs:
+                out[vid] = SessionMeta(session_id=vid, duration_s=sm.duration_s, questions=qs)
+        n = sum(len(s.questions) for s in out.values())
+        if n != len(keep):
+            raise MissingInput(
+                "the LH-REQ session filter kept %d questions but %d ids were selected, so some id "
+                "does not appear in any EVAL session" % (n, len(keep)))
+        _LH_REQ_SESSIONS = out
+    return _LH_REQ_SESSIONS
+
+
+def robot_sessions(question_set: str = "eval") -> Dict[str, SessionMeta]:
+    """The robot session pool for a named question set. One entry point, so a caller cannot pick
+    the pool and the question filter independently and get a mismatched pair."""
+    if question_set not in ROBOT_QUESTION_SETS:
+        raise ValueError("question_set %r not in %r" % (question_set, ROBOT_QUESTION_SETS))
+    return eval_sessions() if question_set == "eval" else lh_req_sessions()
 
 
 # ------------------------------------------------------------------ device answers (D87)

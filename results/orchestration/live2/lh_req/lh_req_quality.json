@@ -1,0 +1,111 @@
+{
+ "_what": "LH-REQ robot quality table. A COMMITTED INPUT FILE, read by the policy, never a constant in policy code: refilling it is a data update that leaves the frozen policy byte-identical.",
+ "_ruling": "D143 ruling A, D6-compliant: the table is FITTED ON THE DEV SPLIT (28 questions) and LH-REQ robots DRAW ONLY FROM THE EVAL SPLIT (69 questions) in every run. The EVAL and all-97 blocks are recorded for reference and MUST NOT be read by the policy.",
+ "_fit_split": "DEV",
+ "_draw_split": "EVAL",
+ "_precision_warning": "The DEV fit rests on 28 questions, with cloud D2 at 7 of 28 and cloud RECENT at 3 of 28, so the fitted numbers carry wide Wilson intervals. They are recorded beside every point estimate as the user ruled; a freeze that quotes the point estimate alone would overstate its own precision.",
+ "_device_stack": "D87, StudyO-Q4 4B-I x RECENT, the ORIN2 in-process harness. NOT the ORIN3 vLLM stack used for single-shot; the two must not be placed side by side as one device's numbers.",
+ "_cloud_source": "results/sember/study_acc2/acc2_requests.jsonl, which carries question_id, rep, split and correct per request, so both sides are computed on the SAME questions. Ids join on a 60-character prefix, 97 of 97 found.",
+ "_controls_passed": [
+  "the all97 cloud D2 figure reproduces the committed d2_acc of 45.3608 in lh_req_definition.json",
+  "the all97 cloud RECENT figure reproduces the committed recent_acc of 21.6495",
+  "the device filter reproduces D87 exactly: 845 questions, 277 correct, 32.781 percent",
+  "DEV 28 and EVAL 69 reproduce the committed per_split, with zero unmatched ids under case folding of BOTH sides"
+ ],
+ "_mismatched_denominator_note": "An earlier version of this comparison subtracted split-subset device figures from the cloud's all-97 aggregate. Every arithmetic check passed and the result was wrong in direction. Both sides here are on the same question set.",
+ "per_split": {
+  "DEV": {
+   "cloud_D2": {
+    "n": 28,
+    "correct": 7,
+    "accuracy": 0.25,
+    "ci95_wilson": [
+     0.126763,
+     0.43356
+    ]
+   },
+   "cloud_RECENT": {
+    "n": 28,
+    "correct": 3,
+    "accuracy": 0.107143,
+    "ci95_wilson": [
+     0.037118,
+     0.271962
+    ]
+   },
+   "device_4B_RECENT": {
+    "n": 28,
+    "correct": 3,
+    "accuracy": 0.107143,
+    "ci95_wilson": [
+     0.037118,
+     0.271962
+    ]
+   },
+   "cross_tier_gain_pp": 14.2857,
+   "representation_gap_pp": 14.2857
+  },
+  "EVAL": {
+   "cloud_D2": {
+    "n": 69,
+    "correct": 37,
+    "accuracy": 0.536232,
+    "ci95_wilson": [
+     0.419782,
+     0.64886
+    ]
+   },
+   "cloud_RECENT": {
+    "n": 69,
+    "correct": 18,
+    "accuracy": 0.26087,
+    "ci95_wilson": [
+     0.171854,
+     0.375108
+    ]
+   },
+   "device_4B_RECENT": {
+    "n": 69,
+    "correct": 17,
+    "accuracy": 0.246377,
+    "ci95_wilson": [
+     0.159896,
+     0.359609
+    ]
+   },
+   "cross_tier_gain_pp": 28.9855,
+   "representation_gap_pp": 27.5362
+  },
+  "all97": {
+   "cloud_D2": {
+    "n": 97,
+    "correct": 44,
+    "accuracy": 0.453608,
+    "ci95_wilson": [
+     0.35819,
+     0.552561
+    ]
+   },
+   "cloud_RECENT": {
+    "n": 97,
+    "correct": 21,
+    "accuracy": 0.216495,
+    "ci95_wilson": [
+     0.146187,
+     0.308403
+    ]
+   },
+   "device_4B_RECENT": {
+    "n": 97,
+    "correct": 20,
+    "accuracy": 0.206186,
+    "ci95_wilson": [
+     0.137626,
+     0.297131
+    ]
+   },
+   "cross_tier_gain_pp": 24.7422,
+   "representation_gap_pp": 23.7113
+  }
+ }
+}
