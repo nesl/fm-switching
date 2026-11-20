@@ -590,11 +590,23 @@ class Live2Coordinator:
                                  representation_defaulted=getattr(
                                      o, "representation_defaulted", False))
         sent = len(s.sent_bytes_for)
+        # RECENT-send fix (user ruling 2026-11-20): a recall released as RECENT sends what it is CHARGED, the recent
+        # window, not the whole session. Before this fix the budget and est_tokens used tokens_for_representation
+        # (467 for RECENT) while the body carried every frame of the session. The window is the session's most recent
+        # frames, the count proportional to the charged share of the history: k = ceil(len(frames) * tokens / whole),
+        # at least 1. Every other representation is unchanged (byte-identical frame list).
+        refs = list(s.frames)
+        idx0 = 0
+        if str(getattr(o, "requested_representation", None) or "").upper() == "RECENT" and refs:
+            whole_tok = max(int(s.est_tokens), 1)
+            k = max(1, min(len(refs), -(-len(refs) * int(tokens) // whole_tok)))
+            idx0 = len(refs) - k
+            self.counts["recent_window_sends"] += 1
         if whole:
-            frames = [dict(frame_ref=r, path=self._path(r)) for r in s.frames]
+            frames = [dict(frame_ref=r, path=self._path(r)) for r in refs[idx0:]]
         else:
-            frames = ([dict(frame_ref=r, path=None) for r in s.frames[:sent]]
-                      + [dict(frame_ref=r, path=self._path(r)) for r in s.frames[sent:]])
+            frames = ([dict(frame_ref=r, path=None) for r in refs[idx0:sent]]
+                      + [dict(frame_ref=r, path=self._path(r)) for r in refs[max(sent, idx0):]])
         self._submit(kind="recall", device_id=o.device_id, session_id=o.session_id,
                      opportunity_id=o.opp_id, decision_id=did, frames=frames,
                      est_tokens=tokens, question=o.question, options=o.options,
@@ -705,7 +717,8 @@ class Live2Coordinator:
                     cache_path=path, request_id=sub.request_id,
                     prompt_tokens=(pt if pt is not None else sub.est_tokens),
                     cached_tokens=ct))
-            self._settle(sub, first_s, done_s, path, t, ct, self._score_of(sub, r))
+            self._settle(sub, first_s, done_s, path, t, ct, self._score_of(sub, r),
+                         http_status=r.get("http_status"))
             self.counts["completed_" + sub.kind] += 1
         self.futures[:] = still
 
@@ -722,7 +735,8 @@ class Live2Coordinator:
         return {}
 
     def _settle(self, sub: Live2Submission, first_s, done_s: float, path, t: float,
-                cached_tokens=None, scored: Optional[Dict[str, Any]] = None) -> None:
+                cached_tokens=None, scored: Optional[Dict[str, Any]] = None,
+                http_status: Optional[int] = None) -> None:
         if sub.kind in ("piece", "whole") and sub.request_id in self.builds:
             b = self.builds.pop(sub.request_id)
             s = self.st.sessions.get(b["session_id"])
@@ -752,6 +766,18 @@ class Live2Coordinator:
             return
         o = self.st.opps.get(sub.opportunity_id) if sub.opportunity_id else None
         if o is None:
+            return
+        # D144 (user ruling 2026-11-20): a non-200 response is a MISS. Before this, a refused request (e.g. HTTP 400
+        # over-context) was settled as an on-time cloud answer with letter "X" because on_time was computed from the
+        # completion time alone. Now no cloud answer is emitted: the device answer stands, the question is a miss.
+        if http_status is not None and int(http_status) != 200:
+            o.state = "failed"
+            self.counts["failed_" + sub.kind] += 1
+            self.answers.append(dict(opportunity_id=o.opp_id, kind=o.kind, device_id=o.device_id,
+                                     decision="CLOUD-failed", delivered_s=None,
+                                     deadline_s=o.deadline_abs(), served_by="device", on_time=False,
+                                     cache_path=path, request_id=sub.request_id,
+                                     http_status=int(http_status)))
             return
         delivered = first_s if first_s is not None else done_s
         o.served_at = delivered
@@ -810,6 +836,9 @@ class Live2Coordinator:
         """
         sub = r.get("sub")
         if sub is None or sub.kind in ("piece", "whole") or not sub.opportunity_id:
+            return None
+        # D144: a non-200 response is a miss, never forwarded as a cloud answer (the decision thread's _settle records it)
+        if r.get("http_status") is not None and int(r.get("http_status")) != 200:
             return None
         o = self.st.opps.get(sub.opportunity_id)
         if o is None:
