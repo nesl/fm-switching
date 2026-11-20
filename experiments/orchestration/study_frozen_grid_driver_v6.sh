@@ -119,6 +119,10 @@ ordered_cells() {   # user order (2026-11-20, after D144): the requeued seed-6 h
   # user ruling 2026-11-20: after the RECENT-send fix, REDO eco-llm and hybrid-F-lhreq at 16 devices seeds 0, 4, 5, 6
   # AHEAD of the rest of the sweep, as new cells tagged _postfix (the pre-fix runs are kept, labelled pre-fix)
   for s in 0 4 5 6; do for a in eco-llm hybrid-F-lhreq; do echo "$a 16 $s _postfix"; done; done
+  # user ruling 2026-11-20 (D151): flash's cost-model-gate calibration cells run AHEAD of the remaining sweep. Read at
+  # every run boundary from $OUT/CALIB_CELLS, one "arm n seed" per line, so cells needing an arm not yet built (WARM-ALL
+  # plus LRU, warm-ahead) can be appended when it exists. A cell already run in the frozen grid or sweep is skipped.
+  grep -v '^#' $OUT/CALIB_CELLS 2>/dev/null | awk 'NF>=3 {print $1, $2, $3}'
   local sw=$(grep -v '^#' $OUT/SWEEP_ARMS 2>/dev/null | tr -s ' \n' ' ') top=$(grep -v '^#' $OUT/TOP5 2>/dev/null | tr -s ' \n' ' ')
   for x in $sw; do echo "$x 16 4"; done
   for x in $sw; do echo "$x 18 4"; done
