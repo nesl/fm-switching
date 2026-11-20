@@ -471,22 +471,40 @@ def controls(paths, runs, side):
              "mean absolute difference at the numerical floor says the frame order carries "
              "nothing and the episode conditions are bags of frames, not episodes")
     # 3. the warm path: presence separated from zero, per condition
-    warm = defaultdict(lambda: dict(n=0, absent=0, zero=0, hit=0, cached_sum=0))
+    # the first instant of an episode CANNOT have a warm prefix, and the two builds report that
+    # differently: the H100's emits cached_tokens 0, the Orin's vLLM 0.20.0 omits the field. Both
+    # mean cold. Counting an omission there as a dead instrument would turn a build difference
+    # into stop condition 5, so absence is split by whether the request could have hit at all.
+    first = {}
+    for r in raw:
+        if r.get("control") or r.get("error") or r.get("t") is None:
+            continue
+        k = (r["model"], r["condition"], r["file_name"])
+        if k not in first or float(r["t"]) < first[k]:
+            first[k] = float(r["t"])
+    warm = defaultdict(lambda: dict(n=0, absent_on_first=0, absent_later=0, zero=0, hit=0,
+                                    cached_sum=0, n_first=0))
     for r in raw:
         if r.get("control") or r.get("error") or r.get("prompt_tokens") is None:
             continue
         w = warm[f"{r['model']}|{r['condition']}"]
         w["n"] += 1
+        is_first = (r.get("t") is not None
+                    and float(r["t"]) <= first.get((r["model"], r["condition"],
+                                                    r["file_name"]), float("inf")))
+        w["n_first"] += bool(is_first)
         if not r.get("cached_tokens_present"):
-            w["absent"] += 1
+            w["absent_on_first" if is_first else "absent_later"] += 1
         elif not r.get("cached_tokens"):
             w["zero"] += 1
         else:
             w["hit"] += 1
             w["cached_sum"] += int(r["cached_tokens"])
-    out["warm_path"] = {k: dict(v, mean_cached_tokens_on_hits=(
-        v["cached_sum"] / v["hit"] if v["hit"] else None),
-        verdict=("INSTRUMENT NEVER READS" if v["absent"] == v["n"]
+    out["warm_path"] = {k: dict(
+        v, mean_cached_tokens_on_hits=(v["cached_sum"] / v["hit"] if v["hit"] else None),
+        verdict=("INSTRUMENT NEVER READS" if v["absent_later"] + v["absent_on_first"] == v["n"]
+                 else "absent only where a hit was impossible (a build difference, not a dead "
+                      "read)" if v["absent_later"] == 0 and v["absent_on_first"]
                  else "no warm prefix ever" if v["hit"] == 0 else "warm path exercised"))
         for k, v in sorted(warm.items())}
     # 4. prompt-token parity between the two models on the same request

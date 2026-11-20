@@ -317,8 +317,12 @@ def main():
                 print(f"  {i + 1}/{len(rows)} err {n_err} neither {n_neither}", flush=True)
 
         # ---- control: grey frames, one per distinct frame count in the run
+        # `--greys 0` means NO grey control. The first version computed the repeat count as
+        # max(1, greys // len(counts)), which is 1 at greys=0, and then built a body with
+        # grey=None, which sent GREY.mp4 to store_path and raised FileNotFoundError after every
+        # real request had already been written. Found on the Orin's gate run.
         grey = grey_jpeg() if a.greys else None
-        counts = sorted({r["n_frames"] for r in rows})
+        counts = sorted({r["n_frames"] for r in rows}) if a.greys else []
         for n in counts:
             proto = next(r for r in rows if r["n_frames"] == n)
             for rep in range(max(1, a.greys // max(1, len(counts)))):

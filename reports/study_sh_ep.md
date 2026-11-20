@@ -274,6 +274,42 @@ for a device deployment, not that deployment's cost**, and every H3 number from 
 that way. If eager mode is not required for memory or stability on this box, the H3 numbers are worth
 re-taking without it; if it is required, the label stands and the bound is the finding.
 
+### 5b.3 The EP-G gate: parity holds and H3's mechanism is already visible
+
+The Orin's five-clip EP-G gate, 65 requests, before either box swept.
+
+| gated quantity | result |
+|---|---|
+| per-request prompt tokens against the H100 precheck, same request ids | **65 of 65 exact**, at every frame count from 9 to 21: 3,084, 3,422, 3,760, ... 7,140 |
+| `cached_tokens` on appended requests | present and above zero on **60 of 60**, and byte-identical to the H100's: 3,056, 3,392, 3,728, ... 6,768 |
+
+Stop condition 3 is satisfied, and three things are settled by it rather than assumed. The
+multimodal processor parity holds across two different vLLM builds with only the server-level
+`--mm-processor-kwargs` matched. `--trust-request-mm-kwargs` was inert, as predicted from the runner
+sending no per-request kwargs. And the uuid-only delta mode IS honoured on vLLM 0.20.0: every frame
+contributes its 338 tokens although its bytes went out once, with none of the low-by-a-multiple-of-338
+signature that a dropped reference would have produced.
+
+**H3's mechanism is measurable already.** The marginal uncached tokens per appended instant are about
+**366**, constant across episode length: the 338-token new frame plus a roughly 28-token recompute at
+the prefix boundary. That is the quantity H3 is about, and it does not grow with the episode. It is a
+gate observation on five clips, not the study's answer, and it is cited at that register.
+
+**A cross-build reporting difference the scorer now handles, not a failure.** On the cold first instant
+of each episode the Orin's vLLM 0.20.0 OMITS `cached_tokens`, where the H100's build emits 0. Both mean
+no reuse, and an omission there is the one place a hit was impossible anyway. Counting it as a dead
+instrument would have turned a build difference into stop condition 5, so `controls.warm_path` now
+splits absence by whether the request could have hit at all: absence only on episode-first instants is
+reported as a build difference, and the stop fires only when the field is absent where reuse was
+possible. Here the instrument reads on 60 of 65 and is silent on exactly the 5 genuine misses, so
+**stop condition 5 is not triggered**.
+
+**One kit bug, found by the gate and fixed.** `--greys 0` did not disable the grey control: the repeat
+count was `max(1, greys // len(counts))`, which is 1 at zero, and the loop then built a grey body with
+no bytes, sent `GREY.mp4` to `store_path` and raised `FileNotFoundError`. It crashed after all 65 real
+requests had been written, so no gate data was lost. The grey loop is now skipped outright when
+`--greys 0`.
+
 ## 6. Mechanism verification, Steps 0 to 5, before the sweep
 
 **Step 0, what would make this run uninterpretable.** Five checks were run and three of them came back
