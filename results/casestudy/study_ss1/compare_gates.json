@@ -77,6 +77,18 @@
     "my_call_if_it_passes": "report the stratum WITH the verification and its limit stated in the same breath, not as a clean cut. If the association is weak or absent, the stratum stays absent and the offset is refuted rather than merely unverified, which is a better outcome than tonight's 'unverifiable'."
    },
    "no_size_column_confirmed": "the CSV columns are IMG, WORKERID, NON, BLR, BRT, DRK, OBS, FRM, ROT, OTH, OTH_TEXT, REJECT, SPLIT. There is no width, height or area field, so no exact size attribute exists to join against and the association route is the only one available."
+  },
+  "SPLIT_CHECK_IS_VACUOUS": {
+   "it_was_proposed_as_a_free_refutation_route": "under a correct offset every mapped manifest id should land on a row whose SPLIT is val; any landing on train or test would refute the offset in one pass with no statistics.",
+   "it_ran_and_passed": "at k=28000, 3,167 of 4,319 manifest ids map onto a CSV row and ALL 3,167 land on VAL rows, 0 on TRAIN, 0 on TEST. 1,152 map onto no row at all.",
+   "BUT_IT_COULD_NOT_HAVE_FAILED": {
+    "finding": "THE FILENAME PREFIX DETERMINES THE SPLIT. Tallying prefix against SPLIT over the whole file: every one of the 15,835 VizWiz_val_* rows is VAL, every one of the 99,860 VizWiz_train_* rows is TRAIN, every one of the 39,965 VizWiz_test_* rows is TEST. Only the VizWiz_v2_* prefix spans two splits, 34,885 TRAIN and 5,520 VAL.",
+    "therefore": "because the probe key is built with the val_ prefix, it can only ever land on a VAL row, FOR ANY OFFSET k. The pass rate is independent of k and the check has NO REFUTATION POWER.",
+    "verdict": "VACUOUS. The 3,167 of 3,167 result is a tautology, not evidence, and must not be banked as a partial verification of the offset."
+   },
+   "why_this_is_worth_recording": "it is the same shape as the identifier-based duplicate check passing clean at 4,319 on 4,319: a check that passes for a reason that does not bear on the question. It is cheap, it reads as reassuring, and its outcome carries no information about what it was aimed at. A free check is only worth running first if it CAN fail.",
+   "what_it_does_incidentally_establish": "coverage, not verification: under k=28000 exactly 3,167 of 4,319 manifest ids would have an annotation row, 73.3 percent, with 1,152 having none. That is a coverage figure and is independent of whether the mapping is correct.",
+   "consequence_for_the_plan": "the k-SCAN is now the ONLY discriminating test available. There is no free refutation route to run before it, so if the stratum is pursued at all it goes straight to the scan over 28000 plus or minus 50, reading the SHAPE: a sharp peak identifies the offset, a flat plateau means the flags carry too little per-image signal to resolve it and the stratum stays absent with that as the stated reason, and association at zero everywhere refutes the offset family."
   }
  },
  "host_and_load_condition": {
