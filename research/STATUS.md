@@ -1,5 +1,9 @@
 # FM-switching — Project Status
 
+Last updated: 2026-11-19 (**StudyLIVE2-pilot MORNING REPORT (section 8): overnight baselines on seed 0 break between 8 and 10 devices for every arm that passes at 8; no policy runs (v1.3-fast failed its own piece test, v1.4-fast not released); transport ReadErrors at 16 devices for always-send arms need a ruling. STOPPED for review.**)
+
+Last updated: 2026-11-18 (later 9) (**StudyLIVE2-pilot INTERIM report on the D114 build (section 7): baselines done; edf's 8-device break comes from D114's C_inflight 4 (C_inflight 8 passes like always-cloud FCFS); policy-core v1.0 superseded; waiting for v1.2-fast release (D125). Pilot results are never round-1 results.**)
+
 Last updated: 2026-11-19 (later 4) (**StudySS1 DEVICE PASS COMPLETE (Jetson Orin, Qwen3-VL-4B under
 vLLM, StudyORIN3 config, real inference; D136): the single-shot dataset-selection benchmark kit is
 built and the device 4B side is measured on both full sets, 0 errors on 5,019 questions. VizWiz-VQA
