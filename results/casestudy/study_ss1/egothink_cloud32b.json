@@ -15436,7 +15436,25 @@
       "prefix_cache_hits": 0,
       "prefix_cache_queries": 8142882
     },
-    "non_question_requests_note": "counters are server-wide for this server process (started 17:16:42 for this run; no operator probe ever reached it). At the VizWiz stamp the totals exceed 4,319 by the first EgoThink questions (Activity/000 to 003, no shared-image candidates), so every VizWiz mm hit is a VizWiz candidate."
+    "non_question_requests_note": "counters are server-wide for this server process (started 17:16:42 for this run; no operator probe ever reached it). At the VizWiz stamp the totals exceed 4,319 by the first EgoThink questions (Activity/000 to 003, no shared-image candidates), so every VizWiz mm hit is a VizWiz candidate.",
+    "counters_note": "Counters are CUMULATIVE for ONE server instance (started 2026-11-19 17:16:42 for this run; VizWiz then EgoThink on the same instance; no operator probe ever reached it). Per-dataset figures are DIFFERENCES between stamps, computed here: never read a total as one dataset's count. The VizWiz stamp was taken after the first EgoThink questions (Activity/000 to 003, no shared-image candidates) had run. The EgoThink stamp is the last 10-s snapshot before the server stopped, so it may omit up to about 10 s of the final requests.",
+    "per_dataset": {
+      "vizwiz": {
+        "mm_cache_hits": 36,
+        "mm_cache_hit_candidates": 36,
+        "mm_cache_queries": 4319,
+        "prefix_cache_hits": 0,
+        "derivation": "VizWiz stamp hits (the 4 EgoThink requests already in it carry no candidate); queries = the 4,319 VizWiz questions"
+      },
+      "egothink": {
+        "mm_cache_hits": 16,
+        "mm_cache_hit_candidates": 16,
+        "mm_cache_queries_seen": 686,
+        "questions": 700,
+        "prefix_cache_hits": 0,
+        "derivation": "EgoThink stamp minus VizWiz stamp; queries_seen = EgoThink stamp queries minus the 4,319 VizWiz questions (less than 700 by any requests after the last snapshot)"
+      }
+    }
   },
   "salt_fix": "cache_salt / -> _ (vLLM 0.31.0 rejects /); kit files unchanged"
 }
