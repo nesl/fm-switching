@@ -1,5 +1,27 @@
 # FM-switching — Project Status
 
+Last updated: 2026-11-19 (later 2) (**StudyEGOLIFE-feas, annotation-only, NO VIDEO, for D139. HEADLINE:
+THE USABLE COUNT IS 3 AND THE RULE FIRES - OFFLINE CORROBORATION ONLY. Applying the rule as written (gap >
+2 min, D2 history <= 19,400 tokens, no audio, no names) to the same-day single-target analysis set: 281 ->
+281 -> 20 -> 15 -> 3. The margin is not close: an upper bound that repairs every excluded multi-target row
+most favourably gives 4, and a 32,768 budget gives 5. `need_name` IS THE BINDING FILTER, NOT THE TOKEN
+BUDGET - 197 of 281 questions need identity recognition and only 34 of 281 need neither audio nor names.
+Coverage, reported with its denominator because 43.8 percent of rows are excluded: of 500 rows, analysis 281,
+`time_list` 36, cross-day 170, MALFORMED 13 - and the 13 pack several timestamps into the single `time`
+string, so a reader taking the first 8 characters gets a plausible gap from a malformed field and raises
+nothing. EgoLifeQA is a MULTI-HOUR benchmark, not a minutes-scale one: 207 of 281 beyond 30 min, median 1 h
+46 m, and over all 500 rows the median question would need 951,241 D2 tokens, 49x budget. Tokens taken from
+live2's own `d2_batch_tokens` rather than re-derived: 20 of 46 fit under 19,400 and under the 19,381
+breakeven, 39 under 32,768; 19.4k buys 7 min 10 s of D2 history. Disk at 14.5 MB per 30 s clip: 0.55 GB for
+the 3 usable, 9.74 GB deduplicated for all 46, neither fetched. MIT and UNGATED, so the StudyOEQA gate does
+not fire. The `3f2002c` GRAVEYARD closure answered a DIFFERENT question and is recorded, not re-litigated;
+what carries forward is that recurring failure mode 2 is AGGRAVATED, because the dense caption layer is
+CHINESE-ONLY. SEPARATELY, a check on the LH-REQ headline in flight that CORRECTS THE PREMISE IT WAS GIVEN:
+S-EMBER is FIVE-option, so chance is 20.00 percent and not 25. RECENT's 21.65 percent is 21 of 97 against
+19.4 expected, exact binomial p = 0.381, INDISTINGUISHABLE FROM CHANCE but 1.65 pp ABOVE it, not below;
+D2's 45.36 percent is p = 1.5e-8. State the gap as 'D2 is above chance where RECENT is not', never as
+'RECENT is below chance'. Report `reports/study_egolife_feas.md`.**)
+
 Last updated: 2026-11-19 (**StudyLIVE2-pilot MORNING REPORT (section 8): overnight baselines on seed 0 break between 8 and 10 devices for every arm that passes at 8; no policy runs (v1.3-fast failed its own piece test, v1.4-fast not released); transport ReadErrors at 16 devices for always-send arms need a ruling. STOPPED for review.**)
 
 Last updated: 2026-11-18 (later 9) (**StudyLIVE2-pilot INTERIM report on the D114 build (section 7): baselines done; edf's 8-device break comes from D114's C_inflight 4 (C_inflight 8 passes like always-cloud FCFS); policy-core v1.0 superseded; waiting for v1.2-fast release (D125). Pilot results are never round-1 results.**)
