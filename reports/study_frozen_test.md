@@ -489,3 +489,247 @@ log line, client dispatch lag p90 1.2 to 1.3 s against 28 ms at 16 devices). Stu
 3. **Grid size**, 16 and 20 as ruled, against 16 and 18.
 4. **Whether an inert value term is acceptable in a frozen policy**, given that three separate corrections to it
    changed no decision.
+
+## 12. Offline analysis of the overnight grid (A6000, 2026-11-20, user request)
+
+CPU only, no new runs. Every number comes from the committed run directories under
+`results/orchestration/live2/frozen_test/runs`; the script is
+`experiments/orchestration/live2/offline_grid_analysis.py` and its output is
+`results/orchestration/live2/frozen_test/offline_grid_analysis.json`.
+
+REGISTERS, because the five answers mix them. MEASURED means read from a run's own logs. MODELLED
+means computed with the committed cost curve (`costs.recall_ttft_s` at COLD) on measured inputs.
+CONSTRUCTED means a counterfactual bound: what a different policy could have had, never what
+happened. Each table says which it is.
+
+Two scope limits apply throughout. hybrid-F6 has no seed-6 cell at 16 devices (its two attempts
+were refused at preflight during the 06:32 git-gc window), so its pooled rows cover seeds 4 and 5
+while every other arm covers 4, 5 and 6: the hybrid-F6 column is NOT a like-for-like comparison
+with the rest and is not offered as one. hybrid-F's seed-6 cell landed while this analysis was
+being written and IS included. And b7 and mooncake reject
+far more robot questions than the hybrids, so their "missed" rows are dominated by questions that
+never reached the cloud at all, which is a different event from a question that was sent and was
+late.
+
+### 12.1 Robot miss decomposition (item 1), 16 devices, seeds 4 to 6, seconds, p50
+
+| arm | outcome | n | never sent | wait before release | engine queue (residual) | prefill (modelled) | after first token | arrival to first token |
+|---|---|---|---|---|---|---|---|---|
+| b7-edf-feasibility | on time | 47 | 0 | 0.1222 | 0.6166 | 2.1211 | 0.0222 | 3.0249 |
+| b7-edf-feasibility | missed | 18 | 14 | 0.1027 | 2.1847 | 3.9287 | 0.0222 | 6.1382 |
+| eco-llm | on time | 46 | 0 | 0.1169 | 0.7103 | 2.1211 | 0.0222 | 2.9238 |
+| eco-llm | missed | 19 | 1 | 0.1218 | 1.0691 | 5.3568 | 0.0222 | 6.6661 |
+| hybrid-F-lhreq | on time | 50 | 0 | 0.0984 | 0.5662 | 2.1211 | 0.0222 | 2.9429 |
+| hybrid-F-lhreq | missed | 15 | 1 | 0.1073 | 0.5675 | 5.3621 | 0.0222 | 6.0820 |
+| hybrid-F6-lhreq | on time | 35 | 0 | 0.2796 | 0.4660 | 2.1211 | 0.0222 | 3.2306 |
+| hybrid-F6-lhreq | missed | 10 | 1 | 0.5211 | 0.6895 | 5.7158 | 0.0222 | 6.7904 |
+| mooncake | on time | 47 | 0 | 0.1097 | 0.7655 | 2.1211 | 0.0222 | 3.1148 |
+| mooncake | missed | 18 | 14 | 0.1131 | 2.1408 | 3.9287 | 0.0222 | 6.1632 |
+
+How the split is formed. Waiting before release is `t_submit - t_opportunity`, MEASURED. Prefill is
+MODELLED: the committed COLD curve on the measured uncached prompt, and the uncached prompt is the
+whole prompt in every robot request in every cell (see 12.2). The engine queue is the RESIDUAL,
+`(t_first_token - t_submit) - prefill`, clamped at zero, so it carries the model's error; the JSON
+records how often the model exceeded the measured TTFT per cell. "After first token" is
+`t_delivered - t_first_token`, MEASURED, and is a constant by construction (12.3).
+
+The shape: waiting before release is 0.10 to 0.52 s and never the binding term. Prefill of the
+history is, at 2.12 s on the questions that met the deadline and 3.93 to 6.42 s on those that
+missed. The 5 s robot deadline is spent on rebuilding the history, not on scheduling it.
+
+### 12.2 Is "peak GPU-resident history 0" an observation (item 2)
+
+Three independent instruments, 16 devices, seeds 4 to 6:
+
+| cell | robot requests | with cached_tokens > 0 | residency rows | believed tiers | prefix_cache_hits | prefix_cache_queries | mm_cache_hits | telemetry_cached_tokens non-null |
+|---|---|---|---|---|---|---|---|---|
+| b7 s4 | 15 | 0 | 372 | all cold | 0 | 5,458,622 | 285 | 0 |
+| b7 s5 | 21 | 0 | 370 | all cold | 0 | 5,548,713 | 735 | 0 |
+| b7 s6 | 15 | 0 | 372 | all cold | 0 | 5,494,250 | 180 | 0 |
+| eco-llm s4 / s5 / s6 | 20 / 24 / 20 | 0 | 372 / 370 / 372 | all cold | 0 | 5,579,984 / 5,622,934 / 5,593,834 | 345 / 1,065 / 405 | 0 |
+| hybrid-F s4 / s5 / s6 | 20 / 24 / 20 | 0 | 372 / 370 / 372 | all cold | 0 | 5,301,776 / 5,317,513 / 5,324,320 | 345 / 1,065 / 405 | 0 |
+| hybrid-F6 s4 / s5 | 20 / 24 | 0 | 372 / 370 | all cold | 0 | 5,236,808 / 5,261,188 | 345 / 1,065 | 0 |
+| mooncake s4 / s5 / s6 | 15 / 21 / 15 | 0 | 372 / 370 / 372 | all cold | 0 | 5,479,025 / 5,556,227 / 5,486,424 | 285 / 735 / 180 | 0 |
+
+It is a REAL OBSERVATION, not an instrument that never reads, and it is corroborated twice over
+from outside the policy's own belief: the engine reports 0 prefix-cache hits against 5.2 to 5.6
+million queries in every cell, and every robot request carries `cached_tokens` 0, which is the
+engine's own per-request number rather than the coordinator's model.
+
+The read sites, per the Step 2 rule (a quantity written and never read is ABSENT):
+
+- `coordinator.py:575`, `cost = C.recall_gpu_s(tokens, s.residency_readiness())`. A real read: the
+  residency sets the GPU seconds the request is charged.
+- `cstate.py:525-526`, which builds `obs.cloud.gpu_warm_sessions` and `host_warm_sessions`, the
+  lists an arm reads to learn what is warm.
+- `coordinator.py:481`, `if s.built_tokens < s.est_tokens and s.believed_tier() != "gpu"`, in the
+  build path.
+
+ONE READ IS DEAD, and it is the one that would close the loop. `residency.jsonl` carries
+`telemetry_cached_tokens`, written at `coordinator.py:901`, and it is NULL in every row of every
+cell: 372 of 372, in all 13 cells. So the engine's own `cached_tokens` never reaches the belief,
+and the belief is never contradicted by the thing it models. In these runs the belief happens to
+be right, which is exactly the condition under which a dead validation read goes unnoticed.
+
+Why the zero is unsurprising rather than suspicious: D84 gives every device its own cache salt, so
+no prompt prefix is shared BETWEEN devices by design, and 12.4 shows the median robot history is
+asked exactly one question, so there is almost no reuse available WITHIN a device either. The
+warm-state axis is close to unexercised in this workload, which is a statement about the workload,
+not about the policies.
+
+### 12.3 What the committed delivery stamp is worth (definition audit, consistency check 4)
+
+The runs were launched with `forward_at = "first"` (recorded in every `run_meta.json`), so an
+answer is stamped delivered at its FIRST TOKEN plus a constant wire delay. That delay is exactly
+0.022176 s in 13,558 of 13,558 answers of b7 n16 s4, which is why the "after first token" column
+in 12.1 is a constant rather than a distribution. The generation that follows is real and is
+charged to no deadline: `t_done - t_first_token` has p50 0.058 s and max 2.715 s in the same cell.
+
+How many questions would change verdict if delivery were stamped at COMPLETION instead (MEASURED,
+same files, same deadlines of 5 s robot and 2 s single-shot; a refused request counts as a miss
+under D144):
+
+| cell | type | n | on time (committed stamp) | on time (at completion) | flip |
+|---|---|---|---|---|---|
+| b7 n16 s4 | robot | 15 | 14 | 11 | 3 |
+| b7 n16 s4 | single-shot | 356 | 332 | 329 | 3 |
+| b7 n16 s5 | robot | 21 | 19 | 11 | 8 |
+| b7 n16 s5 | single-shot | 356 | 320 | 309 | 11 |
+| eco-llm n16 s4 | robot | 20 | 14 | 10 | 4 |
+| eco-llm n16 s4 | single-shot | 356 | 294 | 288 | 6 |
+| eco-llm n16 s5 | robot | 24 | 19 | 10 | 9 |
+| eco-llm n16 s5 | single-shot | 356 | 304 | 293 | 11 |
+| hybrid-F n16 s4 | robot | 20 | 15 | 15 | 0 |
+| hybrid-F n16 s4 | single-shot | 356 | 339 | 339 | 0 |
+| hybrid-F n16 s5 | robot | 24 | 21 | 20 | 1 |
+| hybrid-F n16 s5 | single-shot | 356 | 343 | 343 | 0 |
+| hybrid-F6 n16 s4 | robot | 20 | 14 | 13 | 1 |
+| hybrid-F6 n16 s4 | single-shot | 355 | 334 | 334 | 0 |
+| hybrid-F6 n16 s5 | robot | 24 | 21 | 19 | 2 |
+| hybrid-F6 n16 s5 | single-shot | 356 | 342 | 342 | 0 |
+| mooncake n16 s4 | robot | 15 | 14 | 11 | 3 |
+| mooncake n16 s4 | single-shot | 356 | 332 | 326 | 6 |
+| mooncake n16 s5 | robot | 21 | 19 | 11 | 8 |
+| mooncake n16 s5 | single-shot | 356 | 319 | 310 | 9 |
+
+This is a DEFINITION, not a defect: for an MCQ letter the first token IS the answer, and the
+runner exposes the alternative as a flag. But the definition is load-bearing and it is not neutral
+between arms. At seed 5 the committed stamp puts the robot column at hybrid-F 21, hybrid-F6 21,
+b7 19, eco-llm 19, mooncake 19, a spread of 2; stamping at completion puts it at hybrid-F 20,
+hybrid-F6 19, b7 11, eco-llm 10, mooncake 11, a spread of 9 or 10. The arms that throttle hold the
+engine at a load where generation stays fast, and the committed stamp does not count that. Nothing
+here says which stamp is right; it says the choice decides the size of the effect, and the arms
+whose decode is slow are the baselines, so the current convention UNDERSTATES the policy arms.
+RefSpatial is the case where the first token is certainly not the answer, since its answer is a
+coordinate pair.
+
+### 12.4 Reuse per robot history (item 3), 16 devices, seeds 4 to 6
+
+| arm | robot sessions with questions | questions per history p50 / max | gaps measured | constructed warm-prefix token fraction p50 | constructed fraction with any warm prefix |
+|---|---|---|---|---|---|
+| b7-edf-feasibility | 51 | 1 / 3 | 14 | 0.9778 | 0.9608 |
+| eco-llm | 51 | 1 / 3 | 14 | 0.9867 | 0.9688 |
+| hybrid-F-lhreq | 51 | 1 / 3 | 14 | 0.9867 | 0.9688 |
+| hybrid-F6-lhreq (seeds 4, 5 only) | 34 | 1 / 3 | 11 | 0.9852 | 0.9773 |
+| mooncake | 51 | 1 / 3 | 14 | 0.9778 | 0.9608 |
+
+MEASURED: the median robot history is asked ONE question, and only 11 to 14 same-history gaps
+exist across 34 to 51 sessions, so there is almost no question-to-question reuse to capture.
+
+CONSTRUCTED, and this is the interesting half: if every 30 s upload batch had been prefilled on
+arrival, 97.8 to 98.7 percent of a question's history tokens would already have been in the cache
+at question time, and 96.1 to 97.7 percent of questions would have had some warm prefix. The
+reuse available in this workload is not ACROSS questions, it is WITHIN one history's own growth,
+and nothing in the current setup prefills a batch before a question asks for it. The frame cadence
+used per session is its own measured one (`t_opportunity / frames_on_the_wire`), and the batch size
+is the 30 s the question names.
+
+### 12.5 Warming budget (item 4)
+
+Prefilling each 30 s batch of every robot history, charged with the committed COLD curve on the
+batch's NEW tokens only (MODELLED), against the 62,944-token GPU pool and the 27 GiB host tier
+(110,592 tokens at the committed 262,144 bytes per token):
+
+| cell | robot devices | sessions | warming GPU-s | share of the 1200 s run | peak resident tokens | x GPU pool | x host tier | x GPU plus host | GiB |
+|---|---|---|---|---|---|---|---|---|---|
+| n16 s4 | 7 | 13 | 38.1 | 3.2 % | 119,075 | 1.89 | 1.08 | 0.69 | 29.07 |
+| n16 s5 | 7 | 15 | 49.5 | 4.1 % | 166,659 | 2.65 | 1.51 | 0.96 | 40.69 |
+| n16 s6 | 7 | 13 | 35.7 | 3.0 % | 139,581 | 2.22 | 1.26 | 0.80 | 34.08 |
+| n18 PROJECTED | 8 | n/a | 43.5 | 3.6 % | 159,521 | 2.53 | 1.44 | 0.92 | 38.95 |
+
+The 18-device row is a PROJECTION by robot-device count from the 16-device median, not a
+measurement: no 18-device cell exists yet.
+
+The GPU time is affordable and the memory is not. Warming costs 3 to 4 percent of the run's GPU
+budget, while holding every robot history needs 1.9x to 2.7x the GPU pool and 1.1x to 1.5x the
+host tier on its own; at seed 5 it is 96 percent of the GPU and host tiers combined, and the
+projection at 18 devices is 92 percent. So a warming policy in this setting is a PLACEMENT and
+EVICTION problem, not a compute problem, and the peak above is an upper bound that keeps every
+history of every session that asked a question and ignores the sessions that never asked.
+
+### 12.6 Cross-type value per GPU-second (item 5)
+
+Committed tables, with the GPU-seconds MODELLED by the COLD curve on the measured median prompt of
+that type in these cells:
+
+| axis | gain | median prompt tokens | modelled GPU-s | gain per GPU-s |
+|---|---|---|---|---|
+| dashcam (C1 value) | 0.09000 | 378 | 0.0840 | 1.0714 |
+| SS refspatial | 0.18742 | 1,372 | 0.3049 | 0.6147 |
+| SS realworldqa | 0.08297 | 1,372 | 0.3049 | 0.2721 |
+| robot LH-REQ EVAL | 0.28986 | 9,623 | 2.1384 | 0.1355 |
+| robot LH-REQ DEV | 0.14286 | 9,623 | 2.1384 | 0.0668 |
+
+A shedding rule that maximised gain per GPU-second would shed ROBOT RECALL FIRST, by a factor of 8
+against dashcam frames and 4.5 against RefSpatial, because the robot gain is the largest per
+QUESTION and the smallest per GPU-SECOND: it buys 0.29 of accuracy for 2.14 GPU-s while a dashcam
+frame buys 0.09 for 0.084 GPU-s. That is the arithmetic a value-based shedding rule would act on,
+and it points away from the mechanism this study exists to test.
+
+THE UNITS DO NOT MATCH, and the ranking is therefore a CONVENTION, not a measurement. The robot
+gain is an MCQ-accuracy difference, dashcam is a challenge-mAP value, RefSpatial is a point-in-mask
+fraction and RealWorldQA is exact match. `ss_quality.json _metric_incomparability` already records
+this for C1's ordering, and it binds here for the same reason: a column that adds them is a
+convention about what we are willing to trade, not evidence about what is worth more.
+
+### 12.7 Why hybrid-F sends the 33,839-token history that b7 declines (report only)
+
+Every arm's decision for the same opportunity (opp0010837, robo002, session 1848337166005249,
+arriving at t 957.90 with 33,781 tokens of history), MEASURED at 16 devices seed 0:
+
+| arm | sent to cloud | representation | tokens charged | image parts on the wire | HTTP | letter | on_time as recorded |
+|---|---|---|---|---|---|---|---|
+| b7-edf-feasibility | no | n/a | n/a | n/a | n/a | n/a | n/a |
+| mooncake | no | n/a | n/a | n/a | n/a | n/a | n/a |
+| eco-llm | yes | RECENT | 467 | 375 | 400 | X | true |
+| hybrid-F-lhreq | yes | RECENT | 467 | 375 | 400 | X | true |
+| hybrid-F6-lhreq | yes | RECENT | 467 | 375 | 400 | X | true |
+
+Corroborated on the dry path, same cell, where the decision counts are: b7 CLOUD 375, DEFER 2,
+REJECT 5; mooncake CLOUD 375, REJECT 4, DEVICE 1; hybrid-F CLOUD 375 plus 5 CLOUD-at-RECENT;
+eco-llm CLOUD-at-D2 375 plus 5 CLOUD-at-RECENT. The five rescued questions are the same five.
+
+The chain, with the read sites:
+
+1. b7 and mooncake REJECT it. The feasibility test predicts a COLD prefill of the whole 33,781
+   tokens against a 5 s deadline, which fails `est <= slack + defer_s`
+   (`baselines/constructed.py:184-191`), so the question is answered on the device and never
+   reaches the cloud.
+2. hybrid-F's C3 converts exactly that rejection into a send. `hybrid_arm.py:315-318`: when the
+   question is not CLOUD and is not single-shot, C3 re-tests it at the 467-token recent window,
+   which the same curve says is feasible, and emits CLOUD at representation RECENT. eco-llm
+   rescues the same five questions the same way.
+3. THE PROMISE REACHES THE ACCOUNTING AND NOT THE PAYLOAD. `coordinator.py:574` charges
+   `tokens_for_representation`, which is 467 for RECENT, while `coordinator.py:593-597` builds the
+   request body from `s.frames`, the whole session: 375 image parts went on the wire and the server
+   refused the request with HTTP 400 at 33,839 tokens. C3's RECENT is expressible in the cost and
+   UNEXPRESSIBLE in the request, which is the same shape as the write-only field with one read
+   added.
+4. The refusal was then recorded as an on-time cloud answer with the placeholder letter X, because
+   `coordinator.py:781` computes `ontime = delivered <= o.deadline_abs()` from the completion time
+   alone, with no reference to the status or to whether an answer was parsed. D144 ruling 3 makes
+   it a miss; the H100 has applied that rule and republished the headline.
+
+No code was changed for this subsection. The defect it names is in the harness, not in any arm:
+the policy asked for a cheap representation, was charged for a cheap representation, and sent an
+expensive one.
