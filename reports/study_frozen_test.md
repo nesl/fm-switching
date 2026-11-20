@@ -1614,18 +1614,27 @@ H100 and not on this box, so what is verified for it is that it parses, that the
 after `reqs` and `out` are bound and before the decision load, and that it joins on the `out` dict's
 own key rather than on a field inside the row. Its arithmetic is the same expression that
 `completion_delivery_rescore.py` and `frozen_headline.py` both compute independently and agree on.
-The H100 then committed the seed-4 three-type trace so this box could run it, and **it still cannot**,
-for a reason that is a guard working rather than a defect: with the committed trace in place,
-`score.py` raises `ScoringRefused` under D86, because the only calibration map on this box is the
-INTERIM `orin2_calibration.json` and the run's server is a real `vllm`, which requires the dense
-refit of both tiers. That refit is an H100 artifact. Bypassing a D86 scoring refusal to produce a
-number is exactly the thing the refusal exists to prevent, so it was not bypassed. The module also
-does not import standalone here, so the rewrite could not be exercised in isolation either.
+**The gap is now CLOSED and `score.py` has been run here, both ways.** It took two steps and the
+first failure was mine. The H100 committed the seed-4 three-type trace; with it in place `score.py`
+still raised `ScoringRefused` under D86, because I had let it fall back to its DEFAULT calibration
+argument, which is the INTERIM `orin2_calibration.json`, against a real `vllm` run. That refusal was
+correct and the fix was to pass the dense refit the H100's own driver passes,
+`results/orchestration/live2/calibration/live2_calibration_dense_jpeg.json`, which is tracked on
+origin. Nothing was bypassed; the guard was right and I was using the wrong file.
 
-The gap therefore stands, and it is narrow and named: `score.py`'s copy of the rewrite is verified
-structurally and by two independent implementations of the same arithmetic, and has never been
-executed. One cell scored both ways on the H100 once the GPU frees closes it, and until then no
-number in this section depends on `score.py`.
+With the dense refit, `b7-edf-feasibility_n16_s4` scored both ways:
+
+| delivery rule | robot pool on time | fraction |
+|---|---|---|
+| first token | **14 of 20** | 0.70 |
+| completion | **11 of 20** | 0.55 |
+
+`completion_delivery_rescore.py` independently reported 14 to 11 with 3 flips for that same cell, so
+**three implementations now agree on the same cell**: the audit script, the headline script and the
+production scorer. No part of section 18 rests on an unexecuted code path any more.
+
+This also answers a question the H100 raised about its own work: the refusal was caused by my
+calibration argument, not by anything in its scoring setup, so its cells' scoring is not in question.
 
 ### 18.6 P20, which this raised
 
@@ -1719,3 +1728,36 @@ length relation on a binned plot without computing its correlation, which would 
 The right test, per-request overlap of the actual decode window, was neither of those and settles it.
 A null from the wrong unit of analysis is not evidence, which is the same lesson CLAUDE.md records
 for nulls from absent mechanisms.
+
+
+### 18.7.5 Crediting the timing result: separating the discipline from the arm's own volume
+
+The H100 cautioned that "the engine is quieter" conflates two things, since an arm's release
+discipline and its own offered traffic both shape how busy the engine is when its robot answer
+decodes. That is right in form, and it is separable here.
+
+First, a fact that narrows the question: **each cell runs ONE arm**, so every request overlapping a
+robot decode window is that arm's own traffic. "The engine is quieter" therefore means "this arm has
+less of its OWN work in flight at that moment", which is a property of when it releases, not of who
+else is present.
+
+Second, volume contributes almost nothing. Over the four seeds:
+
+| arm | total requests | requests per second | overlap at robot decode, p50 | overlap divided by the arm's OWN mean in-flight |
+|---|---|---|---|---|
+| b7-edf-feasibility | 54,270 | 11.31 | 50 | **5.5** |
+| mooncake | 54,272 | 11.31 | 51 | **5.6** |
+| eco-llm | 54,292 | 11.31 | 61 | **4.1** |
+| hybrid-F-lhreq | 51,195 | 10.67 | 9 | **2.1** |
+| hybrid-F6-lhreq | 50,305 | 10.48 | 9 | **2.0** |
+
+hybrid-F sends **5.7 percent** fewer requests than b7 and has **82 percent** less overlap at its
+robot decodes, so volume cannot be the explanation. The last column is the decomposition that
+settles it: normalised by each arm's OWN average in-flight load, b7's robot answers decode when the
+engine is **5.5 times busier than that arm's own average**, while hybrid-F's decode at **2.1 times**
+its own average. Even after removing every difference in how much work an arm offers, hybrid-F's
+robot answers land in relatively quieter moments by a factor of about 2.6.
+
+So the credit stands with the release timing, and it is now stated at the right strength: of the
+roughly fivefold difference in decode-window concurrency, about 6 percent is attributable to
+offering less work and the remainder to offering it at different times.
