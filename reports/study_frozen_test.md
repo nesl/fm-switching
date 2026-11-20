@@ -864,3 +864,169 @@ Every one is non-zero, so no arm in the live comparison fails the port-side rule
 is a FLOOR, not a census: C1 acts through `order`, C2 through the dashcam throttle and C5 through
 the cap, and `decision.jsonl` carries none of those three channels, which is the same
 unexpressibility that section 11.4 of `study_policy_f.md` records for C1.
+
+## 14. Four-seed headline at 16 devices, and the second-cell exclusion check (A6000, 2026-11-20)
+
+D144 items 1 and 2. Computed on this box from the committed run directories on origin, with no live
+run touched. Script: `experiments/orchestration/live2/frozen_headline.py`, which is the H100's
+seed-0/4/5 script extended rather than forked, so the two agree by construction where they overlap.
+Output `results/orchestration/live2/frozen_test/frozen_headline_n16_4seed.json`.
+
+What changed in the script: a local trace fallback, because this box does not hold the H100's trace
+tree; a robot-on-time column over ALL questions beside the feasible one; and a per-run D133 verdict
+with its margin in questions and a fragile flag.
+
+CONTROLS before any number below is read.
+- The regenerated traces reproduce the H100's robot opportunity ids EXACTLY at every seed, and the
+  script refuses a run whose trace and outcomes disagree on the robot question set rather than
+  scoring it on a guess.
+- The feasible counts from the local traces, 18 / 15 / 22 at seeds 0 / 4 / 5, equal the committed
+  `frozen_feasible.json` counts to the question.
+- Restricted to seeds 0, 4 and 5 this script reproduces the H100's committed three-seed headline.
+
+THE RUNS ARE PRE-FIX, and this is the limit on everything in 14.1 to 14.3. The RECENT defect
+described in 12.7 was present in every eco-llm, hybrid-F and hybrid-F6 run scored here: 3 to 7
+RECENT releases per run were charged 467 tokens and sent the whole session. The H100 has staged the
+fix (a RECENT release will send the session's most recent k frames, k = ceil(frames x charged /
+history tokens), every other representation byte-identical), and the completed runs cannot be
+rescored for it; redoing them is the user's call. So these numbers describe the arms as they ran,
+not the arms as they are now specified.
+
+### 14.1 Pooled four-seed rates, paired by seed (B = 10,000)
+
+On time = delivered within the deadline (robot 5 s, single-shot 2 s) by a request that returned
+HTTP 200, per D144. The bootstrap resamples opportunities WITHIN each seed and applies the same draw
+to every arm, so the arms stay paired on the same questions; differences against b7 use the same
+draws.
+
+| arm | robot feasible on time | CI95 | difference vs b7 | robot all on time | difference vs b7 | SS on time | CI95 | difference vs b7 | dashcam all-meet |
+|---|---|---|---|---|---|---|---|---|---|
+| b7-edf-feasibility | 64 / 69 = 0.9275 | [0.8551, 0.9855] | reference | 64 / 89 = 0.7191 | reference | 1306 / 1426 = 0.9158 | [0.9011, 0.9299] | reference | 4 of 4 |
+| eco-llm | 62 / 69 = 0.8986 | [0.8261, 0.9565] | [-0.0725, 0.0000] | 62 / 89 = 0.6966 | [-0.0562, 0.0000] | 1191 / 1426 = 0.8352 | [0.8163, 0.8541] | **[-0.0954, -0.0666]** | 4 of 4 |
+| mooncake | 64 / 69 = 0.9275 | [0.8551, 0.9855] | [0.0000, 0.0000] | 64 / 89 = 0.7191 | [0.0000, 0.0000] | 1304 / 1426 = 0.9144 | [0.8997, 0.9285] | [-0.0063, 0.0035] | 4 of 4 |
+| hybrid-F-lhreq | 67 / 69 = 0.9710 | [0.9275, 1.0000] | [-0.0145, 0.1014] | 67 / 89 = 0.7528 | [-0.0112, 0.0899] | 1372 / 1426 = 0.9621 | [0.9516, 0.9719] | **[0.0316, 0.0610]** | 4 of 4 |
+| hybrid-F6-lhreq | 65 / 69 = 0.9420 | [0.8841, 0.9855] | [-0.0435, 0.0725] | 65 / 89 = 0.7303 | [-0.0337, 0.0562] | 1356 / 1426 = 0.9509 | [0.9390, 0.9621] | **[0.0196, 0.0505]** | 4 of 4 |
+
+Read the two columns that exclude zero and the three that do not.
+
+**The single-shot column separates the arms and the robot column does not.** hybrid-F is +3.2 to
++6.1 pp over b7 on single-shot on time and hybrid-F6 is +2.0 to +5.1 pp, both excluding zero;
+eco-llm is -9.5 to -6.7 pp, also excluding zero. On the robot pool, hybrid-F's +4.4 pp point
+estimate carries a CI of [-1.5, +10.1] pp and hybrid-F6's [-4.4, +7.3] pp: at 69 feasible questions
+pooled over four seeds, the robot comparison cannot resolve a difference of this size. Mooncake is
+indistinguishable from b7 on every axis, exactly as section 4c's mechanism note predicts, since its
+377 keep-warm state actions find nothing resident.
+
+So the measured advantage of the frozen policy at 16 devices is on SINGLE-SHOT timeliness, which is
+the device type C6 cannot act on and C3 is deliberately not applied to. The robot axis, which is the
+axis the study is about, is unresolved at this fleet size.
+
+**Every on-time robot question was a feasible one, in all 20 runs.** The robot-all hits equal the
+robot-feasible hits in every single cell (17 / 17, 14 / 14, 19 / 19, 14 / 14 for b7, and so on), so
+no arm ever answered an infeasible question on time. The feasibility rule is not merely a filter
+here, it is a perfect predictor on these 89 questions, which is the strongest support the D133
+headline choice has had, and also the reason the "all questions" column tracks the feasible one.
+
+### 14.2 Per-seed detail, including the seed-6 feasible counts
+
+| arm | seed 0 feas | seed 4 | seed 5 | seed 6 | SS per seed | errors per seed |
+|---|---|---|---|---|---|---|
+| b7-edf-feasibility | 17 / 18 | 14 / 15 | 19 / 22 | 14 / 14 | 317, 332, 320, 337 of 356, 357, 356, 357 | 1, 0, 0, 0 |
+| eco-llm | 16 / 18 | 14 / 15 | 19 / 22 | 13 / 14 | 292, 294, 304, 301 | 1, 0, 0, 1 |
+| mooncake | 17 / 18 | 14 / 15 | 19 / 22 | 14 / 14 | 319, 332, 319, 334 | 0, 0, 0, 1 |
+| hybrid-F-lhreq | 17 / 18 | 15 / 15 | 21 / 22 | 14 / 14 | 341, 339, 343, 349 | 1, 0, 0, 0 |
+| hybrid-F6-lhreq | 16 / 18 | 14 / 15 | 21 / 22 | 14 / 14 | 335, 334, 342, 345 | 1, 0, 0, 0 |
+
+Seed 6 contributes 14 feasible robot questions of 20 asked, the smallest feasible pool of the four
+seeds; seed 5 the largest at 22 of 25. Pooled, 69 feasible of 89 asked. D82's 20-question minimum
+is met per run on ALL questions (20 to 25) and is NOT met per run on the feasible pool (14 to 22),
+which is why the feasible column is pooled and never read per cell.
+
+### 14.3 Per-run D133 verdicts, every one of them fragile
+
+A verdict is marked FRAGILE when one question would change it. The bar is `p_rob` 0.9 from each
+run's own sweep block, so meeting it needs `ceil(0.9 x feasible)` on time.
+
+| arm | seed 0 | seed 4 | seed 5 | seed 6 |
+|---|---|---|---|---|
+| b7-edf-feasibility | meets, margin +0 | meets, +0 | **fails, -1** | meets, +1 |
+| eco-llm | **fails, -1** | meets, +0 | **fails, -1** | meets, +0 |
+| mooncake | meets, +0 | meets, +0 | **fails, -1** | meets, +1 |
+| hybrid-F-lhreq | meets, +0 | meets, +1 | meets, +1 | meets, +1 |
+| hybrid-F6-lhreq | **fails, -1** | meets, +0 | meets, +1 | meets, +1 |
+
+**All twenty verdicts are fragile.** The feasible pools are 14 to 22 questions against a 90 percent
+bar, so one question is worth 4.5 to 7.1 pp and no verdict in this table has more than one
+question of slack. hybrid-F is the only arm that meets the bar at all four seeds, and it does so by
+exactly one question at three of them. A per-run D133 verdict at this fleet size is a coin landing
+on its edge, and nothing in this study should rest on one.
+
+DEFINITIONS, because two "robot pool meets" flags disagree on purpose. The verdict above is over
+the D133 FEASIBLE pool. The `robot_pool_meets` flag inside each run's own scorer block is over ALL
+robot questions, which is 0.70 to 0.75 against the same 0.9 bar, so it is False in all 20 runs. Both
+are correct for what they measure and they must never be quoted as one number.
+
+### 14.4 Second-cell exclusion check (D144 item 2)
+
+The pre-screen in section 13 ran one cell, and the sweep list then excluded arms as duplicates of
+another arm on that one cell. This re-runs the identical screen at a SECOND cell, seed 0 instead of
+seed 4, same workload, and asks whether each excluded arm is still identical. Output
+`results/orchestration/live2/frozen_test/baseline_prescreen_seed0_exclusions.json`.
+
+**Three of the fourteen exclusions were wrong.** At seed 0:
+
+| arm | excluded as identical to | verdict at the second cell | decisions |
+|---|---|---|---|
+| clockwork | b7-edf-feasibility | **SEPARATES** | 13,621 against 13,623 |
+| ekya | b7-edf-feasibility | **SEPARATES** | 13,621 against 13,623 |
+| builder-s2-value | b7-edf-feasibility | **SEPARATES** | 13,621 against 13,623 |
+
+Identical at BOTH cells, so a representative plus an identical list is sound:
+
+| representative | identical at both cells |
+|---|---|
+| b7-edf-feasibility | builder-default, builder-s1-fairshare, builder-s1-feasible, builder-s1-lateness, builder-s4-adaptive, builder-s4-llf, builder-s6-decline, hybrid-base |
+| kvflow | pensieve, rh8-demand-aware-oracle |
+| always-cloud-fcfs | inar-vl, routellm, videostorm, vllm-priority |
+
+clockwork and ekya are two PUBLISHED systems that a one-cell screen would have dropped from the
+sweep. They are restored. Two cells are not all cells either, so the lists above are support for
+the grouping, not proof of it, and that is why the grouping is recorded with the cells it was
+measured on rather than as a property of the arms.
+
+### 14.5 hybrid-F6r and hybrid-F6rm: built, measured, not run live (D144 item 3)
+
+Both arms are registered in `hybrid_arm.py` and neither runs live: C6 is to be redesigned as a
+counterfactual for warming and shedding, and hybrid-F6 results stand as built.
+
+- **hybrid-F6r** gates BOTH C6 consumers to non-single-shot recall: the per-request `_c6_one` and
+  the per-period policy-core mirror in `_c6_prepare`, which is where 94 percent of the cost was.
+- **hybrid-F6rm** gates only the per-request call and keeps advancing the mirror every period, so
+  its robot decisions are identical to hybrid-F6 by construction and it saves nothing.
+
+Why the cheap one is not a speed fix (setwise decision diffs against hybrid-F6, dry, three-type
+LH-REQ cells):
+
+| cell | robot decisions moved | single-shot | dashcam | total |
+|---|---|---|---|---|
+| n=16 seed 0 | 2 | 0 | 82 | 84 |
+| n=16 seed 4 | 0 | 0 | 0 | 0 |
+| n=20 seed 0 | 0 | 2 | 1 | 3 |
+| n=20 seed 4 | 3 | 1 | 142 | 146 |
+| **n=32 seed 0** | **12** | **30** | **10,327** | **10,369** |
+
+`_c6_prepare`'s own docstring says it advances the mirror TO THIS PERIOD, so the mirror carries
+state across periods: skip the single-shot-only periods and the mirror reaches the next robot period
+having never seen them. The divergence grows with fleet size because the skipped periods grow with
+it, and at 32 devices the gate moves ten thousand decisions. **hybrid-F6r is a third policy, not a
+faster hybrid-F6**, and only hybrid-F6rm can carry the label "hybrid-F6 with C6 restricted to
+robots". Both are recorded here so the redesign starts from the measurement rather than from the
+assumption that the gate was free.
+
+The measured cost the gate was meant to remove is in section 6.2: C6's mirror put the F6 arm 2x to
+9x over the 100 ms decision period at p99 at every fleet size, with 94 percent of its calls on
+single-shot requests. A redesign that keeps the mirror per period pays that; one that does not pays
+a different policy. That is the trade the C6 redesign inherits.
+
+D144 item 4, the offline analysis that drives the redesign, is section 12 and was committed earlier
+(`c6b6a02`, refreshed in `3faa91e`).

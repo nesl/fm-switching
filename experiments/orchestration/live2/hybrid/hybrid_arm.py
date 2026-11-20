@@ -134,7 +134,8 @@ class HybridArm:
     def __init__(self, name: str = "hybrid-base", c1=False, c2=False, c3=False, c4=False, c5=False, c6=False,
                  k_r: float = 1.0, m_d: float = 0.05, defs: str = "v1", reserve: Optional[bool] = None,
                  throttle_floor: int = 2, c3_always: bool = False, workload: str = "mixed",
-                 k_r_frac: Optional[float] = None, quality_fit: str = "trace_mix") -> None:
+                 k_r_frac: Optional[float] = None, quality_fit: str = "trace_mix",
+                 c6_robot_only: bool = False, c6_mirror_all_periods: bool = False) -> None:
         from arms_published import B7EdfFeasibilityArm
         self._b7 = B7EdfFeasibilityArm()
         self.name = name
@@ -161,6 +162,27 @@ class HybridArm:
         # None keeps the committed flat scalar, so every run before this parameter existed is
         # unchanged.
         self.k_r_frac = None if k_r_frac is None else float(k_r_frac)
+        # D144 ruling 4: C6 robot-only, as D143 ruling C already stated the design to be. It is a
+        # SEPARATE ARM (hybrid-F6r), not a change to hybrid-F6, because the gate is not
+        # decision-preserving: at 20 devices it deletes one single-shot deviation
+        # (c6_dev_send_to_hold), so D108 / D121 byte-identity cannot hold and D79 applies.
+        #
+        # It gates BOTH consumers of the switch: the per-period policy-core mirror in _c6_prepare,
+        # which is where the cost is (measured 94 percent of C6 calls were on single-shot requests,
+        # and the SS-only periods paid p50 42.6 to 133.5 ms against a 100 ms decision period), and
+        # the per-request _c6_one. Gating only the second would keep the whole cost.
+        self.c6_robot_only = bool(c6_robot_only)
+        # MEASURED, not anticipated: gating the mirror as well is NOT robot-side neutral. The mirror
+        # is a policy-core instance advanced once per period (_c6_prepare's own docstring: "advance
+        # the policy-core mirror to this period"), so it carries state across periods. Skip the
+        # single-shot-only periods and the mirror arrives at the next robot period having never seen
+        # them, which changed 2 robot decisions and 82 dashcam decisions at 16 devices seed 0.
+        #
+        # So there are two robot-only arms, and the difference between them is the whole question:
+        #   c6_mirror_all_periods False (hybrid-F6r)  cheap, robot decisions may differ from F6
+        #   c6_mirror_all_periods True  (hybrid-F6rm) robot decisions identical to F6, no saving,
+        #                                             because the mirror IS the cost
+        self.c6_mirror_all_periods = bool(c6_mirror_all_periods)
         # D140 definition fixes. "v1" = the definitions screened first (labelled "old at-risk / old cap"):
         #   robot at risk when slack < k_r or laxity < 0; C5's cap holds every kind; reserved slot = C2.
         # "v2": robot at risk when LAXITY < k_r, laxity = deadline - now - predicted remaining work (committed
@@ -262,7 +284,10 @@ class HybridArm:
                               value=(self.values or {}).get("dashcam", 0.09)))
         rec_dec: Dict[str, RecallAction] = {}
         pending_risk: List[Any] = []
-        c6_live = self.sw["c6"] and self._scorer is not None and bool(obs.recall) and self._c6_prepare(obs)
+        c6_recall = bool(obs.recall)
+        if c6_recall and self.c6_robot_only and not self.c6_mirror_all_periods:
+            c6_recall = any(getattr(q, "category", None) not in self._ss_types for q in obs.recall)
+        c6_live = self.sw["c6"] and self._scorer is not None and c6_recall and self._c6_prepare(obs)
         for q in sorted(obs.recall, key=lambda x: x.deadline_s):
             est = float(C.recall_ttft_s(max(q.readiness_tokens, 1), q.readiness))
             qs = q.slack_s(now)
@@ -302,7 +327,7 @@ class HybridArm:
                 if est_r <= qs:
                     d = RecallAction(q.query_id, "CLOUD", representation="RECENT")
                     self.stats["c3_recent"] += 1
-            if c6_live:
+            if c6_live and not (self.c6_robot_only and is_ss):
                 d = self._c6_one(q, d, at_risk=bool(self.defs == "v2" and risk))
             rec_dec[q.query_id] = d
             if self.defs == "v2" and self.sw["c2"] and risk:
@@ -615,6 +640,19 @@ CONFIGS.update({
 CONFIGS.update({
     "hybrid-F-lhreq": dict(CONFIGS["hybrid-F"], workload="lh_req", quality_fit="lh_req_dev"),
     "hybrid-F6-lhreq": dict(CONFIGS["hybrid-F6"], workload="lh_req", quality_fit="lh_req_dev"),
+})
+
+# D144 ruling 4. hybrid-F6r = hybrid-F6 with C6 gated to non-single-shot recall. A NEW LABELLED ARM:
+# hybrid-F6 and its cells stay exactly as they were measured, and F6r's cells run fresh (D79).
+CONFIGS.update({
+    "hybrid-F6r": dict(CONFIGS["hybrid-F6"], c6_robot_only=True),
+})
+CONFIGS.update({
+    "hybrid-F6rm": dict(CONFIGS["hybrid-F6r"], c6_mirror_all_periods=True),
+})
+CONFIGS.update({
+    "hybrid-F6r-lhreq": dict(CONFIGS["hybrid-F6r"], workload="lh_req", quality_fit="lh_req_dev"),
+    "hybrid-F6rm-lhreq": dict(CONFIGS["hybrid-F6rm"], workload="lh_req", quality_fit="lh_req_dev"),
 })
 
 # C6 variants of every configuration (D138 follow-up): screening adds "<best>-c6" at 10 and 12 devices.

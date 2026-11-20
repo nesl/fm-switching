@@ -1,0 +1,780 @@
+{
+  "_note": "DRY PRE-SCREEN of every registered live2 arm on the three-type workload (user, 2026-11-20).",
+  "cell": {
+    "seed": 0,
+    "n_devices": 16,
+    "run_s": 1200.0,
+    "ratio": "40:40:20",
+    "dry": true,
+    "robot_question_set": "lh_req",
+    "ss_question_set": "ss2"
+  },
+  "arms": {
+    "builder-s4-adaptive": {
+      "decisions": 13623,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 375,
+        "defer": 2,
+        "decline": 5
+      },
+      "representations": {
+        "D2": 375
+      },
+      "recall_non_default_representation": 0,
+      "defer": 2,
+      "decline": 5,
+      "state_action": 0,
+      "feasibility_actions": 7,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "c7b926061c41de35",
+      "digest_setwise": "ac204d14d86aa511",
+      "wall_s": 152.4,
+      "stats": {
+        "arm": "builder-s4-adaptive",
+        "s1": "feasible",
+        "s2": "feasible",
+        "s3": "fixed",
+        "s4": "adaptive",
+        "s6": "none",
+        "s7": "full",
+        "c_inflight": 8,
+        "sh_admitted": 53628,
+        "sh_held": 18366,
+        "rc_cloud": 375,
+        "rc_defer": 2,
+        "rc_reject": 5,
+        "rc_device": 0,
+        "materialize": 0,
+        "inflight_bound_periods": 8696,
+        "lateness_throttle_periods": 0,
+        "fairshare_held": 0,
+        "whatif_chose_pieces": 0,
+        "whatif_chose_onego": 0,
+        "s7_recent": 0,
+        "s7_degraded": 0,
+        "s7_degrade_still_infeasible": 0
+      },
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "always-cloud-fcfs": {
+      "decisions": 13621,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 380
+      },
+      "representations": {
+        "D2": 380
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 0,
+      "state_action": 0,
+      "feasibility_actions": 0,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": true,
+      "digest": "ef23c45fe0dfa364",
+      "digest_setwise": "a76134bb943a842d",
+      "wall_s": 159.8,
+      "stats": {},
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "builder-s1-fairshare": {
+      "decisions": 13623,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 375,
+        "defer": 2,
+        "decline": 5
+      },
+      "representations": {
+        "D2": 375
+      },
+      "recall_non_default_representation": 0,
+      "defer": 2,
+      "decline": 5,
+      "state_action": 0,
+      "feasibility_actions": 7,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "c7b926061c41de35",
+      "digest_setwise": "ac204d14d86aa511",
+      "wall_s": 162.4,
+      "stats": {
+        "arm": "builder-s1-fairshare",
+        "s1": "fairshare",
+        "s2": "feasible",
+        "s3": "fixed",
+        "s4": "edf",
+        "s6": "none",
+        "s7": "full",
+        "c_inflight": 8,
+        "sh_admitted": 69414,
+        "sh_held": 2580,
+        "rc_cloud": 375,
+        "rc_defer": 2,
+        "rc_reject": 5,
+        "rc_device": 0,
+        "materialize": 0,
+        "inflight_bound_periods": 0,
+        "lateness_throttle_periods": 0,
+        "fairshare_held": 2580,
+        "whatif_chose_pieces": 0,
+        "whatif_chose_onego": 0,
+        "s7_recent": 0,
+        "s7_degraded": 0,
+        "s7_degrade_still_infeasible": 0
+      },
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "b7-edf-feasibility": {
+      "decisions": 13623,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 375,
+        "defer": 2,
+        "decline": 5
+      },
+      "representations": {
+        "D2": 375
+      },
+      "recall_non_default_representation": 0,
+      "defer": 2,
+      "decline": 5,
+      "state_action": 0,
+      "feasibility_actions": 7,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "c7b926061c41de35",
+      "digest_setwise": "ac204d14d86aa511",
+      "wall_s": 165.1,
+      "stats": {},
+      "declared_characteristic": "feasibility_actions",
+      "characteristic_count": 7
+    },
+    "builder-s1-feasible": {
+      "decisions": 13623,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 375,
+        "defer": 2,
+        "decline": 5
+      },
+      "representations": {
+        "D2": 375
+      },
+      "recall_non_default_representation": 0,
+      "defer": 2,
+      "decline": 5,
+      "state_action": 0,
+      "feasibility_actions": 7,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "c7b926061c41de35",
+      "digest_setwise": "ac204d14d86aa511",
+      "wall_s": 165.2,
+      "stats": {
+        "arm": "builder-s1-feasible",
+        "s1": "feasible",
+        "s2": "feasible",
+        "s3": "fixed",
+        "s4": "edf",
+        "s6": "none",
+        "s7": "full",
+        "c_inflight": 8,
+        "sh_admitted": 69414,
+        "sh_held": 2580,
+        "rc_cloud": 375,
+        "rc_defer": 2,
+        "rc_reject": 5,
+        "rc_device": 0,
+        "materialize": 0,
+        "inflight_bound_periods": 0,
+        "lateness_throttle_periods": 0,
+        "fairshare_held": 0,
+        "whatif_chose_pieces": 0,
+        "whatif_chose_onego": 0,
+        "s7_recent": 0,
+        "s7_degraded": 0,
+        "s7_degrade_still_infeasible": 0
+      },
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "builder-default": {
+      "decisions": 13623,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 375,
+        "defer": 2,
+        "decline": 5
+      },
+      "representations": {
+        "D2": 375
+      },
+      "recall_non_default_representation": 0,
+      "defer": 2,
+      "decline": 5,
+      "state_action": 0,
+      "feasibility_actions": 7,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "c7b926061c41de35",
+      "digest_setwise": "ac204d14d86aa511",
+      "wall_s": 165.8,
+      "stats": {
+        "arm": "builder-default",
+        "s1": "all",
+        "s2": "feasible",
+        "s3": "fixed",
+        "s4": "edf",
+        "s6": "none",
+        "s7": "full",
+        "c_inflight": 8,
+        "sh_admitted": 71994,
+        "sh_held": 0,
+        "rc_cloud": 375,
+        "rc_defer": 2,
+        "rc_reject": 5,
+        "rc_device": 0,
+        "materialize": 0,
+        "inflight_bound_periods": 0,
+        "lateness_throttle_periods": 0,
+        "fairshare_held": 0,
+        "whatif_chose_pieces": 0,
+        "whatif_chose_onego": 0,
+        "s7_recent": 0,
+        "s7_degraded": 0,
+        "s7_degrade_still_infeasible": 0
+      },
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "builder-s2-value": {
+      "decisions": 13621,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 375,
+        "decline": 5
+      },
+      "representations": {
+        "D2": 375
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 5,
+      "state_action": 0,
+      "feasibility_actions": 5,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "2153e16fd03321c0",
+      "digest_setwise": "46a1b03e7c5f717b",
+      "wall_s": 167.5,
+      "stats": {
+        "arm": "builder-s2-value",
+        "s1": "all",
+        "s2": "value",
+        "s3": "fixed",
+        "s4": "edf",
+        "s6": "none",
+        "s7": "full",
+        "c_inflight": 8,
+        "sh_admitted": 71994,
+        "sh_held": 0,
+        "rc_cloud": 375,
+        "rc_defer": 0,
+        "rc_reject": 0,
+        "rc_device": 5,
+        "materialize": 0,
+        "inflight_bound_periods": 0,
+        "lateness_throttle_periods": 0,
+        "fairshare_held": 0,
+        "whatif_chose_pieces": 0,
+        "whatif_chose_onego": 0,
+        "s7_recent": 0,
+        "s7_degraded": 0,
+        "s7_degrade_still_infeasible": 0
+      },
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "builder-s1-lateness": {
+      "decisions": 13623,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 375,
+        "defer": 2,
+        "decline": 5
+      },
+      "representations": {
+        "D2": 375
+      },
+      "recall_non_default_representation": 0,
+      "defer": 2,
+      "decline": 5,
+      "state_action": 0,
+      "feasibility_actions": 7,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "c7b926061c41de35",
+      "digest_setwise": "ac204d14d86aa511",
+      "wall_s": 170.0,
+      "stats": {
+        "arm": "builder-s1-lateness",
+        "s1": "lateness",
+        "s2": "feasible",
+        "s3": "fixed",
+        "s4": "edf",
+        "s6": "none",
+        "s7": "full",
+        "c_inflight": 8,
+        "sh_admitted": 71994,
+        "sh_held": 0,
+        "rc_cloud": 375,
+        "rc_defer": 2,
+        "rc_reject": 5,
+        "rc_device": 0,
+        "materialize": 0,
+        "inflight_bound_periods": 0,
+        "lateness_throttle_periods": 0,
+        "fairshare_held": 0,
+        "whatif_chose_pieces": 0,
+        "whatif_chose_onego": 0,
+        "s7_recent": 0,
+        "s7_degraded": 0,
+        "s7_degrade_still_infeasible": 0
+      },
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "clockwork": {
+      "decisions": 13621,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 375,
+        "decline": 5
+      },
+      "representations": {
+        "D2": 375
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 5,
+      "state_action": 0,
+      "feasibility_actions": 5,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "2153e16fd03321c0",
+      "digest_setwise": "46a1b03e7c5f717b",
+      "wall_s": 186.5,
+      "stats": {},
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "ekya": {
+      "decisions": 13621,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 375,
+        "decline": 5
+      },
+      "representations": {
+        "D2": 375
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 5,
+      "state_action": 0,
+      "feasibility_actions": 5,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "2153e16fd03321c0",
+      "digest_setwise": "46a1b03e7c5f717b",
+      "wall_s": 188.9,
+      "stats": {},
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "kvflow": {
+      "decisions": 14001,
+      "kinds": {
+        "release_monitor": 13241,
+        "state_action": 380,
+        "release_recall": 380
+      },
+      "representations": {
+        "D2": 380
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 0,
+      "state_action": 380,
+      "feasibility_actions": 0,
+      "piece_split": 0,
+      "desired_tier_set": 380,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "bbb1821763c4962f",
+      "digest_setwise": "20fa404676ee82e9",
+      "wall_s": 187.6,
+      "stats": {},
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "builder-s4-llf": {
+      "decisions": 13623,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 375,
+        "defer": 2,
+        "decline": 5
+      },
+      "representations": {
+        "D2": 375
+      },
+      "recall_non_default_representation": 0,
+      "defer": 2,
+      "decline": 5,
+      "state_action": 0,
+      "feasibility_actions": 7,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "c7b926061c41de35",
+      "digest_setwise": "ac204d14d86aa511",
+      "wall_s": 204.5,
+      "stats": {
+        "arm": "builder-s4-llf",
+        "s1": "feasible",
+        "s2": "feasible",
+        "s3": "fixed",
+        "s4": "llf",
+        "s6": "none",
+        "s7": "full",
+        "c_inflight": 8,
+        "sh_admitted": 69414,
+        "sh_held": 2580,
+        "rc_cloud": 375,
+        "rc_defer": 2,
+        "rc_reject": 5,
+        "rc_device": 0,
+        "materialize": 0,
+        "inflight_bound_periods": 0,
+        "lateness_throttle_periods": 0,
+        "fairshare_held": 0,
+        "whatif_chose_pieces": 0,
+        "whatif_chose_onego": 0,
+        "s7_recent": 0,
+        "s7_degraded": 0,
+        "s7_degrade_still_infeasible": 0
+      },
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "inar-vl": {
+      "decisions": 13621,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 380
+      },
+      "representations": {
+        "D2": 380
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 0,
+      "state_action": 0,
+      "feasibility_actions": 0,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": true,
+      "digest": "ef23c45fe0dfa364",
+      "digest_setwise": "a76134bb943a842d",
+      "wall_s": 193.9,
+      "stats": {},
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "builder-s6-decline": {
+      "decisions": 13623,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 375,
+        "defer": 2,
+        "decline": 5
+      },
+      "representations": {
+        "D2": 375
+      },
+      "recall_non_default_representation": 0,
+      "defer": 2,
+      "decline": 5,
+      "state_action": 0,
+      "feasibility_actions": 7,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "c7b926061c41de35",
+      "digest_setwise": "ac204d14d86aa511",
+      "wall_s": 201.8,
+      "stats": {
+        "arm": "builder-s6-decline",
+        "s1": "all",
+        "s2": "feasible",
+        "s3": "fixed",
+        "s4": "edf",
+        "s6": "decline",
+        "s7": "full",
+        "c_inflight": 8,
+        "sh_admitted": 71994,
+        "sh_held": 0,
+        "rc_cloud": 375,
+        "rc_defer": 2,
+        "rc_reject": 0,
+        "rc_device": 5,
+        "materialize": 0,
+        "inflight_bound_periods": 0,
+        "lateness_throttle_periods": 0,
+        "fairshare_held": 0,
+        "whatif_chose_pieces": 0,
+        "whatif_chose_onego": 0,
+        "s7_recent": 0,
+        "s7_degraded": 0,
+        "s7_degrade_still_infeasible": 0
+      },
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "hybrid-base": {
+      "decisions": 13623,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 375,
+        "defer": 2,
+        "decline": 5
+      },
+      "representations": {
+        "D2": 375
+      },
+      "recall_non_default_representation": 0,
+      "defer": 2,
+      "decline": 5,
+      "state_action": 0,
+      "feasibility_actions": 7,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "c7b926061c41de35",
+      "digest_setwise": "ac204d14d86aa511",
+      "wall_s": 196.5,
+      "stats": {},
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "pensieve": {
+      "decisions": 14001,
+      "kinds": {
+        "release_monitor": 13241,
+        "state_action": 380,
+        "release_recall": 380
+      },
+      "representations": {
+        "D2": 380
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 0,
+      "state_action": 380,
+      "feasibility_actions": 0,
+      "piece_split": 0,
+      "desired_tier_set": 380,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "bbb1821763c4962f",
+      "digest_setwise": "20fa404676ee82e9",
+      "wall_s": 194.7,
+      "stats": {},
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "rh8-demand-aware-oracle": {
+      "decisions": 14001,
+      "kinds": {
+        "release_monitor": 13241,
+        "state_action": 380,
+        "release_recall": 380
+      },
+      "representations": {
+        "D2": 380
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 0,
+      "state_action": 380,
+      "feasibility_actions": 0,
+      "piece_split": 0,
+      "desired_tier_set": 380,
+      "mu_set": 0,
+      "channel_silent": false,
+      "digest": "bbb1821763c4962f",
+      "digest_setwise": "20fa404676ee82e9",
+      "wall_s": 121.8,
+      "stats": {},
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "routellm": {
+      "decisions": 13621,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 380
+      },
+      "representations": {
+        "D2": 380
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 0,
+      "state_action": 0,
+      "feasibility_actions": 0,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": true,
+      "digest": "ef23c45fe0dfa364",
+      "digest_setwise": "a76134bb943a842d",
+      "wall_s": 124.2,
+      "stats": {},
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "videostorm": {
+      "decisions": 13621,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 380
+      },
+      "representations": {
+        "D2": 380
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 0,
+      "state_action": 0,
+      "feasibility_actions": 0,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": true,
+      "digest": "ef23c45fe0dfa364",
+      "digest_setwise": "a76134bb943a842d",
+      "wall_s": 123.3,
+      "stats": {},
+      "declared_characteristic": null,
+      "characteristic_count": null
+    },
+    "vllm-priority": {
+      "decisions": 13621,
+      "kinds": {
+        "release_monitor": 13241,
+        "release_recall": 380
+      },
+      "representations": {
+        "D2": 380
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 0,
+      "state_action": 0,
+      "feasibility_actions": 0,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": true,
+      "digest": "ef23c45fe0dfa364",
+      "digest_setwise": "a76134bb943a842d",
+      "wall_s": 122.7,
+      "stats": {
+        "arm": "vllm-priority",
+        "requires_server_mode": "priority",
+        "server_scheduling_policy": null,
+        "server_mode_undeclared": true,
+        "priorities_emitted": 72374
+      },
+      "declared_characteristic": null,
+      "characteristic_count": null
+    }
+  },
+  "identical_groups": {
+    "2153e16fd03321c0": [
+      "builder-s2-value",
+      "clockwork",
+      "ekya"
+    ],
+    "bbb1821763c4962f": [
+      "kvflow",
+      "pensieve",
+      "rh8-demand-aware-oracle"
+    ],
+    "c7b926061c41de35": [
+      "b7-edf-feasibility",
+      "builder-default",
+      "builder-s1-fairshare",
+      "builder-s1-feasible",
+      "builder-s1-lateness",
+      "builder-s4-adaptive",
+      "builder-s4-llf",
+      "builder-s6-decline",
+      "hybrid-base"
+    ],
+    "ef23c45fe0dfa364": [
+      "always-cloud-fcfs",
+      "inar-vl",
+      "routellm",
+      "videostorm",
+      "vllm-priority"
+    ]
+  },
+  "distinct_arms": [
+    "always-cloud-fcfs",
+    "b7-edf-feasibility",
+    "builder-s2-value",
+    "kvflow"
+  ],
+  "channel_silent": [
+    "always-cloud-fcfs",
+    "inar-vl",
+    "routellm",
+    "videostorm",
+    "vllm-priority"
+  ],
+  "errors": []
+}

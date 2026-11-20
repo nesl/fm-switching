@@ -14,6 +14,7 @@ Usage: python frozen_headline.py <runs dir> <n_devices> <out json>
 """
 import gzip
 import json
+import math
 import random
 import sys
 from pathlib import Path
@@ -25,10 +26,31 @@ for p in (HERE, HERE / "fleet", REPO / "experiments/orchestration/baselines", RE
     sys.path.insert(0, str(p))
 import costs as C          # noqa: E402
 import traces as TRC       # noqa: E402
+import trace as TR         # noqa: E402
 
 ARMS = ["b7-edf-feasibility", "eco-llm", "mooncake", "hybrid-F-lhreq", "hybrid-F6-lhreq"]
 B = 10000
 SS_L = 2.0
+P_ROB = 0.9              # the scorer's robot pool threshold, from the run's own sweep block
+FRAGILE_MARGIN = 1       # a verdict is FRAGILE when this many questions would flip it
+
+
+def local_trace(trace_dir_name):
+    """Regenerate a run's trace from its directory name, for a box that does not hold the H100's
+    trace tree. The generator is deterministic in (seed, n, ratio, run_s, mode) by its own
+    docstring, and the control is in the caller: the regenerated robot opportunity ids must equal
+    the ids the run's own outcomes carry, or the run is skipped rather than scored on a guess.
+
+    Name shape: seed6_n16_1200s_A_r40-40-20_lh_req_ss2
+    """
+    parts = str(trace_dir_name).split("_")
+    kw = dict(seed=int(parts[0][4:]), n=int(parts[1][1:]), run_s=float(parts[2][:-1]),
+              mode=parts[3], ratio=parts[4][1:].replace("-", ":"),
+              robot_question_set="_".join(parts[5:-1]), ss_question_set=parts[-1])
+    t = TR.generate_trace(kw["seed"], kw["n"], kw["ratio"], kw["run_s"], kw["mode"],
+                          robot_question_set=kw["robot_question_set"],
+                          ss_question_set=kw["ss_question_set"])
+    return t["records"] if isinstance(t, dict) else t
 
 
 def jl(p):
@@ -42,7 +64,9 @@ def jl(p):
 
 def run_flags(d):
     c = json.loads((d / "cell.json").read_text())
-    tr = jl(Path(c["trace_dir"]) / "trace.jsonl")
+    tp = Path(c["trace_dir"]) / "trace.jsonl"
+    tr = jl(tp) if (tp.exists() or tp.with_name(tp.name + ".gz").exists()) \
+        else local_trace(Path(c["trace_dir"]).name)
     link = TRC.RTT_MS / 1000.0
     feas, ssq = {}, set()
     for r in tr:
@@ -64,9 +88,28 @@ def run_flags(d):
         L = SS_L if o["opportunity_id"] in ssq else float(o.get("deadline_s") or 5.0)
         ont[o["opportunity_id"]] = bool(td is not None and rid not in failed and float(td) - float(o["t_opportunity"]) <= L)
     sw = (((c.get("score") or {}).get("score") or {}).get("sweep") or [{}])[0]
-    return dict(robot_feasible={k: ont.get(k, False) for k, v in feas.items() if v}, robot_all=len(feas),
+    # CONTROL: the regenerated trace must name the same robot questions the run itself recorded.
+    robot_in_run = {o["opportunity_id"] for o in jl(d / "outcomes.jsonl")
+                    if o.get("kind") == "recall" and str(o.get("session_id", "")).startswith("robo")}
+    if robot_in_run != set(feas):
+        raise AssertionError("%s: trace and run disagree on the robot questions (%d vs %d)"
+                             % (d.name, len(feas), len(robot_in_run)))
+    nfeas = sum(1 for v in feas.values() if v)
+    hits_f = sum(1 for k, v in feas.items() if v and ont.get(k))
+    # D133 verdict per run, with its margin. p_rob is read from the run's own sweep where present.
+    p_rob = float(sw.get("p_rob") or P_ROB)
+    # The smallest number of on-time questions that MEETS the bar: ceil(p_rob x n), not round().
+    need = (math.ceil(p_rob * nfeas - 1e-9) if nfeas else 0)
+    return dict(robot_feasible={k: ont.get(k, False) for k, v in feas.items() if v},
+                robot_all_map={k: ont.get(k, False) for k in feas}, robot_all=len(feas),
                 ss={k: ont.get(k, False) for k in ssq}, dash=bool(sw.get("dashcam_all_meet")),
-                errors=c.get("n_errors"), requests=c.get("n_requests"))
+                errors=c.get("n_errors"), requests=c.get("n_requests"),
+                d133=dict(p_rob=p_rob, feasible=nfeas, on_time=hits_f,
+                          robot_pool_meets=bool(nfeas and hits_f >= need),
+                          need_to_meet=need, margin_questions=(hits_f - need if nfeas else None),
+                          fragile=bool(nfeas and abs(hits_f - need) <= FRAGILE_MARGIN),
+                          capacity_met=bool(sw.get("capacity_met")),
+                          scorer_robot_pool_meets=sw.get("robot_pool_meets")))
 
 
 def main(runs_dir, n, out):
@@ -83,35 +126,43 @@ def main(runs_dir, n, out):
     seeds = [s for s in (0, 4, 5, 6) if all((a, s) in runs for a in ARMS)]
     # the opportunity sets per seed are shared across arms (same trace); take them from b7
     rob_ids = {s: sorted(runs[("b7-edf-feasibility", s)]["robot_feasible"]) for s in seeds}
+    all_ids = {s: sorted(runs[("b7-edf-feasibility", s)]["robot_all_map"]) for s in seeds}
     ss_ids = {s: sorted(runs[("b7-edf-feasibility", s)]["ss"]) for s in seeds}
     for s in seeds:
         for a in ARMS:
             assert sorted(runs[(a, s)]["robot_feasible"]) == rob_ids[s] and sorted(runs[(a, s)]["ss"]) == ss_ids[s], (a, s)
+            assert sorted(runs[(a, s)]["robot_all_map"]) == all_ids[s], (a, s)
 
-    def pooled(a, rdraw, sdraw):
+    def pooled(a, rdraw, adraw, sdraw):
         rn = sum(runs[(a, s)]["robot_feasible"][k] for s in seeds for k in rdraw[s])
         rd = sum(len(rdraw[s]) for s in seeds)
+        an = sum(runs[(a, s)]["robot_all_map"][k] for s in seeds for k in adraw[s])
+        ad = sum(len(adraw[s]) for s in seeds)
         sn = sum(runs[(a, s)]["ss"][k] for s in seeds for k in sdraw[s])
         sd = sum(len(sdraw[s]) for s in seeds)
-        return rn / rd, sn / sd
+        return rn / rd, an / ad, sn / sd
 
     import numpy as np
-    point = {a: pooled(a, rob_ids, ss_ids) for a in ARMS}
+    point = {a: pooled(a, rob_ids, all_ids, ss_ids) for a in ARMS}
     rng = np.random.default_rng(0)
     # per seed: an arms x questions 0/1 matrix; one index draw per seed per replicate, shared by every arm (paired)
     rob_num = np.zeros((len(ARMS), B)); ss_num = np.zeros((len(ARMS), B))
+    all_num = np.zeros((len(ARMS), B))
     rob_den = sum(len(rob_ids[s]) for s in seeds); ss_den = sum(len(ss_ids[s]) for s in seeds)
+    all_den = sum(len(all_ids[s]) for s in seeds)
     for s in seeds:
-        for ids, num, key in ((rob_ids[s], rob_num, "robot_feasible"), (ss_ids[s], ss_num, "ss")):
+        for ids, num, key in ((rob_ids[s], rob_num, "robot_feasible"), (ss_ids[s], ss_num, "ss"),
+                              (all_ids[s], all_num, "robot_all_map")):
             if not ids:
                 continue
             M = np.array([[runs[(a, s)][key][k] for k in ids] for a in ARMS], dtype=float)
             idx = rng.integers(0, len(ids), size=(B, len(ids)))
             num += M[:, idx].sum(axis=2)
-    boots = {a: list(zip(rob_num[i] / rob_den, ss_num[i] / ss_den)) for i, a in enumerate(ARMS)}
+    boots = {a: list(zip(rob_num[i] / rob_den, all_num[i] / all_den, ss_num[i] / ss_den))
+             for i, a in enumerate(ARMS)}
 
     def ci(xs):
-        xs = sorted(xs)
+        xs = sorted(float(x) for x in xs)
         return [round(xs[int(0.025 * B)], 4), round(xs[int(0.975 * B)], 4)]
 
     rows = []
@@ -120,23 +171,42 @@ def main(runs_dir, n, out):
                          robot_feasible_on_time=round(point[a][0], 4), robot_ci95=ci([x[0] for x in boots[a]]),
                          robot_feasible_n=sum(len(rob_ids[s]) for s in seeds),
                          robot_feasible_hits=sum(runs[(a, s)]["robot_feasible"][k] for s in seeds for k in rob_ids[s]),
-                         ss_on_time=round(point[a][1], 4), ss_ci95=ci([x[1] for x in boots[a]]),
+                         robot_all_on_time=round(point[a][1], 4), robot_all_ci95=ci([x[1] for x in boots[a]]),
+                         robot_all_n=sum(len(all_ids[s]) for s in seeds),
+                         robot_all_hits=sum(runs[(a, s)]["robot_all_map"][k] for s in seeds for k in all_ids[s]),
+                         ss_on_time=round(point[a][2], 4), ss_ci95=ci([x[2] for x in boots[a]]),
                          ss_n=sum(len(ss_ids[s]) for s in seeds),
                          ss_hits=sum(runs[(a, s)]["ss"][k] for s in seeds for k in ss_ids[s]),
                          dashcam_all_meet_runs=f"{sum(runs[(a, s)]['dash'] for s in seeds)} of {len(seeds)}",
                          robot_minus_b7_ci95=ci([x[0] - y[0] for x, y in zip(boots[a], boots['b7-edf-feasibility'])]),
-                         ss_minus_b7_ci95=ci([x[1] - y[1] for x, y in zip(boots[a], boots['b7-edf-feasibility'])]),
+                         robot_all_minus_b7_ci95=ci([x[1] - y[1] for x, y
+                                                     in zip(boots[a], boots['b7-edf-feasibility'])]),
+                         ss_minus_b7_ci95=ci([x[2] - y[2] for x, y
+                                              in zip(boots[a], boots['b7-edf-feasibility'])]),
                          per_run=[dict(seed=s, robot_all=runs[(a, s)]["robot_all"], robot_feasible=len(rob_ids[s]),
                                        robot_feasible_hits=sum(runs[(a, s)]["robot_feasible"].values()),
+                                       robot_all_hits=sum(runs[(a, s)]["robot_all_map"].values()),
                                        ss_hits=sum(runs[(a, s)]["ss"].values()), ss_n=len(ss_ids[s]),
-                                       dash=runs[(a, s)]["dash"], errors=runs[(a, s)]["errors"]) for s in seeds]))
+                                       dash=runs[(a, s)]["dash"], errors=runs[(a, s)]["errors"],
+                                       d133=runs[(a, s)]["d133"]) for s in seeds]))
     res = dict(n_devices=n, seeds_common_support=seeds, bootstrap=f"paired by seed: opportunities resampled within each seed, same draw for every arm, B={B}",
                on_time_rule="delivered within the deadline (robot 5 s, SS 2 s) by an HTTP 200 request", rows=rows)
     Path(out).write_text(json.dumps(res, indent=1) + "\n")
     print("seeds", seeds)
     for r in rows:
-        print(f"{r['arm']:20s} robot {r['robot_feasible_hits']}/{r['robot_feasible_n']} = {r['robot_feasible_on_time']} {r['robot_ci95']} "
-              f"diff {r['robot_minus_b7_ci95']} | SS {r['ss_hits']}/{r['ss_n']} = {r['ss_on_time']} {r['ss_ci95']} diff {r['ss_minus_b7_ci95']} | dash {r['dashcam_all_meet_runs']}")
+        print(f"{r['arm']:20s} feas {r['robot_feasible_hits']}/{r['robot_feasible_n']} = {r['robot_feasible_on_time']} {r['robot_ci95']} "
+              f"d {r['robot_minus_b7_ci95']} | all {r['robot_all_hits']}/{r['robot_all_n']} = {r['robot_all_on_time']} "
+              f"d {r['robot_all_minus_b7_ci95']} | SS {r['ss_hits']}/{r['ss_n']} = {r['ss_on_time']} {r['ss_ci95']} "
+              f"d {r['ss_minus_b7_ci95']} | dash {r['dashcam_all_meet_runs']}")
+    print("\nper-run D133 (feasible pool, p_rob from the run's own sweep):")
+    for r in rows:
+        for pr in r["per_run"]:
+            w = pr["d133"]
+            print("   %-20s seed %d  %2d of %2d feasible on time, needs %2d  D133 meets %-5s "
+                  "(scorer, ALL questions: %-5s)  margin %+d%s"
+                  % (r["arm"], pr["seed"], w["on_time"], w["feasible"], w["need_to_meet"],
+                     w["robot_pool_meets"], w["scorer_robot_pool_meets"], w["margin_questions"],
+                     "  FRAGILE" if w["fragile"] else ""))
 
 
 if __name__ == "__main__":
