@@ -1,6 +1,6 @@
 # StudyFROZEN-test (H100, overnight 2026-11-19 to 20): frozen-policy test, StudySS1-32B and SS timing
 
-**Status: IN PROGRESS. Last updated 2026-11-19 18:55.** Rules: D116 (no methodological change overnight; never seeds 1
+**Status: IN PROGRESS. Last updated 2026-11-19 19:45.** Rules: D116 (no methodological change overnight; never seeds 1
 to 3 or HOLDOUT; never INVALID results; GPU 2 exclusive; no em dashes). PROVISIONAL decisions are marked.
 
 ## 0. Morning summary (kept current)
@@ -11,6 +11,9 @@ to 3 or HOLDOUT; never INVALID results; GPU 2 exclusive; no em dashes). PROVISIO
 - **SS timing: DONE.** 32B TTFT for one single-shot VizWiz request: idle p50 0.41 s / p90 0.67 s; 12-device b7
   background p50 0.66 s / p90 2.59 s; 16-device b7 background saturates the engine (TTFT 9.9 to 43 s on the 24
   requests served in the run window). Robots in both backgrounds were MIXED ("lh-req ready" was not on origin).
+- **StudySS2-32B: DONE and on origin** (numbers only). RefSpatial-Bench 277 of 277, mean point-in-mask accuracy 0.371;
+  RealWorldQA 765 of 765, exact match 0.712; 0 errors; manifest order verified; prefix cache 0 hits. CODA-LM was not
+  in the kit (licence).
 - **Policy grid: NOT STARTED.** It needs "lh-req ready" on origin (robots are LH-REQ only; nothing runs on MIXED for
   the grid). hybrid-F and hybrid-F6 need "policy-F ready". Neither commit was on origin at 18:55.
 
@@ -48,6 +51,26 @@ as the salt; the first attempt failed every request (HTTP 400) and wrote nothing
   smallest 23x30); the device upscales them and the H100 server does not, so those questions saw different pixels
   (accuracy AND TTFT; `vizwiz_below_min_pixels.json`). EgoThink has none. Full image sizes:
   `ss1_image_dims.jsonl`.
+
+## 1b. StudySS2-32B
+
+Kit at 1b8790c (`experiments/casestudy/ss2_*`, files unchanged), run through `experiments/casestudy/ss2_cloud_run.py`
+exactly as StudySS1-32B (fresh round-1 server, idle, one request at a time, greedy, unique cache_salt with the same '/'
+shim, the kit's own `_provenance` with device h100nvl). Data from the public sources (BAAI/RefSpatial-Bench,
+xai-org/RealworldQA), decoded with the builder's own loops without rewriting the manifests; all 1,042 images match the
+manifests' hashes and every question, object and reference matches. CODA-LM is skipped by the kit (images need a
+non-commercial agreement).
+
+| dataset | n | scored | errors | score (kit scorer) | run order | commit |
+|---|---|---|---|---|---|---|
+| RefSpatial-Bench | 277 | 277 | 0 | mean point-in-mask 0.371 (location 0.513, placement 0.286, unseen 0.299); 9 answers with no parsed point | manifest order, verified | 6f7abc4 |
+| RealWorldQA | 765 | 765 | 0 | exact match 0.712 (MCQ 0.715 of 438; free-form 0.709 of 327) | manifest order, verified | cb79d82 |
+
+**Cache:** prefix cache 0 hits on both (86,082 and 1,001,747 queried tokens, per-dataset deltas). Multimodal cache:
+RefSpatial asks several questions per image (277 questions on 91 distinct images); **186 hits against 186 predicted
+repeats** once the candidates are keyed on DECODED PIXELS. Keyed on the parquet's source bytes the prediction was 180:
+6 images differ in bytes but not in pixels, and the content-keyed cache treats them as one. RealWorldQA 3 of 3.
+Candidate lists `results/casestudy/study_ss2/*_shared_images.json` (TTFT-only; accuracy unaffected).
 
 ## 2. SS timing (D142 item 4)
 
