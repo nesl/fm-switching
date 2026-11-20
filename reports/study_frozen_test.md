@@ -54,13 +54,24 @@ hybrid-F6 17 to 16 of 24); every other n16 cell has 0 such answers. The question
 feasible column and every D133 verdict are unchanged. The harness is not changed mid-sweep; the rule is applied in
 analysis to every cell.
 
-**Harness defect, reported to the user (not fixed mid-sweep): RECENT is charged but not sent.** C3 (hybrid-F, F6) and
-eco-llm send some infeasible robot questions as `representation=RECENT`. The coordinator charges
-`tokens_for_representation` = 467 (`coordinator.py:574`) but builds the body from the WHOLE session's frames
-(`coordinator.py:593-597`): the over-context request carried 375 frames. So a "RECENT" send is a full-history send on the
-wire, priced as RECENT. This affects how many requests these arms appear to make cheaply, and is the answer to the
-user's question why hybrid-F sends the 33,839-token history that b7 declines: b7 rejects it as infeasible; C3 turns the
-rejection into a RECENT send, which the body builder then fills with the full history.
+**RECENT charged but not sent: precise description (2026-11-20 08:40; user ruling: fix before the first RECENT-using arm).**
+- CHARGED: `coordinator._submit_recall` computes `tokens = cstate.tokens_for_representation(rep)`; for RECENT that is the
+  recent window, `RECENT_WINDOW_TOKENS` = 467 (capped at the history). The GPU budget is charged
+  `recall_gpu_s(tokens, readiness)` and the submission carries `est_tokens = tokens`.
+- SENT: the body's frame list is built from `s.frames`, EVERY frame of the session (375 frames on the over-context
+  question), whatever the representation. The server therefore prefills the full history.
+- SCORED: what was sent. The delivery time is the full-history prefill's, the cloud letter is answered from the full
+  history; nothing in scoring sees the 467-token charge. So a RECENT release behaved exactly like a D2 release on the wire
+  while being priced as RECENT.
+- TOUCHED (completed runs; RECENT releases per run): eco-llm n16 s0 5, s4 5, s5 3, s6 5, n14 s0 3; hybrid-F n16 s0 5, s4 5,
+  s5 3, s6 5; hybrid-F6 n16 s0 7, s4 6, s5 4, s6 7 (reruns the same). b7 and mooncake never release RECENT (372 of 372 D2).
+  These RECENT releases are mostly infeasible robot questions that b7 would reject and C3 / eco-llm convert; sent as true
+  RECENT they would likely arrive on time with lower accuracy. They cannot be RESCORED (the true RECENT request was never
+  made); they need REDOING if the user wants these arms measured with RECENT actually sent.
+- FIX (prepared, applied with the driver stopped before simplestream, harness tests run with no server up): a RECENT
+  release sends the session's most recent k frames, k = ceil(frames x charged tokens / history tokens), at least 1;
+  every other representation's frame list is byte-identical. Scheduling arms before simplestream run unchanged.
+
 
 Dashcams all meet in every cell. Seed 6 (baselines only so far): b7 14 of 14 feasible / 337 SS, eco-llm 13 of 14 /
 301, mooncake 14 of 14 / 334. No run is saturated by the 5 percent rule.
