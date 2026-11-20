@@ -301,6 +301,7 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
                           defer_images=bool(cfg.get("defer_images", True)),
                           dry_run=not bool(cfg.get("server_url")),
                           gpu_budget_s=cfg.get("gpu_budget_s"), targets=CS.TARGETS)
+    co.st.kv_capacity_enforced = bool(cfg.get("kv_capacity_enforced", False))   # runner flag --kv-capacity-enforced
     br = EmulatorBridge(co)
     cpu0 = time.process_time()
     t_start = time.time()

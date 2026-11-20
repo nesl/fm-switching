@@ -89,6 +89,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--scheduling-policy", default="fcfs", choices=("fcfs", "priority"),
                     help="vllm-priority wiring: start the server with --scheduling-policy priority and "
                          "send each request's priority; default fcfs (the round-1 server)")
+    ap.add_argument("--kv-capacity-enforced", action="store_true",
+                    help="D133 PA-4 / overnight plan: set CoordState.kv_capacity_enforced (enforce gpu_kv_tokens as a "
+                         "capacity for every arm); off by default, recorded in the header")
     ap.add_argument("--c-inflight", type=int, default=None,
                     help="D114 sensitivity: set the EDF-family arm's own c_inflight on the constructed "
                          "instance (the factory passes no arguments to these arms); default = the arm's 4")
@@ -199,6 +202,7 @@ def run(a) -> Dict[str, Any]:
         scheduling_policy=(a.scheduling_policy if sends else None),
         server_extra_flags=(a.server_extra_flags if sends else None),
         c_inflight_set_by_runner=(a.c_inflight is not None),
+        kv_capacity_enforced=bool(a.kv_capacity_enforced),
         model=a.model, split_processes=bool(a.split), is_measurement=False)
     (rdir / "header.json").write_text(json.dumps(header, indent=1, default=str) + "\n")
 
@@ -213,7 +217,7 @@ def run(a) -> Dict[str, Any]:
                gpu_budget_s=a.gpu_budget_s, http_limit=a.http_limit,
                cache_cap_bytes=a.cache_cap_bytes, self_tick_s=a.self_tick_s,
                forward_on_completion=bool(a.forward_on_completion),
-               c_inflight=a.c_inflight,
+               c_inflight=a.c_inflight, kv_capacity_enforced=bool(a.kv_capacity_enforced),
                scheduling_policy=(a.scheduling_policy if sends else None),
                forward_at_first_token=(a.forward_at == "first"))
 
@@ -348,6 +352,7 @@ def _inprocess(a, tdir: Path, rdir: Path, cfg, htok, arm, EM):
                           frame_cache=cache, defer_images=True,
                           dry_run=not bool(a.server), gpu_budget_s=a.gpu_budget_s,
                           targets=cfg.get("targets"))
+    co.st.kv_capacity_enforced = bool(a.kv_capacity_enforced)
     br = EmulatorBridge(co)
     br.kind = a.server_kind
     import time as _t
