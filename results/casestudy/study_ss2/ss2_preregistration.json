@@ -11,7 +11,8 @@
    "fix": "a trailing (?![\\d.]) boundary on the number alternative, which is load-bearing rather than cosmetic.",
    "lesson": "the self-test was written before any data existed and caught two bugs in the parser written to avoid exactly this class. A parser gate measures COVERAGE; it cannot catch a value that parses to the wrong number, which only a vector test can."
   },
-  "gate_rule": "parser_gate() runs on 20 to 30 judge outputs and reports the parse rate BEFORE any full pass, so a 5 percent rate is caught on 30 calls rather than on the full set. No mean is published without its coverage beside it."
+  "gate_rule": "parser_gate() runs on 20 to 30 judge outputs and reports the parse rate BEFORE any full pass, so a 5 percent rate is caught on 30 calls rather than on the full set. No mean is published without its coverage beside it.",
+  "gate_vs_vectors": "a parse-rate GATE measures coverage and cannot catch a value that parses to the WRONG NUMBER. Rating: 11 returning 1.0 would have passed a 100 percent parse rate as a legitimate bottom-of-scale judgement. The gate catches silence; the vectors catch lies. Both are kept. And the two failure modes differ in danger: the StudySS1 parser DROPPED 95 percent of its input, which a coverage check finds, while this one would have KEPT everything and quietly compressed the top of the scale."
  },
  "item_6_cut_PREREGISTERED": {
   "scale": "CODA-LM 1-10",
@@ -58,5 +59,24 @@
   "device": "flash CPU only",
   "n": "18 self-test vectors",
   "timestamp": "2026-11-19T00:00:00"
+ },
+ "item_1_codalm_convention_CHECKED": {
+  "source": "arXiv:2404.10595 (CODA-LM), evaluation section, v5.",
+  "scale": "1 to 10, confirmed. The paper's Table 2 rescales to 1-100 for readability.",
+  "DOES_IT_BINARISE": "NO. The paper reports no pass/fail threshold anywhere. Its primary metric is Text-Score, 'the average score of the whole evaluation set', i.e. a simple MEAN of per-sample 1-10 scores, reported per task: a single Text-Score for general perception, an ALL Text-Score plus per-category figures for regional perception, and a single Text-Score for driving suggestions.",
+  "consequence_for_our_cut": "CODA-LM has NO cut convention, so 6.0 does not override anything and is OURS. It is labelled as ours in ss2_kit.py at the point of definition and will be labelled at the point of use.",
+  "consequence_for_the_table_registers": "the per-task 1-10 MEANS are CODA-LM's own quantity and need no caveat. The 2x2 is a DERIVED OBJECT we built with a cut we chose, and needs its cut named wherever it appears. Two registers in one table, and the table must separate them because a reader will not.",
+  "two_further_deviations_found_while_checking": [
+   "the paper's judge is TEXT-ONLY GPT-4; ours is Mistral-7B-Instruct-v0.2, the same deviation already stated for EgoThink and for the same reason.",
+   "the paper's reported numbers had HUMAN VERIFICATION of the GPT-4 evaluations before Table 2, per its section 4.2. Our pipeline has no such step, so our Text-Scores are not comparable to its published values even setting the judge model aside."
+  ],
+  "reporting_rule": "report on the native 1-10 scale and note that the paper rescales by 10 in its table, so a reader comparing against published CODA-LM figures knows which convention each number is in."
+ },
+ "item_3_out_of_range_RESOLVED": {
+  "choice": "OUT-OF-RANGE ROUTES TO UNPARSED, NEVER CLAMPED.",
+  "why_not_clamped": "clamping 11 to 10 silently invents a value the judge did not give, and nothing downstream would look wrong.",
+  "and_it_is_counted_SEPARATELY": "'the judge emitted no rating' and 'the judge emitted a rating outside 1-10' are different facts about judge COMPLIANCE, and collapsing both to None loses the second. parse_codalm_rating_detail returns a reason, one of ok / no_match / out_of_range / unparseable_number, and parser_gate reports the breakdown plus an explicit out_of_range_n.",
+  "so_the_out_of_range_rate_is_a_REPORTED_QUANTITY": "rather than a correction nobody sees, and it enters the same missingness characterisation built for EgoThink, where containment against CODA-LM's reference answers is computable on every row whether rated or not.",
+  "verified": "Rating: 11 and Rating: 100 and Score: 0 all return (None, 'out_of_range'); 'no rating here' returns (None, 'no_match'); Rating: 7 and [[10]] return their values with reason 'ok'."
  }
 }

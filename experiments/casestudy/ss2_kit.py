@@ -34,6 +34,43 @@ _RATING10 = re.compile(
 )
 
 
+def parse_codalm_rating_detail(text: str) -> Tuple[Optional[float], str]:
+    """Return (rating, reason). The REASON distinguishes three outcomes that must not be conflated.
+
+    D142 note 3. Out-of-range routes to UNPARSED, never clamped: clamping 11 to 10 silently invents
+    a value the judge did not give, and nothing downstream would look wrong. But "the judge emitted
+    no rating" and "the judge emitted a rating outside 1-10" are different facts about judge
+    COMPLIANCE, and collapsing both to None loses the second. So the reason is carried, and the
+    out-of-range rate becomes a reported quantity rather than a correction nobody sees.
+
+    reasons: "ok" | "no_match" (no rating token at all) | "out_of_range" (a number was emitted and
+    it is not in 1-10) | "unparseable_number".
+    """
+    ms = _RATING10.findall(text or "")
+    if not ms:
+        # A number may still be present without any accepted framing; look for a bare integer that
+        # a looser reader would have taken, so "out of range" is not misreported as "no rating".
+        loose = re.search(r"(?:[Rr]ating|[Ss]core)\s*[:=]\s*(\d+(?:\.\d+)?)", text or "")
+        if loose:
+            try:
+                v = float(loose.group(1))
+            except ValueError:
+                return None, "unparseable_number"
+            if not (1.0 <= v <= 10.0):
+                return None, "out_of_range"
+        return None, "no_match"
+    vals = [g for m in ms for g in (m if isinstance(m, tuple) else (m,)) if g]
+    if not vals:
+        return None, "no_match"
+    try:
+        v = float(vals[-1])
+    except ValueError:
+        return None, "unparseable_number"
+    if 1.0 <= v <= 10.0:
+        return v, "ok"
+    return None, "out_of_range"
+
+
 def parse_codalm_rating(text: str) -> Optional[float]:
     """Parse the LAST 1-10 rating in `text`; None if none is present.
 
@@ -58,7 +95,12 @@ def parse_codalm_rating(text: str) -> Optional[float]:
 # Pre-registered 2x2 cut for the 1-10 scale, FIXED BEFORE THE DISTRIBUTION IS SEEN, because an
 # unregistered threshold already moved a StudySS1 headline by 17 points (agreement 0.633 against
 # 0.805 on whether a 0.5 counts as correct).
-CODALM_CUT_PRIMARY = 6.0          # above the 5.5 midpoint of 1-10
+# CHECKED AGAINST THE PAPER (arXiv:2404.10595): CODA-LM does NOT binarise. Its primary metric is
+# "Text-Score", the simple mean of per-sample 1-10 scores over the evaluation set, reported per task
+# and rescaled to 1-100 in its Table 2 for readability. It names NO pass/fail threshold. So the MEAN
+# is CODA-LM's own quantity and the 2x2 below is OUR derived object with a cut WE chose; the cut must
+# be named at the point of use and never presented as the benchmark's.
+CODALM_CUT_PRIMARY = 6.0          # OURS, not CODA-LM's: first integer above the 5.5 midpoint
 CODALM_CUT_SENSITIVITY = (4.0, 5.0, 7.0, 8.0)
 
 
@@ -69,12 +111,19 @@ def parser_gate(texts: List[str]) -> dict:
     to 30 judge outputs before any full pass, so a parse rate of 5 percent is caught on 30 calls
     rather than on 700.
     """
+    from collections import Counter
     n = len(texts)
-    got = [parse_codalm_rating(t) for t in texts]
-    ok = [g for g in got if g is not None]
+    pairs = [parse_codalm_rating_detail(t) for t in texts]
+    ok = [v for v, r in pairs if v is not None]
+    reasons = Counter(r for _, r in pairs)
     return dict(n=n, n_parsed=len(ok), parse_rate=(round(len(ok) / n, 4) if n else None),
-                distinct_values=sorted({g for g in ok}),
-                unparsed_samples=[t[:200] for t, g in zip(texts, got) if g is None][:5],
+                reason_breakdown=dict(reasons),
+                out_of_range_n=reasons.get("out_of_range", 0),
+                out_of_range_note=("an out-of-range rating is routed to UNPARSED, never clamped, and "
+                                   "is counted separately from 'no rating emitted' because the two "
+                                   "are different facts about judge compliance."),
+                distinct_values=sorted({v for v in ok}),
+                unparsed_samples=[t[:200] for t, (v, _) in zip(texts, pairs) if v is None][:5],
                 gate="PASS" if n and len(ok) / n >= 0.95 else "FAIL: investigate before any full pass")
 
 
