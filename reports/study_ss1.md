@@ -448,3 +448,36 @@ directly, and 0.41 s is not the idle reference for a 0.3225 s workload.** This i
 definition point of the same kind already recorded for "area": one name, two input distributions.
 If `idle.json` is to serve as the reference against the 2 s SS deadline, its sample should match the
 workload's token distribution, or the comparison should be made within prompt-length bands.
+
+---
+
+# The disagreement rate, both datasets and pooled
+
+**This is a different claim from the paired difference, and a stronger one.** A null interval is
+consistent with two models that agree almost everywhere. These numbers say the opposite: the two
+models disagree constantly and are right about equally often when they do.
+
+| dataset | n | cloud only | device only | disagree | rate | ratio |
+|---|---|---|---|---|---|---|
+| VizWiz (clean) | 4,291 | 380 | 349 | 729 | **16.99%** | 1.089 |
+| EgoThink | 700 | 53 | 49 | 102 | **14.57%** | 1.082 |
+| **pooled** | **4,991** | **433** | **398** | **831** | **16.65%** | **1.088** |
+
+**The two models disagree on correctness for roughly one question in six**, and when they disagree
+the cloud is right **52.1 percent** of the time against the device's **47.9 percent**. The two
+datasets agree on that ratio to within 0.007 despite entirely different tasks, scorers and
+accuracy levels.
+
+**Why this belongs above the confidence intervals.** The VizWiz paired difference of +0.0072 is the
+**net of 380 cloud-only and 349 device-only questions**. Reporting the net alone presents two large
+offsetting flows as a small effect, which is the averaged-into-undetectability shape seen from the
+other direction: here the population mean is not hiding a concentrated effect, it is hiding **two
+large opposed effects of nearly equal size**.
+
+**D39 in its most literal form, measured rather than asserted:** per-request gain may be zero or
+negative. For a scheduler the shape is **high-variance and approximately zero-mean** on these two
+workloads: escalation costs per request, individual outcomes swing both ways, and the expected
+accuracy gain is small relative to the spread of individual outcomes.
+
+**No verdict and no threshold.** The disagreement rate and the ratio are facts about the data that
+the intervals do not convey; what they imply for dataset qualification is the user's call.
