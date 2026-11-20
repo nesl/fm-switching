@@ -330,5 +330,24 @@
    "what": "the smallest sub-floor image was reported as 121x162. The file's own rows give the minimum by AREA as 23x30 = 690 px; 121x162 is present but is 19,602 px, well inside the set rather than its minimum. The largest in the set are 192x256 = 49,152 px, just under the 65,536 floor.",
    "why_it_matters_slightly": "at 690 px the device upscales about 95x in area to reach its 65,536 floor while the cloud upscales about 6x to reach 4,096, so this is the item where the two renderings diverge most. It is also consistent with the H100's probe of 34 prompt tokens on the 32B for the smallest: a 4,096 px floor implies 4 visual tokens, and 4 plus about 30 tokens of text is 34."
   }
+ },
+ "image_dims_table": {
+  "source": "results/casestudy/study_ss1/ss1_image_dims.jsonl, 5,019 rows of {dataset, qid, w, h, area}",
+  "proxy_DROPPED": "the prompt_tokens-as-size proxy is removed. It was defensible and labelled but mildly circular, and real areas make the disclaimer unnecessary. The scaling branch now regresses the token difference against real pixel area.",
+  "egothink_uniformity_REFUTED": {
+   "checked_rather_than_inferred": "a median is not a distribution, so it was verified: EgoThink has SIX distinct (w,h) pairs, not one. Most common 1440x1080 (310 of 700), then 1920x1440 (220), then 1920x1080 (124). Areas span 1,175,040 to 4,915,200, a 4.2x spread.",
+   "so_the_median_was_a_coincidence": "the median area of 2,073,600 is exactly 1920x1080, but that size is only the THIRD most common. The median landing on a round value is not uniformity.",
+   "the_clean_isolate_does_not_exist": "EgoThink's visual token count is NOT constant, so it cannot isolate the chat template by constancy.",
+   "but_the_useful_property_survives_and_is_stronger": "ZERO of 700 EgoThink images fall below the floor, so NEITHER side's pixel budget binds on any of them and the visual token count is identical ACROSS the two sides however much it varies WITHIN the dataset. EgoThink is therefore a clean template control for that reason, and needs no dimension comparison at all.",
+   "what_each_outcome_means": "100 percent equality on EgoThink closes the template branch outright, the template being identical on both sides. ANY divergence on EgoThink cannot be the floor and must be the template or something unaccounted for."
+  },
+  "THE_CHECK_PAID_FOR_ITSELF_SIDEWAYS": {
+   "finding": "the recorded area is NOT the area the model saw.",
+   "mechanism": "ss1_kit.preprocess_to_jpeg_bytes downscales with Lanczos when the longest side exceeds MAX_SIDE = 2048, so for an image above the cap the staged area is not what the processor received.",
+   "counts": "242 of 4,319 VizWiz images are above the cap (2592x1936) and 41 of 700 EgoThink (40 at 2560x1920, 1 at 2560x1440). Using the staged area for those would be wrong by up to about 1.6x.",
+   "fix": "EFFECTIVE area is computed by applying the cap before regressing, so the regressor is the area the model actually received.",
+   "an_independent_arithmetic_CORROBORATION": "the largest EgoThink images at 2560x1920 become 2048x1536 = 3,145,728 px under the cap, which is 3,072 visual tokens at area/1024; the observed EgoThink prompt_tokens MAXIMUM is 3,114, i.e. 3,072 plus about 42 tokens of text. The arithmetic closes end to end, which confirms the area/1024 rule on the device side from the outputs rather than from the config.",
+   "definition_note": "this is a check-4 point: 'area' names two different quantities, staged and effective, and only the second bears on token counts."
+  }
  }
 }

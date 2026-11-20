@@ -120,7 +120,30 @@ def below_pixels_strata(below, D, qids):
             for k in sorted(tot)}
 
 
-def prompt_token_parity(qids, D, C, below=frozenset()):
+KIT_MAX_SIDE = 2048
+
+
+def effective_area(w, h):
+    """The area the MODEL saw, not the area on disk.
+
+    ss1_kit.preprocess_to_jpeg_bytes downscales with Lanczos when the longest side exceeds
+    MAX_SIDE = 2048, so for an image above that the staged area in ss1_image_dims.jsonl is NOT the
+    area the processor received. Measured: 242 of 4,319 VizWiz and 41 of 700 EgoThink images are
+    above the cap, so using the recorded area for them would be wrong by up to 1.6x.
+
+    Corroboration that this is the right rule: the largest EgoThink images are 2560x1920, which the
+    cap takes to 2048x1536 = 3,145,728 px, i.e. 3,072 visual tokens under area/1024; the observed
+    EgoThink prompt_tokens maximum is 3,114, which is 3,072 plus about 42 tokens of text. The
+    arithmetic closes end to end, which independently confirms area/1024 on the device side.
+    """
+    m = max(w, h)
+    if m <= KIT_MAX_SIDE:
+        return w * h
+    sc = KIT_MAX_SIDE / float(m)
+    return max(1, round(w * sc)) * max(1, round(h * sc))
+
+
+def prompt_token_parity(qids, D, C, below=frozenset(), dims=None):
     """D142 resolution check: compare prompt_tokens per question between the two runs.
 
     prompt_tokens is TEXT tokens PLUS VISUAL tokens, so a difference has two possible sources and
@@ -179,6 +202,27 @@ def prompt_token_parity(qids, D, C, below=frozenset()):
             reading=("if differing == below, the floor explains the divergence exactly and nothing "
                      "else does. Any qid in differing_but_NOT_below is unexplained by the floor and "
                      "points at the chat template or at something unaccounted for."))
+    if len(uniq) > 1 and dims:
+        # REAL pixel area replaces the earlier prompt_tokens proxy, which was defensible but mildly
+        # circular. Effective (post-cap) area, not the staged area.
+        qq = [q for q in qids if D[q].get("prompt_tokens") and C[q].get("prompt_tokens")]
+        ar = [dims.get(q) for q in qq]
+        have = [(a, diffs[i]) for i, a in enumerate(ar) if a]
+        if len(have) > 2:
+            n2 = len(have)
+            ma = statistics.fmean(x[0] for x in have)
+            md = statistics.fmean(x[1] for x in have)
+            sa = statistics.pstdev([x[0] for x in have]) or 1e-9
+            sd = statistics.pstdev([x[1] for x in have]) or 1e-9
+            r2 = sum((a - ma) * (d - md) for a, d in have) / (n2 * sa * sd)
+            srt = sorted(have)
+            k = max(1, n2 // 10)
+            out["scaling_test_real_area"] = dict(
+                regressor="EFFECTIVE pixel area after the kit's 2048 cap (not the staged area)",
+                n=n2, pearson_r=round(r2, 4),
+                mean_diff_smallest_decile=round(statistics.fmean(d for _, d in srt[:k]), 3),
+                mean_diff_largest_decile=round(statistics.fmean(d for _, d in srt[-k:]), 3),
+                proxy_dropped="the prompt_tokens proxy is no longer used; real areas are available.")
     if len(uniq) > 1:
         n = len(pairs)
         mdev = statistics.fmean(dev)
@@ -272,6 +316,8 @@ def main():
                          "DEVICE upscaled and the cloud did not. The two models were shown "
                          "DIFFERENT PIXELS: this damages ACCURACY AND TTFT, not only token counts. "
                          "Kept as a SEPARATE set from --shared-images on purpose.")
+    ap.add_argument("--image-dims", help="ss1_image_dims.jsonl: {dataset,qid,w,h,area}. Real "
+                                          "pixel areas, which replace the prompt_tokens proxy.")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
 
@@ -314,6 +360,14 @@ def main():
     kept_shared = [q for q in qids if q not in shared]
     kept_below = [q for q in qids if q not in below]
     kept_clean = [q for q in qids if q not in union]
+
+    dims = {}
+    if a.image_dims:
+        for line in Path(a.image_dims).read_text().splitlines():
+            if not line.strip():
+                continue
+            r = json.loads(line)
+            dims[r["qid"]] = effective_area(int(r["w"]), int(r["h"]))
 
     dj = {}
     if a.device_judge:
@@ -370,7 +424,7 @@ def main():
                 "are in file CONTENT under different filenames, and a cache keyed by content does "
                 "not care what the identifier says. Identifier-based deduplication cannot see this "
                 "class at all; the stronger form, hashing file contents, is what found it.")),
-        prompt_token_parity=prompt_token_parity(qids, D, C, below),
+        prompt_token_parity=prompt_token_parity(qids, D, C, below, dims),
         below_min_pixels_strata=(below_pixels_strata(below, D, qids)
                                  if below and a.dataset == "vizwiz" else None),
         full_set=_analyse(qids, D, C, a.dataset, cut, dj, jc),
