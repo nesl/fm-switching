@@ -755,3 +755,99 @@ The chain, with the read sites:
 No code was changed for this subsection. The defect it names is in the harness, not in any arm:
 the policy asked for a cheap representation, was charged for a cheap representation, and sent an
 expensive one.
+
+## 13. Dry pre-screen of every live2 arm (A6000, 2026-11-20, user request)
+
+One dry cell per registered arm: 40:40:20 dashcam : LH-REQ EVAL robot : SS2 EVAL single-shot,
+1200 s, seed 4, 16 devices, stub bridge, no engine. SCREENING ONLY, never a result for any arm.
+Script `experiments/orchestration/live2/baseline_prescreen.py`, output
+`results/orchestration/live2/frozen_test/baseline_prescreen.json`, distinct-arm list written to
+`results/orchestration/live2/frozen_test/runs/PRESCREEN_DISTINCT_ARMS`.
+
+**118 registered arms, 0 errors, 60 distinct decision logs, 18 groups of two or more, 24 arms
+channel-silent.**
+
+### 13.1 What "identical" means here, and what it does not
+
+Arms are grouped by the digest of the decision log, positionally, so a group means byte-identity
+including order. The register matters more than the number: this is an OBSERVED coincidence at ONE
+cell, not a constructed proof that two arms are the same policy. A cell that never reaches an arm's
+branch cannot distinguish it from an arm that has no such branch.
+
+The sharpest instance is our own: **hybrid-F, hybrid-F6, hybrid-F6r and their four `-lhreq` and
+four `-c6` twins are all byte-identical at this cell**, twelve names in one group. They are not the
+same arm. C6 moves 3 decisions at 20 devices seed 0, F differs from F6 at five of the six smoke
+cells, and the robot-only gate moves 2 robot and 82 dashcam decisions at 16 devices seed 0. Seed 4
+at 16 devices is simply the one cell where C6 changes nothing. Any reader who takes the grouping as
+a dedup list deletes the comparison the study exists to make, which is why the control file carries
+that warning above the names.
+
+### 13.2 The groups of two or more
+
+| arms | members |
+|---|---|
+| 12 | b7-edf-feasibility, builder-default, builder-s1-fairshare, builder-s1-feasible, builder-s1-lateness, builder-s2-value, builder-s4-adaptive, builder-s4-llf, builder-s6-decline, **clockwork**, **ekya**, hybrid-base |
+| 12 | hybrid-F, hybrid-F-c6, hybrid-F-lhreq, hybrid-F-lhreq-c6, hybrid-F6, hybrid-F6-c6, hybrid-F6-lhreq, hybrid-F6-lhreq-c6, hybrid-F6r, hybrid-F6r-c6, hybrid-F6r-lhreq, hybrid-F6r-lhreq-c6 |
+| 6 | hybrid2-all-k05, hybrid2-all-k05-c6, hybrid2-c1c2k05c3c5, hybrid2-c1c2k05c3c5-c3always, hybrid2-c1c2k05c3c5-c3always-c6, hybrid2-c1c2k05c3c5-c6 |
+| 5 | always-cloud-fcfs, **inar-vl**, **routellm**, **videostorm**, **vllm-priority** |
+| 4 | hybrid2-all-k15, hybrid2-all-k15-c6, hybrid2-c1c2k15c3c5, hybrid2-c1c2k15c3c5-c6 |
+| 4 | hybrid-c1c2k05, hybrid-c1c2k1, hybrid-c1c2k15, hybrid-c1c2k2 |
+| 4 | hybrid-c1c2k1c3, hybrid-c1c2k1c3-c6, hybrid-c1c2k2c3, hybrid-c1c2k2c3-c6 |
+| 4 | hybrid-base-c6, hybrid-c1-c6, hybrid2-c1c5-c6, hybrid2-c5-c6 |
+| 4 | hybrid-c1c2k05-c6, hybrid-c1c2k1-c6, hybrid-c1c2k15-c6, hybrid-c1c2k2-c6 |
+| 3 | **kvflow**, **pensieve**, **rh8-demand-aware-oracle** |
+| 3 | hybrid-c1, hybrid2-c1c5, hybrid2-c5 |
+| 3 | hybrid2-c1c2k05, hybrid2-c1c2k05c5, hybrid2-c1c2k05c5-reserve |
+| 2 each | builder-acfcfs + builder-s2-all; hybrid-all-k1 + its -c6; hybrid-all-k2 + its -c6; confidence-cascade + **streamscout**; hybrid2-c1c2k05c5-c6 + hybrid2-c1c2k05c5-reserve-c6; hybrid2-c1c2k15c3c5-c3always + its -c6 |
+
+Published arms are in bold. Three readings worth stating plainly, each about THIS cell:
+
+1. **Eleven arms decide exactly as b7 does**, including two published systems, clockwork and ekya,
+   and nine of our own builder and hybrid-base variants. For the published pair this is the
+   port-side question in CLAUDE.md: the port is legal and fairly treated and decides nothing b7
+   does not.
+2. **Four published arms decide exactly as always-cloud-fcfs**, and that group is channel-silent,
+   so those four sent everything to the cloud and used no other channel.
+3. **The k_r ladder is inert at this cell**: k_r 0.05, 0.1, 0.15 and 0.2 give one log in the
+   `hybrid-c1c2k*` family, and the same collapse appears in the c3 and -c6 ladders. The screening
+   that chose k_r cannot have been decided by this cell.
+
+### 13.3 Channel-silent arms (24 of 118)
+
+An arm is channel-silent here when it emitted the two unavoidable release kinds and used no other
+decision channel: no non-default representation, no deferral, no decline, no piece split, no tier
+request. This is the port-side rule's question, asked of every arm at once.
+
+always-cloud-fcfs, builder-acfcfs, builder-s2-all, hybrid-base-c6, hybrid-c1-c6, hybrid-c1c2k05-c6,
+hybrid-c1c2k1-c6, hybrid-c1c2k15-c6, hybrid-c1c2k2-c6, hybrid-llm, hybrid2-c1c2k05-c6,
+hybrid2-c1c2k05c5-c6, hybrid2-c1c2k05c5-reserve-c6, hybrid2-c1c2k15-c6, hybrid2-c1c2k15c5-c6,
+hybrid2-c1c2k15c5-reserve-c6, hybrid2-c1c5-c6, hybrid2-c5-c6, inar-vl, routellm,
+thinking-qwenvl-atdm, uniscale, videostorm, vllm-priority.
+
+Six of the 24 are published arms (inar-vl, routellm, thinking-qwenvl-atdm, uniscale, videostorm,
+vllm-priority). The rest are our own `-c6` variants, which is itself informative: a `-c6` variant
+that is channel-silent while its base arm is not has had its base arm's channel removed rather than
+extended, and that is worth a look before any of them is cited.
+
+Three more arms are nearly silent in a different way: device-only, hybrid-llm and perllm emit 377
+decisions against 13,570 for b7, so they release no dashcam frames to the cloud at all at this cell.
+
+### 13.4 Characteristic decision, where it is declared
+
+A single channel read for every arm is exactly the failure CLAUDE.md records, so the characteristic
+is declared per arm from that arm's own description, and the other 112 arms are reported as
+UNDECLARED with their full census rather than as zeros. An undeclared characteristic is not a zero.
+
+| arm | characteristic decision | count at this cell |
+|---|---|---|
+| b7-edf-feasibility | feasibility actions (decline plus defer) | 5 |
+| eco-llm | non-default representation per request | 377 |
+| mooncake | state action (keep-warm retention) | 377 |
+| hybrid-F-lhreq | non-default representation (C3's RECENT) | 5 |
+| hybrid-F6-lhreq | non-default representation (C3's RECENT) | 5 |
+| hybrid-F6r-lhreq | non-default representation (C3's RECENT) | 5 |
+
+Every one is non-zero, so no arm in the live comparison fails the port-side rule. The hybrid count
+is a FLOOR, not a census: C1 acts through `order`, C2 through the dashcam throttle and C5 through
+the cap, and `decision.jsonl` carries none of those three channels, which is the same
+unexpressibility that section 11.4 of `study_policy_f.md` records for C1.
