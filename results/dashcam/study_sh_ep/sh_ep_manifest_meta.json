@@ -16,8 +16,11 @@
  ],
  "seed": 0,
  "header_count_rule": "StudyD3's grey_header generalised: it names the realised frame count and the span. It CHANGES at every instant and sits FIRST in the prompt, so under this header no KV prefix of an append-only episode can ever be reused.",
- "header_constant_rule": "The following are consecutive dashcam frames, oldest first.",
- "header_constant_note": "count-free, so every instant of one episode shares a byte-identical text prefix and the growing frame list is a true KV prefix. Both headers are frozen per request; --header-mode picks one at run time and no manifest rebuild is needed.",
+ "header_constant_rule": {
+  "one_frame": "The following is 1 dashcam frame.",
+  "multi_frame": "The following are consecutive dashcam frames, oldest first."
+ },
+ "header_mode_ruling": "constant (user, 2026-11-20, D145): count-free for EVERY multi-frame condition, so the wording cannot confound a context comparison and an append-only episode has a real reusable KV prefix; C1 keeps StudyD3's committed one-frame literal. `count` is kept in the manifest as the non-default alternative and is not run.",
  "sigma_fake_event_s": 2.890460072101262,
  "negative_ref_min_crop_s": 4.5,
  "negative_ref_rule_sha256": "2ce83d466ca5ecfe311ddfe5a5cff665f13ccefc8820e094fd97097b8542a360",
@@ -3181,10 +3184,10 @@
   }
  ],
  "_provenance": {
-  "git_commit": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
+  "git_commit": "c14ba8d498e54a609b661c0b107cbb24ea93928c",
   "script": "sh_ep_manifest.py",
   "model": "none",
-  "timestamp": "2026-11-20T11:25:08.112727",
+  "timestamp": "2026-11-20T11:33:06.021894",
   "device": "cpu",
   "n": 19490
  }

@@ -72,7 +72,21 @@ def key_of(pts_sorted, keys, t):
     return (None, None) if i < 0 else (keys[i], pts_sorted[i])
 
 
-HEADER_CONSTANT = "The following are consecutive dashcam frames, oldest first."
+HEADER_ONE_FRAME = "The following is 1 dashcam frame."   # d3 grey_header(1), the committed literal
+HEADER_MULTI = "The following are consecutive dashcam frames, oldest first."
+
+
+def header_constant_for(n: int) -> str:
+    """The RULING header (user, 2026-11-20, D145).
+
+    Count-free for every multi-frame condition, so the wording is byte-identical across C3, C6,
+    EP-B and EP-G and across every instant of one episode. Two things follow, and the second is
+    why the ruling went this way: an append-only episode now has a real reusable KV prefix, and
+    the header can no longer confound a context comparison, because a difference between C3 and
+    EP-G can no longer be a difference in what the header said. C1 keeps StudyD3's committed
+    one-frame literal, so the one-frame comparator is the committed body exactly.
+    """
+    return HEADER_ONE_FRAME if n == 1 else HEADER_MULTI
 
 
 def header_for(n: int) -> str:
@@ -254,7 +268,8 @@ def main():
                     duration_s=dur, scene=c["scene"], light=c["light"], weather=c["weather"],
                     n_frames=len(keys), frame_keys=keys, frame_pts=pts, small_sha256=shas,
                     store_refs=refs, store_files=[store_file(x) for x in refs],
-                    header=header_for(len(keys)), header_constant=HEADER_CONSTANT,
+                    header=header_for(len(keys)),
+                    header_constant=header_constant_for(len(keys)),
                     span_s=round(pts[-1] - pts[0], 3) if keys else 0.0,
                     instants_requested=len(want), instants_missing=miss,
                     collapsed=len(want) - miss - len(keys)))
@@ -304,11 +319,12 @@ def main():
                           "and the span. It CHANGES at every instant and sits FIRST in the "
                           "prompt, so under this header no KV prefix of an append-only episode "
                           "can ever be reused.",
-        header_constant_rule=HEADER_CONSTANT,
-        header_constant_note="count-free, so every instant of one episode shares a byte-identical "
-                             "text prefix and the growing frame list is a true KV prefix. Both "
-                             "headers are frozen per request; --header-mode picks one at run "
-                             "time and no manifest rebuild is needed.",
+        header_constant_rule=dict(one_frame=HEADER_ONE_FRAME, multi_frame=HEADER_MULTI),
+        header_mode_ruling="constant (user, 2026-11-20, D145): count-free for EVERY multi-frame "
+                           "condition, so the wording cannot confound a context comparison and "
+                           "an append-only episode has a real reusable KV prefix; C1 keeps "
+                           "StudyD3's committed one-frame literal. `count` is kept in the "
+                           "manifest as the non-default alternative and is not run.",
         sigma_fake_event_s=sigma, negative_ref_min_crop_s=min_crop_s,
         negative_ref_rule_sha256=rule_sha,
         negative_ref_rule="study_e9c_challenge.fake_event_times at seed 0, the "

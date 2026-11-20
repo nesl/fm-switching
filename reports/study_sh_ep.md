@@ -99,33 +99,49 @@ Declared deviations over the committed SH body, each with its reason:
 | JPEG wire bytes, not PNG | the live2 wire format | D70, D91 |
 | `cache_salt` and a per-image client `uuid` | cache isolation; one salt per (clip, condition, model run) and a uuid per (clip, condition, frame), so no episode can read another's warm state | D84 |
 | `stream` true | H3 needs the first token timed | live2's own third declared deviation |
+| the multi-frame header is count-free: `The following are consecutive dashcam frames, oldest first.` | ruled 2026-11-20 (section 4). StudyD3's header names the frame count, which makes a KV prefix unreusable AND makes the wording differ between conditions | none; **stated as a deviation from StudyD3's wording.** C1 keeps StudyD3's committed one-frame literal exactly |
 | prefix caching and the multimodal processor cache ON; `--limit-mm-per-prompt image >= 21` | H3 is a claim about warm episodes, and EP-G carries 21 images | none; the committed SH stack runs with both caches OFF and the image cap at 9 |
 
 Caching is a methodological parameter, not an implementation detail (CLAUDE.md), so the last row is the
 one that needs a control rather than a note: section 8's positive control is what says what turning the
 caches on did to the scores.
 
-## 4. The header, and one open ruling
+## 4. The header: ruled, 2026-11-20
 
 StudyD3's header names the frame count and the span, and it sits **first** in the prompt. Under that
-header an append-only episode has a different first token at every instant, so **no KV prefix can ever
-be reused and H3 is unreachable by construction** for EP-B and EP-G: the warm-path control would report
-`cached_tokens` 0 everywhere and the finding would be "unexercised" in the Rule 2 sense, which is a
-design failure and not evidence about episodes.
+header an append-only episode has a different first token at every instant, so no KV prefix can ever be
+reused and **H3 would be unreachable by construction** for EP-B and EP-G: the warm-path control would
+report `cached_tokens` 0 everywhere and the finding would be "unexercised" in the Rule 2 sense, which is
+a design failure and not evidence about episodes. This was found before any inference, which is what
+Step 0 is for.
 
-This was found before any inference, which is what Step 0 is for. Both headers are therefore frozen into
-every manifest row and `--header-mode` picks one at run time, so either ruling needs no code change and
-no manifest rebuild:
+**The ruling: the count-free header for EVERY multi-frame condition.** C1 keeps StudyD3's committed
+one-frame literal.
 
-| mode | header | consequence |
-|---|---|---|
-| `count` | `The following are 21 consecutive dashcam frames covering 10 seconds, oldest first.` | StudyD3's wording. KV prefix reuse impossible; H3 can only be about the multimodal encoder cache, which the uuid mechanism still gives. |
-| `constant` | `The following are consecutive dashcam frames, oldest first.` | count-free, so every instant of one episode shares a byte-identical text prefix and the growing frame list is a true KV prefix. H3 becomes testable. Deviates from StudyD3's wording. |
+| condition | header sent |
+|---|---|
+| C1 | `The following is 1 dashcam frame.` (StudyD3's committed literal, byte for byte) |
+| C3, C6, EP-B, EP-G | `The following are consecutive dashcam frames, oldest first.` |
+| any request clipped to one frame at the start of a short clip | the one-frame literal |
 
-**C1, C3 and C6 are unaffected** either way: their sliding windows change the first frame at every
-instant, so consecutive requests share no prefix under any header. Those three conditions are 11,694
-requests per model, 60 percent of the work, and they can start immediately. EP-B and EP-G wait on the
-ruling.
+**One flag, not two.** `--header-mode constant` is the ruling and the default, and it is correct for
+**every** condition including C1: the manifest's `header_constant` field already resolves to StudyD3's
+committed one-frame literal whenever the realised frame count is 1. Running C1 under `--header-mode
+count` instead would send the same string today, but it would send a DIFFERENT string on any C3, C6,
+EP-B or EP-G request that happens to be clipped to one frame at the start of a short clip, and the two
+boxes would then disagree on those requests and fail the parity check in section 5b. Both boxes pass
+`--header-mode constant` for the whole run.
+
+It buys two things, and the second is why it applies to the sliding conditions too and not only to the
+episode ones. First, an append-only episode now has a genuinely reusable KV prefix, so H3 is testable at
+all. Second, **the wording can no longer confound a context comparison**: with StudyD3's header, a
+difference between C3 and EP-G would be partly a difference in what the header said, since one would
+announce 3 frames and 1 second and the other 21 frames and 10 seconds. Holding the text fixed makes the
+frames the only thing that varies across conditions, which is the comparison the study exists to make.
+
+The cost is a declared deviation from StudyD3's wording on the multi-frame conditions, recorded in
+section 3 and in every run meta. StudyD3's `count` header stays frozen in every manifest row as the
+non-default alternative and is not run; `--header-mode constant` is the default and the ruling.
 
 ## 5. Metrics
 
@@ -155,6 +171,48 @@ detection and move the difference in the direction of whichever arm misses more.
 
 **Cost.** TTFT cold against warm, new (uncached) prompt tokens per request, KV tokens per episode,
 uplink image bytes per episode.
+
+## 5b. The deployment pair, and why it is cross-stack on purpose
+
+| box | model | what its numbers are |
+|---|---|---|
+| jetson_orin | 4BI, the **full** set: all five conditions and all controls, under vLLM | the **deployed device** arm. Its scores are the device answers for H1, H2 and the rebuilt live workload, and its timings are H3's device-tier cost |
+| h100nvl | 32BI only, under vLLM | the **deployed cloud** arm |
+
+The comparison is labelled **deployed device (Orin 4BI, vLLM) against deployed cloud (H100 32BI,
+vLLM)**, and it is **cross-stack BY DESIGN**. That phrasing is doing real work and is not a hedge. The
+EXPERIMENTS.md sanity-check column requires any comparison across backends to be labelled
+BACKEND-MISMATCHED, and that label exists for comparisons where the backend differs **by accident** and
+the difference is therefore a confound nobody chose. Here the two stacks ARE the two conditions: the
+question is what a device deployment detects against what a cloud deployment detects, so running the 4B
+on device hardware and the 32B on cloud hardware is the treatment, not a flaw in it. Reporting it as an
+accidental mismatch would misdescribe the design in the direction of making it look weaker than it is,
+and reporting it as same-stack would misdescribe it in the direction of making it look stronger.
+
+**What that costs, and what therefore has to be proved rather than assumed.** A capability gap and a
+stack gap are no longer separable by construction, so the one thing holding the comparison together is
+that both arms read the **same input**. The scorer checks it per request id and every failure is a stop
+condition, not a note:
+
+| checked per request | why it is a stop |
+|---|---|
+| equal prompt tokens | the brief requires it per request pair; unequal means the two arms are not reading the same prompt |
+| identical header text | the ruling's header split must be the same on both boxes, or C1 diverges |
+| identical frame sha256 list, in order | the same episode, the same bytes, the same order |
+
+The multimodal processor settings must also match, because they set the image token count: the H100's
+round-1 server runs `--mm-processor-kwargs {"size": {"shortest_edge": 4096, "longest_edge":
+16777216}, "fps": 1.0, "do_sample_frames": false}` with `--trust-request-mm-kwargs`, and the Orin must
+run the same. A difference there moves the prompt tokens and the parity check fails, which is the
+intended outcome: it fails loudly rather than producing a gap that is partly a tokenizer difference.
+
+**One consequence worth stating before the run.** Those processor settings are live2 round 1's, not
+StudyD3's, and StudyD3 and StudyD14b commit **378 prompt tokens at one frame** (336 image pads). If the
+first C1 request does not report 378, then the C1 condition is not the committed one-frame body, the
+study's one-frame comparator is not the committed comparator, and consistency check 1 against the
+committed D14b scores is not available in the form section 10 assumes. The first C1 request's prompt
+token count is therefore reported before the sweep, and a value other than 378 is a stop pending a
+ruling, not something to absorb.
 
 ## 6. Mechanism verification, Steps 0 to 5, before the sweep
 
@@ -218,12 +276,16 @@ Any one of these stops the run or the scoring, and is reported rather than worke
 
 1. The scorer's positive control misses a committed StudyE9c value by more than 1e-9.
 2. More than 1 percent of requests fail after retries, or more than 1 percent return neither Yes nor No.
-3. A prompt-token mismatch between the two models on the same request: they are then not reading the
-   same prompt and no gap between them is a capability gap.
-4. A grey control whose score is not constant at a given frame count.
-5. `cached_tokens` absent from every record: the warm-path instrument never reads, so H3 is unscorable
+3. A prompt-token mismatch between the two arms on the same request id, or a header or frame-sha256
+   mismatch: they are then not reading the same episode and no gap between them is a capability gap.
+   This matters more here than in a same-stack study, because the two arms are two deployments
+   (section 5b) and input identity is the only thing the comparison rests on.
+4. The first C1 request reporting a prompt-token count other than the committed 378 (section 5b): the
+   one-frame comparator is then not the committed one-frame body.
+5. A grey control whose score is not constant at a given frame count.
+6. `cached_tokens` absent from every record: the warm-path instrument never reads, so H3 is unscorable
    as posed and must be re-posed, not reported.
-6. A foreign process on the run's GPU, or a server-log error before the requests complete.
+7. A foreign process on the run's GPU, or a server-log error before the requests complete.
 
 ## 8. The positive control, already run
 
@@ -246,9 +308,32 @@ in the last place, so the AP, the crops, the horizon inclusion and the matched n
 this scorer are StudyE9c's own and not a re-implementation. **PASSED**, and it runs again, first, on
 every scoring pass.
 
-## 9. Open at the time of writing
+## 9. Handoff notes
 
-- **Ruling needed:** the header, section 4. C1, C3 and C6 do not wait on it.
+**h100nvl, the deployed cloud arm, 32BI only.** (1) The store extension first, before any inference: `sh_ep_encode_extra.py --dry-run`
+then without it, on the frame host, with `--src ~/data/dashcam/d14b_frames/small:~/data/dashcam/d14_frames/small`
+and `--store ~/data/live2/jpeg/nexar_q90`. If the Pillow or libjpeg version differs from the store's
+original encode run, report it: those 165 frames are then the only ones whose encode provenance differs.
+(2) Server: prefix caching ON, the multimodal processor cache ON, `--limit-mm-per-prompt image` at 21 or
+more; everything else the committed stack. Record the exact command line in the run meta. (3) `--model 32BI`, all
+five conditions, DEV and EVAL, `--header-mode constant` (the default and the ruling, for every
+condition including C1), `--shuffle-control`. 19,490 requests. The runner is resumable. (4) Report the
+first C1 request's prompt-token count before the sweep: it must be the committed 378.
+
+**jetson_orin, the deployed device arm, the full 4BI set.** Stage the 6,237 frames, 6,072 from the D91 store plus the 165 the extension adds, after
+the H100 has written them, so both boxes read byte-identical input. The full 4BI set, all five
+conditions and all controls, same runner, `--header-mode constant` for every condition including C1,
+and **the same `--mm-processor-kwargs` as the H100**, because those settings set the image token count
+and the parity check in section 5b will fail without them. Its scores are the device answers for H1, H2
+and the rebuilt live workload, and its timings are H3's device-tier cost.
+
+**Both.** Every record carries its own `host`, so the two arms join by `request_id` and separate by
+host without reference to a file name. The stop conditions in section 7 apply on both boxes, and the
+input-identity checks in section 5b can only be computed once both runs exist, so neither box's numbers
+are read before the other's have landed.
+
+## 10. Open at the time of writing
+
 - Step 3's traced unit, to be pasted from the first completed cell before any sweep is scored.
 - The run's own consistency check 1 (this study's C1 against the committed D14b N = 1 scores, which
   differ by the JPEG wire format under D70: 30 to 40 percent of individual Nexar scores move by more

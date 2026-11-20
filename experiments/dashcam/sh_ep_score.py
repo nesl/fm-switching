@@ -384,6 +384,7 @@ def main():
                 res["h2_earliness"][f"{cd}|far{int(far * 100)}"] = earliness_diff(
                     cell, pos_e, lead, boots, [c for c in pos_e])
     res["controls"] = controls(a.runs, runs, side)
+    res["deployment_pair"] = deployment_pair(a.runs)
     res["cost"] = cost(runs)
     res["_provenance"] = stamp(script="sh_ep_score.py", model="none", device="cpu", n=nrec,
                                args=a)
@@ -541,4 +542,53 @@ def cost(runs):
                       kv_tokens_per_episode=q([e["prompt"] - e["cached"] for e in epi]),
                       prompt_tokens_per_episode=q([e["prompt"] for e in epi]),
                       uplink_image_bytes_per_episode=q([e["up"] for e in epi]))
+    return out
+
+
+def deployment_pair(paths):
+    """The identical-input check across the deployment pair: Orin 4BI against H100 32BI.
+
+    The two arms run on two stacks BY DESIGN: they are deployment conditions, a deployed device
+    against a deployed cloud, not an accidental backend mismatch. That makes the INPUT identity
+    the thing that has to be proved, because it is the only thing left holding the comparison
+    together. Three things are checked per request id, and each is a STOP:
+
+      * the same prompt tokens, which the brief requires per request pair;
+      * the same header text;
+      * the same frame sha256 list, in the same order.
+
+    A mismatch in any of them means the two arms are not reading the same episode, and no gap
+    between them is a capability gap.
+    """
+    by = defaultdict(dict)
+    for q in paths:
+        op = gzip.open if str(q).endswith(".gz") else open
+        with op(q, "rt") as fh:
+            for ln in fh:
+                r = json.loads(ln)
+                if r.get("control") or r.get("error") or r.get("prompt_tokens") is None:
+                    continue
+                by[r["request_id"]][r["model"]] = r
+    pairs = [(k, v) for k, v in by.items() if "4BI" in v and "32BI" in v]
+    out = dict(label="DEPLOYED DEVICE (Orin 4BI, vLLM) against DEPLOYED CLOUD (H100 32BI, vLLM). "
+                     "Cross-stack BY DESIGN: these are deployment conditions, not a backend "
+                     "mismatch. Identical inputs are therefore checked per request, not assumed.",
+               hosts={m: sorted({v[m].get("host") for _, v in pairs if m in v})
+                      for m in ("4BI", "32BI")},
+               n_paired=len(pairs), by_condition={})
+    for cd in CONDITIONS:
+        rows = [v for _, v in pairs if v["4BI"]["condition"] == cd]
+        if not rows:
+            continue
+        tok = [v for v in rows if v["4BI"]["prompt_tokens"] != v["32BI"]["prompt_tokens"]]
+        hdr = [v for v in rows if v["4BI"]["header"] != v["32BI"]["header"]]
+        fr = [v for v in rows
+              if list(v["4BI"]["small_sha256"]) != list(v["32BI"]["small_sha256"])]
+        out["by_condition"][cd] = dict(
+            n_paired=len(rows), prompt_token_mismatches=len(tok),
+            header_mismatches=len(hdr), frame_sha256_mismatches=len(fr),
+            examples=[v["4BI"]["request_id"] for v in (tok + hdr + fr)[:10]],
+            identical_inputs=not (tok or hdr or fr))
+    out["identical_inputs"] = (all(v["identical_inputs"] for v in out["by_condition"].values())
+                               if out["by_condition"] else None)
     return out

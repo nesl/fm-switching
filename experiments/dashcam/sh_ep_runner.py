@@ -61,6 +61,8 @@ MODELS = {"4BI": "Qwen/Qwen3-VL-4B-Instruct", "32BI": "Qwen/Qwen3-VL-32B-Instruc
 TRANSPORT = ("ReadError", "RemoteProtocolError", "ConnectError", "WriteError", "ReadTimeout",
              "ConnectTimeout", "PoolTimeout", "WriteTimeout", "CloseError")
 ATTEMPTS = 3
+HOST = os.uname().nodename   # recorded per RECORD, not only per run: the 4BI set runs on the
+                             # H100 and on the Orin, and the cross-stack table joins them by host
 N_GREY = 100                 # StudyD3's own grey count
 GREY_SIZE = (768, 432)       # StudyD14b SMALL, the pixel grid of every stored frame
 
@@ -220,10 +222,13 @@ def main():
     ap.add_argument("--greys", type=int, default=N_GREY)
     ap.add_argument("--shuffle-control", action="store_true",
                     help="re-send C6 and EP-G on the control subset with the context shuffled")
-    ap.add_argument("--header-mode", default="count", choices=("count", "constant"),
-                    help="count: StudyD3's header, which names the frame count and therefore "
-                         "changes at every instant, so no KV prefix is reusable. constant: a "
-                         "count-free header, so an append-only episode has a real KV prefix.")
+    ap.add_argument("--header-mode", default="constant", choices=("count", "constant"),
+                    help="constant (THE RULING, D145, and the default): count-free for every "
+                         "multi-frame condition, so the wording cannot confound a context "
+                         "comparison and an append-only episode has a real reusable KV prefix; "
+                         "C1 keeps StudyD3's committed one-frame literal. count: StudyD3's "
+                         "frame-count header, kept as the non-default alternative; under it no "
+                         "KV prefix is reusable and H3 is unreachable by construction.")
     ap.add_argument("--timeout", type=float, default=600.0)
     a = ap.parse_args()
 
@@ -279,7 +284,7 @@ def main():
                        n_new_images=sum(1 for p in body["messages"][0]["content"]
                                         if p.get("type") == "image_url" and p["image_url"]),
                        cache_salt=salt, mm_uuids=uuids, control=None,
-                       run_tag=a.run_tag, at=datetime.now().isoformat())
+                       host=HOST, run_tag=a.run_tag, at=datetime.now().isoformat())
             fh.write(json.dumps(rec) + "\n")
             fh.flush()
             if (i + 1) % 200 == 0:
@@ -304,7 +309,7 @@ def main():
                            uplink_bytes_new_images=nb,
                            uplink_bytes_body=len(json.dumps(body)), n_new_images=n,
                            cache_salt=salt, mm_uuids=uuids, control="grey",
-                           run_tag=a.run_tag, at=datetime.now().isoformat())
+                           host=HOST, run_tag=a.run_tag, at=datetime.now().isoformat())
                 fh.write(json.dumps(rec) + "\n")
                 fh.flush()
 
@@ -332,7 +337,7 @@ def main():
                            header_mode=a.header_mode, uplink_bytes_new_images=nb,
                            uplink_bytes_body=len(json.dumps(body)), n_new_images=row["n_frames"],
                            cache_salt=salt, mm_uuids=uuids, control="shuffled",
-                           run_tag=a.run_tag, at=datetime.now().isoformat())
+                           host=HOST, run_tag=a.run_tag, at=datetime.now().isoformat())
                 fh.write(json.dumps(rec) + "\n")
                 fh.flush()
 
