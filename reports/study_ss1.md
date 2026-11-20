@@ -206,9 +206,29 @@ Disjoint (intersection 0, union 64). So **accuracy n = 4,291** (minus the 28 onl
 **TTFT n = 4,255** (minus both). A single excluded figure would either drop 36 questions from
 accuracy for no reason or keep 36 contaminated ones in TTFT.
 
-**The 36 are a CENSUS, not a bound.** `mm_cache_hits_total = 36` against 36 candidates, so k = N:
-every candidate fired, none were evicted, and the identities follow from the position matches
-(4 at request 151, 4 at 205, 13 at 731). The exclusion is exact rather than conservative.
+**The 36 are a CENSUS, not a bound, and the basis is three-fold rather than an equality.**
+`mm_cache_hits_total = 36` against 36 candidates is the weakest of the three legs, because an exact
+k = N can also arise from two offsetting errors. What grounds it:
+
+1. **Instance separation.** The H100's prompt-token probes all went to a first server instance that
+   stopped at 17:16; these counters belong to a second instance started 17:16:42 for this run, so
+   no probe-induced hit can be inside the 36.
+2. **Position matching at three checkpoints.** Hits landed at exactly the predicted positions,
+   4 at request 151, 4 at 205 and 13 at 731. A spurious hit would have shown as an excess over
+   prediction at the next checkpoint, and no excess was ever seen.
+3. **The excess over 4,319 is accounted for by name.** `request_success_total` 4,322 and
+   `mm_cache_queries_total` 4,323 exceed the 4,319 questions because the wrapper had already begun
+   EgoThink when this file was stamped: the extra requests are Activity/000 to 003, a dimension
+   with zero shared-image candidates and new image content, so none of the 36 can come from them.
+
+The exclusion is therefore exact rather than conservative. Note also that `mm_cache_queries_total`
+4,323 for 4,319 images means the multimodal queries side is non-vacuous too, the same property
+established overwhelmingly for the prefix cache at 6,702,660 queries against 0 hits.
+
+> **The counter value was read by regex, not by eye.** It sits inside a free-text stamp string
+> where `=36` abuts the next `vllm:` token, and a `35` from a 17:49 snapshot at 3,876 requests was
+> in circulation at the same time. Both numbers were correct for their own moment; only the stamp
+> belongs in this file.
 
 ## Accuracy
 
@@ -306,3 +326,28 @@ The 28 by stratum, mild: other 16 of 2,691 (0.59%), unanswerable 11 of 1,385 (0.
 different native filename numberings and no published crosswalk exists. See `compare_gates.json`
 for the full diagnosis, including why the ~28000 offset is well motivated and still unverified, and
 why the `v2_` prefix does not supply the missing 1,152.
+
+## Reading the EgoThink stamp: the counters are CUMULATIVE
+
+**Stated before that file is read, because the frame is easy to get wrong and expensive to chase
+later.** This VizWiz file already proves the point: its totals include four EgoThink questions, so
+both datasets ran on the same server instance and these counters are **monotonic across the whole
+session** rather than per dataset.
+
+So in the EgoThink stamp, expect:
+
+| counter | expected | NOT |
+|---|---|---|
+| `mm_cache_hits_total` | about **52** (36 VizWiz + 16 EgoThink) | 16 |
+| `mm_cache_queries_total` | about **5,019** | 700 |
+| `prefix_cache_queries_total` | larger still | — |
+| `prefix_cache_hits_total` | **0** | — |
+
+Two readings to avoid, in opposite directions. A reader expecting 16 and seeing 52 would register a
+3.25x over-run and hunt a cache leak that does not exist. A reader expecting 52 and seeing 52 must
+**not** treat that as confirming EgoThink's 16 fired, because 36 of it is already banked from
+VizWiz.
+
+**EgoThink's own hit count is the DIFFERENCE between the two stamps, 52 − 36, and only that
+difference speaks to EgoThink's 16 candidates.** It will be computed as a delta, not read as a
+total.
