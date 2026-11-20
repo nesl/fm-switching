@@ -251,6 +251,12 @@
    "vizwiz_count": "28 of 4,319 are below the 65,536 px floor, smallest 121x162. My flagged tail was the 68 questions under 200 prompt_tokens, so the 28 fall inside it; I stated the tail as POSSIBLY non-empty rather than empty.",
    "what_the_coordinator_had_predicted": "that the floor plausibly never binds for a single item. That is the prediction the data refutes: the tail is not empty.",
    "a_probe_figure": "the H100 probed the smallest image and got 34 prompt tokens on the 32B; the device figure for the same item will be several times that."
+  },
+  "FINAL_PREDICTION": {
+   "statement": "with the processor configs agreeing on all three load-bearing fields, prompt_tokens equality is predicted on 4,291 of 4,319 and divergence on EXACTLY the 28, with the device higher on each.",
+   "falsifier": "any qid that differs WITHOUT being in the 28 is unexplained by the floor and points at the chat template or something unaccounted for. The localisation test reports exactly that set.",
+   "egothink": "100 percent equality predicted, 0 of 700 below the floor.",
+   "the_proxy_is_insurance_only": "the device-prompt_tokens proxy for image size is used only if the scaling branch fires, which it will not if the prediction holds. The H100 has the per-image areas and did not supply them; they are insurance rather than a dependency and are not waited on."
   }
  },
  "orin_version_resolved": {
@@ -284,6 +290,45 @@
   "two_further_checks_implemented": [
    "the 28's answer-type and answerable breakdown with PCT OF STRATUM, since 0.65 percent of the pool can be several percent of one stratum and small badly-framed photos are exactly VizWiz's hard cases",
    "a LOCALISATION TEST on prompt_tokens: equality is pre-stated to hold on 4,291 of 4,319 and to fail on exactly the 28. The test reports whether the differing set EQUALS the below-floor set, and lists any qid that differs without being below the floor, which would be unexplained by the floor and would point at the chat template or something unaccounted for."
-  ]
+  ],
+  "TWO_DENOMINATORS_verified": {
+   "overlap": "ZERO. Verified locally: below-floor n=28, shared-images n=36, intersection 0, union 64. Disjoint.",
+   "accuracy_clean_n": 4291,
+   "accuracy_rule": "4,319 minus the 28 ONLY. The 36 shared-image repeats are a warm-cache TIMING artifact and do not contaminate accuracy, so dropping them from accuracy would discard 36 questions for no reason.",
+   "ttft_clean_n": 4255,
+   "ttft_rule": "4,319 minus the union of 64, because the warm-cache repeats DO contaminate timing.",
+   "why_not_one_figure": "a single 'excluded' denominator would either lose 36 questions from accuracy or keep 36 contaminated questions in TTFT. Implemented as a per-AXIS denominator inside one variant rather than as two whole variants, so the two numbers are reported side by side with their rule.",
+   "my_earlier_structure_was_wrong_here": "I had built a single fully_clean variant over the union, which would have applied the TTFT-only exclusion to accuracy as well. Corrected before any numbers were produced."
+  },
+  "stratum_check_is_MILD": {
+   "table": {
+    "other": {
+     "below": 16,
+     "n": 2691,
+     "rate_pct": 0.59
+    },
+    "unanswerable": {
+     "below": 11,
+     "n": 1385,
+     "rate_pct": 0.79
+    },
+    "yes/no": {
+     "below": 1,
+     "n": 195,
+     "rate_pct": 0.51
+    },
+    "number": {
+     "below": 0,
+     "n": 48,
+     "rate_pct": 0.0
+    }
+   },
+   "reading": "under 1 percent of EVERY stratum, with unanswerable slightly over-represented at 0.79 against 0.65 pooled. Reported as MILD and as a footnote. 0.79 against 0.65 is NOT dressed as a finding: the guess that small photos would concentrate in the hard cases was directionally right and quantitatively negligible.",
+   "why_it_was_worth_checking_anyway": "0.65 percent of a pool can be several percent of one stratum, and this is where that would have shown. It did not."
+  },
+  "one_factual_correction": {
+   "what": "the smallest sub-floor image was reported as 121x162. The file's own rows give the minimum by AREA as 23x30 = 690 px; 121x162 is present but is 19,602 px, well inside the set rather than its minimum. The largest in the set are 192x256 = 49,152 px, just under the 65,536 floor.",
+   "why_it_matters_slightly": "at 690 px the device upscales about 95x in area to reach its 65,536 floor while the cloud upscales about 6x to reach 4,096, so this is the item where the two renderings diverge most. It is also consistent with the H100's probe of 34 prompt tokens on the 32B for the smallest: a 4,096 px floor implies 4 visual tokens, and 4 plus about 30 tokens of text is 34."
+  }
  }
 }

@@ -200,7 +200,7 @@ def prompt_token_parity(qids, D, C, below=frozenset()):
     return out
 
 
-def _analyse(qids, D, C, dataset, cut, dj, jc):
+def _analyse(qids, D, C, dataset, cut, dj, jc, ttft_qids=None):
     """Every statistic, over one qid subset. Called once on the full set and once with the
     shared-image qids removed, so the two columns are always cleaned alike or not at all."""
     pairs = [(score_of(D[q], dataset), score_of(C[q], dataset)) for q in qids]
@@ -221,7 +221,13 @@ def _analyse(qids, D, C, dataset, cut, dj, jc):
         two_by_two=two_by_two(pairs, cut),
         two_by_two_cut_sensitivity=({str(c): two_by_two(pairs, c) for c in (0.3, 0.5, 0.7, 1.0)}
                                     if dataset == "vizwiz" else None),
-        ttft=dict(device=ttft([D[q] for q in qids]), cloud=ttft([C[q] for q in qids])),
+        ttft=dict(device=ttft([D[q] for q in (ttft_qids if ttft_qids is not None else qids)]),
+                  cloud=ttft([C[q] for q in (ttft_qids if ttft_qids is not None else qids)]),
+                  n_ttft=len(ttft_qids if ttft_qids is not None else qids),
+                  denominator_note=("TTFT uses its OWN denominator when the shared-image set is "
+                                    "supplied: those questions are a warm-cache timing artifact "
+                                    "and must leave the TTFT column, but they do NOT contaminate "
+                                    "accuracy and are kept in it.")),
         by_stratum={k: dict(device=mean_ci([x[0] for x in v]),
                             cloud=mean_ci([x[1] for x in v]),
                             paired_difference=paired_bootstrap(v),
@@ -293,8 +299,8 @@ def main():
     below_rows = []
     if a.below_min_pixels:
         v = json.loads(Path(a.below_min_pixels).read_text())
-        items = v if isinstance(v, list) else (v.get("below_min_pixels") or v.get("items")
-                                               or v.get("qids") or [])
+        items = v if isinstance(v, list) else (v.get("rows") or v.get("below_min_pixels")
+                                               or v.get("items") or v.get("qids") or [])
         for it in items:
             if isinstance(it, str):
                 below.add(it)
@@ -370,9 +376,16 @@ def main():
         full_set=_analyse(qids, D, C, a.dataset, cut, dj, jc),
         shared_images_excluded=(_analyse(kept_shared, D, C, a.dataset, cut, dj, jc)
                                 if shared else None),
-        below_min_pixels_excluded=(_analyse(kept_below, D, C, a.dataset, cut, dj, jc)
-                                   if below else None),
-        fully_clean=(_analyse(kept_clean, D, C, a.dataset, cut, dj, jc) if union else None),
+        clean=(_analyse(kept_below, D, C, a.dataset, cut, dj, jc, ttft_qids=kept_clean)
+               if (below or shared) else None),
+        clean_denominators=dict(
+            accuracy_n=len(kept_below),
+            ttft_n=len(kept_clean),
+            rule=("TWO DENOMINATORS, NOT ONE. Accuracy excludes the below-floor set ONLY, because "
+                  "the shared-image repeats are a TTFT-only artifact and dropping them from "
+                  "accuracy would discard questions for no reason. TTFT excludes BOTH, because the "
+                  "warm-cache repeats do contaminate timing. A single 'excluded' figure would "
+                  "either lose questions from accuracy or keep contaminated ones in TTFT.")),
         ttft_condition=dict(
             device_host="Orin, vLLM, idle, one request at a time, cold per image.",
             device_host_attribution_source=(
