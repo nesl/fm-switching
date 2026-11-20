@@ -43,7 +43,24 @@
    "what_would_make_it_possible": "a published mapping between the VizWiz-VQA val ids and the VizWiz v2 / Captions ids. Without one the join has no key."
   },
   "the_coverage_instruction_is_what_caught_it": "the instruction was to report coverage rather than assume the join is complete. Coverage is not partial, it is ZERO, and a join written without a coverage check would have silently produced an empty or wildly undersized stratum table rather than failing.",
-  "effect_on_the_deliverable": "NONE on schedule. The by-flag stratification is additive, not a prerequisite. The comparison reports answer_type and answerable-only as before and states that the by-flag cut is absent with this reason."
+  "effect_on_the_deliverable": "NONE on schedule. The by-flag stratification is additive, not a prerequisite. The comparison reports answer_type and answerable-only as before and states that the by-flag cut is absent with this reason.",
+  "DIAGNOSIS_REFINED": {
+   "my_earlier_wording_was_wrong": "I wrote 'no key'. The CSV's IMG column IS A FILENAME STRING, e.g. VizWiz_val_000000028000.jpg, so there is a key; what differs is the integer space inside it. 'No key' and 'a different numbering' are different diagnoses and this is the second.",
+   "what_the_raw_file_shows": {
+    "columns": "IMG, WORKERID, NON, BLR, BRT, DRK, OBS, FRM, ROT, OTH, OTH_TEXT, REJECT, SPLIT",
+    "val_ids": "3,167 distinct VizWiz_val_<12 digits>.jpg, range 28000..31172",
+    "span_arithmetic": "the span holds exactly 3,173 integers with only 6 missing inside it, in six single-integer gaps. 3,173 IS D136's figure for VizWiz val 'with public answers', which is why the offset hypothesis is attractive rather than merely arithmetical."
+   },
+   "the_manifest_did_NOT_renumber": "checked in the builder rather than assumed: ss1_build_manifests.py:45 reads VizWiz's own val.json and :52 uses e['image'] VERBATIM as the image filename. So VizWiz_val_00000000.jpg is VizWiz-VQA's NATIVE name as shipped, not an SS1 renumbering.",
+   "therefore": "both sides use NATIVE filenames from DIFFERENT VizWiz RELEASES: VizWiz-VQA val numbers 0..4318 in 8 digits, while VizWiz-QualityIssues numbers val 28000..31172 in 12 digits, the v2 / Captions continuous-pool numbering. Neither numbering is ours.",
+   "why_the_offset_is_NOT_APPLIED": {
+    "the_hypothesis": "VQA val image k is the same photograph as quality val image 28000+k, giving coverage 3,167 of 4,319 = 73.3 percent over manifest ids 0..3172.",
+    "status": "UNVERIFIED, and not applied.",
+    "what_would_be_needed": "a published crosswalk between the VQA val ids and the v2 / Captions ids, or a content hash. The approved terms are annotation CSV only with no images, and the SS1 images are gone from tmpfs, so the content route is closed.",
+    "why_not_just_assume_it": "joining on an assumed offset attributes every quality flag by a guess. If the two releases do not enumerate the same photographs in the same order, every flag lands on the wrong image and the stratification is confidently wrong, which is worse than an absent stratum. The arithmetic coincidence is evidence FOR the hypothesis, not verification OF it, and treating it as verification is the declaration-read-as-observation shape this study keeps catching."
+   },
+   "recorded_as": "ABSENT, with the reason that the two releases use different native numberings and no published mapping exists, rather than the weaker and incorrect 'no key'. Additive; it does not hold the commit."
+  }
  },
  "host_and_load_condition": {
   "resolved_by_the_user": true,
@@ -182,5 +199,11 @@
    "the_general_lesson": "identifier-based deduplication cannot see content duplicates under different filenames, and a cache keyed by content does not care what the identifier says. Where a cache keys on content, dedupe on content. Recorded as the form to apply wherever this recurs.",
    "a_true_but_irrelevant_premise": "VizWiz being one question per photo is TRUE and does not bear on this: the duplication is across photos, not across questions on a photo. A premise can be correct and still not support the conclusion drawn from it."
   }
+ },
+ "shared_image_register_rule": {
+  "do_not_pre_commit_to_the_bound_wording": "the lists are labelled a CONSTRUCTED BOUND, the questions that COULD be served warm. But the H100 has been position-matching incrementally, not merely counting: 4 at request 151, 4 at 205 and 13 at 731, each against exactly the candidates predicted to fall in that span, which it describes as identified by position rather than counted.",
+  "the_upgrade_rule_is_the_H100's_own": "an exact census only if k equals N. So if the final mm_cache_hits is 52 against the 36 plus 16 lists, every candidate fired, none were evicted, the identities follow from the positions, and the cloud side has a CENSUS with named members rather than a bound.",
+  "what_I_will_do": "READ THE FINAL FIGURE BEFORE FIXING THE REGISTER. 52 means census and the members are named; below 52 means eviction occurred somewhere and the bound language is correct. The device side remains a bound either way, having neither count nor identities.",
+  "why_this_matters": "pre-committing to bound wording that a 52 cannot upgrade would be the mirror of the error being avoided: a constructed bound reported as a census, run backwards into a census reported as a bound."
  }
 }

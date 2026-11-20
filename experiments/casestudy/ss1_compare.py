@@ -172,7 +172,16 @@ def main():
     shared = set()
     for f in a.shared_images:
         v = json.loads(Path(f).read_text())
-        shared |= set(v if isinstance(v, list) else v.get("qids", []))
+        if isinstance(v, list):
+            shared |= set(v)
+        else:
+            # The H100 marks this a CONSTRUCTED BOUND: the questions that COULD be served warm by
+            # the multimodal cache. The aggregate mm_cache_hits counter gives a COUNT without
+            # identities, so this is a candidate set, not an observed set, on BOTH sides.
+            for k in ("repeat_questions_possibly_warm", "qids", "shared_qids"):
+                if isinstance(v.get(k), list):
+                    shared |= set(v[k])
+                    break
     kept = [q for q in qids if q not in shared]
 
     dj = {}
