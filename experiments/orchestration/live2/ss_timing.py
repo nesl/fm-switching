@@ -57,8 +57,13 @@ def cached_tokens(row, salt):
                 cache_salt=salt, messages=[{"role": "user", "content": [
                     {"type": "text", "text": K.vizwiz_prompt(row["question"])},
                     {"type": "image_url", "image_url": {"url": K.jpeg_data_url(str(R.image_path(row)))}}]}])
-    u = requests.post(EP + "/chat/completions", json=body, timeout=180).json().get("usage") or {}
-    return int((u.get("prompt_tokens_details") or {}).get("cached_tokens") or 0), u.get("prompt_tokens")
+    u = requests.post(EP + "/chat/completions", json=body, timeout=180).json().get("usage")
+    # RAW, never coerced: absent and zero are different observations (vLLM 0.20.0 left this field null)
+    det = (u or {}).get("prompt_tokens_details") if isinstance(u, dict) else None
+    present = isinstance(det, dict) and ("cached_tokens" in det)
+    raw = det.get("cached_tokens") if present else None
+    return dict(usage_present=isinstance(u, dict), details_present=isinstance(det, dict), key_present=present,
+                cached_tokens_raw=raw, prompt_tokens=(u or {}).get("prompt_tokens") if isinstance(u, dict) else None)
 
 
 def summary(recs):
@@ -85,11 +90,20 @@ def idle():
             c1 = cached_tokens(r, same)
             c2 = cached_tokens(r, same)
             ctl.append(dict(qid=r["qid"], unique_salt_first=a, unique_salt_second=b, same_salt_first=c1, same_salt_repeat=c2))
-        ok = all(x["unique_salt_second"][0] == 0 for x in ctl) and all(x["same_salt_repeat"][0] > 0 for x in ctl)
+        num = lambda v: isinstance(v["cached_tokens_raw"], int)                              # noqa: E731
+        instrument_ok = all(num(x[k]) for x in ctl for k in ("unique_salt_first", "unique_salt_second",
+                                                              "same_salt_first", "same_salt_repeat"))
+        ok = bool(instrument_ok and all(x["unique_salt_second"]["cached_tokens_raw"] == 0 for x in ctl)
+                  and all(x["same_salt_repeat"]["cached_tokens_raw"] > 0 for x in ctl))
+        diagnosis = ("pass" if ok else "INSTRUMENT NOT REPORTING (cached_tokens absent or null): isolation unmeasured on this route"
+                     if not instrument_ok else "FIELD POPULATED BUT THE PATTERN FAILED: a real finding about the prefix cache")
         (OUT / "prefix_cache_positive_control.json").write_text(json.dumps(dict(
             label="POSITIVE CONTROL for the StudySS1-32B prefix-cache isolation claim; run on a fresh server AFTER the "
                   "StudySS1-32B run, separately from it; its hits are the control's, not the run's",
-            pass_condition="unique-salt repeat cached 0 AND same-salt repeat cached > 0", passed=ok, rows=ctl), indent=1) + "\n")
+            scope="a separate server start with the identical round-1 command: validates the mechanism and the instrument, "
+                  "not the exact StudySS1-32B server process",
+            pass_condition="every cached_tokens value present and an integer, AND unique-salt repeat == 0 AND same-salt repeat > 0",
+            passed=ok, diagnosis=diagnosis, rows=ctl), indent=1) + "\n")
         recs = [one(r, "ssidle-%d-%d" % (i, time.time_ns())) for i, r in enumerate(rows)]
     finally:
         srv.stop()
