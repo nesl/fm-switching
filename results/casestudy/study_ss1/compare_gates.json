@@ -60,6 +60,23 @@
     "why_not_just_assume_it": "joining on an assumed offset attributes every quality flag by a guess. If the two releases do not enumerate the same photographs in the same order, every flag lands on the wrong image and the stratification is confidently wrong, which is worse than an absent stratum. The arithmetic coincidence is evidence FOR the hypothesis, not verification OF it, and treating it as verification is the declaration-read-as-observation shape this study keeps catching."
    },
    "recorded_as": "ABSENT, with the reason that the two releases use different native numberings and no published mapping exists, rather than the weaker and incorrect 'no key'. Additive; it does not hold the commit."
+  },
+  "OFFSET_TEST_DESIGN": {
+   "status": "DESIGNED, NOT RUN. Strictly after both datasets are committed.",
+   "my_weak_version_is_dropped": "testing elevated BLR/FRM/NON rates on the 28 sub-floor images. n=28 is too weak to settle anything and it is abandoned.",
+   "the_test_to_run": {
+    "design": "join the quality flags under the candidate ~28000 offset, then test the flags against the manifest's `answerable` field, which has 1,385 unanswerable of 4,319.",
+    "why_it_is_powerful": "n in the thousands rather than 28, and the quality-issues paper exists precisely because blind users' photos are often unusable, so flags and unanswerability should be strongly associated in the real data.",
+    "prediction_under_a_CORRECT_offset": "markedly elevated BLR, FRM and OBS among unanswerable questions, and depressed NON, since NON is the no-issue category and unanswerable photos should carry more flaws.",
+    "prediction_under_a_WRONG_offset": "the join is effectively a random permutation, so every rate collapses to the pooled mean and no association appears.",
+    "why_the_failure_semantics_are_right": "a wrong offset CANNOT fake an association, because a permutation destroys exactly the structure being tested. So a strong association is real evidence the mapping is non-random, and its absence is near-conclusive that it is wrong."
+   },
+   "WHAT_IT_CAN_AND_CANNOT_LICENSE": {
+    "can": "move the stratum from ABSENT to reported with a stated verification and its limits.",
+    "cannot": "make the join exact. A passing association verifies that the MAPPING IS NON-RANDOM, not that every individual row landed on its own photograph. A systematic off-by-small-k offset, for instance, would preserve most of the association while mis-assigning every row.",
+    "my_call_if_it_passes": "report the stratum WITH the verification and its limit stated in the same breath, not as a clean cut. If the association is weak or absent, the stratum stays absent and the offset is refuted rather than merely unverified, which is a better outcome than tonight's 'unverifiable'."
+   },
+   "no_size_column_confirmed": "the CSV columns are IMG, WORKERID, NON, BLR, BRT, DRK, OBS, FRM, ROT, OTH, OTH_TEXT, REJECT, SPLIT. There is no width, height or area field, so no exact size attribute exists to join against and the association route is the only one available."
   }
  },
  "host_and_load_condition": {
@@ -348,6 +365,7 @@
    "fix": "EFFECTIVE area is computed by applying the cap before regressing, so the regressor is the area the model actually received.",
    "an_independent_arithmetic_CORROBORATION": "the largest EgoThink images at 2560x1920 become 2048x1536 = 3,145,728 px under the cap, which is 3,072 visual tokens at area/1024; the observed EgoThink prompt_tokens MAXIMUM is 3,114, i.e. 3,072 plus about 42 tokens of text. The arithmetic closes end to end, which confirms the area/1024 rule on the device side from the outputs rather than from the config.",
    "definition_note": "this is a check-4 point: 'area' names two different quantities, staged and effective, and only the second bears on token counts."
-  }
+  },
+  "correction_to_the_instruction": "the instruction was to regress against ss1_image_dims.jsonl's `area` directly. Those are STAGED areas, and for the 242 VizWiz and 41 EgoThink images above the kit's 2048 cap the staged area overstates what the model saw by up to about 1.6x. Effective post-cap area is the correct regressor and the raw field is not."
  }
 }
