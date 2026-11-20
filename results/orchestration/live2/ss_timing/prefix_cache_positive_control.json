@@ -1,0 +1,103 @@
+{
+ "label": "POSITIVE CONTROL for the StudySS1-32B prefix-cache isolation claim; run on a fresh server AFTER the StudySS1-32B run, separately from it; its hits are the control's, not the run's",
+ "scope": "a separate server start with the identical round-1 command: validates the mechanism and the instrument, not the exact StudySS1-32B server process",
+ "pass_condition": "every cached_tokens value present and an integer, AND unique-salt repeat == 0 AND same-salt repeat > 0",
+ "passed": true,
+ "diagnosis": "pass",
+ "reader_near_miss": "This control's own first reader coerced the field with `or 0`, so an absent or null cached_tokens would have read as 0: the unique-salt arm would have passed vacuously and the same-salt arm failed, giving passed=false attributed to the CACHE when the cause was the READER. Fixed (raw values, presence recorded) before the control ran (a peer review, 2026-11-19). A verification layer is itself code that can fail silently.",
+ "rows": [
+  {
+   "qid": "vizwiz_val/VizWiz_val_00002713",
+   "unique_salt_first": {
+    "usage_present": true,
+    "details_present": true,
+    "key_present": true,
+    "cached_tokens_raw": 0,
+    "prompt_tokens": 1250
+   },
+   "unique_salt_second": {
+    "usage_present": true,
+    "details_present": true,
+    "key_present": true,
+    "cached_tokens_raw": 0,
+    "prompt_tokens": 1250
+   },
+   "same_salt_first": {
+    "usage_present": true,
+    "details_present": true,
+    "key_present": true,
+    "cached_tokens_raw": 0,
+    "prompt_tokens": 1250
+   },
+   "same_salt_repeat": {
+    "usage_present": true,
+    "details_present": true,
+    "key_present": true,
+    "cached_tokens_raw": 1248,
+    "prompt_tokens": 1250
+   }
+  },
+  {
+   "qid": "vizwiz_val/VizWiz_val_00001285",
+   "unique_salt_first": {
+    "usage_present": true,
+    "details_present": true,
+    "key_present": true,
+    "cached_tokens_raw": 0,
+    "prompt_tokens": 1245
+   },
+   "unique_salt_second": {
+    "usage_present": true,
+    "details_present": true,
+    "key_present": true,
+    "cached_tokens_raw": 0,
+    "prompt_tokens": 1245
+   },
+   "same_salt_first": {
+    "usage_present": true,
+    "details_present": true,
+    "key_present": true,
+    "cached_tokens_raw": 0,
+    "prompt_tokens": 1245
+   },
+   "same_salt_repeat": {
+    "usage_present": true,
+    "details_present": true,
+    "key_present": true,
+    "cached_tokens_raw": 1232,
+    "prompt_tokens": 1245
+   }
+  },
+  {
+   "qid": "vizwiz_val/VizWiz_val_00003295",
+   "unique_salt_first": {
+    "usage_present": true,
+    "details_present": true,
+    "key_present": true,
+    "cached_tokens_raw": 0,
+    "prompt_tokens": 1238
+   },
+   "unique_salt_second": {
+    "usage_present": true,
+    "details_present": true,
+    "key_present": true,
+    "cached_tokens_raw": 0,
+    "prompt_tokens": 1238
+   },
+   "same_salt_first": {
+    "usage_present": true,
+    "details_present": true,
+    "key_present": true,
+    "cached_tokens_raw": 0,
+    "prompt_tokens": 1238
+   },
+   "same_salt_repeat": {
+    "usage_present": true,
+    "details_present": true,
+    "key_present": true,
+    "cached_tokens_raw": 1232,
+    "prompt_tokens": 1238
+   }
+  }
+ ]
+}
