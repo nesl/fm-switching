@@ -72,12 +72,17 @@ def main(runs_dir, out_path):
             h = int(r.get("history_tokens") or 0)
             dl = float(r.get("deadline_s") or 5.0)
             feas[r["opportunity_id"]] = (C.recall_ttft_s(h, "COLD") + C.recall_ttft_s(h, "GPU-WARM") + link) <= dl
+        # D144 (as corrected 2026-11-20): on time = delivered within the deadline by a request that returned HTTP 200.
+        # The coordinator stamps on_time from completion time alone, so a refused request (HTTP 400, letter "X") would
+        # otherwise count as an on-time cloud answer.
+        failed = {r.get("request_id") for r in jl(first(d, "request.jsonl")) if r.get("http_status") != 200}
         ont = {}
         for o in jl(first(d, "outcomes.jsonl")):
             if o.get("kind") == "recall" and o["opportunity_id"] in feas:
                 td = o.get("t_delivered")
-                ont[o["opportunity_id"]] = bool(td is not None and float(td) - float(o["t_opportunity"])
-                                                <= float(o.get("deadline_s") or 5.0))
+                rid = (o.get("cloud_payload") or {}).get("request_id")
+                ont[o["opportunity_id"]] = bool(td is not None and rid not in failed
+                                                and float(td) - float(o["t_opportunity"]) <= float(o.get("deadline_s") or 5.0))
         fq = [k for k, v in feas.items() if v]
         sw = (((c.get("score") or {}).get("score") or {}).get("sweep") or [{}])[0]
         nreq, nerr = c.get("n_requests"), c.get("n_errors")
@@ -87,7 +92,7 @@ def main(runs_dir, out_path):
                          robot_on_time_all=sum(1 for k in feas if ont.get(k)),
                          robot_on_time_feasible=sum(1 for k in fq if ont.get(k)),
                          scorer_robot_on_time=sw.get("robot_pool_on_time"), scorer_robot_n=sw.get("robot_pool_n"),
-                         matches_scorer=(sw.get("robot_pool_on_time") == sum(1 for k in feas if ont.get(k))),
+                         matches_scorer=(sw.get("robot_pool_on_time") == sum(1 for k in feas if ont.get(k))),  # differs by the refused-request correction
                          dashcam_all_meet=sw.get("dashcam_all_meet"), capacity_met=sw.get("capacity_met"),
                          ss_on_time=sw.get("ss_pool_on_time"), ss_n=sw.get("ss_pool_n"),
                          request_errors=nerr, requests_offered=nreq,
