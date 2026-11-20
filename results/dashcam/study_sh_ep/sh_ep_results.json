@@ -1,6 +1,6 @@
 {
  "label": "StudySH-EP analysis. CPU only; every score is a committed SH-EP run record.",
- "at": "2026-11-20T13:40:13.108172",
+ "at": "2026-11-20T14:44:26.989004",
  "seed": 0,
  "n_bootstrap": 2000,
  "horizons": [
@@ -94,11 +94,8 @@
   "failures": [],
   "passed": true
  },
- "n_records": 27286,
+ "n_records": 31184,
  "coverage": {
-  "4BI|C6": {
-   "clips_or_crops_missing": 300
-  },
   "4BI|EP-B": {
    "clips_or_crops_missing": 300
   },
@@ -168,6 +165,38 @@
     "ci": [
      0.45070274667724025,
      0.5979710119405331
+    ]
+   }
+  },
+  "4BI|C6": {
+   "ap": {
+    "0.5": {
+     "ap": 0.6605402116875485,
+     "ci": [
+      0.5862674937589385,
+      0.7363478367698271
+     ]
+    },
+    "1.0": {
+     "ap": 0.4684607637048858,
+     "ci": [
+      0.39798407161456606,
+      0.5725777549859674
+     ]
+    },
+    "1.5": {
+     "ap": 0.3062232439828777,
+     "ci": [
+      0.2484229328963406,
+      0.40554469794968656
+     ]
+    }
+   },
+   "mAP": {
+    "value": 0.47840807312510397,
+    "ci": [
+     0.4235746105829031,
+     0.5591924579962811
     ]
    }
   },
@@ -353,6 +382,16 @@
    "n_positive": 45,
    "n_negative": 45
   },
+  "4BI|C6": {
+   "mAP": 0.536511600336047,
+   "ap": {
+    "0.5": 0.6600035261274981,
+    "1.0": 0.5744603759124127,
+    "1.5": 0.3750708989682299
+   },
+   "n_positive": 45,
+   "n_negative": 45
+  },
   "32BI|C1": {
    "mAP": 0.6305313118488884,
    "ap": {
@@ -423,6 +462,20 @@
     "ci": [
      -0.05844871390158733,
      0.05314535816694658
+    ]
+   }
+  },
+  "C6": {
+   "gap": 0.1621778961631049,
+   "ci": [
+    0.09953027731925802,
+    0.22414782650417486
+   ],
+   "vs_C1": {
+    "diff": 0.06196104696004395,
+    "ci": [
+     -0.0008552451611173749,
+     0.11626883903689066
     ]
    }
   }
@@ -739,6 +792,162 @@
      1.25
     ]
    }
+  },
+  "C6|far5": {
+   "models": {
+    "4BI": {
+     "threshold": -1.3132615263755527,
+     "achieved_far": 0.046221570066030816,
+     "n_negative_instants": 1363,
+     "detected": 37
+    },
+    "32BI": {
+     "threshold": -5.255209466030264,
+     "achieved_far": 0.02421129860601614,
+     "n_negative_instants": 1363,
+     "detected": 52
+    }
+   },
+   "all": {
+    "n_both": 22,
+    "n_32BI_only": 30,
+    "n_4BI_only": 15,
+    "mean_lead_32BI": 1.8694545454545455,
+    "mean_lead_4BI": 1.7558181818181817,
+    "diff": 0.11363636363636363,
+    "ci": [
+     -0.70609243697479,
+     0.9642857142857143
+    ]
+   },
+   "sudden": {
+    "n_both": 15,
+    "n_32BI_only": 13,
+    "n_4BI_only": 9,
+    "mean_lead_32BI": 1.6580000000000001,
+    "mean_lead_4BI": 1.4246666666666667,
+    "diff": 0.23333333333333334,
+    "ci": [
+     -0.9063210227272728,
+     1.35
+    ]
+   },
+   "slow": {
+    "n_both": 7,
+    "n_32BI_only": 17,
+    "n_4BI_only": 6,
+    "mean_lead_32BI": 2.3225714285714285,
+    "mean_lead_4BI": 2.4654285714285713,
+    "diff": -0.14285714285714285,
+    "ci": [
+     -1.5627232142857144,
+     1.25
+    ]
+   }
+  },
+  "C6|far10": {
+   "models": {
+    "4BI": {
+     "threshold": -2.126927890489214,
+     "achieved_far": 0.0719002201027146,
+     "n_negative_instants": 1363,
+     "detected": 45
+    },
+    "32BI": {
+     "threshold": -7.375616985146673,
+     "achieved_far": 0.05429200293470286,
+     "n_negative_instants": 1363,
+     "detected": 74
+    }
+   },
+   "all": {
+    "n_both": 35,
+    "n_32BI_only": 39,
+    "n_4BI_only": 10,
+    "mean_lead_32BI": 2.619628571428571,
+    "mean_lead_4BI": 2.1910571428571424,
+    "diff": 0.42857142857142855,
+    "ci": [
+     -0.18524305555555554,
+     1.0345822281167103
+    ]
+   },
+   "sudden": {
+    "n_both": 20,
+    "n_32BI_only": 21,
+    "n_4BI_only": 7,
+    "mean_lead_32BI": 2.3363500000000004,
+    "mean_lead_4BI": 2.0363499999999997,
+    "diff": 0.3,
+    "ci": [
+     -0.6879261363636363,
+     1.2631965944272443
+    ]
+   },
+   "slow": {
+    "n_both": 15,
+    "n_32BI_only": 18,
+    "n_4BI_only": 3,
+    "mean_lead_32BI": 2.997333333333333,
+    "mean_lead_4BI": 2.397333333333334,
+    "diff": 0.6,
+    "ci": [
+     0.031250000000000056,
+     1.1666666666666667
+    ]
+   }
+  },
+  "C6|far20": {
+   "models": {
+    "4BI": {
+     "threshold": -4.511047594113474,
+     "achieved_far": 0.1504035216434336,
+     "n_negative_instants": 1363,
+     "detected": 67
+    },
+    "32BI": {
+     "threshold": -9.875051438458302,
+     "achieved_far": 0.12545854732208364,
+     "n_negative_instants": 1363,
+     "detected": 85
+    }
+   },
+   "all": {
+    "n_both": 58,
+    "n_32BI_only": 27,
+    "n_4BI_only": 9,
+    "mean_lead_32BI": 2.960706896551724,
+    "mean_lead_4BI": 2.7107068965517245,
+    "diff": 0.25,
+    "ci": [
+     -0.30360926150121065,
+     0.7885261194029847
+    ]
+   },
+   "sudden": {
+    "n_both": 34,
+    "n_32BI_only": 15,
+    "n_4BI_only": 6,
+    "mean_lead_32BI": 2.816029411764706,
+    "mean_lead_4BI": 2.9042647058823525,
+    "diff": -0.08823529411764706,
+    "ci": [
+     -0.796875,
+     0.6375107758620688
+    ]
+   },
+   "slow": {
+    "n_both": 24,
+    "n_32BI_only": 12,
+    "n_4BI_only": 3,
+    "mean_lead_32BI": 3.1656666666666666,
+    "mean_lead_4BI": 2.4365,
+    "diff": 0.7291666666666666,
+    "ci": [
+     -0.06525362318840577,
+     1.6252840909090893
+    ]
+   }
   }
  },
  "within_model_vs_C1": {
@@ -749,6 +958,15 @@
    "ci": [
     -0.07252193631889023,
     0.02352102322640429
+   ]
+  },
+  "4BI|C6": {
+   "mAP": 0.47840807312510397,
+   "mAP_C1": 0.5379169196321144,
+   "diff": -0.05950884650701044,
+   "ci": [
+    -0.11688199406622472,
+    -0.0036668689340941846
    ]
   },
   "32BI|C3": {
@@ -1008,9 +1226,9 @@
    "worst_spread": 0.2499999979760048
   },
   "shuffled_minus_ordered": {
-   "n": 1298,
-   "mean": 0.5220219479929781,
-   "mean_abs": 2.087684262925737,
+   "n": 1947,
+   "mean": 0.4725033136267917,
+   "mean_abs": 1.9333036856319914,
    "max_abs": 15.12313164158514,
    "note": "a model that reads the episode as a sequence must be DISTURBED by shuffling; a mean absolute difference at the numerical floor says the frame order carries nothing and the episode conditions are bags of frames, not episodes"
   },
@@ -1022,7 +1240,7 @@
    },
    "4BI": {
     "zeros": 0,
-    "hits": 3,
+    "hits": 26,
     "omits_instead_of_zero": true
    }
   },
@@ -1103,11 +1321,22 @@
     "n_first": 300,
     "mean_cached_tokens_on_hits": 688.0,
     "verdict": "warm path exercised"
+   },
+   "4BI|C6": {
+    "n": 3898,
+    "absent_on_first": 300,
+    "absent_later": 3575,
+    "zero": 0,
+    "hit": 23,
+    "cached_sum": 30272,
+    "n_first": 300,
+    "mean_cached_tokens_on_hits": 1316.1739130434783,
+    "verdict": "warm path exercised"
    }
   },
   "stop_condition_5_fires": false,
   "prompt_token_parity": {
-   "pairs": 7796,
+   "pairs": 11694,
    "mismatched": 0,
    "examples": [],
    "note": "the brief requires the same prompt-token count per request pair; a mismatch means the two models are not reading the same prompt and no gap between them is a capability gap"
@@ -1123,7 +1352,7 @@
     "sn4622120321"
    ]
   },
-  "n_paired": 7796,
+  "n_paired": 11694,
   "by_condition": {
    "C1": {
     "n_paired": 3898,
@@ -1134,6 +1363,14 @@
     "identical_inputs": true
    },
    "C3": {
+    "n_paired": 3898,
+    "prompt_token_mismatches": 0,
+    "header_mismatches": 0,
+    "frame_sha256_mismatches": 0,
+    "examples": [],
+    "identical_inputs": true
+   },
+   "C6": {
     "n_paired": 3898,
     "prompt_token_mismatches": 0,
     "header_mismatches": 0,
@@ -1505,15 +1742,68 @@
     "p90": 1295171.3,
     "mean": 909297.3466666667
    }
+  },
+  "4BI|C6": {
+   "requests": 3898,
+   "ttft_all_s": {
+    "n": 3898,
+    "p50": 0.927285,
+    "p90": 0.9300868,
+    "mean": 0.9474324356080039
+   },
+   "ttft_cold_s": {
+    "n": 3875,
+    "p50": 0.927291,
+    "p90": 0.9301326,
+    "mean": 0.9515450067096775
+   },
+   "ttft_warm_s": {
+    "n": 23,
+    "p50": 0.254234,
+    "p90": 0.2584062,
+    "mean": 0.2545536086956522
+   },
+   "new_prompt_tokens": {
+    "n": 3898,
+    "p50": 2070.0,
+    "p90": 2070.0,
+    "mean": 2056.6829143150335
+   },
+   "cached_tokens": {
+    "n": 3898,
+    "p50": 0.0,
+    "p90": 0.0,
+    "mean": 7.766033863519754
+   },
+   "uplink_image_bytes_total": 326096068,
+   "uplink_body_bytes_total": 438840314,
+   "kv_tokens_per_episode": {
+    "n": 300,
+    "p50": 26910.0,
+    "p90": 26910.0,
+    "mean": 26723.166666666668
+   },
+   "prompt_tokens_per_episode": {
+    "n": 300,
+    "p50": 26910.0,
+    "p90": 26910.0,
+    "mean": 26824.073333333334
+   },
+   "uplink_image_bytes_per_episode": {
+    "n": 300,
+    "p50": 1067723.5,
+    "p90": 1559909.8,
+    "mean": 1086986.8933333333
+   }
   }
  },
  "_provenance": {
-  "git_commit": "5337d5072970c27a20b0532f150690bde8aa6343",
+  "git_commit": "0303be76525ac6798c726b012aa02de306595da7",
   "script": "sh_ep_score.py",
   "model": "none",
-  "timestamp": "2026-11-20T13:40:15.630856",
+  "timestamp": "2026-11-20T14:44:30.155487",
   "device": "cpu",
-  "n": 27286,
+  "n": 31184,
   "args": {
    "runs": [
     "results/dashcam/study_sh_ep/sh_ep_requests_4BI_shep1.jsonl",

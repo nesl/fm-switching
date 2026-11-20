@@ -724,3 +724,40 @@ The 4B's C6, EP-B and EP-G, which are running. Until they land, the pairs exist 
 H1's episode half rests on 32B-only contrasts, and the section 1 decision rule is not applied. The
 cost-under-load cell needs a background the engine can sustain. The RefSpatial and single-shot work
 queued for the Orin is independent of all of this.
+
+### 11.9 Update, 2026-11-20: the 4B's C6 lands, and H1's second half turns on the SMALL model
+
+The Orin's C6 arrived (0303be7), giving a third paired condition. It changes the H1 picture, and not
+in the direction the hypothesis anticipated.
+
+| condition | 32B minus 4B | CI | that gap minus C1's | CI |
+|---|---|---|---|---|
+| C1 | +0.1002 | [+0.0378, +0.1665] | reference | |
+| C3 | +0.0980 | [+0.0246, +0.1752] | -0.0023 | [-0.0584, +0.0531] |
+| C6 | **+0.1622** | [+0.0995, +0.2241] | **+0.0620** | [-0.0009, +0.1163] |
+
+**The gap at six frames is 62 percent larger than at one frame**, and the interval on that increase
+only just contains zero, its lower bound being -0.0009. On the point estimate H1's second half holds
+at C6, and the reason is the part worth reporting:
+
+| within one model, C6 minus C1 | diff | CI |
+|---|---|---|
+| 32B | +0.0025 | [-0.0687, +0.0683] |
+| 4B | **-0.0595** | **[-0.1169, -0.0037]** |
+
+**The gap widens because the 4B gets WORSE with six frames, not because the 32B gets better.** The
+32B is flat, as 11.2 reported. The 4B's decline is the one condition contrast in this study whose
+interval excludes zero. So the honest statement of H1 at C6 is not "episode context helps the large
+model", it is **"episode context actively harms the small model while leaving the large one
+unchanged"**, which widens the gap by damaging the weaker arm.
+
+That has a different consequence for a deployment than the hypothesis implied. The gap is not a
+reason to send episodes to the cloud; it is a reason not to send them to the device.
+
+**And on the device the cost runs the same way.** 4B TTFT p50 is 0.9273 s at C6 against 0.2416 s at
+C1, so six frames cost the device **3.8 times** a one-frame evaluation and lose 0.06 mAP. For the
+device, C6 is worse on both axes at once.
+
+Still outstanding: the 4B's EP-B and EP-G, which are the two conditions where H3's warm-prefix saving
+applies, so the episode conditions proper remain 32B-only and section 1's decision rule is still not
+applied.
