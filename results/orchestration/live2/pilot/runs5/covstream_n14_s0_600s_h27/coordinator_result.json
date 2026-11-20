@@ -1,0 +1,199 @@
+{
+ "arm": "covstream",
+ "arm_version": "live2-arm-1.0",
+ "is_measurement": false,
+ "tick_s": 0.1,
+ "decision_period_s": 0.1,
+ "h_s": null,
+ "upload_mode": "A",
+ "window_s": 600.0,
+ "n_devices": 14,
+ "n_sessions": 15,
+ "n_opportunities": 7679,
+ "n_requests": 7678,
+ "n_decisions": 7712,
+ "counts": {
+  "completed_monitor": 7485,
+  "completed_recall": 33,
+  "recall_CLOUD": 34,
+  "session_KEEP_GPU_WARM": 34,
+  "submitted_monitor": 7644,
+  "submitted_recall": 34
+ },
+ "n_monitor_answers": 7485,
+ "n_recall_answers": 33,
+ "n_on_time": 2648,
+ "submit_delay_ms": {
+  "n": 7678,
+  "p50": 6.6381,
+  "p90": 15.3147,
+  "p99": 23.0386,
+  "max": 69.6604
+ },
+ "decision_time": {
+  "n": 5993,
+  "cpu_clock": "time.thread_time() of the deciding thread",
+  "wall_ms": {
+   "n": 5993,
+   "p50": 0.9072,
+   "p90": 0.9488,
+   "p99": 1.2957,
+   "max": 59.8605
+  },
+  "cpu_ms": {
+   "n": 5993,
+   "p50": 0.9014,
+   "p90": 0.9426,
+   "p99": 1.2894,
+   "max": 59.8015
+  },
+  "wall_over_cpu": {
+   "n": 5993,
+   "p50": 1.0065,
+   "p90": 1.0076,
+   "p99": 1.0178,
+   "max": 1.1562
+  },
+  "candidates": {
+   "n": 5993,
+   "p50": 7,
+   "p90": 7,
+   "p99": 7,
+   "max": 8
+  },
+  "candidates_source": "pending items ordered"
+ },
+ "n_pulls": 0,
+ "n_cloud_answers": 7518,
+ "decision_latency_ms": {
+  "p50": 0.9072,
+  "p99": 1.2957,
+  "max": 59.8605,
+  "n": 5993
+ },
+ "cpu_s": 257.144,
+ "wall_s": 598.791,
+ "cpu_percent": 42.9,
+ "request_rate_per_s": 12.82,
+ "budget_gpu_s": 600.0,
+ "budget_spent_gpu_s": 593.61,
+ "epoch_overruns": 0,
+ "max_epoch_lag_s": 0.0,
+ "wall_guard_hit": false,
+ "wall_guard_s": null,
+ "virtual_t_reached_s": 0.0,
+ "n_errors": 0,
+ "first_errors": [],
+ "mu_time_average": null,
+ "arm_stats": null,
+ "bridge": {
+  "arm": "covstream",
+  "n_events": 7865,
+  "n_ticks": 107229,
+  "n_pulls": 0,
+  "n_cloud_answers": 7518,
+  "n_decisions": 5993,
+  "decision_period_s": 0.1,
+  "n_forwarded_on_completion": 7539,
+  "n_skipped_forwarded": 7518,
+  "n_forward_mismatch": 0,
+  "n_recall_first_token": 33,
+  "n_recall_letter_differs": 0,
+  "recall_letter_diffs": [],
+  "n_monitor_score_differs": 0
+ },
+ "self_ticks": 47231,
+ "self_tick_s": 0.005,
+ "backend": {
+  "n_built": 7678,
+  "callback_errors": [],
+  "wire_extra_delay_ms": {
+   "n": 7678,
+   "p50": 9.0407,
+   "p90": 16.34,
+   "p99": 40.8353,
+   "max": 95.3841
+  },
+  "submit_delay_total_ms": {
+   "n": 7678,
+   "p50": 16.6241,
+   "p90": 28.8938,
+   "p99": 55.5161,
+   "max": 125.4005
+  },
+  "first_line_to_first_content_ms": {
+   "n": 7539,
+   "p50": 0.1278,
+   "p99": 2.0723,
+   "max": 30.4577
+  },
+  "n_callback_errors": 0,
+  "build_ms_total": 2078.074,
+  "build_ms_mean": 0.2707,
+  "cache": {
+   "n_cached": 10179,
+   "held_bytes": 690447585,
+   "cap_bytes": 1500000000,
+   "hits": 11409,
+   "misses": 10179,
+   "encoded_bytes": 690447585,
+   "hit_fraction": 0.528488
+  }
+ },
+ "cache": {
+  "n_cached": 10179,
+  "held_bytes": 690447585,
+  "cap_bytes": 1500000000,
+  "hits": 11409,
+  "misses": 10179,
+  "encoded_bytes": 690447585,
+  "hit_fraction": 0.528488
+ },
+ "pid": 2127937,
+ "cpu_s_child": 257.1484,
+ "completion_to_forward_ms": {
+  "n": 7539,
+  "p50_ms": 0.0448,
+  "p90_ms": 0.0639,
+  "p99_ms": 0.0937,
+  "max_ms": 58.7702
+ },
+ "first_token_to_forward_ms": {
+  "n": 7539,
+  "p50_ms": 0.0448,
+  "p90_ms": 0.0639,
+  "p99_ms": 0.0937,
+  "max_ms": 58.7702
+ },
+ "memory_pressure": {
+  "kv_capacity_enforced": false,
+  "gpu_kv_tokens": 62944,
+  "pressure": {
+   "epochs": 5993,
+   "epochs_over_cap": 0,
+   "peak_tokens": 0,
+   "intervals": [],
+   "host_peak_tokens": 0,
+   "host_epochs_over_cap": 0,
+   "intervals_n": 0
+  },
+  "enact_placement_totals": {
+   "calls": 5993,
+   "offloaded": 0,
+   "kept_warm": 0,
+   "evicted": 0,
+   "resident": 0
+  }
+ },
+ "wire_events_sent": 7865,
+ "wire_replies_received": 7539,
+ "wire_write_errors": 1,
+ "wire_max_send_backlog": 29,
+ "completion_to_emulator_ms": {
+  "n": 7539,
+  "p50_ms": 4.6296,
+  "p90_ms": 9.027,
+  "p99_ms": 10.0927,
+  "max_ms": 65.2027
+ }
+}
