@@ -18,6 +18,21 @@ REPO = Path(__file__).resolve().parents[2]
 OUT = REPO / "results/casestudy/study_ss1"
 sys.path.insert(0, str(REPO / "experiments/orchestration"))
 PY = sys.executable
+# vLLM 0.31.0 rejects a cache_salt containing '/', '@', '\\' or NUL (HTTP 400), and the kit passes each question id
+# (e.g. "vizwiz_val/VizWiz_val_00000000") as the salt; the Orin's older vLLM accepted it. The salt only partitions the
+# prefix cache and never reaches the model, so it cannot change an answer. This shim runs the kit's runner UNCHANGED
+# except that the salt has '/' replaced by '_' (still unique per question). Implementation fix, reported.
+SHIM = """
+import sys
+sys.argv = ['ss1_run.py'] + sys.argv[1:]
+sys.path.insert(0, '%s')
+import ss1_run as R
+_call = R.call
+def call(endpoint, model, prompt, data_url, max_tokens, salt, timeout=180):
+    return _call(endpoint, model, prompt, data_url, max_tokens, str(salt).replace('/', '_'), timeout)
+R.call = call
+R.main()
+""" % str(REPO / "experiments/casestudy")
 RUNS = [
     ("vizwiz", "vizwiz_val_manifest.jsonl", "vizwiz_val_cloud32b.json"),
     ("egothink", "egothink_manifest.jsonl", "egothink_cloud32b.json"),
@@ -32,12 +47,13 @@ def main():
     kit_head = subprocess.run(["git", "log", "-1", "--format=%h", "--", "experiments/casestudy/ss1_run.py",
                                "experiments/casestudy/ss1_kit.py"], cwd=REPO, capture_output=True, text=True).stdout.strip()
     srv, sinfo, _M = PL.start_server(27.0)
-    meta = dict(study="StudySS1-32B", server=sinfo, served_model="32BI", endpoint="http://127.0.0.1:8031/v1",
+    meta = dict(study="StudySS1-32B", salt_fix="cache_salt '/' -> '_' (vLLM 0.31.0 rejects '/'); kit files unchanged",
+                server=sinfo, served_model="32BI", endpoint="http://127.0.0.1:8031/v1",
                 kit_last_commit=kit_head, started=time.strftime("%F %T"), runs=[])
     try:
         for ds, man, out in RUNS:
             t0 = time.time()
-            rc = subprocess.run([PY, str(REPO / "experiments/casestudy/ss1_run.py"), "--dataset", ds,
+            rc = subprocess.run([PY, "-c", SHIM, "--dataset", ds,
                                  "--manifest", str(OUT / man), "--ids", "all", "--tier", "cloud", "--model", "32BI",
                                  "--endpoint", "http://127.0.0.1:8031/v1", "--out", str(OUT / out)],
                                 cwd=REPO).returncode
