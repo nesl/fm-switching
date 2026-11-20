@@ -1,0 +1,205 @@
+{
+ "arm": "querystream-proactive",
+ "arm_version": "live2-arm-1.0",
+ "is_measurement": false,
+ "tick_s": 0.1,
+ "decision_period_s": 0.1,
+ "h_s": null,
+ "upload_mode": "A",
+ "window_s": 120.0,
+ "n_devices": 8,
+ "n_sessions": 4,
+ "n_opportunities": 774,
+ "n_requests": 772,
+ "n_decisions": 778,
+ "counts": {
+  "completed_monitor": 764,
+  "completed_recall": 6,
+  "recall_CLOUD": 6,
+  "recall_DEFER": 6,
+  "submitted_monitor": 766,
+  "submitted_recall": 6
+ },
+ "n_monitor_answers": 764,
+ "n_recall_answers": 6,
+ "n_on_time": 644,
+ "submit_delay_ms": {
+  "n": 772,
+  "p50": 1.492,
+  "p90": 2.8355,
+  "p99": 5.2558,
+  "max": 34.4061
+ },
+ "decision_time": {
+  "n": 1199,
+  "cpu_clock": "time.thread_time() of the deciding thread",
+  "wall_ms": {
+   "n": 1199,
+   "p50": 0.5677,
+   "p90": 0.5852,
+   "p99": 0.8375,
+   "max": 31.3
+  },
+  "cpu_ms": {
+   "n": 1199,
+   "p50": 0.561,
+   "p90": 0.5782,
+   "p99": 0.8299,
+   "max": 31.2445
+  },
+  "wall_over_cpu": {
+   "n": 1199,
+   "p50": 1.0123,
+   "p90": 1.0274,
+   "p99": 1.0332,
+   "max": 1.0628
+  },
+  "candidates": {
+   "n": 1199,
+   "p50": 4,
+   "p90": 4,
+   "p99": 5,
+   "max": 5
+  },
+  "candidates_source": "pending items ordered"
+ },
+ "n_pulls": 0,
+ "n_cloud_answers": 770,
+ "decision_latency_ms": {
+  "p50": 0.5677,
+  "p99": 0.8375,
+  "max": 31.3,
+  "n": 1199
+ },
+ "cpu_s": 11.908,
+ "wall_s": 119.565,
+ "cpu_percent": 10.0,
+ "request_rate_per_s": 6.46,
+ "budget_gpu_s": 120.0,
+ "budget_spent_gpu_s": 64.05,
+ "epoch_overruns": 0,
+ "max_epoch_lag_s": 0.0,
+ "wall_guard_hit": false,
+ "wall_guard_s": null,
+ "virtual_t_reached_s": 0.0,
+ "n_errors": 0,
+ "first_errors": [],
+ "mu_time_average": null,
+ "arm_stats": {
+  "arm": "querystream-proactive",
+  "answered_now": 6,
+  "deferred_for_evidence": 6,
+  "answered_on_deadline_pressure": 0,
+  "no_wait_possible": 0
+ },
+ "bridge": {
+  "arm": "querystream-proactive",
+  "n_events": 806,
+  "n_ticks": 23865,
+  "n_pulls": 0,
+  "n_cloud_answers": 770,
+  "n_decisions": 1199,
+  "decision_period_s": 0.1,
+  "n_forwarded_on_completion": 771,
+  "n_skipped_forwarded": 770,
+  "n_forward_mismatch": 0,
+  "n_recall_first_token": 6,
+  "n_recall_letter_differs": 0,
+  "recall_letter_diffs": [],
+  "n_monitor_score_differs": 0
+ },
+ "self_ticks": 11871,
+ "self_tick_s": 0.005,
+ "backend": {
+  "n_built": 772,
+  "callback_errors": [],
+  "wire_extra_delay_ms": {
+   "n": 772,
+   "p50": 2.2626,
+   "p90": 3.1257,
+   "p99": 5.8771,
+   "max": 13.5347
+  },
+  "submit_delay_total_ms": {
+   "n": 772,
+   "p50": 3.6923,
+   "p90": 5.9427,
+   "p99": 14.9953,
+   "max": 37.1021
+  },
+  "first_line_to_first_content_ms": {
+   "n": 771,
+   "p50": 0.4411,
+   "p99": 2.7168,
+   "max": 3.4606
+  },
+  "n_callback_errors": 0,
+  "build_ms_total": 204.7,
+  "build_ms_mean": 0.2652,
+  "cache": {
+   "n_cached": 1278,
+   "held_bytes": 68103382,
+   "cap_bytes": 1500000000,
+   "hits": 1381,
+   "misses": 1278,
+   "encoded_bytes": 68103382,
+   "hit_fraction": 0.519368
+  }
+ },
+ "cache": {
+  "n_cached": 1278,
+  "held_bytes": 68103382,
+  "cap_bytes": 1500000000,
+  "hits": 1381,
+  "misses": 1278,
+  "encoded_bytes": 68103382,
+  "hit_fraction": 0.519368
+ },
+ "pid": 2081826,
+ "cpu_s_child": 11.9086,
+ "completion_to_forward_ms": {
+  "n": 771,
+  "p50_ms": 0.0725,
+  "p90_ms": 0.0901,
+  "p99_ms": 0.097,
+  "max_ms": 0.1132
+ },
+ "first_token_to_forward_ms": {
+  "n": 771,
+  "p50_ms": 0.0725,
+  "p90_ms": 0.0901,
+  "p99_ms": 0.097,
+  "max_ms": 0.1132
+ },
+ "memory_pressure": {
+  "kv_capacity_enforced": false,
+  "gpu_kv_tokens": 62944,
+  "pressure": {
+   "epochs": 1199,
+   "epochs_over_cap": 0,
+   "peak_tokens": 0,
+   "intervals": [],
+   "host_peak_tokens": 0,
+   "host_epochs_over_cap": 0,
+   "intervals_n": 0
+  },
+  "enact_placement_totals": {
+   "calls": 1199,
+   "offloaded": 0,
+   "kept_warm": 0,
+   "evicted": 0,
+   "resident": 0
+  }
+ },
+ "wire_events_sent": 806,
+ "wire_replies_received": 771,
+ "wire_write_errors": 1,
+ "wire_max_send_backlog": 17,
+ "completion_to_emulator_ms": {
+  "n": 771,
+  "p50_ms": 4.4529,
+  "p90_ms": 8.8365,
+  "p99_ms": 10.1855,
+  "max_ms": 10.3014
+ }
+}
