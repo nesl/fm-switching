@@ -455,29 +455,55 @@ workload's token distribution, or the comparison should be made within prompt-le
 
 **This is a different claim from the paired difference, and a stronger one.** A null interval is
 consistent with two models that agree almost everywhere. These numbers say the opposite: the two
-models disagree constantly and are right about equally often when they do.
+models disagree constantly, and when they disagree **neither is reliably more often right**.
 
-| dataset | n | cloud only | device only | disagree | rate | ratio |
-|---|---|---|---|---|---|---|
-| VizWiz (clean) | 4,291 | 380 | 349 | 729 | **16.99%** | 1.089 |
-| EgoThink | 700 | 53 | 49 | 102 | **14.57%** | 1.082 |
-| **pooled** | **4,991** | **433** | **398** | **831** | **16.65%** | **1.088** |
+| dataset | n | cloud only | device only | disagree | rate |
+|---|---|---|---|---|---|
+| VizWiz (clean) | 4,291 | 380 | 349 | 729 | **16.99%** |
+| EgoThink | 700 | 53 | 49 | 102 | **14.57%** |
+| **pooled** | **4,991** | **433** | **398** | **831** | **16.65%** |
 
-**The two models disagree on correctness for roughly one question in six**, and when they disagree
-the cloud is right **52.1 percent** of the time against the device's **47.9 percent**. The two
-datasets agree on that ratio to within 0.007 despite entirely different tasks, scorers and
-accuracy levels.
+**The two models disagree on correctness for roughly one question in six.** Both rates rest on
+large n and are tight enough to support that statement.
 
-**Why this belongs above the confidence intervals.** The VizWiz paired difference of +0.0072 is the
-**net of 380 cloud-only and 349 device-only questions**. Reporting the net alone presents two large
-offsetting flows as a small effect, which is the averaged-into-undetectability shape seen from the
-other direction: here the population mean is not hiding a concentrated effect, it is hiding **two
-large opposed effects of nearly equal size**.
+## When they disagree, the split is not distinguishable from a coin flip
+
+| dataset | split | p(cloud right) | 95% CI on p | implied ratio range | includes 50/50 |
+|---|---|---|---|---|---|
+| VizWiz | 380 / 729 | 0.5213 | [0.4850, 0.5573] | [0.94, 1.26] | **yes** |
+| EgoThink | 53 / 102 | 0.5196 | [0.4237, 0.6141] | [0.74, 1.59] | **yes** |
+| pooled | 433 / 831 | 0.5211 | [0.4871, 0.5548] | [0.95, 1.25] | **yes** |
+
+**Every interval contains exact parity, pooled across 831 disagreements included.** So "the cloud is
+right more often when they disagree" is **not supported at any n available here**.
+
+> **A correction to an earlier draft of this section.** It reported the two off-diagonal ratios,
+> 1.089 and 1.082, as agreeing to within 0.007 and called that "hard to get by accident". That was
+> wrong. EgoThink's ratio is known only to roughly [0.74, 1.59] on 102 disagreements, so two
+> numbers matching to three decimals when one carries an interval of that width is coincidence, not
+> corroboration. The two datasets are **consistent with a common ratio**; they do not establish
+> one, and they do not establish that it differs from 1. This is consistency check 3 in its own
+> form, values agreeing to more precision than the inputs vary, and it was committed before the
+> interval on the split was computed.
+
+**Parity inside the interval is a better result than a slight cloud edge**, and a different one. A
+slight edge invites being banked; exact parity surviving 831 disagreements is a substantive
+statement about escalation on these two workloads. It also sharpens D39 rather than softening it:
+not merely zero-mean in the net, but **no detectable asymmetry in the disagreements that produce
+the net**.
+
+## Why the disagreement rate belongs above the confidence intervals
+
+The VizWiz paired difference of +0.0072 is the **net of 380 cloud-only and 349 device-only
+questions**. Reporting the net alone presents two large offsetting flows as a small effect. Check 3
+covers a real effect averaged below its noise floor; **this is a pair of real effects cancelling**,
+which reads identically in the mean and means something different. That observation does not depend
+on the ratio being precise, only on both flows being large, which they are.
 
 **D39 in its most literal form, measured rather than asserted:** per-request gain may be zero or
 negative. For a scheduler the shape is **high-variance and approximately zero-mean** on these two
-workloads: escalation costs per request, individual outcomes swing both ways, and the expected
-accuracy gain is small relative to the spread of individual outcomes.
+workloads: escalation costs per request, individual outcomes swing both ways, and no asymmetry in
+who is right is detectable.
 
-**No verdict and no threshold.** The disagreement rate and the ratio are facts about the data that
-the intervals do not convey; what they imply for dataset qualification is the user's call.
+**No verdict and no threshold.** The disagreement rate is a fact about the data that the intervals
+do not convey; what it implies for dataset qualification is the user's call.
