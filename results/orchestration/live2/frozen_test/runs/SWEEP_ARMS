@@ -1,7 +1,9 @@
 # BASELINE SWEEP, user order (2026-11-20). One bare arm name per line (the driver splits on whitespace; no inline comments).
 # Source of distinctness: flash's dry pre-screen a592e51 (PRESCREEN_DISTINCT_ARMS, baseline_prescreen.json; its annotated
 # list is preserved in SWEEP_ARMS_flash_a592e51). Excluded as identical to b7 at the pre-screen cell: clockwork, ekya and the
-# builder / hybrid-base variants. pensieve and rh8-demand-aware-oracle are identical to kvflow (only distinct KV arms run).
+# builder / hybrid-base variants (identical to b7 at BOTH seed 4 and seed 0, flash second-cell check). clockwork and ekya RESTORED:
+# they separate from b7 at seed 0 (13,621 vs 13,623 decisions). builder-s2-value also separates but is a builder variant,
+# not a published or scheduling baseline (not run, PROVISIONAL). pensieve and rh8-demand-aware-oracle = kvflow at both cells.
 # Kept although identical to always-cloud-fcfs at that one cell (the rule excludes only b7-identical arms): inar-vl,
 # routellm, videostorm, vllm-priority. rh8-demand-aware-causal placed with the streaming arms (PROVISIONAL).
 # Pass 1 = 16 devices seed 4, pass 2 = 18 devices seed 4 (cells already run are skipped).
@@ -12,6 +14,8 @@ always-cloud-fcfs
 edf-piece1024
 edf-piece2048
 b10-blocking-aware
+clockwork
+ekya
 vllm-priority
 # -- streaming
 simplestream
