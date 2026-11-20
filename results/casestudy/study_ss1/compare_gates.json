@@ -5,7 +5,7 @@
  "gate_1_32b_answers": {
   "status": "NOT AVAILABLE. Commit 01e5395 \"StudySS1-32B\" adds experiments/casestudy/ss1_cloud_run.py only, 54 lines, a server wrapper around the unchanged kit runner. No answer files exist for either dataset.",
   "consequence": "the comparison is gated. The script is built and committed so it runs the moment the answers land.",
-  "status_recheck": "NOT AVAILABLE at this commit. Expecting vizwiz_val_cloud32b.json, egothink_cloud32b.json, vizwiz_shared_images.json (36 qids), egothink_shared_images.json (16 qids) and ss1_cloud32b_run_meta.json."
+  "status_recheck": "NOT AVAILABLE at this commit."
  },
  "gate_2_the_4B_judge_column": {
   "requirement": "same judge, parser and prompt means the FIXED parser, so the 4B side must come from the post-fix scoring.",
@@ -14,26 +14,36 @@
   "constancy": "the forthcoming 32B judge pass uses the same ss1_judge.py and the same ss1_kit parser, with prompt hashes system 75357d685f238b6a and template ed38861d0f82d2d0 recorded in both result files so drift is detectable."
  },
  "gate_3_vizwiz_quality_flags": {
-  "requirement": "VizWiz stratified by image-quality flag (blur, framing, obstruction and so on).",
-  "status": "NOT PRODUCIBLE FROM HELD DATA.",
-  "evidence": [
-   "the manifest rows carry answer_type, answerable, references, question, image, split, qid, dataset, n_references and gen_max_new_tokens. No quality field.",
-   "the device result rows carry the same plus score and timing. No quality field.",
-   "ss1_manifest_meta.json records the source as vizwiz_vqa, CC BY 4.0, Gurari et al. CVPR 2018, whose val annotations carry answer_type and answerable only.",
-   "no VizWiz directory or annotation file exists under the HF cache or the home tree."
+  "user_ruling": "APPROVED: annotation CSV only, join by image id, report coverage; evaluation use only, no redistribution; cite Chiu, Zhao, Gurari, CVPR 2020.",
+  "terms_held": [
+   "annotation CSV only, NO images downloaded",
+   "evaluation use only",
+   "NO REDISTRIBUTION: the CSV is at /home/pragya/vizwiz_quality/ OUTSIDE the repository and is NOT committed, nor is anything derived from it that would reproduce it. Only this coverage finding is committed.",
+   "cite Chiu, Zhao and Gurari, Assessing Image Quality Issues for Real-World Problems, CVPR 2020"
   ],
-  "reason": "the blur / framing / obstruction flags are a SEPARATE VizWiz release, not part of VizWiz-VQA val.",
-  "action": "reported as a gap and NOT acquired. CLAUDE.md: do not propose new datasets; if one seems necessary, describe the gap and do not implement. Every other requested VizWiz stratification, answer type and answerable-only, is producible and is implemented.",
-  "licence_check_outcome": {
-   "instruction": "DO NOT START THE JOIN. The licence check returned neither yes nor no and the question is back with the user.",
-   "findings": [
-    "the VizWiz quality-issues page states NO licence and NO terms of use, and there is no site-wide licence on vizwiz.org",
-    "the sibling VizWiz-VQA page DOES state CC BY 4.0 explicitly, so the absence is an ASYMMETRY BETWEEN TWO RELEASES on the same site rather than a site that never licenses anything, which is the stronger reading against assuming a grant",
-    "the only access-related statement is \"we publicly release the annotation JSON files for self evaluation\", a PURPOSE-LIMITED phrase rather than a grant, and the files are reachable without agreement or registration"
+  "source": "https://vizwiz.cs.colorado.edu/VizWiz_all_answers/VizWiz_quality_issues_train_val_test.csv, 14 MB, 196,069 data rows",
+  "parsed_correctly": {
+   "note": "a naive comma split is WRONG on this file: OTH_TEXT contains commas and newlines inside quotes, which shifts the SPLIT column and produced a garbage tally. Parsed with the csv module and utf-8-sig for the BOM.",
+   "columns": "IMG, WORKERID, NON, BLR, BRT, DRK, OBS, FRM, ROT, OTH, OTH_TEXT, REJECT, SPLIT",
+   "val_rows": 21355,
+   "val_distinct_images": 4271,
+   "workers_per_image": "exactly 5 for all 4,271, so a majority rule would be well defined"
+  },
+  "THE_JOIN_IS_NOT_POSSIBLE": {
+   "verdict": "COVERAGE 0 of 4,319 = 0.0 percent. The by-flag stratification cannot be produced for the SS1 VizWiz-VQA val set.",
+   "reason": "the two releases use DIFFERENT ID SPACES, and not merely different digit widths.",
+   "evidence": [
+    "the quality CSV's VAL images are 3,167 named VizWiz_val_<12 digits>.jpg and 1,104 named VizWiz_v2_<12 digits>.jpg",
+    "the SS1 manifest images are 4,319 named VizWiz_val_<8 digits>.jpg",
+    "direct key overlap: 0 of 4,319",
+    "after normalising to the integer id, the quality CSV's val ids span 28000..31172 while the manifest's span 0..4318: THE RANGES DO NOT OVERLAP AT ALL, so this is not a zero-padding mismatch"
    ],
-   "status": "the gap stands as recorded. Reachable without a gate is not the same as licensed, and an explicit licence on a sibling release makes the silence here harder to read as permission rather than easier.",
-   "if_approved": "join by image id against the StudySS1 VizWiz val manifest, with COVERAGE REPORTED rather than assumed complete; the single train_val_test CSV should cover val in one file."
-  }
+   "interpretation": "VizWiz-QualityIssues is indexed in the VizWiz v2 / Captions numbering, a global index across the wider VizWiz pool, while VizWiz-VQA val is numbered 0..4318 within its own split. The underlying photographs overlap; the identifiers do not.",
+   "why_a_content_join_is_also_unavailable": "the only other route is hashing image content, and that needs the images. The approved terms are annotation CSV only and no images, and the SS1 images are in any case gone from /dev/shm tmpfs.",
+   "what_would_make_it_possible": "a published mapping between the VizWiz-VQA val ids and the VizWiz v2 / Captions ids. Without one the join has no key."
+  },
+  "the_coverage_instruction_is_what_caught_it": "the instruction was to report coverage rather than assume the join is complete. Coverage is not partial, it is ZERO, and a join written without a coverage check would have silently produced an empty or wildly undersized stratum table rather than failing.",
+  "effect_on_the_deliverable": "NONE on schedule. The by-flag stratification is additive, not a prerequisite. The comparison reports answer_type and answerable-only as before and states that the by-flag cut is absent with this reason."
  },
  "host_and_load_condition": {
   "resolved_by_the_user": true,
