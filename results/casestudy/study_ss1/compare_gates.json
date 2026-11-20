@@ -5,7 +5,7 @@
  "gate_1_32b_answers": {
   "status": "NOT AVAILABLE. Commit 01e5395 \"StudySS1-32B\" adds experiments/casestudy/ss1_cloud_run.py only, 54 lines, a server wrapper around the unchanged kit runner. No answer files exist for either dataset.",
   "consequence": "the comparison is gated. The script is built and committed so it runs the moment the answers land.",
-  "status_recheck": "NOT AVAILABLE at this commit. The H100 restarted at 17:17 after the salt fix; outputs expected as vizwiz_val_cloud32b.json and egothink_cloud32b.json."
+  "status_recheck": "NOT AVAILABLE at this commit. Expecting vizwiz_val_cloud32b.json, egothink_cloud32b.json, vizwiz_shared_images.json (36 qids), egothink_shared_images.json (16 qids) and ss1_cloud32b_run_meta.json."
  },
  "gate_2_the_4B_judge_column": {
   "requirement": "same judge, parser and prompt means the FIXED parser, so the 4B side must come from the post-fix scoring.",
@@ -151,5 +151,26 @@
    "consequence": "BOTH TTFT columns are unverified-cold, for different reasons: the cloud's pending arrival, the device's unrecoverable without an Orin re-run, which is NOT proposed."
   },
   "what_is_NOT_being_claimed": "not that either number is wrong. cache_salt=qid with a distinct image and question per request makes warm reuse unlikely on its face. But 'unlikely on its face' is the config string asserting it, which is the thing not to rely on."
+ },
+ "shared_image_content_duplicates": {
+  "finding_source": "the H100, by sha256 of the staged files: VizWiz val has 34 groups of byte-identical photos under DIFFERENT FILENAMES, 70 questions in those groups, of which 36 repeat image content seen earlier in run order. EgoThink contributes 16. 52 in all.",
+  "mechanism_confirmed": "the encoder cache is keyed by IMAGE CONTENT, not by cache_salt. Prediction check: 4 of the 36 VizWiz repeats fall within the first 151 questions in run order, and the counter at request 151 reads mm_cache_hits 4, exact. The prefix cache is separately isolated, 237,781 queries with 0 hits.",
+  "the_exclusion_rule": {
+   "statement": "the 52 are a property of THE DATASET, not of the H100's server, so the exclusion is applied to BOTH columns or NEITHER.",
+   "why": "those 34 groups exist in VizWiz val itself and the Orin ran the same set, so the same duplicate structure was present on the device side. Whether the Orin's vLLM 0.20.0 actually served them warm is NOT verifiable, for the reasons already recorded. Excluding 52 qids from the cloud column while leaving the device column whole would compare a cleaned column against an uncleaned one, and that asymmetry would be introduced by the cleaning rather than by the data.",
+   "implemented": "ss1_compare.py now reports EVERY statistic twice, over the full paired set and over the shared-image-excluded set, for both columns together. Never one cleaned and one not."
+  },
+  "order_check_DONE": {
+   "question": "'repeats an image seen earlier' depends on run order, so do the two sides share an order?",
+   "device_result": "THE DEVICE RAN IN EXACT MANIFEST ORDER for both datasets, verified by comparing the manifest qid sequence against the device row sequence: identical for 4,319 of 4,319 VizWiz and 700 of 700 EgoThink, same order and same set.",
+   "consequence": "if the cloud also ran manifest order, which its unchanged kit runner implies, the candidate set is the SAME 52 and the matched exclusion is exact rather than a union. The cloud's order should be confirmed from its run meta rather than assumed from the runner.",
+   "if_orders_differ": "the device's own candidate set would be a different 52 and the matched exclusion becomes the UNION of the two."
+  },
+  "why_the_identifier_check_could_not_have_found_it": {
+   "the_weaker_form": "len(set(image_ids)) against len(questions). By image ID VizWiz val is 4,319 unique on 4,319 and PASSES CLEAN.",
+   "the_stronger_form": "hash the file CONTENTS. That is what found it.",
+   "the_general_lesson": "identifier-based deduplication cannot see content duplicates under different filenames, and a cache keyed by content does not care what the identifier says. Where a cache keys on content, dedupe on content. Recorded as the form to apply wherever this recurs.",
+   "a_true_but_irrelevant_premise": "VizWiz being one question per photo is TRUE and does not bear on this: the duplication is across photos, not across questions on a photo. A premise can be correct and still not support the conclusion drawn from it."
+  }
  }
 }
