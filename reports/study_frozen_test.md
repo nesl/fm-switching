@@ -3,6 +3,52 @@
 **Status: IN PROGRESS. Last updated 2026-11-19 19:45.** Rules: D116 (no methodological change overnight; never seeds 1
 to 3 or HOLDOUT; never INVALID results; GPU 2 exclusive; no em dashes). PROVISIONAL decisions are marked.
 
+## MORNING SUMMARY (2026-11-20 07:25)
+
+**What ran overnight.** StudySS1-32B and StudySS2-32B (complete, numbers only, on origin); the SS timing measurement;
+the D134 published-baseline queue (19:52 to 21:05, on MIXED, while waiting); then the THREE-TYPE frozen grid from
+21:08 (1200 s, 40:40:20, LH-REQ EVAL robots, SS RefSpatial + RealWorldQA EVAL, tight 27 GiB, push-all, memory
+enforcement on), baselines first and hybrid-F-lhreq / hybrid-F6-lhreq from 02:16 after "policy-F ready (frozen)".
+The grid is still running (14-device cells now; 20 and 24 deferred, see decision 6).
+
+**Headline table, 16 devices, common support (seeds 4 and 5 complete for every arm; all runs valid, 0 request errors,
+dashcams all meet in every run, no run meets capacity). All-questions robot figure; feasible-question column to be
+added offline (needs the trace-side feasibility rule, run when no driver is active).**
+
+| arm | robots on time, s4 + s5 | SS on time at 2 s, s4 + s5 | robot answers sent as RECENT | seed 6 (robots / SS) |
+|---|---|---|---|---|
+| b7 | 33 of 45 | 652 of 713 | 0 of 36 | 14 of 20 / 337 of 357 |
+| eco-llm | 33 of 45 | 598 of 713 | 8 of 44 | 13 of 20 / 302 of 357 |
+| mooncake | 33 of 45 | 651 of 713 | 0 of 36 | 14 of 20 / 335 of 357 |
+| **hybrid-F-lhreq** | **36 of 45** | **682 of 713** | 8 of 44 | queued (06:32 refusal) |
+| hybrid-F6-lhreq | 35 of 45 | 676 of 713 | 9 of 44 | queued (06:32 refusal) |
+
+Reading: on two seeds hybrid-F is ahead of every baseline by 3 robot questions of 45 and 30 SS questions of 713;
+F6 does not improve on F. Two seeds and small margins: a direction, not a settled effect. mooncake equals b7 on
+every seed: its 377 keep-warm actions find nothing resident (memory enforcement evicted nothing in any run; peak
+GPU-resident history 0), an unexercised mechanism, not evidence about mooncake.
+
+**hybrid-F6 caveat (decision period).** C6 is alive live (375 and 385 chooser calls, 13 and 12 decisions changed,
+c6_scorer_error 0) but it breaches the 100 ms decision period: 322 and 323 of about 12,000 periods over 100 ms
+(2.7 percent), p99 207 and 150 ms, max 670 and 517 ms; hybrid-F's p99 is 1.3 ms with 0 breaches. An F6 result is
+therefore partly a late coordinator, reported beside it, not discarded.
+
+**Skipped cells (INVALID twice, rule 5; data kept):** eco-llm, hybrid-F and hybrid-F6 at 16 devices seed 0 and
+eco-llm at 14 devices seed 0 (one seed-0 LH-REQ question whose history reaches 33,839 tokens, over the 32,768
+context; seed 0 only, every size); b7 at 20 devices seed 0 (127 and 111 transport ReadErrors: overload, 97 percent of
+the committed 32B peak). Headline uses common support (seeds 4, 5, 6) so no arm is selected by its representation
+choice; seed-0 b7 and mooncake are kept and marked excluded-from-headline.
+
+**Incidents (not measurements, all set aside):** 21:05 every cell refused at preflight (single-shot images not
+staged; fixed); 02:12 eleven cells refused (my own dry proof overlapped a boundary; repaired); 06:32 three cells
+refused (an automatic git gc triggered by the driver's commits, up to 819 percent CPU; repo-local gc.auto disabled,
+cells requeued).
+
+**Decisions still needed from the user:** (1) grid sizes 16 and 20 (20 overloads the server) or 16 and 18; (2) do
+transport errors invalidate a run or count as misses; (3) does an over-context request invalidate a run or count as
+a miss (a miss restores seed 0 for every arm); (4) C6 does about 94 percent of its work on single-shot requests,
+against D143 C's robot-only design; guarding it would change decisions.
+
 ## 0. Morning summary (kept current)
 
 - **StudySS1-32B: DONE and on origin** (numbers only, no qualification verdict). VizWiz val 4,319 of 4,319 scored, mean
