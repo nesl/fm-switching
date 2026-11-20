@@ -111,9 +111,25 @@ def _scale_xy(x: float, y: float, width: int, height: int, mode: str) -> Tuple[f
 
 
 def _iter_json_points(obj, out):
-    """Walk a parsed JSON object collecting any 2-number coordinate under a known key, or any bare
-    2-element numeric list."""
+    """Walk a parsed JSON object collecting any 2-number coordinate under a known key, any bare
+    2-element numeric list, or an {"x": .., "y": ..} object.
+
+    The x/y OBJECT form was added 2026-11-20 as an implementation fix (user instruction). It was
+    absent, and it is the form Qwen3-VL-32B-Instruct prefers: a reply of
+    `{"points": [{"x": 234, "y": 357}]}` reached this function as a point key mapping to a list of
+    DICTS rather than to a 2-element numeric list, so the point-key branch did not fire; recursing
+    into the dict then found "x" and "y" mapping to NUMBERS rather than to lists, so nothing fired
+    either. Both text fallbacks in `refspatial_parse_points` need brackets or parentheses that this
+    form does not carry, so the reply parsed to ZERO points and scored 0. It cost the CLOUD four
+    questions of StudySS2's RefSpatial comparison and the device none, so the defect was
+    one-directional: see reports/study_ss2.md section 11.3.
+    """
     if isinstance(obj, dict):
+        kl = {str(k).lower(): v for k, v in obj.items()}
+        if (isinstance(kl.get("x"), (int, float)) and isinstance(kl.get("y"), (int, float))
+                and not isinstance(kl.get("x"), bool) and not isinstance(kl.get("y"), bool)):
+            out.append((float(kl["x"]), float(kl["y"])))
+            return
         for k, v in obj.items():
             if k.lower() in _POINT_KEYS and isinstance(v, list) and len(v) == 2 \
                     and all(isinstance(z, (int, float)) for z in v):

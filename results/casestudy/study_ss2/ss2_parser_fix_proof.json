@@ -1,0 +1,87 @@
+{
+ "label": "RefSpatial point-parser fix proof: the {x, y} object form is now parsed, and nothing that already parsed has moved. PARSE-LEVEL ONLY; no mask is read and no score is recomputed here.",
+ "at": "2026-11-20T12:46:44.545791",
+ "pre_fix_commit": "066b575",
+ "replies_checked": 554,
+ "replies_unchanged": 550,
+ "replies_changed": 4,
+ "changed_by_tier": {
+  "device": 0,
+  "cloud32b": 4
+ },
+ "changed": [
+  {
+   "tier": "cloud32b",
+   "qid": "refspatial/location/18",
+   "split": "location",
+   "points_before": 0,
+   "points_after": 1,
+   "parsed_after": [
+    [
+     112,
+     228
+    ]
+   ],
+   "committed_point_accuracy": 0.0,
+   "answer_raw": "```json\n{\n  \"points\": [\n    {\n      \"x\": 234,\n      \"y\": 357\n    }\n  ]\n}\n```"
+  },
+  {
+   "tier": "cloud32b",
+   "qid": "refspatial/placement/30",
+   "split": "placement",
+   "points_before": 0,
+   "points_after": 1,
+   "parsed_after": [
+    [
+     374,
+     185
+    ]
+   ],
+   "committed_point_accuracy": 0.0,
+   "answer_raw": "```json\n{\n  \"points\": [\n    {\n      \"x\": 585,\n      \"y\": 385\n    }\n  ]\n}\n```"
+  },
+  {
+   "tier": "cloud32b",
+   "qid": "refspatial/placement/35",
+   "split": "placement",
+   "points_before": 0,
+   "points_after": 1,
+   "parsed_after": [
+    [
+     164,
+     448
+    ]
+   ],
+   "committed_point_accuracy": 0.0,
+   "answer_raw": "{\n  \"points\": [\n    {\n      \"x\": 341,\n      \"y\": 700\n    }\n  ]\n}"
+  },
+  {
+   "tier": "cloud32b",
+   "qid": "refspatial/unseen/36",
+   "split": "unseen",
+   "points_before": 0,
+   "points_after": 1,
+   "parsed_after": [
+    [
+     374,
+     185
+    ]
+   ],
+   "committed_point_accuracy": 0.0,
+   "answer_raw": "```json\n{\n  \"points\": [\n    {\n      \"x\": 585,\n      \"y\": 385\n    }\n  ]\n}\n```"
+  }
+ ],
+ "not_recovered": {
+  "n": 1,
+  "note": "one further cloud reply carries x and y inside MALFORMED JSON, '[{\"x\": 280, 840], \"y\": 840}]'. It is deliberately NOT recovered: the user's instruction is to parse well-formed forms, and a regex loose enough to salvage this would also salvage text that is not a coordinate. Listed so the choice is visible rather than silent."
+ },
+ "mask_hash_gap": "the manifest records image_sha16 but NO mask hash, so a mask re-staged elsewhere cannot be proven byte-identical to the one the committed run scored against. The rescore therefore belongs on the box that holds the original masks, and a mask sha256 should be recorded when it runs.",
+ "_provenance": {
+  "git_commit": "bb5f9ae4e20a41c302c86faa6b12ffc7a8b0c787",
+  "script": "ss2_parser_fix_proof.py",
+  "model": "none",
+  "timestamp": "2026-11-20T12:46:44.547389",
+  "device": "cpu",
+  "n": 554
+ }
+}

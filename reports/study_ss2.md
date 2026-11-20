@@ -508,6 +508,54 @@ So restricting to well-formed answers **raises** the cloud's RefSpatial lead by 
 on both datasets, formatting either plays no role or works against the cloud, and on neither does it
 inflate the gain. The one thing a why-analysis most needed to exclude is excluded.
 
+### 11.4 The parser fix, proven at the parse level; the rescore is pending
+
+Implementation fix applied on user instruction, 2026-11-20. `ss2_bench_kit._iter_json_points` now
+accepts an `{"x": .., "y": ..}` object as a coordinate, which is the form the 32B prefers and the only
+well-formed form the old parser missed.
+
+**A survey first, so the fix covers what the models actually emit rather than the one case that was
+noticed.** Over all 554 committed RefSpatial replies from both tiers:
+
+| coordinate form in the reply | device | cloud | parsed before the fix? |
+|---|---|---|---|
+| bare `[x, y]` pair | 276 | 261 | yes |
+| `(x, y)` parenthesised tuple | 0 | 7 | yes, by the third fallback |
+| `{"x": .., "y": ..}` object | 0 | **5** | **no** |
+| no coordinate form at all (a refusal) | 1 | 4 | n/a, correctly zero points |
+
+**The proof** (`ss2_parser_fix_proof.py`, output `ss2_parser_fix_proof.json`) re-parses every reply
+with the pre-fix parser read out of git at `066b575` and with the fixed one: **550 of 554 replies are
+unchanged and exactly 4 change**, all of them cloud, each from 0 points to 1, all four with a
+committed accuracy of 0.0. No device reply moves, so the fix cannot flatter the device, and no reply
+that already parsed is disturbed.
+
+| qid | split | parsed point after the fix | committed accuracy |
+|---|---|---|---|
+| `refspatial/location/18` | location | (112, 228) | 0.0 |
+| `refspatial/placement/30` | placement | (374, 185) | 0.0 |
+| `refspatial/placement/35` | placement | (164, 448) | 0.0 |
+| `refspatial/unseen/36` | unseen | (374, 185) | 0.0 |
+
+**One reply is deliberately NOT recovered.** A fifth cloud reply carries x and y inside malformed
+JSON, `[{"x": 280, 840], "y": 840}]`. The instruction is to parse well-formed forms, and a regex loose
+enough to salvage that would also salvage text that is not a coordinate, so it stays unparsed and is
+listed in the proof rather than quietly fixed.
+
+**What is NOT yet done, and why it is not done here.** The scores are unchanged: rescoring needs the
+ground-truth binary masks, which are not on this box. Staging them elsewhere would not be as good as
+rescoring where they already are, and for a reason worth recording on its own: **the manifest holds
+`image_sha16` but no mask hash**, so a re-staged mask cannot be proven byte-identical to the one the
+committed run scored against, while the mask is an input to every score. The rescore therefore belongs
+on the Orin, which holds the originals, and it should record a mask sha256 as it goes so that this gap
+closes for good. It is queued behind StudySH-EP rather than interrupting it.
+
+**Until then every number in sections 11.1 to 11.3 stands as committed and is labelled pre-fix.** The
+direction of the pending correction is known even though its size is not: at most 4 of 277 questions,
+1.44 pp, and it can only move the cloud up, so the RefSpatial gain of +0.1205 is a floor and the
+well-formed-only +0.1473 is unaffected (those four replies emit exactly one point, so they already
+enter the well-formed subset, where they currently score 0).
+
 ## 12. Live arms that read a device score when deciding (same request; live2 audit)
 
 Filed here because it was asked with section 11. Static read of committed code, re-runnable as
