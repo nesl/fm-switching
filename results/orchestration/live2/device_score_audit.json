@@ -1,0 +1,100 @@
+{
+ "label": "StudySS2 request, live2 side: which arms read a device score when deciding. Static read of committed code; no model, no GPU, no run.",
+ "at": "2026-11-20T12:30:56.144398",
+ "arms_declaring_reads_device_answer": [
+  "cascade_adapted.py",
+  "cascade_routing_adapted.py",
+  "r3streaming_adapted.py",
+  "streamscout_adapted.py",
+  "thinking_qwenvl_adapted.py"
+ ],
+ "arms_declaring_false": [],
+ "per_file": {
+  "cascade_adapted.py": {
+   "declares": true,
+   "reads_the_field": true,
+   "field_sites": [
+    20,
+    89
+   ]
+  },
+  "cascade_routing_adapted.py": {
+   "declares": true,
+   "reads_the_field": true,
+   "field_sites": [
+    121
+   ]
+  },
+  "r3streaming_adapted.py": {
+   "declares": true,
+   "reads_the_field": true,
+   "field_sites": [
+    56,
+    57
+   ]
+  },
+  "streamscout_adapted.py": {
+   "declares": true,
+   "reads_the_field": true,
+   "field_sites": [
+    87
+   ]
+  },
+  "thinking_qwenvl_adapted.py": {
+   "declares": true,
+   "reads_the_field": true,
+   "field_sites": [
+    62,
+    63
+   ]
+  }
+ },
+ "live2_supply": {
+  "function": "cstate.py:486-541",
+  "takes_reads_device_answer_parameter": true,
+  "uses_that_parameter_in_its_body": 0,
+  "assignments": [
+   "queries.append(RecallQuery(query_id=o.opp_id, session_id=o.session_id, category=o.qtype or 'recall' if self.category_enabled else 'recall', arrival_s=round(o.t_arrive if o.t_arrive is not None else o.t_event, 3), deadline_s=round(o.deadline_abs(), 3), evidence=ev, readiness=ready, readiness_tokens=tok, device_answer_confidence=None))"
+  ],
+  "assigned_values": [
+   "None"
+  ],
+  "always_none": true
+ },
+ "live2_call_site": {
+  "observation_calls": [
+   [
+    243,
+    "obs = self.st.observation(t, epoch if epoch in _EPOCHS else \"tick\")"
+   ]
+  ],
+  "reads_device_sites": [
+   [
+    171,
+    "self.reads_device = bool(getattr(arm, \"reads_device_answer\", False))"
+   ],
+   [
+    464,
+    "o.served_at = (o.t_event + DEVICE_ANSWER_CHARGE_S if self.reads_device"
+   ],
+   [
+    498,
+    "if self.reads_device and t + 1e-9 < o.t_event + DEVICE_ANSWER_CHARGE_S:"
+   ]
+  ],
+  "passes_the_flag": false
+ },
+ "what_the_declaration_costs": [
+  "o.served_at = (o.t_event + DEVICE_ANSWER_CHARGE_S if self.reads_device",
+  "if self.reads_device and t + 1e-9 < o.t_event + DEVICE_ANSWER_CHARGE_S:"
+ ],
+ "verdict": "DECLARED BY 5 ARMS, SUPPLIED TO NONE. live2's observation builder hard-codes device_answer_confidence=None for every recall query; it accepts a reads_device_answer parameter and uses it 0 times in its body; and the coordinator does not pass that parameter at all, so it always takes its default. The declaration is nonetheless CHARGED: the coordinator reads its own reads_device flag to make the arm wait DEVICE_ANSWER_CHARGE_S before it may act, and to serve the opportunity that much later. So an arm declaring it pays the full price of reading the device answer and receives None instead of the answer.",
+ "_provenance": {
+  "git_commit": "8f4738ace866c5ea5230158103e916357ac03b38",
+  "script": "device_score_audit.py",
+  "model": "none",
+  "timestamp": "2026-11-20T12:30:56.145808",
+  "device": "cpu",
+  "n": 5
+ }
+}

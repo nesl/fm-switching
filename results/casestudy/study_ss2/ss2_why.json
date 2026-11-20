@@ -1,0 +1,474 @@
+{
+ "label": "StudySS2 why-analysis: failure types per subset, image-clustered CIs, and the gain restricted to well-formed answers. CPU only on flash; every score is a committed StudySS2 row; no model, no GPU, no re-scoring.",
+ "at": "2026-11-20T12:28:48.391292",
+ "seed": 0,
+ "n_bootstrap": 10000,
+ "datasets": {
+  "realworldqa": {
+   "dataset": "realworldqa",
+   "n_pairs": 765,
+   "subsets": {
+    "free_form": {
+     "n": 327,
+     "device_accuracy": 0.6788990825688074,
+     "cloud_accuracy": 0.709480122324159,
+     "delta": 0.03058103975535168,
+     "ci95_question_bootstrap": [
+      -0.021406727828746176,
+      0.08256880733944955
+     ],
+     "ci95_image_clustered_bootstrap": [
+      -0.01840632373761208,
+      0.08
+     ],
+     "two_by_two": {
+      "both_right": 191,
+      "cloud_only": 41,
+      "device_only": 31,
+      "both_wrong": 64
+     },
+     "wellformed": {
+      "device": 327,
+      "cloud": 327,
+      "both": 327,
+      "device_only_malformed": 0,
+      "cloud_only_malformed": 0
+     },
+     "wellformed_both_only": {
+      "n": 327,
+      "note": "every pair is well formed on both tiers, so this is the headline cell unchanged and NO part of the gain is answer formatting"
+     },
+     "failure_types": {
+      "contains_gold_as_a_substring": {
+       "device": 1,
+       "cloud": 0
+      },
+      "correct": {
+       "device": 222,
+       "cloud": 232
+      },
+      "direction_flipped": {
+       "device": 2,
+       "cloud": 2
+      },
+      "numeric_off_by_one": {
+       "device": 28,
+       "cloud": 29
+      },
+      "numeric_wrong": {
+       "device": 19,
+       "cloud": 14
+      },
+      "other_wrong": {
+       "device": 11,
+       "cloud": 10
+      },
+      "yes_no_flipped": {
+       "device": 44,
+       "cloud": 40
+      }
+     }
+    },
+    "mcq": {
+     "n": 438,
+     "device_accuracy": 0.636986301369863,
+     "cloud_accuracy": 0.7146118721461188,
+     "delta": 0.0776255707762557,
+     "ci95_question_bootstrap": [
+      0.0319634703196347,
+      0.12100456621004566
+     ],
+     "ci95_image_clustered_bootstrap": [
+      0.032036613272311214,
+      0.12300683371298406
+     ],
+     "two_by_two": {
+      "both_right": 244,
+      "cloud_only": 69,
+      "device_only": 35,
+      "both_wrong": 90
+     },
+     "wellformed": {
+      "device": 438,
+      "cloud": 438,
+      "both": 438,
+      "device_only_malformed": 0,
+      "cloud_only_malformed": 0
+     },
+     "wellformed_both_only": {
+      "n": 438,
+      "note": "every pair is well formed on both tiers, so this is the headline cell unchanged and NO part of the gain is answer formatting"
+     },
+     "failure_types": {
+      "correct": {
+       "device": 279,
+       "cloud": 313
+      },
+      "wrong_letter": {
+       "device": 159,
+       "cloud": 125
+      },
+      "no_letter_extracted": {
+       "device": 0,
+       "cloud": 0
+      }
+     }
+    }
+   },
+   "images": {
+    "n_questions": 765,
+    "n_distinct_images": 762,
+    "questions_per_image": {
+     "1": 759,
+     "2": 3
+    }
+   }
+  },
+  "refspatial": {
+   "dataset": "refspatial",
+   "n_pairs": 277,
+   "subsets": {
+    "location": {
+     "n": 100,
+     "device_accuracy": 0.335,
+     "cloud_accuracy": 0.5133333333333333,
+     "delta": 0.17833333333333332,
+     "ci95_question_bootstrap": [
+      0.07166666666666666,
+      0.285
+     ],
+     "ci95_image_clustered_bootstrap": [
+      0.05555555555555555,
+      0.3020833333333333
+     ],
+     "n_points": {
+      "device": {
+       "1": 98,
+       "2": 1,
+       "0": 1
+      },
+      "cloud": {
+       "0": 3,
+       "3": 1,
+       "1": 96
+      }
+     },
+     "failure_types": {
+      "all_points_inside_mask": {
+       "device": 33,
+       "cloud": 51
+      },
+      "parser_dropped_a_wellformed_point": {
+       "device": 0,
+       "cloud": 1
+      },
+      "points_outside_mask": {
+       "device": 65,
+       "cloud": 45
+      },
+      "refused_or_no_coordinates": {
+       "device": 1,
+       "cloud": 2
+      },
+      "some_points_inside_mask_diluted_by_extras": {
+       "device": 1,
+       "cloud": 1
+      }
+     },
+     "any_point_inside_mask": {
+      "device": 0.34,
+      "cloud": 0.52,
+      "delta": 0.18,
+      "ci95_question_bootstrap": [
+       0.08,
+       0.29
+      ],
+      "note": "CONSTRUCTED from the committed per-question accuracy, not re-scored: a positive fraction implies at least one predicted point was inside the mask. It removes the multi-point dilution, under which a reply carrying one correct point and seven extras scores 0.125."
+     },
+     "wellformed_exactly_one_point": {
+      "device": 98,
+      "cloud": 96,
+      "both": 94
+     },
+     "parser_dropped_wellformed_points": {
+      "device": 0,
+      "cloud": 1,
+      "cloud_accuracy_understated_by_at_most": 0.01,
+      "register": "CONSTRUCTED BOUND, not a measurement: the GT masks are not on this box (the run read them from /dev/shm/ss2_data on the Orin), so whether each dropped point lands inside its mask cannot be checked here. The true correction is between 0 and this bound."
+     },
+     "wellformed_both_only": {
+      "n": 94,
+      "device_accuracy": 0.3191489361702128,
+      "cloud_accuracy": 0.5319148936170213,
+      "delta": 0.2127659574468085,
+      "ci95_question_bootstrap": [
+       0.10638297872340426,
+       0.3191489361702128
+      ]
+     }
+    },
+    "placement": {
+     "n": 100,
+     "device_accuracy": 0.23,
+     "cloud_accuracy": 0.28555555555555556,
+     "delta": 0.05555555555555555,
+     "ci95_question_bootstrap": [
+      -0.05,
+      0.1611111111111111
+     ],
+     "ci95_image_clustered_bootstrap": [
+      -0.056128594682582744,
+      0.16483799705449187
+     ],
+     "n_points": {
+      "device": {
+       "1": 100
+      },
+      "cloud": {
+       "1": 92,
+       "0": 4,
+       "9": 1,
+       "3": 1,
+       "8": 1,
+       "5": 1
+      }
+     },
+     "failure_types": {
+      "all_points_inside_mask": {
+       "device": 23,
+       "cloud": 28
+      },
+      "parser_dropped_a_wellformed_point": {
+       "device": 0,
+       "cloud": 2
+      },
+      "points_outside_mask": {
+       "device": 77,
+       "cloud": 67
+      },
+      "refused_or_no_coordinates": {
+       "device": 0,
+       "cloud": 2
+      },
+      "some_points_inside_mask_diluted_by_extras": {
+       "device": 0,
+       "cloud": 1
+      }
+     },
+     "any_point_inside_mask": {
+      "device": 0.23,
+      "cloud": 0.29,
+      "delta": 0.06,
+      "ci95_question_bootstrap": [
+       -0.05,
+       0.17
+      ],
+      "note": "CONSTRUCTED from the committed per-question accuracy, not re-scored: a positive fraction implies at least one predicted point was inside the mask. It removes the multi-point dilution, under which a reply carrying one correct point and seven extras scores 0.125."
+     },
+     "wellformed_exactly_one_point": {
+      "device": 100,
+      "cloud": 92,
+      "both": 92
+     },
+     "parser_dropped_wellformed_points": {
+      "device": 0,
+      "cloud": 2,
+      "cloud_accuracy_understated_by_at_most": 0.02,
+      "register": "CONSTRUCTED BOUND, not a measurement: the GT masks are not on this box (the run read them from /dev/shm/ss2_data on the Orin), so whether each dropped point lands inside its mask cannot be checked here. The true correction is between 0 and this bound."
+     },
+     "wellformed_both_only": {
+      "n": 92,
+      "device_accuracy": 0.21739130434782608,
+      "cloud_accuracy": 0.30434782608695654,
+      "delta": 0.08695652173913043,
+      "ci95_question_bootstrap": [
+       -0.021739130434782608,
+       0.1956521739130435
+      ]
+     }
+    },
+    "unseen": {
+     "n": 77,
+     "device_accuracy": 0.16883116883116883,
+     "cloud_accuracy": 0.2987012987012987,
+     "delta": 0.12987012987012986,
+     "ci95_question_bootstrap": [
+      0.025974025974025976,
+      0.23376623376623376
+     ],
+     "ci95_image_clustered_bootstrap": [
+      0.015151515151515152,
+      0.2361111111111111
+     ],
+     "n_points": {
+      "device": {
+       "1": 77
+      },
+      "cloud": {
+       "1": 72,
+       "0": 2,
+       "3": 1,
+       "8": 1,
+       "5": 1
+      }
+     },
+     "failure_types": {
+      "all_points_inside_mask": {
+       "device": 13,
+       "cloud": 23
+      },
+      "parser_dropped_a_wellformed_point": {
+       "device": 0,
+       "cloud": 1
+      },
+      "points_outside_mask": {
+       "device": 64,
+       "cloud": 52
+      },
+      "refused_or_no_coordinates": {
+       "device": 0,
+       "cloud": 1
+      }
+     },
+     "any_point_inside_mask": {
+      "device": 0.16883116883116883,
+      "cloud": 0.2987012987012987,
+      "delta": 0.12987012987012986,
+      "ci95_question_bootstrap": [
+       0.025974025974025976,
+       0.23376623376623376
+      ],
+      "note": "CONSTRUCTED from the committed per-question accuracy, not re-scored: a positive fraction implies at least one predicted point was inside the mask. It removes the multi-point dilution, under which a reply carrying one correct point and seven extras scores 0.125."
+     },
+     "wellformed_exactly_one_point": {
+      "device": 77,
+      "cloud": 72,
+      "both": 72
+     },
+     "parser_dropped_wellformed_points": {
+      "device": 0,
+      "cloud": 1,
+      "cloud_accuracy_understated_by_at_most": 0.012987,
+      "register": "CONSTRUCTED BOUND, not a measurement: the GT masks are not on this box (the run read them from /dev/shm/ss2_data on the Orin), so whether each dropped point lands inside its mask cannot be checked here. The true correction is between 0 and this bound."
+     },
+     "wellformed_both_only": {
+      "n": 72,
+      "device_accuracy": 0.18055555555555555,
+      "cloud_accuracy": 0.3194444444444444,
+      "delta": 0.1388888888888889,
+      "ci95_question_bootstrap": [
+       0.027777777777777776,
+       0.25
+      ]
+     }
+    },
+    "ALL": {
+     "n": 277,
+     "device_accuracy": 0.2509025270758123,
+     "cloud_accuracy": 0.37144003208985155,
+     "delta": 0.1205375050140393,
+     "ci95_question_bootstrap": [
+      0.05776173285198556,
+      0.1837144003208985
+     ],
+     "ci95_image_clustered_bootstrap": [
+      0.04051063829787234,
+      0.20245487231831677
+     ],
+     "n_points": {
+      "device": {
+       "1": 275,
+       "2": 1,
+       "0": 1
+      },
+      "cloud": {
+       "0": 9,
+       "3": 3,
+       "1": 260,
+       "9": 1,
+       "8": 2,
+       "5": 2
+      }
+     },
+     "failure_types": {
+      "all_points_inside_mask": {
+       "device": 69,
+       "cloud": 102
+      },
+      "parser_dropped_a_wellformed_point": {
+       "device": 0,
+       "cloud": 4
+      },
+      "points_outside_mask": {
+       "device": 206,
+       "cloud": 164
+      },
+      "refused_or_no_coordinates": {
+       "device": 1,
+       "cloud": 5
+      },
+      "some_points_inside_mask_diluted_by_extras": {
+       "device": 1,
+       "cloud": 2
+      }
+     },
+     "any_point_inside_mask": {
+      "device": 0.2527075812274368,
+      "cloud": 0.37545126353790614,
+      "delta": 0.12274368231046931,
+      "ci95_question_bootstrap": [
+       0.061371841155234655,
+       0.18411552346570398
+      ],
+      "note": "CONSTRUCTED from the committed per-question accuracy, not re-scored: a positive fraction implies at least one predicted point was inside the mask. It removes the multi-point dilution, under which a reply carrying one correct point and seven extras scores 0.125."
+     },
+     "wellformed_exactly_one_point": {
+      "device": 275,
+      "cloud": 260,
+      "both": 258
+     },
+     "parser_dropped_wellformed_points": {
+      "device": 0,
+      "cloud": 4,
+      "cloud_accuracy_understated_by_at_most": 0.01444,
+      "register": "CONSTRUCTED BOUND, not a measurement: the GT masks are not on this box (the run read them from /dev/shm/ss2_data on the Orin), so whether each dropped point lands inside its mask cannot be checked here. The true correction is between 0 and this bound."
+     },
+     "wellformed_both_only": {
+      "n": 258,
+      "device_accuracy": 0.2441860465116279,
+      "cloud_accuracy": 0.39147286821705424,
+      "delta": 0.14728682170542637,
+      "ci95_question_bootstrap": [
+       0.08527131782945736,
+       0.2131782945736434
+      ]
+     }
+    }
+   },
+   "images": {
+    "n_questions": 277,
+    "n_distinct_images": 97,
+    "questions_per_image": {
+     "2": 22,
+     "3": 11,
+     "1": 34,
+     "5": 4,
+     "7": 1,
+     "6": 10,
+     "4": 11,
+     "8": 2,
+     "10": 1,
+     "9": 1
+    }
+   }
+  }
+ },
+ "_provenance": {
+  "git_commit": "8f4738ace866c5ea5230158103e916357ac03b38",
+  "script": "ss2_why.py",
+  "model": "none",
+  "timestamp": "2026-11-20T12:28:51.827875",
+  "device": "cpu",
+  "n": 1042
+ }
+}

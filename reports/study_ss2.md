@@ -391,3 +391,180 @@ second would have produced a complete-looking output with the required breakdown
 
 The hardcoded `study="StudySS1"` label was also wrong on an SS2 output and is now read from the
 data files.
+
+## 11. Why-analysis: where the cloud-minus-device gain comes from (A6000, 2026-11-20, user request)
+
+OFFLINE. Committed per-question rows only, CPU on flash, no model, no GPU, no re-scoring. Script
+`experiments/casestudy/ss2_why.py`, output `results/casestudy/study_ss2/ss2_why.json`. The three
+questions asked are failure types per subset, image-clustered CIs, and the gain restricted to
+well-formed answers. **No verdict: D136's gate call is the user's and is not made here, including by
+implication.**
+
+### 11.1 The headline result, and the stratum it hides
+
+| dataset / stratum | n | device | cloud | delta | CI, question bootstrap | CI, image-clustered |
+|---|---|---|---|---|---|---|
+| RealWorldQA, mcq | 438 | 0.6370 | 0.7146 | **+0.0776** | [+0.032, +0.121] | [+0.032, +0.123] |
+| RealWorldQA, free_form | 327 | 0.6789 | 0.7095 | +0.0306 | **[-0.021, +0.083]** | **[-0.018, +0.080]** |
+| RefSpatial, location | 100 | 0.3350 | 0.5133 | **+0.1783** | [+0.072, +0.285] | [+0.056, +0.302] |
+| RefSpatial, placement | 100 | 0.2300 | 0.2856 | +0.0556 | **[-0.050, +0.161]** | **[-0.056, +0.165]** |
+| RefSpatial, unseen | 77 | 0.1688 | 0.2987 | **+0.1299** | [+0.026, +0.234] | [+0.015, +0.236] |
+| RefSpatial, all | 277 | 0.2509 | 0.3714 | **+0.1205** | [+0.058, +0.184] | [+0.041, +0.202] |
+
+**Two of the five strata do not resolve.** RealWorldQA's pooled +0.0575 is carried entirely by its
+multiple-choice half: the free-form half is +0.0306 with a CI spanning zero under both resampling
+units. RefSpatial's placement split is +0.0556, also spanning zero. The pooled figures are not wrong,
+but a reader who takes them as "the cloud beats the device on these datasets" is reading a result that
+holds on three of five strata and is unresolved on two.
+
+### 11.2 Image-clustered CIs: immaterial on one dataset, material on the other
+
+The committed CI resamples questions. Questions sharing an image are not independent, so that CI is
+too narrow wherever images are reused. Clustering is by the manifest's `image_sha16`, the hash of the
+decoded pixels, which is the same key the shared-image exclusion uses.
+
+| dataset | questions | distinct images | questions per image | effect on the CI |
+|---|---|---|---|---|
+| RealWorldQA | 765 | 762 | 759 images with 1, 3 with 2 | **none to three decimal places** |
+| RefSpatial | 277 | 97 | 1 to 10, median 3 | **the all-splits CI widens from [+0.058, +0.184] to [+0.041, +0.202]**, about 20 percent |
+
+So the committed RealWorldQA CI needs no correction, and the RefSpatial CI does. It still excludes zero
+after clustering, and the per-split CIs widen in the same direction without changing any sign. This is
+worth stating as a check that passed rather than a problem found, but RefSpatial's clustering is heavy
+enough (up to 10 questions on one image) that any future RefSpatial interval should be clustered by
+default.
+
+### 11.3 Failure types, and the answer to the well-formedness question
+
+**RealWorldQA: formatting plays no part at all.** Every one of the 765 answers on BOTH tiers is a
+well-formed candidate answer: 438 of 438 mcq rows yielded exactly one extracted letter on each tier,
+and all 327 free-form replies are at most four words and none ran into the 16-token generation cap.
+There are **zero** malformed answers on either side, so the gain restricted to well-formed-both IS the
+headline unchanged, and no part of it is answer formatting. That was the thing most worth ruling out,
+because the metric is exact string equality and CLAUDE.md's consistency check 3 records a case where an
+accuracy column ranked arms backwards for exactly this reason.
+
+| RealWorldQA failure type | device | cloud |
+|---|---|---|
+| mcq correct | 279 | 313 |
+| mcq wrong letter | 159 | 125 |
+| mcq no letter extracted | **0** | **0** |
+| free_form correct | 222 | 232 |
+| free_form yes/no flipped | 44 | 40 |
+| free_form numeric off by one | 28 | 29 |
+| free_form numeric wrong | 19 | 14 |
+| free_form direction flipped | 2 | 2 |
+| free_form contains the gold as a substring | 1 | 0 |
+| free_form other wrong | 11 | 10 |
+
+The two tiers make the SAME KINDS of mistakes at nearly the same rates on free-form: yes/no flips 44
+against 40, off-by-one counts 28 against 29. The cloud's free-form advantage is 10 extra exact matches
+out of 327, which is the +0.0306 that does not resolve. Its mcq advantage is 34 letters.
+
+**RefSpatial: every formatting artifact penalises the CLOUD, so the gain there is understated.** The
+device emits exactly one point on 275 of 277 questions; the cloud emits one on 260, zero on 9, and
+three, five, eight or nine points on the remaining 8.
+
+| RefSpatial failure type | device | cloud |
+|---|---|---|
+| all points inside the mask | 69 | 102 |
+| points outside the mask | 206 | 164 |
+| some points inside, diluted by extras | 1 | 2 |
+| refused or gave no coordinates | 1 | 5 |
+| **parser dropped a well-formed point** | **0** | **4** |
+
+Two distinct mechanisms, both against the cloud:
+
+1. **A parser gap the cloud hits and the device never does.**
+   `ss2_bench_kit._iter_json_points` accepts a coordinate only as a 2-element numeric list under a
+   point key, or as a bare 2-element list. It does **not** handle `{"x": .., "y": ..}`, and the two
+   text fallbacks need brackets or parentheses that this form does not carry. The 32B prefers exactly
+   that form, so four clean replies such as
+   `{"points": [{"x": 234, "y": 357}]}` parsed to zero points and scored 0. **Register: this bounds
+   the cloud's understatement at 4 of 277, or 1.44 pp, and it is a CONSTRUCTED BOUND, not a
+   measurement.** The ground-truth masks are not on this box, the run having read them from
+   `/dev/shm/ss2_data` on the Orin, so whether each dropped point lands inside its mask cannot be
+   checked here; the true correction is between 0 and that bound. A fifth cloud reply carried
+   coordinates in malformed JSON and is not counted in the four.
+2. **Multi-point dilution**, which turns out to be small. The metric is the fraction of predicted
+   points inside the mask, so a reply with one correct point and seven extras scores 0.125. Replacing
+   it with "did ANY predicted point land inside the mask", which is derivable from the committed
+   per-question accuracy without any mask, moves the all-splits delta from +0.1205 to +0.1227. Worth
+   **+0.0022**, so the cloud's extra points cost it almost nothing.
+
+**The gain on well-formed answers only**, defined for RefSpatial as both tiers emitting exactly one
+parseable point:
+
+| stratum | n well-formed both | device | cloud | delta | against the full-set delta |
+|---|---|---|---|---|---|
+| RefSpatial all | 258 of 277 | 0.2442 | 0.3915 | **+0.1473** [+0.085, +0.213] | +0.1205 |
+| RefSpatial location | 94 of 100 | 0.3191 | 0.5319 | +0.2128 [+0.106, +0.319] | +0.1783 |
+| RefSpatial placement | 92 of 100 | 0.2174 | 0.3043 | +0.0870 [-0.022, +0.196] | +0.0556 |
+| RefSpatial unseen | 72 of 77 | 0.1806 | 0.3194 | +0.1389 [+0.028, +0.250] | +0.1299 |
+| RealWorldQA, both subsets | all | unchanged | unchanged | unchanged | nothing to restrict |
+
+So restricting to well-formed answers **raises** the cloud's RefSpatial lead by 2.7 points, from
++0.1205 to +0.1473, and placement still does not resolve even then. The direction is the useful part:
+on both datasets, formatting either plays no role or works against the cloud, and on neither does it
+inflate the gain. The one thing a why-analysis most needed to exclude is excluded.
+
+## 12. Live arms that read a device score when deciding (same request; live2 audit)
+
+Filed here because it was asked with section 11. Static read of committed code, re-runnable as
+`experiments/orchestration/live2/device_score_audit.py`, output
+`results/orchestration/live2/device_score_audit.json`.
+
+This is the port rule applied to a CHANNEL instead of to an arm. An arm that escalates when the device
+is unsure cannot make that decision if no device score reaches it, so the question is not whether the
+channel is declared but whether it is supplied and read.
+
+**Five arms declare `reads_device_answer = True`, and every one of them reads
+`device_answer_confidence` in its own code:**
+
+| arm file | where it reads the field |
+|---|---|
+| `cascade_adapted.py` (confidence-cascade) | lines 20, 89 |
+| `cascade_routing_adapted.py` (cascade-routing) | line 121 |
+| `r3streaming_adapted.py` (r3streaming) | lines 56, 57 |
+| `streamscout_adapted.py` (streamscout) | line 87 |
+| `thinking_qwenvl_adapted.py` (thinking-qwenvl) | lines 62, 63 |
+
+No arm declares it False explicitly; `hybrid_llm_adapted.py` records in a comment that it stays False.
+
+**In live2 the channel is supplied to none of them, and the break is in three independent places.**
+
+1. `cstate.observation` (`cstate.py:486-541`) hard-codes `device_answer_confidence=None` on every
+   `RecallQuery` it builds. It is the only assignment, and it is unconditional.
+2. That function accepts a `reads_device_answer` parameter and uses it **0 times in its body**,
+   confirmed by walking the function's AST rather than by eye.
+3. `coordinator.py:243` calls `self.st.observation(t, epoch ...)` with two positional arguments and
+   never passes the flag, so it always takes its default `False`. The parameter could not have
+   mattered even if the body had read it.
+
+**And the declaration is charged anyway, which is the part that matters.** `coordinator.py:171`
+computes `self.reads_device` from the arm's declaration, and the two places that read it are both
+costs:
+
+- `coordinator.py:464` serves the opportunity at `o.t_event + DEVICE_ANSWER_CHARGE_S` instead of at
+  `t_event`;
+- `coordinator.py:498` forbids the arm from acting before `t_event + DEVICE_ANSWER_CHARGE_S`.
+
+So an arm declaring that it reads the device answer **waits StudyD8's 0.567 s for an answer it is then
+handed as `None`**. It pays the full price of the read and receives nothing, which leaves it strictly
+worse off than the same arm declaring False. In CLAUDE.md's terms this is the write-only field
+inverted: the flag is live, instrumented and consequential, and the only link it completes is the cost
+one. It is also the shape check 7 names, a comparator charged one price while planning at another.
+
+StudySIM1D already recorded the downstream consequence for one of the five, as PROPOSED and not
+applied: with `conf is None`, streamscout's stage-0 branch fires and the query never reaches the
+cloud, so all its recall decisions stay on the device. The same null holds in live2 for the same
+reason.
+
+**What this does not say.** It does not say these five arms are broken as published; their own code
+reads the field correctly and the channel is real in the interface and in `experiments/orchestration/live/`
+(`adapter.py:201`). It says that **in live2** the device-score channel is unexercised, so any live2
+result in which one of these five arms declines to escalate is an ABSENT LINK under Rule 2 and not
+evidence about cascading. Supplying the field is a methodological change and needs a ruling: the value
+exists in committed form (StudyE7 Job A per-question `letter_probs` for the 4B-D2 configuration, 839 of
+845 questions, per StudyB-baselines amendment 2), so it is a wiring decision and not a measurement
+problem.
