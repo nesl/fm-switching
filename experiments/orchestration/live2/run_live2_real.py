@@ -81,6 +81,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--work", default=None, help="where generated traces are kept")
     ap.add_argument("--n-devices", type=int, default=8)
     ap.add_argument("--ratio", default="50:50")
+    ap.add_argument("--ss-question-set", default="ss1", choices=["ss1", "ss2"],
+                    help="D143: single-shot devices draw from StudySS1 (default) or the EVAL part of the committed StudySS2 "
+                         "30/70 split (RefSpatial + RealWorldQA); recorded in the header and the trace directory name")
     ap.add_argument("--robot-question-set", default="eval", choices=["eval", "lh_req"],
                     help="D142 / D143 A: robots draw from EVAL (default) or EVAL LH-REQ questions only; recorded in the "
                          "header and in the trace directory name")
@@ -151,14 +154,15 @@ def _trace(a, work: Path) -> Path:
     # The cache key must carry every generator input that changes the trace. The defaults keep the historical name
     # (so committed runs' traces are reused unchanged); any other ratio or robot question set gets its own directory,
     # otherwise a 40:40:20 or LH-REQ run would silently reuse a 50:50 EVAL trace.
-    extra = "" if (a.ratio == "50:50" and a.robot_question_set == "eval") else \
-        f"_r{a.ratio.replace(':', '-')}_{a.robot_question_set}"
+    extra = "" if (a.ratio == "50:50" and a.robot_question_set == "eval" and a.ss_question_set == "ss1") else \
+        f"_r{a.ratio.replace(':', '-')}_{a.robot_question_set}_{a.ss_question_set}"
     tdir = work / "traces" / f"seed{a.seed}_n{a.n_devices}_{int(a.run_s)}s_{a.mode}{extra}"
     if not (tdir / "trace.jsonl").exists():
         TR.write_trace(tdir, TR.generate_trace(
             a.seed, a.n_devices, a.ratio, a.run_s, a.mode,
             frame_manifest=(Path(a.frame_manifest) if a.frame_manifest else None),
-            **({} if a.robot_question_set == "eval" else dict(robot_question_set=a.robot_question_set))))
+            **({} if a.robot_question_set == "eval" else dict(robot_question_set=a.robot_question_set)),
+            **({} if a.ss_question_set == "ss1" else dict(ss_question_set=a.ss_question_set))))
     return tdir
 
 
@@ -225,7 +229,7 @@ def run(a) -> Dict[str, Any]:
         calibration_label=cal.get("label"),
         fairness_digest=tmeta.get(f"fairness_digest_{a.mode}"),
         live1_trace_digest=tmeta.get("live1_trace_digest"),
-        seed=a.seed, targets=CS.TARGETS, upload_mode=a.mode, robot_question_set=a.robot_question_set,
+        seed=a.seed, targets=CS.TARGETS, upload_mode=a.mode, robot_question_set=a.robot_question_set, ss_question_set=a.ss_question_set,
         mu_mode=(a.mu_mode if a.arm == "policy-core" else None),
         H=(a.h_s if a.arm == "policy-core" else None),
         decision_period_s=a.decision_period_s, ratio=a.ratio, n_devices=a.n_devices,
