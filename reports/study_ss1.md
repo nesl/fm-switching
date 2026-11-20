@@ -587,3 +587,73 @@ deliverable exists independently. **Judge-dependent:** the native-scale judge me
 paired difference, and the by-dimension judge table above. **Not judge-dependent:** every accuracy
 figure, every 2x2 and cut sensitivity, every TTFT figure, both prompt-token parity results, and the
 disagreement rate.
+
+---
+
+# Step 5: the length/verbosity alternative explanation, tested
+
+**The alternative:** LLM judges are documented to reward length and fluency. Containment asks
+whether the gold string is present and is largely indifferent to what surrounds it; a 0/0.5/1 judge
+can reward register, completeness and hedging, all of which scale with model size independently of
+correctness. **"The judge sees a difference containment cannot" and "the judge sees verbosity
+containment correctly ignores" predict the same table.** These are separable with the data in hand.
+
+## 1. The cloud does write longer answers, so the confound is live
+
+| side | mean words | median | mean chars |
+|---|---|---|---|
+| device | 1.95 | 1.0 | 9.9 |
+| cloud | **3.54** | 2.0 | 18.4 |
+
+**1.81x on mean word count.** The confound is not dead and had to be tested rather than dismissed.
+
+## 2. The judge DOES reward length, holding model and containment fixed
+
+Within one side (model identity fixed) and within one containment stratum (correctness as
+containment sees it fixed), comparing the shortest against the longest length tercile:
+
+| side | containment | n | short tercile | long tercile | delta |
+|---|---|---|---|---|---|
+| device | 0 | 341 | 0.398 | 0.580 | **+0.181** |
+| device | 1 | 325 | 0.921 | 0.991 | +0.069 |
+| cloud | 0 | 334 | 0.554 | 0.685 | **+0.131** |
+| cloud | 1 | 332 | 0.995 | 0.973 | −0.023 |
+
+**A longer answer from the same model, scored the same by containment, receives a materially higher
+judge rating.** On the device's containment-0 answers the effect is +0.181 from short to long
+tercile. **The judge is partly scoring prose**, and this cannot be model quality because the model
+is held fixed.
+
+## 3. But most of the gap survives length matching
+
+The sharpest single cell first: judge mean on **containment-0** answers is device 0.5205 against
+cloud 0.6168, a gap of **+0.096**, while on containment-1 answers it is 0.9708 against 0.9895, a gap
+of only +0.019. The cloud's advantage is concentrated where containment says the answer is wrong,
+which is consistent with **both** readings and therefore does not separate them.
+
+What separates them is matching on length. Restricting to the **387 question-pairs where both sides
+produced the same word count**:
+
+| | n | device | cloud | delta |
+|---|---|---|---|---|
+| matched-length pairs | 387 | 0.8204 | 0.8682 | **+0.0478** |
+
+**+0.0478 of the +0.0623 overall survives, about 77 percent.** So length contributes to the gap but
+does not account for most of it.
+
+## Verdict on the alternative: partly operative, scoped, not dismissed
+
+- **The length effect is real**, demonstrated within model and within containment stratum.
+- **It does not explain the majority of the judge gap**: roughly three quarters survives at matched
+  word count.
+- **One caveat that cuts against over-trusting the 77 percent**: the matched-length set is **317 of
+  387 one-word answers**, so it is the short tail where containment works best, and it
+  under-represents exactly the long free-form `Planning` dimensions where the judge gap was largest
+  (+0.184). The matched-length estimate is therefore itself biased toward the regime where the two
+  scorers agree.
+
+**Reported as a scope condition, not a correction.** The judge column stands, with the caveat that
+part of the +0.0623 is attributable to answer length rather than correctness, that the attributable
+fraction is bounded at roughly a quarter on the matched-length evidence, and that this bound comes
+from a short-answer-dominated subset. **The charitable and uncharitable readings of the scorer
+disagreement are both partly right**, and the data says which share goes to each.
