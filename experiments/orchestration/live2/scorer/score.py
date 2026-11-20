@@ -222,8 +222,22 @@ def load(trace_dir: Path, run_dir: Path) -> Loaded:
     out = {r["opportunity_id"]: r
            for r in (json.loads(l) for l in open(run_dir / "outcomes.jsonl"))}
     reqs: List[Dict[str, Any]] = []
-    if (run_dir / "requests.jsonl").exists():
-        reqs = [json.loads(l) for l in open(run_dir / "requests.jsonl")]
+    for name in ("requests.jsonl", "request.jsonl"):        # live2 writes the singular name
+        if (run_dir / name).exists():
+            reqs = [json.loads(l) for l in open(run_dir / name)]
+            break
+    # D144 (user ruling 2026-11-20): any NON-200 response is a MISS. A refused request (e.g. HTTP 400 over-context) was
+    # settled by the pre-fix coordinator as an on-time cloud answer with letter "X"; strip such cloud deliveries here so
+    # every downstream check (_within, robot_value, assistive scoring) sees the device answer standing and a miss.
+    failed = {r.get("request_id") for r in reqs
+              if r.get("http_status") is not None and int(r.get("http_status")) != 200}
+    if failed:
+        for o in out.values():
+            cp = o.get("cloud_payload") or {}
+            if cp.get("request_id") in failed:
+                o["t_delivered"] = None
+                o["cloud_payload"] = None
+                o["d144_failed_request"] = True
     dec: List[Dict[str, Any]] = []
     for name in ("decisions.jsonl", "decision.jsonl"):
         if (run_dir / name).exists():
