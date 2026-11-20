@@ -1,6 +1,6 @@
 {
  "label": "Device-confidence wiring proof. Dry cells on the frozen grid's own cell; no GPU, no model server, no inference. Pre-fix digests are the committed baseline_prescreen (a592e51) on the identical cell.",
- "at": "2026-11-20T13:01:38.882527",
+ "at": "2026-11-20T13:31:08.433633",
  "cell": {
   "seed": 4,
   "n_devices": 16,
@@ -11,16 +11,64 @@
   "ss_question_set": "ss2"
  },
  "arms": {
-  "r3streaming": {
-   "error": "KeyError(\"unknown arm 'r3streaming'; known: ['always-cloud-fcfs', 'attentionstore', 'b10-blocking-aware', 'b7-edf-feasibility', 'b9', 'builder-acfcfs', 'builder-default', 'builder-s1-fairshare', 'builder-s1-feasible', 'builder-s1-lateness', 'builder-s2-all', 'builder-s2-value', 'builder-s3-whatif', 'builder-s4-adaptive', 'builder-s4-llf', 'builder-s4-reserve', 'builder-s6-decline', 'builder-s7-alw",
-   "wall_s": 1.1
+  "r3-streaming": {
+   "wall_s": 101.9,
+   "n_decision_rows": 4758,
+   "digest": "8aecd24ed0980871",
+   "digest_setwise": "2d4ec4d84143a425",
+   "recall_decisions_total": 381,
+   "on_confidence_present": {
+    "n": 24,
+    "by_decision": {
+     "DEVICE": 19,
+     "DEFER": 5
+    }
+   },
+   "on_confidence_absent": {
+    "n": 357,
+    "by_decision": {
+     "DEVICE": 357
+    }
+   },
+   "declines_to_escalate_on_high_confidence": 19,
+   "escalates_on_low_confidence": 0,
+   "confidence_range": [
+    0.386991,
+    0.999972
+   ],
+   "prefix_digest_committed": "c66adcf4ddc672a7",
+   "digest_changed_vs_prefix": true
   },
-  "thinking-qwenvl": {
-   "error": "KeyError(\"unknown arm 'thinking-qwenvl'; known: ['always-cloud-fcfs', 'attentionstore', 'b10-blocking-aware', 'b7-edf-feasibility', 'b9', 'builder-acfcfs', 'builder-default', 'builder-s1-fairshare', 'builder-s1-feasible', 'builder-s1-lateness', 'builder-s2-all', 'builder-s2-value', 'builder-s3-whatif', 'builder-s4-adaptive', 'builder-s4-llf', 'builder-s4-reserve', 'builder-s6-decline', 'builder-s7",
-   "wall_s": 1.1
+  "thinking-qwenvl-atdm": {
+   "wall_s": 126.4,
+   "n_decision_rows": 13531,
+   "digest": "94f91d4ebb30b5d3",
+   "digest_setwise": "9ed00e8ccb627468",
+   "recall_decisions_total": 404,
+   "on_confidence_present": {
+    "n": 47,
+    "by_decision": {
+     "CLOUD": 17,
+     "DEFER": 30
+    }
+   },
+   "on_confidence_absent": {
+    "n": 357,
+    "by_decision": {
+     "CLOUD": 357
+    }
+   },
+   "declines_to_escalate_on_high_confidence": 0,
+   "escalates_on_low_confidence": 17,
+   "confidence_range": [
+    0.386991,
+    0.999972
+   ],
+   "prefix_digest_committed": "7c4a2c3459039bb1",
+   "digest_changed_vs_prefix": true
   },
   "confidence-cascade": {
-   "wall_s": 105.7,
+   "wall_s": 126.9,
    "n_decision_rows": 13564,
    "digest": "7bbf9555d68e6f29",
    "digest_setwise": "0483391bc04e8b07",
@@ -47,35 +95,31 @@
    "prefix_digest_committed": "7212c388684ed51d",
    "digest_changed_vs_prefix": true
   },
-  "cascade-routing": {
-   "wall_s": 107.0,
-   "n_decision_rows": 13564,
-   "digest": "9a18cc1be9aa65c6",
-   "digest_setwise": "3af10ce41ad5969d",
+  "b7-edf-feasibility": {
+   "wall_s": 127.0,
+   "n_decision_rows": 13570,
+   "digest": "67c8da3057a09aff",
+   "digest_setwise": "4d93d629c3c55e6f",
    "recall_decisions_total": 377,
    "on_confidence_present": {
-    "n": 20,
-    "by_decision": {
-     "DEVICE": 20
-    }
+    "n": 0,
+    "by_decision": {}
    },
    "on_confidence_absent": {
-    "n": 357,
+    "n": 377,
     "by_decision": {
-     "CLOUD": 357
+     "CLOUD": 372,
+     "REJECT": 5
     }
    },
-   "declines_to_escalate_on_high_confidence": 20,
+   "declines_to_escalate_on_high_confidence": 0,
    "escalates_on_low_confidence": 0,
-   "confidence_range": [
-    0.386991,
-    0.999972
-   ],
-   "prefix_digest_committed": "6fee784e54567912",
-   "digest_changed_vs_prefix": true
+   "confidence_range": null,
+   "prefix_digest_committed": "67c8da3057a09aff",
+   "digest_changed_vs_prefix": false
   },
   "streamscout": {
-   "wall_s": 107.5,
+   "wall_s": 127.1,
    "n_decision_rows": 13564,
    "digest": "e6345d256e07f6ba",
    "digest_setwise": "a69db91f387c10a9",
@@ -101,28 +145,32 @@
    "prefix_digest_committed": "7212c388684ed51d",
    "digest_changed_vs_prefix": true
   },
-  "b7-edf-feasibility": {
-   "wall_s": 107.9,
-   "n_decision_rows": 13570,
-   "digest": "67c8da3057a09aff",
-   "digest_setwise": "4d93d629c3c55e6f",
+  "cascade-routing": {
+   "wall_s": 128.7,
+   "n_decision_rows": 13564,
+   "digest": "9a18cc1be9aa65c6",
+   "digest_setwise": "3af10ce41ad5969d",
    "recall_decisions_total": 377,
    "on_confidence_present": {
-    "n": 0,
-    "by_decision": {}
-   },
-   "on_confidence_absent": {
-    "n": 377,
+    "n": 20,
     "by_decision": {
-     "CLOUD": 372,
-     "REJECT": 5
+     "DEVICE": 20
     }
    },
-   "declines_to_escalate_on_high_confidence": 0,
+   "on_confidence_absent": {
+    "n": 357,
+    "by_decision": {
+     "CLOUD": 357
+    }
+   },
+   "declines_to_escalate_on_high_confidence": 20,
    "escalates_on_low_confidence": 0,
-   "confidence_range": null,
-   "prefix_digest_committed": "67c8da3057a09aff",
-   "digest_changed_vs_prefix": false
+   "confidence_range": [
+    0.386991,
+    0.999972
+   ],
+   "prefix_digest_committed": "6fee784e54567912",
+   "digest_changed_vs_prefix": true
   }
  },
  "robot_only_coverage": {
@@ -161,19 +209,22 @@
   "arms_receiving_the_field": [
    "cascade-routing",
    "confidence-cascade",
-   "streamscout"
+   "r3-streaming",
+   "streamscout",
+   "thinking-qwenvl-atdm"
   ],
   "arms_declining_on_high_confidence": [
    "cascade-routing",
-   "confidence-cascade"
+   "confidence-cascade",
+   "r3-streaming"
   ],
   "control_unchanged": true
  },
  "_provenance": {
-  "git_commit": "bad0efc9d12cf1568b50a28f914e9e147327a217",
+  "git_commit": "e04e61452ea4d8b7cb5fc7e46d71b1c87248c982",
   "script": "device_conf_wiring_proof.py",
   "model": "none-dry",
-  "timestamp": "2026-11-20T13:03:27.622429",
+  "timestamp": "2026-11-20T13:32:57.312956",
   "device": "cpu",
   "n": 6
  }

@@ -571,11 +571,14 @@ channel is declared but whether it is supplied and read.
 
 | arm file | where it reads the field |
 |---|---|
-| `cascade_adapted.py` (confidence-cascade) | lines 20, 89 |
-| `cascade_routing_adapted.py` (cascade-routing) | line 121 |
-| `r3streaming_adapted.py` (r3streaming) | lines 56, 57 |
-| `streamscout_adapted.py` (streamscout) | line 87 |
-| `thinking_qwenvl_adapted.py` (thinking-qwenvl) | lines 62, 63 |
+| `cascade_adapted.py`, registered as `confidence-cascade` | lines 20, 89 |
+| `cascade_routing_adapted.py`, registered as `cascade-routing` | line 121 |
+| `r3streaming_adapted.py`, registered as **`r3-streaming`** | lines 56, 57 |
+| `streamscout_adapted.py`, registered as `streamscout` | line 87 |
+| `thinking_qwenvl_adapted.py`, registered as **`thinking-qwenvl-atdm`** | lines 62, 63 |
+
+The two bolded registry names are not their file stems, and getting that wrong produced the
+correction in 12.3.
 
 No arm declares it False explicitly; `hybrid_llm_adapted.py` records in a comment that it stays False.
 
@@ -636,24 +639,38 @@ grid's own cell: seed 4, 16 devices, 1,200 s, 40:40:20, LH-REQ robots, SS2 pool,
 digests are the committed `baseline_prescreen.json` (a592e51) on the identical cell, so the comparison
 is against a committed artifact rather than against a rerun.
 
+All five declaring arms are covered. An earlier version of this proof ran only three, because its arm
+list used file stems for two of them and they raised "unknown arm", which I then misrecorded as those
+arms being unregistered (12.3).
+
 | arm | confidence present / absent | declines on high confidence | escalates on low | digest | committed pre-fix digest |
 |---|---|---|---|---|---|
 | `confidence-cascade` | 20 / 357 | **13** | 7 | `7bbf9555d68e6f29` | `7212c388684ed51d` |
 | `cascade-routing` | 20 / 357 | **20** | 0 | `9a18cc1be9aa65c6` | `6fee784e54567912` |
+| `r3-streaming` | 24 / 357 | **19** | 0 | `8aecd24ed0980871` | `c66adcf4ddc672a7` |
 | `streamscout` | 20 / 357 | **0** | 20 | `e6345d256e07f6ba` | `7212c388684ed51d` |
+| `thinking-qwenvl-atdm` | 47 / 357 | **0** | 17 | `94f91d4ebb30b5d3` | `7c4a2c3459039bb1` |
 | `b7-edf-feasibility` (control) | 0 / 377 | 0 | 0 | `67c8da3057a09aff` | `67c8da3057a09aff` |
+
+The "present" column counts recall DECISIONS carrying a confidence, not distinct questions, which is
+why two arms exceed the cell's 20 robot questions: an arm that re-decides a query across epochs reads
+the value more than once. The denominator 357 is the single-shot questions, which have no committed
+probability at all until 12.4's re-record.
 
 Four things that table settles.
 
 1. **The field arrives**, counted at the point of USE inside each arm's own `decide` rather than from
    a coordinator counter. That is the stronger read: a counter proves the supplier ran, this proves
    the value reached the code that consumes it.
-2. **The characteristic decision fires for two of the three.** `confidence-cascade` declines to
-   escalate on 13 questions and escalates on 7, so both branches of its confidence test are reached,
-   and `cascade-routing` declines on all 20. **`streamscout` escalates on all 20 and never declines**,
-   so its specific decline-on-high-confidence branch does NOT fire in this cell. That is its own
-   fitted thresholds acting on these confidences rather than a wiring failure, and it is reported as a
-   shortfall against the requested proof instead of being rounded up to a pass.
+2. **The characteristic decision fires for three of the five.** `confidence-cascade` declines to
+   escalate 13 times and escalates 7, so both branches of its confidence test are reached;
+   `cascade-routing` declines 20 times and `r3-streaming` 19. **`streamscout` and
+   `thinking-qwenvl-atdm` escalate every time and never decline**, so the specific
+   decline-on-high-confidence decision does NOT fire for them in this cell. That is their own fitted
+   thresholds acting on these confidences rather than a wiring failure, since the field demonstrably
+   arrives and their digests demonstrably move, and it is reported as a shortfall against the
+   requested proof instead of being rounded up to a pass. Whether those thresholds are right at these
+   confidences is a question about those arms, not about the wiring.
 3. **The switch reaches a decision** (Step 2b): every treated arm's digest differs from its committed
    pre-fix digest. The sharpest evidence is what the fix SEPARATES. Pre-fix, `confidence-cascade` and
    `streamscout` had the **same** digest, `7212c388684ed51d`, because neither received a confidence and
@@ -680,10 +697,9 @@ reimplementing it.
 each now carries a `DEVICE_CONFIDENCE_NOT_DELIVERED.md` marker, listed in
 `results/orchestration/live2/device_conf_absent_link_runs.json`: four `confidence-cascade` pilot cells
 and one `cascade-routing` cell. Nothing in them is deleted or recomputed; what is bounded is the
-interpretation. `streamscout` is in the live2 registry and was dry-screened but has no live run.
-`r3streaming` and `thinking-qwenvl` are **not in the live2 registry at all** (50 arms) and have no live
-run, so they never paid the charge and need no relabelling; if either is ported, the wiring now
-supplies the field automatically.
+interpretation. `streamscout`, `r3-streaming` and `thinking-qwenvl-atdm` are all registered and have no live run, so
+they never paid the charge and need no relabelling. **An earlier version of this paragraph said the
+last two were not registered at all. That was wrong; see 12.3.**
 
 ### 12.2 Single-shot has no committed answer probability, and what a re-record needs
 
@@ -712,3 +728,86 @@ already delivered and always were: `cstate.observation` builds each `EpisodicStr
 `delivered_scores`, the device's own per-instant scores, so arms reading the episodic side have never
 been starved. The gap was only ever on the recall side, which is where `device_answer_confidence`
 lives. Nothing was added for dashcams because nothing was missing.
+
+### 12.3 Registry reconciliation before the sweep resumes, and a correction of my own
+
+User instruction 2026-11-20. Script `experiments/orchestration/live2/sweep_registry_recon.py`,
+output `results/orchestration/live2/sweep_registry_recon.json`.
+
+**The correction first, because it is mine.** 12.1 reported `r3streaming` and `thinking-qwenvl` as
+"not in the live2 registry at all". Those are FILE STEMS, from `r3streaming_adapted.py` and
+`thinking_qwenvl_adapted.py`. The registry names are **`r3-streaming`** and
+**`thinking-qwenvl-atdm`**, and both are registered and both declare `reads_device_answer`. My audit
+asked the registry for names I had guessed from file names, got "unknown arm", and recorded the
+answer as a fact about the registry. **All five declaring arms are live2-registered, not three**, and
+the wiring proof now covers five.
+
+A second way the same mistake was available: `arms.ARMS` alone is not the registry. Importing
+`hybrid` adds the hybrid configs, so `hybrid-F-lhreq`, which is in the sweep list and has 7 live
+runs, is absent from that dict until the import the driver performs. Membership is therefore settled
+by calling **`make_arm`**, the driver's own construction path, and never by a name lookup. That is the
+rule this script enforces, and it is the same lesson Step 2b states for a switch, applied to a name.
+
+**The sweep list is sound.** All **29** names build through `make_arm`; **0** are unbuildable. So the
+sweep can neither fail on a name nor silently run the wrong arm.
+
+| sweep name | registered and buildable | declares `reads_device_answer` | live run dirs |
+|---|---|---|---|
+| `r3-streaming` | yes | **yes** | **0** |
+| `streamscout` | yes | **yes** | **0** |
+| `thinking-qwenvl-atdm` | yes | **yes** | **0** |
+| `cascade-routing` | yes | **yes** | 1 |
+| `b7-edf-feasibility` | yes | no | 12 |
+| `eco-llm` | yes | no | 15 |
+| `mooncake` | yes | no | 8 |
+| `attentionstore` | yes | no | 7 |
+| `hybrid-F-lhreq` | yes | no | 7 |
+| `hybrid-llm` | yes | no | 4 |
+| `b9`, `kvflow`, `utility-per-cost` | yes | no | 1 each |
+| the remaining 16 names | yes | no | 0 |
+
+The full per-name record is in the JSON; `confidence-cascade` is **not** in the sweep list, which is
+why it appears in the wiring proof but not here.
+
+**What this means for the sweep, and it is good news.** Four sweep arms read device confidence, and
+three of those four have never run live at all, so the sweep will be their first live run AND their
+first with the field delivered. Only `cascade-routing` has a prior live cell, and that one cell is
+labelled under 12.1. So no post-fix sweep cell will have to be compared against a pre-fix twin for
+three of the four, and for the fourth the pre-fix cell is already marked as an absent link.
+
+### 12.4 The single-shot re-record: kit landed, run pending on the Orin
+
+User ruling 2026-11-20. The kit is committed and runs on the Orin after StudySH-EP; no values exist
+until it does, and `device_confidence` returns None for single-shot questions until then, which is
+the honest value rather than a gap.
+
+| piece | what it does |
+|---|---|
+| `ss2_run.py --logprobs` | adds `logprobs: true, top_logprobs: 20` to the request and records the per-token top-20. **Off by default**, so the function that produced the committed answers is unchanged. Nothing else moves: same prompt, same image, same greedy decoding and seed, so the ANSWERS must reproduce the committed ones and that equality is the re-record's own control |
+| `ss2_device_confidence.py` | turns a re-recorded run into the per-question table |
+| `device_confidence.py` | now merges that table beside the robot one, with `source_of()` naming which table a value came from. The two key spaces are disjoint, a 64-hex digest against `<dataset>/<id>`, so neither can mask the other |
+| `ss2_refspatial_rescore.py` | the same Orin pass does the 11.4 rescore with the fixed parser, **recording a sha256 per mask**, which the manifest has never had |
+
+**The confidence rule, as ruled**, and why the mcq half is deliberately not a new definition:
+
+| items | rule | strength |
+|---|---|---|
+| mcq | the committed `study_f_common.letter_probs`, mass on the letter the model actually emitted, lifted by AST and not retyped | primary. This is **exactly** what StudyE7 supplies for robot questions, so the two sources feeding `device_answer_confidence` are the same quantity rather than two notions of confidence sharing one name |
+| free_form | geometric mean token probability, `exp(mean(token logprob))` | primary |
+| RefSpatial points | the same rule as free_form | **weak, and labelled so in every row.** Token confidence in the digits of a coordinate is not confidence that the point is right |
+
+Length is why the two rules differ at all. A letter is one token, so its probability IS the answer's
+probability. A free-form answer is several tokens and a product over them falls with length, which
+would make a long correct answer look less confident than a short wrong one; the geometric mean
+removes that dependence.
+
+**Two controls the Orin pass must report**, both of which can fail and neither of which is optional:
+the re-recorded answers must equal the committed ones question for question, since only `logprobs`
+was added; and the rescore must move **zero device rows**, because the parser fix adds a form no
+device reply used. `ss2_refspatial_rescore.py` exits non-zero if a device row moves.
+
+Once the table exists, the wiring needs no further change: `cstate._device_confidence` looks the
+question id up in `device_confidence.confidence`, which now consults both tables, so single-shot
+confidences reach the arms by the same path as robot ones. The per-arm proof is then re-run with
+`device_conf_wiring_proof.py`, where the coverage line should move from 20 of 377 toward full, and
+that is the number to check rather than taking the wiring on trust twice.

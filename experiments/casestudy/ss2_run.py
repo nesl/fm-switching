@@ -45,16 +45,27 @@ def load_rows(manifest, ids_arg):
     return [by[q] for q in sorted(want) if q in by]
 
 
-def call(endpoint, model, prompt, data_url, max_tokens, salt, timeout=180):
+def call(endpoint, model, prompt, data_url, max_tokens, salt, timeout=180, logprobs=False):
+    """One single-shot request. With `logprobs`, the per-token top-20 is recorded as well.
+
+    `logprobs` is OFF by default so this stays the function that produced the committed answers.
+    The device-confidence re-record (user ruling 2026-11-20) turns it ON and changes nothing else:
+    same prompt, same image, same greedy decoding and seed, so the ANSWERS must reproduce the
+    committed ones and that equality is the re-record's own control.
+    """
     body = dict(
         model=model, temperature=0.0, seed=0, max_tokens=max_tokens, stream=True,
         stream_options={"include_usage": True}, cache_salt=str(salt),
         messages=[{"role": "user", "content": [
             {"type": "text", "text": prompt},
             {"type": "image_url", "image_url": {"url": data_url}}]}])
+    if logprobs:
+        body["logprobs"] = True
+        body["top_logprobs"] = 20
     t0 = time.monotonic()
     ttft = None
     chunks = []
+    lp = []
     pt = ct = None
     with requests.post(endpoint.rstrip("/") + "/chat/completions", json=body, stream=True,
                        timeout=timeout) as r:
@@ -75,6 +86,11 @@ def call(endpoint, model, prompt, data_url, max_tokens, salt, timeout=180):
                     if ttft is None:
                         ttft = time.monotonic() - t0
                     chunks.append(piece)
+                c = (ch.get("logprobs") or {}).get("content")
+                if c:
+                    lp.extend(c)
+    if logprobs:
+        return "".join(chunks), ttft, time.monotonic() - t0, pt, ct, lp
     return "".join(chunks), ttft, time.monotonic() - t0, pt, ct
 
 

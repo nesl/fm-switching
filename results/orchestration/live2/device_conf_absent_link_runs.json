@@ -19,13 +19,11 @@
  "never_ran_live2": {
   "arms": [
    "streamscout",
-   "r3streaming",
-   "thinking-qwenvl"
+   "r3-streaming",
+   "thinking-qwenvl-atdm"
   ],
-  "streamscout": "in the live2 registry and dry-screened, but no live run directory exists",
-  "r3streaming": "NOT in the live2 registry (50 arms) and no live run directory exists",
-  "thinking_qwenvl": "NOT in the live2 registry (50 arms) and no live run directory exists",
-  "note": "the two unregistered arms declare the flag in the baselines layer only, so they never paid the charge and need no relabelling; if either is ported, the wiring now supplies the field automatically"
+  "note": "all three ARE registered in live2 and all three declare reads_device_answer; none has a committed live run directory, so none ever paid the device-answer charge and none needs relabelling. The baseline sweep will be their first live run and also their first with the field delivered.",
+  "correction": "an earlier version of this file said r3streaming and thinking-qwenvl are NOT in the live2 registry. Those were FILE STEMS; the registry names are r3-streaming and thinking-qwenvl-atdm and both are registered. See results/orchestration/live2/sweep_registry_recon.json and reports/study_ss2.md section 12.3."
  },
  "rule": "CLAUDE.md Rule 2: a null from an experiment where the mechanism was absent is an artifact of the design, not evidence that the mechanism does not exist"
 }

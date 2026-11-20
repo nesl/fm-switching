@@ -41,8 +41,14 @@ PRESCREEN = ROOT / "results/orchestration/live2/frozen_test/baseline_prescreen.j
 OUT = ROOT / "results/orchestration/live2/device_conf_wiring_proof.json"
 SEED, N, RUN_S, RATIO = 4, 16, 1200.0, "40:40:20"
 LH = dict(robot_question_set="lh_req", ss_question_set="ss2")
-ARMS = ["confidence-cascade", "cascade-routing", "streamscout", "r3streaming",
-        "thinking-qwenvl", "b7-edf-feasibility"]
+# REGISTRY names, not file names. The first version of this list used "r3streaming" and
+# "thinking-qwenvl", taken from r3streaming_adapted.py and thinking_qwenvl_adapted.py, and both
+# raised "unknown arm". I recorded that as "not in the live2 registry", which was WRONG: they are
+# registered as r3-streaming and thinking-qwenvl-atdm. The lesson is the one Step 2b already
+# states for switches, applied to a name: an arm is absent only when `make_arm` cannot build it,
+# never because a name guessed from a file name does not resolve.
+ARMS = ["confidence-cascade", "cascade-routing", "streamscout", "r3-streaming",
+        "thinking-qwenvl-atdm", "b7-edf-feasibility"]
 CONTROL = "b7-edf-feasibility"
 
 

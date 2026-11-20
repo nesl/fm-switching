@@ -33,6 +33,11 @@ from typing import Dict, Optional
 ROOT = Path(__file__).resolve().parents[3]
 E7 = ROOT / "results/sember/study_e7/e7_requests_h100nvl.jsonl"
 F4 = ROOT / "results/device/study_f4/partA_accuracy.jsonl"
+# Single-shot confidences, written by experiments/casestudy/ss2_device_confidence.py from a
+# re-recorded Orin 4B pass with logprobs (user ruling 2026-11-20). Absent until that pass runs, and
+# absence is NOT an error: StudySS1 and StudySS2 recorded no probabilities, so None is the honest
+# value for a single-shot question until it does.
+SS2 = ROOT / "results/casestudy/study_ss2/ss2_device_confidence.json"
 
 _PRIMARY: Optional[Dict[str, float]] = None
 _SECONDARY: Optional[Dict[str, float]] = None
@@ -82,9 +87,50 @@ def _load_secondary() -> Dict[str, float]:
     return _SECONDARY
 
 
+_SS2: Optional[Dict[str, float]] = None
+
+
+def _load_ss2() -> Dict[str, float]:
+    """Single-shot confidences, keyed by the SS2 qid (e.g. "realworldqa/0122").
+
+    Kept in a SEPARATE table from the robot one on purpose. The mcq rule is byte-identical to the
+    robot rule, the committed `letter_probs` mass on the emitted letter, but the free-form and
+    point rules are a geometric mean token probability, and the point case is declared a WEAK
+    signal. Merging them into one dict without that provenance would make two different notions of
+    confidence indistinguishable at the point of use, which is the kind of thing `source_of()`
+    exists to keep answerable.
+    """
+    global _SS2
+    if _SS2 is None:
+        out: Dict[str, float] = {}
+        if SS2.exists():
+            doc = json.loads(SS2.read_text())
+            for q, v in (doc.get("confidence") or {}).items():
+                out[str(q)] = max(0.0, min(float(v), 1.0))
+        _SS2 = out
+    return _SS2
+
+
 def confidence(question_id: str) -> Optional[float]:
-    """The committed device-answer confidence for one question, or None. Never synthesized."""
-    return _load_primary().get(question_id)
+    """The committed device-answer confidence for one question, or None. Never synthesized.
+
+    Robot questions come from StudyE7 Job A; single-shot questions from the re-recorded SS2 pass
+    when it exists. The two key spaces are disjoint (a 64-hex digest against "<dataset>/<id>"), so
+    the lookup order cannot mask one with the other.
+    """
+    v = _load_primary().get(question_id)
+    if v is None:
+        v = _load_ss2().get(question_id)
+    return v
+
+
+def source_of(question_id: str) -> Optional[str]:
+    """Which table a value came from, so a report never has to guess."""
+    if question_id in _load_primary():
+        return "StudyE7 Job A letter_probs (robot)"
+    if question_id in _load_ss2():
+        return "StudySS2 re-record (single shot)"
+    return None
 
 
 def dev_median() -> Optional[float]:
