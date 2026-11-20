@@ -1,92 +1,44 @@
-# baseline sweep order (user, 2026-11-20); until flash pre-screen list lands: edf C8, llf, always-cloud-fcfs
+# BASELINE SWEEP, user order (2026-11-20). One bare arm name per line (the driver splits on whitespace; no inline comments).
+# Source of distinctness: flash's dry pre-screen a592e51 (PRESCREEN_DISTINCT_ARMS, baseline_prescreen.json; its annotated
+# list is preserved in SWEEP_ARMS_flash_a592e51). Excluded as identical to b7 at the pre-screen cell: clockwork, ekya and the
+# builder / hybrid-base variants. pensieve and rh8-demand-aware-oracle are identical to kvflow (only distinct KV arms run).
+# Kept although identical to always-cloud-fcfs at that one cell (the rule excludes only b7-identical arms): inar-vl,
+# routellm, videostorm, vllm-priority. rh8-demand-aware-causal placed with the streaming arms (PROVISIONAL).
+# Pass 1 = 16 devices seed 4, pass 2 = 18 devices seed 4 (cells already run are skipped).
+# -- scheduling
 edf
 llf
 always-cloud-fcfs
-# user 2026-11-20: frozen-grid arms at 18 devices seed 4 (pass 2 only; their 16 / s4 cells already exist)
+edf-piece1024
+edf-piece2048
+b10-blocking-aware
+vllm-priority
+# -- streaming
+simplestream
+querystream-proactive
+r3-streaming
+streamscout
+covstream
+thinking-qwenvl-atdm
+rh8-demand-aware-causal
+# -- routing
+hybrid-llm
+routellm
+cascade-routing
+perllm
+# -- other published
+videostorm
+inar-vl
+uniscale
+b9
+utility-per-cost
+# -- KV-cache arms flash marks distinct
+lmcache
+attentionstore
+kvflow
+preble
+# -- frozen-grid arms at 18 devices seed 4 (pass 2 only; their 16 / s4 cells exist; no hybrid-F6 at 18)
 b7-edf-feasibility
 eco-llm
 mooncake
 hybrid-F-lhreq
-#
-# ---- A6000 DRY PRE-SCREEN LIST (user, 2026-11-20). The full annotated file is
-# ---- results/orchestration/live2/frozen_test/runs/PRESCREEN_DISTINCT_ARMS; it is reproduced
-# ---- here because this is the file the driver reads. NOTHING ABOVE THIS LINE WAS CHANGED.
-# DISTINCT-ARM LIST from the A6000 dry pre-screen (user, 2026-11-20).
-# Cell: 40:40:20 dashcam : LH-REQ EVAL robot : SS2 EVAL single-shot, 1200 s, seed 4, 16 devices, DRY.
-# 118 registered arms collapse to 60 distinct decision logs AT THIS CELL. Source:
-#   results/orchestration/live2/frozen_test/baseline_prescreen.json, report section 13.
-#
-# READ THIS BEFORE DROPPING ANY ARM AS A DUPLICATE. 'Identical' here is an OBSERVED
-# coincidence at ONE cell, not a proof that two arms are the same policy: a cell that never
-# reaches an arm's branch cannot tell it from an arm that lacks the branch. In particular
-# hybrid-F, hybrid-F6, hybrid-F6r and their -lhreq twins are ALL identical at seed 4 and
-# n=16 and are NOT the same arm: C6 moves decisions at seed 0 and at 20 and 32 devices.
-# Equally, CHANNEL-SILENT marks an arm that used no decision channel beyond the two
-# unavoidable release kinds AT THIS CELL; it is a flag to investigate, not a verdict.
-#
-# Already in the live comparison, keep running in this order:
-b7-edf-feasibility
-eco-llm
-mooncake
-hybrid-F-lhreq
-hybrid-F6-lhreq
-#
-# The remaining distinct representatives, largest decision count first. Each line gives the
-# arm, its decision count at this cell, and the arms it was identical to.
-b10-blocking-aware             #  57795 decisions 
-lmcache                        #  54118 decisions 
-attentionstore                 #  48135 decisions 
-rh8-demand-aware-causal        #  30098 decisions 
-hybrid-c5-c6                   #  16683 decisions 
-hybrid-c5                      #  16667 decisions 
-edf-piece1024                  #  16466 decisions 
-edf                            #  16370 decisions 
-edf-piece2048                  #  16363 decisions 
-hybrid-c1c5-c6                 #  15486 decisions 
-hybrid-c1c5                    #  15466 decisions 
-llf                            #  15466 decisions 
-hybrid-c1c2k1c5-c6             #  15456 decisions 
-hybrid-c1c2k1c5                #  15444 decisions 
-hybrid-all-k1                  #  15441 decisions identical to: hybrid-all-k1-c6
-covstream                      #  13947 decisions 
-kvflow                         #  13947 decisions identical to: pensieve rh8-demand-aware-oracle
-preble                         #  13947 decisions 
-builder-s3-whatif              #  13944 decisions 
-querystream-proactive          #  13942 decisions 
-b9                             #  13917 decisions 
-hybrid-c1c2k2c5                #  13831 decisions 
-hybrid-c1c2k2c5-c6             #  13831 decisions 
-hybrid-all-k2                  #  13828 decisions identical to: hybrid-all-k2-c6
-always-cloud-fcfs              #  13570 decisions CHANNEL-SILENT identical to: inar-vl routellm videostorm vllm-priority
-builder-acfcfs                 #  13570 decisions CHANNEL-SILENT identical to: builder-s2-all
-builder-s4-reserve             #  13570 decisions 
-builder-s7-degrade             #  13570 decisions 
-builder-s7-always-recent       #  13570 decisions 
-hybrid-base-c6                 #  13570 decisions CHANNEL-SILENT identical to: hybrid-c1-c6 hybrid2-c1c5-c6 hybrid2-c5-c6
-hybrid-c1                      #  13570 decisions identical to: hybrid2-c1c5 hybrid2-c5
-hybrid-c1c2k05                 #  13570 decisions identical to: hybrid-c1c2k1 hybrid-c1c2k15 hybrid-c1c2k2
-hybrid-c1c2k05-c6              #  13570 decisions CHANNEL-SILENT identical to: hybrid-c1c2k1-c6 hybrid-c1c2k15-c6 hybrid-c1c2k2-c6
-hybrid-c1c2k1c3                #  13570 decisions identical to: hybrid-c1c2k1c3-c6 hybrid-c1c2k2c3 hybrid-c1c2k2c3-c6
-hybrid2-all-k05                #  13570 decisions identical to: hybrid2-all-k05-c6 hybrid2-c1c2k05c3c5 hybrid2-c1c2k05c3c5-c3always hybrid2-c1c2k05c3c5-c3always-c6 hybrid2-c1c2k05c3c5-c6
-hybrid2-c1c2k05                #  13570 decisions identical to: hybrid2-c1c2k05c5 hybrid2-c1c2k05c5-reserve
-hybrid2-c1c2k15c3c5-c3always   #  13570 decisions identical to: hybrid2-c1c2k15c3c5-c3always-c6
-simplestream                   #  13570 decisions 
-utility-per-cost               #  13570 decisions 
-cascade-routing                #  13564 decisions 
-confidence-cascade             #  13564 decisions identical to: streamscout
-hybrid-F                       #  13525 decisions identical to: hybrid-F-c6 hybrid-F-lhreq hybrid-F-lhreq-c6 hybrid-F6 hybrid-F6-c6 hybrid-F6-lhreq hybrid-F6-lhreq-c6 hybrid-F6r hybrid-F6r-c6 hybrid-F6r-lhreq hybrid-F6r-lhreq-c6
-hybrid2-all-k15                #  13525 decisions identical to: hybrid2-all-k15-c6 hybrid2-c1c2k15c3c5 hybrid2-c1c2k15c3c5-c6
-hybrid2-c1c2k15                #  13525 decisions 
-hybrid2-c1c2k15c5-reserve      #  13525 decisions 
-hybrid2-c1c2k15c5              #  13525 decisions 
-thinking-qwenvl-atdm           #  13504 decisions CHANNEL-SILENT 
-hybrid2-c1c2k05-c6             #  13462 decisions CHANNEL-SILENT 
-hybrid2-c1c2k05c5-c6           #  13462 decisions CHANNEL-SILENT identical to: hybrid2-c1c2k05c5-reserve-c6
-hybrid2-c1c2k15-c6             #  13417 decisions CHANNEL-SILENT 
-hybrid2-c1c2k15c5-c6           #  13417 decisions CHANNEL-SILENT 
-hybrid2-c1c2k15c5-reserve-c6   #  13417 decisions CHANNEL-SILENT 
-uniscale                       #   8036 decisions CHANNEL-SILENT 
-r3-streaming                   #   4754 decisions 
-device-only                    #    377 decisions 
-hybrid-llm                     #    377 decisions CHANNEL-SILENT 
-perllm                         #    377 decisions 
