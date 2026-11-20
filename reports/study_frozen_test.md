@@ -1366,3 +1366,129 @@ warm and build service by 1.5x to 3.7x (16.1), a real engine would show this wor
 does. **W2 is the safe default and W1 should not be built**, even though at the committed capacity
 the two are equivalent: the cost of W1 appears exactly in the regime a deployment would hit first,
 which is memory pressure.
+
+## 17. KV-reuse debug: why prefix_cache_hits is 0 (A6000, 2026-11-20, user request)
+
+OFFLINE. Committed request logs, committed metrics snapshots and committed code only. No GPU, no
+model server, nothing touched on the H100, which was running StudySH-EP throughout. Worked example
+`eco-llm_n16_s4_1200s_h27_3t`, cross-checked against its postfix twin and `hybrid-F-lhreq` at the same
+cell.
+
+**The answer in one line: the server was configured correctly and the workload has almost no reusable
+prefix, and the three places where it does have one are separated by enough traffic to turn the KV pool
+over at least twice.** No flag needs changing and nothing on the server needs fixing for this.
+
+### 17.0 One definition first, because it changes the size of the puzzle
+
+`prefix_cache_queries_total` counts **tokens queried, not requests**. This run's committed snapshot
+delta is **5,579,984** and the sum of `prompt_tokens` over its 13,562 requests is **5,604,554**, which
+agree to 0.4 percent, the snapshot window omitting the first and last ten seconds. So "0 of about 5.5M
+queries" is 0 of 5.5M tokens offered over 13,562 requests, not 5.5M missed reuse opportunities. The
+number of requests that had any earlier request to reuse at all is **3**.
+
+### 17.1 The server was configured for reuse, and one cache proves it worked
+
+The round-1 command (`experiments/dashcam/sh_ep_server_h100.sh`, which reproduces it byte for byte)
+passes `--no-enable-prefix-caching` and then, later on the same line, `--enable-prefix-caching`, and
+likewise `--limit-mm-per-prompt {"image": 16}` then `{"image": 640, "video": 1}`. Last occurrence wins
+in argparse, so prefix caching was ON and the cap was 640. The multimodal processor cache was ON at 128
+GB. The metrics agree: a disabled prefix cache does not report 5.6M queries.
+
+**The multimodal cache hit exactly as often as it could have, which rules out the uuid path.** From the
+committed `mm_gate.json`: `mm_cache_queries` 16,342 and `mm_cache_hits` **345**. Counting image-part
+references in the request log gives 16,407 references over 16,062 distinct uuids, so **345 references
+beyond the first**, and no uuid is referenced more than twice.
+
+| quantity | from the request log | from the server's counters |
+|---|---|---|
+| image-part references | 16,407 | 16,342 queries (window omits ~20 s) |
+| references beyond the first | **345** | **345 hits** |
+
+Exact agreement. The D84 uuid mechanism resolves every repeated frame to a cache hit and never misses
+one. So the multimodal path is not where the KV zero comes from, and this also corrects a reading I
+sent the H100 earlier in the day: I had grepped `mm_cache_hits_total=0` out of the early snapshots and
+generalised it to the run. The run's delta is 345, not 0, and the H100 was right to ask for the gate
+file.
+
+### 17.2 What the request stream actually offers
+
+| requests | share | what two consecutive ones share |
+|---|---|---|
+| 13,186 single-frame dashcam monitors, all 378 tokens, one image each | 97.2 % | the chat wrapper and the header only, which is on the order of 12 to 18 tokens, against vLLM's 16-token block. Measurably zero blocks: 13,186 requests produced no hit |
+| 376 recall requests over 373 sessions | 2.8 % | 370 sessions hold exactly ONE request |
+
+So **3 requests in 13,562 have any earlier request on the same history**, and a perfect cache could have
+hit on 3. All 16 cache salts are constant per device, one each, so the salt breaks nothing.
+
+### 17.3 The three real opportunities, and why each was certainly evicted
+
+All three are append-only with the same salt and the same leading frame refs in the same order, at 90
+tokens per recall frame. The GPU KV pool is **62,944 tokens**, which is 3,934 blocks of 16.
+
+| session | reuse on offer | separated by | pool turnover between them |
+|---|---|---|---|
+| robo004 s000, r1270 to r5281 | 60 frames, about 5,400 tokens | 350.0 s, 4,010 requests, 1,653,204 tokens | **26.3x** |
+| robo002 s001, r7330 to r7719 | 180 frames, about 16,200 tokens | 34.1 s, 388 requests, 160,955 tokens | **2.6x** |
+| robo003 s001, r7585 to r9532 | 105 frames, about 9,450 tokens | 170.0 s, 1,946 requests, 789,896 tokens | **12.5x** |
+
+The whole run pushes 5,604,554 prompt tokens through a 62,944-token pool in 1,200 s, **89 pool
+turnovers**. Even the closest pair has 2.6 turnovers between its two requests. Eviction before reuse is
+not a hypothesis here, it is arithmetic, and it is the same mechanism section 15 measured offline: this
+is the P0 no-warming case with LRU, observed on the real engine.
+
+### 17.4 (b) Is the full-history body append-only?
+
+**Append-only for every representation except RECENT.** `coordinator.py:606` builds the whole body as
+`refs[idx0:]` with `idx0 = 0`, and the piece path (`:558`) sends `s.frames[:already]` as uuid-only
+references followed by the new refs, so frames are never re-selected and never resampled: a longer
+history is the shorter one plus a suffix, in the same order. The request log confirms it from the other
+side, since the three repeated sessions share their leading uuids exactly.
+
+**The one exception is prefix-breaking by construction**, and it is new. The RECENT-send fix of
+2026-11-20 (`coordinator.py:597-604`) sets `idx0 = len(refs) - k`, so a RECENT release sends a **moving
+suffix window** of the history. Its first frame changes as the session grows, so it shares nothing with
+the full-history body beyond the header. That is the right behaviour for the charge it models, and it
+is worth recording that it also forecloses prefix reuse for those requests. Count in the postfix cell:
+`recent_window_sends` **5**, against 0 pre-fix.
+
+### 17.5 (c) Does the harness abort late requests, or evict anything deliberately?
+
+**No, and no.** There is no `abort` and no `.cancel(` anywhere in `experiments/orchestration/live2/*.py`.
+The HTTP timeouts are 600 s (`asyncbackend.py:107`, `backend.py:85`), far above any request in this run,
+so no request is dropped for lateness: a late request is scored late, not cancelled.
+
+The only `evict` in the live2 tree is the **simulated** one. `cstate.enact_placement` counts
+`offloaded / kept_warm / evicted / resident`, and `run_live2_real.py:52-53` says in terms what those
+counts are: "Output-only: total enact_placement's per-call counts, which cstate returns and discards, so
+a run records whether --kv-capacity-enforced ever evicted anything. **No decision reads it.**" So the
+policy's model of KV residency never touches the engine's actual cache. Nothing in the harness evicts
+anything from vLLM, and the eviction that produced the zero is vLLM's own LRU under the turnover in
+17.3.
+
+### 17.6 Most likely cause, and what the H100 should check when the grid server next comes up
+
+**Cause, in order of contribution.** (1) 97.2 percent of requests are single-frame monitors with less
+than one block of shared prefix, so most of the run cannot hit by construction. (2) The robot side
+offers 3 reuse opportunities in 13,562 requests, because 370 of 373 sessions hold a single request.
+(3) All 3 are separated by 2.6 to 26.3 pool turnovers, so they were evicted before reuse. Together
+these account for the zero completely, with no server defect required.
+
+**What is still worth one check, and it is small.** The arithmetic says those 3 were evicted, but it
+does not prove the block hashes would have matched had they survived. When the frozen-grid server is
+next up, and only then, the cheap test is a **back-to-back** pair rather than a forensic one: send one
+recall body, then immediately resend it with one frame appended, same salt, same device, nothing in
+between, and read `cached_tokens` on the second. StudySH-EP has in effect already run that test on the
+same build and it passes, with `cached_tokens` 3,056 to 6,768 on appended requests, so the expected
+result is a hit, and a miss would be the only genuinely new information available here.
+
+Worth looking at on the server side when convenient, none of it implicated by the evidence above:
+`--kv-offloading-backend native --kv-offloading-size 27`, in case the offload connector changes block
+reuse; and the duplicated `--no-enable-prefix-caching` then `--enable-prefix-caching`, which resolves
+correctly today but is one argparse ordering away from silently disabling the cache, and should be
+reduced to a single flag so that no future run depends on last-occurrence-wins.
+
+**What this is NOT.** It is not evidence that prefix caching fails on this engine, and it must not be
+cited that way: the same build hits on appended requests in StudySH-EP. It is evidence that **the
+frozen grid's own traffic has essentially no reuse to find**, which is a statement about the workload
+and about the 62,944-token pool, and it is the live counterpart of section 15's finding that memory, not
+the GPU, is the binding resource.
