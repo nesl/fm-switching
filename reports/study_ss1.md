@@ -705,3 +705,47 @@ tercile 0.580, +0.181. Model fixed, containment fixed, so this cannot be a quali
 measured on this study's own data. That bears on any future use of this judge, not only on the
 EgoThink comparison, and it is the second instrument finding from the judge pass after the parser
 failure.
+
+---
+
+# The EgoThink judge passes its negative control, and the contrast with CODA-LM is the finding
+
+The committed +0.0623 had an identity-style basis but **no permutation arm**. It now has one:
+150 device questions judged with the ANSWER substituted from the next question, question and gold
+kept.
+
+| | mismatched mean | median | distribution | clears 0.5 |
+|---|---|---|---|---|
+| EgoThink | **0.0347** | 0.0 | 0.0 ×138, 0.5 ×2, 1.0 ×4 | **4.2%** |
+
+Against **0.7431** for the same questions on their own answers: a gap of **+0.708** on a 0-to-1
+scale. **138 of 144 mismatched answers scored exactly 0.** The judge reads content.
+
+**So the judge column stands and is strengthened.** It is the only judge figure in either study
+with both arms of its control. The withdrawal threshold was fixed before the numbers: the `>= 0.5`
+binarisation is the one used for the agreement figure, so a large mismatched share clearing it would
+have contaminated that too. It is 4.2 percent.
+
+## Same judge, opposite verdicts, and the diagnosis is task demand not model size
+
+| | scale | mismatched mean | normalised position in range | verdict |
+|---|---|---|---|---|
+| EgoThink | 0 / 0.5 / 1 | 0.0347 | 3.5% | **PASS** |
+| CODA-LM | 1 to 10 | 6.88 | 65.3% | **FAIL** |
+
+Same `Mistral-7B-Instruct-v0.2`, same temperature, same server. **Mismatched detection is roughly
+nineteen times better on EgoThink in normalised terms.**
+
+**A 7B too weak to grade would fail both.** It passes one and fails the other, so the binding
+constraint is **task demand**: EgoThink asks whether a short answer matches a short gold, CODA-LM
+asks for multi-object paragraph-level reference-grounded comparison. Same capacity, different
+demand.
+
+**This does not license "the CODA-LM prompt is bad."** That prompt is careful — it names accuracy,
+hallucination suppression and correlation, and instructs explicitly against length bias. A weak
+judge given a good rubric still cannot apply it, and CODA-LM's own pipeline used **GPT-4 with human
+verification of its evaluations**, so the comparison was never 7B-against-rubric. **CODA-LM needs a
+larger judge, not a prompt change. EgoThink needs nothing.**
+
+The judge native-scale **means** remain non-absolute, for the separate and unchanged reason that the
+unparsed set is strongly non-random and dropping it inflates both by about 0.005.

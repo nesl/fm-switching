@@ -1,0 +1,60 @@
+{
+ "check": "EgoThink_judge_negative_control_PASSES",
+ "is_measurement": true,
+ "label": "The control arm the committed +0.0623 had never faced. 150 device-side questions, answer substituted from the next question while keeping the question and its gold.",
+ "VERDICT": "THE EGOTHINK JUDGE PASSES, DECISIVELY. The committed judge column stands and is strengthened: it is now the only judge figure in either study with BOTH arms of its control.",
+ "result": {
+  "n_parsed": 144,
+  "n_called": 150,
+  "mismatched_mean": 0.0347,
+  "mismatched_median": 0.0,
+  "mismatched_distribution": {
+   "0.0": 138,
+   "0.5": 2,
+   "1.0": 4
+  },
+  "same_questions_own_answers_mean": 0.7431,
+  "gap": 0.7083,
+  "fraction_mismatched_clearing_the_0p5_binarisation": "4.2 percent",
+  "reading": "138 of 144 mismatched answers scored EXACTLY 0. The judge reads content."
+ },
+ "why_this_mattered_now": "the +0.0623 [+0.0338, +0.0901] was already committed and heading to the user, and it had an identity-style basis but no permutation arm. Had mismatched pairs scored near the top as CODA-LM did, the difference would have been between two numbers that do not track correctness, and the column would have been WITHDRAWN rather than caveated. The threshold for that was set before the numbers: the >= 0.5 binarisation is the one used for the agreement figure, so a large mismatched share clearing it would have contaminated that number too. It is 4.2 percent.",
+ "THE_CONTRAST_IS_THE_FINDING": {
+  "same_judge": "mistralai/Mistral-7B-Instruct-v0.2, temperature 0, seed 0, same server.",
+  "egothink": {
+   "scale": "0 / 0.5 / 1",
+   "mismatched_mean": 0.0347,
+   "normalised_position_in_range": "3.5 percent of range",
+   "verdict": "PASS"
+  },
+  "codalm": {
+   "scale": "1 to 10",
+   "mismatched_mean": 6.88,
+   "normalised_position_in_range": "65.3 percent of range, (6.88-1)/9",
+   "verdict": "FAIL"
+  },
+  "ratio": "mismatched detection is roughly nineteen times better on EgoThink in normalised terms.",
+  "so_the_diagnosis_is_NOT_judge_capacity_alone": "a 7B too weak to grade would fail both. It passes one and fails the other, so the binding constraint is TASK DEMAND rather than model size. EgoThink asks whether a short answer matches a short gold; CODA-LM asks for multi-object, paragraph-level, reference-grounded comparison across several sentences. Same capacity, different demand.",
+  "what_this_does_NOT_license": "it does not license \"the CODA-LM prompt is bad\". That prompt is careful: it names accuracy, hallucination suppression and correlation explicitly, and instructs against length bias. A weak judge given a good rubric still cannot apply it. CODA-LM own pipeline used GPT-4 WITH HUMAN VERIFICATION of its evaluations, so the comparison was never 7B-against-rubric.",
+  "what_would_fix_each": "CODA-LM needs a larger judge, not a prompt change. EgoThink needs nothing: it passes."
+ },
+ "scope": {
+  "n": 150,
+  "side": "device answers only",
+  "why_not_both_sides": "the question is whether the INSTRUMENT reads content, which one side settles. A judge that scores mismatched device answers at 0.035 is not plausibly saturated on cloud answers under the same prompt and temperature.",
+  "why_not_all_700": "150 separates \"near 0\" from \"near the top\" decisively; the observed mean is 0.0347 with 138 of 144 at exactly 0, so no larger n would change the verdict."
+ },
+ "standing_of_the_committed_numbers": {
+  "judge_paired_difference": "+0.0623 [+0.0338, +0.0901] STANDS, with both control arms passed.",
+  "judge_native_means": "still not absolute, for the separate and unchanged reason that the unparsed set is strongly non-random and dropping it inflates both means by about 0.005 each.",
+  "agreement_figure": "the 0.633 against 0.805 agreement figures are unaffected by this control, and the 4.2 percent mismatched pass rate at the 0.5 cut confirms the binarisation is not admitting noise."
+ },
+ "_provenance": {
+  "git_commit": "717305ce8c9fe545aa5905216dee01dfb355519f",
+  "script": "experiments/casestudy/ss1_judge_negctrl.py",
+  "model": "mistralai/Mistral-7B-Instruct-v0.2",
+  "device": "nvidia_rtx_a6000",
+  "n": 150,
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
