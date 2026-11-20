@@ -22,8 +22,45 @@ its rerun). Robot counts reconcile with the scorer in every run (`frozen_feasibl
 | **hybrid-F-lhreq** | **53** | **54** | **1,023** | 1, 0, 0 |
 | hybrid-F6-lhreq | 51 | 52 | 1,011 | 1, 0, 0 |
 
-Dashcams all meet and no run meets capacity in every cell. Seed 6 (baselines only so far): b7 14 of 14 feasible / 337 SS,
-eco-llm 13 of 14 / 301, mooncake 14 of 14 / 334. No run is saturated by the 5 percent rule.
+Dashcams all meet in every cell. Seed 6 (baselines only so far): b7 14 of 14 feasible / 337 SS, eco-llm 13 of 14 /
+301, mooncake 14 of 14 / 334. No run is saturated by the 5 percent rule.
+
+**CAPACITY VERDICT, CORRECTED (user, 2026-11-20).** The earlier statement "no run meets capacity" was WRONG for D133:
+it came from the scorer's `capacity_met`, which computes the robot target over ALL questions (`robot_pool_on_time /
+robot_pool_n`, e.g. hybrid-F s4 15 of 20 = 0.75). Under D133 the robot target is p 0.90 within 5 s over FEASIBLE
+questions (matched per opportunity_id, flash's feasibility rule); the all-questions figure is reported beside it and
+does not decide capacity. Verdict per run = dashcams all meet AND robot feasible on-time >= 0.90 AND >= 20 pooled
+robot questions (the D82 count of all robot questions in the run) AND SS on time >= 0.90 within 2 s. Every row below
+states both denominators; the scorer's own flag (all-questions rule) was false in every row.
+
+| run | dashcams | robot feasible | robot all (pool) | SS at 2 s | D133 verdict |
+|---|---|---|---|---|---|
+| b7 n16 s0 | meet | 17 of 18 (0.944) | 17 of 24 | 317 of 356 (0.890) | fails (SS) |
+| b7 n16 s4 | meet | 14 of 15 (0.933) | 14 of 20 | 332 of 357 (0.930) | **MEETS** |
+| b7 n16 s5 | meet | 19 of 22 (0.864) | 19 of 25 | 320 of 356 (0.899) | fails (robot, SS) |
+| b7 n16 s6 | meet | 14 of 14 (1.000) | 14 of 20 | 337 of 357 (0.944) | **MEETS** |
+| eco-llm n16 s0 | meet | 16 of 18 (0.889) | 17 of 24 | 292 of 356 (0.820) | fails |
+| eco-llm n16 s4 | meet | 14 of 15 (0.933) | 14 of 20 | 294 of 357 (0.824) | fails (SS) |
+| eco-llm n16 s5 | meet | 19 of 22 (0.864) | 19 of 25 | 304 of 356 (0.854) | fails |
+| eco-llm n16 s6 | meet | 13 of 14 (0.929) | 13 of 20 | 301 of 357 (0.843) | fails (SS) |
+| mooncake n16 s0 | meet | 17 of 18 (0.944) | 17 of 24 | 319 of 356 (0.896) | fails (SS) |
+| mooncake n16 s4 | meet | 14 of 15 (0.933) | 14 of 20 | 332 of 357 (0.930) | **MEETS** |
+| mooncake n16 s5 | meet | 19 of 22 (0.864) | 19 of 25 | 319 of 356 (0.896) | fails (robot, SS) |
+| mooncake n16 s6 | meet | 14 of 14 (1.000) | 14 of 20 | 334 of 357 (0.936) | **MEETS** |
+| hybrid-F n16 s0 | meet | 17 of 18 (0.944) | 18 of 24 | 341 of 356 (0.958) | **MEETS** |
+| hybrid-F n16 s4 | meet | 15 of 15 (1.000) | 15 of 20 | 339 of 357 (0.950) | **MEETS** |
+| hybrid-F n16 s5 | meet | 21 of 22 (0.955) | 21 of 25 | 343 of 356 (0.963) | **MEETS** |
+| hybrid-F6 n16 s0 | meet | 16 of 18 (0.889) | 17 of 24 | 335 of 356 (0.941) | fails (robot) |
+| hybrid-F6 n16 s4 | meet | 14 of 15 (0.933) | 14 of 20 | 334 of 357 (0.936) | **MEETS** |
+| hybrid-F6 n16 s5 | meet | 21 of 22 (0.955) | 21 of 25 | 342 of 356 (0.961) | **MEETS** |
+| eco-llm n14 s0 | meet | 11 of 11 | 12 of 15 | 315 of 357 | not measurable (pool 15 < 20) |
+| mooncake n14 s0 | meet | 11 of 11 | 11 of 15 | 326 of 357 | not measurable (pool 15 < 20) |
+| b7 n20 s0 | FAIL | 2 of 19 | 2 of 28 | 5 of 477 | fails (saturated size) |
+
+At 16 devices, seeds 0, 4, 5: hybrid-F meets D133 in 3 of 3 runs, hybrid-F6 2 of 3, b7 and mooncake 1 of 3 (2 of 4
+with seed 6), eco-llm 0. The binding constraint for the baselines is single-shot on time (b7 s0 misses at 0.890 by
+four questions); for hybrid-F6 at s0 it is the robot feasible fraction (16 of 18). Several verdicts sit within one or
+two questions of the 0.90 line.
 
 ## MORNING SUMMARY (2026-11-20 07:25)
 
