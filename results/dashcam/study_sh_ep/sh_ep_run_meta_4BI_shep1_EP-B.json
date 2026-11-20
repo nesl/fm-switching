@@ -1,0 +1,132 @@
+{
+ "label": "StudySH-EP inference run",
+ "model": "4BI",
+ "model_id": "Qwen/Qwen3-VL-4B-Instruct",
+ "run_tag": "shep1",
+ "base": "http://127.0.0.1:8000",
+ "store": "/dev/shm/nexar_q90_sh_ep",
+ "conditions": [
+  "EP-B"
+ ],
+ "sides": [
+  "DEV",
+  "EVAL"
+ ],
+ "header_mode": "constant",
+ "served_model": "Qwen/Qwen3-VL-4B-Instruct",
+ "clips_from_meta": null,
+ "n_clips_after_filter": 300,
+ "requests_attempted": 3898,
+ "errors": 0,
+ "neither_yes_nor_no": 0,
+ "greys": 0,
+ "shuffle_control": false,
+ "committed_sha256": {
+  "yes_no": "33edb03d0bbdeebd4643235fcd1f5501a66131f6cb1ad4bde84d05a89e03fc2b",
+  "QUERY": "e853eeeceb25e9fd82c6e65e4e980665b0f390eb63a8d203bb46e4cfdde66f7c",
+  "GEN": "efb549a6943d633bd7d45fe3a03dd1074e77f22e39e4789f3c6f78ca2fafe213"
+ },
+ "question": "Is a collision or near-collision involving the camera vehicle happening or about to happen? Answer only Yes or No.",
+ "generation": {
+  "temperature": 0.0,
+  "max_tokens": 8,
+  "seed": 0,
+  "logprobs": true,
+  "top_logprobs": 20
+ },
+ "declared_deviations": [
+  "more than one image in the SH body (StudyD3 N = 3 / N = 9 precedent, but live2 bodies.build_body(kind='monitor') refuses it)",
+  "frame spacing 0.5 s, not StudyD3's 3 / 8 s: C3 is NOT StudyD3's N = 3",
+  "JPEG wire bytes from the D91 store where D3 / D14b sent PNG (D70, D91)",
+  "cache_salt and per-image client uuid (D84)",
+  "stream true, to time the first token (live2's declared deviation)",
+  "prefix caching and the multimodal processor cache ON, where the committed SH stack runs with both OFF; --limit-mm-per-prompt image must be >= 21"
+ ],
+ "server_config": {
+  "/v1/models": {
+   "object": "list",
+   "data": [
+    {
+     "id": "qwen3vl4b",
+     "object": "model",
+     "created": 1795214607,
+     "owned_by": "vllm",
+     "root": "/dev/shm/hf_home/hub/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec70b05090aa6165b016eac8ec08e71b17",
+     "parent": null,
+     "max_model_len": 32768,
+     "permission": [
+      {
+       "id": "modelperm-b282db2a6a2c8d6a",
+       "object": "model_permission",
+       "created": 1795214607,
+       "allow_create_engine": false,
+       "allow_sampling": true,
+       "allow_logprobs": true,
+       "allow_search_indices": false,
+       "allow_view": true,
+       "allow_fine_tuning": false,
+       "organization": "*",
+       "group": null,
+       "is_blocking": false
+      }
+     ]
+    },
+    {
+     "id": "Qwen/Qwen3-VL-4B-Instruct",
+     "object": "model",
+     "created": 1795214607,
+     "owned_by": "vllm",
+     "root": "/dev/shm/hf_home/hub/models--Qwen--Qwen3-VL-4B-Instruct/snapshots/ebb281ec70b05090aa6165b016eac8ec08e71b17",
+     "parent": null,
+     "max_model_len": 32768,
+     "permission": [
+      {
+       "id": "modelperm-ab24f7d8392dc64b",
+       "object": "model_permission",
+       "created": 1795214607,
+       "allow_create_engine": false,
+       "allow_sampling": true,
+       "allow_logprobs": true,
+       "allow_search_indices": false,
+       "allow_view": true,
+       "allow_fine_tuning": false,
+       "organization": "*",
+       "group": null,
+       "is_blocking": false
+      }
+     ]
+    }
+   ]
+  },
+  "/version": {
+   "version": "0.20.0"
+  },
+  "/get_server_info": "HTTP 404"
+ },
+ "started": "2026-11-20T14:43:27.333698",
+ "finished": "2026-11-20T15:05:07.835358",
+ "_provenance": {
+  "git_commit": "0303be76525ac6798c726b012aa02de306595da7",
+  "script": "sh_ep_runner.py",
+  "model": "4BI",
+  "timestamp": "2026-11-20T15:05:07.838821",
+  "device": "nesl-orin-3",
+  "n": 3898,
+  "args": {
+   "base": "http://127.0.0.1:8000",
+   "model": "4BI",
+   "store": "/dev/shm/nexar_q90_sh_ep",
+   "run_tag": "shep1",
+   "out": null,
+   "conditions": "EP-B",
+   "sides": "DEV,EVAL",
+   "limit": 0,
+   "greys": 0,
+   "shuffle_control": false,
+   "header_mode": "constant",
+   "clips_from_meta": null,
+   "served_model": null,
+   "timeout": 600.0
+  }
+ }
+}
