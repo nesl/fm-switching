@@ -5,7 +5,7 @@
  "gate_1_32b_answers": {
   "status": "NOT AVAILABLE. Commit 01e5395 \"StudySS1-32B\" adds experiments/casestudy/ss1_cloud_run.py only, 54 lines, a server wrapper around the unchanged kit runner. No answer files exist for either dataset.",
   "consequence": "the comparison is gated. The script is built and committed so it runs the moment the answers land.",
-  "status_recheck": "STILL NOT AVAILABLE at this commit."
+  "status_recheck": "NOT AVAILABLE at this commit. The H100 restarted at 17:17 after the salt fix; outputs expected as vizwiz_val_cloud32b.json and egothink_cloud32b.json."
  },
  "gate_2_the_4B_judge_column": {
   "requirement": "same judge, parser and prompt means the FIXED parser, so the 4B side must come from the post-fix scoring.",
@@ -80,5 +80,76 @@
   "device": "flash CPU only",
   "n": "n/a",
   "timestamp": "2026-11-19T00:00:00"
+ },
+ "image_preprocessing_parity": {
+  "question": "did the Orin 4B run and the H100 32B run preprocess images the same way?",
+  "verdict": "SPLIT: MATCHED client-side, UNMATCHED server-side, and the divergence breaks a premise the kit states in its own docstring.",
+  "client_side": {
+   "status": "MATCHED, verified in code",
+   "evidence": "ss1_kit.preprocess_to_jpeg_bytes is the ONE shared path for both tiers: open, convert RGB, downscale ONLY if the longest side exceeds MAX_SIDE = 2048 (Lanczos), re-encode JPEG quality 90. ss1_run.py sends the result as a data URL. Identical bytes reach both tiers.",
+   "note": "so the divergence is NOT in the pixels sent, which rules out the simplest version of the confound."
+  },
+  "server_side": {
+   "status": "UNMATCHED",
+   "cloud": "--mm-processor-kwargs {\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}}, the live2 round-1 setting. Project convention PROC_SIZE at experiments/sember/study_rh3_inputs.py:39, documented at study_rh3_warmable.py:16 as 'no rescaling of the builder's sizes'.",
+   "device": "NO --mm-processor-kwargs at all. experiments/device/orin3_serve.sh is the only Orin launcher in the repo; its vllm serve line passes served-model-name, max-num-seqs 1, enable-prefix-caching, dtype, max-model-len, limit-mm-per-prompt, gpu-memory-utilization, seed, host and port, and nothing about the image processor. ss1_run.py sets none either and could not, this being a server flag.",
+   "therefore": "the device used the released default processor and the cloud overrode it."
+  },
+  "what_cannot_be_stated": {
+   "what": "the VALUE of the released default size for Qwen3-VL-4B, and so the magnitude and direction of the divergence.",
+   "why": [
+    "the default value is recorded nowhere in this repo",
+    "the model is not on flash; it was served from the Orin",
+    "the images are gone: ss1_manifest_meta.json records data_root_runtime /dev/shm/ss1_data, tmpfs, now empty, so the image dimension distribution cannot be recomputed here"
+   ],
+   "not_assumed": "the released default is NOT assumed and no direction is inferred from it. That assumption would be the same declaration-read-as-observation shape as the host attribution was."
+  },
+  "the_sharper_finding": {
+   "kit_docstring_premise": "ss1_kit.preprocess_to_jpeg_bytes states: the identical bytes are sent to the device 4B and the cloud 32B, and EACH MODEL THEN APPLIES ITS OWN RELEASED IMAGE PROCESSOR, the only imposed preprocessing being the re-encode.",
+   "consequence": "that premise HOLDS for the device and DOES NOT HOLD for the cloud, which overrides its released processor. The kit documents an equivalence the cloud configuration breaks, and breaks for a good reason: the 32B numbers must match the server the live policy runs against.",
+   "why_this_framing": "it names which side departed from the shared design and what the design claimed, rather than treating two settings as symmetric alternatives."
+  },
+  "scope_condition": {
+   "statement": "the paired comparison carries a server-side image-processor divergence. A SCOPE CONDITION, not a defect: every number is correctly measured under its own stated configuration.",
+   "where_it_would_bite": "the cloud setting is documented as not rescaling, so if the released default rescales through a floor and a ceiling, the divergence bites on images OUTSIDE that band. For VizWiz's frequently small blind-user photos that plausibly means the small ones, the same axis as the by-answer-type and answerable-only cuts.",
+   "both_axes": "it would move accuracy, and TTFT through the visual token count, both of which are reported.",
+   "direction": "UNDETERMINED here and deliberately left so."
+  },
+  "what_would_settle_it": [
+   "the Orin session reading its own preprocessor_config.json for Qwen3-VL-4B, or its vLLM startup log, which prints the resolved processor configuration",
+   "the image dimension distribution for the VizWiz val and EgoThink subsets against both configurations' bounds"
+  ],
+  "no_rerun": "NOT proposed in either direction. Matching the Orin instead would make the benchmark cleaner and the live numbers wrong."
+ },
+ "three_stack_differences": {
+  "note": "recorded together with actual version strings on BOTH sides, rather than describing the cloud and leaving the device implied.",
+  "1_model": {
+   "device": "Qwen3-VL-4B-Instruct",
+   "cloud": "32B (round-1 server)",
+   "status": "the intended comparison, not a confound"
+  },
+  "2_vllm_version": {
+   "device": "vLLM 0.20.0+cu126, the official jetson-ai-lab jp6/cu126 wheel. RECORDED: reports/study_orin3_vllm.md:28 and experiments/device/study_orin3_analyse.py:226 ('stack': 'vLLM 0.20.0+cu126').",
+   "cloud": "vLLM 0.31.0, to be carried in its run meta.",
+   "status": "UNMATCHED, and both sides are recorded rather than inferred from a date or a release."
+  },
+  "3_mm_processor_kwargs": {
+   "status": "UNMATCHED server-side, see image_preprocessing_parity above"
+  },
+  "the_salt_fix_itself": "no concern. The cache_salt partitions the prefix cache and never reaches the model, so no prompt, image or decoding setting differs; the kit is byte-identical and the shim is in the H100's wrapper, recorded as salt_fix in ss1_cloud32b_run_meta.json. vLLM 0.31.0 rejects a salt containing '/' while the Orin's 0.20.0 accepted it, which is how the version asymmetry surfaced. The first attempt failed every request and wrote no answers, so there is no partial output to mistake for a result."
+ },
+ "cold_isolation_verification": {
+  "requirement": "per-request cached-token verification that the salt actually isolated, rather than the caching string asserting it. D84 requires this test for cross-device isolation; M6 established per-request cached tokens as the trustworthy figure at concurrency 1, aggregate counters not.",
+  "the_dangerous_form": "the loud failure is benign. The dangerous form is a salt ACCEPTED AND SILENTLY IGNORED: every request shares the prefix cache, warm reuse contaminates every TTFT, and the run succeeds with a caching field still reading 'no warm reuse'. A warm number in a column labelled cold passes every other check.",
+  "cloud_side": "pending. If the verification does not arrive with the answers, the cloud TTFT column is labelled UNVERIFIED-COLD, not dropped, and not upgraded on the strength of the config string.",
+  "device_side": {
+   "status": "UNVERIFIED-COLD, AND NOT RETRO-VERIFIABLE FROM THE SAVED OUTPUT. This is an asymmetry in the verification itself, not only in the stacks.",
+   "reason_1": "vLLM 0.20.0 DOES NOT POPULATE usage.prompt_tokens_details.cached_tokens in the OpenAI API, null in both streaming and non-streaming, recorded at experiments/device/study_orin3_vllm_warm.py:63. StudyORIN3 worked around it by reading /metrics vllm:prefix_cache_hits and _queries deltas per request.",
+   "reason_2": "the SS1 device run recorded NO cached-token field by either route. Its rows carry answer, answer_raw, area, completion_tokens, dataset, dimension, model, prompt, prompt_tokens, qid, question, references, score, tier, total_s and ttft_s, and nothing about caching.",
+   "reason_3": "it cannot be recomputed, the images being gone from tmpfs.",
+   "note": "the /metrics-delta route WOULD have been valid here, since at one request at a time the counter delta IS per-request, which is M6's own condition. The runner simply did not capture it.",
+   "consequence": "BOTH TTFT columns are unverified-cold, for different reasons: the cloud's pending arrival, the device's unrecoverable without an Orin re-run, which is NOT proposed."
+  },
+  "what_is_NOT_being_claimed": "not that either number is wrong. cache_salt=qid with a distinct image and question per request makes warm reuse unlikely on its face. But 'unlikely on its face' is the config string asserting it, which is the thing not to rely on."
  }
 }
