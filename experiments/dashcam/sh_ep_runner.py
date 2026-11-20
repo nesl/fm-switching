@@ -137,7 +137,7 @@ def data_url(b: bytes) -> str:
 
 
 def build_body(row, model, run_tag, store, sent, shuffle_rng=None, grey=None,
-               header_key="header"):
+               header_key="header", served=None):
     """The request body, plus the bytes actually put on the wire."""
     keys = list(row["frame_keys"])
     files = list(row["store_files"])
@@ -169,7 +169,8 @@ def build_body(row, model, run_tag, store, sent, shuffle_rng=None, grey=None,
         sent[u] = got
         jpeg_sha[u] = got
     content.append({"type": "text", "text": QUERY})
-    body = dict(model=MODELS[model], messages=[dict(role="user", content=content)],
+    body = dict(model=served or MODELS[model],
+                messages=[dict(role="user", content=content)],
                 stream=True, stream_options={"include_usage": True}, cache_salt=salt, **GEN)
     return (body, new_bytes, uuids, salt, [keys[i] for i in order],
             [jpeg_sha.get(u) for u in uuids])
@@ -255,6 +256,15 @@ def main():
                          "C1 keeps StudyD3's committed one-frame literal. count: StudyD3's "
                          "frame-count header, kept as the non-default alternative; under it no "
                          "KV prefix is reusable and H3 is unreachable by construction.")
+    ap.add_argument("--clips-from-meta", default=None,
+                    help="restrict the run to the clips listed under this key of "
+                         "sh_ep_manifest_meta.json, e.g. shuffle_control_clips (the "
+                         "pre-registered 50-clip subset, 25 positive and 25 negative EVAL "
+                         "clips). The key must hold a list of clip file names.")
+    ap.add_argument("--served-model", default=None,
+                    help="send this name as the body's `model` instead of the HF id. Needed "
+                         "against a server whose served names are pinned, e.g. the live2 round-1 "
+                         "server, which serves only 32BI and refuses any extra flag.")
     ap.add_argument("--timeout", type=float, default=600.0)
     a = ap.parse_args()
 
@@ -278,12 +288,23 @@ def main():
             if r["condition"] in conds and r["side"] in sides:
                 rows.append(r)
     # time order WITHIN a (clip, condition), so the append-only conditions warm naturally
+    if a.clips_from_meta:
+        meta_all = json.loads((MAN / "sh_ep_manifest_meta.json").read_text())
+        keep = meta_all.get(a.clips_from_meta)
+        if not isinstance(keep, list) or not keep:
+            raise SystemExit(f"sh_ep_manifest_meta.json has no non-empty list at "
+                             f"{a.clips_from_meta!r}; nothing is guessed")
+        keep = set(keep)
+        rows = [r for r in rows if r["file_name"] in keep]
+        if not rows:
+            raise SystemExit(f"no manifest rows left after the {a.clips_from_meta!r} filter")
     rows.sort(key=lambda r: (r["file_name"], r["condition"], r["t"]))
     if a.limit:
         rows = rows[:a.limit]
 
     meta_path = MAN / f"sh_ep_run_meta_{a.model}_{a.run_tag}.json"
     hk = "header" if a.header_mode == "count" else "header_constant"
+    served = a.served_model or MODELS[a.model]
     client = httpx.Client(base_url=a.base.rstrip("/"), timeout=a.timeout)
     cfg = server_config(client)
     sent: dict = {}
@@ -295,7 +316,7 @@ def main():
             if rid in done:
                 continue
             body, nb, uuids, salt, order, jsha = build_body(
-                row, a.model, a.run_tag, a.store, sent, header_key=hk)
+                row, a.model, a.run_tag, a.store, sent, header_key=hk, served=served)
             rec = send(client, body)
             n_err += bool(rec["error"])
             n_neither += bool(rec["neither"])
@@ -329,7 +350,7 @@ def main():
                 row = dict(proto, file_name="GREY.mp4",
                            request_id=f"GREY_n{n:02d}_{rep:03d}", condition=proto["condition"])
                 body, nb, uuids, salt, order, jsha = build_body(
-                    row, a.model, a.run_tag, a.store, {}, grey=grey, header_key=hk)
+                    row, a.model, a.run_tag, a.store, {}, grey=grey, header_key=hk, served=served)
                 rec = send(client, body)
                 rec.update(row_id=f"{row['request_id']}|{a.model}", request_id=row["request_id"],
                            model=a.model, file_name=None, label=None, side=None,
@@ -355,7 +376,7 @@ def main():
                     continue
                 body, nb, uuids, salt, order, jsha = build_body(
                     row, a.model, a.run_tag + "-shuf", a.store, {}, shuffle_rng=rng,
-                    header_key=hk)
+                    header_key=hk, served=served)
                 rec = send(client, body)
                 rec.update(row_id=f"{row['request_id']}|{a.model}|shuf",
                            request_id=row["request_id"], model=a.model,
@@ -374,6 +395,8 @@ def main():
     meta = dict(label="StudySH-EP inference run", model=a.model, model_id=MODELS[a.model],
                 run_tag=a.run_tag, base=a.base, store=str(a.store),
                 conditions=conds, sides=sides, header_mode=a.header_mode,
+                served_model=served, clips_from_meta=a.clips_from_meta,
+                n_clips_after_filter=len({r["file_name"] for r in rows}),
                 requests_attempted=len(rows),
                 errors=n_err, neither_yes_nor_no=n_neither,
                 greys=a.greys, shuffle_control=bool(a.shuffle_control),

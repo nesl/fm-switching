@@ -310,6 +310,37 @@ no bytes, sent `GREY.mp4` to `store_path` and raised `FileNotFoundError`. It cra
 requests had been written, so no gate data was lost. The grey loop is now skipped outright when
 `--greys 0`.
 
+### 5b.4 The cost-under-load cell (user step 3), pre-registered before it runs
+
+EP-G and C1 on 50 clips, as a concurrent client against the live2 round-1 server while a 16-device
+dashcam-and-robot background runs on the same GPU. Reports TTFT and `cached_tokens` per request. The
+kit gained two flags for it, `--clips-from-meta` and `--served-model`, so both boxes still run one
+file.
+
+| choice | value | why it is not a guess |
+|---|---|---|
+| the 50 clips | the pre-registered `shuffle_control_clips` subset | already in the manifest meta, 25 positive and 25 negative, all EVAL. Gives **1,300 requests** (2 conditions x 13 instants x 50 clips) and 10,257 image parts |
+| background workload | two-type dashcam : robot at **50:50** | the committed default: `run_live2_real.py --ratio` defaults to `50:50`, and D103 (f) defines that string as the dashcam : robot ratio the scorer reads. Not the frozen grid's 40:40:20, because the user said dashcam : robot |
+| background arm | `b7-edf-feasibility`, 16 devices, tight memory | the user's step 3 names b7 and 16 devices |
+| served name | `--served-model 32BI` | the round-1 server's served names are pinned and it refuses any extra flag, so the runner's HF id would 404 |
+| condition order | EP-G and C1 **interleaved by clip**, each episode contiguous | the runner already sorts by (clip, condition, instant), so per clip it sends C1's 13 then EP-G's 13. Interleaving matters: run back to back and any drift in background load lands entirely on one condition, which would be read as a condition effect |
+| cache isolation | run tag `shep2-load` | both the `cache_salt` and every image `uuid` are keyed by the run tag, so no load-run request can hit an entry from the unloaded `shep2` run. Each episode still warms on itself, which is what makes the comparison a like-for-like |
+| background length | at least as long as the client, so about 2,400 s for 1,300 requests at 1 to 2 s each, with the client started after the background reaches steady state | a client that outlives its background measures an emptying queue, and one that starts at t=0 measures a warm-up |
+
+**A prediction, stated before the run rather than after it.** Section 17 of
+`reports/study_frozen_test.md` measures the frozen grid pushing 5,604,554 prompt tokens through a
+62,944-token KV pool in 1,200 s, which is **89 pool turnovers**, and that is why the grid's own
+`prefix_cache_hits` is 0. An EP-G episode under that kind of background has 0.5 s between its
+instants and is competing with the same traffic, so **`cached_tokens` should fall sharply under load,
+and may reach zero**, even though it is 3,056 to 6,768 unloaded. If that happens it is the finding,
+not a failure: it would say H3's warm-episode saving is contingent on the episode's prefix surviving
+the background, which is a memory-capacity claim and not a latency one, and it is the same conclusion
+sections 15 and 16 reached offline. If `cached_tokens` instead holds up, that is evidence the pool is
+not as contended as the grid's turnover figure suggests, and worth more than a confirmation.
+
+Either way the number to read first is `cached_tokens` per request, not TTFT: TTFT under load mixes
+queueing with prefill, and only `cached_tokens` says whether the prefix survived.
+
 ## 6. Mechanism verification, Steps 0 to 5, before the sweep
 
 **Step 0, what would make this run uninterpretable.** Five checks were run and three of them came back
