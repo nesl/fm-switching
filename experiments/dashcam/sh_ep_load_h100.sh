@@ -9,6 +9,12 @@
 # Run tag shep2-load: cache_salt and every image uuid differ from the unloaded shep2 run, so nothing is shared with it.
 set -u
 cd /home/pragya/Desktop/fm-switching
+# GPU 2 for the harness and its exclusivity check, exactly as the frozen-grid driver exports them (without these the
+# check defaults to GPU 1 and refuses on another user's job there)
+export CUDA_VISIBLE_DEVICES=GPU-4f1d7e47-e769-a289-4860-e71c0d97267c
+export F_GPU_UUID=GPU-4f1d7e47-e769-a289-4860-e71c0d97267c
+export CLEAN_GPU_UUID=GPU-4f1d7e47-e769-a289-4860-e71c0d97267c
+export HF_TOKEN=$(cat hf-token.txt)
 RUN_S=${RUN_S:-3000}; WARM_S=${WARM_S:-300}; KILL_MARGIN_S=${KILL_MARGIN_S:-120}
 PY=$HOME/.venvs/fm-switching-vllm/bin/python
 CAL=results/orchestration/live2/calibration/live2_calibration_dense_jpeg.json
