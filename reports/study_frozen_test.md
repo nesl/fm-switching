@@ -1483,9 +1483,30 @@ result is a hit, and a miss would be the only genuinely new information availabl
 
 Worth looking at on the server side when convenient, none of it implicated by the evidence above:
 `--kv-offloading-backend native --kv-offloading-size 27`, in case the offload connector changes block
-reuse; and the duplicated `--no-enable-prefix-caching` then `--enable-prefix-caching`, which resolves
-correctly today but is one argparse ordering away from silently disabling the cache, and should be
-reduced to a single flag so that no future run depends on last-occurrence-wins.
+reuse.
+
+**A correction to a recommendation this section first made.** It said the duplicated
+`--no-enable-prefix-caching` then `--enable-prefix-caching`, and the two `--limit-mm-per-prompt`,
+"should be reduced to a single flag" whenever the launcher is next edited. That was written without
+checking what the flag list is, and the H100 pointed out what it is.
+`experiments/orchestration/study_live2_pilot.py:80-83` builds the list from `E.COMMON` and then
+**refuses to start** unless it matches the committed `DE_c38` server's flags element for element, with
+only the host-tier size allowed to differ: `if diff != [("38", host_gib)] or len(ref) != len(flags):
+raise SystemExit`. Deduplicating the list is therefore not a tidy-up of a launcher, it is a change to
+the pinned configuration that every frozen-grid and sweep cell has run under, and it would also trip
+the equality check itself. Under CLAUDE.md that is a methodological change and needs a ruling before
+it is applied, not an edit at the next convenient moment. The StudySH-EP launcher copies the round-1
+command byte for byte on purpose and stays as it is.
+
+The underlying concern stands and is recorded here rather than acted on: the configuration is correct
+today only because argparse takes the last occurrence, so a future reordering of a pinned list could
+silently disable prefix caching in a run that would still look entirely normal. The cheap mitigation
+that does NOT touch the pinned list is to have the run record the engine's own resolved cache
+configuration, which no frozen-grid `run_meta.json` currently does: `server_kind` is `vllm` and no
+cache flag appears, so a reader cannot tell from a committed run whether prefix caching was on. That
+is a reporting gap CLAUDE.md names directly, since caching is a methodological parameter and must be
+stated. It is why this section had to recover the configuration from a launcher script and from the
+metrics counters rather than from the run record.
 
 **What this is NOT.** It is not evidence that prefix caching fails on this engine, and it must not be
 cited that way: the same build hits on appended requests in StudySH-EP. It is evidence that **the
