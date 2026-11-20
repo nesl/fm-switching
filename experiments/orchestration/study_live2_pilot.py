@@ -105,7 +105,42 @@ def start_server(host_gib, scheduling_policy=None, extra_flags=None):
     return srv, dict(command=info.get("server_cmd"), flag_diff=diff, restart_started=t0, up_at=time.time(),
                      startup_s=info.get("startup_s"), log=str(srv.logpath), host_gib=host_gib,
                      scheduling_policy=(scheduling_policy or "fcfs"),
-                     extra_flags=list(extra_flags or [])), M
+                     extra_flags=list(extra_flags or []),
+                     resolved=resolved_server_settings(info.get("server_cmd") or [], srv.logpath)), M
+
+
+# flags the pinned round-1 list sets more than once (as itself or as its --no- negation); argparse keeps the LAST one
+_TWICE_ALIASES = {"--no-enable-prefix-caching": "--enable-prefix-caching"}
+
+
+def resolved_server_settings(cmd, logpath):
+    """Record-only (user ruling 2026-11-20): what the engine actually RESOLVED for every flag the pinned list sets twice,
+    plus the engine's own reported prefix-caching and mm-cache settings, read from the server log. Changes nothing that
+    is sent to vLLM; the pinned flag list is not deduplicated."""
+    import re
+    cmd = [str(x) for x in cmd]
+    seen = {}
+    for i, a in enumerate(cmd):
+        if a.startswith("--"):
+            key = _TWICE_ALIASES.get(a, a)
+            val = a if a in _TWICE_ALIASES or a == key and (i + 1 >= len(cmd) or cmd[i + 1].startswith("--")) else cmd[i + 1]
+            seen.setdefault(key, []).append(dict(index=i, flag=a, value=val))
+    twice = {k: dict(occurrences=v, argv_last_wins=v[-1]) for k, v in seen.items() if len(v) > 1}
+    eng = {}
+    try:
+        txt = Path(logpath).read_text(errors="replace")
+        m = re.search(r"Initializing a V1 LLM engine[^\n]*?enable_prefix_caching=(\w+)", txt)
+        eng["enable_prefix_caching"] = m.group(1) if m else None
+        m = re.search(r"non-default args: (\{[^\n]*\})", txt)
+        if m:
+            for k in ("enable_prefix_caching", "mm_processor_cache_gb", "limit_mm_per_prompt", "mm_processor_kwargs",
+                      "kv_offloading_size", "kv_offloading_backend"):
+                mm = re.search(r"'%s': ((?:\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})|[^,}]+)" % k, m.group(1))
+                eng["non_default_" + k] = mm.group(1).strip() if mm else None
+    except Exception as e:                                                      # noqa: BLE001
+        eng["error"] = f"{type(e).__name__}: {e}"
+    return dict(flags_set_twice=twice, engine_reported=eng,
+                note="record-only; argparse keeps the last occurrence; the pinned flag list is unchanged (user ruling 2026-11-20)")
 
 
 def run_cell(arm_name, n_dev, run_s, host_gib=HOST_TIGHT, tag="", drain_s=20.0):
