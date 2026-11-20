@@ -14,6 +14,7 @@ Usage: python frozen_headline.py <runs dir> <n_devices> <out json>
 """
 import gzip
 import json
+import os
 import math
 import random
 import sys
@@ -53,6 +54,11 @@ def local_trace(trace_dir_name):
     return t["records"] if isinstance(t, dict) else t
 
 
+DELIVERY = os.environ.get("FROZEN_HEADLINE_DELIVERY", "completion")
+if DELIVERY not in ("completion", "first_token"):
+    raise SystemExit("FROZEN_HEADLINE_DELIVERY must be completion or first_token")
+
+
 def jl(p):
     for c in (p, p.with_name(p.name + ".gz")):
         if c.exists():
@@ -79,11 +85,24 @@ def run_flags(d):
         elif dev.startswith("asst"):
             ssq.add(r["opportunity_id"])
     failed = {r.get("request_id") for r in jl(d / "request.jsonl") if r.get("http_status") != 200}
+    # D146: a robot or single-shot answer is delivered at COMPLETION, prefill plus decode, and
+    # COMPLETION IS NOW THE DEFAULT. The committed `t_delivered` is first-token based: in all 40
+    # frozen-grid runs `outcomes.t_cloud_done` equals the request log's `t_first_token` exactly,
+    # and `t_delivered` is that plus a per-row forward delay. The completion stamp is therefore
+    # the request's `t_done` plus the SAME per-row forward delay, which is taken from the data
+    # rather than assumed to be the 0.0222 s constant it turns out to be.
+    done = {}
+    for r in jl(d / "request.jsonl"):
+        if r.get("opportunity_id") and r.get("t_done") is not None:
+            done[r["opportunity_id"]] = float(r["t_done"])
     ont = {}
     for o in jl(d / "outcomes.jsonl"):
         if o.get("kind") != "recall":
             continue
         td = o.get("t_delivered")
+        if DELIVERY == "completion" and td is not None and o.get("t_cloud_done") is not None \
+                and o["opportunity_id"] in done:
+            td = done[o["opportunity_id"]] + (float(td) - float(o["t_cloud_done"]))
         rid = (o.get("cloud_payload") or {}).get("request_id")
         L = SS_L if o["opportunity_id"] in ssq else float(o.get("deadline_s") or 5.0)
         ont[o["opportunity_id"]] = bool(td is not None and rid not in failed and float(td) - float(o["t_opportunity"]) <= L)
@@ -190,7 +209,11 @@ def main(runs_dir, n, out):
                                        dash=runs[(a, s)]["dash"], errors=runs[(a, s)]["errors"],
                                        d133=runs[(a, s)]["d133"]) for s in seeds]))
     res = dict(n_devices=n, seeds_common_support=seeds, bootstrap=f"paired by seed: opportunities resampled within each seed, same draw for every arm, B={B}",
-               on_time_rule="delivered within the deadline (robot 5 s, SS 2 s) by an HTTP 200 request", rows=rows)
+               on_time_rule=("delivered within the deadline (robot 5 s, SS 2 s) by an HTTP 200 "
+                             "request, stamped at " + ("COMPLETION, prefill plus decode (D146; "
+                             "the default from 2026-11-20)" if DELIVERY == "completion"
+                             else "FIRST TOKEN (the pre-D146 rule, kept for comparison)")),
+               delivery=DELIVERY, rows=rows)
     Path(out).write_text(json.dumps(res, indent=1) + "\n")
     print("seeds", seeds)
     for r in rows:

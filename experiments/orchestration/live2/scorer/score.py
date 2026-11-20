@@ -98,6 +98,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import math
 import random
 import sys
@@ -238,6 +239,40 @@ def load(trace_dir: Path, run_dir: Path) -> Loaded:
                 o["t_delivered"] = None
                 o["cloud_payload"] = None
                 o["d144_failed_request"] = True
+    # ---- D146: COMPLETION DELIVERY, and it is the DEFAULT from 2026-11-20.
+    # A robot or single-shot answer counts as delivered when generation COMPLETES, prefill plus
+    # decode; a dashcam Yes/No may stay at first token. The committed `t_delivered` is first-token
+    # based: in all 40 frozen-grid runs `outcomes.t_cloud_done` equals the request log's
+    # `t_first_token` exactly, and `t_delivered` is that plus a per-row forward delay. So the
+    # completion stamp is the request's `t_done` plus the SAME per-row delay, taken from the data
+    # rather than assumed to be the 0.0222 s constant it turns out to be.
+    #
+    # It is rewritten HERE, beside the D144 pass that nulls a failed request's delivery, for the
+    # same reason: `_within`, `robot_value` and the assistive scoring all read `t_delivered`, so one
+    # rewrite reaches every downstream check and none of them has to learn a new field.
+    #
+    # Why it matters rather than merely shifting a number: decode time scales with CONTEXT LENGTH.
+    # Pooled over the 16-device cells, recall decode is 0.072 s below 1,000 prompt tokens and
+    # 1.197 s above 15,000, for the same two output tokens. The first-token stamp hid that
+    # entirely, so an arm that sends a whole history was paying a cost no metric could see.
+    _delivery = os.environ.get("LIVE2_DELIVERY", "completion")
+    if _delivery not in ("completion", "first_token"):
+        raise SystemExit("LIVE2_DELIVERY must be completion or first_token")
+    if _delivery == "completion":
+        done = {r["opportunity_id"]: float(r["t_done"]) for r in reqs
+                if r.get("opportunity_id") and r.get("t_done") is not None}
+        for oid, o in out.items():
+            # `out` is keyed by opportunity_id (line 223), so the KEY is the join and is used
+            # rather than a field inside the row, which need not be present.
+            if o.get("kind") != "recall" or o.get("t_delivered") is None:
+                continue
+            if o.get("t_cloud_done") is None or oid not in done:
+                continue
+            o["t_delivered_first_token"] = o["t_delivered"]
+            o["t_delivered"] = (done[oid]
+                                + (float(o["t_delivered"]) - float(o["t_cloud_done"])))
+            o["delivery_rule"] = "completion"
+
     dec: List[Dict[str, Any]] = []
     for name in ("decisions.jsonl", "decision.jsonl"):
         if (run_dir / name).exists():

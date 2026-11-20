@@ -1523,3 +1523,105 @@ cited that way: the same build hits on appended requests in StudySH-EP. It is ev
 frozen grid's own traffic has essentially no reuse to find**, which is a statement about the workload
 and about the 62,944-token pool, and it is the live counterpart of section 15's finding that memory, not
 the GPU, is the binding resource.
+
+## 18. D146 item 1: completion delivery, re-scored (A6000, 2026-11-20)
+
+OFFLINE. Committed `outcomes` and `request` logs only; no GPU, no model server, no rerun. Scripts
+`completion_delivery_rescore.py` (the audit, 40 runs) and `frozen_headline.py` (the headline, now
+delivery-aware). Old numbers are kept throughout and labelled **first-token delivery**.
+
+### 18.1 The committed stamp is first-token based, verified in all 40 runs
+
+`outcomes.t_cloud_done` equals the request log's `t_first_token` **exactly in all 40 runs, 0
+mismatches**, and `t_delivered` is that plus a per-row forward delay which is the 0.0222 s constant
+section 12.3 identified. The completion stamp is therefore
+
+    t_delivered_completion = t_done + (t_delivered - t_cloud_done)
+
+with the forward delay taken per row rather than assumed. A recall outcome with no matching cloud
+request was never sent, so no delivery rule can change its status; those are excluded from the flip
+count and reported separately.
+
+### 18.2 Flips, 40 runs
+
+| kind | outcomes | flips to late | flips to on time |
+|---|---|---|---|
+| robot | 880 | **132 (15.0 percent)** | 0 |
+| single shot | 14,502 | **217 (1.5 percent)** | 0 |
+
+Zero flips the other way, as the arithmetic requires: completion is never earlier than first token.
+The robot side is ten times more affected than single shot, and 18.4 says why.
+
+### 18.3 The four-seed headline at 16 devices, both rules
+
+Seeds 0, 4, 5, 6; the same cells and the same paired-by-seed bootstrap as section 14.
+
+| arm | robot feasible, first token | robot feasible, **completion** | robot all | SS | minus b7, completion |
+|---|---|---|---|---|---|
+| b7-edf-feasibility | 64/69 = 0.9275 | **42/69 = 0.6087** | 0.7191 to 0.4719 | 0.9158 to 0.8934 | reference |
+| mooncake | 64/69 = 0.9275 | **42/69 = 0.6087** | 0.7191 to 0.4719 | 0.9144 to 0.8948 | [-0.0435, +0.0435] |
+| eco-llm | 62/69 = 0.8986 | **39/69 = 0.5652** | 0.6966 to 0.4382 | 0.8352 to 0.8128 | [-0.1159, +0.0145] |
+| hybrid-F6-lhreq | 65/69 = 0.9420 | **61/69 = 0.8841** | 0.7303 to 0.6854 | 0.9509 to 0.9481 | [+0.1739, +0.3913] |
+| hybrid-F-lhreq | 67/69 = 0.9710 | **66/69 = 0.9565** | 0.7528 to 0.7416 | 0.9621 to 0.9600 | **[+0.2319, +0.4638]** |
+
+**The delivery rule changes the study's conclusion, it does not merely move the numbers.** Under
+first-token delivery the five arms sit within 7 points of each other on robot feasible on-time, which
+is close to the noise floor at 69 questions. Under completion delivery they split into two groups 30
+points apart, and hybrid-F minus b7 becomes **[+0.2319, +0.4638]**, an interval nowhere near zero.
+hybrid-F loses **1** question of 69 where b7 and mooncake lose **22** each.
+
+### 18.4 The mechanism is context length, and it is not contention
+
+The obvious explanation would be that arms which load the engine harder get slower decodes. **That is
+measurably false here.** Over ALL requests at 16 devices, seed 4, decode p50 is 0.045 to 0.078 s for
+every one of ten arms, and the correlation between an arm's total prompt tokens and its decode p50 is
+**r = 0.06**. Contention does not explain it.
+
+Decode time scales with **context length**. Pooled over every 16-device cell, 13,858 recall requests:
+
+| prompt tokens | n | decode p50 | decode p90 |
+|---|---|---|---|
+| under 1,000 | 5,335 | **0.072 s** | 0.212 s |
+| 1,000 to 3,000 | 7,812 | 0.100 s | 0.258 s |
+| 3,000 to 8,000 | 216 | 0.295 s | 0.692 s |
+| 8,000 to 15,000 | 276 | 0.971 s | 1.422 s |
+| over 15,000 | 219 | **1.197 s** | 1.439 s |
+
+A 16-fold longer prompt costs 16 times the decode **for the same two output tokens**, which is what
+attention over a longer KV costs per step. So an arm that sends the whole history pays for it twice,
+once in prefill and again in decode, and **the first-token stamp hid the second payment entirely**.
+That is why the robot side flips ten times more often than single shot: robot prompts reach 21,720
+tokens while single-shot prompts are around 1,372.
+
+This is the study's own thesis arriving from an unexpected direction. hybrid-F's advantage under the
+new rule is not a scheduling advantage, it is a **representation** advantage: post-fix it sends a
+RECENT window of about 1,372 tokens where b7 and mooncake send the full history, and the delivery
+rule makes that choice visible for the first time. The comparison is fair, since generation settings,
+deadlines and workload are identical and the arms differ only in what they chose to send.
+
+### 18.5 What is now the default, and the one thing I could not verify here
+
+Completion delivery is the default in both scorers, with the old rule reachable for comparison:
+`scorer/score.py` via `LIVE2_DELIVERY=first_token` and `frozen_headline.py` via
+`FROZEN_HEADLINE_DELIVERY=first_token`. In `score.py` the rewrite sits beside the D144 pass that
+nulls a failed request's delivery, for the same reason: `_within`, `robot_value` and the assistive
+scoring all read `t_delivered`, so one rewrite reaches every downstream check.
+
+**Register, stated plainly: `frozen_headline.py` was RUN here under both rules and its numbers are
+above; `scorer/score.py` was NOT run here.** It requires the trace directory, which lives on the
+H100 and not on this box, so what is verified for it is that it parses, that the rewrite is ordered
+after `reqs` and `out` are bound and before the decision load, and that it joins on the `out` dict's
+own key rather than on a field inside the row. Its arithmetic is the same expression that
+`completion_delivery_rescore.py` and `frozen_headline.py` both compute independently and agree on.
+One cell scored both ways on the H100 would close that gap, and until it is run no number in this
+section depends on `score.py`.
+
+### 18.6 P20, which this raised
+
+The committed robot recall cap is `max_tokens` 512, and the ruling preserves it. But **the realised
+answer is 2 output tokens in every committed cell**, because the question is multiple choice and the
+model stops at the letter, so the cap has never bound and completion currently charges the decode of
+2 tokens only. A format whose answer is longer would make the cap bind and change this arithmetic by
+orders of magnitude, given that 2 tokens already cost 1.197 s above 15,000 prompt tokens. P20 records
+that the cap must be re-benchmarked against the answer length a chosen format actually produces,
+before that format is adopted.
