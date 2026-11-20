@@ -1,0 +1,94 @@
+{
+ "check": "CODALM_judge_negative_control_FAILS",
+ "is_measurement": true,
+ "label": "Step 4 negative control, run before any StudySS2 data exists. 25 CODA-LM Val scenes x 3 tasks, references PERMUTED by one position so each prediction is another scene reference.",
+ "VERDICT": "THE JUDGE FAILS THE NEGATIVE CONTROL. This is a STOPPING CONDITION on the CODA-LM per-task means, not a caveat.",
+ "why_the_identity_control_could_not_have_caught_this": "a judge that always answers 10 scores 75 of 75 identity pairs at exactly 10.0 with zero variance too. The identity arm proves a 10 CAN be produced; only the permutation shows what a 10 MEANS. Same structure as the prefix-cache pair, where 0 hits on 6,702,660 queried tokens meant nothing until the same-salt arm showed a hit would register.",
+ "result": {
+  "mismatched_general": {
+   "n": 25,
+   "mean": 6.96,
+   "median": 7.0,
+   "min": 4.0,
+   "max": 10.0
+  },
+  "mismatched_regional": {
+   "n": 24,
+   "mean": 7.12,
+   "median": 7.5,
+   "min": 1.0,
+   "max": 10.0
+  },
+  "mismatched_suggestion": {
+   "n": 25,
+   "mean": 6.56,
+   "median": 7.0,
+   "min": 3.0,
+   "max": 10.0
+  },
+  "mismatched_pooled": {
+   "n": 74,
+   "mean": 6.88,
+   "p25": 5.0,
+   "median": 7.0,
+   "p75": 9.0,
+   "min": 1.0,
+   "max": 10.0,
+   "distribution": {
+    "1.0": 1,
+    "3.0": 3,
+    "4.0": 1,
+    "5.0": 19,
+    "6.0": 5,
+    "7.0": 19,
+    "8.0": 7,
+    "9.0": 9,
+    "10.0": 10
+   }
+  },
+  "identity_for_comparison": {
+   "n": 75,
+   "mean": 10.0,
+   "variance": 0.0
+  },
+  "gap": "identity 10.00 against mismatched 6.88 is only 3.12 points of a 10-point scale.",
+  "the_worst_single_fact": "10 of 74 mismatched pairs scored EXACTLY 10.0. The judge awarded full marks to a reference answer describing a DIFFERENT driving scene."
+ },
+ "THE_PREREGISTERED_CUT_IS_INVALIDATED": {
+  "cut": 6.0,
+  "finding": "50 of 74 mismatched references, 68 percent, score at or above 6.0. By task: general 18 of 25 at 72 percent, regional 16 of 24 at 67 percent, suggestion 16 of 25 at 64 percent.",
+  "consequence": "a 2x2 built at the pre-registered cut would classify roughly two thirds of completely mismatched content as correct. The 2x2 cannot be built at 6.0.",
+  "what_I_am_NOT_doing": "raising the cut after seeing this. Moving a pre-registered threshold once the distribution is known is precisely what pre-registration forbids, and it is the error that moved a StudySS1 headline 17 points. The cut is reported as INVALIDATED BY THE CONTROL and the 2x2 is withheld, rather than silently re-chosen.",
+  "note": "the control also shows WHY no cut rescues it: the judge usable range is compressed to roughly 7 to 10, so mismatched and correct content are not separable by any threshold on this scale."
+ },
+ "consequence_for_the_per_task_means": "the CODA-LM per-task 1-10 means CANNOT be reported as quality. Mismatched content sits at 6.88, so a model answer at 7 is indistinguishable from a reference describing another scene. The identity ceiling at 10.0 was SATURATION rather than calibration, exactly as the third anticipated outcome described.",
+ "length_test_BANDED": {
+  "why_banding_was_required": "the permuted spread is wide, 1 to 10, so \"wrong by construction\" is only approximately true: CODA-LM is driving scenes and permuted descriptions overlap heavily, so quality is NOT constant across the set and a raw within-set length gradient is confounded by accidental relevance.",
+  "the_confound_is_real": "pearson r(prediction words, mismatched rating) = +0.232, so longer mismatched predictions do score higher, consistent with more chances to overlap something true.",
+  "raw_ungarded_gradient": "+1.583 from short to long tercile, which is mostly the confound.",
+  "banded_within_permuted_score": {
+   "band_1_to_5": "+0.000 (n=24)",
+   "band_6_to_7": "+0.375 (n=24)",
+   "band_8_to_10": "+0.250 (n=26)"
+  },
+  "reading": "with quality held by banding, the length effect largely disappears, from +1.583 raw to between 0.000 and +0.375 within bands.",
+  "normalised_comparison_against_EGOTHINK": {
+   "egothink": "+0.181 on a 0/0.5/1 scale with a usable range of 1.0, i.e. 0.181 of range, on a prompt with NO anti-length instruction",
+   "codalm": "about +0.3 on a usable range of roughly 3 points (7 to 10), i.e. about 0.10 of range, on a prompt that explicitly instructs the judge to ignore length",
+   "direction": "CODA-LM normalised effect is SMALLER, which is the INTERPRETABLE direction: a smaller effect is clean evidence the explicit instruction helps, whereas a larger one would have been ambiguous between a failing instruction and a scale with more granularity for the same bias to express itself.",
+   "caveat": "this is secondary. It characterises a judge that has just failed its negative control, so it bears on judge design rather than on any CODA-LM result."
+  },
+  "granularity_note": "0/0.5/1 has three attainable values against ten, so a length effect has more room to express itself on the 1-10 scale before saturating. That is why only the smaller direction is clean."
+ },
+ "per_task_observation": "accidental relevance was expected to be highest on suggestion, generic driving advice transferring across scenes, and lowest on regional. The means do not show that: regional is highest at 7.12 and suggestion lowest at 6.56. So the transfer is not driven by the genericity of the text in the way predicted.",
+ "what_would_be_needed": "a judge that separates mismatched from correct content on this task. Candidates not pursued here: a larger judge, the GPT-4 the paper used, or a prompt change. All are methodological and belong to the user.",
+ "split_caveat": "CODA-LM Val references fetched directly under Apache-2.0. If StudySS2 stages a different split, this control must be re-run against the staged references.",
+ "_provenance": {
+  "git_commit": "0a32321b01397dfa793ff5602733ab73f57bac7d",
+  "script": "experiments/casestudy/ss2_codalm_negctrl.py",
+  "model": "mistralai/Mistral-7B-Instruct-v0.2",
+  "device": "nvidia_rtx_a6000",
+  "n": 74,
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
