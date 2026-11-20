@@ -1,0 +1,35 @@
+{
+ "study": "StudySS2",
+ "built_by": "experiments/casestudy/ss2_build_manifests.py",
+ "seed": 0,
+ "data_root_runtime": "/dev/shm/ss2_data",
+ "licences": {
+  "refspatial": "Apache-2.0 (BAAI/RefSpatial-Bench; RoboRefer, arXiv 2506.04308)",
+  "realworldqa": "CC BY-ND 4.0 (xai-org/RealworldQA); images NOT committed (NoDerivatives)",
+  "coda_lm": "SKIPPED: annotations Apache-2.0 but CODA images under CC BY-NC-SA 4.0 + Huawei Dataset Terms (non-commercial, redistribution prohibited, accepted on download); StudySS2 rule skips a dataset whose images need an agreement"
+ },
+ "refspatial": {
+  "n": 277,
+  "by_split": {
+   "location": 100,
+   "placement": 100,
+   "unseen": 77
+  },
+  "by_step": {
+   "1": 30,
+   "2": 110,
+   "3": 85,
+   "4": 39,
+   "5": 13
+  }
+ },
+ "realworldqa": {
+  "n": 765,
+  "by_subset": {
+   "mcq": 438,
+   "free_form": 327
+  }
+ },
+ "refspatial_note": "prompt = RoboRefer get_prompt Qwen branch; score = fraction of predicted points inside the GT binary mask (summarize_acc.py), per-split mean; coordinate convention validated on the smoke set before the full run",
+ "realworldqa_note": "prompt = dataset question verbatim (lmms-eval default); MCQ iff gold in {A,B,C,D}; free-form exact match after lower/strip/rstrip('.')"
+}
