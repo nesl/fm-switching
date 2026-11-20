@@ -17,10 +17,28 @@ its rerun). Robot counts reconcile with the scorer in every run (`frozen_feasibl
 | arm | robots on time over FEASIBLE (of 55) | over all (of 69) | SS on time at 2 s (of 1,069) | request errors (s0, s4, s5) |
 |---|---|---|---|---|
 | b7 | 50 | 50 | 969 | 1, 0, 0 |
-| eco-llm | 49 | 50 | 890 | 1, 0, 0 |
+| eco-llm | 49 | 49 | 890 | 1, 0, 0 |
 | mooncake | 50 | 50 | 970 | 0, 0, 0 |
-| **hybrid-F-lhreq** | **53** | **54** | **1,023** | 1, 0, 0 |
-| hybrid-F6-lhreq | 51 | 52 | 1,011 | 1, 0, 0 |
+| **hybrid-F-lhreq** | **53** | **53** | **1,023** | 1, 0, 0 |
+| hybrid-F6-lhreq | 51 | 51 | 1,011 | 1, 0, 0 |
+
+**Correction (2026-11-20 08:05, found by the A6000 session, re-derived here from the run files).** A request the server
+REFUSED was still counted on time: `coordinator.py` stamps a cloud answer's `on_time` from its completion time alone,
+and the scorer's `_within` reads `t_delivered`, so the HTTP 400 over-context request (opp0010837, history 33,781
+tokens) scored as an on-time cloud answer with letter "X" in eco-llm, hybrid-F and hybrid-F6 at 16 devices seed 0.
+Rule applied from here on (D144): **on time = delivered within the deadline by a request that returned HTTP 200.**
+Effect: the all-questions figure drops by one in exactly those three cells (eco-llm 17 to 16, hybrid-F 18 to 17,
+hybrid-F6 17 to 16 of 24); every other n16 cell has 0 such answers. The question is INFEASIBLE by the trace rule, so the
+feasible column and every D133 verdict are unchanged. The harness is not changed mid-sweep; the rule is applied in
+analysis to every cell.
+
+**Harness defect, reported to the user (not fixed mid-sweep): RECENT is charged but not sent.** C3 (hybrid-F, F6) and
+eco-llm send some infeasible robot questions as `representation=RECENT`. The coordinator charges
+`tokens_for_representation` = 467 (`coordinator.py:574`) but builds the body from the WHOLE session's frames
+(`coordinator.py:593-597`): the over-context request carried 375 frames. So a "RECENT" send is a full-history send on the
+wire, priced as RECENT. This affects how many requests these arms appear to make cheaply, and is the answer to the
+user's question why hybrid-F sends the 33,839-token history that b7 declines: b7 rejects it as infeasible; C3 turns the
+rejection into a RECENT send, which the body builder then fills with the full history.
 
 Dashcams all meet in every cell. Seed 6 (baselines only so far): b7 14 of 14 feasible / 337 SS, eco-llm 13 of 14 /
 301, mooncake 14 of 14 / 334. No run is saturated by the 5 percent rule.
@@ -39,7 +57,7 @@ states both denominators; the scorer's own flag (all-questions rule) was false i
 | b7 n16 s4 | meet | 14 of 15 (0.933) | 14 of 20 | 332 of 357 (0.930) | **MEETS** |
 | b7 n16 s5 | meet | 19 of 22 (0.864) | 19 of 25 | 320 of 356 (0.899) | fails (robot, SS) |
 | b7 n16 s6 | meet | 14 of 14 (1.000) | 14 of 20 | 337 of 357 (0.944) | **MEETS** |
-| eco-llm n16 s0 | meet | 16 of 18 (0.889) | 17 of 24 | 292 of 356 (0.820) | fails |
+| eco-llm n16 s0 | meet | 16 of 18 (0.889) | 16 of 24 | 292 of 356 (0.820) | fails |
 | eco-llm n16 s4 | meet | 14 of 15 (0.933) | 14 of 20 | 294 of 357 (0.824) | fails (SS) |
 | eco-llm n16 s5 | meet | 19 of 22 (0.864) | 19 of 25 | 304 of 356 (0.854) | fails |
 | eco-llm n16 s6 | meet | 13 of 14 (0.929) | 13 of 20 | 301 of 357 (0.843) | fails (SS) |
@@ -47,10 +65,10 @@ states both denominators; the scorer's own flag (all-questions rule) was false i
 | mooncake n16 s4 | meet | 14 of 15 (0.933) | 14 of 20 | 332 of 357 (0.930) | **MEETS** |
 | mooncake n16 s5 | meet | 19 of 22 (0.864) | 19 of 25 | 319 of 356 (0.896) | fails (robot, SS) |
 | mooncake n16 s6 | meet | 14 of 14 (1.000) | 14 of 20 | 334 of 357 (0.936) | **MEETS** |
-| hybrid-F n16 s0 | meet | 17 of 18 (0.944) | 18 of 24 | 341 of 356 (0.958) | **MEETS** |
+| hybrid-F n16 s0 | meet | 17 of 18 (0.944) | 17 of 24 | 341 of 356 (0.958) | **MEETS** |
 | hybrid-F n16 s4 | meet | 15 of 15 (1.000) | 15 of 20 | 339 of 357 (0.950) | **MEETS** |
 | hybrid-F n16 s5 | meet | 21 of 22 (0.955) | 21 of 25 | 343 of 356 (0.963) | **MEETS** |
-| hybrid-F6 n16 s0 | meet | 16 of 18 (0.889) | 17 of 24 | 335 of 356 (0.941) | fails (robot) |
+| hybrid-F6 n16 s0 | meet | 16 of 18 (0.889) | 16 of 24 | 335 of 356 (0.941) | fails (robot) |
 | hybrid-F6 n16 s4 | meet | 14 of 15 (0.933) | 14 of 20 | 334 of 357 (0.936) | **MEETS** |
 | hybrid-F6 n16 s5 | meet | 21 of 22 (0.955) | 21 of 25 | 342 of 356 (0.961) | **MEETS** |
 | eco-llm n14 s0 | meet | 11 of 11 | 12 of 15 | 315 of 357 | not measurable (pool 15 < 20) |
