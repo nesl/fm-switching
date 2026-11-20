@@ -103,7 +103,13 @@ def idle():
             scope="a separate server start with the identical round-1 command: validates the mechanism and the instrument, "
                   "not the exact StudySS1-32B server process",
             pass_condition="every cached_tokens value present and an integer, AND unique-salt repeat == 0 AND same-salt repeat > 0",
-            passed=ok, diagnosis=diagnosis, rows=ctl), indent=1) + "\n")
+            passed=ok, diagnosis=diagnosis,
+            reader_near_miss=("This control's own first reader coerced the field with `or 0`, so an absent or null "
+                              "cached_tokens would have read as 0: the unique-salt arm would have passed vacuously and "
+                              "the same-salt arm failed, giving passed=false attributed to the CACHE when the cause was "
+                              "the READER. Fixed (raw values, presence recorded) before the control ran (a peer review, "
+                              "2026-11-19). A verification layer is itself code that can fail silently."),
+            rows=ctl), indent=1) + "\n")
         recs = [one(r, "ssidle-%d-%d" % (i, time.time_ns())) for i, r in enumerate(rows)]
     finally:
         srv.stop()
