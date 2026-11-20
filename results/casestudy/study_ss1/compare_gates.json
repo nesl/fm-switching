@@ -244,6 +244,13 @@
    "temporal_patch_size": 2,
    "merge_size": 2,
    "image_processor_type": "Qwen2VLImageProcessorFast"
+  },
+  "OUTCOME_OF_THE_PREDICTION": {
+   "egothink": "CORRECT. 0 of 700 below the floor, so EgoThink is clean and parity is expected at 100 percent with no tail.",
+   "vizwiz_direction": "CORRECT. The divergence is confined to the low tail and the DEVICE sees more visual tokens, since it upscales to the floor and the cloud does not.",
+   "vizwiz_count": "28 of 4,319 are below the 65,536 px floor, smallest 121x162. My flagged tail was the 68 questions under 200 prompt_tokens, so the 28 fall inside it; I stated the tail as POSSIBLY non-empty rather than empty.",
+   "what_the_coordinator_had_predicted": "that the floor plausibly never binds for a single item. That is the prediction the data refutes: the tail is not empty.",
+   "a_probe_figure": "the H100 probed the smallest image and got 34 prompt tokens on the 32B; the device figure for the same item will be several times that."
   }
  },
  "orin_version_resolved": {
@@ -253,5 +260,30 @@
   "transformers": "5.20.2, which owns the image processor",
   "model_directory": "present on the box rather than reconstructed from a release page",
   "consequence": "the cached_tokens null conclusion STANDS: vLLM 0.20.0 does not populate it, so the device TTFT column remains PERMANENTLY unverified-cold."
+ },
+ "checkpoint_confound_RULED_OUT": {
+  "verdict": "RULED OUT. THE THREE FIELDS THAT CARRY THE INFERENCE AGREED BY NAME: patch_size 16 on both, merge_size 2 on both, longest_edge 16777216 on both. Also agreeing: temporal_patch_size 2, shortest_edge 65536, image_processor_type Qwen2VLImageProcessorFast.",
+  "why_named_rather_than_'configs match'": "the Orin's point was that ONE differing field would have been the real confound, and a property of the released checkpoints that no rerun could address. Naming the three is what closes it; 'the configs match' would not say which fields were load-bearing.",
+  "cloud_snapshot": "0cfaf48183f594c314753d30a4c4974bc75f3ccb, transformers 5.17.0 on that box; the device box carries transformers 5.20.2. Different transformers versions, identical processor config.",
+  "pixel_to_token_rule": "(H/16)*(W/16)/(2*2), i.e. area/1024, identical on both sides. Qwen3-VL uses patch_size 16 where Qwen2-VL used 14, and both sides are 16."
+ },
+ "exclusion_sets_are_distinct": {
+  "rule": "the two sets are NOT merged into one 'excluded' flag, because they damage different axes and a reader must be able to tell a timing artifact from a difference in what the models were shown.",
+  "shared_images": {
+   "n": "36 VizWiz + 16 EgoThink",
+   "mechanism": "warm multimodal encoder cache, keyed by image content",
+   "axis": "TTFT ONLY; accuracy unaffected, since both models answered the same pixels"
+  },
+  "below_min_pixels": {
+   "n": "28 VizWiz",
+   "mechanism": "image area below the 65,536 px floor, so the device upscaled and the cloud did not",
+   "axis": "ACCURACY AND TTFT"
+  },
+  "the_correction_that_matters": "the narrower framing was that the 28 affect pixel-matched or prompt_tokens comparisons. They affect ACCURACY too: on those 28 the two models were shown DIFFERENT PIXELS, so a 2x2 cell there reflects partly that the device got a larger rendering of the same photo. They are therefore excluded from, or reported separately in, the accuracy statistics as well.",
+  "implemented": "ss1_compare.py now emits FOUR variants of every statistic: full_set, shared_images_excluded, below_min_pixels_excluded, and fully_clean (the paired set minus the UNION). It reports the intersection and the union explicitly, so the clean subset is 4,319 minus the union rather than minus 64 unless the sets are disjoint.",
+  "two_further_checks_implemented": [
+   "the 28's answer-type and answerable breakdown with PCT OF STRATUM, since 0.65 percent of the pool can be several percent of one stratum and small badly-framed photos are exactly VizWiz's hard cases",
+   "a LOCALISATION TEST on prompt_tokens: equality is pre-stated to hold on 4,291 of 4,319 and to fail on exactly the 28. The test reports whether the differing set EQUALS the below-floor set, and lists any qid that differs without being below the floor, which would be unexplained by the floor and would point at the chat template or something unaccounted for."
+  ]
  }
 }

@@ -18,6 +18,7 @@ Usage:
 """
 from __future__ import annotations
 import argparse, json, random, statistics
+import collections
 from collections import defaultdict
 from pathlib import Path
 
@@ -98,7 +99,28 @@ def score_of(r, dataset):
     raise KeyError("no score field in row %r: %r" % (r.get("qid"), sorted(s)))
 
 
-def prompt_token_parity(qids, D, C):
+def below_pixels_strata(below, D, qids):
+    """Do the sub-floor images CLUSTER by stratum?
+
+    Small, badly framed photos are exactly VizWiz's hard cases, so a set that is 0.65 percent of
+    the pool can be several percent of one stratum. The mixing weight is what makes a small
+    exclusion able to move a stratum estimate, which is the same point that made the per-dimension
+    check worth running on EgoThink.
+    """
+    tot = collections.Counter()
+    hit = collections.Counter()
+    for q in qids:
+        for key in ("answer_type", "answerable"):
+            k = "%s=%s" % (key, D[q].get(key))
+            tot[k] += 1
+            if q in below:
+                hit[k] += 1
+    return {k: dict(n_below=hit.get(k, 0), n_stratum=tot[k],
+                    pct_of_stratum=round(100.0 * hit.get(k, 0) / tot[k], 3))
+            for k in sorted(tot)}
+
+
+def prompt_token_parity(qids, D, C, below=frozenset()):
     """D142 resolution check: compare prompt_tokens per question between the two runs.
 
     prompt_tokens is TEXT tokens PLUS VISUAL tokens, so a difference has two possible sources and
@@ -142,6 +164,21 @@ def prompt_token_parity(qids, D, C):
                  "CONSTANT OFFSET of %d on every question: points at the CHAT TEMPLATE, not the "
                  "pixel budget, so NOT a resolution confound" % uniq[0] if len(uniq) == 1 else
                  "VARYING DIFFERENCE: decomposed below"))
+    # THE LOCALISATION TEST, pre-stated: equality is expected to hold everywhere EXCEPT the
+    # sub-floor images, and to fail on exactly those. If it fails anywhere else, the cause is the
+    # chat template or something unaccounted for, NOT the pixel floor.
+    if below:
+        diff_q = {q for q, (d, c) in zip([q for q in qids
+                                          if D[q].get("prompt_tokens") and C[q].get("prompt_tokens")],
+                                         pairs) if c != d}
+        out["localisation_test"] = dict(
+            n_differing=len(diff_q), n_below_min_pixels=len(below),
+            differing_set_equals_below_set=(diff_q == set(below) & set(qids)),
+            differing_but_NOT_below=sorted(diff_q - set(below))[:20],
+            below_but_NOT_differing=sorted((set(below) & set(qids)) - diff_q)[:20],
+            reading=("if differing == below, the floor explains the divergence exactly and nothing "
+                     "else does. Any qid in differing_but_NOT_below is unexplained by the floor and "
+                     "points at the chat template or at something unaccounted for."))
     if len(uniq) > 1:
         n = len(pairs)
         mdev = statistics.fmean(dev)
@@ -222,8 +259,13 @@ def main():
     ap.add_argument("--device-judge")
     ap.add_argument("--cloud-judge")
     ap.add_argument("--shared-images", action="append", default=[],
-                    help="JSON list of qids whose image CONTENT repeats an earlier image in run "
-                         "order. Applied to BOTH columns or NEITHER.")
+                    help="qids whose image CONTENT repeats an earlier image in run order. Warm "
+                         "encoder cache: damages TTFT ONLY. Applied to BOTH columns or NEITHER.")
+    ap.add_argument("--below-min-pixels",
+                    help="qids whose image area is below the 65,536 px min_pixels floor, so the "
+                         "DEVICE upscaled and the cloud did not. The two models were shown "
+                         "DIFFERENT PIXELS: this damages ACCURACY AND TTFT, not only token counts. "
+                         "Kept as a SEPARATE set from --shared-images on purpose.")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
 
@@ -241,13 +283,31 @@ def main():
             shared |= set(v)
         else:
             # The H100 marks this a CONSTRUCTED BOUND: the questions that COULD be served warm by
-            # the multimodal cache. The aggregate mm_cache_hits counter gives a COUNT without
-            # identities, so this is a candidate set, not an observed set, on BOTH sides.
+            # the multimodal cache. Upgrades to a CENSUS only if the final mm_cache_hits equals N.
             for k in ("repeat_questions_possibly_warm", "qids", "shared_qids"):
                 if isinstance(v.get(k), list):
                     shared |= set(v[k])
                     break
-    kept = [q for q in qids if q not in shared]
+
+    below = set()
+    below_rows = []
+    if a.below_min_pixels:
+        v = json.loads(Path(a.below_min_pixels).read_text())
+        items = v if isinstance(v, list) else (v.get("below_min_pixels") or v.get("items")
+                                               or v.get("qids") or [])
+        for it in items:
+            if isinstance(it, str):
+                below.add(it)
+            elif isinstance(it, dict) and it.get("qid"):
+                below.add(it["qid"])
+                below_rows.append(it)
+
+    # THE TWO SETS ARE NOT MERGED. They damage different axes and a reader must be able to tell a
+    # timing artifact from a difference in what the models were shown.
+    union = shared | below
+    kept_shared = [q for q in qids if q not in shared]
+    kept_below = [q for q in qids if q not in below]
+    kept_clean = [q for q in qids if q not in union]
 
     dj = {}
     if a.device_judge:
@@ -264,6 +324,28 @@ def main():
                     "here, including by implication in ordering or framing."),
         pairing=dict(n_device=len(D), n_cloud=len(C), n_paired=len(qids),
                      n_device_only=len(set(D) - set(C)), n_cloud_only=len(set(C) - set(D))),
+        exclusion_sets=dict(
+            note=("TWO DISTINCT SETS, deliberately NOT merged into one 'excluded' flag, because "
+                  "they damage different axes."),
+            shared_images=dict(
+                n=len(shared), n_in_paired=len(qids) - len(kept_shared),
+                mechanism="warm multimodal encoder cache, keyed by image CONTENT",
+                axis_affected="TTFT ONLY; accuracy is unaffected, both models answered the same "
+                              "pixels"),
+            below_min_pixels=dict(
+                n=len(below), n_in_paired=len(qids) - len(kept_below),
+                mechanism="image area below the 65,536 px min_pixels floor, so the DEVICE upscaled "
+                          "to the floor and the cloud (floor 4,096) did not",
+                axis_affected="ACCURACY AND TTFT. The two models were shown DIFFERENT PIXELS, so a "
+                              "2x2 cell on one of these reflects partly that the device got a "
+                              "larger rendering of the same photo. This is NOT only a token-count "
+                              "issue."),
+            overlap=dict(n_intersection=len(shared & below),
+                         n_union=len(union),
+                         disjoint=(len(shared & below) == 0),
+                         note="the fully clean subset is the paired set minus the UNION, not minus "
+                              "the sum of the two sizes unless they are disjoint."),
+            fully_clean_n=len(kept_clean)),
         shared_image_exclusion=dict(
             n_shared_qids_supplied=len(shared), n_shared_in_paired=len(qids) - len(kept),
             rule=("the duplicate-photo structure is a property of VIZWIZ VAL ITSELF, 34 groups of "
@@ -282,9 +364,15 @@ def main():
                 "are in file CONTENT under different filenames, and a cache keyed by content does "
                 "not care what the identifier says. Identifier-based deduplication cannot see this "
                 "class at all; the stronger form, hashing file contents, is what found it.")),
-        prompt_token_parity=prompt_token_parity(qids, D, C),
+        prompt_token_parity=prompt_token_parity(qids, D, C, below),
+        below_min_pixels_strata=(below_pixels_strata(below, D, qids)
+                                 if below and a.dataset == "vizwiz" else None),
         full_set=_analyse(qids, D, C, a.dataset, cut, dj, jc),
-        shared_images_excluded=(_analyse(kept, D, C, a.dataset, cut, dj, jc) if shared else None),
+        shared_images_excluded=(_analyse(kept_shared, D, C, a.dataset, cut, dj, jc)
+                                if shared else None),
+        below_min_pixels_excluded=(_analyse(kept_below, D, C, a.dataset, cut, dj, jc)
+                                   if below else None),
+        fully_clean=(_analyse(kept_clean, D, C, a.dataset, cut, dj, jc) if union else None),
         ttft_condition=dict(
             device_host="Orin, vLLM, idle, one request at a time, cold per image.",
             device_host_attribution_source=(
