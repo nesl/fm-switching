@@ -1,0 +1,71 @@
+{
+ "study": "StudySS1",
+ "pass_": "judge_coverage_and_missingness",
+ "device": {
+  "n": 700,
+  "n_parsed": 682,
+  "n_unparsed": 18,
+  "unparsed_rate": 0.02571,
+  "unparsed_rate_ci95": [
+   0.0163,
+   0.0403
+  ],
+  "containment_mean_parsed": 0.4839,
+  "containment_mean_unparsed": 0.0,
+  "containment_gap_unparsed_minus_parsed": -0.4839,
+  "judge_mean_own_parsed": 0.7353,
+  "unparsed_by_dimension": {
+   "Activity": 2,
+   "Localization_location": 2,
+   "Localization_spatial": 1,
+   "Object_affordance": 5,
+   "Object_attribute": 2,
+   "Object_existence": 1,
+   "Planning_navigation": 1,
+   "Reasoning_counting": 4
+  }
+ },
+ "cloud": {
+  "n": 700,
+  "n_parsed": 679,
+  "n_unparsed": 21,
+  "unparsed_rate": 0.03,
+  "unparsed_rate_ci95": [
+   0.0197,
+   0.0454
+  ],
+  "containment_mean_parsed": 0.4904,
+  "containment_mean_unparsed": 0.0476,
+  "containment_gap_unparsed_minus_parsed": -0.4428,
+  "judge_mean_own_parsed": 0.7968,
+  "unparsed_by_dimension": {
+   "Activity": 2,
+   "Forecasting": 1,
+   "Localization_location": 1,
+   "Localization_spatial": 1,
+   "Object_affordance": 2,
+   "Object_existence": 2,
+   "Planning_assistance": 1,
+   "Planning_navigation": 6,
+   "Reasoning_comparing": 1,
+   "Reasoning_counting": 3,
+   "Reasoning_situated": 1
+  }
+ },
+ "overlap": {
+  "n_unparsed_device": 18,
+  "n_unparsed_cloud": 21,
+  "n_intersection": 5,
+  "n_union": 34,
+  "disjoint": false,
+  "reading": "same questions failing on both sides leaves the paired set intact; disjoint failures remove the union and shrink it twice over."
+ },
+ "paired": {
+  "n_paired_parsed": 666,
+  "judge_mean_device_on_pair": 0.7402,
+  "judge_mean_cloud_on_pair": 0.8026,
+  "filter_effect_note": "compare each side's judge_mean_own_parsed against its mean on the pair. A shift means the pairing filter is not neutral on the reported quantity.",
+  "device_shift_pair_minus_own": 0.0049,
+  "cloud_shift_pair_minus_own": 0.0058
+ }
+}

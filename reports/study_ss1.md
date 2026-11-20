@@ -507,3 +507,83 @@ who is right is detectable.
 
 **No verdict and no threshold.** The disagreement rate is a fact about the data that the intervals
 do not convey; what it implies for dataset qualification is the user's call.
+
+---
+
+# EgoThink, the judge column: the two scorers do not agree
+
+**Mistral-7B-Instruct-v0.2 judge, native 0 / 0.5 / 1 scale, NO binarisation.** Same script, same
+prompt, same post-fix parser on both sides. Paired on the **666** questions where both sides
+produced a readable rating.
+
+| scorer | device | cloud | paired diff | 95% CI | excludes zero |
+|---|---|---|---|---|---|
+| containment | 0.4714 | 0.4771 | +0.0057 | [−0.0229, +0.0343] | **no** |
+| **judge (native)** | **0.7402** | **0.8026** | **+0.0623** | **[+0.0338, +0.0901]** | **yes** |
+
+**The two scorers give different answers on the same 700 questions.** Containment finds no
+detectable difference; the judge finds +0.062 with an interval clear of zero. Both are reported and
+neither is adjudicated here.
+
+**This is why two scorers were required rather than one.** It also coheres with the pre-registered
+finding from the device-side judge pass: containment is weakest exactly where answers are long and
+free-form, so on the dimensions where the gap is largest it is the scorer least able to see one.
+
+Device rating distribution: 107 zeros, 132 halves, 427 ones.
+
+## By dimension, device to cloud on the judge's native scale
+
+| dimension | device | cloud | gap |
+|---|---|---|---|
+| Planning_assistance | 0.5408 | 0.7245 | **+0.184** |
+| Reasoning_comparing | 0.6224 | 0.8061 | **+0.184** |
+| Object_attribute | 0.8542 | 0.9375 | +0.083 |
+| Planning_navigation | 0.4651 | 0.5465 | +0.081 |
+| Reasoning_counting | 0.6778 | 0.7333 | +0.056 |
+| Object_affordance | 0.7841 | 0.8295 | +0.045 |
+| Localization_spatial | 0.8125 | 0.8542 | +0.042 |
+| Activity | 0.7784 | 0.8196 | +0.041 |
+| Forecasting | 0.6768 | 0.7172 | +0.040 |
+| Localization_location | 0.9583 | 0.9896 | +0.031 |
+| Object_existence | 0.8936 | 0.9149 | +0.021 |
+| Reasoning_situated | 0.8265 | 0.8061 | **−0.020** |
+
+The two largest gaps are `Planning_assistance` and `Reasoning_comparing`. `Reasoning_situated` is
+the one negative.
+
+## The judge's unparsed set is NOT missing at random, and the bias is nearly symmetric
+
+The parse failure is the **judge** declining to emit a readable rating, not the answering model
+failing, so it could concentrate where the rating is least certain. Measured rather than assumed,
+using **containment as the yardstick because it is computable for every question whether or not a
+rating was produced**:
+
+| side | unparsed | rate | containment, parsed | containment, unparsed | gap |
+|---|---|---|---|---|---|
+| device | 18 / 700 | 2.571% | 0.4839 | **0.0000** | −0.484 |
+| cloud | 21 / 700 | 3.000% | 0.4904 | **0.0476** | −0.443 |
+
+**The exclusion is strongly informative.** All 18 device-side unparsed questions have containment
+0, and 20 of 21 on the cloud side. The judge hedges almost exclusively on answers that containment
+scores wrong, so dropping the unparsed set **removes near-exclusively failures and inflates both
+judge means**.
+
+**But the bias is nearly symmetric, so the paired difference is barely affected.** The two unparsed
+sets are **not** disjoint: intersection 5, union 34, leaving 666 paired. Restricting each side to
+the pair shifts its own mean by **+0.0049 (device)** and **+0.0058 (cloud)** — so the *differential*
+is **+0.0009**, against a reported difference of +0.0623.
+
+So the direction is known and the magnitude bounded: both means are inflated by roughly 0.005 in
+absolute terms, and the paired difference by about 0.001. **The judge means should not be read as
+estimates of absolute quality**, since they condition on the judge having been willing to rate.
+The paired difference is robust to it.
+
+---
+
+# What is and is not judge-dependent
+
+`egothink_compare_nocloudjudge.json` was committed before the judge finished, so the containment
+deliverable exists independently. **Judge-dependent:** the native-scale judge means, the judge
+paired difference, and the by-dimension judge table above. **Not judge-dependent:** every accuracy
+figure, every 2x2 and cut sensitivity, every TTFT figure, both prompt-token parity results, and the
+disagreement rate.
