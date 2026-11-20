@@ -156,7 +156,7 @@ was already satisfied. Scored with flash's three-type scorer (41b0eae); pre-fix 
 | arm | n | seed | dashcams all meet | robots on time | SS on time (2 s) | capacity | mm gate (hits = same-ID repeats; SS repeats) |
 |---|---|---|---|---|---|---|---|
 | b7 | 16 | 0 | yes | 17 of 24 | 319 of 356 | no | 405 = 405; 0 |
-| mooncake | 16 | 0 | yes | 17 of 24 | 319 of 356 | no | pass |
+| mooncake | 16 | 0 | yes | 17 of 24 | 319 of 356 | no | 405 = 405; 0 |
 | b7 | 16 | 4 | yes | 14 of 20 | 332 of 357 | no | 285 = 285; 0 |
 | eco-llm | 16 | 4 | yes | 14 of 20 | 294 of 357 | no | 345 = 345; 0 |
 | mooncake | 16 | 4 | yes | 14 of 20 | 332 of 357 | no | 285 = 285; 0 |
