@@ -182,3 +182,127 @@ Kit scripts under `experiments/casestudy/`. This report. EXPERIMENTS row StudySS
 Next: flash runs the Mistral-7B judge on EgoThink (scorer a) alongside OpenEQA, and the H100 runs
 this identical kit with the 32B so the device-vs-cloud gap can be measured and the SS dataset
 qualified.
+
+---
+
+# VizWiz: device 4B against cloud 32B (D142)
+
+**Numbers only. No qualification threshold and no verdict:** D136's gate call is the user's and is
+deliberately not made here, including by implication in ordering or framing.
+
+Device: Qwen3-VL-4B on the Orin under vLLM 0.20.0+cu126, idle, one request at a time, cold per
+image. Cloud: Qwen3-VL-32B (`0cfaf481...`, served as 32BI) on H100 NVL under vLLM 0.31.0, server
+started fresh, idle, one request at a time, cold per image. Both 4,319 scored, 0 errors, greedy
+`temperature=0 seed=0`. `run_order` verified as manifest order on both sides, 4,319 of 4,319.
+
+## Two denominators, because the exclusions damage different axes
+
+| set | n | mechanism | axis |
+|---|---|---|---|
+| shared images | 36 | warm multimodal encoder cache, keyed by image content | **TTFT only** |
+| below min pixels | 28 | image area under the 65,536 px floor, device upscaled and cloud did not | **accuracy and TTFT** |
+
+Disjoint (intersection 0, union 64). So **accuracy n = 4,291** (minus the 28 only) and
+**TTFT n = 4,255** (minus both). A single excluded figure would either drop 36 questions from
+accuracy for no reason or keep 36 contaminated ones in TTFT.
+
+**The 36 are a CENSUS, not a bound.** `mm_cache_hits_total = 36` against 36 candidates, so k = N:
+every candidate fired, none were evicted, and the identities follow from the position matches
+(4 at request 151, 4 at 205, 13 at 731). The exclusion is exact rather than conservative.
+
+## Accuracy
+
+| | n | device | cloud | paired diff (cloud − device) | 95% CI |
+|---|---|---|---|---|---|
+| full set | 4,319 | 0.6587 | 0.6650 | **+0.0063** | [−0.0044, +0.0169] |
+| clean | 4,291 | 0.6584 | 0.6656 | **+0.0072** | [−0.0035, +0.0180] |
+
+Paired bootstrap, 10,000 resamples, resampling question indices so the pairing is preserved.
+**Both intervals include zero.**
+
+## The 2x2, clean (n = 4,291), VQA accuracy cut stated at 0.5
+
+| | n |
+|---|---|
+| both right | 2,523 |
+| **cloud only** | **380** |
+| **device only** | **349** |
+| both wrong | 1,039 |
+
+**The device-only cell is 349 of 4,291, against 380 cloud-only.** These are questions the 4B
+answers and the 32B does not. Reported plainly because nothing else in the suite measures it and it
+bears on D39's "per-request gain may be zero or negative".
+
+Cut sensitivity, since VQA accuracy is graded and any 2x2 needs a stated cut:
+
+| cut | both right | cloud only | device only | both wrong |
+|---|---|---|---|---|
+| 0.3 | 2,885 | 367 | 344 | 695 |
+| 0.5 | 2,523 | 380 | 349 | 1,039 |
+| 0.7 | 2,258 | 344 | 309 | 1,380 |
+| 1.0 | 1,986 | 304 | 262 | 1,739 |
+
+The two off-diagonal cells stay within 35 to 42 of each other at every cut.
+
+## By stratum, clean
+
+| stratum | n | device | cloud | diff | 95% CI |
+|---|---|---|---|---|---|
+| answer_type = unanswerable | 1,374 | 0.8354 | 0.8600 | **+0.0245** | [+0.0075, +0.0416] |
+| answer_type = other | 2,675 | 0.5564 | 0.5599 | +0.0035 | [−0.0103, +0.0178] |
+| answer_type = yes/no | 194 | 0.8119 | 0.7639 | −0.0479 | [−0.1000, +0.0052] |
+| answer_type = number | 48 | 0.6542 | 0.5938 | −0.0604 | [−0.1875, +0.0625] |
+| answerable = 0 | 1,374 | 0.8354 | 0.8600 | **+0.0245** | [+0.0075, +0.0416] |
+| answerable = 1 | 2,917 | 0.5750 | 0.5740 | −0.0010 | [−0.0144, +0.0124] |
+
+**Answerable-only is −0.0010 with CI [−0.0144, +0.0124].** The one interval excluding zero is
+`unanswerable`, at +0.0245.
+
+## TTFT
+
+| | n | device p50 | cloud p50 |
+|---|---|---|---|
+| clean | 4,255 | 0.8618 s | 0.3225 s |
+
+**Both columns are labelled UNVERIFIED-COLD**, for different reasons. The cloud's prefix cache
+reports **6,702,660 tokens queried with 0 hits**, which is a strongly non-vacuous zero but is not a
+positive control: it rules out the cache never being consulted, not that a hit would have
+registered. The device column is **permanently** unverified-cold, since vLLM 0.20.0 does not
+populate `cached_tokens` at all and the SS1 runner captured neither that nor the `/metrics` deltas.
+Stack note: these device figures are the ORIN3 vLLM stack, whereas the committed device baseline
+for robot recall is the ORIN2 in-process harness (D87, unexercised per D103c); the two must not be
+placed side by side as one device's numbers.
+
+## The resolution confound: measured, and the prediction held
+
+Pre-registered before the run: equality on 4,291 of 4,319, divergence on exactly the 28, device
+higher on each.
+
+- **identical on 4,291 of 4,319 (99.35%)**
+- **the differing set is EXACTLY the 28.** `differing_but_NOT_below` is empty and
+  `below_but_NOT_differing` is empty.
+- **the device is higher on every one of the 28** (cloud − device is negative on all, 0 elsewhere).
+
+So the floor explains the divergence completely and nothing else contributes. The processor configs
+agree on the three fields that carry the inference, **`patch_size` 16, `merge_size` 2 and
+`longest_edge` 16777216**, with `temporal_patch_size` 2 and the same processor class also agreeing,
+so the checkpoint-level confound is ruled out.
+
+**One part of the prediction was wrong.** I bounded the per-item difference at 60 visual tokens
+(64 − 4); the observed maximum is **74**. The reason is that `min_pixels` is a *minimum*, and the
+upscale is then rounded up to a whole number of patch-merge blocks, so the device's visual count
+exceeds 64 rather than equalling it. The bound was right in form and 14 tokens too tight.
+
+Scaling test on **effective** post-cap area, which replaced the earlier `prompt_tokens` proxy:
+Pearson r = 0.157, mean difference −3.135 in the smallest area decile and **0.000 in the largest**.
+Consistent with a floor that acts only on small images.
+
+The 28 by stratum, mild: other 16 of 2,691 (0.59%), unanswerable 11 of 1,385 (0.79%), yes/no 1 of
+195 (0.51%), number 0 of 48. Under 1% of every stratum.
+
+## Not produced
+
+**By image-quality flag.** Not producible: the quality-issues release and VizWiz-VQA val use
+different native filename numberings and no published crosswalk exists. See `compare_gates.json`
+for the full diagnosis, including why the ~28000 offset is well motivated and still unverified, and
+why the `v2_` prefix does not supply the missing 1,152.

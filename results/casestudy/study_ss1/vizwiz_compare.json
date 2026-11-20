@@ -1,0 +1,1031 @@
+{
+ "study": "StudySS1",
+ "pass_": "device_vs_cloud_compare",
+ "dataset": "vizwiz",
+ "no_verdict": "numbers only. D136's gate call is the user's and is deliberately not made here, including by implication in ordering or framing.",
+ "pairing": {
+  "n_device": 4319,
+  "n_cloud": 4319,
+  "n_paired": 4319,
+  "n_device_only": 0,
+  "n_cloud_only": 0
+ },
+ "exclusion_sets": {
+  "note": "TWO DISTINCT SETS, deliberately NOT merged into one 'excluded' flag, because they damage different axes.",
+  "shared_images": {
+   "n": 36,
+   "n_in_paired": 36,
+   "mechanism": "warm multimodal encoder cache, keyed by image CONTENT",
+   "axis_affected": "TTFT ONLY; accuracy is unaffected, both models answered the same pixels"
+  },
+  "below_min_pixels": {
+   "n": 28,
+   "n_in_paired": 28,
+   "mechanism": "image area below the 65,536 px min_pixels floor, so the DEVICE upscaled to the floor and the cloud (floor 4,096) did not",
+   "axis_affected": "ACCURACY AND TTFT. The two models were shown DIFFERENT PIXELS, so a 2x2 cell on one of these reflects partly that the device got a larger rendering of the same photo. This is NOT only a token-count issue."
+  },
+  "overlap": {
+   "n_intersection": 0,
+   "n_union": 64,
+   "disjoint": true,
+   "note": "the fully clean subset is the paired set minus the UNION, not minus the sum of the two sizes unless they are disjoint."
+  },
+  "fully_clean_n": 4255
+ },
+ "shared_image_exclusion": {
+  "n_shared_qids_supplied": 36,
+  "n_shared_in_paired": 36,
+  "rule": "the duplicate-photo structure is a property of VIZWIZ VAL ITSELF, 34 groups of byte-identical photos under different filenames, so it was present on BOTH sides. The exclusion is therefore applied to BOTH columns or NEITHER: excluding from the cloud column alone would compare a cleaned column against an uncleaned one, an asymmetry introduced by the cleaning rather than by the data.",
+  "order_check": "the device ran in EXACT manifest order for both datasets, verified: manifest qid sequence == device row sequence, 4,319 of 4,319 for VizWiz and 700 of 700 for EgoThink. 'Repeats an image seen earlier' depends on order, so if the cloud also ran manifest order the candidate set is the SAME 52 and the matched exclusion is exact rather than a union. The cloud's order must be confirmed from its run meta.",
+  "identifier_dedup_would_have_missed_this": "by image ID VizWiz val is 4,319 unique on 4,319 and passes clean. The duplicates are in file CONTENT under different filenames, and a cache keyed by content does not care what the identifier says. Identifier-based deduplication cannot see this class at all; the stronger form, hashing file contents, is what found it."
+ },
+ "prompt_token_parity": {
+  "n": 4319,
+  "n_identical": 4291,
+  "frac_identical": 0.993517,
+  "diff_cloud_minus_device": {
+   "min": -74,
+   "median": 0,
+   "max": 0,
+   "mean": -0.313,
+   "n_distinct": 12,
+   "direction": "mixed"
+  },
+  "verdict": "VARYING DIFFERENCE: decomposed below",
+  "localisation_test": {
+   "n_differing": 28,
+   "n_below_min_pixels": 28,
+   "differing_set_equals_below_set": true,
+   "differing_but_NOT_below": [],
+   "below_but_NOT_differing": [],
+   "reading": "if differing == below, the floor explains the divergence exactly and nothing else does. Any qid in differing_but_NOT_below is unexplained by the floor and points at the chat template or at something unaccounted for."
+  },
+  "scaling_test_real_area": {
+   "regressor": "EFFECTIVE pixel area after the kit's 2048 cap (not the staged area)",
+   "n": 4319,
+   "pearson_r": 0.157,
+   "mean_diff_smallest_decile": -3.135,
+   "mean_diff_largest_decile": 0.0,
+   "proxy_dropped": "the prompt_tokens proxy is no longer used; real areas are available."
+  },
+  "scaling_test": {
+   "proxy_for_image_size": "the DEVICE's own prompt_tokens (declared proxy, see docstring)",
+   "pearson_r_diff_vs_device_prompt_tokens": 0.1493,
+   "mean_diff_in_smallest_decile": -3.135,
+   "mean_diff_in_largest_decile": 0.0,
+   "reading": "a near-zero r with a flat decile contrast points at the template or at question-text length; an r away from zero with a decile contrast in the same direction points at the PIXEL BUDGET, which is the confound."
+  }
+ },
+ "below_min_pixels_strata": {
+  "answer_type=number": {
+   "n_below": 0,
+   "n_stratum": 48,
+   "pct_of_stratum": 0.0
+  },
+  "answer_type=other": {
+   "n_below": 16,
+   "n_stratum": 2691,
+   "pct_of_stratum": 0.595
+  },
+  "answer_type=unanswerable": {
+   "n_below": 11,
+   "n_stratum": 1385,
+   "pct_of_stratum": 0.794
+  },
+  "answer_type=yes/no": {
+   "n_below": 1,
+   "n_stratum": 195,
+   "pct_of_stratum": 0.513
+  },
+  "answerable=0": {
+   "n_below": 11,
+   "n_stratum": 1385,
+   "pct_of_stratum": 0.794
+  },
+  "answerable=1": {
+   "n_below": 17,
+   "n_stratum": 2934,
+   "pct_of_stratum": 0.579
+  }
+ },
+ "full_set": {
+  "n_pairs": 4319,
+  "device_accuracy": {
+   "mean": 0.658717,
+   "n": 4319,
+   "ci95": [
+    0.645937,
+    0.671521
+   ]
+  },
+  "cloud_accuracy": {
+   "mean": 0.665015,
+   "n": 4319,
+   "ci95": [
+    0.652119,
+    0.677587
+   ]
+  },
+  "paired_difference": {
+   "delta_cloud_minus_device": 0.006298,
+   "ci95": [
+    -0.004445,
+    0.016902
+   ],
+   "n_pairs": 4319,
+   "n_boot": 10000
+  },
+  "two_by_two": {
+   "both_right": 2539,
+   "cloud_only": 380,
+   "device_only": 353,
+   "both_wrong": 1047,
+   "n": 4319,
+   "cut": 0.5
+  },
+  "two_by_two_cut_sensitivity": {
+   "0.3": {
+    "both_right": 2903,
+    "cloud_only": 369,
+    "device_only": 348,
+    "both_wrong": 699,
+    "n": 4319,
+    "cut": 0.3
+   },
+   "0.5": {
+    "both_right": 2539,
+    "cloud_only": 380,
+    "device_only": 353,
+    "both_wrong": 1047,
+    "n": 4319,
+    "cut": 0.5
+   },
+   "0.7": {
+    "both_right": 2272,
+    "cloud_only": 344,
+    "device_only": 314,
+    "both_wrong": 1389,
+    "n": 4319,
+    "cut": 0.7
+   },
+   "1.0": {
+    "both_right": 1997,
+    "cloud_only": 304,
+    "device_only": 266,
+    "both_wrong": 1752,
+    "n": 4319,
+    "cut": 1.0
+   }
+  },
+  "ttft": {
+   "device": {
+    "n": 4319,
+    "p50": 0.856,
+    "p90": 1.4117,
+    "mean": 1.0942,
+    "min": 0.1331,
+    "max": 2.4428
+   },
+   "cloud": {
+    "n": 4319,
+    "p50": 0.3117,
+    "p90": 0.4688,
+    "mean": 0.3611,
+    "min": 0.0623,
+    "max": 0.8831
+   },
+   "n_ttft": 4319,
+   "denominator_note": "TTFT uses its OWN denominator when the shared-image set is supplied: those questions are a warm-cache timing artifact and must leave the TTFT column, but they do NOT contaminate accuracy and are kept in it."
+  },
+  "by_stratum": {
+   "answer_type=number": {
+    "device": {
+     "mean": 0.654167,
+     "n": 48,
+     "ci95": [
+      0.535417,
+      0.76875
+     ]
+    },
+    "cloud": {
+     "mean": 0.59375,
+     "n": 48,
+     "ci95": [
+      0.460417,
+      0.716667
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.060417,
+     "ci95": [
+      -0.1875,
+      0.0625
+     ],
+     "n_pairs": 48,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 26,
+     "cloud_only": 4,
+     "device_only": 6,
+     "both_wrong": 12,
+     "n": 48,
+     "cut": 0.5
+    }
+   },
+   "answer_type=other": {
+    "device": {
+     "mean": 0.556001,
+     "n": 2691,
+     "ci95": [
+      0.539465,
+      0.572501
+     ]
+    },
+    "cloud": {
+     "mean": 0.558268,
+     "n": 2691,
+     "ci95": [
+      0.541918,
+      0.574842
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.002267,
+     "ci95": [
+      -0.011929,
+      0.016537
+     ],
+     "n_pairs": 2691,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 1278,
+     "cloud_only": 266,
+     "device_only": 261,
+     "both_wrong": 886,
+     "n": 2691,
+     "cut": 0.5
+    }
+   },
+   "answer_type=unanswerable": {
+    "device": {
+     "mean": 0.836751,
+     "n": 1385,
+     "ci95": [
+      0.818051,
+      0.855235
+     ]
+    },
+    "cloud": {
+     "mean": 0.860794,
+     "n": 1385,
+     "ci95": [
+      0.843032,
+      0.878195
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.024043,
+     "ci95": [
+      0.006426,
+      0.040939
+     ],
+     "n_pairs": 1385,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 1092,
+     "cloud_only": 97,
+     "device_only": 64,
+     "both_wrong": 132,
+     "n": 1385,
+     "cut": 0.5
+    }
+   },
+   "answer_type=yes/no": {
+    "device": {
+     "mean": 0.812821,
+     "n": 195,
+     "ci95": [
+      0.765641,
+      0.858462
+     ]
+    },
+    "cloud": {
+     "mean": 0.765128,
+     "n": 195,
+     "ci95": [
+      0.715385,
+      0.814359
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.047692,
+     "ci95": [
+      -0.098974,
+      0.004103
+     ],
+     "n_pairs": 195,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 143,
+     "cloud_only": 13,
+     "device_only": 22,
+     "both_wrong": 17,
+     "n": 195,
+     "cut": 0.5
+    }
+   },
+   "answerable=0": {
+    "device": {
+     "mean": 0.836751,
+     "n": 1385,
+     "ci95": [
+      0.818051,
+      0.855235
+     ]
+    },
+    "cloud": {
+     "mean": 0.860794,
+     "n": 1385,
+     "ci95": [
+      0.843032,
+      0.878195
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.024043,
+     "ci95": [
+      0.006426,
+      0.040939
+     ],
+     "n_pairs": 1385,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 1092,
+     "cloud_only": 97,
+     "device_only": 64,
+     "both_wrong": 132,
+     "n": 1385,
+     "cut": 0.5
+    }
+   },
+   "answerable=1": {
+    "device": {
+     "mean": 0.574676,
+     "n": 2934,
+     "ci95": [
+      0.558862,
+      0.590525
+     ]
+    },
+    "cloud": {
+     "mean": 0.572597,
+     "n": 2934,
+     "ci95": [
+      0.556783,
+      0.588378
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.002079,
+     "ci95": [
+      -0.015678,
+      0.011282
+     ],
+     "n_pairs": 2934,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 1447,
+     "cloud_only": 283,
+     "device_only": 289,
+     "both_wrong": 915,
+     "n": 2934,
+     "cut": 0.5
+    }
+   }
+  }
+ },
+ "shared_images_excluded": {
+  "n_pairs": 4283,
+  "device_accuracy": {
+   "mean": 0.658347,
+   "n": 4283,
+   "ci95": [
+    0.645412,
+    0.671165
+   ]
+  },
+  "cloud_accuracy": {
+   "mean": 0.665071,
+   "n": 4283,
+   "ci95": [
+    0.652113,
+    0.677866
+   ]
+  },
+  "paired_difference": {
+   "delta_cloud_minus_device": 0.006724,
+   "ci95": [
+    -0.004133,
+    0.017534
+   ],
+   "n_pairs": 4283,
+   "n_boot": 10000
+  },
+  "two_by_two": {
+   "both_right": 2516,
+   "cloud_only": 378,
+   "device_only": 350,
+   "both_wrong": 1039,
+   "n": 4283,
+   "cut": 0.5
+  },
+  "two_by_two_cut_sensitivity": {
+   "0.3": {
+    "both_right": 2877,
+    "cloud_only": 367,
+    "device_only": 343,
+    "both_wrong": 696,
+    "n": 4283,
+    "cut": 0.3
+   },
+   "0.5": {
+    "both_right": 2516,
+    "cloud_only": 378,
+    "device_only": 350,
+    "both_wrong": 1039,
+    "n": 4283,
+    "cut": 0.5
+   },
+   "0.7": {
+    "both_right": 2253,
+    "cloud_only": 343,
+    "device_only": 312,
+    "both_wrong": 1375,
+    "n": 4283,
+    "cut": 0.7
+   },
+   "1.0": {
+    "both_right": 1980,
+    "cloud_only": 303,
+    "device_only": 264,
+    "both_wrong": 1736,
+    "n": 4283,
+    "cut": 1.0
+   }
+  },
+  "ttft": {
+   "device": {
+    "n": 4283,
+    "p50": 0.856,
+    "p90": 1.4112,
+    "mean": 1.0929,
+    "min": 0.1725,
+    "max": 2.4428
+   },
+   "cloud": {
+    "n": 4283,
+    "p50": 0.3121,
+    "p90": 0.4683,
+    "mean": 0.361,
+    "min": 0.0623,
+    "max": 0.8831
+   },
+   "n_ttft": 4283,
+   "denominator_note": "TTFT uses its OWN denominator when the shared-image set is supplied: those questions are a warm-cache timing artifact and must leave the TTFT column, but they do NOT contaminate accuracy and are kept in it."
+  },
+  "by_stratum": {
+   "answer_type=number": {
+    "device": {
+     "mean": 0.646809,
+     "n": 47,
+     "ci95": [
+      0.525532,
+      0.76383
+     ]
+    },
+    "cloud": {
+     "mean": 0.585106,
+     "n": 47,
+     "ci95": [
+      0.455319,
+      0.712766
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.061702,
+     "ci95": [
+      -0.189362,
+      0.065957
+     ],
+     "n_pairs": 47,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 25,
+     "cloud_only": 4,
+     "device_only": 6,
+     "both_wrong": 12,
+     "n": 47,
+     "cut": 0.5
+    }
+   },
+   "answer_type=other": {
+    "device": {
+     "mean": 0.555077,
+     "n": 2669,
+     "ci95": [
+      0.538704,
+      0.571562
+     ]
+    },
+    "cloud": {
+     "mean": 0.557962,
+     "n": 2669,
+     "ci95": [
+      0.541476,
+      0.574597
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.002885,
+     "ci95": [
+      -0.011278,
+      0.016898
+     ],
+     "n_pairs": 2669,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 1264,
+     "cloud_only": 265,
+     "device_only": 259,
+     "both_wrong": 881,
+     "n": 2669,
+     "cut": 0.5
+    }
+   },
+   "answer_type=unanswerable": {
+    "device": {
+     "mean": 0.837072,
+     "n": 1373,
+     "ci95": [
+      0.818208,
+      0.855499
+     ]
+    },
+    "cloud": {
+     "mean": 0.861326,
+     "n": 1373,
+     "ci95": [
+      0.843263,
+      0.878733
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.024253,
+     "ci95": [
+      0.007429,
+      0.041442
+     ],
+     "n_pairs": 1373,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 1084,
+     "cloud_only": 96,
+     "device_only": 63,
+     "both_wrong": 130,
+     "n": 1373,
+     "cut": 0.5
+    }
+   },
+   "answer_type=yes/no": {
+    "device": {
+     "mean": 0.81701,
+     "n": 194,
+     "ci95": [
+      0.769588,
+      0.860825
+     ]
+    },
+    "cloud": {
+     "mean": 0.769072,
+     "n": 194,
+     "ci95": [
+      0.719072,
+      0.816495
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.047938,
+     "ci95": [
+      -0.1,
+      0.004639
+     ],
+     "n_pairs": 194,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 143,
+     "cloud_only": 13,
+     "device_only": 22,
+     "both_wrong": 16,
+     "n": 194,
+     "cut": 0.5
+    }
+   },
+   "answerable=0": {
+    "device": {
+     "mean": 0.837072,
+     "n": 1373,
+     "ci95": [
+      0.818208,
+      0.855499
+     ]
+    },
+    "cloud": {
+     "mean": 0.861326,
+     "n": 1373,
+     "ci95": [
+      0.843263,
+      0.878733
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.024253,
+     "ci95": [
+      0.007429,
+      0.041442
+     ],
+     "n_pairs": 1373,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 1084,
+     "cloud_only": 96,
+     "device_only": 63,
+     "both_wrong": 130,
+     "n": 1373,
+     "cut": 0.5
+    }
+   },
+   "answerable=1": {
+    "device": {
+     "mean": 0.574021,
+     "n": 2910,
+     "ci95": [
+      0.558076,
+      0.589897
+     ]
+    },
+    "cloud": {
+     "mean": 0.572474,
+     "n": 2910,
+     "ci95": [
+      0.557045,
+      0.588007
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.001546,
+     "ci95": [
+      -0.015464,
+      0.011856
+     ],
+     "n_pairs": 2910,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 1432,
+     "cloud_only": 282,
+     "device_only": 287,
+     "both_wrong": 909,
+     "n": 2910,
+     "cut": 0.5
+    }
+   }
+  }
+ },
+ "clean": {
+  "n_pairs": 4291,
+  "device_accuracy": {
+   "mean": 0.658401,
+   "n": 4291,
+   "ci95": [
+    0.645444,
+    0.671335
+   ]
+  },
+  "cloud_accuracy": {
+   "mean": 0.665602,
+   "n": 4291,
+   "ci95": [
+    0.652785,
+    0.678187
+   ]
+  },
+  "paired_difference": {
+   "delta_cloud_minus_device": 0.007201,
+   "ci95": [
+    -0.003519,
+    0.018014
+   ],
+   "n_pairs": 4291,
+   "n_boot": 10000
+  },
+  "two_by_two": {
+   "both_right": 2523,
+   "cloud_only": 380,
+   "device_only": 349,
+   "both_wrong": 1039,
+   "n": 4291,
+   "cut": 0.5
+  },
+  "two_by_two_cut_sensitivity": {
+   "0.3": {
+    "both_right": 2885,
+    "cloud_only": 367,
+    "device_only": 344,
+    "both_wrong": 695,
+    "n": 4291,
+    "cut": 0.3
+   },
+   "0.5": {
+    "both_right": 2523,
+    "cloud_only": 380,
+    "device_only": 349,
+    "both_wrong": 1039,
+    "n": 4291,
+    "cut": 0.5
+   },
+   "0.7": {
+    "both_right": 2258,
+    "cloud_only": 344,
+    "device_only": 309,
+    "both_wrong": 1380,
+    "n": 4291,
+    "cut": 0.7
+   },
+   "1.0": {
+    "both_right": 1986,
+    "cloud_only": 304,
+    "device_only": 262,
+    "both_wrong": 1739,
+    "n": 4291,
+    "cut": 1.0
+   }
+  },
+  "ttft": {
+   "device": {
+    "n": 4255,
+    "p50": 0.8618,
+    "p90": 1.4114,
+    "mean": 1.0989,
+    "min": 0.1768,
+    "max": 2.4428
+   },
+   "cloud": {
+    "n": 4255,
+    "p50": 0.3225,
+    "p90": 0.4684,
+    "mean": 0.3628,
+    "min": 0.0635,
+    "max": 0.8831
+   },
+   "n_ttft": 4255,
+   "denominator_note": "TTFT uses its OWN denominator when the shared-image set is supplied: those questions are a warm-cache timing artifact and must leave the TTFT column, but they do NOT contaminate accuracy and are kept in it."
+  },
+  "by_stratum": {
+   "answer_type=number": {
+    "device": {
+     "mean": 0.654167,
+     "n": 48,
+     "ci95": [
+      0.535417,
+      0.76875
+     ]
+    },
+    "cloud": {
+     "mean": 0.59375,
+     "n": 48,
+     "ci95": [
+      0.460417,
+      0.716667
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.060417,
+     "ci95": [
+      -0.1875,
+      0.0625
+     ],
+     "n_pairs": 48,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 26,
+     "cloud_only": 4,
+     "device_only": 6,
+     "both_wrong": 12,
+     "n": 48,
+     "cut": 0.5
+    }
+   },
+   "answer_type=other": {
+    "device": {
+     "mean": 0.556411,
+     "n": 2675,
+     "ci95": [
+      0.539776,
+      0.572935
+     ]
+    },
+    "cloud": {
+     "mean": 0.559925,
+     "n": 2675,
+     "ci95": [
+      0.543514,
+      0.576336
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.003514,
+     "ci95": [
+      -0.01028,
+      0.017757
+     ],
+     "n_pairs": 2675,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 1274,
+     "cloud_only": 266,
+     "device_only": 257,
+     "both_wrong": 878,
+     "n": 2675,
+     "cut": 0.5
+    }
+   },
+   "answer_type=unanswerable": {
+    "device": {
+     "mean": 0.835444,
+     "n": 1374,
+     "ci95": [
+      0.816376,
+      0.854148
+     ]
+    },
+    "cloud": {
+     "mean": 0.859971,
+     "n": 1374,
+     "ci95": [
+      0.842067,
+      0.87722
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.024527,
+     "ci95": [
+      0.007496,
+      0.04163
+     ],
+     "n_pairs": 1374,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 1081,
+     "cloud_only": 97,
+     "device_only": 64,
+     "both_wrong": 132,
+     "n": 1374,
+     "cut": 0.5
+    }
+   },
+   "answer_type=yes/no": {
+    "device": {
+     "mean": 0.811856,
+     "n": 194,
+     "ci95": [
+      0.763918,
+      0.858247
+     ]
+    },
+    "cloud": {
+     "mean": 0.763918,
+     "n": 194,
+     "ci95": [
+      0.713918,
+      0.811856
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.047938,
+     "ci95": [
+      -0.1,
+      0.005155
+     ],
+     "n_pairs": 194,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 142,
+     "cloud_only": 13,
+     "device_only": 22,
+     "both_wrong": 17,
+     "n": 194,
+     "cut": 0.5
+    }
+   },
+   "answerable=0": {
+    "device": {
+     "mean": 0.835444,
+     "n": 1374,
+     "ci95": [
+      0.816376,
+      0.854148
+     ]
+    },
+    "cloud": {
+     "mean": 0.859971,
+     "n": 1374,
+     "ci95": [
+      0.842067,
+      0.87722
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.024527,
+     "ci95": [
+      0.007496,
+      0.04163
+     ],
+     "n_pairs": 1374,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 1081,
+     "cloud_only": 97,
+     "device_only": 64,
+     "both_wrong": 132,
+     "n": 1374,
+     "cut": 0.5
+    }
+   },
+   "answerable=1": {
+    "device": {
+     "mean": 0.575009,
+     "n": 2917,
+     "ci95": [
+      0.559308,
+      0.590881
+     ]
+    },
+    "cloud": {
+     "mean": 0.574049,
+     "n": 2917,
+     "ci95": [
+      0.558039,
+      0.590127
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.00096,
+     "ci95": [
+      -0.014433,
+      0.012376
+     ],
+     "n_pairs": 2917,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 1442,
+     "cloud_only": 283,
+     "device_only": 285,
+     "both_wrong": 907,
+     "n": 2917,
+     "cut": 0.5
+    }
+   }
+  }
+ },
+ "clean_denominators": {
+  "accuracy_n": 4291,
+  "ttft_n": 4255,
+  "rule": "TWO DENOMINATORS, NOT ONE. Accuracy excludes the below-floor set ONLY, because the shared-image repeats are a TTFT-only artifact and dropping them from accuracy would discard questions for no reason. TTFT excludes BOTH, because the warm-cache repeats do contaminate timing. A single 'excluded' figure would either lose questions from accuracy or keep contaminated ones in TTFT."
+ },
+ "ttft_condition": {
+  "device_host": "Orin, vLLM, idle, one request at a time, cold per image.",
+  "device_host_attribution_source": "ESTABLISHED BY the user's statement plus the Orin session's own StudySS1 report at 8492e02, NOT by a _provenance block, which does not exist in any of the five StudySS1 artifacts.",
+  "device_stack": "vLLM 0.20.0+cu126 (jetson-ai-lab jp6/cu126), released image processor, no --mm-processor-kwargs.",
+  "cloud_stack": "vLLM 0.31.0, --mm-processor-kwargs size shortest_edge 4096 longest_edge 16777216 (live2 round-1).",
+  "robot_cost_stack_note": "the committed device baseline for ROBOT RECALL is the ORIN2 in-process harness (D87), unexercised per D103(c). These SS numbers are the ORIN3 vLLM stack and the two must not be placed side by side as one device's numbers.",
+  "both_columns_unverified_cold": "the cloud reports prefix cache isolated, 237,781 queries 0 hits, and an mm_cache_hits count keyed by image content. The DEVICE side is NOT retro-verifiable: vLLM 0.20.0 does not populate cached_tokens at all, the SS1 runner captured neither that nor the /metrics deltas, and the images are gone from tmpfs. Both columns carry the label, for different reasons."
+ },
+ "vizwiz_quality_flags": "NOT PRODUCIBLE from held data; the join is NOT started pending the user's licence ruling. The manifest and rows carry answer_type and answerable only."
+}

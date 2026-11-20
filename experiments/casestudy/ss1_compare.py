@@ -407,7 +407,7 @@ def main():
                               "the sum of the two sizes unless they are disjoint."),
             fully_clean_n=len(kept_clean)),
         shared_image_exclusion=dict(
-            n_shared_qids_supplied=len(shared), n_shared_in_paired=len(qids) - len(kept),
+            n_shared_qids_supplied=len(shared), n_shared_in_paired=len(qids) - len(kept_shared),
             rule=("the duplicate-photo structure is a property of VIZWIZ VAL ITSELF, 34 groups of "
                   "byte-identical photos under different filenames, so it was present on BOTH "
                   "sides. The exclusion is therefore applied to BOTH columns or NEITHER: "
@@ -467,7 +467,7 @@ def main():
             "ruling. The manifest and rows carry answer_type and answerable only.")
 
     Path(a.out).write_text(json.dumps(out, indent=1, default=float))
-    print("wrote", a.out, "| paired", len(qids), "| shared excluded", len(qids) - len(kept))
+    print("wrote", a.out, "| paired", len(qids), "| accuracy n", len(kept_below), "| ttft n", len(kept_clean))
 
 
 if __name__ == "__main__":
