@@ -1,0 +1,55 @@
+{
+ "study": "StudySS2",
+ "dataset": "realworldqa",
+ "tier": "device",
+ "model": "qwen3vl4b",
+ "n": 765,
+ "n_scored": 765,
+ "n_errors": 0,
+ "coord_mode": "norm1000",
+ "caching": "vLLM prefix caching on; distinct image+task per request so no warm reuse; per-request cache_salt=qid; cold single-shot",
+ "decoding": "greedy temperature=0 seed=0 one-at-a-time",
+ "timing": {
+  "ttft_s": {
+   "p50": 0.8984335204586387,
+   "p90": 1.1897599974647164,
+   "mean": 0.8919356284736126
+  },
+  "total_s": {
+   "p50": 0.9592363303527236,
+   "p90": 1.2498733934015036
+  },
+  "prompt_tokens_mean": 1343.4993464052288,
+  "completion_tokens_mean": 2.011764705882353
+ },
+ "overall": {
+  "exact_match": {
+   "n": 765,
+   "mean": 0.6549019607843137,
+   "ci": [
+    0.6209150326797386,
+    0.6889215686274508
+   ]
+  }
+ },
+ "by_stratum": {
+  "subset": {
+   "free_form": {
+    "n": 327,
+    "mean": 0.6788990825688074,
+    "ci": [
+     0.6299694189602446,
+     0.727905198776758
+    ]
+   },
+   "mcq": {
+    "n": 438,
+    "mean": 0.636986301369863,
+    "ci": [
+     0.5958904109589042,
+     0.6804223744292235
+    ]
+   }
+  }
+ }
+}

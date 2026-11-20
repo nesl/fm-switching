@@ -1,5 +1,19 @@
 # FM-switching — Project Status
 
+Last updated: 2026-11-19 (later 5) (**StudySS2 DEVICE PASS COMPLETE (Jetson Orin, Qwen3-VL-4B under
+vLLM, StudySS1 config). Three CPS single-shot candidates; device side + shared benchmark kit only,
+cloud 32B gap / qualification pending on the H100. Licence STOP gate: RefSpatial-Bench Apache-2.0 and
+RealWorldQA CC BY-ND 4.0 cleared (images not committed); CODA-LM SKIPPED because its images need
+agreeing to CODA's CC BY-NC-SA + Huawei non-commercial / no-redistribution terms on download. DEVICE
+4B: RefSpatial-Bench 277 point-in-mask 0.251 [0.200,0.305] (location 0.335 / placement 0.230 / unseen
+0.169; by reasoning step 0.433 at step1 falling to 0.000 at step5), RealWorldQA 765 exact match 0.655
+[0.621,0.689] (MCQ 0.637 / free-form 0.679). A Step 2b check BEFORE the sweep caught a RefSpatial
+scoring artifact: Qwen3-VL emits NORMALISED 0..1000 point coordinates, not absolute pixels; the
+default would have reported a false 0.000 for the 4B. COORD_MODE=norm1000 locked and applied to both
+tiers. Kit pushed as ss2_bench_kit.py because a parallel session already owns ss2_kit.py (its CODA-LM
+1..10 judge parser); the two coexist. 0 errors on 1,042 items, full run 22 min, disk flat.
+reports/study_ss2.md.**)
+
 Last updated: 2026-11-19 (later 2) (**StudyEGOLIFE-feas, annotation-only, NO VIDEO, for D139. HEADLINE:
 THE USABLE COUNT IS 3 AND THE RULE FIRES - OFFLINE CORROBORATION ONLY. Applying the rule as written (gap >
 2 min, D2 history <= 19,400 tokens, no audio, no names) to the same-day single-target analysis set: 281 ->

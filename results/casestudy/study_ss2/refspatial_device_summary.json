@@ -1,0 +1,108 @@
+{
+ "study": "StudySS2",
+ "dataset": "refspatial",
+ "tier": "device",
+ "model": "qwen3vl4b",
+ "n": 277,
+ "n_scored": 277,
+ "n_errors": 0,
+ "coord_mode": "norm1000",
+ "caching": "vLLM prefix caching on; distinct image+task per request so no warm reuse; per-request cache_salt=qid; cold single-shot",
+ "decoding": "greedy temperature=0 seed=0 one-at-a-time",
+ "timing": {
+  "ttft_s": {
+   "p50": 0.15284584555774927,
+   "p90": 0.209908645786345,
+   "mean": 0.1658492797064437
+  },
+  "total_s": {
+   "p50": 1.9946886887773871,
+   "p90": 2.4540375672280788
+  },
+  "prompt_tokens_mean": 310.7653429602888,
+  "completion_tokens_mean": 33.24548736462094
+ },
+ "overall": {
+  "point_accuracy_pooled": {
+   "n": 277,
+   "mean": 0.2509025270758123,
+   "ci": [
+    0.20031588447653428,
+    0.30509927797833913
+   ]
+  },
+  "_note": "benchmark reports per-split means; pooled is n-weighted over all items for convenience only",
+  "frac_items_zero_points": 0.0036101083032490976,
+  "n_points_mean": 1.0
+ },
+ "by_stratum": {
+  "split": {
+   "location": {
+    "n": 100,
+    "mean": 0.335,
+    "ci": [
+     0.24,
+     0.43
+    ]
+   },
+   "placement": {
+    "n": 100,
+    "mean": 0.23,
+    "ci": [
+     0.15,
+     0.32
+    ]
+   },
+   "unseen": {
+    "n": 77,
+    "mean": 0.16883116883116883,
+    "ci": [
+     0.09090909090909091,
+     0.24675324675324675
+    ]
+   }
+  },
+  "step": {
+   "1": {
+    "n": 30,
+    "mean": 0.43333333333333335,
+    "ci": [
+     0.26666666666666666,
+     0.6
+    ]
+   },
+   "2": {
+    "n": 110,
+    "mean": 0.2409090909090909,
+    "ci": [
+     0.16363636363636364,
+     0.32727272727272727
+    ]
+   },
+   "3": {
+    "n": 85,
+    "mean": 0.2823529411764706,
+    "ci": [
+     0.18823529411764706,
+     0.3764705882352941
+    ]
+   },
+   "4": {
+    "n": 39,
+    "mean": 0.15384615384615385,
+    "ci": [
+     0.05128205128205128,
+     0.28205128205128205
+    ]
+   },
+   "5": {
+    "n": 13,
+    "mean": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ]
+   }
+  }
+ }
+}
