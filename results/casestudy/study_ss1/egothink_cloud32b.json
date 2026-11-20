@@ -15427,7 +15427,16 @@
   "cache_check": {
     "pass_condition": "prefix_cache_queries > 0 AND prefix_cache_hits == 0",
     "server_counters_at_stamp": "2026-11-19 17:59:34 vllm:request_success_total=5005 vllm:mm_cache_queries_total=5005 vllm:mm_cache_hits_total=52 vllm:prompt_tokens_total=8142882 vllm:prefix_cache_hits_total=0 vllm:prefix_cache_queries_total=8142882 ",
-    "multimodal_cache_note": "the multimodal encoder cache is keyed by image content, not by cache_salt; questions on byte-identical images can hit it (candidate list: egothink_shared_images.json); hits matched the predicted positions exactly where checked"
+    "multimodal_cache_note": "the multimodal encoder cache is keyed by image content, not by cache_salt; questions on byte-identical images can hit it (candidate list: egothink_shared_images.json); hits matched the predicted positions exactly where checked",
+    "server_counters_parsed": {
+      "request_success": 5005,
+      "mm_cache_queries": 5005,
+      "mm_cache_hits": 52,
+      "prompt_tokens": 8142882,
+      "prefix_cache_hits": 0,
+      "prefix_cache_queries": 8142882
+    },
+    "non_question_requests_note": "counters are server-wide for this server process (started 17:16:42 for this run; no operator probe ever reached it). At the VizWiz stamp the totals exceed 4,319 by the first EgoThink questions (Activity/000 to 003, no shared-image candidates), so every VizWiz mm hit is a VizWiz candidate."
   },
   "salt_fix": "cache_salt / -> _ (vLLM 0.31.0 rejects /); kit files unchanged"
 }
