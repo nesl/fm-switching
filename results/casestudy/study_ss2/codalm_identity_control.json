@@ -1,0 +1,82 @@
+{
+ "check": "CODALM_judge_identity_positive_control",
+ "is_measurement": true,
+ "label": "Run BEFORE StudySS2 data exists, on CODA-LM Val reference answers fetched directly (Apache-2.0, ungated, KaiChen1998/coda-lm). 25 scenes x 3 tasks = 75 identity pairs.",
+ "design": "IDENTITY CONTROL: the reference answer is submitted as the PREDICTION against itself. The reference is the gold standard by construction, so an identity pair must sit at the top of the 1-10 scale. CLAUDE.md check 7: a known-good input must pass the check being applied, and if it fails the CHECK is broken rather than the arm.",
+ "why_the_paper_cannot_supply_this_anchor": "arXiv:2404.10595 section 4.2 records HUMAN VERIFICATION of the GPT-4 evaluations before its Table 2 numbers, so its published Text-Scores cannot calibrate our unverified pipeline. With no valid external comparator there would be no anchor for the absolute level at all.",
+ "RESULT": {
+  "general": {
+   "n": 25,
+   "mean": 10.0,
+   "median": 10.0,
+   "min": 10.0,
+   "max": 10.0,
+   "distribution": {
+    "10.0": 25
+   }
+  },
+  "regional": {
+   "n": 25,
+   "mean": 10.0,
+   "median": 10.0,
+   "min": 10.0,
+   "max": 10.0,
+   "distribution": {
+    "10.0": 25
+   }
+  },
+  "suggestion": {
+   "n": 25,
+   "mean": 10.0,
+   "median": 10.0,
+   "min": 10.0,
+   "max": 10.0,
+   "distribution": {
+    "10.0": 25
+   }
+  },
+  "all": {
+   "n": 75,
+   "mean": 10.0
+  },
+  "verdict": "PASS, and at the ceiling: ALL 75 identity pairs scored EXACTLY 10.0, with no variance at all."
+ },
+ "what_this_buys": {
+  "outcome_realised": "the first of the three anticipated outcomes: references score 9 to 10, so THE TOP OF THE SCALE IS ANCHORED.",
+  "consequence": "a model answer scoring 7 can be read as genuinely below reference quality rather than as an artefact of a judge that never awards high marks. Absolute levels on CODA-LM become PARTIALLY interpretable, which is more than EgoThink has.",
+  "what_it_does_not_establish": "that the judge discriminates WELL between non-identical answers of differing quality. An identity pair is the easiest possible case; a ceiling at 10.0 with zero variance is consistent both with a well-calibrated judge and with one that rewards verbatim overlap. The real run supplies that evidence, not this control."
+ },
+ "parser_validated_on_LIVE_output": {
+  "n": 75,
+  "parsed": 75,
+  "parse_rate": 1.0,
+  "reason_breakdown": {
+   "ok": 75
+  },
+  "out_of_range": 0,
+  "note": "the new 1-10 parser is now validated against live judge output rather than only the 18 self-test vectors, and the reason codes were exercised. 0 out-of-range, so the judge complied with the 1-10 format on every call."
+ },
+ "A_THIRD_FINDING_MY_OWN_GATE_FAILED_FOR_THE_WRONG_REASON": {
+  "what": "the parser gate reported parse_rate 0.6667 and FAIL, with 25 of 75 as no_match.",
+  "cause": "I ran the gate on a STORED EXCERPT truncated to 300 characters, not on the text the parser saw. CODA-LM judges write their short explanation FIRST and the rating LAST, so a head truncation drops the rating entirely: 31 of 75 responses exceeded 300 characters and 25 of those lose their rating to the cut.",
+  "the_real_figure": "75 of 75 parsed, every reason ok.",
+  "lesson": "a coverage gate must be fed the text the parser actually consumed. Mine measured a different string and returned a confident FAIL on a parser that was working perfectly, which is the mirror of the StudySS1 failure: there a broken parser reported a working mean, here a working parser got a broken gate.",
+  "does_this_affect_StudySS1": "NO. SS1 parsed at call time on the full response and only then truncated judge_raw for storage, so its unparsed counts are real. The EgoThink missingness analysis likewise used the call-time judge_rating rather than re-parsing stored text. Only a RE-analysis from stored output would be affected, and none was done.",
+  "forward_rule": "store enough of the response to re-parse it, or store the parsed value and the reason beside the excerpt. The excerpt is not a substitute for the input."
+ },
+ "prompts_are_verbatim": {
+  "source": "DLUT-LYZ/CODA-LM @ evaluation/, Apache-2.0",
+  "mapping": "stage1 -> general (few-shot scene_few_shot), stage2 -> suggestion (few-shot suggestion_few_shot), stage3 -> regional (no few-shot)",
+  "all_three_instruct_the_judge_to_ignore_length": "\"Do not allow the length of the predicted text to influence your evaluation.\" present in all three system prompts.",
+  "consequence_for_carryover_7": "the within-model length-tercile check on CODA-LM is therefore not a re-measurement of the EgoThink length bias; it tests whether an EXPLICIT INSTRUCTION to ignore length works on a 7B judge. A length effect here is a failure to follow an instruction, which is a stronger finding than an unprompted bias."
+ },
+ "split_caveat": "these references are CODA-LM Val, fetched directly. If the StudySS2 producer stages a different split or subset, this anchor is measured on different text than the run it anchors, and must be re-run against the staged references. Recorded so a mismatch is detectable rather than assumed absent.",
+ "_provenance": {
+  "git_commit": "d6609f2381fa4d9e9a243070957b59c1938efb40",
+  "script": "experiments/casestudy/ss2_codalm_control.py with ss2_codalm_judge.py and ss2_kit.py",
+  "model": "mistralai/Mistral-7B-Instruct-v0.2",
+  "device": "nvidia_rtx_a6000",
+  "n": 75,
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
