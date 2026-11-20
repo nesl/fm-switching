@@ -3,6 +3,28 @@
 **Status: IN PROGRESS. Last updated 2026-11-19 19:45.** Rules: D116 (no methodological change overnight; never seeds 1
 to 3 or HOLDOUT; never INVALID results; GPU 2 exclusive; no em dashes). PROVISIONAL decisions are marked.
 
+## HEADLINE AFTER D144 (2026-11-20 07:45)
+
+D144 (user, 2026-11-20): sizes 16 and 18 (20 saturated: b7 n20 s0 delivered 2 of 28 robots); a dropped or
+over-context request is a per-question MISS, the run counts (error count and requests offered recorded, saturated if
+> 5 percent errored); seed 0 is back for every arm. Where a cell had a first attempt and a rule-5 rerun, the FIRST
+attempt is the cell (PROVISIONAL); reruns kept and labelled. The scorer (41b0eae) already counts an undelivered
+request as a miss with the device answer standing; only b7 n16 s0's first attempt needed rescoring (17 of 24, equal to
+its rerun). Robot counts reconcile with the scorer in every run (`frozen_feasible.json`, all_match_scorer true).
+
+**Common support, 16 devices, seeds 0, 4, 5 (seed 6 hybrids running):**
+
+| arm | robots on time over FEASIBLE (of 55) | over all (of 69) | SS on time at 2 s (of 1,069) | request errors (s0, s4, s5) |
+|---|---|---|---|---|
+| b7 | 50 | 50 | 969 | 1, 0, 0 |
+| eco-llm | 49 | 50 | 890 | 1, 0, 0 |
+| mooncake | 50 | 50 | 970 | 0, 0, 0 |
+| **hybrid-F-lhreq** | **53** | **54** | **1,023** | 1, 0, 0 |
+| hybrid-F6-lhreq | 51 | 52 | 1,011 | 1, 0, 0 |
+
+Dashcams all meet and no run meets capacity in every cell. Seed 6 (baselines only so far): b7 14 of 14 feasible / 337 SS,
+eco-llm 13 of 14 / 301, mooncake 14 of 14 / 334. No run is saturated by the 5 percent rule.
+
 ## MORNING SUMMARY (2026-11-20 07:25)
 
 **What ran overnight.** StudySS1-32B and StudySS2-32B (complete, numbers only, on origin); the SS timing measurement;
