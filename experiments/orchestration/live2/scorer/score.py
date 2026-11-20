@@ -136,6 +136,13 @@ SS_P = 0.90                             # same target shape as the robot pool; r
 ASSISTIVE_DEVICE_PREFIX = "asst"
 
 
+# D146: the delivery rule, read ONCE at import. `load` applies it and `score_run` records it in
+# every returned dict, so a committed cell says which rule produced it.
+DELIVERY = os.environ.get("LIVE2_DELIVERY", "completion")
+if DELIVERY not in ("completion", "first_token"):
+    raise SystemExit("LIVE2_DELIVERY must be completion or first_token")
+
+
 def _is_assistive(lo: "Loaded", opp: str, outcome: Optional[Dict[str, Any]] = None) -> bool:
     """Is this opportunity single-shot? From the DEVICE ANSWER's own kind where available.
 
@@ -255,10 +262,7 @@ def load(trace_dir: Path, run_dir: Path) -> Loaded:
     # Pooled over the 16-device cells, recall decode is 0.072 s below 1,000 prompt tokens and
     # 1.197 s above 15,000, for the same two output tokens. The first-token stamp hid that
     # entirely, so an arm that sends a whole history was paying a cost no metric could see.
-    _delivery = os.environ.get("LIVE2_DELIVERY", "completion")
-    if _delivery not in ("completion", "first_token"):
-        raise SystemExit("LIVE2_DELIVERY must be completion or first_token")
-    if _delivery == "completion":
+    if DELIVERY == "completion":
         done = {r["opportunity_id"]: float(r["t_done"]) for r in reqs
                 if r.get("opportunity_id") and r.get("t_done") is not None}
         for oid, o in out.items():
@@ -982,6 +986,18 @@ def score_run(trace_dir: Path, run_dir: Path, calibration: Path, arm: str,
                                          if k != "dashcam_per_device"},
                                       dashcam_per_device=a.dashcam_per_device))
     base = dict(arm=arm, trace_dir=str(trace_dir), run_dir=str(run_dir),
+                # D146: the delivery rule this score was computed under, recorded HERE so every
+                # cell carries it. The H100 found that a driver-scored cell.json had no such
+                # string anywhere, so from the record alone a reader could not tell whether a
+                # post-D146 cell used completion or first token. frozen_headline wrote the rule
+                # into its own output; score_run did not, and the claim that "every output carries
+                # it" was therefore wrong for the production scorer.
+                delivery_rule=DELIVERY,
+                on_time_rule=("an answer is delivered at COMPLETION, prefill plus decode (D146, "
+                              "the default from 2026-11-20); a dashcam Yes/No stays at first token"
+                              if DELIVERY == "completion" else
+                              "an answer is delivered at FIRST TOKEN (the pre-D146 rule, selected "
+                              "by LIVE2_DELIVERY=first_token)"),
                 seed=lo.meta["seed"], n_devices=lo.meta["n_devices"], ratio=lo.meta["ratio"],
                 run_s=lo.meta["run_s"], mode=lo.run_meta.get("mode"),
                 server_kind=lo.run_meta.get("server_kind"),

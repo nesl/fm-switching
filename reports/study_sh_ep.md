@@ -761,3 +761,40 @@ device, C6 is worse on both axes at once.
 Still outstanding: the 4B's EP-B and EP-G, which are the two conditions where H3's warm-prefix saving
 applies, so the episode conditions proper remain 32B-only and section 1's decision rule is still not
 applied.
+
+
+### 11.10 The cost-under-load cell: the revised prediction is confirmed
+
+The H100's load cell completed (16e0ed9): 1,300 client records, 0 errors, 0 neither, against the
+ruled three-type 40:40:20 background at 16 devices.
+
+| quantity | unloaded | **under load** |
+|---|---|---|
+| C1 TTFT p50 | 0.1302 s | **0.4838 s** (3.7x) |
+| EP-G TTFT p50 | 0.1514 s | **0.6215 s** (4.1x) |
+| **EP-G / C1 ratio** | **1.163** | **1.285** |
+| EP-G appended requests warm | 3,595 of 3,898 | **599 of 649** |
+| EP-G median cached tokens | 4,736 | **4,736** |
+
+**5b.5's revised prediction is confirmed on every clause.** `cached_tokens` largely survived rather
+than collapsing: every appended request that could be warm was warm, and the median cached figure is
+**identical** to the unloaded run. What degraded is TTFT, through queueing, by a factor of about
+four on both conditions. And the ratio held: H3's claim is that a warm episode costs about a
+one-frame evaluation, and under a background heavy enough to quadruple both latencies that ratio
+moved only from 1.16 to 1.28.
+
+**That is a stronger result for H3 than the unloaded numbers.** The warm-episode saving is not an
+artifact of an idle engine: it survives contention nearly intact, which is what a deployment needs
+to know.
+
+**5b.4's original prediction was wrong** and is left on the record. It argued from the frozen grid's
+89 pool turnovers per 1,200 s that the prefix would be evicted and `cached_tokens` might reach zero.
+The error was a timescale, corrected in 5b.5 before the run on the measured ground that one pool
+turnover takes 13.8 s of background traffic while consecutive EP-G instants are 0.5 s apart.
+
+**The burst case I asked to be watched for occurred exactly once.** Of the 51 cold EP-G requests, 50
+are the structural first instant of each clip's episode, which cannot be warm. The 51st is a genuine
+mid-episode eviction: clip `01227.mp4` at t = 0.75 s, its second instant, 2 frames and 718 prompt
+tokens, TTFT 0.7692 s. One eviction in 649 appended requests is consistent with 5b.5's reading that
+the average rate leaves the prefix safe and only a burst can dislodge it, and it puts a number on how
+rare that burst is under this background.
