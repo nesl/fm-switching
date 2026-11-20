@@ -230,3 +230,154 @@ The DEV fit rests on 28 questions, with cloud D2 at 7 of 28 and cloud RECENT at 
 intervals are wide and are carried in the file. Also recorded there: on DEV the device and the 32B
 restricted to RECENT are **identical at 0.1071, three of 28 each**, so on these questions a 32B held
 to the recent window is worth nothing over the 4B.
+
+## 5. THE SS2 SINGLE-SHOT POOL, and D84 proved rather than assumed
+
+D143: SS devices draw from RefSpatial-Bench and RealWorldQA, from the EVAL part of a seeded 30 / 70
+split per dataset, with device answers from StudySS2 and a per-(device, opportunity) multimodal UUID.
+
+`DS.ss_questions(question_set, part)` is the single entry point, so a caller cannot pair a dataset
+family with the wrong split part. `generate_trace(..., ss_question_set="ss1"|"ss2")` defaults to
+`"ss1"`.
+
+### 5.1 The split is a committed file, not a derivation
+
+`results/casestudy/study_ss2/ss2_dev_eval_split.json`, written by
+`experiments/casestudy/ss2_make_split.py` and READ at use time. The LH-REQ work established why a
+partition belongs in a file: two independently written derivations of the same split differ
+somewhere and nothing catches it, whereas a file can be diffed. The seed is a fixed STRING, never
+the run seed, so the DEV / EVAL boundary is identical in every run, at every size and under every
+arm.
+
+| dataset | n | DEV | EVAL | fraction | per subset (DEV, EVAL) |
+|---|---|---|---|---|---|
+| refspatial | 277 | 83 | 194 | 0.2996 | location (30, 70), placement (30, 70), unseen (23, 54) |
+| realworldqa | 765 | 229 | 536 | 0.2993 | mcq (131, 307), free_form (98, 229) |
+| **total** | 1,042 | **312** | **730** | | |
+
+**STRATIFIED BY SUBSET, and that is PROVISIONAL.** The ruling asks for a seeded 30 / 70 split of
+each dataset and does not say whether to stratify. An unstratified draw could leave RefSpatial
+`unseen` (77 items) badly represented in either part, which would make the fitted SS value a
+statement about a subset mix the EVAL part does not share. Unstratified is one line away if
+preferred. Every question is in exactly one part, asserted, so the split is a census.
+
+### 5.2 One substitution whose direction is now known
+
+StudySS2 records no per-image byte count, so the committed S-EMBER D2 median still stands in for
+assistive uplink bytes, as it did for SS1. **SS1 had to call the direction of error unknown; SS2
+does not.** Both manifests carry width and height on every row: areas run 196,608 to 2,158,080 px
+against S-EMBER D2's 352 x 256 = 90,112 px, so every SS2 image is **2.2x to 24x larger in area** and
+the substitution almost certainly **understates** assistive uplink cost. Measuring the staged files
+would remove it rather than bound it.
+
+Provenance improves too. StudySS1's five artifacts carry no `_provenance` block and every row had to
+say `device_host="unconfirmed"`. Both SS2 device files carry one naming `device: jetson_orin`, so the
+tier is read from the file rather than taken on anyone's word.
+
+The device files' `caching` string is NOT carried forward as fact. It claims "distinct image+task per
+request so no warm reuse; cold single-shot", and section 10.6 of `study_ss2.md` measured the
+opposite. Each pool row therefore carries `device_cold_per_image` stating what was measured, and
+noting that the live harness does not inherit the problem because the D84 uuid replaces the content
+key: **the committed SS2 TTFT numbers are not the live condition.**
+
+### 5.3 D84 for single-shot: already satisfied by construction, and proved on the cases that would break it
+
+The mechanism exists. `cachekeys.mm_uuid(run_tag, device_id, session_id, frame_ref)` REPLACES the
+engine's computed multimodal hash in vLLM 0.31.0, and the SS trace gives every opportunity its own
+`session_id` of the form `"<device>|ss<cursor>"`. So the uuid is unique per (device, opportunity)
+**without any change to the harness**. Nothing was added; what follows is the check that it is.
+
+This matters because of what StudySS2 measured. A repeated image IS served warm by the multimodal
+encoder cache on both tiers, `cache_salt` does not prevent it because the salt isolates the text
+prefix cache only, and RefSpatial repeats heavily: 61 images carry 247 of its 277 questions.
+
+`fleet/ss2_uuid_proof.py`, output `results/orchestration/live2/lh_req/ss2_uuid_proof.json`, on three
+cells at 1200 s with LH-REQ robots:
+
+| cell | SS image submissions | distinct uuids | (a) same qid, two devices | (b) same qid, one device, twice | (c) identical CONTENT, different qids |
+|---|---|---|---|---|---|
+| n=16 | 356 | **356** | **UNEXERCISED** (0 qids) | **UNEXERCISED** (0 pairs) | **PASS** (31 groups, 73 submissions) |
+| n=20 | 477 | **477** | **PASS** (49 qids, 98 submissions) | **UNEXERCISED** (0 pairs) | **PASS** (48 groups, 192 submissions) |
+| n=32 | 717 | **717** | **PASS** (145 qids, 290 submissions) | **UNEXERCISED** (0 pairs) | **PASS** (48 groups, 191 submissions) |
+
+Zero uuid collisions anywhere. **Two cases are labelled UNEXERCISED rather than passed**, which is
+the distinction CLAUDE.md's taxonomy exists to force:
+
+- **(a) at n=16 only.** No two SS devices draw the same qid at 16 devices, so cross-device sharing
+  cannot arise there at all. It arises and passes at 20, which is the ruled grid size.
+- **(b) at every size.** A device's cursor advances monotonically and the EVAL pool holds 730
+  questions, so no device wraps around inside 1200 s. The case is unreachable in this regime, not
+  confirmed.
+
+**(c) is the load-bearing case and it fires everywhere**, because content is what the cache keys on.
+StudySS1 taught this directly: by image id VizWiz val is 4,319 unique on 4,319 and passes clean,
+while 34 groups of byte-identical photos sat under different filenames. An identifier-based check
+would report (c) as nothing to test.
+
+**Negative control, and it fails where it should.** Recomputing the uuids with device and session
+dropped from the key, which is what a content-or-identifier-keyed scheme does, must produce
+collisions, or the main result is vacuous:
+
+| cell | colliding naive keys | max submissions on one naive key | control can fail |
+|---|---|---|---|
+| n=16 | 0 | 1 | **NO** |
+| n=20 | 49 | 2 | yes |
+| n=32 | 145 | 2 | yes |
+
+**At n=16 the control cannot fail, so that cell's (a) and (b) passes carry no information**, and the
+only informative result at 16 is (c). At 20 and 32 the control fires on 49 and 145 keys and the real
+scheme still shows zero collisions, so the scheme is doing the work rather than the trace happening
+to hold no repeats.
+
+**Register: these are REQUEST BODIES, not server behaviour.** The server-side gate, `mm_cache_queries
+delta > 0 AND mm_cache_hits delta == 0`, is the H100's and is separate; it has adopted the
+non-vacuity condition, integer parsing with a per-key present flag so an absent key reads as
+INSTRUMENT NOT REPORTING rather than pass, and the request-body grep on the first live cell
+regardless of the total.
+
+### 5.4 Byte-identity with the SS option added
+
+Six cells, including two three-type cells and the 20-device 1200 s cell, against origin's `fleet/`:
+
+| cell (seed, n, ratio, run_s) | records | digest, origin | digest, with both options | robot | SS |
+|---|---|---|---|---|---|
+| 0, 16, 40:40:20, 600 | 7,469 | `94c4193f5e51b1d3` | `94c4193f5e51b1d3` | 34 | 176 |
+| 4, 16, 40:40:20, 600 | 7,442 | `a6331f90a331b1da` | `a6331f90a331b1da` | 39 | 177 |
+| 0, 20, 40:40:20, 1200 | 20,014 | `54c183c4aed90496` | `54c183c4aed90496` | 74 | 477 |
+| 0, 12, 50:50, 600 | 6,732 | `4cfb07914aa353df` | `4cfb07914aa353df` | 27 | 0 |
+| 4, 32, 50:50, 600 | 17,863 | `a0c69109477e5ebb` | `a0c69109477e5ebb` | 84 | 0 |
+| 5, 32, 40:40:20, 600 | 15,978 | `e9cb3b9852465f19` | `e9cb3b9852465f19` | 69 | 352 |
+
+All six identical. `test_live2_fleet.py` **234 of 234**, check (h) included.
+
+### 5.5 The ruled grid is fully measurable, and 16 is the entry point by measurement
+
+The user's ruling fixes 1200 s with grid sizes 16 and 20. Against D82's minimum of 20 pooled robot
+questions, seeds 0 / 4 / 5 / 6:
+
+| n | robots | pooled by seed 0 / 4 / 5 / 6 | min | distinct = pooled | measurable at every seed |
+|---|---|---|---|---|---|
+| **16** | 7 | 24 / 20 / 25 / 20 | **20** | yes | **yes** |
+| **20** | 8 | 28 / 24 / 29 / 26 | **24** | yes | **yes** |
+
+**No cell at the ruled sizes needs the not-measurable label.** Section 4.4's fallback was driven
+entirely by n=12, which the ruling drops from the grid, so overnight rule 1's fallback is recorded
+but is **not in force for the grid that will actually run**.
+
+**16 is the D97 entry point, measured rather than chosen.** The smallest size measurable at every
+seed at 1200 s:
+
+| n | robots | pooled by seed 0 / 4 / 5 / 6 | min | measurable |
+|---|---|---|---|---|
+| 12 | 5 | 15 / 16 / 20 / 17 | 15 | no |
+| 13 | 5 | 15 / 16 / 20 / 17 | 15 | no |
+| 14 | 5 | 15 / 16 / 20 / 17 | 15 | no |
+| 15 | 6 | 20 / 18 / 22 / 21 | 18 | no |
+| **16** | 7 | 24 / 20 / 25 / 20 | **20** | **yes** |
+
+12, 13 and 14 give identical counts because the 40 percent robot share rounds to 5 robots at all
+three. Two of the four 16-device cells sit exactly on 20, so the entry point has no margin: any
+change that costs a robot one question makes 16 unmeasurable.
+
+Coverage remains the standing limit. At the ruled sizes a cell touches 0.29 to 0.42 of the
+69-question pool, so two arms compared at one cell are compared on 20 to 29 distinct questions.

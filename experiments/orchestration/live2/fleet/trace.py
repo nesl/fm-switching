@@ -219,6 +219,7 @@ class TraceStats:
     # same question reaching several devices is the normal case, and a pooled count that does not
     # say how many DISTINCT questions it covers overstates what the run measured.
     robot_question_set: str = "eval"
+    ss_question_set: str = "ss1"
     robot_question_pool_n: int = 0
     robot_session_pool_n: int = 0
     robot_question_ask_counts: Dict[str, int] = field(default_factory=dict)
@@ -255,7 +256,8 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                    l_ss_s: float = DEFAULT_L_SS_S,
                    ss_period_s: float = DEFAULT_SS_PERIOD_S,
                    ss_bursty: bool = False,
-                   robot_question_set: str = "eval") -> Dict[str, Any]:
+                   robot_question_set: str = "eval",
+                   ss_question_set: str = "ss1") -> Dict[str, Any]:
     """Build one run's opportunity trace. Returns {records, device_answers, meta, stats}.
 
     Deterministic in `seed` alone given (n_devices, ratio, run_s, stagger_s): the same seed
@@ -405,7 +407,11 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
     # The whole block is inside `if ass_ids`, EMPTY for every two-class ratio, so an existing
     # trace takes not one new branch.
     if ass_ids:
-        pool = [] if count_only else DS.ss1_questions()
+        # D143: "ss1" is the committed default and its trace is byte-identical to every run before
+        # this parameter existed. "ss2" draws from RefSpatial-Bench and RealWorldQA, and ONLY from
+        # the EVAL part of the committed seeded 30 / 70 split, because the SS quality table is
+        # fitted on the DEV part.
+        pool = [] if count_only else DS.ss_questions(ss_question_set, "eval")
         for idx, did in enumerate(ass_ids):
             if not count_only:
                 records.append(dict(kind="device_register", device_id=did, type="assistive",
@@ -579,6 +585,7 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
         st.robot_questions_per_device[did] = nq
     st.robot_questions_total = sum(st.robot_questions_per_device.values())
     st.robot_question_set = robot_question_set
+    st.ss_question_set = ss_question_set
     st.robot_question_pool_n = sum(len(sm.questions) for sm in sessions.values())
     st.robot_session_pool_n = len(sessions)
     st.robot_distinct_questions_asked = len(st.robot_question_ask_counts)
@@ -605,7 +612,7 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
         a["opportunity_id"] = assigned[a.pop("opportunity_key")]
     answers.sort(key=lambda r: (r["device_id"], r["opportunity_id"]))
 
-    meta = dict(robot_question_set=robot_question_set,
+    meta = dict(robot_question_set=robot_question_set, ss_question_set=ss_question_set,
                 seed=seed, n_devices=n_devices, ratio=ratio, run_s=run_s, mode=mode,
                 stagger_s=stagger_s, n_dashcam=n_dash, n_robot=n_rob,
                 n_assistive=n_ass, l_ss_s=float(l_ss_s),

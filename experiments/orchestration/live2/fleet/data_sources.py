@@ -444,6 +444,131 @@ def ss1_questions(verify: bool = True) -> List[Dict[str, Any]]:
     return out
 
 
+# ---------------------------------------------------------------- StudySS2 single-shot pool (D143)
+SS2_DIR = ROOT / "results" / "casestudy" / "study_ss2"
+SS2_SPLIT = SS2_DIR / "ss2_dev_eval_split.json"
+# RefSpatial FIRST, RealWorldQA second. The order is load-bearing in the same way SS1's was: a
+# fleet small enough never to exhaust the first dataset never reaches the second.
+SS2_SOURCES = (("refspatial", SS2_DIR / "refspatial_manifest.jsonl",
+                SS2_DIR / "refspatial_device.json", 277),
+               ("realworldqa", SS2_DIR / "realworldqa_manifest.jsonl",
+                SS2_DIR / "realworldqa_device.json", 765))
+SS_QUESTION_SETS = ("ss1", "ss2")
+_SS2 = None
+_SS2_SPLIT = None
+
+
+def ss2_split() -> Dict[str, Any]:
+    """The committed seeded 30 / 70 DEV / EVAL split, READ not re-derived (D143 ruling A)."""
+    global _SS2_SPLIT
+    if _SS2_SPLIT is None:
+        require(SS2_SPLIT, "the committed StudySS2 DEV / EVAL split "
+                           "(experiments/casestudy/ss2_make_split.py writes it)")
+        d = json.loads(SS2_SPLIT.read_text())
+        for name, blk in d["per_dataset"].items():
+            dev, ev = set(blk["dev_qids"]), set(blk["eval_qids"])
+            if dev & ev:
+                raise MissingInput("SS2 split overlaps on %s: %d qids in both parts"
+                                   % (name, len(dev & ev)))
+            if len(dev) + len(ev) != int(blk["n"]):
+                raise MissingInput("SS2 split for %s covers %d of %d questions"
+                                   % (name, len(dev) + len(ev), blk["n"]))
+        _SS2_SPLIT = d
+    return _SS2_SPLIT
+
+
+def ss2_questions(part: str = "eval", verify: bool = True) -> List[Dict[str, Any]]:
+    """The StudySS2 single-shot pool, RefSpatial then RealWorldQA, restricted to one split part.
+
+    D143 ruling A: SS devices draw from the EVAL part; the SS quality table is fitted on DEV. The
+    default is therefore "eval", the part a run is allowed to draw from.
+
+    PROVENANCE IS PRESENT HERE, unlike StudySS1. Both device files carry a `_provenance` block
+    naming `device: jetson_orin` with the script, commit and timestamp, so the device tier is read
+    from the file rather than taken on anyone's word. The caching string in those files is a
+    DECLARATION and is NOT trusted: StudySS2's within-image test showed both tiers served repeated
+    images warm, so `device_cold_per_image` below records what was measured, not what was claimed.
+
+    `verify=True` re-derives each file's own committed `n` before use.
+    """
+    global _SS2
+    if part not in ("dev", "eval"):
+        raise ValueError("part %r must be 'dev' or 'eval'" % (part,))
+    if _SS2 is None:
+        sp = ss2_split()["per_dataset"]
+        out: Dict[str, List[Dict[str, Any]]] = dict(dev=[], eval=[])
+        for name, man, dev_f, n_expect in SS2_SOURCES:
+            require(man, f"StudySS2 {name} manifest")
+            require(dev_f, f"StudySS2 {name} device answers")
+            d = json.loads(dev_f.read_text())
+            if verify and int(d.get("n", -1)) != n_expect:
+                raise MissingInput(
+                    f"StudySS2 {name} device file does not reproduce its committed n: got "
+                    f"{d.get('n')!r}, expected {n_expect}")
+            prov = d.get("_provenance") or {}
+            ans = {r["qid"]: r for r in d.get("rows", []) if "error" not in r}
+            which = {q: "dev" for q in sp[name]["dev_qids"]}
+            which.update({q: "eval" for q in sp[name]["eval_qids"]})
+            for ln in man.read_text().splitlines():
+                if not ln.strip():
+                    continue
+                r = json.loads(ln)
+                a = ans.get(r["qid"])
+                if a is None:
+                    continue
+                w = which.get(r["qid"])
+                if w is None:
+                    raise MissingInput("StudySS2 question %r is in no split part" % r["qid"])
+                out[w].append(dict(
+                    qid=r["qid"], dataset=name,
+                    question=r.get("question") or r.get("prompt_text"),
+                    image=r.get("image"), image_sha16=r.get("image_sha16"),
+                    width=int(r["width"]), height=int(r["height"]),
+                    references=list(r.get("references") or []),
+                    subset=str(r[sp[name]["subset_field"]]),
+                    prompt_tokens=int(a.get("prompt_tokens") or 1),
+                    # SAME SUBSTITUTION AS SS1, but its direction is now KNOWN rather than unknown.
+                    # StudySS2 records no per-image byte count either, so the committed S-EMBER D2
+                    # median stands in for uplink bytes. SS1 had to call the direction of error
+                    # unknown because VizWiz and EgoThink resolutions were not held. SS2's
+                    # manifests carry width and height on every row: areas run 196,608 to
+                    # 2,158,080 px against S-EMBER D2's 352 x 256 = 90,112 px, so every SS2 image
+                    # is 2.2x to 24x larger in area and the substitution almost certainly
+                    # UNDERSTATES assistive uplink cost. Measuring the staged files would remove
+                    # it rather than bound it.
+                    image_bytes=int(round(E10A_SEMBER_Q88_D2_MEDIAN_B)),
+                    image_area_px=int(r["width"]) * int(r["height"]),
+                    device_answer=a.get("answer"),
+                    device_score=(a.get("score") or {}),
+                    device_model=d.get("model"), device_tier=d.get("tier"),
+                    device_host=prov.get("device") or "unconfirmed",
+                    device_cold_per_image=(
+                        "NOT cold wherever images repeat. StudySS2 measured, within-image on the "
+                        "61 shared RefSpatial images with prompt tokens held at 335 against 337, "
+                        "that later occurrences were 27.5 percent faster on the device and 33.4 "
+                        "percent on the cloud. cache_salt isolates the TEXT prefix cache only; "
+                        "the multimodal cache is keyed by image CONTENT. In a live2 run the D84 "
+                        "per-(device, opportunity) mm uuid REPLACES that content key, so the live "
+                        "harness does not inherit this and the committed SS2 TTFT numbers are not "
+                        "the live condition."),
+                    split_part=w))
+        for part_name in ("dev", "eval"):
+            out[part_name].sort(key=lambda q: (SS2_ORDER[q["dataset"]], q["qid"]))
+        _SS2 = out
+    return _SS2[part]
+
+
+SS2_ORDER = {name: i for i, (name, _m, _d, _n) in enumerate(SS2_SOURCES)}
+
+
+def ss_questions(question_set: str = "ss1", part: str = "eval") -> List[Dict[str, Any]]:
+    """One entry point for the single-shot pool, so a caller cannot combine a dataset family with
+    the wrong split part. "ss1" is the committed default and takes no split (StudySS1 has none)."""
+    if question_set not in SS_QUESTION_SETS:
+        raise ValueError("question_set %r not in %r" % (question_set, SS_QUESTION_SETS))
+    return ss1_questions() if question_set == "ss1" else ss2_questions(part)
+
+
 def device_recall_answers(verify: bool = True) -> Dict[str, Dict[str, Any]]:
     """D87's device comparator, restricted to EVAL. question_id -> {pred, correct, gold}.
 

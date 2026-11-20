@@ -1,0 +1,216 @@
+{
+ "n16": {
+  "cell": {
+   "seed": 0,
+   "n_devices": 16,
+   "ratio": "40:40:20",
+   "run_s": 1200.0,
+   "arm": "hybrid-F",
+   "run_tag": "live2a2e462763da9",
+   "ss_question_set": "ss2",
+   "robot_question_set": "lh_req"
+  },
+  "n_ss_image_submissions": 356,
+  "n_distinct_uuids": 356,
+  "n_distinct_qids_drawn": 356,
+  "uuid_collisions_overall": [],
+  "case_a_same_qid_two_devices": {
+   "n_qids": 0,
+   "n_submissions": 0,
+   "colliding_uuids": [],
+   "pass_": true,
+   "note": "the case the ruling names. A collision here would mean two devices share a multimodal cache entry."
+  },
+  "case_b_same_qid_same_device_twice": {
+   "n_pairs": 0,
+   "n_submissions": 0,
+   "colliding_uuids": [],
+   "pass_": true,
+   "note": "a repeat by one device at a LATER opportunity. For single-shot the intended condition is cold per image, so these must also differ; that is the one place where SS deliberately forgoes the within-device reuse D84 otherwise preserves."
+  },
+  "case_c_identical_image_content_different_qids": {
+   "n_content_groups": 31,
+   "n_submissions": 73,
+   "colliding_uuids": [],
+   "pass_": true,
+   "groups_sample": {
+    "93cba22162b77b3f": [
+     "refspatial/location/0",
+     "refspatial/location/1"
+    ],
+    "5f5234515b4de3f5": [
+     "refspatial/location/18",
+     "refspatial/location/20",
+     "refspatial/location/94"
+    ],
+    "b9a39283f37a7e65": [
+     "refspatial/location/2",
+     "refspatial/location/3"
+    ],
+    "b1a4642d82fb8ee2": [
+     "refspatial/location/22",
+     "refspatial/location/23",
+     "refspatial/location/24"
+    ],
+    "58e97246196ba800": [
+     "refspatial/location/27",
+     "refspatial/location/28",
+     "refspatial/placement/67"
+    ]
+   },
+   "note": "the case a content-keyed cache WOULD hit and an identifier check would miss. StudySS1: by image id VizWiz val is 4,319 unique on 4,319 and passes clean, while 34 groups of byte-identical photos sat under different filenames."
+  },
+  "negative_control": {
+   "scheme": "frame_ref alone, device and session dropped from the key",
+   "n_colliding_keys": 0,
+   "max_submissions_on_one_key": 1,
+   "control_can_fail": false,
+   "note": "collisions MUST appear here. They do not appear in the real scheme, so the real scheme is doing the work rather than the trace happening to hold no repeats."
+  },
+  "register": "request bodies, not server behaviour. The server-side gate (mm_cache_queries > 0 AND mm_cache_hits == 0) is the H100's and is separate."
+ },
+ "n20": {
+  "cell": {
+   "seed": 0,
+   "n_devices": 20,
+   "ratio": "40:40:20",
+   "run_s": 1200.0,
+   "arm": "hybrid-F",
+   "run_tag": "live2a2e462763da9",
+   "ss_question_set": "ss2",
+   "robot_question_set": "lh_req"
+  },
+  "n_ss_image_submissions": 477,
+  "n_distinct_uuids": 477,
+  "n_distinct_qids_drawn": 428,
+  "uuid_collisions_overall": [],
+  "case_a_same_qid_two_devices": {
+   "n_qids": 49,
+   "n_submissions": 98,
+   "colliding_uuids": [],
+   "pass_": true,
+   "note": "the case the ruling names. A collision here would mean two devices share a multimodal cache entry."
+  },
+  "case_b_same_qid_same_device_twice": {
+   "n_pairs": 0,
+   "n_submissions": 0,
+   "colliding_uuids": [],
+   "pass_": true,
+   "note": "a repeat by one device at a LATER opportunity. For single-shot the intended condition is cold per image, so these must also differ; that is the one place where SS deliberately forgoes the within-device reuse D84 otherwise preserves."
+  },
+  "case_c_identical_image_content_different_qids": {
+   "n_content_groups": 48,
+   "n_submissions": 192,
+   "colliding_uuids": [],
+   "pass_": true,
+   "groups_sample": {
+    "93cba22162b77b3f": [
+     "refspatial/location/0",
+     "refspatial/location/1"
+    ],
+    "34c7753544ad58df": [
+     "refspatial/location/15",
+     "refspatial/unseen/0",
+     "refspatial/unseen/1"
+    ],
+    "5f5234515b4de3f5": [
+     "refspatial/location/18",
+     "refspatial/location/20",
+     "refspatial/location/94"
+    ],
+    "b9a39283f37a7e65": [
+     "refspatial/location/2",
+     "refspatial/location/3"
+    ],
+    "b1a4642d82fb8ee2": [
+     "refspatial/location/22",
+     "refspatial/location/23",
+     "refspatial/location/24",
+     "refspatial/unseen/4",
+     "refspatial/unseen/5"
+    ]
+   },
+   "note": "the case a content-keyed cache WOULD hit and an identifier check would miss. StudySS1: by image id VizWiz val is 4,319 unique on 4,319 and passes clean, while 34 groups of byte-identical photos sat under different filenames."
+  },
+  "negative_control": {
+   "scheme": "frame_ref alone, device and session dropped from the key",
+   "n_colliding_keys": 49,
+   "max_submissions_on_one_key": 2,
+   "control_can_fail": true,
+   "note": "collisions MUST appear here. They do not appear in the real scheme, so the real scheme is doing the work rather than the trace happening to hold no repeats."
+  },
+  "register": "request bodies, not server behaviour. The server-side gate (mm_cache_queries > 0 AND mm_cache_hits == 0) is the H100's and is separate."
+ },
+ "n32": {
+  "cell": {
+   "seed": 0,
+   "n_devices": 32,
+   "ratio": "40:40:20",
+   "run_s": 1200.0,
+   "arm": "hybrid-F",
+   "run_tag": "live2a2e462763da9",
+   "ss_question_set": "ss2",
+   "robot_question_set": "lh_req"
+  },
+  "n_ss_image_submissions": 717,
+  "n_distinct_uuids": 717,
+  "n_distinct_qids_drawn": 572,
+  "uuid_collisions_overall": [],
+  "case_a_same_qid_two_devices": {
+   "n_qids": 145,
+   "n_submissions": 290,
+   "colliding_uuids": [],
+   "pass_": true,
+   "note": "the case the ruling names. A collision here would mean two devices share a multimodal cache entry."
+  },
+  "case_b_same_qid_same_device_twice": {
+   "n_pairs": 0,
+   "n_submissions": 0,
+   "colliding_uuids": [],
+   "pass_": true,
+   "note": "a repeat by one device at a LATER opportunity. For single-shot the intended condition is cold per image, so these must also differ; that is the one place where SS deliberately forgoes the within-device reuse D84 otherwise preserves."
+  },
+  "case_c_identical_image_content_different_qids": {
+   "n_content_groups": 48,
+   "n_submissions": 191,
+   "colliding_uuids": [],
+   "pass_": true,
+   "groups_sample": {
+    "93cba22162b77b3f": [
+     "refspatial/location/0",
+     "refspatial/location/1"
+    ],
+    "34c7753544ad58df": [
+     "refspatial/location/15",
+     "refspatial/unseen/0",
+     "refspatial/unseen/1"
+    ],
+    "5f5234515b4de3f5": [
+     "refspatial/location/18",
+     "refspatial/location/20",
+     "refspatial/location/94"
+    ],
+    "b9a39283f37a7e65": [
+     "refspatial/location/2",
+     "refspatial/location/3"
+    ],
+    "b1a4642d82fb8ee2": [
+     "refspatial/location/22",
+     "refspatial/location/23",
+     "refspatial/location/24",
+     "refspatial/unseen/4",
+     "refspatial/unseen/5"
+    ]
+   },
+   "note": "the case a content-keyed cache WOULD hit and an identifier check would miss. StudySS1: by image id VizWiz val is 4,319 unique on 4,319 and passes clean, while 34 groups of byte-identical photos sat under different filenames."
+  },
+  "negative_control": {
+   "scheme": "frame_ref alone, device and session dropped from the key",
+   "n_colliding_keys": 145,
+   "max_submissions_on_one_key": 2,
+   "control_can_fail": true,
+   "note": "collisions MUST appear here. They do not appear in the real scheme, so the real scheme is doing the work rather than the trace happening to hold no repeats."
+  },
+  "register": "request bodies, not server behaviour. The server-side gate (mm_cache_queries > 0 AND mm_cache_hits == 0) is the H100's and is separate."
+ }
+}
