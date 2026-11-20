@@ -1761,3 +1761,141 @@ robot answers land in relatively quieter moments by a factor of about 2.6.
 So the credit stands with the release timing, and it is now stated at the right strength: of the
 roughly fivefold difference in decode-window concurrency, about 6 percent is attributable to
 offering less work and the remainder to offering it at different times.
+
+## 19. D147: what a 3 s robot deadline would cost (A6000, 2026-11-20)
+
+OFFLINE. Committed runs only; no GPU, no model server, no rerun. **Everything here is RE-SCORED and
+every decision was made under 5 s**: no arm knew about a shorter deadline, so each chose what to
+send, when to defer and what to decline against a 5 s bound. An arm that fails at 3 s below might
+not fail if it had been allowed to plan for 3 s, and one that passes might have planned differently
+and done better. Single-shot stays at 2 s and dashcams are untouched.
+
+### 19.1 The answer to the question asked: at 3 s, every arm fails
+
+Robot on time over **ALL** questions, completion delivery (D146), 16 devices, each arm pooled over
+its own seeds. b7, eco-llm, mooncake and the two hybrids have seeds 0, 4, 5 and 6 (89 questions);
+always-cloud-fcfs, edf and llf ran at seed 4 only (20 questions) and are marked.
+
+| arm | seeds | n | L = 2.5 s | **L = 3 s** | L = 4 s | L = 5 s |
+|---|---|---|---|---|---|---|
+| hybrid-F-lhreq | 0,4,5,6 | 89 | 0.2584 | **0.3258** | 0.5281 | 0.7416 |
+| hybrid-F6-lhreq | 0,4,5,6 | 89 | 0.1573 | **0.2809** | 0.4831 | 0.6854 |
+| mooncake | 0,4,5,6 | 89 | 0.1685 | **0.2360** | 0.3034 | 0.4719 |
+| b7-edf-feasibility | 0,4,5,6 | 89 | 0.1910 | **0.2247** | 0.3146 | 0.4719 |
+| eco-llm | 0,4,5,6 | 89 | 0.1685 | **0.2247** | 0.3146 | 0.4382 |
+| always-cloud-fcfs | 4 only | 20 | 0.2500 | 0.3500 | 0.3500 | 0.5000 |
+| llf | 4 only | 20 | 0.2500 | 0.3500 | 0.3500 | 0.5000 |
+| edf | 4 only | 20 | 0.2500 | 0.2500 | 0.2500 | 0.2500 |
+
+**All eight arms fail at 3 s, and all eight already fail at 5 s on this basis.** D133's bar is
+p_rob = 0.9 and the best arm reaches 0.3258 at 3 s and 0.7416 at 5 s. That is not a new failure
+created by the deadline: D133 is defined over FEASIBLE questions, and over all questions no arm has
+ever been close. What the deadline does is widen the shortfall, and it costs the best arm 41 points
+(0.7416 to 0.3258) and the weakest 21 (0.4382 to 0.2247).
+
+Ordering is preserved: hybrid-F leads at every deadline, and its lead over b7 grows from 27 points at
+5 s to 10 at 3 s in absolute terms while remaining the largest at each. edf is flat at 0.25 across
+all four deadlines, which is its own signature: it defers until its history materialises, so its
+misses are already far past 5 s and tightening the bound changes nothing for it.
+
+### 19.2 Why they miss at 3 s: the history is cold, and warming alone fixes almost all of it
+
+The 330 robot questions missed at 3 s across the five four-seed arms. 48 were never sent (declined,
+or answered on the device), leaving 282 sent misses.
+
+| component of the 282 sent misses | p50 | p90 |
+|---|---|---|
+| wait before release | 0.128 s | 0.369 s |
+| **first-token latency** | **4.001 s** | **6.473 s** |
+| decode after the first token | 1.086 s | 1.434 s |
+| requests overlapping the decode window | 44 | 81 |
+
+**Every one of the 282 had a COLD history**: 282 COLD, 0 WARM. Waiting before release is never the
+problem at 0.128 s, and the first-token latency alone is already over the 3 s budget at its median.
+
+**The counterfactual the brief asks for.** Using the MEASURED warm first-token latency from the edf
+and llf cells, **0.3963 s** over their 28 warm requests, plus each question's own measured decode:
+
+| counterfactual | would make 3 s |
+|---|---|
+| warm history, measured decode as it actually was | **279 of 282** |
+| warm history and an idle engine (decode 0.0242 s) | **282 of 282** |
+
+So a 3 s deadline is not what defeats these arms. **A cold history is.** Warming ahead would recover
+279 of the 282 sent misses without touching anything else, and the remaining 3 need the engine to be
+quieter as well.
+
+### 19.3 Cold feasibility at 3 s, with decode included
+
+The committed feasibility formula is `recall_ttft_s(h, COLD) + recall_ttft_s(h, GPU-WARM) + link`,
+which **omits decode**. At 3 s decode can decide a verdict, so the brief's definition is used here,
+a cold rebuild plus decode on an idle engine, and both are reported.
+
+| robot deadline | feasible, cold rebuild + decode | feasible, committed formula | history-token threshold, with decode |
+|---|---|---|---|
+| 5.0 s | **70 of 70** (1.000) | 70 of 70 | **19,500** |
+| 4.0 s | 68 of 70 (0.971) | 58 of 70 | 17,693 |
+| **3.0 s** | **48 of 70 (0.686)** | 42 of 70 | **13,193** |
+| 2.5 s | 42 of 70 (0.600) | 37 of 70 | 10,943 |
+
+The 5 s threshold comes out at 19,500 tokens with decode and 19,479 under the committed formula,
+which confirms the brief's recollection of about 19.4k. **At 3 s the threshold falls to 13,193 tokens
+and 22 of the 70 questions become infeasible cold even on an idle engine.** That is the number that
+matters for redefining D133's headline: the feasible denominator would shrink from 70 to 48, so a
+0.9 bar over feasible questions at 3 s is a bar over a two-thirds subset chosen by history length.
+
+Adding decode moves the threshold by about 1,700 tokens at 3 s, which is why it cannot be left out
+at this deadline even though it is nearly irrelevant at 5 s.
+
+### 19.4 Warm-ahead at 3 s, from the section 15 and 16 simulation
+
+MODELLED, with contention charged to the same GPU and the W2 discipline (warm only in spare
+capacity). Robot questions on time of 65, 16 devices.
+
+| capacity | P0 (as run) | P1 (warm all, LRU) | P2 (hazard) | P3 (oracle) |
+|---|---|---|---|---|
+| 1.00x committed | **25** (43 at 5 s) | **65** | **65** | 65 |
+| 0.50x | 25 (43) | 51 (56) | 62 (63) | 65 |
+| 0.25x | 25 (43) | 34 (47) | 41 (49) | 65 |
+
+**At the committed capacity, warming ahead absorbs the 3 s deadline completely: P1, P2 and P3 all
+reach 65 of 65, the same as at 5 s, while P0 falls from 43 to 25.** The deadline costs 18 of 65
+questions if nothing is warmed and nothing at all if everything is. Under memory pressure it bites:
+at 0.5x the tightening costs P1 five questions and P2 one, and at 0.25x it costs P1 thirteen and P2
+eight.
+
+So the simulation and 19.2 agree from different directions. The gap between what the arms achieve at
+3 s, 0.33 at best, and what is achievable, 65 of 65, is **warming**, not the deadline.
+
+**One inert switch caught before it was reported.** The first run of this at 3 s returned numbers
+IDENTICAL to 5 s at every capacity and policy. That is the signature of a switch that never reached
+a decision, not of a deadline that costs nothing, and it was: the trace records `deadline_s = 5.0` on
+every robot question, and the model read `r.get("deadline_s") or ROB_L`, so the override was never
+consulted. The override is explicit now and the table above is from the fixed run. Had the first
+result been reported it would have been a null from an absent link, which CLAUDE.md names directly.
+
+### 19.5 Answer length, and why decode matters at 3 s
+
+A robot answer is **a single multiple-choice letter** (`cloud_payload.cloud_letter`: B, E and so on),
+and the realised output is **2 tokens** in every committed cell against a committed cap of 512, so
+the cap has never bound. That is P20.
+
+Two tokens is not free, because decode time is set by how busy the engine is, not by how many tokens
+are emitted (18.7.2). Measured on this grid, robot decode against the number of requests overlapping
+its decode window:
+
+| overlapping requests | n | decode p50 |
+|---|---|---|
+| 0 to 3 | 11 | **0.0242 s** |
+| 3 to 6 | 37 | 0.1054 s |
+| 6 to 12 | 164 | 0.2421 s |
+| 12 to 25 | 32 | 0.3448 s |
+| 25 to 45 | 48 | 0.7986 s |
+| 45 and above | 139 | **1.4025 s** |
+
+So the same two-token answer costs 0.024 s on an idle engine and 1.40 s in a crowd, a **58-fold**
+range. At a 5 s deadline that spread is 28 percent of the budget at worst; **at 3 s it is 47
+percent**, and on the actual misses decode was 1.086 s at the median, more than a third of the whole
+3 s budget spent after the first token was already in hand. That is why decode belongs in the
+feasibility rule at this deadline and why the answer format, not just the history, would need
+re-benchmarking before a 3 s bound is adopted.

@@ -53,13 +53,23 @@ import costs as C                                                            # n
 import trace as TR                                                           # noqa: E402
 
 RUNS = REPO / "results/orchestration/live2/frozen_test/runs"
-OUT = REPO / "results/orchestration/live2/frozen_test/warm_state_contention.json"
+OUT = REPO / ("results/orchestration/live2/frozen_test/warm_state_contention"
+              + ("" if os.environ.get("WARM_ROB_L", "5.0") == "5.0"
+                 else "_L" + os.environ["WARM_ROB_L"].replace(".", "p")) + ".json")
 
 GPU_TOKENS, HOST_TOKENS = 62944, 110592
 CAP_SCALES = (1.0, 0.5, 0.25)
 EVAL_SEEDS, FIT_SEED, SIZES = (4, 5, 6), 0, (16,)
 RUN_S, RATIO = 1200.0, "40:40:20"
-ROB_L, SS_L, DASH_L = 5.0, 2.0, 1.0
+# D147: the robot deadline is swept. 5.0 s is the deadline the runs were MADE under; a shorter one
+# re-scores the same simulated timeline and is a counterfactual on scoring, not on behaviour.
+ROB_L = float(os.environ.get("WARM_ROB_L", "5.0"))
+# The trace records deadline_s = 5.0 on every robot question, so `r.get("deadline_s") or ROB_L`
+# always took 5.0 and a WARM_ROB_L override was INERT. The first run at 3 s returned numbers
+# IDENTICAL to 5 s at every capacity and policy, which is the signature of a switch that never
+# reached a decision, not of a deadline that costs nothing. The override is explicit now.
+ROB_L_OVERRIDE = "WARM_ROB_L" in os.environ
+SS_L, DASH_L = 2.0, 1.0
 K_FRAC = 0.3                      # D143 ruling B: at risk when laxity < 0.3 x the type's deadline
 MON_TOKENS, SS_TOKENS = 378, 1372  # MEASURED medians from the committed request logs
 FIT_ARMS = ("b7-edf-feasibility", "hybrid-F-lhreq")
@@ -238,7 +248,10 @@ def events(seed, n):
             questions.append(dict(t=float(r["t"]), sid=r["session_id"], opp=r["opportunity_id"],
                                   h=int(r.get("history_tokens") or 0) if dev.startswith("robo") else SS_TOKENS,
                                   kind="robot" if dev.startswith("robo") else "ss",
-                                  deadline=float(r.get("deadline_s") or (ROB_L if dev.startswith("robo") else SS_L))))
+                                  deadline=(ROB_L if (dev.startswith("robo") and ROB_L_OVERRIDE)
+                                            else float(r.get("deadline_s")
+                                                       or (ROB_L if dev.startswith("robo")
+                                                           else SS_L)))))
     return ses, sorted(batches, key=lambda x: x["t"]), sorted(questions, key=lambda x: x["t"]), sorted(monitors)
 
 
