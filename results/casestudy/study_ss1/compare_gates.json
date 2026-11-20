@@ -205,5 +205,53 @@
   "the_upgrade_rule_is_the_H100's_own": "an exact census only if k equals N. So if the final mm_cache_hits is 52 against the 36 plus 16 lists, every candidate fired, none were evicted, the identities follow from the positions, and the cloud side has a CENSUS with named members rather than a bound.",
   "what_I_will_do": "READ THE FINAL FIGURE BEFORE FIXING THE REGISTER. 52 means census and the members are named; below 52 means eviction occurred somewhere and the bound language is correct. The device side remains a bound either way, having neither count nor identities.",
   "why_this_matters": "pre-committing to bound wording that a 52 cannot upgrade would be the mirror of the error being avoided: a constructed bound reported as a census, run backwards into a census reported as a bound."
+ },
+ "prompt_token_parity_PREREGISTERED": {
+  "written_before_the_test": true,
+  "the_key_names_are_misleading": "for Qwen2VLImageProcessorFast, shortest_edge and longest_edge are min_pixels and max_pixels, TOTAL PIXEL AREA, not edge lengths. The Orin's defaults are min 65536 (256x256 of area) and max 16777216 (4096x4096).",
+  "what_the_override_actually_changed": {
+   "ceiling": "IDENTICAL on both sides, longest_edge 16777216. The binding constraint for real photos is the same.",
+   "floor": "the only difference: 65536 on the Orin against 4096 on the H100.",
+   "consequence": "a min-pixels floor forces UPSCALING only of images BELOW it. Any image above about 256x256 of area is preprocessed identically and yields identical token counts.",
+   "direction_is_the_reverse_of_the_natural_worry": "on a sub-threshold image the ORIN upscales further than the H100, giving the DEVICE more visual tokens, not fewer."
+  },
+  "prediction": {
+   "egothink": "100 PERCENT IDENTICAL prompt_tokens, with no tail. Its minimum device prompt_tokens is 1,186, implying about 1,146 visual tokens and an area near 1.17 million pixels, roughly 18x above the 65,536 floor, so the floor cannot bind on any item.",
+   "vizwiz_bulk": "identical for the large majority, for the same reason.",
+   "vizwiz_low_tail": "divergence is POSSIBLE and is confined to the smallest images. The device minimum prompt_tokens is 104; under the released rule (H/16)*(W/16)/(2*2), i.e. area/1024, the Orin's 65,536 floor implies a hard minimum of 64 visual tokens, and 104 minus roughly 40 tokens of text overhead is about 64. So the smallest items sit AT the floor. 68 questions have prompt_tokens under 200 and 456 under 400.",
+   "direction_if_it_appears": "CLOUD LOWER THAN DEVICE on those items, since the H100's 4,096 floor implies a minimum of 4 visual tokens against the Orin's 64.",
+   "magnitude_bound": "at most 64 minus 4 = 60 visual tokens per affected item.",
+   "why_this_is_worth_writing_down": "it predicts not merely 'identical' but WHERE a divergence would appear, in WHICH DIRECTION, and with what CEILING on its size. A confirmation of that is distinguishable from a coincidence; a flat 100 percent on EgoThink alongside a low-tail-only divergence on VizWiz would confirm the mechanism precisely, and a divergence in the BULK would refute it and point elsewhere."
+  },
+  "interpretation_rules_set_in_advance": {
+   "identical": "identical visual input, confound cleared.",
+   "constant_offset_on_every_question": "the chat template, the 4B and 32B wrapping the same prompt differently. NOT a resolution confound.",
+   "scales_with_image_size_across_the_BULK": "the pixel budget or the vision configs, which IS the confound.",
+   "low_tail_only_with_cloud_lower": "the floor difference, exactly as predicted, and its effect is bounded at 60 tokens on 68 or fewer VizWiz items."
+  },
+  "THE_DEPENDENCY_THAT_NO_RERUN_COULD_FIX": {
+   "what": "prompt_tokens parity means 'same pixels' only if the 32B carries patch_size 16, merge_size 2 and longest_edge 16777216.",
+   "why": "the pixel-to-token rule is (H/16)*(W/16)/(2*2) under patch_size 16 and merge_size 2, and those are properties of the RELEASED CHECKPOINT, invariant to every serve flag. Qwen3-VL uses patch_size 16 where Qwen2-VL used 14.",
+   "status": "the 32B's preprocessor_config.json has been requested. If it matches, the report will say THE THREE FIELDS AGREED rather than 'configs match', since it is those three that carry the inference.",
+   "if_any_differs": "that is the confound, and it is a property of the two checkpoints rather than of anything anyone configured, so no rerun could address it."
+  },
+  "orin_config_verbatim": {
+   "size": {
+    "longest_edge": 16777216,
+    "shortest_edge": 65536
+   },
+   "patch_size": 16,
+   "temporal_patch_size": 2,
+   "merge_size": 2,
+   "image_processor_type": "Qwen2VLImageProcessorFast"
+  }
+ },
+ "orin_version_resolved": {
+  "installed": "vLLM 0.20.0+cu126",
+  "recorded": "vLLM 0.20.0+cu126, from reports/study_orin3_vllm.md:28 and study_orin3_analyse.py:226",
+  "finding": "THEY AGREE, so this is ONE FACT and not a discrepancy. Worth stating explicitly, because 'recorded' and 'installed' agreeing is itself the finding and the register distinction was kept open until it could be closed by evidence rather than assumption.",
+  "transformers": "5.20.2, which owns the image processor",
+  "model_directory": "present on the box rather than reconstructed from a release page",
+  "consequence": "the cached_tokens null conclusion STANDS: vLLM 0.20.0 does not populate it, so the device TTFT column remains PERMANENTLY unverified-cold."
  }
 }
