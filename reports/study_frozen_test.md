@@ -142,6 +142,54 @@ Decisions (PROVISIONAL unless ruled):
    accepts the 40:40:20 ratio but its single-shot pool is still StudySS1's (VizWiz, EgoThink) and has no LH-REQ robot
    selection; no run-length table yet.
 
+## 4c. The three-type grid as run (updated 2026-11-20 01:30)
+
+**Setup:** `experiments/orchestration/study_frozen_grid_driver_v3.sh`; 1200 s (flash's committed run-length table);
+40:40:20 dashcam : LH-REQ EVAL robot : single-shot (RefSpatial + RealWorldQA, EVAL part of the committed 30/70 split);
+SS deadline 2 s, one per 10 s per assistive device; tight 27 GiB; push-all; `--kv-capacity-enforced`; runner flags
+`--robot-question-set lh_req --ss-question-set ss2` (both cross-checked against flash's committed counts: n=16 seed 0
+gives 24 robot and 356 SS questions). Started 21:08 on "ss2-pool ready" (user ruling), so the 01:30 rule-3 fallback
+was already satisfied. Scored with flash's three-type scorer (41b0eae); pre-fix three-type numbers are never compared.
+
+**Valid runs so far (all questions; feasible-question column to follow):**
+
+| arm | n | seed | dashcams all meet | robots on time | SS on time (2 s) | capacity | mm gate (hits = same-ID repeats; SS repeats) |
+|---|---|---|---|---|---|---|---|
+| b7 | 16 | 0 | yes | 17 of 24 | 319 of 356 | no | 405 = 405; 0 |
+| mooncake | 16 | 0 | yes | 17 of 24 | 319 of 356 | no | pass |
+| b7 | 16 | 4 | yes | 14 of 20 | 332 of 357 | no | 285 = 285; 0 |
+| eco-llm | 16 | 4 | yes | 14 of 20 | 294 of 357 | no | 345 = 345; 0 |
+| mooncake | 16 | 4 | yes | 14 of 20 | 332 of 357 | no | 285 = 285; 0 |
+| b7 | 16 | 5 | yes | 19 of 25 | 320 of 356 | no | 735 = 735; 0 |
+
+**Skipped (INVALID twice, rule 5; data kept):** eco-llm n16 s0 (one request of 33,839 tokens exceeds the 32,768
+context, deterministically: one LH-REQ session at seed 0 whose history reaches 33,781 tokens at t = 958 s; absent at
+seed 4); b7 n20 s0 (127 and 111 transport ReadErrors).
+
+**PROVISIONAL decisions taken (all overnight):**
+5. Multimodal-cache gate redefined: the planned "total hits 0" cannot hold, because D84 deliberately lets robot recall
+   resend a session's history frames under the same per-(device, frame) UUID. Pass condition used: mm_cache_hits delta
+   equals the run's repeated-UUID references, AND 0 repeats among single-shot references; wire presence of the uuid
+   key counted per image part (asyncbackend). Every valid run so far passes exactly (agreed with the A6000 session).
+6. Sizes 20 and 24 deferred to the end of the queue (driver v3, `DEFER_SIZES`), no cell dropped: at 20 devices the
+   offered dashcam load is 14.67 req/s, 97 percent of the committed 32B peak (StudyD7b, 15.10 req/s); b7 n20 s0 failed
+   twice with transport ReadErrors starting at t = 510 s, the StudyMOT1 / StudyD7 overload signature (server log
+   silent; client dispatch lag p90 1.2 to 1.3 s against 28 ms at 16 devices). eco-llm n20 s0 was stopped 4 minutes in
+   and set aside. Pending the user's size ruling (the A6000 recommends 16 and 18: 73 and 85 percent of peak).
+7. The 1,042 StudySS2 images were staged in the live frame store as the kit's own JPEG q90 bytes (they were absent, so
+   the first launch at 21:05 was refused at preflight for every cell: not measurements, set aside).
+8. hybrid-F / hybrid-F6 join only after "policy-F ready" and a check that base-with-switches-off is byte-identical to
+   b7; every F6 cell must show c6_calls > 0 and c6_scorer_error == 0 or it is INVALID as not-F6 (the A6000 found a
+   swallowed MissingEvidence that silently disabled C6 before its fix).
+
+**Mechanism notes:** memory enforcement never evicted anything in any run (peak GPU-resident history 0): b7 and
+eco-llm hold no resident history, and mooncake's 377 keep-warm state actions (n16 s4) find nothing resident, so its
+outcomes match b7 on both seeds. Unexercised, not evidence. Single-shot accuracy is device-side only: cloud-served
+SS answers are recorded but not scored in live2 (the StudySS2 scorers are not importable there).
+
+**Pending user rulings:** grid sizes (16 and 20, or 16 and 18); whether transport errors invalidate a run or count as
+misses; whether an over-context request invalidates a run or counts as a miss.
+
 ## 5. Incidents
 
 - 17:10 to 17:16: the first StudySS1-32B attempt failed every request (cache_salt '/'), stopped, no answers written.
