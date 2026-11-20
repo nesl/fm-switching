@@ -284,11 +284,21 @@ The two off-diagonal cells stay within 35 to 42 of each other at every cut.
 |---|---|---|---|
 | clean | 4,255 | 0.8618 s | 0.3225 s |
 
-**Both columns are labelled UNVERIFIED-COLD**, for different reasons. The cloud's prefix cache
-reports **6,702,660 tokens queried with 0 hits**, which is a strongly non-vacuous zero but is not a
-positive control: it rules out the cache never being consulted, not that a hit would have
-registered. The device column is **permanently** unverified-cold, since vLLM 0.20.0 does not
-populate `cached_tokens` at all and the SS1 runner captured neither that nor the `/metrics` deltas.
+**The two columns now carry DIFFERENT labels, for different reasons, which is more informative
+than when both were unverified.**
+
+**Cloud: VERIFIED COLD BY A SAME-CONFIGURATION CONTROL ON A SEPARATE SERVER START, NOT VERIFIED
+IN-PROCESS.** The positive control passed on all three arms on a fresh server on the identical
+round-1 command: on three byte-identical repeats a unique salt gave 0 cached tokens while the same
+salt gave 1,248 of 1,250, 1,232 of 1,245 and 1,232 of 1,238. So the field is populated on 0.31.0, a
+hit does register, and a unique salt prevents one. Joined with the run's own 0 prefix hits on
+**6,702,660 queried tokens**, the conclusion is cold. **The join assumes the instrument behaved
+identically in the control process and the run process**, a same-binary same-command assumption,
+stated rather than hidden.
+
+**Device: PERMANENTLY UNVERIFIED-COLD.** vLLM 0.20.0 does not populate `cached_tokens` at all, and
+the SS1 runner captured neither that nor the `/metrics` deltas, so no control could be constructed
+after the fact.
 Stack note: these device figures are the ORIN3 vLLM stack, whereas the committed device baseline
 for robot recall is the ORIN2 in-process harness (D87, unexercised per D103c); the two must not be
 placed side by side as one device's numbers.
@@ -402,3 +412,39 @@ sides, and the template branch of the confound decomposition is closed outright 
 bounded.** Taken with VizWiz, where the only divergence was exactly the 28 sub-floor images, both
 branches of the decomposition are now resolved: no template difference anywhere, and the pixel
 difference confined to images below the floor.
+
+---
+
+## TTFT: `idle.json` and this run do not disagree, and the reason is measured
+
+`idle.json` reports **p50 0.41 s** over 100 cold VizWiz questions on an idle engine at a median of
+**1,976 prompt tokens**. This run reports cloud **p50 0.3225 s** over 4,255. A reader meeting those
+two side by side would conclude the production run was faster than idle, which is the
+caching-artifact signature consistency check 2 exists to catch. **It is a false alarm with a
+mundane cause, and the cause is measurable rather than inferred.**
+
+Cloud TTFT on this run is strongly prompt-length dependent:
+
+| prompt tokens | n | TTFT p50 | p90 |
+|---|---|---|---|
+| 0–500 | 456 | 0.1013 | 0.1232 |
+| 500–1,000 | 329 | 0.1934 | 0.2042 |
+| 1,000–1,500 | 1,397 | 0.2862 | 0.2993 |
+| 1,500–2,000 | 1,763 | 0.4483 | 0.4654 |
+| 2,000–2,500 | 50 | 0.4528 | 0.4696 |
+| 2,500–4,000 | 324 | 0.7203 | 0.7419 |
+
+A 7x spread across the range. **This run's VizWiz prompts are p50 1,273 and p90 1,991, so
+`idle.json`'s median of 1,976 sits at roughly this workload's p90**: its 100 questions are not a
+representative sample, their median prompt being about 1.55x the workload's.
+
+**Matched on prompt length the apparent paradox inverts, in the correct direction.** For prompts of
+1,800 to 2,150 tokens, bracketing `idle.json`'s median, this run gives **p50 0.4485 s** against
+`idle.json`'s **0.41 s**. The dedicated idle measurement is **faster**, by about 8 percent, which is
+what an idle reference should be.
+
+So neither figure is wrong and they measure different question mixes. **They must not be compared
+directly, and 0.41 s is not the idle reference for a 0.3225 s workload.** This is a check-4
+definition point of the same kind already recorded for "area": one name, two input distributions.
+If `idle.json` is to serve as the reference against the 2 s SS deadline, its sample should match the
+workload's token distribution, or the comparison should be made within prompt-length bands.
