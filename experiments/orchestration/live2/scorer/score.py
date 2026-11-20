@@ -121,6 +121,52 @@ DASH_MIN_INSTANTS = 200                 # D71
 ROB_L_S = DS.ROBOT_DEADLINE_S           # 5.0 (D71)
 ROB_P = 0.90                            # D71
 ROB_MIN_QUESTIONS = 20                  # D82, POOLED over the run
+# D142 item 3 / D143: single-shot is a THIRD device type and must not be scored as a robot. Its
+# opportunities reuse the committed `recall_question` record kind on purpose, so the OUTCOME's kind
+# is "recall" for both and cannot separate them. The DEVICE ANSWER's kind can: the trace writes
+# kind="assistive" for a single-shot answer and kind="recall" for a robot one.
+SS_L_S = 2.0                            # D142 item 3, the single-shot deadline
+SS_P = 0.90                             # same target shape as the robot pool; reported, not a gate
+
+
+# The fleet names devices by type (`fleet/trace.py`: dash###, robo###, asst###), so the device id
+# is a fallback discriminator when the device answers are not in hand. It is a FALLBACK, not the
+# rule: the authoritative field is the device answer's own kind.
+ASSISTIVE_DEVICE_PREFIX = "asst"
+
+
+def _is_assistive(lo: "Loaded", opp: str, outcome: Optional[Dict[str, Any]] = None) -> bool:
+    """Is this opportunity single-shot? From the DEVICE ANSWER's own kind where available.
+
+    The partition is EXHAUSTIVE on purpose. The bug this replaces was a fall-through: `attainment`
+    put every non-monitor outcome in the robot pool with an `else`, so single-shot questions were
+    scored as robot questions at the 5 s robot deadline instead of 2 s. That did not crash. It
+    silently inflated the robot pool (24 robot questions and 356 SS at n=16, so the pool read 380)
+    and corrupted both the headline on-time fraction and D82's 20-question minimum. A loud failure
+    would have been better, which is why this one is loud.
+
+    TWO CALLERS PASS A SHIM WITH NO `device_answers` AT ALL: `policy/audit/leaderboard.py` and
+    `policy/audit/robot_denominators.py` build an object carrying only `outcomes`. They predate
+    single-shot and raising on them would break committed audit tooling, so the device id prefix is
+    used instead and the fallback is not silent: `attainment` records which rule classified the
+    run, so a three-type run scored through a shim cannot quietly look like a robot-only one.
+    """
+    answers = getattr(lo, "device_answers", None)
+    if answers is None:
+        did = (outcome or {}).get("device_id") or ""
+        return bool(did.startswith(ASSISTIVE_DEVICE_PREFIX))
+    dev = answers.get(opp)
+    if dev is None:
+        raise ScoringRefused("no device answer recorded for opportunity %r, so it cannot be "
+                             "classified as robot or single-shot" % (opp,))
+    k = dev.get("kind")
+    if k == "assistive":
+        return True
+    if k == "recall":
+        return False
+    raise ScoringRefused("device answer for opportunity %r carries kind %r, which is neither "
+                         "'recall' nor 'assistive'; refusing to guess which pool it belongs to"
+                         % (opp, k))
 N_BOOT = 2000
 N_BOOT_AP = 1000                        # D103 (e): raised from 200. AP is recomputed per resample
 AP_HORIZONS = (0.0, 0.5, 1.0, 1.5)
@@ -275,6 +321,12 @@ class Attainment:
     robot_pool_meets: bool = False
     robot_per_device: Dict[str, Dict[str, Any]] = field(default_factory=dict)
     robot_worst_device: Optional[str] = None
+    # D142 item 3: single-shot, scored at its OWN 2 s deadline and kept out of the robot pool.
+    ss_pool_n: int = 0
+    ss_pool_on_time: int = 0
+    ss_pool_fraction: Optional[float] = None
+    ss_per_device: Dict[str, Dict[str, Any]] = field(default_factory=dict)
+    ss_classified_by: Optional[str] = None
     capacity_met: bool = False
 
 
@@ -286,13 +338,17 @@ def _within(o: Dict[str, Any], L: float) -> bool:
 def attainment(lo: Loaded, L_dash: float = DASH_L_S, p_dash: float = DASH_P,
                L_rob: float = ROB_L_S, p_rob: float = ROB_P,
                min_dash: int = DASH_MIN_INSTANTS,
-               min_rob: int = ROB_MIN_QUESTIONS) -> Attainment:
+               min_rob: int = ROB_MIN_QUESTIONS,
+               L_ss: float = SS_L_S) -> Attainment:
     a = Attainment()
     by_dev: Dict[str, List[Dict[str, Any]]] = {}
     rob: List[Dict[str, Any]] = []
-    for o in lo.outcomes.values():
+    ss: List[Dict[str, Any]] = []
+    for opp, o in lo.outcomes.items():
         if o["kind"] == "monitor":
             by_dev.setdefault(o["device_id"], []).append(o)
+        elif _is_assistive(lo, opp, o):
+            ss.append(o)
         else:
             rob.append(o)
     for d, os_ in sorted(by_dev.items()):
@@ -329,6 +385,27 @@ def attainment(lo: Loaded, L_dash: float = DASH_L_S, p_dash: float = DASH_P,
                                    key=lambda d: (a.robot_per_device[d]["fraction"]
                                                   if a.robot_per_device[d]["fraction"] is not None
                                                   else 2.0, d))
+    # D142 item 3: single-shot on-time at ITS OWN deadline, reported beside the other two and
+    # NOT folded into capacity. D64's capacity definition is dashcam-all-meet AND robot-pool-meets;
+    # adding a third conjunct would change a committed definition, which is the user's call.
+    a.ss_classified_by = ("device answer kind" if getattr(lo, "device_answers", None) is not None
+                          else "DEVICE ID PREFIX fallback: this run was scored through an object "
+                               "carrying no device answers, so single-shot was identified by the "
+                               "%r device-id prefix rather than by the authoritative field"
+                               % (ASSISTIVE_DEVICE_PREFIX,))
+    a.ss_pool_n = len(ss)
+    a.ss_pool_on_time = sum(1 for o in ss if _within(o, L_ss))
+    if a.ss_pool_n:
+        a.ss_pool_fraction = round(a.ss_pool_on_time / a.ss_pool_n, 6)
+    ssdev: Dict[str, List[Dict[str, Any]]] = {}
+    for o in ss:
+        ssdev.setdefault(o["device_id"], []).append(o)
+    for d, os_ in sorted(ssdev.items()):
+        n = len(os_)
+        k = sum(1 for o in os_ if _within(o, L_ss))
+        a.ss_per_device[d] = dict(n_questions=n, on_time=k,
+                                  fraction=(round(k / n, 6) if n else None))
+
     # No robot devices at all in this cell: the robot conjunct is vacuous, and that is reported
     # rather than being silently read as "met".
     robot_ok = a.robot_pool_meets if a.robot_pool_n else None
@@ -353,6 +430,11 @@ def robot_value(lo: Loaded, L_rob: float = ROB_L_S) -> Dict[str, Any]:
     rows = []
     for opp, o in sorted(lo.outcomes.items()):
         if o["kind"] != "recall":
+            continue
+        # D142 item 3: single-shot answers reuse this record kind but carry no gold letter and are
+        # not MCQ, so they are scored by `assistive_value` instead. Reading dev["gold_letter"] on
+        # one raised KeyError and blocked the score of every three-type run.
+        if _is_assistive(lo, opp):
             continue
         dev = lo.device_answers.get(opp)
         if dev is None:
@@ -875,8 +957,78 @@ def score_run(trace_dir: Path, run_dir: Path, calibration: Path, arm: str,
         base["robot_value"] = rv
         base["robot_rows"] = rv_rows
         base["dashcam_value"] = dashcam_value(lo, cal, L_dash_grid[0])
+        av = assistive_value(lo)
+        base["assistive_rows"] = av.pop("rows")
+        base["assistive_value"] = av
         base["device_only"] = device_only_value(lo, cal)
     return base
+
+
+def assistive_value(lo: Loaded, L_ss: float = SS_L_S) -> Dict[str, Any]:
+    """Single-shot on-time and accuracy, on StudySS2's OWN metrics (D142 item 3).
+
+    The standing answer follows the same rule as the robot pool: the cloud's answer if it arrived
+    within the deadline, otherwise the device's own. Accuracy is then reported per dataset, because
+    the two datasets do not share a metric and averaging them would invent a number:
+
+      * refspatial   `point_accuracy`, the fraction of predicted points inside the ground-truth mask
+      * realworldqa  `exact_match` after the benchmark's own normalisation
+
+    THE CLOUD SIDE IS NOT SCORED HERE. The live harness records the cloud's answer text, and
+    scoring it needs each benchmark's own scorer (the mask for RefSpatial, the normaliser for
+    RealWorldQA), which lives in `experiments/casestudy/ss2_kit.py` and is not importable from a
+    live2 score. So `standing_accuracy` below is the DEVICE accuracy over opportunities whose
+    standing answer is the device's, and it is `None` for those served by the cloud rather than
+    counted as wrong. The count of each is reported, so a reader can see how much of the pool is
+    unscored instead of inferring it. Closing this needs the SS2 scorers wired into the live
+    scorer, and it is named rather than papered over.
+    """
+    rows = []
+    for opp, o in sorted(lo.outcomes.items()):
+        if o["kind"] != "recall" or not _is_assistive(lo, opp):
+            continue
+        dev = lo.device_answers[opp]
+        on_time = _within(o, L_ss)
+        qid = o.get("question_id") or dev.get("question_id") or ""
+        dataset = qid.split("/")[0] if "/" in qid else None
+        sc = dev.get("device_score") or {}
+        metric = "point_accuracy" if dataset == "refspatial" else "exact_match"
+        dev_score = float(sc[metric]) if metric in sc else None
+        rows.append(dict(opportunity_id=opp, device_id=o["device_id"], question_id=qid,
+                         dataset=dataset, on_time=bool(on_time),
+                         source=("cloud" if on_time else "device"),
+                         metric=metric, device_score=dev_score,
+                         standing_score=(None if on_time else dev_score)))
+    def agg(sel):
+        v = [r for r in rows if sel(r) and r["standing_score"] is not None]
+        return dict(n=len(v), mean=(round(sum(r["standing_score"] for r in v) / len(v), 6)
+                                    if v else None))
+    datasets = sorted({r["dataset"] for r in rows if r["dataset"]})
+    return dict(
+        n=len(rows),
+        deadline_s=L_ss,
+        on_time=sum(1 for r in rows if r["on_time"]),
+        on_time_fraction=(round(sum(1 for r in rows if r["on_time"]) / len(rows), 6)
+                          if rows else None),
+        n_cloud_standing=sum(1 for r in rows if r["source"] == "cloud"),
+        n_device_standing=sum(1 for r in rows if r["source"] == "device"),
+        device_accuracy_by_dataset={d: agg(lambda r, d=d: r["dataset"] == d) for d in datasets},
+        device_accuracy_all_opportunities={
+            d: dict(n=sum(1 for r in rows if r["dataset"] == d and r["device_score"] is not None),
+                    mean=(round(sum(r["device_score"] for r in rows
+                                    if r["dataset"] == d and r["device_score"] is not None)
+                                / max(sum(1 for r in rows if r["dataset"] == d
+                                          and r["device_score"] is not None), 1), 6)
+                          if any(r["dataset"] == d and r["device_score"] is not None
+                                 for r in rows) else None))
+            for d in datasets},
+        metrics_not_comparable=("refspatial point_accuracy and realworldqa exact_match are "
+                                "DIFFERENT metrics and are never averaged together here"),
+        cloud_side_unscored=("the cloud's SS answers are recorded but NOT scored in this function; "
+                             "scoring them needs each benchmark's own scorer from "
+                             "experiments/casestudy/ss2_kit.py. standing_accuracy over "
+                             "cloud-served opportunities is therefore absent, not zero."),
+        rows=rows)
 
 
 # ---------------------------------------------------------------- across arms and fleet sizes
