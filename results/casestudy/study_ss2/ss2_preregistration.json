@@ -1,0 +1,62 @@
+{
+ "check": "StudySS2_preregistration_and_parser_gate",
+ "is_measurement": false,
+ "label": "Written BEFORE StudySS2 or StudySS2-32B exist on origin. Neither commit, file nor EXPERIMENTS row is present as of this commit.",
+ "item_1_codalm_parser": {
+  "status": "WRITTEN AND SELF-TESTED, 18 of 18 vectors pass. Gate function ready.",
+  "why_new_code": "the StudySS1 parser dropped 667 of 700 while reporting a working judge_mean 0.1818, the largest cause being the judge obeying the required format while the regex rejected the VALUE. A 1-10 scale with CODA-LM own prompt shares none of that regex assumptions.",
+  "THE_TRAP_AND_IT_BIT_MY_OWN_FIRST_PATTERN": {
+   "what": "on a 1-10 scale the danger is `10`. A pattern built from a single digit class reads 10 as 1: it does not DROP the rating, it silently returns the BOTTOM of the scale for an answer the judge placed at the TOP. That is a confident wrong number rather than a missing one, and it would not appear in a coverage figure at all.",
+   "my_first_pattern_failed_two_vectors": "Rating: 11 returned 1.0 and Rating: 100 returned 10.0, both out-of-range values silently mapped onto scale endpoints.",
+   "fix": "a trailing (?![\\d.]) boundary on the number alternative, which is load-bearing rather than cosmetic.",
+   "lesson": "the self-test was written before any data existed and caught two bugs in the parser written to avoid exactly this class. A parser gate measures COVERAGE; it cannot catch a value that parses to the wrong number, which only a vector test can."
+  },
+  "gate_rule": "parser_gate() runs on 20 to 30 judge outputs and reports the parse rate BEFORE any full pass, so a 5 percent rate is caught on 30 calls rather than on the full set. No mean is published without its coverage beside it."
+ },
+ "item_6_cut_PREREGISTERED": {
+  "scale": "CODA-LM 1-10",
+  "primary": 6.0,
+  "sensitivity": [
+   4.0,
+   5.0,
+   7.0,
+   8.0
+  ],
+  "chosen_before_seeing_the_distribution": true,
+  "rationale": "6.0 is the first integer above the 5.5 midpoint of 1-10. Fixed now because an unregistered threshold already moved a StudySS1 headline by 17 points, agreement 0.633 against 0.805 on whether a judge 0.5 counts as correct."
+ },
+ "item_2_divergence_set_procedure": {
+  "rule": "per dataset, count images below 65,536 px of EFFECTIVE area, post-cap, since ss1_kit downscales when the longest side exceeds 2048. Predict the divergence set BEFORE measuring parity.",
+  "why": "tonight the prompt-token divergence was EXACTLY the images below the device min_pixels 65,536 against the cloud 4,096 override, and nothing else: VizWiz 28 of 4,319 with both residual sets empty, EgoThink 0 of 700.",
+  "do_not_assume_empty": "VizWiz had 28 and EgoThink had 0, so the count must be measured per dataset. CODA-LM is driving scenes and likely has none; RefSpatial may be rendered or cropped and could have many."
+ },
+ "item_3_dedup_on_content": {
+  "rule": "hash the staged files per dataset and derive the warm-encoding candidate set from the hashes, not from identifiers.",
+  "precedent": "VizWiz val holds 34 groups of byte-identical photos under different filenames, and the by-identifier check passes clean at 4,319 of 4,319, so it could not have found them in principle."
+ },
+ "item_4_realworldqa_option_count": {
+  "rule": "report the option count and the implied chance floor beside any MCQ accuracy, measured from the data rather than assumed.",
+  "precedent": "an assumed four options on S-EMBER were actually five, which moved a result from below chance to above it."
+ },
+ "item_5_scorer_per_subset": {
+  "rule": "state the scorer per subset explicitly, because the MCQ against free-form split is PARTLY A SCORER SPLIT: exact-letter match and containment or a judge are different instruments.",
+  "precedent": "two scorers disagreed on the same 700 EgoThink answers, containment giving +0.0057 with an interval including zero and the judge +0.0623 with one excluding it."
+ },
+ "item_7_length_bias_remeasure": {
+  "rule": "run the within-model, within-stratum length-tercile check on CODA-LM directly rather than inheriting the EgoThink caveat.",
+  "why": "the Mistral judge rates longer answers higher with model and containment both fixed, 0.398 to 0.580 on the device containment-0 stratum. A 1-10 scale gives MORE room to reward prose than 0/0.5/1, so the effect could be larger."
+ },
+ "item_8_missingness_yardstick": {
+  "rule": "CODA-LM has reference answers, so containment against them is computable whether or not the judge emits a rating. Use it to characterise the unparsed set.",
+  "why": "the EgoThink missingness analysis only worked because containment was computable on unparsed rows, and it showed all 18 device-side unparsed answers at containment 0.0000 against 0.4839 parsed."
+ },
+ "item_9_egothink_judge_columns": "ALREADY DONE at 6acb3e9, so \"add when ready\" is satisfied by pointing at that commit rather than recomputing.",
+ "_provenance": {
+  "git_commit": "e590e806b2309dbd8f58f5aab5f7fe268dcd4a35",
+  "script": "experiments/casestudy/ss2_kit.py",
+  "model": "n/a",
+  "device": "flash CPU only",
+  "n": "18 self-test vectors",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
