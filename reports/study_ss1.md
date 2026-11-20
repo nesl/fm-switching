@@ -646,14 +646,62 @@ does not account for most of it.
 - **The length effect is real**, demonstrated within model and within containment stratum.
 - **It does not explain the majority of the judge gap**: roughly three quarters survives at matched
   word count.
-- **One caveat that cuts against over-trusting the 77 percent**: the matched-length set is **317 of
-  387 one-word answers**, so it is the short tail where containment works best, and it
-  under-represents exactly the long free-form `Planning` dimensions where the judge gap was largest
-  (+0.184). The matched-length estimate is therefore itself biased toward the regime where the two
-  scorers agree.
+- **The limit on the 77 percent is COMMON SUPPORT, not a correctable bias.** This is the part that
+  decides what could and could not fix it, so it is stated in those terms below.
 
 **Reported as a scope condition, not a correction.** The judge column stands, with the caveat that
 part of the +0.0623 is attributable to answer length rather than correctness, that the attributable
 fraction is bounded at roughly a quarter on the matched-length evidence, and that this bound comes
 from a short-answer-dominated subset. **The charitable and uncharitable readings of the scorer
 disagreement are both partly right**, and the data says which share goes to each.
+
+## What kind of limit the +0.0478 carries: common support, measured
+
+The matched-length estimate collapsed onto one-word answers, and the reason matters for what a
+reader should conclude.
+
+**By range, the overlap is nearly complete.** Word counts present on both sides run 1 to 14, and
+**99.8 percent of device answers and 95.6 percent of cloud answers fall inside it**. Only 1 device
+answer and 17 cloud answers exceed it. So this is **not** a support violation in the strict sense.
+
+**By density, the two distributions differ sharply inside that range.** The device puts 407 of 666
+answers at one word (61 percent) against the cloud's 320 (48 percent), and the cloud carries far
+more mass from 6 words upward. Exact matching therefore concentrates where both densities are
+highest, which is the short end.
+
+**And in the dimensions that drive the headline, matched pairs are thin:**
+
+| dimension | n | device median | cloud median | exact-length matches |
+|---|---|---|---|---|
+| Planning_assistance | 49 | 5.0 | **11.0** | **10** |
+| Planning_navigation | 43 | 3.0 | **8.0** | **8** |
+
+**The judge gap is largest on `Planning_assistance` (+0.184), where the cloud's median answer is
+11 words against the device's 5, and only 10 of 49 questions admit an exact-length comparison.**
+Across both Planning dimensions, 18 matched pairs of 92 questions.
+
+**So the honest statement of the limit, and one correction to a stronger version of it.** It is not
+true that no comparison exists in the long regime: 18 matched Planning pairs exist, so the limit is
+**thin overlap in the regime of interest rather than zero overlap**, and it is set by the device's
+length distribution rather than being strictly structural. But 18 pairs cannot estimate a
+length-adjusted Planning gap, and a larger question set would help only insofar as the device
+produces long answers at all, which it mostly does not. **What a reader has, therefore:**
+
+- a **real judge gap** of +0.0623 on the paired set;
+- a **real judge length bias**, demonstrated within model and within containment stratum at +0.181;
+- a **length-adjusted gap of +0.0478 identified on the short common support**, where both models
+  write alike;
+- and a **long tail where the two scorers disagree most and the length-adjusted comparison rests on
+  18 pairs**, so no adjustment is usefully available there.
+
+That closes the question rather than leaving a reader to suppose a larger n would settle it.
+
+## The length bias is a finding about the instrument, not only a caveat
+
+Stated separately because it stands on its own: **within one model and one containment stratum, the
+judge gives longer answers higher ratings** — device containment-0, short tercile 0.398 against long
+tercile 0.580, +0.181. Model fixed, containment fixed, so this cannot be a quality difference.
+**The Mistral-7B judge is demonstrably sensitive to answer length independent of correctness**,
+measured on this study's own data. That bears on any future use of this judge, not only on the
+EgoThink comparison, and it is the second instrument finding from the judge pass after the parser
+failure.
