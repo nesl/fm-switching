@@ -1899,3 +1899,79 @@ percent**, and on the actual misses decode was 1.086 s at the median, more than 
 3 s budget spent after the first token was already in hand. That is why decode belongs in the
 feasibility rule at this deadline and why the answer format, not just the history, would need
 re-benchmarking before a 3 s bound is adopted.
+
+## 20. The completion headline on the POST-FIX cells (A6000, 2026-11-20, user request)
+
+Section 18.3 scored the pre-fix cells for every arm, because `frozen_headline` built the exact cell
+name. On the user's instruction it now scores **post-fix cells for eco-llm and hybrid-F-lhreq**,
+which were redone after the RECENT-send fix, while **b7 and mooncake are unchanged** (they have no
+post-fix cells) and **hybrid-F6-lhreq stays pre-fix and labelled**, since D145 ruled it is not
+redone. `FROZEN_HEADLINE_CELLS=prefix` reproduces 18.3 for comparison.
+
+### 20.1 The headline moves a long way, and on the ALL-questions basis most of all
+
+Completion delivery, 16 devices, seeds 0, 4, 5, 6.
+
+| arm | cells | robot feasible, pre to post | robot ALL, pre to post | SS, pre to post | minus b7, post |
+|---|---|---|---|---|---|
+| b7-edf-feasibility | pre, unchanged | 0.6087 | 0.4719 | 0.8934 | reference |
+| mooncake | pre, unchanged | 0.6087 | 0.4719 | 0.8948 | [-0.0435, +0.0435] |
+| hybrid-F6-lhreq | pre, not redone | 0.8841 | 0.6854 | 0.9481 | [+0.1739, +0.3913] |
+| eco-llm | **POST** | 0.5652 to **0.6087** | 0.4382 to **0.6742** | 0.8128 to **0.8920** | [0.0, 0.0] |
+| hybrid-F-lhreq | **POST** | 0.9565 to **0.9710** | 0.7416 to **0.9551** | 0.9600 to **0.9811** | **[+0.2464, +0.4783]** |
+
+**The RECENT-send fix is worth far more on the ALL-questions basis than on the feasible one**: it
+moves hybrid-F by 1.5 points on feasible questions and by **21.4 points** on all of them, and
+eco-llm by 4.4 and **23.6** points respectively. That is what the fix should do. The pre-fix defect
+sent the whole history while charging the RECENT price, so the questions it hurt most were the ones
+whose histories were too long to be feasible at all, which sit outside the feasible denominator and
+only show up in the all-questions column.
+
+**Post-fix hybrid-F reaches 0.9551 robot on time over ALL robot questions**, which clears a 0.9 bar
+on the harder of the two denominators. No arm had previously cleared 0.9 on all questions under any
+delivery rule.
+
+One oddity recorded rather than smoothed: eco-llm's post-fix difference against b7 over feasible
+questions is **[0.0, 0.0]**, a degenerate interval, because post-fix eco-llm hits exactly the same 42
+of 69 feasible questions b7 does. Every bootstrap resample therefore gives the same difference. It is
+a real coincidence of outcome sets, not a computation failure, and it should not be read as a
+confidence interval in the usual sense.
+
+### 20.2 The 18.7 mechanism on the post-fix cells: concurrency still dominates, and representation acts through it
+
+Robot requests, p50, four seeds:
+
+| arm and cells | n | prompt tokens | decode | overlapping requests at decode |
+|---|---|---|---|---|
+| b7, pre (unchanged) | 69 | 9,573 | 1.1536 s | 50 |
+| mooncake, pre (unchanged) | 69 | 9,573 | 1.1566 s | 51 |
+| hybrid-F6, pre (not redone) | 86 | 12,228 | 0.2501 s | 9 |
+| eco-llm, pre | 86 | 12,228 | 1.3397 s | 61 |
+| **eco-llm, POST** | 87 | **8,210** | **0.9743 s** | **42** |
+| hybrid-F, pre | 87 | 12,231 | 0.2532 s | 9 |
+| **hybrid-F, POST** | 88 | **8,210** | **0.1376 s** | **8** |
+
+**18.7's conclusion holds post-fix and is strengthened by the cleanest comparison available.**
+Post-fix, eco-llm and hybrid-F send prompts of **identical** median length, 8,210 tokens, on the same
+questions. Their decode differs **sevenfold**, 0.9743 s against 0.1376 s, and their overlap at decode
+differs **fivefold**, 42 against 8. Prompt length is held constant by construction here and the
+decode difference survives intact, so concurrency is the mechanism and length is not.
+
+**But the fix also shows how representation acts: through occupancy, not directly.** Cutting the
+prompt by 33 percent cut eco-llm's overlap by 31 percent, from 61 to 42, and its decode by 27
+percent. A shorter prompt spends less time in flight, so it contributes less to the crowd that every
+other request decodes into. For hybrid-F the same 33 percent cut moved overlap only from 9 to 8,
+because it had little crowd to cut, yet its decode still halved, from 0.2532 to 0.1376 s.
+
+So the two accounts are not rivals. Representation is a lever **on** concurrency, strong where an arm
+is contributing to its own congestion and weak where it is not, and concurrency is what decode
+actually reads. That is a better statement than either 18.4's retracted claim or 18.7's replacement
+taken alone, and it is only visible because the post-fix cells hold prompt length constant across
+two arms with very different release timing.
+
+### 20.3 What this does not change
+
+Sections 18.1 and 18.2 stand: the delivery stamp was first-token based in all 40 runs, and completion
+flips 132 of 880 robot and 217 of 14,502 single-shot outcomes to late. Section 19's deadline sweep
+used pre-fix cells for every arm, so its 3 s table understates the two redone arms; the sweep is
+worth re-running on post-fix cells, and the direction is known from 20.1, both would improve.

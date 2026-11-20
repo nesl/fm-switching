@@ -135,9 +135,16 @@ def main(runs_dir, n, out):
     n = int(n)
     R = Path(runs_dir)
     runs = {}
+    # D145 / user ruling 2026-11-20: eco-llm and hybrid-F-lhreq were REDONE after the RECENT-send
+    # fix, so their post-fix cells are the ones to score. hybrid-F6 is NOT redone (D145 option b)
+    # and stays pre-fix, labelled. b7 and mooncake have no post-fix cells and are unchanged.
+    # FROZEN_HEADLINE_CELLS=prefix scores the pre-fix cells for every arm, which is what section
+    # 18.3 did, so the two can be compared.
+    POSTFIX = ({} if os.environ.get("FROZEN_HEADLINE_CELLS") == "prefix"
+               else {"eco-llm": "_postfix", "hybrid-F-lhreq": "_postfix"})
     for a in ARMS:
         for s in (0, 4, 5, 6):
-            d = R / f"{a}_n{n}_s{s}_1200s_h27_3t"
+            d = R / f"{a}_n{n}_s{s}_1200s_h27_3t{POSTFIX.get(a, '')}"
             if (d / "cell.json").exists():
                 c = json.loads((d / "cell.json").read_text())
                 if c.get("err") is None and c.get("run_valid") and c.get("digests_equal"):
@@ -213,7 +220,12 @@ def main(runs_dir, n, out):
                              "request, stamped at " + ("COMPLETION, prefill plus decode (D146; "
                              "the default from 2026-11-20)" if DELIVERY == "completion"
                              else "FIRST TOKEN (the pre-D146 rule, kept for comparison)")),
-               delivery=DELIVERY, rows=rows)
+               delivery=DELIVERY,
+               cells=("pre-fix for every arm"
+                      if os.environ.get("FROZEN_HEADLINE_CELLS") == "prefix" else
+                      "POST-FIX for eco-llm and hybrid-F-lhreq; pre-fix for b7, mooncake and "
+                      "hybrid-F6-lhreq, which is not redone (D145)"),
+               rows=rows)
     Path(out).write_text(json.dumps(res, indent=1) + "\n")
     print("seeds", seeds)
     for r in rows:
