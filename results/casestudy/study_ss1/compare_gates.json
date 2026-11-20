@@ -89,6 +89,18 @@
    "why_this_is_worth_recording": "it is the same shape as the identifier-based duplicate check passing clean at 4,319 on 4,319: a check that passes for a reason that does not bear on the question. It is cheap, it reads as reassuring, and its outcome carries no information about what it was aimed at. A free check is only worth running first if it CAN fail.",
    "what_it_does_incidentally_establish": "coverage, not verification: under k=28000 exactly 3,167 of 4,319 manifest ids would have an annotation row, 73.3 percent, with 1,152 having none. That is a coverage figure and is independent of whether the mapping is correct.",
    "consequence_for_the_plan": "the k-SCAN is now the ONLY discriminating test available. There is no free refutation route to run before it, so if the stratum is pursued at all it goes straight to the scan over 28000 plus or minus 50, reading the SHAPE: a sharp peak identifies the offset, a flat plateau means the flags carry too little per-image signal to resolve it and the stratum stays absent with that as the stated reason, and association at zero everywhere refutes the offset family."
+  },
+  "CONSENSUS_AGGREGATION": {
+   "status": "ALREADY DONE in the parse; recorded so the plan is explicit rather than implied.",
+   "evidence": "the aggregate built during the licence check is keyed per IMG with a count of flagging workers per flag, e.g. {'NON':0,'BLR':5,'BRT':0,'DRK':0,'OBS':0,'FRM':1,'ROT':0,'OTH':0} with workers=5. All 4,271 VAL images have EXACTLY 5 workers, so the consensus is well defined for every one with no ragged denominators.",
+   "why_it_matters_for_the_scan": "WORKERID confirms the flags are per-ANNOTATOR judgements, not per-image facts, and 15,835 val rows over a 3,173-image val set is 4.99 rows per image. A single annotator's BLR or FRM call is a noisy binary; the mean or majority across five is a far better per-image estimate. Since the k-scan's resolving power depends entirely on how much per-image signal the flags carry, aggregating first is the difference between a scan that peaks and one that plateaus.",
+   "what_will_be_scanned": "the per-image consensus fraction (flagging workers / 5) rather than raw rows, so each image contributes one value per flag."
+  },
+  "THE_SCAN_HAS_THREE_INFORMATIVE_OUTCOMES": {
+   "sharp_peak_at_one_k": "identifies the offset; only the true alignment pairs each flag set with its own photograph, and neighbours smear the per-image signal while preserving the population association.",
+   "flat_plateau": "a REPORTABLE MEASUREMENT, not a failed attempt: the flags do not carry enough per-image signal to resolve the offset. That is a finding about the annotation set, and the stratum stays absent with that as the stated reason.",
+   "zero_everywhere": "refutes the offset family outright, which is the valuable outcome and the justification for spending any time on it.",
+   "contrast_with_the_vacuous_gate": "the scan has three informative outcomes and no uninformative ones, which is the opposite of the SPLIT check I was handed and ran."
   }
  },
  "host_and_load_condition": {
@@ -379,5 +391,16 @@
    "definition_note": "this is a check-4 point: 'area' names two different quantities, staged and effective, and only the second bears on token counts."
   },
   "correction_to_the_instruction": "the instruction was to regress against ss1_image_dims.jsonl's `area` directly. Those are STAGED areas, and for the 242 VizWiz and 41 EgoThink images above the kit's 2048 cap the staged area overstates what the model saw by up to about 1.6x. Effective post-cap area is the correct regressor and the raw field is not."
+ },
+ "method_rules_earned_today": {
+  "free_checks": "A FREE CHECK IS ONLY WORTH RUNNING BEFORE A COSTLY ONE IF IT CAN FAIL. Cheap and informative are independent properties, and a cheap check that reads as reassuring is worse than none, because it spends credibility it has not earned. A 'not refuted' from a check that cannot fail becomes a soft prior on no evidence.",
+  "three_instances_in_one_day_from_three_directions": [
+   "a test file collecting zero tests and reporting success",
+   "identifier-based duplicate detection passing clean at 4,319 of 4,319 while 34 groups of byte-identical photos sat under different filenames",
+   "the SPLIT necessary-condition check, whose pass rate is independent of the offset it was meant to test, proposed deliberately while the pattern was being catalogued"
+  ],
+  "reading": "three instances in one day from three different directions is not a coincidence; it is how the shape presents.",
+  "related_rule_from_the_same_day": "a file can be correct and still be the wrong quantity for the question. ss1_image_dims.jsonl's `area` is honestly what it says and is not what the processor received.",
+  "register_rule_applied_here": "73.3 percent is COVERAGE and holds whether or not the mapping is correct. It must not travel as partial verification."
  }
 }
