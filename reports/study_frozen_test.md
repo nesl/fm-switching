@@ -1062,3 +1062,127 @@ a different policy. That is the trade the C6 redesign inherits.
 
 D144 item 4, the offline analysis that drives the redesign, is section 12 and was committed earlier
 (`c6b6a02`, refreshed in `3faa91e`).
+
+## 15. Offline warm-state study (A6000, 2026-11-20, design input for the C6 redesign)
+
+CPU only, committed traces, no engine, no policy code, no arm. Script
+`experiments/orchestration/live2/warm_state_offline.py`, output
+`results/orchestration/live2/frozen_test/warm_state_offline.json`.
+
+Section 12 established that no robot question in the entire grid was ever served warm (0
+prefix-cache hits against 5.2 to 5.6 million queries per cell, `cached_tokens` 0 on every robot
+request), that robot misses are dominated by history prefill, and that prefilling each 30 s upload
+batch on arrival would have had 97.8 to 98.7 percent of a question's history in cache. This asks the
+next two questions: under real memory capacities, how much of that is keepable, and how much does
+choosing WHICH history to keep add over keeping the recent ones.
+
+REGISTERS. **MEASURED: nothing here.** TRACE: session starts and ends with their declared durations,
+the 30 s history batches with their own token counts, and each robot question's history tokens and
+deadline, all from the committed trace (regenerated locally; the same regeneration reproduced the
+H100's robot opportunity ids exactly, section 14). MODELLED: every time and cost, from the committed
+curves (`costs.recall_ttft_s`, `recall_gpu_s`, StudyRH5). CONSTRUCTED: the policies, the capacities
+below the committed pair, and the oracle.
+
+The composition rule, the one modelling choice that is not just the committed curve: a history of h
+tokens with c of them resident at tier X costs `recall_ttft_s(c, X) + recall_ttft_s(h - c, "COLD")`,
+which reduces to the committed warm number at c = h and the committed cold number at c = 0. The
+HOST-WARM curve already includes the reload, so a host hit is charged its reload.
+
+Three ways the simulation is GENEROUS, so the numbers read as an upper bound on warming's value
+rather than a prediction: the whole GPU pool and host tier are given to robot histories (in the live
+runs they also hold the dashcam and single-shot working set); a batch prefill is charged its GPU
+seconds but never queues; and on-time is TTFT against the 5 s deadline, with a second column adding
+section 12.1's measured 0.74 s p50 of waiting plus queueing, with decode excluded in both.
+
+POLICIES. **P0** no warming, as the grid ran. **P1** warm every batch, evict least recently used,
+GPU to host to cold. **P2** warm every batch, evict the lowest P(question within T), T in 60, 120,
+300 s. **P3** oracle: keeps the histories whose next question is soonest, an upper bound that reads
+the future.
+
+P2's hazard is fitted on SEED 0 only, which is not in the evaluation set (seeds 4, 5, 6), so fit and
+score never share data (D6): two rates, 3.026e-3 per second for a session not yet asked (34 first
+questions over 11,235 s of exposure) and 2.516e-3 for one already asked (14 later questions over
+5,565 s). The horizon is clipped by the session's own declared remaining life, which `session_start`
+carries. That clipping is what makes T read anything at all: with a two-rate hazard and no clipping
+the ranking is monotone in the rate alone, every T gives the same order, and the parameter is inert.
+P2 therefore uses one thing LRU does not have, the session's declared end, and that is an assumption
+about what a deployed policy would know rather than a free lunch.
+
+### 15.1 Results at 16 devices, seeds 4, 5, 6 pooled (65 robot questions)
+
+Tier columns are where the question found its history. TTFT and on-time are MODELLED.
+
+| capacity | policy | GPU | host | cold | TTFT p50 | p90 | on time of 65 | warming GPU-s per 3 cells |
+|---|---|---|---|---|---|---|---|---|
+| 1.00x | P0 (as run) | 0 | 0 | 65 | 2.607 | 5.621 | **51** | 0 |
+| 1.00x | P1 LRU | 41 | 24 | 0 | 0.613 | 0.908 | **65** | 271 |
+| 1.00x | P2 T=60 | 58 | 7 | 0 | 0.576 | 0.851 | **65** | 271 |
+| 1.00x | P2 T=120 / 300 | 54 | 11 | 0 | 0.576 | 0.852 | **65** | 271 |
+| 1.00x | P3 oracle | 65 | 0 | 0 | 0.562 | 0.829 | **65** | 317 |
+| 0.50x | P0 | 0 | 0 | 65 | 2.607 | 5.621 | 51 | 0 |
+| 0.50x | P1 LRU | 20 | 30 | 15 | 0.652 | 3.827 | **60** | 1,774 |
+| 0.50x | P2 T=60 | 38 | 24 | 3 | 0.589 | 0.955 | **64** | 801 |
+| 0.50x | P2 T=120 | 36 | 25 | 4 | 0.589 | 0.955 | 63 | 784 |
+| 0.50x | P2 T=300 | 26 | 36 | 3 | 0.623 | 0.955 | 63 | 761 |
+| 0.50x | P3 oracle | 65 | 0 | 0 | 0.562 | 0.829 | **65** | 924 |
+| 0.25x | P0 | 0 | 0 | 65 | 2.607 | 5.621 | 51 | 0 |
+| 0.25x | P1 LRU | 4 | 19 | 42 | 1.867 | 5.574 | **54** | 2,431 |
+| 0.25x | P2 T=60 | 15 | 25 | 25 | 0.656 | 5.574 | **55** | 1,765 |
+| 0.25x | P2 T=120 | 16 | 22 | 27 | 0.656 | 5.621 | 53 | 1,773 |
+| 0.25x | P2 T=300 | 11 | 21 | 33 | 1.647 | 5.621 | 53 | 1,717 |
+| 0.25x | P3 oracle | 37 | 28 | 0 | 0.562 | 0.944 | **65** | 1,837 |
+
+**18 devices is the same table, exactly.** At 40:40:20 both 16 and 18 devices give SEVEN robot
+devices (16 is 6 dashcam, 7 robot, 3 assistive; 18 is 7, 7, 4), so the robot sessions, batches and
+questions are identical and the robot-side simulation cannot differ. That is worth stating for the
+grid as well as for this study: moving from 16 to 18 devices buys ZERO additional robot questions,
+it only adds dashcam and single-shot load.
+
+Why the two on-time columns are identical in every row: no question's modelled TTFT lands in the
+0.74 s window the queue allowance moves across (`in_queue_flip_window` is 0 in all 36 cells). The
+TTFT distribution is bimodal, a few hundred milliseconds when warm and seconds when cold, so the
+allowance has nothing to flip. The column is reported rather than dropped so that an equality is not
+mistaken for a copy.
+
+### 15.2 The control, which is the only thing tying this to reality
+
+P0 is the condition the grid actually ran, so its modelled on-time is checkable against the measured
+one. MODELLED 51 of 65. MEASURED at the same seeds: hybrid-F 50, hybrid-F6 49, b7 47, mooncake 47,
+eco-llm 46 of 65. The model is optimistic by 1 question against the best arm and 4 against b7, in
+the direction its own exclusions predict, since it charges no queueing and no decode. A model that
+reproduced the measurement exactly would be the suspicious outcome here; one that is optimistic by
+exactly the terms it leaves out is behaving.
+
+### 15.3 What this says for the redesign
+
+**1. At the committed capacity, warming closes the robot deadline completely and selection adds
+nothing.** P0 51 of 65 becomes 65 of 65 under every warming policy, recovering all 14 misses, and
+the P1 to P3 gap is ZERO questions. At 1.0x the histories simply fit: peak residency is 62,736 to
+62,916 GPU tokens against the 62,944 pool with the remainder on host, so an LRU that keeps
+everything is already optimal. The cost is 271 GPU-s across three 1200 s cells, 90 per cell, 7.5
+percent of one cell's GPU budget.
+
+**2. Selection is worth something only under memory pressure, and then it is worth a lot.** The P1
+to P3 gap is 0 questions at 1.0x, **5 questions at 0.5x** (P1 60, P3 65) and **11 questions at
+0.25x** (P1 54, P3 65). P2 captures 4 of the 5 at 0.50x (64 of 65) and 1 of the 11 at 0.25x. So a
+cheap two-rate hazard plus a declared session end recovers most of what selection can give at half
+capacity and almost none of it at quarter capacity, where the ranking problem gets hard.
+
+**3. LRU thrashes, and the cost lands on the GPU budget.** Warming GPU-seconds for P1 rise from 271
+to 1,774 to 2,431 across the three capacities, 9x, while the questions it saves fall from 14 to 9 to
+3. At 0.25x that is 810 GPU-s per 1200 s cell, 68 percent of the budget, to recover 3 questions of
+14, because a history demoted to cold is re-prefilled from scratch at its next batch. P2 does the
+same work for 1,765 GPU-s and P3 for 1,837 with all 14 recovered, so **at tight capacity the
+difference between selection policies is mostly a difference in wasted prefill, not in hit rate.**
+
+**4. A shorter horizon is better, which is a design answer and a small one.** Under pressure T = 60
+beats T = 300 by 1 question at 0.50x and 2 at 0.25x, and the ordering is the same at every capacity.
+The parameter only reads anything because it is clipped by the session's declared remaining life, so
+the useful signal here is NOT the length of the horizon, it is knowing when a session is over.
+
+**5. The honest limit of all five points.** The median robot history is asked exactly ONE question
+(section 12.4), so every policy above is choosing what to keep for a single future event per
+session, and the oracle's advantage is almost entirely the advantage of knowing which sessions those
+are. A warming policy in this workload is a prediction problem about sparse one-shot demand, not a
+caching problem about reuse. That is the shape the C6 redesign has to address, and it is the opposite
+of what a counterfactual chooser tuned on repeated access would assume.
