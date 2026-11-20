@@ -1,0 +1,33 @@
+{
+ "label": "StudySH-EP Orin 4BI server launch, per user ruling 2026-11-20",
+ "ruling": "Run the full 4BI sweep with the Jetson vLLM deployment DEFAULT configuration; do not change deployment defaults; record the exact launch command and classify each flag; drop study-only additions unless needed for parity (mm-processor settings stay matched to the H100).",
+ "device_timing_label": "Orin, default Jetson vLLM config",
+ "deployment_default_source": "experiments/device/orin3_serve.sh (StudyORIN3 launcher)",
+ "launch_command": "vllm serve <SNAP Qwen3-VL-4B-Instruct> --served-model-name qwen3vl4b Qwen/Qwen3-VL-4B-Instruct --max-num-seqs 1 --enable-prefix-caching --dtype bfloat16 --max-model-len 32768 --limit-mm-per-prompt '{\"image\":21,\"video\":0}' --gpu-memory-utilization 0.4 --enforce-eager --mm-processor-kwargs '{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}' --enable-prompt-tokens-details --seed 0 --host 127.0.0.1 --port 8000",
+ "env": {"HF_HOME": "/dev/shm/hf_home", "FLASHINFER_DISABLE_VERSION_CHECK": "1"},
+ "env_note": "FLASHINFER_DISABLE_VERSION_CHECK=1 is an ENVIRONMENT REQUIREMENT for this box, not a study tuning flag: the Orin venv has a flashinfer version-string mismatch (flashinfer-cubin 0.6.13 vs flashinfer 0.6.15.post1) that otherwise aborts vLLM startup. It bypasses the version-string check only; the installed flashinfer is functional. No effect on compute, tokens, or timing. The attention backend is left to the deployment default auto-selection (orin3_serve.sh sets no VLLM_ATTENTION_BACKEND).",
+ "vllm_version": "0.20.0",
+ "flags": {
+  "--max-num-seqs 1": "JETSON DEFAULT (serial, one request at a time)",
+  "--enable-prefix-caching": "JETSON DEFAULT (prefix/KV cache ON; source of cached_tokens)",
+  "--dtype bfloat16": "JETSON DEFAULT",
+  "--max-model-len 32768": "JETSON DEFAULT",
+  "--gpu-memory-utilization 0.4": "JETSON DEFAULT",
+  "--enforce-eager": "JETSON DEFAULT (ENFORCE_EAGER defaults to 1 in orin3_serve.sh). Device timings are therefore eager-mode and labelled accordingly.",
+  "--seed 0": "JETSON DEFAULT",
+  "--host 127.0.0.1 --port 8000": "JETSON DEFAULT",
+  "mm-processor-cache-gb (unset)": "JETSON DEFAULT: not set by the deployment launcher, so the vLLM default of 4 GiB applies; the multimodal processor cache is ON, which is what the uuid-only delta mode resolves against.",
+  "--served-model-name qwen3vl4b Qwen/Qwen3-VL-4B-Instruct": "ADDED (functional): HF id added as a second served name because the kit runner addresses the model by its HF id. No compute effect.",
+  "--limit-mm-per-prompt {image:21}": "ADDED (required): deployment default is image:9; EP-G carries up to 21 images so the sweep cannot run at 9. Admission cap only; no per-request token or compute effect for requests within it.",
+  "--mm-processor-kwargs {size:{shortest_edge:4096,longest_edge:16777216},fps:1.0,do_sample_frames:false}": "ADDED (PARITY): matched to the H100 byte for byte; sets the image token count that the cross-stack comparison depends on.",
+  "--enable-prompt-tokens-details": "ADDED (instrumentation): makes prompt_tokens_details.cached_tokens appear in the response so the runner can record it. Response reporting only, no compute or timing effect."
+ },
+ "dropped_study_only_flags": [
+  "--trust-request-mm-kwargs (absent in Orin vLLM 0.20.0; the runner sends no per-request mm_processor_kwargs so it is inert; gate confirmed exact token parity without it)",
+  "--kv-offloading-backend/--kv-offloading-size (H100 capacity feature; the Orin is unified memory so CPU KV offload is the same pool)",
+  "FLASHINFER_DISABLE_VERSION_CHECK / VLLM_ATTENTION_BACKEND / VLLM_USE_FLASHINFER_SAMPLER (not set by the Jetson deployment launcher)",
+  "--enable-log-requests / --enable-logging-iteration-details (verbose logging added only for earlier diagnosis)"
+ ],
+ "cached_tokens_recording": "Raw records keep cached_tokens ABSENT (null) where the field is missing (cold first instant of an episode on this build); it is NOT mapped to 0. cached_tokens_present separates an absent field from a present 0.",
+ "parity_evidence": "EP-G 5-clip gate: 65/65 exact prompt-token match to the H100 precheck; re-verified under this exact launch config before the sweep."
+}
