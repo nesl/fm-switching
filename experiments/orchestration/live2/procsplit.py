@@ -50,6 +50,31 @@ _EOF = b""
 
 
 # ---------------------------------------------------------------- framing
+
+def _instrument_placement(st):
+    """Output-only: total enact_placement's per-call counts (offloaded / kept_warm / evicted / resident), which cstate
+    returns and discards, so a run records whether --kv-capacity-enforced ever evicted anything. No decision reads it."""
+    tot = {"calls": 0}
+    orig = st.enact_placement
+    def wrapped(now):
+        c = orig(now)
+        tot["calls"] += 1
+        for k, v in (c or {}).items():
+            tot[k] = tot.get(k, 0) + int(v)
+        return c
+    st.enact_placement = wrapped
+    return tot
+
+
+def _memory_pressure(st, tot):
+    p = dict(getattr(st, "pressure", None) or {})
+    p.pop("_open", None)
+    p["intervals_n"] = len(p.get("intervals") or [])
+    p["intervals"] = (p.get("intervals") or [])[:200]
+    return dict(kv_capacity_enforced=bool(getattr(st, "kv_capacity_enforced", False)),
+                gpu_kv_tokens=int(getattr(st, "gpu_kv_tokens", 0) or 0), pressure=p, enact_placement_totals=tot)
+
+
 def send_msg(sock: socket.socket, obj: Any) -> None:
     data = json.dumps(obj).encode()
     sock.sendall(_HDR.pack(len(data)) + data)
@@ -302,6 +327,7 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
                           dry_run=not bool(cfg.get("server_url")),
                           gpu_budget_s=cfg.get("gpu_budget_s"), targets=CS.TARGETS)
     co.st.kv_capacity_enforced = bool(cfg.get("kv_capacity_enforced", False))   # runner flag --kv-capacity-enforced
+    _mp_tot = _instrument_placement(co.st)
     br = EmulatorBridge(co)
     cpu0 = time.process_time()
     t_start = time.time()
@@ -446,6 +472,7 @@ def _serve(sock: socket.socket, cfg: Dict[str, Any]) -> None:
             logs.close()
             if be is not None:
                 be.close()
+            res["memory_pressure"] = _memory_pressure(co.st, _mp_tot)
             (rdir / "coordinator_result.json").write_text(
                 json.dumps(res, indent=1, default=str) + "\n")
             with send_lock:

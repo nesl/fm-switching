@@ -47,6 +47,31 @@ for _p in (str(HERE), str(HERE / "fleet"), str(HERE / "scorer"),
         sys.path.insert(0, _p)
 
 
+
+def _instrument_placement(st):
+    """Output-only: total enact_placement's per-call counts (offloaded / kept_warm / evicted / resident), which cstate
+    returns and discards, so a run records whether --kv-capacity-enforced ever evicted anything. No decision reads it."""
+    tot = {"calls": 0}
+    orig = st.enact_placement
+    def wrapped(now):
+        c = orig(now)
+        tot["calls"] += 1
+        for k, v in (c or {}).items():
+            tot[k] = tot.get(k, 0) + int(v)
+        return c
+    st.enact_placement = wrapped
+    return tot
+
+
+def _memory_pressure(st, tot):
+    p = dict(getattr(st, "pressure", None) or {})
+    p.pop("_open", None)
+    p["intervals_n"] = len(p.get("intervals") or [])
+    p["intervals"] = (p.get("intervals") or [])[:200]
+    return dict(kv_capacity_enforced=bool(getattr(st, "kv_capacity_enforced", False)),
+                gpu_kv_tokens=int(getattr(st, "gpu_kv_tokens", 0) or 0), pressure=p, enact_placement_totals=tot)
+
+
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--arm", required=True)
@@ -353,6 +378,7 @@ def _inprocess(a, tdir: Path, rdir: Path, cfg, htok, arm, EM):
                           dry_run=not bool(a.server), gpu_budget_s=a.gpu_budget_s,
                           targets=cfg.get("targets"))
     co.st.kv_capacity_enforced = bool(a.kv_capacity_enforced)
+    _mp_tot = _instrument_placement(co.st)
     br = EmulatorBridge(co)
     br.kind = a.server_kind
     import time as _t
@@ -364,6 +390,7 @@ def _inprocess(a, tdir: Path, rdir: Path, cfg, htok, arm, EM):
     except Exception as e:                                            # noqa: BLE001
         err = f"{type(e).__name__}: {e}"
     res = co._result(cpu0, _t.time() - t0)
+    res["memory_pressure"] = _memory_pressure(co.st, _mp_tot)          # output only (split mode: procsplit)
     co.write_decision_times(rdir / "decision_time.jsonl.gz")          # D115
     logs.close()
     if be is not None:
