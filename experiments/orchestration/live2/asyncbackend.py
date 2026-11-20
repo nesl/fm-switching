@@ -107,6 +107,10 @@ class AsyncLive2Backend:
         self._client = httpx.AsyncClient(timeout=httpx.Timeout(timeout_s), limits=limits)
         self.build_s = 0.0
         self.n_built = 0
+        # D84 presence, counted on the WIRE body (after materialize resolves deferred parts and strip_internal):
+        # image parts per traffic class, and how many carry a non-empty "uuid" (A6000 / D143 item 4). Output only.
+        self.img_parts: Dict[str, int] = {}
+        self.img_parts_with_uuid: Dict[str, int] = {}
         self.end_wall: Dict[str, float] = {}
         self.on_complete: Any = None
         self.on_first: Any = None
@@ -145,6 +149,7 @@ class AsyncLive2Backend:
             return dict(n=len(v), p50=round(v[len(v) // 2], 4), p90=round(v[int(0.9 * len(v))], 4),
                         p99=round(v[min(len(v) - 1, int(0.99 * len(v)))], 4), max=round(v[-1], 4))
         return dict(n_built=self.n_built, callback_errors=self.callback_errors[:5],
+                    wire_image_parts=dict(self.img_parts), wire_image_parts_with_uuid=dict(self.img_parts_with_uuid),
                     wire_extra_delay_ms=_st(self.wire_extra_ms),
                     submit_delay_total_ms=_st(self.submit_total_ms),
                     first_line_to_first_content_ms=(dict(
@@ -164,6 +169,15 @@ class AsyncLive2Backend:
         wire = B.strip_internal(body, strip_hints=self.strip_hints)
         wire = dict(wire)
         wire["model"] = self.model
+        try:
+            cls = "assistive" if str(getattr(sub, "device_id", "") or "").startswith("asst") else str(sub.kind)
+            for part in ((wire.get("messages") or [{}])[0].get("content") or []):
+                if isinstance(part, dict) and part.get("type") == "image_url":
+                    self.img_parts[cls] = self.img_parts.get(cls, 0) + 1
+                    if part.get("uuid"):
+                        self.img_parts_with_uuid[cls] = self.img_parts_with_uuid.get(cls, 0) + 1
+        except Exception:                                                     # noqa: BLE001
+            self.img_parts["_count_error"] = self.img_parts.get("_count_error", 0) + 1
         # vllm-priority (flash's wiring, steps 2 to 4): the arm's priority_ms, carried on the submission,
         # goes to the TOP LEVEL of the body; the assertion refuses a priority sent to a non-priority
         # server and a priority-mode server left without one.

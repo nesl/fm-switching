@@ -55,10 +55,17 @@ mm_gate() {   # $1 = run dir: non-vacuous multimodal-cache gate + request-body U
                elif .delta.mm_cache_queries > 0 and .delta.mm_cache_hits == 0 then "pass"
                else "FAIL: multimodal hits in a run whose payloads should all be unique (SS timing column not usable)" end)
     | .note = "server-wide counters from 10-s snapshots, first to last (the window can omit the first and last ~10 s); dashcam and robot frames carry per-(device, frame) UUIDs (D84), so total hits bound single-shot hits"' > $d/mm_gate.json
-  # request-body check: single-shot requests (assistive devices), distinct mm UUIDs over SS requests
-  jq -s '[.[] | select((.device_id // "") | startswith("asst"))] |
-         {ss_requests: length, distinct_mm_uuids: ([.[].mm_uuids[]?] | unique | length),
-          ss_requests_with_uuid: (map(select((.mm_uuids // []) | length > 0)) | length)}' $d/request.jsonl > $d/mm_uuid_check.json 2>/dev/null
+  # body checks. (1) PRESENCE on the WIRE body, per image part and per class (asyncbackend counts after materialize and
+  # strip_internal): parts carrying a non-empty "uuid" over parts. (2) the client-side record (request.jsonl): SS
+  # requests and distinct mm UUIDs (equal by construction; reported, not used as the content-class proof, which is the
+  # server gate's). (3) mm_cache_queries beside the run's request count (lower = scrape lag, not a skipped cache).
+  local bk=$(jq -c '(.backend // {}) | {wire_image_parts, wire_image_parts_with_uuid}' $d/coordinator_result.json 2>/dev/null)
+  jq -s --argjson bk "${bk:-null}" --slurpfile g $d/mm_gate.json --argjson nreq "$(jq '.n_requests // null' $d/cell.json 2>/dev/null || echo null)" '
+         [.[] | select((.device_id // "") | startswith("asst"))] |
+         {wire_presence: $bk,
+          client_record: {ss_requests: length, distinct_mm_uuids: ([.[].mm_uuids[]?] | unique | length),
+                          ss_requests_with_uuid: (map(select((.mm_uuids // []) | length > 0)) | length)},
+          mm_cache_queries_delta: ($g[0].delta.mm_cache_queries), run_requests: $nreq}' $d/request.jsonl > $d/mm_uuid_check.json 2>/dev/null
 }
 
 cell() {   # arm n seed [tag]
