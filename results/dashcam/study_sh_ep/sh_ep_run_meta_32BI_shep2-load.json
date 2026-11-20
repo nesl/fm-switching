@@ -1,0 +1,108 @@
+{
+ "label": "StudySH-EP inference run",
+ "model": "32BI",
+ "model_id": "Qwen/Qwen3-VL-32B-Instruct",
+ "run_tag": "shep2-load",
+ "base": "http://127.0.0.1:8031",
+ "store": "/home/pragya/data/live2/jpeg/nexar_q90_sh_ep_view",
+ "conditions": [
+  "EP-G",
+  "C1"
+ ],
+ "sides": [
+  "DEV",
+  "EVAL"
+ ],
+ "header_mode": "constant",
+ "served_model": "32BI",
+ "clips_from_meta": "shuffle_control_clips",
+ "n_clips_after_filter": 50,
+ "requests_attempted": 1300,
+ "errors": 0,
+ "neither_yes_nor_no": 0,
+ "greys": 0,
+ "shuffle_control": false,
+ "committed_sha256": {
+  "yes_no": "33edb03d0bbdeebd4643235fcd1f5501a66131f6cb1ad4bde84d05a89e03fc2b",
+  "QUERY": "e853eeeceb25e9fd82c6e65e4e980665b0f390eb63a8d203bb46e4cfdde66f7c",
+  "GEN": "efb549a6943d633bd7d45fe3a03dd1074e77f22e39e4789f3c6f78ca2fafe213"
+ },
+ "question": "Is a collision or near-collision involving the camera vehicle happening or about to happen? Answer only Yes or No.",
+ "generation": {
+  "temperature": 0.0,
+  "max_tokens": 8,
+  "seed": 0,
+  "logprobs": true,
+  "top_logprobs": 20
+ },
+ "declared_deviations": [
+  "more than one image in the SH body (StudyD3 N = 3 / N = 9 precedent, but live2 bodies.build_body(kind='monitor') refuses it)",
+  "frame spacing 0.5 s, not StudyD3's 3 / 8 s: C3 is NOT StudyD3's N = 3",
+  "JPEG wire bytes from the D91 store where D3 / D14b sent PNG (D70, D91)",
+  "cache_salt and per-image client uuid (D84)",
+  "stream true, to time the first token (live2's declared deviation)",
+  "prefix caching and the multimodal processor cache ON, where the committed SH stack runs with both OFF; --limit-mm-per-prompt image must be >= 21"
+ ],
+ "server_config": {
+  "/v1/models": {
+   "object": "list",
+   "data": [
+    {
+     "id": "32BI",
+     "object": "model",
+     "created": 1795214722,
+     "owned_by": "vllm",
+     "root": "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+     "parent": null,
+     "max_model_len": 32768,
+     "permission": [
+      {
+       "id": "modelperm-ba133499a88270a8",
+       "object": "model_permission",
+       "created": 1795214722,
+       "allow_create_engine": false,
+       "allow_sampling": true,
+       "allow_logprobs": true,
+       "allow_search_indices": false,
+       "allow_view": true,
+       "allow_fine_tuning": false,
+       "organization": "*",
+       "group": null,
+       "is_blocking": false
+      }
+     ]
+    }
+   ]
+  },
+  "/version": {
+   "version": "0.31.0"
+  },
+  "/get_server_info": "HTTP 404"
+ },
+ "started": "2026-11-20T14:45:22.358511",
+ "finished": "2026-11-20T15:02:44.495701",
+ "_provenance": {
+  "git_commit": "a8b14ad2562f04f0b9a5e00f05b7ec5b02b5d835",
+  "script": "sh_ep_runner.py",
+  "model": "32BI",
+  "timestamp": "2026-11-20T15:02:44.497813",
+  "device": "sn4622120321",
+  "n": 1300,
+  "args": {
+   "base": "http://127.0.0.1:8031",
+   "model": "32BI",
+   "store": "/home/pragya/data/live2/jpeg/nexar_q90_sh_ep_view",
+   "run_tag": "shep2-load",
+   "out": "results/dashcam/study_sh_ep/h100/sh_ep_requests_32BI_shep2-load.jsonl",
+   "conditions": "EP-G,C1",
+   "sides": "DEV,EVAL",
+   "limit": 0,
+   "greys": 0,
+   "shuffle_control": false,
+   "header_mode": "constant",
+   "clips_from_meta": "shuffle_control_clips",
+   "served_model": "32BI",
+   "timeout": 600.0
+  }
+ }
+}
