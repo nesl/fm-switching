@@ -1570,7 +1570,7 @@ is close to the noise floor at 69 questions. Under completion delivery they spli
 points apart, and hybrid-F minus b7 becomes **[+0.2319, +0.4638]**, an interval nowhere near zero.
 hybrid-F loses **1** question of 69 where b7 and mooncake lose **22** each.
 
-### 18.4 The mechanism is context length, and it is not contention
+### 18.4 The mechanism, as first reported. WRONG; superseded by 18.7
 
 The obvious explanation would be that arms which load the engine harder get slower decodes. **That is
 measurably false here.** Over ALL requests at 16 devices, seed 4, decode p50 is 0.045 to 0.078 s for
@@ -1593,11 +1593,12 @@ once in prefill and again in decode, and **the first-token stamp hid the second 
 That is why the robot side flips ten times more often than single shot: robot prompts reach 21,720
 tokens while single-shot prompts are around 1,372.
 
-This is the study's own thesis arriving from an unexpected direction. hybrid-F's advantage under the
-new rule is not a scheduling advantage, it is a **representation** advantage: post-fix it sends a
-RECENT window of about 1,372 tokens where b7 and mooncake send the full history, and the delivery
-rule makes that choice visible for the first time. The comparison is fair, since generation settings,
-deadlines and workload are identical and the arms differ only in what they chose to send.
+**Everything in this subsection after the binned table is wrong and is retracted in 18.7.** It is
+left in place, struck through in substance rather than deleted, because the way it was wrong is worth
+keeping: a pooled relation that looked like a clean monotone law was confounded by arm, and the test I
+ran to rule out the alternative was the wrong test. The retracted claim was that hybrid-F's advantage
+is a representation advantage, its RECENT window being shorter than the full history b7 and mooncake
+send. It is not.
 
 ### 18.5 What is now the default, and the one thing I could not verify here
 
@@ -1613,8 +1614,18 @@ H100 and not on this box, so what is verified for it is that it parses, that the
 after `reqs` and `out` are bound and before the decision load, and that it joins on the `out` dict's
 own key rather than on a field inside the row. Its arithmetic is the same expression that
 `completion_delivery_rescore.py` and `frozen_headline.py` both compute independently and agree on.
-One cell scored both ways on the H100 would close that gap, and until it is run no number in this
-section depends on `score.py`.
+The H100 then committed the seed-4 three-type trace so this box could run it, and **it still cannot**,
+for a reason that is a guard working rather than a defect: with the committed trace in place,
+`score.py` raises `ScoringRefused` under D86, because the only calibration map on this box is the
+INTERIM `orin2_calibration.json` and the run's server is a real `vllm`, which requires the dense
+refit of both tiers. That refit is an H100 artifact. Bypassing a D86 scoring refusal to produce a
+number is exactly the thing the refusal exists to prevent, so it was not bypassed. The module also
+does not import standalone here, so the rewrite could not be exercised in isolation either.
+
+The gap therefore stands, and it is narrow and named: `score.py`'s copy of the rewrite is verified
+structurally and by two independent implementations of the same arithmetic, and has never been
+executed. One cell scored both ways on the H100 once the GPU frees closes it, and until then no
+number in this section depends on `score.py`.
 
 ### 18.6 P20, which this raised
 
@@ -1625,3 +1636,86 @@ model stops at the letter, so the cap has never bound and completion currently c
 orders of magnitude, given that 2 tokens already cost 1.197 s above 15,000 prompt tokens. P20 records
 that the cap must be re-benchmarked against the answer length a chosen format actually produces,
 before that format is adopted.
+
+
+## 18.7 Correction to 18.4: the mechanism is per-request concurrency, not context length
+
+The H100 challenged 18.4 on two specific grounds and **both challenges were right**. The claim is
+retracted and replaced. Nothing in 18.1 to 18.3 changes: the flips, the headline and the conclusion
+that the delivery rule separates the arms all stand. What was wrong is the explanation of WHY.
+
+### 18.7.1 The two challenges, and what checking them showed
+
+**Challenge 1: RECENT is too rare to carry the effect.** hybrid-F releases RECENT on only 3 to 5
+robot questions per run, 5 / 5 / 3 / 5 at seeds 0 / 4 / 5 / 6, against a 21-question difference in
+flips. Correct, and the measurement is worse for my claim than the counting argument suggested.
+
+**Challenge 2: the headline cells are PRE-FIX.** Correct and decisive. `frozen_headline.main` builds
+the path `{arm}_n{n}_s{seed}_1200s_h27_3t` exactly, with no `_postfix` suffix, so all four seeds of
+all five arms are pre-fix cells. Pre-fix, a RECENT release **sent the whole history while charging
+467 tokens**, which is the defect the RECENT-send fix repaired. So in these cells RECENT could not
+have shortened anything, and my mechanism was impossible on its own cells.
+
+**And the direct measurement refutes it outright.** Robot prompt tokens, p50, on the same questions:
+
+| seed | b7 | mooncake | eco-llm | hybrid-F | hybrid-F6 |
+|---|---|---|---|---|---|
+| 0 | 11,587 | 11,587 | 12,927 | **13,588** | 12,927 |
+| 4 | 8,207 | 8,207 | 10,248 | **10,248** | 10,248 |
+| 5 | 9,623 | 9,623 | 12,228 | **12,228** | 12,228 |
+| 6 | 9,566 | 9,566 | 11,602 | **11,602** | 11,602 |
+
+**hybrid-F's robot prompts are the same as or LONGER than b7's at every seed**, while its decode is
+four to six times shorter. And eco-llm sends prompts IDENTICAL to hybrid-F's at seeds 4, 5 and 6 with
+a decode of 1.27 to 1.38 s against hybrid-F's 0.18 to 0.31 s. Same lengths, four to seven times the
+decode. Context length cannot be the mechanism.
+
+### 18.7.2 The actual mechanism: how busy the engine is during that request's decode
+
+For each robot request, counting the other requests whose own `[t_submit, t_done]` interval overlaps
+its decode window `[t_first_token, t_done]`:
+
+| arm | robot requests | overlapping requests, p50 | decode p50 |
+|---|---|---|---|
+| eco-llm | 86 | **61** | 1.340 s |
+| mooncake | 69 | **51** | 1.157 s |
+| b7-edf-feasibility | 69 | **50** | 1.154 s |
+| hybrid-F6-lhreq | 86 | **9** | 0.250 s |
+| hybrid-F-lhreq | 87 | **9** | 0.253 s |
+
+**Pearson r = 0.858** between overlapping requests and decode duration over all 397 robot requests,
+against **r = 0.266** for prompt tokens on the same 397. Within every arm separately, concurrency is
+the stronger predictor too: 0.864 against 0.713 for b7, 0.330 against 0.281 for hybrid-F.
+
+So the binned table in 18.4 was a pooled relation **confounded by arm**: its long-prompt bins are
+dominated by exactly the arms that are also the busiest at decode time. Binning made a weak,
+mediated association, r = 0.266, look like a clean monotone law. Prompt length does matter within an
+arm, partly because a longer request occupies the engine longer and so raises its own measured
+overlap, but across arms it points the wrong way.
+
+### 18.7.3 What the result actually says, which is a different claim
+
+hybrid-F's advantage under completion delivery is a **timing advantage**: it releases robot questions
+into an engine five to six times quieter than the one b7, mooncake and eco-llm release into. Its
+deferral and release timing, which is what the policy exists to do, keeps its robot requests out of
+the crowd, and the first-token stamp could not see the benefit because the crowd's cost is paid
+during decode. That is a scheduling result, the opposite of the representation story I told, and it
+is a better result for the policy thesis rather than a worse one: the mechanism credited is the one
+the policy actually implements in these cells.
+
+The delivery rule's standing is unchanged and so is every number in 18.1 to 18.3. What changes is
+what the study may claim about why, and that claim is now attached to an r of 0.858 rather than to a
+confounded bin table.
+
+### 18.7.4 Two of my own tests were wrong, in opposite directions
+
+Worth recording because the pair is instructive. To rule out contention I correlated each ARM's total
+prompt tokens against its decode p50 over ALL requests and got r = 0.06, then reported that
+contention does not explain it. That test could not have detected the effect: it averaged over
+13,000 dashcam monitors whose decodes are 0.05 s, and it compared arm means, which discards the
+within-run timing that is the whole mechanism. Having wrongly excluded contention, I accepted the
+length relation on a binned plot without computing its correlation, which would have shown 0.266.
+
+The right test, per-request overlap of the actual decode window, was neither of those and settles it.
+A null from the wrong unit of analysis is not evidence, which is the same lesson CLAUDE.md records
+for nulls from absent mechanisms.
