@@ -98,6 +98,71 @@ def score_of(r, dataset):
     raise KeyError("no score field in row %r: %r" % (r.get("qid"), sorted(s)))
 
 
+def prompt_token_parity(qids, D, C):
+    """D142 resolution check: compare prompt_tokens per question between the two runs.
+
+    prompt_tokens is TEXT tokens PLUS VISUAL tokens, so a difference has two possible sources and
+    only one is the resolution confound:
+
+      * identical counts            -> identical visual input, no confound (the cleanest outcome);
+      * a CONSTANT offset on every question -> the chat template, since the 4B and 32B may wrap the
+        same prompt differently. NOT a resolution confound;
+      * a difference that SCALES with image size -> the pixel budget, which IS the confound.
+
+    The image dimensions are not recoverable (the images are gone from tmpfs), so the device's own
+    prompt_tokens is used as a PROXY for image size. It is a defensible one, since the text part is
+    short and nearly constant while the visual part dominates and varies, but it is a proxy and is
+    declared as one: a correlation against it is evidence about scaling, not a measurement of it.
+
+    DEPENDENCY, named rather than resolved: "identical counts means identical visual input" assumes
+    both models convert pixels to tokens by the SAME rule, same patch size and same merge size. If
+    their vision configs differ, identical totals would be a coincidence and differing totals would
+    not prove preprocessing differs. The Orin's preprocessor_config.json and the 32B's equivalent
+    settle it; that is the paired item and it is not in this session's hands.
+    """
+    pairs = [(int(D[q].get("prompt_tokens") or 0), int(C[q].get("prompt_tokens") or 0))
+             for q in qids
+             if D[q].get("prompt_tokens") and C[q].get("prompt_tokens")]
+    if not pairs:
+        return dict(status="NOT COMPUTABLE: prompt_tokens missing on one side")
+    diffs = [c - d for d, c in pairs]
+    same = sum(1 for x in diffs if x == 0)
+    uniq = sorted(set(diffs))
+    dev = [d for d, _ in pairs]
+    out = dict(
+        n=len(pairs), n_identical=same, frac_identical=round(same / len(pairs), 6),
+        diff_cloud_minus_device=dict(
+            min=min(diffs), median=statistics.median(diffs), max=max(diffs),
+            mean=round(statistics.fmean(diffs), 3), n_distinct=len(uniq),
+            direction=("cloud HIGHER on all" if min(diffs) > 0 else
+                       "cloud LOWER on all" if max(diffs) < 0 else
+                       "mixed" if same < len(pairs) else "identical throughout")),
+        verdict=("IDENTICAL COUNTS on every question: identical visual input, CONFOUND CLEARED "
+                 "(subject to the vision-config dependency above)" if same == len(pairs) else
+                 "CONSTANT OFFSET of %d on every question: points at the CHAT TEMPLATE, not the "
+                 "pixel budget, so NOT a resolution confound" % uniq[0] if len(uniq) == 1 else
+                 "VARYING DIFFERENCE: decomposed below"))
+    if len(uniq) > 1:
+        n = len(pairs)
+        mdev = statistics.fmean(dev)
+        mdif = statistics.fmean(diffs)
+        sdev = statistics.pstdev(dev) or 1e-9
+        sdif = statistics.pstdev(diffs) or 1e-9
+        r = sum((dev[i] - mdev) * (diffs[i] - mdif) for i in range(n)) / (n * sdev * sdif)
+        order = sorted(range(n), key=lambda i: dev[i])
+        d1 = order[: max(1, n // 10)]
+        d10 = order[-max(1, n // 10):]
+        out["scaling_test"] = dict(
+            proxy_for_image_size="the DEVICE's own prompt_tokens (declared proxy, see docstring)",
+            pearson_r_diff_vs_device_prompt_tokens=round(r, 4),
+            mean_diff_in_smallest_decile=round(statistics.fmean([diffs[i] for i in d1]), 3),
+            mean_diff_in_largest_decile=round(statistics.fmean([diffs[i] for i in d10]), 3),
+            reading=("a near-zero r with a flat decile contrast points at the template or at "
+                     "question-text length; an r away from zero with a decile contrast in the same "
+                     "direction points at the PIXEL BUDGET, which is the confound."))
+    return out
+
+
 def _analyse(qids, D, C, dataset, cut, dj, jc):
     """Every statistic, over one qid subset. Called once on the full set and once with the
     shared-image qids removed, so the two columns are always cleaned alike or not at all."""
@@ -217,6 +282,7 @@ def main():
                 "are in file CONTENT under different filenames, and a cache keyed by content does "
                 "not care what the identifier says. Identifier-based deduplication cannot see this "
                 "class at all; the stronger form, hashing file contents, is what found it.")),
+        prompt_token_parity=prompt_token_parity(qids, D, C),
         full_set=_analyse(qids, D, C, a.dataset, cut, dj, jc),
         shared_images_excluded=(_analyse(kept, D, C, a.dataset, cut, dj, jc) if shared else None),
         ttft_condition=dict(
