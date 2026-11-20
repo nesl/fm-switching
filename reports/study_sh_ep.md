@@ -341,6 +341,52 @@ not as contended as the grid's turnover figure suggests, and worth more than a c
 Either way the number to read first is `cached_tokens` per request, not TTFT: TTFT under load mixes
 queueing with prefill, and only `cached_tokens` says whether the prefix survived.
 
+### 5b.5 The load-cell prediction, REVISED before the run on the right timescale
+
+The prediction in 5b.4 said `cached_tokens` should fall sharply under load and might reach zero. **It
+was wrong, and the error was a timescale, not an arithmetic slip.** It argued from section 17 of
+`study_frozen_test.md`, where the frozen grid pushes its KV pool over 89 times in 1,200 s, and
+inferred that an episode's prefix would not survive. But 89 turnovers per run is the wrong rate to
+compare an episode against. The quantity that matters is how much background traffic passes between
+two CONSECUTIVE instants of one episode, which are 0.5 s apart.
+
+Measured on the ruled background, the committed `b7-edf-feasibility` three-type cell at 16 devices:
+
+| quantity | value |
+|---|---|
+| background prompt tokens in 1,200 s | 5,489,609 over 13,558 requests |
+| background token rate | 4,575 tokens per second, 7.3 percent of the 62,944-token pool per second |
+| **one full pool turnover** | **13.8 s of background traffic** |
+| background tokens between two EP-G instants, 0.5 s | **2,287, or 3.6 percent of the pool** |
+| background tokens across one whole 6 s episode | 27,448, or **0.44 turnovers** |
+
+So an episode lives well inside one pool turnover, and section 17's figure applies to the frozen
+grid's OWN reuse opportunities, which are separated by 34 to 350 s, that is 2.5 to 25 turnovers. The
+two situations differ by three orders of magnitude in the gap being bridged.
+
+**The revised prediction, pre-registered here before the run.** `cached_tokens` should LARGELY SURVIVE:
+EP-G should stay mostly warm, with a median near its unloaded 4,736. What should degrade is TTFT,
+through queueing rather than through recomputation. H3's claim is a RATIO, EP-G against C1, and the
+ratio should stay near its unloaded 1.16x if the warm-episode saving is real under contention. A
+reading where both TTFTs rise together and the ratio holds supports H3 more strongly than the
+unloaded numbers do, because it shows the saving is not an artifact of an idle engine.
+
+**And the failure mode worth watching is a burst, not an average.** The background's robot recalls run
+up to 21,720 prompt tokens, which is 34 percent of the pool in a single request. The average rate says
+the prefix survives; a few large recalls arriving together could still evict one. So if
+`cached_tokens` does collapse, the thing to check is whether the misses CLUSTER in time with the
+background's large recall requests, rather than being spread uniformly. Uniform misses would mean the
+average-rate argument above is wrong; clustered misses would mean it is right and the tail is what
+bites. Those two have different consequences for a deployment, and the run can distinguish them.
+
+**On ordering, the H100 is right and I overstated my own error.** By-clip interleaving IS
+truncation-robust: a cut falls inside at most one clip, so every completed clip carries both its C1
+and its EP-G episode, and truncation then costs whole clips from both conditions equally. The 11
+all-C1 records say only that the saturated run never finished its FIRST clip, each C1 request taking
+about 40 s. That is a magnitude problem, not an ordering flaw, and running EP-G first as two separate
+invocations would have put the two conditions in different background phases, which is the drift
+exposure the by-clip design exists to avoid. The runner stays as it is.
+
 ## 6. Mechanism verification, Steps 0 to 5, before the sweep
 
 **Step 0, what would make this run uninterpretable.** Five checks were run and three of them came back
