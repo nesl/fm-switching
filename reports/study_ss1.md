@@ -351,3 +351,54 @@ VizWiz.
 **EgoThink's own hit count is the DIFFERENCE between the two stamps, 52 − 36, and only that
 difference speaks to EgoThink's 16 candidates.** It will be computed as a delta, not read as a
 total.
+
+---
+
+# EgoThink: device 4B against cloud 32B (D142)
+
+**Numbers only, no verdict.** Same two models, stacks and conditions as the VizWiz section. Both
+700 scored, 0 errors, `run_order` verified manifest order 700 of 700 on both sides.
+
+**Accuracy n = 700** (EgoThink has no below-min-pixels images). **TTFT n = 684**, excluding the 16
+shared-image questions, which are a warm-encoder-cache timing artifact only.
+
+**The 16 are a CENSUS.** `cache_check.per_dataset` gives EgoThink mm hits 16 of 16 candidates,
+computed as a delta on the instance timeline by the only party that knows the instance boundaries.
+One loose thread closed locally: the last snapshot captured 686 of 700 requests, so a candidate in
+the uncaptured final 14 would have meant the 16 observed hits included a spurious one. **All 16
+candidates sit at manifest positions 108 to 583, the latest 102 requests before the 686 boundary**,
+so the truncation is irrelevant and the offsetting-errors mode is ruled out.
+
+## Containment scorer
+
+| | n | device | cloud | paired diff | 95% CI |
+|---|---|---|---|---|---|
+| full = clean | 700 | 0.4714 | 0.4771 | **+0.0057** | [−0.0229, +0.0343] |
+
+**2x2 at cut 0.5:** both right 281 · cloud only 53 · **device only 49** · both wrong 317.
+The interval includes zero.
+
+## TTFT
+
+| | n | device p50 | cloud p50 |
+|---|---|---|---|
+| clean | 684 | 1.4686 s | 0.4505 s |
+
+Both columns **unverified-cold**, as for VizWiz. The prefix positive control is outstanding and is
+the only thing that could upgrade the cloud side.
+
+## Prompt-token parity: 100.000 percent, and it closes the template branch
+
+Pre-registered: 100 percent equality, because **0 of 700 EgoThink images fall below the pixel
+floor**, so neither side's budget binds on any of them.
+
+**Result: 700 of 700 identical. One distinct difference value, zero.**
+
+That is stronger than the VizWiz result in one specific way. EgoThink was never a constant-pixels
+dataset (six distinct `(w,h)` pairs, areas spanning 1,175,040 to 4,915,200, a 4.2x range), so
+identical totals across 700 questions with that much variation **within** the set means the text
+side matches exactly as well as the visual side. **The chat template is therefore identical on both
+sides, and the template branch of the confound decomposition is closed outright rather than
+bounded.** Taken with VizWiz, where the only divergence was exactly the 28 sub-floor images, both
+branches of the decomposition are now resolved: no template difference anywhere, and the pixel
+difference confined to images below the floor.

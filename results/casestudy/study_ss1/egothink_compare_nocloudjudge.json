@@ -1,0 +1,1966 @@
+{
+ "study": "StudySS1",
+ "pass_": "device_vs_cloud_compare",
+ "dataset": "egothink",
+ "no_verdict": "numbers only. D136's gate call is the user's and is deliberately not made here, including by implication in ordering or framing.",
+ "pairing": {
+  "n_device": 700,
+  "n_cloud": 700,
+  "n_paired": 700,
+  "n_device_only": 0,
+  "n_cloud_only": 0
+ },
+ "exclusion_sets": {
+  "note": "TWO DISTINCT SETS, deliberately NOT merged into one 'excluded' flag, because they damage different axes.",
+  "shared_images": {
+   "n": 16,
+   "n_in_paired": 16,
+   "mechanism": "warm multimodal encoder cache, keyed by image CONTENT",
+   "axis_affected": "TTFT ONLY; accuracy is unaffected, both models answered the same pixels"
+  },
+  "below_min_pixels": {
+   "n": 0,
+   "n_in_paired": 0,
+   "mechanism": "image area below the 65,536 px min_pixels floor, so the DEVICE upscaled to the floor and the cloud (floor 4,096) did not",
+   "axis_affected": "ACCURACY AND TTFT. The two models were shown DIFFERENT PIXELS, so a 2x2 cell on one of these reflects partly that the device got a larger rendering of the same photo. This is NOT only a token-count issue."
+  },
+  "overlap": {
+   "n_intersection": 0,
+   "n_union": 16,
+   "disjoint": true,
+   "note": "the fully clean subset is the paired set minus the UNION, not minus the sum of the two sizes unless they are disjoint."
+  },
+  "fully_clean_n": 684
+ },
+ "shared_image_exclusion": {
+  "n_shared_qids_supplied": 16,
+  "n_shared_in_paired": 16,
+  "rule": "the duplicate-photo structure is a property of VIZWIZ VAL ITSELF, 34 groups of byte-identical photos under different filenames, so it was present on BOTH sides. The exclusion is therefore applied to BOTH columns or NEITHER: excluding from the cloud column alone would compare a cleaned column against an uncleaned one, an asymmetry introduced by the cleaning rather than by the data.",
+  "order_check": "the device ran in EXACT manifest order for both datasets, verified: manifest qid sequence == device row sequence, 4,319 of 4,319 for VizWiz and 700 of 700 for EgoThink. 'Repeats an image seen earlier' depends on order, so if the cloud also ran manifest order the candidate set is the SAME 52 and the matched exclusion is exact rather than a union. The cloud's order must be confirmed from its run meta.",
+  "identifier_dedup_would_have_missed_this": "by image ID VizWiz val is 4,319 unique on 4,319 and passes clean. The duplicates are in file CONTENT under different filenames, and a cache keyed by content does not care what the identifier says. Identifier-based deduplication cannot see this class at all; the stronger form, hashing file contents, is what found it."
+ },
+ "prompt_token_parity": {
+  "n": 700,
+  "n_identical": 700,
+  "frac_identical": 1.0,
+  "diff_cloud_minus_device": {
+   "min": 0,
+   "median": 0.0,
+   "max": 0,
+   "mean": 0.0,
+   "n_distinct": 1,
+   "direction": "identical throughout"
+  },
+  "verdict": "IDENTICAL COUNTS on every question: identical visual input, CONFOUND CLEARED (subject to the vision-config dependency above)"
+ },
+ "below_min_pixels_strata": null,
+ "full_set": {
+  "n_pairs": 700,
+  "device_accuracy": {
+   "mean": 0.471429,
+   "n": 700,
+   "ci95": [
+    0.434286,
+    0.508571
+   ]
+  },
+  "cloud_accuracy": {
+   "mean": 0.477143,
+   "n": 700,
+   "ci95": [
+    0.44,
+    0.514286
+   ]
+  },
+  "paired_difference": {
+   "delta_cloud_minus_device": 0.005714,
+   "ci95": [
+    -0.022857,
+    0.034286
+   ],
+   "n_pairs": 700,
+   "n_boot": 10000
+  },
+  "two_by_two": {
+   "both_right": 281,
+   "cloud_only": 53,
+   "device_only": 49,
+   "both_wrong": 317,
+   "n": 700,
+   "cut": 0.5
+  },
+  "two_by_two_cut_sensitivity": null,
+  "ttft": {
+   "device": {
+    "n": 700,
+    "p50": 1.4689,
+    "p90": 1.9898,
+    "mean": 1.4839,
+    "min": 0.7579,
+    "max": 2.3587
+   },
+   "cloud": {
+    "n": 700,
+    "p50": 0.4511,
+    "p90": 0.6187,
+    "mean": 0.4709,
+    "min": 0.2542,
+    "max": 0.7297
+   },
+   "n_ttft": 700,
+   "denominator_note": "TTFT uses its OWN denominator when the shared-image set is supplied: those questions are a warm-cache timing artifact and must leave the TTFT column, but they do NOT contaminate accuracy and are kept in it."
+  },
+  "by_stratum": {
+   "dimension=Activity": {
+    "device": {
+     "mean": 0.32,
+     "n": 100,
+     "ci95": [
+      0.23,
+      0.41
+     ]
+    },
+    "cloud": {
+     "mean": 0.32,
+     "n": 100,
+     "ci95": [
+      0.23,
+      0.41
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.0,
+     "ci95": [
+      -0.07,
+      0.07
+     ],
+     "n_pairs": 100,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 26,
+     "cloud_only": 6,
+     "device_only": 6,
+     "both_wrong": 62,
+     "n": 100,
+     "cut": 0.5
+    }
+   },
+   "dimension=Forecasting": {
+    "device": {
+     "mean": 0.45,
+     "n": 100,
+     "ci95": [
+      0.35,
+      0.55
+     ]
+    },
+    "cloud": {
+     "mean": 0.47,
+     "n": 100,
+     "ci95": [
+      0.37,
+      0.57
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.02,
+     "ci95": [
+      -0.07,
+      0.11
+     ],
+     "n_pairs": 100,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 35,
+     "cloud_only": 12,
+     "device_only": 10,
+     "both_wrong": 43,
+     "n": 100,
+     "cut": 0.5
+    }
+   },
+   "dimension=Localization_location": {
+    "device": {
+     "mean": 0.76,
+     "n": 50,
+     "ci95": [
+      0.64,
+      0.88
+     ]
+    },
+    "cloud": {
+     "mean": 0.8,
+     "n": 50,
+     "ci95": [
+      0.68,
+      0.9
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.04,
+     "ci95": [
+      -0.08,
+      0.16
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 35,
+     "cloud_only": 5,
+     "device_only": 3,
+     "both_wrong": 7,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Localization_spatial": {
+    "device": {
+     "mean": 0.74,
+     "n": 50,
+     "ci95": [
+      0.62,
+      0.86
+     ]
+    },
+    "cloud": {
+     "mean": 0.72,
+     "n": 50,
+     "ci95": [
+      0.6,
+      0.84
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.02,
+     "ci95": [
+      -0.14,
+      0.1
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 31,
+     "cloud_only": 5,
+     "device_only": 6,
+     "both_wrong": 8,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Object_affordance": {
+    "device": {
+     "mean": 0.44,
+     "n": 50,
+     "ci95": [
+      0.3,
+      0.58
+     ]
+    },
+    "cloud": {
+     "mean": 0.44,
+     "n": 50,
+     "ci95": [
+      0.3,
+      0.58
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.0,
+     "ci95": [
+      -0.12,
+      0.12
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 18,
+     "cloud_only": 4,
+     "device_only": 4,
+     "both_wrong": 24,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Object_attribute": {
+    "device": {
+     "mean": 0.76,
+     "n": 50,
+     "ci95": [
+      0.64,
+      0.88
+     ]
+    },
+    "cloud": {
+     "mean": 0.84,
+     "n": 50,
+     "ci95": [
+      0.74,
+      0.94
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.08,
+     "ci95": [
+      0.0,
+      0.18
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 37,
+     "cloud_only": 5,
+     "device_only": 1,
+     "both_wrong": 7,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Object_existence": {
+    "device": {
+     "mean": 0.72,
+     "n": 50,
+     "ci95": [
+      0.6,
+      0.84
+     ]
+    },
+    "cloud": {
+     "mean": 0.68,
+     "n": 50,
+     "ci95": [
+      0.54,
+      0.8
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.04,
+     "ci95": [
+      -0.16,
+      0.08
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 30,
+     "cloud_only": 4,
+     "device_only": 6,
+     "both_wrong": 10,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Planning_assistance": {
+    "device": {
+     "mean": 0.06,
+     "n": 50,
+     "ci95": [
+      0.0,
+      0.14
+     ]
+    },
+    "cloud": {
+     "mean": 0.04,
+     "n": 50,
+     "ci95": [
+      0.0,
+      0.1
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.02,
+     "ci95": [
+      -0.06,
+      0.0
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 2,
+     "cloud_only": 0,
+     "device_only": 1,
+     "both_wrong": 47,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Planning_navigation": {
+    "device": {
+     "mean": 0.12,
+     "n": 50,
+     "ci95": [
+      0.04,
+      0.22
+     ]
+    },
+    "cloud": {
+     "mean": 0.06,
+     "n": 50,
+     "ci95": [
+      0.0,
+      0.14
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.06,
+     "ci95": [
+      -0.14,
+      0.0
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 3,
+     "cloud_only": 0,
+     "device_only": 3,
+     "both_wrong": 44,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Reasoning_comparing": {
+    "device": {
+     "mean": 0.62,
+     "n": 50,
+     "ci95": [
+      0.48,
+      0.76
+     ]
+    },
+    "cloud": {
+     "mean": 0.66,
+     "n": 50,
+     "ci95": [
+      0.52,
+      0.78
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.04,
+     "ci95": [
+      -0.1,
+      0.18
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 26,
+     "cloud_only": 7,
+     "device_only": 5,
+     "both_wrong": 12,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Reasoning_counting": {
+    "device": {
+     "mean": 0.14,
+     "n": 50,
+     "ci95": [
+      0.06,
+      0.24
+     ]
+    },
+    "cloud": {
+     "mean": 0.14,
+     "n": 50,
+     "ci95": [
+      0.06,
+      0.24
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.0,
+     "ci95": [
+      -0.06,
+      0.06
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 6,
+     "cloud_only": 1,
+     "device_only": 1,
+     "both_wrong": 42,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Reasoning_situated": {
+    "device": {
+     "mean": 0.7,
+     "n": 50,
+     "ci95": [
+      0.56,
+      0.82
+     ]
+    },
+    "cloud": {
+     "mean": 0.72,
+     "n": 50,
+     "ci95": [
+      0.6,
+      0.84
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.02,
+     "ci95": [
+      -0.08,
+      0.12
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 32,
+     "cloud_only": 4,
+     "device_only": 3,
+     "both_wrong": 11,
+     "n": 50,
+     "cut": 0.5
+    }
+   }
+  },
+  "judge_native_scale": {
+   "note": "mean of the judge's own 0 / 0.5 / 1 rating. NO binarisation: the >= 0.5 rule used for scorer agreement moved that figure 0.633 to 0.805 and is not applied here.",
+   "n_paired": 682,
+   "device": {
+    "mean": 0.735337,
+    "n": 682,
+    "ci95": [
+     0.706745,
+     0.763196
+    ]
+   },
+   "cloud": null,
+   "paired_difference": null,
+   "by_dimension": {
+    "Activity": {
+     "device": {
+      "mean": 0.780612,
+      "n": 98,
+      "ci95": [
+       0.714286,
+       0.841837
+      ]
+     },
+     "cloud": null
+    },
+    "Forecasting": {
+     "device": {
+      "mean": 0.67,
+      "n": 100,
+      "ci95": [
+       0.59,
+       0.75
+      ]
+     },
+     "cloud": null
+    },
+    "Localization_location": {
+     "device": {
+      "mean": 0.958333,
+      "n": 48,
+      "ci95": [
+       0.90625,
+       1.0
+      ]
+     },
+     "cloud": null
+    },
+    "Localization_spatial": {
+     "device": {
+      "mean": 0.795918,
+      "n": 49,
+      "ci95": [
+       0.693878,
+       0.887755
+      ]
+     },
+     "cloud": null
+    },
+    "Object_affordance": {
+     "device": {
+      "mean": 0.777778,
+      "n": 45,
+      "ci95": [
+       0.666667,
+       0.877778
+      ]
+     },
+     "cloud": null
+    },
+    "Object_attribute": {
+     "device": {
+      "mean": 0.854167,
+      "n": 48,
+      "ci95": [
+       0.75,
+       0.947917
+      ]
+     },
+     "cloud": null
+    },
+    "Object_existence": {
+     "device": {
+      "mean": 0.887755,
+      "n": 49,
+      "ci95": [
+       0.816327,
+       0.94898
+      ]
+     },
+     "cloud": null
+    },
+    "Planning_assistance": {
+     "device": {
+      "mean": 0.55,
+      "n": 50,
+      "ci95": [
+       0.46,
+       0.64
+      ]
+     },
+     "cloud": null
+    },
+    "Planning_navigation": {
+     "device": {
+      "mean": 0.459184,
+      "n": 49,
+      "ci95": [
+       0.357143,
+       0.561224
+      ]
+     },
+     "cloud": null
+    },
+    "Reasoning_comparing": {
+     "device": {
+      "mean": 0.63,
+      "n": 50,
+      "ci95": [
+       0.5,
+       0.76
+      ]
+     },
+     "cloud": null
+    },
+    "Reasoning_counting": {
+     "device": {
+      "mean": 0.663043,
+      "n": 46,
+      "ci95": [
+       0.532609,
+       0.793478
+      ]
+     },
+     "cloud": null
+    },
+    "Reasoning_situated": {
+     "device": {
+      "mean": 0.83,
+      "n": 50,
+      "ci95": [
+       0.73,
+       0.92
+      ]
+     },
+     "cloud": null
+    }
+   },
+   "rating_distribution_device": {
+    "0.0": 112,
+    "0.5": 137,
+    "1.0": 433
+   }
+  }
+ },
+ "shared_images_excluded": {
+  "n_pairs": 684,
+  "device_accuracy": {
+   "mean": 0.476608,
+   "n": 684,
+   "ci95": [
+    0.438596,
+    0.513158
+   ]
+  },
+  "cloud_accuracy": {
+   "mean": 0.475146,
+   "n": 684,
+   "ci95": [
+    0.437135,
+    0.511696
+   ]
+  },
+  "paired_difference": {
+   "delta_cloud_minus_device": -0.001462,
+   "ci95": [
+    -0.030702,
+    0.026316
+   ],
+   "n_pairs": 684,
+   "n_boot": 10000
+  },
+  "two_by_two": {
+   "both_right": 277,
+   "cloud_only": 48,
+   "device_only": 49,
+   "both_wrong": 310,
+   "n": 684,
+   "cut": 0.5
+  },
+  "two_by_two_cut_sensitivity": null,
+  "ttft": {
+   "device": {
+    "n": 684,
+    "p50": 1.4686,
+    "p90": 1.9898,
+    "mean": 1.4796,
+    "min": 0.7579,
+    "max": 2.3587
+   },
+   "cloud": {
+    "n": 684,
+    "p50": 0.4505,
+    "p90": 0.6187,
+    "mean": 0.4703,
+    "min": 0.2542,
+    "max": 0.7297
+   },
+   "n_ttft": 684,
+   "denominator_note": "TTFT uses its OWN denominator when the shared-image set is supplied: those questions are a warm-cache timing artifact and must leave the TTFT column, but they do NOT contaminate accuracy and are kept in it."
+  },
+  "by_stratum": {
+   "dimension=Activity": {
+    "device": {
+     "mean": 0.32,
+     "n": 100,
+     "ci95": [
+      0.23,
+      0.41
+     ]
+    },
+    "cloud": {
+     "mean": 0.32,
+     "n": 100,
+     "ci95": [
+      0.23,
+      0.41
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.0,
+     "ci95": [
+      -0.07,
+      0.07
+     ],
+     "n_pairs": 100,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 26,
+     "cloud_only": 6,
+     "device_only": 6,
+     "both_wrong": 62,
+     "n": 100,
+     "cut": 0.5
+    }
+   },
+   "dimension=Forecasting": {
+    "device": {
+     "mean": 0.454545,
+     "n": 99,
+     "ci95": [
+      0.353535,
+      0.555556
+     ]
+    },
+    "cloud": {
+     "mean": 0.464646,
+     "n": 99,
+     "ci95": [
+      0.363636,
+      0.565657
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.010101,
+     "ci95": [
+      -0.080808,
+      0.10101
+     ],
+     "n_pairs": 99,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 35,
+     "cloud_only": 11,
+     "device_only": 10,
+     "both_wrong": 43,
+     "n": 99,
+     "cut": 0.5
+    }
+   },
+   "dimension=Localization_location": {
+    "device": {
+     "mean": 0.755102,
+     "n": 49,
+     "ci95": [
+      0.632653,
+      0.877551
+     ]
+    },
+    "cloud": {
+     "mean": 0.795918,
+     "n": 49,
+     "ci95": [
+      0.673469,
+      0.897959
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.040816,
+     "ci95": [
+      -0.061224,
+      0.163265
+     ],
+     "n_pairs": 49,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 34,
+     "cloud_only": 5,
+     "device_only": 3,
+     "both_wrong": 7,
+     "n": 49,
+     "cut": 0.5
+    }
+   },
+   "dimension=Localization_spatial": {
+    "device": {
+     "mean": 0.75,
+     "n": 48,
+     "ci95": [
+      0.625,
+      0.875
+     ]
+    },
+    "cloud": {
+     "mean": 0.708333,
+     "n": 48,
+     "ci95": [
+      0.583333,
+      0.833333
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.041667,
+     "ci95": [
+      -0.166667,
+      0.083333
+     ],
+     "n_pairs": 48,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 30,
+     "cloud_only": 4,
+     "device_only": 6,
+     "both_wrong": 8,
+     "n": 48,
+     "cut": 0.5
+    }
+   },
+   "dimension=Object_affordance": {
+    "device": {
+     "mean": 0.44898,
+     "n": 49,
+     "ci95": [
+      0.306122,
+      0.591837
+     ]
+    },
+    "cloud": {
+     "mean": 0.44898,
+     "n": 49,
+     "ci95": [
+      0.306122,
+      0.591837
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.0,
+     "ci95": [
+      -0.102041,
+      0.122449
+     ],
+     "n_pairs": 49,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 18,
+     "cloud_only": 4,
+     "device_only": 4,
+     "both_wrong": 23,
+     "n": 49,
+     "cut": 0.5
+    }
+   },
+   "dimension=Object_attribute": {
+    "device": {
+     "mean": 0.755102,
+     "n": 49,
+     "ci95": [
+      0.632653,
+      0.877551
+     ]
+    },
+    "cloud": {
+     "mean": 0.836735,
+     "n": 49,
+     "ci95": [
+      0.734694,
+      0.938776
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.081633,
+     "ci95": [
+      0.0,
+      0.183673
+     ],
+     "n_pairs": 49,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 36,
+     "cloud_only": 5,
+     "device_only": 1,
+     "both_wrong": 7,
+     "n": 49,
+     "cut": 0.5
+    }
+   },
+   "dimension=Object_existence": {
+    "device": {
+     "mean": 0.729167,
+     "n": 48,
+     "ci95": [
+      0.604167,
+      0.854167
+     ]
+    },
+    "cloud": {
+     "mean": 0.666667,
+     "n": 48,
+     "ci95": [
+      0.520833,
+      0.791667
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.0625,
+     "ci95": [
+      -0.1875,
+      0.0625
+     ],
+     "n_pairs": 48,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 29,
+     "cloud_only": 3,
+     "device_only": 6,
+     "both_wrong": 10,
+     "n": 48,
+     "cut": 0.5
+    }
+   },
+   "dimension=Planning_assistance": {
+    "device": {
+     "mean": 0.065217,
+     "n": 46,
+     "ci95": [
+      0.0,
+      0.152174
+     ]
+    },
+    "cloud": {
+     "mean": 0.043478,
+     "n": 46,
+     "ci95": [
+      0.0,
+      0.108696
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.021739,
+     "ci95": [
+      -0.065217,
+      0.0
+     ],
+     "n_pairs": 46,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 2,
+     "cloud_only": 0,
+     "device_only": 1,
+     "both_wrong": 43,
+     "n": 46,
+     "cut": 0.5
+    }
+   },
+   "dimension=Planning_navigation": {
+    "device": {
+     "mean": 0.122449,
+     "n": 49,
+     "ci95": [
+      0.040816,
+      0.22449
+     ]
+    },
+    "cloud": {
+     "mean": 0.061224,
+     "n": 49,
+     "ci95": [
+      0.0,
+      0.142857
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.061224,
+     "ci95": [
+      -0.142857,
+      0.0
+     ],
+     "n_pairs": 49,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 3,
+     "cloud_only": 0,
+     "device_only": 3,
+     "both_wrong": 43,
+     "n": 49,
+     "cut": 0.5
+    }
+   },
+   "dimension=Reasoning_comparing": {
+    "device": {
+     "mean": 0.659574,
+     "n": 47,
+     "ci95": [
+      0.531915,
+      0.787234
+     ]
+    },
+    "cloud": {
+     "mean": 0.659574,
+     "n": 47,
+     "ci95": [
+      0.531915,
+      0.787234
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.0,
+     "ci95": [
+      -0.12766,
+      0.12766
+     ],
+     "n_pairs": 47,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 26,
+     "cloud_only": 5,
+     "device_only": 5,
+     "both_wrong": 11,
+     "n": 47,
+     "cut": 0.5
+    }
+   },
+   "dimension=Reasoning_counting": {
+    "device": {
+     "mean": 0.14,
+     "n": 50,
+     "ci95": [
+      0.06,
+      0.24
+     ]
+    },
+    "cloud": {
+     "mean": 0.14,
+     "n": 50,
+     "ci95": [
+      0.06,
+      0.24
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.0,
+     "ci95": [
+      -0.06,
+      0.06
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 6,
+     "cloud_only": 1,
+     "device_only": 1,
+     "both_wrong": 42,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Reasoning_situated": {
+    "device": {
+     "mean": 0.7,
+     "n": 50,
+     "ci95": [
+      0.56,
+      0.82
+     ]
+    },
+    "cloud": {
+     "mean": 0.72,
+     "n": 50,
+     "ci95": [
+      0.6,
+      0.84
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.02,
+     "ci95": [
+      -0.08,
+      0.12
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 32,
+     "cloud_only": 4,
+     "device_only": 3,
+     "both_wrong": 11,
+     "n": 50,
+     "cut": 0.5
+    }
+   }
+  },
+  "judge_native_scale": {
+   "note": "mean of the judge's own 0 / 0.5 / 1 rating. NO binarisation: the >= 0.5 rule used for scorer agreement moved that figure 0.633 to 0.805 and is not applied here.",
+   "n_paired": 667,
+   "device": {
+    "mean": 0.73913,
+    "n": 667,
+    "ci95": [
+     0.710645,
+     0.767616
+    ]
+   },
+   "cloud": null,
+   "paired_difference": null,
+   "by_dimension": {
+    "Activity": {
+     "device": {
+      "mean": 0.780612,
+      "n": 98,
+      "ci95": [
+       0.714286,
+       0.841837
+      ]
+     },
+     "cloud": null
+    },
+    "Forecasting": {
+     "device": {
+      "mean": 0.676768,
+      "n": 99,
+      "ci95": [
+       0.59596,
+       0.752525
+      ]
+     },
+     "cloud": null
+    },
+    "Localization_location": {
+     "device": {
+      "mean": 0.957447,
+      "n": 47,
+      "ci95": [
+       0.904255,
+       1.0
+      ]
+     },
+     "cloud": null
+    },
+    "Localization_spatial": {
+     "device": {
+      "mean": 0.808511,
+      "n": 47,
+      "ci95": [
+       0.702128,
+       0.893617
+      ]
+     },
+     "cloud": null
+    },
+    "Object_affordance": {
+     "device": {
+      "mean": 0.777778,
+      "n": 45,
+      "ci95": [
+       0.666667,
+       0.877778
+      ]
+     },
+     "cloud": null
+    },
+    "Object_attribute": {
+     "device": {
+      "mean": 0.851064,
+      "n": 47,
+      "ci95": [
+       0.744681,
+       0.93617
+      ]
+     },
+     "cloud": null
+    },
+    "Object_existence": {
+     "device": {
+      "mean": 0.882979,
+      "n": 47,
+      "ci95": [
+       0.808511,
+       0.946809
+      ]
+     },
+     "cloud": null
+    },
+    "Planning_assistance": {
+     "device": {
+      "mean": 0.532609,
+      "n": 46,
+      "ci95": [
+       0.445652,
+       0.619565
+      ]
+     },
+     "cloud": null
+    },
+    "Planning_navigation": {
+     "device": {
+      "mean": 0.458333,
+      "n": 48,
+      "ci95": [
+       0.354167,
+       0.5625
+      ]
+     },
+     "cloud": null
+    },
+    "Reasoning_comparing": {
+     "device": {
+      "mean": 0.670213,
+      "n": 47,
+      "ci95": [
+       0.542553,
+       0.797872
+      ]
+     },
+     "cloud": null
+    },
+    "Reasoning_counting": {
+     "device": {
+      "mean": 0.663043,
+      "n": 46,
+      "ci95": [
+       0.532609,
+       0.793478
+      ]
+     },
+     "cloud": null
+    },
+    "Reasoning_situated": {
+     "device": {
+      "mean": 0.83,
+      "n": 50,
+      "ci95": [
+       0.73,
+       0.92
+      ]
+     },
+     "cloud": null
+    }
+   },
+   "rating_distribution_device": {
+    "0.0": 107,
+    "0.5": 134,
+    "1.0": 426
+   }
+  }
+ },
+ "clean": {
+  "n_pairs": 700,
+  "device_accuracy": {
+   "mean": 0.471429,
+   "n": 700,
+   "ci95": [
+    0.434286,
+    0.508571
+   ]
+  },
+  "cloud_accuracy": {
+   "mean": 0.477143,
+   "n": 700,
+   "ci95": [
+    0.44,
+    0.514286
+   ]
+  },
+  "paired_difference": {
+   "delta_cloud_minus_device": 0.005714,
+   "ci95": [
+    -0.022857,
+    0.034286
+   ],
+   "n_pairs": 700,
+   "n_boot": 10000
+  },
+  "two_by_two": {
+   "both_right": 281,
+   "cloud_only": 53,
+   "device_only": 49,
+   "both_wrong": 317,
+   "n": 700,
+   "cut": 0.5
+  },
+  "two_by_two_cut_sensitivity": null,
+  "ttft": {
+   "device": {
+    "n": 684,
+    "p50": 1.4686,
+    "p90": 1.9898,
+    "mean": 1.4796,
+    "min": 0.7579,
+    "max": 2.3587
+   },
+   "cloud": {
+    "n": 684,
+    "p50": 0.4505,
+    "p90": 0.6187,
+    "mean": 0.4703,
+    "min": 0.2542,
+    "max": 0.7297
+   },
+   "n_ttft": 684,
+   "denominator_note": "TTFT uses its OWN denominator when the shared-image set is supplied: those questions are a warm-cache timing artifact and must leave the TTFT column, but they do NOT contaminate accuracy and are kept in it."
+  },
+  "by_stratum": {
+   "dimension=Activity": {
+    "device": {
+     "mean": 0.32,
+     "n": 100,
+     "ci95": [
+      0.23,
+      0.41
+     ]
+    },
+    "cloud": {
+     "mean": 0.32,
+     "n": 100,
+     "ci95": [
+      0.23,
+      0.41
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.0,
+     "ci95": [
+      -0.07,
+      0.07
+     ],
+     "n_pairs": 100,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 26,
+     "cloud_only": 6,
+     "device_only": 6,
+     "both_wrong": 62,
+     "n": 100,
+     "cut": 0.5
+    }
+   },
+   "dimension=Forecasting": {
+    "device": {
+     "mean": 0.45,
+     "n": 100,
+     "ci95": [
+      0.35,
+      0.55
+     ]
+    },
+    "cloud": {
+     "mean": 0.47,
+     "n": 100,
+     "ci95": [
+      0.37,
+      0.57
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.02,
+     "ci95": [
+      -0.07,
+      0.11
+     ],
+     "n_pairs": 100,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 35,
+     "cloud_only": 12,
+     "device_only": 10,
+     "both_wrong": 43,
+     "n": 100,
+     "cut": 0.5
+    }
+   },
+   "dimension=Localization_location": {
+    "device": {
+     "mean": 0.76,
+     "n": 50,
+     "ci95": [
+      0.64,
+      0.88
+     ]
+    },
+    "cloud": {
+     "mean": 0.8,
+     "n": 50,
+     "ci95": [
+      0.68,
+      0.9
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.04,
+     "ci95": [
+      -0.08,
+      0.16
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 35,
+     "cloud_only": 5,
+     "device_only": 3,
+     "both_wrong": 7,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Localization_spatial": {
+    "device": {
+     "mean": 0.74,
+     "n": 50,
+     "ci95": [
+      0.62,
+      0.86
+     ]
+    },
+    "cloud": {
+     "mean": 0.72,
+     "n": 50,
+     "ci95": [
+      0.6,
+      0.84
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.02,
+     "ci95": [
+      -0.14,
+      0.1
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 31,
+     "cloud_only": 5,
+     "device_only": 6,
+     "both_wrong": 8,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Object_affordance": {
+    "device": {
+     "mean": 0.44,
+     "n": 50,
+     "ci95": [
+      0.3,
+      0.58
+     ]
+    },
+    "cloud": {
+     "mean": 0.44,
+     "n": 50,
+     "ci95": [
+      0.3,
+      0.58
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.0,
+     "ci95": [
+      -0.12,
+      0.12
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 18,
+     "cloud_only": 4,
+     "device_only": 4,
+     "both_wrong": 24,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Object_attribute": {
+    "device": {
+     "mean": 0.76,
+     "n": 50,
+     "ci95": [
+      0.64,
+      0.88
+     ]
+    },
+    "cloud": {
+     "mean": 0.84,
+     "n": 50,
+     "ci95": [
+      0.74,
+      0.94
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.08,
+     "ci95": [
+      0.0,
+      0.18
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 37,
+     "cloud_only": 5,
+     "device_only": 1,
+     "both_wrong": 7,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Object_existence": {
+    "device": {
+     "mean": 0.72,
+     "n": 50,
+     "ci95": [
+      0.6,
+      0.84
+     ]
+    },
+    "cloud": {
+     "mean": 0.68,
+     "n": 50,
+     "ci95": [
+      0.54,
+      0.8
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.04,
+     "ci95": [
+      -0.16,
+      0.08
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 30,
+     "cloud_only": 4,
+     "device_only": 6,
+     "both_wrong": 10,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Planning_assistance": {
+    "device": {
+     "mean": 0.06,
+     "n": 50,
+     "ci95": [
+      0.0,
+      0.14
+     ]
+    },
+    "cloud": {
+     "mean": 0.04,
+     "n": 50,
+     "ci95": [
+      0.0,
+      0.1
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.02,
+     "ci95": [
+      -0.06,
+      0.0
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 2,
+     "cloud_only": 0,
+     "device_only": 1,
+     "both_wrong": 47,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Planning_navigation": {
+    "device": {
+     "mean": 0.12,
+     "n": 50,
+     "ci95": [
+      0.04,
+      0.22
+     ]
+    },
+    "cloud": {
+     "mean": 0.06,
+     "n": 50,
+     "ci95": [
+      0.0,
+      0.14
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": -0.06,
+     "ci95": [
+      -0.14,
+      0.0
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 3,
+     "cloud_only": 0,
+     "device_only": 3,
+     "both_wrong": 44,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Reasoning_comparing": {
+    "device": {
+     "mean": 0.62,
+     "n": 50,
+     "ci95": [
+      0.48,
+      0.76
+     ]
+    },
+    "cloud": {
+     "mean": 0.66,
+     "n": 50,
+     "ci95": [
+      0.52,
+      0.78
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.04,
+     "ci95": [
+      -0.1,
+      0.18
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 26,
+     "cloud_only": 7,
+     "device_only": 5,
+     "both_wrong": 12,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Reasoning_counting": {
+    "device": {
+     "mean": 0.14,
+     "n": 50,
+     "ci95": [
+      0.06,
+      0.24
+     ]
+    },
+    "cloud": {
+     "mean": 0.14,
+     "n": 50,
+     "ci95": [
+      0.06,
+      0.24
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.0,
+     "ci95": [
+      -0.06,
+      0.06
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 6,
+     "cloud_only": 1,
+     "device_only": 1,
+     "both_wrong": 42,
+     "n": 50,
+     "cut": 0.5
+    }
+   },
+   "dimension=Reasoning_situated": {
+    "device": {
+     "mean": 0.7,
+     "n": 50,
+     "ci95": [
+      0.56,
+      0.82
+     ]
+    },
+    "cloud": {
+     "mean": 0.72,
+     "n": 50,
+     "ci95": [
+      0.6,
+      0.84
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.02,
+     "ci95": [
+      -0.08,
+      0.12
+     ],
+     "n_pairs": 50,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 32,
+     "cloud_only": 4,
+     "device_only": 3,
+     "both_wrong": 11,
+     "n": 50,
+     "cut": 0.5
+    }
+   }
+  },
+  "judge_native_scale": {
+   "note": "mean of the judge's own 0 / 0.5 / 1 rating. NO binarisation: the >= 0.5 rule used for scorer agreement moved that figure 0.633 to 0.805 and is not applied here.",
+   "n_paired": 682,
+   "device": {
+    "mean": 0.735337,
+    "n": 682,
+    "ci95": [
+     0.706745,
+     0.763196
+    ]
+   },
+   "cloud": null,
+   "paired_difference": null,
+   "by_dimension": {
+    "Activity": {
+     "device": {
+      "mean": 0.780612,
+      "n": 98,
+      "ci95": [
+       0.714286,
+       0.841837
+      ]
+     },
+     "cloud": null
+    },
+    "Forecasting": {
+     "device": {
+      "mean": 0.67,
+      "n": 100,
+      "ci95": [
+       0.59,
+       0.75
+      ]
+     },
+     "cloud": null
+    },
+    "Localization_location": {
+     "device": {
+      "mean": 0.958333,
+      "n": 48,
+      "ci95": [
+       0.90625,
+       1.0
+      ]
+     },
+     "cloud": null
+    },
+    "Localization_spatial": {
+     "device": {
+      "mean": 0.795918,
+      "n": 49,
+      "ci95": [
+       0.693878,
+       0.887755
+      ]
+     },
+     "cloud": null
+    },
+    "Object_affordance": {
+     "device": {
+      "mean": 0.777778,
+      "n": 45,
+      "ci95": [
+       0.666667,
+       0.877778
+      ]
+     },
+     "cloud": null
+    },
+    "Object_attribute": {
+     "device": {
+      "mean": 0.854167,
+      "n": 48,
+      "ci95": [
+       0.75,
+       0.947917
+      ]
+     },
+     "cloud": null
+    },
+    "Object_existence": {
+     "device": {
+      "mean": 0.887755,
+      "n": 49,
+      "ci95": [
+       0.816327,
+       0.94898
+      ]
+     },
+     "cloud": null
+    },
+    "Planning_assistance": {
+     "device": {
+      "mean": 0.55,
+      "n": 50,
+      "ci95": [
+       0.46,
+       0.64
+      ]
+     },
+     "cloud": null
+    },
+    "Planning_navigation": {
+     "device": {
+      "mean": 0.459184,
+      "n": 49,
+      "ci95": [
+       0.357143,
+       0.561224
+      ]
+     },
+     "cloud": null
+    },
+    "Reasoning_comparing": {
+     "device": {
+      "mean": 0.63,
+      "n": 50,
+      "ci95": [
+       0.5,
+       0.76
+      ]
+     },
+     "cloud": null
+    },
+    "Reasoning_counting": {
+     "device": {
+      "mean": 0.663043,
+      "n": 46,
+      "ci95": [
+       0.532609,
+       0.793478
+      ]
+     },
+     "cloud": null
+    },
+    "Reasoning_situated": {
+     "device": {
+      "mean": 0.83,
+      "n": 50,
+      "ci95": [
+       0.73,
+       0.92
+      ]
+     },
+     "cloud": null
+    }
+   },
+   "rating_distribution_device": {
+    "0.0": 112,
+    "0.5": 137,
+    "1.0": 433
+   }
+  }
+ },
+ "clean_denominators": {
+  "accuracy_n": 700,
+  "ttft_n": 684,
+  "rule": "TWO DENOMINATORS, NOT ONE. Accuracy excludes the below-floor set ONLY, because the shared-image repeats are a TTFT-only artifact and dropping them from accuracy would discard questions for no reason. TTFT excludes BOTH, because the warm-cache repeats do contaminate timing. A single 'excluded' figure would either lose questions from accuracy or keep contaminated ones in TTFT."
+ },
+ "ttft_condition": {
+  "device_host": "Orin, vLLM, idle, one request at a time, cold per image.",
+  "device_host_attribution_source": "ESTABLISHED BY the user's statement plus the Orin session's own StudySS1 report at 8492e02, NOT by a _provenance block, which does not exist in any of the five StudySS1 artifacts.",
+  "device_stack": "vLLM 0.20.0+cu126 (jetson-ai-lab jp6/cu126), released image processor, no --mm-processor-kwargs.",
+  "cloud_stack": "vLLM 0.31.0, --mm-processor-kwargs size shortest_edge 4096 longest_edge 16777216 (live2 round-1).",
+  "robot_cost_stack_note": "the committed device baseline for ROBOT RECALL is the ORIN2 in-process harness (D87), unexercised per D103(c). These SS numbers are the ORIN3 vLLM stack and the two must not be placed side by side as one device's numbers.",
+  "both_columns_unverified_cold": "the cloud reports prefix cache isolated, 237,781 queries 0 hits, and an mm_cache_hits count keyed by image content. The DEVICE side is NOT retro-verifiable: vLLM 0.20.0 does not populate cached_tokens at all, the SS1 runner captured neither that nor the /metrics deltas, and the images are gone from tmpfs. Both columns carry the label, for different reasons."
+ }
+}
