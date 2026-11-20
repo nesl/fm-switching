@@ -228,6 +228,52 @@ header text. Holding the header fixed isolates the image cost at 338, which is t
 two vision markers, and the count-free header at one frame would be 380 against the committed
 literal's 378. The ruling's header therefore also bought a cleaner cost model than the committed one.
 
+### 5b.1 Input identity, measured on both boxes before either swept
+
+The frames reached the Orin by a relay the credential wall forced: flash pulled them from the H100's
+store, the Mac host relayed flash to Orin with `scp -3`, and no key was added anywhere. A relay through
+a third host is exactly where a silent corruption would arise, so it is checked twice, and the two
+checks answer different questions.
+
+| check | what it proves | result |
+|---|---|---|
+| every staged file against `sh_ep_wire_jpeg_sha256.jsonl.gz` (6,237 rows), joined on `rel_path` | the relay is intact | **6,237 of 6,237 byte-identical**, 0 missing, 0 mismatched; staged total 378,397,777 bytes exactly; all 6,237 hashes distinct |
+| the five EP-G gate clips against the H100 precheck's `jpeg_sha256_sent`, joined on (`file_name`, `key`) | the Orin's bytes are the H100's wire bytes | **105 of 105 byte-identical**, 0 missing, 0 mismatched |
+
+The byte total is corroborated independently, since rsync reported exactly 378,397,777 for the pull to
+flash before any hashing was done.
+
+**A join trap worth recording, because it produced a false failure and will produce others.** The
+Orin's first pass at the second check reported 44 mismatches, and the cause was keying the lookup by
+the frame `key` alone. **A frame key is a time index and is unique only WITHIN a clip.** Measured over
+this study's own frame set: 6,237 frames carry only **782 distinct keys**, **439 of those keys are used
+by more than one clip**, and the key `0015000` is used by **109 clips**, because the evaluated grid is
+built on half-second instants and many clips hold a frame at exactly 15.000 s. Re-keyed by
+(`file_name`, `key`) the check is clean, so the data was right throughout and the join was wrong.
+
+The kit does not have this defect and that was verified rather than assumed: `sh_ep_runner.store_path`
+resolves under the clip directory, the manifest keys its frame set by (`file_name`, `key`), and
+`cachekeys.mm_uuid` carries the clip as `device_id`, so no frame identity anywhere in the kit rests on
+the key alone. The wire manifest also carries `rel_path`, which is unique, and a join on that is safer
+than a join on the pair.
+
+### 5b.2 The Orin's server, and the one deviation that touches a result
+
+Matched verbatim: the `--mm-processor-kwargs`, `--enable-prefix-caching`, `--enable-prompt-tokens-details`.
+Not parity-relevant: `--mm-processor-cache-gb 4` against the H100's 128 and `--limit-mm-per-prompt
+image 32` against 640, both caches ON and the cap above EP-G's 21; and KV offloading omitted, the Orin
+being unified memory so the host pool is the same pool. Omitted as unavailable in vLLM 0.20.0:
+`--trust-request-mm-kwargs`, which governs per-REQUEST overrides and has nothing to govern here,
+because the runner sends no `mm_processor_kwargs` on any request.
+
+**`--enforce-eager` and `--gpu-memory-utilization 0.4` do not touch H1 or H2 and DO touch H3.** They
+leave the token counts alone, so parity and both headline metrics are unaffected. But eager mode
+disables CUDA graph capture, and H3 is a claim about what a multi-frame evaluation COSTS on the device
+that would run it. A device-tier TTFT measured in eager mode is therefore an **upper bound on latency
+for a device deployment, not that deployment's cost**, and every H3 number from the Orin is labelled
+that way. If eager mode is not required for memory or stability on this box, the H3 numbers are worth
+re-taking without it; if it is required, the label stands and the bound is the finding.
+
 ## 6. Mechanism verification, Steps 0 to 5, before the sweep
 
 **Step 0, what would make this run uninterpretable.** Five checks were run and three of them came back
