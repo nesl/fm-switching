@@ -1,0 +1,16 @@
+[2026-11-19 19:27:51] StudySS2-32B start, HEAD 8a1917b
+[19:27:52] starting vLLM server: /home/pragya/.venvs/fm-switching-vllm/bin/vllm serve /home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb --served-model-name 32BI --port 8031 --max-model-len 32768 --gpu-memory-utilization 0.9 --tensor-parallel-size 1 --no-enable-prefix-caching --limit-mm-per-prompt {"image": 16} --dtype bfloat16 --seed 0 --limit-mm-per-prompt {"image": 640, "video": 1} --mm-processor-kwargs {"size": {"shortest_edge": 4096, "longest_edge": 16777216}, "fps": 1.0, "do_sample_frames": false} --trust-request-mm-kwargs --host 127.0.0.1 --enable-prefix-caching --enable-prompt-tokens-details --mm-processor-cache-gb 128 --kv-offloading-backend native --kv-offloading-size 27 --enable-log-requests --enable-logging-iteration-details
+[19:28:59] server up: {"key": "32BI", "repo": "Qwen/Qwen3-VL-32B-Instruct", "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb", "startup_s": 66.8, "log": "logs/study_x_server_32BI_1119_192752.log", "max_model_len": 32768, "gpu_memory_utilization": 0.9, "tensor_parallel_size": 1, "prefix_caching": false, "kv_cache_tokens": 62944, "max_concurrency_at_max_len": 1.92, "available_kv_gib": "15.37", "model_weights_gib": "62.66", "attention_backend_lines": ["(EngineCore pid=2059823) INFO 2026-11-19 19:28:09.078 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention", "(EngineCore pid=2059823) INFO 2026-11-19 19:28:09.079 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.", "(EngineCore pid=2059823) INFO 2026-11-19 19:28:09.562 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].", "(EngineCore pid=2059823) INFO 2026-11-19 19:28:09.562 [flash_attn.py:1167] Using FlashAttention version 3", "(EngineCore pid=2059823) INFO 2026-11-19 19:28:20.679 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."], "cuda_graphs": true, "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)", "extra_server_args": ["--limit-mm-per-prompt", "{\"image\": 640, \"video\": 1}", "--mm-processor-kwargs", "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}"
+  refspatial cloud 25/277  errs=0  elapsed=30s
+  refspatial cloud 50/277  errs=0  elapsed=54s
+  refspatial cloud 75/277  errs=0  elapsed=77s
+  refspatial cloud 100/277  errs=0  elapsed=102s
+  refspatial cloud 125/277  errs=0  elapsed=127s
+  refspatial cloud 150/277  errs=0  elapsed=157s
+  refspatial cloud 175/277  errs=0  elapsed=193s
+  refspatial cloud 200/277  errs=0  elapsed=230s
+  refspatial cloud 225/277  errs=0  elapsed=255s
+  refspatial cloud 250/277  errs=0  elapsed=283s
+  refspatial cloud 275/277  errs=0  elapsed=328s
+  refspatial cloud 277/277  errs=0  elapsed=331s
+wrote /home/pragya/Desktop/fm-switching/results/casestudy/study_ss2/refspatial_cloud32b.json scored 277 errors 0 in 331s
