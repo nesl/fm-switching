@@ -119,6 +119,29 @@ enforcement evicted anything. The harness tests pass, including "a split run dec
 (13 tests). Note from live residency logs: under b7 every robot history is believed cold to the end of a run, so for
 b7 enforcement may have nothing to evict; the per-cell eviction count will show it.
 
+## 4b. Overnight rules (user, 2026-11-19) and decisions taken
+
+Rules: run length from flash's committed table (shortest of 600 / 900 / 1200 s with >= 20 pooled robot questions in
+all 8 cells, 12 and 16 devices, seeds 0, 4, 5, 6, 40:40:20, EVAL-only LH-REQ robots), same for every arm, committed
+before the grid; DEV-fitted tables on EVAL-only questions; if "policy-F ready" is not on origin by 01:30, b7, eco-llm
+and mooncake start the three-type grid and hybrid-F / hybrid-F6 join at the next run boundary after it lands; a
+component that does not move decisions is an ABSENT LINK and the freeze proceeds (only base-with-switches-off != b7
+stops F and F6); INVALID = rerun once then skip and log; server crash = one restart then next cell; push conflict =
+rebase unpushed only.
+
+Decisions (PROVISIONAL unless ruled):
+1. 19:52, by the user's instruction ("run some baselines, pick up bumped work"): the D134 published-baseline queue
+   resumed on MIXED while waiting (ruled; later confirmed as a standing rule).
+2. The D134 driver's placement watcher would have paused on flash's `a0f4159` (credit-axis hardening and pressure
+   instrumentation); marked handled because it needs no H100 wiring (placement path applied since e924005).
+   PROVISIONAL.
+3. The grid will not run a substitute workload under the THREE-TYPE label: if, when it is due, the harness cannot yet
+   express LH-REQ EVAL robots or the RefSpatial + RealWorldQA EVAL single-shot pool, or the run-length table is not
+   committed, the D134 queue keeps GPU 2 busy and this is recorded here. PROVISIONAL.
+4. As of 20:20: "policy-F built (not frozen)" (a3e3dd0) is on origin, not "policy-F ready"; the trace generator
+   accepts the 40:40:20 ratio but its single-shot pool is still StudySS1's (VizWiz, EgoThink) and has no LH-REQ robot
+   selection; no run-length table yet.
+
 ## 5. Incidents
 
 - 17:10 to 17:16: the first StudySS1-32B attempt failed every request (cache_salt '/'), stopped, no answers written.
