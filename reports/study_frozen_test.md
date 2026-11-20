@@ -1215,15 +1215,29 @@ on time at 16 devices seed 4: hybrid-F 15 of 20, b7 14, llf 10, **edf 5**. Decom
 
 edf's prefill is 0.027 s, essentially free, and its questions still miss, because each one WAITS
 5.5 s at the median and up to 11.7 s before release, which is longer than the entire 5 s deadline.
-Its 359 builds cost 211 s of measured build TTFT, and that traffic is what the questions queue
-behind. llf shows the same shape at half the magnitude.
 
-**So warming moves the binding resource rather than removing it.** Section 15 charges warming its
-GPU-seconds and explicitly never queues it, which is listed there as the second generosity; this is
-a measured instance of that exact exclusion deciding the outcome. The modelled P1 "65 of 65" is
-therefore an upper bound on the PREFILL side only, and the measured gap between it and edf's 5 of 20
-is the size of the term the model leaves out. A warming policy that does not schedule its own
-warming traffic against the questions can lose while winning every prefill.
+**WHY it waits, measured rather than assumed.** An earlier draft of this subsection said the
+questions queue behind the build traffic. That is WRONG and the right answer is sharper. edf emits
+2,697 `defer` decisions where b7 emits none, 36 at the median per robot question and up to 42, and a
+robot question is released **0.003 s at the median AFTER the last build completion for its own
+session** (min -0.003 s, max 352 s). With `session_MATERIALIZE` 360 and `release_whole` 360 in the
+same run, the sequence is: the question arrives, the cold prefill of its history is predicted to
+miss the deadline, so the arm defers it in 0.5 s steps while materializing that session's history,
+and releases it the instant the materialization lands. The engine queue residual over the same
+questions is 0.376 s, so the engine was never the bottleneck.
+
+**So edf warms REACTIVELY, at the question, and the question pays the whole warming latency.** That
+is a different failure from the one I first wrote down, and it does not show that warming costs
+on-time. It shows that WHEN you warm decides who pays: warming on demand puts the materialization
+inside the deadline, warming ahead of arrival does not. The offline policies P1 to P3 all warm ahead
+of arrival on batch events, so none of them has this cost, and edf is not a measurement of them.
+
+What the live cells therefore do and do not control for in section 15. They DO confirm the
+mechanism and the magnitudes: a build makes the next question on that session warm, and warm is
+0.384 s against 2.44 to 3.10 s cold, better than the model's 0.562 s. They do NOT yet test the
+model's second generosity, that warming is charged GPU-seconds but never queues, because in these
+two arms the warming was serialised with the question by the arm's own deferral rather than
+competing with it. Section 16 builds that contention in explicitly and calibrates it here.
 
 Two things this does NOT say. It does not say edf's release discipline is warming's fault: edf is
 plain EDF with no feasibility admission, so it releases badly in general, and the 5.5 s wait is a
@@ -1243,3 +1257,112 @@ session, and the oracle's advantage is almost entirely the advantage of knowing 
 are. A warming policy in this workload is a prediction problem about sparse one-shot demand, not a
 caching problem about reuse. That is the shape the C6 redesign has to address, and it is the opposite
 of what a counterfactual chooser tuned on repeated access would assume.
+
+## 16. Warming that competes for the GPU, calibrated on the live cells (user addendum, 2026-11-20)
+
+Section 15 charged warming its GPU-seconds and never queued it, which section 15.4 showed is the
+exclusion that matters. This part builds the contention in: every request and every warming prefill
+goes through one shared server model, and two warming DISCIPLINES are compared under every placement
+policy. Script `experiments/orchestration/live2/warm_state_contention.py`, output
+`results/orchestration/live2/frozen_test/warm_state_contention.json`.
+
+**W1** warms immediately on arrival: a prefill joins ONE FIFO with deadline work, so a prefill that
+arrived first holds a slot the next question waits for. **W2** warms only into spare capacity:
+strict priority for deadline work, and a prefill may not start while anything queued is at risk,
+using the policy's own committed test, laxity below 0.3 times the deadline (D143 ruling B). A prefill
+is never preempted once started, because a prefill is not resumable. Placement policies are section
+15's P1 LRU, P2 at T = 60 s and P3 oracle, with P0 (no warming) as the floor.
+
+### 16.1 Calibration against the live edf and llf cells, and what it is worth
+
+Two numbers, and only one is fitted.
+
+**f, the interference factor, FITTED.** The committed curve gives a request's GPU-busy time in
+isolation; measured TTFT at this load is larger because the engine batches. Fitted as the ratio of
+measured median TTFT to modelled service on the two WARMING-FREE arms: **dashcam 3.18, single-shot
+1.47, robot recall 1.38**. That the dashcam factor is the largest is itself informative: a 378-token
+frame spends most of its TTFT waiting its turn inside the batch, not computing.
+
+**c, the slot count, MEASURED not fitted.** The engine's own concurrency in the same cells, the sum
+of measured TTFT over the run length: 7,008 s over 1,200 s, so **c = 5**.
+
+Fit quality, with the two warming arms as pure validation (modelled over measured, so 1.00 is
+perfect):
+
+| arm | role | dashcam | single-shot | robot | build |
+|---|---|---|---|---|---|
+| b7-edf-feasibility | fit | 1.02 | 1.00 | 1.03 | n/a |
+| hybrid-F-lhreq | fit | 0.98 | 1.00 | 1.03 | n/a |
+| edf | **validation** | 0.99 | **0.27** | **1.38** | **0.65** |
+| llf | **validation** | 1.00 | **0.26** | 0.95 | **0.66** |
+
+**Where the fit holds and where it does not, stated rather than averaged.** Dashcam service
+transfers to the validation arms within 1 percent, and llf's robot recalls within 5 percent. The
+three bad cells are all on the WARM side, which is exactly the side the fit could not see: f was
+fitted on arms whose every request is cold, so a warm single-shot request is modelled at 0.087 s
+against 0.316 s measured (x0.27) and a build at 0.293 s against 0.448 s (x0.65). **So this model
+UNDERSTATES the cost of warm service and of warming itself by roughly 1.5x on builds and 3.7x on
+warm single-shot.** Every W1-versus-W2 difference below is therefore a LOWER BOUND on the contention
+a real engine would show, and the on-time levels are not predictions: the model gives P0 43 of 65
+robot questions against 46 to 50 measured, and 1,070 of 1,070 single-shot against 1,306 of 1,426
+measured, because single-shot service here is one fixed prompt size with no decode. **Read the
+columns against each other, never as levels.**
+
+### 16.2 Results, 16 devices, seeds 4, 5, 6 pooled (65 robot, 1,070 single-shot)
+
+| capacity | policy | W | robot on time | warm | robot queued (p90 / max s) | SS on time | SS queued (p90 / max s) | warming GPU-s |
+|---|---|---|---|---|---|---|---|---|
+| 1.00x | P0 | none | 43 / 65 | 0 | 9 (0.014 / 0.063) | 1070 / 1070 | 145 (0.021 / 0.153) | 0 |
+| 1.00x | P1 | W1 | **65 / 65** | 65 | 10 (0.024 / 0.063) | 1070 / 1070 | 153 (0.023 / 0.157) | 271 |
+| 1.00x | P1 | W2 | **65 / 65** | 65 | 10 (0.024 / 0.063) | 1070 / 1070 | 153 (0.019 / 0.157) | 271 |
+| 1.00x | P2 / P3 | W1, W2 | 65 / 65 | 65 | 10 to 13 | 1070 / 1070 | 153 to 154 | 271 to 317 |
+| 0.50x | P1 | W1 | 55 / 65 | 48 | 18 (0.054 / 0.486) | 1062 / 1070 | 328 (0.154 / **3.746**) | 1,764 |
+| 0.50x | P1 | W2 | **56 / 65** | 49 | 20 (0.057 / 0.198) | **1069 / 1070** | 320 (0.118 / 1.589) | 1,756 |
+| 0.50x | P2 | W1 | 63 / 65 | 62 | 12 (0.030 / 0.417) | 1068 / 1070 | 194 (0.053 / 2.116) | 801 |
+| 0.50x | P2 | W2 | 63 / 65 | 62 | 12 (0.030 / 0.417) | 1068 / 1070 | 194 (0.049 / 2.046) | 801 |
+| 0.50x | P3 | W1 | 65 / 65 | 65 | 13 (0.033 / 0.129) | 1070 / 1070 | 210 (0.056 / 1.083) | 924 |
+| 0.50x | P3 | W2 | 65 / 65 | 65 | 13 (0.033 / 0.096) | 1070 / 1070 | 209 (0.053 / 0.902) | 924 |
+| 0.25x | P1 | W1 | 47 / 65 | 22 | 23 (0.122 / 0.711) | 1059 / 1070 | 388 (0.264 / **3.746**) | 2,433 |
+| 0.25x | P1 | W2 | 47 / 65 | 22 | 25 (0.087 / 0.491) | **1068 / 1070** | 383 (0.157 / 1.625) | 2,433 |
+| 0.25x | P2 | W1 | 49 / 65 | 40 | 16 (0.072 / 0.491) | 1064 / 1070 | 309 (0.116 / 2.360) | 1,763 |
+| 0.25x | P2 | W2 | 49 / 65 | 40 | 17 (0.072 / 0.491) | 1066 / 1070 | 303 (0.094 / 2.046) | 1,763 |
+| 0.25x | P3 | W1 | **65 / 65** | 65 | 19 (0.080 / 0.711) | 1066 / 1070 | 303 (0.092 / 2.515) | 1,830 |
+| 0.25x | P3 | W2 | **65 / 65** | 65 | 20 (0.080 / 0.491) | 1068 / 1070 | 302 (0.087 / 2.046) | 1,832 |
+
+### 16.3 What the contention actually costs
+
+**1. At the committed capacity there is no contention to manage.** Robot on-time is 65 of 65 under
+every policy and both disciplines, 10 of 65 questions queue at all, and the worst wait in the whole
+cell is 63 ms. The GPU has spare slots: deadline work needs about 3.1 of the 5 and warming 0.2 more.
+**W1 and W2 are indistinguishable on outcomes here**, differing only in the single-shot queue p90
+(0.019 s against 0.023 s). The binding resource at 1.0x is MEMORY, which is what section 15 found,
+and adding GPU contention does not change that conclusion.
+
+**2. Under memory pressure the discipline starts to pay, and it pays on SINGLE-SHOT, not robots.**
+At 0.50x with LRU, W2 buys 1 robot question (56 against 55) and **7 single-shot questions (1,069
+against 1,062)**, and cuts the worst single-shot queue wait from **3.746 s to 1.589 s**. At 0.25x it
+buys 0 robot and **9 single-shot** (1,068 against 1,059), with the worst wait 1.625 s against
+3.746 s. The reason is the deadline asymmetry: a single-shot request has 2 s and a robot 5 s, while a
+warming prefill occupies a slot for 0.3 to 0.9 s, so an immediate prefill is a serious fraction of a
+single-shot budget and a minor one of a robot's. **Warming traffic injures the tightest deadline
+class first**, which is the class C6 was already unable to help (section 6.2).
+
+**3. Why pressure creates contention at all, when the GPU is the same size.** Warming GPU-seconds
+rise from 271 at 1.0x to 1,764 and 2,433 at 0.50x and 0.25x for LRU, because evicted histories are
+re-prefilled, so the memory limit manufactures GPU load. At 0.25x that is 811 GPU-s per 1,200 s
+cell. **Contention here is a SYMPTOM of thrashing, not an independent cost**, and the way to avoid it
+is to keep the right histories, not to schedule the prefills better: P2 at 0.50x reaches 63 of 65
+with 801 GPU-s where P1 reaches 55 with 1,764.
+
+**4. Selection still dominates discipline.** At 0.50x, switching LRU to the hazard policy is worth 7
+to 8 robot questions; switching W1 to W2 is worth 1. At 0.25x the oracle is worth 16 to 18 robot
+questions over P2 and the discipline 0. If the redesign can afford one mechanism, it should be the
+choice of WHAT to keep, not the scheduling of WHEN to prefill it.
+
+**5. The one place the discipline is not optional.** W1's worst single-shot queue wait is 3.746 s
+against a 2 s deadline, so an immediate-warming policy does not merely miss a few single-shot
+deadlines, it misses them by more than the deadline itself. Given that the calibration understates
+warm and build service by 1.5x to 3.7x (16.1), a real engine would show this worse than the table
+does. **W2 is the safe default and W1 should not be built**, even though at the committed capacity
+the two are equivalent: the cost of W1 appears exactly in the regime a deployment would hit first,
+which is memory pressure.
