@@ -524,11 +524,13 @@ means computed with the committed cost curve (`costs.recall_ttft_s` at COLD) on 
 CONSTRUCTED means a counterfactual bound: what a different policy could have had, never what
 happened. Each table says which it is.
 
-Two scope limits apply throughout. hybrid-F6 has no seed-6 cell at 16 devices (its two attempts
-were refused at preflight during the 06:32 git-gc window), so its pooled rows cover seeds 4 and 5
-while every other arm covers 4, 5 and 6: the hybrid-F6 column is NOT a like-for-like comparison
-with the rest and is not offered as one. hybrid-F's seed-6 cell landed while this analysis was
-being written and IS included. And b7 and mooncake reject
+One scope note. The seed-6 cells of hybrid-F and hybrid-F6 landed while this analysis was being
+written, and both ARE included: every arm's pooled row now covers seeds 4, 5 and 6 at 16 devices,
+65 robot questions each, so the per-arm columns are like for like on the seed set. They are not
+like for like on what happened to the questions: b7 and mooncake reject far more robot questions
+than the hybrids, so their "missed" rows are dominated by questions that never reached the cloud at
+all, which is a different event from a question that was sent and was late. Section 12.3 numbers
+are at seeds 4 and 5 only, because that is the pairing that existed when they were computed. And b7 and mooncake reject
 far more robot questions than the hybrids, so their "missed" rows are dominated by questions that
 never reached the cloud at all, which is a different event from a question that was sent and was
 late.
@@ -543,8 +545,8 @@ late.
 | eco-llm | missed | 19 | 1 | 0.1218 | 1.0691 | 5.3568 | 0.0222 | 6.6661 |
 | hybrid-F-lhreq | on time | 50 | 0 | 0.0984 | 0.5662 | 2.1211 | 0.0222 | 2.9429 |
 | hybrid-F-lhreq | missed | 15 | 1 | 0.1073 | 0.5675 | 5.3621 | 0.0222 | 6.0820 |
-| hybrid-F6-lhreq | on time | 35 | 0 | 0.2796 | 0.4660 | 2.1211 | 0.0222 | 3.2306 |
-| hybrid-F6-lhreq | missed | 10 | 1 | 0.5211 | 0.6895 | 5.7158 | 0.0222 | 6.7904 |
+| hybrid-F6-lhreq | on time | 49 | 0 | 0.2840 | 0.4798 | 2.1211 | 0.0222 | 3.2306 |
+| hybrid-F6-lhreq | missed | 16 | 1 | 0.4620 | 0.6380 | 5.3621 | 0.0222 | 6.5444 |
 | mooncake | on time | 47 | 0 | 0.1097 | 0.7655 | 2.1211 | 0.0222 | 3.1148 |
 | mooncake | missed | 18 | 14 | 0.1131 | 2.1408 | 3.9287 | 0.0222 | 6.1632 |
 
@@ -570,7 +572,7 @@ Three independent instruments, 16 devices, seeds 4 to 6:
 | b7 s6 | 15 | 0 | 372 | all cold | 0 | 5,494,250 | 180 | 0 |
 | eco-llm s4 / s5 / s6 | 20 / 24 / 20 | 0 | 372 / 370 / 372 | all cold | 0 | 5,579,984 / 5,622,934 / 5,593,834 | 345 / 1,065 / 405 | 0 |
 | hybrid-F s4 / s5 / s6 | 20 / 24 / 20 | 0 | 372 / 370 / 372 | all cold | 0 | 5,301,776 / 5,317,513 / 5,324,320 | 345 / 1,065 / 405 | 0 |
-| hybrid-F6 s4 / s5 | 20 / 24 | 0 | 372 / 370 | all cold | 0 | 5,236,808 / 5,261,188 | 345 / 1,065 | 0 |
+| hybrid-F6 s4 / s5 / s6 | 20 / 24 / 20 | 0 | 372 / 370 / 372 | all cold | 0 | 5,236,808 / 5,261,188 / 5,227,930 | 345 / 1,065 / 405 | 0 |
 | mooncake s4 / s5 / s6 | 15 / 21 / 15 | 0 | 372 / 370 / 372 | all cold | 0 | 5,479,025 / 5,556,227 / 5,486,424 | 285 / 735 / 180 | 0 |
 
 It is a REAL OBSERVATION, not an instrument that never reads, and it is corroborated twice over
@@ -652,7 +654,7 @@ coordinate pair.
 | b7-edf-feasibility | 51 | 1 / 3 | 14 | 0.9778 | 0.9608 |
 | eco-llm | 51 | 1 / 3 | 14 | 0.9867 | 0.9688 |
 | hybrid-F-lhreq | 51 | 1 / 3 | 14 | 0.9867 | 0.9688 |
-| hybrid-F6-lhreq (seeds 4, 5 only) | 34 | 1 / 3 | 11 | 0.9852 | 0.9773 |
+| hybrid-F6-lhreq | 51 | 1 / 3 | 14 | 0.9867 | 0.9688 |
 | mooncake | 51 | 1 / 3 | 14 | 0.9778 | 0.9608 |
 
 MEASURED: the median robot history is asked ONE question, and only 11 to 14 same-history gaps
