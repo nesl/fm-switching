@@ -241,3 +241,174 @@ misses; whether an over-context request invalidates a run or counts as a miss.
 - 17:10 to 17:16: the first StudySS1-32B attempt failed every request (cache_salt '/'), stopped, no answers written.
 - Host Python while the StudySS1 server was measuring idle TTFT: a py_compile and short edit or read scripts (seconds
   each), recorded here; no measured request overlapped a heavy process.
+
+## 6. A6000 morning summary, policy-F side (2026-11-20 07:30)
+
+Written by the A6000 session, which owns the policy-F freeze and the dry proofs. The MORNING SUMMARY section,
+section 0 and sections 4c and 5 remain the H100's; nothing above this line was edited. Everything here is DRY (the
+live2 trace generator with `--dry`, no engine), so every number is a decision-log count, never a served request. The
+live grid is the H100's.
+
+### 6.1 What ran
+
+Committed in `8f8e36c` "policy-F ready (frozen)", pushed from a worktree at origin/main and verified ANCESTOR and
+EQUAL before the worktree was removed. Controls before the push: the fleet suite 234 of 234 through its own runner,
+`test_hybrid.py` 7 of 7 through pytest, and 0 em dashes in everything added.
+
+Four proofs, all on a three-type LH-REQ cell unless stated. Full output in
+`results/orchestration/live2/hybrid/policy_f_proofs.json`; the narrative is `reports/study_policy_f.md` section 11.
+
+**Proof 1, ruling B is inert on robots.** `hybrid-F` is byte-identical to the screened `hybrid2-c1c2k15c3c5` on all
+four two-type cells: 6,554 / 8,087 / 6,472 / 7,872 decisions, matching digests, `ss_seen` 0 in each.
+
+**Proof 2, Step 2b per component.** Each switch toggled alone against the full arm. Two metrics are reported because
+they are different registers and the first one misled me:
+
+| component | decisions moved (setwise) | log positions differing | verdict |
+|---|---|---|---|
+| C1 | 0 | 0 | **ABSENT LINK**, cancelled by geometry |
+| C2 | 712 | 12,071 | moves decisions |
+| C3 | 459 | 6,026 | moves decisions |
+| C5 | 461 | 11,986 | moves decisions |
+| C6 | 3 | 11,794 | moves decisions |
+
+`_differing` counts log POSITIONS and is kept only for the identity proofs, where byte-identity including order is
+the claim. One early divergence desynchronises the rest of the log, so C6 read 11,794 positional against 3 actual, a
+3,931x gap, and C2 17x. `_differing_setwise` counts a multiset over `(t, kind, opportunity_ids, representation,
+defer_s)` and is the right register for "did this switch move a decision". The register error was caught by the
+negative control, not by inspection.
+
+C1's zero is **cancelled by geometry**, not unexercised: dashcam items carry one constant `value` and one constant
+`work`, so `idx` is monotone in slack which is monotone in deadline, making C1's dashcam order identically EDF order;
+and `_cap_dashcam_only` keeps every recall item unconditionally (`hybrid_arm.py:436-437`), so C1 reaches only the
+`order` channel, which the harness discards. That is two of the five null categories at once and neither is evidence
+about the policy.
+
+**Proof 3, dry smoke, 30 of 30 cells ran** (5 arms x {16, 20, 32} x seeds {0, 4}, decision counts):
+
+| n | seed | F | F6 | b7 | eco-llm | mooncake |
+|---|---|---|---|---|---|---|
+| 16 | 0 | 13,564 | 13,582 | 13,623 | 13,621 | 14,001 |
+| 16 | 4 | 13,525 | 13,525 | 13,570 | 13,570 | 13,947 |
+| 20 | 0 | 16,361 | 16,362 | 16,382 | 16,343 | 16,885 |
+| 20 | 4 | 16,504 | 16,542 | 16,512 | 16,475 | 17,010 |
+| 32 | 0 | 15,863 | 16,123 | 16,150 | 16,353 | 16,910 |
+| 32 | 4 | 15,977 | 15,983 | 16,236 | 16,436 | 16,985 |
+
+F differs from F6 at five of the six (n, seed) pairs and is identical at n=16 seed 4 only, so the F6 arm is live
+everywhere else. Per PROVISIONAL decision 8 in section 4c, a live F6 cell must also show `c6_calls > 0` and
+`c6_scorer_error == 0`.
+
+**Proof 4, value-term negative control, 0 decisions moved on all eight cells.** Four patch variants (a flat table
+with every value equal, dashcam 100x, robot 100x, single-shot 1,000x) against both frozen arms. Setwise 0 everywhere;
+the only non-zero positional cell, robot_100x at 2 of 16,361, is two `release_recall` rows swapping places at
+t = 527.0 with both items released either way.
+
+### 6.2 The three findings
+
+**1. The value term is decision-inert in both frozen arms.** A flat table and a 10,000x inversion move nothing. So
+D143 ruling A's LH-REQ swap, the 4.4x half-one correction and the SS ordering flip (refspatial 0.18742 over robot
+0.13204) all change a quantity the frozen policy does not read. **The SS ordering must not be read as evidence about
+single-shot work versus robot recall**; it is a quantity with no reader.
+
+**2. C6 was dead in every `-lhreq` cell and I caused it.** `_LhReqFittedProfiles._DEV_KEY` mapped 4 of the 5
+`(representation, tier)` conditions the escalation path reads, raising `MissingEvidence` on `cloud RICH` (4 of 12
+question types map to RICH) and on `device N1`. `_c6_prepare`'s bare `except Exception` counted that into
+`c6_scorer_error` and returned False, so `c6_live` was False on every period while `live2_describe` still reported
+`c6=True`. Measured before the fix: `c6_scorer_error` 251 of 251 periods with recall, `c6_calls` 0, F6 byte-identical
+to F at all six smoke cells. After re-raising `MissingEvidence` and declaring the two substitutions: `c6_calls` 254,
+`c6_dev_send_to_hold` 6, `c6_scorer_error` 0. A swallowed exception counted into a counter is the same shape as the
+write-only field: every surface sign said the arm was configured.
+
+**3. C6 spends 94 percent of its work on requests D143 ruling C says it cannot act on, and breaches the decision
+period at every size.** Call split by request type:
+
+| n | SS-only periods | calls on SS | mixed or robot periods | calls on robot | deviations |
+|---|---|---|---|---|---|
+| 16 | 356 | 356 | 24 | 24 | 1 on robot |
+| 20 | 476 | 478 | 28 | 28 | **1 on single-shot** (`c6_dev_send_to_hold`) |
+
+Per-period `decide()` wall time against the 100 ms decision period:
+
+| arm | n | all p50 | all p99 | SS-only p50 / p99 | robot p50 / p99 |
+|---|---|---|---|---|---|
+| F | 16 | 0.029 | 0.046 | 0.039 / 0.057 | 0.039 / 0.079 |
+| F6 | 16 | 0.030 | 63.848 | 42.638 / 211.968 | 74.957 / 285.178 |
+| F | 20 | 0.033 | 0.048 | 0.043 / 0.080 | 0.043 / 0.054 |
+| F6 | 20 | 0.034 | 124.524 | 81.747 / 268.761 | 117.976 / 873.407 |
+| F | 32 | 0.044 | 0.069 | 0.054 / 0.158 | 0.054 / 0.184 |
+| F6 | 32 | 0.045 | 249.680 | 133.494 / 345.450 | 146.144 / 403.470 |
+
+So the breach recorded at 32 devices exists at **every** size including the n=16 entry point, 2x to 9x over the
+period at p99. Gating C6 to non-SS recall would cut roughly 42 s of C6 time per 1200 s cell to 3.3 s, a 92 percent
+cut, but **it would delete the one SS decision at n=20**, so the speed fix is NOT decision-preserving under D108 and
+D121 and I have not applied it. D143 ruling C's "C6 is robot-only by design" is false as implemented.
+
+### 6.3 The over-context question, and why a per-arm skip is unsafe
+
+LH-REQ session `1848337166005249` reaches 33,781 history tokens, which with the prompt is the H100's 33,839 against
+the 32,768 context. Checked with the committed trace generator at all four development seeds:
+
+| seed | max session tokens | worst question history | questions over 32,768 |
+|---|---|---|---|
+| 0 | 44,581 | 33,781 | 1, at n=16, 18 and 20 alike |
+| 4 | 27,031 | 24,331 | 0 |
+| 5 | 27,031 | 24,331 | 0 |
+| 6 | 27,031 | 24,331 | 0 |
+
+It is a seed-0 phenomenon only, the same session at every size, and seeds 4, 5 and 6 have 8,437 tokens of headroom
+at their worst question. The p90 session history is about 1,800 tokens, so this is one session at 19x the p90.
+
+**The selection effect.** The arms that hit the request (F, F6, eco-llm) are the ones that chose to send full
+history; b7 and mooncake survive seed 0 because they did not. Skipping the cell per arm leaves a seed-0 panel
+containing only the arms whose representation choice avoided the overflow, which is the thing the study measures.
+Recommended instead: **common support**, seeds 4, 5 and 6 for every arm in the headline, with the seed-0 b7 and
+mooncake cells kept as recorded and marked excluded-from-headline rather than deleted. Cost, which is the argument
+for ruling the question a per-question miss instead: pooled robot questions at n=16 are 24 / 20 / 25 / 20 across
+seeds 0, 4, 5, 6, so common support gives **65 against 89**, a 27 percent loss of the robot denominator on a study
+already at the D82 minimum of 20 per cell.
+
+### 6.4 Grid size, offered load against the committed peak
+
+Offered dashcam load is a step function of the dashcam device count, against the committed 32B one-frame closed-loop
+peak of 15.10 req/s (StudyD7b):
+
+| n | dashcam devices | offered req/s | percent of peak |
+|---|---|---|---|
+| 14, 16 | 6 | 11.01 | 73 |
+| 17, 18 | 7 | 12.83 | 85 |
+| 19, 20 | 8 | 14.67 | 97 |
+| 32 | 13 | 23.83 | 158 |
+
+The ReadErrors at 20 devices match the StudyMOT1 and StudyD7 overload signature exactly (no HTTP status, no server
+log line, client dispatch lag p90 1.2 to 1.3 s against 28 ms at 16 devices). StudyMOT1's own amended rule selected
+66 percent of peak. The A6000 recommends **16 and 18**, and 18 holds the same pooled robot counts as 16
+(24 / 20 / 25 / 20), so the second size costs no denominator.
+
+### 6.5 PROVISIONAL decisions taken on this side (overnight rule)
+
+1. **Two substitutions in the LH-REQ DEV fit**, because the escalation path reads five `(representation, tier)`
+   conditions and the LH-REQ DEV split measures three. `("RICH", "cloud") -> cloud_D2` (D2 is the fullest measured
+   cloud condition and RICH is at least as informative, so this credits the cloud with less) and
+   `("N1", "device") -> device_4B_RECENT` (N1 is the device without history coverage, so its true accuracy is at most
+   the covered device's, and using the covered number credits the device with more). Both understate the cross-tier
+   gain, so neither can manufacture an escalation advantage. Declared in `_SUBSTITUTED` and asserted by
+   `test_lh_req_dev_fit_covers_every_condition_the_policy_reads`.
+2. **C1's value term left as the two-type constant** rather than moved to the DEV fit (0.13204 against 0.142857).
+   Inert either way per proof 4, so this is a hygiene question, not a results question.
+3. **The SS 30/70 split is stratified** by question source.
+4. **SS on-time is deliberately NOT a third capacity conjunct**, because D64 defines capacity as dashcam-all-meet AND
+   robot-pool-meets. Folding it in would be a post-freeze definition change under D79.
+5. **Two metrics shipped for decision diffs**, positional for identity claims and setwise for move claims, rather
+   than replacing the first. Both appear in every proof row so a reader cannot pick up the wrong register silently.
+
+### 6.6 Open user rulings, in the order work is blocked on them
+
+1. **The over-context counting rule** for session `1848337166005249`: miss, or run-invalidating. Now blocking the
+   headline's seed panel and worth 27 percent of the robot denominator.
+2. **C6: byte-identity or the speed fix.** The two cannot both hold. Keeping byte-identity keeps a 2x to 9x breach
+   of the decision period at every size; taking the fix deletes one SS decision and requires a relabel under D79;
+   making C6 robot-only is what D143 ruling C already states and is the A6000's recommendation.
+3. **Grid size**, 16 and 20 as ruled, against 16 and 18.
+4. **Whether an inert value term is acceptable in a frozen policy**, given that three separate corrections to it
+   changed no decision.
