@@ -4,7 +4,8 @@
  "label": "D142 preparation. The 32B answers are NOT on origin, so the comparison has not been run. Three gates resolved in advance.",
  "gate_1_32b_answers": {
   "status": "NOT AVAILABLE. Commit 01e5395 \"StudySS1-32B\" adds experiments/casestudy/ss1_cloud_run.py only, 54 lines, a server wrapper around the unchanged kit runner. No answer files exist for either dataset.",
-  "consequence": "the comparison is gated. The script is built and committed so it runs the moment the answers land."
+  "consequence": "the comparison is gated. The script is built and committed so it runs the moment the answers land.",
+  "status_recheck": "STILL NOT AVAILABLE as of this commit; no 32B answer file for either dataset."
  },
  "gate_2_the_4B_judge_column": {
   "requirement": "same judge, parser and prompt means the FIXED parser, so the 4B side must come from the post-fix scoring.",
@@ -25,43 +26,30 @@
   "action": "reported as a gap and NOT acquired. CLAUDE.md: do not propose new datasets; if one seems necessary, describe the gap and do not implement. Every other requested VizWiz stratification, answer type and answerable-only, is producible and is implemented."
  },
  "host_and_load_condition": {
-  "requirement": "label the device host as unconfirmed with the reason, and state the load condition on BOTH sides.",
-  "host": "UNCONFIRMED. The five StudySS1 artifacts carry no _provenance block at all: git_commit, script, model, device and timestamp are absent. They record tier=device, model=qwen3vl4b and endpoint http://127.0.0.1:8000/v1, which is localhost on whichever machine ran them. Orin against an A6000 proxy is a different device tier, so a TTFT labelled Orin may be another machine. The label travels in the result file field ttft.device_host, not a footnote.",
-  "device_load_condition_FROM_THE_FILE": {
-   "path": "vLLM server over localhost HTTP, so a re-send path rather than the in-process harness",
-   "concurrency": "one-at-a-time, serial, per the decoding field \"greedy temperature=0 seed=0 one-at-a-time\"",
-   "caching": "vLLM prefix caching ON but per-request cache_salt=qid with a distinct image and question per request, so no warm reuse; the file labels it cold single-shot",
-   "wall_clock": "700 requests in 1157.5 s, about 1.65 s per request, consistent with serial execution against a median total_s of 1.531"
-  },
+  "resolved_by_the_user": true,
+  "label": "Orin, vLLM, idle, one request at a time.",
+  "attribution_source": "ESTABLISHED BY the user's statement plus the Orin session's own StudySS1 report at 8492e02, NOT by a _provenance block, which does not exist in any of the five StudySS1 artifacts. Recorded explicitly because a later reader following CLAUDE.md's provenance convention will find the block missing and would otherwise have no route back to this attribution. This is the declaration-read-as-observation shape in its mildest form, and naming the source is the fix.",
+  "device_condition": "the Orin session ran Qwen3-VL-4B under vLLM on the Orin in the StudyORIN3 configuration, one request at a time, idle, cold per image, server on the Orin localhost:8000.",
+  "caching_statement": "\"cold per image, one request at a time, idle\" answers all three things CLAUDE.md requires of a latency measurement in one phrase: what was cached before measurement, the concurrency, and the load. The 32B side will be given the same treatment so the two conditions are comparable on their face rather than by inference.",
+  "stack_distinction": "THE SS DEVICE NUMBERS COME FROM THE ORIN3 vLLM STACK, whereas the committed device baseline for robot recall is the ORIN2 IN-PROCESS harness. D87 fixes robot device recall cost to the in-process harness and calls the server path an API artifact; D94 records the ORIN3 vLLM numbers as a serving-stack sensitivity result rather than the device baseline. So an SS device TTFT and a robot device cost are measured on different stacks and must not be placed side by side as if one device produced both. Stated explicitly rather than left to the label.",
+  "resend_concern_withdrawn": "the earlier D61 / D94 re-send concern is withdrawn and the reason is clean: single-image requests carry no history, so there is no history to re-send and the re-send path cannot be what was measured. The 0.146 s against 5.861 s gap is a property of the long-history path and does not apply here. My own note that the measured median fell between the two anchors is therefore explained rather than merely unresolved: neither anchor was the right comparison.",
   "device_ttft_measured": {
-   "n": 700,
-   "min": 0.758,
-   "median": 1.469,
-   "mean": 1.484,
-   "p95": 2.338,
-   "max": 2.359,
-   "median_prompt_tokens": 2072
-  },
-  "it_matches_NEITHER_documented_regime": {
-   "d61_d94_in_process_harness": [
-    0.146,
-    0.225
-   ],
-   "d61_d94_vllm_resend": [
-    5.861,
-    23.917
-   ],
-   "measured_device_median": 1.469,
-   "reading": "the device median is 6x to 10x the in-process anchors and 4x to 16x FASTER than the re-send anchors, so it sits between them and cannot be classified by matching either. The honest statement is the one the file supports directly: an unloaded serial cold-single-shot measurement over an HTTP server path. The D61 and D94 anchors were measured under different models and context lengths, so they do not classify this measurement and are not used to."
-  },
-  "vizwiz_device_ttft": {
-   "p50": 0.856,
-   "p90": 1.4116,
-   "mean": 1.0942,
-   "median_prompt_tokens": 1550,
-   "note": "same path, load and caching condition as EgoThink, from the same runner."
-  },
-  "cloud_side": "the brief specifies H100 idle. The cloud load condition will be read from the answer file own caching and decoding fields and reported beside the device one rather than assumed."
+   "egothink": {
+    "n": 700,
+    "min": 0.758,
+    "median": 1.469,
+    "mean": 1.484,
+    "p95": 2.338,
+    "max": 2.359,
+    "median_prompt_tokens": 2072
+   },
+   "vizwiz": {
+    "p50": 0.856,
+    "p90": 1.4116,
+    "mean": 1.0942,
+    "median_prompt_tokens": 1550
+   }
+  }
  },
  "device_only_cell_note": "the 2x2 device-only cell is reported plainly whatever its size. A question the 4B gets right and the 32B gets wrong is a case where escalation COSTS accuracy, which bears on D39 per-request gain may be zero or negative, and nothing else in the suite measures it.",
  "threshold_handling": "VizWiz VQA accuracy is graded in [0,1], so the 2x2 needs a cut. It is stated as 0.5 AND reported at 0.3, 0.5, 0.7 and 1.0 as a sensitivity, because an unregistered threshold moved the scorer-agreement headline in this same study by 17 points. The EgoThink judge is reported on its native 0 / 0.5 / 1 scale with NO binarisation, as the brief requires.",

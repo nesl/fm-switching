@@ -132,10 +132,29 @@ def main():
         ttft=dict(device=ttft([D[q] for q in qids]), cloud=ttft([C[q] for q in qids]),
                   device_path_and_load=dv.get("caching"), device_decoding=dv.get("decoding"),
                   cloud_path_and_load=cl.get("caching"), cloud_decoding=cl.get("decoding"),
-                  device_host="UNCONFIRMED: the device run carries no _provenance block and records "
-                              "only tier=device with endpoint 127.0.0.1:8000, which is localhost on "
-                              "whichever machine ran it. Orin against an A6000 proxy is a different "
-                              "device tier."),
+                  device_host="Orin, vLLM, idle, one request at a time.",
+                  device_host_attribution_source=(
+                      "ESTABLISHED BY the user's statement plus the Orin session's own StudySS1 "
+                      "report at 8492e02, NOT by a _provenance block, which does not exist in any "
+                      "of the five StudySS1 artifacts. Recorded because a later reader checking "
+                      "the convention will find the block missing and otherwise have no way back "
+                      "to the attribution."),
+                  device_stack=(
+                      "ORIN3 vLLM server on the Orin's localhost:8000, cold per image. NOTE THE "
+                      "STACK: the committed device baseline for robot recall is the ORIN2 "
+                      "IN-PROCESS harness (D87 fixes robot device recall cost to it and calls the "
+                      "server path an API artifact; D94 records the ORIN3 vLLM numbers as a "
+                      "serving-stack sensitivity result rather than the device baseline). So this "
+                      "TTFT is measured on a DIFFERENT stack from the committed robot device cost "
+                      "and the two must not be placed side by side as one device's numbers."),
+                  resend_path_not_applicable=(
+                      "the D61 / D94 re-send concern does not apply: single-image requests carry "
+                      "no history, so there is no history to re-send."),
+                  cloud_condition_to_state_the_same_way=(
+                      "the 32B side must state path, concurrency and what was cached before "
+                      "measurement in the same phrase form, so the two conditions are comparable "
+                      "on their face rather than by inference (CLAUDE.md treats caching as a "
+                      "methodological parameter).")),
     )
 
     strata = defaultdict(list)
