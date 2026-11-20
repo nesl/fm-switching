@@ -101,6 +101,21 @@
    "flat_plateau": "a REPORTABLE MEASUREMENT, not a failed attempt: the flags do not carry enough per-image signal to resolve the offset. That is a finding about the annotation set, and the stratum stays absent with that as the stated reason.",
    "zero_everywhere": "refutes the offset family outright, which is the valuable outcome and the justification for spending any time on it.",
    "contrast_with_the_vacuous_gate": "the scan has three informative outcomes and no uninformative ones, which is the opposite of the SPLIT check I was handed and ran."
+  },
+  "V2_PREFIX_LEAD_REFUTED": {
+   "the_lead": "that the 1,152 manifest ids unmapped under the val_ prefix are present in the CSV under the v2_ prefix, which would take coverage from 73.3 percent to about 98.9 percent and might join exactly, giving a second independent mapping to calibrate the offset against.",
+   "verdict": "REFUTED in its strong form. The arithmetic proximity of 1,152 and 1,104 is a coincidence of magnitude, not a near-match.",
+   "what_the_tally_shows": {
+    "val_prefixed_VAL": "3,167 images, range 28000..31172, a 3,173 span with 6 missing: a dense contiguous block.",
+    "v2_prefixed_VAL": "1,104 images, range 31192..44551, a span of 13,360 integers: SPARSE, not a block.",
+    "v2_prefixed_TRAIN": "6,977 images, range 31173..44734.",
+    "the_decisive_observation": "the v2_ VAL and v2_ TRAIN ranges are INTERLEAVED over the same numeric span, 31192..44551 against 31173..44734. So the v2_ numbering is a GLOBAL POOL INDEX with val and train images interleaved, not a contiguous val block appended after the val_ block.",
+    "and_they_do_not_tile": "val_ ends at 31172 and v2_ begins at 31192, a 19-integer gap, and the union spans 16,552 integers for 4,271 images with 12,281 missing inside. The two prefixes do not tile a contiguous range."
+   },
+   "why_that_kills_the_single_offset_extension": "manifest ids 3173..4318 would map to 31173..32318 under k=28000, but the v2_ VAL images in that span are sparse and interleaved with v2_ TRAIN images, so there is no correspondence a single offset could express. Coverage under the offset therefore STAYS 73.3 percent, not 98.9.",
+   "and_the_exact_name_fallback_does_not_exist": "the manifest's 4,319 images are ALL val_-prefixed, from VizWiz-VQA's own val.json used verbatim, so it contains no v2_ names at all. There is no subset that could join by name, and so no second independent mapping to calibrate the offset against. The fallback I said was missing is still missing.",
+   "what_it_DOES_clarify_about_the_release": "the quality release spans TWO VizWiz namings: a dense contiguous val_ block, and a sparse global-pool v2_ index whose val and train members interleave. The manifest is the later VQA val of 4,319 contiguous ids 0..4318. So the most coherent reading is that the quality release annotated an EARLIER OR SMALLER val set of about 3,173 images, which is D136's 'val with public answers' figure, and the remaining 1,152 VQA val images simply have no quality annotation under any prefix.",
+   "net_effect_on_the_plan": "unchanged. The k-scan over the val_ block remains the only discriminating test, coverage under a verified offset would be 73.3 percent, and the stratum would carry that denominator rather than 98.9."
   }
  },
  "host_and_load_condition": {
