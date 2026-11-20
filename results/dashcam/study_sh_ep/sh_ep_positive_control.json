@@ -1,0 +1,109 @@
+{
+ "label": "StudySH-EP analysis. CPU only; every score is a committed SH-EP run record.",
+ "at": "2026-11-20T11:25:38.045862",
+ "seed": 0,
+ "n_bootstrap": 2000,
+ "horizons": [
+  0.5,
+  1.0,
+  1.5
+ ],
+ "fars": [
+  0.05,
+  0.1,
+  0.2
+ ],
+ "sudden_split_s": 1.5,
+ "positive_control": {
+  "label": "POSITIVE CONTROL: this scorer's own AP and crop code recomputing StudyE9c's committed |zero arms from the committed StudyD14b trace. A miss above 1e-9 is a STOP: the check is broken, or the metric is.",
+  "tol": 1e-09,
+  "sigma_fake_event_s": 2.890460072101262,
+  "n_positive_by_horizon": {
+   "0.5": 150,
+   "1.0": 106,
+   "1.5": 66
+  },
+  "committed_n_positive_by_horizon": {
+   "0.5": 150,
+   "1.0": 106,
+   "1.5": 66
+  },
+  "committed_sha256": {
+   "fake_event_times": "2ce83d466ca5ecfe311ddfe5a5cff665f13ccefc8820e094fd97097b8542a360",
+   "crop_index": "3d0ab77fce072258f7862537218bec34810730477bb44b52b98f469ce76cad60",
+   "target_index": "6b49d579683018af3f25b88bf04691d5b8cc3437ad9036a0cea72306579a6331"
+  },
+  "arms": {
+   "4BI_N1|zero": {
+    "mAP": 0.5223157117275791,
+    "ap": {
+     "0.5": 0.6726659082027187,
+     "1.0": 0.5479098773740375,
+     "1.5": 0.34637134960598104
+    },
+    "abs_diff": {
+     "mAP": 0.0,
+     "0.5": 0.0,
+     "1.0": 0.0,
+     "1.5": 5.551115123125783e-17
+    }
+   },
+   "32BI_N1|zero": {
+    "mAP": 0.636756194608048,
+    "ap": {
+     "0.5": 0.7813818075253031,
+     "1.0": 0.6349673089311239,
+     "1.5": 0.4939194673677171
+    },
+    "abs_diff": {
+     "mAP": 0.0,
+     "0.5": 1.1102230246251565e-16,
+     "1.0": 0.0,
+     "1.5": 5.551115123125783e-17
+    }
+   },
+   "32BI_N3|zero": {
+    "mAP": 0.6493273374047864,
+    "ap": {
+     "0.5": 0.7978459605726712,
+     "1.0": 0.6550854883405781,
+     "1.5": 0.49505056330111
+    },
+    "abs_diff": {
+     "mAP": 0.0,
+     "0.5": 0.0,
+     "1.0": 0.0,
+     "1.5": 5.551115123125783e-17
+    }
+   },
+   "4BI_N3 (SECONDARY)|zero": {
+    "mAP": 0.5331714750968822,
+    "ap": {
+     "0.5": 0.6900264676633734,
+     "1.0": 0.5466142585234391,
+     "1.5": 0.36287369910383444
+    },
+    "abs_diff": {
+     "mAP": 1.1102230246251565e-16,
+     "0.5": 0.0,
+     "1.0": 1.1102230246251565e-16,
+     "1.5": 5.551115123125783e-17
+    }
+   }
+  },
+  "failures": [],
+  "passed": true
+ },
+ "_provenance": {
+  "git_commit": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
+  "script": "sh_ep_score.py",
+  "model": "none",
+  "timestamp": "2026-11-20T11:25:38.047508",
+  "device": "cpu",
+  "n": 0,
+  "args": {
+   "runs": [],
+   "control_only": true
+  }
+ }
+}
