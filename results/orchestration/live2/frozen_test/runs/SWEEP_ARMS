@@ -4,8 +4,9 @@
 # builder / hybrid-base variants (identical to b7 at BOTH seed 4 and seed 0, flash second-cell check). clockwork and ekya RESTORED:
 # they separate from b7 at seed 0 (13,621 vs 13,623 decisions). builder-s2-value also separates but is a builder variant,
 # not a published or scheduling baseline (not run, PROVISIONAL). pensieve and rh8-demand-aware-oracle = kvflow at both cells.
-# Kept although identical to always-cloud-fcfs at that one cell (the rule excludes only b7-identical arms): inar-vl,
-# routellm, videostorm, vllm-priority. rh8-demand-aware-causal placed with the streaming arms (PROVISIONAL).
+# User ruling 4 (2026-11-20): inar-vl, routellm, videostorm and vllm-priority are identical to always-cloud-fcfs at BOTH
+# cells, so only always-cloud-fcfs runs and they are reported as identical to it. rh8-demand-aware-causal placed with the
+# streaming arms (PROVISIONAL).
 # Pass 1 = 16 devices seed 4, pass 2 = 18 devices seed 4 (cells already run are skipped).
 # -- scheduling
 edf
@@ -16,7 +17,6 @@ edf-piece2048
 b10-blocking-aware
 clockwork
 ekya
-vllm-priority
 # -- streaming
 simplestream
 querystream-proactive
@@ -27,12 +27,9 @@ thinking-qwenvl-atdm
 rh8-demand-aware-causal
 # -- routing
 hybrid-llm
-routellm
 cascade-routing
 perllm
 # -- other published
-videostorm
-inar-vl
 uniscale
 b9
 utility-per-cost
