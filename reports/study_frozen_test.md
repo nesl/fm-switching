@@ -3,6 +3,28 @@
 **Status: IN PROGRESS. Last updated 2026-11-19 19:45.** Rules: D116 (no methodological change overnight; never seeds 1
 to 3 or HOLDOUT; never INVALID results; GPU 2 exclusive; no em dashes). PROVISIONAL decisions are marked.
 
+## HEADLINE (user form, 2026-11-20 08:05): pooled rates with paired-by-seed bootstrap CIs
+
+16 devices, common support seeds 0, 4, 5 (every arm; seed 6 added when hybrid-F6's seed-6 run lands). Rates pooled over
+the seeds; on time = delivered within the deadline (robot 5 s, SS 2 s) by an HTTP 200 request. 95 percent CIs from a
+bootstrap PAIRED BY SEED: opportunities resampled within each seed, the same draw for every arm (all arms share each
+seed's trace), B = 10,000; differences against b7 on the same draws. Measurability (D82): every run has >= 20 robot
+questions (24, 20, 25); feasible counts 18, 15, 22. File: `results/orchestration/live2/frozen_test/frozen_headline_n16.json`
+(script `experiments/orchestration/live2/frozen_headline.py`).
+
+| arm | robot on time over FEASIBLE | minus b7 | SS on time at 2 s | minus b7 | dashcam all-meet |
+|---|---|---|---|---|---|
+| b7 | 50 of 55 = 0.909 [0.836, 0.982] | | 969 of 1,069 = 0.907 [0.889, 0.923] | | 3 of 3 runs |
+| eco-llm | 49 of 55 = 0.891 [0.800, 0.964] | [-0.055, 0.000] | 890 of 1,069 = 0.833 [0.810, 0.855] | **[-0.090, -0.058]** | 3 of 3 |
+| mooncake | 50 of 55 = 0.909 [0.836, 0.982] | [0.000, 0.000] | 970 of 1,069 = 0.907 [0.890, 0.924] | [-0.004, +0.006] | 3 of 3 |
+| hybrid-F-lhreq | 53 of 55 = 0.964 [0.909, 1.000] | [-0.018, +0.127] | 1,023 of 1,069 = 0.957 [0.944, 0.968] | **[+0.034, +0.067]** | 3 of 3 |
+| hybrid-F6-lhreq | 51 of 55 = 0.927 [0.855, 0.982] | [-0.055, +0.091] | 1,011 of 1,069 = 0.946 [0.932, 0.959] | **[+0.022, +0.057]** | 3 of 3 |
+
+Reading: on SS on time, hybrid-F and hybrid-F6 are ahead of b7 and eco-llm behind it, with CIs excluding zero; mooncake
+equals b7. On robot on time over feasible questions no arm differs from b7 with a CI excluding zero (55 feasible
+questions). Capacity is not reported until 18 devices is run (user ruling). Per-run D133 verdicts are in the table below,
+labelled: **per-run verdicts are fragile: 14-15 feasible questions per run tolerate at most one miss at 0.90.**
+
 ## HEADLINE AFTER D144 (2026-11-20 07:45)
 
 D144 (user, 2026-11-20): sizes 16 and 18 (20 saturated: b7 n20 s0 delivered 2 of 28 robots); a dropped or
@@ -43,7 +65,7 @@ rejection into a RECENT send, which the body builder then fills with the full hi
 Dashcams all meet in every cell. Seed 6 (baselines only so far): b7 14 of 14 feasible / 337 SS, eco-llm 13 of 14 /
 301, mooncake 14 of 14 / 334. No run is saturated by the 5 percent rule.
 
-**CAPACITY VERDICT, CORRECTED (user, 2026-11-20).** The earlier statement "no run meets capacity" was WRONG for D133:
+**PER-RUN D133 VERDICTS (fragile: 14-15 feasible questions per run tolerate at most one miss at 0.90; capacity itself is reported only once 18 devices is run).** Corrected 2026-11-20: The earlier statement "no run meets capacity" was WRONG for D133:
 it came from the scorer's `capacity_met`, which computes the robot target over ALL questions (`robot_pool_on_time /
 robot_pool_n`, e.g. hybrid-F s4 15 of 20 = 0.75). Under D133 the robot target is p 0.90 within 5 s over FEASIBLE
 questions (matched per opportunity_id, flash's feasibility rule); the all-questions figure is reported beside it and
