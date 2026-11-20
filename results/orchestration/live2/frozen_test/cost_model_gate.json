@@ -1,0 +1,231 @@
+{
+ "label": "POLICY v2 item 3: cost-model recalibration on committed live requests, with held-out checks by seed and by arm. CPU only; no live run.",
+ "at": "2026-11-20T15:24:58.290075",
+ "n_requests": 304867,
+ "n_cells": 23,
+ "arms": [
+  "always-cloud-fcfs",
+  "b7-edf-feasibility",
+  "eco-llm",
+  "edf",
+  "hybrid-F-lhreq",
+  "hybrid-F6-lhreq",
+  "llf",
+  "mooncake"
+ ],
+ "warm_requests": 720,
+ "splits": [
+  {
+   "name": "by_seed",
+   "fit_on": "seeds 0 and 4",
+   "test_on": "seeds 5 and 6",
+   "n_fit": 172564,
+   "model": {
+    "first_token": {
+     "intercept": -0.024136137190114988,
+     "per_uncached_token": 0.0002065331508925543,
+     "per_overlap": 0.03824974732907673
+    },
+    "decode": {
+     "intercept": 0.00889497319569817,
+     "per_overlap": 0.014458117276450544
+    }
+   },
+   "held_out": {
+    "split": "seeds 5 and 6",
+    "by_cache_state": {
+     "all": {
+      "n": 132303,
+      "first_token": {
+       "predicted_p50": 0.3217,
+       "actual_p50": 0.3044,
+       "ratio_p50": 1.0567,
+       "mae": 0.159
+      },
+      "decode": {
+       "predicted_p50": 0.0812,
+       "actual_p50": 0.0726,
+       "ratio_p50": 1.1178,
+       "mae": 0.0491
+      }
+     },
+     "cold": {
+      "n": 132303,
+      "first_token": {
+       "predicted_p50": 0.3217,
+       "actual_p50": 0.3044,
+       "ratio_p50": 1.0567,
+       "mae": 0.159
+      },
+      "decode": {
+       "predicted_p50": 0.0812,
+       "actual_p50": 0.0726,
+       "ratio_p50": 1.1178,
+       "mae": 0.0491
+      }
+     }
+    }
+   },
+   "in_sample": {
+    "split": "seeds 0 and 4",
+    "by_cache_state": {
+     "all": {
+      "n": 172564,
+      "first_token": {
+       "predicted_p50": 0.3217,
+       "actual_p50": 0.2858,
+       "ratio_p50": 1.1256,
+       "mae": 0.1524
+      },
+      "decode": {
+       "predicted_p50": 0.0667,
+       "actual_p50": 0.0639,
+       "ratio_p50": 1.0443,
+       "mae": 0.0495
+      }
+     },
+     "warm": {
+      "n": 720,
+      "first_token": {
+       "predicted_p50": 0.2949,
+       "actual_p50": 0.326,
+       "ratio_p50": 0.9045,
+       "mae": 0.0787
+      },
+      "decode": {
+       "predicted_p50": 0.0956,
+       "actual_p50": 0.0795,
+       "ratio_p50": 1.2024,
+       "mae": 0.0414
+      }
+     },
+     "cold": {
+      "n": 171844,
+      "first_token": {
+       "predicted_p50": 0.3217,
+       "actual_p50": 0.2854,
+       "ratio_p50": 1.127,
+       "mae": 0.1527
+      },
+      "decode": {
+       "predicted_p50": 0.0667,
+       "actual_p50": 0.0635,
+       "ratio_p50": 1.0513,
+       "mae": 0.0495
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "by_arm",
+   "fit_on": "non-hybrid arms",
+   "test_on": "the hybrids",
+   "n_fit": 203369,
+   "model": {
+    "first_token": {
+     "intercept": -0.023352456393481255,
+     "per_uncached_token": 0.00016474155910036246,
+     "per_overlap": 0.03807914865274331
+    },
+    "decode": {
+     "intercept": 0.004493371262291963,
+     "per_overlap": 0.01507074959014165
+    }
+   },
+   "held_out": {
+    "split": "the hybrids",
+    "by_cache_state": {
+     "all": {
+      "n": 101498,
+      "first_token": {
+       "predicted_p50": 0.2674,
+       "actual_p50": 0.2913,
+       "ratio_p50": 0.918,
+       "mae": 0.1043
+      },
+      "decode": {
+       "predicted_p50": 0.0648,
+       "actual_p50": 0.0482,
+       "ratio_p50": 1.3432,
+       "mae": 0.0384
+      }
+     },
+     "cold": {
+      "n": 101498,
+      "first_token": {
+       "predicted_p50": 0.2674,
+       "actual_p50": 0.2913,
+       "ratio_p50": 0.918,
+       "mae": 0.1043
+      },
+      "decode": {
+       "predicted_p50": 0.0648,
+       "actual_p50": 0.0482,
+       "ratio_p50": 1.3432,
+       "mae": 0.0384
+      }
+     }
+    }
+   },
+   "in_sample": {
+    "split": "non-hybrid arms",
+    "by_cache_state": {
+     "all": {
+      "n": 203369,
+      "first_token": {
+       "predicted_p50": 0.3055,
+       "actual_p50": 0.2994,
+       "ratio_p50": 1.0204,
+       "mae": 0.1771
+      },
+      "decode": {
+       "predicted_p50": 0.0798,
+       "actual_p50": 0.075,
+       "ratio_p50": 1.0646,
+       "mae": 0.0537
+      }
+     },
+     "warm": {
+      "n": 720,
+      "first_token": {
+       "predicted_p50": 0.2917,
+       "actual_p50": 0.326,
+       "ratio_p50": 0.8947,
+       "mae": 0.0802
+      },
+      "decode": {
+       "predicted_p50": 0.0949,
+       "actual_p50": 0.0795,
+       "ratio_p50": 1.1933,
+       "mae": 0.0414
+      }
+     },
+     "cold": {
+      "n": 202649,
+      "first_token": {
+       "predicted_p50": 0.3055,
+       "actual_p50": 0.2993,
+       "ratio_p50": 1.0206,
+       "mae": 0.1775
+      },
+      "decode": {
+       "predicted_p50": 0.0798,
+       "actual_p50": 0.075,
+       "ratio_p50": 1.0649,
+       "mae": 0.0538
+      }
+     }
+    }
+   }
+  }
+ ],
+ "_provenance": {
+  "git_commit": "a99c4607abe9dea696e3640255d5c91a421ed437",
+  "script": "cost_model_gate.py",
+  "model": "none",
+  "timestamp": "2026-11-20T15:25:00.084514",
+  "device": "cpu",
+  "n": 304867
+ }
+}
