@@ -36,13 +36,15 @@ from typing import Any, Dict, List, Optional
 HERE = Path(__file__).resolve().parent
 LIVE2 = HERE.parent
 REPO = LIVE2.parents[2]
-for p in (LIVE2, LIVE2 / "fleet", REPO / "experiments/orchestration/baselines",
+for p in (LIVE2, LIVE2 / "fleet", REPO / "experiments/orchestration",
+          REPO / "experiments/orchestration/baselines",
           REPO / "experiments/orchestration/sim", REPO / "experiments/lib"):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
 import costs as C                                                           # noqa: E402
 from interface import Action, Observation, RecallAction, StreamAction       # noqa: E402
+from policy.profiles import MissingEvidence                                  # noqa: E402
 
 DASH_DEADLINE_S = 1.0
 
@@ -131,12 +133,34 @@ class HybridArm:
 
     def __init__(self, name: str = "hybrid-base", c1=False, c2=False, c3=False, c4=False, c5=False, c6=False,
                  k_r: float = 1.0, m_d: float = 0.05, defs: str = "v1", reserve: Optional[bool] = None,
-                 throttle_floor: int = 2, c3_always: bool = False, workload: str = "mixed") -> None:
+                 throttle_floor: int = 2, c3_always: bool = False, workload: str = "mixed",
+                 k_r_frac: Optional[float] = None, quality_fit: str = "trace_mix") -> None:
         from arms_published import B7EdfFeasibilityArm
         self._b7 = B7EdfFeasibilityArm()
         self.name = name
         self.sw = dict(c1=bool(c1), c2=bool(c2), c3=bool(c3), c4=bool(c4), c5=bool(c5), c6=bool(c6))
         self.k_r, self.m_d = float(k_r), float(m_d)
+        # D143 ruling B: k_r scales with each device type's OWN deadline, k_r = 0.3 x deadline, so a
+        # robot gets 1.5 s and a single-shot request 0.6 s. The SAME rule expressed as a fraction;
+        # no new tuned number is introduced.
+        #
+        # Why it was needed. The flat 1.5 s was chosen against a 5 s robot deadline. Against a 2 s
+        # SS deadline the at-risk test, laxity < k_r + work, fires once slack falls below about
+        # 1.84 to 2.06 s depending on prompt size, which is 92 to 100 percent of an SS request's
+        # whole life: the flag switched on after roughly 0.1 s of queueing while measured cloud TTFT
+        # p50 was 0.3225 s against that 2 s deadline. A threshold whose window spans almost the
+        # entire lifetime of a device type is not a risk detector for that type, it is a constant,
+        # and it drove the dashcam throttle: at 12 devices 55 of 118 SS requests were flagged while
+        # only about 2 of the at-risk entities were robots, holding 1,516 dashcam submissions.
+        #
+        # ROBOTS ARE UNCHANGED, exactly. 0.3 x 5.0 is 1.5 in float64 with no representation error
+        # (both are 3/2), so every robot comparison is bit-identical to the flat 1.5 s and the whole
+        # effect of this ruling is confined to single-shot. That is what makes byte-identity with SS
+        # absent the right proof for it.
+        #
+        # None keeps the committed flat scalar, so every run before this parameter existed is
+        # unchanged.
+        self.k_r_frac = None if k_r_frac is None else float(k_r_frac)
         # D140 definition fixes. "v1" = the definitions screened first (labelled "old at-risk / old cap"):
         #   robot at risk when slack < k_r or laxity < 0; C5's cap holds every kind; reserved slot = C2.
         # "v2": robot at risk when LAXITY < k_r, laxity = deadline - now - predicted remaining work (committed
@@ -165,6 +189,13 @@ class HybridArm:
         if workload not in WORKLOADS:
             raise ValueError("workload must be one of %r" % (WORKLOADS,))
         self.workload = workload
+        # D143 ruling A: the C6 mirror's cross-tier comparator must read the LH-REQ table fitted on
+        # the DEV split when robots draw from LH-REQ. It is passed to the mirror at configure time,
+        # never swapped afterwards: the comment in arms_policy.live2_configure records what a
+        # post-configure swap did when it was measured (dashcam 0.0821 and 0 recalls served).
+        if quality_fit not in ("trace_mix", "lh_req_dev"):
+            raise ValueError("quality_fit %r must be 'trace_mix' or 'lh_req_dev'" % (quality_fit,))
+        self.quality_fit = quality_fit
         self.values = _quality_values(workload) if any(self.sw.values()) else None
         self._ss_tbl = _ss_table() if any(self.sw.values()) else {}
         self._ss_types = frozenset((self._ss_tbl.get("question_type_to_representation") or {}))
@@ -198,12 +229,15 @@ class HybridArm:
             import arms as A
             CH = _chooser_module()
             self._scorer = A.make_arm("policy-core")
+            self._scorer.quality_fit = self.quality_fit
             self._scorer.live2_configure(**kw)
             self._chooser = CH.Chooser(enabled=True, delta=0.0)
 
     def live2_describe(self) -> Dict[str, Any]:
         d = dict(self._b7.live2_describe()) if hasattr(self._b7, "live2_describe") else {}
-        d.update(hybrid=dict(self.sw, k_r=self.k_r, m_d=self.m_d, defs=self.defs, reserve=self.reserve,
+        d.update(hybrid=dict(self.sw, k_r=self.k_r, k_r_frac=self.k_r_frac, m_d=self.m_d,
+                             defs=self.defs, reserve=self.reserve, workload=self.workload,
+                             quality_fit=self.quality_fit,
                              throttle_floor=self.throttle_floor, c3_always=self.c3_always),
                  hybrid_name=self.name)
         return d
@@ -234,11 +268,11 @@ class HybridArm:
             qs = q.slack_s(now)
             slack = qs - est
             if self.defs == "v1":
-                risk = self.sw["c2"] and (qs < self.k_r or slack < 0)
+                risk = self.sw["c2"] and (qs < self._k_r_for(q) or slack < 0)
             else:
                 work = est + self._unbuilt_rebuild_s(q)
                 laxity = qs - work
-                risk = self.sw["c2"] and (laxity < self.k_r)
+                risk = self.sw["c2"] and (laxity < self._k_r_for(q))
             if est <= qs:
                 d = RecallAction(q.query_id, "CLOUD")
             elif est <= qs + self._b7.defer_s:
@@ -333,6 +367,29 @@ class HybridArm:
         unbuilt = max(int(q.readiness_tokens) - built, 0)
         return float(C.recall_ttft_s(unbuilt, "COLD")) if unbuilt > 0 else 0.0
 
+    def _k_r_for(self, q) -> float:
+        """This item's at-risk threshold. D143 ruling B: a fraction of the item's OWN deadline.
+
+        THE DEADLINE HORIZON IS deadline_s MINUS arrival_s, not deadline_s. `RecallQuery.deadline_s`
+        is an ABSOLUTE time on the run clock, as `slack_s(now) = deadline_s - now` shows; the trace
+        RECORD's field of the same name is the duration L. Same name, two definitions, which is
+        check 4's job. Multiplying the absolute time was measured, not reasoned about: it made
+        k_r grow with the clock, flagged effectively every robot at risk, and broke byte-identity
+        with the screened arm on 6,253 of 6,431 decisions. The horizon derived here is 5.0 s for a
+        robot and 2.0 s for a single-shot request, from the item's own two fields, so no new
+        constant and no per-type table is introduced.
+
+        A non-positive horizon falls back to the flat scalar and is COUNTED rather than silently
+        producing a threshold of zero, which would read as "never at risk".
+        """
+        if self.k_r_frac is None:
+            return self.k_r
+        horizon = float(q.deadline_s) - float(q.arrival_s)
+        if not horizon > 0.0:
+            self.stats["k_r_horizon_nonpositive"] += 1
+            return self.k_r
+        return self.k_r_frac * horizon
+
     def _throttle_on(self, now: float, pending_risk) -> bool:
         """C2 (v2) robot channel: is any robot question at risk now? Pending at-risk questions count; one released
         while at risk keeps the throttle on until it completes (live2_completed) or its deadline passes."""
@@ -401,6 +458,10 @@ class HybridArm:
             self._scorer.live2_roster(dict(self._roster))
             self._scorer.decide(obs)
             return True
+        except MissingEvidence:
+            # NOT swallowed. A missing committed quantity is a configuration error, not a transient:
+            # swallowing it counted C6 out of every -lhreq cell while the arm still reported c6=True.
+            raise
         except Exception as e:                                                  # noqa: BLE001
             self.stats["c6_scorer_error"] += 1
             self._c6_last_error = repr(e)[:300]
@@ -534,18 +595,26 @@ CONFIGS.update({
 # on a STRICT improvement in the rollout total (the comparison is `> delta`), so a tie keeps the
 # component's own proposal. With no committed scale for the objective's units, any non-zero delta would
 # be an invented number inside a frozen policy.
+#
+# D143 rulings A and B, applied here before the freeze.
+#   B: k_r_frac = 0.3, so k_r = 0.3 x each type's own deadline (robot 1.5 s, SS 0.6 s). k_r stays
+#      at 1.5 recorded, and 0.3 x 5.0 is exactly 1.5 in float64, so ROBOT decisions are unchanged
+#      and the whole effect is on single-shot.
+#   A: quality_fit = "lh_req_dev" on the "-lhreq" pair only, because the LH-REQ DEV table is the
+#      right source only when robots actually draw from LH-REQ. The bare pair keeps the trace-mix
+#      fit, which is correct for the MIXED workload it names.
 CONFIGS.update({
-    "hybrid-F": dict(c1=True, c2=True, c3=True, c5=True, k_r=1.5, defs="v2",
+    "hybrid-F": dict(c1=True, c2=True, c3=True, c5=True, k_r=1.5, k_r_frac=0.3, defs="v2",
                      throttle_floor=2, c3_always=False, c4=False),
-    "hybrid-F6": dict(c1=True, c2=True, c3=True, c5=True, k_r=1.5, defs="v2",
+    "hybrid-F6": dict(c1=True, c2=True, c3=True, c5=True, k_r=1.5, k_r_frac=0.3, defs="v2",
                       throttle_floor=2, c3_always=False, c4=False, c6=True),
 })
 # Both robot question sets selectable, as named arms so the workload is stated rather than inferred.
 # The "-lhreq" pair is what D142 item 1 evaluates; the bare pair carries the MIXED weighting and is
 # capability only.
 CONFIGS.update({
-    "hybrid-F-lhreq": dict(CONFIGS["hybrid-F"], workload="lh_req"),
-    "hybrid-F6-lhreq": dict(CONFIGS["hybrid-F6"], workload="lh_req"),
+    "hybrid-F-lhreq": dict(CONFIGS["hybrid-F"], workload="lh_req", quality_fit="lh_req_dev"),
+    "hybrid-F6-lhreq": dict(CONFIGS["hybrid-F6"], workload="lh_req", quality_fit="lh_req_dev"),
 })
 
 # C6 variants of every configuration (D138 follow-up): screening adds "<best>-c6" at 10 and 12 devices.

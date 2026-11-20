@@ -107,5 +107,14 @@
    "cross_tier_gain_pp": 24.7422,
    "representation_gap_pp": 23.7113
   }
- }
+ },
+ "_dev_coincidence": {
+  "fact": "on the DEV split, cloud RECENT and the device both score 3 of 28, 0.107143",
+  "same_questions": false,
+  "overlap": 1,
+  "of": 3,
+  "_note": "the aggregates agree and the ITEMS do not: the two score 3 correct each but share only 1 question, so the equality is arithmetic rather than agreement. It matters because the device entry in the policy's LH-REQ fit is this same 0.107143 standing in for device-on-D2, and a reader could take the coincidence as corroboration that the substitution is sound. It is not evidence either way.",
+  "_conclusion_that_does_hold": "at the AGGREGATE, which is what the policy consumes, a 32B restricted to the recent window scores the same as the 4B on these questions, so model size buys nothing at fixed representation here. That is the measured statement; 'the two models agree' is not."
+ },
+ "_device_entry_substitution": "the policy's device value for LH-REQ is the 4B x RECENT measurement. The consumer (rollout.py, the C6 mirror) asks for device accuracy on D2, and NO device-on-D2 result exists on these questions: StudyO-Q4 holds exactly three device arms, 4B-I x RECENT, 4B-T x RICH and 8B-I x RICH, and D87 fixes the comparator at 4B-I x RECENT. Declared, not implied."
 }

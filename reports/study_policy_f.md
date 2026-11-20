@@ -869,3 +869,410 @@ artifact of a check that always passes. The **negative** direction is also exerc
 ## Seeds and data
 
 Development seeds 0 and 4 only. No seed 1, 2 or 3. No HOLDOUT.
+
+## 10. D143 rulings A and B applied, and the SS table filled
+
+### 10.1 Ruling B: k_r scales with each type's deadline
+
+`k_r_frac = 0.3`, so the threshold is 0.3 x each item's own deadline: **1.5 s for a robot, 0.6 s for
+a single-shot request.** `k_r` stays recorded at 1.5. `k_r_frac = None` keeps the committed flat
+scalar, so every legacy arm and every run before this parameter existed is unchanged.
+
+**Robots are unchanged exactly, not approximately.** `0.3 * 5.0` is `1.5` in float64 with no
+representation error, both being 3/2, so every robot comparison is bit-identical to the flat
+threshold and the entire effect of the ruling is confined to single-shot. That is what makes
+byte-identity with SS absent the right proof for it, and section 11.1 runs it.
+
+**THE FIRST IMPLEMENTATION OF THIS RULING WAS WRONG, and the proof is what caught it.** The deadline
+horizon is `deadline_s` MINUS `arrival_s`, not `deadline_s`. On the policy's `RecallQuery`,
+`deadline_s` is an ABSOLUTE time on the run clock, as `slack_s(now) = deadline_s - now` shows, while
+the TRACE RECORD's field of the same name is the duration L. **Same name, two definitions, which is
+exactly what check 4 exists to find and I did not run it before coding.** Multiplying the absolute
+time made `k_r` grow with the clock: by t = 300 s the robot threshold was about 91 s against a 5 s
+deadline, so effectively every robot was flagged at risk for the whole run.
+
+The size of the break is the useful part of the record:
+
+| cell | screened decisions | frozen decisions | differing |
+|---|---|---|---|
+| seed 0, n=12 | 6,554 | 6,431 | **6,253** |
+| seed 0, n=16 | 8,087 | 8,026 | 7,691 |
+| seed 4, n=12 | 6,472 | 6,365 | 6,398 |
+| seed 4, n=16 | 7,872 | 7,837 | 7,808 |
+
+Nearly every decision differed and the decision COUNTS diverged, so this was not a threshold
+boundary effect that could be argued about. The control is what made it readable: the screened arm
+gave **6,554** decisions at seed 0 n=12, its own committed figure from section 7.2, so the control
+reproduced its committed value and the change was unambiguously mine.
+
+The fix derives the horizon from the item's own two fields, `deadline_s - arrival_s`, which gives
+exactly 5.0 for a robot and 2.0 for a single-shot request at any point in the run, so no new
+constant and no per-type table is introduced. A non-positive horizon falls back to the flat scalar
+and is COUNTED (`k_r_horizon_nonpositive`), rather than silently yielding a threshold of zero, which
+would read as "never at risk".
+
+**This is the register trap in its most ordinary form: a field can be correct and still be the wrong
+quantity for the question.** `deadline_s` was the right name, present, typed, non-zero and varying
+by condition, so Step 2 would have passed it. Only a byte-identity proof against a control with a
+committed value caught it.
+
+What it fixes, restated with the measurement that motivated it: against a 2 s SS deadline the flat
+1.5 s made the at-risk test fire once slack fell below 1.84 to 2.06 s depending on prompt size,
+which is **92 to 100 percent of an SS request's whole life**, while measured cloud TTFT p50 was
+0.3225 s. At 12 devices 55 of 118 SS requests were flagged while only about **2** of the at-risk
+entities were robots, holding **1,516** dashcam submissions. At 0.3 x deadline an SS request keeps
+about 1.05 s of un-flagged life instead of about 0.1 s.
+
+### 10.2 Ruling A: rc_accuracy reads the LH-REQ table, fitted on DEV
+
+`_LhReqFittedProfiles` in `arms_policy.py`, selected by `quality_fit="lh_req_dev"` on the `-lhreq`
+arms only, because the LH-REQ table is the right source only when robots actually draw from LH-REQ.
+The bare `hybrid-F` / `hybrid-F6` pair keeps the trace-mix fit, which is correct for the MIXED
+workload it names.
+
+| quantity | trace-mix (before) | LH-REQ DEV fit (after) |
+|---|---|---|
+| cloud D2 | 0.4286 | **0.2500** [0.127, 0.434] |
+| cloud RECENT | 0.3963 | **0.1071** [0.037, 0.272] |
+| **representation gap** | **+3.23 pp** | **+14.29 pp** |
+
+**The correction is 4.4x, not 7.3x.** The 7.3x figure in circulation compared trace-mix's +3.23 pp
+against the **all-97** aggregate's +23.71 pp. Ruling A fits on **DEV**, whose gap is +14.29 pp, so
+the ratio is 4.4x. Direction and conclusion are unchanged; the freeze carries 4.4x.
+
+**The quantity reaches the consumer with its declared type and value, checked rather than assumed.**
+Step 2 asks for the READ, not the place a value is set, so the mirror was inspected after configure:
+
+| arm | mirror profiles class | cloud D2 | cloud RECENT | device D2 | gap |
+|---|---|---|---|---|---|
+| `hybrid-F6-lhreq` | **`_LhReqFittedProfiles`** | 0.250000 | 0.107143 | 0.107143 | **+14.29 pp** |
+| `hybrid-F6` (MIXED) | `_MixWeightedProfiles` | 0.428600 | 0.396294 | 0.323078 | +3.23 pp |
+
+So the selection is live on the arm that needs it and inert on the one that does not. The device
+figures are worth noting beside each other: 0.3231 under trace-mix against 0.1071 on LH-REQ, because
+the LH-REQ questions are far harder for the device, which is the whole reason the workload needs its
+own table.
+
+**Selected at configure time, never swapped after.** `arms_policy.live2_configure` builds the
+engine, rollout and coordinator from `self.pf`, so swapping profiles afterwards leaves a hybrid
+object. That was measured once and produced dashcam 0.0821 with 0 recalls served at 16 devices
+against a true baseline of 0.8164 and 14 of 35, which is not the pre-fix policy but a broken one.
+
+**An unmeasured (representation, tier) RAISES rather than falling back.** A silent fallback to the
+trace-mix value would mix two question populations inside one comparison, which is the failure this
+class exists to remove. Verified: `RICH` at tier `cloud` raises.
+
+**THE DEVICE ENTRY IS A DECLARED SUBSTITUTION.** The consumer, `rollout.py:609-610`, asks for device
+accuracy on **D2**. No device-on-D2 result exists on these questions: StudyO-Q4 holds exactly three
+device arms, **4B-I x RECENT, 4B-T x RICH and 8B-I x RICH**, and D87 fixes the comparator at
+4B-I x RECENT. So the ruled 0.1071 is the 4B x RECENT figure standing in for device-on-D2. It is
+labelled in the table and in the class, not implied.
+
+**One coincidence that must not be read as corroboration.** On DEV, cloud RECENT and the device both
+score **3 of 28**. They are **not the same three questions**: the overlap is **1 of 3**. So the
+aggregates agree and the items do not, and the equality is arithmetic rather than agreement. The
+statement that does hold is the aggregate one, which is what the policy consumes: a 32B restricted
+to the recent window scores the same as the 4B on these questions, so model size buys nothing at
+fixed representation here. "The two models agree" is not supported.
+
+### 10.3 Two numbers for one axis, reported rather than reconciled
+
+| consumer | robot quality value | source |
+|---|---|---|
+| **C1's ordering index** | **0.13204** | `_quality_values("lh_req")`: the committed RC table re-weighted by the LH-REQ category mix, per **D142 item 2** |
+| **C6's mirror** | **0.142857** | the **DEV-fitted LH-REQ** cross-tier gain, per **D143 ruling A** |
+
+One policy now carries **two numbers for the robot quality axis**, from two different question
+populations, differing by 1.08x. This is left as the two rulings specify and marked **PROVISIONAL**:
+ruling A names `rc_accuracy` specifically, and D142 item 2 already ruled on C1's table, so moving C1
+as well would be overriding D142 item 2 rather than applying D143. **Worth settling**, but it does
+not change any ordering, and 1.08x is far smaller than the 4.4x the ruling removed.
+
+### 10.4 The SS quality table, filled from the SS2 DEV split
+
+`results/orchestration/prof1/ss_quality.json`, still a declared input file, so this was a data update
+and the policy code did not change. `refspatial` and `realworldqa` entries were **required**, not
+optional: an SS question's `category` is its dataset name, `_ss_types` is built from this file's
+keys, and `representation_for` RAISES on an unknown type, so without them the SS branch never fires
+and an SS question cannot execute at all.
+
+| dataset | metric | n (DEV) | device | cloud 32B | **gain (DEV fit)** | gain on held-out EVAL | DEV / EVAL |
+|---|---|---|---|---|---|---|---|
+| refspatial | point-in-mask | 83 | 0.2048 | 0.3922 | **+0.1874** | +0.0919 | **2.04x** |
+| realworldqa | exact match | 229 | 0.6419 | 0.7249 | **+0.0830** | +0.0466 | **1.78x** |
+
+**The DEV fit overstates what the held-out part shows, by about 2x on both datasets.** That is a
+property of fitting on 83 and 229 questions, not a defect in the split, and it means C1 values an SS
+request above what EVAL supports. It is reported rather than corrected, because correcting it with
+the EVAL number would be fitting on the scored set, which D6 forbids. The EVAL figures are recorded
+in the file under a key marked **not for the policy**.
+
+`vizwiz` and `egothink` are **retained but unused**, and say so: D143 fixes the pool at RefSpatial
+and RealWorldQA, so an SS category is never `vizwiz` or `egothink` unless `ss_question_set="ss1"` is
+selected, in which case those entries are still **placeholders** and anything reading them must say
+so. `_placeholder` is now False with an explicit `_placeholder_scope`, because the part of the table
+the policy draws from is measured while two retained entries are not.
+
+### 10.5 The SS ordering has flipped, and the metric incomparability now binds
+
+| device type | C1 value, before (placeholder) | C1 value, now |
+|---|---|---|
+| robot | 0.10627 | 0.13204 |
+| dashcam | 0.09000 | 0.09000 |
+| SS refspatial | **0.00100** (floor) | **0.18742** |
+| SS realworldqa | **0.00100** (floor) | **0.08297** |
+
+Under the placeholder, cloud equalled device, the gain was 0, C1's SS value fell to the 1e-3 floor
+and **C1 ranked every single-shot request last at about 106 to 1 against a robot.** With the measured
+DEV values the gains are positive and **refspatial now outranks a robot.** Every SS cell measured
+under the placeholder is superseded, exactly as predicted when the placeholder shipped.
+
+**Check 4 now changes an ORDERING rather than only a reported number.** C1's index compares these
+four values as if they shared a unit, and they do not: the robot and dashcam terms are MCQ-accuracy
+and challenge-mAP differences, refspatial is a point-in-mask fraction, realworldqa is exact match. A
++0.187 point-in-mask gain is **not** "more valuable" than a +0.132 MCQ-accuracy gain in any measured
+sense; it is a different quantity. **The ordering C1 produces is therefore a convention, and it must
+not be reported as evidence that single-shot work matters more than robot recall.** That caveat was
+already in the file as `_metric_incomparability` while the SS value sat on the floor and the
+ordering was insensitive to it. Filling the table is what made it bind.
+
+### 10.6 test_hybrid.py is now real pytest, and the gap that read as a pass is closed
+
+Five `test_*` functions, all passing in 6.2 s, every one writing only to pytest's `tmp_path`:
+
+| test | what it asserts |
+|---|---|
+| `test_base_identity_matches_b7` | **the one property that stops the freeze**: `hybrid-base` byte-identical to committed `b7-edf-feasibility` on seed 0 n=6 and seed 4 n=8 |
+| `test_ss_absent_identity` | at ratio 50:50 the SS wiring is inert: `ss_seen == 0` and zero differing decisions against an emptied SS table |
+| `test_frozen_configs_registered_and_construct` | all four frozen arms in `CONFIGS` and `arms.ARMS`, constructing with the frozen settings |
+| `test_frozen_config_moves_decisions` | Step 2b: `hybrid-F` differs from `hybrid-base`, **80 differing decisions** at seed 0 n=6 |
+| `test_lh_req_workload_changes_the_value_term` | the workload switch reaches the value term: 0.10627 mixed against 0.13204 lh_req, both non-zero and unequal, unknown workload raises |
+
+**The defect this closes.** The file's functions were `dry`, `identity`, `moves` and `pairs`, none
+matching `test_*`, so pytest collected **zero tests and exited reporting success**. Anyone running
+the suites over `live2/hybrid/` saw no failure and concluded the arm was covered, when nothing in
+the pytest suites exercised `hybrid_arm.py` at all, including the SS wiring and the workload switch.
+A check that cannot fail.
+
+**The committed CLI still works unchanged**, so no driver script breaks: `identity`, `moves` and
+`pairs` keep their `out_dir` default and their existing behaviour, with the shared work refactored
+into helpers that take an output directory. The CLI's `identity()` was **not** run against its
+default, because that writes into `results/orchestration/live2/hybrid/` and would overwrite the
+H100's committed `hybrid_identity.json`, `hybrid_moves.json` and `hybrid_pairs.json` with a
+regeneration from a modified tree. Exercised with the output redirected instead: all four committed
+CLI cells identical, 773 / 1,212 / 978 / 1,538 decisions.
+
+Two scope limits, stated rather than left to inference. The pytest tests do not cover the C6 chooser
+beyond construction and a smoke call, and they do not cover the three-class 40:40:20 ratio with SS
+devices present; an SS-present move proof needs a cell large enough to deal assistive devices, and
+it is section 11.2's job rather than the unit suite's. Separately, the CLI `pairs()` reports 0
+differing for all five v1 screening comparisons at a tiny cell (seed 0, n=6) where the committed
+proof used n=12, so **small cells are not sufficient for the v1 pair proofs** and the unit test
+asserts only on `hybrid-F` against base, where the difference is present at n=6.
+
+`fleet/tests/test_live2_fleet.py` still reports **234 of 234**.
+
+## 11. The freeze proofs, and three findings that change what the freeze means
+
+Four proofs, in `experiments/orchestration/live2/hybrid/policy_f_proofs.py`, output in
+`results/orchestration/live2/hybrid/policy_f_proofs.json`. Every cell here is a DRY run: no GPU, no
+server, stub bridge. They are decision-path proofs, so no timing or quality number in this section
+is a measurement of anything.
+
+Proof 4 did not exist when this section was planned. It was added because proof 2's C1 row came back
+zero, and the only honest way to classify that zero was to test it.
+
+### 11.1 Proof 1: ruling B is inert on robots
+
+`hybrid-F` against the screened `hybrid2-c1c2k15c3c5`, two-type cells (50:50, no SS), seeds 0 and 4,
+n = 12 and 16, 600 s. **All four byte-identical**: same decision counts (6,554 / 8,087 / 6,472 /
+7,872), same digests, 0 differing, `ss_seen` 0 in every cell.
+
+0.3 x 5.0 is exactly 1.5 in float64, so a robot's at-risk threshold is bit-identical under the
+ruling and the whole effect is confined to single-shot. This is what lets the screened seed-0 and
+seed-4 numbers carry over to the frozen arm unchanged. The comparison is order-sensitive on purpose:
+byte-identity including log order is the claim being made.
+
+### 11.2 Proof 2: Step 2b per component, on a three-type LH-REQ cell
+
+`hybrid-F6-lhreq`, seed 0, n = 20, 1200 s, 40:40:20, LH-REQ robots and SS2 single-shot. Each
+component switched off against the full arm, 16,361 decisions in the base log.
+
+| component | decisions moved | positional mismatch | reading |
+|---|---|---|---|
+| C1 ordering | **0** | 0 | ABSENT LINK, cancelled by geometry. See 11.4 |
+| C2 at-risk and throttle | 712 | 12,071 | moves decisions |
+| C3 representation | 459 | 6,026 | moves decisions |
+| C5 cap and AIMD | 461 | 11,986 | moves decisions |
+| C6 counterfactual chooser | **3** | 11,794 | moves decisions, barely. See 11.3 |
+
+**The two columns are different quantities and only the first answers Step 2b.** `differing` is a
+multiset difference over (period, action kind, opportunities, representation, defer_s): a
+reordering scores 0, and an admit that became a defer scores 2. `differing_positional` is the
+original order-sensitive count, which counts log positions that stopped lining up, so one early
+divergence desynchronises everything after it. The two differ by 17x on C2 and by 3,931x on C6. The
+positional count is kept beside the setwise one only to show how far apart they are; it is the right
+metric for 11.1 and the wrong metric here.
+
+That defect was mine and it was found by proof 4, not by inspection: the value control's only
+non-zero cell, 2 of 16,361, turned out to be two `release_recall` rows swapping places at t = 527.0
+with both items released either way. A number that survives every arithmetic check while answering a
+different question is the failure this report has hit three times now.
+
+C3's first difference is a genuine kind change (`release_recall` with representation RECENT against
+`defer` at defer_s 0.5, same opportunity `opp0002665`), so C3's move proof does not rest on the
+count alone.
+
+### 11.3 C6 was dead in every -lhreq cell, and the cause was ruling A plus a swallowed exception
+
+Before the fix, on this cell: `c6_scorer_error` **251 of 251** periods that had recall work,
+`c6_calls` **0**, and `hybrid-F6-lhreq` byte-identical to `hybrid-F-lhreq` at all six dry smoke
+cells, while `live2_describe` still reported `c6=True` and the arm still carried the F6 name.
+
+The exception being thrown away:
+
+```
+MissingEvidence: the LH-REQ DEV fit carries no entry for representation 'N1' at tier 'device',
+and this class deliberately does NOT fall back to the trace-mix table
+```
+
+`_LhReqFittedProfiles` (section 10.2) mapped four (representation, tier) pairs. The escalation path
+reads **five**: cloud RICH, cloud RECENT, cloud D2, device D2, device N1. Four of the twelve
+question types map to RICH (`counting_objects_events`, `object_comparison`,
+`temporal_ordering_recognition`, `visual_detail_recall`), and `_device_accuracy` asks for N1 at the
+device tier whenever a question's temporal reference falls outside the device's window. The class
+raises on both by design, to refuse mixing two question populations inside one comparison.
+`_c6_prepare` caught that in a bare `except Exception`, counted it, and returned False, so `c6_live`
+was False on every period.
+
+**This is the declaration-read-as-observation family seen from the other side.** The usual shape is
+a field that is written and never read. Here the component was configured, named, described and
+counted, and the thing that disabled it was recorded in a counter nobody had asked for. The arm
+reported itself as F6 throughout.
+
+Two fixes. `MissingEvidence` is now re-raised rather than counted: a missing committed quantity is a
+configuration error, not a transient, and swallowing it is what converted a bug into a non-event.
+And the two missing conditions resolve, by substitution (11.5).
+
+After the fix, same cell: `c6_calls` **254**, `c6_dev_send_to_hold` **6**, `c6_scorer_error`
+**0**, and C6 moves **3** decisions.
+
+**Three decisions in 1200 s, for a full policy-core mirror evaluation every period.** C6 clears
+Step 2b and it clears the port rule that an arm's characteristic decision must occur at least once
+(254 calls, 6 deviations). It does not clear any bar about being worth its cost, and section 7.3
+already recorded a decision-period breach at 32 devices. Whether to pay that cost for 3 decisions is
+a design question for the user, and it bears directly on whether the `_c6_prepare` speed fix is
+worth doing at all.
+
+Two regression tests now exist, in `test_hybrid.py`:
+
+- `test_c6_actually_fires_on_the_lh_req_workload`: asserts `c6_scorer_error == 0`, `c6_calls > 0`,
+  and that F6 differs from F. This is the port rule applied to a component.
+- `test_lh_req_dev_fit_covers_every_condition_the_policy_reads`: iterates `_RC_TABLE_NAME`, requires
+  every one of the five conditions to resolve, and requires every stand-in to be declared in
+  `_SUBSTITUTED`. This one would have caught the defect at the first cell.
+
+### 11.4 Proof 4: the value term is decision-inert, so ruling A prices nothing
+
+The value and quality tables are written at `hybrid_arm.py:260` (dashcam) and `:311-312` (recall and
+SS), and read in exactly one place: C1's ordering index at `:317`. So if C1 cannot move a decision,
+ruling A has no path to one. Four perturbations, seed 0, n = 20, 1200 s, both frozen arms:
+
+| perturbation | decisions moved (F) | decisions moved (F6) |
+|---|---|---|
+| every value equal (0.1) | **0** | **0** |
+| dashcam 100x the others | **0** | **0** |
+| robot 10,000x dashcam | **0** (2 positional) | **0** (2 positional) |
+| SS 1000x | **0** | **0** |
+
+Flattening the whole table to one constant is the canonical Step 4 control for a quality-driven
+claim, and it moves nothing. The 2 positional entries are the transposition described in 11.2.
+
+**Why it cancels, structurally rather than at this cell.** Dashcam items all carry one constant
+value (`values["dashcam"]`) and one constant work (`epi_s`), so the index
+`value / max(slack, 0.1) / work` is a monotone function of slack, and slack is monotone in the
+deadline: C1's dashcam order is IDENTICALLY EDF order, and the tiebreak `(dl, id)` is the same on
+both branches. Every recall item is kept unconditionally by `_cap_dashcam_only` (`:436-437`) and
+never consumes the dashcam budget, so C1's placement of robot and SS items reaches only the emitted
+action sequence, the `order` channel already recorded in this project as unexpressible.
+
+So the classification is **cancelled by geometry** on the dashcam axis and **unexpressible** on the
+recall axis, not unexercised. The first draft of proof 2 labelled it "category 4, unexercised"; that
+was text, not a measurement, and it was wrong.
+
+**What this costs.** Three things recorded earlier in this report describe a quantity the frozen
+policy does not read:
+
+- ruling A's swap of `rc_accuracy` to the LH-REQ DEV fit (10.2);
+- the 4.4x correction to the half-one mispricing, which the freeze was to carry;
+- the SS ordering flip that put refspatial (0.18742) above a robot (0.13204) (10.5).
+
+None of them can change a decision in `hybrid-F` or `hybrid-F6`. The ordering flip in particular
+must not be read as evidence that single-shot work matters more than robot recall: it is a
+convention attached to an inert axis, and 10.5's warning now has a measurement behind it.
+
+Making the value term bind is a policy change, not a data update: C1's index would have to reach a
+selection that is actually contested. That is the user's decision and nothing here anticipates it.
+
+### 11.5 Two substitutions, PROVISIONAL
+
+The LH-REQ DEV split measures three conditions (cloud_D2 25.000 %, cloud_RECENT 10.714 %,
+device_4B_RECENT 10.714 %, all on 28 questions). The policy reads five. The two stand-ins:
+
+| condition | stands in as | direction of the error |
+|---|---|---|
+| cloud RICH | cloud_D2 | D2 is the fullest cloud condition measured and RICH is at least as informative, so this credits the cloud with LESS |
+| device N1 | device_4B_RECENT | N1 is the device WITHOUT history coverage, so its true accuracy is at most the covered device's: this credits the device with MORE |
+
+Both lean the same way, toward a smaller cross-tier gain, so neither can manufacture an escalation
+advantage. That is the same direction `escalation.py:158-160` argues for its own coverage default.
+Recorded in `_SUBSTITUTED` and asserted by the test in 11.3. The alternative is for the LH-REQ fit
+to measure RICH and the uncovered device, which is new measurement rather than a mapping.
+
+Given 11.4, these substitutions currently feed only the C6 mirror, since the hybrid arm's own value
+table is inert.
+
+### 11.6 Proof 3: dry smoke, 30 of 30 cells
+
+16 / 20 / 32 devices x seeds 0 and 4 x `hybrid-F-lhreq`, `hybrid-F6-lhreq`, `b7-edf-feasibility`,
+`eco-llm`, `mooncake`, all at 1200 s and 40:40:20. Every cell ran; no errors. **Dry-run screening,
+not a result.**
+
+F and F6 differ at five of six cells by 18, 1, 38, 260 and 6 positional decisions. They are
+identical at **n = 16, seed 4**, so C6 is an absent link AT THAT CELL. That is a per-cell statement
+and not the global one the pre-fix run appeared to show.
+
+### 11.7 The SS at-risk flag is now constant at never
+
+`ss_at_risk` is **0** in all six smoke cells, against 356 to 717 SS requests seen per cell.
+
+Ruling B set the SS threshold to 0.3 x 2.0 s = 0.6 s. The flag the ruling was written to fix was
+constant at always-on over 92 to 100 % of an SS request's life; it is now constant at never. A
+constant where a distribution is expected is consistency check 3, and this is the same defect with
+the sign reversed. C2's single-shot path (D142 item 3) exists to throttle dashcam frames for a
+near-deadline SS request, and at 0.6 s against a 2 s deadline it does not fire.
+
+Nothing was changed in response: the ruling is the user's and the finding is recorded rather than
+acted on.
+
+### 11.8 Controls and what is still open
+
+`fleet/tests/test_live2_fleet.py` **234 of 234** through its own runner, so the two-type path,
+including its scorer and attainment checks, is unchanged by everything in this section.
+`test_hybrid.py` **7 of 7**, after fixing an import-order fragility in
+`test_lh_req_workload_changes_the_value_term` that let it pass only when another test had already
+inserted the hybrid directory into `sys.path`.
+
+Open for the user, each affecting what this freeze means rather than whether it holds:
+
+1. **Grid size.** 20 devices offers 14.67 req/s of dashcam monitor load, 97 % of the committed
+   15.10 req/s one-frame closed-loop peak (StudyD7b); 16 offers 11.01 req/s, 73 %. The H100's
+   transport errors at 20 are an overload signature with two precedents (StudyMOT1, StudyD7), not a
+   harness defect. 16 and 18 (7 dashcam devices, 12.83 req/s, 85 %) would both be feasible, and 18
+   holds the same pooled robot counts as 16 (24 / 20 / 25 / 20 at seeds 0 / 4 / 5 / 6). The size axis
+   was fixed from question counts alone, which is the demand half of D97 and not the capacity half.
+2. **Over-context counting.** One LH-REQ session (1848337166005249) carries 33,781 history tokens at
+   a question, above the 32,768 context, at seed 0 at both ruled sizes and at neither size at seed 4.
+   StudyRH8 and StudyRH5 excluded such questions from the denominator, but did so because they were
+   identical in every policy; here they are not, because the arm chooses the representation.
+3. **Whether an inert value term is acceptable in a frozen policy** (11.4).

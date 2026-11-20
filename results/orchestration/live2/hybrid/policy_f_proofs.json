@@ -1,0 +1,926 @@
+{
+ "proof1_ruling_b_inert_on_robots": {
+  "question": "is hybrid-F still byte-identical to the screened hybrid2-c1c2k15c3c5 with SS absent, after D143 ruling B replaced the flat k_r with 0.3 x deadline?",
+  "why": "0.3 x 5.0 is exactly 1.5 in float64, so a robot's threshold is bit-identical and the ruling should touch single-shot only. This is what lets every screened seed-0 and seed-4 number carry over to hybrid-F unchanged.",
+  "rows": [
+   {
+    "seed": 0,
+    "n": 12,
+    "ratio": "50:50",
+    "screened_decisions": 6554,
+    "frozen_decisions": 6554,
+    "screened_digest": "0c539df022e17471",
+    "frozen_digest": "0c539df022e17471",
+    "differing": 0,
+    "identical": true,
+    "ss_seen": 0
+   },
+   {
+    "seed": 0,
+    "n": 16,
+    "ratio": "50:50",
+    "screened_decisions": 8087,
+    "frozen_decisions": 8087,
+    "screened_digest": "fb61a47531efba6c",
+    "frozen_digest": "fb61a47531efba6c",
+    "differing": 0,
+    "identical": true,
+    "ss_seen": 0
+   },
+   {
+    "seed": 4,
+    "n": 12,
+    "ratio": "50:50",
+    "screened_decisions": 6472,
+    "frozen_decisions": 6472,
+    "screened_digest": "85aa9ab3a1816327",
+    "frozen_digest": "85aa9ab3a1816327",
+    "differing": 0,
+    "identical": true,
+    "ss_seen": 0
+   },
+   {
+    "seed": 4,
+    "n": 16,
+    "ratio": "50:50",
+    "screened_decisions": 7872,
+    "frozen_decisions": 7872,
+    "screened_digest": "3d3aaa6e8273883c",
+    "frozen_digest": "3d3aaa6e8273883c",
+    "differing": 0,
+    "identical": true,
+    "ss_seen": 0
+   }
+  ],
+  "all_identical": true
+ },
+ "proof2_step2b_per_component": {
+  "cell": {
+   "arm": "hybrid-F6-lhreq",
+   "seed": 0,
+   "n_devices": 20,
+   "ratio": "40:40:20",
+   "run_s": 1200.0,
+   "robot_question_set": "lh_req",
+   "ss_question_set": "ss2"
+  },
+  "question": "does each component move a decision on a three-type LH-REQ cell?",
+  "rule": "an identical log is an ABSENT LINK, never a negative (CLAUDE.md Step 2b)",
+  "rows": [
+   {
+    "component": "c1",
+    "decisions_on": 16362,
+    "decisions_off": 16362,
+    "differing": 0,
+    "differing_positional": 0,
+    "register": "`differing` is a MULTISET difference over (period, kind, opportunities, representation, defer_s): a reordering scores 0. `differing_positional` is the old order-sensitive count, kept only to show how far the two diverge.",
+    "moves_decisions": false,
+    "classification": "ABSENT LINK, category 1, CANCELLED BY GEOMETRY, and structural rather than specific to this cell. C1's only read is the ordering index at hybrid_arm.py:317, fed by the value field written at :260 (dashcam) and :311-312 (recall and SS). Dashcam items carry ONE constant value and ONE constant work, so the index is a monotone function of slack and slack is monotone in the deadline: C1's dashcam order is IDENTICALLY EDF order. Every recall item is kept unconditionally by _cap_dashcam_only (:436-437), so C1's placement of robot and SS items reaches only the emitted action sequence, the `order` channel this project already records as unexpressible. CONSEQUENCE: the value / quality table has no other read, so D143 ruling A cannot move a decision in hybrid-F. See proof 4.",
+    "first_difference": null
+   },
+   {
+    "component": "c2",
+    "decisions_on": 16362,
+    "decisions_off": 16370,
+    "differing": 712,
+    "differing_positional": 12071,
+    "register": "`differing` is a MULTISET difference over (period, kind, opportunities, representation, defer_s): a reordering scores 0. `differing_positional` is the old order-sensitive count, kept only to show how far the two diverge.",
+    "moves_decisions": true,
+    "classification": "moves decisions",
+    "first_difference": {
+     "on": {
+      "H": null,
+      "arm_version": "live2-arm-1.0",
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_monitor",
+      "mu": null,
+      "note": null,
+      "opportunity_ids": [
+       "opp0000062"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 14.5,
+      "traffic_mix": {
+       "monitor": 0,
+       "piece": 0,
+       "recall": 0,
+       "whole": 0
+      }
+     },
+     "off": {
+      "H": null,
+      "arm_version": "live2-arm-1.0",
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_monitor",
+      "mu": null,
+      "note": null,
+      "opportunity_ids": [
+       "opp0000062"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 14.3,
+      "traffic_mix": {
+       "monitor": 2,
+       "piece": 0,
+       "recall": 0,
+       "whole": 0
+      }
+     }
+    }
+   },
+   {
+    "component": "c3",
+    "decisions_on": 16362,
+    "decisions_off": 16201,
+    "differing": 459,
+    "differing_positional": 6026,
+    "register": "`differing` is a MULTISET difference over (period, kind, opportunities, representation, defer_s): a reordering scores 0. `differing_positional` is the old order-sensitive count, kept only to show how far the two diverge.",
+    "moves_decisions": true,
+    "classification": "moves decisions",
+    "first_difference": {
+     "on": {
+      "H": null,
+      "arm_version": "live2-arm-1.0",
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_recall",
+      "mu": null,
+      "note": "session=robo004|s001|677637195018930_start_0.0_end_599.98",
+      "opportunity_ids": [
+       "opp0010368"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": "RECENT",
+      "representation_defaulted": false,
+      "t": 691.2,
+      "traffic_mix": {
+       "monitor": 5,
+       "piece": 0,
+       "recall": 0,
+       "whole": 0
+      }
+     },
+     "off": {
+      "H": null,
+      "arm_version": "live2-arm-1.0",
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_recall",
+      "mu": null,
+      "note": "session=robo004|s001|677637195018930_start_0.0_end_599.98",
+      "opportunity_ids": [
+       "opp0010368"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": "D2",
+      "representation_defaulted": true,
+      "t": 691.2,
+      "traffic_mix": {
+       "monitor": 5,
+       "piece": 0,
+       "recall": 0,
+       "whole": 0
+      }
+     }
+    }
+   },
+   {
+    "component": "c5",
+    "decisions_on": 16362,
+    "decisions_off": 16361,
+    "differing": 461,
+    "differing_positional": 11986,
+    "register": "`differing` is a MULTISET difference over (period, kind, opportunities, representation, defer_s): a reordering scores 0. `differing_positional` is the old order-sensitive count, kept only to show how far the two diverge.",
+    "moves_decisions": true,
+    "classification": "moves decisions",
+    "first_difference": {
+     "on": {
+      "H": null,
+      "arm_version": "live2-arm-1.0",
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_monitor",
+      "mu": null,
+      "note": null,
+      "opportunity_ids": [
+       "opp0000062"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 14.5,
+      "traffic_mix": {
+       "monitor": 0,
+       "piece": 0,
+       "recall": 0,
+       "whole": 0
+      }
+     },
+     "off": {
+      "H": null,
+      "arm_version": "live2-arm-1.0",
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_monitor",
+      "mu": null,
+      "note": null,
+      "opportunity_ids": [
+       "opp0000062"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 14.3,
+      "traffic_mix": {
+       "monitor": 2,
+       "piece": 0,
+       "recall": 0,
+       "whole": 0
+      }
+     }
+    }
+   },
+   {
+    "component": "c6",
+    "decisions_on": 16362,
+    "decisions_off": 16361,
+    "differing": 3,
+    "differing_positional": 11794,
+    "register": "`differing` is a MULTISET difference over (period, kind, opportunities, representation, defer_s): a reordering scores 0. `differing_positional` is the old order-sensitive count, kept only to show how far the two diverge.",
+    "moves_decisions": true,
+    "classification": "moves decisions",
+    "first_difference": {
+     "on": {
+      "H": null,
+      "arm_version": "live2-arm-1.0",
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": 0.5,
+      "desired_tier": null,
+      "kind": "defer",
+      "mu": null,
+      "note": null,
+      "opportunity_ids": [
+       "opp0004580"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 312.8,
+      "traffic_mix": {
+       "monitor": 1,
+       "piece": 0,
+       "recall": 1,
+       "whole": 0
+      }
+     },
+     "off": {
+      "H": null,
+      "arm_version": "live2-arm-1.0",
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_recall",
+      "mu": null,
+      "note": "session=asst000|ss0031",
+      "opportunity_ids": [
+       "opp0004580"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": "D2",
+      "representation_defaulted": true,
+      "t": 312.8,
+      "traffic_mix": {
+       "monitor": 1,
+       "piece": 0,
+       "recall": 1,
+       "whole": 0
+      }
+     }
+    }
+   }
+  ],
+  "moved": [
+   "c2",
+   "c3",
+   "c5",
+   "c6"
+  ],
+  "absent": [
+   "c1"
+  ]
+ },
+ "proof3_smoke": {
+  "label": "DRY-RUN SCREENING, not a result. No GPU, no server, stub bridge; decision-path only, so no timing or quality number here is meaningful.",
+  "cells": [
+   {
+    "arm": "hybrid-F-lhreq",
+    "seed": 0,
+    "n": 16,
+    "decisions": 13564,
+    "digest": "7444ca2d105c7de6",
+    "ok": true,
+    "ss_seen": 356,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": 705,
+    "throttle_periods": 127
+   },
+   {
+    "arm": "hybrid-F6-lhreq",
+    "seed": 0,
+    "n": 16,
+    "decisions": 13582,
+    "digest": "9edd630c982f1507",
+    "ok": true,
+    "ss_seen": 356,
+    "ss_at_risk": null,
+    "c6_calls": 371,
+    "c6_deviations": null,
+    "throttled_dash": 512,
+    "throttle_periods": 92
+   },
+   {
+    "arm": "b7-edf-feasibility",
+    "seed": 0,
+    "n": 16,
+    "decisions": 13623,
+    "digest": "c7b926061c41de35",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "eco-llm",
+    "seed": 0,
+    "n": 16,
+    "decisions": 13621,
+    "digest": "f9840e54f8f5a8d1",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "mooncake",
+    "seed": 0,
+    "n": 16,
+    "decisions": 14001,
+    "digest": "c712f6949813ee8d",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "hybrid-F-lhreq",
+    "seed": 4,
+    "n": 16,
+    "decisions": 13525,
+    "digest": "ec49e6d5a3b5454f",
+    "ok": true,
+    "ss_seen": 357,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": 687,
+    "throttle_periods": 124
+   },
+   {
+    "arm": "hybrid-F6-lhreq",
+    "seed": 4,
+    "n": 16,
+    "decisions": 13525,
+    "digest": "ec49e6d5a3b5454f",
+    "ok": true,
+    "ss_seen": 357,
+    "ss_at_risk": null,
+    "c6_calls": 354,
+    "c6_deviations": null,
+    "throttled_dash": 687,
+    "throttle_periods": 124
+   },
+   {
+    "arm": "b7-edf-feasibility",
+    "seed": 4,
+    "n": 16,
+    "decisions": 13570,
+    "digest": "67c8da3057a09aff",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "eco-llm",
+    "seed": 4,
+    "n": 16,
+    "decisions": 13570,
+    "digest": "950b9b5a30b4f610",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "mooncake",
+    "seed": 4,
+    "n": 16,
+    "decisions": 13947,
+    "digest": "22aaec1fc4790f66",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "hybrid-F-lhreq",
+    "seed": 0,
+    "n": 20,
+    "decisions": 16361,
+    "digest": "5021e48c40b32730",
+    "ok": true,
+    "ss_seen": 477,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": 1549,
+    "throttle_periods": 235
+   },
+   {
+    "arm": "hybrid-F6-lhreq",
+    "seed": 0,
+    "n": 20,
+    "decisions": 16362,
+    "digest": "5cf30a4f47ac42e4",
+    "ok": true,
+    "ss_seen": 478,
+    "ss_at_risk": null,
+    "c6_calls": 498,
+    "c6_deviations": null,
+    "throttled_dash": 1549,
+    "throttle_periods": 235
+   },
+   {
+    "arm": "b7-edf-feasibility",
+    "seed": 0,
+    "n": 20,
+    "decisions": 16382,
+    "digest": "5c3d7546725156ad",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "eco-llm",
+    "seed": 0,
+    "n": 20,
+    "decisions": 16343,
+    "digest": "0da54e3dda3a71bb",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "mooncake",
+    "seed": 0,
+    "n": 20,
+    "decisions": 16885,
+    "digest": "4700bc59e05fb9b0",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "hybrid-F-lhreq",
+    "seed": 4,
+    "n": 20,
+    "decisions": 16504,
+    "digest": "1eb96ff227bfd639",
+    "ok": true,
+    "ss_seen": 475,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": 936,
+    "throttle_periods": 124
+   },
+   {
+    "arm": "hybrid-F6-lhreq",
+    "seed": 4,
+    "n": 20,
+    "decisions": 16542,
+    "digest": "962e6171dc864a50",
+    "ok": true,
+    "ss_seen": 489,
+    "ss_at_risk": 5,
+    "c6_calls": 376,
+    "c6_deviations": null,
+    "throttled_dash": 730,
+    "throttle_periods": 99
+   },
+   {
+    "arm": "b7-edf-feasibility",
+    "seed": 4,
+    "n": 20,
+    "decisions": 16512,
+    "digest": "1ddeaded25e4c1ed",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "eco-llm",
+    "seed": 4,
+    "n": 20,
+    "decisions": 16475,
+    "digest": "e17a0af108b94199",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "mooncake",
+    "seed": 4,
+    "n": 20,
+    "decisions": 17010,
+    "digest": "d6be2bdefe80c393",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "hybrid-F-lhreq",
+    "seed": 0,
+    "n": 32,
+    "decisions": 15863,
+    "digest": "83327023f4c67546",
+    "ok": true,
+    "ss_seen": 717,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": 7340,
+    "throttle_periods": 657
+   },
+   {
+    "arm": "hybrid-F6-lhreq",
+    "seed": 0,
+    "n": 32,
+    "decisions": 16123,
+    "digest": "5cb11b1c10d44caf",
+    "ok": true,
+    "ss_seen": 742,
+    "ss_at_risk": 6,
+    "c6_calls": 788,
+    "c6_deviations": null,
+    "throttled_dash": 6077,
+    "throttle_periods": 562
+   },
+   {
+    "arm": "b7-edf-feasibility",
+    "seed": 0,
+    "n": 32,
+    "decisions": 16150,
+    "digest": "57c9543b51d425e6",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "eco-llm",
+    "seed": 0,
+    "n": 32,
+    "decisions": 16353,
+    "digest": "2822325bf5ae15fb",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "mooncake",
+    "seed": 0,
+    "n": 32,
+    "decisions": 16910,
+    "digest": "26b54e33f5d879a3",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "hybrid-F-lhreq",
+    "seed": 4,
+    "n": 32,
+    "decisions": 15977,
+    "digest": "1ab905cf8c0d867a",
+    "ok": true,
+    "ss_seen": 712,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": 4719,
+    "throttle_periods": 419
+   },
+   {
+    "arm": "hybrid-F6-lhreq",
+    "seed": 4,
+    "n": 32,
+    "decisions": 15983,
+    "digest": "f6038ffea2cd4a5c",
+    "ok": true,
+    "ss_seen": 716,
+    "ss_at_risk": null,
+    "c6_calls": 701,
+    "c6_deviations": null,
+    "throttled_dash": 5214,
+    "throttle_periods": 464
+   },
+   {
+    "arm": "b7-edf-feasibility",
+    "seed": 4,
+    "n": 32,
+    "decisions": 16236,
+    "digest": "85e066d89647ccbc",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "eco-llm",
+    "seed": 4,
+    "n": 32,
+    "decisions": 16436,
+    "digest": "7e58a756adcf432c",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   },
+   {
+    "arm": "mooncake",
+    "seed": 4,
+    "n": 32,
+    "decisions": 16985,
+    "digest": "d3805a13c57dbee1",
+    "ok": true,
+    "ss_seen": null,
+    "ss_at_risk": null,
+    "c6_calls": null,
+    "c6_deviations": null,
+    "throttled_dash": null,
+    "throttle_periods": null
+   }
+  ],
+  "n_ok": 30,
+  "n_total": 30
+ },
+ "proof4_value_term_negative_control": {
+  "cell": {
+   "seed": 0,
+   "n_devices": 20,
+   "ratio": "40:40:20",
+   "run_s": 1200.0,
+   "robot_question_set": "lh_req",
+   "ss_question_set": "ss2"
+  },
+  "question": "does the value / quality table reach a decision at all?",
+  "reads": "written at hybrid_arm.py:260 and :311-312, read ONLY at :317 through idx()",
+  "rows": {
+   "hybrid-F-lhreq": {
+    "base_decisions": 16361,
+    "base_digest": "5021e48c40b32730",
+    "variants": [
+     {
+      "variant": "flat_all_equal",
+      "decisions": 16361,
+      "digest": "5021e48c40b32730",
+      "differing": 0,
+      "differing_positional": 0,
+      "identical": true
+     },
+     {
+      "variant": "dashcam_100x",
+      "decisions": 16361,
+      "digest": "5021e48c40b32730",
+      "differing": 0,
+      "differing_positional": 0,
+      "identical": true
+     },
+     {
+      "variant": "robot_100x",
+      "decisions": 16361,
+      "digest": "acd986607afe383d",
+      "differing": 0,
+      "differing_positional": 2,
+      "identical": false
+     },
+     {
+      "variant": "ss_1000x",
+      "decisions": 16361,
+      "digest": "5021e48c40b32730",
+      "differing": 0,
+      "differing_positional": 0,
+      "identical": true
+     }
+    ],
+    "all_inert": true,
+    "byte_identical": false
+   },
+   "hybrid-F6-lhreq": {
+    "base_decisions": 16362,
+    "base_digest": "5cf30a4f47ac42e4",
+    "variants": [
+     {
+      "variant": "flat_all_equal",
+      "decisions": 16362,
+      "digest": "5cf30a4f47ac42e4",
+      "differing": 0,
+      "differing_positional": 0,
+      "identical": true
+     },
+     {
+      "variant": "dashcam_100x",
+      "decisions": 16362,
+      "digest": "5cf30a4f47ac42e4",
+      "differing": 0,
+      "differing_positional": 0,
+      "identical": true
+     },
+     {
+      "variant": "robot_100x",
+      "decisions": 16362,
+      "digest": "6522f785447c7613",
+      "differing": 0,
+      "differing_positional": 2,
+      "identical": false
+     },
+     {
+      "variant": "ss_1000x",
+      "decisions": 16362,
+      "digest": "5cf30a4f47ac42e4",
+      "differing": 0,
+      "differing_positional": 0,
+      "identical": true
+     }
+    ],
+    "all_inert": true,
+    "byte_identical": false
+   }
+  },
+  "verdict": "the value term is DECISION-INERT in both frozen arms: ruling A changes a quantity nothing reads"
+ }
+}

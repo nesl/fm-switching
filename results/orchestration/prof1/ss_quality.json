@@ -1,12 +1,12 @@
 {
  "_what": "D142 item 3: the single-shot (assistive) quality table, as a DECLARED INPUT rather than policy code. Swapping these values for the measured 32B results is a DATA UPDATE and leaves the frozen policy untouched; putting them in policy code would make every swap a new labelled policy version with all cells redone under D79.",
- "_status": "PLACEHOLDER",
- "_placeholder": true,
+ "_status": "MEASURED for the D143 single-shot pool (refspatial, realworldqa); PLACEHOLDER retained for the StudySS1 datasets",
+ "_placeholder": false,
  "_placeholder_reason": "The 32B cloud answers for the SS pool do not exist yet. StudySS1-32B (01e5395) is the server wrapper; the answer pass had not run when this was written. Until it lands every number here is a STAND-IN and no SS accuracy figure derived from it may be reported as a measurement.",
  "_device_answer_host": "Orin, vLLM, idle, one request at a time, cold per image",
  "_device_answer_host_reason": "RESOLVED (was 'unconfirmed' in the first version of this file, corrected after reading results/casestudy/study_ss1/compare_gates.json on origin). The condition is ESTABLISHED BY the user's statement plus the Orin session's own StudySS1 report at 8492e02, NOT by a _provenance block: the five StudySS1 artifacts still carry none. So the attribution is as good as the user's word and no better, which is sufficient here and is stated rather than implied.",
  "_when_measured_replace": "Replace cloud_accuracy and the D2/RECENT candidate accuracies with the StudySS1 32B values per dataset, set _placeholder false, add a _provenance block, and leave every other field alone.",
- "_written": "2026-11-19T17:03:31",
+ "_written": "2026-11-19T21:20 (D143 fill)",
  "question_type_to_representation": {
   "vizwiz": {
    "representation": "D2",
@@ -31,7 +31,8 @@
    "_device_accuracy_ci": [
     0.645401713359574,
     0.6720317203056263
-   ]
+   ],
+   "_retained_but_unused": "RETAINED, NOT USED. D143 fixes the SS pool at RefSpatial-Bench and RealWorldQA, so an SS question's category is 'refspatial' or 'realworldqa' and never this. The entry stays because StudySS1's numbers are committed and deleting it would lose the only record of what the placeholder was, and because the StudySS1 pool remains selectable as ss_question_set='ss1'. Its cloud_accuracy is still the PLACEHOLDER (= device accuracy)."
   },
   "egothink": {
    "representation": "D2",
@@ -56,7 +57,202 @@
    "_device_accuracy_ci": [
     0.4342857142857143,
     0.5071428571428571
-   ]
+   ],
+   "_retained_but_unused": "RETAINED, NOT USED. D143 fixes the SS pool at RefSpatial-Bench and RealWorldQA, so an SS question's category is 'refspatial' or 'realworldqa' and never this. The entry stays because StudySS1's numbers are committed and deleting it would lose the only record of what the placeholder was, and because the StudySS1 pool remains selectable as ss_question_set='ss1'. Its cloud_accuracy is still the PLACEHOLDER (= device accuracy)."
+  },
+  "refspatial": {
+   "representation": "D2",
+   "cloud_accuracy": 0.392235609103079,
+   "_device_accuracy": 0.20481927710843373,
+   "_cloud_accuracy_status": "MEASURED, StudySS2 32B, FITTED ON THE DEV SPLIT (D143 ruling A). n=83 of 277; the EVAL part SS devices draw from is held out.",
+   "_metric": "point_accuracy",
+   "_metric_description": "fraction of predicted points inside the ground-truth mask",
+   "_dev_fit": {
+    "n": 83,
+    "device": 0.20481927710843373,
+    "cloud": 0.392235609103079,
+    "gain": 0.18741633199464525,
+    "device_binary_at_0_5": 17,
+    "cloud_binary_at_0_5": 33,
+    "device_ci95_wilson_binary": [
+     0.131998,
+     0.303757
+    ],
+    "cloud_ci95_wilson_binary": [
+     0.299088,
+     0.505154
+    ]
+   },
+   "_eval_holdout_NOT_FOR_THE_POLICY": {
+    "n": 194,
+    "device": 0.2706185567010309,
+    "cloud": 0.36254295532646047,
+    "gain": 0.09192439862542956,
+    "_note": "recorded so the fit can be audited after the fact. The policy must NOT read this."
+   },
+   "_dev_overstates_eval": {
+    "dev_gain": 0.18741633199464525,
+    "eval_gain": 0.09192439862542956,
+    "ratio": 2.0388,
+    "_note": "the DEV fit OVERSTATES the gain the EVAL part actually shows, by this ratio. That is a property of fitting on 83 or 229 questions, not a defect in the split, and it means C1 values an SS request ABOVE what the held-out part supports. Reported rather than corrected: correcting it with the EVAL number would be fitting on the scored set, which D6 forbids."
+   },
+   "candidates": {
+    "D2": {
+     "accuracy": 0.392235609103079,
+     "n": 83,
+     "unreliable": false,
+     "_status": "MEASURED on the DEV split. D2 and RECENT are EQUAL here because an SS request carries no history, so both are the same single image; they are equal, not ordered."
+    },
+    "RECENT": {
+     "accuracy": 0.392235609103079,
+     "n": 83,
+     "unreliable": false,
+     "_status": "MEASURED on the DEV split. D2 and RECENT are EQUAL here because an SS request carries no history, so both are the same single image; they are equal, not ordered."
+    }
+   },
+   "_provenance": {
+    "device": {
+     "git_commit": "f3d7e93b6cb521ac4d4d5f9af7bc9cef157d2fcd",
+     "script": "ss2_run.py",
+     "model": "qwen3vl4b",
+     "timestamp": "2026-11-19T19:07:48.376806",
+     "device": "jetson_orin",
+     "n": 277,
+     "seed": 0,
+     "args": {
+      "dataset": "refspatial",
+      "manifest": "results/casestudy/study_ss2/refspatial_manifest.jsonl",
+      "ids": "all",
+      "tier": "device",
+      "model": "qwen3vl4b",
+      "device": "jetson_orin",
+      "endpoint": "http://127.0.0.1:8000/v1",
+      "out": "results/casestudy/study_ss2/refspatial_device.json",
+      "retries": 4,
+      "limit": 0,
+      "dump": false
+     }
+    },
+    "cloud": {
+     "git_commit": "8a1917bcd04a75959763ce2a2c7371a807640416",
+     "script": "ss2_run.py",
+     "model": "32BI",
+     "timestamp": "2026-11-19T19:34:30.260042",
+     "device": "h100nvl",
+     "n": 277,
+     "seed": 0,
+     "args": {
+      "dataset": "refspatial",
+      "manifest": "/home/pragya/Desktop/fm-switching/results/casestudy/study_ss2/refspatial_manifest.jsonl",
+      "ids": "all",
+      "tier": "cloud",
+      "model": "32BI",
+      "device": "h100nvl",
+      "endpoint": "http://127.0.0.1:8031/v1",
+      "out": "/home/pragya/Desktop/fm-switching/results/casestudy/study_ss2/refspatial_cloud32b.json",
+      "retries": 4,
+      "limit": 0,
+      "dump": false
+     }
+    }
+   }
+  },
+  "realworldqa": {
+   "representation": "D2",
+   "cloud_accuracy": 0.7248908296943232,
+   "_device_accuracy": 0.6419213973799127,
+   "_cloud_accuracy_status": "MEASURED, StudySS2 32B, FITTED ON THE DEV SPLIT (D143 ruling A). n=229 of 765; the EVAL part SS devices draw from is held out.",
+   "_metric": "exact_match",
+   "_metric_description": "exact match after the benchmark's own normalisation",
+   "_dev_fit": {
+    "n": 229,
+    "device": 0.6419213973799127,
+    "cloud": 0.7248908296943232,
+    "gain": 0.08296943231441045,
+    "device_binary_at_0_5": 147,
+    "cloud_binary_at_0_5": 166,
+    "device_ci95_wilson_binary": [
+     0.577953,
+     0.701207
+    ],
+    "cloud_ci95_wilson_binary": [
+     0.6637,
+     0.778661
+    ]
+   },
+   "_eval_holdout_NOT_FOR_THE_POLICY": {
+    "n": 536,
+    "device": 0.6604477611940298,
+    "cloud": 0.707089552238806,
+    "gain": 0.04664179104477617,
+    "_note": "recorded so the fit can be audited after the fact. The policy must NOT read this."
+   },
+   "_dev_overstates_eval": {
+    "dev_gain": 0.08296943231441045,
+    "eval_gain": 0.04664179104477617,
+    "ratio": 1.7789,
+    "_note": "the DEV fit OVERSTATES the gain the EVAL part actually shows, by this ratio. That is a property of fitting on 83 or 229 questions, not a defect in the split, and it means C1 values an SS request ABOVE what the held-out part supports. Reported rather than corrected: correcting it with the EVAL number would be fitting on the scored set, which D6 forbids."
+   },
+   "candidates": {
+    "D2": {
+     "accuracy": 0.7248908296943232,
+     "n": 229,
+     "unreliable": false,
+     "_status": "MEASURED on the DEV split. D2 and RECENT are EQUAL here because an SS request carries no history, so both are the same single image; they are equal, not ordered."
+    },
+    "RECENT": {
+     "accuracy": 0.7248908296943232,
+     "n": 229,
+     "unreliable": false,
+     "_status": "MEASURED on the DEV split. D2 and RECENT are EQUAL here because an SS request carries no history, so both are the same single image; they are equal, not ordered."
+    }
+   },
+   "_provenance": {
+    "device": {
+     "git_commit": "5d51c89247a36db055e772fa49302745a8814bd2",
+     "script": "ss2_run.py",
+     "model": "qwen3vl4b",
+     "timestamp": "2026-11-19T19:20:32.244688",
+     "device": "jetson_orin",
+     "n": 765,
+     "seed": 0,
+     "args": {
+      "dataset": "realworldqa",
+      "manifest": "results/casestudy/study_ss2/realworldqa_manifest.jsonl",
+      "ids": "all",
+      "tier": "device",
+      "model": "qwen3vl4b",
+      "device": "jetson_orin",
+      "endpoint": "http://127.0.0.1:8000/v1",
+      "out": "results/casestudy/study_ss2/realworldqa_device.json",
+      "retries": 4,
+      "limit": 0,
+      "dump": false
+     }
+    },
+    "cloud": {
+     "git_commit": "59ad71998efa06bce880b0c1de39a7aab88b783b",
+     "script": "ss2_run.py",
+     "model": "32BI",
+     "timestamp": "2026-11-19T19:39:28.709827",
+     "device": "h100nvl",
+     "n": 765,
+     "seed": 0,
+     "args": {
+      "dataset": "realworldqa",
+      "manifest": "/home/pragya/Desktop/fm-switching/results/casestudy/study_ss2/realworldqa_manifest.jsonl",
+      "ids": "all",
+      "tier": "cloud",
+      "model": "32BI",
+      "device": "h100nvl",
+      "endpoint": "http://127.0.0.1:8031/v1",
+      "out": "/home/pragya/Desktop/fm-switching/results/casestudy/study_ss2/realworldqa_cloud32b.json",
+      "retries": 4,
+      "limit": 0,
+      "dump": false
+     }
+    }
+   }
   }
  },
  "tables": {},
@@ -64,5 +260,26 @@
  "_metric_incomparability": "CHECK 4, and it bears on the item 4 headline. The three accuracy axes use THREE DIFFERENT METRICS and none is comparable to another: VizWiz is vqa_accuracy (consensus over 10 human answers), EgoThink is containment (judge), and the robot axis is exact-match letter. So an 'SS accuracy' figure may NOT be averaged across the two SS datasets, and SS accuracy may NOT be pooled with robot accuracy. Report them separately with the metric named.",
  "_consequence_of_the_placeholder": "READ THIS BEFORE REPORTING ANY SS NUMBER. The placeholder sets cloud = device accuracy, so C1's value term for an SS request is the floor 1e-3, against 0.10627 for a robot and 0.090 for a dashcam: a ratio of about 106 to 1. C1 therefore ranks EVERY single-shot request last. So the frozen policy's SS behaviour is determined by a STAND-IN number, not by evidence, and an SS on-time or accuracy figure measured under this placeholder is NOT a finding about the policy. It is the expected artifact of valuing SS at the floor. When the 32B values land, C1's SS ordering changes and every SS cell must be rerun; the robot and dashcam axes are unaffected because their value terms do not read this file.",
  "_stack_distinction": "DO NOT PLACE THESE SIDE BY SIDE WITH THE ROBOT DEVICE COST. The SS device numbers come from the ORIN3 vLLM stack; the committed device baseline for robot recall is the ORIN2 in-process harness (per D87, and unexercised per D103 item c). The two stacks never meet in a live number today, and they must not be joined in one. Label both; nothing is rerun.",
- "_32b_status": "NOT AVAILABLE as of origin 3aac01d. compare_gates.json states the 32B answers are not on origin, so the comparison has not been run: commit 01e5395 adds only the 54-line server wrapper. The expected files are vizwiz_val_cloud32b.json and egothink_cloud32b.json. Until they land this table stays a placeholder and the consequence below applies."
+ "_32b_status": "AVAILABLE and used. StudySS2-32B landed on origin (refspatial 277 scored 0 errors, realworldqa 765 scored 0 errors), cloud Qwen3-VL-32B-Instruct @ 0cfaf481 on h100nvl, device Qwen3-VL-4B on jetson_orin, both with _provenance.",
+ "_placeholder_scope": "_placeholder is now False because the pool the policy actually draws from (refspatial, realworldqa) is measured. vizwiz and egothink keep placeholder values and are marked _retained_but_unused; anything that selects ss_question_set='ss1' is back on a placeholder and must say so.",
+ "_fit_split": "DEV",
+ "_draw_split": "EVAL",
+ "_fit_source": "results/casestudy/study_ss2/{refspatial,realworldqa}_{device,cloud32b}.json restricted to the DEV part of results/casestudy/study_ss2/ss2_dev_eval_split.json",
+ "_c1_ordering_consequence": {
+  "_read_this_first": "THE SS ORDERING HAS FLIPPED. Under the placeholder, cloud equalled device, the gain was 0, C1's SS value fell to the 1e-3 floor and C1 ranked every SS request LAST at about 106 to 1 against a robot. With the measured DEV values the gains are positive and refspatial now outranks a robot. Every SS cell measured under the placeholder is superseded.",
+  "c1_values": {
+   "robot_lh_req_weighted": 0.13204348640855837,
+   "dashcam": 0.09,
+   "ss_refspatial": 0.18741633199464525,
+   "ss_realworldqa": 0.08296943231441045,
+   "_robot_source": "_quality_values('lh_req') in hybrid_arm.py: the COMMITTED RC table re-weighted by the LH-REQ category mix, per D142 item 2 ('the workload's own trace-weighted table'). It is NOT the DEV-fitted LH-REQ aggregate."
+  },
+  "_metric_incomparability_now_binds": "CHECK 4, and it now changes an ORDERING rather than only a reported number. C1's index compares these four values as if they shared a unit. They do not: the robot and dashcam terms are MCQ-accuracy and challenge-mAP differences, refspatial is a point-in-mask fraction and realworldqa is exact match. A +0.187 point-in-mask gain is not 'more valuable' than a +0.143 MCQ-accuracy gain in any measured sense; it is a different quantity. The ordering it produces is therefore a CONVENTION, and it must not be reported as evidence that single-shot work matters more than robot recall.",
+  "_two_numbers_for_one_axis": {
+   "c1_robot_value": 0.13204348640855837,
+   "c6_mirror_robot_gain": 0.142857,
+   "_note": "PROVISIONAL and REPORTED, not reconciled. C1's value term reads the committed RC table re-weighted by the LH-REQ mix (D142 item 2) and gives 0.13204, while D143 ruling A sets the C6 mirror's rc_accuracy from the DEV-fitted LH-REQ measurement, whose cross-tier gain is 0.142857. So one policy carries two numbers for the robot quality axis, from two different question populations, differing by 1.08x. Ruling A names rc_accuracy specifically and D142 item 2 already ruled on C1's table, so changing C1 too would be overriding D142 item 2 rather than applying D143. Left as the two rulings specify; the user should settle whether C1 moves to the DEV fit as well.",
+   "_does_it_change_the_ordering": "no. refspatial 0.1874 outranks a robot at either 0.13204 or 0.142857."
+  }
+ }
 }

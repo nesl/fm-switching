@@ -20,6 +20,7 @@ through its public entry points (`Coordinator.escalate`, `Coordinator.on_event`,
 `Rollout.run`, `delta_j`).
 """
 import copy
+import json
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -47,7 +48,7 @@ from policy.eng1_engine_fast import Eng1Engine   # StudyLIVE2-perf: the live pat
 from policy.escalation import EscalationRequest                         # noqa: E402
 from policy.flags import Flags                                          # noqa: E402
 from policy.params import Params                                        # noqa: E402
-from policy.profiles import load_profiles                               # noqa: E402
+from policy.profiles import MissingEvidence, load_profiles               # noqa: E402
 from policy.kvpool import prefix_id_for                                 # noqa: E402
 from policy.residency_belief import ResidencyBelief                     # noqa: E402
 from cstate import D2_TOK_PER_IMG                                       # noqa: E402
@@ -141,6 +142,111 @@ class _MixWeightedProfiles:
         return v
 
 
+LH_REQ_QUALITY = Path(__file__).resolve().parents[3] / \
+    "results/orchestration/live2/lh_req/lh_req_quality.json"
+
+
+class _LhReqFittedProfiles:
+    """`Profiles` with `rc_accuracy` read from the LH-REQ table, FITTED ON THE DEV SPLIT (D143 A).
+
+    Why this exists. `_MixWeightedProfiles` averages the committed per-category RC table over
+    TRACE_MIX, and on the LH-REQ workload that table is measured on the wrong question population:
+    its cloud D2 minus RECENT gap is +3.23 pp, against +14.29 pp measured on the LH-REQ DEV split.
+    The quantity is alive, read, varies by condition and reaches a decision that fires, so Step 2
+    passes it and only check 1, the same name measured twice, finds it. The error is directional:
+    priced at 3 pp, a RECENT degrade looks four times cheaper than it is, so the chooser would be
+    too willing to degrade exactly the questions whose evidence lies outside the window.
+
+    D6 COMPLIANCE is the whole point of using DEV. The table is fitted on the 28 DEV questions and
+    LH-REQ robots draw only from the 69 EVAL questions, so no number the policy is fitted on is
+    also a number it is scored on.
+
+    THE DEVICE ENTRY IS A DECLARED SUBSTITUTION, not a measurement. The consumer asks for device
+    accuracy on D2 (`rollout.py`, the C6 mirror's cross-tier comparator). No device-on-D2 result
+    exists on these questions: StudyO-Q4 holds exactly three device arms, 4B-I x RECENT, 4B-T x
+    RICH and 8B-I x RICH, and D87 fixes the comparator at 4B-I x RECENT. So the ruled 0.1071 is
+    the 4B x RECENT figure standing in for device-on-D2, and it is labelled rather than implied.
+
+    One coincidence that must not be read as corroboration: on DEV, cloud RECENT and the device
+    both score 3 of 28, but they are NOT the same three questions. The overlap is 1 of 3. The
+    aggregates agree; the items do not, so equality here is arithmetic, not agreement.
+
+    Any (rep, tier) the LH-REQ table does not carry RAISES rather than falling back to the
+    trace-mix value. A silent fallback would mix two populations inside one comparison, which is
+    the failure this class exists to remove.
+    """
+
+    _DEV_KEY = {("D2", "cloud"): "cloud_D2",
+                ("RECENT", "cloud"): "cloud_RECENT",
+                ("D2", "device"): "device_4B_RECENT",
+                ("RECENT", "device"): "device_4B_RECENT",
+                ("RICH", "cloud"): "cloud_D2",
+                ("N1", "device"): "device_4B_RECENT"}
+    # The escalation path reads FIVE (tier, representation) conditions; the LH-REQ DEV split measures
+    # THREE. Each stand-in below is chosen to understate the cross-tier gain, never to inflate it, so a
+    # substitution cannot manufacture an escalation advantage:
+    #   ("RICH", "cloud") -> cloud_D2: D2 is the fullest LH-REQ cloud condition measured and RICH is at
+    #     least as informative, so crediting RICH with D2's accuracy credits the cloud with less.
+    #   ("N1", "device")  -> device_4B_RECENT: N1 is the device WITHOUT history coverage, so its true
+    #     accuracy is at most the covered device's, and using the covered number credits the device with
+    #     more. Same direction as escalation.py:158-160 states for its own coverage default.
+    # PROVISIONAL under the overnight rule: a substitution is a methodological choice and is flagged,
+    # not settled. Before the swap these two raised MissingEvidence, which _c6_prepare swallowed into a
+    # counter, so C6 was dead in every -lhreq cell while every surface sign said the arm was configured.
+    _SUBSTITUTED = {("D2", "device"), ("RICH", "cloud"), ("N1", "device")}
+
+    def __init__(self, pf: Any, path: Path = LH_REQ_QUALITY) -> None:
+        self._pf = pf
+        if not path.exists():
+            raise MissingEvidence("the committed LH-REQ quality table is missing: %s" % path)
+        d = json.loads(path.read_text())
+        if d.get("_fit_split") != "DEV":
+            raise MissingEvidence("the LH-REQ quality table is not fitted on DEV (_fit_split=%r), "
+                                  "which D143 ruling A requires" % (d.get("_fit_split"),))
+        self._fit = d["per_split"]["DEV"]
+        self._path = str(path)
+        self._memo: Dict[tuple, float] = {}
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._pf, name)
+
+    def rc_accuracy(self, qtype: str, rep: str, tier: str = "cloud") -> float:
+        key = (rep, tier)
+        hit = self._memo.get(key)
+        if hit is not None:
+            return hit
+        name = self._DEV_KEY.get(key)
+        if name is None:
+            raise MissingEvidence(
+                "the LH-REQ DEV fit carries no entry for representation %r at tier %r, and this "
+                "class deliberately does NOT fall back to the trace-mix table: a fallback would "
+                "mix two question populations inside one comparison" % (rep, tier))
+        v = float(self._fit[name]["accuracy"])
+        self._memo[key] = v
+        return v
+
+    def describe(self) -> Dict[str, Any]:
+        """What the freeze records: the source, the values, their intervals and the substitution."""
+        return dict(
+            source=self._path, fit_split="DEV", draw_split="EVAL",
+            values={"%s|%s" % k: dict(accuracy=float(self._fit[n]["accuracy"]),
+                                      n=int(self._fit[n]["n"]),
+                                      correct=int(self._fit[n]["correct"]),
+                                      ci95_wilson=self._fit[n]["ci95_wilson"],
+                                      substituted=(k in self._SUBSTITUTED))
+                    for k, n in self._DEV_KEY.items()},
+            substitutions={"D2|device": (
+                "the 4B x RECENT measurement standing in for device-on-D2. No device-on-D2 result "
+                "exists on these questions; StudyO-Q4 holds 4B-I x RECENT, 4B-T x RICH and 8B-I x "
+                "RICH only, and D87 fixes the comparator at 4B-I x RECENT.")},
+            precision_note=("the DEV fit rests on 28 questions, cloud D2 at 7 of 28 and cloud "
+                            "RECENT at 3 of 28, so the intervals are wide and are carried here "
+                            "beside every point estimate"),
+            coincidence_note=("cloud RECENT and the device both score 3 of 28 on DEV but on "
+                              "DIFFERENT questions, overlap 1 of 3; the equality is arithmetic, "
+                              "not agreement"))
+
+
 @dataclass
 class PolicyCoreArm(Live2ArmMixin, Policy):
     """The core policy as one `interface.Policy`, so it shares the arms' single action space."""
@@ -202,6 +308,11 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
     rc_priority_keep_monitors: int = 0 # how many monitor releases survive an urgent epoch
     rc_z_dispatch: bool = False     # D131: RC deficit rows reach the dispatch z term
     mix_weighted_quality: bool = True  # D134: trace-mix quality model, False pins QTYPE
+    # D143 ruling A: "trace_mix" is the committed default and leaves every existing run unchanged.
+    # "lh_req_dev" reads the LH-REQ table fitted on the DEV split, which is the only correct source
+    # when robots draw from LH-REQ. Selected HERE rather than swapped after configure, for the
+    # reason the comment in live2_configure gives.
+    quality_fit: str = "trace_mix"
 
     name: str = "policy-core"
     case: str = "own"
@@ -249,8 +360,14 @@ class PolicyCoreArm(Live2ArmMixin, Policy):
         # a hybrid: measured once, that produced dashcam 0.0821 and 0 recalls served at 16
         # devices against a true baseline of 0.8164 and 14 of 35, which is not the pre-fix policy
         # but a broken one.
-        self.pf = (_MixWeightedProfiles(load_profiles()) if self.mix_weighted_quality
-                   else load_profiles())
+        if self.quality_fit not in ("trace_mix", "lh_req_dev"):
+            raise ValueError("quality_fit %r must be 'trace_mix' or 'lh_req_dev'"
+                             % (self.quality_fit,))
+        if self.quality_fit == "lh_req_dev":
+            self.pf = _LhReqFittedProfiles(load_profiles())
+        else:
+            self.pf = (_MixWeightedProfiles(load_profiles()) if self.mix_weighted_quality
+                       else load_profiles())
         p = Params()
         p.gpu_kv_capacity_tokens = int(gpu_kv_tokens)
         p.host_kv_capacity_tokens = int(host_tier_tokens)
