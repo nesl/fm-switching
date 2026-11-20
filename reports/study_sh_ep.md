@@ -206,13 +206,27 @@ round-1 server runs `--mm-processor-kwargs {"size": {"shortest_edge": 4096, "lon
 run the same. A difference there moves the prompt tokens and the parity check fails, which is the
 intended outcome: it fails loudly rather than producing a gap that is partly a tokenizer difference.
 
-**One consequence worth stating before the run.** Those processor settings are live2 round 1's, not
-StudyD3's, and StudyD3 and StudyD14b commit **378 prompt tokens at one frame** (336 image pads). If the
-first C1 request does not report 378, then the C1 condition is not the committed one-frame body, the
-study's one-frame comparator is not the committed comparator, and consistency check 1 against the
-committed D14b scores is not available in the form section 10 assumes. The first C1 request's prompt
-token count is therefore reported before the sweep, and a value other than 378 is a stop pending a
-ruling, not something to absorb.
+**The processor settings are the study's settings, by ruling** (user, 2026-11-20): live2 round 1's
+`--mm-processor-kwargs` are StudySH-EP's settings on **both** machines, because they are deployment
+conditions and this study chooses the live dashcam format. C1 under those settings is therefore the
+study's own one-frame comparator, whatever StudyD3 used. The first C1 prompt-token count is recorded,
+and if it differs from the committed 378, consistency check 1 against StudyD14b is labelled
+**CROSS-SETTING**, with the difference and its cause reported, and the study proceeds.
+
+**Measured, so the label is not needed: the first C1 request reports 378**, on all 28 aborted requests
+and the first requests of the real run. The round-1 settings give the committed 336 image pads at
+768x432, so the C1 condition **is** the committed one-frame body and consistency check 1 stays
+same-setting. This is worth stating as a measurement rather than leaving as an assumption, because it
+was an open risk until the number came back: `shortest_edge` 4096 did not have to land on 336 pads.
+
+**Per-frame cost, measured: 338 tokens, not the 342 the committed arithmetic predicts.** StudyD7's
+378 at one frame against 1,062 at three gives 342 per frame, and the predicted EP-G maximum was 7,218;
+the measured figures under the count-free header are 3,084 at 9 frames rising by a constant 338 per
+frame to **7,140 at 21**. The 4-token difference is the committed figure's own header: StudyD3's N = 1
+and N = 3 headers are different strings, so 342 conflated the per-frame image cost with a change in
+header text. Holding the header fixed isolates the image cost at 338, which is the 336 pads plus the
+two vision markers, and the count-free header at one frame would be 380 against the committed
+literal's 378. The ruling's header therefore also bought a cleaner cost model than the committed one.
 
 ## 6. Mechanism verification, Steps 0 to 5, before the sweep
 
@@ -280,12 +294,14 @@ Any one of these stops the run or the scoring, and is reported rather than worke
    mismatch: they are then not reading the same episode and no gap between them is a capability gap.
    This matters more here than in a same-stack study, because the two arms are two deployments
    (section 5b) and input identity is the only thing the comparison rests on.
-4. The first C1 request reporting a prompt-token count other than the committed 378 (section 5b): the
-   one-frame comparator is then not the committed one-frame body.
-5. A grey control whose score is not constant at a given frame count.
-6. `cached_tokens` absent from every record: the warm-path instrument never reads, so H3 is unscorable
+4. A grey control whose score is not constant at a given frame count.
+5. `cached_tokens` absent from every record: the warm-path instrument never reads, so H3 is unscorable
    as posed and must be re-posed, not reported.
-7. A foreign process on the run's GPU, or a server-log error before the requests complete.
+6. A foreign process on the run's GPU, or a server-log error before the requests complete.
+
+Not a stop, by ruling: a first C1 prompt-token count other than the committed 378. It is recorded, and
+consistency check 1 against StudyD14b is then labelled CROSS-SETTING rather than abandoned. The
+measured value is 378 (section 5b), so the label is not needed.
 
 ## 8. The positive control, already run
 
@@ -320,8 +336,18 @@ five conditions, DEV and EVAL, `--header-mode constant` (the default and the rul
 condition including C1), `--shuffle-control`. 19,490 requests. The runner is resumable. (4) Report the
 first C1 request's prompt-token count before the sweep: it must be the committed 378.
 
+**The store has two layouts, and the runner reads both.** `encode_jpeg.py` writes one flat file per
+frame_ref, `frames/<clip>.mp4__t<t>.jpg`, which is what the manifest's `store_files` are built from.
+The live store on the frame host is laid out `frames/<clip>/t<t>.jpg`, and this study's own 165-frame
+extension wrote flat names beside those clip folders, so the store now mixes the two and nothing was
+overwritten. `sh_ep_runner.store_path` resolves either layout and raises rather than substituting if a
+frame is in neither. That is deliberately preferred to depending on a symlink view: a view can be
+stale or incomplete without the run noticing, and the per-frame sha256 check still has the last word.
+
 **jetson_orin, the deployed device arm, the full 4BI set.** Stage the 6,237 frames, 6,072 from the D91 store plus the 165 the extension adds, after
-the H100 has written them, so both boxes read byte-identical input. The full 4BI set, all five
+the H100 has written them, so both boxes read byte-identical input. Pull with dereferencing
+(`rsync -aL`) so the Orin's copy is plain files, then verify every one against the committed D14b
+manifest before sending a request. The full 4BI set, all five
 conditions and all controls, same runner, `--header-mode constant` for every condition including C1,
 and **the same `--mm-processor-kwargs` as the H100**, because those settings set the image token count
 and the parity check in section 5b will fail without them. Its scores are the device answers for H1, H2
@@ -331,6 +357,20 @@ and the rebuilt live workload, and its timings are H3's device-tier cost.
 host without reference to a file name. The stop conditions in section 7 apply on both boxes, and the
 input-identity checks in section 5b can only be computed once both runs exist, so neither box's numbers
 are read before the other's have landed.
+
+## 9b. What the warm path did, measured before the sweep
+
+The H100's five-clip EP-G pre-check (`results/dashcam/study_sh_ep/h100/sh_ep_precheck_EPG_32BI.jsonl`,
+78 records, 0 errors, count-free header) reports `cached_tokens` **present in every record and above
+zero on every appended request**, from 3,056 to 6,768 against prompt totals of 3,422 to 7,140. So the
+warm path is exercised and H3 is reachable, which is exactly what the count header would have prevented:
+under it the same check would have read zero everywhere and H3 would have been unscorable as posed.
+This is the Step 2 link that was marked unreachable in section 6, now marked live.
+
+Also recorded: 28 C1 requests went out under the count header before the ruling landed and are set
+aside as `ABORTED_count_header_*` under run tag `shep1`, with the real run restarted as `shep2`. Their
+cache cannot reach the real run, because both the `cache_salt` and every image `uuid` are keyed by the
+run tag, so no `shep2` request can hit a `shep1` entry. All 28 reported 378 prompt tokens.
 
 ## 10. Open at the time of writing
 

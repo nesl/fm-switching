@@ -96,6 +96,32 @@ QUERY, QUERY_SHA = committed("QUERY")
 GEN, GEN_SHA = committed("GEN")
 
 
+def store_path(store, clip, key, flat):
+    """Resolve a frame in the D91 nexar store, under EITHER layout it is found in.
+
+    `live2/data/encode_jpeg.py` writes one flat file per frame_ref,
+    `frames/<clip>.mp4__t<t>.jpg`, and the manifest's `store_files` are built from that rule. The
+    H100's actual store is laid out `frames/<clip>/t<t>.jpg`, and StudySH-EP's own 165-frame
+    extension wrote flat names beside those clip folders, so the live store MIXES the two. The
+    first version of this read the flat name only and died with FileNotFoundError on request one.
+
+    Resolving both here rather than depending on a hand-built symlink view matters for a reason
+    beyond convenience: a view is a thing that can be stale or incomplete without the run noticing,
+    and a frame silently read from the wrong place is exactly the failure the per-frame sha256
+    check below exists to catch. So the runner reads the store as it is, and the checksum still
+    has the last word.
+    """
+    cands = [Path(store) / flat,
+             Path(store) / "frames" / clip[:-4] / f"t{flat.rsplit('__t', 1)[-1]}",
+             Path(store) / "frames" / clip[:-4] / f"{key}.jpg"]
+    for q in cands:
+        if q.exists():
+            return q
+    raise FileNotFoundError(
+        f"frame {clip} {key} is in neither store layout; looked at "
+        + ", ".join(str(q) for q in cands) + ". Nothing is substituted.")
+
+
 def grey_jpeg():
     """A grey frame encoded by the D91 nexar recipe, so the control's bytes are the wire form."""
     import io
@@ -135,7 +161,7 @@ def build_body(row, model, run_tag, store, sent, shuffle_rng=None, grey=None,
         if u in sent:
             content.append({"type": "image_url", "image_url": None, "uuid": u})
             continue
-        p = Path(store) / files[i]
+        p = store_path(store, clip, k, files[i])
         b = p.read_bytes()
         got = hashlib.sha256(b).hexdigest()
         content.append({"type": "image_url", "image_url": {"url": data_url(b)}, "uuid": u})
