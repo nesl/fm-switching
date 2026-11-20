@@ -230,8 +230,29 @@ class Profiles:
         return "see the profile JSON; this key carries no provenance field of its own"
 
 
+SS_QUALITY_PATH = DEFAULT_PATH.parent / "ss_quality.json"
+
+
 def load_profiles(path: Optional[Path] = None) -> Profiles:
     p = Path(path) if path else DEFAULT_PATH
     if not p.exists():
         raise MissingEvidence("the DEV profile %s does not exist; run StudyPROF1-dev first" % p)
-    return Profiles(raw=json.loads(p.read_text()), path=str(p))
+    raw = json.loads(p.read_text())
+    # D142 item 3: the single-shot quality table is a DECLARED INPUT merged here, not policy code.
+    # That distinction is the whole point: replacing the placeholder with the measured 32B values
+    # is then a DATA UPDATE and the frozen policy is untouched, where a table living in policy
+    # code would make every swap a new labelled version with all cells redone under D79.
+    #
+    # It also closes the second half of the D136 two-part dependency: the policy family could not
+    # execute SS questions at all, because `rc_accuracy` and `representation_for` RAISE when a
+    # question type has no committed entry. Merging into the path they read is what unblocks them;
+    # a constant inside the SS module would not have.
+    if SS_QUALITY_PATH.exists():
+        ss = json.loads(SS_QUALITY_PATH.read_text())
+        raw.setdefault("RC", {})
+        raw["RC"]["question_type_to_representation"].update(
+            ss.get("question_type_to_representation") or {})
+        raw["RC"]["ss_quality_status"] = ss.get("_status")
+        raw["RC"]["ss_quality_placeholder"] = bool(ss.get("_placeholder"))
+        raw["RC"]["ss_quality_path"] = str(SS_QUALITY_PATH)
+    return Profiles(raw=raw, path=str(p))

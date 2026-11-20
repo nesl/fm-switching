@@ -58,19 +58,70 @@ def _chooser_module():
 RECENT_TOKENS = 467          # live2's committed RECENT_WINDOW_TOKENS (cstate), the representation the coordinator charges
 
 
-def _quality_values() -> Dict[str, float]:
-    """Committed values, read-only: recall = 32B-D2 minus 4B-D2 accuracy, weighted by the EVAL category mix;
-    dashcam = the committed cloud SH gain (figM1 / CTRL1b, +0.090 challenge mAP)."""
+LH_REQ_PATH = REPO / "results/orchestration/live2/lh_req/lh_req_definition.json"
+WORKLOADS = ("mixed", "lh_req")
+
+
+def _lh_req_mix() -> Counter:
+    """The LH-REQ category mix, read from the COMMITTED definition file (`lh_req_question_ids` and
+    `per_category`, 1acbe36). D142 item 2 wants the workload's OWN trace-weighted table, and the
+    weights are that file's per-category counts over the 97 questions.
+
+    This file is the ONE source of truth for the question set: the 97 are NOT re-derived here, and no
+    question filter is written here. The trace option that selects them is owned elsewhere."""
+    d = json.loads(LH_REQ_PATH.read_text())
+    return Counter({k: int(v) for k, v in (d.get("per_category") or {}).items()})
+
+
+def _quality_values(workload: str = "mixed") -> Dict[str, float]:
+    """Committed values, read-only: recall = 32B-D2 minus 4B-D2 accuracy, weighted by the workload's own
+    category mix; dashcam = the committed cloud SH gain (figM1 / CTRL1b, +0.090 challenge mAP).
+
+    The accuracy TABLE is the same committed table for both workloads; only the WEIGHTS differ, which is
+    what "the workload's own trace-weighted table" means. LH-REQ uses all eight S-EMBER categories, all
+    present in the committed table, so no entry is missing and no value is invented."""
+    if workload not in WORKLOADS:
+        raise ValueError("workload must be one of %r" % (WORKLOADS,))
     prof = json.loads((REPO / "results/orchestration/prof1/profiles_dev.json").read_text())["RC"]["tables"]
     cl, dv = prof["32B-D2"]["by_category"], prof["4B-D2"]["by_category"]
-    try:
-        import data_sources as DS
-        mix = Counter(q.category for s in DS.eval_sessions().values() for q in s.questions)
-    except Exception:                                                         # noqa: BLE001
-        mix = Counter({k: 1 for k in cl})
+    if workload == "lh_req":
+        mix = _lh_req_mix()
+    else:
+        try:
+            import data_sources as DS
+            mix = Counter(q.category for s in DS.eval_sessions().values() for q in s.questions)
+        except Exception:                                                     # noqa: BLE001
+            mix = Counter({k: 1 for k in cl})
     num = sum(mix[c] * (float(cl[c]["accuracy"]) - float(dv[c]["accuracy"])) for c in cl if c in dv and mix[c])
     den = sum(mix[c] for c in cl if c in dv and mix[c]) or 1
     return dict(recall=max(num / den, 1e-3), dashcam=0.090)
+
+
+SS_QUALITY_PATH = REPO / "results/orchestration/prof1/ss_quality.json"
+
+
+def _ss_table() -> Dict[str, Any]:
+    """D142 item 3: the single-shot quality table is a DECLARED INPUT, read here, never a constant in this
+    module. Replacing the placeholder with the measured 32B values is then a DATA UPDATE that leaves this
+    frozen policy byte-identical; a table written into policy code would make every swap a new labelled
+    version with all cells redone under D79. The SS question TYPES come from the same file, so even the set
+    of categories that count as single-shot is data rather than policy code."""
+    if not SS_QUALITY_PATH.exists():
+        return {}
+    return json.loads(SS_QUALITY_PATH.read_text())
+
+
+def _ss_values(tbl: Dict[str, Any]) -> Dict[str, float]:
+    """C1's value for an SS request: cloud accuracy minus device accuracy, per dataset. Under the PLACEHOLDER
+    rule those are EQUAL (the placeholder sets cloud = measured device accuracy), so the gain is 0 and C1
+    values an SS request at the floor. That is the conservative reading and it is FLAGGED, not hidden: with
+    no measured cloud answer there is no evidence the cloud beats the device, and inventing a gain here would
+    put a made-up number into the ordering index of a frozen policy."""
+    out: Dict[str, float] = {}
+    for qt, e in (tbl.get("question_type_to_representation") or {}).items():
+        cloud, dev = e.get("cloud_accuracy"), e.get("_device_accuracy")
+        out[qt] = max(float(cloud) - float(dev), 1e-3) if (cloud is not None and dev is not None) else 1e-3
+    return out
 
 
 class HybridArm:
@@ -80,7 +131,7 @@ class HybridArm:
 
     def __init__(self, name: str = "hybrid-base", c1=False, c2=False, c3=False, c4=False, c5=False, c6=False,
                  k_r: float = 1.0, m_d: float = 0.05, defs: str = "v1", reserve: Optional[bool] = None,
-                 throttle_floor: int = 2, c3_always: bool = False) -> None:
+                 throttle_floor: int = 2, c3_always: bool = False, workload: str = "mixed") -> None:
         from arms_published import B7EdfFeasibilityArm
         self._b7 = B7EdfFeasibilityArm()
         self.name = name
@@ -108,7 +159,17 @@ class HybridArm:
         # until it completes or its deadline passes
         self._long_throttle: Dict[str, float] = {}
         self._risk_seen: set = set()
-        self.values = _quality_values() if any(self.sw.values()) else None
+        # D142 item 5 / the "both workloads" ruling: the robot question set is SELECTABLE, and the C1
+        # value term follows it. The capability is built for both; D142 item 1 rules that live policy
+        # EVALUATION uses LH-REQ only and never MIXED. Those are consistent: capability, not evaluation.
+        if workload not in WORKLOADS:
+            raise ValueError("workload must be one of %r" % (WORKLOADS,))
+        self.workload = workload
+        self.values = _quality_values(workload) if any(self.sw.values()) else None
+        self._ss_tbl = _ss_table() if any(self.sw.values()) else {}
+        self._ss_types = frozenset((self._ss_tbl.get("question_type_to_representation") or {}))
+        self._ss_values = _ss_values(self._ss_tbl)
+        self._ss_placeholder = bool(self._ss_tbl.get("_placeholder"))
         self.cap, self._last_adj = 8, None
         self.stats = Counter()
         self._roster: Dict[str, Any] = {}
@@ -184,10 +245,25 @@ class HybridArm:
                 d = RecallAction(q.query_id, "DEFER", defer_s=self._b7.defer_s)
             else:
                 d = RecallAction(q.query_id, "REJECT")
-            if self.sw["c3"] and self.c3_always and risk and d.decision == "CLOUD" and d.representation is None:
+            is_ss = bool(getattr(q, "category", None) in self._ss_types)
+            if is_ss:
+                self.stats["ss_seen"] += 1
+                if risk:
+                    self.stats["ss_at_risk"] += 1
+            # D142 item 3, C2 for single-shot. The SAME laxity test and the SAME k_r as the robot flag (no new
+            # threshold), consumed by the SAME dashcam throttle, which is the one C2 consumer D141 proved moves
+            # decisions (3,570) where the reserved slot was an ABSENT LINK (0 at both k_r). An SS request near
+            # its 2-s deadline therefore throttles dashcam frames exactly as an at-risk robot does.
+            #
+            # C3 is DELIBERATELY NOT applied to an SS request. An SS request carries no history, so RECENT and
+            # D2 are the SAME single image: degrading buys no quality (the declared input records them as
+            # equal, not ordered) while the coordinator would charge RECENT_WINDOW_TOKENS = 467 and answer on
+            # a truncated image prompt. The representation axis does not exist for this device type.
+            if self.sw["c3"] and self.c3_always and risk and not is_ss \
+                    and d.decision == "CLOUD" and d.representation is None:
                 d = RecallAction(q.query_id, "CLOUD", representation="RECENT")
                 self.stats["c3_always_recent"] += 1
-            if self.sw["c3"] and d.decision != "CLOUD":
+            if self.sw["c3"] and not is_ss and d.decision != "CLOUD":
                 est_r = float(C.recall_ttft_s(RECENT_TOKENS, "COLD"))
                 if est_r <= qs:
                     d = RecallAction(q.query_id, "CLOUD", representation="RECENT")
@@ -200,7 +276,8 @@ class HybridArm:
             if d.decision == "CLOUD":
                 items.append(dict(kind="recall", id=q.query_id, dl=q.deadline_s, slack=slack, risk=risk,
                                   work=float(C.recall_gpu_s(max(q.readiness_tokens, 1), q.readiness)),
-                                  value=(self.values or {}).get("recall", 0.1)))
+                                  value=(self._ss_values.get(q.category, 1e-3) if is_ss
+                                         else (self.values or {}).get("recall", 0.1))))
         # order
         def idx(it):
             return it["value"] * (1.0 / max(it["slack"], 0.1)) / max(it["work"], 1e-3)
@@ -437,6 +514,38 @@ CONFIGS.update({
     "hybrid2-c1c2k15": dict(c1=True, c2=True, k_r=1.5, defs="v2"),
     "hybrid2-c1c2k05c5-reserve": dict(c1=True, c2=True, c5=True, k_r=0.5, defs="v2", reserve=True),
     "hybrid2-c1c2k15c5-reserve": dict(c1=True, c2=True, c5=True, k_r=1.5, defs="v2", reserve=True),
+})
+
+# ---------------------------------------------------------------------------------------------------
+# D142: THE FROZEN POLICY. After the "policy-F ready" commit nothing in these two definitions changes;
+# any change is a new labelled version and every policy cell is redone (D79).
+#
+#   hybrid-F  = C1 + C2(k_r 1.5 s, dashcam throttle floor 2, at-risk dashcam exemption)
+#               + C3 (degrade to RECENT only when the full rebuild is predicted infeasible: the DEFAULT
+#                 C3, NOT the c3_always ablation, which D141 showed is a different policy)
+#               + C5 (dashcam-only AIMD cap); C4 inert; v2 definitions throughout.
+#   hybrid-F6 = hybrid-F + C6, flash's committed chooser (70be641) with delta = 0.0.
+#
+# c4 is left False rather than True. D141 recorded all-on as byte-identical to C1+C2+C3+C5 because C4
+# emits no session action, so the two spell the same policy; False is the one that cannot later diverge
+# if C4 ever stops being inert.
+#
+# delta = 0.0 is RECORDED, not tuned, and no tuning happens after the freeze. It means C6 deviates only
+# on a STRICT improvement in the rollout total (the comparison is `> delta`), so a tie keeps the
+# component's own proposal. With no committed scale for the objective's units, any non-zero delta would
+# be an invented number inside a frozen policy.
+CONFIGS.update({
+    "hybrid-F": dict(c1=True, c2=True, c3=True, c5=True, k_r=1.5, defs="v2",
+                     throttle_floor=2, c3_always=False, c4=False),
+    "hybrid-F6": dict(c1=True, c2=True, c3=True, c5=True, k_r=1.5, defs="v2",
+                      throttle_floor=2, c3_always=False, c4=False, c6=True),
+})
+# Both robot question sets selectable, as named arms so the workload is stated rather than inferred.
+# The "-lhreq" pair is what D142 item 1 evaluates; the bare pair carries the MIXED weighting and is
+# capability only.
+CONFIGS.update({
+    "hybrid-F-lhreq": dict(CONFIGS["hybrid-F"], workload="lh_req"),
+    "hybrid-F6-lhreq": dict(CONFIGS["hybrid-F6"], workload="lh_req"),
 })
 
 # C6 variants of every configuration (D138 follow-up): screening adds "<best>-c6" at 10 and 12 devices.

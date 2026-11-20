@@ -1,0 +1,68 @@
+{
+ "_what": "D142 item 3: the single-shot (assistive) quality table, as a DECLARED INPUT rather than policy code. Swapping these values for the measured 32B results is a DATA UPDATE and leaves the frozen policy untouched; putting them in policy code would make every swap a new labelled policy version with all cells redone under D79.",
+ "_status": "PLACEHOLDER",
+ "_placeholder": true,
+ "_placeholder_reason": "The 32B cloud answers for the SS pool do not exist yet. StudySS1-32B (01e5395) is the server wrapper; the answer pass had not run when this was written. Until it lands every number here is a STAND-IN and no SS accuracy figure derived from it may be reported as a measurement.",
+ "_device_answer_host": "Orin, vLLM, idle, one request at a time, cold per image",
+ "_device_answer_host_reason": "RESOLVED (was 'unconfirmed' in the first version of this file, corrected after reading results/casestudy/study_ss1/compare_gates.json on origin). The condition is ESTABLISHED BY the user's statement plus the Orin session's own StudySS1 report at 8492e02, NOT by a _provenance block: the five StudySS1 artifacts still carry none. So the attribution is as good as the user's word and no better, which is sufficient here and is stated rather than implied.",
+ "_when_measured_replace": "Replace cloud_accuracy and the D2/RECENT candidate accuracies with the StudySS1 32B values per dataset, set _placeholder false, add a _provenance block, and leave every other field alone.",
+ "_written": "2026-11-19T17:03:31",
+ "question_type_to_representation": {
+  "vizwiz": {
+   "representation": "D2",
+   "cloud_accuracy": 0.658717295670294,
+   "_cloud_accuracy_status": "PLACEHOLDER = measured device accuracy (vqa_accuracy 0.6587, n=4319). Replace with the 32B value when StudySS1-32B lands.",
+   "candidates": {
+    "D2": {
+     "accuracy": 0.658717295670294,
+     "n": 4319,
+     "unreliable": true,
+     "_status": "PLACEHOLDER = measured device accuracy; D2 and RECENT are EQUAL here because an SS request has no history, so both carry the same single image"
+    },
+    "RECENT": {
+     "accuracy": 0.658717295670294,
+     "n": 4319,
+     "unreliable": true,
+     "_status": "PLACEHOLDER = measured device accuracy; D2 and RECENT are EQUAL here because an SS request has no history, so both carry the same single image"
+    }
+   },
+   "_device_metric": "vqa_accuracy",
+   "_device_accuracy": 0.658717295670294,
+   "_device_accuracy_ci": [
+    0.645401713359574,
+    0.6720317203056263
+   ]
+  },
+  "egothink": {
+   "representation": "D2",
+   "cloud_accuracy": 0.4714285714285714,
+   "_cloud_accuracy_status": "PLACEHOLDER = measured device accuracy (containment 0.4714, n=700). Replace with the 32B value when StudySS1-32B lands.",
+   "candidates": {
+    "D2": {
+     "accuracy": 0.4714285714285714,
+     "n": 700,
+     "unreliable": true,
+     "_status": "PLACEHOLDER = measured device accuracy; D2 and RECENT are EQUAL here because an SS request has no history, so both carry the same single image"
+    },
+    "RECENT": {
+     "accuracy": 0.4714285714285714,
+     "n": 700,
+     "unreliable": true,
+     "_status": "PLACEHOLDER = measured device accuracy; D2 and RECENT are EQUAL here because an SS request has no history, so both carry the same single image"
+    }
+   },
+   "_device_metric": "containment",
+   "_device_accuracy": 0.4714285714285714,
+   "_device_accuracy_ci": [
+    0.4342857142857143,
+    0.5071428571428571
+   ]
+  }
+ },
+ "tables": {},
+ "_placeholder_rule": "cloud_accuracy = the MEASURED DEVICE accuracy for that dataset. This is conservative (it assumes the cloud answer is no better than the device answer, so C1 never values an SS cloud request above what the device already achieves) and it is MEASURED rather than invented. It is still a placeholder: the real cloud accuracy is unknown and could be higher or lower.",
+ "_metric_incomparability": "CHECK 4, and it bears on the item 4 headline. The three accuracy axes use THREE DIFFERENT METRICS and none is comparable to another: VizWiz is vqa_accuracy (consensus over 10 human answers), EgoThink is containment (judge), and the robot axis is exact-match letter. So an 'SS accuracy' figure may NOT be averaged across the two SS datasets, and SS accuracy may NOT be pooled with robot accuracy. Report them separately with the metric named.",
+ "_consequence_of_the_placeholder": "READ THIS BEFORE REPORTING ANY SS NUMBER. The placeholder sets cloud = device accuracy, so C1's value term for an SS request is the floor 1e-3, against 0.10627 for a robot and 0.090 for a dashcam: a ratio of about 106 to 1. C1 therefore ranks EVERY single-shot request last. So the frozen policy's SS behaviour is determined by a STAND-IN number, not by evidence, and an SS on-time or accuracy figure measured under this placeholder is NOT a finding about the policy. It is the expected artifact of valuing SS at the floor. When the 32B values land, C1's SS ordering changes and every SS cell must be rerun; the robot and dashcam axes are unaffected because their value terms do not read this file.",
+ "_stack_distinction": "DO NOT PLACE THESE SIDE BY SIDE WITH THE ROBOT DEVICE COST. The SS device numbers come from the ORIN3 vLLM stack; the committed device baseline for robot recall is the ORIN2 in-process harness (per D87, and unexercised per D103 item c). The two stacks never meet in a live number today, and they must not be joined in one. Label both; nothing is rerun.",
+ "_32b_status": "NOT AVAILABLE as of origin 3aac01d. compare_gates.json states the 32B answers are not on origin, so the comparison has not been run: commit 01e5395 adds only the 54-line server wrapper. The expected files are vizwiz_val_cloud32b.json and egothink_cloud32b.json. Until they land this table stays a placeholder and the consequence below applies."
+}
