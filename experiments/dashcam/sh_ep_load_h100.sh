@@ -2,7 +2,8 @@
 # StudySH-EP step 3, cost under load (D145; pre-registered as reports/study_sh_ep.md section 5b.4): the kit's EP-G and C1
 # on the 50 pre-registered shuffle-control clips (25 positive, 25 negative, EVAL), sent one request at a time by the
 # unchanged kit runner while the live2 harness runs a 16-device dashcam : robot background under b7-edf-feasibility on
-# the pinned round-1 32B server (two-type, the committed default ratio 50:50, the default robot question set, tight
+# the pinned round-1 32B server. BACKGROUND (user ruling 2026-11-20, after the two-type 50:50 load at 16 devices saturated
+# the engine): the frozen grid's three-type load exactly, 40:40:20 dashcam : LH-REQ robot : SS2 single-shot, tight
 # memory 27 GiB, enforcement on, seed 4). The background outlives the client: the client starts only once the background
 # has been sending for WARM_S, and is stopped (resumable, recorded as incomplete) if it is still running KILL_MARGIN_S
 # before the background ends, so it never straddles a run boundary (the harness preflight refuses on host Python).
@@ -19,7 +20,7 @@ RUN_S=${RUN_S:-3000}; WARM_S=${WARM_S:-300}; KILL_MARGIN_S=${KILL_MARGIN_S:-120}
 PY=$HOME/.venvs/fm-switching-vllm/bin/python
 CAL=results/orchestration/live2/calibration/live2_calibration_dense_jpeg.json
 O=results/dashcam/study_sh_ep/h100
-NAME=b7-edf-feasibility_n16_s4_${RUN_S}s_h27_2t_shep_load
+NAME=b7-edf-feasibility_n16_s4_${RUN_S}s_h27_3t_shep_load
 D=$HOME/data/live2/sh_ep_load/$NAME
 LOG=$O/sh_ep_load_driver.log
 OUTC=$O/sh_ep_requests_32BI_shep2-load.jsonl
@@ -28,7 +29,8 @@ mkdir -p $D
 [ "$(nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader | grep -c 4f1d7e47)" = "0" ] || { log "GPU 2 not idle: STOP"; exit 1; }
 log "start background $NAME (run_s $RUN_S), HEAD $(git rev-parse --short HEAD)"
 $PY experiments/orchestration/live2/run_live2_real.py --arm b7-edf-feasibility --n-devices 16 --run-s $RUN_S \
-  --host-tier-gib 27 --seed 4 --kv-capacity-enforced --mode A --calibration $CAL \
+  --host-tier-gib 27 --seed 4 --ratio 40:40:20 --robot-question-set lh_req --kv-capacity-enforced --ss-question-set ss2 \
+  --mode A --calibration $CAL \
   --decision-period-s 0.1 --mu-mode ewma --h-s 0.5 \
   --frame-manifest $HOME/data/live2/jpeg/combined_manifest.jsonl --frames-root $HOME/data/live2/frames_by_ref \
   --work $HOME/data/live2/sh_ep_load/work --server http://127.0.0.1:8031 --server-kind vllm --start-server \
@@ -56,6 +58,6 @@ rm -rf $O/load_background; mkdir -p $O/load_background; cp -r $D $O/load_backgro
 find $O/load_background -type f -size +5M ! -name "*.gz" -exec gzip -9 {} \;
 gzip -kf $OUTC
 git add $OUTC.gz $LOG $O/load_background experiments/dashcam/sh_ep_load_h100.sh results/dashcam/study_sh_ep/sh_ep_run_meta_32BI_shep2-load.json 2>/dev/null
-git commit -q -m "StudySH-EP-32B load: EP-G and C1 on the 50 shuffle-control clips under a 16-device dashcam : robot b7 background (section 5b.4)"
+git commit -q -m "StudySH-EP-32B load: EP-G and C1 on the 50 shuffle-control clips under the frozen grid three-type b7 background at 16 devices (section 5b.4, user ruling)"
 for i in 1 2 3; do git pull --rebase -q 2>/dev/null; git push -q 2>/dev/null && break; sleep 5; done
 log "pushed ($(git rev-parse --short HEAD))"
