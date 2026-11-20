@@ -1,0 +1,1529 @@
+{
+ "label": "StudySH-EP analysis. CPU only; every score is a committed SH-EP run record.",
+ "at": "2026-11-20T13:40:13.108172",
+ "seed": 0,
+ "n_bootstrap": 2000,
+ "horizons": [
+  0.5,
+  1.0,
+  1.5
+ ],
+ "fars": [
+  0.05,
+  0.1,
+  0.2
+ ],
+ "sudden_split_s": 1.5,
+ "positive_control": {
+  "label": "POSITIVE CONTROL: this scorer's own AP and crop code recomputing StudyE9c's committed |zero arms from the committed StudyD14b trace. A miss above 1e-9 is a STOP: the check is broken, or the metric is.",
+  "tol": 1e-09,
+  "sigma_fake_event_s": 2.890460072101262,
+  "n_positive_by_horizon": {
+   "0.5": 150,
+   "1.0": 106,
+   "1.5": 66
+  },
+  "committed_n_positive_by_horizon": {
+   "0.5": 150,
+   "1.0": 106,
+   "1.5": 66
+  },
+  "committed_sha256": {
+   "fake_event_times": "2ce83d466ca5ecfe311ddfe5a5cff665f13ccefc8820e094fd97097b8542a360",
+   "crop_index": "3d0ab77fce072258f7862537218bec34810730477bb44b52b98f469ce76cad60",
+   "target_index": "6b49d579683018af3f25b88bf04691d5b8cc3437ad9036a0cea72306579a6331"
+  },
+  "arms": {
+   "4BI_N1|zero": {
+    "mAP": 0.5223157117275791,
+    "ap": {
+     "0.5": 0.6726659082027187,
+     "1.0": 0.5479098773740375,
+     "1.5": 0.34637134960598104
+    },
+    "abs_diff": {
+     "mAP": 0.0,
+     "0.5": 0.0,
+     "1.0": 0.0,
+     "1.5": 5.551115123125783e-17
+    }
+   },
+   "32BI_N1|zero": {
+    "mAP": 0.636756194608048,
+    "ap": {
+     "0.5": 0.7813818075253031,
+     "1.0": 0.6349673089311239,
+     "1.5": 0.4939194673677171
+    },
+    "abs_diff": {
+     "mAP": 0.0,
+     "0.5": 1.1102230246251565e-16,
+     "1.0": 0.0,
+     "1.5": 5.551115123125783e-17
+    }
+   },
+   "32BI_N3|zero": {
+    "mAP": 0.6493273374047864,
+    "ap": {
+     "0.5": 0.7978459605726712,
+     "1.0": 0.6550854883405781,
+     "1.5": 0.49505056330111
+    },
+    "abs_diff": {
+     "mAP": 0.0,
+     "0.5": 0.0,
+     "1.0": 0.0,
+     "1.5": 5.551115123125783e-17
+    }
+   },
+   "4BI_N3 (SECONDARY)|zero": {
+    "mAP": 0.5331714750968822,
+    "ap": {
+     "0.5": 0.6900264676633734,
+     "1.0": 0.5466142585234391,
+     "1.5": 0.36287369910383444
+    },
+    "abs_diff": {
+     "mAP": 1.1102230246251565e-16,
+     "0.5": 0.0,
+     "1.0": 1.1102230246251565e-16,
+     "1.5": 5.551115123125783e-17
+    }
+   }
+  },
+  "failures": [],
+  "passed": true
+ },
+ "n_records": 27286,
+ "coverage": {
+  "4BI|C6": {
+   "clips_or_crops_missing": 300
+  },
+  "4BI|EP-B": {
+   "clips_or_crops_missing": 300
+  },
+  "4BI|EP-G": {
+   "clips_or_crops_missing": 300
+  }
+ },
+ "arms": {
+  "4BI|C1": {
+   "ap": {
+    "0.5": {
+     "ap": 0.6819005629891288,
+     "ci": [
+      0.6092609167337188,
+      0.760552123743379
+     ]
+    },
+    "1.0": {
+     "ap": 0.5790526895780943,
+     "ci": [
+      0.4898193773213731,
+      0.6892125552683919
+     ]
+    },
+    "1.5": {
+     "ap": 0.35279750632912,
+     "ci": [
+      0.2790679700409861,
+      0.47309045918020115
+     ]
+    }
+   },
+   "mAP": {
+    "value": 0.5379169196321144,
+    "ci": [
+     0.47066100191091437,
+     0.629228605592527
+    ]
+   }
+  },
+  "4BI|C3": {
+   "ap": {
+    "0.5": {
+     "ap": 0.6841071437598701,
+     "ci": [
+      0.6117377755207054,
+      0.7592009805665685
+     ]
+    },
+    "1.0": {
+     "ap": 0.5159989606523635,
+     "ci": [
+      0.43379394174235203,
+      0.635660214919984
+     ]
+    },
+    "1.5": {
+     "ap": 0.33730955737161017,
+     "ci": [
+      0.26937949936613115,
+      0.44292028916944753
+     ]
+    }
+   },
+   "mAP": {
+    "value": 0.5124718872612813,
+    "ci": [
+     0.45070274667724025,
+     0.5979710119405331
+    ]
+   }
+  },
+  "32BI|C1": {
+   "ap": {
+    "0.5": {
+     "ap": 0.782123257943234,
+     "ci": [
+      0.7079119587917986,
+      0.8563587892158823
+     ]
+    },
+    "1.0": {
+     "ap": 0.6629640764940867,
+     "ci": [
+      0.5582551734089126,
+      0.7771319163762527
+     ]
+    },
+    "1.5": {
+     "ap": 0.46931397206820546,
+     "ci": [
+      0.3665771665040995,
+      0.6280367012653755
+     ]
+    }
+   },
+   "mAP": {
+    "value": 0.6381337688351754,
+    "ci": [
+     0.5632017658108748,
+     0.7389254894557303
+    ]
+   }
+  },
+  "32BI|C3": {
+   "ap": {
+    "0.5": {
+     "ap": 0.7664975542556343,
+     "ci": [
+      0.6965598204455343,
+      0.8380885460645053
+     ]
+    },
+    "1.0": {
+     "ap": 0.6011955207471449,
+     "ci": [
+      0.5060615522686035,
+      0.7158870270314232
+     ]
+    },
+    "1.5": {
+     "ap": 0.46359488461681697,
+     "ci": [
+      0.35393581426063214,
+      0.6208972884476868
+     ]
+    }
+   },
+   "mAP": {
+    "value": 0.6104293198731987,
+    "ci": [
+     0.5387010300169471,
+     0.7078768056216626
+    ]
+   }
+  },
+  "32BI|C6": {
+   "ap": {
+    "0.5": {
+     "ap": 0.777514838271852,
+     "ci": [
+      0.7053712808796728,
+      0.8478289612170701
+     ]
+    },
+    "1.0": {
+     "ap": 0.6701787918358966,
+     "ci": [
+      0.5716371047915231,
+      0.7694058666978701
+     ]
+    },
+    "1.5": {
+     "ap": 0.4740642777568781,
+     "ci": [
+      0.36819851878809623,
+      0.6326082642572837
+     ]
+    }
+   },
+   "mAP": {
+    "value": 0.6405859692882089,
+    "ci": [
+     0.5651220332437088,
+     0.7345778799330837
+    ]
+   }
+  },
+  "32BI|EP-B": {
+   "ap": {
+    "0.5": {
+     "ap": 0.7768395096490803,
+     "ci": [
+      0.7067043209538623,
+      0.8463469384856401
+     ]
+    },
+    "1.0": {
+     "ap": 0.6629640764940867,
+     "ci": [
+      0.5582551734089126,
+      0.7771319163762527
+     ]
+    },
+    "1.5": {
+     "ap": 0.49084055020342077,
+     "ci": [
+      0.37005528991247466,
+      0.6335224493857412
+     ]
+    }
+   },
+   "mAP": {
+    "value": 0.6435480454488626,
+    "ci": [
+     0.568828121033515,
+     0.7298894413025471
+    ]
+   }
+  },
+  "32BI|EP-G": {
+   "ap": {
+    "0.5": {
+     "ap": 0.7308247787185715,
+     "ci": [
+      0.6582865241612927,
+      0.8078371054960883
+     ]
+    },
+    "1.0": {
+     "ap": 0.6026238208450534,
+     "ci": [
+      0.507683415648352,
+      0.7055705438339264
+     ]
+    },
+    "1.5": {
+     "ap": 0.4861088228160623,
+     "ci": [
+      0.36647322482975025,
+      0.6232822083406314
+     ]
+    }
+   },
+   "mAP": {
+    "value": 0.6065191407932291,
+    "ci": [
+     0.5255044234492047,
+     0.702267549939249
+    ]
+   }
+  }
+ },
+ "arms_dev_for_contrast": {
+  "4BI|C1": {
+   "mAP": 0.5406586953976238,
+   "ap": {
+    "0.5": 0.6766533529094392,
+    "1.0": 0.5496252621143607,
+    "1.5": 0.3956974711690715
+   },
+   "n_positive": 45,
+   "n_negative": 45
+  },
+  "4BI|C3": {
+   "mAP": 0.5298535382447612,
+   "ap": {
+    "0.5": 0.652326737751895,
+    "1.0": 0.5398362898651958,
+    "1.5": 0.397397587117193
+   },
+   "n_positive": 45,
+   "n_negative": 45
+  },
+  "32BI|C1": {
+   "mAP": 0.6305313118488884,
+   "ap": {
+    "0.5": 0.783736117530261,
+    "1.0": 0.6313555132467673,
+    "1.5": 0.47650230476963695
+   },
+   "n_positive": 45,
+   "n_negative": 45
+  },
+  "32BI|C3": {
+   "mAP": 0.6962808296166904,
+   "ap": {
+    "0.5": 0.8051448737797791,
+    "1.0": 0.7189268626375633,
+    "1.5": 0.5647707524327288
+   },
+   "n_positive": 45,
+   "n_negative": 45
+  },
+  "32BI|C6": {
+   "mAP": 0.6643479855762259,
+   "ap": {
+    "0.5": 0.7572815283425995,
+    "1.0": 0.7112130291702412,
+    "1.5": 0.5245493992158369
+   },
+   "n_positive": 45,
+   "n_negative": 45
+  },
+  "32BI|EP-B": {
+   "mAP": 0.6139493742132106,
+   "ap": {
+    "0.5": 0.761904658006757,
+    "1.0": 0.6313555132467673,
+    "1.5": 0.4485879513861073
+   },
+   "n_positive": 45,
+   "n_negative": 45
+  },
+  "32BI|EP-G": {
+   "mAP": 0.5788003857199736,
+   "ap": {
+    "0.5": 0.7129190218596436,
+    "1.0": 0.601854782066964,
+    "1.5": 0.42162735323331324
+   },
+   "n_positive": 45,
+   "n_negative": 45
+  }
+ },
+ "h1_gap": {
+  "C1": {
+   "gap": 0.10021684920306095,
+   "ci": [
+    0.03784413702764594,
+    0.16646135189910286
+   ]
+  },
+  "C3": {
+   "gap": 0.09795743261191736,
+   "ci": [
+    0.02455780713353001,
+    0.17524232708418053
+   ],
+   "vs_C1": {
+    "diff": -0.0022594165911435926,
+    "ci": [
+     -0.05844871390158733,
+     0.05314535816694658
+    ]
+   }
+  }
+ },
+ "h2_earliness": {
+  "C1|far5": {
+   "models": {
+    "4BI": {
+     "threshold": -1.7014131868435136,
+     "achieved_far": 0.0425531914893617,
+     "n_negative_instants": 1363,
+     "detected": 36
+    },
+    "32BI": {
+     "threshold": -4.63473042717952,
+     "achieved_far": 0.03374908290535583,
+     "n_negative_instants": 1363,
+     "detected": 56
+    }
+   },
+   "all": {
+    "n_both": 27,
+    "n_32BI_only": 29,
+    "n_4BI_only": 9,
+    "mean_lead_32BI": 3.3992962962962965,
+    "mean_lead_4BI": 3.2141111111111114,
+    "diff": 0.18518518518518517,
+    "ci": [
+     -0.5,
+     0.9033724340175945
+    ]
+   },
+   "sudden": {
+    "n_both": 16,
+    "n_32BI_only": 16,
+    "n_4BI_only": 4,
+    "mean_lead_32BI": 4.104875,
+    "mean_lead_4BI": 3.761125,
+    "diff": 0.34375,
+    "ci": [
+     -0.38472222222222224,
+     1.2308823529411759
+    ]
+   },
+   "slow": {
+    "n_both": 11,
+    "n_32BI_only": 13,
+    "n_4BI_only": 5,
+    "mean_lead_32BI": 2.373,
+    "mean_lead_4BI": 2.4184545454545456,
+    "diff": -0.045454545454545456,
+    "ci": [
+     -1.4375,
+     1.35
+    ]
+   }
+  },
+  "C1|far10": {
+   "models": {
+    "4BI": {
+     "threshold": -3.7732452873774647,
+     "achieved_far": 0.08657373440939105,
+     "n_negative_instants": 1363,
+     "detected": 63
+    },
+    "32BI": {
+     "threshold": -7.125793364385903,
+     "achieved_far": 0.06236243580337491,
+     "n_negative_instants": 1363,
+     "detected": 71
+    }
+   },
+   "all": {
+    "n_both": 51,
+    "n_32BI_only": 20,
+    "n_4BI_only": 12,
+    "mean_lead_32BI": 3.368196078431373,
+    "mean_lead_4BI": 3.260352941176471,
+    "diff": 0.10784313725490197,
+    "ci": [
+     -0.43524305555555554,
+     0.6945361635220121
+    ]
+   },
+   "sudden": {
+    "n_both": 24,
+    "n_32BI_only": 16,
+    "n_4BI_only": 7,
+    "mean_lead_32BI": 3.5089166666666665,
+    "mean_lead_4BI": 3.8214166666666665,
+    "diff": -0.31249999999999994,
+    "ci": [
+     -1.0500657894736842,
+     0.4783235785953174
+    ]
+   },
+   "slow": {
+    "n_both": 27,
+    "n_32BI_only": 4,
+    "n_4BI_only": 5,
+    "mean_lead_32BI": 3.2431111111111113,
+    "mean_lead_4BI": 2.76162962962963,
+    "diff": 0.48148148148148145,
+    "ci": [
+     -0.30359083850931673,
+     1.2862637362637332
+    ]
+   }
+  },
+  "C1|far20": {
+   "models": {
+    "4BI": {
+     "threshold": -6.002475727444491,
+     "achieved_far": 0.18488628026412326,
+     "n_negative_instants": 1363,
+     "detected": 77
+    },
+    "32BI": {
+     "threshold": -10.375031447183455,
+     "achieved_far": 0.12252384446074835,
+     "n_negative_instants": 1363,
+     "detected": 89
+    }
+   },
+   "all": {
+    "n_both": 71,
+    "n_32BI_only": 18,
+    "n_4BI_only": 6,
+    "mean_lead_32BI": 4.006577464788734,
+    "mean_lead_4BI": 3.7953098591549304,
+    "diff": 0.2112676056338028,
+    "ci": [
+     -0.3551019021739131,
+     0.80994849695186
+    ]
+   },
+   "sudden": {
+    "n_both": 37,
+    "n_32BI_only": 12,
+    "n_4BI_only": 4,
+    "mean_lead_32BI": 4.078621621621622,
+    "mean_lead_4BI": 4.348891891891893,
+    "diff": -0.2702702702702703,
+    "ci": [
+     -1.0395003556187767,
+     0.5588680926916219
+    ]
+   },
+   "slow": {
+    "n_both": 34,
+    "n_32BI_only": 6,
+    "n_4BI_only": 2,
+    "mean_lead_32BI": 3.928176470588236,
+    "mean_lead_4BI": 3.1928823529411767,
+    "diff": 0.7352941176470589,
+    "ci": [
+     -0.06101371951219512,
+     1.5151633522727272
+    ]
+   }
+  },
+  "C3|far5": {
+   "models": {
+    "4BI": {
+     "threshold": -1.3132616159068593,
+     "achieved_far": 0.034482758620689655,
+     "n_negative_instants": 1363,
+     "detected": 32
+    },
+    "32BI": {
+     "threshold": -5.0066843675684805,
+     "achieved_far": 0.02347762289068232,
+     "n_negative_instants": 1363,
+     "detected": 60
+    }
+   },
+   "all": {
+    "n_both": 25,
+    "n_32BI_only": 35,
+    "n_4BI_only": 7,
+    "mean_lead_32BI": 2.17732,
+    "mean_lead_4BI": 1.35732,
+    "diff": 0.82,
+    "ci": [
+     0.3333333333333334,
+     1.361217948717948
+    ]
+   },
+   "sudden": {
+    "n_both": 19,
+    "n_32BI_only": 16,
+    "n_4BI_only": 3,
+    "mean_lead_32BI": 1.9065789473684207,
+    "mean_lead_4BI": 1.0644736842105267,
+    "diff": 0.8421052631578947,
+    "ci": [
+     0.23529411764705882,
+     1.5625679347826082
+    ]
+   },
+   "slow": {
+    "n_both": 6,
+    "n_32BI_only": 19,
+    "n_4BI_only": 4,
+    "mean_lead_32BI": 3.034666666666667,
+    "mean_lead_4BI": 2.284666666666667,
+    "diff": 0.75,
+    "ci": [
+     0.1660714285714286,
+     1.3333333333333333
+    ]
+   }
+  },
+  "C3|far10": {
+   "models": {
+    "4BI": {
+     "threshold": -2.3502063576999026,
+     "achieved_far": 0.05649303008070433,
+     "n_negative_instants": 1363,
+     "detected": 41
+    },
+    "32BI": {
+     "threshold": -7.500544615167404,
+     "achieved_far": 0.07116654438738078,
+     "n_negative_instants": 1363,
+     "detected": 80
+    }
+   },
+   "all": {
+    "n_both": 37,
+    "n_32BI_only": 43,
+    "n_4BI_only": 4,
+    "mean_lead_32BI": 2.482513513513514,
+    "mean_lead_4BI": 2.482513513513514,
+    "diff": 0.0,
+    "ci": [
+     -0.4667647058823529,
+     0.4393939393939394
+    ]
+   },
+   "sudden": {
+    "n_both": 25,
+    "n_32BI_only": 20,
+    "n_4BI_only": 2,
+    "mean_lead_32BI": 2.09592,
+    "mean_lead_4BI": 2.2559199999999997,
+    "diff": -0.16,
+    "ci": [
+     -0.7381428571428572,
+     0.3333333333333333
+    ]
+   },
+   "slow": {
+    "n_both": 12,
+    "n_32BI_only": 23,
+    "n_4BI_only": 2,
+    "mean_lead_32BI": 3.2879166666666664,
+    "mean_lead_4BI": 2.954583333333334,
+    "diff": 0.3333333333333333,
+    "ci": [
+     -0.5,
+     1.1666666666666667
+    ]
+   }
+  },
+  "C3|far20": {
+   "models": {
+    "4BI": {
+     "threshold": -4.511047624525651,
+     "achieved_far": 0.13206162876008803,
+     "n_negative_instants": 1363,
+     "detected": 72
+    },
+    "32BI": {
+     "threshold": -9.500075302293771,
+     "achieved_far": 0.12839325018341893,
+     "n_negative_instants": 1363,
+     "detected": 88
+    }
+   },
+   "all": {
+    "n_both": 67,
+    "n_32BI_only": 21,
+    "n_4BI_only": 5,
+    "mean_lead_32BI": 3.1484776119402986,
+    "mean_lead_4BI": 3.029074626865672,
+    "diff": 0.11940298507462686,
+    "ci": [
+     -0.4307954545454546,
+     0.6642881604696673
+    ]
+   },
+   "sudden": {
+    "n_both": 39,
+    "n_32BI_only": 11,
+    "n_4BI_only": 4,
+    "mean_lead_32BI": 3.182666666666667,
+    "mean_lead_4BI": 3.272410256410257,
+    "diff": -0.08974358974358974,
+    "ci": [
+     -0.8500735294117647,
+     0.6721614583333317
+    ]
+   },
+   "slow": {
+    "n_both": 28,
+    "n_32BI_only": 10,
+    "n_4BI_only": 1,
+    "mean_lead_32BI": 3.1008571428571434,
+    "mean_lead_4BI": 2.6901428571428574,
+    "diff": 0.4107142857142857,
+    "ci": [
+     -0.3959375,
+     1.25
+    ]
+   }
+  }
+ },
+ "within_model_vs_C1": {
+  "4BI|C3": {
+   "mAP": 0.5124718872612813,
+   "mAP_C1": 0.5379169196321144,
+   "diff": -0.025445032370833065,
+   "ci": [
+    -0.07252193631889023,
+    0.02352102322640429
+   ]
+  },
+  "32BI|C3": {
+   "mAP": 0.6104293198731987,
+   "mAP_C1": 0.6381337688351754,
+   "diff": -0.027704448961976658,
+   "ci": [
+    -0.0910725372753503,
+    0.03241272604033553
+   ]
+  },
+  "32BI|C6": {
+   "mAP": 0.6405859692882089,
+   "mAP_C1": 0.6381337688351754,
+   "diff": 0.002452200453033515,
+   "ci": [
+    -0.06867625529217686,
+    0.068331924376344
+   ]
+  },
+  "32BI|EP-B": {
+   "mAP": 0.6435480454488626,
+   "mAP_C1": 0.6381337688351754,
+   "diff": 0.005414276613687208,
+   "ci": [
+    -0.04853677762862803,
+    0.05200533208681324
+   ]
+  },
+  "32BI|EP-G": {
+   "mAP": 0.6065191407932291,
+   "mAP_C1": 0.6381337688351754,
+   "diff": -0.03161462804194626,
+   "ci": [
+    -0.12479106635889774,
+    0.050664906591605996
+   ]
+  }
+ },
+ "controls": {
+  "grey": {
+   "32BI|n1": {
+    "n": 163,
+    "min": -18.62500001063748,
+    "max": -18.500000011869805,
+    "spread": 0.12499999876767376,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n2": {
+    "n": 63,
+    "min": -15.99999999961691,
+    "max": -15.750000032853846,
+    "spread": 0.24999996676306502,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n3": {
+    "n": 63,
+    "min": -17.750000022935325,
+    "max": -17.50000002920735,
+    "spread": 0.24999999372797532,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n4": {
+    "n": 30,
+    "min": -18.250000014697072,
+    "max": -18.125000016653964,
+    "spread": 0.12499999804310846,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n5": {
+    "n": 30,
+    "min": -18.250000015773672,
+    "max": -18.250000015313933,
+    "spread": 4.597389136051788e-10,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n6": {
+    "n": 30,
+    "min": -18.6250000108636,
+    "max": -18.375000013920218,
+    "spread": 0.2499999969433837,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n7": {
+    "n": 14,
+    "min": -18.750000009753553,
+    "max": -18.750000009716732,
+    "spread": 3.682032456708839e-11,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n8": {
+    "n": 14,
+    "min": -18.625000011224646,
+    "max": -18.50000001213765,
+    "spread": 0.12499999908699522,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n9": {
+    "n": 14,
+    "min": -18.6250000108636,
+    "max": -18.50000001213765,
+    "spread": 0.12499999872595069,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n10": {
+    "n": 14,
+    "min": -18.87500000890822,
+    "max": -18.750000009753553,
+    "spread": 0.12499999915466731,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n11": {
+    "n": 4,
+    "min": -18.875000009060383,
+    "max": -18.750000010094332,
+    "spread": 0.12499999896605019,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n12": {
+    "n": 4,
+    "min": -18.625000011265957,
+    "max": -18.625000011052222,
+    "spread": 2.1373480763031694e-10,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n13": {
+    "n": 4,
+    "min": -18.750000009639148,
+    "max": -18.750000009639148,
+    "spread": 0.0,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n14": {
+    "n": 4,
+    "min": -19.000000008070337,
+    "max": -18.750000010094332,
+    "spread": 0.2499999979760048,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n15": {
+    "n": 4,
+    "min": -18.75000000994217,
+    "max": -18.750000009639148,
+    "spread": 3.030216078059311e-10,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n16": {
+    "n": 4,
+    "min": -18.500000012351386,
+    "max": -18.500000011985488,
+    "spread": 3.658975344933424e-10,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n17": {
+    "n": 4,
+    "min": -18.625000011265957,
+    "max": -18.625000011265957,
+    "spread": 0.0,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n18": {
+    "n": 4,
+    "min": -18.875000008962555,
+    "max": -18.875000008672973,
+    "spread": 2.8958169195902883e-10,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n19": {
+    "n": 4,
+    "min": -18.875000008982436,
+    "max": -18.75000000982777,
+    "spread": 0.12499999915466731,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n20": {
+    "n": 4,
+    "min": -18.625000011093913,
+    "max": -18.375000013970425,
+    "spread": 0.24999999712348853,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "32BI|n21": {
+    "n": 4,
+    "min": -18.875000008773934,
+    "max": -18.625000011265957,
+    "spread": 0.2499999975079774,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   }
+  },
+  "grey_verdict": {
+   "cells": 21,
+   "all_within_quantum": true,
+   "all_exactly_constant": false,
+   "worst_spread": 0.2499999979760048
+  },
+  "shuffled_minus_ordered": {
+   "n": 1298,
+   "mean": 0.5220219479929781,
+   "mean_abs": 2.087684262925737,
+   "max_abs": 15.12313164158514,
+   "note": "a model that reads the episode as a sequence must be DISTURBED by shuffling; a mean absolute difference at the numerical floor says the frame order carries nothing and the episode conditions are bags of frames, not episodes"
+  },
+  "build_reports_zero_cached_tokens": {
+   "32BI": {
+    "zeros": 13171,
+    "hits": 6319,
+    "omits_instead_of_zero": false
+   },
+   "4BI": {
+    "zeros": 0,
+    "hits": 3,
+    "omits_instead_of_zero": true
+   }
+  },
+  "warm_path": {
+   "32BI|C1": {
+    "n": 3898,
+    "absent_on_first": 0,
+    "absent_later": 0,
+    "zero": 3898,
+    "hit": 0,
+    "cached_sum": 0,
+    "n_first": 300,
+    "mean_cached_tokens_on_hits": null,
+    "verdict": "no warm prefix ever"
+   },
+   "32BI|C3": {
+    "n": 3898,
+    "absent_on_first": 0,
+    "absent_later": 0,
+    "zero": 3895,
+    "hit": 3,
+    "cached_sum": 2064,
+    "n_first": 300,
+    "mean_cached_tokens_on_hits": 688.0,
+    "verdict": "warm path exercised"
+   },
+   "32BI|C6": {
+    "n": 3898,
+    "absent_on_first": 0,
+    "absent_later": 0,
+    "zero": 3875,
+    "hit": 23,
+    "cached_sum": 30272,
+    "n_first": 300,
+    "mean_cached_tokens_on_hits": 1316.1739130434783,
+    "verdict": "warm path exercised"
+   },
+   "32BI|EP-B": {
+    "n": 3898,
+    "absent_on_first": 0,
+    "absent_later": 0,
+    "zero": 1200,
+    "hit": 2698,
+    "cached_sum": 4679040,
+    "n_first": 300,
+    "mean_cached_tokens_on_hits": 1734.2624166048925,
+    "verdict": "warm path exercised"
+   },
+   "32BI|EP-G": {
+    "n": 3898,
+    "absent_on_first": 0,
+    "absent_later": 0,
+    "zero": 303,
+    "hit": 3595,
+    "cached_sum": 17417136,
+    "n_first": 300,
+    "mean_cached_tokens_on_hits": 4844.822253129346,
+    "verdict": "warm path exercised"
+   },
+   "4BI|C1": {
+    "n": 3898,
+    "absent_on_first": 300,
+    "absent_later": 3598,
+    "zero": 0,
+    "hit": 0,
+    "cached_sum": 0,
+    "n_first": 300,
+    "mean_cached_tokens_on_hits": null,
+    "verdict": "no warm prefix ever; this build omits the field instead of reporting 0, so absence here IS zero"
+   },
+   "4BI|C3": {
+    "n": 3898,
+    "absent_on_first": 300,
+    "absent_later": 3595,
+    "zero": 0,
+    "hit": 3,
+    "cached_sum": 2064,
+    "n_first": 300,
+    "mean_cached_tokens_on_hits": 688.0,
+    "verdict": "warm path exercised"
+   }
+  },
+  "stop_condition_5_fires": false,
+  "prompt_token_parity": {
+   "pairs": 7796,
+   "mismatched": 0,
+   "examples": [],
+   "note": "the brief requires the same prompt-token count per request pair; a mismatch means the two models are not reading the same prompt and no gap between them is a capability gap"
+  }
+ },
+ "deployment_pair": {
+  "label": "DEPLOYED DEVICE (Orin 4BI, vLLM) against DEPLOYED CLOUD (H100 32BI, vLLM). Cross-stack BY DESIGN: these are deployment conditions, not a backend mismatch. Identical inputs are therefore checked per request, not assumed.",
+  "hosts": {
+   "4BI": [
+    "nesl-orin-3"
+   ],
+   "32BI": [
+    "sn4622120321"
+   ]
+  },
+  "n_paired": 7796,
+  "by_condition": {
+   "C1": {
+    "n_paired": 3898,
+    "prompt_token_mismatches": 0,
+    "header_mismatches": 0,
+    "frame_sha256_mismatches": 0,
+    "examples": [],
+    "identical_inputs": true
+   },
+   "C3": {
+    "n_paired": 3898,
+    "prompt_token_mismatches": 0,
+    "header_mismatches": 0,
+    "frame_sha256_mismatches": 0,
+    "examples": [],
+    "identical_inputs": true
+   }
+  },
+  "identical_inputs": true
+ },
+ "cost": {
+  "32BI|C1": {
+   "requests": 3898,
+   "ttft_all_s": {
+    "n": 3898,
+    "p50": 0.130248,
+    "p90": 0.1323,
+    "mean": 0.1297748681375064
+   },
+   "ttft_cold_s": {
+    "n": 3898,
+    "p50": 0.130248,
+    "p90": 0.1323,
+    "mean": 0.1297748681375064
+   },
+   "ttft_warm_s": null,
+   "new_prompt_tokens": {
+    "n": 3898,
+    "p50": 378.0,
+    "p90": 378.0,
+    "mean": 378.0
+   },
+   "cached_tokens": {
+    "n": 3898,
+    "p50": 0.0,
+    "p90": 0.0,
+    "mean": 0.0
+   },
+   "uplink_image_bytes_total": 236872314,
+   "uplink_body_bytes_total": 318189348,
+   "kv_tokens_per_episode": {
+    "n": 300,
+    "p50": 4914.0,
+    "p90": 4914.0,
+    "mean": 4911.48
+   },
+   "prompt_tokens_per_episode": {
+    "n": 300,
+    "p50": 4914.0,
+    "p90": 4914.0,
+    "mean": 4911.48
+   },
+   "uplink_image_bytes_per_episode": {
+    "n": 300,
+    "p50": 784724.0,
+    "p90": 1120375.1,
+    "mean": 789574.38
+   }
+  },
+  "32BI|C3": {
+   "requests": 3898,
+   "ttft_all_s": {
+    "n": 3898,
+    "p50": 0.235685,
+    "p90": 0.24227479999999998,
+    "mean": 0.23529308568496665
+   },
+   "ttft_cold_s": {
+    "n": 3895,
+    "p50": 0.235687,
+    "p90": 0.24227659999999998,
+    "mean": 0.2353830801026958
+   },
+   "ttft_warm_s": {
+    "n": 3,
+    "p50": 0.117246,
+    "p90": 0.1209388,
+    "mean": 0.11845033333333334
+   },
+   "new_prompt_tokens": {
+    "n": 3898,
+    "p50": 1056.0,
+    "p90": 1056.0,
+    "mean": 1054.6885582349923
+   },
+   "cached_tokens": {
+    "n": 3898,
+    "p50": 0.0,
+    "p90": 0.0,
+    "mean": 0.5295023088763469
+   },
+   "uplink_image_bytes_total": 272789204,
+   "uplink_body_bytes_total": 366844759,
+   "kv_tokens_per_episode": {
+    "n": 300,
+    "p50": 13728.0,
+    "p90": 13728.0,
+    "mean": 13703.92
+   },
+   "prompt_tokens_per_episode": {
+    "n": 300,
+    "p50": 13728.0,
+    "p90": 13728.0,
+    "mean": 13710.8
+   },
+   "uplink_image_bytes_per_episode": {
+    "n": 300,
+    "p50": 903091.0,
+    "p90": 1295171.3,
+    "mean": 909297.3466666667
+   }
+  },
+  "32BI|C6": {
+   "requests": 3898,
+   "ttft_all_s": {
+    "n": 3898,
+    "p50": 0.3792105,
+    "p90": 0.4008482,
+    "mean": 0.3818454009748589
+   },
+   "ttft_cold_s": {
+    "n": 3875,
+    "p50": 0.379273,
+    "p90": 0.4008992,
+    "mean": 0.3833810172903226
+   },
+   "ttft_warm_s": {
+    "n": 23,
+    "p50": 0.1218,
+    "p90": 0.1274894,
+    "mean": 0.1231274347826087
+   },
+   "new_prompt_tokens": {
+    "n": 3898,
+    "p50": 2070.0,
+    "p90": 2070.0,
+    "mean": 2056.6829143150335
+   },
+   "cached_tokens": {
+    "n": 3898,
+    "p50": 0.0,
+    "p90": 0.0,
+    "mean": 7.766033863519754
+   },
+   "uplink_image_bytes_total": 326096068,
+   "uplink_body_bytes_total": 438914184,
+   "kv_tokens_per_episode": {
+    "n": 300,
+    "p50": 26910.0,
+    "p90": 26910.0,
+    "mean": 26723.166666666668
+   },
+   "prompt_tokens_per_episode": {
+    "n": 300,
+    "p50": 26910.0,
+    "p90": 26910.0,
+    "mean": 26824.073333333334
+   },
+   "uplink_image_bytes_per_episode": {
+    "n": 300,
+    "p50": 1067723.5,
+    "p90": 1559909.8,
+    "mean": 1086986.8933333333
+   }
+  },
+  "32BI|EP-B": {
+   "requests": 3898,
+   "ttft_all_s": {
+    "n": 3898,
+    "p50": 0.132414,
+    "p90": 0.15128960000000002,
+    "mean": 0.1308246680348897
+   },
+   "ttft_cold_s": {
+    "n": 1200,
+    "p50": 0.1439885,
+    "p90": 0.174153,
+    "mean": 0.14136750916666666
+   },
+   "ttft_warm_s": {
+    "n": 2698,
+    "p50": 0.1313805,
+    "p90": 0.1416506,
+    "mean": 0.12613548739807265
+   },
+   "new_prompt_tokens": {
+    "n": 3898,
+    "p50": 376.0,
+    "p90": 718.0,
+    "mean": 426.4889687018984
+   },
+   "cached_tokens": {
+    "n": 3898,
+    "p50": 1024.0,
+    "p90": 2704.0,
+    "mean": 1200.3694202154952
+   },
+   "uplink_image_bytes_total": 236872314,
+   "uplink_body_bytes_total": 319542009,
+   "kv_tokens_per_episode": {
+    "n": 300,
+    "p50": 5544.0,
+    "p90": 5544.0,
+    "mean": 5541.513333333333
+   },
+   "prompt_tokens_per_episode": {
+    "n": 300,
+    "p50": 21160.0,
+    "p90": 21160.0,
+    "mean": 21138.31333333333
+   },
+   "uplink_image_bytes_per_episode": {
+    "n": 300,
+    "p50": 784724.0,
+    "p90": 1120375.1,
+    "mean": 789574.38
+   }
+  },
+  "32BI|EP-G": {
+   "requests": 3898,
+   "ttft_all_s": {
+    "n": 3898,
+    "p50": 0.151437,
+    "p90": 0.1608885,
+    "mean": 0.18637187275525913
+   },
+   "ttft_cold_s": {
+    "n": 303,
+    "p50": 0.658339,
+    "p90": 0.6700134,
+    "mean": 0.6416803795379538
+   },
+   "ttft_warm_s": {
+    "n": 3595,
+    "p50": 0.150602,
+    "p90": 0.15825540000000002,
+    "mean": 0.14799677468706537
+   },
+   "new_prompt_tokens": {
+    "n": 3898,
+    "p50": 372.0,
+    "p90": 380.0,
+    "mean": 575.44638276039
+   },
+   "cached_tokens": {
+    "n": 3898,
+    "p50": 4736.0,
+    "p90": 6432.0,
+    "mean": 4468.223704463828
+   },
+   "uplink_image_bytes_total": 378397777,
+   "uplink_body_bytes_total": 511759380,
+   "kv_tokens_per_episode": {
+    "n": 300,
+    "p50": 7544.0,
+    "p90": 7544.0,
+    "mean": 7476.966666666666
+   },
+   "prompt_tokens_per_episode": {
+    "n": 300,
+    "p50": 66456.0,
+    "p90": 66456.0,
+    "mean": 65534.08666666667
+   },
+   "uplink_image_bytes_per_episode": {
+    "n": 300,
+    "p50": 1258893.5,
+    "p90": 1813604.1000000003,
+    "mean": 1261325.9233333333
+   }
+  },
+  "4BI|C1": {
+   "requests": 3898,
+   "ttft_all_s": {
+    "n": 3898,
+    "p50": 0.241568,
+    "p90": 0.2425763,
+    "mean": 0.24138365135967163
+   },
+   "ttft_cold_s": {
+    "n": 3898,
+    "p50": 0.241568,
+    "p90": 0.2425763,
+    "mean": 0.24138365135967163
+   },
+   "ttft_warm_s": null,
+   "new_prompt_tokens": {
+    "n": 3898,
+    "p50": 378.0,
+    "p90": 378.0,
+    "mean": 378.0
+   },
+   "cached_tokens": {
+    "n": 3898,
+    "p50": 0.0,
+    "p90": 0.0,
+    "mean": 0.0
+   },
+   "uplink_image_bytes_total": 236872314,
+   "uplink_body_bytes_total": 318173756,
+   "kv_tokens_per_episode": {
+    "n": 300,
+    "p50": 4914.0,
+    "p90": 4914.0,
+    "mean": 4911.48
+   },
+   "prompt_tokens_per_episode": {
+    "n": 300,
+    "p50": 4914.0,
+    "p90": 4914.0,
+    "mean": 4911.48
+   },
+   "uplink_image_bytes_per_episode": {
+    "n": 300,
+    "p50": 784724.0,
+    "p90": 1120375.1,
+    "mean": 789574.38
+   }
+  },
+  "4BI|C3": {
+   "requests": 3898,
+   "ttft_all_s": {
+    "n": 3898,
+    "p50": 0.5090425000000001,
+    "p90": 0.511976,
+    "mean": 0.5187319751154438
+   },
+   "ttft_cold_s": {
+    "n": 3895,
+    "p50": 0.509043,
+    "p90": 0.5119819999999999,
+    "mean": 0.5189391840821566
+   },
+   "ttft_warm_s": {
+    "n": 3,
+    "p50": 0.2496,
+    "p90": 0.2498744,
+    "mean": 0.2497056666666667
+   },
+   "new_prompt_tokens": {
+    "n": 3898,
+    "p50": 1056.0,
+    "p90": 1056.0,
+    "mean": 1054.6885582349923
+   },
+   "cached_tokens": {
+    "n": 3898,
+    "p50": 0.0,
+    "p90": 0.0,
+    "mean": 0.5295023088763469
+   },
+   "uplink_image_bytes_total": 272789204,
+   "uplink_body_bytes_total": 366805806,
+   "kv_tokens_per_episode": {
+    "n": 300,
+    "p50": 13728.0,
+    "p90": 13728.0,
+    "mean": 13703.92
+   },
+   "prompt_tokens_per_episode": {
+    "n": 300,
+    "p50": 13728.0,
+    "p90": 13728.0,
+    "mean": 13710.8
+   },
+   "uplink_image_bytes_per_episode": {
+    "n": 300,
+    "p50": 903091.0,
+    "p90": 1295171.3,
+    "mean": 909297.3466666667
+   }
+  }
+ },
+ "_provenance": {
+  "git_commit": "5337d5072970c27a20b0532f150690bde8aa6343",
+  "script": "sh_ep_score.py",
+  "model": "none",
+  "timestamp": "2026-11-20T13:40:15.630856",
+  "device": "cpu",
+  "n": 27286,
+  "args": {
+   "runs": [
+    "results/dashcam/study_sh_ep/sh_ep_requests_4BI_shep1.jsonl",
+    "results/dashcam/study_sh_ep/h100/sh_ep_requests_32BI_shep2-C1.jsonl.gz",
+    "results/dashcam/study_sh_ep/h100/sh_ep_requests_32BI_shep2-C3.jsonl.gz",
+    "results/dashcam/study_sh_ep/h100/sh_ep_requests_32BI_shep2-C6.jsonl.gz",
+    "results/dashcam/study_sh_ep/h100/sh_ep_requests_32BI_shep2-EP-B.jsonl.gz",
+    "results/dashcam/study_sh_ep/h100/sh_ep_requests_32BI_shep2-EP-G.jsonl.gz"
+   ],
+   "control_only": false
+  }
+ }
+}

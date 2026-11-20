@@ -491,3 +491,190 @@ run tag, so no `shep2` request can hit a `shep1` entry. All 28 reported 378 prom
 - The run's own consistency check 1 (this study's C1 against the committed D14b N = 1 scores, which
   differ by the JPEG wire format under D70: 30 to 40 percent of individual Nexar scores move by more
   than 1 nat, so the comparison is distributional and not per request).
+
+## 11. Interim results, 2026-11-20 (A6000; the 4B has C1 and C3 only)
+
+Committed scorer, committed crops, EVAL headline, paired clip bootstrap 2,000 at seed 0. The
+positive control passes first, as always: all four StudyE9c zero-latency arms reproduced to one unit
+in the last place. **The 4B has run C1 and C3 only**, so every 32B-minus-4B figure below is at those
+two conditions, and the episode conditions are so far 32B-only. Nothing here is a decision rule
+verdict; section 1's rule is applied once the pairs are complete.
+
+### 11.1 Confirming the planner's quick pass, and where it differs
+
+| quantity | planner, rank-based nearest instant | this run, committed scorer | verdict |
+|---|---|---|---|
+| 32B minus 4B, C1 | +0.098 [+0.04, +0.16] | **+0.1002 [+0.0378, +0.1665]** | **confirmed** |
+| 32B minus 4B, C3 | +0.088 | **+0.0980 [+0.0246, +0.1752]** | confirmed in sign and significance, 1.0 pp higher |
+| 32B C3 minus C1 | -0.028 | **-0.0277 [-0.0911, +0.0324]** | **confirmed** |
+| 32B C6 minus C1 | -0.026 | **+0.0025 [-0.0687, +0.0683]** | sign differs, both within noise |
+| 32B EP-B minus C1 | -0.005 | **+0.0054 [-0.0485, +0.0520]** | sign differs, both within noise |
+| 32B EP-G minus C1 | -0.064 | **-0.0316 [-0.1248, +0.0507]** | same sign, half the magnitude |
+| all four condition CIs include 0 | yes | **yes** | **confirmed** |
+| 32B TTFT p50, C1 | 0.130 | **0.1302** | **confirmed** |
+| 32B TTFT p50, EP-B | 0.132 | **0.1324** | **confirmed** |
+| 32B TTFT p50, C6 | 0.378 | **0.3792** | **confirmed** |
+
+The TTFT figures agree to three or four significant figures, so the two passes are reading the same
+runs. The AP differences are explained by the crop rule rather than by the data: the committed scorer
+applies the challenge's horizon-inclusion rule, so a positive clip enters h = 1.0 and h = 1.5 only if
+`time_of_event - time_of_alert > h`, giving **150 / 106 / 66** positives per horizon, while a nearest
+instant pass over all positives uses 150 at every horizon. That reweights the three per-horizon APs
+and moves mAP by a few points, unevenly across conditions. **No headline conclusion changes**: the
+32B beats the 4B at both available conditions, and no episode condition beats C1.
+
+### 11.2 H1: the first half holds, the second half does not
+
+**32B over 4B is real at both conditions**: +0.1002 at C1 and +0.0980 at C3, both CIs excluding zero.
+
+**The gap is not larger with episode context.** The C3-minus-C1 difference of the gap is
+**-0.0023 [-0.0584, +0.0531]**, and within the 32B no condition beats one frame:
+
+| 32B condition | mAP | minus C1 | CI |
+|---|---|---|---|
+| C1 | 0.6381 | reference | |
+| C3 | 0.6104 | -0.0277 | [-0.0911, +0.0324] |
+| C6 | 0.6406 | +0.0025 | [-0.0687, +0.0683] |
+| EP-B | 0.6435 | +0.0054 | [-0.0485, +0.0520] |
+| EP-G | 0.6065 | -0.0316 | [-0.1248, +0.0507] |
+
+Four conditions, four intervals containing zero, two of them negative. On the evidence so far,
+**more frames of the same episode do not make the 32B better at this task**, and the largest frame
+count, EP-G at up to 21, is the worst of the four. H1's second half is not supported, and it cannot
+yet be called a real negative: the 4B's episode conditions are still running, and the Rule 2
+classification waits for them.
+
+### 11.3 H2: the leads are indistinguishable; what the 32B wins is whether it warns at all
+
+Thresholds set on DEV negative instants, applied to EVAL. The paired lead difference is within noise
+in five of six cells, the exception being C3 at a 5 percent false-alarm rate (+0.82 s [+0.33, +1.36]).
+
+What is not within noise is the detection count:
+
+| cell | 32B detects | 4B detects | 32B achieved FAR | 4B achieved FAR |
+|---|---|---|---|---|
+| C1, far 5 % | **56** | 36 | 0.034 | 0.043 |
+| C1, far 10 % | **71** | 63 | 0.062 | 0.087 |
+| C1, far 20 % | **89** | 77 | 0.123 | 0.185 |
+| C3, far 5 % | **60** | 32 | 0.024 | 0.035 |
+| C3, far 10 % | **80** | 41 | 0.071 | 0.057 |
+| C3, far 20 % | **88** | 72 | 0.128 | 0.132 |
+
+Two things follow, and the second is a caveat against the 32B.
+
+The paired lead comparison is computed only on clips where **both** arms fire, which at C3 far 5 % is
+25 of 150 positives, because the 32B fires on 35 clips the 4B misses. So the lead columns describe a
+small, selected subset, and the counts beside them are the larger effect. The honest statement of H2
+on this evidence is **not** that the 32B warns earlier, it is that **at a matched false-alarm target
+the 32B warns on more clips, and warns no later on the clips both catch**.
+
+The caveat: the 4B's **achieved** EVAL false-alarm rate is above the 32B's in five of six cells, in
+one case 0.185 against 0.123 at a 0.20 target. The operating points are therefore not perfectly
+matched on EVAL and the mismatch favours the 4B, so the 32B's detection advantage above is a lower
+bound, not an inflated one.
+
+### 11.4 H3 is the strongest result in the study so far
+
+| 32B condition | frames at the last instant | TTFT p50 | against C1 | warm requests | median cached tokens |
+|---|---|---|---|---|---|
+| C1 | 1 | **0.1302** | 1.00x | 0 of 3,898 | 0 |
+| EP-B | up to 10 | **0.1324** | **1.02x** | 2,698 | 1,024 |
+| EP-G | up to 21 | **0.1514** | **1.16x** | 3,595 | 4,736 |
+| C3 | 3 | 0.2357 | 1.81x | 3 | 0 |
+| C6 | 6 | 0.3792 | 2.91x | 23 | 0 |
+
+**With the episode kept warm, a 21-frame evaluation costs 1.16 times a one-frame one.** The same
+information sent as a sliding window costs 1.81x at three frames and 2.91x at six. That is H3 as
+posed, and the contrast between EP-G and C6 is the mechanism rather than a coincidence: EP-G carries
+more than three times C6's frames at 40 percent of its TTFT, because its prefix is reused while C6
+rebuilds a different window every instant.
+
+The gate's marginal figure holds at full scale: EP-G's median new prompt tokens is **372** against a
+median **4,736** cached, so each added instant pays for its own frame and almost nothing else.
+
+**This matters most where H1 is weakest.** Episode context is nearly free, and on current evidence it
+also buys nothing in accuracy. A format that costs 1.02x and gains 0.005 mAP is not a bargain, it is
+an irrelevance, and the decision rule in section 1 is the right way to say so once the 4B's pairs land.
+
+### 11.5 The cost-under-load cell did not produce a measurement, and the ordering was my error
+
+The H100's load step was **stopped by the operator as saturated**, correctly, and is not a
+measurement. The two-type 50:50 background at 16 devices saturated the engine on its own: background
+TTFT p50 **47 s** over its last 400 requests, 38 requests running at once, two non-200s. The client
+saw C1 TTFT of 36 to 46 s against 0.1302 s unloaded and completed **11 of 1,300** requests.
+
+**All 11 were C1 and none was EP-G**, so the cell says nothing about the question it exists to ask.
+That part is my fault, not the engine's. I specified interleaving by clip, and the runner sorts by
+(clip, condition, instant), which puts C1 before EP-G inside every clip. That ordering is robust to
+background **drift**, which is what I designed it for, and defenceless against background
+**truncation**, which is the binding risk under saturation. EP-G should go first inside each clip, or
+the two should alternate by clip, so that a truncated run still carries both conditions.
+
+My pre-registered prediction in 5b.4, that `cached_tokens` would fall sharply under load, is
+therefore **untested**. The 11 records all show cached 0, but C1 is cold by construction, so they
+carry no information about it.
+
+The background also needs resizing, and the committed numbers say by how much. D144 records the
+three-type 40:40:20 dashcam offered load at 16 devices as **73 percent** of the committed 32B peak,
+and 20 devices as 97 percent and saturated. A two-type 50:50 cell raises the dashcam share by
+50/40, which puts 16 devices at roughly **91 percent** of peak before the client's own 1,300 requests
+are added, so saturation is what the committed arithmetic predicts. That is a **CONSTRUCTED** scaling
+from two committed figures, not a measurement. Scaled the same way, 12 devices sits near 68 percent
+and leaves headroom; the alternative is the frozen grid's own 40:40:20 cell at 16 devices, which is
+**measured** not to saturate (13,562 requests, 0 errors, scheduling lateness p99 0.15 ms). The choice
+between keeping the user's stated two-type shape at fewer devices and keeping 16 devices at the
+proven three-type mix is the user's.
+
+### 11.6 Controls
+
+| control | result |
+|---|---|
+| positive control | **PASS**, all four committed StudyE9c arms to 1 ulp |
+| prompt-token parity across the deployment pair | **7,796 pairs, 0 mismatched** |
+| grey frames | constant to the engine's logprob resolution: every grey score is an exact multiple of **1/8 nat** at P(Yes) about 8e-9, with `mass_no` 1.0 in all 280 rows. Worst spread 0.25 nats, one or two representation steps |
+| shuffled context order | **mean absolute change 2.09 nats, max 15.1** over 1,298 pairs, so frame order carries real information and the episode conditions are not bags of frames |
+| warm path | exercised on C3, C6, EP-B and EP-G; C1 has no reusable prefix by construction |
+| stop condition 5 | **does not fire** |
+
+Two of these controls failed on my first pass and both failures were mine, not the study's.
+
+The grey control failed on **exact equality**. A score of log P(Yes) at the bottom of a top-20 list is
+quantised, and demanding bit equality of it is the wrong test; the right one is constancy of the
+answer plus a spread inside the quantum, and the quantum is now measured and reported rather than
+assumed.
+
+The warm-path control fired **stop condition 5 on the 4B's C1**, where every request is cold by
+construction. The cause is a build difference: measured over 7,796 records, the H100's build emits
+`cached_tokens` 0 on a cold request 13,171 times, while the Orin's vLLM 0.20.0 emits a zero **never**
+and omits the field instead, reporting it only on the 3 requests that hit. For that build absence IS
+zero and no read is missing, so the stop now fires only for a build that reports neither zeros nor
+hits anywhere. Left unfixed, the study would have stopped on a difference of spelling.
+
+### 11.7 DEV beside EVAL, for contrast only
+
+DEV is where the calibration is fitted, so these are not held-out numbers and are never the headline.
+They are shown because a large EVAL-minus-DEV gap would mean the split is doing more work than the
+condition.
+
+| arm | EVAL | DEV (45 + 45 clips) | EVAL minus DEV |
+|---|---|---|---|
+| 32BI C1 | 0.6381 | 0.6305 | +0.008 |
+| 32BI C3 | 0.6104 | 0.6963 | **-0.086** |
+| 32BI C6 | 0.6406 | 0.6643 | -0.024 |
+| 32BI EP-B | 0.6435 | 0.6139 | +0.030 |
+| 32BI EP-G | 0.6065 | 0.5788 | +0.028 |
+| 4BI C1 | 0.5379 | 0.5407 | -0.003 |
+| 4BI C3 | 0.5125 | 0.5299 | -0.017 |
+
+Six of seven arms sit within 0.03 of their DEV value, which is reassuring at 90 DEV clips. The
+exception is **32B C3 at -0.086**: C3 is the one condition whose ranking would change materially if
+DEV were the headline, and it is also the condition whose gap figure differs most from the planner's
+pass. Both point the same way, that C3's three-frame sliding window is the least stable arm here, and
+it is worth remembering when its numbers are read.
+
+### 11.8 What is still missing
+
+The 4B's C6, EP-B and EP-G, which are running. Until they land, the pairs exist only at C1 and C3, so
+H1's episode half rests on 32B-only contrasts, and the section 1 decision rule is not applied. The
+cost-under-load cell needs a background the engine can sustain. The RefSpatial and single-shot work
+queued for the Orin is independent of all of this.

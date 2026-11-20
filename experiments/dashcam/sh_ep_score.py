@@ -330,6 +330,33 @@ def main():
             res["arms"][f"{m}|{cd}"] = o
             boot[(m, cd)] = bs
 
+    # ---- the same headline on DEV, FOR CONTRAST ONLY (user request)
+    # DEV is where the calibration is fitted, so a DEV number is not a held-out result and is never
+    # the headline. It is reported beside EVAL because a large EVAL-minus-DEV gap on the same arm
+    # would say the split is doing more work than the condition, which is worth seeing rather than
+    # assuming away.
+    pos_d = [c for c in ctx["pos"] if side[c] == "DEV"]
+    neg_d = [c for c in ctx["neg"] if side[c] == "DEV"]
+    res["arms_dev_for_contrast"] = {}
+    if pos_d and neg_d:
+        for m in MODELS:
+            for cd in CONDITIONS:
+                aps = {}
+                for h in HORIZONS:
+                    P = np.array([present[(m, cd, c, h)] for c in pos_d
+                                  if h in incl[c] and (m, cd, c, h) in present])
+                    N = np.array([present[(m, cd, c, h)] for c in neg_d
+                                  if (m, cd, c, h) in present])
+                    if not len(P) or not len(N):
+                        aps = {}
+                        break
+                    aps[h] = ap_step(P, N)
+                if aps:
+                    res["arms_dev_for_contrast"][f"{m}|{cd}"] = dict(
+                        mAP=float(np.mean(list(aps.values()))),
+                        ap={str(h): aps[h] for h in HORIZONS},
+                        n_positive=len(pos_d), n_negative=len(neg_d))
+
     # ---- H1: the 32B minus 4B gap per condition, and that gap against C1's
     res["h1_gap"] = {}
     for cd in CONDITIONS:
@@ -383,6 +410,25 @@ def main():
             if len(cell) == 2:
                 res["h2_earliness"][f"{cd}|far{int(far * 100)}"] = earliness_diff(
                     cell, pos_e, lead, boots, [c for c in pos_e])
+    # ---- within one model: each condition against C1, paired by clip
+    # H1's second half is whether the gap is LARGER with episode context than with one frame, and
+    # that needs the condition contrast INSIDE a model, not only the 32B minus 4B gap. Paired on
+    # the same bootstrap resamples as everything else, so the intervals are comparable.
+    res["within_model_vs_C1"] = {}
+    for m in MODELS:
+        if (m, "C1") not in boot:
+            continue
+        base = boot[(m, "C1")].mean(0)
+        for cd in CONDITIONS:
+            if cd == "C1" or (m, cd) not in boot:
+                continue
+            dd = boot[(m, cd)].mean(0) - base
+            res["within_model_vs_C1"][f"{m}|{cd}"] = dict(
+                mAP=res["arms"][f"{m}|{cd}"]["mAP"]["value"],
+                mAP_C1=res["arms"][f"{m}|C1"]["mAP"]["value"],
+                diff=(res["arms"][f"{m}|{cd}"]["mAP"]["value"]
+                      - res["arms"][f"{m}|C1"]["mAP"]["value"]),
+                ci=[float(np.percentile(dd, 2.5)), float(np.percentile(dd, 97.5))])
     res["controls"] = controls(a.runs, runs, side)
     res["deployment_pair"] = deployment_pair(a.runs)
     res["cost"] = cost(runs)
@@ -428,8 +474,6 @@ def earliness_diff(cell, pos_e, lead, boots, order):
     return out
 
 
-if __name__ == "__main__":
-    main()
 
 
 def controls(paths, runs, side):
@@ -452,10 +496,28 @@ def controls(paths, runs, side):
                     shuf.append(r)
     out = {}
     # 1. grey frames: a constant input must give a constant score
-    out["grey"] = {f"{m}|n{n}": dict(n=len(v), min=min(v), max=max(v),
-                                     spread=max(v) - min(v),
-                                     constant=bool(max(v) - min(v) < 1e-9))
-                   for (m, n), v in sorted(grey.items())}
+    # A grey frame is a CONSTANT INPUT, so its score must be constant. Exact equality is the
+    # wrong test here and the first version of this control failed on it: P(Yes) on grey is about
+    # 8e-9, which sits at the bottom of the top-20 logprob list where the engine reports values
+    # QUANTISED to 1/8 nat. Measured on 280 grey rows, every score is an exact multiple of 1/8 and
+    # mass_no is 1.0 throughout, so the spread of 0.125 to 0.25 nats is one or two representation
+    # steps on a probability of 1e-8, not a change in the model's answer. The test is therefore
+    # constancy of the ANSWER plus a spread within the observed quantum, and the quantum is
+    # reported so the reader can see what the tolerance is.
+    QUANTUM = 0.25
+    out["grey"] = {f"{m}|n{n}": dict(
+        n=len(v), min=min(v), max=max(v), spread=max(v) - min(v),
+        constant_exactly=bool(max(v) - min(v) < 1e-9),
+        within_logprob_quantum=bool(max(v) - min(v) <= QUANTUM + 1e-9),
+        quantum_nats=QUANTUM,
+        note="score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that "
+             "magnitude, so constancy is judged to that resolution")
+        for (m, n), v in sorted(grey.items())}
+    out["grey_verdict"] = dict(
+        cells=len(out["grey"]),
+        all_within_quantum=all(v["within_logprob_quantum"] for v in out["grey"].values()),
+        all_exactly_constant=all(v["constant_exactly"] for v in out["grey"].values()),
+        worst_spread=(max((v["spread"] for v in out["grey"].values()), default=None)))
     # 2. shuffled context order against the ordered request at the same instant
     d = []
     for r in shuf:
@@ -500,13 +562,44 @@ def controls(paths, runs, side):
         else:
             w["hit"] += 1
             w["cached_sum"] += int(r["cached_tokens"])
+    # Does this BUILD ever report a zero, or does it omit the field instead? Measured per model
+    # over every record, because the two builds in this study differ exactly here: the H100's
+    # emits cached_tokens 0 on a cold request, the Orin's vLLM 0.20.0 OMITS the field. On 7,796
+    # records the Orin never emits a zero and never omits the field on a request that DID hit, so
+    # for that build absence IS zero and carries no missing read. Stop condition 5 asks whether
+    # the instrument reads at all, so it fires only for a build that reports NEITHER zeros nor
+    # hits anywhere. The first version of this control fired on the Orin's C1, where every request
+    # is cold by construction, which would have stopped the study on a difference of spelling.
+    emits_zero, emits_hit = defaultdict(int), defaultdict(int)
+    for r in raw:
+        if r.get("control") or r.get("error") or r.get("prompt_tokens") is None:
+            continue
+        if r.get("cached_tokens_present"):
+            (emits_hit if r.get("cached_tokens") else emits_zero)[r["model"]] += 1
+    out["build_reports_zero_cached_tokens"] = {
+        m: dict(zeros=emits_zero[m], hits=emits_hit[m],
+                omits_instead_of_zero=bool(emits_zero[m] == 0 and emits_hit[m] > 0))
+        for m in sorted(set(emits_zero) | set(emits_hit))}
+
+    def _verdict(model, v):
+        omits = (out["build_reports_zero_cached_tokens"].get(model, {})
+                 .get("omits_instead_of_zero", False))
+        absent = v["absent_on_first"] + v["absent_later"]
+        if absent == v["n"] and v["hit"] == 0 and not omits:
+            return "INSTRUMENT NEVER READS"
+        if absent == v["n"] and omits:
+            return ("no warm prefix ever; this build omits the field instead of reporting 0, so "
+                    "absence here IS zero")
+        if v["hit"] == 0:
+            return "no warm prefix ever"
+        return "warm path exercised"
+
     out["warm_path"] = {k: dict(
         v, mean_cached_tokens_on_hits=(v["cached_sum"] / v["hit"] if v["hit"] else None),
-        verdict=("INSTRUMENT NEVER READS" if v["absent_later"] + v["absent_on_first"] == v["n"]
-                 else "absent only where a hit was impossible (a build difference, not a dead "
-                      "read)" if v["absent_later"] == 0 and v["absent_on_first"]
-                 else "no warm prefix ever" if v["hit"] == 0 else "warm path exercised"))
+        verdict=_verdict(k.split("|")[0], v))
         for k, v in sorted(warm.items())}
+    out["stop_condition_5_fires"] = any(
+        x["verdict"] == "INSTRUMENT NEVER READS" for x in out["warm_path"].values())
     # 4. prompt-token parity between the two models on the same request
     pt = defaultdict(dict)
     for r in raw:
@@ -554,7 +647,8 @@ def cost(runs):
     out = {}
     for k, v in sorted(by.items()):
         epi = [e for (m, cd, c), e in ep.items() if f"{m}|{cd}" == k]
-        out[k] = dict(requests=v["n"], ttft_cold_s=q(v["cold"]), ttft_warm_s=q(v["warm"]),
+        out[k] = dict(requests=v["n"], ttft_all_s=q(v["cold"] + v["warm"]),
+                      ttft_cold_s=q(v["cold"]), ttft_warm_s=q(v["warm"]),
                       new_prompt_tokens=q(v["new_tok"]), cached_tokens=q(v["cached"]),
                       uplink_image_bytes_total=v["up"], uplink_body_bytes_total=v["body"],
                       kv_tokens_per_episode=q([e["prompt"] - e["cached"] for e in epi]),
@@ -610,3 +704,7 @@ def deployment_pair(paths):
     out["identical_inputs"] = (all(v["identical_inputs"] for v in out["by_condition"].values())
                                if out["by_condition"] else None)
     return out
+
+
+if __name__ == "__main__":
+    main()
