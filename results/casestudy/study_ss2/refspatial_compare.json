@@ -1,0 +1,538 @@
+{
+ "study": "StudySS2",
+ "pass_": "device_vs_cloud_compare",
+ "dataset": "refspatial",
+ "study_label_source": "read from the device and cloud result files, not hardcoded",
+ "no_verdict": "numbers only. D136's gate call is the user's and is deliberately not made here, including by implication in ordering or framing.",
+ "pairing": {
+  "n_device": 277,
+  "n_cloud": 277,
+  "n_paired": 277,
+  "n_device_only": 0,
+  "n_cloud_only": 0
+ },
+ "exclusion_sets": {
+  "note": "TWO DISTINCT SETS, deliberately NOT merged into one 'excluded' flag, because they damage different axes.",
+  "shared_images": {
+   "n": 186,
+   "n_in_paired": 186,
+   "mechanism": "warm multimodal encoder cache, keyed by image CONTENT",
+   "axis_affected": "TTFT ONLY; accuracy is unaffected, both models answered the same pixels"
+  },
+  "below_min_pixels": {
+   "n": 0,
+   "n_in_paired": 0,
+   "mechanism": "image area below the 65,536 px min_pixels floor, so the DEVICE upscaled to the floor and the cloud (floor 4,096) did not",
+   "axis_affected": "ACCURACY AND TTFT. The two models were shown DIFFERENT PIXELS, so a 2x2 cell on one of these reflects partly that the device got a larger rendering of the same photo. This is NOT only a token-count issue."
+  },
+  "overlap": {
+   "n_intersection": 0,
+   "n_union": 186,
+   "disjoint": true,
+   "note": "the fully clean subset is the paired set minus the UNION, not minus the sum of the two sizes unless they are disjoint."
+  },
+  "fully_clean_n": 91
+ },
+ "shared_image_exclusion": {
+  "n_shared_qids_supplied": 186,
+  "n_shared_in_paired": 186,
+  "rule": "the repeated-image structure is a property of the DATASET itself, so it was present on both sides. The exclusion is therefore applied to BOTH columns or NEITHER: excluding from the cloud column alone would compare a cleaned column against an uncleaned one, an asymmetry introduced by the cleaning rather than by the data.",
+  "key": "sha256 of the image as staged (PIL re-encode of the DECODED pixels), i.e. pixel content: the multimodal cache is keyed by processed image content, so byte-different but pixel-identical source images also hit (the source-byte key undercounted RefSpatial by 6)",
+  "order_check": "manifest (run) order",
+  "register_as_supplied": "constructed bound; TTFT-only (accuracy unaffected)",
+  "register_after_counter_check": {
+   "observed_mm_cache_hits_cumulative": 186,
+   "prior_stamp_subtracted": 0,
+   "observed_mm_cache_hits_this_dataset": 186,
+   "candidate_questions": 186,
+   "equal": true,
+   "register": "CENSUS: the observed per-dataset multimodal hit count equals the candidate count, so the exclusion set is exactly the set of warm-served questions, not an upper bound on it."
+  },
+  "identifier_dedup_would_have_missed_this": "the key is a sha256 of the DECODED pixels, not of the source bytes and not the identifier. The source-byte key undercounted RefSpatial by 6, and an identifier key cannot see this class at all: the multimodal cache is keyed by processed image content, so byte-different but pixel-identical images still hit it."
+ },
+ "prompt_token_parity": {
+  "n": 277,
+  "n_identical": 277,
+  "frac_identical": 1.0,
+  "diff_cloud_minus_device": {
+   "min": 0,
+   "median": 0,
+   "max": 0,
+   "mean": 0.0,
+   "n_distinct": 1,
+   "direction": "identical throughout"
+  },
+  "verdict": "IDENTICAL COUNTS on every question: identical visual input, CONFOUND CLEARED (subject to the vision-config dependency above)"
+ },
+ "below_min_pixels_strata": null,
+ "full_set": {
+  "n_pairs": 277,
+  "device_accuracy": {
+   "mean": 0.250903,
+   "n": 277,
+   "ci95": [
+    0.202166,
+    0.303249
+   ]
+  },
+  "cloud_accuracy": {
+   "mean": 0.37144,
+   "n": 277,
+   "ci95": [
+    0.315283,
+    0.427998
+   ]
+  },
+  "paired_difference": {
+   "delta_cloud_minus_device": 0.120538,
+   "ci95": [
+    0.059366,
+    0.182912
+   ],
+   "n_pairs": 277,
+   "n_boot": 10000
+  },
+  "two_by_two": {
+   "both_right": 45,
+   "cloud_only": 58,
+   "device_only": 25,
+   "both_wrong": 149,
+   "n": 277,
+   "cut": 0.5
+  },
+  "two_by_two_cut_sensitivity": null,
+  "ttft": {
+   "device": {
+    "n": 277,
+    "p50": 0.1528,
+    "p90": 0.21,
+    "mean": 0.1658,
+    "min": 0.1362,
+    "max": 0.2162
+   },
+   "cloud": {
+    "n": 277,
+    "p50": 0.0848,
+    "p90": 0.1266,
+    "mean": 0.0932,
+    "min": 0.0621,
+    "max": 0.1545
+   },
+   "n_ttft": 277,
+   "denominator_note": "TTFT uses its OWN denominator when the shared-image set is supplied: those questions are a warm-cache timing artifact and must leave the TTFT column, but they do NOT contaminate accuracy and are kept in it."
+  },
+  "by_stratum": {
+   "split=location": {
+    "device": {
+     "mean": 0.335,
+     "n": 100,
+     "ci95": [
+      0.245,
+      0.43
+     ]
+    },
+    "cloud": {
+     "mean": 0.513333,
+     "n": 100,
+     "ci95": [
+      0.416667,
+      0.61
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.178333,
+     "ci95": [
+      0.075,
+      0.285
+     ],
+     "n_pairs": 100,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 26,
+     "cloud_only": 25,
+     "device_only": 8,
+     "both_wrong": 41,
+     "n": 100,
+     "cut": 0.5
+    }
+   },
+   "split=placement": {
+    "device": {
+     "mean": 0.23,
+     "n": 100,
+     "ci95": [
+      0.15,
+      0.32
+     ]
+    },
+    "cloud": {
+     "mean": 0.285556,
+     "n": 100,
+     "ci95": [
+      0.2,
+      0.371111
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.055556,
+     "ci95": [
+      -0.053333,
+      0.161111
+     ],
+     "n_pairs": 100,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 11,
+     "cloud_only": 18,
+     "device_only": 12,
+     "both_wrong": 59,
+     "n": 100,
+     "cut": 0.5
+    }
+   },
+   "split=unseen": {
+    "device": {
+     "mean": 0.168831,
+     "n": 77,
+     "ci95": [
+      0.090909,
+      0.25974
+     ]
+    },
+    "cloud": {
+     "mean": 0.298701,
+     "n": 77,
+     "ci95": [
+      0.194805,
+      0.402597
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.12987,
+     "ci95": [
+      0.025974,
+      0.233766
+     ],
+     "n_pairs": 77,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 8,
+     "cloud_only": 15,
+     "device_only": 5,
+     "both_wrong": 49,
+     "n": 77,
+     "cut": 0.5
+    }
+   }
+  }
+ },
+ "shared_images_excluded": {
+  "n_pairs": 91,
+  "device_accuracy": {
+   "mean": 0.258242,
+   "n": 91,
+   "ci95": [
+    0.17033,
+    0.351648
+   ]
+  },
+  "cloud_accuracy": {
+   "mean": 0.412698,
+   "n": 91,
+   "ci95": [
+    0.313797,
+    0.516484
+   ]
+  },
+  "paired_difference": {
+   "delta_cloud_minus_device": 0.154457,
+   "ci95": [
+    0.043956,
+    0.269231
+   ],
+   "n_pairs": 91,
+   "n_boot": 10000
+  },
+  "two_by_two": {
+   "both_right": 17,
+   "cloud_only": 21,
+   "device_only": 7,
+   "both_wrong": 46,
+   "n": 91,
+   "cut": 0.5
+  },
+  "two_by_two_cut_sensitivity": null,
+  "ttft": {
+   "device": {
+    "n": 91,
+    "p50": 0.1984,
+    "p90": 0.2115,
+    "mean": 0.1955,
+    "min": 0.1511,
+    "max": 0.2162
+   },
+   "cloud": {
+    "n": 91,
+    "p50": 0.1218,
+    "p90": 0.1324,
+    "mean": 0.1179,
+    "min": 0.1026,
+    "max": 0.1545
+   },
+   "n_ttft": 91,
+   "denominator_note": "TTFT uses its OWN denominator when the shared-image set is supplied: those questions are a warm-cache timing artifact and must leave the TTFT column, but they do NOT contaminate accuracy and are kept in it."
+  },
+  "by_stratum": {
+   "split=location": {
+    "device": {
+     "mean": 0.286885,
+     "n": 61,
+     "ci95": [
+      0.180328,
+      0.401639
+     ]
+    },
+    "cloud": {
+     "mean": 0.42623,
+     "n": 61,
+     "ci95": [
+      0.311475,
+      0.557377
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.139344,
+     "ci95": [
+      0.008197,
+      0.270492
+     ],
+     "n_pairs": 61,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 13,
+     "cloud_only": 13,
+     "device_only": 5,
+     "both_wrong": 30,
+     "n": 61,
+     "cut": 0.5
+    }
+   },
+   "split=placement": {
+    "device": {
+     "mean": 0.2,
+     "n": 30,
+     "ci95": [
+      0.066667,
+      0.366667
+     ]
+    },
+    "cloud": {
+     "mean": 0.385185,
+     "n": 30,
+     "ci95": [
+      0.218519,
+      0.551852
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.185185,
+     "ci95": [
+      -0.014815,
+      0.385185
+     ],
+     "n_pairs": 30,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 4,
+     "cloud_only": 8,
+     "device_only": 2,
+     "both_wrong": 16,
+     "n": 30,
+     "cut": 0.5
+    }
+   }
+  }
+ },
+ "clean": {
+  "n_pairs": 277,
+  "device_accuracy": {
+   "mean": 0.250903,
+   "n": 277,
+   "ci95": [
+    0.202166,
+    0.303249
+   ]
+  },
+  "cloud_accuracy": {
+   "mean": 0.37144,
+   "n": 277,
+   "ci95": [
+    0.315283,
+    0.427998
+   ]
+  },
+  "paired_difference": {
+   "delta_cloud_minus_device": 0.120538,
+   "ci95": [
+    0.059366,
+    0.182912
+   ],
+   "n_pairs": 277,
+   "n_boot": 10000
+  },
+  "two_by_two": {
+   "both_right": 45,
+   "cloud_only": 58,
+   "device_only": 25,
+   "both_wrong": 149,
+   "n": 277,
+   "cut": 0.5
+  },
+  "two_by_two_cut_sensitivity": null,
+  "ttft": {
+   "device": {
+    "n": 91,
+    "p50": 0.1984,
+    "p90": 0.2115,
+    "mean": 0.1955,
+    "min": 0.1511,
+    "max": 0.2162
+   },
+   "cloud": {
+    "n": 91,
+    "p50": 0.1218,
+    "p90": 0.1324,
+    "mean": 0.1179,
+    "min": 0.1026,
+    "max": 0.1545
+   },
+   "n_ttft": 91,
+   "denominator_note": "TTFT uses its OWN denominator when the shared-image set is supplied: those questions are a warm-cache timing artifact and must leave the TTFT column, but they do NOT contaminate accuracy and are kept in it."
+  },
+  "by_stratum": {
+   "split=location": {
+    "device": {
+     "mean": 0.335,
+     "n": 100,
+     "ci95": [
+      0.245,
+      0.43
+     ]
+    },
+    "cloud": {
+     "mean": 0.513333,
+     "n": 100,
+     "ci95": [
+      0.416667,
+      0.61
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.178333,
+     "ci95": [
+      0.075,
+      0.285
+     ],
+     "n_pairs": 100,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 26,
+     "cloud_only": 25,
+     "device_only": 8,
+     "both_wrong": 41,
+     "n": 100,
+     "cut": 0.5
+    }
+   },
+   "split=placement": {
+    "device": {
+     "mean": 0.23,
+     "n": 100,
+     "ci95": [
+      0.15,
+      0.32
+     ]
+    },
+    "cloud": {
+     "mean": 0.285556,
+     "n": 100,
+     "ci95": [
+      0.2,
+      0.371111
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.055556,
+     "ci95": [
+      -0.053333,
+      0.161111
+     ],
+     "n_pairs": 100,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 11,
+     "cloud_only": 18,
+     "device_only": 12,
+     "both_wrong": 59,
+     "n": 100,
+     "cut": 0.5
+    }
+   },
+   "split=unseen": {
+    "device": {
+     "mean": 0.168831,
+     "n": 77,
+     "ci95": [
+      0.090909,
+      0.25974
+     ]
+    },
+    "cloud": {
+     "mean": 0.298701,
+     "n": 77,
+     "ci95": [
+      0.194805,
+      0.402597
+     ]
+    },
+    "paired_difference": {
+     "delta_cloud_minus_device": 0.12987,
+     "ci95": [
+      0.025974,
+      0.233766
+     ],
+     "n_pairs": 77,
+     "n_boot": 10000
+    },
+    "two_by_two": {
+     "both_right": 8,
+     "cloud_only": 15,
+     "device_only": 5,
+     "both_wrong": 49,
+     "n": 77,
+     "cut": 0.5
+    }
+   }
+  }
+ },
+ "clean_denominators": {
+  "accuracy_n": 277,
+  "ttft_n": 91,
+  "rule": "TWO DENOMINATORS, NOT ONE. Accuracy excludes the below-floor set ONLY, because the shared-image repeats are a TTFT-only artifact and dropping them from accuracy would discard questions for no reason. TTFT excludes BOTH, because the warm-cache repeats do contaminate timing. A single 'excluded' figure would either lose questions from accuracy or keep contaminated ones in TTFT."
+ },
+ "ttft_condition": {
+  "device_host": "Orin, vLLM, idle, one request at a time, cold per image.",
+  "device_host_attribution_source": "ESTABLISHED BY the user's statement plus the Orin session's own StudySS1 report at 8492e02, NOT by a _provenance block, which does not exist in any of the five StudySS1 artifacts.",
+  "device_stack": "vLLM 0.20.0+cu126 (jetson-ai-lab jp6/cu126), released image processor, no --mm-processor-kwargs.",
+  "cloud_stack": "vLLM 0.31.0, --mm-processor-kwargs size shortest_edge 4096 longest_edge 16777216 (live2 round-1).",
+  "robot_cost_stack_note": "the committed device baseline for ROBOT RECALL is the ORIN2 in-process harness (D87), unexercised per D103(c). These SS numbers are the ORIN3 vLLM stack and the two must not be placed side by side as one device's numbers.",
+  "both_columns_unverified_cold": "the cloud reports prefix cache isolated, 237,781 queries 0 hits, and an mm_cache_hits count keyed by image content. The DEVICE side is NOT retro-verifiable: vLLM 0.20.0 does not populate cached_tokens at all, the SS1 runner captured neither that nor the /metrics deltas, and the images are gone from tmpfs. Both columns carry the label, for different reasons."
+ }
+}

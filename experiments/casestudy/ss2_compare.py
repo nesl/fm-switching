@@ -117,16 +117,39 @@ def ttft(rows):
                 min=round(t[0], 4), max=round(t[-1], 4))
 
 
+# The scorer writes a DIFFERENT key per dataset, so the key is looked up per dataset rather than
+# by a scan that could silently pick up a neighbouring field. RefSpatial writes point_accuracy and
+# RealWorldQA writes exact_match; the first version of this file knew neither and raised on row one
+# of both datasets, which is what happens when a reader is written against a declared shape instead
+# of an observed one.
+SCORE_KEY = {
+    "vizwiz": ("vqa_accuracy", "vqa", "accuracy"),
+    "egothink": ("containment", "contains", "accuracy"),
+    "refspatial": ("point_accuracy",),
+    "realworldqa": ("exact_match",),
+    "codalm": ("judge_rating", "rating"),
+}
+
+
 def score_of(r, dataset):
     s = r.get("score") or {}
-    if dataset == "vizwiz":
-        for k in ("vqa_accuracy", "vqa", "accuracy"):
-            if k in s:
-                return float(s[k])
-    for k in ("containment", "contains", "accuracy"):
+    for k in SCORE_KEY.get(dataset, ()):
         if k in s:
             return float(s[k])
-    raise KeyError("no score field in row %r: %r" % (r.get("qid"), sorted(s)))
+    raise KeyError("no score field for dataset %r in row %r: %r"
+                   % (dataset, r.get("qid"), sorted(s)))
+
+
+# The subset a row belongs to, taken from the SCORER's own output so the stratum and the number it
+# strata-fies come from one source. It is NOT a row-level field: --subset-field looked for one at
+# row level, found nothing, and the per-subset breakdown D142 asks for silently collapsed into a
+# single "dimension=None" bucket. A declared flag that is never read is the same defect class as a
+# write-only field.
+SUBSET_KEY = {"refspatial": "split", "realworldqa": "subset", "codalm": "task"}
+
+
+def subset_of(r, dataset):
+    return (r.get("score") or {}).get(SUBSET_KEY.get(dataset, "subset"))
 
 
 def below_pixels_strata(below, D, qids):
@@ -184,10 +207,10 @@ def prompt_token_parity(qids, D, C, below=frozenset(), dims=None):
         same prompt differently. NOT a resolution confound;
       * a difference that SCALES with image size -> the pixel budget, which IS the confound.
 
-    The image dimensions are not recoverable (the images are gone from tmpfs), so the device's own
-    prompt_tokens is used as a PROXY for image size. It is a defensible one, since the text part is
-    short and nearly constant while the visual part dominates and varies, but it is a proxy and is
-    declared as one: a correlation against it is evidence about scaling, not a measurement of it.
+    For StudySS2 the image dimensions ARE recoverable: both manifests carry width and height on
+    every row, so --image-dims supplies REAL pixel areas and the prompt_tokens proxy is not needed.
+    Where dims are absent the device's own prompt_tokens is used as a proxy instead, and a
+    correlation against a proxy is evidence about scaling rather than a measurement of it.
 
     DEPENDENCY, named rather than resolved: "identical counts means identical visual input" assumes
     both models convert pixels to tokens by the SAME rule, same patch size and same merge size. If
@@ -283,9 +306,16 @@ def _analyse(qids, D, C, dataset, cut, dj, jc, ttft_qids=None):
         for q, pr in zip(qids, pairs):
             strata["answer_type=" + str(D[q].get("answer_type"))].append(pr)
             strata["answerable=" + str(D[q].get("answerable"))].append(pr)
-    else:
+    elif dataset == "egothink":
         for q, pr in zip(qids, pairs):
             strata["dimension=" + str(D[q].get("dimension"))].append(pr)
+    else:
+        key = SUBSET_KEY.get(dataset, "subset")
+        for q, pr in zip(qids, pairs):
+            sd, sc = subset_of(D[q], dataset), subset_of(C[q], dataset)
+            if sd != sc:
+                raise ValueError("subset disagrees across tiers for %r: %r vs %r" % (q, sd, sc))
+            strata[key + "=" + str(sd)].append(pr)
 
     out = dict(
         n_pairs=len(qids),
@@ -351,6 +381,12 @@ def main():
                          "Kept as a SEPARATE set from --shared-images on purpose.")
     ap.add_argument("--image-dims", help="ss1_image_dims.jsonl: {dataset,qid,w,h,area}. Real "
                                           "pixel areas, which replace the prompt_tokens proxy.")
+    ap.add_argument("--prev-mm-hits", type=int, default=0,
+                    help="cumulative vllm:mm_cache_hits_total at the PREVIOUS dataset's stamp on "
+                         "the same server instance. The counters are cumulative, so the "
+                         "per-dataset figure is a difference between stamps; without this the "
+                         "register check would compare a cumulative count against one dataset's "
+                         "candidate list.")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
 
@@ -362,17 +398,44 @@ def main():
     cut = CODALM_CUT if a.dataset == "codalm" else 0.5
 
     shared = set()
+    shared_meta = {}
     for f in a.shared_images:
         v = json.loads(Path(f).read_text())
         if isinstance(v, list):
             shared |= set(v)
         else:
+            shared_meta = {k: v.get(k) for k in ("key", "order", "register",
+                                                 "n_shared_images", "n_questions_on_shared")}
             # The H100 marks this a CONSTRUCTED BOUND: the questions that COULD be served warm by
             # the multimodal cache. Upgrades to a CENSUS only if the final mm_cache_hits equals N.
             for k in ("repeat_questions_possibly_warm", "qids", "shared_qids"):
                 if isinstance(v.get(k), list):
                     shared |= set(v[k])
                     break
+
+    # REGISTER CHECK. The candidate list is a constructed bound: the questions that COULD be served
+    # warm. It upgrades to a CENSUS only if the server's observed multimodal hit count equals the
+    # candidate count. That comparison is made here rather than asserted, because the whole value of
+    # the exclusion depends on which register it is in.
+    obs_hits = (((cl.get("cache_check") or {}).get("server_counters_parsed") or {})
+                .get("mm_cache_hits"))
+    if obs_hits is None or not shared:
+        register_note = ("NOT CHECKED: no observed mm_cache_hits in the cloud file, or no candidate "
+                         "list supplied. Stays a CONSTRUCTED BOUND.")
+    else:
+        delta = int(obs_hits) - int(a.prev_mm_hits or 0)
+        register_note = dict(
+            observed_mm_cache_hits_cumulative=int(obs_hits),
+            prior_stamp_subtracted=int(a.prev_mm_hits or 0),
+            observed_mm_cache_hits_this_dataset=delta,
+            candidate_questions=len(shared),
+            equal=(delta == len(shared)),
+            register=("CENSUS: the observed per-dataset multimodal hit count equals the candidate "
+                      "count, so the exclusion set is exactly the set of warm-served questions, "
+                      "not an upper bound on it."
+                      if delta == len(shared) else
+                      "CONSTRUCTED BOUND: observed hits and candidates differ, so the candidate "
+                      "list is not the served set and the exclusion over-excludes or under-excludes."))
 
     below = set()
     below_rows = []
@@ -412,7 +475,9 @@ def main():
               if r.get("judge_rating") is not None}
 
     out = dict(
-        study="StudySS1", pass_="device_vs_cloud_compare", dataset=a.dataset,
+        study=(dv.get("study") or cl.get("study") or "unknown"),
+        pass_="device_vs_cloud_compare", dataset=a.dataset,
+        study_label_source="read from the device and cloud result files, not hardcoded",
         no_verdict=("numbers only. D136's gate call is the user's and is deliberately not made "
                     "here, including by implication in ordering or framing."),
         pairing=dict(n_device=len(D), n_cloud=len(C), n_paired=len(qids),
@@ -441,22 +506,20 @@ def main():
             fully_clean_n=len(kept_clean)),
         shared_image_exclusion=dict(
             n_shared_qids_supplied=len(shared), n_shared_in_paired=len(qids) - len(kept_shared),
-            rule=("the duplicate-photo structure is a property of VIZWIZ VAL ITSELF, 34 groups of "
-                  "byte-identical photos under different filenames, so it was present on BOTH "
-                  "sides. The exclusion is therefore applied to BOTH columns or NEITHER: "
-                  "excluding from the cloud column alone would compare a cleaned column against an "
-                  "uncleaned one, an asymmetry introduced by the cleaning rather than by the data."),
-            order_check=("the device ran in EXACT manifest order for both datasets, verified: "
-                         "manifest qid sequence == device row sequence, 4,319 of 4,319 for VizWiz "
-                         "and 700 of 700 for EgoThink. 'Repeats an image seen earlier' depends on "
-                         "order, so if the cloud also ran manifest order the candidate set is the "
-                         "SAME 52 and the matched exclusion is exact rather than a union. The "
-                         "cloud's order must be confirmed from its run meta."),
+            rule=("the repeated-image structure is a property of the DATASET itself, so it was "
+                  "present on both sides. The exclusion is therefore applied to BOTH columns or "
+                  "NEITHER: excluding from the cloud column alone would compare a cleaned column "
+                  "against an uncleaned one, an asymmetry introduced by the cleaning rather than "
+                  "by the data."),
+            key=shared_meta.get("key"),
+            order_check=shared_meta.get("order"),
+            register_as_supplied=shared_meta.get("register"),
+            register_after_counter_check=register_note,
             identifier_dedup_would_have_missed_this=(
-                "by image ID VizWiz val is 4,319 unique on 4,319 and passes clean. The duplicates "
-                "are in file CONTENT under different filenames, and a cache keyed by content does "
-                "not care what the identifier says. Identifier-based deduplication cannot see this "
-                "class at all; the stronger form, hashing file contents, is what found it.")),
+                "the key is a sha256 of the DECODED pixels, not of the source bytes and not the "
+                "identifier. The source-byte key undercounted RefSpatial by 6, and an identifier "
+                "key cannot see this class at all: the multimodal cache is keyed by processed "
+                "image content, so byte-different but pixel-identical images still hit it.")),
         prompt_token_parity=prompt_token_parity(qids, D, C, below, dims),
         below_min_pixels_strata=(below_pixels_strata(below, D, qids)
                                  if below and a.dataset == "vizwiz" else None),

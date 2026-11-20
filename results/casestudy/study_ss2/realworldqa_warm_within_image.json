@@ -1,0 +1,120 @@
+{
+ "study": "StudySS2",
+ "dataset": "realworldqa",
+ "question": "within one image, is a later request faster than the first? If yes on a tier, that tier served the repeat warm, whatever its caching string says.",
+ "design": "WITHIN-IMAGE. The two compared sets are questions on the SAME images, so pixel area and prompt tokens are held fixed and the composition block below shows it. This is the control the between-subsets comparison lacks.",
+ "n_shared_images": 3,
+ "groups": {
+  "first_occurrence_cold": {
+   "composition": {
+    "n": 3,
+    "area_p50": 1358224,
+    "device_prompt_tokens_p50": 1331,
+    "device_completion_tokens_p50": 2
+   },
+   "device_ttft": {
+    "n": 3,
+    "p50": 0.8879,
+    "p90": 0.8916,
+    "mean": 0.8429,
+    "min": 0.7491,
+    "max": 0.8916
+   },
+   "cloud_ttft": {
+    "n": 3,
+    "p50": 0.3004,
+    "p90": 0.3037,
+    "mean": 0.2923,
+    "min": 0.273,
+    "max": 0.3037
+   }
+  },
+  "later_occurrence_warm": {
+   "composition": {
+    "n": 3,
+    "area_p50": 1358224,
+    "device_prompt_tokens_p50": 1332,
+    "device_completion_tokens_p50": 2
+   },
+   "device_ttft": {
+    "n": 3,
+    "p50": 0.7925,
+    "p90": 0.8891,
+    "mean": 0.7886,
+    "min": 0.6843,
+    "max": 0.8891
+   },
+   "cloud_ttft": {
+    "n": 3,
+    "p50": 0.2613,
+    "p90": 0.2635,
+    "mean": 0.2537,
+    "min": 0.2362,
+    "max": 0.2635
+   }
+  },
+  "never_on_a_shared_image": {
+   "composition": {
+    "n": 759,
+    "area_p50": 1358224,
+    "device_prompt_tokens_p50": 1339,
+    "device_completion_tokens_p50": 2
+   },
+   "device_ttft": {
+    "n": 759,
+    "p50": 0.8985,
+    "p90": 1.1902,
+    "mean": 0.8925,
+    "min": 0.2208,
+    "max": 1.5266
+   },
+   "cloud_ttft": {
+    "n": 759,
+    "p50": 0.3022,
+    "p90": 0.3788,
+    "mean": 0.3033,
+    "min": 0.1241,
+    "max": 0.4879
+   }
+  },
+  "cold_baseline_first_plus_never": {
+   "composition": {
+    "n": 762,
+    "area_p50": 1358224,
+    "device_prompt_tokens_p50": 1339,
+    "device_completion_tokens_p50": 2
+   },
+   "device_ttft": {
+    "n": 762,
+    "p50": 0.8984,
+    "p90": 1.1899,
+    "mean": 0.8923,
+    "min": 0.2208,
+    "max": 1.5266
+   },
+   "cloud_ttft": {
+    "n": 762,
+    "p50": 0.3022,
+    "p90": 0.3787,
+    "mean": 0.3032,
+    "min": 0.1241,
+    "max": 0.4879
+   }
+  }
+ },
+ "device": {
+  "cold_p50": 0.8879,
+  "warm_p50": 0.7925,
+  "warm_over_cold": 0.8926,
+  "pct_faster_when_warm": 10.7
+ },
+ "cloud": {
+  "cold_p50": 0.3004,
+  "warm_p50": 0.2613,
+  "warm_over_cold": 0.8698,
+  "pct_faster_when_warm": 13.0
+ },
+ "device_declared_caching": "vLLM prefix caching on; distinct image+task per request so no warm reuse; per-request cache_salt=qid; cold single-shot",
+ "cloud_observed_mm_hits": 189,
+ "register": "OBSERVED, within-image, both tiers. Not a controlled rerun: no cold repeat of the same questions was run, so this is an observational inference from run order, with composition held fixed rather than adjusted for."
+}

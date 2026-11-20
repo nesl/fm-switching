@@ -1,0 +1,9 @@
+{
+ "_what": "questions whose image area is below the 65,536 px min_pixels floor, so the device would upscale and the cloud (floor 4,096 px) would not",
+ "_register": "CENSUS, not a bound: computed from every row of both SS2 manifests, which carry width and height directly, so no image was unmeasured",
+ "_source": "refspatial_manifest.jsonl and realworldqa_manifest.jsonl width x height, and the same areas after the kit 2048 longest-side cap",
+ "_result": "EMPTY for both datasets. RefSpatial areas run 196,608 to 307,200 px and RealWorldQA 261,668 to 2,158,080 px, so the smallest SS2 image is 3.0x the floor. The 2048 cap only shrinks the longest side and leaves every effective area above the floor as well.",
+ "_contrast_with_ss1": "StudySS1 VizWiz had 28 of 4,319 below the floor, which damaged accuracy and TTFT because the two tiers were shown different pixels. That exclusion is empty here.",
+ "n": 0,
+ "qids": []
+}

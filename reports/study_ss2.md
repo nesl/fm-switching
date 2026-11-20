@@ -219,3 +219,175 @@ Next: the H100 runs this identical kit with the 32B so the device-vs-cloud gap c
 each dataset qualified as an SS candidate (a dataset qualifies only if the 32B clearly beats the 4B,
 preferring small or partial-detail questions). CODA-LM remains skipped unless the user lifts the
 image terms gate.
+
+## 10. StudySS2 compare: paired device against cloud (numbers only, no verdict)
+
+Device Qwen3-VL-4B on the Orin (`jetson_orin`, `_provenance` present), cloud Qwen3-VL-32B-Instruct
+at `0cfaf481` on the H100 NVL, vLLM 0.31.0+cu129, served as `32BI`. Both greedy, temperature 0,
+seed 0, one request at a time, idle, per-request `cache_salt`. Paired on `qid`: RefSpatial 277 of
+277, RealWorldQA 765 of 765, zero device-only and zero cloud-only rows, zero errors on either side.
+
+**No verdict here. D136's gate call is the user's.** The numbers are reported per dataset and subset
+as D142 requires; nothing below is a qualification statement.
+
+### 10.1 Positive control, run before the comparison was read
+
+Check 7 asks that the control arm reproduce its own committed numbers, not merely agree with the
+treatment. The device column is recomputed here from the raw per-question rows and must match the
+committed device summaries exactly.
+
+| quantity | this compare | committed summary | agree |
+|---|---|---|---|
+| RefSpatial device, pooled point accuracy | 0.250903 | 0.2509025 | yes |
+| RefSpatial device, `location` | 0.3350 | 0.335 | yes |
+| RefSpatial device, `placement` | 0.2300 | 0.23 | yes |
+| RealWorldQA device, exact match | 0.654902 | 0.6549019 | yes |
+| RealWorldQA device, `free_form` | 0.6789 | 0.6788990 | yes |
+| RealWorldQA device, `mcq` | 0.6370 | 0.6369863 | yes |
+
+### 10.2 Accuracy, paired bootstrap (10,000 resamples, seed 0)
+
+| dataset / subset | n | device | cloud | cloud minus device | 95 % CI | excludes 0 |
+|---|---|---|---|---|---|---|
+| **RefSpatial, all** | 277 | 0.2509 | 0.3714 | **+12.05 pp** | [+5.94, +18.29] | yes |
+| RefSpatial `location` | 100 | 0.3350 | 0.5133 | **+17.83 pp** | [+7.50, +28.50] | yes |
+| RefSpatial `placement` | 100 | 0.2300 | 0.2856 | +5.56 pp | [-5.33, +16.11] | **no** |
+| RefSpatial `unseen` | 77 | 0.1688 | 0.2987 | **+12.99 pp** | [+2.60, +23.38] | yes |
+| **RealWorldQA, all** | 765 | 0.6549 | 0.7124 | **+5.75 pp** | [+2.35, +9.15] | yes |
+| RealWorldQA `mcq` | 438 | 0.6370 | 0.7146 | **+7.76 pp** | [+3.20, +12.33] | yes |
+| RealWorldQA `free_form` | 327 | 0.6789 | 0.7095 | +3.06 pp | [-2.14, +8.26] | **no** |
+
+Scorer per subset, stated so an MCQ-against-free-form contrast is not read as a model effect:
+RefSpatial is the fraction of predicted points inside the ground-truth mask (`point_accuracy`,
+`norm1000` coordinate mode on both tiers); RealWorldQA is exact match after the benchmark's own
+normalisation, which is letter match on `mcq` and normalised string match on `free_form`.
+
+### 10.3 The 2x2, and the disagreement split
+
+| dataset | both right | cloud only | device only | both wrong | disagree |
+|---|---|---|---|---|---|
+| RefSpatial | 45 | 58 | 25 | 149 | 83 of 277 (30.0 %) |
+| RealWorldQA | 435 | 110 | 66 | 154 | 176 of 765 (23.0 %) |
+
+Cloud-right share of the disagreements, with Wilson 95 % intervals: RefSpatial **0.6988
+[0.5931, 0.7869]**, RealWorldQA **0.6250 [0.5515, 0.6931]**. **Both exclude 0.5.** This is the
+opposite of StudySS1, where every such interval including the pooled one contained parity and the
+claim "the cloud is right more often when they disagree" was withdrawn as unsupported. On SS2 the
+interval supports it on both datasets. The register is a pre-specified binary scorer on both tiers,
+not a judge.
+
+### 10.4 Prompt-token parity: the resolution confound is cleared as a census
+
+| dataset | n | identical counts | max difference |
+|---|---|---|---|
+| RefSpatial | 277 | **277 of 277 (100 %)** | 0 |
+| RealWorldQA | 765 | **765 of 765 (100 %)** | 0 |
+
+**1,042 of 1,042 questions identical**, so the two tiers were shown the same visual input and no
+resolution confound exists on SS2. StudySS1 had 28 VizWiz images diverge; that set is empty here,
+and it is empty for a measurable reason rather than by luck.
+
+**The sub-floor exclusion is an empty CENSUS, not an unchecked assumption**
+(`ss2_below_min_pixels.json`). Both manifests carry `width` and `height` on every row, so every
+image was measured: RefSpatial areas run 196,608 to 307,200 px and RealWorldQA 261,668 to
+2,158,080 px, against a 65,536 px `min_pixels` floor on the device and 4,096 px on the cloud. **The
+smallest SS2 image is 3.0x the device floor**, and the kit's 2048 longest-side cap only shrinks the
+longest side, leaving every effective area above the floor as well. So neither tier upscaled and the
+accuracy denominator loses nothing.
+
+### 10.5 TTFT, and why the repeated-image set had to leave the timing column
+
+Two exclusion sets, not merged, because they damage different axes. Below-floor is empty, so
+accuracy keeps every question: **accuracy n = 277 and 765**. The repeated-image set is TTFT-only:
+**TTFT n = 91 (RefSpatial) and 762 (RealWorldQA)**.
+
+| dataset | tier | p50 full set | p50 cold only | p90 cold only |
+|---|---|---|---|---|
+| RefSpatial | device | 0.1528 | **0.1984** | 0.2115 |
+| RefSpatial | cloud | 0.0848 | **0.1218** | 0.1324 |
+| RealWorldQA | device | 0.8984 | 0.8984 | 1.1899 |
+| RealWorldQA | cloud | 0.3022 | 0.3022 | 0.3787 |
+
+On RefSpatial, **186 of 277 questions (67 %) sit on a repeated image**, so reading the full-set
+cloud p50 of 0.0848 s as a cold number would understate cold cloud TTFT by about **1.4x**. On
+RealWorldQA only 3 of 765 repeat, and the column does not move.
+
+**Register: the repeated-image set is a CENSUS, not a constructed bound.** The candidate lists were
+built as bounds, the questions that *could* be served warm. The server's own counters close it: the
+cumulative `vllm:mm_cache_hits_total` is 186 after RefSpatial and 189 after RealWorldQA, so the
+per-dataset observed hits are **186 and 3**, equal to the candidate counts of **186 and 3**. The
+exclusion is therefore exactly the warm-served set.
+
+Prefix caching, separately: `prefix_cache_hits_total` is **0** on **1,087,829** queried tokens
+across both datasets, so the text prefix cache is isolated, as the per-request `cache_salt`
+intends. The 32B server command carries both `--no-enable-prefix-caching` and
+`--enable-prefix-caching`; the later flag wins, prefix caching was on, and the zero hit count is
+what makes the isolation an observation rather than a flag reading.
+
+### 10.6 Both tiers served the repeats warm, measured within-image
+
+The cloud's warm hits are confirmed by its own counters. The device file instead **declares**
+"distinct image+task per request so no warm reuse; cold single-shot". That is a declaration, and
+`cache_salt` isolates the **text** prefix cache only: the multimodal encoder cache is keyed by image
+**content**, which no salt touches.
+
+A between-subsets comparison cannot settle it, because the repeat set and the clean set differ in
+image-size composition. The test therefore holds composition fixed: **within each of the 61 shared
+images**, first occurrence in run order against later ones (`ss2_warm_within_image.py`).
+
+| RefSpatial | n | device p50 | cloud p50 | device prompt tokens p50 |
+|---|---|---|---|---|
+| first occurrence (cold) | 61 | 0.2096 | 0.1244 | 335 |
+| later occurrences (warm) | 186 | **0.1520** | **0.0829** | 337 |
+| never on a shared image | 30 | 0.1822 | 0.1055 | 226 |
+
+**Same images, prompt tokens 335 against 337**, and the later requests are **27.5 % faster on the
+device** and **33.4 % faster on the cloud**. RealWorldQA points the same way on 3 repeats: device
+10.7 %, cloud 13.0 % faster warm.
+
+The between-subsets direction confirms it and rules out composition as the cause: removing the
+repeats **raises** the device p50 from 0.1528 to 0.1984, while the clean set holds **more** small
+images (41 of 91 at 196,608 px against 28 of 186), which would make it faster, not slower. So
+composition works against the observed direction and cannot produce it.
+
+**Register: OBSERVED, within-image, both tiers.** It is not a controlled rerun; no cold repeat of
+the same questions was run, so this is an observational inference from run order with composition
+held fixed rather than adjusted for. The consequence is a correction to a committed caching string,
+not to any accuracy number: **"cold per image" is false for any dataset whose images repeat**, and
+RefSpatial repeats 67 % of the time.
+
+### 10.7 CODA-LM: no data, and a judge that fails its control
+
+**No CODA-LM answers exist on either tier.** `results/casestudy/study_ss2/` holds no CODA-LM device
+or cloud answer file, so no CODA-LM comparison is reported and none is possible from committed data.
+
+Independently, the Mistral-7B judge on CODA-LM's own 1-10 prompt **FAILS** its negative control:
+mismatched answers score a mean of **6.88** on the 1-10 scale, **65.3 % of the usable range**, with
+10 of 74 at exactly 10.0 and 68 % clearing the pre-registered 6.0 cut. That is a stopping condition
+on the per-task means and the cut was not moved. The EgoThink judge **passes** the same control
+(mismatched 0.0347, 3.5 % of range, 138 of 144 at exactly 0), so with one model, temperature and
+server the instrument is about **19x** better at detecting a mismatch on EgoThink. The binding
+constraint is task demand, not judge size; CODA-LM needs a larger judge.
+
+### 10.8 Two defects fixed in `ss2_compare.py` before it could run
+
+Both were field-path errors in a script written before the data existed, and both are
+implementation fixes under CLAUDE.md, applied and reported rather than discussed first.
+
+1. **`score_of` raised on row one of both datasets.** It looked for `vqa_accuracy` / `containment` /
+   `accuracy`; the SS2 kit writes **`point_accuracy`** and **`exact_match`**. Replaced with a
+   per-dataset key lookup rather than a scan that could pick up a neighbouring field.
+2. **`--subset-field` was declared and never read.** It defaulted to a row-level `subset` field that
+   does not exist on either dataset, and `_analyse` strata-fied only on `answer_type` /
+   `answerable` / `dimension`, so the per-subset breakdown D142 asks for collapsed silently into a
+   single `dimension=None` bucket. The subset is in fact inside the scorer's own output
+   (`score.split` for RefSpatial, `score.subset` for RealWorldQA), which is the better source
+   because the stratum and the number it strata-fies then come from one place. The compare now also
+   **raises** if the two tiers disagree on a question's subset.
+
+A declared flag that is never read is the same defect class as a write-only field: present, typed,
+documented, and carrying no causal link. The first defect announces itself with an exception; the
+second would have produced a complete-looking output with the required breakdown missing.
+
+The hardcoded `study="StudySS1"` label was also wrong on an SS2 output and is now read from the
+data files.
