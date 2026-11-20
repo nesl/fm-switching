@@ -170,5 +170,27 @@
       "h": 240,
       "area": 43200
     }
-  ]
+  ],
+  "affects": "ACCURACY AND TTFT: the two models were shown different pixels for these questions (device upscaled, H100 did not), so exclude them from accuracy statistics as well as from token or timing comparisons; keep this set SEPARATE from the shared-image set (vizwiz_shared_images.json), which is a TTFT-only artifact",
+  "overlap_with_shared_image_questions": 0,
+  "by_answer_type": {
+    "other": {
+      "n": 16,
+      "of": 2691,
+      "answerable": 16
+    },
+    "unanswerable": {
+      "n": 11,
+      "of": 1385
+    },
+    "yes/no": {
+      "n": 1,
+      "of": 195,
+      "answerable": 1
+    },
+    "number": {
+      "n": 0,
+      "of": 48
+    }
+  }
 }
