@@ -1,0 +1,76 @@
+{
+ "check": "StudySS1_compare_gates_and_host_attribution",
+ "is_measurement": true,
+ "label": "D142 preparation. The 32B answers are NOT on origin, so the comparison has not been run. Three gates resolved in advance.",
+ "gate_1_32b_answers": {
+  "status": "NOT AVAILABLE. Commit 01e5395 \"StudySS1-32B\" adds experiments/casestudy/ss1_cloud_run.py only, 54 lines, a server wrapper around the unchanged kit runner. No answer files exist for either dataset.",
+  "consequence": "the comparison is gated. The script is built and committed so it runs the moment the answers land."
+ },
+ "gate_2_the_4B_judge_column": {
+  "requirement": "same judge, parser and prompt means the FIXED parser, so the 4B side must come from the post-fix scoring.",
+  "resolved": "the only judge file on origin, egothink_device_judge.json, IS the post-fix run: 682 of 700 parsed at 97.4 percent. The pre-fix run that parsed 33 of 700 was overwritten and its numbers, judge_mean 0.1818 and agreement 0.5758, are withdrawn rather than retained for comparison.",
+  "why_it_matters": "a paired bootstrap across a fixed and an unfixed scoring is a comparison of parsers, not of models. Both sides of every paired column will carry the post-614c0d9 kit.",
+  "constancy": "the forthcoming 32B judge pass uses the same ss1_judge.py and the same ss1_kit parser, with prompt hashes system 75357d685f238b6a and template ed38861d0f82d2d0 recorded in both result files so drift is detectable."
+ },
+ "gate_3_vizwiz_quality_flags": {
+  "requirement": "VizWiz stratified by image-quality flag (blur, framing, obstruction and so on).",
+  "status": "NOT PRODUCIBLE FROM HELD DATA.",
+  "evidence": [
+   "the manifest rows carry answer_type, answerable, references, question, image, split, qid, dataset, n_references and gen_max_new_tokens. No quality field.",
+   "the device result rows carry the same plus score and timing. No quality field.",
+   "ss1_manifest_meta.json records the source as vizwiz_vqa, CC BY 4.0, Gurari et al. CVPR 2018, whose val annotations carry answer_type and answerable only.",
+   "no VizWiz directory or annotation file exists under the HF cache or the home tree."
+  ],
+  "reason": "the blur / framing / obstruction flags are a SEPARATE VizWiz release, not part of VizWiz-VQA val.",
+  "action": "reported as a gap and NOT acquired. CLAUDE.md: do not propose new datasets; if one seems necessary, describe the gap and do not implement. Every other requested VizWiz stratification, answer type and answerable-only, is producible and is implemented."
+ },
+ "host_and_load_condition": {
+  "requirement": "label the device host as unconfirmed with the reason, and state the load condition on BOTH sides.",
+  "host": "UNCONFIRMED. The five StudySS1 artifacts carry no _provenance block at all: git_commit, script, model, device and timestamp are absent. They record tier=device, model=qwen3vl4b and endpoint http://127.0.0.1:8000/v1, which is localhost on whichever machine ran them. Orin against an A6000 proxy is a different device tier, so a TTFT labelled Orin may be another machine. The label travels in the result file field ttft.device_host, not a footnote.",
+  "device_load_condition_FROM_THE_FILE": {
+   "path": "vLLM server over localhost HTTP, so a re-send path rather than the in-process harness",
+   "concurrency": "one-at-a-time, serial, per the decoding field \"greedy temperature=0 seed=0 one-at-a-time\"",
+   "caching": "vLLM prefix caching ON but per-request cache_salt=qid with a distinct image and question per request, so no warm reuse; the file labels it cold single-shot",
+   "wall_clock": "700 requests in 1157.5 s, about 1.65 s per request, consistent with serial execution against a median total_s of 1.531"
+  },
+  "device_ttft_measured": {
+   "n": 700,
+   "min": 0.758,
+   "median": 1.469,
+   "mean": 1.484,
+   "p95": 2.338,
+   "max": 2.359,
+   "median_prompt_tokens": 2072
+  },
+  "it_matches_NEITHER_documented_regime": {
+   "d61_d94_in_process_harness": [
+    0.146,
+    0.225
+   ],
+   "d61_d94_vllm_resend": [
+    5.861,
+    23.917
+   ],
+   "measured_device_median": 1.469,
+   "reading": "the device median is 6x to 10x the in-process anchors and 4x to 16x FASTER than the re-send anchors, so it sits between them and cannot be classified by matching either. The honest statement is the one the file supports directly: an unloaded serial cold-single-shot measurement over an HTTP server path. The D61 and D94 anchors were measured under different models and context lengths, so they do not classify this measurement and are not used to."
+  },
+  "vizwiz_device_ttft": {
+   "p50": 0.856,
+   "p90": 1.4116,
+   "mean": 1.0942,
+   "median_prompt_tokens": 1550,
+   "note": "same path, load and caching condition as EgoThink, from the same runner."
+  },
+  "cloud_side": "the brief specifies H100 idle. The cloud load condition will be read from the answer file own caching and decoding fields and reported beside the device one rather than assumed."
+ },
+ "device_only_cell_note": "the 2x2 device-only cell is reported plainly whatever its size. A question the 4B gets right and the 32B gets wrong is a case where escalation COSTS accuracy, which bears on D39 per-request gain may be zero or negative, and nothing else in the suite measures it.",
+ "threshold_handling": "VizWiz VQA accuracy is graded in [0,1], so the 2x2 needs a cut. It is stated as 0.5 AND reported at 0.3, 0.5, 0.7 and 1.0 as a sensitivity, because an unregistered threshold moved the scorer-agreement headline in this same study by 17 points. The EgoThink judge is reported on its native 0 / 0.5 / 1 scale with NO binarisation, as the brief requires.",
+ "_provenance": {
+  "git_commit": "01e5395c4576f5e9fe752465fd703f51dc2b7022",
+  "script": "experiments/casestudy/ss1_compare.py (built, not yet run)",
+  "model": "n/a",
+  "device": "flash CPU only",
+  "n": "n/a",
+  "timestamp": "2026-11-19T00:00:00"
+ }
+}
