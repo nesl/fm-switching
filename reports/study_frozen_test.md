@@ -1388,11 +1388,13 @@ number of requests that had any earlier request to reuse at all is **3**.
 
 ### 17.1 The server was configured for reuse, and one cache proves it worked
 
-The round-1 command (`experiments/dashcam/sh_ep_server_h100.sh`, which reproduces it byte for byte)
-passes `--no-enable-prefix-caching` and then, later on the same line, `--enable-prefix-caching`, and
-likewise `--limit-mm-per-prompt {"image": 16}` then `{"image": 640, "video": 1}`. Last occurrence wins
-in argparse, so prefix caching was ON and the cap was 640. The multimodal processor cache was ON at 128
-GB. The metrics agree: a disabled prefix cache does not report 5.6M queries.
+Each run's own `header.json` records the server's full argv at `server.command`, 37 elements for this
+cell. It passes `--no-enable-prefix-caching` at element 13 and `--enable-prefix-caching` at element 27,
+and `--limit-mm-per-prompt` twice, at 14 and 20, with `--mm-processor-cache-gb` at 29. Last occurrence
+wins in argparse, so prefix caching was ON, the image cap was the later 640 and the multimodal
+processor cache was ON at 128 GB. The metrics agree: a disabled prefix cache does not report 5.6M
+queries. `experiments/dashcam/sh_ep_server_h100.sh` reproduces the same command byte for byte, which is
+how this section first recovered it, but the run record is the better citation and is used here.
 
 **The multimodal cache hit exactly as often as it could have, which rules out the uuid path.** From the
 committed `mm_gate.json`: `mm_cache_queries` 16,342 and `mm_cache_hits` **345**. Counting image-part
@@ -1501,12 +1503,20 @@ command byte for byte on purpose and stays as it is.
 The underlying concern stands and is recorded here rather than acted on: the configuration is correct
 today only because argparse takes the last occurrence, so a future reordering of a pinned list could
 silently disable prefix caching in a run that would still look entirely normal. The cheap mitigation
-that does NOT touch the pinned list is to have the run record the engine's own resolved cache
-configuration, which no frozen-grid `run_meta.json` currently does: `server_kind` is `vllm` and no
-cache flag appears, so a reader cannot tell from a committed run whether prefix caching was on. That
-is a reporting gap CLAUDE.md names directly, since caching is a methodological parameter and must be
-stated. It is why this section had to recover the configuration from a launcher script and from the
-metrics counters rather than from the run record.
+that does NOT touch the pinned list is to record the engine's own RESOLVED cache setting beside the
+argv.
+
+A second correction, also the H100's, also to something this section asserted without checking.
+It said no run record states the cache configuration. **The argv is recorded**, per run, at
+`header.json` `server.command`, which is where 17.1 now cites it from; what is absent is the resolved
+value, and `header.json`'s `server` block has no field of that kind. So a reader CAN establish from a
+committed run that prefix caching was on, by applying the last-occurrence rule to the recorded argv,
+and this section's first draft recovered the command from a launcher script when it could have read it
+from the run directory it was already analysing. The residual gap is narrower than claimed and worth
+closing anyway: one field carrying the engine's own `enable_prefix_caching=True` from its init log,
+next to the argv, would spare every future reader the argparse reasoning on a list that deliberately
+contradicts itself. That is a record addition rather than a pinned-list change, so it does not need
+the ruling the dedup does, and the H100 will add it when a grid server next starts.
 
 **What this is NOT.** It is not evidence that prefix caching fails on this engine, and it must not be
 cited that way: the same build hits on appended requests in StudySH-EP. It is evidence that **the
