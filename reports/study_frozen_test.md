@@ -1014,6 +1014,38 @@ LH-REQ cells):
 | n=20 seed 0 | 0 | 2 | 1 | 3 |
 | n=20 seed 4 | 3 | 1 | 142 | 146 |
 | **n=32 seed 0** | **12** | **30** | **10,327** | **10,369** |
+| n=32 seed 4 | 2 | 8 | 6 | 16 |
+
+All six cells are in `results/orchestration/live2/hybrid/policy_f6r_proofs.json`, with the two
+further proofs D144 ruling 4 asks for.
+
+THE CHARACTERISTIC DECISION STILL OCCURS in hybrid-F6r, which a gate that merely silenced C6 would
+also have satisfied on the diff table above: `c6_calls` 20 to 52 per cell, `c6_scorer_error` 0 in
+all six cells, and every call on a period that holds non-single-shot recall (prepare calls equal
+robot-period prepare calls in every cell).
+
+WHAT THE GATE BOUGHT, and it is more than the 92 percent I estimated from the 16-device p50. Wall
+time inside the policy-core mirror per 1200 s cell, dry on this box, so a cost of the mirror and not
+a live latency:
+
+| cell | hybrid-F6 mirror ms | hybrid-F6r mirror ms | cut | F6 C6 calls | F6r C6 calls |
+|---|---|---|---|---|---|
+| n=16 seed 0 | 21,517 | 153 | 99.3 % | 371 | 23 |
+| n=16 seed 4 | 16,917 | 193 | 98.9 % | 354 | 20 |
+| n=20 seed 0 | 56,884 | 424 | 99.3 % | 498 | 26 |
+| n=20 seed 4 | 63,664 | 420 | 99.3 % | 376 | 24 |
+| n=32 seed 0 | 145,901 | 1,398 | 99.0 % | 788 | 52 |
+| n=32 seed 4 | 153,664 | 875 | 99.4 % | 701 | 39 |
+
+So hybrid-F6 spends 17 to 154 seconds of every 1200 second cell inside the mirror, and the gate
+removes 99 percent of it. That is the size of the prize the redesign is aiming at, and it is why
+the gate is tempting; the diff table above is why it cannot be taken as a relabel.
+
+THE DEVIATIONS ARE NOT A SUBSET, which settles the question by itself. At 32 devices seed 0,
+hybrid-F6 deviates 42 times (35 `c6_dev_send_to_hold`, 7 `c6_dev_send_to_recent`) and hybrid-F6r
+deviates 10, of which one is a `c6_dev_recent_to_hold` that hybrid-F6 never makes anywhere. A
+restriction that produces a deviation KIND the unrestricted arm never produces is not the same
+policy with fewer decisions.
 
 `_c6_prepare`'s own docstring says it advances the mirror TO THIS PERIOD, so the mirror carries
 state across periods: skip the single-shot-only periods and the mirror reaches the next robot period
