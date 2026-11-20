@@ -2,3 +2,9 @@
 [17:59:56] starting vLLM server: /home/pragya/.venvs/fm-switching-vllm/bin/vllm serve /home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb --served-model-name 32BI --port 8031 --max-model-len 32768 --gpu-memory-utilization 0.9 --tensor-parallel-size 1 --no-enable-prefix-caching --limit-mm-per-prompt {"image": 16} --dtype bfloat16 --seed 0 --limit-mm-per-prompt {"image": 640, "video": 1} --mm-processor-kwargs {"size": {"shortest_edge": 4096, "longest_edge": 16777216}, "fps": 1.0, "do_sample_frames": false} --trust-request-mm-kwargs --host 127.0.0.1 --enable-prefix-caching --enable-prompt-tokens-details --mm-processor-cache-gb 128 --kv-offloading-backend native --kv-offloading-size 27 --enable-log-requests --enable-logging-iteration-details
 [2026-11-19 18:02:05] idle exit 0
 [2026-11-19 18:02:06] start background ss_bg_b7_n12_s0_MIXED (robots MIXED)
+ss_bg_b7_n12_s0_MIXED {'n': 100, 'p50': 0.6632323139347136, 'p90': 2.591152670327574, 'max': 5.391979548148811, 'prompt_tokens_p50': 1976} errors 0
+[2026-11-19 18:13:31] background ss_bg_b7_n12_s0_MIXED exit 0 ; {"run_valid":true,"n_errors":0,"dash":true}
+[2026-11-19 18:13:32] start background ss_bg_b7_n16_s0_MIXED (robots MIXED)
+ss_bg_b7_n16_s0_MIXED {'n': 24, 'p50': 22.532992660999298, 'p90': 37.08510698098689, 'max': 43.286217506974936, 'prompt_tokens_p50': 1976} errors 76
+[2026-11-19 18:26:54] background ss_bg_b7_n16_s0_MIXED exit 0 ; {"run_valid":true,"n_errors":0,"dash":false}
+[2026-11-19 18:26:54] SS TIMING DONE
