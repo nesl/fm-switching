@@ -1180,6 +1180,63 @@ beats T = 300 by 1 question at 0.50x and 2 at 0.25x, and the ordering is the sam
 The parameter only reads anything because it is clipped by the session's declared remaining life, so
 the useful signal here is NOT the length of the horizon, it is knowing when a session is over.
 
+### 15.4 A MEASURED control that arrived after the simulation, and it inverts the reading
+
+While this section was being written the H100 ran `edf` and `llf`, the first two arms of the
+scheduling sweep. Both EMIT HISTORY BUILDS (359 and 363 of them at 16 devices seed 4, one per
+session) where the five frozen-grid arms emit none, so for the first time in this study a robot
+question meets a warm prefix. Everything in this subsection is MEASURED from those runs.
+
+**The warming mechanism works, and by more than the model said.** All 16 of edf's warm robot recalls
+were preceded by a build on the same session, so the build is what put the prefix in the cache.
+
+| arm | robot requests | cache_path | cached fraction p50 | MEASURED TTFT p50 | mean | max |
+|---|---|---|---|---|---|---|
+| edf | 16 | WARM | 0.988 | **0.384** | 0.331 | 0.461 |
+| edf | 3 | COLD | 0 | 4.448 | 4.945 | 6.257 |
+| llf | 12 | WARM | 0.986 | **0.423** | 0.347 | 0.525 |
+| llf | 3 | COLD | 0 | 4.568 | 4.961 | 6.247 |
+| b7-edf-feasibility | 15 | COLD | 0 | 2.440 | 2.710 | 5.409 |
+| hybrid-F-lhreq | 20 | COLD | 0 | 3.100 | 3.626 | 7.291 |
+
+Against section 15.1's MODELLED numbers this is a clean pass in the conservative direction: modelled
+warm TTFT p50 0.562 to 0.613 s against 0.384 to 0.423 s measured, and modelled cold 2.607 s against
+2.44 to 3.10 s measured. The model understates the warm gain and lands on the cold cost.
+
+**And the arm that gets the warm prefixes has the WORST robot on-time of the four.** Robot questions
+on time at 16 devices seed 4: hybrid-F 15 of 20, b7 14, llf 10, **edf 5**. Decomposed as in 12.1:
+
+| arm | wait before release p50 / max | queue residual p50 | prefill (modelled on measured uncached) p50 | arrival to delivered p50 | on time |
+|---|---|---|---|---|---|
+| edf | **5.483 / 11.741** | 0.376 | 0.027 | 6.839 | 5 of 20 |
+| llf | 1.986 / 5.074 | 0.420 | 0.027 | 4.360 | 10 of 20 |
+| b7-edf-feasibility | 0.115 / 0.156 | 0.530 | 1.824 | 2.617 | 14 of 20 |
+| hybrid-F-lhreq | 0.104 / 0.333 | 0.538 | 2.277 | 3.238 | 15 of 20 |
+
+edf's prefill is 0.027 s, essentially free, and its questions still miss, because each one WAITS
+5.5 s at the median and up to 11.7 s before release, which is longer than the entire 5 s deadline.
+Its 359 builds cost 211 s of measured build TTFT, and that traffic is what the questions queue
+behind. llf shows the same shape at half the magnitude.
+
+**So warming moves the binding resource rather than removing it.** Section 15 charges warming its
+GPU-seconds and explicitly never queues it, which is listed there as the second generosity; this is
+a measured instance of that exact exclusion deciding the outcome. The modelled P1 "65 of 65" is
+therefore an upper bound on the PREFILL side only, and the measured gap between it and edf's 5 of 20
+is the size of the term the model leaves out. A warming policy that does not schedule its own
+warming traffic against the questions can lose while winning every prefill.
+
+Two things this does NOT say. It does not say edf's release discipline is warming's fault: edf is
+plain EDF with no feasibility admission, so it releases badly in general, and the 5.5 s wait is a
+property of the arm as much as of its builds. And it does not say the five frozen-grid arms could get
+the warm prefixes for free: they emit no builds at all, so for them the warm path was never
+reachable, which is what 12.2 measured.
+
+SCOPE CORRECTION TO 12.2, which said no robot question in the grid was ever served warm. That is
+exact for the five frozen-grid arms over the 13 cells it names, and it is NOT true of the grid as a
+whole now that edf and llf have run: 16 of 19 and 12 of 15 of their served robot questions were warm
+at 96.6 percent cached. The warm-state axis is not unexercisable in this harness; it is unexercised
+by the arms that emit no builds.
+
 **5. The honest limit of all five points.** The median robot history is asked exactly ONE question
 (section 12.4), so every policy above is choosing what to keep for a single future event per
 session, and the oracle's advantage is almost entirely the advantage of knowing which sessions those
