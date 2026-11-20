@@ -5,7 +5,7 @@
  "gate_1_32b_answers": {
   "status": "NOT AVAILABLE. Commit 01e5395 \"StudySS1-32B\" adds experiments/casestudy/ss1_cloud_run.py only, 54 lines, a server wrapper around the unchanged kit runner. No answer files exist for either dataset.",
   "consequence": "the comparison is gated. The script is built and committed so it runs the moment the answers land.",
-  "status_recheck": "STILL NOT AVAILABLE as of this commit; no 32B answer file for either dataset."
+  "status_recheck": "STILL NOT AVAILABLE at this commit."
  },
  "gate_2_the_4B_judge_column": {
   "requirement": "same judge, parser and prompt means the FIXED parser, so the 4B side must come from the post-fix scoring.",
@@ -23,7 +23,17 @@
    "no VizWiz directory or annotation file exists under the HF cache or the home tree."
   ],
   "reason": "the blur / framing / obstruction flags are a SEPARATE VizWiz release, not part of VizWiz-VQA val.",
-  "action": "reported as a gap and NOT acquired. CLAUDE.md: do not propose new datasets; if one seems necessary, describe the gap and do not implement. Every other requested VizWiz stratification, answer type and answerable-only, is producible and is implemented."
+  "action": "reported as a gap and NOT acquired. CLAUDE.md: do not propose new datasets; if one seems necessary, describe the gap and do not implement. Every other requested VizWiz stratification, answer type and answerable-only, is producible and is implemented.",
+  "licence_check_outcome": {
+   "instruction": "DO NOT START THE JOIN. The licence check returned neither yes nor no and the question is back with the user.",
+   "findings": [
+    "the VizWiz quality-issues page states NO licence and NO terms of use, and there is no site-wide licence on vizwiz.org",
+    "the sibling VizWiz-VQA page DOES state CC BY 4.0 explicitly, so the absence is an ASYMMETRY BETWEEN TWO RELEASES on the same site rather than a site that never licenses anything, which is the stronger reading against assuming a grant",
+    "the only access-related statement is \"we publicly release the annotation JSON files for self evaluation\", a PURPOSE-LIMITED phrase rather than a grant, and the files are reachable without agreement or registration"
+   ],
+   "status": "the gap stands as recorded. Reachable without a gate is not the same as licensed, and an explicit licence on a sibling release makes the silence here harder to read as permission rather than easier.",
+   "if_approved": "join by image id against the StudySS1 VizWiz val manifest, with COVERAGE REPORTED rather than assumed complete; the single train_val_test CSV should cover val in one file."
+  }
  },
  "host_and_load_condition": {
   "resolved_by_the_user": true,
@@ -48,6 +58,16 @@
     "p90": 1.4116,
     "mean": 1.0942,
     "median_prompt_tokens": 1550
+   }
+  },
+  "stack_distinction_REGISTER_CORRECTED": {
+   "what_I_wrote": "that the SS device TTFT and the robot device cost are measured on different stacks and must not be placed side by side, stated in a way that reads as a live inconsistency.",
+   "the_accurate_claim": "the two stacks NEVER MEET IN A LIVE NUMBER. D103 item (c) already records the device recall cost as UNEXERCISED, because no arm waits for the device answer. So the labelling exists to stop a LATER READER joining them, not to flag an inconsistency present in any current result.",
+   "why_the_distinction_matters": "\"two stacks are in use\" and \"two stacks would conflict if anyone joined them\" are different claims, and only the second is supported. The first would imply a live defect and invite a reconciliation that is not needed. This is the register rule applied to my own sentence: a guard against a future join reported as a present conflict.",
+   "user_ruling": "label both; NOTHING IS RERUN.",
+   "labels": {
+    "ss_device": "Qwen3-VL-4B on the Orin under vLLM, StudyORIN3 configuration, idle, one request at a time, cold per image",
+    "robot_recall_device_cost": "ORIN2 in-process harness, per D87, and unexercised per D103 item (c)"
    }
   }
  },
