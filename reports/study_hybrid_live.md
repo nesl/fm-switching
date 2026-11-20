@@ -1,6 +1,6 @@
 # StudyHYBRID-live: the H100 hybrid, components, move proofs and live screening (D138 to D141)
 
-**Status: INTERIM, 2026-11-19 16:35. Seed-0 screening complete; seed-4 repeats in progress (1 of 4 done); C6 cells
+**Status: INTERIM, 2026-11-19 16:50. Seed-0 screening complete; seed-4 repeats in progress (1 of 4 done); C6 cells
 next. PILOT SCREENING, NOT A ROUND-1 RESULT.** Every live number below is an observed count from one 600-s run
 (Qwen3-VL-32B, round-1 server, tight 27 GiB host tier, 50:50 traffic, push-all, mode A). Robot pools are 21
 questions at 10 devices and 27 at 12 devices on seed 0, so **one question is 4.8 pp at 10 and 3.7 pp at 12**. No
@@ -8,19 +8,22 @@ confidence intervals are claimed and no difference here is a finding until the r
 
 ## 0. Headline so far
 
-1. **With the corrected definitions (D140, D141), every hybrid configuration beats the b7 base by one or two robot
-   questions per size, with every dashcam meeting its target, and C1+C2(k_r 1.5)+C5 PASSES the pilot verdict at both
-   10 and 12 devices on seed 0** (19 of 21, 25 of 27; dashcams all meet). The base fails at both (18 of 21, 23 of
-   27), as has every baseline run at 10 devices so far. C5, C1+C2(k 0.5)+C5 and C1+C2(k 1.5)+C3+C5 pass at 10 and
-   miss at 12 by one question. One seed, margins of one question: this is a lead, not a finding.
+1. **Under the ruled D133 headline (robot p 0.90 within 5 s over FEASIBLE questions, per opportunity_id; feasibility
+   from flash's `feasibility_ceiling.py`), the b7 base AND every corrected hybrid pass at 10 and 12 devices on seed 0.**
+   The base misses one feasible question at each size (18 of 19, 23 of 24); every corrected hybrid configuration
+   delivers every feasible question on time (19 of 19, 24 of 24), with every dashcam meeting its target. **The
+   hybrid's edge on seed 0 is therefore one feasible question per size, not a pass-or-fail difference.** Over all
+   questions (reported beside it), the base is 18 of 21 and 23 of 27 and the best hybrid 19 or 20 of 21 and 25 of 27;
+   the remaining misses are questions no scheduler can deliver on an idle engine (2 of 21 and 3 of 27 are infeasible).
+   (An earlier version of this report read the all-questions figure as the verdict, under which only the hybrids
+   passed; that reading is superseded by the D133 ruling.)
 2. **The first definitions were wrong, and the live runs showed it:** C5's in-flight cap, applied to every kind of
    work, starved robots (base 23 of 27 at 12 devices; old C5 10 of 27; old C1+C5 9 of 27). The decision logs showed
    the cause: robot releases fell from 25 to 6 and 183 robot questions were deferred to expiry, because deadline order
    fills the few free slots with dashcam instants (1 s deadline) ahead of robots (5 s). Making the cap
    dashcam-only (D140) removed the starvation (C5: 24 of 27).
-3. **Two things are not yet known:** robot on-time over FEASIBLE questions (needs the D133 definition and each
-   unreleased question's history size, which the decision logs do not record), and whether the margins survive a
-   second seed, because **the seed-4 repeats have no seed-4 base to compare against** (section 6).
+3. **Not yet known:** whether the one-question edge survives other seeds. The b7 base at seed 4 and the base and
+   C1+C2(k 1.5)+C5 at seeds 5 and 6 are now queued (user ruling), so the comparison is paired per seed.
 
 ## 1. What was built (code: `experiments/orchestration/live2/hybrid/`)
 
@@ -68,52 +71,56 @@ All on 600-s dry cells, seed 0, 12 devices unless stated. Files: `results/orches
 | C6 on vs off (k 1.5, with the at-risk candidates) | 3,109 | moves, but only by decline-to-send (2); RECENT-now and longer-throttle were never chosen in that cell |
 | v1 all-on vs C1+C2+C3+C5 | 0 | identical (C4 inert), so all-on was not run |
 
-## 3. Live results, seed 0 (all runs valid, 0 request errors, emulator lateness p99 0.108 to 0.116 s)
+## 3. Live results (all runs valid, 0 request errors, emulator lateness p99 0.108 to 0.116 s)
 
-**Corrected definitions (v2/v3):**
+**Robot headline (D133, ruled 2026-11-19): on time within 5 s over FEASIBLE questions, matched per opportunity_id**;
+the all-questions figure beside it. Feasibility is a property of the trace (cold rebuild of the history at question
+time + warm answer + link <= the question's deadline, flash's `policy/audit/feasibility_ceiling.py`, 0cb1195),
+applied per question by `experiments/orchestration/live2/hybrid/feasible_on_time.py`. Checks: its per-cell counts
+equal the committed `feasibility_ceiling.json` in all four cells (seed 0: 19 of 21 and 24 of 27 feasible; seed 4: 25
+of 27 and 27 of 29), and its all-questions count equals the run scorer's `robot_pool_on_time` in every run (on time =
+DELIVERED within the deadline). Per-run file: `results/orchestration/live2/hybrid/hybrid_feasible.json`.
 
-| configuration | robots on time, 10 dev (of 21) | 12 dev (of 27) | dashcams all meet | RECENT share of robot answers (10 / 12) | decision latency p50 / p99, ms (12 dev) |
+**Corrected definitions (v2/v3), seed 0:**
+
+| configuration | 10 dev: feasible (of 19) | 10 dev: all (of 21) | 12 dev: feasible (of 24) | 12 dev: all (of 27) | dashcams all meet | RECENT share of robot answers (10 / 12) | decision latency p50 / p99, ms (12 dev) |
+|---|---|---|---|---|---|---|---|
+| base (b7) | 18 (94.7 %) | 18 | 23 (95.8 %) | 23 | yes / yes | 0 / 0 | 0.81 / 1.17 |
+| C5 (dashcam-only cap) | **19** | 19 | **24** | 24 | yes / yes | 0 / 0 | 0.88 / 1.26 |
+| C1+C2(k 0.5)+C5 | **19** | 19 | **24** | 24 | yes / yes | 0 / 0 | 0.90 / 1.29 |
+| C1+C2(k 1.5)+C5 | **19** | 19 | **24** | 25 | yes / yes | 0 / 0 | 0.90 / 1.28 |
+| C1+C2(k 1.5)+C3+C5 | **19** | 20 | **24** | 24 | yes / yes | 1/21 / 2/27 | 0.91 / 1.28 |
+| C3-always ablation (k 1.5) | | | **24** | 24 | yes | 3/27 | 0.91 / 1.29 |
+
+Where "all" exceeds "feasible", an idle-engine-infeasible question was delivered on time anyway (its history was
+already partly built, which the idle bound does not credit): one such question in each of C1+C2(k 1.5)+C5 at 12 and
+C1+C2(k 1.5)+C3+C5 at 10.
+
+**First definitions (v1, "old at-risk / old cap"), seed 0, kept for the record:**
+
+| configuration | 10 dev: feasible (of 19) | 10 dev: all (of 21) | 12 dev: feasible (of 24) | 12 dev: all (of 27) | dashcams all meet |
 |---|---|---|---|---|---|
-| base (b7) | 18 | 23 | yes / yes | 0 / 0 | 0.81 / 1.17 |
-| C5 (dashcam-only cap) | 19 | 24 | yes / yes | 0 / 0 | 0.88 / 1.26 |
-| C1+C2(k 0.5)+C5 | 19 | 24 | yes / yes | 0 / 0 | 0.90 / 1.29 |
-| **C1+C2(k 1.5)+C5** | 19 | **25** | yes / yes | 0 / 0 | 0.90 / 1.28 |
-| **C1+C2(k 1.5)+C3+C5** | **20** | 24 | yes / yes | 1/21 / 2/27 | 0.91 / 1.28 |
-| C3-always ablation (k 1.5), 12 dev only | | 24 | yes | 3/27 | 0.91 / 1.29 |
+| C5 (cap on all work) | 13 | 13 | 10 | 10 | yes / yes |
+| C1+C5 | 13 | 13 | 9 | 9 | yes / yes |
+| C1+C2(k 1.0)+C5 | 14 | 14 | 9 | 9 | yes / yes |
+| C1+C2(k 2.0)+C5 | 16 | 16 | 11 | 11 | yes / yes |
 
-**First definitions (v1, "old at-risk / old cap"), kept for the record:**
+**Seed 4 (in progress):** C1+C2(k 1.5)+C3+C5 at 10 devices: 24 of 25 feasible (96.0 %), 24 of 27 all, dashcams all
+meet, RECENT 2 of 27. At 12 devices the first run was INVALID (one dashcam request failed with a transport
+`ReadError` at t = 246.5 s, the unresolved harness issue first seen at 16 devices in D134); it is excluded and the
+rerun is in progress. The b7 base at seed 4 is queued next as the control.
 
-| configuration | 10 dev (of 21) | 12 dev (of 27) | dashcams all meet |
-|---|---|---|---|
-| C5 (cap on all work) | 13 | 10 | yes / yes |
-| C1+C5 | 13 | 9 | yes / yes |
-| C1+C2(k 1.0)+C5 | 14 | 9 | yes / yes |
-| C1+C2(k 2.0)+C5 | 16 | 11 | yes / yes |
-
-**Seed 4 (in progress):** C1+C2(k 1.5)+C3+C5 at 10 devices: 24 of 27, dashcams all meet, RECENT 2 of 27.
-
-**Pilot verdict (D97 rule, all dashcams meet and pooled robot on-time at least 90 percent, as computed in
-`results/orchestration/live2/pilot/hybrid_live_summary.json`):**
-
-| configuration | 10 devices | 12 devices |
-|---|---|---|
-| base (b7) | fail (85.7 %) | fail (85.2 %) |
-| C5 | PASS (90.5 %) | fail (88.9 %) |
-| C1+C2(k 0.5)+C5 | PASS (90.5 %) | fail (88.9 %) |
-| **C1+C2(k 1.5)+C5** | **PASS (90.5 %)** | **PASS (92.6 %)** |
-| C1+C2(k 1.5)+C3+C5 | PASS (95.2 %) | fail (88.9 %) |
-| C3-always ablation | | fail (88.9 %) |
-| every v1 configuration | fail | fail |
-
-Capacity (largest passing size) is not measured: only 10 and 12 devices were run. A pass at 12 sits on the
-threshold (25 of 27 passes, 24 of 27 fails), so it is one question from either verdict.
+**Verdict under the D133 headline (all dashcams meet AND feasible robot on-time at least 90 percent):** every
+corrected configuration and the base PASS at 10 and 12 devices on seed 0; every v1 configuration fails (the old cap
+starved robots). Capacity (largest passing size) is not measured: only 10 and 12 devices were run.
 
 Decision latency rises from 0.81 to about 0.90 ms p50 with the components, far inside the 100-ms decision period.
 
 ## 4. Mechanism reading (provisional, one seed)
 
-- The b7 base's robot misses at 10 and 12 devices are queueing behind dashcam traffic, not infeasible rebuilds:
-  capping dashcam in-flight work alone (C5) recovers one robot question at each size while every dashcam still meets.
+- Of the base's robot misses, 2 of 3 at 10 devices and 3 of 4 at 12 are infeasible questions no scheduler can serve;
+  the one feasible miss at each size is queueing behind dashcam traffic, and capping dashcam in-flight work alone
+  (C5) recovers it while every dashcam still meets.
 - The throttle at k_r 1.5 fires (3,570 differing decisions) and adds one more robot at 12 devices; at k_r 0.5 it
   almost never fires (44 decisions) and changes nothing live.
 - C3 sends 1 to 2 robots per run as RECENT and adds one robot at 10 devices but not at 12. On MIXED, RECENT costs about
@@ -133,12 +140,12 @@ Decision latency rises from 0.81 to about 0.90 ms p50 with the components, far i
 
 ## 6. Open items and requests
 
-1. **Seed-4 control missing (needs a ruling):** the seed-4 repeats run the best two hybrids only. Without the base at
-   seed 4 (10 and 12 devices, 2 runs, about 25 min) the repeats cannot show whether the hybrid's margin holds.
-   Recommended: add `hybrid-base` at seed 4 before the C6 cells.
-2. **On-time over feasible questions:** needs the D133 definition (provisional: unloaded lower bound, the committed
-   cold rebuild for the history plus warm recall TTFT, at most 5 s) and each robot question's history size from the
-   trace. Not computed yet.
+1. **Seed controls (ruled):** b7 at seed 4 (10, 12), then C1+C2(k 1.5)+C5 at seed 4, then the C6 cells, then the base
+   and C1+C2(k 1.5)+C5 at seeds 5 and 6 (10, 12). C6 runs on C1+C2(k 1.5)+C5 (PROVISIONAL choice: the configuration
+   the follow-up seeds use; it and the C3 combination tie on seed 0).
+5. **Transport ReadError:** a single dashcam request failure invalidated a 12-device run; the harness issue is still
+   unresolved (ruling pending since D134).
+2. **On-time over feasible questions:** done (D133 ruled), section 3.
 3. **Requests to flash (quality model):** the committed 32B-D2 table is PNG frames from t = 0 (0.420 DEV) while live2
    sends JPEG q88 from t = 2 s (0.370 measured, StudyACC2); 32B-RECENT is StudyR1 K3 (12.4k tokens), not live2's
    RECENT (5.5k tokens). C1's value term and C6's "RECENT now" candidate are priced against these tables.
@@ -154,6 +161,7 @@ Decision latency rises from 0.81 to about 0.90 ms p50 with the components, far i
 
 ## 8. Next (queue)
 
-Seed-4 repeats (3 remaining, to about 17:00), best + C6 at 10 and 12 devices (to about 17:25), StudySS1 32B answer
+Seed-4: the C3 combination at 12 (rerun), b7 at 10 and 12, C1+C2(k 1.5)+C5 at 10 and 12; C6 on C1+C2(k 1.5)+C5 at 10
+and 12; the base and C1+C2(k 1.5)+C5 at seeds 5 and 6 (8 runs); about 19:30 in all. Then the StudySS1 32B answer
 pass (about 70 min), OpenEQA when its kit lands, LH-REQ when "lh-req ready" lands (best hybrid and the top two
 baselines at 10 and 12), then the D134 baselines.
