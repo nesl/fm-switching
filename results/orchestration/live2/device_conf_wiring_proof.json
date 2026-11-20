@@ -1,0 +1,180 @@
+{
+ "label": "Device-confidence wiring proof. Dry cells on the frozen grid's own cell; no GPU, no model server, no inference. Pre-fix digests are the committed baseline_prescreen (a592e51) on the identical cell.",
+ "at": "2026-11-20T13:01:38.882527",
+ "cell": {
+  "seed": 4,
+  "n_devices": 16,
+  "run_s": 1200.0,
+  "ratio": "40:40:20",
+  "dry": true,
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2"
+ },
+ "arms": {
+  "r3streaming": {
+   "error": "KeyError(\"unknown arm 'r3streaming'; known: ['always-cloud-fcfs', 'attentionstore', 'b10-blocking-aware', 'b7-edf-feasibility', 'b9', 'builder-acfcfs', 'builder-default', 'builder-s1-fairshare', 'builder-s1-feasible', 'builder-s1-lateness', 'builder-s2-all', 'builder-s2-value', 'builder-s3-whatif', 'builder-s4-adaptive', 'builder-s4-llf', 'builder-s4-reserve', 'builder-s6-decline', 'builder-s7-alw",
+   "wall_s": 1.1
+  },
+  "thinking-qwenvl": {
+   "error": "KeyError(\"unknown arm 'thinking-qwenvl'; known: ['always-cloud-fcfs', 'attentionstore', 'b10-blocking-aware', 'b7-edf-feasibility', 'b9', 'builder-acfcfs', 'builder-default', 'builder-s1-fairshare', 'builder-s1-feasible', 'builder-s1-lateness', 'builder-s2-all', 'builder-s2-value', 'builder-s3-whatif', 'builder-s4-adaptive', 'builder-s4-llf', 'builder-s4-reserve', 'builder-s6-decline', 'builder-s7",
+   "wall_s": 1.1
+  },
+  "confidence-cascade": {
+   "wall_s": 105.7,
+   "n_decision_rows": 13564,
+   "digest": "7bbf9555d68e6f29",
+   "digest_setwise": "0483391bc04e8b07",
+   "recall_decisions_total": 377,
+   "on_confidence_present": {
+    "n": 20,
+    "by_decision": {
+     "DEVICE": 13,
+     "CLOUD": 7
+    }
+   },
+   "on_confidence_absent": {
+    "n": 357,
+    "by_decision": {
+     "DEVICE": 357
+    }
+   },
+   "declines_to_escalate_on_high_confidence": 13,
+   "escalates_on_low_confidence": 7,
+   "confidence_range": [
+    0.386991,
+    0.999972
+   ],
+   "prefix_digest_committed": "7212c388684ed51d",
+   "digest_changed_vs_prefix": true
+  },
+  "cascade-routing": {
+   "wall_s": 107.0,
+   "n_decision_rows": 13564,
+   "digest": "9a18cc1be9aa65c6",
+   "digest_setwise": "3af10ce41ad5969d",
+   "recall_decisions_total": 377,
+   "on_confidence_present": {
+    "n": 20,
+    "by_decision": {
+     "DEVICE": 20
+    }
+   },
+   "on_confidence_absent": {
+    "n": 357,
+    "by_decision": {
+     "CLOUD": 357
+    }
+   },
+   "declines_to_escalate_on_high_confidence": 20,
+   "escalates_on_low_confidence": 0,
+   "confidence_range": [
+    0.386991,
+    0.999972
+   ],
+   "prefix_digest_committed": "6fee784e54567912",
+   "digest_changed_vs_prefix": true
+  },
+  "streamscout": {
+   "wall_s": 107.5,
+   "n_decision_rows": 13564,
+   "digest": "e6345d256e07f6ba",
+   "digest_setwise": "a69db91f387c10a9",
+   "recall_decisions_total": 377,
+   "on_confidence_present": {
+    "n": 20,
+    "by_decision": {
+     "CLOUD": 20
+    }
+   },
+   "on_confidence_absent": {
+    "n": 357,
+    "by_decision": {
+     "DEVICE": 357
+    }
+   },
+   "declines_to_escalate_on_high_confidence": 0,
+   "escalates_on_low_confidence": 20,
+   "confidence_range": [
+    0.386991,
+    0.999972
+   ],
+   "prefix_digest_committed": "7212c388684ed51d",
+   "digest_changed_vs_prefix": true
+  },
+  "b7-edf-feasibility": {
+   "wall_s": 107.9,
+   "n_decision_rows": 13570,
+   "digest": "67c8da3057a09aff",
+   "digest_setwise": "4d93d629c3c55e6f",
+   "recall_decisions_total": 377,
+   "on_confidence_present": {
+    "n": 0,
+    "by_decision": {}
+   },
+   "on_confidence_absent": {
+    "n": 377,
+    "by_decision": {
+     "CLOUD": 372,
+     "REJECT": 5
+    }
+   },
+   "declines_to_escalate_on_high_confidence": 0,
+   "escalates_on_low_confidence": 0,
+   "confidence_range": null,
+   "prefix_digest_committed": "67c8da3057a09aff",
+   "digest_changed_vs_prefix": false
+  }
+ },
+ "robot_only_coverage": {
+  "cell": {
+   "seed": 4,
+   "n_devices": 16,
+   "run_s": 1200.0,
+   "ratio": "50:50",
+   "robot_question_set": "lh_req",
+   "ss_question_set": "ss1",
+   "dry": true
+  },
+  "arm": "confidence-cascade",
+  "recall_decisions": 24,
+  "confidence_present": 24,
+  "confidence_absent": 0,
+  "coverage_fraction": 1.0,
+  "by_decision": {
+   "DEVICE": 16,
+   "CLOUD": 8
+  },
+  "confidence_range": [
+   0.386991,
+   0.999972
+  ]
+ },
+ "control": {
+  "arm": "b7-edf-feasibility",
+  "declares_reads_device_answer": false,
+  "digest": "67c8da3057a09aff",
+  "prefix_digest": "67c8da3057a09aff",
+  "byte_identical": true,
+  "why": "b7 declares nothing, so the fix must not move it. It is also the background arm StudySH-EP's cost-under-load cell runs, so a change here would mean the fix perturbed work in flight."
+ },
+ "verdict": {
+  "arms_receiving_the_field": [
+   "cascade-routing",
+   "confidence-cascade",
+   "streamscout"
+  ],
+  "arms_declining_on_high_confidence": [
+   "cascade-routing",
+   "confidence-cascade"
+  ],
+  "control_unchanged": true
+ },
+ "_provenance": {
+  "git_commit": "bad0efc9d12cf1568b50a28f914e9e147327a217",
+  "script": "device_conf_wiring_proof.py",
+  "model": "none-dry",
+  "timestamp": "2026-11-20T13:03:27.622429",
+  "device": "cpu",
+  "n": 6
+ }
+}

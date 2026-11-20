@@ -28,6 +28,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+# The committed device-answer confidence table, loaded once per process. It is MODULE level and
+# not a CoordState attribute on purpose: CoordState is a dataclass, so an annotated class
+# attribute there would silently become a dataclass FIELD and change its constructor signature.
+_DEV_CONF_CACHE: Optional[Dict[str, float]] = None
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 for _p in (str(ROOT / "experiments/orchestration/baselines"),
@@ -483,6 +488,47 @@ class CoordState:
                         counts["evicted"] += 1
         return counts
 
+    def _device_confidence(self, o) -> Optional[float]:
+        """The committed DEVICE answer confidence for this opportunity, or None.
+
+        User ruling 2026-11-20: the five cascade-style arms must receive what they declare. Before
+        it, `observation` hard-coded this field to None, ignored its own `reads_device_answer`
+        parameter, and the coordinator never passed that parameter, so an arm declaring
+        `reads_device_answer` paid StudyD8's 0.567 s wait (coordinator.py, the two `reads_device`
+        reads) and was handed None. See reports/study_ss2.md section 12.
+
+        The value is the committed per-question table and nothing else
+        (`baselines/device_confidence.py`: StudyE7 Job A `letter_probs` mass on the letter the 4B
+        actually emitted, the harness's own DEVICE answer configuration). NOTHING IS SYNTHESIZED.
+
+        Two failure modes are kept apart on purpose, because conflating them is the defect this
+        fixes. A TABLE that cannot be loaded raises, because returning None then would reproduce
+        the silent absence. A QUESTION absent from the table returns None and is counted: single
+        shot questions have no committed answer probability at all (StudySS1 / StudySS2 ran greedy
+        with no `logprobs`), so None is the honest value for them and every arm already handles it.
+        """
+        qid = getattr(o, "question_id", None)
+        if qid is None:
+            self.counts["device_conf_no_question_id"] = \
+                self.counts.get("device_conf_no_question_id", 0) + 1
+            return None
+        global _DEV_CONF_CACHE
+        if _DEV_CONF_CACHE is None:
+            import device_confidence as DC          # on sys.path via run_live2_cell
+            _DEV_CONF_CACHE = dict(DC._load_primary())
+            if not _DEV_CONF_CACHE:
+                raise RuntimeError(
+                    "device_confidence's committed table is EMPTY; an arm declaring "
+                    "reads_device_answer would be charged the device-answer wait and handed None "
+                    "for every question, which is the defect this supplier exists to fix. "
+                    "Check results/sember/study_e7/e7_requests_h100nvl.jsonl.")
+        v = _DEV_CONF_CACHE.get(qid)
+        if v is None:
+            v = _DEV_CONF_CACHE.get(str(qid).lower())
+        key = "device_conf_supplied" if v is not None else "device_conf_absent"
+        self.counts[key] = self.counts.get(key, 0) + 1
+        return v
+
     def observation(self, now: float, epoch: str, reads_device_answer: bool = False
                     ) -> Observation:
         # Placement is enacted BEFORE the observation is built, so an arm sees the tier its own
@@ -521,7 +567,8 @@ class CoordState:
                 arrival_s=round(o.t_arrive if o.t_arrive is not None else o.t_event, 3),
                 deadline_s=round(o.deadline_abs(), 3), evidence=ev, readiness=ready,
                 readiness_tokens=tok,
-                device_answer_confidence=None))
+                device_answer_confidence=(self._device_confidence(o)
+                                          if reads_device_answer else None)))
         gpu = tuple(sorted(k for k, v in self.sessions.items() if v.believed_tier() == "gpu"))
         host = tuple(sorted(k for k, v in self.sessions.items() if v.believed_tier() == "host"))
         cloud = CloudState(

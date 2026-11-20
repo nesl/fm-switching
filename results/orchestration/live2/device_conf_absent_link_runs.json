@@ -1,0 +1,31 @@
+{
+ "label": "Every committed live2 run of an arm declaring reads_device_answer that predates the 2026-11-20 wiring fix. Each run directory also carries a DEVICE_CONFIDENCE_NOT_DELIVERED.md marker; nothing in those runs is altered, deleted or recomputed.",
+ "at": "2026-11-20T13:02:11.289660",
+ "n_runs": 5,
+ "runs": [
+  "results/orchestration/live2/pilot/runs4/confidence-cascade_n10_s0_600s_h27_published",
+  "results/orchestration/live2/pilot/runs4/confidence-cascade_n16_s0_600s_h27_published",
+  "results/orchestration/live2/pilot/runs4/confidence-cascade_n8_s0_600s_h27_published",
+  "results/orchestration/live2/pilot/runs4/confidence-cascade_n8_s0_600s_h27_published_validity120",
+  "results/orchestration/live2/pilot/runs5/cascade-routing_n8_s0_600s_h27_validity120"
+ ],
+ "by_arm": {
+  "confidence-cascade": 4,
+  "cascade-routing": 1,
+  "streamscout": 0,
+  "r3streaming": 0,
+  "thinking-qwenvl": 0
+ },
+ "never_ran_live2": {
+  "arms": [
+   "streamscout",
+   "r3streaming",
+   "thinking-qwenvl"
+  ],
+  "streamscout": "in the live2 registry and dry-screened, but no live run directory exists",
+  "r3streaming": "NOT in the live2 registry (50 arms) and no live run directory exists",
+  "thinking_qwenvl": "NOT in the live2 registry (50 arms) and no live run directory exists",
+  "note": "the two unregistered arms declare the flag in the baselines layer only, so they never paid the charge and need no relabelling; if either is ported, the wiring now supplies the field automatically"
+ },
+ "rule": "CLAUDE.md Rule 2: a null from an experiment where the mechanism was absent is an artifact of the design, not evidence that the mechanism does not exist"
+}

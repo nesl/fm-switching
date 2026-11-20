@@ -616,3 +616,99 @@ evidence about cascading. Supplying the field is a methodological change and nee
 exists in committed form (StudyE7 Job A per-question `letter_probs` for the 4B-D2 configuration, 839 of
 845 questions, per StudyB-baselines amendment 2), so it is a wiring decision and not a measurement
 problem.
+
+### 12.1 Fixed, and proved on dry cells (user ruling, 2026-11-20)
+
+All three break points are closed. `cstate.observation` now populates the field from the committed
+table when `reads_device_answer` is true, it uses that parameter, and `coordinator.py` passes it. The
+value is `baselines/device_confidence.py` and nothing else, which is StudyE7 Job A's per-question
+`letter_probs` mass on the letter the 4B actually emitted, the harness's own DEVICE answer
+configuration. Nothing is synthesized.
+
+**Two failure modes are kept apart on purpose, because conflating them is the defect being fixed.** A
+TABLE that cannot be loaded now RAISES, because returning None there would reproduce the silent
+absence this fix exists to remove. A QUESTION absent from the table returns None and is counted:
+single-shot questions have no committed answer probability at all (12.2), so None is the honest value
+for them and every arm already handles it.
+
+**The proof** (`device_conf_wiring_proof.py`, output `device_conf_wiring_proof.json`), on the frozen
+grid's own cell: seed 4, 16 devices, 1,200 s, 40:40:20, LH-REQ robots, SS2 pool, dry engine. Pre-fix
+digests are the committed `baseline_prescreen.json` (a592e51) on the identical cell, so the comparison
+is against a committed artifact rather than against a rerun.
+
+| arm | confidence present / absent | declines on high confidence | escalates on low | digest | committed pre-fix digest |
+|---|---|---|---|---|---|
+| `confidence-cascade` | 20 / 357 | **13** | 7 | `7bbf9555d68e6f29` | `7212c388684ed51d` |
+| `cascade-routing` | 20 / 357 | **20** | 0 | `9a18cc1be9aa65c6` | `6fee784e54567912` |
+| `streamscout` | 20 / 357 | **0** | 20 | `e6345d256e07f6ba` | `7212c388684ed51d` |
+| `b7-edf-feasibility` (control) | 0 / 377 | 0 | 0 | `67c8da3057a09aff` | `67c8da3057a09aff` |
+
+Four things that table settles.
+
+1. **The field arrives**, counted at the point of USE inside each arm's own `decide` rather than from
+   a coordinator counter. That is the stronger read: a counter proves the supplier ran, this proves
+   the value reached the code that consumes it.
+2. **The characteristic decision fires for two of the three.** `confidence-cascade` declines to
+   escalate on 13 questions and escalates on 7, so both branches of its confidence test are reached,
+   and `cascade-routing` declines on all 20. **`streamscout` escalates on all 20 and never declines**,
+   so its specific decline-on-high-confidence branch does NOT fire in this cell. That is its own
+   fitted thresholds acting on these confidences rather than a wiring failure, and it is reported as a
+   shortfall against the requested proof instead of being rounded up to a pass.
+3. **The switch reaches a decision** (Step 2b): every treated arm's digest differs from its committed
+   pre-fix digest. The sharpest evidence is what the fix SEPARATES. Pre-fix, `confidence-cascade` and
+   `streamscout` had the **same** digest, `7212c388684ed51d`, because neither received a confidence and
+   both collapsed to the same decisions. They are now distinct, so two arms that were
+   indistinguishable are distinguishable.
+4. **The control is byte-identical.** `b7-edf-feasibility` declares nothing and its digest is exactly
+   its committed pre-fix digest. That matters beyond tidiness: b7 is the background arm StudySH-EP's
+   cost-under-load cell runs, so a change there would have meant the fix perturbed work in flight.
+
+**Coverage is a workload fact, not a supplier weakness.** 20 of 377 looks thin because in that cell
+only 20 recall questions are robot questions while 357 are single-shot. The same arm on a robot-only
+two-type cell (50:50, LH-REQ, 16 devices, 1,200 s) gets **24 of 24, full coverage**, with confidences
+spanning 0.387 to 1.0 and decisions splitting 16 DEVICE to 8 CLOUD.
+
+**A checker failure worth recording, because it produced an impossible result.** The first version of
+this proof computed its own decision digest from `r["action"]` and `r["key"]`, which are not fields of
+a decision row, so every row hashed to the same string and the digest became a function of row COUNT
+alone. Three different arms collided on one digest and b7 appeared to change. b7 reads no confidence
+and cannot change, so that impossible failure was the checker breaking rather than the fix, exactly as
+CLAUDE.md check 7 warns. The proof now imports the committed `baseline_prescreen._digests` instead of
+reimplementing it.
+
+**Earlier runs are labelled, not altered.** Five committed live2 run directories predate the fix and
+each now carries a `DEVICE_CONFIDENCE_NOT_DELIVERED.md` marker, listed in
+`results/orchestration/live2/device_conf_absent_link_runs.json`: four `confidence-cascade` pilot cells
+and one `cascade-routing` cell. Nothing in them is deleted or recomputed; what is bounded is the
+interpretation. `streamscout` is in the live2 registry and was dry-screened but has no live run.
+`r3streaming` and `thinking-qwenvl` are **not in the live2 registry at all** (50 arms) and have no live
+run, so they never paid the charge and need no relabelling; if either is ported, the wiring now
+supplies the field automatically.
+
+### 12.2 Single-shot has no committed answer probability, and what a re-record needs
+
+**Reported as asked: the Orin StudySS1 and StudySS2 runs did NOT record answer probabilities.**
+`ss2_run.py` sends `temperature=0.0, seed=0, max_tokens, stream=True` and no `logprobs` field, so no
+per-question probability exists for any single-shot item. The committed rows carry `answer`,
+`answer_raw`, `completion_tokens`, `prompt_tokens`, `score`, `ttft_s` and `total_s`, and nothing
+probabilistic. That is why 357 of 377 recall questions in the frozen grid's cell return None, and the
+None is correct rather than missing.
+
+What a re-record needs, split by whether it is a re-record or a design decision first:
+
+| items | what is needed | re-record, or a ruling first? |
+|---|---|---|
+| RealWorldQA mcq, 438 of 765 | `logprobs: true, top_logprobs: 20` on the request, then the mass on the emitted letter over A to D. The exact analogue of StudyE7's `letter_probs`, needing no new definition | **pure re-record** |
+| RealWorldQA free_form, 327 of 765 | there is no letter, so a confidence must be DEFINED: the sequence probability of the emitted answer, length-normalised or not | **ruling first**, then re-record |
+| RefSpatial, all 277 | the answer is coordinates, neither a letter nor a short string, and no committed precedent exists for a point-answer confidence | **ruling first**, and the definition is the harder half |
+| cost | 1,042 device items, one at a time, cold per image, on the Orin, same kit and prompts | adds `logprobs` to the request only. No prompt or image changes, so the answers themselves should reproduce the committed ones, and that equality is the control the re-record should report |
+
+So the MCQ half can be supplied by adding one request field and re-running the device pass. The
+free-form and point halves need a ruling on what a confidence MEANS for an answer that is not a
+letter, and until then None for those items is the honest value and the arms handle it.
+
+**One clarification about dashcams, since the instruction mentioned them.** Dashcam device scores are
+already delivered and always were: `cstate.observation` builds each `EpisodicStream` with
+`delivered_scores`, the device's own per-instant scores, so arms reading the episodic side have never
+been starved. The gap was only ever on the recall side, which is where `device_answer_confidence`
+lives. Nothing was added for dashcams because nothing was missing.

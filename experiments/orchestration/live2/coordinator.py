@@ -240,7 +240,8 @@ class Live2Coordinator:
         # observation, so the instant deadline and the built-prefix size the arm reads describe
         # the same state the observation does. It is O(devices + sessions) per period.
         self._roster(t)
-        obs = self.st.observation(t, epoch if epoch in _EPOCHS else "tick")
+        obs = self.st.observation(t, epoch if epoch in _EPOCHS else "tick",
+                                  reads_device_answer=self.reads_device)
         k0 = self._candidates_counter()
         t0 = time.perf_counter()
         c0 = time.thread_time()
