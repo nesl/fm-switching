@@ -1,7 +1,7 @@
 # StudyHYBRID-live: the H100 hybrid, components, move proofs and live screening (D138 to D141)
 
-**Status: INTERIM, 2026-11-19 16:50. Seed-0 screening complete; seed-4 repeats in progress (1 of 4 done); C6 cells
-next. PILOT SCREENING, NOT A ROUND-1 RESULT.** Every live number below is an observed count from one 600-s run
+**Status: CLOSED BY D142 (2026-11-19 17:10): MIXED screening stopped after the b7 seed-4 control; the module is handed
+to flash. PILOT SCREENING, NOT A ROUND-1 RESULT.** Every live number below is an observed count from one 600-s run
 (Qwen3-VL-32B, round-1 server, tight 27 GiB host tier, 50:50 traffic, push-all, mode A). Robot pools are 21
 questions at 10 devices and 27 at 12 devices on seed 0, so **one question is 4.8 pp at 10 and 3.7 pp at 12**. No
 confidence intervals are claimed and no difference here is a finding until the repeats and a seed-4 control land.
@@ -105,10 +105,28 @@ C1+C2(k 1.5)+C3+C5 at 10.
 | C1+C2(k 1.0)+C5 | 14 | 14 | 9 | 9 | yes / yes |
 | C1+C2(k 2.0)+C5 | 16 | 16 | 11 | 11 | yes / yes |
 
-**Seed 4 (in progress):** C1+C2(k 1.5)+C3+C5 at 10 devices: 24 of 25 feasible (96.0 %), 24 of 27 all, dashcams all
-meet, RECENT 2 of 27. At 12 devices the first run was INVALID (one dashcam request failed with a transport
-`ReadError` at t = 246.5 s, the unresolved harness issue first seen at 16 devices in D134); it is excluded and the
-rerun is in progress. The b7 base at seed 4 is queued next as the control.
+**Seed 4 (the paired control, D142), all runs valid, dashcams all meet:**
+
+| configuration | 10 dev: feasible (of 25) | 10 dev: all (of 27) | 12 dev: feasible (of 27) | 12 dev: all (of 29) |
+|---|---|---|---|---|
+| base (b7) | 21 (84.0 %, fail) | 21 | 20 (74.1 %, fail) | 20 |
+| C1+C2(k 1.5)+C3+C5 | **24 (96.0 %, PASS)** | 24 | 22 (81.5 %, fail) | 22 |
+
+The C3 combination's first 12-device seed-4 run was INVALID (one dashcam request failed with a transport `ReadError`
+at t = 246.5 s, the unresolved harness issue first seen at 16 devices in D134); it is excluded and the valid rerun is
+the one shown. C1+C2(k 1.5)+C5 at seed 4, the C6 cells, and seeds 5 and 6 were NOT run: D142 stopped all MIXED
+screening after the b7 seed-4 control.
+
+**Seed 0 and seed 4 side by side (feasible-question headline; margin = hybrid minus base):**
+
+| | 10 devices | 12 devices |
+|---|---|---|
+| seed 0: base / best hybrid | 18 of 19 / 19 of 19 (+1) | 23 of 24 / 24 of 24 (+1) |
+| seed 4: base / C1+C2(k 1.5)+C3+C5 | 21 of 25 / 24 of 25 (+3) | 20 of 27 / 22 of 27 (+2) |
+
+On both seeds the hybrid delivers more feasible robot questions on time than b7 at both sizes, with every dashcam
+meeting; the margin is larger on the harder seed (seed 4, where b7 fails at both sizes). Two seeds, margins of one to
+three questions: a consistent direction, not yet a settled effect.
 
 **Verdict under the D133 headline (all dashcams meet AND feasible robot on-time at least 90 percent):** every
 corrected configuration and the base PASS at 10 and 12 devices on seed 0; every v1 configuration fails (the old cap
@@ -165,3 +183,32 @@ Seed-4: the C3 combination at 12 (rerun), b7 at 10 and 12, C1+C2(k 1.5)+C5 at 10
 and 12; the base and C1+C2(k 1.5)+C5 at seeds 5 and 6 (8 runs); about 19:30 in all. Then the StudySS1 32B answer
 pass (about 70 min), OpenEQA when its kit lands, LH-REQ when "lh-req ready" lands (best hybrid and the top two
 baselines at 10 and 12), then the D134 baselines.
+
+## 9. Hand-over to flash (D142, 2026-11-19)
+
+flash now owns `experiments/orchestration/live2/hybrid/`. The H100 makes no further edits there. State left:
+
+- **Committed and pushed, nothing uncommitted** (last H100 commit to the module: the C6 offer counter, fdbe03d era;
+  `feasible_on_time.py` added in 493ad96). Configurations: `hybrid-*` (v1, "old at-risk / old cap"), `hybrid2-*`
+  (v2/v3: laxity at-risk with the D141 dashcam throttle, floor 2; dashcam-only C5 cap; reserve switch; C3 default and
+  the C3-always ablation), and a `-c6` variant of every configuration.
+- **Proofs on origin:** base byte-identical to b7 (several seeds and sizes, and after every change), Step 2b move proofs
+  for every switch (`results/orchestration/live2/hybrid/hybrid_*proof*.json`).
+- **Open items and known issues:**
+  1. **C6 is wired but its at-risk candidates were never chosen**: in the one dry proof cell (seed 0, 12 devices) the
+     chooser deviated only decline-to-send (2 of 21 calls); "RECENT now" and "longer dashcam throttle" were offered
+     (counter `c6_offered_recent_and_throttle`) but never won. Half the chooser calls find no pending pieces in the
+     policy-core mirror (`c6_no_pending`). C6 was never run live.
+  2. **The mirror is approximate**: it runs policy-core's own admission and release on the same observations but never
+     sees the hybrid's actual releases or completions (forwarding completions trips policy-core's F-4 assertion), so
+     its in-flight model is its own, not the executed one.
+  3. **Quality tables:** C1's value and C6's "RECENT now" are priced with the committed 32B-D2 (PNG, from t = 0) and
+     32B-RECENT (StudyR1 K3, 12.4k tokens) tables, which overstate what live2 sends (StudyACC2).
+  4. **C4 is inert** (no session action is ever emitted); **C1 is inert for robots** (the coordinator re-sorts by
+     deadline and robots are never held), so C1 acts only on dashcam admission under the cap.
+  5. **k_r 0.5** almost never fires the throttle (44 decision rows); **C3-always at k 0.5** is identical to C3.
+  6. **Transport `ReadError`** (harness, not the module) invalidated one 12-device run; ruling still pending.
+  7. **The `live2_completed` hook** on the hybrid is consumed only by the v2 throttle and the C6 long-throttle store;
+     the base is still byte-identical to b7 with it present (proved after adding it).
+  8. `feasible_on_time.py` reproduces the scorer's on-time rule (delivery within the deadline) and reconciles with
+     `feasibility_ceiling.json`; it reads `outcomes.jsonl` and the run's trace directory.
