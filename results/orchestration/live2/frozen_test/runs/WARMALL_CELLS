@@ -1,4 +1,28 @@
-# Overnight item 2 (user ruling 2026-11-20): flash's WARM-ALL + LRU calibration cells run right after the 3 s handful
-# at seed 4, as soon as the arm is on origin WITH its proofs. One "arm n seed tag" per line, added by the operator when
-# the arm lands (its name and how the 0.5x / 0.25x GPU pool and warm-ahead cells are expressed come from flash).
-# Empty until then: the driver skips this block and the queue continues, so GPU 2 never idles.
+# WARM-ALL cells on the EP-G workload. Format: arm n seed tag
+#
+# THESE ARE THE GATE'S HELD-OUT TEST (D151 (6), D154 (2)). The fit is WARMALL_CELLS_1F on the
+# dashcam-1f workload. Nothing fitted there may be reported as a gate pass; the gate passes or
+# fails on THESE cells, and MARGIN_CF is then set once from the held-out p90 absolute error.
+#
+# Ordered so the essential comparison runs first. The first two mirror the 1F fit arm for arm,
+# which is what makes this a like-for-like held-out test rather than a different experiment:
+warm-all-lru 16 4 _L3
+warm-all-lru-reactive 16 4 _L3
+#
+# Then the control, which should collapse toward the no-warming baseline. If it does not, the
+# warming is not what separates the first two arms:
+warm-all-lru-off 16 4 _L3
+#
+# Then the capacity cell, and ONLY the warm-ahead arm can carry it. The reactive arm's peak
+# residency is 33,103 tokens against the P1 simulation's 62,736 to 62,916, because it builds only
+# histories that already have a pending question, so its kv0.25 cell is valid for the COST-MODEL
+# question and must NOT be read as the 0.25x capacity result. warm-all-lru warms every open
+# session, so it is the arm that can be capacity-bound at all:
+warm-all-lru 16 4 _kv0.25_L3
+#
+# All four with the belief corrector in its DEFAULT observe mode (leave LIVE2_BELIEF_CORRECTION
+# unset), so they stay comparable with the handful. Per-cell check: belief_corrections_observed_only
+# MUST equal belief_corrections_changed, else the mutation was applied and the cell is not observe.
+#
+# EXPECT warm-all-lru to push the 62,944-token pool far harder than anything run so far; there is no
+# live number for it. Saturation is a FINDING, not a failed cell: record it rather than retrying.

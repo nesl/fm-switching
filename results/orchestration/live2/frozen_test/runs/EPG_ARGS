@@ -1,0 +1,9 @@
+# D153: the dashcam workload is the append-only episode context (EP-G), never one frame per call.
+# Appended VERBATIM to the run_live2_real.py command for every _epg cell.
+#
+# Verified against the bodies commit (eeea7e0) before this file was written:
+#   run_live2_real.py:100  --dashcam-format  default "oneframe", choices ("oneframe", "epg")
+# so this is the whole switch and no second flag is needed. Floor 3 is the default; the floor is a
+# named constant, and a floor-6 run was measured to agree with the floor-3 run, so raising it later
+# is a one-line change rather than a re-derivation.
+--dashcam-format epg
