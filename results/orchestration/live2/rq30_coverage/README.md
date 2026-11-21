@@ -24,18 +24,36 @@ A first pass of mine also over-reported 357 "missing" ids. They are `realworldqa
 ASSISTANCE questions that never pass through `warm_lat` at all. `rq30_robot_qid_gap.json` is the
 narrower count, over robot rows only.
 
-## The tripwire this exposed (condition matters)
+## CORRECTION: the "tripwire" I reported here was wrong in its direction
 
-Under `lh_req` each seed draws about 139 to 143 DISTINCT robot question_ids, of which about 118 to
-119 are absent from the 97-entry warm table (the `lh_req` id set itself is 69). Re-asks are
-unaffected. First asks are covered only because `scorer/score.py:246-248` consults the measured
-table ONLY IF `device_latency_table()` is not None, i.e. only when `LIVE2_DEVICE_LATENCY` is set;
-otherwise it falls back to the trace's own `device_latency_s`, which every answer row carries.
+The first version of this README said that exporting `LIVE2_DEVICE_LATENCY` would make the scorer
+REFUSE on roughly 119 of 139 distinct robot qids. That is wrong, and the error was mine.
 
-So committed cells are fine because they take the fallback path. If `LIVE2_DEVICE_LATENCY` is ever
-exported to score against the measured table, which is where D155 and D161 (3) point, the scorer
-will REFUSE on roughly 119 of 139 distinct robot qids per seed. It refuses rather than guesses, so
-this surfaces as a stopped score, not a quiet wrong number.
+`score.py:209` reads `DEVICE_LATENCY_SOURCE = os.environ.get("LIVE2_DEVICE_LATENCY",
+"orin_rec_warm")`: the measured Orin WARM table is the DEFAULT, not an opt-in. Coverage of the rows
+the scorer actually reads, `device_answers` with `kind == "recall"`, is **132 of 132 with zero
+refusals**. My 119-of-139 count was taken over `recall_question` TRACE RECORDS, which include
+assistance questions and questions that never become a scored robot answer row, so it was simply
+the wrong denominator.
+
+The real exposure is the opposite of what I described, and smaller: setting
+`LIVE2_DEVICE_LATENCY=trace` would DOWNGRADE first asks to the D87 ORIN2 interpolation, which
+`score.py:212-213` already labels SUPERSEDED.
+
+## Device-latency definitions: already identical in the scored quantity
+
+Measured on seed 4 under the driver's rq30 arguments: 20 first asks and 112 re-asks, and the
+scorer takes **all 132** from the warm table (20/20 and 112/112), median 0.2697 s and 0.2673 s.
+Nothing needed fixing in the scorer.
+
+The two definitions differ only in the trace's own `device_latency_s` field, which the scorer
+ignores by default: `trace.py:773` writes the D87 interpolation for a first ask (median 0.1475 s)
+while `trace.py:879` writes the warm value for a re-ask. **By-deadline outcomes changed: 0.**
+132 of 132 are within the 3.0 s deadline under either source, with a maximum of 0.3065 s.
+
+`trace.py:773` was deliberately NOT edited: changing the trace would move trace content and digests
+under a running sweep, and the scorer, which is authoritative for the scored quantity, is already
+correct. See `device_latency_definition_check.json`.
 
 ## Second-order, for whoever settles the robot device table
 

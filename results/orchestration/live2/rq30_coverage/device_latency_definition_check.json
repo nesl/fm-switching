@@ -1,0 +1,26 @@
+{
+  "question": "do first asks and re-asks carry the same device-latency definition in the SCORED quantity",
+  "answer": "YES, already. No scorer fix was needed; the mismatch is confined to a trace field the scorer ignores by default.",
+  "scorer_default": "score.py:209 DEVICE_LATENCY_SOURCE = os.environ.get('LIVE2_DEVICE_LATENCY', 'orin_rec_warm'), i.e. the measured Orin WARM table IS the default",
+  "measured_seed4_lh_req_rq30": {
+    "scored_recall_rows": 132,
+    "first_asks": 20,
+    "reasks": 112,
+    "first_asks_scored_from_warm_table": "20/20",
+    "reasks_scored_from_warm_table": "112/112",
+    "scorer_median_first_s": 0.2697,
+    "scorer_median_reask_s": 0.2673,
+    "trace_field_median_first_s": 0.1475,
+    "trace_field_median_reask_s": 0.2673,
+    "coverage_of_scored_rows_by_warm_table": "132/132, zero refusals"
+  },
+  "where_the_two_definitions_actually_differ": {
+    "first_ask_trace_field": "fleet/trace.py:773 DS.device_recall_latency_s(hist_tok), the D87 ORIN2 in-process interpolation (0.146 s at 11k to 0.225 s at 28k), which D155 (1) forbids for deliverability conclusions",
+    "reask_trace_field": "fleet/trace.py:879 the warm table value, already correct",
+    "read_by_the_scorer": "only if LIVE2_DEVICE_LATENCY=trace is set, which score.py:212-213 labels SUPERSEDED"
+  },
+  "by_deadline_outcomes_changed": 0,
+  "by_deadline_detail": "132/132 within the 3.0 s deadline under BOTH sources; max latency either way 0.3065 s, so no outcome can turn on the difference, as predicted (~0.27 s << 3 s)",
+  "correction_to_my_earlier_report": "I previously told the H100 and the user that exporting LIVE2_DEVICE_LATENCY would make the scorer REFUSE on roughly 119 of 139 distinct robot qids. That had the direction backwards. The warm table is the DEFAULT, and coverage of the rows the scorer actually reads (device_answers with kind=='recall') is 132/132. My 119-of-139 count was over recall_question TRACE RECORDS, which include assistance questions and questions that never become a scored robot answer row, so it was the wrong denominator. The real exposure is the opposite and smaller: setting LIVE2_DEVICE_LATENCY=trace would DOWNGRADE first asks to the superseded D87 interpolation.",
+  "not_changed_and_why": "fleet/trace.py:773 was left alone deliberately. Editing the trace would change trace content and digests under a running sweep; the scorer is the authoritative path for the scored quantity and it is already correct. The trace field is recorded here as superseded instead."
+}
