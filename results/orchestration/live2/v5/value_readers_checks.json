@@ -1,0 +1,131 @@
+{
+ "_what": "v5 value readers (D149, D151, D152): the committed DEV table, the Step 2b switch diff against the C3 RECENT shortcut, D149 (4)'s value-inversion acceptance test, and the band gap stated rather than filled. OFFLINE, CPU only, no GPU, no model server, no live run.",
+ "_not_a_result": "nothing here is evidence about policy OUTCOMES. These are checks on the reader arithmetic over a declared synthetic grid of delivery probabilities against COMMITTED accuracies.",
+ "dev_table": {
+  "_source": "results/orchestration/live2/lh_req/lh_req_quality.json",
+  "_fit_split": "DEV",
+  "_draw_split": "EVAL",
+  "cloud_D2": 0.25,
+  "cloud_RECENT": 0.107143,
+  "device": 0.107143,
+  "n": 28,
+  "ci95": {
+   "cloud_D2": [
+    0.126763,
+    0.43356
+   ],
+   "cloud_RECENT": [
+    0.037118,
+    0.271962
+   ],
+   "device_4B_RECENT": [
+    0.037118,
+    0.271962
+   ]
+  },
+  "_device_entry_is_a_substitution": "the device entry is 4B x RECENT (D87) standing in for device-on-D2; no device-on-D2 result exists on these questions",
+  "_dev_coincidence": "cloud RECENT and the device both score 3 of 28, but share only 1 of 3 questions, so the equality is arithmetic and not agreement"
+ },
+ "band_gap": {
+  "asked_for": "accuracy DEV-fitted by history-length band (D149 (2))",
+  "fitted": false,
+  "why_not": "the DEV split holds 28 questions and the AGGREGATE Wilson interval for cloud RECENT is already [0.037, 0.272], a width of 0.235. Three bands would hold about nine questions each, so each band estimate would be noise given a shape, and a band table fitted on nine questions would be read later as a measurement.",
+  "what_would_make_bands_fittable": "P19, the full S-EMBER device sweep on the Orin under vLLM: all questions, RICH and RECENT, accuracy and latency. With accuracy measured per question over the whole set, bands are fitted on hundreds rather than on nine, and the device side of the comparison stops being the D87 4B x RECENT substitution.",
+  "until_then": "the reader consults ONE DEV-aggregate accuracy per (representation, tier) and the spec records that history length enters v5 only through p_on_time, never through accuracy."
+ },
+ "step2b_switch_diff": {
+  "unit": "one robot question at one (p_on_time_full, p_on_time_recent) point",
+  "n_decisions": 121,
+  "n_differing": 30,
+  "first_differing": {
+   "p_on_time_full": 0.0,
+   "p_on_time_recent": 0.5,
+   "reader": "DEVICE",
+   "reader_value": 0.107143,
+   "c3_rule": "RECENT",
+   "differs": true
+  },
+  "reader_choice_counts": {
+   "D2": 66,
+   "RECENT": 0,
+   "DEVICE": 55
+  },
+  "c3_choice_counts": {
+   "D2": 66,
+   "RECENT": 30,
+   "DEVICE": 25
+  },
+  "verdict": "SWITCH REACHES A DECISION",
+  "d152_2_falls_out": {
+   "claim": "D152 (2)'s rule, that the RECENT-only shortcut is not used for long-horizon questions, is NOT written into the reader and is not needed as a rule",
+   "arithmetic": "cloud RECENT = 0.107143 and the device = 0.107143 on the committed DEV table, so p x 0.107143 <= 1.0 x 0.107143 for every p <= 1, with equality only at p = 1, and ties go to the device",
+   "recent_chosen_anywhere_on_the_grid": false,
+   "caveat": "cloud RECENT and the device both score 3 of 28, but share only 1 of 3 questions, so the equality is arithmetic and not agreement"
+  }
+ },
+ "step4_value_inversion": {
+  "cells": 36,
+  "flat_table": {
+   "n_changed": 18,
+   "of": 36,
+   "first": [
+    0.6,
+    0.0,
+    "D2",
+    "DEVICE"
+   ]
+  },
+  "inverted_representations": {
+   "n_changed": 27,
+   "of": 36,
+   "first": [
+    0.0,
+    0.6,
+    "DEVICE",
+    "RECENT"
+   ]
+  },
+  "full_history_devalued_10000x": {
+   "n_changed": 18,
+   "of": 36,
+   "first": [
+    0.6,
+    0.0,
+    "D2",
+    "DEVICE"
+   ]
+  },
+  "verdict": "VALUE IS LOAD-BEARING in the reader: every perturbation moves decisions",
+  "scope": "this is the reader in isolation. It does NOT show that value moves OUTCOMES in a run, which is what D149 (4) finally asks for and what only a live or trace-driven v5 arm can show."
+ },
+ "consequence_illustration": {
+  "source": "reports/study_frozen_test.md section 21.2, hybrid-F post-fix at 3 s",
+  "on_time_cloud_answers": 47,
+  "sent_as_D2": 29,
+  "sent_as_RECENT": 18,
+  "measured_correct_rate_RECENT": 0.111,
+  "measured_correct_rate_D2": 0.621,
+  "reader_would_send_RECENT": 0,
+  "expected_correct_from_those_18_as_sent": 1.998,
+  "if_the_device_had_answered_them_EVAL_aggregate": 4.435,
+  "_status": "ILLUSTRATION, NOT A RESULT",
+  "_why": "the 18 are the longest histories and the device figure is an EVAL aggregate over all 69, so the second number is an aggregate applied to a selected subset; the direction is suggestive and the magnitude is not usable",
+  "_what_would_settle_it": "per-question device answers on those same question ids, which P19 produces and the D146 Orin replacement of the D87 A6000 proxy would make the right stack for"
+ },
+ "margins": {
+  "MARGIN_SEND": 0.0,
+  "MARGIN_CF": 0.05,
+  "_note": "D151 (1): fixed in advance, never tuned"
+ },
+ "_provenance": {
+  "git_commit": "44052f2cc6b5ff10d3056fc37357776818a86020",
+  "script": "value_readers.py",
+  "model": "n/a (policy design, no model)",
+  "timestamp": "2026-11-20T16:38:41.914919",
+  "device": "a6000",
+  "n": 121,
+  "args": {
+   "out_dir": "/tmp/claude-1001/sessA/results/orchestration/live2/v5"
+  }
+ }
+}

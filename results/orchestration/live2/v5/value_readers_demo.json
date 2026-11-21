@@ -1,0 +1,117 @@
+{
+ "_what": "worked examples of the other four readers on DECLARED SYNTHETIC inputs, so that the spec's prose has an arithmetic a reader can check by hand. The inputs are invented and labelled; only the accuracies come from the committed DEV table.",
+ "_inputs_are_synthetic": true,
+ "warm_keep": [
+  {
+   "id": "robo003",
+   "weight": 1.0,
+   "p_question": 0.9,
+   "accuracy": 0.25,
+   "p_on_time_warm": 0.97,
+   "p_on_time_cold": 0.05,
+   "harm": 0.0,
+   "gain": 0.207,
+   "admitted": true
+  },
+  {
+   "id": "robo011",
+   "weight": 1.0,
+   "p_question": 0.3,
+   "accuracy": 0.25,
+   "p_on_time_warm": 0.97,
+   "p_on_time_cold": 0.05,
+   "harm": 0.0,
+   "gain": 0.06899999999999999,
+   "admitted": true
+  },
+  {
+   "id": "robo017",
+   "weight": 2.0,
+   "p_question": 0.3,
+   "accuracy": 0.25,
+   "p_on_time_warm": 0.97,
+   "p_on_time_cold": 0.05,
+   "harm": 0.4,
+   "gain": -0.262,
+   "admitted": false
+  }
+ ],
+ "shed": {
+  "shed": [
+   "q2"
+  ],
+  "gpu_s_freed": 2.4,
+  "types_present": [
+   "robot"
+  ],
+  "single_type": true
+ },
+ "backlog": [
+  {
+   "id": "robo003",
+   "weight": 1.0,
+   "p_question": 0.9,
+   "accuracy": 0.25,
+   "p_on_time_after": 0.95,
+   "prefill_gpu_s": 2.0,
+   "value": 0.21375,
+   "density": 0.106875,
+   "within_device_order": "oldest_first_append_only"
+  },
+  {
+   "id": "robo011",
+   "weight": 1.0,
+   "p_question": 0.9,
+   "accuracy": 0.25,
+   "p_on_time_after": 0.95,
+   "prefill_gpu_s": 6.0,
+   "value": 0.21375,
+   "density": 0.035625,
+   "within_device_order": "oldest_first_append_only"
+  }
+ ],
+ "episode_continuity": [
+  {
+   "id": "dash31_start",
+   "weight": 1.0,
+   "accuracy": 0.09,
+   "gpu_s": 0.4,
+   "warm_episode": false,
+   "starving": true,
+   "value": 0.09,
+   "density": 0.22499999999999998,
+   "admitted": true
+  },
+  {
+   "id": "dash07_frame",
+   "weight": 1.0,
+   "accuracy": 0.09,
+   "gpu_s": 0.05,
+   "warm_episode": true,
+   "value": 0.09,
+   "density": 1.7999999999999998,
+   "admitted": true
+  },
+  {
+   "id": "dash22_start",
+   "weight": 1.0,
+   "accuracy": 0.09,
+   "gpu_s": 0.4,
+   "warm_episode": false,
+   "value": 0.09,
+   "density": 0.22499999999999998,
+   "admitted": false
+  }
+ ],
+ "_provenance": {
+  "git_commit": "44052f2cc6b5ff10d3056fc37357776818a86020",
+  "script": "value_readers.py",
+  "model": "n/a (policy design, no model)",
+  "timestamp": "2026-11-20T16:38:41.916522",
+  "device": "a6000",
+  "n": 4,
+  "args": {
+   "out_dir": "/tmp/claude-1001/sessA/results/orchestration/live2/v5"
+  }
+ }
+}
