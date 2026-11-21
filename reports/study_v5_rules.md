@@ -1250,3 +1250,94 @@ exactly the confidence it does not earn.
 and full v5 stays gated.** My default to the user at 06:00 remains option 1, leave it, and the
 question for them is no longer about capacity or about n but about whether a margin calibrated on
 cold-path error may gate warm-path decisions. **My default answer to that is no.**
+
+## Held-out cell 1 is VALID, the prediction holds exactly, and the race turns out to have been a confound on WARMTH
+
+`warm-all-lru_n16_s4_1200s_h27_3t_L3_epg_rf`: `run_valid` true, lateness p99 0.1352 ms, digests
+equal.
+
+| | pre-fix original | race-fixed |
+|---|---|---|
+| HTTP **400** | **4,244** | **0** |
+| HTTP 200 | 10,101 | 8,257 |
+| transport (null) | 37 | 67 |
+| dashcam TTFT p50 | | **101.8 s** |
+
+**4,244 to zero on the same arm, workload and seed, with the queue untouched.** My `cc22429`
+prediction was that the fix removes the 400s and not the queue, and this is that prediction on a
+VALID held-out cell rather than on a replay. D158 (2)'s third proof asked only for a replay of the
+failing sequence, so the proof is now stronger than the requirement.
+
+### The new fact, and it is bigger than the error count
+
+| | WARM | COLD | null |
+|---|---|---|---|
+| pre-fix | **1** | 8 | 11 |
+| race-fixed | **6** | 7 | 7 |
+
+**The race was suppressing warm deliveries**, because a piece whose bytes 400'd left the history
+cold. So the submission race was never only an error-count bug: **it was a confound on the warm
+measurement itself**, biasing warm counts downward in every piece-chaining cell run before the fix.
+
+**I checked which of my own figures this touches.** The v5-rules seeds 4 and 5 cells both ran in the
+race-fixed block (D158 (3) ordered the fix first), so the 56.8 percent warm figure is unaffected.
+**One number I rely on needs confirming and I have asked for it: `noc3`'s WARM 0.** My
+"mechanism-absent comparator" claim rests on that zero being structural, which it should be because
+noc3 has no warm-ahead and issues no pieces, but a zero is exactly the value a suppression bug
+produces and I am not going to assume the difference.
+
+### A within-cell test of whether warmth pays, which is cleaner than any arm-versus-arm comparison
+
+| same cell, same seed, same arm | pre-fix | race-fixed |
+|---|---|---|
+| warm robot deliveries | 1 | **6** |
+| failed requests removed | | **4,244** |
+| **correct by deadline** | **0.30** | **0.30** |
+| on time | 2 / 20 | 1 / 20 |
+| single-shot | 24 / 357 | 30 / 357 |
+
+**Warm deliveries rose six-fold, 4,244 failures were removed, and correct-by-deadline did not move
+at all.** Both changes should have helped. Neither did.
+
+This is an independent replication of the central negative **on a different arm**, with everything
+held fixed except a bug fix. **Named confound: the fix changed two things at once**, warmth and the
+failure count, so this cannot attribute the zero to warmth alone. But it does not need to: two
+interventions that each predict improvement produced none together, which is harder to explain away
+than either alone.
+
+### Correcting the 85 percent cold figure in the retraction above
+
+I derived "these cells run 85 percent COLD" from the single s5 rerun. Cell 1 is **46.2 percent
+warm**, not 15. Two cells:
+
+| cell | warm / released | share |
+|---|---|---|
+| s5 rerun | 3 / 20 | **15.0 percent** |
+| s4 `_rf` (cell 1) | 6 / 13 | **46.2 percent** |
+| pooled | 9 / 33 | **27.3 percent** |
+
+**So the margin population is about 73 percent cold, not 85.** The cold-path objection to MARGIN_CF
+survives at reduced strength: a p90 calibrated on a population that is roughly three-quarters cold is
+still mostly measuring cold-path error, and still gating warm-path decisions. **MARGIN_CF stays
+unset. But the number I used was from one cell presented as a property of the population, and that
+is the register error again, two sections after I retracted it for the same reason.**
+
+### A check-3 flag on the warm share itself
+
+**15.0 percent and 46.2 percent, same arm, same workload, same device count, differing only in
+seed. A 3x spread.** So the warm stratum's size is not a property of the arm; it is set by run-level
+contingency, which is consistent with the LRU thrash story but makes any per-cell statement about it
+unreliable. Also **12 of 45 robot questions across the two cells got no cloud request at all, 26.7
+percent**, which is its own problem with WARM-ALL as a baseline.
+
+**What survives the instability is the direction, because it replicates at both seeds:**
+
+| seed | v5-rules | warm-all-lru | ratio |
+|---|---|---|---|
+| s4 | 60.0 percent | 46.2 percent | 1.30x |
+| s5 | 54.2 percent | 15.0 percent | 3.61x |
+| pooled | 56.8 percent | 27.3 percent | **2.08x** |
+
+**Targeted warming beats unconditional warming at both seeds; the magnitude varies by 2.8x between
+them.** So the thesis-supporting claim holds and I am restating it at 2.08x pooled rather than the
+3.79x I published from one seed, with the direction as the finding and the magnitude as unstable.
