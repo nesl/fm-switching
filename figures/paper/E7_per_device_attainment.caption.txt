@@ -1,0 +1,13 @@
+E7_per_device_attainment
+
+CLAIM:
+The joint policy clears the per-device dashcam target on every one of the 6 dashcam devices: each serves 67 to 68 percent of its dashcam instants within 1 s, far above the 25 percent per-device target, and the worst-served device is within a point of the best, so service is uniform and no device is starved. The robot target is pooled and is reported in the headline, not per device.
+
+SOURCES (committed):
+  results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s4_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ 82c3a27
+  results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s5_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ 8c466e2
+
+STATUS: PILOT. Drawn from the EP-G pilot cells; to be re-run on the repeat-trace cells. Numbers are provisional.
+
+NOTES:
+Committed EP-G PILOT cells hybrid-F-lhreq seeds 4 and 5. Bars are the per-device fraction of dashcam (monitor) instants with within_L true, pooled over the two seeds; error bars are Wilson 95 percent. The dashcam target is per device (D71: L 1.0 s, p 0.25, minimum 200 instants); ANALYSIS_PLAN decision 3 makes the robot target pooled over robot devices (a per-device robot minimum of 20 is unreachable at this run length), so robot attainment is not shown per device here. Assistive devices carry no served target. PILOT.
