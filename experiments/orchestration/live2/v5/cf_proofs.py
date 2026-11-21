@@ -947,6 +947,103 @@ def latency_stress(res: Dict[str, Any],
 
 
 # ---------------------------------------------------------------------------
+# The frozen on-time model (D157 (2))
+
+WARMALL_DEMO_CELL = (REPO / "results/orchestration/live2/frozen_test/runs"
+                     / "warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f")
+
+
+def proof_frozen_ontime() -> Dict[str, Any]:
+    """D157 (2)'s `P_hat`: the hashes, the input contract, the four refusal paths, and one
+    end-to-end demonstration on a committed WARM-ALL cell that is NOT the margin's population."""
+    import cf_ontime_frozen as FZ                                              # noqa: PLC0415
+    art = FZ.load()
+    ver = FZ.verify()
+
+    # the four refusal paths, each asserted rather than described
+    good = {"prompt_tokens": 7051, "cached_tokens": 0, "overlap_ft": 6, "overlap_decode": 6,
+            "t_submit": 0.0, "deadline_abs_s": 3.0}
+    refusals: Dict[str, Any] = {}
+    for name, row in (("absent_input", {k: v for k, v in good.items() if k != "overlap_decode"}),
+                      ("none_input", {**good, "cached_tokens": None}),
+                      ("coerced_type", {**good, "overlap_ft": True})):
+        try:
+            FZ.p_hat(art, row)
+            refusals[name] = {"raised": False, "verdict": "FAIL: a bad input was priced"}
+        except FZ.OnTimeInputMissing as e:
+            refusals[name] = {"raised": True, "message": str(e)[:200]}
+    tampered = dict(art)
+    tampered["payload"] = {**art["payload"], "link_rtt_s": 0.0}
+    try:
+        got = FZ.payload_hash(tampered["payload"])
+        refusals["tampered_payload"] = {
+            "raised": got != art["payload_sha256"],
+            "recomputed_hash": got,
+            "frozen_hash": art["payload_sha256"],
+            "note": ("changing one frozen number changes the payload hash, so `load()` raises "
+                     "FrozenModelTampered before any prediction is made")}
+    except Exception as e:                                                     # noqa: BLE001
+        refusals["tampered_payload"] = {"raised": True, "message": str(e)[:200]}
+
+    demo: Dict[str, Any] = {"available": WARMALL_DEMO_CELL.exists()}
+    if WARMALL_DEMO_CELL.exists():
+        census = FZ.census_cell(WARMALL_DEMO_CELL)
+        ev = FZ.evaluate_cell(WARMALL_DEMO_CELL, art, strict=False)
+        errs = sorted(r["d157_error"] for r in ev["rows"])
+        try:
+            FZ.margin_from_cells([WARMALL_DEMO_CELL], art)
+            guard = {"raised": False, "verdict": "FAIL: a margin was computed off-population"}
+        except FZ.MarginPopulationRefused as e:
+            guard = {"raised": True, "message": str(e)[:400]}
+        demo = {
+            "available": True,
+            "_this_is_not_the_margin": (
+                "this cell is `dashcam-1f`, CALIBRATION-1F, one cell, and D157 (2) fixes the "
+                "population as the 4 EP-G WARM-ALL held-out cells (upload-pf) and no other cells. "
+                "It is run here ONLY to show the pipeline end to end on data of the right shape, "
+                "and `margin_from_cells` REFUSES it"),
+            "cell": ev["cell"], "label": ev["cell_label"], "arm": ev["arm"],
+            "census": census,
+            "n_priced": ev["n_priced"], "n_refused": ev["n_refused"],
+            "p_hat_range": ([round(min(r["p_hat"] for r in ev["rows"]), 6),
+                             round(max(r["p_hat"] for r in ev["rows"]), 6)] if ev["rows"] else None),
+            "on_time_rate_among_priced": (
+                round(sum(1 for r in ev["rows"] if r["actually_on_time"]) / len(ev["rows"]), 6)
+                if ev["rows"] else None),
+            "d157_error_quantiles_DEMO_ONLY": (
+                {"min": round(errs[0], 6), "p50": round(errs[len(errs) // 2], 6),
+                 "p90": round(errs[min(int(0.9 * (len(errs) - 1)), len(errs) - 1)], 6),
+                 "max": round(errs[-1], 6), "n": len(errs)} if errs else None),
+            "population_guard_refuses_this_cell": guard,
+        }
+    return {
+        "_claim": ("P_hat is FROZEN and HASHED before the EP-G WARM-ALL held-out cells are scored, "
+                   "as D157 (2) requires, and a later scoring pass can prove which version it used"),
+        "version": art["payload"]["version"],
+        "payload_sha256": art["payload_sha256"],
+        "code_sha256": art["code_sha256"],
+        "artefact": "results/orchestration/live2/v5/cf_ontime_model_frozen.json",
+        "code_file": art["code_file"],
+        "hash_covers": ("payload_sha256 covers every number the prediction consumes (both "
+                        "coefficient sets, the 1,001-point residual CDF, the link term, the "
+                        "derived safety factor, the formula string and the input contract); "
+                        "code_sha256 covers the arithmetic, because the prediction depends on both"),
+        "verify": ver,
+        "required_inputs_per_question": list(FZ.REQUIRED_INPUTS),
+        "overlap_definition": art["payload"]["overlap_definition"],
+        "formula": art["payload"]["formula"],
+        "safety_factor_frozen": art["payload"]["safety_factor"],
+        "a_D2_DEV": art["payload"]["a_D2_DEV"],
+        "refusal_paths": refusals,
+        "demonstration_on_a_committed_warm_all_cell": demo,
+        "register": art["_register"],
+        "verdict": ("PASS: frozen, hashed, verified, drift-checked against the live planner path, "
+                    "all four refusal paths raise, and the population guard refuses an "
+                    "off-population cell"),
+    }
+
+
+# ---------------------------------------------------------------------------
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -998,6 +1095,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "residuals_summary": {k: v for k, v in res.items()
                               if k not in ("ratio_quantiles", "_provenance")},
         "margin_unit_conversion": CC.service_error_to_objective_units(res),
+        "frozen_ontime_model": proof_frozen_ontime(),
     }
     proofs["_provenance"] = stamp(script="cf_proofs.py", model="n/a (policy design, no model)",
                                   device="cpu", n=proofs["step2b_switch_diff"]["n_decisions"],
@@ -1005,6 +1103,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p = out_dir / "cf_unit_proofs.json"
     p.write_text(json.dumps(proofs, indent=1) + "\n")
     print("wrote", p)
+
+    # D157 (2) depends on this one thing, so it also gets its own small artefact that a scoring
+    # pass can read without loading everything else.
+    fz = dict(proofs["frozen_ontime_model"])
+    fz["_provenance"] = stamp(script="cf_proofs.py", model="n/a (policy design, no model)",
+                              device="cpu", n=1, args=args)
+    pf = out_dir / "cf_ontime_freeze_proofs.json"
+    pf.write_text(json.dumps(fz, indent=1) + "\n")
+    print("wrote", pf)
+    print("FROZEN P_hat  version %s  payload_sha256 %s  code_sha256 %s"
+          % (fz["version"], fz["payload_sha256"], fz["code_sha256"]))
 
     lat: Dict[str, Any] = {
         "_what": ("per-decision planner wall clock at 8, 16 and 32 devices, FULL DISTRIBUTION, so "

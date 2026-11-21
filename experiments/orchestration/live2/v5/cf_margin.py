@@ -127,19 +127,33 @@ def margin_declaration_audit(root: Optional[Path] = None) -> Dict[str, Any]:
                 hits.append({"file": name, "line": i, "text": line.strip()})
     mine = [h for h in hits if h["file"].endswith("v5/cf_margin.py")]
     others = [h for h in hits if not h["file"].endswith("v5/cf_margin.py")]
+    # Modules that READ the single declaration are not conflicts, they are the point. Listed
+    # separately so "one declaration, N readers" is visible rather than inferred.
+    imp = re.compile(r"^\s*(from\s+cf_margin\s+import|import\s+cf_margin)\b")
+    readers: List[Dict[str, Any]] = []
+    for name in names:
+        try:
+            lines = (root / name).read_text().splitlines()
+        except Exception:                                                      # noqa: BLE001
+            continue
+        for i, line in enumerate(lines, 1):
+            if imp.match(line):
+                readers.append({"file": name, "line": i, "text": line.strip()})
     return {
         "declarations": hits,
         "declared_in_cf_margin": len(mine),
         "declared_elsewhere": len(others),
         "single_declaration_for_cf": len(mine) == 1,
         "conflicts": others,
-        "verdict": ("ONE DECLARATION for the counterfactual" if len(mine) == 1 and not others else
+        "readers_of_the_single_declaration": readers,
+        "verdict": ("ONE DECLARATION for the counterfactual, read by %d module(s)" % len(readers)
+                    if len(mine) == 1 and not others else
                     "CONFLICT: MARGIN_CF is declared in more than one place; the counterfactual "
                     "reads cf_margin.MARGIN_CF and nothing else, and the other declarations must "
                     "be removed or deferred to this one by the sessions that own those files"),
-        "note": ("`v5/value_readers.py::MARGIN_CF = 0.05` is a pre-D154 placeholder. It is a "
-                 "declaration this session does not own and must not be imported by any cf_* "
-                 "module; cf_* never reads it."),
+        "note": ("`v5/value_readers.py` carried `MARGIN_CF = 0.05`, a pre-D154 placeholder, and "
+                 "at `25d55b9` it imports this declaration instead. Any new declaration of the "
+                 "name anywhere is a conflict and appears above."),
     }
 
 

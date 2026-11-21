@@ -1,0 +1,154 @@
+{
+ "_claim": "P_hat is FROZEN and HASHED before the EP-G WARM-ALL held-out cells are scored, as D157 (2) requires, and a later scoring pass can prove which version it used",
+ "version": "cf-ontime-1.0",
+ "payload_sha256": "2dc415b7e92084c653f6abf40986b903364dd09b2584d6354940c6685342f89a",
+ "code_sha256": "15aa23c02618edfee27223984b40634516b7a121560326d54e613064a65124a4",
+ "artefact": "results/orchestration/live2/v5/cf_ontime_model_frozen.json",
+ "code_file": "experiments/orchestration/live2/v5/cf_ontime_frozen.py",
+ "hash_covers": "payload_sha256 covers every number the prediction consumes (both coefficient sets, the 1,001-point residual CDF, the link term, the derived safety factor, the formula string and the input contract); code_sha256 covers the arithmetic, because the prediction depends on both",
+ "verify": {
+  "artefact": "results/orchestration/live2/v5/cf_ontime_model_frozen.json",
+  "payload_sha256": "2dc415b7e92084c653f6abf40986b903364dd09b2584d6354940c6685342f89a",
+  "code_sha256": "15aa23c02618edfee27223984b40634516b7a121560326d54e613064a65124a4",
+  "version": "cf-ontime-1.0",
+  "hashes_verified": true,
+  "drift_vs_cf_cost": {
+   "checked": true,
+   "rows": [
+    {
+     "tokens": 7051,
+     "cached": 0,
+     "overlap": 6,
+     "frozen_p_hat": 0.958321824191,
+     "live_cf_cost": 0.958321824191,
+     "abs_diff": 0.0
+    },
+    {
+     "tokens": 21000,
+     "cached": 3000,
+     "overlap": 0,
+     "frozen_p_hat": 0.314164340933,
+     "live_cf_cost": 0.314164340933,
+     "abs_diff": 0.0
+    },
+    {
+     "tokens": 467,
+     "cached": 0,
+     "overlap": 14,
+     "frozen_p_hat": 0.989930351159,
+     "live_cf_cost": 0.989930351159,
+     "abs_diff": 0.0
+    }
+   ],
+   "max_abs_diff": 0.0,
+   "agree": true,
+   "note": "the frozen prediction is self-contained; this only REPORTS whether the planner's live path still agrees with it. Drift is information, not a reason to change the frozen numbers"
+  }
+ },
+ "required_inputs_per_question": [
+  "prompt_tokens",
+  "cached_tokens",
+  "overlap_ft",
+  "overlap_decode",
+  "t_submit",
+  "deadline_abs_s"
+ ],
+ "overlap_definition": "cost_model_gate.features, unchanged: for a request with first-token window [t_submit, t_first_token) and decode window [t_first_token, t_done), the overlap count is the number of OTHER requests in the same cell whose corresponding interval intersects it. Only requests with t_submit, t_first_token, t_done and prompt_tokens all present enter the count, which is the same filter the gate fitted under.",
+ "formula": "first_token = ft_intercept + ft_per_uncached_token x max(prompt_tokens - cached_tokens, 0) + ft_per_overlap x overlap_ft; decode = dec_intercept + dec_per_overlap x overlap_decode; engine_service = first_token + decode; slack = deadline_abs_s - t_submit - link_rtt_s; P_hat = F_ratio(slack / engine_service), F_ratio the empirical CDF of actual-over-predicted engine service on the committed held-out-by-arm requests, linearly interpolated, 0 below its support and 1 above it.",
+ "safety_factor_frozen": 1.5775406165458339,
+ "a_D2_DEV": 0.25,
+ "refusal_paths": {
+  "absent_input": {
+   "raised": true,
+   "message": "P_hat: input 'overlap_decode' is absent. P_hat refuses rather than defaulting (D157 (2) item 4). Required inputs: prompt_tokens, cached_tokens, overlap_ft, overlap_decode, t_submit, deadline_abs_s"
+  },
+  "none_input": {
+   "raised": true,
+   "message": "P_hat: input 'cached_tokens' is None. A None is a MISSING input and not a zero: `backend.cached_tokens_of` returns None rather than 0 so that a zero is never read as a confirmed cold path, and reading"
+  },
+  "coerced_type": {
+   "raised": true,
+   "message": "P_hat: input 'overlap_ft' has type bool, which is not a number. P_hat refuses a coerced input."
+  },
+  "tampered_payload": {
+   "raised": true,
+   "recomputed_hash": "9f25e2e5f78a1787bb1831ba2f61992e77431c155a54560a43855a355ad10140",
+   "frozen_hash": "2dc415b7e92084c653f6abf40986b903364dd09b2584d6354940c6685342f89a",
+   "note": "changing one frozen number changes the payload hash, so `load()` raises FrozenModelTampered before any prediction is made"
+  }
+ },
+ "demonstration_on_a_committed_warm_all_cell": {
+  "available": true,
+  "_this_is_not_the_margin": "this cell is `dashcam-1f`, CALIBRATION-1F, one cell, and D157 (2) fixes the population as the 4 EP-G WARM-ALL held-out cells (upload-pf) and no other cells. It is run here ONLY to show the pipeline end to end on data of the right shape, and `margin_from_cells` REFUSES it",
+  "cell": "warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f",
+  "label": "FROZEN_TEST_THREE_TYPE CALIBRATION-1F dashcam-1f warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f",
+  "arm": "warm-all-lru",
+  "census": {
+   "cell": "warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f",
+   "label": "FROZEN_TEST_THREE_TYPE CALIBRATION-1F dashcam-1f warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f",
+   "arm": "warm-all-lru",
+   "population_check": {
+    "cell": "warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f",
+    "arm": "warm-all-lru",
+    "label": "FROZEN_TEST_THREE_TYPE CALIBRATION-1F dashcam-1f warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f",
+    "in_population": false,
+    "problems": [
+     "label does not contain 'EP-G'",
+     "label does not contain 'upload-pf'",
+     "label contains 'dashcam-1f', which the population excludes"
+    ]
+   },
+   "robot_questions_released": 20,
+   "priceable": 13,
+   "unpriceable": 7,
+   "missing_input_counts": {
+    "prompt_tokens": 7,
+    "cached_tokens": 7,
+    "overlap_ft": 7,
+    "overlap_decode": 7
+   },
+   "on_time_among_unpriceable": 0,
+   "required_inputs": [
+    "prompt_tokens",
+    "cached_tokens",
+    "overlap_ft",
+    "overlap_decode",
+    "t_submit",
+    "deadline_abs_s"
+   ],
+   "_why_it_matters": "D157 (2)'s population is every robot question RELEASED. An unpriceable question is still in the population, so the p90 is taken over fewer points than the population holds unless the user rules how to price them (see p_hat_cold_fallback)"
+  },
+  "n_priced": 13,
+  "n_refused": 7,
+  "p_hat_range": [
+   0.0,
+   0.989064
+  ],
+  "on_time_rate_among_priced": 0.153846,
+  "d157_error_quantiles_DEMO_ONLY": {
+   "min": 0.0,
+   "p50": 0.0,
+   "p90": 0.002505,
+   "max": 0.171209,
+   "n": 13
+  },
+  "population_guard_refuses_this_cell": {
+   "raised": true,
+   "message": "{\n \"refused\": \"D157 (2) fixes the population as the 4 EP-G WARM-ALL held-out cells (upload-pf) and no other cells\",\n \"n_cells_given\": 1,\n \"n_cells_expected\": 4,\n \"looked_for\": {\n  \"arm\": \"warm-all-lru\",\n  \"label_must_contain\": [\n   \"EP-G\",\n   \"upload-pf\"\n  ],\n  \"label_must_not_contain\": [\n   \"dashcam-1f\",\n   \"upload-30s\",\n   \"v5-rules\"\n  ]\n },\n \"checks\": [\n  {\n   \"cell\": \"warm-all-lru_n16_s4_1200s"
+  }
+ },
+ "register": "P_hat is evaluated POST HOC from the cell's own request log, so its overlap counts are the overlaps actually experienced. It measures the cost model's error given perfect knowledge of concurrency, which is a LOWER BOUND on the planner's live error. The WARM-ALL cells carry no planner, so no live predicted probability exists in them to use instead",
+ "verdict": "PASS: frozen, hashed, verified, drift-checked against the live planner path, all four refusal paths raise, and the population guard refuses an off-population cell",
+ "_provenance": {
+  "git_commit": "47b314764c291d21d89d662ef949200745ae5efe",
+  "script": "cf_proofs.py",
+  "model": "n/a (policy design, no model)",
+  "timestamp": "2026-11-20T19:57:01.465538",
+  "device": "cpu",
+  "n": 1,
+  "args": {
+   "build_residuals": false,
+   "out_dir": "/tmp/claude-1001/sessB2/results/orchestration/live2/v5"
+  }
+ }
+}

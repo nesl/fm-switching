@@ -514,7 +514,7 @@ real `hybrid_arm` on real observations is not proved here. See section 8.
 | piece | status | Rule 2 class | why |
 |---|---|---|---|
 | the WARM and SLICE candidates of a state decision | built, scored only when a caller declares expressibility; the module's own answer is False | **unexpressible** | warm-ahead is not expressible in the committed action space (session C section 3): `validate_action` accepts MATERIALIZE only for a session already warm or holding a pending query, so the first warm-ahead for every session is rejected for ever. Scoring it anyway would read a harness blocker as a policy decision |
-| RELOAD | built, counts its own firings, never fires | **unexercised** | across 39 committed 16-device cells the believed tier is cold 14,472, gpu 1,442, host NEVER. Zero reloads reports the state of the fleet, not a mechanism that failed |
+| RELOAD | built, counts its own firings, never fires | **unexercised in our harness, mechanism CONFIRMED on the engine at about 15x** (corrected by M3; see 12.2) | across 39 committed 16-device cells the believed tier is cold 14,472, gpu 1,442, host NEVER, so zero reloads reports the state of the fleet. The H100's M3 then measured reload-from-host at 0.134 s against a cold rebuild's 2.0 s with host residency verified, so the capability is real and waiting on the belief promotion (D157 (4)); "unexercised" alone would understate it |
 | the deficit weight inside one request's candidate set | built and proved inert there | **cancelled by geometry** | a per-device scalar cannot move a within-device argmax; it acts cross-device, where it is controlled |
 | D155 (3) on the DEVICE side | built, read, CONSTANT at 1.0 | **unexercised** | the only committed device latency is 0.567 s, inside every deadline under test; D155 (1) forbids the cold re-send numbers. The condition the amendment is about is never reached |
 | any v5 outcome, including the never-worse-than-base property | **not built and must not be** | not a null | `MARGIN_CF` is unset (G8) and the gate fails (G10). Spec v5 12.1 forbids the cell |
@@ -637,3 +637,150 @@ will agree by construction rather than by coincidence. **If the true-up changes 
 spend, as D156a says it does, then the residual distribution in `cf_service_residuals.json` is
 fitted on pre-true-up cells and must be rebuilt with the EP-G refit**, which is the same rebuild
 D153 already requires. That is one rebuild, not two.
+
+---
+
+## 12. D157 (2): the on-time model `P_hat` is FROZEN and HASHED
+
+D157 (2) names MARGIN_CF's units, population and statistic before the cells that produce them
+exist, and makes the margin depend on this session's on-time model being frozen and committed with
+a hash **before those cells are scored**. This section is that freeze. It also closes section 3.1's
+open item: the units problem is resolved in the only order that works, by naming the population
+first.
+
+**The artefact.** `results/orchestration/live2/v5/cf_ontime_model_frozen.json`, built and verified by
+`experiments/orchestration/live2/v5/cf_ontime_frozen.py`.
+
+```
+version         cf-ontime-1.0
+payload_sha256  2dc415b7e92084c653f6abf40986b903364dd09b2584d6354940c6685342f89a
+code_sha256     15aa23c02618edfee27223984b40634516b7a121560326d54e613064a65124a4
+```
+
+**What each hash covers, and why there are two.** `payload_sha256` is a canonical-JSON hash over
+every number the prediction consumes: both coefficient sets, the 1,001-point residual CDF, the link
+term 0.044 s, the frozen safety factor **1.5775406165458339**, the formula string, the input
+contract and the overlap definition. `code_sha256` is the hash of the module, because **the
+prediction depends on the arithmetic as much as on the coefficients**, and a hash that covered only
+the numbers would let the formula change underneath them. `load()` verifies BOTH and raises
+`FrozenModelTampered` on either, so editing the file breaks the freeze loudly; re-freezing is a
+deliberate, recorded act. Nothing is recomputed at call time and nothing is read from another file
+at call time: the prediction is **self-contained** and does not call `cf_cost`. `--verify` reports
+agreement with the planner's live `cf_cost` path (currently exact, max absolute difference 0.0) so
+that drift is **reported** rather than silently followed.
+
+**The inputs `P_hat` needs per question, in one line:** `prompt_tokens`, `cached_tokens`,
+`overlap_ft`, `overlap_decode`, `t_submit`, `deadline_abs_s`, where the two overlap counts are
+derived from the cell's FULL request log (every other request's `t_submit`, `t_first_token`,
+`t_done`) and `deadline_abs_s = t_opportunity + deadline_s` from the recall outcome. **Verified
+present in the committed WARM-ALL cell** `warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f`, so the held-out
+cells will carry them if they log as that one does.
+
+**The formula, frozen:**
+
+```
+first_token    = -0.022971863327167094 + 1.80598e-4 x max(prompt_tokens - cached_tokens, 0)
+                 + 0.038004811772727576 x overlap_ft
+decode         =  0.003098481072433836 + 0.015084798825142538 x overlap_decode
+engine_service = first_token + decode
+slack          = deadline_abs_s - t_submit - 0.044
+P_hat          = F_ratio(slack / engine_service)
+error (D157)   = 0.250 x | P_hat - 1[actually on time] |
+```
+
+**Four refusal paths, each asserted and not described** (D157 (2) item 4, in the spirit of
+`ScoringRefused`): an **absent** input raises `OnTimeInputMissing`; a **None** input raises, and the
+message says why a None is not a zero (`backend.cached_tokens_of` returns None rather than 0 so a
+zero is never read as a confirmed cold path, and reading None as 0 would price a warm request as
+cold and understate the margin); a **coerced type** raises; and a **changed frozen number** changes
+`payload_sha256`, so `load()` raises before any prediction is made.
+
+**A fifth guard, which is the one I would want if I were scoring this.** `margin_from_cells`
+REFUSES unless there are exactly four cells and each declares itself in the population:
+`cell.json::arm == "warm-all-lru"` and `run_meta.json::label` containing **`EP-G`** and
+**`upload-pf`** and not containing `dashcam-1f`, `upload-30s` or `v5-rules`. On a mismatch it raises
+with the full list of what it looked for and what it found, because **a margin computed over the
+wrong cells is a number nobody could tell apart from the right one.** It correctly refuses the
+committed `dashcam-1f` cell. **If the real cells label themselves differently, that guard will
+refuse them and the strings need correcting; it will never guess.**
+
+### 12.1 Two things the coordinator needs before the cells are scored
+
+**(a) About a third of the population may be unpriceable, and it is not a random third.** On the
+committed WARM-ALL cell, of **20 robot questions released, 13 are priceable and 7 are not**: their
+own cloud request came back **HTTP 400** with `prompt_tokens`, `cached_tokens` and `t_first_token`
+all null, and nothing was delivered, so `1[on time] = 0`. Those questions WERE released, so
+D157 (2)'s population includes them, and the frozen model cannot price them from the request log.
+The refusals are **counted, never dropped quietly** (`--census` reports them per cell without
+needing the model). This is a **population decision for the user, not an implementation detail**:
+
+- as built, the p90 is taken over the priceable subset and the refusal count is reported beside it;
+- if the 400s must be in the margin, `p_hat_cold_fallback` exists, opt-in and labelled, pricing them
+  from the trace's own `history_tokens` with `cached_tokens = 0`. That is the COLD extreme, so it
+  minimises `P_hat`, and on a question that missed a lower `P_hat` means a SMALLER error, so **the
+  fallback biases the margin NARROW**. It is never called by the default path.
+
+**Run `--census` on the four cells the moment they land**: if they show a similar rate, the margin's
+p90 is over roughly 50 points out of a population of about 80, and that denominator belongs in the
+ruling rather than in a footnote.
+
+**(b) A preview of the magnitude, on the wrong population, labelled as such.** On that same
+committed cell the priced questions give D157 errors of p50 **0.000**, p90 **0.0025**, max 0.171,
+with 11 of 13 actually missing and `P_hat` predicting near zero for them. **This is NOT the margin**
+(one cell, `dashcam-1f`, CALIBRATION-1F, and the guard refuses it), but it is a magnitude worth
+knowing before the cells run: **MARGIN_CF may come out very small, of order 0.003 in
+expected-correct-answer units.** A near-zero margin is not a free win. It means the "never worse
+than `hybrid-F-lhreq-noc3`" property rests almost entirely on the cost model being right, which is
+the property D151 (1) wanted the margin to pay for. The user should see that number's likely size
+before it is fixed forever, and D157 (2) is deliberately set up so they can.
+
+**One register caveat the margin's reader must carry.** `P_hat` is evaluated POST HOC from the
+cell's own request log, so its overlap counts are the overlaps each request ACTUALLY experienced.
+That is the same definition the gate fitted on, so it is right for a predicted-versus-actual error,
+and it is **not** the planner's live error: at decision time the planner has a forecast of load, not
+the realised overlaps. **MARGIN_CF as D157 (2) defines it therefore measures the cost model's error
+given perfect knowledge of concurrency, which is a LOWER BOUND on the planner's own error.** That is
+a property of the ruling, not a defect; the WARM-ALL cells carry no planner, so no live predicted
+probability exists in them to use instead.
+
+### 12.2 The H100's M1 and M3, against this model
+
+**M1 (warm-ahead prefill, TTFT 0.088 s warm against 2.757 s cold, 31x): the cold side is consistent
+and the warm side is the model's known weak point, now quantified.** The frozen first-token term
+reproduces 2.757 s at about **15,400 uncached tokens at zero overlap**, which is inside the LH-REQ
+history range, so the cold side is plausible (publishing M1's prompt token count would turn that
+from plausible into a check, and it is worth one line in the M1 record). On the warm side, a fully
+cached request has zero uncached tokens, and the frozen term is then `max(-0.023, 0) = 0.000 s`
+against a **measured 0.088 s**. So the model **under-predicts warm TTFT by the whole of it**,
+clamped at zero by a negative intercept. In absolute terms that is 2.9 percent of a 3 s deadline, so
+it changes no decision in this build; in kind it is exactly G10's warm regime being unidentified out
+of arm, and it is optimistic in the direction that matters (a planner that thinks a warm request is
+free defers it later than it should). **It is not corrected here**: changing the frozen model after
+seeing a measurement is the fitting D157 (2) is constructed to prevent, and the EP-G refit is where
+it belongs, with the M1 number as one of its held-out points.
+
+**M3 (reload-from-host 0.134 s against a cold rebuild's 2.0 s, about 15x, host residency verified):
+my RELOAD classification was right about our harness and understated the capability, and section 7
+is corrected rather than quietly edited.** RELOAD now reads **"unexercised in our harness, mechanism
+CONFIRMED on the engine at about 15x"**. The distinction matters in both directions: it remains true
+that no committed cell reached a host belief (cold 14,472, gpu 1,442, host never over 39 cells), so
+an arm reporting zero reloads has still reported the state of the fleet; and it is now also true
+that **the engine does hold and serve from host**, so the branch is a real capability waiting on the
+belief promotion (D157 (4), top of tomorrow's list) rather than a dead one. `plan_state` already
+scores RELOAD whenever `host_warm` is passed true, so when the promotion lands the candidate needs
+no new code, only a reachable trigger state.
+
+### 12.3 Three earlier items closed, and one still owed
+
+- **The duplicate `MARGIN_CF` is gone** (`25d55b9`): `value_readers.py` now imports the single
+  declaration, and the audit reads **"ONE DECLARATION for the counterfactual, read by 3 modules"**
+  (`cf_planner.py`, `cf_proofs.py`, `value_readers.py`), with an empty conflicts list. The audit now
+  also lists the readers, so "one declaration, N readers" is visible rather than inferred.
+- **Question-first accuracy** is deferred to the outage scenarios (D157 (3)); the substitution stays
+  labelled in every sync trace and the gap stays recorded.
+- **D156 is on origin verbatim**, and section 11's reconciliation stands.
+- **Still owed, and it gates scoring rather than the freeze: the base surrogate audit.**
+  `cf_planner.base_request_choice` against the real `hybrid_arm` on real observations, with the
+  count of differing decisions reported. It is the unaudited side of every counterfactual
+  comparison, and it is not cheap tonight because it needs an arm driven over a committed cell's
+  observations, which is the harness's path and not this module's.
