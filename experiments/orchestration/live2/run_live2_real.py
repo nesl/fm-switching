@@ -39,7 +39,9 @@ from typing import Any, Dict, Optional
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
-for _p in (str(HERE), str(HERE / "fleet"), str(HERE / "scorer"),
+# HERE / "hybrid": hybrid_arm.py imports its sibling value_reader as a top-level module (flash 5d7c084), which fails
+# unless the package directory itself is on the path (every run died at `import hybrid` at 16:37 on 2026-11-20).
+for _p in (str(HERE), str(HERE / "fleet"), str(HERE / "scorer"), str(HERE / "hybrid"),
            str(REPO / "experiments/orchestration/live"),
            str(REPO / "experiments/orchestration/baselines"),
            str(REPO / "experiments/orchestration/sim"), str(REPO / "experiments/lib")):
