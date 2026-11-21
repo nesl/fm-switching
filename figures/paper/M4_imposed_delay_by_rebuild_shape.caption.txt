@@ -1,0 +1,10 @@
+M4_imposed_delay_by_rebuild_shape
+
+CLAIM:
+Rebuilding a long history as one monolithic prefill imposes a large delay on the other jobs sharing the engine (median 13.6 s under KV pressure), while the same rebuild sliced into 1024-token pieces imposes only 3.0 s, about 5x less, at the cost of a little more latency for the rebuilding job itself (2.2 s monolithic vs 3.3 s in pieces). The 2048-token pieces sit between (5.7 s imposed). At a KV pool that fits the histories (256), every shape imposes about 0 s, so the imposed delay is a contention cost, not an intrinsic one.
+
+SOURCES (committed):
+  results/cost/study_eng1c/eng1c_results.json  @ 8b51be8
+
+NOTES:
+Imposed delay is the committed ENG1c Part D `imposed_median` (the extra time a concurrent job waits because of the rebuild); the rebuilding job's own first token is `job_ttft_median`. Both are in seconds so they share one axis. Bars are the median over the six pressure cells (KV pools 27, 38, 60 times load profiles P25 and S2); whiskers are the min and max across those cells. The pool-256 control (histories fit, no contention) gives imposed medians of 0.04, 0.23 and 0.06 s for mono, 2k and 1k, confirming the delay is contention. Imposed delay is risk-orange with a dotted hatch, own latency is query-blue solid, so the two never rest on colour alone.
