@@ -436,3 +436,62 @@ never-uploaded bytes visible.
 So the two halves of the split differ in the workload and in nothing else that is known to move
 these arms. Recorded with the fit, as the H100 asked, so a later reader does not have to re-establish
 it.
+
+---
+
+# Held-out cell 1 of 4 SATURATES, and MARGIN_CF's population is damaged in the one direction that matters
+
+**H100, 20:10, `warm-all-lru_n16_s4_1200s_h27_3t_L3_epg` (EP-G plus per-frame).** 1,524 of 6,262
+requests non-200 by 20:10, **24 percent**, so the cell is saturated under D144's 5 percent line and
+is labelled so. Recorded as a FINDING and not retried, as agreed.
+
+| | count |
+|---|---|
+| dashcam HTTP 400 | 1,113 |
+| robot HTTP 400 | 397 |
+| transport | 18 |
+
+**The mechanism is the submission race again, now on EP-G dashcam episodes, and the trigger is
+queue depth.** Dashcam was CLEAN for the first five minutes. Then, just before each dashcam
+device's first failure, its previous request was still in flight with a **TTFT of 97 to 122 s
+against a 1 s deadline**, so the engine queue was about 100 s deep and the next 0.5 s instant's
+uuid-only references pointed at a frame the engine had not yet registered. Each device then
+cascades, about 185 of about 280 later requests failing.
+
+**This is not a general EP-G fault.** It is warm-everything plus per-frame upload at 16 devices:
+per-frame makes the believed holding grow every 2 s instead of every 30 s (measured 3.27x the
+prefill pieces for this arm), EP-G adds a persistent episode per dashcam, and warm-all-lru warms
+every open session. The first five clean minutes are the evidence: the fault arrives with the
+queue, not with the format.
+
+**That is a capacity result worth having on its own.** It is the saturation point for
+warm-everything that the offline P1 simulation could not give us, and it is why
+`warm-all-lru-reactive`'s 33,103-token peak was never a substitute for it.
+
+## Why this damages MARGIN_CF specifically, and not just this cell's score
+
+D157 (2) sets MARGIN_CF as the p90 of `0.250 x |P_hat - 1[on time]|` over every robot question
+released in these four cells. A question returned HTTP 400 has null `prompt_tokens`, so **it is in
+the population, counts as missed, and cannot be priced.** On the 1F race cell that was 7 of 20. Here
+it is about 400 robot 400s, so most of this cell's released robot questions are unpriceable, and the
+H100 expects cell 4 (`_kv0.25`) to do the same. Cells 2 and 3, `-reactive` and `-off`, should be
+clean.
+
+**So the population is two damaged cells of four, and the damage is NOT RANDOM. It concentrates on
+exactly the long warm-ahead requests whose prediction error the margin exists to capture.** A p90
+computed over the survivors would therefore be **biased NARROW in the one direction that matters**:
+it drops the hardest-to-predict cases and keeps the easy ones. D154 (2) sets the margin ONCE and
+freezes it, so a margin set from this population locks that bias in permanently.
+
+## Recommendation, and it is the user's call because D157 (2) named the population
+
+**Do not set MARGIN_CF tonight.** Compute the p90 over the two clean cells and report it as a
+DIAGNOSTIC, explicitly labelled not-the-margin, so the magnitude is known. Set the real margin once
+the submission race is fixed and the four cells are re-run on a clean engine.
+
+The reasoning, in one line: a margin whose job is to pay for the cost model's error must not be
+measured on a population that systematically excludes the errors it would have been largest on.
+
+Two things this does NOT block. **v5-rules needs no margin and no gate** (D156 (1)), so the night's
+live v5 result is unaffected. And the gate's own held-out p90 can still be reported from the clean
+cells with the damage stated, because that number is descriptive rather than frozen into the policy.
