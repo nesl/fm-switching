@@ -75,6 +75,11 @@ def _memory_pressure(st, tot):
 
 
 def build_parser() -> argparse.ArgumentParser:
+    # B3: the --robot-deadline-s default and the trace-name anchor are READ from data_sources, so
+    # there is one definition of each. `main` overwrites `_DS.ROBOT_DEADLINE_S` with the parsed
+    # value, and this function runs BEFORE that assignment, so the default it reads is the
+    # module's own committed 3.0 and never a value a previous parse left behind.
+    import data_sources as _DS
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--arm", required=True)
     ap.add_argument("--out", required=True, help="the run directory for this ONE cell")
@@ -89,10 +94,12 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--robot-question-set", default="eval", choices=["eval", "lh_req"],
                     help="D142 / D143 A: robots draw from EVAL (default) or EVAL LH-REQ questions only; recorded in the "
                          "header and in the trace directory name")
-    ap.add_argument("--robot-deadline-s", type=float, default=5.0,
-                    help="D147: the robot (long-horizon) deadline L, written into every robot question of the trace and "
-                         "used by the scorer; 5.0 is the historical default (D71). Any other value gets its own trace "
-                         "directory (_L<value>) and is recorded in the header")
+    ap.add_argument("--robot-deadline-s", type=float, default=_DS.ROBOT_DEADLINE_S,
+                    help="D147 / B3: the robot (long-horizon) deadline L, written into every robot question of the "
+                         "trace and used by the scorer. The DEFAULT IS NOW 3.0 (single-shot + 1 s, from the use case); "
+                         "5.0 was the historical starting value (D71) and is one point of the D147 sweep. Any value "
+                         "other than the 5.0 TRACE NAME ANCHOR gets its own trace directory (_L<value>) and is "
+                         "recorded in the header, so a 3 s run is tagged _L3 whether it was passed or defaulted")
     ap.add_argument("--run-s", type=float, default=600.0)
     ap.add_argument("--mode", default="A", choices=("A", "B"))
     ap.add_argument("--seed", type=int, default=0)
@@ -163,6 +170,7 @@ def _arm_kwargs(a) -> Dict[str, Any]:
 
 
 def _trace(a, work: Path) -> Path:
+    import data_sources as _DS
     import trace as TR
     if a.trace_dir:
         return Path(a.trace_dir)
@@ -171,7 +179,13 @@ def _trace(a, work: Path) -> Path:
     # otherwise a 40:40:20 or LH-REQ run would silently reuse a 50:50 EVAL trace.
     extra = "" if (a.ratio == "50:50" and a.robot_question_set == "eval" and a.ss_question_set == "ss1") else \
         f"_r{a.ratio.replace(':', '-')}_{a.robot_question_set}_{a.ss_question_set}"
-    if float(a.robot_deadline_s) != 5.0:                                 # D147: a different L is a different trace
+    # D147: a different L is a different trace. The comparison is against the 5.0 TRACE NAME
+    # ANCHOR and NOT against the argparse default, which B3 has moved to 3.0. Tying it to the
+    # default would silently give the un-suffixed name a second meaning: committed un-suffixed
+    # cells are 5 s, so a defaulted 3 s run must be tagged _L3 exactly as an explicit one is, and
+    # a 5 s run must stay un-suffixed. Committed _L3 and un-suffixed cells both stay addressable,
+    # which is what the H100's driver and the offline re-scorer key off.
+    if float(a.robot_deadline_s) != _DS.TRACE_NAME_ANCHOR_DEADLINE_S:
         extra += f"_L{float(a.robot_deadline_s):g}"
     if a.dashcam_format != "oneframe":          # D153: a different dashcam format is a different workload
         extra += f"_{a.dashcam_format}"

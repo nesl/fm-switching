@@ -1,0 +1,275 @@
+{
+ "study": "StudyORIN-REC warm latency wired into the D155 scorer (3 s and 5 s re-score)",
+ "date": "2026-11-20",
+ "artefact": {
+  "path": "results/sember/study_orin_rec/orin_rec_warm.jsonl",
+  "sha256": "f62818358637cfce72cc6d43ae3b4332a2eb6ab5675f201607e4637b578c7b6a",
+  "commit": "00a223d",
+  "n": 97
+ },
+ "measured_table": {
+  "keyed_on": "question_id",
+  "n": 97,
+  "completion_s": {
+   "min": 0.2503,
+   "p10": 0.2602,
+   "p25": 0.2635,
+   "p50": 0.2697,
+   "p75": 0.2778,
+   "p90": 0.2893,
+   "max": 0.3108,
+   "iqr": 0.0143,
+   "mean": 0.2724
+  },
+  "ttft_s": {
+   "p50": 0.2109,
+   "p90": 0.2303
+  },
+  "prompt_tokens": {
+   "min": 5476,
+   "p50": 5524,
+   "max": 5682
+  },
+  "cached_tokens": {
+   "min": 5392,
+   "max": 5392,
+   "note": "constant 5392 on all 97: the input is near-constant, 60 RECENT frames"
+  },
+  "completion_tokens": {
+   "min": 2,
+   "max": 2,
+   "note": "2 on every one of the 97, so P20's 512-token cap is NOT the device's latency lever"
+  },
+  "joined": {
+   "trace_questions": 89,
+   "covered": 89,
+   "missing": 0,
+   "note": "all 89 robot questions of seeds 0/4/5/6 and all 20 of the 3 s seed-4 cell key into the measured table; a missing entry REFUSES and the proof is recorded under refusal_proof"
+  }
+ },
+ "mechanism_verification": {
+  "step0": [
+   "is the comparator about to change? no: the on-time tables do not read device latency and are the positive control",
+   "does the mechanism have a reachable path at this size and regime? CHECKED FIRST and the answer was no at 3 s (0.2503 to 0.3065 s against 3.0 s), which is why the null was pre-classified as unexercised BEFORE the sweep rather than explained after",
+   "does a run I depend on key into my analysis? yes: the join is on question_id and was verified at 89 of 89 and 20 of 20 before any scoring"
+  ],
+  "step1": "if the device's own answer latency is representation- and path-dependent (FORMULATION physical component of Context Inertia), then D155 (3)'s by-deadline rule, which credits a device answer only when it ARRIVES within L, differs from D152 (1)'s any-time rule exactly on the questions where device latency exceeds L, so replacing a superseded latency source by a measured one moves the by-deadline column on those questions and only those",
+  "step2": [
+   {
+    "link": "measured per-question device latency exists and varies",
+    "quantity": "data_sources.device_recall_warm_latency_s()[question_id]",
+    "value": "0.2503 to 0.3065 s over the 89 scored questions, p50 0.2704",
+    "varies": "YES, 89 distinct values, IQR 0.0143 s",
+    "read": "scorer/score.py device_latency_s -> device_within (line 273), which decides _standing_by_deadline's second branch (score.py:632)"
+   },
+   {
+    "link": "the by-deadline rule consumes it against the per-question deadline",
+    "quantity": "SC.device_within({}, dev, dls[k]) in frozen_headline.run_flags",
+    "value": "L = 3.0 on the _L3 family, 5.0 on the un-suffixed family",
+    "varies": "the INPUT varies (0.146-0.225 -> 0.250-0.307); the OUTPUT is True in both conditions, which is UNEXERCISED and not absent",
+    "read": "frozen_headline.py corr_bd[k] and dev_only_bd[k]"
+   },
+   {
+    "link": "latency exceeding L flips a device answer to a miss",
+    "quantity": "the same device_within, under the Step 4 control",
+    "value": "with +2.8 s of device wait, 20 of 20 answers go late and by-deadline parts from any-time on every arm",
+    "varies": "YES under the control, NO in the measured regime",
+    "read": "same site; see negative_control"
+   }
+  ],
+  "step2b": {
+   "cells_diffed": "b7/eco-llm/mooncake/edf at n16 seed 4, L = 3 s, and the 5-arm 5 s family, each scored twice: LIVE2_DEVICE_LATENCY=trace and =orin_rec_warm",
+   "differing_decisions": 0,
+   "first_differing": null,
+   "switch_arrived": "YES, and this is the part that is NOT a null: the device_latency_s column printed by the scorer changes from min 0.1460 / p50 0.1532 / max 0.2250 to min 0.2503 / p50 0.2704 / max 0.3065, so the measured value reached device_within with its declared type and value on every question. The DECISION is unchanged because every value is far inside the deadline, not because the switch was discarded",
+   "classification": "UNEXERCISED (Rule 2), with the reason stated as headroom"
+  },
+  "step4": {
+   "cell": "n16 seed 4, L = 3 s, 4 arms",
+   "control": "LIVE2_DEVICE_WAIT_S=2.8 on top of the measured latency, so device arrival is 3.05 to 3.11 s against a 3.0 s deadline",
+   "result": {
+    "device_answers_late": 20,
+    "by_deadline": {
+     "b7-edf-feasibility": "8/20 -> 5/20",
+     "eco-llm": "6/20 -> 5/20",
+     "mooncake": "8/20 -> 5/20",
+     "edf": "6/20 -> 3/20",
+     "DEVICE ONLY": "6/20 -> 0/20"
+    },
+    "any_time": "unchanged on every arm, as the rule requires"
+   },
+   "verdict": "the mechanism IS live and reachable; the measured null is a headroom null"
+  },
+  "step5": {
+   "alternative": "the two columns could agree because the by-deadline branch is never evaluated (unexpressible), which would look identical in the output",
+   "distinguished_by": "the Step 4 control: disabling the headroom rather than the mechanism changes the column on every arm, which an unevaluated branch could not do. The printed per-question latency column also changes with the source, so the quantity is read"
+  }
+ },
+ "consistency_check": {
+  "check1_cross_check": [
+   {
+    "quantity": "device recall latency, p50",
+    "this_run": 0.2704,
+    "prior": 0.1532,
+    "prior_source": "D87 ORIN2 in-process interpolation via data_sources.device_recall_latency_s (the superseded source)",
+    "ratio": 1.765,
+    "agree": "under the 2x bar on the median"
+   },
+   {
+    "quantity": "device recall latency, per-question ratio",
+    "this_run": "0.2503 to 0.3065",
+    "prior": "0.1460 to 0.2250",
+    "prior_source": "same",
+    "ratio": "min 1.196, p50 1.725, MAX 2.099",
+    "agree": "ONE question crosses the 2x bar and is EXPLAINED, not chosen between: the two quantities have different definitions. D87's is a TTFT indexed on FULL history tokens and clamps to 0.146 at <= 11k, while the measured one is a COMPLETION time on a near-constant ~5.5k-token RECENT prompt and does not scale with history length at all. The ratio spread tracks the proxy's token indexing, not measurement noise"
+   },
+   {
+    "quantity": "warm completion p50 / p90",
+    "this_run": "0.2697 / 0.2894",
+    "prior": "0.2697 / 0.2894",
+    "prior_source": "orin_rec_warm_meta.json warm_summary (commit 00a223d)",
+    "ratio": 1.0,
+    "agree": "agree, and the loader self-checks against it"
+   }
+  ],
+  "check2_physical": {
+   "rate": "the measured 0.270 s delivers 2 output tokens on a 5,476 to 5,682-token prompt of which 5,392 tokens are CACHED, so about 110 to 290 tokens are actually prefilled. Implied end-to-end 5,524/0.270 = about 20,500 prompt-tok/s if the whole prompt were computed, and about 410 to 1,070 tok/s on the tokens actually computed",
+   "labelled": "WARM PATH, explicitly. cached_tokens covers the RECENT frames on all 97 requests (cached_covers_frames_all true in the committed meta), so the 20,500 tok/s figure is a cache-hit artefact by construction and MUST NOT be compared to a cold prefill curve. The committed A6000 cold prefill is about 7,100 tok/s and the 4B saturated curve is 29,500 tok/s (costs.PREFILL_TOK_S); neither is the comparator for a warm number and no comparison is drawn",
+   "cold_counterpart": "D155a: the COLD path on the same 97 is 3.354 s end to end of which 3.296 s is TTFT, and post-first-token time is 0.058 s cold against 0.059 s warm. The 2-token answer costs the same either way and the whole cold excess is a re-prefill charged before the first token. That is the physical component of Context Inertia on this workload, 12.4x, and it is consistent with a warm figure of 0.270 s",
+   "history_note": "the 11k to 28k-token history is NOT the measured prompt: these are RECENT requests at 60 frames and about 5.5k tokens (r1_prompt_tokens, the full-history comparator, is 11,399 to 12,830). The 0.270 s is not a 28k-token prefill and is not reported as one"
+  },
+  "check3_distribution": {
+   "spread": {
+    "n": 97,
+    "min": 0.2503,
+    "p10": 0.2602,
+    "p25": 0.2635,
+    "p50": 0.2697,
+    "p75": 0.2778,
+    "p90": 0.2893,
+    "max": 0.3108,
+    "iqr": 0.0143
+   },
+   "near_constant": "YES, and the INPUT is near-constant too",
+   "input_is_near_constant_too": "every part-1 RECENT request carries exactly 60 frames; prompt_tokens span only 5,476 to 5,682 (3.8 percent) and cached_tokens is 5,392 on all 97. A 22.4 percent latency spread on a 3.8 percent input spread is a DISTRIBUTION, not a constant, so this is expected rather than a caching or short-circuit artefact. The diagnostic the protocol warns about would be latencies identical to three decimals, and they are not",
+   "artefact_spread_check": "the by-deadline column is NOT a spread here: it is 0 flips, so there is no plausible spread to mistake for an effect",
+   "averaged_out_check": "the effect, if any, would be concentrated on the longest histories. Checked: the stratum does not exist under the measured source, because the measured latency does not depend on history length (RECENT prompt, near-constant). The slowest question, 0.3065 s, is still 10.2 percent of a 3 s deadline"
+  },
+  "check4_definitions": {
+   "device_recall_latency": "THIS RUN: measured WARM COMPLETION time (prefill + 2-token decode) on a 60-frame RECENT prompt, per question, Jetson AGX Orin, qwen3vl4b, vLLM. PRIOR COMMITTED: D87's ORIN2 in-process TTFT, two points (0.146 at 11k, 0.225 at 28k) linearly interpolated on FULL history tokens and clamped. SAME NAME, THREE DIFFERENCES: completion vs TTFT, measured vs interpolated, RECENT prompt vs full history. Reconciled by labelling: the old source stays reachable as LIVE2_DEVICE_LATENCY=trace and every output under it says superseded",
+   "delivery": "completion, D146 (1), on both sides of the comparison",
+   "robot_deadline": "3.0 s on the _L3 family and 5.0 s on the un-suffixed family, read per question from the trace's own deadline_s and never from a literal. B3 moved the DEFAULT to 3.0 and kept the TRACE NAME ANCHOR at 5.0, so one name keeps one meaning",
+   "device_only_row": "the measured warm device answers alone, no cloud. Its CORRECTNESS is still D87's 4B-I x RECENT StudyO-Q4 set (A6000-produced); only the LATENCY is the Orin's. The row is labelled as that mixture and the mixture is not resolved here, because changing the correctness source is a methodological change"
+  },
+  "check5_claim_linkage": {
+   "headline": "by-deadline equals any-time at the measured warm latency, 0 device answers flip",
+   "bears_on": "the physical component of Context Inertia (FORMULATION): it says the DEVICE side of that component is negligible against a 3 s deadline on this workload, so the deadline pressure D147 introduces falls entirely on the CLOUD path",
+   "supports_or_weakens": "it does not speak to the representation-vs-placement claim at all, and it REMOVES a confound from D152 (1)'s headline: the device fallback it credits is now known to arrive in time rather than assumed to",
+   "scoped_out_check": "nothing measured here is scoped out by FORMULATION",
+   "provisional_resolved": "reports/study_frozen_test.md section 24.1's by-deadline column was marked PROVISIONAL because it rested on the superseded latency. It is now settled on the measured source, with the same numbers"
+  },
+  "check6_proxy": {
+   "proxies_used": [
+    {
+     "proxy": "the 97-question measured table is applied to each question by question_id",
+     "actually_measures": "that question's own warm latency on the Orin",
+     "valid": "YES, it is the same question set (LH-REQ) and the join is exact at 89 of 89 and 20 of 20, so this is an identity and not a proxy"
+    },
+    {
+     "proxy": "DEVICE-ONLY correctness",
+     "actually_measures": "the 4B's accuracy on the A6000 / H100, not on the Orin",
+     "valid": "QUESTIONABLE and labelled. StudyD15 Part A rejected the H100-for-Orin proxy as an exact numerical stand-in. The Orin's own warm run answers 16 of these 89 correctly against the proxy's 20, so the device-only row would read 0.1798 rather than 0.2247 on measured correctness. This affects the device-only row's LEVEL and is reported as a limitation; it does not touch the flip count, which is a latency question"
+    }
+   ]
+  },
+  "check7_controls": {
+   "positive_control_1": {
+    "what": "the 5 s family re-scored under LIVE2_DEVICE_LATENCY=trace must reproduce the committed frozen_headline_n16_4seed_d155.json",
+    "result": "IDENTICAL on every field of every arm row",
+    "why_it_matters": "it proves B3's ROBOT_DEADLINE_S change and the new default source did not move a committed number, and that the check itself can detect a match"
+   },
+   "positive_control_2": {
+    "what": "the 3 s family re-scored under LIVE2_DEVICE_LATENCY=trace must reproduce the committed frozen_headline_n16_s4_d155_L3.json",
+    "result": "IDENTICAL on every field of every arm row"
+   },
+   "positive_control_3": {
+    "what": "a quantity that CANNOT depend on device latency must be unmoved by the new source: the on-time tables",
+    "result": "unmoved. 5 s: b7 feas 42/69, all 42/89, SS 1274/1426; hybrid-F 67/69, 85/89, 1399/1426; dash 4 of 4 for every arm. 3 s: b7 7/10 and 7/20, eco-llm 7/10 and 15/20, mooncake 7/10 and 7/20, edf 4/10 and 4/20, SS 343/342/342/281 of 357",
+    "why_it_matters": "if this had moved, the CHECK would be broken, not the arm, because device latency is not an input to an on-time table"
+   },
+   "control_arm_audited": {
+    "what": "b7-edf-feasibility is the comparator every difference is taken against, so it is audited on its own numbers before the comparison is read",
+    "result": "b7 by-deadline 38/89 = 0.4270 and on-time feas 42/69 = 0.6087 at 5 s, and 8/20 = 0.4000 with 7/10 on time at 3 s, all equal to its committed values"
+   },
+   "negative_control": "see mechanism_verification.step4"
+  }
+ },
+ "b3_trace_digest_proof": {
+  "ruling": "B3: ROBOT_DEADLINE_S default 5.0 -> 3.0 (D147), with the TRACE NAME ANCHOR held at 5.0",
+  "naming_decision": "the _L<x> tag is appended when the deadline differs from the 5.0 ANCHOR, not from the default. Chosen deliberately: committed un-suffixed cells mean 5 s, so anchoring on the default would give one directory name two meanings. Consequence, stated: a run that now takes the 3 s DEFAULT is tagged _L3 exactly as an explicit --robot-deadline-s 3 run is, committed _L3 cells stay addressable under FROZEN_HEADLINE_SUFFIX=_L3, and committed un-suffixed cells stay addressable and stay 5 s",
+  "required_proof": {
+   "explicit_5s": {
+    "regenerated_fairness_digest_A": "150289c5fb6964dca1f5de2c485f912be97211d0bb8394749dd83da2ce161e18",
+    "committed_fairness_digest_A": "150289c5fb6964dca1f5de2c485f912be97211d0bb8394749dd83da2ce161e18",
+    "regenerated_fairness_digest_B": "42e479125391300cf25196073ac1758114628877c7969d1c786e60522abe366f",
+    "committed_fairness_digest_B": "42e479125391300cf25196073ac1758114628877c7969d1c786e60522abe366f",
+    "device_answers_jsonl": "sha256 MATCHES committed byte for byte",
+    "trace_jsonl": "differs from committed in ONE field only, frame_bytes on monitor_opportunity records (13,193 of 14,985 rows), which is the pre-existing and documented D103 (h) median fallback already recorded in frozen_headline.device_answers_for. It is NOT caused by B3: the fairness digests exclude monitor frames in pull mode and both match exactly, and the regeneration at 5.0 is byte-for-byte what the pre-B3 default produced",
+    "verdict": "NO COMMITTED TRACE DIGEST CHANGES"
+   },
+   "explicit_3s": {
+    "regenerated_fairness_digest": "e49f079035ebc405101d63d464ba922428d5bc44abd17b96f6196bc02bbbc4e6",
+    "committed_fairness_digest_in_L3_cells": "e49f079035ebc405101d63d464ba922428d5bc44abd17b96f6196bc02bbbc4e6",
+    "cells": "b7-edf-feasibility, eco-llm, mooncake, edf, all at n16 seed 4 _L3",
+    "verdict": "the H100 passed --robot-deadline-s 3 for the whole handful, so those cells generate at 3.0 whatever the default is, and they reproduce their committed fairness digest exactly after B3"
+   },
+   "proof_is_not_vacuous": "the 5.0 and 3.0 digests DIFFER (1502... vs e49f...), so the deadline is live in the digest and a match at 5.0 is informative rather than an instrument that cannot fail"
+  },
+  "second_order_bug_found_and_fixed": "frozen_headline.local_trace left DS.ROBOT_DEADLINE_S alone when a directory name carried no _L tag. With the default at 3.0 that would have regenerated every UN-SUFFIXED (5 s) cell's trace with 3 s deadlines written into its questions and scored the whole committed 5 s family against the wrong bound, with nothing looking wrong. The absent tag is now resolved EXPLICITLY to the 5.0 anchor. The positive control above is what would have caught it, and it is the reason that control was run before the comparison",
+  "not_touched": "fleet/trace.py and coordinator.py were not needed and were not touched"
+ },
+ "cascade_arms": {
+  "ruling": "D154 (5): the five cascade-style arms rerun on measured device latency",
+  "arms": [
+   "confidence-cascade",
+   "cascade-routing",
+   "r3-streaming",
+   "streamscout",
+   "thinking-qwenvl"
+  ],
+  "register_correction": "the brief names data_sources.py:191 DEVICE_WAIT_RULE_S = 0.567 as what these arms use. That constant has exactly ONE reference in the repository, its own declaration, so it is WRITE-ONLY and wiring a number into it would change nothing. What the arms actually pay is baselines/costs.py:37 DEV_LAT_S = 0.567, read by coordinator.py:63 DEVICE_ANSWER_CHARGE_S and applied at coordinator.py:471 (the device answer's service time) and coordinator.py:505 (the earliest instant such an arm may act)",
+  "what_was_done": {
+   "superseded_label": "data_sources.DEVICE_WAIT_RULE_S kept, labelled SUPERSEDED, and annotated with the write-only finding and the real site",
+   "measured_value_added": "data_sources.DEVICE_WAIT_MEASURED_S = 0.2697 (the measured warm p50), READ by scorer/score.py cascade_device_wait(), which stamps every score output with label proxy-0.567 or measured-warm and the flag measured_device_wait_applied",
+   "cards_labelled": "all five adapters carry the charge, its site, and its register in the class body",
+   "deliberately_not_done": "no per-arm device_answer_wait_s attribute was added. Nothing reads a per-arm wait, and a field written and never read is ABSENT by the Step 2 rule, so adding one would have manufactured exactly the write-only mechanism this entry reports"
+  },
+  "still_open": "the LIVE cascade wait is unchanged and every cascade cell is still proxy-0.567. Both application sites are LIVE decision-timing sites in coordinator.py, which this session does not own, so adopting the measured value changes what the arm DOES and requires a RERUN, not a re-score. The one-line change the owning session needs: coordinator.py:63 DEVICE_ANSWER_CHARGE_S = DS.DEVICE_WAIT_MEASURED_S, or a per-question lookup keyed on the question id. Changing baselines/costs.py DEV_LAT_S instead would move committed dashcam, sim and map_bridge numbers and is a methodological change, not applied",
+  "no_cascade_cell_in_this_rescore": "none of the five is in the _L3 family or the 5 s headline family, so no number reported here depends on this item"
+ },
+ "answer_length_fact": {
+  "completion_tokens": 2,
+  "on_all_of": 97,
+  "consequence": "P20's answer cap (512, unchanged per D155 (2)) is NOT the device's latency lever: a 2-token answer cannot be shortened. D155a measures the split directly: 0.058 s cold and 0.059 s warm after the first token, so 0.270 s warm is about 0.211 s of prefill-plus-fixed-overhead and 0.059 s of decode, and the 3.296 s cold TTFT is re-prefill of frames the device already holds. Where this bears on a conclusion: any device-side latency lever on this workload is a PREFILL or RESIDENCY lever, and the 12.4x cold-to-warm gap is the whole of it"
+ },
+ "refusal_proof": {
+  "what": "a question present in the trace but absent from the measured table must REFUSE, not default to zero",
+  "how": "LIVE2_DEVICE_LATENCY=measured:<table with one in-trace question dropped>",
+  "result": "ScoringRefused raised at score.py:254 naming the question_id and the opportunity_id; the run produced no output",
+  "also": "a table missing a question that is NOT in the scored trace scores normally, so the refusal is keyed on what the run actually needs"
+ },
+ "files": {
+  "rescored": [
+   "results/orchestration/live2/frozen_test/frozen_headline_n16_4seed_d155_measured_warm.json",
+   "results/orchestration/live2/frozen_test/frozen_headline_n16_s4_d155_L3_measured_warm.json"
+  ],
+  "superseded_kept": [
+   "results/orchestration/live2/frozen_test/frozen_headline_n16_4seed_d155.json",
+   "results/orchestration/live2/frozen_test/frozen_headline_n16_s4_d155_L3.json"
+  ]
+ },
+ "tests": {
+  "live2_suite": "test_live2_coord 26/26, d114 16/16, d118 26/26, fakeserver 4/4, fix 16/16, fix2 22/22, harness 33/33, history_size 9/9, all OK",
+  "imports": "import hybrid OK, import arms OK"
+ }
+}

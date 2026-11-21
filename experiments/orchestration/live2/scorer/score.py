@@ -126,6 +126,10 @@ for _p in (str(LIVE2 / "fleet"), str(ROOT / "experiments/orchestration/sim"),
         sys.path.insert(0, _p)
 
 import data_sources as DS       # noqa: E402
+# D154 (5) needs the LIVE cascade device-answer charge in order to LABEL a cascade cell, and that
+# charge lives in the baselines cost table (`costs.DEV_LAT_S`), read by `coordinator.py:63`.
+# Importing the table is cheap: it holds constants only and loads no model and no score data.
+import costs as C              # noqa: E402
 
 DASH_L_S = DS.NEXAR_DEADLINE_S          # 1.0 (D71)
 DASH_P = 0.25                           # D71
@@ -169,24 +173,44 @@ if DELIVERY not in ("completion", "first_token"):
 # hand. One definition, one read, one place to change.
 #
 # WHERE THE DEVICE LATENCY COMES FROM, and it is a SLOT, not a constant:
-#   "trace"            the per-question `device_latency_s` the trace generator already wrote into
-#                      `device_answers.jsonl`. For robot recall that field is
+#   "orin_rec_warm"    THE DEFAULT from 2026-11-20. StudyORIN-REC's MEASURED WARM per-question
+#                      device COMPLETION latency on the 97 LH-REQ questions (Jetson AGX Orin,
+#                      qwen3vl4b under vLLM, commit 00a223d): p50 0.2697 s, p90 0.2894 s, min
+#                      0.2503 s, max 0.3108 s over 97 questions. Read per question from the
+#                      committed `results/sember/study_orin_rec/orin_rec_warm.jsonl` through
+#                      `data_sources.device_recall_warm_latency_s`, never copied into a constant
+#                      here. WARM PATH, labelled: the exact RECENT frames are prefilled first and
+#                      `cached_tokens` covers them on all 97, so it must not be read against a
+#                      cold prefill curve.
+#   "trace"            SUPERSEDED, kept so a cell scored before the measurement reproduces
+#                      exactly. The per-question `device_latency_s` the trace generator wrote
+#                      into `device_answers.jsonl`, which for robot recall is
 #                      `data_sources.device_recall_latency_s(history_tokens)`: D87's ORIN2
 #                      IN-PROCESS harness cost, 0.146 s at 11k tokens and 0.225 s at 28k,
-#                      interpolated between and clamped outside. This is the committed default.
-#   "measured:<path>"  a JSON table of MEASURED WARM per-question device latencies, keyed by
+#                      interpolated between and clamped outside. D146 (2) REPLACES exactly this
+#                      substitution, so every output produced under it says `superseded`.
+#   "measured:<path>"  a JSON table of MEASURED per-question device latencies, keyed by
 #                      `question_id` or by `opportunity_id`, either as {key: seconds} or as
-#                      {key: {"device_latency_s": seconds}}. This is the drop-in slot for
-#                      StudyORIN-REC's warm path: when the Orin's measured per-question warm
-#                      latency lands it is pointed at here, and nothing in either scorer changes.
+#                      {key: {"device_latency_s": seconds}}. The generic drop-in slot, kept for a
+#                      later device or a sensitivity run.
+#
+# The DEFAULT was moved off "trace" deliberately, rather than left to an environment variable a
+# run might forget to set. A quantity the whole by-deadline column turns on must not have a
+# superseded default: `trace` is now something a run has to ASK for, and says so when it does.
 #
 # WHAT MUST NOT GO IN THAT SLOT (D155 (1)): the device's own answer latency on the 97 LH-REQ
-# questions, TTFT median 3.296 s and end-to-end median 6.651 s, is the COLD RE-SEND path. D61 (b)
-# classifies the resend path as an API ARTIFACT and NOT the device baseline, so those two numbers
-# are not a device latency and are wired nowhere in this file.
-DEVICE_LATENCY_SOURCE = os.environ.get("LIVE2_DEVICE_LATENCY", "trace")
-if not (DEVICE_LATENCY_SOURCE == "trace" or DEVICE_LATENCY_SOURCE.startswith("measured:")):
-    raise SystemExit("LIVE2_DEVICE_LATENCY must be 'trace' or 'measured:<path to json>'")
+# questions, end-to-end median 3.354 s of which 3.296 s is TTFT (D155a; the earlier 6.651 s added
+# TTFT to an end-to-end figure that already contained it), is the COLD RE-SEND path. D61 (b)
+# classifies the resend path as an API ARTIFACT and NOT the device baseline, so those numbers are
+# not a device latency and are wired nowhere in this file. D155a also settles that the WARM figure
+# needs no caveat on answer length: post-first-token time is 0.058 s cold and 0.059 s warm, so the
+# 2-token answer costs the same either way and the whole cold excess is a re-prefill of frames the
+# device already holds, charged before the first token.
+DEVICE_LATENCY_SOURCE = os.environ.get("LIVE2_DEVICE_LATENCY", "orin_rec_warm")
+if not (DEVICE_LATENCY_SOURCE in ("orin_rec_warm", "trace")
+        or DEVICE_LATENCY_SOURCE.startswith("measured:")):
+    raise SystemExit("LIVE2_DEVICE_LATENCY must be 'orin_rec_warm' (measured warm, the default), "
+                     "'trace' (D87 interpolation, SUPERSEDED) or 'measured:<path to json>'")
 # The device's clock starts at the QUESTION instant by default: D1 gives every device a local
 # model it can run itself, so it is not waiting on the cloud to fail first. A cascade arm that
 # makes the device wait for the cloud sets this instead of editing the rule.
@@ -199,6 +223,10 @@ def device_latency_table() -> Optional[Dict[str, float]]:
     global _DEV_LAT_TABLE
     if DEVICE_LATENCY_SOURCE == "trace":
         return None
+    if DEVICE_LATENCY_SOURCE == "orin_rec_warm":
+        if _DEV_LAT_TABLE is None:
+            _DEV_LAT_TABLE = DS.device_recall_warm_latency_s()
+        return _DEV_LAT_TABLE
     if _DEV_LAT_TABLE is None:
         raw = json.loads(Path(DEVICE_LATENCY_SOURCE.split(":", 1)[1]).read_text())
         rows = raw
@@ -245,19 +273,68 @@ def device_within(o: Dict[str, Any], dev: Dict[str, Any], L: float) -> bool:
     return (DEVICE_WAIT_S + device_latency_s(dev)) <= L + 1e-9
 
 
+_MEANING = {
+    "trace": ("trace: the per-question `device_latency_s` in device_answers.jsonl, which for "
+              "robot recall is D87's ORIN2 IN-PROCESS cost, 0.146 s at 11k tokens to 0.225 s "
+              "at 28k, interpolated and clamped. SUPERSEDED by D146 (2); kept only so a cell "
+              "scored before StudyORIN-REC's warm measurement reproduces exactly."),
+    "orin_rec_warm": ("orin_rec_warm: StudyORIN-REC's MEASURED WARM per-question device "
+                      "COMPLETION latency on the 97 LH-REQ questions (Jetson AGX Orin, "
+                      "qwen3vl4b under vLLM, commit 00a223d). WARM PATH: the exact RECENT "
+                      "frames are prefilled first and cached_tokens covers them on all 97, so "
+                      "it is not comparable to a cold prefill curve."),
+}
+
+
+def cascade_device_wait() -> Dict[str, Any]:
+    """D154 (5): what the five cascade-style arms pay for the device answer, and its REGISTER.
+
+    This is a LABEL, not a behaviour change, and the distinction is the whole point of the entry.
+    The live wait those arms pay is `baselines/costs.py:37 DEV_LAT_S = 0.567`, read by
+    `coordinator.py:63 DEVICE_ANSWER_CHARGE_S` and applied at `coordinator.py:471` (the device
+    answer's service time) and `coordinator.py:505` (the earliest instant such an arm may act).
+    Both are LIVE decision-timing sites, so adopting the measured value changes what the arm DOES
+    and needs a RERUN, which is what D154 (5) queues. No re-score can produce it.
+
+    `data_sources.DEVICE_WAIT_RULE_S` is NOT that site: it has one reference in the repository,
+    its own declaration, so it is write-only and wiring a number into it would change nothing.
+    """
+    applied = abs(float(C.DEV_LAT_S) - float(DS.DEVICE_WAIT_MEASURED_S)) <= 1e-9
+    return dict(
+        arms=list(DS.CASCADE_ARMS),
+        live_charge_s=float(C.DEV_LAT_S),
+        live_charge_site="baselines/costs.py:37 -> coordinator.py:63, applied at :471 and :505",
+        measured_warm_s=float(DS.DEVICE_WAIT_MEASURED_S),
+        measured_warm_source="StudyORIN-REC warm p50 (commit 00a223d), per question where keyed",
+        measured_device_wait_applied=applied,
+        label=("measured-warm" if applied else "proxy-0.567"),
+        register=("the live cascade wait is a RERUN item, not a re-score: it changes when the arm "
+                  "may act. Until coordinator.py adopts the measured value every cascade cell is "
+                  "labelled proxy-0.567 per D154 (5), whatever the scorer's device latency "
+                  "source is. The scorer's own device-answer arrival IS on the measured table."),
+        superseded=("data_sources.DEVICE_WAIT_RULE_S = 0.567 is kept and labelled superseded; it "
+                    "is write-only (one reference, its own declaration) and is not what these "
+                    "arms pay"))
+
+
 def device_delivery_rule() -> Dict[str, Any]:
     """The device-side rule, recorded in every output so a cell says what produced it."""
     return dict(
         device_latency_source=DEVICE_LATENCY_SOURCE,
         device_wait_s=DEVICE_WAIT_S,
-        meaning=("trace: the per-question `device_latency_s` in device_answers.jsonl, which for "
-                 "robot recall is D87's ORIN2 IN-PROCESS cost, 0.146 s at 11k tokens to 0.225 s "
-                 "at 28k, interpolated and clamped"
-                 if DEVICE_LATENCY_SOURCE == "trace" else
-                 "measured: a MEASURED WARM per-question device latency table"),
-        excluded=("D155 (1): the LH-REQ device answer latencies, TTFT median 3.296 s and "
-                  "end-to-end median 6.651 s, are the COLD RE-SEND path, which D61 (b) "
-                  "classifies as an API artifact and not the device baseline. Not used here."),
+        superseded_source=(DEVICE_LATENCY_SOURCE == "trace"),
+        meaning=_MEANING.get(DEVICE_LATENCY_SOURCE,
+                             "measured: a MEASURED per-question device latency table"),
+        excluded=("D155 (1): the LH-REQ device answer latencies, end-to-end median 3.354 s of "
+                  "which 3.296 s is TTFT (D155a corrects the earlier 6.651 s, which had added "
+                  "TTFT to an end-to-end figure that already contained it), are the COLD RE-SEND "
+                  "path, which D61 (b) classifies as an API artifact and not the device "
+                  "baseline. Not used here."),
+        answer_length=("D146 (1) / P20: a robot answer is 2 OUTPUT TOKENS (completion_tokens == 2 "
+                       "on all 97 measured questions), so the 512-token answer cap is not the "
+                       "device's latency lever and a 0.270 s completion is almost entirely "
+                       "prefill plus fixed overhead."),
+        cascade_device_wait=cascade_device_wait(),
         source="D155 (3) amending D152 (1), user decision 2026-11-20")
 
 

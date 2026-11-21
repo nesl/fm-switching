@@ -40,6 +40,18 @@ class ThinkingQwenVLAdapted(Policy):
     # device-side model's own answer before deciding, so it receives
     # `device_answer_confidence` and the harness charges that device answer.
     reads_device_answer = True
+    # D154 (5) / D146 (2), THE CHARGE AND ITS REGISTER. The device answer this arm waits for is
+    # charged `costs.DEV_LAT_S = 0.567 s` (StudyD8 arm A's single-frame total p50), read by
+    # `coordinator.py:63 DEVICE_ANSWER_CHARGE_S` and applied at `coordinator.py:471` (the device
+    # answer's service time) and `:505` (the earliest instant this arm may act). That 0.567 s is a
+    # PROXY and is SUPERSEDED by StudyORIN-REC's measured warm device completion latency, p50
+    # 0.2697 s per question (commit 00a223d). Because both application sites are LIVE
+    # decision-timing sites, adopting the measured value changes what this arm DOES and needs a
+    # RERUN, not a re-score: every committed cell of this arm is therefore labelled `proxy-0.567`,
+    # which `scorer/score.py:cascade_device_wait` emits into the header of every score it writes.
+    # `data_sources.DEVICE_WAIT_RULE_S` is NOT the site to change: it has one reference in the
+    # repository, its own declaration. No attribute is declared here for the measured value, on
+    # purpose: nothing reads a per-arm wait, and a field written and never read is absent.
     defaults_used = ("cadence_s", "frame_count", "representation", "session_action", "order")
     restricts_action_space = "decides readiness / stopping only"
     restriction_reason = ("it is a COMPONENT baseline for response timing, which is the property "

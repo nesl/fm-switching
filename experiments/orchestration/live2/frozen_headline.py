@@ -58,7 +58,12 @@ def local_trace(trace_dir_name):
     # generator takes no deadline argument: run_live2_real.py:447 sets DS.ROBOT_DEADLINE_S before
     # generating, so a 3 s trace is reproduced by setting the same global here. Getting this wrong
     # is caught rather than scored, by the caller's id-equality control.
-    deadline = None
+    # B3 made 3.0 the DEFAULT `DS.ROBOT_DEADLINE_S`, so "leave the global alone when there is no
+    # _L tag" stopped being safe: an UN-SUFFIXED directory means 5 s by the trace-name anchor, and
+    # regenerating it under a 3.0 global would have written 3 s deadlines into a 5 s cell's
+    # questions and scored the whole committed 5 s family against the wrong bound with nothing
+    # looking wrong. The absent tag is therefore resolved EXPLICITLY to the anchor.
+    deadline = DS.TRACE_NAME_ANCHOR_DEADLINE_S
     if parts and parts[-1].startswith("L") and parts[-1][1:].replace(".", "", 1).isdigit():
         deadline = float(parts[-1][1:])
         parts = parts[:-1]
@@ -67,8 +72,7 @@ def local_trace(trace_dir_name):
               robot_question_set="_".join(parts[5:-1]), ss_question_set=parts[-1])
     prev = DS.ROBOT_DEADLINE_S
     try:
-        if deadline is not None:
-            DS.ROBOT_DEADLINE_S = deadline
+        DS.ROBOT_DEADLINE_S = float(deadline)
         t = TR.generate_trace(kw["seed"], kw["n"], kw["ratio"], kw["run_s"], kw["mode"],
                               robot_question_set=kw["robot_question_set"],
                               ss_question_set=kw["ss_question_set"])
@@ -198,6 +202,11 @@ def run_flags(d):
         if o.get("kind") == "recall":
             cl[o["opportunity_id"]] = (o.get("cloud_payload") or {}).get("cloud_letter")
     corr_any, corr_bd, dev_late = {}, {}, {}
+    # D152 (1)'s headline CREDITS the device answer as the fallback, so the fallback's own
+    # standalone number belongs beside every arm rather than being inferred from the arms. These
+    # two maps are ARM-INDEPENDENT (one trace per seed, shared by every arm), which is exactly why
+    # they are a usable floor: they say what the device alone would deliver.
+    dev_only_any, dev_only_bd, dev_lat = {}, {}, {}
     for k in feas:
         dev = ans.get(k)
         if dev is None:
@@ -209,6 +218,12 @@ def run_flags(d):
         on_t = SC.device_within({}, dev, dls[k])
         dev_late[k] = not on_t
         corr_bd[k] = bool((cl.get(k) == gold) if cloud_stands else (dev_ok and on_t))
+        dev_only_any[k] = dev_ok
+        dev_only_bd[k] = bool(dev_ok and on_t)
+        # the latency the SCORER used, which under the measured source is NOT the trace's own
+        # `device_latency_s` field. Reading the trace field here would report the superseded D87
+        # interpolation in a run scored on the measured table, and nothing would look wrong.
+        dev_lat[k] = round(SC.device_latency_s(dev), 6)
     nfeas = sum(1 for v in feas.values() if v)
     hits_f = sum(1 for k, v in feas.items() if v and ont.get(k))
     # D133 verdict per run, with its margin. p_rob is read from the run's own sweep where present.
@@ -217,10 +232,13 @@ def run_flags(d):
     need = (math.ceil(p_rob * nfeas - 1e-9) if nfeas else 0)
     return dict(robot_correct_by_deadline=dict(corr_bd),
                 robot_correct_any_time=dict(corr_any),
+                device_only_by_deadline=dict(dev_only_bd),
+                device_only_any_time=dict(dev_only_any),
+                device_latency_s=dict(dev_lat),
                 device_late_n=sum(1 for v in dev_late.values() if v),
-                device_latency_s_range=([round(min(ans[k]["device_latency_s"] for k in corr_bd), 6),
-                                         round(max(ans[k]["device_latency_s"] for k in corr_bd), 6)]
-                                        if corr_bd else None),
+                device_latency_s_range=([round(min(dev_lat.values()), 6),
+                                         round(max(dev_lat.values()), 6)]
+                                        if dev_lat else None),
                 deadline_s_range=([min(dls.values()), max(dls.values())] if dls else None),
                 robot_feasible={k: ont.get(k, False) for k, v in feas.items() if v},
                 robot_all_map={k: ont.get(k, False) for k in feas}, robot_all=len(feas),
@@ -319,6 +337,42 @@ def main(runs_dir, n, out):
         xs = sorted(float(x) for x in xs)
         return [round(xs[int(0.025 * B)], 4), round(xs[int(0.975 * B)], 4)]
 
+    # ------------------------------------------------------------ THE DEVICE-ONLY ROW.
+    # D152 (1)'s headline credits the device answer as the fallback whenever the cloud misses, so
+    # the fallback's own standalone number belongs beside every arm: it is the floor any arm has to
+    # beat, and an arm below it is worse than not asking the cloud at all. It is taken from b7's
+    # run because the maps are arm-independent (one trace per seed), and that is ASSERTED below
+    # rather than assumed, so a map that ever became arm-dependent would stop the run.
+    A0 = ARMS[0]
+    for s in seeds:
+        for a in ARMS:
+            for key in ("device_only_by_deadline", "device_only_any_time", "device_latency_s"):
+                assert runs[(a, s)][key] == runs[(A0, s)][key], (key, a, s)
+    dev_bd_hits = sum(runs[(A0, s)]["device_only_by_deadline"][k] for s in seeds for k in all_ids[s])
+    dev_at_hits = sum(runs[(A0, s)]["device_only_any_time"][k] for s in seeds for k in all_ids[s])
+    dev_lat_all = sorted(runs[(A0, s)]["device_latency_s"][k] for s in seeds for k in all_ids[s])
+    def _q(p):
+        return round(float(np.percentile(np.array(dev_lat_all, dtype=float), p)), 4)
+    device_only = dict(
+        label="DEVICE ONLY: the measured warm device answers alone, no cloud",
+        by_deadline_hits=dev_bd_hits, any_time_hits=dev_at_hits,
+        n=sum(len(all_ids[s]) for s in seeds),
+        by_deadline=round(dev_bd_hits / all_den, 4), any_time=round(dev_at_hits / all_den, 4),
+        device_answers_late=sum(runs[(A0, s)]["device_late_n"] for s in seeds),
+        device_latency_s=dict(n=len(dev_lat_all), min=round(dev_lat_all[0], 4), p10=_q(10),
+                              p25=_q(25), p50=_q(50), p75=_q(75), p90=_q(90),
+                              max=round(dev_lat_all[-1], 4),
+                              iqr=round(_q(75) - _q(25), 4)),
+        correctness_source=("the device ANSWERS are still D87's 4B-I x RECENT StudyO-Q4 set "
+                            "(A6000-produced, `data_sources.device_recall_answers`), written by "
+                            "fleet/trace.py. Only the LATENCY is the Orin's measured warm value, "
+                            "so this row MIXES a measured latency with a proxy correctness and is "
+                            "labelled, not silently pooled. Changing the correctness source is a "
+                            "methodological change and is not made here."),
+        answer_length=("robot answers are 2 OUTPUT TOKENS, so the P20 answer cap is not the "
+                       "device's latency lever and the measured completion is almost entirely "
+                       "prefill plus fixed overhead."))
+
     rows = []
     for a in ARMS:
         rows.append(dict(arm=a,
@@ -390,6 +444,7 @@ def main(runs_dir, n, out):
                                   "BESIDE the headline and never mixed with it in one column or "
                                   "one sentence (D155 (3)).",
                device_delivery_rule=SC.device_delivery_rule(),
+               device_only=device_only,
                on_time_rule=("delivered within the deadline (robot 5 s, SS 2 s) by an HTTP 200 "
                              "request, stamped at " + ("COMPLETION, prefill plus decode (D146; "
                              "the default from 2026-11-20)" if DELIVERY == "completion"
@@ -412,6 +467,16 @@ def main(runs_dir, n, out):
                  r["robot_correct_any_time_hits"], r["robot_correct_n"],
                  r["robot_correct_delivered_any_time"], r["robot_correct_any_time_ci95"],
                  r["device_late_n"]))
+    do = device_only
+    print("   %-20s by-deadline %2d/%2d = %.4f %-16s|  any-time %2d/%2d = %.4f %-16s|  "
+          "device answers late %d"
+          % ("DEVICE ONLY", do["by_deadline_hits"], do["n"], do["by_deadline"], "",
+             do["any_time_hits"], do["n"], do["any_time"], "", do["device_answers_late"]))
+    print("   device latency (the scorer's source, %s): n %d  min %.4f  p25 %.4f  p50 %.4f  "
+          "p75 %.4f  p90 %.4f  max %.4f  IQR %.4f"
+          % ((SC.DEVICE_LATENCY_SOURCE,) + tuple(
+              do["device_latency_s"][k] for k in
+              ("n", "min", "p25", "p50", "p75", "p90", "max", "iqr"))))
     print("\non-time tables, unchanged and labelled:")
     for r in rows:
         print(f"{r['arm']:20s} feas {r['robot_feasible_hits']}/{r['robot_feasible_n']} = {r['robot_feasible_on_time']} {r['robot_ci95']} "

@@ -2508,3 +2508,259 @@ The confound is bounded at **one question of 20, about 5 pp**, on the arm predic
 So the offline table in section 22.2 IS a usable stand-in for a live 3 s run, with a 5 pp caveat on
 deferring arms, and the live twin the H100 added for hybrid-F-lhreq is confirmation rather than a
 correction. llf completes the upper bound when it lands.
+
+## 25. StudyORIN-REC's measured WARM device latency wired into the D155 scorer, and the 3 s and 5 s families re-scored on it (A6000, offline, 2026-11-20)
+
+**A6000, offline, CPU only.** Section 24.1 left the by-deadline column PROVISIONAL because it
+rested on D87's ORIN2 in-process substitution, which D146 (2) replaces. The Orin's WARM
+measurement has landed (`00a223d`), and this section wires it in, re-scores both deadline families
+under both rules, and answers the question section 24.1 asked: how many device answers flip.
+
+Outputs: `results/orchestration/live2/frozen_test/frozen_headline_n16_s4_d155_L3_measured_warm.json`,
+`..._n16_4seed_d155_measured_warm.json`, proofs in `..._d155_measured_warm_proofs.json`. The
+pre-measurement files are KEPT and reachable as `LIVE2_DEVICE_LATENCY=trace`, which now labels
+every output it produces `superseded`.
+
+### 25.1 What was wired, and the one register correction
+
+`scorer/score.py`'s device-latency slot was already built. Two things changed. First, the
+MEASURED table is now the **default** source (`LIVE2_DEVICE_LATENCY=orin_rec_warm`), read per
+question from the committed `results/sember/study_orin_rec/orin_rec_warm.jsonl` through
+`data_sources.device_recall_warm_latency_s`, so no later run can silently pick up the superseded
+number; `trace` is something a run now has to ask for. A question present in the trace but absent
+from the table still **REFUSES** (`ScoringRefused` at `score.py:254`), and that is proved rather
+than asserted: dropping one in-trace question from the table stops the run and names the
+`question_id` and `opportunity_id`. Dropping a question the run does not need scores normally, so
+the refusal is keyed on what the run actually consumes.
+
+Second, the cascade side, and here the brief's premise needs correcting. **`data_sources.py:191
+DEVICE_WAIT_RULE_S = 0.567` is not what the five cascade arms pay.** It has exactly one reference
+in the repository, its own declaration: it is a write-only constant and wiring a number into it
+would change nothing. What they pay is `baselines/costs.py:37 DEV_LAT_S = 0.567`, read by
+`coordinator.py:63 DEVICE_ANSWER_CHARGE_S` and applied at `coordinator.py:471` (the device
+answer's service time) and `:505` (the earliest instant such an arm may act). Both are LIVE
+decision-timing sites, so adopting the measured value **changes what the arm does and needs a
+rerun, not a re-score** - which is exactly what D154 (5) queues. What is done here: the proxy is
+kept and labelled superseded with the write-only finding recorded beside it;
+`data_sources.DEVICE_WAIT_MEASURED_S = 0.2697` is added and **is read**, by
+`score.py:cascade_device_wait()`, which stamps every score output with `proxy-0.567` or
+`measured-warm` and a `measured_device_wait_applied` flag; and all five adapter cards carry the
+charge, its site and its register. No per-arm `device_answer_wait_s` attribute was added on
+purpose: nothing reads a per-arm wait, and a field written and never read is ABSENT by the Step 2
+rule, so adding one would have manufactured the very write-only mechanism this paragraph reports.
+No number in this section depends on that item: none of the five cascade arms is in either family.
+
+### 25.2 The measured table and its spread, before any score
+
+97 questions, keyed on `question_id`, joined to **89 of 89** robot questions across seeds 0/4/5/6
+and **20 of 20** in the 3 s seed-4 cell, with zero misses.
+
+| | min | p10 | p25 | p50 | p75 | p90 | max | IQR |
+|---|---|---|---|---|---|---|---|---|
+| completion_s (n=97) | 0.2503 | 0.2602 | 0.2638 | **0.2697** | 0.2781 | 0.2894 | 0.3108 | 0.0143 |
+| ttft_s (n=97) | 0.1913 | 0.2016 | - | 0.2109 | - | 0.2303 | 0.2525 | 0.0140 |
+| the 89 scored | 0.2503 | 0.2600 | 0.2638 | 0.2704 | 0.2781 | 0.2944 | 0.3065 | 0.0143 |
+
+**It is near-constant, and so is the input, which is why that is expected rather than a caching
+artefact.** Every part-1 RECENT request carries exactly 60 frames; `prompt_tokens` spans only
+5,476 to 5,682 (3.8 percent) and `cached_tokens` is **5,392 on all 97**. A 22.4 percent latency
+spread on a 3.8 percent input spread is a distribution, not a constant. The shape the protocol
+warns about - values identical to three decimals across inputs that differ - does not occur here.
+
+### 25.3 The 3 s family (`_L3`), n=16 seed 4, under BOTH rules on the measured latency
+
+| arm | by deadline (D155 (3), headline) | any time (D152 (1), beside it) | on time, all questions | device answers late |
+|---|---|---|---|---|
+| b7-edf-feasibility | **8/20 = 0.4000** [0.20, 0.60] | 8/20 = 0.4000 [0.20, 0.60] | 7/20 = 0.35 | **0** |
+| eco-llm | **6/20 = 0.3000** [0.10, 0.50] | 6/20 = 0.3000 [0.10, 0.50] | 15/20 = 0.75 | **0** |
+| mooncake | **8/20 = 0.4000** [0.20, 0.60] | 8/20 = 0.4000 [0.20, 0.60] | 7/20 = 0.35 | **0** |
+| edf | **6/20 = 0.3000** [0.10, 0.50] | 6/20 = 0.3000 [0.10, 0.50] | 4/20 = 0.20 | **0** |
+| **DEVICE ONLY** (measured warm answers alone, no cloud) | **6/20 = 0.3000** | 6/20 = 0.3000 | - | **0** |
+
+### 25.4 The 5 s family (un-suffixed), n=16 seeds 0/4/5/6, under BOTH rules on the measured latency
+
+| arm | by deadline | any time | on time, all questions | device answers late |
+|---|---|---|---|---|
+| b7-edf-feasibility | **38/89 = 0.4270** [0.3258, 0.5281] | 38/89 = 0.4270 | 42/89 = 0.4719 | **0** |
+| eco-llm | **33/89 = 0.3708** [0.2697, 0.4719] | 33/89 = 0.3708 | 60/89 = 0.6742 | **0** |
+| mooncake | **39/89 = 0.4382** [0.3371, 0.5393] | 39/89 = 0.4382 | 42/89 = 0.4719 | **0** |
+| hybrid-F-lhreq | **43/89 = 0.4831** [0.3820, 0.5843] | 43/89 = 0.4831 | 85/89 = 0.9551 | **0** |
+| hybrid-F6-lhreq | **44/89 = 0.4944** [0.3933, 0.5955] | 44/89 = 0.4944 | 61/89 = 0.6854 | **0** |
+| **DEVICE ONLY** (measured warm answers alone, no cloud) | **20/89 = 0.2247** | 20/89 = 0.2247 | - | **0** |
+
+### 25.5 The answer to the question: by deadline EQUALS any time, and ZERO device answers flip
+
+**The user's expectation holds, and it holds plainly: at a measured 0.2503 to 0.3065 s against a
+3 s deadline, by-deadline equals any-time on every arm, and the number of device answers that flip
+relative to the superseded 0.146 to 0.225 s source is ZERO - 0 of 20 at 3 s and 0 of 89 at 5 s.**
+Every arm row is identical between the two sources, field for field.
+
+**Classified under Rule 2 as INCONCLUSIVE / UNEXERCISED, and the reason is headroom.** The rule is
+live and the switch reaches the decision - the per-question latency the scorer consumes moves from
+min 0.1460 / p50 0.1532 / max 0.2250 to min 0.2503 / p50 0.2704 / max 0.3065, so the measured value
+arrives at `device_within` with its declared type and value on all 89 questions. The decision does
+not change because **the slowest measured device answer is 0.3065 s, 10.2 percent of a 3 s
+deadline**; the deadline would have to fall below 0.2503 s, or the latency rise 9.8x, before the
+by-deadline rule could bite. This is not a negative about the policy and not a settled finding
+about the rule: it is a statement that the device side of the deadline is not where the pressure
+is. **The pressure D147's 3 s introduces falls entirely on the cloud path.**
+
+**Section 24.1's PROVISIONAL marking is now discharged.** The numbers it reported stand, and they
+stand for a different reason than it could then give: not because the superseded latency happened
+to be small, but because the measured one is small too.
+
+### 25.6 Robot answers are 2 TOKENS, and where that bears on a conclusion
+
+`completion_tokens == 2` on every one of the 97 measured questions. **P20's answer cap (512,
+unchanged per D155 (2)) is therefore not the device's latency lever** - a 2-token answer cannot be
+shortened, and no cap above 2 changes anything. D155a measures the split directly: post-first-token
+time is 0.058 s cold and 0.059 s warm, so the measured 0.270 s warm completion is about 0.211 s of
+prefill plus fixed overhead against 0.059 s of decode, and the 3.296 s cold TTFT is re-prefill of
+frames the device already holds. **Where it bears on a conclusion:** any device-side latency lever
+on this workload is a prefill or residency lever, never an answer-length one, and the 12.4x
+cold-to-warm gap is the whole of it. This is the physical component of Context Inertia measured on
+the device side of the robot workload, and it says the device's cost is in holding the context, not
+in producing the answer.
+
+### 25.7 Mechanism verification, completed BEFORE the sweep
+
+Full record in `d155_measured_warm_proofs.json`. Summary.
+
+- **Step 0** found the stop condition in advance: the measured range 0.2503 to 0.3065 s against a
+  3 s deadline is not reachable by the by-deadline branch, so the null was **pre-classified as
+  unexercised before the sweep ran** rather than explained after it. It also fixed the join order:
+  question-id coverage was verified at 89 of 89 and 20 of 20 before any scoring.
+- **Step 1**, the chain: if device answer latency is path-dependent, then D155 (3)'s rule differs
+  from D152 (1)'s exactly on questions where device latency exceeds L, so swapping a superseded
+  latency source for a measured one moves the by-deadline column on those questions and only those.
+- **Step 2**: the implementing quantity is `device_recall_warm_latency_s()[question_id]`, 0.2503 to
+  0.3065 s over 89 distinct values, **read** at `score.py:273 device_within`, which decides
+  `_standing_by_deadline`'s second branch at `score.py:632`. Not zero, not constant, not
+  write-only.
+- **Step 2b**: both conditions run on the 3 s cell and the 5 s family. **0 differing decisions**,
+  no first-differing decision - and that is reported as an UNEXERCISED link and not as a negative,
+  because the switch demonstrably arrived: the latency column the scorer prints changes with it.
+- **Step 4**, the negative control, on n=16 seed 4 at 3 s: `LIVE2_DEVICE_WAIT_S=2.8` puts device
+  arrival at 3.05 to 3.11 s. All 20 answers go late, and by-deadline parts from any-time on every
+  arm - b7 8/20 to 5/20, eco-llm 6/20 to 5/20, mooncake 8/20 to 5/20, edf 6/20 to 3/20, DEVICE
+  ONLY 6/20 to **0/20** - while any-time is unchanged throughout, as the rule requires. **The
+  mechanism is live and reachable; the null is a headroom null.**
+- **Step 5**: the alternative explanation for two identical columns is that the branch is never
+  evaluated (unexpressible), which would look the same in the output. Step 4 distinguishes them:
+  removing the headroom rather than the mechanism moves the column on every arm, which an
+  unevaluated branch could not do.
+
+### 25.8 Results consistency check, all seven points
+
+1. **Cross-check.** Device recall latency p50 **0.2704 s this run against 0.1532 s prior** (D87
+   interpolation, the superseded source): ratio **1.725x**, under the 2x investigation bar. **State
+   it plainly, because the whole by-deadline column turns on this quantity.** Per question the
+   ratio runs 1.196 to **2.099**, and the single question above 2x is explained rather than chosen
+   between: the two quantities have **different definitions** (see point 4), D87's clamping to
+   0.146 at 11k tokens while the measured value does not track history length at all, so the ratio
+   spread tracks the proxy's token indexing and not measurement noise. The loader's self-check
+   against the committed `warm_summary` p50 0.2697 / p90 0.2894 agrees exactly.
+2. **Physical plausibility, and the label is the point.** 0.270 s delivers 2 output tokens on a
+   5,524-token prompt of which **5,392 tokens are cached**, so only about 110 to 290 tokens are
+   actually prefilled. Taken end to end that is about 20,500 prompt-tok/s, which is **faster than
+   the committed A6000 cold prefill of about 7,100 tok/s**. That is not a finding and not an
+   error: **it is a WARM path and is labelled as one** - `cached_covers_frames_all` is true on all
+   97 - so it must not be compared against a cold curve, and no such comparison is drawn. On the
+   tokens actually computed the rate is about 410 to 1,070 tok/s, which is unremarkable for a 4B on
+   an Orin. The cold counterpart on the same 97 is 3.354 s e2e / 3.296 s TTFT (D155a), 12.4x the
+   warm figure, which is consistent rather than anomalous. **Register note:** the 11k to
+   28k-token history is NOT the measured prompt - these are 60-frame RECENT requests at about
+   5.5k tokens, and `r1_prompt_tokens` (the full-history comparator) is 11,399 to 12,830. The
+   0.270 s is not a 28k-token prefill and is not reported as one.
+3. **Distribution.** Full spread in 25.2 rather than p50 and p90 alone: n=97, min 0.2503, max
+   0.3108, IQR 0.0143. Near-constant, and the input is near-constant too (60 frames every request,
+   3.8 percent token spread, cached_tokens 5,392 on all 97), so this is expected. The artefact
+   spread and averaged-out shapes are both checked: there is no spread in the by-deadline column to
+   mistake for an effect (it is 0 flips), and the stratum where an effect would concentrate (the
+   longest histories) **does not exist under the measured source**, because a RECENT prompt does
+   not grow with history.
+4. **Definition audit, and this is where the 2x outlier lives.** Same name, three differences.
+   THIS RUN: measured WARM **completion** time (prefill + 2-token decode) on a 60-frame RECENT
+   prompt, per question, Orin / qwen3vl4b / vLLM. PRIOR COMMITTED: D87's ORIN2 in-process **TTFT**,
+   two points interpolated on **full history tokens** and clamped. Completion vs TTFT, measured vs
+   interpolated, RECENT prompt vs full history. Reconciled by labelling, not by picking: the old
+   source stays reachable and says `superseded` in its own header. Delivery is `completion` on both
+   sides. The robot deadline is read per question from the trace (3.0 on `_L3`, 5.0 un-suffixed),
+   never from a literal.
+5. **Claim linkage.** The headline bears on the **physical component of Context Inertia**: it says
+   the device side of that component is negligible against a 3 s deadline on this workload. It does
+   not speak to the representation-vs-placement claim. Its real contribution is removing a
+   confound from D152 (1): the device fallback that headline credits is now **known** to arrive in
+   time rather than assumed to.
+6. **Proxy validity.** The measured table applied by `question_id` is an identity, not a proxy -
+   same question set, exact join. But the **DEVICE-ONLY row mixes sources** and is labelled as
+   such: its correctness is still D87's 4B-I x RECENT StudyO-Q4 set, produced on the A6000 / H100,
+   which StudyD15 Part A rejected as an exact numerical stand-in for the Orin. **The Orin's own
+   warm run answers 16 of these 89 correctly against the proxy's 20, so a device-only row on
+   measured correctness would read 0.1798 rather than 0.2247.** That affects the row's LEVEL and is
+   reported as a limitation; it does not touch the flip count, which is a latency question.
+   Changing the correctness source is a methodological change and is not made here.
+7. **Validate the control, and a positive control.** Three, run **before** the comparison was read.
+   (a) The 5 s family re-scored under `LIVE2_DEVICE_LATENCY=trace` reproduces the committed
+   `frozen_headline_n16_4seed_d155.json` **identically on every field of every arm row**. (b) The
+   3 s family likewise reproduces the committed `frozen_headline_n16_s4_d155_L3.json` identically.
+   (c) **The positive control proper:** a quantity that *cannot* depend on device latency must be
+   unmoved by the new source. The on-time tables are unmoved - 5 s b7 feas 42/69, all 42/89, SS
+   1274/1426, hybrid-F 67/69 and 85/89 and 1399/1426, dash 4 of 4 for every arm; 3 s b7 7/10 and
+   7/20, eco-llm 7/10 and 15/20, mooncake 7/10 and 7/20, edf 4/10 and 4/20. **Had any of these
+   moved, the check would be broken and not the arm**, because device latency is not an input to an
+   on-time table. (d) The **control arm's own numbers** were audited before any difference against
+   it was read: b7 is the comparator for every `_minus_b7` interval, and its by-deadline 0.4270 and
+   on-time 0.6087 at 5 s, and 0.4000 and 7/10 at 3 s, all equal its committed values.
+
+### 25.9 B3: the robot deadline default moves to 3 s, with the trace name anchored at 5 s
+
+**`DS.ROBOT_DEADLINE_S` is now 3.0** (D147: single-shot + 1 s, from the use case; 5.0 was a
+starting value so cold rebuilds were feasible) and `run_live2_real.py --robot-deadline-s` defaults
+to it rather than to a second literal.
+
+**The naming decision, made deliberately.** `run_live2_real.py:167` tagged a trace `_L<x>` when the
+deadline differed from the literal 5.0. That literal is now a named constant,
+`DS.TRACE_NAME_ANCHOR_DEADLINE_S = 5.0`, and it **stays 5.0 and is NOT tied to the default**.
+Anchoring on the default instead would have given one directory name two meanings - every
+committed un-suffixed cell is 5 s, and a new defaulted cell would have been 3 s - which is the
+definition-audit failure in its purest form. Consequence, stated rather than discovered later: a
+run that now takes the 3 s **default** is tagged `_L3` exactly as an explicit `--robot-deadline-s
+3` run is; committed `_L3` cells stay addressable under `FROZEN_HEADLINE_SUFFIX=_L3`; committed
+un-suffixed cells stay addressable and stay 5 s.
+
+**The required proof: no committed trace digest changes for cells that passed the flag
+explicitly.**
+
+| regenerated at | fairness_digest_A | fairness_digest_B | against |
+|---|---|---|---|
+| explicit 5.0 | `150289c5...161e18` | `42e47912...be366f` | committed `seed4_..._lh_req_ss2/trace_meta.json`: **both MATCH** |
+| explicit 3.0 | `e49f0790...bbc4e6` | `415e3d29...98 0221` | committed `_L3` cells' `header.json` fairness_digest, all four arms: **MATCHES** |
+
+`device_answers.jsonl` matches the committed sha256 byte for byte at 5.0. `trace.jsonl` differs in
+**one field only**, `frame_bytes` on `monitor_opportunity` records (13,193 of 14,985 rows), which
+is the pre-existing and already-documented D103 (h) median fallback recorded in
+`frozen_headline.device_answers_for`; the fairness digests exclude monitor frames in pull mode and
+both match exactly, so **this is not caused by B3**. And the proof is not vacuous: the 5.0 and 3.0
+digests **differ**, so the deadline is live in the digest and a match at 5.0 is informative rather
+than an instrument that cannot fail.
+
+**A second-order bug B3 would have caused, found by that control and fixed.**
+`frozen_headline.local_trace` left `DS.ROBOT_DEADLINE_S` alone when a directory name carried no
+`_L` tag. With the default at 3.0 it would have regenerated **every un-suffixed (5 s) cell's trace
+with 3 s deadlines written into its questions** and scored the whole committed 5 s family against
+the wrong bound, with nothing looking wrong. The absent tag is now resolved explicitly to the 5.0
+anchor. Positive control (a) is what caught it, which is the reason it was run before the
+comparison rather than after.
+
+`fleet/trace.py` and `coordinator.py` were not needed for B3 and were not touched. Live2 suite:
+`test_live2_coord` 26/26, `d114` 16/16, `d118` 26/26, `fakeserver` 4/4, `fix` 16/16, `fix2` 22/22,
+`harness` 33/33, `history_size` 9/9, all OK; `import hybrid` and `import arms` both clean.
+
+### 25.10 What this does not settle
+
+The **cascade arms are still `proxy-0.567`** and their rerun is still queued (25.1). The
+**device-only row's correctness is still an A6000 proxy** (check 6), and resolving it would move
+that row from 0.2247 to about 0.1798 at 5 s - it does not move any arm. And the 3 s family is
+**one seed and four arms**; seeds 5 and 6 and the remaining `HANDFUL_L3` arms are not yet run, so
+25.3 is a four-arm table at seed 4 and not a 3 s headline.

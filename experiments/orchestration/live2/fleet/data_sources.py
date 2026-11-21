@@ -40,7 +40,18 @@ NEXAR_INSTANT_CADENCE_S = 0.5
 NEXAR_GRID_STEP_S = 0.25
 NEXAR_GRID_T0_S = 3.0
 NEXAR_DEADLINE_S = 1.0          # D62/D71: L for a monitoring instant
-ROBOT_DEADLINE_S = 5.0          # D68/D71: L for a recall question
+# D147 / B3 (user ruling 2026-11-20): the robot (long-horizon) deadline is SINGLE-SHOT + 1 s = 3 s,
+# from the use case. 5.0 was a starting value chosen so cold rebuilds were feasible (D68/D71) and
+# is now swept as sensitivity {2.5, 3, 4, 5} rather than assumed.
+ROBOT_DEADLINE_S = 3.0
+# THE NAMING ANCHOR, and it is NOT the default. A trace directory carries an `_L<x>` tag when its
+# deadline differs from this value, so the UN-SUFFIXED name means 5 s and has meant 5 s in every
+# committed cell. It must therefore stay 5.0 even though the default has moved to 3.0: tying it to
+# the default instead would make a new un-suffixed cell mean 3 s while every committed un-suffixed
+# cell means 5 s, which is one name with two definitions and the exact failure the definition
+# audit exists to catch. Committed `_L3` cells stay addressable, committed un-suffixed cells stay
+# addressable, and a run that now takes the 3 s DEFAULT is tagged `_L3` like an explicit one.
+TRACE_NAME_ANCHOR_DEADLINE_S = 5.0
 
 ORIN_CALIB_A = 0.114932         # StudyORIN2-stack
 ORIN_CALIB_B = 1.174287         # StudyORIN2-stack
@@ -186,9 +197,94 @@ ORIN_CALIBRATION = ROOT / "results/dashcam/study_orin2/orin2_calibration.json"
 
 # D87: device recall COST = the ORIN2 in-process harness. The server re-send path is an API
 # artifact (repo D61) and is not used anywhere in round 1.
+#
+# SUPERSEDED by D146 (2) as of StudyORIN-REC's WARM measurement (commit 00a223d). It is KEPT, not
+# deleted, so a cell scored before the measurement can still be reproduced exactly and so no later
+# run can silently pick it up: `scorer/score.py` now defaults to the measured table and reaches
+# this interpolation only when asked for `LIVE2_DEVICE_LATENCY=trace`, which it labels superseded.
 ORIN_RECALL_TTFT_S = {11_000: 0.146, 28_000: 0.225}
 # D87 amendment 2 / StudyD8: arms whose published mechanism waits for the device's answer.
+#
+# SUPERSEDED by D154 (5) / D155 (1), and the register matters: THIS NAME IS NOT WHAT THE CASCADE
+# ARMS PAY. It has exactly one reference in the whole repository, its own declaration here, so it
+# is a WRITE-ONLY constant and wiring a new number into it would change nothing. The value the
+# five cascade arms actually pay is `baselines/costs.py:37 DEV_LAT_S`, read by
+# `coordinator.py:63 DEVICE_ANSWER_CHARGE_S` and applied at `coordinator.py:471` (the device
+# answer's service time) and `coordinator.py:505` (the earliest instant such an arm may act).
+# Changing the LIVE path therefore needs an edit in `coordinator.py` and a RERUN of those cells,
+# which is exactly what D154 (5) queues; it is not a re-score. `DEVICE_WAIT_MEASURED_S` below is
+# the measured replacement value and IS read (by `scorer/score.py`, which labels every cascade
+# cell `proxy-0.567` until the coordinator adopts it).
 DEVICE_WAIT_RULE_S = 0.567
+
+# ---------------------------------------------------------------- D146 (2) / D155 (1): THE
+# MEASURED WARM DEVICE RECALL LATENCY, which replaces the D87 interpolation above.
+#
+# StudyORIN-REC part 2 (commit 00a223d), Jetson AGX Orin, qwen3vl4b under vLLM, the same 97 LH-REQ
+# questions part 1 used. Measured on the WARM path: the exact RECENT frames are prefilled first
+# and `cached_tokens` covers them on every one of the 97 requests, so this is a WARM-PATH number
+# and must never be compared against a cold prefill curve.
+#
+# NOT THIS, and D155 (1) is explicit: part 1's COLD RE-SEND path, end-to-end median 3.354 s of
+# which 3.296 s is TTFT (D155a; the earlier 6.651 s added TTFT to an end-to-end figure that
+# already contained it), is ruled an API artefact by D61 (b) and is not the device baseline.
+# D155a also measures why the two paths differ: post-first-token time is 0.058 s cold and 0.059 s
+# warm, so the 2-token answer costs the same either way and the entire cold excess is a re-prefill
+# of frames the device already holds, charged before the first token.
+ORIN_REC_WARM = ROOT / "results/sember/study_orin_rec/orin_rec_warm.jsonl"
+ORIN_REC_WARM_SHA256 = ("f62818358637cfce72cc6d43ae3b4332"
+                        "a2eb6ab5675f201607e4637b578c7b6a")
+ORIN_REC_WARM_N = 97
+# The committed summary in `orin_rec_warm_meta.json`, as a self-check on the loader below.
+ORIN_REC_WARM_COMPLETION_P50 = 0.2697
+ORIN_REC_WARM_COMPLETION_P90 = 0.2894
+# The scalar a harness needs where it has no question id to key on: the measured p50. The
+# per-question table is preferred everywhere a question id exists, and the scorer REFUSES rather
+# than falling back to this one, because a missing entry is a stop condition and not a default.
+DEVICE_WAIT_MEASURED_S = ORIN_REC_WARM_COMPLETION_P50
+# The five arms whose published mechanism waits for the device's own answer before deciding
+# (`reads_device_answer = True`): confidence-cascade, cascade-routing, r3-streaming, streamscout
+# and thinking-qwenvl. Listed here so the scorer can LABEL their cells per D154 (5) without
+# importing five policy modules that load dashcam score tables to construct themselves.
+CASCADE_ARMS = ("confidence-cascade", "cascade-routing", "r3-streaming", "streamscout",
+                "thinking-qwenvl")
+
+_ORIN_REC_WARM: Optional[Dict[str, Dict[str, float]]] = None
+
+
+def orin_rec_warm_rows() -> Dict[str, Dict[str, float]]:
+    """{question_id: the measured WARM row} for the 97 LH-REQ questions.
+
+    `completion_s` is the delivery stamp D146 (1) asks for, prefill plus decode. `ttft_s` is kept
+    beside it so a first-token comparison stays possible, and both are per question rather than a
+    median, so a scorer never has to average before it decides.
+    """
+    global _ORIN_REC_WARM
+    if _ORIN_REC_WARM is None:
+        require(ORIN_REC_WARM, "StudyORIN-REC measured WARM device recall latency")
+        out: Dict[str, Dict[str, float]] = {}
+        for ln in open(ORIN_REC_WARM):
+            if not ln.strip():
+                continue
+            r = json.loads(ln)
+            if r.get("error"):
+                continue
+            out[str(r["question_id"])] = dict(
+                completion_s=float(r["completion_s"]), ttft_s=float(r["ttft_s"]),
+                prompt_tokens=float(r["prompt_tokens"]),
+                completion_tokens=float(r["completion_tokens"]),
+                cached_tokens=float(r["cached_tokens"]), correct=bool(r["correct"]))
+        if len(out) != ORIN_REC_WARM_N:
+            raise MissingInput(
+                "StudyORIN-REC warm holds %d usable questions, expected %d; refusing to score a "
+                "device deadline against a partial table" % (len(out), ORIN_REC_WARM_N))
+        _ORIN_REC_WARM = out
+    return _ORIN_REC_WARM
+
+
+def device_recall_warm_latency_s() -> Dict[str, float]:
+    """{question_id: measured WARM completion seconds}, the scorer's default device latency."""
+    return {q: r["completion_s"] for q, r in orin_rec_warm_rows().items()}
 
 # Caveats that must appear in EVERY scorer output header.
 SEMBER_JPEG_CAVEAT = (
