@@ -1,0 +1,12 @@
+M8_ss2_accuracy_gap_by_dataset
+
+CLAIM:
+On StudySS2, the cloud 32B beats the device 4B on both datasets. The gap is much larger on RefSpatial spatial reasoning, where cloud 37.1% beats device 25.1% by a paired 12.1 pp (95% CI [5.9, 18.3]), than on RealWorldQA general visual QA, where cloud 71.2% beats device 65.5% by 5.8 pp (95% CI [2.4, 9.2]). The value of escalating to the cloud therefore depends on the task.
+
+SOURCES (committed):
+  results/casestudy/study_ss2/refspatial_compare.json  @ d1af566
+  results/casestudy/study_ss2/realworldqa_compare.json  @ d1af566
+  results/casestudy/study_ss2/refspatial_rescore.json  @ ce0ef81
+
+NOTES:
+Numbers are each compare file's `clean` block (n=277 RefSpatial, n=765 RealWorldQA), which excludes only the below-min-pixel set per the file's two-denominators rule; CIs are the committed paired bootstrap. Device is Qwen3-VL-4B on the Orin, cloud is 32B. Committed refinement, flagged not re-plotted: the RefSpatial cloud rescore (refspatial_rescore.json) moves the paired gap from +12.1 pp to +12.8 pp via the fixed point parser on the cloud side, with 0 device rows moved (control passed), which only widens the RefSpatial gap; the headline direction and ordering are unchanged. Device purple and cloud blue sit in separate labelled dataset groups, so the pair is never distinguished by hue alone.

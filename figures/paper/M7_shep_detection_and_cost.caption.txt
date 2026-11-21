@@ -1,0 +1,10 @@
+M7_shep_detection_and_cost
+
+CLAIM:
+At every episode condition the cloud 32B detects sudden hazards better than the device 4B: the mAP gap runs 10.0 to 16.2 pp and every 95 percent CI is above zero. Adding frames does not close the gap: the device 4B does not improve beyond the one-frame C1 condition (mAP 0.538) and falls at the two highest frame-count conditions C6 (0.478) and EP-G (0.466). The cost of episode context is paid on the cold path only: full-history EP-G context costs the device 1.88 s cold at first-token p50 but 0.29 s warm, close to the 0.24 s one-frame cost.
+
+SOURCES (committed):
+  results/dashcam/study_sh_ep/sh_ep_results.json  @ f835b3d
+
+NOTES:
+Device is Qwen3-VL-4B-Instruct on the Orin; cloud is 32B-Instruct on an H100; cross-stack by deployment design with per-request input identity verified (deployment_pair: 0 prompt-token, header or frame-sha mismatches). Detection mAP CIs are the study's clip bootstrap. Panel B shows TTFT p50 only (no CI in the committed cost block). C1 is one frame so it has no warm reuse path. Conditions: C1 one frame, C3/C6 clip windows, EP-B/EP-G append-only episodes. Device is purple and cloud is blue in separate paired bars and labelled, so the blue/purple pair is never hue-alone; cold is risk-orange and warm is KV-green. StudySH-EP is CLOSED with a one-frame C1 verdict; this figure shows why (episodes do not help detection and their cost is a cold-start cost).
