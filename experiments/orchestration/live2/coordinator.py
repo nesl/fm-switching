@@ -63,6 +63,28 @@ from backend import (Live2Backend, Live2Submission, cached_tokens_of,    # noqa:
                      output_tokens_of, prompt_tokens_of)
 
 DEVICE_ANSWER_CHARGE_S = C.DEV_LAT_S         # StudyD8's 0.567 s RULE (D87, amendment 2 item 3)
+
+# D168 / D154 (5): the five arms that WAIT for the device answer (reads_device_answer = True:
+# confidence-cascade, cascade-routing, r3-streaming, streamscout, thinking-qwenvl) must wait the
+# MEASURED Orin warm latency for the actual question, not the flat 0.567 s proxy. Both live sites
+# are decision timing, so this changes what those arms DO; it is a rerun, never a re-score.
+#
+# Measured-first with a COUNTED fallback, not a silent one: a question absent from the table would
+# otherwise reintroduce the proxy invisibly. The fallback is counted so a cell that used it is
+# detectable, and the dry proof shows the count is zero on the real traces.
+DEVICE_WAIT_MEASURED = True                  # set False to reproduce a committed proxy-0.567 cell
+_DEV_WAIT_TABLE = None
+
+
+def _device_wait_table():
+    global _DEV_WAIT_TABLE
+    if _DEV_WAIT_TABLE is None:
+        try:
+            import data_sources as _DS
+            _DEV_WAIT_TABLE = dict(_DS.device_recall_warm_latency_s())
+        except Exception:
+            _DEV_WAIT_TABLE = {}
+    return _DEV_WAIT_TABLE
 # D99 (1): ONE DECISION PERIOD FOR EVERY ARM, 100 ms, with the events of each period batched.
 # It replaces the 50 ms event grid AND the per-arm H tick: H is now the rollout horizon only
 # (spec 6.1, 9 as amended). Every arm therefore decides at the same rate, which is what makes
@@ -544,7 +566,7 @@ class Live2Coordinator:
                 continue
             if ra.decision in ("DEVICE", "REJECT"):
                 o.state = "declined"
-                o.served_at = (o.t_event + DEVICE_ANSWER_CHARGE_S if self.reads_device
+                o.served_at = (o.t_event + self._device_wait_s(o) if self.reads_device
                                else t)
                 self.answers.append(dict(opportunity_id=o.opp_id, kind="recall",
                                          device_id=o.device_id, decision=ra.decision,
@@ -578,7 +600,7 @@ class Live2Coordinator:
         if not cands:
             return
         o = min(cands, key=lambda x: x.deadline_abs())
-        if self.reads_device and t + 1e-9 < o.t_event + DEVICE_ANSWER_CHARGE_S:
+        if self.reads_device and t + 1e-9 < o.t_event + self._device_wait_s(o):
             return
         if o.state == "offered":
             if self.upload_mode != "B":
@@ -696,6 +718,42 @@ class Live2Coordinator:
                      est_tokens=est_tokens, question=B.SH_QUERY, options=(),
                      max_tokens=B.SH_GEN["max_tokens"], t=t, mix=mix,
                      dashcam_format=("epg" if epg else "oneframe"))
+
+    def _device_wait_s(self, o) -> float:
+        """How long a device-reading arm waits for this question's own device answer (D168).
+
+        The measured Orin WARM completion time for THIS question (StudyORIN-REC WARM, the same
+        table the scorer uses), not the flat 0.567 s proxy. Keyed on question_id, which is the
+        trace generator's own id, so the live wait and the scored arrival agree by construction
+        instead of by coincidence.
+        """
+        if not DEVICE_WAIT_MEASURED:
+            self.counts["device_wait_proxy_by_switch"] += 1
+            return float(DEVICE_ANSWER_CHARGE_S)
+        # SCOPE. The measured table is StudyORIN-REC WARM over 97 ROBOT RECALL questions. It is
+        # the only measured device latency that exists: there is none for single-shot and none for
+        # dashcam (data_sources has ORIN_REC_WARM and the superseded ORIN2 in-process curve, and
+        # nothing else). So the measured value is used exactly where it was measured, and every
+        # other path is counted BY TYPE rather than lumped into one "fallback", because the three
+        # cases need different remedies and only one of them is a missing table entry.
+        qid = getattr(o, "question_id", None)
+        if qid is not None:
+            v = _device_wait_table().get(str(qid))
+            if v is not None:
+                self.counts["device_wait_measured"] += 1
+                return float(v)
+            # a recall-kind opportunity whose id is not in the robot table: on this workload these
+            # are the ASSISTANCE questions, which share the recall opportunity kind
+            self.counts["device_wait_no_measured_value_recall_kind"] += 1
+            return float(DEVICE_ANSWER_CHARGE_S)
+        if getattr(o, "kind", None) == "monitor":
+            # a dashcam instant has no question_id and no measured device latency at all. The
+            # committed code charged it the 0.567 s ROBOT RECALL proxy, which is a category error
+            # it inherited, not one introduced here. Counted so it cannot be mistaken for measured.
+            self.counts["device_wait_no_measured_value_monitor"] += 1
+            return float(DEVICE_ANSWER_CHARGE_S)
+        self.counts["device_wait_no_measured_value_other"] += 1
+        return float(DEVICE_ANSWER_CHARGE_S)
 
     def _submit_touch(self, s, t: float, dt_ms: float, preds, mix) -> Optional[str]:
         """Component 2. A real TOUCH: one minimal request that re-presents the built prefix.

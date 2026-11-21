@@ -1,0 +1,56 @@
+{
+  "_asked": "D168 / user ruling: wire the MEASURED Orin warm latency into the LIVE device wait of r3-streaming, streamscout and the cascade arms (no 0.567 s proxy), prove other arms byte-identical, and mark them ready.",
+  "_outcome": "WIRED, PROVED CORRECT WHERE A MEASURED VALUE EXISTS, AND NO ARM IS MARKED READY. The measured table covers 0.00 to 0.11 percent of these arms' device-wait lookups, so at least 99.89 percent of each arm's live wait would still be the 0.567 s proxy, which the ruling forbids.",
+  "why": {
+    "the_only_measured_device_latency_that_exists": "StudyORIN-REC WARM, 97 ROBOT RECALL questions, completion p50 0.2697 s (data_sources ORIN_REC_WARM). There is NO measured device latency for single-shot and NONE for dashcam; data_sources carries only this table and the superseded ORIN2 in-process curve (ORIN_RECALL_TTFT_S, 0.146 / 0.225 s).",
+    "so_the_wait_cannot_be_measured_where_it_is_mostly_spent": "these arms spend their device wait almost entirely on DASHCAM instants, which have no question_id and no measured device latency at all."
+  },
+  "coverage_measured_300s_seed4_16dev_epg_perframe": [
+    {
+      "arm": "confidence-cascade",
+      "measured": 4,
+      "pct_measured": 0.03,
+      "no_value_recall_kind": 79,
+      "no_value_monitor": 14118
+    },
+    {
+      "arm": "r3-streaming",
+      "measured": 5,
+      "pct_measured": 0.11,
+      "no_value_recall_kind": 83,
+      "no_value_monitor": 4617
+    },
+    {
+      "arm": "streamscout",
+      "measured": 0,
+      "pct_measured": 0.0,
+      "no_value_recall_kind": 0,
+      "no_value_monitor": 14118,
+      "note": "resolves ZERO measured waits: every one of its lookups is a dashcam instant"
+    },
+    {
+      "arm": "cascade-routing",
+      "measured": 5,
+      "pct_measured": 0.04,
+      "no_value_recall_kind": 87,
+      "no_value_monitor": 14118
+    }
+  ],
+  "step2b_result_and_why_it_is_NOT_a_negative": {
+    "measured": "digests identical between measured-wait and proxy-wait for all four arms (devwait_proofs.json P1)",
+    "classification": "NOT a real negative. Under CLAUDE.md Rule 2 this is UNEXERCISED: the switch is alive and reaches a decision site, but the path it would change carries a measured value in 0.03 to 0.11 percent of calls, so the dominant path is identical BY CONSTRUCTION rather than by the policy being indifferent.",
+    "what_proves_the_mechanism_is_alive": "P3 on a constructed coordinator: a known question_id returns the table value exactly, an unknown one returns the proxy, and both counters increment. So the accessor is not dead; there is simply almost nothing for it to resolve."
+  },
+  "pre_existing_category_error_found_and_NOT_introduced_here": {
+    "what": "the committed code charges DEVICE_ANSWER_CHARGE_S = 0.567 s, a ROBOT RECALL device latency (StudyD8 arm A), as the wait before a cascade arm may act on a DASHCAM instant and on an ASSISTANCE question.",
+    "scale": "for confidence-cascade that path is 14,118 of 14,201 device-wait lookups, so these arms' live timing is governed almost entirely by a number measured on a DIFFERENT TASK TYPE.",
+    "register": "pre-existing in the committed code and in every committed cascade cell; my change leaves it untouched, which is exactly why no digest moved. Raised rather than patched, because choosing a dashcam device wait is a measurement and a ruling, not an implementation detail."
+  },
+  "what_would_unblock_each_arm": [
+    "an Orin dashcam EP-G device latency, which D153 and D146 (2) already queue as the Orin dashcam re-record. This is the binding one: it is the dominant path for all four arms.",
+    "a single-shot device latency for the assistance questions (79 to 87 lookups per arm)",
+    "with both, the arms can run with no proxy anywhere and can then be marked ready"
+  ],
+  "scope_fix_applied": "the measured table is now used only where it was measured. The other paths are counted BY TYPE (device_wait_no_measured_value_recall_kind / _monitor / _other) rather than as one fallback, because the three need different remedies and only one is a missing table entry.",
+  "non_cascade_arms": "byte-identical, as required: 9 committed arms (edf, llf, b7, always-cloud-fcfs, mooncake, attentionstore-prefetch, warm-all-lru, simplestream, querystream-proactive) give identical digests with the measured wait on and off, because the wait applies only where reads_device_answer is True."
+}

@@ -1,0 +1,105 @@
+{
+  "table": {
+    "n_questions": 97,
+    "min": 0.2503,
+    "p50": 0.2697,
+    "max": 0.3108,
+    "proxy_it_replaces": 0.567
+  },
+  "P1_step2b_cascade": {
+    "confidence-cascade": {
+      "digest_measured": "6aeabb7680418a87",
+      "digest_proxy": "6aeabb7680418a87",
+      "rows_measured": 7733,
+      "rows_proxy": 7733,
+      "decisions_moved": false
+    },
+    "cascade-routing": {
+      "digest_measured": "86e04963de29397e",
+      "digest_proxy": "86e04963de29397e",
+      "rows_measured": 7733,
+      "rows_proxy": 7733,
+      "decisions_moved": false
+    },
+    "r3-streaming": {
+      "digest_measured": "071bb08589b71157",
+      "digest_proxy": "071bb08589b71157",
+      "rows_measured": 1933,
+      "rows_proxy": 1933,
+      "decisions_moved": false
+    },
+    "streamscout": {
+      "digest_measured": "db98f54602b5db96",
+      "digest_proxy": "db98f54602b5db96",
+      "rows_measured": 7733,
+      "rows_proxy": 7733,
+      "decisions_moved": false
+    },
+    "thinking-qwenvl": {
+      "error": "KeyError: \"unknown arm 'thinking-qwenvl'; known: ['always-cloud-fcfs', 'attentionstore', 'attentionstore-prefetch', 'attentionstor"
+    }
+  },
+  "P2_note": "the dry harness returns rows, not the coordinator, so the fallback COUNTER is read in P3 on a constructed coordinator instead of being inferred here",
+  "P3_counters": {
+    "wait_known_question": 0.2766,
+    "table_value": 0.2766,
+    "wait_unknown_question": 0.567,
+    "proxy": 0.567,
+    "device_wait_measured": 1,
+    "device_wait_fallback_proxy": 1
+  },
+  "P4_non_cascade_identical": {
+    "edf": {
+      "digest_measured": "ae8fb84f8cc455f5",
+      "digest_proxy": "ae8fb84f8cc455f5",
+      "identical": true
+    },
+    "llf": {
+      "digest_measured": "f8ebe26e85d8eb1e",
+      "digest_proxy": "f8ebe26e85d8eb1e",
+      "identical": true
+    },
+    "b7-edf-feasibility": {
+      "digest_measured": "0789e7dc3750dc69",
+      "digest_proxy": "0789e7dc3750dc69",
+      "identical": true
+    },
+    "always-cloud-fcfs": {
+      "digest_measured": "48c5c03c3608c3c5",
+      "digest_proxy": "48c5c03c3608c3c5",
+      "identical": true
+    },
+    "mooncake": {
+      "digest_measured": "b2ec9520ba903733",
+      "digest_proxy": "b2ec9520ba903733",
+      "identical": true
+    },
+    "attentionstore-prefetch": {
+      "digest_measured": "86b73d5057b07fe4",
+      "digest_proxy": "86b73d5057b07fe4",
+      "identical": true
+    },
+    "warm-all-lru": {
+      "digest_measured": "27422ac16c4a711c",
+      "digest_proxy": "27422ac16c4a711c",
+      "identical": true
+    },
+    "simplestream": {
+      "digest_measured": "712c925f884b4550",
+      "digest_proxy": "712c925f884b4550",
+      "identical": true
+    },
+    "querystream-proactive": {
+      "digest_measured": "9c6c971ca5460f96",
+      "digest_proxy": "9c6c971ca5460f96",
+      "identical": true
+    }
+  },
+  "checks": {
+    "P1_step2b_cascade": false,
+    "P3_counters": true,
+    "P4_non_cascade_identical": true
+  },
+  "ALL_PASS": false,
+  "_elapsed_s": 763.2
+}

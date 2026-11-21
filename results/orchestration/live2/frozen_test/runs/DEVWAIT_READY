@@ -1,0 +1,23 @@
+# Arms released to run with the MEASURED device wait. One arm name per line, exact.
+#
+# THIS FILE IS DELIBERATELY EMPTY. No arm is released.
+#
+# The measured Orin warm latency IS wired into both live sites (coordinator.py _device_wait_s,
+# read at the served_at charge and at the earliest-act gate) and proved correct on a constructed
+# coordinator. But it resolves 0.00 to 0.11 percent of these arms' device-wait lookups:
+#
+#   confidence-cascade   measured    4 of 14,201   dashcam instants 14,118
+#   cascade-routing      measured    5 of 14,210   dashcam instants 14,118
+#   r3-streaming         measured    5 of  4,705   dashcam instants  4,617
+#   streamscout          measured    0 of 14,118   dashcam instants 14,118
+#
+# The reason is that the ONLY measured device latency that exists is StudyORIN-REC WARM over 97
+# ROBOT RECALL questions. There is none for dashcam and none for single-shot, and these arms spend
+# their wait almost entirely on dashcam instants. Releasing them now would run them on the 0.567 s
+# proxy for at least 99.89 percent of their waits, which the ruling forbids.
+#
+# BINDING PREREQUISITE: an Orin dashcam EP-G device latency, already queued by D153 and D146 (2) as
+# the Orin dashcam re-record. A single-shot device latency closes the remaining 79 to 87 lookups.
+#
+# See results/orchestration/live2/frozen_test/devwait_coverage.json. The three cascade arms
+# additionally need the pre-registered DEV threshold calibration, which is also not committed.
