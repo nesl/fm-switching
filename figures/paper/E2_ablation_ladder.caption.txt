@@ -1,0 +1,19 @@
+E2_ablation_ladder
+
+CLAIM:
+The full joint policy serves 98% of SS opportunities within 2 s, the best of the committed variants. Removing the counterfactual term (v5-rules) drops SS to 56%, while removing only C3 keeps it at 96%, close to the full policy; the no-warming base is 92%. The intermediate mechanism rungs (chunk/JIT, guard, deficit) are not isolated as committed cells in the pilot run and are shown empty and labelled, not interpolated.
+
+SOURCES (committed):
+  results/orchestration/live2/frozen_test/runs/warm-all-lru-off_n16_s4_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ bdc9638
+  results/orchestration/live2/frozen_test/runs/warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ c284721
+  results/orchestration/live2/frozen_test/runs/v5-rules_n16_s4_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ 19d5ef8
+  results/orchestration/live2/frozen_test/runs/v5-rules_n16_s5_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ 7a572f8
+  results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ 1f59d36
+  results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ 1b4fba3
+  results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s4_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ 82c3a27
+  results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s5_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ 8c466e2
+
+STATUS: PILOT. Drawn from the EP-G pilot cells; to be re-run on the repeat-trace cells. Numbers are provisional.
+
+NOTES:
+EP-G PILOT cells, seeds 4 and 5 (seed 5 absent for the two warm-all-lru-off and -reactive cells, which are single-seed). SS within 2 s is the committed per-opportunity within_L on recall. Error bars are Wilson 95 percent. This is not a clean nested ladder: the committed cells isolate the base, reactive warming, the no-C3 and no-counterfactual ablations, and the full policy, but not the chunk/JIT, guard or deficit rungs, so those are left empty and labelled per the figure brief. The proactive warm-all baseline is not a ladder rung here (it collapses under load; see M5) and is omitted. Dashcam is not shown on this axis; on dashcam the full policy is 68 percent and v5-rules collapses to 11 percent, so the counterfactual term matters on both workloads. Arm colours are the shared registry; PILOT.
