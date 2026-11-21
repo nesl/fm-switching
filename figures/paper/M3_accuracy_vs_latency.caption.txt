@@ -1,0 +1,12 @@
+M3_accuracy_vs_latency
+
+CLAIM:
+Across tiers and representations, the richer full-history representation buys accuracy over the recent window (device 28% to 29%, cloud 33% to 37% on EVAL) but at a cold first-token cost that puts the device over the 3 s budget (device recent 3.32 s, device rich 6.63 s). Warming removes that cost: the device recent-window first token drops from 3.32 s cold to 0.21 s warm at the same accuracy, moving the device from over budget to well under it. A long-history representation can therefore be both accurate and on time only if its prefix is warm.
+
+SOURCES (committed):
+  results/sember/study_orin_rec/orin_rec_part2.jsonl  @ c31ea43
+  results/sember/study_acc2/acc2_requests.jsonl  @ 6b3a173
+  results/sember/study_orin_rec/orin_rec_warm_meta.json  @ 00a223d
+
+NOTES:
+Device is Qwen3-VL-4B on the Orin (StudyORIN-REC part 2, and its best-case warm run where the recent frames are prefilled, agreeing with the cold answers on 93 of 97 items so accuracy is unchanged); cloud is 32B (StudyACC2). Latency is TTFT p50; accuracy is EVAL with over-context rows excluded from the denominator and Wilson 95 percent CIs (vertical bars). Only the device recent-window warm point is a committed measurement; the warming arrow is drawn only for it and not inferred for the other cells. Points are directly labelled, so the blue (cloud) and purple (device) pair is never distinguished by hue alone; representation is also shown by marker (circle recent, triangle rich) and cold vs warm by open vs filled.
