@@ -513,3 +513,12 @@
 [2026-11-21 13:06:35] start warm-all-lru-reactive_n8_s5_1200s_h27_3t_L3_epg_ls08 HEAD 44f71be ss-pool [--ss-question-set ss2] deadline [--robot-deadline-s 3 --dashcam-format epg  --robot-upload per-frame ] workload [dashcam-EP-G upload-pf load-sweep]
 [2026-11-21 13:07:49] OPERATOR (offload-verify ruling): OFFLOAD_VERIFY on origin; STOP set, the break starts at the next run boundary
 [2026-11-21 13:27:56] end warm-all-lru-reactive_n8_s5_1200s_h27_3t_L3_epg_ls08 {"err":null,"run_valid":true,"digests_equal":true,"n_requests":6409,"n_errors":0,"lat_p99":0.1926,"scored":true,"name":"warm-all-lru-reactive_n8_s5_1200s_h27_3t_L3_epg_ls08","rc":0,"mm_gate":"FAIL: multimodal hits in a run whose payloads should all be unique (SS timing column not usable)","valid":true,"request_errors":0,"requests_offered":6409,"saturated":false}
+[2026-11-21 13:28:00] COMMITTED: warm-all-lru-reactive at 8 devices, seed 5 (_L3_epg_ls08) (c10532a); origin c10532a
+[2026-11-21 13:28:00] STOP file found: driver exits at a run boundary
+error: cannot pull with rebase: You have unstaged changes.
+error: please commit or stash them.
+[2026-11-21 13:28:10] OFFLOAD VERIFY start HEAD c10532a: experiments/orchestration/live2/offload_verify.py --out results/orchestration/live2/offload_verify/offload_verify_h100.json
+[2026-11-21 13:28:11] OFFLOAD VERIFY end rc=1 (124 = the 15-min cap)
+[2026-11-21 13:28:18] OPERATOR: offload-verify break over; driver v16 restarted (seed-5 sweep resumes, then BASELINE_MATRIX)
+[2026-11-21 13:28:18] frozen grid driver v16 (D164: sweep seed 5, then BASELINE_MATRIX in its order; v15 order until it lands) start, HEAD 42cb630
+[2026-11-21 13:28:19] start warm-all-lru-reactive_n12_s5_1200s_h27_3t_L3_epg_ls12 HEAD 42cb630 ss-pool [--ss-question-set ss2] deadline [--robot-deadline-s 3 --dashcam-format epg  --robot-upload per-frame ] workload [dashcam-EP-G upload-pf load-sweep]
