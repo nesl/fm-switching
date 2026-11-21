@@ -1,0 +1,44 @@
+# D162 / D159 (B) controlled load sweep for the cost-model refit. LIGHT TO THE HEALTHY EDGE ONLY.
+# Format: arm n seed tag [extra harness args]
+# Pre-registration, committed BEFORE this file: research/prereg_cost_model_gate_d162.md (9bd6793)
+#
+# ARM: warm-all-lru-reactive, held fixed. Chosen on measurement, not taste. It is the only warming
+# arm that NEVER crossed in any committed cell: its CAL1F cell at 4,511.7 uncached tok/s is the
+# highest non-crossing cell in the entire 56-cell set, and its EP-G cell sits at 0.446 s, while it
+# still produces 91.3 percent warm requests on EP-G. So it generates the warm rows the held-out
+# split needs without itself leaving the healthy regime, which is what a healthy-regime warm fit
+# requires. The committed by_arm split failed precisely by holding out arms with zero warm rows.
+#
+# LOAD LEVER: device count n, which is exogenous to the policy. A policy-driven lever would confound
+# load with the quantity being priced.
+#
+# WORKLOAD: EP-G + per-frame at the 3 s deadline (_L3_epg in the tag), so the fit regime matches the
+# regime MARGIN_CF is scored in.
+#
+# THE EDGE IS ENFORCED AFTER THE FACT, NOT GUESSED. Requests are classified by their own 100 s
+# window's first-token p50: healthy at or below 2.781 s, unclassified to 31.0 s, collapsed above.
+# Only healthy windows are fitted or tested. n=20 is the one that may cross (a committed n20 cell of
+# another arm reached 5,444 tok/s and a 77 s window), so this sweep BRACKETS the edge rather than
+# being designed to reach collapse. If n=20 crosses, its healthy windows still contribute and its
+# crossed windows become a diagnostic. Nothing here is run into collapse on purpose.
+#
+# SPLIT: seed 4 fits, seed 5 is held out. Precondition checked FIRST: warm_rows_held_out > 0.
+
+warm-all-lru-reactive 4 4 _L3_epg_ls04
+warm-all-lru-reactive 8 4 _L3_epg_ls08
+warm-all-lru-reactive 12 4 _L3_epg_ls12
+warm-all-lru-reactive 16 4 _L3_epg_ls16
+warm-all-lru-reactive 20 4 _L3_epg_ls20
+warm-all-lru-reactive 4 5 _L3_epg_ls04
+warm-all-lru-reactive 8 5 _L3_epg_ls08
+warm-all-lru-reactive 12 5 _L3_epg_ls12
+warm-all-lru-reactive 16 5 _L3_epg_ls16
+warm-all-lru-reactive 20 5 _L3_epg_ls20
+
+# NOT in this sweep, deliberately:
+#  - a second arm. D162 says one fixed arm, and the whole point is that load varies while the
+#    policy does not. The committed gate's failure was load confounded with arm INSIDE the fit set.
+#  - anything above n=20. That would be designed to collapse, which D162 excludes, and the
+#    collapsed regime already has 62 windows of committed data to serve as the diagnostic.
+#  - CAL1F (dashcam-1f, upload-30s). The D156 (4) gate fitted on CAL1F and tested on EP-G, so its
+#    fit and test differed in workload as well as regime. Here both are EP-G.
