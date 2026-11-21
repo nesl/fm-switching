@@ -1,0 +1,118 @@
+{
+  "P1_rule": {
+    "dashcam": {
+      "max_offload_tokens": 0
+    },
+    "robot": null,
+    "assistive": {
+      "max_offload_tokens": 0,
+      "max_load_tokens": 0
+    },
+    "unknown": null
+  },
+  "P2_step2b": {
+    "dashcam": {
+      "on": {
+        "max_offload_tokens": 0
+      },
+      "off": null,
+      "digest_on": "c2b36485fab9308c",
+      "digest_off": "8806160f095d472a",
+      "body_moved": true
+    },
+    "robot": {
+      "on": null,
+      "off": null,
+      "digest_on": "250b1d33e33186db",
+      "digest_off": "250b1d33e33186db",
+      "body_moved": false
+    },
+    "assistive": {
+      "on": {
+        "max_offload_tokens": 0,
+        "max_load_tokens": 0
+      },
+      "off": null,
+      "digest_on": "836882d64c3decc8",
+      "digest_off": "250b1d33e33186db",
+      "body_moved": true
+    }
+  },
+  "P3_declared_type": [
+    {
+      "type": "dashcam",
+      "key": "max_offload_tokens",
+      "value": 0,
+      "py_type": "int",
+      "is_int_not_bool": true
+    },
+    {
+      "type": "assistive",
+      "key": "max_offload_tokens",
+      "value": 0,
+      "py_type": "int",
+      "is_int_not_bool": true
+    },
+    {
+      "type": "assistive",
+      "key": "max_load_tokens",
+      "value": 0,
+      "py_type": "int",
+      "is_int_not_bool": true
+    }
+  ],
+  "P4_survives_strip": {
+    "on_wire": true,
+    "value": {
+      "max_offload_tokens": 0
+    },
+    "internal_gone": true
+  },
+  "P5_negative_control": {
+    "dashcam": {
+      "switch_off": "8806160f095d472a",
+      "committed": "8806160f095d472a",
+      "identical": true
+    },
+    "robot": {
+      "switch_off": "250b1d33e33186db",
+      "committed": "250b1d33e33186db",
+      "identical": true
+    },
+    "assistive": {
+      "switch_off": "250b1d33e33186db",
+      "committed": "250b1d33e33186db",
+      "identical": true
+    }
+  },
+  "P6_port_rule": {
+    "v5full_declares": true,
+    "other_arms_declare": {
+      "edf": false,
+      "llf": false,
+      "b7-edf-feasibility": false,
+      "always-cloud-fcfs": false,
+      "mooncake": false,
+      "attentionstore-prefetch": false,
+      "warm-all-lru": false,
+      "v5-rules": false,
+      "v5-rules-2": false
+    },
+    "emissions": {
+      "assistive": true,
+      "dashcam": true,
+      "robot": false
+    }
+  },
+  "checks": {
+    "P1_rule": true,
+    "P2_step2b": true,
+    "P3_declared_type": true,
+    "P4_survives_strip": true,
+    "P5_negative_control": true,
+    "P6_port_rule": true
+  },
+  "ALL_PASS": true,
+  "_elapsed_s": 0.12,
+  "_not_established_here": "whether the ENGINE honours kv_transfer_params. These proofs show the policy decides per type and the value reaches the wire with its declared type. offload_verify.py on the H100 answers the engine question; until it runs, component 1 may not be described as working."
+}

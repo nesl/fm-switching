@@ -174,6 +174,7 @@ def build_body(*, kind: str, device_id: str, session_id: Optional[str], run_tag:
                question: Optional[str] = None, options: Sequence[str] = (),
                max_tokens: int = 1, model: str = MODEL_DEFAULT, stream: bool = True,
                est_tokens: int = 0, retain: bool = True,
+               kv_transfer_params: Optional[Dict[str, Any]] = None,
                time_scale: float = 1.0, defer_images: bool = False,
                dashcam_format: str = "oneframe") -> Dict[str, Any]:
     """One chat-completions body.
@@ -223,6 +224,10 @@ def build_body(*, kind: str, device_id: str, session_id: Optional[str], run_tag:
     )
     if stream:
         body["stream_options"] = {"include_usage": True}
+    # D150 / D164 per-request host-offload controls. A REAL vLLM field, so it must survive
+    # strip_internal (which drops only `_live2` and the fm_* stub hints) and reach the engine.
+    if kv_transfer_params:
+        body["kv_transfer_params"] = dict(kv_transfer_params)
     # fm_* are the CPU stub's hint fields (experiments/orchestration/live/fake_server.py); a real
     # vLLM server ignores unknown top-level keys only if it is not strict, so a real run strips
     # them (see backend.Live2Backend(strip_hints=True)).

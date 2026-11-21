@@ -52,6 +52,7 @@ import costs as C                                                       # noqa: 
 from interface import Budget, check_fairness                            # noqa: E402
 
 import bodies as B                                                      # noqa: E402
+import offload_policy as OP                                             # noqa: E402
 import cachekeys as CK                                                  # noqa: E402
 import cstate as CS                                                     # noqa: E402
 import schema as SC                                                     # noqa: E402
@@ -106,6 +107,10 @@ class Live2Coordinator:
                  max_wall_s: Optional[float] = None,
                  frame_cache: Any = None, defer_images: bool = False) -> None:
         self.arm = arm
+        # D164: per-request host-offload controls are POLICY actions, so only an arm that
+        # declares the capability emits them; every baseline keeps vLLM's defaults and so
+        # keeps byte-identical bodies. Read once here, never re-read, so it cannot drift.
+        self._offload_controls = OP.arm_enables(arm)
         self.be = backend
         self.events = sorted(events, key=lambda e: (_sched(e), e.get("kind", "")))
         self.upload_mode = upload_mode
@@ -828,6 +833,7 @@ class Live2Coordinator:
                             frames=frames, question=question, options=options,
                             max_tokens=max_tokens, est_tokens=est_tokens,
                             defer_images=self.defer_images,
+                            kv_transfer_params=OP.params_for(d.type, self._offload_controls),
                             dashcam_format=dashcam_format)
         sub = Live2Submission(request_id=rid, decision_id=decision_id, kind=kind,
                               device_id=device_id, session_id=session_id,

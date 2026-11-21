@@ -78,6 +78,9 @@ HEALTHY_LAG_S_DEFAULT = 2.781
 
 class V5FullArm:
     """v5-rules-2 plus the counterfactual. Every live2 hook is delegated to v5-rules-2."""
+    # D164 / component 1: this arm emits the per-type host-offload controls; baselines do not.
+    live2_offload_controls = True
+
 
     def __init__(self, name: str = "v5-full",
                  counterfactual: bool = True,
