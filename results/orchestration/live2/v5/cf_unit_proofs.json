@@ -1,0 +1,1852 @@
+{
+ "_what": "unit proofs for the v5 counterfactual engine (D151): the three decision kinds, per-decision horizons, two-level fidelity, the latest safe start with DECODE INCLUDED, the objective with per-device deficit weighting and harm to others, the single declared margin, the planner-timeout fallback, and the per-decision wall-clock instrument",
+ "_register": "CPU only. Nothing here is a policy result. Every planner proof is DRY: the scorable margin is UNSET (D154 (2)) and the cost-model gate FAILS (D151 (6)), so no v5 cell may run (spec v5 section 12.1)",
+ "_dev_seeds_only": [
+  0,
+  4,
+  5,
+  6
+ ],
+ "describe": {
+  "base_policy": "hybrid-F-lhreq-noc3",
+  "base_surrogate_note": "base_request_choice is a SURROGATE for hybrid-F-lhreq-noc3's robot-request rule, written from the committed source (baselines/constructed.py::B7EDFFeasibility.decide and hybrid/hybrid_arm.py::HybridArm.decide with c3 off): CLOUD if the prefill-only estimate fits the slack, DEFER by 0.5 s if it fits slack + 0.5, else the device answers. Its agreement with the real arm on real observations is NOT proved here and must be proved by the owner of hybrid_arm.py before any cell is scored.",
+  "objective": "deficit-weighted expected CORRECT answers delivered BY THE DEADLINE from either source, minus harm to other devices (D151 (4), D152 (1) as amended by D155 (3)); the same objective every reader in spec v5 section 7 maximises",
+  "decision_kinds_counterfactual": [
+   "request",
+   "state",
+   "sync"
+  ],
+  "decision_kinds_rule_based": {
+   "dashcam_frame": "rule-based (D151 (2)): the C5 cap, episode continuity and the deficit counters decide it; owned by the arm, not the counterfactual",
+   "single_shot": "rule-based (D151 (2)): feasibility only; owned by the arm"
+  },
+  "candidates": {
+   "request": [
+    "ADMIT_NOW_D2",
+    "DEFER_TO_LATEST_SAFE_START",
+    "SEND_RECENT",
+    "DEVICE_ANSWERS"
+   ],
+   "state": [
+    "WARM",
+    "TOUCH",
+    "KEEP",
+    "RELOAD",
+    "HOLD_BACK",
+    "SLICE"
+   ],
+   "sync": [
+    "QUESTION_FIRST",
+    "WAIT",
+    "LEAVE_TO_DEVICE"
+   ]
+  },
+  "horizons": {
+   "request": "its own deadline plus the deadlines it displaces",
+   "state": "until the history's next likely question, capped 120 s (range (60.0, 120.0))",
+   "sync": "until caught up"
+  },
+  "two_level_fidelity": {
+   "near_exact_s_by_kind": {
+    "request": null,
+    "state": 3.0,
+    "sync": 3.0
+   },
+   "declared_not_fitted": true,
+   "coarse_level": "offered-load forecast (Little's law)"
+  },
+  "margin": {
+   "declared_in": "v5/cf_margin.py::MARGIN_CF",
+   "value": null,
+   "is_set": false,
+   "rule": "D154 (2): MARGIN_CF is set ONCE, when the D151 (6) cost-model gate passes, equal to that gate's held-out p90 ABSOLUTE prediction error in the objective's units (expected correct on-time answers); frozen before any v5 cell, identical in every cell, never swept. The gate does not pass, so it is not set, so NO v5 CELL MAY RUN (spec v5 section 12.1, gap G8)."
+  },
+  "safety_factor": 1.5775406165458339,
+  "imposed_rules": {
+   "no_RECENT_for_LH": true,
+   "note": "D155 (4): no RECENT for long-horizon questions, IMPOSED. Under the superseded D87 device entry (0.107143) this fell out of the arithmetic because cloud RECENT tied the device and ties go to the device. The measured Orin entry (0.071429, StudyORIN-REC part 1) breaks the tie, so the arithmetic alone would send RECENT above P(on time) about 0.667. D155 (4) keeps the rule and requires it be imposed explicitly. Every override is counted."
+  },
+  "engine_actions": "v5-engine-actions-1.0",
+  "budget_ms": 20.0,
+  "counts": {
+   "decisions": 0,
+   "request": 0,
+   "state": 0,
+   "sync": 0,
+   "rule_based_refused": 0,
+   "deviations": 0,
+   "timeout_fallback": 0,
+   "recent_suppressed_by_rule": 0,
+   "deferrals_chosen": 0,
+   "warm_unexpressible": 0,
+   "harm_nonzero": 0,
+   "replans": 0
+  }
+ },
+ "history_token_draws": {
+  "n": 377,
+  "source": "results/orchestration/live2/frozen_test/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2/trace.jsonl.gz",
+  "p50": 1333,
+  "min": 220,
+  "max": 24961
+ },
+ "positive_control_committed_model": {
+  "_claim": "the residual summary is of the COMMITTED model, not of a refit of my own",
+  "committed_model": {
+   "first_token": {
+    "intercept": -0.022971863327167094,
+    "per_uncached_token": 0.00018059817042233292,
+    "per_overlap": 0.038004811772727576
+   },
+   "decode": {
+    "intercept": 0.003098481072433836,
+    "per_overlap": 0.015084798825142538
+   }
+  },
+  "my_model": {
+   "first_token": {
+    "intercept": -0.022971863327167094,
+    "per_uncached_token": 0.00018059817042233292,
+    "per_overlap": 0.038004811772727576
+   },
+   "decode": {
+    "intercept": 0.003098481072433836,
+    "per_overlap": 0.015084798825142538
+   }
+  },
+  "coefficients_identical": true,
+  "committed_n_requests": 345066,
+  "my_n_requests": 345066,
+  "request_counts_identical": true,
+  "committed_n_fit": 243568,
+  "my_n_fit": 243568,
+  "verdict": "PASS: the committed by-arm model and request count reproduce exactly, so the check is sound"
+ },
+ "margin": {
+  "_claim": "MARGIN_CF is read from one declared constant, so 'never tuned' is checkable from the code (D151 (1), D154 (2), session A's requirement 3)",
+  "MARGIN_CF": null,
+  "is_set": false,
+  "scorable_path_refuses_while_unset": true,
+  "refusal_message": "D154 (2): MARGIN_CF is set ONCE, when the D151 (6) cost-model gate passes, equal to that gate's held-out p90 ABSOLUTE prediction error in the objective's units (expected correct on-time answers); froz",
+  "dry_path": {
+   "value": 0.0,
+   "source": "DRY_OVERRIDE",
+   "scorable": false
+  },
+  "declaration_audit": {
+   "declarations": [
+    {
+     "file": "experiments/orchestration/live2/v5/value_readers.py",
+     "line": 65,
+     "text": "MARGIN_CF = 0.05"
+    },
+    {
+     "file": "experiments/orchestration/live2/v5/cf_margin.py",
+     "line": 51,
+     "text": "MARGIN_CF: Optional[float] = None"
+    }
+   ],
+   "declared_in_cf_margin": 1,
+   "declared_elsewhere": 1,
+   "single_declaration_for_cf": true,
+   "conflicts": [
+    {
+     "file": "experiments/orchestration/live2/v5/value_readers.py",
+     "line": 65,
+     "text": "MARGIN_CF = 0.05"
+    }
+   ],
+   "verdict": "CONFLICT: MARGIN_CF is declared in more than one place; the counterfactual reads cf_margin.MARGIN_CF and nothing else, and the other declarations must be removed or deferred to this one by the sessions that own those files",
+   "note": "`v5/value_readers.py::MARGIN_CF = 0.05` is a pre-D154 placeholder. It is a declaration this session does not own and must not be imported by any cf_* module; cf_* never reads it."
+  },
+  "unit_conversion_gap": "D154 (2) names the gate's p90 absolute prediction error IN THE OBJECTIVE'S UNITS. The gate (`cost_model_gate.py`) predicts first-token and decode SECONDS, so its error is in seconds; the objective is in expected correct answers delivered by the deadline. No committed rule converts one into the other. `cf_cost.service_error_to_objective_units` shows the only defensible route (push the p90 service error through the delivery-probability curve and the committed accuracy table, which makes the margin a function of the question population) and REFUSES to return a number. Until the conversion is RULED, MARGIN_CF cannot be set even by a gate that passes.",
+  "verdict": "PASS: the only scorable read raises until D154 (2) sets the value, so no v5 cell can run"
+ },
+ "cost_and_latest_safe_start": {
+  "_claim": "predicted service includes DECODE (spec v5 section 5.2) and the latest safe start READS it: cf_cost.latest_safe_start consumes ServicePrediction.total_s, which is first token PLUS decode PLUS link",
+  "model": {
+   "split": "by_arm",
+   "fit_on": "non-hybrid arms",
+   "test_on": "the hybrids",
+   "first_token": {
+    "intercept": -0.022971863327167094,
+    "per_uncached_token": 0.00018059817042233292,
+    "per_overlap": 0.038004811772727576
+   },
+   "decode": {
+    "intercept": 0.003098481072433836,
+    "per_overlap": 0.015084798825142538
+   },
+   "gate_status": "FAILS (spec v5 section 12): decode over-predicts by 25 to 32 percent in every held-out class, and warm is confounded with arm, so the warm regime is unidentified out of arm (G10). D154 (2) cannot set MARGIN_CF until it passes."
+  },
+  "safety_factor": {
+   "safety_factor": 1.5775406165458339,
+   "raw_quantile": 1.5775406165458339,
+   "quantile": 0.9,
+   "floored_at": 1.0,
+   "measured_not_chosen": true,
+   "source": "results/orchestration/live2/frozen_test/runs (committed request logs)",
+   "split": "fit on the non-hybrid arms, test on the hybrids",
+   "widened_because_the_gate_fails": true,
+   "gate_status": "FAILS: decode over-predicts by 25 to 32 percent in every held-out class and warm is confounded with arm (spec v5 section 12)"
+  },
+  "predictions": [
+   {
+    "tokens": 467,
+    "overlap": 0,
+    "first_token_s": 0.061367,
+    "decode_s": 0.003098,
+    "engine_s": 0.064466,
+    "total_s": 0.108466,
+    "total_prefill_only_s": 0.105367,
+    "decode_share": 0.028566,
+    "uncached_tokens": 467,
+    "overlap_ft": 0,
+    "overlap_decode": 0
+   },
+   {
+    "tokens": 467,
+    "overlap": 2,
+    "first_token_s": 0.137377,
+    "decode_s": 0.033268,
+    "engine_s": 0.170645,
+    "total_s": 0.214645,
+    "total_prefill_only_s": 0.181377,
+    "decode_share": 0.154991,
+    "uncached_tokens": 467,
+    "overlap_ft": 2,
+    "overlap_decode": 2
+   },
+   {
+    "tokens": 467,
+    "overlap": 8,
+    "first_token_s": 0.365406,
+    "decode_s": 0.123777,
+    "engine_s": 0.489183,
+    "total_s": 0.533183,
+    "total_prefill_only_s": 0.409406,
+    "decode_share": 0.232147,
+    "uncached_tokens": 467,
+    "overlap_ft": 8,
+    "overlap_decode": 8
+   },
+   {
+    "tokens": 467,
+    "overlap": 24,
+    "first_token_s": 0.973483,
+    "decode_s": 0.365134,
+    "engine_s": 1.338617,
+    "total_s": 1.382617,
+    "total_prefill_only_s": 1.017483,
+    "decode_share": 0.264089,
+    "uncached_tokens": 467,
+    "overlap_ft": 24,
+    "overlap_decode": 24
+   },
+   {
+    "tokens": 3000,
+    "overlap": 0,
+    "first_token_s": 0.518823,
+    "decode_s": 0.003098,
+    "engine_s": 0.521921,
+    "total_s": 0.565921,
+    "total_prefill_only_s": 0.562823,
+    "decode_share": 0.005475,
+    "uncached_tokens": 3000,
+    "overlap_ft": 0,
+    "overlap_decode": 0
+   },
+   {
+    "tokens": 3000,
+    "overlap": 2,
+    "first_token_s": 0.594832,
+    "decode_s": 0.033268,
+    "engine_s": 0.6281,
+    "total_s": 0.6721,
+    "total_prefill_only_s": 0.638832,
+    "decode_share": 0.049499,
+    "uncached_tokens": 3000,
+    "overlap_ft": 2,
+    "overlap_decode": 2
+   },
+   {
+    "tokens": 3000,
+    "overlap": 8,
+    "first_token_s": 0.822861,
+    "decode_s": 0.123777,
+    "engine_s": 0.946638,
+    "total_s": 0.990638,
+    "total_prefill_only_s": 0.866861,
+    "decode_share": 0.124947,
+    "uncached_tokens": 3000,
+    "overlap_ft": 8,
+    "overlap_decode": 8
+   },
+   {
+    "tokens": 3000,
+    "overlap": 24,
+    "first_token_s": 1.430938,
+    "decode_s": 0.365134,
+    "engine_s": 1.796072,
+    "total_s": 1.840072,
+    "total_prefill_only_s": 1.474938,
+    "decode_share": 0.198434,
+    "uncached_tokens": 3000,
+    "overlap_ft": 24,
+    "overlap_decode": 24
+   },
+   {
+    "tokens": 7051,
+    "overlap": 0,
+    "first_token_s": 1.250426,
+    "decode_s": 0.003098,
+    "engine_s": 1.253524,
+    "total_s": 1.297524,
+    "total_prefill_only_s": 1.294426,
+    "decode_share": 0.002388,
+    "uncached_tokens": 7051,
+    "overlap_ft": 0,
+    "overlap_decode": 0
+   },
+   {
+    "tokens": 7051,
+    "overlap": 2,
+    "first_token_s": 1.326435,
+    "decode_s": 0.033268,
+    "engine_s": 1.359704,
+    "total_s": 1.403704,
+    "total_prefill_only_s": 1.370435,
+    "decode_share": 0.0237,
+    "uncached_tokens": 7051,
+    "overlap_ft": 2,
+    "overlap_decode": 2
+   },
+   {
+    "tokens": 7051,
+    "overlap": 8,
+    "first_token_s": 1.554464,
+    "decode_s": 0.123777,
+    "engine_s": 1.678241,
+    "total_s": 1.722241,
+    "total_prefill_only_s": 1.598464,
+    "decode_share": 0.07187,
+    "uncached_tokens": 7051,
+    "overlap_ft": 8,
+    "overlap_decode": 8
+   },
+   {
+    "tokens": 7051,
+    "overlap": 24,
+    "first_token_s": 2.162541,
+    "decode_s": 0.365134,
+    "engine_s": 2.527675,
+    "total_s": 2.571675,
+    "total_prefill_only_s": 2.206541,
+    "decode_share": 0.141983,
+    "uncached_tokens": 7051,
+    "overlap_ft": 24,
+    "overlap_decode": 24
+   },
+   {
+    "tokens": 13193,
+    "overlap": 0,
+    "first_token_s": 2.35966,
+    "decode_s": 0.003098,
+    "engine_s": 2.362758,
+    "total_s": 2.406758,
+    "total_prefill_only_s": 2.40366,
+    "decode_share": 0.001287,
+    "uncached_tokens": 13193,
+    "overlap_ft": 0,
+    "overlap_decode": 0
+   },
+   {
+    "tokens": 13193,
+    "overlap": 2,
+    "first_token_s": 2.435669,
+    "decode_s": 0.033268,
+    "engine_s": 2.468938,
+    "total_s": 2.512938,
+    "total_prefill_only_s": 2.479669,
+    "decode_share": 0.013239,
+    "uncached_tokens": 13193,
+    "overlap_ft": 2,
+    "overlap_decode": 2
+   },
+   {
+    "tokens": 13193,
+    "overlap": 8,
+    "first_token_s": 2.663698,
+    "decode_s": 0.123777,
+    "engine_s": 2.787475,
+    "total_s": 2.831475,
+    "total_prefill_only_s": 2.707698,
+    "decode_share": 0.043715,
+    "uncached_tokens": 13193,
+    "overlap_ft": 8,
+    "overlap_decode": 8
+   },
+   {
+    "tokens": 13193,
+    "overlap": 24,
+    "first_token_s": 3.271775,
+    "decode_s": 0.365134,
+    "engine_s": 3.636909,
+    "total_s": 3.680909,
+    "total_prefill_only_s": 3.315775,
+    "decode_share": 0.099197,
+    "uncached_tokens": 13193,
+    "overlap_ft": 24,
+    "overlap_decode": 24
+   },
+   {
+    "tokens": 21000,
+    "overlap": 0,
+    "first_token_s": 3.76959,
+    "decode_s": 0.003098,
+    "engine_s": 3.772688,
+    "total_s": 3.816688,
+    "total_prefill_only_s": 3.81359,
+    "decode_share": 0.000812,
+    "uncached_tokens": 21000,
+    "overlap_ft": 0,
+    "overlap_decode": 0
+   },
+   {
+    "tokens": 21000,
+    "overlap": 2,
+    "first_token_s": 3.845599,
+    "decode_s": 0.033268,
+    "engine_s": 3.878867,
+    "total_s": 3.922867,
+    "total_prefill_only_s": 3.889599,
+    "decode_share": 0.008481,
+    "uncached_tokens": 21000,
+    "overlap_ft": 2,
+    "overlap_decode": 2
+   },
+   {
+    "tokens": 21000,
+    "overlap": 8,
+    "first_token_s": 4.073628,
+    "decode_s": 0.123777,
+    "engine_s": 4.197405,
+    "total_s": 4.241405,
+    "total_prefill_only_s": 4.117628,
+    "decode_share": 0.029183,
+    "uncached_tokens": 21000,
+    "overlap_ft": 8,
+    "overlap_decode": 8
+   },
+   {
+    "tokens": 21000,
+    "overlap": 24,
+    "first_token_s": 4.681705,
+    "decode_s": 0.365134,
+    "engine_s": 5.046839,
+    "total_s": 5.090839,
+    "total_prefill_only_s": 4.725705,
+    "decode_share": 0.071724,
+    "uncached_tokens": 21000,
+    "overlap_ft": 24,
+    "overlap_decode": 24
+   }
+  ],
+  "decode_is_nonzero": true,
+  "decode_varies": true,
+  "decode_range_s": [
+   0.003098,
+   0.365134
+  ],
+  "decode_share_range": [
+   0.000812,
+   0.264089
+  ],
+  "latest_safe_start_rows": [
+   {
+    "tokens": 3000,
+    "overlap": 0,
+    "latest_start_s": 2.107236,
+    "predicted_service_s": 0.565921,
+    "safety_factor": 1.577541,
+    "feasible": true,
+    "must_start_now": false,
+    "deferral_s": 2.107236,
+    "decode_included": true,
+    "latest_start_if_decode_omitted_s": 2.112124,
+    "decode_omission_error_s": 0.004888
+   },
+   {
+    "tokens": 3000,
+    "overlap": 8,
+    "latest_start_s": 1.437228,
+    "predicted_service_s": 0.990638,
+    "safety_factor": 1.577541,
+    "feasible": true,
+    "must_start_now": false,
+    "deferral_s": 1.437228,
+    "decode_included": true,
+    "latest_start_if_decode_omitted_s": 1.632491,
+    "decode_omission_error_s": 0.195263
+   },
+   {
+    "tokens": 7051,
+    "overlap": 0,
+    "latest_start_s": 0.953103,
+    "predicted_service_s": 1.297524,
+    "safety_factor": 1.577541,
+    "feasible": true,
+    "must_start_now": false,
+    "deferral_s": 0.953103,
+    "decode_included": true,
+    "latest_start_if_decode_omitted_s": 0.957991,
+    "decode_omission_error_s": 0.004888
+   },
+   {
+    "tokens": 7051,
+    "overlap": 8,
+    "latest_start_s": 0.283095,
+    "predicted_service_s": 1.722241,
+    "safety_factor": 1.577541,
+    "feasible": true,
+    "must_start_now": false,
+    "deferral_s": 0.283095,
+    "decode_included": true,
+    "latest_start_if_decode_omitted_s": 0.478358,
+    "decode_omission_error_s": 0.195263
+   },
+   {
+    "tokens": 13193,
+    "overlap": 0,
+    "latest_start_s": -0.796759,
+    "predicted_service_s": 2.406758,
+    "safety_factor": 1.577541,
+    "feasible": false,
+    "must_start_now": true,
+    "deferral_s": 0.0,
+    "decode_included": true,
+    "latest_start_if_decode_omitted_s": -0.791871,
+    "decode_omission_error_s": 0.004888
+   },
+   {
+    "tokens": 13193,
+    "overlap": 8,
+    "latest_start_s": -1.466767,
+    "predicted_service_s": 2.831475,
+    "safety_factor": 1.577541,
+    "feasible": false,
+    "must_start_now": true,
+    "deferral_s": 0.0,
+    "decode_included": true,
+    "latest_start_if_decode_omitted_s": -1.271504,
+    "decode_omission_error_s": 0.195263
+   }
+  ],
+  "decode_omission_error_s_range": [
+   0.004888,
+   0.195263
+  ],
+  "feasible_token_threshold_at_3s": {
+   "overlap0_with_decode": 10396,
+   "overlap0_prefill_only": 10413,
+   "overlap8_with_decode": 8044,
+   "overlap8_prefill_only": 8730
+  },
+  "tokens_decode_omission_would_add": {
+   "overlap0": 17,
+   "overlap8": 686
+  },
+  "reconciliation_with_spec_5_2": {
+   "prior_value": "about 1,700 tokens at 3 s (frozen_test 19.3, quoted in spec v5 5.2)",
+   "prior_basis": "costs.py's measured cold prefill rates and the MEASURED median decode on the actual misses, 1.086 s (19.5)",
+   "this_run_basis": "the committed gate model: 1.806e-4 s per uncached token and a decode term LINEAR in overlap, 0.0031 + 0.01508 x overlap",
+   "shift_curve_tokens_by_overlap": [
+    {
+     "overlap": 0,
+     "tokens_shift": 17
+    },
+    {
+     "overlap": 2,
+     "tokens_shift": 184
+    },
+    {
+     "overlap": 4,
+     "tokens_shift": 351
+    },
+    {
+     "overlap": 6,
+     "tokens_shift": 518
+    },
+    {
+     "overlap": 8,
+     "tokens_shift": 686
+    },
+    {
+     "overlap": 10,
+     "tokens_shift": 853
+    },
+    {
+     "overlap": 12,
+     "tokens_shift": 1020
+    },
+    {
+     "overlap": 14,
+     "tokens_shift": 1187
+    },
+    {
+     "overlap": 16,
+     "tokens_shift": 1354
+    },
+    {
+     "overlap": 18,
+     "tokens_shift": 1520
+    },
+    {
+     "overlap": 20,
+     "tokens_shift": 1687
+    },
+    {
+     "overlap": 22,
+     "tokens_shift": 1854
+    },
+    {
+     "overlap": 24,
+     "tokens_shift": 2022
+    },
+    {
+     "overlap": 26,
+     "tokens_shift": 2189
+    },
+    {
+     "overlap": 28,
+     "tokens_shift": 2356
+    },
+    {
+     "overlap": 30,
+     "tokens_shift": 2523
+    },
+    {
+     "overlap": 32,
+     "tokens_shift": 2690
+    }
+   ],
+   "overlap_at_which_this_model_reaches_1700_tokens": 22,
+   "agree": true,
+   "explanation": "the omission shift is monotone in concurrency, so the two figures are the same quantity at different loads, not a disagreement: this model reaches 1,700 tokens at about 22 concurrent requests, and 19.3's measurement is on the actual misses, which are the loaded instants. The quiet rows (overlap 0 and 8) are smaller BECAUSE the gate's decode term is linear in overlap and so understates the convex tail the gate report itself measures (0.024 s at 0 to 3 overlaps rising to 1.403 s above 45). That understatement is the gate's known defect and it biases the planner toward deferring too late, which is the one-sided error spec v5 5.2 warns about"
+  },
+  "p_on_time_rows": [
+   {
+    "slack_s": 0.2,
+    "p_on_time": 0.0
+   },
+   {
+    "slack_s": 0.5,
+    "p_on_time": 0.00083
+   },
+   {
+    "slack_s": 1.0,
+    "p_on_time": 0.059978
+   },
+   {
+    "slack_s": 1.5,
+    "p_on_time": 0.486491
+   },
+   {
+    "slack_s": 2.0,
+    "p_on_time": 0.810248
+   },
+   {
+    "slack_s": 3.0,
+    "p_on_time": 0.976219
+   },
+   {
+    "slack_s": 5.0,
+    "p_on_time": 0.989172
+   },
+   {
+    "slack_s": 10.0,
+    "p_on_time": 0.997383
+   }
+  ],
+  "p_on_time_monotone": true,
+  "p_on_time_nondegenerate": true,
+  "verdict": "PASS: decode non-zero, varies with load, and moves the latest safe start"
+ },
+ "two_level_fidelity": {
+  "_claim": "two-level fidelity (D151 (4), spec v5 section 5.4): the near-term level counts the overlaps each request actually experiences, the far level prices them from an offered-load forecast, and the split point is DECLARED per decision kind",
+  "near_exact_s_by_kind": {
+   "request": null,
+   "state": 3.0,
+   "sync": 3.0
+  },
+  "declared_not_fitted": true,
+  "fixed_point_iterations": 3,
+  "n_requests": 12,
+  "n_differing": 12,
+  "first_differing": {
+   "req_id": "r00",
+   "exact_p_on_time": 0.94611,
+   "coarse_p_on_time": 0.974504,
+   "exact_overlap_ft": 11,
+   "coarse_overlap_ft": 4
+  },
+  "exact_counts": {
+   "n_exact": 12,
+   "n_coarse": 0
+  },
+  "coarse_counts": {
+   "n_exact": 0,
+   "n_coarse": 12
+  },
+  "verdict": "PASS: the two levels disagree, so the split point changes predictions"
+ },
+ "objective_and_deficit_weighting": {
+  "_claim": "the objective is deficit-weighted expected correct answers delivered BY THE DEADLINE from either source, minus harm to others (D151 (4), D152 (1) as amended by D155 (3))",
+  "objective": "deficit-weighted expected CORRECT answers delivered BY THE DEADLINE from either source, minus harm to other devices (D151 (4), D152 (1) as amended by D155 (3)); the same objective every reader in spec v5 section 7 maximises",
+  "counters": {
+   "gain": 1.0,
+   "n_updates": 40,
+   "target": {
+    "robot": 0.9,
+    "dashcam": 0.9,
+    "single_shot": 0.9
+   },
+   "target_source": "D133 robot headline: p 0.90 within the deadline, applied per type",
+   "steers_on": "observable on-time (D152 (1))",
+   "objective_scores": "correct answers delivered by the deadline (D155 (3))",
+   "mismatch": "gap G14, located rather than smoothed; see module docstring",
+   "devices": {
+    "robo000": {
+     "served": 20,
+     "on_time": 20,
+     "rate": 1.0,
+     "shortfall": 0.0,
+     "weight": 1.0
+    },
+    "robo001": {
+     "served": 20,
+     "on_time": 10,
+     "rate": 0.5,
+     "shortfall": 0.4,
+     "weight": 1.4
+    }
+   }
+  },
+  "counters_vary": true,
+  "on_time_vs_correctness": {
+   "counters_steer_on": "observable on-time (D152 (1))",
+   "objective_scores": "correct answers by the deadline (D155 (3))",
+   "gap": "G14",
+   "resolution": "the weight is computed from on-time alone and multiplies a CORRECTNESS term; nothing converts one into the other, and the mismatch is confined to that one factor"
+  },
+  "within_device_invariance": {
+   "claim": "w_i cannot change the argmax within one device's candidate set",
+   "weights_tried": [
+    1.0,
+    1.5,
+    3.0,
+    10.0
+   ],
+   "rows": [
+    {
+     "weight": 1.0,
+     "argmax_index": 0,
+     "values": [
+      0.225,
+      0.10178585
+     ]
+    },
+    {
+     "weight": 1.5,
+     "argmax_index": 0,
+     "values": [
+      0.3375,
+      0.152678775
+     ]
+    },
+    {
+     "weight": 3.0,
+     "argmax_index": 0,
+     "values": [
+      0.675,
+      0.30535755
+     ]
+    },
+    {
+     "weight": 10.0,
+     "argmax_index": 0,
+     "values": [
+      2.25,
+      1.0178585
+     ]
+    }
+   ],
+   "argmax_constant_across_weights": true,
+   "verdict": "CONFIRMED: cancelled by geometry within a device; the weighting's characteristic decision is CROSS-DEVICE"
+  },
+  "harm": {
+   "rows_flat_weights": {
+    "total": 0.012689281,
+    "n_affected": 6,
+    "rows": [
+     {
+      "req_id": "o00",
+      "device_id": "robo002",
+      "weight": 1.0,
+      "p_on_time_before": 0.970584,
+      "p_on_time_after": 0.962125,
+      "accuracy": 0.25,
+      "value_lost": 0.00211488
+     },
+     {
+      "req_id": "o01",
+      "device_id": "robo003",
+      "weight": 1.0,
+      "p_on_time_before": 0.970584,
+      "p_on_time_after": 0.962125,
+      "accuracy": 0.25,
+      "value_lost": 0.00211488
+     },
+     {
+      "req_id": "o02",
+      "device_id": "robo004",
+      "weight": 1.0,
+      "p_on_time_before": 0.970584,
+      "p_on_time_after": 0.962125,
+      "accuracy": 0.25,
+      "value_lost": 0.00211488
+     },
+     {
+      "req_id": "o03",
+      "device_id": "robo005",
+      "weight": 1.0,
+      "p_on_time_before": 0.970584,
+      "p_on_time_after": 0.962125,
+      "accuracy": 0.25,
+      "value_lost": 0.00211488
+     },
+     {
+      "req_id": "o04",
+      "device_id": "robo006",
+      "weight": 1.0,
+      "p_on_time_before": 0.970584,
+      "p_on_time_after": 0.962125,
+      "accuracy": 0.25,
+      "value_lost": 0.00211488
+     },
+     {
+      "req_id": "o05",
+      "device_id": "robo007",
+      "weight": 1.0,
+      "p_on_time_before": 0.970584,
+      "p_on_time_after": 0.962125,
+      "accuracy": 0.25,
+      "value_lost": 0.00211488
+     }
+    ]
+   },
+   "rows_deficit_weighted": {
+    "total": 0.015861602,
+    "n_affected": 6,
+    "rows": [
+     {
+      "req_id": "o00",
+      "device_id": "robo002",
+      "weight": 1.5,
+      "p_on_time_before": 0.970584,
+      "p_on_time_after": 0.962125,
+      "accuracy": 0.25,
+      "value_lost": 0.00317232
+     },
+     {
+      "req_id": "o01",
+      "device_id": "robo003",
+      "weight": 1.5,
+      "p_on_time_before": 0.970584,
+      "p_on_time_after": 0.962125,
+      "accuracy": 0.25,
+      "value_lost": 0.00317232
+     },
+     {
+      "req_id": "o02",
+      "device_id": "robo004",
+      "weight": 1.5,
+      "p_on_time_before": 0.970584,
+      "p_on_time_after": 0.962125,
+      "accuracy": 0.25,
+      "value_lost": 0.00317232
+     },
+     {
+      "req_id": "o03",
+      "device_id": "robo005",
+      "weight": 1.0,
+      "p_on_time_before": 0.970584,
+      "p_on_time_after": 0.962125,
+      "accuracy": 0.25,
+      "value_lost": 0.00211488
+     },
+     {
+      "req_id": "o04",
+      "device_id": "robo006",
+      "weight": 1.0,
+      "p_on_time_before": 0.970584,
+      "p_on_time_after": 0.962125,
+      "accuracy": 0.25,
+      "value_lost": 0.00211488
+     },
+     {
+      "req_id": "o05",
+      "device_id": "robo007",
+      "weight": 1.0,
+      "p_on_time_before": 0.970584,
+      "p_on_time_after": 0.962125,
+      "accuracy": 0.25,
+      "value_lost": 0.00211488
+     }
+    ]
+   },
+   "harm_nonzero": true,
+   "weighting_changes_harm": true,
+   "read": "cf_planner.plan_request scores every candidate as value MINUS this harm, so the harm changes which candidate wins"
+  },
+  "device_term": {
+   "p_device_on_time_at_3s": 1.0,
+   "device_wait_s": 0.567,
+   "source": "live2/fleet/data_sources.py::DEVICE_WAIT_RULE_S",
+   "label": "proxy-0.567 (D154 (5)); D155 (1) forbids the cold re-send latencies",
+   "status": "CONSTANT",
+   "why": "the only committed device-answer latency is the 0.567 s proxy and D155 (1) forbids the StudyORIN-REC cold re-send latencies, so P(device on time) = 1.0 for every robot deadline under test. D155 (3)'s by-the-deadline restriction is live on the cloud side and INERT on the device side in this build",
+   "stopping_condition_for": "any claim that v5 trades the device's delivery risk against the cloud's; that claim cannot be tested until the measured warm per-question Orin latencies land"
+  },
+  "verdict": "PASS: the weighting varies, acts cross-device, and provably cancels within a device; harm is non-zero and read"
+ },
+ "step2b_switch_diff": {
+  "_claim": "the counterfactual's choice differs from the base's on real decisions",
+  "_register": "DRY: margin 0 by explicit override, scorable=False on every decision. A wiring proof, not a policy comparison",
+  "n_decisions": 56,
+  "n_differing": 38,
+  "first_differing": {
+   "cell": {
+    "tokens": 467,
+    "n_others": 6,
+    "readiness": "COLD"
+   },
+   "base": "ADMIT_NOW_D2",
+   "cf": "DEFER_TO_LATEST_SAFE_START",
+   "chosen": "DEFER_TO_LATEST_SAFE_START",
+   "delta": 0.012670656
+  },
+  "base_choice_counts": {
+   "ADMIT_NOW_D2": 48,
+   "DEVICE_ANSWERS": 8
+  },
+  "cf_choice_counts": {
+   "ADMIT_NOW_D2": 40,
+   "DEFER_TO_LATEST_SAFE_START": 12,
+   "DEVICE_ANSWERS": 4
+  },
+  "all_decisions_nonscorable": true,
+  "characteristic_decisions": {
+   "deferrals_chosen": 12,
+   "recent_suppressed_by_rule": 6,
+   "harm_nonzero": 118,
+   "timeout_fallback": 0,
+   "note": "CLAUDE.md's port rule: an arm must be shown to make its own characteristic decision at least once. The counterfactual's is the DEFERRAL to a latest safe start, and it is counted here"
+  },
+  "verdict": "SWITCH REACHES A DECISION"
+ },
+ "timeout_fallback": {
+  "_claim": "a decision that would exceed the budget falls back to the base policy, and the fallback count is a reported quantity (spec v5 section 10)",
+  "budget_ms_tight": 0.0,
+  "budget_ms_loose": 1000000.0,
+  "n_decisions": 20,
+  "timeout_fallback_tight": 20,
+  "timeout_fallback_loose": 0,
+  "all_tight_decisions_are_base": true,
+  "deviations_tight": 0,
+  "deviations_loose": 4,
+  "fallback_target": "hybrid-F-lhreq-noc3",
+  "fallback_target_is_noc3": true,
+  "why_noc3": "a timeout must not re-enable C3: otherwise a slow planner would silently change the representation policy as well as the timing policy (spec v5 section 10)",
+  "verdict": "PASS: the fallback fires under a zero budget, never deviates, and targets noc3"
+ },
+ "rule_based_refusal": {
+  "_claim": "D151 (2) is exact about the split and v5 does not widen it: three kinds are counterfactual, dashcam frames and single-shot stay rule-based",
+  "counterfactual_kinds": [
+   "request",
+   "state",
+   "sync"
+  ],
+  "refusals": {
+   "dashcam_frame": {
+    "refused": true,
+    "reason": "rule-based (D151 (2)): the C5 cap, episode continuity and the deficit counters decide it; owned by the arm, not the counterfactual"
+   },
+   "single_shot": {
+    "refused": true,
+    "reason": "rule-based (D151 (2)): feasibility only; owned by the arm"
+   }
+  },
+  "rule_based_refused_count": 2,
+  "unknown_kind_raises": true,
+  "unknown_kind_message": "unknown decision kind 'episode_refresh'; counterfactual kinds are ('request', 'state', 'sync') and the rule-based kinds are ['dashcam_frame', 'single_shot']",
+  "verdict": "PASS"
+ },
+ "state_and_sync": {
+  "_claim": "state and sync are counterfactual kinds with their own candidate sets, horizons and near-term windows (D151 (2), (4))",
+  "state_candidates": [
+   "WARM",
+   "TOUCH",
+   "KEEP",
+   "RELOAD",
+   "HOLD_BACK",
+   "SLICE"
+  ],
+  "sync_candidates": [
+   "QUESTION_FIRST",
+   "WAIT",
+   "LEAVE_TO_DEVICE"
+  ],
+  "state_free_capacity": {
+   "kind": "state",
+   "decision_id": "s001",
+   "device_id": "robo001",
+   "chosen": "WARM",
+   "base_choice": "KEEP",
+   "cf_choice": "WARM",
+   "deviated": true,
+   "value_base": 0.0,
+   "value_cf": 0.252,
+   "delta": 0.252,
+   "margin": 0.0,
+   "margin_source": "DRY_OVERRIDE",
+   "scorable": false,
+   "timeout_fallback": false,
+   "elapsed_ms": 0.018466,
+   "candidates": [
+    {
+     "name": "WARM",
+     "value": 0.252,
+     "gain": 0.252,
+     "harm": 0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "horizon_s": 30.0,
+      "p_question": 0.8,
+      "accuracy": 0.25,
+      "unexpressible_note": null
+     }
+    },
+    {
+     "name": "TOUCH",
+     "value": 0.252,
+     "gain": 0.252,
+     "harm": 0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "lever": "KEEP_GPU_WARM, not a pin"
+     }
+    },
+    {
+     "name": "KEEP",
+     "value": 0.0,
+     "gain": 0.0,
+     "harm": 0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "lever": "do nothing; the reference option"
+     }
+    },
+    {
+     "name": "RELOAD",
+     "value": null,
+     "gain": 0.252,
+     "harm": 0.0,
+     "expressible": false,
+     "scored": false,
+     "detail": {
+      "trigger_state": "belief == host",
+      "observed_in_committed_cells": false,
+      "note": "reload has no observed trigger state: cold 14,472 / gpu 1,442 / host NEVER over 39 committed 16-device cells (engine_actions section 2). Zero reloads is the state of the fleet, not a mechanism that failed"
+     }
+    },
+    {
+     "name": "HOLD_BACK",
+     "value": 0.0,
+     "gain": 0.0,
+     "harm": -0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "lever": "D150's \"above all\": do not let this rebuild evict a history whose question is due",
+      "avoided_harm": 0.0
+     }
+    },
+    {
+     "name": "SLICE",
+     "value": 0.252,
+     "gain": 0.252,
+     "harm": 0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "n_slices": 8,
+      "slice_tokens": 1024,
+      "scope": "BACKGROUND WARMING ONLY (D151 (3)); never a deadline request",
+      "harm_model": "half the monolithic harm, DECLARED and NOT MEASURED: StudySLICE1 has not run, so every slicing value is parametric"
+     }
+    }
+   ],
+   "trace": {
+    "horizon": "until the history's next likely question, capped 120 s (range (60.0, 120.0))",
+    "horizon_s": 30.0,
+    "horizon_cap_s": 120.0,
+    "exact_until_s": 3.0,
+    "near_exact_window_s": 3.0,
+    "weight": 1.4,
+    "engine_actions": "v5-engine-actions-1.0",
+    "warm_expressible": true
+   }
+  },
+  "state_under_harm": {
+   "kind": "state",
+   "decision_id": "s002",
+   "device_id": "robo001",
+   "chosen": "HOLD_BACK",
+   "base_choice": "KEEP",
+   "cf_choice": "HOLD_BACK",
+   "deviated": true,
+   "value_base": 0.0,
+   "value_cf": 0.5,
+   "delta": 0.5,
+   "margin": 0.0,
+   "margin_source": "DRY_OVERRIDE",
+   "scorable": false,
+   "timeout_fallback": false,
+   "elapsed_ms": 0.01009,
+   "candidates": [
+    {
+     "name": "WARM",
+     "value": -0.248,
+     "gain": -0.248,
+     "harm": 0.5,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "horizon_s": 30.0,
+      "p_question": 0.8,
+      "accuracy": 0.25,
+      "unexpressible_note": null
+     }
+    },
+    {
+     "name": "TOUCH",
+     "value": 0.252,
+     "gain": 0.252,
+     "harm": 0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "lever": "KEEP_GPU_WARM, not a pin"
+     }
+    },
+    {
+     "name": "KEEP",
+     "value": 0.0,
+     "gain": 0.0,
+     "harm": 0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "lever": "do nothing; the reference option"
+     }
+    },
+    {
+     "name": "RELOAD",
+     "value": null,
+     "gain": -0.248,
+     "harm": 0.5,
+     "expressible": false,
+     "scored": false,
+     "detail": {
+      "trigger_state": "belief == host",
+      "observed_in_committed_cells": false,
+      "note": "reload has no observed trigger state: cold 14,472 / gpu 1,442 / host NEVER over 39 committed 16-device cells (engine_actions section 2). Zero reloads is the state of the fleet, not a mechanism that failed"
+     }
+    },
+    {
+     "name": "HOLD_BACK",
+     "value": 0.5,
+     "gain": 0.0,
+     "harm": -0.5,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "lever": "D150's \"above all\": do not let this rebuild evict a history whose question is due",
+      "avoided_harm": 0.5
+     }
+    },
+    {
+     "name": "SLICE",
+     "value": 0.002,
+     "gain": -0.248,
+     "harm": 0.25,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "n_slices": 8,
+      "slice_tokens": 1024,
+      "scope": "BACKGROUND WARMING ONLY (D151 (3)); never a deadline request",
+      "harm_model": "half the monolithic harm, DECLARED and NOT MEASURED: StudySLICE1 has not run, so every slicing value is parametric"
+     }
+    }
+   ],
+   "trace": {
+    "horizon": "until the history's next likely question, capped 120 s (range (60.0, 120.0))",
+    "horizon_s": 30.0,
+    "horizon_cap_s": 120.0,
+    "exact_until_s": 3.0,
+    "near_exact_window_s": 3.0,
+    "weight": 1.4,
+    "engine_actions": "v5-engine-actions-1.0",
+    "warm_expressible": true
+   }
+  },
+  "state_warm_unexpressible": {
+   "chosen": "TOUCH",
+   "warm_scored": false,
+   "warm_expressible": false,
+   "engine_actions": "v5-engine-actions-1.0",
+   "note": "engine_actions section 3: warm-ahead is not expressible in the committed action space, so the candidate is not scored. Under CLAUDE.md Rule 2 a null produced in that state is UNEXPRESSIBLE, never a negative"
+  },
+  "harm_changes_the_state_choice": true,
+  "sync_tight_deadline_long_catchup": {
+   "kind": "sync",
+   "decision_id": "y001",
+   "device_id": "robo001",
+   "chosen": "QUESTION_FIRST",
+   "base_choice": "QUESTION_FIRST",
+   "cf_choice": "QUESTION_FIRST",
+   "deviated": false,
+   "value_base": 0.149195671,
+   "value_cf": 0.149195671,
+   "delta": 0.0,
+   "margin": 0.0,
+   "margin_source": "DRY_OVERRIDE",
+   "scorable": false,
+   "timeout_fallback": false,
+   "elapsed_ms": 0.019079,
+   "candidates": [
+    {
+     "name": "QUESTION_FIRST",
+     "value": 0.149195671,
+     "gain": 0.149195671,
+     "harm": 0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "tokens": 7000,
+      "p_on_time": 0.983909,
+      "pred": {
+       "first_token_s": 1.241215,
+       "decode_s": 0.003098,
+       "engine_s": 1.244314,
+       "total_s": 1.288314,
+       "total_prefill_only_s": 1.285215,
+       "decode_share": 0.002405,
+       "uncached_tokens": 7000,
+       "overlap_ft": 0,
+       "overlap_decode": 0
+      },
+      "accuracy": 0.107143,
+      "accuracy_is_a_substitution": true,
+      "substitution_note": "no committed accuracy exists for a question-first answer; cloud RECENT stands in as the closest measured truncated-history figure",
+      "rule": "D54 pre-outage history plus recent frames"
+     }
+    },
+    {
+     "name": "WAIT",
+     "value": 0.1000006,
+     "gain": 0.1000006,
+     "harm": 0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "tokens": 21000,
+      "p_on_time": 0.0,
+      "catch_up_s": 8.0,
+      "pred": {
+       "first_token_s": 3.76959,
+       "decode_s": 0.003098,
+       "engine_s": 3.772688,
+       "total_s": 3.816688,
+       "total_prefill_only_s": 3.81359,
+       "decode_share": 0.000812,
+       "uncached_tokens": 21000,
+       "overlap_ft": 0,
+       "overlap_decode": 0
+      },
+      "ordering": "oldest-first within a device: append-only KV cannot prefill a later frame first (D148, D152 (3))"
+     }
+    },
+    {
+     "name": "LEAVE_TO_DEVICE",
+     "value": 0.1000006,
+     "gain": 0.1000006,
+     "harm": 0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "p_device_on_time": 1.0
+     }
+    }
+   ],
+   "trace": {
+    "horizon": "until caught up",
+    "catch_up_s": 8.0,
+    "exact_until_s": 3.0,
+    "near_exact_window_s": 3.0,
+    "outage_model": "SYNTHETIC (D150 (4), P6): no outage traces exist; every outage number carries that label",
+    "accuracy_question_first": 0.107143,
+    "accuracy_question_first_is_a_substitution": true,
+    "accuracy_full": 0.25,
+    "weight": 1.4
+   }
+  },
+  "sync_late_deadline_short_catchup": {
+   "kind": "sync",
+   "decision_id": "y002",
+   "device_id": "robo001",
+   "chosen": "WAIT",
+   "base_choice": "QUESTION_FIRST",
+   "cf_choice": "WAIT",
+   "deviated": true,
+   "value_base": 0.149954661,
+   "value_cf": 0.347310826,
+   "delta": 0.197356165,
+   "margin": 0.0,
+   "margin_source": "DRY_OVERRIDE",
+   "scorable": false,
+   "timeout_fallback": false,
+   "elapsed_ms": 0.01523,
+   "candidates": [
+    {
+     "name": "QUESTION_FIRST",
+     "value": 0.149954661,
+     "gain": 0.149954661,
+     "harm": 0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "tokens": 7000,
+      "p_on_time": 0.999089,
+      "pred": {
+       "first_token_s": 1.241215,
+       "decode_s": 0.003098,
+       "engine_s": 1.244314,
+       "total_s": 1.288314,
+       "total_prefill_only_s": 1.285215,
+       "decode_share": 0.002405,
+       "uncached_tokens": 7000,
+       "overlap_ft": 0,
+       "overlap_decode": 0
+      },
+      "accuracy": 0.107143,
+      "accuracy_is_a_substitution": true,
+      "substitution_note": "no committed accuracy exists for a question-first answer; cloud RECENT stands in as the closest measured truncated-history figure",
+      "rule": "D54 pre-outage history plus recent frames"
+     }
+    },
+    {
+     "name": "WAIT",
+     "value": 0.347310826,
+     "gain": 0.347310826,
+     "harm": 0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "tokens": 21000,
+      "p_on_time": 0.989243,
+      "catch_up_s": 1.0,
+      "pred": {
+       "first_token_s": 3.76959,
+       "decode_s": 0.003098,
+       "engine_s": 3.772688,
+       "total_s": 3.816688,
+       "total_prefill_only_s": 3.81359,
+       "decode_share": 0.000812,
+       "uncached_tokens": 21000,
+       "overlap_ft": 0,
+       "overlap_decode": 0
+      },
+      "ordering": "oldest-first within a device: append-only KV cannot prefill a later frame first (D148, D152 (3))"
+     }
+    },
+    {
+     "name": "LEAVE_TO_DEVICE",
+     "value": 0.1000006,
+     "gain": 0.1000006,
+     "harm": 0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "p_device_on_time": 1.0
+     }
+    }
+   ],
+   "trace": {
+    "horizon": "until caught up",
+    "catch_up_s": 1.0,
+    "exact_until_s": 3.0,
+    "near_exact_window_s": 3.0,
+    "outage_model": "SYNTHETIC (D150 (4), P6): no outage traces exist; every outage number carries that label",
+    "accuracy_question_first": 0.107143,
+    "accuracy_question_first_is_a_substitution": true,
+    "accuracy_full": 0.25,
+    "weight": 1.4
+   }
+  },
+  "sync_choice_moves": true,
+  "sync_accuracy_gap": "the three sync options must differ in ACCURACY as well as in P(on time); no committed accuracy exists for a question-first (truncated-history) answer, so cloud RECENT stands in and the substitution is recorded in every sync decision's trace. Without it WAIT is dominated by construction and the sync switch would reach no decision. A v5 outage result may not be read until that accuracy is measured or ruled",
+  "counts": {
+   "decisions": 5,
+   "request": 0,
+   "state": 3,
+   "sync": 2,
+   "rule_based_refused": 0,
+   "deviations": 4,
+   "timeout_fallback": 0,
+   "recent_suppressed_by_rule": 0,
+   "deferrals_chosen": 0,
+   "warm_unexpressible": 1,
+   "harm_nonzero": 0,
+   "replans": 0
+  },
+  "verdict": "PASS: both kinds reach a decision; the harm term moves the state choice and the catch-up and deadline move the sync choice"
+ },
+ "negative_controls": {
+  "_claim": "disabling each mechanism changes the decisions it is claimed to drive",
+  "_register": "DRY, margin 0 by override except control 5. Not a policy result.",
+  "reference_choice_counts": {
+   "ADMIT_NOW_D2": 16,
+   "DEFER_TO_LATEST_SAFE_START": 36,
+   "DEVICE_ANSWERS": 4
+  },
+  "controls": {
+   "decode_zeroed": {
+    "n_changed": 8,
+    "of": 56,
+    "first": {
+     "index": 6,
+     "reference": "ADMIT_NOW_D2",
+     "control": "DEFER_TO_LATEST_SAFE_START"
+    },
+    "mechanism": "the decode term of the predicted service (spec v5 section 5.2)",
+    "expectation": "the latest safe start and every P(on time) move, so decisions must change; if they do not, decode is not driving them"
+   },
+   "flat_accuracy_table": {
+    "n_changed": 52,
+    "of": 56,
+    "first": {
+     "index": 0,
+     "reference": "ADMIT_NOW_D2",
+     "control": "DEVICE_ANSWERS"
+    },
+    "mechanism": "value (D149 (4)'s acceptance test, CLAUDE.md Step 4)",
+    "expectation": "with every accuracy equal the representation choice is value-free, so decisions must change or value is decorative"
+   },
+   "no_displacement": {
+    "n_changed": 12,
+    "of": 56,
+    "first": {
+     "index": 4,
+     "reference": "DEFER_TO_LATEST_SAFE_START",
+     "control": "ADMIT_NOW_D2"
+    },
+    "mechanism": "harm to other devices (D151 (4))",
+    "expectation": "with no other request in the queue the harm term is identically zero and the overlap counts collapse, so decisions must change",
+    "harm_nonzero_count_reference": 118,
+    "harm_nonzero_count_control": 0
+   },
+   "deficit_weighting_flattened": {
+    "n_changed": 0,
+    "of": 56,
+    "first": null,
+    "mechanism": "per-device deficit weighting (D149 (1), D151 (4))",
+    "expectation": "ZERO CHANGE IS THE CORRECT RESULT on this grid, and it is the point of proof_objective's within-device invariance: every decision here is for one device whose candidates the weight scales equally. The weighting's characteristic decision is CROSS-DEVICE and is controlled in the harm rows instead"
+   },
+   "margin_enormous": {
+    "n_deviations": 0,
+    "all_chosen_equal_base": true,
+    "mechanism": "the deviation margin (D151 (1))",
+    "expectation": "at an enormous margin the planner is exactly the base policy, which is the never-worse-than-base property stated as a control"
+   }
+  },
+  "verdict": "PASS with one DOCUMENTED ZERO: decode, value and displacement each move the decisions; the deficit weighting correctly moves none on a single-device grid and is controlled cross-device in proof_objective"
+ },
+ "episode_frames_read_from_trace": {
+  "_claim": "the episode frame list comes from the trace record's own list field; a record carrying one frame_ref is labelled dashcam-1f and is never padded into an episode (D153's labelling ruling)",
+  "fields_read_in_order": [
+   "episode_frame_refs",
+   "frame_refs",
+   "episode_frames",
+   "frames"
+  ],
+  "rows": [
+   {
+    "record_keys": [
+     "frame_ref",
+     "kind"
+    ],
+    "frames": {
+     "frames": [
+      "00422.mp4|t0003.00"
+     ],
+     "n_frames": 1,
+     "source_field": "frame_ref",
+     "format": "single_frame",
+     "label": "dashcam-1f"
+    },
+    "tokens": {
+     "tokens": 380,
+     "source": "declared formula 338 x frames + 42 text",
+     "derived": true,
+     "n_frames": 1
+    }
+   },
+   {
+    "record_keys": [
+     "episode_frame_refs",
+     "kind"
+    ],
+    "frames": {
+     "frames": [
+      "00422.mp4|t0003.00",
+      "00422.mp4|t0003.50",
+      "00422.mp4|t0004.00"
+     ],
+     "n_frames": 3,
+     "source_field": "episode_frame_refs",
+     "format": "episode",
+     "label": "EP-G"
+    },
+    "tokens": {
+     "tokens": 1056,
+     "source": "declared formula 338 x frames + 42 text",
+     "derived": true,
+     "n_frames": 3
+    }
+   },
+   {
+    "record_keys": [
+     "est_tokens",
+     "frame_refs",
+     "kind"
+    ],
+    "frames": {
+     "frames": [
+      "s|f00060.00"
+     ],
+     "n_frames": 1,
+     "source_field": "frame_refs",
+     "format": "episode",
+     "label": "dashcam-1f"
+    },
+    "tokens": {
+     "tokens": 90,
+     "source": "est_tokens",
+     "derived": false
+    }
+   },
+   {
+    "record_keys": [
+     "kind"
+    ],
+    "frames": {
+     "frames": [],
+     "n_frames": 0,
+     "source_field": null,
+     "format": "none",
+     "label": "unknown"
+    },
+    "tokens": {
+     "tokens": 42,
+     "source": "declared formula 338 x frames + 42 text",
+     "derived": true,
+     "n_frames": 0
+    }
+   }
+  ],
+  "committed_trace_record": {
+   "source": "results/orchestration/live2/frozen_test/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2/trace.jsonl.gz",
+   "frames": {
+    "frames": [
+     "00422.mp4|t0003.00"
+    ],
+    "n_frames": 1,
+    "source_field": "frame_ref",
+    "format": "single_frame",
+    "label": "dashcam-1f"
+   },
+   "tokens": {
+    "tokens": 380,
+    "source": "declared formula 338 x frames + 42 text",
+    "derived": true,
+    "n_frames": 1
+   }
+  },
+  "note": "bodies.py, coordinator.py, fleet/trace.py and run_live2_real.py are being changed to emit EP-G bodies as this is written, so nothing here depends on their current shape: the reader takes whichever list field the record presents",
+  "verdict": "PASS: both record shapes read correctly and are labelled apart"
+ },
+ "traced_unit": {
+  "_claim": "CLAUDE.md Step 3: one unit, every quantity, checkable by hand",
+  "trace_text": [
+   "UNIT: one robot question, robo005, history 7,051 tokens (committed seed-4 trace value), deadline 3.0 s (D147), readiness COLD, 6 other robot requests in flight at t=0 with the same deadline.",
+   "deficit: served 10, on time 7, rate 0.700, target 0.900, shortfall 0.200, weight w = 1 + 1.0 x 0.200 = 1.200",
+   "accuracy table (committed DEV, lh_req_quality.json): D2 0.250000, RECENT 0.107143, device 0.071429",
+   "safety factor 1.577541 (p90 of held-out actual/predicted service, floored at 1.0)",
+   "predicted service for this question: 1.616062 s, of which decode 0.093607; latest safe start = 3.0 - 1.577541 x 1.616062 = 0.450597 s",
+   "prefill-only latest safe start would be 0.598266 s, an error of 0.147669 s in the planner's favour: the deferral the committed formula would allow",
+   "  candidate ADMIT_NOW_D2               value 0.272675009  gain 0.291068984  harm 0.018393975  scored True",
+   "  candidate DEFER_TO_LATEST_SAFE_START value 0.272026788  gain 0.284716069  harm 0.012689281  scored True",
+   "  candidate SEND_RECENT                value 0.115839734  gain 0.128529015  harm 0.012689281  scored False",
+   "  candidate DEVICE_ANSWERS             value 0.085714800  gain 0.085714800  harm 0.000000000  scored True",
+   "base (hybrid-F-lhreq-noc3 surrogate): prefill-only estimate 1.566889 s against slack 3.000000 s -> ADMIT_NOW_D2",
+   "counterfactual argmax: ADMIT_NOW_D2; delta over base 0.000000000; margin 0.0 (DRY_OVERRIDE); chosen ADMIT_NOW_D2",
+   "binding constraint: the DEADLINE through P(on time); no KV cap and no accelerator budget is charged in this module, which decides and does not execute. KV and accelerator accounting stay with the harness.",
+   "outcome register: this is a PREDICTED value, not an observed outcome. The unit has no both_met / latency_miss / quality_miss because nothing was run."
+  ],
+  "decision": {
+   "kind": "request",
+   "decision_id": "TRACE-ONE",
+   "device_id": "robo005",
+   "chosen": "ADMIT_NOW_D2",
+   "base_choice": "ADMIT_NOW_D2",
+   "cf_choice": "ADMIT_NOW_D2",
+   "deviated": false,
+   "value_base": 0.272675009,
+   "value_cf": 0.272675009,
+   "delta": 0.0,
+   "margin": 0.0,
+   "margin_source": "DRY_OVERRIDE",
+   "scorable": false,
+   "timeout_fallback": false,
+   "elapsed_ms": 0.321326,
+   "candidates": [
+    {
+     "name": "ADMIT_NOW_D2",
+     "value": 0.272675009,
+     "gain": 0.291068984,
+     "harm": 0.018393975,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "p_on_time": 0.958322,
+      "accuracy": 0.25,
+      "start_s": 0.0,
+      "pred": {
+       "first_token_s": 1.478455,
+       "decode_s": 0.093607,
+       "engine_s": 1.572062,
+       "total_s": 1.616062,
+       "total_prefill_only_s": 1.522455,
+       "decode_share": 0.057923,
+       "uncached_tokens": 7051,
+       "overlap_ft": 6,
+       "overlap_decode": 6
+      },
+      "harm_rows": 6,
+      "n_exact": 7,
+      "n_coarse": 0
+     }
+    },
+    {
+     "name": "DEFER_TO_LATEST_SAFE_START",
+     "value": 0.272026788,
+     "gain": 0.284716069,
+     "harm": 0.012689281,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "p_on_time": 0.928675,
+      "accuracy": 0.25,
+      "start_s": 0.450597,
+      "pred": {
+       "first_token_s": 1.478455,
+       "decode_s": 0.003098,
+       "engine_s": 1.481553,
+       "total_s": 1.525553,
+       "total_prefill_only_s": 1.522455,
+       "decode_share": 0.002031,
+       "uncached_tokens": 7051,
+       "overlap_ft": 6,
+       "overlap_decode": 0
+      },
+      "harm_rows": 6,
+      "n_exact": 7,
+      "n_coarse": 0,
+      "latest_safe_start": {
+       "latest_start_s": 0.450597,
+       "predicted_service_s": 1.616062,
+       "safety_factor": 1.577541,
+       "feasible": true,
+       "must_start_now": false,
+       "deferral_s": 0.450597,
+       "decode_included": true,
+       "latest_start_if_decode_omitted_s": 0.598266,
+       "decode_omission_error_s": 0.147669
+      }
+     }
+    },
+    {
+     "name": "SEND_RECENT",
+     "value": 0.115839734,
+     "gain": 0.128529015,
+     "harm": 0.012689281,
+     "expressible": true,
+     "scored": false,
+     "detail": {
+      "p_on_time": 0.999006,
+      "accuracy": 0.107143,
+      "start_s": 0.0,
+      "pred": {
+       "first_token_s": 0.289396,
+       "decode_s": 0.003098,
+       "engine_s": 0.292495,
+       "total_s": 0.336495,
+       "total_prefill_only_s": 0.333396,
+       "decode_share": 0.009208,
+       "uncached_tokens": 467,
+       "overlap_ft": 6,
+       "overlap_decode": 0
+      },
+      "harm_rows": 6,
+      "n_exact": 7,
+      "n_coarse": 0,
+      "suppressed_by_rule": "D155 (4): no RECENT for long-horizon questions, IMPOSED. Under the superseded D87 device entry (0.107143) this fell out of the arithmetic because cloud RECENT tied the device and ties go to the device. The measured Orin entry (0.071429, StudyORIN-REC part 1) breaks the tie, so the arithmetic alone would send RECENT above P(on time) about 0.667. D155 (4) keeps the rule and requires it be imposed explicitly. Every override is counted."
+     }
+    },
+    {
+     "name": "DEVICE_ANSWERS",
+     "value": 0.0857148,
+     "gain": 0.0857148,
+     "harm": 0.0,
+     "expressible": true,
+     "scored": true,
+     "detail": {
+      "p_device_on_time": 1.0,
+      "p_device_on_time_is_constant": true,
+      "device_wait_s": 0.567,
+      "label": "proxy-0.567 (D154 (5)); D155 (1) forbids the cold re-send latencies",
+      "accuracy": 0.071429
+     }
+    }
+   ],
+   "trace": {
+    "base": {
+     "choice": "ADMIT_NOW_D2",
+     "prefill_only_estimate_s": 1.566889,
+     "slack_s": 3.0,
+     "defer_s": 0.5,
+     "c3": "OFF (D154 (3)): RECENT is not in the base's candidate set",
+     "surrogate": true,
+     "surrogate_note": "base_request_choice is a SURROGATE for hybrid-F-lhreq-noc3's robot-request rule, written from the committed source (baselines/constructed.py::B7EDFFeasibility.decide and hybrid/hybrid_arm.py::HybridArm.decide with c3 off): CLOUD if the prefill-only estimate fits the slack, DEFER by 0.5 s if it fits slack + 0.5, else the device answers. Its agreement with the real arm on real observations is NOT proved here and must be proved by the owner of hybrid_arm.py before any cell is scored."
+    },
+    "weight": 1.2,
+    "deficit_shortfall": 0.2,
+    "horizon": "its own deadline plus the deadlines it displaces",
+    "horizon_abs_s": 3.0,
+    "n_displaced_deadlines": 6,
+    "exact_until_s": 3.0,
+    "safety_factor": 1.5775406165458339,
+    "latest_safe_start": {
+     "latest_start_s": 0.450597,
+     "predicted_service_s": 1.616062,
+     "safety_factor": 1.577541,
+     "feasible": true,
+     "must_start_now": false,
+     "deferral_s": 0.450597,
+     "decode_included": true,
+     "latest_start_if_decode_omitted_s": 0.598266,
+     "decode_omission_error_s": 0.147669
+    },
+    "decode_included": true,
+    "deadline_abs_s": 3.0,
+    "now_s": 0.0,
+    "history_tokens": 7051,
+    "cached_tokens": 0,
+    "readiness": "COLD",
+    "accuracy_table": {
+     "D2": 0.25,
+     "RECENT": 0.107143,
+     "DEVICE": 0.071429
+    },
+    "p_device_on_time": 1.0
+   }
+  },
+  "elapsed_ms": 0.321326
+ },
+ "residuals_summary": {
+  "_what": "the committed cost model's HELD-OUT residual distribution: actual engine service over predicted engine service, used as the delivery-probability model P(on time) = F(slack / predicted)",
+  "_source": "results/orchestration/live2/frozen_test/runs (committed request logs)",
+  "_model_source": "cost_model_gate.py fit/apply, held out BY ARM",
+  "_register": "MEASURED on committed data. Not a live run.",
+  "split": "fit on the non-hybrid arms, test on the hybrids",
+  "seeds": [
+   0,
+   4,
+   5,
+   6
+  ],
+  "cells_excluded_for_reconciliation": "the four `_L3` cells (the 3 s handful, committed after cost_model_gate.json was written) are excluded so that this summary is of the COMMITTED gate's own cell set and reconciles with it exactly. Including them is part of the EP-G refit D153 requires, not of this summary",
+  "n_fit": 243568,
+  "n_held_out": 101498,
+  "warm_rows_held_out": 0,
+  "ratio_p50": 1.031466,
+  "ratio_p90": 1.577541,
+  "ratio_p99": 3.682543,
+  "p90_abs_error_s": 0.181655,
+  "p50_abs_error_s": 0.062528,
+  "p99_abs_error_s": 1.362557,
+  "_limitations": [
+   "the held-out rows are overwhelmingly COLD (warm is confounded with arm, G10), so the warm regime of this distribution is unidentified",
+   "every cell is dashcam-1f (D153, G17), so the distribution is of a workload v5 does not run",
+   "the gate FAILS on the decode term (25 to 32 percent over-prediction in every held-out class), so every probability derived from it is PROVISIONAL"
+  ],
+  "model": {
+   "first_token": {
+    "intercept": -0.022971863327167094,
+    "per_uncached_token": 0.00018059817042233292,
+    "per_overlap": 0.038004811772727576
+   },
+   "decode": {
+    "intercept": 0.003098481072433836,
+    "per_overlap": 0.015084798825142538
+   }
+  }
+ },
+ "margin_unit_conversion": {
+  "p90_abs_service_error_s": 0.181655,
+  "units_of_the_gate": "seconds of service time",
+  "units_of_the_objective": "expected correct answers delivered by the deadline",
+  "conversion_exists": false,
+  "refused": true,
+  "why": "The gate's error is in SECONDS of service; the objective is in expected correct answers",
+  "what_would_settle_it": "a user ruling that names the population the margin is expressed over (for example the p90 error evaluated at the median robot question's slack on the EP-G workload), recorded in the design log BEFORE the gate's ratios are looked at again"
+ },
+ "_provenance": {
+  "git_commit": "4c8c814b45d0dab0e384e2cdc8e8b0b75659cfd1",
+  "script": "cf_proofs.py",
+  "model": "n/a (policy design, no model)",
+  "timestamp": "2026-11-20T19:07:34.877635",
+  "device": "cpu",
+  "n": 56,
+  "args": {
+   "build_residuals": false,
+   "out_dir": "/tmp/claude-1001/sessB/results/orchestration/live2/v5"
+  }
+ }
+}
