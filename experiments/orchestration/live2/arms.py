@@ -686,3 +686,14 @@ ARMS.update(KVPREFETCH_ARMS)
 # makes no counterfactual prediction and so needs neither.
 from arms_v5rules import V5RULES_ARMS                                   # noqa: E402
 ARMS.update(V5RULES_ARMS)
+
+# D160: v5-rules-2 is v5-rules with its two DESIGN flaws fixed, which the user classed as design
+# changes and not bugs. Warming happens in CHUNKS on a session's unwarmed tail (D160 (1), replacing
+# the withdrawn D152 (3) per-frame prefill, which coupled upload to warming against D150 SYNC (1)
+# and made warming cost scale with request count), and a SATURATION GUARD on live engine feedback
+# sheds background warming first (D160 (2), replacing the bare W2 yield, which never fired in
+# 12,001 epochs; the diagnosis is in `reports/study_v5rules2_design.md`). Imported last for the
+# same cycle reason as the blocks above, and deliberately NOT in ARM_NAMES for the same reason
+# `v5-rules` is not: a new labelled arm under D79, never to be read as full v5.
+from arms_v5rules2 import V5RULES2_ARMS                                 # noqa: E402
+ARMS.update(V5RULES2_ARMS)

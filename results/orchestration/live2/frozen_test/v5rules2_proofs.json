@@ -1,0 +1,339 @@
+{
+  "ALL_PASS": true,
+  "P0_positive_control": {
+    "committed": {
+      "attribution": "f1d32c7, ROBOT_DEADLINE_S 5.0 -> 3.0 (D154 (1)); established by bisect plus a trace field diff showing exactly 20 rows differing in deadline_s alone. 34a4af0 and 2b8714c are both innocent.",
+      "digest": "d7ad8f6296049611",
+      "rederived_at": "origin/main 7dcc262, clean worktree, 2026-11-21",
+      "representations": {
+        "D2": 372
+      },
+      "rows": 13541,
+      "source": "results/orchestration/live2/frozen_test/value_reader_proofs.json",
+      "superseded": {
+        "digest": "5d3469549fead8ac",
+        "recorded_at": "5d7c084 (2026-11-20 16:30)",
+        "reproduces_at_origin": false,
+        "rows": 13525
+      }
+    },
+    "digest_matches": true,
+    "observed": {
+      "digest": "d7ad8f6296049611",
+      "rows": 13541
+    },
+    "pass": true,
+    "quantity": "committed base digest and row count at this cell",
+    "rows_match": true
+  },
+  "P1_roster_additive": {
+    "b7-edf-feasibility": {
+      "digest": "3ae38cb986c2937e",
+      "rows": 13570
+    },
+    "hybrid-F-lhreq-noc3": {
+      "digest": "d7ad8f6296049611",
+      "rows": 13541
+    },
+    "note": "est_tokens_by_session is ADDITIVE to the roster dict. These digests are recorded so a later change to the roster can be checked against them; the base digest above is the committed one, which is the live proof that the addition changed nothing.",
+    "pass": true,
+    "v5-rules": {
+      "digest": "d85093f61d360ba6",
+      "rows": 14397
+    }
+  },
+  "P2_negative_control": {
+    "base_digest": "200f72359b035c3a",
+    "control_v5_rules_off": {
+      "digest": "200f72359b035c3a",
+      "matches_base": true,
+      "note": "the committed arm whose own negative control passes, run here as the control ON this control: if it did not match, the test would be broken, not the arm",
+      "rows": 13541
+    },
+    "ignored": [
+      "arm_version"
+    ],
+    "off_digest": "200f72359b035c3a",
+    "pass": true,
+    "quantity": "v5-rules-2-off against the base, byte-identical on every DECISION field",
+    "raw_base_digest": "d7ad8f6296049611",
+    "raw_off_digest": "e941bb67057e20f9",
+    "rows": 13541
+  },
+  "P3_step2b": {
+    "ignored": [
+      "arm_version"
+    ],
+    "pass": true,
+    "vs_base": {
+      "differing": 12120,
+      "digests": [
+        "ca9650cf01db5350",
+        "3b4f1b7d42ff51d2"
+      ],
+      "first": {
+        "a": {
+          "H": null,
+          "belief": {
+            "cold_tokens_by_session": {},
+            "gpu_tokens_by_session": {},
+            "host_tokens_by_session": {}
+          },
+          "cost_model_id": null,
+          "defer_s": null,
+          "desired_tier": null,
+          "kind": "release_piece",
+          "mu": null,
+          "note": "session=robo001|s000|680890187975381_start_0.0_end_599.995",
+          "opportunity_ids": [],
+          "piece_tokens": 1024,
+          "predicted": {
+            "completion_s": null,
+            "imposed_delay_s_by_request": {},
+            "ttft_s": null
+          },
+          "representation": null,
+          "representation_defaulted": false,
+          "t": 0.1,
+          "traffic_mix": {
+            "monitor": 0,
+            "piece": 0,
+            "recall": 0,
+            "whole": 0
+          }
+        },
+        "b": {
+          "H": null,
+          "belief": {
+            "cold_tokens_by_session": {},
+            "gpu_tokens_by_session": {},
+            "host_tokens_by_session": {}
+          },
+          "cost_model_id": null,
+          "defer_s": null,
+          "desired_tier": null,
+          "kind": "release_monitor",
+          "mu": null,
+          "note": null,
+          "opportunity_ids": [
+            "opp0000000"
+          ],
+          "piece_tokens": null,
+          "predicted": {
+            "completion_s": null,
+            "imposed_delay_s_by_request": {},
+            "ttft_s": null
+          },
+          "representation": null,
+          "representation_defaulted": false,
+          "t": 6.2,
+          "traffic_mix": {
+            "monitor": 0,
+            "piece": 0,
+            "recall": 0,
+            "whole": 0
+          }
+        },
+        "index": 0
+      },
+      "rows": [
+        12293,
+        12120
+      ]
+    },
+    "vs_v5rules": {
+      "differing": 12293,
+      "digests": [
+        "ca9650cf01db5350",
+        "de1373a45d68b6ad"
+      ],
+      "first": {
+        "a": {
+          "H": null,
+          "belief": {
+            "cold_tokens_by_session": {},
+            "gpu_tokens_by_session": {},
+            "host_tokens_by_session": {}
+          },
+          "cost_model_id": null,
+          "defer_s": null,
+          "desired_tier": null,
+          "kind": "release_piece",
+          "mu": null,
+          "note": "session=robo001|s000|680890187975381_start_0.0_end_599.995",
+          "opportunity_ids": [],
+          "piece_tokens": 1024,
+          "predicted": {
+            "completion_s": null,
+            "imposed_delay_s_by_request": {},
+            "ttft_s": null
+          },
+          "representation": null,
+          "representation_defaulted": false,
+          "t": 0.1,
+          "traffic_mix": {
+            "monitor": 0,
+            "piece": 0,
+            "recall": 0,
+            "whole": 0
+          }
+        },
+        "b": {
+          "H": null,
+          "belief": {
+            "cold_tokens_by_session": {},
+            "gpu_tokens_by_session": {},
+            "host_tokens_by_session": {}
+          },
+          "cost_model_id": null,
+          "defer_s": null,
+          "desired_tier": null,
+          "kind": "release_piece",
+          "mu": null,
+          "note": "session=robo000|s000|1011205677616862_start_0.0_end_314.103",
+          "opportunity_ids": [],
+          "piece_tokens": 301,
+          "predicted": {
+            "completion_s": null,
+            "imposed_delay_s_by_request": {},
+            "ttft_s": null
+          },
+          "representation": null,
+          "representation_defaulted": false,
+          "t": 0.1,
+          "traffic_mix": {
+            "monitor": 0,
+            "piece": 0,
+            "recall": 0,
+            "whole": 0
+          }
+        },
+        "index": 0
+      },
+      "rows": [
+        12293,
+        16089
+      ]
+    },
+    "workload": "EP-G + per-frame (the live cells' workload)"
+  },
+  "P4_port_rule": {
+    "arm_asks": {
+      "chunk_trigger_horizon": 28,
+      "chunk_trigger_size": 174,
+      "emitted": 183,
+      "wanted": 202
+    },
+    "characteristic": "a chunked warm-ahead prefill piece, counted as release_piece or release_whole in the coordinator's own decision log",
+    "observed_pieces": {
+      "base": 0,
+      "v5_rules": 3948,
+      "v5_rules_2": 183
+    },
+    "pass": true
+  },
+  "P5_prefill_count": {
+    "criterion": "ratio <= 0.25, on BOTH the original trace and an rq30 trace",
+    "expected_from_d2_accounting": "about 1/22 = 0.045, since a chunk of 2,048 tokens is about 22 robot frames",
+    "original_trace": {
+      "base": 0,
+      "firings_v5_rules_2": {
+        "chunk": 174,
+        "emitted": 183,
+        "jit": 28,
+        "jit_suppressed": 102915,
+        "wanted": 202
+      },
+      "ratio_v2_over_v1": 0.04635,
+      "v5_rules": 3948,
+      "v5_rules_2": 183
+    },
+    "pass": true,
+    "rq30_trace": {
+      "firings_v5_rules": {
+        "chunk": 0,
+        "emitted": 83868,
+        "jit": 0,
+        "jit_suppressed": 0,
+        "wanted": 163962
+      },
+      "firings_v5_rules_2": {
+        "chunk": 131,
+        "emitted": 163,
+        "jit": 136,
+        "jit_suppressed": 129313,
+        "wanted": 267
+      },
+      "ratio_v2_over_v1": 0.04131,
+      "v5_rules": 3946,
+      "v5_rules_2": 163
+    }
+  },
+  "P6_guard": {
+    "loaded_cell": {
+      "by_backlog": 0,
+      "by_lag": 22,
+      "epochs": 12001,
+      "guard_active_epochs": 22,
+      "shed_epochs": 22,
+      "sheds_equal_active": true,
+      "warm_ahead_emitted": 339
+    },
+    "note": "the guard returns the base's action untouched when active, so warming is the ONLY thing shed; shed_epochs == guard_active_epochs is that invariant, checked rather than asserted",
+    "pass": true,
+    "quiet_cell": {
+      "by_backlog": 0,
+      "by_lag": 7,
+      "epochs": 12001,
+      "guard_active_epochs": 7,
+      "shed_epochs": 7,
+      "sheds_equal_active": true,
+      "warm_ahead_emitted": 183
+    }
+  },
+  "P7_no_future_read": {
+    "estimator": "_observe_questions / _expected_gap_s, EWMA over observed intervals per device",
+    "forbidden_tokens_anywhere": [
+      "future",
+      "trace"
+    ],
+    "forbidden_tokens_in_code": [],
+    "pass": true,
+    "reads": "obs.recall arrival_s of questions already delivered to the arm, and nothing else",
+    "scan_method": "ast.unparse with every docstring blanked, so the module's own prose cannot trip its own proof"
+  },
+  "P8_illegal": {
+    "base": 0,
+    "base_default": 0,
+    "pass": true,
+    "v5_rules_2": 0,
+    "v5_rules_2_loaded": 0
+  },
+  "_provenance": {
+    "device": "nvidia_rtx_a6000",
+    "git_commit": "7dcc262b836316b79ed24801664347c15236dd27",
+    "model": "CPU-stub",
+    "n": 2,
+    "script": "v5rules2_proofs.py",
+    "timestamp": "2026-11-21T10:49:55.681493"
+  },
+  "cell": {
+    "n": 16,
+    "ratio": "40:40:20",
+    "robot_question_set": "lh_req",
+    "run_s": 1200.0,
+    "seed": 4,
+    "ss_question_set": "ss2"
+  },
+  "cell_loaded": {
+    "dashcam_format": "epg",
+    "dashcam_min_frames": 3,
+    "n": 32,
+    "ratio": "40:40:20",
+    "robot_question_set": "lh_req",
+    "robot_upload": "per-frame",
+    "run_s": 1200.0,
+    "seed": 4,
+    "ss_question_set": "ss2"
+  }
+}

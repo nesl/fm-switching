@@ -27,7 +27,9 @@ STRIP = ("arm", "decision_latency_ms", "decision_id")
 
 
 def dry(arm_name, seed, n, run_s=120.0, ratio="50:50", patch=None,
-        robot_question_set="eval", ss_question_set="ss1"):
+        robot_question_set="eval", ss_question_set="ss1",
+        dashcam_format="oneframe", dashcam_min_frames=None,
+        robot_upload="batch-30s", robot_reask_mean_s=0.0):
     import arms as A
     import cachekeys as CK
     import cstate as CS
@@ -39,9 +41,22 @@ def dry(arm_name, seed, n, run_s=120.0, ratio="50:50", patch=None,
     from test_live2_coord import GPU_KV, HOST_GIB, HOST_TOK
     with tempfile.TemporaryDirectory() as d:
         d = Path(d)
-        TR.write_trace(d / "t", TR.generate_trace(seed, n, ratio, run_s, "A",
-                                                  robot_question_set=robot_question_set,
-                                                  ss_question_set=ss_question_set))
+        # The workload knobs are forwarded so a dry proof can run the SAME workload the live
+        # cells run. They default to the committed values, so every existing caller is unchanged:
+        # oneframe dashcam, batch-30s upload, no re-asks. Forwarding them matters because D160 (1)
+        # is a fix to PER-FRAME upload behaviour, and a dry run left on batch-30s cannot exhibit
+        # the problem it fixes (measured: v5-rules issues 827 pieces on batch-30s against about
+        # 84,000 per-frame, so a chunking proof run on the default would be measuring nothing).
+        _kw = dict(robot_question_set=robot_question_set, ss_question_set=ss_question_set)
+        if dashcam_format != "oneframe":
+            _kw["dashcam_format"] = dashcam_format
+            if dashcam_min_frames is not None:
+                _kw["dashcam_min_frames"] = int(dashcam_min_frames)
+        if robot_upload != "batch-30s":
+            _kw["robot_upload"] = robot_upload
+        if float(robot_reask_mean_s) > 0.0:
+            _kw["robot_reask_mean_s"] = float(robot_reask_mean_s)
+        TR.write_trace(d / "t", TR.generate_trace(seed, n, ratio, run_s, "A", **_kw))
         arm = A.make_arm(arm_name)
         if patch is not None:
             patch(arm)

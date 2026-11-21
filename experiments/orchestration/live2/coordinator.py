@@ -445,6 +445,19 @@ class Live2Coordinator:
             built_tokens_by_session={sid: int(s.built_tokens)
                                      for sid, s in self.st.sessions.items()
                                      if s.built_tokens > 0},
+            # D160 (1): `est_tokens` beside `built_tokens`, so an arm can see a session's UNWARMED
+            # TAIL (est minus built) and warm it in CHUNKS instead of once per uploaded frame.
+            # Without this the tail is not observable at all: `built_tokens_by_session` alone gives
+            # no history size, which `arms_v5rules._candidates` records as the reason v5-rules asks
+            # for every robot session every epoch, and which is what made warming cost scale with
+            # request count (about 84,000 prefills per run). CAUSAL: `est_tokens` is the cumulative
+            # history the cloud has ALREADY RECEIVED (`cstate.py:311` on preload, `:330` on each
+            # append), never a future upload. ADDITIVE: the base reads only `sh_instant`,
+            # `built_tokens_by_session`, `session_device` and `frame_bytes` and never iterates or
+            # hashes the roster dict, so no existing arm's behaviour can change.
+            est_tokens_by_session={sid: int(s.est_tokens)
+                                   for sid, s in self.st.sessions.items()
+                                   if s.est_tokens > 0},
         ))
 
     # ---------------------------------------------------------------- enactment

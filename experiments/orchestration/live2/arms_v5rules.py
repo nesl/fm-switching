@@ -213,7 +213,44 @@ CELL = dict(seed=4, n=16, run_s=1200.0, ratio="40:40:20",
 # `reports/study_policy_v2_gate.md` section with the value-reader table). This is CLAUDE.md check
 # 7's POSITIVE CONTROL: a known-good committed arm must reproduce its committed number in this
 # harness. If it does not, the check is broken and not the arm, and nothing else may be read.
-BASE_COMMITTED = dict(digest="5d3469549fead8ac", rows=13525,
+# RE-DERIVED 2026-11-21 ~10:05 at origin/main, per D160 addendum. The previous values
+# (digest 5d3469549fead8ac, rows 13525) were recorded at 5d7c084 on 2026-11-20 16:30 and DO NOT
+# reproduce at current origin, which gives d7ad8f6296049611 and 13541 rows, 16 rows more.
+#
+# SESSION D'S OWN UNCOMMITTED WORK IS RULED OUT, which is why this is a re-derivation and not a
+# bug fix: the same digest and row count come back from a CLEAN worktree at origin/main (7dcc262)
+# carrying none of session D's edits. The staleness is pre-existing on origin.
+#
+# WHICH COMMIT MOVED IT IS NOW ESTABLISHED BY BISECT AND FIELD DIFF, and it is benign.
+#
+#   eeea7e0 (11-20 18:48)  base digest 5d3469549fead8ac, 13525 rows  -> the committed value
+#   f1d32c7 (11-20 19:13)  ROBOT_DEADLINE_S 5.0 -> 3.0
+#   34a4af0 (11-20 19:22)  base digest d7ad8f6296049611, 13541 rows
+#
+# Diffing the two traces at the dry-proof cell: 14,985 records on both sides, and exactly 20 rows
+# differ, in ONE field, `deadline_s`, 5.0 -> 3.0. Twenty is the robot question count at this cell.
+# So the base digest moved because the ROBOT DEADLINE was tightened from 5 s to 3 s at f1d32c7,
+# which is the user's own ruling D154 (1). A tighter deadline changes decisions, and those
+# decisions are the 16 extra rows.
+#
+# BOTH COMMITS SESSION D FIRST SUSPECTED ARE INNOCENT, and their own neutrality claims stand:
+#   34a4af0 per-frame upload ("at the default the trace is BYTE-IDENTICAL") - true relative to its
+#           own parent 7cf9d56; session D's first bisect compared it against eeea7e0, which is 18
+#           commits earlier, not its parent, so the deadline change sat inside the interval.
+#   2b8714c race fix ("changes no decision") - ruled out outright, since the shift is already
+#           present at 34a4af0, which predates it by about two hours.
+#
+# So nothing here is a defect in anyone's commit. It is a legitimate user-ordered methodological
+# change whose positive control was never re-derived afterwards.
+#
+# This matters beyond this constant: a positive control is only a control while it reproduces, and
+# a stale one fails on every arm it is applied to, which is exactly how it surfaced here.
+BASE_COMMITTED = dict(digest="d7ad8f6296049611", rows=13541,
+                      superseded=dict(digest="5d3469549fead8ac", rows=13525,
+                                      recorded_at="5d7c084 (2026-11-20 16:30)",
+                                      reproduces_at_origin=False),
+                      rederived_at="origin/main 7dcc262, clean worktree, 2026-11-21",
+                      attribution="f1d32c7, ROBOT_DEADLINE_S 5.0 -> 3.0 (D154 (1)); established by bisect plus a trace field diff showing exactly 20 rows differing in deadline_s alone. 34a4af0 and 2b8714c are both innocent.",
                       representations={"D2": 372},
                       source="results/orchestration/live2/frozen_test/value_reader_proofs.json")
 # The frames-store cell for the cached-token proof. Small on purpose: the proof is a property of
