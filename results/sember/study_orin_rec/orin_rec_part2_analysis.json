@@ -1,0 +1,215 @@
+{
+ "label": "StudyORIN-REC part2 analysis",
+ "design": "Qwen3-VL-4B-Instruct on Jetson AGX Orin, default Jetson vLLM config (enforce-eager, max-num-seqs 1, prefix caching ON, FLASHINFER_DISABLE_VERSION_CHECK=1), mm-processor-kwargs matched to the committed ACC2 robot requests (shortest_edge 4096, do_sample_frames false; no downscale, no resample), image cap raised 21->640 for RICH histories. One request at a time, idle. Full S-EMBER recall suite, DEV and EVAL, both representations: RECENT (last 120 s) and D2/RICH (full D2 history). Requests are COLD (fresh run tag / salt / uuids), so cached_tokens is absent by design. Over-context questions are reported as such, never truncated.",
+ "device": "nvidia_jetson_orin",
+ "model": "qwen3vl4b",
+ "requests_total_distinct": 1690,
+ "accuracy_by_rep_split_wilson95": {
+  "RECENT_DEV": {
+   "acc_ci95": [
+    0.2675,
+    0.2158,
+    0.3264
+   ],
+   "k": 65,
+   "n": 243
+  },
+  "RECENT_EVAL": {
+   "acc_ci95": [
+    0.2807,
+    0.2463,
+    0.3179
+   ],
+   "k": 169,
+   "n": 602
+  },
+  "D2_DEV": {
+   "acc_ci95": [
+    0.2922,
+    0.2386,
+    0.3522
+   ],
+   "k": 71,
+   "n": 243
+  },
+  "D2_EVAL": {
+   "acc_ci95": [
+    0.2936,
+    0.2585,
+    0.3314
+   ],
+   "k": 175,
+   "n": 596
+  }
+ },
+ "paired_agreement_with_a6000_proxy_by_rep_split": {
+  "RECENT_DEV": {
+   "agreement_ci95": [
+    0.5267,
+    0.464,
+    0.5886
+   ],
+   "agree": 128,
+   "matched": 243,
+   "device_acc_on_paired": 0.2675,
+   "proxy_acc_on_paired": 0.3663
+  },
+  "RECENT_EVAL": {
+   "agreement_ci95": [
+    0.5415,
+    0.5016,
+    0.5809
+   ],
+   "agree": 326,
+   "matched": 602,
+   "device_acc_on_paired": 0.2807,
+   "proxy_acc_on_paired": 0.3272
+  },
+  "D2_DEV": {
+   "agreement_ci95": [
+    0.5144,
+    0.4518,
+    0.5765
+   ],
+   "agree": 125,
+   "matched": 243,
+   "device_acc_on_paired": 0.2922,
+   "proxy_acc_on_paired": 0.3704
+  },
+  "D2_EVAL": {
+   "agreement_ci95": [
+    0.5034,
+    0.4633,
+    0.5433
+   ],
+   "agree": 300,
+   "matched": 596,
+   "device_acc_on_paired": 0.2936,
+   "proxy_acc_on_paired": 0.3775
+  }
+ },
+ "agreement_note": "Paired per question_id with the committed StudyACC2 A6000 proxy (results/sember/study_acc2/acc2_requests.jsonl), reported per (rep,split), NEVER pooled. Agreement = fraction where the device letter equals the proxy letter on the question_id intersection; over_context device rows carry no answer and are excluded. proxy_missing was 0 in every cell.",
+ "latency_p50_p90_by_rep": {
+  "RECENT": {
+   "n": 845,
+   "ttft_s": {
+    "p50": 3.3172,
+    "p90": 3.3515,
+    "min": 0.2396,
+    "max": 3.8681
+   },
+   "completion_s": {
+    "p50": 3.3758,
+    "p90": 3.4103,
+    "min": 0.2987,
+    "max": 3.9274
+   },
+   "n_frames": {
+    "p50": 60.0,
+    "p90": 60.0,
+    "max": 60
+   },
+   "prompt_tokens": {
+    "p50": 5524.0,
+    "p90": 5603.0,
+    "max": 5864
+   }
+  },
+  "D2": {
+   "n": 839,
+   "ttft_s": {
+    "p50": 6.8556,
+    "p90": 16.8329,
+    "min": 0.241,
+    "max": 27.632
+   },
+   "completion_s": {
+    "p50": 6.9144,
+    "p90": 16.8995,
+    "min": 0.3004,
+    "max": 27.7046
+   },
+   "n_frames": {
+    "p50": 115.0,
+    "p90": 235.4,
+    "max": 338
+   },
+   "prompt_tokens": {
+    "p50": 10466.0,
+    "p90": 21309.2,
+    "max": 30583
+   }
+  }
+ },
+ "latency_note": "RECENT is the cold single-turn path: TTFT p50 3.317 s is frame prefill (matches StudyORIN-REC part1 cold TTFT 3.296 s and the SH-EP cold path). D2/RICH TTFT scales with history (p50 6.86 s, p90 16.83 s, up to 338 frames / 30,583 prompt tokens). Prefix caching is ON in the deployment but each request uses a fresh salt, so no request is served warm; see StudyORIN-REC WARM for the best-case warm latency.",
+ "over_context": {
+  "count": 6,
+  "policy": "reported as over-context, never silently truncated (D146)",
+  "rows": [
+   {
+    "rep": "D2",
+    "split": "EVAL",
+    "question_id": "0C17EAFE8AE5A76A95812A4F9AE3188F676D2DE189F51E8E844C667206C0D352",
+    "n_frames": 577,
+    "r1_prompt_tokens": 12627,
+    "category": "counting_objects_events"
+   },
+   {
+    "rep": "D2",
+    "split": "EVAL",
+    "question_id": "0EC4CF4189934B3A517F3C55AD4F81733FF7AE715D5E9639C3AF438533205333",
+    "n_frames": 378,
+    "r1_prompt_tokens": 12613,
+    "category": "visual_detail_recall"
+   },
+   {
+    "rep": "D2",
+    "split": "EVAL",
+    "question_id": "6396063DAEAF78E3CA93D7D6084C2096F95BFB31291E693716D86EA2903E6577",
+    "n_frames": 562,
+    "r1_prompt_tokens": 12657,
+    "category": "visual_detail_recall"
+   },
+   {
+    "rep": "D2",
+    "split": "EVAL",
+    "question_id": "92C88EE2ACE83DDF1007CF49D5D8A8D8EEB84849A55D0D567964B9348B887389",
+    "n_frames": 573,
+    "r1_prompt_tokens": 12830,
+    "category": "temporal_ordering_recognition"
+   },
+   {
+    "rep": "D2",
+    "split": "EVAL",
+    "question_id": "9AFF87C2773439515730562A9E6C8B6B30DD0F3AD361E9716E7E7D7461093A38",
+    "n_frames": 500,
+    "r1_prompt_tokens": 12694,
+    "category": "sequential_action"
+   },
+   {
+    "rep": "D2",
+    "split": "EVAL",
+    "question_id": "F1C02E4A357EF7C98137D61D519A4ACA869998AE9C2A17908E88E40B290D201C",
+    "n_frames": 505,
+    "r1_prompt_tokens": 12662,
+    "category": "temporal_ordering_recognition"
+   }
+  ]
+ },
+ "cached_tokens_note": "COLD run: cached_tokens present on 0/1690 requests, nonzero on 0/1690. Expected (fresh salt per request).",
+ "consistency_checks": {
+  "cross_check_prompt_tokens": "RECENT prompt_tokens p50 = 5524, exactly the committed ACC2 RECENT median (parity target 5,476-5,682). mm-processor config parity confirmed.",
+  "positive_control_proxy": "A6000 proxy committed accuracy reproduced from acc2_requests.jsonl: D2 DEV 0.3704, D2 EVAL 0.3738, RECENT DEV 0.3663, RECENT EVAL 0.3272; these match proxy_acc_on_paired up to the over_context exclusion.",
+  "dedup": "The runner was resumed from index 205 after the WARM insert; 2 questions straddling the boundary (D2/EVAL 0C17EAFE8AE5, 0EC4CF418993, both over_context) were written twice. Deduped by (rep,question_id) keeping first occurrence: 1692 -> 1690 rows. This also resolved the RECENT/D2 EVAL count asymmetry (both 602). Recording artifact of the resume, not a methodological change.",
+  "frames_missing": "total frames_missing across all requests = 2 (recorded per row)."
+ },
+ "headline": "On the full S-EMBER recall suite the 4B device model scores 0.27-0.29 across both representations and splits, a few points below the A6000 proxy (0.33-0.38), and agrees with the proxy's letter on about half the questions (0.50-0.54). RICH history does not beat RECENT on the device (D2 vs RECENT within CI on both splits) while costing ~2x the TTFT and pushing 6 EVAL questions over the 32768-token context.",
+ "_provenance": {
+  "git_commit": "00a223d116f7d4e7107a0d7c15eb90062c168d94",
+  "script": "analyze_part2.py",
+  "model": "qwen3vl4b",
+  "device": "nvidia_jetson_orin",
+  "n": 1690,
+  "timestamp": "2026-11-21T05:28:31.471367+00:00"
+ }
+}
