@@ -115,3 +115,69 @@ response path and because it is an instrumentation change during a live measurem
 - The engine's multimodal-cache keying is **ASSUMED** from the accounting, not read from source.
 - The 28/111 split is **MEASURED**; the interpretation of the 111 as "never observed warm" rather
   than "never inserted" is the limitation the instrument exists to remove.
+
+---
+
+## RESOLVED 12:40 by oscillation counting: it is eviction pressure, my 80 percent was wrong, and the instrument I proposed is now much less needed
+
+The H100 observed that v5-rules-2's **dashcam** requests are also costlier per request, 802 (s4) and
+768 (s5) uncached tokens against noc3's 480 and 480, and argued this supports mutual eviction over
+never-inserted. It does, and the decisive test is free: count **oscillation**, a
+warm then cold then warm sequence on one stream, which **proves** insertion, loss and re-insertion
+without any engine change.
+
+| arm | dashcam streams | ever warm | oscillating | **warm to cold to warm events** |
+|---|---|---|---|---|
+| `noc3` (**no warming at all**) | 6 | 6 | 6 | **694** |
+| `v5-rules-2` | 6 | 6 | 6 | **591** |
+| `v5-rules` | 6 | 6 | 6 | **460** |
+
+| arm | robot sessions | ever warm | oscillating | events |
+|---|---|---|---|---|
+| `noc3` | 12 | 10 | 5 | 5 |
+| `v5-rules-2` | 22 | **15** | 10 | 25 |
+| `v5-rules` | 22 | **22** | 19 | 104 |
+
+**noc3, which issues no warm-ahead prefill at all, already oscillates 694 times on dashcam.** So
+constant insertion and eviction is the **baseline state of this engine**, not something warming
+introduced. That settles the direction: the cache is under continuous pressure regardless of arm.
+
+### My 80 percent was three states conflated, and here they are separated
+
+| of v5-rules-2's 139 COLD warm-ahead prefills | count | share |
+|---|---|---|
+| **EVICTED**: the session was observed warm EARLIER and this piece still missed | **28** | 20 percent |
+| **PRE-FIRST-WARM**: the session DOES become warm later, so insertion demonstrably works for it | **77** | **55 percent** |
+| in a session **never observed warm at all** | **34** | 24 percent |
+
+I reported 111 as "never observed warm" and let that stand next to a discussion of "never
+inserted". **Only 34 are even candidates for never-inserted.** For the 77, insertion is
+demonstrably working in that very session, so they are pre-residency or evicted before the next
+touch, not uninserted. Splitting at "was it ever warm before this request" was the wrong cut; the
+right one also asks whether it was ever warm *after*.
+
+### The mechanism, stated at the register the evidence supports
+
+**Residency requires frequent touching, and the KV pool cannot hold a rarely-touched robot history
+against constant dashcam churn.** The cleanest evidence is the contrast within the robot column:
+under v5-rules' frequent pieces **22 of 22** sessions achieve warmth, under v5-rules-2's rare
+pieces only **15 of 22**, and 7 never do. That is the same trade recorded in
+`reports/study_v5rules2_live.md`: chunking removed the traffic that was keeping its own cache warm.
+
+This is consistent with the user's framing, and now measured rather than assumed: at 16 devices
+62,944 KV tokens cannot hold every robot history plus the dashcam episodes, so a history touched
+once every 7.7 s loses its place to a dashcam stream touched several times a second.
+
+### Consequence for item 3, against my own proposal
+
+**The instrument I proposed an hour ago is now substantially less needed, and I am saying so rather
+than leaving the recommendation where it was.** Offline analysis has narrowed the ambiguous set from
+111 to **34 prefills in 7 sessions**, and the dominant mechanism is established by the oscillation
+counts. One integer per request would still close those 34 exactly, and it remains the smallest
+sufficient design, but it no longer answers a first-order question.
+
+My recommendation changes to: **do not deploy it for this lead.** If it is deployed later it should
+be for a different reason, such as pricing warms by predicted cache state in the counterfactual,
+where knowing insertion per request would let the cost model condition on residency rather than
+infer it. That is the use the user's own brief addition for session B points at, and it is a
+stronger justification than the one I first offered.
