@@ -616,3 +616,64 @@ zero correct answers at the price of 163 single-shot deliveries, and declined to
 paper's "v5 without the counterfactual", **shows the counterfactual is load-bearing rather than
 decorative.** That is a cleaner result than a v5-rules win would have been, and it is the first
 evidence in the project that distinguishes the two halves of the design.
+
+## The chain breaks EARLIER than I said: 95 percent of recalls still went out COLD
+
+The H100's `arm_stats` at seed 4 is the sharpest number in this study:
+
+| | |
+|---|---|
+| warm-ahead wants | 163,914 |
+| emitted | 83,959 |
+| **unexpressible** | **79,935 (49 percent)** |
+| **recalls released at GPU-WARM** | **19 of 377** |
+| recalls released at COLD | **358 of 377 (95 percent)** |
+
+**So after 3,253 prefill pieces, 95 percent of v5-rules' recalls still went out cold.** I wrote that
+"making a question feasible does not make its answer right". That is true and it is not the main
+thing. **The main thing is that the warming mostly did not land on the questions that were asked.**
+The chain breaks one link earlier than I placed it:
+
+  warm-ahead emitted -> pieces issued                        HOLDS (3,253)
+  -> the warmed session is the one that gets asked           **FAILS (19 of 377)**
+  -> question feasible -> released                            holds (8 extra, exactly the base's 8 declines)
+  -> answer correct                                           fails (+0)
+
+**And the 8 extra releases are EXACTLY the base's 8 declines**, confirmed by opportunity id, so the
+comparison has no confound at all: the same 8 questions, released instead of declined, worth +1
+on-time and +0 correct.
+
+### Why an unconditional RULE must fail this way, and what fixes it
+
+v5-rules warms **every open session indiscriminately**, because that is what D156 (2) specifies as a
+rule. With 3,253 pieces spread across every open session, the chance that any particular session is
+warm **at the moment its question arrives** is low, and 19 of 377 measures it.
+
+**This is precisely the term session A's warm/keep reader has and v5-rules does not.** Its gain
+function is
+
+  weight x **p_question** x accuracy x (p_on_time_warm - p_on_time_cold) - harm
+
+and `p_question` is "the probability a question arrives for this history inside the horizon". That
+is the exact quantity an unconditional rule ignores. So this result argues for the **value reader**
+at least as strongly as for the harm term: the harm term would have stopped v5-rules spending the
+budget, and the `p_question` term would have told it **where to spend it instead.**
+
+## W2's yield: escalated from UNEXERCISED to a PROBABLE DEFECT
+
+`arm_stats` has **no `warm_ahead_yielded_epochs` key at all**. The counter is a `Counter` and the key
+is only created inside `if plan.yielded:` (`arms_v5rules.py:180-181`), while the three keys beside it
+are incremented unconditionally and are present. **So the counter is wired and the value is a
+genuine zero: v5-rules never yielded to deadline work, not once, in 12,001 epochs.**
+
+**That is no longer "unexercised" and I am re-classifying it.** Unexercised means no condition
+reached the mechanism. But this cell is the heaviest contention the project has produced: 163
+single-shot questions lost, about 7,000 dashcam instants unreleased, and a sibling cell on the same
+workload saturated with a 100 s queue. **Deadline work was not merely at risk, it was being
+destroyed, and the yield designed to protect it never fired.**
+
+So the honest classification is **fired-and-did-not-help's opposite: a mechanism that should have
+fired and did not**, which points at `engine_actions.deadline_work_at_risk` reading the wrong thing
+or reading it too late, rather than at an untested branch. It is a defect to investigate, not a
+branch to exercise. Not changed tonight (policy behaviour, D106/D116); it goes on tomorrow's list
+beside the belief promotion, and it is cheaper to diagnose than either.
