@@ -58,11 +58,14 @@ hybrid-F-lhreq 16 5 _L3_epg_rq30
 hybrid-F-lhreq 16 6 _L3_epg_rq30
 hybrid-F-lhreq 16 7 _L3_epg_rq30
 
+# v5-rules at seeds 6 and 7: the old rung, placed last in the paper core so every
+# ablation rung covers the same seeds 4 to 7 for the paired analysis (user).
+v5-rules 16 6 _L3_epg_rq30
+v5-rules 16 7 _L3_epg_rq30
+
 # ---- our versions on the same workload
 v5-rules 16 4 _L3_epg_rq30
 v5-rules 16 5 _L3_epg_rq30
-v5-rules 16 6 _L3_epg_rq30
-v5-rules 16 7 _L3_epg_rq30
 # seeds 4-6 already finished for these two; listed so the matrix is complete, skipped on sight
 v5-rules-2 16 4 _L3_epg_rq30
 v5-rules-2 16 5 _L3_epg_rq30
@@ -74,15 +77,25 @@ hybrid-F-lhreq-noc3 16 6 _L3_epg_rq30
 hybrid-F-lhreq-noc3 16 7 _L3_epg_rq30
 
 # ---------------------------------------------------------------- THEN: seeds 4-5 only
-# "the LRU-contrast arm" in D164 is read as warm-all-lru-off, the same arm with warming OFF, which
-# is the contrast that isolates warming from LRU eviction. If warm-all-lru-reactive was meant
-# instead, say so and I will swap two lines; both are two cells.
+# CORRECTED by the user: the LRU-contrast arm is the LMCACHE ADAPTER, not warm-all-lru-off (a
+# negative control) nor -reactive (a calibration instrument). Its own card says so: lmcache.md
+# line 36 calls it "the LRU contrast to AttentionStore's scheduler-aware eviction and Pensieve's
+# value-ordered" eviction. It IS live-runnable: arms_published.py registers "lmcache" ->
+# LMCacheArm over baselines/lmcache_adapted.py, so it is NOT dropped.
+#
+# It is HELD pending its port proof, which it has never had. Two reasons for caution, both on
+# origin: arms_published.py:311 lists lmcache in OUT_OF_CARD_SCOPE (B-recall), and its card's
+# line 75 records that live2/coordinator.py never reads an action's `order` field, so the FCFS
+# request order of adaptation A2 cannot reach a decision here. Its characteristic decision is the
+# OTHER half, LRU eviction over gpu_slots. Under the port rule it may not be scored until that
+# decision is shown to fire at least once. Proof running now; these lines are uncommented only
+# if it does, and reported as unexpressible if it does not.
 r3-streaming 16 4 _L3_epg_rq30
 r3-streaming 16 5 _L3_epg_rq30
 streamscout 16 4 _L3_epg_rq30
 streamscout 16 5 _L3_epg_rq30
-warm-all-lru-off 16 4 _L3_epg_rq30
-warm-all-lru-off 16 5 _L3_epg_rq30
+# lmcache 16 4 _L3_epg_rq30
+# lmcache 16 5 _L3_epg_rq30
 
 # ---------------------------------------------------------------- AFTER CALIBRATION (commented)
 # These three escalate on a device-confidence threshold. D164 requires each arm's threshold to be
@@ -108,6 +121,8 @@ warm-all-lru-off 16 5 _L3_epg_rq30
 # kvflow_prefetch_proofs.json records the characteristic decision as UNEXPRESSIBLE (the arm wanted
 # 8,600 fetches and validate_action refused all 8,600) and Step 2b as an ABSENT LINK. Under the
 # CLAUDE.md port rule it may not be scored until its characteristic decision occurs at least once.
+# CUTOFF 2026-11-28 (user): if the harness fix is not proved by then, kvflow-prefetch is reported
+# as "published mechanism not expressible in this harness" with the reason. It is NEVER run partially.
 # kvflow-prefetch 16 4 _L3_epg_rq30
 # kvflow-prefetch 16 5 _L3_epg_rq30
 # kvflow-prefetch 16 6 _L3_epg_rq30
