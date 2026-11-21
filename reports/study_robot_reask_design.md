@@ -141,3 +141,83 @@ truncated. That work is not wasted by either ruling.
   what drives the conclusion; it holds at every `rho`.
 - The device-answer bias **direction** is **ARGUED**, not measured, from the harness modelling
   device latency as growing with history while holding accuracy fixed.
+
+---
+
+## MEASURED 08:00: my own proposal recovers ZERO questions, and the pool caps distinct n at 69
+
+The count_only measurement is run (on flash, CPU only; the H100 correctly declined it as host
+Python during live runs). It reproduces the committed cell exactly, which is the control on the
+measurement: 20 robot asks, 20 distinct, pool coverage 0.2899.
+
+| generator stat, seed 4, n16, ratio 40:40:20, `lh_req` | value |
+|---|---|
+| `robot_question_pool_n` | **69** |
+| `robot_session_pool_n` | **51** |
+| `robot_sessions_started` | 22 |
+| `robot_sessions_completed` | 15 |
+| `robot_questions_total` | **20** |
+| `robot_distinct_questions_asked` | **20** |
+| `robot_asks_per_distinct_question` | 1.0 |
+| `robot_questions_before_join` | **0** |
+
+Classifying all 69 pool questions by what happened to them:
+
+| | questions | recoverable by asking later? |
+|---|---|---|
+| asked | **20** | n/a |
+| skipped, `t_ask` beyond the played session duration | **0** | n/a, none exist |
+| skipped, absolute time beyond the 1,200 s run horizon | **8** | **NO** |
+| in a session that was never played at all | **41** | **NO** |
+| dropped before the join point | **0** | n/a, none exist |
+
+**My proposed amendment recovers nothing, and I withdraw it.** I argued that the generator's two
+horizon skips were "recoverable by exactly the mechanism D159 (C) introduces: ask them later." Both
+halves of that are wrong on measurement:
+
+- The **beyond-session** bucket, which is the one that would have been recoverable, is **empty**.
+- The **beyond-run** 8 are skipped precisely because there is **no later time inside the run**.
+  Asking them would mean asking *earlier* than their original time, which is the one thing the gold
+  validity argument forbids.
+- The **41** are in sessions never played. No question-level mechanism reaches them; only playing
+  more sessions does.
+
+I inferred a reservoir from a stale code comment (`fleet/trace.py:318-321` says "the LH-REQ pool at
+69 questions", which is right) plus an assumption about which skip dominated, and did not measure
+the split before proposing the fix. Same failure shape as the knee bracket and the race audit: an
+inference standing in for a measurement.
+
+### What the measurement says the real lever is, and where it runs out
+
+Distinct questions are limited by **sessions played**: 22 of 51, carrying 28 of the 69 questions.
+The levers that move it are more robot device-seconds (more robot devices, a ratio shifted toward
+robot, or a longer run), not anything done per question. **And the pool is a hard ceiling: 69.**
+
+Against a required n of about 3,200 (CONSTRUCTED, `reports/study_v5_rules.md`), playing every
+session in the pool gives at most **69 distinct robot questions, a 3.45x improvement that falls
+short by a factor of about 46.** So **no lever inside this dataset reaches the required n**, and
+proposing a new dataset is forbidden by CLAUDE.md's rules. That is the honest answer to D159 (C)'s
+third question, and it is an answer about the experiment's design rather than about its
+implementation.
+
+### Where that leaves re-asks, which now look useful for a different reason
+
+The required n of 3,200 was constructed for an **unpaired** comparison of proportions. Re-asks do
+not give independent samples, but they do give something a between-question design cannot: the
+**same question, in the same session, asked repeatedly against a monotonically growing history**,
+identically for every arm. That is a **repeated-measures design**, in which each question is its own
+control and the arm contrast is estimated within question. Power then comes from pairing rather
+than from independence, and the 12.4x asks are spent on the paired structure instead of being
+discarded by the clustering.
+
+It also measures something directly relevant to the project's own claim: **does an answer flip from
+wrong to right as evidence accumulates, and does the arm that warms get there sooner?** That is
+closer to Context Inertia than a one-shot accuracy difference is.
+
+So my recommendation changes. **Keep D159 (C)'s mechanism exactly as the user specified it**,
+including drawing from already-asked questions in the same session, which I had proposed to amend
+and no longer do. Change the **analysis** from "more samples" to "repeated measures within
+question", and report the history-growth curve per question rather than a pooled proportion. The
+device-answer staleness objection from the section above is **unchanged and still binding**, and it
+bites harder in a repeated-measures design, because the within-question contrast is exactly where a
+frozen device answer sits on one side of the comparison.
