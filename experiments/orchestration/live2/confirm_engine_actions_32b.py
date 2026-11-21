@@ -926,7 +926,21 @@ def measure_m2(e: Engine, args: argparse.Namespace, run_tag: str, frames, questi
                           % frontier.get("verdict"))
         return res
     unit = int(frontier["unit_tokens"])
-    flood_units = max(int(frontier["frontier_units"]) - 1, 1)
+    # D157 (1): the flood now has to cross the GPU POOL, not the GPU-plus-host frontier,
+    # because the discriminator above is GPU residency rather than reuse. Sized from the
+    # MEASURED unit and the committed pool, with one unit of headroom so the boundary falls
+    # BETWEEN the two target histories rather than on one of them, and reported either way.
+    gpu_units = max(int(GPU_POOL_TOKENS // max(unit, 1)), 1)
+    flood_units = max(gpu_units - 1, 1)
+    res["flood_sizing"] = dict(
+        rule="cross the GPU pool so exactly one of the two histories leaves GPU",
+        unit_tokens=unit, gpu_pool_tokens=int(GPU_POOL_TOKENS), gpu_units=gpu_units,
+        flood_units=flood_units, flood_target_tokens=flood_units * unit,
+        superseded=dict(rule="cross the GPU-plus-host frontier", flood_units=max(int(
+            frontier["frontier_units"]) - 1, 1), why="at 17 units (190,328 tokens) it evicted "
+            "BOTH histories to cold in 3 of 3 repetitions, so it was too BIG, not too small; and "
+            "the probe-measured frontier overstates a passive history's window because probing "
+            "refreshes what it probes"))
     reps: List[Dict[str, Any]] = []
     per_rep_s = 14.0 + unit * flood_units / 6_000.0
     for i in range(int(args.m2_reps)):
@@ -972,10 +986,35 @@ def measure_m2(e: Engine, args: argparse.Namespace, run_tag: str, frames, questi
                                    repeat_servable_from_cache=True),
                         extra=dict(rep=i, condition=cond))
 
-            def hit(r: Dict[str, Any]) -> Optional[bool]:
-                ct = r["cached_tokens"]
-                return None if ct is None else bool(ct > COLD_OK_CACHED_MAX)
-            hT, hU = hit(pT), hit(pU)
+            # D157 (1), and the reason is the OPPOSITE of the one a reader would guess from
+            # "the pressure did not land inside the one-history window". The first run's own
+            # records say T_residency cold, U_residency cold, both with 0 cached tokens, in 3 of
+            # 3 repetitions. So both histories were FULLY EVICTED: the flood was too BIG, not too
+            # small. 17 units at 11,191 tokens, 190,328 in all, cleared both out of GPU and host
+            # alike.
+            #
+            # The measured frontier of 18 units (201,438 tokens) does not contradict that: the
+            # ladder's own probes REFRESH the residency of what they probe, which is the same
+            # effect M3 has to work around with a twin, so a frontier measured by probing
+            # overstates the window a PASSIVE history survives in.
+            #
+            # Two changes follow. The discriminator is the RESIDENCY TIER rather than whether any
+            # reuse survived, because M3 proved an evicted history lands in HOST and still reports
+            # external cached 11,168: hit-or-miss cannot separate "in GPU" from "in host", and the
+            # touch claim is about the GPU's LRU. And the flood is sized to cross the GPU POOL
+            # alone, which is far SMALLER than what ran, so one history leaves GPU while both stay
+            # reachable in host.
+            def gpu_resident(r: Dict[str, Any]) -> Optional[bool]:
+                if r.get("cached_tokens") is None:
+                    return None
+                # The probe records `residency_class` (see the reps' T_residency field), NOT
+                # `residency`. Reading the wrong key would have returned None for every probe and
+                # turned every repetition into NO EVIDENCE, which looks like a measurement.
+                tier = r.get("residency_class")
+                if tier is None:
+                    return None
+                return tier == "gpu"
+            hT, hU = gpu_resident(pT), gpu_resident(pU)
             if hT is None or hU is None:
                 outcome = "NO EVIDENCE"
             elif hT and not hU:
