@@ -120,3 +120,66 @@ mechanism-absent comparator, MARGIN_CF unset, and targeted warming reaching warm
 unconditional warming. The knee strengthens the last of these: `warm-all-lru` is above the knee and
 `v5-rules` is a selective arm, so part of unconditional warming's lower warm share is its own queue
 evicting and delaying what it warmed.
+
+## r3-streaming adds the low anchor, and it sharpens the knee's shape
+
+`r3-streaming_n16_s4_1200s_h27_3t_L3_epg`: **1,347 uncached tok/s, TTFT p50 0.146 s**, 0 non-200.
+A fifth below-side point, at a third of the load of the other four. It does not locate the knee,
+as the H100 said, but it does measure the shape of the side it is on:
+
+| | load change | TTFT change |
+|---|---|---|
+| **below** the knee, 1,347 to 4,443 tok/s | **3.30x** | **3.08x** |
+| **across** the knee, 4,443 to 5,192 tok/s | **1.17x** | **80.0x** |
+
+**Below the knee, first-token latency is roughly proportional to offered work. Across it, a 17
+percent load increase costs 80x.** So the curve is not merely steep somewhere; it is near-linear and
+cheap up to a threshold and then explodes, which is the shape that makes the cost model's single
+linear coefficient impossible rather than merely imprecise.
+
+## r3-streaming's own row must NOT be read as a result about r3-streaming
+
+The H100 asked whether declining everything is intended behaviour before its row is read. **It is
+not the proxy device latency, which was its guess. The escalate-on-low branch is unreachable on
+this data, for two independently measured reasons.**
+
+Measured in this cell (`decision.jsonl`, 4,284 rows):
+
+| kind | n |
+|---|---|
+| `release_monitor` | 3,905 of 11,764 eligible (**33.2 percent**) |
+| `decline` | **376** |
+| `defer` | 3 |
+| **`release_recall`** | **ZERO, of 377 recall opportunities** |
+
+Measured earlier on the same arm, in the device-confidence wiring proof
+(`device_conf_wiring_proof.json`): **confidence present on 24 of 381 recalls, absent on 357;
+decline-on-high 19; escalate-on-low 0.**
+
+**So both paths lead to decline and neither is a fault:**
+
+1. **Where device confidence exists, it is far too high to trigger an escalation.** StudySS2
+   recorded the device's MCQ letter-mass median at **0.986**. A cascade that escalates on LOW
+   confidence correctly declines at 0.986, which is the 19 decline-on-high events.
+2. **Where it does not exist, which is 357 of 381, the arm defaults to decline.** STATUS already
+   records why the field is absent: the re-recorded single-shot confidences are **not injected into
+   the harness query objects**, because that is a separate methodological wiring change that was
+   flagged for the user and deliberately not applied overnight.
+
+**Under Rule 2 this is UNEXERCISED: the mechanism is reachable but no condition in the run reaches
+it.** It is not a negative about r3-streaming and it is not evidence about confidence cascades.
+**Under the port rule it is the explicit failure case: the arm's characteristic decision, routing a
+query on low device confidence, occurred zero times, so its row is not a measurement of the arm.**
+The decline rows carry `note: null`, so the log alone cannot distinguish branch 1 from branch 2;
+that is a logging gap worth closing before any cascade arm is scored.
+
+**One distinction this cell earns.** Its dashcam SLO fails with only a third of eligible monitors
+released, so **its dashcam failure is a DECISION, not a queue.** Every other dashcam failure
+measured tonight was a queue at or above the knee. r3-streaming sits at 1,347 tok/s with a 0.146 s
+TTFT and fails anyway because it declines to look. Those two failure modes share a column in the
+results table and have nothing else in common, and the table should not let them.
+
+**Whether releasing 33.2 percent of eligible monitors is intended is a question for the arm's
+card, not for the data**, and I am not guessing at it: it is consistent with a streaming policy that
+samples on a cadence, and inconsistent with the full-coverage behaviour of `b7` and `mooncake` on
+the same workload. Flagged for the user rather than resolved.
