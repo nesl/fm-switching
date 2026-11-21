@@ -440,3 +440,74 @@ Check 5, claim linkage: M1 and M3 bear on physical inertia (reconstruction cost)
 warm-state capacity; none of the three bears on semantic inertia and none is cited for accuracy.
 Check 6, proxy validity: the text filler, declared in section 7. Check 7, validate the control:
 the preflight positive control, in both directions, before anything else runs.
+
+---
+
+# RESULT, measured on the H100's deployment stack 19:30 to 19:39 (commit b685fbb)
+
+Script `24c5492` unchanged, no flags, fresh round-1 server via `start_server`. Exit code 1.
+
+**Headline: 32B CONFIRMATION NOT PASSED, because M2 is NOT ESTABLISHED. M1 and M3 both PASS.**
+
+| measurement | verdict | the number |
+|---|---|---|
+| M1 warm-ahead raises cached tokens | **PASS** | 12-piece warm build of an 11,266-token history gives `cached_tokens` **11,152**; TTFT **0.088 s warm against 2.757 s cold**, residency gpu against cold |
+| M2 touched survives, untouched evicted | **NOT ESTABLISHED** | 3 of 3 repetitions INDETERMINATE (`T_survived` 0, `U_survived` 0): the 190k-token flood did not land inside the one-history window |
+| M3 reload-from-host beats rebuild | **PASS** | `verified_host_resident` true on the twin, twin and reload both classify `host`, external cached **11,168**, reload TTFT **0.134 s against a cold-KV 2.0 s** |
+
+## M1 is the mechanism v5-rules rests on, and it holds at 31x
+
+0.088 s against 2.757 s is a **31x** TTFT reduction on an 11,266-token history. v5-rules' dry proof
+showed the WIRE FORM of this (the question carrying 2 frames instead of 330); **this is the engine
+side of the same claim, and it is now measured rather than owed.** The caveat in the script still
+stands and must travel: M1 shows the engine pays a warm-ahead off, NOT that an arm can issue one,
+because the script issues it directly over HTTP while warming ahead became expressible in the
+committed action space only with PATCH 1.
+
+## M3 PASSED AGAINST MY EXPLICIT PREDICTION, and that is the most consequential line in this report
+
+I told the H100 to expect `NOT ESTABLISHED` and to treat it as unexercised rather than a failure,
+on the grounds that `believed_tier` is never `host` in 56 committed cells. **I was wrong, and wrong
+in a way that matters more than being right would have.**
+
+The two facts are both true and they are about different layers:
+
+- **The ENGINE holds histories in the host tier and serves them from there**, verified on a twin
+  before timing, and a reload is **0.134 s against a cold rebuild's 2.0 s, about 15x**.
+- **Our COORDINATOR's belief never says `host`** in any committed cell.
+
+So reload-from-host is **not an unreachable mechanism. It is a real, fast mechanism our policy
+cannot currently trigger**, and the gap is in belief PROMOTION, not in the engine. Everything I and
+session C wrote about this action being "unexercised" was right about our harness and wrong as a
+statement about the capability. The correct reading is the opposite of the one I was heading for:
+the 15x is sitting there unclaimed because the belief does not track the tier the engine is already
+using.
+
+That changes what the belief work is worth. It is no longer housekeeping on a dead field; it is the
+only thing between the policy and a measured 15x on history restoration.
+
+## M2 is unexercised, and the reason is in the JSON rather than in a guess
+
+The flood was about 190,000 tokens in 42 s and did not evict exactly one of the two histories, so
+both survived in all three repetitions and the control could not discriminate. That is Rule 2
+**unexercised**, NOT evidence that touch fails. The script's own design anticipated this: its
+control is a REVERSAL rather than a null, so a mis-sized flood yields INDETERMINATE instead of a
+false asymmetry, which is why this came back honest rather than wrong.
+
+**The fix is known and the data for it is in the same JSON.** M2 needs its pressure sized from the
+MEASURED frontier the run recorded, rather than from a flood chosen in advance. That is a second
+short break, and it is the user's call whether to spend one.
+
+## Consequence for the gates, stated plainly
+
+**"32B confirmation passed" requires all three, so it is NOT met.** Full v5 therefore fails this
+condition in addition to the one it already failed, and the JSON's own `policy_consequence` records
+the narrower true statement: **reload may go live.**
+
+This changes nothing for v5-rules, which depends on M1 (passed) and not on M2 or M3, and stays
+queued. It changes nothing about full v5's critical path either, because `MARGIN_CF` remains
+unsettable: D154 (2) defines it in the objective's units while the gate's error is in seconds, and
+no conversion is ruled. **Full v5 was already blocked by a ruling, not by this run.**
+
+The preflight usage block is in the JSON, which settles `EXTERNAL_HIT_KEYS` (previously CONSTRUCTED
+and unverified, and `engine_actions.py`'s own docstring asked for exactly this).
