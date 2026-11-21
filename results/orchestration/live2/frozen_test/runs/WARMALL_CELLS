@@ -1,6 +1,27 @@
 # WARM-ALL cells on the EP-G workload. Format: arm n seed tag
 #
-# THESE ARE THE GATE'S HELD-OUT TEST (D151 (6), D154 (2)). The fit is WARMALL_CELLS_1F on the
+# THESE ARE THE GATE'S HELD-OUT TEST (D151 (6), D154 (2)).
+#
+# D156 (4) ADDS A REQUIREMENT THESE CELLS DID NOT CARRY WHEN I FIRST WROTE THEM: the held-out
+# cells must run with PER-FRAME UPLOAD (upload-pf), while the FIT cells stay on upload-30s.
+# So each cell below needs `--robot-upload per-frame` (34a4af0) in addition to EPG_ARGS. The
+# driver's tag mechanism has no per-frame tag, so this needs either a new tag or the flag
+# appended for these cells specifically; flagged to the H100 rather than assumed.
+#
+# NOTE THE CONSEQUENCE, because it is deliberate and not an oversight: the two halves of the
+# split now differ in TWO things, the dashcam format AND the upload contract. That is the user's
+# design: the held-out test is the workload v5 actually runs, not a minimal perturbation of the
+# fit. It means a held-out failure does not localise to one of the two changes, and the p90
+# error is the number reported either way.
+#
+# Per-frame upload makes the believed holding grow every 2 s instead of every 30 s, so
+# incrementally-materialising arms find work on far more epochs: warm-all-lru measured 180 to
+# 588 prefill pieces (3.27x) and v5-rules 330 to 1,163 (3.52x) on the same cells. At 16 devices
+# over 1,200 s that is the number to watch for saturation.
+#
+# D97 eligibility must be RECOMPUTED for per-frame cells: eligibility.py:94 reads
+# robot_history_batches, which is 14.6x larger under per-frame on the same definition, so a
+# per-frame cell's entry table must not be read off a committed one. The fit is WARMALL_CELLS_1F on the
 # dashcam-1f workload. Nothing fitted there may be reported as a gate pass; the gate passes or
 # fails on THESE cells, and MARGIN_CF is then set once from the held-out p90 absolute error.
 #

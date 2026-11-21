@@ -1,0 +1,43 @@
+# v5-rules (D156 (2)), the rule-based v5 and the paper's "v5 without the counterfactual" ablation.
+# Format: arm n seed tag
+#
+# Commit 88f4710. Needs EP-G (EPG_ARGS) and, per D156 (2), per-frame upload
+# (--robot-upload per-frame, 34a4af0). Robot deadline 3 s, which B3 made the default in f1d32c7
+# and which the driver also passes explicitly.
+#
+# NO GATE PASS REQUIRED. D156 (1) scopes D151 (6)'s cost-model gate to COUNTERFACTUAL decisions,
+# and this arm has none: nothing in it imports v5/value_readers.py, so MARGIN_CF is unreachable
+# from it by construction rather than by discipline.
+#
+# THE THREE PROOFS, all passing dry, with ISSUED counts and never asks:
+#   warm-ahead prefills issued   827 against its base's 0 and -off's 0
+#   cached prefix at question    rises 0 to 328 of 330 frames on the 4 recalls BOTH arms released,
+#                                so the question itself carries 2 frames instead of 330
+#   illegal actions              0 of 14,397 decisions
+#   Step 2b against its base     1,126 differing decisions, first a release_piece at t = 0.1 s
+#   Step 4                       -off byte-identical to base with 0 prefills, so those 1,126 are
+#                                the warming channel and nothing else
+#
+# THE RESULT TO READ FIRST, and it is the whole causal claim in one pair of counts: v5-rules
+# released 6 recalls and declined 0 where its base released 4 and declined 2. The two extra are
+# the 20,281- and 24,331-token histories the base refuses to rebuild cold inside 3 s.
+#
+# TWO CAVEATS THAT MUST TRAVEL WITH ITS NUMBERS.
+# (a) THE SUBMISSION RACE. coordinator.py adds a frame to sent_bytes_for at SUBMISSION, so a fast
+#     second piece references those images by uuid before the engine has registered the piece
+#     carrying their bytes, and the request 400s; once one piece fails the cascade continues on
+#     that session. Measured on warm-all-lru's CAL1F cell: 226 HTTP 400s, and of those ZERO had a
+#     previous request on the same session that completed 200 before this one was sent (192 still
+#     in flight, 217 already failed), median gap 0.12 s. v5-rules is a warm-ahead arm and WILL hit
+#     the same race, so expect a 400 cascade on its prefills and read its delivery numbers with
+#     that caveat. The fix is a coordinator change (count bytes as sent only on a 200, or serialise
+#     a session's pieces) which alters wire bodies for every piece-chaining arm, so it is NOT an
+#     overnight change and is flagged for the morning.
+# (b) W2's YIELD IS UNEXERCISED: deadline_work_at_risk was False in 12,001 of 12,001 dry epochs, so
+#     "yields to deadline work" is unproven (Rule 2). Please report warm_ahead_yielded_epochs; a
+#     live cell is the first place contention can show it.
+#
+# Seeds 4 and 5 only. At seed 0 this is the arm most likely to send D144 (3)'s 33,839-token
+# request, because warming makes long histories feasible; charge the miss if seed 0 is ever run.
+v5-rules 16 4 _L3
+v5-rules 16 5 _L3
