@@ -271,6 +271,22 @@ questions "RECENT beats the device" is one plausible reading of a wide interval,
 
 ## H. RETRACTED IN PART: the measured latencies are the COLD re-send path, an API artifact
 
+**D155 (1) corrects this section and D155a corrects my ARITHMETIC too. Both are marked at the
+point of use rather than quietly edited.**
+
+**THE 6.651 s FIGURE WAS MINE AND IT WAS WRONG, independently of the artefact question.** I added
+TTFT to end-to-end when end-to-end already contains it. The cold path is **3.354 s end to end,
+3.296 s of it TTFT**. Post-first-token time is **0.058 s cold and 0.059 s warm**, so the 2-token
+answer costs the same either way and there is no 3.35 s of 'completion' to explain. Measured warm
+completion is p50 0.270 s.
+
+**And the mechanism turns out to be specific rather than merely an artefact, which makes D61 (b)'s
+exclusion stronger than the label suggested.** prompt_tokens are IDENTICAL cold and warm, 5,524 on
+all 97 questions, while cold recomputes the KV that warm reuses as 5,392 cached tokens. So the
+entire excess is a RE-PREFILL of frames the device already holds, charged as TTFT BEFORE the first
+token. The right wording is that, not 'charged after the first token', and the warm number needs no
+caveat on this axis.
+
 **D155 (1) corrects this section and I am marking the retraction at the point of use rather than
 quietly editing the numbers.** I reported the StudyORIN-REC part 1 latencies as the device baseline
 and drew three conclusions from them. They are the **COLD RE-SEND path**, which D61 (b) already
