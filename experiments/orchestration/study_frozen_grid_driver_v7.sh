@@ -130,7 +130,14 @@ ordered_cells() {   # user order (2026-11-20, after D144): the requeued seed-6 h
   # at every boundary, so an arm flash lands later joins at the next boundary); then the rest of the sweep at 3 s.
   local hf=$(grep -v '^#' $OUT/HANDFUL_L3 2>/dev/null | tr -s ' \n' ' ')
   local sw=$(grep -v '^#' $OUT/SWEEP_ARMS 2>/dev/null | tr -s ' \n' ' ') top=$(grep -v '^#' $OUT/TOP5 2>/dev/null | tr -s ' \n' ' ')
-  for s in 4 5 6; do for x in $hf; do echo "$x 16 $s _L3"; done; done
+  # overnight queue (user ruling 2026-11-20, item 2): handful seed 4 -> the WARM-ALL calibration cells (when flash's arm
+  # is on origin with its proofs; $OUT/WARMALL_CELLS, "arm n seed tag") -> v5 at 16 seed 4 (only if flash posts
+  # "policy-v5 ready" with the gate and the 32B confirmation passed; $OUT/V5_CELLS) -> handful seeds 5 and 6 -> the rest
+  # of the sweep at 3 s. An empty or missing file is skipped, so the queue never stalls.
+  for x in $hf; do echo "$x 16 4 _L3"; done
+  grep -v '^#' $OUT/WARMALL_CELLS 2>/dev/null | awk 'NF>=3 {print $1, $2, $3, $4}'
+  grep -v '^#' $OUT/V5_CELLS 2>/dev/null | awk 'NF>=3 {print $1, $2, $3, $4}'
+  for s in 5 6; do for x in $hf; do echo "$x 16 $s _L3"; done; done
   for x in $sw; do echo "$x 16 4 _L3"; done
   for x in $sw; do echo "$x 18 4 _L3"; done
   for s in 5 6 0; do for x in $top; do echo "$x 16 $s _L3"; done; done
