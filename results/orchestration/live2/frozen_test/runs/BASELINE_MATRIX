@@ -77,7 +77,12 @@ hybrid-F-lhreq-noc3 16 6 _L3_epg_rq30
 hybrid-F-lhreq-noc3 16 7 _L3_epg_rq30
 
 # ---------------------------------------------------------------- THEN: seeds 4-5 only
-# LABEL REQUIRED on r3-streaming and streamscout: scorer/score.py cascade_device_wait() lists them
+# HELD (user ruling about 14:45): r3-streaming and streamscout do NOT run on the 0.567 s proxy.
+# They are commented until the MEASURED Orin warm latency is wired into their LIVE wait and their
+# names are added to runs/DEVWAIT_READY with the proof in the same commit. The driver (v18) also
+# holds them at any tag; that hold is the safety net and this file is what says what will run.
+#
+# WHY THEY ARE IN THIS GROUP AT ALL: scorer/score.py cascade_device_wait() lists them
 # as cascade-style arms, alongside confidence-cascade, cascade-routing and thinking-qwenvl, because
 # they WAIT for the device answer. That wait is the flat costs.py:37 DEV_LAT_S = 0.567 s, against a
 # measured warm p50 of 0.2697 s, and measured_device_wait_applied is still false. It is a
@@ -103,10 +108,10 @@ hybrid-F-lhreq-noc3 16 7 _L3_epg_rq30
 # STEERS the coordinator's eviction order; it cannot command vLLM residency (D44). Its card's
 # adaptation A2 (FCFS request order) remains unexpressible, since `order` is never read; that is
 # a harness property recorded in the card at line 75, not a change to the adaptation.
-r3-streaming 16 4 _L3_epg_rq30
-r3-streaming 16 5 _L3_epg_rq30
-streamscout 16 4 _L3_epg_rq30
-streamscout 16 5 _L3_epg_rq30
+# r3-streaming 16 4 _L3_epg_rq30
+# r3-streaming 16 5 _L3_epg_rq30
+# streamscout 16 4 _L3_epg_rq30
+# streamscout 16 5 _L3_epg_rq30
 lmcache 16 4 _L3_epg_rq30
 lmcache 16 5 _L3_epg_rq30
 

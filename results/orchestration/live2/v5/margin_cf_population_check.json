@@ -1,0 +1,82 @@
+{
+  "_asked": "D168: set MARGIN_CF once, population = the four EP-G WARM-ALL held-out cells, counting only robot questions released in HEALTHY-regime windows, minimum n = 40",
+  "_outcome": "MARGIN_CF IS NOT SET. n = 16 healthy-window released robot questions against a required minimum of 40, so D168 (4) applies: do not set the margin, report n.",
+  "_ordering_kept": "D168 (1) requires P_hat to be frozen before any population cell is SCORED. No cell was scored: this is a COUNT of the population, which D168 (4) requires in order to decide whether to proceed at all. No P_hat was applied and no error was computed.",
+  "population_cells": [
+    {
+      "cell": "warm-all-lru_n16_s4_1200s_h27_3t_L3_epg_rf",
+      "arm": "warm-all-lru",
+      "http_400": 0,
+      "race_clean": true,
+      "windows": {
+        "healthy": 1,
+        "unclassified": 1,
+        "collapsed": 6
+      },
+      "robot_questions": 20,
+      "released": 13,
+      "healthy_released": 2
+    },
+    {
+      "cell": "warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_epg",
+      "arm": "warm-all-lru-reactive",
+      "http_400": 0,
+      "race_clean": true,
+      "windows": {
+        "healthy": 12
+      },
+      "robot_questions": 20,
+      "released": 0,
+      "healthy_released": 0
+    },
+    {
+      "cell": "warm-all-lru-off_n16_s4_1200s_h27_3t_L3_epg",
+      "arm": "warm-all-lru-off",
+      "http_400": 0,
+      "race_clean": true,
+      "windows": {
+        "healthy": 12
+      },
+      "robot_questions": 20,
+      "released": 12,
+      "healthy_released": 12
+    },
+    {
+      "cell": "warm-all-lru_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rf",
+      "arm": "warm-all-lru",
+      "http_400": 0,
+      "race_clean": true,
+      "windows": {
+        "healthy": 1,
+        "collapsed": 8
+      },
+      "robot_questions": 20,
+      "released": 15,
+      "healthy_released": 2
+    }
+  ],
+  "totals": {
+    "robot_questions": 80,
+    "released": 40,
+    "healthy_released": 16,
+    "minimum_required": 40
+  },
+  "race_clean_all_four": true,
+  "race_clean_note": "Verified by MEASURED HTTP 400 count, not by the presence of an _rf label, as D168 (2) requires. Two cells (reactive, off) have no _rf rerun and never needed one: they were already clean, consistent with the race only affecting long warm-ahead chains. Non-200 non-400 rows: 67 and 29 in the two _rf cells, which are the transport errors with no status the H100 reports, not race 400s.",
+  "population_guard_defect_confirmed": {
+    "found": "cf_ontime_frozen.py:91 POPULATION_ARM = 'warm-all-lru', a single arm name, enforced with exactly four cells",
+    "why_it_is_wrong": "the four WARMALL_CELLS span THREE arms: warm-all-lru, warm-all-lru-reactive and warm-all-lru-off. The guard as written would refuse two of the four cells it is supposed to admit.",
+    "status": "NOT YET FIXED, because fixing it would only enable a margin that D168 (4) forbids setting. It is recorded here so the fix is not forgotten when the population changes."
+  },
+  "why_the_population_is_hostile_to_a_healthy_only_margin": {
+    "mechanism": "the two halves of the population fail for OPPOSITE reasons, which is why no reweighting inside it can help. The cells that RELEASE robot questions (warm-all-lru and its kv0.25 cell, 13 and 15 released) are mostly COLLAPSED (6 of 8 and 8 of 9 windows), so their released questions are almost all outside the healthy regime. The cell with the most healthy windows that releases anything (warm-all-lru-off, 12 of 12 healthy) is the NO-WARMING control. And warm-all-lru-reactive has 12 of 12 healthy windows but releases ZERO robot questions, so it contributes nothing.",
+    "predicted": "WARMALL_CELLS itself predicted this: 'EXPECT warm-all-lru to push the 62,944-token pool far harder than anything run so far; there is no live number for it. Saturation is a FINDING, not a failed cell.' It saturated.",
+    "consequence": "12 of the 16 healthy-window questions come from the no-warming control arm, so even the n = 16 that exists is dominated by the one arm whose behaviour the margin is least meant to characterise."
+  },
+  "what_would_unblock_it": [
+    "more cells: the margin population is a user-fixed set (D157 (2)), so widening it is a ruling, not a choice I may make",
+    "rq30 re-asks in the population cells would multiply robot questions per cell (the rq30 cells carry about 112 re-asks against 20 first asks), but these four cells were run without re-asks",
+    "dropping D168 (3)'s healthy-only restriction would give n = 40 exactly, the released total; that restriction exists because D160 (2) says the counterfactual acts only in the healthy regime, so removing it is also a ruling"
+  ],
+  "blocked_downstream": "No full-v5 cell may run: D154 (2) forbids any v5 cell before MARGIN_CF is set. V5FULL_CELLS is therefore NOT posted."
+}
