@@ -75,7 +75,11 @@ then 4,244 on the EP-G held-out cell 1 (SATURATED, 29 %), with dashcam TTFT abou
 count as sent only on HTTP 200), proven live (0 x 400 on every later warm-all cell). (3) warm-all-lru s5 first attempt
 INVALID: one 21 s lateness burst at t = 1,138 to 1,159 s after a coordinator-link reset; the rerun was valid. (4) Score
 failed on warm-all-lru 1F from scorer/data_sources version skew within one process (f1d32c7 pushed mid-run). (5) n_requests
-and n_errors come back null in cell.json for warm-all cells (DEFECT; counts taken from request.jsonl).
+and n_errors come back null in cell.json for warm-all and querystream cells (DEFECT; counts taken from request.jsonl).
+(6) DEFECT: dashcam rows in request.jsonl carry `session_id` null (robot and single-shot rows are populated), so anything
+keyed on dashcam session identity pools all dashcam devices silently (it voided one of flash's tests tonight); worth a grep
+of the tree before any per-dashcam-session analysis. An engine-side cache log (per-session insertion and eviction) is the
+INSTRUMENTATION GAP that keeps the cause of the knee crossing open.
 
 **Labels and PROVISIONAL decisions.** `dashcam-1f` (sensitivity only) = every cell before the EP-G switch; `upload-30s` = every
 cell before the per-frame cells; `race-affected` = piece-chaining cells before 2b8714c (warm-all-lru and -reactive 1F,
