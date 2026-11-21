@@ -1,6 +1,6 @@
 ## 06:00 analysis summary (session D): v5-rules, the cost-model gate, and what is blocked
 
-**Last updated: 2026-11-21 06:25 (section 1b added after the 06:00 summary).** Headline figures for every arm and cell are the H100's, in
+**Last updated: 2026-11-21 07:30 (section 1b superseded, section 5 extended; the 06:00 summary itself stands).** Headline figures for every arm and cell are the H100's, in
 `reports/study_frozen_test.md` section "06:00 SUMMARY (2026-11-21, H100 overnight; D156 (5) form)".
 Nothing in this section restates a number from that table; the analysis below is the other half.
 Full write-ups: `reports/study_v5_rules.md`, `reports/study_cost_model_gate_d156.md`.
@@ -34,42 +34,50 @@ this one makes the fitted model invalid.
 the estimator is sound and the **fit set** is not. The estimator was imported unchanged from
 `live2/cost_model_gate.py`; only the split differs.
 
-### 1b. ADDENDUM 06:25, after the 06:00 summary: the gate's confound is now quantified, and the knee is bracketed to 3.9 percent
+### 1b. ADDENDUM 07:30, superseding the 06:25 addendum: a severity separation, NOT a bracketed knee
 
-`reports/study_saturation_knee.md`, commit `939b300`, instrument
-`experiments/orchestration/live2/v5/knee_within_run.py`.
+`reports/study_saturation_knee.md`, commits `939b300` then `8673361`, instrument
+`experiments/orchestration/live2/v5/knee_two_sets.py`. The earlier instrument
+`knee_within_run.py` and its JSON carry a **withdrawn** bound; the report holds the full retraction
+and what I claimed first, which is the record. This section holds only what currently stands.
 
-Partitioning all 29 EP-G and CAL1F cells by whether first-token p50 in **any** 100 s window of
-submit time exceeds 2.0 s (criterion declared before the partition was read) separates them with
-**zero misclassifications**: 19 cells at 4,356.0 to 4,511.7 uncached tok/s never cross, 10 cells at
-4,685.8 to 5,830.8 all cross. The knee bound narrows from the between-cell gap
-[4,511.7, 5,192.1] to **[4,511.7, 4,685.8]**, a 3.9 percent bracket.
+**WITHDRAWN at 07:30:** the knee "bracketed to [4,511.7, 4,685.8] uncached tok/s, 3.9 percent, zero
+misclassifications in 29 cells", which I published at 06:25 and the H100 adopted. Putting the
+committed gate's own 26 cells on the same axis gives an **overlapping** partition at the same
+declared 2.0 s criterion: highest non-crossing 4,706.9, lowest crossing 4,670.5, interleaved across
+that band. No threshold among 2.0, 5.0 and 10.0 s separates the combined 56 cells, and at 5.0 s the
+EP-G set inverts on its own. The clean partition existed only inside the set whose gap I used to
+pick the threshold, and the sensitivity check I reported was applied to crossing *times* rather
+than to the *partition*, which is the check that would have caught it.
 
-**This names section 1's diagnosis exactly.** The gate's two CAL1F fit cells are
-`warm-all-lru-reactive` at 4,511.7 tok/s, which is **the highest non-crossing cell in the entire
-set**, and `warm-all-lru` at 5,476.2 tok/s, which crosses in its first window. The fit set is not
-merely confounded by arm: **it is two points on opposite sides of a phase transition, one of them
-the boundary cell itself.** OLS with an unconstrained intercept spanning that is why the intercept
-went to -2.37 s and why 52 percent of in-sample predictions are negative. The gate verdict does not
-change and v5 still does not go live; the reason is now a measured threshold rather than an inferred
-confound, which also means the remedy is specific: a fit set drawn entirely from one side.
+**WHAT STANDS.** A severity separation with the middle unoccupied: across the gate's 26 cells the
+worst first-token p50 in any 100 s window **never exceeds 2.781 s** and is 0.915 s or below in 23
+of them, while every severe cell in either set is at 5,190 uncached tok/s or above with a worst
+window of **31 to 478 s**. Run-mean uncached tok/s does **not** determine which side a cell falls
+on, so this is a transition zone of roughly 4,500 to 4,750, not a threshold, and the axis is
+incomplete.
 
-**One correction to make against myself.** I hypothesised that *crossing time* explained the wide
-severity spread above the knee. Over the 10 crossing cells, terminal-window p50 correlates with
-run-mean load at rho **+0.84** and with crossing time at rho **-0.13**. Refuted by my own
-instrument. Crossing time explains only how much of a run sits on each side, which is why it moves
-the pooled statistic and not the severity.
+**Section 1's gate diagnosis is UNAFFECTED and does not depend on the withdrawn bound.** The two
+CAL1F fit cells sit at 4,511.7 and 5,476.2 tok/s with worst windows of 0.26 s and 31.89 s, a **120x
+severity difference inside one fit set**. That is what drives the OLS intercept to -2.37 s and makes
+52 percent of in-sample predictions negative. The verdict is unchanged, v5 still does not go live,
+and the remedy is still specific: a fit set whose cells do not differ 120x in service severity.
 
-**A reading change for the frozen-test table, affecting no score.** For the 10 crossing cells the
-pooled first-token p50 is a mixture of two regimes and is not a property of the arm: the controlled
-pair 1.0 percent apart in load differs **47x pooled and 1.9x on the terminal window**. TTFT may not
-be compared across two crossing arms on the pooled figure. No scored quantity moves, because
-deadline and on-time are per request and are never pooled across the regimes.
+**Also unaffected:** for the 10 EP-G crossing cells the **pooled** first-token p50 is a two-regime
+mixture and may not be compared between arms, since the controlled pair 1.0 percent apart in load
+differs 47x pooled and 1.9x on the terminal window. That rests on the per-cell within-run ramps,
+not on any threshold. No scored quantity moves, because deadline and on-time are per request and
+are never pooled across the regimes. The H100 has adopted this in `reports/study_frozen_test.md`.
 
-Open lead, not a finding: at the crossing the median request's uncached token count is flat while
-the mean cached fraction falls 0.80 to 0.68, so the rate rise is carried by a **tail** of
-badly-missing requests. Cause and direction unestablished; `residency.jsonl` would separate them and
-is unread.
+**A second correction against myself, still standing:** I hypothesised that *crossing time*
+explained the severity spread. Terminal-window p50 correlates with run-mean load at rho **+0.84**
+and with crossing time at rho **-0.13**. Refuted by my own instrument.
+
+**The cache lead is closed unresolved.** The dashcam COLD share nearly triples at the crossing and
+accounts for roughly 1,900 of the ~4,000 tok/s rise, but LRU pressure is refuted at request level
+with the wrong sign, and the queue-to-cold test is **void** because `session_id` is null on all
+9,434 dashcam request rows, which pooled 6 devices into one pseudo-session. It needs
+instrumentation, not another file: a per-dashcam-session cache log or an engine-side eviction trace.
 
 ### 2. MARGIN_CF stays unset, and both pre-registered conditions for setting it are now MET
 
@@ -161,8 +169,34 @@ significance to one outlier cell.
 ### 5. Session B's state
 
 - **`P_hat` IS frozen and committed with its hash** (see section 2), which satisfies D157 (2).
-- **The deficit weighting and the p99 instrument: UNKNOWN.** Neither I nor the H100 heard from B
-  tonight, and I am reporting that rather than inferring it from the files.
+- **`P_hat`'s zero warm held-out rows are STRUCTURAL, measured at 07:20.** Full write-up:
+  `reports/study_counterfactual_warm_holdout.md`, commit `8673361`. At 06:00 I had the declaration
+  `warm_rows_held_out: 0` from B's own artefact but not the cause. `cf_cost.py:63-66` sets
+  `GATE_SPLIT = "by_arm"`, that split holds out the hybrids, and **all eight hybrid cells are 0.00
+  percent warm at request level**. The split holds out exactly the arms that contain no warm rows,
+  so it **cannot validate warm first-token prediction even in principle**. The whole 26-cell gate
+  set is 1,797 warm of 345,072 requests, 0.52 percent, reconciling to the gate JSON's own totals
+  within 6 requests (explained by `features()`' stricter row filter).
+
+  So `P_hat` is fitted at 0.52 percent warm, validated at **0.00 percent structurally**, and applied
+  to EP-G WARM-ALL cells that are **83 to 91 percent warm**. A **second** extrapolation sits on a
+  different axis: the gate is fitted where the service is never more than **2.781 s** behind and
+  applied where it is up to **478 s** behind, about 170x, on the axis its own linear `overlap` term
+  is supposed to carry.
+
+  **Check 7 passes and locates the fault.** The `by_seed` split is the positive control: it carries
+  1,797 warm held-out rows at a warm first-token ratio of 0.9108. The estimator can be validated on
+  warm data when a split provides any, so **the failure is the split, not the estimator**, the same
+  shape as the D156 (4) gate. The remedy is therefore specific rather than more data: hold out an
+  arm that produces warm rows, which among committed cells means `by_seed` or a new split over the
+  WARM-ALL arms. **This is a user decision, not an analysis step.**
+
+  NOT CLAIMED: that `P_hat` is wrong on warm or on loaded requests. Only that the committed
+  `by_arm` validation cannot speak to either regime, so its held-out error is not evidence about
+  the regime MARGIN_CF is scored in.
+- **The deficit weighting and the p99 instrument: UNKNOWN.** B pushed **nothing during the overnight
+  window**; its last commit is `023ce6f` at 2026-11-20 20:02, before 21:00. Neither I nor the H100
+  heard from B. Reported as unknown rather than inferred from the files.
 
 ### 6. What is BLOCKED, and why
 
@@ -199,7 +233,7 @@ check:
 3. **My MARGIN_CF n-argument was arithmetically wrong** (I conflated the warm stratum with D157 (2)'s
    population), and the cold-share figure that replaced it came from one cell, which is the same
    register error twice in three sections.
-4. **The queue is created by the ARM, not by EP-G** — caught before publication this time.
+4. **The queue is created by the ARM, not by EP-G**, caught before publication this time.
 
 ### 9. For the user: decisions, each with my default
 
