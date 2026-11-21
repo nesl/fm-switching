@@ -37,6 +37,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+import os
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 for _p in (str(HERE), str(ROOT / "experiments/orchestration/live"),
@@ -64,6 +66,9 @@ DEVICE_ANSWER_CHARGE_S = C.DEV_LAT_S         # StudyD8's 0.567 s RULE (D87, amen
 # (spec 6.1, 9 as amended). Every arm therefore decides at the same rate, which is what makes
 # the decision rate stop being an arm property, and it is recorded in the run header.
 DECISION_PERIOD_S = 0.1
+# D150 PATCH 2's belief correction: "observe" counts and does not mutate, "apply" mutates.
+# Default observe, so no committed or in-flight baseline cell changes behaviour under it.
+BELIEF_CORRECTION = os.environ.get("LIVE2_BELIEF_CORRECTION", "observe")
 DEFAULT_TICK_S = DECISION_PERIOD_S           # kept as the old name; same value for every arm
 HEADER_TEXT = "D2 history"                   # the committed D2 header text, 31 tokens (StudyRH4)
 
@@ -703,6 +708,15 @@ class Live2Coordinator:
             if sub.session_id:
                 _s = self.st.sessions.get(sub.session_id)
                 if _s is not None:
+                    # OBSERVE-ONLY BY DEFAULT, and the default is the point. On a DRY cell the
+                    # corrector cannot fire (no engine, so no cached_tokens), which is why the
+                    # 50-arm byte-identity prescreen proves PATCH 1 harmless and proves NOTHING
+                    # about this read. On a LIVE cell it mutates a belief that arms read, so
+                    # enabling it mid-sweep would make the cells before and after incomparable
+                    # for every arm that reads residency. So the counters always run and the
+                    # MUTATION is gated: `observe` measures how often the correction WOULD fire
+                    # and changes no decision; `apply` is for v5 cells, which are new cells.
+                    _snap = (dict(_s.belief), _s.last_touch_s)
                     _bu = EA.belief_update_from_cached_tokens(
                         _s, ct, pt, now=t,
                         external_tokens=EA.external_cached_tokens_of(usage))
@@ -710,6 +724,10 @@ class Live2Coordinator:
                     if _bu.changed:
                         self.counts["belief_corrections_changed"] += 1
                         self.counts["belief_to_" + _bu.after] += 1
+                    if BELIEF_CORRECTION != "apply":
+                        _s.belief, _s.last_touch_s = _snap
+                        if _bu.changed:
+                            self.counts["belief_corrections_observed_only"] += 1
             done_s = sub.sent_s + (r["total_s"] * self.speed if r.get("total_s") else 0.0)
             first_s = (sub.sent_s + r["ttft_s"] * self.speed) if r.get("ttft_s") else None
             if self.logs is not None:
