@@ -1,0 +1,33 @@
+[19:08:46] starting vLLM server: /home/pragya/.venvs/fm-switching-vllm/bin/vllm serve /home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb --served-model-name 32BI --port 8031 --max-model-len 32768 --gpu-memory-utilization 0.9 --tensor-parallel-size 1 --no-enable-prefix-caching --limit-mm-per-prompt {"image": 16} --dtype bfloat16 --seed 0 --limit-mm-per-prompt {"image": 640, "video": 1} --mm-processor-kwargs {"size": {"shortest_edge": 4096, "longest_edge": 16777216}, "fps": 1.0, "do_sample_frames": false} --trust-request-mm-kwargs --host 127.0.0.1 --enable-prefix-caching --enable-prompt-tokens-details --mm-processor-cache-gb 128 --kv-offloading-backend native --kv-offloading-size 27 --enable-log-requests --enable-logging-iteration-details
+[19:09:50] server up: {"key": "32BI", "repo": "Qwen/Qwen3-VL-32B-Instruct", "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb", "startup_s": 63.8, "log": "logs/study_x_server_32BI_1120_190846.log", "max_model_len": 32768, "gpu_memory_utilization": 0.9, "tensor_parallel_size": 1, "prefix_caching": false, "kv_cache_tokens": 62944, "max_concurrency_at_max_len": 1.92, "available_kv_gib": "15.37", "model_weights_gib": "62.66", "attention_backend_lines": ["(EngineCore pid=3032879) INFO 2026-11-20 19:09:03.810 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention", "(EngineCore pid=3032879) INFO 2026-11-20 19:09:03.811 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.", "(EngineCore pid=3032879) INFO 2026-11-20 19:09:04.311 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].", "(EngineCore pid=3032879) INFO 2026-11-20 19:09:04.312 [flash_attn.py:1167] Using FlashAttention version 3", "(EngineCore pid=3032879) INFO 2026-11-20 19:09:13.109 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."], "cuda_graphs": true, "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)", "extra_server_args": ["--limit-mm-per-prompt", "{\"image\": 640, \"video\": 1}", "--mm-processor-kwargs", "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}"
+[19:29:59] server 32BI stopped
+{
+ "arm": "warm-all-lru",
+ "n_devices": 16,
+ "mode": "A",
+ "run_s": 1200.0,
+ "seed": 4,
+ "split": true,
+ "err": null,
+ "wall_s": 1200.596,
+ "run_dir": "/home/pragya/data/live2/frozen_grid/runs/warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f",
+ "trace_dir": "/home/pragya/data/live2/frozen_grid/work/traces/seed4_n16_1200s_A_r40-40-20_lh_req_ss2_L3",
+ "lateness": {
+  "max_ms": 177.9561,
+  "mean_ms": 0.0902,
+  "n": 42744,
+  "p50_ms": 0.0656,
+  "p90_ms": 0.1007,
+  "p99_ms": 0.1783
+ },
+ "run_valid": true,
+ "digests_equal": true,
+ "n_requests": 14385,
+ "n_errors": 329,
+ "server_kind": "vllm",
+ "is_measurement": false,
+ "score": {
+  "ok": false,
+  "error": "AttributeError: module 'data_sources' has no attribute 'device_recall_warm_latency_s'"
+ }
+}
