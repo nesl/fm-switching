@@ -939,3 +939,90 @@ cell lands, and the reasoning above says what would and would not overturn it.**
 One-frame C1 via the committed `d14b_infer_vllm.py` body, which is the Orin's existing default, so
 no change of plan is required. EP-B remains the right format for any future condition that needs
 episode breadth, on H3's evidence, but H1 gives no reason to pay for it on this task today.
+
+---
+
+## 13. Verdict FINAL: the 4B's EP-G landed and confirmed the pre-registered prediction
+
+The Orin pushed `4BI|EP-G` as f9da42a, completing the sweep: 19,490 real requests, zero errors, plus
+controls. Rescored with every cell present, `coverage` now empty. **The verdict of section 12 is
+unchanged and is no longer provisional: dashcams stay one-frame.**
+
+### 13.1 What section 12.5 predicted, and what happened
+
+Section 12.5 was written before this cell existed and said: for EP-G to rescue H1 it would have to
+show the 4B degrading sharply while the 32B held, and such a gap would be section 12.2's C6 trap in
+a new place rather than a reason to adopt the format.
+
+| quantity | value | reading |
+|---|---|---|
+| H1 gap at EP-G | **+0.1409** [+0.0660, +0.2073] | larger than C1's +0.1002, as the prediction allowed |
+| 4BI EP-G vs its own C1 | **-0.0723** [-0.1378, **-0.0051**] | **CI excludes zero: the 4B is significantly WORSE** |
+| 32BI EP-G vs its own C1 | -0.0316 [-0.1248, +0.0507] | includes zero, and negative |
+
+**The wider gap at EP-G is entirely the 4B degrading.** The prediction was correct not only in
+direction but in mechanism, and the trap it named is the one that occurred.
+
+### 13.2 The completed H1 table
+
+| condition | 32B minus 4B | CI | 32B vs own C1 | 4B vs own C1 |
+|---|---|---|---|---|
+| C1 | +0.1002 | [+0.038, +0.167] | reference | reference |
+| C3 | +0.0980 | [+0.025, +0.175] | -0.028 ns | -0.025 ns |
+| C6 | +0.1622 | [+0.100, +0.224] | +0.002 ns | **-0.060 sig** |
+| EP-B | +0.1125 | [+0.054, +0.172] | +0.005 ns | -0.007 ns |
+| EP-G | +0.1409 | [+0.066, +0.207] | -0.032 ns | **-0.072 sig** |
+
+**No 32B condition differs from its own C1.** All four CIs include zero. Episode context does not
+improve the large model's challenge AP, at any breadth tested.
+
+### 13.3 The finding the sweep produced that the hypotheses did not ask for
+
+C6 and EP-G are the two highest frame-count conditions, and they are **the only two where the 4B
+degrades with a CI excluding zero**, at -0.060 and -0.072. The 32B degrades in neither. So:
+
+**Multi-frame input hurts the small model and does not help the large one.**
+
+That asymmetry is a deployment result rather than a hypothesis result, and it is the reason the two
+largest 32B-minus-4B gaps in the table sit on the two conditions nobody should adopt. A reader
+ranking conditions by the gap column would pick C6 or EP-G, which are precisely the conditions that
+most damage the model actually running on the device.
+
+### 13.4 H2 at EP-G, consistent with the other four conditions
+
+| FAR | 4B detects | 32B detects | only 32B | only 4B | lead diff | lead CI |
+|---|---|---|---|---|---|---|
+| 5% | 20 | 30 | 16 | 6 | +0.536 | [-0.12, +1.50] |
+| 10% | 39 | 49 | 23 | 13 | -0.231 | [-0.89, +0.35] |
+| 20% | 57 | 69 | 25 | 13 | +0.159 | [-0.30, +0.64] |
+
+The 32B detects more at every FAR, the discordance is lopsided, and every lead-time CI includes
+zero. **Across all five conditions and three FARs, 15 of 15 cells favour the 32B on detection count
+and 14 of 15 lead-time CIs include zero.** H2 holds as detection count and fails as lead time, with
+no exception introduced by the completed data.
+
+### 13.5 The grey control's cold-versus-warm step, as the Orin reported it
+
+The Orin found the 4B grey score constant per frame count except that the cold rep0 differs from the
+three warm reps by one logprob-quantization step, about 0.25 nats, at 9 of 21 frame counts, and
+diagnosed it to prefix-cache cold versus warm numerics (reps 1 to 3 bit-identical to each other).
+Recorded PROVISIONAL at `results/dashcam/study_sh_ep/sh_ep_4BI_grey_control.json`.
+
+**No change to the scoring is needed and none was made.** This scorer already judges grey constancy
+against a measured 1/8 nat quantum rather than exact equality, for exactly this reason, and all 21
+cells pass as `within_logprob_quantum` with worst spread 0.250. The control's intent, that the score
+is invariant to frame CONTENT, holds. The two diagnoses agree and the Orin's is cited rather than
+re-derived.
+
+### 13.6 Final classification, unchanged
+
+**Dashcams stay one-frame.** H1 fails for every episode condition, H2 and H3 hold, and the rule is a
+conjunction. **FIRED AND DID NOT HELP** under CLAUDE.md Rule 2, licensed by the controls in section
+12.0: the shuffle control shows the model reads the episode as a sequence, the warm-path control
+shows EP-B and EP-G carried 1,024 and 4,736 resident tokens, and prompt-token parity was exact on
+all 15,592 pairs. The mechanism reached the model, changed its output, and did not improve detection
+of a coming crash.
+
+H3 remains the study's most useful result and is unaffected: episode context kept warm costs what
+one frame costs, 0.1324 s against 0.1302 s at EP-B, while the same breadth paid cold costs 2.9 times
+as much. The dashcam format does not change; what the study establishes is the price of residency.

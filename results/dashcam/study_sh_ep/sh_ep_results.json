@@ -1,6 +1,6 @@
 {
  "label": "StudySH-EP analysis. CPU only; every score is a committed SH-EP run record.",
- "at": "2026-11-20T16:44:54.715865",
+ "at": "2026-11-20T16:56:13.753850",
  "seed": 0,
  "n_bootstrap": 2000,
  "horizons": [
@@ -94,12 +94,8 @@
   "failures": [],
   "passed": true
  },
- "n_records": 35082,
- "coverage": {
-  "4BI|EP-G": {
-   "clips_or_crops_missing": 300
-  }
- },
+ "n_records": 38980,
+ "coverage": {},
  "arms": {
   "4BI|C1": {
    "ap": {
@@ -226,6 +222,38 @@
     "ci": [
      0.471236242652821,
      0.6099762407778542
+    ]
+   }
+  },
+  "4BI|EP-G": {
+   "ap": {
+    "0.5": {
+     "ap": 0.6144853095780543,
+     "ci": [
+      0.542542227936057,
+      0.6980268083758427
+     ]
+    },
+    "1.0": {
+     "ap": 0.48480022250299865,
+     "ci": [
+      0.3987743492890031,
+      0.5879584772383839
+     ]
+    },
+    "1.5": {
+     "ap": 0.2975790564744135,
+     "ci": [
+      0.23469846075316206,
+      0.40009576224221816
+     ]
+    }
+   },
+   "mAP": {
+    "value": 0.46562152951848884,
+    "ci": [
+     0.4018152600788038,
+     0.5548537383511557
     ]
    }
   },
@@ -431,6 +459,16 @@
    "n_positive": 45,
    "n_negative": 45
   },
+  "4BI|EP-G": {
+   "mAP": 0.5293339850391442,
+   "ap": {
+    "0.5": 0.6563572460140666,
+    "1.0": 0.5712451359918234,
+    "1.5": 0.36039957311154225
+   },
+   "n_positive": 45,
+   "n_negative": 45
+  },
   "32BI|C1": {
    "mAP": 0.6305313118488884,
    "ap": {
@@ -529,6 +567,20 @@
     "ci": [
      -0.03279350730663565,
      0.05218803430591283
+    ]
+   }
+  },
+  "EP-G": {
+   "gap": 0.14089761127474026,
+   "ci": [
+    0.06598605734204,
+    0.2072998914797939
+   ],
+   "vs_C1": {
+    "diff": 0.04068076207167931,
+    "ci": [
+     -0.03821534970800939,
+     0.11135260649160605
     ]
    }
   }
@@ -1157,6 +1209,162 @@
      1.152215719063545
     ]
    }
+  },
+  "EP-G|far5": {
+   "models": {
+    "4BI": {
+     "threshold": -0.8259393600704167,
+     "achieved_far": 0.019809244314013204,
+     "n_negative_instants": 1363,
+     "detected": 20
+    },
+    "32BI": {
+     "threshold": -5.006686219821845,
+     "achieved_far": 0.013939838591342627,
+     "n_negative_instants": 1363,
+     "detected": 30
+    }
+   },
+   "all": {
+    "n_both": 14,
+    "n_32BI_only": 16,
+    "n_4BI_only": 6,
+    "mean_lead_32BI": 1.7092142857142856,
+    "mean_lead_4BI": 1.1735,
+    "diff": 0.5357142857142857,
+    "ci": [
+     -0.11538461538461539,
+     1.5
+    ]
+   },
+   "sudden": {
+    "n_both": 10,
+    "n_32BI_only": 7,
+    "n_4BI_only": 4,
+    "mean_lead_32BI": 1.5534,
+    "mean_lead_4BI": 0.8534,
+    "diff": 0.7,
+    "ci": [
+     -0.19249999999999992,
+     2.0
+    ]
+   },
+   "slow": {
+    "n_both": 4,
+    "n_32BI_only": 9,
+    "n_4BI_only": 2,
+    "mean_lead_32BI": 2.09875,
+    "mean_lead_4BI": 1.97375,
+    "diff": 0.12499999999999989,
+    "ci": [
+     -0.5000000000000004,
+     0.5
+    ]
+   }
+  },
+  "EP-G|far10": {
+   "models": {
+    "4BI": {
+     "threshold": -2.5788895709823816,
+     "achieved_far": 0.05355832721936904,
+     "n_negative_instants": 1363,
+     "detected": 39
+    },
+    "32BI": {
+     "threshold": -6.876020753063131,
+     "achieved_far": 0.03154805575935436,
+     "n_negative_instants": 1363,
+     "detected": 49
+    }
+   },
+   "all": {
+    "n_both": 26,
+    "n_32BI_only": 23,
+    "n_4BI_only": 13,
+    "mean_lead_32BI": 1.671076923076923,
+    "mean_lead_4BI": 1.9018461538461535,
+    "diff": -0.23076923076923078,
+    "ci": [
+     -0.8889880952380952,
+     0.35298861480075877
+    ]
+   },
+   "sudden": {
+    "n_both": 15,
+    "n_32BI_only": 11,
+    "n_4BI_only": 8,
+    "mean_lead_32BI": 1.3291333333333335,
+    "mean_lead_4BI": 2.0957999999999997,
+    "diff": -0.7666666666666667,
+    "ci": [
+     -1.6669117647058824,
+     0.0005952380952348621
+    ]
+   },
+   "slow": {
+    "n_both": 11,
+    "n_32BI_only": 12,
+    "n_4BI_only": 5,
+    "mean_lead_32BI": 2.137363636363636,
+    "mean_lead_4BI": 1.6373636363636364,
+    "diff": 0.5,
+    "ci": [
+     -0.1875,
+     1.2
+    ]
+   }
+  },
+  "EP-G|far20": {
+   "models": {
+    "4BI": {
+     "threshold": -4.51104772987939,
+     "achieved_far": 0.1408657373440939,
+     "n_negative_instants": 1363,
+     "detected": 57
+    },
+    "32BI": {
+     "threshold": -9.125109694251014,
+     "achieved_far": 0.07923697725605282,
+     "n_negative_instants": 1363,
+     "detected": 69
+    }
+   },
+   "all": {
+    "n_both": 44,
+    "n_32BI_only": 25,
+    "n_4BI_only": 13,
+    "mean_lead_32BI": 2.422090909090909,
+    "mean_lead_4BI": 2.263,
+    "diff": 0.1590909090909091,
+    "ci": [
+     -0.3,
+     0.6428571428571429
+    ]
+   },
+   "sudden": {
+    "n_both": 25,
+    "n_32BI_only": 14,
+    "n_4BI_only": 8,
+    "mean_lead_32BI": 1.90788,
+    "mean_lead_4BI": 2.42788,
+    "diff": -0.52,
+    "ci": [
+     -1.0477678571428573,
+     -0.04994047619047652
+    ]
+   },
+   "slow": {
+    "n_both": 19,
+    "n_32BI_only": 11,
+    "n_4BI_only": 5,
+    "mean_lead_32BI": 3.0986842105263155,
+    "mean_lead_4BI": 2.0460526315789473,
+    "diff": 1.0526315789473684,
+    "ci": [
+     0.4166666666666667,
+     1.8001086956521735
+    ]
+   }
   }
  },
  "within_model_vs_C1": {
@@ -1185,6 +1393,15 @@
    "ci": [
     -0.047069922113589395,
     0.028652460262572593
+   ]
+  },
+  "4BI|EP-G": {
+   "mAP": 0.46562152951848884,
+   "mAP_C1": 0.5379169196321144,
+   "diff": -0.07229539011362557,
+   "ci": [
+    -0.13775842260097723,
+    -0.005075615765161138
    ]
   },
   "32BI|C3": {
@@ -1435,18 +1652,228 @@
     "within_logprob_quantum": true,
     "quantum_nats": 0.25,
     "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n1": {
+    "n": 4,
+    "min": -11.500010489198878,
+    "max": -11.50001048917635,
+    "spread": 2.2527757437273976e-11,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n2": {
+    "n": 4,
+    "min": -14.25000100702828,
+    "max": -14.250001006686496,
+    "spread": 3.41783490398484e-10,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n3": {
+    "n": 4,
+    "min": -14.99999994936964,
+    "max": -14.999999949136804,
+    "spread": 2.3283597272438783e-10,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n4": {
+    "n": 4,
+    "min": -14.500000028427445,
+    "max": -14.500000028267857,
+    "spread": 1.595878984517185e-10,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n5": {
+    "n": 4,
+    "min": -14.500000028427445,
+    "max": -14.250001006139529,
+    "spread": 0.24999902228791626,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n6": {
+    "n": 4,
+    "min": -14.250001006182973,
+    "max": -14.250001006139529,
+    "spread": 4.3444359221211926e-11,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n7": {
+    "n": 4,
+    "min": -14.250001006150182,
+    "max": -14.25000100594505,
+    "spread": 2.0513191145710152e-10,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n8": {
+    "n": 4,
+    "min": -13.500000894908752,
+    "max": -13.250001880564776,
+    "spread": 0.24999901434397565,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n9": {
+    "n": 4,
+    "min": -13.000001881565872,
+    "max": -12.750002881225983,
+    "spread": 0.24999900033988887,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n10": {
+    "n": 4,
+    "min": -13.25000188039701,
+    "max": -13.250001880323236,
+    "spread": 7.37738758971318e-11,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n11": {
+    "n": 4,
+    "min": -12.500003831440756,
+    "max": -12.500003827362347,
+    "spread": 4.078408721852611e-09,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n12": {
+    "n": 4,
+    "min": -12.750002883448992,
+    "max": -12.50000382713579,
+    "spread": 0.24999905631320196,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n13": {
+    "n": 4,
+    "min": -11.750007636664723,
+    "max": -11.75000762984494,
+    "spread": 6.819782072398084e-09,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n14": {
+    "n": 4,
+    "min": -11.250013344060068,
+    "max": -11.250013343927382,
+    "spread": 1.326867504758411e-10,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n15": {
+    "n": 4,
+    "min": -11.250013348464446,
+    "max": -11.000016210513197,
+    "spread": 0.24999713795124912,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n16": {
+    "n": 4,
+    "min": -10.75002095007584,
+    "max": -10.500027639384603,
+    "spread": 0.2499933106912362,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n17": {
+    "n": 4,
+    "min": -10.750020952159208,
+    "max": -10.5000276393425,
+    "spread": 0.24999331281670756,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n18": {
+    "n": 4,
+    "min": -10.000045739397143,
+    "max": -10.000045739318693,
+    "spread": 7.844924709843326e-11,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n19": {
+    "n": 4,
+    "min": -9.250096323255889,
+    "max": -9.000123029239523,
+    "spread": 0.2499732940163657,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n20": {
+    "n": 4,
+    "min": -9.500074359214619,
+    "max": -9.50007435907804,
+    "spread": 1.3657874831096706e-10,
+    "constant_exactly": true,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
+   },
+   "4BI|n21": {
+    "n": 4,
+    "min": -9.500074354199647,
+    "max": -9.250096326529544,
+    "spread": 0.24997802767010313,
+    "constant_exactly": false,
+    "within_logprob_quantum": true,
+    "quantum_nats": 0.25,
+    "note": "score is log P(Yes) at about 1e-8; the engine quantises logprobs to 1/8 nat at that magnitude, so constancy is judged to that resolution"
    }
   },
   "grey_verdict": {
-   "cells": 21,
+   "cells": 42,
    "all_within_quantum": true,
    "all_exactly_constant": false,
    "worst_spread": 0.2499999979760048
   },
   "shuffled_minus_ordered": {
-   "n": 1947,
-   "mean": 0.4725033136267917,
-   "mean_abs": 1.9333036856319914,
+   "n": 2596,
+   "mean": 0.5150256279230327,
+   "mean_abs": 1.9263887078619633,
    "max_abs": 15.12313164158514,
    "note": "a model that reads the episode as a sequence must be DISTURBED by shuffling; a mean absolute difference at the numerical floor says the frame order carries nothing and the episode conditions are bags of frames, not episodes"
   },
@@ -1458,7 +1885,7 @@
    },
    "4BI": {
     "zeros": 0,
-    "hits": 2724,
+    "hits": 6319,
     "omits_instead_of_zero": true
    }
   },
@@ -1561,11 +1988,22 @@
     "n_first": 300,
     "mean_cached_tokens_on_hits": 1734.2624166048925,
     "verdict": "warm path exercised"
+   },
+   "4BI|EP-G": {
+    "n": 3898,
+    "absent_on_first": 300,
+    "absent_later": 3,
+    "zero": 0,
+    "hit": 3595,
+    "cached_sum": 17417136,
+    "n_first": 300,
+    "mean_cached_tokens_on_hits": 4844.822253129346,
+    "verdict": "warm path exercised"
    }
   },
   "stop_condition_5_fires": false,
   "prompt_token_parity": {
-   "pairs": 15592,
+   "pairs": 19490,
    "mismatched": 0,
    "examples": [],
    "note": "the brief requires the same prompt-token count per request pair; a mismatch means the two models are not reading the same prompt and no gap between them is a capability gap"
@@ -1581,7 +2019,7 @@
     "sn4622120321"
    ]
   },
-  "n_paired": 15592,
+  "n_paired": 19490,
   "by_condition": {
    "C1": {
     "n_paired": 3898,
@@ -1608,6 +2046,14 @@
     "identical_inputs": true
    },
    "EP-B": {
+    "n_paired": 3898,
+    "prompt_token_mismatches": 0,
+    "header_mismatches": 0,
+    "frame_sha256_mismatches": 0,
+    "examples": [],
+    "identical_inputs": true
+   },
+   "EP-G": {
     "n_paired": 3898,
     "prompt_token_mismatches": 0,
     "header_mismatches": 0,
@@ -2085,15 +2531,68 @@
     "p90": 1120375.1,
     "mean": 789574.38
    }
+  },
+  "4BI|EP-G": {
+   "requests": 3898,
+   "ttft_all_s": {
+    "n": 3898,
+    "p50": 0.2957265,
+    "p90": 0.3173694,
+    "mean": 0.4132671121087737
+   },
+   "ttft_cold_s": {
+    "n": 303,
+    "p50": 1.881347,
+    "p90": 1.8923972,
+    "mean": 1.8250996171617164
+   },
+   "ttft_warm_s": {
+    "n": 3595,
+    "p50": 0.294245,
+    "p90": 0.31292159999999997,
+    "mean": 0.29427260611961054
+   },
+   "new_prompt_tokens": {
+    "n": 3898,
+    "p50": 372.0,
+    "p90": 380.0,
+    "mean": 575.44638276039
+   },
+   "cached_tokens": {
+    "n": 3898,
+    "p50": 4736.0,
+    "p90": 6432.0,
+    "mean": 4468.223704463828
+   },
+   "uplink_image_bytes_total": 378397777,
+   "uplink_body_bytes_total": 511467072,
+   "kv_tokens_per_episode": {
+    "n": 300,
+    "p50": 7544.0,
+    "p90": 7544.0,
+    "mean": 7476.966666666666
+   },
+   "prompt_tokens_per_episode": {
+    "n": 300,
+    "p50": 66456.0,
+    "p90": 66456.0,
+    "mean": 65534.08666666667
+   },
+   "uplink_image_bytes_per_episode": {
+    "n": 300,
+    "p50": 1258893.5,
+    "p90": 1813604.1000000003,
+    "mean": 1261325.9233333333
+   }
   }
  },
  "_provenance": {
-  "git_commit": "70630f13026c2ef66cd3eceee5d9168dfd4561b4",
+  "git_commit": "f9da42a973f32b1d1f3f5844edd63fb5be8f9779",
   "script": "sh_ep_score.py",
   "model": "none",
-  "timestamp": "2026-11-20T16:44:58.256579",
+  "timestamp": "2026-11-20T16:56:17.962903",
   "device": "cpu",
-  "n": 35082,
+  "n": 38980,
   "args": {
    "runs": [
     "results/dashcam/study_sh_ep/sh_ep_requests_4BI_shep1.jsonl",
