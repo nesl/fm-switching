@@ -677,3 +677,40 @@ fired and did not**, which points at `engine_actions.deadline_work_at_risk` read
 or reading it too late, rather than at an untested branch. It is a defect to investigate, not a
 branch to exercise. Not changed tonight (policy behaviour, D106/D116); it goes on tomorrow's list
 beside the belief promotion, and it is cheaper to diagnose than either.
+
+## The dashcam loss, decomposed exactly, because three arms make it possible
+
+The H100's mooncake cell released **11,764** dashcam monitors, which is **exactly** the eligible
+EP-G instant count (13,193 captured less the 1,429 excluded at the 3-frame floor). So the
+denominator is confirmed by measurement rather than derived, and the three arms decompose the loss
+cleanly:
+
+| arm | throttle | warm-ahead | released | dropped | share |
+|---|---|---|---|---|---|
+| b7, mooncake | no | no | **11,764** | 0 | 0 percent |
+| hybrid-F-lhreq-noc3 | **C5** | no | 11,112 | 652 | 5.5 percent |
+| v5-rules | **C5** | **yes** | 4,045 | 7,719 | **65.6 percent** |
+
+**So C5's in-flight throttle costs 652 instants on its own, and warm-ahead costs the other 7,067.
+Warm-ahead is 91.6 percent of the loss.** My first description was "about two thirds of dashcam
+instants were never sent", which was right about the total and said nothing about the attribution.
+This is the attribution, and it is only available because b7 and mooncake pin the denominator at
+the top while noc3 isolates the throttle in the middle.
+
+**One consequence for reading C5 itself:** at 5.5 percent, C5's throttle is nearly free on this
+workload when nothing else is competing for the engine. It is not the throttle that is expensive;
+it is the throttle MULTIPLIED by a queue, and v5-rules supplies the queue. A throttle on in-flight
+requests is a cap whose cost is proportional to how long each request stays in flight, so it is
+cheap under a quiet engine and ruinous under a busy one. Nothing in C5 knows which regime it is in.
+
+## A prediction of mine confirmed on a workload it was not made on
+
+mooncake came back **identical to b7** on EP-G: 0.40 correct delivered, 7 of 20 on time, 330 of 357
+single-shot, and the same 11,764 monitors. That is the arithmetic-identity result reported earlier
+from the `dashcam-1f` cells, where readiness is constant at COLD in 377 of 377 cases, so
+MOONCAKE-REUSE-FIRST's sort key is the constant 2 and the policy reduces to EDF.
+
+**It was asserted on one workload and now holds on another**, which is what makes it an arithmetic
+property rather than a coincidence of regime. It also means the EP-G mooncake cell carries no
+information about mooncake that the b7 cell does not, and the pair should be reported as one
+measurement with a note, not as two agreeing arms.
