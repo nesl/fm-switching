@@ -80,6 +80,9 @@ cell() {   # arm n seed [tag]
   local ssargs=$(cat $OUT/SS_POOL_ARGS 2>/dev/null)
   # D147 (user ruling 2026-11-20): a cell tagged _L3 runs at robot deadline 3 s (SS 2 s and dashcam 1 s unchanged)
   local lflag=""; case "$tag" in *_L3*) lflag="--robot-deadline-s 3";; esac
+  # D151 WARM-ALL calibration, PROVISIONAL (user away; pre-registered default): "0.5x / 0.25x GPU pool" is the harness's
+  # LOGICAL pool with enforcement on (coordinator belief and enforcement); the engine's real pool is pinned and unchanged
+  case "$tag" in *_kv0.5*) lflag="$lflag --gpu-kv-tokens 31472";; *_kv0.25*) lflag="$lflag --gpu-kv-tokens 15736";; esac
   while [ "$(nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader | grep -c 4f1d7e47)" != "0" ]; do sleep 2; done
   log "start $name HEAD $(git rev-parse --short HEAD) ss-pool [$ssargs] deadline [${lflag:-robot 5 s}]"
   mkdir -p $d
