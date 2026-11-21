@@ -1,0 +1,64 @@
+[19:30:09] starting vLLM server: /home/pragya/.venvs/fm-switching-vllm/bin/vllm serve /home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb --served-model-name 32BI --port 8031 --max-model-len 32768 --gpu-memory-utilization 0.9 --tensor-parallel-size 1 --no-enable-prefix-caching --limit-mm-per-prompt {"image": 16} --dtype bfloat16 --seed 0 --limit-mm-per-prompt {"image": 640, "video": 1} --mm-processor-kwargs {"size": {"shortest_edge": 4096, "longest_edge": 16777216}, "fps": 1.0, "do_sample_frames": false} --trust-request-mm-kwargs --host 127.0.0.1 --enable-prefix-caching --enable-prompt-tokens-details --mm-processor-cache-gb 128 --kv-offloading-backend native --kv-offloading-size 27 --enable-log-requests --enable-logging-iteration-details
+[19:31:13] server up: {"key": "32BI", "repo": "Qwen/Qwen3-VL-32B-Instruct", "revision": "0cfaf48183f594c314753d30a4c4974bc75f3ccb", "startup_s": 63.8, "log": "logs/study_x_server_32BI_1120_193009.log", "max_model_len": 32768, "gpu_memory_utilization": 0.9, "tensor_parallel_size": 1, "prefix_caching": false, "kv_cache_tokens": 62944, "max_concurrency_at_max_len": 1.92, "available_kv_gib": "15.37", "model_weights_gib": "62.66", "attention_backend_lines": ["(EngineCore pid=3048999) INFO 2026-11-20 19:30:25.983 [cuda.py:585] Using backend AttentionBackendEnum.FLASH_ATTN for vit attention", "(EngineCore pid=3048999) INFO 2026-11-20 19:30:25.984 [mm_encoder_attention.py:372] Using AttentionBackendEnum.FLASH_ATTN for MMEncoderAttention.", "(EngineCore pid=3048999) INFO 2026-11-20 19:30:26.474 [cuda.py:526] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].", "(EngineCore pid=3048999) INFO 2026-11-20 19:30:26.474 [flash_attn.py:1167] Using FlashAttention version 3", "(EngineCore pid=3048999) INFO 2026-11-20 19:30:35.241 [topk_topp_sampler.py:96] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0."], "cuda_graphs": true, "sampler": "vLLM PyTorch-native top-k/top-p (VLLM_USE_FLASHINFER_SAMPLER=0)", "extra_server_args": ["--limit-mm-per-prompt", "{\"image\": 640, \"video\": 1}", "--mm-processor-kwargs", "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}"
+{
+  "headline": {
+    "established": {
+      "M1": true,
+      "M2": false,
+      "M3": true
+    },
+    "all_three": false,
+    "verdicts": {
+      "M1": "PASS",
+      "M2": "NOT ESTABLISHED",
+      "M3": "PASS"
+    },
+    "statement": "32B CONFIRMATION NOT PASSED: M2 NOT ESTABLISHED",
+    "policy_consequence": "reload may go live"
+  },
+  "budget": {
+    "limit_s": 900.0,
+    "spent_s": 457.77,
+    "skipped": []
+  },
+  "preflight": {
+    "first_cached_tokens": 0,
+    "repeat_cached_tokens": 800,
+    "fresh_salt_cached_tokens": 0,
+    "prompt_tokens": 801,
+    "raw_usage_block_of_repeat": [
+      "completion_tokens",
+      "prompt_tokens",
+      "prompt_tokens_details",
+      "total_tokens"
+    ],
+    "external_hit_keys_probed": [
+      "external_computed_tokens",
+      "num_external_computed_tokens",
+      "connector_cached_tokens",
+      "kv_connector_cached_tokens",
+      "offloaded_cached_tokens"
+    ],
+    "external_cached_tokens_of_repeat": null,
+    "verdict": "PASS"
+  },
+  "frontier": {
+    "unit_tokens": 11191,
+    "ladder_units": 24,
+    "build_seconds": 25.187,
+    "frontier_units": 18,
+    "frontier_tokens": 201438,
+    "committed_gpu_pool_tokens": 62944,
+    "committed_host_tier_tokens": 110592,
+    "hypothesis_sum_tokens": 173536,
+    "hypothesis_host_only_tokens": 110592,
+    "note": "frontier_units is the number of one-history units at the YOUNG end of the ladder that still reported reuse. It is measured on this server at this moment and is the only capacity figure M2 relies on.",
+    "verdict": "MEASURED",
+    "closer_to": "GPU+host sum"
+  },
+  "dry_validation": null,
+  "stopped": null
+}
+wrote /home/pragya/Desktop/fm-switching/results/orchestration/live2/v5/engine_actions_32b_confirmation.json
+[19:38:56] server 32BI stopped
+rc 1
