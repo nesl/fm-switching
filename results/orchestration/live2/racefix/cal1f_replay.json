@@ -1,0 +1,235 @@
+{
+ "_what": "D158 (2) proof 3: the CAL1F warm-all-lru failing sequence under both rules.",
+ "_register": "a RECONSTRUCTION of the two rules over the committed request log, not a re-execution of the coordinator and not a server round trip",
+ "run_dir": "results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f",
+ "requests_total": 14360,
+ "session_requests": 1191,
+ "sessions": 378,
+ "http_400": 226,
+ "http_200": 957,
+ "old_rule": {
+  "requests": 1191,
+  "with_a_dangerous_reference": 747,
+  "dangerous_reference_parts": 30464,
+  "image_parts_carrying_bytes": 4323,
+  "image_parts_as_reference": 92484
+ },
+ "new_rule": {
+  "requests": 1191,
+  "with_a_dangerous_reference": 0,
+  "dangerous_reference_parts": 0,
+  "image_parts_carrying_bytes": 34535,
+  "image_parts_as_reference": 62272
+ },
+ "proof3_pass": true,
+ "on_the_400s": {
+  "old": {
+   "requests": 226,
+   "with_a_dangerous_reference": 226,
+   "dangerous_reference_parts": 21274,
+   "image_parts_carrying_bytes": 1319,
+   "image_parts_as_reference": 32947
+  },
+  "new": {
+   "requests": 226,
+   "with_a_dangerous_reference": 0,
+   "dangerous_reference_parts": 0,
+   "image_parts_carrying_bytes": 22341,
+   "image_parts_as_reference": 11925
+  }
+ },
+ "control_on_the_200s": {
+  "_why": "the reverse check: if the old rule's dangerous references were as common on the requests that SUCCEEDED, the mechanism would not be the explanation",
+  "old": {
+   "requests": 957,
+   "with_a_dangerous_reference": 517,
+   "dangerous_reference_parts": 8913,
+   "image_parts_carrying_bytes": 2979,
+   "image_parts_as_reference": 59238
+  },
+  "new": {
+   "requests": 957,
+   "with_a_dangerous_reference": 0,
+   "dangerous_reference_parts": 0,
+   "image_parts_carrying_bytes": 11892,
+   "image_parts_as_reference": 50325
+  }
+ },
+ "cost": {
+  "image_parts_carrying_bytes_before": 4323,
+  "image_parts_carrying_bytes_after": 34535,
+  "image_parts_resent": 30212,
+  "ratio": 7.9887
+ },
+ "sample_400s": [
+  {
+   "request_id": "r5946",
+   "http_status": 400,
+   "t_submit": 496.219306,
+   "device_id": "robo003",
+   "n_parts": 15,
+   "references": 11,
+   "bytes": 4,
+   "dangerous": 11,
+   "new": {
+    "request_id": "r5946",
+    "http_status": 400,
+    "t_submit": 496.219306,
+    "device_id": "robo003",
+    "n_parts": 15,
+    "references": 0,
+    "bytes": 15,
+    "dangerous": 0
+   }
+  },
+  {
+   "request_id": "r6238",
+   "http_status": 400,
+   "t_submit": 520.188291,
+   "device_id": "robo005",
+   "n_parts": 15,
+   "references": 11,
+   "bytes": 4,
+   "dangerous": 11,
+   "new": {
+    "request_id": "r6238",
+    "http_status": 400,
+    "t_submit": 520.188291,
+    "device_id": "robo005",
+    "n_parts": 15,
+    "references": 0,
+    "bytes": 15,
+    "dangerous": 0
+   }
+  },
+  {
+   "request_id": "r6302",
+   "http_status": 400,
+   "t_submit": 525.684322,
+   "device_id": "robo003",
+   "n_parts": 26,
+   "references": 15,
+   "bytes": 11,
+   "dangerous": 15,
+   "new": {
+    "request_id": "r6302",
+    "http_status": 400,
+    "t_submit": 525.684322,
+    "device_id": "robo003",
+    "n_parts": 26,
+    "references": 0,
+    "bytes": 26,
+    "dangerous": 0
+   }
+  },
+  {
+   "request_id": "r6303",
+   "http_status": 400,
+   "t_submit": 525.760642,
+   "device_id": "robo003",
+   "n_parts": 30,
+   "references": 26,
+   "bytes": 4,
+   "dangerous": 26,
+   "new": {
+    "request_id": "r6303",
+    "http_status": 400,
+    "t_submit": 525.760642,
+    "device_id": "robo003",
+    "n_parts": 30,
+    "references": 0,
+    "bytes": 30,
+    "dangerous": 0
+   }
+  },
+  {
+   "request_id": "r6596",
+   "http_status": 400,
+   "t_submit": 550.098392,
+   "device_id": "robo005",
+   "n_parts": 26,
+   "references": 15,
+   "bytes": 11,
+   "dangerous": 15,
+   "new": {
+    "request_id": "r6596",
+    "http_status": 400,
+    "t_submit": 550.098392,
+    "device_id": "robo005",
+    "n_parts": 26,
+    "references": 0,
+    "bytes": 26,
+    "dangerous": 0
+   }
+  },
+  {
+   "request_id": "r6600",
+   "http_status": 400,
+   "t_submit": 550.198659,
+   "device_id": "robo005",
+   "n_parts": 30,
+   "references": 26,
+   "bytes": 4,
+   "dangerous": 26,
+   "new": {
+    "request_id": "r6600",
+    "http_status": 400,
+    "t_submit": 550.198659,
+    "device_id": "robo005",
+    "n_parts": 30,
+    "references": 0,
+    "bytes": 30,
+    "dangerous": 0
+   }
+  },
+  {
+   "request_id": "r6663",
+   "http_status": 400,
+   "t_submit": 555.673736,
+   "device_id": "robo003",
+   "n_parts": 41,
+   "references": 30,
+   "bytes": 11,
+   "dangerous": 30,
+   "new": {
+    "request_id": "r6663",
+    "http_status": 400,
+    "t_submit": 555.673736,
+    "device_id": "robo003",
+    "n_parts": 41,
+    "references": 0,
+    "bytes": 41,
+    "dangerous": 0
+   }
+  },
+  {
+   "request_id": "r6954",
+   "http_status": 400,
+   "t_submit": 581.335419,
+   "device_id": "robo005",
+   "n_parts": 45,
+   "references": 41,
+   "bytes": 4,
+   "dangerous": 41,
+   "new": {
+    "request_id": "r6954",
+    "http_status": 400,
+    "t_submit": 581.335419,
+    "device_id": "robo005",
+    "n_parts": 45,
+    "references": 0,
+    "bytes": 45,
+    "dangerous": 0
+   }
+  }
+ ],
+ "_provenance": {
+  "git_commit": "cc2242970013a79474845926558729e6df8a6998",
+  "script": "racefix_proofs.py",
+  "model": "none-dry",
+  "timestamp": "2026-11-20T21:13:16.634569",
+  "device": "none-cpu",
+  "n": 1191,
+  "seed": 10
+ }
+}

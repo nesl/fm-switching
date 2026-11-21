@@ -182,7 +182,13 @@ class Live2Coordinator:
         # reference (StudyRH7 wire form) and only the new frame carries bytes, which is the
         # mechanism behind proof (a).
         self.dashcam_format = "oneframe"
+        # D158 (2): `_mon_sent` is submission time and drives the CHARGE; `_mon_confirmed` is
+        # 200 time and drives REFERENCE ELIGIBILITY. The session-side pair is documented on
+        # `cstate.SessionRec`, and the reason the dashcam side needs the same split is that an
+        # EP-G episode re-sends the same frame list every 2 s, so its references outrun the
+        # engine exactly as a session's do.
         self._mon_sent: Dict[str, set] = defaultdict(set)
+        self._mon_confirmed: Dict[str, set] = defaultdict(set)
         self.epg_requests: List[Dict[str, Any]] = []
         # A cell whose decision loop cannot keep up with its own tick would otherwise run for
         # many times its window and report nothing. The guard stops it and the result SAYS SO,
@@ -587,10 +593,25 @@ class Live2Coordinator:
         refs = list(getattr(o, "episode_frame_refs", None) or [])
         epg = self.dashcam_format == "epg" and bool(refs)
         if epg:
+            # D158 (2), THE DASHCAM TWIN OF THE SESSION SPLIT, and it is needed here for the
+            # same reason and with the same shape. The saturated held-out cell
+            # `warm-all-lru_n16_s4_1200s_h27_3t_L3_epg` had 1,113 dashcam 400s against 397 robot
+            # ones, each device's first failure arriving while its previous request was still in
+            # flight at a TTFT of 97 to 122 s, so the dashcam path is the LARGER half of this bug.
+            #
+            # `sent` (submission time) decides the CHARGE, so the budget spend and therefore
+            # every decision is unchanged. `confirmed` (200 time) decides the WIRE FORM, because
+            # a frame whose carrying request has not returned cannot be referenced by uuid alone.
             sent = self._mon_sent[device_id]
-            frames = [dict(frame_ref=r, path=(None if r in sent else self._path(r)))
+            confirmed = self._mon_confirmed[device_id]
+            # `_path` is resolved once per frame because the charge depends on it: a frame the
+            # store lacks resolves to None, carries no bytes and so prefills nothing, and the
+            # pre-fix charge counted exactly the frames that were both new and resolvable.
+            # Keeping that identical is what keeps this an unchanged decision.
+            paths = {r: self._path(r) for r in refs}
+            n_new = sum(1 for r in refs if r not in sent and paths[r] is not None)
+            frames = [dict(frame_ref=r, path=(None if r in confirmed else paths[r]))
                       for r in refs]
-            n_new = sum(1 for f in frames if f["path"] is not None)
             est_tokens = B.epg_prompt_tokens(len(refs))
             cost = B.epg_prompt_tokens(n_new) / C.PREFILL_TOK_S["32BI"]
         else:
@@ -610,19 +631,36 @@ class Live2Coordinator:
             # sending bytes it did not send. On a real run `preflight.require_frames` refuses to
             # start in that state, and this count is what makes the refusal checkable.
             n_ref = sum(1 for f in frames if f["path"] is None)
+            # D158 (2) MOVES THESE TWO COUNTERS, and says so rather than keeping them flattering.
+            # They count the WIRE, which is what their names claim, so after the fix a frame that
+            # is sent but not yet confirmed is counted as bytes and not as a reference. On a real
+            # EP-G run the reference count therefore FALLS and the bytes count RISES by
+            # `epg_frames_bytes_resent_unconfirmed`, which is the price of the fix on the dashcam
+            # side and is reported, not hidden. `new_tokens_charged` now reads the charge's own
+            # basis (`n_new`, the submission-time set) instead of re-deriving it from the body;
+            # the two were equal by construction before the fix, so nothing moves on old runs
+            # and the record cannot drift from `gpu_s_charged` after it.
             self.counts["epg_monitor_requests"] += 1
             self.counts["epg_frames_sent_as_reference"] += n_ref
             self.counts["epg_frames_sent_as_bytes"] += len(frames) - n_ref
+            self.counts["epg_frames_bytes_resent_unconfirmed"] += len(frames) - n_ref - n_new
             self.epg_requests.append(dict(
                 opportunity_id=o.opp_id, device_id=device_id, t=t,
                 episode_id=getattr(o, "episode_id", None),
                 episode_index=getattr(o, "episode_index", None),
                 n_frames=len(refs), frame_refs=list(refs),
-                n_as_reference=n_ref, n_unresolved=sum(1 for r in refs if r not in sent
-                                                       and r in {f["frame_ref"] for f in frames
-                                                                 if f["path"] is None}),
+                n_as_reference=n_ref,
+                # A REFERENCE CLAIMED FOR BYTES THE ENGINE HAS NOT ACKNOWLEDGED, which is the
+                # 400 this fix exists to remove, and it should now be 0 in every record. The
+                # pre-fix expression counted only frames unresolvable on disk; this one also
+                # catches a frame referenced while its carrying request is still in flight,
+                # which is the actual fault. The two agree exactly before the fix, where
+                # `confirmed` and `sent` are the same set.
+                n_unresolved=sum(1 for f in frames if f["path"] is None
+                                 and f["frame_ref"] not in confirmed),
+                n_bytes_resent_unconfirmed=len(frames) - n_ref - n_new,
                 prompt_tokens_expected=est_tokens,
-                new_tokens_charged=B.epg_prompt_tokens(len(frames) - n_ref),
+                new_tokens_charged=B.epg_prompt_tokens(n_new),
                 gpu_s_charged=round(cost, 6)))
         else:
             frames = [dict(frame_ref=o.frame_ref, path=self._path(o.frame_ref))]
@@ -648,6 +686,11 @@ class Live2Coordinator:
         left = target - s.built_tokens
         piece = left if slice_tokens is None else min(int(slice_tokens), left)
         n_new = max(1, int(round(piece / float(CS.D2_TOK_PER_IMG))))
+        # BUILD PROGRESS, and it reads the SUBMISSION-time set (D158 (2)). It must: `already`
+        # chooses which frames this piece builds, so making it wait for a 200 would rebuild the
+        # same frames and change DECISIONS rather than only wire bodies. Reference eligibility
+        # is the other job, and that one does wait; see `s.confirmed_bytes_for` just below and
+        # in `_submit_recall`.
         already = len(s.sent_bytes_for)
         new_refs = s.frames[already:already + n_new]
         if not new_refs:
@@ -661,8 +704,15 @@ class Live2Coordinator:
         did = self._log_decision(t, "release_piece" if kind == "piece" else "release_whole",
                                  [], piece_tokens=int(piece), latency_ms=dt_ms, preds=preds,
                                  mix=mix, key="rc:" + s.session_id, session_id=s.session_id)
-        frames = ([dict(frame_ref=r, path=None) for r in s.frames[:already]]
+        # REFERENCE ELIGIBILITY (D158 (2)). The already-built prefix may go as uuid-only
+        # references only for the frames whose carrying request RETURNED 200; the rest carry
+        # their bytes again, because the engine has not registered the piece holding them and
+        # answers 400 to a reference it cannot resolve. `already` and `new_refs` above are
+        # untouched, so this changes the wire body and nothing else.
+        frames = ([dict(frame_ref=r, path=(None if r in s.confirmed_bytes_for
+                                           else self._path(r))) for r in s.frames[:already]]
                   + [dict(frame_ref=r, path=self._path(r)) for r in new_refs])
+        self.counts["racefix_bytes_resent"] += _n_resent(frames, s)
         rid = self._submit(kind=kind, device_id=s.device_id, session_id=s.session_id,
                            opportunity_id=None, decision_id=did, frames=frames,
                            est_tokens=int(s.built_tokens + piece), question=None, options=(),
@@ -695,7 +745,6 @@ class Live2Coordinator:
                                  representation=getattr(o, "requested_representation", None),
                                  representation_defaulted=getattr(
                                      o, "representation_defaulted", False))
-        sent = len(s.sent_bytes_for)
         # RECENT-send fix (user ruling 2026-11-20): a recall released as RECENT sends what it is CHARGED, the recent
         # window, not the whole session. Before this fix the budget and est_tokens used tokens_for_representation
         # (467 for RECENT) while the body carried every frame of the session. The window is the session's most recent
@@ -711,8 +760,20 @@ class Live2Coordinator:
         if whole:
             frames = [dict(frame_ref=r, path=self._path(r)) for r in refs[idx0:]]
         else:
-            frames = ([dict(frame_ref=r, path=None) for r in refs[idx0:sent]]
-                      + [dict(frame_ref=r, path=self._path(r)) for r in refs[max(sent, idx0):]])
+            # REFERENCE ELIGIBILITY (D158 (2)), and note that this is now a SET MEMBERSHIP test
+            # where it used to be a prefix index. The old line read `sent = len(s.sent_bytes_for)`
+            # and sliced `refs[idx0:sent]`, i.e. it used a COUNT as an INDEX, which is sound only
+            # while the bytes-sent set is a PREFIX of the frame list. Neither set is a prefix in
+            # general: a `whole` recall sends bytes for the TAIL as well, and a 200 can arrive out
+            # of submission order. Testing membership needs no such invariant, so the invariant is
+            # removed rather than assumed. A frame goes as a uuid-only reference if and only if
+            # the request that carried its bytes returned 200; everything else carries bytes
+            # again, which costs UPLINK BYTES and is the declared price of the fix. The uuid is
+            # unchanged, so whether the engine also re-prefills a re-sent image or serves it from
+            # its own multimodal cache is an engine question and is NOT claimed here.
+            frames = [dict(frame_ref=r, path=(None if r in s.confirmed_bytes_for
+                                              else self._path(r))) for r in refs[idx0:]]
+            self.counts["racefix_bytes_resent"] += _n_resent(frames, s)
         self._submit(kind="recall", device_id=o.device_id, session_id=o.session_id,
                      opportunity_id=o.opp_id, decision_id=did, frames=frames,
                      est_tokens=tokens, question=o.question, options=o.options,
@@ -761,6 +822,13 @@ class Live2Coordinator:
                               est_tokens=int(est_tokens), sent_s=t, cache_salt=d.salt,
                               mm_uuids=list(body["_live2"]["mm_uuids"]), traffic_mix=dict(mix),
                               meta=dict(nominal_t=t - delay_s, decision_delay_s=delay_s,
+                                        # D158 (2): the frames whose BYTES this request carries,
+                                        # recorded at submission so `_collect` can promote
+                                        # exactly these on a 200. Recorded explicitly rather
+                                        # than reconstructed from `mm_uuids`, which are the body
+                                        # builder's composite cache keys and not frame refs.
+                                        bytes_frame_refs=[f["frame_ref"] for f in frames
+                                                          if f.get("path") is not None],
                                         **self._priority_for(kind, device_id, session_id, opportunity_id)))
         self.st.in_flight[kind] += 1
         self.counts["submitted_" + kind] += 1
@@ -793,6 +861,53 @@ class Live2Coordinator:
             return float(C.episodic_cloud_latency_s("32BI", 1, 25))
         return float(C.recall_ttft_s(max(sub.est_tokens, 1), "COLD"))
 
+    def _promote_confirmed_bytes(self, sub: Live2Submission, r: Dict[str, Any]) -> None:
+        """D158 (2). A frame's bytes become REFERENCEABLE when the request carrying them got 200.
+
+        This is the whole fix, and it is the only place reference eligibility advances. Before
+        it existed, `_submit` marked a frame sent and the next request on the same session
+        referenced it by uuid alone, often while the carrying request was still in flight; the
+        engine had not registered the piece holding the bytes and answered HTTP 400, after which
+        every later reference on that session pointed at bytes the engine never received. On
+        CAL1F `warm-all-lru` that was 226 400s with ZERO preceded by a completed 200 on the same
+        session.
+
+        It runs BEFORE `_settle`, on purpose: `_settle` can release a chained recall in this same
+        completion, and promoting first lets that recall reference the frames this 200 just
+        confirmed instead of re-sending their bytes. Running it after would still be correct,
+        only more expensive.
+
+        A DRY RUN HAS NO ENGINE AND NO `http_status`, so nothing is ever promoted and every
+        reference goes out as bytes. That is the conservative direction, it changes no decision,
+        and it is why the 50-arm dry prescreen proves this change decision-neutral and proves
+        nothing about the wire form on a live cell.
+        """
+        if r.get("http_status") != 200:
+            return
+        refs = list((sub.meta or {}).get("bytes_frame_refs") or ())
+        if not refs:
+            return
+        if sub.session_id:
+            s = self.st.sessions.get(sub.session_id)
+            if s is None:
+                return
+            # Intersected with the submission-time set rather than assigned, which keeps
+            # `confirmed_bytes_for` a SUBSET of `sent_bytes_for` by construction. The one way
+            # they could diverge is a `session_start` that replaces a SessionRec for a
+            # session_id with a request still in flight against the old record
+            # (`cstate.session_start`, which only preserves a preloaded history); that frame
+            # belongs to a history this record does not have, so it is dropped and counted
+            # rather than promoted into the wrong session.
+            promote = set(refs) & s.sent_bytes_for
+            self.counts["racefix_confirm_dropped_stale"] += len(refs) - len(promote)
+            s.confirmed_bytes_for |= promote
+            assert s.confirmed_bytes_for <= s.sent_bytes_for, (
+                "confirmed bytes outside the submitted set for %s" % sub.session_id)
+            self.counts["racefix_bytes_confirmed_session"] += len(promote)
+        elif sub.kind == "monitor":
+            self._mon_confirmed[sub.device_id] |= set(refs)
+            self.counts["racefix_bytes_confirmed_monitor"] += len(refs)
+
     def _collect(self, t: float) -> None:
         still = []
         for fut, sub in self.futures:
@@ -803,6 +918,7 @@ class Live2Coordinator:
             self.st.in_flight[sub.kind] = max(self.st.in_flight[sub.kind] - 1, 0)
             if r.get("error"):
                 self.errors.append(r["error"])
+            self._promote_confirmed_bytes(sub, r)
             usage = r.get("usage") or {}
             ct = cached_tokens_of(usage)
             pt = prompt_tokens_of(usage)
@@ -1166,6 +1282,20 @@ def _sched(ev: Dict[str, Any]) -> float:
 def _cpu_s() -> float:
     r = resource.getrusage(resource.RUSAGE_SELF)
     return r.ru_utime + r.ru_stime
+
+
+def _n_resent(frames: List[Dict[str, Any]], s) -> int:
+    """D158 (2): image parts in this body that carry bytes a PREVIOUS request already sent.
+
+    The declared price of the fix, counted the same way at both call sites. A part counts only if
+    it actually carries bytes (`_path` resolved) AND the frame is in the submission-time set, so
+    a frame the store cannot resolve is not miscounted as a re-send and neither is a frame whose
+    bytes are going out for the first time.
+    """
+    return sum(1 for f in frames
+               if f.get("path") is not None
+               and f["frame_ref"] in s.sent_bytes_for
+               and f["frame_ref"] not in s.confirmed_bytes_for)
 
 
 class _DryFuture:

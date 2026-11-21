@@ -1,0 +1,42 @@
+# D158 (2): the submission race is fixed. This file IS the evidence, not a flag.
+#
+# Fix: sent_bytes_for was doing two jobs and the set is split. sent_bytes_for still advances at
+# SUBMISSION and still drives BUILD PROGRESS, so no decision moves. New confirmed_bytes_for
+# advances only on HTTP 200 and drives REFERENCE ELIGIBILITY. The dashcam side is split the same
+# way (_mon_sent / _mon_confirmed), which the brief did not name but the data demanded: the
+# saturated cell was 1,113 dashcam 400s against 397 robot. Pieces are NOT serialised.
+#
+# THE THREE PROOFS D158 (2) REQUIRED, all passing:
+#   1.  50-arm prescreen before/after at the same commit: 50 of 50 byte-identical, 0 errors
+#   1b. the same claim on a cell with a REAL frame store: digests identical both arms, both
+#       regimes, frames_sent identical at 2,205 and 1,922
+#   2.  body-level diff: 439 of 7,060 bodies change, 0 for any other reason, 0 with no bare
+#       reference
+#   3.  CAL1F replay: 226 of 226 failures carried a reference to unacknowledged bytes under the
+#       old rule, 0 under the new
+#   tests: 152 of 152, identical to baseline, including D153's epg_bodies_proof
+#
+# PROOF 1 AS ORIGINALLY SPECIFIED WAS VACUOUS, which is why 1b exists. baseline_prescreen passes
+# no frames_root, so _path returns None for every frame, sent_bytes_for never grows, and the
+# quantity the fix branches on is EMPTY. Proof 1 alone proves decision-identity in a regime where
+# no frame carries bytes. That is the same false-proof shape already recorded for EP-G's proof (a),
+# and it was caught at Step 0 rather than after the sweep.
+#
+# READ THIS BEFORE TREATING THE RACE AS CLOSED. A dangerous reference is NECESSARY for the 400 but
+# NOT SUFFICIENT: 226 of 226 failures carried one, and so did 517 of 957 SUCCESSES. So the engine
+# registers some images before the carrying request returns, and the 200 is a later moment than the
+# one that actually matters. Proof 3 therefore bounds the fix FROM ONE SIDE ONLY: it removes the
+# condition present in 100 percent of failures. It does NOT establish that those 226 would now
+# return 200. Only D158 (3)'s re-run settles that, and the _rf cells are what decide it.
+#
+# COST, which is larger than "uplink rises" suggests, because an unconfirmed frame is re-sent:
+#   warm-all-lru declared cell   737.4 MB to 1,147.6 MB   x1.556
+#   CAL1F sequence               4,323 to 34,535 image parts carrying bytes   x7.99
+#   edf                          no change   x1.000, because it has no in-flight overlap and so
+#                                never had the race
+# Prompt tokens are NOT claimed to rise: a re-sent frame keeps its mm_uuid, so the engine's
+# multimodal cache key is unchanged and est_tokens does not move. Whether the engine re-prefills a
+# re-sent image or serves it from its mm cache needs a live cell, and that is the one open cost.
+#
+# Any EP-G cell quoting epg_frames_sent_as_reference or _as_bytes must say which side of this fix
+# it is on: those counters count the WIRE, which is what their names claim, so their values move.

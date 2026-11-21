@@ -87,7 +87,31 @@ class SessionRec:
     session_id: str
     device_id: str
     frames: List[str] = field(default_factory=list)       # every frame_ref on cloud-side disk
-    sent_bytes_for: set = field(default_factory=set)      # frames whose BYTES the engine saw
+    # D158 (2). ONE SET WAS DOING TWO JOBS and only one of them could wait for a 200, so it is
+    # now two sets. The names are meant to be read at the call site: "sent" is the wire,
+    # "confirmed" is the engine's answer, and the gap between them is one request's flight time.
+    #
+    #   sent_bytes_for       frames whose bytes this session has PUT ON THE WIRE, answered or
+    #                        not. This drives BUILD PROGRESS: `coordinator._advance_build` reads
+    #                        its length to pick the next piece's frames. It advances at
+    #                        SUBMISSION, exactly as the single set did, so no decision moves.
+    #   confirmed_bytes_for  frames whose carrying request RETURNED 200, so the engine has
+    #                        registered the piece holding their bytes. This drives REFERENCE
+    #                        ELIGIBILITY: only these may go out as uuid-only references. It
+    #                        advances in `coordinator._collect`.
+    #
+    # THE BUG THE SPLIT FIXES. Both jobs used to read the submission-time set, so a frame added
+    # at submission was referenced by uuid alone by the next request on the same session before
+    # the engine had registered the piece carrying its bytes, and the engine answered HTTP 400.
+    # On CAL1F `warm-all-lru` that was 226 400s, of which ZERO had a previous request on the same
+    # session that had completed 200 before this one was sent (192 were still in flight, median
+    # gap 0.12 s). Once one request fails, every later reference on that session points at bytes
+    # the engine never received, so it cascades.
+    #
+    # `confirmed_bytes_for` is kept a SUBSET of `sent_bytes_for` by the promoter, which is why
+    # nothing here needs the old prefix assumption; see `_advance_build` and `_submit_recall`.
+    sent_bytes_for: set = field(default_factory=set)
+    confirmed_bytes_for: set = field(default_factory=set)
     est_tokens: int = 0
     preloaded_tokens: int = 0     # D101: tokens the cloud already held, cold, at run start
     open: bool = True
