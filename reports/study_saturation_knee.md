@@ -385,3 +385,96 @@ rather than by a shift in the typical request, and the queue spreads that tail's
 population. Whether the cache tail causes the crossing or follows from it is not established by
 these data: both move together within one 25 s window at t = 475. The measurement that would
 separate them is the residency and eviction log, which is on disk (`residency.jsonl`) and unread.
+
+---
+
+## The cache lead, pursued: three mechanism hypotheses tested, all three fail, and one of my own tests retracted
+
+`residency.jsonl` is not the file I said it was. On
+`querystream-proactive_n16_s5_1200s_h27_3t_L3_epg` it holds 370 rows, one per single-shot or robot
+session, **no dashcam rows at all**, `believed_tier` = `cold` in **370 of 370**, and
+`telemetry_cached_tokens` **null in every row**. It is the coordinator's belief at admission, not an
+engine eviction log, so it cannot separate the two causal directions and I was wrong to point the
+H100 at it. Noted separately under check 3: a belief column that is constant across 370 rows with
+its telemetry field never populated is an unfed channel, which is consistent with the earlier
+finding that `release_at_GPU-WARM` beliefs run conservative. REGISTER: one cell.
+
+The request log can be pushed further than the belief log, and it kills more than it settles.
+
+### What is real: the cold share, not an eviction
+
+Dashcam engine-observed `cache_path` = COLD, by 100 s window of submit time:
+
+| t_submit (s) | n | COLD | P(COLD) |
+|---|---|---|---|
+| 0 to 400 | 3,816 | 234 | **0.059 to 0.063, flat** |
+| 400 to 500 | 1,003 | 74 | 0.074 |
+| 500 to 600 | 986 | 147 | **0.149** |
+| 600 to 700 | 995 | 175 | **0.176** |
+| 700 to 900 | 1,983 | 229 | 0.126 then 0.105 |
+| 900 to 1100 | 651 | 103 | 0.150 then 0.241 |
+
+Flat for the first four windows, then nearly triples at the crossing. Decomposing the mean
+cached-fraction fall across the crossing at t = 475 into composition and within-stratum parts:
+
+| | mean cached_fraction |
+|---|---|
+| actual, pre-crossing | 0.8026 |
+| actual, post-crossing | 0.6922 |
+| post-crossing **reweighted to the pre-crossing mix** | **0.7549** |
+
+So **57 percent of the fall is composition** (dashcam COLD share 5.9 to 13.6 percent, while the
+warm dashcam count is flat at 4,288 then 4,184, meaning about 400 *extra* fully-cold requests) and
+**43 percent is within-stratum** (warm dashcam cached fraction 0.8832 to 0.8308). Both are real and
+neither dominates. A fully-cold dashcam request carries about 3,760 uncached tokens against about
+400 for a warm one, so roughly 400 extra cold requests over the 725 s post-crossing window is on
+the order of 1,900 extra uncached tok/s, a large share of the rise from about 4,600 to about 8,600.
+
+### What fails: every mechanism I proposed for it
+
+**Hypothesis 1, LRU pressure on resident prefixes. REFUTED, and wrongly signed.** Per-request
+Spearman against `cached_fraction`:
+
+| | pre-crossing (n=4,569) | post-crossing (n=4,872) |
+|---|---|---|
+| backlog at submit | +0.043 | +0.157 |
+| gap since the same session's previous submit | +0.068 | +0.053 |
+| intervening distinct sessions | +0.030 | +0.161 |
+
+LRU pressure predicts **negative** correlations: more backlog and more interleaving should mean
+fewer hits. Every coefficient is near zero and the two non-trivial ones are **positive**. The
+per-request cache hit is essentially independent of backlog, and what sign there is runs the wrong
+way.
+
+**Hypothesis 2, queue to cold: a request goes COLD because its own predecessor had not finished and
+so was not yet inserted. RETRACTED, the test is void.** `session_id` is **null on all 9,434 dashcam
+request rows**, so grouping by session pooled 6 devices into a single pseudo-session keyed on
+`None`, put 9,361 of 9,433 requests in one conditioning cell, and left the contrast arm at n = 72.
+This is not an underpowered null, it is a broken grouping, and it is the register error in a new
+place: I keyed an analysis on a field without checking it was populated. The result it produced
+(risk ratio 0.7x) should not be cited.
+
+**Hypothesis 3, composition.** The COLD share rising is 57 percent of the arithmetic, but it is a
+restatement of what needs explaining, not a cause.
+
+The gate is **not** affected by the null `session_id`. `cost_model_gate.features()` takes `kind`
+from `outcomes.jsonl` joined on `opportunity_id`, not from the request rows, and its `overlap`
+counts are cell-wide interval counts by construction with no session key. Checked directly rather
+than assumed, because the gate's FAIL verdict partly rests on the overlap spread. The kind splits
+in the sections above are also unaffected, since a null `session_id` falls through to the dashcam
+branch, which is correct.
+
+### Where this leaves the lead
+
+The cold share rises at the crossing, by enough work to account for much of the rate rise, and
+**the cause is unresolved**: the one belief-side file cannot see it, the eviction hypothesis is
+refuted at request level with the wrong sign, and the queue-to-cold hypothesis is untestable from
+this log because dashcam requests carry no session identity. The measurement that would resolve it
+does not exist yet: a per-dashcam-session cache log, or any engine-side insertion and eviction
+trace. That is a concrete instrumentation ask rather than a file to go read, and it is the honest
+end of the lead tonight.
+
+**DEFECT to report, beside the null `n_requests` and `n_errors` in `cell.json`:** dashcam rows in
+`request.jsonl` carry `session_id: null` while robot and single-shot rows are populated. Anything
+keyed on dashcam session identity is silently impossible, and it fails by pooling rather than by
+erroring, which is the shape that survives checks.
