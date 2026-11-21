@@ -1,0 +1,433 @@
+{
+ "label": "D156 (4) cost-model gate: fit on CALIBRATION-1F, test held out on the EP-G WARM-ALL cells (upload-pf). Estimator imported unchanged from the committed live2/cost_model_gate.py; only the split differs. CPU only, committed logs only.",
+ "at": "2026-11-21T08:05:01.990531",
+ "decisions": [
+  "D151 (6)",
+  "D154 (2)",
+  "D156 (4)",
+  "D157 (2)"
+ ],
+ "deadlines_for_scale": {
+  "dashcam_s": 1.0,
+  "robot_s": 3.0
+ },
+ "fit_cells": {
+  "warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f_rf": {
+   "n": 10324,
+   "warm": 510,
+   "warm_frac": 0.0494,
+   "first_token_p50": 64.5416,
+   "first_token_p90": 174.2787,
+   "overlap_ft_p50": 1426.0,
+   "prompt_tokens_p50": 378.0
+  },
+  "warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_cal1f": {
+   "n": 13954,
+   "warm": 393,
+   "warm_frac": 0.0282,
+   "first_token_p50": 0.2663,
+   "first_token_p90": 0.5364,
+   "overlap_ft_p50": 6.0,
+   "prompt_tokens_p50": 378.0
+  }
+ },
+ "test_cells": {
+  "warm-all-lru-off_n16_s4_1200s_h27_3t_L3_epg": {
+   "n": 12126,
+   "warm": 11047,
+   "warm_frac": 0.911,
+   "first_token_p50": 0.4519,
+   "first_token_p90": 0.9648,
+   "overlap_ft_p50": 10.0,
+   "prompt_tokens_p50": 3760.0
+  },
+  "warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_epg": {
+   "n": 12523,
+   "warm": 11436,
+   "warm_frac": 0.9132,
+   "first_token_p50": 0.4464,
+   "first_token_p90": 0.8318,
+   "overlap_ft_p50": 10.0,
+   "prompt_tokens_p50": 3422.0
+  },
+  "warm-all-lru_n16_s4_1200s_h27_3t_L3_epg_rf": {
+   "n": 8257,
+   "warm": 6889,
+   "warm_frac": 0.8343,
+   "first_token_p50": 99.5074,
+   "first_token_p90": 396.7462,
+   "overlap_ft_p50": 2048.0,
+   "prompt_tokens_p50": 3760.0
+  },
+  "warm-all-lru_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rf": {
+   "n": 9511,
+   "warm": 8192,
+   "warm_frac": 0.8613,
+   "first_token_p50": 138.5545,
+   "first_token_p90": 223.2794,
+   "overlap_ft_p50": 2529.0,
+   "prompt_tokens_p50": 3760.0
+  }
+ },
+ "seed5_cell": {
+  "warm-all-lru_n16_s5_1200s_h27_3t_L3_epg_rerun": {
+   "n": 9020,
+   "warm": 7675,
+   "warm_frac": 0.8509,
+   "first_token_p50": 134.6291,
+   "first_token_p90": 356.8129,
+   "overlap_ft_p50": 2171.0,
+   "prompt_tokens_p50": 3760.0
+  }
+ },
+ "n_fit": 24278,
+ "n_test": 42417,
+ "fit_warm_fraction": 0.0372,
+ "test_warm_fraction": 0.8856,
+ "model": {
+  "first_token": {
+   "intercept": -2.8699095280354965,
+   "per_uncached_token": 0.0003153437911545162,
+   "per_overlap": 0.062379071618684875
+  },
+  "decode": {
+   "intercept": 0.7565360182517046,
+   "per_overlap": 0.0014828249566769477
+  }
+ },
+ "gate": {
+  "split": "THE GATE: fit CAL1F, test EP-G WARM-ALL held out",
+  "by_cache_state": {
+   "all": {
+    "n": 42417,
+    "negative_first_token_predictions": 25967,
+    "negative_fraction": 0.6122,
+    "first_token": {
+     "predicted_p50": -1.6896,
+     "actual_p50": 0.7081,
+     "ratio_p50": -2.3861,
+     "abs_err_p50": 2.6836,
+     "abs_err_p90": 41.1655,
+     "abs_err_max": 507.911
+    },
+    "decode": {
+     "predicted_p50": 0.7728,
+     "actual_p50": 0.1513,
+     "abs_err_p50": 0.7182,
+     "abs_err_p90": 2.3168
+    }
+   },
+   "warm": {
+    "n": 37564,
+    "negative_first_token_predictions": 23703,
+    "negative_fraction": 0.631,
+    "first_token": {
+     "predicted_p50": -1.6934,
+     "actual_p50": 0.6738,
+     "ratio_p50": -2.5131,
+     "abs_err_p50": 2.6806,
+     "abs_err_p90": 38.7824,
+     "abs_err_max": 496.2481
+    },
+    "decode": {
+     "predicted_p50": 0.7728,
+     "actual_p50": 0.1459,
+     "abs_err_p50": 0.7152,
+     "abs_err_p90": 2.2659
+    }
+   },
+   "cold": {
+    "n": 4853,
+    "negative_first_token_predictions": 2264,
+    "negative_fraction": 0.4665,
+    "first_token": {
+     "predicted_p50": 20.006,
+     "actual_p50": 11.467,
+     "ratio_p50": 1.7447,
+     "abs_err_p50": 2.8281,
+     "abs_err_p90": 149.7283,
+     "abs_err_max": 507.911
+    },
+    "decode": {
+     "predicted_p50": 0.9508,
+     "actual_p50": 0.3229,
+     "abs_err_p50": 0.7602,
+     "abs_err_p90": 4.2872
+    }
+   },
+   "_p90_tail_composition": {
+    "n": 4242,
+    "warm": 3269,
+    "cold": 973,
+    "by_kind": {
+     "robot": 10,
+     "single_shot": 108,
+     "dashcam": 4124
+    }
+   }
+  }
+ },
+ "in_sample": {
+  "split": "in sample on CAL1F",
+  "by_cache_state": {
+   "all": {
+    "n": 24278,
+    "negative_first_token_predictions": 14521,
+    "negative_fraction": 0.5981,
+    "first_token": {
+     "predicted_p50": -1.9398,
+     "actual_p50": 0.4667,
+     "ratio_p50": -4.1565,
+     "abs_err_p50": 2.701,
+     "abs_err_p90": 30.4944,
+     "abs_err_max": 296.4982
+    },
+    "decode": {
+     "predicted_p50": 0.7684,
+     "actual_p50": 0.1025,
+     "abs_err_p50": 0.704,
+     "abs_err_p90": 1.0488
+    }
+   },
+   "warm": {
+    "n": 903,
+    "negative_first_token_predictions": 437,
+    "negative_fraction": 0.4839,
+    "first_token": {
+     "predicted_p50": 1.3394,
+     "actual_p50": 3.9915,
+     "ratio_p50": 0.3356,
+     "abs_err_p50": 2.7467,
+     "abs_err_p90": 29.612,
+     "abs_err_max": 154.9896
+    },
+    "decode": {
+     "predicted_p50": 0.8203,
+     "actual_p50": 0.0456,
+     "abs_err_p50": 0.8007,
+     "abs_err_p90": 2.1795
+    }
+   },
+   "cold": {
+    "n": 23375,
+    "negative_first_token_predictions": 14084,
+    "negative_fraction": 0.6025,
+    "first_token": {
+     "predicted_p50": -2.0022,
+     "actual_p50": 0.4544,
+     "ratio_p50": -4.4058,
+     "abs_err_p50": 2.7005,
+     "abs_err_p90": 30.4955,
+     "abs_err_max": 296.4982
+    },
+    "decode": {
+     "predicted_p50": 0.7684,
+     "actual_p50": 0.1086,
+     "abs_err_p50": 0.701,
+     "abs_err_p90": 0.9838
+    }
+   },
+   "_p90_tail_composition": {
+    "n": 2428,
+    "warm": 90,
+    "cold": 2338,
+    "by_kind": {
+     "robot": 6,
+     "single_shot": 55,
+     "dashcam": 2367
+    }
+   }
+  }
+ },
+ "diagnostics": [
+  {
+   "name": "A_within_epg",
+   "note": "DIAGNOSTIC, not the gate: fit on the two EP-G cells whose arm does not warm ahead, test on the two warm-all-lru EP-G cells",
+   "model": {
+    "first_token": {
+     "intercept": -0.018611844733034216,
+     "per_uncached_token": 0.0001443059439786657,
+     "per_overlap": 0.04091496194114293
+    },
+    "decode": {
+     "intercept": -0.014110496085589749,
+     "per_overlap": 0.01816744316479002
+    }
+   },
+   "result": {
+    "split": "within EP-G",
+    "by_cache_state": {
+     "all": {
+      "n": 17768,
+      "negative_first_token_predictions": 0,
+      "negative_fraction": 0.0,
+      "first_token": {
+       "predicted_p50": 92.0605,
+       "actual_p50": 125.4131,
+       "ratio_p50": 0.7341,
+       "abs_err_p50": 23.0232,
+       "abs_err_p90": 184.7704,
+       "abs_err_max": 567.7338
+      },
+      "decode": {
+       "predicted_p50": 19.3524,
+       "actual_p50": 1.4499,
+       "abs_err_p50": 18.9424,
+       "abs_err_p90": 32.2983
+      }
+     },
+     "warm": {
+      "n": 15081,
+      "negative_first_token_predictions": 0,
+      "negative_fraction": 0.0,
+      "first_token": {
+       "predicted_p50": 88.9178,
+       "actual_p50": 122.4867,
+       "ratio_p50": 0.7259,
+       "abs_err_p50": 22.3407,
+       "abs_err_p90": 135.053,
+       "abs_err_max": 555.4314
+      },
+      "decode": {
+       "predicted_p50": 19.1344,
+       "actual_p50": 1.4117,
+       "abs_err_p50": 18.698,
+       "abs_err_p90": 32.4309
+      }
+     },
+     "cold": {
+      "n": 2687,
+      "negative_first_token_predictions": 0,
+      "negative_fraction": 0.0,
+      "first_token": {
+       "predicted_p50": 100.5391,
+       "actual_p50": 156.2935,
+       "ratio_p50": 0.6433,
+       "abs_err_p50": 26.6569,
+       "abs_err_p90": 290.2217,
+       "abs_err_max": 567.7338
+      },
+      "decode": {
+       "predicted_p50": 21.4416,
+       "actual_p50": 1.5642,
+       "abs_err_p50": 21.2361,
+       "abs_err_p90": 31.8864
+      }
+     },
+     "_p90_tail_composition": {
+      "n": 1777,
+      "warm": 1264,
+      "cold": 513,
+      "by_kind": {
+       "robot": 3,
+       "single_shot": 44,
+       "dashcam": 1730
+      }
+     }
+    }
+   }
+  },
+  {
+   "name": "B_across_seed",
+   "note": "DIAGNOSTIC, not the gate: fit on the seed-4 EP-G cells, test on the seed-5 rerun",
+   "model": {
+    "first_token": {
+     "intercept": -3.5845649227433207,
+     "per_uncached_token": 0.012983764400531663,
+     "per_overlap": 0.06344062011603027
+    },
+    "decode": {
+     "intercept": 0.9764679298151575,
+     "per_overlap": 0.001826033559206272
+    }
+   },
+   "result": {
+    "split": "EP-G seed 5",
+    "by_cache_state": {
+     "all": {
+      "n": 9020,
+      "negative_first_token_predictions": 29,
+      "negative_fraction": 0.0032,
+      "first_token": {
+       "predicted_p50": 143.2194,
+       "actual_p50": 134.6291,
+       "ratio_p50": 1.0638,
+       "abs_err_p50": 27.5672,
+       "abs_err_p90": 185.3917,
+       "abs_err_max": 437.6905
+      },
+      "decode": {
+       "predicted_p50": 2.8445,
+       "actual_p50": 1.5037,
+       "abs_err_p50": 1.9468,
+       "abs_err_p90": 6.7855
+      }
+     },
+     "warm": {
+      "n": 7675,
+      "negative_first_token_predictions": 29,
+      "negative_fraction": 0.0038,
+      "first_token": {
+       "predicted_p50": 135.6905,
+       "actual_p50": 105.3949,
+       "ratio_p50": 1.2874,
+       "abs_err_p50": 25.7783,
+       "abs_err_p90": 166.7573,
+       "abs_err_max": 437.6905
+      },
+      "decode": {
+       "predicted_p50": 2.7861,
+       "actual_p50": 1.4833,
+       "abs_err_p50": 1.902,
+       "abs_err_p90": 6.5221
+      }
+     },
+     "cold": {
+      "n": 1345,
+      "negative_first_token_predictions": 0,
+      "negative_fraction": 0.0,
+      "first_token": {
+       "predicted_p50": 184.9385,
+       "actual_p50": 172.1323,
+       "ratio_p50": 1.0744,
+       "abs_err_p50": 41.2246,
+       "abs_err_p90": 262.3916,
+       "abs_err_max": 431.3723
+      },
+      "decode": {
+       "predicted_p50": 3.1677,
+       "actual_p50": 1.6937,
+       "abs_err_p50": 2.1946,
+       "abs_err_p90": 9.6111
+      }
+     },
+     "_p90_tail_composition": {
+      "n": 902,
+      "warm": 656,
+      "cold": 246,
+      "by_kind": {
+       "robot": 9,
+       "single_shot": 27,
+       "dashcam": 866
+      }
+     }
+    }
+   }
+  }
+ ],
+ "verdict": "FAIL",
+ "verdict_reasons": [
+  "the fitted model predicts NEGATIVE first-token latency for 59.8% of its OWN fit data and 61.2% of the held-out data; a negative first-token time is physically impossible, so the model is invalid rather than inaccurate (consistency check 2)",
+  "held-out first-token ratio_p50 is -2.3861, which is negative",
+  "held-out p90 absolute first-token error is 41.1655 s, larger than every deadline in the system, so D154 (2)'s literal definition of MARGIN_CF as this quantity is unusable and D157 (2)'s on-time-probability units must govern"
+ ],
+ "consequence": "Full v5 does NOT go live. D154 (2) forbids any v5 cell while MARGIN_CF is unset, and the gate does not pass.",
+ "_provenance": {
+  "git_commit": "1a491f919e298f5a485d3ef0e4a9d8062ab4038c",
+  "script": "cost_model_gate_d156.py",
+  "model": "none",
+  "timestamp": "2026-11-21T08:05:01.993534",
+  "device": "cpu",
+  "n": 66695
+ }
+}
