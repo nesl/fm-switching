@@ -883,3 +883,93 @@ nor unexercised. It operated and produced no effect distinguishable from zero on
 measured and large cost elsewhere. The release side is **cancelled by geometry** in the precise
 sense of the taxonomy: alive, and identical between branches in 11 of 11 cold cases because the
 deadline, not the decision, settles the outcome there.
+
+## The held-out WARM-ALL cell is INVALID on apparatus capacity, and that blocks the gate rather than failing it
+
+`warm-all-lru_n16_s5_1200s_h27_3t_L3_epg` (EP-G, per-frame, race-fixed) returned
+**`run_valid` FALSE**. The cause is the harness, not the policy and not the engine:
+
+| quantity | value |
+|---|---|
+| emulator event lateness, mean | 82 ms |
+| p99 | **2,723 ms** |
+| max | **14,313 ms** |
+| n events | 41,033 |
+| procsplit coordinator link | ended in `ConnectionResetError` |
+
+**A mean of 82 ms against a p99 of 2,723 ms is a 33x ratio, and it is exactly the shape
+consistency-check 3 exists to catch.** Any validity rule written on the mean passes this run. The
+rule is written on the tail, so it caught it. Worth noting because the temptation at 03:00 is to
+read the mean and proceed.
+
+### My race-fix prediction held on both halves, and that part survives the invalidity
+
+The prediction committed at `cc22429` was that the fix removes the 400s and not the queue.
+
+| | pre-fix, same point | post-fix |
+|---|---|---|
+| non-200 responses in ~5,100 | about **1,500** | **29** |
+| dashcam TTFT p50 | | **50 s** |
+| dashcam TTFT p90 | | **413 s** |
+
+**Both halves confirmed.** The non-200 comparison is safe despite the invalidity because both
+conditions ran on the same harness, so the lateness is common to the comparison rather than a
+confound in it.
+
+### What the 50 s TTFT does and does not establish
+
+The TTFT numbers come from the real H100 engine, not from the emulator, so they are a genuine
+server-side measurement. But the events that offered that load were late, in bursts, by up to
+14.3 s, so **the load pattern is not the intended one and I cannot attribute the magnitude to the
+intended workload.** Lateness followed by catch-up both spreads and bunches the offered load, and I
+cannot sign the net effect, so I am not claiming a direction.
+
+**What survives is the direction, not the number.** A p50 of 50 s against a **1.0 s** dashcam
+deadline (D154 (1)) is a factor of 50, and no plausible reshuffling of arrival times turns 50 s into
+under 1 s. **So "WARM-ALL cannot meet the dashcam deadline at 16 devices on this engine" is
+established; "it misses by 50x" is not.** Register: direction MEASURED, magnitude PERTURBED.
+
+**And a separate caution on what the invalidity itself means.** The emulator saturating is a fact
+about our apparatus, not about warm-everything on real hardware. Reporting "warm-everything does
+not scale" from an emulator ceiling would be a check-6 proxy error: the harness ceiling and the
+engine queue are two different saturations that happen to co-occur here. The engine queue is the
+one that bears on the policy claim, and it is the one measured on the real server.
+
+### The consequence for the gate, which is the part that needs a user decision
+
+D157 (2) names the MARGIN_CF population as **every robot question released in the 4 EP-G WARM-ALL
+held-out cells (upload-pf) and no other cells.** D156 (4) makes those same cells the gate's
+held-out test. D158 (1) holds the margin until all four run clean.
+
+**Two of those four are the `_rf` warm-all-lru re-runs still queued, and they will probably hit the
+same ceiling, because warm-all-lru is the heaviest-load arm in the project and that load is what
+exceeded the harness.** If they do:
+
+**The gate is not failed. It is UNTESTABLE on its pre-registered held-out population.** Those are
+different outcomes with different remedies, and conflating them would relax a gate by accident:
+
+- a FAILED gate means the cost model mispredicts, and the remedy is a better cost model;
+- an UNTESTABLE gate means the held-out cells do not exist, and **no amount of cost-model work
+  changes it.**
+
+Under D106 / D116 I am not redefining the population to whatever ran, which would be a
+methodological change made at 03:00 by the session that benefits from it. **So: MARGIN_CF stays
+unset, the gate is reported untested rather than failed, and full v5 stays gated.** That is the
+default that needs no decision and it is what I will carry into the 06:00 summary.
+
+**For the user at 06:00, the options I can see, with my default first:**
+
+1. **Leave it.** Full v5 stays gated, gate reported untested on capacity. Costs nothing, decides
+   nothing, and is D106-compliant. **My default.**
+2. Re-run the held-out WARM-ALL cells at **fewer devices**. This is a methodological change to the
+   pre-registered held-out population and I will not make it overnight.
+3. Accept a **2-of-4** population for MARGIN_CF. Weakens the pre-registration and I recommend
+   against it; the margin is the one number in v5 that must not be chosen after seeing the cells.
+
+**The new fact for the 06:00 summary is that full v5's blocker has moved again: from a definition
+(MARGIN_CF had no units), to a mechanism (warm-ahead was unexpressible), to a measurement (the gate),
+and now to apparatus capacity on the gate's own test cells.** Each move has been to something more
+concrete, which is progress, but this last one is the first that more analysis cannot clear.
+
+Per the overnight brief the driver re-runs the cell once (`_rerun`, about 02:55) and skips with a log
+if it is invalid again. That is the right handling and I am not intervening.
