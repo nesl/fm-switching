@@ -1,0 +1,14 @@
+E3_mechanism_over_time
+
+CLAIM:
+The joint policy sustains its on-time service across the whole 20-minute run: dashcam stays near 71% within 1 s and SS near 100% within 2 s from start to finish, rather than degrading as load accumulates (contrast the warm-all baseline in M5, whose latency grows into the minutes). The coordinator CPU cost stays bounded and low throughout. The prefix-reuse mechanism is active: the cell sends 107,298 EP-G frames by reference to a built prefix against 18,810 as bytes.
+
+SOURCES (committed):
+  results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s4_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ 82c3a27
+  results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s4_1200s_h27_3t_L3_epg/host_load.jsonl.gz  @ 82c3a27
+  results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json  @ 82c3a27
+
+STATUS: PILOT. Drawn from the EP-G pilot cells; to be re-run on the repeat-trace cells. Numbers are provisional.
+
+NOTES:
+Committed EP-G PILOT cell hybrid-F-lhreq seed 4. Top: fraction of opportunities served within deadline per 90 s bin, monitor (dashcam, 1 s) and recall (SS, 2 s), from the committed within_L. Bottom: the run's own coordinator CPU busy fraction from host_load.jsonl.gz (the system loadavg also carries other users and is not the run's load; the engine/GPU load is reflected in the sustained service above, not in CPU). Believed-tier warm share is not plotted because it understates prefix reuse by construction (StudyV5-ENGINE); the frames-by-reference versus by-bytes counts stand in for the warm mechanism. Colours from the shared registry. PILOT.
