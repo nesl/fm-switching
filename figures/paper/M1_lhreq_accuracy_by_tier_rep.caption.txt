@@ -1,0 +1,13 @@
+M1_lhreq_accuracy_by_tier_rep
+
+CLAIM:
+On the 69 EVAL long-history-required (LH-REQ) questions, moving from the recent-window to the full-history (D2) representation raises accuracy from 16% to 41% on the device 4B tier and from 26% to 54% on the cloud 32B tier. The full-history gain is large on both tiers, in contrast to the full S-EMBER suite where the D2-minus-recent EVAL gap is about 1 pp on the device and about 5 pp on the cloud. Error bars are Wilson 95 percent intervals; each question is a single trial.
+
+SOURCES (committed):
+  results/orchestration/live2/lh_req/lh_req_definition.json  @ 1acbe36
+  results/sember/study_orin_rec/orin_rec_part2.jsonl  @ c31ea43
+  results/sember/study_acc2/acc2_requests.jsonl  @ 6b3a173
+  results/sember/study_orin_rec/orin_rec_part2_analysis.json  @ c31ea43
+
+NOTES:
+Tiers: device is Qwen3-VL-4B-Instruct on the Jetson Orin (StudyORIN-REC part 2); cloud is the 32B instruct comparator whose accuracy is measured on the A6000 accuracy box per the project convention (StudyACC2). LH-REQ was defined on the accuracy-box selection model, where these questions show D2 45.4% vs recent 21.6% (gap 23.7 pp, 95% CI [12.4, 35.1]); that selection gap is why the subset exists and is not re-plotted here. Over-context rows are excluded from the denominator and reported in-bar: only 3 device D2 rows are over context, cloud has none. Device and cloud are separate x-groups and labelled, so the blue/purple pair is never distinguished by hue alone; recent vs full within a group differ by lightness and hatch, which survive CVD and grayscale.
