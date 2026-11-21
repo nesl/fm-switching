@@ -36,7 +36,7 @@ the estimator is sound and the **fit set** is not. The estimator was imported un
 
 ### 1b. ADDENDUM 06:25, after the 06:00 summary: the gate's confound is now quantified, and the knee is bracketed to 3.9 percent
 
-`reports/study_saturation_knee.md`, commit `5a489d2`, instrument
+`reports/study_saturation_knee.md`, commit `939b300`, instrument
 `experiments/orchestration/live2/v5/knee_within_run.py`.
 
 Partitioning all 29 EP-G and CAL1F cells by whether first-token p50 in **any** 100 s window of
@@ -233,7 +233,7 @@ session D section above. Ran on GPU 2 from 17:00 to 06:00, GPU 2 never idle exce
   D156 v5-rules block at seeds 4 and 5 (v5-rules beside 7 arms), and the EP-G handful at seed 4 (all 11 arms; the last,
   hybrid-F-lhreq with C3, gives correct by deadline 0.35 and on time 16/20 against its C3-off twin's 0.45 and 8/20, so the
   RECENT fallback buys deliveries that are wrong, as pre-registered). The EP-G handful at seed 5 continues past 06:00.
-- Full v5 did NOT run: the cost-model gate FAILS (session D, 21e2179). One INVALID cell (warm-all-lru s5 first attempt,
+- Full v5 did NOT run: the cost-model gate FAILS (session D, 6dc49db). One INVALID cell (warm-all-lru s5 first attempt,
   harness link reset) was re-run once per D143 and the rerun is valid. No foreign process on GPU 2 all night.
 - Incidents (details in the report): `import hybrid` broken by 5d7c084 (fixed e2c8933 / e7b4dda); the submission race
   (fixed 2b8714c, 0 HTTP 400 on every later cell); scorer version skew (f1d32c7 mid-run); null n_requests / n_errors in

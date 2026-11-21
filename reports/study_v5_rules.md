@@ -1133,7 +1133,7 @@ they go on tomorrow's list.
 against. That is the second instance of the `cell.json` population defect recorded above, on the
 same arm.
 
-## RETRACTION: 87fc0d4's warm comparison was a register error, and it reversed the ranking
+## RETRACTION: 501d545's warm comparison was a register error, and it reversed the ranking
 
 **The comparison in the section above is withdrawn.** I put warm-all-lru's **engine-observed**
 warm share (3 of 20, from `score.robot_rows` `cache_path`) beside v5-rules' **belief** share

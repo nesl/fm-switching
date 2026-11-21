@@ -53,7 +53,7 @@ until the flagged confidence-injection wiring change is applied.
   the prefills that buy warmth fill the queue that makes warm answers late. noc3's warm 0 is structural (0 pieces, post-fix).
   The arm's own belief counter (`release_at_GPU-WARM`) UNDER-reports warmth and was retracted as a source.
 - warm-all-lru (warm everything) reaches LESS warmth (16 of 48, 33 %) than targeted v5-rules, and saturates the engine.
-- SATURATION KNEE (flash 5a489d2, within-run 100 s windows over 29 cells, criterion declared before reading: any window's
+- SATURATION KNEE (flash 939b300, within-run 100 s windows over 29 cells, criterion declared before reading: any window's
   first-token p50 above 2.0 s): 19 cells at 4,356 to 4,512 uncached tok/s never cross, 10 cells at 4,686 to 5,831 all
   cross, 0 misclassified, so the knee lies in [4,512, 4,686] uncached tok/s (3.9 percent). Above it, first-token latency is
   ACCUMULATED BACKLOG, not current rate. **The crossing cells' POOLED TTFT is not a property of the arm and must NOT be
@@ -65,7 +65,7 @@ until the flagged confidence-injection wiring change is applied.
   against their one-frame runs.
 
 **Gate and v5.** 32B engine-action confirmation PASSED (M1, M3 in b685fbb; M2 in e77fa65, touch keeps T in GPU, U goes to
-host, 3 of 3). The cost-model gate FAILS (flash 21e2179: negative predicted TTFT on 52 % of fit and 62 % of held-out data,
+host, 3 of 3). The cost-model gate FAILS (flash 6dc49db: negative predicted TTFT on 52 % of fit and 62 % of held-out data,
 held-out p90 error 31.9 s), so MARGIN_CF is unset and FULL v5 DID NOT RUN. Options are flash's, default leave-it.
 
 **Incidents.** (1) 5d7c084 broke `import hybrid` in every live run at 16:37 (llf n16 s6 lost its first attempt and orphaned
