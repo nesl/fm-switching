@@ -605,3 +605,35 @@ counters, `cf_instrument.py` a self test, `cf_planner.py` the candidate sets). T
 numbers are machine-dependent by nature; everything else is deterministic, and the residual build
 reads committed logs only. CPU only throughout: nothing in this session touched a GPU, the H100 or
 the Orin, and only development seeds 0, 4, 5 and 6 appear anywhere.
+
+---
+
+## 11. Addendum: D156 and D156a, which landed on origin during this session's push
+
+Both were read after the artefacts above were produced, so this section is a reconciliation and
+nothing above was changed to fit it.
+
+**D156 confirms the refusal this build enforces, and narrows what it blocks.** The D151 (6)
+cost-model gate applies to **counterfactual decisions only**, and a rules-only `v5-rules` (base
+`hybrid-F-lhreq-noc3` plus warm-ahead as a RULE, plus EP-G, plus per-frame upload) makes no
+counterfactual predictions and therefore needs no gate pass. Two consequences for this deliverable:
+
+1. **`cf_margin`'s refusal is in exactly the right place.** Everything in `cf_*` is a counterfactual
+   decision, so the gate and `MARGIN_CF` gate all of it, and `v5-rules` is unaffected by anything
+   here. The claim "no v5 cell may run" in section 0 should be read as **no full-v5 (counterfactual)
+   cell**; `v5-rules` cells are a different labelled version and are not blocked by G8 or G10.
+2. **This build is not on `v5-rules`' critical path.** `v5-rules` needs warm-ahead expressible as a
+   rule in `engine_actions.py` (session C), not the counterfactual. The one thing it should borrow
+   from here is `cf_instrument.DecisionClock`, if a per-decision wall clock is wanted for the rules
+   arm as well; it has no dependency on `cf_margin`, `cf_cost` or `cf_planner`.
+
+**D156a (the EP-G budget charge, assessed and deferred) does not touch this module and lines up with
+it.** `cf_*` charges no accelerator budget at all (section 7), so the deferral changes nothing here.
+Where the two meet is the charge rule: D156a charges an episode's NEW tokens, trued up at completion
+from the engine-reported `cached_tokens` so that what is charged is the uncached tokens actually
+computed. `cf_cost.predict` already prices service on `max(tokens - cached_tokens, 0)`, which is the
+same quantity, so when the true-up lands the planner's cost basis and the harness's charge basis
+will agree by construction rather than by coincidence. **If the true-up changes what every arm can
+spend, as D156a says it does, then the residual distribution in `cf_service_residuals.json` is
+fitted on pre-true-up cells and must be rebuilt with the EP-G refit**, which is the same rebuild
+D153 already requires. That is one rebuild, not two.
