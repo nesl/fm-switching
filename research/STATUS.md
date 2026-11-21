@@ -1,6 +1,6 @@
 ## 06:00 analysis summary (session D): v5-rules, the cost-model gate, and what is blocked
 
-**Last updated: 2026-11-21 07:30 (section 1b superseded, section 5 extended; the 06:00 summary itself stands).** Headline figures for every arm and cell are the H100's, in
+**Last updated: 2026-11-21 09:00 (StudyFIG paper figures M1-M8 motivation and E1-E8 evaluation (PILOT) plus a one-page contact sheet complete and pushed; StudyORIN-REC-REASK seeds 4-7 complete, parity 75 of 78 reproduce part 1 and 78 of 78 reproduce warm, 141 of 398 re-asks change the device answer. PREVIOUSLY 2026-11-21 07:30: section 1b superseded, section 5 extended; the 06:00 summary itself stands).** Headline figures for every arm and cell are the H100's, in
 `reports/study_frozen_test.md` section "06:00 SUMMARY (2026-11-21, H100 overnight; D156 (5) form)".
 Nothing in this section restates a number from that table; the analysis below is the other half.
 Full write-ups: `reports/study_v5_rules.md`, `reports/study_cost_model_gate_d156.md`.
