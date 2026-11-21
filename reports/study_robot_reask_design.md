@@ -221,3 +221,75 @@ question", and report the history-growth curve per question rather than a pooled
 device-answer staleness objection from the section above is **unchanged and still binding**, and it
 bites harder in a repeated-measures design, because the within-question contrast is exactly where a
 frozen device answer sits on one side of the comparison.
+
+---
+
+## MEASURED 11:15: the Orin's REASK record lands, and it REFUTES my directional claim
+
+`experiments/orchestration/live2/v5/reask_device_join.py`, joining StudyORIN-REC-REASK seeds 4 to 7
+over the frozen D87 answers on `opportunity_id`. All four seeds are pushed; the join writes one
+replacement row per re-ask.
+
+| seed | re-asks | differs from frozen | measured device accuracy | frozen | delta |
+|---|---|---|---|---|---|
+| 4 | 112 | 38 (**33.9 percent**) | 0.152 | 0.196 | **-0.045** |
+| 5 | 102 | 27 (26.5 percent) | 0.225 | 0.157 | **+0.069** |
+| 6 | 101 | 46 (**45.5 percent**) | 0.109 | 0.218 | **-0.109** |
+| 7 | 83 | 30 (36.1 percent) | 0.217 | 0.169 | **+0.048** |
+| **pooled** | **398** | 141 (35.4 percent) | **0.1734** | **0.1859** | **-0.0126** |
+
+My seed-4 figure of 33.9 percent reproduces the Orin's independently reported 34 percent.
+
+### What I got wrong
+
+I argued, twice, that freezing the device answer **understates the device and therefore overstates
+the benefit of escalating**, and I reasoned it from the harness modelling device latency as growing
+with history while holding accuracy fixed. **That direction is not supported.** It goes both ways:
+frozen **overstated** the device at seeds 4 and 6, and **understated** it at seeds 5 and 7. At seed
+6 it overstated by a factor of two, 0.218 against a measured 0.109.
+
+The argument was plausible and it was not measured. The honest statement is that the frozen answer
+is **wrong on about a third of re-asks in an unpredictable direction**, which is worse for an
+arm comparison than a known bias would be: a known direction can be bounded, a sign that flips by
+seed cannot.
+
+### The pooled number would have hidden it, which is check 3
+
+Pooled, the frozen and measured device accuracies differ by **-1.26 pp**, which reads as "freezing
+barely matters". Per seed the swings are **-10.9 to +6.9 pp**, eight times larger and in both
+directions. A pooled headline would have concluded the opposite of the truth. This is the
+"real effect averaged into undetectability" shape, with the extra twist that the strata cancel
+rather than dilute.
+
+It bites hardest in exactly the analysis D161 (2) ordered. A **paired, within-question** contrast
+puts the device answer on one side of the comparison, so a per-seed sign flip is not noise that
+averages out across seeds, it is a different comparator in each seed's pairing.
+
+### Parity, the control on the measurement
+
+| seed | reproduces part 1 | reproduces WARM |
+|---|---|---|
+| 4 | 19 of 20 | 20 of 20 |
+| 5 | 22 of 22 | 22 of 22 |
+| 6 | 16 of 17 | 17 of 17 |
+| 7 | 18 of 19 | 19 of 19 |
+
+**WARM is reproduced in 78 of 78**, and the three part-1 misses are the declared D81 prefix-cache
+near-tie drift. So the measurement apparatus is sound and the differences above are real
+re-ask-time behaviour, not a recording artefact.
+
+### Latency, and a cross-check worth keeping
+
+`device_latency_s` is replaced by the Orin's measured `completion_s`, not `ttft_s`, because D155
+scores a device answer by **when it arrives** and the committed warm table is completion-based
+(`ORIN_REC_WARM_COMPLETION_P50` 0.2697, table span 0.2503 to 0.3108). Cross-check on the first
+joined row: measured `completion_s` **0.2954** against the committed warm reference **0.2944** for
+the same question, agreeing to about 1 ms. That is an independent confirmation that the committed
+table is completion-based and that D161 (3)'s latency requirement was already met.
+
+### Consequence for the PROVISIONAL label
+
+The label can be removed per seed as its join lands, which is now all four. But the removal is only
+honest alongside the finding above: **the robot numbers on re-asks moved by up to 11 pp per seed and
+in both directions**, so any rq30 cell scored before this join is not merely provisional, it is
+scored against a comparator that was wrong on a third of its rows.
