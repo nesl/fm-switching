@@ -1,0 +1,19 @@
+E8_decision_latency
+
+CLAIM:
+The coordinator's per-period decision latency is far inside the 100 ms decision period for every arm. The joint policy runs at 0.9 ms p50 and 1.4 ms p99, about 72x inside the period; the slowest arm shown (warm-all + LRU) is 4.0 ms p99. The policy's scheduling overhead is negligible against the period it runs in.
+
+SOURCES (committed):
+  results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json  @ 82c3a27
+  results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json  @ 1f59d36
+  results/orchestration/live2/frozen_test/runs/v5-rules_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json  @ 19d5ef8
+  results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json  @ d4dcc76
+  results/orchestration/live2/frozen_test/runs/cascade-routing_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json  @ dd45989
+  results/orchestration/live2/frozen_test/runs/mooncake_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json  @ 894485d
+  results/orchestration/live2/frozen_test/runs/eco-llm_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json  @ 5bf3ad3
+  results/orchestration/live2/frozen_test/runs/b7-edf-feasibility_n16_s4_1200s_h27_3t_L3_epg/coordinator_result.json  @ bd790fb
+
+STATUS: PILOT. Drawn from the EP-G pilot cells; to be re-run on the repeat-trace cells. Numbers are provisional.
+
+NOTES:
+Committed EP-G PILOT cells (seed 4), coordinator_result.json decision_latency_ms (the coordinator's own compute per 100 ms period, counted and never netted out per D99). Bars are p99, the tick is p50, log y. The 100 ms period is the committed D99 decision period. Rare maxima spike to tens of ms (and once to ~224 ms for warm-all-lru), well below the period's own slack; STATUS notes the hybrid-F6 variant (not shown here) breaches the period in 2.7 percent of periods, so F6 is not the headline arm. Arm colours from the shared registry. PILOT.
