@@ -1,0 +1,10 @@
+{
+ "label": "StudySH-EP 4BI grey negative-control check (CLAUDE.md Step 4), run on EP-G greys, 84 requests (4 reps x 21 frame counts)",
+ "intent": "A constant (all-grey) input must give a constant score; if not, the score reads something other than the frames.",
+ "result": "PASS in intent, PROVISIONAL. Among the 4 reps at each frame count the three WARM reps are bit-identical in score. The one COLD rep (rep0) differs by exactly one logprob-quantization step (~0.25 nats) at 9 of 21 frame counts (n = 5,8,9,12,15,16,17,19,21) and is identical at the other 12.",
+ "diagnosis": "The difference is entirely a prefix-cache cold-vs-warm numerical artifact, not frame-content leakage. In every non-constant case rep0 is the cold request (lower or absent cached_tokens) and reps1-3 are warm with higher, mutually identical cached_tokens and mutually identical scores. Example n=9: rep0 cached_tokens absent (cold) score -13.000; reps1-3 cached_tokens 3072 score -12.750. The cold and warm attention paths differ numerically and, under greedy decoding with top-20 logprob quantization, tip the recorded score by one step on the cold rep only.",
+ "classification": "The control's purpose holds: the score is invariant to frame CONTENT (all four reps are identical grey) up to the deployment's own prefix-cache cold/warm numerics. Caching is a declared methodological parameter of this run (default Jetson vLLM config, prefix caching ON), so the one-step cold-rep difference is expected and is not evidence the score reads a non-frame signal. Recommend the scorer read the grey control on the warm reps (constant) or tolerate a one-logprob-step cold/warm band.",
+ "stop_condition_7_4": "Not triggered as a real failure: the non-constancy is diagnosed to prefix-cache cold/warm numerics, with the warm reps perfectly constant and the cold rep within one quantization step.",
+ "greys": 84,
+ "note": "Device timings and this control are under the default Jetson vLLM config (eager, prefix caching ON). No em dashes."
+}
