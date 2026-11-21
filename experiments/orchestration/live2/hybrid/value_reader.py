@@ -20,7 +20,25 @@ into a worse one and counting it as a save because it arrived on time.
 THE TABLE IS DEV-FITTED (D6) and committed: `results/orchestration/live2/lh_req/lh_req_quality.json`,
 fitted on the 28 DEV questions, where LH-REQ robots draw only from the 69 EVAL questions.
 
-    cloud D2      0.250000      cloud RECENT  0.107143      device 4B-RECENT  0.107143
+    cloud D2      0.250000      cloud RECENT  0.107143      device 4B-RECENT  0.071429
+
+THE DEVICE ENTRY IS NOW MEASURED, NOT SUBSTITUTED (StudyORIN-REC part 1, D146 (2)): 2 of 28 on DEV,
+Wilson [0.019812, 0.226454], on the Orin under vLLM. It replaces D87's 3 of 28 = 0.107143, which
+came from the ORIN2 in-process harness rather than the stack the device runs. The docstring above
+this line once said the device is right 'about 25 percent'; that figure was an EVAL-split number
+quoted beside a DEV comparison, which is the split-mixing error this file now refuses to repeat.
+
+D152 (2) IS AN IMPOSED USER RULE HERE, NOT A DERIVED ONE, AND THAT DISTINCTION IS THE POINT.
+Under D87's substituted entry the device scored EXACTLY what cloud RECENT scored, 0.107143, and
+ties go to the device, so RECENT was never sent and D152 (2) appeared to FALL OUT of the
+arithmetic. With the device measured at 0.071429 the tie is gone: cloud RECENT strictly beats the
+device, and the unconstrained reader would send RECENT whenever P(on time) > 0.6667. Over a
+declared grid, 7 of 20 decision cells flip. So the rule no longer follows from the table and is
+IMPOSED as `forbid_recent_for_lh`, default ON per D155 (4), documented as a user rule so that no
+later reader mistakes it for a result. It is not statistically settled either: the DEV device
+interval [0.019812, 0.226454] CONTAINS cloud RECENT's 0.107143, so on 28 questions 'RECENT beats
+the device' is one reading of a wide interval. D155 (4) revisits it after the WARM device latency
+and larger samples.
 
 BANDS BY HISTORY LENGTH ARE NOT SUPPORTED BY THIS TABLE, and that is reported rather than faked.
 D149 asks for the accuracy to be DEV-fitted by history-length band. The DEV split holds 28
@@ -81,7 +99,8 @@ class ValueTable:
 
 
 def choose(reps: Tuple[str, ...], p_on_time: Callable[[str], float], table: ValueTable,
-           history_tokens: Optional[int] = None) -> Dict[str, Any]:
+           history_tokens: Optional[int] = None, *, is_long_horizon: bool = True,
+           forbid_recent_for_lh: bool = True) -> Dict[str, Any]:
     """The reader. Returns the chosen representation or None, with the arithmetic that chose it.
 
     `p_on_time(rep)` is the policy's own probability that a request sent with that representation
@@ -89,6 +108,13 @@ def choose(reps: Tuple[str, ...], p_on_time: Callable[[str], float], table: Valu
     then reduces to "send the best representation that fits, and only if it beats the device".
     """
     dev = table.accuracy("device", history_tokens)
+    # D152 (2) via D155 (4): IMPOSED, not derived. RECENT is not an admissible representation for a
+    # long-horizon question, whatever the table says about it. See the module docstring for why this
+    # is a rule rather than an inference: the equality that used to produce it was an artefact of
+    # D87's substituted device entry, and the measured entry removes it.
+    forbidden = {"RECENT"} if (forbid_recent_for_lh and is_long_horizon) else set()
+    excluded = [r for r in reps if r in forbidden]
+    reps = tuple(r for r in reps if r not in forbidden)
     scored = []
     for r in reps:
         p = float(p_on_time(r))
@@ -100,6 +126,10 @@ def choose(reps: Tuple[str, ...], p_on_time: Callable[[str], float], table: Valu
     return dict(send=send, representation=(best["representation"] if send else None),
                 device_value=dev, best=best, considered=scored,
                 band_used=bool(table.bands and history_tokens is not None),
+                excluded_by_rule=tuple(excluded),
+                rule_imposed=("D152 (2) via D155 (4): RECENT not admissible for a long-horizon "
+                              "question. IMPOSED user rule, not derived from the table."
+                              if excluded else None),
                 transform=table.transform,
                 reason=("value %.4f beats the device's %.4f" % (best["value"], dev)) if send
                 else ("no representation beats the device's own answer at %.4f" % dev))

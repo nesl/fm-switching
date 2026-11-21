@@ -276,3 +276,61 @@ prediction was made on their deferral behaviour. The table above gives it a mech
 are the only arms with real engine prefix reuse**, so they are the arms whose live cost differs most
 from anything a re-score can reconstruct. The prediction stands and its reasoning is now stronger
 than when it was written.
+
+---
+
+# D155 (4): the RECENT rule is now IMPOSED, and D149 (4) discriminates where value acts
+
+## 1. Why the rule had to become a rule
+
+Under D87's SUBSTITUTED device entry the device scored exactly what cloud RECENT scored, 0.107143,
+and ties go to the device, so RECENT was never sent and D152 (2) appeared to **fall out** of the
+reader's arithmetic. StudyORIN-REC part 1 measured the device at **2 of 28 = 0.071429** on the DEV
+fit split, so the tie is gone, cloud RECENT strictly beats the device, and the unconstrained reader
+sends RECENT whenever `P(on time) > 0.6667`. **7 of 20 cells of a declared grid flip.**
+
+So D155 (4) imposes it. `choose(..., forbid_recent_for_lh=True, is_long_horizon=True)` removes RECENT
+from the candidate set for a long-horizon question before any value is compared, and the decision
+record carries `excluded_by_rule` and `rule_imposed` so the rule can never be read back as a result.
+Measured effect at the four grid points where the unconstrained reader would have sent RECENT:
+
+| p(D2) | p(RECENT) | rule ON | rule OFF |
+|---|---|---|---|
+| 0.0 | 0.7 | withhold | SEND RECENT |
+| 0.0 | 1.0 | withhold | SEND RECENT |
+| 0.3 | 0.7 | SEND D2 | SEND RECENT |
+| 0.3 | 1.0 | SEND D2 | SEND RECENT |
+
+A SHORT-horizon question is unaffected (`is_long_horizon=False` still sends RECENT), so the rule is
+scoped to the questions D152 (2) is about rather than applied globally.
+
+**Documented as IMPOSED, not derived.** The module docstring now says so, gives the superseded
+figure, and records that it is not statistically settled: the DEV device interval
+[0.019812, 0.226454] CONTAINS cloud RECENT's 0.107143, so on 28 questions "RECENT beats the device"
+is one reading of a wide interval. D155 (4) revisits after the warm device latency and larger
+samples. One stale figure in that docstring is also corrected: it claimed the device is right "about
+25 percent", which was an EVAL number quoted beside a DEV comparison.
+
+## 2. D149 (4)'s acceptance test, run where value acts
+
+In C3's fallback slot the test could not discriminate, because that slot ever offers one candidate.
+Warming is the decision value is supposed to drive, so the control was moved rather than weakened.
+Eight candidate histories over both representations, with weight, question probability, delivery
+gain and harm all varied so no single term dominates by construction. Artefact:
+`results/orchestration/live2/v5/value_inversion_at_warmkeep.json`.
+
+| slots | committed admitted | flat | inverted | full devalued 10,000x |
+|---|---|---|---|---|
+| 2 | h1, h4 | h1, h4 (order changed) | **h4, h1** | **h4, h2** |
+| 3 | h1, h4, h3 | **h1, h4, h2** | **h4, h1, h2** | **h4, h2, h6** |
+| 4 | h1, h4, h3, h2 | **h1, h4, h2, h6** | **h4, h1, h2, h6** | **h4, h2, h6, h8** |
+
+**The test DISCRIMINATES: the ranking changes under all three transforms at every slot count, and
+the admitted SET changes in 8 of the 9 cells.** So the earlier null was a property of the slot, not
+of the mechanism, and G11's diagnosis is confirmed: the test is sound and C3's fallback was the
+wrong place to run it.
+
+**REGISTER, marked at the point of use: this is a CONSTRUCTED candidate set, not observed traffic.**
+It establishes that value is load-bearing in the warm/keep reader as written. It is not a census and
+it says nothing about how often such a set arises in a run, which only a live v5 cell with the
+reader at admission can show.
