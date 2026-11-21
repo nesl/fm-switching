@@ -467,3 +467,77 @@ changing the result. **The one quantity that is constant, W2's yield, is classif
 `unexercised`** and is reported as such rather than as a working discipline. Nothing in this report
 is a settled finding about whether `v5-rules` beats its base on any outcome: no outcome was
 scored, and scoring is the H100's.
+
+---
+
+# FIRST LIVE RESULT, and a pre-registered discriminator for its dashcam failure
+
+**H100, `v5-rules_n16_s4_1200s_h27_3t_L3_epg`, EP-G plus per-frame, on the race-FIXED path
+(2b8714c in tree). VALID, 0 errors in 7,675 requests.** The fix held: this arm warms ahead, which
+is what saturated held-out cell 1 at 24 percent non-200, and it came back clean.
+
+| quantity | v5-rules | b7 (same workload) |
+|---|---|---|
+| **robot correct delivered by deadline** | **0.45** | 0.40 |
+| robot on time | **9 of 20** | 7 of 20 |
+| **single-shot on time** | **188 of 357** | **330 of 357** |
+| dashcam all-meet | **FALSE** | meets |
+| dashcam monitors released | **4,045** | about 11,400 |
+
+Decision kinds: `release_monitor` 4,045, `release_piece` 3,253, `release_recall` 377, no declines.
+TTFT p50 by class: robot 3.78 s, SS 1.51 s, dashcam 0.53 s. Belief observe check passes, 148 = 148.
+
+**So the robot claim holds live and the cost lands on the other two types.** That is the honest
+headline and it is not a wash: v5-rules wins the metric it was built for and loses two it was not
+asked about, which is exactly the shape a rules-only policy with no objective should be expected to
+produce.
+
+## The mechanism I believe is at work, and the test that decides it
+
+**Only 4,045 of about 11,764 eligible EP-G instants were released, about a third.** The parts are
+each as designed and the combination is not:
+
+1. **C5 caps dashcam requests IN FLIGHT**, not per unit time: `hybrid_arm.py:215`, a dashcam frame
+   is not submitted beyond `throttle_floor` dashcam requests in flight, floor 2.
+2. **v5-rules adds 3,253 warm-ahead prefill pieces**, which deepen the engine queue, so each
+   dashcam request stays in flight LONGER.
+3. An in-flight CAP plus a longer in-flight TIME is fewer releases per second. The throttle
+   converts warm-ahead's queue into **dropped instants**, and nothing in either rule knows that.
+
+The same mechanism explains the single-shot collapse: SS TTFT p50 is 1.51 s against a 2 s deadline,
+so SS is queued behind the prefills rather than being refused.
+
+### The discriminator, pre-registered before the cell exists
+
+**`hybrid-F-lhreq-noc3` at seed 4 on EP-G is v5-rules' base: it has the SAME C5 throttle at the
+same floor and NO warm-ahead.** It is running next, so:
+
+- **If the base releases about 11,400 dashcam monitors**, C5 alone is not the cause and
+  **warm-ahead's queue is**. My reading above stands and the dashcam failure is v5-rules'.
+- **If the base also releases about 4,045**, then C5's in-flight cap is the cause under EP-G
+  whatever the arm does, v5-rules is innocent of the dashcam failure, and **the finding is about
+  the base policy on this workload instead**. b7 would then be the odd one out, which is consistent
+  with its having no throttle at all.
+
+Either way the number to read is the base's `release_monitor` count, and I have written the two
+readings down first so neither can be chosen afterwards.
+
+## Why this argues FOR the counterfactual rather than against v5
+
+**v5-rules has no objective and no harm term. It warms ahead as a RULE.** Session B's counterfactual
+objective is `w_i x [expected correct on time] - sum_j w_j x (harm to others from displacement)`,
+and the harm term is a difference of two simulated queues rather than a coefficient. **A policy with
+that term would price exactly the cost measured here**: 3,253 prefills that buy +0.05 on the robot
+headline and spend it on 7,700 dashcam instants and 142 single-shot answers.
+
+So the first live v5 result is evidence that **the harm term is necessary, not optional.** That is
+worth more than a clean win would have been, because a clean win would not have told us which part
+of v5 was doing the work.
+
+## Where the yield counter lives
+
+`warm_ahead_yielded_epochs` is recorded on the ARM (`arms_v5rules.py:181`, into `self.stats`), and
+the coordinator surfaces it as **`arm_stats`** (`coordinator.py:1226`), NOT under `counts`. A grep
+for "yield" in `counts` finds nothing, which is why it looked absent. Also in `arm_stats`:
+`warm_ahead_wanted`, `warm_ahead_emitted` and `warm_ahead_unexpressible`, which are the ASK-side
+numbers and must not be read as issued prefills.
