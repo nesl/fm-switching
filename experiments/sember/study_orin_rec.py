@@ -49,13 +49,13 @@ LH97 = set(json.load(open(REPO / "results/orchestration/live2/lh_req/lh_req_defi
 GATE_LO, GATE_HI = 5476, 5682
 
 
-def one(client, p, model):
+def one(client, p, model, tag=None, salt=None):
     vid = p["video_id"]
     frames = [dict(frame_ref=A.ref(vid, t), path=A.path_of(vid, t)) for t in p["frame_times"]]
     M = A._MCQ[p["question_id"]]
-    tag = "orinrec-" + uuid.uuid4().hex[:12]
+    tag = tag or ("orinrec-" + uuid.uuid4().hex[:12])
     body = B.build_body(kind="recall", device_id="acc2", session_id=vid, run_tag=tag,
-                        salt=uuid.uuid4().hex, header=HEADER_TEXT, frames=frames,
+                        salt=(salt or uuid.uuid4().hex), header=HEADER_TEXT, frames=frames,
                         question=M["question"], options=M["options"],
                         max_tokens=B.RECALL_GEN["max_tokens"], est_tokens=len(frames) * 90)
     wire = dict(B.strip_internal(B.materialize(body, None), strip_hints=True), model=model)
@@ -101,8 +101,42 @@ def one(client, p, model):
                 over_context=over, error=err, text="".join(text)[:300], req=p.get("req"))
 
 
+def warm_one(client, p, model, cold_letter):
+    """WARM best-case (D153/user): one prefill-only request (exactly the 60 RECENT frames + header,
+    max_tokens 1, NOT timed, SAME cache_salt) stands in for capture-time prefill, then the real
+    question request, TIMED, which must reuse the frame prefix. cached_tokens on the real request
+    must cover the frames or this is a STOP. Agreement with the cold part-1 letter is D81 drift."""
+    vid = p["video_id"]
+    frames = [dict(frame_ref=A.ref(vid, t), path=A.path_of(vid, t)) for t in p["frame_times"]]
+    M = A._MCQ[p["question_id"]]
+    tag = "orinrec-warm-" + uuid.uuid4().hex[:12]
+    salt = uuid.uuid4().hex                                  # one salt shared by prefill + real
+    # prefill-only: header + frames, NO question, max_tokens 1, same tag+salt
+    pre = B.build_body(kind="recall", device_id="acc2", session_id=vid, run_tag=tag, salt=salt,
+                       header=HEADER_TEXT, frames=frames, question=None,
+                       max_tokens=B.RECALL_GEN["max_tokens"], est_tokens=len(frames) * 90)
+    pre["max_tokens"] = 1                                    # recall gen forces 512; prefill wants 1
+    pre_wire = dict(B.strip_internal(B.materialize(pre, None), strip_hints=True), model=model)
+    pre_wire = {k: v for k, v in pre_wire.items() if k != "stream_options"}
+    pre_wire["stream"] = False                              # non-streamed prefill; drop stream_options
+    try:                                                    # NOT timed; just warms the prefix
+        r = client.post(URL, json=pre_wire, timeout=600.0)
+        pre_err = None if r.status_code == 200 else f"prefill HTTP {r.status_code}: {r.text[:200]!r}"
+    except Exception as e:                                                        # noqa: BLE001
+        pre_err = f"prefill {type(e).__name__}: {e}"
+    # real question request, TIMED, same tag+salt+frames -> frame prefix is warm
+    rec = one(client, dict(p, _warm_tag=tag, _warm_salt=salt), model, tag=tag, salt=salt)
+    pt = rec.get("prompt_tokens") or 0
+    ct = rec.get("cached_tokens")
+    frames_tok = pt - 32                                    # frames+header are all but the trailing question block
+    rec.update(mode="warm", prefill_error=pre_err, cold_letter=cold_letter,
+               agree_with_cold=(rec["letter"] == cold_letter),
+               cached_covers_frames=(ct is not None and ct >= min(5000, frames_tok)))
+    return rec
+
+
 def select(mode):
-    if mode in ("gate", "part1"):
+    if mode in ("gate", "part1", "warm"):
         rows = [p for p in PLAN if p["rep"] == "RECENT" and p["question_id"] in LH97]
         rows.sort(key=lambda p: (p["question_id"]))
         return rows[:1] if mode == "gate" else rows
@@ -110,12 +144,12 @@ def select(mode):
         rows = [p for p in PLAN if p["rep"] in ("RECENT", "D2")]
         rows.sort(key=lambda p: (p["question_id"], p["rep"]))
         return rows
-    raise SystemExit("mode must be gate|part1|part2")
+    raise SystemExit("mode must be gate|part1|part2|warm")
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mode", required=True, choices=("gate", "part1", "part2"))
+    ap.add_argument("--mode", required=True, choices=("gate", "part1", "part2", "warm"))
     ap.add_argument("--model", default="qwen3vl4b")
     ap.add_argument("--limit", type=int, default=0)
     a = ap.parse_args()
@@ -135,12 +169,30 @@ def main():
     rows = [p for p in select(a.mode) if (p["question_id"], p["rep"]) not in done]
     if a.limit:
         rows = rows[:a.limit]
+    cold = {}
+    if a.mode == "warm":
+        for l in (OUT / "orin_rec_part1.jsonl").open():
+            if l.strip():
+                r = json.loads(l)
+                cold[r["question_id"]] = r.get("letter")
     print(f"mode {a.mode}: {len(rows)} requests to run (model {a.model})", flush=True)
-    n_err = n_over = 0
+    n_err = n_over = n_agree = n_uncov = 0
     started = datetime.now().isoformat()
     with httpx.Client(timeout=httpx.Timeout(600.0)) as c, out.open("a") as fh:
         for i, p in enumerate(rows):
-            rec = one(c, p, a.model)
+            if a.mode == "warm":
+                rec = warm_one(c, p, a.model, cold.get(p["question_id"]))
+                n_agree += bool(rec.get("agree_with_cold"))
+                if not rec.get("cached_covers_frames"):
+                    n_uncov += 1
+                    fh.write(json.dumps(rec) + "\n"); fh.flush()
+                    print(f"STOP: question {rec['question_id']} cached_tokens={rec.get('cached_tokens')} "
+                          f"does NOT cover frames (prompt_tokens={rec.get('prompt_tokens')}). "
+                          f"Warm prefill is not reusing the frame prefix.", flush=True)
+                    print("WARM_RESULT STOP", flush=True)
+                    break
+            else:
+                rec = one(c, p, a.model)
             n_err += bool(rec["error"] and not rec["over_context"])
             n_over += bool(rec["over_context"])
             fh.write(json.dumps(rec) + "\n")
@@ -153,9 +205,32 @@ def main():
                 print("GATE_RESULT", "PASS" if ok else "STOP", flush=True)
             if (i + 1) % 50 == 0:
                 print(f"  {i + 1}/{len(rows)} err {n_err} over_context {n_over}", flush=True)
+    warm_summary = {}
+    if a.mode == "warm":
+        import statistics as st
+        recs = [json.loads(l) for l in out.open() if l.strip()]
+        ok = [r for r in recs if not r.get("error")]
+        def pct(xs, q):
+            xs = sorted(x for x in xs if x is not None)
+            return None if not xs else round(xs[min(len(xs) - 1, int(q * len(xs)))], 4)
+        warm_summary = dict(
+            label="device BEST-CASE warm latency (exact RECENT frames prefilled)",
+            n=len(ok), stopped=(n_uncov > 0),
+            cached_covers_frames_all=(n_uncov == 0),
+            agree_with_cold=sum(1 for r in ok if r.get("agree_with_cold")),
+            ttft_p50=pct([r["ttft_s"] for r in ok], 0.5), ttft_p90=pct([r["ttft_s"] for r in ok], 0.9),
+            completion_p50=pct([r["completion_s"] for r in ok], 0.5),
+            completion_p90=pct([r["completion_s"] for r in ok], 0.9),
+            cached_tokens_min=min((r.get("cached_tokens") or 0) for r in ok) if ok else None)
+        print("WARM_RESULT", "STOP" if n_uncov else "PASS",
+              "| agree_with_cold", warm_summary["agree_with_cold"], "/", len(ok),
+              "| TTFT p50", warm_summary["ttft_p50"], "p90", warm_summary["ttft_p90"],
+              "| completion p50", warm_summary["completion_p50"], "p90", warm_summary["completion_p90"],
+              flush=True)
     meta = dict(label=f"StudyORIN-REC {a.mode}", mode=a.mode, model=a.model,
                 requests=len(rows), errors=n_err, over_context=n_over,
                 header_text=HEADER_TEXT, recall_gen=B.RECALL_GEN, store=str(A.STORE),
+                warm_summary=warm_summary,
                 started=started, finished=datetime.now().isoformat())
     meta["_provenance"] = stamp(script="study_orin_rec.py", model=a.model,
                                 device="nvidia_jetson_orin", n=len(rows), args=a)

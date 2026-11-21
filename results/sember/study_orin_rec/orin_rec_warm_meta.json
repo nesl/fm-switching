@@ -1,0 +1,42 @@
+{
+ "label": "StudyORIN-REC warm",
+ "mode": "warm",
+ "model": "qwen3vl4b",
+ "requests": 95,
+ "errors": 0,
+ "over_context": 0,
+ "header_text": "D2 history",
+ "recall_gen": {
+  "temperature": 0.0,
+  "max_tokens": 512,
+  "seed": 42
+ },
+ "store": "/dev/shm/sember_d2_q88",
+ "warm_summary": {
+  "label": "device BEST-CASE warm latency (exact RECENT frames prefilled)",
+  "n": 97,
+  "stopped": false,
+  "cached_covers_frames_all": true,
+  "agree_with_cold": 93,
+  "ttft_p50": 0.2109,
+  "ttft_p90": 0.2303,
+  "completion_p50": 0.2697,
+  "completion_p90": 0.2894,
+  "cached_tokens_min": 5392
+ },
+ "started": "2026-11-20T17:44:06.197770",
+ "finished": "2026-11-20T17:49:39.808011",
+ "_provenance": {
+  "git_commit": "bd1401cdf8202db60d2cc09c42bbc54fdff7c0c8",
+  "script": "study_orin_rec.py",
+  "model": "qwen3vl4b",
+  "timestamp": "2026-11-20T17:49:39.810805",
+  "device": "nvidia_jetson_orin",
+  "n": 95,
+  "args": {
+   "mode": "warm",
+   "model": "qwen3vl4b",
+   "limit": 0
+  }
+ }
+}
