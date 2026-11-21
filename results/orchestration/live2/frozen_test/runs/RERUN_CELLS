@@ -1,42 +1,45 @@
-# D159 (E): cells still used in analysis that were RUN BEFORE THE RACE FIX (2b8714c, 2026-11-20 21:28).
+# D159 (E), REVISED 07:40 after measuring instead of inferring. ONE cell, not eight.
 # Format the driver reads: arm n seed tag
-# Determined by ancestry, not timestamps: a cell ran WITH the fix iff 2b8714c is an ancestor of the
-# git_commit its run_meta.json/header.json recorded. 58 of 84 real cells are pre-fix; this file is
-# the still-used subset, in priority order. Audit: reports/study_prefix_race_audit.md
 #
-# WHY IT MATTERS: the race was a confound on WARMTH, not only on errors. A piece whose bytes 400'd
-# left the history cold, so warm counts in every pre-fix cell are biased DOWNWARD (measured: warm
-# robot deliveries 1 -> 6 across the fix on one arm/workload/seed). Every quantity below is a warm
-# quantity, which is why these specific cells are the ones worth the GPU time.
+# WHAT I GOT WRONG IN THE FIRST VERSION. I listed 8 cells on the grounds that they were run before
+# the race fix (2b8714c, 2026-11-20 21:28). Pre-fix is NOT the same as race-contaminated. The race
+# sent piece bytes before confirmation, and its signature is an HTTP 400; the fix was proved by
+# 4,244 400s going to 0 on one arm/workload/seed. So the direct test is the 400 count in the cell's
+# own request log, and an arm that issues no pieces cannot be bitten at all. Measured:
+#
+#   cell                                                reqs   400s  warm%
+#   b7-edf-feasibility   16 4 _L3_epg                  12126      0  91.10   race-clean
+#   eco-llm              16 4 _L3_epg                  12134      4  91.00   race-clean (0.03%)
+#   warm-all-lru-off     16 4 _L3_epg                  12126      0  91.10   race-clean
+#   warm-all-lru-reactive 16 4 _L3_epg                 12523      0  91.32   race-clean
+#   warm-all-lru-reactive 16 4 _L3_cal1f               13954      0   2.82   race-clean
+#   hybrid-F-lhreq       16 4 (base)                   12825      0   0.00   race-clean
+#   hybrid-F6-lhreq      16 4 (base)                   12616      0   0.00   race-clean
+#   warm-all-lru         16 4 _L3_cal1f                14360    226   3.24   CONTAMINATED
+#   warm-all-lru         16 4 _L3_epg                  14382   4244  60.46   has post-fix twin _rf
+#
+# Seven of the eight I listed have ZERO or 4 400s and need no GPU time. eco-llm's 4 of 12,134 moved
+# nothing: its warm share is 91.00 percent against 91.10 for the two cells with zero 400s on the
+# identical workload, so it is already consistent with the clean cells.
 
-# TIER 1, the D156(4) cost-model gate. BOTH fit cells and 2 of its 4 test cells are pre-fix, and
-# the gate exists to predict warm first-token latency. Highest priority: nothing about the gate's
-# refit under D159 (B) is interpretable while its fit data is race-contaminated on warmth.
+# THE ONE CONTAMINATED STILL-USED CELL: a FIT cell of the D156(4) cost-model gate, 226 HTTP 400s,
+# and the gate exists to predict warm first-token latency. Its co-fit cell
+# (warm-all-lru-reactive _L3_cal1f) is clean, so this one cell is the whole contamination in that
+# gate's fit set.
 warm-all-lru 16 4 _L3_cal1f_rf
-warm-all-lru-reactive 16 4 _L3_cal1f_rf
-warm-all-lru-reactive 16 4 _L3_epg_rf
-warm-all-lru-off 16 4 _L3_epg_rf
 
-# TIER 2, de-confound the seed-4 row of the frozen-test headline table. Every other seed-4 _L3_epg
-# cell is post-fix, so these two mix race status with arm inside one row of the table.
-b7-edf-feasibility 16 4 _L3_epg_rf
-eco-llm 16 4 _L3_epg_rf
-
-# TIER 3, test whether the hybrids' ZERO warm rows are structural or race-induced. My 07:20 finding
-# that the committed by_arm split holds out exactly the zero-warm arms rests on these two cells, and
-# all 26 cells of that gate set are pre-fix, so the zero may be partly a race artefact. Two cells
-# settle it. If warm stays 0 post-fix, the finding is structural as claimed; if it does not, my
-# "structural" wording is wrong and MARGIN_CF's blocker needs restating.
-hybrid-F-lhreq 16 4 _rf
-hybrid-F6-lhreq 16 4 _rf
-
-# NOT LISTED, deliberately:
-#  - warm-all-lru 16 4 _L3_epg: already has a post-fix twin, _L3_epg_rf (that pair IS the race-fix
-#    proof, 4,244 HTTP 400s to 0 on the same arm/workload/seed).
-#  - the other 50 pre-fix cells: the _L3 (no EP-G) set is superseded by _L3_epg, and the remaining
-#    23 cells of the 26-cell gate set are superseded for FITTING by D159 (B)'s new load sweep.
-#    They stay cited only as the by_seed positive control, which is a control on the estimator and
-#    not a warm measurement. Listed in full in the audit report if any are wanted later.
-#  - edf 16 6 and llf 16 6: status UNKNOWN, not pre-fix. edf_n16_s6's recorded git_commit 42e96ae
-#    is unreachable on origin and llf_n16_s6 has no git_commit field at all. Those are provenance
-#    defects to fix, not reruns to schedule, and I have not guessed their status.
+# "STRUCTURAL" IS RESTORED, and this is why the hybrid cells are not listed. At 07:32 I withdrew the
+# word structural from my finding that the committed by_arm split holds out exactly the zero-warm
+# arms, on the grounds that those cells are pre-fix. Measured: both hybrid cells have 0 non-200 and
+# 0 HTTP 400 and 0 warm rows. The race never fired in them, so their zero warm is a property of the
+# arms and the finding stands as first written. The withdrawal was my own over-correction, made by
+# inferring contamination from a date rather than measuring it.
+#
+# NOT LISTED, with reasons:
+#  - the 7 cells tabulated above: measured race-clean.
+#  - warm-all-lru 16 4 _L3_epg: already has its post-fix twin _L3_epg_rf; that pair IS the proof.
+#  - edf 16 6 and llf 16 6: resolved by the H100. 42e96ae is an orphaned local "logs" commit from
+#    2026-11-20 16:14, so edf_n16_s6 is pre-fix, and it is a 5 s dashcam-1f D151 calibration cell of
+#    an arm that issues no pieces, so the race cannot touch it. llf_n16_s6 (no suffix) is NOT a run:
+#    it died at "import hybrid" before writing run_meta, and the real cell is the _rerun directory.
+#    The suffix-less directory is excluded from the census, which is 83 real cells, not 84.
