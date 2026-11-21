@@ -53,6 +53,7 @@ from interface import Budget, check_fairness                            # noqa: 
 
 import bodies as B                                                      # noqa: E402
 import offload_policy as OP                                             # noqa: E402
+import touch_policy as TP                                               # noqa: E402
 import cachekeys as CK                                                  # noqa: E402
 import cstate as CS                                                     # noqa: E402
 import schema as SC                                                     # noqa: E402
@@ -111,6 +112,10 @@ class Live2Coordinator:
         # declares the capability emits them; every baseline keeps vLLM's defaults and so
         # keeps byte-identical bodies. Read once here, never re-read, so it cannot drift.
         self._offload_controls = OP.arm_enables(arm)
+        # Component 2: KEEP_GPU_WARM additionally issues a REAL touch request for an
+        # arm that declares it. Without this the action only steers the coordinator's
+        # own eviction order and cannot move vLLM's LRU recency (D150, D44).
+        self._touch_requests = TP.arm_enables(arm)
         self.be = backend
         self.events = sorted(events, key=lambda e: (_sched(e), e.get("kind", "")))
         self.upload_mode = upload_mode
@@ -505,6 +510,8 @@ class Live2Coordinator:
                 s.desired_tier = "host"
             elif xa.action == "KEEP_GPU_WARM":
                 s.desired_tier = "gpu"
+                if self._touch_requests:
+                    self._submit_touch(s, t, dt_ms, preds, mix)
             elif xa.action == "MATERIALIZE":
                 rid = self._advance_build(s, xa.target_tokens, xa.slice_tokens, t, dt_ms,
                                           preds, mix)
@@ -687,6 +694,53 @@ class Live2Coordinator:
                      est_tokens=est_tokens, question=B.SH_QUERY, options=(),
                      max_tokens=B.SH_GEN["max_tokens"], t=t, mix=mix,
                      dashcam_format=("epg" if epg else "oneframe"))
+
+    def _submit_touch(self, s, t: float, dt_ms: float, preds, mix) -> Optional[str]:
+        """Component 2. A real TOUCH: one minimal request that re-presents the built prefix.
+
+        It carries NO new frames and asks for one token, so it is the cheapest way to make the
+        engine ACCESS the prefix, which is the only thing that moves vLLM's LRU recency (D150;
+        residency cannot be commanded, D44).
+
+        Refusals are counted, never silent, and each has its own counter so a proof can tell a
+        guard refusal from an empty prefix from a budget refusal. M6's mixed-touch rule is the
+        important one: a touch that straddles the tiers LOSES host-warmth, so issuing it would
+        destroy the copy it exists to protect.
+        """
+        built = len(s.confirmed_bytes_for)
+        prefix_tokens = int(getattr(s, "built_tokens", 0) or 0)
+        d = TP.should_touch(belief=dict(getattr(s, "belief", {}) or {}),
+                            prefix_tokens=prefix_tokens, costs=C,
+                            budget_ok=self.st.budget.can_spend)
+        self.counts["touch_considered"] += 1
+        if not d["touch"]:
+            self.counts["touch_refused"] += 1
+            self.counts["touch_refused_" + ("guard" if "M6" in d["reason"] or "cold" in d["reason"]
+                                            else "budget" if "budget" in d["reason"]
+                                            else "no_prefix")] += 1
+            return None
+        if built <= 0:
+            self.counts["touch_refused"] += 1
+            self.counts["touch_refused_no_confirmed_prefix"] += 1
+            return None
+        self.st.budget.spend(d["price_gpu_s"])
+        did = self._log_decision(t, "touch", [], latency_ms=dt_ms, preds=preds, mix=mix,
+                                 key="touch:" + s.session_id, session_id=s.session_id,
+                                 piece_tokens=0)
+        # uuid-only references for the frames whose carrying request returned 200 (D158 (2)); a
+        # touch never re-sends bytes, because re-sending would make it a rebuild, not a touch.
+        frames = [dict(frame_ref=r, path=None) for r in s.frames[:built]
+                  if r in s.confirmed_bytes_for]
+        if not frames:
+            self.counts["touch_refused"] += 1
+            self.counts["touch_refused_no_confirmed_prefix"] += 1
+            return None
+        self.counts["touch_issued"] += 1
+        self.counts["touch_issued_" + d["predicted_tier"]] += 1
+        return self._submit(kind="touch", device_id=s.device_id, session_id=s.session_id,
+                            opportunity_id=None, decision_id=did, frames=frames,
+                            est_tokens=prefix_tokens, question=None, options=(),
+                            max_tokens=TP.TOUCH_MAX_TOKENS, t=t, mix=mix)
 
     def _advance_build(self, s, target_tokens: Optional[int], slice_tokens: Optional[int],
                        t: float, dt_ms: float, preds, mix) -> Optional[str]:

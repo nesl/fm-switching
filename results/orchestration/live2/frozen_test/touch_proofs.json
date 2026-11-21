@@ -1,0 +1,73 @@
+{
+  "P1_price_by_state": {
+    "prices_11k": {
+      "gpu": 0.382,
+      "host": 0.459,
+      "cold": 2.4444444444444446
+    },
+    "distinct": 3,
+    "cold_over_gpu": 6.399069226294357
+  },
+  "P2_m6_guard": {
+    "wholly_gpu": {
+      "allowed": true,
+      "reason": "wholly gpu at belief 1.000"
+    },
+    "wholly_host": {
+      "allowed": true,
+      "reason": "wholly host at belief 1.000"
+    },
+    "near_boundary_host": {
+      "allowed": false,
+      "reason": "belief host=0.800 below 0.95: treated as straddling the tiers (StudyRES1 R3), and a MIXED touch loses host-warmth (M6)"
+    },
+    "mixed_half": {
+      "allowed": false,
+      "reason": "belief host=0.500 below 0.95: treated as straddling the tiers (StudyRES1 R3), and a MIXED touch loses host-warmth (M6)"
+    },
+    "cold": {
+      "allowed": false,
+      "reason": "cold: nothing to refresh, a touch would be a cold rebuild"
+    }
+  },
+  "P3_reaches_a_request": {
+    "request_id": "r1",
+    "touch_considered": 1,
+    "touch_issued": 1,
+    "touch_issued_gpu": 1,
+    "submitted_body_present": true,
+    "body_max_tokens": 1,
+    "body_images": 8,
+    "body_any_inline_bytes": false,
+    "why_not_dry": "confirmed_bytes_for is always empty in a dry cell (_DryFuture http_status=None), so a dry cell cannot issue a touch"
+  },
+  "P4_step2b": {
+    "switch_off_touch_issued": 0,
+    "switch_off_keep_gpu_warm_seen": 1,
+    "guard_refused_request_id": null,
+    "guard_refused_count": 1,
+    "decisions_moved": true
+  },
+  "P5_body": {
+    "max_tokens": 1,
+    "n_images": 2,
+    "any_inline_bytes": false,
+    "n_new_frames": 0
+  },
+  "P6_v5full_status": {
+    "declares_switch": true,
+    "emits_keep_gpu_warm_today": false,
+    "status": "UNEXERCISED in v5-full until plan_state is wired (component 6); the mechanism is proved live through lmcache, which does emit KEEP_GPU_WARM",
+    "evidence": "arms_v5rules.py:18 states the v5-rules base has no KEEP_GPU_WARM"
+  },
+  "checks": {
+    "P1_price_by_state": true,
+    "P2_m6_guard": true,
+    "P3_reaches_a_request": true,
+    "P4_step2b": true,
+    "P5_body": true,
+    "P6_declared": true
+  },
+  "ALL_PASS": true,
+  "_elapsed_s": 0.1
+}
