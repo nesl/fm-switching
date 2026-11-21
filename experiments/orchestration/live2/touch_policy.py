@@ -1,4 +1,4 @@
-"""TOUCH as a real request, priced by predicted cache state (full v5 component 2, D150, M2, M6).
+"""TOUCH, and state-based pricing for warm and reload (full v5 component 2, D150, M2, M6, D160).
 
 WHAT WAS ALREADY THERE, AND WHY IT IS NOT THIS. `engine_actions.touch()` returns
 SessionAction(sid, "KEEP_GPU_WARM"), and `coordinator._enact` turns that into `s.desired_tier =
@@ -88,3 +88,44 @@ def should_touch(*, belief: Dict[str, float], prefix_tokens: int,
 def arm_enables(arm: Any) -> bool:
     """Only an arm that declares the capability issues touch requests (D164's shape)."""
     return bool(getattr(arm, "live2_touch_requests", False))
+
+
+# ----------------------------------------------------------------- warm and reload, priced by state
+def build_price_gpu_s(piece_tokens: int, prefix_tokens: int, belief: Dict[str, float],
+                      costs: Any) -> Dict[str, Any]:
+    """What a warm piece or a reload will actually cost the GPU, by PREDICTED CACHE STATE (D160).
+
+    The committed charge is `recall_gpu_s(piece, "COLD")`: the new slice, always at cold rates, and
+    nothing else. That prices the SLICE SIZE and ignores the larger term. The request also
+    RE-PRESENTS the already-built prefix, and what the engine then does depends on whether that
+    prefix survived:
+
+      GPU-warm   the prefix is a cache hit and costs nothing to re-present
+      host-warm  it is reloaded over the host tier, about 15x cheaper than rebuilding (M3)
+      cold       it is re-prefilled in full, which is the dominant term and the one the committed
+                 charge silently omits
+
+    So the same action costs very different amounts in the three states, which is exactly why D160
+    says to price by predicted state and not by slice size. The NEW tokens are genuinely uncached in
+    every state, so they stay at cold rates; only the prefix term moves.
+
+    Returns the parts as well as the total, so a proof can read which term carried the price
+    instead of inferring it from a single number.
+    """
+    piece = max(int(piece_tokens), 0)
+    prefix = max(int(prefix_tokens), 0)
+    tier, mass = predicted_tier(belief)
+    new_cost = float(costs.recall_gpu_s(piece, "COLD")) if piece > 0 else 0.0
+    if prefix == 0 or tier == "gpu":
+        prefix_cost = 0.0
+    else:
+        prefix_cost = float(costs.recall_gpu_s(prefix, READINESS[tier]))
+    return dict(total_gpu_s=new_cost + prefix_cost, new_tokens_gpu_s=new_cost,
+                prefix_gpu_s=prefix_cost, predicted_tier=tier, belief_mass=mass,
+                piece_tokens=piece, prefix_tokens=prefix,
+                committed_charge_gpu_s=new_cost)
+
+
+def arm_enables_state_pricing(arm: Any) -> bool:
+    """Arm-scoped like the other v5 switches, so every baseline keeps the committed charge."""
+    return bool(getattr(arm, "live2_state_priced_costs", False))

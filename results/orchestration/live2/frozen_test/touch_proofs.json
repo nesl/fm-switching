@@ -60,13 +60,50 @@
     "status": "UNEXERCISED in v5-full until plan_state is wired (component 6); the mechanism is proved live through lmcache, which does emit KEEP_GPU_WARM",
     "evidence": "arms_v5rules.py:18 states the v5-rules base has no KEEP_GPU_WARM"
   },
+  "P7_build_price_by_state": {
+    "gpu": {
+      "total_gpu_s": 0.45511111111111113,
+      "new_tokens_gpu_s": 0.45511111111111113,
+      "prefix_gpu_s": 0.0,
+      "committed_charge_gpu_s": 0.45511111111111113,
+      "predicted_tier": "gpu"
+    },
+    "host": {
+      "total_gpu_s": 0.9141111111111111,
+      "new_tokens_gpu_s": 0.45511111111111113,
+      "prefix_gpu_s": 0.459,
+      "committed_charge_gpu_s": 0.45511111111111113,
+      "predicted_tier": "host"
+    },
+    "cold": {
+      "total_gpu_s": 2.8995555555555557,
+      "new_tokens_gpu_s": 0.45511111111111113,
+      "prefix_gpu_s": 2.4444444444444446,
+      "committed_charge_gpu_s": 0.45511111111111113,
+      "predicted_tier": "cold"
+    },
+    "totals": {
+      "gpu": 0.455111,
+      "host": 0.914111,
+      "cold": 2.899556
+    },
+    "note": "the committed charge equals the new-token term in every state, so it omitted the prefix term entirely; that omission is what 'priced by slice size' meant"
+  },
+  "P8_pricing_negative_control": {
+    "committed": 0.45511111111111113,
+    "switch_off_equivalent": 0.45511111111111113,
+    "identical": true,
+    "switch_on_total": 2.8995555555555557
+  },
   "checks": {
     "P1_price_by_state": true,
     "P2_m6_guard": true,
     "P3_reaches_a_request": true,
     "P4_step2b": true,
     "P5_body": true,
-    "P6_declared": true
+    "P6_declared": true,
+    "P7_build_price_by_state": true,
+    "P8_pricing_negative_control": true
   },
   "ALL_PASS": true,
   "_elapsed_s": 0.1

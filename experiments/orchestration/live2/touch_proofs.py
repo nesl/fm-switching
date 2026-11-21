@@ -147,8 +147,40 @@ def main():
         evidence="arms_v5rules.py:18 states the v5-rules base has no KEEP_GPU_WARM")
     p6 = TP.arm_enables(a) is True
 
+    # P7 WARM AND RELOAD PRICED BY STATE (D160). The same action in the three states must cost
+    # three different amounts, and the prefix term must be the one that moves: pricing the slice
+    # alone is what the committed charge already did.
+    pr = {k: TP.build_price_gpu_s(2048, 11000, b, C) for k, b in pure.items()}
+    res["P7_build_price_by_state"] = {k: {kk: v[kk] for kk in
+                                          ("total_gpu_s", "new_tokens_gpu_s", "prefix_gpu_s",
+                                           "committed_charge_gpu_s", "predicted_tier")}
+                                      for k, v in pr.items()}
+    totals = {k: round(v["total_gpu_s"], 6) for k, v in pr.items()}
+    p7 = (len(set(totals.values())) == 3
+          and pr["gpu"]["prefix_gpu_s"] == 0.0
+          and pr["cold"]["prefix_gpu_s"] > pr["host"]["prefix_gpu_s"] > 0.0
+          # every state charges the SAME new-token term, so only the state moved the price
+          and len({round(v["new_tokens_gpu_s"], 9) for v in pr.values()}) == 1
+          # and the committed charge equals the new-token term alone, i.e. it omitted the prefix
+          and all(abs(v["committed_charge_gpu_s"] - v["new_tokens_gpu_s"]) < 1e-12
+                  for v in pr.values()))
+    res["P7_build_price_by_state"]["totals"] = totals
+    res["P7_build_price_by_state"]["note"] = (
+        "the committed charge equals the new-token term in every state, so it omitted the prefix "
+        "term entirely; that omission is what 'priced by slice size' meant")
+
+    # P8 NEGATIVE CONTROL for the pricing switch: off must reproduce the committed charge exactly.
+    off = TP.build_price_gpu_s(2048, 11000, {"cold": 1.0}, C)
+    res["P8_pricing_negative_control"] = dict(
+        committed=C.recall_gpu_s(2048, "COLD"),
+        switch_off_equivalent=off["committed_charge_gpu_s"],
+        identical=abs(C.recall_gpu_s(2048, "COLD") - off["committed_charge_gpu_s"]) < 1e-12,
+        switch_on_total=off["total_gpu_s"])
+    p8 = res["P8_pricing_negative_control"]["identical"]
+
     checks = dict(P1_price_by_state=p1, P2_m6_guard=p2, P3_reaches_a_request=p3,
-                  P4_step2b=p4, P5_body=p5, P6_declared=p6)
+                  P4_step2b=p4, P5_body=p5, P6_declared=p6,
+                  P7_build_price_by_state=p7, P8_pricing_negative_control=p8)
     res["checks"] = checks
     res["ALL_PASS"] = all(checks.values())
     res["_elapsed_s"] = round(time.time() - t0, 1)
@@ -157,7 +189,8 @@ def main():
     for k, v in checks.items():
         print(f"  {k:24s} {'PASS' if v else 'FAIL'}")
     print(f"\nALL_PASS: {res['ALL_PASS']}")
-    print(f"price 11k by state: {prices}")
+    print(f"touch price 11k by state: {prices}")
+    print(f"warm/reload price 2048 new on an 11k prefix: {res['P7_build_price_by_state']['totals']}")
     print(f"touch issued: switch on {res['P3_reaches_a_request']['touch_issued']}, "
           f"switch off {res['P4_step2b']['switch_off_touch_issued']}, "
           f"M6 guard refusals {res['P4_step2b']['guard_refused_count']}")

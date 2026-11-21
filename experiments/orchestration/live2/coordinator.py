@@ -116,6 +116,8 @@ class Live2Coordinator:
         # arm that declares it. Without this the action only steers the coordinator's
         # own eviction order and cannot move vLLM's LRU recency (D150, D44).
         self._touch_requests = TP.arm_enables(arm)
+        # D160: price warm and reload by predicted cache state, not by slice size.
+        self._state_priced_costs = TP.arm_enables_state_pricing(arm)
         self.be = backend
         self.events = sorted(events, key=lambda e: (_sched(e), e.get("kind", "")))
         self.upload_mode = upload_mode
@@ -767,7 +769,16 @@ class Live2Coordinator:
         new_refs = s.frames[already:already + n_new]
         if not new_refs:
             return None
-        cost = C.recall_gpu_s(max(piece, 1), "COLD")
+        if self._state_priced_costs:
+            # The committed charge prices the SLICE only. This also prices re-presenting
+            # the built prefix, whose cost depends on whether it survived (D160).
+            _pr = TP.build_price_gpu_s(max(piece, 1), int(getattr(s, "built_tokens", 0) or 0),
+                                       dict(getattr(s, "belief", {}) or {}), C)
+            cost = _pr["total_gpu_s"]
+            self.counts["state_priced_build"] += 1
+            self.counts["state_priced_build_" + _pr["predicted_tier"]] += 1
+        else:
+            cost = C.recall_gpu_s(max(piece, 1), "COLD")
         if not self.st.budget.can_spend(cost):
             self.counts["budget_refusal"] += 1
             return None

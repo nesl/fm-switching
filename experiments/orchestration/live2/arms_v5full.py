@@ -82,6 +82,8 @@ class V5FullArm:
     live2_offload_controls = True
     # Component 2: KEEP_GPU_WARM issues a real touch request, priced by predicted cache state.
     live2_touch_requests = True
+    # D160: warm and reload priced by predicted cache state, not slice size.
+    live2_state_priced_costs = True
 
 
     def __init__(self, name: str = "v5-full",
