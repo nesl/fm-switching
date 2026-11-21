@@ -77,6 +77,14 @@ hybrid-F-lhreq-noc3 16 6 _L3_epg_rq30
 hybrid-F-lhreq-noc3 16 7 _L3_epg_rq30
 
 # ---------------------------------------------------------------- THEN: seeds 4-5 only
+# LABEL REQUIRED on r3-streaming and streamscout: scorer/score.py cascade_device_wait() lists them
+# as cascade-style arms, alongside confidence-cascade, cascade-routing and thinking-qwenvl, because
+# they WAIT for the device answer. That wait is the flat costs.py:37 DEV_LAT_S = 0.567 s, against a
+# measured warm p50 of 0.2697 s, and measured_device_wait_applied is still false. It is a
+# DECISION-TIMING site (coordinator.py:63, applied at :471 and :505), so adopting the measured
+# value changes what the arm does and needs a RERUN, which D154 (5) already queues. These two cells
+# therefore run now and are labelled proxy-0.567, exactly as D154 (5) says; they are not blocked by
+# it, and the cascade-THRESHOLD calibration below is a separate requirement.
 # CORRECTED by the user: the LRU-contrast arm is the LMCACHE ADAPTER, not warm-all-lru-off (a
 # negative control) nor -reactive (a calibration instrument). Its own card says so: lmcache.md
 # line 36 calls it "the LRU contrast to AttentionStore's scheduler-aware eviction and Pensieve's

@@ -4,7 +4,7 @@ D56 makes where each history lives a core decision, and D150 records that vLLM c
 to pin KV. What vLLM 0.31.0 does expose is per-request offload control, so the policy expresses the
 per-type rule the user set:
 
-    assistive (single-shot)  no host retention, no reload     nothing to come back to: one view, one answer
+    assistive (single-shot)  no host retention                nothing to come back to: one view, one answer
     dashcam                  no host retention                a dead episode ages out of GPU and never flushes host
     robot history            retention on, reload allowed     the one history worth paying to keep
 
@@ -33,18 +33,21 @@ from typing import Any, Dict, Optional
 #                           against the positive control's HOST-WARM (external 8,080) on an
 #                           otherwise identical probe. This is what the dashcam and assistive
 #                           no-retention rule rides on.
-#   max_load_tokens: 0      HONOURED. Read came back COLD at 1.387 s, matching the 1.411 s cold
-#                           read, where the identically constructed positive control was
-#                           HOST-WARM at 0.123 s.
+#   max_load_tokens: 0      HONOURED (COLD at 1.387 s against the positive control's HOST-WARM
+#                           at 0.123 s), but NOT USED: D167 rules forbid-reload unnecessary, and
+#                           its evidence is a between-probe comparison rather than a within-probe
+#                           A/B, so the rule does not rest on it.
 #   kv_load_tiers: []       NOT HONOURED. The same probe came back HOST-WARM (external 8,080,
 #                           0.120 s), so the empty tier filter is ignored on this build. It is
 #                           recorded here because it is the obvious-looking way to express
 #                           "forbid reload" and it silently does nothing.
 NO_RETENTION: Dict[str, Any] = {"max_offload_tokens": 0}
-NO_RETENTION_NO_RELOAD: Dict[str, Any] = {"max_offload_tokens": 0, "max_load_tokens": 0}
 
+# D167: forbid-reload is NOT NEEDED and is not used. Dropping it also removes the rule's only
+# dependence on the control whose evidence is weaker (a between-probe comparison), and it is
+# redundant anyway: a request that was never retained on host has nothing there to reload.
 RULE: Dict[str, Optional[Dict[str, Any]]] = {
-    "assistive": NO_RETENTION_NO_RELOAD,
+    "assistive": NO_RETENTION,
     "dashcam": NO_RETENTION,
     "robot": None,
 }

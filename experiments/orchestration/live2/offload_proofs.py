@@ -37,7 +37,10 @@ def main():
 
     # P1 the rule itself: the declared per-type decision, read back from the module
     res["P1_rule"] = {t: OP.params_for(t, True) for t in ("dashcam", "robot", "assistive", "unknown")}
-    p1 = (res["P1_rule"]["assistive"] == {"max_offload_tokens": 0, "max_load_tokens": 0}
+    # D167: alert and single-shot both carry skip-retention ONLY; forbid-reload is not used. This
+    # expectation was changed by that ruling, not relaxed to make a failing check pass: before it,
+    # assistive also carried max_load_tokens and P1 asserted so.
+    p1 = (res["P1_rule"]["assistive"] == {"max_offload_tokens": 0}
           and res["P1_rule"]["dashcam"] == {"max_offload_tokens": 0}
           and res["P1_rule"]["robot"] is None and res["P1_rule"]["unknown"] is None)
 
@@ -106,8 +109,57 @@ def main():
           and all(v is False for v in others.values() if isinstance(v, bool))
           and sum(res["P6_port_rule"]["emissions"].values()) == 2)
 
+    # P7 (D167) ON A CONSTRUCTED COORDINATOR: the flag must be present on exactly the alert and
+    # single-shot requests of full v5 and absent everywhere else. Checked on the ACTUAL submitted
+    # wire bodies, per device type, not on the rule table, because the rule table was already P1.
+    import tempfile
+    import arms as A2
+    import cachekeys as CK
+    import cstate as CS2
+    from coordinator import Live2Coordinator, Logs
+
+    def fleet(switch_on):
+        d = Path(tempfile.mkdtemp())
+        arm = A2.make_arm("b7-edf-feasibility")
+        setattr(arm, "live2_offload_controls", bool(switch_on))
+        arm.live2_configure(gpu_kv_tokens=62944, host_tier_gib=27, host_tier_tokens=48000,
+                            targets=CS2.TARGETS)
+        co = Live2Coordinator(arm, None, [], gpu_kv_tokens=62944, host_tier_gib=27,
+                              host_tier_tokens=48000, upload_mode="A", window_s=600.0,
+                              drain_s=5.0, seed=4, logs=Logs(d / "r").open(),
+                              run_tag=CK.run_tag(4, "off"), dry_run=True)
+        out = {}
+        for dev, typ in (("dash000", "dashcam"), ("robo000", "robot"), ("ss000", "assistive")):
+            co.st.register(dict(kind="device_register", device_id=dev, type=typ,
+                                uplink_mbps=13.6, rtt_ms=44.0, start_t=0.0), "salt_" + dev)
+            sid = "s_" + dev
+            co.st.session_start(dict(kind="session_start", device_id=dev, session_id=sid, t=0.0))
+            sess = co.st.sessions[sid]
+            sess.frames = ["f0"]
+            sess.sent_bytes_for = {"f0"}
+            sess.confirmed_bytes_for = {"f0"}
+            sess.built_tokens = 900
+            n = len(co.futures)
+            co._submit(kind="monitor" if typ == "dashcam" else "recall", device_id=dev,
+                       session_id=(None if typ == "dashcam" else sid), opportunity_id=None,
+                       decision_id=None,
+                       frames=[dict(frame_ref="f0", path=None)],
+                       est_tokens=900, question=(None if typ == "dashcam" else "q?"),
+                       options=(), max_tokens=1, t=1.0, mix=co.st.traffic_mix())
+            body = co.futures[n][1].body if len(co.futures) > n else None
+            out[typ] = (body or {}).get("kv_transfer_params")
+        return out
+
+    on, off = fleet(True), fleet(False)
+    res["P7_flag_on_exactly_the_right_requests"] = dict(switch_on=on, switch_off=off)
+    p7 = (on["dashcam"] == {"max_offload_tokens": 0}
+          and on["assistive"] == {"max_offload_tokens": 0}
+          and on["robot"] is None
+          and all(v is None for v in off.values()))
+
     checks = dict(P1_rule=p1, P2_step2b=p2, P3_declared_type=p3, P4_survives_strip=p4,
-                  P5_negative_control=p5, P6_port_rule=p6)
+                  P5_negative_control=p5, P6_port_rule=p6,
+                  P7_flag_on_exactly_the_right_requests=p7)
     res["checks"] = checks
     res["ALL_PASS"] = all(checks.values())
     res["_elapsed_s"] = round(time.time() - t0, 2)
@@ -123,6 +175,8 @@ def main():
     print(f"\nALL_PASS: {res['ALL_PASS']}")
     print(f"rule: dashcam {res['P1_rule']['dashcam']}  robot {res['P1_rule']['robot']}  "
           f"assistive {res['P1_rule']['assistive']}")
+    print(f"wire bodies, switch ON : {res['P7_flag_on_exactly_the_right_requests']['switch_on']}")
+    print(f"wire bodies, switch OFF: {res['P7_flag_on_exactly_the_right_requests']['switch_off']}")
     print(f"wrote {OUT}")
     return 0 if res["ALL_PASS"] else 1
 
