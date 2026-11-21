@@ -1,0 +1,37 @@
+{
+  "4": {
+    "rows": 80683,
+    "digest": "c4bcde4b7c5a62bf",
+    "kinds": {
+      "release_whole": 26,
+      "release_recall": 78,
+      "state_action": 63747,
+      "release_monitor": 16832
+    },
+    "state_action_subtypes": {
+      "?": 63747
+    }
+  },
+  "8": {
+    "rows": 80729,
+    "digest": "3a86b74ffc0efc8b",
+    "kinds": {
+      "release_whole": 26,
+      "release_recall": 78,
+      "state_action": 63747,
+      "release_monitor": 16878
+    },
+    "state_action_subtypes": {
+      "?": 63747
+    }
+  },
+  "_verdict": {
+    "port_rule": "PASS",
+    "characteristic_decision": "LRU tier assignment over gpu_slots (state_action), 63747 in a dry 16-device seed-4 cell",
+    "materialize_half_reaches_engine": "26 release_whole prefills",
+    "is_read": "cstate.py:412-430 enact_placement reads desired_tier; placement_enacted defaults True at cstate.py:417",
+    "step2b": "gpu_slots 4 vs 8 -> different digests and row counts, so the cap moves decisions",
+    "stated_limit": "enact_placement STEERS the coordinator's eviction order and cannot command vLLM residency (D44); card adaptation A2 (FCFS order) stays unexpressible because `order` is never read (card line 75)",
+    "corrects": "my earlier audit called desired_tier write-only; that was fixed by D133 Part A and the claim no longer holds"
+  }
+}

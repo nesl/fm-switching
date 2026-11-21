@@ -83,19 +83,24 @@ hybrid-F-lhreq-noc3 16 7 _L3_epg_rq30
 # value-ordered" eviction. It IS live-runnable: arms_published.py registers "lmcache" ->
 # LMCacheArm over baselines/lmcache_adapted.py, so it is NOT dropped.
 #
-# It is HELD pending its port proof, which it has never had. Two reasons for caution, both on
-# origin: arms_published.py:311 lists lmcache in OUT_OF_CARD_SCOPE (B-recall), and its card's
-# line 75 records that live2/coordinator.py never reads an action's `order` field, so the FCFS
-# request order of adaptation A2 cannot reach a decision here. Its characteristic decision is the
-# OTHER half, LRU eviction over gpu_slots. Under the port rule it may not be scored until that
-# decision is shown to fire at least once. Proof running now; these lines are uncommented only
-# if it does, and reported as unexpressible if it does not.
+# PORT PROOF PASSED 2026-11-21 (offload/lmcache_port.json), so these cells are released.
+#   characteristic decision: 63,747 state_action decisions in a dry 16-device seed-4 cell, and
+#     26 release_whole prefills, so the MATERIALIZE half reaches the engine.
+#   it is READ, which was the real risk: desired_tier is no longer the write-only field the
+#     earlier audit found. cstate.py:412-430 enacts it (D133 Part A) and placement_enacted
+#     defaults True (cstate.py:417), so the LRU tier assignment changes behaviour.
+#   Step 2b: gpu_slots 4 vs 8 gives different digests (c4bcde4b... vs 3a86b74f...) over 80,683
+#     vs 80,729 rows, so the LRU cap moves decisions rather than only logging them.
+# STATED LIMIT, which applies to every arm equally and is not an lmcache defect: enact_placement
+# STEERS the coordinator's eviction order; it cannot command vLLM residency (D44). Its card's
+# adaptation A2 (FCFS request order) remains unexpressible, since `order` is never read; that is
+# a harness property recorded in the card at line 75, not a change to the adaptation.
 r3-streaming 16 4 _L3_epg_rq30
 r3-streaming 16 5 _L3_epg_rq30
 streamscout 16 4 _L3_epg_rq30
 streamscout 16 5 _L3_epg_rq30
-# lmcache 16 4 _L3_epg_rq30
-# lmcache 16 5 _L3_epg_rq30
+lmcache 16 4 _L3_epg_rq30
+lmcache 16 5 _L3_epg_rq30
 
 # ---------------------------------------------------------------- AFTER CALIBRATION (commented)
 # These three escalate on a device-confidence threshold. D164 requires each arm's threshold to be
