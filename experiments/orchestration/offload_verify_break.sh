@@ -1,7 +1,7 @@
 #!/bin/bash
 # User ruling 2026-11-21 ~13:00: at the next run boundary after flash posts its live verification script for the
 # per-request host-offload controls (max_offload_tokens / max_load_tokens / kv_load_tiers), take ONE ~10 min break on a
-# fresh round-1 server, run the script UNCHANGED (nothing is built on this host), then resume the seed-5 sweep (driver v15,
+# fresh round-1 server, run the script UNCHANGED (nothing is built on this host), then resume the seed-5 sweep (driver v16,
 # which skips finished cells).
 # Trigger contract, posted by flash on origin as runs/OFFLOAD_VERIFY:
 #   CMD <script path relative to the repo> <args...>     (run with the live2 venv python, exactly as written)
@@ -46,5 +46,5 @@ else
   git pull --rebase -q 2>/dev/null; git push -q 2>/dev/null
 fi
 rm -f $OUT/STOP
-tmux new-session -d -s frozengrid "bash experiments/orchestration/study_frozen_grid_driver_v15.sh"
-log "OPERATOR: offload-verify break over; driver v15 restarted (seed-5 sweep resumes)"
+tmux new-session -d -s frozengrid "bash experiments/orchestration/study_frozen_grid_driver_v16.sh"
+log "OPERATOR: offload-verify break over; driver v16 restarted (seed-5 sweep resumes, then BASELINE_MATRIX)"
