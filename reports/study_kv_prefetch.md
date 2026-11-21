@@ -775,3 +775,77 @@ are drafted here for the owner to apply.
 | `results/orchestration/live2/kv_prefetch/attentionstore_prefetch_proofs.json` | `arms_kvprefetch.py` | none-dry | nvidia_rtx_a6000 | 16 | `attentionstore-prefetch` passes all four proofs on the committed harness: +19 prefills, Step 2b 2,708 | -- |
 | `results/orchestration/live2/kv_prefetch/kvflow_prefetch_proofs.json` | `arms_kvprefetch.py` | none-dry | nvidia_rtx_a6000 | 16 | `kvflow-prefetch` UNEXPRESSIBLE: 0 of 8,600 emitted, Step 2b 0 | -- |
 | `results/orchestration/live2/kv_prefetch/kvflow_prefetch_concentration.json` | probe, section 4.5 | none-dry | nvidia_rtx_a6000 | 16 | kvflow's prefetch fires on 3 of 374 sessions, a 0.8 % stratum | -- |
+
+---
+
+# Mooncake, resolved from the card AND the paper, because I said two different things
+
+**The user is right that I contradicted myself.** An hour apart I listed mooncake among six baselines
+publishing a proactive mechanism, then reported that its card publishes none. Neither statement was
+right, and the resolution is sharper than both. Paper read at arXiv:2407.00079 (v5 HTML; §1 to §6
+start verbatim, §6.1 onward from an extracted summary and marked as such below).
+
+## What the paper actually publishes
+
+**It DOES publish a proactive cache mechanism, and my first claim was not baseless.** Verbatim:
+
+- §1.1: *"Conductor is also responsible for predicting the future usage of KVCache blocks"*, and
+  *"executing scheduling operations such as swapping and replication accordingly."*
+- §1.1: *"The hottest blocks should be replicated to multiple nodes to avoid fetching congestion"*;
+  *"the coldest ones should be swapped out to reduce reserving costs."*
+- §3: *"It also replicates or swaps certain blocks of the KVCache if it is beneficial for future
+  inference."*
+
+That last sentence is a mechanism acting on cache for inference that has **not arrived**, so a flat
+"its card publishes nothing proactive" is wrong.
+
+**But it is NOT warm-ahead of a session, and the paper itself undercuts the predictive reading.**
+Verbatim, §1.2: *"a heuristic-based automated hot-spot migration scheme that replicates hot KVCache
+blocks"* **"without requiring precise predictions of future KVCache usage"**. And the words
+`prefetch`, `preload`, `speculative`, `warm up` and `ahead of time` appear **nowhere** in the
+verbatim text read. Every per-request data movement is triggered on arrival: §1.1's
+*"For each request, the global scheduler (Conductor) needs to select a pair of prefill and decoding
+instances"* and then *"transfer as much reusable KVCache as possible to the selected prefill
+instance"*; Algorithm 1's `FindBestPrefixMatch`.
+
+So the published mechanism is **background hot-block REPLICATION and SWAP-OUT across nodes and
+tiers**, not prefill of a session's history before its question arrives.
+
+## Why it is unreachable here, which is the part both of my earlier claims missed
+
+The mechanism is real and our harness cannot express it, for two **structural** reasons that are
+nothing to do with PATCH 1:
+
+1. **Replication needs more than one replica, and our adaptation has one.** The card's ADAPTATION A1
+   maps *"disaggregated prefill/decode pools"* to *"one replica"*. With one replica there is no node
+   to replicate a hot block TO, so the hotter half of the mechanism is inexpressible by construction.
+2. **Swap-out needs a reachable slower tier, and the belief never reaches one.** `believed_tier` is
+   `cold` or `gpu` and **never `host`** in 56 committed 16-device cells. So the colder half has no
+   destination either.
+
+The card's own "Not reproduced" section already disposes of the machinery both halves would live in:
+*"The disaggregated architecture; the transfer engine and its storage tiers"*.
+
+## The verdict, and it differs from both of my earlier statements
+
+**Mooncake gets no warm-ahead arm, and the reason is not that its paper lacks a proactive mechanism.
+The reason is that the proactive mechanism it does publish is cross-replica replication and
+tier swap-out, and our adaptation removed the replicas while the belief never reaches the tier.**
+That is an ADAPTATION consequence, which belongs in the card and in any fairness statement, not a
+claim that the paper is purely reactive.
+
+**Consequence for the rerun, reversing what I told the H100.** I suggested its mooncake rerun could
+be dropped because there was nothing for `no-prefetch` to deprive it of. **That was wrong and the
+rerun stays.** The label is accurate and the reason behind it is now a recorded limitation rather
+than an absence: mooncake is compared in a harness that cannot express the proactive mechanism it
+publishes, for reasons A1 and the unreachable host tier. That belongs beside any mooncake number,
+and dropping the rerun would have removed the cell that the limitation attaches to.
+
+**A second finding stands unchanged and is independent of all of this**: with readiness constant at
+COLD in 377 of 377 cases, mooncake's reuse-first sort key is the constant 2, so MOONCAKE-REUSE-FIRST
+is arithmetically identical to EDF in these cells. That is why its scores sit exactly on b7's.
+
+**Register:** §6.1 onward was read as an extracted summary, not verbatim, so a claim of "no
+pre-arrival prefetch anywhere in the paper" rests partly on that summary. The verbatim range (§1 to
+§6 start) is enough to settle the question the card turns on, and the limit is stated rather than
+hidden.

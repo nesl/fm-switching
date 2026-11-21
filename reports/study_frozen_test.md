@@ -2470,9 +2470,19 @@ forbids mixing the two, so they are re-scored here from the committed run dirs.
 | mooncake | **8/20 = 0.4000** | 8/20 = 0.4000 | 7/20 = 0.35 | 0 |
 | edf | **6/20 = 0.3000** | 6/20 = 0.3000 | 4/20 = 0.20 | 0 |
 
-**The two rules agree on every cell**, because no device answer is late at the scorer's 0.146 to
-0.225 s device latency. So the split the H100 flagged resolves benignly: the pre-D155 figures are
-also the D155 figures here, and nothing needs relabelling on that account.
+**The two rules agree on every cell at the latency the scorer used. THAT COLUMN IS PROVISIONAL AND
+THE CONCLUSION I FIRST DREW FROM IT WAS NOT SAFE.** The scorer's device latency is 0.146 to 0.225 s,
+which is D87's ORIN2 IN-PROCESS harness, and D146 (2) replaces exactly that substitution. It cannot
+establish that device answers arrive on time: it is the superseded number. I had just installed the
+MEASURED device ACCURACY in the value table while leaving the superseded device LATENCY in the
+scorer, which is the same split-source error in two halves of one pipeline.
+
+Under the measured COLD re-send path (end to end 6.65 s) every device answer at a 3 s deadline would
+be late and the by-deadline column would differ from any-time on every cell. D155 (1) rules that
+cold path an API artefact per D61 (b), so it is not the baseline either. **The Orin's WARM
+measurement decides, and until it is wired the by-deadline column here is PROVISIONAL.** When it
+lands, every 3 s cell is re-scored with per-question measured device completion latency under both
+rules, and the report states HOW MANY device answers flip.
 
 **This is also a cross-validation of the offline path, and a strong one.** All four arms reproduce
 the H100's live driver scores EXACTLY: b7 0.40 and 7 of 20, eco-llm 0.30 and 15 of 20, mooncake 0.40
