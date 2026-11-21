@@ -85,8 +85,9 @@ cell() {   # arm n seed [tag]
   case "$tag" in *_kv0.5*) lflag="$lflag --gpu-kv-tokens 31472";; *_kv0.25*) lflag="$lflag --gpu-kv-tokens 15736";; esac
   # D153: a cell tagged _epg runs the EP-G dashcam episode workload with the arguments flash's commit put in EPG_ARGS;
   # a cell without it is dashcam-1f (one frame per call), recorded in its label
-  local wl="dashcam-1f"; case "$tag" in *_cal1f*) wl="CALIBRATION-1F dashcam-1f";; esac
-  case "$tag" in *_epg*) lflag="$lflag $(grep -v '^#' $OUT/EPG_ARGS | tr '\n' ' ')"; wl="dashcam-EP-G";; esac
+  local wl="dashcam-1f upload-30s"; case "$tag" in *_cal1f*) wl="CALIBRATION-1F dashcam-1f upload-30s";; esac
+  # D156 (2): every EP-G cell (the WARM-ALL held-out cells onward) also uploads robot frames per frame (flash 34a4af0)
+  case "$tag" in *_epg*) lflag="$lflag $(grep -v '^#' $OUT/EPG_ARGS | tr '\n' ' ') --robot-upload per-frame"; wl="dashcam-EP-G upload-pf";; esac
   while [ "$(nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader | grep -c 4f1d7e47)" != "0" ]; do sleep 2; done
   log "start $name HEAD $(git rev-parse --short HEAD) ss-pool [$ssargs] deadline [${lflag:-robot 5 s}] workload [$wl]"
   mkdir -p $d
@@ -155,7 +156,15 @@ ordered_cells() {   # user order (2026-11-20, after D144): the requeued seed-6 h
   # then baselines: EP-G (handful seeds 4, 5, 6, then the sweep) once available, else dashcam-1f.
   grep -v '^#' $OUT/WARMALL_CELLS_1F 2>/dev/null | awk 'NF>=3 {print $1, $2, $3, $4}'
   [ -s $OUT/EPG_ARGS ] && grep -v '^#' $OUT/WARMALL_CELLS 2>/dev/null | awk 'NF>=3 {t=$4; if (t !~ /_epg/) t=t "_epg"; print $1, $2, $3, t}'
-  grep -v '^#' $OUT/V5RULES_CELLS 2>/dev/null | awk 'NF>=3 {print $1, $2, $3, $4}'
+  # D156 (3): once flash posts "v5-rules ready" (its arm name in $OUT/V5RULES_CELLS, first column), right after the 4
+  # EP-G WARM-ALL cells: v5-rules beside b7, hybrid-F-lhreq-noc3, mooncake, eco-llm, edf, llf and warm-all-lru, 3 s, 16
+  # devices, EP-G + per-frame, all 8 at seed 4, then the same 8 at seed 5 (a cell already run, e.g. warm-all-lru s4 from
+  # the WARM-ALL block, is skipped). Then the rest of the EP-G handful, then the sweep.
+  local v5r=$(grep -v '^#' $OUT/V5RULES_CELLS 2>/dev/null | awk 'NF>=1 {print $1}' | sort -u | tr '\n' ' ')
+  if [ -n "$v5r" ] && [ -s $OUT/EPG_ARGS ]; then
+    for s in 4 5; do for x in $v5r b7-edf-feasibility hybrid-F-lhreq-noc3 mooncake eco-llm edf llf warm-all-lru; do
+      echo "$x 16 $s _L3_epg"; done; done
+  fi
   grep -v '^#' $OUT/V5_CELLS 2>/dev/null | awk 'NF>=3 {print $1, $2, $3, $4}'
   if [ -s $OUT/EPG_ARGS ]; then
     for s in 4 5 6; do for x in $hf; do echo "$x 16 $s _L3_epg"; done; done
