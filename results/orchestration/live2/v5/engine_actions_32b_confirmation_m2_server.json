@@ -1,0 +1,111 @@
+{
+ "server": {
+  "command": [
+   "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+   "serve",
+   "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+   "--served-model-name",
+   "32BI",
+   "--port",
+   "8031",
+   "--max-model-len",
+   "32768",
+   "--gpu-memory-utilization",
+   "0.9",
+   "--tensor-parallel-size",
+   "1",
+   "--no-enable-prefix-caching",
+   "--limit-mm-per-prompt",
+   "{\"image\": 16}",
+   "--dtype",
+   "bfloat16",
+   "--seed",
+   "0",
+   "--limit-mm-per-prompt",
+   "{\"image\": 640, \"video\": 1}",
+   "--mm-processor-kwargs",
+   "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}",
+   "--trust-request-mm-kwargs",
+   "--host",
+   "127.0.0.1",
+   "--enable-prefix-caching",
+   "--enable-prompt-tokens-details",
+   "--mm-processor-cache-gb",
+   "128",
+   "--kv-offloading-backend",
+   "native",
+   "--kv-offloading-size",
+   "27",
+   "--enable-log-requests",
+   "--enable-logging-iteration-details"
+  ],
+  "flag_diff": [
+   [
+    "38",
+    "27"
+   ]
+  ],
+  "restart_started": 1795245198.9661613,
+  "up_at": 1795245263.1071317,
+  "startup_s": 63.7,
+  "log": "logs/study_x_server_32BI_1120_231318.log",
+  "host_gib": 27.0,
+  "scheduling_policy": "fcfs",
+  "extra_flags": [],
+  "resolved": {
+   "flags_set_twice": {
+    "--enable-prefix-caching": {
+     "occurrences": [
+      {
+       "index": 13,
+       "flag": "--no-enable-prefix-caching",
+       "value": "--no-enable-prefix-caching"
+      },
+      {
+       "index": 27,
+       "flag": "--enable-prefix-caching",
+       "value": "--enable-prefix-caching"
+      }
+     ],
+     "argv_last_wins": {
+      "index": 27,
+      "flag": "--enable-prefix-caching",
+      "value": "--enable-prefix-caching"
+     }
+    },
+    "--limit-mm-per-prompt": {
+     "occurrences": [
+      {
+       "index": 14,
+       "flag": "--limit-mm-per-prompt",
+       "value": "{\"image\": 16}"
+      },
+      {
+       "index": 20,
+       "flag": "--limit-mm-per-prompt",
+       "value": "{\"image\": 640, \"video\": 1}"
+      }
+     ],
+     "argv_last_wins": {
+      "index": 20,
+      "flag": "--limit-mm-per-prompt",
+      "value": "{\"image\": 640, \"video\": 1}"
+     }
+    }
+   },
+   "engine_reported": {
+    "enable_prefix_caching": "True",
+    "non_default_enable_prefix_caching": "True",
+    "non_default_mm_processor_cache_gb": "128.0",
+    "non_default_limit_mm_per_prompt": "{'image': 640, 'video': 1}",
+    "non_default_mm_processor_kwargs": "{'size': {'shortest_edge': 4096, 'longest_edge': 16777216}, 'fps': 1.0, 'do_sample_frames': False}",
+    "non_default_kv_offloading_size": "27.0",
+    "non_default_kv_offloading_backend": null
+   },
+   "note": "record-only; argparse keeps the last occurrence; the pinned flag list is unchanged (user ruling 2026-11-20)"
+  }
+ },
+ "script_rc": 0,
+ "wall_s": 241.5,
+ "note": "round-1 server via study_live2_pilot.start_server(27.0); script e09391f (D157 (1) M2 frontier-sized) run with only --out, so the first run (b685fbb) is not overwritten"
+}
