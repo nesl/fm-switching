@@ -1,0 +1,70 @@
+{
+  "version": "kv-prefetch-1.0",
+  "baseline": "mooncake",
+  "register": "OBSERVED COUNTS from a DRY decision-path run, stub bridge, no engine. Counts of decisions and beliefs, never of seconds.",
+  "cell": {
+    "seed": 4,
+    "n_devices": 16,
+    "run_s": 1200.0,
+    "ratio": "40:40:20",
+    "dry": true,
+    "robot_question_set": "lh_req",
+    "ss_question_set": "ss2"
+  },
+  "card_ruling": {
+    "verdict": "NO PROACTIVE MECHANISM ON THE CARD",
+    "card": "baselines/cards/mooncake.md",
+    "claims_quoted": [
+      "we developed a prediction-based early rejection policy",
+      "its architecture maximises KVCache reuse across a disaggregated prefill/decode pool",
+      "maximise KVCache reuse -> serve GPU-warm, then host-warm, then cold (MOONCAKE-REUSE-FIRST order) | FAITHFUL in effect"
+    ],
+    "not_reproduced_quoted": "The disaggregated architecture; the transfer engine and its storage tiers; the TBT SLO; the paper's throughput results.",
+    "reasoning": "Both quoted mechanisms are triggered BY a request. Neither creates cache for a request that has not arrived. The transfer engine, which is where any prefetch would live, is explicitly NOT REPRODUCED. Giving mooncake a warm-ahead lever would hand it a capability its card does not claim.",
+    "revises": "reports/policy_v5_assessment.md section I, which recorded 'probably yes, needs a ruling' on the grounds that cache-centric scheduling is 'the closest published analogue to warm-ahead'. An analogy is not a claim."
+  },
+  "measured": {
+    "epochs": 12001,
+    "session_actions_emitted": {
+      "KEEP_GPU_WARM": 377
+    },
+    "recall_readiness_at_first_sight": {
+      "COLD": 377
+    },
+    "distinct_readiness_values": 1,
+    "readiness_by_nth_ask": {
+      "ask1/COLD": 374,
+      "ask2/COLD": 3
+    },
+    "ask_count_histogram": {
+      "1": 371,
+      "2": 3
+    },
+    "distinct_sessions_asked": 374,
+    "max_gpu_warm_sessions_in_obs": 0,
+    "max_host_warm_sessions_in_obs": 0,
+    "decision_kinds": {
+      "decline": 5,
+      "release_monitor": 13193,
+      "release_recall": 372,
+      "state_action": 377
+    }
+  },
+  "step2_verdict": {
+    "causal_link": "KVCache reuse -> MOONCAKE-REUSE-FIRST order -> which recall is served first -> more reuse, lower TTFT, more on-time answers",
+    "implementing_quantity": "RecallQuery.readiness, the first sort key of MooncakeAdapted.decide",
+    "varies_as_expected": false,
+    "classification": "CONSTANT: the sort key takes one value in every epoch, so the reuse-first order is identical to deadline order and the mechanism cannot affect any decision. A CLAUDE.md Step 2 stopping condition.",
+    "independent_of_prefetch_ruling": true,
+    "prior_channel_finding": "cards/mooncake.md D130 port note: coordinator.py never reads Action.order, so the reuse-first order cannot reach a decision in live2 even when the signal varies. This audit adds the SIGNAL half."
+  },
+  "no_arm_added": "No mooncake arm is registered by this file. Its committed cells are unaffected and need no relabelling, because no proactive mechanism was withheld from it.",
+  "_provenance": {
+    "git_commit": "55ec283ad48e719a0a1541bb41a06b3bf74d7556",
+    "script": "arms_kvprefetch.py",
+    "model": "none-dry",
+    "timestamp": "2026-11-20T17:55:45.381727",
+    "device": "nvidia_rtx_a6000",
+    "n": 16
+  }
+}

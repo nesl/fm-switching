@@ -1,0 +1,176 @@
+{
+  "version": "kv-prefetch-1.0",
+  "arm": "attentionstore-prefetch",
+  "base": "attentionstore",
+  "control": "attentionstore-prefetch-off",
+  "register": "DRY decision-path runs, stub bridge, no engine. Every number below is a COUNT OF DECISIONS, never of seconds, and nothing here is a measured latency, quality or capacity result.",
+  "cell": {
+    "seed": 4,
+    "n_devices": 16,
+    "run_s": 1200.0,
+    "ratio": "40:40:20",
+    "dry": true,
+    "robot_question_set": "lh_req",
+    "ss_question_set": "ss2"
+  },
+  "check7_positive_control": {
+    "quantity": "committed `attentionstore` decision-kind census at this cell",
+    "base_decisions": 48135,
+    "base_census": {
+      "decisions": 48135,
+      "kinds": {
+        "release_monitor": 13193,
+        "release_whole": 374,
+        "release_recall": 377,
+        "state_action": 34191
+      },
+      "representations": {
+        "D2": 377
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 0,
+      "state_action": 34191,
+      "feasibility_actions": 0,
+      "piece_split": 374,
+      "desired_tier_set": 34191,
+      "mu_set": 0,
+      "channel_silent": false
+    },
+    "base_state_actions": 34191,
+    "why": "the base is the committed arm this treatment is measured against; if its own numbers are not its own, the comparison is unreadable and the check is broken rather than the arm"
+  },
+  "proof1_well_formedness": {
+    "completed": true,
+    "illegal_actions": 0,
+    "decisions_committed": 50843,
+    "decisions_shimmed": 1402698,
+    "decisions_base": 48135,
+    "decisions_control": 48135,
+    "note": "validate_action runs on every epoch inside Policy.__call__; a cell that completes emitted no action outside the registered domain"
+  },
+  "proof2_fairness_digest": {
+    "base": "attentionstore",
+    "base_digest": "b09ce0cc04cd6bec",
+    "base_decisions": 48135,
+    "control_arm": "attentionstore-prefetch-off",
+    "control_digest": "b09ce0cc04cd6bec",
+    "control_identical_to_base": true,
+    "control_identical_including_arm_version": false,
+    "treatment_digest": "ad6def3999fdedd3",
+    "treatment_digest_shimmed": "88f5b6120f06ab8b",
+    "_register": "identity is asserted on the decision rows with `arm_version` removed, because the coordinator writes that label into every row and a new arm necessarily carries a new one. The unstripped comparison is reported beside it so the label difference is visible rather than hidden.",
+    "note": "the control shares the base's digest, so the arm adds nothing outside its one channel; a treatment digest equal to the base's would be an ABSENT LINK"
+  },
+  "proof3_characteristic_decision": {
+    "characteristic": "scheduler_aware_fetch_ahead: a MATERIALIZE for a session the scheduler holds and that has NO pending question. The committed adapter can only fetch for a session already in obs.recall, so this decision kind does not exist in any committed attentionstore cell.",
+    "_register": "prefills_issued is an OBSERVED COUNT of release_piece / release_whole rows in the coordinator's own decision log. prefetch_* below are the arm's ASKS, one per promoted session per epoch, most of which no-op; they are not a decision count and must not be reported as one.",
+    "prefills_issued_committed": 393,
+    "prefills_issued_shimmed": 945,
+    "prefills_issued_base": 374,
+    "prefills_issued_control": 374,
+    "arm_asks_committed": {
+      "prefetch_ahead_emitted": 1934,
+      "prefetch_ahead_unexpressible": 45692,
+      "prefetch_wanted": 47626,
+      "queue_head": 377,
+      "queue_tail": 2289180
+    },
+    "arm_asks_shimmed": {
+      "prefetch_ahead_emitted": 39855,
+      "prefetch_ahead_unexpressible": 0,
+      "prefetch_wanted": 39855,
+      "queue_head": 377,
+      "queue_tail": 2289180
+    },
+    "verdict": "PASS: 393 prefetch-ahead prefills issued where the committed base issues 374"
+  },
+  "proof4_step2b_decision_diff": {
+    "vs": "attentionstore",
+    "differing_setwise": 2708,
+    "differing_positional": 50843,
+    "first_differing_index": 0,
+    "first_differing_row": {
+      "H": null,
+      "arm_version": "kv-prefetch-1.0",
+      "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_monitor",
+      "mu": null,
+      "note": null,
+      "opportunity_ids": [
+        "opp0000000"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 5.1,
+      "traffic_mix": {
+        "monitor": 0,
+        "piece": 0,
+        "recall": 0,
+        "whole": 0
+      }
+    },
+    "differing_setwise_shimmed": 1371757,
+    "differing_positional_shimmed": 1402698,
+    "first_differing_index_shimmed": 0,
+    "first_differing_row_shimmed": {
+      "H": null,
+      "arm_version": "kv-prefetch-1.0",
+      "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_whole",
+      "mu": null,
+      "note": "session=robo000|s000|1011205677616862_start_0.0_end_314.103",
+      "opportunity_ids": [],
+      "piece_tokens": 301,
+      "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 0.1,
+      "traffic_mix": {
+        "monitor": 0,
+        "piece": 0,
+        "recall": 0,
+        "whole": 0
+      }
+    },
+    "verdict": "PASS"
+  },
+  "summary": {
+    "all_four_pass_committed": true,
+    "all_four_pass_shimmed": true,
+    "blocking": "none",
+    "scoreable_today": true
+  },
+  "_provenance": {
+    "git_commit": "55ec283ad48e719a0a1541bb41a06b3bf74d7556",
+    "script": "arms_kvprefetch.py",
+    "model": "none-dry",
+    "timestamp": "2026-11-20T18:14:46.602183",
+    "device": "nvidia_rtx_a6000",
+    "n": 16
+  }
+}

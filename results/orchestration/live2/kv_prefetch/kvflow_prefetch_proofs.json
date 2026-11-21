@@ -1,0 +1,177 @@
+{
+  "version": "kv-prefetch-1.0",
+  "arm": "kvflow-prefetch",
+  "base": "kvflow",
+  "control": "kvflow-prefetch-off",
+  "register": "DRY decision-path runs, stub bridge, no engine. Every number below is a COUNT OF DECISIONS, never of seconds, and nothing here is a measured latency, quality or capacity result.",
+  "cell": {
+    "seed": 4,
+    "n_devices": 16,
+    "run_s": 1200.0,
+    "ratio": "40:40:20",
+    "dry": true,
+    "robot_question_set": "lh_req",
+    "ss_question_set": "ss2"
+  },
+  "check7_positive_control": {
+    "quantity": "committed `kvflow` decision-kind census at this cell",
+    "base_decisions": 13947,
+    "base_census": {
+      "decisions": 13947,
+      "kinds": {
+        "release_monitor": 13193,
+        "state_action": 377,
+        "release_recall": 377
+      },
+      "representations": {
+        "D2": 377
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 0,
+      "state_action": 377,
+      "feasibility_actions": 0,
+      "piece_split": 0,
+      "desired_tier_set": 377,
+      "mu_set": 0,
+      "channel_silent": false
+    },
+    "base_state_actions": 377,
+    "why": "the base is the committed arm this treatment is measured against; if its own numbers are not its own, the comparison is unreadable and the check is broken rather than the arm"
+  },
+  "proof1_well_formedness": {
+    "completed": true,
+    "illegal_actions": 0,
+    "decisions_committed": 13947,
+    "decisions_shimmed": 15135,
+    "decisions_base": 13947,
+    "decisions_control": 13947,
+    "note": "validate_action runs on every epoch inside Policy.__call__; a cell that completes emitted no action outside the registered domain"
+  },
+  "proof2_fairness_digest": {
+    "base": "kvflow",
+    "base_digest": "7fa6b4aa9a9dd9c6",
+    "base_decisions": 13947,
+    "control_arm": "kvflow-prefetch-off",
+    "control_digest": "7fa6b4aa9a9dd9c6",
+    "control_identical_to_base": true,
+    "control_identical_including_arm_version": false,
+    "treatment_digest": "7fa6b4aa9a9dd9c6",
+    "treatment_digest_shimmed": "786e5878b0337f52",
+    "_register": "identity is asserted on the decision rows with `arm_version` removed, because the coordinator writes that label into every row and a new arm necessarily carries a new one. The unstripped comparison is reported beside it so the label difference is visible rather than hidden.",
+    "note": "the control shares the base's digest, so the arm adds nothing outside its one channel; a treatment digest equal to the base's would be an ABSENT LINK"
+  },
+  "proof3_characteristic_decision": {
+    "characteristic": "prefetch_ahead: a MATERIALIZE for a session the cloud holds frames for and that has NO pending question. Every committed emitter of MATERIALIZE names `q.session_id`, so this decision kind does not exist in any committed cell of kvflow.",
+    "_register": "prefills_issued is an OBSERVED COUNT of release_piece / release_whole rows in the coordinator's own decision log. prefetch_* below are the arm's ASKS, one per promoted session per epoch, most of which no-op; they are not a decision count and must not be reported as one.",
+    "prefills_issued_committed": 0,
+    "prefills_issued_shimmed": 87,
+    "prefills_issued_base": 0,
+    "prefills_issued_control": 0,
+    "arm_asks_committed": {
+      "node_set_widened_by": 2289180,
+      "prefetch_ahead_emitted": 0,
+      "prefetch_ahead_unexpressible": 8600,
+      "prefetch_wanted": 8600,
+      "steps_finite": 15865
+    },
+    "arm_asks_shimmed": {
+      "node_set_widened_by": 2289180,
+      "prefetch_ahead_emitted": 5120,
+      "prefetch_ahead_unexpressible": 0,
+      "prefetch_wanted": 5120,
+      "steps_finite": 15865
+    },
+    "verdict": "UNEXPRESSIBLE on the committed harness: the arm wanted 8600 fetches and was refused 8600 times by validate_action, and issued 0 prefills against the base's 0. With PATCH 1 shimmed in it issues 87. The mechanism is present and reaches a decision; the channel it acts through is what is missing. CLAUDE.md Rule 2 'unexpressible', NOT a negative and NOT a finding about this published system."
+  },
+  "proof4_step2b_decision_diff": {
+    "vs": "kvflow",
+    "differing_setwise": 0,
+    "differing_positional": 13947,
+    "first_differing_index": 0,
+    "first_differing_row": {
+      "H": null,
+      "arm_version": "kv-prefetch-1.0",
+      "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_monitor",
+      "mu": null,
+      "note": null,
+      "opportunity_ids": [
+        "opp0000000"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 5.1,
+      "traffic_mix": {
+        "monitor": 0,
+        "piece": 0,
+        "recall": 0,
+        "whole": 0
+      }
+    },
+    "differing_setwise_shimmed": 9698,
+    "differing_positional_shimmed": 15135,
+    "first_differing_index_shimmed": 0,
+    "first_differing_row_shimmed": {
+      "H": null,
+      "arm_version": "kv-prefetch-1.0",
+      "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_monitor",
+      "mu": null,
+      "note": null,
+      "opportunity_ids": [
+        "opp0000000"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 5.1,
+      "traffic_mix": {
+        "monitor": 0,
+        "piece": 0,
+        "recall": 0,
+        "whole": 0
+      }
+    },
+    "verdict": "ABSENT LINK on the committed harness; shimmed diff is 9698"
+  },
+  "summary": {
+    "all_four_pass_committed": false,
+    "all_four_pass_shimmed": true,
+    "blocking": "PATCH 1 of reports/study_engine_actions.md section 3.1 (Observation.live_sessions and validate_action's known_sessions) is NOT applied at origin/main 55ec283, and interface.py and cstate.py are outside this session's file ownership",
+    "scoreable_today": false
+  },
+  "_provenance": {
+    "git_commit": "55ec283ad48e719a0a1541bb41a06b3bf74d7556",
+    "script": "arms_kvprefetch.py",
+    "model": "none-dry",
+    "timestamp": "2026-11-20T18:14:38.445699",
+    "device": "nvidia_rtx_a6000",
+    "n": 16
+  }
+}

@@ -670,3 +670,10 @@ ARM_NAMES = ARM_NAMES + tuple(sorted(BUILDER_ARMS))
 # `warm-all-lru` cannot yet make its own characteristic decision (see reports/study_engine_actions.md).
 from arms_warmall import WARMALL_ARMS                                   # noqa: E402
 ARMS.update(WARMALL_ARMS)
+
+# D155 (5) / StudyKV-PREFETCH: the KV-cache baselines' own published proactive mechanisms, now that
+# PATCH 1 makes warming ahead expressible. Imported LAST for the same reason as the blocks above.
+# Deliberately NOT added to ARM_NAMES: these are new labelled arms under D79, not round-1 arms, and
+# the committed no-prefetch cells must stay the comparison until they are rerun.
+from arms_kvprefetch import KVPREFETCH_ARMS                             # noqa: E402
+ARMS.update(KVPREFETCH_ARMS)

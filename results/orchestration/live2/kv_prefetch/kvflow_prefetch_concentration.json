@@ -1,0 +1,36 @@
+{
+  "version": "kv-prefetch-1.0",
+  "baseline": "kvflow",
+  "measurement": "distinct sessions ever selected by kvflow's prefetch, shimmed condition",
+  "register": "OBSERVED COUNT from a DRY decision-path run, stub bridge, no engine. Counts of planned actions and sessions, never of seconds.",
+  "cell": {
+    "seed": 4,
+    "n_devices": 16,
+    "run_s": 1200.0,
+    "ratio": "40:40:20",
+    "dry": true,
+    "robot_question_set": "lh_req",
+    "ss_question_set": "ss2",
+    "condition": "PATCH 1 shimmed"
+  },
+  "method": "engine_actions.plan_warm_ahead wrapped to record WarmAheadPlan.legal. NOTE: an earlier probe wrapped interface.validate_action instead and returned 0, because arms_warmall's shim wrapper strips the shimmed sessions from action.sessions before calling the next validator in the chain. That probe measured the shim, not the arm, and its zero is recorded here so it cannot be mistaken for a result.",
+  "distinct_sessions_prefetched": 3,
+  "sessions_in_fleet": 374,
+  "mixing_weight": 0.008,
+  "total_legal_prefetch_actions": 5120,
+  "per_session": {
+    "robo002|s001|539288665917819_start_0.0_end_599.993": 3172,
+    "robo003|s001|3703477849945137_start_0.0_end_599.96": 1877,
+    "robo004|s000|1242272464195379_start_0.0_end_599.982": 71
+  },
+  "interpretation": "The three sessions are exactly the three that ask twice at this cell. KVFlowAdapted._steps_to_execution returns inf unless self._gap[sid] exists, and _gap is written only on a session's second appearance in obs.recall, so a single-ask session is never a prefetch candidate. Once a gap exists, max(g - (now - last), 0) decays to 0 and stays there, so those sessions are candidates in every remaining epoch. The lever is all-or-nothing per session and is 'nothing' for 371 of 374.",
+  "consequence": "87 prefills issued is a total effect on a 0.8 percent stratum, not a small uniform effect. CLAUDE.md check 3 requires the stratum and the mixing weight beside the number.",
+  "_provenance": {
+    "git_commit": "55ec283ad48e719a0a1541bb41a06b3bf74d7556",
+    "script": "probe via engine_actions.plan_warm_ahead wrapper, recorded in reports/study_kv_prefetch.md section 4.5",
+    "model": "none-dry",
+    "device": "nvidia_rtx_a6000",
+    "n": 16,
+    "timestamp": "2026-11-20T18:19:19.613129"
+  }
+}
