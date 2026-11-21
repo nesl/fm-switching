@@ -269,7 +269,33 @@ that is a user decision, not one the reader can be left to make. **Not statistic
 either**: the DEV device interval [0.019812, 0.226454] CONTAINS cloud RECENT's 0.107143, so on 28
 questions "RECENT beats the device" is one plausible reading of a wide interval, not a fact.
 
-## H. The measured device latency is 11.7x the committed proxy, and the device cannot meet a 3 s deadline
+## H. RETRACTED IN PART: the measured latencies are the COLD re-send path, an API artifact
+
+**D155 (1) corrects this section and I am marking the retraction at the point of use rather than
+quietly editing the numbers.** I reported the StudyORIN-REC part 1 latencies as the device baseline
+and drew three conclusions from them. They are the **COLD RE-SEND path**, which D61 (b) already
+classifies as an API ARTIFACT and not the device baseline. **Consequences (1) and (2) below do not
+stand**, nothing was wired anywhere, and the cascade arms keep their `proxy-0.567` label until the
+Orin's WARM per-question latencies land.
+
+What survives is narrower. Consequence (3) was a real gap and the user has since amended D152 (1):
+the robot headline is now correct answers delivered BY THE DEADLINE from either source, with
+correct-at-any-time beside it. **Re-scored offline (section 23 of `study_frozen_test.md`, commit
+`8e1dbbb`): the two columns are equal integer for integer on all 89 questions, all five arms, all
+four cells, and no ranking changes anywhere.** Classified under Rule 2 as INCONCLUSIVE, sub-case
+**unexercised**: the rule is live and reachable (Step 2b moves 9 of 20 decisions with an injected
+9.999 s device latency, and 0 of 20 on the committed source), and nothing in these runs reaches it.
+The reason is headroom: the scorer's device latency is D87's in-process 0.146 to 0.225 s against a
+5 s deadline, **22.2x**, so no device answer is late in any committed cell. The honest sentence is
+"the deadline rule makes no difference AT 0.146 to 0.225 s", and that clause must travel with it.
+Where a ranking change would come from once a warm latency lands: b7 and mooncake lean on the
+device fallback on roughly half their questions against hybrid-F's 4 of 89, so a device latency
+above the deadline would hit the baselines far harder than hybrid-F.
+
+The superseded reading follows, kept so the retraction is auditable.
+
+### H.0 SUPERSEDED: what I originally wrote
+
 
 | quantity | measured (n = 97) | committed proxy |
 |---|---|---|
