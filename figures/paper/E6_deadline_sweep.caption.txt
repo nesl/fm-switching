@@ -1,0 +1,12 @@
+E6_deadline_sweep
+
+CLAIM:
+The joint policy serves the most robot opportunities within deadline at every robot deadline from 2.5 s (46%) to 5 s (96%), and leads the baselines across the whole sweep. SS has a fixed 2 s deadline and does not vary here. Because decisions were made under a 5 s bound and re-scored at the tighter deadlines, the tight-deadline points are a lower bound on what an arm that planned for that deadline could achieve.
+
+SOURCES (committed):
+  results/orchestration/live2/frozen_test/deadline_sweep.json  @ 5271c85
+
+STATUS: PILOT. Drawn from the EP-G pilot cells; to be re-run on the repeat-trace cells. Numbers are provisional.
+
+NOTES:
+Committed deadline_sweep.json, 16 devices. Lines are robot_all_on_time with the committed robot_ci95 as the shaded band. Arms shown are the four-seed-supported headline arms (hybrid-F-lhreq, hybrid-F6, eco-llm, mooncake, b7); single-seed arms (always-cloud-fcfs, edf, llf) are omitted for support. CAVEAT from the file: RE-SCORED, decisions made under 5 s, no arm knew of a shorter deadline, so an arm that fails at 3 s here might not fail if it had planned for 3 s; the ranking is stable across the sweep (D155). Arm colours and order from the shared registry. PILOT.
