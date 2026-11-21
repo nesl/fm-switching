@@ -8,37 +8,40 @@
   },
   "P1_step2b_cascade": {
     "confidence-cascade": {
-      "digest_measured": "6aeabb7680418a87",
+      "digest_measured": "ff1c213aea4b52f8",
       "digest_proxy": "6aeabb7680418a87",
-      "rows_measured": 7733,
+      "rows_measured": 7739,
       "rows_proxy": 7733,
-      "decisions_moved": false
+      "decisions_moved": true
     },
     "cascade-routing": {
-      "digest_measured": "86e04963de29397e",
+      "digest_measured": "2689d0a61f85d1ed",
       "digest_proxy": "86e04963de29397e",
-      "rows_measured": 7733,
+      "rows_measured": 7739,
       "rows_proxy": 7733,
-      "decisions_moved": false
+      "decisions_moved": true
     },
     "r3-streaming": {
-      "digest_measured": "071bb08589b71157",
+      "digest_measured": "16afe2a7574ceb85",
       "digest_proxy": "071bb08589b71157",
-      "rows_measured": 1933,
+      "rows_measured": 1934,
       "rows_proxy": 1933,
-      "decisions_moved": false
+      "decisions_moved": true
     },
     "streamscout": {
-      "digest_measured": "db98f54602b5db96",
+      "digest_measured": "517913621562f75a",
       "digest_proxy": "db98f54602b5db96",
-      "rows_measured": 7733,
+      "rows_measured": 7739,
       "rows_proxy": 7733,
-      "decisions_moved": false
+      "decisions_moved": true
     },
     "thinking-qwenvl": {
       "error": "KeyError: \"unknown arm 'thinking-qwenvl'; known: ['always-cloud-fcfs', 'attentionstore', 'attentionstore-prefetch', 'attentionstor"
     }
   },
+  "P1_unregistered_arms": [
+    "thinking-qwenvl"
+  ],
   "P2_note": "the dry harness returns rows, not the coordinator, so the fallback COUNTER is read in P3 on a constructed coordinator instead of being inferred here",
   "P3_counters": {
     "wait_known_question": 0.2766,
@@ -46,7 +49,8 @@
     "wait_unknown_question": 0.567,
     "proxy": 0.567,
     "device_wait_measured": 1,
-    "device_wait_fallback_proxy": 1
+    "device_wait_measured_robot": 1,
+    "no_measured_value_recall_kind": 1
   },
   "P4_non_cascade_identical": {
     "edf": {
@@ -96,10 +100,10 @@
     }
   },
   "checks": {
-    "P1_step2b_cascade": false,
+    "P1_step2b_cascade": true,
     "P3_counters": true,
     "P4_non_cascade_identical": true
   },
-  "ALL_PASS": false,
-  "_elapsed_s": 763.2
+  "ALL_PASS": true,
+  "_elapsed_s": 761.6
 }

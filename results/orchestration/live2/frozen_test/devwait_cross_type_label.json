@@ -1,0 +1,51 @@
+{
+  "label": "proxy-0.567-cross-type",
+  "_what_it_means": "the cell's device-waiting arm used DEVICE_ANSWER_CHARGE_S = 0.567 s, a ROBOT RECALL latency (StudyD8 arm A), as its live wait for DASHCAM instants and SINGLE-SHOT questions as well as robot questions. Both live sites are decision timing (coordinator.py, the served_at charge and the earliest-act gate), so the arm acted on a schedule set by a number measured on a different task type.",
+  "_scale": "for confidence-cascade on a 300 s 16-device cell, 14,118 of 14,201 device-wait lookups were dashcam instants and 79 were single-shot questions, against 4 robot questions. So the cross-type proxy governed over 99.9 percent of the wait, not a corner case.",
+  "_register": "PRE-EXISTING in the committed code; not introduced by the measured-wait work, and it is precisely why the first Step 2b comparison showed zero movement. Raised rather than silently patched, because choosing a dashcam device wait is a measurement, not an implementation detail.",
+  "_resolution": "measured tables now exist and are wired (results/device/study_devlat/orin_device_latency_tables.json): dashcam EP-G warm-append first token by episode position (0.2349 s at 1 frame to 0.3169 s at 21), and single-shot completion per question (1,042 questions). The fallback counter is 0 on all four arms, so cells run from here carry no proxy.",
+  "affected_committed_cells": [
+    {
+      "cell": "cascade-routing_n16_s4_1200s_h27_3t_L3_epg",
+      "commit": "dd459891",
+      "label": "proxy-0.567-cross-type"
+    },
+    {
+      "cell": "cascade-routing_n16_s5_1200s_h27_3t_L3_epg",
+      "commit": "05d190ea",
+      "label": "proxy-0.567-cross-type"
+    },
+    {
+      "cell": "r3-streaming_n16_s4_1200s_h27_3t_L3_epg",
+      "commit": "802b1d76",
+      "label": "proxy-0.567-cross-type"
+    },
+    {
+      "cell": "r3-streaming_n16_s5_1200s_h27_3t_L3_epg",
+      "commit": "20413088",
+      "label": "proxy-0.567-cross-type"
+    }
+  ],
+  "affected_pilot_dirs": [
+    "pilot/runs4/confidence-cascade_n10_s0_600s_h27_published",
+    "pilot/runs4/confidence-cascade_n16_s0_600s_h27_published",
+    "pilot/runs4/confidence-cascade_n8_s0_600s_h27_published",
+    "pilot/runs4/confidence-cascade_n8_s0_600s_h27_published_validity120",
+    "pilot/runs5/cascade-routing_n8_s0_600s_h27_validity120",
+    "pilot/runs5/covstream_n10_s0_600s_h27",
+    "pilot/runs5/covstream_n12_s0_600s_h27",
+    "pilot/runs5/covstream_n14_s0_600s_h27",
+    "pilot/runs5/covstream_n8_s0_600s_h27",
+    "pilot/runs5/covstream_n8_s0_600s_h27_validity120",
+    "pilot/runs5/querystream-proactive_n8_s0_600s_h27_validity120",
+    "pilot/runs5/simplestream_n8_s0_600s_h27_validity120"
+  ],
+  "none_feeds_a_headline": true,
+  "headline_rule": "no cell in this list may feed a headline comparison. They remain valid only as pre-measured-wait sensitivity, and any table citing them must carry the proxy-0.567-cross-type label.",
+  "arms_with_no_committed_cells": [
+    "confidence-cascade",
+    "streamscout",
+    "thinking-qwenvl"
+  ],
+  "thinking_qwenvl_note": "not a registered live2 arm at all: arms.make_arm('thinking-qwenvl') raises 'unknown arm'. It appears in the scorer's cascade list but was never ported, so it can neither be run nor released. Flagged rather than left to surface later."
+}

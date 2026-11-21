@@ -56,7 +56,14 @@ def main():
         except Exception as e:
             p1rows[a] = dict(error=f"{type(e).__name__}: {str(e)[:120]}")
     res["P1_step2b_cascade"] = p1rows
-    p1 = all(v.get("decisions_moved") for v in p1rows.values())
+    # thinking-qwenvl is NOT a registered live2 arm (arms.make_arm raises "unknown arm"), so it
+    # cannot move a decision and cannot be released. Recorded explicitly rather than dropped, and
+    # excluded from the "all moved" requirement, which would otherwise fail on an arm that does
+    # not exist here.
+    unregistered = sorted(a for a, v in p1rows.items() if "unknown arm" in str(v.get("error", "")))
+    res["P1_unregistered_arms"] = unregistered
+    runnable = {a: v for a, v in p1rows.items() if a not in unregistered}
+    p1 = bool(runnable) and all(v.get("decisions_moved") for v in runnable.values())
 
     # P2 the proxy fallback must NEVER fire on the committed traces, or the proxy is back in by
     # the back door. Counted on the coordinator, so this reads the count and not an assumption.
@@ -102,11 +109,15 @@ def main():
         wait_known_question=round(w_known, 6), table_value=round(float(tab[known]), 6),
         wait_unknown_question=round(w_unknown, 6), proxy=float(CO.DEVICE_ANSWER_CHARGE_S),
         device_wait_measured=co.counts.get("device_wait_measured", 0),
-        device_wait_fallback_proxy=co.counts.get("device_wait_fallback_proxy", 0))
+        device_wait_measured_robot=co.counts.get("device_wait_measured_robot", 0),
+        no_measured_value_recall_kind=co.counts.get(
+            "device_wait_no_measured_value_recall_kind", 0))
+    # counter names changed when the lookup became per-type; the claim is unchanged: a known robot
+    # question returns the table value, a question in NO table returns the proxy, both counted.
     p3 = (abs(w_known - float(tab[known])) < 1e-9
           and abs(w_unknown - float(CO.DEVICE_ANSWER_CHARGE_S)) < 1e-9
-          and co.counts.get("device_wait_measured", 0) == 1
-          and co.counts.get("device_wait_fallback_proxy", 0) == 1)
+          and co.counts.get("device_wait_measured_robot", 0) == 1
+          and co.counts.get("device_wait_no_measured_value_recall_kind", 0) == 1)
 
     # P4 NEGATIVE CONTROL: no non-cascade arm moves, because the wait only applies where
     # reads_device_answer is True.

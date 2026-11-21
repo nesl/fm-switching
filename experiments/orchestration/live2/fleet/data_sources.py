@@ -282,6 +282,35 @@ def orin_rec_warm_rows() -> Dict[str, Dict[str, float]]:
     return _ORIN_REC_WARM
 
 
+DEVLAT_TABLES = ROOT / "results/device/study_devlat/orin_device_latency_tables.json"
+_DEVLAT = None
+
+
+def _devlat() -> Dict[str, Any]:
+    global _DEVLAT
+    if _DEVLAT is None:
+        import json as _j
+        _DEVLAT = _j.loads(DEVLAT_TABLES.read_text())
+    return _DEVLAT
+
+
+def dashcam_append_ttft_s() -> Dict[int, float]:
+    """Measured Orin EP-G WARM-APPEND first-token latency by episode frame position.
+
+    The deployment mode under D148 and D153: each frame is prefilled onto the warm episode context,
+    so a query at position n pays one appended frame, not a re-send. First token, because D146 (1)
+    lets a dashcam Yes/No count there. The committed artefact also carries the EPISODE-START curve
+    (a full re-send, 1.88 s at 9 frames to 3.13 s at 21) which is about 10x more expensive and is
+    NOT used here, because it is not the deployment path.
+    """
+    return {int(k): float(v) for k, v in _devlat()["dashcam_append_ttft_s"].items()}
+
+
+def single_shot_total_s() -> Dict[str, float]:
+    """Measured Orin single-shot COMPLETION latency per question (D146 (1) counts at completion)."""
+    return {str(k): float(v) for k, v in _devlat()["single_shot_total_s"].items()}
+
+
 def device_recall_warm_latency_s() -> Dict[str, float]:
     """{question_id: measured WARM completion seconds}, the scorer's default device latency."""
     return {q: r["completion_s"] for q, r in orin_rec_warm_rows().items()}

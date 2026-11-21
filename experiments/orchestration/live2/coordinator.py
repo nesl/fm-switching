@@ -76,6 +76,10 @@ DEVICE_WAIT_MEASURED = True                  # set False to reproduce a committe
 _DEV_WAIT_TABLE = None
 
 
+_DEV_WAIT_SS = None
+_DEV_WAIT_DASH = None
+
+
 def _device_wait_table():
     global _DEV_WAIT_TABLE
     if _DEV_WAIT_TABLE is None:
@@ -85,6 +89,28 @@ def _device_wait_table():
         except Exception:
             _DEV_WAIT_TABLE = {}
     return _DEV_WAIT_TABLE
+
+
+def _device_wait_single_shot():
+    global _DEV_WAIT_SS
+    if _DEV_WAIT_SS is None:
+        try:
+            import data_sources as _DS
+            _DEV_WAIT_SS = dict(_DS.single_shot_total_s())
+        except Exception:
+            _DEV_WAIT_SS = {}
+    return _DEV_WAIT_SS
+
+
+def _device_wait_dashcam():
+    global _DEV_WAIT_DASH
+    if _DEV_WAIT_DASH is None:
+        try:
+            import data_sources as _DS
+            _DEV_WAIT_DASH = dict(_DS.dashcam_append_ttft_s())
+        except Exception:
+            _DEV_WAIT_DASH = {}
+    return _DEV_WAIT_DASH
 # D99 (1): ONE DECISION PERIOD FOR EVERY ARM, 100 ms, with the events of each period batched.
 # It replaces the 50 ms event grid AND the per-arm H tick: H is now the rollout horizon only
 # (spec 6.1, 9 as amended). Every arm therefore decides at the same rate, which is what makes
@@ -736,21 +762,32 @@ class Live2Coordinator:
         # nothing else). So the measured value is used exactly where it was measured, and every
         # other path is counted BY TYPE rather than lumped into one "fallback", because the three
         # cases need different remedies and only one of them is a missing table entry.
+        if getattr(o, "kind", None) == "monitor":
+            # DASHCAM: measured Orin EP-G warm-append first-token latency at this episode position
+            # (D148 / D153 deployment mode). Clamped to the table's range, which is the 21-frame
+            # EP-G cap, so a position past the cap is the cap rather than a silent proxy.
+            tab = _device_wait_dashcam()
+            if tab:
+                n = len(getattr(o, "episode_frame_refs", None) or ()) or 1
+                n = min(max(int(n), min(tab)), max(tab))
+                self.counts["device_wait_measured"] += 1
+                self.counts["device_wait_measured_dashcam"] += 1
+                return float(tab[n])
+            self.counts["device_wait_no_measured_value_monitor"] += 1
+            return float(DEVICE_ANSWER_CHARGE_S)
         qid = getattr(o, "question_id", None)
         if qid is not None:
-            v = _device_wait_table().get(str(qid))
+            v = _device_wait_table().get(str(qid))        # ROBOT recall, completion (ORIN-REC WARM)
             if v is not None:
                 self.counts["device_wait_measured"] += 1
+                self.counts["device_wait_measured_robot"] += 1
                 return float(v)
-            # a recall-kind opportunity whose id is not in the robot table: on this workload these
-            # are the ASSISTANCE questions, which share the recall opportunity kind
+            v = _device_wait_single_shot().get(str(qid))  # SINGLE-SHOT, completion (StudySS2 Orin)
+            if v is not None:
+                self.counts["device_wait_measured"] += 1
+                self.counts["device_wait_measured_single_shot"] += 1
+                return float(v)
             self.counts["device_wait_no_measured_value_recall_kind"] += 1
-            return float(DEVICE_ANSWER_CHARGE_S)
-        if getattr(o, "kind", None) == "monitor":
-            # a dashcam instant has no question_id and no measured device latency at all. The
-            # committed code charged it the 0.567 s ROBOT RECALL proxy, which is a category error
-            # it inherited, not one introduced here. Counted so it cannot be mistaken for measured.
-            self.counts["device_wait_no_measured_value_monitor"] += 1
             return float(DEVICE_ANSWER_CHARGE_S)
         self.counts["device_wait_no_measured_value_other"] += 1
         return float(DEVICE_ANSWER_CHARGE_S)
