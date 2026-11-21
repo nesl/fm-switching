@@ -1,0 +1,116 @@
+{
+ "label": "StudySS2 device-confidence re-record (logprobs ON) and RefSpatial rescore: controls and provenance",
+ "user_ruling": "2026-11-20: re-record the StudySS2 single-shot DEVICE answers with logprobs on so the five cascade arms get a real answer-confidence instead of None, and rescore RefSpatial with the fixed point parser. Greedy decoding unchanged, so the answers must reproduce the committed run and that equality is the control.",
+ "server_config": {
+  "stack": "Jetson AGX Orin, vLLM 0.20.0, orin3_serve.sh verbatim: released image processor, NO --mm-processor-kwargs, --limit-mm-per-prompt image:9, --enforce-eager, --max-num-seqs 1, --enable-prefix-caching, --max-model-len 32768, --seed 0.",
+  "source_of_truth": "refspatial_compare.json ttft_condition.device_stack ('vLLM 0.20.0+cu126, released image processor, no --mm-processor-kwargs'). This is NOT the ACC2/ORIN-REC server (which forces shortest_edge 4096, cap 640); the SS2 device stack uses released mm defaults.",
+  "only_addition": "FLASHINFER_DISABLE_VERSION_CHECK=1 env (cubin version-mismatch safety, inert to the model/image-processor config, so it cannot affect the answer-equality control).",
+  "cached_tokens": "vLLM 0.20.0 does not populate cached_tokens on the device; absent throughout (as refspatial_compare.json records).",
+  "sizing_param_note": "The committed StudySS2 row records max_model_len 8192 and gpu_mem_util 0.22; this run used orin3_serve.sh defaults max_model_len 32768 and gpu_mem_util 0.4. These are KV-cache sizing parameters only: every SS2 prompt is <=1797 tokens (fits both) and neither changes per-prompt logits. The answer-equality control (99.81% exact, below) empirically confirms the configs are equivalent for these items; the image-processor config (released defaults, no mm-kwargs, FLASH_ATTN), which governs visual-token identity, is matched exactly."
+ },
+ "producer_change": {
+  "file": "experiments/casestudy/ss2_run.py",
+  "change": "Added a --logprobs flag that wires the pre-existing call(logprobs=...) path into main() and stores the per-token top-20 as rows[].logprobs. The kit (commit 5337d50) shipped the call() plumbing and the downstream consumers (ss2_device_confidence.py expects *_device_logprobs.json) but not the producer wiring; this completes it. Default (no --logprobs) output is byte-unchanged, so the committed path is untouched. Implementation fix, reported here."
+ },
+ "staging_control": {
+  "rule": "ss2_build_manifests.py re-extracts images from the re-staged parquet and regenerates the manifests; the regenerated refspatial_manifest.jsonl, realworldqa_manifest.jsonl, ss2_manifest_meta.json and both smoke sets are BYTE-IDENTICAL to the committed ones (git diff empty).",
+  "result": "PASS. Byte-identity reproduces every image_sha16, qid and ordering from the parquet source. (On-disk PNG sha differs from image_sha16 by construction: image_sha16 is the sha of the raw parquet bytes, the PNG is a PIL re-encode; the answer-equality control is the guard on pixel identity.)",
+  "images": {
+   "refspatial_png": 554,
+   "realworldqa_png": 749,
+   "data_root": "/dev/shm/ss2_data"
+  }
+ },
+ "smoke": "5-request realworldqa logprobs smoke: 5/5 scored, 0 errors, per-token top-20 logprobs populated on every row, both mcq and free_form subsets exercised, and all 5 answers matched the committed run.",
+ "equality_control": {
+  "verdict": "PASS-IN-INTENT, PROVISIONAL",
+  "exact": "1040 of 1042 re-recorded answers are byte-identical to committed (realworldqa 764/765, refspatial 276/277).",
+  "diffs": [
+   {
+    "qid": "realworldqa/0004",
+    "new": "C",
+    "committed": "A",
+    "gold": "C",
+    "decision_token": "C logprob -0.6035 (p 0.547) vs A -0.8535 (p 0.426), margin ~0.25 nat",
+    "diagnosis": "a ~50/50 MCQ near-tie; the committed run and my own 5-request smoke both emitted A, the full run emitted C. Same input, two answers: prefix-cache cold/warm numerical nondeterminism (the grey-control / D81 one-logprob-quantum tip). Here the flip happened to land on the CORRECT letter (em 0 -> 1)."
+   },
+   {
+    "qid": "refspatial/placement/6",
+    "new_point": [
+     372,
+     500
+    ],
+    "committed_point": [
+     377,
+     500
+    ],
+    "diagnosis": "one coordinate digit differs by 5 px; SCORE UNCHANGED (point_accuracy 1.0 both, both points inside the GT mask). A single-token near-tie, score-invariant."
+   }
+  ],
+  "classification": "Both diffs are diagnosed to the deployment's declared prefix-caching cold/warm numerical nondeterminism, not a server-config or method error: 99.81% exact reproduction, one diff score-invariant and one a 0.25-nat MCQ near-tie. Caching is a declared methodological parameter of this run.",
+  "accuracy_reproduction": {
+   "realworldqa": {
+    "re_record": 0.6562,
+    "committed": 0.6549,
+    "note": "+1 of 765, the 0004 flip to the correct letter"
+   },
+   "refspatial": {
+    "re_record": 0.2509,
+    "committed": 0.2509,
+    "note": "identical; the one coordinate flip was score-invariant"
+   }
+  }
+ },
+ "confidence_table": {
+  "file": "results/casestudy/study_ss2/ss2_device_confidence.json",
+  "n": 1042,
+  "skipped": 0,
+  "mcq_chosen_letter_mass": {
+   "n": 438,
+   "median": 0.985628,
+   "range": [
+    0.333333,
+    1.0
+   ],
+   "rule": "committed study_f_common.letter_probs, mass on the emitted letter (same quantity as StudyE7 robot confidence)"
+  },
+  "geometric_mean_token_prob": {
+   "n": 604,
+   "median": 0.848303,
+   "range": [
+    0.574869,
+    1.0
+   ],
+   "rule": "exp(mean token logprob); refspatial points carry signal_strength=weak"
+  }
+ },
+ "refspatial_rescore": {
+  "file": "results/casestudy/study_ss2/refspatial_rescore.json",
+  "control": "device_rows_moved = 0 (required 0) -> PASS. The fixed point parser is a no-op on the device (the 4B never emitted the {\"x\",\"y\"} dict form); device point-accuracy 0.2509 -> 0.2509 unchanged.",
+  "cloud_rows_moved": 4,
+  "cloud": {
+   "old": 0.3714,
+   "new": 0.3787
+  },
+  "delta_cloud_minus_device": {
+   "old": 0.1205,
+   "new": 0.1278
+  },
+  "masks_hashed": 277
+ },
+ "wiring_proof": {
+  "ran": "device_conf_wiring_proof.py 6 (dry cells, no GPU/server)",
+  "pass": "The confidence field reaches all 5 reader arms (confidence-cascade, cascade-routing, streamscout, r3-streaming, thinking-qwenvl-atdm); the characteristic decision FIRES non-zero (decline-to-escalate-on-high-confidence: cascade-routing 20, r3-streaming 19, confidence-cascade 13; escalate-on-low: streamscout 20, thinking-qwenvl-atdm 17, confidence-cascade 7). Control b7-edf-feasibility byte-identical (digest == prefix_digest), control_unchanged=true.",
+  "coverage_line": "recall-decision confidence coverage UNCHANGED at 20 of 377 present (357 absent). Per the proof's own note (lines 112-115), of the 377 recall decisions only 20 are robot questions (which carry a committed answer probability); the other 357 are SINGLE-SHOT, which previously had no answer probability at all.",
+  "what_this_step_changed": "This re-record PRODUCES the single-shot answer probabilities that were missing (ss2_device_confidence.json, 1042 questions). It does NOT by itself move the 20/377 line, because device_conf_wiring_proof reads q.device_answer_confidence off the harness query objects and the harness is NOT yet wired to inject ss2_device_confidence.json into the 357 single-shot recall queries.",
+  "flag_for_user": "Injecting the new single-shot confidences into the harness query objects is a SEPARATE wiring change that alters what the cascade arms observe and therefore their decisions, i.e. a methodological change. Per CLAUDE.md it must be flagged and discussed before applying; it was NOT applied overnight. Once wired, re-running this proof should lift the 357 single-shot queries from absent to present."
+ },
+ "_provenance": {
+  "git_commit": "c31ea43",
+  "script": "ss2_run.py + ss2_device_confidence.py + ss2_refspatial_rescore.py",
+  "device": "nvidia_jetson_orin",
+  "model": "qwen3vl4b",
+  "n": 1042,
+  "timestamp": "2026-11-21T06:13:51.360878+00:00"
+ }
+}

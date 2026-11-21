@@ -128,6 +128,10 @@ def main():
     ap.add_argument("--retries", type=int, default=4)
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--dump", action="store_true", help="store parsed points + mask dims per item")
+    ap.add_argument("--logprobs", action="store_true",
+                    help="record per-token top-20 logprobs for the device-confidence re-record "
+                         "(user ruling 2026-11-20); greedy decoding is unchanged, so answers must "
+                         "still reproduce the committed run and that equality is the control")
     a = ap.parse_args()
 
     rows = load_rows(a.manifest, a.ids)
@@ -140,10 +144,15 @@ def main():
         prompt = build_prompt(a.dataset, row)
         data_url = K.jpeg_data_url(str(DATA / row["image"]))
         text = None
+        lp = None
         for att in range(a.retries + 1):
             try:
-                text, ttft, total, pt, ct = call(a.endpoint, a.model, prompt, data_url,
-                                                 row["gen_max_new_tokens"], row["qid"])
+                _r = call(a.endpoint, a.model, prompt, data_url,
+                          row["gen_max_new_tokens"], row["qid"], logprobs=a.logprobs)
+                if a.logprobs:
+                    text, ttft, total, pt, ct, lp = _r
+                else:
+                    text, ttft, total, pt, ct = _r
                 break
             except Exception as e:
                 if att >= a.retries:
@@ -160,6 +169,8 @@ def main():
                    references=row.get("references"), object=row.get("object"),
                    ttft_s=ttft, total_s=total, prompt_tokens=pt, completion_tokens=ct,
                    score=score_row(a.dataset, row, answer, dump=a.dump))
+        if a.logprobs:
+            rec["logprobs"] = lp
         out_rows.append(rec)
         if a.dump:
             print("  [%s] %s\n    -> %r\n    score=%s" %
