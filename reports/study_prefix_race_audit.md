@@ -150,3 +150,59 @@ the stamp, and a rerun would not tell us what the original run was.
 - The warmth-bias direction (downward) is **MEASURED**, on one arm/workload/seed pair across
   the fix: warm robot deliveries 1 then 6. The MAGNITUDE on any other cell is **not**
   measured and is not assumed here.
+
+---
+
+## CORRECTION 07:40: pre-fix is not race-contaminated, and I withdrew a word I should have kept
+
+Everything above dates cells correctly and then draws the wrong inference from the date. The race
+sent piece bytes before confirmation and **its signature is an HTTP 400**, which is how the fix was
+proved (4,244 to 0 on one arm/workload/seed). So the question "was this cell bitten" is answered by
+the 400 count in the cell's own request log, not by whether it predates `2b8714c`. An arm that
+issues no pieces cannot be bitten at all. The H100's remark that `llf` issues no pieces is what
+prompted the check.
+
+Measured over all eight cells I listed:
+
+| cell | requests | HTTP 400 | warm % | verdict |
+|---|---|---|---|---|
+| `b7-edf-feasibility` 16 4 `_L3_epg` | 12,126 | **0** | 91.10 | race-clean |
+| `eco-llm` 16 4 `_L3_epg` | 12,134 | 4 | 91.00 | race-clean, 0.03 percent |
+| `warm-all-lru-off` 16 4 `_L3_epg` | 12,126 | **0** | 91.10 | race-clean |
+| `warm-all-lru-reactive` 16 4 `_L3_epg` | 12,523 | **0** | 91.32 | race-clean |
+| `warm-all-lru-reactive` 16 4 `_L3_cal1f` | 13,954 | **0** | 2.82 | race-clean |
+| `hybrid-F-lhreq` 16 4 (base) | 12,825 | **0** | **0.00** | race-clean |
+| `hybrid-F6-lhreq` 16 4 (base) | 12,616 | **0** | **0.00** | race-clean |
+| `warm-all-lru` 16 4 `_L3_cal1f` | 14,360 | **226** | 3.24 | **CONTAMINATED** |
+
+**Seven of the eight need no GPU time.** `eco-llm`'s 4 of 12,134 moved nothing: 91.00 percent warm
+against 91.10 for the two zero-400 cells on the identical workload. `RERUN_CELLS` is now the single
+contaminated still-used cell, `warm-all-lru 16 4 _L3_cal1f_rf`, which is a **fit** cell of the
+D156 (4) gate. Its co-fit cell is clean, so that one cell is the entire contamination in that fit
+set. About 140 GPU-minutes freed.
+
+### Section 2 above is wrong and "structural" is restored
+
+Both hybrid cells measure **0 non-200, 0 HTTP 400 and 0 warm rows**. The race never fired in them,
+so their zero warm is a property of the arms and **my 07:20 finding stands exactly as first
+written**. The withdrawal in section 2 was my own over-correction, produced by inferring
+contamination from a date rather than measuring it. Both the error and its reversal are left here
+rather than edited away, because the failure mode is the interesting part: within ninety minutes I
+over-claimed a word, withdrew it on an unmeasured inference, and then restored it on measurement.
+The lesson is the one the knee retraction taught, in the other direction: **check before
+publishing, including before publishing a retraction.**
+
+The H100 separately notes it never applied "structural" to the gate's hybrid cells at all; its one
+use of the word is `noc3`'s WARM 0 at seeds 4 and 5 on EP-G, which ran post-fix with 0 pieces. That
+stands independently.
+
+### Census and the two provenance gaps, resolved by the H100
+
+The census is **83 real cells, not 84.** `llf_n16_s6_1200s_h27_3t` (no suffix) is **not a run**: it
+is the attempt that died at `import hybrid` before writing `run_meta`, and the real cell is the
+`_rerun` directory at `e2c8933`. `edf_n16_s6`'s `git_commit` **42e96ae** exists on the H100 as an
+orphaned local "logs" commit from 2026-11-20 16:14, left unreachable because the driver's next
+`pull --rebase` rewrote it before pushing. So that cell **is** pre-fix, and it is a 5 s dashcam-1f
+D151 calibration cell of an arm that issues no pieces, so the race could not touch it either way.
+Neither needs a rerun. The orphan is not being pushed: there is no branch for it and nothing reads
+it.
