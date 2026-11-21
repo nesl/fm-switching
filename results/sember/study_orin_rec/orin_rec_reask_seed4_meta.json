@@ -1,0 +1,34 @@
+{
+ "label": "StudyORIN-REC REASK seed 4",
+ "study": "StudyORIN-REC-REASK",
+ "seed": 4,
+ "model": "qwen3vl4b",
+ "n_reasks": 112,
+ "n_distinct_questions": 20,
+ "parity": {
+  "n": 20,
+  "reproduces_part1": 19,
+  "reproduces_warm": 20,
+  "note": "window ends at ask_time_session (episode clock); mismatch beyond prefix-cache near-tie drift (D81) is a real disagreement"
+ },
+ "clock": "episode (reask_time_session / ask_time_session); D2 frame store is episode-indexed, verified question_time==ask_time_session",
+ "recent_window": "committed 60-frame last-120s filter over the D2 frame list, ending at the episode time",
+ "warm_path": "prefill frames untimed (max_tokens 1, same tag+salt), then time the question; logprobs on the timed question",
+ "errors": 0,
+ "over_context": 0,
+ "started": "2026-11-21T08:33:26.393445",
+ "finished": "2026-11-21T08:41:11.404688",
+ "_provenance": {
+  "git_commit": "cd49d2e50ff3f447b14aaf334135a20184d4ea76",
+  "script": "study_orin_rec_reask.py",
+  "model": "qwen3vl4b",
+  "timestamp": "2026-11-21T08:41:11.407606",
+  "device": "nvidia_jetson_orin",
+  "n": 112,
+  "args": {
+   "seed": 4,
+   "model": "qwen3vl4b",
+   "limit": 0
+  }
+ }
+}
