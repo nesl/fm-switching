@@ -3,6 +3,69 @@
 **Status: IN PROGRESS. Last updated 2026-11-19 19:45.** Rules: D116 (no methodological change overnight; never seeds 1
 to 3 or HOLDOUT; never INVALID results; GPU 2 exclusive; no em dashes). PROVISIONAL decisions are marked.
 
+## 06:00 SUMMARY (2026-11-21, H100 overnight; D156 (5) form)
+
+**v5-rules table.** 3 s robot deadline, 16 devices, EP-G dashcam episodes + per-frame robot upload (`upload-pf`), race-fixed
+path (flash 2b8714c), D155 headline = correct answers delivered BY THE DEADLINE. Dashcam is PROVISIONAL until the Orin's EP-G
+device re-record. Excluded dashcam instants (D153 floor 3, identical for every arm at a seed): s4 1,429 of 13,193 (10.8 %),
+s5 1,431 of 13,200 (10.8 %). `warm` = robot questions whose request hit a cached prefix (ENGINE-observed cache_path), over
+robot questions released to the cloud. Errors = non-200 requests from request.jsonl.
+
+| arm | seed | correct by deadline | device-only row | robot on time | SS within 2 s | dashcam all meet | errors | warm / released |
+|---|---|---|---|---|---|---|---|---|
+| **v5-rules** | 4 | **0.45** | 0.30 | 9/20 | **188/357** | **no** | 0 | 12/20 |
+| hybrid-F-lhreq-noc3 (v5 base) | 4 | 0.45 | 0.30 | 8/20 | 351/357 | yes | 1 | 0/12 |
+| b7-edf-feasibility | 4 | 0.40 | 0.30 | 7/20 | 330/357 | yes | 0 | 0/12 |
+| mooncake | 4 | 0.40 | 0.30 | 7/20 | 330/357 | yes | 0 | 0/12 |
+| eco-llm | 4 | 0.30 | 0.30 | 15/20 | 333/357 | yes | 5 | 0/20 |
+| edf | 4 | 0.30 | 0.30 | 2/20 | 122/357 | yes | 0 | 3/4 |
+| llf | 4 | 0.30 | 0.30 | 1/20 | 188/357 | yes | 0 | 1/1 |
+| warm-all-lru (`_rf`) | 4 | 0.30 | 0.30 | 1/20 | 30/357 | no | 67 | 6/13 |
+| **v5-rules** | 5 | **0.40** | 0.32 | 6/25 | **195/356** | **no** | 1 | 13/24 |
+| hybrid-F-lhreq-noc3 (v5 base) | 5 | 0.36 | 0.32 | 8/25 | 353/356 | yes | 0 | 0/12 |
+| b7-edf-feasibility | 5 | 0.36 | 0.32 | 2/25 | 326/356 | yes | 0 | 0/12 |
+| mooncake | 5 | 0.36 | 0.32 | 2/25 | 326/356 | yes | 1 | 0/12 |
+| eco-llm | 5 | 0.20 | 0.32 | 13/25 | 324/356 | yes | 0 | 0/24 |
+| edf | 5 | 0.32 | 0.32 | 0/25 | 93/356 | yes | 0 | 1/1 |
+| llf | 5 | 0.32 | 0.32 | 0/25 | 142/356 | yes | 0 | 0/0 |
+| warm-all-lru (`_rerun`) | 5 | 0.32 | 0.32 | 0/25 | 21/356 | no | 52 | 3/20 |
+
+**Reading (flash's analysis: reports/study_v5_rules.md, study_cost_model_gate_d156.md; numbers above are the H100's).**
+- v5-rules against its OWN base (noc3): correct by deadline 0.45 = 0.45 (s4), 0.40 against 0.36 (s5); pooled one discordant
+  question of 45, McNemar exact p = 1.0, so NO gain. It costs 163 + 158 = 321 single-shot questions and the dashcam SLO
+  (4,045 and 4,619 monitors released against about 11,000), through 3,253 / 2,894 warm-ahead pieces queuing ahead of them.
+- The comparison is EXACT: v5-rules' extra releases are precisely the base's declines (8 of 8 at s4, 12 of 12 at s5). Of the
+  20 extras, 16 ended on the device answer the base already had; of 4 cloud answers, 2 right where the device was wrong, 1
+  wrong where the device was right. v5-rules escalates 44 of 45 robot questions, the base 24 of 45.
+- Warm-ahead DOES reach the warm state (engine: 12/20 and 13/24 robot questions, about 57 %) and still converts to nothing:
+  the prefills that buy warmth fill the queue that makes warm answers late. noc3's warm 0 is structural (0 pieces, post-fix).
+  The arm's own belief counter (`release_at_GPU-WARM`) UNDER-reports warmth and was retracted as a source.
+- warm-all-lru (warm everything) reaches LESS warmth (16 of 48, 33 %) than targeted v5-rules, and saturates the engine
+  (dashcam TTFT p50 50 to 141 s).
+- Per-frame upload hurts the rebuild-on-demand arms (edf, llf: SS 93 to 188 of 356); arms that do not rebuild are unchanged
+  against their one-frame runs.
+
+**Gate and v5.** 32B engine-action confirmation PASSED (M1, M3 in b685fbb; M2 in e77fa65, touch keeps T in GPU, U goes to
+host, 3 of 3). The cost-model gate FAILS (flash 21e2179: negative predicted TTFT on 52 % of fit and 62 % of held-out data,
+held-out p90 error 31.9 s), so MARGIN_CF is unset and FULL v5 DID NOT RUN. Options are flash's, default leave-it.
+
+**Incidents.** (1) 5d7c084 broke `import hybrid` in every live run at 16:37 (llf n16 s6 lost its first attempt and orphaned
+a server); fixed in run_live2_real.py (e2c8933) and in hybrid_arm (e7b4dda). (2) The SUBMISSION RACE: bytes marked sent at
+submission, so warm-ahead pieces 0.12 s apart referenced unregistered images: 226 HTTP 400 on warm-all-lru CALIBRATION-1F,
+then 4,244 on the EP-G held-out cell 1 (SATURATED, 29 %), with dashcam TTFT about 100 s; fixed by flash (2b8714c: bytes
+count as sent only on HTTP 200), proven live (0 x 400 on every later warm-all cell). (3) warm-all-lru s5 first attempt
+INVALID: one 21 s lateness burst at t = 1,138 to 1,159 s after a coordinator-link reset; the rerun was valid. (4) Score
+failed on warm-all-lru 1F from scorer/data_sources version skew within one process (f1d32c7 pushed mid-run). (5) n_requests
+and n_errors come back null in cell.json for warm-all cells (DEFECT; counts taken from request.jsonl).
+
+**Labels and PROVISIONAL decisions.** `dashcam-1f` (sensitivity only) = every cell before the EP-G switch; `upload-30s` = every
+cell before the per-frame cells; `race-affected` = piece-chaining cells before 2b8714c (warm-all-lru and -reactive 1F,
+held-out cell 1 pre-fix, held-out -reactive); `proxy-0.567` = cascade arms before the Orin's warm latencies; `no-prefetch` =
+mooncake (D155 (5)). PROVISIONAL: the EP-G sweep after the handful (the brief named only the handful); `_kv0.5` / `_kv0.25`
+= the harness's LOGICAL pool (the engine pool is pinned); the D157 margin population is the four held-out cells, of which
+-reactive and -off ran before the race fix (-off issues no pieces; -reactive did, with 0 errors): whether that counts as
+"clean after the fix" under D158 (1) is the user's.
+
 > **D153 LABEL (user decision 2026-11-20 17:10): every cell in this report up to the EP-G switch is `dashcam-1f`.** Its
 > dashcam devices send ONE frame per call, not the append-only episode format (EP-G) that D153 makes the dashcam
 > workload. These cells are SENSITIVITY ONLY and are never a headline. That covers the frozen grid, the post-fix redo, the
