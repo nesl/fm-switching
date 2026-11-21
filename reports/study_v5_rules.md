@@ -1132,3 +1132,121 @@ they go on tomorrow's list.
 `arm_stats` is **NULL** for warm-all-lru, so there are no warm-ahead counters to cross-check the 3
 against. That is the second instance of the `cell.json` population defect recorded above, on the
 same arm.
+
+## RETRACTION: 87fc0d4's warm comparison was a register error, and it reversed the ranking
+
+**The comparison in the section above is withdrawn.** I put warm-all-lru's **engine-observed**
+warm share (3 of 20, from `score.robot_rows` `cache_path`) beside v5-rules' **belief** share
+(`arm_stats release_at_GPU-WARM`, 25 of 381). Two registers and two populations in one table: the
+arm's own belief against the engine's observation, and robot-only against robot plus single-shot
+(381 = 25 robot + 356 SS). **This is exactly the error CLAUDE.md names: mark the register at the
+point of use.** I marked it at the point of derivation, in the section where 25 of 381 first
+appeared, and then lost it when I built the comparison.
+
+**A coincidence hid it.** The belief numerator and the engine numerator are both **25** (belief: 25
+of 381 robot plus SS; engine: 25 of 44 robot, pooled). **A number with the right numerator and the
+wrong denominator survives every arithmetic check**, and it is why the 6.6 percent looked plausible
+enough to build a paper sentence on.
+
+### The corrected table, engine-observed `cache_path` throughout
+
+| arm | WARM | COLD | null | warm share of released |
+|---|---|---|---|---|
+| **v5-rules** s4 | 12 | 8 | 0 | **60.0 percent** |
+| **v5-rules** s5 | 13 | 11 | 1 | **54.2 percent** |
+| **v5-rules** pooled | **25** | 19 | 1 | **56.8 percent** |
+| warm-all-lru s5 | 3 | 17 | 5 | **15.0 percent** |
+| hybrid-F-lhreq-noc3 s5 | **0** | | | **0** |
+| b7 s5 | **0** | | | **0** |
+
+**The ranking is the reverse of what I published. The targeted arm reaches warm on more than half
+its robot questions; the maximal-effort arm reaches it on 15 percent.** 3.8x, the other way.
+
+The belief undercounts warmth heavily and in the conservative direction, which is the same direction
+PATCH 2's observer already showed (13 of 15 belief corrections were to GPU-warm). **So the belief is
+not merely imprecise, it is biased, and every statement I have made tonight from
+`release_at_GPU-WARM` understates warmth.** The 3,358-prefills-per-warm-release figure is withdrawn
+with the rest.
+
+### Warm-everything achieves LESS warmth than targeted warming, and that is a result for the thesis
+
+warm-all-lru prefills every batch on arrival into an LRU pool. **At 16 devices on EP-G that pool
+thrashes: indiscriminate prefill evicts what it just warmed, so the unconditional arm ends up warm
+15 percent of the time while the selective arm ends up warm 57 percent.**
+
+**This is the first result tonight that supports the project's thesis rather than qualifying it.**
+FORMULATION's case for representation-aware and demand-aware warm state is that selectivity beats
+both extremes; here the always-warm extreme is beaten by selection **on its own chosen metric**, not
+on cost. It also means WARM-ALL is a weaker identifier of the warm regime than its name promises,
+which bears directly on the gate below.
+
+### And the null relocates: the chain breaks AFTER warmth, not before it
+
+My proposed scoping clause, that the target state is unreachable at this operating point, is
+**withdrawn and replaced.** It was built on the bad number. The target state is reached for most
+questions, and the gain is still nothing. So the chain breaks later, and the data say where:
+
+| link in warm-ahead's chain | status | evidence |
+|---|---|---|
+| prefill issued ahead of the question | works | 83,961 emitted at s5 |
+| history WARM at question time | **works** | **25 of 44 robot questions pooled, 56.8 percent** |
+| warm leads to an answer **by the deadline** | **FAILS** | **5 of 9 warm extras fell back to the base's device answer** |
+| the answer is **correct** | **FAILS half the time** | of 4 cloud answers delivered, 2 wrong, 1 of those destroying a correct device answer |
+
+**That is a stronger negative than the reachability story and it should replace it, as the H100
+says.** Reachability would have been an excuse, and a scoping clause naming fewer devices or a
+shorter episode would have promised that the mechanism works somewhere else. **This says the
+mechanism does the thing it was built to do and the thing is not worth anything here.**
+
+**And the mechanism is self-defeating in a specific, measurable way.** The 83,961 prefills that buy
+the warmth are the same requests that fill the engine queue, and it is the queue that stops the warm
+questions coming back by the deadline. **Warm-ahead spends the capacity that warmth exists to
+exploit.** That is why warmth at 57 percent converts to nothing: the arm is bidding against itself,
+and the register where it wins (cache residency) is not the register where the deadline is decided
+(queue depth).
+
+### The base is the mechanism-absent comparator, and it is indistinguishable
+
+`hybrid-F-lhreq-noc3` and `b7` reach **WARM 0** on robot questions. So the base is not a weaker
+version of v5-rules, it is the **mechanism-absent condition**: 25 warm questions against 0 warm
+questions, and the two are indistinguishable on correct-by-deadline (9 discordant pairs, 5 to 4,
+McNemar exact p = 1.0).
+
+Step 4's canonical form, disable the mechanism and watch the result collapse, **is degenerate when
+the headline is already null**, so I am not claiming Step 4 in its literal wording. What I am
+claiming is the comparator: **an arm with zero warm robot questions matches an arm with 25, which is
+the strongest available evidence that warmth is not driving outcomes on this workload.**
+
+**Rule 2, rewritten: fired and did not help, with the break localized to the warm-to-on-time link,
+and with the mechanism-absent comparator indistinguishable from it.** No reachability clause. The
+scoping statement that remains is narrower and is about the engine, not the policy: on a server where
+the queue rather than the cache decides the deadline, cache warmth cannot pay.
+
+### Correcting my own MARGIN_CF argument, which was wrong in a different way
+
+The H100 asked me to check the D157 margin stratum on `cache_path` rather than the belief. Doing so
+found an error of mine that its correction does not cover.
+
+**I argued that MARGIN_CF would be set by one or two observations because the warm stratum is about
+11 points. That conflated two populations and is withdrawn.** D157 (2) names the margin population
+as **every robot question released in the four held-out cells, warm and cold alike**: about 80 to
+100 points. The p90 of 80 is the 72nd order statistic. **It is perfectly well estimated.** My
+objection was arithmetically wrong.
+
+**The real objection is the opposite shape and it is worse.** Those four cells are WARM-ALL cells,
+which we now know run **85 percent COLD**. So:
+
+- **MARGIN_CF would be a confidently estimated p90 of predominantly COLD-path prediction error;**
+- the decisions it gates are counterfactual deviations about **warm** placement;
+- and the warm coefficient behind the few warm predictions in that p90 is still fitted on about 12
+  points, so those predictions are unreliable **and too rare to move the p90 that is calibrated on
+  them.**
+
+**So the margin is not fragile, it is precise about the wrong regime.** That is harder to notice than
+a noisy margin and worse to ship, because a tight confidence interval on the wrong quantity invites
+exactly the confidence it does not earn.
+
+**The conclusion is unchanged and the reason is now the third different one: MARGIN_CF stays unset
+and full v5 stays gated.** My default to the user at 06:00 remains option 1, leave it, and the
+question for them is no longer about capacity or about n but about whether a margin calibrated on
+cold-path error may gate warm-path decisions. **My default answer to that is no.**
