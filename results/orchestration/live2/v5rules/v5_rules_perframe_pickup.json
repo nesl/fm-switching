@@ -1,0 +1,59 @@
+{
+  "supported": true,
+  "cell": {
+    "seed": 4,
+    "n": 8,
+    "run_s": 600.0,
+    "ratio": "50:50",
+    "robot_question_set": "lh_req",
+    "ss_question_set": "ss2",
+    "dashcam_format": "epg",
+    "robot_deadline_s": 3.0,
+    "dry": true
+  },
+  "batch_30s": {
+    "prefills_issued": 330,
+    "prefills_issued_base": 0,
+    "recalls": 6,
+    "recalls_base": 4,
+    "shared_recalls": 4,
+    "v5_frames_as_reference": 328,
+    "v5_frames_as_bytes": 2,
+    "base_frames_as_reference": 0,
+    "base_frames_as_bytes": 330,
+    "asks": {
+      "emitted": 23990,
+      "wanted": 32742,
+      "unexpressible": 8746,
+      "yielded_epochs": 0,
+      "_register": "ASKS, one per candidate session per epoch; not a decision count"
+    },
+    "verdict": "PASS on the 4 recalls BOTH arms released: the prefix the engine has already been sent rises from 0 frames to 328, so the bytes the question itself must carry fall from 330 to 2, on every one of them, with 0 unresolved frames. Separately and reported as its own quantity, v5-rules released 6 recalls against the base's 4."
+  },
+  "per_frame": {
+    "prefills_issued": 1163,
+    "prefills_issued_base": 0,
+    "recalls": 6,
+    "recalls_base": 4,
+    "shared_recalls": 4,
+    "v5_frames_as_reference": 362,
+    "v5_frames_as_bytes": 9,
+    "base_frames_as_reference": 0,
+    "base_frames_as_bytes": 371,
+    "asks": {
+      "emitted": 23990,
+      "wanted": 32742,
+      "unexpressible": 8746,
+      "yielded_epochs": 0,
+      "_register": "ASKS, one per candidate session per epoch; not a decision count"
+    },
+    "verdict": "PASS on the 4 recalls BOTH arms released: the prefix the engine has already been sent rises from 0 frames to 362, so the bytes the question itself must carry fall from 371 to 9, on every one of them, with 0 unresolved frames. Separately and reported as its own quantity, v5-rules released 6 recalls against the base's 4."
+  },
+  "ratio_per_frame_over_batch": 3.524,
+  "verdict": "PICKED UP with no change to the arm: 1163 prefills issued under per-frame against 330 under batch-30s, the base issuing 0 under both. The arm file contains no reference to the contract beyond passing it to the trace generator.",
+  "_measured_at": {
+    "origin_sha": "34a4af0",
+    "note": "measured in a SECOND detached worktree at origin/main after the per-frame switch landed, because this session's own commit was refused by the permission classifier and the tree holding the arm is still at df586a0. The arm file is byte-identical in both worktrees. Labelled with the sha it was measured at rather than the sha the arm is committed against.",
+    "cross_check": "the committed per-frame proof measures the same effect on warm-all-lru as 180 to 588 prefill pieces, 3.27x, on an 8-device 300 s cell (reports/study_perframe_upload.md, commit 34a4af0). v5-rules gives 3.52x on an 8-device 600 s cell: agreement to 1.08x on the ratio."
+  }
+}

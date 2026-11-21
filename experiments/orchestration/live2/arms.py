@@ -677,3 +677,12 @@ ARMS.update(WARMALL_ARMS)
 # the committed no-prefetch cells must stay the comparison until they are rerun.
 from arms_kvprefetch import KVPREFETCH_ARMS                             # noqa: E402
 ARMS.update(KVPREFETCH_ARMS)
+
+# StudyV5-RULES: the RULES-ONLY v5 arm, `hybrid-F-lhreq-noc3` plus warm-ahead as a rule (D150
+# STATE lever 1, D152 (3), spec v5 sections 4 and 8). Imported LAST for the same reason as the
+# blocks above (it imports from arms.py, so an earlier import would cycle). Deliberately NOT added
+# to ARM_NAMES: it is a new labelled arm under D79, not a round-1 arm. It must never be read as
+# full v5, which D154 (2) blocks until the D151 (6) gate passes and MARGIN_CF is set; `v5-rules`
+# makes no counterfactual prediction and so needs neither.
+from arms_v5rules import V5RULES_ARMS                                   # noqa: E402
+ARMS.update(V5RULES_ARMS)

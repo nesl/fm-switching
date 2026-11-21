@@ -1,0 +1,388 @@
+{
+  "proofs": {
+    "version": "v5-rules-1.0",
+    "arm": "v5-rules",
+    "base": "hybrid-F-lhreq-noc3",
+    "engine_actions_version": "v5-engine-actions-1.0",
+    "cell": {
+      "seed": 4,
+      "n": 16,
+      "run_s": 1200.0,
+      "ratio": "40:40:20",
+      "robot_question_set": "lh_req",
+      "ss_question_set": "ss2",
+      "dry": true
+    },
+    "check7_positive_control": {
+      "quantity": "hybrid-F-lhreq-noc3 decision digest, rows and representations at this cell",
+      "this_digest": "5d3469549fead8ac",
+      "prior_digest": "5d3469549fead8ac",
+      "this_rows": 13525,
+      "prior_rows": 13525,
+      "this_representations": {
+        "D2": 372
+      },
+      "prior_representations": {
+        "D2": 372
+      },
+      "source_of_prior": "results/orchestration/live2/frozen_test/value_reader_proofs.json",
+      "base_feasibility_actions": 5,
+      "agree": true,
+      "note": "the digest is computed over the decision rows INCLUDING arm_version, which is the register the committed value is in: every hybrid arm reports live2-arm-1.0, which is why the committed digests of five differently named hybrids coincide. A FAILURE here means the check is broken, not the arm, and nothing below may be read."
+    },
+    "proof_illegal_actions": {
+      "illegal_actions": 0,
+      "decisions": 14397,
+      "completed": true,
+      "base_decisions": 13525,
+      "off_decisions": 13525,
+      "note": "validate_action runs on every epoch inside Policy.__call__ and raises on anything outside the registered domain, including a MATERIALIZE naming a session the observation did not contain; a completed cell emitted no such action"
+    },
+    "proof_warm_ahead_prefills": {
+      "prefills_issued": 827,
+      "prefills_issued_base": 0,
+      "prefills_issued_off": 0,
+      "_register": "prefills_issued is an OBSERVED COUNT of release_piece / release_whole rows in the coordinator's own decision log. warm_ahead_* below are the arm's ASKS, one per candidate robot session per epoch, most of which no-op inside _advance_build; they are not a decision count and are never summed with it.",
+      "characteristic": "warm_ahead_prefill: a MATERIALIZE for a robot session with no pending question, issued ahead of its question",
+      "arm_asks": {
+        "emitted": 83980,
+        "wanted": 163962,
+        "unexpressible": 79962,
+        "yielded_epochs": 0
+      },
+      "release_readiness_belief": {
+        "release_at_COLD": 357,
+        "release_at_GPU-WARM": 20
+      },
+      "release_readiness_belief_off": {
+        "release_at_COLD": 372
+      },
+      "release_readiness_belief_base_not_instrumented": true,
+      "_readiness_register": "this is the arm's BELIEF at release time. On a PARTIALLY built history the belief stays COLD while the built prefix is already reused on the wire as uuid references (coordinator.py:745-752, spec v5 section 8), so a COLD release here is NOT evidence that the request was uncached. The wire-form measurement is cached_token_proof().",
+      "verdict": "PASS: 827 prefills issued where the base issues 0"
+    },
+    "step4_negative_control": {
+      "control_arm": "v5-rules-off",
+      "mechanism_disabled": "warm_ahead",
+      "base_digest": "df9bf72fa552c094",
+      "control_digest": "df9bf72fa552c094",
+      "treatment_digest": "74c6ba238b4ea794",
+      "control_identical_to_base": true,
+      "control_identical_including_arm_version": false,
+      "prefills_issued_off": 0,
+      "_register": "identity is asserted on the decision rows with arm_version REMOVED, because the coordinator writes that label into every row and a new arm necessarily carries a new one; the unstripped comparison is reported beside it so the label difference is visible rather than hidden.",
+      "note": "the control must collapse to the base BYTE-IDENTICALLY, which is stronger than 'converges'. A treatment digest equal to the base's would instead be an ABSENT LINK.",
+      "verdict": "PASS: disabling warm_ahead reproduces the base exactly and issues 0 prefills"
+    },
+    "step2b_decision_diff": {
+      "vs": "hybrid-F-lhreq-noc3",
+      "differing_setwise": 1126,
+      "differing_positional": 14397,
+      "first_differing_index": 0,
+      "first_differing_row_v5_rules": {
+        "H": null,
+        "arm_version": "v5-rules-1.0",
+        "belief": {
+          "cold_tokens_by_session": {},
+          "gpu_tokens_by_session": {},
+          "host_tokens_by_session": {}
+        },
+        "cost_model_id": null,
+        "defer_s": null,
+        "desired_tier": null,
+        "kind": "release_piece",
+        "mu": null,
+        "note": "session=robo000|s000|1011205677616862_start_0.0_end_314.103",
+        "opportunity_ids": [],
+        "piece_tokens": 301,
+        "predicted": {
+          "completion_s": null,
+          "imposed_delay_s_by_request": {},
+          "ttft_s": null
+        },
+        "representation": null,
+        "representation_defaulted": false,
+        "t": 0.1,
+        "traffic_mix": {
+          "monitor": 0,
+          "piece": 0,
+          "recall": 0,
+          "whole": 0
+        }
+      },
+      "first_differing_row_base": {
+        "H": null,
+        "arm_version": "live2-arm-1.0",
+        "belief": {
+          "cold_tokens_by_session": {},
+          "gpu_tokens_by_session": {},
+          "host_tokens_by_session": {}
+        },
+        "cost_model_id": null,
+        "defer_s": null,
+        "desired_tier": null,
+        "kind": "release_monitor",
+        "mu": null,
+        "note": null,
+        "opportunity_ids": [
+          "opp0000000"
+        ],
+        "piece_tokens": null,
+        "predicted": {
+          "completion_s": null,
+          "imposed_delay_s_by_request": {},
+          "ttft_s": null
+        },
+        "representation": null,
+        "representation_defaulted": false,
+        "t": 5.1,
+        "traffic_mix": {
+          "monitor": 0,
+          "piece": 0,
+          "recall": 0,
+          "whole": 0
+        }
+      },
+      "_register": "the setwise count is the decision count; the positional count is reported beside it because one early divergence desynchronises the rest of the log (test_hybrid._differing's own docstring).",
+      "verdict": "PASS"
+    },
+    "summary": {
+      "positive_control": true,
+      "proof_warm_ahead_prefills": true,
+      "proof_illegal_actions": true,
+      "step4_negative_control": true,
+      "step2b": true,
+      "cached_tokens": "see cached_token_proof(); run separately because it needs a frames store",
+      "all_pass": true
+    }
+  },
+  "cached_token_proof": {
+    "paired_on_shared_recalls": {
+      "shared_recalls": 4,
+      "every_shared_recall_reuses_more": true,
+      "base_frames_as_reference": 0,
+      "v5_frames_as_reference": 328,
+      "base_frames_as_bytes": 330,
+      "v5_frames_as_bytes": 2,
+      "per_recall": [
+        {
+          "session_id": "robo000|s000|1011205677616862_start_0.0_end_314.103",
+          "t": 156.8,
+          "n_frames": 75,
+          "base_n_reference": 0,
+          "v5_n_reference": 75,
+          "base_n_bytes": 75,
+          "v5_n_bytes": 0
+        },
+        {
+          "session_id": "robo000|s001|1242272464195379_start_0.0_end_599.982",
+          "t": 448.9,
+          "n_frames": 60,
+          "base_n_reference": 0,
+          "v5_n_reference": 58,
+          "base_n_bytes": 60,
+          "v5_n_bytes": 2
+        },
+        {
+          "session_id": "robo002|s000|1801507587388662_start_0.0_end_369.243",
+          "t": 95.0,
+          "n_frames": 75,
+          "base_n_reference": 0,
+          "v5_n_reference": 75,
+          "base_n_bytes": 75,
+          "v5_n_bytes": 0
+        },
+        {
+          "session_id": "robo002|s001|616157548208645_start_0.0_end_422.008",
+          "t": 547.3,
+          "n_frames": 120,
+          "base_n_reference": 0,
+          "v5_n_reference": 120,
+          "base_n_bytes": 120,
+          "v5_n_bytes": 0
+        }
+      ]
+    },
+    "admission": {
+      "recalls_base": 4,
+      "recalls_v5_rules": 6,
+      "only_in_v5_rules": [
+        {
+          "session_id": "robo001|s000|680890187975381_start_0.0_end_599.995",
+          "t": 316.2,
+          "n_frames": 225,
+          "est_tokens": 20281
+        },
+        {
+          "session_id": "robo003|s000|671013742223430_start_0.0_end_600.122",
+          "t": 419.3,
+          "n_frames": 270,
+          "est_tokens": 24331
+        }
+      ],
+      "only_in_base": [],
+      "declines_base": 2,
+      "declines_v5_rules": 0,
+      "note": "a recall the base declines and v5-rules releases is the causal chain's last link, not a confound: the base's feasibility test refuses a history it would have to rebuild cold inside the deadline, and the same history already warm is feasible. It is reported as its own quantity and is NOT folded into the reuse column."
+    },
+    "cell": {
+      "seed": 4,
+      "n": 8,
+      "run_s": 600.0,
+      "ratio": "50:50",
+      "robot_question_set": "lh_req",
+      "ss_question_set": "ss2",
+      "dashcam_format": "epg",
+      "dry": true,
+      "robot_deadline_s": 3.0,
+      "frames_root": "placeholder store, one file per trace frame_ref"
+    },
+    "frames_store": {
+      "refs": 5678,
+      "n_unresolved": 0,
+      "preflight_ok": true,
+      "note": "the bytes are not JPEGs and nothing is scored from them; the proof is of the WIRE FORM. Without this store every frame goes as a uuid reference and the proof measures nothing."
+    },
+    "dashcam_format_as_read_off_the_wire": {
+      "base": {
+        "dashcam_format": "epg",
+        "epg_counts": {
+          "epg_frames_sent_as_bytes": 4332,
+          "epg_frames_sent_as_reference": 39351,
+          "epg_monitor_requests": 3864
+        },
+        "budget_refusals": 0
+      },
+      "v5_rules": {
+        "dashcam_format": "epg",
+        "epg_counts": {
+          "epg_frames_sent_as_bytes": 4332,
+          "epg_frames_sent_as_reference": 39351,
+          "epg_monitor_requests": 3864
+        },
+        "budget_refusals": 0
+      }
+    },
+    "register": "a WIRE-FORM measurement, not an engine measurement and not a belief. vLLM's own cached_tokens needs a usage block and is the H100's to report. The reused prefix is an OBSERVED COUNT of frames sent as uuid references; the token figure is DERIVED at 338 tokens per image and is a LOWER bound.",
+    "base": {
+      "arm": "hybrid-F-lhreq-noc3",
+      "prefills_issued": 0,
+      "recalls": 4,
+      "recalls_reusing_a_prefix": 0,
+      "frames_total": 330,
+      "frames_as_reference": 0,
+      "frames_as_bytes": 330,
+      "reused_prefix_tokens_lower_bound": 0,
+      "per_recall": [
+        {
+          "session_id": "robo002|s000|1801507587388662_start_0.0_end_369.243",
+          "t": 95.0,
+          "n_frames": 75,
+          "n_reference": 0,
+          "n_bytes": 75,
+          "est_tokens": 6781
+        },
+        {
+          "session_id": "robo000|s000|1011205677616862_start_0.0_end_314.103",
+          "t": 156.8,
+          "n_frames": 75,
+          "n_reference": 0,
+          "n_bytes": 75,
+          "est_tokens": 6781
+        },
+        {
+          "session_id": "robo000|s001|1242272464195379_start_0.0_end_599.982",
+          "t": 448.9,
+          "n_frames": 60,
+          "n_reference": 0,
+          "n_bytes": 60,
+          "est_tokens": 5431
+        },
+        {
+          "session_id": "robo002|s001|616157548208645_start_0.0_end_422.008",
+          "t": 547.3,
+          "n_frames": 120,
+          "n_reference": 0,
+          "n_bytes": 120,
+          "est_tokens": 10831
+        }
+      ]
+    },
+    "v5_rules": {
+      "arm": "v5-rules",
+      "prefills_issued": 330,
+      "recalls": 6,
+      "recalls_reusing_a_prefix": 6,
+      "frames_total": 825,
+      "frames_as_reference": 808,
+      "frames_as_bytes": 17,
+      "reused_prefix_tokens_lower_bound": 273104,
+      "per_recall": [
+        {
+          "session_id": "robo002|s000|1801507587388662_start_0.0_end_369.243",
+          "t": 95.0,
+          "n_frames": 75,
+          "n_reference": 75,
+          "n_bytes": 0,
+          "est_tokens": 6781
+        },
+        {
+          "session_id": "robo000|s000|1011205677616862_start_0.0_end_314.103",
+          "t": 156.8,
+          "n_frames": 75,
+          "n_reference": 75,
+          "n_bytes": 0,
+          "est_tokens": 6781
+        },
+        {
+          "session_id": "robo001|s000|680890187975381_start_0.0_end_599.995",
+          "t": 316.2,
+          "n_frames": 225,
+          "n_reference": 210,
+          "n_bytes": 15,
+          "est_tokens": 20281
+        },
+        {
+          "session_id": "robo003|s000|671013742223430_start_0.0_end_600.122",
+          "t": 419.3,
+          "n_frames": 270,
+          "n_reference": 270,
+          "n_bytes": 0,
+          "est_tokens": 24331
+        },
+        {
+          "session_id": "robo000|s001|1242272464195379_start_0.0_end_599.982",
+          "t": 448.9,
+          "n_frames": 60,
+          "n_reference": 58,
+          "n_bytes": 2,
+          "est_tokens": 5431
+        },
+        {
+          "session_id": "robo002|s001|616157548208645_start_0.0_end_422.008",
+          "t": 547.3,
+          "n_frames": 120,
+          "n_reference": 120,
+          "n_bytes": 0,
+          "est_tokens": 10831
+        }
+      ]
+    },
+    "arm_asks": {
+      "emitted": 23990,
+      "wanted": 32742,
+      "unexpressible": 8746,
+      "yielded_epochs": 0,
+      "_register": "ASKS, one per candidate session per epoch; not a decision count"
+    },
+    "verdict": "PASS on the 4 recalls BOTH arms released: the prefix the engine has already been sent rises from 0 frames to 328, so the bytes the question itself must carry fall from 330 to 2, on every one of them, with 0 unresolved frames. Separately and reported as its own quantity, v5-rules released 6 recalls against the base's 4."
+  },
+  "_provenance": {
+    "git_commit": "df586a0351b4a3245398fc22467b7e7bfa006db9",
+    "script": "arms_v5rules.py",
+    "model": "none-dry",
+    "timestamp": "2026-11-20T19:25:49.636712",
+    "device": "nvidia_rtx_a6000",
+    "n": 16
+  }
+}

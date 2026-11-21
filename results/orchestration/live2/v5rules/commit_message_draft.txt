@@ -1,0 +1,74 @@
+v5-rules: the rules-only v5 arm, hybrid-F-lhreq-noc3 plus warm-ahead as a rule
+
+WHY IT CAN RUN WHILE FULL v5 CANNOT. D154 (2) forbids any v5 cell before
+MARGIN_CF is set from the D151 (6) gate's held-out p90 error, and that gate
+fails. v5-rules makes no counterfactual prediction, reads no margin and imports
+nothing from v5/value_readers.py, so MARGIN_CF is unreachable from it by
+construction rather than by discipline.
+
+D156 IS NOT ON ORIGIN. The brief's premise, that the gate applies to
+counterfactual decisions only, is cited as D156; the design log ends at D155a
+and no file mentions D156. Built to the user's decision message, which every
+D-row from D153 on names as the authority, and the row is owed. v5-rules should
+not be cited against D154 (2) until it has one.
+
+THE THREE PROOFS, ISSUED COUNTS AND NOT ASKS.
+1. Warm-ahead prefills ISSUED 827 against the base's 0, read off the
+   coordinator's decision log as release_piece rows. The arm's ASKS were 83,980,
+   a different number by 102x, reported beside it and never summed. The 79,962
+   refused asks are NOT the PATCH 1 blocker: an instrumented re-run classified
+   79,962 of 79,962 as not_open, with 0 refused while present in
+   obs.live_sessions. PATCH 1 is live at df586a0 and no shim is used anywhere.
+2. Cached tokens at question time, on the 4 recalls BOTH arms released: the
+   prefix the engine had already been sent rises 0 to 328 of 330 frames, so the
+   bytes the question itself carries fall 330 to 2, on 4 of 4. Register stated:
+   this is the WIRE FORM, not vLLM's cached_tokens, which needs a usage block
+   and is the H100's to report; the proxy is valid for "the prompt was already
+   sent" and not for "the engine served it from cache". Frame store resolved,
+   n_unresolved 0 of 5,678, because without it every frame goes as a uuid
+   reference and the proof measures nothing.
+3. 0 illegal actions over 14,397 decisions.
+
+Step 2b against hybrid-F-lhreq-noc3: 1,126 differing decisions setwise, first at
+index 0, a release_piece at t=0.1 before any question exists. Step 4: the -off
+control is byte-identical to the base with 0 prefills, so the 1,126 are the
+warming channel and nothing else. Check 7 positive control: the base reproduces
+its committed digest 5d3469549fead8ac, 13,525 rows, D2 372 / RECENT 0, 5
+feasibility actions.
+
+THE ADMISSION EFFECT, reported as its own quantity and never folded into the
+reuse column: v5-rules released 6 recalls and declined 0 where the base released
+4 and declined 2, the two extra being the 20,281 and 24,331 token histories its
+feasibility test refuses to rebuild cold inside 3 s. The counts pair to the unit.
+
+ONE LINK IS CONSTANT AND IS NAMED. W2's yield never fired, 0 of 12,001 epochs,
+so "yields to deadline work" is UNEXERCISED under Rule 2 and unproven. It is a
+safety property and not the mechanism under test, and a dry stub bridge is where
+contention is absent, so the H100's cell is where it can first be seen.
+
+The >2x disagreement check 1 found is explained by measurement, not argument:
+warm-all-lru's committed 1,684 prefills at the identical cell are 754 robot plus
+930 single-shot, and v5-rules is robot-only by design because a single-shot
+image is captured AT question time. On the robot half the two agree at 1.10x.
+
+PER-FRAME UPLOAD IS PICKED UP, measured rather than predicted: the switch
+landed at 34a4af0 while this ran, and v5-rules issues 1,163 prefills under
+--robot-upload per-frame against 330 under batch-30s on the same cell, 3.52x,
+with the base at 0 under both. That agrees to 1.08x with the committed 3.27x
+measured on warm-all-lru. The arm needs no change, which is the committed
+reason: the record kind is unchanged so every arm needs none. The contract is
+passed to the trace generator only if that generator takes it, so the file
+still runs on a tree without the switch. Measured in a second worktree at
+34a4af0, labelled with that sha, because this commit sits on df586a0.
+
+FOR THE OPERATOR: pass --robot-deadline-s 3 (the committed default is still 5.0
+and nothing in the output says so), pass --dashcam-format epg, and decide the upload
+contract explicitly, labelling a default cell upload-30s. Registered name v5-rules; make_arm resolves it with only the
+harness's own path. v5-rules-off and v5-rules-noyield are constructible,
+-noyield is in no run plan, and none of the three is in ARM_NAMES.
+
+Report reports/study_v5_rules.md. Dry decision-path runs with a stub bridge and
+no engine: counts of decisions and of frames on the wire, never seconds.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01T8MWad7BRhG6fF73CRUcAn
