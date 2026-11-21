@@ -2448,3 +2448,53 @@ construction, since the by-deadline rule can only remove credit, never add it. I
 2. Do **not** carry section 23.4 forward as "the deadline rule makes no difference". It makes no
    difference **at 0.146 to 0.225 s**. The sentence without that clause is the error this section
    exists to prevent.
+
+## 24. The 3 s handful under D155 (3), and section 22's confound measured
+
+**A6000, offline, CPU only.** `frozen_headline.py` extended to score a deadline family of cells
+(`FROZEN_HEADLINE_SUFFIX=_L3`) and to regenerate the 3 s trace locally, which needs
+`DS.ROBOT_DEADLINE_S` set before generation because `generate_trace` takes no deadline argument
+(`run_live2_real.py:447` does the same thing). Output
+`results/orchestration/live2/frozen_test/frozen_headline_n16_s4_d155_L3.json`.
+
+### 24.1 The three cells the H100 scored before D155 landed, re-scored under D155
+
+The H100's driver scored b7, eco-llm and mooncake at 3 s seed 4 BEFORE `8e1dbbb`, so their
+`cell.json` carries D152's `correct_answers_delivered` rather than D155's by-deadline figure. D155 (3)
+forbids mixing the two, so they are re-scored here from the committed run dirs.
+
+| arm | by deadline | any time | on time | device answers late |
+|---|---|---|---|---|
+| b7-edf-feasibility | **8/20 = 0.4000** | 8/20 = 0.4000 | 7/20 = 0.35 | 0 |
+| eco-llm | **6/20 = 0.3000** | 6/20 = 0.3000 | 15/20 = 0.75 | 0 |
+| mooncake | **8/20 = 0.4000** | 8/20 = 0.4000 | 7/20 = 0.35 | 0 |
+| edf | **6/20 = 0.3000** | 6/20 = 0.3000 | 4/20 = 0.20 | 0 |
+
+**The two rules agree on every cell**, because no device answer is late at the scorer's 0.146 to
+0.225 s device latency. So the split the H100 flagged resolves benignly: the pre-D155 figures are
+also the D155 figures here, and nothing needs relabelling on that account.
+
+**This is also a cross-validation of the offline path, and a strong one.** All four arms reproduce
+the H100's live driver scores EXACTLY: b7 0.40 and 7 of 20, eco-llm 0.30 and 15 of 20, mooncake 0.40
+and 7 of 20, edf 0.30 and 4 of 20. The trace was REGENERATED locally rather than read from the
+H100's tree, and `local_trace`'s own control (the regenerated robot opportunity ids must equal the
+ids the run's outcomes carry, or the run is skipped rather than scored on a guess) passed on all
+four. An offline re-score matching a live driver to the question, on a regenerated trace, is the
+check that licenses every other offline number in this report.
+
+### 24.2 Section 22's confound, now measured at both ends
+
+Section 22 predicted that the offline 3 s re-score of a 5 s cell would stand in for a live 3 s run,
+with b7 the lower bound on the error and edf and llf the upper bound, because b7 declines while edf
+and llf defer.
+
+| arm | offline 3 s re-score (decisions made at 5 s) | live 3 s | difference |
+|---|---|---|---|
+| b7 | on time 0.3500, correct 0.4000 | on time 0.3500, correct 0.4000 | **0 questions** |
+| edf | on time 0.2500, correct 0.3500 | on time 0.2000, correct 0.3000 | **1 question of 20 on each** |
+
+**Prediction 2 HOLDS exactly at the b7 end and prediction 3 holds directionally at the edf end.**
+The confound is bounded at **one question of 20, about 5 pp**, on the arm predicted to move most.
+So the offline table in section 22.2 IS a usable stand-in for a live 3 s run, with a 5 pp caveat on
+deferring arms, and the live twin the H100 added for hybrid-F-lhreq is confirmation rather than a
+correction. llf completes the upper bound when it lands.

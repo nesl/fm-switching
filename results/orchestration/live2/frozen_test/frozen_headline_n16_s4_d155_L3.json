@@ -1,0 +1,405 @@
+{
+ "n_devices": 16,
+ "seeds_common_support": [
+  4
+ ],
+ "bootstrap": "paired by seed: opportunities resampled within each seed, same draw for every arm, B=10000",
+ "headline": "D155 (3), amending D152 (1): CORRECT ANSWERS DELIVERED BY THE DEADLINE (the cloud's answer if it is on time, else the DEVICE's answer IF IT TOO ARRIVES WITHIN THE DEADLINE, else no answer and the question is a miss; scored on the representation actually sent). On time is reported beside it, not as the headline.",
+ "headline_beside_it": "D152 (1): CORRECT ANSWERS DELIVERED AT ANY TIME, which credits the device's answer regardless of when it lands. Reported BESIDE the headline and never mixed with it in one column or one sentence (D155 (3)).",
+ "device_delivery_rule": {
+  "device_latency_source": "trace",
+  "device_wait_s": 0.0,
+  "meaning": "trace: the per-question `device_latency_s` in device_answers.jsonl, which for robot recall is D87's ORIN2 IN-PROCESS cost, 0.146 s at 11k tokens to 0.225 s at 28k, interpolated and clamped",
+  "excluded": "D155 (1): the LH-REQ device answer latencies, TTFT median 3.296 s and end-to-end median 6.651 s, are the COLD RE-SEND path, which D61 (b) classifies as an API artifact and not the device baseline. Not used here.",
+  "source": "D155 (3) amending D152 (1), user decision 2026-11-20"
+ },
+ "on_time_rule": "delivered within the deadline (robot 5 s, SS 2 s) by an HTTP 200 request, stamped at COMPLETION, prefill plus decode (D146; the default from 2026-11-20)",
+ "delivery": "completion",
+ "cells": "POST-FIX for eco-llm and hybrid-F-lhreq; pre-fix for b7, mooncake and hybrid-F6-lhreq, which is not redone (D145)",
+ "rows": [
+  {
+   "arm": "b7-edf-feasibility",
+   "robot_correct_delivered_by_deadline": 0.4,
+   "robot_correct_by_deadline_ci95": [
+    0.2,
+    0.6
+   ],
+   "robot_correct_by_deadline_hits": 8,
+   "robot_correct_delivered_any_time": 0.4,
+   "robot_correct_any_time_ci95": [
+    0.2,
+    0.6
+   ],
+   "robot_correct_any_time_hits": 8,
+   "robot_correct_n": 20,
+   "robot_correct_by_deadline_minus_any_time": 0.0,
+   "device_late_n": 0,
+   "robot_feasible_on_time": 0.7,
+   "robot_ci95": [
+    0.4,
+    1.0
+   ],
+   "robot_feasible_n": 10,
+   "robot_feasible_hits": 7,
+   "robot_all_on_time": 0.35,
+   "robot_all_ci95": [
+    0.15,
+    0.55
+   ],
+   "robot_all_n": 20,
+   "robot_all_hits": 7,
+   "ss_on_time": 0.9608,
+   "ss_ci95": [
+    0.9384,
+    0.9804
+   ],
+   "ss_n": 357,
+   "ss_hits": 343,
+   "dashcam_all_meet_runs": "1 of 1",
+   "robot_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "robot_all_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "ss_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "robot_correct_by_deadline_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "robot_correct_any_time_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "per_run": [
+    {
+     "seed": 4,
+     "robot_all": 20,
+     "robot_feasible": 10,
+     "robot_feasible_hits": 7,
+     "robot_all_hits": 7,
+     "ss_hits": 343,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 8,
+     "robot_correct_any_time_hits": 8,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 1,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.210878
+     ],
+     "deadline_s_range": [
+      3.0,
+      3.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 10,
+      "on_time": 7,
+      "robot_pool_meets": false,
+      "need_to_meet": 9,
+      "margin_questions": -2,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    }
+   ]
+  },
+  {
+   "arm": "eco-llm",
+   "robot_correct_delivered_by_deadline": 0.3,
+   "robot_correct_by_deadline_ci95": [
+    0.1,
+    0.5
+   ],
+   "robot_correct_by_deadline_hits": 6,
+   "robot_correct_delivered_any_time": 0.3,
+   "robot_correct_any_time_ci95": [
+    0.1,
+    0.5
+   ],
+   "robot_correct_any_time_hits": 6,
+   "robot_correct_n": 20,
+   "robot_correct_by_deadline_minus_any_time": 0.0,
+   "device_late_n": 0,
+   "robot_feasible_on_time": 0.7,
+   "robot_ci95": [
+    0.4,
+    1.0
+   ],
+   "robot_feasible_n": 10,
+   "robot_feasible_hits": 7,
+   "robot_all_on_time": 0.75,
+   "robot_all_ci95": [
+    0.55,
+    0.9
+   ],
+   "robot_all_n": 20,
+   "robot_all_hits": 15,
+   "ss_on_time": 0.958,
+   "ss_ci95": [
+    0.9356,
+    0.9776
+   ],
+   "ss_n": 357,
+   "ss_hits": 342,
+   "dashcam_all_meet_runs": "1 of 1",
+   "robot_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "robot_all_minus_b7_ci95": [
+    0.2,
+    0.6
+   ],
+   "ss_minus_b7_ci95": [
+    -0.014,
+    0.0056
+   ],
+   "robot_correct_by_deadline_minus_b7_ci95": [
+    -0.25,
+    0.0
+   ],
+   "robot_correct_any_time_minus_b7_ci95": [
+    -0.25,
+    0.0
+   ],
+   "per_run": [
+    {
+     "seed": 4,
+     "robot_all": 20,
+     "robot_feasible": 10,
+     "robot_feasible_hits": 7,
+     "robot_all_hits": 15,
+     "ss_hits": 342,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 6,
+     "robot_correct_any_time_hits": 6,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 1,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.210878
+     ],
+     "deadline_s_range": [
+      3.0,
+      3.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 10,
+      "on_time": 7,
+      "robot_pool_meets": false,
+      "need_to_meet": 9,
+      "margin_questions": -2,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    }
+   ]
+  },
+  {
+   "arm": "mooncake",
+   "robot_correct_delivered_by_deadline": 0.4,
+   "robot_correct_by_deadline_ci95": [
+    0.2,
+    0.6
+   ],
+   "robot_correct_by_deadline_hits": 8,
+   "robot_correct_delivered_any_time": 0.4,
+   "robot_correct_any_time_ci95": [
+    0.2,
+    0.6
+   ],
+   "robot_correct_any_time_hits": 8,
+   "robot_correct_n": 20,
+   "robot_correct_by_deadline_minus_any_time": 0.0,
+   "device_late_n": 0,
+   "robot_feasible_on_time": 0.7,
+   "robot_ci95": [
+    0.4,
+    1.0
+   ],
+   "robot_feasible_n": 10,
+   "robot_feasible_hits": 7,
+   "robot_all_on_time": 0.35,
+   "robot_all_ci95": [
+    0.15,
+    0.55
+   ],
+   "robot_all_n": 20,
+   "robot_all_hits": 7,
+   "ss_on_time": 0.958,
+   "ss_ci95": [
+    0.9356,
+    0.9776
+   ],
+   "ss_n": 357,
+   "ss_hits": 342,
+   "dashcam_all_meet_runs": "1 of 1",
+   "robot_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "robot_all_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "ss_minus_b7_ci95": [
+    -0.0084,
+    0.0
+   ],
+   "robot_correct_by_deadline_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "robot_correct_any_time_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "per_run": [
+    {
+     "seed": 4,
+     "robot_all": 20,
+     "robot_feasible": 10,
+     "robot_feasible_hits": 7,
+     "robot_all_hits": 7,
+     "ss_hits": 342,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 8,
+     "robot_correct_any_time_hits": 8,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.210878
+     ],
+     "deadline_s_range": [
+      3.0,
+      3.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 10,
+      "on_time": 7,
+      "robot_pool_meets": false,
+      "need_to_meet": 9,
+      "margin_questions": -2,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    }
+   ]
+  },
+  {
+   "arm": "edf",
+   "robot_correct_delivered_by_deadline": 0.3,
+   "robot_correct_by_deadline_ci95": [
+    0.1,
+    0.5
+   ],
+   "robot_correct_by_deadline_hits": 6,
+   "robot_correct_delivered_any_time": 0.3,
+   "robot_correct_any_time_ci95": [
+    0.1,
+    0.5
+   ],
+   "robot_correct_any_time_hits": 6,
+   "robot_correct_n": 20,
+   "robot_correct_by_deadline_minus_any_time": 0.0,
+   "device_late_n": 0,
+   "robot_feasible_on_time": 0.4,
+   "robot_ci95": [
+    0.1,
+    0.7
+   ],
+   "robot_feasible_n": 10,
+   "robot_feasible_hits": 4,
+   "robot_all_on_time": 0.2,
+   "robot_all_ci95": [
+    0.05,
+    0.4
+   ],
+   "robot_all_n": 20,
+   "robot_all_hits": 4,
+   "ss_on_time": 0.7871,
+   "ss_ci95": [
+    0.7451,
+    0.8291
+   ],
+   "ss_n": 357,
+   "ss_hits": 281,
+   "dashcam_all_meet_runs": "1 of 1",
+   "robot_minus_b7_ci95": [
+    -0.6,
+    0.0
+   ],
+   "robot_all_minus_b7_ci95": [
+    -0.3,
+    0.0
+   ],
+   "ss_minus_b7_ci95": [
+    -0.2157,
+    -0.1317
+   ],
+   "robot_correct_by_deadline_minus_b7_ci95": [
+    -0.25,
+    0.0
+   ],
+   "robot_correct_any_time_minus_b7_ci95": [
+    -0.25,
+    0.0
+   ],
+   "per_run": [
+    {
+     "seed": 4,
+     "robot_all": 20,
+     "robot_feasible": 10,
+     "robot_feasible_hits": 4,
+     "robot_all_hits": 4,
+     "ss_hits": 281,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 6,
+     "robot_correct_any_time_hits": 6,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.210878
+     ],
+     "deadline_s_range": [
+      3.0,
+      3.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 10,
+      "on_time": 4,
+      "robot_pool_meets": false,
+      "need_to_meet": 9,
+      "margin_questions": -5,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    }
+   ]
+  }
+ ]
+}

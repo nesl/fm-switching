@@ -28,6 +28,7 @@ for p in (HERE, HERE / "fleet", HERE / "scorer", REPO / "experiments/orchestrati
 import costs as C          # noqa: E402
 import traces as TRC       # noqa: E402
 import trace as TR         # noqa: E402
+import data_sources as DS  # noqa: E402
 # D155 (3): the DEVICE side of the delivery rule is IMPORTED from the production scorer, never
 # re-implemented here and never read from an environment variable of this file's own. The D146
 # `DELIVERY` switch was module-level in score.py and local in this file, the two scorers
@@ -36,6 +37,8 @@ import trace as TR         # noqa: E402
 import score as SC         # noqa: E402
 
 ARMS = ["b7-edf-feasibility", "eco-llm", "mooncake", "hybrid-F-lhreq", "hybrid-F6-lhreq"]
+if os.environ.get("FROZEN_HEADLINE_ARMS"):
+    ARMS = [a for a in os.environ["FROZEN_HEADLINE_ARMS"].split(",") if a]
 B = 10000
 SS_L = 2.0
 P_ROB = 0.9              # the scorer's robot pool threshold, from the run's own sweep block
@@ -51,12 +54,26 @@ def local_trace(trace_dir_name):
     Name shape: seed6_n16_1200s_A_r40-40-20_lh_req_ss2
     """
     parts = str(trace_dir_name).split("_")
+    # A trailing _L<x> is the D147 robot deadline, not part of the question-set name. The
+    # generator takes no deadline argument: run_live2_real.py:447 sets DS.ROBOT_DEADLINE_S before
+    # generating, so a 3 s trace is reproduced by setting the same global here. Getting this wrong
+    # is caught rather than scored, by the caller's id-equality control.
+    deadline = None
+    if parts and parts[-1].startswith("L") and parts[-1][1:].replace(".", "", 1).isdigit():
+        deadline = float(parts[-1][1:])
+        parts = parts[:-1]
     kw = dict(seed=int(parts[0][4:]), n=int(parts[1][1:]), run_s=float(parts[2][:-1]),
               mode=parts[3], ratio=parts[4][1:].replace("-", ":"),
               robot_question_set="_".join(parts[5:-1]), ss_question_set=parts[-1])
-    t = TR.generate_trace(kw["seed"], kw["n"], kw["ratio"], kw["run_s"], kw["mode"],
-                          robot_question_set=kw["robot_question_set"],
-                          ss_question_set=kw["ss_question_set"])
+    prev = DS.ROBOT_DEADLINE_S
+    try:
+        if deadline is not None:
+            DS.ROBOT_DEADLINE_S = deadline
+        t = TR.generate_trace(kw["seed"], kw["n"], kw["ratio"], kw["run_s"], kw["mode"],
+                              robot_question_set=kw["robot_question_set"],
+                              ss_question_set=kw["ss_question_set"])
+    finally:
+        DS.ROBOT_DEADLINE_S = prev
     return t["records"] if isinstance(t, dict) else t
 
 
@@ -230,7 +247,10 @@ def main(runs_dir, n, out):
                else {"eco-llm": "_postfix", "hybrid-F-lhreq": "_postfix"})
     for a in ARMS:
         for s in (0, 4, 5, 6):
-            d = R / f"{a}_n{n}_s{s}_1200s_h27_3t{POSTFIX.get(a, '')}"
+            # FROZEN_HEADLINE_SUFFIX scores a different deadline family of cells, e.g. _L3
+            # for the D147 3 s handful. POSTFIX does not apply to those: they are new cells.
+            _sfx = os.environ.get("FROZEN_HEADLINE_SUFFIX", "")
+            d = R / (f"{a}_n{n}_s{s}_1200s_h27_3t" + (_sfx or POSTFIX.get(a, "")))
             if (d / "cell.json").exists():
                 c = json.loads((d / "cell.json").read_text())
                 if c.get("err") is None and c.get("run_valid") and c.get("digests_equal"):
