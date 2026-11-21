@@ -106,38 +106,57 @@ class Arm:
         return kw
 
 
-# Proposed policy first (hero, blue, solid). Then warming baseline (green),
-# cascade-routing (purple, dashdot + triangle so it stays distinct from blue
-# under CVD), eco-llm (risk/orange), then static baselines in grey. Order is the
-# legend and plotting order in every figure.
+# Proposed policy first (hero, blue, solid). hybrid-F-lhreq (full joint policy) and
+# hybrid-F-lhreq-noc3 (the no-C3 ablation) are DISTINCT arms and must stay separable,
+# so the ablation takes a darker blue with its own dashed line and diamond marker. Then
+# the warming baseline (green), cascade-routing (purple), eco-llm (risk/orange), and the
+# remaining baselines in greys/shades, each with its own linestyle and marker so identity
+# never rests on hue alone. Order is the legend and plotting order in every figure.
 ARMS = {
-    "hybrid-F-lhreq-noc3": Arm("hybrid-F-lhreq-noc3", "joint (ours)", BLUE, 0, "-", "o"),
-    "warm-all-lru":        Arm("warm-all-lru", "warm-all + LRU", GREEN, 1, "--", "s", "///"),
-    "cascade-routing":     Arm("cascade-routing", "cascade-routing", PURPLE, 2, "-.", "^", "xxx"),
-    "eco-llm":             Arm("eco-llm", "eco-llm", RISK, 3, ":", "D", "..."),
-    "always-local":        Arm("always-local", "always-local", GREY, 4, "-", "v", ""),
-    "always-cloud":        Arm("always-cloud", "always-cloud", shade(GREY, 0.35), 5, "--", "P", "\\\\"),
-    "no-warm":             Arm("no-warm", "no warming", LIGHT_GREY, 6, ":", "x", ""),
+    "hybrid-F-lhreq":      Arm("hybrid-F-lhreq", "joint (ours)", BLUE, 0, "-", "o"),
+    "hybrid-F-lhreq-noc3": Arm("hybrid-F-lhreq-noc3", "joint, no C3", shade(BLUE, 0.3), 1, "--", "D", "||"),
+    "hybrid-F6-lhreq":     Arm("hybrid-F6-lhreq", "joint F6", tint(BLUE, 0.4), 2, ":", "P", "--"),
+    "warm-all-lru":        Arm("warm-all-lru", "warm-all + LRU", GREEN, 3, "--", "s", "///"),
+    "warm-all-lru-reactive": Arm("warm-all-lru-reactive", "warm-all reactive", tint(GREEN, 0.4), 4, "-.", "v", "\\\\"),
+    "warm-all-lru-off":    Arm("warm-all-lru-off", "no warming (base)", LIGHT_GREY, 5, ":", "x", ""),
+    "cascade-routing":     Arm("cascade-routing", "cascade-routing", PURPLE, 6, "-.", "^", "xxx"),
+    "eco-llm":             Arm("eco-llm", "eco-llm", RISK, 7, ":", "v", "..."),
+    "mooncake":            Arm("mooncake", "mooncake", shade(PURPLE, 0.3), 8, "--", "P", "\\\\"),
+    "querystream-proactive": Arm("querystream-proactive", "querystream", tint(PURPLE, 0.35), 9, ":", "<", ""),
+    "r3-streaming":        Arm("r3-streaming", "r3-streaming", tint(RISK, 0.35), 10, "-.", ">", ""),
+    "simplestream":        Arm("simplestream", "simplestream", shade(RISK, 0.3), 11, "--", "h", ""),
+    "edf":                 Arm("edf", "EDF", GREY, 12, "-", "x", ""),
+    "llf":                 Arm("llf", "LLF", shade(GREY, 0.3), 13, "--", "+", ""),
+    "b7-edf-feasibility":  Arm("b7-edf-feasibility", "EDF-feasibility (b7)", shade(GREY, 0.5), 14, "-", "*", ""),
+    "v5-rules":            Arm("v5-rules", "v5-rules", tint(BLUE, 0.2), 15, "-.", "8", ""),
+    "always-local":        Arm("always-local", "always-local", GREY, 16, "-", "1", ""),
+    "always-cloud":        Arm("always-cloud", "always-cloud", shade(GREY, 0.35), 17, "--", "2", "\\\\"),
+    "always-cloud-fcfs":   Arm("always-cloud-fcfs", "always-cloud FCFS", shade(GREY, 0.2), 18, ":", "3", ""),
 }
 
-ALIASES = {
-    "hybrid-F-lhreq-noc3": "hybrid-F-lhreq-noc3",
+ALIASES = {k: k for k in ARMS}
+ALIASES.update({
+    "hybrid-f-lhreq": "hybrid-F-lhreq",
     "hybrid-f-lhreq-noc3": "hybrid-F-lhreq-noc3",
-    "hybrid-F-lhreq": "hybrid-F-lhreq-noc3",
-    "hybrid-f-lhreq": "hybrid-F-lhreq-noc3",
-    "warm-all-lru": "warm-all-lru",
+    "hybrid-f6-lhreq": "hybrid-F6-lhreq",
     "warm-all": "warm-all-lru",
-    "cascade-routing": "cascade-routing",
-    "eco-llm": "eco-llm",
-    "always-local": "always-local",
-    "always-cloud": "always-cloud",
-    "no-warm": "no-warm",
-}
+    "b7": "b7-edf-feasibility",
+})
+
+# distinct fallback styles for an arm not in the registry (grey, never a brand hue)
+_FALLBACK_MARKERS = ["o", "s", "^", "D", "v", "P", "X", "*", "h", "<", ">", "p"]
+_fallback_cache = {}
 
 
 def arm(name: str) -> Arm:
     key = ALIASES.get(name, ALIASES.get(name.lower(), name))
-    return ARMS[key]
+    if key in ARMS:
+        return ARMS[key]
+    if key not in _fallback_cache:
+        i = len(_fallback_cache)
+        _fallback_cache[key] = Arm(key, key, shade(GREY, 0.15 * (i % 3)), 100 + i,
+                                   ["-", "--", ":"][i % 3], _FALLBACK_MARKERS[i % len(_FALLBACK_MARKERS)])
+    return _fallback_cache[key]
 
 
 def arms_in_order(names):
