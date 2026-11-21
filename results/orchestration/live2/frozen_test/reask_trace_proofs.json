@@ -28,6 +28,16 @@
   "distinct_over_all_seeds": 57,
   "export_rows_total": 398,
   "note_ids": "opportunity_id is assigned in canonical sort order, so a re-ask cell renumbers every later opportunity; ids are not comparable across the re-ask on/off pair, while every non-id field of the OFF trace is present unchanged in the ON trace",
+  "orin_reask_record": {
+    "experiments_row": "StudyORIN-REC-REASK",
+    "join_key": "opportunity_id",
+    "parity_part1": "19/20 (the miss is the declared D81 prefix-cache near-tie drift)",
+    "parity_warm": "20/20",
+    "prompt_tokens_p50": 5510,
+    "reasks_differing_from_original_seed4": "34 percent",
+    "seed4_commit": "cc24d56",
+    "warm_ttft_p50_s": 0.209
+  },
   "per_seed": {
     "4": {
       "asks_per_distinct": 6.6,
@@ -86,5 +96,5 @@
     "fairness_digest_off": "c2a9c3466ace611a0fdb168f80f8337c87b9e8dc13eddbb4c72d7b29417263c3",
     "off_and_on_differ": true
   },
-  "recent_window_definition_for_orin": "committed 60-frame last-120 s filter over the D2 frame list ending at reask_time, matching StudyORIN-REC part 1; the Orin proposed this and session D confirms it"
+  "recent_window_definition_for_orin": "CORRECTED: the committed 60-frame last-120 s filter over the D2 frame list ends at reask_time_session, the EPISODE clock, not at reask_time. The D2 store is episode-indexed and the generator's own history accounting uses the episode clock (DS.d2_frames_in(0.0, t_ask_session)), so history_tokens in these rows was always computed that way. Session D's first README line said reask_time and was wrong; the Orin's parity control settled it, reproducing part 1 on 19 of 20 and WARM on 20 of 20 at seed 4 with the episode clock."
 }
