@@ -9,6 +9,17 @@ THE STANDING ANSWER (the object every metric is computed on)
 
   standing answer = the CLOUD's answer if it was DELIVERED within L, else the DEVICE's answer.
 
+D155 (3), amending D152 (1), splits that sentence in two and the robot headline takes the FIRST:
+
+  BY DEADLINE (the headline)  the cloud's answer if delivered within L, else the DEVICE's answer
+                              IF IT TOO ARRIVES WITHIN L, else NO answer and the question misses.
+  ANY TIME (reported beside)  the cloud's answer if delivered within L, else the device's answer
+                              whenever it lands. This is the D152 (1) behaviour, kept and labelled.
+
+The two are never mixed in one column or one sentence. Every output carries them in separate
+fields suffixed `_by_deadline` and `_any_time`, and the device-latency source that decides the
+first is recorded beside them (`device_delivery_rule`). The on-time-only tables are untouched.
+
 Every row is keyed on the `opportunity_id` the TRACE GENERATOR assigned (D96 (1)): the scorer
 reads that id from `outcomes.jsonl` and from `device_answers.jsonl` and never constructs or
 parses one. The descriptive fields it needs for the play-indexed AP and the per-device breakdown
@@ -141,6 +152,113 @@ ASSISTIVE_DEVICE_PREFIX = "asst"
 DELIVERY = os.environ.get("LIVE2_DELIVERY", "completion")
 if DELIVERY not in ("completion", "first_token"):
     raise SystemExit("LIVE2_DELIVERY must be completion or first_token")
+
+# ---------------------------------------------------------------- D155: the DEVICE side of the
+# delivery rule. These names are the ONE definition both scorers use.
+#
+# D152 (1) made the robot headline CORRECT ANSWERS DELIVERED and credited the DEVICE's answer
+# whenever the cloud missed the deadline, with no regard for when the device's own answer would
+# land. D155 (3) AMENDS that: a device answer counts only if it ARRIVES WITHIN THE DEADLINE, and
+# the old rule ("correct at any time") is reported BESIDE it. The two are never mixed in one
+# column or one sentence, which is why `robot_value` returns two separate fields and
+# `robot_headline` carries two separate numbers rather than one number and a footnote.
+#
+# These are MODULE-LEVEL on purpose, and `frozen_headline.py` IMPORTS them from here rather than
+# reading an environment variable of its own. The D146 `DELIVERY` switch was module-level in this
+# file and local in that one, the two scorers disagreed, and the switch had to be hoisted by
+# hand. One definition, one read, one place to change.
+#
+# WHERE THE DEVICE LATENCY COMES FROM, and it is a SLOT, not a constant:
+#   "trace"            the per-question `device_latency_s` the trace generator already wrote into
+#                      `device_answers.jsonl`. For robot recall that field is
+#                      `data_sources.device_recall_latency_s(history_tokens)`: D87's ORIN2
+#                      IN-PROCESS harness cost, 0.146 s at 11k tokens and 0.225 s at 28k,
+#                      interpolated between and clamped outside. This is the committed default.
+#   "measured:<path>"  a JSON table of MEASURED WARM per-question device latencies, keyed by
+#                      `question_id` or by `opportunity_id`, either as {key: seconds} or as
+#                      {key: {"device_latency_s": seconds}}. This is the drop-in slot for
+#                      StudyORIN-REC's warm path: when the Orin's measured per-question warm
+#                      latency lands it is pointed at here, and nothing in either scorer changes.
+#
+# WHAT MUST NOT GO IN THAT SLOT (D155 (1)): the device's own answer latency on the 97 LH-REQ
+# questions, TTFT median 3.296 s and end-to-end median 6.651 s, is the COLD RE-SEND path. D61 (b)
+# classifies the resend path as an API ARTIFACT and NOT the device baseline, so those two numbers
+# are not a device latency and are wired nowhere in this file.
+DEVICE_LATENCY_SOURCE = os.environ.get("LIVE2_DEVICE_LATENCY", "trace")
+if not (DEVICE_LATENCY_SOURCE == "trace" or DEVICE_LATENCY_SOURCE.startswith("measured:")):
+    raise SystemExit("LIVE2_DEVICE_LATENCY must be 'trace' or 'measured:<path to json>'")
+# The device's clock starts at the QUESTION instant by default: D1 gives every device a local
+# model it can run itself, so it is not waiting on the cloud to fail first. A cascade arm that
+# makes the device wait for the cloud sets this instead of editing the rule.
+DEVICE_WAIT_S = float(os.environ.get("LIVE2_DEVICE_WAIT_S", "0.0"))
+_DEV_LAT_TABLE: Optional[Dict[str, float]] = None
+
+
+def device_latency_table() -> Optional[Dict[str, float]]:
+    """The measured warm per-question table, or None when the trace's own field is the source."""
+    global _DEV_LAT_TABLE
+    if DEVICE_LATENCY_SOURCE == "trace":
+        return None
+    if _DEV_LAT_TABLE is None:
+        raw = json.loads(Path(DEVICE_LATENCY_SOURCE.split(":", 1)[1]).read_text())
+        rows = raw
+        if isinstance(raw, dict) and isinstance(raw.get("device_latency_s"), dict):
+            rows = raw["device_latency_s"]
+        _DEV_LAT_TABLE = {
+            str(k): float(v["device_latency_s"] if isinstance(v, dict) else v)
+            for k, v in rows.items()}
+    return _DEV_LAT_TABLE
+
+
+def device_latency_s(dev: Dict[str, Any]) -> float:
+    """Seconds from the device's start to its own answer, for ONE opportunity.
+
+    It REFUSES rather than guessing. A missing latency used to be invisible, because the device
+    answer was credited whatever happened and there was no quantity to be missing. Under D155 it
+    decides whether that answer counts at all, so an absent one is a stop condition, not a zero.
+    """
+    tab = device_latency_table()
+    if tab is not None:
+        for key in ("question_id", "opportunity_id"):
+            k = dev.get(key)
+            if k is not None and str(k) in tab:
+                return float(tab[str(k)])
+        raise ScoringRefused(
+            "LIVE2_DEVICE_LATENCY=%s holds no measured device latency for question_id %r / "
+            "opportunity_id %r, and D155 scores a device answer by WHEN IT ARRIVES, so there is "
+            "nothing to fall back to" % (DEVICE_LATENCY_SOURCE, dev.get("question_id"),
+                                         dev.get("opportunity_id")))
+    v = dev.get("device_latency_s")
+    if v is None:
+        raise ScoringRefused(
+            "device answer for opportunity %r carries no `device_latency_s`, so D155 cannot say "
+            "whether it arrived within the deadline" % (dev.get("opportunity_id"),))
+    return float(v)
+
+
+def device_within(o: Dict[str, Any], dev: Dict[str, Any], L: float) -> bool:
+    """D155 (3): did the DEVICE's own answer arrive within the deadline?
+
+    Measured from the same `t_opportunity` the cloud's deadline is measured from, so both sides
+    of the comparison are on one clock.
+    """
+    return (DEVICE_WAIT_S + device_latency_s(dev)) <= L + 1e-9
+
+
+def device_delivery_rule() -> Dict[str, Any]:
+    """The device-side rule, recorded in every output so a cell says what produced it."""
+    return dict(
+        device_latency_source=DEVICE_LATENCY_SOURCE,
+        device_wait_s=DEVICE_WAIT_S,
+        meaning=("trace: the per-question `device_latency_s` in device_answers.jsonl, which for "
+                 "robot recall is D87's ORIN2 IN-PROCESS cost, 0.146 s at 11k tokens to 0.225 s "
+                 "at 28k, interpolated and clamped"
+                 if DEVICE_LATENCY_SOURCE == "trace" else
+                 "measured: a MEASURED WARM per-question device latency table"),
+        excluded=("D155 (1): the LH-REQ device answer latencies, TTFT median 3.296 s and "
+                  "end-to-end median 6.651 s, are the COLD RE-SEND path, which D61 (b) "
+                  "classifies as an API artifact and not the device baseline. Not used here."),
+        source="D155 (3) amending D152 (1), user decision 2026-11-20")
 
 
 def _is_assistive(lo: "Loaded", opp: str, outcome: Optional[Dict[str, Any]] = None) -> bool:
@@ -471,9 +589,30 @@ def attainment(lo: Loaded, L_dash: float = DASH_L_S, p_dash: float = DASH_P,
 
 # ---------------------------------------------------------------- task value
 def _standing(o: Dict[str, Any], dev: Dict[str, Any], L: float) -> Dict[str, Any]:
+    """The standing answer under the ANY-TIME rule (D152 (1)): the device always stands in.
+
+    D155 (3) does not change this function. The any-time standing answer stays exactly as
+    committed, because D155 requires it to be REPORTED BESIDE the new rule rather than replaced,
+    and a quantity that is re-derived in two places drifts. `_standing_by_deadline` is the new
+    rule and is a separate function for the same reason.
+    """
     if _within(o, L):
         return dict(source="cloud", payload=o.get("cloud_payload") or {})
     return dict(source="device", payload=dev)
+
+
+def _standing_by_deadline(o: Dict[str, Any], dev: Dict[str, Any], L: float) -> Dict[str, Any]:
+    """D155 (3): the cloud's answer if it arrived in time, else the DEVICE's IF IT ARRIVED IN TIME.
+
+    The third branch is the whole amendment: when neither side made the deadline there is NO
+    answer by the deadline, so the opportunity is a miss and not a device credit. Under D152 (1)
+    that third branch did not exist.
+    """
+    if _within(o, L):
+        return dict(source="cloud", payload=o.get("cloud_payload") or {})
+    if device_within(o, dev, L):
+        return dict(source="device", payload=dev)
+    return dict(source="none", payload=None)
 
 
 def robot_value(lo: Loaded, L_rob: float = ROB_L_S) -> Dict[str, Any]:
@@ -493,8 +632,18 @@ def robot_value(lo: Loaded, L_rob: float = ROB_L_S) -> Dict[str, Any]:
         if dev is None:
             raise ScoringRefused(f"no device answer recorded for recall opportunity {opp!r}")
         st = _standing(o, dev, L_rob)
+        stbd = _standing_by_deadline(o, dev, L_rob)
         gold = dev["gold_letter"]
         cl = (o.get("cloud_payload") or {}).get("cloud_letter")
+        # D155 (3): the by-deadline row. `source_by_deadline == "none"` is a DEFINITE miss, not an
+        # unknown, so it enters the denominator as a False and never as a None. A None here would
+        # silently shrink the denominator and make the amendment look like it changed nothing.
+        if stbd["source"] == "none":
+            sc_bd: Optional[bool] = False
+        elif stbd["source"] == "device":
+            sc_bd = bool(dev["device_correct"])
+        else:
+            sc_bd = None if cl is None else (cl == gold)
         rows.append(dict(opportunity_id=opp, device_id=o["device_id"],
                          question_id=o.get("question_id"), gold=gold,
                          source=st["source"], device_correct=bool(dev["device_correct"]),
@@ -503,16 +652,37 @@ def robot_value(lo: Loaded, L_rob: float = ROB_L_S) -> Dict[str, Any]:
                          standing_correct=(bool(dev["device_correct"])
                                            if st["source"] == "device"
                                            else (None if cl is None else cl == gold)),
+                         source_by_deadline=stbd["source"],
+                         device_latency_s=device_latency_s(dev),
+                         device_on_time=device_within(o, dev, L_rob),
+                         standing_correct_by_deadline=sc_bd,
                          cache_path=path_by_opp.get(opp)))
     def acc(sel) -> Optional[float]:
         v = [r for r in rows if sel(r) and r["standing_correct"] is not None]
         return round(sum(1 for r in v if r["standing_correct"]) / len(v), 6) if v else None
+
+    def acc_bd(sel) -> Optional[float]:
+        v = [r for r in rows if sel(r) and r["standing_correct_by_deadline"] is not None]
+        return (round(sum(1 for r in v if r["standing_correct_by_deadline"]) / len(v), 6)
+                if v else None)
     served = [r for r in rows if r["source"] == "cloud"]
     cloud_known = [r for r in served if r["cloud_correct"] is not None]
     out = dict(
         n=len(rows), n_cloud_standing=len(served), n_device_standing=len(rows) - len(served),
         standing_accuracy=acc(lambda r: True),
         standing_accuracy_n=sum(1 for r in rows if r["standing_correct"] is not None),
+        # D155 (3): the by-deadline rule, kept in its OWN fields beside the any-time ones above.
+        standing_accuracy_by_deadline=acc_bd(lambda r: True),
+        standing_accuracy_by_deadline_n=sum(
+            1 for r in rows if r["standing_correct_by_deadline"] is not None),
+        n_device_standing_by_deadline=sum(1 for r in rows
+                                          if r["source_by_deadline"] == "device"),
+        n_no_answer_by_deadline=sum(1 for r in rows if r["source_by_deadline"] == "none"),
+        device_answers_late=sum(1 for r in rows if not r["device_on_time"]),
+        device_latency_s_range=([round(min(r["device_latency_s"] for r in rows), 6),
+                                 round(max(r["device_latency_s"] for r in rows), 6)]
+                                if rows else None),
+        device_delivery_rule=device_delivery_rule(),
         device_only_accuracy=(round(sum(1 for r in rows if r["device_correct"]) / len(rows), 6)
                               if rows else None),
         cloud_accuracy_on_served=(round(sum(1 for r in cloud_known if r["cloud_correct"])
@@ -1030,12 +1200,36 @@ def score_run(trace_dir: Path, run_dir: Path, calibration: Path, arm: str,
         # delivered 2.3x b7's on-time rate and no more correct answers, because 18 of its 47
         # on-time answers were sent as RECENT, which is right about 11 percent of the time.
         # On time counts answers that arrive; this counts answers that are right.
+        # D155 (3) AMENDS D152 (1): the headline metric is now
+        # `correct_answers_delivered_by_deadline`, in which a DEVICE answer counts only if it
+        # ARRIVES WITHIN THE DEADLINE. `correct_answers_delivered_any_time`, the D152 (1)
+        # behaviour that credits a device answer whenever it lands, is reported BESIDE it in its
+        # own field. The two must never be mixed in one column or one sentence, so there is no
+        # field here called `correct_answers_delivered` any more: a reader cannot pick up the
+        # ambiguous name by accident.
         base["robot_headline"] = dict(
-            metric="correct_answers_delivered",
-            definition=("the cloud's answer when it is delivered within the deadline, otherwise "
-                        "the device's answer, each scored on the representation actually sent"),
-            correct_answers_delivered=rv.get("standing_accuracy"),
-            n=rv.get("standing_accuracy_n"),
+            metric="correct_answers_delivered_by_deadline",
+            definition=("D155 (3): the cloud's answer when it is delivered within the deadline, "
+                        "otherwise the DEVICE's answer IF THE DEVICE'S ANSWER ALSO ARRIVES "
+                        "WITHIN THE DEADLINE, otherwise no answer and the question is a miss; "
+                        "each answer scored on the representation actually sent"),
+            correct_answers_delivered_by_deadline=rv.get("standing_accuracy_by_deadline"),
+            n_by_deadline=rv.get("standing_accuracy_by_deadline_n"),
+            beside_it_any_time=dict(
+                metric="correct_answers_delivered_any_time",
+                definition=("D152 (1), reported beside the headline and never mixed with it: the "
+                            "cloud's answer when it is delivered within the deadline, otherwise "
+                            "the device's answer REGARDLESS OF WHEN IT LANDS"),
+                correct_answers_delivered_any_time=rv.get("standing_accuracy"),
+                n=rv.get("standing_accuracy_n")),
+            device_side=dict(
+                rule=rv.get("device_delivery_rule"),
+                device_latency_s_range=rv.get("device_latency_s_range"),
+                device_answers_late=rv.get("device_answers_late"),
+                n_device_standing_any_time=rv.get("n_device_standing"),
+                n_device_standing_by_deadline=rv.get("n_device_standing_by_deadline"),
+                n_no_answer_by_deadline=rv.get("n_no_answer_by_deadline")),
+            amendment="D155 (3) amends D152 (1), user decision 2026-11-20",
             on_time_beside_it=dict(
                 robot_pool_on_time=sweep[0].get("robot_pool_on_time") if sweep else None,
                 robot_pool_n=sweep[0].get("robot_pool_n") if sweep else None,
@@ -1216,9 +1410,19 @@ def compare(policy: Dict[str, Any], baseline: Dict[str, Any],
         lambda q: 1.0 if br[q]["source"] == "cloud" else 0.0, seed=seed)
     both = [q for q in qs if pr[q]["standing_correct"] is not None
             and br[q]["standing_correct"] is not None]
+    # The ANY-TIME interval (D152 (1)) keeps its committed key and definition, so every committed
+    # comparison recomputes to the same numbers.
     out["robot_standing_accuracy"] = paired_bootstrap(
         both, lambda q: 1.0 if pr[q]["standing_correct"] else 0.0,
         lambda q: 1.0 if br[q]["standing_correct"] else 0.0, seed=seed)
+    # D155 (3): the HEADLINE interval, on its own key. Keys ending `_any_time` and `_by_deadline`
+    # are the two rules; a key with neither suffix is the committed any-time one.
+    bd = [q for q in qs if pr[q].get("standing_correct_by_deadline") is not None
+          and br[q].get("standing_correct_by_deadline") is not None]
+    out["robot_standing_accuracy_by_deadline"] = paired_bootstrap(
+        bd, lambda q: 1.0 if pr[q]["standing_correct_by_deadline"] else 0.0,
+        lambda q: 1.0 if br[q]["standing_correct_by_deadline"] else 0.0, seed=seed)
+    out["robot_standing_accuracy_any_time"] = out["robot_standing_accuracy"]
     out["note"] = ("differences are policy minus baseline on the SAME units. The dashcam AP "
                    "difference needs both arms' play streams and is produced by "
                    "`ap_diff_bootstrap` from a scorer run that holds both.")

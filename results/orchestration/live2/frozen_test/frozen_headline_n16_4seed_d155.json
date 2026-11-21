@@ -1,0 +1,1014 @@
+{
+ "n_devices": 16,
+ "seeds_common_support": [
+  0,
+  4,
+  5,
+  6
+ ],
+ "bootstrap": "paired by seed: opportunities resampled within each seed, same draw for every arm, B=10000",
+ "headline": "D155 (3), amending D152 (1): CORRECT ANSWERS DELIVERED BY THE DEADLINE (the cloud's answer if it is on time, else the DEVICE's answer IF IT TOO ARRIVES WITHIN THE DEADLINE, else no answer and the question is a miss; scored on the representation actually sent). On time is reported beside it, not as the headline.",
+ "headline_beside_it": "D152 (1): CORRECT ANSWERS DELIVERED AT ANY TIME, which credits the device's answer regardless of when it lands. Reported BESIDE the headline and never mixed with it in one column or one sentence (D155 (3)).",
+ "device_delivery_rule": {
+  "device_latency_source": "trace",
+  "device_wait_s": 0.0,
+  "meaning": "trace: the per-question `device_latency_s` in device_answers.jsonl, which for robot recall is D87's ORIN2 IN-PROCESS cost, 0.146 s at 11k tokens to 0.225 s at 28k, interpolated and clamped",
+  "excluded": "D155 (1): the LH-REQ device answer latencies, TTFT median 3.296 s and end-to-end median 6.651 s, are the COLD RE-SEND path, which D61 (b) classifies as an API artifact and not the device baseline. Not used here.",
+  "source": "D155 (3) amending D152 (1), user decision 2026-11-20"
+ },
+ "on_time_rule": "delivered within the deadline (robot 5 s, SS 2 s) by an HTTP 200 request, stamped at COMPLETION, prefill plus decode (D146; the default from 2026-11-20)",
+ "delivery": "completion",
+ "cells": "POST-FIX for eco-llm and hybrid-F-lhreq; pre-fix for b7, mooncake and hybrid-F6-lhreq, which is not redone (D145)",
+ "rows": [
+  {
+   "arm": "b7-edf-feasibility",
+   "robot_correct_delivered_by_deadline": 0.427,
+   "robot_correct_by_deadline_ci95": [
+    0.3258,
+    0.5281
+   ],
+   "robot_correct_by_deadline_hits": 38,
+   "robot_correct_delivered_any_time": 0.427,
+   "robot_correct_any_time_ci95": [
+    0.3258,
+    0.5281
+   ],
+   "robot_correct_any_time_hits": 38,
+   "robot_correct_n": 89,
+   "robot_correct_by_deadline_minus_any_time": 0.0,
+   "device_late_n": 0,
+   "robot_feasible_on_time": 0.6087,
+   "robot_ci95": [
+    0.4928,
+    0.7246
+   ],
+   "robot_feasible_n": 69,
+   "robot_feasible_hits": 42,
+   "robot_all_on_time": 0.4719,
+   "robot_all_ci95": [
+    0.3708,
+    0.573
+   ],
+   "robot_all_n": 89,
+   "robot_all_hits": 42,
+   "ss_on_time": 0.8934,
+   "ss_ci95": [
+    0.8766,
+    0.9095
+   ],
+   "ss_n": 1426,
+   "ss_hits": 1274,
+   "dashcam_all_meet_runs": "4 of 4",
+   "robot_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "robot_all_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "ss_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "robot_correct_by_deadline_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "robot_correct_any_time_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "per_run": [
+    {
+     "seed": 0,
+     "robot_all": 24,
+     "robot_feasible": 18,
+     "robot_feasible_hits": 10,
+     "robot_all_hits": 10,
+     "ss_hits": 312,
+     "ss_n": 356,
+     "robot_correct_by_deadline_hits": 12,
+     "robot_correct_any_time_hits": 12,
+     "robot_correct_n": 24,
+     "dash": true,
+     "errors": 1,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.225
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 18,
+      "on_time": 10,
+      "robot_pool_meets": false,
+      "need_to_meet": 17,
+      "margin_questions": -7,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    },
+    {
+     "seed": 4,
+     "robot_all": 20,
+     "robot_feasible": 15,
+     "robot_feasible_hits": 11,
+     "robot_all_hits": 11,
+     "ss_hits": 329,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 10,
+     "robot_correct_any_time_hits": 10,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.210878
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 15,
+      "on_time": 11,
+      "robot_pool_meets": false,
+      "need_to_meet": 14,
+      "margin_questions": -3,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    },
+    {
+     "seed": 5,
+     "robot_all": 25,
+     "robot_feasible": 22,
+     "robot_feasible_hits": 11,
+     "robot_all_hits": 11,
+     "ss_hits": 309,
+     "ss_n": 356,
+     "robot_correct_by_deadline_hits": 11,
+     "robot_correct_any_time_hits": 11,
+     "robot_correct_n": 25,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.211714
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 22,
+      "on_time": 11,
+      "robot_pool_meets": false,
+      "need_to_meet": 20,
+      "margin_questions": -9,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    },
+    {
+     "seed": 6,
+     "robot_all": 20,
+     "robot_feasible": 14,
+     "robot_feasible_hits": 10,
+     "robot_all_hits": 10,
+     "ss_hits": 324,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 5,
+     "robot_correct_any_time_hits": 5,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.209205
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 14,
+      "on_time": 10,
+      "robot_pool_meets": false,
+      "need_to_meet": 13,
+      "margin_questions": -3,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    }
+   ]
+  },
+  {
+   "arm": "eco-llm",
+   "robot_correct_delivered_by_deadline": 0.3708,
+   "robot_correct_by_deadline_ci95": [
+    0.2697,
+    0.4719
+   ],
+   "robot_correct_by_deadline_hits": 33,
+   "robot_correct_delivered_any_time": 0.3708,
+   "robot_correct_any_time_ci95": [
+    0.2697,
+    0.4719
+   ],
+   "robot_correct_any_time_hits": 33,
+   "robot_correct_n": 89,
+   "robot_correct_by_deadline_minus_any_time": 0.0,
+   "device_late_n": 0,
+   "robot_feasible_on_time": 0.6087,
+   "robot_ci95": [
+    0.4928,
+    0.7246
+   ],
+   "robot_feasible_n": 69,
+   "robot_feasible_hits": 42,
+   "robot_all_on_time": 0.6742,
+   "robot_all_ci95": [
+    0.573,
+    0.764
+   ],
+   "robot_all_n": 89,
+   "robot_all_hits": 60,
+   "ss_on_time": 0.892,
+   "ss_ci95": [
+    0.8759,
+    0.9081
+   ],
+   "ss_n": 1426,
+   "ss_hits": 1272,
+   "dashcam_all_meet_runs": "4 of 4",
+   "robot_minus_b7_ci95": [
+    0.0,
+    0.0
+   ],
+   "robot_all_minus_b7_ci95": [
+    0.1236,
+    0.2921
+   ],
+   "ss_minus_b7_ci95": [
+    -0.0056,
+    0.0021
+   ],
+   "robot_correct_by_deadline_minus_b7_ci95": [
+    -0.1124,
+    -0.0112
+   ],
+   "robot_correct_any_time_minus_b7_ci95": [
+    -0.1124,
+    -0.0112
+   ],
+   "per_run": [
+    {
+     "seed": 0,
+     "robot_all": 24,
+     "robot_feasible": 18,
+     "robot_feasible_hits": 10,
+     "robot_all_hits": 15,
+     "ss_hits": 311,
+     "ss_n": 356,
+     "robot_correct_by_deadline_hits": 11,
+     "robot_correct_any_time_hits": 11,
+     "robot_correct_n": 24,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.225
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 18,
+      "on_time": 10,
+      "robot_pool_meets": false,
+      "need_to_meet": 17,
+      "margin_questions": -7,
+      "fragile": false,
+      "capacity_met": true,
+      "scorer_robot_pool_meets": true
+     }
+    },
+    {
+     "seed": 4,
+     "robot_all": 20,
+     "robot_feasible": 15,
+     "robot_feasible_hits": 11,
+     "robot_all_hits": 16,
+     "ss_hits": 328,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 8,
+     "robot_correct_any_time_hits": 8,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.210878
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 15,
+      "on_time": 11,
+      "robot_pool_meets": false,
+      "need_to_meet": 14,
+      "margin_questions": -3,
+      "fragile": false,
+      "capacity_met": true,
+      "scorer_robot_pool_meets": true
+     }
+    },
+    {
+     "seed": 5,
+     "robot_all": 25,
+     "robot_feasible": 22,
+     "robot_feasible_hits": 11,
+     "robot_all_hits": 14,
+     "ss_hits": 309,
+     "ss_n": 356,
+     "robot_correct_by_deadline_hits": 9,
+     "robot_correct_any_time_hits": 9,
+     "robot_correct_n": 25,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.211714
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 22,
+      "on_time": 11,
+      "robot_pool_meets": false,
+      "need_to_meet": 20,
+      "margin_questions": -9,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    },
+    {
+     "seed": 6,
+     "robot_all": 20,
+     "robot_feasible": 14,
+     "robot_feasible_hits": 10,
+     "robot_all_hits": 15,
+     "ss_hits": 324,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 5,
+     "robot_correct_any_time_hits": 5,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.209205
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 14,
+      "on_time": 10,
+      "robot_pool_meets": false,
+      "need_to_meet": 13,
+      "margin_questions": -3,
+      "fragile": false,
+      "capacity_met": true,
+      "scorer_robot_pool_meets": true
+     }
+    }
+   ]
+  },
+  {
+   "arm": "mooncake",
+   "robot_correct_delivered_by_deadline": 0.4382,
+   "robot_correct_by_deadline_ci95": [
+    0.3371,
+    0.5393
+   ],
+   "robot_correct_by_deadline_hits": 39,
+   "robot_correct_delivered_any_time": 0.4382,
+   "robot_correct_any_time_ci95": [
+    0.3371,
+    0.5393
+   ],
+   "robot_correct_any_time_hits": 39,
+   "robot_correct_n": 89,
+   "robot_correct_by_deadline_minus_any_time": 0.0,
+   "device_late_n": 0,
+   "robot_feasible_on_time": 0.6087,
+   "robot_ci95": [
+    0.4928,
+    0.7246
+   ],
+   "robot_feasible_n": 69,
+   "robot_feasible_hits": 42,
+   "robot_all_on_time": 0.4719,
+   "robot_all_ci95": [
+    0.3708,
+    0.573
+   ],
+   "robot_all_n": 89,
+   "robot_all_hits": 42,
+   "ss_on_time": 0.8948,
+   "ss_ci95": [
+    0.8787,
+    0.9109
+   ],
+   "ss_n": 1426,
+   "ss_hits": 1276,
+   "dashcam_all_meet_runs": "4 of 4",
+   "robot_minus_b7_ci95": [
+    -0.0435,
+    0.0435
+   ],
+   "robot_all_minus_b7_ci95": [
+    -0.0337,
+    0.0337
+   ],
+   "ss_minus_b7_ci95": [
+    -0.0035,
+    0.0063
+   ],
+   "robot_correct_by_deadline_minus_b7_ci95": [
+    0.0,
+    0.0337
+   ],
+   "robot_correct_any_time_minus_b7_ci95": [
+    0.0,
+    0.0337
+   ],
+   "per_run": [
+    {
+     "seed": 0,
+     "robot_all": 24,
+     "robot_feasible": 18,
+     "robot_feasible_hits": 11,
+     "robot_all_hits": 11,
+     "ss_hits": 313,
+     "ss_n": 356,
+     "robot_correct_by_deadline_hits": 12,
+     "robot_correct_any_time_hits": 12,
+     "robot_correct_n": 24,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.225
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 18,
+      "on_time": 11,
+      "robot_pool_meets": false,
+      "need_to_meet": 17,
+      "margin_questions": -6,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    },
+    {
+     "seed": 4,
+     "robot_all": 20,
+     "robot_feasible": 15,
+     "robot_feasible_hits": 11,
+     "robot_all_hits": 11,
+     "ss_hits": 326,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 10,
+     "robot_correct_any_time_hits": 10,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.210878
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 15,
+      "on_time": 11,
+      "robot_pool_meets": false,
+      "need_to_meet": 14,
+      "margin_questions": -3,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    },
+    {
+     "seed": 5,
+     "robot_all": 25,
+     "robot_feasible": 22,
+     "robot_feasible_hits": 11,
+     "robot_all_hits": 11,
+     "ss_hits": 310,
+     "ss_n": 356,
+     "robot_correct_by_deadline_hits": 11,
+     "robot_correct_any_time_hits": 11,
+     "robot_correct_n": 25,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.211714
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 22,
+      "on_time": 11,
+      "robot_pool_meets": false,
+      "need_to_meet": 20,
+      "margin_questions": -9,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    },
+    {
+     "seed": 6,
+     "robot_all": 20,
+     "robot_feasible": 14,
+     "robot_feasible_hits": 9,
+     "robot_all_hits": 9,
+     "ss_hits": 327,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 6,
+     "robot_correct_any_time_hits": 6,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 1,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.209205
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 14,
+      "on_time": 9,
+      "robot_pool_meets": false,
+      "need_to_meet": 13,
+      "margin_questions": -4,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    }
+   ]
+  },
+  {
+   "arm": "hybrid-F-lhreq",
+   "robot_correct_delivered_by_deadline": 0.4831,
+   "robot_correct_by_deadline_ci95": [
+    0.382,
+    0.5843
+   ],
+   "robot_correct_by_deadline_hits": 43,
+   "robot_correct_delivered_any_time": 0.4831,
+   "robot_correct_any_time_ci95": [
+    0.382,
+    0.5843
+   ],
+   "robot_correct_any_time_hits": 43,
+   "robot_correct_n": 89,
+   "robot_correct_by_deadline_minus_any_time": 0.0,
+   "device_late_n": 0,
+   "robot_feasible_on_time": 0.971,
+   "robot_ci95": [
+    0.9275,
+    1.0
+   ],
+   "robot_feasible_n": 69,
+   "robot_feasible_hits": 67,
+   "robot_all_on_time": 0.9551,
+   "robot_all_ci95": [
+    0.9101,
+    0.9888
+   ],
+   "robot_all_n": 89,
+   "robot_all_hits": 85,
+   "ss_on_time": 0.9811,
+   "ss_ci95": [
+    0.9734,
+    0.9874
+   ],
+   "ss_n": 1426,
+   "ss_hits": 1399,
+   "dashcam_all_meet_runs": "4 of 4",
+   "robot_minus_b7_ci95": [
+    0.2464,
+    0.4783
+   ],
+   "robot_all_minus_b7_ci95": [
+    0.382,
+    0.5843
+   ],
+   "ss_minus_b7_ci95": [
+    0.0729,
+    0.1031
+   ],
+   "robot_correct_by_deadline_minus_b7_ci95": [
+    -0.0225,
+    0.1461
+   ],
+   "robot_correct_any_time_minus_b7_ci95": [
+    -0.0225,
+    0.1461
+   ],
+   "per_run": [
+    {
+     "seed": 0,
+     "robot_all": 24,
+     "robot_feasible": 18,
+     "robot_feasible_hits": 18,
+     "robot_all_hits": 23,
+     "ss_hits": 349,
+     "ss_n": 356,
+     "robot_correct_by_deadline_hits": 13,
+     "robot_correct_any_time_hits": 13,
+     "robot_correct_n": 24,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.225
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 18,
+      "on_time": 18,
+      "robot_pool_meets": true,
+      "need_to_meet": 17,
+      "margin_questions": 1,
+      "fragile": true,
+      "capacity_met": true,
+      "scorer_robot_pool_meets": true
+     }
+    },
+    {
+     "seed": 4,
+     "robot_all": 20,
+     "robot_feasible": 15,
+     "robot_feasible_hits": 15,
+     "robot_all_hits": 20,
+     "ss_hits": 348,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 11,
+     "robot_correct_any_time_hits": 11,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.210878
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 15,
+      "on_time": 15,
+      "robot_pool_meets": true,
+      "need_to_meet": 14,
+      "margin_questions": 1,
+      "fragile": true,
+      "capacity_met": true,
+      "scorer_robot_pool_meets": true
+     }
+    },
+    {
+     "seed": 5,
+     "robot_all": 25,
+     "robot_feasible": 22,
+     "robot_feasible_hits": 20,
+     "robot_all_hits": 23,
+     "ss_hits": 347,
+     "ss_n": 356,
+     "robot_correct_by_deadline_hits": 12,
+     "robot_correct_any_time_hits": 12,
+     "robot_correct_n": 25,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.211714
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 22,
+      "on_time": 20,
+      "robot_pool_meets": true,
+      "need_to_meet": 20,
+      "margin_questions": 0,
+      "fragile": true,
+      "capacity_met": true,
+      "scorer_robot_pool_meets": true
+     }
+    },
+    {
+     "seed": 6,
+     "robot_all": 20,
+     "robot_feasible": 14,
+     "robot_feasible_hits": 14,
+     "robot_all_hits": 19,
+     "ss_hits": 355,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 7,
+     "robot_correct_any_time_hits": 7,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 1,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.209205
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 14,
+      "on_time": 14,
+      "robot_pool_meets": true,
+      "need_to_meet": 13,
+      "margin_questions": 1,
+      "fragile": true,
+      "capacity_met": true,
+      "scorer_robot_pool_meets": true
+     }
+    }
+   ]
+  },
+  {
+   "arm": "hybrid-F6-lhreq",
+   "robot_correct_delivered_by_deadline": 0.4944,
+   "robot_correct_by_deadline_ci95": [
+    0.3933,
+    0.5955
+   ],
+   "robot_correct_by_deadline_hits": 44,
+   "robot_correct_delivered_any_time": 0.4944,
+   "robot_correct_any_time_ci95": [
+    0.3933,
+    0.5955
+   ],
+   "robot_correct_any_time_hits": 44,
+   "robot_correct_n": 89,
+   "robot_correct_by_deadline_minus_any_time": 0.0,
+   "device_late_n": 0,
+   "robot_feasible_on_time": 0.8841,
+   "robot_ci95": [
+    0.7971,
+    0.9565
+   ],
+   "robot_feasible_n": 69,
+   "robot_feasible_hits": 61,
+   "robot_all_on_time": 0.6854,
+   "robot_all_ci95": [
+    0.5843,
+    0.7753
+   ],
+   "robot_all_n": 89,
+   "robot_all_hits": 61,
+   "ss_on_time": 0.9481,
+   "ss_ci95": [
+    0.9362,
+    0.9593
+   ],
+   "ss_n": 1426,
+   "ss_hits": 1352,
+   "dashcam_all_meet_runs": "4 of 4",
+   "robot_minus_b7_ci95": [
+    0.1739,
+    0.3913
+   ],
+   "robot_all_minus_b7_ci95": [
+    0.1236,
+    0.3034
+   ],
+   "ss_minus_b7_ci95": [
+    0.0379,
+    0.0715
+   ],
+   "robot_correct_by_deadline_minus_b7_ci95": [
+    0.0112,
+    0.1348
+   ],
+   "robot_correct_any_time_minus_b7_ci95": [
+    0.0112,
+    0.1348
+   ],
+   "per_run": [
+    {
+     "seed": 0,
+     "robot_all": 24,
+     "robot_feasible": 18,
+     "robot_feasible_hits": 15,
+     "robot_all_hits": 15,
+     "ss_hits": 332,
+     "ss_n": 356,
+     "robot_correct_by_deadline_hits": 13,
+     "robot_correct_any_time_hits": 13,
+     "robot_correct_n": 24,
+     "dash": true,
+     "errors": 1,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.225
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 18,
+      "on_time": 15,
+      "robot_pool_meets": false,
+      "need_to_meet": 17,
+      "margin_questions": -2,
+      "fragile": false,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    },
+    {
+     "seed": 4,
+     "robot_all": 20,
+     "robot_feasible": 15,
+     "robot_feasible_hits": 13,
+     "robot_all_hits": 13,
+     "ss_hits": 334,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 11,
+     "robot_correct_any_time_hits": 11,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.210878
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 15,
+      "on_time": 13,
+      "robot_pool_meets": false,
+      "need_to_meet": 14,
+      "margin_questions": -1,
+      "fragile": true,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    },
+    {
+     "seed": 5,
+     "robot_all": 25,
+     "robot_feasible": 22,
+     "robot_feasible_hits": 19,
+     "robot_all_hits": 19,
+     "ss_hits": 342,
+     "ss_n": 356,
+     "robot_correct_by_deadline_hits": 13,
+     "robot_correct_any_time_hits": 13,
+     "robot_correct_n": 25,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.211714
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 22,
+      "on_time": 19,
+      "robot_pool_meets": false,
+      "need_to_meet": 20,
+      "margin_questions": -1,
+      "fragile": true,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    },
+    {
+     "seed": 6,
+     "robot_all": 20,
+     "robot_feasible": 14,
+     "robot_feasible_hits": 14,
+     "robot_all_hits": 14,
+     "ss_hits": 344,
+     "ss_n": 357,
+     "robot_correct_by_deadline_hits": 7,
+     "robot_correct_any_time_hits": 7,
+     "robot_correct_n": 20,
+     "dash": true,
+     "errors": 0,
+     "device_late_n": 0,
+     "device_latency_s_range": [
+      0.146,
+      0.209205
+     ],
+     "deadline_s_range": [
+      5.0,
+      5.0
+     ],
+     "d133": {
+      "p_rob": 0.9,
+      "feasible": 14,
+      "on_time": 14,
+      "robot_pool_meets": true,
+      "need_to_meet": 13,
+      "margin_questions": 1,
+      "fragile": true,
+      "capacity_met": false,
+      "scorer_robot_pool_meets": false
+     }
+    }
+   ]
+  }
+ ]
+}

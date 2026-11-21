@@ -22,12 +22,18 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
-for p in (HERE, HERE / "fleet", REPO / "experiments/orchestration/baselines", REPO / "experiments/orchestration/sim",
-          REPO / "experiments/lib"):
+for p in (HERE, HERE / "fleet", HERE / "scorer", REPO / "experiments/orchestration/baselines",
+          REPO / "experiments/orchestration/sim", REPO / "experiments/lib"):
     sys.path.insert(0, str(p))
 import costs as C          # noqa: E402
 import traces as TRC       # noqa: E402
 import trace as TR         # noqa: E402
+# D155 (3): the DEVICE side of the delivery rule is IMPORTED from the production scorer, never
+# re-implemented here and never read from an environment variable of this file's own. The D146
+# `DELIVERY` switch was module-level in score.py and local in this file, the two scorers
+# disagreed, and it had to be hoisted by hand. `device_within` and `device_delivery_rule` have
+# exactly one definition, so the two scorers cannot drift apart on which device answers count.
+import score as SC         # noqa: E402
 
 ARMS = ["b7-edf-feasibility", "eco-llm", "mooncake", "hybrid-F-lhreq", "hybrid-F6-lhreq"]
 B = 10000
@@ -72,7 +78,11 @@ _ANS = {}
 
 
 def device_answers_for(seed, trace_dir):
-    """{opportunity_id: (gold_letter, device_correct)} for one cell's robot questions.
+    """{opportunity_id: the device answer ROW} for one cell's robot questions.
+
+    It returns the whole row, not a (gold, correct) pair, because D155 (3) needs the row's
+    `device_latency_s` and `question_id` as well, and `score.device_latency_s` reads them from the
+    row itself. The pair was the committed shape; widening it to the row keeps one join key.
 
     Read from the run's own trace directory when it is present, and regenerated otherwise, because
     only one trace is committed. The regeneration is verified rather than assumed: regenerating
@@ -93,7 +103,7 @@ def device_answers_for(seed, trace_dir):
                                   robot_question_set="lh_req", ss_question_set="ss2")
             TR.write_trace(Path(d) / "t", b)
             rows = [json.loads(x) for x in open(Path(d) / "t" / "device_answers.jsonl")]
-    out = {r["opportunity_id"]: (r["gold_letter"], bool(r["device_correct"])) for r in rows
+    out = {r["opportunity_id"]: r for r in rows
            if r.get("kind") == "recall" and r.get("gold_letter") is not None}
     _ANS[seed] = out
     return out
@@ -106,6 +116,7 @@ def run_flags(d):
         else local_trace(Path(c["trace_dir"]).name)
     link = TRC.RTT_MS / 1000.0
     feas, ssq = {}, set()
+    dls = {}        # D155 (3): the per-question deadline, which the DEVICE is now held to as well
     for r in tr:
         if r.get("kind") != "recall_question":
             continue
@@ -119,6 +130,7 @@ def run_flags(d):
                 raise AssertionError("recall_question %s carries no deadline_s; refusing to "
                                      "assume one" % r.get("opportunity_id"))
             feas[r["opportunity_id"]] = (C.recall_ttft_s(h, "COLD") + C.recall_ttft_s(h, "GPU-WARM") + link) <= float(r["deadline_s"])
+            dls[r["opportunity_id"]] = float(r["deadline_s"])
         elif dev.startswith("asst"):
             ssq.add(r["opportunity_id"])
     failed = {r.get("request_id") for r in jl(d / "request.jsonl") if r.get("http_status") != 200}
@@ -157,25 +169,42 @@ def run_flags(d):
     # on time and the device's otherwise, scored on the representation actually sent. On time is
     # reported beside it. The cloud letter actually produced is compared to the gold letter, so a
     # release made as RECENT is scored as RECENT and no accuracy table is consulted.
+    #
+    # D155 (3) AMENDS D152 (1). A DEVICE answer now counts only if it ARRIVES WITHIN THE DEADLINE
+    # (`corr_bd`, the headline); the D152 (1) behaviour that credits a device answer regardless of
+    # when it lands is kept as `corr_any` and REPORTED BESIDE IT. The two never share a column.
+    # Whether a device answer is on time is decided by `score.device_within`, imported above, so
+    # this file and the production scorer apply one rule to one latency source.
     ans = device_answers_for(int(c["seed"]), c["trace_dir"])
     cl = {}
     for o in jl(d / "outcomes.jsonl"):
         if o.get("kind") == "recall":
             cl[o["opportunity_id"]] = (o.get("cloud_payload") or {}).get("cloud_letter")
-    corr = {}
+    corr_any, corr_bd, dev_late = {}, {}, {}
     for k in feas:
-        g = ans.get(k)
-        if g is None:
+        dev = ans.get(k)
+        if dev is None:
             continue
-        gold, dev_ok = g
-        corr[k] = bool((cl.get(k) == gold) if (ont.get(k) and cl.get(k)) else dev_ok)
+        gold, dev_ok = dev["gold_letter"], bool(dev["device_correct"])
+        cloud_stands = bool(ont.get(k) and cl.get(k))
+        # the committed D152 (1) expression, unchanged
+        corr_any[k] = bool((cl.get(k) == gold) if cloud_stands else dev_ok)
+        on_t = SC.device_within({}, dev, dls[k])
+        dev_late[k] = not on_t
+        corr_bd[k] = bool((cl.get(k) == gold) if cloud_stands else (dev_ok and on_t))
     nfeas = sum(1 for v in feas.values() if v)
     hits_f = sum(1 for k, v in feas.items() if v and ont.get(k))
     # D133 verdict per run, with its margin. p_rob is read from the run's own sweep where present.
     p_rob = float(sw.get("p_rob") or P_ROB)
     # The smallest number of on-time questions that MEETS the bar: ceil(p_rob x n), not round().
     need = (math.ceil(p_rob * nfeas - 1e-9) if nfeas else 0)
-    return dict(robot_correct={k: v for k, v in corr.items()},
+    return dict(robot_correct_by_deadline=dict(corr_bd),
+                robot_correct_any_time=dict(corr_any),
+                device_late_n=sum(1 for v in dev_late.values() if v),
+                device_latency_s_range=([round(min(ans[k]["device_latency_s"] for k in corr_bd), 6),
+                                         round(max(ans[k]["device_latency_s"] for k in corr_bd), 6)]
+                                        if corr_bd else None),
+                deadline_s_range=([min(dls.values()), max(dls.values())] if dls else None),
                 robot_feasible={k: ont.get(k, False) for k, v in feas.items() if v},
                 robot_all_map={k: ont.get(k, False) for k in feas}, robot_all=len(feas),
                 ss={k: ont.get(k, False) for k in ssq}, dash=bool(sw.get("dashcam_all_meet")),
@@ -223,17 +252,23 @@ def main(runs_dir, n, out):
         ad = sum(len(adraw[s]) for s in seeds)
         sn = sum(runs[(a, s)]["ss"][k] for s in seeds for k in sdraw[s])
         sd = sum(len(sdraw[s]) for s in seeds)
-        # D152: correct answers delivered, over the SAME denominator as robot_all (every robot
-        # question), because a question the cloud never answered still has the device's answer.
-        cn = sum(runs[(a, s)]["robot_correct"].get(k, False) for s in seeds for k in adraw[s])
-        return rn / rd, an / ad, sn / sd, cn / ad
+        # D152 / D155: correct answers delivered, over the SAME denominator as robot_all (every
+        # robot question). Under D155 (3) a question where neither the cloud nor the device makes
+        # the deadline stays in that denominator and counts as a miss, which is why the
+        # denominator does not change between the two columns.
+        cb = sum(runs[(a, s)]["robot_correct_by_deadline"].get(k, False)
+                 for s in seeds for k in adraw[s])
+        ca = sum(runs[(a, s)]["robot_correct_any_time"].get(k, False)
+                 for s in seeds for k in adraw[s])
+        return rn / rd, an / ad, sn / sd, cb / ad, ca / ad
 
     import numpy as np
     point = {a: pooled(a, rob_ids, all_ids, ss_ids) for a in ARMS}
     rng = np.random.default_rng(0)
     # per seed: an arms x questions 0/1 matrix; one index draw per seed per replicate, shared by every arm (paired)
     rob_num = np.zeros((len(ARMS), B)); ss_num = np.zeros((len(ARMS), B))
-    all_num = np.zeros((len(ARMS), B)); cor_num = np.zeros((len(ARMS), B))
+    all_num = np.zeros((len(ARMS), B))
+    cbd_num = np.zeros((len(ARMS), B)); cat_num = np.zeros((len(ARMS), B))
     rob_den = sum(len(rob_ids[s]) for s in seeds); ss_den = sum(len(ss_ids[s]) for s in seeds)
     all_den = sum(len(all_ids[s]) for s in seeds)
     for s in seeds:
@@ -249,11 +284,15 @@ def main(runs_dir, n, out):
             draws[key] = idx
             num += M[:, idx].sum(axis=2)
         if all_ids[s]:
-            C = np.array([[runs[(a, s)]["robot_correct"].get(k, False) for k in all_ids[s]]
-                          for a in ARMS], dtype=float)
-            cor_num += C[:, draws["robot_all_map"]].sum(axis=2)
+            # both correctness columns use the SAME index draw as robot_all, so the three are
+            # paired question by question and any difference between them is the rule, not the draw
+            for key, num in (("robot_correct_by_deadline", cbd_num),
+                             ("robot_correct_any_time", cat_num)):
+                M = np.array([[runs[(a, s)][key].get(k, False) for k in all_ids[s]]
+                              for a in ARMS], dtype=float)
+                num += M[:, draws["robot_all_map"]].sum(axis=2)
     boots = {a: list(zip(rob_num[i] / rob_den, all_num[i] / all_den, ss_num[i] / ss_den,
-                         cor_num[i] / all_den))
+                         cbd_num[i] / all_den, cat_num[i] / all_den))
              for i, a in enumerate(ARMS)}
 
     def ci(xs):
@@ -263,13 +302,24 @@ def main(runs_dir, n, out):
     rows = []
     for a in ARMS:
         rows.append(dict(arm=a,
-                         # D152: the headline. On time follows it.
-                         robot_correct_delivered=round(point[a][3], 4),
-                         robot_correct_ci95=ci([x[3] for x in boots[a]]),
-                         robot_correct_n=sum(len(all_ids[s]) for s in seeds),
-                         robot_correct_hits=sum(
-                             runs[(a, s)]["robot_correct"].get(k, False)
+                         # D155 (3): THE HEADLINE. A device answer counts only if it arrives
+                         # within the deadline. On time follows it.
+                         robot_correct_delivered_by_deadline=round(point[a][3], 4),
+                         robot_correct_by_deadline_ci95=ci([x[3] for x in boots[a]]),
+                         robot_correct_by_deadline_hits=sum(
+                             runs[(a, s)]["robot_correct_by_deadline"].get(k, False)
                              for s in seeds for k in all_ids[s]),
+                         # D152 (1), REPORTED BESIDE IT and never mixed with it: a device answer
+                         # counts whenever it lands.
+                         robot_correct_delivered_any_time=round(point[a][4], 4),
+                         robot_correct_any_time_ci95=ci([x[4] for x in boots[a]]),
+                         robot_correct_any_time_hits=sum(
+                             runs[(a, s)]["robot_correct_any_time"].get(k, False)
+                             for s in seeds for k in all_ids[s]),
+                         robot_correct_n=sum(len(all_ids[s]) for s in seeds),
+                         robot_correct_by_deadline_minus_any_time=round(
+                             point[a][3] - point[a][4], 4),
+                         device_late_n=sum(runs[(a, s)]["device_late_n"] for s in seeds),
                          robot_feasible_on_time=round(point[a][0], 4), robot_ci95=ci([x[0] for x in boots[a]]),
                          robot_feasible_n=sum(len(rob_ids[s]) for s in seeds),
                          robot_feasible_hits=sum(runs[(a, s)]["robot_feasible"][k] for s in seeds for k in rob_ids[s]),
@@ -285,16 +335,41 @@ def main(runs_dir, n, out):
                                                      in zip(boots[a], boots['b7-edf-feasibility'])]),
                          ss_minus_b7_ci95=ci([x[2] - y[2] for x, y
                                               in zip(boots[a], boots['b7-edf-feasibility'])]),
+                         robot_correct_by_deadline_minus_b7_ci95=ci(
+                             [x[3] - y[3] for x, y
+                              in zip(boots[a], boots['b7-edf-feasibility'])]),
+                         robot_correct_any_time_minus_b7_ci95=ci(
+                             [x[4] - y[4] for x, y
+                              in zip(boots[a], boots['b7-edf-feasibility'])]),
                          per_run=[dict(seed=s, robot_all=runs[(a, s)]["robot_all"], robot_feasible=len(rob_ids[s]),
                                        robot_feasible_hits=sum(runs[(a, s)]["robot_feasible"].values()),
                                        robot_all_hits=sum(runs[(a, s)]["robot_all_map"].values()),
                                        ss_hits=sum(runs[(a, s)]["ss"].values()), ss_n=len(ss_ids[s]),
+                                       # D155 (3): the two headline columns PER CELL, so a reader
+                                       # can see where they part company without pooling first
+                                       robot_correct_by_deadline_hits=sum(
+                                           runs[(a, s)]["robot_correct_by_deadline"].get(k, False)
+                                           for k in all_ids[s]),
+                                       robot_correct_any_time_hits=sum(
+                                           runs[(a, s)]["robot_correct_any_time"].get(k, False)
+                                           for k in all_ids[s]),
+                                       robot_correct_n=len(all_ids[s]),
                                        dash=runs[(a, s)]["dash"], errors=runs[(a, s)]["errors"],
+                                       device_late_n=runs[(a, s)]["device_late_n"],
+                                       device_latency_s_range=runs[(a, s)]["device_latency_s_range"],
+                                       deadline_s_range=runs[(a, s)]["deadline_s_range"],
                                        d133=runs[(a, s)]["d133"]) for s in seeds]))
     res = dict(n_devices=n, seeds_common_support=seeds, bootstrap=f"paired by seed: opportunities resampled within each seed, same draw for every arm, B={B}",
-               headline="D152: CORRECT ANSWERS DELIVERED (the cloud's answer if on time, else "
-                        "the device's, scored on the representation actually sent). On time is "
-                        "reported beside it, not as the headline.",
+               headline="D155 (3), amending D152 (1): CORRECT ANSWERS DELIVERED BY THE DEADLINE "
+                        "(the cloud's answer if it is on time, else the DEVICE's answer IF IT TOO "
+                        "ARRIVES WITHIN THE DEADLINE, else no answer and the question is a miss; "
+                        "scored on the representation actually sent). On time is reported beside "
+                        "it, not as the headline.",
+               headline_beside_it="D152 (1): CORRECT ANSWERS DELIVERED AT ANY TIME, which credits "
+                                  "the device's answer regardless of when it lands. Reported "
+                                  "BESIDE the headline and never mixed with it in one column or "
+                                  "one sentence (D155 (3)).",
+               device_delivery_rule=SC.device_delivery_rule(),
                on_time_rule=("delivered within the deadline (robot 5 s, SS 2 s) by an HTTP 200 "
                              "request, stamped at " + ("COMPLETION, prefill plus decode (D146; "
                              "the default from 2026-11-20)" if DELIVERY == "completion"
@@ -307,6 +382,17 @@ def main(runs_dir, n, out):
                rows=rows)
     Path(out).write_text(json.dumps(res, indent=1) + "\n")
     print("seeds", seeds)
+    print("device latency source:", SC.DEVICE_LATENCY_SOURCE, " device wait s:", SC.DEVICE_WAIT_S)
+    print("\nD155 (3) HEADLINE (by deadline) and D152 (1) BESIDE IT (any time), never mixed:")
+    for r in rows:
+        print("   %-20s by-deadline %2d/%2d = %.4f %s  |  any-time %2d/%2d = %.4f %s  |  "
+              "device answers late %d"
+              % (r["arm"], r["robot_correct_by_deadline_hits"], r["robot_correct_n"],
+                 r["robot_correct_delivered_by_deadline"], r["robot_correct_by_deadline_ci95"],
+                 r["robot_correct_any_time_hits"], r["robot_correct_n"],
+                 r["robot_correct_delivered_any_time"], r["robot_correct_any_time_ci95"],
+                 r["device_late_n"]))
+    print("\non-time tables, unchanged and labelled:")
     for r in rows:
         print(f"{r['arm']:20s} feas {r['robot_feasible_hits']}/{r['robot_feasible_n']} = {r['robot_feasible_on_time']} {r['robot_ci95']} "
               f"d {r['robot_minus_b7_ci95']} | all {r['robot_all_hits']}/{r['robot_all_n']} = {r['robot_all_on_time']} "

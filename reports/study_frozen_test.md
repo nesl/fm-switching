@@ -2134,3 +2134,317 @@ answers than hybrid-F (0.3077 against 0.2769) while hybrid-F more than doubles i
 
 If prediction 2 fails, the right response is to ask for hybrid-F-lhreq at 3 s in the handful rather
 than to read 22.2 as if it were live. That request is the user's to make, not mine or the H100's.
+
+---
+
+## 23. D155 (3): correct answers delivered BY THE DEADLINE, re-scored offline (A6000, 2026-11-20)
+
+**The ruling.** D155 (3) amends D152 (1). The robot headline becomes **correct answers delivered by
+the deadline, from either source**: the cloud's answer if it is delivered within the deadline,
+otherwise the **device's answer if the device's answer also arrives within the deadline**, otherwise
+no answer and the question is a miss. The D152 (1) behaviour, which credits a device answer
+regardless of when it lands, stays and is reported **beside** it as **correct answers delivered at
+any time**. The two are never mixed in one column or one sentence. The on-time-only tables of
+sections 14, 18, 20 and 21 are untouched and stay labelled.
+
+Nothing live was run. Nothing touched the H100 or the Orin. Everything below is an offline re-score
+of committed cells on flash.
+
+### 23.1 The device-latency source, stated before any number
+
+This is the load-bearing disclosure, so it comes first.
+
+The re-score used **the per-question `device_latency_s` field already committed in each cell's
+`device_answers.jsonl`**. For a robot recall question the trace generator writes that field as
+`data_sources.device_recall_latency_s(history_tokens)` (`fleet/trace.py:573`), which is **D87's
+ORIN2 in-process harness cost**: 0.146 s at 11k history tokens and 0.225 s at 28k, linearly
+interpolated between and **clamped** outside. Observed across the four committed seeds at n=16 the
+values run **0.146 s to 0.225 s**, with the floor-pile at 0.146 s produced by the clamp.
+
+**What was NOT used.** The device's own answer latency on the 97 LH-REQ questions, TTFT median
+3.296 s and end-to-end median 6.651 s, is **not wired anywhere**. D155 (1) rules those the cold
+re-send path and D61 (b) classifies the resend path as an API artifact and not the device baseline.
+They appear in `scorer/score.py` only inside a comment that says they must not be used, and in the
+`excluded` string of `device_delivery_rule()`, which every output now carries.
+
+**Could a device answer be late under the source actually used? No, not once.** The committed robot
+deadline in every one of these traces is **5.0 s** (`deadline_s`, read from the question and never
+from a literal). A device answer is late iff `device_wait_s + device_latency_s > L`, which at
+`device_wait_s = 0` needs `L < 0.225 s`. The headroom is **22.2x** at the committed maximum, and
+still 11.1x at the D147 2.5 s end of the deadline sweep. **Device answers late: 0 of 89, in every
+arm, in every cell.** This is the central fact of section 23 and the reason the headline does not
+move. It is reported as a property of the latency source, not as a finding about any policy.
+
+**The slot, so the measured warm value drops in.** `LIVE2_DEVICE_LATENCY` takes `trace` (the
+default above) or `measured:<path to json>`, a table of measured warm per-question device latencies
+keyed by `question_id` or `opportunity_id`. When StudyORIN-REC's warm path lands it is pointed at
+through that variable and **nothing in either scorer changes**. `LIVE2_DEVICE_WAIT_S` exists beside
+it for a cascade arm whose device waits on the cloud before starting. Both are read **once, at
+module level, in `scorer/score.py` only**, and `frozen_headline.py` **imports** `device_within` and
+`device_delivery_rule` from it rather than reading an environment variable of its own. This is
+deliberate: the D146 `DELIVERY` switch was module-level in one scorer and local in the other, the
+two disagreed, and it had to be hoisted by hand. There is now one definition and one read.
+
+### 23.2 Mechanism verification, completed before the sweep
+
+**Step 0, what would invalidate this run.** Is the comparator about to change? No: D155 (3) fixes
+both columns and the on-time tables are frozen. Does a run I depend on key into the analysis? Yes,
+the committed `frozen_headline_n16_4seed_d152.json` is the bar the any-time column must reproduce,
+so it is checked as a positive control rather than assumed. **Does the mechanism have a reachable
+path at this size and in this regime?** This is the question that mattered, it was asked before the
+sweep, and the answer was **no**: 0.225 s against a 5.0 s deadline. The run went ahead because the
+ruling is a scoring rule and the user asked explicitly whether a device answer could be late at
+all, but the null was predicted before it was produced, not explained after.
+
+**Step 1, the causal chain.** If a device answer takes a non-zero time to produce, then an
+opportunity whose cloud answer misses the deadline is credited under D152 (1) with an answer that
+may itself arrive after the deadline; charging the device its own latency removes that credit on
+every question where the device is also late, which lowers the headline for whichever arms lean
+hardest on the device fallback, and because arms lean on the fallback by different amounts (b7 and
+mooncake fall back on roughly half their questions, hybrid-F on few), the ranking between arms can
+change. Every link is in D152 (1), D155 (3) and D1 (the device always has an answer).
+
+**Step 2, each link instantiated.**
+
+| causal link | implementing quantity | value / range in this run | varies as expected? | evidence |
+|---|---|---|---|---|
+| device answer takes non-zero time | `device_answers.jsonl::device_latency_s` | 0.146 to 0.225 s over 89 questions, 11 distinct values at seed 4 | yes, non-zero and varies with `history_tokens` | `rows[].device_latency_s` in `d155_device_delivery_proofs.json` |
+| that time is compared against the deadline | `score.device_within` | read at `score.py::_standing_by_deadline` and at `frozen_headline.py::run_flags`, both of which change a decision | **yes as code, NO as outcome** | the probe below moves 9 of 20 decisions; the committed source moves 0 |
+| late device answers lose their credit | `standing_correct_by_deadline`, `source_by_deadline == "none"` | **0 of 89 questions**, every arm | **no, CONSTANT in this run** | `device_answers_late: 0`, `n_no_answer_by_deadline: 0` |
+| the lost credit changes the arm ranking | pooled by-deadline minus any-time per arm | **0.0000 for all five arms** | **no, CONSTANT** | table 23.3 |
+
+Links 3 and 4 are **CONSTANT**. Under the mandatory protocol that is a stopping condition for a
+sweep that tests a causal claim, and it is recorded as one. It is **not** a stopping condition for
+this task, because the task is to implement a scoring rule and report what it does to committed
+numbers, and the user asked in advance whether the device could be late at all. The constant is the
+answer to that question, and section 23.4 classifies it rather than reporting it as a finding.
+
+**Step 2b, does the switch reach a decision?** Yes as a switch, no on this data. Both conditions
+were run on one cell (`b7-edf-feasibility_n16_s4_1200s_h27_3t`) and the decision logs diffed. With
+the committed source the by-deadline and any-time decisions are **identical on all 20 questions**.
+With an artificial 9.999 s device latency injected through the `measured:` slot, **9 of 20
+decisions differ**, the first being `opp0002118`, which moves from `device` to `none`, and the
+by-deadline accuracy moves 0.5000 to 0.4000 while any-time stays at 0.5000. The switch arrives at
+the object under test with its declared type and value and it changes an outcome. The 9.999 s is a
+**switch proof, not a device-latency claim**, and is deliberately not the number D155 (1) excludes.
+
+**Step 3, one traced unit.** The full 20-question trace for that cell is committed in
+`results/orchestration/live2/frozen_test/d155_device_delivery_proofs.json` under
+`step3_one_traced_unit`, with per question: `t_opportunity`, `t_delivered`, the cloud latency, the
+deadline, `device_latency_s`, `device_on_time`, both sources, the cloud letter, the gold letter and
+both correctness columns. Four lines of it, hand-checkable:
+
+| opp | t_opp | t_del | cloud lat | dev lat | deadline | src any-time | src by-deadline | any | by-deadline |
+|---|---|---|---|---|---|---|---|---|---|
+| opp0000906 | 94.96 | 97.42 | 2.459 | 0.146 | 5.0 | cloud | cloud | True | True |
+| opp0002118 | 200.42 | 206.16 | **5.746** | 0.149 | 5.0 | device | device | False | False |
+| opp0003438 | 315.86 | none | none | 0.189 | 5.0 | device | device | True | True |
+| opp0007718 | 689.20 | 696.12 | **6.922** | 0.179 | 5.0 | device | device | False | False |
+
+`opp0002118` and `opp0007718` are exactly the shape the amendment was written for: the cloud blew
+the 5 s deadline, so the device stands in. Under D152 (1) it stands in unconditionally. Under
+D155 (3) it stands in because 0.149 s and 0.179 s are inside 5.0 s. Both answers happen to be
+wrong, so neither column scores them, but the branch taken is the amended one.
+
+**Step 4, negative control.** Two directions, both run on the same single cell.
+
+- *Mechanism disabled:* with the committed latencies the mechanism is unreachable and the
+  by-deadline column collapses exactly onto the any-time column, 0.5000 on both. That is the null.
+- *Mechanism forced reachable:* with the 9.999 s probe the by-deadline column moves to 0.4000 and
+  the any-time column does not move at all. **The result does change when the mechanism can fire**,
+  so the collapse above is a property of the latency values and not a dead switch, a write-only
+  field or a discarded channel.
+
+**Step 5, alternative explanations for the headline result.** The headline result is "the ranking
+does not change". It could be produced by (a) device answers genuinely always arriving in time
+[the claimed mechanism], or (b) the by-deadline column never being computed, the device branch
+never being reached, or the new field being written and never read [plumbing]. These are
+distinguished by the Step 2b diff: under (b) the probe would also move nothing, and it moves 9 of
+20 decisions. A third possibility, (c) the device latency source being wrong in a way that
+understates it, is **not** ruled out by anything here and is the live risk; it is section 23.5.
+
+### 23.3 The re-scored table: every committed cell x arm
+
+Cells: the frozen grid at n=16, seeds 0, 4, 5 and 6, common support, completion delivery (D146),
+post-fix cells for eco-llm and hybrid-F-lhreq and pre-fix for the other three (D145). Robot
+deadline 5.0 s from the question. Denominator for both correctness columns is **all** robot
+questions, because a question neither side answers in time stays in it as a miss.
+
+**Per cell, cell x arm.**
+
+| arm | seed | n | on-time | correct delivered BY DEADLINE | correct delivered ANY TIME | device answers late |
+|---|---|---|---|---|---|---|
+| b7-edf-feasibility | 0 | 24 | 10 (0.4167) | 12 (0.5000) | 12 (0.5000) | 0 |
+| b7-edf-feasibility | 4 | 20 | 11 (0.5500) | 10 (0.5000) | 10 (0.5000) | 0 |
+| b7-edf-feasibility | 5 | 25 | 11 (0.4400) | 11 (0.4400) | 11 (0.4400) | 0 |
+| b7-edf-feasibility | 6 | 20 | 10 (0.5000) | 5 (0.2500) | 5 (0.2500) | 0 |
+| eco-llm | 0 | 24 | 15 (0.6250) | 11 (0.4583) | 11 (0.4583) | 0 |
+| eco-llm | 4 | 20 | 16 (0.8000) | 8 (0.4000) | 8 (0.4000) | 0 |
+| eco-llm | 5 | 25 | 14 (0.5600) | 9 (0.3600) | 9 (0.3600) | 0 |
+| eco-llm | 6 | 20 | 15 (0.7500) | 5 (0.2500) | 5 (0.2500) | 0 |
+| mooncake | 0 | 24 | 11 (0.4583) | 12 (0.5000) | 12 (0.5000) | 0 |
+| mooncake | 4 | 20 | 11 (0.5500) | 10 (0.5000) | 10 (0.5000) | 0 |
+| mooncake | 5 | 25 | 11 (0.4400) | 11 (0.4400) | 11 (0.4400) | 0 |
+| mooncake | 6 | 20 | 9 (0.4500) | 6 (0.3000) | 6 (0.3000) | 0 |
+| hybrid-F-lhreq | 0 | 24 | 23 (0.9583) | 13 (0.5417) | 13 (0.5417) | 0 |
+| hybrid-F-lhreq | 4 | 20 | 20 (1.0000) | 11 (0.5500) | 11 (0.5500) | 0 |
+| hybrid-F-lhreq | 5 | 25 | 23 (0.9200) | 12 (0.4800) | 12 (0.4800) | 0 |
+| hybrid-F-lhreq | 6 | 20 | 19 (0.9500) | 7 (0.3500) | 7 (0.3500) | 0 |
+| hybrid-F6-lhreq | 0 | 24 | 15 (0.6250) | 13 (0.5417) | 13 (0.5417) | 0 |
+| hybrid-F6-lhreq | 4 | 20 | 13 (0.6500) | 11 (0.5500) | 11 (0.5500) | 0 |
+| hybrid-F6-lhreq | 5 | 25 | 19 (0.7600) | 13 (0.5200) | 13 (0.5200) | 0 |
+| hybrid-F6-lhreq | 6 | 20 | 14 (0.7000) | 7 (0.3500) | 7 (0.3500) | 0 |
+
+**Pooled over the four seeds, with paired-by-seed bootstrap CIs, B = 10,000.**
+
+| arm | on-time, feasible pool | on-time, all questions | correct delivered BY DEADLINE (headline) | correct delivered ANY TIME (beside it) | by-deadline minus any-time |
+|---|---|---|---|---|---|
+| b7-edf-feasibility | 42/69 = 0.6087 [0.4928, 0.7246] | 42/89 = 0.4719 | **38/89 = 0.4270** [0.3258, 0.5281] | 38/89 = 0.4270 [0.3258, 0.5281] | 0.0000 |
+| eco-llm | 42/69 = 0.6087 [0.4928, 0.7246] | 60/89 = 0.6742 | **33/89 = 0.3708** [0.2697, 0.4719] | 33/89 = 0.3708 [0.2697, 0.4719] | 0.0000 |
+| mooncake | 42/69 = 0.6087 [0.4928, 0.7246] | 42/89 = 0.4719 | **39/89 = 0.4382** [0.3371, 0.5393] | 39/89 = 0.4382 [0.3371, 0.5393] | 0.0000 |
+| hybrid-F-lhreq | 67/69 = 0.9710 [0.9275, 1.0] | 85/89 = 0.9551 | **43/89 = 0.4831** [0.3820, 0.5843] | 43/89 = 0.4831 [0.3820, 0.5843] | 0.0000 |
+| hybrid-F6-lhreq | 61/69 = 0.8841 [0.7971, 0.9565] | 61/89 = 0.6854 | **44/89 = 0.4944** [0.3933, 0.5955] | 44/89 = 0.4944 [0.3933, 0.5955] | 0.0000 |
+
+Paired differences against b7, identical under both rules: eco-llm [-0.1124, -0.0112], mooncake
+[0.0000, 0.0337], hybrid-F [-0.0225, 0.1461], hybrid-F6 [0.0112, 0.1348].
+
+### 23.4 Where the ranking changes, which is the whole point of the amendment
+
+**It changes nowhere.** Under the device-latency source actually available, the by-deadline column
+and the any-time column are **equal question by question, in all 89 questions, in all five arms, in
+all four cells**. Not close, not equal to three decimals: the same integer hit counts. Every
+ordering, every paired interval and every verdict is therefore identical under the two rules, and
+the amendment changes no conclusion in sections 14, 18, 20, 21 or 22.
+
+**Classified under Rule 2 this is INCONCLUSIVE, sub-case UNEXERCISED**, and it must not be read as
+a real negative. The mechanism is present in both scorers, reachable, and demonstrably able to move
+9 of 20 decisions on one cell, but **no condition in these runs reaches it**: the device-latency
+source tops out at 0.225 s against a 5.0 s deadline, 22.2x of headroom. It is not "the device is
+never late"; it is "under D87's ORIN2 in-process cost the device is never late". The precedent the
+project keeps for exactly this shape is E36, E36b and E36c, where a quantity that was correctly and
+consistently zero passed every consistency check, and the only thing that caught it was asking
+whether the mechanism had a reachable path.
+
+What the amendment has nevertheless done, and this is real: it removes a way the headline could
+have over-credited the device without anyone noticing, and it puts the device's latency on the
+critical path of the metric, where a measured warm value will now be felt. The ordering being
+unchanged **today** is a fact about today's latency source and nothing more.
+
+**The register.** "0 device answers late in 89 questions" is an **observed count** over the
+committed cells at n=16 on seeds 0, 4, 5 and 6, not a **constructed bound** over the design space.
+The bound that would generalise it is the separate statement "a device answer cannot be late while
+`L >= 0.225 s`", which is a construction from the clamp ceiling and holds only for this source.
+
+### 23.5 Results consistency check, all seven points, recorded before the conclusions above
+
+**1. Cross-check against committed measurements.** Two positive controls, two cell selections.
+
+| quantity | this run | prior run | source of prior | ratio | agree |
+|---|---|---|---|---|---|
+| b7 correct delivered, any time, pooled | 0.4270 (38/89) | 0.4270 (38/89) | `frozen_headline_n16_4seed_d152.json` | 1.000 | agree |
+| eco-llm correct delivered, any time | 0.3708 (33/89) | 0.3708 (33/89) | same | 1.000 | agree |
+| mooncake correct delivered, any time | 0.4382 (39/89) | 0.4382 (39/89) | same | 1.000 | agree |
+| hybrid-F correct delivered, any time | 0.4831 (43/89) | 0.4831 (43/89) | same | 1.000 | agree |
+| hybrid-F6 correct delivered, any time | 0.4944 (44/89) | 0.4944 (44/89) | same | 1.000 | agree |
+| b7 robot feasible on-time, completion, pre-fix | 0.6087 | 0.6087 | D146 design-log row | 1.000 | agree |
+| mooncake feasible on-time, completion, pre-fix | 0.6087 | 0.6087 | D146 | 1.000 | agree |
+| eco-llm feasible on-time, completion, pre-fix | 0.5652 | 0.5652 | D146 | 1.000 | agree |
+| hybrid-F6 feasible on-time, completion, pre-fix | 0.8841 | 0.8841 | D146 | 1.000 | agree |
+| hybrid-F feasible on-time, completion, pre-fix | 0.9565 | 0.9565 | D146 | 1.000 | agree |
+| hybrid-F minus b7 interval, pre-fix | [+0.2319, +0.4638] | [+0.2319, +0.4638] | D146 | 1.000 | agree |
+| device recall latency at 11k / 28k tokens | 0.146 / 0.225 s | 0.146 / 0.225 s | D87 via `data_sources.ORIN_RECALL_TTFT_S` | 1.000 | agree |
+
+No disagreement anywhere, let alone 2x. The pre-fix row set was produced by re-running with
+`FROZEN_HEADLINE_CELLS=prefix` and is committed as `frozen_headline_n16_4seed_d155_prefix.json`;
+the default run uses the D145 post-fix selection, which is why eco-llm reads 0.6087 and hybrid-F
+reads 0.9710 there and 0.5652 and 0.9565 in the pre-fix control. Same quantity, two cell
+selections, both labelled, neither mixed.
+
+**2. Physical plausibility, and this one is flagged.** Read as a prefill rate, the device latency
+implies 11,146 tokens in 0.146 s, about **76,000 tok/s**, against a committed A6000 cold prefill of
+about 7,100 tok/s. That is roughly 10.7x faster than the committed curve and would be a caching
+artefact if it were a prefill. **It is not a prefill, and the register is the point.** D61 (b)
+states that on the Orin the in-process path does not resend the image history, and that the model
+work there is 0.13 to 0.19 s at 11k and 28k tokens; the 0.146 s is that incremental warm model
+work on a context the process already holds, not the cost of building the context. The figure is
+therefore not comparable to a cold-prefill curve and the 10.7x is not a discrepancy between two
+measurements of the same thing. It is recorded here because the by-deadline column depends on this
+number and a reader must know which path it describes. The cloud-side latencies are untouched by
+this section and were plausibility-checked in section 18.
+
+**3. Distribution sanity.** Device latency is not a constant where a distribution is expected: 11
+distinct values over 20 questions at seed 4, ranging 0.146 to 0.211 s and monotone in
+`history_tokens`. There is a visible pile at exactly 0.146 s, which is the **clamp** at or below
+11k tokens and not short-circuiting; it is documented in `device_recall_latency_s` and reproduced
+here. Per-seed ranges: seed 0 [0.146, 0.225], seed 4 [0.146, 0.2109], seed 5 [0.146, 0.2117],
+seed 6 [0.146, 0.2092]. The **artefact-spread** check applies in reverse here and is the reason
+section 23.4 is worded as it is: the by-deadline column is not a plausible spread that could be
+mistaken for a measurement, it is an exact integer-for-integer copy of the any-time column, which
+advertises what happened rather than hiding it. The **averaged-out-effect** check: there is no
+stratum on which the effect is concealed, because `device_answers_late` is 0 in every cell, every
+arm and every seed, not 0 on average.
+
+**4. Definition audit.** `correct_answers_delivered_by_deadline`: cloud answer if
+`t_delivered - t_opportunity <= L`, else device answer if `device_wait_s + device_latency_s <= L`,
+else miss; denominator all robot questions; `L = 5.0 s` from the question's own `deadline_s`;
+`device_wait_s = 0.0`. `correct_answers_delivered_any_time`: identical except the device branch is
+unconditional; this is D152 (1) verbatim and its expression in `frozen_headline.py` is unchanged
+character for character. "On time": delivered within the deadline by an HTTP 200 request (D144),
+stamped at completion, prefill plus decode (D146). "Robot question": n = 89 pooled, 24 / 20 / 25 /
+20 by seed, same opportunity ids across arms by the same trace. No name is used here with two
+definitions; the two rules carry two distinct names with the suffixes `_by_deadline` and
+`_any_time`, and the ambiguous bare name `correct_answers_delivered` has been **removed** from the
+scorer's output so it cannot be picked up by accident.
+
+**5. Claim linkage.** The headline bears on **C5** (joint representation x placement x timing beats
+decomposed policies under a quality SLO), which is the accept/reject claim and is status untested.
+Under both rules hybrid-F-lhreq at 0.4831 and hybrid-F6-lhreq at 0.4944 sit above b7 at 0.4270,
+with hybrid-F6's interval against b7 at [0.0112, 0.1348] and hybrid-F's at [-0.0225, 0.1461]. This
+section does **not** move C5 in either direction, because it changes no number; it changes the
+definition under which the number will be read once a measured device latency exists. Nothing
+measured here is scoped out by FORMULATION.md.
+
+**6. Proxy validity.** `device_latency_s` is an explicit **proxy** for the device's warm
+per-question answer latency. What it actually measures: D87's ORIN2 in-process harness cost at two
+history sizes, 11k and 28k, **linearly interpolated and clamped** at every other size, so for 18 of
+the 20 questions at seed 4 it is a derived value and not a measurement. Is it valid for the claim?
+For the narrow claim "no device answer is late at a 5 s deadline" it is robust, because the
+conclusion survives any value up to 5.0 s and the proxy's own measured endpoints are 22x below
+that. For the **by-deadline column itself as a headline number** it is **not yet validated**, and
+that column is marked **unvalidated pending StudyORIN-REC's measured warm per-question latency**.
+The cold re-send proxy is rejected outright under D155 (1) and D61 (b) and is not used.
+
+**7. Validate the control, not only the result.** The control arm is **b7-edf-feasibility**, and it
+was checked against its own committed values before the comparison was read, not after. Its
+any-time correct-delivered reproduces its committed 0.4270 at 38 of 89 exactly; its feasible
+on-time reproduces 0.6087 at 42 of 69 exactly; its single-shot on-time reproduces 0.8934 at 1274 of
+1426 and its dashcam all-meet 4 of 4. **Positive control:** D146's committed pre-fix completion
+numbers are a known-good committed arm set, and all five of them plus the hybrid-F minus b7
+interval [+0.2319, +0.4638] reproduce exactly from this modified scorer. A scorer that had broken
+the committed path would have failed there; it did not, so the zero in section 23.4 is a property
+of the data and not of a broken check. The impossible-success side was also watched: had the
+by-deadline column come back **better** than any-time anywhere, that would have been impossible by
+construction, since the by-deadline rule can only remove credit, never add it. It did not.
+
+### 23.6 Files
+
+| file | what |
+|---|---|
+| `experiments/orchestration/live2/scorer/score.py` | `DEVICE_LATENCY_SOURCE`, `DEVICE_WAIT_S`, `device_latency_s`, `device_within`, `device_delivery_rule`, `_standing_by_deadline`; `robot_value` gains the by-deadline fields; `robot_headline` metric is now `correct_answers_delivered_by_deadline` with `beside_it_any_time`; a `robot_standing_accuracy_by_deadline` interval beside the committed one |
+| `experiments/orchestration/live2/frozen_headline.py` | imports the device rule from `score.py` rather than re-implementing it; two correctness columns, per cell and pooled, paired on the same bootstrap draw |
+| `results/orchestration/live2/frozen_test/frozen_headline_n16_4seed_d155.json` | the re-score, D145 post-fix selection |
+| `results/orchestration/live2/frozen_test/frozen_headline_n16_4seed_d155_prefix.json` | the pre-fix control that reproduces D146 |
+| `results/orchestration/live2/frozen_test/d155_device_delivery_proofs.json` | Step 3 traced unit, Step 2b diff, Step 4 both controls |
+
+### 23.7 What should happen next
+
+1. When StudyORIN-REC's **measured warm per-question** device latency lands, point
+   `LIVE2_DEVICE_LATENCY` at it and re-run exactly the two commands in 23.6. No code changes. If
+   any measured warm latency exceeds the deadline, section 23.4's "changes nowhere" expires on the
+   spot and the ranking must be re-read, because the arms lean on the device fallback by very
+   different amounts: b7 and mooncake fall back on about half their questions, hybrid-F on 4 of 89.
+   That asymmetry is where a ranking change would come from, and it is already visible in the
+   on-time column.
+2. Do **not** carry section 23.4 forward as "the deadline rule makes no difference". It makes no
+   difference **at 0.146 to 0.225 s**. The sentence without that clause is the error this section
+   exists to prevent.
