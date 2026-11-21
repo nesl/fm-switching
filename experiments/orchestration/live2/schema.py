@@ -16,7 +16,9 @@ FLEET -> COORDINATOR
   monitor_offer    {device_id, opportunity_id, instant_id, t_capture, deadline_s,
                     frame_bytes}                                            mode B only
   monitor_frame    {device_id, opportunity_id, instant_id, t_capture, t_arrive, deadline_s,
-                    frame_ref, frame_bytes}            mode A pushed; mode B after a pull
+                    frame_ref, frame_bytes, episode_id, episode_index, frame_refs,
+                    episode_frames}                   mode A pushed; mode B after a pull
+                    the four episode fields are D153's EP-G context and are absent by default
   history_preload  {device_id, session_id, frame_refs[], est_tokens, t}      robots (D101)
   history_append   {device_id, session_id, batch_id, t_arrive, frame_refs[], est_tokens}
   recall_question  {device_id, opportunity_id, session_id, question_id, t_ask, t_arrive,
@@ -81,7 +83,8 @@ FIELDS: Dict[str, tuple] = {
     "monitor_offer": ("device_id", "opportunity_id", "instant_id", "t_capture", "deadline_s",
                       "frame_bytes"),
     "monitor_frame": ("device_id", "opportunity_id", "instant_id", "t_capture", "t_arrive",
-                      "deadline_s", "frame_ref", "frame_bytes"),
+                      "deadline_s", "frame_ref", "frame_bytes", "episode_id", "episode_index",
+                      "frame_refs", "episode_frames"),
     "history_preload": ("device_id", "session_id", "frame_refs", "est_tokens", "t"),
     "history_append": ("device_id", "session_id", "batch_id", "t_arrive", "frame_refs",
                        "est_tokens"),
@@ -134,6 +137,10 @@ class MonitorOffer:
 
 @dataclass
 class MonitorFrame:
+    # D153: the EPISODE fields carry the append-only episode context of D148, assigned by the
+    # TRACE GENERATOR and independent of any arm's decisions. `frame_refs` is the episode's
+    # frames oldest first, ending with `frame_ref`; `episode_index` is the index within the
+    # refresh cycle. All four are absent on a one-frame trace, which is the default.
     device_id: str
     opportunity_id: str
     instant_id: str
@@ -142,6 +149,10 @@ class MonitorFrame:
     deadline_s: float
     frame_ref: str
     frame_bytes: int
+    episode_id: Optional[str] = None
+    episode_index: Optional[int] = None
+    frame_refs: Optional[List[str]] = None
+    episode_frames: Optional[int] = None
 
 
 @dataclass
@@ -221,7 +232,14 @@ del _k, _c, _want
 # pre-existing caller predates it, so requiring it would break them for a field that is
 # genuinely optional: an event without a category simply carries None, which is what the
 # coordinator saw before the field existed.
-OPTIONAL_FIELDS: Dict[str, tuple] = {"recall_question": ("category",)}
+# D153: the four EPISODE fields on `monitor_frame` are optional in exactly the same sense.
+# They are present only when the trace was generated with the EP-G dashcam format; a one-frame
+# trace carries none of them and the coordinator then builds the committed StudyD3 body, which
+# is what every caller before D153 did.
+OPTIONAL_FIELDS: Dict[str, tuple] = {
+    "recall_question": ("category",),
+    "monitor_frame": ("episode_id", "episode_index", "frame_refs", "episode_frames"),
+}
 
 
 def make(kind: str, **kw: Any) -> Dict[str, Any]:

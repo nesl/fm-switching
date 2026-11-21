@@ -44,6 +44,18 @@ RULINGS IMPLEMENTED HERE
             clip or session (D84) can never collide. The descriptive fields a scorer or a joiner
             needs - `play_id`, `clip`, `t_local`, `session_id`, `question_id` - travel alongside
             it in the trace, never inside it.
+  D148/D153 THE DASHCAM EPISODE (`dashcam_format="epg"`; "oneframe" is the default and leaves
+            every committed trace byte-identical). The dashcam format is fixed BY THE TASK:
+            every dashcam query, device and cloud, carries the append-only episode context of
+            D148, which is EP-G as StudySH-EP ran it, and never one frame per call. THE EPISODE
+            FRAME LIST IS EMITTED HERE, deterministically and independently of any arm's
+            release decisions, because D153 says each frame is prefilled AS CAPTURED: the
+            episode accumulates every captured frame of the play whether or not an arm acted on
+            that instant. That is what makes proof (b), an identical request digest across
+            arms, hold BY CONSTRUCTION rather than by coordinator discipline. Each
+            `monitor_opportunity` then carries `episode_id`, `episode_index` (the index within
+            the refresh cycle), `frame_refs` (the ordered episode frames, oldest first) and
+            `episode_frames` (their count). See EPG_REFRESH_NOTE for the refresh and the floor.
   D96 (2)   the canonical FAIRNESS DIGEST is `fairness_digest`: an order-independent sha256 over
             sorted event tuples covering device_register, session_start, session_end,
             history_append, recall_question, and monitor_offer in PULL mode or monitor_frame in
@@ -126,9 +138,58 @@ DIGEST_KINDS = ("device_register", "session_start", "session_end", "history_prel
                 "history_batch", "recall_question", "monitor_opportunity")
 MONITOR_WIRE_KIND = {"A": "monitor_frame", "B": "monitor_offer"}
 
+# ---------------------------------------------------------------- D148 / D153: the episode
+DASHCAM_FORMATS = ("oneframe", "epg")
+# StudySH-EP `sh_ep_manifest.EP_G_CAP_FRAMES` = 21 frames, about 10 s at the 0.5 s cadence. The
+# value is retyped here rather than imported, because this module is loaded with only `fleet/`
+# on sys.path in some callers and must not reach for the live2 root; `epg_proofs.json` asserts
+# it equals the committed constant.
+EPG_CAP_FRAMES = 21
+# D153's minimum-frame floor, ONE named constant: instants before an episode's Nth frame are
+# not decision instants for ANY arm, device or cloud, excluded identically and counted. The
+# user may raise it to 6, which is why it is a parameter (`dashcam_min_frames`) with this
+# default and not a literal anywhere else.
+EPG_MIN_FRAMES = 3
+EPG_FLOORS_REPORTED = (3, 6)         # proof (d) reports the excluded count at both
+# StudySH-EP's measured EP-G prompt-token law, `prompt_tokens = 42 + 338 * n_frames`. Same
+# values as `bodies.EPG_TEXT_TOKENS` / `bodies.EPG_TOK_PER_FRAME`, repeated here for the same
+# sys.path reason as EPG_CAP_FRAMES and asserted equal in `epg_proofs.json`.
+EPG_TEXT_TOKENS = 42
+EPG_TOK_PER_FRAME = 338
+
+EPG_REFRESH_NOTE = (
+    "PROVISIONAL (flash, 2026-11-20), the LITERAL reading of D153. D153 says 'fresh context "
+    "after N s with no carry-over', which is NOT StudySH-EP's sliding cap: SH-EP capped EP-G at "
+    "the last 21 frames and its cap bound exactly at its last instant, so SH-EP never exercised "
+    "a refresh at all and cannot settle this. Implemented here as a FRESH CONTEXT EVERY 21 "
+    "FRAMES WITH NO CARRY-OVER, N = 21 frames = 10.5 s at the 0.5 s cadence, matching SH-EP's "
+    "cap. Measured on the committed seed-4 16-device 1200 s 40:40:20 trace (13,193 monitor "
+    "instants, 189 plays): the literal refresh gives a median 10 frames per request, excludes "
+    "1,429 instants at floor 3 (10.83 percent) and costs 46,260,494 prompt tokens per run, "
+    "against the sliding cap's median 21, 378 exclusions (2.87 percent) and 80,794,968 tokens. "
+    "The literal reading is implemented because it is what the D-row says and because it halves "
+    "the token load, which matters at 32 devices. A ruling for the sliding cap changes one "
+    "function, `_epg_episode`.")
+
 DEFAULT_STAGGER_S = DS.HISTORY_BATCH_S      # 30 s, the D68 history-batch period
 ANSWER_PAYLOAD_B = 300                      # a cloud answer body; see links.deliver_s
 JOIN_FRAC_MAX = 0.5                         # D101: join ~ U[0, 0.5 x session duration)
+
+
+def _epg_episode(play_id: str, refs: Sequence[str], idx: int,
+                 cap_frames: int = EPG_CAP_FRAMES) -> Dict[str, Any]:
+    """The append-only episode context at the `idx`-th captured instant of one play (D148).
+
+    Pure, deterministic, and a function of the CAPTURE INDEX alone, so it cannot depend on any
+    arm's decisions. `refs` is the play's captured frames in order. The refresh is the literal
+    reading of D153 (see EPG_REFRESH_NOTE): a fresh context every `cap_frames` frames with no
+    carry-over, so the episode's frames are the current cycle's frames up to and including this
+    one, oldest first.
+    """
+    cycle, pos = divmod(int(idx), int(cap_frames))
+    start = cycle * int(cap_frames)
+    return dict(episode_id=f"{play_id}|e{cycle:03d}", episode_index=pos,
+                frame_refs=list(refs[start:idx + 1]), episode_frames=pos + 1)
 
 
 # ---------------------------------------------------------------- deterministic dealing
@@ -225,9 +286,28 @@ class TraceStats:
     robot_question_ask_counts: Dict[str, int] = field(default_factory=dict)
     robot_distinct_questions_asked: int = 0
     robot_question_repeats: int = 0
+    # D153 proof (d). `epg_instants_captured` counts every instant of every play, decision
+    # instant or not; `dashcam_instants` keeps its meaning and counts DECISION instants only.
+    # The exclusions are counted at BOTH floors the user named, whichever one is applied, so the
+    # cost of raising the floor to 6 is readable off a run made at 3.
+    dashcam_format: str = "oneframe"
+    dashcam_min_frames: int = 0
+    epg_instants_captured: int = 0
+    epg_episodes: int = 0
+    epg_frames_in_requests: int = 0
+    epg_excluded_by_floor: Dict[int, int] = field(default_factory=dict)
 
     def as_dict(self) -> Dict[str, Any]:
         d = dict(self.__dict__)
+        if self.epg_instants_captured:
+            n_dec = sum(self.dashcam_instants.values())
+            d["epg_frames_per_request_mean"] = (
+                round(self.epg_frames_in_requests / n_dec, 4) if n_dec else None)
+            d["epg_excluded_frac_by_floor"] = {
+                k: round(v / self.epg_instants_captured, 6)
+                for k, v in sorted(self.epg_excluded_by_floor.items())}
+            d["epg_prompt_tokens_total"] = (EPG_TEXT_TOKENS * n_dec
+                                            + EPG_TOK_PER_FRAME * self.epg_frames_in_requests)
         d["dashcam_min_instants"] = min(self.dashcam_instants.values()) if self.dashcam_instants \
             else None
         d["robot_pool_meets_20"] = self.robot_questions_total >= 20
@@ -257,8 +337,14 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                    ss_period_s: float = DEFAULT_SS_PERIOD_S,
                    ss_bursty: bool = False,
                    robot_question_set: str = "eval",
-                   ss_question_set: str = "ss1") -> Dict[str, Any]:
+                   ss_question_set: str = "ss1",
+                   dashcam_format: str = "oneframe",
+                   dashcam_min_frames: int = EPG_MIN_FRAMES) -> Dict[str, Any]:
     """Build one run's opportunity trace. Returns {records, device_answers, meta, stats}.
+
+    `dashcam_format="epg"` is D153's append-only episode context (D148). It adds the episode
+    fields to every `monitor_opportunity` and drops the instants below `dashcam_min_frames`,
+    which are not decision instants for ANY arm. "oneframe" is the default and changes nothing.
 
     Deterministic in `seed` alone given (n_devices, ratio, run_s, stagger_s): the same seed
     produces a byte-identical trace, which is what makes the arms paired (D79).
@@ -274,6 +360,12 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
         raise ValueError(f"mode {mode!r} not in {MODES} (D69)")
     if run_s <= 0:
         raise ValueError("run_s must be positive")
+    if dashcam_format not in DASHCAM_FORMATS:
+        raise ValueError(f"dashcam_format {dashcam_format!r} not in {DASHCAM_FORMATS} (D153)")
+    epg = dashcam_format == "epg"
+    floor = int(dashcam_min_frames)
+    if epg and not 1 <= floor <= EPG_CAP_FRAMES:
+        raise ValueError(f"dashcam_min_frames {floor} outside 1..{EPG_CAP_FRAMES}")
     n_dash, n_rob, n_ass = _split_fleet3(n_devices, ratio)
 
     clips = DS.nexar_clip_meta()
@@ -316,7 +408,10 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
 
     records: List[Dict[str, Any]] = []
     answers: List[Dict[str, Any]] = []
-    st = TraceStats(n_devices=n_devices, n_dashcam=n_dash, n_robot=n_rob)
+    st = TraceStats(n_devices=n_devices, n_dashcam=n_dash, n_robot=n_rob,
+                    dashcam_format=dashcam_format,
+                    dashcam_min_frames=(floor if epg else 0),
+                    epg_excluded_by_floor=({f: 0 for f in EPG_FLOORS_REPORTED} if epg else {}))
 
     # start_t is drawn in a FIXED device order so the draw does not depend on the ratio split.
     # D101: only the DASHCAM draw is used. The robot draw is still taken, so the dashcam
@@ -358,10 +453,34 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
             st.dashcam_plays_started += 1
             st.dashcam_plays_completed += int(completed)
             st.clip_play_counts[clip] = st.clip_play_counts.get(clip, 0) + 1
-            for t_local in DS.nexar_instants(cm.duration_s):
+            play_instants = DS.nexar_instants(cm.duration_s)
+            # the frame_ref literal is the D91 encoder's own rule, asserted as a SOURCE string
+            # by tests/test_live2_fix2.py, so it is spelled here exactly as it was spelled
+            play_refs = [f"{clip}|t{t_local:07.2f}" for t_local in play_instants]
+            pending_b = 0            # bytes of frames captured but not yet charged an upload
+            for idx, t_local in enumerate(play_instants):
                 t_run = t + t_local
                 if t_run > run_s + 1e-9:
                     break
+                frame_ref = play_refs[idx]
+                nb = frame_bytes_by_ref.get(frame_ref, default_frame_bytes)
+                ep = _epg_episode(play_id, play_refs, idx) if epg else None
+                if epg:
+                    # Every captured frame is charged to the uplink exactly once, and the charge
+                    # lands on the first DECISION instant at or after its capture. So the two
+                    # instants below the floor are not lost bytes: their frames go up with the
+                    # floor instant's request, which is the request that first carries them.
+                    pending_b += nb
+                    st.epg_instants_captured += 1
+                    for fl in EPG_FLOORS_REPORTED:
+                        if ep["episode_frames"] < fl:
+                            st.epg_excluded_by_floor[fl] = st.epg_excluded_by_floor.get(fl, 0) + 1
+                    if ep["episode_index"] == 0:
+                        st.epg_episodes += 1
+                    if ep["episode_frames"] < floor:
+                        continue
+                    nb, pending_b = pending_b, 0
+                    st.epg_frames_in_requests += ep["episode_frames"]
                 if not count_only:
                     key = (clip, round(t_local, 6))
                     if key not in orin:
@@ -369,15 +488,16 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                             f"no committed Orin device score for instant {key}; the dense "
                             f"StudyORIN1 set does not cover this clip at this cadence")
                     o = orin[key]
-                    frame_ref = f"{clip}|t{t_local:07.2f}"
-                    nb = frame_bytes_by_ref.get(frame_ref, default_frame_bytes)
                     opp = f"{play_id}|t{t_local:07.2f}"
-                    records.append(dict(kind="monitor_opportunity", device_id=did,
-                                        opportunity_key=opp, instant_id=opp, play_id=play_id,
-                                        clip=clip, t=round(t_run, 6),
-                                        t_local=round(t_local, 6),
-                                        deadline_s=DS.NEXAR_DEADLINE_S, frame_ref=frame_ref,
-                                        frame_bytes=nb, play_completed=completed))
+                    rec = dict(kind="monitor_opportunity", device_id=did,
+                               opportunity_key=opp, instant_id=opp, play_id=play_id,
+                               clip=clip, t=round(t_run, 6),
+                               t_local=round(t_local, 6),
+                               deadline_s=DS.NEXAR_DEADLINE_S, frame_ref=frame_ref,
+                               frame_bytes=nb, play_completed=completed)
+                    if epg:
+                        rec.update(ep)
+                    records.append(rec)
                     answers.append(dict(opportunity_key=opp, device_id=did, kind="monitor",
                                         play_id=play_id, clip=clip,
                                         t_local=round(t_local, 6),
@@ -613,6 +733,18 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
     answers.sort(key=lambda r: (r["device_id"], r["opportunity_id"]))
 
     meta = dict(robot_question_set=robot_question_set, ss_question_set=ss_question_set,
+                dashcam_format=dashcam_format,
+                dashcam_min_frames=(floor if epg else None),
+                epg_cap_frames=(EPG_CAP_FRAMES if epg else None),
+                epg_refresh_rule=(EPG_REFRESH_NOTE if epg else None),
+                epg_floor_rule=(
+                    "D153: an instant whose episode holds fewer than %d frames is NOT a "
+                    "decision instant for any arm, device or cloud. Such instants are "
+                    "excluded identically, by not being emitted as opportunities at all, so no "
+                    "arm can see them and the exclusion cannot differ by arm. Their frames are "
+                    "still CAPTURED and still enter the "
+                    "episode context, and their uplink bytes are charged to the first decision "
+                    "instant that carries them." % floor) if epg else None,
                 seed=seed, n_devices=n_devices, ratio=ratio, run_s=run_s, mode=mode,
                 stagger_s=stagger_s, n_dashcam=n_dash, n_robot=n_rob,
                 n_assistive=n_ass, l_ss_s=float(l_ss_s),
@@ -731,10 +863,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--mode", default="A", choices=list(MODES))
     ap.add_argument("--stagger-s", type=float, default=DEFAULT_STAGGER_S)
     ap.add_argument("--frame-manifest", default=None)
+    ap.add_argument("--dashcam-format", default="oneframe", choices=list(DASHCAM_FORMATS),
+                    help="D153: 'epg' is the append-only episode context of D148")
+    ap.add_argument("--dashcam-min-frames", type=int, default=EPG_MIN_FRAMES,
+                    help="D153's minimum-frame floor; epg only")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
     b = generate_trace(a.seed, a.devices, a.ratio, a.run_s, a.mode, a.stagger_s,
-                       Path(a.frame_manifest) if a.frame_manifest else None)
+                       Path(a.frame_manifest) if a.frame_manifest else None,
+                       dashcam_format=a.dashcam_format,
+                       dashcam_min_frames=a.dashcam_min_frames)
     meta = write_trace(Path(a.out), b)
     print(json.dumps(meta, indent=2, sort_keys=True))
     return 0

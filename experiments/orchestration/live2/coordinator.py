@@ -175,6 +175,15 @@ class Live2Coordinator:
         self.counts: Dict[str, int] = defaultdict(int)
         self.builds: Dict[str, Dict[str, Any]] = {}
         self.reads_device = bool(getattr(arm, "reads_device_answer", False))
+        # D153: the dashcam format is read OFF THE TRACE, not configured here. A monitor_frame
+        # that carries the episode fields puts this run in "epg"; a trace without them keeps the
+        # committed one-frame contract. `_mon_sent` is per device the frames whose BYTES this
+        # device has already put on the wire, so an already-sent frame goes as a uuid-only
+        # reference (StudyRH7 wire form) and only the new frame carries bytes, which is the
+        # mechanism behind proof (a).
+        self.dashcam_format = "oneframe"
+        self._mon_sent: Dict[str, set] = defaultdict(set)
+        self.epg_requests: List[Dict[str, Any]] = []
         # A cell whose decision loop cannot keep up with its own tick would otherwise run for
         # many times its window and report nothing. The guard stops it and the result SAYS SO,
         # with the virtual time it reached, which is the number that matters.
@@ -335,6 +344,7 @@ class Live2Coordinator:
             return "stream_arrival"
         if k == "monitor_frame":
             o = self.st.monitor_frame(ev)
+            self._take_episode(o, ev)
             self._device_answer(o)
             return "stream_arrival"
         if k == "recall_question":
@@ -342,6 +352,39 @@ class Live2Coordinator:
             self._roster()
             return "recall_arrival"
         raise KeyError(f"the coordinator has no handler for event kind {k!r}")
+
+    def _take_episode(self, o, ev: Dict[str, Any]) -> None:
+        """D153: copy the trace's EPISODE context onto the opportunity, unchanged.
+
+        The coordinator DERIVES NOTHING here. The episode frame list is the trace generator's,
+        is a function of the capture index alone, and is identical for every arm, which is what
+        makes proof (b) hold by construction rather than by scheduling discipline. A run whose
+        trace carries the episode fields and then stops carrying them is a plumbing fault, not a
+        format change, so it RAISES: mode B's `traces.pull_responder` rebuilds the monitor_frame
+        itself and would otherwise silently drop the episode back to one frame.
+        """
+        refs = ev.get("frame_refs")
+        if refs:
+            self.dashcam_format = "epg"
+            o.episode_id = ev.get("episode_id")
+            o.episode_index = ev.get("episode_index")
+            o.episode_frame_refs = list(refs)
+            if ev.get("episode_frames") is not None \
+                    and int(ev["episode_frames"]) != len(o.episode_frame_refs):
+                raise RuntimeError(
+                    f"monitor_frame {o.opp_id} declares {ev['episode_frames']} episode frames "
+                    f"and carries {len(o.episode_frame_refs)}")
+            if o.frame_ref is not None and o.episode_frame_refs[-1] != o.frame_ref:
+                raise RuntimeError(
+                    f"monitor_frame {o.opp_id}: the episode's last frame "
+                    f"{o.episode_frame_refs[-1]!r} is not this instant's frame {o.frame_ref!r}; "
+                    f"D148's episode is append-only and ends at the current instant")
+        elif self.dashcam_format == "epg":
+            raise RuntimeError(
+                f"monitor_frame {o.opp_id} carries no episode frame list in a run whose earlier "
+                f"frames did (D153 EP-G). The episode context must come from the TRACE, so a "
+                f"producer that rebuilds the event (mode B `traces.pull_responder`) has to "
+                f"forward the four episode fields; it is not optional once the trace has them")
 
     def _device_answer(self, o) -> None:
         """The device answers every opportunity locally and immediately (spec v4 section 1.2),
@@ -519,7 +562,40 @@ class Live2Coordinator:
                         keys = [_sched(x) for x in self.injected]
                         self.injected.insert(bisect.bisect_right(keys, _sched(ev)), ev)
             return
-        cost = C.episodic_gpu_s("32BI", self.st.devices[device_id].frame_count)
+        # D153: under EP-G the request is the whole append-only episode, so its PROMPT is the
+        # episode's and not one frame's, while its PREFILL is only the frames the engine has not
+        # already seen. The two are different numbers and both are needed:
+        #
+        #   est_tokens  the episode's whole prompt, from StudySH-EP's measured token law. It is
+        #               what the engine will report as prompt_tokens, so it is what the request
+        #               log, the token accounting and the fake server's hint must carry.
+        #   cost        the GPU-seconds charged to the budget, which is the NEW tokens only.
+        #               Charging the whole prompt every turn would price an append-only episode
+        #               as a cold rebuild and deny the mechanism D148 exists to exercise: it is
+        #               also not what live2 does anywhere else, since `_advance_build` charges a
+        #               history append `recall_gpu_s(piece)` for the PIECE and not for the
+        #               cumulative prompt. The difference is not academic - on the proof cell the
+        #               whole-prompt charge exhausts the run's GPU budget after 429 of 1,874
+        #               decision instants, so the arms would be compared on budget rationing
+        #               rather than on scheduling. Conservative by the header's own tokens, which
+        #               ARE in the shared prefix and are charged again here, because StudySH-EP
+        #               measured the 42 text tokens together and splitting them would be an
+        #               invented number.
+        #
+        # `episodic_gpu_s` is not used for either: it reads a committed PROMPT_TOK table keyed by
+        # the three measured frame counts {1, 3, 9} and has no entry for an episode of 10 to 21.
+        refs = list(getattr(o, "episode_frame_refs", None) or [])
+        epg = self.dashcam_format == "epg" and bool(refs)
+        if epg:
+            sent = self._mon_sent[device_id]
+            frames = [dict(frame_ref=r, path=(None if r in sent else self._path(r)))
+                      for r in refs]
+            n_new = sum(1 for f in frames if f["path"] is not None)
+            est_tokens = B.epg_prompt_tokens(len(refs))
+            cost = B.epg_prompt_tokens(n_new) / C.PREFILL_TOK_S["32BI"]
+        else:
+            est_tokens = 378
+            cost = C.episodic_gpu_s("32BI", self.st.devices[device_id].frame_count)
         if not self.st.budget.can_spend(cost):
             self.counts["budget_refusal"] += 1
             return
@@ -527,11 +603,34 @@ class Live2Coordinator:
         o.state = "in_flight"
         did = self._log_decision(t, "release_monitor", [o.opp_id], latency_ms=dt_ms,
                                  preds=preds, mix=mix, key="mon:" + device_id)
-        frames = [dict(frame_ref=o.frame_ref, path=self._path(o.frame_ref))]
+        if epg:
+            # Counted off the FRAMES ACTUALLY BUILT, not off the sent-set: `_path` returns None
+            # for a frame it cannot find on disk, and `bodies.image_part` then emits the
+            # uuid-only reference, so a run with no frames root would otherwise be recorded as
+            # sending bytes it did not send. On a real run `preflight.require_frames` refuses to
+            # start in that state, and this count is what makes the refusal checkable.
+            n_ref = sum(1 for f in frames if f["path"] is None)
+            self.counts["epg_monitor_requests"] += 1
+            self.counts["epg_frames_sent_as_reference"] += n_ref
+            self.counts["epg_frames_sent_as_bytes"] += len(frames) - n_ref
+            self.epg_requests.append(dict(
+                opportunity_id=o.opp_id, device_id=device_id, t=t,
+                episode_id=getattr(o, "episode_id", None),
+                episode_index=getattr(o, "episode_index", None),
+                n_frames=len(refs), frame_refs=list(refs),
+                n_as_reference=n_ref, n_unresolved=sum(1 for r in refs if r not in sent
+                                                       and r in {f["frame_ref"] for f in frames
+                                                                 if f["path"] is None}),
+                prompt_tokens_expected=est_tokens,
+                new_tokens_charged=B.epg_prompt_tokens(len(frames) - n_ref),
+                gpu_s_charged=round(cost, 6)))
+        else:
+            frames = [dict(frame_ref=o.frame_ref, path=self._path(o.frame_ref))]
         self._submit(kind="monitor", device_id=device_id, session_id=None,
                      opportunity_id=o.opp_id, decision_id=did, frames=frames,
-                     est_tokens=378, question=B.SH_QUERY, options=(),
-                     max_tokens=B.SH_GEN["max_tokens"], t=t, mix=mix)
+                     est_tokens=est_tokens, question=B.SH_QUERY, options=(),
+                     max_tokens=B.SH_GEN["max_tokens"], t=t, mix=mix,
+                     dashcam_format=("epg" if epg else "oneframe"))
 
     def _advance_build(self, s, target_tokens: Optional[int], slice_tokens: Optional[int],
                        t: float, dt_ms: float, preds, mix) -> Optional[str]:
@@ -633,7 +732,8 @@ class Live2Coordinator:
     def _submit(self, *, kind: str, device_id: str, session_id: Optional[str],
                 opportunity_id: Optional[str], decision_id: Optional[str],
                 frames: List[Dict[str, Any]], est_tokens: int, question: Optional[str],
-                options, max_tokens: int, t: float, mix: Dict[str, int]) -> str:
+                options, max_tokens: int, t: float, mix: Dict[str, int],
+                dashcam_format: str = "oneframe") -> str:
         self.n_req += 1
         rid = f"r{self.n_req}"
         d = self.st.devices[device_id]
@@ -653,7 +753,8 @@ class Live2Coordinator:
                             run_tag=self.run_tag, salt=d.salt, header=HEADER_TEXT,
                             frames=frames, question=question, options=options,
                             max_tokens=max_tokens, est_tokens=est_tokens,
-                            defer_images=self.defer_images)
+                            defer_images=self.defer_images,
+                            dashcam_format=dashcam_format)
         sub = Live2Submission(request_id=rid, decision_id=decision_id, kind=kind,
                               device_id=device_id, session_id=session_id,
                               opportunity_id=opportunity_id, body=body,
@@ -668,6 +769,12 @@ class Live2Coordinator:
             for f in frames:
                 if f.get("path") is not None:
                     s.sent_bytes_for.add(f["frame_ref"])
+        elif kind == "monitor":
+            # the same bookkeeping on the dashcam side, which had no need of it while a
+            # monitoring request was one frame that was never sent twice (D153)
+            for f in frames:
+                if f.get("path") is not None:
+                    self._mon_sent[device_id].add(f["frame_ref"])
         if self.dry_run:
             self.futures.append((_DryFuture(sub, self._dry_service_s(sub), t,
                                             lambda: self.st.now), sub))
@@ -1001,7 +1108,30 @@ class Live2Coordinator:
             mu_time_average=(self.arm.mu_time_average()
                              if hasattr(self.arm, "mu_time_average") else None),
             arm_stats=getattr(self.arm, "stats", None),
+            dashcam_format=self.dashcam_format,
+            epg=self._epg_summary(),
         )
+
+    def _epg_summary(self) -> Optional[Dict[str, Any]]:
+        """D153 proof (a) on this run's own requests: how many frames each monitoring request
+        carried and how many of them went as uuid-only references, by episode index."""
+        if not self.epg_requests:
+            return None
+        n = [r["n_frames"] for r in self.epg_requests]
+        byidx: Dict[int, Dict[str, Any]] = {}
+        for r in self.epg_requests:
+            d = byidx.setdefault(int(r["episode_index"] or 0),
+                                 dict(n=0, frames=0, as_reference=0))
+            d["n"] += 1
+            d["frames"] += r["n_frames"]
+            d["as_reference"] += r["n_as_reference"]
+        return dict(requests=len(n), frames_min=min(n), frames_max=max(n),
+                    frames_median=sorted(n)[len(n) // 2],
+                    frames_total=sum(n),
+                    prompt_tokens_total=sum(r["prompt_tokens_expected"]
+                                            for r in self.epg_requests),
+                    episodes=len({r["episode_id"] for r in self.epg_requests}),
+                    by_episode_index={k: byidx[k] for k in sorted(byidx)})
 
 
 _EPOCHS = ("stream_arrival", "stream_departure", "recall_arrival", "request_completion",

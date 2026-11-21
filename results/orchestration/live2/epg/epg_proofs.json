@@ -1,0 +1,1272 @@
+{
+ "label": "StudyEPG-bodies: D153's four proofs for the EP-G dashcam bodies in live2. CPU ONLY, NO SERVER, NOT A MEASUREMENT.",
+ "cell": {
+  "seed": 0,
+  "n_devices": 8,
+  "ratio": "50:50",
+  "run_s": 300.0,
+  "mode": "A"
+ },
+ "headline_cell": {
+  "seed": 4,
+  "n_devices": 16,
+  "ratio": "40:40:20",
+  "run_s": 1200.0,
+  "mode": "A"
+ },
+ "arms": [
+  "always-cloud-fcfs",
+  "edf",
+  "eco-llm",
+  "warm-all-lru"
+ ],
+ "frames_store": {
+  "placeholder_files": 2966,
+  "preflight": {
+   "trace_dir": "/tmp/tmpejd9txcv/t",
+   "frames_root": "/tmp/tmpejd9txcv/frames",
+   "n_refs": 2966,
+   "n_missing": 0,
+   "n_empty": 0,
+   "missing": [],
+   "empty": [],
+   "ok": true
+  },
+  "note": "PLACEHOLDER bytes, not JPEGs: the proof is of the wire form. A real run uses the D91 store and preflight refuses to start with any frame missing"
+ },
+ "trace_meta": {
+  "dashcam_format": "epg",
+  "dashcam_min_frames": 3,
+  "epg_cap_frames": 21,
+  "epg_refresh_rule": "PROVISIONAL (flash, 2026-11-20), the LITERAL reading of D153. D153 says 'fresh context after N s with no carry-over', which is NOT StudySH-EP's sliding cap: SH-EP capped EP-G at the last 21 frames and its cap bound exactly at its last instant, so SH-EP never exercised a refresh at all and cannot settle this. Implemented here as a FRESH CONTEXT EVERY 21 FRAMES WITH NO CARRY-OVER, N = 21 frames = 10.5 s at the 0.5 s cadence, matching SH-EP's cap. Measured on the committed seed-4 16-device 1200 s 40:40:20 trace (13,193 monitor instants, 189 plays): the literal refresh gives a median 10 frames per request, excludes 1,429 instants at floor 3 (10.83 percent) and costs 46,260,494 prompt tokens per run, against the sliding cap's median 21, 378 exclusions (2.87 percent) and 80,794,968 tokens. The literal reading is implemented because it is what the D-row says and because it halves the token load, which matters at 32 devices. A ruling for the sliding cap changes one function, `_epg_episode`.",
+  "epg_floor_rule": "D153: an instant whose episode holds fewer than 3 frames is NOT a decision instant for any arm, device or cloud. Such instants are excluded identically, by not being emitted as opportunities at all, so no arm can see them and the exclusion cannot differ by arm. Their frames are still CAPTURED and still enter the episode context, and their uplink bytes are charged to the first decision instant that carries them.",
+  "fairness_digest_A": "5c4eb47df38596b12c10264340335c18b76453cdf13c0a4bffdc768aa612fe72",
+  "fairness_digest_B": "028a3b0fa62a6328e4122c31f18f06482ea4148b49411f1e4d600511630defc9",
+  "seed": 0,
+  "n_devices": 8,
+  "ratio": "50:50",
+  "run_s": 300.0
+ },
+ "step_2b_switch_reaches_a_decision": {
+  "arm": "edf",
+  "decisions_epg": 1884,
+  "decisions_oneframe": 2117,
+  "differing_decisions": 2117,
+  "first_differing_decision": {
+   "index": 0,
+   "epg": {
+    "t": 8.7,
+    "kind": "release_monitor",
+    "opportunity_ids": [
+     "opp0000000"
+    ]
+   },
+   "oneframe": {
+    "t": 7.6,
+    "kind": "release_monitor",
+    "opportunity_ids": [
+     "opp0000000"
+    ]
+   }
+  },
+  "bodies_on_shared_opportunities": 1864,
+  "bodies_differing": 1864,
+  "epg_frames": [
+   3,
+   4,
+   5,
+   "...",
+   21
+  ],
+  "oneframe_frames": [
+   1
+  ],
+  "ok": true
+ },
+ "parity_law": {
+  "source": "results/dashcam/study_sh_ep/h100/sh_ep_requests_32BI_shep2-EP-G.jsonl.gz",
+  "rows": 3898,
+  "deviation_hist": {
+   "-2": 3,
+   "0": 3895
+  },
+  "deviation_zero": 3895,
+  "deviation_nonzero": 3,
+  "solved_tokens_per_frame": 338.0,
+  "solved_text_tokens": 42.0,
+  "code_tokens_per_frame": 338,
+  "code_text_tokens": 42,
+  "prompt_tokens_at_21": {
+   "7140": 287
+  },
+  "rows_at_21": 287,
+  "modal_prompt_tokens_by_n": {
+   "1": 378,
+   "2": 718,
+   "3": 1056,
+   "4": 1394,
+   "5": 1732,
+   "6": 2070,
+   "7": 2408,
+   "8": 2746,
+   "9": 3084,
+   "10": 3422,
+   "11": 3760,
+   "12": 4098,
+   "13": 4436,
+   "14": 4774,
+   "15": 5112,
+   "16": 5450,
+   "17": 5788,
+   "18": 6126,
+   "19": 6464,
+   "20": 6802,
+   "21": 7140
+  },
+  "solved_from_frame_counts": [
+   6,
+   21
+  ],
+  "epg_prompt_tokens_21": 7140,
+  "agree": true
+ },
+ "parity_body_vs_sh_ep": {
+  "ok": true,
+  "row": "00005_EP-G_t0014.75",
+  "n_frames": 9,
+  "header_sh_ep": "The following are consecutive dashcam frames, oldest first.",
+  "header_live2": "The following are consecutive dashcam frames, oldest first.",
+  "header_identical": true,
+  "question_identical": true,
+  "gen_identical": true,
+  "sh_ep": null,
+  "live2": null,
+  "normalised_digest": "e064b16a4ea3b80d895d35654df04090fa2bed1f53f174eee608193088add515",
+  "exemptions": [
+   "served model name",
+   "cache_salt (D84)",
+   "uuid values (D84)",
+   "stream / stream_options (live2 times the first token)"
+  ]
+ },
+ "proof_a_cached_tokens_rise_and_reset": {
+  "ok": true,
+  "requests": 1871,
+  "rises": 1757,
+  "resets": 110,
+  "violations": [],
+  "n_violations": 0,
+  "traced_device": "dash000",
+  "traced_requests": [
+   {
+    "device_id": "dash000",
+    "t": 29.6,
+    "n_frames": 3,
+    "frames_as_reference": 0,
+    "frames_as_bytes": 3,
+    "shared_prefix_frames": 0,
+    "expected_cached_frames": 0,
+    "expected_cached_tokens_at_least": 0,
+    "prompt_tokens_expected": 1056,
+    "est_tokens": 1056,
+    "first_of_episode": true
+   },
+   {
+    "device_id": "dash000",
+    "t": 30.0,
+    "n_frames": 4,
+    "frames_as_reference": 3,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 3,
+    "expected_cached_frames": 3,
+    "expected_cached_tokens_at_least": 1014,
+    "prompt_tokens_expected": 1394,
+    "est_tokens": 1394,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 30.5,
+    "n_frames": 5,
+    "frames_as_reference": 4,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 4,
+    "expected_cached_frames": 4,
+    "expected_cached_tokens_at_least": 1352,
+    "prompt_tokens_expected": 1732,
+    "est_tokens": 1732,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 31.0,
+    "n_frames": 6,
+    "frames_as_reference": 5,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 5,
+    "expected_cached_frames": 5,
+    "expected_cached_tokens_at_least": 1690,
+    "prompt_tokens_expected": 2070,
+    "est_tokens": 2070,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 31.5,
+    "n_frames": 7,
+    "frames_as_reference": 6,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 6,
+    "expected_cached_frames": 6,
+    "expected_cached_tokens_at_least": 2028,
+    "prompt_tokens_expected": 2408,
+    "est_tokens": 2408,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 32.0,
+    "n_frames": 8,
+    "frames_as_reference": 7,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 7,
+    "expected_cached_frames": 7,
+    "expected_cached_tokens_at_least": 2366,
+    "prompt_tokens_expected": 2746,
+    "est_tokens": 2746,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 32.5,
+    "n_frames": 9,
+    "frames_as_reference": 8,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 8,
+    "expected_cached_frames": 8,
+    "expected_cached_tokens_at_least": 2704,
+    "prompt_tokens_expected": 3084,
+    "est_tokens": 3084,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 33.0,
+    "n_frames": 10,
+    "frames_as_reference": 9,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 9,
+    "expected_cached_frames": 9,
+    "expected_cached_tokens_at_least": 3042,
+    "prompt_tokens_expected": 3422,
+    "est_tokens": 3422,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 33.5,
+    "n_frames": 11,
+    "frames_as_reference": 10,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 10,
+    "expected_cached_frames": 10,
+    "expected_cached_tokens_at_least": 3380,
+    "prompt_tokens_expected": 3760,
+    "est_tokens": 3760,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 34.0,
+    "n_frames": 12,
+    "frames_as_reference": 11,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 11,
+    "expected_cached_frames": 11,
+    "expected_cached_tokens_at_least": 3718,
+    "prompt_tokens_expected": 4098,
+    "est_tokens": 4098,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 34.5,
+    "n_frames": 13,
+    "frames_as_reference": 12,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 12,
+    "expected_cached_frames": 12,
+    "expected_cached_tokens_at_least": 4056,
+    "prompt_tokens_expected": 4436,
+    "est_tokens": 4436,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 35.0,
+    "n_frames": 14,
+    "frames_as_reference": 13,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 13,
+    "expected_cached_frames": 13,
+    "expected_cached_tokens_at_least": 4394,
+    "prompt_tokens_expected": 4774,
+    "est_tokens": 4774,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 35.5,
+    "n_frames": 15,
+    "frames_as_reference": 14,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 14,
+    "expected_cached_frames": 14,
+    "expected_cached_tokens_at_least": 4732,
+    "prompt_tokens_expected": 5112,
+    "est_tokens": 5112,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 36.0,
+    "n_frames": 16,
+    "frames_as_reference": 15,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 15,
+    "expected_cached_frames": 15,
+    "expected_cached_tokens_at_least": 5070,
+    "prompt_tokens_expected": 5450,
+    "est_tokens": 5450,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 36.5,
+    "n_frames": 17,
+    "frames_as_reference": 16,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 16,
+    "expected_cached_frames": 16,
+    "expected_cached_tokens_at_least": 5408,
+    "prompt_tokens_expected": 5788,
+    "est_tokens": 5788,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 37.0,
+    "n_frames": 18,
+    "frames_as_reference": 17,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 17,
+    "expected_cached_frames": 17,
+    "expected_cached_tokens_at_least": 5746,
+    "prompt_tokens_expected": 6126,
+    "est_tokens": 6126,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 37.5,
+    "n_frames": 19,
+    "frames_as_reference": 18,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 18,
+    "expected_cached_frames": 18,
+    "expected_cached_tokens_at_least": 6084,
+    "prompt_tokens_expected": 6464,
+    "est_tokens": 6464,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 38.0,
+    "n_frames": 20,
+    "frames_as_reference": 19,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 19,
+    "expected_cached_frames": 19,
+    "expected_cached_tokens_at_least": 6422,
+    "prompt_tokens_expected": 6802,
+    "est_tokens": 6802,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 38.5,
+    "n_frames": 21,
+    "frames_as_reference": 20,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 20,
+    "expected_cached_frames": 20,
+    "expected_cached_tokens_at_least": 6760,
+    "prompt_tokens_expected": 7140,
+    "est_tokens": 7140,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 40.1,
+    "n_frames": 3,
+    "frames_as_reference": 0,
+    "frames_as_bytes": 3,
+    "shared_prefix_frames": 0,
+    "expected_cached_frames": 0,
+    "expected_cached_tokens_at_least": 0,
+    "prompt_tokens_expected": 1056,
+    "est_tokens": 1056,
+    "first_of_episode": true
+   },
+   {
+    "device_id": "dash000",
+    "t": 40.5,
+    "n_frames": 4,
+    "frames_as_reference": 3,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 3,
+    "expected_cached_frames": 3,
+    "expected_cached_tokens_at_least": 1014,
+    "prompt_tokens_expected": 1394,
+    "est_tokens": 1394,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 41.0,
+    "n_frames": 5,
+    "frames_as_reference": 4,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 4,
+    "expected_cached_frames": 4,
+    "expected_cached_tokens_at_least": 1352,
+    "prompt_tokens_expected": 1732,
+    "est_tokens": 1732,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 41.5,
+    "n_frames": 6,
+    "frames_as_reference": 5,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 5,
+    "expected_cached_frames": 5,
+    "expected_cached_tokens_at_least": 1690,
+    "prompt_tokens_expected": 2070,
+    "est_tokens": 2070,
+    "first_of_episode": false
+   },
+   {
+    "device_id": "dash000",
+    "t": 42.0,
+    "n_frames": 7,
+    "frames_as_reference": 6,
+    "frames_as_bytes": 1,
+    "shared_prefix_frames": 6,
+    "expected_cached_frames": 6,
+    "expected_cached_tokens_at_least": 2028,
+    "prompt_tokens_expected": 2408,
+    "est_tokens": 2408,
+    "first_of_episode": false
+   }
+  ],
+  "note": "expected_cached_* is what the WIRE FORM implies, not an engine measurement: the engine-side cached_tokens confirmation is the H100's"
+ },
+ "proof_b_request_digest_identical_across_arms": {
+  "ok": true,
+  "arms": [
+   "always-cloud-fcfs",
+   "eco-llm",
+   "edf",
+   "warm-all-lru"
+  ],
+  "released_per_arm": {
+   "always-cloud-fcfs": 1871,
+   "eco-llm": 1871,
+   "edf": 1871,
+   "warm-all-lru": 1871
+  },
+  "pairs": {
+   "always-cloud-fcfs_vs_eco-llm": {
+    "common_opportunities": 1871,
+    "differing": 0,
+    "first_differing": []
+   },
+   "always-cloud-fcfs_vs_edf": {
+    "common_opportunities": 1871,
+    "differing": 0,
+    "first_differing": []
+   },
+   "always-cloud-fcfs_vs_warm-all-lru": {
+    "common_opportunities": 1871,
+    "differing": 0,
+    "first_differing": []
+   }
+  },
+  "digest_over_all_bodies": {
+   "always-cloud-fcfs": "d1d8b01991143bb81b116d0ac3058dd006148083d9c2763a6e33f0e52109bc92",
+   "eco-llm": "d1d8b01991143bb81b116d0ac3058dd006148083d9c2763a6e33f0e52109bc92",
+   "edf": "d1d8b01991143bb81b116d0ac3058dd006148083d9c2763a6e33f0e52109bc92",
+   "warm-all-lru": "d1d8b01991143bb81b116d0ac3058dd006148083d9c2763a6e33f0e52109bc92"
+  },
+  "note": "body_digest is sha256 over the wire body with the internal _live2 block removed, so it covers the header, every image part, the question, the generation parameters and the cache_salt"
+ },
+ "proof_c_device_and_cloud": {
+  "ok": true,
+  "compared": 40,
+  "violations": [],
+  "device_answer_source": "committed StudyORIN1-dense N=1 one-frame scores (fleet/data_sources.orin_dense_scores) - NOT an EP-G device answer; see the report's limitation",
+  "examples": [
+   {
+    "opportunity_id": "opp0000000",
+    "n_frames": 3,
+    "content_identical": true,
+    "differing_top_level_keys": [
+     "model"
+    ],
+    "header": "The following are consecutive dashcam frames, oldest first.",
+    "question": "Is a collision or near-collision involving the camera vehicle happening or about to happen? Answer only Yes or No."
+   },
+   {
+    "opportunity_id": "opp0000001",
+    "n_frames": 4,
+    "content_identical": true,
+    "differing_top_level_keys": [
+     "model"
+    ],
+    "header": "The following are consecutive dashcam frames, oldest first.",
+    "question": "Is a collision or near-collision involving the camera vehicle happening or about to happen? Answer only Yes or No."
+   },
+   {
+    "opportunity_id": "opp0000002",
+    "n_frames": 5,
+    "content_identical": true,
+    "differing_top_level_keys": [
+     "model"
+    ],
+    "header": "The following are consecutive dashcam frames, oldest first.",
+    "question": "Is a collision or near-collision involving the camera vehicle happening or about to happen? Answer only Yes or No."
+   }
+  ]
+ },
+ "proof_d_excluded_instants": {
+  "proof_cell": {
+   "cell": {
+    "seed": 0,
+    "n_devices": 8,
+    "ratio": "50:50",
+    "run_s": 300.0,
+    "mode": "A"
+   },
+   "instants_captured": 2104,
+   "decision_instants_at_floor_3": 1874,
+   "episodes": 115,
+   "excluded_by_floor": {
+    "3": 230,
+    "6": 572
+   },
+   "excluded_frac_by_floor": {
+    "3": 0.109316,
+    "6": 0.271863
+   },
+   "frames_in_requests": 21226,
+   "frames_per_request_mean": 11.3266,
+   "prompt_tokens_total": 7253096,
+   "floor_6_run": {
+    "decision_instants": 1532,
+    "excluded": 572,
+    "frames_in_requests": 19858,
+    "prompt_tokens_total": 6776348
+   },
+   "floor_6_agrees_with_the_floor_3_run": true
+  },
+  "headline_cell": {
+   "cell": {
+    "seed": 4,
+    "n_devices": 16,
+    "ratio": "40:40:20",
+    "run_s": 1200.0,
+    "mode": "A"
+   },
+   "instants_captured": 13193,
+   "decision_instants_at_floor_3": 11764,
+   "episodes": 715,
+   "excluded_by_floor": {
+    "3": 1429,
+    "6": 3564
+   },
+   "excluded_frac_by_floor": {
+    "3": 0.108315,
+    "6": 0.270143
+   },
+   "frames_in_requests": 133083,
+   "frames_per_request_mean": 11.3127,
+   "prompt_tokens_total": 45476142,
+   "floor_6_run": {
+    "decision_instants": 9629,
+    "excluded": 3564,
+    "frames_in_requests": 124544,
+    "prompt_tokens_total": 42500290
+   },
+   "floor_6_agrees_with_the_floor_3_run": true
+  }
+ },
+ "negative_control": {
+  "oneframe_trace_has_episode_fields": false,
+  "oneframe_stats_epg_counters_zero": true,
+  "oneframe_run_dashcam_format": "oneframe",
+  "oneframe_run_epg_summary": null,
+  "oneframe_monitor_requests": 2103,
+  "oneframe_frames_per_request": [
+   1
+  ],
+  "oneframe_headers": [
+   "The following is 1 dashcam frame."
+  ],
+  "multiframe_without_epg_refused": "the committed SH body is one frame per call, got 2; D153's episode body needs dashcam_format='epg'",
+  "ok": true
+ },
+ "consistency": {
+  "constants_match_committed": {
+   "cap_frames": {
+    "code": 21,
+    "committed": 21,
+    "agree": true
+   },
+   "cadence_s": {
+    "code": 0.5,
+    "committed": 0.5,
+    "agree": true
+   },
+   "header_multi": {
+    "code": "The following are consecutive dashcam frames, oldest first.",
+    "committed": "The following are consecutive dashcam frames, oldest first.",
+    "agree": true
+   },
+   "header_one_frame": {
+    "code": "The following is 1 dashcam frame.",
+    "committed": "The following is 1 dashcam frame.",
+    "agree": true
+   },
+   "question": {
+    "agree": true
+   },
+   "token_constants": {
+    "trace": [
+     42,
+     338
+    ],
+    "bodies": [
+     42,
+     338
+    ],
+    "agree": true
+   }
+  },
+  "prior_measurement": {
+   "monitor_instants": 13193,
+   "plays": 189,
+   "excluded_floor3": 1429,
+   "excluded_frac": 0.1083,
+   "prompt_tokens": 46260494,
+   "median_frames": 10
+  },
+  "this_run": {
+   "monitor_instants": 13193,
+   "plays": 189,
+   "excluded_floor3": 1429,
+   "decision_instants": 11764,
+   "prompt_tokens_over_decision_instants": 45476142
+  },
+  "reconciliation": {
+   "instants": {
+    "this": 13193,
+    "prior": 13193,
+    "ratio": 1.0
+   },
+   "excluded": {
+    "this": 1429,
+    "prior": 1429,
+    "ratio": 1.0
+   },
+   "prompt_tokens": {
+    "this": 45476142,
+    "prior": 46260494,
+    "ratio": 0.983045,
+    "explained": "the prior figure counts a request at EVERY captured instant, including the 1,429 the floor excludes; charging those 1,429 instants their 2,143 frames and their header text accounts for the difference exactly",
+    "excluded_instants": 1429,
+    "excluded_instant_frames": 2143,
+    "prior_minus_excluded": 45476142,
+    "matches_this": true
+   },
+   "median_frames": {
+    "this_over_decision_instants": 11,
+    "prior_over_all_instants": 10,
+    "explained": "the same distribution read over two denominators: with the two sub-floor instants of every cycle included the median is 10, over decision instants only it is 11"
+   }
+  },
+  "schema_sides_agree": {
+   "schema_present": true,
+   "compared": [
+    "cloud_answer",
+    "device_register",
+    "history_append",
+    "history_preload",
+    "monitor_frame",
+    "monitor_offer",
+    "pull_request",
+    "recall_question",
+    "session_end",
+    "session_start"
+   ],
+   "d96_pending": false,
+   "note": "field lists identical"
+  },
+  "proxies": [
+   "expected_cached_tokens is derived from the wire form, NOT measured on an engine; the engine-side rise and reset is the H100's to confirm",
+   "frame bytes are StudyE10a committed medians unless a Part-2 manifest is passed, unchanged by this work"
+  ]
+ },
+ "per_arm": {
+  "always-cloud-fcfs": {
+   "dashcam_format": "epg",
+   "epg": {
+    "requests": 1871,
+    "frames_min": 3,
+    "frames_max": 21,
+    "frames_median": 11,
+    "frames_total": 21202,
+    "prompt_tokens_total": 7244858,
+    "episodes": 114,
+    "by_episode_index": {
+     "2": {
+      "n": 114,
+      "frames": 342,
+      "as_reference": 0
+     },
+     "3": {
+      "n": 114,
+      "frames": 456,
+      "as_reference": 342
+     },
+     "4": {
+      "n": 114,
+      "frames": 570,
+      "as_reference": 456
+     },
+     "5": {
+      "n": 114,
+      "frames": 684,
+      "as_reference": 570
+     },
+     "6": {
+      "n": 113,
+      "frames": 791,
+      "as_reference": 678
+     },
+     "7": {
+      "n": 111,
+      "frames": 888,
+      "as_reference": 777
+     },
+     "8": {
+      "n": 109,
+      "frames": 981,
+      "as_reference": 872
+     },
+     "9": {
+      "n": 108,
+      "frames": 1080,
+      "as_reference": 972
+     },
+     "10": {
+      "n": 105,
+      "frames": 1155,
+      "as_reference": 1050
+     },
+     "11": {
+      "n": 102,
+      "frames": 1224,
+      "as_reference": 1122
+     },
+     "12": {
+      "n": 87,
+      "frames": 1131,
+      "as_reference": 1044
+     },
+     "13": {
+      "n": 85,
+      "frames": 1190,
+      "as_reference": 1105
+     },
+     "14": {
+      "n": 85,
+      "frames": 1275,
+      "as_reference": 1190
+     },
+     "15": {
+      "n": 85,
+      "frames": 1360,
+      "as_reference": 1275
+     },
+     "16": {
+      "n": 85,
+      "frames": 1445,
+      "as_reference": 1360
+     },
+     "17": {
+      "n": 85,
+      "frames": 1530,
+      "as_reference": 1445
+     },
+     "18": {
+      "n": 85,
+      "frames": 1615,
+      "as_reference": 1530
+     },
+     "19": {
+      "n": 85,
+      "frames": 1700,
+      "as_reference": 1615
+     },
+     "20": {
+      "n": 85,
+      "frames": 1785,
+      "as_reference": 1700
+     }
+    }
+   },
+   "counts": {
+    "epg_frames_sent_as_bytes": 2099,
+    "epg_frames_sent_as_reference": 19103,
+    "epg_monitor_requests": 1871,
+    "submitted_monitor": 1871
+   },
+   "budget": {
+    "gpu_budget_s": 300.0,
+    "spent_gpu_s": 160.577,
+    "budget_refusals": 0,
+    "new_tokens_charged_total": 788044,
+    "prompt_tokens_total": 7244858,
+    "whole_prompt_charge_would_be_gpu_s": 1293.725
+   }
+  },
+  "edf": {
+   "dashcam_format": "epg",
+   "epg": {
+    "requests": 1871,
+    "frames_min": 3,
+    "frames_max": 21,
+    "frames_median": 11,
+    "frames_total": 21202,
+    "prompt_tokens_total": 7244858,
+    "episodes": 114,
+    "by_episode_index": {
+     "2": {
+      "n": 114,
+      "frames": 342,
+      "as_reference": 0
+     },
+     "3": {
+      "n": 114,
+      "frames": 456,
+      "as_reference": 342
+     },
+     "4": {
+      "n": 114,
+      "frames": 570,
+      "as_reference": 456
+     },
+     "5": {
+      "n": 114,
+      "frames": 684,
+      "as_reference": 570
+     },
+     "6": {
+      "n": 113,
+      "frames": 791,
+      "as_reference": 678
+     },
+     "7": {
+      "n": 111,
+      "frames": 888,
+      "as_reference": 777
+     },
+     "8": {
+      "n": 109,
+      "frames": 981,
+      "as_reference": 872
+     },
+     "9": {
+      "n": 108,
+      "frames": 1080,
+      "as_reference": 972
+     },
+     "10": {
+      "n": 105,
+      "frames": 1155,
+      "as_reference": 1050
+     },
+     "11": {
+      "n": 102,
+      "frames": 1224,
+      "as_reference": 1122
+     },
+     "12": {
+      "n": 87,
+      "frames": 1131,
+      "as_reference": 1044
+     },
+     "13": {
+      "n": 85,
+      "frames": 1190,
+      "as_reference": 1105
+     },
+     "14": {
+      "n": 85,
+      "frames": 1275,
+      "as_reference": 1190
+     },
+     "15": {
+      "n": 85,
+      "frames": 1360,
+      "as_reference": 1275
+     },
+     "16": {
+      "n": 85,
+      "frames": 1445,
+      "as_reference": 1360
+     },
+     "17": {
+      "n": 85,
+      "frames": 1530,
+      "as_reference": 1445
+     },
+     "18": {
+      "n": 85,
+      "frames": 1615,
+      "as_reference": 1530
+     },
+     "19": {
+      "n": 85,
+      "frames": 1700,
+      "as_reference": 1615
+     },
+     "20": {
+      "n": 85,
+      "frames": 1785,
+      "as_reference": 1700
+     }
+    }
+   },
+   "counts": {
+    "epg_frames_sent_as_bytes": 2099,
+    "epg_frames_sent_as_reference": 19103,
+    "epg_monitor_requests": 1871,
+    "submitted_monitor": 1871
+   },
+   "budget": {
+    "gpu_budget_s": 300.0,
+    "spent_gpu_s": 151.624,
+    "budget_refusals": 0,
+    "new_tokens_charged_total": 788044,
+    "prompt_tokens_total": 7244858,
+    "whole_prompt_charge_would_be_gpu_s": 1293.725
+   }
+  },
+  "eco-llm": {
+   "dashcam_format": "epg",
+   "epg": {
+    "requests": 1871,
+    "frames_min": 3,
+    "frames_max": 21,
+    "frames_median": 11,
+    "frames_total": 21202,
+    "prompt_tokens_total": 7244858,
+    "episodes": 114,
+    "by_episode_index": {
+     "2": {
+      "n": 114,
+      "frames": 342,
+      "as_reference": 0
+     },
+     "3": {
+      "n": 114,
+      "frames": 456,
+      "as_reference": 342
+     },
+     "4": {
+      "n": 114,
+      "frames": 570,
+      "as_reference": 456
+     },
+     "5": {
+      "n": 114,
+      "frames": 684,
+      "as_reference": 570
+     },
+     "6": {
+      "n": 113,
+      "frames": 791,
+      "as_reference": 678
+     },
+     "7": {
+      "n": 111,
+      "frames": 888,
+      "as_reference": 777
+     },
+     "8": {
+      "n": 109,
+      "frames": 981,
+      "as_reference": 872
+     },
+     "9": {
+      "n": 108,
+      "frames": 1080,
+      "as_reference": 972
+     },
+     "10": {
+      "n": 105,
+      "frames": 1155,
+      "as_reference": 1050
+     },
+     "11": {
+      "n": 102,
+      "frames": 1224,
+      "as_reference": 1122
+     },
+     "12": {
+      "n": 87,
+      "frames": 1131,
+      "as_reference": 1044
+     },
+     "13": {
+      "n": 85,
+      "frames": 1190,
+      "as_reference": 1105
+     },
+     "14": {
+      "n": 85,
+      "frames": 1275,
+      "as_reference": 1190
+     },
+     "15": {
+      "n": 85,
+      "frames": 1360,
+      "as_reference": 1275
+     },
+     "16": {
+      "n": 85,
+      "frames": 1445,
+      "as_reference": 1360
+     },
+     "17": {
+      "n": 85,
+      "frames": 1530,
+      "as_reference": 1445
+     },
+     "18": {
+      "n": 85,
+      "frames": 1615,
+      "as_reference": 1530
+     },
+     "19": {
+      "n": 85,
+      "frames": 1700,
+      "as_reference": 1615
+     },
+     "20": {
+      "n": 85,
+      "frames": 1785,
+      "as_reference": 1700
+     }
+    }
+   },
+   "counts": {
+    "epg_frames_sent_as_bytes": 2099,
+    "epg_frames_sent_as_reference": 19103,
+    "epg_monitor_requests": 1871,
+    "submitted_monitor": 1871
+   },
+   "budget": {
+    "gpu_budget_s": 300.0,
+    "spent_gpu_s": 160.577,
+    "budget_refusals": 0,
+    "new_tokens_charged_total": 788044,
+    "prompt_tokens_total": 7244858,
+    "whole_prompt_charge_would_be_gpu_s": 1293.725
+   }
+  },
+  "warm-all-lru": {
+   "dashcam_format": "epg",
+   "epg": {
+    "requests": 1871,
+    "frames_min": 3,
+    "frames_max": 21,
+    "frames_median": 11,
+    "frames_total": 21202,
+    "prompt_tokens_total": 7244858,
+    "episodes": 114,
+    "by_episode_index": {
+     "2": {
+      "n": 114,
+      "frames": 342,
+      "as_reference": 0
+     },
+     "3": {
+      "n": 114,
+      "frames": 456,
+      "as_reference": 342
+     },
+     "4": {
+      "n": 114,
+      "frames": 570,
+      "as_reference": 456
+     },
+     "5": {
+      "n": 114,
+      "frames": 684,
+      "as_reference": 570
+     },
+     "6": {
+      "n": 113,
+      "frames": 791,
+      "as_reference": 678
+     },
+     "7": {
+      "n": 111,
+      "frames": 888,
+      "as_reference": 777
+     },
+     "8": {
+      "n": 109,
+      "frames": 981,
+      "as_reference": 872
+     },
+     "9": {
+      "n": 108,
+      "frames": 1080,
+      "as_reference": 972
+     },
+     "10": {
+      "n": 105,
+      "frames": 1155,
+      "as_reference": 1050
+     },
+     "11": {
+      "n": 102,
+      "frames": 1224,
+      "as_reference": 1122
+     },
+     "12": {
+      "n": 87,
+      "frames": 1131,
+      "as_reference": 1044
+     },
+     "13": {
+      "n": 85,
+      "frames": 1190,
+      "as_reference": 1105
+     },
+     "14": {
+      "n": 85,
+      "frames": 1275,
+      "as_reference": 1190
+     },
+     "15": {
+      "n": 85,
+      "frames": 1360,
+      "as_reference": 1275
+     },
+     "16": {
+      "n": 85,
+      "frames": 1445,
+      "as_reference": 1360
+     },
+     "17": {
+      "n": 85,
+      "frames": 1530,
+      "as_reference": 1445
+     },
+     "18": {
+      "n": 85,
+      "frames": 1615,
+      "as_reference": 1530
+     },
+     "19": {
+      "n": 85,
+      "frames": 1700,
+      "as_reference": 1615
+     },
+     "20": {
+      "n": 85,
+      "frames": 1785,
+      "as_reference": 1700
+     }
+    }
+   },
+   "counts": {
+    "epg_frames_sent_as_bytes": 2099,
+    "epg_frames_sent_as_reference": 19103,
+    "epg_monitor_requests": 1871,
+    "submitted_monitor": 1871
+   },
+   "budget": {
+    "gpu_budget_s": 300.0,
+    "spent_gpu_s": 161.479,
+    "budget_refusals": 0,
+    "new_tokens_charged_total": 788044,
+    "prompt_tokens_total": 7244858,
+    "whole_prompt_charge_would_be_gpu_s": 1293.725
+   }
+  }
+ },
+ "cost_accounting": {
+  "rule": "the budget is charged the NEW tokens of an append-only episode (42 + 338 x frames carrying bytes), while est_tokens carries the whole episode prompt, which is what the engine will report",
+  "why": "charging the whole prompt every turn prices an append-only episode as a cold rebuild, denies the mechanism D148 exists to exercise, and is not what live2 does for a history append (`_advance_build` charges the PIECE)",
+  "conservative_by": "the header's own text tokens, which are in the shared prefix and are charged again; StudySH-EP measured the 42 text tokens together and splitting them would be an invented number",
+  "per_arm": {
+   "always-cloud-fcfs": {
+    "gpu_budget_s": 300.0,
+    "spent_gpu_s": 160.577,
+    "budget_refusals": 0,
+    "new_tokens_charged_total": 788044,
+    "prompt_tokens_total": 7244858,
+    "whole_prompt_charge_would_be_gpu_s": 1293.725
+   },
+   "edf": {
+    "gpu_budget_s": 300.0,
+    "spent_gpu_s": 151.624,
+    "budget_refusals": 0,
+    "new_tokens_charged_total": 788044,
+    "prompt_tokens_total": 7244858,
+    "whole_prompt_charge_would_be_gpu_s": 1293.725
+   },
+   "eco-llm": {
+    "gpu_budget_s": 300.0,
+    "spent_gpu_s": 160.577,
+    "budget_refusals": 0,
+    "new_tokens_charged_total": 788044,
+    "prompt_tokens_total": 7244858,
+    "whole_prompt_charge_would_be_gpu_s": 1293.725
+   },
+   "warm-all-lru": {
+    "gpu_budget_s": 300.0,
+    "spent_gpu_s": 161.479,
+    "budget_refusals": 0,
+    "new_tokens_charged_total": 788044,
+    "prompt_tokens_total": 7244858,
+    "whole_prompt_charge_would_be_gpu_s": 1293.725
+   }
+  }
+ },
+ "_provenance": {
+  "git_commit": "e04a7c04b723e271b013936744c9e0ed41494044",
+  "script": "epg_bodies_proof.py",
+  "model": "none",
+  "timestamp": "2026-11-20T18:45:33.039507",
+  "device": "cpu",
+  "n": 1871
+ }
+}

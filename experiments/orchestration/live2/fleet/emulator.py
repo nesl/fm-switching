@@ -486,12 +486,18 @@ class FleetEmulator:
                 self._on_pull_arrived(payload, t)
             elif what == "frame_arrived":
                 r = payload["rec"]
+                # D153: the four EPISODE fields are forwarded exactly as the trace generator
+                # wrote them, and ONLY if it wrote them. The emulator derives none of them: the
+                # episode context must not depend on anything that happens at run time, or
+                # proof (b) stops holding by construction.
+                ep = {k: r[k] for k in ("episode_id", "episode_index", "frame_refs",
+                                        "episode_frames") if k in r}
                 self._to_coord(EV.make("monitor_frame", device_id=r["device_id"],
                                        opportunity_id=r["opportunity_id"],
                                        instant_id=r["opportunity_id"], t_capture=r["t"],
                                        t_arrive=payload["t_arrive"],
                                        deadline_s=r["deadline_s"], frame_ref=r["frame_ref"],
-                                       frame_bytes=int(r["frame_bytes"])), t)
+                                       frame_bytes=int(r["frame_bytes"]), **ep), t)
             elif what == "recall_question":
                 self._on_recall_question(payload, t)
             elif what == "question_arrived":

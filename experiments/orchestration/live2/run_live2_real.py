@@ -97,6 +97,15 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--mode", default="A", choices=("A", "B"))
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--frame-manifest", default=None)
+    ap.add_argument("--dashcam-format", default="oneframe", choices=("oneframe", "epg"),
+                    help="D153: 'epg' sends every dashcam query, device and cloud, as the append-only episode "
+                         "context of D148 (EP-G as StudySH-EP ran it); 'oneframe' is the committed StudyD3 body and "
+                         "the default. It is a property of the TRACE, so a different format gets its own trace "
+                         "directory and its own fairness digest, and the coordinator reads it off the trace")
+    ap.add_argument("--dashcam-min-frames", type=int, default=3,
+                    help="D153's minimum-frame floor: instants before an episode's Nth frame are not decision "
+                         "instants for ANY arm, device or cloud, and are excluded by not being emitted at all. "
+                         "epg only; the user may raise it to 6")
     ap.add_argument("--frames-root", default=None)
     ap.add_argument("--server", default=None, help="OpenAI-compatible base URL; omit to send nothing")
     ap.add_argument("--server-kind", default="vllm")
@@ -164,13 +173,20 @@ def _trace(a, work: Path) -> Path:
         f"_r{a.ratio.replace(':', '-')}_{a.robot_question_set}_{a.ss_question_set}"
     if float(a.robot_deadline_s) != 5.0:                                 # D147: a different L is a different trace
         extra += f"_L{float(a.robot_deadline_s):g}"
+    if a.dashcam_format != "oneframe":          # D153: a different dashcam format is a different workload
+        extra += f"_{a.dashcam_format}"
+        if int(a.dashcam_min_frames) != 3:
+            extra += f"f{int(a.dashcam_min_frames)}"
     tdir = work / "traces" / f"seed{a.seed}_n{a.n_devices}_{int(a.run_s)}s_{a.mode}{extra}"
     if not (tdir / "trace.jsonl").exists():
         TR.write_trace(tdir, TR.generate_trace(
             a.seed, a.n_devices, a.ratio, a.run_s, a.mode,
             frame_manifest=(Path(a.frame_manifest) if a.frame_manifest else None),
             **({} if a.robot_question_set == "eval" else dict(robot_question_set=a.robot_question_set)),
-            **({} if a.ss_question_set == "ss1" else dict(ss_question_set=a.ss_question_set))))
+            **({} if a.ss_question_set == "ss1" else dict(ss_question_set=a.ss_question_set)),
+            **({} if a.dashcam_format == "oneframe"
+               else dict(dashcam_format=a.dashcam_format,
+                         dashcam_min_frames=int(a.dashcam_min_frames)))))
     return tdir
 
 
@@ -250,6 +266,10 @@ def run(a) -> Dict[str, Any]:
         server_extra_flags=(a.server_extra_flags if sends else None),
         c_inflight_set_by_runner=(a.c_inflight is not None),
         kv_capacity_enforced=bool(a.kv_capacity_enforced),
+        dashcam_format=tmeta.get("dashcam_format", "oneframe"),
+        dashcam_min_frames=tmeta.get("dashcam_min_frames"),
+        epg_cap_frames=tmeta.get("epg_cap_frames"),
+        epg_refresh_rule=tmeta.get("epg_refresh_rule"),
         model=a.model, split_processes=bool(a.split), is_measurement=False)
     (rdir / "header.json").write_text(json.dumps(header, indent=1, default=str) + "\n")
 

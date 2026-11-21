@@ -65,6 +65,47 @@ _PENDING = "_fm_pending"        # the deferred part's own bookkeeping, stripped 
 SH_QUERY = committed_constant(D3_SCRIPT, "QUERY")
 SH_GEN = committed_constant(D3_SCRIPT, "GEN")
 SH_HEADER = "The following is 1 dashcam frame."          # d3 grey_header(1); D14b N=1 manifest
+
+# ---------------------------------------------------------------- D153: the EP-G episode body
+# D153 fixes the dashcam format BY THE TASK: every dashcam query, device and cloud, carries the
+# append-only episode context of D148, which is EP-G as StudySH-EP ran it. The format is a
+# PARAMETER of this builder (`dashcam_format`), default "oneframe", so nothing changes for a
+# caller that has not asked for EP-G.
+#
+# The multi-frame header is the COUNT-FREE literal StudySH-EP sent for every multi-frame
+# condition under the D145 ruling. It is READ out of the committed manifest script rather than
+# retyped, exactly as SH_QUERY and SH_GEN are read out of StudyD3's: a count-bearing header
+# changes at every instant and sits first in the prompt, so under it no KV prefix of an
+# append-only episode could ever be reused and the mechanism EP-G exists to exercise would be
+# silently dead. A ONE-frame body keeps StudyD3's committed literal, so C1 and the committed
+# calibration body stay byte-identical.
+SH_EP_SCRIPT = D3_SCRIPT.parent / "sh_ep_manifest.py"
+SH_HEADER_MULTI = committed_constant(SH_EP_SCRIPT, "HEADER_MULTI")
+DASHCAM_FORMATS = ("oneframe", "epg")
+
+# THE PARITY TARGET. StudySH-EP's committed EP-G prompt_tokens obey
+# prompt_tokens = 3084 + 338 * (n - 9) = 42 + 338 * n exactly (3,895 of 3,898 EP-G instants at
+# deviation 0 and 3 at -2, with 7,140 at n = 21), i.e. about 42 text tokens for the count-free
+# header plus StudyD3's question, and 338 tokens per frame. These are the only quantities EP-G
+# adds to the token accounting, they are MEASURED not assumed, and
+# `results/orchestration/live2/epg/epg_proofs.json` re-derives both from the committed
+# StudySH-EP request records rather than trusting this line.
+EPG_TEXT_TOKENS = 42
+EPG_TOK_PER_FRAME = 338
+
+
+def epg_prompt_tokens(n_frames: int) -> int:
+    """The prompt tokens an EP-G monitor body of `n_frames` frames costs (StudySH-EP)."""
+    return EPG_TEXT_TOKENS + EPG_TOK_PER_FRAME * int(n_frames)
+
+
+def monitor_header(n_frames: int, dashcam_format: str = "oneframe") -> str:
+    """The header an SH monitoring body of this many frames carries (D145, D153)."""
+    if dashcam_format not in DASHCAM_FORMATS:
+        raise ValueError(f"dashcam_format {dashcam_format!r} not in {DASHCAM_FORMATS}")
+    return SH_HEADER if int(n_frames) == 1 else SH_HEADER_MULTI
+
+
 RECALL_GEN = dict(committed_constant(R1_SCRIPT, "CELLS")["K1"][2],
                   seed=committed_constant(R1_SCRIPT, "SEED"))
 _build_messages = load_committed(O_Q4_SCRIPT, "build_messages")
@@ -133,21 +174,34 @@ def build_body(*, kind: str, device_id: str, session_id: Optional[str], run_tag:
                question: Optional[str] = None, options: Sequence[str] = (),
                max_tokens: int = 1, model: str = MODEL_DEFAULT, stream: bool = True,
                est_tokens: int = 0, retain: bool = True,
-               time_scale: float = 1.0, defer_images: bool = False) -> Dict[str, Any]:
+               time_scale: float = 1.0, defer_images: bool = False,
+               dashcam_format: str = "oneframe") -> Dict[str, Any]:
     """One chat-completions body.
 
     `frames` is a list of {"frame_ref": str, "path": Path or None}; `path` None means send the
     uuid-only reference because this device already sent those bytes.
+
+    `dashcam_format` selects the SH monitoring format (D153). "oneframe" is the committed
+    StudyD3 body and the default, and it still REFUSES more than one frame. "epg" is the
+    append-only episode context of D148: the episode's frames oldest first, the count-free
+    multi-frame header, StudyD3's question and generation parameters unchanged.
     """
     gen: Dict[str, Any] = dict(temperature=0.0, max_tokens=int(max_tokens))
     if kind == "monitor":
-        # the committed SH body: its header, one frame, its question, its generation parameters
+        # the committed SH body: its header, its frames, its question, its generation parameters
         if question not in (None, "", SH_QUERY):
             raise ValueError("the SH monitoring body carries StudyD3's committed question; a "
                              "caller may not substitute one")
-        if len(frames) != 1:
-            raise ValueError(f"the committed SH body is one frame per call, got {len(frames)}")
-        header, question, options = SH_HEADER, SH_QUERY, ()
+        if dashcam_format not in DASHCAM_FORMATS:
+            raise ValueError(f"dashcam_format {dashcam_format!r} not in {DASHCAM_FORMATS}")
+        if dashcam_format == "oneframe":
+            if len(frames) != 1:
+                raise ValueError(f"the committed SH body is one frame per call, got "
+                                 f"{len(frames)}; D153's episode body needs "
+                                 f"dashcam_format='epg'")
+        elif not frames:
+            raise ValueError("an EP-G monitoring body carries at least one frame")
+        header, question, options = monitor_header(len(frames), dashcam_format), SH_QUERY, ()
         gen = dict(SH_GEN)
     elif kind == "recall":
         if question:
@@ -178,7 +232,9 @@ def build_body(*, kind: str, device_id: str, session_id: Optional[str], run_tag:
     body["fm_time_scale"] = float(time_scale)
     body["_live2"] = dict(kind=kind, device_id=device_id, session_id=session_id,
                           mm_uuids=uuids, n_new_frames=sum(1 for f in frames
-                                                           if f.get("path") is not None))
+                                                           if f.get("path") is not None),
+                          n_frames=len(frames), frame_refs=[f["frame_ref"] for f in frames],
+                          dashcam_format=(dashcam_format if kind == "monitor" else None))
     return body
 
 

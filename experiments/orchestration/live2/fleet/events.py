@@ -50,7 +50,8 @@ FIELDS: Dict[str, tuple] = {
     "monitor_offer": ("device_id", "opportunity_id", "instant_id", "t_capture", "deadline_s",
                       "frame_bytes"),
     "monitor_frame": ("device_id", "opportunity_id", "instant_id", "t_capture", "t_arrive",
-                      "deadline_s", "frame_ref", "frame_bytes"),
+                      "deadline_s", "frame_ref", "frame_bytes", "episode_id", "episode_index",
+                      "frame_refs", "episode_frames"),
     # D101: the frames the cloud ALREADY HOLDS at t = 0 for a session joined part-way. NO
     # batch_id and NO t_arrive, because nothing arrived during the run, and NO UPLINK TIME is
     # charged for it.
@@ -72,7 +73,14 @@ FIELDS: Dict[str, tuple] = {
 # pre-existing caller predates it, so requiring it would break them for a field that is
 # genuinely optional: an event without a category simply carries None, which is what the
 # coordinator saw before the field existed.
-OPTIONAL_FIELDS: Dict[str, tuple] = {"recall_question": ("category",)}
+# D153: the four EPISODE fields on `monitor_frame` are optional in exactly the same sense.
+# They are present only when the trace was generated with the EP-G dashcam format; a one-frame
+# trace carries none of them and the coordinator then builds the committed StudyD3 body, which
+# is what every caller before D153 did.
+OPTIONAL_FIELDS: Dict[str, tuple] = {
+    "recall_question": ("category",),
+    "monitor_frame": ("episode_id", "episode_index", "frame_refs", "episode_frames"),
+}
 
 
 def make(kind: str, **kw: Any) -> Dict[str, Any]:
