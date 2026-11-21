@@ -1,5 +1,32 @@
-# User decision 2026-11-20 (~18:50), priority (2): WARM-ALL calibration on dashcam-1f, labelled CALIBRATION-1F (the tag
-# _cal1f). seed 4, 16 devices, 3 s. warm-all-lru is expressible since PATCH 1 (e04a7c0: 1,684 prefills dry);
-# warm-all-lru-reactive passed its four proofs (09d2f49). Both registered on origin.
-warm-all-lru 16 4 _L3_cal1f
-warm-all-lru-reactive 16 4 _L3_cal1f
+# WARM-ALL calibration cells on the CURRENT dashcam-1f workload (user decision).
+# Format: arm n seed tag
+#
+# PURPOSE, and it is a gate design rather than a convenience. The D151 (6) cost-model gate fails
+# because WARM IS CONFOUNDED WITH ARM: arms that rebuild histories go warm and show engine prefix
+# reuse (edf 358 gpu beliefs / 512,992 hits, llf 362 / 424,224) while b7 and the hybrids show zero
+# of both, so the warm coefficient is fitted on edf and llf alone and applied to arms that never go
+# warm. These two cells are the first arm that goes warm and cold under ONE policy, which is what
+# identifies the warm regime out of arm.
+#
+# THESE CELLS ARE THE FIT. The EP-G WARM-ALL cells are the HELD-OUT TEST (D151 (6), D154 (2)), so
+# nothing fitted here may be reported as a gate pass. Label these CALIBRATION-1F.
+#
+# warm-all-lru is the PRIMARY instrument: it warms AHEAD of a question, which became expressible
+# only with PATCH 1 (Observation.live_sessions). Proof it is legitimate to queue: all 50 committed
+# arms are byte-identical before and after that patch (results/orchestration/live2/v5/
+# patch1_byte_identity_proof.json), and with the patch live the arm issues 1,684 prefills against
+# b7's 0, so its characteristic decision is non-zero.
+#
+# warm-all-lru-reactive is the SECOND instrument and is NOT warm-ahead: it slice-builds histories
+# that already have a pending question, so the question pays the materialisation and it cannot show
+# that warming helps on-time. Its counter is warm_reactive_emitted and must never be summed with a
+# warm-ahead count. It is included because a sliced build is the only committed shape that both goes
+# warm AND reports engine reuse (72 of 95 positive-telemetry rows are on piece-chaining arms, none
+# on an arm that rebuilds whole), so it carries the cost-model signal even where warm-ahead does not.
+#
+# Run with the belief corrector in its default OBSERVE mode (LIVE2_BELIEF_CORRECTION unset), so
+# these cells stay comparable with the rest of the handful. The counters still report:
+# belief_corrections_observed_only MUST equal belief_corrections_changed, or the mutation was
+# applied and the cell is not an observe cell.
+warm-all-lru 16 4 _L3
+warm-all-lru-reactive 16 4 _L3
