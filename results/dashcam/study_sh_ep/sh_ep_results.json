@@ -1,6 +1,6 @@
 {
  "label": "StudySH-EP analysis. CPU only; every score is a committed SH-EP run record.",
- "at": "2026-11-20T14:44:26.989004",
+ "at": "2026-11-20T16:44:54.715865",
  "seed": 0,
  "n_bootstrap": 2000,
  "horizons": [
@@ -94,11 +94,8 @@
   "failures": [],
   "passed": true
  },
- "n_records": 31184,
+ "n_records": 35082,
  "coverage": {
-  "4BI|EP-B": {
-   "clips_or_crops_missing": 300
-  },
   "4BI|EP-G": {
    "clips_or_crops_missing": 300
   }
@@ -197,6 +194,38 @@
     "ci": [
      0.4235746105829031,
      0.5591924579962811
+    ]
+   }
+  },
+  "4BI|EP-B": {
+   "ap": {
+    "0.5": {
+     "ap": 0.6996910710316515,
+     "ci": [
+      0.6290035069573149,
+      0.771189572039266
+     ]
+    },
+    "1.0": {
+     "ap": 0.5790526895780943,
+     "ci": [
+      0.4898193773213731,
+      0.6892125552683919
+     ]
+    },
+    "1.5": {
+     "ap": 0.3143523049729067,
+     "ci": [
+      0.24587787992713428,
+      0.4289558909063465
+     ]
+    }
+   },
+   "mAP": {
+    "value": 0.5310320218608842,
+    "ci": [
+     0.471236242652821,
+     0.6099762407778542
     ]
    }
   },
@@ -392,6 +421,16 @@
    "n_positive": 45,
    "n_negative": 45
   },
+  "4BI|EP-B": {
+   "mAP": 0.5067627872833906,
+   "ap": {
+    "0.5": 0.6253948222885558,
+    "1.0": 0.5496252621143607,
+    "1.5": 0.34526827744725536
+   },
+   "n_positive": 45,
+   "n_negative": 45
+  },
   "32BI|C1": {
    "mAP": 0.6305313118488884,
    "ap": {
@@ -476,6 +515,20 @@
     "ci": [
      -0.0008552451611173749,
      0.11626883903689066
+    ]
+   }
+  },
+  "EP-B": {
+   "gap": 0.11251602358797841,
+   "ci": [
+    0.05353685776775706,
+    0.17189490068898805
+   ],
+   "vs_C1": {
+    "diff": 0.012299174384917455,
+    "ci": [
+     -0.03279350730663565,
+     0.05218803430591283
     ]
    }
   }
@@ -948,6 +1001,162 @@
      1.6252840909090893
     ]
    }
+  },
+  "EP-B|far5": {
+   "models": {
+    "4BI": {
+     "threshold": -1.701413101764349,
+     "achieved_far": 0.04035216434336023,
+     "n_negative_instants": 1363,
+     "detected": 35
+    },
+    "32BI": {
+     "threshold": -5.006691495277413,
+     "achieved_far": 0.029347028613352897,
+     "n_negative_instants": 1363,
+     "detected": 61
+    }
+   },
+   "all": {
+    "n_both": 25,
+    "n_32BI_only": 36,
+    "n_4BI_only": 10,
+    "mean_lead_32BI": 2.04804,
+    "mean_lead_4BI": 2.2680399999999996,
+    "diff": -0.22,
+    "ci": [
+     -0.625,
+     0.14589120370370343
+    ]
+   },
+   "sudden": {
+    "n_both": 18,
+    "n_32BI_only": 18,
+    "n_4BI_only": 5,
+    "mean_lead_32BI": 1.8023888888888888,
+    "mean_lead_4BI": 2.1357222222222223,
+    "diff": -0.3333333333333333,
+    "ci": [
+     -0.8043780193236715,
+     0.07142857142857142
+    ]
+   },
+   "slow": {
+    "n_both": 7,
+    "n_32BI_only": 18,
+    "n_4BI_only": 5,
+    "mean_lead_32BI": 2.679714285714286,
+    "mean_lead_4BI": 2.608285714285714,
+    "diff": 0.0714285714285715,
+    "ci": [
+     -0.75,
+     0.8333333333333335
+    ]
+   }
+  },
+  "EP-B|far10": {
+   "models": {
+    "4BI": {
+     "threshold": -2.5788896725138772,
+     "achieved_far": 0.06456346294937637,
+     "n_negative_instants": 1363,
+     "detected": 49
+    },
+    "32BI": {
+     "threshold": -7.000899815996384,
+     "achieved_far": 0.05355832721936904,
+     "n_negative_instants": 1363,
+     "detected": 75
+    }
+   },
+   "all": {
+    "n_both": 41,
+    "n_32BI_only": 34,
+    "n_4BI_only": 8,
+    "mean_lead_32BI": 2.392390243902439,
+    "mean_lead_4BI": 2.6484878048780485,
+    "diff": -0.25609756097560976,
+    "ci": [
+     -0.9432133838383839,
+     0.3929041353383456
+    ]
+   },
+   "sudden": {
+    "n_both": 25,
+    "n_32BI_only": 18,
+    "n_4BI_only": 5,
+    "mean_lead_32BI": 1.97436,
+    "mean_lead_4BI": 2.55436,
+    "diff": -0.58,
+    "ci": [
+     -1.4447463768115942,
+     0.3393262987012985
+    ]
+   },
+   "slow": {
+    "n_both": 16,
+    "n_32BI_only": 16,
+    "n_4BI_only": 3,
+    "mean_lead_32BI": 3.0455625,
+    "mean_lead_4BI": 2.7955625,
+    "diff": 0.25,
+    "ci": [
+     -0.8333333333333334,
+     1.25
+    ]
+   }
+  },
+  "EP-B|far20": {
+   "models": {
+    "4BI": {
+     "threshold": -4.75861428885465,
+     "achieved_far": 0.15480557593543653,
+     "n_negative_instants": 1363,
+     "detected": 74
+    },
+    "32BI": {
+     "threshold": -10.000045717639782,
+     "achieved_far": 0.12545854732208364,
+     "n_negative_instants": 1363,
+     "detected": 91
+    }
+   },
+   "all": {
+    "n_both": 69,
+    "n_32BI_only": 22,
+    "n_4BI_only": 5,
+    "mean_lead_32BI": 3.2035942028985507,
+    "mean_lead_4BI": 3.1238840579710145,
+    "diff": 0.07971014492753623,
+    "ci": [
+     -0.42257789159197606,
+     0.6
+    ]
+   },
+   "sudden": {
+    "n_both": 40,
+    "n_32BI_only": 13,
+    "n_4BI_only": 3,
+    "mean_lead_32BI": 3.258275,
+    "mean_lead_4BI": 3.3957749999999995,
+    "diff": -0.1375,
+    "ci": [
+     -0.8095982142857143,
+     0.5540915915915914
+    ]
+   },
+   "slow": {
+    "n_both": 29,
+    "n_32BI_only": 9,
+    "n_4BI_only": 2,
+    "mean_lead_32BI": 3.1281724137931035,
+    "mean_lead_4BI": 2.7488620689655177,
+    "diff": 0.3793103448275862,
+    "ci": [
+     -0.41675,
+     1.152215719063545
+    ]
+   }
   }
  },
  "within_model_vs_C1": {
@@ -967,6 +1176,15 @@
    "ci": [
     -0.11688199406622472,
     -0.0036668689340941846
+   ]
+  },
+  "4BI|EP-B": {
+   "mAP": 0.5310320218608842,
+   "mAP_C1": 0.5379169196321144,
+   "diff": -0.006884897771230247,
+   "ci": [
+    -0.047069922113589395,
+    0.028652460262572593
    ]
   },
   "32BI|C3": {
@@ -1240,7 +1458,7 @@
    },
    "4BI": {
     "zeros": 0,
-    "hits": 26,
+    "hits": 2724,
     "omits_instead_of_zero": true
    }
   },
@@ -1332,11 +1550,22 @@
     "n_first": 300,
     "mean_cached_tokens_on_hits": 1316.1739130434783,
     "verdict": "warm path exercised"
+   },
+   "4BI|EP-B": {
+    "n": 3898,
+    "absent_on_first": 300,
+    "absent_later": 900,
+    "zero": 0,
+    "hit": 2698,
+    "cached_sum": 4679040,
+    "n_first": 300,
+    "mean_cached_tokens_on_hits": 1734.2624166048925,
+    "verdict": "warm path exercised"
    }
   },
   "stop_condition_5_fires": false,
   "prompt_token_parity": {
-   "pairs": 11694,
+   "pairs": 15592,
    "mismatched": 0,
    "examples": [],
    "note": "the brief requires the same prompt-token count per request pair; a mismatch means the two models are not reading the same prompt and no gap between them is a capability gap"
@@ -1352,7 +1581,7 @@
     "sn4622120321"
    ]
   },
-  "n_paired": 11694,
+  "n_paired": 15592,
   "by_condition": {
    "C1": {
     "n_paired": 3898,
@@ -1371,6 +1600,14 @@
     "identical_inputs": true
    },
    "C6": {
+    "n_paired": 3898,
+    "prompt_token_mismatches": 0,
+    "header_mismatches": 0,
+    "frame_sha256_mismatches": 0,
+    "examples": [],
+    "identical_inputs": true
+   },
+   "EP-B": {
     "n_paired": 3898,
     "prompt_token_mismatches": 0,
     "header_mismatches": 0,
@@ -1795,15 +2032,68 @@
     "p90": 1559909.8,
     "mean": 1086986.8933333333
    }
+  },
+  "4BI|EP-B": {
+   "requests": 3898,
+   "ttft_all_s": {
+    "n": 3898,
+    "p50": 0.25651650000000004,
+    "p90": 0.36428560000000004,
+    "mean": 0.27270313622370446
+   },
+   "ttft_cold_s": {
+    "n": 1200,
+    "p50": 0.3069365,
+    "p90": 0.3649403,
+    "mean": 0.3049215316666667
+   },
+   "ttft_warm_s": {
+    "n": 2698,
+    "p50": 0.25651650000000004,
+    "p90": 0.27177470000000004,
+    "mean": 0.25837323461823575
+   },
+   "new_prompt_tokens": {
+    "n": 3898,
+    "p50": 376.0,
+    "p90": 718.0,
+    "mean": 426.4889687018984
+   },
+   "cached_tokens": {
+    "n": 3898,
+    "p50": 1024.0,
+    "p90": 2704.0,
+    "mean": 1200.3694202154952
+   },
+   "uplink_image_bytes_total": 236872314,
+   "uplink_body_bytes_total": 319446706,
+   "kv_tokens_per_episode": {
+    "n": 300,
+    "p50": 5544.0,
+    "p90": 5544.0,
+    "mean": 5541.513333333333
+   },
+   "prompt_tokens_per_episode": {
+    "n": 300,
+    "p50": 21160.0,
+    "p90": 21160.0,
+    "mean": 21138.31333333333
+   },
+   "uplink_image_bytes_per_episode": {
+    "n": 300,
+    "p50": 784724.0,
+    "p90": 1120375.1,
+    "mean": 789574.38
+   }
   }
  },
  "_provenance": {
-  "git_commit": "0303be76525ac6798c726b012aa02de306595da7",
+  "git_commit": "70630f13026c2ef66cd3eceee5d9168dfd4561b4",
   "script": "sh_ep_score.py",
   "model": "none",
-  "timestamp": "2026-11-20T14:44:30.155487",
+  "timestamp": "2026-11-20T16:44:58.256579",
   "device": "cpu",
-  "n": 31184,
+  "n": 35082,
   "args": {
    "runs": [
     "results/dashcam/study_sh_ep/sh_ep_requests_4BI_shep1.jsonl",

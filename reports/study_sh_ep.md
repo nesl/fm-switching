@@ -798,3 +798,144 @@ mid-episode eviction: clip `01227.mp4` at t = 0.75 s, its second instant, 2 fram
 tokens, TTFT 0.7692 s. One eviction in 649 appended requests is consistent with 5b.5's reading that
 the average rate leaves the prefix safe and only a burst can dislodge it, and it puts a number on how
 rare that burst is under this background.
+
+---
+
+## 12. Verdict, PROVISIONAL pending the 4B's EP-G
+
+Scored on origin data at 2026-11-20 with `experiments/dashcam/sh_ep_score.py`, all five 32BI
+conditions and four of the five 4BI conditions. **The 4B's EP-G is the one missing cell** (the Orin
+is running it; coverage reports 300 clips absent for `4BI|EP-G`). Every number below is complete
+except the EP-G row of H1, and section 12.5 states what that cell can and cannot still change.
+
+### 12.0 The controls first, because they decide whether anything else can be read
+
+| control | result | what it establishes |
+|---|---|---|
+| prompt-token parity | **0 mismatched of 15,592 pairs** | the two models read the SAME prompt, so a gap between them is a capability gap and not a prompt difference. This is what makes the cross-stack design legitimate. |
+| grey frames | 21 of 21 cells constant to the 1/8 nat logprob quantum | a blank frame produces no signal, so the scores are not reading an artefact of the harness |
+| shuffled minus ordered | mean abs difference **1.93 nats**, max 15.12, n = 1,947 | **the model reads the episode as a SEQUENCE.** This is the Step 2 evidence that the episode channel is live rather than decorative |
+| warm path | C1 "no warm prefix ever"; EP-B 1,024 cached; EP-G 4,736 cached | the episode conditions genuinely carried resident context |
+| positive control | all four committed StudyE9c `|zero` arms reproduced | the scorer itself is correct |
+
+The shuffle control is the one that matters most. **A mechanism that could not express itself would
+be a different finding entirely**, and this rules that out before any null below is interpreted.
+
+### 12.1 H1, challenge AP. First half holds everywhere, second half does not hold at all
+
+32B minus 4B, EVAL, paired clip bootstrap:
+
+| condition | gap | CI | 32B > 4B? |
+|---|---|---|---|
+| C1, one frame | +0.1002 | [+0.038, +0.166] | yes |
+| C3 | +0.0980 | [+0.025, +0.175] | yes |
+| C6 | +0.1622 | [+0.100, +0.224] | yes |
+| EP-B | +0.1125 | [+0.054, +0.172] | yes |
+
+**The 32B beats the 4B in every condition with a CI excluding zero.** But H1 as pre-registered asks
+for more: that the gap be LARGER with episode context than with one frame. C3's gap is 0.0980
+against C1's 0.1002, which is smaller. EP-B's is 0.1125, larger by 0.012 against a CI half-width of
+about 0.06. No episode condition enlarges the gap in a way any CI separates from zero.
+
+The within-model contrast says the same thing more directly, and it is the one that matters for a
+deployment choice:
+
+| | 32BI vs its own C1 | 4BI vs its own C1 |
+|---|---|---|
+| C3 | -0.028 [-0.091, +0.032] | -0.025 [-0.073, +0.024] |
+| C6 | **+0.002** [-0.069, +0.068] | **-0.060 [-0.117, -0.004]** |
+| EP-B | +0.005 [-0.049, +0.052] | -0.007 [-0.047, +0.029] |
+| EP-G | -0.032 [-0.125, +0.051] | pending |
+
+**Episode context does not improve the 32B's challenge AP over a single frame.** Every 32B contrast
+against C1 includes zero.
+
+### 12.2 The trap in C6, which the gap column would have walked us into
+
+C6 has the LARGEST 32B-minus-4B gap, +0.1622, and a reader ranking conditions by that column would
+choose C6. That reading is wrong. Decomposed, C6 is **+0.002 for the 32B (CI includes zero) and
+-0.060 for the 4B with a CI that EXCLUDES zero**. C6's larger gap is the 4B DEGRADING under
+multi-frame input, not the 32B gaining from it.
+
+Choosing C6 on gap size would be choosing the condition that most damages the model actually
+deployed on the device. This is CLAUDE.md consistency check 3's artefact spread: a credible spread
+that cannot carry the meaning the column name suggests. The gap is real; what it measures is not
+what "bigger gap means more episode value" assumes.
+
+### 12.3 H2, and the reframing holds: detection COUNT, not lead time
+
+At a DEV-fitted threshold matched to each false-alarm rate:
+
+| condition, FAR | 4B detects | 32B detects | only 32B | only 4B | McNemar p | lead diff (s) | lead CI |
+|---|---|---|---|---|---|---|---|
+| C1, 5% | 36 | **56** | 29 | 9 | 1.7e-03 | +0.185 | [-0.50, +0.90] |
+| C1, 10% | 63 | 71 | 20 | 12 | 2.2e-01 | +0.108 | [-0.44, +0.69] |
+| C1, 20% | 77 | 89 | 18 | 6 | 2.3e-02 | +0.211 | [-0.36, +0.81] |
+| C3, 5% | 32 | **60** | 35 | 7 | 1.5e-05 | +0.820 | [+0.33, +1.36] |
+| C3, 10% | 41 | **80** | 43 | 4 | 2.8e-09 | 0.000 | [-0.47, +0.44] |
+| C3, 20% | 72 | 88 | 21 | 5 | 2.5e-03 | +0.119 | [-0.43, +0.66] |
+| C6, 5% | 37 | 52 | 30 | 15 | 3.6e-02 | +0.114 | [-0.71, +0.96] |
+| C6, 10% | 45 | **74** | 39 | 10 | 3.9e-05 | +0.429 | [-0.19, +1.03] |
+| C6, 20% | 67 | 85 | 27 | 9 | 3.9e-03 | +0.250 | [-0.30, +0.79] |
+| EP-B, 5% | 35 | **61** | 36 | 10 | 1.6e-04 | -0.220 | [-0.62, +0.15] |
+| EP-B, 10% | 49 | **75** | 34 | 8 | 6.9e-05 | -0.256 | [-0.94, +0.39] |
+| EP-B, 20% | 74 | 91 | 22 | 5 | 1.5e-03 | +0.080 | [-0.42, +0.60] |
+
+**The 32B detects more crashes in all 12 cells, significantly in 11 of 12. Lead time among the clips
+BOTH models detect is indistinguishable from zero in 11 of 12.**
+
+So the 32B's advantage is that it detects crashes the 4B never detects at all, not that it warns
+earlier on the ones both catch. Scoring H2 as lead time would have conditioned on joint detection
+and thrown away the entire effect, reporting a null on the question the study exists to answer. The
+discordant pairs are lopsided everywhere, 43 against 4 at C3 FAR 10 percent.
+
+### 12.4 H3 holds decisively, and it is the clearest result in the study
+
+| arm | TTFT p50 (s) | new prompt tokens p50 | cached tokens mean |
+|---|---|---|---|
+| 32BI C1, one frame | 0.1302 | 378 | 0 |
+| **32BI EP-B, episode warm** | **0.1324** | 376 | 1,200 |
+| **32BI EP-G, episode warm** | **0.1514** | 372 | 4,468 |
+| 32BI C3, multi-frame cold | 0.2357 | 1,056 | 0.5 |
+| 32BI C6, multi-frame cold | 0.3792 | 2,070 | 7.8 |
+
+**With the episode kept warm, a multi-frame evaluation costs what a one-frame one costs.** EP-B
+carries 1,024 cached tokens of episode context for 0.1324 s against one frame's 0.1302 s, a 1.7
+percent difference. EP-G carries 4,736 and costs 0.1514 s. The same breadth of context paid for
+COLD costs 0.2357 s at C3 and 0.3792 s at C6, **2.9 times** EP-B.
+
+This is the thesis of the project measured directly on the dashcam workload: the price of context is
+dominated by whether it is resident, not by how much of it there is.
+
+### 12.5 The decision rule, applied
+
+The rule fixed in section 1: if H1 and H2 both hold on EVAL with a CI excluding zero for an episode
+condition, the cheapest condition that also satisfies H3 becomes the dashcam format; otherwise
+dashcams stay one-frame and the null is classified.
+
+**H1 does not hold for any episode condition.** No episode condition enlarges the 32B-4B gap with a
+CI excluding zero, and no episode condition improves the 32B over its own C1. H2 and H3 both hold,
+but the rule is a conjunction. **Dashcams stay one-frame.**
+
+**Classification under CLAUDE.md Rule 2: FIRED AND DID NOT HELP**, the only category that is
+evidence about the thing itself rather than about the experiment. The mechanism was present,
+expressed and scorable, and section 12.0 is what licenses that classification rather than one of the
+other four: the shuffle control shows the model demonstrably reads the episode as a sequence
+(mean abs 1.93 nats); the warm-path control shows EP-B and EP-G genuinely carried 1,024 and 4,736
+resident tokens; prompt-token parity was exact on all 15,592 pairs. Episode context reached the
+model, changed its output, and did not improve challenge AP.
+
+**What the 4B's EP-G can still change.** It fills one cell: the EP-G row of H1 and of the within-4B
+contrast. It cannot change H2, H3, the controls, or any C1/C3/C6/EP-B result, all of which are
+complete. For EP-G to rescue H1 it would have to show the 4B degrading sharply at EP-G while the 32B
+holds, which would enlarge the gap. Note that the 32B's own EP-G is **-0.032 against its C1**, the
+most negative of its four contrasts, so an EP-G-driven reversal would have to come entirely from the
+4B side and would be the C6 trap of section 12.2 in a new place: a gap widened by the device model
+getting worse is not a reason to adopt the format. **The verdict is marked PROVISIONAL until that
+cell lands, and the reasoning above says what would and would not overturn it.**
+
+### 12.6 Consequence for the dashcam re-record
+
+One-frame C1 via the committed `d14b_infer_vllm.py` body, which is the Orin's existing default, so
+no change of plan is required. EP-B remains the right format for any future condition that needs
+episode breadth, on H3's evidence, but H1 gives no reason to pay for it on this task today.
