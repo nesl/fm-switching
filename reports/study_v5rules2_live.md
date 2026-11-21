@@ -99,3 +99,74 @@ obvious before this cell:
 - The causal chain from warming to fewer declines to more releases is **ARGUED** from the decision
   counts, not traced per decision. The counts are the H100's and are consistent, but a per-decision
   trace would be needed to call it proved.
+
+---
+
+## CORRECTION: the slice IS binding. Chunking defeats its own prefix cache.
+
+I reported that `WARM_AHEAD_SLICE_TOKENS = 1024` "is not binding" because measured uncached tokens
+per prefill were 5,480. That was wrong, and the real mechanism is more interesting and more
+actionable.
+
+`coordinator._advance_build:700` reads
+`piece = left if slice_tokens is None else min(int(slice_tokens), left)`, so the slice **is**
+enforced. With `D2_TOK_PER_IMG = 90`, a 1,024-token slice is about 11 new frames. The excess is not
+the slice overrunning; it is the **prefix being re-sent uncached**.
+
+Engine-observed `cache_path` on the warm-ahead prefills themselves:
+
+| arm | prefills | cache_path | uncached per request | prompt per request | cached per request |
+|---|---|---|---|---|---|
+| `v5-rules` | 3,007 | **WARM 2,902, COLD 104** (96.5 percent warm) | **471** | 10,127 | 9,656 |
+| **`v5-rules-2`** | 156 | **COLD 139, WARM 17** (**89.1 percent COLD**) | **5,480** | 6,968 | 1,488 |
+
+**v5-rules' prefills hit the prefix cache 96.5 percent of the time and send only the new slice.
+v5-rules-2's miss it 89.1 percent of the time and re-send most of the history.** Of its 5,480
+uncached tokens per piece, roughly 1,024 are genuinely new and about **4,456 are prefix that should
+have been cached and was not**. Over 156 pieces that is about **695,000 tokens, or 579 uncached
+tok/s of pure cache-miss waste**, which is **2.3x the entire +250 tok/s by which the arm exceeds
+noc3**.
+
+### Why, and it is a trap in the design rather than a bug
+
+Warming works by sending uuid references for frames the engine has already seen, so it depends on
+the session's prefix still being resident. What keeps a prefix resident is being touched often.
+v5-rules issued a piece about every 0.4 s per the run's 3,007 over 1,200 s, comfortably inside
+retention. v5-rules-2 issues one about every 7.7 s, and with roughly four dashcam requests per
+second competing for the same cache the session is evicted in between.
+
+**So the mechanism that makes chunking cheap in request count is the same mechanism that makes each
+request expensive in tokens.** Chunking removed the very traffic that was keeping its own cache
+warm. That is why the total barely moved: 19.3x fewer pieces at 11.6x the cost each.
+
+### What it changes for full v5, replacing my earlier requirement 1
+
+My earlier statement, that the counterfactual must price warming in tokens rather than asks, is
+right but insufficient. **The token cost of a warm is not a property of the warm; it depends on
+whether the prefix survived since the last one.** A cost model that prices a 1,024-token slice at
+1,024 tokens will be wrong by about 5x on 89 percent of this arm's warms.
+
+Three consequences, in order of how much they change the build:
+
+1. **The cost model must take cache state as an input, not infer it.** The engine reports
+   `cache_path` and `cached_tokens` per request; the D162 refit already carries `cached_tokens` in
+   its `uncached_tokens` feature, so a refit on healthy-regime data will learn the right
+   coefficient. What it cannot do is predict WHICH state a future warm will land in.
+2. **The chunk interval is now a cache-residency decision, not only a volume decision.** There may
+   be no good fixed value: frequent warms are cheap per warm and numerous, rare warms are few and
+   expensive, and the product is roughly conserved. If that holds, D160 (1)'s chunk size is a
+   knob with a flat objective, which is worth knowing before it is swept.
+3. **This is a candidate explanation for the dashcam hold-back that does not require the release
+   chain.** 579 tok/s of cache-miss waste is enough on its own to cross the transition zone.
+
+### Register, and what is NOT established
+
+- The `cache_path` counts, token figures and the 579 tok/s are **MEASURED** from the cells' own
+  request logs.
+- The 1,024-new-plus-4,456-prefix split is **DERIVED** from the slice rule and `D2_TOK_PER_IMG`,
+  not measured per request.
+- **Eviction by competing dashcam traffic is the PROPOSED mechanism and is not proved.** The
+  alternative is that the prefix was never inserted for these sessions at all. Distinguishing them
+  needs the residency or eviction trace, which is the same instrument gap recorded in
+  `reports/study_saturation_knee.md` for the cache-tail lead. Both leads now want the same missing
+  measurement, which raises its priority.
