@@ -70,6 +70,11 @@ until the flagged confidence-injection wiring change is applied.
 **Gate and v5.** 32B engine-action confirmation PASSED (M1, M3 in b685fbb; M2 in e77fa65, touch keeps T in GPU, U goes to
 host, 3 of 3). The cost-model gate FAILS (flash 6dc49db: negative predicted TTFT on 52 % of fit and 62 % of held-out data,
 held-out p90 error 31.9 s), so MARGIN_CF is unset and FULL v5 DID NOT RUN. Options are flash's, default leave-it.
+Refit (flash 323dbd4, prediction pre-registered at 1a491f9) with the race-contaminated fit cell swapped for its race-fixed
+rerun (warm-all-lru 1F `_cal1f_rf`, 0 HTTP 400 against 226): still FAIL and WORSE (intercept -2.37 to -2.87 s, held-out p90
+error 31.9 to 41.2 s), so the failure is the model FORM, not the race. The 226 fast-failing 400s had MASKED that cell's
+saturation (race-clean first-token p50 64.5 s against 31.9 s), a third race confound besides errors and suppressed warmth;
+it is material only for that cell (flash's D159 (E) 400 census).
 
 **Incidents.** (1) 5d7c084 broke `import hybrid` in every live run at 16:37 (llf n16 s6 lost its first attempt and orphaned
 a server); fixed in run_live2_real.py (e2c8933) and in hybrid_arm (e7b4dda). (2) The SUBMISSION RACE: bytes marked sent at
