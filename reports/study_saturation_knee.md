@@ -183,3 +183,67 @@ results table and have nothing else in common, and the table should not let them
 card, not for the data**, and I am not guessing at it: it is consistent with a streaming policy that
 samples on a cadence, and inconsistent with the full-coverage behaviour of `b7` and `mooncake` on
 the same workload. Flagged for the user rather than resolved.
+
+## CORRECTION: my explanation of the cascade declines was wrong, and the real one is sharper
+
+I told the H100 that the cascade arms decline because "device confidence is high where present,
+absent otherwise". **The first half is wrong as a family explanation and I withdraw it.** The
+committed `device_conf_wiring_proof.json` settles it, and it says something more useful.
+
+**All five cascade arms see the IDENTICAL confidence range on the present cases,
+`[0.386991, 0.999972]`.** What differs is where each arm's threshold sits and what it does when the
+field is missing:
+
+| arm | present | decisions on PRESENT confidence | absent | **default on ABSENT** | discriminates? |
+|---|---|---|---|---|---|
+| `confidence-cascade` | 20 | DEVICE 13, CLOUD 7 | 357 | DEVICE | **YES, 13 / 7** |
+| `cascade-routing` | 20 | **DEVICE 20** | 357 | **CLOUD** | no, all read HIGH |
+| `streamscout` | 20 | **CLOUD 20** | 357 | DEVICE | no, all read LOW |
+| `r3-streaming` | 24 | DEVICE 19, DEFER 5 | 357 | DEVICE | no, all read HIGH |
+| `thinking-qwenvl-atdm` | 47 | CLOUD 17, DEFER 30 | 357 | **CLOUD** | no, all read LOW |
+| `b7` (control) | 0 | none | 377 | CLOUD 372, REJECT 5 | n/a, no confidence rule |
+
+**So confidence level is not the explanation. `cascade-routing` and `streamscout` read the SAME
+twenty confidences and make exactly OPPOSITE decisions on all twenty.** Four of the five arms have
+a threshold lying entirely outside the observed range, so each routes every robot question one way,
+and which way depends only on which side its threshold falls. **Only `confidence-cascade`
+discriminates at all.**
+
+### The larger problem: a missing-data default decides 94 percent of every cascade arm's recalls
+
+**357 of about 381 recall decisions in every cascade arm are made by its behaviour on a MISSING
+field, not by its published mechanism.** Three arms default to DEVICE, two to CLOUD, and that
+single adapter choice determines the arm's entire single-shot result:
+
+- `cascade-routing` defaults to CLOUD, released 357 SS recalls, scored **SS 356 of 357**.
+- `r3-streaming` defaults to DEVICE, released 0, scored **SS 0 of 357**.
+
+**Those two numbers are the full span of the SS metric, and they differ by nothing but the default.**
+Reporting them as two cascade policies' performance would be reporting a coin flip inside our
+adapter. Neither is a measurement of confidence-based routing.
+
+The field is missing because the re-recorded single-shot confidences are **not injected into the
+harness query objects**, which STATUS records as a methodological wiring change flagged for the user
+and deliberately not applied overnight. **That one unapplied change is now the largest single
+determinant of five arms' headline numbers.**
+
+### A pre-registered prediction, committed before the cells run
+
+If the default is what drives the SS column, then for the two cascade arms not yet run tonight:
+
+- **`thinking-qwenvl-atdm` (default CLOUD) should score SS at or near 356 of 357.**
+- **`streamscout` (default DEVICE) should score SS at or near 0 of 357.**
+
+Both follow from the absent-case default alone and from nothing about either paper's mechanism.
+**This is recorded before the cells run so it can fail.** If either lands in between, the default is
+not the whole story and this section is wrong.
+
+### Revised classification, narrower than what I proposed
+
+I proposed that "the whole cascade family is unexercised". **The H100's narrower framing is the
+correct one and I adopt it: the cascade family's ROBOT-side characteristic decision is zero in both
+cells measured tonight**, `cascade-routing` 0 of 20 and `r3-streaming` 0 of 377. But
+`cascade-routing`'s escalation fires 357 times on single-shot, so the arm is not inert; it is
+**driven by its default on the side where it acts and threshold-saturated on the side where it does
+not.** Rule 2 **unexercised** applies to the robot side only, and the single-shot side is not a null
+at all but an unmeasured mechanism with a default standing in for it.
