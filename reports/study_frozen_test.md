@@ -53,9 +53,12 @@ until the flagged confidence-injection wiring change is applied.
   the prefills that buy warmth fill the queue that makes warm answers late. noc3's warm 0 is structural (0 pieces, post-fix).
   The arm's own belief counter (`release_at_GPU-WARM`) UNDER-reports warmth and was retracted as a source.
 - warm-all-lru (warm everything) reaches LESS warmth (16 of 48, 33 %) than targeted v5-rules, and saturates the engine.
-- SATURATION KNEE (flash 939b300, within-run 100 s windows over 29 cells, criterion declared before reading: any window's
-  first-token p50 above 2.0 s): 19 cells at 4,356 to 4,512 uncached tok/s never cross, 10 cells at 4,686 to 5,831 all
-  cross, 0 misclassified, so the knee lies in [4,512, 4,686] uncached tok/s (3.9 percent). Above it, first-token latency is
+- SATURATION, by within-run 100 s windows (flash 939b300 and its later correction). Cells separate sharply in SEVERITY,
+  with no cell at intermediate worst-window first-token latency, but run-mean uncached tok/s does NOT predict which side a
+  cell falls on: between 4,670 and 4,707 tok/s both behaviours occur, across two independent cell sets (tonight's EP-G and
+  CAL1F cells, and the 29 earlier gate cells), and no crossing criterion among 2.0, 5.0 and 10.0 s separates all 58. A
+  bracketed threshold on this axis ([4,512, 4,686]) was claimed and WITHDRAWN (flash); the transition is a ZONE of roughly
+  4,500 to 4,750 uncached tok/s and something other than run-mean load decides it. Past it, first-token latency is
   ACCUMULATED BACKLOG, not current rate. **The crossing cells' POOLED TTFT is not a property of the arm and must NOT be
   compared between them** (it reports where the median request fell on the ramp); compare their terminal 100 s window
   instead. The crossing cells: v5-rules s4 and s5, querystream-proactive s4 and s5, and the six warm-all-lru cells (1F,
