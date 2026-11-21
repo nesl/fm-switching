@@ -1,0 +1,114 @@
+# D164 BASELINE MATRIX. One cell per line: "arm n seed tag". Lines starting # are NOT run.
+#
+# WORKLOAD, fixed by D164 and identical for every line: 16 devices, EP-G default episodes
+# (fixed 21-frame refresh, NOT the policy episode rule), per-frame upload, rq30 re-asks,
+# deadlines dashcam 1.0 s / robot 3.0 s / single-shot 2.0 s, memory 1x. That is the tag _L3_epg_rq30.
+#
+# WHY THE EPISODE RULE IS ABSENT HERE: D164 makes ending an episode on the cloud's calibrated
+# crossing a POLICY mechanism, so baselines run the workload's default EP-G as their published
+# mechanisms would. This matrix therefore no longer waits on the episode rule.
+#
+# A finished cell is never rerun, so the v5-rules-2 and noc3 rq30 cells already done at seeds 4, 5
+# and 6 are listed for completeness and will be skipped.
+#
+# ---------------------------------------------------------------- RUN NOW: the paper core, seeds 4-7
+# edf runs at its D128 default C_inflight = 8.
+# attentionstore-prefetch, NOT plain attentionstore: D164 asks for the arm WITH its
+# published prefetch, and D155 (5) relabels the no-prefetch cells. Its proofs PASS
+# (attentionstore_prefetch_proofs.json: characteristic decision 393 prefetch-ahead
+# prefills against the base's 374, Step 2b PASS).
+edf 16 4 _L3_epg_rq30
+edf 16 5 _L3_epg_rq30
+edf 16 6 _L3_epg_rq30
+edf 16 7 _L3_epg_rq30
+llf 16 4 _L3_epg_rq30
+llf 16 5 _L3_epg_rq30
+llf 16 6 _L3_epg_rq30
+llf 16 7 _L3_epg_rq30
+b7-edf-feasibility 16 4 _L3_epg_rq30
+b7-edf-feasibility 16 5 _L3_epg_rq30
+b7-edf-feasibility 16 6 _L3_epg_rq30
+b7-edf-feasibility 16 7 _L3_epg_rq30
+always-cloud-fcfs 16 4 _L3_epg_rq30
+always-cloud-fcfs 16 5 _L3_epg_rq30
+always-cloud-fcfs 16 6 _L3_epg_rq30
+always-cloud-fcfs 16 7 _L3_epg_rq30
+simplestream 16 4 _L3_epg_rq30
+simplestream 16 5 _L3_epg_rq30
+simplestream 16 6 _L3_epg_rq30
+simplestream 16 7 _L3_epg_rq30
+querystream-proactive 16 4 _L3_epg_rq30
+querystream-proactive 16 5 _L3_epg_rq30
+querystream-proactive 16 6 _L3_epg_rq30
+querystream-proactive 16 7 _L3_epg_rq30
+mooncake 16 4 _L3_epg_rq30
+mooncake 16 5 _L3_epg_rq30
+mooncake 16 6 _L3_epg_rq30
+mooncake 16 7 _L3_epg_rq30
+attentionstore-prefetch 16 4 _L3_epg_rq30
+attentionstore-prefetch 16 5 _L3_epg_rq30
+attentionstore-prefetch 16 6 _L3_epg_rq30
+attentionstore-prefetch 16 7 _L3_epg_rq30
+warm-all-lru 16 4 _L3_epg_rq30
+warm-all-lru 16 5 _L3_epg_rq30
+warm-all-lru 16 6 _L3_epg_rq30
+warm-all-lru 16 7 _L3_epg_rq30
+hybrid-F-lhreq 16 4 _L3_epg_rq30
+hybrid-F-lhreq 16 5 _L3_epg_rq30
+hybrid-F-lhreq 16 6 _L3_epg_rq30
+hybrid-F-lhreq 16 7 _L3_epg_rq30
+
+# ---- our versions on the same workload
+v5-rules 16 4 _L3_epg_rq30
+v5-rules 16 5 _L3_epg_rq30
+v5-rules 16 6 _L3_epg_rq30
+v5-rules 16 7 _L3_epg_rq30
+# seeds 4-6 already finished for these two; listed so the matrix is complete, skipped on sight
+v5-rules-2 16 4 _L3_epg_rq30
+v5-rules-2 16 5 _L3_epg_rq30
+v5-rules-2 16 6 _L3_epg_rq30
+v5-rules-2 16 7 _L3_epg_rq30
+hybrid-F-lhreq-noc3 16 4 _L3_epg_rq30
+hybrid-F-lhreq-noc3 16 5 _L3_epg_rq30
+hybrid-F-lhreq-noc3 16 6 _L3_epg_rq30
+hybrid-F-lhreq-noc3 16 7 _L3_epg_rq30
+
+# ---------------------------------------------------------------- THEN: seeds 4-5 only
+# "the LRU-contrast arm" in D164 is read as warm-all-lru-off, the same arm with warming OFF, which
+# is the contrast that isolates warming from LRU eviction. If warm-all-lru-reactive was meant
+# instead, say so and I will swap two lines; both are two cells.
+r3-streaming 16 4 _L3_epg_rq30
+r3-streaming 16 5 _L3_epg_rq30
+streamscout 16 4 _L3_epg_rq30
+streamscout 16 5 _L3_epg_rq30
+warm-all-lru-off 16 4 _L3_epg_rq30
+warm-all-lru-off 16 5 _L3_epg_rq30
+
+# ---------------------------------------------------------------- AFTER CALIBRATION (commented)
+# These three escalate on a device-confidence threshold. D164 requires each arm's threshold to be
+# set on DEV by its OWN card's procedure, per confidence type (mcq / free-form / point, with point
+# declared WEAK), pre-registered before fitting. Until that pre-registration is committed these
+# cells must not run: an uncalibrated threshold is what made 4 of 5 cascade arms saturate on the
+# robot side (reports/study_saturation_knee.md, the cascade correction). Uncomment to release.
+# confidence-cascade 16 4 _L3_epg_rq30
+# confidence-cascade 16 5 _L3_epg_rq30
+# confidence-cascade 16 6 _L3_epg_rq30
+# confidence-cascade 16 7 _L3_epg_rq30
+# cascade-routing 16 4 _L3_epg_rq30
+# cascade-routing 16 5 _L3_epg_rq30
+# cascade-routing 16 6 _L3_epg_rq30
+# cascade-routing 16 7 _L3_epg_rq30
+# eco-llm 16 4 _L3_epg_rq30
+# eco-llm 16 5 _L3_epg_rq30
+# eco-llm 16 6 _L3_epg_rq30
+# eco-llm 16 7 _L3_epg_rq30
+
+# ---------------------------------------------------------------- AFTER PROOFS (commented)
+# kvflow-prefetch's published prefetch does NOT currently pass its proofs on this harness:
+# kvflow_prefetch_proofs.json records the characteristic decision as UNEXPRESSIBLE (the arm wanted
+# 8,600 fetches and validate_action refused all 8,600) and Step 2b as an ABSENT LINK. Under the
+# CLAUDE.md port rule it may not be scored until its characteristic decision occurs at least once.
+# kvflow-prefetch 16 4 _L3_epg_rq30
+# kvflow-prefetch 16 5 _L3_epg_rq30
+# kvflow-prefetch 16 6 _L3_epg_rq30
+# kvflow-prefetch 16 7 _L3_epg_rq30
