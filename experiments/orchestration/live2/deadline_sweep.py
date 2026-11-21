@@ -19,6 +19,7 @@ from __future__ import annotations
 import gzip
 import json
 import math
+import os
 import re
 import sys
 from collections import defaultdict
@@ -45,6 +46,45 @@ NB, SEED = 10000, 0
 DECODE_BY_OVERLAP = {"0-3": 0.0242, "3-6": 0.1054, "6-12": 0.2421,
                      "12-25": 0.3448, "25-45": 0.7986, "45+": 1.4025}
 DECODE_IDLE = 0.0242
+# D145 / user ruling: eco-llm and hybrid-F-lhreq were redone after the RECENT-send fix, so their
+# POST-FIX cells are the ones to score; hybrid-F6 is not redone and stays pre-fix; b7 and mooncake
+# have no post-fix cells. DEADLINE_SWEEP_CELLS=prefix reproduces the original section 19 table.
+POSTFIX = ({} if os.environ.get("DEADLINE_SWEEP_CELLS") == "prefix"
+           else {"eco-llm": "_postfix", "hybrid-F-lhreq": "_postfix"})
+
+
+_ANS = {}
+
+
+def device_answers(seed):
+    """{opportunity_id: (gold_letter, device_correct)} for the robot questions of one seed.
+
+    Regenerated locally rather than read from a committed trace, because only seed 4's trace is on
+    origin. That is safe HERE and the check is recorded: regenerating seed 4 reproduces the
+    committed `device_answers.jsonl` sha256 EXACTLY (f38476b4...), so the device answers are not an
+    approximation. The regenerated `trace.jsonl` does NOT match, and the reason is known and
+    harmless for this use: the only differing field is `frame_bytes` on monitor records, 13,193 of
+    them, where a measured run carries per-frame bytes from the encode manifest and a flash
+    regeneration falls back to the E10a median (D103 h). Robot question ids, history tokens, gold
+    letters and device answers are identical. So this fallback must never be used for an uplink or
+    dashcam quantity, and is used here only for gold letters and device correctness.
+    """
+    if seed in _ANS:
+        return _ANS[seed]
+    import tempfile
+    sys.path.insert(0, str(HERE / "fleet"))
+    import trace as TR
+    with tempfile.TemporaryDirectory() as d:
+        b = TR.generate_trace(seed, 16, "40:40:20", 1200.0, "A",
+                              robot_question_set="lh_req", ss_question_set="ss2")
+        TR.write_trace(Path(d) / "t", b)
+        out = {}
+        for ln in open(Path(d) / "t" / "device_answers.jsonl"):
+            r = json.loads(ln)
+            if r.get("kind") == "recall" and r.get("gold_letter") is not None:
+                out[r["opportunity_id"]] = (r["gold_letter"], bool(r["device_correct"]))
+    _ANS[seed] = out
+    return out
 
 
 def jl(p):
@@ -88,7 +128,9 @@ def one(run: Path):
         rid = (o.get("cloud_payload") or {}).get("request_id")
         t0 = float(o["t_opportunity"])
         rec = dict(oid=oid, t0=t0, bad=bool(rid in failed),
-                   history_tokens=int((o.get("cloud_payload") or {}).get("tokens_charged") or 0))
+                   history_tokens=int((o.get("cloud_payload") or {}).get("tokens_charged") or 0),
+                   cloud_letter=(o.get("cloud_payload") or {}).get("cloud_letter"),
+                   representation=(o.get("cloud_payload") or {}).get("representation"))
         for rule in ("first_token", "completion"):
             td = o.get("t_delivered")
             if td is None:
@@ -111,6 +153,10 @@ def one(run: Path):
         else:
             ss.append(rec)
 
+    # ROBOT ACCURACY: the cloud's own answer when it arrives on time, otherwise the device's.
+    # The cloud letter is whatever the cloud actually produced, so a release made as RECENT is
+    # scored as RECENT automatically: no accuracy table is consulted and none can be mis-applied.
+    ans = device_answers(int(c.get("seed")))
     sweep = (((c.get("score") or {}).get("score") or {}).get("sweep") or [{}])[0]
     res = dict(arm=c.get("arm"), seed=c.get("seed"), n_devices=c.get("n_devices"),
                dashcam_all_meet=bool(sweep.get("dashcam_all_meet")),
@@ -123,7 +169,18 @@ def one(run: Path):
         # feasibility at this deadline, the D147 item 3 definition: a COLD rebuild plus decode on
         # an IDLE engine. The committed formula omits decode; at 3 s decode can decide a verdict,
         # so it is added here and the two definitions are reported side by side.
+        acc_n = acc_k = 0
+        for r, h in zip(rob, hits):
+            g = ans.get(r["oid"])
+            if g is None:
+                continue
+            gold, dev_ok = g
+            correct = (r["cloud_letter"] == gold) if (h and r["cloud_letter"]) else dev_ok
+            acc_n += 1
+            acc_k += bool(correct)
         res["by_deadline"][str(L)] = dict(
+            robot_accuracy=(round(acc_k / acc_n, 4) if acc_n else None),
+            robot_accuracy_n=acc_n, robot_accuracy_hits=acc_k,
             robot_all_on_time_completion=sum(hits),
             robot_all_on_time_first_token=sum(hits_ft),
             robot_all_n=len(rob),
@@ -148,7 +205,10 @@ def main():
     import numpy as np
     by_arm = defaultdict(dict)
     for name, v in got.items():
-        if v["n_devices"] != 16 or name.endswith("_postfix") or "_rerun" in name:
+        if v["n_devices"] != 16 or "_rerun" in name:
+            continue
+        want = POSTFIX.get(v["arm"], "")
+        if (name.endswith("_postfix")) != (want == "_postfix"):
             continue
         by_arm[v["arm"]][v["seed"]] = v
     rng = np.random.default_rng(SEED)
@@ -183,7 +243,11 @@ def main():
                     num += sum(q[i] for i in idx)
                     den += len(q)
                 boots.append(num / den if den else 0.0)
+            an = sum(h["robot_accuracy_n"] for h in hits)
+            ak = sum(h["robot_accuracy_hits"] for h in hits)
             row[str(L)] = dict(
+                robot_accuracy=round(ak / an, 4) if an else None,
+                robot_accuracy_hits=ak, robot_accuracy_n=an,
                 robot_all_on_time=round(k / n, 4) if n else None, robot_hits=k, robot_n=n,
                 robot_ci95=[round(float(np.percentile(boots, 2.5)), 4),
                             round(float(np.percentile(boots, 97.5)), 4)],

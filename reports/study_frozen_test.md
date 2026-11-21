@@ -1975,3 +1975,99 @@ Sections 18.1 and 18.2 stand: the delivery stamp was first-token based in all 40
 flips 132 of 880 robot and 217 of 14,502 single-shot outcomes to late. Section 19's deadline sweep
 used pre-fix cells for every arm, so its 3 s table understates the two redone arms; the sweep is
 worth re-running on post-fix cells, and the direction is known from 20.1, both would improve.
+
+## 21. The deadline sweep on post-fix cells, with robot ACCURACY beside on-time (A6000, 2026-11-20)
+
+Section 19 re-run on post-fix cells for eco-llm and hybrid-F-lhreq (pre-fix for b7, mooncake and
+hybrid-F6, which is not redone), with the column the user asked for: **robot accuracy**, scored as
+the cloud's own answer when it arrives on time and the device's answer otherwise. A release made as
+RECENT is scored as RECENT automatically, because the cloud letter actually produced is compared to
+the gold letter and no accuracy table is consulted. `DEADLINE_SWEEP_CELLS=prefix` reproduces
+section 19. Still re-scored with decisions made under 5 s.
+
+### 21.1 On time and accuracy rank the arms differently
+
+| arm | seeds | n | 2.5 s | 3 s | 4 s | 5 s |
+|---|---|---|---|---|---|---|
+| **hybrid-F-lhreq** on time | 0,4,5,6 | 89 | 0.4607 | **0.5281** | 0.7528 | **0.9551** |
+| hybrid-F-lhreq accuracy | | 89 | 0.2809 | **0.3034** | 0.4157 | 0.4831 |
+| **eco-llm** on time | 0,4,5,6 | 89 | 0.3708 | **0.4270** | 0.5056 | 0.6742 |
+| eco-llm accuracy | | 89 | 0.2584 | **0.2584** | 0.2921 | 0.3708 |
+| **hybrid-F6-lhreq** on time | 0,4,5,6 | 89 | 0.1573 | 0.2809 | 0.4831 | 0.6854 |
+| hybrid-F6-lhreq accuracy | | 89 | 0.2697 | 0.3371 | 0.4494 | **0.4944** |
+| **b7-edf-feasibility** on time | 0,4,5,6 | 89 | 0.1910 | 0.2247 | 0.3146 | 0.4719 |
+| b7-edf-feasibility accuracy | | 89 | 0.3034 | **0.3146** | 0.3483 | 0.4270 |
+| **mooncake** on time | 0,4,5,6 | 89 | 0.1685 | 0.2360 | 0.3034 | 0.4719 |
+| mooncake accuracy | | 89 | 0.3146 | 0.3146 | 0.3371 | 0.4382 |
+| edf on time / accuracy | 4,5 | 45 | 0.1333 / 0.3333 | 0.1556 / 0.3556 | 0.2000 / 0.3556 | 0.2667 / 0.3556 |
+| llf on time / accuracy | 4 | 20 | 0.2500 / 0.3500 | 0.3500 / 0.4000 | 0.3500 / 0.4000 | 0.5000 / 0.5000 |
+| always-cloud-fcfs on time / accuracy | 4 | 20 | 0.2500 / 0.4000 | 0.3500 / 0.4000 | 0.3500 / 0.4000 | 0.5000 / 0.5000 |
+
+**The two columns do not agree, and at 3 s they nearly invert.** On time, hybrid-F leads at 0.5281
+and b7 is next to last at 0.2247. On accuracy at the same deadline, **b7 (0.3146) is AHEAD of
+hybrid-F (0.3034)**, and eco-llm, second on time at 0.4270, is **last on accuracy at 0.2584**.
+hybrid-F delivers 2.3 times b7's on-time rate at 3 s and ends with slightly fewer correct answers.
+
+The post-fix gain is also almost entirely an on-time gain: hybrid-F's 3 s on-time rose from 0.3258
+pre-fix to 0.5281 post-fix, while at 5 s its accuracy is 0.4831 against hybrid-F6's **0.4944**, and
+hybrid-F6 is the arm that was NOT redone.
+
+### 21.2 Why: the extra on-time answers are RECENT, and RECENT is almost never right
+
+Cloud answers delivered on time at 3 s, split by the representation actually sent:
+
+| arm | on-time cloud answers | D2 | D2 correct | RECENT | **RECENT correct** |
+|---|---|---|---|---|---|
+| b7-edf-feasibility | 20 | 20 | 0.650 | 0 | n/a |
+| eco-llm, post-fix | 38 | 21 | 0.619 | 17 | **0.118** |
+| hybrid-F-lhreq, post-fix | 47 | 29 | 0.621 | 18 | **0.111** |
+
+**A full-history answer is right about 62 to 65 percent of the time and a RECENT answer about 11
+percent.** b7 sends D2 only, so every on-time answer it delivers is a good one. The post-fix hybrids
+buy their extra on-time answers by sending RECENT, and those answers are right one time in nine.
+
+So the RECENT-send fix did exactly what it was built to do, sending what it charges for, and the
+consequence is that **meeting the deadline and answering the question have come apart**. An arm can
+raise on time by sending less evidence, and less evidence answers the question wrongly. The 11.1 and
+11.8 percent measured here sit right on D143's committed DEV figure for cloud RECENT, 10.714
+percent, so this is the expected behaviour of that representation rather than a surprise about these
+runs.
+
+One number in the record does not match this. D151 (3) describes RECENT as "rarely worth it on
+LH-REQ: 26 % vs device 25 %", which is a different pair of quantities from D143's committed cloud
+D2 25.000, cloud RECENT 10.714 and device 10.714 on DEV. Measured on EVAL here, cloud RECENT is
+0.111 to 0.118 and cloud D2 is 0.619 to 0.650, so the gap between the two representations is far
+wider than "26 against 25" suggests. Flagged rather than reconciled, since both figures are the
+user's.
+
+### 21.3 What this says for the headline and for v2
+
+**On time alone is the wrong headline for the robot type**, and this sweep is the clearest statement
+of it the study has produced: the ranking by on time and the ranking by accuracy disagree at every
+deadline, and at 3 s they nearly invert. A policy tuned on on time will prefer RECENT, because
+RECENT is cheap and lands inside the deadline, and it will be wrong nine times in ten when it does.
+
+This bears directly on D149. Its clause (2) already says value within a type must decide full
+history against RECENT by "accuracy x P(on time)", and 21.2 is the measured version of exactly that
+product: 0.62 x P(on time with D2) against 0.11 x P(on time with RECENT). On these questions RECENT
+wins that product only when P(on time with D2) falls below about 18 percent of P(on time with
+RECENT), which at 5 s it does not. **D151 (3)'s judgement that RECENT is rarely worth it on LH-REQ
+is confirmed, and by a wider margin than the figure quoted there.**
+
+It also sharpens D147's pending item. If the D133 headline moves to all robot questions, it should
+carry the accuracy column with it, because the on-time column alone would rank an arm that answers
+wrongly above one that answers correctly and late.
+
+### 21.4 A regeneration check worth recording
+
+Only seed 4's trace is committed, so gold letters and device correctness for seeds 0, 5 and 6 are
+regenerated locally. That is safe here and the check is explicit: regenerating seed 4 reproduces the
+committed `device_answers.jsonl` sha256 **exactly**. The regenerated `trace.jsonl` does NOT match,
+and the reason is known and confined: the only differing field is `frame_bytes` on the 13,193
+monitor records, where a measured run carries per-frame bytes from the encode manifest and a flash
+regeneration falls back to the E10a median, which is D103 (h). Robot question ids, history tokens,
+gold letters and device answers are identical.
+
+So a locally regenerated trace is sound for robot-side quantities and **must never be used for an
+uplink or dashcam quantity**. That applies to `frozen_headline.local_trace` as well, which is used
+for feasibility and reads only history tokens.
