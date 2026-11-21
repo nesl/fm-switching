@@ -42,7 +42,8 @@ for p in (LIVE2, LIVE2 / "fleet", REPO / "experiments/orchestration",
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
-import costs as C                                                           # noqa: E402
+import costs as C
+import value_reader as VR                                                           # noqa: E402
 from interface import Action, Observation, RecallAction, StreamAction       # noqa: E402
 from policy.profiles import MissingEvidence                                  # noqa: E402
 
@@ -135,7 +136,8 @@ class HybridArm:
                  k_r: float = 1.0, m_d: float = 0.05, defs: str = "v1", reserve: Optional[bool] = None,
                  throttle_floor: int = 2, c3_always: bool = False, workload: str = "mixed",
                  k_r_frac: Optional[float] = None, quality_fit: str = "trace_mix",
-                 c6_robot_only: bool = False, c6_mirror_all_periods: bool = False) -> None:
+                 c6_robot_only: bool = False, c6_mirror_all_periods: bool = False,
+                 c3_value_reader: bool = False, value_transform: str = "none") -> None:
         from arms_published import B7EdfFeasibilityArm
         self._b7 = B7EdfFeasibilityArm()
         self.name = name
@@ -171,6 +173,13 @@ class HybridArm:
         # which is where the cost is (measured 94 percent of C6 calls were on single-shot requests,
         # and the SS-only periods paid p50 42.6 to 133.5 ms against a 100 ms decision period), and
         # the per-request _c6_one. Gating only the second would keep the whole cost.
+        # D149 / D152 (2), DEFAULT OFF: replace C3's feasibility-triggered RECENT fallback with
+        # the value reader. `value_transform` is the D149 (4) acceptance control: flattening or
+        # inverting the table MUST change decisions, and it runs through the same code path as the
+        # real table so the control cannot differ from the thing it controls.
+        self.c3_value_reader = bool(c3_value_reader)
+        self.value_transform = str(value_transform)
+        self._value_table = None
         self.c6_robot_only = bool(c6_robot_only)
         # MEASURED, not anticipated: gating the mirror as well is NOT robot-side neutral. The mirror
         # is a policy-core instance advanced once per period (_c6_prepare's own docstring: "advance
@@ -254,6 +263,8 @@ class HybridArm:
             self._scorer.quality_fit = self.quality_fit
             self._scorer.live2_configure(**kw)
             self._chooser = CH.Chooser(enabled=True, delta=0.0)
+        if self.c3_value_reader and self._value_table is None:
+            self._value_table = VR.ValueTable(transform=self.value_transform)
 
     def live2_describe(self) -> Dict[str, Any]:
         d = dict(self._b7.live2_describe()) if hasattr(self._b7, "live2_describe") else {}
@@ -324,7 +335,25 @@ class HybridArm:
                 self.stats["c3_always_recent"] += 1
             if self.sw["c3"] and not is_ss and d.decision != "CLOUD":
                 est_r = float(C.recall_ttft_s(RECENT_TOKENS, "COLD"))
-                if est_r <= qs:
+                if self.c3_value_reader:
+                    # D149 / D152 (2): the fallback asks whether the answer would be any GOOD, not
+                    # merely whether it would arrive. A representation is sent only if
+                    # P(on time) x accuracy beats the device's own answer. On the committed DEV
+                    # table cloud RECENT and the device are both 0.107143, so RECENT never
+                    # strictly beats the device and the RECENT-only shortcut disappears, which is
+                    # what D152 (2) rules and what it predicted would "fall out of the value
+                    # reader" rather than need a rule of its own.
+                    vr = VR.choose(("RECENT",),
+                                   lambda rep, _q=qs, _e=est_r: 1.0 if _e <= _q else 0.0,
+                                   self._value_table,
+                                   history_tokens=getattr(q, "readiness_tokens", None))
+                    self.stats["c3_value_considered"] += 1
+                    if vr["send"]:
+                        d = RecallAction(q.query_id, "CLOUD", representation=vr["representation"])
+                        self.stats["c3_value_sent"] += 1
+                    else:
+                        self.stats["c3_value_withheld"] += 1
+                elif est_r <= qs:
                     d = RecallAction(q.query_id, "CLOUD", representation="RECENT")
                     self.stats["c3_recent"] += 1
             if c6_live and not (self.c6_robot_only and is_ss):
@@ -664,3 +693,31 @@ def register() -> None:
     import arms as A
     for name, kw in CONFIGS.items():
         A.ARMS[name] = (lambda n=name, k=kw: HybridArm(name=n, **k))
+
+
+# D149 / D152 (2), DEFAULT OFF on hybrid-F itself: the value-reader arms. `hybrid-Fv` replaces C3's
+# feasibility-triggered RECENT fallback with the reader; the `-flat` and `-invert` pair are D149
+# (4)'s acceptance control, which must MOVE decisions against `hybrid-Fv` or the value table is
+# decorative. All three are new labelled arms (D79), so hybrid-F's own cells are untouched.
+CONFIGS.update({
+    "hybrid-Fv": dict(CONFIGS["hybrid-F"], c3_value_reader=True),
+    "hybrid-Fv-flat": dict(CONFIGS["hybrid-F"], c3_value_reader=True, value_transform="flat"),
+    "hybrid-Fv-invert": dict(CONFIGS["hybrid-F"], c3_value_reader=True, value_transform="invert"),
+})
+CONFIGS.update({
+    "hybrid-Fv-lhreq": dict(CONFIGS["hybrid-F-lhreq"], c3_value_reader=True),
+    "hybrid-Fv-flat-lhreq": dict(CONFIGS["hybrid-F-lhreq"], c3_value_reader=True,
+                                 value_transform="flat"),
+    "hybrid-Fv-invert-lhreq": dict(CONFIGS["hybrid-F-lhreq"], c3_value_reader=True,
+                                   value_transform="invert"),
+})
+
+
+# D152 (2) interim reference, requested by the H100 for the 3 s handful: hybrid-F with C3 OFF, so
+# no RECENT fallback of any kind. A NEW LABELLED ARM under D79; hybrid-F's own cells are untouched.
+# c3=False is the WHOLE change: k_r_frac stays 0.3, so k_r is 0.9 s at a 3 s deadline exactly as it
+# is for hybrid-F, and C2's at-risk test, the dashcam throttle and C1/C4/C5 are unchanged.
+CONFIGS.update({
+    "hybrid-F-noc3": dict(CONFIGS["hybrid-F"], c3=False),
+    "hybrid-F-lhreq-noc3": dict(CONFIGS["hybrid-F-lhreq"], c3=False),
+})

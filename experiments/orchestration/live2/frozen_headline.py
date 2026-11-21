@@ -112,7 +112,13 @@ def run_flags(d):
         dev = str(r.get("device_id", ""))
         if dev.startswith("robo"):
             h = int(r.get("history_tokens") or 0)
-            feas[r["opportunity_id"]] = (C.recall_ttft_s(h, "COLD") + C.recall_ttft_s(h, "GPU-WARM") + link) <= float(r.get("deadline_s") or 5.0)
+            # D147: the deadline comes from the QUESTION, never from a literal. A silent 5.0
+            # here would score a 3 s run against a 5 s bound and nothing would look wrong, so an
+            # absent deadline raises instead.
+            if r.get("deadline_s") is None:
+                raise AssertionError("recall_question %s carries no deadline_s; refusing to "
+                                     "assume one" % r.get("opportunity_id"))
+            feas[r["opportunity_id"]] = (C.recall_ttft_s(h, "COLD") + C.recall_ttft_s(h, "GPU-WARM") + link) <= float(r["deadline_s"])
         elif dev.startswith("asst"):
             ssq.add(r["opportunity_id"])
     failed = {r.get("request_id") for r in jl(d / "request.jsonl") if r.get("http_status") != 200}
@@ -135,7 +141,10 @@ def run_flags(d):
                 and o["opportunity_id"] in done:
             td = done[o["opportunity_id"]] + (float(td) - float(o["t_cloud_done"]))
         rid = (o.get("cloud_payload") or {}).get("request_id")
-        L = SS_L if o["opportunity_id"] in ssq else float(o.get("deadline_s") or 5.0)
+        if o["opportunity_id"] not in ssq and o.get("deadline_s") is None:
+            raise AssertionError("recall outcome %s carries no deadline_s; refusing to assume one"
+                                 % o["opportunity_id"])
+        L = SS_L if o["opportunity_id"] in ssq else float(o["deadline_s"])
         ont[o["opportunity_id"]] = bool(td is not None and rid not in failed and float(td) - float(o["t_opportunity"]) <= L)
     sw = (((c.get("score") or {}).get("score") or {}).get("sweep") or [{}])[0]
     # CONTROL: the regenerated trace must name the same robot questions the run itself recorded.

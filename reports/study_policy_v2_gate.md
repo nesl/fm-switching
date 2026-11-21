@@ -112,3 +112,65 @@ The decode convexity is a modelling fix I can make without new data: a piecewise
 overlap, fitted on the six measured overlap buckets rather than as one line. I have not made it yet,
 because changing the model to improve a held-out ratio I have already seen is fitting to the test
 set. It should be fitted on the cold data, held out by arm, and reported once rather than tuned.
+
+---
+
+# D149 / D152 value reader: Step 2b passes, the acceptance test does not discriminate
+
+**A6000, 2026-11-20. Dry cells, CPU only.** Script
+`experiments/orchestration/live2/hybrid/value_reader.py`, wired into `HybridArm` behind
+`c3_value_reader`, DEFAULT OFF. Proofs in
+`results/orchestration/live2/frozen_test/value_reader_proofs.json`. Cell: seed 4, 16 devices,
+1,200 s, 40:40:20, LH-REQ robots, SS2 pool, dry engine.
+
+## What the reader does
+
+It replaces C3's feasibility-triggered RECENT fallback. The old branch sent RECENT whenever the full
+history would not fit and RECENT would, a feasibility test with no reference to whether the answer
+would be any good. The reader asks instead whether the answer beats the one the device already has:
+
+    value(rep) = P(on time | rep) x accuracy(rep)   against   value(device) = accuracy(device)
+
+On the committed DEV table (`lh_req_quality.json`, D6-compliant, fitted on the 28 DEV questions),
+cloud D2 is 0.250, cloud RECENT is 0.107143 and the device is 0.107143. **RECENT never strictly
+beats the device**, so the RECENT shortcut disappears without a rule of its own, which is what
+D152 (2) ruled and predicted would fall out of the reader.
+
+## The proofs
+
+| arm | decision digest | representations released |
+|---|---|---|
+| hybrid-F-lhreq | `ec49e6d5a3b5454f` | D2 372, **RECENT 5** |
+| hybrid-F-lhreq-noc3 | `5d3469549fead8ac` | D2 372, RECENT 0 |
+| **hybrid-Fv-lhreq** (value reader) | `5d3469549fead8ac` | D2 372, RECENT 0 |
+| hybrid-Fv-flat-lhreq | `5d3469549fead8ac` | D2 372, RECENT 0 |
+| hybrid-Fv-invert-lhreq | `5d3469549fead8ac` | D2 372, RECENT 0 |
+| hybrid-F6-lhreq (regression check) | `ec49e6d5a3b5454f` | D2 372, RECENT 5 |
+
+**Step 2b PASSES.** The value reader moves decisions against hybrid-F, and it removes exactly the 5
+RECENT releases C3 was making. The reader is behaviourally identical to turning C3 off on this cell,
+which is the right answer: D152 (2) says the RECENT-only shortcut is not used for long-horizon
+questions, and the reader reaches that conclusion from the value table rather than from a switch.
+
+**D149 (4)'s ACCEPTANCE TEST DOES NOT DISCRIMINATE HERE, and that is a failure of the test, not a
+pass.** Flattening and inverting the table leave the digest unchanged. The cause is scope, not
+decoration: C3's slot consults the reader ONLY when the full history did not fit, so the only
+candidate ever offered is RECENT, and under all three tables the reader withholds it. A control
+whose every case lands the same way under every treatment cannot detect anything.
+
+That the reader CAN express a preference is shown directly, outside the arm:
+
+| table | only RECENT fits | both D2 and RECENT fit |
+|---|---|---|
+| committed | withhold | **send D2** |
+| flattened | withhold | **withhold** |
+| inverted | withhold | **withhold** |
+
+So the transforms do change the decision when the reader is offered a real choice. **The acceptance
+test will only be meaningful once the reader is consulted at ADMISSION**, choosing among D2, RECENT
+and the device, rather than in a fallback slot that offers one candidate. That is where D151 (3)
+puts the robot decision anyway, so this is an argument for moving the reader there in v5 and not a
+reason to weaken the test.
+
+Recorded as **unexercised** under CLAUDE.md Rule 2: the mechanism is present and reachable, and no
+condition in this cell reaches the branch where it would differ.
