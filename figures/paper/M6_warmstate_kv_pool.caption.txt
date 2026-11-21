@@ -1,0 +1,10 @@
+M6_warmstate_kv_pool
+
+CLAIM:
+In the offline warm-state sim, a no-warming policy holds 78% on time at every pool size because it never uses the pool, while warming the right histories reaches 100 percent on time at the deployed pool. As the KV pool shrinks to one quarter, a pool-aware warming policy that spills to the host tier (P3) holds full warm coverage (0.95) and 100% on time, while a naive GPU-only warming policy (P1) loses coverage (0.00) and falls to 83% on time. The value of warm state depends on managing the pool, not just on turning warming on.
+
+SOURCES (committed):
+  results/orchestration/live2/frozen_test/warm_state_offline.json  @ a9a5dfe
+
+NOTES:
+Offline warm-state study (warm_state_offline.json, user 2026-11-20): what a warming policy could have bought, an offline simulation over 65 questions at 16 devices, eval seeds 4, 5, 6, deployed pool gpu 62,944 and host 110,592 tokens, scales 1.0, 0.5, 0.25. Warm coverage is the median covered fraction; on-time is on_time_with_queue_frac at the committed 0.74 s queue allowance. Policies: P0 no warming (all cold), P1 GPU warming with LRU eviction, P2 time-to-live warming, P3 pool-aware warming that spills to the host KV tier. Each policy carries its own colour, linestyle and marker. This is an offline sim, not a live EP-G run, and is labelled as such; it bounds what warming could buy.
