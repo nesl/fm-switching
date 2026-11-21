@@ -52,8 +52,15 @@ until the flagged confidence-injection wiring change is applied.
 - Warm-ahead DOES reach the warm state (engine: 12/20 and 13/24 robot questions, about 57 %) and still converts to nothing:
   the prefills that buy warmth fill the queue that makes warm answers late. noc3's warm 0 is structural (0 pieces, post-fix).
   The arm's own belief counter (`release_at_GPU-WARM`) UNDER-reports warmth and was retracted as a source.
-- warm-all-lru (warm everything) reaches LESS warmth (16 of 48, 33 %) than targeted v5-rules, and saturates the engine
-  (dashcam TTFT p50 50 to 141 s).
+- warm-all-lru (warm everything) reaches LESS warmth (16 of 48, 33 %) than targeted v5-rules, and saturates the engine.
+- SATURATION KNEE (flash 5a489d2, within-run 100 s windows over 29 cells, criterion declared before reading: any window's
+  first-token p50 above 2.0 s): 19 cells at 4,356 to 4,512 uncached tok/s never cross, 10 cells at 4,686 to 5,831 all
+  cross, 0 misclassified, so the knee lies in [4,512, 4,686] uncached tok/s (3.9 percent). Above it, first-token latency is
+  ACCUMULATED BACKLOG, not current rate. **The crossing cells' POOLED TTFT is not a property of the arm and must NOT be
+  compared between them** (it reports where the median request fell on the ramp); compare their terminal 100 s window
+  instead. The crossing cells: v5-rules s4 and s5, querystream-proactive s4 and s5, and the six warm-all-lru cells (1F,
+  EP-G pre-fix, s5 rerun, s4 `_rf`, s4 kv0.25 `_rf`, and the s5 invalid first attempt). Pooled TTFT figures quoted for those
+  cells elsewhere in this report are descriptive only; no scored result moves (deadline and on-time are per request).
 - Per-frame upload hurts the rebuild-on-demand arms (edf, llf: SS 93 to 188 of 356); arms that do not rebuild are unchanged
   against their one-frame runs.
 
