@@ -1,0 +1,59 @@
+{
+  "_note": "Residency-log audit of the two claims this work depends on: whether the believed tier is ever HOST, and whether telemetry_cached_tokens is ever positive. OBSERVED from committed residency logs; nothing here is measured on an engine by this session.",
+  "_register": "OBSERVED COUNT over committed logs, not a constructed bound and not a census of any single cell",
+  "population": {
+    "residency_files": 213,
+    "rows": 20630,
+    "n16_files": 56,
+    "n16_rows": 16951
+  },
+  "claim_host_never": {
+    "believed_tier_all_cells": {
+      "gpu": 2216,
+      "cold": 18414
+    },
+    "believed_tier_n16_cells": {
+      "cold": 15096,
+      "gpu": 1855
+    },
+    "host_rows": 0,
+    "verdict": "CONFIRMED on a wider base than the 39 cells it was reported from: host appears in 0 of 20630 rows across 213 residency logs. The branch exists in code (cstate.py:169, reachable at :447 and :486) and no committed run reaches the state, so reload-from-host has no observed trigger state and must not be scored as a mechanism that failed."
+  },
+  "claim_telemetry_never_positive": {
+    "rows_with_field": 20630,
+    "positive_rows": 95,
+    "positive_values": {
+      "n": 95,
+      "min": 992,
+      "median": 3952,
+      "max": 18896
+    },
+    "positive_by_believed_tier": {
+      "cold": 72,
+      "gpu": 23
+    },
+    "positive_by_arm": {
+      "edf-piece1024": 67,
+      "b10-blocking-aware": 6,
+      "edf-piece2048": 5,
+      "edf": 5,
+      "attentionstore": 5,
+      "pc": 2,
+      "acc2_pc": 2,
+      "acc_pc": 2,
+      "policy-core": 1
+    },
+    "verdict": "DISAGREEMENT RESOLVED, not a contradiction. It was reported positive in NONE of 18,738 rows across 45 cells; over 213 logs it is positive in 95 rows. The two populations differ: every positive row is in a PILOT or acceptance run (pilot/runs3, pilot/runs4, accept_d114, harness_addendum), and zero are in the frozen-grid and sweep cells that sweep covered. Both readings are correct on their own population.",
+    "mechanism": "72 of 95 positive rows are on the PIECE-CHAINING arms (edf-piece1024, edf-piece2048), and 72 of 95 positive rows carry believed_tier = 'cold'. That is exactly the gap coordinator.py:745-752 documents: in a piece chain the already-built prefix IS reused on the wire as uuid references, so piece k+1 reports cached_tokens > 0 while the readiness the arm sees still says COLD. The telemetry is not dead; it is only ever exercised by an arm that slices.",
+    "_label_fix": "the first pass of this audit reported an arm literally named 'run', 6 rows: a path-parsing artifact of the .../<cell>/run/residency.jsonl layout used by the acceptance runs. Corrected here to the owning arm. The totals and every verdict are unchanged."
+  },
+  "consequence_for_warm_all": "WARM-ALL must slice, and it does: WARM_AHEAD_SLICE_TOKENS = 1024, so every warm-ahead prefill is submitted with slice_tokens set and takes the coordinator's kind='piece' path (observed: 77 release_piece rows in the shimmed smoke cell where b7 emits none). A monolithic warm-ahead would have produced the same warm state while leaving the belief corrector with nothing to read. This is the one place where the choice of a default is load-bearing rather than cosmetic.",
+  "_provenance": {
+    "git_commit": "70630f13026c2ef66cd3eceee5d9168dfd4561b4",
+    "script": "engine_actions_residency_audit (inline)",
+    "model": "none-offline",
+    "timestamp": "2026-11-20T17:00:57.265251",
+    "device": "nvidia_rtx_a6000",
+    "n": 213
+  }
+}

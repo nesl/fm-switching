@@ -1,0 +1,67 @@
+{
+  "_LABEL": "STACK-SUBSTITUTED CODE SMOKE TEST. NOT EVIDENCE.",
+  "_rules": [
+    "never reported as evidence",
+    "never compared to any Qwen3-VL number",
+    "the three measurements that count run on the H100 deployment stack (vLLM 0.31.0, native offload 27 GiB)"
+  ],
+  "stack": {
+    "engine": "vllm",
+    "engine_version": "0.8.5",
+    "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "device": "nvidia_rtx_a6000",
+    "deployment_stack": false
+  },
+  "raw_usage_first": {
+    "prompt_tokens": 7112,
+    "total_tokens": 7113,
+    "completion_tokens": 1,
+    "prompt_tokens_details": null
+  },
+  "raw_usage_appended": {
+    "prompt_tokens": 7592,
+    "total_tokens": 7593,
+    "completion_tokens": 1,
+    "prompt_tokens_details": null
+  },
+  "M1_warm_append": {
+    "first_prompt_tokens": 7112,
+    "appended_prompt_tokens": 7592,
+    "appended_cached_tokens": null,
+    "verdict": "FAIL or not reported: no reuse on the appended body (cached_tokens=None)"
+  },
+  "M2_belief_corrector_on_real_usage": {
+    "before": "cold",
+    "after": "cold",
+    "changed": false,
+    "reason": "no usage reported: no evidence, belief untouched",
+    "cached_tokens": null,
+    "prompt_tokens": 7592,
+    "external": null,
+    "verdict": "NO CHANGE: the corrector did not move the belief on this usage block"
+  },
+  "M3_reload_from_host": {
+    "run": false,
+    "reason": "not runnable on vLLM 0.8.5: no native KV offload tier, so there is no HOST-WARM state to reload from. It runs on the deployment stack only."
+  },
+  "B3_external_hit_keys": {
+    "probed": [
+      "external_computed_tokens",
+      "num_external_computed_tokens",
+      "connector_cached_tokens",
+      "kv_connector_cached_tokens",
+      "offloaded_cached_tokens"
+    ],
+    "found_first": null,
+    "found_appended": null,
+    "verdict": "no external/connector token field is present in this engine's usage block, which is expected on 0.8.5 and does NOT confirm the key list. B3 stays open until the deployment stack dumps its own usage block."
+  },
+  "_provenance": {
+    "git_commit": "70630f13026c2ef66cd3eceee5d9168dfd4561b4",
+    "script": "smoke_engine_actions.py",
+    "model": "qwenvl7b",
+    "timestamp": "2026-11-20T17:00:22.312920",
+    "device": "nvidia_rtx_a6000",
+    "n": 2
+  }
+}
