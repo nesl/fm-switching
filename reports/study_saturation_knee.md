@@ -478,3 +478,79 @@ end of the lead tonight.
 `request.jsonl` carry `session_id: null` while robot and single-shot rows are populated. Anything
 keyed on dashcam session identity is silently impossible, and it fails by pooling rather than by
 erroring, which is the shape that survives checks.
+
+---
+
+## RETRACTION: the bracketed knee does not survive an independent cell set, and my own sensitivity check was not run on the thing that mattered
+
+I published `[4,511.7, 4,685.8]` uncached tok/s with "zero misclassifications in 29 cells" earlier
+this morning. **It is refuted.** The refutation came from putting the **pre-EP-G gate cells** on the
+same axis, which I had never done. Same host, same instrument, same declared 2.0 s criterion;
+different arms and a different workload. Set B is **exactly** the 26 cells the committed
+`cost_model_gate.json` fits on: its own `arms` field crossed with its `CELL` template at seeds 0, 4,
+5 and 6. The `_n14` and `_n20` variants on disk are deliberately excluded, because they are not in
+the gate's set and one of them is the only severe cell among them.
+
+### The independent set overlaps
+
+The five cells around the boundary, all of them in the gate's 26:
+
+| | load (unc tok/s) | worst 100 s window | crosses at 2.0 s? |
+|---|---|---|---|
+| `always-cloud-fcfs` s4 | 4,670.5 | 2.781 s | **yes** |
+| `eco-llm` s4 | 4,670.5 | 2.664 s | **yes** |
+| `eco-llm` s6 | 4,681.7 | 0.713 s | no |
+| `eco-llm` s0 | 4,697.6 | 2.617 s | **yes** |
+| `eco-llm` s5 | **4,706.9** | 0.915 s | **no** |
+
+Crossing and non-crossing cells **interleave** across 4,670 to 4,707 tok/s. Highest non-crossing is
+4,706.9, lowest crossing is 4,670.5, so the partition overlaps by 36.4 tok/s instead of separating.
+
+### And the criterion sensitivity was worse than I reported
+
+I reported the 5.0 s and 10.0 s thresholds "as a sensitivity check" but only ever checked them as
+*crossing times*, never as **partitions**. Checked properly:
+
+| criterion | EP-G/CAL1F set (n=30) | gate set (n=26) | **combined (n=56)** |
+|---|---|---|---|
+| 2.0 s | separated | **overlap 36.4** | **overlap** |
+| 5.0 s | **overlap 34.1** | no cell crosses | **overlap** |
+| 10.0 s | **overlap 34.1** | no cell crosses | **overlap** |
+
+**No criterion separates the combined 56 cells.** At 5.0 s the EP-G set inverts on its own:
+`v5-rules` s4 at 4,719.9 does not cross while `v5-rules` s5 at 4,685.8 does. The clean partition
+existed only inside the EP-G/CAL1F set, at exactly the threshold I chose **after** looking at that
+set's gap. That is a selection effect in my own criterion, and the sensitivity check I claimed to
+have run is the check that would have caught it. The failure is not that 2.0 s was a bad number; it
+is that I reported a robustness check I had not actually applied to the claim.
+
+### What survives, stated at the register the data supports
+
+**The severity separation is real and no cell occupies the middle.** Across the gate's 26 cells the
+worst 100 s window **never exceeds 2.781 s**, and it is 0.915 s or below for 23 of them. Every
+severe cell in either set is at 5,190 tok/s or above with a worst window of 31 to 478 s. So the gap
+in **severity** is unoccupied, at a ratio of about 11x between the worst mild cell and the mildest
+severe one, while the gap in **load** is occupied.
+
+**What dies is the axis, not the phenomenon.** Run-mean uncached tok/s does not determine which side
+a cell falls on. The knee is a **transition zone**, roughly 4,500 to 4,750, and something other than
+run-mean load decides within it. That is the H100's burstiness objection, which has now been right
+three times tonight: first against the pooled TTFT, then against the single above-knee level, now
+against the threshold itself.
+
+### What this does and does not touch
+
+**Unaffected, and still the useful result:** the 10 EP-G crossing cells are two-regime mixtures and
+their **pooled** first-token p50 may not be compared between arms. That rests on the within-run
+ramps measured directly in each cell, not on any threshold, so it stands as published. The terminal
+window remains the comparable statistic, and no scored quantity moves.
+
+**Also unaffected:** the gate diagnosis. The two CAL1F fit cells differ by 160x in overlap and sit at
+4,511.7 and 5,476.2 tok/s with worst windows 0.26 s and 31.89 s. That is a 120x severity difference
+between two cells in one fit set, which is what makes the OLS intercept go negative. The diagnosis
+needed the severity difference, not a threshold between the cells, so it does not depend on the
+retracted bracket.
+
+**Withdrawn:** the phrase "phase transition" where I used it to mean a sharp threshold in load, and
+the 3.9 percent bracket in every place it appears. `knee_within_run.json` carries the stale bound and
+is superseded by `knee_two_sets.json`.
