@@ -174,3 +174,92 @@ reason to weaken the test.
 
 Recorded as **unexercised** under CLAUDE.md Rule 2: the mechanism is present and reachable, and no
 condition in this cell reaches the branch where it would differ.
+
+---
+
+# The D151 (6) cost-model gate: FAILS, and the reason is that warm is confounded with arm
+
+**A6000, 2026-11-20, CPU only.** `experiments/orchestration/live2/cost_model_gate.py` over
+345,066 committed requests in 26 cells. Output `results/orchestration/live2/frozen_test/cost_model_gate.json`.
+
+## The fits
+
+    first_token = a0 + a1 * uncached_tokens + a2 * overlap_ft
+    decode      = b0 + b1 * overlap_decode
+
+| split | class | n | first token pred/act | decode pred/act |
+|---|---|---|---|---|
+| by seed, held out | all | 172,502 | 1.072 | **1.298** |
+| by seed, held out | warm | 1,077 | 0.911 | **1.245** |
+| by seed, held out | cold | 171,425 | 1.072 | **1.309** |
+| by arm, held out | all | 101,498 | 0.938 | **1.316** |
+| by arm, held out | **warm** | **0** | n/a | n/a |
+
+**First token predicts acceptably out of sample**, 0.94 to 1.07. **Decode over-predicts by 25 to 32
+percent in every held-out class.** On that alone the gate does not pass.
+
+## Why it cannot be fixed by collecting more of the same data
+
+The warm class is 1,797 of 345,066 requests, 0.52 percent. That scarcity is the visible problem and
+it is not the real one. Per cell:
+
+| cell | believed tier counts | engine prefix_cache_hits |
+|---|---|---|
+| edf n16 s4 | gpu 358, cold 373 | 512,992 |
+| llf n16 s4 | gpu 362, cold 373 | 424,224 |
+| b7 n16 s4 | **cold 372, gpu 0** | **0** |
+| hybrid-F-lhreq n16 s4 | **cold 372, gpu 0** | **0** |
+
+**Warm is not a condition that varies within an arm. It is a property of which arm is running.** edf
+and llf rebuild histories, so they reach a fully built state, take a GPU belief, and show hundreds
+of thousands of engine prefix hits. b7 and the hybrids never rebuild, never take a GPU belief, and
+show exactly zero engine prefix hits. The coordinator's belief and the engine's own counters agree
+at cell level, which is a reassuring result in itself.
+
+The consequence for the gate is fatal and is not about sample size: **the warm coefficient is fitted
+entirely on edf and llf and would be applied to arms that never go warm.** That is why the by-arm
+split has ZERO held-out warm requests, a figure that reads as a shortage and is actually a
+statement that the warm regime is unidentified out of arm. Collecting more committed cells of the
+same arms cannot fix it; only an arm that goes warm and cold under the SAME policy can, which is
+exactly what WARM-ALL plus LRU is for.
+
+**Verdict: the gate FAILS. v5 does not go live on this evidence.** The ordering constraint stands:
+WARM-ALL must run before the gate is retried.
+
+## The belief-versus-engine question, answered as posed and then corrected
+
+The user asked for the prediction error reported separately for requests where the belief said cold
+while the engine reported cache hits. **There are no such rows, and the reason is worth stating
+because it is not the reassuring one.**
+
+`telemetry_cached_tokens` appears in 18,738 residency rows over 45 cells: absent in 16,934, exactly
+zero in 1,804, **positive in none**. I first read that as a broken write, because five cells report
+424,000 to 513,000 engine prefix hits while every telemetry row in them reads zero. That reading was
+wrong and I checked it before reporting it. The field is written at `coordinator.py:756` on the
+history-build path ONLY, so it covers history pieces and not the dashcam monitor traffic that
+produces most of those hits, and on the slice it does cover it is honestly zero. `cached_tokens_of`
+in `backend.py` is careful in the same direction: absent returns None rather than 0, with a comment
+that a zero "would be read as a confirmed cold path and D81's WARM / COLD tag would then be a
+fabrication."
+
+**But the phenomenon the question was aimed at is real, and the committed code already names it.**
+`coordinator.py:745-752` says it outright: a partially built history keeps a COLD readiness, while
+"the already-built prefix is still reused on the wire as uuid references, so the request is cheap
+even while the readiness the arm sees says COLD; that gap is a limitation of the committed action
+space and is reported." So an arm can be told COLD on a request the engine serves cheaply. That is
+the user's PROVISIONAL note, and its anchor is that comment and the edf/llf prefix-hit counts,
+not a telemetry disagreement that does not exist in the logs.
+
+Recorded PROVISIONAL per the ruling: **the belief understates residency on partially built
+histories, by construction rather than by fault.** Wiring `telemetry_cached_tokens` into the belief
+as D150 directs will NOT by itself correct this, because the field does not observe the traffic
+where the reuse happens. Session C should know that before it wires it.
+
+## What this predicts for the 3 s handful
+
+Section 22 of `study_frozen_test.md` predicted that edf and llf would move most between the offline
+3 s re-score and a live 3 s run, as the upper bound on the planning-versus-scoring confound. That
+prediction was made on their deferral behaviour. The table above gives it a mechanism: **edf and llf
+are the only arms with real engine prefix reuse**, so they are the arms whose live cost differs most
+from anything a re-score can reconstruct. The prediction stands and its reasoning is now stronger
+than when it was written.
