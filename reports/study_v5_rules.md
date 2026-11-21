@@ -541,3 +541,78 @@ the coordinator surfaces it as **`arm_stats`** (`coordinator.py:1226`), NOT unde
 for "yield" in `counts` finds nothing, which is why it looked absent. Also in `arm_stats`:
 `warm_ahead_wanted`, `warm_ahead_emitted` and `warm_ahead_unexpressible`, which are the ASK-side
 numbers and must not be read as issued prefills.
+
+---
+
+# THE DISCRIMINATOR SETTLES IT, and against its OWN BASE v5-rules buys nothing
+
+`hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg`, same workload, VALID, 1 transport error in 11,481.
+
+**The pre-registered discriminator fires on its FIRST branch: the base released 11,112 dashcam
+monitors against v5-rules' 4,045, with the SAME C5 throttle at the same floor and no warm-ahead.
+So C5 is not holding those instants back. Warm-ahead's queue is**, and the dashcam failure is
+v5-rules'. The mechanism in the previous section stands.
+
+## I compared against the wrong arm, and the right comparison reverses my headline
+
+I reported "the robot claim holds live, +0.05 over b7". **b7 is not v5-rules' base.
+`hybrid-F-lhreq-noc3` is**, and that is the comparison the warm-ahead rule has to earn, because the
+rule is what was ADDED to it. Against the base:
+
+| quantity | v5-rules | its base (noc3) | delta |
+|---|---|---|---|
+| **robot correct delivered by deadline** | 0.45 | **0.45** | **0.00** |
+| robot on time | 9 of 20 | 8 of 20 | +1 question |
+| single-shot on time | 188 of 357 | **351 of 357** | **-163 questions** |
+| dashcam all-meet | **FAIL** | meets | fails |
+| dashcam monitors released | 4,045 | **11,112** | about -7,000 |
+| declines | 0 | 8 | -8 |
+
+**So warm-ahead bought +1 robot on-time answer and ZERO extra correct-by-deadline answers, at a
+cost of 163 single-shot questions and about 7,000 unreleased dashcam instants.** On the headline
+D152 (1) names it is not a trade at all: the gain is 0.00.
+
+My "+0.05 over b7" was true and irrelevant. b7 has no C5 throttle and no warm-ahead, so it differs
+from v5-rules in two ways at once and cannot isolate either.
+
+## The causal chain's last link FAILS, and that is the substantive finding
+
+The dry proof's claim was that warming makes long histories feasible, measured as 6 recalls
+released against the base's 4 with 2 declines. **Live, that half holds exactly: v5-rules declined 0
+where its base declined 8.** The extra releases happened.
+
+**And they produced no extra correct answers.** Eight extra releases converted into +1 on-time and
++0 correct-by-deadline. So the chain is:
+
+  warm-ahead -> history resident -> long question becomes feasible -> released -> **answer is wrong**
+
+and it breaks at the last link. **Making a question feasible does not make its answer right.** The
+extra questions are the longest histories in the pool, and those are where accuracy is worst to
+begin with, so warming buys delivery on exactly the questions the cloud gets wrong anyway. That is
+a result about the premise, not about the implementation.
+
+## Should this be fixed before seed 5? NO, and the reason is methodological
+
+The H100 asks whether the dashcam hold-back is a fault to fix before seed 5 is read. **It is not a
+code fault and it must not be changed before seed 5.** Three reasons:
+
+1. **It is the policy doing what the rule says**, with an opportunity cost nobody priced. Changing
+   it changes the POLICY, not an implementation, which is a methodological change.
+2. **Seed 5 is a replication of this configuration.** Altering the arm between seeds 4 and 5 makes
+   them incomparable and destroys the only replication this result will have.
+3. **The result is more useful as it stands.** A v5-rules that had been quietly tuned until the
+   dashcams passed would have hidden the finding; this version measures it.
+
+So: run seed 5 unchanged, and report the trade.
+
+## What it means for v5, stated without softening
+
+**As configured, warm-ahead as an unconditional RULE is not worth its cost.** It is the strongest
+possible argument for session B's harm term, which subtracts the expected correct on-time answers
+LOST by others from displacement: a policy with that term would have seen 3,253 prefills buying
+zero correct answers at the price of 163 single-shot deliveries, and declined to issue them.
+
+**The right reading is not "v5 fails".** It is that the rule-only ablation, which is also the
+paper's "v5 without the counterfactual", **shows the counterfactual is load-bearing rather than
+decorative.** That is a cleaner result than a v5-rules win would have been, and it is the first
+evidence in the project that distinguishes the two halves of the design.
