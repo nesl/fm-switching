@@ -511,3 +511,56 @@ no conversion is ruled. **Full v5 was already blocked by a ruling, not by this r
 
 The preflight usage block is in the JSON, which settles `EXTERNAL_HIT_KEYS` (previously CONSTRUCTED
 and unverified, and `engine_actions.py`'s own docstring asked for exactly this).
+
+---
+
+# M2 PASSES on the re-sized flood: 32B CONFIRMATION PASSED, all three
+
+**H100, 23:13 to 23:18, fresh round-1 server, script e09391f, result e77fa65.** Exit code 0.
+
+| condition | rep | T | U | outcome | flood |
+|---|---|---|---|---|---|
+| TOUCH | 0, 1, 2 | **gpu** | **host** | **T_SURVIVED** x3 | 47,027 / 47,131 / 46,982 |
+| NOTOUCH | 0, 1, 2 | host | host | INDETERMINATE x3 | 47,048 / 46,962 / 47,097 |
+
+**The touch moves a history between TIERS.** Touched stays in GPU, untouched falls to host, and with
+no touch BOTH fall to host. That is the stronger statement the tier discriminator was built to
+reach, and it is cleaner than "survives" would have been: survival was never the question, since M3
+had already shown a host-resident history still serves at 0.134 s.
+
+**The control behaves exactly as designed.** NOTOUCH shows NO asymmetry rather than the opposite
+winner, which satisfies the pass rule's second branch and establishes that the touch is what moved
+T. A flood that merely happened to be the right size would have produced the same winner in both
+conditions.
+
+The re-sizing was right and the bracketing contingency was not needed: 4 units of about 47,000
+tokens separates the two histories, where 17 units at 190,328 had cleared both to cold.
+
+## What all three passing does and does not establish, which is the part to carry forward
+
+| | engine property | wired into the policy? |
+|---|---|---|
+| **M1** warm-ahead pays off, TTFT 0.088 s against 2.757 s cold, **31x** | **CONFIRMED** | **yes, since PATCH 1.** Before it, warming ahead was rejected by `validate_action` |
+| **M2** touch keeps a history in GPU while an untouched one falls to host | **CONFIRMED** | **NO.** `coordinator._enact` handles `KEEP_GPU_WARM` by setting `desired_tier` (`coordinator.py:482`) and **emits no request** |
+| **M3** reload from host beats rebuild, 0.134 s against 2.0 s, **15x** | **CONFIRMED** | **NO.** `believed_tier` is never `host` in 56 committed cells, so the trigger state never occurs |
+
+**So all three engine actions are real on the deployment stack, and two of the three cannot be
+triggered by our policy at all.** The engine can do everything v5's STATE half was designed around;
+the gap is entirely in the coordinator. That is a much better position than the reverse would have
+been, and it turns three separate "unexercised" notes into one statement with a number attached to
+each.
+
+**It also changes what `desired_tier` is.** CLAUDE.md cites it as the canonical write-only field,
+three references and no read, and that is still true of the code. **But M2 has now measured the
+engine property that field was supposed to drive.** So it is not dead code to delete: it is an
+unclaimed tier promotion with a confirmed effect behind it. A write-only field whose mechanism is
+proven is a different object from one whose mechanism is hypothetical, and the remedy is to wire it
+rather than to remove it.
+
+## Consequence for the gates
+
+**The full-v5 condition "32B confirmation passed" is now MET.** Full v5 remains gated on the
+cost-model gate alone, which cannot pass tonight: D158 (1) holds MARGIN_CF until all four held-out
+cells run clean after the race fix, and two of the four were damaged. **So the remaining blocker is
+a measurement rather than a definition or a mechanism**, which is the first time tonight that has
+been true.
