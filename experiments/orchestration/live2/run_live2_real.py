@@ -87,6 +87,10 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--robot-question-set", default="eval", choices=["eval", "lh_req"],
                     help="D142 / D143 A: robots draw from EVAL (default) or EVAL LH-REQ questions only; recorded in the "
                          "header and in the trace directory name")
+    ap.add_argument("--robot-deadline-s", type=float, default=5.0,
+                    help="D147: the robot (long-horizon) deadline L, written into every robot question of the trace and "
+                         "used by the scorer; 5.0 is the historical default (D71). Any other value gets its own trace "
+                         "directory (_L<value>) and is recorded in the header")
     ap.add_argument("--run-s", type=float, default=600.0)
     ap.add_argument("--mode", default="A", choices=("A", "B"))
     ap.add_argument("--seed", type=int, default=0)
@@ -156,6 +160,8 @@ def _trace(a, work: Path) -> Path:
     # otherwise a 40:40:20 or LH-REQ run would silently reuse a 50:50 EVAL trace.
     extra = "" if (a.ratio == "50:50" and a.robot_question_set == "eval" and a.ss_question_set == "ss1") else \
         f"_r{a.ratio.replace(':', '-')}_{a.robot_question_set}_{a.ss_question_set}"
+    if float(a.robot_deadline_s) != 5.0:                                 # D147: a different L is a different trace
+        extra += f"_L{float(a.robot_deadline_s):g}"
     tdir = work / "traces" / f"seed{a.seed}_n{a.n_devices}_{int(a.run_s)}s_{a.mode}{extra}"
     if not (tdir / "trace.jsonl").exists():
         TR.write_trace(tdir, TR.generate_trace(
@@ -230,6 +236,7 @@ def run(a) -> Dict[str, Any]:
         fairness_digest=tmeta.get(f"fairness_digest_{a.mode}"),
         live1_trace_digest=tmeta.get("live1_trace_digest"),
         seed=a.seed, targets=CS.TARGETS, upload_mode=a.mode, robot_question_set=a.robot_question_set, ss_question_set=a.ss_question_set,
+        robot_deadline_s=float(a.robot_deadline_s),
         mu_mode=(a.mu_mode if a.arm == "policy-core" else None),
         H=(a.h_s if a.arm == "policy-core" else None),
         decision_period_s=a.decision_period_s, ratio=a.ratio, n_devices=a.n_devices,
@@ -415,7 +422,8 @@ def _inprocess(a, tdir: Path, rdir: Path, cfg, htok, arm, EM):
 def _score(tdir: Path, rdir: Path, cal: Path, arm: str) -> Dict[str, Any]:
     import score as SC
     try:
-        return dict(ok=True, score=SC.score_run(tdir, rdir, cal, arm))
+        import data_sources as _DS
+        return dict(ok=True, score=SC.score_run(tdir, rdir, cal, arm, L_rob_grid=(float(_DS.ROBOT_DEADLINE_S),)))
     except Exception as e:                                            # noqa: BLE001
         return dict(ok=False, error=f"{type(e).__name__}: {e}")
 
@@ -431,6 +439,10 @@ def _start_server(a):
 
 def main(argv=None) -> int:
     a = build_parser().parse_args(argv)
+    # D147: set the robot deadline ONCE, before any module reads it: trace generation reads DS.ROBOT_DEADLINE_S at call
+    # time and the scorer binds it at import (it is imported lazily, after this line).
+    import data_sources as _DS
+    _DS.ROBOT_DEADLINE_S = float(a.robot_deadline_s)
     out = run(a)
     print(json.dumps(out, indent=1, default=str))
     return 0 if not out.get("err") else 1
