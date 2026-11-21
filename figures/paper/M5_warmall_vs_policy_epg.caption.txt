@@ -1,0 +1,13 @@
+M5_warmall_vs_policy_epg
+
+CLAIM:
+On EP-G, the warm-everything baseline warm-all-lru serves only 5% of dashcam opportunities within the 1 s deadline and 6% of SS recalls within 2 s, and its dashcam service latency grows from about 1 s early in the run to about 438 s late, because prefilling every batch saturates the engine. The selective policy hybrid-F-lhreq-noc3 serves 65% of dashcam within 1 s and 96% of SS within 2 s and holds a flat 0.8 s dashcam latency across the run. Warming indiscriminately is worse than the selective policy, which is the case for a policy rather than a fixed warm-all rule.
+
+SOURCES (committed):
+  results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s4_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ d4dcc76
+  results/orchestration/live2/frozen_test/runs/warm-all-lru_n16_s5_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ 3b901dc
+  results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ 1f59d36
+  results/orchestration/live2/frozen_test/runs/hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg/outcomes.jsonl.gz  @ 1b4fba3
+
+NOTES:
+EP-G pilot cells, seeds 4 and 5, 16 devices, 1200 s, ratio 40:40:20. Workloads present: monitor (dashcam, deadline 1.0 s) and recall (SS, deadline 2.0 s); served-within-deadline is the committed per-opportunity within_L. Panel A error bars are Wilson 95 percent. Panel B is the median of t_delivered minus t_opportunity per 2 min bin, log scale. warm-all-lru is KV-green (the warming baseline), the policy is query-blue, each also carrying its own linestyle and marker. Warm share is discussed in the header and not plotted: believed-tier warm share is not a sound cross-arm metric here (StudyV5-ENGINE: the residency belief understates prefix reuse). Numbers are provisional pending the repeat-trace cells.
