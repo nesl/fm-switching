@@ -1,0 +1,12 @@
+E1_headline_by_workload
+
+CLAIM:
+The joint policy serves 97% of robot recalls within 5 s and 96% of SS opportunities within 2 s, the highest of the five arms on both. Its SS service beats the EDF-feasibility baseline b7 by a paired 3.2 to 6.1 pp (CI excludes 0); its robot gain over b7 is -1.5 to 10.1 pp (CI includes 0). Every arm meets the dashcam target in all 4 runs, so robot and SS are the binding workloads and the policy is best on both.
+
+SOURCES (committed):
+  results/orchestration/live2/frozen_test/frozen_headline_n16_4seed.json  @ 2a29fed
+
+STATUS: PILOT. Drawn from the EP-G pilot cells; to be re-run on the repeat-trace cells. Numbers are provisional.
+
+NOTES:
+EP-G PILOT cells, frozen_headline_n16_4seed.json, 16 devices, seeds 0, 4, 5, 6 (seed 0 is the pilot seed, so this headline is pilot-stage and watermarked PILOT; the reported run uses seeds 1-3 and does not exist yet). On-time rule: delivered within the deadline by an HTTP 200 (robot 5 s, SS 2 s, dashcam 1 s). Error bars on robot and SS are the committed paired bootstrap ci95; dashcam is fraction of runs meeting the per-device target and carries no opportunity-level CI. Positive control: b7's own minus-b7 deltas are exactly 0, confirming it is the baseline. Arm colours and order are the shared registry; the joint policy is query-blue. Clean EP-G family only.
