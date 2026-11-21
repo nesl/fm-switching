@@ -30,6 +30,18 @@ robot questions released to the cloud. Errors = non-200 requests from request.js
 | llf | 5 | 0.32 | 0.32 | 0/25 | 142/356 | yes | 0 | 0/0 |
 | warm-all-lru (`_rerun`) | 5 | 0.32 | 0.32 | 0/25 | 21/356 | no | 52 | 3/20 |
 
+**The rest of the EP-G handful at seed 4** (same workload; correct by deadline / robot on time / SS within 2 s / dashcam):
+hybrid-F-lhreq WITH C3 0.35 / 16/20 / 351/357 / yes (against its C3-off twin's 0.45 / 8/20: the RECENT fallback buys
+deliveries that are wrong, as flash pre-registered); simplestream 0.15 / 20/20 / 355/357 / yes; querystream-proactive
+0.35 / 4/20 / 100/357 / yes, with the engine SATURATED (TTFT p50 about 35 s on every class; 6,230,473 uncached prompt
+tokens, 17 percent more than b7, above the saturation knee flash bounds at 4,512 to 5,192 uncached tok/s);
+r3-streaming 0.30 / 0/20 / 0/357 / NO (it declined all 376 recalls and released 3,905 of 11,764 monitors at 1,347 tok/s:
+its dashcam failure is a DECISION, not a queue); cascade-routing 0.30 / 0/20 / 356/357 / yes (declined all 20 robot
+questions, released every SS question; 4,356 tok/s). The two cascade arms' robot-side characteristic decision is ZERO
+(Rule 2 unexercised), and their single-shot rows are set by each adapter's default on the MISSING device-confidence
+field (cascade-routing defaults CLOUD, r3-streaming DEVICE), so they are NOT measurements of confidence-based routing
+until the flagged confidence-injection wiring change is applied.
+
 **Reading (flash's analysis: reports/study_v5_rules.md, study_cost_model_gate_d156.md; numbers above are the H100's).**
 - v5-rules against its OWN base (noc3): correct by deadline 0.45 = 0.45 (s4), 0.40 against 0.36 (s5); pooled one discordant
   question of 45, McNemar exact p = 1.0, so NO gain. It costs 163 + 158 = 321 single-shot questions and the dashcam SLO
