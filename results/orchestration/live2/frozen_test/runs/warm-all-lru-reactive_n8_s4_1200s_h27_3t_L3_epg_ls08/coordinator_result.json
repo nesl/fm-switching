@@ -1,0 +1,340 @@
+{
+ "arm": "warm-all-lru-reactive",
+ "arm_version": "warm-all-1.0",
+ "is_measurement": false,
+ "tick_s": 0.1,
+ "decision_period_s": 0.1,
+ "h_s": null,
+ "upload_mode": "A",
+ "window_s": 1200.0,
+ "n_devices": 8,
+ "n_sessions": 247,
+ "n_opportunities": 6116,
+ "n_requests": 6378,
+ "n_decisions": 6391,
+ "counts": {
+  "belief_corrections": 508,
+  "belief_corrections_changed": 127,
+  "belief_corrections_observed_only": 127,
+  "belief_to_gpu": 127,
+  "completed_monitor": 5868,
+  "completed_piece": 270,
+  "completed_recall": 238,
+  "epg_frames_bytes_resent_unconfirmed": 164,
+  "epg_frames_sent_as_bytes": 6743,
+  "epg_frames_sent_as_reference": 59619,
+  "epg_monitor_requests": 5869,
+  "racefix_bytes_confirmed_monitor": 6742,
+  "racefix_bytes_confirmed_session": 698,
+  "racefix_bytes_resent": 0,
+  "racefix_confirm_dropped_stale": 0,
+  "recall_CLOUD": 364,
+  "recall_DEFER": 5,
+  "recall_REJECT": 8,
+  "session_MATERIALIZE": 374,
+  "submitted_monitor": 5869,
+  "submitted_piece": 271,
+  "submitted_recall": 238
+ },
+ "n_monitor_answers": 5868,
+ "n_recall_answers": 246,
+ "n_on_time": 6102,
+ "submit_delay_ms": {
+  "n": 6243,
+  "p50": 3.9261,
+  "p90": 8.0632,
+  "p99": 11.0924,
+  "max": 48.9667
+ },
+ "decision_time": {
+  "n": 12000,
+  "cpu_clock": "time.thread_time() of the deciding thread",
+  "wall_ms": {
+   "n": 12000,
+   "p50": 0.497,
+   "p90": 0.5198,
+   "p99": 0.6113,
+   "max": 1.4115
+  },
+  "cpu_ms": {
+   "n": 12000,
+   "p50": 0.4906,
+   "p90": 0.5129,
+   "p99": 0.6055,
+   "max": 1.4047
+  },
+  "wall_over_cpu": {
+   "n": 12000,
+   "p50": 1.0129,
+   "p90": 1.0143,
+   "p99": 1.0293,
+   "max": 1.0742
+  },
+  "candidates": {
+   "n": 12000,
+   "p50": 3,
+   "p90": 3,
+   "p99": 4,
+   "max": 5
+  },
+  "candidates_source": "pending items ordered"
+ },
+ "n_pulls": 0,
+ "n_cloud_answers": 6106,
+ "decision_latency_ms": {
+  "p50": 0.497,
+  "p99": 0.6113,
+  "max": 1.4115,
+  "n": 12000
+ },
+ "cpu_s": 326.09,
+ "wall_s": 1198.886,
+ "cpu_percent": 27.2,
+ "request_rate_per_s": 5.32,
+ "budget_gpu_s": 1200.0,
+ "budget_spent_gpu_s": 515.17,
+ "epoch_overruns": 0,
+ "max_epoch_lag_s": 0.0,
+ "wall_guard_hit": false,
+ "wall_guard_s": null,
+ "virtual_t_reached_s": 0.0,
+ "n_errors": 0,
+ "first_errors": [],
+ "mu_time_average": null,
+ "arm_stats": {
+  "warm_reactive_wanted": 374,
+  "warm_reactive_emitted": 374,
+  "warm_reactive_unexpressible": 0,
+  "release_at_COLD": 364,
+  "warm_reactive_yielded_epochs": 3
+ },
+ "dashcam_format": "epg",
+ "epg": {
+  "requests": 5869,
+  "frames_min": 3,
+  "frames_max": 21,
+  "frames_median": 11,
+  "frames_total": 66362,
+  "prompt_tokens_total": 22676854,
+  "episodes": 355,
+  "by_episode_index": {
+   "2": {
+    "n": 355,
+    "frames": 1065,
+    "as_reference": 0
+   },
+   "3": {
+    "n": 355,
+    "frames": 1420,
+    "as_reference": 945
+   },
+   "4": {
+    "n": 355,
+    "frames": 1775,
+    "as_reference": 1415
+   },
+   "5": {
+    "n": 355,
+    "frames": 2130,
+    "as_reference": 1774
+   },
+   "6": {
+    "n": 354,
+    "frames": 2478,
+    "as_reference": 2121
+   },
+   "7": {
+    "n": 353,
+    "frames": 2824,
+    "as_reference": 2466
+   },
+   "8": {
+    "n": 353,
+    "frames": 3177,
+    "as_reference": 2822
+   },
+   "9": {
+    "n": 348,
+    "frames": 3480,
+    "as_reference": 3130
+   },
+   "10": {
+    "n": 330,
+    "frames": 3630,
+    "as_reference": 3298
+   },
+   "11": {
+    "n": 325,
+    "frames": 3900,
+    "as_reference": 3574
+   },
+   "12": {
+    "n": 279,
+    "frames": 3627,
+    "as_reference": 3347
+   },
+   "13": {
+    "n": 266,
+    "frames": 3724,
+    "as_reference": 3458
+   },
+   "14": {
+    "n": 264,
+    "frames": 3960,
+    "as_reference": 3694
+   },
+   "15": {
+    "n": 263,
+    "frames": 4208,
+    "as_reference": 3944
+   },
+   "16": {
+    "n": 263,
+    "frames": 4471,
+    "as_reference": 4204
+   },
+   "17": {
+    "n": 263,
+    "frames": 4734,
+    "as_reference": 4464
+   },
+   "18": {
+    "n": 263,
+    "frames": 4997,
+    "as_reference": 4732
+   },
+   "19": {
+    "n": 263,
+    "frames": 5260,
+    "as_reference": 4994
+   },
+   "20": {
+    "n": 262,
+    "frames": 5502,
+    "as_reference": 5237
+   }
+  }
+ },
+ "bridge": {
+  "arm": "warm-all-lru-reactive",
+  "n_events": 8652,
+  "n_ticks": 228337,
+  "n_pulls": 0,
+  "n_cloud_answers": 6106,
+  "n_decisions": 12000,
+  "decision_period_s": 0.1,
+  "n_forwarded_on_completion": 6107,
+  "n_skipped_forwarded": 6106,
+  "n_forward_mismatch": 0,
+  "n_recall_first_token": 238,
+  "n_recall_letter_differs": 0,
+  "recall_letter_diffs": [],
+  "n_monitor_score_differs": 0
+ },
+ "self_ticks": 108336,
+ "self_tick_s": 0.005,
+ "backend": {
+  "n_built": 6378,
+  "callback_errors": [],
+  "wire_image_parts": {
+   "assistive": 475,
+   "monitor": 66362,
+   "piece": 1104,
+   "recall": 61
+  },
+  "wire_image_parts_with_uuid": {
+   "assistive": 475,
+   "monitor": 66362,
+   "piece": 1104,
+   "recall": 61
+  },
+  "wire_extra_delay_ms": {
+   "n": 6378,
+   "p50": 5.3153,
+   "p90": 9.916,
+   "p99": 13.4278,
+   "max": 82.7206
+  },
+  "submit_delay_total_ms": {
+   "n": 6378,
+   "p50": 9.6412,
+   "p90": 16.7592,
+   "p99": 19.8333,
+   "max": 92.2539
+  },
+  "first_line_to_first_content_ms": {
+   "n": 6377,
+   "p50": 0.4332,
+   "p99": 2.2354,
+   "max": 40.2889
+  },
+  "n_callback_errors": 0,
+  "build_ms_total": 2221.491,
+  "build_ms_mean": 0.3483,
+  "cache": {
+   "n_cached": 8724,
+   "held_bytes": 664922616,
+   "cap_bytes": 1500000000,
+   "hits": 7442,
+   "misses": 8724,
+   "encoded_bytes": 664922616,
+   "hit_fraction": 0.460349
+  }
+ },
+ "cache": {
+  "n_cached": 8724,
+  "held_bytes": 664922616,
+  "cap_bytes": 1500000000,
+  "hits": 7442,
+  "misses": 8724,
+  "encoded_bytes": 664922616,
+  "hit_fraction": 0.460349
+ },
+ "pid": 3593480,
+ "cpu_s_child": 326.1045,
+ "completion_to_forward_ms": {
+  "n": 6107,
+  "p50_ms": 0.088,
+  "p90_ms": 0.1013,
+  "p99_ms": 0.1197,
+  "max_ms": 0.7081
+ },
+ "first_token_to_forward_ms": {
+  "n": 6107,
+  "p50_ms": 0.088,
+  "p90_ms": 0.1013,
+  "p99_ms": 0.1197,
+  "max_ms": 0.7081
+ },
+ "memory_pressure": {
+  "kv_capacity_enforced": true,
+  "gpu_kv_tokens": 62944,
+  "pressure": {
+   "epochs": 12000,
+   "epochs_over_cap": 0,
+   "peak_tokens": 12689,
+   "intervals": [],
+   "host_peak_tokens": 0,
+   "host_epochs_over_cap": 0,
+   "intervals_n": 0
+  },
+  "enact_placement_totals": {
+   "calls": 12000,
+   "offloaded": 0,
+   "kept_warm": 0,
+   "evicted": 0,
+   "resident": 245
+  }
+ },
+ "wire_events_sent": 8652,
+ "wire_replies_received": 6107,
+ "wire_write_errors": 1,
+ "wire_max_send_backlog": 15,
+ "completion_to_emulator_ms": {
+  "n": 6107,
+  "p50_ms": 5.1563,
+  "p90_ms": 8.884,
+  "p99_ms": 10.1564,
+  "max_ms": 12.3944
+ }
+}
