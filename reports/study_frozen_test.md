@@ -2071,3 +2071,59 @@ gold letters and device answers are identical.
 So a locally regenerated trace is sound for robot-side quantities and **must never be used for an
 uplink or dashcam quantity**. That applies to `frozen_headline.local_trace` as well, which is used
 for feasibility and reads only history tokens.
+
+## 22. Pre-registration for the 3 s handful (A6000, 2026-11-20, written BEFORE the cells land)
+
+The H100 runs ten arms live at a 3 s robot deadline at 16 devices, seeds 4, 5 and 6. This section is
+written before any of those cells exist, so the comparison below cannot be chosen after seeing it.
+
+### 22.1 The confound, named first
+
+`hybrid-F-lhreq-noc3` runs live at 3 s. **`hybrid-F-lhreq` itself is not in the handful**, so its 3 s
+live twin does not exist until the rest-of-sweep pass about ten hours later. Until then the only
+available comparison is against the OFFLINE 3 s re-score of hybrid-F's post-fix cells, which ran
+live at 5 s. Those are not the same condition: hybrid-F's deferrals and rejections were decided
+against a 5 s bound, so a difference between it and noc3 mixes the C3 change with the change in what
+the arm was planning for.
+
+**That confound is measurable rather than arguable, and it costs nothing to measure.** b7, eco-llm,
+mooncake, edf and llf are in BOTH the handful and the offline re-score. Comparing live-at-3 s with
+offline-rescored-at-3 s for the SAME arm isolates exactly one thing: what planning for 3 s does that
+scoring at 3 s does not. b7 is the handful's first cell, so the estimate arrives before anything else.
+
+### 22.2 The offline 3 s baseline on the handful's own support
+
+Seeds 4, 5 and 6, 65 robot questions, completion delivery, post-fix cells where they exist. These are
+the numbers the live cells will be compared against.
+
+| arm | on time | **correct delivered** |
+|---|---|---|
+| hybrid-F-lhreq | 0.5385 | 0.2769 |
+| eco-llm | 0.4462 | 0.2462 |
+| hybrid-F6-lhreq | 0.3077 | 0.3385 |
+| mooncake | 0.2462 | 0.3077 |
+| b7-edf-feasibility | 0.2308 | **0.3077** |
+| edf | 0.1556 | 0.3556 |
+| llf, seed 4 only | 0.3500 | 0.4000 |
+| always-cloud-fcfs, seed 4 only | 0.3500 | 0.4000 |
+
+On this support the section 21 pattern holds and is if anything sharper: **b7 delivers more correct
+answers than hybrid-F (0.3077 against 0.2769) while hybrid-F more than doubles its on-time rate.**
+
+### 22.3 What I predict, so it can be wrong
+
+1. **`hybrid-F-lhreq-noc3` loses on time against hybrid-F's 0.5385 and gains on correct delivered
+   against its 0.2769.** It should land near b7's 0.3077 or above, because removing the RECENT
+   fallback stops converting a device answer worth about 25 percent into a cloud answer worth about
+   11 percent. If noc3 does NOT gain on correct delivered, section 21's diagnosis is wrong and the
+   RECENT fallback was not what moved the headline.
+2. **The control, b7 live at 3 s against b7 offline-rescored at 3 s, agrees within a few questions
+   of 65.** b7 declines rather than defers, so planning for a shorter deadline should change little
+   for it. If they differ substantially, the offline re-score is not a usable stand-in for a live
+   3 s run, and every comparison in 22.2 needs its own live twin before it is read.
+3. **edf and llf change most between offline and live.** They defer until their own builds complete,
+   so a 3 s bound should change their deferral behaviour more than any other arm's. That makes them
+   the upper bound on the confound and b7 the lower bound.
+
+If prediction 2 fails, the right response is to ask for hybrid-F-lhreq at 3 s in the handful rather
+than to read 22.2 as if it were live. That request is the user's to make, not mine or the H100's.
