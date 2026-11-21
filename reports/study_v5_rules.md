@@ -1039,3 +1039,96 @@ Defect noted: `n_requests` and `n_errors` come back **null** in `cell.json` on t
 both the invalid and the valid attempt. The H100 is taking error counts from `request.jsonl`, which
 is right. Recording it as a defect rather than a quirk, because a null error count on the
 heaviest-load arm in the project is precisely where an error count is load-bearing.
+
+## The characteristic check passes, and the margin it would be fitted on is not estimable
+
+The H100 ran the check on the valid rerun. **WARM-ALL does reach the warm regime: 3 of the 20
+released robot questions were WARM, all 3 with `cached_tokens` > 0 (mean 9,717); the 17 COLD had 0
+cached.** (5 of the 25 robot questions got no cloud request at all. The 293 `release_recall` rows are
+robot plus single-shot and single-shot carries no history, so the warm stratum is robot-only.)
+
+**So the port rule is satisfied and the cells are not valid-and-useless.** The worry recorded above
+is withdrawn as stated. What replaces it is narrower and is a judgment the H100 put to me, so I will
+answer it rather than pass it on.
+
+### 10 to 12 warm observations cannot set MARGIN_CF, and the reason is not a rule of thumb
+
+D154 (2) defines **MARGIN_CF as the gate's held-out p90 absolute prediction error.** Across the four
+held-out cells the warm stratum will be about 10 to 12 points.
+
+**The p90 of 11 points is the 10th or 11th order statistic. It is, to within interpolation, the
+maximum of the sample. So MARGIN_CF would be set by one observation, possibly two.** That is not a
+question of whether a coefficient can be fitted at n = 11, which it arguably can; it is that **the
+specific functional D154 (2) asks for is the least estimable functional of a sample that size.**
+Drop the largest warm residual and the margin moves materially. The margin is the one number in v5
+that must not be fragile, because every counterfactual deviation in the policy is gated on it.
+
+**There is a second problem on top of n.** The 3 warm questions are not a random sample of the warm
+regime; they are the questions that happened to arrive warm, which is determined by queue state,
+which is correlated with everything else the cell measures. **So it is a selected stratum, and its
+p90 is being asked to bound error on a different population.** D157 (2) names that population as
+every robot question in the four cells, warm and cold alike.
+
+**My answer to the H100's question is therefore no, and my default to the user at 06:00 is
+unchanged: MARGIN_CF stays unset and full v5 stays gated.** Not on apparatus capacity, which the
+rerun cleared, and not on the absence of the regime, which this check cleared, but because **the
+estimator D154 (2) specifies is determined by one or two observations at the n the design yields.**
+That is a defensible reason to hold, and it is also the kind of thing that is much cheaper to say
+tonight than to discover after the margin is frozen and hashed.
+
+### The regime, not the policy: WARM-ALL reaches warm only 15 percent of the time
+
+| arm | warm at question time | share |
+|---|---|---|
+| **warm-all-lru**, prefills every batch on arrival | 3 of 20 robot questions | **15.0 percent** |
+| **v5-rules**, warm-ahead on predicted need | 25 of 381 releases | **6.6 percent** |
+
+**The maximal-effort arm beats the targeted arm by 2.3x and still misses 85 percent of the time.**
+
+This reframes the warm-ahead negative, and I think it is the most useful thing to come out of the
+night. Warm-ahead did not fail because it predicts badly or prefills the wrong histories. **The
+regime it targets is nearly unreachable on EP-G at 16 devices by any policy, including the one whose
+entire design is to reach it unconditionally.** Two independent arms now agree on that, at the
+opposite ends of the effort scale.
+
+So the Rule 2 entry for warm-ahead gains a scoping clause: **fired and did not help, on a workload
+where the mechanism's target state is reachable 15 percent of the time at best.** That is a
+statement about the operating point, not about the policy, and it is the version that belongs in the
+paper. It also says what would change the answer, which the bare null does not: fewer devices, a
+shorter episode, or a server that is not queue-bound.
+
+### The first attempt was a link drop, measured, and it supersedes my explanation of the score agreement
+
+All **522** events more than 1 s late lie in **one 21 s window**, `due_t` 1,138.5 to 1,159.3 s of a
+1,200 s run: 41 in minute 18, 481 in minute 19, and lateness normal before it. The
+`ConnectionResetError` is in thread `live2-coord-rx`. **Logged as a link drop, not graded
+saturation.** The bimodality argument predicted this shape and the timestamps confirm it.
+
+**It also gives a better reason for the two attempts' near-identical scores than the one I recorded
+above.** I wrote that they agree because the arm is pinned at the floor by a 50 s queue. That was
+speculation. **The measured reason is that the lateness is confined to 1.7 percent of the run, at
+the end, so 98 percent of the scored content never met it.** My explanation may also be true but it
+was not the evidence; this is. Left visible rather than edited.
+
+**One constructive note on the rule, which is not a case for relaxing it.** The validity rule cannot
+distinguish "late throughout" from "one burst in the last 21 s", and those have different
+consequences for a score. The remedy is to report **where** the lateness fell, which the H100 has
+now done, not to lower the threshold: a run whose coordinator link dropped and which ended in an
+exception should be rejected regardless of how little of it was affected.
+
+### The race fix is now proven on a VALID cell
+
+| | value |
+|---|---|
+| requests | 9,072 |
+| **HTTP 400** | **0** |
+| transport errors (null status) | 52 (**0.57 percent**) |
+
+**Zero 400s on a valid run of the exact arm and workload that produced about 1,500 of them pre-fix.**
+That is stronger than D158 (2)'s third proof as written, which asked only for a replay of the failing
+sequence. The 52 transport errors are a different class and a separate open item, not a blocker;
+they go on tomorrow's list.
+
+`arm_stats` is **NULL** for warm-all-lru, so there are no warm-ahead counters to cross-check the 3
+against. That is the second instance of the `cell.json` population defect recorded above, on the
+same arm.
