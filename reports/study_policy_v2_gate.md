@@ -397,3 +397,42 @@ minus 5 pp caveat on arms that defer, and prediction 2 and prediction 3 both hol
 **Register:** three arms at one seed is three paired comparisons, not a distribution. The bound is
 an observed range over the cells that exist, not a constructed bound, and seeds 5 and 6 will widen
 or confirm it rather than being needed to justify it.
+
+---
+
+# The gate's train/test split, and the confound that was checked rather than assumed
+
+**The D151 (6) gate is now fitted and tested on different workloads by design** (user decision):
+
+- **FIT:** `runs/WARMALL_CELLS_1F`, `warm-all-lru` and `warm-all-lru-reactive` at 16 devices, seed 4,
+  3 s, on the dashcam-1f workload, cells tagged `_L3_cal1f`.
+- **HELD-OUT TEST:** `runs/WARMALL_CELLS`, the same two arms plus a `-off` control and a `kv0.25`
+  capacity cell, on the EP-G workload.
+
+Nothing fitted on the 1F cells may be reported as a gate pass. MARGIN_CF is set once, from the
+HELD-OUT p90 absolute prediction error, per D154 (2).
+
+**The confound I raised and the H100 closed, recorded here because a train/test split is only as
+good as the invariance between its halves.** `warm-all-lru` releases **412 times without a frame
+store and 421 with one**, because `sent_bytes_for` only grows when a frame path resolves. Had the fit
+cells run without a store and the held-out cells with one, the gate would have been fitted and tested
+on arms that behaved differently for a reason unrelated to the workload, and the split would have
+been void while looking fine.
+
+**It does not apply, and the reason is structural rather than a coincidence of this run.** The H100's
+driver has ONE `cell()` function and ONE command line: every cell, 1F and EP-G, fit and held-out,
+gets the same `--frames-root $HOME/data/live2/frames_by_ref` and the same
+`--frame-manifest $HOME/data/live2/jpeg/combined_manifest.jsonl`. Only the deadline, pool and
+dashcam-format flags vary by tag. Mode is A for every cell.
+
+**And the failure mode is caught rather than tolerated:** the harness's per-cell frames preflight
+(`frames_preflight.json`) refuses a run whose frames do not resolve, so an EP-G cell that reaches a
+frame the store lacks fails loud instead of quietly sending uuid-only references. That matters
+because uuid-only references are exactly what produced a FALSE proof during development: with no
+store, the authoring session's first version of proof (a) showed a perfect cached-token rise with
+ZERO frames carrying bytes. An `n_unresolved` counter now makes a reference claimed for
+never-uploaded bytes visible.
+
+So the two halves of the split differ in the workload and in nothing else that is known to move
+these arms. Recorded with the fit, as the H100 asked, so a later reader does not have to re-establish
+it.
