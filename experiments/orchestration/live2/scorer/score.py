@@ -1021,6 +1021,29 @@ def score_run(trace_dir: Path, run_dir: Path, calibration: Path, arm: str,
         rv_rows = rv.pop("rows")
         base["robot_value"] = rv
         base["robot_rows"] = rv_rows
+        # D152: the robot headline is CORRECT ANSWERS DELIVERED, the cloud's answer when it
+        # arrives on time and the device's otherwise, scored on the representation actually sent.
+        # robot_value already computes it as `standing_accuracy`; it is surfaced HERE as the
+        # headline, with on time reported beside it rather than as the metric.
+        #
+        # Why it is the headline, in one measured line: at a 3 s deadline post-fix, hybrid-F
+        # delivered 2.3x b7's on-time rate and no more correct answers, because 18 of its 47
+        # on-time answers were sent as RECENT, which is right about 11 percent of the time.
+        # On time counts answers that arrive; this counts answers that are right.
+        base["robot_headline"] = dict(
+            metric="correct_answers_delivered",
+            definition=("the cloud's answer when it is delivered within the deadline, otherwise "
+                        "the device's answer, each scored on the representation actually sent"),
+            correct_answers_delivered=rv.get("standing_accuracy"),
+            n=rv.get("standing_accuracy_n"),
+            on_time_beside_it=dict(
+                robot_pool_on_time=sweep[0].get("robot_pool_on_time") if sweep else None,
+                robot_pool_n=sweep[0].get("robot_pool_n") if sweep else None,
+                robot_pool_fraction=sweep[0].get("robot_pool_fraction") if sweep else None,
+                note="D152: deficit counters stay on observable on time; the HEADLINE does not"),
+            device_only_accuracy=rv.get("device_only_accuracy"),
+            cloud_accuracy_on_served=rv.get("cloud_accuracy_on_served"),
+            source="D152 (user decision 2026-11-20)")
         base["dashcam_value"] = dashcam_value(lo, cal, L_dash_grid[0])
         av = assistive_value(lo)
         base["assistive_rows"] = av.pop("rows")

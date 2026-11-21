@@ -68,6 +68,37 @@ def jl(p):
     raise FileNotFoundError(p)
 
 
+_ANS = {}
+
+
+def device_answers_for(seed, trace_dir):
+    """{opportunity_id: (gold_letter, device_correct)} for one cell's robot questions.
+
+    Read from the run's own trace directory when it is present, and regenerated otherwise, because
+    only one trace is committed. The regeneration is verified rather than assumed: regenerating
+    seed 4 reproduces the committed `device_answers.jsonl` sha256 EXACTLY. The regenerated
+    `trace.jsonl` does not match, in one field only, `frame_bytes` on monitor records (the D103 (h)
+    median fallback), which is why this helper reads ONLY device answers and never frame bytes.
+    """
+    ap = Path(trace_dir) / "device_answers.jsonl"
+    rows = None
+    if ap.exists() or ap.with_name(ap.name + ".gz").exists():
+        rows = jl(ap)
+    else:
+        if seed in _ANS:
+            return _ANS[seed]
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            b = TR.generate_trace(seed, 16, "40:40:20", 1200.0, "A",
+                                  robot_question_set="lh_req", ss_question_set="ss2")
+            TR.write_trace(Path(d) / "t", b)
+            rows = [json.loads(x) for x in open(Path(d) / "t" / "device_answers.jsonl")]
+    out = {r["opportunity_id"]: (r["gold_letter"], bool(r["device_correct"])) for r in rows
+           if r.get("kind") == "recall" and r.get("gold_letter") is not None}
+    _ANS[seed] = out
+    return out
+
+
 def run_flags(d):
     c = json.loads((d / "cell.json").read_text())
     tp = Path(c["trace_dir"]) / "trace.jsonl"
@@ -113,13 +144,30 @@ def run_flags(d):
     if robot_in_run != set(feas):
         raise AssertionError("%s: trace and run disagree on the robot questions (%d vs %d)"
                              % (d.name, len(feas), len(robot_in_run)))
+    # D152: the robot headline is CORRECT ANSWERS DELIVERED, the cloud's answer when it arrives
+    # on time and the device's otherwise, scored on the representation actually sent. On time is
+    # reported beside it. The cloud letter actually produced is compared to the gold letter, so a
+    # release made as RECENT is scored as RECENT and no accuracy table is consulted.
+    ans = device_answers_for(int(c["seed"]), c["trace_dir"])
+    cl = {}
+    for o in jl(d / "outcomes.jsonl"):
+        if o.get("kind") == "recall":
+            cl[o["opportunity_id"]] = (o.get("cloud_payload") or {}).get("cloud_letter")
+    corr = {}
+    for k in feas:
+        g = ans.get(k)
+        if g is None:
+            continue
+        gold, dev_ok = g
+        corr[k] = bool((cl.get(k) == gold) if (ont.get(k) and cl.get(k)) else dev_ok)
     nfeas = sum(1 for v in feas.values() if v)
     hits_f = sum(1 for k, v in feas.items() if v and ont.get(k))
     # D133 verdict per run, with its margin. p_rob is read from the run's own sweep where present.
     p_rob = float(sw.get("p_rob") or P_ROB)
     # The smallest number of on-time questions that MEETS the bar: ceil(p_rob x n), not round().
     need = (math.ceil(p_rob * nfeas - 1e-9) if nfeas else 0)
-    return dict(robot_feasible={k: ont.get(k, False) for k, v in feas.items() if v},
+    return dict(robot_correct={k: v for k, v in corr.items()},
+                robot_feasible={k: ont.get(k, False) for k, v in feas.items() if v},
                 robot_all_map={k: ont.get(k, False) for k in feas}, robot_all=len(feas),
                 ss={k: ont.get(k, False) for k in ssq}, dash=bool(sw.get("dashcam_all_meet")),
                 errors=c.get("n_errors"), requests=c.get("n_requests"),
@@ -166,25 +214,37 @@ def main(runs_dir, n, out):
         ad = sum(len(adraw[s]) for s in seeds)
         sn = sum(runs[(a, s)]["ss"][k] for s in seeds for k in sdraw[s])
         sd = sum(len(sdraw[s]) for s in seeds)
-        return rn / rd, an / ad, sn / sd
+        # D152: correct answers delivered, over the SAME denominator as robot_all (every robot
+        # question), because a question the cloud never answered still has the device's answer.
+        cn = sum(runs[(a, s)]["robot_correct"].get(k, False) for s in seeds for k in adraw[s])
+        return rn / rd, an / ad, sn / sd, cn / ad
 
     import numpy as np
     point = {a: pooled(a, rob_ids, all_ids, ss_ids) for a in ARMS}
     rng = np.random.default_rng(0)
     # per seed: an arms x questions 0/1 matrix; one index draw per seed per replicate, shared by every arm (paired)
     rob_num = np.zeros((len(ARMS), B)); ss_num = np.zeros((len(ARMS), B))
-    all_num = np.zeros((len(ARMS), B))
+    all_num = np.zeros((len(ARMS), B)); cor_num = np.zeros((len(ARMS), B))
     rob_den = sum(len(rob_ids[s]) for s in seeds); ss_den = sum(len(ss_ids[s]) for s in seeds)
     all_den = sum(len(all_ids[s]) for s in seeds)
     for s in seeds:
+        # the correctness draw must be the SAME index draw as robot_all, so the two columns are
+        # paired question by question and their difference is meaningful
+        draws = {}
         for ids, num, key in ((rob_ids[s], rob_num, "robot_feasible"), (ss_ids[s], ss_num, "ss"),
                               (all_ids[s], all_num, "robot_all_map")):
             if not ids:
                 continue
             M = np.array([[runs[(a, s)][key][k] for k in ids] for a in ARMS], dtype=float)
             idx = rng.integers(0, len(ids), size=(B, len(ids)))
+            draws[key] = idx
             num += M[:, idx].sum(axis=2)
-    boots = {a: list(zip(rob_num[i] / rob_den, all_num[i] / all_den, ss_num[i] / ss_den))
+        if all_ids[s]:
+            C = np.array([[runs[(a, s)]["robot_correct"].get(k, False) for k in all_ids[s]]
+                          for a in ARMS], dtype=float)
+            cor_num += C[:, draws["robot_all_map"]].sum(axis=2)
+    boots = {a: list(zip(rob_num[i] / rob_den, all_num[i] / all_den, ss_num[i] / ss_den,
+                         cor_num[i] / all_den))
              for i, a in enumerate(ARMS)}
 
     def ci(xs):
@@ -194,6 +254,13 @@ def main(runs_dir, n, out):
     rows = []
     for a in ARMS:
         rows.append(dict(arm=a,
+                         # D152: the headline. On time follows it.
+                         robot_correct_delivered=round(point[a][3], 4),
+                         robot_correct_ci95=ci([x[3] for x in boots[a]]),
+                         robot_correct_n=sum(len(all_ids[s]) for s in seeds),
+                         robot_correct_hits=sum(
+                             runs[(a, s)]["robot_correct"].get(k, False)
+                             for s in seeds for k in all_ids[s]),
                          robot_feasible_on_time=round(point[a][0], 4), robot_ci95=ci([x[0] for x in boots[a]]),
                          robot_feasible_n=sum(len(rob_ids[s]) for s in seeds),
                          robot_feasible_hits=sum(runs[(a, s)]["robot_feasible"][k] for s in seeds for k in rob_ids[s]),
@@ -216,6 +283,9 @@ def main(runs_dir, n, out):
                                        dash=runs[(a, s)]["dash"], errors=runs[(a, s)]["errors"],
                                        d133=runs[(a, s)]["d133"]) for s in seeds]))
     res = dict(n_devices=n, seeds_common_support=seeds, bootstrap=f"paired by seed: opportunities resampled within each seed, same draw for every arm, B={B}",
+               headline="D152: CORRECT ANSWERS DELIVERED (the cloud's answer if on time, else "
+                        "the device's, scored on the representation actually sent). On time is "
+                        "reported beside it, not as the headline.",
                on_time_rule=("delivered within the deadline (robot 5 s, SS 2 s) by an HTTP 200 "
                              "request, stamped at " + ("COMPLETION, prefill plus decode (D146; "
                              "the default from 2026-11-20)" if DELIVERY == "completion"
