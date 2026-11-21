@@ -83,8 +83,11 @@ cell() {   # arm n seed [tag]
   # D151 WARM-ALL calibration, PROVISIONAL (user away; pre-registered default): "0.5x / 0.25x GPU pool" is the harness's
   # LOGICAL pool with enforcement on (coordinator belief and enforcement); the engine's real pool is pinned and unchanged
   case "$tag" in *_kv0.5*) lflag="$lflag --gpu-kv-tokens 31472";; *_kv0.25*) lflag="$lflag --gpu-kv-tokens 15736";; esac
+  # D153: a cell tagged _epg runs the EP-G dashcam episode workload with the arguments flash's commit put in EPG_ARGS;
+  # a cell without it is dashcam-1f (one frame per call), recorded in its label
+  local wl="dashcam-1f"; case "$tag" in *_epg*) lflag="$lflag $(grep -v '^#' $OUT/EPG_ARGS | tr '\n' ' ')"; wl="dashcam-EP-G";; esac
   while [ "$(nvidia-smi --query-compute-apps=gpu_uuid --format=csv,noheader | grep -c 4f1d7e47)" != "0" ]; do sleep 2; done
-  log "start $name HEAD $(git rev-parse --short HEAD) ss-pool [$ssargs] deadline [${lflag:-robot 5 s}]"
+  log "start $name HEAD $(git rev-parse --short HEAD) ss-pool [$ssargs] deadline [${lflag:-robot 5 s}] workload [$wl]"
   mkdir -p $d
   ( metrics_loop $d/metrics_snapshots.log ) &
   local mp=$!
@@ -93,7 +96,7 @@ cell() {   # arm n seed [tag]
     --decision-period-s 0.1 --mu-mode ewma --h-s 0.5 \
     --frame-manifest $HOME/data/live2/jpeg/combined_manifest.jsonl --frames-root $HOME/data/live2/frames_by_ref \
     --work $RAW/work --server http://127.0.0.1:8031 --server-kind vllm --start-server \
-    --label "FROZEN_TEST_THREE_TYPE $name" --out $d > $d.stdout 2>&1
+    --label "FROZEN_TEST_THREE_TYPE $wl $name" --out $d > $d.stdout 2>&1
   local rc=$?
   kill $mp 2>/dev/null; wait $mp 2>/dev/null
   mm_gate $d
@@ -137,9 +140,17 @@ ordered_cells() {   # user order (2026-11-20, after D144): the requeued seed-6 h
   # is on origin with its proofs; $OUT/WARMALL_CELLS, "arm n seed tag") -> v5 at 16 seed 4 (only if flash posts
   # "policy-v5 ready" with the gate and the 32B confirmation passed; $OUT/V5_CELLS) -> handful seeds 5 and 6 -> the rest
   # of the sweep at 3 s. An empty or missing file is skipped, so the queue never stalls.
-  # PRIORITY (user ruling 2026-11-20, pre-21:00): the WARM-ALL calibration cells run at the NEXT run boundary once on
-  # origin with proofs, AHEAD of the remaining handful seed-4 arms (the cost-model gate cannot pass without them)
-  grep -v '^#' $OUT/WARMALL_CELLS 2>/dev/null | awk 'NF>=3 {print $1, $2, $3, $4}'
+  # D153 (user decision 2026-11-20): the dashcam workload is the append-only episode format (EP-G). Once flash's EP-G
+  # live-bodies commit is on origin with its proofs, $OUT/EPG_ARGS holds the harness arguments that select it, and from
+  # the next boundary: the WARM-ALL calibration cells (EP-G ONLY, never dashcam-1f) -> the 3 s handful redone on EP-G
+  # at seed 4, then seeds 5 and 6 -> the rest of the sweep on EP-G (PROVISIONAL: the brief names only the handful).
+  # Until then the one-frame queue below keeps GPU 2 busy; every such cell is labelled dashcam-1f (sensitivity only).
+  if [ -s $OUT/EPG_ARGS ]; then
+    grep -v '^#' $OUT/WARMALL_CELLS 2>/dev/null | awk 'NF>=3 {t=$4; if (t !~ /_epg/) t=t "_epg"; print $1, $2, $3, t}'
+    for s in 4 5 6; do for x in $hf; do echo "$x 16 $s _L3_epg"; done; done
+    for x in $sw; do echo "$x 16 4 _L3_epg"; done
+  fi
+  # PRIORITY (user ruling 2026-11-20, pre-21:00) is superseded for WARM-ALL by D153: no WARM-ALL cell on dashcam-1f.
   for x in $hf; do echo "$x 16 4 _L3"; done
   grep -v '^#' $OUT/V5_CELLS 2>/dev/null | awk 'NF>=3 {print $1, $2, $3, $4}'
   for s in 5 6; do for x in $hf; do echo "$x 16 $s _L3"; done; done

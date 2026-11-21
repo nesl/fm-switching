@@ -3,6 +3,13 @@
 **Status: IN PROGRESS. Last updated 2026-11-19 19:45.** Rules: D116 (no methodological change overnight; never seeds 1
 to 3 or HOLDOUT; never INVALID results; GPU 2 exclusive; no em dashes). PROVISIONAL decisions are marked.
 
+> **D153 LABEL (user decision 2026-11-20 17:10): every cell in this report up to the EP-G switch is `dashcam-1f`.** Its
+> dashcam devices send ONE frame per call, not the append-only episode format (EP-G) that D153 makes the dashcam
+> workload. These cells are SENSITIVITY ONLY and are never a headline. That covers the frozen grid, the post-fix redo, the
+> 5 s sweep cells, the D151 calibration cells and the 3 s handful cells named `*_L3` without `_epg`. Cells named `*_epg`
+> run the EP-G workload from flash's EP-G live-bodies commit; driver v8 switches to them at the first run boundary after
+> that commit lands with its proofs. The driver also writes the workload into every cell's label and log line.
+
 ## HEADLINE (user form, 2026-11-20 08:05): pooled rates with paired-by-seed bootstrap CIs
 
 16 devices, common support seeds 0, 4, 5 (every arm; seed 6 added when hybrid-F6's seed-6 run lands). Rates pooled over
