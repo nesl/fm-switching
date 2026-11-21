@@ -1,0 +1,12 @@
+E4_capacity_knee
+
+CLAIM:
+The serving engine saturates at a sharp capacity knee between 4512 and 5192 offered uncached tokens per second. Clean cells below the knee hold first-token latency near 0.45 s, while a cell above it jumps to 36 s first-token p50. At 16 devices the clean policies sit below the knee; the knee is the per-engine capacity that bounds how large a fleet one engine can serve on time.
+
+SOURCES (committed):
+  results/orchestration/live2/frozen_test/saturation_knee.json  @ 2d1bd89
+
+STATUS: PILOT. Drawn from the EP-G pilot cells; to be re-run on the repeat-trace cells. Numbers are provisional.
+
+NOTES:
+Committed saturation_knee.json. Clean EP-G cells only (_L3_epg); the cal1f, rf and other labelled cells are excluded. first_token_p50_s vs offered_uncached_tok_per_s, log y. The knee band is the committed knee_bounded_between_tok_per_s. The live EP-G pilot is 16 devices only, so capacity is expressed as offered load, not fleet size; the per-fleet-size sweep is deferred to the repeat-trace cells (the committed fleet/eligibility ladder is a trace-level eligibility count, not a live-capacity curve, so it is not used here). Marks are coloured by arm from the shared registry. PILOT.
