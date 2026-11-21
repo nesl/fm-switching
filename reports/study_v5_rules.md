@@ -973,3 +973,69 @@ concrete, which is progress, but this last one is the first that more analysis c
 
 Per the overnight brief the driver re-runs the cell once (`_rerun`, about 02:55) and skips with a log
 if it is invalid again. That is the right handling and I am not intervening.
+
+## The rerun is VALID, so the untestable branch is withdrawn, and a worse version of it replaces it
+
+`..._rerun` came back **`run_valid` true**, digests equal, **lateness p99 0.1625 ms** against the
+first attempt's 2,723 ms. **So the first attempt's saturation was not a deterministic ceiling of
+warm-everything on this harness, and my lean toward the gate being untestable on capacity is
+withdrawn.** The two `_rf` held-out cells may well run valid.
+
+**But I would not call the first attempt noisy.** 2,723 ms against 0.1625 ms is four orders of
+magnitude on the same cell, same arm, same seed. **A load-driven ceiling is graded; this is
+bimodal**, which points at the `ConnectionResetError` being **upstream** of the lateness rather than
+a symptom of it (link drops, emulator blocks on IO, events pile up behind it). On a shared box
+(`sn4622120321`, per CLAUDE.md) external contention is the obvious candidate. "The harness saturates
+under warm-everything" and "the link dropped once" are different notes for the paper's limitations
+and only the second is supported.
+
+### A trap in the two attempts' agreement, recorded before anyone falls into it
+
+| | by deadline | on time | single-shot |
+|---|---|---|---|
+| attempt 1, **INVALID** | 0.32 | 1 / 25 | 17 / 356 |
+| rerun, **VALID** | 0.32 | 0 / 25 | 21 / 356 |
+
+The run that failed the validity rule scored the same as the run that passed it. **This must not be
+read as evidence that the validity rule is too strict.** The scores agree because the arm is pinned
+at the floor by a 50 s engine queue, where 2.7 s of harness lateness is far below the noise of what
+is being measured. On a cell near a decision boundary the same lateness could dominate the outcome.
+**The agreement is exactly what saturation predicts and carries no information about the rule.**
+
+### The replacement worry, which no re-run can clear
+
+WARM-ALL has exactly one job in the gate: **it is the only arm that identifies the warm regime out of
+arm**, because in the committed arms warm is confounded with arm (only edf and llf ever go warm;
+`policy_v5_assessment.md:72`). The gate's held-out test therefore needs **warm observations inside
+these cells.**
+
+This cell has a dashcam TTFT p90 of **413 s** and an engine queue 50 s deep. **A prefill issued ahead
+of a question can complete long after the question arrives.** So warm-all-lru can be warm-all by
+intent and still release every one of its 293 recalls at **COLD**.
+
+**If it does, the held-out cells are VALID runs containing ZERO warm observations, and the gate is
+untestable for a reason that re-running cannot fix and that `run_valid` cannot see.** That is
+strictly worse than the capacity ceiling, which a re-run just cleared.
+
+**It is also the port rule applied to a baseline.** CLAUDE.md: *a port's proofs must include that its
+characteristic decision occurs at least once.* WARM-ALL's characteristic property is that histories
+are warm **when the question arrives**. **Nobody has checked that it achieves it.** It has been
+treated as true by construction because the arm's name says so, which is how `desired_tier` survived
+three references with no read, and how a port passed both required proofs while making zero decisions
+of its own kind.
+
+Asked of the H100 before cell 1 lands: the distribution of `cache_path` at question time over the
+293 `release_recall` rows, with `cached_tokens`. **The check is at least one release at GPU-WARM
+with `cached_tokens` > 0.** Zero means valid-and-useless; non-zero means I can ask whether the warm
+stratum is large enough to fit a coefficient on, which is a separate and smaller question.
+
+### Gate status for the 06:00 summary, unchanged in conclusion and changed in reason
+
+MARGIN_CF stays unset and full v5 stays gated. **The reason is no longer apparatus capacity, which
+the rerun cleared. It is that the gate's held-out cells are not yet shown to contain the regime the
+gate exists to test.** My default for the user is unchanged and is still option 1, leave it.
+
+Defect noted: `n_requests` and `n_errors` come back **null** in `cell.json` on the warm-all cells, on
+both the invalid and the valid attempt. The H100 is taking error counts from `request.jsonl`, which
+is right. Recording it as a defect rather than a quirk, because a null error count on the
+heaviest-load arm in the project is precisely where an error count is load-bearing.
