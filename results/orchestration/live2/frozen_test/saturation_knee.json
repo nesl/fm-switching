@@ -1,0 +1,107 @@
+{
+ "label": "A saturation knee in offered prefill work across nine committed cells, four arms and two workloads. Read with the committed cost_model_gate.features(). CPU only.",
+ "at": "2026-11-21T04:31:13.143849",
+ "n_cells": 9,
+ "knee_bounded_between_tok_per_s": [
+  4511.7,
+  5192.1
+ ],
+ "below_knee": {
+  "n": 4,
+  "ttft_p50_range_s": [
+   0.2663,
+   0.4519
+  ]
+ },
+ "above_knee": {
+  "n": 5,
+  "ttft_p50_range_s": [
+   31.8897,
+   138.5545
+  ]
+ },
+ "control": "CAL1F and EP-G each appear on BOTH sides, so neither workload nor arm identity explains the separation; offered work does.",
+ "register": "knee BOUNDED not LOCATED (no cell in the gap); x axis is a MEAN over the run so it conflates rate with burstiness; n=9 observational cells, not a designed sweep.",
+ "cells": [
+  {
+   "cell": "warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_epg",
+   "n_requests": 12523,
+   "uncached_prompt_tokens": 5294171,
+   "offered_uncached_tok_per_s": 4411.8,
+   "first_token_p50_s": 0.4464,
+   "overlap_ft_p50": 10.0
+  },
+  {
+   "cell": "warm-all-lru-off_n16_s4_1200s_h27_3t_L3_epg",
+   "n_requests": 12126,
+   "uncached_prompt_tokens": 5331925,
+   "offered_uncached_tok_per_s": 4443.3,
+   "first_token_p50_s": 0.4519,
+   "overlap_ft_p50": 10.0
+  },
+  {
+   "cell": "b7-edf-feasibility_n16_s4_1200s_h27_3t_L3_epg",
+   "n_requests": 12126,
+   "uncached_prompt_tokens": 5331925,
+   "offered_uncached_tok_per_s": 4443.3,
+   "first_token_p50_s": 0.4494,
+   "overlap_ft_p50": 10.0
+  },
+  {
+   "cell": "warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_cal1f",
+   "n_requests": 13954,
+   "uncached_prompt_tokens": 5414029,
+   "offered_uncached_tok_per_s": 4511.7,
+   "first_token_p50_s": 0.2663,
+   "overlap_ft_p50": 6.0
+  },
+  {
+   "cell": "querystream-proactive_n16_s4_1200s_h27_3t_L3_epg",
+   "n_requests": 10439,
+   "uncached_prompt_tokens": 6230473,
+   "offered_uncached_tok_per_s": 5192.1,
+   "first_token_p50_s": 35.9108,
+   "overlap_ft_p50": 672.0
+  },
+  {
+   "cell": "warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f",
+   "n_requests": 14031,
+   "uncached_prompt_tokens": 6571481,
+   "offered_uncached_tok_per_s": 5476.2,
+   "first_token_p50_s": 31.8897,
+   "overlap_ft_p50": 969.0
+  },
+  {
+   "cell": "warm-all-lru_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rf",
+   "n_requests": 9511,
+   "uncached_prompt_tokens": 6853259,
+   "offered_uncached_tok_per_s": 5711.0,
+   "first_token_p50_s": 138.5545,
+   "overlap_ft_p50": 2529.0
+  },
+  {
+   "cell": "warm-all-lru_n16_s5_1200s_h27_3t_L3_epg_rerun",
+   "n_requests": 9020,
+   "uncached_prompt_tokens": 6878028,
+   "offered_uncached_tok_per_s": 5731.7,
+   "first_token_p50_s": 134.6291,
+   "overlap_ft_p50": 2171.0
+  },
+  {
+   "cell": "warm-all-lru_n16_s4_1200s_h27_3t_L3_epg_rf",
+   "n_requests": 8257,
+   "uncached_prompt_tokens": 6996938,
+   "offered_uncached_tok_per_s": 5830.8,
+   "first_token_p50_s": 99.5074,
+   "overlap_ft_p50": 2048.0
+  }
+ ],
+ "_provenance": {
+  "git_commit": "18448dcbe94be717761a8d88575dbc3934fe2b1b",
+  "script": "saturation_knee (inline analysis)",
+  "model": "none",
+  "timestamp": "2026-11-21T04:31:13.145555",
+  "device": "cpu",
+  "n": 9
+ }
+}
