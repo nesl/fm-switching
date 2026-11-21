@@ -334,3 +334,66 @@ wrong place to run it.
 It establishes that value is load-bearing in the warm/keep reader as written. It is not a census and
 it says nothing about how often such a set arises in a run, which only a live v5 cell with the
 reader at admission can show.
+
+---
+
+# PATCH 2's owed proof is MET: the corrector is exercised on a live cell, without altering it
+
+**Measured on the H100, `llf_n16_s4_1200s_h27_3t_L3`, post-patch, observe mode.** From that cell's
+`coordinator_result.json` under `counts`:
+
+| counter | value |
+|---|---|
+| `belief_corrections` | 724 |
+| `belief_corrections_changed` | **15** |
+| `belief_corrections_observed_only` | **15** |
+| `belief_to_gpu` | 13 |
+| `belief_to_cold` | 2 |
+
+**The observe check PASSES**: `changed == observed_only`, so every correction's mutation was
+withheld and no decision in that cell was altered. **So the proof I owed is discharged in the form I
+wanted and could not guarantee: the corrector is EXERCISED on a live run, making 15 corrections it
+would have applied, 13 of them promoting a belief to GPU-warm, while leaving the run that
+demonstrates it untouched.**
+
+Two things follow, and the second is the more useful.
+
+1. **It is not `unexercised` under Rule 2.** Had `belief_corrections_changed` come back 0, the
+   honest report would have been that the corrector never fires and the wiring proves nothing.
+   15 of 724 is small but non-zero and the destinations are sensible: 13 promotions to GPU-warm are
+   what a correction from engine telemetry should look like, since the engine reporting reuse means
+   the history is resident when the coordinator thought otherwise.
+2. **It quantifies the belief's error rate for the first time.** The coordinator's belief was wrong,
+   in a direction the engine could detect, on **15 of 724 observations, about 2.1 percent**, and
+   wrong CONSERVATIVELY in 13 of those 15: it said cold where the engine had the history. That is
+   the direction `coordinator.py:745-752` already predicts in words, now with a number against it.
+
+**What this does NOT establish**, stated because the gap is the one that matters for v5: a 2.1
+percent correction rate on the history-build path is not evidence about the dashcam traffic, where
+the wider audit found most reuse happens and where this field does not look. Wiring remains
+necessary and not sufficient, and the outcome D151 asks for (the belief tracking residency on
+partially built histories) is still unproved.
+
+---
+
+# Section 22's confound, complete at both ends and with no systematic direction
+
+The H100 has now run all three arms section 22 named, so the bound is closed rather than bracketed.
+
+| arm | offline 3 s re-score (decided at 5 s) | live 3 s | difference |
+|---|---|---|---|
+| b7 (predicted lower bound) | on time 0.3500, correct 0.4000 | 0.3500, 0.4000 | **0 questions** |
+| edf (predicted upper bound) | 0.2500, 0.3500 | 0.2000, 0.3000 | **-1 question each** |
+| llf (predicted upper bound) | 0.3500, 0.4000 | 0.4000, 0.4500 | **+1 question each** |
+
+**The confound is plus or minus one question of 20, about 5 pp, and it has NO systematic
+direction**: the two deferring arms moved by the same magnitude in OPPOSITE directions while the
+declining arm did not move at all. That is the best available outcome for section 22.2's table. A
+one-sided error of 5 pp would have been a bias to correct for; a two-sided one of the same size is
+noise to state. So the offline table stands as a usable stand-in for a live 3 s run, with a plus or
+minus 5 pp caveat on arms that defer, and prediction 2 and prediction 3 both hold: b7 moved least
+(not at all), and edf and llf moved most (one question each).
+
+**Register:** three arms at one seed is three paired comparisons, not a distribution. The bound is
+an observed range over the cells that exist, not a constructed bound, and seeds 5 and 6 will widen
+or confirm it rather than being needed to justify it.
