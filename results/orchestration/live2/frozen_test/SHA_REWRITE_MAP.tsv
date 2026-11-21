@@ -1,0 +1,72 @@
+# SHA rewrite map: 2026-11-21 attribution-trailer strip
+#
+# WHY THIS FILE EXISTS. 46 commits were rewritten on 2026-11-21 at about 07:00 to remove
+# assistant attribution trailers that violated a standing user rule. The rewrite was
+# MESSAGE-ONLY: the tree at the rewritten tip is byte-identical to the pre-rewrite tip (both
+# 7ad9ec32683cb4b6a7a8440f42b42afef27d0566) and the commit count was unchanged, so for every
+# pair below the two commits point at identical code and identical content. Only the commit
+# message, and therefore the SHA, differs.
+#
+# WHAT IT IS FOR. Any hash in this repository that no longer resolves can be looked up here.
+# The dangling hashes that remain are ALL git_commit and head PROVENANCE STAMPS inside result
+# JSONs (frozen_test/**/header.json, run_meta.json, and three top-level result files). Those
+# were written by the harness at run time and record the HEAD the run actually executed at.
+# They were deliberately NOT rewritten: editing them would make a measurement record claim a
+# run happened at a commit that did not exist when it ran. Resolve them through this table.
+# Prose citations in reports/ and research/ WERE re-pointed, in commit d6b76b6.
+#
+# The pre-rewrite tip is kept as a local ref on the flash box only, NOT on origin:
+# refs/backup/pre-strip-20261121 -> 4d0a3f49d85b21df4495df35f52edf0467e49373
+#
+# PAIRING METHOD: positional over 'git rev-list --reverse' from the common base
+# 1b4fba3fc9f138e71e59d3b9409f8e9d5e94677e, cross-checked by subject line. 46 of 46 match.
+# Only 16 of the 46 carried trailers; the other 30 are descendants whose SHAs changed because
+# a rewritten commit sits below them. 27 of those 30 are the H100's run and log commits.
+#
+# old_sha40	new_sha40	author_date	subject
+1787001ecf058ebf960cd8e0880b2c0d6b43c5e4	1d1af9e2b7e6344bb7be9b64381956aa121cf37d	2026-11-21 00:46:46 -0800	v5-rules seed 5: the zero replicates, and the 20 separating decisions are exactly the base's declines
+b9abafc835aaf62510541494830c48e1bf876091	c031b04f92bc567cd4faee2587d95d1262637a08	2026-11-21 00:49:40 -0800	v5-rules per-question join: my decomposition retracted, and the comparison has no detectable difference
+ad7ee5cc2b1d8908589deae1621e98208d0b9c31	9bdba568d37b1c2f36881c3338d3b3beeb99d3e3	2026-11-21 01:05:29 -0800	frozen-test: mooncake at 16 devices, seed 5 (_L3_epg) (three-type grid, 1200 s)
+53deda50f91d63eac92539a7d24d201d0ffe4bbd	83fe8bd48d73ef91df02e777cd06b093b5cedf3f	2026-11-21 01:05:30 -0800	logs
+5240598ccbfba68cba455ffad6525c911bc00b84	9ce684fef5baebf20daaab89fc0beace2fd07d06	2026-11-21 01:26:53 -0800	frozen-test: eco-llm at 16 devices, seed 5 (_L3_epg) (three-type grid, 1200 s)
+26a5734bba4b4b1ddffcb7f8c0fb34cc60cae20a	b1c970d5db4ebc0adfa399c601c9664e3ccd6d05	2026-11-21 01:48:20 -0800	frozen-test: edf at 16 devices, seed 5 (_L3_epg) (three-type grid, 1200 s)
+f6511c03485cd6bbd887e3966bba57b7dc633ece	f922198a5f89cca2e96b503c8841f7fc6160d5df	2026-11-21 02:09:49 -0800	frozen-test: llf at 16 devices, seed 5 (_L3_epg) (three-type grid, 1200 s)
+bc8244310423f2c91c4ac127dc9230fe899f814e	f8e944a690aceaab176ec80a16036c71ffd8f446	2026-11-21 02:35:09 -0800	held-out WARM-ALL cell INVALID on apparatus capacity: the gate becomes untestable, not failed
+45d6bb8d590b0306757c0f2c2958d69c1abefd3d	3b901dc5e9def9598916936b89df4af8ac4c1296	2026-11-21 02:57:16 -0800	frozen-test: warm-all-lru at 16 devices, seed 5 (_L3_epg) (three-type grid, 1200 s)
+e5be1ba8c8466e4ecba836694a44b7a0ae509e04	b9117f132b0f6b9fc457e92adb84925b948476af	2026-11-21 02:57:17 -0800	logs
+87fc0d47542466fce8e1b6c897621d27e9371406	501d5453a56b19db67a69aab6cbbc73d51943aa0	2026-11-21 02:59:28 -0800	warm-all-lru rerun VALID: untestable-on-capacity withdrawn, and the port rule applied to WARM-ALL replaces it
+17f8577004ec906f701ef0b8a4b313b30afc3073	80597486457d7f0610ebde971238e93df6c36894	2026-11-21 03:01:02 -0800	WARM-ALL characteristic check PASSES at 3 of 20, and MARGIN_CF is not estimable at that n
+91f56e524473fb96ba3c0ea98f77e6b37255cc01	a28ad31f733e36575f040dbcf1099724ca054795	2026-11-21 03:04:11 -0800	RETRACTION: 87fc0d4's warm comparison was a register error; the ranking reverses and the null relocates
+8ec4b241ed7cb36efd7610acd568bcc2d981589f	2a10704e3ed2170a119134d8f539e449bfde0265	2026-11-21 03:21:19 -0800	frozen-test: warm-all-lru at 16 devices, seed 4 (_L3_epg_rf) (three-type grid, 1200 s)
+4a003d055934fb8352156e48727586cf3b235796	a741665aa12535e519ff54716b1444d5ea54fb86	2026-11-21 03:21:20 -0800	logs
+f66afca6ccf2ef1cc494f38e432dab00e0f7dd7f	0e24cb93ad0cc17c3e14cabac93305ba4c9e5b2a	2026-11-21 03:23:22 -0800	held-out cell 1 VALID: 4,244 400s to zero, and the race was a confound on WARMTH as well as errors
+59f1228ed14ecb06a4dd0cb20de8ca9e0b7b605a	3424fad80d57ede6b64b69fbd8cb129d89a023ba	2026-11-21 03:25:18 -0800	noc3 WARM 0 confirmed STRUCTURAL: comparator settled, and the economic reading is the plainest result
+38f9f31282c5d4165f3ea76ae96743da12b2e481	535d1d667450229db6217b069263001c89e8a8be	2026-11-21 03:43:44 -0800	frozen-test: warm-all-lru at 16 devices, seed 4 (_kv0.25_L3_epg_rf) (three-type grid, 1200 s)
+647d5048d6ed5cb215422e587b482d3e6dfc5b7a	93cf2db0a832e12af704c2c9037bfc1be65ca18f	2026-11-21 03:43:45 -0800	logs
+21e21794bd4eb8b291c7430bc4ee3a46c7ba370c	6dc49dbce326897dbc3cd29d6f3bd0bdb932532c	2026-11-21 03:54:40 -0800	D156(4) cost-model gate: FAIL. Full v5 does not go live, and the reason is measured
+ce48c80fe9ec22736236d43ad6d1b1fe464f7439	0700ee2887e0f2e5ffbbb64a792517b3f620b2d0	2026-11-21 03:56:13 -0800	study_frozen_test: 06:00 summary draft (v5-rules table s4 and s5, gate, incidents, labels, PROVISIONAL decisions)
+0ba26ac74643e36015e5cbdc58e294c896ba7c26	c156cc27c9ba83a207379bc1e26cc5b8205f1c1f	2026-11-21 03:56:13 -0800	logs
+081eb6d8ece0b28831da6b9e071fcbc36fa3de7e	c6983b263963c4f4834c524dcf24b83b49539c58	2026-11-21 03:58:36 -0800	STATUS.md: session D's 06:00 analysis summary. v5 does not go live; MARGIN_CF's conditions are met and it still must not be set
+3a0781b391ff3d2d3d2faeba4a074f5cf0dd6acf	5e45fd907faf26800f16f31eecaa3b2903aad552	2026-11-21 04:05:17 -0800	frozen-test: simplestream at 16 devices, seed 4 (_L3_epg) (three-type grid, 1200 s)
+18448dcbe94be717761a8d88575dbc3934fe2b1b	f6e4ddfe7b08135c033d49a01d806adec347c6cd	2026-11-21 04:27:50 -0800	frozen-test: querystream-proactive at 16 devices, seed 4 (_L3_epg) (three-type grid, 1200 s)
+01b036241d06ed79a1623fbbf8d6d68219659aeb	2d1bd89fea12a85462ec7caf24429f6b8ffd1a3c	2026-11-21 04:31:30 -0800	A saturation knee at 4,512 to 5,192 uncached tok/s explains the gate failure and all three proactive arms
+7eab15cafa5d9398fbab2e86318d9b7b0faac0d6	802b1d76ce2e9bec84a7cb298a39f3d177aed642	2026-11-21 04:49:16 -0800	frozen-test: r3-streaming at 16 devices, seed 4 (_L3_epg) (three-type grid, 1200 s)
+711f135a6dda98b1e09c5c61d0a680fc1b5ddac8	57fd4763b054c9d41ae69b0b69772516ecccb7a9	2026-11-21 04:49:17 -0800	logs
+8cf6655ea1600cc2602f6533a29cb8ca552b5595	5d0c6e7cfb7a7ef736b0916fa1e10b4e22b247d9	2026-11-21 04:51:47 -0800	r3-streaming: the low knee anchor, and its row is UNEXERCISED rather than a result
+f7260e18ac8ca03977cd7fe6311139caedf031e0	dd4598919c7a5d5a945121a1757a6aed768e65e3	2026-11-21 05:10:47 -0800	frozen-test: cascade-routing at 16 devices, seed 4 (_L3_epg) (three-type grid, 1200 s)
+ecc5b889e6b9666895cfed2e466c6d715425c456	09ebdb1e8e63189312e568eea073079fa476e8e6	2026-11-21 05:10:48 -0800	logs
+eba96b83f33708bdede3a073ea533e8cd13d5ae0	34bd6063cd5a76941e0fc730ca4befee7f0b8efb	2026-11-21 05:13:32 -0800	CORRECTION: the cascade declines are threshold placement and a missing-data default, not confidence level
+d3ef93a9e3fa7387d22a7a04bcbd39ce1e9dcc0f	82c3a27802ead787e85a3bfa7b0ca56131638455	2026-11-21 05:32:18 -0800	frozen-test: hybrid-F-lhreq at 16 devices, seed 4 (_L3_epg) (three-type grid, 1200 s)
+69ef441d85a44ae2d36aa9c7d13315020614931b	c56c0ad7adff8395e94c9fcf464b42891b06dca0	2026-11-21 05:32:19 -0800	logs
+0cbe5de198df25d51588c916949ef812f5affa07	9e6fa31a6a289cd82f513b147d7d6fd2de27f0ec	2026-11-21 05:40:29 -0800	logs
+8f11c7d46cf146620ccee8b06b53fce413f1173a	071720f56f3088897bbf47439b8acebe7aeccb16	2026-11-21 05:41:04 -0800	06:00 summary: study_frozen_test.md table plus the rest of the EP-G handful at seed 4; STATUS.md H100 run summary below session D's analysis section
+11023905b45250c01ba88bbb1312dcd6a64943f0	a5be2665de56a53b13059cc786839993e11e8559	2026-11-21 05:53:47 -0800	frozen-test: simplestream at 16 devices, seed 5 (_L3_epg) (three-type grid, 1200 s)
+b880778a99eeb31852d0768ed84a400441f0ad84	fbc3275bd7bf8c410fcf054e5fbd4bf7e247e011	2026-11-21 06:15:59 -0800	frozen-test: querystream-proactive at 16 devices, seed 5 (_L3_epg) (three-type grid, 1200 s)
+5a489d2f1c62eb662d4e1c55c1ad10f895a01628	939b300014291d140f29413fdb6f658731a4caf5	2026-11-21 06:22:46 -0800	knee: the within-run crossing instrument narrows the knee to 3.9 percent over 29 cells, and refutes session D's own explanation of the spread above it
+83ed56ca2b82e5fb6dd4d10325cd6b08a3c97eb1	dd1308e5a731c9182f01fb203517a8ef67588053	2026-11-21 06:23:39 -0800	logs
+90d121c5f4e000b56a6b3da8831aee6919fdf4e3	1bc7db49df12b6e967d8e8be922ba5a187ad20c2	2026-11-21 06:23:52 -0800	study_frozen_test 06:00 summary: the saturation knee [4,512, 4,686] uncached tok/s (flash 5a489d2), and pooled TTFT marked non-comparable across the 10 crossing cells
+16b9b82e1aa183e9a833d3a35bf2756ba10d5c5a	e2948a9564b3c891a26d489445734f984d97233c	2026-11-21 06:24:24 -0800	STATUS: section 1b added after the 06:00 summary, naming the gate's fit-set confound as a phase-transition straddle and correcting session D's crossing-time hypothesis
+247880f91734805fe5d48484af16c0d0c693f6b1	268e575948099bf483e0ee32b11cc7c4cfd12366	2026-11-21 06:27:50 -0800	knee: the cache lead pursued to its end, three mechanism hypotheses refuted, one of session D's own tests retracted as void
+e05a74762aa76a92311fc32b9c8a11057dcfdcfb	6cdd60690ad6efed4a1340964dad79f15db03bdf	2026-11-21 06:28:25 -0800	study_frozen_test 06:00 summary: dashcam session_id null in request.jsonl recorded as a defect; engine-side cache log as the instrumentation gap
+92d9fb70e9bb654a24eb63085ba94c0cab3f0d30	204130883f33f8a585897556142b490c78797071	2026-11-21 06:37:21 -0800	frozen-test: r3-streaming at 16 devices, seed 5 (_L3_epg) (three-type grid, 1200 s)
+4d0a3f49d85b21df4495df35f52edf0467e49373	05d190ead2ece177b05133129f7a429ebc8fea20	2026-11-21 06:58:48 -0800	frozen-test: cascade-routing at 16 devices, seed 5 (_L3_epg) (three-type grid, 1200 s)
