@@ -1,0 +1,14 @@
+M2_ttft_vs_history_cold_warm
+
+CLAIM:
+Cold first-token latency rises with history length and crosses the 3 s first-token budget at about 12k prompt tokens, while a warm prefix keeps first-token latency far below the budget at every history length (the warm median stays near 0.3 s and does not approach 3 s even at 30k tokens). The 32B idle deployment-stack confirmation reproduces the same cold-rises, warm-flat separation. Bands are the 25th to 75th percentile of the binned requests.
+
+SOURCES (committed):
+  results/cost/study_eng1/eng1_partA_requests_h100nvl.jsonl  @ ea4a6e8
+  results/cost/study_eng1/eng1_partB_requests_h100nvl.jsonl  @ ea4a6e8
+  results/cost/study_eng1/eng1_partC_requests_h100nvl.jsonl  @ ea4a6e8
+  results/cost/study_eng1/eng1_partD_requests_h100nvl.jsonl  @ ea4a6e8
+  results/orchestration/live2/v5/engine_actions_32b_confirmation_m2.json  @ e77fa65
+
+NOTES:
+Cold is the engine-reported 0 cached tokens (the whole prefix is rebuilt); warm is a built prefix with only a small new delta prefilled (uncached tokens at most one 1024-token piece). The uncached delta is what drives first-token latency, so bounding it isolates the warm-reuse regime; partially cached rebuilds with a larger uncached delta are excluded from both series. ENG1 curves are the StudyENG1 engine-timing request mix on the H100 deployment stack (74,401 cold, 75,315 warm, -69,456 partial excluded, over 313 to 30,105 prompt tokens); the overlay points are the StudyV5-ENGINE 32B confirmation, one request at a time and idle on Qwen3-VL-32B-Instruct, so it sits at the lower, unloaded end and is drawn as a separate series, not merged into the ENG1 bands. Cold is risk-orange, warm is KV-green; the warm series also carries a dashed line and square markers so the two never rest on colour alone. This figure measures the physical component of context inertia (transfer and reconstruction latency), the premise the policy acts on.
