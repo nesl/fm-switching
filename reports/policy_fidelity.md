@@ -196,3 +196,85 @@ Specifically, and these should be read as corrections to how I have been reporti
 - The decision text for D154 to D163 is **not in the repo**; my reading of those comes from the
   user's messages and the code's citations.
 - **Nothing here was run.** This is a source audit.
+
+---
+
+## CORRECTION 14:00, from the H100's read of vLLM 0.31.0 source: a REAL host tier existed all along
+
+The H100 read the live server's own `/proc` cmdline and its installed `vllm-0.31.0+cu129`
+dist-info, with `ls`, `grep` and `sed` only and no Python, so the sweep was untouched. Its finding
+changes one of my headline claims and I am correcting it rather than letting it stand.
+
+**The live server runs native host offloading, and has in every live2 run.** pid 3740212, port
+8031, 32BI, cmdline includes:
+
+```
+--enable-prefix-caching --enable-prompt-tokens-details --mm-processor-cache-gb 128
+--kv-offloading-backend native --kv-offloading-size 27 --max-model-len 32768
+```
+
+With backend `native` and `VLLM_USE_SIMPLE_KV_OFFLOAD` unset, `config/vllm.py:1140-1148` resolves to
+`kv_connector = "OffloadingConnector"`, `cpu_bytes_to_use = 27 GiB`, `kv_role = kv_both`. So **a
+real, engine-managed 27 GiB CPU KV tier was present in every cell this project has ever run.**
+
+### What stands and what does not
+
+| my claim | verdict |
+|---|---|
+| `enact_placement` contains no engine call; `OFFLOAD_TO_HOST` / `KEEP_GPU_WARM` never moved KV | **STANDS**, as a statement about the POLICY's actions |
+| the only real actuator is sending a request | **STANDS** for the policy; the ENGINE has its own actuator |
+| "there is no host tier in any run" | **WRONG. There is one, engine-managed.** |
+| "where a report says host-warm, that is a belief" | **TOO STRONG.** The policy's `host` marking is a belief. But KV genuinely moved to host, and **some `cache_path` WARM hits may have been CPU loads rather than GPU-resident hits.** |
+
+So the correct statement is: **the tier was never under POLICY control, and it was never absent.**
+Those are different failures and I conflated them.
+
+### The consequence I care about most, and it sharpens this morning's result
+
+**Residency is TWO-TIER, so a `cache_path` COLD means neither GPU nor host served it.** That makes
+the prefix-cache-miss finding stronger, not weaker: v5-rules-2's 139 cold warm-ahead prefills
+missed **both** a 62,944-token GPU pool **and** a 27 GiB host tier. A 27 GiB tier is far larger than
+the modelled `host_tier_tokens = 110630`, so "the pool was too small" is a much harder explanation
+to sustain than it was an hour ago.
+
+**That is a new open question and I am not guessing at it:** either the offload tier is not
+retaining robot prefixes, or it is not being consulted for them. Distinguishing those needs the
+offload connector's own metrics, not the request log.
+
+## The episode-end KV drop (item 5 of the episode-semantics check) is NOT expressible
+
+The H100's grep settles it. There is **no per-session or per-prefix delete** in 0.31.0:
+
+| | |
+|---|---|
+| `save_kv_layer` | internal worker hook (`base.py:344`), called from the attention layer |
+| `save_kv_to_host` | internal (`nixl/base_worker.py:2724`) |
+| **explicit drops** | **whole-cache only**: `offloading/scheduler.py:1991 reset_cache()`, `entrypoints/llm.py:802 reset_prefix_cache` |
+| per-session evict | **does not exist** |
+
+**So "an episode ENDS, its KV is dropped" cannot be implemented as a drop.** The options are to
+make the old episode **unreachable** by rolling its `cache_salt`, which prevents reuse but does not
+free memory, or to reset the whole cache, which would destroy every other session's state and is
+not usable. This is a hard constraint on the episode design and it should be settled before the
+rest of the episode work is built.
+
+### But per-request control DOES exist, which I had wrong
+
+`kv_transfer_params` is a real field on both OpenAI protocols
+(`chat_completion/protocol.py:143`, `:470`, via `extra_args` at `:693-695`) and `OffloadingConnector`
+reads it per request (`offloading/scheduler.py:388-415`, `:547-555`, both marked experimental):
+
+| parameter | effect | policy aim it serves |
+|---|---|---|
+| `max_offload_tokens` | caps what is offloaded to host; **0 means do not retain on host** | **single-shot never retained**, on the HOST tier only |
+| `max_load_tokens` | caps loading from host | limiting a reload |
+| `kv_load_tiers` | list of `{medium, locality}` matchers; `[]` means load from no tier | forbidding a reload |
+| `SamplingParams.skip_reading_prefix_cache` | bypasses READING the cache (`sampling_params.py:360`) | a true cold measurement |
+
+**And no restart is needed**, because the connector is already loaded. My earlier claim that the
+smallest build needs a server restart was **wrong for `kv_transfer_params`**; it is right only for
+switching connector (to LMCache, say).
+
+**One thing the H100 flags as unverified and I will not assume:** that `kv_transfer_params` sent on
+a chat request actually reaches the offload scheduler on this build. Confirming it needs one live
+request, and none will be sent without a ruling.
