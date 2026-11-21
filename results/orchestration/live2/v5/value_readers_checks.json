@@ -96,7 +96,22 @@
    ]
   },
   "verdict": "VALUE IS LOAD-BEARING in the reader: every perturbation moves decisions",
-  "scope": "this is the reader in isolation. It does NOT show that value moves OUTCOMES in a run, which is what D149 (4) finally asks for and what only a live or trace-driven v5 arm can show."
+  "scope": "this is the reader in isolation. It does NOT show that value moves OUTCOMES in a run, which is what D149 (4) finally asks for and what only a live or trace-driven v5 arm can show.",
+  "measured_in_arm": {
+   "cell": "dry, seed 4, 16 devices, 1200 s, 40:40:20, LH-REQ robots",
+   "source": "reports/study_policy_v2_gate.md, value-reader section; results/orchestration/live2/frozen_test/value_reader_proofs.json",
+   "digests": {
+    "hybrid-Fv-lhreq": "5d3469549fead8ac",
+    "hybrid-Fv-flat-lhreq": "5d3469549fead8ac",
+    "hybrid-Fv-invert-lhreq": "5d3469549fead8ac",
+    "hybrid-F-lhreq-noc3": "5d3469549fead8ac",
+    "hybrid-F-lhreq": "ec49e6d5a3b5454f"
+   },
+   "outcome": "the three tables are indistinguishable in-arm: UNEXERCISED, Rule 2",
+   "why": "the reader sits in C3's fallback slot, reached only when the full history did not fit, so the only candidate ever offered is RECENT and every table withholds it",
+   "remedy": "consult the reader at ADMISSION over D2, RECENT and the device, which is where D151 (3) puts the robot decision",
+   "base_policy_consequence": "the reader's digest equals hybrid-F-lhreq-noc3's exactly, so v5's base is noc3 and not hybrid-F"
+  }
  },
  "consequence_illustration": {
   "source": "reports/study_frozen_test.md section 21.2, hybrid-F post-fix at 3 s",
@@ -118,14 +133,14 @@
   "_note": "D151 (1): fixed in advance, never tuned"
  },
  "_provenance": {
-  "git_commit": "44052f2cc6b5ff10d3056fc37357776818a86020",
+  "git_commit": "8a8f5927e8493eaf31760208c60645617ae8197d",
   "script": "value_readers.py",
   "model": "n/a (policy design, no model)",
-  "timestamp": "2026-11-20T16:38:41.914919",
+  "timestamp": "2026-11-20T17:20:39.329730",
   "device": "a6000",
   "n": 121,
   "args": {
-   "out_dir": "/tmp/claude-1001/sessA/results/orchestration/live2/v5"
+   "out_dir": "/tmp/claude-1001/sessA2/results/orchestration/live2/v5"
   }
  }
 }

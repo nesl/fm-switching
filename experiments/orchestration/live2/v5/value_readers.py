@@ -16,6 +16,18 @@ WHAT THIS MODULE IS AND IS NOT.
    `lh_req_quality.json` convention (`arms_policy._LhReqFittedProfiles`): refilling the table is a
    data update that leaves the reader byte-identical.
 
+THE ACCEPTANCE TEST NEEDS THE READER AT ADMISSION, which is a correctness note and not a caveat.
+Wired behind `c3_value_reader` in `hybrid_arm`, the reader is consulted only in C3's old fallback
+slot, reached only when the full history did not fit, so the only candidate ever offered is RECENT.
+Measured consequence on the dry seed-4 cell (`study_policy_v2_gate.md`, value-reader section): the
+committed, flattened and inverted tables ALL give decision digest `5d3469549fead8ac`, so D149 (4)'s
+acceptance test does not discriminate and is classified UNEXERCISED under CLAUDE.md Rule 2. That is
+a failure of the test, not a pass of the mechanism. v5 calls the reader at ADMISSION over the full
+D151 (3) candidate set (D2, RECENT, device), which is also where D151 (3) puts the robot decision.
+The same cell shows the reader's digest is IDENTICAL to simply turning C3 off, which is why v5's
+base policy is `hybrid-F-lhreq-noc3` rather than hybrid-F: taking C3 off is the decision the value
+rule arrives at, not an ablation chosen for convenience.
+
 D6 COMPLIANCE. The reader is FITTED on the DEV split (28 questions) and LH-REQ robots draw only
 from the EVAL split (69). Every number the reader consults is a DEV number. EVAL numbers appear in
 this module in exactly one place, `consequence_illustration`, which is labelled as an illustration
@@ -402,6 +414,23 @@ def step4_value_inversion(table: Dict[str, Any]) -> Dict[str, Any]:
     out["scope"] = ("this is the reader in isolation. It does NOT show that value moves OUTCOMES in "
                     "a run, which is what D149 (4) finally asks for and what only a live or "
                     "trace-driven v5 arm can show.")
+    out["measured_in_arm"] = {
+        "cell": "dry, seed 4, 16 devices, 1200 s, 40:40:20, LH-REQ robots",
+        "source": "reports/study_policy_v2_gate.md, value-reader section; "
+                  "results/orchestration/live2/frozen_test/value_reader_proofs.json",
+        "digests": {"hybrid-Fv-lhreq": "5d3469549fead8ac",
+                    "hybrid-Fv-flat-lhreq": "5d3469549fead8ac",
+                    "hybrid-Fv-invert-lhreq": "5d3469549fead8ac",
+                    "hybrid-F-lhreq-noc3": "5d3469549fead8ac",
+                    "hybrid-F-lhreq": "ec49e6d5a3b5454f"},
+        "outcome": "the three tables are indistinguishable in-arm: UNEXERCISED, Rule 2",
+        "why": ("the reader sits in C3's fallback slot, reached only when the full history did not "
+                "fit, so the only candidate ever offered is RECENT and every table withholds it"),
+        "remedy": ("consult the reader at ADMISSION over D2, RECENT and the device, which is where "
+                   "D151 (3) puts the robot decision"),
+        "base_policy_consequence": ("the reader's digest equals hybrid-F-lhreq-noc3's exactly, so "
+                                    "v5's base is noc3 and not hybrid-F"),
+    }
     return out
 
 
