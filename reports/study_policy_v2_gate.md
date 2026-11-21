@@ -495,3 +495,42 @@ measured on a population that systematically excludes the errors it would have b
 Two things this does NOT block. **v5-rules needs no margin and no gate** (D156 (1)), so the night's
 live v5 result is unaffected. And the gate's own held-out p90 can still be reported from the clean
 cells with the damage stated, because that number is descriptive rather than frozen into the policy.
+
+## The saturation and the race are ONE mechanism, and a prediction for the re-run
+
+**Written BEFORE the `_rf` re-run exists, so it is a prediction and not a rationalisation.**
+
+The H100's per-minute error curve on held-out cell 1:
+
+| minute | 2 | 3 | 4 | 5 | **6** | **7** | 8 |
+|---|---|---|---|---|---|---|---|
+| errors | 17 | 31 | 73 | 57 | **654** | **596** | 101 |
+
+**That is a cliff, not a gradual degradation**: an 11.5x jump between minutes 5 and 6 on unchanged
+code. The dashcam TTFT just before each device's first failure was **97 to 122 s against a 1 s
+deadline**, so the queue had crossed the depth at which a 0.5 s instant cadence outruns the engine.
+From there each device's own uuid references begin pointing at frames the engine has not registered.
+
+**So the race is the failure MODE and queue depth is the TRIGGER. They are one mechanism, not
+two**, which is exactly why the first five minutes were clean under the same code and the same arm.
+
+### The prediction
+
+**The race fix will remove the 400s and will NOT remove the 100 s queue.** So the `_rf` re-run
+should come back **valid and still slow**: few or no HTTP 400s, and dashcam TTFTs that still climb
+far past the 1 s deadline once the queue builds, with the misses appearing as late deliveries
+instead of errors.
+
+**If the re-run comes back both clean AND fast, something other than the race was also at work**,
+and that must be found before the cell is used as a capacity number. The most likely candidate
+would be that the 400s were themselves relieving the queue, in which case removing them makes the
+load strictly worse rather than better, and a faster clean run would mean the comparison is not
+measuring what it appears to.
+
+### Why this matters beyond one cell
+
+If the prediction holds, **the capacity limit for warm-everything at 16 devices under EP-G plus
+per-frame is a QUEUEING limit, not an error limit**, and the fix converts a visible failure (24
+percent non-200) into an invisible one (deliveries past their deadline). That is a worse failure to
+read, not a better one, and it is the reason this cell's saturation data was worth preserving under
+its own name rather than being overwritten by the re-run.
