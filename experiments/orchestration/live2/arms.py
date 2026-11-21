@@ -662,3 +662,11 @@ ARMS.update(UPPER_BOUND_ARMS)
 from arms_builder import BUILDER_ARMS                                   # noqa: E402
 ARMS.update(BUILDER_ARMS)
 ARM_NAMES = ARM_NAMES + tuple(sorted(BUILDER_ARMS))
+
+# D150 / StudyV5-ENGINE: the WARM-ALL + LRU calibration arms. Registered in ARMS so `make_arm`
+# resolves them without the caller importing arms_warmall first, and imported LAST for the same
+# reason as the two blocks above (it imports from arms.py, so an earlier import would cycle).
+# Deliberately NOT added to ARM_NAMES: these are calibration instruments, not round-1 arms, and
+# `warm-all-lru` cannot yet make its own characteristic decision (see reports/study_engine_actions.md).
+from arms_warmall import WARMALL_ARMS                                   # noqa: E402
+ARMS.update(WARMALL_ARMS)

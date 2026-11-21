@@ -1,0 +1,70 @@
+{
+  "version": "v5-engine-actions-1.0",
+  "cases": [
+    {
+      "case": "warm hit promotes cold to gpu",
+      "before": "cold",
+      "after": "gpu",
+      "changed": true,
+      "ok": true,
+      "field_written": 4940
+    },
+    {
+      "case": "zero hit on a full-prefix request demotes gpu to cold",
+      "before": "gpu",
+      "after": "cold",
+      "changed": true,
+      "ok": true
+    },
+    {
+      "case": "zero hit on a 378-token monitor does NOT demote",
+      "before": "gpu",
+      "after": "gpu",
+      "changed": false,
+      "ok": true
+    },
+    {
+      "case": "no usage block is no evidence",
+      "before": "gpu",
+      "after": "gpu",
+      "changed": false,
+      "ok": true
+    },
+    {
+      "case": "zero gpu reuse with connector hits goes to host, not cold",
+      "before": "gpu",
+      "after": "host",
+      "changed": true,
+      "ok": true
+    },
+    {
+      "case": "a confirming correction is reported as changed=False",
+      "before": "gpu",
+      "after": "gpu",
+      "changed": false,
+      "ok": true
+    },
+    {
+      "case": "slice_plan partitions without overlap or loss",
+      "value": [
+        1024,
+        1024,
+        1024,
+        1024,
+        904
+      ],
+      "ok": true
+    }
+  ],
+  "all_ok": true,
+  "corrections_that_changed_a_belief": 3,
+  "step2b": "PASS",
+  "_provenance": {
+    "git_commit": "70630f13026c2ef66cd3eceee5d9168dfd4561b4",
+    "script": "engine_actions.py",
+    "model": "none-cpu",
+    "timestamp": "2026-11-20T17:16:49.057651",
+    "device": "nvidia_rtx_a6000",
+    "n": 7
+  }
+}

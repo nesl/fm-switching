@@ -1,0 +1,199 @@
+{
+  "version": "warm-all-1.0",
+  "cell": {
+    "seed": 4,
+    "n_devices": 16,
+    "run_s": 1200.0,
+    "ratio": "40:40:20",
+    "dry": true,
+    "robot_question_set": "lh_req",
+    "ss_question_set": "ss2"
+  },
+  "proof1_well_formedness": {
+    "completed": true,
+    "decisions": 13570,
+    "illegal_actions": 0,
+    "decisions_shimmed": 12648,
+    "note": "validate_action runs on every epoch inside Policy.__call__; a cell that completes emitted no action outside the registered domain"
+  },
+  "check1_positive_control": {
+    "quantity": "b7-edf-feasibility feasibility_actions (decline + defer) at this cell",
+    "this_run": 5,
+    "prior_run": 5,
+    "source_of_prior": "reports/study_frozen_test.md section 13.4",
+    "agree": true,
+    "base_decisions_this_run": 13570,
+    "base_census": {
+      "decisions": 13570,
+      "kinds": {
+        "release_monitor": 13193,
+        "release_recall": 372,
+        "decline": 5
+      },
+      "representations": {
+        "D2": 372
+      },
+      "recall_non_default_representation": 0,
+      "defer": 0,
+      "decline": 5,
+      "state_action": 0,
+      "feasibility_actions": 5,
+      "piece_split": 0,
+      "desired_tier_set": 0,
+      "mu_set": 0,
+      "channel_silent": false
+    }
+  },
+  "proof2_fairness_digest": {
+    "base": "b7-edf-feasibility",
+    "base_digest": "67c8da3057a09aff",
+    "base_decisions": 13570,
+    "control_arm": "warm-all-lru-off",
+    "control_digest": "ae20da0673f533c2",
+    "control_identical_to_base": false,
+    "treatment_digest": "ae20da0673f533c2",
+    "treatment_digest_shimmed": "8c4420add2a8228a",
+    "note": "the control shares the base's digest, so the arm adds nothing outside its one channel; a treatment digest equal to the base's would be an ABSENT LINK",
+    "_CORRECTION": "This file was produced BEFORE the digest was changed to strip `arm_version`, so `control_identical_to_base: false` above is a LABEL difference, not a decision difference. `test_hybrid.STRIP` removes arm, decision_latency_ms and decision_id but NOT `arm_version`, which the coordinator writes into every decision row, so a new arm differs from its base in every row on its own version string. The setwise diff in proof 4 is 0, and a dedicated re-check (b7-edf-feasibility against warm-all-lru-off, same cell) found FULL BYTE IDENTITY over all 13,570 rows once `arm_version` is removed, with `arm_version` the only differing field. STEP 4 THEREFORE PASSES in its strongest form. See reports/study_engine_actions.md 6c. A later run of this script reports `control_identical_to_base` on the stripped rows directly.",
+    "control_identical_to_base_stripped_of_arm_version": true,
+    "control_differing_fields": [
+      "arm_version"
+    ],
+    "control_rows_compared": 13570
+  },
+  "proof3_characteristic_decision": {
+    "prefills_issued_committed": 0,
+    "prefills_issued_shimmed": 2603,
+    "prefills_issued_base": 0,
+    "_register": "prefills_issued is an OBSERVED COUNT of release_piece / release_whole rows in the coordinator's own decision log. warm_ahead_* below are the arm's ASKS, one per candidate session per epoch, most of which no-op; they are not a decision count and must not be reported as one.",
+    "characteristic": "warm_ahead_prefill (a MATERIALIZE for a session with no pending question), reported WITH the readiness split of the arm's own released recalls, because the gate needs an arm that goes warm AND cold under one policy, not merely an arm that warms",
+    "release_readiness_committed": {
+      "release_at_COLD": 372
+    },
+    "release_readiness_shimmed": {
+      "release_at_COLD": 358,
+      "release_at_GPU-WARM": 19
+    },
+    "release_readiness_base": {
+      "release_at_COLD": 372
+    },
+    "arm_asks_committed": {
+      "emitted": 0,
+      "wanted": 2289557,
+      "unexpressible": 2289180,
+      "yielded_epochs": 0
+    },
+    "arm_asks_shimmed": {
+      "emitted": 2289180,
+      "wanted": 2289557,
+      "unexpressible": 0,
+      "yielded_epochs": 0
+    },
+    "both_states": {
+      "committed": {
+        "distinct_readiness": 1,
+        "split": {
+          "COLD": 372
+        }
+      },
+      "shimmed": {
+        "distinct_readiness": 2,
+        "split": {
+          "GPU-WARM": 19,
+          "COLD": 358
+        }
+      },
+      "verdict": "PASS: both warm and cold releases under one policy",
+      "note": "readiness is the arm's BELIEF at release time, the only residency signal a dry run has. The live cell must report the engine's own cache_path split beside it; the two are different quantities."
+    },
+    "verdict": "UNEXPRESSIBLE on the committed harness: the arm asked 2289557 times and was rejected 2289180 times and issued 0 prefills, against the base's 0. With the known-session widening shimmed in it issues 2603. The mechanism is present; the channel it acts through is what is missing, so this is CLAUDE.md Rule 2 'unexpressible' and NOT a negative."
+  },
+  "proof4_step2b_decision_diff": {
+    "vs": "b7-edf-feasibility",
+    "differing_setwise": 0,
+    "differing_positional": 13570,
+    "first_differing_index": 0,
+    "first_differing_row": {
+      "H": null,
+      "arm_version": "warm-all-1.0",
+      "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_monitor",
+      "mu": null,
+      "note": null,
+      "opportunity_ids": [
+        "opp0000000"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 5.1,
+      "traffic_mix": {
+        "monitor": 0,
+        "piece": 0,
+        "recall": 0,
+        "whole": 0
+      }
+    },
+    "differing_setwise_shimmed": 6134,
+    "first_differing_index_shimmed": 0,
+    "first_differing_row_shimmed": {
+      "H": null,
+      "arm_version": "warm-all-1.0",
+      "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_piece",
+      "mu": null,
+      "note": "session=robo000|s000|1011205677616862_start_0.0_end_314.103",
+      "opportunity_ids": [],
+      "piece_tokens": 301,
+      "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 0.1,
+      "traffic_mix": {
+        "monitor": 0,
+        "piece": 0,
+        "recall": 0,
+        "whole": 0
+      }
+    },
+    "verdict": "ABSENT LINK on the committed harness; shimmed diff is 6134"
+  },
+  "summary": {
+    "all_four_pass": false,
+    "both_states_under_one_policy": "PASS: both warm and cold releases under one policy",
+    "blocking": "validate_action known-session widening (see reports/study_engine_actions.md)",
+    "step4_negative_control": "PASS: byte-identical to the base on every field of all 13,570 rows except `arm_version`",
+    "_note_on_all_four_pass": "all_four_pass is false because PROOF 3 fails: the characteristic decision count is 0 on the committed harness. Proofs 1, 2 and 4 and the positive control pass. Proof 3's failure is CLAUDE.md Rule 2 'unexpressible', NOT a negative result, and warm-all-lru must not be scored until the known-session widening lands. The legal fallback warm-all-lru-reactive passes all four: see engine_actions_warmall_reactive_proofs.json."
+  },
+  "_provenance": {
+    "git_commit": "70630f13026c2ef66cd3eceee5d9168dfd4561b4",
+    "script": "arms_warmall.py",
+    "model": "none-dry",
+    "timestamp": "2026-11-20T17:10:46.808516",
+    "device": "nvidia_rtx_a6000",
+    "n": 16
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "version": "warm-all-1.0",
+  "arm": "warm-all-lru-reactive",
+  "_label": "THE LEGAL FALLBACK. It warms REACTIVELY, at the question, so it CANNOT show that warming helps on-time and is not offered for that. It exists because a sliced build reuses its own prefix on the wire, so it produces warm and cold ENGINE rows under one policy with no patch to the action space.",
+  "cell": {
+    "seed": 4,
+    "n_devices": 16,
+    "run_s": 1200.0,
+    "ratio": "40:40:20",
+    "dry": true,
+    "robot_question_set": "lh_req",
+    "ss_question_set": "ss2"
+  },
+  "check1_positive_control": {
+    "quantity": "b7-edf-feasibility feasibility_actions at this cell",
+    "this_run": 5,
+    "prior_run": 5,
+    "source_of_prior": "reports/study_frozen_test.md section 13.4",
+    "agree": true
+  },
+  "proof1_well_formedness": {
+    "completed": true,
+    "decisions": 14222,
+    "illegal_actions": 0
+  },
+  "proof2_fairness_digest": {
+    "base": "b7-edf-feasibility",
+    "base_digest": "67c8da3057a09aff",
+    "base_decisions": 13570,
+    "treatment_digest": "c1a3c261d080353b",
+    "treatment_decisions": 14222,
+    "control_arm": "warm-all-lru-off",
+    "control_note": "the byte-identity control is shared with proofs(); it is the same base and the same off switch"
+  },
+  "proof3_characteristic_decision": {
+    "characteristic": "warm_reactive prefill (a sliced MATERIALIZE of a PENDING session)",
+    "prefills_issued": 645,
+    "prefills_issued_base": 0,
+    "arm_asks": {
+      "warm_reactive_emitted": 645,
+      "warm_reactive_unexpressible": 0,
+      "warm_reactive_wanted": 645,
+      "warm_reactive_yielded_epochs": 15
+    },
+    "release_readiness": {
+      "release_at_COLD": 635
+    },
+    "release_readiness_base": {},
+    "_register": "prefills_issued is an OBSERVED COUNT of release_piece / release_whole rows in the coordinator's decision log. The release_readiness split is the arm's BELIEF, which promotes only on a COMPLETE build and therefore stays COLD for this arm; the warm rows this arm exists to produce are at the ENGINE level, in each sliced piece's own cached_tokens, which a dry run cannot see and the live cell must report.",
+    "verdict": "PASS: 645 reactive prefills issued where the base issues 0"
+  },
+  "proof4_step2b_decision_diff": {
+    "vs": "b7-edf-feasibility",
+    "differing_setwise": 1394,
+    "differing_positional": 14222,
+    "first_differing_index": 0,
+    "first_differing_row": {
+      "H": null,
+      "arm_version": "warm-all-1.0",
+      "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_monitor",
+      "mu": null,
+      "note": null,
+      "opportunity_ids": [
+        "opp0000000"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 5.1,
+      "traffic_mix": {
+        "monitor": 0,
+        "piece": 0,
+        "recall": 0,
+        "whole": 0
+      }
+    },
+    "verdict": "PASS"
+  },
+  "summary": {
+    "all_four_pass": true,
+    "runnable_on_committed_harness": true,
+    "what_it_does_not_show": "that warming ahead helps. The question pays the materialisation, which study_frozen_test.md 15.4 measured as edf's 5.483 s median wait. Only the patched warm-all-lru tests warming ahead."
+  },
+  "_provenance": {
+    "git_commit": "70630f13026c2ef66cd3eceee5d9168dfd4561b4",
+    "script": "arms_warmall.py",
+    "model": "none-dry",
+    "timestamp": "2026-11-20T17:14:56.889544",
+    "device": "nvidia_rtx_a6000",
+    "n": 16
+  }
+}
