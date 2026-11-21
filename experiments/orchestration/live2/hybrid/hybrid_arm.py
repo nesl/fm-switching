@@ -43,7 +43,16 @@ for p in (LIVE2, LIVE2 / "fleet", REPO / "experiments/orchestration",
         sys.path.insert(0, str(p))
 
 import costs as C
-import value_reader as VR                                                           # noqa: E402
+# `hybrid` is imported BOTH as a package (the live harness puts live2/ on sys.path but NOT
+# live2/hybrid/) and as a flat module directory (flash's proofs put live2/hybrid/ on sys.path).
+# A bare `import value_reader` works only in the second case, and it killed every live run on the
+# H100 at "import hybrid", llf included, because run_live2_real imports hybrid to register the
+# hybrid-* arms whatever arm is being run. Both forms are tried so the module works however it is
+# imported, and the harness's own path setup is now part of what I test before pushing.
+try:
+    from . import value_reader as VR                                          # noqa: E402
+except ImportError:                                                           # noqa: BLE001
+    import value_reader as VR                                                 # noqa: E402
 from interface import Action, Observation, RecallAction, StreamAction       # noqa: E402
 from policy.profiles import MissingEvidence                                  # noqa: E402
 
