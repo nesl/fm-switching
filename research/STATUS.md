@@ -1,6 +1,6 @@
 ## 06:00 analysis summary (session D): v5-rules, the cost-model gate, and what is blocked
 
-**Last updated: 2026-11-21 06:00.** Headline figures for every arm and cell are the H100's, in
+**Last updated: 2026-11-21 06:25 (section 1b added after the 06:00 summary).** Headline figures for every arm and cell are the H100's, in
 `reports/study_frozen_test.md` section "06:00 SUMMARY (2026-11-21, H100 overnight; D156 (5) form)".
 Nothing in this section restates a number from that table; the analysis below is the other half.
 Full write-ups: `reports/study_v5_rules.md`, `reports/study_cost_model_gate_d156.md`.
@@ -33,6 +33,43 @@ this one makes the fitted model invalid.
 -0.024 and held-out ratios 0.91 to 1.13 over 26 pre-EP-G cells, same functions, same code path. So
 the estimator is sound and the **fit set** is not. The estimator was imported unchanged from
 `live2/cost_model_gate.py`; only the split differs.
+
+### 1b. ADDENDUM 06:25, after the 06:00 summary: the gate's confound is now quantified, and the knee is bracketed to 3.9 percent
+
+`reports/study_saturation_knee.md`, commit `5a489d2`, instrument
+`experiments/orchestration/live2/v5/knee_within_run.py`.
+
+Partitioning all 29 EP-G and CAL1F cells by whether first-token p50 in **any** 100 s window of
+submit time exceeds 2.0 s (criterion declared before the partition was read) separates them with
+**zero misclassifications**: 19 cells at 4,356.0 to 4,511.7 uncached tok/s never cross, 10 cells at
+4,685.8 to 5,830.8 all cross. The knee bound narrows from the between-cell gap
+[4,511.7, 5,192.1] to **[4,511.7, 4,685.8]**, a 3.9 percent bracket.
+
+**This names section 1's diagnosis exactly.** The gate's two CAL1F fit cells are
+`warm-all-lru-reactive` at 4,511.7 tok/s, which is **the highest non-crossing cell in the entire
+set**, and `warm-all-lru` at 5,476.2 tok/s, which crosses in its first window. The fit set is not
+merely confounded by arm: **it is two points on opposite sides of a phase transition, one of them
+the boundary cell itself.** OLS with an unconstrained intercept spanning that is why the intercept
+went to -2.37 s and why 52 percent of in-sample predictions are negative. The gate verdict does not
+change and v5 still does not go live; the reason is now a measured threshold rather than an inferred
+confound, which also means the remedy is specific: a fit set drawn entirely from one side.
+
+**One correction to make against myself.** I hypothesised that *crossing time* explained the wide
+severity spread above the knee. Over the 10 crossing cells, terminal-window p50 correlates with
+run-mean load at rho **+0.84** and with crossing time at rho **-0.13**. Refuted by my own
+instrument. Crossing time explains only how much of a run sits on each side, which is why it moves
+the pooled statistic and not the severity.
+
+**A reading change for the frozen-test table, affecting no score.** For the 10 crossing cells the
+pooled first-token p50 is a mixture of two regimes and is not a property of the arm: the controlled
+pair 1.0 percent apart in load differs **47x pooled and 1.9x on the terminal window**. TTFT may not
+be compared across two crossing arms on the pooled figure. No scored quantity moves, because
+deadline and on-time are per request and are never pooled across the regimes.
+
+Open lead, not a finding: at the crossing the median request's uncached token count is flat while
+the mean cached fraction falls 0.80 to 0.68, so the rate rise is carried by a **tail** of
+badly-missing requests. Cause and direction unestablished; `residency.jsonl` would separate them and
+is unread.
 
 ### 2. MARGIN_CF stays unset, and both pre-registered conditions for setting it are now MET
 
