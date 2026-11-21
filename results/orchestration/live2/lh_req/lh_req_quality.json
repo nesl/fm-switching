@@ -4,7 +4,7 @@
  "_fit_split": "DEV",
  "_draw_split": "EVAL",
  "_precision_warning": "The DEV fit rests on 28 questions, with cloud D2 at 7 of 28 and cloud RECENT at 3 of 28, so the fitted numbers carry wide Wilson intervals. They are recorded beside every point estimate as the user ruled; a freeze that quotes the point estimate alone would overstate its own precision.",
- "_device_stack": "D87, StudyO-Q4 4B-I x RECENT, the ORIN2 in-process harness. NOT the ORIN3 vLLM stack used for single-shot; the two must not be placed side by side as one device's numbers.",
+ "_device_stack": "StudyORIN-REC part 1 (D146 (2)): MEASURED on the Jetson Orin under vLLM with Qwen3-VL-4B, the stack the device actually runs, replacing D87's ORIN2 in-process substitution. This closes G7. The superseded D87 entry is kept beside it as `device_4B_RECENT_D87_SUPERSEDED` so the change is auditable rather than silent.",
  "_cloud_source": "results/sember/study_acc2/acc2_requests.jsonl, which carries question_id, rep, split and correct per request, so both sides are computed on the SAME questions. Ids join on a 60-character prefix, 97 of 97 found.",
  "_controls_passed": [
   "the all97 cloud D2 figure reproduces the committed d2_acc of 45.3608 in lh_req_definition.json",
@@ -35,15 +35,28 @@
    },
    "device_4B_RECENT": {
     "n": 28,
+    "correct": 2,
+    "accuracy": 0.071429,
+    "ci95_wilson": [
+     0.019812,
+     0.226454
+    ],
+    "_source": "StudyORIN-REC part 1, Qwen3-VL-4B on the Jetson Orin under vLLM, ACC2 mm-processor kwargs, header 'D2 history', RECALL_GEN temperature 0.0 max_tokens 512 seed 42; same question ids as the cloud side, paired on question_id",
+    "_measured_not_substituted": true
+   },
+   "cross_tier_gain_pp": 14.2857,
+   "representation_gap_pp": 14.2857,
+   "device_4B_RECENT_D87_SUPERSEDED": {
+    "n": 28,
     "correct": 3,
     "accuracy": 0.107143,
     "ci95_wilson": [
      0.037118,
      0.271962
-    ]
-   },
-   "cross_tier_gain_pp": 14.2857,
-   "representation_gap_pp": 14.2857
+    ],
+    "_superseded_by": "device_4B_RECENT, StudyORIN-REC part 1, D146 (2)",
+    "_why": "D87's ORIN2 in-process harness, not the ORIN3 vLLM stack the device actually runs"
+   }
   },
   "EVAL": {
    "cloud_D2": {
@@ -66,15 +79,28 @@
    },
    "device_4B_RECENT": {
     "n": 69,
+    "correct": 11,
+    "accuracy": 0.15942,
+    "ci95_wilson": [
+     0.091418,
+     0.263345
+    ],
+    "_source": "StudyORIN-REC part 1, Qwen3-VL-4B on the Jetson Orin under vLLM, ACC2 mm-processor kwargs, header 'D2 history', RECALL_GEN temperature 0.0 max_tokens 512 seed 42; same question ids as the cloud side, paired on question_id",
+    "_measured_not_substituted": true
+   },
+   "cross_tier_gain_pp": 28.9855,
+   "representation_gap_pp": 27.5362,
+   "device_4B_RECENT_D87_SUPERSEDED": {
+    "n": 69,
     "correct": 17,
     "accuracy": 0.246377,
     "ci95_wilson": [
      0.159896,
      0.359609
-    ]
-   },
-   "cross_tier_gain_pp": 28.9855,
-   "representation_gap_pp": 27.5362
+    ],
+    "_superseded_by": "device_4B_RECENT, StudyORIN-REC part 1, D146 (2)",
+    "_why": "D87's ORIN2 in-process harness, not the ORIN3 vLLM stack the device actually runs"
+   }
   },
   "all97": {
    "cloud_D2": {
@@ -109,12 +135,10 @@
   }
  },
  "_dev_coincidence": {
-  "fact": "on the DEV split, cloud RECENT and the device both score 3 of 28, 0.107143",
-  "same_questions": false,
-  "overlap": 1,
-  "of": 3,
-  "_note": "the aggregates agree and the ITEMS do not: the two score 3 correct each but share only 1 question, so the equality is arithmetic rather than agreement. It matters because the device entry in the policy's LH-REQ fit is this same 0.107143 standing in for device-on-D2, and a reader could take the coincidence as corroboration that the substitution is sound. It is not evidence either way.",
-  "_conclusion_that_does_hold": "at the AGGREGATE, which is what the policy consumes, a 32B restricted to the recent window scores the same as the 4B on these questions, so model size buys nothing at fixed representation here. That is the measured statement; 'the two models agree' is not."
+  "fact": "SUPERSEDED. With the D87 substitution, cloud RECENT and the device both scored 3 of 28 on DEV, an arithmetic coincidence over only 1 shared question.",
+  "_now": "the measured device scores 2 of 28 on DEV (0.071429) against cloud RECENT's 3 of 28 (0.107143), so THE TIE IS GONE and cloud RECENT now STRICTLY BEATS the device on the DEV fit.",
+  "_consequence": "D152 (2)'s rule no longer falls out of the value reader. Under the tie, ties went to the device and RECENT was never sent; with the measured entry the reader sends RECENT whenever P(on time) > 0.6667. Reported for a ruling, not silently acted on.",
+  "_not_resolved": "the DEV device Wilson interval [0.019812, 0.226454] CONTAINS cloud RECENT's 0.107143, so 'RECENT beats the device' is not statistically settled on 28 questions."
  },
- "_device_entry_substitution": "the policy's device value for LH-REQ is the 4B x RECENT measurement. The consumer (rollout.py, the C6 mirror) asks for device accuracy on D2, and NO device-on-D2 result exists on these questions: StudyO-Q4 holds exactly three device arms, 4B-I x RECENT, 4B-T x RICH and 8B-I x RICH, and D87 fixes the comparator at 4B-I x RECENT. Declared, not implied."
+ "_device_entry_substitution": "CLOSED by StudyORIN-REC part 1. The device entry is no longer a substitution: it is measured on the same 97 question ids, paired per split. The earlier note described D87's 4B-I x RECENT standing in for a device-on-D2 result that did not exist; the measured entry is also RECENT, so the representation caveat stands and only the STACK substitution is closed."
 }

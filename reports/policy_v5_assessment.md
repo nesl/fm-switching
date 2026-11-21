@@ -216,3 +216,110 @@ mark its interface assumptions PROVISIONAL.**
 **F.5 The value-inversion test cannot pass where the reader currently sits.** **My default: move the
 reader to ADMISSION as part of v5 (where D151 (3) puts the robot decision anyway) and run D149 (4)
 there, rather than weaken the test.** Not done tonight; it is step 8 work.
+
+---
+
+# Addendum, 2026-11-20 after the D154 ruling and StudyORIN-REC part 1
+
+## G. The measured device entry breaks the tie that D152 (2) rested on
+
+**StudyORIN-REC part 1 landed (`bd1401c`) and its gate passed**: 1 request, 0 errors, header
+`D2 history`, `RECALL_GEN` temperature 0.0 / max_tokens 512 / seed 42, store `/dev/shm/sember_d2_q88`,
+Qwen3-VL-4B on the Orin under vLLM with the ACC2 mm-processor kwargs. 97 questions, RECENT, paired on
+`question_id`.
+
+| split | measured device | Wilson 95% | superseded D87 proxy |
+|---|---|---|---|
+| **DEV (the fit split)** | **2/28 = 0.071429** | **[0.019812, 0.226454]** | 3/28 = 0.107143 |
+| EVAL (reference only) | 11/69 = 0.159420 | [0.091418, 0.263345] | 0.246377 |
+
+Installed in `lh_req_quality.json`, with the D87 entry kept beside it as
+`device_4B_RECENT_D87_SUPERSEDED` so the change is auditable rather than silent. **G7 closes** for
+the STACK substitution; the representation caveat stands, because the measured entry is also RECENT
+and no device-on-D2 result exists.
+
+### G.1 What it does to the reader, recomputed as ruled
+
+Under D87 the device scored **exactly** what cloud RECENT scored, 0.107143, and ties go to the
+device, so RECENT was never sent and **D152 (2)'s rule fell out of the reader arithmetically**. The
+measured entry is lower, so that tie is gone:
+
+| | RECENT strictly beats the device? | RECENT sent when | D2 sent when |
+|---|---|---|---|
+| D87 proxy (0.107143) | **no**, exact tie | never | `P(on time) > 0.4286` |
+| **measured (0.071429)** | **yes** | **`P(on time) > 0.6667`** | `P(on time) > 0.2857` |
+
+Decision grid, rows `P(on time | D2)`, columns `P(on time | RECENT)`. **7 of 20 cells flip**, all in
+the direction of sending more:
+
+| p_D2 \ p_RECENT | 0.0 | 0.5 | 0.6 | 0.7 | 1.0 |
+|---|---|---|---|---|---|
+| 0.0 | withhold | withhold | withhold | **SEND RECENT** | **SEND RECENT** |
+| 0.3 | **SEND D2** | **SEND D2** | **SEND D2** | **SEND RECENT** | **SEND RECENT** |
+| 0.5 | SEND D2 | SEND D2 | SEND D2 | SEND D2 | SEND D2 |
+| 1.0 | SEND D2 | SEND D2 | SEND D2 | SEND D2 | SEND D2 |
+
+(Under D87 the whole `p_D2 = 0.0` and `0.3` rows were `withhold`.)
+
+**Consequence, reported and not acted on: D152 (2)'s rule no longer falls out of the value reader.**
+It said the RECENT shortcut must not be used for long-horizon questions, and the reader derived that
+from the tie. With the device measured, the reader now sends RECENT whenever it is more than about
+two-thirds likely to arrive. The rule must therefore be **imposed explicitly or abandoned**, and
+that is a user decision, not one the reader can be left to make. **Not statistically settled
+either**: the DEV device interval [0.019812, 0.226454] CONTAINS cloud RECENT's 0.107143, so on 28
+questions "RECENT beats the device" is one plausible reading of a wide interval, not a fact.
+
+## H. The measured device latency is 11.7x the committed proxy, and the device cannot meet a 3 s deadline
+
+| quantity | measured (n = 97) | committed proxy |
+|---|---|---|
+| device TTFT | median **3.296 s** (p90 3.324, max 3.416) | n/a |
+| device completion | median 3.354 s | n/a |
+| **device end to end** | median **6.651 s** (min 6.542, max 6.891) | `DEVICE_WAIT_RULE_S = 0.567 s` |
+
+**The proxy is wrong by 11.73x, and all 97 of 97 questions exceed it.** Every cell of the five
+cascade arms run against `0.567 s` is therefore labelled `proxy-0.567` and queued for rerun per
+D154 (5).
+
+**Three consequences that go beyond the cascade arms.**
+
+1. **At D147's 3 s robot deadline the device's own answer is NEVER deliverable.** 6.651 s end to end
+   is more than twice the deadline. D149 and D152 both rest on "the device answers when the full
+   history cannot arrive in time"; on this stack, at this deadline, it does not arrive either.
+2. **Capping the answer would not rescue it.** TTFT alone is 3.296 s, already past 3 s, so P20's
+   answer cap (which would cut the 3.354 s completion) leaves the request late on prefill alone.
+   P20 is still worth doing, and it cannot fix this.
+3. **D152 (1)'s headline counts the device's answer whenever the cloud's does not arrive.** If the
+   device answer is itself late, `correct_answers_delivered` is crediting an answer that misses the
+   deadline. This needs a ruling: either the headline counts the device answer regardless of its
+   latency (in which case it is not a delivery metric), or it does not (in which case the 3 s
+   headline numbers already reported must be recomputed).
+
+**The spread is tight (IQR 6.634 to 6.678) and that is expected, not a caching artefact**: all 97
+part-1 requests are RECENT at exactly 60 frames, so the input is constant and a near-constant
+latency is what should follow. Flagged under consistency check 3 because a constant where a
+distribution is expected is normally a warning; here the constancy of the INPUT is the explanation
+and it is stated rather than assumed.
+
+## I. Baselines whose published mechanism includes proactive prefetch or warming
+
+Listed as ruled, with **no behaviour changed tonight**. Each needs a ruling on whether its adapter
+should now use the warm-ahead action that PATCH 1 makes expressible.
+
+| baseline | published mechanism includes proactive warming? | what its adapter does today | should it use warm-ahead per its card? |
+|---|---|---|---|
+| mooncake | **yes**, KVCache-centric disaggregated prefill with a prediction-based early-rejection and cache-aware scheduling | reactive only; 0 gpu beliefs, 0 engine prefix hits in its committed cells | **probably yes**, needs a ruling. Its card's cache-centric scheduling is the closest published analogue to warm-ahead |
+| preble | **yes**, prefix-aware scheduling that places requests to maximise reuse | reactive | arguable: its reuse is placement, not prefetch. Ruling needed |
+| kvflow | **yes**, flow-based KV management with eviction and reload | reactive | likely yes for reload, which is unreachable today (belief never host) |
+| attentionstore | **yes**, a hierarchical KV cache with explicit prefetch from slower tiers | reactive | **yes on its card**, and it is the baseline most disadvantaged by the current action space |
+| lmcache | **yes**, cross-request KV reuse with offload and load | reactive | likely yes. Note the H100 declined an LMCache install for a torch-version reason (`study_rh5` line 105) |
+| pensieve | **yes**, multi-turn KV retention across turns | reactive | likely yes for retention, which is what `touch` expresses |
+| b7-edf-feasibility, edf, llf, always-cloud-fcfs | no, these are schedulers | reactive | no |
+| eco-llm, r3-streaming, thinking-qwenvl-atdm, confidence-cascade, cascade-routing, streamscout | no proactive warming in their cards | reactive | no |
+
+**This is the fairness question PATCH 1 opens, stated plainly: six of the KV-cache family publish a
+proactive mechanism, and until tonight none of them could express it, because warming ahead was
+rejected by the validator. Every committed comparison against them was therefore a comparison
+against an adapter that could not do what its paper says it does.** That is not a flaw in the
+adapters; it is the action space. It does not change any committed number, and it does change what
+those numbers mean. Ruling requested before any v5-versus-baseline headline is written.
