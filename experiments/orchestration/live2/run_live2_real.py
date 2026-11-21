@@ -113,6 +113,11 @@ def build_parser() -> argparse.ArgumentParser:
                     help="D153's minimum-frame floor: instants before an episode's Nth frame are not decision "
                          "instants for ANY arm, device or cloud, and are excluded by not being emitted at all. "
                          "epg only; the user may raise it to 6")
+    ap.add_argument("--robot-reask-mean-s", type=float, default=0.0,
+                    help="D159 (C) / D161: per robot device a Poisson re-ask process with this "
+                         "mean interval in seconds, drawing uniformly from that session's "
+                         "questions already asked. 0.0 (the default) emits no re-asks and leaves "
+                         "the trace byte-identical to the committed one.")
     ap.add_argument("--robot-upload", default="batch-30s", choices=("batch-30s", "per-frame"),
                     help="D154 (4) / D150 SYNC (1): 'per-frame' uploads every robot history frame AS CAPTURED, one "
                          "request per frame, for ALL arms; 'batch-30s' is D68's fixed 30-s batch and the committed "
@@ -198,6 +203,10 @@ def _trace(a, work: Path) -> Path:
             extra += f"f{int(a.dashcam_min_frames)}"
     if a.robot_upload != "batch-30s":           # D154 (4): a different upload contract is a different workload
         extra += "_perframe"
+    # D159 (C) / D161: a different question volume is a different workload, and the directory MUST
+    # differ or `if not (tdir / "trace.jsonl").exists()` would silently reuse the non-re-ask trace.
+    if float(a.robot_reask_mean_s) > 0.0:
+        extra += "_rq%g" % float(a.robot_reask_mean_s)
     tdir = work / "traces" / f"seed{a.seed}_n{a.n_devices}_{int(a.run_s)}s_{a.mode}{extra}"
     if not (tdir / "trace.jsonl").exists():
         TR.write_trace(tdir, TR.generate_trace(
@@ -208,7 +217,9 @@ def _trace(a, work: Path) -> Path:
             **({} if a.dashcam_format == "oneframe"
                else dict(dashcam_format=a.dashcam_format,
                          dashcam_min_frames=int(a.dashcam_min_frames))),
-            **({} if a.robot_upload == "batch-30s" else dict(robot_upload=a.robot_upload))))
+            **({} if a.robot_upload == "batch-30s" else dict(robot_upload=a.robot_upload)),
+            **({} if float(a.robot_reask_mean_s) <= 0.0
+               else dict(robot_reask_mean_s=float(a.robot_reask_mean_s)))))
     return tdir
 
 

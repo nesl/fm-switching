@@ -1,0 +1,90 @@
+{
+  "_provenance": {
+    "device": "nvidia_rtx_a6000",
+    "git_commit": "2c04f76c7f8a1611a8d6763a42696040f1228cc5",
+    "model": "32BI",
+    "n": 4,
+    "script": "reask_trace_proofs.py",
+    "timestamp": "2026-11-21T08:22:45.827558"
+  },
+  "criterion": {
+    "dashcam_format": "epg",
+    "n_devices": 16,
+    "ratio": "40:40:20",
+    "reask_mean_s": 30.0,
+    "robot_question_set": "lh_req",
+    "robot_upload": "per-frame",
+    "run_s": 1200.0,
+    "seeds": [
+      4,
+      5,
+      6,
+      7
+    ],
+    "ss_question_set": "ss2"
+  },
+  "device_latency_note": "scorer/score.py:248-258 prefers the MEASURED warm table keyed on question_id and REFUSES rather than guessing, and all 69 pool questions are present in it, so a re-ask already scored at the recent-window warm latency. D161 (3) is satisfied in the scored path; the trace's own superseded fallback field is now set from the same table so the two agree.",
+  "distinct_coverage_over_all_seeds": 0.8261,
+  "distinct_over_all_seeds": 57,
+  "export_rows_total": 398,
+  "note_ids": "opportunity_id is assigned in canonical sort order, so a re-ask cell renumbers every later opportunity; ids are not comparable across the re-ask on/off pair, while every non-id field of the OFF trace is present unchanged in the ON trace",
+  "per_seed": {
+    "4": {
+      "asks_per_distinct": 6.6,
+      "distinct_coverage_of_pool": 0.2899,
+      "distinct_questions": 20,
+      "export": "results/orchestration/live2/reask_lists/reask_list_seed4.jsonl",
+      "originals": 20,
+      "reask_empty_pool": 0,
+      "reasks": 112,
+      "reasks_beyond_32k": 0,
+      "total_asks": 132
+    },
+    "5": {
+      "asks_per_distinct": 5.08,
+      "distinct_coverage_of_pool": 0.3623,
+      "distinct_questions": 25,
+      "export": "results/orchestration/live2/reask_lists/reask_list_seed5.jsonl",
+      "originals": 25,
+      "reask_empty_pool": 0,
+      "reasks": 102,
+      "reasks_beyond_32k": 0,
+      "total_asks": 127
+    },
+    "6": {
+      "asks_per_distinct": 6.05,
+      "distinct_coverage_of_pool": 0.2899,
+      "distinct_questions": 20,
+      "export": "results/orchestration/live2/reask_lists/reask_list_seed6.jsonl",
+      "originals": 20,
+      "reask_empty_pool": 0,
+      "reasks": 101,
+      "reasks_beyond_32k": 0,
+      "total_asks": 121
+    },
+    "7": {
+      "asks_per_distinct": 4.773,
+      "distinct_coverage_of_pool": 0.3188,
+      "distinct_questions": 22,
+      "export": "results/orchestration/live2/reask_lists/reask_list_seed7.jsonl",
+      "originals": 22,
+      "reask_empty_pool": 0,
+      "reasks": 83,
+      "reasks_beyond_32k": 15,
+      "total_asks": 105
+    }
+  },
+  "pool_n": 69,
+  "proof_1_off_is_deterministic": true,
+  "proof_1b_off_is_subset_of_on": true,
+  "proof_1c_only_recall_added": true,
+  "proof_1d_ids_renumber": true,
+  "proof_2_on_is_deterministic": true,
+  "proof_3_digests_equal": {
+    "fairness": true,
+    "fairness_digest": "96c1a0b486381709e2fc63e9b0f33f9e1ba1d887d6cedf21d89d407621177849",
+    "fairness_digest_off": "c2a9c3466ace611a0fdb168f80f8337c87b9e8dc13eddbb4c72d7b29417263c3",
+    "off_and_on_differ": true
+  },
+  "recent_window_definition_for_orin": "committed 60-frame last-120 s filter over the D2 frame list ending at reask_time, matching StudyORIN-REC part 1; the Orin proposed this and session D confirms it"
+}

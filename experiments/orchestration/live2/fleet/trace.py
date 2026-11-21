@@ -380,7 +380,8 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                    ss_question_set: str = "ss1",
                    dashcam_format: str = "oneframe",
                    dashcam_min_frames: int = EPG_MIN_FRAMES,
-                   robot_upload: str = ROBOT_UPLOAD_DEFAULT) -> Dict[str, Any]:
+                   robot_upload: str = ROBOT_UPLOAD_DEFAULT,
+                   robot_reask_mean_s: float = 0.0) -> Dict[str, Any]:
     """Build one run's opportunity trace. Returns {records, device_answers, meta, stats}.
 
     `dashcam_format="epg"` is D153's append-only episode context (D148). It adds the episode
@@ -792,6 +793,102 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
     st.robot_question_repeats = sum(v - 1 for v in st.robot_question_ask_counts.values() if v > 1)
     st.session_repeats = sum(v - 1 for v in st.session_play_counts.values() if v > 1)
 
+    # ------------------------------------------------------------------ D159 (C) / D161 re-asks
+    # OFF BY DEFAULT (`robot_reask_mean_s = 0.0`), so a trace built without it is byte-identical
+    # to the committed one: the block does not run at all.
+    #
+    # D159 (C): per robot device a Poisson re-ask process, drawing UNIFORMLY from that session's
+    # questions ALREADY ASKED, originals left at their real times, gold unchanged. D161 (1)
+    # confirmed the already-asked draw pool after the measurement showed no recoverable reservoir.
+    #
+    # The RNG is a DEDICATED stream keyed on (seed, device), never the generator's own `rng`, so
+    # turning re-asks on cannot perturb any other part of the trace. It is a pure function of the
+    # seed and the device id, so every arm given the same cell arguments gets the same re-asks,
+    # which is what the fairness digest then proves rather than assumes.
+    if robot_reask_mean_s and float(robot_reask_mean_s) > 0.0 and not count_only:
+        mean_s = float(robot_reask_mean_s)
+        warm_lat = DS.device_recall_warm_latency_s()
+        # session spans in WALL CLOCK, from the records the loop above already emitted
+        # t0 is the session's OWN episode clock origin on the run clock, and it is NOT the
+        # session_start record's t: a joined session (D101) starts its episode before the run
+        # window, so session_start is clamped at the join while the episode clock began earlier.
+        # Taking t0 from session_start made t_ask_session disagree with the originals' own values
+        # (measured: an original with t=156.677541 carries t_ask_session=164.0, so t0=-7.32), which
+        # would put the re-ask's history window and the Orin's recent window on the wrong clock.
+        # t0 is therefore derived from an ORIGINAL ask, using the generator's own accounting.
+        span = {}
+        for r in records:
+            if r["kind"] == "session_end" and str(r["device_id"]).startswith("robo"):
+                span.setdefault(r["session_id"], {})["t_end"] = float(r["t"])
+        asked = {}
+        for r in records:
+            if r["kind"] == "recall_question" and str(r["device_id"]).startswith("robo"):
+                asked.setdefault(r["session_id"], []).append(r)
+        extra, n_beyond_32k, n_no_pool = [], 0, 0
+        for sid in sorted(asked):
+            sp = span.get(sid) or {}
+            originals = sorted(asked[sid], key=lambda r: float(r["t"]))
+            o0 = originals[0]
+            t0 = float(o0["t"]) - float(o0["t_ask_session"])
+            # a session truncated by the run horizon has no session_end record
+            t_end = min(float(sp.get("t_end", run_s)), float(run_s))
+            dur_s = t_end - t0
+            if dur_s <= 0:
+                continue
+            dev = originals[0]["device_id"]
+            rr = random.Random("reask|%d|%s|%s" % (int(seed), dev, sid))
+            t = float(originals[0]["t"])          # the first ask opens the eligible window
+            k = 0
+            while True:
+                t = t + rr.expovariate(1.0 / mean_s)
+                if t > t_end + 1e-9:
+                    break
+                pool = [o for o in originals if float(o["t"]) <= t + 1e-9]
+                if not pool:
+                    n_no_pool += 1
+                    continue
+                src = pool[rr.randrange(len(pool))]
+                k += 1
+                t_sess = t - t0
+                # the history the CLOUD holds AT THE RE-ASK, by the same D2 accounting the
+                # original ask used (`fleet/trace.py` robot loop), recomputed for the later time.
+                nfr = len(DS.d2_frames_in(0.0, min(t_sess, dur_s)))
+                hist_tok = DS.d2_batch_tokens(nfr, first_batch=True)
+                if hist_tok > 32_000:
+                    n_beyond_32k += 1          # D159 (C): COUNT, never truncate
+                qid = src["question_id"]
+                opp = "%s|%s#r%d" % (sid, qid, k)
+                extra.append(dict(kind="recall_question", device_id=dev, session_id=sid,
+                                  opportunity_key=opp, question_id=qid,
+                                  t=round(t, 6), t_ask_session=round(t_sess, 6),
+                                  deadline_s=DS.ROBOT_DEADLINE_S, question=src["question"],
+                                  options=src["options"], gold_letter=src["gold_letter"],
+                                  category=src["category"], history_tokens=hist_tok,
+                                  reask_of=src["opportunity_key"], reask_index=k))
+                da = dev_answers[qid]
+                # D161 (3): the device latency on a re-ask is the RECENT-WINDOW WARM measurement
+                # (D155 / StudyORIN-REC WARM), NOT `device_recall_latency_s(hist_tok)`, which
+                # grows with history. The SCORER already prefers the measured table keyed on
+                # question_id and REFUSES rather than guessing (`scorer/score.py:248-258`), so the
+                # scored quantity was already correct; this makes the trace's own superseded
+                # fallback field agree with it instead of contradicting it.
+                answers.append(dict(opportunity_key=opp, device_id=dev, kind="recall",
+                                    session_id=sid, question_id=qid,
+                                    device_answer=da["pred"], device_correct=da["correct"],
+                                    gold_letter=da["gold"],
+                                    device_latency_s=float(warm_lat[qid]),
+                                    history_tokens=hist_tok, reask_index=k))
+                st.robot_question_ask_counts[qid] = st.robot_question_ask_counts.get(qid, 0) + 1
+        records.extend(extra)
+        st.robot_reask_mean_s = mean_s
+        st.robot_reasks_emitted = len(extra)
+        st.robot_reasks_beyond_32k = n_beyond_32k
+        st.robot_reask_empty_pool = n_no_pool
+        st.robot_questions_total = sum(st.robot_questions_per_device.values()) + len(extra)
+        st.robot_distinct_questions_asked = len(st.robot_question_ask_counts)
+        st.robot_question_repeats = sum(v - 1 for v in st.robot_question_ask_counts.values()
+                                       if v > 1)
+
     records.sort(key=lambda r: (round(float(r.get("t", 0.0)), 6),
                                 TRACE_KINDS.index(r["kind"]), r["device_id"],
                                 r.get("opportunity_key") or r.get("session_id") or ""))
@@ -811,6 +908,12 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
     for a in answers:
         a["opportunity_id"] = assigned[a.pop("opportunity_key")]
     answers.sort(key=lambda r: (r["device_id"], r["opportunity_id"]))
+    # D159 (C) / D161: a re-ask carries `reask_of`, which held the ORIGINAL's opportunity_key.
+    # That key has just been popped, so translate the reference to the assigned opportunity_id or
+    # it would dangle. Done here, in the same place and from the same map, so the two cannot drift.
+    for r in records:
+        if "reask_of" in r:
+            r["reask_of"] = assigned[r["reask_of"]]
 
     meta = dict(robot_question_set=robot_question_set, ss_question_set=ss_question_set,
                 robot_upload=robot_upload,
