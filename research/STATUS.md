@@ -1,3 +1,189 @@
+## 06:00 analysis summary (session D): v5-rules, the cost-model gate, and what is blocked
+
+**Last updated: 2026-11-21 06:00.** Headline figures for every arm and cell are the H100's, in
+`reports/study_frozen_test.md` section "06:00 SUMMARY (2026-11-21, H100 overnight; D156 (5) form)".
+Nothing in this section restates a number from that table; the analysis below is the other half.
+Full write-ups: `reports/study_v5_rules.md`, `reports/study_cost_model_gate_d156.md`.
+
+### 1. FULL v5 DOES NOT GO LIVE. The D156 (4) cost-model gate FAILS, measured tonight for the first time.
+
+The gate could not run until all four held-out EP-G WARM-ALL cells were valid, which happened at
+about 03:45. It then failed on three independent grounds
+(`results/orchestration/live2/frozen_test/cost_model_gate_d156.json`):
+
+| | n | predicted p50 | actual p50 | ratio | negative predictions |
+|---|---|---|---|---|---|
+| in sample (CAL1F) | 27,985 | **-1.2727 s** | 0.7629 s | **-1.67** | **52.2 percent** |
+| held out (EP-G) | 42,417 | **-1.4344 s** | 0.7081 s | **-2.03** | **61.6 percent** |
+
+1. The fitted model predicts **negative first-token latency** for 52.2 percent of its own fit data
+   and 61.6 percent of held-out data. Physically impossible, so the model is **invalid rather than
+   inaccurate**, and this is visible **in sample** with no held-out test needed (check 2).
+2. The held-out ratio is negative, so there is no sense in which it is off by a factor.
+3. Held-out p90 absolute first-token error is **31.92 s** against a 1.0 s dashcam deadline.
+
+**Diagnosis: the FIT set is internally confounded by arm.** The two CAL1F fit cells differ by 160x
+in overlapping-request count (969 against 6) and 120x in first-token latency on the same workload,
+so OLS spans that with one linear term and buys the cheap end by driving the intercept to -2.37 s.
+This is the assessment's recorded *warm is confounded with arm* recurring as **load confounded with
+arm inside the fit set**, which is worse: the earlier confound limited what the gate could identify,
+this one makes the fitted model invalid.
+
+**Positive control passes (check 7):** the committed `cost_model_gate.json` recorded intercept
+-0.024 and held-out ratios 0.91 to 1.13 over 26 pre-EP-G cells, same functions, same code path. So
+the estimator is sound and the **fit set** is not. The estimator was imported unchanged from
+`live2/cost_model_gate.py`; only the split differs.
+
+### 2. MARGIN_CF stays unset, and both pre-registered conditions for setting it are now MET
+
+This is the important change since 21:00 and it needs a user decision.
+
+| condition | state |
+|---|---|
+| D158 (1): all four held-out cells run clean after the race fix | **MET** |
+| D157 (2): `P_hat` frozen and committed with its hash before scoring | **MET** (`cf_ontime_model_frozen.json`, `payload_sha256 2dc415b7...`, `code_sha256 15aa23c0...`) |
+
+**So the user's own conditions are satisfied and the margin still must not be set.** The reason is
+structural and is declared in session B's own artefact: `cf_ontime_frozen` builds `P_hat` from the
+committed gate's `by_arm` split, and that split's payload records **`warm_rows_held_out: 0`.**
+Confirmed independently in the committed gate JSON, whose `by_arm` held-out block has only `all`
+and `cold` strata, both n=101,498, while all 1,797 warm requests sit in the fit set.
+
+**`P_hat` has therefore never been validated on a single warm request, and the held-out cells it
+would be scored on are 83 to 91 percent warm.** The one test that would have validated the
+underlying cost model on this workload is the D156 (4) gate, and it failed tonight.
+
+**Credit where it belongs: B declared `warm_rows_held_out: 0` in the frozen payload.** It is why
+this took two minutes to find rather than never, and it is the register-marking CLAUDE.md asks for.
+
+### 3. v5-rules: the result, stated in the register that survived every correction
+
+**v5-rules escalates 44 of 45 robot questions against its base's 24 of 45, 1.83x, plus 83,961
+warm-ahead prefills at seed 5 alone.** The fate of the 20 escalations the two arms differ on:
+
+| fate of the 20 extra escalations | n |
+|---|---|
+| cloud answer correct where the device was wrong | **2** |
+| cloud answer wrong where the device was **right** | **1** |
+| no change, of which **resolved to the device's own answer anyway** | 17, of which **16** |
+
+**Sixteen of twenty extra escalations produced the answer that would have been produced without
+them.** The device is carrying the robot task, and escalation pays only on the conjunction
+device-wrong AND cloud-right AND returns-by-deadline, **hit 2 times in 20**.
+
+**Statistical register.** Across 45 questions there are 9 discordant pairs, 5 favouring v5-rules and
+4 the base: **McNemar exact two-sided p = 1.0.** Six of the nine flips are on questions where both
+arms made the *same* decision, so queue noise flips 0.24 of questions while the effect is 0.022 per
+question. Detecting a difference this size would need about **3,200 robot questions**, roughly 70x
+what these cells carry (CONSTRUCTED from the observed discordance rate). **The finding is the
+asymmetry, not the sign:** the gain is one discordant pair and needs a power analysis; the losses are
+thousands of unreleased requests and do not.
+
+**The warm chain, engine-observed `cache_path` throughout (never the belief, which is biased
+conservative):** v5-rules reaches GPU-WARM on **25 of 44** released robot questions, 56.8 percent,
+while `hybrid-F-lhreq-noc3` and `b7` reach it **0** times. So warmth is reached for most questions
+and buys nothing, and the base is a genuine **mechanism-absent comparator** rather than a weaker
+variant (confirmed structural: `release_piece` 0, `submitted_piece` 0, both cells post-fix, zero 400s).
+
+**Rule 2, settled:** **fired and did not help** on the warm-ahead side, with the break localized to
+the **warm-to-on-time** link (5 of 9 warm extras fell back to the base's device answer, and 2 of the
+4 cloud answers that did arrive were wrong). **Cancelled by geometry** on the release side, where
+the deadline rather than the decision settles all 11 cold cases.
+
+**Mechanism, measured twice on different arms.** Unconditional prefill drives overlapping requests
+from about 10 to about 2,000; EP-G multiplies the result about 3x. **Prefilling ahead of demand buys
+cache residency and spends the engine**, which is why 57 percent warmth converts to nothing: the arm
+wins in the register of cache residency and loses in the register where the deadline is decided.
+
+**One result supports the thesis rather than qualifying it.** Targeted warming reaches warm more
+often than unconditional warming, 1.7x pooled over three warm-all cells, with the direction
+replicating at both seeds (about 1.3x at seed 4, 3.6x at seed 5) and the magnitude unstable.
+Indiscriminate prefill thrashes the LRU pool. Reported as direction-with-unstable-magnitude:
+seed 4 alone is not significant (Fisher exact p = 0.39) and the pooled version (p = 0.035) owes its
+significance to one outlier cell.
+
+### 4. What landed and is proved
+
+- **The submission race is fixed and proved on a valid held-out cell**: HTTP 400 went from **4,244
+  to 0** on the same arm, workload and seed, with the queue untouched. Stronger than D158 (2)'s third
+  proof, which asked only for a replay. My `cc22429` prediction, that the fix removes the 400s and
+  not the queue, holds exactly.
+- **The race was also a confound on WARMTH**, not only on errors: warm robot deliveries went 1 to 6
+  on that cell, because a piece whose bytes 400'd left the history cold. **Every piece-chaining cell
+  run before the fix has its warm count biased downward.** The v5-rules cells both ran post-fix.
+- **All three engine actions confirmed on the 32B deployment stack** (M1 warm-ahead 31x, M2 touch
+  moves a history between tiers, M3 reload 15x), and **two of the three are unwired**: `_enact` sets
+  `desired_tier` and emits no request, and `believed_tier` is never `host`. `desired_tier` now has a
+  *measured* mechanism behind it, so the remedy is to wire it, not remove it.
+- **WARM-ALL's characteristic property is verified, not assumed**: at least one release at GPU-WARM
+  with `cached_tokens` > 0 in every valid cell (port rule).
+- **A within-cell natural experiment, n = 1 of its kind**: on one cell, warm deliveries rose six-fold
+  and 4,244 failures were removed, and correct-by-deadline did not move. Confound named, the fix
+  changed both at once. `_kv0.25` has no pre-fix twin, so this cannot be replicated.
+
+### 5. Session B's state
+
+- **`P_hat` IS frozen and committed with its hash** (see section 2), which satisfies D157 (2).
+- **The deficit weighting and the p99 instrument: UNKNOWN.** Neither I nor the H100 heard from B
+  tonight, and I am reporting that rather than inferring it from the files.
+
+### 6. What is BLOCKED, and why
+
+| blocked | on what | can analysis clear it? |
+|---|---|---|
+| full v5 going live | the D156 (4) gate, which FAILS | **no**, needs a user ruling on the fit set or the model form |
+| MARGIN_CF | `P_hat`'s cost model never validated on a warm request | **no**, needs a gate that passes on this workload |
+| M2 and M3 in the policy | `desired_tier` is write-only; `believed_tier` never `host` | no, both are policy changes |
+| the warm-ahead yield (W2) | probable defect: the key is absent from `arm_stats`, value a genuine zero in 12,001 epochs | diagnosable, not tonight |
+| dashcam scoring on EP-G cells | the Orin's EP-G device re-record | no |
+| cascade arms | still on the 0.567 s proxy, labelled `proxy-0.567` | no |
+| D97 eligibility for per-frame cells | recompute at `eligibility.py:94` | yes, not done |
+
+### 7. PROVISIONAL and labels
+
+EP-G budget charge is the new-token charge with the true-up deferred (D156 (3)); dashcam scoring on
+EP-G cells is PROVISIONAL until the Orin's re-record; the belief-correction observer runs in
+`observe` mode and changes no policy behaviour (D157 (4)); cells run before the race fix with any
+piece-chaining arm are **race-affected**, and that includes the gate's own CAL1F `warm-all-lru` fit
+cell (226 HTTP 400s), which is also its load outlier; `n_requests` and `n_errors` come back **null**
+in `cell.json` on every warm-all cell, recorded as a **defect**, with error counts taken from
+`request.jsonl`.
+
+### 8. Corrections made tonight, recorded rather than edited away
+
+Four, all caught before or shortly after publication, three of them by the H100 and one by my own
+check:
+
+1. **A register error**: I compared one arm's engine-observed warm share against another's internal
+   belief, on different populations. **It reversed the ranking.** A coincidence hid it, both
+   numerators were 25.
+2. **A scoping clause withdrawn**: I proposed that warm-ahead's target state is unreachable at this
+   operating point. It is reached 57 percent of the time; the chain breaks later.
+3. **My MARGIN_CF n-argument was arithmetically wrong** (I conflated the warm stratum with D157 (2)'s
+   population), and the cold-share figure that replaced it came from one cell, which is the same
+   register error twice in three sections.
+4. **The queue is created by the ARM, not by EP-G** — caught before publication this time.
+
+### 9. For the user: decisions, each with my default
+
+1. **The gate.** Default: **leave it. The gate fails as pre-registered, MARGIN_CF stays unset, full
+   v5 does not go live.** Alternatives: refit on a fit set stratified by load (changes a
+   pre-registered split, and trades the confound for a coverage gap, since the excluded cell is the
+   only fit cell in the loaded regime); or change the model form, constraining the intercept to be
+   non-negative and adding a queueing term. **The data points at the model form**, because a linear
+   overlap term cannot describe a system spanning 0.27 s to 138 s, but it is a change to the
+   instrument and needs pre-registration.
+2. **MARGIN_CF.** Default: **stays unset**, because `P_hat` rests on a cost model held out on zero
+   warm rows. The clean-cell p90 is available as a DIAGNOSTIC labelled not-the-margin per D158 (1)
+   and I have not computed it as a margin.
+3. **v5-rules in the paper.** Default: report it as the "v5 without the counterfactual" ablation with
+   the economic reading leading (1.83x the escalations, 16 of 20 answered by the device anyway,
+   McNemar p = 1.0), and the warm analysis second. The ablation produced one measured instance of the
+   harm D151's counterfactual exists to decline, which is evidence **for** the full policy.
+4. **Tomorrow's first items**, unchanged and user-ruled: belief promotion to host (D157 (4)),
+   `deadline_work_at_risk` as a probable defect, the value reader at admission with `p_question`, the
+   base surrogate audit, and the D156 (3) budget true-up.
+
 Last updated: 2026-11-20 21:30 (**StudyORIN-REC part 2 pushed.** On the full S-EMBER recall suite the 4B device model scores 0.27-0.29 across both representations and both splits, a few points below the A6000 proxy (0.33-0.38), and agrees with the proxy's letter on about half the questions per split (0.50-0.54, never pooled). RICH history does not beat RECENT on the device (D2 vs RECENT within CI on both splits) while costing ~2x the TTFT (RECENT cold TTFT p50 3.32 s, D2/RICH p50 6.86 s, p90 16.83 s) and pushing 6 EVAL questions over the 32,768-token context, reported as over-context and never truncated. Parity control passed (RECENT prompt_tokens p50 5,524 = committed ACC2 median). COLD run throughout. StudyORIN-REC part 1 and WARM pushed earlier tonight. Next: StudySS2 re-record + RefSpatial rescore.) PREVIOUSLY 2026-11-20 22:15 (**StudySS2 device-confidence re-record + RefSpatial rescore pushed, all controls pass.** The 357 single-shot recall questions that had no answer probability now have one: 1,042 items re-recorded on the committed SS2 device config (orin3_serve.sh verbatim, released processor, cap 9) with logprobs on. Equality control PASS-in-intent PROVISIONAL (1,040/1,042 byte-identical; the 2 diffs are prefix-cache cold/warm nondeterminism, one score-invariant and one a 0.25-nat MCQ near-tie that flipped to the correct letter). Confidence table: MCQ letter-mass median 0.986, geometric-mean median 0.848. RefSpatial rescore control: device rows moved 0 (PASS), cloud moved 4 (0.3714 to 0.3787), 277 masks hashed. Wiring proof: the field reaches all 5 reader arms and the characteristic decision fires, control b7 byte-identical, but recall coverage stays 20/377 because injecting the new single-shot confidences into the harness query objects is a separate methodological wiring change, FLAGGED for the user and NOT applied overnight.) PREVIOUSLY 2026-11-20 18:40 (**D153 to D155 land; the dashcam format changes under every arm and the v5 gate still fails.** D153 fixes the dashcam format BY THE TASK rather than by StudySH-EP's verdict: every dashcam query uses D148's append-only episode context (EP-G), never one frame per call, with a 3-frame floor excluded identically for every arm. **The live contract is still one frame per call and `bodies.py:148` RAISES on a multi-frame monitor body, so every committed cell is `dashcam-1f` and no EP-G measurement of any policy exists yet**; the H100 is labelling its current cells accordingly and has armed `runs/EPG_ARGS` to switch at a boundary. Measured for the floor decision: EP-G already carries NINE frames at the first decision instant in 287 of 300 clips because the StudySH-EP manifest built a 4 s pre-roll from 165 frames that are NOT in the committed D91 store, so in live2, whose grid starts at 3.0 s with no pre-roll, every episode starts at ONE frame and the floor costs 2 instants per episode rather than 0.15 percent. The refresh is the largest open number: D153's literal fresh-context-with-no-carry-over gives a median 10 frames per request and excludes 1,429 of 13,193 instants, against a sliding cap's 21 frames and 378. **WARM-ALL AS BRIEFED IS UNEXPRESSIBLE**: warming AHEAD of a question was rejected by the validator, so the arm issues 0 prefills and is behaviourally b7 (Rule 2 unexpressible, not a negative). A user-ruled patch now adds `Observation.live_sessions`, making proactive warming expressible for the first time, with a 50-arm before/after prescreen running as its byte-identity proof; `warm-all-lru-reactive` passes all four proofs meanwhile (645 prefills against the base's 0, Step 2b 1,394). **Six KV-cache baselines publish a proactive mechanism none of them could express until tonight**, so every committed comparison against them was against an adapter that could not do what its paper says; D155 (5) implements them per card, mooncake first. **The D151 (6) cost-model gate FAILS** because warm is confounded with arm, so D154 (2) leaves MARGIN_CF unsettable and NO v5 cell may run. StudyORIN-REC part 1 measured the device at DEV 2/28, closing G7 and removing the tie that made D152 (2) look derived, so D155 (4) imposes it as a user rule; D149 (4)'s acceptance test now discriminates at warm/keep. D155 (3)'s by-deadline headline changes no ranking at 0.146 to 0.225 s device latency, classified unexercised. StudySH-EP is CLOSED, one frame, fired and did not help. Policy v5 assessment: 1 of 27 elements dry-proved, 0 live-validated, and the critical path cannot complete before 06:00.) PREVIOUSLY 2026-11-20 18:40 (**StudySH-EP CLOSED and the policy v5 gate FAILS.** StudySH-EP is final: dashcams stay one-frame, classified FIRED AND DID NOT HELP. The 32B beats the 4B in every condition with a CI excluding zero, but H1's second half fails everywhere and no 32B condition differs from its own C1; H2 holds as DETECTION COUNT (15 of 15 cells) and fails as LEAD TIME (14 of 15 CIs include zero), so the 32B detects crashes the 4B never detects rather than warning earlier; H3 holds decisively, warm episode context costing 0.1324 s against one frame's 0.1302 s while the same breadth COLD costs 2.9x, which is the physical component of Context Inertia measured on the dashcam workload. Two results the hypotheses did not ask for: multi-frame input hurts the 4B at the two highest frame counts (-0.060, -0.072, both CIs excluding zero) and helps the 32B at none, so the two LARGEST 32B-minus-4B gaps sit on the two conditions nobody should adopt and ranking by the gap column selects exactly the formats that damage the device. Section 12.5 pre-registered that EP-G would either leave the verdict alone or widen the gap by the 4B degrading, and named the latter as a trap rather than a reason to adopt; the landed cell is the latter. **THE D151 (6) COST-MODEL GATE FAILS, so v5 does NOT go live.** Decode over-predicts by 25 to 32 percent held out, and the cause is not the recorded scarcity of warm requests but that WARM IS CONFOUNDED WITH ARM: arms that rebuild histories go warm and show hundreds of thousands of engine prefix hits, arms that do not show zero of both, so the warm coefficient is fitted on edf and llf and applied to arms that never go warm. Only WARM-ALL + LRU can identify it. Also recorded PROVISIONAL: `telemetry_cached_tokens` is positive in none of 18,738 residency rows, which is NOT a broken write (it is logged on the history-build path only), but the belief does understate residency on partially built histories by construction, as `coordinator.py:745-752` already states; wiring it will not by itself fix that. `believed_tier` is never `host` in 39 cells, so reload-from-host has no observed trigger state. Sessions A (spec v5, value readers) and C (engine actions, WARM-ALL) landed or are running on flash; B waits on C's interface note. New E-id rows: StudyPOLICY-V5, StudyV5-ENGINE, StudyORIN-REC, StudyD14b-FULL.) PREVIOUSLY 2026-11-20 07:30 (**StudyFROZEN-test overnight: three-type grid running; at 16 devices on seeds 4 and 5 hybrid-F-lhreq leads every baseline (robots 36 vs 33 of 45, SS 682 vs 652 of 713), F6 does not beat F and breaches the 100 ms decision period in 2.7 percent of periods; morning summary in reports/study_frozen_test.md; four user rulings pending.**) PREVIOUSLY 2026-11-20 (**StudyPOLICY-F FROZEN, with three findings that change what the freeze means and three questions for the user.** D143 rulings A and B are applied and the four freeze proofs are in `results/orchestration/live2/hybrid/policy_f_proofs.json`. (1) **THE VALUE TERM IS DECISION-INERT.** The value and quality tables are read in exactly one place, C1's ordering index, and a Step 4 control moves ZERO decisions of 16,361 under a flat table, a 100x dashcam skew, a 1000x SS skew and a 10,000x robot inversion. Dashcam items carry one constant value and one constant work so C1's order is identically EDF, and every recall item is kept unconditionally by the cap, so C1 reaches only the unexpressible `order` channel: CANCELLED BY GEOMETRY, not unexercised. Consequence: ruling A's LH-REQ swap, the 4.4x half-one correction and the SS ordering flip all change a quantity the frozen policy does not read, and the SS flip must NOT be read as evidence about single-shot against robot recall. (2) **C6 WAS DEAD in every -lhreq cell** until this run: ruling A's DEV-fit class covered 4 of the 5 (representation, tier) conditions the escalation path reads, raised MissingEvidence on cloud RICH and device N1, and `_c6_prepare` swallowed it into a counter while `live2_describe` still reported c6=True. Fixed by re-raising MissingEvidence and by two PROVISIONAL substitutions that both understate the cross-tier gain; C6 now fires 254 times and moves 3 decisions, which clears Step 2b and says nothing about whether it is worth a policy-core mirror every period. Two regression tests added, one of which would have caught it at the first cell. (3) **The SS at-risk flag is now constant at never** (0 of 356 to 717 SS requests per cell): ruling B's 0.6 s against a 2 s deadline is the same always-on defect with the sign reversed, recorded and not acted on. Also corrected: `_differing` counted LOG POSITIONS, not decisions, so proof 2's first numbers were in the wrong register (C6 11,794 positional against 3 actual); both metrics now ship, labelled. Proof 1 byte-identical on all 4 two-type cells, proof 3 at 30 of 30 dry cells, fleet suite 234 of 234, test_hybrid 7 of 7. **FOR THE USER:** (a) 20 devices offers 97 percent of the committed 15.10 req/s one-frame peak, which is what the H100's transport errors are (StudyMOT1 and StudyD7 precedent), so 16 and 18 are the feasible pair and 18 holds the same pooled robot counts as 16; (b) the over-context question in LH-REQ session 1848337166005249 needs a counting rule, since StudyRH8's exclusion rested on it being identical across policies and here it is not; (c) whether an inert value term is acceptable in a frozen policy (`reports/study_policy_f.md` section 11).)
 
 # FM-switching — Project Status
