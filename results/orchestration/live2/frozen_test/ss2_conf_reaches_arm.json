@@ -1,0 +1,51 @@
+{
+  "_provenance": {
+    "device": "nvidia_rtx_a6000",
+    "git_commit": "dddf31a4c0c38f413ccbf402f2a2f3875bdb978f",
+    "model": "CPU-stub",
+    "n": 2,
+    "script": "ss2_conf_reaches_arm_proof.py",
+    "timestamp": "2026-11-21T11:13:31.537715"
+  },
+  "arms": {
+    "cascade-routing": {
+      "field_reaches_the_arm": true,
+      "rows_equal": true,
+      "with_ss2": {
+        "digest": "d35c32b081e2f8b1",
+        "rows": 13564
+      },
+      "without_ss2": {
+        "digest": "a2c7bfcd53c9f7a7",
+        "rows": 13564
+      }
+    },
+    "confidence-cascade": {
+      "field_reaches_the_arm": true,
+      "rows_equal": true,
+      "with_ss2": {
+        "digest": "b310a47eb8661b1c",
+        "rows": 13564
+      },
+      "without_ss2": {
+        "digest": "7da4caa6dc441a84",
+        "rows": 13564
+      }
+    }
+  },
+  "cell": {
+    "n": 16,
+    "ratio": "40:40:20",
+    "robot_question_set": "lh_req",
+    "run_s": 1200.0,
+    "seed": 4,
+    "ss_question_set": "ss2"
+  },
+  "ignored": [
+    "arm_version"
+  ],
+  "method": "the first version of this proof captured the ARM's stats, but device_conf_absent is a COORDINATOR counter that _dry does not return, so W2 was ASSERTED on evidence that did not exist. This is the direct A/B instead: with the table, then with _load_ss2 stubbed to {} (the pre-wiring state). A changed digest proves the field reaches the arm and moves decisions; an UNCHANGED digest would prove the wiring inert, which is the write-only-field failure in a new place and is what this exists to exclude.",
+  "note_rows_equal": "row counts are EQUAL on both sides, so the confidences change the CONTENT of decisions and not their number, which is what a threshold flipping DEVICE against CLOUD on the same opportunities looks like",
+  "pass": true,
+  "quantity": "cascade decision digest with the committed SS2 table present vs absent"
+}

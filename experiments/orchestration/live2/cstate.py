@@ -32,6 +32,7 @@ from typing import Any, Dict, List, Optional, Tuple
 # not a CoordState attribute on purpose: CoordState is a dataclass, so an annotated class
 # attribute there would silently become a dataclass FIELD and change its constructor signature.
 _DEV_CONF_CACHE: Optional[Dict[str, float]] = None
+_DEV_CONF_SS2: Optional[Dict[str, float]] = None   # D159 (D), the single-shot table
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
@@ -536,7 +537,7 @@ class CoordState:
             self.counts["device_conf_no_question_id"] = \
                 self.counts.get("device_conf_no_question_id", 0) + 1
             return None
-        global _DEV_CONF_CACHE
+        global _DEV_CONF_CACHE, _DEV_CONF_SS2
         if _DEV_CONF_CACHE is None:
             import device_confidence as DC          # on sys.path via run_live2_cell
             _DEV_CONF_CACHE = dict(DC._load_primary())
@@ -546,11 +547,33 @@ class CoordState:
                     "reads_device_answer would be charged the device-answer wait and handed None "
                     "for every question, which is the defect this supplier exists to fix. "
                     "Check results/sember/study_e7/e7_requests_h100nvl.jsonl.")
+            # D159 (D): the SINGLE-SHOT table as well. Before this, only `_load_primary` (the
+            # robot StudyE7 table) was consulted, so every single-shot question returned None even
+            # though `device_confidence.confidence()` already consulted both and
+            # `ss2_device_confidence.json` already existed. Measured consequence: 357 of the 377
+            # recall decisions per cell, 94.7 percent, were decided by each cascade arm's
+            # MISSING-DATA DEFAULT rather than by its published mechanism
+            # (`reports/study_saturation_knee.md`, the cascade correction). The two key spaces are
+            # disjoint by construction, a 64-hex digest against "<dataset>/<id>", so neither can
+            # mask the other. SS2 absence stays NON-FATAL, unlike the robot table: StudySS1 and
+            # StudySS2 recorded no probabilities, so None was the honest value until the
+            # re-recorded pass existed.
+            _DEV_CONF_SS2 = dict(DC._load_ss2())
         v = _DEV_CONF_CACHE.get(qid)
         if v is None:
             v = _DEV_CONF_CACHE.get(str(qid).lower())
+        src = "robot" if v is not None else None
+        if v is None and _DEV_CONF_SS2:
+            v = _DEV_CONF_SS2.get(qid)
+            if v is None:
+                v = _DEV_CONF_SS2.get(str(qid).lower())
+            if v is not None:
+                src = "single_shot"
         key = "device_conf_supplied" if v is not None else "device_conf_absent"
         self.counts[key] = self.counts.get(key, 0) + 1
+        if src is not None:
+            k2 = "device_conf_from_" + src
+            self.counts[k2] = self.counts.get(k2, 0) + 1
         return v
 
     def observation(self, now: float, epoch: str, reads_device_answer: bool = False

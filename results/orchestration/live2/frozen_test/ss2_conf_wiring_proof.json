@@ -1,0 +1,82 @@
+{
+  "W1_coverage": {
+    "by_rule": {
+      "geometric_mean_token_prob|primary": 94,
+      "geometric_mean_token_prob|weak": 119,
+      "mcq_chosen_letter_mass|primary": 144
+    },
+    "confidence_min": 0.4045,
+    "confidence_p10_p50_max": [
+      0.7619,
+      0.8734,
+      1.0
+    ],
+    "covered": 357,
+    "harness_single_shot_distinct": 357,
+    "key_spaces_disjoint": true,
+    "missing": 0,
+    "missing_examples": [],
+    "pass": true,
+    "robot_table_entries": 839,
+    "ss2_table_entries": 1042
+  },
+  "W2_cascade_receives": {},
+  "W3_non_cascade_identical": {
+    "base_matches_committed": true,
+    "digests": {
+      "b7-edf-feasibility": {
+        "digest": "ed1038485cd95fc8",
+        "rows": 13570
+      },
+      "cascade-routing": {
+        "digest": "d35c32b081e2f8b1",
+        "rows": 13564
+      },
+      "confidence-cascade": {
+        "digest": "b310a47eb8661b1c",
+        "rows": 13564
+      },
+      "hybrid-F-lhreq-noc3": {
+        "digest": "200f72359b035c3a",
+        "rows": 13541
+      }
+    },
+    "note": "run with the SS2 table WIRED. A non-cascade arm is never handed the field, so its digest here must equal its digest without the wiring. The base's committed digest is the external anchor: if it still matches BASE_COMMITTED, the wiring moved nothing for arms that do not read the field.",
+    "pass": null
+  },
+  "W4_prediction": {
+    "claim": "wiring the confidences will NOT by itself make four of the five cascade arms discriminate. Their thresholds sit OUTSIDE the observed confidence range, which is why all five read the identical robot range [0.386991, 0.999972] and yet cascade-routing called all 20 DEVICE while streamscout called the same 20 CLOUD (reports/study_saturation_knee.md, the cascade correction). The single-shot range is comparable, min 0.4045 and p50 0.8734, so the same saturation should recur.",
+    "committed_before": "any cascade cell runs with the wiring live",
+    "predicted": {
+      "cascade_routing": "saturates, reads nearly all 357 as HIGH",
+      "confidence_cascade": "SPLITS: it discriminated 13 DEVICE / 7 CLOUD on the robot side, so it should split the 357 too",
+      "r3_streaming": "saturates",
+      "streamscout": "saturates, reads nearly all 357 as LOW",
+      "thinking_qwenvl_atdm": "saturates"
+    },
+    "refuted_if": "any of the four saturating arms splits the 357 by more than 10/90",
+    "why_it_matters": "if the prediction holds, the 94.7 percent missing-data problem is replaced by a THRESHOLD-PLACEMENT problem rather than solved, and the cascade family still cannot be scored on its published mechanism"
+  },
+  "_provenance": {
+    "device": "nvidia_rtx_a6000",
+    "git_commit": "dddf31a4c0c38f413ccbf402f2a2f3875bdb978f",
+    "model": "CPU-stub",
+    "n": 357,
+    "script": "ss2_conf_wiring_proof.py",
+    "timestamp": "2026-11-21T11:01:07.959673"
+  },
+  "cell": {
+    "n": 16,
+    "ratio": "40:40:20",
+    "robot_question_set": "lh_req",
+    "run_s": 1200.0,
+    "seed": 4,
+    "ss_question_set": "ss2"
+  },
+  "check_6_proxy_validity": {
+    "consequence": "a cascade arm compares ONE threshold against all three, so 119 of 357 decisions, 33.3 percent, rest on a declared WEAK signal. Per check 6 that subset may NOT carry a headline conclusion and must be reported as a limitation with the affected analysis marked unvalidated",
+    "detail": "144 of the 357 use mcq_chosen_letter_mass, the same rule as the robot table and declared signal_strength primary; 94 use geometric_mean_token_prob on free_form, also primary; and 119 use geometric_mean_token_prob on the point subset, which the committed table itself declares signal_strength WEAK",
+    "proxy": "one `device_answer_confidence` field carrying TWO different notions of confidence",
+    "remedy": "report the three rules separately, or restrict any cascade headline to the 238 primary-signal questions"
+  }
+}
