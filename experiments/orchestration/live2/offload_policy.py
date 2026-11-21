@@ -16,16 +16,30 @@ The robot branch deliberately emits NO field, because retention-on and reload-al
 default, and a no-op field would be a write that claims a decision it does not make. Only the two
 deviating types carry a control.
 
-WHAT IS AND IS NOT ESTABLISHED HERE. This module decides and emits. Whether the engine HONOURS the
-field is a separate question, answered on the H100 by offload_verify.py, and it is exactly the
-write-only-field trap in reverse: the value provably reaches the wire, and until that script runs
-nothing here may be described as working. State it that way in any report.
+WHAT IS ESTABLISHED. This module decides and emits, and offload_verify.py has now confirmed on the
+H100 that the engine HONOURS both spellings used here (see the block below). The rule is therefore
+actuatable, not merely emitted. The one residual gap is the register of the forbid-reload evidence:
+it rests on a between-probe comparison with the identically constructed positive control, because
+that probe's own within-probe control was contaminated by its predecessor's recompute.
 """
 from typing import Any, Dict, Optional
 
 # int 0, never False: a bool would be a different declared type arriving at the engine, and the
 # coerced-field failure (a field declared int read as bool, turning 2 into 1) is a committed
 # precedent in this repo's protocol.
+# VERIFIED ON THE H100, 2026-11-21 (results/orchestration/live2/offload_verify/
+# offload_verify_h100.json, run on a fresh round-1 server). Do NOT change these spellings:
+#   max_offload_tokens: 0   HONOURED. Store with it, evict, re-read: COLD (cached 0, external 0),
+#                           against the positive control's HOST-WARM (external 8,080) on an
+#                           otherwise identical probe. This is what the dashcam and assistive
+#                           no-retention rule rides on.
+#   max_load_tokens: 0      HONOURED. Read came back COLD at 1.387 s, matching the 1.411 s cold
+#                           read, where the identically constructed positive control was
+#                           HOST-WARM at 0.123 s.
+#   kv_load_tiers: []       NOT HONOURED. The same probe came back HOST-WARM (external 8,080,
+#                           0.120 s), so the empty tier filter is ignored on this build. It is
+#                           recorded here because it is the obvious-looking way to express
+#                           "forbid reload" and it silently does nothing.
 NO_RETENTION: Dict[str, Any] = {"max_offload_tokens": 0}
 NO_RETENTION_NO_RELOAD: Dict[str, Any] = {"max_offload_tokens": 0, "max_load_tokens": 0}
 

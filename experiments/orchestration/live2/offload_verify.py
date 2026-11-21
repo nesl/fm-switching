@@ -63,6 +63,12 @@ def g(d, *names):
     return sum(v for k, v in d.items() if any(k.split(":", 1)[-1].startswith(n) for n in names))
 
 
+# NOTE ON kv_offload_load_bytes, from the 2026-11-21 run: the delta came back FRACTIONAL
+# (3913421399.102), so it is a histogram sum and not a byte counter. The classification below only
+# ever asks whether it is > 0, which a histogram sum still answers, and the external-hit count
+# carries the verdict either way. It is recorded so nobody later cites this number AS BYTES.
+
+
 def classify(d, cached_tokens, prompt_tokens):
     """RH5's pre-registered discriminator, unchanged."""
     local, ext = g(d, "prefix_cache_hits"), g(d, "external_prefix_cache_hits")
@@ -152,9 +158,16 @@ async def run(base, model, kv, out):
                 "does max_offload_tokens=0 stop the prefix being retained on host")
     await probe("Q3a_forbid_reload_max_load_tokens", None, {"max_load_tokens": 0},
                 "does max_load_tokens=0 stop a host-resident prefix being reloaded")
-    # the control for Q3: same prefix, no controls. Must be HOST-WARM, or Q3a's COLD proves nothing.
+    # The control for Q3, with the fix the first run proved necessary. On 2026-11-21 this control
+    # came back GPU-WARM, because the FORBIDDEN read had itself recomputed the prefix cold and left
+    # it GPU-resident, and nothing evicted it in between, so the control hit that recompute and
+    # never consulted the host. It could then not distinguish "forbid-reload worked" from "never on
+    # host", which is why the verdict was INCONCLUSIVE. Evicting first forces the control to answer
+    # the question it exists to answer.
     salt3 = "offverify|Q3a_forbid_reload_max_load_tokens"
+    ev3 = await cell.evict(kv, "Q3a_control")
     ctl = await cell.post(text(salt3, PREFIX_WORDS), salt3, kvtp=None, label="Q3a_control_replain")
+    ctl["eviction_before_control"] = ev3
     probes.append(dict(probe="Q3a_control_was_it_on_host", question=
                        "after the forbidden read, is the same prefix still reachable on host",
                        read=ctl))
