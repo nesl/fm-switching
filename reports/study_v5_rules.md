@@ -1341,3 +1341,60 @@ percent**, which is its own problem with WARM-ALL as a baseline.
 **Targeted warming beats unconditional warming at both seeds; the magnitude varies by 2.8x between
 them.** So the thesis-supporting claim holds and I am restating it at 2.08x pooled rather than the
 3.79x I published from one seed, with the direction as the finding and the magnitude as unstable.
+
+## noc3's WARM 0 is confirmed STRUCTURAL, so the comparator framing is settled
+
+Four independent lines, both seeds (s4 HEAD `19d5ef8`, s5 HEAD `1e93903`, both with the fix commit
+`2b8714c` as an ancestor):
+
+| check | s4 | s5 |
+|---|---|---|
+| `release_piece` / `submitted_piece` | 0 / 0 | 0 / 0 |
+| ran on the fixed path | yes | yes |
+| HTTP 400 | **0** | **0** |
+| robot `cache_path` WARM | **0** | **0** |
+
+**noc3 chains no pieces, so the race could not touch it, and it had no 400s to suppress anything
+with. The zero is the mechanism being absent, not suppressed.** The mechanism-absent comparator
+framing stands and the Rule 2 entry is settled rather than provisional: **fired and did not help,
+with the break localized to the warm-to-on-time link, against a comparator that reaches the state
+zero times and matches it.**
+
+### The release counts expose the economic reading, which is the plainest version of the result
+
+| | robot questions released to cloud, pooled over s4 and s5 |
+|---|---|
+| hybrid-F-lhreq-noc3 | **24 of 45 (53.3 percent)** |
+| v5-rules | **44 of 45 (97.8 percent)** |
+
+**v5-rules escalates 1.83x as many robot questions, plus 83,961 prefills at s5 alone, for +1 correct
+answer in 45.**
+
+And the fate of the 20 extra escalations says why, in the strongest possible form:
+
+| fate of the 20 extra escalations | n |
+|---|---|
+| cloud answer correct where the device was wrong | **2** |
+| cloud answer wrong where the device was right | **1** |
+| no change, of which **resolved to the device's own answer anyway** | 17, of which **16** |
+
+**Sixteen of the twenty extra escalations resolved to the device answer the base already had.** That
+is not "the extra work was unhelpful", it is **80 percent of the extra cloud work producing the
+answer that would have been produced without it.**
+
+**So the device is carrying the robot task**, and escalation can only pay on the intersection of
+three conditions: the device is wrong, the cloud is right, and the cloud returns by the deadline.
+**That intersection was hit 2 times in 20.** A policy that escalates more aggressively is buying
+lottery tickets on a conjunction, and on this workload the first condition is rare because the device
+is usually right and the third is rare because the queue is deep.
+
+**This is the result I would lead the section with.** It needs no power analysis, no warm counts and
+no belief field: twice the cloud escalations, four fifths of them answered by the device regardless,
+and one net question.
+
+### Limitation recorded now rather than discovered at 06:00
+
+**`_kv0.25` has no pre-fix twin** (it waited for the fix under D158), so the within-cell pre/post
+natural experiment exists for exactly one cell, warm-all-lru s4. **It is n = 1 of its kind and
+cannot be replicated on cell 4.** Reported as a single natural experiment with its confound named,
+not as a pair of them.
