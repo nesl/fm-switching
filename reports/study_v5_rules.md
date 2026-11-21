@@ -714,3 +714,88 @@ MOONCAKE-REUSE-FIRST's sort key is the constant 2 and the policy reduces to EDF.
 property rather than a coincidence of regime. It also means the EP-G mooncake cell carries no
 information about mooncake that the b7 cell does not, and the pair should be reported as one
 measurement with a note, not as two agreeing arms.
+
+## Seed 5 replicates the zero, and the 20 decisions that separate the two arms are now named
+
+The H100's seed-5 EP-G per-frame race-fixed block (25 robot questions at this seed) against the
+same base:
+
+| | by deadline | on time | single-shot | dashcam | release_monitor |
+|---|---|---|---|---|---|
+| v5-rules | 0.40 | 6 / 25 | 195 / 356 | FAIL | 4,619 |
+| hybrid-F-lhreq-noc3 (base) | 0.36 | 8 / 25 | **353 / 356** | meet | 10,848 |
+| delta | **+0.04** | **-2** | **-158** | lost | **-6,229** |
+
+The +0.04 is one question of 25. Pooled over seeds 4 and 5, **45 robot questions, the headline gain
+is +1 question correct by deadline, on time -1, single-shot -321.** The zero replicates to within
+one question, which is the smallest unit the metric has.
+
+### The decision-level comparison, which is the part that is new
+
+My ask (3) was whether the base's declines are the extra releases. The H100's answer is exact at
+both seeds: **8 of 8 at seed 4, 12 of 12 at seed 5. Every opportunity the base declined,
+v5-rules released, and v5-rules released nothing else the base did not.**
+
+So across two seeds the two arms differ on **exactly 20 recall decisions**, each identifiable by
+opportunity id, out of roughly 27,000 decision rows. **Those 20 extra releases bought +1 correct by
+deadline and -1 on time.**
+
+This is Step 2b satisfied in the strongest form available: not "the logs differ", but the
+differing decisions enumerated and the direction of each one known. It also makes the release half
+of v5-rules a settled measurement rather than an estimate: **its decision rule is a strict
+superset of its base on the release side, by 20 decisions, worth +1 question.**
+
+### And it forces the attribution of the other losses, by arithmetic rather than inference
+
+Twenty extra recall requests over two seeds cannot destroy 321 single-shot questions and 6,229
+dashcam monitors in one seed. The load that can is the other channel: at seed 5 v5-rules emitted
+**83,961 warm-ahead prefills** and 2,894 rebuild pieces, against the base's zero of both.
+
+**So the two halves of v5-rules separate cleanly, and they are not equally priced:**
+
+| half | mechanism | cost to the other tasks | benefit |
+|---|---|---|---|
+| release side | release what the base declines | **20 requests, negligible** | **+1 question / 45** |
+| warm-ahead side | prefill ahead of the question | 83,961 prefills, -158 SS, -6,229 monitors at s5 | not separable from the +1 |
+
+The release side is nearly free and does something small. The warm-ahead side is the entire cost.
+**Reported as one arm, v5-rules looks like a policy that gains nothing at great expense; decomposed,
+it is a cheap rule worth one question bolted to an expensive one worth an unknown amount.** Those
+are different objects and the paper's "v5 without the counterfactual" ablation should not be read as
+testing the first.
+
+### Warm-ahead's own efficiency at seed 5
+
+| quantity | value |
+|---|---|
+| warm_ahead_wanted | 163,816 |
+| emitted | 83,961 |
+| unexpressible | 79,830 (**48.7 percent of wants**) |
+| release_at_COLD | 356 |
+| release_at_GPU-WARM | **25** of 381 (6.6 percent) |
+
+**83,961 prefills were emitted and 25 questions arrived at GPU-WARM: about 3,358 prefills per warm
+release.** At seed 4 the figure was 19 of 377 (5.0 percent), so the hit rate replicates low rather
+than being a seed artefact. Nearly half of what the arm wanted was unexpressible, which is the
+same channel-discard shape recorded for `desired_tier`, and the warm-ahead yield key is **again
+absent from `arm_stats` at seed 5**, so the probable defect recorded for W2 replicates too.
+
+### The one open question the ids can still answer, and it is cheap
+
+Of the 20 extra releases, **how many were released at GPU-WARM, and is the +1 correct-by-deadline
+question among them?** The two outcomes are not the same finding:
+
+- if the +1 is a GPU-WARM release, warm-ahead converted once in 45 and the headline is "the
+  mechanism works and costs 3,358 prefills per hit";
+- if the +1 is a COLD release, **warm-ahead contributed nothing to the headline at all** and the
+  entire +1 is attributable to releasing a declined question, which the release rule does without
+  any prefill. The 83,961 prefills would then have bought zero questions, not one.
+
+That is a join on ids the H100 already has in hand, and it decides which of two very different
+sentences the paper carries. Asked; not blocking, and if it does not land the result is reported
+with both readings stated.
+
+**Status: the zero is replicated and labelled. Under Rule 2 this is fired-and-did-not-help on the
+warm-ahead side (the mechanism emitted 83,961 prefills and landed 25 warm releases, so it is not
+unexercised) and a small real positive on the release side. It is not a settled negative for
+warm-ahead until the Step 4 control runs, which is the GPU-WARM join above.**
