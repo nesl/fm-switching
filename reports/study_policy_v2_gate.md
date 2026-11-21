@@ -233,7 +233,20 @@ while the engine reported cache hits. **There are no such rows, and the reason i
 because it is not the reassuring one.**
 
 `telemetry_cached_tokens` appears in 18,738 residency rows over 45 cells: absent in 16,934, exactly
-zero in 1,804, **positive in none**. I first read that as a broken write, because five cells report
+zero in 1,804, **positive in none**.
+
+**CORRECTION, added 2026-11-20 after a wider audit (session C, 213 logs and 20,630 rows): "positive
+in none" is true of THIS population and is not a property of the field.** Over the wider base the
+field is positive in **95 rows**, 992 to 18,896 tokens, median 3,952. Every positive row sits in a
+pilot or acceptance cell and none in the 45 frozen-grid and sweep cells counted above, so both
+readings are correct on their own population and my error was generalising a population-specific
+zero into a statement about the field. The conclusion below is unaffected, and one of its clauses is
+now measured rather than inferred: **72 of those 95 positive rows are on PIECE-CHAINING arms and
+none is on an arm that rebuilds whole.** So going warm and reporting reuse are DIFFERENT properties,
+which is why edf and llf take 358 and 362 GPU beliefs while reporting reuse zero times. It is also
+why the WARM-ALL instrument has to SLICE: a sliced build is the only committed shape that both goes
+warm and reports reuse, so it is the only one that can identify the warm coefficient within a single
+arm rather than across arms. I first read that as a broken write, because five cells report
 424,000 to 513,000 engine prefix hits while every telemetry row in them reads zero. That reading was
 wrong and I checked it before reporting it. The field is written at `coordinator.py:756` on the
 history-build path ONLY, so it covers history pieces and not the dashcam monitor traffic that
