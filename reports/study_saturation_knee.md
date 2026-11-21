@@ -247,3 +247,141 @@ cells measured tonight**, `cascade-routing` 0 of 20 and `r3-streaming` 0 of 377.
 **driven by its default on the side where it acts and threshold-saturated on the side where it does
 not.** Rule 2 **unexercised** applies to the robot side only, and the single-shot side is not a null
 at all but an unmeasured mechanism with a default standing in for it.
+
+---
+
+## The within-run instrument: the knee narrows to 3.9 percent, and the pooled TTFT of every crossing cell has been read wrong
+
+The H100 sent `querystream-proactive_n16_s5` as a point that does not fit: 5,550 uncached tok/s,
+above the knee, but TTFT p50 7.87 s rather than the 31.9 s to 138.6 s the other above-knee cells
+showed. It is not a counterexample. It is the knee being crossed in the middle of a run, and
+measuring it dissolved the discrepancy, narrowed the knee bound by a factor of four, and refuted
+my own first explanation of it.
+
+### What the run-mean axis was hiding
+
+`querystream-proactive_n16_s5`, dashcam first-token p50 by 100 s window of submit time, against
+offered uncached tokens per second in the same window:
+
+| t_submit (s) | offered unc tok/s | n | non-200 | ft p50 (s) | ft p90 (s) |
+|---|---|---|---|---|---|
+| 0 to 100 | 4,039.2 | 869 | 0 | 0.458 | 3.026 |
+| 100 to 200 | 4,660.4 | 1,037 | 0 | 0.670 | 2.637 |
+| 200 to 300 | 4,927.5 | 1,018 | 1 | 3.246 | 5.323 |
+| 300 to 400 | 4,799.7 | 1,020 | 0 | 1.540 | 4.128 |
+| 400 to 500 | 6,169.2 | 1,037 | 0 | 1.829 | 8.005 |
+| 500 to 600 | 9,954.5 | 1,017 | 0 | 41.527 | 80.630 |
+| 600 to 700 | 9,108.2 | 1,028 | 0 | 98.003 | 108.520 |
+| 700 to 800 | 8,986.6 | 1,019 | 1 | 161.483 | 167.579 |
+| 800 to 900 | 8,398.9 | 1,028 | 0 | 177.354 | 218.758 |
+| 900 to 1000 | 4,862.1 | 621 | 10 | 228.227 | 245.443 |
+| 1000 to 1100 | 697.1 | 59 | 0 | 198.688 | 219.128 |
+| 1100 to 1200 | 0.0 | 7 | 7 | n/a | n/a |
+
+Run mean 5,550.3 uncached tok/s, one x-coordinate for a run whose offered load ranges 0 to 9,954.
+
+The pooled p50 of 7.88 s is the median of a monotone ramp from 0.46 s to 228 s. It reports
+approximately the TTFT at the moment the median request was submitted. **It is a mixture of two
+regimes, and it is not a level this arm ever sat at.** This cell's own last window is 198.7 s,
+squarely inside the above-knee band. The discrepancy was in the summary statistic, not the cell.
+
+Two further readings from the same table, both of which matter beyond this cell:
+
+- **TTFT does not track instantaneous load.** Offered load falls back to 4,862 and then 697, which
+  are below-knee rates, and TTFT does not recover: 228 s and 199 s. Above the knee, TTFT is set by
+  accumulated backlog, not by the current rate. The knee is a threshold in the rate; the level above
+  it is an integral.
+- **The 19 non-200 are not the submission race.** All 19 are dashcam, all carry `http_status` null
+  rather than an HTTP code, 17 of 19 are at t > 900 s, and 7 of them are the last 7 requests of the
+  run. These are the null-status transport class (0.57 percent, already on tomorrow's list), and
+  they are the tail of a collapsing run. They cannot be biasing the pooled p50 downward: 19 of
+  9,760, all in the slow half, so excluding them raises the late p50 if anything.
+
+### The same instrument on all 29 cells, which narrows the knee
+
+Criterion declared in advance of reading the result: a cell **crosses** if the first-token p50 in
+any 100 s window of submit time exceeds 2.0 s. The below-side cells sit at 0.27 s to 0.54 s pooled
+and the above-side at 31.9 s and up, so 2.0 s is more than an order of magnitude from either. The
+5.0 s and 10.0 s thresholds are reported alongside as a sensitivity check.
+
+| group | n | run-mean unc tok/s | pooled ft p50 (s) | crosses at 2.0 s? |
+|---|---|---|---|---|
+| never crosses | **19** | 4,356.0 to **4,511.7** | 0.27 to 0.54 | **none, 0 of 19** |
+| crosses | **10** | **4,685.8** to 5,830.8 | 0.81 to 373.39 | **all, 10 of 10** |
+
+**Zero misclassifications in 29 cells.** The knee was bounded between 4,511.7 and 5,192.1 tok/s by
+the gap between cells; the within-run criterion bounds it between **4,511.7 and 4,685.8**, a 3.9
+percent interval rather than 15 percent. REGISTER: this is an **observed partition over 29 cells**,
+not a fitted threshold, and the bound is the gap between the highest non-crossing cell and the
+lowest crossing one.
+
+The narrowing came from `v5-rules`, which no cell-level reading could have placed. Both seeds are
+just above the bound and both show the **weakest** crossings in the set: s5 crosses at 400 s and
+reaches only 5.93 s in its last window, and s4 crosses the 2.0 s threshold at 200 s but never the
+5.0 s one and ends at 0.61 s, so s4 crosses **transiently and recovers**. The cells nearest the
+boundary showing the mildest and least sustained crossings is the consistency check on the boundary
+itself.
+
+The control from the earlier section still holds across the new bound: the highest non-crossing cell
+is **CAL1F** (`warm-all-lru-reactive`, 4,511.7) and the lowest crossing cell is **EP-G** (`v5-rules`
+s5, 4,685.8), so the bracket is spanned by two different workloads and is not a workload artefact.
+
+### My explanation of the spread above the knee was wrong, by my own instrument
+
+On seeing querystream s5 cross later in its run than warm-all-lru s5, which crosses in its first
+window, I formed the
+hypothesis that **crossing time** explains the pooled spread, since the two cells are 1.0 percent
+apart in load and 47x apart in pooled p50. Spearman correlations over the 10 crossing cells:
+
+| y | vs run-mean load | vs crossing time |
+|---|---|---|
+| pooled ft p50 | **+0.77** | -0.43 |
+| last-window ft p50 | **+0.84** | **-0.13** |
+
+**Crossing time explains essentially nothing about severity (rho -0.13 on the terminal window), and
+load explains it monotonically (+0.84).** My hypothesis is refuted. What crossing time explains is
+only how much of a run is spent on each side, which is why it correlates with the *pooled* statistic
+and not with the severity.
+
+The controlled pair is the clearest way to see it. Those two cells are 1.0 percent apart in load:
+
+| cell | load | crosses at | pooled ft p50 | last-window ft p50 |
+|---|---|---|---|---|
+| `querystream-proactive` s5 | 5,550.3 | 200 s | **7.88 s** | **198.69 s** |
+| `warm-all-lru` s5 epg | 5,603.6 | 100 s | **373.39 s** | **377.10 s** |
+
+On the pooled statistic they differ 47x. On the terminal window they differ 1.9x. **The 47x was the
+summary statistic, not the system.**
+
+### Consequence for the frozen-test table
+
+For the 19 non-crossing cells the pooled first-token p50 is a fair summary: those runs are in one
+regime throughout, and their first and last windows agree to within 0.2 s.
+
+For the **10 crossing cells the pooled p50 is not a property of the arm.** It is a function of where
+in its own ramp the median request happened to land, and it moves 47x between two cells that are 1
+percent apart in load. Any row of `study_frozen_test.md` whose cell appears in the crossing group
+should be read as a mixture, and the severity comparison between two crossing arms should use the
+terminal window or an explicitly post-crossing statistic. This does not change any arm's **deadline
+or on-time** score, which is computed per request and never pooled across the regimes, so no scored
+result moves. It changes only how the TTFT column may be compared.
+
+One exception worth recording against the "backlog does not drain" reading: 9 of the 10 crossing
+cells end above their crossing threshold, but `warm-all-lru` CAL1F pools 31.89 s and ends at 4.51 s,
+so that run does partly drain. The non-recovery is the common case tonight, not a law.
+
+### Status
+
+PROVISIONAL, consistent with the overnight brief: the 2.0 s crossing criterion and the terminal
+window as the severity statistic are both unforeseen decisions taken to read a result, not
+methodological changes to any scored quantity. Neither is used to compute a score. The knee bound
+and the partition are MEASURED over 29 cells; the mechanism behind the threshold is not established
+here, and the cache-tail observation below is the open lead.
+
+The cache side, recorded as a lead and not a finding: in querystream s5 the median request's
+uncached token count is flat at 372 to 378 across the crossing, while the mean cached fraction falls
+0.80 to 0.68. The offered-rate rise is therefore carried by a **tail** of badly-missing requests
+rather than by a shift in the typical request, and the queue spreads that tail's cost over the whole
+population. Whether the cache tail causes the crossing or follows from it is not established by
+these data: both move together within one 25 s window at t = 475. The measurement that would
+separate them is the residency and eviction log, which is on disk (`residency.jsonl`) and unread.
