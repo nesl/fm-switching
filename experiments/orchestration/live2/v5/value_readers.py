@@ -62,7 +62,12 @@ DEVICE = "DEVICE"
 # MARGIN_CF guards the counterfactual's deviation from base hybrid-F. Both are in units of the
 # objective: expected correct on-time answers.
 MARGIN_SEND = 0.0
-MARGIN_CF = 0.05
+# MARGIN_CF IS NOT DECLARED HERE. It lives in cf_margin.py as the single declared constant whose
+# ONLY read is cf_margin.resolve_margin(), which is what makes D151 (1)'s "never tuned" checkable
+# FROM THE CODE rather than from a promise. A second declaration here defeated that: a reader
+# auditing the margin would have found two values and no way to tell which one a run used. The
+# placeholder 0.05 that stood here was never read by any cf_* function.
+from cf_margin import MARGIN_CF, MARGIN_CF_RULE  # noqa: E402,F401  the single declaration
 
 
 @dataclass(frozen=True)
