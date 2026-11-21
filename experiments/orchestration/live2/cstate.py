@@ -585,7 +585,9 @@ class CoordState:
         return Observation(now_s=round(now, 3), epoch=epoch, streams=tuple(streams),
                            recall=tuple(queries), cloud=cloud,
                            budget_remaining_gpu_s=(self.budget.remaining_gpu_s()
-                                                   if self.budget is not None else 0.0))
+                                                   if self.budget is not None else 0.0),
+                           live_sessions=tuple(sorted(k for k, v in self.sessions.items()
+                                                      if v.open)))
 
     def _host_fraction(self) -> float:
         if self.host_tier_tokens <= 0:

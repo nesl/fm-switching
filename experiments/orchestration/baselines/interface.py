@@ -154,6 +154,10 @@ class Observation:
     budget_remaining_gpu_s: float
     # The device is always warm for its own history: a fixed design assumption, not an observation.
     device_always_warm: bool = True
+    # A session the coordinator already holds uploaded frames for is a CAUSALLY KNOWN entity: it
+    # exists, it has uploaded, and nothing about it is in the future. Naming it is therefore not a
+    # future-knowledge leak, which is what `known_sessions` in `validate_action` guards against.
+    live_sessions: Tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.epoch not in EPOCH_KINDS:
@@ -270,7 +274,7 @@ def validate_action(action: Action, obs: Observation) -> Action:
     sids = {s.stream_id for s in obs.streams}
     qids = {q.query_id for q in obs.recall}
     known_sessions = (set(obs.cloud.gpu_warm_sessions) | set(obs.cloud.host_warm_sessions)
-                      | {q.session_id for q in obs.recall})
+                      | {q.session_id for q in obs.recall} | set(obs.live_sessions))
     seen = set()
     for s in action.streams:
         if s.stream_id not in sids:

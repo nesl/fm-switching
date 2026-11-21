@@ -54,6 +54,7 @@ import cachekeys as CK                                                  # noqa: 
 import cstate as CS                                                     # noqa: E402
 import schema as SC                                                     # noqa: E402
 import scores as S2                                                     # noqa: E402
+import engine_actions as EA                                              # noqa: E402
 from backend import (Live2Backend, Live2Submission, cached_tokens_of,    # noqa: E402
                      output_tokens_of, prompt_tokens_of)
 
@@ -694,6 +695,21 @@ class Live2Coordinator:
             ct = cached_tokens_of(usage)
             pt = prompt_tokens_of(usage)
             path, frac = SC.cache_path_of(ct, pt)
+            # D150 / spec v5 section 8: the engine's OWN per-request cached-token count corrects
+            # the residency belief. Until this read existed the belief was a prediction with no
+            # correction, which is the write-only shape CLAUDE.md names. The corrector refuses to
+            # act on a monitor (no session) and on a None (no usage block is NO EVIDENCE, not a
+            # miss), both of which it distinguishes internally.
+            if sub.session_id:
+                _s = self.st.sessions.get(sub.session_id)
+                if _s is not None:
+                    _bu = EA.belief_update_from_cached_tokens(
+                        _s, ct, pt, now=t,
+                        external_tokens=EA.external_cached_tokens_of(usage))
+                    self.counts["belief_corrections"] += 1
+                    if _bu.changed:
+                        self.counts["belief_corrections_changed"] += 1
+                        self.counts["belief_to_" + _bu.after] += 1
             done_s = sub.sent_s + (r["total_s"] * self.speed if r.get("total_s") else 0.0)
             first_s = (sub.sent_s + r["ttft_s"] * self.speed) if r.get("ttft_s") else None
             if self.logs is not None:
