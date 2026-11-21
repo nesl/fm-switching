@@ -697,3 +697,13 @@ ARMS.update(V5RULES_ARMS)
 # `v5-rules` is not: a new labelled arm under D79, never to be read as full v5.
 from arms_v5rules2 import V5RULES2_ARMS                                 # noqa: E402
 ARMS.update(V5RULES2_ARMS)
+
+# FULL v5 (D151 + D160 (2)): v5-rules-2 plus session B's counterfactual on robot request, state and
+# sync decisions, with cf_objective's deficit weighting and cf_instrument's decision clock. The
+# cf_* modules are CALLED and never copied. Imported last for the same cycle reason as the blocks
+# above, and NOT in ARM_NAMES for the same reason v5-rules and v5-rules-2 are not. A SCORABLE
+# full-v5 cell cannot be constructed until the D162 gate passes, because cf_margin.resolve_margin
+# raises MarginUnset in the scorable path; that is deliberate, so "no cells before the gate" is a
+# property of the code rather than of a session's discipline.
+from arms_v5full import V5FULL_ARMS                                     # noqa: E402
+ARMS.update(V5FULL_ARMS)
