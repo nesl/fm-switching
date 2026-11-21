@@ -1,0 +1,42 @@
+# D159 (E): cells still used in analysis that were RUN BEFORE THE RACE FIX (2b8714c, 2026-11-20 21:28).
+# Format the driver reads: arm n seed tag
+# Determined by ancestry, not timestamps: a cell ran WITH the fix iff 2b8714c is an ancestor of the
+# git_commit its run_meta.json/header.json recorded. 58 of 84 real cells are pre-fix; this file is
+# the still-used subset, in priority order. Audit: reports/study_prefix_race_audit.md
+#
+# WHY IT MATTERS: the race was a confound on WARMTH, not only on errors. A piece whose bytes 400'd
+# left the history cold, so warm counts in every pre-fix cell are biased DOWNWARD (measured: warm
+# robot deliveries 1 -> 6 across the fix on one arm/workload/seed). Every quantity below is a warm
+# quantity, which is why these specific cells are the ones worth the GPU time.
+
+# TIER 1, the D156(4) cost-model gate. BOTH fit cells and 2 of its 4 test cells are pre-fix, and
+# the gate exists to predict warm first-token latency. Highest priority: nothing about the gate's
+# refit under D159 (B) is interpretable while its fit data is race-contaminated on warmth.
+warm-all-lru 16 4 _L3_cal1f_rf
+warm-all-lru-reactive 16 4 _L3_cal1f_rf
+warm-all-lru-reactive 16 4 _L3_epg_rf
+warm-all-lru-off 16 4 _L3_epg_rf
+
+# TIER 2, de-confound the seed-4 row of the frozen-test headline table. Every other seed-4 _L3_epg
+# cell is post-fix, so these two mix race status with arm inside one row of the table.
+b7-edf-feasibility 16 4 _L3_epg_rf
+eco-llm 16 4 _L3_epg_rf
+
+# TIER 3, test whether the hybrids' ZERO warm rows are structural or race-induced. My 07:20 finding
+# that the committed by_arm split holds out exactly the zero-warm arms rests on these two cells, and
+# all 26 cells of that gate set are pre-fix, so the zero may be partly a race artefact. Two cells
+# settle it. If warm stays 0 post-fix, the finding is structural as claimed; if it does not, my
+# "structural" wording is wrong and MARGIN_CF's blocker needs restating.
+hybrid-F-lhreq 16 4 _rf
+hybrid-F6-lhreq 16 4 _rf
+
+# NOT LISTED, deliberately:
+#  - warm-all-lru 16 4 _L3_epg: already has a post-fix twin, _L3_epg_rf (that pair IS the race-fix
+#    proof, 4,244 HTTP 400s to 0 on the same arm/workload/seed).
+#  - the other 50 pre-fix cells: the _L3 (no EP-G) set is superseded by _L3_epg, and the remaining
+#    23 cells of the 26-cell gate set are superseded for FITTING by D159 (B)'s new load sweep.
+#    They stay cited only as the by_seed positive control, which is a control on the estimator and
+#    not a warm measurement. Listed in full in the audit report if any are wanted later.
+#  - edf 16 6 and llf 16 6: status UNKNOWN, not pre-fix. edf_n16_s6's recorded git_commit 42e96ae
+#    is unreachable on origin and llf_n16_s6 has no git_commit field at all. Those are provenance
+#    defects to fix, not reruns to schedule, and I have not guessed their status.
