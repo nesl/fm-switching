@@ -35,28 +35,25 @@
     "n12_s5": 10343,
     "n16_s4": 12522,
     "n16_s5": 12515,
-    "n20_s4": 4433
+    "n20_s4": 4433,
+    "n20_s5": 4277
   },
-  "cells_missing": [
-    "warm-all-lru-reactive_n20_s5_1200s_h27_3t_L3_epg_ls20"
-  ],
+  "cells_missing": [],
   "zone_counts": {
     "healthy": {
       "requests": 66851,
       "warm": 61038
     },
     "unclassified": {
-      "requests": 1153,
-      "warm": 1017
+      "requests": 2352,
+      "warm": 2048
     },
     "collapsed": {
-      "requests": 3280,
-      "warm": 2529
+      "requests": 6358,
+      "warm": 4756
     }
   },
   "warm_rows_held_out": 30532,
-  "verdict": "WITHHELD: the sweep is incomplete, so the held-out set is not the pre-registered one. Missing: warm-all-lru-reactive_n20_s5_1200s_h27_3t_L3_epg_ls20",
-  "verdict_withheld": true,
   "step0_queue_term_varies": {
     "min": 0.0,
     "p50": 746.0,
@@ -187,51 +184,51 @@
     "split": "collapsed (DIAGNOSTIC ONLY, cannot pass or fail the gate)",
     "by_cache_state": {
       "all": {
-        "n": 3280,
+        "n": 6358,
         "n_negative_predictions": 0,
         "first_token": {
-          "predicted_p50": 259.0543,
-          "actual_p50": 308.4373,
-          "ratio_p50": 0.8399,
-          "mae": 61.9467
+          "predicted_p50": 252.2359,
+          "actual_p50": 294.3266,
+          "ratio_p50": 0.857,
+          "mae": 64.229
         },
         "decode": {
-          "predicted_p50": 3.3167,
-          "actual_p50": 43.5211,
-          "ratio_p50": 0.0762,
-          "mae": 61.393
+          "predicted_p50": 3.0903,
+          "actual_p50": 51.025,
+          "ratio_p50": 0.0606,
+          "mae": 63.9076
         }
       },
       "warm": {
-        "n": 2529,
+        "n": 4756,
         "n_negative_predictions": 0,
         "first_token": {
-          "predicted_p50": 266.0113,
-          "actual_p50": 309.6959,
-          "ratio_p50": 0.8589,
-          "mae": 62.1224
+          "predicted_p50": 251.8463,
+          "actual_p50": 293.4421,
+          "ratio_p50": 0.8582,
+          "mae": 63.0951
         },
         "decode": {
-          "predicted_p50": 3.4882,
-          "actual_p50": 44.3392,
-          "ratio_p50": 0.0787,
-          "mae": 60.9355
+          "predicted_p50": 2.9599,
+          "actual_p50": 50.9865,
+          "ratio_p50": 0.0581,
+          "mae": 61.9971
         }
       },
       "cold": {
-        "n": 751,
+        "n": 1602,
         "n_negative_predictions": 0,
         "first_token": {
-          "predicted_p50": 253.7689,
-          "actual_p50": 283.0514,
-          "ratio_p50": 0.8965,
-          "mae": 61.3549
+          "predicted_p50": 254.9427,
+          "actual_p50": 311.4594,
+          "ratio_p50": 0.8185,
+          "mae": 67.5953
         },
         "decode": {
-          "predicted_p50": 2.0201,
-          "actual_p50": 33.6496,
-          "ratio_p50": 0.06,
-          "mae": 62.9337
+          "predicted_p50": 3.5705,
+          "actual_p50": 59.7126,
+          "ratio_p50": 0.0598,
+          "mae": 69.5797
         }
       }
     }
@@ -321,5 +318,13 @@
       "ratio_warm": 1.049,
       "pass_": true
     }
-  ]
+  ],
+  "criteria": {
+    "ratio_all": 1.0524,
+    "ratio_all_pass": true,
+    "ratio_warm": 1.0697,
+    "ratio_warm_pass": true,
+    "sensitivity_pass": true
+  },
+  "verdict": "PASS"
 }
