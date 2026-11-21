@@ -1,0 +1,581 @@
+{
+ "cell": {
+  "seed": 0,
+  "n_devices": 8,
+  "ratio": "50:50",
+  "run_s": 300.0,
+  "mode": "A"
+ },
+ "arms": [
+  "always-cloud-fcfs",
+  "edf",
+  "eco-llm",
+  "warm-all-lru",
+  "llf",
+  "mooncake"
+ ],
+ "what_this_is": "NOT A MEASUREMENT: wire forms and event streams on the CPU, no GPU, no server, no model, no frame encoded",
+ "trace_dirs": {
+  "batch-30s": "/tmp/claude-1001/perframe_work/traces/seed0_n8_300s_A",
+  "per-frame": "/tmp/claude-1001/perframe_work/traces/seed0_n8_300s_A_perframe"
+ },
+ "trace_sha256": {
+  "batch-30s": "65602e0ada7f6d894dd7e157151d187d7924b86d4f693ff2daa4950ab7ef6679",
+  "per-frame": "79c357e8d60730cb12914a4c7dd7e2be429ab18f934b8baa8cc8d0a3d06e38e3"
+ },
+ "fairness_digest_trace": {
+  "batch-30s": "25bb1171528fa50095be8c116ff7b953e823aab07897d2fd3e510a9579a57ea3",
+  "per-frame": "2dfc2301316a5e00a791c5c2dd2398c9934ca60cee38e03cfce0989c3977382b"
+ },
+ "frame_store": {
+  "batch-30s": {
+   "n_refs": 2968,
+   "n_written": 0,
+   "n_unresolved": 0,
+   "n_empty": 0,
+   "ok": true,
+   "preflight": {
+    "trace_dir": "/tmp/claude-1001/perframe_work/traces/seed0_n8_300s_A",
+    "frames_root": "/tmp/claude-1001/perframe_work/frames_batch-30s",
+    "n_refs": 2968,
+    "n_missing": 0,
+    "n_empty": 0,
+    "ok": true,
+    "server_kind": "device-only-no-server",
+    "enforced": false
+   }
+  },
+  "per-frame": {
+   "n_refs": 2987,
+   "n_written": 0,
+   "n_unresolved": 0,
+   "n_empty": 0,
+   "ok": true,
+   "preflight": {
+    "trace_dir": "/tmp/claude-1001/perframe_work/traces/seed0_n8_300s_A_perframe",
+    "frames_root": "/tmp/claude-1001/perframe_work/frames_per-frame",
+    "n_refs": 2987,
+    "n_missing": 0,
+    "n_empty": 0,
+    "ok": true,
+    "server_kind": "device-only-no-server",
+    "enforced": false
+   }
+  }
+ },
+ "invariants": {
+  "n_uploads_batch": 41,
+  "n_uploads_perframe": 599,
+  "every_record_one_frame": true,
+  "frame_bytes_values": [
+   24570
+  ],
+  "records_offered_at_capture_time": 599,
+  "records_total": 599,
+  "d2_token_law_ok": 603,
+  "cum_tokens_running_total_ok": 603,
+  "batch_stream_is_a_prefix": true,
+  "sessions_with_extra_frames": {
+   "robo002|s001|738411278796189_start_0.0_end_315.479": 6,
+   "robo001|s001|2211104685971437_start_0.0_end_600.013": 7,
+   "robo000|s001|725470496713219_start_0.0_end_596.49": 2,
+   "robo003|s001|665069879728607_start_0.0_end_599.973": 4
+  },
+  "extra_frames_total": 19,
+  "sessions_only_in_perframe": [
+   "robo001|s001|2211104685971437_start_0.0_end_600.013"
+  ],
+  "robot_upload_meta": "per-frame",
+  "history_batch_s_meta": null
+ },
+ "cross_arm_upload_digest": {
+  "batch-30s": {
+   "arms": [
+    "always-cloud-fcfs",
+    "edf",
+    "eco-llm",
+    "warm-all-lru",
+    "llf",
+    "mooncake"
+   ],
+   "n_uploads_per_arm": {
+    "always-cloud-fcfs": 41,
+    "edf": 41,
+    "eco-llm": 41,
+    "warm-all-lru": 41,
+    "llf": 41,
+    "mooncake": 41
+   },
+   "digest_by_arm": {
+    "always-cloud-fcfs": "3a68b9d2b4ecaf160e63e71063f7106cdd5732f0006ee5b8885316358af2bb2e",
+    "edf": "3a68b9d2b4ecaf160e63e71063f7106cdd5732f0006ee5b8885316358af2bb2e",
+    "eco-llm": "3a68b9d2b4ecaf160e63e71063f7106cdd5732f0006ee5b8885316358af2bb2e",
+    "warm-all-lru": "3a68b9d2b4ecaf160e63e71063f7106cdd5732f0006ee5b8885316358af2bb2e",
+    "llf": "3a68b9d2b4ecaf160e63e71063f7106cdd5732f0006ee5b8885316358af2bb2e",
+    "mooncake": "3a68b9d2b4ecaf160e63e71063f7106cdd5732f0006ee5b8885316358af2bb2e"
+   },
+   "all_equal": true,
+   "pairwise_vs_first": {
+    "always-cloud-fcfs vs edf": {
+     "n_differing": 0,
+     "equal": true
+    },
+    "always-cloud-fcfs vs eco-llm": {
+     "n_differing": 0,
+     "equal": true
+    },
+    "always-cloud-fcfs vs warm-all-lru": {
+     "n_differing": 0,
+     "equal": true
+    },
+    "always-cloud-fcfs vs llf": {
+     "n_differing": 0,
+     "equal": true
+    },
+    "always-cloud-fcfs vs mooncake": {
+     "n_differing": 0,
+     "equal": true
+    }
+   },
+   "trace_file_digest": "581c590a6269895c1d2f8e2450f9495357e72c7ffdf9910aaa4ab8623562fdbe",
+   "decisions_by_arm": {
+    "always-cloud-fcfs": 2111,
+    "edf": 2117,
+    "eco-llm": 2111,
+    "warm-all-lru": 2291,
+    "llf": 2117,
+    "mooncake": 2119
+   },
+   "requests_by_arm": {
+    "always-cloud-fcfs": 2108,
+    "edf": 2113,
+    "eco-llm": 2108,
+    "warm-all-lru": 2288,
+    "llf": 2111,
+    "mooncake": 2108
+   },
+   "decision_kinds_by_arm": {
+    "always-cloud-fcfs": {
+     "release_monitor": 2103,
+     "release_recall": 8
+    },
+    "edf": {
+     "defer": 1,
+     "release_monitor": 2103,
+     "release_recall": 8,
+     "release_whole": 5
+    },
+    "eco-llm": {
+     "release_monitor": 2103,
+     "release_recall": 8
+    },
+    "warm-all-lru": {
+     "release_monitor": 2103,
+     "release_piece": 180,
+     "release_recall": 8
+    },
+    "llf": {
+     "decline": 2,
+     "defer": 1,
+     "release_monitor": 2103,
+     "release_recall": 6,
+     "release_whole": 5
+    },
+    "mooncake": {
+     "release_monitor": 2103,
+     "release_recall": 8,
+     "state_action": 8
+    }
+   },
+   "decision_counts_differ_by_arm": true,
+   "tamper_control": {
+    "row_perturbed": 20,
+    "field": "est_tokens",
+    "delta_tokens": 1,
+    "digest_changed": true,
+    "n_differing_detected": 1
+   },
+   "arrival_delay_s": {
+    "n": 580,
+    "min": 0.123171,
+    "p50": 14.238794,
+    "max": 28.238794,
+    "mean": 13.823571
+   },
+   "fairness_digest_by_arm": {
+    "always-cloud-fcfs": "25bb1171528fa50095be8c116ff7b953e823aab07897d2fd3e510a9579a57ea3",
+    "edf": "25bb1171528fa50095be8c116ff7b953e823aab07897d2fd3e510a9579a57ea3",
+    "eco-llm": "25bb1171528fa50095be8c116ff7b953e823aab07897d2fd3e510a9579a57ea3",
+    "warm-all-lru": "25bb1171528fa50095be8c116ff7b953e823aab07897d2fd3e510a9579a57ea3",
+    "llf": "25bb1171528fa50095be8c116ff7b953e823aab07897d2fd3e510a9579a57ea3",
+    "mooncake": "25bb1171528fa50095be8c116ff7b953e823aab07897d2fd3e510a9579a57ea3"
+   },
+   "digests_equal_by_arm": {
+    "always-cloud-fcfs": true,
+    "edf": true,
+    "eco-llm": true,
+    "warm-all-lru": true,
+    "llf": true,
+    "mooncake": true
+   }
+  },
+  "per-frame": {
+   "arms": [
+    "always-cloud-fcfs",
+    "edf",
+    "eco-llm",
+    "warm-all-lru",
+    "llf",
+    "mooncake"
+   ],
+   "n_uploads_per_arm": {
+    "always-cloud-fcfs": 599,
+    "edf": 599,
+    "eco-llm": 599,
+    "warm-all-lru": 599,
+    "llf": 599,
+    "mooncake": 599
+   },
+   "digest_by_arm": {
+    "always-cloud-fcfs": "65d09dece9794260e5961cdfcedbe4b68d50738e8d8c5857bac30ba5cc91abbc",
+    "edf": "65d09dece9794260e5961cdfcedbe4b68d50738e8d8c5857bac30ba5cc91abbc",
+    "eco-llm": "65d09dece9794260e5961cdfcedbe4b68d50738e8d8c5857bac30ba5cc91abbc",
+    "warm-all-lru": "65d09dece9794260e5961cdfcedbe4b68d50738e8d8c5857bac30ba5cc91abbc",
+    "llf": "65d09dece9794260e5961cdfcedbe4b68d50738e8d8c5857bac30ba5cc91abbc",
+    "mooncake": "65d09dece9794260e5961cdfcedbe4b68d50738e8d8c5857bac30ba5cc91abbc"
+   },
+   "all_equal": true,
+   "pairwise_vs_first": {
+    "always-cloud-fcfs vs edf": {
+     "n_differing": 0,
+     "equal": true
+    },
+    "always-cloud-fcfs vs eco-llm": {
+     "n_differing": 0,
+     "equal": true
+    },
+    "always-cloud-fcfs vs warm-all-lru": {
+     "n_differing": 0,
+     "equal": true
+    },
+    "always-cloud-fcfs vs llf": {
+     "n_differing": 0,
+     "equal": true
+    },
+    "always-cloud-fcfs vs mooncake": {
+     "n_differing": 0,
+     "equal": true
+    }
+   },
+   "trace_file_digest": "928bd6cbc5641da54a02faace8fe6daed8633b0146bd865f31956d507fff1f2d",
+   "decisions_by_arm": {
+    "always-cloud-fcfs": 2111,
+    "edf": 2123,
+    "eco-llm": 2111,
+    "warm-all-lru": 2699,
+    "llf": 2122,
+    "mooncake": 2119
+   },
+   "requests_by_arm": {
+    "always-cloud-fcfs": 2108,
+    "edf": 2118,
+    "eco-llm": 2108,
+    "warm-all-lru": 2694,
+    "llf": 2110,
+    "mooncake": 2107
+   },
+   "decision_kinds_by_arm": {
+    "always-cloud-fcfs": {
+     "release_monitor": 2103,
+     "release_recall": 8
+    },
+    "edf": {
+     "defer": 2,
+     "release_monitor": 2103,
+     "release_whole": 18
+    },
+    "eco-llm": {
+     "release_monitor": 2103,
+     "release_recall": 8
+    },
+    "warm-all-lru": {
+     "release_monitor": 2103,
+     "release_piece": 588,
+     "release_recall": 8
+    },
+    "llf": {
+     "decline": 8,
+     "defer": 1,
+     "release_monitor": 2103,
+     "release_whole": 10
+    },
+    "mooncake": {
+     "decline": 1,
+     "release_monitor": 2103,
+     "release_recall": 7,
+     "state_action": 8
+    }
+   },
+   "decision_counts_differ_by_arm": true,
+   "tamper_control": {
+    "row_perturbed": 299,
+    "field": "est_tokens",
+    "delta_tokens": 1,
+    "digest_changed": true,
+    "n_differing_detected": 1
+   },
+   "arrival_delay_s": {
+    "n": 599,
+    "min": 0.036453,
+    "p50": 0.036453,
+    "max": 0.036453,
+    "mean": 0.036453
+   },
+   "fairness_digest_by_arm": {
+    "always-cloud-fcfs": "2dfc2301316a5e00a791c5c2dd2398c9934ca60cee38e03cfce0989c3977382b",
+    "edf": "2dfc2301316a5e00a791c5c2dd2398c9934ca60cee38e03cfce0989c3977382b",
+    "eco-llm": "2dfc2301316a5e00a791c5c2dd2398c9934ca60cee38e03cfce0989c3977382b",
+    "warm-all-lru": "2dfc2301316a5e00a791c5c2dd2398c9934ca60cee38e03cfce0989c3977382b",
+    "llf": "2dfc2301316a5e00a791c5c2dd2398c9934ca60cee38e03cfce0989c3977382b",
+    "mooncake": "2dfc2301316a5e00a791c5c2dd2398c9934ca60cee38e03cfce0989c3977382b"
+   },
+   "digests_equal_by_arm": {
+    "always-cloud-fcfs": true,
+    "edf": true,
+    "eco-llm": true,
+    "warm-all-lru": true,
+    "llf": true,
+    "mooncake": true
+   }
+  }
+ },
+ "step2b": {
+  "n_batch": 41,
+  "n_perframe": 599,
+  "n_differing": 599,
+  "first_difference": {
+   "index": 0,
+   "batch_30s": [
+    "robo000",
+    "robo000|s000|1076761904546143_start_0.0_end_372.705",
+    "robo000|s000|1076761904546143_start_0.0_end_372.705|b004",
+    "13.113704",
+    "1076761904546143_start_0.0_end_372.705|f00108.00,1076761904546143_start_0.0_end_372.705|f00110.00,1076761904546143_start_0.0_end_372.705|f00112.00,1076761904546143_start_0.0_end_372.705|f00114.00,1076761904546143_start_0.0_end_372.705|f00116.00,1076761904546143_start_0.0_end_372.705|f00118.00,1076761904546143_start_0.0_end_372.705|f00120.00",
+    "630"
+   ],
+   "per_frame": [
+    "robo003",
+    "robo003|s000|769785152204550_start_0.0_end_323.615",
+    "robo003|s000|769785152204550_start_0.0_end_323.615|u00000",
+    "0.175166",
+    "769785152204550_start_0.0_end_323.615|f00152.00",
+    "90"
+   ]
+  },
+  "digest_batch": "581c590a6269895c1d2f8e2450f9495357e72c7ffdf9910aaa4ab8623562fdbe",
+  "digest_perframe": "928bd6cbc5641da54a02faace8fe6daed8633b0146bd865f31956d507fff1f2d"
+ },
+ "holding": {
+  "batch-30s": {
+   "frame_delivery_delay_s": {
+    "n": 580,
+    "min": 0.0,
+    "p50": 14.0,
+    "max": 28.0,
+    "mean": 13.591953
+   },
+   "holding_gap_tokens_at_question": {
+    "n": 8,
+    "min": 270,
+    "p50": 990,
+    "max": 1260,
+    "mean": 810.0
+   },
+   "n_questions_with_gap": 8
+  },
+  "per-frame": {
+   "frame_delivery_delay_s": {
+    "n": 599,
+    "min": 0.0,
+    "p50": 0.0,
+    "max": 0.0,
+    "mean": 0.0
+   },
+   "holding_gap_tokens_at_question": {
+    "n": 8,
+    "min": 0,
+    "p50": 0,
+    "max": 0,
+    "mean": 0.0
+   },
+   "n_questions_with_gap": 0
+  }
+ },
+ "recall_prompt_tokens": {
+  "batch-30s": 95828,
+  "per-frame": 95828
+ },
+ "cost": {
+  "batch-30s": {
+   "upload_requests": 41,
+   "frames_total": 580,
+   "frames_per_request_min": 6,
+   "frames_per_request_max": 15,
+   "tokens_per_request_min": 540,
+   "tokens_per_request_max": 1381,
+   "tokens_per_request_mean": 1275.439,
+   "tokens_total": 52293,
+   "uplink_bytes_total": 14250600,
+   "uplink_bytes_per_request_min": 147420,
+   "uplink_bytes_per_request_max": 368550,
+   "uplink_queue_p99_s_median": 0.0,
+   "uplink_queue_p99_s_max": 0.0,
+   "uplink_queue_max_s": 0.0,
+   "robot_questions": 8,
+   "engine_requests_by_arm": {
+    "always-cloud-fcfs": 2108,
+    "edf": 2113,
+    "eco-llm": 2108,
+    "warm-all-lru": 2288,
+    "llf": 2111,
+    "mooncake": 2108
+   },
+   "engine_decision_kinds_by_arm": {
+    "always-cloud-fcfs": {
+     "release_monitor": 2103,
+     "release_recall": 8
+    },
+    "edf": {
+     "defer": 1,
+     "release_monitor": 2103,
+     "release_recall": 8,
+     "release_whole": 5
+    },
+    "eco-llm": {
+     "release_monitor": 2103,
+     "release_recall": 8
+    },
+    "warm-all-lru": {
+     "release_monitor": 2103,
+     "release_piece": 180,
+     "release_recall": 8
+    },
+    "llf": {
+     "decline": 2,
+     "defer": 1,
+     "release_monitor": 2103,
+     "release_recall": 6,
+     "release_whole": 5
+    },
+    "mooncake": {
+     "release_monitor": 2103,
+     "release_recall": 8,
+     "state_action": 8
+    }
+   }
+  },
+  "per-frame": {
+   "upload_requests": 599,
+   "frames_total": 599,
+   "frames_per_request_min": 1,
+   "frames_per_request_max": 1,
+   "tokens_per_request_min": 90,
+   "tokens_per_request_max": 121,
+   "tokens_per_request_mean": 90.207,
+   "tokens_total": 54034,
+   "uplink_bytes_total": 14717430,
+   "uplink_bytes_per_request_min": 24570,
+   "uplink_bytes_per_request_max": 24570,
+   "uplink_queue_p99_s_median": 0.0,
+   "uplink_queue_p99_s_max": 0.014453,
+   "uplink_queue_max_s": 0.014453,
+   "robot_questions": 8,
+   "engine_requests_by_arm": {
+    "always-cloud-fcfs": 2108,
+    "edf": 2118,
+    "eco-llm": 2108,
+    "warm-all-lru": 2694,
+    "llf": 2110,
+    "mooncake": 2107
+   },
+   "engine_decision_kinds_by_arm": {
+    "always-cloud-fcfs": {
+     "release_monitor": 2103,
+     "release_recall": 8
+    },
+    "edf": {
+     "defer": 2,
+     "release_monitor": 2103,
+     "release_whole": 18
+    },
+    "eco-llm": {
+     "release_monitor": 2103,
+     "release_recall": 8
+    },
+    "warm-all-lru": {
+     "release_monitor": 2103,
+     "release_piece": 588,
+     "release_recall": 8
+    },
+    "llf": {
+     "decline": 8,
+     "defer": 1,
+     "release_monitor": 2103,
+     "release_whole": 10
+    },
+    "mooncake": {
+     "decline": 1,
+     "release_monitor": 2103,
+     "release_recall": 7,
+     "state_action": 8
+    }
+   }
+  }
+ },
+ "negative_control": {
+  "origin_main": "25d55b9484317db980808d84b0c3e741f3da8e0b",
+  "records_byte_identical": true,
+  "device_answers_byte_identical": true,
+  "n_records": 2177,
+  "digest_old": "65602e0ada7f6d894dd7e157151d187d7924b86d4f693ff2daa4950ab7ef6679",
+  "digest_new": "65602e0ada7f6d894dd7e157151d187d7924b86d4f693ff2daa4950ab7ef6679",
+  "fairness_digest_old": "25bb1171528fa50095be8c116ff7b953e823aab07897d2fd3e510a9579a57ea3",
+  "fairness_digest_new": "25bb1171528fa50095be8c116ff7b953e823aab07897d2fd3e510a9579a57ea3",
+  "stats_keys_added": [
+   "robot_history_frames",
+   "robot_history_tokens",
+   "robot_history_uploads",
+   "robot_upload"
+  ],
+  "meta_keys_added": [
+   "robot_upload",
+   "robot_upload_rule"
+  ],
+  "per_frame_counters_zero_under_default": {
+   "robot_history_uploads": 41,
+   "robot_history_frames": 580,
+   "robot_upload": "batch-30s"
+  }
+ },
+ "robot_upload_note": "D154 (4) / D150 SYNC (1): robot history frames upload PER FRAME AS CAPTURED, for ALL arms, replacing D68's fixed 30-s batches. One `history_batch` record per D2 frame, offered at t0 + the frame's session-local capture time, carrying exactly one frame_ref and one frame's bytes. The record KIND, its fields and the D2 token accounting are unchanged, so the emulator, the coordinator, `cstate` and every arm need no change; `cum_tokens` still carries the session's running total and the 31-token D2 header is still charged once per session, on its first holding (the D101 preload where there is one, otherwise the first frame). ONE INTENDED DIFFERENCE BEYOND PACKAGING, named because it is visible in the counts: under batch-30s a window whose END falls after the run horizon is dropped whole, taking frames captured BEFORE the horizon with it; per-frame keeps every frame captured before the horizon, which is the point of the contract. Earlier cells are labelled upload-30s.",
+ "d2_accounting": {
+  "tok_per_img": 90,
+  "header_tok": 31,
+  "stride_s": 2.0,
+  "hist_frame_bytes": 24570,
+  "history_batch_s": 30.0
+ },
+ "_provenance": {
+  "git_commit": "df586a0351b4a3245398fc22467b7e7bfa006db9",
+  "script": "perframe_upload_proof.py",
+  "model": "none",
+  "timestamp": "2026-11-20T19:16:43.219431",
+  "device": "cpu",
+  "n": 599,
+  "seed": 0,
+  "args": {
+   "out": "/tmp/claude-1001/perframe/results/orchestration/live2/perframe",
+   "work": "/tmp/claude-1001/perframe_work"
+  }
+ }
+}

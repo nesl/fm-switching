@@ -56,6 +56,12 @@ RULINGS IMPLEMENTED HERE
             `monitor_opportunity` then carries `episode_id`, `episode_index` (the index within
             the refresh cycle), `frame_refs` (the ordered episode frames, oldest first) and
             `episode_frames` (their count). See EPG_REFRESH_NOTE for the refresh and the floor.
+  D150/D154 THE ROBOT UPLOAD CONTRACT (`robot_upload="per-frame"`; "batch-30s" is the default
+            and leaves every committed trace byte-identical). D154 (4) replaces D68's fixed
+            30-s batches with ONE UPLOAD PER FRAME AS CAPTURED, for ALL arms. Like the episode
+            frame list, the upload schedule is emitted HERE and is a function of the session's
+            own D2 capture grid alone, so it cannot depend on any arm's decisions and the
+            cross-arm upload digest is identical BY CONSTRUCTION. See ROBOT_UPLOAD_NOTE.
   D96 (2)   the canonical FAIRNESS DIGEST is `fairness_digest`: an order-independent sha256 over
             sorted event tuples covering device_register, session_start, session_end,
             history_append, recall_question, and monitor_offer in PULL mode or monitor_frame in
@@ -171,6 +177,32 @@ EPG_REFRESH_NOTE = (
     "the token load, which matters at 32 devices. A ruling for the sliding cap changes one "
     "function, `_epg_episode`.")
 
+# ---------------------------------------------------------------- D150 SYNC (1) / D154 (4)
+# The ROBOT UPLOAD CONTRACT. "batch-30s" is D68 as every committed cell ran it: the session's
+# own 30-s grid, one record per window carrying that window's D2 frames. "per-frame" is D150
+# SYNC (1) as D154 (4) orders it: one record per frame, offered AT ITS CAPTURE TIME.
+#
+# It is a property of the TRACE and of nothing else. The frame set, the D2 token accounting
+# (`data_sources.d2_batch_tokens`: 90 tokens per 352x256 image plus the 31-token header once per
+# session) and the uplink bytes per frame are unchanged; only the PACKAGING and the OFFER TIME
+# change. No arm is consulted, so no arm can gain or lose by it, and the cross-arm digest proof
+# holds by construction rather than by discipline.
+ROBOT_UPLOADS = ("batch-30s", "per-frame")
+ROBOT_UPLOAD_DEFAULT = "batch-30s"
+
+ROBOT_UPLOAD_NOTE = (
+    "D154 (4) / D150 SYNC (1): robot history frames upload PER FRAME AS CAPTURED, for ALL arms, "
+    "replacing D68's fixed 30-s batches. One `history_batch` record per D2 frame, offered at "
+    "t0 + the frame's session-local capture time, carrying exactly one frame_ref and one frame's "
+    "bytes. The record KIND, its fields and the D2 token accounting are unchanged, so the "
+    "emulator, the coordinator, `cstate` and every arm need no change; `cum_tokens` still carries "
+    "the session's running total and the 31-token D2 header is still charged once per session, on "
+    "its first holding (the D101 preload where there is one, otherwise the first frame). "
+    "ONE INTENDED DIFFERENCE BEYOND PACKAGING, named because it is visible in the counts: under "
+    "batch-30s a window whose END falls after the run horizon is dropped whole, taking frames "
+    "captured BEFORE the horizon with it; per-frame keeps every frame captured before the "
+    "horizon, which is the point of the contract. Earlier cells are labelled upload-30s.")
+
 DEFAULT_STAGGER_S = DS.HISTORY_BATCH_S      # 30 s, the D68 history-batch period
 ANSWER_PAYLOAD_B = 300                      # a cloud answer body; see links.deliver_s
 JOIN_FRAC_MAX = 0.5                         # D101: join ~ U[0, 0.5 x session duration)
@@ -264,6 +296,14 @@ class TraceStats:
     robot_sessions_started: int = 0
     robot_sessions_completed: int = 0
     robot_history_batches: int = 0
+    # D154 (4): which upload contract this trace was built under, how many upload records the
+    # robots sent, and how many FRAMES those records carried. The frame count is the invariant
+    # the two modes must agree on inside the run horizon: per-frame upload changes how the same
+    # frames are packaged, not which frames the session captures.
+    robot_upload: str = "batch-30s"
+    robot_history_uploads: int = 0
+    robot_history_frames: int = 0
+    robot_history_tokens: int = 0
     # D101: the join draw and what the cloud already holds at t = 0, per robot device.
     robot_join_offset_s: Dict[str, float] = field(default_factory=dict)
     robot_preload_frames: Dict[str, int] = field(default_factory=dict)
@@ -339,12 +379,17 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                    robot_question_set: str = "eval",
                    ss_question_set: str = "ss1",
                    dashcam_format: str = "oneframe",
-                   dashcam_min_frames: int = EPG_MIN_FRAMES) -> Dict[str, Any]:
+                   dashcam_min_frames: int = EPG_MIN_FRAMES,
+                   robot_upload: str = ROBOT_UPLOAD_DEFAULT) -> Dict[str, Any]:
     """Build one run's opportunity trace. Returns {records, device_answers, meta, stats}.
 
     `dashcam_format="epg"` is D153's append-only episode context (D148). It adds the episode
     fields to every `monitor_opportunity` and drops the instants below `dashcam_min_frames`,
     which are not decision instants for ANY arm. "oneframe" is the default and changes nothing.
+
+    `robot_upload="per-frame"` is D154 (4) / D150 SYNC (1): one `history_batch` record per D2
+    frame, offered at its capture time, instead of D68's 30-s windows (see ROBOT_UPLOAD_NOTE).
+    "batch-30s" is the default and changes nothing.
 
     Deterministic in `seed` alone given (n_devices, ratio, run_s, stagger_s): the same seed
     produces a byte-identical trace, which is what makes the arms paired (D79).
@@ -362,6 +407,9 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
         raise ValueError("run_s must be positive")
     if dashcam_format not in DASHCAM_FORMATS:
         raise ValueError(f"dashcam_format {dashcam_format!r} not in {DASHCAM_FORMATS} (D153)")
+    if robot_upload not in ROBOT_UPLOADS:
+        raise ValueError(f"robot_upload {robot_upload!r} not in {ROBOT_UPLOADS} (D154 (4))")
+    per_frame = robot_upload == "per-frame"
     epg = dashcam_format == "epg"
     floor = int(dashcam_min_frames)
     if epg and not 1 <= floor <= EPG_CAP_FRAMES:
@@ -628,7 +676,35 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                 st.robot_join_offset_s[did] = round(join, 6)
                 st.robot_preload_frames[did] = len(pre_fr)
                 st.robot_preload_tokens[did] = tokens_sent
-            while True:
+            if per_frame:
+                # D154 (4) / D150 SYNC (1). ONE RECORD PER FRAME, offered at the frame's own
+                # capture time. The frame set is `d2_frames_in(join, duration)`, which is
+                # exactly the union of the windows the batch branch below walks, so no frame is
+                # added or dropped by the contract; the D2 header is charged once per session by
+                # the same `emitted == 0` rule the batch branch uses.
+                for i, x in enumerate(DS.d2_frames_in(join, sm.duration_s)):
+                    t_offer = t0 + x
+                    if t_offer > run_s + 1e-9:
+                        break
+                    tok = DS.d2_batch_tokens(1, first_batch=(emitted == 0))
+                    emitted += 1
+                    tokens_sent += tok
+                    if not count_only:
+                        records.append(dict(kind="history_batch", device_id=did,
+                                            session_id=play_id,
+                                            batch_id=f"{play_id}|u{i:05d}",
+                                            t=round(t_offer, 6),
+                                            frame_refs=[f"{sid}|f{x:08.2f}"],
+                                            est_tokens=tok, cum_tokens=tokens_sent,
+                                            frame_bytes=default_hist_frame_bytes))
+                    st.robot_history_batches += 1
+                    st.robot_history_uploads += 1
+                    st.robot_history_frames += 1
+                    st.robot_history_tokens += tok
+            else:
+              # D68, the COMMITTED branch, unchanged and deliberately left at its own
+              # indentation so the diff shows no reformatting of a committed code path.
+              while True:
                 b += 1
                 w_from = (b - 1) * DS.HISTORY_BATCH_S
                 w_to = min(b * DS.HISTORY_BATCH_S, sm.duration_s)
@@ -658,6 +734,9 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                                         est_tokens=tok, cum_tokens=tokens_sent,
                                         frame_bytes=len(fr) * default_hist_frame_bytes))
                 st.robot_history_batches += 1
+                st.robot_history_uploads += 1
+                st.robot_history_frames += len(fr)
+                st.robot_history_tokens += tok
                 if w_to >= sm.duration_s - 1e-9:
                     break
             for q in sm.questions:
@@ -704,6 +783,7 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
             t = t_end
         st.robot_questions_per_device[did] = nq
     st.robot_questions_total = sum(st.robot_questions_per_device.values())
+    st.robot_upload = robot_upload
     st.robot_question_set = robot_question_set
     st.ss_question_set = ss_question_set
     st.robot_question_pool_n = sum(len(sm.questions) for sm in sessions.values())
@@ -733,6 +813,11 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
     answers.sort(key=lambda r: (r["device_id"], r["opportunity_id"]))
 
     meta = dict(robot_question_set=robot_question_set, ss_question_set=ss_question_set,
+                robot_upload=robot_upload,
+                robot_upload_rule=(ROBOT_UPLOAD_NOTE if per_frame else
+                                   "D68: robot history frames upload in fixed %.0f-s batches on "
+                                   "the session's own grid (upload-30s, the committed contract)."
+                                   % DS.HISTORY_BATCH_S),
                 dashcam_format=dashcam_format,
                 dashcam_min_frames=(floor if epg else None),
                 epg_cap_frames=(EPG_CAP_FRAMES if epg else None),
@@ -754,7 +839,9 @@ def generate_trace(seed: int, n_devices: int, ratio: str, run_s: float, mode: st
                 cadence_s=DS.NEXAR_INSTANT_CADENCE_S,
                 dashcam_deadline_s=DS.NEXAR_DEADLINE_S,
                 robot_deadline_s=DS.ROBOT_DEADLINE_S,
-                history_batch_s=DS.HISTORY_BATCH_S,
+                # D154 (4): the 30-s period is a property of the batch-30s contract alone, so
+                # a per-frame trace carries None here rather than a number that does not apply.
+                history_batch_s=(None if per_frame else DS.HISTORY_BATCH_S),
                 robot_join_frac_max=JOIN_FRAC_MAX,
                 robot_join=join_meta,
                 robot_join_rule=(

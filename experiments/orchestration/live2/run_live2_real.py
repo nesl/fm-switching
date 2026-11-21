@@ -113,6 +113,11 @@ def build_parser() -> argparse.ArgumentParser:
                     help="D153's minimum-frame floor: instants before an episode's Nth frame are not decision "
                          "instants for ANY arm, device or cloud, and are excluded by not being emitted at all. "
                          "epg only; the user may raise it to 6")
+    ap.add_argument("--robot-upload", default="batch-30s", choices=("batch-30s", "per-frame"),
+                    help="D154 (4) / D150 SYNC (1): 'per-frame' uploads every robot history frame AS CAPTURED, one "
+                         "request per frame, for ALL arms; 'batch-30s' is D68's fixed 30-s batch and the committed "
+                         "default (earlier cells are labelled upload-30s). It is a property of the TRACE, so a "
+                         "per-frame cell gets its own trace directory, its own fairness digest and its own run tag")
     ap.add_argument("--frames-root", default=None)
     ap.add_argument("--server", default=None, help="OpenAI-compatible base URL; omit to send nothing")
     ap.add_argument("--server-kind", default="vllm")
@@ -191,6 +196,8 @@ def _trace(a, work: Path) -> Path:
         extra += f"_{a.dashcam_format}"
         if int(a.dashcam_min_frames) != 3:
             extra += f"f{int(a.dashcam_min_frames)}"
+    if a.robot_upload != "batch-30s":           # D154 (4): a different upload contract is a different workload
+        extra += "_perframe"
     tdir = work / "traces" / f"seed{a.seed}_n{a.n_devices}_{int(a.run_s)}s_{a.mode}{extra}"
     if not (tdir / "trace.jsonl").exists():
         TR.write_trace(tdir, TR.generate_trace(
@@ -200,7 +207,8 @@ def _trace(a, work: Path) -> Path:
             **({} if a.ss_question_set == "ss1" else dict(ss_question_set=a.ss_question_set)),
             **({} if a.dashcam_format == "oneframe"
                else dict(dashcam_format=a.dashcam_format,
-                         dashcam_min_frames=int(a.dashcam_min_frames)))))
+                         dashcam_min_frames=int(a.dashcam_min_frames))),
+            **({} if a.robot_upload == "batch-30s" else dict(robot_upload=a.robot_upload))))
     return tdir
 
 
@@ -258,7 +266,11 @@ def run(a) -> Dict[str, Any]:
     arm.live2_configure(**conf)
 
     header = dict(
-        label=a.label or "StudyLIVE2 real-server cell", git_commit=RC.git_commit(),
+        # D154 (4): the contract is appended to the CELL LABEL as well as to the run tag, so a
+        # per-frame cell announces itself in every artefact that carries a label.
+        label=((a.label or "StudyLIVE2 real-server cell")
+               + ("" if a.robot_upload == "batch-30s" else " [robot-upload=per-frame]")),
+        git_commit=RC.git_commit(),
         arm=arm.name, arm_version=getattr(arm, "arm_version", None),
         flags=(arm.flags.as_dict() if hasattr(arm, "flags") else {}),
         gpu_kv_tokens=a.gpu_kv_tokens, host_tier_gib=a.host_tier_gib, host_tier_tokens=htok,
@@ -280,6 +292,8 @@ def run(a) -> Dict[str, Any]:
         server_extra_flags=(a.server_extra_flags if sends else None),
         c_inflight_set_by_runner=(a.c_inflight is not None),
         kv_capacity_enforced=bool(a.kv_capacity_enforced),
+        robot_upload=tmeta.get("robot_upload", "batch-30s"),
+        robot_upload_rule=tmeta.get("robot_upload_rule"),
         dashcam_format=tmeta.get("dashcam_format", "oneframe"),
         dashcam_min_frames=tmeta.get("dashcam_min_frames"),
         epg_cap_frames=tmeta.get("epg_cap_frames"),
@@ -291,7 +305,11 @@ def run(a) -> Dict[str, Any]:
                run_s=a.run_s, drain_s=a.drain_s, decision_period_s=a.decision_period_s,
                gpu_kv_tokens=a.gpu_kv_tokens, host_tier_gib=a.host_tier_gib,
                host_tier_tokens=htok, seed=a.seed,
-               run_tag=CK.run_tag(a.seed, a.arm), frames_root=a.frames_root,
+               # D154 (4): the run tag carries the upload contract, so a per-frame cell can never be
+               # mistaken for a committed upload-30s one and never shares an engine-side cache entry with it.
+               run_tag=CK.run_tag(a.seed, a.arm,
+                                  label=("live2" if a.robot_upload == "batch-30s" else "live2perframe")),
+               frames_root=a.frames_root,
                server_url=a.server, model=a.model,
                strip_hints=(a.server_kind != "fake"), defer_images=True,
                calibration_knots_path=(str(knots) if knots else None),
@@ -358,6 +376,7 @@ def run(a) -> Dict[str, Any]:
     (rdir / "coordinator_result.json").write_text(
         json.dumps(res, indent=1, default=str) + "\n")
     out = dict(arm=a.arm, n_devices=a.n_devices, mode=a.mode, run_s=a.run_s, seed=a.seed,
+               robot_upload=header["robot_upload"],
                split=bool(a.split), err=err, wall_s=round(wall, 3),
                run_dir=str(rdir), trace_dir=str(tdir),
                lateness=rm.get("lateness"), run_valid=rm.get("run_valid"),

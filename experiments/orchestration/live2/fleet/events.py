@@ -27,6 +27,16 @@ FLEET -> COORDINATOR
   recall_question  {device_id, opportunity_id, session_id, question_id, t_ask, t_arrive,
                     deadline_s, question, options[], category}
 
+D154 (4) / D150 SYNC (1): THE UPLOAD CONTRACT IS A PROPERTY OF THE TRACE AND NOT OF THIS
+SCHEMA. A `history_append` carries one upload of a session's history, whatever packages it:
+under the committed `batch-30s` contract that is a 30-s window's D2 frames (D68), and under
+`per-frame` it is ONE FRAME, offered at its capture time, for ALL arms. The fields, their
+meanings and the D2 token accounting are IDENTICAL in both - `est_tokens` is still the
+session's CUMULATIVE history tokens after this append and `batch_id` is still the upload's
+unique id - which is why neither this schema, the emulator, the coordinator nor any arm needed
+a change. `fleet/trace.ROBOT_UPLOAD_NOTE` and `trace_meta.robot_upload` say which contract a
+trace was built under.
+
 COORDINATOR -> FLEET
   pull_request     {device_id, instant_id, t_sent}
   cloud_answer     {device_id, opportunity_id, t_done, payload}

@@ -32,6 +32,16 @@ disk, NO KV), so a later question still pays the cold rebuild. It carries no `ba
 `t_arrive`, because it is not a batch that arrived during the run; `t` is the run-clock instant
 at which the holding is declared, which is 0.0 for a join-point preload.
 
+D154 (4) / D150 SYNC (1): THE UPLOAD CONTRACT IS A PROPERTY OF THE TRACE AND NOT OF THIS
+SCHEMA. A `history_append` carries one upload of a session's history, whatever packages it:
+under the committed `batch-30s` contract that is a 30-s window's D2 frames (D68), and under
+`per-frame` it is ONE FRAME, offered at its capture time, for ALL arms. The fields, their
+meanings and the D2 token accounting are IDENTICAL in both - `est_tokens` is still the
+session's CUMULATIVE history tokens after this append and `batch_id` is still the upload's
+unique id - which is why neither this schema, the emulator, the coordinator nor any arm needed
+a change. `fleet/trace.ROBOT_UPLOAD_NOTE` and `trace_meta.robot_upload` say which contract a
+trace was built under.
+
 D96: EVERY OPPORTUNITY CARRIES AN opportunity_id, UNIQUE WITHIN THE RUN AND ASSIGNED BY THE
 TRACE GENERATOR. It is echoed unchanged into cloud_answer and into every log. THE COORDINATOR
 NEVER CONSTRUCTS, DERIVES OR PARSES ONE: a bare instant_id or question_id is ambiguous once D84
