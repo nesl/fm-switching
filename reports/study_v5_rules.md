@@ -799,3 +799,87 @@ with both readings stated.
 warm-ahead side (the mechanism emitted 83,961 prefills and landed 25 warm releases, so it is not
 unexercised) and a small real positive on the release side. It is not a settled negative for
 warm-ahead until the Step 4 control runs, which is the GPU-WARM join above.**
+
+## The per-question join lands, and it REFUTES the decomposition in the section above
+
+The H100 joined each of the 20 extra releases to its engine-observed `cache_path` and its D155
+per-question headline, from the four committed `cell.json` files. **The decomposition I published
+immediately above is wrong and is retracted here rather than edited, so the error stays visible.**
+
+I wrote: "the release side is nearly free and worth +1, the warm-ahead side is the entire cost."
+The first half does not survive the join.
+
+| extra releases, pooled | n | net correct by deadline |
+|---|---|---|
+| released **COLD** | **11** | **0, in 11 of 11** |
+| released **GPU-WARM** | 9 | **+1** |
+
+**All 11 COLD extras came back as device answers identical to the base's, every one.** So releasing
+an opportunity the base declined, when the history is cold, changes nothing at all: the cloud answer
+does not beat the deadline and the device answer stands, exactly as it did in the base. **The
+release rule's standalone value is not "small", it is exactly zero, 11 of 11.**
+
+The single pooled +1 is a **GPU-WARM** release. So the +1 is not separable from warm-ahead; it was
+**produced by** warm-ahead. The correct statement is the opposite of mine: *the release rule does
+nothing on its own, and the one question that moved is warm-ahead's.*
+
+### What the 9 warm extras actually did, which is the first measurement of the harm term's target
+
+| outcome among the 9 WARM extras | n |
+|---|---|
+| cloud answer arrived and was CORRECT where the base's device answer was wrong | **2** |
+| cloud answer arrived and was WRONG, where the base's device answer was **RIGHT** | **1** |
+| cloud answer arrived and was wrong, base also wrong | 1 |
+| **fell back to a device answer identical to the base's** | **5** |
+
+Two things follow, and the second is the more useful.
+
+**First, warm-ahead's conversion has two stages and loses most of its yield at the second.** Nine
+questions were released warm; **four cloud answers actually arrived**. Five fell back to the
+device answer the base already had. Being warm got the request started; it did not get the answer
+back by the deadline. So the 3,358-prefills-per-warm-release figure from the section above
+understates the true price: pooled over both seeds it is about **168,000 prefills for one net
+question**, and the gross ledger behind that net is **+2 and -1**.
+
+**Second, that -1 is the first measured instance of exactly the harm D151's counterfactual exists to
+prevent**: a question whose device answer was correct, escalated to cloud, and returned wrong. The
+harm term is the only element of v5 that can decline such an escalation; v5-rules by construction
+cannot. **n = 1, so this is an existence proof and not a rate**, but it is a real one, and it is
+evidence for the full policy that the ablation produced against itself.
+
+### The register this result belongs in: there is no detectable difference
+
+The join also reports the questions **both** arms released, and six of those flipped outcome anyway
+on timing alone (seed 4: one up, one down; seed 5: two up, two down). Combined with the extras:
+
+| source of flips | questions | favour v5-rules | favour base |
+|---|---|---|---|
+| the 20 decisions that differ | 20 | 2 | 1 |
+| the 25 where both arms made the SAME decision | 25 | 3 | 3 |
+| **all** | **45** | **5** | **4** |
+
+**Nine discordant pairs, five to four. McNemar exact two-sided p = 1.0.**
+
+**So "+0.04 by deadline" and "+1 question pooled" are both one discordant pair's worth of imbalance
+in a measurement whose own queue noise flips a quarter of the questions.** The per-question flip
+rate from timing alone is 6 of 25, or 0.24; the effect being measured is 1 of 45, or 0.022. **The
+noise is an order of magnitude larger than the effect, per question.**
+
+To detect a paired difference of this size at this discordance rate at 80 percent power would take
+about **3,200 robot questions**, roughly 70 times what these cells carry. *(Register: CONSTRUCTED
+from the observed discordance rate, not measured.)*
+
+**The honest headline is therefore not "warm-ahead gains +1 question", it is "at 45 questions this
+comparison cannot distinguish warm-ahead from its base in either direction, while warm-ahead's cost
+on the other two tasks is large and unambiguous."** The cost side needs no power analysis: -321
+single-shot questions and a failed dashcam SLO are not one discordant pair, they are thousands of
+unreleased requests, and that asymmetry, not the +1, is the finding.
+
+### Rule 2 classification, settled
+
+**Fired and did not help**, on the warm-ahead side: the mechanism emitted 167,920 prefills across
+the two seeds and landed 9 warm releases among the decisions that mattered, so it is neither absent
+nor unexercised. It operated and produced no effect distinguishable from zero on the headline, at a
+measured and large cost elsewhere. The release side is **cancelled by geometry** in the precise
+sense of the taxonomy: alive, and identical between branches in 11 of 11 cold cases because the
+deadline, not the decision, settles the outcome there.
