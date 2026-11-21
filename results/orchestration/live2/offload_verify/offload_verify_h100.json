@@ -1,0 +1,454 @@
+{
+  "_meta": {
+    "base": "http://127.0.0.1:8031",
+    "model": "32BI",
+    "gpu_kv_tokens": 62944,
+    "fill_factor": 1.5,
+    "started": "2026-11-21T13:51:00",
+    "finished": "2026-11-21T13:52:17",
+    "server": {
+      "command": [
+        "/home/pragya/.venvs/fm-switching-vllm/bin/vllm",
+        "serve",
+        "/home/pragya/.cache/huggingface/hub/models--Qwen--Qwen3-VL-32B-Instruct/snapshots/0cfaf48183f594c314753d30a4c4974bc75f3ccb",
+        "--served-model-name",
+        "32BI",
+        "--port",
+        "8031",
+        "--max-model-len",
+        "32768",
+        "--gpu-memory-utilization",
+        "0.9",
+        "--tensor-parallel-size",
+        "1",
+        "--no-enable-prefix-caching",
+        "--limit-mm-per-prompt",
+        "{\"image\": 16}",
+        "--dtype",
+        "bfloat16",
+        "--seed",
+        "0",
+        "--limit-mm-per-prompt",
+        "{\"image\": 640, \"video\": 1}",
+        "--mm-processor-kwargs",
+        "{\"size\": {\"shortest_edge\": 4096, \"longest_edge\": 16777216}, \"fps\": 1.0, \"do_sample_frames\": false}",
+        "--trust-request-mm-kwargs",
+        "--host",
+        "127.0.0.1",
+        "--enable-prefix-caching",
+        "--enable-prompt-tokens-details",
+        "--mm-processor-cache-gb",
+        "128",
+        "--kv-offloading-backend",
+        "native",
+        "--kv-offloading-size",
+        "27",
+        "--enable-log-requests",
+        "--enable-logging-iteration-details"
+      ],
+      "flag_diff": [
+        [
+          "38",
+          "27"
+        ]
+      ],
+      "restart_started": 1795297793.5384982,
+      "up_at": 1795297860.6848261,
+      "startup_s": 66.8,
+      "log": "logs/study_x_server_32BI_1121_134953.log",
+      "host_gib": 27,
+      "scheduling_policy": "fcfs",
+      "extra_flags": [],
+      "resolved": {
+        "flags_set_twice": {
+          "--enable-prefix-caching": {
+            "occurrences": [
+              {
+                "index": 13,
+                "flag": "--no-enable-prefix-caching",
+                "value": "--no-enable-prefix-caching"
+              },
+              {
+                "index": 27,
+                "flag": "--enable-prefix-caching",
+                "value": "--enable-prefix-caching"
+              }
+            ],
+            "argv_last_wins": {
+              "index": 27,
+              "flag": "--enable-prefix-caching",
+              "value": "--enable-prefix-caching"
+            }
+          },
+          "--limit-mm-per-prompt": {
+            "occurrences": [
+              {
+                "index": 14,
+                "flag": "--limit-mm-per-prompt",
+                "value": "{\"image\": 16}"
+              },
+              {
+                "index": 20,
+                "flag": "--limit-mm-per-prompt",
+                "value": "{\"image\": 640, \"video\": 1}"
+              }
+            ],
+            "argv_last_wins": {
+              "index": 20,
+              "flag": "--limit-mm-per-prompt",
+              "value": "{\"image\": 640, \"video\": 1}"
+            }
+          }
+        },
+        "engine_reported": {
+          "enable_prefix_caching": "True",
+          "non_default_enable_prefix_caching": "True",
+          "non_default_mm_processor_cache_gb": "128.0",
+          "non_default_limit_mm_per_prompt": "{'image': 640, 'video': 1}",
+          "non_default_mm_processor_kwargs": "{'size': {'shortest_edge': 4096, 'longest_edge': 16777216}, 'fps': 1.0, 'do_sample_frames': False}",
+          "non_default_kv_offloading_size": "27.0",
+          "non_default_kv_offloading_backend": null
+        },
+        "note": "record-only; argparse keeps the last occurrence; the pinned flag list is unchanged (user ruling 2026-11-20)"
+      }
+    }
+  },
+  "probes": [
+    {
+      "probe": "Q2_positive_control_plain_reload",
+      "question": "does host reload take effect with no kv_transfer_params",
+      "store": {
+        "label": "store",
+        "http": 200,
+        "ok": true,
+        "error": null,
+        "kv_transfer_params": null,
+        "latency_s": 1.36,
+        "prompt_tokens": 8094,
+        "cached_tokens": 0,
+        "state": "COLD",
+        "evidence": {
+          "local_hits": 0,
+          "external_hits": 0,
+          "load_bytes": 0,
+          "need": 7014.6
+        },
+        "metric_delta": {
+          "vllm:kv_offload_size_count": 1.0,
+          "vllm:kv_offload_store_size_sum": 2118123520.0,
+          "vllm:kv_offload_store_size_bucket": 1.0,
+          "vllm:prefix_cache_queries_total": 8094.0,
+          "vllm:kv_offload_store_time_total": 0.043,
+          "vllm:kv_offload_lookup_sync_delay_seconds_bucket": 11.0,
+          "vllm:kv_offload_total_time_total": 0.043,
+          "vllm:kv_offload_cpu_allocation_size_created": 1795297862.112,
+          "vllm:kv_offload_lookup_sync_delay_seconds_created": 1795297862.112,
+          "vllm:kv_offload_total_bytes_total": 2118123520.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_count": 1.0,
+          "vllm:external_prefix_cache_queries_total": 8094.0,
+          "vllm:kv_offload_store_size_created": 1795297862.113,
+          "vllm:kv_offload_cpu_allocation_size_sum": 505.0,
+          "vllm:kv_offload_store_time_created": 1795297862.113,
+          "vllm:kv_offload_size_sum": 2118123520.0,
+          "vllm:kv_offload_store_size_count": 1.0,
+          "vllm:kv_offload_cpu_allocation_size_bucket": 6.0,
+          "vllm:kv_offload_cpu_allocation_size_count": 1.0,
+          "vllm:kv_offload_store_bytes_created": 1795297862.113,
+          "vllm:kv_offload_lookup_sync_delay_seconds_sum": 0.0,
+          "vllm:kv_offload_size_bucket": 1.0,
+          "vllm:kv_offload_store_bytes_total": 2118123520.0
+        }
+      },
+      "eviction": {
+        "filled_tokens": 97378,
+        "requests": 12,
+        "failed": null
+      },
+      "read": {
+        "label": "read",
+        "http": 200,
+        "ok": true,
+        "error": null,
+        "kv_transfer_params": null,
+        "latency_s": 0.123,
+        "prompt_tokens": 8094,
+        "cached_tokens": 8080,
+        "state": "HOST-WARM",
+        "evidence": {
+          "local_hits": 0,
+          "external_hits": 8080.0,
+          "load_bytes": 3913421399.102,
+          "need": 7014.6
+        },
+        "metric_delta": {
+          "vllm:kv_offload_load_size_count": 1.0,
+          "vllm:kv_offload_load_time_total": 0.048,
+          "vllm:kv_offload_lookup_sync_delay_seconds_bucket": 9.0,
+          "vllm:kv_offload_total_bytes_total": 2118123520.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_count": 1.0,
+          "vllm:external_prefix_cache_queries_total": 8094.0,
+          "vllm:kv_offload_size_sum": 2118123520.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_sum": 0.0,
+          "vllm:kv_offload_size_bucket": 1.0,
+          "vllm:kv_offload_load_size_created": 1795297879.102,
+          "vllm:kv_offload_size_count": 1.0,
+          "vllm:prefix_cache_queries_total": 8094.0,
+          "vllm:kv_offload_total_time_total": 0.048,
+          "vllm:kv_offload_load_size_sum": 2118123520.0,
+          "vllm:kv_offload_load_size_bucket": 1.0,
+          "vllm:kv_offload_load_time_created": 1795297879.102,
+          "vllm:kv_offload_load_bytes_created": 1795297879.102,
+          "vllm:external_prefix_cache_hits_total": 8080.0,
+          "vllm:kv_offload_load_bytes_total": 2118123520.0
+        }
+      }
+    },
+    {
+      "probe": "Q1_skip_retention",
+      "question": "does max_offload_tokens=0 stop the prefix being retained on host",
+      "store": {
+        "label": "store",
+        "http": 200,
+        "ok": true,
+        "error": null,
+        "kv_transfer_params": {
+          "max_offload_tokens": 0
+        },
+        "latency_s": 1.358,
+        "prompt_tokens": 8116,
+        "cached_tokens": 0,
+        "state": "COLD",
+        "evidence": {
+          "local_hits": 0,
+          "external_hits": 0,
+          "load_bytes": 0,
+          "need": 7034.4
+        },
+        "metric_delta": {
+          "vllm:kv_offload_lookup_sync_delay_seconds_bucket": 11.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_count": 1.0,
+          "vllm:external_prefix_cache_queries_total": 8116.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_sum": 0.0,
+          "vllm:prefix_cache_queries_total": 8116.0
+        }
+      },
+      "eviction": {
+        "filled_tokens": 97355,
+        "requests": 12,
+        "failed": null
+      },
+      "read": {
+        "label": "read",
+        "http": 200,
+        "ok": true,
+        "error": null,
+        "kv_transfer_params": null,
+        "latency_s": 1.411,
+        "prompt_tokens": 8116,
+        "cached_tokens": 0,
+        "state": "COLD",
+        "evidence": {
+          "local_hits": 0,
+          "external_hits": 0,
+          "load_bytes": 0,
+          "need": 7034.4
+        },
+        "metric_delta": {
+          "vllm:kv_offload_store_size_sum": 2126512128.0,
+          "vllm:kv_offload_store_time_total": 0.041,
+          "vllm:kv_offload_lookup_sync_delay_seconds_bucket": 11.0,
+          "vllm:kv_offload_total_bytes_total": 2126512128.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_count": 1.0,
+          "vllm:external_prefix_cache_queries_total": 8116.0,
+          "vllm:kv_offload_size_sum": 2126512128.0,
+          "vllm:kv_offload_store_size_count": 1.0,
+          "vllm:kv_offload_cpu_allocation_size_bucket": 6.0,
+          "vllm:kv_offload_cpu_allocation_size_count": 1.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_sum": 0.0,
+          "vllm:kv_offload_size_bucket": 1.0,
+          "vllm:kv_offload_store_bytes_total": 2126512128.0,
+          "vllm:kv_offload_size_count": 1.0,
+          "vllm:kv_offload_store_size_bucket": 1.0,
+          "vllm:prefix_cache_queries_total": 8116.0,
+          "vllm:kv_offload_total_time_total": 0.041,
+          "vllm:kv_offload_cpu_allocation_size_sum": 507.0
+        }
+      }
+    },
+    {
+      "probe": "Q3a_forbid_reload_max_load_tokens",
+      "question": "does max_load_tokens=0 stop a host-resident prefix being reloaded",
+      "store": {
+        "label": "store",
+        "http": 200,
+        "ok": true,
+        "error": null,
+        "kv_transfer_params": null,
+        "latency_s": 1.4,
+        "prompt_tokens": 8125,
+        "cached_tokens": 0,
+        "state": "COLD",
+        "evidence": {
+          "local_hits": 0,
+          "external_hits": 0,
+          "load_bytes": 0,
+          "need": 7042.5
+        },
+        "metric_delta": {
+          "vllm:kv_offload_lookup_sync_delay_seconds_bucket": 11.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_count": 1.0,
+          "vllm:external_prefix_cache_queries_total": 8125.0,
+          "vllm:kv_offload_cpu_allocation_size_bucket": 6.0,
+          "vllm:kv_offload_cpu_allocation_size_count": 1.0,
+          "vllm:kv_offload_cpu_cache_usage_perc": 0.073,
+          "vllm:kv_offload_lookup_sync_delay_seconds_sum": 0.0,
+          "vllm:prefix_cache_queries_total": 8125.0,
+          "vllm:kv_offload_cpu_allocation_size_sum": 507.0,
+          "vllm:kv_offload_cpu_cache_write_usage_perc": 0.073
+        }
+      },
+      "eviction": {
+        "filled_tokens": 97440,
+        "requests": 12,
+        "failed": null
+      },
+      "read": {
+        "label": "read",
+        "http": 200,
+        "ok": true,
+        "error": null,
+        "kv_transfer_params": {
+          "max_load_tokens": 0
+        },
+        "latency_s": 1.387,
+        "prompt_tokens": 8125,
+        "cached_tokens": 0,
+        "state": "COLD",
+        "evidence": {
+          "local_hits": 0,
+          "external_hits": 0,
+          "load_bytes": 0,
+          "need": 7042.5
+        },
+        "metric_delta": {
+          "vllm:kv_offload_lookup_sync_delay_seconds_bucket": 11.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_count": 1.0,
+          "vllm:external_prefix_cache_queries_total": 8125.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_sum": 0.0,
+          "vllm:prefix_cache_queries_total": 8125.0
+        }
+      }
+    },
+    {
+      "probe": "Q3a_control_was_it_on_host",
+      "question": "after the forbidden read, is the same prefix still reachable on host",
+      "read": {
+        "label": "Q3a_control_replain",
+        "http": 200,
+        "ok": true,
+        "error": null,
+        "kv_transfer_params": null,
+        "latency_s": 0.071,
+        "prompt_tokens": 8125,
+        "cached_tokens": 8112,
+        "state": "GPU-WARM",
+        "evidence": {
+          "local_hits": 8112.0,
+          "external_hits": 0,
+          "load_bytes": 0,
+          "need": 7042.5
+        },
+        "metric_delta": {
+          "vllm:kv_offload_lookup_sync_delay_seconds_bucket": 11.0,
+          "vllm:prefix_cache_hits_total": 8112.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_count": 1.0,
+          "vllm:external_prefix_cache_queries_total": 13.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_sum": 0.0,
+          "vllm:prefix_cache_queries_total": 8125.0
+        }
+      }
+    },
+    {
+      "probe": "Q3b_forbid_reload_empty_tiers",
+      "question": "does kv_load_tiers=[] stop a host-resident prefix being reloaded",
+      "store": {
+        "label": "store",
+        "http": 200,
+        "ok": true,
+        "error": null,
+        "kv_transfer_params": null,
+        "latency_s": 1.391,
+        "prompt_tokens": 8081,
+        "cached_tokens": 0,
+        "state": "COLD",
+        "evidence": {
+          "local_hits": 0,
+          "external_hits": 0,
+          "load_bytes": 0,
+          "need": 7002.9
+        },
+        "metric_delta": {
+          "vllm:kv_offload_lookup_sync_delay_seconds_bucket": 10.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_count": 1.0,
+          "vllm:external_prefix_cache_queries_total": 8081.0,
+          "vllm:kv_offload_cpu_allocation_size_bucket": 6.0,
+          "vllm:kv_offload_cpu_allocation_size_count": 1.0,
+          "vllm:kv_offload_cpu_cache_usage_perc": 0.073,
+          "vllm:kv_offload_lookup_sync_delay_seconds_sum": 0.0,
+          "vllm:prefix_cache_queries_total": 8081.0,
+          "vllm:kv_offload_cpu_allocation_size_sum": 505.0,
+          "vllm:kv_offload_cpu_cache_write_usage_perc": 0.073
+        }
+      },
+      "eviction": {
+        "filled_tokens": 97178,
+        "requests": 12,
+        "failed": null
+      },
+      "read": {
+        "label": "read",
+        "http": 200,
+        "ok": true,
+        "error": null,
+        "kv_transfer_params": {
+          "kv_load_tiers": []
+        },
+        "latency_s": 0.12,
+        "prompt_tokens": 8081,
+        "cached_tokens": 8080,
+        "state": "HOST-WARM",
+        "evidence": {
+          "local_hits": 0,
+          "external_hits": 8080.0,
+          "load_bytes": 2118123520.0,
+          "need": 7002.9
+        },
+        "metric_delta": {
+          "vllm:kv_offload_load_size_count": 1.0,
+          "vllm:kv_offload_load_time_total": 0.046,
+          "vllm:kv_offload_lookup_sync_delay_seconds_bucket": 9.0,
+          "vllm:kv_offload_total_bytes_total": 2118123520.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_count": 1.0,
+          "vllm:external_prefix_cache_queries_total": 8081.0,
+          "vllm:kv_offload_size_sum": 2118123520.0,
+          "vllm:kv_offload_lookup_sync_delay_seconds_sum": 0.0,
+          "vllm:kv_offload_size_bucket": 1.0,
+          "vllm:kv_offload_size_count": 1.0,
+          "vllm:prefix_cache_queries_total": 8081.0,
+          "vllm:kv_offload_total_time_total": 0.046,
+          "vllm:kv_offload_load_size_sum": 2118123520.0,
+          "vllm:kv_offload_load_size_bucket": 1.0,
+          "vllm:external_prefix_cache_hits_total": 8080.0,
+          "vllm:kv_offload_load_bytes_total": 2118123520.0
+        }
+      }
+    }
+  ],
+  "verdicts": {
+    "positive_control": "PASS: a plain re-read after eviction was served from host",
+    "Q2_host_reload": "YES",
+    "Q1_skip_retention": "YES: nothing was retained on host",
+    "Q3a_max_load_tokens": "INCONCLUSIVE: read was COLD but the control came back GPU-WARM, so it may never have been on host (absence, not a working control)",
+    "Q3b_kv_load_tiers": "NO: read came back HOST-WARM despite the control (http 200)"
+  }
+}
