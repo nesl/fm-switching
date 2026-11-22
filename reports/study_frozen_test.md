@@ -1,7 +1,168 @@
 # StudyFROZEN-test (H100, overnight 2026-11-19 to 20): frozen-policy test, StudySS1-32B and SS timing
 
-**Status: IN PROGRESS. Last updated 2026-11-19 19:45.** Rules: D116 (no methodological change overnight; never seeds 1
+**Status: IN PROGRESS. Last updated 2026-11-22 05:43.** Rules: D116 (no methodological change overnight; never seeds 1
 to 3 or HOLDOUT; never INVALID results; GPU 2 exclusive; no em dashes). PROVISIONAL decisions are marked.
+
+## 06:00 summary, 2026-11-22
+
+H100 overnight from 18:50 (user's overnight brief; D106 / D116; commits per D166). Workload for every row below:
+BASELINE_MATRIX tag `_L3_epg_rq30` = 16 devices, 1,200 s, robot deadline 3 s, EP-G dashcam episodes, per-frame robot upload,
+rq30 re-asks. Robot = correct answers delivered BY THE DEADLINE (D155 headline, `robot_headline`) and robot on time / feasible;
+SS = single-shot within 2 s / pool; dash = all dashcam deadlines met; load = uncached prompt tokens per second over the
+run (request.jsonl, prompt minus cached, / 1200 s). **Read per seed only, never pooled**: the Orin re-ask device answers flip the
+frozen-answer error's sign by seed (flash e016c230). Robot numbers still use the scorer's measured Orin WARM device latency
+(default `orin_rec_warm`), which covers every scored robot row (flash 1c239d5e). Transition zone for saturation is about
+4,500 to 4,750 uncached tok/s; a saturated cell is scored almost entirely on the device fallback answers, which are fixed by
+the seed's trace, so **saturated arms at the same seed show identical scores by coincidence on shared inputs, not duplication**
+(checked raw: always-cloud vs b7 s4, mooncake vs b7 vs llf s6, different request logs and routing splits).
+
+### 1. Runs done overnight (since 18:50)
+
+30 valid cells committed: b7 s5 to s7; covex-v6-state s4 (as `_rerun`), s5, s6 (HELD-CODE, see 4); always-cloud s4 to s7
+(s5 as `_rerun`); simplestream s4 to s7; querystream-proactive s4 to s7; mooncake s4 to s7; attentionstore-prefetch s4 to s7;
+warm-all-lru s4 to s6 (s7 still running when this was written at 05:43, due about 05:44; then old v5-rules s6 and s7 close the paper core).
+INVALID / skipped (never used): covex-v6-state s4 first attempt (unknown arm, 19:42), covex-v6-state s7 and its rerun (stopped,
+held code, 21:14 / 21:16), always-cloud s5 first attempt (preflight refused: orphaned server, 21:16). HTTP 400 counts overnight:
+14 always-cloud s7, 16 querystream-proactive s7, 16 attentionstore-prefetch s7, all on `robo004|s000` (see 4); every other
+overnight cell 0. Transport errors with no status (not refusals) range 0 to 77 per cell.
+
+### 2. Paper-core table (BASELINE_MATRIX cells run so far, all valid)
+
+| arm | seed | robot by deadline | robot on time | SS within 2 s | dash | load tok/s | 400s |
+|---|---|---|---|---|---|---|---|
+| edf | 4 | 0.386 | 5/132 | 49/357 | fail | 4,668 | 0 |
+| edf | 5 | 0.291 | 4/127 | 55/356 | fail | 4,657 | 0 |
+| edf | 6 | 0.099 | 5/121 | 52/357 | fail | 4,660 | 0 |
+| edf | 7 | 0.295 | 1/105 | 65/359 | meet | 4,593 | 14 |
+| llf | 4 | 0.394 | 7/132 | 135/357 | meet | 4,551 | 0 |
+| llf | 5 | 0.299 | 5/127 | 147/356 | meet | 4,494 | 0 |
+| llf | 6 | 0.099 | 9/121 | 167/357 | meet | 4,556 | 0 |
+| llf | 7 | 0.314 | 4/105 | 167/359 | meet | 4,513 | 0 |
+| b7-edf-feasibility | 4 | 0.371 | 5/132 | 32/357 | fail | 6,163 | 0 |
+| b7-edf-feasibility | 5 | 0.307 | 5/127 | 26/356 | fail | 5,202 | 0 |
+| b7-edf-feasibility | 6 | 0.091 | 7/121 | 167/357 | meet | 5,004 | 0 |
+| b7-edf-feasibility | 7 | 0.324 | 8/105 | 301/359 | meet | 4,531 | 0 |
+| always-cloud-fcfs | 4 | 0.371 | 5/132 | 32/357 | fail | 5,491 | 0 |
+| always-cloud-fcfs | 5 | 0.315 | 6/127 | 28/356 | fail | 5,663 | 0 |
+| always-cloud-fcfs | 6 | 0.083 | 3/121 | 49/357 | fail | 5,352 | 0 |
+| always-cloud-fcfs | 7 | 0.295 | 1/105 | 34/359 | fail | 5,931 | 14 |
+| simplestream | 4 | 0.144 | 132/132 | 355/357 | meet | 4,426 | 0 |
+| simplestream | 5 | 0.299 | 126/127 | 356/356 | meet | 4,430 | 0 |
+| simplestream | 6 | 0.165 | 120/121 | 356/357 | meet | 4,431 | 0 |
+| simplestream | 7 | 0.286 | 105/105 | 358/359 | meet | 4,422 | 0 |
+| querystream-proactive | 4 | 0.371 | 5/132 | 28/357 | fail | 5,636 | 0 |
+| querystream-proactive | 5 | 0.299 | 3/127 | 19/356 | fail | 5,608 | 0 |
+| querystream-proactive | 6 | 0.083 | 3/121 | 48/357 | fail | 5,350 | 0 |
+| querystream-proactive | 7 | 0.295 | 0/105 | 34/359 | fail | 5,332 | 16 |
+| mooncake | 4 | 0.371 | 5/132 | 32/357 | fail | 5,663 | 0 |
+| mooncake | 5 | 0.307 | 5/127 | 27/356 | fail | 5,950 | 0 |
+| mooncake | 6 | 0.091 | 7/121 | 167/357 | meet | 5,152 | 0 |
+| mooncake | 7 | 0.333 | 8/105 | 309/359 | meet | 4,523 | 0 |
+| attentionstore-prefetch | 4 | 0.371 | 4/132 | 22/357 | fail | 5,880 | 0 |
+| attentionstore-prefetch | 5 | 0.315 | 6/127 | 18/356 | fail | 5,682 | 0 |
+| attentionstore-prefetch | 6 | 0.083 | 3/121 | 44/357 | fail | 4,848 | 0 |
+| attentionstore-prefetch | 7 | 0.295 | 0/105 | 29/359 | fail | 6,005 | 16 |
+| warm-all-lru | 4 | 0.371 | 3/132 | 23/357 | fail | 5,595 | 0 |
+| warm-all-lru | 5 | 0.307 | 4/127 | 19/356 | fail | 5,902 | 0 |
+| warm-all-lru | 6 | 0.074 | 2/121 | 30/357 | fail | 5,552 | 0 |
+| v5-rules (old, ablation ladder) | 4 | 0.439 | 40/132 | 170/357 | fail | 4,704 | 0 |
+| v5-rules-2 = covex-v6-rules | 4 | 0.485 | 38/132 | 245/357 | fail | 4,729 | 0 |
+| v5-rules-2 = covex-v6-rules | 5 | 0.331 | 37/127 | 258/356 | fail | 4,722 | 0 |
+| v5-rules-2 = covex-v6-rules | 6 | 0.157 | 32/121 | 259/357 | fail | 4,718 | 0 |
+| v5-rules-2 = covex-v6-rules | 7 | 0.390 | 23/105 | 266/359 | fail | 4,730 | 0 |
+| hybrid-F-lhreq-noc3 = covex-v6-base | 4 | 0.470 | 35/132 | 337/357 | meet | 4,479 | 0 |
+| hybrid-F-lhreq-noc3 = covex-v6-base | 5 | 0.339 | 27/127 | 343/356 | meet | 4,471 | 0 |
+| hybrid-F-lhreq-noc3 = covex-v6-base | 6 | 0.248 | 41/121 | 349/357 | meet | 4,487 | 0 |
+| hybrid-F-lhreq-noc3 = covex-v6-base | 7 | 0.381 | 19/105 | 354/359 | meet | 4,423 | 0 |
+
+Reading it, per seed: (a) **most baselines saturate** (load above about 5,000 tok/s; SS 18 to 65 of about 357; dashcam fail):
+b7 s4 / s5, always-cloud, querystream-proactive, mooncake s4 / s5, attentionstore-prefetch, warm-all-lru; edf sits in the
+transition zone at all four seeds; llf just below it. (b) **simplestream is the opposite corner**: on time almost everywhere
+(robot 105 to 132 of the pool, SS and dashcam near perfect) but robot correctness 0.14 to 0.30, because it sends robot questions
+with about 650 tokens of bounded context (p50 653, max 782) against about 10,800 for noc3; cloud letters are real A to E, not a
+placeholder. (c) **covex-v6-base (noc3) is the strongest balanced row**: SS 337 to 354, dashcam meets at every seed. (d)
+**covex-v6-rules (v5-rules-2) fails dashcam at every seed**; its robot headline is not consistently above noc3 (ahead at s4, s7;
+behind at s5, s6). Not in this table: cascade arms and kvflow-prefetch (held, see 5), r3-streaming and streamscout (released
+on the measured device wait, matrix positions after the paper core), lmcache, the 'our versions' block beyond the pair.
+
+### 3. Ladder rung results
+
+**covex-v6-state (rung 2)**, posted by flash at 465273a / c68a186e (re-issued after the name fix), passed the operator gate
+(harm_warm computed from the D162 model, never declared; pre-registration 2323a58 an ancestor; harm_warm_capped present).
+
+| seed | robot by deadline | robot on time | SS within 2 s | dash | load | TOUCH issued | budget refusals | status |
+|---|---|---|---|---|---|---|---|---|
+| 4 | 0.508 | 92/132 | 264/357 | fail | 3,369 | 1,246 | 12,824 | old touch price |
+| 5 | 0.433 | 116/127 | 347/356 | fail | 4,501 | 178 | 0 | old touch price |
+| 6 | 0.140 | 12/121 | 75/357 | fail | 957 | 0 | 44,382 | **HELD-CODE (D173), not comparable** |
+| 7 | | | | | | | | stopped and skipped (held code) |
+
+What the two clean seeds establish (s4, s5): **TOUCH fires live** (1,438 and 178 chosen) although the dry cell predicted zero:
+plan_state's gain crosses MARGIN_CF once robot history passes about 18,000 to 19,000 tokens with a question imminent, a
+combination the dry cell never sampled (flash 397bdb54; the belief corrector cannot raise the gain, refuted by code path).
+**Robot on time rises to 92 and 116** against noc3's 35 and 27. At s4 that gain is partly a **transfer**: touches were priced at
+recall_gpu_s(whole prefix) while the planner scored them at harm 0 (flash b988ed6e, cf_planner.py:573-575), so 12,824 budget
+refusals left 88 SS unsent (noc3 1) and dashcam on time fell to 1,786 (noc3 6,167). At s5, with 178 touches and 0 refusals,
+SS is intact (350 vs 346) and robot is still 116, so **the robot gain does not need the transfer**; its cause (state pricing,
+per-type host retention, or the touches) is NOT attributed. **Dashcam failure is rung 1's, not rung 2's**: dashcam on time
+rung 1 (v5-rules-2) 773 / 1,219 at s4 / s5, rung 2 1,786 / 2,458, noc3 6,167 / 5,540; v5-rules-2 submits about half the
+monitors with ZERO budget refusals in every cell, so the loss is in what the arm ASKS FOR, not what it is charged (flash
+afbe7276); rung 2 submits 1.6x more monitors. Halving a deficit is not closing it; no cell of this rung is dashcam-neutral.
+**Per-type host retention is live for the first time**: all 269 / 356 SS sends COLD (max_offload_tokens = 0). harm_warm was
+priced on exactly one live decision per cell (capped once, correctly, above 18,106 uncached tokens): **no HOLD_BACK or SLICE
+conclusion**. Not posted: covex-v6-fair (D165 objective unbuilt), covex-v6 (plan_sync, compounds, episode switch, D170 rule).
+
+### 4. Incidents
+
+1. **edf, always-cloud, querystream-proactive and attentionstore-prefetch at s7: 14, 14, 16, 16 x HTTP 400**, all on
+   `robo004|s000` with 378 to 587 images, over the 32,768-token context (seed 7 is the only seed with beyond-32k re-asks: 15,
+   max history 52,861; flash over32k_s7_finding.json). D170 (user): in scope as a deployment constraint, no capping, seed 7
+   kept, refusals are misses (D144 scores a non-200 as the device answer standing). llf, b7, mooncake, simplestream, noc3 and
+   v5-rules-2 sent nothing over the limit at s7: the count is each arm's own send decision.
+2. **Saturation**: see 2 (a). b7's s4 load of 6,163 tok/s is real, not an artefact: its dashcam requests miss the prefix cache
+   far more (1,247 cold vs edf's 703) and its single-shot requests never hit it (all 244 cold).
+3. **Offload-verify break (user-approved, 13:50, rc 0)**: positive control PASS (host reload served from host, 8,080 tokens);
+   skip-retention (max_offload_tokens = 0) YES; host reload YES; forbid-reload max_load_tokens INCONCLUSIVE (its control was
+   contaminated by the forbidden read's own recompute; fixed in the script afterwards); kv_load_tiers = [] NO (ignored). The
+   first attempt at 13:28 never ran (my `timeout` wrapper tripped the pilot preflight).
+4. **covex-v6-state s4, 19:40: unknown arm** in the harness process (names registered in another process only); then the
+   crashed run's **server was orphaned** (start_server preceded make_arm) and the driver's rerun waited for GPU 2 from 19:42 to
+   19:45 until I stopped it. flash fixed both: names register in arms.py (c821fc3), arm built before the server plus an atexit
+   backstop (86ecf29c). My watch now alerts on a GPU held 2 min with no harness process.
+5. **Held code, 20:30 to 21:15**: flash's 8733280 added a d162 pricing switch to covex-v6-state that DEFAULTED ON, so s6 ran the
+   held first-token charge (its own D102 proof fails) and budget-starved at t = 264 s (44,382 refusals). I stopped s7 (D106
+   blocker); flash set the default off (778a4e27). D173 labels s6 / s7 held-code.
+6. **My error: SIGTERM orphaned two servers** when stopping s7 and its rerun (Python atexit does not run on SIGTERM); cost
+   always-cloud s5's first attempt (preflight refused) and about 3 min of idle GPU. Rule now: stop a harness only with SIGINT.
+7. **Touch is mispriced** (flash 9daceb59): measured warm touches are 1,246 / 1,246 WARM with 3 uncached tokens (p50) and 1
+   output token; time to first token p50 0.53 s is 70 to 98 percent queueing by the D162 decomposition, while the charge
+   scaled with prefix length (3.4x to 9.5x overcharge). The re-price was implemented and HELD: the first-token charge fails
+   D102 (double-counts the queue term) and the work-only charge then fails D102's utilisation half (its per-request intercept
+   bills 46 to 51 percent of the wall clock; utilisation 1.07 to 1.34 of wall). **The touch price must not be lowered to make
+   dashcam recover; it changes only if a measurement says it is wrong.**
+8. **D166 5 MB guard**: attentionstore-prefetch decision.jsonl.gz s4 (8.3 MB), s5 and s6 not committed, kept on disk.
+9. **Counters missing**: coordinator_result.json has no `counts` in some cells (b7 s4 / s5, mooncake s4 to s6, warm-all-lru s4
+   to s6, both n20 sweep cells), which is also why cell.json's n_requests / n_errors are null there; their budget refusals
+   are NOT RECORDED, not zero. Scores, HTTP counts and loads come from other files and are unaffected.
+
+### 5. PROVISIONAL decisions overnight (D106 / D116)
+
+1. **covex-v6-state s6 and s7 skipped at 20:16, re-queued at 20:29**: skipped after flash withdrew them on the named touch
+   defect; re-queued because s5 showed the robot gain without the budget transfer, so replication was the open question.
+   (s6 then ran held code and s7 was stopped; see 4.5.)
+2. **covex-v6-state s4 to s7 skipped as a blocker at 19:42, released at 19:46** after the name fix was proved through the
+   harness's own entry point with a negative control.
+3. **No diagnostic cells queued** (-notouch, -nobelief, -noprice): outside the brief; recommended for the user (notouch at
+   s4 separates touch from the robot gain; noprice at s5 tests flash's hypothesis that state pricing explains the dashcam
+   recovery, NOT established).
+4. **Old-tag r3-streaming / streamscout gap-fill cells dropped** (user ruling ~16:15); cascade arms held until their
+   pre-registered DEV threshold calibration; kvflow-prefetch held to the 2026-11-28 cutoff (characteristic decision
+   unexpressible); thinking-qwenvl not a registered live2 arm.
+
+**For the user's ruling**: (a) touch pricing (first-token and work-only charges both fail D102; planner scores TOUCH at harm 0
+regardless); (b) the rung-1 dashcam submission gap (flash's concurrency-limit hypothesis, untested; needs per-epoch visible but
+unreleased monitors beside in-flight occupancy); (c) the optional diagnostics in 5.3; (d) where to keep the over-5 MB decision
+logs.
 
 ## 06:00 SUMMARY (2026-11-21, H100 overnight; D156 (5) form)
 
