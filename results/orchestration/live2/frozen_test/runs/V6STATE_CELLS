@@ -1,0 +1,42 @@
+# D172 rung 2, covex-v6-state. One cell per line: "arm n seed tag". Lines starting # are NOT run.
+#
+# WORKLOAD, identical to BASELINE_MATRIX: 16 devices, EP-G default episodes (fixed 21-frame
+# refresh, NOT the policy episode rule), per-frame upload, rq30 re-asks, deadlines dashcam 1.0 s /
+# robot 3.0 s / single-shot 2.0 s, memory 1x. Tag _L3_epg_rq30.
+#
+# THE RUNG. covex-v6-rules plus four things: per-type host retention (max_offload_tokens = 0 for
+# alert and single-shot), TOUCH chosen by plan_state, residency belief corrected from engine
+# telemetry including host hits, and state-based pricing.
+#
+# WHY THIS IS POSTED, and it is not because the rung's headline decision fires. Read both.
+#
+#   plan_state DOES NOT DEVIATE. 44,300 state decisions on a dry 16-device cell, KEEP on every
+#   one. Its own argmax prefers a non-KEEP candidate on 44,299 of them and D151's margin rule
+#   overrides it back each time: max predicted gain 0.151 against MARGIN_CF 0.16456, arithmetic
+#   ceiling 0.250, so a near miss and not a cap. Expect no TOUCH in these cells.
+#
+#   TWO OF THE FOUR ADDITIONS CANNOT BE TESTED WITHOUT AN ENGINE. Per-type host retention acts by
+#   sending kv_transfer_params to vLLM, and the belief corrector is driven by the engine's own
+#   cached_tokens. A dry cell has neither, so both are UNEXERCISED there BY CONSTRUCTION and the
+#   dry nulls carry no information about them. These cells are the only way to exercise them.
+#
+#   THE DIFFERENCE THAT EXISTS IS ATTRIBUTED. covex-v6-state is NOT byte-identical to
+#   covex-v6-rules at 16 devices (6e8927b9f7f92040 against ae997d6af16a2ef4, 15,734 rows against
+#   17,050), and one-factor ablation names STATE-BASED PRICING as the sole cause: -noprice returns
+#   to the rung below's digest exactly and is the only ablation that does. At 8 devices the rung
+#   IS byte-identical, because pricing can only matter once the budget binds.
+#   results/orchestration/live2/frozen_test/v6state_attribution.json
+#
+# harm_warm IS COMPUTED, never declared, per research/prereg_harm_warm_d172.md (on origin before
+# this list). No line here and no registered default sets it. Cap counter: harm_warm_capped.
+#
+# PROVISIONAL (D106 / D116, user away): the decision to post is mine. The user's D172 says to post
+# each PROVED rung, and the four conditions are met (Step 2b, positive control, spec v6 section 12
+# rows, baselines byte-identical). My earlier reason to hold was that the rung was byte-identical
+# to the rung below; it is not, so that reason is gone. If the user would rather not spend GPU
+# hours on a rung whose named decision never fires, cancel these four cells.
+
+covex-v6-state 16 4 _L3_epg_rq30
+covex-v6-state 16 5 _L3_epg_rq30
+covex-v6-state 16 6 _L3_epg_rq30
+covex-v6-state 16 7 _L3_epg_rq30

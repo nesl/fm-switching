@@ -1,0 +1,95 @@
+{
+ "_what": "covex-v6-state (rung 2): which of the rung's four additions moves decisions",
+ "_register": "DRY cells, no GPU and no engine. That is a HARD LIMIT on two of the four additions and is the first thing to read below, not a footnote",
+ "cell": {
+  "seed": 4,
+  "n": 16,
+  "run_s": 1200.0,
+  "ratio": "50:50",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dry": true
+ },
+ "margin_cf": 0.16456,
+ "digests": {
+  "_convention": "sha256 over decision rows with arm_version removed, 16 hex",
+  "covex-v6-rules (v5-rules-2)": {
+   "digest": "ae997d6af16a2ef4",
+   "rows": 17050
+  },
+  "covex-v6-state": {
+   "digest": "6e8927b9f7f92040",
+   "rows": 15734
+  },
+  "covex-v6-state-off": {
+   "digest": "ae997d6af16a2ef4",
+   "rows": 17050
+  },
+  "covex-v6-state-noprice": {
+   "digest": "ae997d6af16a2ef4",
+   "rows": 17050
+  },
+  "covex-v6-state-noretain": {
+   "digest": "6e8927b9f7f92040",
+   "rows": 15734
+  },
+  "covex-v6-state-nobelief": {
+   "digest": "6e8927b9f7f92040",
+   "rows": 15734
+  }
+ },
+ "negative_control": {
+  "_claim": "the rung with every addition off collapses to covex-v6-rules byte-identically",
+  "collapses": true,
+  "verdict": "PASS: covex-v6-state-off reproduces ae997d6af16a2ef4 exactly"
+ },
+ "attribution": {
+  "state_priced_costs": {
+   "moves_decisions": true,
+   "evidence": "-noprice returns to the rung below's digest exactly, and it is the ONLY ablation that does. Turning this one switch off restores covex-v6-rules; turning either other one off leaves the full rung's digest unchanged",
+   "why_only_at_16_devices": "it changes what a warm COSTS against the budget, so it can only matter once the budget is the binding constraint. At 8 devices covex-v6-state is byte-identical to covex-v6-rules (69874e94d2ddee85 both), which is the same fact seen from the other side and not a second result",
+   "effect": "17,050 decision rows fall to 15,734, a 7.7 percent reduction"
+  },
+  "per_type_host_retention": {
+   "moves_decisions": false,
+   "rule2_class": "UNEXERCISED, and UNEXERCISABLE in this cell",
+   "why": "it acts by sending kv_transfer_params (max_offload_tokens = 0 for alert and single-shot) to vLLM. A dry cell has NO ENGINE, so the controls are emitted and nothing receives them. The null here is a property of the harness and carries no information about the mechanism"
+  },
+  "belief_from_telemetry": {
+   "moves_decisions": false,
+   "rule2_class": "UNEXERCISED, and UNEXERCISABLE in this cell",
+   "why": "the corrector is driven by the engine's own cached_tokens. A dry cell produces none, so it cannot fire. coordinator.py says this of itself in the comment on the belief-correction gate: a dry byte-identity screen proves the correction harmless and proves NOTHING about this read"
+  },
+  "plan_state": {
+   "moves_decisions": false,
+   "rule2_class": "FIRED AND DID NOT HELP, with the reason named",
+   "why": "44,300 state decisions, KEEP on every one. plan_state's own argmax prefers a non-KEEP candidate on 44,299 of them and D151's margin rule overrides it back on every one. Max predicted gain 0.151 against MARGIN_CF 0.16456, arithmetic ceiling 0.250, so a near miss and not a cap",
+   "gain_distribution": {
+    "n": 44300,
+    "n_with_a_delta": 44299,
+    "n_positive": 44299,
+    "mean": 0.028181,
+    "max": 0.151,
+    "gt_0.01": 20467,
+    "gt_0.05": 8013,
+    "gt_0.10": 5178,
+    "gt_0.12": 3909,
+    "gt_0.14": 1149,
+    "gt_0.16456": 0
+   }
+  }
+ },
+ "harm_warm": {
+  "_claim": "computed per research/prereg_harm_warm_d172.md, never declared",
+  "on_this_cell": {
+   "state_decisions_with_a_rebuild": 65,
+   "priced": 0,
+   "no_queue_behind_the_warm": 65,
+   "capped": 0,
+   "hold_back_gain_sum": 0.0
+  },
+  "reading": "ALL 65 decisions that coincided with a real rebuild had nothing queued behind the warm, so harm_warm was a true zero on every one and HOLD_BACK's gain was 0 throughout. THIS CELL SAYS NOTHING ABOUT WHETHER THE COMPUTATION WORKS. The 8-device cell is the only evidence that it does: 527 of 2,035 decisions priced, mean over the priced set 0.1039, max 0.120, capped 0",
+  "superseded_claim": "an earlier 16-device run showed 897 HOLD_BACK choices all clearing the margin. Those were scored for sessions NOBODY WAS WARMING, so they weighed a rebuild that was never going to happen, and nothing was emitted for any of them. UNEXPRESSIBLE under Rule 2, not a finding"
+ },
+ "verdict": "covex-v6-state differs from covex-v6-rules at 16 devices through STATE-BASED PRICING ALONE. plan_state decides and never deviates. The other two additions cannot be exercised without an engine, so the dry evidence for this rung is exhausted and only a live cell can test them"
+}
