@@ -1,0 +1,136 @@
+{
+ "_what": "C5 item (c): the same three numbers for the REPRICED rung-2 cell (D174 (1) charge)",
+ "_cell": "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30, read from origin/main (pushed by the H100 at 24ca4fc); VALID, 0 errors, 0 HTTP 400, budget_refusal 0, load 4,477 tok/s",
+ "_why_it_matters": "the old-price covex-v6-state s4 cell exhausted its 1,200 GPU-second budget exactly and logged 12,824 budget refusals, so no dashcam reading from it could be separated from budget starvation. This cell has ZERO refusals, so the dashcam result is now attributable to scheduling alone",
+ "my_split_vs_the_other_two_arms_at_seed_4": {
+  "_denominator": "monitor opportunities, 11,764, identical stream on all three arms",
+  "on_time": {
+   "base": 5986,
+   "rung1": 701,
+   "rung2_repriced": 2209
+  },
+  "a_late_during_a_robot_prefill": {
+   "base": 1566,
+   "rung1": 2235,
+   "rung2_repriced": 3070
+  },
+  "a2_late_no_prefill_overlap": {
+   "base": 2191,
+   "rung1": 1891,
+   "rung2_repriced": 2888
+  },
+  "b_cap_shut_nothing_in_flight": {
+   "base": 799,
+   "rung1": 1784,
+   "rung2_repriced": 1601
+  },
+  "b2_cap_shut_prefill_in_flight": {
+   "base": 923,
+   "rung1": 5058,
+   "rung2_repriced": 1913
+  },
+  "c_cap_open_unsent": {
+   "base": 299,
+   "rung1": 95,
+   "rung2_repriced": 83
+  },
+  "epochs_at_the_cap_floor_of_12000": {
+   "base": 2989,
+   "rung1": 8428,
+   "rung2_repriced": 5177
+  },
+  "robot_prefills_released": {
+   "base": 407,
+   "rung1": 587,
+   "rung2_repriced": 608
+  },
+  "monitor_ttft_p50_s": {
+   "rung2_repriced": 0.483
+  }
+ },
+ "c5a_eight_bucket_reconciliation": {
+  "buckets": {
+   "not_released": 3597,
+   "released_unsettled": 0,
+   "released_refused": 0,
+   "on_time": 2209,
+   "late_at_release": 251,
+   "late_at_first_token": 5567,
+   "late_at_forward_only": 140,
+   "late_request_row_absent": 0
+  },
+  "shares": {
+   "not_released": 0.3058,
+   "released_unsettled": 0.0,
+   "released_refused": 0.0,
+   "on_time": 0.1878,
+   "late_at_release": 0.0213,
+   "late_at_first_token": 0.4732,
+   "late_at_forward_only": 0.0119,
+   "late_request_row_absent": 0.0
+  },
+  "buckets_sum": 11764,
+  "buckets_sum_equals_denominator": true,
+  "control": {
+   "_claim": "bucket on_time must EQUAL this cell's committed dashcam on-time count",
+   "reconstructed_on_time": 2209,
+   "committed_on_time": 2209,
+   "committed_delivery_rule": "completion",
+   "committed_on_time_rule": "an answer is delivered at COMPLETION, prefill plus decode (D146, the default from 2026-11-20); a dashcam Yes/No stays at first token",
+   "committed_L_dash": 1.0,
+   "tolerance": "EXACT, 0 counts",
+   "pass": true
+  },
+  "d146_both_readings": {
+   "on_time_completed_delivery_rule_committed": 2209,
+   "on_time_first_token_rule": 2349,
+   "difference": 140,
+   "late_at_forward_only": 140,
+   "difference_equals_late_at_forward_only": true,
+   "note": "the committed cell uses t_delivered, which for a monitor is first token plus the forward hop; the first-token reading is also what the coordinator's own cloud_payload.on_time flag records"
+  }
+ },
+ "finding": "THE CORRECT CHARGE MOVES THE LOSS FROM 'NEVER RELEASED' TO 'RELEASED TOO LATE'; IT DOES NOT FIX THE TARGET. On-time triples, 701 to 2,209, and is still well under the base's 5,986. The bucket that collapses is b2, cap shut with a robot prefill in flight: 5,058 at rung 1 against 1,913 here, about 3,100 opportunities. They do not become on-time answers: the late buckets absorb them (a 2,235 to 3,070, a2 1,891 to 2,888). So at rung 2 with the charge correct the DOMINANT failure is LATENESS, a + a2 = 5,958 of 11,764 (50.6 percent), while the cap buckets b + b2 = 3,514 (29.9 percent). At rung 1 it was the reverse. The AIMD cap is still half shut: 5,177 of 12,000 epochs at its floor against the base's 2,989",
+ "consequence_for_the_C5_choice": "SUPERSEDED by CORRECTION_2026_11_22 above. The original text claimed the engine flag reached the dominant bucket at rung 2; the release-delay measurement shows the lateness is a coordinator hold, so c5attr is the decisive test at BOTH rungs and the engine-flag cells are secondary.",
+ "committed_count_caveat": "the committed dashcam on-time count for this cell is 2,209, not the 2,349 the H100 reported: 2,349 is the coordinator's own first-token flag and 2,209 is the scorer's t_delivered rule. The difference is EXACTLY the forward-hop bucket, 140, and C5-A's control reproduces 2,209 with zero tolerance",
+ "CORRECTION_2026_11_22": {
+  "what_was_wrong": "my bucket (a), 'submitted late AND overlapping a robot prefill', was read as ENGINE blocking and used to conclude that at rung 2 the engine flag (layer 1) addressed the dominant loss. That reading is WRONG. Overlap is not causation: the user measured release delay (t_submit minus t_opportunity) at rung 2 p50 0.74 s and p90 0.97 s of a 1.0 s deadline, against the base's 0.30 and 0.89, with 72 percent over 0.5 s against 37. With a 0.74 s median hold a monitor overlaps whatever happens to be running, so the overlap test cannot distinguish 'the prefill delayed it' from 'it was held and the prefill was there'. This is a proxy-validity failure (CLAUDE.md check 6) in my own artefact",
+  "the_measurement_that_settles_it": {
+   "release_delay_s": {
+    "base": {
+     "p50": 0.3,
+     "p90": 0.89,
+     "over_0_5_s": 0.37
+    },
+    "rung2_repriced": {
+     "p50": 0.74,
+     "p90": 0.97,
+     "over_0_5_s": 0.72
+    }
+   },
+   "engine_first_token_s": {
+    "base": {
+     "p50": 0.44,
+     "p90": 0.69
+    },
+    "rung2_repriced": {
+     "p50": 0.48,
+     "p90": 0.84
+    }
+   },
+   "dashcam_uncached_per_request_median": {
+    "base": 374,
+    "rung2_repriced": 376,
+    "_reading": "the engine does the SAME work; episodes are not being evicted"
+   },
+   "release_plus_first_token_over_1_s": {
+    "base": 0.37,
+    "rung2_repriced": 0.71
+   },
+   "_source": "user / planner, from the committed covex-v6-state-uo s4 outcomes and request logs"
+  },
+  "the_corrected_reading": "rung 2's late monitors are frames HELD UNDER THE C5 CAP (at its floor in 5,177 of 12,000 epochs against the base's 2,989) and released after most of their deadline had passed. Lateness at rung 2 is a COORDINATOR RELEASE DECISION, not engine time. So the late buckets are reachable by layer 2 as well, and the C5 attribution diagnostic (c5attr) is the DECISIVE test while the engine-flag cells are secondary. The inversion I reported, that layer 1 addressed the dominant bucket at rung 2, does not hold",
+  "what_is_still_valid_from_the_original_split": "the COUNTS and the not-released versus submitted division stand, and so does the finding that the correct charge moves about 3,100 opportunities out of 'cap shut with a prefill in flight' without turning them into on-time answers. What does not stand is the attribution of the late buckets to the engine",
+  "consequence": "c5_loss_split.py's bucket (a) must not be read as engine blocking; it is 'late AND a prefill was in flight', nothing more. C5-A is adding a release-delay versus engine-time split to every cell, which is the honest version of the distinction bucket (a) was reaching for"
+ }
+}

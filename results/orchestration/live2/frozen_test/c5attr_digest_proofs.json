@@ -1,0 +1,319 @@
+{
+ "_what": "covex-v6-state-uo-c5attr: what it must not have moved (P1), that its rule reaches the cap (P2), that a dry cell cannot exercise it unaided (P3), and that disabling the rule collapses it to its comparator (P4)",
+ "_protocol": "one dry cell per process; planner wall-clock cutoff patched off; POSTED workload knobs forwarded; --trip-s 0.90 is a PROOF INSTRUMENT that raises the dry monitor service time above C5's 0.8 s trip, applied identically to both sides of every comparison and never quoted as a latency",
+ "P1_committed_arms_unchanged": {
+  "_claim": "the committed arms decide identically before and after this work, with the BEFORE side taken from git at f2d617fa",
+  "cell": {
+   "seed": 4,
+   "n": 16,
+   "run_s": 1200.0,
+   "workload": "posted"
+  },
+  "before_commit": "f2d617fa",
+  "rows": [
+   {
+    "arm": "covex-v6-state-uo",
+    "before": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218
+    },
+    "after": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218
+    },
+    "identical": true
+   },
+   {
+    "arm": "covex-v6-base",
+    "before": {
+     "digest": "af8befb9420ad86a",
+     "rows": 12085
+    },
+    "after": {
+     "digest": "af8befb9420ad86a",
+     "rows": 12085
+    },
+    "identical": true
+   },
+   {
+    "arm": "v5-rules-2",
+    "before": {
+     "digest": "18067c4c66bb44b8",
+     "rows": 11955
+    },
+    "after": {
+     "digest": "18067c4c66bb44b8",
+     "rows": 11955
+    },
+    "identical": true
+   },
+   {
+    "arm": "b7-edf-feasibility",
+    "before": {
+     "digest": "b9aadd1c3a2b26d5",
+     "rows": 12265
+    },
+    "after": {
+     "digest": "b9aadd1c3a2b26d5",
+     "rows": 12265
+    },
+    "identical": true
+   }
+  ],
+  "verdict": "PASS: 4 committed arms byte-identical across the change"
+ },
+ "P3_dry_default_is_unexercised": {
+  "_claim": "on an unmodified dry cell the monitor service time is the committed curve's constant 0.3950 s, below C5's 0.8 s trip, so the cap never halves and this rule CANNOT fire. A null here is UNEXERCISED, not a negative",
+  "covex-v6-state-uo": {
+   "arm": "covex-v6-state-uo",
+   "seed": 4,
+   "n": 16,
+   "run_s": 1200.0,
+   "workload": "posted",
+   "trip_s": 0.0,
+   "lat_scale": 1.0,
+   "force_flag": null,
+   "cutoff_off": true,
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "flag_on_the_cap_owner": false,
+   "cap_adjustments": 1,
+   "episodic_in_flight": {
+    "p50": 3,
+    "p90": 5,
+    "max": 8,
+    "share_at_or_above_the_ceiling_8": 0.008,
+    "share_at_or_above_the_floor_4": 0.2931
+   },
+   "cap_trace_head": [
+    [
+     0.0,
+     8
+    ]
+   ],
+   "cap_series_digest": "18704d18adda3ffc",
+   "cap_final": 8,
+   "cap_min": 8,
+   "stats": {
+    "c5_decrease": null,
+    "c5_increase": null,
+    "c5_dash_held": 22437,
+    "decisions": 12001,
+    "state_decisions": 60934,
+    "c5_attr_suppressed_decrease": null,
+    "c5_attr_slow_all_self_released": null,
+    "c5_attr_slow_mixed": null,
+    "c5_attr_trip_without_slow_evidence": null
+   }
+  },
+  "candidate": {
+   "arm": "covex-v6-state-uo-c5attr",
+   "seed": 4,
+   "n": 16,
+   "run_s": 1200.0,
+   "workload": "posted",
+   "trip_s": 0.0,
+   "lat_scale": 1.0,
+   "force_flag": null,
+   "cutoff_off": true,
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "flag_on_the_cap_owner": true,
+   "cap_adjustments": 1,
+   "episodic_in_flight": {
+    "p50": 3,
+    "p90": 5,
+    "max": 8,
+    "share_at_or_above_the_ceiling_8": 0.008,
+    "share_at_or_above_the_floor_4": 0.2931
+   },
+   "cap_trace_head": [
+    [
+     0.0,
+     8
+    ]
+   ],
+   "cap_series_digest": "18704d18adda3ffc",
+   "cap_final": 8,
+   "cap_min": 8,
+   "stats": {
+    "c5_decrease": null,
+    "c5_increase": null,
+    "c5_dash_held": 22437,
+    "decisions": 12001,
+    "state_decisions": 60934,
+    "c5_attr_suppressed_decrease": null,
+    "c5_attr_slow_all_self_released": null,
+    "c5_attr_slow_mixed": null,
+    "c5_attr_trip_without_slow_evidence": null
+   }
+  },
+  "identical": true,
+  "c5_decrease_is_zero": [
+   null,
+   null
+  ],
+  "verdict": "PASS: identical digests and no halving to attribute, so the instrument in P2 is necessary"
+ },
+ "P2_step2b_cap_trajectory": {
+  "_claim": "the rule changes the cap trajectory and is not a write-only field",
+  "covex-v6-state-uo": {
+   "arm": "covex-v6-state-uo",
+   "seed": 4,
+   "n": 16,
+   "run_s": 1200.0,
+   "workload": "posted",
+   "trip_s": 0.9,
+   "lat_scale": 1.0,
+   "force_flag": null,
+   "cutoff_off": true,
+   "digest": "8203b967799d2f0a",
+   "rows": 7809,
+   "flag_on_the_cap_owner": false,
+   "cap_adjustments": 2,
+   "episodic_in_flight": {
+    "p50": 4,
+    "p90": 4,
+    "max": 4,
+    "share_at_or_above_the_ceiling_8": 0.0,
+    "share_at_or_above_the_floor_4": 0.6337
+   },
+   "cap_trace_head": [
+    [
+     0.0,
+     8
+    ],
+    [
+     7.1,
+     4
+    ]
+   ],
+   "cap_series_digest": "ca03d4809dba2fda",
+   "cap_final": 4,
+   "cap_min": 4,
+   "stats": {
+    "c5_decrease": 1193,
+    "c5_increase": null,
+    "c5_dash_held": 66389,
+    "decisions": 12001,
+    "state_decisions": 60934,
+    "c5_attr_suppressed_decrease": null,
+    "c5_attr_slow_all_self_released": null,
+    "c5_attr_slow_mixed": null,
+    "c5_attr_trip_without_slow_evidence": null
+   }
+  },
+  "candidate": {
+   "arm": "covex-v6-state-uo-c5attr",
+   "seed": 4,
+   "n": 16,
+   "run_s": 1200.0,
+   "workload": "posted",
+   "trip_s": 0.9,
+   "lat_scale": 1.0,
+   "force_flag": null,
+   "cutoff_off": true,
+   "digest": "8203b967799d2f0a",
+   "rows": 7809,
+   "flag_on_the_cap_owner": true,
+   "cap_adjustments": 2,
+   "episodic_in_flight": {
+    "p50": 4,
+    "p90": 4,
+    "max": 4,
+    "share_at_or_above_the_ceiling_8": 0.0,
+    "share_at_or_above_the_floor_4": 0.6337
+   },
+   "cap_trace_head": [
+    [
+     0.0,
+     8
+    ],
+    [
+     11.0,
+     4
+    ]
+   ],
+   "cap_series_digest": "ab5cc48d4b8467c3",
+   "cap_final": 4,
+   "cap_min": 4,
+   "stats": {
+    "c5_decrease": 699,
+    "c5_increase": null,
+    "c5_dash_held": 66248,
+    "decisions": 12001,
+    "state_decisions": 60934,
+    "c5_attr_suppressed_decrease": 4938,
+    "c5_attr_slow_all_self_released": 4938,
+    "c5_attr_slow_mixed": 699,
+    "c5_attr_trip_without_slow_evidence": null
+   }
+  },
+  "decisions": {
+   "setwise_differing_decisions": 0,
+   "positional_differing_rows": 0,
+   "first_differing_row": null
+  },
+  "cap_trajectory_moved": true,
+  "suppressed_halvings": 4938,
+  "verdict": "PASS: the cap trajectory differs (ca03d4809dba2fda against ab5cc48d4b8467c3, first halving [[7.1, 4]] against [[11.0, 4]]) and 4938 halvings were suppressed",
+  "_decision_level_note": "the number of DIFFERING DECISIONS is reported as measured and is a separate register from the cap trajectory: a held dashcam stream emits no decision row, so a cap that differs need not show up as a differing row in a dry cell"
+ },
+ "P4_negative_control": {
+  "_claim": "with its own switch forced off the candidate IS covex-v6-state-uo, which is what makes the P2 difference the rule and not the wrapper",
+  "candidate_flag_off": {
+   "arm": "covex-v6-state-uo-c5attr",
+   "seed": 4,
+   "n": 16,
+   "run_s": 1200.0,
+   "workload": "posted",
+   "trip_s": 0.9,
+   "lat_scale": 1.0,
+   "force_flag": "off",
+   "cutoff_off": true,
+   "digest": "8203b967799d2f0a",
+   "rows": 7809,
+   "flag_on_the_cap_owner": false,
+   "cap_adjustments": 2,
+   "episodic_in_flight": {
+    "p50": 4,
+    "p90": 4,
+    "max": 4,
+    "share_at_or_above_the_ceiling_8": 0.0,
+    "share_at_or_above_the_floor_4": 0.6337
+   },
+   "cap_trace_head": [
+    [
+     0.0,
+     8
+    ],
+    [
+     7.1,
+     4
+    ]
+   ],
+   "cap_series_digest": "ca03d4809dba2fda",
+   "cap_final": 4,
+   "cap_min": 4,
+   "stats": {
+    "c5_decrease": 1193,
+    "c5_increase": null,
+    "c5_dash_held": 66389,
+    "decisions": 12001,
+    "state_decisions": 60934,
+    "c5_attr_suppressed_decrease": null,
+    "c5_attr_slow_all_self_released": null,
+    "c5_attr_slow_mixed": null,
+    "c5_attr_trip_without_slow_evidence": null
+   }
+  },
+  "covex-v6-state-uo": {
+   "digest": "8203b967799d2f0a",
+   "rows": 7809,
+   "cap_series_digest": "ca03d4809dba2fda"
+  },
+  "identical": true,
+  "verdict": "PASS: collapses to the comparator exactly"
+ },
+ "verdict": "ALL_PASS"
+}
