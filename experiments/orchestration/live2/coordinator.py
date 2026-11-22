@@ -1289,8 +1289,16 @@ class Live2Coordinator:
         # it on the request id is what makes that exact. Decrementing by the engine's own
         # `prompt - cached` instead would mix a predicted increment with a measured decrement and
         # the in-flight total would drift, silently inflating every later price.
-        if self._d162_pricing:
-            self._uncached_pending[rid] = int(self._uncached_last_charged)
+        # D179: UNCONDITIONAL, where it used to sit under `if self._d162_pricing`. The increments
+        # to `_uncached_in_flight` were already unconditional (four sites), so gating only the
+        # bookkeeping and the decrement made the field a MONOTONICALLY INCREASING CUMULATIVE TOTAL
+        # on any arm that does not declare D162 pricing: the run's whole uncached volume, under a
+        # name that says queue depth. Nothing read it there, so nothing was wrong until session
+        # B's release re-check became the first reader outside the gate and measured a 1.0 s alert
+        # deadline against a number in the tens of thousands, firing the D179 STOP at 0.9998.
+        # Decision-neutral by construction: under D162 pricing the condition was already true, and
+        # without it no other site reads the field. Proved on a digest for one arm of each kind.
+        self._uncached_pending[rid] = int(self._uncached_last_charged)
         d = self.st.devices[device_id]
         # THE TRUE SUBMISSION STAMP (StudyLIVE2-harness addendum (a), from flash's branch). A
         # decision that takes 100 ms puts its requests on the wire 100 ms after the epoch it
@@ -1525,9 +1533,10 @@ class Live2Coordinator:
                     # C5 attribution support, monitors only; False and 0 on every other kind
                     self_released_prefill_overlap=bool(_ovl),
                     self_released_prefill_uncached=int(_ovl_unc)))
-            if self._d162_pricing:
-                _u = self._uncached_pending.pop(sub.request_id, 0)
-                self._uncached_in_flight = max(self._uncached_in_flight - int(_u), 0)
+            # D179: UNCONDITIONAL, paired with the write above, so the field means the same thing
+            # on every arm. See the note at the write site.
+            _u = self._uncached_pending.pop(sub.request_id, 0)
+            self._uncached_in_flight = max(self._uncached_in_flight - int(_u), 0)
             self._settle(sub, first_s, done_s, path, t, ct, self._score_of(sub, r),
                          http_status=r.get("http_status"))
             self.counts["completed_" + sub.kind] += 1
