@@ -47,17 +47,16 @@ V6_LADDER: List[Dict[str, Any]] = [
      "adds": ("per-type host retention (max_offload_tokens = 0 for alert and single-shot), TOUCH "
               "chosen by plan_state, residency belief corrected from engine telemetry including "
               "host hits, state-based pricing"),
-     "implemented_by": None, "ready": False, "committed_as": [],
-     "missing": ["plan_state has no caller outside the proofs",
-                 "residency belief is not corrected from telemetry (telemetry_cached_tokens NULL)",
-                 "no arm class exists for this rung"]},
+     "implemented_by": "covex-v6-state", "ready": True, "committed_as": [],
+     "built": "arms_v6state.V6StateArm (2026-11-21); harm_warm COMPUTED per "
+              "research/prereg_harm_warm_d172.md",
+     "missing": []},
     {"rung": 3, "name": "covex-v6-fair",
      "adds": "deficit feed (observe() called by the coordinator) + value reader on",
-     "implemented_by": None, "ready": False, "committed_as": [],
-     "missing": ["DeficitCounters.observe() has no caller, so every weight is 1.0",
-                 "the value reader is off",
-                 "the D165 lexicographic objective is not built",
-                 "no arm class exists for this rung"]},
+     "implemented_by": "covex-v6-fair", "ready": True, "committed_as": [],
+     "built": "arms_v6fair.V6FairArm (2026-11-21); deficit feed live from the coordinator's "
+              "completion hook",
+     "missing": ["the D165 lexicographic objective is not built"]},
     {"rung": 4, "name": "covex-v6",
      "adds": ("the counterfactual: request, state and sync decisions, compound candidates, the "
               "episode-rule switch"),
@@ -164,6 +163,14 @@ def register() -> None:
         if target == "v5-rules-2":
             import arms_v5rules2 as _R2
             A.ARMS[v6_name] = (lambda n=v6_name, **kw: _R2.V5Rules2Arm(name=n, **kw))
+            return
+        if target == "covex-v6-state":
+            import arms_v6state as _VS
+            _VS.register()
+            return
+        if target == "covex-v6-fair":
+            import arms_v6fair as _VF6
+            _VF6.register()
             return
         if target == "v5-full":
             import arms_v5full as _VF

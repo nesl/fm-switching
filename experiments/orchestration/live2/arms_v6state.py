@@ -323,6 +323,8 @@ class V6StateArm:
                 for lo in (0.0, 0.01, 0.05, 0.10, 0.12, 0.14, 0.16, 0.16456, 0.18, 0.20, 0.25):
                     if float(d.delta) > lo:
                         self.stats["state_delta_gt_%s" % ("%g" % lo).replace(".", "p")] += 1
+                self.stats["state_delta_milli_sum"] += int(round(float(d.delta) * 1000.0))
+                self.stats["state_delta_n"] += 1
             # HOLD_BACK, WARM and TOUCH gains SEPARATELY against the margin, per the ruling
             for c in (d.candidates or ()):
                 if c.name not in ("HOLD_BACK", "WARM", "TOUCH") or c.value is None:
@@ -334,7 +336,6 @@ class V6StateArm:
                     int(round(float(c.value) * 1000.0)))
                 if d.margin_effective is not None and float(c.value) > d.margin_effective:
                     self.stats["gain_%s_over_margin" % c.name] += 1
-                self.stats["state_delta_milli_sum"] += int(round(float(d.delta) * 1000.0))
             if d.deviated:
                 self.stats["state_deviations"] += 1
             if d.chosen == "TOUCH":

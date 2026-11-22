@@ -1161,13 +1161,29 @@ class Live2Coordinator:
             if hasattr(self.arm, "live2_completed"):
                 # An arm that keeps its own model of what the engine is running must be told
                 # when a request finishes, or its model never empties.
+                # D172 rung 3: the DEADLINE and both on-time flags, so an arm can feed the
+                # deficit counters without re-deriving either. The counters measure on-time
+                # delivery FROM EITHER SOURCE (D155 (3)), and the two sources are reported
+                # SEPARATELY rather than pre-combined, because combining them is a policy choice
+                # and belongs in the arm, not here. Additive: every committed arm reads named
+                # keys and none of them reads these.
+                _o = self.st.opps.get(sub.opportunity_id) if sub.opportunity_id else None
+                _dl = _o.deadline_abs() if _o is not None else None
+                _devw = self._device_wait_s(_o) if _o is not None else None
+                _t_opp = (getattr(_o, "t_arrive", None) or getattr(_o, "t_event", None)
+                          ) if _o is not None else None
                 self.arm.live2_completed(dict(
                     kind=sub.kind, device_id=sub.device_id, session_id=sub.session_id,
                     opportunity_id=sub.opportunity_id, decision_id=sub.decision_id,
                     t_submit=sub.sent_s, t_first_token=first_s, t_done=done_s,
                     cache_path=path, request_id=sub.request_id,
                     prompt_tokens=(pt if pt is not None else sub.est_tokens),
-                    cached_tokens=ct))
+                    cached_tokens=ct,
+                    deadline_abs_s=_dl,
+                    cloud_on_time=(None if _dl is None else bool(done_s <= _dl + 1e-9)),
+                    device_wait_s=_devw,
+                    device_on_time=(None if (_dl is None or _devw is None or _t_opp is None)
+                                    else bool(_t_opp + _devw <= _dl + 1e-9))))
             self._settle(sub, first_s, done_s, path, t, ct, self._score_of(sub, r),
                          http_status=r.get("http_status"))
             self.counts["completed_" + sub.kind] += 1

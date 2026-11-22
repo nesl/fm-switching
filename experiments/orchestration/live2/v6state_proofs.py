@@ -109,7 +109,8 @@ def main() -> int:
     n_touch = int(sd.get("state_chosen_TOUCH", 0))
     n_warm = int(sd.get("state_chosen_WARM", 0))
     n_keep = int(sd.get("state_chosen_KEEP", 0))
-    mean_delta = (sd.get("state_delta_milli_sum", 0) / 1000.0 / n_dec) if n_dec else 0.0
+    n_delta = int(sd.get("state_delta_n", 0))
+    mean_delta = (sd.get("state_delta_milli_sum", 0) / 1000.0 / n_delta) if n_delta else 0.0
     max_delta = sd.get("state_delta_max_milli", 0) / 1000.0
     over = int(sd.get("state_delta_gt_0p16456", 0))
     moved = _digest(rows, ("arm_version",)) != _digest(r2c, ("arm_version",))
@@ -150,7 +151,11 @@ def main() -> int:
         "priced": nhw, "no_queue_behind_the_warm": int(st.get("harm_warm_no_queue", 0)),
         "unpriced_refusals": int(st.get("harm_warm_unpriced", 0)),
         "nonzero": int(st.get("harm_warm_nonzero", 0)),
-        "mean": (round(st.get("harm_warm_milli_sum", 0) / 1000.0 / nhw, 6) if nhw else None),
+        "mean_over_priced": (round(st.get("harm_warm_milli_sum", 0) / 1000.0 / nhw, 6)
+                             if nhw else None),
+        "_mean_denominator": ("the PRICED decisions, not all state decisions; dividing the sum "
+                              "by every decision understates it by the fraction with nothing "
+                              "queued behind the warm"),
         "max": round(st.get("harm_warm_max_milli", 0) / 1000.0, 6),
         "capped": int(st.get("harm_warm_capped", 0)),
         "cap_counter_exists": True,
@@ -171,6 +176,8 @@ def main() -> int:
                       "constructed grid"),
         "margin_cf": margin,
         "n_decisions": n_dec,
+        "n_decisions_with_a_delta": n_delta,
+        "n_timeout_or_unscored": n_dec - n_delta,
         "n_positive_gain": int(sd.get("state_delta_gt_0", 0)),
         "mean_gain": round(mean_delta, 6),
         "max_gain": round(max_delta, 6),
