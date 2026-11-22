@@ -1,0 +1,376 @@
+{
+ "_what": "Proofs for the cascade threshold calibration: the characteristic decision occurs in BOTH directions, the switch reaches a decision (Step 2b), the identity control holds across processes, and the device wait is fully measured.",
+ "cell": {
+  "ratio": "40:40:20",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dashcam_format": "epg",
+  "robot_upload": "per-frame",
+  "robot_reask_mean_s": 30.0,
+  "seed": 4,
+  "n": 16,
+  "run_s": 1200.0
+ },
+ "prereg": "research/prereg_cascade_calibration.md",
+ "fitted_floors": {
+  "robot": 0.800338,
+  "ss_mcq": 0.985936,
+  "ss_free_form": 0.984783,
+  "ss_point": 0.817276
+ },
+ "P0_identity_control": {
+  "digest_a": "b9290071679f1baa",
+  "digest_b": "b9290071679f1baa",
+  "rows_a": 12253,
+  "rows_b": 12253,
+  "identical": true,
+  "error": null,
+  "meaning": "one dry cell per process. If this fails, no A-versus-B comparison from these cells may be read."
+ },
+ "P1_characteristic_decision": {
+  "fitted": {
+   "arm": "confidence-cascade",
+   "escalate_cloud": 223,
+   "stop_device": 266,
+   "no_confidence_device": 0,
+   "unknown_type": 0,
+   "by_type": {
+    "robot": {
+     "escalate_cloud": 44,
+     "stop_device": 88
+    },
+    "ss_free_form": {
+     "escalate_cloud": 44,
+     "stop_device": 50
+    },
+    "ss_point": {
+     "escalate_cloud": 61,
+     "stop_device": 58
+    },
+    "ss_mcq": {
+     "escalate_cloud": 74,
+     "stop_device": 70
+    }
+   },
+   "stream_scores_seen": {
+    "None": 1156,
+    "0.0": 70844
+   }
+  },
+  "cell_digest": "b9290071679f1baa"
+ },
+ "P2_step2b_per_type": {
+  "robot": {
+   "floor_lo": 0.0,
+   "floor_hi": 1.0,
+   "rows_lo": 12253,
+   "rows_hi": 12253,
+   "digest_lo": "6967f60bea689527",
+   "digest_hi": "758e36ae26915121",
+   "n_differing_decisions_setwise": 264,
+   "first_difference": "(1014.9, 'decline', None, None, ('opp0010346',), None)",
+   "moved": true,
+   "stats_lo": {
+    "arm": "confidence-cascade",
+    "escalate_cloud": 179,
+    "stop_device": 310,
+    "no_confidence_device": 0,
+    "unknown_type": 0,
+    "by_type": {
+     "robot": {
+      "escalate_cloud": 0,
+      "stop_device": 132
+     },
+     "ss_free_form": {
+      "escalate_cloud": 44,
+      "stop_device": 50
+     },
+     "ss_point": {
+      "escalate_cloud": 61,
+      "stop_device": 58
+     },
+     "ss_mcq": {
+      "escalate_cloud": 74,
+      "stop_device": 70
+     }
+    },
+    "stream_scores_seen": {
+     "None": 1156,
+     "0.0": 70844
+    }
+   },
+   "stats_hi": {
+    "arm": "confidence-cascade",
+    "escalate_cloud": 311,
+    "stop_device": 178,
+    "no_confidence_device": 0,
+    "unknown_type": 0,
+    "by_type": {
+     "robot": {
+      "escalate_cloud": 132,
+      "stop_device": 0
+     },
+     "ss_free_form": {
+      "escalate_cloud": 44,
+      "stop_device": 50
+     },
+     "ss_point": {
+      "escalate_cloud": 61,
+      "stop_device": 58
+     },
+     "ss_mcq": {
+      "escalate_cloud": 74,
+      "stop_device": 70
+     }
+    },
+    "stream_scores_seen": {
+     "None": 1156,
+     "0.0": 70844
+    }
+   }
+  },
+  "ss_mcq": {
+   "floor_lo": 0.0,
+   "floor_hi": 1.0,
+   "rows_lo": 12253,
+   "rows_hi": 12253,
+   "digest_lo": "c3313e08100c2345",
+   "digest_hi": "c4eb3ecacd1a48be",
+   "n_differing_decisions_setwise": 262,
+   "first_difference": "(1011.0, 'decline', None, None, ('opp0010302',), None)",
+   "moved": true,
+   "stats_lo": {
+    "arm": "confidence-cascade",
+    "escalate_cloud": 149,
+    "stop_device": 340,
+    "no_confidence_device": 0,
+    "unknown_type": 0,
+    "by_type": {
+     "robot": {
+      "escalate_cloud": 44,
+      "stop_device": 88
+     },
+     "ss_free_form": {
+      "escalate_cloud": 44,
+      "stop_device": 50
+     },
+     "ss_point": {
+      "escalate_cloud": 61,
+      "stop_device": 58
+     },
+     "ss_mcq": {
+      "escalate_cloud": 0,
+      "stop_device": 144
+     }
+    },
+    "stream_scores_seen": {
+     "None": 1156,
+     "0.0": 70844
+    }
+   },
+   "stats_hi": {
+    "arm": "confidence-cascade",
+    "escalate_cloud": 280,
+    "stop_device": 209,
+    "no_confidence_device": 0,
+    "unknown_type": 0,
+    "by_type": {
+     "robot": {
+      "escalate_cloud": 44,
+      "stop_device": 88
+     },
+     "ss_free_form": {
+      "escalate_cloud": 44,
+      "stop_device": 50
+     },
+     "ss_point": {
+      "escalate_cloud": 61,
+      "stop_device": 58
+     },
+     "ss_mcq": {
+      "escalate_cloud": 131,
+      "stop_device": 13
+     }
+    },
+    "stream_scores_seen": {
+     "None": 1156,
+     "0.0": 70844
+    }
+   }
+  },
+  "ss_free_form": {
+   "floor_lo": 0.0,
+   "floor_hi": 1.0,
+   "rows_lo": 12253,
+   "rows_hi": 12253,
+   "digest_lo": "f9dc62917a5a0e2f",
+   "digest_hi": "cf2b2c228657e1f2",
+   "n_differing_decisions_setwise": 178,
+   "first_difference": "(1001.0, 'decline', None, None, ('opp0010201',), None)",
+   "moved": true,
+   "stats_lo": {
+    "arm": "confidence-cascade",
+    "escalate_cloud": 179,
+    "stop_device": 310,
+    "no_confidence_device": 0,
+    "unknown_type": 0,
+    "by_type": {
+     "robot": {
+      "escalate_cloud": 44,
+      "stop_device": 88
+     },
+     "ss_free_form": {
+      "escalate_cloud": 0,
+      "stop_device": 94
+     },
+     "ss_point": {
+      "escalate_cloud": 61,
+      "stop_device": 58
+     },
+     "ss_mcq": {
+      "escalate_cloud": 74,
+      "stop_device": 70
+     }
+    },
+    "stream_scores_seen": {
+     "None": 1156,
+     "0.0": 70844
+    }
+   },
+   "stats_hi": {
+    "arm": "confidence-cascade",
+    "escalate_cloud": 268,
+    "stop_device": 221,
+    "no_confidence_device": 0,
+    "unknown_type": 0,
+    "by_type": {
+     "robot": {
+      "escalate_cloud": 44,
+      "stop_device": 88
+     },
+     "ss_free_form": {
+      "escalate_cloud": 89,
+      "stop_device": 5
+     },
+     "ss_point": {
+      "escalate_cloud": 61,
+      "stop_device": 58
+     },
+     "ss_mcq": {
+      "escalate_cloud": 74,
+      "stop_device": 70
+     }
+    },
+    "stream_scores_seen": {
+     "None": 1156,
+     "0.0": 70844
+    }
+   }
+  },
+  "ss_point": {
+   "floor_lo": 0.0,
+   "floor_hi": 1.0,
+   "rows_lo": 12253,
+   "rows_hi": 12253,
+   "digest_lo": "3379af014c8ed231",
+   "digest_hi": "4d37b9a7591f9869",
+   "n_differing_decisions_setwise": 238,
+   "first_difference": "(1003.8, 'decline', None, None, ('opp0010228',), None)",
+   "moved": true,
+   "stats_lo": {
+    "arm": "confidence-cascade",
+    "escalate_cloud": 162,
+    "stop_device": 327,
+    "no_confidence_device": 0,
+    "unknown_type": 0,
+    "by_type": {
+     "robot": {
+      "escalate_cloud": 44,
+      "stop_device": 88
+     },
+     "ss_free_form": {
+      "escalate_cloud": 44,
+      "stop_device": 50
+     },
+     "ss_point": {
+      "escalate_cloud": 0,
+      "stop_device": 119
+     },
+     "ss_mcq": {
+      "escalate_cloud": 74,
+      "stop_device": 70
+     }
+    },
+    "stream_scores_seen": {
+     "None": 1156,
+     "0.0": 70844
+    }
+   },
+   "stats_hi": {
+    "arm": "confidence-cascade",
+    "escalate_cloud": 281,
+    "stop_device": 208,
+    "no_confidence_device": 0,
+    "unknown_type": 0,
+    "by_type": {
+     "robot": {
+      "escalate_cloud": 44,
+      "stop_device": 88
+     },
+     "ss_free_form": {
+      "escalate_cloud": 44,
+      "stop_device": 50
+     },
+     "ss_point": {
+      "escalate_cloud": 119,
+      "stop_device": 0
+     },
+     "ss_mcq": {
+      "escalate_cloud": 74,
+      "stop_device": 70
+     }
+    },
+    "stream_scores_seen": {
+     "None": 1156,
+     "0.0": 70844
+    }
+   }
+  }
+ },
+ "P3_cascade_routing": {
+  "stats": {
+   "arm": "cascade-routing",
+   "route_cloud_direct": 0,
+   "route_device_stop": 0,
+   "cascade_started": 0,
+   "cascade_escalated": 0,
+   "cascade_stopped_posthoc": 489,
+   "cloud_infeasible": 0
+  },
+  "digest_lambda_002": "2af9400f672aa1c1",
+  "digest_lambda_200": "2af9400f672aa1c1",
+  "lambda_moves_decisions": false,
+  "n_differing_decisions_setwise": 0,
+  "error": null,
+  "note": "lambda is NOT fitted here, for the reason in the calibration file. This is a positive control on the constant, so that an unfitted constant is not reported without saying whether it is also inert."
+ },
+ "P4_ecollm": {
+  "stats": null,
+  "digest": "f32fa95c6953c64e",
+  "error": null,
+  "note": "no threshold to calibrate; characteristic decision only."
+ },
+ "_provenance": {
+  "git_commit": "d8b886198f846da9668e8085202fbfe0cd2b9790",
+  "script": "cascade_threshold_calibration.py",
+  "model": "none",
+  "timestamp": "2026-11-22T09:47:10.784059",
+  "device": "cpu",
+  "n": 16,
+  "args": {
+   "cmd": "proofs",
+   "run_s": 1200.0,
+   "fn": "<function cmd_proofs at 0x7fd83727f2e0>"
+  }
+ }
+}

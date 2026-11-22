@@ -28,6 +28,12 @@ MARKERS = (
     ("recall_accuracy", "the committed S-EMBER recall-accuracy lookup table", "S-EMBER"),
     ("_DC.dev_median", "the device-confidence floor fitted on S-EMBER DEV questions",
      "S-EMBER DEV"),
+    # D164 / ruling 2026-11-22 item 2: the SAME floor, fitted once per CONFIDENCE TYPE. Listed
+    # here so the auditor that exists to enumerate fitted constants does not stop seeing this one
+    # when it moves from a scalar to a per-type table.
+    ("_DC.fitted_floors", "the per-confidence-type device-confidence floors, DEV-fitted "
+                          "(research/prereg_cascade_calibration.md)",
+     "LH-REQ DEV (robot) and the committed StudySS2 30/70 DEV part (single shot)"),
     ("P.stream_profile", "the measured resource-quality profile (quality, demand, lag)",
      "Nexar EVALUATION clips (StudyE9b / E9c on StudyD14b's 300 validation clips)"),
     ("P.d_star_s", "StudyE9d's d* delay curve",

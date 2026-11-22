@@ -179,3 +179,74 @@ def _rank_agreement(a, b) -> float:
 
 if __name__ == "__main__":
     print(json.dumps(coverage(), indent=1, default=str))
+
+
+# ---------------------------------------------------------------- per confidence type (D164)
+# The ruling of 2026-11-22 item 2 and D164: a single threshold across confidence types is wrong,
+# so a policy fits one per type and must be able to ask which type a question carries. The type
+# and the value come from THE SAME committed row; handing a policy the value without its rule is
+# exactly what `source_of` exists to prevent, and a floor fitted on mcq letter-mass applied to a
+# geometric-mean token probability is the fault it prevents in practice.
+_SS2_RULES: Optional[Dict[str, Dict[str, str]]] = None
+
+CALIBRATION = ROOT / "results/orchestration/live2/cascade_calibration/cascade_thresholds.json"
+_FLOORS: Optional[Dict[str, float]] = None
+
+
+def _load_ss2_rules() -> Dict[str, Dict[str, str]]:
+    global _SS2_RULES
+    if _SS2_RULES is None:
+        out: Dict[str, Dict[str, str]] = {}
+        if SS2.exists():
+            for r in (json.loads(SS2.read_text()).get("rows") or []):
+                out[str(r["qid"])] = dict(rule=str(r.get("rule")),
+                                          signal_strength=str(r.get("signal_strength")),
+                                          dataset=str(r.get("dataset")))
+        _SS2_RULES = out
+    return _SS2_RULES
+
+
+def kind_of(question_id: Optional[str]) -> Optional[str]:
+    """The CONFIDENCE TYPE of one question: robot | ss_mcq | ss_free_form | ss_point, or None.
+
+    None means "no committed confidence of any type", which is the same condition every policy
+    reading this module already handles. Nothing is synthesized and nothing is guessed from the
+    shape of the id: the answer comes from the committed tables.
+    """
+    if question_id is None:
+        return None
+    q = str(question_id)
+    if q in _load_primary() or q.lower() in _load_primary():
+        return "robot"
+    r = _load_ss2_rules().get(q) or _load_ss2_rules().get(q.lower())
+    if r is None:
+        return None
+    if r["rule"] == "mcq_chosen_letter_mass":
+        return "ss_mcq"
+    return "ss_point" if r["signal_strength"] == "weak" else "ss_free_form"
+
+
+def fitted_floors() -> Dict[str, float]:
+    """The DEV-fitted per-type confidence floors, READ FROM THE COMMITTED FILE.
+
+    Written by `live2/cascade_threshold_calibration.py fit` under the pre-registration in
+    `research/prereg_cascade_calibration.md`, and never re-derived at use time: the LH-REQ work
+    established that two independently written derivations of one partition differ somewhere and
+    nothing catches it. Absence RAISES rather than falling back to a scalar, because a silent
+    fallback to one threshold across types is the defect the calibration exists to remove.
+    """
+    global _FLOORS
+    if _FLOORS is None:
+        if not CALIBRATION.exists():
+            raise RuntimeError(
+                "the DEV calibration file is missing: %s. Run "
+                "`experiments/orchestration/live2/cascade_threshold_calibration.py fit`. A "
+                "cascade arm may not fall back to one floor across confidence types."
+                % CALIBRATION)
+        d = json.loads(CALIBRATION.read_text())
+        _FLOORS = {str(k): (None if v is None else float(v))
+                   for k, v in (d.get("confidence_floors") or {}).items()}
+        if not _FLOORS:
+            raise RuntimeError("the DEV calibration file carries no confidence_floors: %s"
+                               % CALIBRATION)
+    return dict(_FLOORS)

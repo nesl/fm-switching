@@ -31,7 +31,7 @@ CPU only.
 """
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -87,11 +87,52 @@ class CascadeAdapted(Policy):
                                  else _DC.dev_median())
         self.confidence_floor_source = ("median committed device confidence (StudyE7 Job A "
                                         "4B-D2) over S-EMBER DEV questions")
+        # D164 / user ruling 2026-11-22 item 2: ONE FLOOR PER CONFIDENCE TYPE, by the card's own
+        # procedure (the median committed device confidence over DEV questions) applied to each
+        # type's own DEV population. The types are different signals on different scales -- the
+        # robot and mcq values are letter-probability mass, the free-form and point values are a
+        # geometric mean token probability -- so one floor across them is not a stricter or looser
+        # operating point, it is a different one per type by accident. The values are READ from
+        # the committed calibration file, never re-derived here.
+        self.confidence_floors = _DC.fitted_floors()
+        self.confidence_floors_source = ("results/orchestration/live2/cascade_calibration/"
+                                         "cascade_thresholds.json, fitted on DEV per type under "
+                                         "research/prereg_cascade_calibration.md")
+        self.stats = dict(arm=self.name, escalate_cloud=0, stop_device=0, no_confidence_device=0,
+                          unknown_type=0, by_type={}, stream_scores_seen={})
+
+    def reset(self, seed: int = 0) -> None:
+        self.stats = dict(arm=self.name, escalate_cloud=0, stop_device=0, no_confidence_device=0,
+                          unknown_type=0, by_type={}, stream_scores_seen={})
+
+    def _floor_for(self, q) -> Tuple[Optional[float], str]:
+        """The floor for THIS query's confidence type, and the type itself.
+
+        The type is resolved from `q.question_id` (the field D171 (3) added) against the same
+        committed row that supplies the confidence value. A question whose type cannot be resolved
+        falls back to the card's single S-EMBER DEV floor and is COUNTED, so a cell decided by a
+        fallback is visible rather than silent.
+        """
+        import device_confidence as _DC
+        kind = _DC.kind_of(getattr(q, "question_id", None))
+        if kind is None or self.confidence_floors.get(kind) is None:
+            self.stats["unknown_type"] += 1
+            return self.confidence_floor, (kind or "unresolved")
+        return float(self.confidence_floors[kind]), kind
+
+    def _count(self, kind: str, what: str) -> None:
+        d = self.stats["by_type"].setdefault(kind, dict(escalate_cloud=0, stop_device=0))
+        d[what] += 1
 
     def decide(self, obs: Observation) -> Action:
         acts: List[StreamAction] = []
         for s in obs.streams:
             v = s.latest_score()
+            # Step 2 instrumentation: the thresholded quantity itself, so a CONSTANT where a
+            # distribution is expected is visible in the proof rather than inferred (CLAUDE.md
+            # results check 3).
+            k = "None" if v is None else repr(round(float(v), 6))
+            self.stats["stream_scores_seen"][k] = self.stats["stream_scores_seen"].get(k, 0) + 1
             escalate = (v is not None and v >= self.tau_trigger and s.network.connected)
             acts.append(StreamAction(s.stream_id, "cloud" if escalate else "local",
                                      self.cadence_s if escalate else None,
@@ -101,9 +142,16 @@ class CascadeAdapted(Policy):
             c = q.device_answer_confidence
             if c is None:
                 # no device answer yet: the cascade's first stage has not run, so run it locally
+                self.stats["no_confidence_device"] += 1
                 rec.append(RecallAction(q.query_id, "DEVICE"))
-            elif self.confidence_floor is None or c < self.confidence_floor:
+                continue
+            floor, kind = self._floor_for(q)
+            if floor is None or c < floor:
+                self.stats["escalate_cloud"] += 1
+                self._count(kind, "escalate_cloud")
                 rec.append(RecallAction(q.query_id, "CLOUD"))
             else:
+                self.stats["stop_device"] += 1
+                self._count(kind, "stop_device")
                 rec.append(RecallAction(q.query_id, "DEVICE"))
         return Action(streams=acts, recall=rec)

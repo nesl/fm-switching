@@ -1,3 +1,35 @@
+## 2026-11-22 (session E): the cascade arms' DEV threshold calibration, one arm released of three
+
+**Last updated: 2026-11-22.** StudyCASCADE-calib, pre-registered in
+`research/prereg_cascade_calibration.md` and committed BEFORE any threshold was computed
+(`d8b88619`), per D164 and the user ruling of 2026-11-22 item 2.
+
+**`confidence-cascade` IS CALIBRATED AND RELEASED.** One floor per CONFIDENCE TYPE, by its own
+card's procedure (the median committed device confidence over DEV questions), each on that type's
+own DEV population: robot **0.800338** (LH-REQ DEV 28, per D143 A), ss_mcq **0.985936** (131),
+ss_free_form **0.984783** (98), ss_point **0.817276** (83, DECLARED WEAK, no headline). The robot
+floor moves 0.7358 to 0.800338, ratio 1.088, which is a POPULATION change and not a method change.
+Its characteristic decision occurs IN BOTH DIRECTIONS for every type (223 CLOUD against 266 DEVICE
+over 489 queries, 0 absent confidences, 0 unresolved types), Step 2b moves 264 / 262 / 178 / 238
+decisions per type, and the cross-process identity control passed first. **Its EPISODIC threshold
+`tau_trigger` is UNEXPRESSIBLE here** and that is declared on every row: live2's delivered stream
+score is a placeholder, two distinct values in 72,000 reads, so the dashcam side escalates
+unconditionally whatever tau is.
+
+**`cascade-routing` IS NOT RELEASED, for two independent reasons.** Its card's method cannot be
+expressed (lambda is fitted offline against a cost budget B; live2 has only physical capacity, D58,
+and D174 (1) found zero budget refusals anywhere), and it FAILS the CLAUDE.md port rule: 0 of 489
+recall decisions are its characteristic skip-or-cascade choice, all are post-hoc stops, and
+lambda 0.02 against 2.0 moves 0 decisions. **`eco-llm` is not released either, but nothing found
+here blocks it**: its card specifies no threshold and it reads no confidence at all, so the
+matrix's own premise was wrong for it and releasing it is a one-line user ruling.
+
+**D168 / D155 (5) is CLEARED for both device-waiting cascade arms**, verified on the coordinator's
+own counters: 18,364 and 18,463 measured lookups with every `no_measured_value` counter absent, so
+neither reads the superseded 0.567 s proxy. **One stale label reported and not changed:**
+`scorer/score.py:cascade_device_wait()` compares two constants and so still stamps `proxy-0.567`
+on every cascade score header. Report `reports/study_cascade_calibration.md`.
+
 ## 2026-11-22 morning (session D): D174 applied, rung 2 posted, and the rung-1 gap explained
 
 **Last updated: 2026-11-22. The 06:00 summary below is superseded on the budget charge and on

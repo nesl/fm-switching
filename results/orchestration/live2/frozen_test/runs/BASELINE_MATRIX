@@ -116,20 +116,61 @@ streamscout 16 5 _L3_epg_rq30
 lmcache 16 4 _L3_epg_rq30
 lmcache 16 5 _L3_epg_rq30
 
-# ---------------------------------------------------------------- AFTER CALIBRATION (commented)
-# These three escalate on a device-confidence threshold. D164 requires each arm's threshold to be
-# set on DEV by its OWN card's procedure, per confidence type (mcq / free-form / point, with point
-# declared WEAK), pre-registered before fitting. Until that pre-registration is committed these
-# cells must not run: an uncalibrated threshold is what made 4 of 5 cascade arms saturate on the
-# robot side (reports/study_saturation_knee.md, the cascade correction). Uncomment to release.
-# confidence-cascade 16 4 _L3_epg_rq30
-# confidence-cascade 16 5 _L3_epg_rq30
-# confidence-cascade 16 6 _L3_epg_rq30
-# confidence-cascade 16 7 _L3_epg_rq30
+# ---------------------------------------------------------------- CALIBRATION DONE 2026-11-22
+# D164's calibration requirement is DISCHARGED FOR ONE ARM OF THE THREE. Pre-registration
+# research/prereg_cascade_calibration.md, committed BEFORE any threshold was computed (d8b88619);
+# fit and proofs in results/orchestration/live2/cascade_calibration/; report
+# reports/study_cascade_calibration.md.
+#
+# CORRECTION TO THIS BLOCK'S OWN PREMISE: "these three escalate on a device-confidence threshold"
+# is true of confidence-cascade only. cascade-routing has no FITTED threshold (its card calibrates
+# lambda, not a confidence floor) and eco-llm reads no confidence at all: it does not declare
+# reads_device_answer. The gate therefore does not apply to eco-llm rather than being unmet by it.
+#
+# RELEASED: confidence-cascade. One floor per CONFIDENCE TYPE, by its own card's procedure (the
+# median committed device confidence over DEV questions, amendment 2), each on that type's own DEV
+# population: robot 0.800338 (LH-REQ DEV, 28, per D143 A), ss_mcq 0.985936 (131), ss_free_form
+# 0.984783 (98), ss_point 0.817276 (83, DECLARED WEAK, no headline). Proofs on this exact workload
+# at seed 4: characteristic decision non-zero IN BOTH DIRECTIONS for all four types (223 CLOUD
+# escalations against 266 DEVICE stops over 489 queries, 0 of unresolved type), Step 2b moves
+# decisions for every type (264 / 262 / 178 / 238 differing decisions), and the cross-process
+# identity control passes first (digest b9290071679f1baa twice). Device wait fully MEASURED:
+# 18,364 measured lookups, every no_measured_value counter absent, so no 0.567 s proxy anywhere.
+# DECLARED LIMIT on every row of this arm: its EPISODIC threshold tau_trigger is UNEXPRESSIBLE
+# here, because live2's delivered stream score is a placeholder (two distinct values in 72,000
+# reads: None and 0.0), so its dashcam side escalates unconditionally and no value of tau_trigger
+# below zero would change it. Its card also claims A-episodic only (OUT_OF_CARD_SCOPE).
+confidence-cascade 16 4 _L3_epg_rq30
+confidence-cascade 16 5 _L3_epg_rq30
+confidence-cascade 16 6 _L3_epg_rq30
+confidence-cascade 16 7 _L3_epg_rq30
+#
+# STILL HELD: cascade-routing. NOT a calibration failure to retry, two independent reasons.
+#   (1) Its card's method cannot be expressed: lambda is fitted OFFLINE so expected cost meets a
+#       cost budget B, and live2 has no B (coordinator.py:321 is physical capacity, D58; D174 (1)
+#       found budget refusals zero in every committed cell). No lambda was invented.
+#   (2) It FAILS THE PORT RULE: its characteristic decision, the skip-or-cascade choice over the
+#       three supermodels, occurs ZERO times. All 489 recall decisions are cascade_stopped_posthoc
+#       (route_cloud_direct 0, route_device_stop 0, cascade_started 0, cascade_escalated 0), so it
+#       answers DEVICE on every query. Since D159 (D) supplies a confidence for every question,
+#       the ex-ante branch is never reached, and q_dev_post puts a confidence of about 0.85 at an
+#       implied 0.90 accuracy against Q_CLOUD_RICH 0.3953, so the gain is negative whatever lambda
+#       is: lambda_base 0.02 against 2.0 gives the IDENTICAL digest and 0 differing decisions.
+#   Its device wait is fully measured (18,463 lookups, fallback counters absent), so D168 is NOT
+#   what holds it. Releasing it needs a user ruling on the post-hoc scale, which is a change to
+#   the method its card declares and was not made here.
 # cascade-routing 16 4 _L3_epg_rq30
 # cascade-routing 16 5 _L3_epg_rq30
 # cascade-routing 16 6 _L3_epg_rq30
 # cascade-routing 16 7 _L3_epg_rq30
+#
+# STILL HELD: eco-llm, pending a USER RULING and nothing else. Its card specifies no threshold and
+# it reads no confidence, so there is nothing to calibrate and nothing was invented; the blocking
+# condition above is inapplicable rather than unmet. Its own proofs pass: 240 joint (tier,
+# representation) selections on the audit cell, 210 CLOUD/D2 and 30 CLOUD/RECENT, so both
+# representations are selected; D137 (3)'s measured quality table is in force and D135 (2) holds
+# (it plans with the price it is charged). It is held only because releasing an arm whose gate does
+# not apply is a ruling, not a calibration outcome. Uncomment on the user's word.
 # eco-llm 16 4 _L3_epg_rq30
 # eco-llm 16 5 _L3_epg_rq30
 # eco-llm 16 6 _L3_epg_rq30

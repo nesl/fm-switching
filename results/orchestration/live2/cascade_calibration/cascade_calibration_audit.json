@@ -1,0 +1,123 @@
+{
+ "_what": "Prereg proof 3 (the device wait is MEASURED, fallback counters zero) and the characteristic-decision mix for each of the three cascade arms, read from the coordinator's own counters on one dry cell per arm, one cell per process.",
+ "cell": {
+  "ratio": "40:40:20",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dashcam_format": "epg",
+  "robot_upload": "per-frame",
+  "robot_reask_mean_s": 30.0,
+  "seed": 4,
+  "n": 16,
+  "run_s": 600.0
+ },
+ "confidence-cascade": {
+  "arm": "confidence-cascade",
+  "seed": 4,
+  "run_s": 600.0,
+  "n_rows": 6038,
+  "digest": "5c8bd127725c23ac",
+  "arm_stats": {
+   "arm": "confidence-cascade",
+   "escalate_cloud": 99,
+   "stop_device": 141,
+   "no_confidence_device": 0,
+   "unknown_type": 0,
+   "by_type": {
+    "robot": {
+     "escalate_cloud": 17,
+     "stop_device": 46
+    },
+    "ss_free_form": {
+     "escalate_cloud": 20,
+     "stop_device": 24
+    },
+    "ss_point": {
+     "escalate_cloud": 23,
+     "stop_device": 36
+    },
+    "ss_mcq": {
+     "escalate_cloud": 39,
+     "stop_device": 35
+    }
+   },
+   "stream_scores_seen": {
+    "None": 1156,
+    "0.0": 34844
+   }
+  },
+  "device_wait_counts": {
+   "device_wait_measured": 18364,
+   "device_wait_measured_dashcam": 18223,
+   "device_wait_measured_robot": 46,
+   "device_wait_measured_single_shot": 95
+  },
+  "device_confidence_counts": {},
+  "decision_mix": {
+   "decline|None": 141,
+   "release_monitor|None": 5798,
+   "release_recall|D2": 99
+  },
+  "device_wait_measured_switch": true,
+  "proxy_s": 0.567
+ },
+ "cascade-routing": {
+  "arm": "cascade-routing",
+  "seed": 4,
+  "run_s": 600.0,
+  "n_rows": 6038,
+  "digest": "8b5f6c5472b37d3b",
+  "arm_stats": {
+   "arm": "cascade-routing",
+   "route_cloud_direct": 0,
+   "route_device_stop": 0,
+   "cascade_started": 0,
+   "cascade_escalated": 0,
+   "cascade_stopped_posthoc": 240,
+   "cloud_infeasible": 0
+  },
+  "device_wait_counts": {
+   "device_wait_measured": 18463,
+   "device_wait_measured_dashcam": 18223,
+   "device_wait_measured_robot": 63,
+   "device_wait_measured_single_shot": 177
+  },
+  "device_confidence_counts": {},
+  "decision_mix": {
+   "decline|None": 240,
+   "release_monitor|None": 5798
+  },
+  "device_wait_measured_switch": true,
+  "proxy_s": 0.567
+ },
+ "eco-llm": {
+  "arm": "eco-llm",
+  "seed": 4,
+  "run_s": 600.0,
+  "n_rows": 6040,
+  "digest": "94759674da4cc43d",
+  "arm_stats": null,
+  "device_wait_counts": {},
+  "device_confidence_counts": {},
+  "decision_mix": {
+   "release_monitor|None": 5800,
+   "release_recall|D2": 210,
+   "release_recall|RECENT": 30
+  },
+  "device_wait_measured_switch": true,
+  "proxy_s": 0.567
+ },
+ "_provenance": {
+  "git_commit": "d8b886198f846da9668e8085202fbfe0cd2b9790",
+  "script": "cascade_threshold_calibration.py",
+  "model": "none",
+  "timestamp": "2026-11-22T09:50:01.584748",
+  "device": "cpu",
+  "n": 16,
+  "args": {
+   "cmd": "audit",
+   "run_s": 600.0,
+   "fn": "<function cmd_audit at 0x778b66f2b400>"
+  }
+ }
+}

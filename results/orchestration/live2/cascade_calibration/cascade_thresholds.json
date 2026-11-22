@@ -1,0 +1,147 @@
+{
+ "_what": "DEV-fitted decision thresholds for the cascade arms, one per confidence type. Pre-registered in research/prereg_cascade_calibration.md (commit d8b88619) BEFORE this ran.",
+ "_rule": "fitted on DEV only (D6); the robot population is LH-REQ DEV and the single-shot populations are the committed seeded 30/70 DEV part (D143 A). EVAL is never fitted on and HOLDOUT is never read.",
+ "_consumers": "baselines/cascade_adapted.py reads `confidence_floors` from this file via device_confidence.fitted_floors(); the type of a query is resolved from device_confidence.kind_of(question_id).",
+ "trigger_rate": 0.2,
+ "min_dev_items": 10,
+ "confidence_floors": {
+  "robot": 0.800338,
+  "ss_mcq": 0.985936,
+  "ss_free_form": 0.984783,
+  "ss_point": 0.817276
+ },
+ "tau_trigger": -7.000911,
+ "per_type": [
+  {
+   "type": "episodic",
+   "method": "the (1 - trigger_rate) quantile of the DEVICE arm's score on StudyD3 DEVELOPMENT-split negatives",
+   "card": "cards/cascade.md adaptation A2",
+   "trigger_rate": 0.2,
+   "value": -7.000911,
+   "signal": "log P(Yes) of the 4BI device arm at N = 1",
+   "dev_population": "StudyD3 development clips, negatives, all offsets",
+   "distribution": {
+    "n": 3000,
+    "min": -20.25,
+    "p25": -15.25,
+    "median": -11.750008,
+    "p75": -7.750431,
+    "max": -0.005234,
+    "n_distinct": 2853
+   },
+   "prereg_fail_conditions_triggered": []
+  },
+  {
+   "type": "robot",
+   "method": "the median committed device confidence over DEV questions",
+   "card": "cards/cascade.md amendment 2 (2026-11-13)",
+   "signal": "StudyE7 Job A letter_probs mass on the emitted letter (4B-D2)",
+   "dev_population": "LH-REQ DEV (D143 A), 28 ids, 28 with a committed value",
+   "n_dev_ids": 28,
+   "n_with_value": 28,
+   "distribution": {
+    "n": 28,
+    "min": 0.365808,
+    "p25": 0.620833,
+    "median": 0.800338,
+    "p75": 0.949029,
+    "max": 0.999748,
+    "n_distinct": 28
+   },
+   "value": 0.800338,
+   "prereg_fail_conditions_triggered": []
+  },
+  {
+   "type": "ss_mcq",
+   "method": "the median committed device confidence over DEV questions",
+   "card": "cards/cascade.md amendment 2, applied per confidence type (D164)",
+   "signal": "letter_probs mass on the emitted letter",
+   "dev_population": "StudySS2 committed 30/70 DEV part (D143 A)",
+   "weak": false,
+   "n_with_value": 131,
+   "distribution": {
+    "n": 131,
+    "min": 0.333333,
+    "p25": 0.880739,
+    "median": 0.985936,
+    "p75": 0.999877,
+    "max": 1.0,
+    "n_distinct": 121
+   },
+   "value": 0.985936,
+   "prereg_fail_conditions_triggered": []
+  },
+  {
+   "type": "ss_free_form",
+   "method": "the median committed device confidence over DEV questions",
+   "card": "cards/cascade.md amendment 2, applied per confidence type (D164)",
+   "signal": "geometric mean token probability",
+   "dev_population": "StudySS2 committed 30/70 DEV part (D143 A)",
+   "weak": false,
+   "n_with_value": 98,
+   "distribution": {
+    "n": 98,
+    "min": 0.588367,
+    "p25": 0.888351,
+    "median": 0.984783,
+    "p75": 0.999411,
+    "max": 1.0,
+    "n_distinct": 94
+   },
+   "value": 0.984783,
+   "prereg_fail_conditions_triggered": []
+  },
+  {
+   "type": "ss_point",
+   "method": "the median committed device confidence over DEV questions",
+   "card": "cards/cascade.md amendment 2, applied per confidence type (D164)",
+   "signal": "geometric mean token probability",
+   "dev_population": "StudySS2 committed 30/70 DEV part (D143 A)",
+   "weak": true,
+   "n_with_value": 83,
+   "distribution": {
+    "n": 83,
+    "min": 0.693107,
+    "p25": 0.787486,
+    "median": 0.817276,
+    "p75": 0.840709,
+    "max": 0.879621,
+    "n_distinct": 74
+   },
+   "value": 0.817276,
+   "weak_note": "DECLARED WEAK by its own source: token confidence in the digits of a coordinate is not confidence that the point is right. Fitted and reported; may not carry a headline (CLAUDE.md check 6)",
+   "prereg_fail_conditions_triggered": []
+  }
+ ],
+ "committed_comparators": {
+  "confidence_floor_card": 0.7358,
+  "tau_trigger_card": -7.0009,
+  "source": "cards/cascade.md hyperparameter table and amendment 2"
+ },
+ "not_calibratable": {
+  "cascade-routing": {
+   "quantity": "lambda",
+   "card_method": "cards/cascade_routing.md and the paper: lambda is calibrated OFFLINE so that expected cost meets a cost budget B. The card states this explicitly and uses it to justify not adding B to the shared observation schema.",
+   "why_not": "live2 has no cost budget B. coordinator.py:321 sets gpu_budget_s = window_s x 1.0 GPU-second per second and its own comment says this is the PHYSICAL CAPACITY, so it never binds artificially (D58: round 1 has no fixed budget). D174 (1)'s census found budget refusals ZERO in every committed cell. The quantity the paper's calibration targets does not exist here, so no lambda is fitted and lambda_base stays at its committed 0.02, an UNFITTED CONSTANT.",
+   "also": "this arm has no fitted confidence threshold at all: its escalation test is q_cloud - (Q_DEVICE + (1 - Q_DEVICE) * conf) - lambda * c_cloud > 0, whose implied confidence threshold is a consequence of the committed quality priors and the cost curves, not a free parameter."
+  },
+  "eco-llm": {
+   "quantity": "none",
+   "card_method": "cards/ecollm.md specifies no threshold calibration. The arm does not declare reads_device_answer, so it never receives a device confidence; its rule is select = max(feasible, key=(quality, -cost)) under SLOs taken from the observation (the query's own deadline, the remaining budget), with min_quality left None.",
+   "why_not": "there is no thresholded confidence to set. The card further establishes (D137 item 3, D138) that quality is consumed only as an ORDER, so no value in the quality table can move a decision; price reaches a decision only through feasibility. Nothing is invented here.",
+   "also": "BASELINE_MATRIX's 'these three escalate on a device-confidence threshold' is wrong for eco-llm: it escalates on nothing of the kind."
+  }
+ },
+ "_provenance": {
+  "git_commit": "d8b886198f846da9668e8085202fbfe0cd2b9790",
+  "script": "cascade_threshold_calibration.py",
+  "model": "none",
+  "timestamp": "2026-11-22T09:11:01.463015",
+  "device": "cpu",
+  "n": 3340,
+  "args": {
+   "cmd": "fit",
+   "fn": "<function cmd_fit at 0x70ed5cadaf80>"
+  }
+ }
+}

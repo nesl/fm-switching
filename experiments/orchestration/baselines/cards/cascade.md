@@ -95,3 +95,64 @@ the before and after are the same cell: recall timely accuracy 0.3048 -> 0.3405 
 decisions 83 DEVICE -> 40 CLOUD + 43 DEVICE (the 43 are the queries whose committed device
 confidence is at or above the fitted floor, plus the 2 with no committed value at all). On the EVAL split, which is what every recall metric
 is now reported on, the arm's timely accuracy is 0.3330.
+
+## D164 calibration (2026-11-22): ONE FLOOR PER CONFIDENCE TYPE, still the card's own procedure
+
+Pre-registered in `research/prereg_cascade_calibration.md`, committed before any value was
+computed (commit `d8b88619`). Fitted by
+`experiments/orchestration/live2/cascade_threshold_calibration.py fit`, written to
+`results/orchestration/live2/cascade_calibration/cascade_thresholds.json` and READ from there by
+the arm (never re-derived at use time, for the reason the LH-REQ work established).
+
+**The procedure is unchanged.** Amendment 2's rule is still "the median committed device
+confidence over DEV questions"; A2's rule is still "the (1 - trigger_rate) quantile of the DEVICE
+arm's score on development-split negatives". What changed is the POPULATION: it is partitioned by
+CONFIDENCE TYPE, because the live2 workload mixes signals that are not on one scale. The robot and
+mcq values are letter-probability mass; the free-form and point values are a geometric mean token
+probability. One floor across them is not a stricter or a looser operating point, it is a
+different one per type by accident.
+
+| confidence type | signal | DEV population | n | fitted floor |
+|---|---|---|---|---|
+| `robot` | StudyE7 Job A letter mass (4B-D2) | LH-REQ DEV (D143 A) | 28 | **0.800338** |
+| `ss_mcq` | the same letter-mass rule, single shot | StudySS2 committed 30/70 DEV | 131 | **0.985936** |
+| `ss_free_form` | geometric mean token probability | StudySS2 committed 30/70 DEV | 98 | **0.984783** |
+| `ss_point` | the same, over the digits of a coordinate | StudySS2 committed 30/70 DEV | 83 | **0.817276** (WEAK) |
+| `episodic` | `latest_score()`, the delivered dashcam score | StudyD3 DEV negatives at rate 0.20 | 3,000 | **-7.000911** (`tau_trigger`) |
+
+`ss_point` is WEAK by its own source's declaration and may not carry a headline.
+
+**The robot floor moves 0.7358 -> 0.800338, and the reason is the population, not the method.**
+Amendment 2 took the median over ALL S-EMBER DEV questions; D143 A says the robot table is fitted
+on the LH-REQ DEV split, which is the DEV counterpart of the LH-REQ EVAL questions a live cell's
+robots actually draw from. Ratio 1.088, well inside the 2x reconciliation bar. Every cascade
+recall number committed before this is superseded, and was already superseded by D168's device
+wait.
+
+**`tau_trigger` IS UNEXPRESSIBLE IN LIVE2, and this is a harness property, not a change to the
+card.** The quantity A2's threshold is compared against is `StreamState.latest_score()`, which in
+live2 is a PLACEHOLDER: `coordinator._device_answer` appends `(t, 0.0)` and the cloud path appends
+`(delivered, 0.0)`, with the comment "the SCORES here are placeholders: task value is scored
+offline from the recordings (D85, D87)". Measured on the posted cell (16 devices, seed 4, 600 s,
+EP-G, per-frame, rq30) the arm saw exactly two distinct values across 36,000 stream reads:
+`None` 1,156 times and `0.0` 34,844 times, and nothing else. Since `-7.0009 < 0.0`, the test
+`v >= tau_trigger` is TRUE for every stream that has ever delivered anything, so this arm's
+episodic side escalates unconditionally and **no value of `tau_trigger` below 0 changes it**.
+Under CLAUDE.md Rule 2 this is **unexpressible**, not a negative: the mechanism fires and the
+harness discards the channel it acts through. The card's own `-7.0009` stands for the A-episodic
+setting where it was measured, and a reader must not attribute live2 episodic behaviour to it.
+(This card's `experiments` tuple is `A-episodic` only, so live2 rows for this arm are already
+outside its claimed scope.)
+
+**The type is resolved from the same committed row as the value.** `device_confidence.kind_of`
+keys on `RecallQuery.question_id` (the live field D171 (3) added) and returns the type from the
+committed table that supplies the confidence. The harness's `RecallQuery.category` carries only
+the DATASET for a single-shot question, so it cannot separate `ss_mcq` from `ss_free_form`; the
+subset is not on the observation. Reading the rule beside the value is what
+`device_confidence.source_of` exists for: handing a policy a confidence without its rule is how
+two different notions of confidence become indistinguishable at the point of use.
+
+**Reads, named.** `confidence_floors` is read at `cascade_adapted.py` in `_floor_for`, whose
+return value is compared against `q.device_answer_confidence` in `decide` and decides CLOUD
+against DEVICE. The per-type counts are in `self.stats`, and `unknown_type` counts any query whose
+type could not be resolved, so a cell decided by the fallback is visible rather than silent.

@@ -2,10 +2,20 @@
 # Driver contract: an arm named here is released; every other device-waiting arm stays held.
 r3-streaming
 streamscout
+confidence-cascade
 #
 # RELEASED because their device wait now has NO proxy anywhere: the fallback counter is 0.
 #   r3-streaming   2,890 measured lookups (dashcam 2,802, robot 5, single-shot 83), fallback 0
 #   streamscout    8,766 measured lookups (all dashcam),                            fallback 0
+#   confidence-cascade  RELEASED 2026-11-22. 18,364 measured lookups (dashcam 18,223, robot 46,
+#                  single-shot 95), every no_measured_value counter ABSENT, and its D164 threshold
+#                  calibration is now committed: one floor per confidence type, fitted on DEV by
+#                  its own card's procedure, pre-registered first (d8b88619). Proofs:
+#                  results/orchestration/live2/cascade_calibration/, report
+#                  reports/study_cascade_calibration.md. ONE DECLARED LIMIT carried on every row:
+#                  its EPISODIC tau_trigger is unexpressible here, because live2's delivered
+#                  stream score is a placeholder 0.0, so its dashcam side escalates
+#                  unconditionally and no tau_trigger below zero would change it.
 #
 # The wait is measured per type, from committed Orin records on the Jetson deployment default
 # config (results/device/study_devlat/orin_device_latency_tables.json):
@@ -20,8 +30,15 @@ streamscout
 # rerun and not a relabel. Proofs in devwait_proofs.json; 9 non-cascade arms byte-identical.
 #
 # STILL HELD, and why:
-#   confidence-cascade, cascade-routing   fallback is 0 for them too, but D164 additionally
-#                                         requires the pre-registered DEV threshold calibration
-#                                         per card and per confidence type, which is NOT committed.
+#   cascade-routing                       fallback is 0 for it too (18,463 measured lookups on the
+#                                         posted cell, every no_measured_value counter absent), so
+#                                         the DEVICE WAIT is NOT what holds it. It is held because
+#                                         (a) its card's calibration target does not exist here
+#                                         (lambda is fitted offline against a cost budget B; live2
+#                                         has only physical capacity, D58 / D174 (1)) and (b) it
+#                                         FAILS THE PORT RULE: 0 of 489 recall decisions are its
+#                                         characteristic skip-or-cascade choice, all are post-hoc
+#                                         stops, and lambda 0.02 against 2.0 moves 0 decisions.
+#                                         See reports/study_cascade_calibration.md section 5.
 #   thinking-qwenvl                       NOT a registered live2 arm: arms.make_arm raises
 #                                         "unknown arm". It cannot be run or released at all.
