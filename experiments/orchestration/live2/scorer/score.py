@@ -264,13 +264,78 @@ def device_latency_s(dev: Dict[str, Any]) -> float:
     return float(v)
 
 
+_SS_LAT_TABLE: Optional[Dict[str, float]] = None
+_DASH_LAT_TABLE: Optional[Dict[int, float]] = None
+
+
+def single_shot_latency_table() -> Dict[str, float]:
+    """Measured Orin SINGLE-SHOT completion per question (StudySS2). Separate table from the robot
+    one, because the robot table is 97 LH-REQ questions and holds no single-shot id."""
+    global _SS_LAT_TABLE
+    if _SS_LAT_TABLE is None:
+        try:
+            _SS_LAT_TABLE = dict(DS.single_shot_total_s())
+        except Exception:
+            _SS_LAT_TABLE = {}
+    return _SS_LAT_TABLE
+
+
+def dashcam_latency_table() -> Dict[int, float]:
+    """Measured Orin EP-G warm-append first token by episode frame position."""
+    global _DASH_LAT_TABLE
+    if _DASH_LAT_TABLE is None:
+        try:
+            _DASH_LAT_TABLE = dict(DS.dashcam_append_ttft_s())
+        except Exception:
+            _DASH_LAT_TABLE = {}
+    return _DASH_LAT_TABLE
+
+
+def device_latency_any_type_s(o: Dict[str, Any], dev: Dict[str, Any]) -> Optional[float]:
+    """The measured device latency for THIS opportunity, whatever its type (D155 (3) for all types).
+
+    Per type, because the three tables are different measurements and none of them covers another's
+    ids: robot recall from StudyORIN-REC WARM (completion), single-shot from StudySS2 (completion,
+    D146 (1)), dashcam from StudySH-EP EP-G warm append by episode frame position (first token,
+    which D146 (1) allows for a Yes/No alert).
+
+    Returns None when no measured value exists for this opportunity, so a caller can REPORT the gap
+    rather than be handed a silent number. It never falls back to another type's table: that is the
+    cross-type substitution that produced the proxy-0.567-cross-type label.
+    """
+    qid = o.get("question_id") or dev.get("question_id")
+    if o.get("kind") == "monitor":
+        tab = dashcam_latency_table()
+        if not tab:
+            return None
+        n = o.get("episode_frames") or dev.get("episode_frames") or len(
+            o.get("episode_frame_refs") or ()) or 1
+        n = min(max(int(n), min(tab)), max(tab))
+        return float(tab[n])
+    if qid is not None:
+        rob = device_latency_table()
+        if rob is not None and str(qid) in rob:
+            return float(rob[str(qid)])
+        ss = single_shot_latency_table()
+        if str(qid) in ss:
+            return float(ss[str(qid)])
+    v = dev.get("device_latency_s")
+    return float(v) if v is not None else None
+
+
 def device_within(o: Dict[str, Any], dev: Dict[str, Any], L: float) -> bool:
     """D155 (3): did the DEVICE's own answer arrive within the deadline?
 
     Measured from the same `t_opportunity` the cloud's deadline is measured from, so both sides
-    of the comparison are on one clock.
+    of the comparison are on one clock. Applies to EVERY type: the per-type measured latency comes
+    from `device_latency_any_type_s`, and an opportunity with NO measured device latency is treated
+    as NOT within the deadline, because crediting it would be the unconditional device credit this
+    rule exists to remove.
     """
-    return (DEVICE_WAIT_S + device_latency_s(dev)) <= L + 1e-9
+    v = device_latency_any_type_s(o, dev)
+    if v is None:
+        return False
+    return (DEVICE_WAIT_S + v) <= L + 1e-9
 
 
 _MEANING = {
@@ -1353,11 +1418,23 @@ def assistive_value(lo: Loaded, L_ss: float = SS_L_S) -> Dict[str, Any]:
         sc = dev.get("device_score") or {}
         metric = "point_accuracy" if dataset == "refspatial" else "exact_match"
         dev_score = float(sc[metric]) if metric in sc else None
+        # D155 (3) FOR SINGLE-SHOT. Previously the device answer was credited whenever the cloud
+        # missed, with no check that it ARRIVED in time. It frequently does not: refspatial device
+        # completion is p50 1.9947 s against a 2.0 s deadline and 126 of 1,042 single-shot
+        # questions (45.5 percent of refspatial) exceed it. Both readings are reported, because
+        # D155 (3) requires the any-time figure BESIDE the new rule, not replaced by it.
+        stbd = _standing_by_deadline(o, dev, L_ss)
+        dev_lat = device_latency_any_type_s(o, dev)
         rows.append(dict(opportunity_id=opp, device_id=o["device_id"], question_id=qid,
                          dataset=dataset, on_time=bool(on_time),
                          source=("cloud" if on_time else "device"),
+                         source_by_deadline=stbd["source"],
+                         device_latency_s=dev_lat,
+                         device_within_deadline=bool(device_within(o, dev, L_ss)),
                          metric=metric, device_score=dev_score,
-                         standing_score=(None if on_time else dev_score)))
+                         standing_score=(None if on_time else dev_score),
+                         standing_score_by_deadline=(
+                             None if stbd["source"] != "device" else dev_score)))
     def agg(sel):
         v = [r for r in rows if sel(r) and r["standing_score"] is not None]
         return dict(n=len(v), mean=(round(sum(r["standing_score"] for r in v) / len(v), 6)
@@ -1371,6 +1448,34 @@ def assistive_value(lo: Loaded, L_ss: float = SS_L_S) -> Dict[str, Any]:
                           if rows else None),
         n_cloud_standing=sum(1 for r in rows if r["source"] == "cloud"),
         n_device_standing=sum(1 for r in rows if r["source"] == "device"),
+        # D155 (3) for single-shot, reported BESIDE the any-time figures above rather than
+        # replacing them. `n_no_answer_by_deadline` is the branch that did not exist before: the
+        # cloud missed AND the device's own answer was late, so there is no answer by the deadline
+        # and the opportunity is a miss, not a device credit.
+        by_deadline=dict(
+            n_cloud_standing=sum(1 for r in rows if r["source_by_deadline"] == "cloud"),
+            n_device_standing=sum(1 for r in rows if r["source_by_deadline"] == "device"),
+            n_no_answer_by_deadline=sum(1 for r in rows if r["source_by_deadline"] == "none"),
+            n_device_late=sum(1 for r in rows
+                              if not r["on_time"] and not r["device_within_deadline"]),
+            n_device_latency_unknown=sum(1 for r in rows if r["device_latency_s"] is None),
+            device_accuracy_by_dataset={
+                d: dict(n=sum(1 for r in rows if r["dataset"] == d
+                              and r["standing_score_by_deadline"] is not None),
+                        mean=(round(sum(r["standing_score_by_deadline"] for r in rows
+                                        if r["dataset"] == d
+                                        and r["standing_score_by_deadline"] is not None)
+                                    / max(sum(1 for r in rows if r["dataset"] == d
+                                              and r["standing_score_by_deadline"] is not None), 1),
+                                    6)
+                              if any(r["dataset"] == d
+                                     and r["standing_score_by_deadline"] is not None
+                                     for r in rows) else None))
+                for d in datasets},
+            rule=("a device answer counts only if it arrived by the 2.0 s single-shot deadline. "
+                  "refspatial device completion is p50 1.9947 s against that deadline and 126 of "
+                  "1,042 measured single-shot questions exceed it, all of them refspatial "
+                  "(45.5 percent of that dataset); realworldqa has none.")),
         device_accuracy_by_dataset={d: agg(lambda r, d=d: r["dataset"] == d) for d in datasets},
         device_accuracy_all_opportunities={
             d: dict(n=sum(1 for r in rows if r["dataset"] == d and r["device_score"] is not None),

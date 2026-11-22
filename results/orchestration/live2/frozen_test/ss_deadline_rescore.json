@@ -1,0 +1,132 @@
+{
+  "_what": "D155 (3) applied to SINGLE-SHOT in the scorer: a device answer counts only if it arrived by the type's 2.0 s deadline. Re-score of the committed edf rq30 matrix cells.",
+  "_why_it_was_needed": "assistive_value credited the device unconditionally whenever the cloud missed (source = cloud if on_time else device) with NO check that the device answer arrived. _standing_by_deadline existed but was called only for robot.",
+  "_trace_identity": "the rq30 traces live on the H100, so each trace was REGENERATED locally and proved identical to the committed cell by its fairness digest (run_meta.trace_fairness_digest) before any scoring. All four matched; a mismatch would have skipped the cell rather than scored it.",
+  "per_cell": {
+    "4": {
+      "n": 357,
+      "cloud_on_time": 49,
+      "anytime_device": 308,
+      "bd_device": 252,
+      "bd_none": 56,
+      "bd_late": 56,
+      "unknown": 0,
+      "acc_anytime": {
+        "realworldqa": {
+          "n": 207,
+          "mean": 0.637681
+        },
+        "refspatial": {
+          "n": 101,
+          "mean": 0.321782
+        }
+      },
+      "acc_bd": {
+        "realworldqa": {
+          "n": 207,
+          "mean": 0.637681
+        },
+        "refspatial": {
+          "n": 45,
+          "mean": 0.466667
+        }
+      }
+    },
+    "5": {
+      "n": 356,
+      "cloud_on_time": 55,
+      "anytime_device": 301,
+      "bd_device": 251,
+      "bd_none": 50,
+      "bd_late": 50,
+      "unknown": 0,
+      "acc_anytime": {
+        "realworldqa": {
+          "n": 213,
+          "mean": 0.624413
+        },
+        "refspatial": {
+          "n": 88,
+          "mean": 0.323864
+        }
+      },
+      "acc_bd": {
+        "realworldqa": {
+          "n": 213,
+          "mean": 0.624413
+        },
+        "refspatial": {
+          "n": 38,
+          "mean": 0.421053
+        }
+      }
+    },
+    "6": {
+      "n": 357,
+      "cloud_on_time": 52,
+      "anytime_device": 305,
+      "bd_device": 258,
+      "bd_none": 47,
+      "bd_late": 47,
+      "unknown": 0,
+      "acc_anytime": {
+        "realworldqa": {
+          "n": 211,
+          "mean": 0.616114
+        },
+        "refspatial": {
+          "n": 94,
+          "mean": 0.31383
+        }
+      },
+      "acc_bd": {
+        "realworldqa": {
+          "n": 211,
+          "mean": 0.616114
+        },
+        "refspatial": {
+          "n": 47,
+          "mean": 0.361702
+        }
+      }
+    },
+    "7": {
+      "n": 359,
+      "cloud_on_time": 65,
+      "anytime_device": 294,
+      "bd_device": 241,
+      "bd_none": 53,
+      "bd_late": 53,
+      "unknown": 0,
+      "acc_anytime": {
+        "realworldqa": {
+          "n": 201,
+          "mean": 0.621891
+        },
+        "refspatial": {
+          "n": 93,
+          "mean": 0.295699
+        }
+      },
+      "acc_bd": {
+        "realworldqa": {
+          "n": 201,
+          "mean": 0.621891
+        },
+        "refspatial": {
+          "n": 40,
+          "mean": 0.375
+        }
+      }
+    }
+  },
+  "headline": "47 to 56 single-shot items per cell, about 15 percent of the pool, were credited as device answers that never arrived by the deadline. All of them refspatial.",
+  "measured_device_latency_basis": "refspatial device completion p50 1.9947 s against the 2.0 s deadline, max 3.4093 s: 126 of 277 refspatial questions (45.5 percent) exceed it. realworldqa has 0 of 765 late.",
+  "accuracy_interaction_worth_reading": "the any-time reading was wrong in BOTH directions at once. On seed 4 refspatial device accuracy reads 0.3218 over 101 items any-time, and 0.4667 over 45 items by deadline. So the late answers were disproportionately WRONG: counting them inflated coverage AND understated the accuracy of the answers that actually arrived. realworldqa is unchanged at 0.6377 over 207, consistent with none of it being late.",
+  "other_types": {
+    "robot": "already applied; _standing_by_deadline was wired for recall before this change.",
+    "dashcam": "rule now applied, and it changes nothing: measured EP-G warm-append first token is 0.2349 to 0.3662 s across all 21 episode positions against a 1.0 s deadline, so no position can be late. Stated rather than skipped, and the check will fire if that ever changes. The episode-START curve would be late at 13 of 20 positions, which is a further reason the append path is the one deployment uses (D148, D153)."
+  },
+  "no_measured_value_handling": "device_within returns False when no measured device latency exists for an opportunity, so an unmeasurable device answer is NOT credited. It never falls back to another type's table, which is the cross-type substitution that produced the proxy-0.567-cross-type label.",
+  "both_readings_reported": "assistive_value now returns the any-time fields unchanged and a by_deadline block beside them, per D155 (3)'s requirement that the any-time figure be reported beside the new rule rather than replaced."
+}
