@@ -160,6 +160,8 @@ conclusion**. Not posted: covex-v6-fair (D165 objective unbuilt), covex-v6 (plan
    pre-registered DEV threshold calibration; kvflow-prefetch held to the 2026-11-28 cutoff (characteristic decision
    unexpressible); thinking-qwenvl not a registered live2 arm.
 
+**E5 memory sweep (user ruling ~09:00, driver v23)**: after BASELINE_MATRIX, the paper core at `_kv0.5` (covex-v6-base, covex-v6-rules, edf, llf, b7, always-cloud, mooncake, attentionstore-prefetch, simplestream, querystream-proactive, warm-all-lru; seeds 4 and 5; same workload), from about 10:25. `_kv0.5` is the committed `_kv0.25` mechanism, `--gpu-kv-tokens 31472` = 62,944 / 2 with capacity enforcement on. **CAVEAT for every `_kv0.5` / `_kv0.25` row: it halves the HARNESS's LOGICAL pool (coordinator belief and enforcement); the engine's real vLLM KV pool is unchanged, so these cells test the policy under a smaller believed capacity, NOT vLLM under a smaller allocation.** The over-limit rule (D175) cannot move seeds 4 and 5 (histories top out near 26,900 tokens); covex-v6-rules is proved identical at s4, covex-v6-base at s4 requested of flash.
+
 **For the user's ruling**: (a) touch pricing (first-token and work-only charges both fail D102; planner scores TOUCH at harm 0
 regardless); (b) the rung-1 dashcam submission gap (flash's concurrency-limit hypothesis, untested; needs per-epoch visible but
 unreleased monitors beside in-flight occupancy); (c) the optional diagnostics in 5.3; (d) where to keep the over-5 MB decision
