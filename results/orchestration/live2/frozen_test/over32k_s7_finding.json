@@ -1,0 +1,48 @@
+{
+  "_question": "edf_n16_s7 rq30 has 14 HTTP 400s, the first non-zero count since the race fix. Is it the race? Is the session in robot_reasks_beyond_32k? Does the scorer treat a 400 as a miss or an invalid row? Should over-32k recalls be capped in the harness?",
+  "_answer_1_not_the_race": "CORRECT, it is a context-length refusal. Confirmed from the TRACE rather than inferred from size: seed 7 is the only seed of the four with beyond-32k re-asks.",
+  "measured_per_seed_rq30_lh_req_epg_perframe": {
+    "seed4": {
+      "reasks": 112,
+      "robot_reasks_beyond_32k": 0,
+      "max_history_tokens": 26851,
+      "recall_rows_over_32768": 0
+    },
+    "seed5": {
+      "reasks": 102,
+      "robot_reasks_beyond_32k": 0,
+      "max_history_tokens": 26941,
+      "recall_rows_over_32768": 0
+    },
+    "seed6": {
+      "reasks": 101,
+      "robot_reasks_beyond_32k": 0,
+      "max_history_tokens": 26671,
+      "recall_rows_over_32768": 0
+    },
+    "seed7": {
+      "reasks": 83,
+      "robot_reasks_beyond_32k": 15,
+      "max_history_tokens": 52861,
+      "recall_rows_over_32768": 18
+    }
+  },
+  "_answer_1a_is_the_session_counted": "YES. All 18 over-32,768 recall rows at seed 7 belong to the single session the H100 named, and 15 of them are RE-ASKS, which is exactly the robot_reasks_beyond_32k stat (the other 3 are original asks, which the stat does not cover). Max history 52,861 tokens, 1.6x the 32,768 limit.",
+  "_answer_1b_miss_not_invalid": {
+    "verdict": "A 400 is scored as a MISS, correctly, and this is already a user ruling, not an open question.",
+    "where": "D144 (2026-11-20) is implemented in BOTH places: coordinator.py:1210 _settle sets state failed, emits decision CLOUD-failed with on_time False and served_by device; scorer/score.py:436 strips any cloud delivery whose request_id returned non-200 so every downstream check sees the device answer standing.",
+    "what_it_fixed": "the comment at both sites names this exact case: before D144 a refused over-context request was settled as an ON-TIME cloud answer with letter 'X'. So the pre-D144 behaviour would have REWARDED sending an unservable request. It no longer does."
+  },
+  "_answer_2_do_not_cap": {
+    "verdict": "Do NOT cap over-32k recalls in the harness. D159 (C) rules COUNT, never truncate, and that is what the trace does at fleet/trace.py:858.",
+    "why_it_is_the_workload_and_not_a_defect": "every arm receives the identical opportunity stream, so an over-32k question is a legitimate discriminator: a full-history arm that sends it earns a miss, and an arm that predicts infeasibility and declines avoids it. That is precisely the decision under test, and b7's feasibility rule and the policy's own infeasibility prediction are the mechanisms that should act on it.",
+    "expected_at_s7": "the H100 is right that other full-history arms at seed 7 (llf, b7, mooncake and so on) may hit the same wall. That is informative rather than a problem: always-cloud should eat the misses, b7 should decline them."
+  },
+  "_premise_that_needs_updating_and_it_is_not_the_harness": {
+    "what": "D152 (3) put the 32k context limit out of scope on a stated premise: 'the 32k-token context limit (about 10 minutes of frames) is out of scope for now (LH-REQ histories reach about 21k)'.",
+    "why_it_no_longer_holds": "seed 7 reaches 52,861 tokens, 2.5x that premise. The mechanism is the rq30 re-ask design itself: a re-ask is placed LATER in the session than the original ask, so it is asked against a much larger history. Seeds 4 to 6 stay under 32k only because their sessions are shorter.",
+    "consequence": "D152 (3)'s scoping sentence is now false for seed 7 and should be revisited by the user. Nothing in the harness needs to change for that; the premise does."
+  },
+  "_arithmetic_note": "14 observed 400s against 18 over-32,768 rows: edf released 14 of the 18. The remaining 4 were presumably not released before their deadline, so they are device-answer misses rather than refusals.",
+  "_not_done": "nothing was rerun, excluded or capped."
+}
