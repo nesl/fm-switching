@@ -164,17 +164,20 @@ confidence-cascade 16 7 _L3_epg_rq30
 # cascade-routing 16 6 _L3_epg_rq30
 # cascade-routing 16 7 _L3_epg_rq30
 #
-# STILL HELD: eco-llm, pending a USER RULING and nothing else. Its card specifies no threshold and
-# it reads no confidence, so there is nothing to calibrate and nothing was invented; the blocking
-# condition above is inapplicable rather than unmet. Its own proofs pass: 240 joint (tier,
-# representation) selections on the audit cell, 210 CLOUD/D2 and 30 CLOUD/RECENT, so both
-# representations are selected; D137 (3)'s measured quality table is in force and D135 (2) holds
-# (it plans with the price it is charged). It is held only because releasing an arm whose gate does
-# not apply is a ruling, not a calibration outcome. Uncomment on the user's word.
-# eco-llm 16 4 _L3_epg_rq30
-# eco-llm 16 5 _L3_epg_rq30
-# eco-llm 16 6 _L3_epg_rq30
-# eco-llm 16 7 _L3_epg_rq30
+# RELEASED: eco-llm, and NOT because a threshold was fitted for it. Its card specifies none and the
+# arm reads no confidence (it does not declare reads_device_answer), so the calibration gate above
+# is INAPPLICABLE to it rather than unmet, and nothing was invented to satisfy it. No reader should
+# take these cells as carrying a calibrated cascade threshold.
+# What was verified before release: 240 joint (tier, representation) selections on the audit cell,
+# 210 CLOUD/D2 and 30 CLOUD/RECENT, so both representations are actually selected and the port rule
+# is satisfied; D137 (3)'s measured quality table is in force (USE_MEASURED_QUALITY = True) and
+# D135 (2) holds, the arm planning with the price it is charged.
+# Released under the user's 2026-11-22 priority item 2, which asks that the three cascade arms be
+# marked ready and states that this completes the baseline set.
+eco-llm 16 4 _L3_epg_rq30
+eco-llm 16 5 _L3_epg_rq30
+eco-llm 16 6 _L3_epg_rq30
+eco-llm 16 7 _L3_epg_rq30
 
 # ---------------------------------------------------------------- AFTER PROOFS (commented)
 # kvflow-prefetch's published prefetch does NOT currently pass its proofs on this harness:
