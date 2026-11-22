@@ -1,0 +1,105 @@
+{
+ "_what": "D179 (4) release re-check: negative control, Step 2b, and the 50 percent alert stop condition",
+ "_protocol": "one dry cell per process in a subprocess; cf_instrument's wall-clock cutoff patched off for digest comparability",
+ "arm": "covex-v6-base",
+ "cell": {
+  "n": 16,
+  "run_s": 1200.0,
+  "ratio": "40:40:20",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dashcam_format": "epg",
+  "robot_upload": "per-frame",
+  "robot_reask_mean_s": 30.0
+ },
+ "cases": [
+  {
+   "seed": 4,
+   "off": {
+    "arm": "covex-v6-base",
+    "mode": "off",
+    "seed": 4,
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "kinds": {
+     "release_monitor": 11584,
+     "release_recall": 412,
+     "defer": 12,
+     "decline": 77
+    }
+   },
+   "on": {
+    "arm": "covex-v6-base",
+    "mode": "on",
+    "seed": 4,
+    "digest": "e3fbe12e3b095af6",
+    "rows": 12265,
+    "kinds": {
+     "release_monitor": 2,
+     "release_recall": 8,
+     "release_infeasible": 12166,
+     "defer": 12,
+     "decline": 77
+    }
+   },
+   "A_off_digest": "af8befb9420ad86a",
+   "A_off_rows": 12085,
+   "A_committed": {
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "source": "results/orchestration/live2/frozen_test/c5attr_digest_proofs.json :: P1_committed_arms_unchanged"
+   },
+   "A_off_matches_committed": true,
+   "B_decisions_differing": 12256,
+   "B_first_difference": {
+    "index": 3,
+    "off": {
+     "t": 7.1,
+     "kind": "release_monitor",
+     "opportunity_ids": [
+      "opp0000003"
+     ]
+    },
+    "on": {
+     "t": 7.1,
+     "kind": "release_infeasible",
+     "opportunity_ids": [
+      "opp0000003"
+     ]
+    }
+   },
+   "B_switch_reaches_a_decision": true,
+   "C_alert_skips": 12166,
+   "C_alert_released": 2,
+   "C_alert_denominator": 12168,
+   "C_alert_skip_fraction": 0.999836,
+   "C_under_50_percent": false
+  }
+ ],
+ "verdict": "STOP AND REPORT (D179 (4) alert stop condition fired at 0.999836). The negative control PASSED and Step 2b PASSED; the alert fraction is a wrong-register input on a non-D162-priced arm, diagnosed in _stop, and the re-run on a priced arm is NOT performed.",
+ "_stop": {
+  "fired": true,
+  "condition": "D179 (4): the re-check must not fire on more than 50 percent of alert requests",
+  "measured": "12,166 of 12,168 alert requests, 0.999836",
+  "other_stop_condition": "'any committed arm's dry decisions change with the switch off' did NOT fire: switch-off reproduced the committed af8befb9420ad86a / 12,085 rows exactly",
+  "classification": "NOT a finding about the policy. Under CLAUDE.md Rule 2 this is INCONCLUSIVE, and specifically a WRONG-REGISTER input: the quantity read as queue-ahead could not mean what the column said.",
+  "diagnosis": "`_uncached_in_flight` is INCREMENTED unconditionally at four release sites (coordinator.py lines 918 monitor, 1052 touch, 1117 build, 1206 recall) and DECREMENTED only inside `if self._d162_pricing` in `_collect` (coordinator.py:1508-1510). Every other read of it is inside that same gate, so on an arm that does not declare D162 pricing the field is dormant and monotonically increasing: the cumulative uncached tokens of the whole run. covex-v6-base does not declare it (arms_v6state.py:132 defaults it False), so the predicted first token exceeded every 1.0 s alert deadline within seconds of run start. The re-check was the first code to read the field outside the gate.",
+  "remedy_applied": "the coordinator now RAISES if live2_release_recheck is set without live2_d162_pricing, inside session B's own __init__ block",
+  "remedy_not_applied": "making the decrement at coordinator.py:1508 unconditional, which is the other candidate fix. NOT applied: it changes a committed quantity's semantics on arms this session does not own. Written up for the planner instead.",
+  "rerun_required": {
+   "arm": "covex-v6-rules-wo (D162-priced, arms_v6state.py:447)",
+   "cell": {
+    "n": 16,
+    "run_s": 1200.0,
+    "ratio": "40:40:20",
+    "robot_question_set": "lh_req",
+    "ss_question_set": "ss2",
+    "dashcam_format": "epg",
+    "robot_upload": "per-frame",
+    "robot_reask_mean_s": 30.0
+   },
+   "seed": 4,
+   "status": "NOT RUN: the brief's STOP AND REPORT applies"
+  }
+ }
+}

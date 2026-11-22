@@ -1,0 +1,218 @@
+{
+ "_what": "D179 (4) Step 3: one traced unit per deadline type at its release instant",
+ "_not_a_measurement": "dry coordinator, no engine; the numbers are the D162 model's own predictions, which is what the re-check decides on",
+ "price_source": "cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)",
+ "drift_check": {
+  "checked": true,
+  "agrees": true
+ },
+ "interface_check": {
+  "checked": true,
+  "agrees": true
+ },
+ "deadline_s_used": {
+  "alert": 1.0,
+  "note": "taken from the opportunity, never from a per-type constant"
+ },
+ "units": [
+  {
+   "type": "alert",
+   "at_release": {
+    "t_release_s": 10.1,
+    "opportunity": "o000",
+    "episode_frames": 4,
+    "episode_refs": [
+     "f00.jpg",
+     "f01.jpg",
+     "f02.jpg",
+     "f03.jpg"
+    ],
+    "predicted_prompt_tokens": 1394,
+    "predicted_uncached_tokens": 1394,
+    "uncached_queued_ahead": 30000,
+    "deadline_abs_s": 11.0,
+    "remaining_s": 0.9000000000000004,
+    "terms": {
+     "intercept_s": 0.06779759059832724,
+     "per_uncached_s": 0.2543091761308759,
+     "per_queue_s": 4.607421868015605,
+     "est_first_token_s": 4.929528634744808
+    },
+    "budget_gpu_s_remaining": 600.0
+   },
+   "decision": {
+    "submissions": 0,
+    "bound_by": "deadline re-check (D179 (4))",
+    "counts": {
+     "release_infeasible": 1,
+     "release_infeasible_alert": 1
+    },
+    "opportunity_state": "declined",
+    "gpu_s_charged": 0.0,
+    "uncached_in_flight_after": 30000,
+    "outcome": "device answer stands (latency_miss for the cloud answer that was never asked for; the frame is NOT lost)"
+   },
+   "skipped_event": {
+    "qtype": "alert",
+    "uncached": 1394,
+    "queued_uncached_ahead": 30000,
+    "est_first_token_s": 4.929528634744808,
+    "remaining_s": 0.9000000000000004,
+    "feasible": false,
+    "opportunity_id": "o000",
+    "device_id": "dash000",
+    "kind": "monitor",
+    "t": 10.1,
+    "episode_id": "ep0",
+    "episode_index": 0,
+    "n_episode_frames": 4,
+    "skipped_frame_ref": "f03.jpg",
+    "est_tokens": 1394,
+    "deadline_abs": 11.0
+   },
+   "next_instant_same_episode": {
+    "t_release_s": 12.1,
+    "opportunity": "o001",
+    "episode_refs": [
+     "f00.jpg",
+     "f01.jpg",
+     "f02.jpg",
+     "f03.jpg",
+     "f04.jpg"
+    ],
+    "carries_the_skipped_frame": true,
+    "predicted_prompt_tokens": 1732,
+    "predicted_uncached_tokens": 1732,
+    "uncached_if_instant_0_had_been_sent": 380,
+    "rise_tokens": 1352,
+    "gpu_s_charged": 0.315971
+   }
+  },
+  {
+   "type": "recall",
+   "at_release": {
+    "t_release_s": 10.01,
+    "opportunity": "q000",
+    "session": "robo000|s000",
+    "readiness": "COLD",
+    "predicted_prompt_tokens": 8000,
+    "predicted_uncached_tokens": 8000,
+    "uncached_queued_ahead": 0,
+    "deadline_abs_s": 10.05,
+    "remaining_s": 0.040000000000000924,
+    "terms": {
+     "intercept_s": 0.06779759059832724,
+     "per_uncached_s": 1.4594500782259736,
+     "per_queue_s": 0.0,
+     "est_first_token_s": 1.5272476688243009
+    },
+    "budget_gpu_s_remaining": 600.0
+   },
+   "decision": {
+    "submissions": 0,
+    "bound_by": "deadline re-check (D179 (4))",
+    "counts": {
+     "release_infeasible": 1,
+     "release_infeasible_recall": 1
+    },
+    "opportunity_state": "declined",
+    "gpu_s_charged": 0.0,
+    "outcome": "device answer stands"
+   },
+   "skipped_event": {
+    "qtype": "recall",
+    "uncached": 8000,
+    "queued_uncached_ahead": 0,
+    "est_first_token_s": 1.5272476688243009,
+    "remaining_s": 0.040000000000000924,
+    "feasible": false,
+    "opportunity_id": "q000",
+    "device_id": "robo000",
+    "kind": "recall",
+    "t": 10.01,
+    "session_id": "robo000|s000",
+    "est_tokens": 8000,
+    "readiness": "COLD",
+    "deadline_abs": 10.05
+   }
+  },
+  {
+   "type": "assistance",
+   "at_release": {
+    "t_release_s": 10.01,
+    "opportunity": "q000",
+    "session": "asst000|s000",
+    "readiness": "COLD",
+    "predicted_prompt_tokens": 1400,
+    "predicted_uncached_tokens": 1400,
+    "uncached_queued_ahead": 0,
+    "deadline_abs_s": 10.05,
+    "remaining_s": 0.040000000000000924,
+    "terms": {
+     "intercept_s": 0.06779759059832724,
+     "per_uncached_s": 0.25540376368954537,
+     "per_queue_s": 0.0,
+     "est_first_token_s": 0.3232013542878726
+    },
+    "budget_gpu_s_remaining": 600.0
+   },
+   "decision": {
+    "submissions": 0,
+    "bound_by": "deadline re-check (D179 (4))",
+    "counts": {
+     "release_infeasible": 1,
+     "release_infeasible_assistance": 1
+    },
+    "opportunity_state": "declined",
+    "gpu_s_charged": 0.0,
+    "outcome": "device answer stands"
+   },
+   "skipped_event": {
+    "qtype": "assistance",
+    "uncached": 1400,
+    "queued_uncached_ahead": 0,
+    "est_first_token_s": 0.3232013542878726,
+    "remaining_s": 0.040000000000000924,
+    "feasible": false,
+    "opportunity_id": "q000",
+    "device_id": "asst000",
+    "kind": "recall",
+    "t": 10.01,
+    "session_id": "asst000|s000",
+    "est_tokens": 1400,
+    "readiness": "COLD",
+    "deadline_abs": 10.05
+   }
+  },
+  {
+   "type": "recall-feasible",
+   "at_release": {
+    "t_release_s": 10.01,
+    "opportunity": "q000",
+    "session": "robo000|s000",
+    "readiness": "COLD",
+    "predicted_prompt_tokens": 8000,
+    "predicted_uncached_tokens": 8000,
+    "uncached_queued_ahead": 0,
+    "deadline_abs_s": 40.0,
+    "remaining_s": 29.990000000000002,
+    "terms": {
+     "intercept_s": 0.06779759059832724,
+     "per_uncached_s": 1.4594500782259736,
+     "per_queue_s": 0.0,
+     "est_first_token_s": 1.5272476688243009
+    },
+    "budget_gpu_s_remaining": 600.0
+   },
+   "decision": {
+    "submissions": 1,
+    "bound_by": "neither",
+    "counts": {},
+    "opportunity_state": "in_flight",
+    "gpu_s_charged": null,
+    "outcome": "sent to cloud"
+   },
+   "skipped_event": null
+  }
+ ]
+}

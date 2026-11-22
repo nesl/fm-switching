@@ -54,6 +54,9 @@ from interface import Budget, check_fairness                            # noqa: 
 import bodies as B                                                      # noqa: E402
 import offload_policy as OP                                             # noqa: E402
 import d162_price as DP                                                 # noqa: E402
+# ---- D179 (4) RELEASE RE-CHECK (session B), import. BEGIN --------------------------------------
+import release_recheck as RR                                            # noqa: E402
+# ---- END D179 (4) -----------------------------------------------------------------------------
 import touch_policy as TP                                               # noqa: E402
 import cachekeys as CK                                                  # noqa: E402
 import cstate as CS                                                     # noqa: E402
@@ -274,6 +277,46 @@ class Live2Coordinator:
         self._charge_mode = DP.arm_charge_mode(arm)
         if self._d162_pricing:
             DP.assert_no_drift()
+        # ---- D179 (4) RELEASE RE-CHECK (session B), state. BEGIN contiguous block -------------
+        # b7 tests deadline feasibility AT ARRIVAL only. With this on, every DEADLINE request
+        # (alert, recall, assistance) is re-tested AT WIRE TIME and is NOT SENT if it can no
+        # longer make its deadline; the device answer stands. Background work (piece, whole,
+        # touch) carries no deadline and is out of scope. See live2/release_recheck.py for which
+        # feasibility quantity is used and why it is not b7's own `est`.
+        #
+        # ARM-SCOPED INSTANCE attribute, default False. `RR.arm_enables` RAISES on a class-level
+        # ON rather than reading it, because a class attribute turns the rung on for every arm in
+        # the run and a module global defaulting ON once cost a whole live cell.
+        self._release_recheck = RR.arm_enables(arm)
+        # the re-check reads the D162 predictor whether or not the arm's CHARGE is D162-priced,
+        # so the coefficient drift check has to run on this switch too, not only on pricing.
+        if self._release_recheck:
+            DP.assert_no_drift()
+            RR.assert_no_interface_drift()
+            # THE QUEUE INPUT IS ONLY IN THE RIGHT REGISTER ON A D162-PRICED ARM, and this guard
+            # exists because the first dry cell found out the hard way: the re-check fired on
+            # 12,166 of 12,168 alert requests (99.98 percent) on `covex-v6-base`, which tripped
+            # the D179 STOP condition. `_uncached_in_flight` is INCREMENTED unconditionally at
+            # four release sites (lines 918, 1052, 1117 and 1206) and DECREMENTED only inside
+            # `if self._d162_pricing` in `_collect` (line 1508), and every other read of it is
+            # likewise inside that gate. So on an arm that does not declare D162 pricing the
+            # field is not a queue depth at all: it is the cumulative sum of every uncached token
+            # the run has ever released, which grows without bound and makes the predicted first
+            # token exceed any deadline after the first few seconds. A quantity in the wrong
+            # register is not a wrong computation and survives every arithmetic check, so it is
+            # refused here rather than read. Making the decrement unconditional would be the
+            # other remedy; it is NOT applied here, because it changes a committed quantity's
+            # semantics on arms this session does not own.
+            if not self._d162_pricing:
+                raise RuntimeError(
+                    "live2_release_recheck needs live2_d162_pricing on the same arm: "
+                    "`_uncached_in_flight` is decremented only under D162 pricing "
+                    "(coordinator.py:1508), so on %r it is a cumulative run total and not the "
+                    "queue ahead of this request" % (getattr(arm, "name", arm),))
+        # one row per skipped request, for the report's traced unit; the COUNTERS are the frozen
+        # names in `self.counts` and these rows never substitute for them.
+        self.release_infeasible_events: List[Dict[str, Any]] = []
+        # ---- END D179 (4) block ---------------------------------------------------------------
         # the third term of the price: uncached tokens the engine is already working on. Tracked
         # here because only the coordinator knows what is in flight, and it is what makes the
         # planner's harm and this charge the same arithmetic rather than two similar ones.
@@ -828,6 +871,65 @@ class Live2Coordinator:
             cost = (DP.price_gpu_s(_uncached, self._uncached_in_flight, self._charge_mode)
                     if self._d162_pricing
                     else C.episodic_gpu_s("32BI", self.st.devices[device_id].frame_count))
+        # ---- D179 (4) RELEASE RE-CHECK, ALERT PATH (session B). BEGIN contiguous block --------
+        # WIRE TIME. `t` here is the release instant: it is the same `t` `_submit` stamps the
+        # request with (its own `delay_s` is a real-run wall-clock correction, zero in a dry run),
+        # and nothing in this method has been mutated yet, so a skip spends no budget, charges no
+        # queue and needs no refund. The deadline comes from the OPPORTUNITY (`o.deadline_abs()`),
+        # never from a per-type constant, because the deadline is a property of the instant.
+        #
+        # THE QUANTITY is `release_recheck.decide`: the committed D162 first-token model, its
+        # coefficients IMPORTED from `d162_price`, applied to this request's own predicted
+        # uncached tokens (`_uncached`, the same number the charge uses) and to
+        # `_uncached_in_flight`, the uncached work already in front of it, against the time left
+        # to the deadline. b7's own `est` (costs.recall_ttft_s, hybrid/hybrid_arm.py:364) is an
+        # ISOLATED reload TTFT with no queue term and so cannot see that the queue grew since
+        # arrival, which is the whole point of re-asking at release.
+        #
+        # AND ON THIS PATH THERE WAS NOTHING TO RE-ASK: the alert path has never had a
+        # feasibility gate at all. `hybrid/hybrid_arm.py:351` computes `slack` for a dashcam
+        # instant, line 355 appends the item UNCONDITIONALLY, and the only read of `it["slack"]`
+        # is line 443 inside the utility-per-cost ORDERING index. So for alerts this is the FIRST
+        # feasibility test the path has ever carried.
+        #
+        # THE QUESTION FOR THIS INSTANT IS SKIPPED, THE FRAME IS NOT. Returning here is BEFORE
+        # `_mon_sent[device_id]` is updated, so this frame is not recorded as sent; the episode is
+        # append-only EP-G, so the NEXT instant's `episode_frame_refs` still carries it and that
+        # request's `n_new`, and therefore its `_uncached`, RISE by this frame. Asserted on the
+        # actual request body in tests/test_release_recheck.py.
+        #
+        # `o.state = "declined"` IS REQUIRED AND IS NOT COSMETIC. Left "arrived", the same instant
+        # would be re-offered every 100 ms decision period and fail the same check each time, so
+        # the counter would count ITEM-PERIODS instead of instants - exactly the confusion
+        # `share_capacity.py` records about c5_dash_held. Declining it counts it once. The
+        # consequence is stated rather than hidden: `_expire` will not also record this instant as
+        # NOT-TAKEN, which is how the committed budget-refusal decline at `_submit_recall` already
+        # behaves, and the outcome row below says `served_by="device"` with the device's own
+        # delivery time, which `_device_answer` appended at ingest (this method is never reached
+        # for an instant the device did not already answer locally).
+        if self._release_recheck:
+            _rr = RR.decide(qtype="alert", uncached=_uncached,
+                            queued_uncached_ahead=self._uncached_in_flight,
+                            remaining_s=o.deadline_abs() - t)
+            if not _rr["feasible"]:
+                RR.note_infeasible(self.counts, "alert")
+                o.state = "declined"
+                self.answers.append(dict(opportunity_id=o.opp_id, kind="monitor",
+                                         device_id=device_id, decision=RR.DECISION,
+                                         delivered_s=o.t_event,
+                                         deadline_s=o.deadline_abs(), served_by="device",
+                                         on_time=None))
+                self._log_decision(t, RR.LOG_KIND, [o.opp_id], latency_ms=dt_ms, preds=preds,
+                                   mix=mix, key="mon:" + device_id)
+                self.release_infeasible_events.append(dict(
+                    _rr, opportunity_id=o.opp_id, device_id=device_id, kind="monitor", t=t,
+                    episode_id=getattr(o, "episode_id", None),
+                    episode_index=getattr(o, "episode_index", None),
+                    n_episode_frames=len(refs) if epg else 1,
+                    skipped_frame_ref=o.frame_ref,
+                    est_tokens=int(est_tokens), deadline_abs=o.deadline_abs()))
+                return
+        # ---- END D179 (4) block ---------------------------------------------------------------
         if not self.st.budget.can_spend(cost):
             self.counts["budget_refusal"] += 1
             self.counts["budget_refusal_monitor"] += 1
@@ -1069,6 +1171,48 @@ class Live2Coordinator:
                      else max(int(tokens) - int(getattr(s, "built_tokens", 0) or 0), 0))
         if self._d162_pricing:
             cost = DP.price_gpu_s(_uncached, self._uncached_in_flight, self._charge_mode)
+        # ---- D179 (4) RELEASE RE-CHECK, RECALL AND ASSISTANCE PATHS (session B). BEGIN block --
+        # The same wire-time test as the alert path, for the other two DEADLINE types. b7 DOES
+        # gate this path at arrival (`est <= qs`, hybrid/hybrid_arm.py:384, with `est` from the
+        # committed cost curve at line 364), which is why this one is a RE-check: the arrival test
+        # declines 306 of 485 offered recalls in the committed base cells, and what it cannot see
+        # is the queue that grew between that decision and this release. The predictor is the
+        # committed D162 model with the queue term, coefficients imported from `d162_price`.
+        #
+        # The type comes from the device-id prefix, which is how the committed cells distinguish
+        # robot recall from assistance; a device this module cannot classify is counted under a
+        # separate diagnostic name and is NOT re-checked, because its deadline semantics are not
+        # established here. Placed before the budget check, so a skip spends nothing and the
+        # decline mirrors the committed budget-refusal decline exactly (state, outcome row shape,
+        # device delivery time), with its own decision string so the two are never confused.
+        if self._release_recheck:
+            _qt = RR.type_of_request("recall", o.device_id)
+            if _qt is None:
+                self.counts[RR.COUNTER_UNCLASSIFIED] += 1
+            else:
+                _rr = RR.decide(qtype=_qt, uncached=_uncached,
+                                queued_uncached_ahead=self._uncached_in_flight,
+                                remaining_s=o.deadline_abs() - t)
+                if not _rr["feasible"]:
+                    RR.note_infeasible(self.counts, _qt)
+                    o.state = "declined"
+                    o.served_at = (o.t_event + self._device_wait_s(o) if self.reads_device
+                                   else t)
+                    self.answers.append(dict(opportunity_id=o.opp_id, kind="recall",
+                                             device_id=o.device_id, decision=RR.DECISION,
+                                             delivered_s=o.served_at,
+                                             deadline_s=o.deadline_abs(), served_by="device",
+                                             on_time=None))
+                    self._log_decision(t, RR.LOG_KIND, [o.opp_id], latency_ms=dt_ms, preds=preds,
+                                       mix=mix, key="rc:" + (o.session_id or ""),
+                                       session_id=o.session_id)
+                    self.release_infeasible_events.append(dict(
+                        _rr, opportunity_id=o.opp_id, device_id=o.device_id, kind="recall", t=t,
+                        session_id=o.session_id, est_tokens=int(tokens),
+                        readiness=s.residency_readiness(),
+                        deadline_abs=o.deadline_abs()))
+                    return
+        # ---- END D179 (4) block ---------------------------------------------------------------
         if not self.st.budget.can_spend(cost):
             self.counts["budget_refusal"] += 1
             self.counts["budget_refusal_recall"] += 1
