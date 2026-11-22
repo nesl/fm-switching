@@ -29,6 +29,816 @@
  },
  "cells": [
   {
+   "cell": "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-uo",
+   "arm_version": "covex-v6-state-1.0",
+   "denominator": {
+    "unit": "one monitor opportunity, counted PER RUN",
+    "monitor_opportunities": 11764,
+    "committed_n_instants": 11764,
+    "matches_committed_denominator": true,
+    "d153": {
+     "min_episode_index_with_a_request": 2,
+     "max_episode_index_with_a_request": 20,
+     "n_requests_summed": 8172,
+     "episodes": 707
+    }
+   },
+   "buckets": {
+    "not_released": 3597,
+    "released_unsettled": 0,
+    "released_refused": 0,
+    "on_time": 2209,
+    "late_at_release": 251,
+    "late_at_first_token": 5567,
+    "late_at_forward_only": 140,
+    "late_request_row_absent": 0
+   },
+   "shares": {
+    "not_released": 0.3058,
+    "released_unsettled": 0.0,
+    "released_refused": 0.0,
+    "on_time": 0.1878,
+    "late_at_release": 0.0213,
+    "late_at_first_token": 0.4732,
+    "late_at_forward_only": 0.0119,
+    "late_request_row_absent": 0.0
+   },
+   "buckets_sum": 11764,
+   "buckets_sum_equals_denominator": true,
+   "control": {
+    "_claim": "bucket on_time must EQUAL this cell's committed dashcam on-time count",
+    "reconstructed_on_time": 2209,
+    "committed_on_time": 2209,
+    "committed_delivery_rule": "completion",
+    "committed_on_time_rule": "an answer is delivered at COMPLETION, prefill plus decode (D146, the default from 2026-11-20); a dashcam Yes/No stays at first token",
+    "committed_L_dash": 1.0,
+    "tolerance": "EXACT, 0 counts",
+    "pass": true
+   },
+   "d146_both_readings": {
+    "on_time_completed_delivery_rule_committed": 2209,
+    "on_time_first_token_rule": 2349,
+    "difference": 140,
+    "late_at_forward_only": 140,
+    "difference_equals_late_at_forward_only": true,
+    "note": "the committed cell uses t_delivered, which for a monitor is first token plus the forward hop; the first-token reading is also what the coordinator's own cloud_payload.on_time flag records"
+   },
+   "latency_components_s": {
+    "release_delay_t_submit_minus_t_opportunity": {
+     "n": 8167,
+     "min": 0.0473,
+     "p25": 0.4336,
+     "p50": 0.7423,
+     "p75": 0.8884,
+     "p90": 0.9679,
+     "p99": 1.008,
+     "max": 1.3607,
+     "mean": 0.6486,
+     "distinct_values": 8108
+    },
+    "uplink_PROXY_t_frame_arrive_minus_t_opportunity": {
+     "n": 8167,
+     "min": 0.0271,
+     "p25": 0.0513,
+     "p50": 0.0598,
+     "p75": 0.0684,
+     "p90": 0.0792,
+     "p99": 0.1659,
+     "max": 0.224,
+     "mean": 0.0636,
+     "distinct_values": 7455
+    },
+    "coordinator_hold_PROXY_t_submit_minus_t_frame_arrive": {
+     "n": 8167,
+     "min": 0.0029,
+     "p25": 0.3664,
+     "p50": 0.675,
+     "p75": 0.8259,
+     "p90": 0.9072,
+     "p99": 0.9548,
+     "max": 1.3205,
+     "mean": 0.585,
+     "distinct_values": 8118
+    },
+    "ttft_t_first_token_minus_t_submit": {
+     "n": 8167,
+     "min": 0.1142,
+     "p25": 0.3567,
+     "p50": 0.4831,
+     "p75": 0.6369,
+     "p90": 0.8374,
+     "p99": 1.7407,
+     "max": 5.4144,
+     "mean": 0.5378,
+     "distinct_values": 8115
+    },
+    "forward_hop_t_delivered_minus_t_cloud_done": {
+     "n": 8167,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "delivered_age_t_delivered_minus_t_opportunity": {
+     "n": 8167,
+     "min": 0.2245,
+     "p25": 0.9669,
+     "p50": 1.2124,
+     "p75": 1.4211,
+     "p90": 1.6644,
+     "p99": 2.6237,
+     "max": 6.3363,
+     "mean": 1.2086,
+     "distinct_values": 8144
+    }
+   },
+   "late_at_first_token_stratified": {
+    "_why": "late_at_first_token is NOT a bucket of slow engine work. These rows are late because the deadline runs from t_opportunity while the engine's clock starts at t_submit, and at covex-v6-state most of the deadline is gone by then.",
+    "n": 5567,
+    "release_delay_s": {
+     "n": 5567,
+     "min": 0.0659,
+     "p25": 0.695,
+     "p50": 0.8249,
+     "p75": 0.9104,
+     "p90": 0.9682,
+     "p99": 0.9969,
+     "max": 1.0,
+     "mean": 0.7878,
+     "distinct_values": 5526
+    },
+    "engine_service_s_t_cloud_done_minus_t_submit": {
+     "n": 5567,
+     "min": 0.1244,
+     "p25": 0.383,
+     "p50": 0.519,
+     "p75": 0.6932,
+     "p90": 0.9072,
+     "p99": 1.9906,
+     "max": 5.4144,
+     "mean": 0.5851,
+     "distinct_values": 5552
+    },
+    "n_release_delay_over_0_8_x_deadline": 3095,
+    "share_release_delay_over_0_8_x_deadline": 0.556,
+    "n_engine_service_within_the_whole_deadline": 5176,
+    "share_engine_service_within_the_whole_deadline": 0.9298,
+    "_register_of_the_last_two": "CONSTRUCTED BOUND, not an observed count. 'engine service within the whole deadline' says the server's own time would have fitted inside 1.0 s had release been instantaneous. Release cannot be instantaneous: the uplink alone is ~0.06 s, and holding none of these requests would change the queue they were served in, so the server time itself would not be preserved. It bounds how much of this bucket the RELEASE side could in principle reach; it predicts no arm's result."
+   },
+   "late_split_release_vs_engine": {
+    "_ruling": "USER RULING 2026-11-22: split every LATE monitor by whether the deadline was lost BEFORE submission or after it. The three components are differences of consecutive stamps on one clock, so release_delay + engine_time + forward_hop = t_delivered - t_opportunity identically.",
+    "n_late": 5958,
+    "release_delay_s": {
+     "n": 5958,
+     "min": 0.0659,
+     "p25": 0.6941,
+     "p50": 0.8319,
+     "p75": 0.9246,
+     "p90": 0.9791,
+     "p99": 1.0092,
+     "max": 1.3607,
+     "mean": 0.7915,
+     "distinct_values": 5914
+    },
+    "engine_time_s_t_cloud_done_minus_t_submit": {
+     "n": 5958,
+     "min": 0.1244,
+     "p25": 0.377,
+     "p50": 0.5147,
+     "p75": 0.6876,
+     "p90": 0.9055,
+     "p99": 1.9906,
+     "max": 5.4144,
+     "mean": 0.5809,
+     "distinct_values": 5939
+    },
+    "forward_hop_s": {
+     "n": 5958,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "shares_over_thresholds": {
+     "release_delay_over_0_5_s": 0.9332,
+     "release_delay_over_0_8_s": 0.5624,
+     "engine_time_over_0_5_s": 0.525,
+     "engine_time_over_0_8_s": 0.1584
+    },
+    "partition": {
+     "deadline_already_lost_at_release": 251,
+     "lost_by_release_plus_engine": 5567,
+     "lost_only_by_the_forward_hop": 140,
+     "sum": 5958,
+     "partitions_the_late_buckets_exactly": true,
+     "_identity": "by construction this partition IS the three late buckets renamed: deadline_already_lost_at_release == late_at_release, lost_by_release_plus_engine == late_at_first_token, and lost_only_by_the_forward_hop == late_at_forward_only. It is computed independently and checked, so an equality here is a CONSISTENCY CHECK on the two code paths and NOT new evidence",
+     "matches_bucket_by_bucket": [
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   "c5_trip_classes": {
+    "_question": "part (3) of the ruling: which SLOW monitors trip C5, by what their wait overlapped. A monitor TRIPS C5 when its first token, measured from t_submit, exceeds 0.8 x L_dash = 0.8 s, which is the AIMD trip whose reconstruction in c5_loss_split.py reproduced the base arm's own c5_decrease / c5_increase counters",
+    "_population": "LATE monitors only, which is the population the ruling asks about; a tripping monitor that still delivered on time is not in it",
+    "n_tripping": 944,
+    "ttft_s_of_tripping_monitors": {
+     "n": 944,
+     "min": 0.8004,
+     "p25": 0.8635,
+     "p50": 0.958,
+     "p75": 1.1699,
+     "p90": 1.6626,
+     "p99": 3.8137,
+     "max": 5.4144,
+     "mean": 1.1505,
+     "distinct_values": 944
+    },
+    "classes_PARTITION_precedence_recall_build_touch_none": {
+     "recall": 702,
+     "build_piece": 93,
+     "touch": 56,
+     "none": 93
+    },
+    "shares": {
+     "recall": 0.7436,
+     "build_piece": 0.0985,
+     "touch": 0.0593,
+     "none": 0.0985
+    },
+    "overlap_NON_EXCLUSIVE_counts": {
+     "recall": 702,
+     "build_piece": 295,
+     "touch": 297
+    },
+    "_precedence_note": "the PARTITION assigns a monitor overlapping several classes to the first of recall, build_piece, touch, so the four classes sum to n_tripping. The non-exclusive counts are given beside it because a precedence order is a choice and the reader should be able to see past it",
+    "trip_classifier": "EXACT decision_id join",
+    "n_classified_exactly": 3100,
+    "n_classified_by_proxy": 0,
+    "intervals_by_class": {
+     "recall": 478,
+     "build_piece": 130,
+     "touch": 2466
+    }
+   },
+   "released_monitor_uncached_tokens": {
+    "n": 8167,
+    "min": 366.0,
+    "p25": 370.0,
+    "p50": 376.0,
+    "p75": 706.0,
+    "p90": 1056.0,
+    "p99": 2070.0,
+    "max": 7140.0,
+    "mean": 561.2262,
+    "distinct_values": 81
+   },
+   "all_released_thresholds": {
+    "_population": "ALL released monitors, late or not. This is the population the user's own reference measurement is over, so these are the numbers that compare directly with it; the late-only figures are in late_split_release_vs_engine",
+    "n": 8167,
+    "release_delay_over_0_5_s": 0.7163,
+    "release_delay_over_0_8_s": 0.4106,
+    "release_plus_first_token_over_1_0_s": 0.7124,
+    "release_plus_first_token_s": {
+     "n": 8167,
+     "min": 0.2023,
+     "p25": 0.9447,
+     "p50": 1.1902,
+     "p75": 1.399,
+     "p90": 1.6422,
+     "p99": 2.6015,
+     "max": 6.3142,
+     "mean": 1.1865,
+     "distinct_values": 8144
+    }
+   },
+   "fraction_of_released_with_ttft_over_0_8_s": 0.118,
+   "fraction_of_released_with_release_delay_over_0_8_s": 0.4106,
+   "diagnostics_for_not_released": {
+    "_register": "DIAGNOSTIC, not an attribution. The logs carry no refusal record keyed to an opportunity, so bucket not_released is never sub-attributed.",
+    "monitor_in_flight_occupancy_at_t_opportunity_plus_0_95_s": {
+     "n": 3597,
+     "min": 0.0,
+     "p25": 4.0,
+     "p50": 4.0,
+     "p75": 5.0,
+     "p90": 6.0,
+     "p99": 8.0,
+     "max": 13.0,
+     "mean": 4.1465,
+     "distinct_values": 10
+    },
+    "monitor_in_flight_occupancy_all_epochs": {
+     "n": 12000,
+     "min": 0.0,
+     "p25": 4.0,
+     "p50": 5.0,
+     "p75": 6.0,
+     "p90": 8.0,
+     "p99": 9.0,
+     "max": 14.0,
+     "mean": 4.9576,
+     "distinct_values": 15
+    },
+    "coordinator_release_monitor_decisions": 8172,
+    "coordinator_counts_submitted_monitor": 8172,
+    "coordinator_counts_budget_refusal": null,
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 1191.41,
+    "budget_exhausted": false
+   },
+   "settled_deliveries_with_no_request_row": {
+    "n": 0,
+    "note": "the request log is truncated at the run edge relative to the outcomes; these instants are scored on t_delivered alone and their latency components are not available"
+   },
+   "refusals_D175": {
+    "refused_request_ids_in_cell": 0,
+    "monitor_opportunities_hit": 0,
+    "source": "scorer/score.py refused_request_ids(), imported not reimplemented"
+   },
+   "prefix_caching": {
+    "enabled": true,
+    "prefix_cache_hits_total_max": 52622624,
+    "prefix_cache_queries_total_max": 59951531,
+    "hit_fraction": 0.8778,
+    "label": "WARM SERVER: every latency in this cell was served with prefix caching on; none of these numbers is a cold prefill"
+   },
+   "traced_unit_median_release_delay": {
+    "_why": "one traced unit, a late_at_first_token instant, arithmetic by hand",
+    "opportunity_id": "opp0007664",
+    "device_id": "dash004",
+    "t_opportunity": 756.477952,
+    "deadline_s": 1.0,
+    "t_frame_arrive": 756.549405,
+    "uplink_s": 0.0715,
+    "t_submit": 757.302874,
+    "hold_s": 0.7535,
+    "release_delay_s": 0.8249,
+    "prompt_tokens": 2408,
+    "cached_tokens": 1696,
+    "uncached_tokens": 712,
+    "t_first_token": 758.054134,
+    "ttft_s": 0.7513,
+    "t_cloud_done": 758.054134,
+    "first_token_age_s": 1.5762,
+    "t_delivered": 758.07631,
+    "forward_hop_s": 0.0222,
+    "delivered_age_s": 1.5984,
+    "bound_by": "release_delay consumed 82% of the 1.0 s deadline, then the engine's own first token needed 0.751 s more",
+    "outcome": "latency_miss"
+   },
+   "traced_unit_note": "the MEDIAN-release-delay row of the late_at_first_token bucket, chosen so the trace is representative of the bucket rather than of its tail; uplink + hold + ttft + forward_hop must equal delivered_age to the rounding shown",
+   "per_device": {
+    "dash000": {
+     "n_instants": 1940,
+     "on_time": 358,
+     "fraction": 0.184536
+    },
+    "dash001": {
+     "n_instants": 1967,
+     "on_time": 338,
+     "fraction": 0.171835
+    },
+    "dash002": {
+     "n_instants": 1957,
+     "on_time": 369,
+     "fraction": 0.188554
+    },
+    "dash003": {
+     "n_instants": 1965,
+     "on_time": 393,
+     "fraction": 0.2
+    },
+    "dash004": {
+     "n_instants": 1983,
+     "on_time": 434,
+     "fraction": 0.21886
+    },
+    "dash005": {
+     "n_instants": 1952,
+     "on_time": 317,
+     "fraction": 0.162398
+    }
+   }
+  },
+  {
+   "cell": "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-uo",
+   "arm_version": "covex-v6-state-1.0",
+   "denominator": {
+    "unit": "one monitor opportunity, counted PER RUN",
+    "monitor_opportunities": 11769,
+    "committed_n_instants": 11769,
+    "matches_committed_denominator": true,
+    "d153": {
+     "min_episode_index_with_a_request": 2,
+     "max_episode_index_with_a_request": 20,
+     "n_requests_summed": 8351,
+     "episodes": 712
+    }
+   },
+   "buckets": {
+    "not_released": 3422,
+    "released_unsettled": 0,
+    "released_refused": 0,
+    "on_time": 2374,
+    "late_at_release": 187,
+    "late_at_first_token": 5652,
+    "late_at_forward_only": 134,
+    "late_request_row_absent": 0
+   },
+   "shares": {
+    "not_released": 0.2908,
+    "released_unsettled": 0.0,
+    "released_refused": 0.0,
+    "on_time": 0.2017,
+    "late_at_release": 0.0159,
+    "late_at_first_token": 0.4802,
+    "late_at_forward_only": 0.0114,
+    "late_request_row_absent": 0.0
+   },
+   "buckets_sum": 11769,
+   "buckets_sum_equals_denominator": true,
+   "control": {
+    "_claim": "bucket on_time must EQUAL this cell's committed dashcam on-time count",
+    "reconstructed_on_time": 2374,
+    "committed_on_time": 2374,
+    "committed_delivery_rule": "completion",
+    "committed_on_time_rule": "an answer is delivered at COMPLETION, prefill plus decode (D146, the default from 2026-11-20); a dashcam Yes/No stays at first token",
+    "committed_L_dash": 1.0,
+    "tolerance": "EXACT, 0 counts",
+    "pass": true
+   },
+   "d146_both_readings": {
+    "on_time_completed_delivery_rule_committed": 2374,
+    "on_time_first_token_rule": 2508,
+    "difference": 134,
+    "late_at_forward_only": 134,
+    "difference_equals_late_at_forward_only": true,
+    "note": "the committed cell uses t_delivered, which for a monitor is first token plus the forward hop; the first-token reading is also what the coordinator's own cloud_payload.on_time flag records"
+   },
+   "latency_components_s": {
+    "release_delay_t_submit_minus_t_opportunity": {
+     "n": 8347,
+     "min": 0.0579,
+     "p25": 0.4251,
+     "p50": 0.7237,
+     "p75": 0.8691,
+     "p90": 0.9535,
+     "p99": 1.0074,
+     "max": 1.0775,
+     "mean": 0.6385,
+     "distinct_values": 8289
+    },
+    "uplink_PROXY_t_frame_arrive_minus_t_opportunity": {
+     "n": 8347,
+     "min": 0.0317,
+     "p25": 0.0497,
+     "p50": 0.0591,
+     "p75": 0.0681,
+     "p90": 0.0793,
+     "p99": 0.167,
+     "max": 0.2286,
+     "mean": 0.0629,
+     "distinct_values": 7581
+    },
+    "coordinator_hold_PROXY_t_submit_minus_t_frame_arrive": {
+     "n": 8347,
+     "min": 0.0082,
+     "p25": 0.3625,
+     "p50": 0.6599,
+     "p75": 0.8088,
+     "p90": 0.8905,
+     "p99": 0.9484,
+     "max": 1.0105,
+     "mean": 0.5756,
+     "distinct_values": 8306
+    },
+    "ttft_t_first_token_minus_t_submit": {
+     "n": 8347,
+     "min": 0.1244,
+     "p25": 0.3481,
+     "p50": 0.4825,
+     "p75": 0.6354,
+     "p90": 0.8063,
+     "p99": 1.5934,
+     "max": 5.5053,
+     "mean": 0.5266,
+     "distinct_values": 8305
+    },
+    "forward_hop_t_delivered_minus_t_cloud_done": {
+     "n": 8347,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "delivered_age_t_delivered_minus_t_opportunity": {
+     "n": 8347,
+     "min": 0.2117,
+     "p25": 0.9525,
+     "p50": 1.2048,
+     "p75": 1.4059,
+     "p90": 1.6278,
+     "p99": 2.4785,
+     "max": 5.6272,
+     "mean": 1.1872,
+     "distinct_values": 8305
+    }
+   },
+   "late_at_first_token_stratified": {
+    "_why": "late_at_first_token is NOT a bucket of slow engine work. These rows are late because the deadline runs from t_opportunity while the engine's clock starts at t_submit, and at covex-v6-state most of the deadline is gone by then.",
+    "n": 5652,
+    "release_delay_s": {
+     "n": 5652,
+     "min": 0.0801,
+     "p25": 0.6908,
+     "p50": 0.815,
+     "p75": 0.9061,
+     "p90": 0.9567,
+     "p99": 0.9922,
+     "max": 1.0,
+     "mean": 0.7817,
+     "distinct_values": 5614
+    },
+    "engine_service_s_t_cloud_done_minus_t_submit": {
+     "n": 5652,
+     "min": 0.1347,
+     "p25": 0.3928,
+     "p50": 0.5258,
+     "p75": 0.6897,
+     "p90": 0.8912,
+     "p99": 1.7792,
+     "max": 5.5053,
+     "mean": 0.5807,
+     "distinct_values": 5631
+    },
+    "n_release_delay_over_0_8_x_deadline": 3019,
+    "share_release_delay_over_0_8_x_deadline": 0.5341,
+    "n_engine_service_within_the_whole_deadline": 5273,
+    "share_engine_service_within_the_whole_deadline": 0.9329,
+    "_register_of_the_last_two": "CONSTRUCTED BOUND, not an observed count. 'engine service within the whole deadline' says the server's own time would have fitted inside 1.0 s had release been instantaneous. Release cannot be instantaneous: the uplink alone is ~0.06 s, and holding none of these requests would change the queue they were served in, so the server time itself would not be preserved. It bounds how much of this bucket the RELEASE side could in principle reach; it predicts no arm's result."
+   },
+   "late_split_release_vs_engine": {
+    "_ruling": "USER RULING 2026-11-22: split every LATE monitor by whether the deadline was lost BEFORE submission or after it. The three components are differences of consecutive stamps on one clock, so release_delay + engine_time + forward_hop = t_delivered - t_opportunity identically.",
+    "n_late": 5973,
+    "release_delay_s": {
+     "n": 5973,
+     "min": 0.0801,
+     "p25": 0.6886,
+     "p50": 0.8166,
+     "p75": 0.9134,
+     "p90": 0.9693,
+     "p99": 1.0097,
+     "max": 1.0775,
+     "mean": 0.7835,
+     "distinct_values": 5934
+    },
+    "engine_time_s_t_cloud_done_minus_t_submit": {
+     "n": 5973,
+     "min": 0.134,
+     "p25": 0.387,
+     "p50": 0.5208,
+     "p75": 0.6841,
+     "p90": 0.8831,
+     "p99": 1.7774,
+     "max": 5.5053,
+     "mean": 0.5751,
+     "distinct_values": 5950
+    },
+    "forward_hop_s": {
+     "n": 5973,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "shares_over_thresholds": {
+     "release_delay_over_0_5_s": 0.9386,
+     "release_delay_over_0_8_s": 0.5383,
+     "engine_time_over_0_5_s": 0.5378,
+     "engine_time_over_0_8_s": 0.1408
+    },
+    "partition": {
+     "deadline_already_lost_at_release": 187,
+     "lost_by_release_plus_engine": 5652,
+     "lost_only_by_the_forward_hop": 134,
+     "sum": 5973,
+     "partitions_the_late_buckets_exactly": true,
+     "_identity": "by construction this partition IS the three late buckets renamed: deadline_already_lost_at_release == late_at_release, lost_by_release_plus_engine == late_at_first_token, and lost_only_by_the_forward_hop == late_at_forward_only. It is computed independently and checked, so an equality here is a CONSISTENCY CHECK on the two code paths and NOT new evidence",
+     "matches_bucket_by_bucket": [
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   "c5_trip_classes": {
+    "_question": "part (3) of the ruling: which SLOW monitors trip C5, by what their wait overlapped. A monitor TRIPS C5 when its first token, measured from t_submit, exceeds 0.8 x L_dash = 0.8 s, which is the AIMD trip whose reconstruction in c5_loss_split.py reproduced the base arm's own c5_decrease / c5_increase counters",
+    "_population": "LATE monitors only, which is the population the ruling asks about; a tripping monitor that still delivered on time is not in it",
+    "n_tripping": 841,
+    "ttft_s_of_tripping_monitors": {
+     "n": 841,
+     "min": 0.8001,
+     "p25": 0.873,
+     "p50": 0.9827,
+     "p75": 1.2128,
+     "p90": 1.591,
+     "p99": 3.2088,
+     "max": 5.5053,
+     "mean": 1.1408,
+     "distinct_values": 841
+    },
+    "classes_PARTITION_precedence_recall_build_touch_none": {
+     "recall": 613,
+     "build_piece": 84,
+     "touch": 5,
+     "none": 139
+    },
+    "shares": {
+     "recall": 0.7289,
+     "build_piece": 0.0999,
+     "touch": 0.0059,
+     "none": 0.1653
+    },
+    "overlap_NON_EXCLUSIVE_counts": {
+     "recall": 613,
+     "build_piece": 256,
+     "touch": 20
+    },
+    "_precedence_note": "the PARTITION assigns a monitor overlapping several classes to the first of recall, build_piece, touch, so the four classes sum to n_tripping. The non-exclusive counts are given beside it because a precedence order is a choice and the reader should be able to see past it",
+    "trip_classifier": "EXACT decision_id join",
+    "n_classified_exactly": 795,
+    "n_classified_by_proxy": 0,
+    "intervals_by_class": {
+     "recall": 477,
+     "build_piece": 134,
+     "touch": 168
+    }
+   },
+   "released_monitor_uncached_tokens": {
+    "n": 8347,
+    "min": 366.0,
+    "p25": 370.0,
+    "p50": 376.0,
+    "p75": 704.0,
+    "p90": 1056.0,
+    "p99": 2068.0,
+    "max": 7140.0,
+    "mean": 552.1967,
+    "distinct_values": 78
+   },
+   "all_released_thresholds": {
+    "_population": "ALL released monitors, late or not. This is the population the user's own reference measurement is over, so these are the numbers that compare directly with it; the late-only figures are in late_split_release_vs_engine",
+    "n": 8347,
+    "release_delay_over_0_5_s": 0.7134,
+    "release_delay_over_0_8_s": 0.3858,
+    "release_plus_first_token_over_1_0_s": 0.6995,
+    "release_plus_first_token_s": {
+     "n": 8347,
+     "min": 0.1895,
+     "p25": 0.9303,
+     "p50": 1.1826,
+     "p75": 1.3837,
+     "p90": 1.6056,
+     "p99": 2.4563,
+     "max": 5.6051,
+     "mean": 1.1651,
+     "distinct_values": 8305
+    }
+   },
+   "fraction_of_released_with_ttft_over_0_8_s": 0.1036,
+   "fraction_of_released_with_release_delay_over_0_8_s": 0.3858,
+   "diagnostics_for_not_released": {
+    "_register": "DIAGNOSTIC, not an attribution. The logs carry no refusal record keyed to an opportunity, so bucket not_released is never sub-attributed.",
+    "monitor_in_flight_occupancy_at_t_opportunity_plus_0_95_s": {
+     "n": 3422,
+     "min": 0.0,
+     "p25": 4.0,
+     "p50": 4.0,
+     "p75": 5.0,
+     "p90": 6.0,
+     "p99": 8.0,
+     "max": 10.0,
+     "mean": 4.2472,
+     "distinct_values": 11
+    },
+    "monitor_in_flight_occupancy_all_epochs": {
+     "n": 12000,
+     "min": 0.0,
+     "p25": 4.0,
+     "p50": 5.0,
+     "p75": 6.0,
+     "p90": 8.0,
+     "p99": 9.0,
+     "max": 13.0,
+     "mean": 4.9727,
+     "distinct_values": 14
+    },
+    "coordinator_release_monitor_decisions": 8351,
+    "coordinator_counts_submitted_monitor": 8351,
+    "coordinator_counts_budget_refusal": null,
+    "budget_gpu_s": 1200.0,
+    "budget_spent_gpu_s": 1177.69,
+    "budget_exhausted": false
+   },
+   "settled_deliveries_with_no_request_row": {
+    "n": 0,
+    "note": "the request log is truncated at the run edge relative to the outcomes; these instants are scored on t_delivered alone and their latency components are not available"
+   },
+   "refusals_D175": {
+    "refused_request_ids_in_cell": 0,
+    "monitor_opportunities_hit": 0,
+    "source": "scorer/score.py refused_request_ids(), imported not reimplemented"
+   },
+   "prefix_caching": {
+    "enabled": true,
+    "prefix_cache_hits_total_max": 28728624,
+    "prefix_cache_queries_total_max": 36089269,
+    "hit_fraction": 0.796,
+    "label": "WARM SERVER: every latency in this cell was served with prefix caching on; none of these numbers is a cold prefill"
+   },
+   "traced_unit_median_release_delay": {
+    "_why": "one traced unit, a late_at_first_token instant, arithmetic by hand",
+    "opportunity_id": "opp0005328",
+    "device_id": "dash001",
+    "t_opportunity": 530.689577,
+    "deadline_s": 1.0,
+    "t_frame_arrive": 530.76009,
+    "uplink_s": 0.0705,
+    "t_submit": 531.50456,
+    "hold_s": 0.7445,
+    "release_delay_s": 0.815,
+    "prompt_tokens": 4774,
+    "cached_tokens": 3392,
+    "uncached_tokens": 1382,
+    "t_first_token": 532.242654,
+    "ttft_s": 0.7381,
+    "t_cloud_done": 532.242654,
+    "first_token_age_s": 1.5531,
+    "t_delivered": 532.26483,
+    "forward_hop_s": 0.0222,
+    "delivered_age_s": 1.5753,
+    "bound_by": "release_delay consumed 81% of the 1.0 s deadline, then the engine's own first token needed 0.738 s more",
+    "outcome": "latency_miss"
+   },
+   "traced_unit_note": "the MEDIAN-release-delay row of the late_at_first_token bucket, chosen so the trace is representative of the bucket rather than of its tail; uplink + hold + ttft + forward_hop must equal delivered_age to the rounding shown",
+   "per_device": {
+    "dash000": {
+     "n_instants": 1963,
+     "on_time": 440,
+     "fraction": 0.224147
+    },
+    "dash001": {
+     "n_instants": 1966,
+     "on_time": 391,
+     "fraction": 0.198881
+    },
+    "dash002": {
+     "n_instants": 1953,
+     "on_time": 417,
+     "fraction": 0.213518
+    },
+    "dash003": {
+     "n_instants": 1981,
+     "on_time": 390,
+     "fraction": 0.19687
+    },
+    "dash004": {
+     "n_instants": 1948,
+     "on_time": 319,
+     "fraction": 0.163758
+    },
+    "dash005": {
+     "n_instants": 1958,
+     "on_time": 417,
+     "fraction": 0.212972
+    }
+   }
+  },
+  {
    "cell": "covex-v6-state_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
    "arm": "covex-v6-state",
    "arm_version": "covex-v6-state-1.0",
@@ -191,6 +1001,108 @@
     "share_engine_service_within_the_whole_deadline": 0.9438,
     "_register_of_the_last_two": "CONSTRUCTED BOUND, not an observed count. 'engine service within the whole deadline' says the server's own time would have fitted inside 1.0 s had release been instantaneous. Release cannot be instantaneous: the uplink alone is ~0.06 s, and holding none of these requests would change the queue they were served in, so the server time itself would not be preserved. It bounds how much of this bucket the RELEASE side could in principle reach; it predicts no arm's result."
    },
+   "late_split_release_vs_engine": {
+    "_ruling": "USER RULING 2026-11-22: split every LATE monitor by whether the deadline was lost BEFORE submission or after it. The three components are differences of consecutive stamps on one clock, so release_delay + engine_time + forward_hop = t_delivered - t_opportunity identically.",
+    "n_late": 4675,
+    "release_delay_s": {
+     "n": 4675,
+     "min": 0.0646,
+     "p25": 0.6927,
+     "p50": 0.8239,
+     "p75": 0.9185,
+     "p90": 0.9737,
+     "p99": 1.006,
+     "max": 1.1567,
+     "mean": 0.7882,
+     "distinct_values": 4651
+    },
+    "engine_time_s_t_cloud_done_minus_t_submit": {
+     "n": 4675,
+     "min": 0.1246,
+     "p25": 0.3715,
+     "p50": 0.5056,
+     "p75": 0.6603,
+     "p90": 0.8662,
+     "p99": 1.6163,
+     "max": 5.4968,
+     "mean": 0.5565,
+     "distinct_values": 4661
+    },
+    "forward_hop_s": {
+     "n": 4675,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "shares_over_thresholds": {
+     "release_delay_over_0_5_s": 0.9393,
+     "release_delay_over_0_8_s": 0.5322,
+     "engine_time_over_0_5_s": 0.5112,
+     "engine_time_over_0_8_s": 0.1358
+    },
+    "partition": {
+     "deadline_already_lost_at_release": 114,
+     "lost_by_release_plus_engine": 4467,
+     "lost_only_by_the_forward_hop": 94,
+     "sum": 4675,
+     "partitions_the_late_buckets_exactly": true,
+     "_identity": "by construction this partition IS the three late buckets renamed: deadline_already_lost_at_release == late_at_release, lost_by_release_plus_engine == late_at_first_token, and lost_only_by_the_forward_hop == late_at_forward_only. It is computed independently and checked, so an equality here is a CONSISTENCY CHECK on the two code paths and NOT new evidence",
+     "matches_bucket_by_bucket": [
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   "c5_trip_classes": {
+    "_question": "part (3) of the ruling: which SLOW monitors trip C5, by what their wait overlapped. A monitor TRIPS C5 when its first token, measured from t_submit, exceeds 0.8 x L_dash = 0.8 s, which is the AIMD trip whose reconstruction in c5_loss_split.py reproduced the base arm's own c5_decrease / c5_increase counters",
+    "_population": "LATE monitors only, which is the population the ruling asks about; a tripping monitor that still delivered on time is not in it",
+    "n_tripping": 635,
+    "ttft_s_of_tripping_monitors": {
+     "n": 635,
+     "min": 0.8,
+     "p25": 0.8582,
+     "p50": 0.9517,
+     "p75": 1.1727,
+     "p90": 1.4958,
+     "p99": 3.6179,
+     "max": 5.4968,
+     "mean": 1.0991,
+     "distinct_values": 633
+    },
+    "classes_PARTITION_precedence_recall_build_touch_none": {
+     "recall": 468,
+     "build_piece": 68,
+     "touch": 34,
+     "none": 65
+    },
+    "shares": {
+     "recall": 0.737,
+     "build_piece": 0.1071,
+     "touch": 0.0535,
+     "none": 0.1024
+    },
+    "overlap_NON_EXCLUSIVE_counts": {
+     "recall": 468,
+     "build_piece": 211,
+     "touch": 160
+    },
+    "_precedence_note": "the PARTITION assigns a monitor overlapping several classes to the first of recall, build_piece, touch, so the four classes sum to n_tripping. The non-exclusive counts are given beside it because a precedence order is a choice and the reader should be able to see past it",
+    "trip_classifier": "EXACT decision_id join",
+    "n_classified_exactly": 1723,
+    "n_classified_by_proxy": 0,
+    "intervals_by_class": {
+     "recall": 362,
+     "build_piece": 100,
+     "touch": 1246
+    }
+   },
    "released_monitor_uncached_tokens": {
     "n": 6367,
     "min": 366.0,
@@ -202,6 +1114,25 @@
     "max": 7140.0,
     "mean": 546.2764,
     "distinct_values": 74
+   },
+   "all_released_thresholds": {
+    "_population": "ALL released monitors, late or not. This is the population the user's own reference measurement is over, so these are the numbers that compare directly with it; the late-only figures are in late_split_release_vs_engine",
+    "n": 6367,
+    "release_delay_over_0_5_s": 0.7299,
+    "release_delay_over_0_8_s": 0.3908,
+    "release_plus_first_token_over_1_0_s": 0.7195,
+    "release_plus_first_token_s": {
+     "n": 6367,
+     "min": 0.2043,
+     "p25": 0.9548,
+     "p50": 1.1868,
+     "p75": 1.3802,
+     "p90": 1.5921,
+     "p99": 2.303,
+     "max": 6.4869,
+     "mean": 1.1615,
+     "distinct_values": 6357
+    }
    },
    "fraction_of_released_with_ttft_over_0_8_s": 0.101,
    "fraction_of_released_with_release_delay_over_0_8_s": 0.3908,
@@ -475,6 +1406,108 @@
     "share_engine_service_within_the_whole_deadline": 0.9325,
     "_register_of_the_last_two": "CONSTRUCTED BOUND, not an observed count. 'engine service within the whole deadline' says the server's own time would have fitted inside 1.0 s had release been instantaneous. Release cannot be instantaneous: the uplink alone is ~0.06 s, and holding none of these requests would change the queue they were served in, so the server time itself would not be preserved. It bounds how much of this bucket the RELEASE side could in principle reach; it predicts no arm's result."
    },
+   "late_split_release_vs_engine": {
+    "_ruling": "USER RULING 2026-11-22: split every LATE monitor by whether the deadline was lost BEFORE submission or after it. The three components are differences of consecutive stamps on one clock, so release_delay + engine_time + forward_hop = t_delivered - t_opportunity identically.",
+    "n_late": 5998,
+    "release_delay_s": {
+     "n": 5998,
+     "min": 0.0849,
+     "p25": 0.6988,
+     "p50": 0.8244,
+     "p75": 0.9189,
+     "p90": 0.9745,
+     "p99": 1.0095,
+     "max": 1.2542,
+     "mean": 0.7907,
+     "distinct_values": 5966
+    },
+    "engine_time_s_t_cloud_done_minus_t_submit": {
+     "n": 5998,
+     "min": 0.1298,
+     "p25": 0.3928,
+     "p50": 0.5255,
+     "p75": 0.6853,
+     "p90": 0.8792,
+     "p99": 1.9157,
+     "max": 5.431,
+     "mean": 0.5818,
+     "distinct_values": 5980
+    },
+    "forward_hop_s": {
+     "n": 5998,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "shares_over_thresholds": {
+     "release_delay_over_0_5_s": 0.9375,
+     "release_delay_over_0_8_s": 0.5587,
+     "engine_time_over_0_5_s": 0.5509,
+     "engine_time_over_0_8_s": 0.1405
+    },
+    "partition": {
+     "deadline_already_lost_at_release": 213,
+     "lost_by_release_plus_engine": 5641,
+     "lost_only_by_the_forward_hop": 144,
+     "sum": 5998,
+     "partitions_the_late_buckets_exactly": true,
+     "_identity": "by construction this partition IS the three late buckets renamed: deadline_already_lost_at_release == late_at_release, lost_by_release_plus_engine == late_at_first_token, and lost_only_by_the_forward_hop == late_at_forward_only. It is computed independently and checked, so an equality here is a CONSISTENCY CHECK on the two code paths and NOT new evidence",
+     "matches_bucket_by_bucket": [
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   "c5_trip_classes": {
+    "_question": "part (3) of the ruling: which SLOW monitors trip C5, by what their wait overlapped. A monitor TRIPS C5 when its first token, measured from t_submit, exceeds 0.8 x L_dash = 0.8 s, which is the AIMD trip whose reconstruction in c5_loss_split.py reproduced the base arm's own c5_decrease / c5_increase counters",
+    "_population": "LATE monitors only, which is the population the ruling asks about; a tripping monitor that still delivered on time is not in it",
+    "n_tripping": 843,
+    "ttft_s_of_tripping_monitors": {
+     "n": 843,
+     "min": 0.8007,
+     "p25": 0.869,
+     "p50": 0.9782,
+     "p75": 1.2358,
+     "p90": 1.6914,
+     "p99": 3.3115,
+     "max": 5.431,
+     "mean": 1.1599,
+     "distinct_values": 843
+    },
+    "classes_PARTITION_precedence_recall_build_touch_none": {
+     "recall": 597,
+     "build_piece": 101,
+     "touch": 2,
+     "none": 143
+    },
+    "shares": {
+     "recall": 0.7082,
+     "build_piece": 0.1198,
+     "touch": 0.0024,
+     "none": 0.1696
+    },
+    "overlap_NON_EXCLUSIVE_counts": {
+     "recall": 597,
+     "build_piece": 277,
+     "touch": 19
+    },
+    "_precedence_note": "the PARTITION assigns a monitor overlapping several classes to the first of recall, build_piece, touch, so the four classes sum to n_tripping. The non-exclusive counts are given beside it because a precedence order is a choice and the reader should be able to see past it",
+    "trip_classifier": "EXACT decision_id join",
+    "n_classified_exactly": 802,
+    "n_classified_by_proxy": 0,
+    "intervals_by_class": {
+     "recall": 477,
+     "build_piece": 134,
+     "touch": 176
+    }
+   },
    "released_monitor_uncached_tokens": {
     "n": 8312,
     "min": 366.0,
@@ -486,6 +1519,25 @@
     "max": 7140.0,
     "mean": 557.8176,
     "distinct_values": 88
+   },
+   "all_released_thresholds": {
+    "_population": "ALL released monitors, late or not. This is the population the user's own reference measurement is over, so these are the numbers that compare directly with it; the late-only figures are in late_split_release_vs_engine",
+    "n": 8312,
+    "release_delay_over_0_5_s": 0.719,
+    "release_delay_over_0_8_s": 0.404,
+    "release_plus_first_token_over_1_0_s": 0.7043,
+    "release_plus_first_token_s": {
+     "n": 8312,
+     "min": 0.1746,
+     "p25": 0.9336,
+     "p50": 1.2008,
+     "p75": 1.406,
+     "p90": 1.6138,
+     "p99": 2.4892,
+     "max": 5.6096,
+     "mean": 1.1755,
+     "distinct_values": 8284
+    }
    },
    "fraction_of_released_with_ttft_over_0_8_s": 0.1037,
    "fraction_of_released_with_release_delay_over_0_8_s": 0.404,
@@ -759,6 +1811,108 @@
     "share_engine_service_within_the_whole_deadline": 0.9244,
     "_register_of_the_last_two": "CONSTRUCTED BOUND, not an observed count. 'engine service within the whole deadline' says the server's own time would have fitted inside 1.0 s had release been instantaneous. Release cannot be instantaneous: the uplink alone is ~0.06 s, and holding none of these requests would change the queue they were served in, so the server time itself would not be preserved. It bounds how much of this bucket the RELEASE side could in principle reach; it predicts no arm's result."
    },
+   "late_split_release_vs_engine": {
+    "_ruling": "USER RULING 2026-11-22: split every LATE monitor by whether the deadline was lost BEFORE submission or after it. The three components are differences of consecutive stamps on one clock, so release_delay + engine_time + forward_hop = t_delivered - t_opportunity identically.",
+    "n_late": 3757,
+    "release_delay_s": {
+     "n": 3757,
+     "min": 0.0712,
+     "p25": 0.6085,
+     "p50": 0.7675,
+     "p75": 0.8919,
+     "p90": 0.9677,
+     "p99": 1.0071,
+     "max": 1.0154,
+     "mean": 0.7324,
+     "distinct_values": 3743
+    },
+    "engine_time_s_t_cloud_done_minus_t_submit": {
+     "n": 3757,
+     "min": 0.1339,
+     "p25": 0.3804,
+     "p50": 0.503,
+     "p75": 0.6612,
+     "p90": 0.8754,
+     "p99": 2.444,
+     "max": 2.9967,
+     "mean": 0.5904,
+     "distinct_values": 3742
+    },
+    "forward_hop_s": {
+     "n": 3757,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "shares_over_thresholds": {
+     "release_delay_over_0_5_s": 0.8608,
+     "release_delay_over_0_8_s": 0.4363,
+     "engine_time_over_0_5_s": 0.5057,
+     "engine_time_over_0_8_s": 0.1373
+    },
+    "partition": {
+     "deadline_already_lost_at_release": 110,
+     "lost_by_release_plus_engine": 3466,
+     "lost_only_by_the_forward_hop": 181,
+     "sum": 3757,
+     "partitions_the_late_buckets_exactly": true,
+     "_identity": "by construction this partition IS the three late buckets renamed: deadline_already_lost_at_release == late_at_release, lost_by_release_plus_engine == late_at_first_token, and lost_only_by_the_forward_hop == late_at_forward_only. It is computed independently and checked, so an equality here is a CONSISTENCY CHECK on the two code paths and NOT new evidence",
+     "matches_bucket_by_bucket": [
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   "c5_trip_classes": {
+    "_question": "part (3) of the ruling: which SLOW monitors trip C5, by what their wait overlapped. A monitor TRIPS C5 when its first token, measured from t_submit, exceeds 0.8 x L_dash = 0.8 s, which is the AIMD trip whose reconstruction in c5_loss_split.py reproduced the base arm's own c5_decrease / c5_increase counters",
+    "_population": "LATE monitors only, which is the population the ruling asks about; a tripping monitor that still delivered on time is not in it",
+    "n_tripping": 516,
+    "ttft_s_of_tripping_monitors": {
+     "n": 516,
+     "min": 0.8001,
+     "p25": 0.8721,
+     "p50": 1.0177,
+     "p75": 1.8117,
+     "p90": 2.2961,
+     "p99": 2.8909,
+     "max": 2.9967,
+     "mean": 1.3398,
+     "distinct_values": 516
+    },
+    "classes_PARTITION_precedence_recall_build_touch_none": {
+     "recall": 454,
+     "build_piece": 0,
+     "touch": 0,
+     "none": 62
+    },
+    "shares": {
+     "recall": 0.8798,
+     "build_piece": 0.0,
+     "touch": 0.0,
+     "none": 0.1202
+    },
+    "overlap_NON_EXCLUSIVE_counts": {
+     "recall": 454,
+     "build_piece": 0,
+     "touch": 0
+    },
+    "_precedence_note": "the PARTITION assigns a monitor overlapping several classes to the first of recall, build_piece, touch, so the four classes sum to n_tripping. The non-exclusive counts are given beside it because a precedence order is a choice and the reader should be able to see past it",
+    "trip_classifier": "EXACT decision_id join",
+    "n_classified_exactly": 410,
+    "n_classified_by_proxy": 0,
+    "intervals_by_class": {
+     "recall": 407,
+     "build_piece": 0,
+     "touch": 0
+    }
+   },
    "released_monitor_uncached_tokens": {
     "n": 9743,
     "min": 366.0,
@@ -770,6 +1924,25 @@
     "max": 5450.0,
     "mean": 479.7159,
     "distinct_values": 68
+   },
+   "all_released_thresholds": {
+    "_population": "ALL released monitors, late or not. This is the population the user's own reference measurement is over, so these are the numbers that compare directly with it; the late-only figures are in late_split_release_vs_engine",
+    "n": 9743,
+    "release_delay_over_0_5_s": 0.3706,
+    "release_delay_over_0_8_s": 0.1683,
+    "release_plus_first_token_over_1_0_s": 0.367,
+    "release_plus_first_token_s": {
+     "n": 9743,
+     "min": 0.2052,
+     "p25": 0.5623,
+     "p50": 0.8371,
+     "p75": 1.145,
+     "p90": 1.3799,
+     "p99": 2.6599,
+     "max": 3.946,
+     "mean": 0.8927,
+     "distinct_values": 9708
+    }
    },
    "fraction_of_released_with_ttft_over_0_8_s": 0.0548,
    "fraction_of_released_with_release_delay_over_0_8_s": 0.1683,
@@ -1043,6 +2216,108 @@
     "share_engine_service_within_the_whole_deadline": 0.9438,
     "_register_of_the_last_two": "CONSTRUCTED BOUND, not an observed count. 'engine service within the whole deadline' says the server's own time would have fitted inside 1.0 s had release been instantaneous. Release cannot be instantaneous: the uplink alone is ~0.06 s, and holding none of these requests would change the queue they were served in, so the server time itself would not be preserved. It bounds how much of this bucket the RELEASE side could in principle reach; it predicts no arm's result."
    },
+   "late_split_release_vs_engine": {
+    "_ruling": "USER RULING 2026-11-22: split every LATE monitor by whether the deadline was lost BEFORE submission or after it. The three components are differences of consecutive stamps on one clock, so release_delay + engine_time + forward_hop = t_delivered - t_opportunity identically.",
+    "n_late": 4433,
+    "release_delay_s": {
+     "n": 4433,
+     "min": 0.0617,
+     "p25": 0.6308,
+     "p50": 0.771,
+     "p75": 0.8846,
+     "p90": 0.9583,
+     "p99": 1.0058,
+     "max": 1.0195,
+     "mean": 0.7387,
+     "distinct_values": 4414
+    },
+    "engine_time_s_t_cloud_done_minus_t_submit": {
+     "n": 4433,
+     "min": 0.1417,
+     "p25": 0.3983,
+     "p50": 0.5135,
+     "p75": 0.6543,
+     "p90": 0.8387,
+     "p99": 2.2973,
+     "max": 5.5872,
+     "mean": 0.584,
+     "distinct_values": 4424
+    },
+    "forward_hop_s": {
+     "n": 4433,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "shares_over_thresholds": {
+     "release_delay_over_0_5_s": 0.8773,
+     "release_delay_over_0_8_s": 0.4453,
+     "engine_time_over_0_5_s": 0.5317,
+     "engine_time_over_0_8_s": 0.1205
+    },
+    "partition": {
+     "deadline_already_lost_at_release": 106,
+     "lost_by_release_plus_engine": 4162,
+     "lost_only_by_the_forward_hop": 165,
+     "sum": 4433,
+     "partitions_the_late_buckets_exactly": true,
+     "_identity": "by construction this partition IS the three late buckets renamed: deadline_already_lost_at_release == late_at_release, lost_by_release_plus_engine == late_at_first_token, and lost_only_by_the_forward_hop == late_at_forward_only. It is computed independently and checked, so an equality here is a CONSISTENCY CHECK on the two code paths and NOT new evidence",
+     "matches_bucket_by_bucket": [
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   "c5_trip_classes": {
+    "_question": "part (3) of the ruling: which SLOW monitors trip C5, by what their wait overlapped. A monitor TRIPS C5 when its first token, measured from t_submit, exceeds 0.8 x L_dash = 0.8 s, which is the AIMD trip whose reconstruction in c5_loss_split.py reproduced the base arm's own c5_decrease / c5_increase counters",
+    "_population": "LATE monitors only, which is the population the ruling asks about; a tripping monitor that still delivered on time is not in it",
+    "n_tripping": 534,
+    "ttft_s_of_tripping_monitors": {
+     "n": 534,
+     "min": 0.8007,
+     "p25": 0.8559,
+     "p50": 0.9365,
+     "p75": 1.5524,
+     "p90": 2.2592,
+     "p99": 5.4208,
+     "max": 5.5872,
+     "mean": 1.3011,
+     "distinct_values": 534
+    },
+    "classes_PARTITION_precedence_recall_build_touch_none": {
+     "recall": 427,
+     "build_piece": 0,
+     "touch": 0,
+     "none": 107
+    },
+    "shares": {
+     "recall": 0.7996,
+     "build_piece": 0.0,
+     "touch": 0.0,
+     "none": 0.2004
+    },
+    "overlap_NON_EXCLUSIVE_counts": {
+     "recall": 427,
+     "build_piece": 0,
+     "touch": 0
+    },
+    "_precedence_note": "the PARTITION assigns a monitor overlapping several classes to the first of recall, build_piece, touch, so the four classes sum to n_tripping. The non-exclusive counts are given beside it because a precedence order is a choice and the reader should be able to see past it",
+    "trip_classifier": "EXACT decision_id join",
+    "n_classified_exactly": 401,
+    "n_classified_by_proxy": 0,
+    "intervals_by_class": {
+     "recall": 400,
+     "build_piece": 0,
+     "touch": 0
+    }
+   },
    "released_monitor_uncached_tokens": {
     "n": 9808,
     "min": 366.0,
@@ -1054,6 +2329,25 @@
     "max": 4774.0,
     "mean": 479.8518,
     "distinct_values": 71
+   },
+   "all_released_thresholds": {
+    "_population": "ALL released monitors, late or not. This is the population the user's own reference measurement is over, so these are the numbers that compare directly with it; the late-only figures are in late_split_release_vs_engine",
+    "n": 9808,
+    "release_delay_over_0_5_s": 0.4265,
+    "release_delay_over_0_8_s": 0.2015,
+    "release_plus_first_token_over_1_0_s": 0.4352,
+    "release_plus_first_token_s": {
+     "n": 9808,
+     "min": 0.1849,
+     "p25": 0.5712,
+     "p50": 0.9019,
+     "p75": 1.2122,
+     "p90": 1.4263,
+     "p99": 2.4063,
+     "max": 6.4617,
+     "mean": 0.93,
+     "distinct_values": 9771
+    }
    },
    "fraction_of_released_with_ttft_over_0_8_s": 0.0569,
    "fraction_of_released_with_release_delay_over_0_8_s": 0.2015,
@@ -1327,6 +2621,108 @@
     "share_engine_service_within_the_whole_deadline": 0.9255,
     "_register_of_the_last_two": "CONSTRUCTED BOUND, not an observed count. 'engine service within the whole deadline' says the server's own time would have fitted inside 1.0 s had release been instantaneous. Release cannot be instantaneous: the uplink alone is ~0.06 s, and holding none of these requests would change the queue they were served in, so the server time itself would not be preserved. It bounds how much of this bucket the RELEASE side could in principle reach; it predicts no arm's result."
    },
+   "late_split_release_vs_engine": {
+    "_ruling": "USER RULING 2026-11-22: split every LATE monitor by whether the deadline was lost BEFORE submission or after it. The three components are differences of consecutive stamps on one clock, so release_delay + engine_time + forward_hop = t_delivered - t_opportunity identically.",
+    "n_late": 3586,
+    "release_delay_s": {
+     "n": 3586,
+     "min": 0.066,
+     "p25": 0.6182,
+     "p50": 0.7743,
+     "p75": 0.8924,
+     "p90": 0.9597,
+     "p99": 1.0059,
+     "max": 1.0243,
+     "mean": 0.7375,
+     "distinct_values": 3582
+    },
+    "engine_time_s_t_cloud_done_minus_t_submit": {
+     "n": 3586,
+     "min": 0.126,
+     "p25": 0.3939,
+     "p50": 0.5171,
+     "p75": 0.6603,
+     "p90": 0.872,
+     "p99": 2.2486,
+     "max": 3.7762,
+     "mean": 0.5899,
+     "distinct_values": 3577
+    },
+    "forward_hop_s": {
+     "n": 3586,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "shares_over_thresholds": {
+     "release_delay_over_0_5_s": 0.874,
+     "release_delay_over_0_8_s": 0.4445,
+     "engine_time_over_0_5_s": 0.5368,
+     "engine_time_over_0_8_s": 0.1347
+    },
+    "partition": {
+     "deadline_already_lost_at_release": 72,
+     "lost_by_release_plus_engine": 3357,
+     "lost_only_by_the_forward_hop": 157,
+     "sum": 3586,
+     "partitions_the_late_buckets_exactly": true,
+     "_identity": "by construction this partition IS the three late buckets renamed: deadline_already_lost_at_release == late_at_release, lost_by_release_plus_engine == late_at_first_token, and lost_only_by_the_forward_hop == late_at_forward_only. It is computed independently and checked, so an equality here is a CONSISTENCY CHECK on the two code paths and NOT new evidence",
+     "matches_bucket_by_bucket": [
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   "c5_trip_classes": {
+    "_question": "part (3) of the ruling: which SLOW monitors trip C5, by what their wait overlapped. A monitor TRIPS C5 when its first token, measured from t_submit, exceeds 0.8 x L_dash = 0.8 s, which is the AIMD trip whose reconstruction in c5_loss_split.py reproduced the base arm's own c5_decrease / c5_increase counters",
+    "_population": "LATE monitors only, which is the population the ruling asks about; a tripping monitor that still delivered on time is not in it",
+    "n_tripping": 483,
+    "ttft_s_of_tripping_monitors": {
+     "n": 483,
+     "min": 0.8001,
+     "p25": 0.8692,
+     "p50": 1.0097,
+     "p75": 1.6155,
+     "p90": 2.1644,
+     "p99": 2.851,
+     "max": 3.7762,
+     "mean": 1.2895,
+     "distinct_values": 483
+    },
+    "classes_PARTITION_precedence_recall_build_touch_none": {
+     "recall": 373,
+     "build_piece": 0,
+     "touch": 0,
+     "none": 110
+    },
+    "shares": {
+     "recall": 0.7723,
+     "build_piece": 0.0,
+     "touch": 0.0,
+     "none": 0.2277
+    },
+    "overlap_NON_EXCLUSIVE_counts": {
+     "recall": 373,
+     "build_piece": 0,
+     "touch": 0
+    },
+    "_precedence_note": "the PARTITION assigns a monitor overlapping several classes to the first of recall, build_piece, touch, so the four classes sum to n_tripping. The non-exclusive counts are given beside it because a precedence order is a choice and the reader should be able to see past it",
+    "trip_classifier": "EXACT decision_id join",
+    "n_classified_exactly": 411,
+    "n_classified_by_proxy": 0,
+    "intervals_by_class": {
+     "recall": 408,
+     "build_piece": 0,
+     "touch": 0
+    }
+   },
    "released_monitor_uncached_tokens": {
     "n": 9883,
     "min": 366.0,
@@ -1338,6 +2734,25 @@
     "max": 7140.0,
     "mean": 477.3589,
     "distinct_values": 71
+   },
+   "all_released_thresholds": {
+    "_population": "ALL released monitors, late or not. This is the population the user's own reference measurement is over, so these are the numbers that compare directly with it; the late-only figures are in late_split_release_vs_engine",
+    "n": 9883,
+    "release_delay_over_0_5_s": 0.3458,
+    "release_delay_over_0_8_s": 0.1614,
+    "release_plus_first_token_over_1_0_s": 0.347,
+    "release_plus_first_token_s": {
+     "n": 9883,
+     "min": 0.2007,
+     "p25": 0.546,
+     "p50": 0.7974,
+     "p75": 1.1287,
+     "p90": 1.3918,
+     "p99": 2.3397,
+     "max": 4.7375,
+     "mean": 0.8739,
+     "distinct_values": 9838
+    }
    },
    "fraction_of_released_with_ttft_over_0_8_s": 0.0509,
    "fraction_of_released_with_release_delay_over_0_8_s": 0.1614,
@@ -1611,6 +3026,108 @@
     "share_engine_service_within_the_whole_deadline": 0.9317,
     "_register_of_the_last_two": "CONSTRUCTED BOUND, not an observed count. 'engine service within the whole deadline' says the server's own time would have fitted inside 1.0 s had release been instantaneous. Release cannot be instantaneous: the uplink alone is ~0.06 s, and holding none of these requests would change the queue they were served in, so the server time itself would not be preserved. It bounds how much of this bucket the RELEASE side could in principle reach; it predicts no arm's result."
    },
+   "late_split_release_vs_engine": {
+    "_ruling": "USER RULING 2026-11-22: split every LATE monitor by whether the deadline was lost BEFORE submission or after it. The three components are differences of consecutive stamps on one clock, so release_delay + engine_time + forward_hop = t_delivered - t_opportunity identically.",
+    "n_late": 3002,
+    "release_delay_s": {
+     "n": 3002,
+     "min": 0.0617,
+     "p25": 0.5759,
+     "p50": 0.752,
+     "p75": 0.8735,
+     "p90": 0.9585,
+     "p99": 1.0091,
+     "max": 1.0184,
+     "mean": 0.7112,
+     "distinct_values": 2993
+    },
+    "engine_time_s_t_cloud_done_minus_t_submit": {
+     "n": 3002,
+     "min": 0.1295,
+     "p25": 0.3849,
+     "p50": 0.5118,
+     "p75": 0.6296,
+     "p90": 0.8547,
+     "p99": 2.1575,
+     "max": 2.8818,
+     "mean": 0.5694,
+     "distinct_values": 2993
+    },
+    "forward_hop_s": {
+     "n": 3002,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "shares_over_thresholds": {
+     "release_delay_over_0_5_s": 0.8308,
+     "release_delay_over_0_8_s": 0.3974,
+     "engine_time_over_0_5_s": 0.5183,
+     "engine_time_over_0_8_s": 0.1249
+    },
+    "partition": {
+     "deadline_already_lost_at_release": 87,
+     "lost_by_release_plus_engine": 2739,
+     "lost_only_by_the_forward_hop": 176,
+     "sum": 3002,
+     "partitions_the_late_buckets_exactly": true,
+     "_identity": "by construction this partition IS the three late buckets renamed: deadline_already_lost_at_release == late_at_release, lost_by_release_plus_engine == late_at_first_token, and lost_only_by_the_forward_hop == late_at_forward_only. It is computed independently and checked, so an equality here is a CONSISTENCY CHECK on the two code paths and NOT new evidence",
+     "matches_bucket_by_bucket": [
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   "c5_trip_classes": {
+    "_question": "part (3) of the ruling: which SLOW monitors trip C5, by what their wait overlapped. A monitor TRIPS C5 when its first token, measured from t_submit, exceeds 0.8 x L_dash = 0.8 s, which is the AIMD trip whose reconstruction in c5_loss_split.py reproduced the base arm's own c5_decrease / c5_increase counters",
+    "_population": "LATE monitors only, which is the population the ruling asks about; a tripping monitor that still delivered on time is not in it",
+    "n_tripping": 375,
+    "ttft_s_of_tripping_monitors": {
+     "n": 375,
+     "min": 0.8004,
+     "p25": 0.8626,
+     "p50": 1.0096,
+     "p75": 1.6021,
+     "p90": 2.1087,
+     "p99": 2.7736,
+     "max": 2.8818,
+     "mean": 1.2598,
+     "distinct_values": 375
+    },
+    "classes_PARTITION_precedence_recall_build_touch_none": {
+     "recall": 326,
+     "build_piece": 0,
+     "touch": 0,
+     "none": 49
+    },
+    "shares": {
+     "recall": 0.8693,
+     "build_piece": 0.0,
+     "touch": 0.0,
+     "none": 0.1307
+    },
+    "overlap_NON_EXCLUSIVE_counts": {
+     "recall": 326,
+     "build_piece": 0,
+     "touch": 0
+    },
+    "_precedence_note": "the PARTITION assigns a monitor overlapping several classes to the first of recall, build_piece, touch, so the four classes sum to n_tripping. The non-exclusive counts are given beside it because a precedence order is a choice and the reader should be able to see past it",
+    "trip_classifier": "EXACT decision_id join",
+    "n_classified_exactly": 385,
+    "n_classified_by_proxy": 0,
+    "intervals_by_class": {
+     "recall": 385,
+     "build_piece": 0,
+     "touch": 0
+    }
+   },
    "released_monitor_uncached_tokens": {
     "n": 10511,
     "min": 366.0,
@@ -1622,6 +3139,25 @@
     "max": 3760.0,
     "mean": 452.4519,
     "distinct_values": 56
+   },
+   "all_released_thresholds": {
+    "_population": "ALL released monitors, late or not. This is the population the user's own reference measurement is over, so these are the numbers that compare directly with it; the late-only figures are in late_split_release_vs_engine",
+    "n": 10511,
+    "release_delay_over_0_5_s": 0.2645,
+    "release_delay_over_0_8_s": 0.1138,
+    "release_plus_first_token_over_1_0_s": 0.2689,
+    "release_plus_first_token_s": {
+     "n": 10511,
+     "min": 0.1983,
+     "p25": 0.5258,
+     "p50": 0.7317,
+     "p75": 1.026,
+     "p90": 1.2763,
+     "p99": 2.1329,
+     "max": 3.8822,
+     "mean": 0.8046,
+     "distinct_values": 10464
+    }
    },
    "fraction_of_released_with_ttft_over_0_8_s": 0.0381,
    "fraction_of_released_with_release_delay_over_0_8_s": 0.1138,
@@ -1895,6 +3431,108 @@
     "share_engine_service_within_the_whole_deadline": 0.7747,
     "_register_of_the_last_two": "CONSTRUCTED BOUND, not an observed count. 'engine service within the whole deadline' says the server's own time would have fitted inside 1.0 s had release been instantaneous. Release cannot be instantaneous: the uplink alone is ~0.06 s, and holding none of these requests would change the queue they were served in, so the server time itself would not be preserved. It bounds how much of this bucket the RELEASE side could in principle reach; it predicts no arm's result."
    },
+   "late_split_release_vs_engine": {
+    "_ruling": "USER RULING 2026-11-22: split every LATE monitor by whether the deadline was lost BEFORE submission or after it. The three components are differences of consecutive stamps on one clock, so release_delay + engine_time + forward_hop = t_delivered - t_opportunity identically.",
+    "n_late": 4126,
+    "release_delay_s": {
+     "n": 4126,
+     "min": 0.0863,
+     "p25": 0.7355,
+     "p50": 0.8497,
+     "p75": 0.9365,
+     "p90": 0.9877,
+     "p99": 1.0097,
+     "max": 1.0277,
+     "mean": 0.8228,
+     "distinct_values": 4108
+    },
+    "engine_time_s_t_cloud_done_minus_t_submit": {
+     "n": 4126,
+     "min": 0.1201,
+     "p25": 0.405,
+     "p50": 0.5772,
+     "p75": 0.9166,
+     "p90": 1.7774,
+     "p99": 5.6743,
+     "max": 20.3475,
+     "mean": 0.9096,
+     "distinct_values": 4120
+    },
+    "forward_hop_s": {
+     "n": 4126,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "shares_over_thresholds": {
+     "release_delay_over_0_5_s": 0.9687,
+     "release_delay_over_0_8_s": 0.6292,
+     "engine_time_over_0_5_s": 0.5889,
+     "engine_time_over_0_8_s": 0.3095
+    },
+    "partition": {
+     "deadline_already_lost_at_release": 201,
+     "lost_by_release_plus_engine": 3853,
+     "lost_only_by_the_forward_hop": 72,
+     "sum": 4126,
+     "partitions_the_late_buckets_exactly": true,
+     "_identity": "by construction this partition IS the three late buckets renamed: deadline_already_lost_at_release == late_at_release, lost_by_release_plus_engine == late_at_first_token, and lost_only_by_the_forward_hop == late_at_forward_only. It is computed independently and checked, so an equality here is a CONSISTENCY CHECK on the two code paths and NOT new evidence",
+     "matches_bucket_by_bucket": [
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   "c5_trip_classes": {
+    "_question": "part (3) of the ruling: which SLOW monitors trip C5, by what their wait overlapped. A monitor TRIPS C5 when its first token, measured from t_submit, exceeds 0.8 x L_dash = 0.8 s, which is the AIMD trip whose reconstruction in c5_loss_split.py reproduced the base arm's own c5_decrease / c5_increase counters",
+    "_population": "LATE monitors only, which is the population the ruling asks about; a tripping monitor that still delivered on time is not in it",
+    "n_tripping": 1277,
+    "ttft_s_of_tripping_monitors": {
+     "n": 1277,
+     "min": 0.8002,
+     "p25": 0.9749,
+     "p50": 1.3245,
+     "p75": 1.9963,
+     "p90": 3.3329,
+     "p99": 11.6911,
+     "max": 20.3475,
+     "mean": 1.8905,
+     "distinct_values": 1277
+    },
+    "classes_PARTITION_precedence_recall_build_touch_none": {
+     "recall": 990,
+     "build_piece": 90,
+     "touch": 1,
+     "none": 196
+    },
+    "shares": {
+     "recall": 0.7753,
+     "build_piece": 0.0705,
+     "touch": 0.0008,
+     "none": 0.1535
+    },
+    "overlap_NON_EXCLUSIVE_counts": {
+     "recall": 990,
+     "build_piece": 405,
+     "touch": 31
+    },
+    "_precedence_note": "the PARTITION assigns a monitor overlapping several classes to the first of recall, build_piece, touch, so the four classes sum to n_tripping. The non-exclusive counts are given beside it because a precedence order is a choice and the reader should be able to see past it",
+    "trip_classifier": "declared uncached PROXY only (this cell writes no decision log)",
+    "n_classified_exactly": 0,
+    "n_classified_by_proxy": 156,
+    "intervals_by_class": {
+     "recall": 442,
+     "build_piece": 145,
+     "touch": 11
+    }
+   },
    "released_monitor_uncached_tokens": {
     "n": 4827,
     "min": 366.0,
@@ -1906,6 +3544,25 @@
     "max": 6802.0,
     "mean": 801.9171,
     "distinct_values": 102
+   },
+   "all_released_thresholds": {
+    "_population": "ALL released monitors, late or not. This is the population the user's own reference measurement is over, so these are the numbers that compare directly with it; the late-only figures are in late_split_release_vs_engine",
+    "n": 4827,
+    "release_delay_over_0_5_s": 0.8684,
+    "release_delay_over_0_8_s": 0.5384,
+    "release_plus_first_token_over_1_0_s": 0.8399,
+    "release_plus_first_token_s": {
+     "n": 4827,
+     "min": 0.2133,
+     "p25": 1.1101,
+     "p50": 1.3299,
+     "p75": 1.6675,
+     "p90": 2.47,
+     "p99": 6.3415,
+     "max": 21.1304,
+     "mean": 1.5817,
+     "distinct_values": 4822
+    }
    },
    "fraction_of_released_with_ttft_over_0_8_s": 0.265,
    "fraction_of_released_with_release_delay_over_0_8_s": 0.5384,
@@ -2179,6 +3836,108 @@
     "share_engine_service_within_the_whole_deadline": 0.7704,
     "_register_of_the_last_two": "CONSTRUCTED BOUND, not an observed count. 'engine service within the whole deadline' says the server's own time would have fitted inside 1.0 s had release been instantaneous. Release cannot be instantaneous: the uplink alone is ~0.06 s, and holding none of these requests would change the queue they were served in, so the server time itself would not be preserved. It bounds how much of this bucket the RELEASE side could in principle reach; it predicts no arm's result."
    },
+   "late_split_release_vs_engine": {
+    "_ruling": "USER RULING 2026-11-22: split every LATE monitor by whether the deadline was lost BEFORE submission or after it. The three components are differences of consecutive stamps on one clock, so release_delay + engine_time + forward_hop = t_delivered - t_opportunity identically.",
+    "n_late": 4011,
+    "release_delay_s": {
+     "n": 4011,
+     "min": 0.0661,
+     "p25": 0.7595,
+     "p50": 0.8692,
+     "p75": 0.9434,
+     "p90": 0.9914,
+     "p99": 1.0098,
+     "max": 1.0189,
+     "mean": 0.8303,
+     "distinct_values": 3984
+    },
+    "engine_time_s_t_cloud_done_minus_t_submit": {
+     "n": 4011,
+     "min": 0.1295,
+     "p25": 0.3954,
+     "p50": 0.575,
+     "p75": 0.9532,
+     "p90": 1.8906,
+     "p99": 5.5947,
+     "max": 18.347,
+     "mean": 0.9018,
+     "distinct_values": 4001
+    },
+    "forward_hop_s": {
+     "n": 4011,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "shares_over_thresholds": {
+     "release_delay_over_0_5_s": 0.9661,
+     "release_delay_over_0_8_s": 0.647,
+     "engine_time_over_0_5_s": 0.6036,
+     "engine_time_over_0_8_s": 0.3179
+    },
+    "partition": {
+     "deadline_already_lost_at_release": 230,
+     "lost_by_release_plus_engine": 3729,
+     "lost_only_by_the_forward_hop": 52,
+     "sum": 4011,
+     "partitions_the_late_buckets_exactly": true,
+     "_identity": "by construction this partition IS the three late buckets renamed: deadline_already_lost_at_release == late_at_release, lost_by_release_plus_engine == late_at_first_token, and lost_only_by_the_forward_hop == late_at_forward_only. It is computed independently and checked, so an equality here is a CONSISTENCY CHECK on the two code paths and NOT new evidence",
+     "matches_bucket_by_bucket": [
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   "c5_trip_classes": {
+    "_question": "part (3) of the ruling: which SLOW monitors trip C5, by what their wait overlapped. A monitor TRIPS C5 when its first token, measured from t_submit, exceeds 0.8 x L_dash = 0.8 s, which is the AIMD trip whose reconstruction in c5_loss_split.py reproduced the base arm's own c5_decrease / c5_increase counters",
+    "_population": "LATE monitors only, which is the population the ruling asks about; a tripping monitor that still delivered on time is not in it",
+    "n_tripping": 1275,
+    "ttft_s_of_tripping_monitors": {
+     "n": 1275,
+     "min": 0.8002,
+     "p25": 0.9835,
+     "p50": 1.3424,
+     "p75": 2.1119,
+     "p90": 3.1868,
+     "p99": 7.5752,
+     "max": 18.347,
+     "mean": 1.8456,
+     "distinct_values": 1274
+    },
+    "classes_PARTITION_precedence_recall_build_touch_none": {
+     "recall": 961,
+     "build_piece": 82,
+     "touch": 7,
+     "none": 225
+    },
+    "shares": {
+     "recall": 0.7537,
+     "build_piece": 0.0643,
+     "touch": 0.0055,
+     "none": 0.1765
+    },
+    "overlap_NON_EXCLUSIVE_counts": {
+     "recall": 961,
+     "build_piece": 437,
+     "touch": 35
+    },
+    "_precedence_note": "the PARTITION assigns a monitor overlapping several classes to the first of recall, build_piece, touch, so the four classes sum to n_tripping. The non-exclusive counts are given beside it because a precedence order is a choice and the reader should be able to see past it",
+    "trip_classifier": "declared uncached PROXY only (this cell writes no decision log)",
+    "n_classified_exactly": 0,
+    "n_classified_by_proxy": 175,
+    "intervals_by_class": {
+     "recall": 423,
+     "build_piece": 161,
+     "touch": 14
+    }
+   },
    "released_monitor_uncached_tokens": {
     "n": 5178,
     "min": 366.0,
@@ -2190,6 +3949,25 @@
     "max": 6802.0,
     "mean": 768.5133,
     "distinct_values": 106
+   },
+   "all_released_thresholds": {
+    "_population": "ALL released monitors, late or not. This is the population the user's own reference measurement is over, so these are the numbers that compare directly with it; the late-only figures are in late_split_release_vs_engine",
+    "n": 5178,
+    "release_delay_over_0_5_s": 0.7945,
+    "release_delay_over_0_8_s": 0.5021,
+    "release_plus_first_token_over_1_0_s": 0.7646,
+    "release_plus_first_token_s": {
+     "n": 5178,
+     "min": 0.2021,
+     "p25": 1.0244,
+     "p50": 1.287,
+     "p75": 1.6214,
+     "p90": 2.379,
+     "p99": 5.7156,
+     "max": 19.0914,
+     "mean": 1.4879,
+     "distinct_values": 5168
+    }
    },
    "fraction_of_released_with_ttft_over_0_8_s": 0.2474,
    "fraction_of_released_with_release_delay_over_0_8_s": 0.5021,
@@ -2463,6 +4241,108 @@
     "share_engine_service_within_the_whole_deadline": 0.786,
     "_register_of_the_last_two": "CONSTRUCTED BOUND, not an observed count. 'engine service within the whole deadline' says the server's own time would have fitted inside 1.0 s had release been instantaneous. Release cannot be instantaneous: the uplink alone is ~0.06 s, and holding none of these requests would change the queue they were served in, so the server time itself would not be preserved. It bounds how much of this bucket the RELEASE side could in principle reach; it predicts no arm's result."
    },
+   "late_split_release_vs_engine": {
+    "_ruling": "USER RULING 2026-11-22: split every LATE monitor by whether the deadline was lost BEFORE submission or after it. The three components are differences of consecutive stamps on one clock, so release_delay + engine_time + forward_hop = t_delivered - t_opportunity identically.",
+    "n_late": 3910,
+    "release_delay_s": {
+     "n": 3910,
+     "min": 0.0584,
+     "p25": 0.7359,
+     "p50": 0.852,
+     "p75": 0.9391,
+     "p90": 0.9796,
+     "p99": 1.0144,
+     "max": 1.0316,
+     "mean": 0.8151,
+     "distinct_values": 3895
+    },
+    "engine_time_s_t_cloud_done_minus_t_submit": {
+     "n": 3910,
+     "min": 0.1263,
+     "p25": 0.4014,
+     "p50": 0.5695,
+     "p75": 0.8821,
+     "p90": 1.777,
+     "p99": 6.8868,
+     "max": 16.0012,
+     "mean": 0.9248,
+     "distinct_values": 3906
+    },
+    "forward_hop_s": {
+     "n": 3910,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "shares_over_thresholds": {
+     "release_delay_over_0_5_s": 0.9573,
+     "release_delay_over_0_8_s": 0.6141,
+     "engine_time_over_0_5_s": 0.5977,
+     "engine_time_over_0_8_s": 0.2946
+    },
+    "partition": {
+     "deadline_already_lost_at_release": 186,
+     "lost_by_release_plus_engine": 3640,
+     "lost_only_by_the_forward_hop": 84,
+     "sum": 3910,
+     "partitions_the_late_buckets_exactly": true,
+     "_identity": "by construction this partition IS the three late buckets renamed: deadline_already_lost_at_release == late_at_release, lost_by_release_plus_engine == late_at_first_token, and lost_only_by_the_forward_hop == late_at_forward_only. It is computed independently and checked, so an equality here is a CONSISTENCY CHECK on the two code paths and NOT new evidence",
+     "matches_bucket_by_bucket": [
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   "c5_trip_classes": {
+    "_question": "part (3) of the ruling: which SLOW monitors trip C5, by what their wait overlapped. A monitor TRIPS C5 when its first token, measured from t_submit, exceeds 0.8 x L_dash = 0.8 s, which is the AIMD trip whose reconstruction in c5_loss_split.py reproduced the base arm's own c5_decrease / c5_increase counters",
+    "_population": "LATE monitors only, which is the population the ruling asks about; a tripping monitor that still delivered on time is not in it",
+    "n_tripping": 1152,
+    "ttft_s_of_tripping_monitors": {
+     "n": 1152,
+     "min": 0.8002,
+     "p25": 0.9673,
+     "p50": 1.3155,
+     "p75": 2.1058,
+     "p90": 3.475,
+     "p99": 12.6239,
+     "max": 16.0012,
+     "mean": 2.0084,
+     "distinct_values": 1152
+    },
+    "classes_PARTITION_precedence_recall_build_touch_none": {
+     "recall": 883,
+     "build_piece": 66,
+     "touch": 0,
+     "none": 203
+    },
+    "shares": {
+     "recall": 0.7665,
+     "build_piece": 0.0573,
+     "touch": 0.0,
+     "none": 0.1762
+    },
+    "overlap_NON_EXCLUSIVE_counts": {
+     "recall": 883,
+     "build_piece": 380,
+     "touch": 43
+    },
+    "_precedence_note": "the PARTITION assigns a monitor overlapping several classes to the first of recall, build_piece, touch, so the four classes sum to n_tripping. The non-exclusive counts are given beside it because a precedence order is a choice and the reader should be able to see past it",
+    "trip_classifier": "declared uncached PROXY only (this cell writes no decision log)",
+    "n_classified_exactly": 0,
+    "n_classified_by_proxy": 174,
+    "intervals_by_class": {
+     "recall": 444,
+     "build_piece": 157,
+     "touch": 17
+    }
+   },
    "released_monitor_uncached_tokens": {
     "n": 5452,
     "min": 366.0,
@@ -2474,6 +4354,25 @@
     "max": 7140.0,
     "mean": 721.8723,
     "distinct_values": 103
+   },
+   "all_released_thresholds": {
+    "_population": "ALL released monitors, late or not. This is the population the user's own reference measurement is over, so these are the numbers that compare directly with it; the late-only figures are in late_split_release_vs_engine",
+    "n": 5452,
+    "release_delay_over_0_5_s": 0.732,
+    "release_delay_over_0_8_s": 0.4408,
+    "release_plus_first_token_over_1_0_s": 0.7018,
+    "release_plus_first_token_s": {
+     "n": 5452,
+     "min": 0.2211,
+     "p25": 0.9212,
+     "p50": 1.2358,
+     "p75": 1.556,
+     "p90": 2.2135,
+     "p99": 6.8646,
+     "max": 17.0052,
+     "mean": 1.4342,
+     "distinct_values": 5445
+    }
    },
    "fraction_of_released_with_ttft_over_0_8_s": 0.2118,
    "fraction_of_released_with_release_delay_over_0_8_s": 0.4408,
@@ -2747,6 +4646,108 @@
     "share_engine_service_within_the_whole_deadline": 0.7705,
     "_register_of_the_last_two": "CONSTRUCTED BOUND, not an observed count. 'engine service within the whole deadline' says the server's own time would have fitted inside 1.0 s had release been instantaneous. Release cannot be instantaneous: the uplink alone is ~0.06 s, and holding none of these requests would change the queue they were served in, so the server time itself would not be preserved. It bounds how much of this bucket the RELEASE side could in principle reach; it predicts no arm's result."
    },
+   "late_split_release_vs_engine": {
+    "_ruling": "USER RULING 2026-11-22: split every LATE monitor by whether the deadline was lost BEFORE submission or after it. The three components are differences of consecutive stamps on one clock, so release_delay + engine_time + forward_hop = t_delivered - t_opportunity identically.",
+    "n_late": 3718,
+    "release_delay_s": {
+     "n": 3718,
+     "min": 0.0725,
+     "p25": 0.7415,
+     "p50": 0.8469,
+     "p75": 0.9307,
+     "p90": 0.9751,
+     "p99": 1.0125,
+     "max": 1.0358,
+     "mean": 0.8141,
+     "distinct_values": 3696
+    },
+    "engine_time_s_t_cloud_done_minus_t_submit": {
+     "n": 3718,
+     "min": 0.1318,
+     "p25": 0.3942,
+     "p50": 0.5522,
+     "p75": 0.9212,
+     "p90": 1.8976,
+     "p99": 9.2464,
+     "max": 23.3237,
+     "mean": 0.996,
+     "distinct_values": 3713
+    },
+    "forward_hop_s": {
+     "n": 3718,
+     "min": 0.0222,
+     "p25": 0.0222,
+     "p50": 0.0222,
+     "p75": 0.0222,
+     "p90": 0.0222,
+     "p99": 0.0222,
+     "max": 0.0222,
+     "mean": 0.0222,
+     "distinct_values": 1
+    },
+    "shares_over_thresholds": {
+     "release_delay_over_0_5_s": 0.9623,
+     "release_delay_over_0_8_s": 0.6248,
+     "engine_time_over_0_5_s": 0.5737,
+     "engine_time_over_0_8_s": 0.3002
+    },
+    "partition": {
+     "deadline_already_lost_at_release": 136,
+     "lost_by_release_plus_engine": 3508,
+     "lost_only_by_the_forward_hop": 74,
+     "sum": 3718,
+     "partitions_the_late_buckets_exactly": true,
+     "_identity": "by construction this partition IS the three late buckets renamed: deadline_already_lost_at_release == late_at_release, lost_by_release_plus_engine == late_at_first_token, and lost_only_by_the_forward_hop == late_at_forward_only. It is computed independently and checked, so an equality here is a CONSISTENCY CHECK on the two code paths and NOT new evidence",
+     "matches_bucket_by_bucket": [
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   "c5_trip_classes": {
+    "_question": "part (3) of the ruling: which SLOW monitors trip C5, by what their wait overlapped. A monitor TRIPS C5 when its first token, measured from t_submit, exceeds 0.8 x L_dash = 0.8 s, which is the AIMD trip whose reconstruction in c5_loss_split.py reproduced the base arm's own c5_decrease / c5_increase counters",
+    "_population": "LATE monitors only, which is the population the ruling asks about; a tripping monitor that still delivered on time is not in it",
+    "n_tripping": 1116,
+    "ttft_s_of_tripping_monitors": {
+     "n": 1116,
+     "min": 0.8009,
+     "p25": 1.0098,
+     "p50": 1.4089,
+     "p75": 2.2159,
+     "p90": 3.7122,
+     "p99": 17.3035,
+     "max": 23.3237,
+     "mean": 2.2487,
+     "distinct_values": 1115
+    },
+    "classes_PARTITION_precedence_recall_build_touch_none": {
+     "recall": 940,
+     "build_piece": 28,
+     "touch": 0,
+     "none": 148
+    },
+    "shares": {
+     "recall": 0.8423,
+     "build_piece": 0.0251,
+     "touch": 0.0,
+     "none": 0.1326
+    },
+    "overlap_NON_EXCLUSIVE_counts": {
+     "recall": 940,
+     "build_piece": 378,
+     "touch": 36
+    },
+    "_precedence_note": "the PARTITION assigns a monitor overlapping several classes to the first of recall, build_piece, touch, so the four classes sum to n_tripping. The non-exclusive counts are given beside it because a precedence order is a choice and the reader should be able to see past it",
+    "trip_classifier": "declared uncached PROXY only (this cell writes no decision log)",
+    "n_classified_exactly": 0,
+    "n_classified_by_proxy": 180,
+    "intervals_by_class": {
+     "recall": 400,
+     "build_piece": 170,
+     "touch": 10
+    }
+   },
    "released_monitor_uncached_tokens": {
     "n": 5302,
     "min": 366.0,
@@ -2758,6 +4759,25 @@
     "max": 7140.0,
     "mean": 730.5813,
     "distinct_values": 105
+   },
+   "all_released_thresholds": {
+    "_population": "ALL released monitors, late or not. This is the population the user's own reference measurement is over, so these are the numbers that compare directly with it; the late-only figures are in late_split_release_vs_engine",
+    "n": 5302,
+    "release_delay_over_0_5_s": 0.7101,
+    "release_delay_over_0_8_s": 0.4387,
+    "release_plus_first_token_over_1_0_s": 0.6873,
+    "release_plus_first_token_s": {
+     "n": 5302,
+     "min": 0.2085,
+     "p25": 0.8606,
+     "p50": 1.2124,
+     "p75": 1.528,
+     "p90": 2.311,
+     "p99": 6.6092,
+     "max": 24.2402,
+     "mean": 1.4556,
+     "distinct_values": 5291
+    }
    },
    "fraction_of_released_with_ttft_over_0_8_s": 0.2111,
    "fraction_of_released_with_release_delay_over_0_8_s": 0.4387,
@@ -2873,6 +4893,18 @@
   "_claim": "the decomposition's on_time bucket reproduces each cell's OWN committed dashcam on-time count from cell.json, EXACTLY. The required control is a base (hybrid-F-lhreq-noc3) cell, a known-good committed arm; every other cell with a score block is checked the same way.",
   "rows": [
    {
+    "cell": "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "reconstructed": 2209,
+    "committed": 2209,
+    "pass": true
+   },
+   {
+    "cell": "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "reconstructed": 2374,
+    "committed": 2374,
+    "pass": true
+   },
+   {
     "cell": "covex-v6-state_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
     "reconstructed": 1692,
     "committed": 1692,
@@ -2935,11 +4967,13 @@
   ],
   "base_cells_checked": 4,
   "base_verdict": "PASS: exact on all 4 base cells",
-  "all_verdict": "PASS: exact on all 10 cells with a score block",
-  "sum_verdict": "PASS: buckets sum to the declared denominator on all 10 cells"
+  "all_verdict": "PASS: exact on all 12 cells with a score block",
+  "sum_verdict": "PASS: buckets sum to the declared denominator on all 12 cells"
  },
  "answer": {
   "dominant_bucket_per_cell": {
+   "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": "late_at_first_token",
+   "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": "late_at_first_token",
    "covex-v6-state_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun": "not_released",
    "covex-v6-state_n16_s5_1200s_h27_3t_L3_epg_rq30": "late_at_first_token",
    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": "on_time",
@@ -2955,7 +4989,7 @@
   "dominant_bucket_pooled_covex_v6_state": "late_at_first_token",
   "shares_covex_v6_state": {
    "not_released": [
-    0.2937,
+    0.2908,
     0.4588
    ],
    "released_unsettled": [
@@ -2968,15 +5002,15 @@
    ],
    "on_time": [
     0.1438,
-    0.1966
+    0.2017
    ],
    "late_at_release": [
     0.0097,
-    0.0181
+    0.0213
    ],
    "late_at_first_token": [
     0.3797,
-    0.4793
+    0.4802
    ],
    "late_at_forward_only": [
     0.008,
@@ -3021,7 +5055,8 @@
     0.0
    ]
   },
-  "reading": "The first-token distribution cannot see the loss because the deadline is measured from t_opportunity and the first-token figure is measured from t_submit. At covex-v6-state the gap between those two stamps is the whole story: the median release delay is 0.73 to 0.74 s of a 1.0 s deadline, and 40 percent of released monitors are already past 0.8 s old when the engine first sees them. A 0.49 s median first token on top of that lands the median delivery at 1.22 s, so a monitor that was fast by every engine measure still misses. The uplink is ~0.06 s and identical across arms; the forward hop is the 0.0222 s constant; so the release delay is coordinator HOLD, and it is 0.68 s at covex-v6-state against 0.24 s at the base. On top of that, covex-v6-state never releases 29 to 46 percent of its monitor opportunities at all."
+  "c5_trip_classes_reading": "PLAINLY, AND IT IS THE FAVOURABLE ANSWER rather than the feared one: the NONE class is SMALL. At the repriced rung-2 cell 93 of 944 tripping late monitors, 9.9 percent, trip C5 with nothing of ours in flight, and 139 of 841 at the repriced seed 5, 16.5 percent; at seed 4 the other 90.1 percent overlap a recall (702, 74.4 percent), a build piece (93, 9.9 percent) or a touch (56, 5.9 percent). The same shape holds on every cell: NONE is 9.9 to 22.8 percent, and recall overlap is the largest class everywhere (70 to 88 percent). So a C5 attribution rule has a reachable path on about 9 in 10 of the halvings, and the irreducible residue it cannot suppress is bounded at roughly 10 to 23 percent of trips, cell-dependent. TWO LIMITS ON THIS, both stated rather than buried: overlap is CO-OCCURRENCE IN TIME, not a proven causal wait, and with 2,466 touch intervals spanning the run a co-occurrence is cheap, which is why the non-exclusive counts are published beside the precedence partition; and NONE being small bounds what the rule could reach among TRIPS, not how much on-time it would recover, because the halving is only one input to the hold.",
+  "reading": "The first-token distribution cannot see the loss because the deadline is measured from t_opportunity and the first-token figure is measured from t_submit. At covex-v6-state the gap between those two stamps is the whole story: the median release delay is 0.73 to 0.74 s of a 1.0 s deadline, and 40 percent of released monitors are already past 0.8 s old when the engine first sees them. A 0.49 s median first token on top of that lands the median delivery at 1.22 s, so a monitor that was fast by every engine measure still misses. The uplink is ~0.06 s and identical across arms; the forward hop is the 0.0222 s constant; so the release delay is coordinator HOLD, and it is 0.68 s at covex-v6-state against 0.24 s at the base. On top of that, covex-v6-state never releases 29 to 46 percent of its monitor opportunities at all. THE TWO REPRICED CELLS SETTLE THE ATTRIBUTION: covex-v6-state-uo seeds 4 and 5 both have ZERO budget refusals, so budget starvation cannot be the explanation there, and both show the same picture - release delay p50 0.742 and 0.724 s against the base's 0.300 s, 71.6 and 71.3 percent of released monitors over 0.5 s against 37.1 percent, and 71.2 and 70.0 percent with release plus first token already over the whole 1.0 s deadline against 36.7 percent - while the engine does the SAME WORK on every arm (dashcam uncached median 376 against 374, so episodes are not being evicted) and first token moves only 0.44 to 0.48 s at p50. Lateness at rung 2 is a coordinator RELEASE decision, not engine time."
  },
  "consistency_check": {
   "1_cross_check_against_committed": {
@@ -3029,6 +5064,8 @@
     {
      "quantity": "dashcam on-time count, every scored cell",
      "this_run": [
+      2209,
+      2374,
       1692,
       2314,
       5986,
@@ -3041,6 +5078,8 @@
       1584
      ],
      "prior": [
+      2209,
+      2374,
       1692,
       2314,
       5986,
@@ -3054,7 +5093,7 @@
      ],
      "source_of_prior": "each cell's own cell.json score.score.sweep[0]",
      "ratio": 1.0,
-     "verdict": "agree, EXACT on all 10"
+     "verdict": "agree, EXACT on all 12"
     },
     {
      "quantity": "monitor opportunities (denominator), hybrid-F seeds 4 to 7",
@@ -3122,6 +5161,156 @@
       0.9414
      ],
      "verdict": "DISAGREE and RESOLVED: the planner's 1,786 and 2,458 are the FIRST-TOKEN reading (t_cloud_done - t_opportunity <= 1.0 s), which is also what the coordinator's own cloud_payload.on_time flag records. The COMMITTED cell.json counts are 1,692 and 2,314, on t_delivered. The difference is exactly bucket late_at_forward_only, 94 and 144. Both readings are reported"
+    },
+    {
+     "quantity": "covex-v6-state-uo s4 committed dashcam on-time",
+     "this_run": 2209,
+     "prior": 2209,
+     "source_of_prior": "that cell's own cell.json",
+     "ratio": 1.0,
+     "verdict": "agree, EXACT"
+    },
+    {
+     "quantity": "covex-v6-state-uo s4 coordinator first-token flag, and the difference",
+     "this_run": [
+      2349,
+      140
+     ],
+     "prior": [
+      2349,
+      140
+     ],
+     "source_of_prior": "the user's reference measurement",
+     "ratio": 1.0,
+     "verdict": "agree, EXACT, and it is an INDEPENDENT check of the forward-hop bucket: the 140 was derived here from the bucket definition and matches the user's independently measured difference"
+    },
+    {
+     "quantity": "release delay p50 / p90, base s4 and repriced rung 2 (all released)",
+     "this_run": [
+      [
+       0.2997,
+       0.8879
+      ],
+      [
+       0.7423,
+       0.9679
+      ]
+     ],
+     "prior": [
+      [
+       0.3,
+       0.89
+      ],
+      [
+       0.74,
+       0.97
+      ]
+     ],
+     "source_of_prior": "the user's reference measurement",
+     "ratio": 1.0,
+     "verdict": "agree to the precision quoted"
+    },
+    {
+     "quantity": "share of released monitors with release delay over 0.5 s, base / rung 2",
+     "this_run": [
+      0.3706,
+      0.7163
+     ],
+     "prior": [
+      0.37,
+      0.72
+     ],
+     "source_of_prior": "the user's reference measurement",
+     "ratio": 1.0,
+     "verdict": "agree"
+    },
+    {
+     "quantity": "engine first token p50 / p90, base / rung 2",
+     "this_run": [
+      [
+       0.4385,
+       0.6927
+      ],
+      [
+       0.4831,
+       0.8374
+      ]
+     ],
+     "prior": [
+      [
+       0.44,
+       0.69
+      ],
+      [
+       0.48,
+       0.84
+      ]
+     ],
+     "source_of_prior": "the user's reference measurement",
+     "ratio": 1.0,
+     "verdict": "agree"
+    },
+    {
+     "quantity": "dashcam uncached per request, median, base / rung 2",
+     "this_run": [
+      374.0,
+      376.0
+     ],
+     "prior": [
+      374,
+      376
+     ],
+     "source_of_prior": "the user's reference measurement",
+     "ratio": 1.0,
+     "verdict": "agree, and it is the load-bearing one: the engine is doing the SAME work on both arms, so neither a longer prompt nor episode eviction explains rung 2's lateness"
+    },
+    {
+     "quantity": "share with release plus first token over 1 s, base / rung 2",
+     "this_run": [
+      0.367,
+      0.7124
+     ],
+     "prior": [
+      0.37,
+      0.71
+     ],
+     "source_of_prior": "the user's reference measurement",
+     "ratio": 1.0,
+     "verdict": "agree"
+    },
+    {
+     "quantity": "covex-v6-state-uo s5 committed dashcam on-time, and the first-token flag",
+     "this_run": [
+      2374,
+      2508,
+      134
+     ],
+     "prior": [
+      2374,
+      2508,
+      134
+     ],
+     "source_of_prior": "that cell's own cell.json and outcomes",
+     "ratio": 1.0,
+     "verdict": "agree, EXACT; the 134 difference is again exactly the forward-hop bucket"
+    },
+    {
+     "quantity": "robot by_deadline headline, uo s4 / old s4 / uo s5 / old s5",
+     "this_run": [
+      0.613636,
+      0.507576,
+      0.425197,
+      0.433071
+     ],
+     "prior": [
+      0.614,
+      0.508,
+      0.425,
+      0.433
+     ],
+     "source_of_prior": "the coordinator's reference figures",
+     "ratio": 1.0,
+     "verdict": "agree, and MY READ OF THE LOGS CONFIRMS THE ACCOUNT GIVEN WITH THEM: the old-price s4 cell exhausted 1,200.0 of 1,200.0 GPU-s with 12,824 budget refusals and the old-price s5 cell spent 1,066.77 s with none, so the charge fix bites at s4 and not at s5. Expressed in questions rather than fractions the s5 difference is ONE of 127 (54 against 55) and the s4 difference is 14 of 132 (81 against 67). This is the ROBOT pool, a different object from this file's dashcam instants"
     }
    ]
   },
@@ -3143,7 +5332,8 @@
     }
    ],
    "artefact_spread_check": "the arm difference this analysis rests on is coordinator_hold, 0.68 s at covex-v6-state against 0.24 s at the base. What those values ARE: wall seconds between the trace's frame-arrival stamp and the request log's t_submit, on the same clock as t_opportunity and t_delivered, which the committed scorer uses. They carry the meaning claimed, with the declared limit that they bundle the arm's decision with in-process queueing and do not separate the two",
-   "averaged_out_effect_check": "the two covex-v6-state seeds are reported SEPARATELY and their dominant buckets differ (not_released at seed 4, late_at_first_token at seed 5), because seed 4 exhausted its 1,200 GPU-second budget exactly and logged 12,824 budget refusals while seed 5 spent 1,066.77 s and logged none. A pooled dominant bucket is also given, labelled as pooled, so the two cannot be read as one regime"
+   "averaged_out_effect_check": "the two covex-v6-state seeds are reported SEPARATELY and their dominant buckets differ (not_released at seed 4, late_at_first_token at seed 5), because seed 4 exhausted its 1,200 GPU-second budget exactly and logged 12,824 budget refusals while seed 5 spent 1,066.77 s and logged none. A pooled dominant bucket is also given, labelled as pooled, so the two cannot be read as one regime",
+   "trip_classifier_control": "the recall / build / touch classifier is an EXACT decision_id join on 7 of 11 cells, where it reproduces the coordinator's own submitted_* counters exactly (covex-v6-state-uo: 8,167 release_monitor, 488 release_recall, 146 release_piece, 2,466 touch). The 4 v5-rules-2 cells write no decision log and fall back to the declared uncached proxy, whose error was MEASURED on a cell where both are available: 17 of 147 build pieces (11.6 %) have uncached < 200 from cache hits and land in the touch class, 0.7 % of touches. Those 4 cells' build and touch splits carry that error; their NONE share does not, because NONE depends only on whether ANY class overlapped"
   },
   "4_definition_audit": {
    "monitor_opportunity": "one kind == 'monitor' row of outcomes.jsonl.gz, PER RUN; equals the committed sum of dashcam_per_device[*].n_instants on all 10 cells",
@@ -3168,6 +5358,18 @@
    "positive_control": {
     "_claim": "the decomposition's on_time bucket reproduces each cell's OWN committed dashcam on-time count from cell.json, EXACTLY. The required control is a base (hybrid-F-lhreq-noc3) cell, a known-good committed arm; every other cell with a score block is checked the same way.",
     "rows": [
+     {
+      "cell": "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30",
+      "reconstructed": 2209,
+      "committed": 2209,
+      "pass": true
+     },
+     {
+      "cell": "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30",
+      "reconstructed": 2374,
+      "committed": 2374,
+      "pass": true
+     },
      {
       "cell": "covex-v6-state_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
       "reconstructed": 1692,
@@ -3231,26 +5433,100 @@
     ],
     "base_cells_checked": 4,
     "base_verdict": "PASS: exact on all 4 base cells",
-    "all_verdict": "PASS: exact on all 10 cells with a score block",
-    "sum_verdict": "PASS: buckets sum to the declared denominator on all 10 cells"
+    "all_verdict": "PASS: exact on all 12 cells with a score block",
+    "sum_verdict": "PASS: buckets sum to the declared denominator on all 12 cells"
    },
    "what_it_catches": "a known-good committed arm, hybrid-F-lhreq-noc3, must have its own committed on-time count reproduced EXACTLY by this decomposition. It did not on the first attempt: seed 7 came back 7,509 against the committed 7,513 because the release join went through the request log. The control is what found that, and the 4-count size is the point: a decomposition that is wrong by 4 on one cell and right on three would pass any eyeball check of the rung-2 numbers",
-   "control_arm_own_numbers_cross_checked": "hybrid-F seeds 4 to 7 committed on-time 5,986 / 5,375 / 6,297 / 7,513 and denominators 11,764 / 11,769 / 11,786 / 11,779, all read from the cells' own cell.json and all reproduced"
+   "control_arm_own_numbers_cross_checked": "hybrid-F seeds 4 to 7 committed on-time 5,986 / 5,375 / 6,297 / 7,513 and denominators 11,764 / 11,769 / 11,786 / 11,779, all read from the cells' own cell.json and all reproduced",
+   "late_split_cross_path_check": "the three-way release/engine/hop partition is computed on a SEPARATE code path from the late buckets and must reproduce them bucket by bucket. It does, on all 11 cells. That is a check on two code paths agreeing, NOT independent evidence, and is labelled so in late_split_release_vs_engine.partition._identity"
   }
+ },
+ "repricing_comparison": {
+  "_what": "the REPRICED rung-2 cells against the old-price ones, seed by seed, with each cell's BUDGET STATE printed beside its number because that is what decides whether the charge fix could have mattered at all",
+  "_two_different_objects_do_not_conflate": "the `by_deadline` headline quoted for these cells is the ROBOT pool metric, `robot_headline.correct_answers_delivered_by_deadline`, over 127 to 132 QUESTIONS. The dashcam decomposition in this file is a DIFFERENT object over ~11,769 monitor INSTANTS. They are reported in separate rows and must not be compared with each other or summed.",
+  "rows": [
+   {
+    "seed": "4",
+    "robot_pool_by_deadline": {
+     "repriced": 0.613636,
+     "old_price": 0.507576,
+     "delta": 0.10606,
+     "n_questions": 132,
+     "correct_answers_repriced_vs_old": [
+      81,
+      67
+     ],
+     "delta_in_QUESTIONS": 14
+    },
+    "dashcam_on_time_THIS_FILES_OBJECT": {
+     "repriced": 2209,
+     "old_price": 1692,
+     "denominator": 11764,
+     "delta_instants": 517
+    },
+    "budget_state_repriced": {
+     "budget_spent_gpu_s": 1191.41,
+     "budget_gpu_s": 1200.0,
+     "budget_refusals": null,
+     "budget_exhausted": false
+    },
+    "budget_state_old_price": {
+     "budget_spent_gpu_s": 1200.0,
+     "budget_gpu_s": 1200.0,
+     "budget_refusals": 12824,
+     "budget_exhausted": true
+    }
+   },
+   {
+    "seed": "5",
+    "robot_pool_by_deadline": {
+     "repriced": 0.425197,
+     "old_price": 0.433071,
+     "delta": -0.007874,
+     "n_questions": 127,
+     "correct_answers_repriced_vs_old": [
+      54,
+      55
+     ],
+     "delta_in_QUESTIONS": -1
+    },
+    "dashcam_on_time_THIS_FILES_OBJECT": {
+     "repriced": 2374,
+     "old_price": 2314,
+     "denominator": 11769,
+     "delta_instants": 60
+    },
+    "budget_state_repriced": {
+     "budget_spent_gpu_s": 1177.69,
+     "budget_gpu_s": 1200.0,
+     "budget_refusals": null,
+     "budget_exhausted": false
+    },
+    "budget_state_old_price": {
+     "budget_spent_gpu_s": 1066.77,
+     "budget_gpu_s": 1200.0,
+     "budget_refusals": null,
+     "budget_exhausted": false
+    }
+   }
+  ],
+  "_register_warning": "READ THESE AS SINGLE SEEDS WITH NO INTERVAL. There are two repriced cells, one per seed, so no dispersion can be computed and NO DIRECTION IS SUPPORTED by either difference on its own. Specifically, the seed-5 robot difference of -0.0079 is ONE QUESTION out of 127 (55 correct against 54): it is not a regression and must not be presented as one. The seed-4 difference of +0.1061 is 14 questions out of 132. The budget state is why the two differ and this analysis CONFIRMS that account from the logs: the old-price seed-4 cell exhausted its 1,200 GPU-second budget EXACTLY (1,200.0 of 1,200.0) and logged 12,824 budget refusals, while the old-price seed-5 cell spent 1,066.77 s and logged NONE. A charge fix can only bite where the charge bound, so a large seed-4 move and a one-question seed-5 move is the expected shape rather than a conflict. Both repriced cells have ZERO budget refusals (1,191.41 and 1,177.69 of 1,200.0 spent), which is what makes them the first rung-2 cells whose dashcam numbers are attributable to SCHEDULING alone. On the dashcam object this file decomposes, both seeds move the same way (+517 and +60 instants), and the +60 is likewise too small for a single seed to carry."
  },
  "proposed_policy_spec_v6_section_12_row": {
   "_do_not_edit": "research/policy_spec_v6.md is owned by another session. This is the PROPOSED row text only; this script and this JSON do not touch it",
-  "row": "| C5-A | dashcam on-time vs measured latency, covex-v6-state s4-rerun and s5 | the deadline runs from `t_opportunity`, the engine's clock from `t_submit`, and at rung 2 the median release delay is 0.74 s of a 1.0 s deadline (coordinator hold 0.68 s against the base's 0.24 s; uplink ~0.06 s on every arm). So 10.4 % of sent monitors exceeding 0.8 s to first token is consistent with only 2,314 of 11,769 on time: median delivered age is 1.22 s. Exhaustive split of all 11,764 / 11,769 monitor opportunities: not_released 45.9 / 29.4 %, on_time 14.4 / 19.7 %, late_at_first_token 38.0 / 47.9 %, late_at_release 1.0 / 1.8 %, late_at_forward_only 0.8 / 1.2 %, refused 0 / 0. 93-94 % of late_at_first_token had engine service time inside the whole deadline (CONSTRUCTED BOUND). Seed 4 and seed 5 are DIFFERENT REGIMES: s4 exhausted 1,200 GPU-s exactly with 12,824 budget refusals, s5 spent 1,066.77 s with none. Committed counts are 1,692 and 2,314; the planner's 1,786 and 2,458 are the D146 FIRST-TOKEN reading, larger by exactly the late_at_forward_only bucket (94, 144). Positive control: exact on all 4 hybrid-F base cells and all 10 scored cells. s6/s7 HELD-CODE, not read. | experiments/orchestration/live2/dashcam_ontime_reconcile.py -> results/orchestration/live2/frozen_test/dashcam_ontime_reconcile.json |"
+  "row": "| C5-A | dashcam on-time vs measured latency, 12 committed cells incl. BOTH repriced covex-v6-state-uo cells (s4, s5) | Lateness at rung 2 is a coordinator RELEASE decision, not engine time. The deadline runs from `t_opportunity`, the engine's clock from `t_submit`. On the two repriced cells (ZERO budget refusals, so scheduling-attributable): release delay p50 0.742 / 0.724 s and p90 0.968 / 0.954 against the base's 0.300 / 0.888; 71.6 / 71.3 % of released monitors over 0.5 s vs 37.1 %; 71.2 / 70.0 % with release + first token already past the whole 1.0 s deadline vs 36.7 %; while first token moves only 0.44 to 0.48 s at p50 and dashcam uncached median is 376 vs 374, so the engine does the SAME work and episodes are not evicted. Every late monitor partitions exactly into deadline-already-lost-at-release / lost-by-release-plus-engine / lost-only-by-the-forward-hop = 251 / 5,567 / 140 (uo s4) and 187 / 5,652 / 134 (uo s5), on a code path separate from the buckets, on all 12 cells. Exhaustive 8-bucket split sums to the denominator on all 12; uo-s4 / uo-s5 not_released 30.6 / 29.1 %, on_time 18.8 / 20.2 %, late_at_first_token 47.3 / 48.0 %, refused 0. C5 TRIP CLASSES among late tripping monitors (EXACT decision_id join): uo s4 recall 74.4 %, build 9.9 %, touch 5.9 %, NONE 9.9 %; uo s5 NONE 16.5 %; NONE 9.9 to 22.8 % across all cells, so a C5 attribution rule has a reachable path on ~8-9 in 10 halvings and its irreducible residue is ~10-23 % of trips; overlap is co-occurrence in time, not a proven causal wait. Committed on-time counts are the scorer t_delivered rule; the coordinator's first-token flag is larger by exactly the forward-hop bucket (140 / 134 / 94 / 144). REPRICING, single seeds with no interval: the robot by_deadline headline (a DIFFERENT object, 127-132 questions, not this file's 11,769 instants) moves +0.106 at s4 = 14 questions where the old-price cell had EXHAUSTED its 1,200 GPU-s budget with 12,824 refusals, and -0.0079 at s5 = ONE question of 127 where the old-price cell spent 1,066.77 s with none. The s5 difference is not a regression and supports no direction. Positive control exact, 0 tolerance, on all 4 hybrid-F base cells and all 12 scored cells. covex-v6-state s6/s7 HELD-CODE, not read. | experiments/orchestration/live2/dashcam_ontime_reconcile.py -> results/orchestration/live2/frozen_test/dashcam_ontime_reconcile.json |"
  },
  "_provenance": {
-  "git_commit": "f2d617fab1f41108a4019765d3abd046ed189f7d",
+  "git_commit": "4f9d7262480dfbc11c5948aa586e72a8dfec075a",
   "script": "dashcam_ontime_reconcile.py",
   "model": "qwenvl3b",
-  "timestamp": "2026-11-22T10:57:04.739368",
+  "timestamp": "2026-11-22T11:37:47.888880",
   "device": "a6000",
-  "n": 117729,
+  "n": 141262,
   "args": {
    "cells": [
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30",
     "covex-v6-state_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
     "covex-v6-state_n16_s5_1200s_h27_3t_L3_epg_rq30",
     "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
