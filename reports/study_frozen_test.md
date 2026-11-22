@@ -20,10 +20,10 @@ the seed's trace, so **saturated arms at the same seed show identical scores by 
 
 30 valid cells committed: b7 s5 to s7; covex-v6-state s4 (as `_rerun`), s5, s6 (HELD-CODE, see 4); always-cloud s4 to s7
 (s5 as `_rerun`); simplestream s4 to s7; querystream-proactive s4 to s7; mooncake s4 to s7; attentionstore-prefetch s4 to s7;
-warm-all-lru s4 to s6 (s7 still running when this was written at 05:43, due about 05:44; then old v5-rules s6 and s7 close the paper core).
+warm-all-lru s4 to s7 (s7 ended 05:44, 22 x 400 on robo004|s000; its low 3,792 tok/s is because 6,814 dashcam requests went unsent, not because it was healthy); then old v5-rules s6 and s7 close the paper core.
 INVALID / skipped (never used): covex-v6-state s4 first attempt (unknown arm, 19:42), covex-v6-state s7 and its rerun (stopped,
 held code, 21:14 / 21:16), always-cloud s5 first attempt (preflight refused: orphaned server, 21:16). HTTP 400 counts overnight:
-14 always-cloud s7, 16 querystream-proactive s7, 16 attentionstore-prefetch s7, all on `robo004|s000` (see 4); every other
+14 always-cloud s7, 16 querystream-proactive s7, 16 attentionstore-prefetch s7, 22 warm-all-lru s7, all on `robo004|s000` (see 4); every other
 overnight cell 0. Transport errors with no status (not refusals) range 0 to 77 per cell.
 
 ### 2. Paper-core table (BASELINE_MATRIX cells run so far, all valid)
@@ -65,6 +65,7 @@ overnight cell 0. Transport errors with no status (not refusals) range 0 to 77 p
 | warm-all-lru | 4 | 0.371 | 3/132 | 23/357 | fail | 5,595 | 0 |
 | warm-all-lru | 5 | 0.307 | 4/127 | 19/356 | fail | 5,902 | 0 |
 | warm-all-lru | 6 | 0.074 | 2/121 | 30/357 | fail | 5,552 | 0 |
+| warm-all-lru | 7 | 0.295 | 1/105 | 28/359 | fail | 3,792 | 22 |
 | v5-rules (old, ablation ladder) | 4 | 0.439 | 40/132 | 170/357 | fail | 4,704 | 0 |
 | v5-rules-2 = covex-v6-rules | 4 | 0.485 | 38/132 | 245/357 | fail | 4,729 | 0 |
 | v5-rules-2 = covex-v6-rules | 5 | 0.331 | 37/127 | 258/356 | fail | 4,722 | 0 |
@@ -114,7 +115,7 @@ conclusion**. Not posted: covex-v6-fair (D165 objective unbuilt), covex-v6 (plan
 
 ### 4. Incidents
 
-1. **edf, always-cloud, querystream-proactive and attentionstore-prefetch at s7: 14, 14, 16, 16 x HTTP 400**, all on
+1. **edf, always-cloud, querystream-proactive, attentionstore-prefetch and warm-all-lru at s7: 14, 14, 16, 16, 22 x HTTP 400**, all on
    `robo004|s000` with 378 to 587 images, over the 32,768-token context (seed 7 is the only seed with beyond-32k re-asks: 15,
    max history 52,861; flash over32k_s7_finding.json). D170 (user): in scope as a deployment constraint, no capping, seed 7
    kept, refusals are misses (D144 scores a non-200 as the device answer standing). llf, b7, mooncake, simplestream, noc3 and
