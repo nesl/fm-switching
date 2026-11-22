@@ -33,6 +33,13 @@
 # the EWMA is above 0.8 s while NO individual pending monitor was (the cap reacting to its own
 # queueing), 3.9 to 7.3 percent fire on monitors that overlapped NOTHING of ours, and the rest are
 # mixed. The rule suppresses none of those, by design.
+# AT RUNG 2 ITSELF (covex-v6-state-uo s4 and s5, now committed) the rule can see MORE: 63.4 and
+# 63.7 percent of halvings (142 of 224, 121 of 190) fire on all-ours evidence, with 19.2 and 16.3
+# percent having no individual slow pending monitor. Slow monitors by overlap at rung 2: recall
+# 52.2 and 54.4 percent, several 24.0 and 19.7, warm build 9.6 and 11.6, NONE 14.2 and 14.2.
+# The same pass reproduces the user's release-delay reading on those cells exactly: p50 0.742 and
+# 0.724 s, p90 0.968 and 0.953, 71.6 and 71.3 percent over 0.5 s, first token p50 0.483, dashcam
+# uncached 376.
 # results/orchestration/live2/frozen_test/c5attr_trip_attribution.json
 #
 # TWO CANDIDATE INTERVENTIONS, ON TWO DIFFERENT QUANTITIES, NEITHER ADOPTED:
@@ -81,10 +88,13 @@
 #   REGISTER: a replay holds the trace FIXED, so it reports a cap trajectory and NOT an outcome.
 #   These live cells are the only thing that can carry an outcome.
 # results/orchestration/live2/frozen_test/c5attr_digest_proofs.json   (dry, one cell per process)
+#   VERDICT ALL_PASS.
 #   P1 the committed arms are BYTE-IDENTICAL across this work (covex-v6-state-uo, covex-v6-base,
 #      v5-rules-2, b7-edf-feasibility), with the BEFORE side taken from git and not from a number
 #      recorded in this tree.
-#   P2 Step 2b in the code: the cap series digest differs and halvings are suppressed. The number
+#   P2 Step 2b in the code (1,200 s posted cell, seed 4): the cap series digest differs, the first
+#      halving moves 7.1 s -> 11.0 s and cap decreases fall 1,193 -> 699 on 4,938 suppression
+#      events. The number
 #      of DIFFERING DECISIONS in the dry cell is ZERO and is reported as such: with the dry
 #      stand-in's monitor latency a CONSTANT above the trip, the cap reaches its floor in both
 #      arms within seconds and stays there, so the rule can only postpone the first halving. The

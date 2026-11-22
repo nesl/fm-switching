@@ -55,7 +55,7 @@ loss split's own measured buckets.
 | causal link | implementing quantity | value / range in this run | varies as expected? | evidence (the READ, not the write) |
 |---|---|---|---|---|
 | our own released work overlaps a monitor's wait | `coordinator._self_released_overlap`, reported as `self_released_prefill_overlap` | True for the majority of slow monitors on the live traces; on the dry instrumented cell 221 of 312 trips had all-self-released evidence | yes | READ at `hybrid_arm.py` `live2_completed` -> `_attr_mon`, consumed by `_attr_suppresses` |
-| the rule suppresses a halving | `stats["c5_attr_suppressed_decrease"]` | **4,153 to 4,899 suppression EVENTS per rung-1 live cell, which is 436 to 514 halvings PREVENTED (see the register note below); 221 events on the dry instrumented cell** | yes | `_aimd` returns before `self.cap = max(4, self.cap // 2)` |
+| the rule suppresses a halving | `stats["c5_attr_suppressed_decrease"]` | **4,153 to 4,899 suppression EVENTS per rung-1 live cell, which is 436 to 514 halvings PREVENTED (see the register note below); 4,938 events and 494 prevented on the dry instrumented cell** | yes | `_aimd` returns before `self.cap = max(4, self.cap // 2)` |
 | the cap is higher | the cap series | epochs at the floor **7,544 to 8,428 -> 3,324 to 4,877** of 12,000 (replay, rung 1) | yes | `_cap_dashcam_only` reads `self.cap` at `hybrid_arm.py:536` |
 | a higher cap releases more dashcam work | `budget = cap - epi`, `c5_dash_held` | **NOT MEASURABLE OFF A SERVER.** Dry: 0 differing decisions (see Step 2b) | **UNEXERCISED dry** | the live cells of `C5DIAG_CELLS` are the only path |
 | more releases means more on-time alerts | scorer dashcam on-time | not measured here | **UNEXERCISED dry** | as above |
@@ -84,10 +84,11 @@ again. The number of HALVINGS PREVENTED is the difference in cap decreases (436 
 cell), and that is the number to quote. A reader given 4,899 against 599 committed halvings would
 read an impossible count.
 
-**Secondary, in the code, dry, one cell per process** (`c5attr_digest_proofs.json` P2): the cap
-series digest differs and the first halving moves from t = 7.1 s to t = 11.0 s, with halvings
-suppressed (count in the JSON; 221 on the 120 s exploratory cell and the same mechanism at 1,200
-s). **The number of differing DECISIONS is ZERO**, at 300 s and at the full 1,200 s, at seeds 4 and
+**Secondary, in the code, dry, one cell per process** (`c5attr_digest_proofs.json` P2, verdict
+ALL_PASS, 1,200 s posted cell at seed 4): the cap series digest differs
+(`ca03d4809dba2fda` against `ab5cc48d4b8467c3`), the first halving moves from t = 7.1 s to
+t = 11.0 s, cap decreases fall **1,193 to 699** (494 halvings prevented) on 4,938 suppression
+events, and 699 halvings still fire on mixed evidence. **The number of differing DECISIONS is ZERO**, at 300 s and at the full 1,200 s, at seeds 4 and
 5 (the two row files are byte-identical, 7,809 rows), and that is reported rather than hidden.
 The reason is structural and measured, in two parts. (a) Reaching the trip in a dry cell requires
 raising the monitor service time, and the dry stand-in's latency is a CONSTANT, so once it is above
@@ -138,7 +139,7 @@ decision, and it is not used as such.
 ### Step 4: negative controls (two, both pass)
 
 - **The arm's own switch forced off** (`--force-flag off`): byte-identical to `covex-v6-state-uo`,
-  same decision digest and same cap series digest (P4). So the P2 difference is the rule and not
+  same decision digest and same cap series digest (P4, PASS). So the P2 difference is the rule and not
   the wrapper, the subclass or the coordinator's new keys.
 - **The rule present but unable to fire** (replay, NEVER-SUPPRESS: the uncached threshold raised
   past any observed value): reproduces the committed cap trajectory EXACTLY on all eight cells.
@@ -187,7 +188,7 @@ be reported that way.
 | base-arm reconstruction against the arm's own counters | 154/97, 112/106, 118/97, 92/77 | 154/97, 111/106, 117/97, 92/77 | the cells' `arm_stats` | within 1 count | agree |
 | server `max_num_batched_tokens` | 8192 (assumed for the live server) | 8192 | `results/cost/study_e10/e10e_run_meta_h100nvl.json` | 1.000 | agree |
 | `--long-prefill-token-threshold` values ever measured here | 2048 (new, pre-registered) | 1024 (P1), 512 (P2) | `baselines/tuned_engine.py`, StudyE10e | n/a | new value, declared |
-| committed arms' dry decision digests | unchanged | the same digests from git at `f2d617fa` | P1 of `c5attr_digest_proofs.json` | 1.000 | agree |
+| committed arms' dry decision digests | `covex-v6-state-uo` 9a4be873eb3c5fba / 14,218 rows, `covex-v6-base` af8befb9420ad86a / 12,085, `v5-rules-2` 18067c4c66bb44b8 / 11,955, `b7-edf-feasibility` b9aadd1c3a2b26d5 / 12,265 | the identical digests and row counts from git at `f2d617fa` | P1 of `c5attr_digest_proofs.json`, verdict PASS | 1.000 | agree |
 
 2. **Physical plausibility.** No latency is measured or claimed by this work. The two latency-like
 numbers quoted are (a) the dry stand-in's constant monitor service time 0.3950 s, which is
@@ -252,6 +253,8 @@ overlapping request's own decision kind from the cell's decision log.
 | v5-rules-2 s6 | 1,024 | 501 (48.9%) | 73 (7.1%) | 293 (28.6%) | **157 (15.3%)** |
 | v5-rules-2 s7 | 1,002 | 532 (53.1%) | 42 (4.2%) | 315 (31.4%) | **113 (11.3%)** |
 | base noc3 s4 to s7 | 267 to 376 | 79 to 90% | 0 | 0 | **9.8 to 20.5%** |
+| **rung 2** covex-v6-state-uo s4 | 717 | 374 (52.2%) | 69 (9.6%) | 172 (24.0%) | **102 (14.2%)** |
+| **rung 2** covex-v6-state-uo s5 | 619 | 337 (54.4%) | 72 (11.6%) | 122 (19.7%) | **88 (14.2%)** |
 
 **What bounds the candidate, stated plainly.** Classifying the committed halvings by the evidence
 they fired on:
@@ -262,6 +265,8 @@ they fired on:
 | s5 | 548 | 300 (54.7%) | 41 | 40 | **167 (30.5%)** |
 | s6 | 548 | 278 (50.7%) | 30 | 34 | **206 (37.6%)** |
 | s7 | 539 | 295 (54.7%) | 34 | 21 | **189 (35.1%)** |
+| **rung 2** uo s4 | 224 | 142 (63.4%) | 22 | 17 | **43 (19.2%)** |
+| **rung 2** uo s5 | 190 | 121 (63.7%) | 19 | 19 | **31 (16.3%)** |
 
 So **only about half of rung 1's halvings fire on evidence the rule can attribute to our own
 released work (50.7 to 54.7 percent)**. The rest are mixed, are monitors that overlapped nothing of
@@ -275,15 +280,35 @@ suppressed the cap stays at 8, which changes the later trajectory, the evidence 
 subsequent trips. The static share is the honest answer to "how much of the committed behaviour can
 this rule even see"; the replay is the answer to "what does the trajectory look like under it".
 
-**Cross-check against the user's own measurement** (their numbers, measured independently from the
-covex-v6-state-uo s4 logs, against mine from the rung-1 and base cells): release delay
-`t_submit - t_opportunity` base p50 0.30 s / p90 0.89 s with 37 percent over 0.5 s, mine 0.201 to
-0.362 / 0.829 to 0.902 with 26.5 to 42.7 percent; rung-1 p50 0.759 to 0.816 / p90 0.960 to 0.985
-with 71.0 to 86.8 percent over 0.5 s, against their rung-2 0.74 / 0.97 and 72 percent; dashcam
-uncached per request base 374, rung 1 376 to 378, against their 374 and 376. **The quantities agree
-and the direction is theirs: lateness is release delay inside the coordinator, not engine time.**
-The rung-2 (`covex-v6-state-uo`) cells themselves were not on disk in this worktree when the
-breakdown ran; the row is present and marked MISSING, and the script runs unchanged once they are.
+**At rung 2 the rule can see MORE of the behaviour than at rung 1: 63.4 and 63.7 percent of
+halvings fire on evidence attributable to our own released work, against rung 1's 50.7 to 54.7.**
+The remainder is the same two kinds: 16.3 to 19.2 percent are trips with no individual slow pending
+monitor, and 17 to 19 halvings per cell fire on monitors that overlapped nothing of ours.
+
+**Cross-check against the user's own measurement, on the same cells, and it agrees on every
+quantity.** Their numbers were measured independently from the `covex-v6-state-uo` s4 logs; mine
+come from the same cells through this script:
+
+| quantity | user (uo s4) | this run (uo s4 / s5) | base, this run | agree |
+|---|---|---|---|---|
+| release delay p50 | 0.74 s | **0.742 / 0.724** | 0.201 to 0.362 | agree |
+| release delay p90 | 0.97 s | **0.968 / 0.953** | 0.829 to 0.902 | agree |
+| share over 0.5 s | 72% | **71.6 / 71.3%** | 26.5 to 42.7% | agree |
+| engine first-token p50 | 0.48 s | **0.483 / 0.483** | 0.436 to 0.449 | agree |
+| engine first-token p90 | 0.84 s | **0.837 / 0.806** | n/a | agree |
+| dashcam uncached per request | 376 | **376 / 376** | 374 | agree |
+
+**The direction is theirs and this pass reproduces it: the lateness is release delay inside the
+coordinator, not engine time.** That is also why the engine-flag cells are secondary.
+
+**Sensitivity to the 200-token definition, declared because it is large.** The ruling's threshold
+for "a robot prefill of ours" is uncached >= 200 tokens. Re-running the same pass with the
+threshold at 2,000 (so that only the big builds and cold recalls count) drops the attributable
+share of halvings from 63.4 and 63.7 percent to **14.3 and 19.0** at rung 2, and from 50.7 to 54.7
+down to **27.8 to 33.1** at rung 1. So most of what the rule attributes is MANY SMALL prefills
+(median uncached 1,372 to 1,398, as `c5_loss_split.json` already noted), not the few 3,071-token
+warm builds. This is reproducible by changing `UNCACHED_MIN` in
+`c5attr_trip_attribution.py`; the committed JSON uses the ruling's 200 and no other value.
 
 ## 3. The engine-flag diagnostic
 
@@ -301,6 +326,10 @@ diagnostic.
 
 ## 4. What was not done, and what is not established
 
+- **P3's own reading, stated exactly:** on an unmodified dry cell the two arms are
+  byte-identical and the `c5_decrease` counter is ABSENT from both (an absent Counter key is zero),
+  so there is no halving to attribute and the proof instrument in P2 is necessary rather than
+  decorative.
 - **No winner, no adoption, no default changed.** Both candidates are off unless a cell list names
   them.
 - **No outcome.** Nothing here shows that either candidate improves alert on-time delivery. The

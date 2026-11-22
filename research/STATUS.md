@@ -20,8 +20,9 @@ epochs with the cap at its floor fall **7,544-8,428 to 3,324-4,877** of 12,000, 
 6,528 epochs end with a different cap**. Controls: the committed replay reproduces
 `c5_loss_split.json`'s own reconstruction exactly and the base arms' own counters within one count;
 NEVER-SUPPRESS reproduces the committed trajectory exactly; ALWAYS-SUPPRESS moves it. Dry, in
-code (`c5attr_digest_proofs.json`): the four committed arms are byte-identical across this work
-with the BEFORE side taken from git; the cap series moves and 221 halvings are suppressed; and
+code (`c5attr_digest_proofs.json`, ALL_PASS): the four committed arms are byte-identical across this
+work with the BEFORE side taken from git; the cap series moves, the first halving slips 7.1 s to
+11.0 s and cap decreases fall 1,193 to 699; and
 **differing decisions are ZERO, declared UNEXERCISED** because the dry stand-in's monitor latency is
 a constant, so above the trip the cap sits at its floor in both arms.
 
@@ -29,10 +30,12 @@ a constant, so above the trip the cap sits at its floor in both arms.
 second addendum): only **50.7 to 54.7 percent** of rung-1 halvings fire on evidence the rule can
 attribute to our own released work. **30.5 to 37.6 percent** are trips where the EWMA is above
 0.8 s while no individual pending monitor was, 3.9 to 7.3 percent fire on monitors that overlapped
-NOTHING of ours, and the rest are mixed; the rule suppresses none of those by design. The same pass
-reproduces the user's release-delay reading independently: rung-1 release delay p50 0.759 to 0.816 s
-with 71 to 87 percent over 0.5 s against the base's 0.201 to 0.362 s and 26 to 43 percent, with
-dashcam uncached work per request unchanged (374 against 376 to 378).
+NOTHING of ours, and the rest are mixed; the rule suppresses none of those by design. At rung 2 itself (covex-v6-state-uo s4 and s5) the
+rule can see more: **63.4 and 63.7 percent** of halvings fire on all-ours evidence. The same pass
+reproduces the user's release-delay reading on those cells exactly (p50 0.742 and 0.724 s, p90
+0.968 and 0.953, 71.6 and 71.3 percent over 0.5 s, first token p50 0.483, dashcam uncached 376),
+against the base's 0.201 to 0.362 s and 26 to 43 percent, so **the lateness is release delay inside
+the coordinator, not engine time**, and the engine-flag cells are secondary.
 
 **NOT an outcome.** A replay holds the trace fixed. Nothing here shows that either candidate
 improves alert on-time delivery; the posted live cells are the only thing that can.
