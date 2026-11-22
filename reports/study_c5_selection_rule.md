@@ -51,3 +51,33 @@ plain covex-v6-state-uo, covex-v6-state-uo-c5attr, and the shares arm:
 The three D179 (6) checks are pre-registered PASS/FAIL conditions. The two confounds above are
 stated observations from committed cells, not predictions. No outcome of any shares cell is
 claimed anywhere in this file, because none exists yet.
+
+## D181 floors: why lambda counts deliverable demand (addendum 5)
+
+Floors reserve capacity for demand THE SYSTEM CAN DELIVER. An offered opportunity counts toward
+lambda unless a FEASIBILITY check declined it; a THROTTLE decline counts.
+
+The reason the two are not the same, which an earlier planner claim got wrong: a THROTTLE decline
+is produced by the mechanism D179 replaces, so sizing the replacement from the throttle's own
+restriction is circular and would bake C5's collapse into the floor meant to prevent it. A
+FEASIBILITY decline is a correct decision about a request that cannot be delivered at all, and
+reserving floor capacity for it takes capacity from work that can be.
+
+Measured, which is what settles it per type rather than an assumption:
+- alert: 47,098 offered, 39,949 sent, and the feasibility share of the 7,149 not sent is ZERO
+  (no gate exists on that code path, and no decline counter appears in any base cell). The gap is
+  entirely throttle, so lambda uses the OFFERED rate.
+- recall: 485 offered, 179 sent. The 63 percent gap is b7 declining cold histories that cannot
+  make a 3 s deadline, which is D147's explicit consequence. So lambda uses the SUBMITTED rate.
+- assistance: 1,429 offered, 1,428 sent. b7 declines ONE request across four cells, so the choice
+  does not matter to four significant figures.
+
+Frozen: alert 1,622.1, recall 655.8, assistance 242.8 uncached tokens; sum 58.3 percent of
+W_max = 4,323.3, so D180's 0.75 cap does not fire and nothing is scaled; flexible 1,802.6 (41.7
+percent). Both D180 bounds are import-time assertions in experiments/orchestration/live2/
+share_capacity.py so a later edit cannot silently break them.
+
+STATED LIMITATION: the uncached and first-token factors are measured on requests the base ACTUALLY
+SENT, so for recall they describe the deliverable population. If the 306 declined cold histories
+are larger than those sent, and they are, the recall floor is biased DOWNWARD. That is consistent
+with the rule's intent, and a cold rebuild that becomes feasible borrows from the flexible pool.

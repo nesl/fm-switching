@@ -1,0 +1,69 @@
+{
+ "w_max_tokens": 4323.3,
+ "u_alert_tokens": 374.0,
+ "floors_tokens": {
+  "alert": 1622.1,
+  "recall": 655.8,
+  "assistance": 242.8
+ },
+ "flexible_tokens": 1802.6,
+ "floor_fractions": {
+  "alert": 0.3752,
+  "recall": 0.1517,
+  "assistance": 0.0562
+ },
+ "flexible_fraction": 0.417,
+ "factors": {
+  "alert": {
+   "lambda_per_s": 9.8121,
+   "lambda_basis": "offered (C5 declines are a throttle)",
+   "median_uncached": 374.0,
+   "median_first_token_s": 0.442,
+   "offered": 47098,
+   "sent": 39949,
+   "feasibility_declines": 0
+  },
+  "recall": {
+   "lambda_per_s": 0.0373,
+   "lambda_basis": "submitted (b7 declines are feasibility)",
+   "median_uncached": 7717.0,
+   "median_first_token_s": 2.279,
+   "offered": 485,
+   "sent": 179,
+   "feasibility_declines": 306
+  },
+  "assistance": {
+   "lambda_per_s": 0.2975,
+   "lambda_basis": "either; they differ by one request",
+   "median_uncached": 1372.0,
+   "median_first_token_s": 0.5943,
+   "offered": 1429,
+   "sent": 1428,
+   "feasibility_declines": 1
+  }
+ },
+ "source": "hybrid-F-lhreq-noc3 (covex-v6-base) seeds 4 to 7, _L3_epg_rq30, healthy windows only; derivation in results/orchestration/live2/frozen_test/d181_share_floors.json",
+ "scaling_applied": false,
+ "rulings": [
+  "D179 (2), (3)",
+  "D180",
+  "D181",
+  "user addendum 5, 2026-11-22"
+ ],
+ "_what": "D179 (2) / D180 / D181 / addendum 5: the FROZEN capacity and floors for share-based admission, derived from committed covex-v6-base cells",
+ "decline_split_alert": {
+  "offered": 47098,
+  "sent": 39949,
+  "not_sent": 7149,
+  "feasibility_declines": 0,
+  "feasibility_share_of_offered": 0.0,
+  "bound_from_addendum_5": 0.02,
+  "verdict": "0.00 percent is inside the 2 percent bound, so the alert floor FREEZES at 1622.1",
+  "how_zero_was_established_two_ways": {
+   "code": "hybrid/hybrid_arm.py computes slack at line 351 and appends the dashcam item UNCONDITIONALLY at line 355; the only read of it['slack'] is line 443, inside the utility-per-cost ORDERING index, so no feasibility gate exists on the alert path. The D170 32k rule reads RecallQuery.readiness_tokens and cannot touch a monitor",
+   "data": "no decline counter (budget_refusal, over_limit, infeasible) appears in ANY of the four committed covex-v6-base cells; an absent Counter key is zero"
+  },
+  "throttle_side_not_split": "the arm's throttle counters count ITEM-PERIODS, not opportunities, because both loops run once per 100 ms period: c5_dash_held 45,839 to 50,589 and c2_throttled_dash 2,670 to 4,348 per cell. They cannot be differenced against the 7,149 not-sent OPPORTUNITIES, so no C5-against-C2 split is claimed. Addendum 5's check needs only the feasibility share",
+  "note_on_7153_vs_7149": "the ruling quotes 7,153; the authoritative test (an outcome whose cloud_payload carries a request_id) gives 7,149. The difference is the truncated request.jsonl at seed 7, which gives 10,511 sends by request rows against 10,515 by cloud_payload. The floor moves only in its fourth significant figure, so 1622.1 stands; 7,149 is the figure to quote"
+ }
+}
