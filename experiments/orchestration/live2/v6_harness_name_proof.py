@@ -33,7 +33,12 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 ENTRY = HERE / "run_live2_real.py"
 
-LADDER = ["covex-v6-base", "covex-v6-rules", "covex-v6-state", "covex-v6-fair", "covex-v6"]
+LADDER = ["covex-v6-base", "covex-v6-rules", "covex-v6-state", "covex-v6-fair", "covex-v6",
+          # D174 (1): the POSTED repriced arm, and its siblings, which a cell list names and so
+          # the harness must resolve. The first V6STATE_CELLS release was SKIPPED for exactly
+          # this: a name that resolved in my process and not in the harness's.
+          "covex-v6-state-uo", "covex-v6-rules-uo", "covex-v6-state-wo", "covex-v6-rules-wo",
+          "covex-v6-state-d162"]
 UNKNOWN = "covex-v6-not-an-arm"
 MARKER = "unknown arm"
 

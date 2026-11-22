@@ -1,0 +1,204 @@
+{
+ "_what": "covex-v6-state (rung 2) proofs",
+ "_register": "DRY cells, no GPU and no engine: claims about decisions, not about latency",
+ "cell": {
+  "seed": 4,
+  "n": 16,
+  "run_s": 1200.0,
+  "ratio": "50:50",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dry": true
+ },
+ "margin_cf": 0.16456,
+ "digest_convention": "committed digests include arm_version; the no-version digest is the one that answers whether the DECISIONS are the same",
+ "P0_positive_control": {
+  "_claim": "two arms that must differ do differ",
+  "digests": [
+   "0c04ab712b3fb627",
+   "fc4918a38efe8996"
+  ],
+  "differ": true,
+  "verdict": "PASS: the check is live"
+ },
+ "P1_negative_control": {
+  "_claim": "the rung with every added channel off collapses to covex-v6-rules",
+  "v5_rules_2_full_digest": "612d4399acdc6a29",
+  "off_full_digest": "cebccc0bf45755c6",
+  "v5_rules_2_no_version": "69874e94d2ddee85",
+  "off_no_version": "69874e94d2ddee85",
+  "rows": [
+   4376,
+   4376
+  ],
+  "collapses_byte_identically": true,
+  "note": "the four capability flags are INSTANCE attributes for this reason: as class attributes they stayed on under -off, state pricing kept changing the budget charge, and the control differed from the rung below while claiming to be it",
+  "verdict": "PASS: byte-identical decisions"
+ },
+ "P2_step2b": {
+  "_claim": "the plan_state switch reaches a decision",
+  "state_decisions": 44235,
+  "skipped": {
+   "state_skipped_nothing_built": 9447,
+   "state_skipped_no_question_estimate": 42189,
+   "state_skipped_rules_acting": 129
+  },
+  "reaches_a_decision": true,
+  "verdict": "PASS: plan_state reaches 44235 decisions, where before this rung it had no caller outside the proofs and implemented no causal link in any run"
+ },
+ "P3_port_rule": {
+  "_claim": "the rung's CHARACTERISTIC decision, TOUCH, occurs at least once",
+  "chosen": {
+   "state_chosen_KEEP": 43338,
+   "state_chosen_HOLD_BACK": 897
+  },
+  "touch_emitted": 0,
+  "decisions_moved_against_covex_v6_rules": true,
+  "verdict": "FAIL: ZERO TOUCH decisions. The rung makes 44235 state decisions and chooses KEEP on every one, so covex-v6-state is byte-identical to covex-v6-rules and a cell of it would spend GPU hours reproducing the rung below"
+ },
+ "P4b_harm_warm_computed": {
+  "_claim": "harm_warm is COMPUTED from the D162 model and never a declared grid value (research/prereg_harm_warm_d172.md)",
+  "coefficient": null,
+  "priced": 36628,
+  "no_queue_behind_the_warm": 7607,
+  "unpriced_refusals": 0,
+  "nonzero": 36628,
+  "mean_over_priced": 0.050055,
+  "_mean_denominator": "the PRICED decisions, not all state decisions; dividing the sum by every decision understates it by the fraction with nothing queued behind the warm",
+  "max": 0.176,
+  "capped": 0,
+  "cap_counter_exists": true,
+  "per_candidate_gain_against_margin": {
+   "HOLD_BACK": {
+    "n": 44235,
+    "mean": 0.041448,
+    "max": 0.176,
+    "n_over_margin": 897
+   },
+   "WARM": {
+    "n": 44235,
+    "mean": -0.013212,
+    "max": 0.098,
+    "n_over_margin": 0
+   },
+   "TOUCH": {
+    "n": 44235,
+    "mean": 0.028179,
+    "max": 0.151,
+    "n_over_margin": 0
+   }
+  },
+  "identity_check": "HOLD_BACK's value IS harm_warm by construction, so its gain sum must equal the harm_warm sum: 1833432 vs 1833432",
+  "verdict": "PASS: harm_warm is priced on 36628 decisions, capped 0, and the three candidate gains are reported separately"
+ },
+ "P4_gain_distribution": {
+  "_claim": "the predicted gain of each state decision against MARGIN_CF (D172)",
+  "_register": "a REAL dry cell at the posted shape, 16 devices and 1200 s, not a constructed grid",
+  "margin_cf": 0.16456,
+  "n_decisions": 44235,
+  "n_decisions_with_a_delta": 44234,
+  "n_timeout_or_unscored": 1,
+  "n_positive_gain": 44234,
+  "mean_gain": 0.052929,
+  "max_gain": 0.176,
+  "shortfall_of_the_maximum": -0.01144,
+  "exceedance": {
+   ">0": 44234,
+   ">0p01": 36555,
+   ">0p05": 18762,
+   ">0p1": 7262,
+   ">0p12": 5699,
+   ">0p14": 2772,
+   ">0p16": 1141,
+   ">0p16456": 897
+  },
+  "n_over_margin": 897,
+  "fraction_over_margin": 0.020278,
+  "ceiling": "the gain is w * p_question * acc * (p_warm - p_cold) with acc = 0.250, so its arithmetic ceiling is 0.250 and a gain above the margin is not forbidden by the formula. The maximum OBSERVED is 0.176, which is a near miss and not a cap",
+  "rule2_class": "FIRED AND DID NOT HELP, with the reason named: plan_state's own argmax prefers a non-KEEP candidate on 44234 of 44235 decisions, and D151's margin rule then overrides it back to KEEP on every one of them. The mechanism is not absent, not unexpressible and not unexercised: it decides, and the MODEL-ERROR BAR is what stops it acting",
+  "verdict": "PASS: the distribution is reported against the margin"
+ },
+ "P5_baselines_unchanged": {
+  "_claim": "no committed arm declares any of the four capability flags",
+  "arms_declaring_a_flag": [
+   {
+    "arm": "covex-v6-state",
+    "flags": [
+     "live2_offload_controls",
+     "live2_touch_requests",
+     "live2_state_priced_costs",
+     "live2_belief_apply"
+    ]
+   },
+   {
+    "arm": "covex-v6-state-nobelief",
+    "flags": [
+     "live2_offload_controls",
+     "live2_touch_requests",
+     "live2_state_priced_costs"
+    ]
+   },
+   {
+    "arm": "covex-v6-state-noprice",
+    "flags": [
+     "live2_offload_controls",
+     "live2_touch_requests",
+     "live2_belief_apply"
+    ]
+   },
+   {
+    "arm": "covex-v6-state-noretain",
+    "flags": [
+     "live2_touch_requests",
+     "live2_state_priced_costs",
+     "live2_belief_apply"
+    ]
+   },
+   {
+    "arm": "covex-v6-state-notouch",
+    "flags": [
+     "live2_offload_controls",
+     "live2_state_priced_costs",
+     "live2_belief_apply"
+    ]
+   },
+   {
+    "arm": "v5-full",
+    "flags": [
+     "live2_offload_controls",
+     "live2_touch_requests",
+     "live2_state_priced_costs"
+    ]
+   },
+   {
+    "arm": "v5-full-noguarddefer",
+    "flags": [
+     "live2_offload_controls",
+     "live2_touch_requests",
+     "live2_state_priced_costs"
+    ]
+   },
+   {
+    "arm": "v5-full-nohealthy",
+    "flags": [
+     "live2_offload_controls",
+     "live2_touch_requests",
+     "live2_state_priced_costs"
+    ]
+   },
+   {
+    "arm": "v5-full-off",
+    "flags": [
+     "live2_offload_controls",
+     "live2_touch_requests",
+     "live2_state_priced_costs"
+    ]
+   }
+  ],
+  "only_this_rung_declares_them": false,
+  "verdict": "FAIL: an arm outside this rung declares a capability flag"
+ },
+ "ALL_PASS": false,
+ "POST_V6STATE_CELLS": false,
+ "post_decision": "DO NOT POST: covex-v6-state is byte-identical to covex-v6-rules on this cell, so every posted cell would spend GPU hours reproducing a cell that already exists. The blocker is the margin, not the wiring, and it is recorded rather than worked around: MARGIN_CF is never changed (D157, D172)"
+}

@@ -132,19 +132,45 @@ def first_token_s(uncached_tokens: int, queued_uncached_ahead: int = 0) -> float
 # forward pass, and charging it to a GPU budget is the SAME category error as the queue term one
 # level down: time the request OCCUPIES rather than GPU work it CONSUMES.
 #
-# So "uncached-only" is here, and it is NOT the default: D173 (1) names intercept plus
-# per-uncached, and the finding above is reported for ruling rather than acted on.
-CHARGE_MODE = "work-only"       # "first-token" | "work-only" (D173 (1)) | "uncached-only"
+# D174 (1) RULES THE UNCACHED-ONLY CHARGE. The intercept is occupancy, not work: it adds a flat
+# 0.0678 s per request, tracks nothing the engine does, and takes utilisation past 1.0 of wall on
+# both measured cells. The per-uncached term alone tracks measured GPU busy time to 2 percent and
+# its implied 5,482 tok/s agrees with the committed 5,600 tok/s prefill rate. So the charge is one
+# term, and the two terms the planner still needs are kept where they are correct:
+#
+#   per_uncached * u               THE CHARGE. Work this request makes the GPU do.
+#   + intercept                    occupancy, not work: out of the charge (D174 (1)).
+#   + per_queue * queued_ahead     delay this request SUFFERS: planner harm only (D173 (1)).
+#
+# WHY THE MODE IS ARM-SCOPED FROM HERE ON. It used to be one module global, and a module global is
+# how covex-v6-state s6 ran a charge nobody had ruled: the switch that selected it defaulted ON
+# through a helper and no proof asked the arm itself. An arm now carries its own mode, so an arm
+# named for work-only cannot silently start charging something else when the default moves.
+RULED_CHARGE_MODE = "uncached-only"                   # D174 (1), 2026-11-22
+CHARGE_MODE = RULED_CHARGE_MODE   # module default; "first-token" | "work-only" | "uncached-only"
+MODES = ("first-token", "work-only", "uncached-only")
 
 
-def price_gpu_s(uncached_tokens: int, queued_uncached_ahead: int = 0) -> float:
-    """The coordinator's budget charge. Identical arithmetic to `first_token_s` BY CONSTRUCTION in
-    the default mode, so the ruling's "identically in both" holds as written."""
-    if CHARGE_MODE == "uncached-only":
+def price_gpu_s(uncached_tokens: int, queued_uncached_ahead: int = 0,
+                mode: Optional[str] = None) -> float:
+    """The coordinator's budget charge, in the arm's declared mode (default: the ruled one)."""
+    m = mode or CHARGE_MODE
+    if m not in MODES:
+        raise ValueError("unknown charge mode %r" % (m,))
+    if m == "uncached-only":
         return PER_UNCACHED_S * max(int(uncached_tokens), 0)
-    if CHARGE_MODE == "work-only":
+    if m == "work-only":
         return first_token_s(uncached_tokens, 0)
     return first_token_s(uncached_tokens, queued_uncached_ahead)
+
+
+def arm_charge_mode(arm: Any) -> str:
+    """The arm's own charge mode. An arm that declares none gets the RULED mode, never a
+    module-global that some other code path may have moved."""
+    m = getattr(arm, "live2_charge_mode", None) or RULED_CHARGE_MODE
+    if m not in MODES:
+        raise ValueError("arm %r declares unknown charge mode %r" % (arm, m))
+    return str(m)
 
 
 def arm_enables(arm: Any) -> bool:
@@ -159,6 +185,10 @@ def as_dict() -> Dict[str, Any]:
             "replaces": ("costs.recall_gpu_s(tokens, tier), StudyRH5 Part A isolated reload TTFT, "
                          "which scales with the PREFIX and so overcharged a warm touch 3.4x at a "
                          "7k prefix rising to 9.5x at 21k"),
+            "charge": {"ruled_mode": RULED_CHARGE_MODE, "ruling": "D174 (1), 2026-11-22",
+                       "charge_terms": "per_uncached * uncached",
+                       "excluded": {"intercept": "occupancy, not work (D174 (1))",
+                                    "queue term": "delay suffered, planner harm only (D173 (1))"}},
             "read_by": ["coordinator budget charge (every request of a covex-v6 arm)",
                         "cf_planner candidate harm, via cf_objective.harm_warm_from_queue_delay"]}
 

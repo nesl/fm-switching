@@ -63,6 +63,7 @@ for _p in (str(_Path(__file__).resolve().parents[1] / "baselines"),
 from interface import Action, Observation, SessionAction                       # noqa: E402
 
 import arms_v5rules2 as V2                                                     # noqa: E402
+import d162_price as DP                                                        # noqa: E402
 from touch_policy import TOUCH_UNCACHED_TOKENS as TP_TOUCH_UNCACHED            # noqa: E402
 
 V6STATE_VERSION = "covex-v6-state-1.0"
@@ -92,6 +93,7 @@ class V6StateArm:
                  state_priced_costs: Optional[bool] = None,
                  belief_apply: Optional[bool] = None,
                  d162_pricing: Optional[bool] = None,
+                 charge_mode: Optional[str] = None,
                  dry: bool = False, dry_margin: Optional[float] = None,
                  budget_ms: Optional[float] = None,
                  **rules_kw: Any) -> None:
@@ -120,6 +122,11 @@ class V6StateArm:
         # cell, and robot fell to 12 of 121. The same shape as the name check: I verified the
         # thing I was thinking about instead of the thing that decides the behaviour.
         self.live2_d162_pricing = (False if d162_pricing is None else bool(d162_pricing))
+        # D174 (1): the charge MODE is the arm's, read by the coordinator through
+        # d162_price.arm_charge_mode. An arm that declares none charges the ruled uncached-only.
+        if charge_mode is not None and charge_mode not in DP.MODES:
+            raise ValueError("unknown charge mode %r" % (charge_mode,))
+        self.live2_charge_mode = charge_mode or DP.RULED_CHARGE_MODE
         self.dry = bool(dry)
         self.dry_margin = dry_margin
         self._cf = None
@@ -178,6 +185,7 @@ class V6StateArm:
                      touch_requests=self.live2_touch_requests,
                      belief_apply=self.live2_belief_apply,
                      d162_pricing=self.live2_d162_pricing,
+                     budget_charge_mode=self.live2_charge_mode,
                      one_price_source=("D162 predicted first token, read identically by the "
                                        "planner's TOUCH harm and the coordinator's budget "
                                        "charge (user ruling, 2026-11-21)"),
@@ -428,20 +436,30 @@ class V6RulesWorkOnlyArm(V2.V5Rules2Arm):
     """
 
     live2_d162_pricing = True
+    live2_charge_mode = "work-only"
 
-    def __init__(self, name: str = "covex-v6-rules-wo", **kw: Any) -> None:
+    def __init__(self, name: str = "covex-v6-rules-wo", *,
+                 charge_mode: str = "work-only", **kw: Any) -> None:
         V2.V5Rules2Arm.__init__(self, name=name, **kw)
-        self.arm_version = "covex-v6-rules-wo-1.0"
+        self.arm_version = "covex-v6-rules-%s-1.0" % ("wo" if charge_mode == "work-only"
+                                                      else "uo")
         self.live2_d162_pricing = True
+        # D174 (1) SUPERSEDES work-only. This arm keeps its name and its mode together: the
+        # module default moved to uncached-only and an arm named -wo must not quietly follow it.
+        self.live2_charge_mode = charge_mode
         self.live2_source = (self.live2_source
-                             + "; budget charged by live2/d162_price work-only (D173 (1), (2))")
+                             + "; budget charged by live2/d162_price %s (D173 (2), D174 (1))"
+                             % self.live2_charge_mode)
 
     def live2_describe(self) -> Dict[str, Any]:
         d = dict(V2.V5Rules2Arm.live2_describe(self))
         d.update(arm=self.name, arm_version=self.arm_version,
                  rung="covex-v6-rules with corrected budget charging (D173 (2))",
-                 budget_charge=("live2/d162_price work-only: intercept + per-uncached, no queue "
-                                "term; the queue term is used only in the planner's harm"),
+                 budget_charge=("live2/d162_price %s; the queue term is used only in the "
+                                "planner's harm (D173 (1)), and under the ruled uncached-only "
+                                "mode the intercept is excluded too (D174 (1))"
+                                % self.live2_charge_mode),
+                 budget_charge_mode=self.live2_charge_mode,
                  state_aware_decision_pricing=False,
                  source=self.live2_source)
         return d
@@ -470,9 +488,19 @@ V6STATE_ARMS = {
     # D173 (2) rerun arms. DISTINCT NAMES, because the driver never reruns a cell whose name
     # already exists valid, and because the charge must be enabled BY THE ARM: a tag suffix
     # carries no flags.
-    "covex-v6-state-wo": lambda **kw: V6StateArm(name="covex-v6-state-wo",
-                                                 d162_pricing=True, **kw),
-    "covex-v6-rules-wo": lambda **kw: V6RulesWorkOnlyArm(name="covex-v6-rules-wo", **kw),
+    # SUPERSEDED BY D174 (1), kept so the two charges stay separable by name rather than by
+    # whatever the module default happens to be. Neither -wo arm is posted.
+    "covex-v6-state-wo": lambda **kw: V6StateArm(name="covex-v6-state-wo", d162_pricing=True,
+                                                 charge_mode="work-only", **kw),
+    "covex-v6-rules-wo": lambda **kw: V6RulesWorkOnlyArm(name="covex-v6-rules-wo",
+                                                         charge_mode="work-only", **kw),
+    # D174 (1) THE RULED RERUN ARM: uncached tokens only, no intercept, no queue term.
+    "covex-v6-state-uo": lambda **kw: V6StateArm(name="covex-v6-state-uo", d162_pricing=True,
+                                                 charge_mode="uncached-only", **kw),
+    # built for symmetry and NOT posted: D174 (1) skips the rung-1 rerun because the budget never
+    # bound there (zero refusals in every committed v5-rules-2 cell).
+    "covex-v6-rules-uo": lambda **kw: V6RulesWorkOnlyArm(name="covex-v6-rules-uo",
+                                                         charge_mode="uncached-only", **kw),
 }
 
 

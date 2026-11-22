@@ -1,3 +1,75 @@
+## 2026-11-22 morning (session D): D174 applied, rung 2 posted, and the rung-1 gap explained
+
+**Last updated: 2026-11-22. The 06:00 summary below is superseded on the budget charge and on
+whether a rung-2 cell list is posted; everything else in it stands.**
+
+### D174 (1): the budget charge is uncached tokens only, and it PASSES D102 both halves
+
+The charge is `0.0001824312597782467 x uncached`. No 0.0678 s intercept (per-request OCCUPANCY,
+not work) and no queue term (delay SUFFERED, not work); both excluded terms stay in the planner's
+harm to others, where they are the right quantity.
+
+| half of D102 | result |
+|---|---|
+| never binds artificially | 0 budget refusals on a dry 8-device probe cell, 2,038 state decisions, 4,376 decision rows against covex-v6-rules' 4,376. Work-only gave 298 refusals and 4,317 rows; the full first-token formula gave 10,612 and silenced `plan_state` entirely |
+| utilisation tracks measured GPU busy time | per-uncached term 737.5 s against measured 721.9 s (s4) and 985.3 against 964.5 s (s5), ratio 1.022 on both; implied 5,482 tok/s against the committed 5,600; utilisation 0.61 and 0.82 of wall against measured busy fractions 0.60 and 0.80, nothing oversubscribed. Work-only reached 1.07 and 1.34 and FAILED here |
+
+`V6STATE_CELLS` is reposted as `covex-v6-state-uo` at seeds 4 to 7, a DISTINCT name so the
+budget-mispriced s4/s5 and held-code s6/s7 cells keep their meaning. The rung-1 rerun is skipped
+per the ruling: the budget never bound there.
+
+**The charge MODE is now arm-scoped** (`live2_charge_mode`), not a module global. A global that any
+code path can move is how covex-v6-state s6 ran an unruled charge and died at t = 264 s of 1,200.
+
+### D174 (2): the rung-1 dashcam submission gap is C5's AIMD cap collapsing
+
+Read-only from the committed cells, no new cells. Identical opportunity streams (11,764 monitor
+opportunities at s4 in both arms); released fraction 0.41 to 0.46 at rung 1 against the base's
+0.83 to 0.89 across seeds 4 to 7. **Both hypotheses in the ruling fail, and the mechanism is a
+third one.**
+
+- **(a) warm builds occupy slots: not the per-epoch mechanism, and it cannot be.** C5 subtracts
+  only `running_by_class["episodic"]` from its cap and cstate classes piece and whole builds under
+  `"recall"`, so a build cannot take a dashcam cap slot at all. 59 to 70 percent of the epochs
+  where a monitor goes unreleased have NO build in flight.
+- **(b) C2 fires more often: REFUTED WITH THE OPPOSITE SIGN.** Epochs with a robot inside
+  k_r = 0.9 s are 261 to 562 at rung 1 against the BASE's 578 to 711, because warming is what
+  stops a question being at risk. At-risk epochs touch 2 to 6 percent of the gap epochs.
+- **(c) the AIMD cap collapses.** 156 to 180 long builds per cell, under one in flight on average,
+  push monitor first-token p90 from 0.65 to 0.71 s to 1.39 to 1.65 s and the share above C5's 0.8 s
+  trip from 4 to 6 percent to 21 to 27. Each trip HALVES the cap (floor 4) and recovery is +1 per
+  5 s, so the cap sits at its floor for 7,544 to 8,428 of 12,000 epochs against the base's 1,844
+  to 2,989, and the release budget (cap minus episodic in flight) is zero in 87 to 93 percent of
+  the gap epochs. The hysteresis is why (a) reads as absent per epoch: the damage outlives the
+  build that caused it.
+
+**Positive control:** the reconstructed AIMD trajectory reproduces the base arm's own `c5_decrease`
+and `c5_increase` exactly on all four base cells (154/154, 112/111, 118/117, 92/92 and 97/97,
+106/106, 97/97, 77/77). Without that the cap trajectory would be a model output compared against
+nothing.
+
+**Declared proxy (check 6):** the C2 test is reconstructed from arrival and release times inside
+k_r, not from the arm's predicted remaining work, so it OVERSTATES at-risk periods and the
+refutation runs in the safe direction. It exists because v5-rules-2's `arm_stats` reports only its
+own warming counters: the base hybrid it wraps keeps `c2_throttle_periods`, `c2_throttled_dash` and
+`c5_dash_held` in a separate Counter that NO committed v5-rules-2 cell surfaces. Recommended for
+future cells.
+
+**What this means for the ladder.** The rung-1 dashcam loss is not budget (zero refusals), not the
+cap arithmetic and not C2. It is the base policy's own controller reacting to a latency signal that
+warming moves, so repricing could never have fixed it. Any fix is a change to C5's AIMD rule or to
+how warming yields: **a policy change for the user to rule on, not an implementation fix, and it
+has not been made.**
+
+### D174 (3): the oversized logs are mirrored and verified
+
+The four attentionstore-prefetch `decision.jsonl.gz` (8.1 to 10.5 MB, 1.01 to 1.34 M rows, 99
+percent `state_action`) stay off git. Mirrored to `/home/pragya/fm_oversized_logs/runs/<cell>/` and
+verified against `oversized_logs_manifest.jsonl` on sha256, byte count, row count, kind histogram
+and first and last timestamp: four of four exact. The H100's key is read-only on flash and flash's
+key is confined to the H100's rsync root, so the transfer is a PULL from the share; no new key was
+needed and nothing was worked around.
+
 ## 06:00 summary (session D, 2026-11-21 overnight): the v6 ladder built to rung 3, and why no cell list was posted
 
 **Last updated: 2026-11-21 (overnight). The section below this one is SUPERSEDED for everything it

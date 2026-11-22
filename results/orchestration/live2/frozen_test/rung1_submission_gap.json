@@ -1,0 +1,463 @@
+{
+ "_what": "D174 (2): the rung-1 dashcam submission gap, read-only from committed cells",
+ "_method": "monitor opportunities from outcomes.jsonl.gz (every opportunity appears, presented to the device); released = the opportunity whose cloud_payload carries a request_id; in-flight occupancy rebuilt from request.jsonl.gz t_submit and t_done, classed by whether the request carries an opportunity_id (monitor or recall) or none (a warm-ahead build)",
+ "_proxy_declaration": "the C2 at-risk test is reconstructed from arrival and release times inside k_r = 0.3 x 3.0 s, NOT from the arm's predicted remaining work, so it OVERSTATES at-risk periods; the arm's own c2_throttle_periods is absent from every committed v5-rules-2 cell because the wrapper keeps its own Counter",
+ "cells": [
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11764,
+   "monitors_released": 9743,
+   "submission_gap": 2021,
+   "released_fraction": 0.828,
+   "counts_submitted_monitor": 9745,
+   "builds_submitted": 0,
+   "recalls_released": 410,
+   "epochs_with_an_unreleased_monitor": 1420,
+   "a_slot_competition": {
+    "build_in_flight_mean_over_gap_epochs": 0.0,
+    "build_in_flight_mean_over_all_epochs": 0.0,
+    "gap_epochs_with_zero_builds_in_flight": 1420,
+    "episodic_in_flight_mean_over_gap_epochs": 4.063
+   },
+   "b_c2_throttle_proxy": {
+    "epochs_with_a_robot_inside_k_r": 659,
+    "gap_epochs_with_a_robot_inside_k_r": 53,
+    "share_of_gap_epochs": 0.037
+   },
+   "c_aimd_cap_collapse": {
+    "monitor_ttft_p50": 0.439,
+    "monitor_ttft_p90": 0.693,
+    "monitor_ttft_over_the_0_8_s_trip": 0.055,
+    "epochs_with_the_estimate_over_the_trip": 1356,
+    "reconstructed_cap_mean": 6.358,
+    "epochs_at_the_cap_floor_4": 2989,
+    "epochs_at_cap_8": 5370,
+    "reconstructed_decreases": 154,
+    "reconstructed_increases": 97,
+    "arm_recorded_decreases": 154,
+    "arm_recorded_increases": 97,
+    "gap_epochs_where_episodic_in_flight_reached_the_cap": 1057,
+    "gap_epochs_where_episodic_in_flight_reached_the_throttle_floor": 1412
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11769,
+   "monitors_released": 9808,
+   "submission_gap": 1961,
+   "released_fraction": 0.833,
+   "counts_submitted_monitor": 9812,
+   "builds_submitted": 0,
+   "recalls_released": 401,
+   "epochs_with_an_unreleased_monitor": 1453,
+   "a_slot_competition": {
+    "build_in_flight_mean_over_gap_epochs": 0.0,
+    "build_in_flight_mean_over_all_epochs": 0.0,
+    "gap_epochs_with_zero_builds_in_flight": 1453,
+    "episodic_in_flight_mean_over_gap_epochs": 4.518
+   },
+   "b_c2_throttle_proxy": {
+    "epochs_with_a_robot_inside_k_r": 711,
+    "gap_epochs_with_a_robot_inside_k_r": 83,
+    "share_of_gap_epochs": 0.057
+   },
+   "c_aimd_cap_collapse": {
+    "monitor_ttft_p50": 0.449,
+    "monitor_ttft_p90": 0.706,
+    "monitor_ttft_over_the_0_8_s_trip": 0.057,
+    "epochs_with_the_estimate_over_the_trip": 994,
+    "reconstructed_cap_mean": 6.443,
+    "epochs_at_the_cap_floor_4": 2590,
+    "epochs_at_cap_8": 5432,
+    "reconstructed_decreases": 112,
+    "reconstructed_increases": 106,
+    "arm_recorded_decreases": 111,
+    "arm_recorded_increases": 106,
+    "gap_epochs_where_episodic_in_flight_reached_the_cap": 1170,
+    "gap_epochs_where_episodic_in_flight_reached_the_throttle_floor": 1447
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11786,
+   "monitors_released": 9883,
+   "submission_gap": 1903,
+   "released_fraction": 0.839,
+   "counts_submitted_monitor": 9886,
+   "builds_submitted": 0,
+   "recalls_released": 411,
+   "epochs_with_an_unreleased_monitor": 1349,
+   "a_slot_competition": {
+    "build_in_flight_mean_over_gap_epochs": 0.0,
+    "build_in_flight_mean_over_all_epochs": 0.0,
+    "gap_epochs_with_zero_builds_in_flight": 1349,
+    "episodic_in_flight_mean_over_gap_epochs": 4.319
+   },
+   "b_c2_throttle_proxy": {
+    "epochs_with_a_robot_inside_k_r": 578,
+    "gap_epochs_with_a_robot_inside_k_r": 61,
+    "share_of_gap_epochs": 0.045
+   },
+   "c_aimd_cap_collapse": {
+    "monitor_ttft_p50": 0.446,
+    "monitor_ttft_p90": 0.692,
+    "monitor_ttft_over_the_0_8_s_trip": 0.051,
+    "epochs_with_the_estimate_over_the_trip": 983,
+    "reconstructed_cap_mean": 6.498,
+    "epochs_at_the_cap_floor_4": 2592,
+    "epochs_at_cap_8": 5766,
+    "reconstructed_decreases": 118,
+    "reconstructed_increases": 97,
+    "arm_recorded_decreases": 117,
+    "arm_recorded_increases": 97,
+    "gap_epochs_where_episodic_in_flight_reached_the_cap": 1042,
+    "gap_epochs_where_episodic_in_flight_reached_the_throttle_floor": 1348
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11779,
+   "monitors_released": 10515,
+   "submission_gap": 1264,
+   "released_fraction": 0.893,
+   "counts_submitted_monitor": 10519,
+   "builds_submitted": 0,
+   "recalls_released": 385,
+   "epochs_with_an_unreleased_monitor": 950,
+   "a_slot_competition": {
+    "build_in_flight_mean_over_gap_epochs": 0.0,
+    "build_in_flight_mean_over_all_epochs": 0.0,
+    "gap_epochs_with_zero_builds_in_flight": 950,
+    "episodic_in_flight_mean_over_gap_epochs": 4.434
+   },
+   "b_c2_throttle_proxy": {
+    "epochs_with_a_robot_inside_k_r": 694,
+    "gap_epochs_with_a_robot_inside_k_r": 47,
+    "share_of_gap_epochs": 0.049
+   },
+   "c_aimd_cap_collapse": {
+    "monitor_ttft_p50": 0.436,
+    "monitor_ttft_p90": 0.652,
+    "monitor_ttft_over_the_0_8_s_trip": 0.038,
+    "epochs_with_the_estimate_over_the_trip": 767,
+    "reconstructed_cap_mean": 6.876,
+    "epochs_at_the_cap_floor_4": 1844,
+    "epochs_at_cap_8": 7238,
+    "reconstructed_decreases": 92,
+    "reconstructed_increases": 77,
+    "arm_recorded_decreases": 92,
+    "arm_recorded_increases": 77,
+    "gap_epochs_where_episodic_in_flight_reached_the_cap": 706,
+    "gap_epochs_where_episodic_in_flight_reached_the_throttle_floor": 947
+   }
+  },
+  {
+   "cell": "v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11764,
+   "monitors_released": 4827,
+   "submission_gap": 6937,
+   "released_fraction": 0.41,
+   "counts_submitted_monitor": 4829,
+   "builds_submitted": 156,
+   "recalls_released": 449,
+   "epochs_with_an_unreleased_monitor": 4969,
+   "a_slot_competition": {
+    "build_in_flight_mean_over_gap_epochs": 0.674,
+    "build_in_flight_mean_over_all_epochs": 0.457,
+    "gap_epochs_with_zero_builds_in_flight": 3502,
+    "episodic_in_flight_mean_over_gap_epochs": 4.247
+   },
+   "b_c2_throttle_proxy": {
+    "epochs_with_a_robot_inside_k_r": 319,
+    "gap_epochs_with_a_robot_inside_k_r": 111,
+    "share_of_gap_epochs": 0.022
+   },
+   "c_aimd_cap_collapse": {
+    "monitor_ttft_p50": 0.52,
+    "monitor_ttft_p90": 1.648,
+    "monitor_ttft_over_the_0_8_s_trip": 0.265,
+    "epochs_with_the_estimate_over_the_trip": 5652,
+    "reconstructed_cap_mean": 4.574,
+    "epochs_at_the_cap_floor_4": 8428,
+    "epochs_at_cap_8": 579,
+    "reconstructed_decreases": 599,
+    "reconstructed_increases": 88,
+    "arm_recorded_decreases": null,
+    "arm_recorded_increases": null,
+    "gap_epochs_where_episodic_in_flight_reached_the_cap": 4340,
+    "gap_epochs_where_episodic_in_flight_reached_the_throttle_floor": 4961
+   }
+  },
+  {
+   "cell": "v5-rules-2_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11769,
+   "monitors_released": 5179,
+   "submission_gap": 6590,
+   "released_fraction": 0.44,
+   "counts_submitted_monitor": 5182,
+   "builds_submitted": 175,
+   "recalls_released": 426,
+   "epochs_with_an_unreleased_monitor": 4640,
+   "a_slot_competition": {
+    "build_in_flight_mean_over_gap_epochs": 0.705,
+    "build_in_flight_mean_over_all_epochs": 0.472,
+    "gap_epochs_with_zero_builds_in_flight": 3052,
+    "episodic_in_flight_mean_over_gap_epochs": 4.341
+   },
+   "b_c2_throttle_proxy": {
+    "epochs_with_a_robot_inside_k_r": 486,
+    "gap_epochs_with_a_robot_inside_k_r": 229,
+    "share_of_gap_epochs": 0.049
+   },
+   "c_aimd_cap_collapse": {
+    "monitor_ttft_p50": 0.502,
+    "monitor_ttft_p90": 1.56,
+    "monitor_ttft_over_the_0_8_s_trip": 0.247,
+    "epochs_with_the_estimate_over_the_trip": 5126,
+    "reconstructed_cap_mean": 4.669,
+    "epochs_at_the_cap_floor_4": 7945,
+    "epochs_at_cap_8": 694,
+    "reconstructed_decreases": 548,
+    "reconstructed_increases": 94,
+    "arm_recorded_decreases": null,
+    "arm_recorded_increases": null,
+    "gap_epochs_where_episodic_in_flight_reached_the_cap": 4143,
+    "gap_epochs_where_episodic_in_flight_reached_the_throttle_floor": 4620
+   }
+  },
+  {
+   "cell": "v5-rules-2_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11786,
+   "monitors_released": 5452,
+   "submission_gap": 6334,
+   "released_fraction": 0.463,
+   "counts_submitted_monitor": 5456,
+   "builds_submitted": 174,
+   "recalls_released": 449,
+   "epochs_with_an_unreleased_monitor": 4410,
+   "a_slot_competition": {
+    "build_in_flight_mean_over_gap_epochs": 0.761,
+    "build_in_flight_mean_over_all_epochs": 0.463,
+    "gap_epochs_with_zero_builds_in_flight": 2885,
+    "episodic_in_flight_mean_over_gap_epochs": 4.402
+   },
+   "b_c2_throttle_proxy": {
+    "epochs_with_a_robot_inside_k_r": 261,
+    "gap_epochs_with_a_robot_inside_k_r": 110,
+    "share_of_gap_epochs": 0.025
+   },
+   "c_aimd_cap_collapse": {
+    "monitor_ttft_p50": 0.488,
+    "monitor_ttft_p90": 1.394,
+    "monitor_ttft_over_the_0_8_s_trip": 0.212,
+    "epochs_with_the_estimate_over_the_trip": 5149,
+    "reconstructed_cap_mean": 4.803,
+    "epochs_at_the_cap_floor_4": 7712,
+    "epochs_at_cap_8": 1017,
+    "reconstructed_decreases": 548,
+    "reconstructed_increases": 91,
+    "arm_recorded_decreases": null,
+    "arm_recorded_increases": null,
+    "gap_epochs_where_episodic_in_flight_reached_the_cap": 3943,
+    "gap_epochs_where_episodic_in_flight_reached_the_throttle_floor": 4409
+   }
+  },
+  {
+   "cell": "v5-rules-2_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11779,
+   "monitors_released": 5302,
+   "submission_gap": 6477,
+   "released_fraction": 0.45,
+   "counts_submitted_monitor": 5306,
+   "builds_submitted": 180,
+   "recalls_released": 401,
+   "epochs_with_an_unreleased_monitor": 4569,
+   "a_slot_competition": {
+    "build_in_flight_mean_over_gap_epochs": 1.079,
+    "build_in_flight_mean_over_all_epochs": 0.677,
+    "gap_epochs_with_zero_builds_in_flight": 2676,
+    "episodic_in_flight_mean_over_gap_epochs": 4.409
+   },
+   "b_c2_throttle_proxy": {
+    "epochs_with_a_robot_inside_k_r": 562,
+    "gap_epochs_with_a_robot_inside_k_r": 253,
+    "share_of_gap_epochs": 0.055
+   },
+   "c_aimd_cap_collapse": {
+    "monitor_ttft_p50": 0.477,
+    "monitor_ttft_p90": 1.469,
+    "monitor_ttft_over_the_0_8_s_trip": 0.211,
+    "epochs_with_the_estimate_over_the_trip": 5038,
+    "reconstructed_cap_mean": 4.879,
+    "epochs_at_the_cap_floor_4": 7544,
+    "epochs_at_cap_8": 1358,
+    "reconstructed_decreases": 539,
+    "reconstructed_increases": 85,
+    "arm_recorded_decreases": null,
+    "arm_recorded_increases": null,
+    "gap_epochs_where_episodic_in_flight_reached_the_cap": 4268,
+    "gap_epochs_where_episodic_in_flight_reached_the_throttle_floor": 4563
+   }
+  }
+ ],
+ "positive_control_on_the_reconstruction": {
+  "_claim": "the reconstructed AIMD trajectory reproduces the counters the BASE arm recorded for itself; without this the rung-1 numbers would be a model output compared against nothing",
+  "rows": [
+   {
+    "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "decreases": [
+     154,
+     154
+    ],
+    "increases": [
+     97,
+     97
+    ],
+    "ratio_decreases": 1.0,
+    "ratio_increases": 1.0,
+    "within_2x": true
+   },
+   {
+    "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "decreases": [
+     112,
+     111
+    ],
+    "increases": [
+     106,
+     106
+    ],
+    "ratio_decreases": 1.009,
+    "ratio_increases": 1.0,
+    "within_2x": true
+   },
+   {
+    "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "decreases": [
+     118,
+     117
+    ],
+    "increases": [
+     97,
+     97
+    ],
+    "ratio_decreases": 1.009,
+    "ratio_increases": 1.0,
+    "within_2x": true
+   },
+   {
+    "cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
+    "decreases": [
+     92,
+     92
+    ],
+    "increases": [
+     77,
+     77
+    ],
+    "ratio_decreases": 1.0,
+    "ratio_increases": 1.0,
+    "within_2x": true
+   },
+   {
+    "cell": "v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "counters_absent": true
+   },
+   {
+    "cell": "v5-rules-2_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "counters_absent": true
+   },
+   {
+    "cell": "v5-rules-2_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "counters_absent": true
+   },
+   {
+    "cell": "v5-rules-2_n16_s7_1200s_h27_3t_L3_epg_rq30",
+    "counters_absent": true
+   }
+  ],
+  "verdict": "PASS: all 4 cells with recorded counters agree within 2x"
+ },
+ "verdict": {
+  "the_gap": {
+   "monitor_opportunities_identical_across_arms": true,
+   "released_fraction_base": [
+    0.828,
+    0.893
+   ],
+   "released_fraction_rung1": [
+    0.41,
+    0.463
+   ]
+  },
+  "a_slot_competition": {
+   "finding": "NOT THE PER-EPOCH MECHANISM, and it cannot be by construction",
+   "builds_submitted_per_cell": [
+    156,
+    180
+   ],
+   "mean_builds_in_flight": [
+    0.457,
+    0.677
+   ],
+   "gap_epochs_with_zero_builds_in_flight": [
+    2676,
+    3502
+   ],
+   "share_of_gap_epochs_with_no_build_in_flight": [
+    0.586,
+    0.705
+   ],
+   "why_not": "C5 subtracts only running_by_class['episodic'] from its cap and cstate classes piece and whole builds under 'recall', so a build cannot take a dashcam cap slot. And 58 to 70 percent of the epochs where a monitor goes unreleased have NO build in flight at all, so even an indirect per-epoch account fails. 156 to 180 builds per cell cannot occupy 4,400 to 5,000 epochs directly"
+  },
+  "b_c2_throttle": {
+   "finding": "REFUTED, AND WITH THE OPPOSITE SIGN",
+   "epochs_with_a_robot_inside_k_r_base": [
+    578,
+    711
+   ],
+   "epochs_with_a_robot_inside_k_r_rung1": [
+    261,
+    562
+   ],
+   "share_of_gap_epochs_rung1": [
+    0.022,
+    0.055
+   ],
+   "why_not": "the hypothesis predicts MORE at-risk robots under warming. The proxy counts FEWER: 261 to 562 epochs against the base's 578 to 711, because warming is what makes a robot question not at risk. And at-risk epochs touch only 6 to 12 percent of the epochs where monitors go unreleased, so the throttle cannot be holding them down. The proxy OVERSTATES at-risk periods, so this bound runs in the safe direction"
+  },
+  "c_aimd_cap_collapse": {
+   "finding": "THIS IS THE MECHANISM",
+   "monitor_ttft_p90_base": [
+    0.652,
+    0.706
+   ],
+   "monitor_ttft_p90_rung1": [
+    1.394,
+    1.648
+   ],
+   "fraction_over_the_0_8_s_trip_base": [
+    0.038,
+    0.057
+   ],
+   "fraction_over_the_0_8_s_trip_rung1": [
+    0.211,
+    0.265
+   ],
+   "epochs_at_the_cap_floor_base": [
+    1844,
+    2989
+   ],
+   "epochs_at_the_cap_floor_rung1": [
+    7544,
+    8428
+   ],
+   "share_of_gap_epochs_at_the_cap": [
+    0.873,
+    0.934
+   ],
+   "chain": "a few long warm builds (156 to 180 per cell, under one in flight on average) lengthen monitor first-token times: p90 goes from 0.65 to 0.71 s in the base to 1.39 to 1.65 s at rung 1, and the share above C5's 0.8 s trip from 4 to 6 percent to 21 to 27 percent. Each trip HALVES the AIMD cap, floor 4, and recovery is +1 every 5 s, so the cap spends 7,544 to 8,428 of 12,000 epochs at its floor against the base's 1,844 to 2,989. The dashcam release budget is cap minus episodic in flight, which is then zero in 87 to 93 percent of the epochs where a monitor goes unreleased. The HYSTERESIS is why (a) looks absent per epoch: one trip costs 5 s of recovery per step, so the damage outlives the build that caused it",
+   "what_this_implies": "the rung-1 dashcam loss is NOT budget (zero refusals), NOT the cap arithmetic and NOT C2. It is a BASE-POLICY controller reacting to a latency signal that warming moves, and it would not be fixed by repricing, which is why D174 (1) skips the rung-1 rerun. Any fix is a change to C5's AIMD rule or to how warming yields, and is a POLICY change for the user to rule on, not an implementation fix"
+  }
+ }
+}

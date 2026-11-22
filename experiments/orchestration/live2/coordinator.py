@@ -173,6 +173,9 @@ class Live2Coordinator:
         # charge moves. See live2/d162_price.py for why the old charge was wrong-shaped rather
         # than merely conservative.
         self._d162_pricing = DP.arm_enables(arm)
+        # D174 (1): the mode comes from the ARM, never from the module global. An arm that
+        # declares pricing without a mode gets the ruled one (uncached-only).
+        self._charge_mode = DP.arm_charge_mode(arm)
         if self._d162_pricing:
             DP.assert_no_drift()
         # the third term of the price: uncached tokens the engine is already working on. Tracked
@@ -718,12 +721,12 @@ class Live2Coordinator:
                       for r in refs]
             est_tokens = B.epg_prompt_tokens(len(refs))
             _uncached = B.epg_prompt_tokens(n_new)
-            cost = (DP.price_gpu_s(_uncached, self._uncached_in_flight)
+            cost = (DP.price_gpu_s(_uncached, self._uncached_in_flight, self._charge_mode)
                     if self._d162_pricing else _uncached / C.PREFILL_TOK_S["32BI"])
         else:
             est_tokens = 378
             _uncached = est_tokens
-            cost = (DP.price_gpu_s(_uncached, self._uncached_in_flight)
+            cost = (DP.price_gpu_s(_uncached, self._uncached_in_flight, self._charge_mode)
                     if self._d162_pricing
                     else C.episodic_gpu_s("32BI", self.st.devices[device_id].frame_count))
         if not self.st.budget.can_spend(cost):
@@ -857,7 +860,8 @@ class Live2Coordinator:
             self.counts["touch_refused"] += 1
             self.counts["touch_refused_no_confirmed_prefix"] += 1
             return None
-        _touch_price = (DP.price_gpu_s(TP.TOUCH_UNCACHED_TOKENS, self._uncached_in_flight)
+        _touch_price = (DP.price_gpu_s(TP.TOUCH_UNCACHED_TOKENS, self._uncached_in_flight,
+                                       self._charge_mode)
                         if self._d162_pricing else d["price_gpu_s"])
         if self._d162_pricing and not self.st.budget.can_spend(_touch_price):
             self.counts["touch_refused"] += 1
@@ -922,7 +926,8 @@ class Live2Coordinator:
             cost = C.recall_gpu_s(max(piece, 1), "COLD")
         if self._d162_pricing:
             # a build prefills exactly its piece, so the piece IS the uncached count
-            cost = DP.price_gpu_s(max(int(piece), 1), self._uncached_in_flight)
+            cost = DP.price_gpu_s(max(int(piece), 1), self._uncached_in_flight,
+                                   self._charge_mode)
         if not self.st.budget.can_spend(cost):
             self.counts["budget_refusal"] += 1
             self.counts["budget_refusal_build"] += 1
@@ -964,7 +969,7 @@ class Live2Coordinator:
         _uncached = (int(tokens) if s.residency_readiness() == "COLD"
                      else max(int(tokens) - int(getattr(s, "built_tokens", 0) or 0), 0))
         if self._d162_pricing:
-            cost = DP.price_gpu_s(_uncached, self._uncached_in_flight)
+            cost = DP.price_gpu_s(_uncached, self._uncached_in_flight, self._charge_mode)
         if not self.st.budget.can_spend(cost):
             self.counts["budget_refusal"] += 1
             self.counts["budget_refusal_recall"] += 1

@@ -13,115 +13,128 @@
    }
   },
   "replaces": "costs.recall_gpu_s(tokens, tier), StudyRH5 Part A isolated reload TTFT, which scales with the PREFIX and so overcharged a warm touch 3.4x at a 7k prefix rising to 9.5x at 21k",
+  "charge": {
+   "ruled_mode": "uncached-only",
+   "ruling": "D174 (1), 2026-11-22",
+   "charge_terms": "per_uncached * uncached",
+   "excluded": {
+    "intercept": "occupancy, not work (D174 (1))",
+    "queue term": "delay suffered, planner harm only (D173 (1))"
+   }
+  },
   "read_by": [
    "coordinator budget charge (every request of a covex-v6 arm)",
    "cf_planner candidate harm, via cf_objective.harm_warm_from_queue_delay"
   ]
  },
  "P0_positive_control": {
-  "_claim": "the charge varies with the work it prices, ignores the queue under the ruled mode, and the planner's harm basis still sees the queue",
-  "charge_mode": "work-only",
-  "touch_idle": 0.070534,
-  "cold_recall_11k": 2.074541,
+  "_claim": "the charge varies with the work it prices and with nothing else, and the planner's harm basis still sees the queue and the per-request intercept",
+  "charge_mode": "uncached-only",
+  "ruled_mode": "uncached-only",
+  "touch_idle": 0.002736,
+  "cold_recall_11k": 2.006744,
   "charge_varies_with_uncached": true,
   "charge_ignores_queue_term": true,
+  "charge_has_no_intercept": true,
   "harm_basis_varies_with_queue": true,
-  "verdict": "PASS: the charge prices work only and the harm basis still prices delay"
+  "harm_basis_keeps_the_intercept": true,
+  "verdict": "PASS: the charge prices uncached work only and the harm basis still prices delay and occupancy"
  },
  "P1_planner_equals_coordinator": {
-  "_claim": "planner and coordinator read one model; they agree on the work terms and differ by exactly the queue term, which is D173 (1)'s split",
-  "charge_mode": "work-only",
+  "_claim": "planner and coordinator read one model; the charge is exactly the per-uncached work term and the difference is exactly the two terms the rulings exclude from a budget",
+  "charge_mode": "uncached-only",
   "coefficients_shared_not_copied": true,
   "rows": [
    {
     "case": "touch on an 11k warm prefix",
     "uncached": 15,
     "queued_ahead": 0,
-    "coordinator_charge_gpu_s": 0.070534059,
-    "work_terms_gpu_s": 0.070534059,
+    "coordinator_charge_gpu_s": 0.002736469,
+    "per_uncached_term_gpu_s": 0.002736469,
     "planner_harm_basis_s": 0.070534059,
-    "charge_equals_work_terms": true,
-    "difference_is_exactly_the_queue_term": true
+    "charge_equals_per_uncached_term": true,
+    "difference_is_exactly_intercept_plus_queue": true
    },
    {
     "case": "touch, 3,000 ahead",
     "uncached": 15,
     "queued_ahead": 3000,
-    "coordinator_charge_gpu_s": 0.070534059,
-    "work_terms_gpu_s": 0.070534059,
+    "coordinator_charge_gpu_s": 0.002736469,
+    "per_uncached_term_gpu_s": 0.002736469,
     "planner_harm_basis_s": 0.531276246,
-    "charge_equals_work_terms": true,
-    "difference_is_exactly_the_queue_term": true
+    "charge_equals_per_uncached_term": true,
+    "difference_is_exactly_intercept_plus_queue": true
    },
    {
     "case": "touch on a 21k warm prefix",
     "uncached": 15,
     "queued_ahead": 1000,
-    "coordinator_charge_gpu_s": 0.070534059,
-    "work_terms_gpu_s": 0.070534059,
+    "coordinator_charge_gpu_s": 0.002736469,
+    "per_uncached_term_gpu_s": 0.002736469,
     "planner_harm_basis_s": 0.224114788,
-    "charge_equals_work_terms": true,
-    "difference_is_exactly_the_queue_term": true
+    "charge_equals_per_uncached_term": true,
+    "difference_is_exactly_intercept_plus_queue": true
    },
    {
     "case": "warm recall, 200 new",
     "uncached": 200,
     "queued_ahead": 0,
-    "coordinator_charge_gpu_s": 0.104283843,
-    "work_terms_gpu_s": 0.104283843,
+    "coordinator_charge_gpu_s": 0.036486252,
+    "per_uncached_term_gpu_s": 0.036486252,
     "planner_harm_basis_s": 0.104283843,
-    "charge_equals_work_terms": true,
-    "difference_is_exactly_the_queue_term": true
+    "charge_equals_per_uncached_term": true,
+    "difference_is_exactly_intercept_plus_queue": true
    },
    {
     "case": "warm recall, 200 new, 5,000 ahead",
     "uncached": 200,
     "queued_ahead": 5000,
-    "coordinator_charge_gpu_s": 0.104283843,
-    "work_terms_gpu_s": 0.104283843,
+    "coordinator_charge_gpu_s": 0.036486252,
+    "per_uncached_term_gpu_s": 0.036486252,
     "planner_harm_basis_s": 0.872187487,
-    "charge_equals_work_terms": true,
-    "difference_is_exactly_the_queue_term": true
+    "charge_equals_per_uncached_term": true,
+    "difference_is_exactly_intercept_plus_queue": true
    },
    {
     "case": "cold recall 11k",
     "uncached": 11000,
     "queued_ahead": 0,
-    "coordinator_charge_gpu_s": 2.074541448,
-    "work_terms_gpu_s": 2.074541448,
+    "coordinator_charge_gpu_s": 2.006743858,
+    "per_uncached_term_gpu_s": 2.006743858,
     "planner_harm_basis_s": 2.074541448,
-    "charge_equals_work_terms": true,
-    "difference_is_exactly_the_queue_term": true
+    "charge_equals_per_uncached_term": true,
+    "difference_is_exactly_intercept_plus_queue": true
    },
    {
     "case": "build piece 1024",
     "uncached": 1024,
     "queued_ahead": 2000,
-    "coordinator_charge_gpu_s": 0.254607201,
-    "work_terms_gpu_s": 0.254607201,
+    "coordinator_charge_gpu_s": 0.18680961,
+    "per_uncached_term_gpu_s": 0.18680961,
     "planner_harm_basis_s": 0.561768658,
-    "charge_equals_work_terms": true,
-    "difference_is_exactly_the_queue_term": true
+    "charge_equals_per_uncached_term": true,
+    "difference_is_exactly_intercept_plus_queue": true
    },
    {
     "case": "dashcam append, 90 new",
     "uncached": 90,
     "queued_ahead": 400,
-    "coordinator_charge_gpu_s": 0.084216404,
-    "work_terms_gpu_s": 0.084216404,
+    "coordinator_charge_gpu_s": 0.016418813,
+    "per_uncached_term_gpu_s": 0.016418813,
     "planner_harm_basis_s": 0.145648696,
-    "charge_equals_work_terms": true,
-    "difference_is_exactly_the_queue_term": true
+    "charge_equals_per_uncached_term": true,
+    "difference_is_exactly_intercept_plus_queue": true
    }
   ],
-  "charge_equals_work_terms_everywhere": true,
-  "difference_is_only_the_queue_term": true,
-  "verdict": "PASS: one model, shared coefficients, agreement on the work terms on all 8 constructed requests, and the only difference is the queue term"
+  "charge_equals_per_uncached_term_everywhere": true,
+  "difference_is_only_intercept_and_queue": true,
+  "verdict": "PASS: one model, shared coefficients, the charge is the per-uncached term on all 8 constructed requests, and the only difference from the planner's basis is intercept plus queue term"
  },
  "P2_budget_vs_gpu_busy": {
-  "_claim": "the budget must not bind artificially (D102)",
+  "_claim": "the budget must not bind artificially AND its utilisation must track measured GPU busy time (D102, both halves)",
   "cell": "covex-v6-state-d162, dry, 8 devices, 600 s, seed 4",
   "subject_declares_the_charge": true,
+  "ruled_charge": "uncached-only (D174 (1))",
   "reference_v5_rules_2_decision_rows": 4376,
   "rows": [
    {
@@ -135,17 +148,24 @@
    },
    {
     "charge_mode": "work-only",
-    "budget_refusal": 288,
-    "budget_refusal_monitor": 288,
+    "budget_refusal": 298,
+    "budget_refusal_monitor": 298,
     "budget_refusal_build": 0,
     "budget_refusal_recall": 0,
     "state_decisions": 2038,
-    "decision_rows": 4318
+    "decision_rows": 4317
+   },
+   {
+    "charge_mode": "uncached-only",
+    "budget_refusal": 0,
+    "budget_refusal_monitor": 0,
+    "budget_refusal_build": 0,
+    "budget_refusal_recall": 0,
+    "state_decisions": 2038,
+    "decision_rows": 4376
    }
   ],
-  "diagnosis": "the THIRD TERM is the problem and it is a double count. per_queue * queued_ahead is the LATENCY this request SUFFERS because other requests' work is in front of it, not GPU time this request consumes. Charging it bills the same GPU-seconds once per request queued behind them: with k requests of u tokens in flight the queue charge grows as u^2 k^2 / 2 while the real work grows linearly. On the planner side the same term is CORRECT, because there it prices the delay a candidate IMPOSES on others, which is exactly what it measures",
-  "intercept_is_not_the_driver": "charging the 0.0678 s intercept to every request makes a 1-frame dashcam append 2.0x dearer and a 21-frame one 1.1x dearer, which alone would not starve anything",
-  "ruled_charge": "work-only (D173 (1))",
+  "diagnosis": "TWO TERMS WERE CHARGED THAT ARE NOT WORK, and each failed a different half. per_queue * queued_ahead is the LATENCY this request SUFFERS because other requests' work is in front of it; charging it bills the same GPU-seconds once per request queued behind them, growing as u^2 k^2 / 2 against linear real work, and it bound the budget artificially on a dry cell (10,612 refusals). The 0.0678 s intercept is per-request OCCUPANCY, not work: it passed the dry half but added 46 and 51 percent of wall clock on the measured cells and took utilisation to 1.07 and 1.34 while the GPU was 60 to 80 percent busy. On the PLANNER side both terms are CORRECT, because there they price the delay a candidate IMPOSES on others",
   "d102_utilisation_vs_measured_gpu_busy": [
    {
     "cell": "covex-v6-state s4",
@@ -173,44 +193,67 @@
    }
   ],
   "per_uncached_term_tracks_measured_busy": true,
-  "cells_where_work_only_oversubscribes_the_wall_clock": [
-   "covex-v6-state s4",
-   "covex-v6-state s5"
+  "cells_where_the_ruled_charge_oversubscribes_the_wall_clock": [],
+  "utilisation_finding": "the PER-UNCACHED term tracks measured GPU busy time to 2 percent (737.5 against 721.9 s at s4, 985.3 against 964.5 s at s5), and its implied rate 5,482 tok/s agrees with the committed 5,600 tok/s prefill rate to 2 percent. Its utilisation is 0.61 and 0.82 of wall against measured busy fractions of 0.60 and 0.80, so the charge neither oversubscribes the clock nor undercharges the engine",
+  "gate": "refusals at or below 500, plan_state still reaching decisions, the decision log within 10 percent of covex-v6-rules' 4376 rows, the per-uncached term within 10 percent of measured busy time, and no cell oversubscribed",
+  "rejected_modes_for_contrast": [
+   {
+    "charge_mode": "first-token",
+    "budget_refusal": 10612,
+    "budget_refusal_monitor": 10593,
+    "budget_refusal_build": 17,
+    "budget_refusal_recall": 2,
+    "state_decisions": 0,
+    "decision_rows": 2252
+   },
+   {
+    "charge_mode": "work-only",
+    "budget_refusal": 298,
+    "budget_refusal_monitor": 298,
+    "budget_refusal_build": 0,
+    "budget_refusal_recall": 0,
+    "state_decisions": 2038,
+    "decision_rows": 4317
+   }
   ],
-  "utilisation_finding": "the PER-UNCACHED term tracks measured GPU busy time to 2 percent, and its implied rate 5,482 tok/s agrees with the committed 5,600 tok/s prefill rate to 2 percent. The INTERCEPT tracks nothing: it adds 46 percent (s4) and 51 percent (s5) of the wall clock and takes work-only utilisation to 1.07 and 1.34 of wall while the GPU is 60 to 80 percent busy. A budget cannot be more than fully subscribed by requests the engine had time for, so work-only FAILS the utilisation half of D102 on measured data even though it passes the no-artificial-binding half on a dry cell",
-  "gate": "refusals at or below 500, plan_state still reaching decisions, and the decision log within 10 percent of covex-v6-rules' 4376 rows",
-  "rejected_mode_for_contrast": {
-   "charge_mode": "first-token",
-   "budget_refusal": 10612,
-   "budget_refusal_monitor": 10593,
-   "budget_refusal_build": 17,
-   "budget_refusal_recall": 2,
-   "state_decisions": 0,
-   "decision_rows": 2252
-  },
-  "verdict": "FAIL: work-only passes the dry no-binding half (288 refusals, 2038 state decisions, 4318 rows) but FAILS the utilisation half: it oversubscribes the wall clock on ['covex-v6-state s4', 'covex-v6-state s5'] while the GPU is 60 to 80 percent busy, because of the 0.0678 s per-request INTERCEPT. The per-uncached term alone tracks measured busy time to 2 percent. NO ARM IS ENABLED and no rerun is posted"
+  "verdict": "PASS: under the ruled uncached-only charge the budget does not bind artificially (0 refusals, 2038 state decisions, 4376 rows against covex-v6-rules' 4376) and its utilisation tracks measured GPU busy time to 2 percent on both committed cells with neither oversubscribed"
  },
- "P3_baselines_unchanged": {
-  "_claim": "no arm declares the pricing switch while its D102 proof fails; and if it is ever ruled on, no arm outside covex-v6 declares it",
+ "P3_charge_declared_only_where_ruled": {
+  "_claim": "only covex-v6 arms declare the charge; every posted pricing arm declares the RULED mode; and nothing prices at all while D102 fails",
+  "ruled_mode": "uncached-only",
   "arms_with_d162_pricing": [
-   "covex-v6-rules-wo",
-   "covex-v6-state-d162",
-   "covex-v6-state-wo"
+   {
+    "arm": "covex-v6-rules-uo",
+    "charge_mode": "uncached-only"
+   },
+   {
+    "arm": "covex-v6-rules-wo",
+    "charge_mode": "work-only"
+   },
+   {
+    "arm": "covex-v6-state-d162",
+    "charge_mode": "uncached-only"
+   },
+   {
+    "arm": "covex-v6-state-uo",
+    "charge_mode": "uncached-only"
+   },
+   {
+    "arm": "covex-v6-state-wo",
+    "charge_mode": "work-only"
+   }
   ],
   "only_covex_v6": true,
-  "reprice_is_held": false,
+  "d102_passes": true,
   "proof_probe_arm": "covex-v6-state-d162",
-  "arms_declaring_it_other_than_the_probe": [
-   "covex-v6-rules-wo",
-   "covex-v6-state-wo"
-  ],
-  "probe_found_in_cell_lists": [],
-  "verdict": "PASS: only covex-v6 arms price this way"
+  "pricing_arms_found_in_cell_lists": [],
+  "posted_with_a_superseded_mode": [],
+  "verdict": "PASS: 5 arm(s) declare the charge, all covex-v6; 0 posted cell(s), all at the ruled uncached-only; the proof probe is in no cell list"
  },
  "P4_no_drift": {
   "checked": true,
   "agrees": true,
   "verdict": "PASS: coefficients equal the committed gate file"
  },
- "ALL_PASS": false
+ "ALL_PASS": true
 }
