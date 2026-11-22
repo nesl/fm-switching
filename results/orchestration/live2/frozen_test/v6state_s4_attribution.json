@@ -1,0 +1,118 @@
+{
+ "_what": "why covex-v6-state's live TOUCH gain exceeds MARGIN_CF when the dry maximum did not, and what the s4 cell does and does not establish",
+ "cell": "covex-v6-state_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+ "prediction_that_failed": {
+  "predicted": "zero TOUCH, because the dry 16-device maximum gain was 0.151 < MARGIN_CF 0.16456",
+  "observed": "1,438 TOUCH, 1,440 deviations, max gain 0.192",
+  "register": "the prediction was made from a DRY cell and stated as what to expect live. A dry cell is a claim about code paths, not about which states a live run reaches, and I presented it as the latter"
+ },
+ "q1_why_the_live_gain_is_higher": {
+  "belief_corrector_hypothesis": "REFUTED, by code path and not by argument",
+  "belief_refutation": {
+   "claim": "the belief corrector cannot raise the TOUCH value",
+   "evidence": "`belief_by_session` has exactly one consumer in arms_v6state.decide (:314-315): `host_warm`, which gates RELOAD's EXPRESSIBILITY and nothing else. It never enters `_p_warm_cold`, never enters `_p_question`, and never enters the gain. RELOAD was not chosen in this cell",
+   "note": "the belief corrector IS live in this cell and may well matter elsewhere, through the coordinator's own eviction and residency bookkeeping. What it cannot do is raise this number"
+  },
+  "actual_driver": "HISTORY SIZE, through p_cold falling off a cliff",
+  "arithmetic": {
+   "formula": "gain = w * p_question * acc * (p_warm - p_cold), w = 1 at rung 2, acc = 0.250",
+   "max_live": 0.192,
+   "implies_p_question_times_dp": 0.768,
+   "max_dry": 0.151,
+   "dry_implies_p_question_times_dp": 0.604,
+   "p_warm_minus_p_cold_by_history": [
+    {
+     "est": 7000,
+     "built": 3500,
+     "p_warm": 0.9932,
+     "p_cold": 0.9839,
+     "dp": 0.0093,
+     "gain_at_p_q_1": 0.0023
+    },
+    {
+     "est": 11000,
+     "built": 5500,
+     "p_warm": 0.987,
+     "p_cold": 0.8757,
+     "dp": 0.1113,
+     "gain_at_p_q_1": 0.0278
+    },
+    {
+     "est": 13000,
+     "built": 6500,
+     "p_warm": 0.9854,
+     "p_cold": 0.7497,
+     "dp": 0.2357,
+     "gain_at_p_q_1": 0.0589
+    },
+    {
+     "est": 17000,
+     "built": 8500,
+     "p_warm": 0.971,
+     "p_cold": 0.3972,
+     "dp": 0.5738,
+     "gain_at_p_q_1": 0.1435
+    },
+    {
+     "est": 21000,
+     "built": 10500,
+     "p_warm": 0.8994,
+     "p_cold": 0.1356,
+     "dp": 0.7638,
+     "gain_at_p_q_1": 0.191
+    }
+   ],
+   "reading": "the live maximum 0.192 lands on the est 21,000 row at p_question = 1.0 (0.1910), and the dry maximum 0.151 lands between the 17,000 and 21,000 rows. The margin is crossed at roughly est 18,000 to 19,000 tokens. p_cold collapses from 0.9839 at 7k to 0.1356 at 21k while p_warm stays high, so the gain is almost entirely a function of how large a history is when a question is imminent"
+  },
+  "why_dry_did_not_reach_it": {
+   "state_skipped_no_question_estimate": {
+    "dry": 42253,
+    "live": 14565
+   },
+   "state_decisions": {
+    "dry": 44300,
+    "live": 62770
+   },
+   "reading": "the dry cell skipped 42,253 decisions for want of a question-rate estimate against the live cell's 14,565. The large-history AND imminent-question combination was simply never sampled dry. This is UNDER-SAMPLING in the dry cell, not a mechanism that switched on live"
+  },
+  "how_to_confirm": "one cell of covex-v6-state-nobelief at the same seed. If the TOUCH count is materially unchanged, belief is confirmed irrelevant to this gain by experiment as well as by code"
+ },
+ "q2_state_action_1438_vs_touch_1246": {
+  "answer": "not unaccounted: 192 touches were REFUSED. coordinator.py logs a `state_action` row for EVERY KEEP_GPU_WARM (:548-554) and then calls `_submit_touch`, which can refuse. The arm's `state_touch_emitted` counts the ACTION it emitted, not the request the coordinator issued",
+  "refusal_counters": [
+   "touch_refused_guard (M6 mixed-tier, or cold)",
+   "touch_refused_budget",
+   "touch_refused_no_prefix",
+   "touch_refused_no_confirmed_prefix"
+  ],
+  "needed": "the touch_refused_* breakdown from the cell's counts, to say WHICH refusal"
+ },
+ "q3_88_single_shot_never_sent": {
+  "status": "NOT ESTABLISHED; two candidates, and they have different remedies",
+  "candidate_1_budget_displacement": {
+   "mechanism": "`_submit_touch` SPENDS from the same GPU budget as every request (coordinator.py `self.st.budget.spend(d['price_gpu_s'])`), and `touch_price_gpu_s` prices a touch at `recall_gpu_s(PREFIX_TOKENS, tier)`, the whole prefix at its predicted tier's rate, NOT at TOUCH_MAX_TOKENS = 1. With 1,246 touches issued on histories in the 10k to 21k range, that is a substantial draw on the budget that serves single-shot",
+   "why_it_matters": "if true, the robot gain (92 of 132 against noc3's 35) is partly BOUGHT with single-shot sends (269 of 357 against noc3's 337), and by_deadline 0.508 is the net of a transfer rather than a free gain"
+  },
+  "candidate_2_feasibility_decline": "the inherited noc3 feasibility check declining them",
+  "needed": [
+   "budget_remaining_gpu_s at end of run",
+   "total GPU-s spent on touches",
+   "the decline reason counts for single-shot opportunities",
+   "the same figures from covex-v6-state-notouch at one seed, which separates the two candidates in a single cell"
+  ]
+ },
+ "q4_harm_warm_priced_once_capped_once": {
+  "cap_is_correct": "the cap fires at QUEUE_TOKEN_S * u > 2.781 s, i.e. u > 18,106 uncached tokens. Histories of that size are exactly what the q1 table shows this cell reaching, so one warm of over 18k tokens hitting the cap is consistent and not a defect",
+  "the_real_finding": "90 of 91 rebuild-coincident decisions had NOTHING QUEUED BEHIND the warm, so harm_warm was a true zero on them. Across dry and live, the computation has now been exercised on 528 decisions in total and on exactly ONE in a live cell. HOLD_BACK's maximum gain was 0.157, below the margin, so it never won. No HOLD_BACK or SLICE conclusion may be drawn from this cell"
+ },
+ "what_this_cell_DOES_establish": [
+  "per-type host retention is LIVE and exercised for the first time: all 269 single-shot sends were COLD, which is max_offload_tokens = 0 doing exactly what it was built to do, and no dry cell could have shown it",
+  "plan_state deviates live: 1,440 deviations, 1,438 TOUCH, all clearing the weighted margin",
+  "the TOUCH channel reaches the engine: 1,246 touch decision rows"
+ ],
+ "what_must_be_resolved_before_the_robot_gain_is_believed": [
+  "the 88 unsent single-shot questions, budget displacement against feasibility decline",
+  "the dashcam FAIL, which is not yet diagnosed and may invalidate the cell's headline",
+  "the 192 touch refusals, by reason"
+ ]
+}
