@@ -47,10 +47,23 @@ But the rung is **not** byte-identical to `covex-v6-rules` at 16 devices: digest
 `6e8927b9f7f92040` against `ae997d6af16a2ef4`, 15,734 rows against 17,050. At **8** devices it
 *is* byte-identical (`69874e94d2ddee85` both). So the difference is not `plan_state`, which emits
 nothing, but one of the rung's other three additions, and it appears only where the budget binds.
-State-based pricing is the first suspect, since it changes what a warm costs against the budget
-and can only matter once the budget is the binding constraint. **Which switch it is, is being
-attributed by one-factor ablation and is NOT yet established; no claim about this rung's effect
-may be made until it is.**
+**Attributed by one-factor ablation: state-based pricing, alone.**
+
+| arm | digest | rows |
+|---|---|---|
+| `covex-v6-rules` | `ae997d6af16a2ef4` | 17,050 |
+| `covex-v6-state` | `6e8927b9f7f92040` | 15,734 |
+| `-off` | `ae997d6af16a2ef4` | collapses, so the control is a control |
+| `-noprice` | `ae997d6af16a2ef4` | **the only ablation that returns** |
+| `-noretain` | `6e8927b9f7f92040` | unchanged |
+| `-nobelief` | `6e8927b9f7f92040` | unchanged |
+
+**The last two rows are not nulls.** Per-type host retention acts by sending `kv_transfer_params`
+to vLLM, and the belief corrector runs off the engine's own `cached_tokens`. A dry cell has
+neither, so both are **unexercisable there by construction** and those two ablations could not
+have differed. The coordinator's own comment says exactly this of the belief read: a dry
+byte-identity screen proves the correction harmless and proves nothing about it. Reporting either
+as "no effect" would be the E36 failure again.
 
 Only **65** of the 44,300 state decisions coincide with an actual rebuild, and all 65 had nothing
 queued behind them, so `harm_warm` was 0 on every one and `HOLD_BACK`'s gain was 0 throughout.
@@ -58,10 +71,15 @@ The computed `harm_warm` therefore did not get a chance to act in this cell.
 
 ### What was posted
 
-**Nothing.** No `V6STATE_CELLS`, no `V6FAIR_CELLS`, no `V6_CELLS`. `plan_state`, the decision the
-rung is named for, never deviates, and the behavioural difference that does exist at 16 devices is
-not yet attributed to a switch. Posting before that attribution would produce cells whose
-difference from `covex-v6-rules` nobody could name. `MARGIN_CF` is never changed (D157, D172).
+**`runs/V6STATE_CELLS`**, four cells, `covex-v6-state` at 16 devices, seeds 4 to 7, `_L3_epg_rq30`.
+Posted only after the ablation above named the switch. Two of the rung's four additions cannot be
+tested without an engine, so the dry evidence is exhausted and these cells are the only way to
+exercise them. Expect **no TOUCH**: `plan_state` never deviates, and that is the predicted result,
+not a fault.
+
+**No `V6FAIR_CELLS`, no `V6_CELLS`.** Rung 3's D165 lexicographic objective is not built; rung 4
+needs `plan_sync` wired, the compounds, the episode switch and D170's over-limit rule.
+`MARGIN_CF` is never changed (D157, D172).
 
 ### `harm_warm` is computed, not declared
 
