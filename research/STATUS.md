@@ -110,6 +110,24 @@ it imposes on the queue behind it.
 5. `deficit_feed_unseen_declines` was named in a docstring and a commit message and never
    incremented. Now live: 2 declines the feed cannot see, against 4,333 it can.
 
+### The posted cells were skipped once, and the reason is a verification failure worth keeping
+
+`covex-v6-state` s4 crashed 80 s in with `KeyError: unknown arm 'covex-v6-state'` and all four
+cells were skipped. I had checked that the v6 names resolved by importing `arm_names_v6` in **my**
+process and calling `make_arm`. They did. `run_live2_real.py` imports `hybrid` and nothing else,
+so in the **harness's** process they were never registered.
+
+**A name resolves in the process that resolves it.** A check run in a process the harness does not
+use is not a check of the harness, and `make_arm` returning an object proves only that whatever
+*that* caller imported was enough. This is the register rule from the other side: the entry
+existed, and I never verified it existed where it is read.
+
+Fixed by registering the ladder in `arms.py` beside the other arm families, so importing `arms` is
+enough. Proved by `v6_harness_name_proof.py`, which **spawns `run_live2_real.py` itself** with the
+real command line; all five names return rc=0 and the cells complete. Its negative control is not
+optional: "no KeyError appeared" passes trivially if the subprocess never reached `make_arm`, so a
+deliberately unknown name must still raise, and it does.
+
 ### PROVISIONAL decisions (D106 / D116, user away)
 
 - Rungs that are not built are registered to a factory that **raises** and names its missing
