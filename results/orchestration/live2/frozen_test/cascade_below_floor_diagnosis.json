@@ -1,0 +1,960 @@
+{
+ "label": "READ-ONLY diagnosis: how does confidence-cascade score 0.0579 at seed 6 when three other arms score 0.0826? CPU only on flash, committed files only, no GPU, no model, no arm changed, no policy code written.",
+ "rev": "origin/main",
+ "rev_sha": "622bd591177110605eddd3b119c8c7926bf94e24",
+ "cells_read_from": "results/orchestration/live2/frozen_test/runs",
+ "experiments_md_status": "the frozen-test cells cited here are carried by StudyPOLICY-V5, StudyCASCADE-calib and StudyD179-SHARES in research/EXPERIMENTS.md; none is marked INVALID, and every cell read here carries run_valid true, which is reported per cell",
+ "comparison_terms": "INPUT, STACK AND DECODING MATCH for every arm-versus-arm comparison inside one seed: all arms at a seed run the SAME trace (the run_meta fairness digest is equal to the trace's, `digests_equal` true in every cell read), the same vllm server kind, the same 3 s robot deadline and the same scorer rev. ACROSS trace families they DO NOT match: the `_L3_epg` cells and the `_L3_epg_rq30` cells are different workloads (rq30 adds D159/D161 re-asks, 121 robot questions at seed 6 against 20 to 25 without it), so cascade-routing's `_L3_epg` cells are never compared numerically with confidence-cascade's rq30 cells; only their port-rule counts are set side by side.",
+ "step1_and_2_reproduce_and_floor": {
+  "per_arm": {
+   "confidence-cascade": {
+    "cell": "confidence-cascade_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "run_valid": true,
+    "seed": 6,
+    "headline_correct_by_deadline": 0.057851,
+    "headline_n": 121,
+    "hits": 7,
+    "robot_value_standing_accuracy_by_deadline": 0.057851,
+    "robot_value_standing_accuracy_any_time": 0.057851,
+    "n_cloud_standing": 0,
+    "n_device_standing": 121,
+    "n_no_answer_by_deadline": 0,
+    "device_answers_late": 0,
+    "cloud_accuracy_on_served": null,
+    "cloud_answers_available": 0,
+    "device_only_robot_accuracy": 0.057851,
+    "device_only_robot_n": 121,
+    "sweep_robot_pool_on_time": 0,
+    "sweep_robot_pool_n": 121,
+    "cloud_standing_ids": [],
+    "hit_ids": [
+     "opp0007656",
+     "opp0007716",
+     "opp0007802",
+     "opp0008944",
+     "opp0008984",
+     "opp0009148",
+     "opp0009213"
+    ]
+   },
+   "always-cloud-fcfs": {
+    "cell": "always-cloud-fcfs_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "run_valid": true,
+    "seed": 6,
+    "headline_correct_by_deadline": 0.082645,
+    "headline_n": 121,
+    "hits": 10,
+    "robot_value_standing_accuracy_by_deadline": 0.082645,
+    "robot_value_standing_accuracy_any_time": 0.082645,
+    "n_cloud_standing": 3,
+    "n_device_standing": 118,
+    "n_no_answer_by_deadline": 0,
+    "device_answers_late": 0,
+    "cloud_accuracy_on_served": 1.0,
+    "cloud_answers_available": 3,
+    "device_only_robot_accuracy": 0.057851,
+    "device_only_robot_n": 121,
+    "sweep_robot_pool_on_time": 3,
+    "sweep_robot_pool_n": 121,
+    "cloud_standing_ids": [
+     "opp0000006",
+     "opp0000402",
+     "opp0000847"
+    ],
+    "hit_ids": [
+     "opp0000006",
+     "opp0000402",
+     "opp0000847",
+     "opp0007656",
+     "opp0007716",
+     "opp0007802",
+     "opp0008944",
+     "opp0008984",
+     "opp0009148",
+     "opp0009213"
+    ]
+   },
+   "querystream-proactive": {
+    "cell": "querystream-proactive_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "run_valid": true,
+    "seed": 6,
+    "headline_correct_by_deadline": 0.082645,
+    "headline_n": 121,
+    "hits": 10,
+    "robot_value_standing_accuracy_by_deadline": 0.082645,
+    "robot_value_standing_accuracy_any_time": 0.082645,
+    "n_cloud_standing": 3,
+    "n_device_standing": 118,
+    "n_no_answer_by_deadline": 0,
+    "device_answers_late": 0,
+    "cloud_accuracy_on_served": 1.0,
+    "cloud_answers_available": 3,
+    "device_only_robot_accuracy": 0.057851,
+    "device_only_robot_n": 121,
+    "sweep_robot_pool_on_time": 3,
+    "sweep_robot_pool_n": 121,
+    "cloud_standing_ids": [
+     "opp0000006",
+     "opp0000402",
+     "opp0000847"
+    ],
+    "hit_ids": [
+     "opp0000006",
+     "opp0000402",
+     "opp0000847",
+     "opp0007656",
+     "opp0007716",
+     "opp0007802",
+     "opp0008944",
+     "opp0008984",
+     "opp0009148",
+     "opp0009213"
+    ]
+   },
+   "attentionstore-prefetch": {
+    "cell": "attentionstore-prefetch_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "run_valid": true,
+    "seed": 6,
+    "headline_correct_by_deadline": 0.082645,
+    "headline_n": 121,
+    "hits": 10,
+    "robot_value_standing_accuracy_by_deadline": 0.082645,
+    "robot_value_standing_accuracy_any_time": 0.082645,
+    "n_cloud_standing": 3,
+    "n_device_standing": 118,
+    "n_no_answer_by_deadline": 0,
+    "device_answers_late": 0,
+    "cloud_accuracy_on_served": 1.0,
+    "cloud_answers_available": 3,
+    "device_only_robot_accuracy": 0.057851,
+    "device_only_robot_n": 121,
+    "sweep_robot_pool_on_time": 3,
+    "sweep_robot_pool_n": 121,
+    "cloud_standing_ids": [
+     "opp0000006",
+     "opp0000402",
+     "opp0000847"
+    ],
+    "hit_ids": [
+     "opp0000006",
+     "opp0000402",
+     "opp0000847",
+     "opp0007656",
+     "opp0007716",
+     "opp0007802",
+     "opp0008944",
+     "opp0008984",
+     "opp0009148",
+     "opp0009213"
+    ]
+   },
+   "warm-all-lru": {
+    "cell": "warm-all-lru_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "run_valid": true,
+    "seed": 6,
+    "headline_correct_by_deadline": 0.07438,
+    "headline_n": 121,
+    "hits": 9,
+    "robot_value_standing_accuracy_by_deadline": 0.07438,
+    "robot_value_standing_accuracy_any_time": 0.07438,
+    "n_cloud_standing": 2,
+    "n_device_standing": 119,
+    "n_no_answer_by_deadline": 0,
+    "device_answers_late": 0,
+    "cloud_accuracy_on_served": 1.0,
+    "cloud_answers_available": 2,
+    "device_only_robot_accuracy": 0.057851,
+    "device_only_robot_n": 121,
+    "sweep_robot_pool_on_time": 2,
+    "sweep_robot_pool_n": 121,
+    "cloud_standing_ids": [
+     "opp0000402",
+     "opp0000847"
+    ],
+    "hit_ids": [
+     "opp0000402",
+     "opp0000847",
+     "opp0007656",
+     "opp0007716",
+     "opp0007802",
+     "opp0008944",
+     "opp0008984",
+     "opp0009148",
+     "opp0009213"
+    ]
+   }
+  },
+  "fields_used": {
+   "headline": "cell.json -> score.score.robot_headline.correct_answers_delivered_by_deadline (and .n_by_deadline)",
+   "cross_check": "cell.json -> score.score.robot_value.standing_accuracy_by_deadline",
+   "per_question": "cell.json -> score.score.robot_rows[].standing_correct_by_deadline",
+   "floor": "cell.json -> score.score.device_only.robot_accuracy (and .robot_n)",
+   "on_time": "cell.json -> score.score.sweep[0].robot_pool_on_time"
+  },
+  "floor_control": {
+   "three_arms": [
+    "always-cloud-fcfs",
+    "querystream-proactive",
+    "attentionstore-prefetch"
+   ],
+   "agree_in_count": true,
+   "agree_in_question_ids": true,
+   "shared_hit_ids": [
+    "opp0000006",
+    "opp0000402",
+    "opp0000847",
+    "opp0007656",
+    "opp0007716",
+    "opp0007802",
+    "opp0008944",
+    "opp0008984",
+    "opp0009148",
+    "opp0009213"
+   ],
+   "device_only_floor_by_arm": {
+    "confidence-cascade": 0.057851,
+    "always-cloud-fcfs": 0.057851,
+    "querystream-proactive": 0.057851,
+    "attentionstore-prefetch": 0.057851,
+    "warm-all-lru": 0.057851
+   },
+   "device_only_floor_is_arm_independent": true,
+   "device_only_floor": 0.057851,
+   "ids_hit_by_every_arm": [
+    "opp0007656",
+    "opp0007716",
+    "opp0007802",
+    "opp0008944",
+    "opp0008984",
+    "opp0009148",
+    "opp0009213"
+   ],
+   "n_ids_hit_by_every_arm": 7,
+   "verdict": "0.0826 IS NOT THE DEVICE FLOOR. The three arms do agree on the exact question ids, so they are one set and not a coincidence of counts, but that set is the 7-question device floor PLUS 3 questions each of them won with an ON-TIME and CORRECT cloud answer. The floor is the arm-independent score.score.device_only.robot_accuracy, which is 0.057851 (7 of 121) in EVERY arm's own cell at this seed, confidence-cascade's included. confidence-cascade scores AT the floor, not below it."
+  }
+ },
+ "step3_crosstab": {
+  "cell": "confidence-cascade_n16_s6_1200s_h27_3t_L3_epg_rq30",
+  "robot_pool_n": 121,
+  "n_robot_cloud_requests": 54,
+  "n_robot_requests_non_200": 0,
+  "scorer_n_cloud_standing": 0,
+  "scorer_robot_pool_on_time": 0,
+  "scorer_device_answers_late": 0,
+  "scorer_n_no_answer_by_deadline": 0,
+  "crosstab": [
+   {
+    "escalation": "escalated(release_recall)",
+    "cloud": "cloud delivered LATE (raw first-token)",
+    "scored_source": "device",
+    "scored_hit": false,
+    "n": 53,
+    "example_ids": [
+     "opp0001157",
+     "opp0001748",
+     "opp0002236",
+     "opp0002258"
+    ]
+   },
+   {
+    "escalation": "escalated(release_recall)",
+    "cloud": "cloud request sent, never delivered",
+    "scored_source": "device",
+    "scored_hit": false,
+    "n": 1,
+    "example_ids": [
+     "opp0009020"
+    ]
+   },
+   {
+    "escalation": "escalated(release_recall)",
+    "cloud": "no cloud request",
+    "scored_source": "device",
+    "scored_hit": false,
+    "n": 3,
+    "example_ids": [
+     "opp0009491",
+     "opp0009493",
+     "opp0010396"
+    ]
+   },
+   {
+    "escalation": "no decision row",
+    "cloud": "no cloud request",
+    "scored_source": "device",
+    "scored_hit": false,
+    "n": 3,
+    "example_ids": [
+     "opp0011912",
+     "opp0011928",
+     "opp0012008"
+    ]
+   },
+   {
+    "escalation": "not escalated(decline)",
+    "cloud": "no cloud request",
+    "scored_source": "device",
+    "scored_hit": false,
+    "n": 54,
+    "example_ids": [
+     "opp0000006",
+     "opp0000330",
+     "opp0000402",
+     "opp0000763"
+    ]
+   },
+   {
+    "escalation": "not escalated(decline)",
+    "cloud": "no cloud request",
+    "scored_source": "device",
+    "scored_hit": true,
+    "n": 7,
+    "example_ids": [
+     "opp0007656",
+     "opp0007716",
+     "opp0007802",
+     "opp0008944"
+    ]
+   }
+  ],
+  "residues": "two small residues, neither of which touches the 7-against-10 gap: 3 opportunities carry a `release_recall` row and no request row in the request log, and 3 more carry no decision row at all (they arrive at the very end of the window and are never decided). All 6 are scored on the device answer and all 6 are misses either way.",
+  "note": "every one of the 121 is scored on the DEVICE's answer (`scored_source` is device for all of them), `device_answers_late` is 0 and `n_no_answer_by_deadline` is 0, so no device answer was lost, discarded or held to be late in this cell"
+ },
+ "step3_contested_questions": {
+  "ids": [
+   "opp0000006",
+   "opp0000402",
+   "opp0000847"
+  ],
+  "n": 3,
+  "n_distinct_question_ids": 1,
+  "distinct_question_ids": [
+   "4a400fbf90897f0fd7d7c99be71e0b0edc804db2dd9a04e3f7df6e47eb84e884"
+  ],
+  "detail": [
+   {
+    "opportunity_id": "opp0000006",
+    "question_id": "4a400fbf90897f0fd7d7c99be71e0b0edc804db2dd9a04e3f7df6e47eb84e884",
+    "gold": "E",
+    "device_id": "robo003",
+    "t_opportunity": 13.095611,
+    "deadline_s": 3.0,
+    "device_answer_confidence": 0.9999660516171582,
+    "robot_confidence_floor": 0.800338,
+    "arm_rule": "stop at DEVICE (confidence >= floor)",
+    "cascade": {
+     "decision_rows": [
+      "decline"
+     ],
+     "cloud_requests": [],
+     "t_delivered": null,
+     "source": "device",
+     "device_correct": false,
+     "device_on_time": true,
+     "device_latency_s": 0.2944,
+     "scored_hit": false
+    },
+    "peer_always_cloud": {
+     "source": "cloud",
+     "cloud_letter": "E",
+     "cloud_correct": true,
+     "device_correct": false,
+     "scored_hit": true
+    }
+   },
+   {
+    "opportunity_id": "opp0000402",
+    "question_id": "4a400fbf90897f0fd7d7c99be71e0b0edc804db2dd9a04e3f7df6e47eb84e884",
+    "gold": "E",
+    "device_id": "robo003",
+    "t_opportunity": 54.368711,
+    "deadline_s": 3.0,
+    "device_answer_confidence": 0.9999660516171582,
+    "robot_confidence_floor": 0.800338,
+    "arm_rule": "stop at DEVICE (confidence >= floor)",
+    "cascade": {
+     "decision_rows": [
+      "decline"
+     ],
+     "cloud_requests": [],
+     "t_delivered": null,
+     "source": "device",
+     "device_correct": false,
+     "device_on_time": true,
+     "device_latency_s": 0.2944,
+     "scored_hit": false
+    },
+    "peer_always_cloud": {
+     "source": "cloud",
+     "cloud_letter": "E",
+     "cloud_correct": true,
+     "device_correct": false,
+     "scored_hit": true
+    }
+   },
+   {
+    "opportunity_id": "opp0000847",
+    "question_id": "4a400fbf90897f0fd7d7c99be71e0b0edc804db2dd9a04e3f7df6e47eb84e884",
+    "gold": "E",
+    "device_id": "robo003",
+    "t_opportunity": 97.644152,
+    "deadline_s": 3.0,
+    "device_answer_confidence": 0.9999660516171582,
+    "robot_confidence_floor": 0.800338,
+    "arm_rule": "stop at DEVICE (confidence >= floor)",
+    "cascade": {
+     "decision_rows": [
+      "decline"
+     ],
+     "cloud_requests": [],
+     "t_delivered": null,
+     "source": "device",
+     "device_correct": false,
+     "device_on_time": true,
+     "device_latency_s": 0.2944,
+     "scored_hit": false
+    },
+    "peer_always_cloud": {
+     "source": "cloud",
+     "cloud_letter": "E",
+     "cloud_correct": true,
+     "device_correct": false,
+     "scored_hit": true
+    }
+   }
+  ],
+  "concentration": "THE WHOLE 7-AGAINST-10 GAP IS ONE QUESTION. All 3 contested opportunities carry the SAME question_id on the same device (robo003), the same gold letter E and the same device confidence 0.9999660516171582: they are one LH-REQ question asked three times by the D159 / D161 re-ask mechanism (rq30). The arm's confidence test is deterministic in the question, so it stops at the device all three times, and the device is wrong all three times. The difference between 0.0579 and 0.0826 is therefore 1 distinct question with a mixing weight of 3 of 121, and it must not be read as a 3-question effect, nor as a general direction. CLAUDE.md, 'Mark the register at the point of use': this is a single category's delta, not a census."
+ },
+ "step4_deciding_read": {
+  "rev": "origin/main",
+  "the_question": "which read decides that the device answer does not stand?",
+  "answer": "in this cell NO read decides that. The device answer STANDS on all 121 questions. The 3-question gap is decided one step earlier, by the ARM, at the escalation test.",
+  "scorer_path": [
+   {
+    "where": "experiments/orchestration/live2/scorer/score.py:817-818",
+    "what": "robot_value calls `_standing` and `_standing_by_deadline` per question; these produce `source` and `source_by_deadline` and nothing else selects the answer"
+   },
+   {
+    "where": "experiments/orchestration/live2/scorer/score.py:787-798",
+    "what": "`_standing_by_deadline`: the CLOUD's answer if `_within(o, L)`, else the DEVICE's if `device_within(o, dev, L)`, else source 'none' (a miss). This is the only place a device answer can be refused, and it refuses on the DEVICE's own measured latency, which is arm-independent"
+   },
+   {
+    "where": "experiments/orchestration/live2/scorer/score.py:687-689",
+    "what": "`_within` reads `o['t_delivered']`: a LATE cloud answer makes this False, so lateness sends the question to the DEVICE branch. A late cloud answer therefore cannot displace a device answer. This REFUTES the leading hypothesis as a matter of the code, before any count is taken"
+   },
+   {
+    "where": "experiments/orchestration/live2/scorer/score.py:326-338",
+    "what": "`device_within` = (DEVICE_WAIT_S + measured per-question latency) <= L. One table for every arm, so it cannot differentiate arms"
+   },
+   {
+    "where": "experiments/orchestration/live2/scorer/score.py:826-827",
+    "what": "the device branch's read: `sc_bd = bool(dev['device_correct'])`. This is the read that produced 7 of 121 for confidence-cascade, on all 121"
+   },
+   {
+    "where": "experiments/orchestration/live2/scorer/score.py:484-519",
+    "what": "`refused_request_ids` (D175 (1)). Not reached for any robot question in this cell: all 54 robot cloud requests carry http_status 200"
+   }
+  ],
+  "arm_path": [
+   {
+    "where": "experiments/orchestration/baselines/cascade_adapted.py:142-156",
+    "what": "THE DECIDING READ. `c = q.device_answer_confidence`; escalate to CLOUD iff `c < floor`, else stop at DEVICE. For the 3 contested questions c is 0.999966 against the DEV-fitted robot floor 0.800338, so the arm stops at the device, and the device answer is WRONG"
+   },
+   {
+    "where": "experiments/orchestration/live2/coordinator.py:767-777",
+    "what": "the coordinator's consumption of that decision: a DEVICE / REJECT RecallAction sets `o.state = 'declined'`, writes the outcome row with `served_by='device'` and logs decision kind 'decline'. No cloud request is ever made, which is why these 3 outcomes carry cloud_payload None"
+   }
+  ],
+  "abc": {
+   "a_arm_never_produced_a_device_answer": false,
+   "b_scorer_discarded_the_device_answer": false,
+   "c_arm_declined_to_escalate": true,
+   "which": "(c)",
+   "why": "(a) is ruled out because all 121 rows carry a device answer with a measured latency in [0.2503, 0.3065] s and `device_on_time` true. (b) is ruled out because `n_device_standing` is 121 of 121, `device_answers_late` is 0 and `n_no_answer_by_deadline` is 0: the scorer discarded nothing. (c) is what happened: on the 3 contested questions the arm's own confidence test chose DEVICE and no cloud request was made. THIS IS NOT A SCORER BUG."
+  }
+ },
+ "step5_port_rule": {
+  "robot_confidence_floor": 0.800338,
+  "floor_source": "results/orchestration/live2/cascade_calibration/cascade_thresholds.json -> confidence_floors.robot",
+  "confidence_source": "results/sember/study_e7/e7_requests_h100nvl.jsonl -> letter_probs.mass[first_token], the table baselines/device_confidence.py reads",
+  "rule_site": "experiments/orchestration/baselines/cascade_adapted.py:149 (`c < floor`)",
+  "per_cell": {
+   "confidence-cascade_n16_s4_1200s_h27_3t_L3_epg_rq30": {
+    "seed": 4,
+    "run_valid": true,
+    "robot_pool_n": 132,
+    "confidence_coverage": 132,
+    "escalations_from_decision_log": 44,
+    "stop_device_from_decision_log": 88,
+    "no_decision_row": 0,
+    "escalations_reconstructed_from_rule": 44,
+    "stop_device_reconstructed_from_rule": 88,
+    "rows_agreeing": 132,
+    "rows_disagreeing": 0,
+    "disagreements": [],
+    "cloud_answers_standing": 3,
+    "headline": 0.393939,
+    "device_only_floor": 0.371212
+   },
+   "confidence-cascade_n16_s5_1200s_h27_3t_L3_epg_rq30": {
+    "seed": 5,
+    "run_valid": true,
+    "robot_pool_n": 127,
+    "confidence_coverage": 127,
+    "escalations_from_decision_log": 35,
+    "stop_device_from_decision_log": 92,
+    "no_decision_row": 0,
+    "escalations_reconstructed_from_rule": 35,
+    "stop_device_reconstructed_from_rule": 92,
+    "rows_agreeing": 127,
+    "rows_disagreeing": 0,
+    "disagreements": [],
+    "cloud_answers_standing": 0,
+    "headline": 0.299213,
+    "device_only_floor": 0.299213
+   },
+   "confidence-cascade_n16_s6_1200s_h27_3t_L3_epg_rq30": {
+    "seed": 6,
+    "run_valid": true,
+    "robot_pool_n": 121,
+    "confidence_coverage": 121,
+    "escalations_from_decision_log": 57,
+    "stop_device_from_decision_log": 61,
+    "no_decision_row": 3,
+    "escalations_reconstructed_from_rule": 57,
+    "stop_device_reconstructed_from_rule": 64,
+    "rows_agreeing": 121,
+    "rows_disagreeing": 0,
+    "disagreements": [],
+    "cloud_answers_standing": 0,
+    "headline": 0.057851,
+    "device_only_floor": 0.057851
+   }
+  },
+  "verdict": "PORT RULE PASSES for confidence-cascade. Its characteristic decision, a confidence-based escalation, fires 57 times of 121 robot questions in the s6 cell and is non-zero in every committed cell of the arm. The decision log and the arm's rule re-applied offline agree on all 121 rows, so the escalations are confidence-driven and not an artefact of some other path. The arm's problem is not that it never escalates: it is that NONE of its 57 escalations was delivered inside the 3 s deadline (n_cloud_standing is 0)."
+ },
+ "step6_family_port_rule": {
+  "cascade-routing_n16_s4_1200s_h27_3t_L3_epg": {
+   "arm": "cascade-routing",
+   "robot_pool_n": 20,
+   "escalations_from_decision_log": 0,
+   "stop_device_from_decision_log": 20,
+   "headline": 0.3,
+   "device_only_floor": 0.3,
+   "n_cloud_standing": 0,
+   "port_rule": "FAIL"
+  },
+  "cascade-routing_n16_s5_1200s_h27_3t_L3_epg": {
+   "arm": "cascade-routing",
+   "robot_pool_n": 25,
+   "escalations_from_decision_log": 0,
+   "stop_device_from_decision_log": 25,
+   "headline": 0.32,
+   "device_only_floor": 0.32,
+   "n_cloud_standing": 0,
+   "port_rule": "FAIL"
+  },
+  "r3-streaming_n16_s4_1200s_h27_3t_L3_epg": {
+   "arm": "r3-streaming",
+   "robot_pool_n": 20,
+   "escalations_from_decision_log": 0,
+   "stop_device_from_decision_log": 19,
+   "headline": 0.3,
+   "device_only_floor": 0.3,
+   "n_cloud_standing": 0,
+   "port_rule": "FAIL"
+  },
+  "r3-streaming_n16_s4_1200s_h27_3t_L3_epg_rq30": {
+   "arm": "r3-streaming",
+   "robot_pool_n": 132,
+   "escalations_from_decision_log": 0,
+   "stop_device_from_decision_log": 126,
+   "headline": 0.371212,
+   "device_only_floor": 0.371212,
+   "n_cloud_standing": 0,
+   "port_rule": "FAIL"
+  },
+  "r3-streaming_n16_s5_1200s_h27_3t_L3_epg": {
+   "arm": "r3-streaming",
+   "robot_pool_n": 25,
+   "escalations_from_decision_log": 0,
+   "stop_device_from_decision_log": 25,
+   "headline": 0.32,
+   "device_only_floor": 0.32,
+   "n_cloud_standing": 0,
+   "port_rule": "FAIL"
+  },
+  "r3-streaming_n16_s5_1200s_h27_3t_L3_epg_rq30": {
+   "arm": "r3-streaming",
+   "robot_pool_n": 127,
+   "escalations_from_decision_log": 0,
+   "stop_device_from_decision_log": 127,
+   "headline": 0.299213,
+   "device_only_floor": 0.299213,
+   "n_cloud_standing": 0,
+   "port_rule": "FAIL"
+  },
+  "streamscout_n16_s4_1200s_h27_3t_L3_epg_rq30": {
+   "arm": "streamscout",
+   "robot_pool_n": 132,
+   "escalations_from_decision_log": 132,
+   "stop_device_from_decision_log": 0,
+   "headline": 0.136364,
+   "device_only_floor": 0.371212,
+   "n_cloud_standing": 132,
+   "port_rule": "PASS"
+  },
+  "streamscout_n16_s5_1200s_h27_3t_L3_epg_rq30": {
+   "arm": "streamscout",
+   "robot_pool_n": 127,
+   "escalations_from_decision_log": 127,
+   "stop_device_from_decision_log": 0,
+   "headline": 0.299213,
+   "device_only_floor": 0.299213,
+   "n_cloud_standing": 126,
+   "port_rule": "PASS"
+  }
+ },
+ "step6_grid": {
+  "n_cells_scanned": 127,
+  "seeds": [
+   "0",
+   "4",
+   "5",
+   "6",
+   "7"
+  ],
+  "cells_strictly_below_their_own_floor": [
+   {
+    "cell": "eco-llm_n16_s5_1200s_h27_3t_L3_epg",
+    "arm": "eco-llm",
+    "seed": 5,
+    "run_valid": true,
+    "by_deadline": 0.2,
+    "n": 25,
+    "floor": 0.32,
+    "floor_n": 25,
+    "n_cloud_standing": 13,
+    "cloud_accuracy_on_served": 0.153846
+   },
+   {
+    "cell": "edf_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "arm": "edf",
+    "seed": 5,
+    "run_valid": true,
+    "by_deadline": 0.291339,
+    "n": 127,
+    "floor": 0.299213,
+    "floor_n": 127,
+    "n_cloud_standing": 4,
+    "cloud_accuracy_on_served": 0.0
+   },
+   {
+    "cell": "hybrid-F-lhreq_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "arm": "hybrid-F-lhreq",
+    "seed": 4,
+    "run_valid": true,
+    "by_deadline": 0.340909,
+    "n": 132,
+    "floor": 0.371212,
+    "floor_n": 132,
+    "n_cloud_standing": 111,
+    "cloud_accuracy_on_served": 0.297297
+   },
+   {
+    "cell": "hybrid-F-lhreq_n16_s5_1200s_h27_3t_L3_epg",
+    "arm": "hybrid-F-lhreq",
+    "seed": 5,
+    "run_valid": true,
+    "by_deadline": 0.28,
+    "n": 25,
+    "floor": 0.32,
+    "floor_n": 25,
+    "n_cloud_standing": 21,
+    "cloud_accuracy_on_served": 0.238095
+   },
+   {
+    "cell": "simplestream_n16_s4_1200s_h27_3t_L3",
+    "arm": "simplestream",
+    "seed": 4,
+    "run_valid": true,
+    "by_deadline": 0.2,
+    "n": 20,
+    "floor": 0.3,
+    "floor_n": 20,
+    "n_cloud_standing": 20,
+    "cloud_accuracy_on_served": 0.2
+   },
+   {
+    "cell": "simplestream_n16_s4_1200s_h27_3t_L3_epg",
+    "arm": "simplestream",
+    "seed": 4,
+    "run_valid": true,
+    "by_deadline": 0.15,
+    "n": 20,
+    "floor": 0.3,
+    "floor_n": 20,
+    "n_cloud_standing": 20,
+    "cloud_accuracy_on_served": 0.15
+   },
+   {
+    "cell": "simplestream_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "arm": "simplestream",
+    "seed": 4,
+    "run_valid": true,
+    "by_deadline": 0.143939,
+    "n": 132,
+    "floor": 0.371212,
+    "floor_n": 132,
+    "n_cloud_standing": 132,
+    "cloud_accuracy_on_served": 0.143939
+   },
+   {
+    "cell": "simplestream_n16_s5_1200s_h27_3t_L3_epg",
+    "arm": "simplestream",
+    "seed": 5,
+    "run_valid": true,
+    "by_deadline": 0.24,
+    "n": 25,
+    "floor": 0.32,
+    "floor_n": 25,
+    "n_cloud_standing": 24,
+    "cloud_accuracy_on_served": 0.208333
+   },
+   {
+    "cell": "simplestream_n16_s7_1200s_h27_3t_L3_epg_rq30",
+    "arm": "simplestream",
+    "seed": 7,
+    "run_valid": true,
+    "by_deadline": 0.285714,
+    "n": 105,
+    "floor": 0.295238,
+    "floor_n": 105,
+    "n_cloud_standing": 105,
+    "cloud_accuracy_on_served": 0.285714
+   },
+   {
+    "cell": "streamscout_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "arm": "streamscout",
+    "seed": 4,
+    "run_valid": true,
+    "by_deadline": 0.136364,
+    "n": 132,
+    "floor": 0.371212,
+    "floor_n": 132,
+    "n_cloud_standing": 132,
+    "cloud_accuracy_on_served": 0.136364
+   }
+  ],
+  "n_below": 10,
+  "cells_exactly_at_their_own_floor": [
+   "always-cloud-fcfs_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "always-cloud-fcfs_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "attentionstore-prefetch_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "attentionstore-prefetch_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "b7-edf-feasibility_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "cascade-routing_n16_s4_1200s_h27_3t_L3_epg",
+   "cascade-routing_n16_s5_1200s_h27_3t_L3_epg",
+   "confidence-cascade_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "confidence-cascade_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "eco-llm_n16_s4_1200s_h27_3t_L3_epg",
+   "edf_n16_s4_1200s_h27_3t_L3",
+   "edf_n16_s4_1200s_h27_3t_L3_epg",
+   "edf_n16_s5_1200s_h27_3t_L3_epg",
+   "edf_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "llf_n16_s4_1200s_h27_3t_L3_epg",
+   "llf_n16_s5_1200s_h27_3t_L3_epg",
+   "llf_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "lmcache_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "lmcache_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "mooncake_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "querystream-proactive_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "querystream-proactive_n16_s5_1200s_h27_3t_L3_epg",
+   "querystream-proactive_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "querystream-proactive_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "r3-streaming_n16_s4_1200s_h27_3t_L3_epg",
+   "r3-streaming_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "r3-streaming_n16_s5_1200s_h27_3t_L3_epg",
+   "r3-streaming_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "simplestream_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "streamscout_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "warm-all-lru-reactive_n12_s4_1200s_h27_3t_L3_epg_ls12",
+   "warm-all-lru-reactive_n12_s5_1200s_h27_3t_L3_epg_ls12",
+   "warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_cal1f",
+   "warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_epg",
+   "warm-all-lru-reactive_n16_s4_1200s_h27_3t_L3_epg_ls16",
+   "warm-all-lru-reactive_n16_s5_1200s_h27_3t_L3_epg_ls16",
+   "warm-all-lru-reactive_n20_s4_1200s_h27_3t_L3_epg_ls20",
+   "warm-all-lru-reactive_n20_s5_1200s_h27_3t_L3_epg_ls20",
+   "warm-all-lru-reactive_n4_s4_1200s_h27_3t_L3_epg_ls04",
+   "warm-all-lru-reactive_n4_s5_1200s_h27_3t_L3_epg_ls04",
+   "warm-all-lru-reactive_n8_s4_1200s_h27_3t_L3_epg_ls08",
+   "warm-all-lru-reactive_n8_s5_1200s_h27_3t_L3_epg_ls08",
+   "warm-all-lru_n16_s4_1200s_h27_3t_L3_cal1f_rf",
+   "warm-all-lru_n16_s4_1200s_h27_3t_L3_epg",
+   "warm-all-lru_n16_s4_1200s_h27_3t_L3_epg_rf",
+   "warm-all-lru_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "warm-all-lru_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rf",
+   "warm-all-lru_n16_s5_1200s_h27_3t_L3_epg",
+   "warm-all-lru_n16_s5_1200s_h27_3t_L3_epg_rerun",
+   "warm-all-lru_n16_s7_1200s_h27_3t_L3_epg_rq30"
+  ],
+  "cascade_family": [
+   {
+    "cell": "cascade-routing_n16_s4_1200s_h27_3t_L3_epg",
+    "arm": "cascade-routing",
+    "seed": 4,
+    "run_valid": true,
+    "by_deadline": 0.3,
+    "n": 20,
+    "floor": 0.3,
+    "floor_n": 20,
+    "n_cloud_standing": 0,
+    "cloud_accuracy_on_served": null
+   },
+   {
+    "cell": "cascade-routing_n16_s5_1200s_h27_3t_L3_epg",
+    "arm": "cascade-routing",
+    "seed": 5,
+    "run_valid": true,
+    "by_deadline": 0.32,
+    "n": 25,
+    "floor": 0.32,
+    "floor_n": 25,
+    "n_cloud_standing": 0,
+    "cloud_accuracy_on_served": null
+   },
+   {
+    "cell": "confidence-cascade_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "arm": "confidence-cascade",
+    "seed": 4,
+    "run_valid": true,
+    "by_deadline": 0.393939,
+    "n": 132,
+    "floor": 0.371212,
+    "floor_n": 132,
+    "n_cloud_standing": 3,
+    "cloud_accuracy_on_served": 1.0
+   },
+   {
+    "cell": "confidence-cascade_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "arm": "confidence-cascade",
+    "seed": 5,
+    "run_valid": true,
+    "by_deadline": 0.299213,
+    "n": 127,
+    "floor": 0.299213,
+    "floor_n": 127,
+    "n_cloud_standing": 0,
+    "cloud_accuracy_on_served": null
+   },
+   {
+    "cell": "confidence-cascade_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "arm": "confidence-cascade",
+    "seed": 6,
+    "run_valid": true,
+    "by_deadline": 0.057851,
+    "n": 121,
+    "floor": 0.057851,
+    "floor_n": 121,
+    "n_cloud_standing": 0,
+    "cloud_accuracy_on_served": null
+   },
+   {
+    "cell": "r3-streaming_n16_s4_1200s_h27_3t_L3_epg",
+    "arm": "r3-streaming",
+    "seed": 4,
+    "run_valid": true,
+    "by_deadline": 0.3,
+    "n": 20,
+    "floor": 0.3,
+    "floor_n": 20,
+    "n_cloud_standing": 0,
+    "cloud_accuracy_on_served": null
+   },
+   {
+    "cell": "r3-streaming_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "arm": "r3-streaming",
+    "seed": 4,
+    "run_valid": true,
+    "by_deadline": 0.371212,
+    "n": 132,
+    "floor": 0.371212,
+    "floor_n": 132,
+    "n_cloud_standing": 0,
+    "cloud_accuracy_on_served": null
+   },
+   {
+    "cell": "r3-streaming_n16_s5_1200s_h27_3t_L3_epg",
+    "arm": "r3-streaming",
+    "seed": 5,
+    "run_valid": true,
+    "by_deadline": 0.32,
+    "n": 25,
+    "floor": 0.32,
+    "floor_n": 25,
+    "n_cloud_standing": 0,
+    "cloud_accuracy_on_served": null
+   },
+   {
+    "cell": "r3-streaming_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "arm": "r3-streaming",
+    "seed": 5,
+    "run_valid": true,
+    "by_deadline": 0.299213,
+    "n": 127,
+    "floor": 0.299213,
+    "floor_n": 127,
+    "n_cloud_standing": 0,
+    "cloud_accuracy_on_served": null
+   },
+   {
+    "cell": "streamscout_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "arm": "streamscout",
+    "seed": 4,
+    "run_valid": true,
+    "by_deadline": 0.136364,
+    "n": 132,
+    "floor": 0.371212,
+    "floor_n": 132,
+    "n_cloud_standing": 132,
+    "cloud_accuracy_on_served": 0.136364
+   },
+   {
+    "cell": "streamscout_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "arm": "streamscout",
+    "seed": 5,
+    "run_valid": true,
+    "by_deadline": 0.299213,
+    "n": 127,
+    "floor": 0.299213,
+    "floor_n": 127,
+    "n_cloud_standing": 126,
+    "cloud_accuracy_on_served": 0.293651
+   }
+  ],
+  "every_below_cell_has_cloud_standing": true,
+  "verdict": "THREE SEPARATE THINGS, not one fault.\n(1) The reported observation is NOT a fault at all. confidence-cascade s6 sits exactly ON its cell's device floor with zero cloud answers standing. 0.0826 was floor + 3 correct cloud deliveries, not a floor.\n(2) A REAL below-floor effect exists in 10 committed cells, and in every one of them n_cloud_standing > 0: an ON-TIME but WRONG cloud answer legitimately replaces a correct device answer under the standing-answer rule (score.py:787-798). So an escalation CAN make a question worse than not asking, and it does, most sharply at simplestream s4 rq30 (0.1439 against a floor of 0.3712 with 132 of 132 cloud standing) and streamscout s4 rq30 (0.1364 against 0.3712, 132 of 132). This is a property of the metric's replacement semantics plus a cloud that is worse than the device on this workload. It is NOT the late-answer mechanism that was hypothesised, because a late answer never stands.\n(3) TWO arms in the cascade family FAIL the port rule, which is a third kind of fault and the one that outranks a number. cascade-routing makes ZERO robot escalations in both of its committed cells (20 of 20 and 25 of 25 declines), which is the already-open issue; r3-streaming makes ZERO in ALL FOUR of its committed cells (19 of 20, 126 of 132, 25 of 25, 127 of 127 declines, no release_recall at all). Both therefore score EXACTLY the device floor in every committed cell by construction, and neither number is evidence about the policy. confidence-cascade and streamscout PASS the port rule. Grouping these as one cascade fault would hide that the remedies differ: r3-streaming and cascade-routing need their escalation test reached at all, confidence-cascade needs its escalations delivered inside the deadline, and the below-floor cells need the standing-answer rule read as what it is rather than as a bug."
+ },
+ "consistency_check": {
+  "scope": "CLAUDE.md's seven checks, applied to a diagnosis that MEASURES NOTHING NEW: every number here is copied out of a committed per-cell score or counted out of a committed log, so checks 1 and 2 are about agreement with the committed values rather than about a new measurement.",
+  "c1_cross_check_committed": "PASS. The two headline quantities have prior committed values and this run reads exactly those: 0.057851 and 0.082645 come from score.score.robot_headline.correct_answers_delivered_by_deadline, and each is reproduced independently from score.score.robot_rows (7 and 10 of 121, ratio 1.000) and again from score.score.robot_value.standing_accuracy_by_deadline. The floor 0.057851 is confirmed in 17 separate committed files: every seed-6 rq30 cell's own score.score.device_only.robot_accuracy, which is written per cell by an arm-independent function. No disagreement anywhere, let alone 2x.",
+  "c2_physical_plausibility": "NOT APPLICABLE and said so rather than skipped: no latency, throughput or size is measured or derived here. The one timing quantity used, `t_delivered` minus `t_opportunity`, is used only to label a delivery late or on time and is declared a first-token proxy; the scorer's own completion-based judgement is what every scored column rests on.",
+  "c3_distribution_sanity": "PASS, with one constant explained rather than trusted. score.score.device_only.robot_accuracy is byte-identical across all 17 seed-6 cells, which is a CONSTANT where a reader might expect a distribution. It is the correct constant: the device answers come from one trace per seed that no arm can see, so the quantity cannot vary by arm, and that invariance is the whole reason it can serve as a floor. The quantities that SHOULD spread do: n_cloud_standing runs 0 to 120 across the seed-6 cells and the headline runs 0.0579 to 0.4959. Per-question device latencies spread 0.2503 to 0.3065 s.",
+  "c4_definition_audit": "PASS, and it is what resolved the question. 'Device-answer floor' was being used with two different definitions: (i) what every arm scores when the cloud delivers nothing usable, which is the committed score.score.device_only.robot_accuracy, 0.057851 at seed 6; and (ii) the lowest score among the saturated arms, 0.082645. Only (i) is the floor. 'Robot on time' is score.score.sweep[0].robot_pool_on_time, the count of questions whose CLOUD answer landed within L, which is 0 for confidence-cascade and 3 for the three peers; it is not the count of questions answered. L_rob is 3.0 s in every cell read (the _L3 tag) and p_rob is 0.9. A 'robot question' is a recall outcome on a robo* session: 121 at seed 6, 132 at seed 4, 127 at seed 5. The `_L3_epg` and `_L3_epg_rq30` directories are DIFFERENT workloads and are never compared numerically here.",
+  "c5_claim_linkage": "The result bears on the baseline suite's port rule and on the standing-answer metric, not on a Context Inertia claim: it says what two committed numbers mean and which arms' numbers are evidence about a policy at all. Nothing measured here is scoped out by FORMULATION.md; no KV transfer between heterogeneous tiers is touched.",
+  "c6_proxy_validity": "Two proxies, both declared in the script docstring. (i) Escalation read from the coordinator's decision log rather than the arm's own `stats` counter, because the split-process cells persist only wire statistics. VALID for the headline here because step 5 reconstructs the arm's own rule offline from the committed confidence table and the DEV-fitted floor and the two agree on 121 of 121, 132 of 132 and 127 of 127 rows. (ii) The raw first-token `t_delivered` used for the late / on-time label in the cross-tab. NOT valid for a scored column and not used for one: it is reported beside the scorer's own source_by_deadline, and the raw split and the scorer disagree on exactly one warm-all-lru question, which is the completion-delivery rewrite (D146) doing its job.",
+  "c7_validate_the_control": "PASS, and this check is the one that found the answer. The CONTROL under examination was the floor itself. Audited three ways: it is identical across all five arms at seed 6 (arm-independent, as its own definition requires); its value equals the number of questions every arm gets right from the device alone, 7; and the three peers' 10-question hit sets are identical to the exact opportunity id, so they are one set and not a coincidence of counts. That identity is what shows the 10 is floor + 3 rather than a floor: the 3 extra ids are precisely the 3 cloud-standing ids in all three peers. POSITIVE CONTROL: always-cloud-fcfs, an arm that escalates everything and is committed and valid, must sit AT OR ABOVE the floor under this check, and it does (0.0826 against 0.0579) while r3-streaming and cascade-routing, which never escalate, sit EXACTLY ON it in every committed cell. The check distinguishes them, so the check is not broken.",
+  "stop_conditions_hit": "none"
+ },
+ "hypothesis_verdict": "THE LEADING HYPOTHESIS IS REFUTED, twice over. (i) By code: a late cloud answer fails `_within` (score.py:687-689), so `_standing_by_deadline` falls to the DEVICE branch; lateness can never displace a device answer, only an ON-TIME answer can. (ii) By count: in this cell confidence-cascade has n_cloud_standing 0, device_answers_late 0 and n_no_answer_by_deadline 0, so all 121 questions were scored on the device's own answer and none was lost. D175 (1)'s refusal path is also not implicated: all 54 robot cloud requests in the cell carry http_status 200.",
+ "headline": "There is no below-floor arm here. The device floor at seed 6 is 0.057851 (7 of 121), and confidence-cascade scores exactly that. 0.0826 is the floor plus 3 questions that always-cloud-fcfs, querystream-proactive and attentionstore-prefetch each won with an on-time correct cloud answer, on the same 3 opportunity ids. confidence-cascade lost those 3 because its own confidence test stopped at the device: device confidence 0.999966 against a DEV-fitted floor of 0.800338, and the device answer wrong on all three. That is case (c), the arm's own decision, not a scorer bug, and the 3 opportunities are ONE question re-asked three times, so the gap is 1 distinct question at a mixing weight of 3 of 121. The arm's real pathology in this cell is separate and worse: 57 confidence-based escalations fired and NOT ONE was delivered inside 3 s.",
+ "_provenance": {
+  "git_commit": "622bd591177110605eddd3b119c8c7926bf94e24",
+  "script": "cascade_below_floor_diagnosis.py",
+  "model": "none",
+  "device": "cpu",
+  "n": 127,
+  "note": "n is per-section; see step6_grid.n_cells_scanned and the per-cell pools"
+ }
+}
