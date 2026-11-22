@@ -13,7 +13,7 @@ run (request.jsonl, prompt minus cached, / 1200 s). **"Robot on time" and "SS wi
 frozen-answer error's sign by seed (flash e016c230). Robot numbers still use the scorer's measured Orin WARM device latency
 (default `orin_rec_warm`), which covers every scored robot row (flash 1c239d5e). Transition zone for saturation is about
 4,500 to 4,750 uncached tok/s; a saturated cell is scored almost entirely on the device fallback answers, which are fixed by
-the seed's trace, so **saturated arms at the same seed show identical scores by coincidence on shared inputs, not duplication**
+the seed's trace, so **saturated arms at the same seed show identical scores by coincidence on shared inputs, not duplication** (CORRECTED 2026-11-22 ~15:30, flash cb9b9968: the shared base is `score.score.device_only.robot_accuracy`, the arm-independent device-only floor written into every cell of a seed, e.g. 0.0579 = 7 of 121 at s6; arms above it add identical cloud-standing wins, e.g. 0.0826 = floor + 3 wins on the same question ids)
 (checked raw: always-cloud vs b7 s4, mooncake vs b7 vs llf s6, different request logs and routing splits).
 
 ### 1. Runs done overnight (since 18:50)
@@ -159,6 +159,8 @@ conclusion**. Not posted: covex-v6-fair (D165 objective unbuilt), covex-v6 (plan
 4. **Old-tag r3-streaming / streamscout gap-fill cells dropped** (user ruling ~16:15); cascade arms held until their
    pre-registered DEV threshold calibration; kvflow-prefetch held to the 2026-11-28 cutoff (characteristic decision
    unexpressible); thinking-qwenvl not a registered live2 arm.
+
+**Port-rule status for the baseline table (flash cb9b9968, 2026-11-22 ~15:30)**: cascade-routing (0 robot escalations in both committed cells) and r3-streaming (0 in ALL FOUR committed cells, newly found) FAIL the port rule, so they sit exactly on the device-only floor by construction and must NOT be listed as scored baselines until the user rules (flash is taking it to the user). confidence-cascade PASSES (44 / 35 / 57 escalations at s4 / s5 / s6), but none of its s5 or s6 escalations arrived inside 3 s (n_cloud_standing 0; a live-timing rerun item under D154 (5)); its s6 0.0579 equals the floor, NOT below it (an earlier operator flag was a misread). A real below-floor effect exists in 10 of 127 cells: an ON-TIME but WRONG cloud answer replaces a correct device answer (worst simplestream s4 0.144 vs floor 0.371, streamscout s4 0.136); every such cell has n_cloud_standing > 0.
 
 **C5 attribution candidate (covex-v6-state-uo-c5attr), scope declared before its cells**: of the cap halvings in the committed cells, the share the rule can reach (every slow monitor since the last adjustment overlapped a robot prefill the coordinator released with at least 200 uncached tokens) is 63.4 / 63.7 percent at rung 2 (covex-v6-state-uo s4 / s5: 142 of 224, 121 of 190) and 50.7 to 54.7 percent at rung 1. Out of reach by design: halvings on monitors that overlapped nothing of ours, and halvings where the EWMA exceeds 0.8 s while NO single pending monitor is slow (19.2 / 16.3 percent at rung 2, 30.5 to 37.6 at rung 1). The reachable share is very sensitive to the user's 200-token threshold (at 2,000 it is 14.3 / 19.0 percent at rung 2): most attributed prefills are small (median about 1,375 uncached), not the 3,071-token warm builds. The rule does move the cap (Step 2b on committed traces: 436 to 514 of 539 to 599 halvings prevented per rung-1 cell). An earlier figure of "8 to 9 in 10" classified monitors, not halvings, and is withdrawn (flash, c5attr_trip_attribution.json).
 
