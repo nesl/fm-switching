@@ -1,0 +1,130 @@
+{
+ "_what": "covex-v6-state-shares resolves through run_live2_real.py itself",
+ "_register": "P0 and P1 are SUBPROCESS probes of the harness's own entry point with the posted workload knobs; P2 is an in-process attribute read and is a statement about registration only",
+ "entry_point": "experiments/orchestration/live2/run_live2_real.py",
+ "registered_in": "experiments/orchestration/live2/arms_v6shares.py, imported from arms.py beside the other v6 families",
+ "posted_knobs": [
+  "--ratio",
+  "40:40:20",
+  "--robot-question-set",
+  "lh_req",
+  "--ss-question-set",
+  "ss2",
+  "--dashcam-format",
+  "epg",
+  "--robot-upload",
+  "per-frame",
+  "--robot-reask-mean-s",
+  "30.0"
+ ],
+ "P0_negative_control": {
+  "_claim": "a name that is NOT registered still raises through this same path",
+  "probe": {
+   "arm": "covex-v6-state-shares-not-an-arm",
+   "seed": 0,
+   "returncode": 1,
+   "raised_unknown_arm": true,
+   "tail": "KeyError: \"unknown arm 'covex-v6-state-shares-not-an-arm'; known: ['always-cloud-fcfs', 'attentionstore', 'attentionstore-prefetch', 'attentionstore-prefetch-noyield', 'attentionstore-prefetch-off', 'b10-blocking-aware', 'b7-edf-feasibility', 'b9', 'builder-acfcfs', 'builder-default', 'builder-s1-fa"
+  },
+  "verdict": "PASS: the check can see an unresolved name"
+ },
+ "P1_resolution": {
+  "_claim": "each shares arm name resolves in the harness's own process",
+  "probes": [
+   {
+    "arm": "covex-v6-state-shares",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   {
+    "arm": "covex-v6-state-shares-off",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   {
+    "arm": "covex-v6-state-shares-noadmit",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   {
+    "arm": "covex-v6-state-shares-norecheck",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   }
+  ],
+  "all_resolve": true,
+  "verdict": "PASS: all 4 names resolve"
+ },
+ "P2_switch_scope": {
+  "switch_names": [
+   "live2_share_admission",
+   "live2_release_recheck"
+  ],
+  "arms_under_test": {
+   "covex-v6-state-shares": {
+    "live2_share_admission": [
+     true,
+     true,
+     true
+    ],
+    "live2_release_recheck": [
+     true,
+     true,
+     true
+    ]
+   },
+   "covex-v6-state-shares-noadmit": {
+    "live2_share_admission": [
+     false,
+     false,
+     false
+    ],
+    "live2_release_recheck": [
+     true,
+     true,
+     true
+    ]
+   },
+   "covex-v6-state-shares-norecheck": {
+    "live2_share_admission": [
+     true,
+     true,
+     true
+    ],
+    "live2_release_recheck": [
+     false,
+     false,
+     false
+    ]
+   },
+   "covex-v6-state-shares-off": {
+    "live2_share_admission": [
+     false,
+     false,
+     false
+    ],
+    "live2_release_recheck": [
+     false,
+     false,
+     false
+    ]
+   }
+  },
+  "n_other_arms_all_off": 171,
+  "other_arms_with_a_switch_on": {},
+  "unconstructible": {},
+  "_what_a_chain_is": "the wrapper and every object `_rules`/`_base` reaches; a single getattr on the wrapper is the check that passes while the inner object decides differently",
+  "_claim": "both switches are ON for covex-v6-state-shares, on every object of its chain, and OFF on every other arm",
+  "verdict": "PASS: on for the shares arm and off on 171 others",
+  "_register": "REGISTRATION ONLY. Nothing reads either switch at this commit: share_admission.allowed() returns (True, 'disabled') and the coordinator has no call site, so these are write-only fields. The CLAUDE.md Step 2b proof that a switch moves a decision is a diff of two decision logs and is NOT claimed here."
+ },
+ "verdict": "ALL_PASS"
+}

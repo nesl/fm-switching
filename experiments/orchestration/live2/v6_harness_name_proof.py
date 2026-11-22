@@ -41,7 +41,11 @@ LADDER = ["covex-v6-base", "covex-v6-rules", "covex-v6-state", "covex-v6-fair", 
           "covex-v6-state-d162",
           # the C5 attribution CANDIDATE (user ruling 2026-11-22 addendum). A cell list names it,
           # so the harness must resolve it; it is default-off everywhere else.
-          "covex-v6-state-uo-c5attr"]
+          "covex-v6-state-uo-c5attr",
+          # D179 share-based admission, on a DISTINCT name because covex-v6-state-uo's four
+          # committed cells would otherwise collide with it. Same reason it is in this list as
+          # the rest: the cell list names it, so the HARNESS must resolve it.
+          "covex-v6-state-shares", "covex-v6-state-shares-off"]
 UNKNOWN = "covex-v6-not-an-arm"
 MARKER = "unknown arm"
 

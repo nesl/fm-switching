@@ -731,6 +731,14 @@ ARMS.update(V6FAIR_ARMS)
 # point itself.
 from arms_v6c5 import V6C5_ARMS                                         # noqa: E402
 ARMS.update(V6C5_ARMS)
+# D179 share-based admission, on a DISTINCT name because covex-v6-state-uo already has four
+# committed cells at seeds 4 to 7 and the driver keys a cell on the name, so a share cell run
+# under the committed name would be skipped or would collide with a cell that decided
+# differently. Registered HERE for the same reason as every other v6 family above: a name
+# registered only in its own module does not exist in the harness's process.
+# `v6shares_name_proof.py` asks the entry point itself.
+from arms_v6shares import V6SHARES_ARMS                                 # noqa: E402
+ARMS.update(V6SHARES_ARMS)
 
 
 def _register_v6_aliases() -> None:

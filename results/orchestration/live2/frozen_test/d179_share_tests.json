@@ -1,0 +1,433 @@
+{
+ "_what": "the D179 (6b) unit tests for share admission and deadline-aware release",
+ "_runner": "a plain script, because pytest is NOT installed in the fmtk env. Explicit pass/fail summary, non-zero exit on any FAIL",
+ "_register": "PENDING IS NOT A PASS. A check whose mechanism does not exist has not tested the claim (CLAUDE.md Rule 1 in its test-side form), so the counts are kept separate and PENDING is never folded into GREEN",
+ "interface_commit": "f3482026 experiments/orchestration/live2/share_admission.py",
+ "capacity": {
+  "w_max_tokens": 4323.3,
+  "u_alert_tokens": 374.0,
+  "floors_tokens": {
+   "alert": 1622.1,
+   "recall": 655.8,
+   "assistance": 242.8
+  },
+  "flexible_tokens": 1802.6,
+  "floor_fractions": {
+   "alert": 0.3752,
+   "recall": 0.1517,
+   "assistance": 0.0562
+  },
+  "flexible_fraction": 0.417,
+  "factors": {
+   "alert": {
+    "lambda_per_s": 9.8121,
+    "lambda_basis": "offered (C5 declines are a throttle)",
+    "median_uncached": 374.0,
+    "median_first_token_s": 0.442,
+    "offered": 47098,
+    "sent": 39949,
+    "feasibility_declines": 0
+   },
+   "recall": {
+    "lambda_per_s": 0.0373,
+    "lambda_basis": "submitted (b7 declines are feasibility)",
+    "median_uncached": 7717.0,
+    "median_first_token_s": 2.279,
+    "offered": 485,
+    "sent": 179,
+    "feasibility_declines": 306
+   },
+   "assistance": {
+    "lambda_per_s": 0.2975,
+    "lambda_basis": "either; they differ by one request",
+    "median_uncached": 1372.0,
+    "median_first_token_s": 0.5943,
+    "offered": 1429,
+    "sent": 1428,
+    "feasibility_declines": 1
+   }
+  },
+  "source": "hybrid-F-lhreq-noc3 (covex-v6-base) seeds 4 to 7, _L3_epg_rq30, healthy windows only; derivation in results/orchestration/live2/frozen_test/d181_share_floors.json",
+  "scaling_applied": false,
+  "rulings": [
+   "D179 (2), (3)",
+   "D180",
+   "D181",
+   "user addendum 5, 2026-11-22"
+  ]
+ },
+ "checks": [
+  {
+   "status": "GREEN",
+   "w_max": 4323.3,
+   "floors": {
+    "alert": 1622.1,
+    "recall": 655.8,
+    "assistance": 242.8
+   },
+   "flexible": 1802.6000000000004,
+   "sum": 4323.3,
+   "floor_sum_fraction": 0.583,
+   "negative_control": "a +1 token perturbation of the alert floor breaks the identity",
+   "_what_would_fail_if_wrong": "a floor table that did not sum with the flexible pool to W_max, which is how a future edit to one of the four numbers would silently over- or under-commit the engine; and a summary() block publishing different capacity numbers from the ones the allocator divides",
+   "id": "T1",
+   "what": "shares sum to W_max (floors plus flexible, exactly)"
+  },
+  {
+   "status": "PENDING",
+   "reason": "share_admission.allowed() body not landed yet (session A commit 2): session A commit 2: the allocator body",
+   "id": "T2",
+   "what": "floors are honoured under contention"
+  },
+  {
+   "status": "GREEN",
+   "background_kinds": [
+    "piece",
+    "whole",
+    "touch"
+   ],
+   "foreground_checked": [
+    "append",
+    "monitor",
+    "recall"
+   ],
+   "prefix_to_type": {
+    "dash": "alert",
+    "robo": "recall",
+    "asst": "assistance"
+   },
+   "_what_would_fail_if_wrong": "a touch classified as deadline work would be allowed into another type's floor by 3b's own rule, and 3b would still pass",
+   "id": "T3a",
+   "what": "the background classifier (load-bearing for T3b)"
+  },
+  {
+   "status": "PENDING",
+   "reason": "share_admission.allowed() body not landed yet (session A commit 2): session A commit 2: the allocator body",
+   "id": "T3b",
+   "what": "background work never enters another type's floor"
+  },
+  {
+   "status": "PENDING",
+   "reason": "share_admission.allowed() body not landed yet (session A commit 2): session A commit 2: the allocator body",
+   "id": "T4",
+   "what": "the borrowing path works, and is bounded by W_max"
+  },
+  {
+   "status": "PENDING",
+   "reason": "share_admission.allowed() body not landed yet (session A commit 2): session A commit 2: the allocator body",
+   "id": "T5",
+   "what": "an oversize deadline request is admitted only when alone"
+  },
+  {
+   "status": "GREEN",
+   "tokens": 7717,
+   "deadline_s": 3.0,
+   "predicate": "costs.recall_ttft_s(readiness_tokens, readiness) <= slack_s, which is b7's own rule in baselines/constructed.py",
+   "readiness_rows": [
+    {
+     "readiness": "GPU-WARM",
+     "est_ttft_s": 0.268,
+     "feasible_at_arrival": true,
+     "flip_hold_s": 2.732
+    },
+    {
+     "readiness": "HOST-WARM",
+     "est_ttft_s": 0.322,
+     "feasible_at_arrival": true,
+     "flip_hold_s": 2.678
+    },
+    {
+     "readiness": "COLD",
+     "est_ttft_s": 1.7149,
+     "feasible_at_arrival": true,
+     "flip_hold_s": 1.2851
+    }
+   ],
+   "smallest_flipping_hold_s": 1.2851,
+   "_what_would_fail_if_wrong": "if every request were infeasible at arrival, b7 would already decline it and the re-check would change nothing; if none could become infeasible, the re-check would never fire. Either way a null from the share cells would be an absent mechanism and not a finding about the policy",
+   "id": "T6a",
+   "what": "the release re-check has a reachable path"
+  },
+  {
+   "status": "PENDING",
+   "reason": "session B's release re-check has no entry point yet. For this check to be written it needs: (i) a predicate callable, taking the request's predicted first-token time and its slack at the release instant, returning feasible/infeasible; and (ii) a counter incremented on each skip, distinguishable from an arrival-time b7 decline, so a release skip cannot be read as an arrival decline. Both named in arm_stats.",
+   "id": "T6b",
+   "what": "the release re-check skips an infeasible request"
+  },
+  {
+   "status": "GREEN",
+   "asserted_on": "the request BODY's _live2.frame_refs, not only the uncached count; the count is reported as corroboration",
+   "episode_refs": [
+    "f01",
+    "f02",
+    "f03",
+    "f04",
+    "f05"
+   ],
+   "next_request_frame_refs": [
+    "f01",
+    "f02",
+    "f03",
+    "f04",
+    "f05"
+   ],
+   "uncached_after_release": 380,
+   "uncached_after_skip": 718,
+   "delta_tokens": 338,
+   "epg_tok_per_frame": 338,
+   "_what_would_fail_if_wrong": "if a skip dropped the frame, the episode would lose an instant permanently and the alert task would be answered off an incomplete episode - a QUALITY loss that no latency counter would show, and the exact thing D179 (4) promises not to do. If instead the skip marked the frame sent, the next request would reference bytes the engine never received",
+   "id": "T7a",
+   "what": "a skipped alert frame is carried by the next request (body level)"
+  },
+  {
+   "status": "PENDING",
+   "reason": "needs session B's skip path. The check is: release one EP-G monitor at instant k, skip instant k+1 through the re-check, and assert the frame of k+1 is absent from the coordinator's `_mon_sent[device]` and present in instant k+2's `_live2.frame_refs` with its bytes (path not None). Session B need expose only that the skip returns without touching `_mon_sent`; the assertion is then readable off `co.epg_requests`.",
+   "id": "T7b",
+   "what": "a release skip leaves the frame unsent (coordinator level)"
+  },
+  {
+   "status": "GREEN",
+   "why_this_invariant": "W is the resource every D179 decision divides and a leak in it is silent: it raises nothing, drifts upward over a cell, and reads as 'the shares are too tight' rather than as a bug. Session A already fixed one bug of this exact shape in the background accumulator",
+   "interleavings": [
+    "one background and one large foreground alert in flight",
+    "the large foreground reached first token",
+    "duplicate first token for an id already removed",
+    "settle after first token, same id",
+    "first token for an id never submitted",
+    "a recall submitted",
+    "that recall failed with no content token",
+    "a zero-token and a negative-token submission",
+    "a submission with an unknown type",
+    "drained"
+   ],
+   "trace": [
+    {
+     "after": "one background and one large foreground alert in flight",
+     "w": {
+      "alert": 3300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "bg": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "total": 3300,
+     "tracked": 2
+    },
+    {
+     "after": "the large foreground reached first token",
+     "w": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "bg": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "total": 300,
+     "tracked": 1
+    },
+    {
+     "after": "duplicate first token for an id already removed",
+     "w": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "bg": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "total": 300,
+     "tracked": 1
+    },
+    {
+     "after": "settle after first token, same id",
+     "w": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "bg": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "total": 300,
+     "tracked": 1
+    },
+    {
+     "after": "first token for an id never submitted",
+     "w": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "bg": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "total": 300,
+     "tracked": 1
+    },
+    {
+     "after": "a recall submitted",
+     "w": {
+      "alert": 300,
+      "recall": 7000,
+      "assistance": 0
+     },
+     "bg": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "total": 7300,
+     "tracked": 2
+    },
+    {
+     "after": "that recall failed with no content token",
+     "w": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "bg": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "total": 300,
+     "tracked": 1
+    },
+    {
+     "after": "a zero-token and a negative-token submission",
+     "w": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "bg": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "total": 300,
+     "tracked": 3
+    },
+    {
+     "after": "a submission with an unknown type",
+     "w": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "bg": {
+      "alert": 300,
+      "recall": 0,
+      "assistance": 0
+     },
+     "total": 300,
+     "tracked": 1
+    },
+    {
+     "after": "drained",
+     "w": {
+      "alert": 0,
+      "recall": 0,
+      "assistance": 0
+     },
+     "bg": {
+      "alert": 0,
+      "recall": 0,
+      "assistance": 0
+     },
+     "total": 0,
+     "tracked": 0
+    }
+   ],
+   "_what_would_fail_if_wrong": "a decrement that recomputed the amount instead of removing the stored one; a non-idempotent first-token hook; a settle path that double-subtracted; an unknown type creating a fourth bucket that no floor covers",
+   "id": "T8",
+   "what": "W is conserved and never negative (mine)"
+  }
+ ],
+ "green": [
+  "T1",
+  "T3a",
+  "T6a",
+  "T7a",
+  "T8"
+ ],
+ "pending": [
+  "T2",
+  "T3b",
+  "T4",
+  "T5",
+  "T6b",
+  "T7b"
+ ],
+ "failed": [],
+ "counts": {
+  "green": 5,
+  "pending": 6,
+  "failed": 0
+ },
+ "stub_controls": {
+  "_what": "which PENDING checks would catch a wrong allocator body, proved by running them against two deliberately wrong ones",
+  "stubs": {
+   "always-admit": "admits everything",
+   "always-deny": "denies everything"
+  },
+  "by_stub": {
+   "always-admit": {
+    "T2": "PASSED",
+    "T3b": "CAUGHT: a background recall warm of 450 tokens was admitted with the flexible pool exhausted and only alert's floor of 1622.1 tokens free; reason 's",
+    "T4": "CAUGHT: a borrow of 2101 tokens carried total W past W_max = 4323.3 and was admitted for a reason other than the oversize-when-alone rule: 'stub: ad",
+    "T5": "CAUGHT: an oversize assistance request of 4324 tokens was admitted while 1 tokens of its own type were in flight; reason 'stub: admit everything'"
+   },
+   "always-deny": {
+    "T2": "CAUGHT: type alert was denied 1621 tokens inside its own floor of 1622.1 while the other types held {'recall': 2458.4000000000005, 'assistance': 242",
+    "T3b": "CAUGHT: a background warm may borrow a FREE flexible pool; denied with 'stub: deny everything'",
+    "T4": "CAUGHT: a deadline alert request of 327 tokens was denied with its own share of 2223.0 exhausted and 2100.3 tokens of W_max unused; reason 'stub: de",
+    "T5": "CAUGHT: an oversize assistance request was denied with nothing of its type in flight, so it can never be sent at all; reason 'stub: deny everything'"
+   }
+  },
+  "per_check": {
+   "T2": {
+    "caught_by": [
+     "always-deny"
+    ],
+    "verdict": "DISCRIMINATING"
+   },
+   "T3b": {
+    "caught_by": [
+     "always-admit",
+     "always-deny"
+    ],
+    "verdict": "DISCRIMINATING"
+   },
+   "T4": {
+    "caught_by": [
+     "always-admit",
+     "always-deny"
+    ],
+    "verdict": "DISCRIMINATING"
+   },
+   "T5": {
+    "caught_by": [
+     "always-admit",
+     "always-deny"
+    ],
+    "verdict": "DISCRIMINATING"
+   }
+  },
+  "all_discriminating": true
+ },
+ "verdict": "NO_FAILURES: 5 green, 6 pending a body that is not landed"
+}
