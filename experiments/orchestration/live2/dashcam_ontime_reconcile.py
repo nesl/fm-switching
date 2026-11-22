@@ -121,6 +121,7 @@ CELLS: List[str] = [
     # dashcam numbers are attributable to SCHEDULING alone rather than to budget starvation.
     "covex-v6-state-uo" + TAG % 4,
     "covex-v6-state-uo" + TAG % 5,
+    "covex-v6-state-uo" + TAG % 6,
     "covex-v6-state" + TAG % 4 + "_rerun",
     "covex-v6-state" + TAG % 5,
 ]
@@ -206,6 +207,117 @@ def _prefix_cache(cell_dir: Path) -> Dict[str, Any]:
             "hit_fraction": round(hits / qs, 4) if qs else None,
             "label": ("WARM SERVER: every latency in this cell was served with prefix caching on; "
                       "none of these numbers is a cold prefill")}
+
+
+AIMD_TRIP_S = 0.8 * DASH_L_S    # C5's trip on the monitor first-token estimate
+EWMA_A = 0.3
+CAP_FLOOR, CAP_CEIL = 4, 8
+
+
+def cap_trajectory(req: List[Dict[str, Any]], mon_opps: set, cr: Dict[str, Any],
+                   n_ep: int) -> Dict[str, Any]:
+    """C5's AIMD cap, RECONSTRUCTED on the arm's own rule and CONTROLLED against the arm's own
+    counters. covex-v6-state-uo reports `c5_decrease`, `c5_increase` and `c5_dash_held` in
+    `arm_stats`, so unlike the rung-1 case this reconstruction has a direct bar to clear and the
+    verdict below is not a model compared against nothing. The rule is the one c5_loss_split.py
+    reconstructed: an EWMA (alpha 0.3) of monitor first-token time measured from t_submit, halve
+    on a crossing of 0.8 s with a 1 s minimum between adjustments, additive +1 every 5 s, floor 4
+    ceiling 8."""
+    upd = sorted((float(r["t_done"]), float(r["t_first_token"]) - float(r["t_submit"]))
+                 for r in req
+                 if r.get("opportunity_id") in mon_opps
+                 and r.get("t_first_token") is not None and r.get("t_done") is not None)
+    lat, j = 0.0, 0
+    cap, last_adj = CAP_CEIL, None
+    caps = [CAP_CEIL] * n_ep
+    n_dec = n_inc = 0
+    t_first_halving = None
+    for e in range(n_ep):
+        t = e * PERIOD_S
+        while j < len(upd) and upd[j][0] <= t:
+            v = upd[j][1]
+            lat = v if lat <= 0 else EWMA_A * v + (1 - EWMA_A) * lat
+            j += 1
+        if lat > AIMD_TRIP_S:
+            if last_adj is None or t - last_adj >= 1.0:
+                cap = max(CAP_FLOOR, cap // 2)
+                n_dec += 1
+                last_adj = t
+                if t_first_halving is None:
+                    t_first_halving = round(t, 2)
+        elif last_adj is None or t - last_adj >= 5.0:
+            if cap < CAP_CEIL:
+                cap += 1
+                n_inc += 1
+            last_adj = t
+        caps[e] = cap
+    st = cr.get("arm_stats") or {}
+    rec_d, rec_i = st.get("c5_decrease"), st.get("c5_increase")
+    return {
+        "epochs": n_ep,
+        "epochs_at_floor_4": sum(1 for c in caps if c == CAP_FLOOR),
+        "share_of_epochs_at_floor": round(sum(1 for c in caps if c == CAP_FLOOR) / n_ep, 4),
+        "epochs_at_ceiling_8": sum(1 for c in caps if c == CAP_CEIL),
+        "mean_cap": round(sum(caps) / n_ep, 4),
+        "reconstructed_halvings": n_dec,
+        "reconstructed_increases": n_inc,
+        "first_halving_t_s": t_first_halving,
+        "arm_recorded_c5_decrease": rec_d,
+        "arm_recorded_c5_increase": rec_i,
+        "arm_recorded_c5_dash_held": st.get("c5_dash_held"),
+        "control": ("the arm reports its own counters; reconstruction %s"
+                    % (("MATCHES within 10 percent on both (%s vs %s dec, %s vs %s inc)"
+                        % (n_dec, rec_d, n_inc, rec_i))
+                       if rec_d and rec_i and abs(n_dec - rec_d) <= 0.1 * rec_d
+                       and abs(n_inc - rec_i) <= 0.1 * rec_i
+                       else ("DOES NOT match the arm's own counters (%s vs %s dec, %s vs %s "
+                             "inc), so the trajectory is UNVALIDATED and only the arm's own "
+                             "c5_dash_held and c5_decrease / c5_increase may be cited"
+                             % (n_dec, rec_d, n_inc, rec_i)))
+                    if rec_d is not None
+                    else "this arm reports no c5 counters; trajectory UNVALIDATED"),
+    }
+
+
+def workload_facts(cell: str, cr: Dict[str, Any], out: List[Dict[str, Any]],
+                   req: List[Dict[str, Any]], sc: Dict[str, Any]) -> Dict[str, Any]:
+    """What DIFFERS IN THE WORKLOAD across seeds, read RUN-SIDE and labelled as such.
+
+    PROXY / LIMITATION, declared: the trace directory these cells name
+    (/home/pragya/data/live2/frozen_grid/work/traces/seed*) is NOT present on this box, so none
+    of this comes from the trace generator's own metadata. It is read from the run's record of
+    what the arm actually saw. For a CROSS-ARM comparison at one seed that is equivalent, because
+    the committed fairness digest guarantees every arm saw the same event stream. For the
+    CROSS-SEED comparison asked for here it is weaker: a different seed is a different workload
+    by construction, so these are DESCRIPTIONS of three different workloads and not a controlled
+    contrast."""
+    k = cr.get("counts") or {}
+    e = cr.get("epg") or {}
+    rec_t = sorted(float(o["t_opportunity"]) for o in out if o.get("kind") == "recall")
+    hp = sc.get("history_preload") or {}
+
+    def _q(v, p):
+        return round(v[min(int(p * len(v)), len(v) - 1)], 1) if v else None
+    return {
+        "_source": "RUN-SIDE; the trace directory is absent from this box (see docstring)",
+        "dashcam_monitor_opportunities": sum(1 for o in out if o.get("kind") == "monitor"),
+        "all_opportunities": cr.get("n_opportunities"),
+        "n_sessions": cr.get("n_sessions"),
+        "robot_and_ss_questions_recall_outcomes": len(rec_t),
+        "recall_arrival_t_s": {"p10": _q(rec_t, .1), "p50": _q(rec_t, .5),
+                               "p90": _q(rec_t, .9), "first": _q(rec_t, 0.0),
+                               "last": round(rec_t[-1], 1) if rec_t else None},
+        "recalls_released_to_cloud": k.get("recall_CLOUD"),
+        "warming_builds_released": k.get("state_priced_build"),
+        "warming_pieces_submitted": k.get("submitted_piece"),
+        "touches_submitted": k.get("submitted_touch"),
+        "episodes": e.get("episodes"),
+        "episode_frames_median": e.get("frames_median"),
+        "episode_frames_total": e.get("frames_total"),
+        "monitor_requests_released": e.get("requests"),
+        "monitor_prompt_tokens_total": e.get("prompt_tokens_total"),
+        "history_preload_est_tokens": hp.get("est_tokens"),
+    }
 
 
 def reconcile(cell: str) -> Dict[str, Any]:
@@ -651,6 +763,11 @@ def reconcile(cell: str) -> Dict[str, Any]:
             "monitor_opportunities_hit": counts["released_refused"],
             "source": "scorer/score.py refused_request_ids(), imported not reimplemented",
         },
+        "cap_trajectory": cap_trajectory(req, mon_opps, cr, n_ep),
+        "workload_facts": workload_facts(
+            cell, cr, out, req,
+            ((json.loads((d / "cell.json").read_text()).get("score") or {}).get("score") or {})
+            if (d / "cell.json").exists() else {}),
         "prefix_caching": _prefix_cache(d),
         "traced_unit_median_release_delay": (
             sorted(trace_cands, key=lambda z: z["release_delay_s"])[len(trace_cands) // 2]
@@ -1101,38 +1218,181 @@ def main() -> int:
         "makes them the first rung-2 cells whose dashcam numbers are attributable to SCHEDULING "
         "alone. On the dashcam object this file decomposes, both seeds move the same way (+517 "
         "and +60 instants), and the +60 is likewise too small for a single seed to carry.")
+    uo = [c for c in live if c["arm"] == "covex-v6-state-uo"]
+    def _uo(k, f):
+        return {c["cell"].split("_n16_")[1][:2]: f(c) for c in uo}
+    out["s6_natural_experiment"] = {
+        "_question": ("the coordinator's question: covex-v6-state-uo seed 6 MEETS the dashcam "
+                      "target where seeds 4 and 5 FAIL. Same arm, same code, same workload "
+                      "shape, different seed. What is different?"),
+        "_register_FIRST_because_it_changes_the_reading": (
+            "ONE CELL OF THREE, and the margin is 1.5 POINTS ON THE BINDING DEVICE. The target is "
+            "p_dash = 0.25 per eligible device. At seed 6 the WORST device is 0.2646, clearing "
+            "the bar by 1.46 pp; seeds 4 and 5 have worst devices at 0.1624 and 0.1638. Three "
+            "cells of one arm (fail, fail, meet) ESTABLISH NO RATE and this must not be written "
+            "as 'the arm meets dashcam'. Seed 7 of this arm is NOT on origin at the time of "
+            "writing, so this is three cells and not four."),
+        "_structural_finding_THE_MAIN_POINT": (
+            "THE RELEASE PROBLEM IS PRESENT AT SEED 6 TOO, and that is the finding. Even in the "
+            "cell that meets the target, 60.8 percent of released monitors are already past the "
+            "whole 1.0 s deadline at their FIRST TOKEN, the median release delay is 0.639 s of "
+            "that deadline, and on-time is 27.6 percent. Seed 6 clears the bar because the bar is "
+            "0.25, not because the hold has gone away. So the dashcam failure is NOT seed-"
+            "dependent in kind; what is seed-dependent is whether a structurally identical "
+            "release pattern happens to land either side of a low bar."),
+        "on_time_share": _uo("x", lambda c: c["shares"]["on_time"]),
+        "worst_device_fraction": None,
+        "q1_cap_trajectory": {
+            "epochs_at_floor_4_of_12000": _uo("x", lambda c: c["cap_trajectory"][
+                "epochs_at_floor_4"]),
+            "share_of_epochs_at_floor": _uo("x", lambda c: c["cap_trajectory"][
+                "share_of_epochs_at_floor"]),
+            "mean_cap": _uo("x", lambda c: c["cap_trajectory"]["mean_cap"]),
+            "halvings_reconstructed": _uo("x", lambda c: c["cap_trajectory"][
+                "reconstructed_halvings"]),
+            "halvings_arm_recorded": _uo("x", lambda c: c["cap_trajectory"][
+                "arm_recorded_c5_decrease"]),
+            "first_halving_t_s": _uo("x", lambda c: c["cap_trajectory"]["first_halving_t_s"]),
+            "arm_recorded_c5_dash_held": _uo("x", lambda c: c["cap_trajectory"][
+                "arm_recorded_c5_dash_held"]),
+            "answer": (
+                "THE CAP IS LESS SHUT AT SEED 6, BY A LITTLE: 36.4 percent of epochs at the floor "
+                "against 43.1 (s4) and 40.3 (s5), mean cap 5.646 against 5.347 and 5.386, and "
+                "2,670 epochs at the ceiling against 2,040 and 1,851. But the HALVING COUNT DOES "
+                "NOT ORDER THE OUTCOME: seed 5 has the FEWEST halvings (188 by the arm's own "
+                "counter) and the second-worst on-time share, while seed 6 has 206, between the "
+                "two. So the driver is the cap's MEAN LEVEL and its recovery between halvings, "
+                "not how often it halves. The arm's own c5_dash_held barely moves at all: 58,705 "
+                "at s6 against 59,777 and 59,453, a 1.8 percent difference, which is far too "
+                "small to carry a 47 percent relative change in on-time share on its own."),
+            "first_order_cause_in_the_signal_the_cap_READS": (
+                "the cap reads an EWMA of monitor first-token time against a 0.8 s trip, and that "
+                "trip sits almost exactly at the p90 OF ITS OWN INPUT DISTRIBUTION. Monitor TTFT "
+                "p50 is identical across the three cells (0.4831 / 0.4825 / 0.4847) and p75 is "
+                "near-identical (0.6369 / 0.6354 / 0.6241); it is only the upper tail that moves, "
+                "and it moves ACROSS the trip: p90 is 0.8374 and 0.8063 (both ABOVE 0.8) at seeds "
+                "4 and 5 and 0.7956 (just BELOW) at seed 6. The share of released monitors over "
+                "0.8 s is 11.8 / 10.4 / 9.8 percent, monotone with the outcome and only 2 points "
+                "wide. A control loop whose trip point coincides with the p90 of its own input is "
+                "operating at a knife edge, which is the most economical account of why three "
+                "cells of one arm straddle a pass/fail line."),
+            "control": _uo("x", lambda c: c["cap_trajectory"]["control"][:120]),
+        },
+        "q2_release_delay": {
+            "p50": _uo("x", lambda c: c["latency_components_s"][
+                "release_delay_t_submit_minus_t_opportunity"]["p50"]),
+            "p90": _uo("x", lambda c: c["latency_components_s"][
+                "release_delay_t_submit_minus_t_opportunity"]["p90"]),
+            "share_over_0_5_s": _uo("x", lambda c: c["all_released_thresholds"][
+                "release_delay_over_0_5_s"]),
+            "share_release_plus_first_token_over_1_0_s": _uo("x", lambda c: c[
+                "all_released_thresholds"]["release_plus_first_token_over_1_0_s"]),
+            "monitors_released": _uo("x", lambda c: c["all_released_thresholds"]["n"]),
+            "ttft_p50_FOR_CONTRAST": _uo("x", lambda c: c["latency_components_s"][
+                "ttft_t_first_token_minus_t_submit"]["p50"]),
+            "uncached_p50_FOR_CONTRAST": _uo("x", lambda c: c[
+                "released_monitor_uncached_tokens"]["p50"]),
+            "answer": (
+                "THE HOLD IS SHORTER AT SEED 6 AND THAT IS THE MECHANISM, confirming the "
+                "two-clocks account a THIRD time on a cell nobody had looked at when it was "
+                "written. Release delay p50 0.639 s against 0.742 and 0.724; share over 0.5 s "
+                "62.2 percent against 71.6 and 71.3; share already past the whole deadline at "
+                "first token 60.8 percent against 71.2 and 70.0. Over the same span the ENGINE "
+                "DOES NOT MOVE: TTFT p50 is 0.4847 against 0.4831 and 0.4825, and dashcam "
+                "uncached median is 374 against 376 and 376. A shorter hold releases 8,686 "
+                "monitors against 8,167 and 8,347, and the extra releases are what the on-time "
+                "count is made of."),
+        },
+        "q3_workload": {
+            "facts": {c["cell"].split("_n16_")[1][:2]: c["workload_facts"] for c in uo},
+            "answer": (
+                "THE 'LESS RECALL PRESSURE AT SEED 6' ACCOUNT IS NOT SUPPORTED, and I tested it "
+                "rather than asserting it. Recall outcomes are 478 at seed 6 against 489 and 483, "
+                "2.2 percent fewer than seed 4, and their arrival distribution is if anything "
+                "LATER (p50 658.5 s against 613.7 and 601.3). On every other load dimension SEED "
+                "6 IS THE HEAVIEST of the three: 97,696 episode frames against 92,189 and 93,338; "
+                "33.39 M monitor prompt tokens against 31.50 M and 31.90 M; 8,689 monitor "
+                "requests released against 8,172 and 8,351; and preloaded histories roughly "
+                "double the size (median 6,781 est. tokens against 3,721 and 4,621, total 46,207 "
+                "against 26,227 and 26,767). Warming is identical (148 builds and 148 pieces "
+                "against 147/147 and 148/148). Touches vary wildly and DO NOT order the outcome "
+                "either: 2,466 at seed 4, 173 at seed 5, 407 at seed 6. Episode counts and median "
+                "episode length are flat (706-712 episodes, median 11 frames). So seed 6 did "
+                "MORE prefill work and still held its monitors less and delivered more on time; a "
+                "lighter workload is NOT the explanation. A 2.2 percent recall difference cannot "
+                "carry a 47 percent relative change in on-time share."),
+            "what_I_could_not_determine": (
+                "WHY seed 6's monitor TTFT upper tail sits just below the 0.8 s trip while seeds "
+                "4 and 5 sit just above it. That would need the per-request queue state inside "
+                "the server at each arrival, which no committed log carries. So the chain "
+                "'something about seed 6 -> lower TTFT tail -> fewer trips -> higher mean cap -> "
+                "shorter hold -> more on time' is established from its SECOND link onward and the "
+                "FIRST link is not. Three cells cannot settle it either."),
+        },
+    }
+    try:
+        import json as _j
+        wd = {}
+        for c in uo:
+            cj = cell_dir(c["cell"]) / "cell.json"
+            sw = ((_j.loads(cj.read_text()).get("score") or {}).get("score")
+                  or {}).get("sweep") or [{}]
+            pdv = (sw[0].get("dashcam_per_device") or {})
+            wd[c["cell"].split("_n16_")[1][:2]] = {
+                "worst_device_fraction": (round(min(v["fraction"] for v in pdv.values()), 4)
+                                          if pdv else None),
+                "p_dash_target": ((_j.loads(cj.read_text()).get("score") or {}).get("score")
+                                  or {}).get("target_defaults", {}).get("p_dash"),
+                "all_meet": sw[0].get("dashcam_all_meet"),
+                "per_device": {k: round(v["fraction"], 4) for k, v in pdv.items()}}
+        out["s6_natural_experiment"]["worst_device_fraction"] = wd
+    except Exception as exc:                                    # pragma: no cover
+        out["s6_natural_experiment"]["worst_device_fraction"] = {"error": str(exc)}
     out["proposed_policy_spec_v6_section_12_row"] = {
         "_do_not_edit": ("research/policy_spec_v6.md is owned by another session. This is the "
                          "PROPOSED row text only; this script and this JSON do not touch it"),
-        "row": ("| C5-A | dashcam on-time vs measured latency, 12 committed cells incl. BOTH "
-                "repriced covex-v6-state-uo cells (s4, s5) | Lateness at rung 2 is a coordinator "
-                "RELEASE decision, not engine time. The deadline runs from `t_opportunity`, the "
-                "engine's clock from `t_submit`. On the two repriced cells (ZERO budget refusals, "
-                "so scheduling-attributable): release delay p50 0.742 / 0.724 s and p90 0.968 / "
-                "0.954 against the base's 0.300 / 0.888; 71.6 / 71.3 % of released monitors over "
-                "0.5 s vs 37.1 %; 71.2 / 70.0 % with release + first token already past the whole "
-                "1.0 s deadline vs 36.7 %; while first token moves only 0.44 to 0.48 s at p50 and "
-                "dashcam uncached median is 376 vs 374, so the engine does the SAME work and "
-                "episodes are not evicted. Every late monitor partitions exactly into "
-                "deadline-already-lost-at-release / lost-by-release-plus-engine / "
-                "lost-only-by-the-forward-hop = 251 / 5,567 / 140 (uo s4) and 187 / 5,652 / 134 "
-                "(uo s5), on a code path separate from the buckets, on all 12 cells. Exhaustive "
-                "8-bucket split sums to the denominator on all 12; uo-s4 / uo-s5 not_released "
-                "30.6 / 29.1 %, on_time 18.8 / 20.2 %, late_at_first_token 47.3 / 48.0 %, refused "
-                "0. C5 TRIP CLASSES among late tripping monitors (EXACT decision_id join): uo s4 "
-                "recall 74.4 %, build 9.9 %, touch 5.9 %, NONE 9.9 %; uo s5 NONE 16.5 %; NONE 9.9 "
-                "to 22.8 % across all cells, so a C5 attribution rule has a reachable path on "
-                "~8-9 in 10 halvings and its irreducible residue is ~10-23 % of trips; overlap is "
+        "row": ("| C5-A | dashcam on-time vs measured latency, 13 committed cells incl. all "
+                "THREE repriced covex-v6-state-uo cells (s4, s5, s6) | Lateness at rung 2 is a "
+                "coordinator RELEASE decision, not engine time, and this holds in the cell that "
+                "MEETS the dashcam target as well as the two that miss it. Release delay p50 "
+                "0.742 / 0.724 / 0.639 s (uo s4/s5/s6) against the base's 0.300; share of "
+                "released monitors already past the whole 1.0 s deadline AT FIRST TOKEN 71.2 / "
+                "70.0 / 60.8 % against 36.7 %; while monitor TTFT p50 is flat at 0.483 / 0.483 / "
+                "0.485 and dashcam uncached median is 376 / 376 / 374 against 374, so the engine "
+                "does the same work and episodes are not evicted. Every late monitor partitions "
+                "exactly into deadline-already-lost-at-release / lost-by-release-plus-engine / "
+                "lost-only-by-the-forward-hop (251/5,567/140, 187/5,652/134, 244/5,035/157), on a "
+                "code path separate from the buckets, on all 13 cells. S6 NATURAL EXPERIMENT, and "
+                "the register matters: s6 MEETS p_dash=0.25 with its WORST device at 0.2646, a "
+                "1.46 pp margin, against worst devices 0.1624 (s4) and 0.1638 (s5); ONE CELL OF "
+                "THREE ESTABLISHES NO RATE and s7 is not on origin. Even at s6, 60.8 % of "
+                "released monitors blow the deadline before first token, so the release problem "
+                "is structural in all three and only the pass/fail side of a low bar is "
+                "seed-dependent. Cap trajectory (reconstruction matches the arm's own c5_decrease "
+                "/ c5_increase within 1-2 counts on all three): epochs at floor 43.1 / 40.3 / "
+                "36.4 %, mean cap 5.347 / 5.386 / 5.646, c5_dash_held 59,777 / 59,453 / 58,705 (a "
+                "1.8 % spread). The HALVING COUNT DOES NOT ORDER THE OUTCOME (s5 has the fewest "
+                "at 188 and the second-worst share), so the driver is the cap's mean level, whose "
+                "first-order signal is that the 0.8 s trip sits AT THE p90 OF ITS OWN INPUT: "
+                "monitor TTFT p90 0.8374 / 0.8063 / 0.7956, straddling the trip, with the share "
+                "over 0.8 s only 11.8 / 10.4 / 9.8 %. WORKLOAD does NOT explain s6: recall is 2.2 "
+                "% lower (478 vs 489) and arrives LATER, but s6 is the HEAVIEST cell on every "
+                "other axis (97,696 episode frames, 33.39 M monitor prompt tokens, 8,689 releases, "
+                "preloads ~2x) with identical warming; touches vary 2,466 / 173 / 407 and do not "
+                "order it. C5 TRIP CLASSES among late tripping monitors (EXACT decision_id join "
+                "on 9 of 13 cells, reproducing the coordinator's submitted_* counters): NONE is "
+                "9.9 / 16.5 / 14.9 % at uo s4/s5/s6 and 9.9 to 22.8 % across all cells, recall "
+                "overlap largest everywhere, so a C5 attribution rule has a reachable path on "
+                "~8-9 in 10 halvings with an irreducible residue of ~10-23 % of trips; overlap is "
                 "co-occurrence in time, not a proven causal wait. Committed on-time counts are "
                 "the scorer t_delivered rule; the coordinator's first-token flag is larger by "
-                "exactly the forward-hop bucket (140 / 134 / 94 / 144). REPRICING, single seeds "
-                "with no interval: the robot by_deadline headline (a DIFFERENT object, 127-132 "
-                "questions, not this file's 11,769 instants) moves +0.106 at s4 = 14 questions "
-                "where the old-price cell had EXHAUSTED its 1,200 GPU-s budget with 12,824 "
-                "refusals, and -0.0079 at s5 = ONE question of 127 where the old-price cell spent "
-                "1,066.77 s with none. The s5 difference is not a regression and supports no "
-                "direction. Positive control exact, 0 tolerance, on all 4 hybrid-F base cells and "
-                "all 12 scored cells. covex-v6-state s6/s7 HELD-CODE, not read. | "
+                "exactly the forward-hop bucket on all 13 cells. REPRICING, single seeds, no "
+                "interval: the robot by_deadline headline (a DIFFERENT object, 121-132 questions, "
+                "not this file's ~11,780 instants) moves +0.106 at s4 = 14 questions, where the "
+                "old-price cell had EXHAUSTED its 1,200 GPU-s budget with 12,824 refusals, and "
+                "-0.0079 at s5 = ONE question of 127; the s5 difference is not a regression and "
+                "supports no direction. Positive control exact, 0 tolerance, on all 4 hybrid-F "
+                "base cells and all 13 scored cells. covex-v6-state s6/s7 HELD-CODE, not read. | "
                 "experiments/orchestration/live2/dashcam_ontime_reconcile.py -> "
                 "results/orchestration/live2/frozen_test/dashcam_ontime_reconcile.json |"),
     }
