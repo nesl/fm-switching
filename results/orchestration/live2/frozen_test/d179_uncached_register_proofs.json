@@ -1,0 +1,79 @@
+{
+ "_what": "D179: (a) the `_uncached_in_flight` register fix proved decision-neutral, and (b) the switch-off REFERENCE for session B's release re-check on a D162-priced arm, which had none. Committed as a JSON rather than left in a commit message at the H100's request: a commit message cannot be checked mechanically.",
+ "digest_recipes": {
+  "A_established": "sha256(json.dumps(rows_without_arm_version, sort_keys=True, separators=(',',':'), default=float))[:16]  -- /tmp/claude-1001/fresh.py, the ESTABLISHED recipe, the one every cross-session table in this project uses",
+  "B_this_session": "sha256(json.dumps(rows_without_arm_version, sort_keys=True, default=str))[:16]  -- this session's ref.py; DIFFERENT SERIALISATION, so its strings are NOT comparable with recipe A even on identical decisions"
+ },
+ "LESSON_RECORDED": "A DIGEST IS ONLY COMPARABLE WITHIN ONE RECIPE, and this file exists partly because I learned that the hard way in the same afternoon. I wrote ref.py with a second serialisation instead of reusing fresh.py's, compared a recipe-B string against a recipe-A table, saw 11,955 rows under two different hashes, and reported a possible determinism or dirty-tree problem that did not exist. Three clean cells settled it: the decisions are identical and the hash functions are not. Every digest below therefore names its recipe, and anything to be quoted against another session's table is computed with recipe A.",
+ "part_a_register_fix": {
+  "recipe": "A",
+  "cells": [
+   {
+    "arm": "covex-v6-base",
+    "d162_priced": false,
+    "before": "af8befb9420ad86a",
+    "after": "af8befb9420ad86a",
+    "rows": 12085,
+    "identical": true,
+    "audited_against_committed": "d179_offswitch_digest_proofs.json, pre-change"
+   },
+   {
+    "arm": "covex-v6-rules-wo",
+    "d162_priced": true,
+    "before": "18067c4c66bb44b8",
+    "after": "18067c4c66bb44b8",
+    "rows": 11955,
+    "identical": true,
+    "audited_against_committed": "d179_offswitch_digest_proofs.json, pre-change"
+   }
+  ],
+  "verdict": "DECISION-NEUTRAL on one priced and one unpriced arm, the two kinds the fix distinguishes, each audited against a value committed BEFORE the change rather than only against itself (consistency check 7).",
+  "caveat_stated": "the AFTER side of this pair was run from the shared worktree, which carries this session's uncommitted edits including v5/cf_objective.py. Both sides are internally consistent and both matched committed values, so the neutrality conclusion stands, but part B below is the clean-tree version and is the one to cite."
+ },
+ "part_b_release_recheck_reference": {
+  "recipe": "B",
+  "arm": "covex-v6-rules-wo",
+  "seed": 4,
+  "switch": "live2_release_recheck OFF",
+  "cells": [
+   {
+    "role": "REFERENCE, pre-re-check code",
+    "commit": "2f3824ea",
+    "coordinator_blob": "dbc6c66dbb1eae009654aded3a22742e0a97710e",
+    "note": "cited at the clean sha 2f3824ea, whose coordinator.py is the IDENTICAL BLOB to e64181fe's parent c46d34f4; the parent is a stray commit carrying another session's tree, so the clean sha is quoted instead",
+    "digest": "fbc399664fca7358",
+    "rows": 11955,
+    "release_infeasible_keys_present": false
+   },
+   {
+    "role": "post-change, switch off",
+    "commit": "414d332a",
+    "digest": "fbc399664fca7358",
+    "rows": 11955,
+    "release_infeasible_keys_present": false
+   }
+  ],
+  "verdict": "IDENTICAL. The re-check's presence with its switch off changes no decision on a D162-priced arm. The four release_infeasible counter keys are ABSENT, not zero, so an absent key cannot be misread as a measured zero.",
+  "two_further_findings_from_the_control_cells": [
+   {
+    "finding": "covex-v6-rules and covex-v6-rules-wo are byte-identical on this dry cell",
+    "digests": "both fbc399664fca7358 / 11955",
+    "means": "the charge mode is UNEXERCISED on a dry cell, which independently confirms what D174 part B3 found: a dry comparison cannot test a price change, because the old charge's damage was touch pricing and a touch needs an engine"
+   },
+   {
+    "finding": "the planner wall-clock cutoff does not bind on this arm",
+    "digests": "patched off fbc399664fca7358 == not patched fbc399664fca7358",
+    "means": "for covex-v6-rules-wo the 20 ms limit changes no decision, so its digest is not CPU-speed dependent here. This was checked rather than assumed BECAUSE a speed-dependent digest would silently break every cross-host comparison"
+   }
+  ]
+ },
+ "_provenance": {
+  "git_commit": "a076f108550c24e4717ddeee3df208caaffa0f23",
+  "script": "ref.py and fresh.py, one dry cell per process",
+  "model": null,
+  "device": "flash_cpu",
+  "n": 16,
+  "cell": "seed 4, 16 devices, 1200 s, ratio 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0",
+  "timestamp": "2026-11-22T14:19:40.942168"
+ }
+}
