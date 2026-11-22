@@ -1,0 +1,44 @@
+{
+ "_what": "covex-v6-state s4: the root cause of the dashcam and single-shot collapse",
+ "cell": "covex-v6-state_n16_s4_1200s_h27_3t_L3_epg_rq30_rerun",
+ "root_cause": {
+  "one_line": "the objective scores TOUCH at harm = 0.0 while the coordinator charges each touch up to 0.67 GPU-s of the budget that serves every other request",
+  "planner_side": {
+   "site": "v5/cf_planner.py:573-575",
+   "code": "Candidate(\"TOUCH\", value=gain(p_warm, p_cold, 0.0), harm=0.0)",
+   "its_own_comment": "\"TOUCH keeps an existing warm state: no rebuild, so no harm\" - true about REBUILD harm, and it is not the cost the coordinator charges"
+  },
+  "coordinator_side": {
+   "site": "coordinator.py::_submit_touch -> self.st.budget.spend(d['price_gpu_s'])",
+   "price": "touch_policy.touch_price_gpu_s = costs.recall_gpu_s(WHOLE PREFIX, predicted tier)",
+   "charged_gpu_s": {
+    "7k prefix": 0.2431,
+    "11k": 0.382,
+    "17k": 0.5556,
+    "21k": 0.6714
+   },
+   "total_this_cell": "about 620 GPU-s for 1,246 touches at a 15k-token prefix, in a 1,200 s run"
+  },
+  "shape": "CLAUDE.md consistency check 7's general shape, verbatim: a comparator planning at one price while charged another. The planner chose 1,438 touches because they were FREE in its objective; the coordinator spent the budget; 12,824 budget refusals followed"
+ },
+ "the_chain_end_to_end": [
+  "plan_state scores TOUCH with harm = 0.0, so TOUCH wins whenever its gain clears the margin",
+  "1,438 TOUCH chosen, 1,246 issued; the other 192 were refused and ALL 192 for budget",
+  "each issued touch is charged recall_gpu_s(whole prefix), about 620 GPU-s in total",
+  "the shared budget runs out: budget_refusal 12,824 against noc3's 0",
+  "refused work is settled on the device (coordinator.py:925 DEVICE-on-refusal)",
+  "single-shot: 88 of 357 never sent, all budget refusals, against noc3's 1",
+  "dashcam: 5,397 of 11,764 never sent against noc3's 2,021, and 1,786 on time against 6,167",
+  "robot: 92 of 132 on time against 35, because robot histories are the thing being kept warm"
+ ],
+ "verdict_on_the_cell": "the robot gain is BOUGHT, and the price is paid by dashcam above all. by_deadline 0.508 against v5-rules-2's 0.485 is the net of a transfer between types, not a free gain, and it must not be reported as one",
+ "the_question_that_is_still_open_and_is_measurable_now": {
+  "is_the_CHARGE_itself_right": "NOT ESTABLISHED, and it decides which fix is correct",
+  "proxy_validity": "consistency check 6. `recall_gpu_s(prefix, GPU-WARM)` is StudyRH5 Part A's isolated RELOAD TTFT for a full RECALL. A touch sends TOUCH_MAX_TOKENS = 1 with uuid-only references on a prefix the M6 guard has already required to be believed GPU-warm at 0.95 or better. Charging it a full recall's TTFT is a proxy whose validity nobody has established",
+  "the_measurement_is_ALREADY_ON_DISK": "the cell completed 1,246 touch requests, so their own t_first_token is in request.jsonl. Measured touch TTFT against the 0.24 to 0.67 s charged settles it without a new cell",
+  "if_measured_much_less_than_charged": "a MISPRICING bug: the budget was spent on work the engine did not do, and the rung must be re-priced and rerun before any of its numbers are read",
+  "if_measured_is_close_to_charged": "the charge is right and the OBJECTIVE is wrong: a touch genuinely costs about half a GPU-second and plan_state must price it, which is a policy change and needs a ruling, not a patch"
+ },
+ "what_must_not_happen": "the touch price must not be lowered to make the dashcam number recover. That is tuning a cost until the result improves, which is the thing MARGIN_CF's never-tuned discipline exists to prevent. The price changes only if the measurement says it is wrong",
+ "recommendation": "stop covex-v6-state after s5 rather than running s6 and s7. They would reproduce a configuration whose defect is now named, at about 40 minutes of GPU for no new information, and the baselines can have that time"
+}
