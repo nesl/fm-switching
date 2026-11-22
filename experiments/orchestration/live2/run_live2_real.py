@@ -253,15 +253,37 @@ def run(a) -> Dict[str, Any]:
     # D115: 1 s host-load sampler over the whole run (server start to server stop)
     import hostload as HL
     hl = HL.HostLoadSampler(rdir / "host_load.jsonl.gz").start()
-    if a.start_server:
-        srv, sinfo = _start_server(a)
-
+    # THE ARM IS BUILT BEFORE THE SERVER IS STARTED. It used to be the other way round, so a bad
+    # arm name crashed AFTER the server was up, the server was left orphaned at ppid 1, and the
+    # next cell waited forever for a GPU that nothing would release. That cost three idle minutes
+    # on GPU 2 on 2026-11-21 when `covex-v6-state` did not resolve. Nothing here touches the
+    # server: `_arm_kwargs` reads only the parsed command line, and `live2_configure` still runs
+    # further down, after `sends` and `sinfo` exist. So the cheap, failure-prone step now happens
+    # first, and the expensive, resource-holding one second.
     import hybrid  # noqa: F401  (registers the hybrid-* arms; D138)
     arm = A.make_arm(a.arm, **_arm_kwargs(a))
     if a.c_inflight is not None:
         if not hasattr(arm, "c_inflight"):
             raise SystemExit(f"--c-inflight given but arm {a.arm} has no c_inflight")
         arm.c_inflight = int(a.c_inflight)
+
+    if a.start_server:
+        srv, sinfo = _start_server(a)
+        # AND A BACKSTOP, because ordering only fixes the failure we have already seen. Anything
+        # that raises between here and the normal stop below would orphan the server just the
+        # same. `atexit` fires on a normal exit, on SystemExit and on an unhandled exception,
+        # which covers every one of those; it cannot cover SIGKILL, and nothing in-process can.
+        # Guarded by a flag so the normal stop is not repeated.
+        import atexit
+
+        def _stop_if_still_running(_s=srv):
+            try:
+                if not getattr(_s, "_live2_stopped", False):
+                    _s.stop()
+            except Exception:                                          # noqa: BLE001
+                pass
+
+        atexit.register(_stop_if_still_running)
     conf = dict(gpu_kv_tokens=a.gpu_kv_tokens, host_tier_gib=a.host_tier_gib,
                 host_tier_tokens=htok, targets=CS.TARGETS)
     if sends:                                    # vllm-priority refuses an undeclared server mode
@@ -355,6 +377,7 @@ def run(a) -> Dict[str, Any]:
     wall = time.time() - t0
     if srv is not None:
         srv.stop()
+        srv._live2_stopped = True          # tell the atexit backstop this one is already down
     host_load = hl.stop()
 
     rm = (json.loads((rdir / "run_meta.json").read_text())
