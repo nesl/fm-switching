@@ -1,0 +1,94 @@
+{
+ "_what": "D179 (1) to (3) SHARE ADMISSION wired into the coordinator's admission path, with the proofs that the off-switch changes nothing, that the switch reaches a decision, and that the arm's characteristic decision occurs. Dry cell, seed 4, 16 devices, 1200 s, posted knobs, one cell per process.",
+ "digest_recipe": "A, the established one: sha256(json.dumps(rows_without_arm_version, sort_keys=True, separators=(',',':'), default=float))[:16]",
+ "off_switch_identity": {
+  "verdict": "PASS, and NO LONGER VACUOUS, which is the point",
+  "why_it_was_vacuous_before": "worker D's 17-of-17 proof ran at a commit where share_admission.py had no importer and the switches had no reader, so the identity was guaranteed by the code rather than evidence about the plumbing. These two cells run against the wired coordinator.",
+  "cells": [
+   {
+    "arm": "covex-v6-base",
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "committed_value": "af8befb9420ad86a / 12085",
+    "identical": true
+   },
+   {
+    "arm": "covex-v6-state-uo",
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "committed_value": "9a4be873eb3c5fba / 14218",
+    "identical": true
+   }
+  ]
+ },
+ "step_2b": {
+  "verdict": "PASS, and attributable to THIS switch only after a fix",
+  "the_error_and_the_fix": "The first attempt read Step 2b off a row-count change alone: 14,218 to 13,360. That was not attributable, because covex-v6-state-shares carries BOTH new switches, and the D179 (4) release re-check is known to move decisions by itself. A held instant also left NO trace in the decision log, since the gate returns before _log_decision, so share admission was invisible to the log and to any digest: the 'unexpressible' category of Rule 2, inside the mechanism under test. Now one decision row per DISTINCT held instant, deliberately not per period, since the same instant returns every 100 ms and per-period logging would count item-periods, the confusion share_capacity.py records about c5_dash_held.",
+  "shares_on": {
+   "digest": "3a5b40d78b9dcb3b",
+   "rows": 13390,
+   "state_decisions": 63886
+  }
+ },
+ "port_rule": {
+  "verdict": "PASS: the characteristic decision occurs 87 times, over 30 distinct instants",
+  "admits": {
+   "alert": 10064,
+   "recall": 184,
+   "assistance": 322
+  },
+  "denies": {
+   "alert": 0,
+   "recall": 48,
+   "assistance": 39
+  },
+  "holds_distinct_instants": {
+   "recall": 22,
+   "assistance": 8
+  },
+  "holds_item_periods": {
+   "recall": 48,
+   "assistance": 39
+  },
+  "reasons": {
+   "own_floor": 10120,
+   "own_share": 184,
+   "oversize_alone": 197,
+   "oversize_alone_over_wmax": 56,
+   "oversize_wait_for_own_type": 26,
+   "w_max": 57,
+   "borrow_background": 13,
+   "floor_denied_background": 4
+  },
+  "reasons_reconcile": "10,657 = 10,570 admits + 87 denies exactly, so no decision escapes classification",
+  "alerts_are_never_denied": "0 of 10,064, all through the own_floor path. That is the floor guarantee working, and it is the behaviour the fourth ordering bug destroyed: with the headroom test before the floor test, a 374-token alert was refused for the 1.48 s prefill of one oversize recall."
+ },
+ "w_is_not_leaking": {
+  "verdict": "NO LEAK",
+  "zero_returns": 241,
+  "tracked_requests_at_end": 2,
+  "high_water": 15410,
+  "final_by_type": {
+   "alert": 0,
+   "recall": 7368,
+   "assistance": 1805
+  },
+  "argument": "W returns to EXACTLY ZERO 241 times during the cell. A leak never returns to zero, so the 9,173 tokens outstanding at the cutoff are not a leak; only TWO requests are still tracked, one recall and one assistance, submitted near the end and not yet settled. This was checked because a W leak is the most silent failure available here: it raises nothing, prints nothing, drifts upward over a 1,200 s cell and reads as 'the floors are too tight'. A drift IS a distribution, so consistency check 3 cannot see it.",
+  "high_water_is_expected": "15,410 is 3.6x W_max = 4,323.3, which is the oversize exemption behaving as D179 (3) specifies and as the allocator's own comment states: a request larger than its share is admitted when alone and feasible, nothing can be preempted, so W must overrun."
+ },
+ "at_or_above_floor_periods": {
+  "recall": 1019,
+  "assistance": 444,
+  "alert": 0
+ },
+ "WHAT_THIS_DRY_CELL_CANNOT_ESTABLISH": "The alert type NEVER reaches its own floor in this cell, so the largest floor (1,622.1, 37.5 percent of W_max) is never binding here while recall and assistance are denied 87 times. That is NOT evidence that the alert floor is oversized, and must not be read as such: in a DRY cell W is submit to SETTLE against a synthetic service time (coordinator.py _dry_service_s), whereas the floors were derived from LIVE submit-to-first-token behaviour, and the dry quantity is the larger of the two. Dry and live W are different quantities under one name (consistency check 4). A dry cell can prove the allocator's LOGIC, its determinism, the port rule and the off-switch identity. Only a live cell can size W or test whether a floor binds.",
+ "_provenance": {
+  "git_commit": "c9ee357a3a124b22232878cd0246dadef51331ac",
+  "script": "fresh.py / fresh_cnt.py, one dry cell per process",
+  "model": null,
+  "device": "flash_cpu",
+  "n": 16,
+  "cell": "seed 4, 16 devices, 1200 s, ratio 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0",
+  "timestamp": "2026-11-22T15:32:28.203295"
+ }
+}

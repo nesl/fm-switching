@@ -57,6 +57,10 @@ import d162_price as DP                                                 # noqa: 
 # ---- D179 (4) RELEASE RE-CHECK (session B), import. BEGIN --------------------------------------
 import release_recheck as RR                                            # noqa: E402
 # ---- END D179 (4) -----------------------------------------------------------------------------
+# ---- D179 (1) to (3) SHARE ADMISSION (session A), import. BEGIN --------------------------------
+import share_admission as SA                                             # noqa: E402
+from share_capacity import FLOORS_TOKENS as SCAP_FLOORS                  # noqa: E402
+# ---- END D179 (1) to (3) ----------------------------------------------------------------------
 import touch_policy as TP                                               # noqa: E402
 import cachekeys as CK                                                  # noqa: E402
 import cstate as CS                                                     # noqa: E402
@@ -320,6 +324,26 @@ class Live2Coordinator:
         # the third term of the price: uncached tokens the engine is already working on. Tracked
         # here because only the coordinator knows what is in flight, and it is what makes the
         # planner's harm and this charge the same arithmetic rather than two similar ones.
+        # ---- D179 (1) to (3) SHARE ADMISSION (session A), state. BEGIN contiguous block -------
+        # W is per type and is submit to FIRST TOKEN, which is OBSERVABLE: asyncbackend fires
+        # on_first at the first content token and `answer_on_first` already consumes it. It is
+        # deliberately NOT `_uncached_in_flight`, which drains at COMPLETION and so carries the
+        # decode tail: the right queue input for the D174 charge and the wrong resource here.
+        #
+        # A DENIAL HOLDS, IT DOES NOT DECLINE. Capacity may free before the deadline, so the
+        # instant stays "arrived" and is re-offered next period. That composes with D179 (4):
+        # shares hold a request while it still has a chance, and the release re-check declines it
+        # once it does not. It also means a hold is counted TWICE, deliberately and under two
+        # names, because the same instant is re-offered every 100 ms period: `_periods` counts
+        # item-periods and `_instants` counts distinct opportunities held at least once. Reporting
+        # only the first is the confusion `share_capacity.py` records about c5_dash_held, where
+        # 7,149 unsent opportunities could not be reconciled against counters in the tens of
+        # thousands.
+        self._share_admission = SA.arm_enables(arm)
+        self._w = SA.WTracker()
+        self._share_held_instants: Dict[str, set] = {t: set() for t in SA.TYPES}
+        self._share_events: List[Dict[str, Any]] = []
+        # ---- END D179 (1) to (3) block --------------------------------------------------------
         self._uncached_in_flight = 0
         self._uncached_pending: Dict[str, int] = {}
         self._uncached_last_charged = 0
@@ -930,6 +954,14 @@ class Live2Coordinator:
                     est_tokens=int(est_tokens), deadline_abs=o.deadline_abs()))
                 return
         # ---- END D179 (4) block ---------------------------------------------------------------
+        # ---- D179 (1) to (3) SHARE ADMISSION, ALERT PATH. BEGIN contiguous block -------------
+        # After the D179 (4) feasibility decline and BEFORE the budget check: an instant that can
+        # no longer make its deadline is declined for good, one that can but has no capacity is
+        # HELD, and only then does the budget get a say.
+        if not self._share_ok(qtype="alert", uncached=_uncached, kind="monitor", t=t,
+                              key=o.opp_id, feasible=True):
+            return
+        # ---- END D179 (1) to (3) block --------------------------------------------------------
         if not self.st.budget.can_spend(cost):
             self.counts["budget_refusal"] += 1
             self.counts["budget_refusal_monitor"] += 1
@@ -1069,6 +1101,12 @@ class Live2Coordinator:
             self.counts["touch_refused_budget"] += 1
             return None
         self.st.budget.spend(_touch_price)
+        # ---- D179 (1) to (3) SHARE ADMISSION, TOUCH (background). BEGIN block ----------------
+        _tq = SA.type_of_device(getattr(s, "device_id", "") or "")
+        if not self._share_ok(qtype=_tq, uncached=TP.TOUCH_UNCACHED_TOKENS, kind="touch", t=t,
+                              key="touch:" + str(s.session_id)):
+            return None
+        # ---- END D179 (1) to (3) block --------------------------------------------------------
         self._uncached_in_flight += int(TP.TOUCH_UNCACHED_TOKENS)
         self._uncached_last_charged = int(TP.TOUCH_UNCACHED_TOKENS)
         self.counts["touch_price_milli_sum"] += int(round(_touch_price * 1000.0))
@@ -1134,6 +1172,16 @@ class Live2Coordinator:
             self.counts["budget_refusal_build"] += 1
             return None
         self.st.budget.spend(cost)
+        # ---- D179 (1) to (3) SHARE ADMISSION, WARM BUILD (background). BEGIN block -----------
+        # D179 (3) chunks warms at 2,048, which exceeds recall's equal-split share of 1,256.7, so
+        # a warm is admitted through the BORROW path and only while recall itself is idle. An
+        # oversize test on background would have refused every chunk in every state, which is
+        # warming switched off rather than tight floors.
+        _bq = SA.type_of_device(getattr(s, "device_id", "") or "")
+        if not self._share_ok(qtype=_bq, uncached=max(int(piece), 1), kind="piece", t=t,
+                              key="build:" + str(getattr(s, "session_id", ""))):
+            return None
+        # ---- END D179 (1) to (3) block --------------------------------------------------------
         self._uncached_in_flight += max(int(piece), 1)
         self._uncached_last_charged = max(int(piece), 1)
         kind = "piece" if slice_tokens is not None else "whole"
@@ -1213,6 +1261,14 @@ class Live2Coordinator:
                         deadline_abs=o.deadline_abs()))
                     return
         # ---- END D179 (4) block ---------------------------------------------------------------
+        # ---- D179 (1) to (3) SHARE ADMISSION, RECALL AND ASSISTANCE. BEGIN block -------------
+        # The type comes from the device id, so an assistance request is charged against the
+        # assistance floor and not lumped in with recall: this method serves both.
+        _rq = SA.type_of_device(o.device_id)
+        if not self._share_ok(qtype=_rq, uncached=_uncached, kind="recall", t=t,
+                              key=o.opp_id, feasible=True):
+            return
+        # ---- END D179 (1) to (3) block --------------------------------------------------------
         if not self.st.budget.can_spend(cost):
             self.counts["budget_refusal"] += 1
             self.counts["budget_refusal_recall"] += 1
@@ -1299,6 +1355,16 @@ class Live2Coordinator:
         # Decision-neutral by construction: under D162 pricing the condition was already true, and
         # without it no other site reads the field. Proved on a digest for one arm of each kind.
         self._uncached_pending[rid] = int(self._uncached_last_charged)
+        # ---- D179 (1) to (3) SHARE ADMISSION, W TRACKING. BEGIN contiguous block --------------
+        # Tracked HERE, at the single point where a request id exists for every kind, rather than
+        # at the four release sites, so the id W is keyed on is exactly the id the drain pops.
+        # Keying on anything else is how an in-flight total drifts, which the note above records.
+        if self._share_admission:
+            _wq = SA.type_of_device(device_id)
+            if _wq is not None:
+                self._w.on_submit(rid, _wq, int(self._uncached_last_charged),
+                                  background=SA.is_background(kind))
+        # ---- END D179 (1) to (3) block --------------------------------------------------------
         d = self.st.devices[device_id]
         # THE TRUE SUBMISSION STAMP (StudyLIVE2-harness addendum (a), from flash's branch). A
         # decision that takes 100 ms puts its requests on the wire 100 ms after the epoch it
@@ -1357,6 +1423,73 @@ class Live2Coordinator:
         else:
             self.futures.append((self.be.submit_live2(sub), sub))
         return rid
+
+    # ---- D179 (1) to (3) SHARE ADMISSION (session A), the one gate. BEGIN contiguous block ----
+    def _share_ok(self, *, qtype, uncached, kind, t, key, feasible=None) -> bool:
+        """One admission gate for all four release sites. True means submit.
+
+        Returns True unchanged when the switch is off, so every other arm keeps its decisions.
+        `feasible` carries the b7 conjunct explicitly rather than by convention, because a
+        convention no test can reach is the same shape as a write-only field.
+        """
+        if not self._share_admission or qtype is None:
+            return True
+        ok, why = SA.allowed(qtype=qtype, uncached=int(uncached), kind=str(kind),
+                             tracker=self._w, feasible=feasible, enabled=True)
+        self.counts["share_" + ("admit" if ok else "deny") + "_" + qtype] += 1
+        self.counts["share_reason_" + why] += 1
+        if not ok:
+            # Item-periods AND distinct instants, under two names. See the note in __init__.
+            self.counts["share_hold_periods_" + qtype] += 1
+            if key is not None and key not in self._share_held_instants[qtype]:
+                self._share_held_instants[qtype].add(key)
+                self.counts["share_hold_instants_" + qtype] += 1
+                # ONE DECISION ROW PER DISTINCT HELD INSTANT, not per period. Without it a hold
+                # leaves NO trace in the decision log: it returns before `_log_decision`, so the
+                # mechanism would be invisible to the committed logs and to any digest, and a
+                # row-count change could not be attributed to this switch rather than to another
+                # one on the same arm. That is the "unexpressible" category of Rule 2, and it
+                # nearly happened: the first proof of this gate credited a digest change to share
+                # admission when the arm also carries the D179 (4) re-check. Per-period logging is
+                # deliberately NOT done, because the same instant returns every 100 ms and the log
+                # would count item-periods, the confusion `share_capacity.py` records.
+                self._log_decision(float(t), "share_hold", [key] if key else [],
+                                   latency_ms=0.0, preds=None, mix=None, key=str(key))
+        # The counters live on the COORDINATOR, and `test_hybrid.dry` returns only the ARM's stats
+        # (hybrid/test_hybrid.py:46), so without this mirror a dry proof cannot see them at all and
+        # would read a live mechanism as a dead one. The H100's reader takes the same block.
+        # W OVER TIME, which D180 (5) asks for and which is also the only way to tell an
+        # end-of-run in-flight residue from a LEAK. A leak in W raises nothing and prints nothing:
+        # it drifts upward over a 1,200 s cell and reads as "the floors are too tight". So record
+        # the high-water mark, how often W returned to zero (a leak never does), and how long each
+        # type sat at or above its floor.
+        _wt = self._w.total()
+        self._w_hi = max(getattr(self, "_w_hi", 0), _wt)
+        if _wt == 0:
+            self._w_zero = getattr(self, "_w_zero", 0) + 1
+        for _t in SA.TYPES:
+            if self._w.w(_t) >= SCAP_FLOORS[_t]:
+                self.counts["share_at_or_above_floor_" + _t] += 1
+        _as = getattr(self.arm, "stats", None)
+        if isinstance(_as, dict):
+            _as["share_admission"] = SA.summary(self._w, enabled=True)
+            _as["share_w_high_water"] = int(self._w_hi)
+            _as["share_w_zero_returns"] = int(getattr(self, "_w_zero", 0))
+            _as["share_w_tracked_at_end"] = int(self._w.as_dict()["tracked_requests"])
+            for _k, _v in self.counts.items():
+                if str(_k).startswith("share_"):
+                    _as[_k] = _v
+        if len(self._share_events) < 20000:
+            self._share_events.append(dict(
+                t=round(float(t), 6), qtype=qtype, kind=str(kind), uncached=int(uncached),
+                admitted=bool(ok), reason=why, key=key,
+                w_by_type=dict(self._w.as_dict()["w_by_type"]), w_total=self._w.total()))
+        return ok
+
+    def _share_track(self, request_id, qtype, uncached, *, background) -> None:
+        if self._share_admission and qtype is not None:
+            self._w.on_submit(str(request_id), qtype, int(uncached), background=background)
+    # ---- END D179 (1) to (3) block ------------------------------------------------------------
 
     def _dry_service_s(self, sub: Live2Submission) -> float:
         """The deterministic stand-in used by `--dry-run`, which sends no HTTP at all.
@@ -1537,6 +1670,16 @@ class Live2Coordinator:
             # on every arm. See the note at the write site.
             _u = self._uncached_pending.pop(sub.request_id, 0)
             self._uncached_in_flight = max(self._uncached_in_flight - int(_u), 0)
+            # ---- D179 (1) SHARE ADMISSION, W DRAIN AT SETTLE. BEGIN block ---------------------
+            # NOT redundant with the first-token drain. `on_first` is wired only when a real
+            # backend exists (procsplit.py:430-433), so a DRY cell never fires it and a
+            # first-token-only drain would let W climb monotonically until the allocator shut for
+            # good, which reads as "the floors are too tight" rather than as a bug. This also
+            # catches a live request that settled without ever yielding a content token: an error,
+            # a refusal, a timeout. Idempotent with the drain above.
+            if self._share_admission:
+                self._w.on_settled_without_first_token(str(sub.request_id))
+            # ---- END D179 (1) block -----------------------------------------------------------
             self._settle(sub, first_s, done_s, path, t, ct, self._score_of(sub, r),
                          http_status=r.get("http_status"))
             self.counts["completed_" + sub.kind] += 1
@@ -1696,6 +1839,15 @@ class Live2Coordinator:
         the first token's logprobs and the recall letter from the text so far (the first token).
         `cache_path` is not known until the usage block at stream end, so the payload carries
         None; the scorer takes cache_path from request.jsonl. Returns None for build pieces."""
+        # ---- D179 (1) SHARE ADMISSION, W DRAIN AT FIRST TOKEN. BEGIN block -------------------
+        # The LIVE drain, and the one D179 (1) specifies. Idempotent, so the settle drain below
+        # cannot double-subtract. Fires only when a real backend exists, which is why the settle
+        # drain is not optional: in a DRY cell this hook is never called at all.
+        if self._share_admission:
+            _rid = r.get("request_id") or getattr(r.get("sub"), "request_id", None)
+            if _rid:
+                self._w.on_first_token(str(_rid))
+        # ---- END D179 (1) block ---------------------------------------------------------------
         sub = r.get("sub")
         if sub is None or sub.kind in ("piece", "whole") or not sub.opportunity_id:
             return None
