@@ -37,17 +37,31 @@ same shape three times and it must not be reported as three nulls:
 The first two moved from **artefact** to **measured fact**, which is a different claim from
 "constant" and the one that is true. Under Rule 2 they are UNEXERCISED, not negative.
 
-**3. The margin, not the wiring, is what stops rung 2.** `covex-v6-state` makes 44,235 state
-decisions at 16 devices and chooses KEEP on every one. `plan_state`'s own argmax prefers a
-non-KEEP candidate on almost all of them; D151's margin rule then overrides it back. Maximum
-predicted gain 0.151 against `MARGIN_CF` 0.16456, with an arithmetic ceiling of 0.250, so it is a
-near miss and not a cap. The rung is therefore byte-identical to `covex-v6-rules`.
+**3. The margin stops `plan_state`; the rung still moves, through a different switch.**
+`covex-v6-state` makes **44,300** state decisions at 16 devices and chooses KEEP on every one.
+`plan_state`'s own argmax prefers a non-KEEP candidate on 44,299 of them; D151's margin rule then
+overrides it back. Maximum predicted gain **0.151** against `MARGIN_CF` **0.16456**, with an
+arithmetic ceiling of 0.250, so it is a near miss and not a cap.
+
+But the rung is **not** byte-identical to `covex-v6-rules` at 16 devices: digest
+`6e8927b9f7f92040` against `ae997d6af16a2ef4`, 15,734 rows against 17,050. At **8** devices it
+*is* byte-identical (`69874e94d2ddee85` both). So the difference is not `plan_state`, which emits
+nothing, but one of the rung's other three additions, and it appears only where the budget binds.
+State-based pricing is the first suspect, since it changes what a warm costs against the budget
+and can only matter once the budget is the binding constraint. **Which switch it is, is being
+attributed by one-factor ablation and is NOT yet established; no claim about this rung's effect
+may be made until it is.**
+
+Only **65** of the 44,300 state decisions coincide with an actual rebuild, and all 65 had nothing
+queued behind them, so `harm_warm` was 0 on every one and `HOLD_BACK`'s gain was 0 throughout.
+The computed `harm_warm` therefore did not get a chance to act in this cell.
 
 ### What was posted
 
-**Nothing.** No `V6STATE_CELLS`, no `V6FAIR_CELLS`, no `V6_CELLS`. Posting a rung that is
-byte-identical to the rung below would spend GPU hours reproducing cells that already exist.
-`MARGIN_CF` is never changed (D157, D172).
+**Nothing.** No `V6STATE_CELLS`, no `V6FAIR_CELLS`, no `V6_CELLS`. `plan_state`, the decision the
+rung is named for, never deviates, and the behavioural difference that does exist at 16 devices is
+not yet attributed to a switch. Posting before that attribution would produce cells whose
+difference from `covex-v6-rules` nobody could name. `MARGIN_CF` is never changed (D157, D172).
 
 ### `harm_warm` is computed, not declared
 
