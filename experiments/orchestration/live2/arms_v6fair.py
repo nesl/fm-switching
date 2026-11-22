@@ -123,6 +123,15 @@ class V6FairArm(VS.V6StateArm):
     def decide(self, obs: Observation) -> Action:
         act = VS.V6StateArm.decide(self, obs)
         if self.deficit_feed:
+            # THE FEED'S BLIND SPOT, COUNTED AT THE ONLY PLACE IT IS VISIBLE. A declined
+            # opportunity is never submitted, so it never reaches `live2_completed` and never
+            # reaches the counters. It is visible HERE, in the action this arm just produced, and
+            # nowhere later. Without this count the shortfall of a device whose requests are being
+            # declined reads as zero, which is the exact case the deficit weighting exists to
+            # catch, and the counters would look complete while missing it.
+            for ra in (act.recall or ()):
+                if str(getattr(ra, "decision", "")).upper() != "CLOUD":
+                    self.stats["deficit_feed_unseen_declines"] += 1
             # the weights the feed is producing, so a run can show the mechanism is no longer
             # multiplying everything by one
             try:
