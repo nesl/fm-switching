@@ -1,0 +1,56 @@
+{
+ "_what": "every v6 ladder name resolves through run_live2_real.py itself",
+ "_register": "the harness's OWN entry point, spawned as a subprocess with the real command line. NOT a bare make_arm in this process, which is the check that passed while the harness was failing",
+ "entry_point": "experiments/orchestration/live2/run_live2_real.py",
+ "registered_in": "experiments/orchestration/live2/arms.py, beside the other arm families",
+ "P0_negative_control": {
+  "_claim": "a name that is NOT registered still raises through this same path",
+  "probe": {
+   "arm": "covex-v6-not-an-arm",
+   "returncode": 1,
+   "raised_unknown_arm": true,
+   "reached_make_arm": true,
+   "tail": "KeyError: \"unknown arm 'covex-v6-not-an-arm'; known: ['always-cloud-fcfs', 'attentionstore', 'attentionstore-prefetch', 'attentionstore-prefetch-noyield', 'attentionstore-prefetch-off', 'b10-blocking-"
+  },
+  "verdict": "PASS: the check can see an unresolved name"
+ },
+ "ladder": [
+  {
+   "arm": "covex-v6-base",
+   "returncode": 0,
+   "raised_unknown_arm": false,
+   "reached_make_arm": true,
+   "tail": "}"
+  },
+  {
+   "arm": "covex-v6-rules",
+   "returncode": 0,
+   "raised_unknown_arm": false,
+   "reached_make_arm": true,
+   "tail": "}"
+  },
+  {
+   "arm": "covex-v6-state",
+   "returncode": 0,
+   "raised_unknown_arm": false,
+   "reached_make_arm": true,
+   "tail": "}"
+  },
+  {
+   "arm": "covex-v6-fair",
+   "returncode": 0,
+   "raised_unknown_arm": false,
+   "reached_make_arm": true,
+   "tail": "}"
+  },
+  {
+   "arm": "covex-v6",
+   "returncode": 0,
+   "raised_unknown_arm": false,
+   "reached_make_arm": true,
+   "tail": "}"
+  }
+ ],
+ "all_resolve": true,
+ "verdict": "PASS: all 5 ladder names resolve through the harness's own entry point"
+}

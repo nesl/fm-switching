@@ -707,3 +707,36 @@ ARMS.update(V5RULES2_ARMS)
 # property of the code rather than of a session's discipline.
 from arms_v5full import V5FULL_ARMS                                     # noqa: E402
 ARMS.update(V5FULL_ARMS)
+
+# D172 spec v6 LADDER. Rungs 2 and 3 are new arms; rungs 0, 1 and 4 are ALIASES of
+# hybrid-F-lhreq-noc3, v5-rules-2 and v5-full, proved identical by decision digest in
+# `v6_alias_proof.py`. Registered HERE, beside the other arm families, and NOT only in
+# `arm_names_v6.register()`.
+#
+# WHY HERE IS THE WHOLE POINT. The first release of these names registered them only in
+# `arm_names_v6.register()`, and I "proved" they resolved by importing that module myself and
+# calling `make_arm`. The HARNESS never imports it: `run_live2_real.py` imports `hybrid` and
+# nothing else, so in the harness process the names did not exist and the first covex-v6-state
+# cell died at `make_arm` 80 s in. A name resolves in the process that resolves it, and a check
+# run in a process the harness does not use is not a check. `v6_harness_name_proof.py` now asks
+# the harness's OWN entry point instead.
+from arms_v6state import V6STATE_ARMS                                   # noqa: E402
+ARMS.update(V6STATE_ARMS)
+from arms_v6fair import V6FAIR_ARMS                                     # noqa: E402
+ARMS.update(V6FAIR_ARMS)
+
+
+def _register_v6_aliases() -> None:
+    """Rungs 0, 1 and 4, which alias committed arms. Deferred into a function because the rung-0
+    alias needs `hybrid.CONFIGS`, and importing `hybrid` at this module's import time would cycle
+    (`hybrid/__init__` calls `register()`, which imports `arms`)."""
+    import arm_names_v6 as _V6N                                         # noqa: PLC0415
+    _V6N.register()
+
+
+try:
+    _register_v6_aliases()
+except Exception:                                                       # noqa: BLE001
+    # a cycle or a missing optional module must not take down every arm in the registry; the
+    # harness proof below is what reports it
+    pass

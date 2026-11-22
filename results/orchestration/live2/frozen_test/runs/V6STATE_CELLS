@@ -1,5 +1,13 @@
 # D172 rung 2, covex-v6-state. One cell per line: "arm n seed tag". Lines starting # are NOT run.
 #
+# REISSUED 2026-11-21 after the first release was SKIPPED: the name did not resolve in the
+# harness's process. run_live2_real.py imports `hybrid` and nothing else, and the v6 names were
+# registered only in arm_names_v6.register(), which it never imports. They are now registered in
+# arms.py beside the other arm families, so importing `arms` is enough, and the resolution is
+# proved by spawning run_live2_real.py ITSELF rather than by calling make_arm in a friendly
+# process: live2/v6_harness_name_proof.py, with a negative control that an unknown name still
+# raises. All five ladder names return rc=0 through the real entry point.
+#
 # WORKLOAD, identical to BASELINE_MATRIX: 16 devices, EP-G default episodes (fixed 21-frame
 # refresh, NOT the policy episode rule), per-frame upload, rq30 re-asks, deadlines dashcam 1.0 s /
 # robot 3.0 s / single-shot 2.0 s, memory 1x. Tag _L3_epg_rq30.
