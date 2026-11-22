@@ -1,0 +1,70 @@
+{
+  "_what": "D169 MARGIN_CF population, committed BEFORE any scoring, as D169 step 2 requires.",
+  "_definition": "robot questions RELEASED in HEALTHY-regime windows (the D162 window rule: the observed first-token p50 of the question's own 100 s submit window <= 2.781 s) in the rq30 paired cells of v5-rules-2 and hybrid-F-lhreq-noc3 at seeds 4, 5, 6 and 7.",
+  "_why_this_population": "D157 (2)'s four WARM-ALL cells were structurally unable to meet D168's minimum: they yielded 16 healthy-window robot questions against a required 40, because the cells that released robot questions were mostly collapsed and the one with 12 healthy windows released none. These cells are v5-rules-2 (full v5's own base) and its no-C3 base, are independent of the D162 fit (which used warm-all-lru-reactive sweep cells), and contain no full-v5 cell.",
+  "cells": [
+    {
+      "cell": "v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30",
+      "arm": "v5-rules-2",
+      "seed": 4,
+      "commit": "08a7ee19 2026-11-21"
+    },
+    {
+      "cell": "v5-rules-2_n16_s5_1200s_h27_3t_L3_epg_rq30",
+      "arm": "v5-rules-2",
+      "seed": 5,
+      "commit": "9f7fca97 2026-11-21"
+    },
+    {
+      "cell": "v5-rules-2_n16_s6_1200s_h27_3t_L3_epg_rq30",
+      "arm": "v5-rules-2",
+      "seed": 6,
+      "commit": "5793543d 2026-11-21"
+    },
+    {
+      "cell": "v5-rules-2_n16_s7_1200s_h27_3t_L3_epg_rq30",
+      "arm": "v5-rules-2",
+      "seed": 7,
+      "commit": "48c5c82f 2026-11-21"
+    },
+    {
+      "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+      "arm": "hybrid-F-lhreq-noc3",
+      "seed": 4,
+      "commit": "b21d1918 2026-11-21"
+    },
+    {
+      "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+      "arm": "hybrid-F-lhreq-noc3",
+      "seed": 5,
+      "commit": "f1727ccd 2026-11-21"
+    },
+    {
+      "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+      "arm": "hybrid-F-lhreq-noc3",
+      "seed": 6,
+      "commit": "61ea567f 2026-11-21"
+    },
+    {
+      "cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
+      "arm": "hybrid-F-lhreq-noc3",
+      "seed": 7,
+      "commit": "ee92fbdf 2026-11-21"
+    }
+  ],
+  "n_cells": 8,
+  "missing": [],
+  "thresholds": {
+    "min_n_overall": 40,
+    "min_n_warm": 40,
+    "rule": "if either is unmet the margin is NOT set and n is reported (D169 step 3)"
+  },
+  "error_formula": "0.250 x |P_hat(on time) - 1[actually on time]| per question, p90 over the population, set ONCE",
+  "P_hat": {
+    "artefact": "results/orchestration/live2/v5/cf_ontime_model_d162.json",
+    "version": "cf-ontime-d162-1.0",
+    "payload_sha256": "8fa0c7febd7b64deb98a2bdec531f3af65dc77ea52e42d01b03caaf413aa8758",
+    "code_sha256": "df6863b04892a4ab33e9c62f82470cd4618114195eef294326ec1071086bdf4d",
+    "frozen_before_scoring": true
+  }
+}
