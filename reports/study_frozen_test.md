@@ -20,7 +20,7 @@ the seed's trace, so **saturated arms at the same seed show identical scores by 
 
 30 valid cells committed: b7 s5 to s7; covex-v6-state s4 (as `_rerun`), s5, s6 (HELD-CODE, see 4); always-cloud s4 to s7
 (s5 as `_rerun`); simplestream s4 to s7; querystream-proactive s4 to s7; mooncake s4 to s7; attentionstore-prefetch s4 to s7;
-warm-all-lru s4 to s7 (s7 ended 05:44, 22 x 400 on robo004|s000; its low 3,792 tok/s is because 6,814 dashcam requests went unsent, not because it was healthy); then old v5-rules s6 and s7 close the paper core.
+warm-all-lru s4 to s7 (s7 ended 05:44, 22 x 400 on robo004|s000; its low 3,792 tok/s is because 6,814 dashcam requests went unsent, not because it was healthy). Paper core still to run (matrix order): hybrid-F-lhreq s4 to s7 (from 05:44), then old v5-rules s6 and s7, ending about 07:56.
 INVALID / skipped (never used): covex-v6-state s4 first attempt (unknown arm, 19:42), covex-v6-state s7 and its rerun (stopped,
 held code, 21:14 / 21:16), always-cloud s5 first attempt (preflight refused: orphaned server, 21:16). HTTP 400 counts overnight:
 14 always-cloud s7, 16 querystream-proactive s7, 16 attentionstore-prefetch s7, 22 warm-all-lru s7, all on `robo004|s000` (see 4); every other
