@@ -724,6 +724,13 @@ from arms_v6state import V6STATE_ARMS                                   # noqa: 
 ARMS.update(V6STATE_ARMS)
 from arms_v6fair import V6FAIR_ARMS                                     # noqa: E402
 ARMS.update(V6FAIR_ARMS)
+# C5 attribution CANDIDATE (user ruling 2026-11-22 addendum), default off and adopted by nothing.
+# Registered HERE for the same reason as the rest of the v6 family: `run_live2_real.py` imports
+# `arms` and `hybrid` and nothing else, so a name registered only in its own module does not
+# exist in the harness's process. v6_harness_name_proof.py checks this one through the entry
+# point itself.
+from arms_v6c5 import V6C5_ARMS                                         # noqa: E402
+ARMS.update(V6C5_ARMS)
 
 
 def _register_v6_aliases() -> None:

@@ -63,6 +63,17 @@ import engine_actions as EA                                              # noqa:
 from backend import (Live2Backend, Live2Submission, cached_tokens_of,    # noqa: E402
                      output_tokens_of, prompt_tokens_of)
 
+# C5 ATTRIBUTION SUPPORT (candidate, read by no committed arm). The coordinator records the
+# [release, finish] span of every NON-MONITOR request it releases together with the uncached
+# token count it CHARGED for it, and reports on each monitor completion whether that monitor's
+# wait overlapped such a span. The threshold is the one c5_loss_split.py's ruling fixed: a
+# "robot prefill" is a build, touch or recall the coordinator itself released with uncached
+# >= 200 tokens. Nothing here changes a decision; the two keys are additive on live2_completed
+# and the digest proofs in results/orchestration/live2/frozen_test/c5attr_digest_proofs.json
+# show every committed arm unchanged.
+C5ATTR_UNCACHED_MIN = 200
+C5ATTR_SPAN_KEEP_S = 60.0
+
 DEVICE_ANSWER_CHARGE_S = C.DEV_LAT_S         # StudyD8's 0.567 s RULE (D87, amendment 2 item 3)
 
 # D168 / D154 (5): the five arms that WAIT for the device answer (reads_device_answer = True:
@@ -269,6 +280,9 @@ class Live2Coordinator:
         self._uncached_in_flight = 0
         self._uncached_pending: Dict[str, int] = {}
         self._uncached_last_charged = 0
+        # request id -> {t0, t1, uncached} for every NON-MONITOR request released, t1 None while
+        # it is still in flight. See C5ATTR_UNCACHED_MIN.
+        self._released_prefills: Dict[str, Dict[str, Any]] = {}
         # D150 PATCH 2 belief correction, ARM-SCOPED like every other v5 switch (D172 rung 2).
         # It was a process-wide env switch, so turning it on for one arm turned it on for every
         # arm in the same run and made the cells incomparable, which is the thing the env
@@ -1169,6 +1183,11 @@ class Live2Coordinator:
                                         **self._priority_for(kind, device_id, session_id, opportunity_id)))
         self.st.in_flight[kind] += 1
         self.counts["submitted_" + kind] += 1
+        if kind != "monitor":
+            # the uncached count THIS request was charged: every release path sets
+            # `_uncached_last_charged` immediately before calling `_submit`
+            self._released_prefills[rid] = dict(t0=float(t), t1=None,
+                                                uncached=int(self._uncached_last_charged))
         if session_id is not None:
             s = self.st.sessions[session_id]
             for f in frames:
@@ -1245,6 +1264,32 @@ class Live2Coordinator:
             self._mon_confirmed[sub.device_id] |= set(refs)
             self.counts["racefix_bytes_confirmed_monitor"] += len(refs)
 
+    def _self_released_overlap(self, sub: Live2Submission, first_s: Optional[float],
+                               done_s: float) -> Tuple[bool, int]:
+        """Did this monitor's WAIT overlap a robot prefill THE COORDINATOR ITSELF RELEASED?
+
+        Causally available at this instant and no more than that: the coordinator knows what it
+        released, when, and what has not finished yet. A span with `t1` None is still in flight,
+        so it overlaps anything that had not ended before it began. The monitor's wait is
+        [submitted, first token]; when the engine reported no first token the whole request is
+        used, which is the longer interval and so the conservative choice for a rule that
+        SUPPRESSES a back-off.
+
+        The uncached count is the one the coordinator CHARGED at release (its own prediction),
+        not the engine's later `prompt - cached`: the predicted number is what exists at release
+        time and is identical in a dry run, which is what makes the rule provable off a server.
+        """
+        t0 = float(sub.sent_s)
+        t1 = float(first_s if first_s is not None else done_s)
+        worst = 0
+        for sp in self._released_prefills.values():
+            if int(sp["uncached"]) < C5ATTR_UNCACHED_MIN:
+                continue
+            end = sp["t1"]
+            if float(sp["t0"]) <= t1 and (end is None or float(end) >= t0):
+                worst = max(worst, int(sp["uncached"]))
+        return bool(worst > 0), worst
+
     def _collect(self, t: float) -> None:
         still = []
         for fut, sub in self.futures:
@@ -1290,6 +1335,11 @@ class Live2Coordinator:
                             self.counts["belief_corrections_observed_only"] += 1
             done_s = sub.sent_s + (r["total_s"] * self.speed if r.get("total_s") else 0.0)
             first_s = (sub.sent_s + r["ttft_s"] * self.speed) if r.get("ttft_s") else None
+            _sp = self._released_prefills.get(sub.request_id)
+            if _sp is not None:
+                _sp["t1"] = float(done_s)
+            _ovl, _ovl_unc = ((False, 0) if sub.kind != "monitor"
+                              else self._self_released_overlap(sub, first_s, done_s))
             if self.logs is not None:
                 self.logs.request.write(SC.RequestRecord(
                     request_id=sub.request_id, decision_id=sub.decision_id,
@@ -1327,13 +1377,19 @@ class Live2Coordinator:
                     cloud_on_time=(None if _dl is None else bool(done_s <= _dl + 1e-9)),
                     device_wait_s=_devw,
                     device_on_time=(None if (_dl is None or _devw is None or _t_opp is None)
-                                    else bool(_t_opp + _devw <= _dl + 1e-9))))
+                                    else bool(_t_opp + _devw <= _dl + 1e-9)),
+                    # C5 attribution support, monitors only; False and 0 on every other kind
+                    self_released_prefill_overlap=bool(_ovl),
+                    self_released_prefill_uncached=int(_ovl_unc)))
             if self._d162_pricing:
                 _u = self._uncached_pending.pop(sub.request_id, 0)
                 self._uncached_in_flight = max(self._uncached_in_flight - int(_u), 0)
             self._settle(sub, first_s, done_s, path, t, ct, self._score_of(sub, r),
                          http_status=r.get("http_status"))
             self.counts["completed_" + sub.kind] += 1
+        for _rid in [k for k, v in self._released_prefills.items()
+                     if v["t1"] is not None and float(v["t1"]) < t - C5ATTR_SPAN_KEEP_S]:
+            del self._released_prefills[_rid]
         self.futures[:] = still
 
     def _score_of(self, sub: Live2Submission, r: Dict[str, Any]) -> Dict[str, Any]:

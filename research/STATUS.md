@@ -1,3 +1,50 @@
+## 2026-11-22 (session C5-B): two CANDIDATE fixes and one engine diagnostic for rung 1's dashcam loss, all default off
+
+**Last updated: 2026-11-22.** StudyC5-ATTR, under the user ruling of 2026-11-22 (addendum).
+**NOTHING IS ADOPTED AND NO WINNER IS DECLARED; that choice is the user's.** Every switch is
+default off and is turned on only by an arm a cell list names.
+
+**Built.** `covex-v6-state-uo-c5attr` (`experiments/orchestration/live2/arms_v6c5.py`, a subclass of
+`covex-v6-state-uo`, whose own file is untouched): identical in every respect except that C5 does
+not halve its cap for a slow monitor whose wait overlapped a robot prefill THE COORDINATOR ITSELF
+RELEASED (a build, touch or recall with uncached >= 200 tokens). The overlap test is the
+coordinator's (`_self_released_overlap`, reported on the completion hook that feeds the EWMA); the
+decision is the arm's (`_attr_suppresses`, read in `_aimd`); the switch is an INSTANCE attribute on
+the HybridArm that owns the cap.
+
+**Proved.** Step 2b on the committed live traces (`c5attr_replay_proofs.json`, read-only): the rule
+prevents **436 to 514 of the 539 to 599 cap halvings per rung-1 cell** (the counter reads 4,153 to
+4,899 suppression EVENTS, because a suppression does not advance C5's one-second cooldown and the
+rule re-evaluates every 0.1 s epoch while the trip persists), cap decreases fall **539-599 to 85-112**,
+epochs with the cap at its floor fall **7,544-8,428 to 3,324-4,877** of 12,000, and **4,529 to
+6,528 epochs end with a different cap**. Controls: the committed replay reproduces
+`c5_loss_split.json`'s own reconstruction exactly and the base arms' own counters within one count;
+NEVER-SUPPRESS reproduces the committed trajectory exactly; ALWAYS-SUPPRESS moves it. Dry, in
+code (`c5attr_digest_proofs.json`): the four committed arms are byte-identical across this work
+with the BEFORE side taken from git; the cap series moves and 221 halvings are suppressed; and
+**differing decisions are ZERO, declared UNEXERCISED** because the dry stand-in's monitor latency is
+a constant, so above the trip the cap sits at its floor in both arms.
+
+**What bounds it, from the same read-only pass** (`c5attr_trip_attribution.json`, under the user's
+second addendum): only **50.7 to 54.7 percent** of rung-1 halvings fire on evidence the rule can
+attribute to our own released work. **30.5 to 37.6 percent** are trips where the EWMA is above
+0.8 s while no individual pending monitor was, 3.9 to 7.3 percent fire on monitors that overlapped
+NOTHING of ours, and the rest are mixed; the rule suppresses none of those by design. The same pass
+reproduces the user's release-delay reading independently: rung-1 release delay p50 0.759 to 0.816 s
+with 71 to 87 percent over 0.5 s against the base's 0.201 to 0.362 s and 26 to 43 percent, with
+dashcam uncached work per request unchanged (374 against 376 to 378).
+
+**NOT an outcome.** A replay holds the trace fixed. Nothing here shows that either candidate
+improves alert on-time delivery; the posted live cells are the only thing that can.
+
+**Posted for the H100:** `results/orchestration/live2/frozen_test/runs/C5DIAG_CELLS` - two
+`covex-v6-state-uo-c5attr` cells (seeds 4, 5) and two ENGINE-FLAG DIAGNOSTIC cells
+(`covex-v6-state-uo` and `covex-v6-base`, seed 5, tag `_L3_epg_rq30_lpt2048`) that the H100 must
+launch with `--long-prefill-token-threshold 2048` and then restore the committed no-flag
+configuration. **N = 2048 is pre-registered in `research/prereg_c5_engine_flag.md`** with the
+arithmetic from the vLLM 0.31.0 source. The flag is SERVER-WIDE: adopting it would mean rerunning
+every arm, which is why it is a diagnostic and not a candidate policy.
+
 ## 2026-11-22 (session E): the cascade arms' DEV threshold calibration, one arm released of three
 
 **Last updated: 2026-11-22.** StudyCASCADE-calib, pre-registered in

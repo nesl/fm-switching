@@ -38,7 +38,10 @@ LADDER = ["covex-v6-base", "covex-v6-rules", "covex-v6-state", "covex-v6-fair", 
           # the harness must resolve. The first V6STATE_CELLS release was SKIPPED for exactly
           # this: a name that resolved in my process and not in the harness's.
           "covex-v6-state-uo", "covex-v6-rules-uo", "covex-v6-state-wo", "covex-v6-rules-wo",
-          "covex-v6-state-d162"]
+          "covex-v6-state-d162",
+          # the C5 attribution CANDIDATE (user ruling 2026-11-22 addendum). A cell list names it,
+          # so the harness must resolve it; it is default-off everywhere else.
+          "covex-v6-state-uo-c5attr"]
 UNKNOWN = "covex-v6-not-an-arm"
 MARKER = "unknown arm"
 

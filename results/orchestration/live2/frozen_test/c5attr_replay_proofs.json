@@ -1,0 +1,830 @@
+{
+ "_what": "C5 attribution candidate (covex-v6-state-uo-c5attr): the rule's effect on the AIMD cap trajectory, replayed on the committed live traces",
+ "_register": "a CAP TRAJECTORY under the rule, on a FIXED trace. NOT an outcome, NOT a submission count, NOT a headline. The trace cannot react to a cap that was never applied",
+ "_rule": "suppress the halving when every slow monitor (first token > 0.8 s) seen since the last cap adjustment overlapped a robot prefill the coordinator released with uncached >= 200 tokens; on suppression the cap is HELD",
+ "cells": [
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "control_positive_reconstruction": {
+    "_claim": "the committed replay reproduces the arm's own AIMD counters",
+    "reconstructed": [
+     154,
+     97
+    ],
+    "arm_recorded": [
+     154,
+     97
+    ],
+    "within_one_count": true
+   },
+   "control_negative_never_suppress": {
+    "_claim": "with the rule present but never able to fire, the trajectory must be the committed one exactly",
+    "identical": true,
+    "epochs_with_a_different_cap": 0,
+    "decreases": [
+     154,
+     154
+    ]
+   },
+   "control_positive_always_suppress": {
+    "_claim": "the check can see a difference at all",
+    "epochs_with_a_different_cap": 6630,
+    "first_differing_epoch": {
+     "epoch": 685,
+     "t_s": 68.5,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     2989,
+     0
+    ],
+    "mean_cap": [
+     6.3584,
+     8.0
+    ],
+    "decreases": [
+     154,
+     0
+    ],
+    "increases": [
+     97,
+     0
+    ]
+   },
+   "candidate": {
+    "mode": "attr",
+    "decreases": 28,
+    "increases": 38,
+    "suppressed": 1091,
+    "trips_with_mixed_evidence": 21,
+    "trips_without_slow_evidence": 7,
+    "epochs_at_floor": 949,
+    "mean_cap": 7.4348
+   },
+   "committed": {
+    "mode": "committed",
+    "decreases": 154,
+    "increases": 97,
+    "suppressed": 0,
+    "trips_with_mixed_evidence": 0,
+    "trips_without_slow_evidence": 0,
+    "epochs_at_floor": 2989,
+    "mean_cap": 6.3584
+   },
+   "step2b_cap_trajectory": {
+    "epochs_with_a_different_cap": 4806,
+    "first_differing_epoch": {
+     "epoch": 685,
+     "t_s": 68.5,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     2989,
+     949
+    ],
+    "mean_cap": [
+     6.3584,
+     7.4348
+    ],
+    "decreases": [
+     154,
+     28
+    ],
+    "increases": [
+     97,
+     38
+    ]
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "control_positive_reconstruction": {
+    "_claim": "the committed replay reproduces the arm's own AIMD counters",
+    "reconstructed": [
+     112,
+     106
+    ],
+    "arm_recorded": [
+     111,
+     106
+    ],
+    "within_one_count": true
+   },
+   "control_negative_never_suppress": {
+    "_claim": "with the rule present but never able to fire, the trajectory must be the committed one exactly",
+    "identical": true,
+    "epochs_with_a_different_cap": 0,
+    "decreases": [
+     112,
+     112
+    ]
+   },
+   "control_positive_always_suppress": {
+    "_claim": "the check can see a difference at all",
+    "epochs_with_a_different_cap": 6568,
+    "first_differing_epoch": {
+     "epoch": 561,
+     "t_s": 56.1,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     2590,
+     0
+    ],
+    "mean_cap": [
+     6.443,
+     8.0
+    ],
+    "decreases": [
+     112,
+     0
+    ],
+    "increases": [
+     106,
+     0
+    ]
+   },
+   "candidate": {
+    "mode": "attr",
+    "decreases": 30,
+    "increases": 77,
+    "suppressed": 748,
+    "trips_with_mixed_evidence": 26,
+    "trips_without_slow_evidence": 4,
+    "epochs_at_floor": 1161,
+    "mean_cap": 7.1162
+   },
+   "committed": {
+    "mode": "committed",
+    "decreases": 112,
+    "increases": 106,
+    "suppressed": 0,
+    "trips_with_mixed_evidence": 0,
+    "trips_without_slow_evidence": 0,
+    "epochs_at_floor": 2590,
+    "mean_cap": 6.443
+   },
+   "step2b_cap_trajectory": {
+    "epochs_with_a_different_cap": 3205,
+    "first_differing_epoch": {
+     "epoch": 561,
+     "t_s": 56.1,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     2590,
+     1161
+    ],
+    "mean_cap": [
+     6.443,
+     7.1162
+    ],
+    "decreases": [
+     112,
+     30
+    ],
+    "increases": [
+     106,
+     77
+    ]
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "control_positive_reconstruction": {
+    "_claim": "the committed replay reproduces the arm's own AIMD counters",
+    "reconstructed": [
+     118,
+     97
+    ],
+    "arm_recorded": [
+     117,
+     97
+    ],
+    "within_one_count": true
+   },
+   "control_negative_never_suppress": {
+    "_claim": "with the rule present but never able to fire, the trajectory must be the committed one exactly",
+    "identical": true,
+    "epochs_with_a_different_cap": 0,
+    "decreases": [
+     118,
+     118
+    ]
+   },
+   "control_positive_always_suppress": {
+    "_claim": "the check can see a difference at all",
+    "epochs_with_a_different_cap": 6234,
+    "first_differing_epoch": {
+     "epoch": 497,
+     "t_s": 49.7,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     2592,
+     0
+    ],
+    "mean_cap": [
+     6.4977,
+     8.0
+    ],
+    "decreases": [
+     118,
+     0
+    ],
+    "increases": [
+     97,
+     0
+    ]
+   },
+   "candidate": {
+    "mode": "attr",
+    "decreases": 30,
+    "increases": 62,
+    "suppressed": 758,
+    "trips_with_mixed_evidence": 28,
+    "trips_without_slow_evidence": 2,
+    "epochs_at_floor": 1152,
+    "mean_cap": 7.2157
+   },
+   "committed": {
+    "mode": "committed",
+    "decreases": 118,
+    "increases": 97,
+    "suppressed": 0,
+    "trips_with_mixed_evidence": 0,
+    "trips_without_slow_evidence": 0,
+    "epochs_at_floor": 2592,
+    "mean_cap": 6.4977
+   },
+   "step2b_cap_trajectory": {
+    "epochs_with_a_different_cap": 3698,
+    "first_differing_epoch": {
+     "epoch": 497,
+     "t_s": 49.7,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     2592,
+     1152
+    ],
+    "mean_cap": [
+     6.4977,
+     7.2157
+    ],
+    "decreases": [
+     118,
+     30
+    ],
+    "increases": [
+     97,
+     62
+    ]
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "control_positive_reconstruction": {
+    "_claim": "the committed replay reproduces the arm's own AIMD counters",
+    "reconstructed": [
+     92,
+     77
+    ],
+    "arm_recorded": [
+     92,
+     77
+    ],
+    "within_one_count": true
+   },
+   "control_negative_never_suppress": {
+    "_claim": "with the rule present but never able to fire, the trajectory must be the committed one exactly",
+    "identical": true,
+    "epochs_with_a_different_cap": 0,
+    "decreases": [
+     92,
+     92
+    ]
+   },
+   "control_positive_always_suppress": {
+    "_claim": "the check can see a difference at all",
+    "epochs_with_a_different_cap": 4762,
+    "first_differing_epoch": {
+     "epoch": 860,
+     "t_s": 86.0,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     1844,
+     0
+    ],
+    "mean_cap": [
+     6.8759,
+     8.0
+    ],
+    "decreases": [
+     92,
+     0
+    ],
+    "increases": [
+     77,
+     0
+    ]
+   },
+   "candidate": {
+    "mode": "attr",
+    "decreases": 20,
+    "increases": 43,
+    "suppressed": 595,
+    "trips_with_mixed_evidence": 16,
+    "trips_without_slow_evidence": 4,
+    "epochs_at_floor": 686,
+    "mean_cap": 7.4984
+   },
+   "committed": {
+    "mode": "committed",
+    "decreases": 92,
+    "increases": 77,
+    "suppressed": 0,
+    "trips_with_mixed_evidence": 0,
+    "trips_without_slow_evidence": 0,
+    "epochs_at_floor": 1844,
+    "mean_cap": 6.8759
+   },
+   "step2b_cap_trajectory": {
+    "epochs_with_a_different_cap": 2799,
+    "first_differing_epoch": {
+     "epoch": 860,
+     "t_s": 86.0,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     1844,
+     686
+    ],
+    "mean_cap": [
+     6.8759,
+     7.4984
+    ],
+    "decreases": [
+     92,
+     20
+    ],
+    "increases": [
+     77,
+     43
+    ]
+   }
+  },
+  {
+   "cell": "v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "control_positive_reconstruction": {
+    "_claim": "the committed replay reproduces the arm's own AIMD counters",
+    "reconstructed": [
+     599,
+     88
+    ],
+    "arm_recorded": [
+     null,
+     null
+    ],
+    "within_one_count": null
+   },
+   "control_negative_never_suppress": {
+    "_claim": "with the rule present but never able to fire, the trajectory must be the committed one exactly",
+    "identical": true,
+    "epochs_with_a_different_cap": 0,
+    "decreases": [
+     599,
+     599
+    ]
+   },
+   "control_positive_always_suppress": {
+    "_claim": "the check can see a difference at all",
+    "epochs_with_a_different_cap": 11421,
+    "first_differing_epoch": {
+     "epoch": 463,
+     "t_s": 46.3,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     8428,
+     0
+    ],
+    "mean_cap": [
+     4.5744,
+     8.0
+    ],
+    "decreases": [
+     599,
+     0
+    ],
+    "increases": [
+     88,
+     0
+    ]
+   },
+   "candidate": {
+    "mode": "attr",
+    "decreases": 85,
+    "increases": 86,
+    "suppressed": 4899,
+    "trips_with_mixed_evidence": 76,
+    "trips_without_slow_evidence": 9,
+    "epochs_at_floor": 3415,
+    "mean_cap": 5.695
+   },
+   "committed": {
+    "mode": "committed",
+    "decreases": 599,
+    "increases": 88,
+    "suppressed": 0,
+    "trips_with_mixed_evidence": 0,
+    "trips_without_slow_evidence": 0,
+    "epochs_at_floor": 8428,
+    "mean_cap": 4.5744
+   },
+   "step2b_cap_trajectory": {
+    "epochs_with_a_different_cap": 6528,
+    "first_differing_epoch": {
+     "epoch": 463,
+     "t_s": 46.3,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     8428,
+     3415
+    ],
+    "mean_cap": [
+     4.5744,
+     5.695
+    ],
+    "decreases": [
+     599,
+     85
+    ],
+    "increases": [
+     88,
+     86
+    ]
+   }
+  },
+  {
+   "cell": "v5-rules-2_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "control_positive_reconstruction": {
+    "_claim": "the committed replay reproduces the arm's own AIMD counters",
+    "reconstructed": [
+     548,
+     94
+    ],
+    "arm_recorded": [
+     null,
+     null
+    ],
+    "within_one_count": null
+   },
+   "control_negative_never_suppress": {
+    "_claim": "with the rule present but never able to fire, the trajectory must be the committed one exactly",
+    "identical": true,
+    "epochs_with_a_different_cap": 0,
+    "decreases": [
+     548,
+     548
+    ]
+   },
+   "control_positive_always_suppress": {
+    "_claim": "the check can see a difference at all",
+    "epochs_with_a_different_cap": 11306,
+    "first_differing_epoch": {
+     "epoch": 460,
+     "t_s": 46.0,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     7945,
+     0
+    ],
+    "mean_cap": [
+     4.6686,
+     8.0
+    ],
+    "decreases": [
+     548,
+     0
+    ],
+    "increases": [
+     94,
+     0
+    ]
+   },
+   "candidate": {
+    "mode": "attr",
+    "decreases": 112,
+    "increases": 93,
+    "suppressed": 4153,
+    "trips_with_mixed_evidence": 95,
+    "trips_without_slow_evidence": 17,
+    "epochs_at_floor": 4877,
+    "mean_cap": 5.5281
+   },
+   "committed": {
+    "mode": "committed",
+    "decreases": 548,
+    "increases": 94,
+    "suppressed": 0,
+    "trips_with_mixed_evidence": 0,
+    "trips_without_slow_evidence": 0,
+    "epochs_at_floor": 7945,
+    "mean_cap": 4.6686
+   },
+   "step2b_cap_trajectory": {
+    "epochs_with_a_different_cap": 4529,
+    "first_differing_epoch": {
+     "epoch": 460,
+     "t_s": 46.0,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     7945,
+     4877
+    ],
+    "mean_cap": [
+     4.6686,
+     5.5281
+    ],
+    "decreases": [
+     548,
+     112
+    ],
+    "increases": [
+     94,
+     93
+    ]
+   }
+  },
+  {
+   "cell": "v5-rules-2_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "control_positive_reconstruction": {
+    "_claim": "the committed replay reproduces the arm's own AIMD counters",
+    "reconstructed": [
+     548,
+     91
+    ],
+    "arm_recorded": [
+     null,
+     null
+    ],
+    "within_one_count": null
+   },
+   "control_negative_never_suppress": {
+    "_claim": "with the rule present but never able to fire, the trajectory must be the committed one exactly",
+    "identical": true,
+    "epochs_with_a_different_cap": 0,
+    "decreases": [
+     548,
+     548
+    ]
+   },
+   "control_positive_always_suppress": {
+    "_claim": "the check can see a difference at all",
+    "epochs_with_a_different_cap": 10983,
+    "first_differing_epoch": {
+     "epoch": 474,
+     "t_s": 47.4,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     7712,
+     0
+    ],
+    "mean_cap": [
+     4.803,
+     8.0
+    ],
+    "decreases": [
+     548,
+     0
+    ],
+    "increases": [
+     91,
+     0
+    ]
+   },
+   "candidate": {
+    "mode": "attr",
+    "decreases": 100,
+    "increases": 98,
+    "suppressed": 4283,
+    "trips_with_mixed_evidence": 77,
+    "trips_without_slow_evidence": 23,
+    "epochs_at_floor": 3996,
+    "mean_cap": 5.8651
+   },
+   "committed": {
+    "mode": "committed",
+    "decreases": 548,
+    "increases": 91,
+    "suppressed": 0,
+    "trips_with_mixed_evidence": 0,
+    "trips_without_slow_evidence": 0,
+    "epochs_at_floor": 7712,
+    "mean_cap": 4.803
+   },
+   "step2b_cap_trajectory": {
+    "epochs_with_a_different_cap": 5135,
+    "first_differing_epoch": {
+     "epoch": 474,
+     "t_s": 47.4,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     7712,
+     3996
+    ],
+    "mean_cap": [
+     4.803,
+     5.8651
+    ],
+    "decreases": [
+     548,
+     100
+    ],
+    "increases": [
+     91,
+     98
+    ]
+   }
+  },
+  {
+   "cell": "v5-rules-2_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "control_positive_reconstruction": {
+    "_claim": "the committed replay reproduces the arm's own AIMD counters",
+    "reconstructed": [
+     539,
+     85
+    ],
+    "arm_recorded": [
+     null,
+     null
+    ],
+    "within_one_count": null
+   },
+   "control_negative_never_suppress": {
+    "_claim": "with the rule present but never able to fire, the trajectory must be the committed one exactly",
+    "identical": true,
+    "epochs_with_a_different_cap": 0,
+    "decreases": [
+     539,
+     539
+    ]
+   },
+   "control_positive_always_suppress": {
+    "_claim": "the check can see a difference at all",
+    "epochs_with_a_different_cap": 10642,
+    "first_differing_epoch": {
+     "epoch": 474,
+     "t_s": 47.4,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     7544,
+     0
+    ],
+    "mean_cap": [
+     4.8793,
+     8.0
+    ],
+    "decreases": [
+     539,
+     0
+    ],
+    "increases": [
+     85,
+     0
+    ]
+   },
+   "candidate": {
+    "mode": "attr",
+    "decreases": 89,
+    "increases": 97,
+    "suppressed": 4318,
+    "trips_with_mixed_evidence": 71,
+    "trips_without_slow_evidence": 18,
+    "epochs_at_floor": 3324,
+    "mean_cap": 5.8635
+   },
+   "committed": {
+    "mode": "committed",
+    "decreases": 539,
+    "increases": 85,
+    "suppressed": 0,
+    "trips_with_mixed_evidence": 0,
+    "trips_without_slow_evidence": 0,
+    "epochs_at_floor": 7544,
+    "mean_cap": 4.8793
+   },
+   "step2b_cap_trajectory": {
+    "epochs_with_a_different_cap": 5182,
+    "first_differing_epoch": {
+     "epoch": 474,
+     "t_s": 47.4,
+     "committed_cap": 4,
+     "candidate_cap": 8
+    },
+    "epochs_at_floor": [
+     7544,
+     3324
+    ],
+    "mean_cap": [
+     4.8793,
+     5.8635
+    ],
+    "decreases": [
+     539,
+     89
+    ],
+    "increases": [
+     85,
+     97
+    ]
+   }
+  }
+ ],
+ "summary": {
+  "controls": {
+   "reconstruction_within_one_count": true,
+   "never_suppress_identical": true,
+   "always_suppress_moves_the_trajectory": true
+  },
+  "rung1_cells": [
+   "v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "v5-rules-2_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "v5-rules-2_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "v5-rules-2_n16_s7_1200s_h27_3t_L3_epg_rq30"
+  ],
+  "rung1_suppressed_halvings": [
+   4899,
+   4153,
+   4283,
+   4318
+  ],
+  "rung1_epochs_with_a_different_cap": [
+   6528,
+   4529,
+   5135,
+   5182
+  ],
+  "rung1_decreases_committed_vs_candidate": [
+   [
+    599,
+    85
+   ],
+   [
+    548,
+    112
+   ],
+   [
+    548,
+    100
+   ],
+   [
+    539,
+    89
+   ]
+  ],
+  "rung1_epochs_at_floor_committed_vs_candidate": [
+   [
+    8428,
+    3415
+   ],
+   [
+    7945,
+    4877
+   ],
+   [
+    7712,
+    3996
+   ],
+   [
+    7544,
+    3324
+   ]
+  ],
+  "port_rule": "the characteristic decision is a SUPPRESSED HALVING; it occurs [4899, 4153, 4283, 4318] times per rung-1 cell"
+ },
+ "verdict": "PASS: controls hold and the rule moves the cap trajectory on every rung-1 cell"
+}

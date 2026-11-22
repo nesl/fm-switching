@@ -88,9 +88,14 @@ def start_server(host_gib, scheduling_policy=None, extra_flags=None):
         raise SystemExit(f"unknown scheduling policy {scheduling_policy!r}: STOP")
     if scheduling_policy == "priority":
         flags = flags + ["--scheduling-policy", "priority"]
-    # D130 tuned-engine (cards/tuned_engine.md P1): only this flag is accepted, appended after the DE_c38 check
+    # D130 tuned-engine (cards/tuned_engine.md P1): only these flag lists are accepted, appended after the DE_c38
+    # check. The 2048 entry is the ENGINE-FLAG DIAGNOSTIC pre-registered in research/prereg_c5_engine_flag.md
+    # (committed before any cell of runs/C5DIAG_CELLS runs); it is a DIAGNOSTIC, never a headline, it is
+    # server-wide so it changes every arm in the cells it is used for, and the committed configuration is the one
+    # with NO extra flags. The allowlist stays an allowlist: an unlisted flag still STOPS.
     if extra_flags:
-        if list(extra_flags) != ["--long-prefill-token-threshold", "1024"]:
+        if list(extra_flags) not in (["--long-prefill-token-threshold", "1024"],
+                                     ["--long-prefill-token-threshold", "2048"]):
             raise SystemExit(f"unsupported extra server flags {extra_flags!r}: STOP")
         flags = flags + list(extra_flags)
     os.environ["PYTHONPATH"] = str(M.PLUGIN_DIR)

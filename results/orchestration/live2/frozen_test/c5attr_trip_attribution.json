@@ -1,0 +1,303 @@
+{
+ "_what": "which slow monitors trip C5's cap, classified by what their wait overlapped; and the release delay the user's ruling of 2026-11-22 rests on",
+ "_register": "READ-ONLY attribution on committed traces. NONE means nothing OF OURS with uncached >= 200 tokens was in flight during that monitor's wait, so the cap was reacting to its own queueing and the attribution rule does NOT suppress that halving",
+ "_definitions": {
+  "slow monitor": "first-token time > 0.8 s, C5's own trip",
+  "ours": "a non-monitor request the coordinator released with uncached >= 200 tokens, labelled by its own decision kind from the cell's decision log",
+  "counted at a halving": "slow monitors are counted as the evidence of the halving they were pending for, so a monitor is counted once"
+ },
+ "cells": [
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "monitor_requests_with_a_first_token": 9743,
+   "monitor_ttft_p50": 0.439,
+   "monitor_ttft_p90": 0.693,
+   "monitor_uncached_median": 374,
+   "release_delay_s_p50": 0.3,
+   "release_delay_s_p90": 0.888,
+   "release_delay_share_over_0_5s": 0.3706,
+   "our_released_prefills_uncached_ge_200": 407,
+   "slow_monitors_counted_at_a_halving": 376,
+   "slow_monitor_overlap_classes": {
+    "NONE": 37,
+    "recall": 339
+   },
+   "slow_monitor_overlap_shares": {
+    "NONE": 0.0984,
+    "recall": 0.9016
+   },
+   "halvings_by_evidence": {
+    "evidence_all_ours": 85,
+    "evidence_mixed": 10,
+    "evidence_none_ours": 7,
+    "no_slow_evidence": 52
+   },
+   "halvings_total": 154,
+   "share_of_halvings_the_rule_would_suppress": 0.5519
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "monitor_requests_with_a_first_token": 9808,
+   "monitor_ttft_p50": 0.449,
+   "monitor_ttft_p90": 0.706,
+   "monitor_uncached_median": 374,
+   "release_delay_s_p50": 0.362,
+   "release_delay_s_p90": 0.902,
+   "release_delay_share_over_0_5s": 0.4265,
+   "our_released_prefills_uncached_ge_200": 400,
+   "slow_monitors_counted_at_a_halving": 315,
+   "slow_monitor_overlap_classes": {
+    "NONE": 40,
+    "recall": 275
+   },
+   "slow_monitor_overlap_shares": {
+    "NONE": 0.127,
+    "recall": 0.873
+   },
+   "halvings_by_evidence": {
+    "evidence_all_ours": 68,
+    "evidence_mixed": 9,
+    "evidence_none_ours": 6,
+    "no_slow_evidence": 29
+   },
+   "halvings_total": 112,
+   "share_of_halvings_the_rule_would_suppress": 0.6071
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "monitor_requests_with_a_first_token": 9883,
+   "monitor_ttft_p50": 0.446,
+   "monitor_ttft_p90": 0.692,
+   "monitor_uncached_median": 374,
+   "release_delay_s_p50": 0.258,
+   "release_delay_s_p90": 0.877,
+   "release_delay_share_over_0_5s": 0.3458,
+   "our_released_prefills_uncached_ge_200": 408,
+   "slow_monitors_counted_at_a_halving": 341,
+   "slow_monitor_overlap_classes": {
+    "NONE": 70,
+    "recall": 271
+   },
+   "slow_monitor_overlap_shares": {
+    "NONE": 0.2053,
+    "recall": 0.7947
+   },
+   "halvings_by_evidence": {
+    "evidence_all_ours": 75,
+    "evidence_mixed": 7,
+    "evidence_none_ours": 17,
+    "no_slow_evidence": 19
+   },
+   "halvings_total": 118,
+   "share_of_halvings_the_rule_would_suppress": 0.6356
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "monitor_requests_with_a_first_token": 10511,
+   "monitor_ttft_p50": 0.436,
+   "monitor_ttft_p90": 0.652,
+   "monitor_uncached_median": 374,
+   "release_delay_s_p50": 0.201,
+   "release_delay_s_p90": 0.829,
+   "release_delay_share_over_0_5s": 0.2645,
+   "our_released_prefills_uncached_ge_200": 385,
+   "slow_monitors_counted_at_a_halving": 267,
+   "slow_monitor_overlap_classes": {
+    "NONE": 42,
+    "recall": 225
+   },
+   "slow_monitor_overlap_shares": {
+    "NONE": 0.1573,
+    "recall": 0.8427
+   },
+   "halvings_by_evidence": {
+    "evidence_all_ours": 55,
+    "evidence_mixed": 6,
+    "evidence_none_ours": 10,
+    "no_slow_evidence": 21
+   },
+   "halvings_total": 92,
+   "share_of_halvings_the_rule_would_suppress": 0.5978
+  },
+  {
+   "cell": "v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "monitor_requests_with_a_first_token": 4827,
+   "monitor_ttft_p50": 0.52,
+   "monitor_ttft_p90": 1.648,
+   "monitor_uncached_median": 378,
+   "release_delay_s_p50": 0.816,
+   "release_delay_s_p90": 0.982,
+   "release_delay_share_over_0_5s": 0.8684,
+   "our_released_prefills_uncached_ge_200": 587,
+   "slow_monitors_counted_at_a_halving": 1114,
+   "slow_monitor_overlap_classes": {
+    "NONE": 135,
+    "recall": 607,
+    "several": 280,
+    "warm_build": 92
+   },
+   "slow_monitor_overlap_shares": {
+    "NONE": 0.1212,
+    "recall": 0.5449,
+    "several": 0.2513,
+    "warm_build": 0.0826
+   },
+   "halvings_by_evidence": {
+    "evidence_all_ours": 321,
+    "evidence_mixed": 31,
+    "evidence_none_ours": 35,
+    "no_slow_evidence": 212
+   },
+   "halvings_total": 599,
+   "share_of_halvings_the_rule_would_suppress": 0.5359
+  },
+  {
+   "cell": "v5-rules-2_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "monitor_requests_with_a_first_token": 5178,
+   "monitor_ttft_p50": 0.502,
+   "monitor_ttft_p90": 1.56,
+   "monitor_uncached_median": 378,
+   "release_delay_s_p50": 0.802,
+   "release_delay_s_p90": 0.985,
+   "release_delay_share_over_0_5s": 0.7945,
+   "our_released_prefills_uncached_ge_200": 584,
+   "slow_monitors_counted_at_a_halving": 1118,
+   "slow_monitor_overlap_classes": {
+    "NONE": 186,
+    "recall": 518,
+    "several": 328,
+    "warm_build": 86
+   },
+   "slow_monitor_overlap_shares": {
+    "NONE": 0.1664,
+    "recall": 0.4633,
+    "several": 0.2934,
+    "warm_build": 0.0769
+   },
+   "halvings_by_evidence": {
+    "evidence_all_ours": 300,
+    "evidence_mixed": 41,
+    "evidence_none_ours": 40,
+    "no_slow_evidence": 167
+   },
+   "halvings_total": 548,
+   "share_of_halvings_the_rule_would_suppress": 0.5474
+  },
+  {
+   "cell": "v5-rules-2_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "monitor_requests_with_a_first_token": 5452,
+   "monitor_ttft_p50": 0.488,
+   "monitor_ttft_p90": 1.394,
+   "monitor_uncached_median": 376,
+   "release_delay_s_p50": 0.768,
+   "release_delay_s_p90": 0.972,
+   "release_delay_share_over_0_5s": 0.732,
+   "our_released_prefills_uncached_ge_200": 601,
+   "slow_monitors_counted_at_a_halving": 1024,
+   "slow_monitor_overlap_classes": {
+    "NONE": 157,
+    "recall": 501,
+    "several": 293,
+    "warm_build": 73
+   },
+   "slow_monitor_overlap_shares": {
+    "NONE": 0.1533,
+    "recall": 0.4893,
+    "several": 0.2861,
+    "warm_build": 0.0713
+   },
+   "halvings_by_evidence": {
+    "evidence_all_ours": 278,
+    "evidence_mixed": 30,
+    "evidence_none_ours": 34,
+    "no_slow_evidence": 206
+   },
+   "halvings_total": 548,
+   "share_of_halvings_the_rule_would_suppress": 0.5073
+  },
+  {
+   "cell": "v5-rules-2_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "monitor_requests_with_a_first_token": 5302,
+   "monitor_ttft_p50": 0.477,
+   "monitor_ttft_p90": 1.469,
+   "monitor_uncached_median": 376,
+   "release_delay_s_p50": 0.759,
+   "release_delay_s_p90": 0.96,
+   "release_delay_share_over_0_5s": 0.7101,
+   "our_released_prefills_uncached_ge_200": 570,
+   "slow_monitors_counted_at_a_halving": 1002,
+   "slow_monitor_overlap_classes": {
+    "NONE": 113,
+    "recall": 532,
+    "several": 315,
+    "warm_build": 42
+   },
+   "slow_monitor_overlap_shares": {
+    "NONE": 0.1128,
+    "recall": 0.5309,
+    "several": 0.3144,
+    "warm_build": 0.0419
+   },
+   "halvings_by_evidence": {
+    "evidence_all_ours": 295,
+    "evidence_mixed": 34,
+    "evidence_none_ours": 21,
+    "no_slow_evidence": 189
+   },
+   "halvings_total": 539,
+   "share_of_halvings_the_rule_would_suppress": 0.5473
+  },
+  {
+   "cell": "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "missing": true
+  },
+  {
+   "cell": "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "missing": true
+  },
+  {
+   "cell": "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "missing": true
+  },
+  {
+   "cell": "covex-v6-state-uo_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "missing": true
+  }
+ ],
+ "summary": {
+  "release_delay_p50": {
+   "base": [
+    0.201,
+    0.362
+   ],
+   "rung1": [
+    0.759,
+    0.816
+   ],
+   "rung2": null
+  },
+  "release_delay_share_over_0_5s": {
+   "base": [
+    0.2645,
+    0.4265
+   ],
+   "rung1": [
+    0.7101,
+    0.8684
+   ],
+   "rung2": null
+  },
+  "share_of_halvings_the_rule_would_suppress": {
+   "base": [
+    0.5519,
+    0.6356
+   ],
+   "rung1": [
+    0.5073,
+    0.5474
+   ],
+   "rung2": null
+  },
+  "reading": "the share of slow monitors whose wait overlapped NOTHING of ours bounds what the attribution rule can recover: those halvings are not suppressed by it, by design, because the cap is then reacting to its own queueing"
+ }
+}

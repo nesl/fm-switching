@@ -277,6 +277,23 @@ class HybridArm:
         self._ss_values = _ss_values(self._ss_tbl)
         self._ss_placeholder = bool(self._ss_tbl.get("_placeholder"))
         self.cap, self._last_adj = 8, None
+        # ---- C5 ATTRIBUTION, a CANDIDATE and DEFAULT OFF (user ruling 2026-11-22 addendum) ----
+        # An INSTANCE attribute, not a class attribute and not a module global. Both of the
+        # others have cost real cells here: a module global that defaulted ON once cost a whole
+        # live cell, and a class attribute left ON under an `-off` arm made a negative control
+        # that did not collapse (arms_v6state.py's own note). Nothing in this file turns it on;
+        # only `arms_v6c5.covex-v6-state-uo-c5attr` does, and it sets it on THIS object.
+        #
+        # THE RULE. The AIMD cap exists to back off from ENGINE OVERLOAD. A monitor whose wait
+        # overlapped a robot prefill the coordinator ITSELF released is not evidence of overload;
+        # it is evidence of our own scheduling. So when every slow monitor seen since the last
+        # cap adjustment is of that kind, the halving is SUPPRESSED (the cap is HELD, neither
+        # halved nor stepped up, and the recovery timer is not restarted).
+        self.c5_attr_self_released = False
+        # (ttft_s, overlapped a self-released robot prefill) per monitor completion since the
+        # last cap adjustment. Only filled while the rule is on, so an arm with it off carries
+        # the same state it always did.
+        self._attr_mon: list = []
         self.stats = Counter()
         self._roster: Dict[str, Any] = {}
         self._scorer = None                  # C6: a policy-core instance used ONLY as state mirror + rollout
@@ -523,6 +540,15 @@ class HybridArm:
     def live2_completed(self, info: Dict[str, Any]) -> None:
         """Only the v2 C2 throttle reads completions (a robot released at risk ends the throttle when it completes);
         b7 declares no live2_completed, so this cannot change the base's decisions (identity test)."""
+        if self.c5_attr_self_released and info.get("kind") == "monitor":
+            # the two keys the coordinator adds for this rule; the overlap test is ITS work,
+            # because only the coordinator knows what it released and when
+            _t0, _tf = info.get("t_submit"), info.get("t_first_token")
+            if _t0 is not None and _tf is not None:
+                self._attr_mon.append((float(_tf) - float(_t0),
+                                       bool(info.get("self_released_prefill_overlap"))))
+                if len(self._attr_mon) > 256:
+                    del self._attr_mon[:-256]
         for store in (self._risk_inflight, self._long_throttle):
             if store:
                 for k in (info.get("opportunity_id"), info.get("decision_id")):
@@ -634,19 +660,46 @@ class HybridArm:
             return RecallAction(q.query_id, "DEFER", defer_s=self._b7.defer_s)
         return RecallAction(q.query_id, "REJECT")
 
+    def _attr_suppresses(self) -> bool:
+        """The candidate attribution rule's test, run only when `c5_attr_self_released` is on.
+
+        Suppress the halving when there IS slow-monitor evidence since the last adjustment and
+        ALL of it overlapped a robot prefill this coordinator released. No slow evidence at all
+        (the EWMA is high from older history) does NOT suppress: the rule only re-attributes
+        lateness it can see, and inventing a suppression from an absence would make the cap
+        unresponsive for a reason the data does not support.
+        """
+        slow = [ov for v, ov in self._attr_mon if v > 0.8 * DASH_DEADLINE_S]
+        if not slow:
+            self.stats["c5_attr_trip_without_slow_evidence"] += 1
+            return False
+        if all(slow):
+            self.stats["c5_attr_slow_all_self_released"] += 1
+            return True
+        self.stats["c5_attr_slow_mixed"] += 1
+        return False
+
     def _aimd(self, obs: Observation) -> None:
         lat = (obs.cloud.latency_estimate_s or {}).get("episodic")
         now = obs.now_s
         if lat is not None and lat > 0.8 * DASH_DEADLINE_S:
             if self._last_adj is None or now - self._last_adj >= 1.0:
+                if self.c5_attr_self_released and self._attr_suppresses():
+                    # HELD: no halving, no step up, and the recovery timer is NOT restarted, so
+                    # the next genuine trip is still one second away and nothing is granted the
+                    # cap that the AIMD rule would not have granted it.
+                    self.stats["c5_attr_suppressed_decrease"] += 1
+                    return
                 self.cap = max(4, self.cap // 2)
                 self._last_adj = now
                 self.stats["c5_decrease"] += 1
+                self._attr_mon.clear()
         elif self._last_adj is None or now - self._last_adj >= 5.0:
             if self.cap < 8:
                 self.cap += 1
                 self.stats["c5_increase"] += 1
             self._last_adj = now
+            self._attr_mon.clear()
 
 
 CONFIGS: Dict[str, Dict[str, Any]] = {

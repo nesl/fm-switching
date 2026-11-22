@@ -1,0 +1,144 @@
+# C5 DIAGNOSTIC CELLS. One cell per line: "arm n seed tag [server flags...]". Lines starting # are
+# NOT run. Fields 5 onward go VERBATIM to run_live2_real --server-extra-flags, exactly as
+# `vllm serve` takes them. Posted by session C5-B, 2026-11-22, under the user ruling of 2026-11-22
+# (addendum).
+#
+# ---------------------------------------------------------------- WHAT IS BEING TESTED
+# Rung 1 (committed name v5-rules-2, ladder name covex-v6-rules) loses most of its dashcam (alert)
+# opportunities as a RELEASE decision, not a delivery failure. Read-only, seeds 4 to 7
+# (results/orchestration/live2/frozen_test/c5_loss_split.json): monitor opportunities NEVER
+# SUBMITTED are 52 to 58 percent of all opportunities against 13 to 17 percent for the base arm,
+# and the dominant bucket is "C5's AIMD in-flight cap is shut AND a robot prefill is in flight" at
+# 37.5 to 43.0 percent against 3.7 to 7.9. C5's cap starts at 8, HALVES (floor 4) whenever the
+# EWMA of monitor first-token time exceeds 0.8 s, and recovers only +1 per 5 s, so it sits at its
+# floor in about 65 percent of epochs against about 20 for the base.
+#
+# USER RULING 2026-11-22 (second addendum): rung 2's dashcam lateness is RELEASE DELAY INSIDE THE
+# COORDINATOR, not engine time. Measured by the user on covex-v6-state-uo s4: release delay
+# (t_submit - t_opportunity) p50 0.74 s / p90 0.97 s with 72 percent over 0.5 s against the base's
+# 0.30 / 0.89 and 37 percent, while engine first-token time moves only 0.44 -> 0.48 (p50) and the
+# dashcam uncached work per request is the same (374 against 376). The earlier reading that
+# lateness pointed at the engine was withdrawn: with a 0.74 s median hold a monitor overlaps
+# whatever is running, so overlap was never evidence of causation.
+#
+# CONSEQUENCE FOR THIS FILE: the C5 ATTRIBUTION CELLS ARE THE DECISIVE TEST AND COME FIRST. The two
+# engine-flag cells are SECONDARY and are kept as a diagnostic, not as a candidate.
+#
+# AND THE ATTRIBUTION RULE DOES REACH THE CAP (Step 2b, proved before this posting, read-only on
+# the committed live traces): on the four rung-1 cells it prevents 436 to 514 of the 539 to 599 cap
+# halvings, epochs with the cap at its floor fall 7,544-8,428 to 3,324-4,877 of 12,000, and 4,529
+# to 6,528 epochs end with a different cap. WHAT BOUNDS IT, measured in the same pass and stated
+# here because the user needs it before choosing: only 50.7 to 54.7 percent of rung-1 halvings fire
+# on evidence the rule can attribute to our own released work. 30.5 to 37.6 percent are trips where
+# the EWMA is above 0.8 s while NO individual pending monitor was (the cap reacting to its own
+# queueing), 3.9 to 7.3 percent fire on monitors that overlapped NOTHING of ours, and the rest are
+# mixed. The rule suppresses none of those, by design.
+# results/orchestration/live2/frozen_test/c5attr_trip_attribution.json
+#
+# TWO CANDIDATE INTERVENTIONS, ON TWO DIFFERENT QUANTITIES, NEITHER ADOPTED:
+#   layer 2, the POLICY    covex-v6-state-uo-c5attr: C5 does not halve for a slow monitor whose
+#                          wait overlapped a robot prefill THE COORDINATOR ITSELF RELEASED.
+#   layer 1, the ENGINE    --long-prefill-token-threshold 2048: cap a long prefill's per-step
+#                          token share so the waiting scan is not left with nothing.
+# These cells make both RUNNABLE AND PROVED. Choosing between them, or adopting either, is a user
+# ruling and is NOT made here.
+#
+# ---------------------------------------------------------------- WHAT MUST NOT BE READ AS A HEADLINE
+# 1. NOTHING in this file is a headline. Every cell is a DIAGNOSTIC for the C5 decision.
+# 2. The two engine-flag cells run a DIFFERENT SERVER. They may NOT be compared with any committed
+#    cell of the same arm, in either direction: that comparison is two servers, not two arms. The
+#    only fair comparison inside the flag condition is uo against base, which share the server.
+# 3. covex-v6-state-uo-c5attr is a CANDIDATE arm, default off everywhere else, adopted by nothing.
+#    Its cells are not a new rung and must not be read as one.
+# 4. The engine flag is SERVER-WIDE. If it were ever adopted, EVERY arm would have to be rerun
+#    under it, which is exactly why it is a diagnostic here.
+#
+# ---------------------------------------------------------------- WORKLOAD, identical to BASELINE_MATRIX
+# 16 devices, EP-G default episodes (fixed 21-frame refresh, NOT the policy episode rule),
+# per-frame upload, rq30 re-asks, deadlines dashcam 1.0 s / robot 3.0 s / single-shot 2.0 s,
+# memory 1x, ratio 40:40:20, robot_question_set lh_req, ss_question_set ss2, 1200 s. Tag
+# _L3_epg_rq30 (plus the engine-flag suffix below).
+#
+# PLANNER TIME LIMIT: as V6STATE_CELLS, budget_ms = 20.0 and cf_instrument.over_budget ON for live
+# cells. Every cell carries arm_stats.planner_time_limit; report the rate from the first cell and
+# stop if it flags.
+#
+# ---------------------------------------------------------------- PROOFS, ALL RUN BEFORE THIS POSTING
+# results/orchestration/live2/frozen_test/c5attr_replay_proofs.json   (live traces, read-only)
+#   STEP 2b, THE CAP TRAJECTORY. The committed request and outcome logs of all eight rung-1 and
+#   base cells replayed through C5's own AIMD rule, as committed and under the candidate rule:
+#   on the four rung-1 cells cap decreases fall from 539 to 599 down to 85 to 112 (436 to 514
+#   halvings PREVENTED), epochs with the cap at its floor fall from 7,544 to 8,428 down to 3,324
+#   to 4,877 of 12,000, and 4,529 to 6,528 epochs end with a DIFFERENT cap. The counter
+#   c5_attr_suppressed_decrease reads 4,153 to 4,899 and is a count of suppression EVENTS, not of
+#   distinct halvings: a suppression does not advance C5's one-second cooldown, so the rule
+#   re-evaluates every 0.1 s epoch while the trip persists. Quote the prevented halvings.
+#   CONTROLS: the committed replay reproduces the base arms' own c5_increase / c5_decrease
+#   counters within one count (the control c5_loss_split.json established) and reproduces that
+#   file's own reconstruction for the rung-1 cells EXACTLY (599 / 548 / 548 / 539 decreases);
+#   a NEVER-SUPPRESS variant reproduces the committed trajectory exactly (negative control);
+#   an ALWAYS-SUPPRESS variant moves it (positive control: the check can see a difference).
+#   REGISTER: a replay holds the trace FIXED, so it reports a cap trajectory and NOT an outcome.
+#   These live cells are the only thing that can carry an outcome.
+# results/orchestration/live2/frozen_test/c5attr_digest_proofs.json   (dry, one cell per process)
+#   P1 the committed arms are BYTE-IDENTICAL across this work (covex-v6-state-uo, covex-v6-base,
+#      v5-rules-2, b7-edf-feasibility), with the BEFORE side taken from git and not from a number
+#      recorded in this tree.
+#   P2 Step 2b in the code: the cap series digest differs and halvings are suppressed. The number
+#      of DIFFERING DECISIONS in the dry cell is ZERO and is reported as such: with the dry
+#      stand-in's monitor latency a CONSTANT above the trip, the cap reaches its floor in both
+#      arms within seconds and stays there, so the rule can only postpone the first halving. The
+#      dry harness has no condition in which the EWMA oscillates around the trip, which is the
+#      regime the live traces are in. The decision-level register is therefore UNEXERCISED dry,
+#      by construction, and that is what these live cells are for.
+#   P3 an unmodified dry cell cannot exercise the rule at all (monitor service time is the
+#      committed curve's constant 0.3950 s, below the 0.8 s trip, c5_decrease 0).
+#   P4 negative control: the candidate with its own switch forced off is byte-identical to
+#      covex-v6-state-uo, so the P2 difference is the rule and not the wrapper.
+# results/orchestration/live2/frozen_test/v6_harness_name_proof.json
+#   the arm name resolves through run_live2_real.py ITSELF, spawned as a subprocess, with the
+#   negative control that an unknown name still raises.
+# research/prereg_c5_engine_flag.md
+#   the threshold value, PRE-REGISTERED in this same commit, with the arithmetic.
+#
+# ---------------------------------------------------------------- FIRST: THE TWO POLICY-CANDIDATE CELLS
+# These are the DECISIVE cells and are run FIRST. Do not reorder the engine-flag cells ahead of
+# them.
+# The arm resolves through the harness and is registered in arms.py beside the other v6 names
+# (arms_v6c5.py holds the arm; arms_v6state.py is untouched). Its switch is an INSTANCE attribute
+# on the HybridArm that owns the cap, default off; no module global and no class attribute.
+covex-v6-state-uo-c5attr 16 4 _L3_epg_rq30
+covex-v6-state-uo-c5attr 16 5 _L3_epg_rq30
+#
+# ---------------------------------------------------------------- SECOND, AND SECONDARY: THE ENGINE-FLAG CELLS
+# SECONDARY under the user ruling of 2026-11-22 (second addendum), because rung 2's lateness is
+# release delay inside the coordinator and not engine time. They are kept, not dropped: they are
+# the only measurement that can say whether the engine contributes at all, and they bound layer 1.
+# THE ARM IS UNCHANGED AND THE SERVER DIFFERS, so the tag carries the SERVER, and it carries the
+# VALUE: _L3_epg_rq30_lpt2048. The H100 suggested _L3_epg_rq30; the value is in the tag instead so
+# that a later run at a different N cannot land in a directory whose name says only "lpt". This is
+# the register rule applied to a filename.
+#
+# THE H100 MUST launch the server for EXACTLY these two cells with
+#     --long-prefill-token-threshold 2048
+# (the driver passes fields 5 onward verbatim and verifies every token of it in the launched
+# server's own argv, SIGINTing the cell otherwise), and MUST RESTORE THE COMMITTED CONFIGURATION,
+# which is NO extra server flags, immediately afterwards. study_live2_pilot.start_server's
+# allowlist now accepts this one additional flag list and still STOPS on anything else.
+#
+# N = 2048 IS PRE-REGISTERED in research/prereg_c5_engine_flag.md, committed in or below the commit
+# that posts this file, with the arithmetic. In brief: the live server resolves
+# max_num_batched_tokens = 8192 (it does not set the flag; committed E10e server records for the
+# same engine version and base flag list); monitor prompts are 1,056 min / 3,760 p50 / 7,140 max
+# (measured, so the ruling's "about 1,056" is the MINIMUM, not the typical); the cap applies per
+# request per step in BOTH the running and the waiting scan (0.31.0 scheduler.py:679 and :1110) and
+# is forced to 0 when the long prefill is alone (:614-620). N = 2048 is the largest power of two
+# that is at least the smallest monitor prompt (so the smallest monitor is never chunked) and still
+# admits a waiting monitor at the measured p90 robot prefill-phase concurrency of 3:
+# 8192 - 16 - 3 x 2048 = 2032 >= 1; admission first fails at 4 concurrent long prefills. COST TO A
+# LONG PREFILL: a 27k-token prefill (measured max non-monitor prompt 26,660) needs
+# ceil(26660 / 2048) = 14 steps at best against 4 unthrottled, i.e. at least 10 extra steps.
+# --max-num-partial-prefills IS NOT USED: it does not exist in vLLM 0.31.0 (source grep; the
+# committed StudyE10e flag check says the same).
+covex-v6-state-uo 16 5 _L3_epg_rq30_lpt2048 --long-prefill-token-threshold 2048
+covex-v6-base 16 5 _L3_epg_rq30_lpt2048 --long-prefill-token-threshold 2048
