@@ -128,6 +128,11 @@ class RecallQuery:
     readiness: str                           # in READINESS, for this session on the cloud
     readiness_tokens: int
     device_answer_confidence: Optional[float] = None   # StudyD13 logprob, if the device answered
+    # D171 (3): the id the MEASURED device-latency tables are keyed on. `query_id` is the
+    # OPPORTUNITY id and is not that key, so without this field an arm reading the measured device
+    # model has nothing to look up and falls back to the superseded 0.567 proxy on every request.
+    # Optional and unread by every committed arm, so no baseline's behaviour changes.
+    question_id: Optional[str] = None
 
     def slack_s(self, now_s: float) -> float:
         return self.deadline_s - now_s

@@ -614,6 +614,7 @@ class CoordState:
                 arrival_s=round(o.t_arrive if o.t_arrive is not None else o.t_event, 3),
                 deadline_s=round(o.deadline_abs(), 3), evidence=ev, readiness=ready,
                 readiness_tokens=tok,
+                question_id=getattr(o, "question_id", None),
                 device_answer_confidence=(self._device_confidence(o)
                                           if reads_device_answer else None)))
         gpu = tuple(sorted(k for k, v in self.sessions.items() if v.believed_tier() == "gpu"))

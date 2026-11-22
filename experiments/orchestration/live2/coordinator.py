@@ -166,6 +166,13 @@ class Live2Coordinator:
         self._touch_requests = TP.arm_enables(arm)
         # D160: price warm and reload by predicted cache state, not by slice size.
         self._state_priced_costs = TP.arm_enables_state_pricing(arm)
+        # D150 PATCH 2 belief correction, ARM-SCOPED like every other v5 switch (D172 rung 2).
+        # It was a process-wide env switch, so turning it on for one arm turned it on for every
+        # arm in the same run and made the cells incomparable, which is the thing the env
+        # switch's own comment says must not happen. The env value is kept as an override so no
+        # committed invocation changes behaviour.
+        self._belief_apply = bool(BELIEF_CORRECTION == "apply"
+                                  or getattr(arm, "live2_belief_apply", False))
         self.be = backend
         self.events = sorted(events, key=lambda e: (_sched(e), e.get("kind", "")))
         self.upload_mode = upload_mode
@@ -518,6 +525,13 @@ class Live2Coordinator:
             est_tokens_by_session={sid: int(s.est_tokens)
                                    for sid, s in self.st.sessions.items()
                                    if s.est_tokens > 0},
+            # D172 rung 2: the coordinator's residency BELIEF, which the telemetry corrector
+            # writes when belief-apply is on. Without it an arm can price a warm against a cold
+            # only by guessing which state the session is in, which is the guess D160 says to
+            # replace with the predicted state. ADDITIVE, like est_tokens_by_session: no committed
+            # arm reads it.
+            belief_by_session={sid: dict(s.belief or {})
+                               for sid, s in self.st.sessions.items()},
         ))
 
     # ---------------------------------------------------------------- enactment
@@ -1126,7 +1140,7 @@ class Live2Coordinator:
                     if _bu.changed:
                         self.counts["belief_corrections_changed"] += 1
                         self.counts["belief_to_" + _bu.after] += 1
-                    if BELIEF_CORRECTION != "apply":
+                    if not self._belief_apply:
                         _s.belief, _s.last_touch_s = _snap
                         if _bu.changed:
                             self.counts["belief_corrections_observed_only"] += 1

@@ -383,6 +383,86 @@ def harm_to_others(before: "CC.QueuePlan", after: "CC.QueuePlan", *, candidate_r
 
 
 # ---------------------------------------------------------------------------
+# harm_warm: what a BACKGROUND WARM costs the requests queued behind it
+#
+# Pre-registered in `research/prereg_harm_warm_d172.md` BEFORE any grid was rerun under it.
+
+# The committed D162 model's queued-ahead coefficient, read from the gate file rather than
+# retyped. It is `first_token.per_queue_token`, NOT `per_uncached_token` (0.00018243, 19 percent
+# larger): only the queued-ahead one answers what work placed AHEAD of a request costs THAT
+# request, which is what a background warm does.
+QUEUE_TOKEN_S = 0.0001535807289338535
+QUEUE_TOKEN_S_SOURCE = ("results/orchestration/live2/frozen_test/cost_model_gate_d162.json :: "
+                        "model.first_token.per_queue_token (gate commit 68a2b47)")
+HEALTHY_FIRST_TOKEN_BOUND_S = 2.781          # D160 (2); the cap, never silent
+
+
+@dataclass
+class WarmHarm:
+    total: float
+    n_affected: int
+    delta_t_s: float
+    capped: bool
+    rows: Tuple[Dict[str, Any], ...] = ()
+
+    def as_dict(self) -> Dict[str, Any]:
+        return {"total": round(self.total, 9), "n_affected": self.n_affected,
+                "delta_t_s": round(self.delta_t_s, 9), "capped": self.capped,
+                "rows": [dict(r) for r in self.rows]}
+
+
+def harm_warm_from_queue_delay(uncached_tokens: int,
+                               others: Sequence[Dict[str, Any]], *,
+                               p_on_time: Any, acc_cloud: float, acc_device: float,
+                               counters: Optional[DeficitCounters] = None) -> WarmHarm:
+    """`harm_warm`: the expected correct on-time answers that a warm of `uncached_tokens` costs
+    the requests already queued behind it, PREDICTED from the D162 model (D172 follow-up ruling).
+
+    Each `others` row is a pending request as a dict with `req_id`, `device_id`, `engine_s` (its
+    own predicted service time) and `slack_s` (deadline minus now). The warm adds
+    `QUEUE_TOKEN_S * uncached_tokens` seconds to each one's first token, which is a reduction of
+    its slack by the same amount.
+
+    THE VALUATION IS `option_value`, the same function `harm_to_others` uses, so this term and
+    the request-decision harm are in one currency and D171 (2)'s replacement semantics apply to
+    both: a displaced request falls back to ITS OWN DEVICE and is never charged its full cloud
+    accuracy.
+
+    THE CAP IS COUNTED. A warm whose added delay would push a request's first token past the
+    healthy-regime bound is outside the range the D162 model was fitted on, so the delay is capped
+    there and `capped` is set. D160 (2) does not trust the model across the saturation transition,
+    and a silently extrapolated harm would be a number from outside the fit wearing a fitted
+    number's clothes.
+    """
+    u = max(int(uncached_tokens), 0)
+    dt = QUEUE_TOKEN_S * u
+    capped = False
+    if dt > HEALTHY_FIRST_TOKEN_BOUND_S:
+        dt = HEALTHY_FIRST_TOKEN_BOUND_S
+        capped = True
+    rows: List[Dict[str, Any]] = []
+    total = 0.0
+    for r in others:
+        w = (counters.weight(str(r.get("device_id"))) if counters else float(r.get("weight", 1.0)))
+        eng = float(r.get("engine_s", 0.0))
+        slack = float(r.get("slack_s", 0.0))
+        p_dev = float(r.get("p_device_on_time", 1.0))
+        pb = float(p_on_time(eng, slack))
+        pa = float(p_on_time(eng, slack - dt))
+        if pb == pa:
+            continue
+        vb = option_value(w, pb, acc_cloud, p_dev, acc_device)
+        va = option_value(w, pa, acc_cloud, p_dev, acc_device)
+        if vb == va:
+            continue
+        rows.append({"req_id": r.get("req_id"), "device_id": r.get("device_id"),
+                     "weight": round(w, 6), "p_on_time_before": round(pb, 6),
+                     "p_on_time_after": round(pa, 6), "value_lost": round(vb - va, 9)})
+        total += vb - va
+    return WarmHarm(total, len(rows), dt, capped, tuple(rows))
+
+
+# ---------------------------------------------------------------------------
 # The two properties of the weighting that a report must not get wrong
 
 
