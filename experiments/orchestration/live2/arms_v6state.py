@@ -274,7 +274,8 @@ class V6StateArm:
         built = roster.get("built_tokens_by_session") or {}
         est = roster.get("est_tokens_by_session") or {}
         belief = roster.get("belief_by_session") or {}
-        already = {sa.session_id for sa in (act.sessions or ())}
+        already = {sa.session_id: sa for sa in (act.sessions or ())}
+        drop: set = set()
         extra: List[Any] = []
         for sid in (obs.live_sessions or ()):
             did = sdev.get(sid)
@@ -284,11 +285,7 @@ class V6StateArm:
             if b <= 0:
                 self.stats["state_skipped_nothing_built"] += 1
                 continue
-            if sid in already:
-                # the rules arm is already acting on this session this epoch; a second action for
-                # the same session in one epoch is not expressible, so the rung does not plan it
-                self.stats["state_skipped_rules_acting"] += 1
-                continue
+            act_now = already.get(sid)
             q = self._p_question(str(did), float(obs.now_s))
             if not q["has_estimate"]:
                 self.stats["state_skipped_no_question_estimate"] += 1
@@ -299,16 +296,34 @@ class V6StateArm:
                 continue
             bb = dict(belief.get(sid) or {})
             host_warm = float(bb.get("host", 0.0) or 0.0) >= WARM_BELIEF_MIN
+            # HOLD_BACK ONLY MEANS SOMETHING WHERE THERE IS A REBUILD TO HOLD BACK. Its value is
+            # the harm a warm WOULD do, so planning it for a session nobody is warming decides
+            # against a rebuild that was never going to happen: the choice is made, nothing is
+            # emitted, and under Rule 2 the result is UNEXPRESSIBLE, not a policy finding. So the
+            # warming candidates are scored only where the rules arm has actually asked to
+            # MATERIALIZE this session this epoch, and HOLD_BACK then REMOVES that ask.
+            warming = (act_now is not None and str(getattr(act_now, "action", "")) == "MATERIALIZE")
+            u = max(int(est.get(sid, b) or b) - b, 0)
+            if warming:
+                u = int(getattr(act_now, "target_tokens", 0) or u) - b
+                u = max(u, 0)
+            hw = self._harm_warm(obs, sid, u) if warming else 0.0
+            if not warming and act_now is not None:
+                # some other session action this epoch; a second one is not expressible
+                self.stats["state_skipped_rules_acting"] += 1
+                continue
             self.stats["state_decisions"] += 1
+            self.stats["state_decisions_with_a_rebuild" if warming
+                       else "state_decisions_without_a_rebuild"] += 1
             d = cf.plan_state(
                 decision_id="st:%s:%d" % (sid, self.stats["state_decisions"]),
                 device_id=str(did),
                 now_s=float(obs.now_s), p_question=float(q["p_question"]),
                 next_question_s=float(q["next_question_s"]),
                 p_on_time_warm=float(p["warm"]), p_on_time_cold=float(p["cold"]),
-                harm_warm=self._harm_warm(obs, sid, max(int(est.get(sid, b) or b) - b, 0)),
-                warm_expressible=True, host_warm=host_warm,
-                tokens_to_build=max(int(est.get(sid, b) or b) - b, 0),
+                harm_warm=hw,
+                warm_expressible=bool(warming), host_warm=host_warm,
+                tokens_to_build=u,
                 slice_tokens=getattr(self._rules, "slice_tokens", None))
             self.stats["state_chosen_" + str(d.chosen)] += 1
             if d.delta is not None:
@@ -338,9 +353,19 @@ class V6StateArm:
                     self.stats["gain_%s_over_margin" % c.name] += 1
             if d.deviated:
                 self.stats["state_deviations"] += 1
-            if d.chosen == "TOUCH":
+            if d.chosen == "TOUCH" and act_now is None:
                 extra.append(SessionAction(session_id=sid, action="KEEP_GPU_WARM"))
                 self.stats["state_touch_emitted"] += 1
+            elif d.chosen in ("HOLD_BACK", "SLICE") and warming:
+                # the channel HOLD_BACK acts through: the rebuild does not go out this epoch
+                drop.add(sid)
+                self.stats["state_%s_enacted" % d.chosen.lower()] += 1
+            elif d.chosen in ("HOLD_BACK", "SLICE"):
+                self.stats["state_%s_unexpressible" % d.chosen.lower()] += 1
+        if drop:
+            act.sessions = [sa for sa in (act.sessions or ())
+                            if not (sa.session_id in drop
+                                    and str(getattr(sa, "action", "")) == "MATERIALIZE")]
         if extra:
             act.sessions = list(act.sessions or ()) + extra
         return act

@@ -1,3 +1,104 @@
+## 06:00 summary (session D, 2026-11-21 overnight): the v6 ladder built to rung 3, and why no cell list was posted
+
+**Last updated: 2026-11-21 (overnight). The section below this one is SUPERSEDED for everything it
+says about arm names and about full v5 being built; its cost-model-gate analysis stands.**
+
+### What was built, rung by rung
+
+D172 renamed the ladder and `research/arm_name_map.md` maps every committed name onto it.
+Committed cells keep their original names.
+
+| rung | name | was | state tonight |
+|---|---|---|---|
+| 0 | `covex-v6-base` | `hybrid-F-lhreq-noc3` | READY, 6 committed cells, reused |
+| 1 | `covex-v6-rules` | `v5-rules-2` | READY, 4 committed cells, reused |
+| 2 | `covex-v6-state` | did not exist | **BUILT tonight** (`arms_v6state.py`) |
+| 3 | `covex-v6-fair` | did not exist | **BUILT tonight** (`arms_v6fair.py`) |
+| 4 | `covex-v6` | `v5-full` | runnable **for the first time**, ZERO cells |
+
+### The three findings that matter more than the build
+
+**1. `v5-full` had never run.** It raised `RecursionError` on its first observation, every time,
+because `__call__` dispatched through `self._rules.__class__`, which resolves against the object
+actually running, so a `V5FullArm` borrowing `V5Rules2Arm.__call__` found that same method again.
+988 frames and out. Every earlier statement that full v5 was built described a class that existed,
+not an arm that ran. Fixed by naming the delegate class statically. Its first completed decisions
+were made tonight: 6 counterfactual request decisions on a dry cell.
+
+**2. Three mechanisms are live, fed, and still inert, each for a measured reason.** This is the
+same shape three times and it must not be reported as three nulls:
+
+| mechanism | was inert because | is now inert because |
+|---|---|---|
+| device term in the counterfactual (D171 (3)) | the input was a flat 0.567 s proxy | the measured robot warm latency, 0.2503 to 0.3108 s, is inside every robot deadline |
+| deficit weighting (D172 rung 3) | `observe()` had no caller, so every weight was exactly 1.0 | the feed runs, and at 8 devices 4,333 of 4,333 answers are on time, so every shortfall is 0 |
+| `plan_state` (D172 rung 2) | it had no caller outside the proofs, so it was ABSENT | it decides, and the model-error margin overrides it |
+
+The first two moved from **artefact** to **measured fact**, which is a different claim from
+"constant" and the one that is true. Under Rule 2 they are UNEXERCISED, not negative.
+
+**3. The margin, not the wiring, is what stops rung 2.** `covex-v6-state` makes 44,235 state
+decisions at 16 devices and chooses KEEP on every one. `plan_state`'s own argmax prefers a
+non-KEEP candidate on almost all of them; D151's margin rule then overrides it back. Maximum
+predicted gain 0.151 against `MARGIN_CF` 0.16456, with an arithmetic ceiling of 0.250, so it is a
+near miss and not a cap. The rung is therefore byte-identical to `covex-v6-rules`.
+
+### What was posted
+
+**Nothing.** No `V6STATE_CELLS`, no `V6FAIR_CELLS`, no `V6_CELLS`. Posting a rung that is
+byte-identical to the rung below would spend GPU hours reproducing cells that already exist.
+`MARGIN_CF` is never changed (D157, D172).
+
+### `harm_warm` is computed, not declared
+
+Pre-registered in `research/prereg_harm_warm_d172.md` **before** any grid was rerun under it
+(ruling relayed by the H100; marked PROVISIONAL under D106 / D116 until the user confirms).
+`HOLD_BACK`'s value **is** `harm_warm`, and until tonight every caller handed that number in: in
+`d171_proofs.py::P5` 33 of 48 state deltas came back exactly equal to the grid's own input. It now
+comes from the committed D162 `per_queue_token` coefficient (0.00015358, **not**
+`per_uncached_token` 0.00018243, which is 19 percent larger and answers a different question),
+through the same `p_on_time` curve and valued by the same `option_value` as `harm_to_others`, so
+gain and harm stay in one currency. Capped at the healthy-regime bound 2.781 s with
+`harm_warm_capped` counted.
+
+On a dry 8-device cell: priced on 527 of 2,035 decisions, mean over the priced set 0.1039, max
+0.120, capped 0. `WARM`'s mean gain is **negative**, -0.0218, because warming now carries the cost
+it imposes on the queue behind it.
+
+### Bugs found by building, each of which would have produced a confident null
+
+1. The question-rate lookup was keyed on `session_id`; the rules arm keys `_gap_ewma` on **device**
+   id. Every lookup missed, `plan_state` planned nothing in 21,003 epochs, and every surface sign
+   said the rung was wired. Caught by counting skips **by reason** instead of trusting the zero.
+2. The four capability flags were class attributes, so `covex-v6-state-off` kept them on and the
+   "negative control" differed from the rung below by 4,376 rows while claiming to be it.
+3. `state_delta_milli_sum` landed inside the per-candidate loop and triple-counted every delta.
+4. `harm_warm`'s mean was divided by all decisions rather than the priced ones: 0.0269 against the
+   correct 0.1039.
+5. `deficit_feed_unseen_declines` was named in a docstring and a commit message and never
+   incremented. Now live: 2 declines the feed cannot see, against 4,333 it can.
+
+### PROVISIONAL decisions (D106 / D116, user away)
+
+- Rungs that are not built are registered to a factory that **raises** and names its missing
+  components, rather than being left unregistered. Either way a driver skips the item; a raising
+  factory says why. Reversible in one line.
+- The `harm_warm` ruling arrived relayed by the H100 and is marked PROVISIONAL until confirmed.
+- Belief correction was made **arm-scoped**. It was a process-wide env switch, so enabling it for
+  one arm enabled it for every arm in the same run, which the switch's own comment forbids.
+
+### Blockers
+
+- **rung 2 and 3 cell lists**: the predicted gain does not clear `MARGIN_CF`. Recorded, not worked
+  around.
+- **rung 3**: the D165 lexicographic objective is not built.
+- **rung 4**: `plan_sync` has no caller, the compound candidates are unbuilt, the episode-rule
+  switch is missing, and D170's explicit over-limit rule is not in.
+- **the deficit feed's blind spot**: declined opportunities never reach the completion hook, so a
+  device whose requests are declined has its shortfall undercounted. Counted, not corrected.
+
+---
+
 ## 06:00 analysis summary (session D): v5-rules, the cost-model gate, and what is blocked
 
 **Last updated: 2026-11-21 09:00 (StudyFIG paper figures M1-M8 motivation and E1-E8 evaluation (PILOT) plus a one-page contact sheet complete and pushed; StudyORIN-REC-REASK seeds 4-7 complete, parity 75 of 78 reproduce part 1 and 78 of 78 reproduce warm, 141 of 398 re-asks change the device answer. PREVIOUSLY 2026-11-21 07:30: section 1b superseded, section 5 extended; the 06:00 summary itself stands).** Headline figures for every arm and cell are the H100's, in
