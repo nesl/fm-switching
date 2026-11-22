@@ -1,0 +1,266 @@
+{
+ "_what": "D174 (1) uncached-only budget charge proofs",
+ "price": {
+  "form": "first_token_s = 0.067798 + 0.00018243 * uncached + 0.00015358 * queued_uncached_ahead",
+  "source": "cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)",
+  "drift_check": {
+   "agrees": true,
+   "mismatches": [],
+   "gate_values": {
+    "intercept": 0.06779759059832724,
+    "per_uncached_token": 0.0001824312597782467,
+    "per_queue_token": 0.0001535807289338535
+   }
+  },
+  "replaces": "costs.recall_gpu_s(tokens, tier), StudyRH5 Part A isolated reload TTFT, which scales with the PREFIX and so overcharged a warm touch 3.4x at a 7k prefix rising to 9.5x at 21k",
+  "charge": {
+   "ruled_mode": "uncached-only",
+   "ruling": "D174 (1), 2026-11-22",
+   "charge_terms": "per_uncached * uncached",
+   "excluded": {
+    "intercept": "occupancy, not work (D174 (1))",
+    "queue term": "delay suffered, planner harm only (D173 (1))"
+   }
+  },
+  "read_by": [
+   "coordinator budget charge (every request of a covex-v6 arm)",
+   "cf_planner candidate harm, via cf_objective.harm_warm_from_queue_delay"
+  ]
+ },
+ "B4_mode_is_arm_scoped": {
+  "_claim": "each arm's charge mode is the ARM's and cannot be moved by the module default, and each arm's mode is the one its name claims",
+  "ruled_mode": "uncached-only",
+  "rows": [
+   {
+    "arm": "covex-v6-state-uo",
+    "declared_mode": "uncached-only",
+    "mode_after_moving_the_global": "uncached-only",
+    "unaffected_by_the_global": true
+   },
+   {
+    "arm": "covex-v6-state-wo",
+    "declared_mode": "work-only",
+    "mode_after_moving_the_global": "work-only",
+    "unaffected_by_the_global": true
+   },
+   {
+    "arm": "covex-v6-rules-uo",
+    "declared_mode": "uncached-only",
+    "mode_after_moving_the_global": "uncached-only",
+    "unaffected_by_the_global": true
+   },
+   {
+    "arm": "covex-v6-rules-wo",
+    "declared_mode": "work-only",
+    "mode_after_moving_the_global": "work-only",
+    "unaffected_by_the_global": true
+   },
+   {
+    "arm": "covex-v6-state-d162",
+    "declared_mode": "uncached-only",
+    "mode_after_moving_the_global": "uncached-only",
+    "unaffected_by_the_global": true
+   }
+  ],
+  "modes_match_the_names": true,
+  "verdict": "PASS: 5 arms, each pinned to its own mode and matching its name"
+ },
+ "B3_step2b": {
+  "_claim": "the charge reaches a decision (CLAUDE.md Step 2b)",
+  "cell": {
+   "seed": 4,
+   "n": 16,
+   "run_s": 1200.0,
+   "ratio": "40:40:20",
+   "robot_question_set": "lh_req",
+   "ss_question_set": "ss2",
+   "dashcam_format": "epg",
+   "robot_upload": "per-frame",
+   "robot_reask_mean_s": 30.0
+  },
+  "protocol": "one dry cell per process, planner cutoff patched off",
+  "across_modes_on_the_arm_that_declares_the_charge": [
+   {
+    "charge_mode": "first-token",
+    "digest": "649dc487b8b09eb2",
+    "rows": 4287,
+    "state_decisions": 29838,
+    "cf_planner_decisions": 29838,
+    "cf_timeout_abandons": null,
+    "cf_budget_ms": 20.0
+   },
+   {
+    "charge_mode": "work-only",
+    "digest": "7904a2aa2f072cdf",
+    "rows": 14212,
+    "state_decisions": 60962,
+    "cf_planner_decisions": 60962,
+    "cf_timeout_abandons": null,
+    "cf_budget_ms": 20.0
+   },
+   {
+    "charge_mode": "uncached-only",
+    "digest": "7904a2aa2f072cdf",
+    "rows": 14212,
+    "state_decisions": 60962,
+    "cf_planner_decisions": 60962,
+    "cf_timeout_abandons": null,
+    "cf_budget_ms": 20.0
+   }
+  ],
+  "distinct_digests_across_modes": 2,
+  "ruled_against_the_old_charge": {
+   "classification": "UNEXERCISABLE DRY BY CONSTRUCTION: the old charge's damage was touch pricing, and a touch needs an engine. The posted cells are the test",
+   "dry_evidence_for_the_charge_itself": "the three modes above, which differ"
+  },
+  "verdict": "PASS: the charge moves decisions across modes (2 distinct digests on 3 modes)"
+ },
+ "B2_before_after_on_baselines": {
+  "_claim": "a baseline's decisions are identical before and after the change, with the BEFORE side taken from git and not from a recorded number",
+  "cell": {
+   "seed": 4,
+   "n": 8,
+   "run_s": 600.0,
+   "ratio": "50:50",
+   "robot_question_set": "lh_req",
+   "ss_question_set": "ss2"
+  },
+  "rows": [
+   {
+    "arm": "b7-edf-feasibility",
+    "before_commit": "f15fa90f",
+    "before": {
+     "digest": "fc4918a38efe8996",
+     "rows": 4338
+    },
+    "after": {
+     "digest": "fc4918a38efe8996",
+     "rows": 4338
+    },
+    "identical": true
+   },
+   {
+    "arm": "hybrid-F-lhreq-noc3",
+    "before_commit": "f15fa90f",
+    "before": {
+     "digest": "0c04ab712b3fb627",
+     "rows": 4337
+    },
+    "after": {
+     "digest": "0c04ab712b3fb627",
+     "rows": 4337
+    },
+    "identical": true
+   }
+  ],
+  "verdict": "PASS: 2 baseline(s) byte-identical across the change"
+ },
+ "B1_committed_digests": {
+  "_claim": "each arm reproduces itself across processes; the charge change moved no unpriced arm",
+  "cell": {
+   "seed": 4,
+   "n": 16,
+   "run_s": 1200.0,
+   "ratio": "50:50",
+   "robot_question_set": "lh_req",
+   "ss_question_set": "ss2"
+  },
+  "protocol": "one dry cell per process, planner cutoff patched off",
+  "rows": [
+   {
+    "arm": "v5-rules-2",
+    "committed": "ae997d6af16a2ef4",
+    "run_1": {
+     "digest": "ae997d6af16a2ef4",
+     "rows": 17050,
+     "state_decisions": null,
+     "cf_planner_decisions": null,
+     "cf_timeout_abandons": null,
+     "cf_budget_ms": null
+    },
+    "run_2": {
+     "digest": "ae997d6af16a2ef4",
+     "rows": 17050,
+     "state_decisions": null,
+     "cf_planner_decisions": null,
+     "cf_timeout_abandons": null,
+     "cf_budget_ms": null
+    },
+    "reproduces_itself": true,
+    "equals_the_recorded_digest": true
+   },
+   {
+    "arm": "covex-v6-state",
+    "committed": "6e8927b9f7f92040",
+    "run_1": {
+     "digest": "e7a41d55b717f0f8",
+     "rows": 15913,
+     "state_decisions": 44300,
+     "cf_planner_decisions": 44300,
+     "cf_timeout_abandons": null,
+     "cf_budget_ms": 20.0
+    },
+    "run_2": {
+     "digest": "e7a41d55b717f0f8",
+     "rows": 15913,
+     "state_decisions": 44300,
+     "cf_planner_decisions": 44300,
+     "cf_timeout_abandons": null,
+     "cf_budget_ms": 20.0
+    },
+    "reproduces_itself": true,
+    "equals_the_recorded_digest": false
+   },
+   {
+    "arm": "covex-v6-state-off",
+    "committed": "ae997d6af16a2ef4",
+    "run_1": {
+     "digest": "ae997d6af16a2ef4",
+     "rows": 17050,
+     "state_decisions": null,
+     "cf_planner_decisions": null,
+     "cf_timeout_abandons": null,
+     "cf_budget_ms": null
+    },
+    "run_2": {
+     "digest": "ae997d6af16a2ef4",
+     "rows": 17050,
+     "state_decisions": null,
+     "cf_planner_decisions": null,
+     "cf_timeout_abandons": null,
+     "cf_budget_ms": null
+    },
+    "reproduces_itself": true,
+    "equals_the_recorded_digest": true
+   },
+   {
+    "arm": "covex-v6-state-noprice",
+    "committed": "ae997d6af16a2ef4",
+    "run_1": {
+     "digest": "7f218e50d57406b4",
+     "rows": 17088,
+     "state_decisions": 45337,
+     "cf_planner_decisions": 45337,
+     "cf_timeout_abandons": null,
+     "cf_budget_ms": 20.0
+    },
+    "run_2": {
+     "digest": "7f218e50d57406b4",
+     "rows": 17088,
+     "state_decisions": 45337,
+     "cf_planner_decisions": 45337,
+     "cf_timeout_abandons": null,
+     "cf_budget_ms": 20.0
+    },
+    "reproduces_itself": true,
+    "equals_the_recorded_digest": false
+   }
+  ],
+  "arms_not_equal_to_the_recorded_digest": [
+   "covex-v6-state",
+   "covex-v6-state-noprice"
+  ],
+  "verdict": "PASS: all 4 arms reproduce themselves; ['covex-v6-state', 'covex-v6-state-noprice'] differ from digests recorded in a multi-arm process and are reported, not failed on"
+ },
+ "ALL_PASS": true
+}

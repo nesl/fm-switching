@@ -1,0 +1,339 @@
+{
+ "_what": "D174 (2) follow-up for the C5 decision: rung 1's dashcam loss split into engine blocking (a), a cap closed with no work in flight (b), and other (c)",
+ "_definitions": {
+  "robot_prefill": "a build or recall request the coordinator released with uncached >= 200 tokens, uncached = prompt_tokens - cached_tokens",
+  "a": "submitted, delivered later than the 1.0 s deadline, and its [submit, done] interval OVERLAPS a robot prefill's",
+  "b": "never submitted, in an epoch where the reconstructed cap was at or near its floor (<= 5) or fully occupied, AND no robot prefill was in flight",
+  "near_floor": "cap <= 5, the floor 4 plus one AIMD step"
+ },
+ "cells": [
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11764,
+   "on_time": 5986,
+   "on_time_share": 0.5088,
+   "a_submitted_late_behind_a_robot_prefill": 1566,
+   "a_share": 0.1331,
+   "a_overlapping_prefill_uncached_p50": 1373,
+   "a_overlapping_prefill_uncached_p90": 8758,
+   "a2_submitted_late_no_prefill_overlap": 2191,
+   "a2_share": 0.1862,
+   "b_not_submitted_cap_closed_no_prefill_in_flight": 799,
+   "b_share": 0.0679,
+   "b2_not_submitted_cap_closed_prefill_in_flight": 923,
+   "b2_share": 0.0785,
+   "c_not_submitted_cap_open": 299,
+   "c_share": 0.0254,
+   "robot_prefills_released": 407,
+   "robot_prefill_uncached_p50": 1372,
+   "monitor_ttft_p50": 0.439,
+   "epochs_at_cap_floor": 2989,
+   "control_reconstructed_decreases": 154,
+   "control_reconstructed_increases": 97,
+   "control_arm_recorded_decreases": 154,
+   "control_arm_recorded_increases": 97
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11769,
+   "on_time": 5375,
+   "on_time_share": 0.4567,
+   "a_submitted_late_behind_a_robot_prefill": 1792,
+   "a_share": 0.1523,
+   "a_overlapping_prefill_uncached_p50": 1374,
+   "a_overlapping_prefill_uncached_p90": 7245,
+   "a2_submitted_late_no_prefill_overlap": 2641,
+   "a2_share": 0.2244,
+   "b_not_submitted_cap_closed_no_prefill_in_flight": 835,
+   "b_share": 0.0709,
+   "b2_not_submitted_cap_closed_prefill_in_flight": 823,
+   "b2_share": 0.0699,
+   "c_not_submitted_cap_open": 303,
+   "c_share": 0.0257,
+   "robot_prefills_released": 400,
+   "robot_prefill_uncached_p50": 1372,
+   "monitor_ttft_p50": 0.448,
+   "epochs_at_cap_floor": 2590,
+   "control_reconstructed_decreases": 112,
+   "control_reconstructed_increases": 106,
+   "control_arm_recorded_decreases": 111,
+   "control_arm_recorded_increases": 106
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11786,
+   "on_time": 6297,
+   "on_time_share": 0.5343,
+   "a_submitted_late_behind_a_robot_prefill": 1426,
+   "a_share": 0.121,
+   "a_overlapping_prefill_uncached_p50": 1374,
+   "a_overlapping_prefill_uncached_p90": 8512,
+   "a2_submitted_late_no_prefill_overlap": 2160,
+   "a2_share": 0.1833,
+   "b_not_submitted_cap_closed_no_prefill_in_flight": 865,
+   "b_share": 0.0734,
+   "b2_not_submitted_cap_closed_prefill_in_flight": 754,
+   "b2_share": 0.064,
+   "c_not_submitted_cap_open": 284,
+   "c_share": 0.0241,
+   "robot_prefills_released": 408,
+   "robot_prefill_uncached_p50": 1372,
+   "monitor_ttft_p50": 0.446,
+   "epochs_at_cap_floor": 2592,
+   "control_reconstructed_decreases": 118,
+   "control_reconstructed_increases": 97,
+   "control_arm_recorded_decreases": 117,
+   "control_arm_recorded_increases": 97
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11779,
+   "on_time": 7509,
+   "on_time_share": 0.6375,
+   "a_submitted_late_behind_a_robot_prefill": 1205,
+   "a_share": 0.1023,
+   "a_overlapping_prefill_uncached_p50": 1374,
+   "a_overlapping_prefill_uncached_p90": 7262,
+   "a2_submitted_late_no_prefill_overlap": 1797,
+   "a2_share": 0.1526,
+   "b_not_submitted_cap_closed_no_prefill_in_flight": 540,
+   "b_share": 0.0458,
+   "b2_not_submitted_cap_closed_prefill_in_flight": 442,
+   "b2_share": 0.0375,
+   "c_not_submitted_cap_open": 286,
+   "c_share": 0.0243,
+   "robot_prefills_released": 385,
+   "robot_prefill_uncached_p50": 1372,
+   "monitor_ttft_p50": 0.436,
+   "epochs_at_cap_floor": 1844,
+   "control_reconstructed_decreases": 92,
+   "control_reconstructed_increases": 77,
+   "control_arm_recorded_decreases": 92,
+   "control_arm_recorded_increases": 77
+  },
+  {
+   "cell": "v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11764,
+   "on_time": 701,
+   "on_time_share": 0.0596,
+   "a_submitted_late_behind_a_robot_prefill": 2235,
+   "a_share": 0.19,
+   "a_overlapping_prefill_uncached_p50": 1396,
+   "a_overlapping_prefill_uncached_p90": 13781,
+   "a2_submitted_late_no_prefill_overlap": 1891,
+   "a2_share": 0.1607,
+   "b_not_submitted_cap_closed_no_prefill_in_flight": 1784,
+   "b_share": 0.1516,
+   "b2_not_submitted_cap_closed_prefill_in_flight": 5058,
+   "b2_share": 0.43,
+   "c_not_submitted_cap_open": 95,
+   "c_share": 0.0081,
+   "robot_prefills_released": 587,
+   "robot_prefill_uncached_p50": 1375,
+   "monitor_ttft_p50": 0.52,
+   "epochs_at_cap_floor": 8428,
+   "control_reconstructed_decreases": 599,
+   "control_reconstructed_increases": 88,
+   "control_arm_recorded_decreases": null,
+   "control_arm_recorded_increases": null
+  },
+  {
+   "cell": "v5-rules-2_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11769,
+   "on_time": 1167,
+   "on_time_share": 0.0992,
+   "a_submitted_late_behind_a_robot_prefill": 2147,
+   "a_share": 0.1824,
+   "a_overlapping_prefill_uncached_p50": 1398,
+   "a_overlapping_prefill_uncached_p90": 13331,
+   "a2_submitted_late_no_prefill_overlap": 1864,
+   "a2_share": 0.1584,
+   "b_not_submitted_cap_closed_no_prefill_in_flight": 1795,
+   "b_share": 0.1525,
+   "b2_not_submitted_cap_closed_prefill_in_flight": 4730,
+   "b2_share": 0.4019,
+   "c_not_submitted_cap_open": 66,
+   "c_share": 0.0056,
+   "robot_prefills_released": 584,
+   "robot_prefill_uncached_p50": 1377,
+   "monitor_ttft_p50": 0.502,
+   "epochs_at_cap_floor": 7945,
+   "control_reconstructed_decreases": 548,
+   "control_reconstructed_increases": 94,
+   "control_arm_recorded_decreases": null,
+   "control_arm_recorded_increases": null
+  },
+  {
+   "cell": "v5-rules-2_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11786,
+   "on_time": 1542,
+   "on_time_share": 0.1308,
+   "a_submitted_late_behind_a_robot_prefill": 2060,
+   "a_share": 0.1748,
+   "a_overlapping_prefill_uncached_p50": 1395,
+   "a_overlapping_prefill_uncached_p90": 11822,
+   "a2_submitted_late_no_prefill_overlap": 1850,
+   "a2_share": 0.157,
+   "b_not_submitted_cap_closed_no_prefill_in_flight": 1706,
+   "b_share": 0.1447,
+   "b2_not_submitted_cap_closed_prefill_in_flight": 4415,
+   "b2_share": 0.3746,
+   "c_not_submitted_cap_open": 213,
+   "c_share": 0.0181,
+   "robot_prefills_released": 601,
+   "robot_prefill_uncached_p50": 1375,
+   "monitor_ttft_p50": 0.488,
+   "epochs_at_cap_floor": 7712,
+   "control_reconstructed_decreases": 548,
+   "control_reconstructed_increases": 91,
+   "control_arm_recorded_decreases": null,
+   "control_arm_recorded_increases": null
+  },
+  {
+   "cell": "v5-rules-2_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "monitor_opportunities": 11779,
+   "on_time": 1584,
+   "on_time_share": 0.1345,
+   "a_submitted_late_behind_a_robot_prefill": 1992,
+   "a_share": 0.1691,
+   "a_overlapping_prefill_uncached_p50": 1396,
+   "a_overlapping_prefill_uncached_p90": 13775,
+   "a2_submitted_late_no_prefill_overlap": 1726,
+   "a2_share": 0.1465,
+   "b_not_submitted_cap_closed_no_prefill_in_flight": 1683,
+   "b_share": 0.1429,
+   "b2_not_submitted_cap_closed_prefill_in_flight": 4761,
+   "b2_share": 0.4042,
+   "c_not_submitted_cap_open": 33,
+   "c_share": 0.0028,
+   "robot_prefills_released": 570,
+   "robot_prefill_uncached_p50": 1377,
+   "monitor_ttft_p50": 0.477,
+   "epochs_at_cap_floor": 7544,
+   "control_reconstructed_decreases": 539,
+   "control_reconstructed_increases": 85,
+   "control_arm_recorded_decreases": null,
+   "control_arm_recorded_increases": null
+  }
+ ],
+ "control": {
+  "_claim": "the reconstructed AIMD trajectory reproduces the base arm's own counters; v5-rules-2 does not report them, which is why the reconstruction exists",
+  "rows": [
+   {
+    "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "decreases": [
+     154,
+     154
+    ],
+    "increases": [
+     97,
+     97
+    ]
+   },
+   {
+    "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "decreases": [
+     112,
+     111
+    ],
+    "increases": [
+     106,
+     106
+    ]
+   },
+   {
+    "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "decreases": [
+     118,
+     117
+    ],
+    "increases": [
+     97,
+     97
+    ]
+   },
+   {
+    "cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
+    "decreases": [
+     92,
+     92
+    ],
+    "increases": [
+     77,
+     77
+    ]
+   }
+  ],
+  "tolerance": "1 count on each counter, stated; exact on 2 of 4, one decrement high on 2",
+  "verdict": "PASS: within one count on all 4 cells that record them, exact on 2"
+ },
+ "verdict": {
+  "on_time_share": {
+   "base": [
+    0.4567,
+    0.6375
+   ],
+   "rung1": [
+    0.0596,
+    0.1345
+   ]
+  },
+  "a_engine_blocking": {
+   "base": [
+    0.1023,
+    0.1523
+   ],
+   "rung1": [
+    0.1691,
+    0.19
+   ],
+   "reading": "submitted, late, and overlapping a robot prefill. Rung 1 is only modestly worse than the base here, so head-of-line blocking is real but is NOT where the loss is"
+  },
+  "a2_late_with_no_prefill_overlap": {
+   "base": [
+    0.1526,
+    0.2244
+   ],
+   "rung1": [
+    0.1465,
+    0.1607
+   ],
+   "reading": "late behind something OTHER than a robot prefill, chiefly other monitors. Essentially unchanged between the two arms"
+  },
+  "b_cap_closed_with_nothing_in_flight": {
+   "base": [
+    0.0458,
+    0.0734
+   ],
+   "rung1": [
+    0.1429,
+    0.1525
+   ],
+   "reading": "the cap was shut by the MEMORY of past lateness while no robot prefill was running. This is the part only a C5 rule can reach, and rung 1 is 2 to 3 times the base"
+  },
+  "b2_cap_closed_with_a_prefill_in_flight": {
+   "base": [
+    0.0375,
+    0.0785
+   ],
+   "rung1": [
+    0.3746,
+    0.43
+   ],
+   "reading": "THE DOMINANT BUCKET AND JOINTLY CAUSED: 37.5 to 43.0 percent of all opportunities at rung 1 against 3.7 to 7.9 percent at the base, a 5 to 10 fold increase. The cap is shut AND real prefill work is in flight, so neither cause can be assigned it alone"
+  },
+  "c_cap_open_and_still_not_submitted": {
+   "base": [
+    0.0241,
+    0.0257
+   ],
+   "rung1": [
+    0.0028,
+    0.0181
+   ],
+   "reading": "small and smaller at rung 1; not a channel"
+  },
+  "what_each_layer_could_reach": "NOT SUBMITTED (b + b2 + c) is 52 to 58 percent of all opportunities at rung 1 against 13 to 17 percent at the base, and SUBMITTED-BUT-LATE (a + a2) is 31 to 35 percent against 25 to 38. So the loss is overwhelmingly a RELEASE decision, not a delivery failure, and a C5 attribution rule (layer 2) is the only thing that reaches it directly. But the cap closes BECAUSE monitor first-token times cross C5's 0.8 s trip, and engine priority (layer 1) acts on exactly that, so layer 1 is upstream of layer 2's symptom: it would shrink a directly and b and b2 indirectly by keeping the cap open. The two are not alternatives on the same quantity",
+  "a_caveat_on_the_blocking_population": "the prefills that late monitors overlap have median uncached 1,395 to 1,398 tokens with p90 11,822 to 13,781, and the released robot prefills have median 1,375 to 1,377. So the overlap is dominated by MANY SMALL prefills rather than by the few 3,071-token warm builds, which the >= 200-token definition includes recalls in, as the ruling specified. Rung 1 releases 570 to 601 such prefills against the base's 385 to 408"
+ }
+}

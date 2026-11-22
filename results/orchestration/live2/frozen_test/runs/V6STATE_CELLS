@@ -1,50 +1,98 @@
-# D172 rung 2, covex-v6-state. One cell per line: "arm n seed tag". Lines starting # are NOT run.
+# D172 rung 2, covex-v6-state, REPRICED UNDER D174 (1). One cell per line: "arm n seed tag".
+# Lines starting # are NOT run.
 #
-# REISSUED 2026-11-21 after the first release was SKIPPED: the name did not resolve in the
-# harness's process. run_live2_real.py imports `hybrid` and nothing else, and the v6 names were
-# registered only in arm_names_v6.register(), which it never imports. They are now registered in
-# arms.py beside the other arm families, so importing `arms` is enough, and the resolution is
-# proved by spawning run_live2_real.py ITSELF rather than by calling make_arm in a friendly
-# process: live2/v6_harness_name_proof.py, with a negative control that an unknown name still
-# raises. All five ladder names return rc=0 through the real entry point.
+# REISSUED 2026-11-22. The arm is covex-v6-state-uo, a DISTINCT NAME, because the four
+# covex-v6-state cells already on disk must keep meaning what they meant: s4 and s5 ran the old
+# charge (builds always priced COLD, a touch priced as a whole-prefix recall) and are labelled
+# budget-mispriced; s6 and s7 ran a held pricing switch that defaulted ON and are labelled
+# held-code. A same-name repost would be skipped as existing.
 #
+# WHAT CHANGED, AND IT IS A HARNESS CORRECTNESS FIX, NOT A POLICY COMPONENT (D173 (2)). The
+# coordinator's GPU budget models physical capacity (D102), so it now charges each request of a
+# covex-v6 arm the D162 model's PER-UNCACHED WORK TERM ALONE:
+#
+#     charge = 0.0001824312597782467 * uncached_tokens
+#
+# The 0.0678 s intercept is per-request OCCUPANCY and the queue term is delay the request SUFFERS;
+# neither is GPU work, and both stay in the planner's harm to others, where they are the right
+# quantity. D174 (1).
+#
+# D102, BOTH HALVES, PASS IN THIS COMMIT (live2/one_price_proofs.py ->
+# results/orchestration/live2/frozen_test/one_price_proofs.json):
+#
+#   never binds artificially   0 budget refusals on a dry 8-device cell of the probe arm, 2,038
+#                              state decisions, 4,376 decision rows against covex-v6-rules' 4,376.
+#                              Under work-only it was 298 refusals and 4,317 rows; under the full
+#                              first-token formula 10,612 refusals and plan_state silenced.
+#   utilisation tracks busy    per-uncached term 737.5 s against measured GPU busy 721.9 s (s4)
+#                              and 985.3 against 964.5 s (s5), a ratio of 1.022 on both, implied
+#                              5,482 tok/s against the committed 5,600. Utilisation 0.61 and 0.82
+#                              of wall against measured busy fractions 0.60 and 0.80. Nothing
+#                              oversubscribed. Work-only reached 1.07 and 1.34 and FAILED here.
+#
+# THE CHARGE IS ENABLED BY THE ARM AND THE MODE IS THE ARM'S. live2_d162_pricing is an instance
+# attribute set only by covex-v6-state-uo (and the -wo siblings and the proof probe), and
+# live2_charge_mode travels with it, so an arm named for a superseded charge cannot follow the
+# module default when it moves. That default moving under a helper is exactly how covex-v6-state
+# s6 ran an unruled charge and died at t = 264 s of 1,200. P3 fails the proof if any pricing arm
+# at a non-ruled mode, or the proof probe, appears in any file in this directory.
+#
+#
+# THE PLANNER'S TIME LIMIT, stated here because the live runs use it (user ruling 2026-11-22).
+# budget_ms = 20.0 (cf_instrument.BUDGET_MS, D151 (5)). Proofs run with cf_instrument.over_budget
+# PATCHED OFF so a decision digest is a property of the arm; LIVE CELLS RUN WITH IT ON, because
+# abandoning to base when the clock runs out is a real cost of the policy (D99 (3)).
+#   measured on flash, dry, 16 devices, seed 4: 1 to 2 abandonments out of 44,300 state
+#   decisions, i.e. 0.002 to 0.005 percent, all of kind "state".
+# THAT NUMBER IS A LOWER BOUND FOR THESE CELLS AND MUST NOT BE QUOTED FOR THEM. The H100 host CPU
+# is about 2.2x slower than flash on the committed policy benchmark (D115 (1)), so the live rate
+# will be higher. Every cell now carries `arm_stats.planner_time_limit`: budget_ms, decisions,
+# abandoned_to_base, fraction, by_kind, and `flag` true above 1 percent on any kind or overall
+# (coordinator._planner_time_limit_summary). REPORT THE RATE FROM THE FIRST LIVE CELL before the
+# remaining three run, and stop if it flags.
+#
+# D175 (2): THE D170 OVER-LIMIT RULE IS ON AT EVERY covex-v6 RUNG, this arm included. A recall
+# whose predicted prompt exceeds 32,768 tokens is INFEASIBLE and the question is the device's.
+# It is ON here and OFF on every old committed name and every baseline, so the committed rung 0 to
+# 2 cells stay reusable only if the rule moves no decision, which is proved one-cell-per-process
+# in d175_digest_proofs.json (the 18 over-limit questions exist only at seed 7 under rq30, so that
+# is where the proof has to look; a null at seeds 4 to 6 is UNEXERCISED).
 # WORKLOAD, identical to BASELINE_MATRIX: 16 devices, EP-G default episodes (fixed 21-frame
 # refresh, NOT the policy episode rule), per-frame upload, rq30 re-asks, deadlines dashcam 1.0 s /
 # robot 3.0 s / single-shot 2.0 s, memory 1x. Tag _L3_epg_rq30.
 #
 # THE RUNG. covex-v6-rules plus four things: per-type host retention (max_offload_tokens = 0 for
 # alert and single-shot), TOUCH chosen by plan_state, residency belief corrected from engine
-# telemetry including host hits, and state-based pricing.
+# telemetry including host hits, and state-based pricing of DECISIONS (which stays the rung's own
+# component and is not what D174 changed).
 #
-# WHY THIS IS POSTED, and it is not because the rung's headline decision fires. Read both.
+# WHAT TO EXPECT, unchanged from the first posting and still not a reason to hold.
 #
-#   plan_state DOES NOT DEVIATE. 44,300 state decisions on a dry 16-device cell, KEEP on every
-#   one. Its own argmax prefers a non-KEEP candidate on 44,299 of them and D151's margin rule
-#   overrides it back each time: max predicted gain 0.151 against MARGIN_CF 0.16456, arithmetic
-#   ceiling 0.250, so a near miss and not a cap. Expect no TOUCH in these cells.
+#   plan_state DOES NOT DEVIATE on a dry cell. 44,300 state decisions at 16 devices, KEEP on every
+#   one; its own argmax prefers a non-KEEP candidate on 44,299 and D151's margin rule overrides it
+#   back: max predicted gain 0.151 against MARGIN_CF 0.16456, arithmetic ceiling 0.250.
 #
 #   TWO OF THE FOUR ADDITIONS CANNOT BE TESTED WITHOUT AN ENGINE. Per-type host retention acts by
-#   sending kv_transfer_params to vLLM, and the belief corrector is driven by the engine's own
-#   cached_tokens. A dry cell has neither, so both are UNEXERCISED there BY CONSTRUCTION and the
-#   dry nulls carry no information about them. These cells are the only way to exercise them.
+#   sending kv_transfer_params to vLLM; the belief corrector is driven by the engine's own
+#   cached_tokens. A dry cell has neither, so both are UNEXERCISED there BY CONSTRUCTION. These
+#   cells are the only way to exercise them.
 #
-#   THE DIFFERENCE THAT EXISTS IS ATTRIBUTED. covex-v6-state is NOT byte-identical to
-#   covex-v6-rules at 16 devices (6e8927b9f7f92040 against ae997d6af16a2ef4, 15,734 rows against
-#   17,050), and one-factor ablation names STATE-BASED PRICING as the sole cause: -noprice returns
-#   to the rung below's digest exactly and is the only ablation that does. At 8 devices the rung
-#   IS byte-identical, because pricing can only matter once the budget binds.
+#   THE 16-DEVICE DIFFERENCE IS ATTRIBUTED. covex-v6-state is not byte-identical to covex-v6-rules
+#   at 16 devices, and one-factor ablation names state-based pricing as the sole cause: -noprice
+#   returns to the rung below's digest exactly. At 8 devices the rung IS byte-identical, because
+#   pricing can only matter once the budget binds.
 #   results/orchestration/live2/frozen_test/v6state_attribution.json
 #
-# harm_warm IS COMPUTED, never declared, per research/prereg_harm_warm_d172.md (on origin before
-# this list). No line here and no registered default sets it. Cap counter: harm_warm_capped.
+# harm_warm IS COMPUTED, never declared, per research/prereg_harm_warm_d172.md. No line here and
+# no registered default sets it. Cap counter: harm_warm_capped.
 #
-# PROVISIONAL (D106 / D116, user away): the decision to post is mine. The user's D172 says to post
-# each PROVED rung, and the four conditions are met (Step 2b, positive control, spec v6 section 12
-# rows, baselines byte-identical). My earlier reason to hold was that the rung was byte-identical
-# to the rung below; it is not, so that reason is gone. If the user would rather not spend GPU
-# hours on a rung whose named decision never fires, cancel these four cells.
+# NOT POSTED, and the reason is in D174 (1): the covex-v6-rules rerun is SKIPPED because the
+# budget never bound at rung 1. budget_refusal is zero in every committed v5-rules and v5-rules-2
+# cell, so the rung-1 dashcam loss cannot be a budget-accounting artefact and repricing cannot
+# move it. covex-v6-rules-uo is built and registered for symmetry and must not be run.
+# results/orchestration/live2/frozen_test/budget_refusal_census.json
 
-covex-v6-state 16 4 _L3_epg_rq30
-covex-v6-state 16 5 _L3_epg_rq30
-covex-v6-state 16 6 _L3_epg_rq30
-covex-v6-state 16 7 _L3_epg_rq30
+covex-v6-state-uo 16 4 _L3_epg_rq30
+covex-v6-state-uo 16 5 _L3_epg_rq30
+covex-v6-state-uo 16 6 _L3_epg_rq30
+covex-v6-state-uo 16 7 _L3_epg_rq30
