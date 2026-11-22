@@ -1,0 +1,79 @@
+{
+  "_order": "P_hat frozen (082a6e3b) -> population committed (082a6e3b) -> this computation",
+  "p_hat_version": "cf-ontime-d162-1.0",
+  "per_cell": {
+    "v5-rules-2_n16_s4_1200s_h27_3t_L3_epg_rq30": {
+      "robot_questions": 132,
+      "released": 93,
+      "healthy_scored": 93,
+      "skipped_missing_input": 0
+    },
+    "v5-rules-2_n16_s5_1200s_h27_3t_L3_epg_rq30": {
+      "robot_questions": 127,
+      "released": 70,
+      "healthy_scored": 70,
+      "skipped_missing_input": 0
+    },
+    "v5-rules-2_n16_s6_1200s_h27_3t_L3_epg_rq30": {
+      "robot_questions": 121,
+      "released": 92,
+      "healthy_scored": 92,
+      "skipped_missing_input": 0
+    },
+    "v5-rules-2_n16_s7_1200s_h27_3t_L3_epg_rq30": {
+      "robot_questions": 105,
+      "released": 42,
+      "healthy_scored": 42,
+      "skipped_missing_input": 0
+    },
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": {
+      "robot_questions": 132,
+      "released": 54,
+      "healthy_scored": 54,
+      "skipped_missing_input": 0
+    },
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": {
+      "robot_questions": 127,
+      "released": 45,
+      "healthy_scored": 45,
+      "skipped_missing_input": 0
+    },
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": {
+      "robot_questions": 121,
+      "released": 54,
+      "healthy_scored": 54,
+      "skipped_missing_input": 0
+    },
+    "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30": {
+      "robot_questions": 105,
+      "released": 26,
+      "healthy_scored": 26,
+      "skipped_missing_input": 0
+    }
+  },
+  "n_overall": 476,
+  "n_warm": 271,
+  "n_cold": 205,
+  "thresholds": {
+    "min_n": 40,
+    "min_n_warm": 40
+  },
+  "error_p90_overall": 0.16456,
+  "error_p90_warm": 0.150341,
+  "error_p90_cold": 0.173231,
+  "error_p50_overall": 0.01156,
+  "on_time_rate": 0.5987,
+  "p_hat_mean": 0.6509,
+  "margin_cf": 0.16456,
+  "verdict": "SET",
+  "_verification": {
+    "healthy_scored_equals_released_in_all_8_cells": "checked rather than assumed, because a constant where a distribution is expected is a breakage signal. It is REAL: all 96 windows (8 cells x 12) classify healthy, with window first-token p50 far under the 2.781 s bound. noc3 spans 0.364 to 0.522 s across its four seeds; v5-rules-2 spans 0.393 to 2.165 s, higher and more variable because it warms, with its seed-4 maximum of 2.165 s approaching the bound without crossing it. That is the saturation guard holding the arm inside the healthy band, which is what D160 (2) asks of it.",
+    "skipped_missing_input": "0 in every cell, so no question was silently dropped for a missing P_hat input.",
+    "calibration_direction": "p_hat_mean 0.6509 against an actual on_time_rate of 0.5987, so P_hat is about 6.5 points optimistic on this population. Reported rather than corrected: the margin is the p90 of the error, and correcting the model to the population it is scored on would be fitting to the test.",
+    "warm_vs_cold": "warm p90 0.1503 is below cold p90 0.1732, so the model is better calibrated where the prefix survived, which is the expected direction."
+  },
+  "_what_the_number_means": {
+    "units": "D157 (2) units: a_D2_DEV (0.250) x |P_hat - 1[on time]|, so the error ceiling is 0.25 and MARGIN_CF = 0.16456 is 66 percent of that ceiling.",
+    "consequence_stated_now_not_after_the_runs": "a margin this large relative to its ceiling means the counterfactual will deviate from the base RARELY: it must predict a gain above 0.165 expected correct on-time answers before it is allowed to act. That is the cost model's own held-out error being priced honestly, and it is the mechanism by which v5 is never worse than its base up to model error (D151 (1)). It also means full v5 may equal v5-rules-2 on most decisions, which is what D163 predicts: the gain should concentrate on decisions whose consequences land beyond the current period and be near zero where rules suffice. A near-equal result is therefore NOT evidence the counterfactual is broken, and must not be read as one."
+  }
+}
