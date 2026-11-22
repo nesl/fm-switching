@@ -1,0 +1,120 @@
+{
+ "_what": "D172 (2) identity of every ready v6 ladder name with its committed arm",
+ "_register": "DRY cell, no GPU and no engine: the claim is that the two names produce the same DECISIONS, which is what cell reuse rests on",
+ "cell": {
+  "seed": 4,
+  "n": 8,
+  "run_s": 600.0,
+  "ratio": "50:50",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dry": true
+ },
+ "digest_convention": "sha256 over the decision rows, 16 hex; the committed convention includes arm_version and does not key on the arm's name",
+ "P0_positive_control": {
+  "_claim": "two arms that must differ do differ, so the digest and the runner are live",
+  "hybrid-F-lhreq-noc3": {
+   "digest": "9939acfbd99455c4",
+   "rows": 4337,
+   "kinds": {
+    "decline": 2,
+    "release_monitor": 4331,
+    "release_recall": 4
+   }
+  },
+  "b7-edf-feasibility": {
+   "digest": "990603d4033c172a",
+   "rows": 4338,
+   "kinds": {
+    "decline": 2,
+    "release_monitor": 4332,
+    "release_recall": 4
+   }
+  },
+  "differ": true,
+  "verdict": "PASS: the check is live"
+ },
+ "identity": [
+  {
+   "rung": 0,
+   "name": "covex-v6-base",
+   "ready": true,
+   "committed_as": "hybrid-F-lhreq-noc3",
+   "digest_committed_name": "9939acfbd99455c4",
+   "digest_v6_name": "9939acfbd99455c4",
+   "rows_committed_name": 4337,
+   "rows_v6_name": 4337,
+   "kinds": {
+    "decline": 2,
+    "release_monitor": 4331,
+    "release_recall": 4
+   },
+   "identical": true,
+   "committed_cells_of_the_old_name": 6,
+   "verdict": "PASS: identical decisions, so hybrid-F-lhreq-noc3's 6 committed cells ARE covex-v6-base's cells and are reused, never rerun for the name"
+  },
+  {
+   "rung": 1,
+   "name": "covex-v6-rules",
+   "ready": true,
+   "committed_as": "v5-rules-2",
+   "digest_committed_name": "612d4399acdc6a29",
+   "digest_v6_name": "612d4399acdc6a29",
+   "rows_committed_name": 4376,
+   "rows_v6_name": 4376,
+   "kinds": {
+    "decline": 2,
+    "release_monitor": 4331,
+    "release_piece": 39,
+    "release_recall": 4
+   },
+   "identical": true,
+   "committed_cells_of_the_old_name": 4,
+   "verdict": "PASS: identical decisions, so v5-rules-2's 4 committed cells ARE covex-v6-rules's cells and are reused, never rerun for the name"
+  },
+  {
+   "rung": 2,
+   "name": "covex-v6-state",
+   "ready": false,
+   "missing": [
+    "plan_state has no caller outside the proofs",
+    "residency belief is not corrected from telemetry (telemetry_cached_tokens NULL)",
+    "no arm class exists for this rung"
+   ],
+   "verdict": "NOT BUILT: the name raises rather than resolving to the rung below, so no cell can run it by mistake"
+  },
+  {
+   "rung": 3,
+   "name": "covex-v6-fair",
+   "ready": false,
+   "missing": [
+    "DeficitCounters.observe() has no caller, so every weight is 1.0",
+    "the value reader is off",
+    "the D165 lexicographic objective is not built",
+    "no arm class exists for this rung"
+   ],
+   "verdict": "NOT BUILT: the name raises rather than resolving to the rung below, so no cell can run it by mistake"
+  },
+  {
+   "rung": 4,
+   "name": "covex-v6",
+   "ready": true,
+   "committed_as": "v5-full",
+   "digest_committed_name": "74eeb58f34079e72",
+   "digest_v6_name": "74eeb58f34079e72",
+   "rows_committed_name": 4376,
+   "rows_v6_name": 4376,
+   "kinds": {
+    "decline": 2,
+    "release_monitor": 4331,
+    "release_piece": 39,
+    "release_recall": 4
+   },
+   "identical": true,
+   "committed_cells_of_the_old_name": 0,
+   "verdict": "PASS: identical decisions, but v5-full has ZERO committed cells, so there is nothing to reuse and this rung is NOT covered by existing runs"
+  }
+ ],
+ "all_ready_rungs_identical": true,
+ "ALL_PASS": true
+}

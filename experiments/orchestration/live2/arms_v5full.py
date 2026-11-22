@@ -96,7 +96,9 @@ class V5FullArm:
                  **rules_kw: Any) -> None:
         import arms_v5rules2 as V2
         self._rules = V2.V5Rules2Arm(name=name, **rules_kw)
-        self._base = self._rules                      # delegation target, as v5-rules-2 does
+        # kept because `__getattr__` consumers and the rules arm's own helpers read it; it is
+        # NO LONGER a dispatch target, because dispatching through it is what recursed.
+        self._base = self._rules
         self.name = name
         self.arm_version = V5FULL_VERSION
         self.counterfactual = bool(counterfactual)
@@ -130,7 +132,11 @@ class V5FullArm:
         return getattr(self.__dict__["_rules"], k)
 
     def __call__(self, obs: Observation) -> Action:
-        return self._rules.__class__.__call__(self, obs)
+        # Named statically for the same reason as `arms_v5rules2.V5Rules2Arm.__call__`: a dynamic
+        # `self._rules.__class__` lookup is what made this arm recurse forever on its first
+        # observation.
+        import arms_v5rules2 as _V2                                            # noqa: PLC0415
+        return _V2.V5Rules2Arm.__call__(self, obs)
 
     def live2_roster(self, roster: Dict[str, Any]) -> None:
         self._rules.live2_roster(roster)

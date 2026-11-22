@@ -168,7 +168,21 @@ Alerts and assistance stay rule-based (D151 (2)).
 ## 10. Evaluation (summary)
 
 - Baselines run once on the final workload (D164): EDF (8 in flight), LLF, b7, always-cloud, eco-llm, confidence-cascade, cascade-routing (thresholds calibrated per card), SimpleStream, QueryStream-proactive, R3-Streaming, StreamScout, Mooncake, AttentionStore and KVFlow (with published prefetch), an LRU-contrast arm (the lmcache adapter), warm-all-lru, device-only (offline).
-- Ablation ladder: base, + warming (v5-rules), + chunked JIT and guard (v5-rules-2), + per-type state, + deficit and value, + counterfactual (full v5), + episode rule.
+- Ablation ladder (D172 names; `research/arm_name_map.md` maps every old name to its rung):
+
+| rung | name | adds | implemented by | status |
+|---|---|---|---|---|
+| 0 | `covex-v6-base` | the hybrid-F-lhreq-noc3 rules | `hybrid-F-lhreq-noc3` | READY, 6 committed cells |
+| 1 | `covex-v6-rules` | chunked just-in-time warming + saturation guard | `v5-rules-2` | READY, 4 committed cells |
+| 2 | `covex-v6-state` | per-type host retention, TOUCH chosen by `plan_state`, belief from telemetry, state pricing | none yet | NOT BUILT |
+| 3 | `covex-v6-fair` | deficit feed + value reader | none yet | NOT BUILT |
+| 4 | `covex-v6` | the counterfactual: request, state, sync, compounds, episode-rule switch | `v5-full` | runnable, ZERO cells |
+
+  `v5-rules` is NOT rung 1 under another name: it is the superseded naive per-frame warm-ahead
+  design, and `v5-rules-2` replaced it with a different mechanism. A rung that is not built
+  RAISES rather than resolving to the rung below (`arm_names_v6.py`), so no cell can run a lower
+  rung under a higher name. Cell lists: `V6STATE_CELLS`, `V6FAIR_CELLS`, `V6_CELLS` (which
+  supersedes `V5FULL_CELLS`).
 - Metrics: recall correct by deadline (paired, clustered), assistance within 2 s, alert challenge mAP and per-episode target, per-device target attainment, capacity, decision latency.
 - Sweeps after the core grid: memory (1x, 0.5x, 0.25x), deadline (recall 2.5 to 5 s), fleet size, re-ask rate, network.
 - Real-device validation (P21) only after the policy works.

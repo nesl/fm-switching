@@ -143,7 +143,13 @@ class V5Rules2Arm:
         return getattr(self.__dict__["_base"], k)
 
     def __call__(self, obs: Observation) -> Action:
-        return self._base.__class__.__call__(self, obs)
+        # THE CLASS IS NAMED STATICALLY, and that is the whole fix. `self._base.__class__`
+        # resolves against whatever object is actually running: when a V5FullArm borrows this
+        # method, its `_base` is a V5Rules2Arm, so the lookup returned THIS method again and the
+        # call recursed until the stack ran out. The behaviour this line wants is "run the HYBRID
+        # arm's decision step with my state", and HybridArm is what it must say.
+        from hybrid.hybrid_arm import HybridArm                                # noqa: PLC0415
+        return HybridArm.__call__(self, obs)
 
     def live2_roster(self, roster: Dict[str, Any]) -> None:
         self._roster = dict(roster or {})
