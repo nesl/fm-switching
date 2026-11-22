@@ -1,0 +1,3622 @@
+{
+ "_what": "OFFLINE ESTIMATE of the third C5 candidate, DEADLINE-AWARE RELEASE (user ruling 2026-11-22, item 2). NOTHING IS IMPLEMENTED. No cell was run, no server started, no policy code touched.",
+ "_register": "ESTIMATE from committed logs. Item (c) is a CONSTRUCTED BOUND and is labelled as such at every point of use, never a prediction.",
+ "_the_rule": "do not release a dashcam monitor whose hold-so-far (t_submit - t_opportunity) plus its predicted first-token time already exceeds its 1.0 s deadline; the device answers it instead",
+ "_item_1_carried_as_context_not_redone": {
+  "finding": "the base's b7 feasibility rule never fires on monitors: hybrid_arm.py line 351 computes slack and line 355 appends unconditionally; it['slack'] is read only at line 443 inside the utility-per-cost ordering index, so it is an ORDERING term and never an admission test. The CLOUD / DEFER / REJECT feasibility branch exists only in the recall loop.",
+  "epi_s": "hybrid_arm.py line 345: C.episodic_cloud_latency_s('32BI', 1, 25), FIXED arguments once per decision, so it is a constant that cannot reflect live engine time or the episode's frame count",
+  "episode_continuity_D149_3": "not implemented in hybrid_arm.py, so it overrides nothing"
+ },
+ "_proxies_declared": {
+  "uncached": "prompt_tokens - cached_tokens, the ENGINE'S OBSERVED count. The coordinator charges a PREDICTED count, so predictor (ii) is given its most favourable input and is optimistic about its own accuracy.",
+  "uncached_queued_ahead": "reconstructed as the sum of observed uncached over all requests in flight at this request's t_submit. An analogue of the coordinator's _uncached_in_flight, which accumulates PREDICTED uncached, not that counter.",
+  "slot_occupancy": "t_done - t_submit, because the C5 cap's in_flight['monitor'] is decremented in _collect at future completion. The first-token interval is reported beside it and is NOT what the cap uses.",
+  "mean_cap": "read from dashcam_ontime_reconcile.json's cap_trajectory, whose reconstruction was controlled there against each arm's own c5_decrease and c5_increase counters. Not recomputed here.",
+  "term2_of_the_bound": "prices a counterfactual release with the same predictor and the cell's median monitor uncached count. A model on a request that did not happen."
+ },
+ "_predictors": {
+  "i_constant": "the cell's own median monitor first-token time, or the user's 0.44 s. A CONSTANT, so it CANNOT DISTINGUISH REQUESTS: the rule degenerates to a pure hold threshold and treats a 120-token frame and a 13,000-token one identically.",
+  "ii_d162_model": "first_token_s = 0.06779759059832724 + 0.0001824312597782467 * uncached + 0.0001535807289338535 * uncached_queued_ahead, IMPORTED from d162_price.py (cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)). It VARIES PER REQUEST, which (i) cannot, but IT IS A MODEL, fitted on warm prefix-cached cells, and its inputs here are reconstructed.",
+  "iii_oracle": "the request's own measured engine first token. NOT a candidate: no arm has it at release. Its only role is the check-7 anchor.",
+  "d162_drift_check_at_import": {
+   "agrees": true,
+   "mismatches": [],
+   "gate_values": {
+    "intercept": 0.06779759059832724,
+    "per_uncached_token": 0.0001824312597782467,
+    "per_queue_token": 0.0001535807289338535
+   }
+  }
+ },
+ "_epg_caveat_item_d": "A SKIPPED FRAME IS STILL PREFILLED BY THE EPISODE'S NEXT REQUEST, because the episode context is append-only under EP-G. THE SAVING IS SLOTS AND SCHEDULING, NOT THE FRAME'S PREFILL WORK. Accordingly: (b) is reported in SLOT-SECONDS of in-flight occupancy and is never converted to GPU-seconds or to tokens; (c) converts slot-seconds only into further slot-seconds of a live monitor; and the DOA requests' uncached tokens are reported as `deferred_uncached_tokens_A_DEBT_NOT_A_SAVING`, which returns to the engine on the episode's next request rather than being saved. No claim of prefill tokens saved is made anywhere in this file.",
+ "_caching": "vLLM PREFIX CACHING WAS ENABLED in every cell read, per each cell's own prefix_caching block. Every latency is a WARM-SERVER number; none is a cold prefill. The D162 coefficients were fitted in the same warm regime.",
+ "cells": [
+  {
+   "cell": "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-uo",
+   "seed": 4,
+   "is_base": false,
+   "monitor_opportunities": 11764,
+   "released_monitors_with_a_request_row": 8167,
+   "deadline_s_distinct": [
+    1.0
+   ],
+   "measured_monitor_first_token_s": {
+    "n": 8167,
+    "min": 0.1142,
+    "p25": 0.3567,
+    "p50": 0.4831,
+    "p75": 0.6369,
+    "p90": 0.8374,
+    "p99": 1.7407,
+    "max": 5.4144,
+    "mean": 0.5378,
+    "distinct_values": 8115
+   },
+   "hold_at_release_s": {
+    "n": 8167,
+    "min": 0.0473,
+    "p25": 0.4336,
+    "p50": 0.7423,
+    "p75": 0.8884,
+    "p90": 0.9679,
+    "p99": 1.008,
+    "max": 1.3607,
+    "mean": 0.6486,
+    "distinct_values": 8108
+   },
+   "monitor_uncached_tokens": {
+    "n": 8167,
+    "min": 366.0,
+    "p25": 370.0,
+    "p50": 376.0,
+    "p75": 706.0,
+    "p90": 1056.0,
+    "p99": 2070.0,
+    "max": 7140.0,
+    "mean": 561.2,
+    "distinct_values": 81
+   },
+   "queued_ahead_uncached_tokens_RECONSTRUCTED": {
+    "n": 8167,
+    "min": 366.0,
+    "p25": 1852.0,
+    "p50": 2542.0,
+    "p75": 3311.0,
+    "p90": 4429.0,
+    "p99": 9864.0,
+    "max": 33606.0,
+    "mean": 2842.0,
+    "distinct_values": 2442
+   },
+   "d162_predicted_first_token_s": {
+    "n": 8167,
+    "min": 0.1908,
+    "p25": 0.4229,
+    "p50": 0.5369,
+    "p75": 0.6937,
+    "p90": 0.8819,
+    "p99": 1.834,
+    "max": 5.5818,
+    "mean": 0.6067,
+    "distinct_values": 5501
+   },
+   "variants": {
+    "const_user_0.44": {
+     "_note": "predictor (i) with the USER'S constant 0.44 s, i.e. the hold threshold 0.56 s. A CONSTANT: it cannot distinguish requests.",
+     "doa": 5574,
+     "live": 2593,
+     "doa_share_of_released": 0.6825,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 5299,
+      "flagged_but_would_have_MET_FP": 275,
+      "not_flagged_and_missed_FN": 519,
+      "not_flagged_and_met_TN": 2074,
+      "precision": 0.9507,
+      "recall": 0.9108,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 3672.558,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.7046,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.5724,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 5574,
+      "min": 0.166,
+      "p25": 0.4408,
+      "p50": 0.5757,
+      "p75": 0.7681,
+      "p90": 1.0075,
+      "p99": 2.1557,
+      "max": 6.522,
+      "mean": 0.659,
+      "distinct_values": 5559
+     },
+     "slot_seconds_live": {
+      "n": 2593,
+      "min": 0.14,
+      "p25": 0.4518,
+      "p50": 0.5679,
+      "p75": 0.704,
+      "p90": 0.8525,
+      "p99": 1.2721,
+      "max": 3.002,
+      "mean": 0.594,
+      "distinct_values": 2589
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 5574,
+      "min": 0.124,
+      "p25": 0.3513,
+      "p50": 0.4778,
+      "p75": 0.6511,
+      "p90": 0.8774,
+      "p99": 1.9448,
+      "max": 5.414,
+      "mean": 0.551,
+      "distinct_values": 5554
+     },
+     "mean_live_occupancy_s": 0.5937,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3457350
+    },
+    "const_cell_own_median": {
+     "_note": "predictor (i) with THIS CELL'S own median monitor first-token time (0.4831 s), threshold 0.5169 s. Still a constant.",
+     "doa": 5779,
+     "live": 2388,
+     "doa_share_of_released": 0.7076,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 5431,
+      "flagged_but_would_have_MET_FP": 348,
+      "not_flagged_and_missed_FN": 387,
+      "not_flagged_and_met_TN": 2001,
+      "precision": 0.9398,
+      "recall": 0.9335,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 3808.278,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.7307,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.5936,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 5779,
+      "min": 0.166,
+      "p25": 0.443,
+      "p50": 0.577,
+      "p75": 0.7681,
+      "p90": 1.0066,
+      "p99": 2.1557,
+      "max": 6.522,
+      "mean": 0.659,
+      "distinct_values": 5762
+     },
+     "slot_seconds_live": {
+      "n": 2388,
+      "min": 0.14,
+      "p25": 0.4469,
+      "p50": 0.5655,
+      "p75": 0.7001,
+      "p90": 0.8473,
+      "p99": 1.2703,
+      "max": 3.002,
+      "mean": 0.588,
+      "distinct_values": 2384
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 5779,
+      "min": 0.124,
+      "p25": 0.3533,
+      "p50": 0.481,
+      "p75": 0.6513,
+      "p90": 0.8776,
+      "p99": 1.9404,
+      "max": 5.414,
+      "mean": 0.552,
+      "distinct_values": 5759
+     },
+     "mean_live_occupancy_s": 0.5879,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3555222
+    },
+    "d162_model": {
+     "_note": "predictor (ii), the committed D162 model on this request's own observed uncached and the reconstructed queued-ahead. VARIES per request but IS A MODEL.",
+     "doa": 6077,
+     "live": 2090,
+     "doa_share_of_released": 0.7441,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 5629,
+      "flagged_but_would_have_MET_FP": 448,
+      "not_flagged_and_missed_FN": 189,
+      "not_flagged_and_met_TN": 1901,
+      "precision": 0.9263,
+      "recall": 0.9675,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 4098.394,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.7863,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.6388,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 6077,
+      "min": 0.166,
+      "p25": 0.4567,
+      "p50": 0.5975,
+      "p75": 0.7839,
+      "p90": 1.0248,
+      "p99": 2.1914,
+      "max": 6.522,
+      "mean": 0.674,
+      "distinct_values": 6060
+     },
+     "slot_seconds_live": {
+      "n": 2090,
+      "min": 0.14,
+      "p25": 0.4104,
+      "p50": 0.5275,
+      "p75": 0.6385,
+      "p90": 0.7685,
+      "p99": 1.0329,
+      "max": 1.213,
+      "mean": 0.533,
+      "distinct_values": 2086
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 6077,
+      "min": 0.124,
+      "p25": 0.3668,
+      "p50": 0.501,
+      "p75": 0.6742,
+      "p90": 0.8928,
+      "p99": 1.9686,
+      "max": 5.414,
+      "mean": 0.569,
+      "distinct_values": 6055
+     },
+     "mean_live_occupancy_s": 0.5329,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3732902
+    },
+    "oracle_measured_engine_first_token": {
+     "_note": "NOT A CANDIDATE PREDICTOR. The request's own measured engine first token, which no arm has at release. Reported only as the consistency anchor for check 7.",
+     "doa": 5818,
+     "live": 2349,
+     "doa_share_of_released": 0.7124,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 5818,
+      "flagged_but_would_have_MET_FP": 0,
+      "not_flagged_and_missed_FN": 0,
+      "not_flagged_and_met_TN": 2349,
+      "precision": 1.0,
+      "recall": 1.0,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 4011.278,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.7696,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.6252,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 5818,
+      "min": 0.166,
+      "p25": 0.4697,
+      "p50": 0.6116,
+      "p75": 0.7985,
+      "p90": 1.0422,
+      "p99": 2.1945,
+      "max": 6.522,
+      "mean": 0.689,
+      "distinct_values": 5803
+     },
+     "slot_seconds_live": {
+      "n": 2349,
+      "min": 0.14,
+      "p25": 0.3883,
+      "p50": 0.5082,
+      "p75": 0.6145,
+      "p90": 0.7352,
+      "p99": 0.9436,
+      "max": 2.35,
+      "mean": 0.511,
+      "distinct_values": 2344
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 5818,
+      "min": 0.124,
+      "p25": 0.3787,
+      "p50": 0.5166,
+      "p75": 0.6927,
+      "p90": 0.9105,
+      "p99": 1.9984,
+      "max": 5.414,
+      "mean": 0.584,
+      "distinct_values": 5799
+     },
+     "mean_live_occupancy_s": 0.5112,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3597100
+    },
+    "const_user_0.44_plus_forward_hop": {
+     "_note": "SENSITIVITY: the committed scorer delivers at first token PLUS a 0.0222 s forward hop, so a rule that ignores the hop is slightly lenient. Same constant, deadline effectively 0.9778 s.",
+     "doa": 5700,
+     "live": 2467,
+     "doa_share_of_released": 0.6979,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 5387,
+      "flagged_but_would_have_MET_FP": 313,
+      "not_flagged_and_missed_FN": 431,
+      "not_flagged_and_met_TN": 2036,
+      "precision": 0.9451,
+      "recall": 0.9259,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 3756.855,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.7208,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.5856,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 5700,
+      "min": 0.166,
+      "p25": 0.4423,
+      "p50": 0.577,
+      "p75": 0.7685,
+      "p90": 1.0066,
+      "p99": 2.1557,
+      "max": 6.522,
+      "mean": 0.659,
+      "distinct_values": 5684
+     },
+     "slot_seconds_live": {
+      "n": 2467,
+      "min": 0.14,
+      "p25": 0.4491,
+      "p50": 0.5656,
+      "p75": 0.7005,
+      "p90": 0.8486,
+      "p99": 1.2712,
+      "max": 3.002,
+      "mean": 0.59,
+      "distinct_values": 2463
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 5700,
+      "min": 0.124,
+      "p25": 0.3528,
+      "p50": 0.4807,
+      "p75": 0.6516,
+      "p90": 0.8776,
+      "p99": 1.9448,
+      "max": 5.414,
+      "mean": 0.552,
+      "distinct_values": 5680
+     },
+     "mean_live_occupancy_s": 0.5899,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3520334
+    }
+   },
+   "traced_unit": {
+    "_what": "one DOA monitor at the MEDIAN hold of this cell's DOA population. Every quantity the rule and the estimate use, with the arithmetic shown.",
+    "opportunity_id": "opp0005363",
+    "device_id": "dash004",
+    "t_opportunity": 534.297952,
+    "deadline_s": 1.0,
+    "t_submit": 535.143676,
+    "hold_at_release_s": 0.8457,
+    "deadline_remaining_at_release_s": 0.1543,
+    "prompt_minus_cached_uncached_tokens": 372,
+    "queued_ahead_uncached_tokens_RECONSTRUCTED": 3536,
+    "predictor_i_constant_user_s": 0.44,
+    "predictor_i_constant_cell_median_s": 0.4831,
+    "predictor_ii_d162_s": 0.6787,
+    "predictor_ii_arithmetic": "0.067798 + 0.0001824313 * 372 + 0.0001535807 * 3536 = 0.6787",
+    "measured_engine_first_token_s": 0.4265,
+    "doa_under_i_user": true,
+    "doa_under_ii_d162": true,
+    "doa_under_oracle": true,
+    "t_done": 535.599396,
+    "slot_seconds_this_request_occupied": 0.4557,
+    "slot_seconds_to_first_token_ALTERNATIVE_NOT_USED": 0.4265,
+    "t_delivered_age_s": 1.2944,
+    "outcome": "latency_miss: delivered age 1.2944 s against a 1.0 s deadline",
+    "what_bound_it": "RELEASE DELAY: 85 percent of the deadline was already spent before the engine saw the request, and the engine's own first token then needed 0.4265 s more. Neither the KV budget nor the accelerator budget refused it: this cell's budget_refusal_monitor is ABSENT, and an absent Counter key is zero.",
+    "what_the_rule_would_have_done": "not released it; the device answers. The slot it held for 0.4557 s is freed, and under EP-G its 372 uncached tokens are STILL prefilled by the episode's next request, so no prefill work is saved."
+   },
+   "constructed_bounds": {
+    "const_user_0.44": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 3672.558,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 275,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 2025,
+     "mean_live_monitor_occupancy_s": 0.5937,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 6185.9,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 2300,
+     "not_released_total": 3597,
+     "upper_bound_on_time_instants_recoverable": 2300,
+     "as_share_of_monitor_opportunities": 0.1955,
+     "committed_on_time": 2209,
+     "bound_as_share_of_committed_on_time": 1.0412,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    },
+    "const_cell_own_median": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 3808.278,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 348,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 1935,
+     "mean_live_monitor_occupancy_s": 0.5879,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 6477.8,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 2283,
+     "not_released_total": 3597,
+     "upper_bound_on_time_instants_recoverable": 2283,
+     "as_share_of_monitor_opportunities": 0.1941,
+     "committed_on_time": 2209,
+     "bound_as_share_of_committed_on_time": 1.0335,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    },
+    "d162_model": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 4098.394,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 448,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 1567,
+     "mean_live_monitor_occupancy_s": 0.5329,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 7690.7,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 2015,
+     "not_released_total": 3597,
+     "upper_bound_on_time_instants_recoverable": 2015,
+     "as_share_of_monitor_opportunities": 0.1713,
+     "committed_on_time": 2209,
+     "bound_as_share_of_committed_on_time": 0.9122,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    }
+   },
+   "slot_seconds": {
+    "_which_interval": "t_done - t_submit. The C5 cap counts in_flight['monitor'], incremented at submit (coordinator.py:1184) and decremented in _collect when the future completes (coordinator.py:1300), so the slot is held to t_done and not to the first token.",
+    "all_released_monitors_total_slot_seconds": 5212.124,
+    "mean_cap_from_reconcile_cap_trajectory": 5.3466,
+    "wall_clock_s": 1200.0,
+    "run_slot_second_capacity_wall_times_mean_cap": 6415.9,
+    "monitor_share_of_that_capacity": 0.8124
+   },
+   "control_e": {
+    "_claim_1": "the released population must equal dashcam_ontime_reconcile.json's four released buckets, zero tolerance",
+    "reconcile_released": 8167,
+    "this_run_released": 8167,
+    "pass_1": true,
+    "_claim_2": "the DOA count under the ORACLE predictor must equal that file's late_at_release + late_at_first_token, zero tolerance: a monitor whose hold plus its own measured engine first token exceeds 1.0 s is exactly one that missed at or before its first token",
+    "reconcile_late_at_release_plus_late_at_first_token": 5818,
+    "this_run_oracle_doa": 5818,
+    "pass_2": true,
+    "_claim_3": "hold > 1.0 s must equal that file's late_at_release bucket: the user's 'released after the whole deadline had already passed' figure",
+    "reconcile_late_at_release": 251,
+    "this_run_hold_over_deadline": 251,
+    "pass_3": true,
+    "_claim_4": "every monitor row's own deadline_s must be 1.0 s, read not assumed: a per-row deadline of anything else makes every threshold here wrong",
+    "deadline_s_distinct": [
+     1.0
+    ],
+    "pass_4": true
+   },
+   "user_figures": {
+    "share_held_over_0.56_s_at_release": 0.6825,
+    "share_held_over_the_whole_1.0_s_deadline": 0.0307
+   },
+   "prefix_caching": {
+    "enabled": true,
+    "prefix_cache_hits_total_max": 52622624,
+    "prefix_cache_queries_total_max": 59951531,
+    "hit_fraction": 0.8778,
+    "label": "WARM SERVER: every latency in this cell was served with prefix caching on; none of these numbers is a cold prefill"
+   },
+   "runs_blob_check": {
+    "request.jsonl.gz": {
+     "origin_main": "7cd27614c0787a4abc7828588aeba9bfc594121c",
+     "read": "7cd27614c0787a4abc7828588aeba9bfc594121c",
+     "identical": true
+    },
+    "outcomes.jsonl.gz": {
+     "origin_main": "915f6fe03d992fd54204c28637bd9aad0b10af3d",
+     "read": "915f6fe03d992fd54204c28637bd9aad0b10af3d",
+     "identical": true
+    },
+    "coordinator_result.json": {
+     "origin_main": "4f510152a3f059c5457ee78bcc439a2b3e7ff980",
+     "read": "4f510152a3f059c5457ee78bcc439a2b3e7ff980",
+     "identical": true
+    }
+   },
+   "coordinator_counts_monitor": {
+    "submitted_monitor": 8172,
+    "budget_refusal_monitor": null,
+    "c5_dash_held": 59777,
+    "c5_decrease": 223
+   }
+  },
+  {
+   "cell": "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-uo",
+   "seed": 5,
+   "is_base": false,
+   "monitor_opportunities": 11769,
+   "released_monitors_with_a_request_row": 8347,
+   "deadline_s_distinct": [
+    1.0
+   ],
+   "measured_monitor_first_token_s": {
+    "n": 8347,
+    "min": 0.1244,
+    "p25": 0.3481,
+    "p50": 0.4825,
+    "p75": 0.6354,
+    "p90": 0.8063,
+    "p99": 1.5934,
+    "max": 5.5053,
+    "mean": 0.5266,
+    "distinct_values": 8305
+   },
+   "hold_at_release_s": {
+    "n": 8347,
+    "min": 0.0579,
+    "p25": 0.4251,
+    "p50": 0.7237,
+    "p75": 0.8691,
+    "p90": 0.9535,
+    "p99": 1.0074,
+    "max": 1.0775,
+    "mean": 0.6385,
+    "distinct_values": 8289
+   },
+   "monitor_uncached_tokens": {
+    "n": 8347,
+    "min": 366.0,
+    "p25": 370.0,
+    "p50": 376.0,
+    "p75": 704.0,
+    "p90": 1056.0,
+    "p99": 2068.0,
+    "max": 7140.0,
+    "mean": 552.2,
+    "distinct_values": 78
+   },
+   "queued_ahead_uncached_tokens_RECONSTRUCTED": {
+    "n": 8347,
+    "min": 366.0,
+    "p25": 1812.0,
+    "p50": 2514.0,
+    "p75": 3283.0,
+    "p90": 4324.0,
+    "p99": 8761.0,
+    "max": 26716.0,
+    "mean": 2765.4,
+    "distinct_values": 2291
+   },
+   "d162_predicted_first_token_s": {
+    "n": 8347,
+    "min": 0.1908,
+    "p25": 0.421,
+    "p50": 0.5359,
+    "p75": 0.6899,
+    "p90": 0.8656,
+    "p99": 1.6832,
+    "max": 4.4237,
+    "mean": 0.5932,
+    "distinct_values": 5335
+   },
+   "variants": {
+    "const_user_0.44": {
+     "_note": "predictor (i) with the USER'S constant 0.44 s, i.e. the hold threshold 0.56 s. A CONSTANT: it cannot distinguish requests.",
+     "doa": 5625,
+     "live": 2722,
+     "doa_share_of_released": 0.6739,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 5318,
+      "flagged_but_would_have_MET_FP": 307,
+      "not_flagged_and_missed_FN": 521,
+      "not_flagged_and_met_TN": 2201,
+      "precision": 0.9454,
+      "recall": 0.9108,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 3645.675,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.6987,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.564,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 5625,
+      "min": 0.16,
+      "p25": 0.4454,
+      "p50": 0.5873,
+      "p75": 0.7561,
+      "p90": 0.9948,
+      "p99": 1.8943,
+      "max": 4.55,
+      "mean": 0.648,
+      "distinct_values": 5599
+     },
+     "slot_seconds_live": {
+      "n": 2722,
+      "min": 0.15,
+      "p25": 0.4163,
+      "p50": 0.5542,
+      "p75": 0.6977,
+      "p90": 0.8489,
+      "p99": 1.2244,
+      "max": 5.993,
+      "mean": 0.577,
+      "distinct_values": 2716
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 5625,
+      "min": 0.134,
+      "p25": 0.3503,
+      "p50": 0.4908,
+      "p75": 0.6548,
+      "p90": 0.8607,
+      "p99": 1.7323,
+      "max": 4.53,
+      "mean": 0.544,
+      "distinct_values": 5605
+     },
+     "mean_live_occupancy_s": 0.5775,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3406774
+    },
+    "const_cell_own_median": {
+     "_note": "predictor (i) with THIS CELL'S own median monitor first-token time (0.4825 s), threshold 0.5175 s. Still a constant.",
+     "doa": 5873,
+     "live": 2474,
+     "doa_share_of_released": 0.7036,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 5472,
+      "flagged_but_would_have_MET_FP": 401,
+      "not_flagged_and_missed_FN": 367,
+      "not_flagged_and_met_TN": 2107,
+      "precision": 0.9317,
+      "recall": 0.9371,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 3804.539,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.7292,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.5886,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 5873,
+      "min": 0.16,
+      "p25": 0.4465,
+      "p50": 0.5873,
+      "p75": 0.7554,
+      "p90": 0.989,
+      "p99": 1.8943,
+      "max": 4.55,
+      "mean": 0.648,
+      "distinct_values": 5844
+     },
+     "slot_seconds_live": {
+      "n": 2474,
+      "min": 0.15,
+      "p25": 0.4107,
+      "p50": 0.5508,
+      "p75": 0.6925,
+      "p90": 0.8406,
+      "p99": 1.2131,
+      "max": 5.993,
+      "mean": 0.571,
+      "distinct_values": 2469
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 5873,
+      "min": 0.134,
+      "p25": 0.3529,
+      "p50": 0.4916,
+      "p75": 0.6555,
+      "p90": 0.8562,
+      "p99": 1.7323,
+      "max": 4.53,
+      "mean": 0.545,
+      "distinct_values": 5852
+     },
+     "mean_live_occupancy_s": 0.5711,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3519986
+    },
+    "d162_model": {
+     "_note": "predictor (ii), the committed D162 model on this request's own observed uncached and the reconstructed queued-ahead. VARIES per request but IS A MODEL.",
+     "doa": 6124,
+     "live": 2223,
+     "doa_share_of_released": 0.7337,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 5664,
+      "flagged_but_would_have_MET_FP": 460,
+      "not_flagged_and_missed_FN": 175,
+      "not_flagged_and_met_TN": 2048,
+      "precision": 0.9249,
+      "recall": 0.97,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 4083.374,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.7826,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.6318,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 6124,
+      "min": 0.16,
+      "p25": 0.4609,
+      "p50": 0.6073,
+      "p75": 0.7743,
+      "p90": 1.0004,
+      "p99": 1.8993,
+      "max": 5.993,
+      "mean": 0.667,
+      "distinct_values": 6095
+     },
+     "slot_seconds_live": {
+      "n": 2223,
+      "min": 0.15,
+      "p25": 0.3792,
+      "p50": 0.5019,
+      "p75": 0.6251,
+      "p90": 0.74,
+      "p99": 1.0295,
+      "max": 2.219,
+      "mean": 0.51,
+      "distinct_values": 2217
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 6124,
+      "min": 0.134,
+      "p25": 0.3698,
+      "p50": 0.5088,
+      "p75": 0.6757,
+      "p90": 0.8753,
+      "p99": 1.7732,
+      "max": 5.505,
+      "mean": 0.564,
+      "distinct_values": 6102
+     },
+     "mean_live_occupancy_s": 0.5102,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3681510
+    },
+    "oracle_measured_engine_first_token": {
+     "_note": "NOT A CANDIDATE PREDICTOR. The request's own measured engine first token, which no arm has at release. Reported only as the consistency anchor for check 7.",
+     "doa": 5839,
+     "live": 2508,
+     "doa_share_of_released": 0.6995,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 5839,
+      "flagged_but_would_have_MET_FP": 0,
+      "not_flagged_and_missed_FN": 0,
+      "not_flagged_and_met_TN": 2508,
+      "precision": 1.0,
+      "recall": 1.0,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 3965.116,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.76,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.6135,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 5839,
+      "min": 0.16,
+      "p25": 0.4754,
+      "p50": 0.6174,
+      "p75": 0.7873,
+      "p90": 1.0142,
+      "p99": 1.9324,
+      "max": 5.993,
+      "mean": 0.679,
+      "distinct_values": 5812
+     },
+     "slot_seconds_live": {
+      "n": 2508,
+      "min": 0.15,
+      "p25": 0.368,
+      "p50": 0.4851,
+      "p75": 0.6132,
+      "p90": 0.7329,
+      "p99": 0.9995,
+      "max": 2.219,
+      "mean": 0.499,
+      "distinct_values": 2499
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 5839,
+      "min": 0.134,
+      "p25": 0.3895,
+      "p50": 0.5231,
+      "p75": 0.6873,
+      "p90": 0.8908,
+      "p99": 1.7792,
+      "max": 5.505,
+      "mean": 0.578,
+      "distinct_values": 5817
+     },
+     "mean_live_occupancy_s": 0.4994,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3528168
+    },
+    "const_user_0.44_plus_forward_hop": {
+     "_note": "SENSITIVITY: the committed scorer delivers at first token PLUS a 0.0222 s forward hop, so a rule that ignores the hop is slightly lenient. Same constant, deadline effectively 0.9778 s.",
+     "doa": 5750,
+     "live": 2597,
+     "doa_share_of_released": 0.6889,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 5404,
+      "flagged_but_would_have_MET_FP": 346,
+      "not_flagged_and_missed_FN": 435,
+      "not_flagged_and_met_TN": 2162,
+      "precision": 0.9398,
+      "recall": 0.9255,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 3727.799,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.7145,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.5768,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 5750,
+      "min": 0.16,
+      "p25": 0.4465,
+      "p50": 0.5876,
+      "p75": 0.7566,
+      "p90": 0.9917,
+      "p99": 1.8943,
+      "max": 4.55,
+      "mean": 0.648,
+      "distinct_values": 5722
+     },
+     "slot_seconds_live": {
+      "n": 2597,
+      "min": 0.15,
+      "p25": 0.4138,
+      "p50": 0.5527,
+      "p75": 0.6946,
+      "p90": 0.8433,
+      "p99": 1.2244,
+      "max": 5.993,
+      "mean": 0.574,
+      "distinct_values": 2591
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 5750,
+      "min": 0.134,
+      "p25": 0.3519,
+      "p50": 0.4916,
+      "p75": 0.6557,
+      "p90": 0.8607,
+      "p99": 1.7323,
+      "max": 4.53,
+      "mean": 0.545,
+      "distinct_values": 5730
+     },
+     "mean_live_occupancy_s": 0.5736,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3464970
+    }
+   },
+   "traced_unit": {
+    "_what": "one DOA monitor at the MEDIAN hold of this cell's DOA population. Every quantity the rule and the estimate use, with the arithmetic shown.",
+    "opportunity_id": "opp0000810",
+    "device_id": "dash002",
+    "t_opportunity": 93.890822,
+    "deadline_s": 1.0,
+    "t_submit": 94.715111,
+    "hold_at_release_s": 0.8243,
+    "deadline_remaining_at_release_s": 0.1757,
+    "prompt_minus_cached_uncached_tokens": 370,
+    "queued_ahead_uncached_tokens_RECONSTRUCTED": 1484,
+    "predictor_i_constant_user_s": 0.44,
+    "predictor_i_constant_cell_median_s": 0.4825,
+    "predictor_ii_d162_s": 0.3632,
+    "predictor_ii_arithmetic": "0.067798 + 0.0001824313 * 370 + 0.0001535807 * 1484 = 0.3632",
+    "measured_engine_first_token_s": 0.2826,
+    "doa_under_i_user": true,
+    "doa_under_ii_d162": true,
+    "doa_under_oracle": true,
+    "t_done": 95.051962,
+    "slot_seconds_this_request_occupied": 0.3369,
+    "slot_seconds_to_first_token_ALTERNATIVE_NOT_USED": 0.2826,
+    "t_delivered_age_s": 1.129,
+    "outcome": "latency_miss: delivered age 1.1290 s against a 1.0 s deadline",
+    "what_bound_it": "RELEASE DELAY: 82 percent of the deadline was already spent before the engine saw the request, and the engine's own first token then needed 0.2826 s more. Neither the KV budget nor the accelerator budget refused it: this cell's budget_refusal_monitor is ABSENT, and an absent Counter key is zero.",
+    "what_the_rule_would_have_done": "not released it; the device answers. The slot it held for 0.3369 s is freed, and under EP-G its 370 uncached tokens are STILL prefilled by the episode's next request, so no prefill work is saved."
+   },
+   "constructed_bounds": {
+    "const_user_0.44": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 3645.675,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 307,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 1944,
+     "mean_live_monitor_occupancy_s": 0.5775,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 6312.9,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 2251,
+     "not_released_total": 3422,
+     "upper_bound_on_time_instants_recoverable": 2251,
+     "as_share_of_monitor_opportunities": 0.1913,
+     "committed_on_time": 2374,
+     "bound_as_share_of_committed_on_time": 0.9482,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    },
+    "const_cell_own_median": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 3804.539,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 401,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 1841,
+     "mean_live_monitor_occupancy_s": 0.5711,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 6661.8,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 2242,
+     "not_released_total": 3422,
+     "upper_bound_on_time_instants_recoverable": 2242,
+     "as_share_of_monitor_opportunities": 0.1905,
+     "committed_on_time": 2374,
+     "bound_as_share_of_committed_on_time": 0.9444,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    },
+    "d162_model": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 4083.374,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 460,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 1482,
+     "mean_live_monitor_occupancy_s": 0.5102,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 8003.5,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 1942,
+     "not_released_total": 3422,
+     "upper_bound_on_time_instants_recoverable": 1942,
+     "as_share_of_monitor_opportunities": 0.165,
+     "committed_on_time": 2374,
+     "bound_as_share_of_committed_on_time": 0.818,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    }
+   },
+   "slot_seconds": {
+    "_which_interval": "t_done - t_submit. The C5 cap counts in_flight['monitor'], incremented at submit (coordinator.py:1184) and decremented in _collect when the future completes (coordinator.py:1300), so the slot is held to t_done and not to the first token.",
+    "all_released_monitors_total_slot_seconds": 5217.531,
+    "mean_cap_from_reconcile_cap_trajectory": 5.3862,
+    "wall_clock_s": 1200.0,
+    "run_slot_second_capacity_wall_times_mean_cap": 6463.4,
+    "monitor_share_of_that_capacity": 0.8072
+   },
+   "control_e": {
+    "_claim_1": "the released population must equal dashcam_ontime_reconcile.json's four released buckets, zero tolerance",
+    "reconcile_released": 8347,
+    "this_run_released": 8347,
+    "pass_1": true,
+    "_claim_2": "the DOA count under the ORACLE predictor must equal that file's late_at_release + late_at_first_token, zero tolerance: a monitor whose hold plus its own measured engine first token exceeds 1.0 s is exactly one that missed at or before its first token",
+    "reconcile_late_at_release_plus_late_at_first_token": 5839,
+    "this_run_oracle_doa": 5839,
+    "pass_2": true,
+    "_claim_3": "hold > 1.0 s must equal that file's late_at_release bucket: the user's 'released after the whole deadline had already passed' figure",
+    "reconcile_late_at_release": 187,
+    "this_run_hold_over_deadline": 187,
+    "pass_3": true,
+    "_claim_4": "every monitor row's own deadline_s must be 1.0 s, read not assumed: a per-row deadline of anything else makes every threshold here wrong",
+    "deadline_s_distinct": [
+     1.0
+    ],
+    "pass_4": true
+   },
+   "user_figures": {
+    "share_held_over_0.56_s_at_release": 0.6739,
+    "share_held_over_the_whole_1.0_s_deadline": 0.0224
+   },
+   "prefix_caching": {
+    "enabled": true,
+    "prefix_cache_hits_total_max": 28728624,
+    "prefix_cache_queries_total_max": 36089269,
+    "hit_fraction": 0.796,
+    "label": "WARM SERVER: every latency in this cell was served with prefix caching on; none of these numbers is a cold prefill"
+   },
+   "runs_blob_check": {
+    "request.jsonl.gz": {
+     "origin_main": "e37e6e99cf31f1fb59fd96515a119c3627be4a9b",
+     "read": "e37e6e99cf31f1fb59fd96515a119c3627be4a9b",
+     "identical": true
+    },
+    "outcomes.jsonl.gz": {
+     "origin_main": "5041e6c55e5a229f922c6c33adb41e06baca757c",
+     "read": "5041e6c55e5a229f922c6c33adb41e06baca757c",
+     "identical": true
+    },
+    "coordinator_result.json": {
+     "origin_main": "7d7b7e12a8ac69b546bbe5daec778e4fdfae64fa",
+     "read": "7d7b7e12a8ac69b546bbe5daec778e4fdfae64fa",
+     "identical": true
+    }
+   },
+   "coordinator_counts_monitor": {
+    "submitted_monitor": 8351,
+    "budget_refusal_monitor": null,
+    "c5_dash_held": 59453,
+    "c5_decrease": 188
+   }
+  },
+  {
+   "cell": "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "covex-v6-state-uo",
+   "seed": 6,
+   "is_base": false,
+   "monitor_opportunities": 11786,
+   "released_monitors_with_a_request_row": 8686,
+   "deadline_s_distinct": [
+    1.0
+   ],
+   "measured_monitor_first_token_s": {
+    "n": 8686,
+    "min": 0.1294,
+    "p25": 0.3497,
+    "p50": 0.4847,
+    "p75": 0.6241,
+    "p90": 0.7956,
+    "p99": 1.7737,
+    "max": 6.7619,
+    "mean": 0.5319,
+    "distinct_values": 8632
+   },
+   "hold_at_release_s": {
+    "n": 8686,
+    "min": 0.0499,
+    "p25": 0.2982,
+    "p50": 0.6391,
+    "p75": 0.8431,
+    "p90": 0.9423,
+    "p99": 1.0104,
+    "max": 1.0536,
+    "mean": 0.5809,
+    "distinct_values": 8629
+   },
+   "monitor_uncached_tokens": {
+    "n": 8686,
+    "min": 366.0,
+    "p25": 370.0,
+    "p50": 374.0,
+    "p75": 380.0,
+    "p90": 1056.0,
+    "p99": 2394.0,
+    "max": 7140.0,
+    "mean": 530.8,
+    "distinct_values": 84
+   },
+   "queued_ahead_uncached_tokens_RECONSTRUCTED": {
+    "n": 8686,
+    "min": 366.0,
+    "p25": 1850.0,
+    "p50": 2534.0,
+    "p75": 3272.0,
+    "p90": 4305.0,
+    "p99": 10659.0,
+    "max": 31717.0,
+    "mean": 2830.4,
+    "distinct_values": 2305
+   },
+   "d162_predicted_first_token_s": {
+    "n": 8686,
+    "min": 0.1908,
+    "p25": 0.4219,
+    "p50": 0.5342,
+    "p75": 0.682,
+    "p90": 0.8507,
+    "p99": 2.0705,
+    "max": 5.4303,
+    "mean": 0.5993,
+    "distinct_values": 5231
+   },
+   "variants": {
+    "const_user_0.44": {
+     "_note": "predictor (i) with the USER'S constant 0.44 s, i.e. the hold threshold 0.56 s. A CONSTANT: it cannot distinguish requests.",
+     "doa": 4969,
+     "live": 3717,
+     "doa_share_of_released": 0.5721,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 4610,
+      "flagged_but_would_have_MET_FP": 359,
+      "not_flagged_and_missed_FN": 669,
+      "not_flagged_and_met_TN": 3048,
+      "precision": 0.9278,
+      "recall": 0.8733,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 3337.185,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.6115,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.4926,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 4969,
+      "min": 0.163,
+      "p25": 0.4457,
+      "p50": 0.5808,
+      "p75": 0.7539,
+      "p90": 1.0004,
+      "p99": 2.5672,
+      "max": 6.802,
+      "mean": 0.672,
+      "distinct_values": 4949
+     },
+     "slot_seconds_live": {
+      "n": 3717,
+      "min": 0.156,
+      "p25": 0.4239,
+      "p50": 0.5546,
+      "p75": 0.6772,
+      "p90": 0.8216,
+      "p99": 1.1863,
+      "max": 2.219,
+      "mean": 0.57,
+      "distinct_values": 3707
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 4969,
+      "min": 0.129,
+      "p25": 0.3475,
+      "p50": 0.4911,
+      "p75": 0.6464,
+      "p90": 0.873,
+      "p99": 2.3745,
+      "max": 6.762,
+      "mean": 0.564,
+      "distinct_values": 4955
+     },
+     "mean_live_occupancy_s": 0.5703,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3012060
+    },
+    "const_cell_own_median": {
+     "_note": "predictor (i) with THIS CELL'S own median monitor first-token time (0.4847 s), threshold 0.5153 s. Still a constant.",
+     "doa": 5293,
+     "live": 3393,
+     "doa_share_of_released": 0.6094,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 4789,
+      "flagged_but_would_have_MET_FP": 504,
+      "not_flagged_and_missed_FN": 490,
+      "not_flagged_and_met_TN": 2903,
+      "precision": 0.9048,
+      "recall": 0.9072,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 3531.635,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.6472,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.5213,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 5293,
+      "min": 0.163,
+      "p25": 0.4457,
+      "p50": 0.5792,
+      "p75": 0.7502,
+      "p90": 0.9909,
+      "p99": 2.52,
+      "max": 6.802,
+      "mean": 0.667,
+      "distinct_values": 5270
+     },
+     "slot_seconds_live": {
+      "n": 3393,
+      "min": 0.156,
+      "p25": 0.4216,
+      "p50": 0.5544,
+      "p75": 0.6761,
+      "p90": 0.8192,
+      "p99": 1.1737,
+      "max": 2.219,
+      "mean": 0.567,
+      "distinct_values": 3386
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 5293,
+      "min": 0.129,
+      "p25": 0.3495,
+      "p50": 0.4908,
+      "p75": 0.6435,
+      "p90": 0.8676,
+      "p99": 2.3504,
+      "max": 6.762,
+      "mean": 0.561,
+      "distinct_values": 5276
+     },
+     "mean_live_occupancy_s": 0.5675,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3156988
+    },
+    "d162_model": {
+     "_note": "predictor (ii), the committed D162 model on this request's own observed uncached and the reconstructed queued-ahead. VARIES per request but IS A MODEL.",
+     "doa": 5612,
+     "live": 3074,
+     "doa_share_of_released": 0.6461,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 5065,
+      "flagged_but_would_have_MET_FP": 547,
+      "not_flagged_and_missed_FN": 214,
+      "not_flagged_and_met_TN": 2860,
+      "precision": 0.9025,
+      "recall": 0.9595,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 3873.429,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.7098,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.5717,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 5612,
+      "min": 0.163,
+      "p25": 0.4677,
+      "p50": 0.6116,
+      "p75": 0.7819,
+      "p90": 1.0116,
+      "p99": 2.4646,
+      "max": 6.802,
+      "mean": 0.69,
+      "distinct_values": 5588
+     },
+     "slot_seconds_live": {
+      "n": 3074,
+      "min": 0.156,
+      "p25": 0.3901,
+      "p50": 0.5119,
+      "p75": 0.6259,
+      "p90": 0.7351,
+      "p99": 0.9769,
+      "max": 1.182,
+      "mean": 0.515,
+      "distinct_values": 3066
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 5612,
+      "min": 0.129,
+      "p25": 0.3751,
+      "p50": 0.5174,
+      "p75": 0.6802,
+      "p90": 0.8843,
+      "p99": 2.3129,
+      "max": 6.762,
+      "mean": 0.585,
+      "distinct_values": 5597
+     },
+     "mean_live_occupancy_s": 0.5152,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3361912
+    },
+    "oracle_measured_engine_first_token": {
+     "_note": "NOT A CANDIDATE PREDICTOR. The request's own measured engine first token, which no arm has at release. Reported only as the consistency anchor for check 7.",
+     "doa": 5279,
+     "live": 3407,
+     "doa_share_of_released": 0.6078,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 5279,
+      "flagged_but_would_have_MET_FP": 0,
+      "not_flagged_and_missed_FN": 0,
+      "not_flagged_and_met_TN": 3407,
+      "precision": 1.0,
+      "recall": 1.0,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 3746.066,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.6865,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.5529,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 5279,
+      "min": 0.165,
+      "p25": 0.4904,
+      "p50": 0.6273,
+      "p75": 0.7954,
+      "p90": 1.0289,
+      "p99": 2.52,
+      "max": 6.802,
+      "mean": 0.71,
+      "distinct_values": 5258
+     },
+     "slot_seconds_live": {
+      "n": 3407,
+      "min": 0.156,
+      "p25": 0.3736,
+      "p50": 0.4961,
+      "p75": 0.6153,
+      "p90": 0.7205,
+      "p99": 0.9573,
+      "max": 2.017,
+      "mean": 0.502,
+      "distinct_values": 3398
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 5279,
+      "min": 0.129,
+      "p25": 0.399,
+      "p50": 0.5339,
+      "p75": 0.6983,
+      "p90": 0.912,
+      "p99": 2.3504,
+      "max": 6.762,
+      "mean": 0.606,
+      "distinct_values": 5267
+     },
+     "mean_live_occupancy_s": 0.5022,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3182984
+    },
+    "const_user_0.44_plus_forward_hop": {
+     "_note": "SENSITIVITY: the committed scorer delivers at first token PLUS a 0.0222 s forward hop, so a rule that ignores the hop is slightly lenient. Same constant, deadline effectively 0.9778 s.",
+     "doa": 5136,
+     "live": 3550,
+     "doa_share_of_released": 0.5913,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 4708,
+      "flagged_but_would_have_MET_FP": 428,
+      "not_flagged_and_missed_FN": 571,
+      "not_flagged_and_met_TN": 2979,
+      "precision": 0.9167,
+      "recall": 0.8918,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 3440.109,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.6304,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.5078,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 5136,
+      "min": 0.163,
+      "p25": 0.4459,
+      "p50": 0.58,
+      "p75": 0.7518,
+      "p90": 0.9983,
+      "p99": 2.5205,
+      "max": 6.802,
+      "mean": 0.67,
+      "distinct_values": 5114
+     },
+     "slot_seconds_live": {
+      "n": 3550,
+      "min": 0.156,
+      "p25": 0.4219,
+      "p50": 0.5546,
+      "p75": 0.6761,
+      "p90": 0.8197,
+      "p99": 1.1737,
+      "max": 2.219,
+      "mean": 0.568,
+      "distinct_values": 3541
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 5136,
+      "min": 0.129,
+      "p25": 0.3491,
+      "p50": 0.4913,
+      "p75": 0.645,
+      "p90": 0.8723,
+      "p99": 2.3596,
+      "max": 6.762,
+      "mean": 0.563,
+      "distinct_values": 5120
+     },
+     "mean_live_occupancy_s": 0.5681,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 3087170
+    }
+   },
+   "traced_unit": {
+    "_what": "one DOA monitor at the MEDIAN hold of this cell's DOA population. Every quantity the rule and the estimate use, with the arithmetic shown.",
+    "opportunity_id": "opp0003785",
+    "device_id": "dash000",
+    "t_opportunity": 382.061879,
+    "deadline_s": 1.0,
+    "t_submit": 382.879413,
+    "hold_at_release_s": 0.8175,
+    "deadline_remaining_at_release_s": 0.1825,
+    "prompt_minus_cached_uncached_tokens": 380,
+    "queued_ahead_uncached_tokens_RECONSTRUCTED": 2550,
+    "predictor_i_constant_user_s": 0.44,
+    "predictor_i_constant_cell_median_s": 0.4847,
+    "predictor_ii_d162_s": 0.5288,
+    "predictor_ii_arithmetic": "0.067798 + 0.0001824313 * 380 + 0.0001535807 * 2550 = 0.5288",
+    "measured_engine_first_token_s": 0.5332,
+    "doa_under_i_user": true,
+    "doa_under_ii_d162": true,
+    "doa_under_oracle": true,
+    "t_done": 383.493303,
+    "slot_seconds_this_request_occupied": 0.6139,
+    "slot_seconds_to_first_token_ALTERNATIVE_NOT_USED": 0.5332,
+    "t_delivered_age_s": 1.3729,
+    "outcome": "latency_miss: delivered age 1.3729 s against a 1.0 s deadline",
+    "what_bound_it": "RELEASE DELAY: 82 percent of the deadline was already spent before the engine saw the request, and the engine's own first token then needed 0.5332 s more. Neither the KV budget nor the accelerator budget refused it: this cell's budget_refusal_monitor is ABSENT, and an absent Counter key is zero.",
+    "what_the_rule_would_have_done": "not released it; the device answers. The slot it held for 0.6139 s is freed, and under EP-G its 380 uncached tokens are STILL prefilled by the episode's next request, so no prefill work is saved."
+   },
+   "constructed_bounds": {
+    "const_user_0.44": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 3337.185,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 359,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 1355,
+     "mean_live_monitor_occupancy_s": 0.5703,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 5851.6,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 1714,
+     "not_released_total": 3100,
+     "upper_bound_on_time_instants_recoverable": 1714,
+     "as_share_of_monitor_opportunities": 0.1454,
+     "committed_on_time": 3250,
+     "bound_as_share_of_committed_on_time": 0.5274,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    },
+    "const_cell_own_median": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 3531.635,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 504,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 1200,
+     "mean_live_monitor_occupancy_s": 0.5675,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 6223.1,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 1704,
+     "not_released_total": 3100,
+     "upper_bound_on_time_instants_recoverable": 1704,
+     "as_share_of_monitor_opportunities": 0.1446,
+     "committed_on_time": 3250,
+     "bound_as_share_of_committed_on_time": 0.5243,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    },
+    "d162_model": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 3873.429,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 547,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 911,
+     "mean_live_monitor_occupancy_s": 0.5152,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 7518.3,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 1458,
+     "not_released_total": 3100,
+     "upper_bound_on_time_instants_recoverable": 1458,
+     "as_share_of_monitor_opportunities": 0.1237,
+     "committed_on_time": 3250,
+     "bound_as_share_of_committed_on_time": 0.4486,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    }
+   },
+   "slot_seconds": {
+    "_which_interval": "t_done - t_submit. The C5 cap counts in_flight['monitor'], incremented at submit (coordinator.py:1184) and decremented in _collect when the future completes (coordinator.py:1300), so the slot is held to t_done and not to the first token.",
+    "all_released_monitors_total_slot_seconds": 5457.002,
+    "mean_cap_from_reconcile_cap_trajectory": 5.646,
+    "wall_clock_s": 1200.0,
+    "run_slot_second_capacity_wall_times_mean_cap": 6775.2,
+    "monitor_share_of_that_capacity": 0.8054
+   },
+   "control_e": {
+    "_claim_1": "the released population must equal dashcam_ontime_reconcile.json's four released buckets, zero tolerance",
+    "reconcile_released": 8686,
+    "this_run_released": 8686,
+    "pass_1": true,
+    "_claim_2": "the DOA count under the ORACLE predictor must equal that file's late_at_release + late_at_first_token, zero tolerance: a monitor whose hold plus its own measured engine first token exceeds 1.0 s is exactly one that missed at or before its first token",
+    "reconcile_late_at_release_plus_late_at_first_token": 5279,
+    "this_run_oracle_doa": 5279,
+    "pass_2": true,
+    "_claim_3": "hold > 1.0 s must equal that file's late_at_release bucket: the user's 'released after the whole deadline had already passed' figure",
+    "reconcile_late_at_release": 244,
+    "this_run_hold_over_deadline": 244,
+    "pass_3": true,
+    "_claim_4": "every monitor row's own deadline_s must be 1.0 s, read not assumed: a per-row deadline of anything else makes every threshold here wrong",
+    "deadline_s_distinct": [
+     1.0
+    ],
+    "pass_4": true
+   },
+   "user_figures": {
+    "share_held_over_0.56_s_at_release": 0.5721,
+    "share_held_over_the_whole_1.0_s_deadline": 0.0281
+   },
+   "prefix_caching": {
+    "enabled": true,
+    "prefix_cache_hits_total_max": 32789936,
+    "prefix_cache_queries_total_max": 39935573,
+    "hit_fraction": 0.8211,
+    "label": "WARM SERVER: every latency in this cell was served with prefix caching on; none of these numbers is a cold prefill"
+   },
+   "runs_blob_check": {
+    "request.jsonl.gz": {
+     "origin_main": "8042eeb12ad58f21daa7743f07fe09e52c91e54f",
+     "read": "8042eeb12ad58f21daa7743f07fe09e52c91e54f",
+     "identical": true
+    },
+    "outcomes.jsonl.gz": {
+     "origin_main": "d459bf3a8d305e8dbfee03e24d8564e6b71d6f34",
+     "read": "d459bf3a8d305e8dbfee03e24d8564e6b71d6f34",
+     "identical": true
+    },
+    "coordinator_result.json": {
+     "origin_main": "d36d69117803830463f625b4a5f264a605731554",
+     "read": "d36d69117803830463f625b4a5f264a605731554",
+     "identical": true
+    }
+   },
+   "coordinator_counts_monitor": {
+    "submitted_monitor": 8689,
+    "budget_refusal_monitor": null,
+    "c5_dash_held": 58705,
+    "c5_decrease": 206
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "arm": "hybrid-F-lhreq-noc3",
+   "seed": 4,
+   "is_base": true,
+   "monitor_opportunities": 11764,
+   "released_monitors_with_a_request_row": 9743,
+   "deadline_s_distinct": [
+    1.0
+   ],
+   "measured_monitor_first_token_s": {
+    "n": 9743,
+    "min": 0.12,
+    "p25": 0.3176,
+    "p50": 0.4385,
+    "p75": 0.5532,
+    "p90": 0.6927,
+    "p99": 2.0244,
+    "max": 2.9967,
+    "mean": 0.4777,
+    "distinct_values": 9661
+   },
+   "hold_at_release_s": {
+    "n": 9743,
+    "min": 0.0485,
+    "p25": 0.1465,
+    "p50": 0.2997,
+    "p75": 0.6949,
+    "p90": 0.8879,
+    "p99": 1.0013,
+    "max": 1.0154,
+    "mean": 0.415,
+    "distinct_values": 9649
+   },
+   "monitor_uncached_tokens": {
+    "n": 9743,
+    "min": 366.0,
+    "p25": 370.0,
+    "p50": 374.0,
+    "p75": 378.0,
+    "p90": 1044.0,
+    "p99": 2056.0,
+    "max": 5450.0,
+    "mean": 479.7,
+    "distinct_values": 68
+   },
+   "queued_ahead_uncached_tokens_RECONSTRUCTED": {
+    "n": 9743,
+    "min": 366.0,
+    "p25": 1806.0,
+    "p50": 2246.0,
+    "p75": 2978.0,
+    "p90": 3860.0,
+    "p99": 10669.0,
+    "max": 26471.0,
+    "mean": 2598.9,
+    "distinct_values": 1852
+   },
+   "d162_predicted_first_token_s": {
+    "n": 9743,
+    "min": 0.1908,
+    "p25": 0.4197,
+    "p50": 0.5218,
+    "p75": 0.6022,
+    "p90": 0.7529,
+    "p99": 1.9262,
+    "max": 4.5109,
+    "mean": 0.5545,
+    "distinct_values": 4298
+   },
+   "variants": {
+    "const_user_0.44": {
+     "_note": "predictor (i) with the USER'S constant 0.44 s, i.e. the hold threshold 0.56 s. A CONSTANT: it cannot distinguish requests.",
+     "doa": 3316,
+     "live": 6427,
+     "doa_share_of_released": 0.3403,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 2983,
+      "flagged_but_would_have_MET_FP": 333,
+      "not_flagged_and_missed_FN": 593,
+      "not_flagged_and_met_TN": 5834,
+      "precision": 0.8996,
+      "recall": 0.8342,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 2085.448,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.379,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.2733,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 3316,
+      "min": 0.167,
+      "p25": 0.4128,
+      "p50": 0.5206,
+      "p75": 0.6634,
+      "p90": 0.9334,
+      "p99": 2.6161,
+      "max": 4.395,
+      "mean": 0.629,
+      "distinct_values": 3308
+     },
+     "slot_seconds_live": {
+      "n": 6427,
+      "min": 0.146,
+      "p25": 0.3936,
+      "p50": 0.5243,
+      "p75": 0.6317,
+      "p90": 0.7466,
+      "p99": 1.0437,
+      "max": 3.705,
+      "mean": 0.532,
+      "distinct_values": 6392
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 3316,
+      "min": 0.132,
+      "p25": 0.3273,
+      "p50": 0.4441,
+      "p75": 0.5798,
+      "p90": 0.8176,
+      "p99": 2.3519,
+      "max": 2.975,
+      "mean": 0.531,
+      "distinct_values": 3303
+     },
+     "mean_live_occupancy_s": 0.5317,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 1977814
+    },
+    "const_cell_own_median": {
+     "_note": "predictor (i) with THIS CELL'S own median monitor first-token time (0.4385 s), threshold 0.5615 s. Still a constant.",
+     "doa": 3307,
+     "live": 6436,
+     "doa_share_of_released": 0.3394,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 2977,
+      "flagged_but_would_have_MET_FP": 330,
+      "not_flagged_and_missed_FN": 599,
+      "not_flagged_and_met_TN": 5837,
+      "precision": 0.9002,
+      "recall": 0.8325,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 2080.28,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.378,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.2726,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 3307,
+      "min": 0.167,
+      "p25": 0.4123,
+      "p50": 0.5197,
+      "p75": 0.6638,
+      "p90": 0.9355,
+      "p99": 2.6161,
+      "max": 4.395,
+      "mean": 0.629,
+      "distinct_values": 3299
+     },
+     "slot_seconds_live": {
+      "n": 6436,
+      "min": 0.146,
+      "p25": 0.3938,
+      "p50": 0.5244,
+      "p75": 0.6314,
+      "p90": 0.7464,
+      "p99": 1.0437,
+      "max": 3.705,
+      "mean": 0.532,
+      "distinct_values": 6401
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 3307,
+      "min": 0.132,
+      "p25": 0.3269,
+      "p50": 0.444,
+      "p75": 0.5795,
+      "p90": 0.8176,
+      "p99": 2.3519,
+      "max": 2.975,
+      "mean": 0.531,
+      "distinct_values": 3294
+     },
+     "mean_live_occupancy_s": 0.5318,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 1974462
+    },
+    "d162_model": {
+     "_note": "predictor (ii), the committed D162 model on this request's own observed uncached and the reconstructed queued-ahead. VARIES per request but IS A MODEL.",
+     "doa": 3868,
+     "live": 5875,
+     "doa_share_of_released": 0.397,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 3289,
+      "flagged_but_would_have_MET_FP": 579,
+      "not_flagged_and_missed_FN": 287,
+      "not_flagged_and_met_TN": 5588,
+      "precision": 0.8503,
+      "recall": 0.9197,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 2578.645,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.4686,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.338,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 3868,
+      "min": 0.167,
+      "p25": 0.4437,
+      "p50": 0.5584,
+      "p75": 0.7245,
+      "p90": 0.9662,
+      "p99": 2.7174,
+      "max": 4.395,
+      "mean": 0.667,
+      "distinct_values": 3856
+     },
+     "slot_seconds_live": {
+      "n": 5875,
+      "min": 0.146,
+      "p25": 0.3735,
+      "p50": 0.5011,
+      "p75": 0.6081,
+      "p90": 0.6989,
+      "p99": 0.9197,
+      "max": 2.19,
+      "mean": 0.498,
+      "distinct_values": 5845
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 3868,
+      "min": 0.132,
+      "p25": 0.3596,
+      "p50": 0.4811,
+      "p75": 0.6383,
+      "p90": 0.8545,
+      "p99": 2.4366,
+      "max": 2.997,
+      "mean": 0.569,
+      "distinct_values": 3852
+     },
+     "mean_live_occupancy_s": 0.4978,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 2284048
+    },
+    "oracle_measured_engine_first_token": {
+     "_note": "NOT A CANDIDATE PREDICTOR. The request's own measured engine first token, which no arm has at release. Reported only as the consistency anchor for check 7.",
+     "doa": 3576,
+     "live": 6167,
+     "doa_share_of_released": 0.367,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 3576,
+      "flagged_but_would_have_MET_FP": 0,
+      "not_flagged_and_missed_FN": 0,
+      "not_flagged_and_met_TN": 6167,
+      "precision": 1.0,
+      "recall": 1.0,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 2470.286,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.4489,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.3238,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 3576,
+      "min": 0.167,
+      "p25": 0.4619,
+      "p50": 0.5776,
+      "p75": 0.7395,
+      "p90": 1.0007,
+      "p99": 2.7289,
+      "max": 4.395,
+      "mean": 0.691,
+      "distinct_values": 3569
+     },
+     "slot_seconds_live": {
+      "n": 6167,
+      "min": 0.146,
+      "p25": 0.3684,
+      "p50": 0.4952,
+      "p75": 0.6025,
+      "p90": 0.6963,
+      "p99": 0.8905,
+      "max": 2.023,
+      "mean": 0.492,
+      "distinct_values": 6135
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 3576,
+      "min": 0.134,
+      "p25": 0.3813,
+      "p50": 0.5041,
+      "p75": 0.6677,
+      "p90": 0.8962,
+      "p99": 2.4454,
+      "max": 2.997,
+      "mean": 0.596,
+      "distinct_values": 3561
+     },
+     "mean_live_occupancy_s": 0.4918,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 2117462
+    },
+    "const_user_0.44_plus_forward_hop": {
+     "_note": "SENSITIVITY: the committed scorer delivers at first token PLUS a 0.0222 s forward hop, so a rule that ignores the hop is slightly lenient. Same constant, deadline effectively 0.9778 s.",
+     "doa": 3440,
+     "live": 6303,
+     "doa_share_of_released": 0.3531,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 3055,
+      "flagged_but_would_have_MET_FP": 385,
+      "not_flagged_and_missed_FN": 521,
+      "not_flagged_and_met_TN": 5782,
+      "precision": 0.8881,
+      "recall": 0.8543,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 2157.345,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.392,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.2827,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 3440,
+      "min": 0.167,
+      "p25": 0.4135,
+      "p50": 0.5211,
+      "p75": 0.6621,
+      "p90": 0.9245,
+      "p99": 2.6118,
+      "max": 4.395,
+      "mean": 0.627,
+      "distinct_values": 3431
+     },
+     "slot_seconds_live": {
+      "n": 6303,
+      "min": 0.146,
+      "p25": 0.3924,
+      "p50": 0.524,
+      "p75": 0.6312,
+      "p90": 0.7458,
+      "p99": 1.0292,
+      "max": 3.705,
+      "mean": 0.531,
+      "distinct_values": 6269
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 3440,
+      "min": 0.132,
+      "p25": 0.3285,
+      "p50": 0.4455,
+      "p75": 0.5795,
+      "p90": 0.8109,
+      "p99": 2.3488,
+      "max": 2.975,
+      "mean": 0.53,
+      "distinct_values": 3426
+     },
+     "mean_live_occupancy_s": 0.5308,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 2037672
+    }
+   },
+   "traced_unit": {
+    "_what": "one DOA monitor at the MEDIAN hold of this cell's DOA population. Every quantity the rule and the estimate use, with the arithmetic shown.",
+    "opportunity_id": "opp0000558",
+    "device_id": "dash003",
+    "t_opportunity": 71.136009,
+    "deadline_s": 1.0,
+    "t_submit": 71.93452,
+    "hold_at_release_s": 0.7985,
+    "deadline_remaining_at_release_s": 0.2015,
+    "prompt_minus_cached_uncached_tokens": 704,
+    "queued_ahead_uncached_tokens_RECONSTRUCTED": 2502,
+    "predictor_i_constant_user_s": 0.44,
+    "predictor_i_constant_cell_median_s": 0.4385,
+    "predictor_ii_d162_s": 0.5805,
+    "predictor_ii_arithmetic": "0.067798 + 0.0001824313 * 704 + 0.0001535807 * 2502 = 0.5805",
+    "measured_engine_first_token_s": 0.3838,
+    "doa_under_i_user": true,
+    "doa_under_ii_d162": true,
+    "doa_under_oracle": true,
+    "t_done": 72.371159,
+    "slot_seconds_this_request_occupied": 0.4366,
+    "slot_seconds_to_first_token_ALTERNATIVE_NOT_USED": 0.3838,
+    "t_delivered_age_s": 1.2045,
+    "outcome": "latency_miss: delivered age 1.2045 s against a 1.0 s deadline",
+    "what_bound_it": "RELEASE DELAY: 80 percent of the deadline was already spent before the engine saw the request, and the engine's own first token then needed 0.3838 s more. Neither the KV budget nor the accelerator budget refused it: this cell's budget_refusal_monitor is ABSENT, and an absent Counter key is zero.",
+    "what_the_rule_would_have_done": "not released it; the device answers. The slot it held for 0.4366 s is freed, and under EP-G its 704 uncached tokens are STILL prefilled by the episode's next request, so no prefill work is saved."
+   },
+   "constructed_bounds": {
+    "const_user_0.44": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 2085.448,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 333,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 592,
+     "mean_live_monitor_occupancy_s": 0.5317,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 3922.2,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 925,
+     "not_released_total": 2021,
+     "upper_bound_on_time_instants_recoverable": 925,
+     "as_share_of_monitor_opportunities": 0.0786,
+     "committed_on_time": 5986,
+     "bound_as_share_of_committed_on_time": 0.1545,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    },
+    "const_cell_own_median": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 2080.28,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 330,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 595,
+     "mean_live_monitor_occupancy_s": 0.5318,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 3911.8,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 925,
+     "not_released_total": 2021,
+     "upper_bound_on_time_instants_recoverable": 925,
+     "as_share_of_monitor_opportunities": 0.0786,
+     "committed_on_time": 5986,
+     "bound_as_share_of_committed_on_time": 0.1545,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    },
+    "d162_model": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 2578.645,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 579,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 205,
+     "mean_live_monitor_occupancy_s": 0.4978,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 5180.1,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 784,
+     "not_released_total": 2021,
+     "upper_bound_on_time_instants_recoverable": 784,
+     "as_share_of_monitor_opportunities": 0.0666,
+     "committed_on_time": 5986,
+     "bound_as_share_of_committed_on_time": 0.131,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    }
+   },
+   "slot_seconds": {
+    "_which_interval": "t_done - t_submit. The C5 cap counts in_flight['monitor'], incremented at submit (coordinator.py:1184) and decremented in _collect when the future completes (coordinator.py:1300), so the slot is held to t_done and not to the first token.",
+    "all_released_monitors_total_slot_seconds": 5502.94,
+    "mean_cap_from_reconcile_cap_trajectory": 6.3584,
+    "wall_clock_s": 1200.0,
+    "run_slot_second_capacity_wall_times_mean_cap": 7630.1,
+    "monitor_share_of_that_capacity": 0.7212
+   },
+   "control_e": {
+    "_claim_1": "the released population must equal dashcam_ontime_reconcile.json's four released buckets, zero tolerance",
+    "reconcile_released": 9743,
+    "this_run_released": 9743,
+    "pass_1": true,
+    "_claim_2": "the DOA count under the ORACLE predictor must equal that file's late_at_release + late_at_first_token, zero tolerance: a monitor whose hold plus its own measured engine first token exceeds 1.0 s is exactly one that missed at or before its first token",
+    "reconcile_late_at_release_plus_late_at_first_token": 3576,
+    "this_run_oracle_doa": 3576,
+    "pass_2": true,
+    "_claim_3": "hold > 1.0 s must equal that file's late_at_release bucket: the user's 'released after the whole deadline had already passed' figure",
+    "reconcile_late_at_release": 110,
+    "this_run_hold_over_deadline": 110,
+    "pass_3": true,
+    "_claim_4": "every monitor row's own deadline_s must be 1.0 s, read not assumed: a per-row deadline of anything else makes every threshold here wrong",
+    "deadline_s_distinct": [
+     1.0
+    ],
+    "pass_4": true
+   },
+   "user_figures": {
+    "share_held_over_0.56_s_at_release": 0.3403,
+    "share_held_over_the_whole_1.0_s_deadline": 0.0113
+   },
+   "prefix_caching": {
+    "enabled": true,
+    "prefix_cache_hits_total_max": 32975344,
+    "prefix_cache_queries_total_max": 38407826,
+    "hit_fraction": 0.8586,
+    "label": "WARM SERVER: every latency in this cell was served with prefix caching on; none of these numbers is a cold prefill"
+   },
+   "runs_blob_check": {
+    "request.jsonl.gz": {
+     "origin_main": "be512251d9dfad9549415e127b3bdca7d78dc32f",
+     "read": "be512251d9dfad9549415e127b3bdca7d78dc32f",
+     "identical": true
+    },
+    "outcomes.jsonl.gz": {
+     "origin_main": "bf97bf1af6103c42a765c470441fdff73f621029",
+     "read": "bf97bf1af6103c42a765c470441fdff73f621029",
+     "identical": true
+    },
+    "coordinator_result.json": {
+     "origin_main": "759466fa8d77efd2455e99ba345ddf9378d88566",
+     "read": "759466fa8d77efd2455e99ba345ddf9378d88566",
+     "identical": true
+    }
+   },
+   "coordinator_counts_monitor": {
+    "submitted_monitor": 9745,
+    "budget_refusal_monitor": null,
+    "c5_dash_held": 50589,
+    "c5_decrease": 154
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "arm": "hybrid-F-lhreq-noc3",
+   "seed": 5,
+   "is_base": true,
+   "monitor_opportunities": 11769,
+   "released_monitors_with_a_request_row": 9808,
+   "deadline_s_distinct": [
+    1.0
+   ],
+   "measured_monitor_first_token_s": {
+    "n": 9808,
+    "min": 0.1195,
+    "p25": 0.3306,
+    "p50": 0.4485,
+    "p75": 0.5668,
+    "p90": 0.706,
+    "p99": 1.8263,
+    "max": 5.5872,
+    "mean": 0.485,
+    "distinct_values": 9743
+   },
+   "hold_at_release_s": {
+    "n": 9808,
+    "min": 0.0544,
+    "p25": 0.1467,
+    "p50": 0.3624,
+    "p75": 0.7484,
+    "p90": 0.9024,
+    "p99": 1.0021,
+    "max": 1.0195,
+    "mean": 0.445,
+    "distinct_values": 9713
+   },
+   "monitor_uncached_tokens": {
+    "n": 9808,
+    "min": 366.0,
+    "p25": 370.0,
+    "p50": 374.0,
+    "p75": 378.0,
+    "p90": 1046.0,
+    "p99": 1732.0,
+    "max": 4774.0,
+    "mean": 479.9,
+    "distinct_values": 71
+   },
+   "queued_ahead_uncached_tokens_RECONSTRUCTED": {
+    "n": 9808,
+    "min": 366.0,
+    "p25": 1842.0,
+    "p50": 2478.0,
+    "p75": 2992.0,
+    "p90": 3957.0,
+    "p99": 10382.0,
+    "max": 39771.0,
+    "mean": 2635.0,
+    "distinct_values": 1862
+   },
+   "d162_predicted_first_token_s": {
+    "n": 9808,
+    "min": 0.1908,
+    "p25": 0.421,
+    "p50": 0.5267,
+    "p75": 0.6341,
+    "p90": 0.7745,
+    "p99": 1.8051,
+    "max": 6.6194,
+    "mean": 0.56,
+    "distinct_values": 4479
+   },
+   "variants": {
+    "const_user_0.44": {
+     "_note": "predictor (i) with the USER'S constant 0.44 s, i.e. the hold threshold 0.56 s. A CONSTANT: it cannot distinguish requests.",
+     "doa": 3848,
+     "live": 5960,
+     "doa_share_of_released": 0.3923,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 3609,
+      "flagged_but_would_have_MET_FP": 239,
+      "not_flagged_and_missed_FN": 659,
+      "not_flagged_and_met_TN": 5301,
+      "precision": 0.9379,
+      "recall": 0.8456,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 2414.564,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.4285,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.3123,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 3848,
+      "min": 0.159,
+      "p25": 0.4425,
+      "p50": 0.5501,
+      "p75": 0.691,
+      "p90": 0.8884,
+      "p99": 2.2311,
+      "max": 7.267,
+      "mean": 0.627,
+      "distinct_values": 3834
+     },
+     "slot_seconds_live": {
+      "n": 5960,
+      "min": 0.145,
+      "p25": 0.3925,
+      "p50": 0.5247,
+      "p75": 0.6416,
+      "p90": 0.7784,
+      "p99": 1.2617,
+      "max": 3.075,
+      "mean": 0.54,
+      "distinct_values": 5936
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 3848,
+      "min": 0.13,
+      "p25": 0.3592,
+      "p50": 0.4682,
+      "p75": 0.5995,
+      "p90": 0.7722,
+      "p99": 2.0333,
+      "max": 5.587,
+      "mean": 0.531,
+      "distinct_values": 3843
+     },
+     "mean_live_occupancy_s": 0.5403,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 2174936
+    },
+    "const_cell_own_median": {
+     "_note": "predictor (i) with THIS CELL'S own median monitor first-token time (0.4485 s), threshold 0.5515 s. Still a constant.",
+     "doa": 3912,
+     "live": 5896,
+     "doa_share_of_released": 0.3989,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 3651,
+      "flagged_but_would_have_MET_FP": 261,
+      "not_flagged_and_missed_FN": 617,
+      "not_flagged_and_met_TN": 5279,
+      "precision": 0.9333,
+      "recall": 0.8554,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 2451.396,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.435,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.3171,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 3912,
+      "min": 0.159,
+      "p25": 0.4426,
+      "p50": 0.5501,
+      "p75": 0.6903,
+      "p90": 0.8849,
+      "p99": 2.171,
+      "max": 7.267,
+      "mean": 0.627,
+      "distinct_values": 3897
+     },
+     "slot_seconds_live": {
+      "n": 5896,
+      "min": 0.145,
+      "p25": 0.3919,
+      "p50": 0.5241,
+      "p75": 0.6412,
+      "p90": 0.7794,
+      "p99": 1.2617,
+      "max": 3.075,
+      "mean": 0.54,
+      "distinct_values": 5872
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 3912,
+      "min": 0.13,
+      "p25": 0.3596,
+      "p50": 0.4686,
+      "p75": 0.5994,
+      "p90": 0.7705,
+      "p99": 2.033,
+      "max": 5.587,
+      "mean": 0.53,
+      "distinct_values": 3907
+     },
+     "mean_live_occupancy_s": 0.54,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 2202918
+    },
+    "d162_model": {
+     "_note": "predictor (ii), the committed D162 model on this request's own observed uncached and the reconstructed queued-ahead. VARIES per request but IS A MODEL.",
+     "doa": 4537,
+     "live": 5271,
+     "doa_share_of_released": 0.4626,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 3997,
+      "flagged_but_would_have_MET_FP": 540,
+      "not_flagged_and_missed_FN": 271,
+      "not_flagged_and_met_TN": 5000,
+      "precision": 0.881,
+      "recall": 0.9365,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 3003.091,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.5329,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.3884,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 4537,
+      "min": 0.159,
+      "p25": 0.4663,
+      "p50": 0.581,
+      "p75": 0.7256,
+      "p90": 0.9103,
+      "p99": 2.5581,
+      "max": 7.267,
+      "mean": 0.662,
+      "distinct_values": 4518
+     },
+     "slot_seconds_live": {
+      "n": 5271,
+      "min": 0.145,
+      "p25": 0.3699,
+      "p50": 0.4997,
+      "p75": 0.6078,
+      "p90": 0.7184,
+      "p99": 0.9455,
+      "max": 2.548,
+      "mean": 0.499,
+      "distinct_values": 5251
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 4537,
+      "min": 0.13,
+      "p25": 0.3851,
+      "p50": 0.4994,
+      "p75": 0.6379,
+      "p90": 0.8093,
+      "p99": 2.2959,
+      "max": 5.587,
+      "mean": 0.567,
+      "distinct_values": 4529
+     },
+     "mean_live_occupancy_s": 0.4993,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 2532806
+    },
+    "oracle_measured_engine_first_token": {
+     "_note": "NOT A CANDIDATE PREDICTOR. The request's own measured engine first token, which no arm has at release. Reported only as the consistency anchor for check 7.",
+     "doa": 4268,
+     "live": 5540,
+     "doa_share_of_released": 0.4352,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 4268,
+      "flagged_but_would_have_MET_FP": 0,
+      "not_flagged_and_missed_FN": 0,
+      "not_flagged_and_met_TN": 5540,
+      "precision": 1.0,
+      "recall": 1.0,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 2900.436,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.5147,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.3751,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 4268,
+      "min": 0.171,
+      "p25": 0.4792,
+      "p50": 0.5932,
+      "p75": 0.739,
+      "p90": 0.9359,
+      "p99": 2.5846,
+      "max": 7.267,
+      "mean": 0.68,
+      "distinct_values": 4246
+     },
+     "slot_seconds_live": {
+      "n": 5540,
+      "min": 0.145,
+      "p25": 0.3664,
+      "p50": 0.497,
+      "p75": 0.6027,
+      "p90": 0.7127,
+      "p99": 0.9244,
+      "max": 1.196,
+      "mean": 0.494,
+      "distinct_values": 5519
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 4268,
+      "min": 0.142,
+      "p25": 0.3986,
+      "p50": 0.5146,
+      "p75": 0.6572,
+      "p90": 0.8442,
+      "p99": 2.3128,
+      "max": 5.587,
+      "mean": 0.587,
+      "distinct_values": 4262
+     },
+     "mean_live_occupancy_s": 0.4936,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 2374930
+    },
+    "const_user_0.44_plus_forward_hop": {
+     "_note": "SENSITIVITY: the committed scorer delivers at first token PLUS a 0.0222 s forward hop, so a rule that ignores the hop is slightly lenient. Same constant, deadline effectively 0.9778 s.",
+     "doa": 4007,
+     "live": 5801,
+     "doa_share_of_released": 0.4085,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 3707,
+      "flagged_but_would_have_MET_FP": 300,
+      "not_flagged_and_missed_FN": 561,
+      "not_flagged_and_met_TN": 5240,
+      "precision": 0.9251,
+      "recall": 0.8686,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 2511.628,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.4457,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.3249,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 4007,
+      "min": 0.159,
+      "p25": 0.4436,
+      "p50": 0.5508,
+      "p75": 0.6898,
+      "p90": 0.8849,
+      "p99": 2.171,
+      "max": 7.267,
+      "mean": 0.627,
+      "distinct_values": 3990
+     },
+     "slot_seconds_live": {
+      "n": 5801,
+      "min": 0.145,
+      "p25": 0.3901,
+      "p50": 0.5231,
+      "p75": 0.6402,
+      "p90": 0.7779,
+      "p99": 1.1049,
+      "max": 3.075,
+      "mean": 0.538,
+      "distinct_values": 5777
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 4007,
+      "min": 0.13,
+      "p25": 0.3607,
+      "p50": 0.4691,
+      "p75": 0.5995,
+      "p90": 0.7706,
+      "p99": 2.033,
+      "max": 5.587,
+      "mean": 0.531,
+      "distinct_values": 4000
+     },
+     "mean_live_occupancy_s": 0.5384,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 2243748
+    }
+   },
+   "traced_unit": {
+    "_what": "one DOA monitor at the MEDIAN hold of this cell's DOA population. Every quantity the rule and the estimate use, with the arithmetic shown.",
+    "opportunity_id": "opp0006570",
+    "device_id": "dash005",
+    "t_opportunity": 650.048084,
+    "deadline_s": 1.0,
+    "t_submit": 650.85354,
+    "hold_at_release_s": 0.8055,
+    "deadline_remaining_at_release_s": 0.1945,
+    "prompt_minus_cached_uncached_tokens": 372,
+    "queued_ahead_uncached_tokens_RECONSTRUCTED": 2136,
+    "predictor_i_constant_user_s": 0.44,
+    "predictor_i_constant_cell_median_s": 0.4485,
+    "predictor_ii_d162_s": 0.4637,
+    "predictor_ii_arithmetic": "0.067798 + 0.0001824313 * 372 + 0.0001535807 * 2136 = 0.4637",
+    "measured_engine_first_token_s": 0.3852,
+    "doa_under_i_user": true,
+    "doa_under_ii_d162": true,
+    "doa_under_oracle": true,
+    "t_done": 651.326607,
+    "slot_seconds_this_request_occupied": 0.4731,
+    "slot_seconds_to_first_token_ALTERNATIVE_NOT_USED": 0.3852,
+    "t_delivered_age_s": 1.2129,
+    "outcome": "latency_miss: delivered age 1.2129 s against a 1.0 s deadline",
+    "what_bound_it": "RELEASE DELAY: 81 percent of the deadline was already spent before the engine saw the request, and the engine's own first token then needed 0.3852 s more. Neither the KV budget nor the accelerator budget refused it: this cell's budget_refusal_monitor is ABSENT, and an absent Counter key is zero.",
+    "what_the_rule_would_have_done": "not released it; the device answers. The slot it held for 0.4731 s is freed, and under EP-G its 372 uncached tokens are STILL prefilled by the episode's next request, so no prefill work is saved."
+   },
+   "constructed_bounds": {
+    "const_user_0.44": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 2414.564,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 239,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 799,
+     "mean_live_monitor_occupancy_s": 0.5403,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 4468.9,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 1038,
+     "not_released_total": 1961,
+     "upper_bound_on_time_instants_recoverable": 1038,
+     "as_share_of_monitor_opportunities": 0.0882,
+     "committed_on_time": 5375,
+     "bound_as_share_of_committed_on_time": 0.1931,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    },
+    "const_cell_own_median": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 2451.396,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 261,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 780,
+     "mean_live_monitor_occupancy_s": 0.54,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 4539.6,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 1041,
+     "not_released_total": 1961,
+     "upper_bound_on_time_instants_recoverable": 1041,
+     "as_share_of_monitor_opportunities": 0.0885,
+     "committed_on_time": 5375,
+     "bound_as_share_of_committed_on_time": 0.1937,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    },
+    "d162_model": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 3003.091,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 540,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 394,
+     "mean_live_monitor_occupancy_s": 0.4993,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 6014.6,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 934,
+     "not_released_total": 1961,
+     "upper_bound_on_time_instants_recoverable": 934,
+     "as_share_of_monitor_opportunities": 0.0794,
+     "committed_on_time": 5375,
+     "bound_as_share_of_committed_on_time": 0.1738,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    }
+   },
+   "slot_seconds": {
+    "_which_interval": "t_done - t_submit. The C5 cap counts in_flight['monitor'], incremented at submit (coordinator.py:1184) and decremented in _collect when the future completes (coordinator.py:1300), so the slot is held to t_done and not to the first token.",
+    "all_released_monitors_total_slot_seconds": 5635.002,
+    "mean_cap_from_reconcile_cap_trajectory": 6.443,
+    "wall_clock_s": 1200.0,
+    "run_slot_second_capacity_wall_times_mean_cap": 7731.6,
+    "monitor_share_of_that_capacity": 0.7288
+   },
+   "control_e": {
+    "_claim_1": "the released population must equal dashcam_ontime_reconcile.json's four released buckets, zero tolerance",
+    "reconcile_released": 9808,
+    "this_run_released": 9808,
+    "pass_1": true,
+    "_claim_2": "the DOA count under the ORACLE predictor must equal that file's late_at_release + late_at_first_token, zero tolerance: a monitor whose hold plus its own measured engine first token exceeds 1.0 s is exactly one that missed at or before its first token",
+    "reconcile_late_at_release_plus_late_at_first_token": 4268,
+    "this_run_oracle_doa": 4268,
+    "pass_2": true,
+    "_claim_3": "hold > 1.0 s must equal that file's late_at_release bucket: the user's 'released after the whole deadline had already passed' figure",
+    "reconcile_late_at_release": 106,
+    "this_run_hold_over_deadline": 106,
+    "pass_3": true,
+    "_claim_4": "every monitor row's own deadline_s must be 1.0 s, read not assumed: a per-row deadline of anything else makes every threshold here wrong",
+    "deadline_s_distinct": [
+     1.0
+    ],
+    "pass_4": true
+   },
+   "user_figures": {
+    "share_held_over_0.56_s_at_release": 0.3923,
+    "share_held_over_the_whole_1.0_s_deadline": 0.0108
+   },
+   "prefix_caching": {
+    "enabled": true,
+    "prefix_cache_hits_total_max": 32980848,
+    "prefix_cache_queries_total_max": 38363008,
+    "hit_fraction": 0.8597,
+    "label": "WARM SERVER: every latency in this cell was served with prefix caching on; none of these numbers is a cold prefill"
+   },
+   "runs_blob_check": {
+    "request.jsonl.gz": {
+     "origin_main": "77ea82481ad80473ab7451f76b09f7abe89268c2",
+     "read": "77ea82481ad80473ab7451f76b09f7abe89268c2",
+     "identical": true
+    },
+    "outcomes.jsonl.gz": {
+     "origin_main": "4e49d66b8a848578e2f44b68b40e6d0e41939863",
+     "read": "4e49d66b8a848578e2f44b68b40e6d0e41939863",
+     "identical": true
+    },
+    "coordinator_result.json": {
+     "origin_main": "1fe8f2bd4e883609b4f1e7947b5555364d00428b",
+     "read": "1fe8f2bd4e883609b4f1e7947b5555364d00428b",
+     "identical": true
+    }
+   },
+   "coordinator_counts_monitor": {
+    "submitted_monitor": 9812,
+    "budget_refusal_monitor": null,
+    "c5_dash_held": 50251,
+    "c5_decrease": 111
+   }
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "arm": "hybrid-F-lhreq-noc3",
+   "seed": 6,
+   "is_base": true,
+   "monitor_opportunities": 11786,
+   "released_monitors_with_a_request_row": 9883,
+   "deadline_s_distinct": [
+    1.0
+   ],
+   "measured_monitor_first_token_s": {
+    "n": 9883,
+    "min": 0.1176,
+    "p25": 0.3262,
+    "p50": 0.4464,
+    "p75": 0.5629,
+    "p90": 0.6919,
+    "p99": 1.8441,
+    "max": 3.7762,
+    "mean": 0.478,
+    "distinct_values": 9805
+   },
+   "hold_at_release_s": {
+    "n": 9883,
+    "min": 0.0516,
+    "p25": 0.1357,
+    "p50": 0.2583,
+    "p75": 0.6756,
+    "p90": 0.8768,
+    "p99": 0.998,
+    "max": 1.0243,
+    "mean": 0.3959,
+    "distinct_values": 9772
+   },
+   "monitor_uncached_tokens": {
+    "n": 9883,
+    "min": 366.0,
+    "p25": 370.0,
+    "p50": 374.0,
+    "p75": 378.0,
+    "p90": 1042.0,
+    "p99": 1732.0,
+    "max": 7140.0,
+    "mean": 477.4,
+    "distinct_values": 71
+   },
+   "queued_ahead_uncached_tokens_RECONSTRUCTED": {
+    "n": 9883,
+    "min": 366.0,
+    "p25": 1842.0,
+    "p50": 2475.0,
+    "p75": 2984.0,
+    "p90": 3731.0,
+    "p99": 10534.0,
+    "max": 28841.0,
+    "mean": 2608.8,
+    "distinct_values": 1866
+   },
+   "d162_predicted_first_token_s": {
+    "n": 9883,
+    "min": 0.1908,
+    "p25": 0.421,
+    "p50": 0.5263,
+    "p75": 0.6316,
+    "p90": 0.7518,
+    "p99": 1.8022,
+    "max": 4.934,
+    "mean": 0.5555,
+    "distinct_values": 4405
+   },
+   "variants": {
+    "const_user_0.44": {
+     "_note": "predictor (i) with the USER'S constant 0.44 s, i.e. the hold threshold 0.56 s. A CONSTANT: it cannot distinguish requests.",
+     "doa": 3119,
+     "live": 6764,
+     "doa_share_of_released": 0.3156,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 2883,
+      "flagged_but_would_have_MET_FP": 236,
+      "not_flagged_and_missed_FN": 546,
+      "not_flagged_and_met_TN": 6218,
+      "precision": 0.9243,
+      "recall": 0.8408,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 1972.73,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.3529,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.253,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 3119,
+      "min": 0.156,
+      "p25": 0.4315,
+      "p50": 0.5504,
+      "p75": 0.7031,
+      "p90": 0.9339,
+      "p99": 2.388,
+      "max": 4.146,
+      "mean": 0.632,
+      "distinct_values": 3114
+     },
+     "slot_seconds_live": {
+      "n": 6764,
+      "min": 0.147,
+      "p25": 0.3977,
+      "p50": 0.526,
+      "p75": 0.6303,
+      "p90": 0.7411,
+      "p99": 1.1236,
+      "max": 2.763,
+      "mean": 0.535,
+      "distinct_values": 6726
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 3119,
+      "min": 0.126,
+      "p25": 0.3479,
+      "p50": 0.4604,
+      "p75": 0.6028,
+      "p90": 0.8246,
+      "p99": 2.1626,
+      "max": 3.776,
+      "mean": 0.534,
+      "distinct_values": 3111
+     },
+     "mean_live_occupancy_s": 0.5347,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 1875576
+    },
+    "const_cell_own_median": {
+     "_note": "predictor (i) with THIS CELL'S own median monitor first-token time (0.4464 s), threshold 0.5536 s. Still a constant.",
+     "doa": 3158,
+     "live": 6725,
+     "doa_share_of_released": 0.3195,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 2908,
+      "flagged_but_would_have_MET_FP": 250,
+      "not_flagged_and_missed_FN": 521,
+      "not_flagged_and_met_TN": 6204,
+      "precision": 0.9208,
+      "recall": 0.8481,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 1997.184,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.3573,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.2561,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 3158,
+      "min": 0.156,
+      "p25": 0.4324,
+      "p50": 0.5514,
+      "p75": 0.7013,
+      "p90": 0.9281,
+      "p99": 2.388,
+      "max": 4.146,
+      "mean": 0.632,
+      "distinct_values": 3153
+     },
+     "slot_seconds_live": {
+      "n": 6725,
+      "min": 0.147,
+      "p25": 0.3972,
+      "p50": 0.5254,
+      "p75": 0.63,
+      "p90": 0.741,
+      "p99": 1.121,
+      "max": 2.763,
+      "mean": 0.534,
+      "distinct_values": 6687
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 3158,
+      "min": 0.126,
+      "p25": 0.3484,
+      "p50": 0.4607,
+      "p75": 0.6028,
+      "p90": 0.8245,
+      "p99": 2.1626,
+      "max": 3.776,
+      "mean": 0.534,
+      "distinct_values": 3150
+     },
+     "mean_live_occupancy_s": 0.5341,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 1894834
+    },
+    "d162_model": {
+     "_note": "predictor (ii), the committed D162 model on this request's own observed uncached and the reconstructed queued-ahead. VARIES per request but IS A MODEL.",
+     "doa": 3648,
+     "live": 6235,
+     "doa_share_of_released": 0.3691,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 3169,
+      "flagged_but_would_have_MET_FP": 479,
+      "not_flagged_and_missed_FN": 260,
+      "not_flagged_and_met_TN": 5975,
+      "precision": 0.8687,
+      "recall": 0.9242,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 2431.184,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.435,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.3118,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 3648,
+      "min": 0.156,
+      "p25": 0.4524,
+      "p50": 0.5737,
+      "p75": 0.7347,
+      "p90": 0.9664,
+      "p99": 2.4916,
+      "max": 4.146,
+      "mean": 0.666,
+      "distinct_values": 3639
+     },
+     "slot_seconds_live": {
+      "n": 6235,
+      "min": 0.147,
+      "p25": 0.3812,
+      "p50": 0.5112,
+      "p75": 0.6114,
+      "p90": 0.7097,
+      "p99": 0.9132,
+      "max": 2.433,
+      "mean": 0.507,
+      "distinct_values": 6200
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 3648,
+      "min": 0.126,
+      "p25": 0.3703,
+      "p50": 0.4958,
+      "p75": 0.6374,
+      "p90": 0.8589,
+      "p99": 2.2461,
+      "max": 3.776,
+      "mean": 0.569,
+      "distinct_values": 3634
+     },
+     "mean_live_occupancy_s": 0.5065,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 2180464
+    },
+    "oracle_measured_engine_first_token": {
+     "_note": "NOT A CANDIDATE PREDICTOR. The request's own measured engine first token, which no arm has at release. Reported only as the consistency anchor for check 7.",
+     "doa": 3429,
+     "live": 6454,
+     "doa_share_of_released": 0.347,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 3429,
+      "flagged_but_would_have_MET_FP": 0,
+      "not_flagged_and_missed_FN": 0,
+      "not_flagged_and_met_TN": 6454,
+      "precision": 1.0,
+      "recall": 1.0,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 2363.177,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.4228,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.3031,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 3429,
+      "min": 0.162,
+      "p25": 0.4709,
+      "p50": 0.5948,
+      "p75": 0.7547,
+      "p90": 0.9973,
+      "p99": 2.5199,
+      "max": 4.146,
+      "mean": 0.689,
+      "distinct_values": 3422
+     },
+     "slot_seconds_live": {
+      "n": 6454,
+      "min": 0.147,
+      "p25": 0.3764,
+      "p50": 0.5048,
+      "p75": 0.6066,
+      "p90": 0.7045,
+      "p99": 0.9006,
+      "max": 2.347,
+      "mean": 0.5,
+      "distinct_values": 6416
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 3429,
+      "min": 0.136,
+      "p25": 0.3945,
+      "p50": 0.5184,
+      "p75": 0.6634,
+      "p90": 0.8841,
+      "p99": 2.254,
+      "max": 3.776,
+      "mean": 0.594,
+      "distinct_values": 3420
+     },
+     "mean_live_occupancy_s": 0.4999,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 2044608
+    },
+    "const_user_0.44_plus_forward_hop": {
+     "_note": "SENSITIVITY: the committed scorer delivers at first token PLUS a 0.0222 s forward hop, so a rule that ignores the hop is slightly lenient. Same constant, deadline effectively 0.9778 s.",
+     "doa": 3233,
+     "live": 6650,
+     "doa_share_of_released": 0.3271,
+     "confusion_against_oracle_outcome": {
+      "flagged_and_would_have_missed_TP": 2953,
+      "flagged_but_would_have_MET_FP": 280,
+      "not_flagged_and_missed_FN": 476,
+      "not_flagged_and_met_TN": 6174,
+      "precision": 0.9134,
+      "recall": 0.8612,
+      "_reading": "FP counts monitors the rule would have CUT that in fact arrived on time. They are the cost of the rule and are NOT netted off any number in this file."
+     },
+     "cap_slot_seconds_freed": 2042.172,
+     "cap_slot_seconds_freed_share_of_all_monitor_slot_seconds": 0.3654,
+     "cap_slot_seconds_freed_share_of_wall_times_mean_cap": 0.2619,
+     "_share_denominators": "the first denominator is the slot-seconds ALL released monitors occupied in this cell; the second is wall clock (1200 s) times the mean reconstructed C5 cap, which is the run's whole in-flight capacity and is shared with recall and warming work, so the second share is not a share of a dashcam-only resource",
+     "slot_seconds_doa": {
+      "n": 3233,
+      "min": 0.156,
+      "p25": 0.4335,
+      "p50": 0.5514,
+      "p75": 0.6965,
+      "p90": 0.9221,
+      "p99": 2.388,
+      "max": 4.146,
+      "mean": 0.632,
+      "distinct_values": 3227
+     },
+     "slot_seconds_live": {
+      "n": 6650,
+      "min": 0.147,
+      "p25": 0.3967,
+      "p50": 0.5247,
+      "p75": 0.63,
+      "p90": 0.741,
+      "p99": 1.0851,
+      "max": 2.763,
+      "mean": 0.533,
+      "distinct_values": 6613
+     },
+     "occupancy_to_first_token_s_doa_ALTERNATIVE_NOT_USED": {
+      "n": 3233,
+      "min": 0.126,
+      "p25": 0.3493,
+      "p50": 0.4613,
+      "p75": 0.6021,
+      "p90": 0.8208,
+      "p99": 2.1626,
+      "max": 3.776,
+      "mean": 0.534,
+      "distinct_values": 3225
+     },
+     "mean_live_occupancy_s": 0.5334,
+     "deferred_uncached_tokens_A_DEBT_NOT_A_SAVING": 1931674
+    }
+   },
+   "traced_unit": {
+    "_what": "one DOA monitor at the MEDIAN hold of this cell's DOA population. Every quantity the rule and the estimate use, with the arithmetic shown.",
+    "opportunity_id": "opp0006097",
+    "device_id": "dash000",
+    "t_opportunity": 607.247879,
+    "deadline_s": 1.0,
+    "t_submit": 608.053507,
+    "hold_at_release_s": 0.8056,
+    "deadline_remaining_at_release_s": 0.1944,
+    "prompt_minus_cached_uncached_tokens": 376,
+    "queued_ahead_uncached_tokens_RECONSTRUCTED": 1864,
+    "predictor_i_constant_user_s": 0.44,
+    "predictor_i_constant_cell_median_s": 0.4464,
+    "predictor_ii_d162_s": 0.4227,
+    "predictor_ii_arithmetic": "0.067798 + 0.0001824313 * 376 + 0.0001535807 * 1864 = 0.4227",
+    "measured_engine_first_token_s": 0.3598,
+    "doa_under_i_user": true,
+    "doa_under_ii_d162": true,
+    "doa_under_oracle": true,
+    "t_done": 608.459369,
+    "slot_seconds_this_request_occupied": 0.4059,
+    "slot_seconds_to_first_token_ALTERNATIVE_NOT_USED": 0.3598,
+    "t_delivered_age_s": 1.1876,
+    "outcome": "latency_miss: delivered age 1.1876 s against a 1.0 s deadline",
+    "what_bound_it": "RELEASE DELAY: 81 percent of the deadline was already spent before the engine saw the request, and the engine's own first token then needed 0.3598 s more. Neither the KV budget nor the accelerator budget refused it: this cell's budget_refusal_monitor is ABSENT, and an absent Counter key is zero.",
+    "what_the_rule_would_have_done": "not released it; the device answers. The slot it held for 0.4059 s is freed, and under EP-G its 376 uncached tokens are STILL prefilled by the episode's next request, so no prefill work is saved."
+   },
+   "constructed_bounds": {
+    "const_user_0.44": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 1972.73,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 236,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 764,
+     "mean_live_monitor_occupancy_s": 0.5347,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 3689.4,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 1000,
+     "not_released_total": 1903,
+     "upper_bound_on_time_instants_recoverable": 1000,
+     "as_share_of_monitor_opportunities": 0.0848,
+     "committed_on_time": 6297,
+     "bound_as_share_of_committed_on_time": 0.1588,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    },
+    "const_cell_own_median": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 1997.184,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 250,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 748,
+     "mean_live_monitor_occupancy_s": 0.5341,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 3739.3,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 998,
+     "not_released_total": 1903,
+     "upper_bound_on_time_instants_recoverable": 998,
+     "as_share_of_monitor_opportunities": 0.0847,
+     "committed_on_time": 6297,
+     "bound_as_share_of_committed_on_time": 0.1585,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    },
+    "d162_model": {
+     "_register": "CONSTRUCTED BOUND, not a prediction",
+     "freed_slot_seconds": 2431.184,
+     "offset_on_time_instants_the_rule_WOULD_ITSELF_DESTROY": 479,
+     "_offset_note": "these are monitors the predictor flags as DOA that in fact arrived inside the deadline. They are a DIRECT LOSS the rule causes and are reported here rather than netted off the bound, because the bound and the offset are different registers: the bound is constructed and the offset is an OBSERVED COUNT. A reader who wants one number should subtract it and keep the bound label.",
+     "bound_minus_offset_STILL_A_BOUND": 389,
+     "mean_live_monitor_occupancy_s": 0.5065,
+     "term1_freed_slot_seconds_over_mean_live_occupancy": 4800.0,
+     "term2_not_released_opportunities_still_inside_deadline_at_a_freed_slot": 868,
+     "not_released_total": 1903,
+     "upper_bound_on_time_instants_recoverable": 868,
+     "as_share_of_monitor_opportunities": 0.0736,
+     "committed_on_time": 6297,
+     "bound_as_share_of_committed_on_time": 0.1378,
+     "_arithmetic": "upper bound = min( freed_slot_seconds / mean_live_occupancy_s , one-to-one greedy matches of freed-slot instants to not-released opportunities still inside their deadline ). Both terms are upper bounds in the direction of optimism about the rule.",
+     "_why_not_a_prediction": [
+      "releasing fewer monitors changes the queue the survivors are served in, so their measured first-token times would NOT be preserved; every one was measured with the DOA requests in front of it",
+      "the C5 cap's own AIMD input is an EWMA of that same first-token distribution, so the cap would trip differently once the distribution changes: a feedback loop this estimate cannot follow",
+      "term 2 prices a counterfactual release with a model (predictor ii) or a constant (predictor i), never with a measurement, because the release did not happen",
+      "EP-G: the skipped frame is still prefilled by the episode's next request, so no prefill work is freed and the freed slot-seconds overstate the GPU time freed",
+      "the C5 budget is `cap - in_flight` where in_flight sums ALL classes (running_by_class recall + episodic, cstate.py:626), so a freed slot is not reserved for dashcam: it could be taken by recall or warming work instead. This construction assigns every freed slot to dashcam, which is optimistic for the dashcam axis, and it OMITS any robot-side gain, so it is not a bound on the run's total improvement in either direction",
+      "term 2 allows at most ONE recovered opportunity per freed-slot instant even though the DOA request held its slot for a whole interval. That makes term 2 tighter than term 1 but it is still a matching on a frozen timeline, not a schedule"
+     ]
+    }
+   },
+   "slot_seconds": {
+    "_which_interval": "t_done - t_submit. The C5 cap counts in_flight['monitor'], incremented at submit (coordinator.py:1184) and decremented in _collect when the future completes (coordinator.py:1300), so the slot is held to t_done and not to the first token.",
+    "all_released_monitors_total_slot_seconds": 5589.306,
+    "mean_cap_from_reconcile_cap_trajectory": 6.4977,
+    "wall_clock_s": 1200.0,
+    "run_slot_second_capacity_wall_times_mean_cap": 7797.2,
+    "monitor_share_of_that_capacity": 0.7168
+   },
+   "control_e": {
+    "_claim_1": "the released population must equal dashcam_ontime_reconcile.json's four released buckets, zero tolerance",
+    "reconcile_released": 9883,
+    "this_run_released": 9883,
+    "pass_1": true,
+    "_claim_2": "the DOA count under the ORACLE predictor must equal that file's late_at_release + late_at_first_token, zero tolerance: a monitor whose hold plus its own measured engine first token exceeds 1.0 s is exactly one that missed at or before its first token",
+    "reconcile_late_at_release_plus_late_at_first_token": 3429,
+    "this_run_oracle_doa": 3429,
+    "pass_2": true,
+    "_claim_3": "hold > 1.0 s must equal that file's late_at_release bucket: the user's 'released after the whole deadline had already passed' figure",
+    "reconcile_late_at_release": 72,
+    "this_run_hold_over_deadline": 72,
+    "pass_3": true,
+    "_claim_4": "every monitor row's own deadline_s must be 1.0 s, read not assumed: a per-row deadline of anything else makes every threshold here wrong",
+    "deadline_s_distinct": [
+     1.0
+    ],
+    "pass_4": true
+   },
+   "user_figures": {
+    "share_held_over_0.56_s_at_release": 0.3156,
+    "share_held_over_the_whole_1.0_s_deadline": 0.0073
+   },
+   "prefix_caching": {
+    "enabled": true,
+    "prefix_cache_hits_total_max": 33291168,
+    "prefix_cache_queries_total_max": 38777214,
+    "hit_fraction": 0.8585,
+    "label": "WARM SERVER: every latency in this cell was served with prefix caching on; none of these numbers is a cold prefill"
+   },
+   "runs_blob_check": {
+    "request.jsonl.gz": {
+     "origin_main": "01b1f1424fafca35ad809ea8600533bacedab4a7",
+     "read": "01b1f1424fafca35ad809ea8600533bacedab4a7",
+     "identical": true
+    },
+    "outcomes.jsonl.gz": {
+     "origin_main": "ffb260370960bae3d5d1782629d355f0d4429302",
+     "read": "ffb260370960bae3d5d1782629d355f0d4429302",
+     "identical": true
+    },
+    "coordinator_result.json": {
+     "origin_main": "cb137bee55e08de83e59591ee6c62ecae87c5947",
+     "read": "cb137bee55e08de83e59591ee6c62ecae87c5947",
+     "identical": true
+    }
+   },
+   "coordinator_counts_monitor": {
+    "submitted_monitor": 9886,
+    "budget_refusal_monitor": null,
+    "c5_dash_held": 49586,
+    "c5_decrease": 117
+   }
+  }
+ ],
+ "user_figures_verification": {
+  "_what": "the four figures in the user's own measurement, verified from the logs rather than trusted. The denominator is RELEASED monitors, which is what reproduces them; over all monitor opportunities they would be smaller.",
+  "rows": [
+   {
+    "figure": "rung-2 uo s4: share of SENT rung-2 monitors already unable to meet the deadline at release (held > 0.56 s)",
+    "user": 0.68,
+    "this_run": 0.6825
+   },
+   {
+    "figure": "base s4: same quantity",
+    "user": 0.34,
+    "this_run": 0.3403
+   },
+   {
+    "figure": "rung-2 uo s4: released after the whole 1.0 s deadline had passed",
+    "user": 0.03,
+    "this_run": 0.0307
+   },
+   {
+    "figure": "base s4: same quantity",
+    "user": 0.01,
+    "this_run": 0.0113
+   }
+  ],
+  "median_engine_first_token_s_per_cell": {
+   "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 0.4831,
+   "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 0.4825,
+   "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 0.4847,
+   "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 0.4385,
+   "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 0.4485,
+   "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 0.4464
+  },
+  "note_on_0.44": "the user's constant 0.44 s is the BASE's median monitor first-token time (0.4385 to 0.4485 measured here). The rung-2 cells' own median is 0.4825 to 0.4847, so applying 0.56 s to a rung-2 cell uses a threshold 0.017 s to 0.020 s more lenient than that cell's own median implies. Both are reported per cell."
+ },
+ "three_candidate_comparison": {
+  "_what": "item 3: what each candidate addresses and what it cannot, using only measured quantities. NO RECOMMENDATION IS MADE; the user rules.",
+  "_no_recommendation": true,
+  "rows": [
+   {
+    "candidate": "A. c5attr, the C5 attribution rule",
+    "what_it_addresses": "suppresses a C5 halving whose slow-monitor evidence overlaps work the coordinator itself released",
+    "measured_reach": "63.4 and 63.7 percent of rung-2 halvings fire on evidence attributable to our own released work (uo s4 / s5), against 50.7 to 54.7 percent at rung 1",
+    "what_it_cannot_do": "19.2 and 16.3 percent of rung-2 halvings are trips where the EWMA exceeded 0.8 s while NO individual pending monitor did, which the rule does not suppress by design; 17 to 19 halvings per cell fire on monitors that overlapped nothing of ours",
+    "measured_fragility": "the attributable share falls to 14.3 and 19.0 percent if the overlap threshold moves from 200 to 2,000 uncached tokens, so most of what it attributes is many small prefills (median uncached 1,372 to 1,398), not the few 3,071-token warm builds",
+    "register": "its own analysis, static share plus a cap-trajectory replay; NO OUTCOME",
+    "source": "reports/study_c5_candidates.md, c5attr_trip_attribution.json"
+   },
+   {
+    "candidate": "B. deadline-aware release",
+    "what_it_addresses": "the slot a monitor occupies when it was already infeasible at release: the held -> dead -> slot -> held cycle",
+    "measured_reach": "see `headline` in this file",
+    "what_it_cannot_do": [
+     "it does not reduce PREFILL WORK: under EP-G the skipped frame is prefilled by the episode's next request anyway",
+     "it cannot reach the NOT-RELEASED bucket, which is 30.6 / 29.1 / 26.3 percent of rung-2 monitor opportunities and the larger loss; it only stops bad releases",
+     "under predictor (i) it cannot distinguish requests at all, so it is a hold threshold and its false positives are monitors that in fact arrived on time",
+     "it cannot be scored as an outcome offline: the queue the survivors are served in, and the cap's own AIMD trajectory, both change under it"
+    ],
+    "measured_fragility": "the DOA share moves with the predictor and with the threshold constant; both are reported per cell",
+    "register": "OFFLINE ESTIMATE, with a CONSTRUCTED BOUND for the recoverable instants",
+    "source": "this file"
+   },
+   {
+    "candidate": "C. a deadline-derived C5 set point",
+    "what_it_addresses": "the trip threshold itself: C5 halves on an EWMA crossing of 0.8 s, and 0.8 s sits almost exactly at the p90 of its own input",
+    "measured_reach": "monitor first-token p90 is 0.8374 / 0.8063 / 0.7956 at uo s4 / s5 / s6, straddling the 0.8 s trip, while p50 is flat at 0.483 (0.4831 / 0.4825 / 0.4847). So the trip is set where its input's tail is, and a 0.0374 s move in the tail moves the arm across it",
+    "what_it_cannot_do": "it changes WHEN the cap reacts, not what the cap reacts to: the loss that the reconcile file attributes to release delay inside the coordinator (hold p50 0.742 / 0.724 / 0.572 against the base's 0.201 to 0.362) is upstream of the trip. No set point was measured here and no arm was built.",
+    "measured_fragility": "the p90 straddles the trip across seeds, so any set point derived from one seed's tail is a one-seed quantity",
+    "register": "MOTIVATED BY A MEASUREMENT ONLY. No candidate rule, no arm, no estimate; it is the weakest-specified of the three",
+    "source": "dashcam_ontime_reconcile.json latency_components_s per cell"
+   }
+  ]
+ },
+ "headline": {
+  "_register": "DOA shares are OBSERVED COUNTS over released monitors. The recoverable instants are a CONSTRUCTED BOUND and carry that label at every use.",
+  "doa_share_of_released": {
+   "const_user_0.44": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 0.6825,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 0.6739,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 0.5721,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 0.3403,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 0.3923,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 0.3156
+   },
+   "const_cell_own_median": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 0.7076,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 0.7036,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 0.6094,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 0.3394,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 0.3989,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 0.3195
+   },
+   "d162_model": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 0.7441,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 0.7337,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 0.6461,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 0.397,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 0.4626,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 0.3691
+   },
+   "oracle_measured_engine_first_token": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 0.7124,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 0.6995,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 0.6078,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 0.367,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 0.4352,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 0.347
+   }
+  },
+  "cap_slot_seconds_freed": {
+   "const_user_0.44": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 3672.558,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 3645.675,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 3337.185,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 2085.448,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 2414.564,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 1972.73
+   },
+   "const_cell_own_median": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 3808.278,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 3804.539,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 3531.635,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 2080.28,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 2451.396,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 1997.184
+   },
+   "d162_model": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 4098.394,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 4083.374,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 3873.429,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 2578.645,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 3003.091,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 2431.184
+   }
+  },
+  "upper_bound_on_time_instants_recoverable_CONSTRUCTED_BOUND": {
+   "const_user_0.44": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 2300,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 2251,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 1714,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 925,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 1038,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 1000
+   },
+   "const_cell_own_median": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 2283,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 2242,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 1704,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 925,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 1041,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 998
+   },
+   "d162_model": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 2015,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 1942,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 1458,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 784,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 934,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 868
+   }
+  },
+  "offset_on_time_instants_the_rule_would_itself_destroy_OBSERVED_COUNT": {
+   "const_user_0.44": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 275,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 307,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 359,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 333,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 239,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 236
+   },
+   "const_cell_own_median": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 348,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 401,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 504,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 330,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 261,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 250
+   },
+   "d162_model": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 448,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 460,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 547,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 579,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 540,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 479
+   }
+  },
+  "control_e_all_pass": true
+ },
+ "consistency_check": {
+  "1_cross_check_against_committed": {
+   "rows": [
+    {
+     "quantity": "released monitors",
+     "cell": "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 8167,
+     "prior": 8167,
+     "source_of_prior": "dashcam_ontime_reconcile.json four released buckets",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "released monitors",
+     "cell": "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 8347,
+     "prior": 8347,
+     "source_of_prior": "dashcam_ontime_reconcile.json four released buckets",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "released monitors",
+     "cell": "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 8686,
+     "prior": 8686,
+     "source_of_prior": "dashcam_ontime_reconcile.json four released buckets",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "released monitors",
+     "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 9743,
+     "prior": 9743,
+     "source_of_prior": "dashcam_ontime_reconcile.json four released buckets",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "released monitors",
+     "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 9808,
+     "prior": 9808,
+     "source_of_prior": "dashcam_ontime_reconcile.json four released buckets",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "released monitors",
+     "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 9883,
+     "prior": 9883,
+     "source_of_prior": "dashcam_ontime_reconcile.json four released buckets",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "late_at_release count",
+     "cell": "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 251,
+     "prior": 251,
+     "source_of_prior": "dashcam_ontime_reconcile.json",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "late_at_release count",
+     "cell": "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 187,
+     "prior": 187,
+     "source_of_prior": "dashcam_ontime_reconcile.json",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "late_at_release count",
+     "cell": "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 244,
+     "prior": 244,
+     "source_of_prior": "dashcam_ontime_reconcile.json",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "late_at_release count",
+     "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 110,
+     "prior": 110,
+     "source_of_prior": "dashcam_ontime_reconcile.json",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "late_at_release count",
+     "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 106,
+     "prior": 106,
+     "source_of_prior": "dashcam_ontime_reconcile.json",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "late_at_release count",
+     "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 72,
+     "prior": 72,
+     "source_of_prior": "dashcam_ontime_reconcile.json",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "DOA under the oracle predictor",
+     "cell": "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 5818,
+     "prior": 5818,
+     "source_of_prior": "dashcam_ontime_reconcile.json late_at_release + late_at_first_token",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "DOA under the oracle predictor",
+     "cell": "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 5839,
+     "prior": 5839,
+     "source_of_prior": "dashcam_ontime_reconcile.json late_at_release + late_at_first_token",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "DOA under the oracle predictor",
+     "cell": "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 5279,
+     "prior": 5279,
+     "source_of_prior": "dashcam_ontime_reconcile.json late_at_release + late_at_first_token",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "DOA under the oracle predictor",
+     "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 3576,
+     "prior": 3576,
+     "source_of_prior": "dashcam_ontime_reconcile.json late_at_release + late_at_first_token",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "DOA under the oracle predictor",
+     "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 4268,
+     "prior": 4268,
+     "source_of_prior": "dashcam_ontime_reconcile.json late_at_release + late_at_first_token",
+     "ratio": 1.0,
+     "agree": true
+    },
+    {
+     "quantity": "DOA under the oracle predictor",
+     "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+     "this_run": 3429,
+     "prior": 3429,
+     "source_of_prior": "dashcam_ontime_reconcile.json late_at_release + late_at_first_token",
+     "ratio": 1.0,
+     "agree": true
+    }
+   ],
+   "verdict": "every quantity this run measures that was measured before is EXACT against the prior committed value, zero tolerance, on all 6 cells"
+  },
+  "2_physical_plausibility": {
+   "_what": "every rate implied here is checked against the committed curves rather than left as a latency",
+   "d162_per_uncached_rate_tok_s": 5482.0,
+   "committed_cold_prefill_tok_s": 5600,
+   "ratio": 0.979,
+   "verdict": "the D162 per-uncached term implies 5,482 tok/s against the committed 5,600 tok/s cold prefill rate, a ratio of 0.979, well inside 2x. No quantity in this file is faster than a committed curve.",
+   "slot_seconds_sanity": "total monitor slot-seconds per cell divided by wall times mean cap is reported per cell as monitor_share_of_that_capacity and must lie in (0, 1]; a value above 1 would mean more occupancy than the cap permits and would be an instrumentation error",
+   "slot_seconds_share_per_cell": {
+    "covex-v6-state-uo_n16_s4_1200s_h27_3t_L3_epg_rq30": 0.8124,
+    "covex-v6-state-uo_n16_s5_1200s_h27_3t_L3_epg_rq30": 0.8072,
+    "covex-v6-state-uo_n16_s6_1200s_h27_3t_L3_epg_rq30": 0.8054,
+    "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 0.7212,
+    "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 0.7288,
+    "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 0.7168
+   },
+   "slot_seconds_share_all_within_unit_interval": true
+  },
+  "3_distribution_sanity": {
+   "_what": "no median appears in this file without its spread and its distinct_values. The three shapes CLAUDE.md names are checked: a constant where a distribution is expected, an artefact spread, and a real effect averaged into undetectability.",
+   "a_constant_where_a_distribution_is_expected": {
+    "found": "the forward hop is 0.0222 s with distinct_values 1 on every cell, already recorded in the reconcile file as a trace constant. It is USED only as a labelled sensitivity variant, never as a measurement.",
+    "checked_no_other": "hold, first-token, uncached, queued-ahead and slot-seconds all carry distinct_values in the thousands per cell; see each cell's spreads"
+   },
+   "b_artefact_spread": "THE SPREAD AT RISK HERE IS THE DOA SHARE ACROSS PREDICTORS, and what it is must be stated before it is trusted. Under predictor (i) the values ARE a hold threshold and nothing else: the column cannot mean 'the rule identified an infeasible request', only 'the request was held longer than a fixed number'. The confusion table against the oracle outcome is reported per variant so the reader can see how much of each DOA count is a request that in fact arrived on time.",
+   "c_effect_averaged_into_undetectability": "the DOA share is NOT averaged across arms: every number is reported per cell, and the rung-2 and base strata are kept apart with their own denominators, because the whole question is a 68-against-34 stratum difference"
+  },
+  "4_definition_audit": {
+   "monitor_opportunity": "one kind == 'monitor' row of outcomes.jsonl.gz, the same denominator as dashcam_ontime_reconcile.json and as the committed scorer's sum of dashcam_per_device[*].n_instants",
+   "released_monitor": "cloud_payload.request_id set, not in refused_request_ids, request row present. Equals that file's four released buckets exactly, asserted per cell",
+   "hold_at_release": "t_submit - t_opportunity, that file's release_delay, unchanged",
+   "deadline": "1.0 s from t_opportunity, read per row and asserted",
+   "uncached": "prompt_tokens - cached_tokens, the same definition as c5_loss_split.py",
+   "DOA": "hold + predicted first token > 1.0 s. Under the ORACLE predictor this is EXACTLY that file's late_at_release + late_at_first_token, which is why the classifier is consistent with those buckets rather than merely similar: late_at_release is the hold > 1.0 s subset and late_at_first_token is the remainder whose first-token age exceeds 1.0 s",
+   "slot_second": "one second of one C5 in-flight slot, t_done - t_submit. NOT a GPU-second and never converted to one",
+   "names_used_with_two_definitions": "none found"
+  },
+  "5_claim_linkage": {
+   "bears_on": "FORMULATION.md's Context Inertia physical component, the timing half: this is a release-timing question, not a representation one",
+   "supports": "the reconcile file's finding that rung-2's dashcam lateness is RELEASE DELAY INSIDE THE COORDINATOR and not engine time. The DOA share is the same finding counted as a decision rather than as a latency.",
+   "does_not_speak_to": "whether the rule improves alert on-time delivery. Nothing here is an outcome: the bound is a bound and the arm does not exist.",
+   "scoped_out_check": "nothing here measures KV transfer between heterogeneous tiers, which FORMULATION.md Scoping excludes"
+  },
+  "6_proxy_validity": {
+   "_see": "_proxies_declared",
+   "questionable_and_therefore_not_headline": "uncached_queued_ahead is RECONSTRUCTED from observed uncached counts and is not the coordinator's own counter. Predictor (ii)'s DOA share therefore carries a proxy in one of its two inputs and is reported BESIDE predictor (i), not instead of it. The CONSTRUCTED BOUND is reported under all three predictors for the same reason.",
+   "observed_vs_predicted_uncached": "the observed count favours the model, so any accuracy claim for predictor (ii) is an upper bound on its live accuracy"
+  },
+  "7_validate_the_control": {
+   "_what": "the BASE arm is the control and its own numbers are checked against their committed values BEFORE the rung-2 comparison is read",
+   "negative_control_the_classifier_must_reproduce_the_base": {
+    "user_base_s4_held_over_0.56": 0.34,
+    "this_run_base_s4": 0.0113,
+    "user_base_s4_released_after_deadline": 0.01
+   },
+   "positive_control_a_known_good_committed_arm_must_pass_the_check": {
+    "_claim": "on the base cells, a known-good committed arm, the oracle DOA count must equal the committed reconcile buckets exactly. If it fails, THE CHECK IS BROKEN, NOT THE ARM.",
+    "rows": [
+     {
+      "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+      "oracle_doa": 3576,
+      "committed_buckets": 3576,
+      "pass": true
+     },
+     {
+      "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+      "oracle_doa": 4268,
+      "committed_buckets": 4268,
+      "pass": true
+     },
+     {
+      "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+      "oracle_doa": 3429,
+      "committed_buckets": 3429,
+      "pass": true
+     }
+    ]
+   },
+   "impossible_success_check": "a DOA share of 0 on a base cell, or of 1 on a rung-2 cell, would be an impossible success and an impossible failure respectively; neither occurs"
+  }
+ },
+ "proposed_policy_spec_v6_section_12_row": {
+  "_register": "PROPOSED ONLY. research/policy_spec_v6.md is NOT edited by this script and was not touched. This row is placed here for the user to rule on.",
+  "id": "C5-c",
+  "name": "deadline-aware release (dashcam monitors)",
+  "rule": "at release, skip a dashcam monitor whose hold-so-far (now - t_opportunity) plus its predicted first-token time exceeds its deadline; the device answers it. The prediction is the D162 model on the request's own predicted uncached count and the coordinator's live _uncached_in_flight, which is the one price source both the planner and the coordinator already read.",
+  "default": "OFF. Not implemented; no arm carries it.",
+  "why_the_existing_rule_does_not_cover_it": "b7's feasibility branch is in the RECALL loop only; the dashcam loop computes slack at hybrid_arm.py:351 and appends unconditionally at :355, and slack is read only in the ordering index at :443",
+  "evidence": "results/orchestration/live2/frozen_test/dashcam_deadline_release_estimate.json",
+  "what_the_evidence_is": "an OFFLINE ESTIMATE with a CONSTRUCTED BOUND on recoverable on-time instants. NOT an outcome and not a measured gain.",
+  "what_would_settle_it": "an arm that applies the test, run on the same three seeds, scored against the committed base on dashcam on-time; the offline bound cannot be converted into that because the survivors' queue and the cap's AIMD trajectory both change",
+  "stopping_condition_if_built": "Step 2b: diff the decision logs of the arm with and without the test on one cell and report the number of differing release decisions before scoring anything"
+ },
+ "what_could_not_be_determined": [
+  "whether the rule improves dashcam on-time delivery. No arm exists; the bound is a bound.",
+  "what the live predicted uncached count would have been at each release. The coordinator logs the engine's observed count, so predictor (ii) was evaluated on the observed one and is optimistic about its own accuracy.",
+  "the coordinator's own _uncached_in_flight series. It is not in the logs, so the queued-ahead input is a reconstruction.",
+  "how the C5 cap's AIMD trajectory would move under the rule. Its input is an EWMA of the very first-token distribution the rule changes.",
+  "whether a device answer is as good as a cloud answer on these frames. This file counts slots and deadlines, never answer quality."
+ ],
+ "_provenance": {
+  "git_commit": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+  "script": "dashcam_deadline_release_estimate.py",
+  "model": "qwen7b",
+  "timestamp": "2026-11-22T12:24:05.724370",
+  "n": 54634,
+  "args": {
+   "out": "/tmp/claude-1001/mapwt/results/orchestration/live2/frozen_test/dashcam_deadline_release_estimate.json"
+  },
+  "model_note": "the model slug is a required provenance field; this is a log analysis and ran no model. The cells were served by a 32B instruct engine on the H100 NVL.",
+  "git_commit_note": "the stamped commit is the HEAD of the worktree this analysis ran in, which another session had parked off origin/main. The commit that CARRIES this file is built against origin/main, and every run file read is checked blob-identical to origin/main's per cell under runs_blob_check."
+ }
+}
