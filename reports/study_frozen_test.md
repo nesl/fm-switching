@@ -9,7 +9,7 @@ H100 overnight from 18:50 (user's overnight brief; D106 / D116; commits per D166
 BASELINE_MATRIX tag `_L3_epg_rq30` = 16 devices, 1,200 s, robot deadline 3 s, EP-G dashcam episodes, per-frame robot upload,
 rq30 re-asks. Robot = correct answers delivered BY THE DEADLINE (D155 headline, `robot_headline`) and robot on time / feasible;
 SS = single-shot within 2 s / pool; dash = all dashcam deadlines met; load = uncached prompt tokens per second over the
-run (request.jsonl, prompt minus cached, / 1200 s). **Read per seed only, never pooled**: the Orin re-ask device answers flip the
+run (request.jsonl, prompt minus cached, / 1200 s). **"Robot on time" and "SS within 2 s" count CLOUD deliveries only**: a device-served answer carries no delivery timestamp in outcomes.jsonl in any arm, so an arm that answers on the device (r3-streaming: all 132 robot and 357 SS on the device) shows 0 there while its device answers still count in "robot by deadline". **Read per seed only, never pooled**: the Orin re-ask device answers flip the
 frozen-answer error's sign by seed (flash e016c230). Robot numbers still use the scorer's measured Orin WARM device latency
 (default `orin_rec_warm`), which covers every scored robot row (flash 1c239d5e). Transition zone for saturation is about
 4,500 to 4,750 uncached tok/s; a saturated cell is scored almost entirely on the device fallback answers, which are fixed by
