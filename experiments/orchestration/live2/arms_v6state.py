@@ -13,13 +13,30 @@ them; this arm declares them. The decision is `plan_state`, which until now had 
 `cf_proofs.py` and therefore implemented no causal link in any run (CLAUDE.md Step 2: a quantity
 that is written and never read is ABSENT).
 
-THE ONE PLACE THIS ARM IS PARAMETRIC AND A READER MUST NOT MISS IT. `plan_state`'s candidate set
-is WARM, TOUCH, KEEP, RELOAD, HOLD_BACK and SLICE. HOLD_BACK's value IS `harm_warm` and SLICE's
-is half of it, and NO COMMITTED MEASUREMENT OF `harm_warm` EXISTS: StudySLICE1 has not run. So
-this arm passes `harm_warm = 0.0` and the two candidates whose entire value is that number are
-scored at zero and can never win. The live comparison at this rung is WARM and TOUCH against
-KEEP, which is the comparison the rung is named for. Reporting a HOLD_BACK or SLICE result off
-this arm would be reporting a declared input as a finding.
+WHERE `harm_warm` COMES FROM, AND WHAT IT IS AND IS NOT. `plan_state`'s candidate set is WARM,
+TOUCH, KEEP, RELOAD, HOLD_BACK and SLICE. HOLD_BACK's value IS `harm_warm` and SLICE's is half of
+it. This arm COMPUTES that number: `_harm_warm` calls `cf_objective.harm_warm_from_queue_delay`,
+which takes the warm's uncached tokens through the committed D162 `per_queue_token` coefficient
+to a per-request delay, through the same `p_on_time` curve every other v5 prediction uses, and
+values the rows with `option_value`, the same function `harm_to_others` uses, so this term and
+the request-decision harm stay in one currency under D171 (2). Pre-registered in
+`research/prereg_harm_warm_d172.md` BEFORE any grid was rerun under it. Capped at the
+healthy-regime bound with `harm_warm_capped` counted, never silent.
+
+IT IS STILL A PREDICTION, which is a different sentence from the one this docstring used to make.
+NO COMMITTED MEASUREMENT of a warm's realised cost exists, because StudySLICE1 has not run, so a
+HOLD_BACK or SLICE result off this arm is a statement about the D162 COST MODEL and must say so.
+What it is no longer is a declared grid value read back out as if it were a model output, which
+is what `harm_warm = 0.0` made it until `a353cb0c`.
+
+AND THE WARMING CANDIDATES ARE SCORED ONLY WHERE THERE IS A REBUILD TO ACT ON. `harm_warm` is the
+harm a warm WOULD do, so scoring it for a session nobody is warming decides against a rebuild
+that was never going to happen. Before `f63aea35` this arm did exactly that and chose HOLD_BACK
+897 times on a 16-device cell, every one clearing the margin, while emitting nothing for any of
+them: UNEXPRESSIBLE under Rule 2, and it would have been reported as 897 deviations. WARM,
+HOLD_BACK and SLICE are now scored only where the rules arm has asked to MATERIALIZE this session
+this epoch, `tokens_to_build` is that ask's own target, and HOLD_BACK and SLICE act by REMOVING
+that ask from the action, which is the channel that makes them expressible at all.
 
 RELOAD is offered only at `belief == host` and no committed cell has ever observed a host-warm
 session (cold 14,472 / gpu 1,442 / host never, over 39 committed 16-device cells). It stays in
