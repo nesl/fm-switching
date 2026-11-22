@@ -1,0 +1,31 @@
+{
+  "_asked": "D170 follow-up item 2: state exactly which quantity the code compares against MARGIN_CF, show the formula and file:line, and fix if it mixes units.",
+  "_headline": "The CURRENCY is consistent: both sides of the comparison are deficit-weighted expected correct on-time answers, and MARGIN_CF is in the same units. But THREE things are wrong around it, one latent and two live, and none of them is a unit mix.",
+  "the_comparison": {
+    "site": "experiments/orchestration/live2/v5/cf_planner.py:457",
+    "code": "delta = value_cf - value_base ; deviated = bool(cf_choice != base['choice'] and delta > m.value)",
+    "value_of_a_candidate": "cf_planner.py:382 -> Candidate(value = v - harm.total)",
+    "v": "cf_objective.option_value(w, p_cloud_on_time, acc_cloud, p_dev_on_time, acc_dev) = w x (p_cloud x acc_cloud + (1 - p_cloud) x p_dev x acc_dev)   [cf_objective.py:~96]",
+    "harm": "cf_objective.harm_to_others = sum over OTHER requests of option_value(w_other, p_before, acc_other, p_dev, 0.0) - option_value(w_other, p_after, ...), i.e. w_other x acc_other x (p_before - p_after)   [cf_objective.py:~118]",
+    "margin": "MARGIN_CF = p90 of a_D2_DEV x |P_hat - 1[on time]|, a_D2_DEV = 0.250 = the committed cloud_D2 accuracy",
+    "units_verdict": "ONE CURRENCY. option_value multiplies a probability by acc['D2'] = table['cloud_D2'] = 0.250, which is the SAME constant the margin uses, so gain, harm and margin are all 'expected correct on-time answers'. harm_to_others says so itself and is not a tuned penalty."
+  },
+  "finding_1_LATENT_the_deficit_weight_is_on_one_side_only": {
+    "what": "option_value multiplies by w = counters.weight(device_id) = 1 + gain x shortfall, floored at 1 (cf_objective.py:150). MARGIN_CF carries NO weight: it was computed as 0.250 x |P_hat - outcome| per question, unweighted.",
+    "why_it_is_inert_today": "the deficit counters are never fed (observe() has no production caller), so shortfall is 0 and weight is exactly 1.0 for every device. Verified by construction: DeficitCounters().weight('robo000') returns 1.0.",
+    "why_it_becomes_live": "the moment the deficit feed lands (the next component), w > 1 for any device below target. A device at w = 2 would clear a FIXED margin at half the true gain, so the same deviation would be permitted for a device behind its target and refused for one meeting it. That is arguably the intent of deficit weighting, but it is NOT what 'compare the gain to the one margin' means, and it is not what the margin was measured as.",
+    "needs_a_ruling_not_a_patch": "either (a) weight the margin by the same w at the comparison, or (b) compare the UNWEIGHTED gain to the margin and let w act only on ranking among candidates. These give different policies and the choice is the user's. Flagged BEFORE the deficit feed lands, so it cannot silently change what the margin means."
+  },
+  "finding_2_LIVE_harm_ignores_the_device_fallback": {
+    "what": "harm_to_others passes acc_dev = 0.0, so another device's displaced request is valued as losing its FULL cloud accuracy rather than the cloud-minus-device delta.",
+    "why_that_is_inconsistent": "D165 (B) makes answer semantics REPLACEMENT on the gain side: a missed cloud answer leaves the device's answer standing, worth p_dev x acc_dev. The harm side sets that term to zero, so the two sides of one subtraction use different semantics.",
+    "direction": "it OVERSTATES harm, which makes the counterfactual MORE conservative. Combined with a margin at 66 percent of its ceiling, the conservatism compounds.",
+    "not_fixed_here": "changing it changes decisions, so it is reported rather than patched."
+  },
+  "finding_3_LIVE_the_counterfactual_still_uses_the_0.567_proxy": {
+    "what": "cf_objective.DEVICE_ANSWER_WAIT_S = 0.567 (cf_objective.py:82-87), labelled 'proxy-0.567 (D154 (5))', and p_device_on_time(3.0) returns exactly 1.0.",
+    "why_it_matters_now": "its own docstring names itself the drop-in point: 'Implemented and read so that the measured warm per-question latencies D155 (1) promises can be dropped in without touching a decision path.' Those measured tables now exist and are wired into the coordinator's live wait, but the COUNTERFACTUAL's own device model still uses the proxy.",
+    "effect": "p_device_on_time is constant 1.0 at every robot deadline under the proxy, so option_value's second term never varies with the device's actual speed. With the measured tables it would vary, and for single-shot it would frequently be 0 (refspatial completion exceeds the 2 s deadline in 45.5 percent of questions)."
+  },
+  "_margin_not_changed": "MARGIN_CF stays 0.16456 as accepted. None of the three findings is a reason to move it, and the ruling says not to."
+}
