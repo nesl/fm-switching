@@ -35,6 +35,7 @@ mode. A dry proof is a proof about the code, never a result about the policy.
 """
 from __future__ import annotations
 
+import ast
 import json
 import re
 import subprocess
@@ -46,9 +47,26 @@ REPO = Path(__file__).resolve().parents[4]
 GATE_JSON = REPO / "results/orchestration/live2/frozen_test/cost_model_gate.json"
 
 # ---------------------------------------------------------------------------
-# THE CONSTANT. Do not give it a number until D154 (2) is satisfiable (see module docstring).
-# A placeholder number here would be read by a later session as a ruling.
-MARGIN_CF: Optional[float] = None
+# THE CONSTANT. SET ONCE, 2026-11-21, under D169 step 3 and accepted by the user at 2cb2d5c1.
+# It is not a placeholder and it is not tuned: it is the p90 absolute error of the frozen D162
+# on-time model over the D169 population (robot questions RELEASED in HEALTHY-regime windows of
+# the rq30 v5-rules-2 / hybrid-F-lhreq-noc3 pair, seeds 4 to 7), in the objective's own units,
+# computed by `v5/margin_cf_d169.py` into `results/orchestration/live2/v5/margin_cf_d169.json`:
+#
+#   n_overall 476 (minimum 40)   n_warm 271 (minimum 40)   n_cold 205
+#   p90 overall 0.164560   warm 0.150341   cold 0.173231
+#
+# D154 (2)'s UNIT_CONVERSION_GAP below is CLOSED for this value and the paragraph is kept as the
+# record of why it was open: D162's model predicts the ON-TIME PROBABILITY directly, so its error
+# is already a probability, and the margin is that error times the committed device-vs-cloud
+# accuracy delta `a_D2_DEV = 0.250`. No seconds-to-answers conversion is invented anywhere.
+#
+# D171 (1): the margin is compared against the gain WEIGHTED by the deciding device's deficit
+# weight (`cf_planner.effective_margin`). MARGIN_CF itself is unweighted, per question, which is
+# how it was measured, and that is exactly why the weight has to appear on the comparison.
+MARGIN_CF: Optional[float] = 0.16456
+MARGIN_CF_SET_BY = ("D169 step 3, 2026-11-21, commit 2cb2d5c1; population and per-cell counts in "
+                    "results/orchestration/live2/v5/margin_cf_d169.json")
 
 MARGIN_CF_RULE = (
     "D154 (2): MARGIN_CF is set ONCE, when the D151 (6) cost-model gate passes, equal to that "
@@ -102,7 +120,6 @@ def margin_declaration_audit(root: Optional[Path] = None) -> Dict[str, Any]:
     file belongs to another session, so it is reported and not edited.
     """
     root = root or REPO
-    pat = re.compile(r"^\s*MARGIN_CF\b\s*[:=]")
     hits: List[Dict[str, Any]] = []
     try:
         files = subprocess.run(["git", "grep", "-l", "MARGIN_CF", "--", "*.py"],
@@ -116,15 +133,33 @@ def margin_declaration_audit(root: Optional[Path] = None) -> Dict[str, Any]:
     me = str(Path(__file__).resolve().relative_to(root))
     if me not in names:
         names.append(me)
+    # PARSED, not grepped. A regex on `^\s*MARGIN_CF\s*[:=]` reports the DOCSTRING LINE
+    # "MARGIN_CF   = the p90 of that error, set ONCE" in `cf_ontime_frozen.py` as a second
+    # declaration, which is a false conflict: prose that describes the constant is not a fork of
+    # it. `ast` sees only real module-level bindings, so the audit answers the question it claims
+    # to answer. (It was a false positive and not a miss, which is the safe direction, but a check
+    # that cries wolf is a check a later session learns to ignore.)
     for name in names:
         p = root / name
         try:
-            lines = p.read_text().splitlines()
+            src = p.read_text()
         except Exception:                                                      # noqa: BLE001
             continue
-        for i, line in enumerate(lines, 1):
-            if pat.match(line):
-                hits.append({"file": name, "line": i, "text": line.strip()})
+        try:
+            tree = ast.parse(src)
+        except SyntaxError:
+            continue
+        lines = src.splitlines()
+        for node in tree.body:
+            tgts: List[Any] = []
+            if isinstance(node, ast.Assign):
+                tgts = list(node.targets)
+            elif isinstance(node, ast.AnnAssign):
+                tgts = [node.target]
+            for t in tgts:
+                if isinstance(t, ast.Name) and t.id == "MARGIN_CF":
+                    hits.append({"file": name, "line": node.lineno,
+                                 "text": lines[node.lineno - 1].strip()})
     mine = [h for h in hits if h["file"].endswith("v5/cf_margin.py")]
     others = [h for h in hits if not h["file"].endswith("v5/cf_margin.py")]
     # Modules that READ the single declaration are not conflicts, they are the point. Listed

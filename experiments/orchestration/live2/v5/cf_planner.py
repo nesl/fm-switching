@@ -70,6 +70,32 @@ for _p in (str(HERE), str(REPO / "experiments/orchestration/live2"),
 
 import cf_cost as CC                                                           # noqa: E402
 import cf_margin as CM                                                         # noqa: E402
+
+# D171 (1): THE MODEL-ERROR CHECK IS WEIGHTED BY THE DEFICIT WEIGHT OF THE DEVICE THE DECISION IS
+# ABOUT. `deviate iff (value_cf - value_base) > w_d * MARGIN_CF`. The reason is a units one and it
+# is the finding the d5d12dfc audit raised: `option_value` multiplies the GAIN by `w_d`, so a
+# device at w = 2 doubles every gain it reports, and against a FIXED margin it would clear the
+# model-error bar at half the true gain. MARGIN_CF was measured UNWEIGHTED, per question, so the
+# weight must appear on both sides or on neither. The deficit weights keep their other two roles
+# untouched (ranking candidates, and the harm term): what they must not do is loosen the check
+# that exists to stop the counterfactual acting inside its own prediction error.
+#
+# With every w = 1 this is arithmetically the current rule, and `d171_proofs.py::P1` proves the
+# decision logs byte-identical on today's dry cells. The switch exists so that equality is
+# DEMONSTRATED by running both, not asserted from the algebra.
+MARGIN_WEIGHTED_BY_DEFICIT = True
+
+# D171 (2): the harm term prices each displaced request's OWN device answer as its fallback, the
+# same replacement semantics D165 (B) gives the gain side. OFF reproduces the pre-D171 term, which
+# passed `acc_dev = 0.0` and so charged a displaced request its FULL cloud accuracy. The switch is
+# what makes the A/B a Step 2b diff instead of an assertion about algebra.
+HARM_REPLACEMENT_SEMANTICS = True
+
+
+def effective_margin(margin_value: float, weight: float) -> float:
+    """The bar a deviation must clear: `w_d * MARGIN_CF` (D171 (1)), or the bare margin if the
+    switch is off. One function, so the three decision kinds cannot drift apart."""
+    return float(margin_value) * (float(weight) if MARGIN_WEIGHTED_BY_DEFICIT else 1.0)
 import cf_objective as CO                                                      # noqa: E402
 from cf_instrument import DecisionClock, BUDGET_MS                             # noqa: E402
 
@@ -219,6 +245,7 @@ class Decision:
     scorable: bool
     timeout_fallback: bool
     elapsed_ms: float
+    margin_effective: Optional[float] = None    # D171 (1): w_d * MARGIN_CF, the bar actually used
     candidates: List[Candidate] = field(default_factory=list)
     trace: Dict[str, Any] = field(default_factory=dict)
 
@@ -230,6 +257,8 @@ class Decision:
                 "value_cf": (None if self.value_cf is None else round(self.value_cf, 9)),
                 "delta": (None if self.delta is None else round(self.delta, 9)),
                 "margin": self.margin, "margin_source": self.margin_source,
+                "margin_effective": (None if self.margin_effective is None
+                                     else round(self.margin_effective, 9)),
                 "scorable": self.scorable, "timeout_fallback": self.timeout_fallback,
                 "elapsed_ms": round(self.elapsed_ms, 6),
                 "candidates": [c.as_dict() for c in self.candidates],
@@ -340,15 +369,20 @@ class Counterfactual:
                      deadline_abs_s: float, history_tokens: int, cached_tokens: int = 0,
                      readiness: str = "COLD", recent_tokens: int = 467,
                      others: Sequence[CC.PendingRequest] = (),
-                     coarse_overlap_forecast: float = 0.0) -> Decision:
+                     coarse_overlap_forecast: float = 0.0,
+                     question_id: Optional[str] = None, kind: str = "robot",
+                     episode_frames: Optional[int] = None) -> Decision:
         """Admit now with full history, defer to the latest safe start, send RECENT, or let the
         device answer. Four candidates and no others (spec v5 section 5.1)."""
         m = self._margin()
         acc = {"D2": float(self.table["cloud_D2"]), "RECENT": float(self.table["cloud_RECENT"]),
                "DEVICE": float(self.table["device"])}
         w = self.counters.weight(device_id)
+        m_eff = effective_margin(m.value, w)
         dl_s = float(deadline_abs_s) - float(now_s)
-        p_dev = CO.p_device_on_time(dl_s)
+        dev_wait_s = CO.device_wait_s(kind=kind, question_id=question_id,
+                                      episode_frames=episode_frames)
+        p_dev = CO.p_device_on_time(dl_s, dev_wait_s)
         base = base_request_choice(history_tokens, readiness, dl_s)
         cands: List[Candidate] = []
         timed_out = False
@@ -368,7 +402,8 @@ class Counterfactual:
                         req_id=decision_id, device_id=device_id, start_s=float(start_s),
                         tokens=int(tokens), cached_tokens=int(cached),
                         deadline_abs_s=float(deadline_abs_s), accuracy=0.0, weight=w,
-                        kind="robot", is_candidate=True)]
+                        kind=kind, question_id=question_id, episode_frames=episode_frames,
+                        is_candidate=True)]
                 return CC.plan_queue(self.model, self.residuals, rs, now_s=now_s,
                                      exact_until_s=exact_until_s, decision_kind="request",
                                      coarse_overlap_forecast=coarse_overlap_forecast)
@@ -380,7 +415,9 @@ class Counterfactual:
                 after = _queue(start_s, tokens, cached)
                 mine = after.by_id()[decision_id]
                 harm = CO.harm_to_others(before, after, candidate_req_id=decision_id,
-                                         counters=self.counters)
+                                         counters=self.counters,
+                                         acc_device=(acc["DEVICE"]
+                                                     if HARM_REPLACEMENT_SEMANTICS else 0.0))
                 v = CO.option_value(w, mine.p_on_time, accuracy, p_dev, acc["DEVICE"])
                 if harm.total != 0.0:
                     self.counts["harm_nonzero"] += 1
@@ -425,8 +462,8 @@ class Counterfactual:
                                    gain=CO.device_only_value(w, p_dev, acc["DEVICE"]),
                                    harm=0.0, scored=True,
                                    detail={"p_device_on_time": p_dev,
-                                           "p_device_on_time_is_constant": True,
-                                           "device_wait_s": CO.DEVICE_ANSWER_WAIT_S,
+                                           "device_wait_s": round(dev_wait_s, 6),
+                                           "device_wait_source": CO.DEVICE_LATENCY_SOURCE,
                                            "label": CO.DEVICE_ANSWER_LABEL,
                                            "accuracy": acc["DEVICE"]}))
 
@@ -453,7 +490,7 @@ class Counterfactual:
                 chosen, deviated, delta = base["choice"], False, None
             else:
                 delta = value_cf - value_base
-                deviated = bool(cf_choice != base["choice"] and delta > m.value)
+                deviated = bool(cf_choice != base["choice"] and delta > m_eff)
                 chosen = cf_choice if deviated else base["choice"]
 
         if deviated:
@@ -465,7 +502,7 @@ class Counterfactual:
         d = Decision(
             kind="request", decision_id=decision_id, device_id=device_id, chosen=chosen,
             base_choice=base["choice"], cf_choice=cf_choice, deviated=deviated,
-            value_base=value_base, value_cf=value_cf, delta=delta, margin=m.value,
+            value_base=value_base, value_cf=value_cf, delta=delta, margin=m.value, margin_effective=m_eff,
             margin_source=m.source, scorable=m.scorable, timeout_fallback=timed_out,
             elapsed_ms=self.clock.records[-1]["elapsed_ms"], candidates=cands,
             trace={"base": base, "weight": round(w, 6), "deficit_shortfall":
@@ -505,6 +542,7 @@ class Counterfactual:
         m = self._margin()
         acc = float(self.table["cloud_D2"]) if accuracy is None else float(accuracy)
         w = self.counters.weight(device_id)
+        m_eff = effective_margin(m.value, w)
         horizon_s = min(max(float(next_question_s) - float(now_s), 0.0), CC.HORIZON_WARM_CAP_S)
         exact_until_s = float(now_s) + float(CC.NEAR_EXACT_S["state"] or 0.0)
         if warm_expressible is None:
@@ -579,7 +617,7 @@ class Counterfactual:
                 chosen, deviated, delta = "KEEP", False, None
             else:
                 delta = (best.value - base_c.value) if best else None
-                deviated = bool(best is not None and best.name != "KEEP" and delta > m.value)
+                deviated = bool(best is not None and best.name != "KEEP" and delta > m_eff)
                 chosen = best.name if deviated else "KEEP"
         if not warm_expressible:
             self.counts["warm_unexpressible"] += 1
@@ -591,7 +629,7 @@ class Counterfactual:
                      base_choice="KEEP", cf_choice=(best.name if best else "KEEP"),
                      deviated=deviated, value_base=base_c.value,
                      value_cf=(best.value if best else None), delta=delta, margin=m.value,
-                     margin_source=m.source, scorable=m.scorable, timeout_fallback=timed_out,
+                     margin_effective=m_eff, margin_source=m.source, scorable=m.scorable, timeout_fallback=timed_out,
                      elapsed_ms=self.clock.records[-1]["elapsed_ms"], candidates=cands,
                      trace={"horizon": HORIZONS["state"], "horizon_s": round(horizon_s, 6),
                             "horizon_cap_s": CC.HORIZON_WARM_CAP_S,
@@ -621,7 +659,8 @@ class Counterfactual:
                   full_tokens: int, catch_up_s: float,
                   acc_question_first: Optional[float] = None,
                   others: Sequence[CC.PendingRequest] = (),
-                  coarse_overlap_forecast: float = 0.0) -> Decision:
+                  coarse_overlap_forecast: float = 0.0, question_id: Optional[str] = None,
+                  kind: str = "robot", episode_frames: Optional[int] = None) -> Decision:
         """A question arriving before catch-up: question-first, wait, or leave it to the device.
 
         D150 SYNC (3)'s three options, entering the SAME comparison as a request decision rather
@@ -644,8 +683,11 @@ class Counterfactual:
         acc_qf = (float(self.table["cloud_RECENT"]) if acc_qf_substituted
                   else float(acc_question_first))
         w = self.counters.weight(device_id)
+        m_eff = effective_margin(m.value, w)
         dl_s = float(deadline_abs_s) - float(now_s)
-        p_dev = CO.p_device_on_time(dl_s)
+        dev_wait_s = CO.device_wait_s(kind=kind, question_id=question_id,
+                                      episode_frames=episode_frames)
+        p_dev = CO.p_device_on_time(dl_s, dev_wait_s)
         exact_until_s = float(now_s) + float(CC.NEAR_EXACT_S["sync"] or 0.0)
         cands: List[Candidate] = []
         timed_out = False
@@ -690,7 +732,10 @@ class Counterfactual:
             cands.append(Candidate("LEAVE_TO_DEVICE",
                                    value=CO.device_only_value(w, p_dev, acc["DEVICE"]),
                                    gain=CO.device_only_value(w, p_dev, acc["DEVICE"]), harm=0.0,
-                                   scored=True, detail={"p_device_on_time": p_dev}))
+                                   scored=True,
+                                   detail={"p_device_on_time": p_dev,
+                                           "device_wait_s": round(dev_wait_s, 6),
+                                           "device_wait_source": CO.DEVICE_LATENCY_SOURCE}))
             if t.over_budget(self.budget_ms):
                 timed_out = True
             scored = [c for c in cands if c.scored and c.value is not None]
@@ -703,7 +748,7 @@ class Counterfactual:
                 chosen, deviated, delta = base_c.name, False, None
             else:
                 delta = best.value - base_c.value
-                deviated = bool(best.name != base_c.name and delta > m.value)
+                deviated = bool(best.name != base_c.name and delta > m_eff)
                 chosen = best.name if deviated else base_c.name
         if deviated:
             self.counts["deviations"] += 1
@@ -712,7 +757,7 @@ class Counterfactual:
         d = Decision(kind="sync", decision_id=decision_id, device_id=device_id, chosen=chosen,
                      base_choice=base_c.name, cf_choice=best.name, deviated=deviated,
                      value_base=base_c.value, value_cf=best.value, delta=delta, margin=m.value,
-                     margin_source=m.source, scorable=m.scorable, timeout_fallback=timed_out,
+                     margin_effective=m_eff, margin_source=m.source, scorable=m.scorable, timeout_fallback=timed_out,
                      elapsed_ms=self.clock.records[-1]["elapsed_ms"], candidates=cands,
                      trace={"horizon": HORIZONS["sync"], "catch_up_s": float(catch_up_s),
                             "exact_until_s": round(exact_until_s, 6),

@@ -185,30 +185,63 @@ def history_token_draws() -> Dict[str, Any]:
 # Component unit proofs
 
 
+MARGIN_CF_COMMITTED = 0.16456       # D169 step 3, commit 2cb2d5c1; the value the user accepted
+
+
 def proof_margin() -> Dict[str, Any]:
-    """The margin is ONE declared constant, it is UNSET, and a scorable decision refuses to run."""
+    """The margin is ONE declared constant, it holds the value D169 set, and the refusal machinery
+    that guarded it while it was unset still works.
+
+    THE CLAIM CHANGED WHEN THE VALUE WAS SET, and the assertion had to change with it. Until
+    2cb2d5c1 this proof asserted that the scorable path REFUSES; once MARGIN_CF is set, a refusal
+    would be the failure. So the refusal is now tested the only way it still can be: by setting
+    the constant back to None for the length of one call (a POSITIVE CONTROL on the guard), and
+    the live assertion is that the declared value is the one D169 committed and nothing has
+    retuned it.
+    """
     audit = CM.margin_declaration_audit()
-    raised = None
+    live = CM.resolve_margin()
+    _saved = CM.MARGIN_CF
     try:
-        CM.resolve_margin()
-        refused = False
-    except CM.MarginUnset as e:
-        refused = True
-        raised = str(e)[:200]
+        CM.MARGIN_CF = None
+        try:
+            CM.resolve_margin()
+            refused, raised = False, None
+        except CM.MarginUnset as e:
+            refused, raised = True, str(e)[:200]
+    finally:
+        CM.MARGIN_CF = _saved
     dry = CM.resolve_margin(dry=True, dry_value=DRY_MARGIN)
     return {
         "_claim": ("MARGIN_CF is read from one declared constant, so 'never tuned' is checkable "
                    "from the code (D151 (1), D154 (2), session A's requirement 3)"),
         "MARGIN_CF": CM.MARGIN_CF,
         "is_set": CM.MARGIN_CF is not None,
-        "scorable_path_refuses_while_unset": refused,
-        "refusal_message": raised,
+        "set_by": getattr(CM, "MARGIN_CF_SET_BY", None),
+        "matches_the_committed_d169_value": CM.MARGIN_CF == MARGIN_CF_COMMITTED,
+        "live_read": {"value": live.value, "source": live.source, "scorable": live.scorable},
+        "guard_positive_control": {
+            "_what": "the constant forced to None for one call, then restored",
+            "scorable_path_refuses_while_unset": refused,
+            "refusal_message": raised,
+            "restored": CM.MARGIN_CF == MARGIN_CF_COMMITTED,
+        },
         "dry_path": {"value": dry.value, "source": dry.source, "scorable": dry.scorable},
         "declaration_audit": audit,
         "unit_conversion_gap": CM.UNIT_CONVERSION_GAP,
-        "verdict": ("PASS: the only scorable read raises until D154 (2) sets the value, so no v5 "
-                    "cell can run" if refused else
-                    "FAIL: a scorable decision was produced without a ruled margin"),
+        "unit_conversion_gap_status": (
+            "CLOSED for this value: D162's model predicts the on-time PROBABILITY, so its p90 "
+            "absolute error is already a probability, and the margin is that error times the "
+            "committed accuracy delta a_D2_DEV = 0.250. No seconds-to-answers conversion is "
+            "invented. The paragraph above is kept as the record of why the gap was open"),
+        "verdict": ("PASS: one declaration, holding the D169 value, with the unset guard still "
+                    "refusing and the dry path still unscorable"
+                    if (CM.MARGIN_CF == MARGIN_CF_COMMITTED and refused and not dry.scorable
+                        and live.scorable and audit["single_declaration_for_cf"]
+                        and not audit["conflicts"]) else
+                    "FAIL: MARGIN_CF is not the committed D169 value" if CM.MARGIN_CF != MARGIN_CF_COMMITTED else
+                    "FAIL: the unset guard no longer refuses" if not refused else
+                    "FAIL: the declaration audit reports a conflict"),
     }
 
 
@@ -437,18 +470,19 @@ def proof_objective(res: Dict[str, Any]) -> Dict[str, Any]:
                      "the harm changes which candidate wins"),
         },
         "device_term": {
-            "p_device_on_time_at_3s": CO.p_device_on_time(ROBOT_DEADLINE_S),
-            "device_wait_s": CO.DEVICE_ANSWER_WAIT_S,
-            "source": CO.DEVICE_ANSWER_WAIT_SOURCE,
+            "p_device_on_time_at_3s": CO.p_device_on_time(ROBOT_DEADLINE_S,
+                                                          question_id=_a_robot_qid()),
+            "device_wait_s": CO.device_wait_s(question_id=_a_robot_qid()),
+            "source": CO.DEVICE_LATENCY_SOURCE,
             "label": CO.DEVICE_ANSWER_LABEL,
-            "status": "CONSTANT",
-            "why": ("the only committed device-answer latency is the 0.567 s proxy and D155 (1) "
-                    "forbids the StudyORIN-REC cold re-send latencies, so P(device on time) = 1.0 "
-                    "for every robot deadline under test. D155 (3)'s by-the-deadline restriction "
-                    "is live on the cloud side and INERT on the device side in this build"),
-            "stopping_condition_for": ("any claim that v5 trades the device's delivery risk "
-                                       "against the cloud's; that claim cannot be tested until "
-                                       "the measured warm per-question Orin latencies land"),
+            "status": "UNEXERCISED on robot decisions (D171 (3)); it was CONSTANT before",
+            "why": ("D171 (3) replaced the 0.567 s proxy with the measured Orin tables. P(device "
+                    "on time) is still 1.0 on every robot decision, but now BECAUSE THE MEASURED "
+                    "ROBOT WARM LATENCY (0.2503 to 0.3108 s) IS INSIDE EVERY ROBOT DEADLINE, "
+                    "which is a fact about the device, where before it was a fact about a flat "
+                    "input. The term varies on single-shot (refspatial misses 2.0 s in 45.5 "
+                    "percent of questions). Under Rule 2 that is UNEXERCISED, not CONSTANT"),
+            "proof": "v5/d171_proofs.py::P3_device_model",
         },
         "verdict": ("PASS: the weighting varies, acts cross-device, and provably cancels "
                     "within a device; harm is non-zero and read"
@@ -472,10 +506,26 @@ def _grid_requests() -> List[Dict[str, Any]]:
     return out
 
 
+def _a_robot_qid() -> str:
+    """A real StudyORIN-REC question id, so the measured device table is actually hit (D171 (3));
+    a synthetic id would fall back to the superseded proxy and the proof would price a device
+    answer on a number no one measured."""
+    CO.DEVLAT._tables()
+    return sorted(CO.DEVLAT._robot or {"q": 0.0})[0]
+
+
+def _robot_qids() -> List[str]:
+    CO.DEVLAT._tables()
+    return sorted(CO.DEVLAT._robot or {})
+
+
 def _others(n: int, now_s: float = 0.0) -> List[CC.PendingRequest]:
+    q = _robot_qids()
     return [CC.PendingRequest(req_id="o%02d" % i, device_id="robo%03d" % (100 + i),
                               start_s=now_s, tokens=7051, deadline_abs_s=now_s + ROBOT_DEADLINE_S,
-                              accuracy=0.25, kind="robot") for i in range(n)]
+                              accuracy=0.25, kind="robot",
+                              question_id=(q[(i + 7) % len(q)] if q else None))
+            for i in range(n)]
 
 
 def _run_grid(cf: CP.Counterfactual, grid: Sequence[Dict[str, Any]]) -> List[CP.Decision]:
@@ -485,7 +535,8 @@ def _run_grid(cf: CP.Counterfactual, grid: Sequence[Dict[str, Any]]) -> List[CP.
             decision_id="g%04d" % i, device_id="robo000", now_s=0.0,
             deadline_abs_s=ROBOT_DEADLINE_S, history_tokens=g["tokens"],
             readiness=g["readiness"], others=_others(g["n_others"]),
-            coarse_overlap_forecast=float(g["n_others"])))
+            coarse_overlap_forecast=float(g["n_others"]),
+            question_id=(_robot_qids()[i % len(_robot_qids())] if _robot_qids() else None)))
     return out
 
 

@@ -75,16 +75,112 @@ for _p in (str(HERE), str(REPO / "experiments/orchestration/live2"),
 
 import cf_cost as CC                                                           # noqa: E402
 
-# The committed device-answer latency, and its label. D154 (5): every cell run before the measured
-# per-question Orin warm latencies land is labelled `proxy-0.567`.
-try:
-    import data_sources as _DS                                                 # noqa: E402
-    DEVICE_ANSWER_WAIT_S = float(_DS.DEVICE_WAIT_RULE_S)
-    DEVICE_ANSWER_WAIT_SOURCE = "live2/fleet/data_sources.py::DEVICE_WAIT_RULE_S"
-except Exception:                                                              # noqa: BLE001
-    DEVICE_ANSWER_WAIT_S = 0.567
-    DEVICE_ANSWER_WAIT_SOURCE = "0.567 s cascade device-answer wait (fallback literal)"
-DEVICE_ANSWER_LABEL = "proxy-0.567 (D154 (5)); D155 (1) forbids the cold re-send latencies"
+# ---------------------------------------------------------------------------
+# THE MEASURED DEVICE-ANSWER LATENCY (D171 (3)). The 0.567 s proxy is GONE from the decision
+# path: this reads the same three measured Orin tables the coordinator's live device wait reads
+# (`coordinator.py::_device_wait_s`, :764 dashcam, :780 robot, :785 single-shot), through the same
+# `fleet/data_sources.py` accessors, so the counterfactual's device model and the live wait cannot
+# drift apart. Per TYPE and, for dashcam, per EPISODE POSITION, because the three tables are three
+# different measurements and none of them covers another's ids.
+#
+# WHAT THE MEASURED TABLES DO AND DO NOT MAKE VARY, which a report must not get wrong:
+#   robot       0.2503 to 0.3108 s over 97 LH-REQ questions (StudyORIN-REC WARM, completion).
+#               Every value is inside every robot deadline under test (2.5 to 5 s), so
+#               `p_device_on_time` is still 1.0 on EVERY robot decision. It is now CONSTANT
+#               BECAUSE THE DEVICE IS FAST, which is a measured fact, and no longer constant
+#               because the input was a flat proxy, which was an artefact. The two look the same
+#               in the output and are not the same claim.
+#   single_shot 1,042 questions (StudySS2, completion, D146 (1)): realworldqa p50 0.9592 s,
+#               refspatial p50 1.9947 s and max 3.4093 s against a 2.0 s deadline. HERE the term
+#               varies, and 45.5 percent of refspatial questions give p_device_on_time = 0.
+#   dashcam     EP-G warm APPEND first token by episode frame position, 0.2349 to 0.3169 s over
+#               positions 1 to 21 (StudySH-EP, D146 (1) allows first token for a Yes/No alert).
+#               Inside a 1 s dashcam deadline at every position; the EPISODE START curve is the
+#               one that reaches 1.88 s.
+# So the mechanism is LIVE and it is UNEXERCISED on the robot decisions the counterfactual makes
+# in today's cells (CLAUDE.md Rule 2), which is a different sentence from "constant" and is the
+# one that is true.
+DEVICE_WAIT_FALLBACK_S = 0.567
+DEVICE_WAIT_FALLBACK_NOTE = (
+    "the superseded proxy-0.567 literal (D154 (5)), kept ONLY as the value counted when a lookup "
+    "finds no measured entry. D171 (3) requires that counter to be 0: a non-zero fallback means "
+    "the counterfactual priced a device answer on a number no one measured")
+
+
+class DeviceLatency:
+    """The measured per-type device-answer latency, with a fallback COUNTER rather than a silence.
+
+    Mirrors `coordinator.py::_device_wait_s` lookup for lookup. Counts by type, and counts the
+    fallback by WHY it was reached, because a missing dashcam table and a question id absent from
+    the single-shot table need different remedies and only one of them is a missing measurement.
+    """
+
+    def __init__(self) -> None:
+        self._robot: Optional[Dict[str, float]] = None
+        self._ss: Optional[Dict[str, float]] = None
+        self._dash: Optional[Dict[int, float]] = None
+        self.counts: Dict[str, int] = {}
+
+    def _bump(self, k: str) -> None:
+        self.counts[k] = self.counts.get(k, 0) + 1
+
+    def _tables(self) -> None:
+        if self._robot is not None:
+            return
+        try:
+            import data_sources as _DS                                         # noqa: PLC0415
+            self._robot = {str(k): float(v) for k, v in _DS.device_recall_warm_latency_s().items()}
+            self._ss = {str(k): float(v) for k, v in _DS.single_shot_total_s().items()}
+            self._dash = {int(k): float(v) for k, v in _DS.dashcam_append_ttft_s().items()}
+        except Exception:                                                      # noqa: BLE001
+            self._robot, self._ss, self._dash = {}, {}, {}
+
+    def wait_s(self, *, kind: str = "robot", question_id: Optional[str] = None,
+               episode_frames: Optional[int] = None) -> float:
+        self._tables()
+        if kind in ("dashcam", "monitor"):
+            tab = self._dash or {}
+            if tab:
+                n = int(episode_frames or 1)
+                n = min(max(n, min(tab)), max(tab))
+                self._bump("measured_dashcam")
+                return float(tab[n])
+            self._bump("fallback_no_dashcam_table")
+            return DEVICE_WAIT_FALLBACK_S
+        if question_id is not None:
+            qid = str(question_id)
+            v = (self._robot or {}).get(qid)
+            if v is not None:
+                self._bump("measured_robot")
+                return float(v)
+            v = (self._ss or {}).get(qid)
+            if v is not None:
+                self._bump("measured_single_shot")
+                return float(v)
+            self._bump("fallback_question_id_not_in_any_table")
+            return DEVICE_WAIT_FALLBACK_S
+        self._bump("fallback_no_question_id")
+        return DEVICE_WAIT_FALLBACK_S
+
+    def as_dict(self) -> Dict[str, Any]:
+        self._tables()
+        n_fb = sum(v for k, v in self.counts.items() if k.startswith("fallback"))
+        return {"source": DEVICE_LATENCY_SOURCE,
+                "n_robot": len(self._robot or {}), "n_single_shot": len(self._ss or {}),
+                "n_dashcam_positions": len(self._dash or {}),
+                "counts": dict(sorted(self.counts.items())),
+                "n_fallback": n_fb, "fallback_is_zero": n_fb == 0,
+                "fallback_s": DEVICE_WAIT_FALLBACK_S,
+                "fallback_note": DEVICE_WAIT_FALLBACK_NOTE}
+
+
+DEVICE_LATENCY_SOURCE = (
+    "results/device/study_devlat/orin_device_latency_tables.json via fleet/data_sources.py "
+    "(device_recall_warm_latency_s, single_shot_total_s, dashcam_append_ttft_s) - the SAME "
+    "accessors coordinator.py::_device_wait_s reads")
+DEVICE_ANSWER_LABEL = "measured-orin (D171 (3)); the proxy-0.567 literal is no longer on this path"
+
+DEVLAT = DeviceLatency()
 
 # The on-time target the deficit counters measure a shortfall against. It is the committed robot
 # SLO (D133: p 0.90 within the deadline), per type, and it is DECLARED, not fitted.
@@ -177,15 +273,23 @@ class DeficitCounters:
 # The device side of the objective (D155 (3))
 
 
-def p_device_on_time(deadline_s: float, wait_s: float = DEVICE_ANSWER_WAIT_S) -> float:
-    """P(the DEVICE's own answer arrives within the question's deadline), D155 (3).
+def device_wait_s(*, kind: str = "robot", question_id: Optional[str] = None,
+                  episode_frames: Optional[int] = None) -> float:
+    """The MEASURED wait for this question's own device answer (D171 (3))."""
+    return DEVLAT.wait_s(kind=kind, question_id=question_id, episode_frames=episode_frames)
 
-    CONSTANT at 1.0 in this build for every robot deadline under test, because the only committed
-    device-answer latency is the 0.567 s proxy. Implemented and read so that the measured warm
-    per-question latencies D155 (1) promises can be dropped in without touching a decision path,
-    and reported as CONSTANT until they are.
+
+def p_device_on_time(deadline_s: float, wait_s: Optional[float] = None, *,
+                     kind: str = "robot", question_id: Optional[str] = None,
+                     episode_frames: Optional[int] = None) -> float:
+    """P(the DEVICE's own answer arrives within this question's deadline), D155 (3) on D171 (3).
+
+    `wait_s` is the measured latency for THIS question unless a caller supplies one explicitly
+    (the negative control does, and only the negative control should).
     """
-    return 1.0 if float(wait_s) <= float(deadline_s) else 0.0
+    w = (device_wait_s(kind=kind, question_id=question_id, episode_frames=episode_frames)
+         if wait_s is None else float(wait_s))
+    return 1.0 if float(w) <= float(deadline_s) else 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -226,12 +330,26 @@ class Harm:
 def harm_to_others(before: "CC.QueuePlan", after: "CC.QueuePlan", *, candidate_req_id: str,
                    counters: Optional[DeficitCounters] = None,
                    acc_by_req: Optional[Dict[str, float]] = None,
-                   deadline_by_req: Optional[Dict[str, float]] = None) -> Harm:
+                   deadline_by_req: Optional[Dict[str, float]] = None,
+                   acc_device: float = 0.0,
+                   acc_device_by_req: Optional[Dict[str, float]] = None) -> Harm:
     """The expected correct on-time answers OTHER devices lose because this option was taken.
 
     Positive numbers are losses. Every row is one other request whose predicted delivery
     probability moved, with its own device's weight and its own accuracy, so the harm is in the
     same units as the gain and is never a tuned penalty.
+
+    D171 (2), REPLACEMENT SEMANTICS ON BOTH SIDES OF THE SUBTRACTION. A displaced request does not
+    lose its whole cloud answer: its own DEVICE answers instead, exactly as D165 (B) prices the
+    gain side. Each row is therefore
+
+        w_o * (p_before - p_after) * (acc_cloud_o - acc_dev_o * p_dev_on_time_o)
+
+    which is what `option_value` returns when it is given the real `acc_dev` instead of 0.0, and
+    `acc_dev = 0.0` is what it was given before. The old term valued a displaced request at its
+    FULL cloud accuracy, so it OVERSTATED harm wherever the other device could have answered: the
+    counterfactual was more conservative than the objective says it should be. The device's own
+    delivery probability is the measured one (D171 (3)), keyed on that request's own question.
     """
     b = before.by_id()
     a = after.by_id()
@@ -246,14 +364,20 @@ def harm_to_others(before: "CC.QueuePlan", after: "CC.QueuePlan", *, candidate_r
         w = (counters.weight(rb.device_id) if counters else rb.weight)
         acc = (acc_by_req or {}).get(rid, rb.accuracy)
         dl = (deadline_by_req or {}).get(rid, rb.deadline_abs_s)
-        p_dev = p_device_on_time(max(dl - rb.start_s, 0.0)) if dl != math.inf else 1.0
-        vb = option_value(w, rb.p_on_time, acc, p_dev, 0.0)
-        va = option_value(w, ra.p_on_time, acc, p_dev, 0.0)
+        a_dev = (acc_device_by_req or {}).get(rid, float(acc_device))
+        p_dev = (p_device_on_time(max(dl - rb.start_s, 0.0), kind=rb.kind,
+                                  question_id=rb.question_id,
+                                  episode_frames=rb.episode_frames)
+                 if dl != math.inf else 1.0)
+        vb = option_value(w, rb.p_on_time, acc, p_dev, a_dev)
+        va = option_value(w, ra.p_on_time, acc, p_dev, a_dev)
         if abs(vb - va) > 0.0:
             rows.append({"req_id": rid, "device_id": rb.device_id, "weight": round(w, 6),
                          "p_on_time_before": round(rb.p_on_time, 6),
                          "p_on_time_after": round(ra.p_on_time, 6),
-                         "accuracy": acc, "value_lost": round(vb - va, 9)})
+                         "accuracy": acc, "accuracy_device": a_dev,
+                         "p_device_on_time": p_dev,
+                         "value_lost": round(vb - va, 9)})
             total += vb - va
     return Harm(total, tuple(rows), len(rows))
 

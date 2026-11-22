@@ -318,6 +318,10 @@ class PendingRequest:
     accuracy: float = 0.0           # accuracy of the representation it carries (committed table)
     weight: float = 1.0             # its device's deficit weight, read by cf_objective
     kind: str = "robot"
+    # D171 (3): the identity the MEASURED device-latency tables are keyed on, so the harm term can
+    # price each displaced request's own device fallback instead of a flat proxy.
+    question_id: Optional[str] = None
+    episode_frames: Optional[int] = None
     is_candidate: bool = False      # the request the current decision is about
     # filled by `plan_queue`
     pred: Optional[ServicePrediction] = None

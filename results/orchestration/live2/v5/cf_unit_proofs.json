@@ -57,8 +57,8 @@
   },
   "margin": {
    "declared_in": "v5/cf_margin.py::MARGIN_CF",
-   "value": null,
-   "is_set": false,
+   "value": 0.16456,
+   "is_set": true,
    "rule": "D154 (2): MARGIN_CF is set ONCE, when the D151 (6) cost-model gate passes, equal to that gate's held-out p90 ABSOLUTE prediction error in the objective's units (expected correct on-time answers); frozen before any v5 cell, identical in every cell, never swept. The gate does not pass, so it is not set, so NO v5 CELL MAY RUN (spec v5 section 12.1, gap G8)."
   },
   "safety_factor": 1.5775406165458339,
@@ -124,10 +124,21 @@
  },
  "margin": {
   "_claim": "MARGIN_CF is read from one declared constant, so 'never tuned' is checkable from the code (D151 (1), D154 (2), session A's requirement 3)",
-  "MARGIN_CF": null,
-  "is_set": false,
-  "scorable_path_refuses_while_unset": true,
-  "refusal_message": "D154 (2): MARGIN_CF is set ONCE, when the D151 (6) cost-model gate passes, equal to that gate's held-out p90 ABSOLUTE prediction error in the objective's units (expected correct on-time answers); froz",
+  "MARGIN_CF": 0.16456,
+  "is_set": true,
+  "set_by": "D169 step 3, 2026-11-21, commit 2cb2d5c1; population and per-cell counts in results/orchestration/live2/v5/margin_cf_d169.json",
+  "matches_the_committed_d169_value": true,
+  "live_read": {
+   "value": 0.16456,
+   "source": "cf_margin.MARGIN_CF",
+   "scorable": true
+  },
+  "guard_positive_control": {
+   "_what": "the constant forced to None for one call, then restored",
+   "scorable_path_refuses_while_unset": true,
+   "refusal_message": "D154 (2): MARGIN_CF is set ONCE, when the D151 (6) cost-model gate passes, equal to that gate's held-out p90 ABSOLUTE prediction error in the objective's units (expected correct on-time answers); froz",
+   "restored": true
+  },
   "dry_path": {
    "value": 0.0,
    "source": "DRY_OVERRIDE",
@@ -137,8 +148,8 @@
    "declarations": [
     {
      "file": "experiments/orchestration/live2/v5/cf_margin.py",
-     "line": 51,
-     "text": "MARGIN_CF: Optional[float] = None"
+     "line": 67,
+     "text": "MARGIN_CF: Optional[float] = 0.16456"
     }
    ],
    "declared_in_cf_margin": 1,
@@ -146,6 +157,11 @@
    "single_declaration_for_cf": true,
    "conflicts": [],
    "readers_of_the_single_declaration": [
+    {
+     "file": "experiments/orchestration/live2/v5/cf_ontime_frozen.py",
+     "line": 150,
+     "text": "import cf_margin as CM                                                     # noqa: PLC0415"
+    },
     {
      "file": "experiments/orchestration/live2/v5/cf_planner.py",
      "line": 72,
@@ -162,11 +178,12 @@
      "text": "from cf_margin import MARGIN_CF, MARGIN_CF_RULE  # noqa: E402,F401  the single declaration"
     }
    ],
-   "verdict": "ONE DECLARATION for the counterfactual, read by 3 module(s)",
+   "verdict": "ONE DECLARATION for the counterfactual, read by 4 module(s)",
    "note": "`v5/value_readers.py` carried `MARGIN_CF = 0.05`, a pre-D154 placeholder, and at `25d55b9` it imports this declaration instead. Any new declaration of the name anywhere is a conflict and appears above."
   },
   "unit_conversion_gap": "D154 (2) names the gate's p90 absolute prediction error IN THE OBJECTIVE'S UNITS. The gate (`cost_model_gate.py`) predicts first-token and decode SECONDS, so its error is in seconds; the objective is in expected correct answers delivered by the deadline. No committed rule converts one into the other. `cf_cost.service_error_to_objective_units` shows the only defensible route (push the p90 service error through the delivery-probability curve and the committed accuracy table, which makes the margin a function of the question population) and REFUSES to return a number. Until the conversion is RULED, MARGIN_CF cannot be set even by a gate that passes.",
-  "verdict": "PASS: the only scorable read raises until D154 (2) sets the value, so no v5 cell can run"
+  "unit_conversion_gap_status": "CLOSED for this value: D162's model predicts the on-time PROBABILITY, so its p90 absolute error is already a probability, and the margin is that error times the committed accuracy delta a_D2_DEV = 0.250. No seconds-to-answers conversion is invented. The paragraph above is kept as the record of why the gap was open",
+  "verdict": "PASS: one declaration, holding the D169 value, with the unset guard still refusing and the dry path still unscorable"
  },
  "cost_and_latest_safe_start": {
   "_claim": "predicted service includes DECODE (spec v5 section 5.2) and the latest safe start READS it: cf_cost.latest_safe_start consumes ServicePrediction.total_s, which is first token PLUS decode PLUS link",
@@ -802,6 +819,8 @@
       "p_on_time_before": 0.970584,
       "p_on_time_after": 0.962125,
       "accuracy": 0.25,
+      "accuracy_device": 0.0,
+      "p_device_on_time": 1.0,
       "value_lost": 0.00211488
      },
      {
@@ -811,6 +830,8 @@
       "p_on_time_before": 0.970584,
       "p_on_time_after": 0.962125,
       "accuracy": 0.25,
+      "accuracy_device": 0.0,
+      "p_device_on_time": 1.0,
       "value_lost": 0.00211488
      },
      {
@@ -820,6 +841,8 @@
       "p_on_time_before": 0.970584,
       "p_on_time_after": 0.962125,
       "accuracy": 0.25,
+      "accuracy_device": 0.0,
+      "p_device_on_time": 1.0,
       "value_lost": 0.00211488
      },
      {
@@ -829,6 +852,8 @@
       "p_on_time_before": 0.970584,
       "p_on_time_after": 0.962125,
       "accuracy": 0.25,
+      "accuracy_device": 0.0,
+      "p_device_on_time": 1.0,
       "value_lost": 0.00211488
      },
      {
@@ -838,6 +863,8 @@
       "p_on_time_before": 0.970584,
       "p_on_time_after": 0.962125,
       "accuracy": 0.25,
+      "accuracy_device": 0.0,
+      "p_device_on_time": 1.0,
       "value_lost": 0.00211488
      },
      {
@@ -847,6 +874,8 @@
       "p_on_time_before": 0.970584,
       "p_on_time_after": 0.962125,
       "accuracy": 0.25,
+      "accuracy_device": 0.0,
+      "p_device_on_time": 1.0,
       "value_lost": 0.00211488
      }
     ]
@@ -862,6 +891,8 @@
       "p_on_time_before": 0.970584,
       "p_on_time_after": 0.962125,
       "accuracy": 0.25,
+      "accuracy_device": 0.0,
+      "p_device_on_time": 1.0,
       "value_lost": 0.00317232
      },
      {
@@ -871,6 +902,8 @@
       "p_on_time_before": 0.970584,
       "p_on_time_after": 0.962125,
       "accuracy": 0.25,
+      "accuracy_device": 0.0,
+      "p_device_on_time": 1.0,
       "value_lost": 0.00317232
      },
      {
@@ -880,6 +913,8 @@
       "p_on_time_before": 0.970584,
       "p_on_time_after": 0.962125,
       "accuracy": 0.25,
+      "accuracy_device": 0.0,
+      "p_device_on_time": 1.0,
       "value_lost": 0.00317232
      },
      {
@@ -889,6 +924,8 @@
       "p_on_time_before": 0.970584,
       "p_on_time_after": 0.962125,
       "accuracy": 0.25,
+      "accuracy_device": 0.0,
+      "p_device_on_time": 1.0,
       "value_lost": 0.00211488
      },
      {
@@ -898,6 +935,8 @@
       "p_on_time_before": 0.970584,
       "p_on_time_after": 0.962125,
       "accuracy": 0.25,
+      "accuracy_device": 0.0,
+      "p_device_on_time": 1.0,
       "value_lost": 0.00211488
      },
      {
@@ -907,6 +946,8 @@
       "p_on_time_before": 0.970584,
       "p_on_time_after": 0.962125,
       "accuracy": 0.25,
+      "accuracy_device": 0.0,
+      "p_device_on_time": 1.0,
       "value_lost": 0.00211488
      }
     ]
@@ -917,12 +958,12 @@
   },
   "device_term": {
    "p_device_on_time_at_3s": 1.0,
-   "device_wait_s": 0.567,
-   "source": "live2/fleet/data_sources.py::DEVICE_WAIT_RULE_S",
-   "label": "proxy-0.567 (D154 (5)); D155 (1) forbids the cold re-send latencies",
-   "status": "CONSTANT",
-   "why": "the only committed device-answer latency is the 0.567 s proxy and D155 (1) forbids the StudyORIN-REC cold re-send latencies, so P(device on time) = 1.0 for every robot deadline under test. D155 (3)'s by-the-deadline restriction is live on the cloud side and INERT on the device side in this build",
-   "stopping_condition_for": "any claim that v5 trades the device's delivery risk against the cloud's; that claim cannot be tested until the measured warm per-question Orin latencies land"
+   "device_wait_s": 0.2766,
+   "source": "results/device/study_devlat/orin_device_latency_tables.json via fleet/data_sources.py (device_recall_warm_latency_s, single_shot_total_s, dashcam_append_ttft_s) - the SAME accessors coordinator.py::_device_wait_s reads",
+   "label": "measured-orin (D171 (3)); the proxy-0.567 literal is no longer on this path",
+   "status": "UNEXERCISED on robot decisions (D171 (3)); it was CONSTANT before",
+   "why": "D171 (3) replaced the 0.567 s proxy with the measured Orin tables. P(device on time) is still 1.0 on every robot decision, but now BECAUSE THE MEASURED ROBOT WARM LATENCY (0.2503 to 0.3108 s) IS INSIDE EVERY ROBOT DEADLINE, which is a fact about the device, where before it was a fact about a flat input. The term varies on single-shot (refspatial misses 2.0 s in 45.5 percent of questions). Under Rule 2 that is UNEXERCISED, not CONSTANT",
+   "proof": "v5/d171_proofs.py::P3_device_model"
   },
   "verdict": "PASS: the weighting varies, acts cross-device, and provably cancels within a device; harm is non-zero and read"
  },
@@ -930,7 +971,7 @@
   "_claim": "the counterfactual's choice differs from the base's on real decisions",
   "_register": "DRY: margin 0 by explicit override, scorable=False on every decision. A wiring proof, not a policy comparison",
   "n_decisions": 56,
-  "n_differing": 38,
+  "n_differing": 37,
   "first_differing": {
    "cell": {
     "tokens": 467,
@@ -940,21 +981,21 @@
    "base": "ADMIT_NOW_D2",
    "cf": "DEFER_TO_LATEST_SAFE_START",
    "chosen": "DEFER_TO_LATEST_SAFE_START",
-   "delta": 0.012670656
+   "delta": 0.009045125
   },
   "base_choice_counts": {
    "ADMIT_NOW_D2": 48,
    "DEVICE_ANSWERS": 8
   },
   "cf_choice_counts": {
-   "ADMIT_NOW_D2": 40,
-   "DEFER_TO_LATEST_SAFE_START": 12,
-   "DEVICE_ANSWERS": 4
+   "ADMIT_NOW_D2": 43,
+   "DEFER_TO_LATEST_SAFE_START": 11,
+   "DEVICE_ANSWERS": 2
   },
   "all_decisions_nonscorable": true,
   "characteristic_decisions": {
-   "deferrals_chosen": 12,
-   "recent_suppressed_by_rule": 6,
+   "deferrals_chosen": 11,
+   "recent_suppressed_by_rule": 10,
    "harm_nonzero": 118,
    "timeout_fallback": 0,
    "note": "CLAUDE.md's port rule: an arm must be shown to make its own characteristic decision at least once. The counterfactual's is the DEFERRAL to a latest safe start, and it is counted here"
@@ -1026,9 +1067,10 @@
    "delta": 0.252,
    "margin": 0.0,
    "margin_source": "DRY_OVERRIDE",
+   "margin_effective": 0.0,
    "scorable": false,
    "timeout_fallback": false,
-   "elapsed_ms": 0.015677,
+   "elapsed_ms": 0.014392,
    "candidates": [
     {
      "name": "WARM",
@@ -1130,9 +1172,10 @@
    "delta": 0.5,
    "margin": 0.0,
    "margin_source": "DRY_OVERRIDE",
+   "margin_effective": 0.0,
    "scorable": false,
    "timeout_fallback": false,
-   "elapsed_ms": 0.009776,
+   "elapsed_ms": 0.009555,
    "candidates": [
     {
      "name": "WARM",
@@ -1242,9 +1285,10 @@
    "delta": 0.0,
    "margin": 0.0,
    "margin_source": "DRY_OVERRIDE",
+   "margin_effective": 0.0,
    "scorable": false,
    "timeout_fallback": false,
-   "elapsed_ms": 0.018215,
+   "elapsed_ms": 0.018465,
    "candidates": [
     {
      "name": "QUESTION_FIRST",
@@ -1306,7 +1350,9 @@
      "expressible": true,
      "scored": true,
      "detail": {
-      "p_device_on_time": 1.0
+      "p_device_on_time": 1.0,
+      "device_wait_s": 0.567,
+      "device_wait_source": "results/device/study_devlat/orin_device_latency_tables.json via fleet/data_sources.py (device_recall_warm_latency_s, single_shot_total_s, dashcam_append_ttft_s) - the SAME accessors coordinator.py::_device_wait_s reads"
      }
     }
    ],
@@ -1335,9 +1381,10 @@
    "delta": 0.197356165,
    "margin": 0.0,
    "margin_source": "DRY_OVERRIDE",
+   "margin_effective": 0.0,
    "scorable": false,
    "timeout_fallback": false,
-   "elapsed_ms": 0.014664,
+   "elapsed_ms": 0.014943,
    "candidates": [
     {
      "name": "QUESTION_FIRST",
@@ -1399,7 +1446,9 @@
      "expressible": true,
      "scored": true,
      "detail": {
-      "p_device_on_time": 1.0
+      "p_device_on_time": 1.0,
+      "device_wait_s": 0.567,
+      "device_wait_source": "results/device/study_devlat/orin_device_latency_tables.json via fleet/data_sources.py (device_recall_warm_latency_s, single_shot_total_s, dashcam_append_ttft_s) - the SAME accessors coordinator.py::_device_wait_s reads"
      }
     }
    ],
@@ -1437,13 +1486,13 @@
   "_claim": "disabling each mechanism changes the decisions it is claimed to drive",
   "_register": "DRY, margin 0 by override except control 5. Not a policy result.",
   "reference_choice_counts": {
-   "ADMIT_NOW_D2": 16,
+   "ADMIT_NOW_D2": 18,
    "DEFER_TO_LATEST_SAFE_START": 36,
-   "DEVICE_ANSWERS": 4
+   "DEVICE_ANSWERS": 2
   },
   "controls": {
    "decode_zeroed": {
-    "n_changed": 8,
+    "n_changed": 4,
     "of": 56,
     "first": {
      "index": 6,
@@ -1454,7 +1503,7 @@
     "expectation": "the latest safe start and every P(on time) move, so decisions must change; if they do not, decode is not driving them"
    },
    "flat_accuracy_table": {
-    "n_changed": 52,
+    "n_changed": 54,
     "of": 56,
     "first": {
      "index": 0,
@@ -1465,7 +1514,7 @@
     "expectation": "with every accuracy equal the representation choice is value-free, so decisions must change or value is decorative"
    },
    "no_displacement": {
-    "n_changed": 12,
+    "n_changed": 8,
     "of": 56,
     "first": {
      "index": 4,
@@ -1616,9 +1665,9 @@
    "safety factor 1.577541 (p90 of held-out actual/predicted service, floored at 1.0)",
    "predicted service for this question: 1.616062 s, of which decode 0.093607; latest safe start = 3.0 - 1.577541 x 1.616062 = 0.450597 s",
    "prefill-only latest safe start would be 0.598266 s, an error of 0.147669 s in the planner's favour: the deferral the committed formula would allow",
-   "  candidate ADMIT_NOW_D2               value 0.272675009  gain 0.291068984  harm 0.018393975  scored True",
-   "  candidate DEFER_TO_LATEST_SAFE_START value 0.272026788  gain 0.284716069  harm 0.012689281  scored True",
-   "  candidate SEND_RECENT                value 0.115839734  gain 0.128529015  harm 0.012689281  scored False",
+   "  candidate ADMIT_NOW_D2               value 0.277930462  gain 0.291068984  harm 0.013138522  scored True",
+   "  candidate DEFER_TO_LATEST_SAFE_START value 0.275652319  gain 0.284716069  harm 0.009063751  scored True",
+   "  candidate SEND_RECENT                value 0.119465265  gain 0.128529015  harm 0.009063751  scored False",
    "  candidate DEVICE_ANSWERS             value 0.085714800  gain 0.085714800  harm 0.000000000  scored True",
    "base (hybrid-F-lhreq-noc3 surrogate): prefill-only estimate 1.566889 s against slack 3.000000 s -> ADMIT_NOW_D2",
    "counterfactual argmax: ADMIT_NOW_D2; delta over base 0.000000000; margin 0.0 (DRY_OVERRIDE); chosen ADMIT_NOW_D2",
@@ -1633,20 +1682,21 @@
    "base_choice": "ADMIT_NOW_D2",
    "cf_choice": "ADMIT_NOW_D2",
    "deviated": false,
-   "value_base": 0.272675009,
-   "value_cf": 0.272675009,
+   "value_base": 0.277930462,
+   "value_cf": 0.277930462,
    "delta": 0.0,
    "margin": 0.0,
    "margin_source": "DRY_OVERRIDE",
+   "margin_effective": 0.0,
    "scorable": false,
    "timeout_fallback": false,
-   "elapsed_ms": 0.307253,
+   "elapsed_ms": 0.326893,
    "candidates": [
     {
      "name": "ADMIT_NOW_D2",
-     "value": 0.272675009,
+     "value": 0.277930462,
      "gain": 0.291068984,
-     "harm": 0.018393975,
+     "harm": 0.013138522,
      "expressible": true,
      "scored": true,
      "detail": {
@@ -1671,9 +1721,9 @@
     },
     {
      "name": "DEFER_TO_LATEST_SAFE_START",
-     "value": 0.272026788,
+     "value": 0.275652319,
      "gain": 0.284716069,
-     "harm": 0.012689281,
+     "harm": 0.009063751,
      "expressible": true,
      "scored": true,
      "detail": {
@@ -1709,9 +1759,9 @@
     },
     {
      "name": "SEND_RECENT",
-     "value": 0.115839734,
+     "value": 0.119465265,
      "gain": 0.128529015,
-     "harm": 0.012689281,
+     "harm": 0.009063751,
      "expressible": true,
      "scored": false,
      "detail": {
@@ -1744,9 +1794,9 @@
      "scored": true,
      "detail": {
       "p_device_on_time": 1.0,
-      "p_device_on_time_is_constant": true,
       "device_wait_s": 0.567,
-      "label": "proxy-0.567 (D154 (5)); D155 (1) forbids the cold re-send latencies",
+      "device_wait_source": "results/device/study_devlat/orin_device_latency_tables.json via fleet/data_sources.py (device_recall_warm_latency_s, single_shot_total_s, dashcam_append_ttft_s) - the SAME accessors coordinator.py::_device_wait_s reads",
+      "label": "measured-orin (D171 (3)); the proxy-0.567 literal is no longer on this path",
       "accuracy": 0.071429
      }
     }
@@ -1793,7 +1843,7 @@
     "p_device_on_time": 1.0
    }
   },
-  "elapsed_ms": 0.307253
+  "elapsed_ms": 0.326893
  },
  "residuals_summary": {
   "_what": "the committed cost model's HELD-OUT residual distribution: actual engine service over predicted engine service, used as the delivery-probability model P(on time) = F(slack / predicted)",
@@ -1986,15 +2036,15 @@
   "verdict": "PASS: frozen, hashed, verified, drift-checked against the live planner path, all four refusal paths raise, and the population guard refuses an off-population cell"
  },
  "_provenance": {
-  "git_commit": "47b314764c291d21d89d662ef949200745ae5efe",
+  "git_commit": "d5d12dfc90f1d265dcdd2c288cbdc564796afaa1",
   "script": "cf_proofs.py",
   "model": "n/a (policy design, no model)",
-  "timestamp": "2026-11-20T19:57:01.463752",
+  "timestamp": "2026-11-21T18:50:34.931669",
   "device": "cpu",
   "n": 56,
   "args": {
    "build_residuals": false,
-   "out_dir": "/tmp/claude-1001/sessB2/results/orchestration/live2/v5"
+   "out_dir": "/tmp/claude-1001/mapwt/results/orchestration/live2/v5"
   }
  }
 }

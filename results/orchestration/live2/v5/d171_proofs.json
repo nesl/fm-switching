@@ -1,0 +1,220 @@
+{
+ "_what": "D171 (1) weighted margin, (2) harm under replacement semantics, (3) measured device model; each behind a switch, each proved by an A/B diff",
+ "_register": "DRY throughout: proofs about the code, never results about the policy",
+ "margin_cf": 0.16456,
+ "margin_cf_set_by": "D169 step 3, 2026-11-21, commit 2cb2d5c1; population and per-cell counts in results/orchestration/live2/v5/margin_cf_d169.json",
+ "dry_margin_used": 0.16456,
+ "P0_positive_control": {
+  "_claim": "the comparison can see a difference that is there by construction",
+  "deviations_at_margin_0_16456": 0,
+  "deviations_at_margin_1e9": 0,
+  "logs_differ": true,
+  "verdict": "PASS: the check is live"
+ },
+ "P1_weighted_margin": {
+  "_claim": "deviate iff (value_cf - value_base) > w_d * MARGIN_CF; with all w = 1 this is the pre-D171 rule exactly",
+  "excluded_from_the_byte_comparison": [
+   "margin_effective",
+   "elapsed_ms"
+  ],
+  "excluded_why": "margin_effective is the field D171 (1) ADDS, so it differs by construction; elapsed_ms is wall clock and differs between any two runs",
+  "all_weights_are_1_in_the_default_grid": true,
+  "weights_seen": [
+   1.0
+  ],
+  "logs_byte_identical_with_all_w_1": true,
+  "deficit_case": {
+   "device": "robo000",
+   "served": 10,
+   "on_time": 5,
+   "weights_seen": [
+    1.4
+   ],
+   "effective_bar_seen": [
+    0.230384
+   ],
+   "margin_cf": 0.16456,
+   "deviations_weighted": 0,
+   "deviations_unweighted": 0,
+   "decisions_that_change": 0,
+   "first_change": null,
+   "direction": "the weighted rule deviates LESS often, which is the intended direction: a device in deficit must clear a HIGHER model-error bar, not a lower one",
+   "rule2_class": "UNEXERCISED: w > 1 moved the bar but no decision's delta fell in the band between the two bars on this grid; the switch is wired and this grid does not reach it"
+  },
+  "verdict": "PASS: byte-identical at w = 1 and the bar moves at w > 1"
+ },
+ "P2_harm_replacement": {
+  "_claim": "harm_to_others prices each displaced device's own answer as its fallback (D165 (B) replacement semantics), instead of acc_dev = 0.0",
+  "formula": "w_o * (p_before - p_after) * (acc_cloud_o - acc_dev_o * p_dev_on_time_o)",
+  "n_decisions": 56,
+  "n_candidate_harm_terms": 224,
+  "n_harm_terms_nonzero_before": 118,
+  "n_harm_terms_nonzero_after": 118,
+  "harm_terms_smaller_in_magnitude": 118,
+  "harm_terms_larger_in_magnitude": 0,
+  "mean_abs_harm_before": 0.009394994080357143,
+  "mean_abs_harm_after": 0.006710694142857143,
+  "decisions_changed": 0,
+  "first_change": null,
+  "deviations_before": 0,
+  "deviations_after": 0,
+  "direction": "harm SHRINKS, so the counterfactual is LESS conservative than it was: the old term overstated the loss by ignoring the displaced device's own answer",
+  "rule2_class": "UNEXERCISED: every harm term shrank but none shrank past a margin, so no decision on this grid changes. The term is live and this grid does not reach a case where it decides",
+  "verdict": "PASS: the term is live, every harm magnitude shrank, and the direction is the one replacement semantics predicts"
+ },
+ "P3_device_model": {
+  "_claim": "the counterfactual's device model is the measured Orin table the coordinator reads, per type and episode position; the 0.567 proxy is off the path",
+  "source": "results/device/study_devlat/orin_device_latency_tables.json via fleet/data_sources.py (device_recall_warm_latency_s, single_shot_total_s, dashcam_append_ttft_s) - the SAME accessors coordinator.py::_device_wait_s reads",
+  "label": "measured-orin (D171 (3)); the proxy-0.567 literal is no longer on this path",
+  "lookup_counts": {
+   "measured_dashcam": 42,
+   "measured_robot": 1174,
+   "measured_single_shot": 2361
+  },
+  "n_fallback": 0,
+  "fallback_is_zero": true,
+  "wait_s": {
+   "robot": {
+    "n": 97,
+    "min": 0.2503,
+    "max": 0.3108,
+    "mean": 0.272441
+   },
+   "single_shot": {
+    "n": 1042,
+    "min": 0.280623,
+    "max": 3.40926,
+    "mean": 1.253157
+   },
+   "dashcam_append": {
+    "n": 21,
+    "min": 0.23488,
+    "max": 0.366243,
+    "mean": 0.284411
+   }
+  },
+  "p_device_on_time": {
+   "robot_at_3s": {
+    "mean": 1.0,
+    "n_zero": 0,
+    "n": 97,
+    "varies": false
+   },
+   "single_shot_at_2s": {
+    "mean": 0.879079,
+    "n_zero": 126,
+    "n": 1042,
+    "varies": true
+   },
+   "refspatial_at_2s": {
+    "mean": 0.545126,
+    "n_zero": 126,
+    "n": 277,
+    "fraction_missed": 0.4549
+   },
+   "dashcam_append_at_1s": {
+    "mean": 1.0,
+    "n_zero": 0,
+    "n": 21,
+    "varies": false
+   }
+  },
+  "register": "the term VARIES ACROSS TYPES and is CONSTANT AT 1.0 WITHIN THE ROBOT TYPE, because every measured robot warm latency (0.2503 to 0.3108 s) is inside every robot deadline under test. The counterfactual plans robot requests in today's cells, so on those decisions the device term is still constant - now constant BECAUSE THE DEVICE IS FAST (measured) rather than because the input was a flat proxy (an artefact). Under CLAUDE.md Rule 2 that is UNEXERCISED, not CONSTANT and not ABSENT",
+  "verdict": "PASS: fallback 0, tables read, and the term varies on the types whose measurement says it should"
+ },
+ "P4_baselines_unchanged": {
+  "_claim": "the three changes are unreachable from every baseline arm",
+  "importers_of_cf_modules": [
+   "experiments/orchestration/live2/arms_v5full.py:119:            import cf_instrument as CI",
+   "experiments/orchestration/live2/arms_v5full.py:120:            import cf_planner as CP",
+   "experiments/orchestration/live2/v5/cf_margin.py:198:    from cf_cost import ratio_quantile                                         # noqa: PLC0415",
+   "experiments/orchestration/live2/v5/cf_objective.py:76:import cf_cost as CC                                                           # noqa: E402",
+   "experiments/orchestration/live2/v5/cf_ontime_frozen.py:149:    import cf_cost as CC                                                       # noqa: PLC0415",
+   "experiments/orchestration/live2/v5/cf_ontime_frozen.py:150:    import cf_margin as CM                                                     # noqa: PLC0415",
+   "experiments/orchestration/live2/v5/cf_ontime_frozen.py:622:        import cf_cost as CC                                                   # noqa: PLC0415",
+   "experiments/orchestration/live2/v5/cf_planner.py:71:import cf_cost as CC                                                           # noqa: E402",
+   "experiments/orchestration/live2/v5/cf_planner.py:72:import cf_margin as CM                                                         # noqa: E402",
+   "experiments/orchestration/live2/v5/cf_planner.py:99:import cf_objective as CO                                                      # noqa: E402",
+   "experiments/orchestration/live2/v5/cf_planner.py:100:from cf_instrument import DecisionClock, BUDGET_MS                             # noqa: E402",
+   "experiments/orchestration/live2/v5/cf_proofs.py:49:import cf_cost as CC                                                           # noqa: E402",
+   "experiments/orchestration/live2/v5/cf_proofs.py:50:import cf_margin as CM                                                         # noqa: E402",
+   "experiments/orchestration/live2/v5/cf_proofs.py:51:import cf_objective as CO                                                      # noqa: E402",
+   "experiments/orchestration/live2/v5/cf_proofs.py:52:import cf_planner as CP                                                        # noqa: E402",
+   "experiments/orchestration/live2/v5/cf_proofs.py:53:from cf_instrument import DecisionClock                                        # noqa: E402",
+   "experiments/orchestration/live2/v5/value_readers.py:70:from cf_margin import MARGIN_CF, MARGIN_CF_RULE  # noqa: E402,F401  the single declaration"
+  ],
+  "importers_outside_v5": [
+   "experiments/orchestration/live2/arms_v5full.py:119:            import cf_instrument as CI",
+   "experiments/orchestration/live2/arms_v5full.py:120:            import cf_planner as CP"
+  ],
+  "only_importer_outside_v5_is_arms_v5full": true,
+  "verdict": "PASS: byte-identical baselines by construction, because no baseline arm imports a module any of the three changes touches"
+ },
+ "P5_delta_distribution": {
+  "_claim": "the predicted gain over base, per kind, against the 0.16456 bar",
+  "register": "CONSTRUCTED GRID, not a census. These are declared inputs crossed into a grid; a fraction here is a fraction of the grid and bounds nothing about a cell",
+  "margin_cf": 0.16456,
+  "rows": [
+   {
+    "kind": "request",
+    "n": 56,
+    "min": 0.0,
+    "p50": 0.0,
+    "p90": 0.014506523,
+    "max": 0.070921085,
+    "n_positive": 12,
+    "n_over_margin": 0,
+    "fraction_over_margin": 0.0
+   },
+   {
+    "kind": "state",
+    "n": 48,
+    "min": 0.0045,
+    "p50": 0.25,
+    "p90": 0.5,
+    "max": 0.5,
+    "n_positive": 48,
+    "n_over_margin": 28,
+    "fraction_over_margin": 0.5833
+   },
+   {
+    "kind": "sync",
+    "n": 9,
+    "min": 0.0,
+    "p50": 0.103752407,
+    "p90": 0.14104079,
+    "max": 0.14104079,
+    "n_positive": 5,
+    "n_over_margin": 0,
+    "fraction_over_margin": 0.0
+   }
+  ],
+  "any_kind_exceeds_the_margin": true,
+  "state_gains_by_winning_candidate": {
+   "WARM": {
+    "n": 12,
+    "n_over_margin": 2,
+    "max_delta": 0.21375,
+    "delta_equals_declared_harm_input": 0
+   },
+   "HOLD_BACK": {
+    "n": 33,
+    "n_over_margin": 24,
+    "max_delta": 0.5,
+    "delta_equals_declared_harm_input": 33
+   },
+   "TOUCH": {
+    "n": 3,
+    "n_over_margin": 2,
+    "max_delta": 0.21375,
+    "delta_equals_declared_harm_input": 0
+   }
+  },
+  "state_gains_that_are_a_declared_input_not_a_model_output": 33,
+  "state_caveat": "HOLD_BACK's value IS `harm_warm`, which this grid DECLARES (0, 0.05, 0.25, 0.5). So every state delta equal to one of those numbers is this grid's own input read back out, not a gain the cost model predicted, and counting it as 'clears the margin' would be consistency-check 3's artefact spread. The state deltas that ARE model output are the WARM/TOUCH ones, `w * p_question * acc * (p_warm - p_cold)`, whose ceiling on this grid is 0.8 * 0.25 * 0.94 = 0.188. `harm_warm` itself has no committed measurement (StudySLICE1 has not run), so no state fraction here may be cited until it does",
+  "reading_request_and_sync": "NEITHER the request kind (max gain 0.0709, 0 of 56 over the bar) NOR the sync kind (max 0.1410, 0 of 9) clears 0.16456 anywhere on this grid. A full-v5 arm whose only counterfactual kinds were these two would choose the base's option every time and be IDENTICAL to v5-rules-2 by construction. D163 predicts exactly that, so it is not evidence the counterfactual is broken, and the margin does not move (D157). The open question is whether a cell reaches request decisions this constructed grid does not: the single-question ceiling is P * (0.25 - 0.071) = 0.179, barely over the bar, so a request deviation needs a near-certain swing on one question or a compound",
+  "reading": "At least one kind clears the margin on this grid, so deviations are reachable; the per-kind fractions above say which kind carries them",
+  "verdict": "PASS: the distribution is reported for all three kinds"
+ },
+ "ALL_PASS": true
+}
