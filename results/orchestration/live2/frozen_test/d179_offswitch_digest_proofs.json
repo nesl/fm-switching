@@ -1,0 +1,1044 @@
+{
+ "_what": "D179 (6a): with live2_share_admission and live2_release_recheck both OFF, the share-admission build changes no other arm's decisions",
+ "_before_sha": "ef48f61cb41e2ea95cf44e8a92b756533b3dd415",
+ "_after_sha": "f3482026d285784bbc8cb03ca9dfd7dfb122f5b3",
+ "_before_root": "/tmp/claude-1001/d179_before",
+ "_after_root": "/tmp/claude-1001/d179_after",
+ "_cell": {
+  "n": 16,
+  "run_s": 1200.0,
+  "seed": 4,
+  "ratio": "40:40:20",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dashcam_format": "epg",
+  "robot_upload": "per-frame",
+  "robot_reask_mean_s": 30.0
+ },
+ "_protocol": {
+  "one_dry_cell_per_process": true,
+  "cf_instrument_over_budget_patched_off": true,
+  "concurrency": 18,
+  "sequential": false,
+  "cores": 24,
+  "loadavg_driver_start": [
+   0.74,
+   0.56,
+   0.29
+  ],
+  "loadavg_driver_end": [
+   11.51,
+   17.32,
+   14.35
+  ],
+  "wall_s": 1275.51,
+  "cpu_user_s_by_arm": [
+   [
+    "covex-v6-base",
+    574.31,
+    603.81
+   ],
+   [
+    "covex-v6-rules",
+    527.13,
+    603.23
+   ],
+   [
+    "covex-v6-state-uo",
+    604.57,
+    643.47
+   ],
+   [
+    "v5-rules-2",
+    550.76,
+    542.52
+   ],
+   [
+    "hybrid-F-lhreq-noc3",
+    607.89,
+    561.23
+   ],
+   [
+    "b7-edf-feasibility",
+    586.74,
+    574.74
+   ],
+   [
+    "always-cloud-fcfs",
+    639.95,
+    602.76
+   ],
+   [
+    "edf",
+    616.76,
+    604.81
+   ],
+   [
+    "llf",
+    589.49,
+    612.64
+   ],
+   [
+    "mooncake",
+    645.48,
+    559.53
+   ],
+   [
+    "attentionstore-prefetch",
+    676.28,
+    678.93
+   ],
+   [
+    "simplestream",
+    619.56,
+    657.95
+   ],
+   [
+    "querystream-proactive",
+    593.56,
+    570.84
+   ],
+   [
+    "warm-all-lru",
+    652.73,
+    654.43
+   ],
+   [
+    "confidence-cascade",
+    610.4,
+    633.67
+   ],
+   [
+    "eco-llm",
+    589.29,
+    605.03
+   ],
+   [
+    "covex-v6-state-noprice",
+    608.26,
+    593.68
+   ]
+  ]
+ },
+ "_registry": {
+  "n_at_import": 171,
+  "n_after_register": 171,
+  "added_by_register": [],
+  "n_arms_tested": 17,
+  "arms_not_constructed": []
+ },
+ "arms": [
+  {
+   "arm": "covex-v6-base",
+   "before": {
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.09,
+     17.45,
+     9.68
+    ],
+    "cpu_user_s": 574.31,
+    "cpu_sys_s": 0.75,
+    "wall_s": 582.07,
+    "pid": 3635218
+   },
+   "after_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.13,
+     17.71,
+     10.01
+    ],
+    "cpu_user_s": 603.81,
+    "cpu_sys_s": 0.77,
+    "wall_s": 612.06,
+    "pid": 3635227
+   }
+  },
+  {
+   "arm": "covex-v6-rules",
+   "before": {
+    "digest": "18067c4c66bb44b8",
+    "rows": 11955,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "18067c4c66bb44b8",
+    "rows": 11955,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     19.93,
+     17.05,
+     9.21
+    ],
+    "cpu_user_s": 527.13,
+    "cpu_sys_s": 0.76,
+    "wall_s": 539.21,
+    "pid": 3635225
+   },
+   "after_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.13,
+     17.71,
+     10.01
+    ],
+    "cpu_user_s": 603.23,
+    "cpu_sys_s": 0.74,
+    "wall_s": 610.62,
+    "pid": 3635231
+   }
+  },
+  {
+   "arm": "covex-v6-state-uo",
+   "before": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "state_decisions": 60934,
+    "error": null
+   },
+   "after": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "state_decisions": 60934,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.13,
+     17.71,
+     10.01
+    ],
+    "cpu_user_s": 604.57,
+    "cpu_sys_s": 1.14,
+    "wall_s": 611.75,
+    "pid": 3635229
+   },
+   "after_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.18,
+     18.06,
+     10.5
+    ],
+    "cpu_user_s": 643.47,
+    "cpu_sys_s": 1.23,
+    "wall_s": 652.8,
+    "pid": 3635232
+   },
+   "after_repeat": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "state_decisions": 60934,
+    "error": null
+   },
+   "after_self_reproduces_under_load": true,
+   "after_repeat_host": {
+    "loadavg_start": [
+     20.2,
+     18.03,
+     10.45
+    ],
+    "loadavg_end": [
+     11.51,
+     17.32,
+     14.35
+    ],
+    "cpu_user_s": 620.37,
+    "cpu_sys_s": 1.39,
+    "wall_s": 623.57,
+    "pid": 3656906
+   }
+  },
+  {
+   "arm": "v5-rules-2",
+   "before": {
+    "digest": "18067c4c66bb44b8",
+    "rows": 11955,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "18067c4c66bb44b8",
+    "rows": 11955,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.03,
+     17.3,
+     9.51
+    ],
+    "cpu_user_s": 550.76,
+    "cpu_sys_s": 0.74,
+    "wall_s": 563.95,
+    "pid": 3635234
+   },
+   "after_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     19.94,
+     17.14,
+     9.33
+    ],
+    "cpu_user_s": 542.52,
+    "cpu_sys_s": 0.72,
+    "wall_s": 548.1,
+    "pid": 3635236
+   }
+  },
+  {
+   "arm": "hybrid-F-lhreq-noc3",
+   "before": {
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.12,
+     17.75,
+     10.07
+    ],
+    "cpu_user_s": 607.89,
+    "cpu_sys_s": 0.91,
+    "wall_s": 616.13,
+    "pid": 3635245
+   },
+   "after_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.11,
+     17.36,
+     9.57
+    ],
+    "cpu_user_s": 561.23,
+    "cpu_sys_s": 0.71,
+    "wall_s": 569.58,
+    "pid": 3635238
+   }
+  },
+  {
+   "arm": "b7-edf-feasibility",
+   "before": {
+    "digest": "b9aadd1c3a2b26d5",
+    "rows": 12265,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "b9aadd1c3a2b26d5",
+    "rows": 12265,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.07,
+     17.58,
+     9.85
+    ],
+    "cpu_user_s": 586.74,
+    "cpu_sys_s": 0.64,
+    "wall_s": 594.07,
+    "pid": 3635244
+   },
+   "after_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.09,
+     17.45,
+     9.68
+    ],
+    "cpu_user_s": 574.74,
+    "cpu_sys_s": 0.8,
+    "wall_s": 581.25,
+    "pid": 3635240
+   }
+  },
+  {
+   "arm": "always-cloud-fcfs",
+   "before": {
+    "digest": "c7f86bb7755828de",
+    "rows": 12253,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "c7f86bb7755828de",
+    "rows": 12253,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.2,
+     18.03,
+     10.45
+    ],
+    "cpu_user_s": 639.95,
+    "cpu_sys_s": 0.76,
+    "wall_s": 651.33,
+    "pid": 3635242
+   },
+   "after_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.13,
+     17.71,
+     10.01
+    ],
+    "cpu_user_s": 602.76,
+    "cpu_sys_s": 0.67,
+    "wall_s": 608.7,
+    "pid": 3635246
+   }
+  },
+  {
+   "arm": "edf",
+   "before": {
+    "digest": "9db366ac8f684d45",
+    "rows": 16327,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "9db366ac8f684d45",
+    "rows": 16327,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.18,
+     17.84,
+     10.18
+    ],
+    "cpu_user_s": 616.76,
+    "cpu_sys_s": 0.82,
+    "wall_s": 626.94,
+    "pid": 3635248
+   },
+   "after_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.11,
+     17.79,
+     10.12
+    ],
+    "cpu_user_s": 604.81,
+    "cpu_sys_s": 0.73,
+    "wall_s": 618.19,
+    "pid": 3635251
+   }
+  },
+  {
+   "arm": "llf",
+   "before": {
+    "digest": "961be8fe4942d86b",
+    "rows": 14075,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "961be8fe4942d86b",
+    "rows": 14075,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.07,
+     17.62,
+     9.9
+    ],
+    "cpu_user_s": 589.49,
+    "cpu_sys_s": 0.62,
+    "wall_s": 600.88,
+    "pid": 3635250
+   },
+   "after_host": {
+    "loadavg_start": [
+     0.74,
+     0.56,
+     0.29
+    ],
+    "loadavg_end": [
+     20.18,
+     17.84,
+     10.18
+    ],
+    "cpu_user_s": 612.64,
+    "cpu_sys_s": 0.91,
+    "wall_s": 622.94,
+    "pid": 3635249
+   }
+  },
+  {
+   "arm": "mooncake",
+   "before": {
+    "digest": "7544b3aa16433c70",
+    "rows": 12742,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "7544b3aa16433c70",
+    "rows": 12742,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     19.93,
+     17.05,
+     9.21
+    ],
+    "loadavg_end": [
+     19.22,
+     19.61,
+     14.71
+    ],
+    "cpu_user_s": 645.48,
+    "cpu_sys_s": 1.03,
+    "wall_s": 648.51,
+    "pid": 3652455
+   },
+   "after_host": {
+    "loadavg_start": [
+     19.94,
+     17.14,
+     9.33
+    ],
+    "loadavg_end": [
+     20.1,
+     19.83,
+     14.33
+    ],
+    "cpu_user_s": 559.53,
+    "cpu_sys_s": 0.96,
+    "wall_s": 561.28,
+    "pid": 3652802
+   }
+  },
+  {
+   "arm": "attentionstore-prefetch",
+   "before": {
+    "digest": "b563cf7612fd1e02",
+    "rows": 46931,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "b563cf7612fd1e02",
+    "rows": 46931,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     20.03,
+     17.3,
+     9.51
+    ],
+    "loadavg_end": [
+     15.46,
+     18.56,
+     14.64
+    ],
+    "cpu_user_s": 676.28,
+    "cpu_sys_s": 1.46,
+    "wall_s": 679.43,
+    "pid": 3653334
+   },
+   "after_host": {
+    "loadavg_start": [
+     20.11,
+     17.36,
+     9.57
+    ],
+    "loadavg_end": [
+     14.86,
+     18.38,
+     14.6
+    ],
+    "cpu_user_s": 678.93,
+    "cpu_sys_s": 1.34,
+    "wall_s": 682.28,
+    "pid": 3653535
+   }
+  },
+  {
+   "arm": "simplestream",
+   "before": {
+    "digest": "870a3c3586d1b537",
+    "rows": 12253,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "870a3c3586d1b537",
+    "rows": 12253,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     20.09,
+     17.45,
+     9.68
+    ],
+    "loadavg_end": [
+     18.72,
+     19.5,
+     14.73
+    ],
+    "cpu_user_s": 619.56,
+    "cpu_sys_s": 1.01,
+    "wall_s": 620.65,
+    "pid": 3654000
+   },
+   "after_host": {
+    "loadavg_start": [
+     20.09,
+     17.45,
+     9.68
+    ],
+    "loadavg_end": [
+     15.46,
+     18.56,
+     14.64
+    ],
+    "cpu_user_s": 657.95,
+    "cpu_sys_s": 1.1,
+    "wall_s": 661.11,
+    "pid": 3654130
+   }
+  },
+  {
+   "arm": "querystream-proactive",
+   "before": {
+    "digest": "a0b9e14e513c621c",
+    "rows": 12646,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "a0b9e14e513c621c",
+    "rows": 12646,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     20.07,
+     17.58,
+     9.85
+    ],
+    "loadavg_end": [
+     19.22,
+     19.61,
+     14.71
+    ],
+    "cpu_user_s": 593.56,
+    "cpu_sys_s": 0.95,
+    "wall_s": 596.39,
+    "pid": 3654542
+   },
+   "after_host": {
+    "loadavg_start": [
+     20.07,
+     17.62,
+     9.9
+    ],
+    "loadavg_end": [
+     19.37,
+     19.66,
+     14.65
+    ],
+    "cpu_user_s": 570.84,
+    "cpu_sys_s": 1.11,
+    "wall_s": 573.08,
+    "pid": 3654823
+   }
+  },
+  {
+   "arm": "warm-all-lru",
+   "before": {
+    "digest": "751381e72502fffe",
+    "rows": 17205,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "751381e72502fffe",
+    "rows": 17205,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     20.13,
+     17.71,
+     10.01
+    ],
+    "loadavg_end": [
+     12.88,
+     17.78,
+     14.46
+    ],
+    "cpu_user_s": 652.73,
+    "cpu_sys_s": 1.21,
+    "wall_s": 654.95,
+    "pid": 3655168
+   },
+   "after_host": {
+    "loadavg_start": [
+     20.13,
+     17.71,
+     10.01
+    ],
+    "loadavg_end": [
+     12.25,
+     17.56,
+     14.41
+    ],
+    "cpu_user_s": 654.43,
+    "cpu_sys_s": 1.17,
+    "wall_s": 657.25,
+    "pid": 3655204
+   }
+  },
+  {
+   "arm": "confidence-cascade",
+   "before": {
+    "digest": "b9290071679f1baa",
+    "rows": 12253,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "b9290071679f1baa",
+    "rows": 12253,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     20.13,
+     17.71,
+     10.01
+    ],
+    "loadavg_end": [
+     17.23,
+     19.08,
+     14.72
+    ],
+    "cpu_user_s": 610.4,
+    "cpu_sys_s": 0.93,
+    "wall_s": 612.55,
+    "pid": 3655400
+   },
+   "after_host": {
+    "loadavg_start": [
+     20.12,
+     17.75,
+     10.07
+    ],
+    "loadavg_end": [
+     14.86,
+     18.38,
+     14.6
+    ],
+    "cpu_user_s": 633.67,
+    "cpu_sys_s": 1.0,
+    "wall_s": 636.59,
+    "pid": 3655424
+   }
+  },
+  {
+   "arm": "eco-llm",
+   "before": {
+    "digest": "f32fa95c6953c64e",
+    "rows": 12253,
+    "state_decisions": null,
+    "error": null
+   },
+   "after": {
+    "digest": "f32fa95c6953c64e",
+    "rows": 12253,
+    "state_decisions": null,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     20.12,
+     17.75,
+     10.07
+    ],
+    "loadavg_end": [
+     18.15,
+     19.35,
+     14.73
+    ],
+    "cpu_user_s": 589.29,
+    "cpu_sys_s": 1.08,
+    "wall_s": 591.55,
+    "pid": 3655522
+   },
+   "after_host": {
+    "loadavg_start": [
+     20.11,
+     17.79,
+     10.12
+    ],
+    "loadavg_end": [
+     17.23,
+     19.08,
+     14.72
+    ],
+    "cpu_user_s": 605.03,
+    "cpu_sys_s": 0.96,
+    "wall_s": 606.98,
+    "pid": 3655661
+   }
+  },
+  {
+   "arm": "covex-v6-state-noprice",
+   "before": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "state_decisions": 60934,
+    "error": null
+   },
+   "after": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "state_decisions": 60934,
+    "error": null
+   },
+   "identical": true,
+   "before_host": {
+    "loadavg_start": [
+     20.18,
+     17.84,
+     10.18
+    ],
+    "loadavg_end": [
+     16.35,
+     18.83,
+     14.68
+    ],
+    "cpu_user_s": 608.26,
+    "cpu_sys_s": 1.33,
+    "wall_s": 611.64,
+    "pid": 3655872
+   },
+   "after_host": {
+    "loadavg_start": [
+     20.18,
+     17.84,
+     10.18
+    ],
+    "loadavg_end": [
+     17.51,
+     19.17,
+     14.72
+    ],
+    "cpu_user_s": 593.68,
+    "cpu_sys_s": 1.32,
+    "wall_s": 595.22,
+    "pid": 3656070
+   },
+   "after_repeat": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "state_decisions": 60934,
+    "error": null
+   },
+   "after_self_reproduces_under_load": true,
+   "after_repeat_host": {
+    "loadavg_start": [
+     20.18,
+     18.06,
+     10.5
+    ],
+    "loadavg_end": [
+     13.57,
+     17.99,
+     14.52
+    ],
+    "cpu_user_s": 602.33,
+    "cpu_sys_s": 1.3,
+    "wall_s": 604.06,
+    "pid": 3657045
+   }
+  }
+ ],
+ "planner_self_reproduction_under_load": [
+  {
+   "arm": "covex-v6-state-uo",
+   "after": "9a4be873eb3c5fba",
+   "after_repeat": "9a4be873eb3c5fba",
+   "reproduces": true
+  },
+  {
+   "arm": "covex-v6-state-noprice",
+   "after": "9a4be873eb3c5fba",
+   "after_repeat": "9a4be873eb3c5fba",
+   "reproduces": true
+  }
+ ],
+ "verdict": "PASS: all 17 constructed arms give byte-identical decision digests before and after, with both switches OFF.",
+ "_scope": {
+  "tracked_files_changed_between_the_two_shas": [
+   "experiments/orchestration/live2/share_admission.py"
+  ],
+  "coordinator_py_byte_identical_across_the_two_sides": true,
+  "share_admission_importers": {
+   "before": 0,
+   "after": 0
+  },
+  "switch_name_references": {
+   "before": {
+    "live2_share_admission": 0,
+    "live2_release_recheck": 0
+   },
+   "after": {
+    "live2_share_admission": 0,
+    "live2_release_recheck": 0
+   }
+  },
+  "share_capacity_present": {
+   "before": false,
+   "after": false
+  }
+ },
+ "_verdict_register": "TRUE BUT VACUOUS at this after commit, and therefore an ABSENT LINK in the Step 2b sense, not a negative. The identity below is a real measurement and it is also guaranteed by the code: the only tracked difference between the two shas is the addition of share_admission.py, which NO module imports and which cannot even be imported at the after commit (it does `import share_capacity` and share_capacity.py is absent from that tree), while coordinator.py is byte-identical on both sides and neither switch name appears anywhere in either tree. The per-type work tracking and the switch plumbing that D179 (6a) exists to clear ARE NOT IN ANY REACHABLE COMMIT yet. This result therefore clears the interface commit only; the gate must be re-run against session A's plumbing commit before the shares cells are read against it.",
+ "_positive_control": "the digest DISCRIMINATES arms, so the identity is not an artefact of a degenerate hash: 14 distinct digests across 17 arms, row counts 11,955 to 46,931.",
+ "_provenance": {
+  "git_commit": "17bdf159bc743a4d82e4761b556f7d186b4883d4",
+  "script": "d179_offswitch_digest_proofs.py",
+  "model": "n/a (policy proof, dry cells, no server)",
+  "timestamp": "2026-11-22T13:51:59.965617",
+  "device": "flash (CPU)",
+  "n": 36,
+  "seed": 4
+ }
+}
