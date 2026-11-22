@@ -144,7 +144,23 @@ def _cell(arm: str, seed: int) -> Optional[Dict[str, Any]]:
         e = min(max(int(t_opp / PERIOD_S), 0), n_ep - 1)
         cp = o.get("cloud_payload") or {}
         rid = cp.get("request_id")
-        if rid and opp in monitors_by_opp:
+        # A SETTLED cloud_payload IS THE AUTHORITY ON "RELEASED", and the request log is not.
+        # The first version required the request ROW to exist, and `request.jsonl.gz` is truncated
+        # short of the outcomes on at least one cell (hybrid-F seed 7 ends at r10896 while four
+        # settled monitor outcomes reference r10897 to r10900), so four released, on-time instants
+        # were counted as never released and this cell's on_time came out 7,509 against the
+        # committed 7,513. Found by C5-A's positive control, which this file had no equivalent of.
+        released = bool(rid)
+        if released and opp not in monitors_by_opp:
+            # released and settled, but no request row to split its lateness with: score it from
+            # the outcome alone, which is what the committed scorer does.
+            td = o.get("t_delivered")
+            if td is not None and float(td) - t_opp <= DASH_L_S + 1e-9:
+                on_time += 1
+            else:
+                a_late_not_behind += 1
+            continue
+        if released:
             td = o.get("t_delivered")
             late = not (td is not None and float(td) - t_opp <= DASH_L_S + 1e-9)
             if not late:
@@ -236,6 +252,27 @@ def main() -> int:
                  and abs(c["control_reconstructed_increases"]
                          - c["control_arm_recorded_increases"]) <= 1
                  for c in ctl)
+    # SECOND CONTROL, AND THE FILE SHOULD HAVE HAD IT FROM THE START: the on_time bucket must
+    # equal the cell's own COMMITTED dashcam on-time count, with zero tolerance. A decomposition
+    # that does not reproduce the number it decomposes is not a decomposition. This is what caught
+    # the truncation above.
+    COMMITTED_ON_TIME = {"hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30": 5986,
+                         "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30": 5375,
+                         "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30": 6297,
+                         "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30": 7513}
+    on_rows = [{"cell": c["cell"], "mine": c["on_time"],
+                "committed": COMMITTED_ON_TIME.get(c["cell"]),
+                "equal": c["on_time"] == COMMITTED_ON_TIME.get(c["cell"])}
+               for c in live if c["cell"] in COMMITTED_ON_TIME]
+    out["control_on_time_against_committed"] = {
+        "_claim": ("the on_time bucket equals the cell's own committed dashcam on-time count, "
+                   "zero tolerance, on every base cell"),
+        "_source": "each cell's committed score block, via C5-A's dashcam_ontime_reconcile.json",
+        "rows": on_rows,
+        "verdict": ("PASS: exact on all %d base cells" % len(on_rows)
+                    if on_rows and all(r["equal"] for r in on_rows) else
+                    "FAIL: the decomposition does not reproduce the number it decomposes: %s"
+                    % [r for r in on_rows if not r["equal"]])}
     out["control"] = {
         "_claim": ("the reconstructed AIMD trajectory reproduces the base arm's own counters; "
                    "v5-rules-2 does not report them, which is why the reconstruction exists"),

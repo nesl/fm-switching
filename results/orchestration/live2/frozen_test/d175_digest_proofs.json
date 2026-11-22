@@ -114,7 +114,27 @@
     "cf_timeout_abandons": null
    },
    "identical": true
+  },
+  {
+   "arm": "covex-v6-base",
+   "seed": 4,
+   "posted_workload": false,
+   "_why": "asked for by the H100 so the one alias carrying the strongest balanced row rests on a measurement and not on the token argument",
+   "rule_off": {
+    "digest": "ebb7074100918d64",
+    "rows": 17401
+   },
+   "rule_on": {
+    "digest": "ebb7074100918d64",
+    "rows": 17401
+   },
+   "old_committed_name_hybrid_F_lhreq_noc3": {
+    "digest": "ebb7074100918d64",
+    "rows": 17401
+   },
+   "identical": true,
+   "also_equals_the_old_name": true
   }
  ],
- "verdict": "PASS: the rule changes no decision on any of the 4 cases, so the committed rung 0 to 2 cells stay reusable under D172 (2)"
+ "verdict": "PASS: the rule changes no decision on any of the 5 cases, so the committed rung 0 to 2 cells stay reusable under D172 (2); covex-v6-base at seed 4 is byte-identical with the rule off, with it on, AND to the committed hybrid-F-lhreq-noc3 digest ebb7074100918d64 / 17,401 rows, so both rung-0 and rung-1 aliases are proved aliases WITH the rule on"
 }

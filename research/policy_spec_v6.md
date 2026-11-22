@@ -1,6 +1,6 @@
 # COVEX policy specification v6
 
-**Status:** current specification, 2026-11-21. Supersedes `policy_spec_v4.md` and the repository's `research/policy_spec_v5.md`. Every rule cites the design-log row it comes from (`policy_design_log.md`, D1 to D166, P1 to P21). Where this document and an earlier spec disagree, this one holds. Items marked **PENDING** await a user ruling and carry a default.
+**Status:** current specification, 2026-11-22 (D176 to D178 applied). Supersedes `policy_spec_v4.md` and the repository's `research/policy_spec_v5.md`. Every rule cites the design-log row it comes from (`policy_design_log.md`, D1 to D178, P1 to P21). Where this document and an earlier spec disagree, this one holds. Items marked **PENDING** await a user ruling and carry a default.
 
 **How to use it:** every component that is built is checked against the section that defines it, and the fidelity table in section 12 is filled in (IMPLEMENTED / PARTIAL / MISSING, with file:line) before any result from that build is read as a result of this policy.
 
@@ -10,7 +10,9 @@
 
 Many CPS devices share one cloud accelerator running a large VLM (Qwen3-VL-32B on an H100 under vLLM 0.31.0). Every device runs its own small model (Qwen3-VL-4B on a Jetson Orin under vLLM, default Jetson configuration, D145, deployment defaults never changed) and **always has its own answer** (D19, D87). The device answer is the **incumbent**: the cloud is used only when doing so is expected to change the outcome (D149 (2), D152 (2)).
 
-**Answer semantics: replacement** (D152 (1), D155 (3), D165 (B)). If the cloud's answer is delivered by the deadline it REPLACES the device's answer; otherwise the device's answer stands. There is no per-question selection between the two answers. So the realised gain of escalating one query is +1 (device wrong, cloud right), -1 (device right, cloud wrong) or 0, and its EXPECTATION, which is what the policy estimates, is P(cloud on time) x [acc_cloud - acc_device], from type-level DEV accuracies (D149). The joint split into corrective and harmful flips affects variance, not the expectation; it is reported, not estimated online. Per-question selection between answers (cascade-style) and accuracy bands by history length (not fittable on 28 DEV questions, G4) are out of scope.
+**Answer semantics: replacement, and the policy's currency is on-time cloud answers** (D152 (1), D155 (3), D177). If the cloud's answer is delivered by its deadline it REPLACES the device's answer; otherwise the device's answer stands. At runtime nobody compares the two answers' chances of being correct (there is no ground truth). Because the cloud with full evidence is more accurate than the device on all three query types (measured), the accuracy difference is a positive constant within a type and never changes a decision, so the policy does NOT weight by accuracy: its job is to get as many queries as possible an on-time cloud answer, with priority to devices behind their targets, without making other queries late. Correctness (correct answers delivered by the deadline) is the OUTCOME measured offline, not an online estimate. The recent-frames shortcut, the one case where the cloud was not more accurate, is banned (D152 (2)).
+
+Per-question selection between answers (cascade-style) and accuracy bands by history length (not fittable on 28 DEV questions, G4) remain out of scope.
 
 The binding resource is **evidence readiness**: whether a device's accumulated evidence (its history or episode, as KV) is ready on the accelerator when a query arrives. Making it ready consumes the same accelerator that serves deadlines, and the KV pool cannot hold every device's evidence at once (D56, D150, D160).
 
@@ -21,7 +23,7 @@ The binding resource is **evidence readiness**: whether a device's accumulated e
 
 **Objective: lexicographic, SLO-constrained** (D2, D41, D149, D151 (4), D165 (A)):
 1. **Across types**, actions are compared ONLY by deficit-weighted target attainment: J(a) = sum over affected devices d of Z_d x (change in d's on-time target attainment under a), each change normalised by the device's own target window so sparse and dense devices are comparable (D122 B2). Deficit counters Z_d act as approximate shadow prices on the unmet per-device targets (virtual queues); no optimality guarantee is claimed.
-2. **Within a type**, among actions whose J differs by less than the margin, expected correctness decides: which recall history to warm or keep, full history vs leaving it to the device, which same-type request to shed (D149 (2)).
+2. **Within a type**, among actions whose J differs by less than the margin, the action giving more on-time cloud answers in total (including harm to other queries of that type) is chosen (D177; accuracy is not weighted, see answer semantics).
 Deficits are therefore an exchange rate across types, but in target-attainment units set online by how far each device is from its target, never a fixed value ratio between a correct answer of one type and of another.
 
 **Memory capacities are inputs, not constants** (D56): GPU KV pool (62,944 tokens on the H100), host tier (27 GiB native write-through offload). Evidence that reaches the cloud is never deleted; "drop" means demoted to cold (raw frames, rebuilt by prefill).
@@ -34,9 +36,9 @@ One query type per device (D148, D136; mixed types per device out of scope, P9, 
 
 | type | purpose | dataset | evidence | deadline | target |
 |---|---|---|---|---|---|
-| **alert** (short horizon, dashcam) | is a crash happening / coming | Nexar, 2 fps | the current episode: append-only, up to 21 frames | 1.0 s (D71, D154 (1)) | per episode (D166 (2)) |
-| **recall** (long horizon, robot) | did I see X a while ago | S-EMBER LH-REQ, 69 EVAL questions whose evidence lies outside the 120 s recent window (D139) | the device's full history (D2 format), growing; device keeps only its recent window | 3.0 s (D147) | headline: correct answers delivered by the deadline (D152 (1), D155 (3)) |
-| **assistance** (single shot) | answer about the current view | RefSpatial + RealWorldQA, EVAL 70 % split (D136, D142) | one image, no history | 2.0 s (D142) | 90 % within the deadline |
+| **alert** (short horizon, dashcam) | is a crash happening / coming | Nexar, 2 fps | the current episode: append-only, up to 21 frames | 1.0 s (D71, D154 (1)) | per episode: at least 25 % of the episode's decision instants receive an on-time cloud answer (D178 (1)) |
+| **recall** (long horizon, robot) | did I see X a while ago | S-EMBER LH-REQ, 69 EVAL questions whose evidence lies outside the 120 s recent window (D139) | the device's full history (D2 format), growing; device keeps only its recent window | 3.0 s (D147) | per device: 90 % of its recall questions receive an on-time cloud answer (D178 (1); set from the use case, expected to be under pressure); headline OUTCOME: correct answers delivered by the deadline (D152 (1), D155 (3), D177) |
+| **assistance** (single shot) | answer about the current view | RefSpatial + RealWorldQA, EVAL 70 % split (D136, D142) | one image, no history | 2.0 s (D142) | per device: 90 % within the deadline (D178 (1)) |
 
 **Workload** (D142, D159 (C)): 16 devices (6 alert, 7 recall, 3 assistance), 1,200 s runs, seeds 4 to 7 (seeds 1 to 3 never used in development). Recall questions are re-asked on the same session's history after their original ask time (Poisson, mean 30 s), identical for every arm; gold is unchanged because the evidence is already in the past. Analysis is repeated-measures within question, paired across arms, clustered by question (D161).
 
@@ -51,7 +53,7 @@ One query type per device (D148, D136; mixed types per device out of scope, P9, 
 | **deficit counters** | per device, how far below its target it is | live, from the **realised on-time** outcome at each opportunity's deadline (observable online) | D149 (1), D151 (4), D122 B; must be FED (`observe()` called by the coordinator) |
 | **cost model** | predicted first-token and completion time from uncached tokens and uncached tokens queued ahead | profiled; fitted and tested on **healthy-regime** requests only | D162; non-negative form; never trusted across the saturation transition (D160 (2)) |
 | **residency belief** | per session: GPU-warm, host-warm, cold | coordinator bookkeeping **corrected by engine telemetry**, including host hits | D44, D47, D150; PATCH 2 in mutate mode for full v5 |
-| **quality table** | accuracy by type and representation, device vs cloud | profiled on DEV (D6) | D149; device entry = measured Orin values (D146 (2), D155) |
+| **quality table** | accuracy by type and representation, device vs cloud | profiled on DEV (D6) | REPORTING ONLY since D177: the policy does not weight by accuracy; used to confirm cloud > device per type and to score outcomes offline | D149; device entry = measured Orin values (D146 (2), D155) |
 | **device latency** | per question | measured on the Orin, warm path (0.27 s median for recall) | D155, D161 (3) |
 | **question-rate estimate** | per device, expected time to next query | causal EWMA over queries already seen | D11, D48, D160 (1); never the trace's future |
 | **engine health** | first-token lag of deadline requests, deadline work queued | live | D160 (2) |
@@ -78,7 +80,7 @@ The base is **hybrid-F-lhreq-noc3** (D152 (2), D154 (3)) plus D160's warming and
 - **C1 ordering, C2 laxity-triggered alert throttle** (k_r = 0.3 x deadline, floor 2, at-risk alert exemption), **C5 alert-only in-flight cap** (AIMD 4 to 8).
 - **No recent-frames shortcut for recall** (D152 (2), imposed as a user rule, D155 (4)): full history if it can arrive in time, otherwise the device answers.
 - **Chunked just-in-time warming** (D160 (1)): a recall session's unwarmed tail is prefilled when a new chunk of uploaded material (2,048 tokens) has accumulated, or once early when a question is expected within the horizon (at most one early warm per session per expected-question cycle).
-- **Saturation guard** (D160 (2)): fires when observed first-token lag of deadline requests exceeds 2.0 s or deadline work queued exceeds 100 (both declared from committed cells); while active, background warming is shed first and nothing else changes. **Exit with hysteresis** (D166 (3)): the guard exits only after both signals stay below 0.5x their entry thresholds for 2 s, so delayed observations cannot oscillate warming on and off; the lag signal's update rate (it is an EWMA over completions) is measured and reported.
+- **Saturation guard** (D160 (2), D178 (3)): fires when, for ANY query type, the observed first-token lag of its deadline requests exceeds 80 % of THAT TYPE's deadline (alert 0.8 s, assistance 1.6 s, recall 2.4 s; derived from the deadlines, not tuned, and the alert value coincides with C5's 0.8 s trip), or deadline work queued exceeds 100; while active, background warming is shed first and nothing else changes. **Exit with hysteresis** (D166 (3)): the guard exits only after both signals stay below 0.5x their entry thresholds for 2 s, so delayed observations cannot oscillate warming on and off; the lag signal's update rate (it is an EWMA over completions) is measured and reported.
 - **Episode continuity** (D149 (3)): frames of an alert episode already admitted come before a new episode.
 
 ---
@@ -129,7 +131,7 @@ Alerts and assistance stay rule-based (D151 (2)).
 
 **Fidelity of the horizon:** exact step-level simulation only over the near term (the current deadlines in flight); beyond it, future demand is valued from the causal question-rate estimate and a coarse load forecast. A 60 to 120 s state horizon is a valuation of expected future questions, not a detailed simulation of future engine execution.
 
-**Objective** (D151 (4), D165 (A)): the lexicographic rule of section 1, harm to other devices included (D15, D152 (1)).
+**Objective** (D151 (4), D165 (A), D177): change in on-time cloud answers (P(cloud on time) summed over the affected queries), weighted per device by deficit counters, harm to other devices included (D15). MARGIN_CF is expressed in the same units: p90 of abs(P_hat - 1[on time]) = 0.6582 on-time answers, which is the committed 0.16456 divided by the 0.250 accuracy constant that previously scaled both gain and margin, so decisions within a type are unchanged (D177 (3), D178 (5)).
 
 **Healthy regime only** (D160 (2)): candidates are evaluated only inside the healthy regime; if the guard is active, the counterfactual defers to it.
 
@@ -150,7 +152,7 @@ Alerts and assistance stay rule-based (D151 (2)).
 - At episode end: the episode's KV is abandoned (not retained on host; ages out of the GPU), its per-episode target restarts, and the coordinator, queue and counters treat the next episode as a new instance.
 - Instants before an episode's third frame are not decision instants for any arm (D153), counted per run.
 - Calibration and thresholds are fitted on the episode format for both tiers from StudySH-EP DEV folds (the one-frame maps D86 / D105 do not apply).
-- **Target** (D166 (2)): per episode, enough cloud-served instants before the episode ends; the deficit restarts with each episode.
+- **Target** (D166 (2), D178 (1)): per episode, AT LEAST 25 % of the episode's decision instants receive an on-time cloud answer; the deficit restarts with each episode.
 - This is a policy mechanism (our insight). Baselines run the workload's default EP-G (fixed 21-frame refresh). In policy runs the device keeps its default episodes and the cloud's context is a policy choice over the same frames.
 - Note for reporting: the data supports that the 32B **detects crashes the 4B misses**, not that it detects earlier (StudySH-EP: lead time not different at matched FAR in 14 of 15 cells).
 
@@ -174,8 +176,8 @@ Alerts and assistance stay rule-based (D151 (2)).
 |---|---|---|---|---|
 | 0 | `covex-v6-base` | the hybrid-F-lhreq-noc3 rules | `hybrid-F-lhreq-noc3` | READY, 6 committed cells |
 | 1 | `covex-v6-rules` | chunked just-in-time warming + saturation guard | `v5-rules-2` | READY, 4 committed cells |
-| 2 | `covex-v6-state` | per-type host retention, TOUCH chosen by `plan_state`, belief from telemetry, state pricing | none yet | NOT BUILT |
-| 3 | `covex-v6-fair` | deficit feed + value reader | none yet | NOT BUILT |
+| 2 | `covex-v6-state` | per-type host retention, TOUCH chosen by `plan_state`, belief from telemetry, state pricing | none yet | BUILT; `covex-v6-state-uo` posted at seeds 4 to 7 under the D174 (1) charge |
+| 3 | `covex-v6-fair` | deficit feed ONLY (the value reader is REMOVED by D177 (2)) | none yet | BUILT, no proofs yet |
 | 4 | `covex-v6` | the counterfactual: request, state, sync, compounds, episode-rule switch | `v5-full` | runnable, ZERO cells |
 
   `v5-rules` is NOT rung 1 under another name: it is the superseded naive per-frame warm-ahead
@@ -201,6 +203,10 @@ Paths are relative to `experiments/orchestration/live2/`. Status is as of 2026-1
 
 | element | section | D-rows | status | file:line |
 |---|---|---|---|---|
+| targets alert 25 % per episode, recall 90 %, assistance 90 %; one declared gain, swept later | 2, 3 | D178 (1), (2) | **MISSING** | the three targets are now DECLARED in sections 2 and 8 of this spec; neither the per-episode alert denominator nor the per-device recall and assistance targets are wired into `cf_objective.DeficitCounters` yet, which still carries one `ON_TIME_TARGET` per kind with no per-episode reset, and the deficit GAIN is still the module default `DEFICIT_GAIN = 1.0` rather than a value declared with its source. Both are CORE item 3 and must land before any covex-v6-fair or covex-v6 cell (D178 (2)) |
+| guard threshold per type at 80 % of its deadline | 5 | D178 (3) | **MISSING** | the committed guard fires on ONE threshold (first-token lag 2.0 s, declared from committed cells) for all types, in `arms_v5rules2.py:81`; D178 (3) replaces it with per-type thresholds 0.8 / 1.6 / 2.4 s derived from the deadlines. Applies to covex-v6-rules and above; v5-rules-2's committed cells keep the old guard under their own name. CORE item 4 |
+| value reader REMOVED (accuracy not weighted) | 1, 7 | D177 (2) | **MISSING** | `v5/value_readers.py` is still present and `covex-v6-fair` still declares `value_reader=True`; D177 (2) removes it, so covex-v6-fair becomes the deficit feed ONLY and the quality table becomes reporting only. The removal must be proved DECISION-NEUTRAL, which is what D149 (4) already measured on the frozen policy (a flat or 10,000x inverted table moved zero decisions). CORE item 2 |
+| objective in ON-TIME units (accuracy multipliers out of gain and harm) | 1, 7 | D177 (1), (3), D178 (5) | **MISSING** | `cf_objective.option_value` still multiplies by `acc_cloud` and `acc_dev`, and `harm_to_others` by the replacement accuracy difference. D177 removes both and restates MARGIN_CF as 0.6582 = 0.16456 / 0.250, which must leave decisions within a type UNCHANGED and is therefore provable byte-identical on today's dry cells. CORE item 2 |
 | deficit counters fed from realised on-time | 3 | D149 (1), D151 (4) | **MISSING** | `v5/cf_objective.py:140` defines `observe()`; its ONLY callers are `v5/cf_proofs.py` (test code), so no production path feeds it |
 | cost model, healthy-regime, non-negative | 3, 7 | D160 (2), D162 | **PARTIAL** | pre-registered at `research/prereg_cost_model_gate_d162.md` (9bd6793); refit awaits the seed-5 load-sweep cells |
 | residency belief corrected incl. host hits | 3 | D150 | **PARTIAL** | `cstate.py:123` reads `telemetry_cached_tokens`, but the field is NULL in every committed residency row, so the correction never fires; PATCH 2 still observe-mode |

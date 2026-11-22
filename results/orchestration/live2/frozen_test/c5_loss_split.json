@@ -88,16 +88,16 @@
   {
    "cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
    "monitor_opportunities": 11779,
-   "on_time": 7509,
-   "on_time_share": 0.6375,
+   "on_time": 7513,
+   "on_time_share": 0.6378,
    "a_submitted_late_behind_a_robot_prefill": 1205,
    "a_share": 0.1023,
    "a_overlapping_prefill_uncached_p50": 1374,
    "a_overlapping_prefill_uncached_p90": 7262,
    "a2_submitted_late_no_prefill_overlap": 1797,
    "a2_share": 0.1526,
-   "b_not_submitted_cap_closed_no_prefill_in_flight": 540,
-   "b_share": 0.0458,
+   "b_not_submitted_cap_closed_no_prefill_in_flight": 536,
+   "b_share": 0.0455,
    "b2_not_submitted_cap_closed_prefill_in_flight": 442,
    "b2_share": 0.0375,
    "c_not_submitted_cap_open": 286,
@@ -146,12 +146,12 @@
    "a_share": 0.1824,
    "a_overlapping_prefill_uncached_p50": 1398,
    "a_overlapping_prefill_uncached_p90": 13331,
-   "a2_submitted_late_no_prefill_overlap": 1864,
-   "a2_share": 0.1584,
+   "a2_submitted_late_no_prefill_overlap": 1865,
+   "a2_share": 0.1585,
    "b_not_submitted_cap_closed_no_prefill_in_flight": 1795,
    "b_share": 0.1525,
-   "b2_not_submitted_cap_closed_prefill_in_flight": 4730,
-   "b2_share": 0.4019,
+   "b2_not_submitted_cap_closed_prefill_in_flight": 4729,
+   "b2_share": 0.4018,
    "c_not_submitted_cap_open": 66,
    "c_share": 0.0056,
    "robot_prefills_released": 584,
@@ -216,6 +216,37 @@
    "control_arm_recorded_increases": null
   }
  ],
+ "control_on_time_against_committed": {
+  "_claim": "the on_time bucket equals the cell's own committed dashcam on-time count, zero tolerance, on every base cell",
+  "_source": "each cell's committed score block, via C5-A's dashcam_ontime_reconcile.json",
+  "rows": [
+   {
+    "cell": "hybrid-F-lhreq-noc3_n16_s4_1200s_h27_3t_L3_epg_rq30",
+    "mine": 5986,
+    "committed": 5986,
+    "equal": true
+   },
+   {
+    "cell": "hybrid-F-lhreq-noc3_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "mine": 5375,
+    "committed": 5375,
+    "equal": true
+   },
+   {
+    "cell": "hybrid-F-lhreq-noc3_n16_s6_1200s_h27_3t_L3_epg_rq30",
+    "mine": 6297,
+    "committed": 6297,
+    "equal": true
+   },
+   {
+    "cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
+    "mine": 7513,
+    "committed": 7513,
+    "equal": true
+   }
+  ],
+  "verdict": "PASS: exact on all 4 base cells"
+ },
  "control": {
   "_claim": "the reconstructed AIMD trajectory reproduces the base arm's own counters; v5-rules-2 does not report them, which is why the reconstruction exists",
   "rows": [
@@ -271,7 +302,7 @@
   "on_time_share": {
    "base": [
     0.4567,
-    0.6375
+    0.6378
    ],
    "rung1": [
     0.0596,
@@ -302,7 +333,7 @@
   },
   "b_cap_closed_with_nothing_in_flight": {
    "base": [
-    0.0458,
+    0.0455,
     0.0734
    ],
    "rung1": [
