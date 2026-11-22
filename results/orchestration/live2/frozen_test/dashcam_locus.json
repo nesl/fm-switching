@@ -1,0 +1,76 @@
+{
+ "_what": "where the dashcam failure lives, and the refutation of my per-type-retention hypothesis",
+ "my_hypothesis": {
+  "claim": "covex-v6-state sets max_offload_tokens = 0 for ALERT as well as single-shot, so dashcam KV is never retained; that frees KV for robot histories and would also deepen the dashcam deficit",
+  "status": "REFUTED",
+  "refuted_by": "the rung-1 against rung-2 dashcam comparison at both seeds. Rung 2 does not deepen the deficit; it roughly HALVES it. The hypothesis predicted the opposite sign"
+ },
+ "dashcam_outcomes": {
+  "_units": "of 11,764 opportunities per cell: on time / sent but late / never sent",
+  "s4": {
+   "covex-v6-rules (v5-rules-2)": [
+    773,
+    4054,
+    6937
+   ],
+   "covex-v6-state": [
+    1786,
+    4581,
+    5397
+   ],
+   "noc3 (covex-v6-base)": [
+    6167,
+    3576,
+    2021
+   ]
+  },
+  "s5": {
+   "covex-v6-rules (v5-rules-2)": [
+    1219,
+    3960,
+    6590
+   ],
+   "covex-v6-state": [
+    2458,
+    5854,
+    3457
+   ],
+   "noc3 (covex-v6-base)": [
+    5540,
+    4268,
+    1961
+   ]
+  }
+ },
+ "what_the_numbers_say": {
+  "rung_2_improves_dashcam_over_rung_1": {
+   "s4": {
+    "on_time_ratio": 2.31,
+    "fewer_unsent": 1540
+   },
+   "s5": {
+    "on_time_ratio": 2.02,
+    "fewer_unsent": 3133
+   },
+   "note": "this holds at s4 EVEN WITH its 12,824 budget refusals, which is the stronger form of the result: the rung recovers dashcam over rung 1 while simultaneously starving it with touches"
+  },
+  "the_deficit_is_rung_1_s": {
+   "rung_1_against_the_base": {
+    "s4": "7.98x fewer dashcam on time",
+    "s5": "4.54x"
+   },
+   "rung_2_against_the_base": {
+    "s4": "3.45x",
+    "s5": "2.25x"
+   },
+   "reading": "the dashcam failure is introduced at RUNG 1, by the covex-v6-rules lineage, and rung 2 partially recovers it. The fix lives in rung 1 and not in touch pricing, which is where I had ranked it"
+  }
+ },
+ "the_mechanism_that_now_needs_testing": {
+  "candidate": "STATE-BASED PRICING. v5-rules-2 charges a warm-ahead build C.recall_gpu_s(piece, 'COLD') whatever the session's predicted state is. Rung 2 charges touch_policy.build_price_gpu_s, which prices by PREDICTED TIER, so a build onto a GPU-warm prefix costs far less. Cheaper builds leave more budget, and dashcam monitors are what the budget was refusing",
+  "why_it_is_credible": "state pricing is already the SOLE cause of rung 2's dry-cell difference from rung 1, by one-factor ablation (v6state_attribution.json). The same switch explaining the live dashcam recovery would be one mechanism, not two",
+  "the_test": "covex-v6-state-noprice at s5; if dashcam falls back towards 1,219 on time, settled",
+  "register": "NOT ESTABLISHED. This is a hypothesis with a named test, exactly as the refuted one was, and it must not be reported as the explanation until the cell runs"
+ },
+ "what_this_does_not_change": "rung 2 is still far below the base on dashcam, 2,458 against 5,540 at s5. Halving a deficit is not closing it, and no cell of this rung may be read as dashcam-neutral"
+}
