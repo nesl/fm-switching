@@ -1,3 +1,65 @@
+## 2026-11-22 (main flash session): D179 share-based admission under construction, and a register fault that fired a STOP
+
+**Last updated: 2026-11-22.** StudyD179-SHARES and the StudyC5-ATTR outcome, under D179 to D181
+and the user addenda of 2026-11-22.
+**NO SHARES RESULT EXISTS. The allocator has no call site, so both switches are registered and
+read by nothing, and the 17-of-17 off-switch byte-identity proof is TRUE AND VACUOUS until that
+changes.** `runs/V6SHARES_CELLS` is deliberately NOT posted: driver v27 already reads that path at
+top priority, so posting it now would run the arm with write-only switches and produce a cell
+byte-identical to `covex-v6-state-uo` under a new name, which would read as a shares result and be
+a rename.
+
+**StudyC5-ATTR is CLOSED as a candidate, by a rule pre-registered before its cells ran.** Alert
+verdict FAIL / MEETS / MEETS / MEETS at seeds 4 to 7, with dashcam on-time gains of +901, +1,253
+and +646 at s4 to s6, so the mechanism fires and helps on its own target. It is still not adopted:
+adoption required the alert target at 3 of 4 seeds WITH robot `by_deadline` within 0.01 of the
+comparator, s4 fails on alert and s6's robot gap is -0.033, so at most 2 of 4 could qualify, and
+that was settled before s7 ran. The ROBOT COST disqualifies it, not the alert bucket. The engine
+flag fallback is also null, measured at both rungs. So share-based admission is now the ONLY live
+route, which raises the cost of getting it wrong.
+
+**Frozen and committed.** `W_max` 4,323.3 uncached tokens; floors alert 1,622.1, recall 655.8,
+assistance 242.8, summing to 58.3 percent, so D180's 0.75 cap does not fire and no floor is
+scaled; both D180 bounds are import-time assertions. D181's lambda rule is applied per type, and
+addendum 5's check passes with a zero: the feasibility share of the 7,149 unsent alert
+opportunities is 0.00 percent against a 2 percent bound, established from the code and from the
+data independently.
+
+**Four faults found BEFORE any sweep, each of which would have produced a believable shares
+failure rather than a crash:** an oversize branch that refused every 2,048-token warm chunk in
+every state, which is warming switched off and not tight floors; background denied its own type's
+floor, which D179 (3) places there; a headroom test that refused the median recall question, so
+the arm would have served no robot traffic; and a floor tested after headroom, which refused a
+374-token alert for the 1.48 s prefill of one oversize recall and so rebuilt the head-of-line
+blocking D179 exists to remove. A floor is an admission guarantee, not a budget line.
+
+**A STOP fired and is classified, not worked around.** The wire-time release re-check skipped
+12,166 of 12,168 alert requests, against a 50 percent bar. Cause: `_uncached_in_flight` was
+incremented at four unconditional sites and decremented only under `if self._d162_pricing`, so on
+an unpriced arm it was the run's cumulative uncached volume under a name that says queue depth.
+Every earlier read sat inside the same gate, so nothing was wrong until the re-check became the
+first reader outside it. Fixed in `414d332a`, proved decision-neutral on one priced and one
+unpriced arm against pre-change committed digests. Under Rule 2 the run is INCONCLUSIVE,
+wrong-register input, and is not evidence about the policy. The field passed Step 2 and Step 2b
+while meaning the wrong thing, which is exactly why the register is marked at the point of use.
+
+**Stated limit of the mechanism, to be read before any shares result.** The oversize exemption
+necessarily overruns `W_max`, and nothing can be preempted, so a floor can only be protected
+prospectively. One median recall holds W above `W_max` for about 1.48 s, roughly 22 percent of
+wall time at the base's measured 179 recalls per cell, with about 14.5 alert opportunities inside
+each overrun. Alerts inside their floor still flow; alerts above it wait. Reports must plot W
+including overruns rather than clipping at `W_max`.
+
+**Definition audit, check 4.** Live W is submit to FIRST TOKEN; dry W is submit to SETTLE, because
+`on_first` is wired only when a real backend exists (`procsplit.py:430-433`). Same name, different
+quantities, the dry one larger. Dry and live W must never be compared, and a dry cell can prove
+the allocator's logic and determinism but cannot size W.
+
+**Next.** Wire the allocator and the W tracker into the coordinator's admission path, which is the
+step that turns four passing-but-vacuous proofs into real ones; re-run the release re-check on a
+D162-priced arm now that its input means what it says; then the dry s4 report, the section 12
+rows, and only then a cell list.
+
 ## 2026-11-22 (session C5-B): two CANDIDATE fixes and one engine diagnostic for rung 1's dashcam loss, all default off
 
 **Last updated: 2026-11-22.** StudyC5-ATTR, under the user ruling of 2026-11-22 (addendum).
