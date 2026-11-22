@@ -1,0 +1,84 @@
+{
+ "_what": "is the touch charge right? Decomposing the measured touch TTFT, covex-v6-state s4",
+ "verdict": "MISPRICING CONFIRMED. The charge is 3.4x to 9.5x too high AND has the wrong shape",
+ "what_a_touch_actually_is": {
+  "n": 1246,
+  "http_200": 1246,
+  "cache_path_WARM": 1246,
+  "prompt_tokens_p50": 10001,
+  "uncached_tokens_p50": 3,
+  "uncached_tokens_max": 15,
+  "output_tokens": 1,
+  "reading": "the engine re-materialises nothing; it processes about 3 new tokens on a warm hit"
+ },
+ "the_trap_this_nearly_fell_into": {
+  "observed_ttft": {
+   "p10": 0.228,
+   "p50": 0.534,
+   "p90": 1.101,
+   "max": 2.978
+  },
+  "charged_range": [
+   0.2431,
+   0.6714
+  ],
+  "why_it_looks_like_agreement": "the TTFT p50 of 0.534 s sits neatly INSIDE the charged range, so on TTFT alone the charge reads as correct",
+  "why_it_is_not": "TTFT under load is SERVICE TIME and the budget spends GPU TIME. Two different quantities landing in the same range is not agreement. Consistency check 6's invalid proxy, and check 2's plausible-rate trap: a number that passes a range test while measuring the wrong thing"
+ },
+ "the_decomposition_that_settles_it": {
+  "model": "committed D162: first_token = 0.067798 + 0.00018243 * uncached + 0.00015358 * queue_ahead",
+  "rows": [
+   {
+    "quantile": "p10",
+    "observed_s": 0.228,
+    "gpu_attributable_s": 0.0683,
+    "queue_share_pct": 70.0,
+    "implied_tokens_queued_ahead": 1040
+   },
+   {
+    "quantile": "p50",
+    "observed_s": 0.534,
+    "gpu_attributable_s": 0.0683,
+    "queue_share_pct": 87.2,
+    "implied_tokens_queued_ahead": 3032
+   },
+   {
+    "quantile": "p90",
+    "observed_s": 1.101,
+    "gpu_attributable_s": 0.0683,
+    "queue_share_pct": 93.8,
+    "implied_tokens_queued_ahead": 6724
+   },
+   {
+    "quantile": "max",
+    "observed_s": 2.978,
+    "gpu_attributable_s": 0.0683,
+    "queue_share_pct": 97.7,
+    "implied_tokens_queued_ahead": 18945
+   }
+  ],
+  "reading": "70 to 98 percent of the observed TTFT is QUEUEING BEHIND OTHER REQUESTS, which is not GPU time and must not be charged to a GPU budget. This is a stronger discriminator than finding a near-idle touch, because it decomposes every one of the 1,246 rather than relying on a quiet moment existing",
+  "independent_agreement": "the decomposition is the committed D162 model and the measurement is the s4 request log; neither was fitted to the other"
+ },
+ "the_error_has_the_wrong_SHAPE": {
+  "charged_scales_with": "prefix tokens",
+  "actual_work_scales_with": "uncached tokens, about 3, independent of prefix size",
+  "overcharge_by_prefix": {
+   "7000": 3.4,
+   "11000": 5.4,
+   "17000": 7.9,
+   "21000": 9.5
+  },
+  "why_shape_matters_more_than_size": "a magnitude error could be absorbed as conservatism. A shape error cannot: the overcharge grows with exactly the quantity that should not matter, so it penalises precisely the large warm histories a touch exists to protect"
+ },
+ "the_corrected_price": {
+  "function": "touch_policy.touch_price_gpu_s_d162",
+  "value_at_warm": 0.07053,
+  "uses_the_MAX_uncached": "15 tokens, not the p50 of 3, so the corrected price is an UPPER BOUND on the work and cannot flatter the policy",
+  "non_gpu_tiers": "falls back to the reload proxy, where a touch really would pay for the prefix; mixed_touch_guard refuses those anyway, so that is the conservative branch and not the live one",
+  "effect_on_s4_if_it_had_been_used": "620 GPU-s on touches becomes about 88 GPU-s",
+  "switch": "touch_policy.TOUCH_PRICE_MODE, DEFAULT 'reload-proxy' - nothing changes until ruled"
+ },
+ "what_i_did_NOT_do": "I did not change the default, and I did not re-run anything under the new price. The measurement says the charge is wrong, which is the condition I set for touching it, but changing a cost that makes a failing result recover is exactly the move that needs to be VISIBLE AND RULED rather than applied overnight. The switch exists so the user can rule on one line, and so the s4 and s5 cells stay interpretable under the price they actually ran",
+ "and_the_separate_defect_that_this_does_not_fix": "cf_planner.py:573-575 scores TOUCH at harm = 0.0 whatever the price is. Even at 0.0705 GPU-s the objective still does not see the cost it spends. Correcting the price lowers the bill; it does not make the planner aware there is one. Both need the ruling"
+}

@@ -70,12 +70,73 @@ def touch_price_gpu_s(prefix_tokens: int, belief: Dict[str, float], costs: Any) 
     return float(costs.recall_gpu_s(max(int(prefix_tokens), 1), READINESS[tier]))
 
 
+# ---------------------------------------------------------------------------
+# D172 follow-up: the touch price, MEASURED rather than proxied.
+#
+# `touch_price_gpu_s` above charges `recall_gpu_s(WHOLE PREFIX, tier)`, which is StudyRH5 Part A's
+# ISOLATED RELOAD TTFT for a full RECALL. covex-v6-state s4 measured what a touch actually is:
+# 1,246 touches, every one a WARM cache hit, prompt_tokens p50 10,001 and UNCACHED p50 3, max 15,
+# output 1 token. The engine re-materialises nothing.
+#
+# THE OBSERVED TTFT DOES NOT SETTLE IT AND LOOKS LIKE IT DOES, which is why this is written down.
+# Measured touch TTFT was p50 0.534 s, sitting neatly inside the 0.24 to 0.67 s charged, so on
+# TTFT alone the charge reads as correct. It is not: TTFT under load is service time, and the
+# budget spends GPU time. Decomposing the measurement through the committed D162 model
+# (`first_token = 0.067798 + 0.00018243 * uncached + 0.00015358 * queue_ahead`) separates them:
+#
+#   observed      GPU-attributable      queue share
+#   p10 0.228 s      0.0683 s              70.0 %
+#   p50 0.534 s      0.0683 s              87.2 %
+#   p90 1.101 s      0.0683 s              93.8 %
+#   max 2.978 s      0.0683 s              97.7 %
+#
+# So 70 to 98 percent of what looked like agreement is QUEUEING BEHIND OTHER REQUESTS, which is
+# not GPU time and must not be charged to a GPU budget. Two quantities landing in the same range
+# is not agreement; it is consistency check 6's invalid proxy and check 2's plausible-rate trap.
+#
+# AND THE ERROR HAS THE WRONG SHAPE, not merely the wrong size. The charge SCALES WITH PREFIX
+# TOKENS while a warm touch's work does not, so the overcharge grows with exactly the thing that
+# should not matter: 3.6x at a 7k prefix, 5.6x at 11k, 8.1x at 17k, 9.8x at 21k. A magnitude error
+# could be absorbed as conservatism; a shape error cannot, because it penalises precisely the
+# large warm histories a touch exists to protect.
+TOUCH_PRICE_D162 = {"intercept_s": 0.067798, "per_uncached_token_s": 0.00018243,
+                    "source": ("results/orchestration/live2/frozen_test/cost_model_gate_d162.json"
+                               " :: model.first_token (gate commit 68a2b47)")}
+# Measured on the s4 cell: uncached per touch p50 3, max 15. The MAX is used, not the median, so
+# the corrected price stays an upper bound on the work and cannot flatter the policy.
+TOUCH_UNCACHED_TOKENS = 15
+TOUCH_PRICE_MODE = "reload-proxy"      # DEFAULT, the committed behaviour; nothing changes
+
+
+def touch_price_gpu_s_d162(prefix_tokens: int, belief: Dict[str, float], costs: Any) -> float:
+    """What a touch costs the GPU on a WARM HIT, from the committed D162 model.
+
+    Independent of `prefix_tokens` by construction, because on a warm hit the prefix is not
+    re-materialised and the only work is the handful of uncached tokens plus the request's own
+    overhead. Falls back to the reload proxy for a tier that is NOT GPU-warm, where a touch really
+    would pay for the prefix; `mixed_touch_guard` refuses those anyway, so the fallback is the
+    conservative branch and not the live one.
+    """
+    tier, _ = predicted_tier(belief)
+    if tier != "gpu":
+        return float(costs.recall_gpu_s(max(int(prefix_tokens), 1), READINESS[tier]))
+    return float(TOUCH_PRICE_D162["intercept_s"]
+                 + TOUCH_PRICE_D162["per_uncached_token_s"] * TOUCH_UNCACHED_TOKENS)
+
+
+def price_for_touch(prefix_tokens: int, belief: Dict[str, float], costs: Any) -> float:
+    """The ONE read of the touch price, so the mode cannot be set in two places."""
+    if TOUCH_PRICE_MODE == "d162-warm-hit":
+        return touch_price_gpu_s_d162(prefix_tokens, belief, costs)
+    return touch_price_gpu_s(prefix_tokens, belief, costs)
+
+
 def should_touch(*, belief: Dict[str, float], prefix_tokens: int,
                  costs: Any, budget_ok: Any = None) -> Dict[str, Any]:
     """The whole decision for one session, as data so a proof can read it."""
     allowed, reason = mixed_touch_guard(belief)
     tier, mass = predicted_tier(belief)
-    price = touch_price_gpu_s(prefix_tokens, belief, costs)
+    price = price_for_touch(prefix_tokens, belief, costs)
     ok = bool(allowed) and int(prefix_tokens) > 0
     if allowed and int(prefix_tokens) <= 0:
         reason = "no built prefix to re-present"
