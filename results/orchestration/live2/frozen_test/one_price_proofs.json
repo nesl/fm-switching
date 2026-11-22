@@ -116,7 +116,8 @@
  },
  "P2_budget_vs_gpu_busy": {
   "_claim": "the budget must not bind artificially (D102)",
-  "cell": "covex-v6-state, dry, 8 devices, 600 s, seed 4",
+  "cell": "covex-v6-state-d162, dry, 8 devices, 600 s, seed 4",
+  "subject_declares_the_charge": true,
   "reference_v5_rules_2_decision_rows": 4376,
   "rows": [
    {
@@ -143,20 +144,16 @@
   "verdict": "FAIL: under the ruling's formula as written the budget binds ARTIFICIALLY. 10612 refusals (10593 dashcam) against 288 under work-only, and plan_state reaches 0 decisions against 2038. The arm is MORE starved than it was under the old touch price, for a different reason. The rerun is HELD"
  },
  "P3_baselines_unchanged": {
-  "_claim": "no committed arm declares the pricing switch",
+  "_claim": "no arm declares the pricing switch while its D102 proof fails; and if it is ever ruled on, no arm outside covex-v6 declares it",
   "arms_with_d162_pricing": [
-   "covex-v6-fair",
-   "covex-v6-fair-nofeed",
-   "covex-v6-fair-novalue",
-   "covex-v6-fair-off",
-   "covex-v6-state",
-   "covex-v6-state-nobelief",
-   "covex-v6-state-noprice",
-   "covex-v6-state-noretain",
-   "covex-v6-state-notouch"
+   "covex-v6-state-d162"
   ],
   "only_covex_v6": true,
-  "verdict": "PASS: only covex-v6 arms price this way, so every baseline's charge is the committed one"
+  "reprice_is_held": true,
+  "proof_probe_arm": "covex-v6-state-d162",
+  "arms_declaring_it_other_than_the_probe": [],
+  "probe_found_in_cell_lists": [],
+  "verdict": "PASS: the reprice is held, only the proof's own probe arm covex-v6-state-d162 declares it, and that arm appears in no cell list"
  },
  "P4_no_drift": {
   "checked": true,

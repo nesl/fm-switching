@@ -107,7 +107,19 @@ class V6StateArm:
         self.live2_touch_requests = _d(touch_requests)
         self.live2_state_priced_costs = _d(state_priced_costs)
         self.live2_belief_apply = _d(belief_apply)
-        self.live2_d162_pricing = _d(d162_pricing)
+        # DEFAULT FALSE, AND NOT THROUGH `_d`. `_d(None)` returns `self.plan_state`, which is
+        # True for covex-v6-state, so routing this switch through it DECLARED the D162 charge on
+        # every cell of the rung. The charge's own D102 proof FAILS and the reprice is HELD
+        # pending a ruling, so the arm must not declare it until one turns it on.
+        #
+        # THIS IS WHAT I GOT WRONG AND IT COST A CELL. I said "the default charge is unchanged"
+        # having checked the two MODE literals, `TOUCH_PRICE_MODE` and `CHARGE_MODE`, which are
+        # indeed unchanged. Neither of them gates anything: `d162_price.arm_enables` reads THIS
+        # attribute, and this attribute was True. covex-v6-state s6 ran the held charge, stalled
+        # at 44,382 budget refusals with its last request submitted at t = 264 s of a 1,200 s
+        # cell, and robot fell to 12 of 121. The same shape as the name check: I verified the
+        # thing I was thinking about instead of the thing that decides the behaviour.
+        self.live2_d162_pricing = (False if d162_pricing is None else bool(d162_pricing))
         self.dry = bool(dry)
         self.dry_margin = dry_margin
         self._cf = None
@@ -412,6 +424,11 @@ V6STATE_ARMS = {
                                                       state_priced_costs=False, **kw),
     "covex-v6-state-nobelief": lambda **kw: V6StateArm(name="covex-v6-state-nobelief",
                                                        belief_apply=False, **kw),
+    # The ONE PRICE SOURCE charge, explicitly ON. It exists so the D102 proof can exercise the
+    # charge it is testing without the rung's default declaring it, and so a ruled rerun has a
+    # name to run. It must NOT be put in a cell list until the reprice is ruled.
+    "covex-v6-state-d162": lambda **kw: V6StateArm(name="covex-v6-state-d162",
+                                                   d162_pricing=True, **kw),
 }
 
 

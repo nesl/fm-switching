@@ -31,6 +31,11 @@ import costs as C                                                              #
 import d162_price as DP                                                        # noqa: E402
 import touch_policy as TP                                                      # noqa: E402
 
+# The reprice is HELD while its D102 gate fails. Flipping this to False is part of applying a
+# ruling, and the proof below then changes what it asserts, which is deliberate: the strong form
+# ("nobody declares it") is only correct while it is held.
+D102_FAILS = True
+
 # constructed requests: (label, uncached tokens, uncached queued ahead)
 CASES = [("touch on an 11k warm prefix", TP.TOUCH_UNCACHED_TOKENS, 0),
          ("touch, 3,000 ahead", TP.TOUCH_UNCACHED_TOKENS, 3000),
@@ -108,7 +113,11 @@ def p2_budget_vs_gpu_busy() -> Dict[str, Any]:
     try:
         for mode in ("first-token", "work-only"):
             DP.CHARGE_MODE = mode
-            dec, st = TH.dry("covex-v6-state", 4, 8, run_s=600.0, ratio="50:50",
+            # covex-v6-state-d162 DECLARES the charge. The rung's own default does not, so
+            # running this test on `covex-v6-state` made BOTH modes identical and the proof
+            # PASSED VACUOUSLY the moment the default was corrected. A proof whose subject has
+            # been switched off is not a passing proof.
+            dec, st = TH.dry("covex-v6-state-d162", 4, 8, run_s=600.0, ratio="50:50",
                              robot_question_set="lh_req", ss_question_set="ss2")
             c = holder["c"]
             rows.append({"charge_mode": mode,
@@ -126,7 +135,8 @@ def p2_budget_vs_gpu_busy() -> Dict[str, Any]:
     ok = full["budget_refusal"] <= work["budget_refusal"] * 2
     return {
         "_claim": "the budget must not bind artificially (D102)",
-        "cell": "covex-v6-state, dry, 8 devices, 600 s, seed 4",
+        "cell": "covex-v6-state-d162, dry, 8 devices, 600 s, seed 4",
+        "subject_declares_the_charge": True,
         "reference_v5_rules_2_decision_rows": 4376,
         "rows": rows,
         "diagnosis": (
@@ -161,10 +171,48 @@ def p3_baselines_unchanged() -> Dict[str, Any]:
         if bool(getattr(arm, "live2_d162_pricing", False)):
             on.append(name)
     only_v6 = all(n.startswith("covex-v6") for n in on)
-    return {"_claim": "no committed arm declares the pricing switch",
+    # WHILE THE REPRICE IS HELD, NO ARM MAY DECLARE IT, not even a covex-v6 one. The first
+    # version of this proof asked only whether a NON-v6 arm declared the switch, and it PASSED
+    # while covex-v6-state had it on by default: `_d(None)` returned `plan_state`, which is True.
+    # covex-v6-state s6 then ran the held charge for real, stalled at 44,382 budget refusals with
+    # its last request submitted at t = 264 s of a 1,200 s cell, and the cell was lost. A proof
+    # that asks the weaker question passes while the thing it exists to prevent is happening.
+    held = D102_FAILS
+    # The one arm allowed to declare it: the proof's own subject, which exists so P2 can exercise
+    # the charge it tests. Allowing it is only safe if it can never reach a cell, so that is
+    # CHECKED rather than trusted.
+    PROBE = "covex-v6-state-d162"
+    offenders = [n for n in on if n != PROBE]
+    runs = REPO / "results/orchestration/live2/frozen_test/runs"
+    in_cell_lists = []
+    if runs.exists():
+        for f in sorted(runs.iterdir()):
+            if not f.is_file():
+                continue
+            try:
+                for ln in f.read_text().splitlines():
+                    ln = ln.strip()
+                    if ln and not ln.startswith("#") and ln.split()[0] == PROBE:
+                        in_cell_lists.append("%s: %s" % (f.name, ln))
+            except Exception:                                                  # noqa: BLE001
+                continue
+    return {"_claim": ("no arm declares the pricing switch while its D102 proof fails; and if it "
+                       "is ever ruled on, no arm outside covex-v6 declares it"),
             "arms_with_d162_pricing": on, "only_covex_v6": only_v6,
-            "verdict": ("PASS: only covex-v6 arms price this way, so every baseline's charge is "
-                        "the committed one" if only_v6 else
+            "reprice_is_held": held,
+            "proof_probe_arm": PROBE,
+            "arms_declaring_it_other_than_the_probe": offenders,
+            "probe_found_in_cell_lists": in_cell_lists,
+            "verdict": ("PASS: the reprice is held, only the proof's own probe arm %s declares "
+                        "it, and that arm appears in no cell list" % PROBE
+                        if (held and not offenders and not in_cell_lists) else
+                        "FAIL: the reprice is HELD and %d arm(s) beyond the probe declare it: "
+                        "%s. Every cell of those arms runs an unruled charge"
+                        % (len(offenders), offenders) if (held and offenders) else
+                        "FAIL: the probe arm %s is in a CELL LIST (%s); it exists only for this "
+                        "proof and must not run until the reprice is ruled"
+                        % (PROBE, in_cell_lists) if in_cell_lists else
+                        "PASS: only covex-v6 arms price this way" if only_v6 else
                         "FAIL: a non-v6 arm declares the switch")}
 
 
