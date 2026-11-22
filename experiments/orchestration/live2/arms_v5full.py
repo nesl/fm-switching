@@ -227,6 +227,9 @@ class V5FullArm:
                 self.stats["cf_deviations"] += 1
             if d.timeout_fallback:
                 self.stats["cf_timeout_fallback"] += 1
+            # one accounting for both rungs, per the 2026-11-22 ruling
+            import cf_planner as _CP
+            _CP.note_abandon(self.stats, d, float(getattr(self._cf, "budget_ms", 0.0)))
         return act
 
 

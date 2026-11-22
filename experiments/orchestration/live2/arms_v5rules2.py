@@ -97,13 +97,19 @@ class V5Rules2Arm:
                  guard_backlog: int = GUARD_BACKLOG_DEFAULT,
                  guard: bool = True,
                  just_in_time: bool = True,
-                 slice_tokens: Optional[int] = EA.WARM_AHEAD_SLICE_TOKENS) -> None:
+                 slice_tokens: Optional[int] = EA.WARM_AHEAD_SLICE_TOKENS,
+                 over_limit_infeasible: bool = False) -> None:
         from hybrid.hybrid_arm import CONFIGS, HybridArm
         if V5RULES2_BASE not in CONFIGS:
             raise KeyError("committed base config %r is absent from hybrid_arm.CONFIGS"
                            % (V5RULES2_BASE,))
         # The committed config taken whole, exactly as arms_v5rules does. Not re-derived.
         self._base = HybridArm(name=V5RULES2_BASE, **CONFIGS[V5RULES2_BASE])
+        # D170, default OFF. Set on BOTH: `self` is what HybridArm.__call__ runs against, and
+        # `self._base` is the config mirror, so leaving one unset is how a switch reads as live
+        # and decides nothing.
+        self._base.over_limit_infeasible = bool(over_limit_infeasible)
+        self.over_limit_infeasible = bool(over_limit_infeasible)
         self.name = name
         self.warm_ahead = bool(warm_ahead)
         self.chunk_tokens = int(chunk_tokens)

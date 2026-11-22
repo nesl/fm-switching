@@ -1,0 +1,163 @@
+{
+ "_what": "D170: over-limit (>32,768-token) requests sent, per arm and seed",
+ "_limit_tokens": 32768,
+ "_sent_test": "an outcome row whose cloud_payload.tokens_charged exceeds the limit. A request_id alone is NOT the test: simplestream carries one on all 18 over-limit questions at seed 7 with tokens_charged 467, which is a short representation of a long history, not an over-limit send",
+ "offered_by_seed": {
+  "4": {
+   "over_limit_recall_opportunities": 0,
+   "max_history_tokens": 0,
+   "opportunity_ids": []
+  },
+  "5": {
+   "over_limit_recall_opportunities": 0,
+   "max_history_tokens": 0,
+   "opportunity_ids": []
+  },
+  "6": {
+   "over_limit_recall_opportunities": 0,
+   "max_history_tokens": 0,
+   "opportunity_ids": []
+  },
+  "7": {
+   "over_limit_recall_opportunities": 18,
+   "max_history_tokens": 52861,
+   "opportunity_ids": [
+    "opp0004992",
+    "opp0005118",
+    "opp0005231",
+    "opp0005257",
+    "opp0005939",
+    "opp0006097",
+    "opp0006207",
+    "opp0006379",
+    "opp0006418",
+    "opp0007246",
+    "opp0007945",
+    "opp0008403",
+    "opp0008801",
+    "opp0008807",
+    "opp0009028",
+    "opp0009099",
+    "opp0009258",
+    "opp0009318"
+   ]
+  }
+ },
+ "cells": [
+  {
+   "cell": "always-cloud-fcfs_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "seed": 7,
+   "over_limit_offered": 18,
+   "over_limit_sent_as_send_decision": 2,
+   "over_limit_released_as_a_shorter_representation": 0,
+   "sends": [
+    {
+     "opportunity_id": "opp0006097",
+     "tokens_charged": 38821,
+     "history_tokens": 38821,
+     "cloud_letter": "X",
+     "scored_on_time": true,
+     "t_submit_to_delivered_s": 0.0222
+    },
+    {
+     "opportunity_id": "opp0008403",
+     "tokens_charged": 48811,
+     "history_tokens": 48811,
+     "cloud_letter": "X",
+     "scored_on_time": false,
+     "t_submit_to_delivered_s": 0.0222
+    }
+   ]
+  },
+  {
+   "cell": "attentionstore-prefetch_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "seed": 7,
+   "over_limit_offered": 18,
+   "over_limit_sent_as_send_decision": 0,
+   "over_limit_released_as_a_shorter_representation": 0,
+   "sends": []
+  },
+  {
+   "cell": "b7-edf-feasibility_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "seed": 7,
+   "over_limit_offered": 18,
+   "over_limit_sent_as_send_decision": 0,
+   "over_limit_released_as_a_shorter_representation": 0,
+   "sends": []
+  },
+  {
+   "cell": "edf_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "seed": 7,
+   "over_limit_offered": 18,
+   "over_limit_sent_as_send_decision": 0,
+   "over_limit_released_as_a_shorter_representation": 0,
+   "sends": []
+  },
+  {
+   "cell": "hybrid-F-lhreq-noc3_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "seed": 7,
+   "over_limit_offered": 18,
+   "over_limit_sent_as_send_decision": 0,
+   "over_limit_released_as_a_shorter_representation": 0,
+   "sends": []
+  },
+  {
+   "cell": "llf_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "seed": 7,
+   "over_limit_offered": 18,
+   "over_limit_sent_as_send_decision": 0,
+   "over_limit_released_as_a_shorter_representation": 0,
+   "sends": []
+  },
+  {
+   "cell": "mooncake_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "seed": 7,
+   "over_limit_offered": 18,
+   "over_limit_sent_as_send_decision": 0,
+   "over_limit_released_as_a_shorter_representation": 0,
+   "sends": []
+  },
+  {
+   "cell": "querystream-proactive_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "seed": 7,
+   "over_limit_offered": 18,
+   "over_limit_sent_as_send_decision": 0,
+   "over_limit_released_as_a_shorter_representation": 0,
+   "sends": []
+  },
+  {
+   "cell": "simplestream_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "seed": 7,
+   "over_limit_offered": 18,
+   "over_limit_sent_as_send_decision": 0,
+   "over_limit_released_as_a_shorter_representation": 18,
+   "sends": []
+  },
+  {
+   "cell": "v5-rules-2_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "seed": 7,
+   "over_limit_offered": 18,
+   "over_limit_sent_as_send_decision": 0,
+   "over_limit_released_as_a_shorter_representation": 0,
+   "sends": []
+  },
+  {
+   "cell": "warm-all-lru_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "seed": 7,
+   "over_limit_offered": 18,
+   "over_limit_sent_as_send_decision": 0,
+   "over_limit_released_as_a_shorter_representation": 0,
+   "sends": []
+  }
+ ],
+ "summary": {
+  "over_limit_questions_exist_only_at_seed_7": true,
+  "seeds_4_to_6_are_UNEXERCISED": "no recall question reaches the limit at seeds 4 to 6 (max history 26,671 to 26,941 tokens), so a zero there is unexercised and carries no information about any arm's over-limit behaviour (CLAUDE.md Rule 2)",
+  "arms_that_sent_one": [
+   "always-cloud-fcfs_n16_s7_1200s_h27_3t_L3_epg_rq30"
+  ],
+  "our_arms_sent_none": true,
+  "but_the_rule_is_still_absent": "our arms decline these questions on TIME, not on the limit: the feasibility test is `est <= slack` with est = recall_ttft_s(history, readiness), and a 34k to 53k-token COLD history cannot be predicted to finish inside a 3 s deadline. That is b7's existing behaviour inherited through the base, and D170 asks that 'already behaves correctly' be verified SEPARATELY from 'has the rule'. It is absent: no 32768 appears anywhere under experiments/orchestration. THE CASE THE RULE EXISTS FOR IS ONE WARMING CREATES: a 40k-token history already built WARM has a small predicted est, passes `est <= slack`, is sent, and is refused by the engine. Rung 1 and above warm ahead, so the reachable path appears exactly where the rule is missing",
+  "defect_found_in_a_baseline_cell": "always-cloud-fcfs at seed 7 sent two (38,821 and 48,811 tokens charged). Both came back with no prompt_tokens, no http_status and cloud_letter 'X', the no-letter sentinel, and opp0006097 was recorded as DELIVERED ON TIME 17 ms after submission, which is impossible for a 38,821-token prefill (check 2). The scorer's `cloud_stands = on_time and cloud_letter` is then true, so the engine's refusal REPLACES the device's answer, which is the opposite of D170's 'the device answer stands'. MEASURED IMPACT ON EVERY COMMITTED NUMBER: ZERO, because that question's device answer is itself wrong (gold A, device incorrect), so standing_correct is false either way. The conflict between D144 (3) ('a per-question MISS for whichever arm sends it') and D170's gloss ('with the device answer standing') is therefore REAL IN THE RULES and UNEXERCISED IN THE DATA, and it is the user's to settle"
+ }
+}

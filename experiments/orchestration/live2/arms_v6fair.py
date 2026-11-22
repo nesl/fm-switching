@@ -59,8 +59,16 @@ class V6FairArm(VS.V6StateArm):
 
     def __init__(self, name: str = "covex-v6-fair", *,
                  deficit_feed: bool = True, value_reader: bool = True,
+                 over_limit_infeasible: bool = True,
                  **kw: Any) -> None:
-        VS.V6StateArm.__init__(self, name=name, **kw)
+        # D170 is ON from this rung up, and only from this rung up. covex-v6-fair and covex-v6
+        # have NO committed cells, so switching it on costs no provenance. Rungs 0 to 2 keep it
+        # OFF because turning it on there would put the rule behind a version label whose cells
+        # are already committed, and that is the user's call, not mine: the rule provably changes
+        # nothing on any committed cell (18 over-limit questions exist, all at seed 7, and no arm
+        # of ours sent one), so the choice is about the label and not about the numbers.
+        VS.V6StateArm.__init__(self, name=name,
+                               over_limit_infeasible=over_limit_infeasible, **kw)
         self.arm_version = V6FAIR_VERSION
         self.deficit_feed = bool(deficit_feed)
         self.value_reader = bool(value_reader)
@@ -77,6 +85,10 @@ class V6FairArm(VS.V6StateArm):
                      rules_base=V6FAIR_RULES_BASE,
                      deficit_feed=self.deficit_feed,
                      value_reader=self.value_reader,
+                     over_limit_infeasible=dict(
+                         on=bool(getattr(self._rules, "over_limit_infeasible", False)),
+                         limit_tokens=32768, ruling="D170",
+                         counter="over_limit_infeasible, over_limit_tokens_max"),
                      on_time_rule="cloud_on_time OR device_on_time (D155 (3))",
                      feed_blind_spot=("declined opportunities never reach live2_completed, so "
                                       "the counters see the SERVED population and a device "
@@ -156,6 +168,9 @@ V6FAIR_ARMS = {
                                                    deficit_feed=False, **kw),
     "covex-v6-fair-novalue": lambda **kw: V6FairArm(name="covex-v6-fair-novalue",
                                                     value_reader=False, **kw),
+    # one-factor ablation of the D170 rule, so "with the rule" has a comparator
+    "covex-v6-fair-nolimit": lambda **kw: V6FairArm(name="covex-v6-fair-nolimit",
+                                                    over_limit_infeasible=False, **kw),
 }
 
 

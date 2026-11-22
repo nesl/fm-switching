@@ -136,20 +136,55 @@ def _ss_values(tbl: Dict[str, Any]) -> Dict[str, float]:
     return out
 
 
+# D170: the engine's context limit is a DEPLOYMENT CONSTRAINT, identical for every arm. A request
+# whose predicted prompt exceeds it cannot be answered at all, so sending one spends the engine and
+# still misses. Our policy treats it as INFEASIBLE in its feasibility check and leaves the question
+# to the device.
+#
+# WHY A SWITCH, DEFAULT OFF, AND NOT A CHANGE TO THE BASE. "Already behaves correctly" and "has
+# the rule" are different claims and D170 asks for them separately. Measured on the committed
+# cells: 18 recall questions exceed the limit, all at seed 7 (34,051 to 52,861 tokens), and every
+# arm of ours sent NONE of them. They are declined on TIME, not on the limit: `est <= slack` with
+# est = recall_ttft_s(history, readiness) cannot predict a 34k-token COLD history inside a 3 s
+# deadline. That is b7's behaviour inherited through the base, and it is not the rule.
+#
+# THE CASE THE RULE EXISTS FOR IS ONE WARMING CREATES. A 40k-token history already built WARM has
+# a SMALL predicted est, passes `est <= slack`, is sent, and is refused by the engine. Rung 1 and
+# above warm ahead, so the reachable path appears exactly where the rule is missing. The one arm
+# that did send over-limit requests, always-cloud-fcfs at seed 7, got back no prompt_tokens, no
+# http_status and the 'X' no-letter sentinel, with one of the two recorded as delivered ON TIME
+# 17 ms after submission.
+CONTEXT_LIMIT_TOKENS = 32768
+
+
 class HybridArm:
     """Built on the committed b7 live2 wrapper; see the module docstring."""
 
     SWITCHES = ("c1", "c2", "c3", "c4", "c5", "c6")
+    # D170's switch as a CLASS-LEVEL DEFAULT, read-only, with every instance setting its own in
+    # __init__. The instance value is what ablates; this default exists because the recall loop is
+    # BORROWED by objects that never ran HybridArm.__init__ (the counterfactual's mirror of the
+    # base is one), and on those `self.over_limit_infeasible` raised AttributeError inside a
+    # generic except, which silently changed plan_state's candidate scoring: covex-v6-state's dry
+    # log moved 15,734 to 15,954 rows and covex-v6-state-off, which has plan_state off, did not.
+    # This is the mirror image of the earlier flags-as-class-attributes bug: there a class
+    # attribute with no instance value broke the negative control, here a missing class default
+    # broke a borrowed method.
+    over_limit_infeasible = False
 
     def __init__(self, name: str = "hybrid-base", c1=False, c2=False, c3=False, c4=False, c5=False, c6=False,
                  k_r: float = 1.0, m_d: float = 0.05, defs: str = "v1", reserve: Optional[bool] = None,
                  throttle_floor: int = 2, c3_always: bool = False, workload: str = "mixed",
                  k_r_frac: Optional[float] = None, quality_fit: str = "trace_mix",
                  c6_robot_only: bool = False, c6_mirror_all_periods: bool = False,
-                 c3_value_reader: bool = False, value_transform: str = "none") -> None:
+                 c3_value_reader: bool = False, value_transform: str = "none",
+                 over_limit_infeasible: bool = False) -> None:
         from arms_published import B7EdfFeasibilityArm
         self._b7 = B7EdfFeasibilityArm()
         self.name = name
+        # D170. DEFAULT OFF so no committed arm's decisions move; enabled by the ladder arms that
+        # have no cells yet, and proved to change nothing on the committed ones.
+        self.over_limit_infeasible = bool(over_limit_infeasible)
         self.sw = dict(c1=bool(c1), c2=bool(c2), c3=bool(c3), c4=bool(c4), c5=bool(c5), c6=bool(c6))
         self.k_r, self.m_d = float(k_r), float(m_d)
         # D143 ruling B: k_r scales with each device type's OWN deadline, k_r = 0.3 x deadline, so a
@@ -318,7 +353,18 @@ class HybridArm:
                 work = est + self._unbuilt_rebuild_s(q)
                 laxity = qs - work
                 risk = self.sw["c2"] and (laxity < self._k_r_for(q))
-            if est <= qs:
+            over_limit = (self.over_limit_infeasible
+                          and int(getattr(q, "readiness_tokens", 0) or 0) > CONTEXT_LIMIT_TOKENS)
+            if over_limit:
+                # INFEASIBLE, not deferred and not retried smaller: the engine cannot answer this
+                # prompt at any time, so the question is the device's and the arm is charged for
+                # the send it did not make (D170, D144 (3)).
+                d = RecallAction(q.query_id, "REJECT")
+                self.stats["over_limit_infeasible"] += 1
+                self.stats["over_limit_tokens_max"] = max(
+                    int(self.stats.get("over_limit_tokens_max", 0)),
+                    int(getattr(q, "readiness_tokens", 0) or 0))
+            elif est <= qs:
                 d = RecallAction(q.query_id, "CLOUD")
             elif est <= qs + self._b7.defer_s:
                 d = RecallAction(q.query_id, "DEFER", defer_s=self._b7.defer_s)

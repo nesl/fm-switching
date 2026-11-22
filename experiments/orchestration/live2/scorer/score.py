@@ -480,6 +480,48 @@ class Loaded:
     decisions: List[Dict[str, Any]]
 
 
+
+def refused_request_ids(reqs: Sequence[Dict[str, Any]]) -> set:
+    """Requests that NEVER DELIVERED AN ANSWER, so no cloud answer of theirs may stand.
+
+    D175 (1) (user ruling 2026-11-22): under replacement semantics (D165 B) only a DELIVERED cloud
+    answer replaces the device's, so a REFUSED request leaves the device answer standing. D144 (2)
+    already nulled the delivery of any NON-200 response; the hole D175 closes is the request that
+    never got a status at all.
+
+    THE HOLE, MEASURED. The over-context request at always-cloud-fcfs seed 7 came back with
+    http_status None, prompt_tokens None and output_tokens None, and the coordinator had already
+    settled it as an on-time cloud answer with the 'X' no-letter sentinel, delivered 17 ms after
+    submission for a 38,821-token prefill. `http_status is not None and != 200` is False for it,
+    so the D144 pass skipped it and the scorer's `cloud_stands` then let a refusal REPLACE a
+    device answer.
+
+    WHY THE TEST IS NOT THE LETTER. 'X' is StudyR1's "no A-E found in the answer" sentinel, which
+    a genuinely delivered answer can also produce, so treating 'X' as refusal would discard real
+    cloud answers and silently improve every arm that generates poor text. The test is whether the
+    REQUEST completed: a non-200 status, or no status at all with no prompt and no output tokens.
+
+    WHY THE SECOND CLAUSE IS NARROW. Across the 49 committed rq30 cells there are 441,023 requests
+    with status 200 and tokens, 3,568 with status 200 and no token fields (kept: they answered),
+    700 with no status and no tokens (refused: caught here), and 82 non-200 (already caught). The
+    3,568 are the reason the clause requires BOTH token fields to be absent rather than keying on
+    the status alone.
+    """
+    out = set()
+    for r in reqs:
+        hs = r.get("http_status")
+        if hs is not None:
+            try:
+                if int(hs) != 200:
+                    out.add(r.get("request_id"))
+            except (TypeError, ValueError):
+                out.add(r.get("request_id"))
+            continue
+        if not r.get("prompt_tokens") and not r.get("output_tokens"):
+            out.add(r.get("request_id"))
+    return out
+
+
 def load(trace_dir: Path, run_dir: Path) -> Loaded:
     trace_dir, run_dir = Path(trace_dir), Path(run_dir)
     meta = json.loads((trace_dir / "trace_meta.json").read_text())
@@ -497,8 +539,7 @@ def load(trace_dir: Path, run_dir: Path) -> Loaded:
     # D144 (user ruling 2026-11-20): any NON-200 response is a MISS. A refused request (e.g. HTTP 400 over-context) was
     # settled by the pre-fix coordinator as an on-time cloud answer with letter "X"; strip such cloud deliveries here so
     # every downstream check (_within, robot_value, assistive scoring) sees the device answer standing and a miss.
-    failed = {r.get("request_id") for r in reqs
-              if r.get("http_status") is not None and int(r.get("http_status")) != 200}
+    failed = refused_request_ids(reqs)
     if failed:
         for o in out.values():
             cp = o.get("cloud_payload") or {}

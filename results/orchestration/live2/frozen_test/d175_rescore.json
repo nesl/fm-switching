@@ -1,0 +1,406 @@
+{
+ "_what": "D175 (1): impact of never letting a refused request replace the device answer",
+ "_fix": "scorer/score.py now uses refused_request_ids(): a non-200 status, OR no status at all with no prompt_tokens and no output_tokens. frozen_headline.py already excluded these, so the headline is unchanged by construction",
+ "cells": [
+  {
+   "cell": "always-cloud-fcfs_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 37,
+   "outcomes_that_lose_an_on_time_cloud_answer": 1,
+   "flipped": [
+    {
+     "opportunity_id": "opp0004280",
+     "kind": "monitor",
+     "device_id": "dash003",
+     "tokens_charged": 1394,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.7762
+    }
+   ],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 829,
+   "dashcam_on_time_total_after": 828
+  },
+  {
+   "cell": "always-cloud-fcfs_n16_s5_1200s_h27_3t_L3_epg_rq30_rerun",
+   "requests_newly_treated_as_refused": 64,
+   "outcomes_that_lose_an_on_time_cloud_answer": 0,
+   "flipped": [],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 646,
+   "dashcam_on_time_total_after": 646
+  },
+  {
+   "cell": "always-cloud-fcfs_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 12,
+   "outcomes_that_lose_an_on_time_cloud_answer": 2,
+   "flipped": [
+    {
+     "opportunity_id": "opp0002643",
+     "kind": "monitor",
+     "device_id": "dash003",
+     "tokens_charged": 1056,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.2207
+    },
+    {
+     "opportunity_id": "opp0003519",
+     "kind": "monitor",
+     "device_id": "dash000",
+     "tokens_charged": 4774,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.2103
+    }
+   ],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 1421,
+   "dashcam_on_time_total_after": 1419
+  },
+  {
+   "cell": "always-cloud-fcfs_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 19,
+   "outcomes_that_lose_an_on_time_cloud_answer": 3,
+   "flipped": [
+    {
+     "opportunity_id": "opp0005944",
+     "kind": "monitor",
+     "device_id": "dash001",
+     "tokens_charged": 6126,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.2239
+    },
+    {
+     "opportunity_id": "opp0006068",
+     "kind": "monitor",
+     "device_id": "dash002",
+     "tokens_charged": 1056,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.3595
+    },
+    {
+     "opportunity_id": "opp0006097",
+     "kind": "recall",
+     "device_id": "robo004",
+     "tokens_charged": 38821,
+     "cloud_letter": "X",
+     "delivered_minus_opportunity_s": 0.1713
+    }
+   ],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 959,
+   "dashcam_on_time_total_after": 957
+  },
+  {
+   "cell": "attentionstore-prefetch_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 7,
+   "outcomes_that_lose_an_on_time_cloud_answer": 1,
+   "flipped": [
+    {
+     "opportunity_id": "opp0004386",
+     "kind": "monitor",
+     "device_id": "dash004",
+     "tokens_charged": 4436,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.3168
+    }
+   ],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 803,
+   "dashcam_on_time_total_after": 802
+  },
+  {
+   "cell": "attentionstore-prefetch_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 5,
+   "outcomes_that_lose_an_on_time_cloud_answer": 0,
+   "flipped": [],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 612,
+   "dashcam_on_time_total_after": 612
+  },
+  {
+   "cell": "attentionstore-prefetch_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 7,
+   "outcomes_that_lose_an_on_time_cloud_answer": 3,
+   "flipped": [
+    {
+     "opportunity_id": "opp0005407",
+     "kind": "monitor",
+     "device_id": "dash004",
+     "tokens_charged": 1056,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.3426
+    },
+    {
+     "opportunity_id": "opp0005410",
+     "kind": "monitor",
+     "device_id": "dash000",
+     "tokens_charged": 2746,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.2557
+    },
+    {
+     "opportunity_id": "opp0006688",
+     "kind": "monitor",
+     "device_id": "dash003",
+     "tokens_charged": 2070,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.4959
+    }
+   ],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 932,
+   "dashcam_on_time_total_after": 929
+  },
+  {
+   "cell": "b7-edf-feasibility_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 76,
+   "outcomes_that_lose_an_on_time_cloud_answer": 2,
+   "flipped": [
+    {
+     "opportunity_id": "opp0003529",
+     "kind": "monitor",
+     "device_id": "dash004",
+     "tokens_charged": 2746,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.2463
+    },
+    {
+     "opportunity_id": "opp0006054",
+     "kind": "monitor",
+     "device_id": "dash002",
+     "tokens_charged": 3760,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.1926
+    }
+   ],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 816,
+   "dashcam_on_time_total_after": 814
+  },
+  {
+   "cell": "b7-edf-feasibility_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 38,
+   "outcomes_that_lose_an_on_time_cloud_answer": 0,
+   "flipped": [],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 672,
+   "dashcam_on_time_total_after": 672
+  },
+  {
+   "cell": "b7-edf-feasibility_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 5,
+   "outcomes_that_lose_an_on_time_cloud_answer": 0,
+   "flipped": [],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 4927,
+   "dashcam_on_time_total_after": 4927
+  },
+  {
+   "cell": "mooncake_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 52,
+   "outcomes_that_lose_an_on_time_cloud_answer": 1,
+   "flipped": [
+    {
+     "opportunity_id": "opp0003702",
+     "kind": "monitor",
+     "device_id": "dash005",
+     "tokens_charged": 2746,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.2308
+    }
+   ],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 806,
+   "dashcam_on_time_total_after": 805
+  },
+  {
+   "cell": "mooncake_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 51,
+   "outcomes_that_lose_an_on_time_cloud_answer": 2,
+   "flipped": [
+    {
+     "opportunity_id": "opp0003880",
+     "kind": "monitor",
+     "device_id": "dash002",
+     "tokens_charged": 2070,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.1944
+    },
+    {
+     "opportunity_id": "opp0006755",
+     "kind": "monitor",
+     "device_id": "dash001",
+     "tokens_charged": 6126,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.9633
+    }
+   ],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 673,
+   "dashcam_on_time_total_after": 671
+  },
+  {
+   "cell": "mooncake_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 12,
+   "outcomes_that_lose_an_on_time_cloud_answer": 1,
+   "flipped": [
+    {
+     "opportunity_id": "opp0000916",
+     "kind": "monitor",
+     "device_id": "dash003",
+     "tokens_charged": 4098,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.1583
+    }
+   ],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 4835,
+   "dashcam_on_time_total_after": 4834
+  },
+  {
+   "cell": "querystream-proactive_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 32,
+   "outcomes_that_lose_an_on_time_cloud_answer": 0,
+   "flipped": [],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 760,
+   "dashcam_on_time_total_after": 760
+  },
+  {
+   "cell": "querystream-proactive_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 38,
+   "outcomes_that_lose_an_on_time_cloud_answer": 0,
+   "flipped": [],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 563,
+   "dashcam_on_time_total_after": 563
+  },
+  {
+   "cell": "querystream-proactive_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 49,
+   "outcomes_that_lose_an_on_time_cloud_answer": 1,
+   "flipped": [
+    {
+     "opportunity_id": "opp0002574",
+     "kind": "monitor",
+     "device_id": "dash003",
+     "tokens_charged": 3422,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.1321
+    }
+   ],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 1434,
+   "dashcam_on_time_total_after": 1433
+  },
+  {
+   "cell": "querystream-proactive_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 34,
+   "outcomes_that_lose_an_on_time_cloud_answer": 1,
+   "flipped": [
+    {
+     "opportunity_id": "opp0001811",
+     "kind": "monitor",
+     "device_id": "dash004",
+     "tokens_charged": 2408,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.1691
+    }
+   ],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 970,
+   "dashcam_on_time_total_after": 969
+  },
+  {
+   "cell": "v5-rules-2_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 1,
+   "outcomes_that_lose_an_on_time_cloud_answer": 0,
+   "flipped": [],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 1542,
+   "dashcam_on_time_total_after": 1542
+  },
+  {
+   "cell": "v5-rules_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 1,
+   "outcomes_that_lose_an_on_time_cloud_answer": 0,
+   "flipped": [],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 607,
+   "dashcam_on_time_total_after": 607
+  },
+  {
+   "cell": "warm-all-lru_n16_s4_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 77,
+   "outcomes_that_lose_an_on_time_cloud_answer": 2,
+   "flipped": [
+    {
+     "opportunity_id": "opp0000979",
+     "kind": "monitor",
+     "device_id": "dash004",
+     "tokens_charged": 3760,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.1592
+    },
+    {
+     "opportunity_id": "opp0001176",
+     "kind": "monitor",
+     "device_id": "dash005",
+     "tokens_charged": 2746,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.1785
+    }
+   ],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 584,
+   "dashcam_on_time_total_after": 582
+  },
+  {
+   "cell": "warm-all-lru_n16_s5_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 31,
+   "outcomes_that_lose_an_on_time_cloud_answer": 0,
+   "flipped": [],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 522,
+   "dashcam_on_time_total_after": 522
+  },
+  {
+   "cell": "warm-all-lru_n16_s6_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 48,
+   "outcomes_that_lose_an_on_time_cloud_answer": 1,
+   "flipped": [
+    {
+     "opportunity_id": "opp0002835",
+     "kind": "monitor",
+     "device_id": "dash003",
+     "tokens_charged": 6126,
+     "cloud_letter": null,
+     "delivered_minus_opportunity_s": 0.1911
+    }
+   ],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 914,
+   "dashcam_on_time_total_after": 913
+  },
+  {
+   "cell": "warm-all-lru_n16_s7_1200s_h27_3t_L3_epg_rq30",
+   "requests_newly_treated_as_refused": 4,
+   "outcomes_that_lose_an_on_time_cloud_answer": 0,
+   "flipped": [],
+   "dashcam_devices_whose_target_verdict_changes": [],
+   "dashcam_on_time_total_before": 684,
+   "dashcam_on_time_total_after": 684
+  }
+ ],
+ "summary": {
+  "cells_touched": 23,
+  "total_outcomes_losing_an_on_time_cloud_answer": 21,
+  "by_kind": {
+   "monitor": 20,
+   "recall": 1
+  },
+  "dashcam_target_verdicts_changed": 0,
+  "our_arms_affected": [],
+  "headline_impact": "ZERO BY CONSTRUCTION: frozen_headline.py already excluded every request with a missing status from `ont`, and `cloud_stands` reads `ont`, so no headline number moves. The movement is confined to the per-cell score blocks that scorer/score.py writes",
+  "the_over_limit_recall": "always-cloud-fcfs seed 7, opp0006097, 38,821 tokens charged, letter 'X', recorded delivered 17 ms after submission. Its standing answer does not change even so, because that question's DEVICE answer is also wrong (gold A, device incorrect), so standing_correct is false either way. The D144 (3) against D175 (1) conflict stays unexercised in the data"
+ }
+}

@@ -64,6 +64,7 @@ from interface import Action, Observation, SessionAction                       #
 
 import arms_v5rules2 as V2                                                     # noqa: E402
 import d162_price as DP                                                        # noqa: E402
+import cf_planner as CP                                                        # noqa: E402
 from touch_policy import TOUCH_UNCACHED_TOKENS as TP_TOUCH_UNCACHED            # noqa: E402
 
 V6STATE_VERSION = "covex-v6-state-1.0"
@@ -94,10 +95,17 @@ class V6StateArm:
                  belief_apply: Optional[bool] = None,
                  d162_pricing: Optional[bool] = None,
                  charge_mode: Optional[str] = None,
+                 # D175 (2): ON at EVERY covex-v6 rung, base included, as D170 specified. The
+                 # committed cells of rungs 0 to 2 stay reusable only if their decision digests
+                 # are unchanged, which is what d170_rule_proofs checks; none of our arms sent an
+                 # over-limit request, so the rule has nothing to change there.
+                 over_limit_infeasible: bool = True,
                  dry: bool = False, dry_margin: Optional[float] = None,
                  budget_ms: Optional[float] = None,
                  **rules_kw: Any) -> None:
-        self._rules = V2.V5Rules2Arm(name=name, **rules_kw)
+        self._rules = V2.V5Rules2Arm(name=name,
+                                     over_limit_infeasible=bool(over_limit_infeasible),
+                                     **rules_kw)
         self._base = self._rules
         self.name = name
         self.arm_version = V6STATE_VERSION
@@ -371,6 +379,7 @@ class V6StateArm:
                 warm_expressible=bool(warming), host_warm=host_warm,
                 tokens_to_build=u,
                 slice_tokens=getattr(self._rules, "slice_tokens", None))
+            CP.note_abandon(self.stats, d, float(getattr(cf, "budget_ms", 0.0)))
             self.stats["state_chosen_" + str(d.chosen)] += 1
             if d.delta is not None:
                 self.state_deltas.append(float(d.delta))
@@ -439,8 +448,10 @@ class V6RulesWorkOnlyArm(V2.V5Rules2Arm):
     live2_charge_mode = "work-only"
 
     def __init__(self, name: str = "covex-v6-rules-wo", *,
-                 charge_mode: str = "work-only", **kw: Any) -> None:
-        V2.V5Rules2Arm.__init__(self, name=name, **kw)
+                 charge_mode: str = "work-only",
+                 over_limit_infeasible: bool = True, **kw: Any) -> None:
+        V2.V5Rules2Arm.__init__(self, name=name,
+                                over_limit_infeasible=over_limit_infeasible, **kw)
         self.arm_version = "covex-v6-rules-%s-1.0" % ("wo" if charge_mode == "work-only"
                                                       else "uo")
         self.live2_d162_pricing = True

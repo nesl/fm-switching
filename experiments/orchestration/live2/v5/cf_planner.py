@@ -209,6 +209,31 @@ def episode_tokens_from_record(rec: Dict[str, Any]) -> Dict[str, Any]:
 # The decision record
 
 
+
+def note_abandon(stats: Any, d: Any, budget_ms: float) -> None:
+    """Record one planner decision and whether the TIME LIMIT abandoned it to base.
+
+    User ruling 2026-11-22: the limit is proved with OFF (so a digest is a property of the arm)
+    and RUN with ON (D99 (3): it is a real cost of the policy), and every live cell of rung 2 and
+    up must carry the count and fraction of decisions abandoned to base BY DECISION KIND, plus
+    the budget_ms in force, with any cell above 1 percent flagged.
+
+    WHY IT HAS TO BE COUNTED PER CELL AND NOT ASSUMED FROM A DRY RUN. `over_budget` compares
+    elapsed `perf_counter_ns` against `budget_ms`, so the rate is a property of the MACHINE as
+    much as of the policy: three dry runs of covex-v6-state on one cell gave 15,734, 15,954 and
+    15,935 decision rows with no code change. The H100's host CPU is about 2.2x slower than
+    flash on the committed policy benchmark (D115 (1)), so flash's rate is a LOWER BOUND on the
+    rate the live cells will show and must never be quoted for them.
+    """
+    kind = str(getattr(d, "kind", "unknown") or "unknown")
+    stats["cf_planner_decisions"] += 1
+    stats["cf_planner_decisions_" + kind] += 1
+    if bool(getattr(d, "timeout_fallback", False)):
+        stats["cf_timeout_abandons"] += 1
+        stats["cf_timeout_abandons_" + kind] += 1
+    stats["cf_budget_ms"] = float(budget_ms)
+
+
 @dataclass
 class Candidate:
     name: str

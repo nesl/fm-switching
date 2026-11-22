@@ -144,6 +144,91 @@ class Logs:
                 w.close()
 
 
+
+def _arm_stats(arm: Any) -> Optional[Dict[str, Any]]:
+    """Every Counter in the arm's delegation chain, prefixed where a name would collide.
+
+    WHY THIS IS NOT `arm.stats`. A v6 ladder arm wraps a V5Rules2Arm which holds the BASE
+    HybridArm as `_base`, and the base is where the recall decision is actually made. So
+    `arm.stats` reported the wrapper's own counters and NOTHING from the policy that decided:
+    every committed v5-rules-2 cell carries `warm_ahead_emitted` and `guard_active_epochs` and
+    carries NO `c2_throttle_periods`, `c2_throttled_dash` or `c5_dash_held`, although the base
+    counts all three on every period. That gap forced the rung-1 submission-gap diagnosis
+    (D174 (2)) through a reconstruction and a declared proxy, because the arm's own answer was
+    not in the file. An unread counter is the write-only-field failure wearing the other mask.
+
+    Collisions are prefixed by the holder's class rather than summed: `decisions` means a
+    different thing on a wrapper than on the base, and adding them would invent a number.
+    """
+    if arm is None:
+        return None
+    seen, chain, i = {id(arm)}, [arm], 0
+    while i < len(chain):
+        o = chain[i]
+        i += 1
+        for attr in ("_rules", "_base", "_scorer"):
+            nxt = getattr(o, attr, None)
+            if nxt is not None and id(nxt) not in seen:
+                seen.add(id(nxt))
+                chain.append(nxt)
+    out: Dict[str, Any] = {}
+    for o in chain:
+        st = getattr(o, "stats", None)
+        if not st:
+            continue
+        for k, v in dict(st).items():
+            if k in out and out[k] != v:
+                out["%s.%s" % (type(o).__name__, k)] = v
+            else:
+                out[k] = v
+    if out:
+        out.update(_planner_time_limit_summary(out) or {})
+    return out or None
+
+
+def _planner_time_limit_summary(st: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """The planner TIME-LIMIT abandonment rate, by decision kind, in every cell that plans.
+
+    User ruling 2026-11-22. Derived here rather than left to the reader because the quantity that
+    matters is a FRACTION and the counters are counts: a cell with 44,300 state decisions and 300
+    abandonments is fine, and one with 300 decisions and 300 abandonments is a cell whose planner
+    never ran. Without the denominator beside it the count reads the same either way.
+
+    Flagged above 1 percent per kind OR overall, which is the ruling's bar.
+    """
+    tot = int(st.get("cf_planner_decisions", 0) or 0)
+    if not tot:
+        return None
+    kinds = sorted(k[len("cf_planner_decisions_"):] for k in st
+                   if k.startswith("cf_planner_decisions_"))
+    by_kind: Dict[str, Any] = {}
+    flagged = []
+    for kind in kinds:
+        n = int(st.get("cf_planner_decisions_" + kind, 0) or 0)
+        a = int(st.get("cf_timeout_abandons_" + kind, 0) or 0)
+        f = (a / n) if n else None
+        by_kind[kind] = {"decisions": n, "abandoned_to_base": a,
+                         "fraction": (round(f, 6) if f is not None else None)}
+        if f is not None and f > 0.01:
+            flagged.append(kind)
+    a_tot = int(st.get("cf_timeout_abandons", 0) or 0)
+    f_tot = a_tot / tot
+    if f_tot > 0.01 and "ALL" not in flagged:
+        flagged.append("ALL")
+    return {"planner_time_limit": {
+        "budget_ms": st.get("cf_budget_ms"),
+        "decisions": tot, "abandoned_to_base": a_tot, "fraction": round(f_tot, 6),
+        "by_kind": by_kind,
+        "over_1_percent": flagged,
+        "flag": bool(flagged),
+        "_note": ("cf_instrument.over_budget is a WALL-CLOCK limit (D99 (3), D151 (5)), so this "
+                  "rate is a property of the host CPU as well as of the policy. The H100 host is "
+                  "about 2.2x slower than flash on the committed policy benchmark (D115 (1)), so "
+                  "a rate measured on flash is a LOWER BOUND for a live cell and must not be "
+                  "quoted for one. Proofs run with the limit OFF so a decision digest is a "
+                  "property of the arm; live cells run with it ON because it is a real cost")}}
+
+
 class Live2Coordinator:
     def __init__(self, arm, backend: Optional[Live2Backend], events: List[Dict[str, Any]],
                  *, gpu_kv_tokens: int, host_tier_gib: float, host_tier_tokens: int,
@@ -1494,7 +1579,7 @@ class Live2Coordinator:
             n_errors=len(self.errors), first_errors=self.errors[:3],
             mu_time_average=(self.arm.mu_time_average()
                              if hasattr(self.arm, "mu_time_average") else None),
-            arm_stats=getattr(self.arm, "stats", None),
+            arm_stats=_arm_stats(self.arm),
             dashcam_format=self.dashcam_format,
             epg=self._epg_summary(),
         )

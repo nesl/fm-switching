@@ -1,0 +1,102 @@
+{
+ "_what": "D170 over-limit rule proofs",
+ "limit_tokens": 32768,
+ "P0_positive_control": {
+  "_claim": "a constructed over-limit query on a WARM prefix, which the time test would admit, is rejected by the rule and only by the rule",
+  "limit_tokens": 32768,
+  "query_tokens": 32769,
+  "readiness": "GPU-WARM",
+  "arms": {
+   "covex-v6-fair": {
+    "rule_on": true,
+    "decisions": [
+     [
+      "probe-over",
+      "REJECT"
+     ]
+    ],
+    "over_limit_infeasible_count": 1,
+    "counter_found_on": [
+     "HybridArm"
+    ]
+   },
+   "covex-v6-fair-nolimit": {
+    "rule_on": false,
+    "decisions": [
+     [
+      "probe-over",
+      "CLOUD"
+     ]
+    ],
+    "over_limit_infeasible_count": 0,
+    "counter_found_on": []
+   }
+  },
+  "verdict": "PASS: the rule declines it (1 counted) and the ablation does not (0)"
+ },
+ "P3_committed_arms_unchanged": {
+  "_claim": "the rule is off at rungs 0 to 2 and on every baseline, and a committed arm's decisions are byte-identical across this change, with the BEFORE side taken from git",
+  "flags": {
+   "covex-v6-base": true,
+   "covex-v6-rules": true,
+   "covex-v6-state": true,
+   "covex-v6-state-uo": true,
+   "v5-rules-2": false,
+   "v5-rules": false,
+   "hybrid-F-lhreq-noc3": false,
+   "b7-edf-feasibility": false,
+   "covex-v6-fair": true,
+   "covex-v6": true
+  },
+  "off_on_the_old_names_and_baselines": true,
+  "on_at_every_covex_v6_rung": true,
+  "ruling": "D175 (2)",
+  "before_after": [
+   {
+    "arm": "v5-rules-2",
+    "before_commit": "b1a4392a",
+    "before": {
+     "digest": "0a3ae9e2b6d79373",
+     "rows": 3056
+    },
+    "after": {
+     "digest": "0a3ae9e2b6d79373",
+     "rows": 3056
+    },
+    "identical": true
+   },
+   {
+    "arm": "b7-edf-feasibility",
+    "before_commit": "b1a4392a",
+    "before": {
+     "digest": "593848e69d9a4302",
+     "rows": 3025
+    },
+    "after": {
+     "digest": "593848e69d9a4302",
+     "rows": 3025
+    },
+    "identical": true
+   }
+  ],
+  "cell": {
+   "ratio": "40:40:20",
+   "robot_question_set": "lh_req",
+   "ss_question_set": "ss2",
+   "dashcam_format": "epg",
+   "robot_upload": "per-frame",
+   "robot_reask_mean_s": 30.0,
+   "seed": 4,
+   "n": 8,
+   "run_s": 600.0
+  },
+  "verdict": "PASS: off on 4 old committed names and baselines, on at all 6 covex-v6 rungs, and 2 arm(s) byte-identical across the change"
+ },
+ "P1_P2_delegated": {
+  "_claim": "the rule changes no decision at rungs 0 to 2, and is invisible where no question reaches the limit",
+  "delegated_to": "results/orchestration/live2/frozen_test/d175_digest_proofs.json",
+  "why": "a digest comparison is valid only one cell per process; this script runs several cells in one process, which is the polluted register",
+  "verdict": "PASS: proved under the correct protocol in d175_digest_proofs.json"
+ },
+ "ALL_PASS": true
+}

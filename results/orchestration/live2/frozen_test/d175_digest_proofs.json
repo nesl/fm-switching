@@ -1,0 +1,120 @@
+{
+ "_what": "D175 (2): the D170 over-limit rule changes no decision at rungs 0 to 2",
+ "_protocol": "one dry cell per process; a second run inside one process does not reproduce the first, which is an OPEN defect recorded separately",
+ "_why_seed_7": "the 18 over-limit recall questions exist only at seed 7 under rq30 re-asks (34,051 to 52,861 tokens); seeds 4 to 6 top out near 26,900, so a null there is UNEXERCISED and proves nothing about the rule",
+ "cases": [
+  {
+   "arm": "covex-v6-base",
+   "seed": 7,
+   "posted_workload": true,
+   "rule_off": {
+    "arm": "covex-v6-base",
+    "rule": "off",
+    "seed": 7,
+    "posted": true,
+    "digest": "cdfafa48342b7e6a",
+    "rows": 12157,
+    "state_decisions": null,
+    "over_limit_infeasible": null,
+    "cf_timeout_abandons": null
+   },
+   "rule_on": {
+    "arm": "covex-v6-base",
+    "rule": "on",
+    "seed": 7,
+    "posted": true,
+    "digest": "cdfafa48342b7e6a",
+    "rows": 12157,
+    "state_decisions": null,
+    "over_limit_infeasible": 18,
+    "cf_timeout_abandons": null
+   },
+   "identical": true
+  },
+  {
+   "arm": "covex-v6-rules",
+   "seed": 7,
+   "posted_workload": true,
+   "rule_off": {
+    "arm": "covex-v6-rules",
+    "rule": "off",
+    "seed": 7,
+    "posted": true,
+    "digest": "a3c000f4ae2f37f5",
+    "rows": 12179,
+    "state_decisions": null,
+    "over_limit_infeasible": null,
+    "cf_timeout_abandons": null
+   },
+   "rule_on": {
+    "arm": "covex-v6-rules",
+    "rule": "on",
+    "seed": 7,
+    "posted": true,
+    "digest": "a3c000f4ae2f37f5",
+    "rows": 12179,
+    "state_decisions": null,
+    "over_limit_infeasible": null,
+    "cf_timeout_abandons": null
+   },
+   "identical": true
+  },
+  {
+   "arm": "covex-v6-state",
+   "seed": 7,
+   "posted_workload": true,
+   "rule_off": {
+    "arm": "covex-v6-state",
+    "rule": "off",
+    "seed": 7,
+    "posted": true,
+    "digest": "6a109870301df3e5",
+    "rows": 12734,
+    "state_decisions": 58543,
+    "over_limit_infeasible": null,
+    "cf_timeout_abandons": null
+   },
+   "rule_on": {
+    "arm": "covex-v6-state",
+    "rule": "on",
+    "seed": 7,
+    "posted": true,
+    "digest": "6a109870301df3e5",
+    "rows": 12734,
+    "state_decisions": 58543,
+    "over_limit_infeasible": null,
+    "cf_timeout_abandons": null
+   },
+   "identical": true
+  },
+  {
+   "arm": "covex-v6-rules",
+   "seed": 4,
+   "posted_workload": false,
+   "rule_off": {
+    "arm": "covex-v6-rules",
+    "rule": "off",
+    "seed": 4,
+    "posted": false,
+    "digest": "ae997d6af16a2ef4",
+    "rows": 17050,
+    "state_decisions": null,
+    "over_limit_infeasible": null,
+    "cf_timeout_abandons": null
+   },
+   "rule_on": {
+    "arm": "covex-v6-rules",
+    "rule": "on",
+    "seed": 4,
+    "posted": false,
+    "digest": "ae997d6af16a2ef4",
+    "rows": 17050,
+    "state_decisions": null,
+    "over_limit_infeasible": null,
+    "cf_timeout_abandons": null
+   },
+   "identical": true
+  }
+ ],
+ "verdict": "PASS: the rule changes no decision on any of the 4 cases, so the committed rung 0 to 2 cells stay reusable under D172 (2)"
+}

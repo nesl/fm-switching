@@ -158,11 +158,16 @@ def register() -> None:
     def _alias(v6_name: str, target: str) -> None:
         if target in HA.CONFIGS:
             kw = dict(HA.CONFIGS[target])
-            A.ARMS[v6_name] = (lambda n=v6_name, k=kw: HA.HybridArm(name=n, **k))
+            # D175 (2): the over-limit rule is ON at every covex-v6 rung, the BASE included. The
+            # old name keeps it off, so the committed cells keep meaning what they meant, and the
+            # alias stays an alias only if the digests agree, which is proved not assumed.
+            A.ARMS[v6_name] = (lambda n=v6_name, k=kw: HA.HybridArm(
+                name=n, **dict({"over_limit_infeasible": True}, **k)))
             return
         if target == "v5-rules-2":
             import arms_v5rules2 as _R2
-            A.ARMS[v6_name] = (lambda n=v6_name, **kw: _R2.V5Rules2Arm(name=n, **kw))
+            A.ARMS[v6_name] = (lambda n=v6_name, **kw: _R2.V5Rules2Arm(
+                name=n, **dict({"over_limit_infeasible": True}, **kw)))
             return
         if target == "covex-v6-state":
             import arms_v6state as _VS
@@ -174,7 +179,11 @@ def register() -> None:
             return
         if target == "v5-full":
             import arms_v5full as _VF
-            A.ARMS[v6_name] = (lambda n=v6_name, **kw: _VF.V5FullArm(name=n, **kw))
+            # D170 IS ON AT RUNG 4, as it is at rung 3: covex-v6 has no committed cells, so the
+            # rule costs no provenance here. `v5-full` keeps its own registry entry untouched;
+            # this alias is the rung, and the rung carries the rule.
+            A.ARMS[v6_name] = (lambda n=v6_name, **kw: _VF.V5FullArm(
+                name=n, **dict({"over_limit_infeasible": True}, **kw)))
             return
         raise KeyError("no alias construction is defined for target %r; an alias must name the "
                        "CLASS it shares with the committed arm, never go through a registry "
