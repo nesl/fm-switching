@@ -53,6 +53,7 @@ from interface import Budget, check_fairness                            # noqa: 
 
 import bodies as B                                                      # noqa: E402
 import offload_policy as OP                                             # noqa: E402
+import d162_price as DP                                                 # noqa: E402
 import touch_policy as TP                                               # noqa: E402
 import cachekeys as CK                                                  # noqa: E402
 import cstate as CS                                                     # noqa: E402
@@ -166,6 +167,20 @@ class Live2Coordinator:
         self._touch_requests = TP.arm_enables(arm)
         # D160: price warm and reload by predicted cache state, not by slice size.
         self._state_priced_costs = TP.arm_enables_state_pricing(arm)
+        # ONE PRICE SOURCE (user ruling, 2026-11-21). When the arm declares it, EVERY request this
+        # coordinator charges is priced by the D162 predicted first-token time, the same model and
+        # the same arithmetic the planner uses for a candidate's harm. Arm-scoped, so no baseline's
+        # charge moves. See live2/d162_price.py for why the old charge was wrong-shaped rather
+        # than merely conservative.
+        self._d162_pricing = DP.arm_enables(arm)
+        if self._d162_pricing:
+            DP.assert_no_drift()
+        # the third term of the price: uncached tokens the engine is already working on. Tracked
+        # here because only the coordinator knows what is in flight, and it is what makes the
+        # planner's harm and this charge the same arithmetic rather than two similar ones.
+        self._uncached_in_flight = 0
+        self._uncached_pending: Dict[str, int] = {}
+        self._uncached_last_charged = 0
         # D150 PATCH 2 belief correction, ARM-SCOPED like every other v5 switch (D172 rung 2).
         # It was a process-wide env switch, so turning it on for one arm turned it on for every
         # arm in the same run and made the cells incomparable, which is the thing the env
@@ -702,14 +717,22 @@ class Live2Coordinator:
             frames = [dict(frame_ref=r, path=(None if r in confirmed else paths[r]))
                       for r in refs]
             est_tokens = B.epg_prompt_tokens(len(refs))
-            cost = B.epg_prompt_tokens(n_new) / C.PREFILL_TOK_S["32BI"]
+            _uncached = B.epg_prompt_tokens(n_new)
+            cost = (DP.price_gpu_s(_uncached, self._uncached_in_flight)
+                    if self._d162_pricing else _uncached / C.PREFILL_TOK_S["32BI"])
         else:
             est_tokens = 378
-            cost = C.episodic_gpu_s("32BI", self.st.devices[device_id].frame_count)
+            _uncached = est_tokens
+            cost = (DP.price_gpu_s(_uncached, self._uncached_in_flight)
+                    if self._d162_pricing
+                    else C.episodic_gpu_s("32BI", self.st.devices[device_id].frame_count))
         if not self.st.budget.can_spend(cost):
             self.counts["budget_refusal"] += 1
+            self.counts["budget_refusal_monitor"] += 1
             return
         self.st.budget.spend(cost)
+        self._uncached_in_flight += int(_uncached)
+        self._uncached_last_charged = int(_uncached)
         o.state = "in_flight"
         did = self._log_decision(t, "release_monitor", [o.opp_id], latency_ms=dt_ms,
                                  preds=preds, mix=mix, key="mon:" + device_id)
@@ -834,7 +857,16 @@ class Live2Coordinator:
             self.counts["touch_refused"] += 1
             self.counts["touch_refused_no_confirmed_prefix"] += 1
             return None
-        self.st.budget.spend(d["price_gpu_s"])
+        _touch_price = (DP.price_gpu_s(TP.TOUCH_UNCACHED_TOKENS, self._uncached_in_flight)
+                        if self._d162_pricing else d["price_gpu_s"])
+        if self._d162_pricing and not self.st.budget.can_spend(_touch_price):
+            self.counts["touch_refused"] += 1
+            self.counts["touch_refused_budget"] += 1
+            return None
+        self.st.budget.spend(_touch_price)
+        self._uncached_in_flight += int(TP.TOUCH_UNCACHED_TOKENS)
+        self._uncached_last_charged = int(TP.TOUCH_UNCACHED_TOKENS)
+        self.counts["touch_price_milli_sum"] += int(round(_touch_price * 1000.0))
         did = self._log_decision(t, "touch", [], latency_ms=dt_ms, preds=preds, mix=mix,
                                  key="touch:" + s.session_id, session_id=s.session_id,
                                  piece_tokens=0)
@@ -888,10 +920,16 @@ class Live2Coordinator:
             self.counts["state_priced_build_" + _pr["predicted_tier"]] += 1
         else:
             cost = C.recall_gpu_s(max(piece, 1), "COLD")
+        if self._d162_pricing:
+            # a build prefills exactly its piece, so the piece IS the uncached count
+            cost = DP.price_gpu_s(max(int(piece), 1), self._uncached_in_flight)
         if not self.st.budget.can_spend(cost):
             self.counts["budget_refusal"] += 1
+            self.counts["budget_refusal_build"] += 1
             return None
         self.st.budget.spend(cost)
+        self._uncached_in_flight += max(int(piece), 1)
+        self._uncached_last_charged = max(int(piece), 1)
         kind = "piece" if slice_tokens is not None else "whole"
         did = self._log_decision(t, "release_piece" if kind == "piece" else "release_whole",
                                  [], piece_tokens=int(piece), latency_ms=dt_ms, preds=preds,
@@ -921,8 +959,15 @@ class Live2Coordinator:
         # as a host reload. Both helpers are committed in `cstate.py`.
         tokens = s.tokens_for_representation(getattr(o, "requested_representation", None))
         cost = C.recall_gpu_s(tokens, s.residency_readiness())
+        # UNCACHED, not tokens: a warm recall re-presents a prefix the engine already holds, and
+        # charging it for the whole history is the same wrong shape the touch charge had.
+        _uncached = (int(tokens) if s.residency_readiness() == "COLD"
+                     else max(int(tokens) - int(getattr(s, "built_tokens", 0) or 0), 0))
+        if self._d162_pricing:
+            cost = DP.price_gpu_s(_uncached, self._uncached_in_flight)
         if not self.st.budget.can_spend(cost):
             self.counts["budget_refusal"] += 1
+            self.counts["budget_refusal_recall"] += 1
             o.state = "declined"
             self.answers.append(dict(opportunity_id=o.opp_id, kind="recall",
                                      device_id=o.device_id, decision="DEVICE-on-refusal",
@@ -930,6 +975,8 @@ class Live2Coordinator:
                                      served_by="device", on_time=None))
             return
         self.st.budget.spend(cost)
+        self._uncached_in_flight += int(_uncached)
+        self._uncached_last_charged = int(_uncached)
         o.state = "in_flight"
         did = self._log_decision(t, "release_recall", [o.opp_id], latency_ms=dt_ms, preds=preds,
                                  mix=mix, key="rc:" + (o.session_id or ""),
@@ -989,6 +1036,13 @@ class Live2Coordinator:
                 dashcam_format: str = "oneframe") -> str:
         self.n_req += 1
         rid = f"r{self.n_req}"
+        # ONE PRICE SOURCE bookkeeping: the charge site has just added its PREDICTED uncached
+        # count to `_uncached_in_flight`, and the completion must remove THE SAME NUMBER. Keying
+        # it on the request id is what makes that exact. Decrementing by the engine's own
+        # `prompt - cached` instead would mix a predicted increment with a measured decrement and
+        # the in-flight total would drift, silently inflating every later price.
+        if self._d162_pricing:
+            self._uncached_pending[rid] = int(self._uncached_last_charged)
         d = self.st.devices[device_id]
         # THE TRUE SUBMISSION STAMP (StudyLIVE2-harness addendum (a), from flash's branch). A
         # decision that takes 100 ms puts its requests on the wire 100 ms after the epoch it
@@ -1184,6 +1238,9 @@ class Live2Coordinator:
                     device_wait_s=_devw,
                     device_on_time=(None if (_dl is None or _devw is None or _t_opp is None)
                                     else bool(_t_opp + _devw <= _dl + 1e-9))))
+            if self._d162_pricing:
+                _u = self._uncached_pending.pop(sub.request_id, 0)
+                self._uncached_in_flight = max(self._uncached_in_flight - int(_u), 0)
             self._settle(sub, first_s, done_s, path, t, ct, self._score_of(sub, r),
                          http_status=r.get("http_status"))
             self.counts["completed_" + sub.kind] += 1

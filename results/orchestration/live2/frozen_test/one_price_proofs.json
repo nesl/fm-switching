@@ -1,0 +1,167 @@
+{
+ "_what": "ONE PRICE SOURCE proofs",
+ "price": {
+  "form": "first_token_s = 0.067798 + 0.00018243 * uncached + 0.00015358 * queued_uncached_ahead",
+  "source": "cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)",
+  "drift_check": {
+   "agrees": true,
+   "mismatches": [],
+   "gate_values": {
+    "intercept": 0.06779759059832724,
+    "per_uncached_token": 0.0001824312597782467,
+    "per_queue_token": 0.0001535807289338535
+   }
+  },
+  "replaces": "costs.recall_gpu_s(tokens, tier), StudyRH5 Part A isolated reload TTFT, which scales with the PREFIX and so overcharged a warm touch 3.4x at a 7k prefix rising to 9.5x at 21k",
+  "read_by": [
+   "coordinator budget charge (every request of a covex-v6 arm)",
+   "cf_planner candidate harm, via cf_objective.harm_warm_from_queue_delay"
+  ]
+ },
+ "P0_positive_control": {
+  "_claim": "the price varies with both of its inputs",
+  "touch_idle": 0.070534,
+  "cold_recall_11k": 2.074541,
+  "varies_with_uncached": true,
+  "varies_with_queue_ahead": true,
+  "verdict": "PASS: the price is not a constant"
+ },
+ "P1_planner_equals_coordinator": {
+  "_claim": "planner and coordinator prices are equal per request",
+  "rows": [
+   {
+    "case": "touch on an 11k warm prefix",
+    "uncached": 15,
+    "queued_ahead": 0,
+    "coordinator_charge_gpu_s": 0.070534059,
+    "planner_first_token_s": 0.070534059,
+    "equal": true,
+    "old_reload_proxy_gpu_s": 0.382,
+    "harm_coefficient_is_the_price_source": true
+   },
+   {
+    "case": "touch, 3,000 ahead",
+    "uncached": 15,
+    "queued_ahead": 3000,
+    "coordinator_charge_gpu_s": 0.531276246,
+    "planner_first_token_s": 0.531276246,
+    "equal": true,
+    "old_reload_proxy_gpu_s": 0.382,
+    "harm_coefficient_is_the_price_source": true
+   },
+   {
+    "case": "touch on a 21k warm prefix",
+    "uncached": 15,
+    "queued_ahead": 1000,
+    "coordinator_charge_gpu_s": 0.224114788,
+    "planner_first_token_s": 0.224114788,
+    "equal": true,
+    "old_reload_proxy_gpu_s": 0.382,
+    "harm_coefficient_is_the_price_source": true
+   },
+   {
+    "case": "warm recall, 200 new",
+    "uncached": 200,
+    "queued_ahead": 0,
+    "coordinator_charge_gpu_s": 0.104283843,
+    "planner_first_token_s": 0.104283843,
+    "equal": true,
+    "old_reload_proxy_gpu_s": null,
+    "harm_coefficient_is_the_price_source": true
+   },
+   {
+    "case": "warm recall, 200 new, 5,000 ahead",
+    "uncached": 200,
+    "queued_ahead": 5000,
+    "coordinator_charge_gpu_s": 0.872187487,
+    "planner_first_token_s": 0.872187487,
+    "equal": true,
+    "old_reload_proxy_gpu_s": null,
+    "harm_coefficient_is_the_price_source": true
+   },
+   {
+    "case": "cold recall 11k",
+    "uncached": 11000,
+    "queued_ahead": 0,
+    "coordinator_charge_gpu_s": 2.074541448,
+    "planner_first_token_s": 2.074541448,
+    "equal": true,
+    "old_reload_proxy_gpu_s": null,
+    "harm_coefficient_is_the_price_source": true
+   },
+   {
+    "case": "build piece 1024",
+    "uncached": 1024,
+    "queued_ahead": 2000,
+    "coordinator_charge_gpu_s": 0.561768658,
+    "planner_first_token_s": 0.561768658,
+    "equal": true,
+    "old_reload_proxy_gpu_s": null,
+    "harm_coefficient_is_the_price_source": true
+   },
+   {
+    "case": "dashcam append, 90 new",
+    "uncached": 90,
+    "queued_ahead": 400,
+    "coordinator_charge_gpu_s": 0.145648696,
+    "planner_first_token_s": 0.145648696,
+    "equal": true,
+    "old_reload_proxy_gpu_s": null,
+    "harm_coefficient_is_the_price_source": true
+   }
+  ],
+  "all_equal": true,
+  "coefficients_shared": true,
+  "verdict": "PASS: identical on all 8 constructed requests, and the planner's harm coefficient IS the price source rather than a copy of it"
+ },
+ "P2_budget_vs_gpu_busy": {
+  "_claim": "the budget must not bind artificially (D102)",
+  "cell": "covex-v6-state, dry, 8 devices, 600 s, seed 4",
+  "reference_v5_rules_2_decision_rows": 4376,
+  "rows": [
+   {
+    "charge_mode": "first-token",
+    "budget_refusal": 10612,
+    "budget_refusal_monitor": 10593,
+    "budget_refusal_build": 17,
+    "budget_refusal_recall": 2,
+    "state_decisions": 0,
+    "decision_rows": 2252
+   },
+   {
+    "charge_mode": "work-only",
+    "budget_refusal": 288,
+    "budget_refusal_monitor": 288,
+    "budget_refusal_build": 0,
+    "budget_refusal_recall": 0,
+    "state_decisions": 2038,
+    "decision_rows": 4318
+   }
+  ],
+  "diagnosis": "the THIRD TERM is the problem and it is a double count. per_queue * queued_ahead is the LATENCY this request SUFFERS because other requests' work is in front of it, not GPU time this request consumes. Charging it bills the same GPU-seconds once per request queued behind them: with k requests of u tokens in flight the queue charge grows as u^2 k^2 / 2 while the real work grows linearly. On the planner side the same term is CORRECT, because there it prices the delay a candidate IMPOSES on others, which is exactly what it measures",
+  "intercept_is_not_the_driver": "charging the 0.0678 s intercept to every request makes a 1-frame dashcam append 2.0x dearer and a 21-frame one 1.1x dearer, which alone would not starve anything",
+  "verdict": "FAIL: under the ruling's formula as written the budget binds ARTIFICIALLY. 10612 refusals (10593 dashcam) against 288 under work-only, and plan_state reaches 0 decisions against 2038. The arm is MORE starved than it was under the old touch price, for a different reason. The rerun is HELD"
+ },
+ "P3_baselines_unchanged": {
+  "_claim": "no committed arm declares the pricing switch",
+  "arms_with_d162_pricing": [
+   "covex-v6-fair",
+   "covex-v6-fair-nofeed",
+   "covex-v6-fair-novalue",
+   "covex-v6-fair-off",
+   "covex-v6-state",
+   "covex-v6-state-nobelief",
+   "covex-v6-state-noprice",
+   "covex-v6-state-noretain",
+   "covex-v6-state-notouch"
+  ],
+  "only_covex_v6": true,
+  "verdict": "PASS: only covex-v6 arms price this way, so every baseline's charge is the committed one"
+ },
+ "P4_no_drift": {
+  "checked": true,
+  "agrees": true,
+  "verdict": "PASS: coefficients equal the committed gate file"
+ },
+ "ALL_PASS": false
+}

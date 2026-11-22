@@ -63,6 +63,7 @@ for _p in (str(_Path(__file__).resolve().parents[1] / "baselines"),
 from interface import Action, Observation, SessionAction                       # noqa: E402
 
 import arms_v5rules2 as V2                                                     # noqa: E402
+from touch_policy import TOUCH_UNCACHED_TOKENS as TP_TOUCH_UNCACHED            # noqa: E402
 
 V6STATE_VERSION = "covex-v6-state-1.0"
 V6STATE_RULES_BASE = "v5-rules-2"
@@ -90,6 +91,7 @@ class V6StateArm:
                  touch_requests: Optional[bool] = None,
                  state_priced_costs: Optional[bool] = None,
                  belief_apply: Optional[bool] = None,
+                 d162_pricing: Optional[bool] = None,
                  dry: bool = False, dry_margin: Optional[float] = None,
                  budget_ms: Optional[float] = None,
                  **rules_kw: Any) -> None:
@@ -105,6 +107,7 @@ class V6StateArm:
         self.live2_touch_requests = _d(touch_requests)
         self.live2_state_priced_costs = _d(state_priced_costs)
         self.live2_belief_apply = _d(belief_apply)
+        self.live2_d162_pricing = _d(d162_pricing)
         self.dry = bool(dry)
         self.dry_margin = dry_margin
         self._cf = None
@@ -162,6 +165,10 @@ class V6StateArm:
                      offload_controls=self.live2_offload_controls,
                      touch_requests=self.live2_touch_requests,
                      belief_apply=self.live2_belief_apply,
+                     d162_pricing=self.live2_d162_pricing,
+                     one_price_source=("D162 predicted first token, read identically by the "
+                                       "planner's TOUCH harm and the coordinator's budget "
+                                       "charge (user ruling, 2026-11-21)"),
                      harm_warm=("COMPUTED from the D162 model's per_queue_token "
                                 "coefficient per research/prereg_harm_warm_d172.md; never a "
                                 "declared grid value. Capped at the healthy-regime bound with "
@@ -339,6 +346,8 @@ class V6StateArm:
                 next_question_s=float(q["next_question_s"]),
                 p_on_time_warm=float(p["warm"]), p_on_time_cold=float(p["cold"]),
                 harm_warm=hw,
+                # the touch's OWN harm, from the same price source the coordinator charges
+                harm_touch=self._harm_warm(obs, sid, TP_TOUCH_UNCACHED),
                 warm_expressible=bool(warming), host_warm=host_warm,
                 tokens_to_build=u,
                 slice_tokens=getattr(self._rules, "slice_tokens", None))

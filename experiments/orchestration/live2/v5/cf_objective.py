@@ -391,9 +391,17 @@ def harm_to_others(before: "CC.QueuePlan", after: "CC.QueuePlan", *, candidate_r
 # retyped. It is `first_token.per_queue_token`, NOT `per_uncached_token` (0.00018243, 19 percent
 # larger): only the queued-ahead one answers what work placed AHEAD of a request costs THAT
 # request, which is what a background warm does.
-QUEUE_TOKEN_S = 0.0001535807289338535
-QUEUE_TOKEN_S_SOURCE = ("results/orchestration/live2/frozen_test/cost_model_gate_d162.json :: "
-                        "model.first_token.per_queue_token (gate commit 68a2b47)")
+# ONE PRICE SOURCE (user ruling, 2026-11-21): imported, not re-declared. Two modules holding the
+# same literal is how "identical in the planner and in the coordinator" stops being true without
+# anyone editing either number.
+try:
+    import d162_price as _DP                                                   # noqa: E402
+    QUEUE_TOKEN_S = _DP.PER_QUEUE_S
+    QUEUE_TOKEN_S_SOURCE = "live2/d162_price.py::PER_QUEUE_S (" + _DP.SOURCE + ")"
+except Exception:                                                              # noqa: BLE001
+    QUEUE_TOKEN_S = 0.0001535807289338535
+    QUEUE_TOKEN_S_SOURCE = ("results/orchestration/live2/frozen_test/cost_model_gate_d162.json :: "
+                            "model.first_token.per_queue_token (gate commit 68a2b47)")
 HEALTHY_FIRST_TOKEN_BOUND_S = 2.781          # D160 (2); the cap, never silent
 
 

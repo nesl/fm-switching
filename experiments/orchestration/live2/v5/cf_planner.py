@@ -529,7 +529,8 @@ class Counterfactual:
                    p_question: float, next_question_s: float,
                    accuracy: Optional[float] = None,
                    p_on_time_warm: float, p_on_time_cold: float,
-                   harm_warm: float = 0.0, warm_expressible: Optional[bool] = None,
+                   harm_warm: float = 0.0, harm_touch: float = 0.0,
+                   warm_expressible: Optional[bool] = None,
                    host_warm: bool = False, slice_tokens: Optional[int] = None,
                    tokens_to_build: int = 0) -> Decision:
         """Warm, touch, keep, reload, hold back or slice (D150's four levers plus keep and reload).
@@ -568,11 +569,25 @@ class Counterfactual:
                                                "action space (engine_actions section 3): the "
                                                "candidate is NOT scored, so the harness blocker "
                                                "is never read as a policy decision")}))
-            # TOUCH keeps an existing warm state: no rebuild, so no harm, and its gain is the
-            # survival it buys, which the caller supplies as p_on_time_warm against cold.
-            cands.append(Candidate("TOUCH", value=gain(p_on_time_warm, p_on_time_cold, 0.0),
-                                   gain=gain(p_on_time_warm, p_on_time_cold, 0.0), harm=0.0,
-                                   scored=True, detail={"lever": "KEEP_GPU_WARM, not a pin"}))
+            # TOUCH COSTS SOMETHING AND THIS LINE USED TO SAY IT DID NOT. Its old comment read
+            # "no rebuild, so no harm", which is true about REBUILD harm and is not the cost the
+            # coordinator charges: a touch is a real request that occupies the engine ahead of
+            # everything queued behind it. Scoring it at harm = 0.0 while the coordinator spent
+            # up to 0.67 GPU-s on each one is CLAUDE.md check 7's general shape, a comparator
+            # planning at one price while charged another, and in covex-v6-state s4 it produced
+            # 1,438 touches, 12,824 budget refusals and a dashcam collapse from 6,167 on-time to
+            # 1,786. The caller now supplies `harm_touch` from the SAME D162 price source the
+            # coordinator charges (user ruling, 2026-11-21).
+            cands.append(Candidate("TOUCH",
+                                   value=gain(p_on_time_warm, p_on_time_cold, harm_touch),
+                                   gain=gain(p_on_time_warm, p_on_time_cold, 0.0),
+                                   harm=float(harm_touch),
+                                   scored=True,
+                                   detail={"lever": "KEEP_GPU_WARM, not a pin",
+                                           "harm_source": ("cf_objective.harm_warm_from_queue_"
+                                                           "delay on the touch's own uncached "
+                                                           "tokens; the coordinator charges the "
+                                                           "same model")}))
             cands.append(Candidate("KEEP", value=0.0, gain=0.0, harm=0.0, scored=True,
                                    detail={"lever": "do nothing; the reference option"}))
             cands.append(Candidate("RELOAD", value=(gain(p_on_time_warm, p_on_time_cold, harm_warm)
