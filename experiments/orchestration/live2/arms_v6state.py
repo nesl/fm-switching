@@ -409,6 +409,44 @@ class V6StateArm:
         return act
 
 
+class V6RulesWorkOnlyArm(V2.V5Rules2Arm):
+    """covex-v6-rules-wo: rung 1 with CORRECT BUDGET CHARGING and nothing else (D173 (2)).
+
+    D173 (2) separates two things that had been one. Charging a request what the engine will
+    actually do is a HARNESS correctness property and belongs at EVERY rung; pricing a DECISION by
+    its predicted cache state is a POLICY component and stays covex-v6-state's.
+
+    So this arm is `v5-rules-2` with the D162 work-only charge and NO state-aware decision
+    pricing, no touch, no plan_state, no per-type retention, no belief-apply. It exists because
+    v5-rules-2 charged every warm build `recall_gpu_s(piece, "COLD")` whatever the session's
+    predicted state was, which overcharges a build onto a warm prefix and is what the "warming
+    fails dashcam" finding was measured under. Those cells are labelled budget-mispriced.
+
+    IT IS A NEW ARM AND NOT AN ALIAS. `covex-v6-rules` remains byte-identical to `v5-rules-2` by
+    decision digest, because a committed cell must keep meaning what it meant. This is the
+    repriced sibling, under its own name, so the two are comparable rather than confusable.
+    """
+
+    live2_d162_pricing = True
+
+    def __init__(self, name: str = "covex-v6-rules-wo", **kw: Any) -> None:
+        V2.V5Rules2Arm.__init__(self, name=name, **kw)
+        self.arm_version = "covex-v6-rules-wo-1.0"
+        self.live2_d162_pricing = True
+        self.live2_source = (self.live2_source
+                             + "; budget charged by live2/d162_price work-only (D173 (1), (2))")
+
+    def live2_describe(self) -> Dict[str, Any]:
+        d = dict(V2.V5Rules2Arm.live2_describe(self))
+        d.update(arm=self.name, arm_version=self.arm_version,
+                 rung="covex-v6-rules with corrected budget charging (D173 (2))",
+                 budget_charge=("live2/d162_price work-only: intercept + per-uncached, no queue "
+                                "term; the queue term is used only in the planner's harm"),
+                 state_aware_decision_pricing=False,
+                 source=self.live2_source)
+        return d
+
+
 V6STATE_ARMS = {
     "covex-v6-state": lambda **kw: V6StateArm(name="covex-v6-state", **kw),
     # CLAUDE.md Step 4 negative control: the added channel off must collapse to covex-v6-rules
@@ -429,6 +467,12 @@ V6STATE_ARMS = {
     # name to run. It must NOT be put in a cell list until the reprice is ruled.
     "covex-v6-state-d162": lambda **kw: V6StateArm(name="covex-v6-state-d162",
                                                    d162_pricing=True, **kw),
+    # D173 (2) rerun arms. DISTINCT NAMES, because the driver never reruns a cell whose name
+    # already exists valid, and because the charge must be enabled BY THE ARM: a tag suffix
+    # carries no flags.
+    "covex-v6-state-wo": lambda **kw: V6StateArm(name="covex-v6-state-wo",
+                                                 d162_pricing=True, **kw),
+    "covex-v6-rules-wo": lambda **kw: V6RulesWorkOnlyArm(name="covex-v6-rules-wo", **kw),
 }
 
 

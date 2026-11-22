@@ -1,0 +1,96 @@
+{
+ "_what": "D173 (4): how much of the v5-rules lineage's dashcam and single-shot loss is budget refusal",
+ "answer": "NONE OF IT. budget_refusal is absent, i.e. ZERO, in every committed v5-rules and v5-rules-2 cell and in covex-v6-state s5",
+ "census": {
+  "_source": "each cell's own coordinator_result.json counts, read locally",
+  "rows": [
+   {
+    "cell": "hybrid-F-lhreq-noc3 s4 (covex-v6-base)",
+    "monitors_submitted": 9745,
+    "recalls": 412,
+    "pieces": 0,
+    "budget_refusal": 0
+   },
+   {
+    "cell": "hybrid-F-lhreq-noc3 s5",
+    "monitors_submitted": 9812,
+    "recalls": 402,
+    "pieces": 0,
+    "budget_refusal": 0
+   },
+   {
+    "cell": "v5-rules-2 s4 (covex-v6-rules)",
+    "monitors_submitted": 4829,
+    "recalls": 451,
+    "pieces": 156,
+    "budget_refusal": 0
+   },
+   {
+    "cell": "v5-rules-2 s5",
+    "monitors_submitted": 5182,
+    "recalls": 427,
+    "pieces": 175,
+    "budget_refusal": 0
+   },
+   {
+    "cell": "v5-rules-2 s6",
+    "monitors_submitted": 5456,
+    "pieces": 174,
+    "budget_refusal": 0
+   },
+   {
+    "cell": "v5-rules-2 s7",
+    "monitors_submitted": 5306,
+    "pieces": 180,
+    "budget_refusal": 0
+   },
+   {
+    "cell": "v5-rules s4 (superseded design)",
+    "monitors_submitted": 3259,
+    "pieces": 3027,
+    "budget_refusal": 0
+   },
+   {
+    "cell": "v5-rules s5",
+    "monitors_submitted": 4619,
+    "pieces": 2894,
+    "budget_refusal": 0
+   },
+   {
+    "cell": "covex-v6-state s4 (rerun, old price)",
+    "monitors_submitted": 6367,
+    "recalls": 366,
+    "pieces": 111,
+    "budget_refusal": 12824,
+    "note": "touch-driven, the only non-zero in the set"
+   },
+   {
+    "cell": "covex-v6-state s5",
+    "monitors_submitted": 8315,
+    "recalls": 480,
+    "pieces": 147,
+    "budget_refusal": 0
+   },
+   {
+    "cell": "covex-v6-state s6 (held charge)",
+    "monitors_submitted": 2104,
+    "pieces": 41,
+    "budget_refusal": 44382,
+    "note": "the d162 first-token charge; held code, not comparable"
+   }
+  ]
+ },
+ "the_restatement_D173_4_asks_for": {
+  "old_statement": "v5-rules-2's warming fails dashcam, and at covex-v6-state s4 budget refusals deepened an existing rung-1 deficit",
+  "corrected_statement": "the rung-1 dashcam loss is NOT budget starvation and never was. v5-rules-2 SUBMITS HALF the dashcam monitors the base submits, 4,829 against 9,745 at s4 and 5,182 against 9,812 at s5, with budget_refusal EXACTLY ZERO in all four of its cells. The arm does not ask. Of the 11,764 opportunities, the 6,937 unsent at s4 were never submitted by the policy, not refused by a budget",
+  "and_the_rung_2_recovery_is_the_same_quantity": "covex-v6-state s5 submits 8,315 monitors, 1.60x v5-rules-2's 5,182, and delivers 2,458 dashcam on time against 1,219, 2.02x. The recovery tracks SUBMISSIONS, with zero budget refusals on both sides. So rung 2 helps dashcam by asking more often, not by charging differently",
+  "consequence_for_D173_2": "correcting the budget charge CANNOT fix rung 1's dashcam loss, because budget refusals never caused it. A covex-v6-rules-wo rerun would change the charge and leave the submission gap where it is. D173 (2)'s premise, that v5-rules-2's warm builds being charged COLD is what damaged dashcam, does not survive the census"
+ },
+ "where_the_mechanism_must_be_instead": {
+  "not_the_budget": "budget_refusal 0 in every rung-1 cell",
+  "not_the_charge_magnitude": "the committed build charge is recall_gpu_s(PIECE, COLD), i.e. cold prefill on the NEW tokens only, which is approximately right: the D162 work-only charge is 1.12x at a 1,024-token piece and 0.90x at 4,096. The whole-prefix overcharge was the TOUCH price, not the build price",
+  "candidate": "a CONCURRENCY limit rather than a budget limit: warm-ahead builds occupy in-flight request slots, and a monitor not submitted while slots are full is never charged and never refused, so it appears in no counter. 156 to 180 pieces per cell against about 4,900 monitors is the ratio to examine",
+  "register": "HYPOTHESIS with a named test, not a finding. The test is the per-epoch count of monitor opportunities visible but not released, beside in-flight occupancy"
+ },
+ "single_shot": "at s5 covex-v6-state sent 347 of 356 and noc3 343, so single-shot is NOT lost at rung 1 or rung 2 except at s4, where it is the 88 touch-driven budget refusals. Single-shot loss is budget; dashcam loss is not"
+}

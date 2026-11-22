@@ -19,100 +19,104 @@
   ]
  },
  "P0_positive_control": {
-  "_claim": "the price varies with both of its inputs",
+  "_claim": "the charge varies with the work it prices, ignores the queue under the ruled mode, and the planner's harm basis still sees the queue",
+  "charge_mode": "work-only",
   "touch_idle": 0.070534,
   "cold_recall_11k": 2.074541,
-  "varies_with_uncached": true,
-  "varies_with_queue_ahead": true,
-  "verdict": "PASS: the price is not a constant"
+  "charge_varies_with_uncached": true,
+  "charge_ignores_queue_term": true,
+  "harm_basis_varies_with_queue": true,
+  "verdict": "PASS: the charge prices work only and the harm basis still prices delay"
  },
  "P1_planner_equals_coordinator": {
-  "_claim": "planner and coordinator prices are equal per request",
+  "_claim": "planner and coordinator read one model; they agree on the work terms and differ by exactly the queue term, which is D173 (1)'s split",
+  "charge_mode": "work-only",
+  "coefficients_shared_not_copied": true,
   "rows": [
    {
     "case": "touch on an 11k warm prefix",
     "uncached": 15,
     "queued_ahead": 0,
     "coordinator_charge_gpu_s": 0.070534059,
-    "planner_first_token_s": 0.070534059,
-    "equal": true,
-    "old_reload_proxy_gpu_s": 0.382,
-    "harm_coefficient_is_the_price_source": true
+    "work_terms_gpu_s": 0.070534059,
+    "planner_harm_basis_s": 0.070534059,
+    "charge_equals_work_terms": true,
+    "difference_is_exactly_the_queue_term": true
    },
    {
     "case": "touch, 3,000 ahead",
     "uncached": 15,
     "queued_ahead": 3000,
-    "coordinator_charge_gpu_s": 0.531276246,
-    "planner_first_token_s": 0.531276246,
-    "equal": true,
-    "old_reload_proxy_gpu_s": 0.382,
-    "harm_coefficient_is_the_price_source": true
+    "coordinator_charge_gpu_s": 0.070534059,
+    "work_terms_gpu_s": 0.070534059,
+    "planner_harm_basis_s": 0.531276246,
+    "charge_equals_work_terms": true,
+    "difference_is_exactly_the_queue_term": true
    },
    {
     "case": "touch on a 21k warm prefix",
     "uncached": 15,
     "queued_ahead": 1000,
-    "coordinator_charge_gpu_s": 0.224114788,
-    "planner_first_token_s": 0.224114788,
-    "equal": true,
-    "old_reload_proxy_gpu_s": 0.382,
-    "harm_coefficient_is_the_price_source": true
+    "coordinator_charge_gpu_s": 0.070534059,
+    "work_terms_gpu_s": 0.070534059,
+    "planner_harm_basis_s": 0.224114788,
+    "charge_equals_work_terms": true,
+    "difference_is_exactly_the_queue_term": true
    },
    {
     "case": "warm recall, 200 new",
     "uncached": 200,
     "queued_ahead": 0,
     "coordinator_charge_gpu_s": 0.104283843,
-    "planner_first_token_s": 0.104283843,
-    "equal": true,
-    "old_reload_proxy_gpu_s": null,
-    "harm_coefficient_is_the_price_source": true
+    "work_terms_gpu_s": 0.104283843,
+    "planner_harm_basis_s": 0.104283843,
+    "charge_equals_work_terms": true,
+    "difference_is_exactly_the_queue_term": true
    },
    {
     "case": "warm recall, 200 new, 5,000 ahead",
     "uncached": 200,
     "queued_ahead": 5000,
-    "coordinator_charge_gpu_s": 0.872187487,
-    "planner_first_token_s": 0.872187487,
-    "equal": true,
-    "old_reload_proxy_gpu_s": null,
-    "harm_coefficient_is_the_price_source": true
+    "coordinator_charge_gpu_s": 0.104283843,
+    "work_terms_gpu_s": 0.104283843,
+    "planner_harm_basis_s": 0.872187487,
+    "charge_equals_work_terms": true,
+    "difference_is_exactly_the_queue_term": true
    },
    {
     "case": "cold recall 11k",
     "uncached": 11000,
     "queued_ahead": 0,
     "coordinator_charge_gpu_s": 2.074541448,
-    "planner_first_token_s": 2.074541448,
-    "equal": true,
-    "old_reload_proxy_gpu_s": null,
-    "harm_coefficient_is_the_price_source": true
+    "work_terms_gpu_s": 2.074541448,
+    "planner_harm_basis_s": 2.074541448,
+    "charge_equals_work_terms": true,
+    "difference_is_exactly_the_queue_term": true
    },
    {
     "case": "build piece 1024",
     "uncached": 1024,
     "queued_ahead": 2000,
-    "coordinator_charge_gpu_s": 0.561768658,
-    "planner_first_token_s": 0.561768658,
-    "equal": true,
-    "old_reload_proxy_gpu_s": null,
-    "harm_coefficient_is_the_price_source": true
+    "coordinator_charge_gpu_s": 0.254607201,
+    "work_terms_gpu_s": 0.254607201,
+    "planner_harm_basis_s": 0.561768658,
+    "charge_equals_work_terms": true,
+    "difference_is_exactly_the_queue_term": true
    },
    {
     "case": "dashcam append, 90 new",
     "uncached": 90,
     "queued_ahead": 400,
-    "coordinator_charge_gpu_s": 0.145648696,
-    "planner_first_token_s": 0.145648696,
-    "equal": true,
-    "old_reload_proxy_gpu_s": null,
-    "harm_coefficient_is_the_price_source": true
+    "coordinator_charge_gpu_s": 0.084216404,
+    "work_terms_gpu_s": 0.084216404,
+    "planner_harm_basis_s": 0.145648696,
+    "charge_equals_work_terms": true,
+    "difference_is_exactly_the_queue_term": true
    }
   ],
-  "all_equal": true,
-  "coefficients_shared": true,
-  "verdict": "PASS: identical on all 8 constructed requests, and the planner's harm coefficient IS the price source rather than a copy of it"
+  "charge_equals_work_terms_everywhere": true,
+  "difference_is_only_the_queue_term": true,
+  "verdict": "PASS: one model, shared coefficients, agreement on the work terms on all 8 constructed requests, and the only difference is the queue term"
  },
  "P2_budget_vs_gpu_busy": {
   "_claim": "the budget must not bind artificially (D102)",
@@ -141,19 +145,67 @@
   ],
   "diagnosis": "the THIRD TERM is the problem and it is a double count. per_queue * queued_ahead is the LATENCY this request SUFFERS because other requests' work is in front of it, not GPU time this request consumes. Charging it bills the same GPU-seconds once per request queued behind them: with k requests of u tokens in flight the queue charge grows as u^2 k^2 / 2 while the real work grows linearly. On the planner side the same term is CORRECT, because there it prices the delay a candidate IMPOSES on others, which is exactly what it measures",
   "intercept_is_not_the_driver": "charging the 0.0678 s intercept to every request makes a 1-frame dashcam append 2.0x dearer and a 21-frame one 1.1x dearer, which alone would not starve anything",
-  "verdict": "FAIL: under the ruling's formula as written the budget binds ARTIFICIALLY. 10612 refusals (10593 dashcam) against 288 under work-only, and plan_state reaches 0 decisions against 2038. The arm is MORE starved than it was under the old touch price, for a different reason. The rerun is HELD"
+  "ruled_charge": "work-only (D173 (1))",
+  "d102_utilisation_vs_measured_gpu_busy": [
+   {
+    "cell": "covex-v6-state s4",
+    "measured_gpu_busy_s": 721.9,
+    "measured_busy_fraction_of_wall": 0.6,
+    "per_uncached_term_s": 737.5,
+    "per_uncached_over_measured_busy": 1.022,
+    "intercept_total_s": 548.5,
+    "intercept_fraction_of_wall": 0.46,
+    "work_only_total_s": 1286.0,
+    "work_only_utilisation_of_wall": 1.07,
+    "uncached_only_utilisation_of_wall": 0.61
+   },
+   {
+    "cell": "covex-v6-state s5",
+    "measured_gpu_busy_s": 964.5,
+    "measured_busy_fraction_of_wall": 0.8,
+    "per_uncached_term_s": 985.3,
+    "per_uncached_over_measured_busy": 1.022,
+    "intercept_total_s": 617.9,
+    "intercept_fraction_of_wall": 0.51,
+    "work_only_total_s": 1603.3,
+    "work_only_utilisation_of_wall": 1.34,
+    "uncached_only_utilisation_of_wall": 0.82
+   }
+  ],
+  "per_uncached_term_tracks_measured_busy": true,
+  "cells_where_work_only_oversubscribes_the_wall_clock": [
+   "covex-v6-state s4",
+   "covex-v6-state s5"
+  ],
+  "utilisation_finding": "the PER-UNCACHED term tracks measured GPU busy time to 2 percent, and its implied rate 5,482 tok/s agrees with the committed 5,600 tok/s prefill rate to 2 percent. The INTERCEPT tracks nothing: it adds 46 percent (s4) and 51 percent (s5) of the wall clock and takes work-only utilisation to 1.07 and 1.34 of wall while the GPU is 60 to 80 percent busy. A budget cannot be more than fully subscribed by requests the engine had time for, so work-only FAILS the utilisation half of D102 on measured data even though it passes the no-artificial-binding half on a dry cell",
+  "gate": "refusals at or below 500, plan_state still reaching decisions, and the decision log within 10 percent of covex-v6-rules' 4376 rows",
+  "rejected_mode_for_contrast": {
+   "charge_mode": "first-token",
+   "budget_refusal": 10612,
+   "budget_refusal_monitor": 10593,
+   "budget_refusal_build": 17,
+   "budget_refusal_recall": 2,
+   "state_decisions": 0,
+   "decision_rows": 2252
+  },
+  "verdict": "FAIL: work-only passes the dry no-binding half (288 refusals, 2038 state decisions, 4318 rows) but FAILS the utilisation half: it oversubscribes the wall clock on ['covex-v6-state s4', 'covex-v6-state s5'] while the GPU is 60 to 80 percent busy, because of the 0.0678 s per-request INTERCEPT. The per-uncached term alone tracks measured busy time to 2 percent. NO ARM IS ENABLED and no rerun is posted"
  },
  "P3_baselines_unchanged": {
   "_claim": "no arm declares the pricing switch while its D102 proof fails; and if it is ever ruled on, no arm outside covex-v6 declares it",
   "arms_with_d162_pricing": [
-   "covex-v6-state-d162"
+   "covex-v6-rules-wo",
+   "covex-v6-state-d162",
+   "covex-v6-state-wo"
   ],
   "only_covex_v6": true,
-  "reprice_is_held": true,
+  "reprice_is_held": false,
   "proof_probe_arm": "covex-v6-state-d162",
-  "arms_declaring_it_other_than_the_probe": [],
+  "arms_declaring_it_other_than_the_probe": [
+   "covex-v6-rules-wo",
+   "covex-v6-state-wo"
+  ],
   "probe_found_in_cell_lists": [],
-  "verdict": "PASS: the reprice is held, only the proof's own probe arm covex-v6-state-d162 declares it, and that arm appears in no cell list"
+  "verdict": "PASS: only covex-v6 arms price this way"
  },
  "P4_no_drift": {
   "checked": true,

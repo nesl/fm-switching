@@ -104,14 +104,44 @@ def first_token_s(uncached_tokens: int, queued_uncached_ahead: int = 0) -> float
 # dry covex-v6-state cell under the full formula produced 10,612 budget refusals, 10,593 of them
 # dashcam, which is the budget binding ARTIFICIALLY in D102's sense.
 #
-# Both modes are here and the FULL one is the default, because the ruling names the full formula.
-# The split is offered, not taken.
-CHARGE_MODE = "first-token"      # or "work-only": intercept + per-uncached, no queue term
+# D173 (1) SETTLES THIS: "work-only" is the charge and the queue term is used only in the
+# planner's harm to others. The reasoning below is kept as the record of why the full formula was
+# tried first and what it did.
+# D173 (1): BUDGET = ENGINE WORK. The budget charges the work a request DOES and never the delay
+# it SUFFERS, so the queue term is out of the charge and stays in the planner's harm, where it is
+# the right quantity. This was the held variant; the ruling takes it.
+# AND THE SAME TEST, APPLIED TO THE REMAINING TWO TERMS, separates them too. D102 asks that
+# budget utilisation TRACK MEASURED GPU BUSY TIME. Against the committed cells, with total
+# uncached tokens over wall clock as the measured busy proxy (the H100's reported load rate, which
+# reproduces the per-type uncached totals to 0.02 percent):
+#
+#   cell                 per-uncached term   measured busy   intercepts    total / wall
+#   s4 covex-v6-state         737.5 s           721.9 s        548.5 s        1.07
+#   s5 covex-v6-state         985.3 s           964.5 s        617.9 s        1.34
+#
+# The PER-UNCACHED TERM TRACKS MEASURED BUSY TIME TO 2 PERCENT, and its implied rate, 1 /
+# 0.00018243 = 5,482 tok/s, agrees with the committed cold prefill rate of 5,600 tok/s to 2
+# percent as well. That is an independent validation and it is the half of the charge that is
+# right.
+#
+# THE INTERCEPT DOES NOT TRACK ANYTHING. It adds 0.0678 s per request regardless of size, which
+# is 46 percent (s4) and 51 percent (s5) of the whole wall clock, and takes total utilisation to
+# 1.07 and 1.34 of wall while the GPU is 60 to 80 percent busy. A budget cannot be more than
+# fully subscribed by requests the engine had time for: that is D102's artificial binding,
+# measured. The intercept is per-request overhead, HTTP and scheduling and tokenisation and one
+# forward pass, and charging it to a GPU budget is the SAME category error as the queue term one
+# level down: time the request OCCUPIES rather than GPU work it CONSUMES.
+#
+# So "uncached-only" is here, and it is NOT the default: D173 (1) names intercept plus
+# per-uncached, and the finding above is reported for ruling rather than acted on.
+CHARGE_MODE = "work-only"       # "first-token" | "work-only" (D173 (1)) | "uncached-only"
 
 
 def price_gpu_s(uncached_tokens: int, queued_uncached_ahead: int = 0) -> float:
     """The coordinator's budget charge. Identical arithmetic to `first_token_s` BY CONSTRUCTION in
     the default mode, so the ruling's "identically in both" holds as written."""
+    if CHARGE_MODE == "uncached-only":
+        return PER_UNCACHED_S * max(int(uncached_tokens), 0)
     if CHARGE_MODE == "work-only":
         return first_token_s(uncached_tokens, 0)
     return first_token_s(uncached_tokens, queued_uncached_ahead)

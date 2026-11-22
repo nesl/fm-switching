@@ -34,7 +34,11 @@ import touch_policy as TP                                                      #
 # The reprice is HELD while its D102 gate fails. Flipping this to False is part of applying a
 # ruling, and the proof below then changes what it asserts, which is deliberate: the strong form
 # ("nobody declares it") is only correct while it is held.
-D102_FAILS = True
+# D173 (1) takes the work-only charge, so the CHARGE is no longer held. Enabling it on an arm
+# still waits on this file reporting PASS, which is what item 1 says.
+D102_FAILS = False
+BASE_TOLERANCE = 500      # declared slack for a correct charge, not a budget for failure
+RULES_ROWS = 4376         # covex-v6-rules' own dry decision-row count at this cell
 
 # constructed requests: (label, uncached tokens, uncached queued ahead)
 CASES = [("touch on an 11k warm prefix", TP.TOUCH_UNCACHED_TOKENS, 0),
@@ -52,42 +56,73 @@ def p0_positive_control() -> Dict[str, Any]:
     constants agreeing."""
     a = DP.price_gpu_s(15, 0)
     b = DP.price_gpu_s(11000, 0)
-    varies_in_queue = DP.price_gpu_s(15, 0) != DP.price_gpu_s(15, 5000)
-    return {"_claim": "the price varies with both of its inputs",
+    # TWO FUNCTIONS, TWO QUESTIONS, and conflating them broke this control once already. Under
+    # D173 (1) the CHARGE is work-only, so `price_gpu_s` must NOT vary with the queue term and an
+    # earlier version of this control failed for exactly that reason, reporting the ruling as a
+    # broken check. The queue sensitivity belongs to `first_token_s`, which is the planner's harm
+    # basis and the only place the queue term is still read.
+    charge_varies_uncached = a != b
+    charge_ignores_queue = DP.price_gpu_s(15, 0) == DP.price_gpu_s(15, 5000)
+    harm_varies_queue = DP.first_token_s(15, 0) != DP.first_token_s(15, 5000)
+    ok = charge_varies_uncached and harm_varies_queue and (
+        charge_ignores_queue if DP.CHARGE_MODE == "work-only" else True)
+    return {"_claim": ("the charge varies with the work it prices, ignores the queue under the "
+                       "ruled mode, and the planner's harm basis still sees the queue"),
+            "charge_mode": DP.CHARGE_MODE,
             "touch_idle": round(a, 6), "cold_recall_11k": round(b, 6),
-            "varies_with_uncached": a != b, "varies_with_queue_ahead": varies_in_queue,
-            "verdict": ("PASS: the price is not a constant"
-                        if (a != b and varies_in_queue) else
+            "charge_varies_with_uncached": charge_varies_uncached,
+            "charge_ignores_queue_term": charge_ignores_queue,
+            "harm_basis_varies_with_queue": harm_varies_queue,
+            "verdict": ("PASS: the charge prices work only and the harm basis still prices delay"
+                        if ok else
                         "FAIL: THE CHECK IS BROKEN; an equality below would be two constants")}
 
 
 def p1_planner_equals_coordinator() -> Dict[str, Any]:
-    """The ruling's test. Coordinator charge against planner harm basis, per request."""
+    """ONE MODEL, TWO TERMS, under D173 (1).
+
+    The earlier form of this proof demanded `coordinator_charge == planner_first_token` per
+    request, and it PASSED while the charge included the queue term. D173 (1) rules that term OUT
+    of the charge and keeps it in the planner's harm, so demanding equality now would be demanding
+    the thing the ruling forbids. What must still hold, and is what "one price source" means:
+
+      1. the two sides share ONE SET OF COEFFICIENTS, imported and not copied;
+      2. they agree exactly on the WORK terms, intercept + per-uncached;
+      3. the ONLY difference is the queue term, and it appears on the planner side alone.
+
+    Point 3 is asserted as an exact arithmetic identity rather than described, so a future edit
+    that let some other difference in would fail here.
+    """
     rows: List[Dict[str, Any]] = []
+    same_coeff = (CO.QUEUE_TOKEN_S == DP.PER_QUEUE_S)
     for label, u, q in CASES:
-        # the COORDINATOR's charge, as coordinator.py computes it under the switch
-        coord = DP.price_gpu_s(u, q)
-        # the PLANNER's basis for the same request: cf_objective prices the delay a request of
-        # `u` uncached tokens imposes, through the same model. The quantity both sides must agree
-        # on is the predicted first-token time of this request.
-        plan = CO.QUEUE_TOKEN_S * 0 + DP.first_token_s(u, q)
-        # and the harm term's own coefficient must BE the price source's, not a copy
-        same_coeff = CO.QUEUE_TOKEN_S == DP.PER_QUEUE_S
+        coord = DP.price_gpu_s(u, q)                  # the coordinator's budget charge
+        work = DP.first_token_s(u, 0)                 # the work terms alone
+        plan = DP.first_token_s(u, q)                 # the planner's harm basis
+        queue_only = DP.PER_QUEUE_S * q
         rows.append({"case": label, "uncached": u, "queued_ahead": q,
                      "coordinator_charge_gpu_s": round(coord, 9),
-                     "planner_first_token_s": round(plan, 9),
-                     "equal": coord == plan,
-                     "old_reload_proxy_gpu_s": (round(C.recall_gpu_s(11000, "GPU-WARM"), 6)
-                                                if "touch" in label else None),
-                     "harm_coefficient_is_the_price_source": same_coeff})
-    allequal = all(r["equal"] for r in rows)
-    allcoef = all(r["harm_coefficient_is_the_price_source"] for r in rows)
-    return {"_claim": "planner and coordinator prices are equal per request",
-            "rows": rows, "all_equal": allequal, "coefficients_shared": allcoef,
-            "verdict": ("PASS: identical on all %d constructed requests, and the planner's harm "
-                        "coefficient IS the price source rather than a copy of it" % len(rows)
-                        if (allequal and allcoef) else
-                        "FAIL: the two sides disagree")}
+                     "work_terms_gpu_s": round(work, 9),
+                     "planner_harm_basis_s": round(plan, 9),
+                     "charge_equals_work_terms": coord == work,
+                     "difference_is_exactly_the_queue_term":
+                         abs((plan - coord) - queue_only) < 1e-12})
+    agree_work = all(r["charge_equals_work_terms"] for r in rows)
+    only_queue = all(r["difference_is_exactly_the_queue_term"] for r in rows)
+    return {"_claim": ("planner and coordinator read one model; they agree on the work terms and "
+                       "differ by exactly the queue term, which is D173 (1)'s split"),
+            "charge_mode": DP.CHARGE_MODE,
+            "coefficients_shared_not_copied": same_coeff,
+            "rows": rows,
+            "charge_equals_work_terms_everywhere": agree_work,
+            "difference_is_only_the_queue_term": only_queue,
+            "verdict": ("PASS: one model, shared coefficients, agreement on the work terms on all "
+                        "%d constructed requests, and the only difference is the queue term"
+                        % len(rows)
+                        if (same_coeff and agree_work and only_queue) else
+                        "FAIL: the coefficients are copied, not shared" if not same_coeff else
+                        "FAIL: the charge is not the work terms" if not agree_work else
+                        "FAIL: the two sides differ by something other than the queue term")}
 
 
 def p2_budget_vs_gpu_busy() -> Dict[str, Any]:
@@ -128,11 +163,47 @@ def p2_budget_vs_gpu_busy() -> Dict[str, Any]:
                          "state_decisions": int((st or {}).get("state_decisions", 0)),
                          "decision_rows": len(dec)})
     finally:
-        DP.CHARGE_MODE = "first-token"
+        DP.CHARGE_MODE = "work-only"
         cls.__init__ = old_init
+    # D102'S OTHER HALF, and it is the half that decides. "The budget never binds artificially"
+    # is necessary; "budget utilisation tracks measured GPU busy time" is the test the ruling
+    # names, and it cannot be answered by a dry cell at all. It CAN be answered against the
+    # committed cells, whose measured load rate reproduces their per-type uncached totals to 0.02
+    # percent, so it is the engine's own throughput and not a model output.
+    MEASURED = [{"cell": "covex-v6-state s4", "n_req": 8090, "uncached": 4042800,
+                 "run_s": 1200.0},
+                {"cell": "covex-v6-state s5", "n_req": 9114, "uncached": 5401200,
+                 "run_s": 1200.0}]
+    PREFILL_TOK_S = 5600.0
+    util: List[Dict[str, Any]] = []
+    for m in MEASURED:
+        busy = m["uncached"] / PREFILL_TOK_S
+        work_term = DP.PER_UNCACHED_S * m["uncached"]
+        icpt = DP.INTERCEPT_S * m["n_req"]
+        util.append({
+            "cell": m["cell"],
+            "measured_gpu_busy_s": round(busy, 1),
+            "measured_busy_fraction_of_wall": round(busy / m["run_s"], 2),
+            "per_uncached_term_s": round(work_term, 1),
+            "per_uncached_over_measured_busy": round(work_term / busy, 3),
+            "intercept_total_s": round(icpt, 1),
+            "intercept_fraction_of_wall": round(icpt / m["run_s"], 2),
+            "work_only_total_s": round(work_term + icpt, 1),
+            "work_only_utilisation_of_wall": round((work_term + icpt) / m["run_s"], 2),
+            "uncached_only_utilisation_of_wall": round(work_term / m["run_s"], 2)})
+    tracks = all(0.9 <= u["per_uncached_over_measured_busy"] <= 1.1 for u in util)
+    oversubscribed = [u["cell"] for u in util if u["work_only_utilisation_of_wall"] > 1.0]
+
     full = next(r for r in rows if r["charge_mode"] == "first-token")
     work = next(r for r in rows if r["charge_mode"] == "work-only")
-    ok = full["budget_refusal"] <= work["budget_refusal"] * 2
+    # D173 (1) RULES the work-only charge, so the gate is on IT and not on a comparison between
+    # the two. A comparison would pass whenever the rejected mode is worse, which tells us
+    # nothing about whether the ruled one is sound.
+    ruled = work
+    ok = (ruled["budget_refusal"] <= BASE_TOLERANCE
+          and ruled["state_decisions"] > 0
+          and ruled["decision_rows"] >= 0.9 * RULES_ROWS
+          and tracks and not oversubscribed)
     return {
         "_claim": "the budget must not bind artificially (D102)",
         "cell": "covex-v6-state-d162, dry, 8 devices, 600 s, seed 4",
@@ -150,13 +221,33 @@ def p2_budget_vs_gpu_busy() -> Dict[str, Any]:
         "intercept_is_not_the_driver": (
             "charging the 0.0678 s intercept to every request makes a 1-frame dashcam append "
             "2.0x dearer and a 21-frame one 1.1x dearer, which alone would not starve anything"),
-        "verdict": ("PASS: the budget does not bind artificially" if ok else
-                    "FAIL: under the ruling's formula as written the budget binds ARTIFICIALLY. "
-                    "%d refusals (%d dashcam) against %d under work-only, and plan_state reaches "
-                    "0 decisions against %d. The arm is MORE starved than it was under the old "
-                    "touch price, for a different reason. The rerun is HELD"
-                    % (full["budget_refusal"], full["budget_refusal_monitor"],
-                       work["budget_refusal"], work["state_decisions"])),
+        "ruled_charge": "work-only (D173 (1))",
+        "d102_utilisation_vs_measured_gpu_busy": util,
+        "per_uncached_term_tracks_measured_busy": tracks,
+        "cells_where_work_only_oversubscribes_the_wall_clock": oversubscribed,
+        "utilisation_finding": (
+            "the PER-UNCACHED term tracks measured GPU busy time to 2 percent, and its implied "
+            "rate 5,482 tok/s agrees with the committed 5,600 tok/s prefill rate to 2 percent. "
+            "The INTERCEPT tracks nothing: it adds 46 percent (s4) and 51 percent (s5) of the "
+            "wall clock and takes work-only utilisation to 1.07 and 1.34 of wall while the GPU is "
+            "60 to 80 percent busy. A budget cannot be more than fully subscribed by requests the "
+            "engine had time for, so work-only FAILS the utilisation half of D102 on measured "
+            "data even though it passes the no-artificial-binding half on a dry cell"),
+        "gate": ("refusals at or below %d, plan_state still reaching decisions, and the decision "
+                 "log within 10 percent of covex-v6-rules' %d rows"
+                 % (BASE_TOLERANCE, RULES_ROWS)),
+        "rejected_mode_for_contrast": full,
+        "verdict": ("PASS: under the ruled work-only charge the budget does not bind "
+                    "artificially: %d refusals, %d state decisions, %d rows against "
+                    "covex-v6-rules' %d" % (ruled["budget_refusal"], ruled["state_decisions"],
+                                            ruled["decision_rows"], RULES_ROWS) if ok else
+                    "FAIL: work-only passes the dry no-binding half (%d refusals, %d state "
+                    "decisions, %d rows) but FAILS the utilisation half: it oversubscribes the "
+                    "wall clock on %s while the GPU is 60 to 80 percent busy, because of the "
+                    "0.0678 s per-request INTERCEPT. The per-uncached term alone tracks measured "
+                    "busy time to 2 percent. NO ARM IS ENABLED and no rerun is posted"
+                    % (ruled["budget_refusal"], ruled["state_decisions"],
+                       ruled["decision_rows"], oversubscribed)),
     }
 
 
