@@ -1169,5 +1169,31 @@
   "device": "jetson_orin",
   "model": "qwen3vl4b",
   "timestamp": "2026-11-21"
+ },
+ "_STACK_AUDIT_the_three_sources_do_NOT_share_one_stack": {
+  "deployment_default": "experiments/device/orin3_serve.sh: vLLM, --max-num-seqs 1, --enable-prefix-caching, --dtype bfloat16, --max-model-len 32768, --limit-mm-per-prompt image:9, --gpu-memory-utilization 0.4, --enforce-eager, --seed 0, and NO --mm-processor-kwargs (released image-processor defaults).",
+  "single_shot_SS2": {
+   "vllm": "0.20.0",
+   "mm_processor_kwargs": "NONE, released defaults",
+   "limit_mm_per_prompt": "image:9",
+   "matches_deployment": true,
+   "evidence": "ss2_device_logprobs_rerecord.json server_config: 'orin3_serve.sh verbatim: released image processor, NO --mm-processor-kwargs'"
+  },
+  "dashcam_SH_EP": {
+   "vllm": "0.20.0",
+   "mm_processor_kwargs": "FORCED: size.shortest_edge 4096, size.longest_edge 16777216, fps 1.0, do_sample_frames false",
+   "limit_mm_per_prompt": "image:21 (ADDED; deployment default is 9)",
+   "matches_deployment": false,
+   "why_it_deviates": "sh_ep_orin_launch.json records both as deliberate additions, the mm-processor settings 'matched to the H100' for cross-tier parity and the image cap raised because EP-G carries up to 21 images. The file's own summary label is 'Orin, default Jetson vLLM config', which is what I first relied on and which is NOT accurate for the mm settings."
+  },
+  "robot_ORIN_REC": {
+   "vllm": "0.20.0",
+   "mm_processor_kwargs": "FORCED: shortest_edge 4096, cap 640",
+   "matches_deployment": false,
+   "evidence": "named as a contrast by SS2's own server_config: 'This is NOT the ACC2/ORIN-REC server (which forces shortest_edge 4096, cap 640); the SS2 device stack uses released mm defaults.'"
+  },
+  "consequence_stated_not_estimated": "image token count, and therefore per-image latency, depends on the image-processor configuration. The DASHCAM and ROBOT tables were produced with shortest_edge forced to 4096 for H100 parity; the SINGLE-SHOT table was produced on the deployment default. So the three tables are not mutually calibrated, and the dashcam and robot numbers are not deployment-configuration numbers. Forcing a large shortest_edge should raise tokens per image and so RAISE latency, which would make those two tables conservative, but the direction and size are UNMEASURED and are not claimed here.",
+  "correction_of_my_earlier_statement": "I previously reported that the dashcam table matches deployment, on the strength of sh_ep_orin_launch.json's summary label. That was wrong: the same file records the mm flags as additions. The single-shot table is the only one of the three on the deployment default.",
+  "what_would_settle_it": "a latency-only Orin re-measure of the EP-G append path under orin3_serve.sh with NO --mm-processor-kwargs, at image:21 for admission only. That is the step-2 script the ruling allowed and which step 1 made unnecessary for existence; it would now be needed only for deployment-configuration fidelity."
  }
 }

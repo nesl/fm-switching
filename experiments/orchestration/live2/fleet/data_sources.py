@@ -246,8 +246,10 @@ DEVICE_WAIT_MEASURED_S = ORIN_REC_WARM_COMPLETION_P50
 # (`reads_device_answer = True`): confidence-cascade, cascade-routing, r3-streaming, streamscout
 # and thinking-qwenvl. Listed here so the scorer can LABEL their cells per D154 (5) without
 # importing five policy modules that load dashcam score tables to construct themselves.
-CASCADE_ARMS = ("confidence-cascade", "cascade-routing", "r3-streaming", "streamscout",
-                "thinking-qwenvl")
+# D170 follow-up: thinking-qwenvl is DROPPED. It was never ported to live2 (arms.make_arm
+# raises "unknown arm"), so it can neither be run nor released, and leaving it here made the
+# cascade list claim five arms where four exist.
+CASCADE_ARMS = ("confidence-cascade", "cascade-routing", "r3-streaming", "streamscout")
 
 _ORIN_REC_WARM: Optional[Dict[str, Dict[str, float]]] = None
 
