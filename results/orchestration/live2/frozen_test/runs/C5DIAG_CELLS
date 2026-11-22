@@ -152,3 +152,27 @@ covex-v6-state-uo-c5attr 16 5 _L3_epg_rq30
 # committed StudyE10e flag check says the same).
 covex-v6-state-uo 16 5 _L3_epg_rq30_lpt2048 --long-prefill-token-threshold 2048
 covex-v6-base 16 5 _L3_epg_rq30_lpt2048 --long-prefill-token-threshold 2048
+#
+# ADDED 2026-11-22 (user addendum B, about 12:40): c5attr at seeds 6 and 7, to run AHEAD of the
+# matrix tail and alongside the D179/D180/D181 shares build. Reason it is worth the GPU time: at
+# s5 this rule FLIPPED the scorer's dashcam verdict (plain covex-v6-state-uo s5 FAILS, c5attr s5
+# MEETS) at no robot cost, on time 3,761 against 2,508, and it moved BOTH the unsent bucket (-711)
+# and the LATE bucket (-542). At s4 it moved only the unsent bucket (+901 on time, late -43) and
+# still FAILED. Two seeds disagree about the mechanism, so neither "it works" nor "it does not" is
+# supportable yet; s6 and s7 are what make a per-seed statement possible at all.
+#
+# A CONFOUND THAT MUST TRAVEL WITH THESE CELLS: the PLAIN arm already MEETS dashcam at s6 without
+# any fix (worst device 0.2646 against the 0.25 target). So s6 cannot distinguish the rule from the
+# seed, and s7 is the only genuinely new information unless s6's plain and c5attr numbers differ in
+# the buckets rather than in the verdict. Report the bucket split, not only the verdict.
+#
+# SELECTION RULE (user addendum C): share admission is the PRIMARY C5 replacement. c5attr is the
+# fallback ONLY IF shares fails any of its three D179 (6) checks AND c5attr meets the alert target
+# at 3 or more of seeds 4 to 7 with robot by-deadline within 0.01 of the plain uo arm. If both
+# pass, shares stays and c5attr is reported as a cheaper, less robust alternative. These two cells
+# exist to make that rule decidable; they do not themselves adopt anything.
+#
+# Shares cells take PRIORITY over these the moment V6SHARES_CELLS is posted and gated.
+
+covex-v6-state-uo-c5attr 16 6 _L3_epg_rq30
+covex-v6-state-uo-c5attr 16 7 _L3_epg_rq30
