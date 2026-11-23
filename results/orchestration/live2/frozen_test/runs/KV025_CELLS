@@ -1,0 +1,184 @@
+# D189 item 1: THE 0.25x GPU KV MEMORY CONDITION, six edge-condition arms at SEEDS 4 AND 5 ONLY.
+# One cell per line: "arm n seed tag". Lines starting # are NOT run. 12 lines, none omitted.
+#
+# Posted by the flash session under D187 overnight autonomy and USER DECISION D189 item 1. Read
+# only once the operator records "KV025_CELLS <sha256>" in the LOCAL, gitignored $OUT/V6_GATE_OK.
+# Seeds 6 and 7 are a LATER list, by the user's instruction. The later rungs (state, fair, cf) are
+# NOT in this list, also by the user's instruction.
+#
+# ======================================================================================
+# THE POOL: 15,736 TOKENS. The mechanism is the COMMITTED one and nothing here is new.
+# ======================================================================================
+#
+# study_frozen_grid_driver_v28.sh:85, and v30.sh:85 is the same line verbatim:
+#
+#   case "$tag" in *_kv0.5*) lflag="$lflag --gpu-kv-tokens 31472";; *_kv0.25*) lflag="$lflag --gpu-kv-tokens 15736";; esac
+#
+# with its own D151 comment on the two lines above it ("0.5x / 0.25x GPU pool ... is the harness's
+# LOGICAL pool with enforcement on (coordinator belief and enforcement); the engine's real pool is
+# pinned and unchanged"). The default is 62,944 (run_live2_real.py:130 `--gpu-kv-tokens` default,
+# and live2/tests/test_live2_coord.py:40 `GPU_KV = 62_944`), so 15,736 is 62,944 / 4 EXACTLY and
+# 31,472 is 62,944 / 2 exactly. Enforcement is not optional and not added here: every frozen-grid
+# cell already runs `--kv-capacity-enforced` (v28:130, v30:142). Its origin is D151's
+# "0.5x / 0.25x GPU pool" calibration.
+#
+# THE CAVEAT THAT BOUNDS EVERY NUMBER FROM THESE CELLS, in the driver's own words for _kv0.5:
+# _kv0.25 changes the HARNESS'S LOGICAL POOL ONLY, the coordinator's BELIEF plus ENFORCEMENT at
+# --gpu-kv-tokens 15736. THE ENGINE'S REAL vLLM ALLOCATION IS PINNED AND UNCHANGED. A result from
+# these cells is about the policy under a smaller BELIEVED capacity, NOT about vLLM under a smaller
+# allocation.
+#
+# AND THAT CAVEAT IS NOW CONFIRMED ON HARDWARE, NOT INFERRED: commit 72e2d718 records that the H100
+# read the _kv0.5 SERVER LOGS and found vLLM's own GPU KV cache stayed at 62,944 tokens throughout,
+# so the committed memory sweep never shrank the engine at all. Driver v30:153 now logs the
+# engine-reported pool beside the logical one for every cell, which is how a reader checks it.
+#
+# ======================================================================================
+# CAN THE SERVER START AT THIS SETTING? UNVERIFIED ON HARDWARE FOR A _kv0.25-TAGGED CELL
+# OF THESE SIX ARMS. THE H100 SHOULD CONFIRM BEFORE THE FIRST CELL RATHER THAN ASSUME IT.
+# ======================================================================================
+#
+# This box cannot start a server (the H100 owns the GPU and a run is in progress), so no server was
+# started and the statement is NOT asserted. What bears on it, strongest first:
+#
+#   1. A _kv0.25-TAGGED CELL HAS ALREADY RUN TO A VALID RESULT ON HARDWARE, count of ONE:
+#      warm-all-lru_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rf. Its header carries gpu_kv_tokens 15736,
+#      kv_capacity_enforced true, memory_setting tight, server startup_s 69.7, and its cell.json
+#      has err null, run_valid true, digests_equal true, score.ok true. It is a DIFFERENT arm and a
+#      different tag suffix (_rf, not _rq30), so it is evidence that the SETTING runs, not that
+#      these six arms do.
+#   2. The _kv0.5 sweep is running now at --gpu-kv-tokens 31472 through the SAME line of the SAME
+#      driver, and 10 of these 12 arm-seed pairs already have a landed, valid _kv0.5 cell
+#      (all but eco-llm, which is not in the driver's _kv0.5 arm list). Server startup 63.8 to
+#      78.9 s across them.
+#   3. Because the tag changes only the harness's logical pool (point above, confirmed from the
+#      server logs), the server a _kv0.25 cell launches is the SAME pinned server every other cell
+#      launches. That is a strong argument and it is still an argument, not a measurement.
+#   4. Rung 4's DRY 0.25x probe reported pd_free_kv_min 0 and pd_free_kv_max 15736, so 15,736 is
+#      the figure the harness actually uses.
+#
+# STATED PLAINLY: SERVER STARTUP AT 0.25x IS UNVERIFIED ON HARDWARE FOR THESE CELLS. Confirm it on
+# the first cell (v30:153 logs the engine pool) before committing the other eleven.
+#
+# ======================================================================================
+# THE CHECK THAT CAME BEFORE THIS POSTING: ONE HISTORY CAN EXCEED THE WHOLE POOL.
+# ======================================================================================
+#
+# The worry is quantitative and it is REAL: the pool is 15,736 tokens and a single recall history on
+# this workload reaches 26,955 tokens (max engine prompt_tokens over the committed cells below;
+# est_tokens tops out at 27,031 in the dry replay). So ONE history can exceed the whole pool.
+# Proof: results/orchestration/live2/frozen_test/kv025_runnability_probe.json, one dry cell per
+# process at seed 4 on a clean `git archive origin/main` export of b20cb15f, concurrency 3.
+# TWO POSITIVE CONTROLS ON THE INSTRUMENT, BOTH PASS, one of them an arm that is IN this list:
+# covex-v6-base reproduces its committed af8befb9420ad86a / 12,085 and covex-v6-rules reproduces
+# v5-rules-2's committed 18067c4c66bb44b8 / 11,955, both from c5attr_digest_proofs.json P1. A
+# failure there would have been the CHECK and not the arm.
+#
+# NO ARM IS UNABLE TO RUN. What happens instead, established from the code and then measured:
+#
+#   THERE IS NO ADMISSION GATE ON POOL SIZE ANYWHERE. The only consumer that can act on a history
+#   larger than the pool is `CoordState.enact_placement` (cstate.py:498-517), and it EVICTS: it
+#   sorts the on-GPU sessions (offload-wanted first, then least recently touched) and moves them to
+#   host until `used <= cap`. The loop is a bounded `for` over a finite list with a `break`, so when
+#   ONE session alone exceeds the cap it evicts every on-GPU session and exits with `used > cap`.
+#   It does not raise, it does not retry, and it does not loop. The oversized history then reads as
+#   host-resident and is re-materialised when next needed: that is COST, not failure, and the cost
+#   is the thing the condition exists to measure.
+#   `engine_actions.hold_back` (engine_actions.py:276-295) is the one graceful pool-size REFUSAL in
+#   the tree, and it has NO CALLER on origin/main, so it is not what these cells exercise.
+#   `arms_policy.live2_configure` raises only on a NON-POSITIVE pool (arms_policy.py:354-357); 15,736
+#   is positive. The D175 over-limit rule is at 32,768 and is independent of the pool; the largest
+#   observed prompt is 26,955, so it stays unexercised at seeds 4 and 5, as study_frozen_test.md:184
+#   already records.
+#
+# PER-ARM RUNNABILITY. Dry cell at 15,736 with kv_capacity_enforced TRUE (which `test_hybrid.dry`
+# does not set, so the probe builds the coordinator itself to run the regime these cells run);
+# `wall_s` pairs are the does-it-spin check; `evicted` is from the COMMITTED LIVE _kv0.5 cells'
+# own `coordinator_result.json.memory_pressure`; `over 15,736` counts engine `prompt_tokens`
+# above the 0.25x pool in those same committed cells, falling back to the arm's 1x _L3_epg_rq30
+# cells where no _kv0.5 cell exists. `n/a` means THE READ WAS NOT AVAILABLE AND IS NOT A ZERO:
+# eco-llm has no _kv0.5 cell at all (it is not in the driver's _kv0.5 arm list) and mooncake's
+# s4 cell predates the memory_pressure record. Every `0` in the table is a read value.
+#
+# | arm | dry 0.25x | raised | wall_s 0.25x / 1x | dry digest 0.25x vs 1x | dry built_tok max | dry epochs over cap 0.25x / 1x | live 0.5x evicted s4/s5 | over 15,736 s4/s5 | max prompt tok |
+# |---|---|---|---|---|---|---|---|---|---|
+# | llf | RAN, 14,075 rows | none | 313 / 315 | SAME (961be8fe4942d86b) | 13,891 | 8 / 0 | 2 / 4 | 20 / 2 | 26,940 |
+# | mooncake | RAN, 12,742 rows | none | 293 / 293 | SAME (7544b3aa16433c70) | 0 | 0 / 0 | n/a / 0 | 0 / 0 | 13,005 |
+# | simplestream | RAN, 12,253 rows | none | 241 / 240 | SAME (870a3c3586d1b537) | 0 | 0 / 0 | 0 / 0 | 0 / 0 | 7,140 |
+# | eco-llm | RAN, 12,253 rows | none | 236 / 235 | SAME (f32fa95c6953c64e) | 0 | 0 / 0 | n/a / n/a | 0 / 0 | 13,340 |
+# | covex-v6-base | RAN, 12,085 rows | none | 302 / 247 | SAME (af8befb9420ad86a) | 0 | 0 / 0 | 0 / 0 | 0 / 0 | 13,334 |
+# | covex-v6-rules | RAN, 11,955 rows | none | 224 / 231 | SAME (18067c4c66bb44b8) | 7,289 | 14 / 0 | 5 / 9 | 55 / 37 | 26,955 |
+#
+# HOW TO READ THAT TABLE, because the two halves say different things and must not be merged:
+#
+#   NOTHING RAISES AND NOTHING SPINS. All six arms completed the dry 0.25x cell with no exception,
+#   and the 0.25x wall time stays within 1.22x of the same arm's 1x wall time (worst case covex-v6-base at
+#   302 s against 247 s), which is the direct evidence against a retry loop. The residual spread
+#   is host-load noise at concurrency 3 and is not read as a pool effect.
+#
+#   THE DRY DECISION DIGEST IS UNCHANGED FOR EVERY ARM. The pool moves ZERO decisions in dry. For
+#   llf, mooncake, simplestream and eco-llm that is STRUCTURAL and not a measurement artefact: the
+#   pool reaches those arms only as `self._caps` (arms.py:82), which is WRITTEN ONCE AND NEVER READ
+#   anywhere in the tree, so it is a write-only field in CLAUDE.md Step 2's sense and those arms
+#   CANNOT observe the pool. For the two covex arms the pool IS read on a decision path
+#   (policy/rollout.py:411 and policy/coordinator.py:569 via `params.gpu_kv_capacity_tokens`), and
+#   it still moved no dry decision at this seed.
+#
+#   THE MECHANISM IS NOT THEREFORE ABSENT, AND THIS IS THE DISTINCTION THAT DECIDES WHETHER THESE
+#   CELLS ARE WORTH GPU TIME. Enforcement DID fire, on exactly two of the six arms, and on the
+#   SAME two in dry and in the committed live cells, which is the consistency check: in dry at
+#   0.25x llf went from 0 epochs over cap to 8 (peak GPU 23,650, host peak 26,913) and
+#   covex-v6-rules from 0 to 14 (peak GPU 16,747, host peak 47,588); LIVE at 0.5x llf evicted 2
+#   and 4 times and covex-v6-rules 5 and 9, against 0 evictions at 1x for both. An eviction
+#   changes what a later prefill COSTS, not what the arm DECIDES, and the dry harness has no
+#   engine and so cannot price it. So a 0.25x cell of llf or covex-v6-rules is NOT a guaranteed
+#   null: the effect lives in latency and GPU time, which only a live cell can measure, and that
+#   is the whole reason these two cells are worth the GPU.
+#
+#   FOR mooncake, simplestream, eco-llm AND covex-v6-base THE POOL CANNOT BIND AT ALL, and that is
+#   a PRE-REGISTERED EXPECTATION OF A NULL rather than a surprise to be explained afterwards. In
+#   every committed cell of those four arms, at 1x and at 0.5x, GPU `peak_tokens` is 0, `resident`
+#   is 0 and `evicted` is 0, because `enact_placement` only considers sessions with
+#   `built_tokens > 0` (cstate.py:448) and those arms never build a prefix; the dry probe reproduces
+#   `built_tokens_max` 0 for covex-v6-base. Their largest prompt is also BELOW the pool (7,140 to
+#   13,340), so not one request of theirs can exceed it. Under CLAUDE.md Rule 2 a null from those
+#   four cells is INCONCLUSIVE - UNEXERCISED, and it must be reported as such and never as evidence
+#   that memory pressure does not matter. They are posted because the sweep needs the matched
+#   comparator at the same memory, which is exactly the reason rung 4's list gives for its own
+#   matched-memory control, and because 0 of 12,000 epochs over cap is itself the measurement for
+#   an arm that holds no KV.
+#
+# ======================================================================================
+# ONE THING THE OPERATOR MUST DECIDE, FLAGGED AND NOT DECIDED HERE.
+# ======================================================================================
+#
+# A REAL-ENGINE 0.25x CONDITION NOW EXISTS AND IS NOT WHAT THIS LIST POSTS. Commits 72e2d718 and
+# 3c79183c added and verified a launcher entry for exactly
+#
+#     --num-gpu-blocks-override 984 --max-model-len 15744
+#
+# (984 blocks of 16 = 15,744 tokens), allowlisted in study_live2_pilot.py, and driver v30 will take
+# server flags from fields 5+ of ANY GATED list and label the cell engine-kv-override[...]. That
+# condition SHRINKS THE ENGINE; this list's tag condition does not. The two are not
+# interchangeable, and under the real one every prompt over 15,744 tokens is ENGINE-REFUSED, which
+# by the committed counts above would hit llf (20 and 2 requests) and covex-v6-rules (55 and 37)
+# and NO OTHER ARM of the six. The flags must be written in the declared order or the allowlist's
+# exact match halts the driver. WHICH CONDITION D189 ITEM 1 WANTS IS THE USER'S CALL; this list
+# posts the TAG condition it was asked for, and posts NO real-engine line.
+#
+# WORKLOAD, identical to the _kv0.5 sweep: 16 devices, 1,200 s, ratio 40:40:20, robot question set
+# lh_req, single-shot set ss2, dashcam_format EP-G, robot upload PER-FRAME, robot_reask_mean_s 30.0
+# (rq30), deadlines dashcam 1.0 s / robot 3.0 s (_L3) / single-shot 2.0 s. Tag _kv0.25_L3_epg_rq30.
+#
+llf 16 4 _kv0.25_L3_epg_rq30
+mooncake 16 4 _kv0.25_L3_epg_rq30
+simplestream 16 4 _kv0.25_L3_epg_rq30
+eco-llm 16 4 _kv0.25_L3_epg_rq30
+covex-v6-base 16 4 _kv0.25_L3_epg_rq30
+covex-v6-rules 16 4 _kv0.25_L3_epg_rq30
+llf 16 5 _kv0.25_L3_epg_rq30
+mooncake 16 5 _kv0.25_L3_epg_rq30
+simplestream 16 5 _kv0.25_L3_epg_rq30
+eco-llm 16 5 _kv0.25_L3_epg_rq30
+covex-v6-base 16 5 _kv0.25_L3_epg_rq30
+covex-v6-rules 16 5 _kv0.25_L3_epg_rq30

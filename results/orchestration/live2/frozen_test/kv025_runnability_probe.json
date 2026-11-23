@@ -1,0 +1,1118 @@
+{
+ "_what": "D189 item 1, the check that had to come before posting: can each of the six edge-condition arms RUN AT ALL at the 0.25x GPU KV pool of 15,736 tokens, given that a single recall history on this workload reaches about 26,900 tokens and so can exceed the WHOLE logical pool.",
+ "_pool": {
+  "tokens_1x": 62944,
+  "tokens_0.5x": 31472,
+  "tokens_0.25x": 15736,
+  "driver_line": "experiments/orchestration/study_frozen_grid_driver_v28.sh:85  case \"$tag\" in *_kv0.5*) lflag=\"$lflag --gpu-kv-tokens 31472\";; *_kv0.25*) lflag=\"$lflag --gpu-kv-tokens 15736\";; esac",
+  "default_source": "experiments/orchestration/live2/run_live2_real.py:130 (--gpu-kv-tokens default 62944) and experiments/orchestration/live2/tests/test_live2_coord.py:40 (GPU_KV = 62_944); 15,736 = 62,944 / 4 exactly",
+  "enforcement": "every frozen-grid cell runs --kv-capacity-enforced (study_frozen_grid_driver_v28.sh:130)",
+  "caveat": "_kv0.25 changes the HARNESS'S LOGICAL pool only, the coordinator's belief plus enforcement at --gpu-kv-tokens 15736. THE ENGINE'S REAL vLLM ALLOCATION IS PINNED AND UNCHANGED, exactly as the driver's own D151 comment says for _kv0.5."
+ },
+ "_protocol": {
+  "clean_checkout": "git archive origin/main at b20cb15f9b44ae2af2a97f5053734f372bccac58, extracted to a scratch tree; NOT the shared worktree. arms_v6cf is deliberately NOT registered, because arms.py reverted its registration on origin/main (cf_protect_defer calls cf_objective.attainment_margin at import time and that function is in no commit); importing it would have killed this probe on a clean checkout for every arm.",
+  "one_cell_per_process": true,
+  "concurrency": "3 concurrent dry cells throughout, declared because host load can perturb a dry digest (d184_r3_wallclock_probe.json)",
+  "digest_recipe": "sha256(json.dumps(rows without arm_version, sort_keys=True, separators=(',',':'), default=float))[:16], the committed recipe",
+  "posted_knobs": {
+   "ratio": "40:40:20",
+   "robot_question_set": "lh_req",
+   "ss_question_set": "ss2",
+   "dashcam_format": "epg",
+   "robot_upload": "per-frame",
+   "robot_reask_mean_s": 30.0,
+   "n_devices": 16,
+   "run_s": 1200.0,
+   "seed": 4,
+   "planner_wall_clock_cutoff": "patched off"
+  },
+  "script": "experiments/orchestration/live2/kv025_runnability_probe.py",
+  "script_note": "the committed file is BYTE-IDENTICAL (sha256 026c6ef5088373abef10b3d9e639950fcf7f9a1cefc02f3677ab7f6dcc886630) to the file that was executed, which sat at experiments/orchestration/live2/kv025_probe.py inside the clean export; it must be run FROM the live2 directory, since it needs its own directory on sys.path",
+  "what_a_dry_cell_CANNOT_show_here": "the COST of an eviction. A dry cell has no engine, so a history that enforcement pushed to host is never re-prefilled against a real prefill curve. Every cost statement in this file is therefore taken from COMMITTED LIVE cells, never from the replay, and the replay is used only for (a) does it raise, (b) does it spin, (c) does the pool move a decision, (d) does enforcement reach the eviction branch."
+ },
+ "positive_control_on_the_instrument": {
+  "_claim": "a known-good committed arm must reproduce its committed dry digest through THIS runner, else the check is broken and not the arm",
+  "arm": "covex-v6-base",
+  "kv_scale": 1.0,
+  "enforcement": false,
+  "committed": {
+   "digest": "af8befb9420ad86a",
+   "rows": 12085,
+   "source": "results/orchestration/live2/frozen_test/c5attr_digest_proofs.json P1"
+  },
+  "measured": {
+   "digest": "af8befb9420ad86a",
+   "rows": 12085,
+   "wall_s": 248.59
+  },
+  "pass": true
+ },
+ "second_positive_control": {
+  "_claim": "a second committed arm, this time one that is IN the posted six, reproduces its committed dry digest through this runner at 1x WITH enforcement on",
+  "arm": "covex-v6-rules",
+  "alias": "v5-rules-2",
+  "kv_scale": 1.0,
+  "enforcement": true,
+  "committed": {
+   "digest": "18067c4c66bb44b8",
+   "rows": 11955,
+   "source": "results/orchestration/live2/frozen_test/c5attr_digest_proofs.json P1 (as v5-rules-2)"
+  },
+  "measured": {
+   "digest": "18067c4c66bb44b8",
+   "rows": 11955
+  },
+  "pass": true
+ },
+ "pool_binds_which_arms": {
+  "_claim": "the dry replay and the committed LIVE cells agree on WHICH of the six arms the pool can bind, which is consistency check 1 for this probe",
+  "binds": [
+   "llf",
+   "covex-v6-rules"
+  ],
+  "cannot_bind": [
+   "mooncake",
+   "simplestream",
+   "eco-llm",
+   "covex-v6-base"
+  ],
+  "why": "`enact_placement` only considers sessions with `built_tokens > 0` (cstate.py:448); the four non-binding arms never build a prefix, so `built_tokens_max` is 0 in dry and `peak_tokens` / `resident` / `evicted` are 0 in every committed cell of theirs at 1x and at 0.5x alike",
+  "dry_built_tokens_max": {
+   "llf": 13891,
+   "mooncake": 0,
+   "simplestream": 0,
+   "eco-llm": 0,
+   "covex-v6-base": 0,
+   "covex-v6-rules": 7289
+  },
+  "dry_epochs_over_cap_0.25x": {
+   "llf": 8,
+   "mooncake": 0,
+   "simplestream": 0,
+   "eco-llm": 0,
+   "covex-v6-base": 0,
+   "covex-v6-rules": 14
+  },
+  "dry_epochs_over_cap_1x": {
+   "llf": 0,
+   "mooncake": 0,
+   "simplestream": 0,
+   "eco-llm": 0,
+   "covex-v6-base": 0,
+   "covex-v6-rules": 0
+  },
+  "dry_host_peak_tokens_0.25x": {
+   "llf": 26913,
+   "mooncake": 0,
+   "simplestream": 0,
+   "eco-llm": 0,
+   "covex-v6-base": 0,
+   "covex-v6-rules": 47588
+  }
+ },
+ "server_start_at_0.25x": {
+  "_claim": "WHETHER THE SERVER CAN START AT 15,736 IS UNVERIFIED ON HARDWARE FOR THESE SIX ARMS and is NOT asserted here. No server was started: the H100 owns the GPU and a run is in progress.",
+  "evidence_strongest_first": [
+   {
+    "kind": "a _kv0.25-tagged cell has already run to a VALID result, count of ONE",
+    "cell": "warm-all-lru_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rf",
+    "gpu_kv_tokens": 15736,
+    "kv_capacity_enforced": true,
+    "memory_setting": "tight",
+    "server_startup_s": 69.7,
+    "cell_json": {
+     "err": null,
+     "run_valid": true,
+     "digests_equal": true,
+     "score_ok": true
+    },
+    "engine_prompt_tokens": {
+     "n": 9511,
+     "max": 26921,
+     "p50": 3760,
+     "n_over_15736": 49
+    },
+    "register": "a DIFFERENT arm and a different tag suffix (_rf, not _rq30), so it is evidence that the SETTING runs, not that these six arms do"
+   },
+   {
+    "kind": "the _kv0.5 sweep is running now through the same driver line",
+    "landed_and_valid_of_the_12_arm_seed_pairs": 10,
+    "missing": "eco-llm at both seeds (it is not in the driver's _kv0.5 arm list)",
+    "server_startup_s_range": [
+     63.8,
+     78.9
+    ]
+   },
+   {
+    "kind": "the tag changes only the harness's LOGICAL pool, so a _kv0.25 cell launches the SAME pinned server as every other cell",
+    "source": "commit 72e2d718: the H100 read the _kv0.5 SERVER LOGS and vLLM's own GPU KV cache stayed at 62,944 tokens throughout",
+    "register": "an argument, not a measurement"
+   },
+   {
+    "kind": "rung 4's dry 0.25x probe",
+    "pd_free_kv_min": 0,
+    "pd_free_kv_max": 15736,
+    "source": "results/orchestration/live2/frozen_test/d187_cfpd_c5attr_proofs.json",
+    "register": "shows 15,736 is the figure the harness uses, not that a server starts"
+   }
+  ],
+  "instruction": "confirm on the FIRST cell before committing the other eleven; driver v30:153 logs the engine-reported GPU KV pool beside the logical one"
+ },
+ "a_different_condition_not_posted": {
+  "_claim": "a REAL-engine 0.25x condition now exists and is NOT what KV025_CELLS posts; which condition D189 item 1 wants is the user's call",
+  "flags": "--num-gpu-blocks-override 984 --max-model-len 15744",
+  "order_matters": "the allowlist in study_live2_pilot.py is an EXACT list match, so a transposed line halts the driver",
+  "commits": [
+   "72e2d718",
+   "3c79183c"
+  ],
+  "consequence": "it SHRINKS THE ENGINE, and every prompt over 15,744 tokens is ENGINE-REFUSED; by the committed counts that is llf (20 and 2 requests) and covex-v6-rules (55 and 37) and no other arm of the six"
+ },
+ "per_arm": [
+  {
+   "arm": "llf",
+   "dry_0.25x": {
+    "ran": true,
+    "raised": null,
+    "gpu_kv_tokens": 15736,
+    "digest": "961be8fe4942d86b",
+    "rows": 14075,
+    "wall_s": 312.65,
+    "kv_capacity_enforced_on_state": true,
+    "est_tokens_max": 27031,
+    "built_tokens_max": 13891,
+    "n_sessions_est_over_pool": 13,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 8,
+     "peak_tokens": 23650,
+     "intervals": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "_open": 0,
+     "host_peak_tokens": 26913,
+     "host_epochs_over_cap": 0
+    },
+    "decision_kinds": {
+     "decline": 78,
+     "defer": 1444,
+     "release_monitor": 11764,
+     "release_recall": 410,
+     "release_whole": 379
+    }
+   },
+   "dry_1x": {
+    "ran": true,
+    "raised": null,
+    "gpu_kv_tokens": 62944,
+    "digest": "961be8fe4942d86b",
+    "rows": 14075,
+    "wall_s": 314.78,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 0,
+     "peak_tokens": 42601,
+     "intervals": [],
+     "_open": 0,
+     "host_peak_tokens": 0,
+     "host_epochs_over_cap": 0
+    }
+   },
+   "dry_pool_moved_a_decision": false,
+   "live_committed_memory_pressure": {
+    "s4_1x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 62944,
+     "pressure": {
+      "epochs": 11999,
+      "epochs_over_cap": 0,
+      "peak_tokens": 39811,
+      "intervals": [],
+      "host_peak_tokens": 0,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 0
+     },
+     "enact_placement_totals": {
+      "calls": 11999,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 0,
+      "resident": 235
+     }
+    },
+    "s4_0.5x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 31472,
+     "pressure": {
+      "epochs": 12000,
+      "epochs_over_cap": 2,
+      "peak_tokens": 33424,
+      "intervals": [
+       1,
+       1
+      ],
+      "host_peak_tokens": 10021,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 2
+     },
+     "enact_placement_totals": {
+      "calls": 12000,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 2,
+      "resident": 241
+     }
+    },
+    "s5_1x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 62944,
+     "pressure": {
+      "epochs": 11996,
+      "epochs_over_cap": 0,
+      "peak_tokens": 46282,
+      "intervals": [],
+      "host_peak_tokens": 0,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 0
+     },
+     "enact_placement_totals": {
+      "calls": 11996,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 0,
+      "resident": 273
+     }
+    },
+    "s5_0.5x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 31472,
+     "pressure": {
+      "epochs": 11999,
+      "epochs_over_cap": 4,
+      "peak_tokens": 35404,
+      "intervals": [
+       1,
+       1,
+       1,
+       1
+      ],
+      "host_peak_tokens": 16982,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 4
+     },
+     "enact_placement_totals": {
+      "calls": 11999,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 4,
+      "resident": 280
+     }
+    }
+   },
+   "live_committed_prompt_tokens": {
+    "s4_1x": {
+     "cell": "llf_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "pool": 62944,
+     "enforced": true,
+     "server_startup_s": 66.8,
+     "n_requests": 10504,
+     "prompt_tokens_max": 26940,
+     "prompt_tokens_p50": 3422,
+     "n_over_15736": 17,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    },
+    "s4_0.5x": {
+     "cell": "llf_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+     "pool": 31472,
+     "enforced": true,
+     "server_startup_s": 69.9,
+     "n_requests": 10674,
+     "prompt_tokens_max": 26940,
+     "prompt_tokens_p50": 3422,
+     "n_over_15736": 20,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    },
+    "s5_1x": {
+     "cell": "llf_n16_s5_1200s_h27_3t_L3_epg_rq30",
+     "pool": 62944,
+     "enforced": true,
+     "server_startup_s": 66.8,
+     "n_requests": 11570,
+     "prompt_tokens_max": 17974,
+     "prompt_tokens_p50": 3422,
+     "n_over_15736": 2,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    },
+    "s5_0.5x": {
+     "cell": "llf_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+     "pool": 31472,
+     "enforced": true,
+     "server_startup_s": 66.8,
+     "n_requests": 11604,
+     "prompt_tokens_max": 17974,
+     "prompt_tokens_p50": 3422,
+     "n_over_15736": 2,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    }
+   },
+   "live_0.5x_evicted": [
+    2,
+    4
+   ],
+   "live_0.5x_resident": [
+    241,
+    280
+   ]
+  },
+  {
+   "arm": "mooncake",
+   "dry_0.25x": {
+    "ran": true,
+    "raised": null,
+    "gpu_kv_tokens": 15736,
+    "digest": "7544b3aa16433c70",
+    "rows": 12742,
+    "wall_s": 293.24,
+    "kv_capacity_enforced_on_state": true,
+    "est_tokens_max": 27031,
+    "built_tokens_max": 0,
+    "n_sessions_est_over_pool": 13,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 0,
+     "peak_tokens": 0,
+     "intervals": [],
+     "_open": 0,
+     "host_peak_tokens": 0,
+     "host_epochs_over_cap": 0
+    },
+    "decision_kinds": {
+     "decline": 77,
+     "release_monitor": 11764,
+     "release_recall": 412,
+     "state_action": 489
+    }
+   },
+   "dry_1x": {
+    "ran": true,
+    "raised": null,
+    "gpu_kv_tokens": 62944,
+    "digest": "7544b3aa16433c70",
+    "rows": 12742,
+    "wall_s": 292.88,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 0,
+     "peak_tokens": 0,
+     "intervals": [],
+     "_open": 0,
+     "host_peak_tokens": 0,
+     "host_epochs_over_cap": 0
+    }
+   },
+   "dry_pool_moved_a_decision": false,
+   "live_committed_memory_pressure": {
+    "s4_1x": null,
+    "s4_0.5x": null,
+    "s5_1x": null,
+    "s5_0.5x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 31472,
+     "pressure": {
+      "epochs": 11926,
+      "epochs_over_cap": 0,
+      "peak_tokens": 0,
+      "intervals": [],
+      "host_peak_tokens": 0,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 0
+     },
+     "enact_placement_totals": {
+      "calls": 11926,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 0,
+      "resident": 0
+     }
+    }
+   },
+   "live_committed_prompt_tokens": {
+    "s4_1x": {
+     "cell": "mooncake_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "pool": 62944,
+     "enforced": true,
+     "server_startup_s": 66.8,
+     "n_requests": 8497,
+     "prompt_tokens_max": 12898,
+     "prompt_tokens_p50": 3760,
+     "n_over_15736": 0,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    },
+    "s4_0.5x": {
+     "cell": "mooncake_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+     "pool": 31472,
+     "enforced": true,
+     "server_startup_s": 66.8,
+     "n_requests": 7894,
+     "prompt_tokens_max": 12898,
+     "prompt_tokens_p50": 3760,
+     "n_over_15736": 0,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    },
+    "s5_1x": {
+     "cell": "mooncake_n16_s5_1200s_h27_3t_L3_epg_rq30",
+     "pool": 62944,
+     "enforced": true,
+     "server_startup_s": 66.7,
+     "n_requests": 9743,
+     "prompt_tokens_max": 13235,
+     "prompt_tokens_p50": 3760,
+     "n_over_15736": 0,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    },
+    "s5_0.5x": {
+     "cell": "mooncake_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+     "pool": 31472,
+     "enforced": true,
+     "server_startup_s": 66.7,
+     "n_requests": 8390,
+     "prompt_tokens_max": 13005,
+     "prompt_tokens_p50": 3760,
+     "n_over_15736": 0,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    }
+   },
+   "live_0.5x_evicted": [
+    null,
+    0
+   ],
+   "live_0.5x_resident": [
+    null,
+    0
+   ]
+  },
+  {
+   "arm": "simplestream",
+   "dry_0.25x": {
+    "ran": true,
+    "raised": null,
+    "gpu_kv_tokens": 15736,
+    "digest": "870a3c3586d1b537",
+    "rows": 12253,
+    "wall_s": 240.78,
+    "kv_capacity_enforced_on_state": true,
+    "est_tokens_max": 27031,
+    "built_tokens_max": 0,
+    "n_sessions_est_over_pool": 13,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 0,
+     "peak_tokens": 0,
+     "intervals": [],
+     "_open": 0,
+     "host_peak_tokens": 0,
+     "host_epochs_over_cap": 0
+    },
+    "decision_kinds": {
+     "release_monitor": 11764,
+     "release_recall": 489
+    }
+   },
+   "dry_1x": {
+    "ran": true,
+    "raised": null,
+    "gpu_kv_tokens": 62944,
+    "digest": "870a3c3586d1b537",
+    "rows": 12253,
+    "wall_s": 239.86,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 0,
+     "peak_tokens": 0,
+     "intervals": [],
+     "_open": 0,
+     "host_peak_tokens": 0,
+     "host_epochs_over_cap": 0
+    }
+   },
+   "dry_pool_moved_a_decision": false,
+   "live_committed_memory_pressure": {
+    "s4_1x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 62944,
+     "pressure": {
+      "epochs": 11999,
+      "epochs_over_cap": 0,
+      "peak_tokens": 0,
+      "intervals": [],
+      "host_peak_tokens": 0,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 0
+     },
+     "enact_placement_totals": {
+      "calls": 11999,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 0,
+      "resident": 0
+     }
+    },
+    "s4_0.5x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 31472,
+     "pressure": {
+      "epochs": 11997,
+      "epochs_over_cap": 0,
+      "peak_tokens": 0,
+      "intervals": [],
+      "host_peak_tokens": 0,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 0
+     },
+     "enact_placement_totals": {
+      "calls": 11997,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 0,
+      "resident": 0
+     }
+    },
+    "s5_1x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 62944,
+     "pressure": {
+      "epochs": 11998,
+      "epochs_over_cap": 0,
+      "peak_tokens": 0,
+      "intervals": [],
+      "host_peak_tokens": 0,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 0
+     },
+     "enact_placement_totals": {
+      "calls": 11998,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 0,
+      "resident": 0
+     }
+    },
+    "s5_0.5x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 31472,
+     "pressure": {
+      "epochs": 11998,
+      "epochs_over_cap": 0,
+      "peak_tokens": 0,
+      "intervals": [],
+      "host_peak_tokens": 0,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 0
+     },
+     "enact_placement_totals": {
+      "calls": 11998,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 0,
+      "resident": 0
+     }
+    }
+   },
+   "live_committed_prompt_tokens": {
+    "s4_1x": {
+     "cell": "simplestream_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "pool": 62944,
+     "enforced": true,
+     "server_startup_s": 75.8,
+     "n_requests": 12244,
+     "prompt_tokens_max": 7140,
+     "prompt_tokens_p50": 3422,
+     "n_over_15736": 0,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    },
+    "s4_0.5x": {
+     "cell": "simplestream_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+     "pool": 31472,
+     "enforced": true,
+     "server_startup_s": 66.7,
+     "n_requests": 12246,
+     "prompt_tokens_max": 7140,
+     "prompt_tokens_p50": 3422,
+     "n_over_15736": 0,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    },
+    "s5_1x": {
+     "cell": "simplestream_n16_s5_1200s_h27_3t_L3_epg_rq30",
+     "pool": 62944,
+     "enforced": true,
+     "server_startup_s": 78.9,
+     "n_requests": 12241,
+     "prompt_tokens_max": 7140,
+     "prompt_tokens_p50": 3422,
+     "n_over_15736": 0,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    },
+    "s5_0.5x": {
+     "cell": "simplestream_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+     "pool": 31472,
+     "enforced": true,
+     "server_startup_s": 66.8,
+     "n_requests": 12240,
+     "prompt_tokens_max": 7140,
+     "prompt_tokens_p50": 3422,
+     "n_over_15736": 0,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    }
+   },
+   "live_0.5x_evicted": [
+    0,
+    0
+   ],
+   "live_0.5x_resident": [
+    0,
+    0
+   ]
+  },
+  {
+   "arm": "eco-llm",
+   "dry_0.25x": {
+    "ran": true,
+    "raised": null,
+    "gpu_kv_tokens": 15736,
+    "digest": "f32fa95c6953c64e",
+    "rows": 12253,
+    "wall_s": 236.41,
+    "kv_capacity_enforced_on_state": true,
+    "est_tokens_max": 27031,
+    "built_tokens_max": 0,
+    "n_sessions_est_over_pool": 13,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 0,
+     "peak_tokens": 0,
+     "intervals": [],
+     "_open": 0,
+     "host_peak_tokens": 0,
+     "host_epochs_over_cap": 0
+    },
+    "decision_kinds": {
+     "release_monitor": 11764,
+     "release_recall": 489
+    }
+   },
+   "dry_1x": {
+    "ran": true,
+    "raised": null,
+    "gpu_kv_tokens": 62944,
+    "digest": "f32fa95c6953c64e",
+    "rows": 12253,
+    "wall_s": 235.06,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 0,
+     "peak_tokens": 0,
+     "intervals": [],
+     "_open": 0,
+     "host_peak_tokens": 0,
+     "host_epochs_over_cap": 0
+    }
+   },
+   "dry_pool_moved_a_decision": false,
+   "live_committed_memory_pressure": {
+    "s4_1x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 62944,
+     "pressure": {
+      "epochs": 11939,
+      "epochs_over_cap": 0,
+      "peak_tokens": 0,
+      "intervals": [],
+      "host_peak_tokens": 0,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 0
+     },
+     "enact_placement_totals": {
+      "calls": 11939,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 0,
+      "resident": 0
+     }
+    },
+    "s4_0.5x": null,
+    "s5_1x": null,
+    "s5_0.5x": null
+   },
+   "live_committed_prompt_tokens": {
+    "s4_1x": {
+     "cell": "eco-llm_n16_s4_1200s_h27_3t_L3_epg_rq30",
+     "pool": 62944,
+     "enforced": true,
+     "server_startup_s": 66.8,
+     "n_requests": 8501,
+     "prompt_tokens_max": 12898,
+     "prompt_tokens_p50": 3760,
+     "n_over_15736": 0,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    },
+    "s4_0.5x": null,
+    "s5_1x": {
+     "cell": "eco-llm_n16_s5_1200s_h27_3t_L3_epg_rq30",
+     "pool": 62944,
+     "enforced": true,
+     "server_startup_s": 63.8,
+     "n_requests": 9441,
+     "prompt_tokens_max": 13340,
+     "prompt_tokens_p50": 3422,
+     "n_over_15736": 0,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    },
+    "s5_0.5x": null
+   },
+   "live_0.5x_evicted": [
+    null,
+    null
+   ],
+   "live_0.5x_resident": [
+    null,
+    null
+   ]
+  },
+  {
+   "arm": "covex-v6-base",
+   "dry_0.25x": {
+    "ran": true,
+    "raised": null,
+    "gpu_kv_tokens": 15736,
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "wall_s": 302.36,
+    "kv_capacity_enforced_on_state": true,
+    "est_tokens_max": 27031,
+    "built_tokens_max": 0,
+    "n_sessions_est_over_pool": 13,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 0,
+     "peak_tokens": 0,
+     "intervals": [],
+     "_open": 0,
+     "host_peak_tokens": 0,
+     "host_epochs_over_cap": 0
+    },
+    "decision_kinds": {
+     "decline": 77,
+     "defer": 12,
+     "release_monitor": 11584,
+     "release_recall": 412
+    }
+   },
+   "dry_1x": {
+    "ran": true,
+    "raised": null,
+    "gpu_kv_tokens": 62944,
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "wall_s": 247.19,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 0,
+     "peak_tokens": 0,
+     "intervals": [],
+     "_open": 0,
+     "host_peak_tokens": 0,
+     "host_epochs_over_cap": 0
+    }
+   },
+   "dry_pool_moved_a_decision": false,
+   "live_committed_memory_pressure": {
+    "s4_1x": null,
+    "s4_0.5x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 31472,
+     "pressure": {
+      "epochs": 11999,
+      "epochs_over_cap": 0,
+      "peak_tokens": 0,
+      "intervals": [],
+      "host_peak_tokens": 0,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 0
+     },
+     "enact_placement_totals": {
+      "calls": 11999,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 0,
+      "resident": 0
+     }
+    },
+    "s5_1x": null,
+    "s5_0.5x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 31472,
+     "pressure": {
+      "epochs": 12000,
+      "epochs_over_cap": 0,
+      "peak_tokens": 0,
+      "intervals": [],
+      "host_peak_tokens": 0,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 0
+     },
+     "enact_placement_totals": {
+      "calls": 12000,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 0,
+      "resident": 0
+     }
+    }
+   },
+   "live_committed_prompt_tokens": {
+    "s4_1x": null,
+    "s4_0.5x": {
+     "cell": "covex-v6-base_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+     "pool": 31472,
+     "enforced": true,
+     "server_startup_s": 66.8,
+     "n_requests": 10323,
+     "prompt_tokens_max": 13334,
+     "prompt_tokens_p50": 3760,
+     "n_over_15736": 0,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    },
+    "s5_1x": null,
+    "s5_0.5x": {
+     "cell": "covex-v6-base_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+     "pool": 31472,
+     "enforced": true,
+     "server_startup_s": 66.8,
+     "n_requests": 10139,
+     "prompt_tokens_max": 13235,
+     "prompt_tokens_p50": 3422,
+     "n_over_15736": 0,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    }
+   },
+   "live_0.5x_evicted": [
+    0,
+    0
+   ],
+   "live_0.5x_resident": [
+    0,
+    0
+   ]
+  },
+  {
+   "arm": "covex-v6-rules",
+   "dry_0.25x": {
+    "ran": true,
+    "raised": null,
+    "gpu_kv_tokens": 15736,
+    "digest": "18067c4c66bb44b8",
+    "rows": 11955,
+    "wall_s": 224.41,
+    "kv_capacity_enforced_on_state": true,
+    "est_tokens_max": 27031,
+    "built_tokens_max": 7289,
+    "n_sessions_est_over_pool": 13,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 14,
+     "peak_tokens": 16747,
+     "intervals": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+     ],
+     "_open": 0,
+     "host_peak_tokens": 47588,
+     "host_epochs_over_cap": 0
+    },
+    "decision_kinds": {
+     "decline": 29,
+     "defer": 4,
+     "release_monitor": 11299,
+     "release_piece": 163,
+     "release_recall": 460
+    }
+   },
+   "dry_1x": {
+    "ran": true,
+    "raised": null,
+    "gpu_kv_tokens": 62944,
+    "digest": "18067c4c66bb44b8",
+    "rows": 11955,
+    "wall_s": 230.86,
+    "pressure": {
+     "epochs": 12001,
+     "epochs_over_cap": 0,
+     "peak_tokens": 58281,
+     "intervals": [],
+     "_open": 0,
+     "host_peak_tokens": 0,
+     "host_epochs_over_cap": 0
+    }
+   },
+   "dry_pool_moved_a_decision": false,
+   "live_committed_memory_pressure": {
+    "s4_1x": null,
+    "s4_0.5x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 31472,
+     "pressure": {
+      "epochs": 12000,
+      "epochs_over_cap": 5,
+      "peak_tokens": 32706,
+      "intervals": [
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "host_peak_tokens": 33131,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 5
+     },
+     "enact_placement_totals": {
+      "calls": 12000,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 5,
+      "resident": 22
+     }
+    },
+    "s5_1x": null,
+    "s5_0.5x": {
+     "kv_capacity_enforced": true,
+     "gpu_kv_tokens": 31472,
+     "pressure": {
+      "epochs": 12000,
+      "epochs_over_cap": 9,
+      "peak_tokens": 33429,
+      "intervals": [
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1,
+       1
+      ],
+      "host_peak_tokens": 29035,
+      "host_epochs_over_cap": 0,
+      "intervals_n": 9
+     },
+     "enact_placement_totals": {
+      "calls": 12000,
+      "offloaded": 0,
+      "kept_warm": 0,
+      "evicted": 9,
+      "resident": 21
+     }
+    }
+   },
+   "live_committed_prompt_tokens": {
+    "s4_1x": null,
+    "s4_0.5x": {
+     "cell": "covex-v6-rules_n16_s4_1200s_h27_3t_kv0.5_L3_epg_rq30",
+     "pool": 31472,
+     "enforced": true,
+     "server_startup_s": 66.8,
+     "n_requests": 5423,
+     "prompt_tokens_max": 26660,
+     "prompt_tokens_p50": 3422,
+     "n_over_15736": 55,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    },
+    "s5_1x": null,
+    "s5_0.5x": {
+     "cell": "covex-v6-rules_n16_s5_1200s_h27_3t_kv0.5_L3_epg_rq30",
+     "pool": 31472,
+     "enforced": true,
+     "server_startup_s": 66.8,
+     "n_requests": 5819,
+     "prompt_tokens_max": 26955,
+     "prompt_tokens_p50": 3422,
+     "n_over_15736": 37,
+     "run_valid": true,
+     "err": null,
+     "score_ok": true
+    }
+   },
+   "live_0.5x_evicted": [
+    5,
+    9
+   ],
+   "live_0.5x_resident": [
+    22,
+    21
+   ]
+  }
+ ],
+ "_provenance": {
+  "git_commit": "b20cb15f9b44ae2af2a97f5053734f372bccac58",
+  "script": "kv025_runnability_probe.py",
+  "model": "none (dry replay, no engine, no server, no inference)",
+  "device": "flash (CPU)",
+  "n": 13,
+  "timestamp": "2026-11-23T07:52:35.579990",
+  "note": "git_commit is THE COMMIT THE PROBE RAN ON: the probe ran against a clean `git archive origin/main` export of this sha, not the shared worktree."
+ }
+}
