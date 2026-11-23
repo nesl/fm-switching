@@ -316,20 +316,27 @@ def f5():
                           if (f, s) in rh and rh[(f, s)][col] is not None])
             if v1 is None or v2 is None:
                 continue
-            ax.plot([1.0, 0.5], [v1, v2], color=st["color"], marker=st["marker"], ls=st["ls"],
-                    lw=1.6, ms=7, label=(st["label"] if col == "robot_on_time_frac" else None),
-                    zorder=3)
+            # the 0.5x points are a halved SELF-IMPOSED coordinator budget, not a halved engine KV
+            # pool, so the 1x->0.5x segment is drawn dotted and greyed to mark it logical-only.
+            ax.plot([1.0, 0.5], [v1, v2], color=st["color"], marker=st["marker"], ls=":",
+                    lw=1.3, ms=7, alpha=0.75,
+                    label=(st["label"] if col == "robot_on_time_frac" else None), zorder=3)
+        ax.axvspan(0.38, 0.74, color=FL.C["grey"], alpha=0.10, zorder=0)
         ax.set_xticks([0.5, 1.0])
-        ax.set_xticklabels(["0.5x", "1x"])
+        ax.set_xticklabels(["0.5x\n(logical-only)", "1x"])
         ax.set_xlim(0.38, 1.12)
         ax.invert_xaxis()
-        ax.set_xlabel("KV pool size (fraction of deployed)")
+        ax.set_xlabel("KV budget (fraction of deployed)")
         ax.set_title(title, fontsize=9.8)
+        ax.text(0.56, ax.get_ylim()[1], "logical budget,\nnot engine pool", fontsize=6.6,
+                color=FL.C["grey"], va="top", ha="center")
     axes[0].set_ylabel("value (mean over seeds 4 and 5)")
     axes[0].legend(loc="best", fontsize=6.8, ncol=2)
-    fig.suptitle("F5  Memory sweep: full memory (1x) vs half KV pool (0.5x), seeds 4 and 5\n"
-                 "(0.25x is added automatically when the KV025 cells land)", fontsize=10.6, y=1.02)
-    fig.tight_layout(rect=[0, 0, 1, 0.96])
+    fig.suptitle("F5  Budget sweep: full memory (1x) vs halved SELF-IMPOSED KV budget (0.5x, "
+                 "LOGICAL-ONLY)\n0.5x does NOT test engine memory pressure (D189: same server argv, "
+                 "engine pool 62944 both; evidence d189_kv05_logical_only.json). Real-engine 0.25x "
+                 "cells are pending.", fontsize=8.8, y=1.03)
+    fig.tight_layout(rect=[0, 0, 1, 0.95])
     return FL.save(fig, "F5_memory_sweep")
 
 

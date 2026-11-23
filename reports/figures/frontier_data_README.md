@@ -32,11 +32,12 @@ base and rules each cover two raw arm names at different memory: base = hybrid-F
 - covex-v6-state_n16_s4_1200s_h27_3t_L3_epg_rq30: preflight-only stub, absent: cell.json, outcomes.jsonl.gz
 - covex-v6-state_n16_s6_1200s_h27_3t_L3_epg_rq30: preflight-only stub, absent: outcomes.jsonl.gz
 - covex-v6-state_n16_s7_1200s_h27_3t_L3_epg_rq30: preflight-only stub, absent: cell.json, outcomes.jsonl.gz
+- llf_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
 - v5-rules_n16_s7_1200s_h27_3t_L3_epg_rq30: preflight-only stub, absent: cell.json, outcomes.jsonl.gz
 
 ## Provenance
 
-- runs dir last commit: 9fcef35b
+- runs dir last commit: bb2cbf0e
 - scorer score.py last commit: 9803dca0
 - d179_rung2_verdict.py last commit: 302ac817
 - build time is deliberately NOT stamped here: the output is byte-deterministic given the input, so the D190 poll commits only on a real data change. The git commit of this file is the build time of record.

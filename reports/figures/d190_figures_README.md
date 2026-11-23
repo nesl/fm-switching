@@ -59,14 +59,22 @@ Source: the three seed-5 cells covex-v6-state-uo, covex-v6-state-uo-c5attr, cove
 buckets computed with the committed delivery functions (D._committed_delivery, D._within); hold times
 from the D179 scorer's hold_times block.
 
-## F5 memory sweep (F5_memory_sweep)
+## F5 budget sweep (F5_memory_sweep)
 
-Claim: halving the KV pool (1x to 0.5x) leaves robot on-time and alert attainment essentially
-unchanged for every arm that has both cells at seeds 4 and 5, so at this 16-device fleet the KV pool
-is not the binding resource. Only base, rules, and the baselines carry a 0.5x cell today; the covex
-state, C5 and shares arms have no 0.5x cell yet, and the 0.25x column is added automatically when the
-KV025 cells land.
-Source: frontier_data.csv, 1x and 0.5x rows at seeds 4 and 5.
+Claim: the committed 0.5x cells are LOGICAL-ONLY and do NOT test engine memory pressure, so the
+1x to 0.5x segment is drawn dotted and greyed and labelled logical-only on the figure. D189 proved
+from the cells themselves (results/orchestration/live2/frozen_test/d189_kv05_logical_only.json, commit
+bb2cbf0e) that the _kv0.5 and 1x server argv are identical token for token (num-gpu-blocks-override
+absent from both, max-model-len 32768 and gpu-memory-utilization 0.9 in both), so the engine kept its
+full 62944-token pool; the only difference is the coordinator's self-imposed gpu_kv_tokens budget
+belief (31472 vs 62944). Under that halved budget, robot on-time and alert attainment are essentially
+unchanged for the arms that carry both cells (base, rules, and the baselines), which is consistent
+with an arm that cannot observe the budget being unaffected by the condition. This is a budget
+sweep, not a memory sweep. The real-engine 0.25x cells (which shrink vLLM itself) are pending and
+will form the genuine memory condition at the right-hand end; when the 0.25x rung points land they
+carry the D190 (6) id(obs) cache caveat (consistent with the committed rung-2 and rung-3 grid,
+inconsistent with the ladder after the planned joint rerun of rungs 2 to 4).
+Source: frontier_data.csv, 1x and 0.5x rows at seeds 4 and 5; d189_kv05_logical_only.json.
 
 ## Provenance and known gaps
 
