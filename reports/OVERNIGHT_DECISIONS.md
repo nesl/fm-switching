@@ -231,3 +231,39 @@ more accurate and inheriting the admission consequence by accident.
 
 NOTHING WAS CHANGED. The constants are as frozen, with both D180 bounds still import-time assertions
 in share_capacity.py, and r1 and r2 both ran on them.
+
+---
+
+## 2026-11-23 04:45Z DEFECT CAUSED BY MY OWN P0 CHANGE: the r2 cells gzip coordinator_result, and the committed scorer reads it as ABSENT, silently
+
+WHAT HAPPENED. The P0 instrumentation that shipped with the r1 fix serialises
+`release_infeasible_events` and `share_events` into `coordinator_result.json`. That made the file
+large enough that the harness now writes `coordinator_result.json.gz` instead: the r2 s4 cell has
+`coordinator_result.json.gz` at 252 KB where every earlier cell, r1 included, has a plain
+`coordinator_result.json`.
+
+WHY IT IS DANGEROUS RATHER THAN MERELY UNTIDY. The committed pre-registered scorer reads it as
+
+    coord = json.load(open(coord_path)) if os.path.exists(coord_path) else {}
+
+so a missing file yields an EMPTY DICT with NO ERROR AND NO WARNING. Every diagnostic sourced from
+it (`release_infeasible` per type, the share counters, planner abandonment) would read as ABSENT,
+which in this project has repeatedly been mistaken for ZERO. It is the same shape as the faults
+caught all night: a quantity that cannot be read reported as a quantity that is not there.
+
+WHAT IS AND IS NOT AFFECTED. The three pre-registered D179 checks come from `cell.json`'s
+`score.score.sweep[0]` and from `outcomes.jsonl.gz`, NOT from `coordinator_result`, so the VERDICT
+is not affected. The DIAGNOSTICS are. The H100's own per-seed reports read the cell directly and are
+unaffected.
+
+THE FIX APPLIED, and deliberately NOT to the scorer: when assembling a runs directory for scoring,
+decompress `coordinator_result.json.gz` to `coordinator_result.json`. The scorer was pre-registered
+before any shares cell existed and its value comes from not being edited after the data arrives, so
+the input is normalised instead of the instrument. A `.gz` fallback inside the scorer would also be
+defensible as a pure reader fix, but it is not necessary, and the smaller change is the one that
+cannot be argued with tomorrow.
+
+RECORDED FOR TOMORROW: if the scorer is ever rerun by someone assembling a runs directory by hand,
+they must decompress that file first, or the diagnostics silently empty. Worth a one-line guard in
+the scorer that FAILS LOUDLY when `coordinator_result.json.gz` exists and `coordinator_result.json`
+does not, rather than a fallback that quietly succeeds.
