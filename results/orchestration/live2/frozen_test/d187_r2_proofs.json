@@ -1,0 +1,58 @@
+{
+ "_what": "Proofs for the D187 r2 queue-register fix and the covex-v6-state-shares-r2 label. Committed as a FILE without being asked twice: the H100 made the same two requests on r1 (digests asserted only in a header, and no name proof of its own), and the right response to a reviewer asking for something reasonable once is to do it unprompted the next time.",
+ "digest_recipe": "sha256(json.dumps(rows_without_arm_version, sort_keys=True, separators=(',',':'), default=float))[:16], as in /tmp/claude-1001/fresh.py",
+ "cell": "seed 4, 16 devices, 1200 s, ratio 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0",
+ "THE_CHANGE": {
+  "what": "the release re-check's queue input is now self._w.total() (submit to FIRST TOKEN) instead of self._uncached_in_flight (submit to COMPLETION, which includes decode), at both re-check call sites; and W tracking is now UNCONDITIONAL",
+  "why_it_is_an_implementation_bug_not_a_choice": "cost_model_gate_d162.py:97 builds the fitted queue regressor as _queue_ahead over the interval (t_submit, t_submit + first_token_s), and _queue_ahead sums the weight of intervals OPEN AT THE START INSTANT. So the coefficient was estimated against submit-to-first-token work. Feeding it submit-to-completion work gives the model a LARGER quantity than its own regressor, which overestimates the predicted first token and refuses work that would have fitted. This is read from the fit's source, not inferred from behaviour.",
+  "why_W_tracking_had_to_become_unconditional": "it was gated on share admission, so an arm carrying the re-check WITHOUT share admission (covex-v6-state-shares-noadmit) would have read W as 0. That UNDERSTATES the queue, which is the UNSAFE direction, and the fix would have introduced it."
+ },
+ "off_switch_identity_FINAL_CODE": {
+  "verdict": "PASS on both arms, each audited against a value committed BEFORE the change",
+  "cells": [
+   {
+    "arm": "covex-v6-base",
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "identical": true
+   },
+   {
+    "arm": "covex-v6-state-uo",
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "state_decisions": 60934,
+    "identical": true,
+    "why_decisive": "check 2's comparator, AND unconditional W tracking touches every arm, so an unchanged uo is what permits r2 to be compared against the committed rung 2 at all"
+   }
+  ]
+ },
+ "r2_name_proof": {
+  "_what": "covex-v6-state-shares-r2 resolves through run_live2_real.py itself, with a negative control",
+  "probes": {
+   "covex-v6-state-shares-r2": {
+    "arm": "covex-v6-state-shares-r2",
+    "rc": 0,
+    "unknown_arm": false,
+    "tail": "}"
+   },
+   "covex-v6-state-shares-r2-not-an-arm": {
+    "arm": "covex-v6-state-shares-r2-not-an-arm",
+    "rc": 1,
+    "unknown_arm": true,
+    "tail": "KeyError: \"unknown arm 'covex-v6-state-shares-r2-not-an-arm'; known: ['always-cloud-fcfs', 'attentionstore', 'attentionstore-prefetch', 'attentionstore-prefetch-noyield', 'attentionstore-prefetch-off'"
+   }
+  },
+  "verdict": "PASS",
+  "_note": "through run_live2_real.py ITSELF as a subprocess with the posted knobs. The harness imports only `arms` and `hybrid`, so a name that resolves in a friendly process can still die at cell start. The negative control is not optional: without it, 'no KeyError appeared' passes trivially whenever the subprocess failed for another reason."
+ },
+ "WHAT_THESE_PROOFS_DO_NOT_SHOW": "They show the change HARMLESS. They show almost NOTHING about its SIZE. On a dry cell `on_first` never fires because there is no backend, so W drains only at settle and the two quantities nearly coincide: the very difference this fix is about is absent dry. The firing proof is the live r2 cells, against the pass check pre-registered at 3ed47764 with its failure condition, its seed-5 control and its harm bound of at most 10 late robot requests.",
+ "_provenance": {
+  "git_commit": "03138e7ca0b6b7cb7f78de1a64e5bc15b810ad4a",
+  "_note": "stamped to the commit the measurement RAN ON, which is the rule the H100 had to correct me on twice today: once where the field held origin/main at writing time, and once where an artefact was updated after a code change and the stamp was left behind",
+  "script": "fresh.py and a harness name probe, one dry cell per process",
+  "model": null,
+  "device": "flash_cpu",
+  "n": 16,
+  "timestamp": "2026-11-22T20:02:51.411210"
+ }
+}
