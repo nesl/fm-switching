@@ -125,3 +125,4 @@ For a new file `runs/<LIST>` on origin:
 - 18:37 PROVENANCE NOTE for the user: the 02:33Z message carrying the eviction caveat and asking for it to be recorded
   arrived as from="unknown" (from-name A6000), not from flash's bridge session; flash says it did not send it. Likely
   flash's own watchdog-resumed read-only session on the A6000. It was not acted on as a proxy write.
+- 18:43 (interactive session): r1 RE-GATED at 79eedc6 (COLD branch exactly pre-fix; digests re-measured on the final code; r1 name proof with negative control, d187_r1_proofs.json). r1 s4 to s7 from ~18:47, then the _kv0.5 sweep. Provenance of the 02:33Z message settled by flash: its own watchdog-spawned read-only session.
