@@ -71,15 +71,14 @@ class INARVLAdapted(Policy):
         below was a constant and the router's input never moved. The channel is now
         `s.device_scores`: StudyORIN1's committed per-instant score for the instants this device
         has captured, which is what card A1 says this arm reads. The statistics are unchanged.
+
+        D205 (2): the window is the CURRENT EPISODE's scores, not the whole 40-entry deque.
+        The paper's signals describe ONE image; card A1 substitutes a trajectory for them,
+        and a trajectory running across two clip plays is not a substitute for one image.
+        Measured before the slice: 5,289 of 5,499 windows spanned more than one EP-G
+        episode.
         """
-        if s.device_scores is None:
-            raise RuntimeError(
-                "inar-vl was asked to decide on stream %r with NO device score channel. Card A1 "
-                "makes the DEVICE's own score trajectory this arm's image-signal substitute, so "
-                "there is nothing to compute here and a neutral value may not be invented "
-                "(D201 (3) FAIL LOUD). The harness must supply EpisodicStream.device_scores."
-                % getattr(s, "stream_id", None))
-        h = np.asarray([v for v in s.device_scores], dtype=float)
+        h = np.asarray(s.current_episode_device_scores("inar-vl"), dtype=float)
         if len(h) == 0:
             return dict(blur=1.0, exposure=0.5, artifact=0.5, detail=0.0)
         # A weak / flat / noisy device trajectory is the analogue of a degraded image.

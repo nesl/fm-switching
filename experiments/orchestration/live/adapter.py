@@ -12,7 +12,7 @@ WHAT IS LIVE, AND WHERE IT COMES FROM.
 
 | observation field | live source |
 |---|---|
-| `streams[].delivered_scores / _times_s` | what the APPLICATION has actually received: a cloud answer when its request completed, the device's own score otherwise |
+| `streams[].delivered_scores / _times_s` | the shape of what the APPLICATION receives (a cloud answer when its request completed, the device's own score otherwise) but **NOT ITS VALUES**: this harness has no per-instant score source wired, so every value is None = UNKNOWN. Until one is wired, NO SCORE-READING ARM MAY BE RUN HERE, and the seven that read these values RAISE rather than decide. Before D205 both writers put a literal `0.0` here, which is the MAXIMUM of log P(Yes) and made every one of them escalate on every instant. |
 | `streams[].cadence_s`, `frame_count`, `on_cloud` | the orchestrator's own current setting for that stream |
 | `cloud.queued_by_class`, `running_by_class` | the orchestrator's in-flight bookkeeping, cross-checked against the server's `/metrics` |
 | `cloud.gpu_kv_fraction` | the server's `vllm:gpu_cache_usage_perc` |
@@ -169,7 +169,13 @@ class StreamState:
     frame_count: int = 1
     on_cloud: bool = True
     suspend_until_s: float = -1.0
-    delivered: deque = field(default_factory=lambda: deque(maxlen=40))   # (t, score)
+    # D205: `delivered` is the APPLICATION-VISIBLE stream and `delivered_device` is the DEVICE's
+    # own, exactly as live2/cstate.py splits them. `device_score_unknown` counts instants that
+    # arrived with no committed score; one is enough to make the device channel unusable, and
+    # `_observation` then hands the arm None so that a score reader raises.
+    delivered: deque = field(default_factory=lambda: deque(maxlen=40))   # (t, score or None)
+    delivered_device: deque = field(default_factory=lambda: deque(maxlen=40))
+    device_score_unknown: int = 0
     last_issue_s: float = -1.0
 
 
@@ -220,6 +226,14 @@ class LiveOrchestrator:
                 stream_id=s.stream_id,
                 delivered_scores=tuple(v for _t, v in s.delivered),
                 delivered_times_s=tuple(round(t, 3) for t, _v in s.delivered),
+                # D205: None, not a short tuple. A shortened tuple reads as "this stream has had
+                # fewer instants", which is the shape that let a constant pass for a trajectory.
+                device_scores=(None if s.device_score_unknown else
+                               tuple(v for _t, v, _e in s.delivered_device)),
+                device_times_s=(None if s.device_score_unknown else
+                                tuple(round(t, 3) for t, _v, _e in s.delivered_device)),
+                device_episode_ids=(None if s.device_score_unknown else
+                                    tuple(e for _t, _v, e in s.delivered_device)),
                 cadence_s=s.cadence_s, frame_count=s.frame_count, on_cloud=s.on_cloud,
                 network=NetworkState(connected=True, uplink_bps=C.UPLINK_BPS, rtt_s=C.RTT_S)))
         m = self.be.metrics()
@@ -416,7 +430,16 @@ class LiveOrchestrator:
                 # the application reads the device's own score, at the device's own cadence
                 if t - s.last_issue_s >= C.DEVICE_CADENCE_S:
                     s.last_issue_s = t
-                    s.delivered.append((t + self.device_latency_s, 0.0))
+                    # D205 (2a): the REAL score or RAISE, and NOTHING neutral. This harness has no
+                    # per-instant score source wired (live2 gets one from the trace's own
+                    # device_answers.jsonl; this adapter has no equivalent), so what is recorded
+                    # is None = UNKNOWN and the instant is counted. It is NOT 0.0: that literal
+                    # was the maximum of log P(Yes) and made all seven readers escalate on every
+                    # instant. The raise lands on the READER, which is where it belongs, because
+                    # an arm that does not read scores must still be runnable here.
+                    s.device_score_unknown += 1
+                    self.counts["device_score_unknown"] += 1
+                    s.delivered.append((t + self.device_latency_s, None))
                 continue
             if s.last_issue_s >= 0 and t - s.last_issue_s < s.cadence_s - 1e-9:
                 continue
@@ -447,7 +470,15 @@ class LiveOrchestrator:
                 self.counts["inflight_episodic"] -= 1
                 st = self.streams.get(sub.meta.get("stream"))
                 if st is not None and r["ttft_s"] is not None:
-                    st.delivered.append((sub.sent_s + r["ttft_s"] * self.speed, 0.0))
+                    # D205 (2a): the cloud's own score for this answer, or None = UNKNOWN. This
+                    # harness runs no score extractor (live2 has live2/scores.sh_score; the v1
+                    # backend returns no logprobs), so None it is. Never 0.0.
+                    sc = (r.get("score") or {}).get("cloud_score") if isinstance(
+                        r.get("score"), dict) else None
+                    if sc is None:
+                        st.device_score_unknown += 1
+                        self.counts["cloud_score_unknown"] += 1
+                    st.delivered.append((sub.sent_s + r["ttft_s"] * self.speed, sc))
                 self._ewma("episodic", r["ttft_s"])
             else:
                 self.counts["inflight_recall"] = max(

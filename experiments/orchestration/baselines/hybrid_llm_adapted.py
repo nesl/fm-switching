@@ -49,16 +49,14 @@ def _features(stream) -> List[float]:
         `device_answer_confidence` off this arm's recall path. Card A4 says the features are the
         DEVICE-score trajectory, and the router was fitted on StudyD3 device scores.
 
-    So the channel is `stream.device_scores`. The six statistics are unchanged.
+    So the channel is `stream.device_scores`, and the window is the CURRENT EPISODE's scores
+    (D205 (2)). Card A4 fits the features on "trajectory statistics over the offsets <= the
+    decision moment" of ONE StudyD3 clip, so a window running across two clip plays is outside
+    the distribution the router was fitted on. Measured before the slice: 5,289 of 5,499
+    windows spanned more than one EP-G episode. The six statistics are unchanged.
     """
-    if stream.device_scores is None:
-        raise RuntimeError(
-            "hybrid-llm was asked to route stream %r with NO device score channel. Card A4 makes "
-            "the DEVICE's score trajectory this router's features x, and the router was fitted on "
-            "StudyD3 device scores, so a neutral feature vector may not be substituted "
-            "(D201 (3) FAIL LOUD). The harness must supply EpisodicStream.device_scores."
-            % getattr(stream, "stream_id", None))
-    h = [v for v in stream.device_scores if v is not None]
+    h = [v for v in stream.current_episode_device_scores("hybrid-llm")
+         if v is not None]
     if not h:
         return [0.0] * len(DS.FEATURES)
     prev = np.asarray(h[:-1] if len(h) > 1 else h, dtype=float)

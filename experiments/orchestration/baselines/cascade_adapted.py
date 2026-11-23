@@ -127,7 +127,29 @@ class CascadeAdapted(Policy):
     def decide(self, obs: Observation) -> Action:
         acts: List[StreamAction] = []
         for s in obs.streams:
-            v = s.latest_score()
+            # D205 (2b): the DEVICE's own newest score, not the application-visible stream.
+            #
+            # The card is explicit. Its mapping table gives "scorer / verifier on an episodic
+            # stream | the device's DELIVERED score against `tau_trigger` | ADAPTATION A1", and A2
+            # sets that threshold as "the (1 - trigger_rate) quantile of the DEVICE arm's score on
+            # development-split negatives": tau_trigger = -7.0009 fitted on 3,000 StudyD3
+            # development-split negatives, and D164 re-fits it per confidence type with the
+            # `episodic` type at -7.000911 on StudyD3 DEV negatives at rate 0.20. A threshold
+            # fitted on the DEVICE arm's scores must be compared against a DEVICE score.
+            # `latest_score()` is the application-visible stream and carries the CLOUD's answer for
+            # every instant the cloud served in time, which is a different population.
+            #
+            # The card already named this defect: its D164 section records that the quantity A2's
+            # threshold is compared against "in live2 is a PLACEHOLDER: coordinator._device_answer
+            # appends (t, 0.0) and the cloud path appends (delivered, 0.0)". Because the score is
+            # log P(Yes), that 0.0 was the MAXIMUM of the range, so `v >= -7.0009` held on every
+            # instant of every committed cell and this arm escalated unconditionally.
+            #
+            # NEITHER PATH OF THIS ARM NEEDS THE CLOUD SCORE, so a DRY cell is a valid proof for
+            # it: the episodic scorer reads the device's own score here, and the recall scorer
+            # reads `device_answer_confidence`, a committed per-question table lookup
+            # (cstate.py:516) that a dry cell supplies too.
+            v = s.latest_device_score("confidence-cascade")
             # Step 2 instrumentation: the thresholded quantity itself, so a CONSTANT where a
             # distribution is expected is visible in the proof rather than inferred (CLAUDE.md
             # results check 3).

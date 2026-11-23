@@ -1,0 +1,142 @@
+{
+ "label": "D205 step 2, parts (a) to (c) and the ESCALATION RATE half of (d). DRY cell, CPU only. NOT a latency, quality or capacity result. The escalation rate is the number the ruling asked for, and it carries an ESCALATE AND STOP on two of the three arms.",
+ "sha": "13e9978cae09d06ffef12576b20a0acddad8783c",
+ "is_measurement": false,
+ "cell": "seed 4, 4 devices, 300 s, 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0, DRY; both sides at 13e9978c, two trees differing only in the D201 plus D205 patch",
+ "STOP_CONDITION_HIT": {
+  "which": "a fixed arm that still escalates on every instant",
+  "arms": [
+   "inar-vl",
+   "hybrid-llm"
+  ],
+  "statement": "inar-vl's escalation rate is 1.0 BEFORE and 1.0 AFTER: 6,000 of 6,000 per-stream decisions are `cloud`. hybrid-llm's is 0.0 before and 0.0 after: 6,000 of 6,000 are `local`. Both are pinned at an extreme, and the fix did not move either. confidence-cascade moved from 0.9165 to 0.284, so the plumbing itself is sound and the two nulls are properties of those two arms.",
+  "register": "this is NOT a claim that real scores fail to reach them. They reach them, they vary over 921 distinct values, the episode slice is exact, and the arms consume them. The decision does not move. In this project's own vocabulary that is CANCELLED BY GEOMETRY for inar-vl and a THRESHOLD question for hybrid-llm, not a settled negative about either policy, and NOT a fixed arm."
+ },
+ "escalation_rate": {
+  "definition": "the fraction of per-stream decisions on which the arm returned mode `cloud`, counted by wrapping Policy.decide and reading every StreamAction it emitted. This is the arm's RULE, independent of how many instants the harness then had to release. The release_monitor count is given beside it.",
+  "rows": [
+   {
+    "arm": "inar-vl",
+    "pristine": 1.0,
+    "patched": 1.0,
+    "pristine_modes": {
+     "cloud": 6000
+    },
+    "patched_modes": {
+     "cloud": 6000
+    },
+    "pristine_decisions": 957,
+    "patched_decisions": 957,
+    "pristine_release_monitor": 922,
+    "patched_release_monitor": 922,
+    "moved": false
+   },
+   {
+    "arm": "hybrid-llm",
+    "pristine": 0.0,
+    "patched": 0.0,
+    "pristine_modes": {
+     "local": 6000
+    },
+    "patched_modes": {
+     "local": 6000
+    },
+    "pristine_decisions": 35,
+    "patched_decisions": 35,
+    "pristine_release_monitor": 0,
+    "patched_release_monitor": 0,
+    "moved": false
+   },
+   {
+    "arm": "confidence-cascade",
+    "pristine": 0.9165,
+    "patched": 0.284,
+    "pristine_modes": {
+     "local": 501,
+     "cloud": 5499
+    },
+    "patched_modes": {
+     "local": 4296,
+     "cloud": 1704
+    },
+    "pristine_decisions": 957,
+    "patched_decisions": 368,
+    "pristine_release_monitor": 922,
+    "patched_release_monitor": 333,
+    "moved": true,
+    "note": "the pristine 0.9165 rather than 1.0 is the cold start: `latest_score()` is None until a stream's first instant arrives, and 501 of 6,000 decisions are those epochs. Every decision that HAD a score escalated."
+   }
+  ]
+ },
+ "diagnosis_of_the_two_that_did_not_move": {
+  "inar-vl": {
+   "what_is_live": "the four image signals now vary: 56,135 values inside the sliced windows over 921 distinct values, -20.6513 to -0.0231, which is log P(Yes) in the right register and the right sign",
+   "why_the_decision_does_not_move": "audit hit 17. Seven of the ten `fuse` inputs are literal constants typed into the source: all six text signals are hard zeros on the episodic path (inarvl_adapted.py:78-80) and `energy_j=0.0` for every candidate (:61), so the energy axis the paper routes on is inert. `route()` picks its candidate off a Pareto frontier over (quality, latency, energy) with quality_floor=0.6, gain_per_second=0.2 and gain_per_joule=0.0, all three of them our own values and not the paper's. At that operating point the image branch cannot cross the edge-cloud boundary.",
+   "what_would_distinguish_it": "sweep quality_floor and gain_per_second, which the card already flags as ours rather than the paper's ('the paper tunes sufficient quality per deployment'). That is a methodological change and is NOT made here."
+  },
+  "hybrid-llm": {
+   "what_is_live": "the same device channel and the same sliced window",
+   "why_the_decision_does_not_move": "the routing threshold is 0.5 and the card's own hyperparameter table says the threshold is THE PAPER'S COST KNOB, 'swept, not fitted'. The card's amendment already recorded the consequence of running it at one point: 'p_w 0.679-0.846 against a 0.5 threshold, so keep local remains the rule's own answer everywhere'. Card A5 adds that the encoder is a logistic model on 6 features, so 'the router's capacity is far lower than the paper's', and A6 that y^prob degenerates to y^det on our single-response data.",
+   "what_would_distinguish_it": "a THRESHOLD SWEEP, which is what the paper does and what the card says the knob is for. Running this arm at a single 0.5 threshold produces a degenerate arm BY CONSTRUCTION, before any score plumbing is considered. Sweeping it is a methodological change and is NOT made here."
+  }
+ },
+ "D205_2c_the_episode_slice": {
+  "ruling": "slice the trajectory window to the current episode; the crossing fraction must be 0",
+  "before": {
+   "calls_with_an_episode_key": 5499,
+   "windows_crossing_an_episode": 5289,
+   "fraction": 0.962
+  },
+  "after": {
+   "calls_with_an_episode_key": 5499,
+   "windows_crossing_an_episode": 0,
+   "fraction": 0.0
+  },
+  "window_length_after": {
+   "min": 0,
+   "max": 19
+  },
+  "window_length_note": "consistent with D192's episode definition, clip segments of UP TO 21 frames: the longest sliced window is 19 instants and the deque that holds it is 40, so the old window could and did hold two episodes",
+  "how_the_slice_is_taken": "the CONTIGUOUS TAIL whose episode id equals the newest one (interface.py current_episode_device_scores), so an id that recurs after an interruption cannot pull an older run of instants back in",
+  "verified_for": [
+   "inar-vl",
+   "hybrid-llm",
+   "confidence-cascade"
+  ],
+  "cascade_note": "confidence-cascade reads `latest_device_score()`, one value, so slicing does not apply to it; its 0 crossings are the accessor being exercised by the other two arms in the same process"
+ },
+ "D205_2a_all_four_writers": {
+  "live2/coordinator.py:663": "the DEVICE's committed per-instant score off the wire, or None counted as unknown; never 0.0",
+  "live2/coordinator.py:1917": "the CLOUD's own score from `_score_of`, or None kept as None because a dry cell has no logprobs and a live first token whose top-20 holds neither Yes nor No has no p_yes; never 0.0",
+  "live/adapter.py:419": "None counted as unknown. This harness has NO per-instant score source wired, so there is no real score to write and none is invented. The device channel is then handed to the arm as None and every score reader raises, which is the correct outcome: no score-reading arm may be run on the v1 adapter until a score source is wired.",
+  "live/adapter.py:450": "the cloud score if the backend returned one, else None counted as unknown. The v1 backend runs no score extractor, so it is None today.",
+  "nothing_substitutes_a_neutral_value": true,
+  "where_the_raise_lives": "at the producer (fleet/emulator.device_score_of raises for an instant the trace's answer table does not cover) and at the reader (interface._require_device_channel, reached from both arms and from cascade). NOT in the writer, so an arm that does not read scores stays runnable on a harness with no score source."
+ },
+ "D205_2b_which_score_each_card_specifies": {
+  "inar-vl": "the DEVICE's own score trajectory, never the cloud's (card inarvl.md A1). ACCEPTED AS WRITTEN in the D201 part 1 report.",
+  "hybrid-llm": "the DEVICE's own score trajectory as the router features x (card A4), and it is FORBIDDEN the cloud's, because the router emits p_w(x) ~ Pr[q(S) >= q(L)] and routes before either model answers. ACCEPTED AS WRITTEN.",
+  "confidence-cascade": {
+   "episodic_path": "the DEVICE's own delivered score against `tau_trigger`. Card cascade.md's mapping table: 'scorer / verifier on an episodic stream | the device's DELIVERED score against tau_trigger | ADAPTATION A1'. A2 fixes the threshold as 'the (1 - trigger_rate) quantile of the DEVICE arm's score on development-split negatives', tau_trigger = -7.0009 on 3,000 StudyD3 development-split negatives; D164 re-fits per confidence type and the `episodic` type is -7.000911 on StudyD3 DEV negatives at rate 0.20.",
+   "recall_path": "`device_answer_confidence`, the StudyD13 logprob, against a fitted floor (card: FAITHFUL in role). That is a committed per-question table lookup (cstate.py:516), already live since the 2026-11-20 ruling.",
+   "does_it_need_the_cloud_score": false,
+   "so_the_dry_cell_is_its_proof": true,
+   "why": "both of its scorers read DEVICE quantities, and the recall one is a committed table lookup that a dry cell supplies. No cloud score enters either path, so the dry s4 cell is a valid proof for this arm and a LIVE cell is not required for it. The other arms that declare reads_device_answer (cascade-routing, r3-streaming, streamscout, thinking-qwenvl-atdm) are not in this commit and are not claimed either way.",
+   "the_card_already_named_this_defect": "its D164 section records that the quantity A2's threshold is compared against 'in live2 is a PLACEHOLDER: coordinator._device_answer appends (t, 0.0) and the cloud path appends (delivered, 0.0)'"
+  }
+ },
+ "what_is_NOT_in_this_commit": [
+  "the identity half of step 2d, the decision-log diff over every reported arm, is running separately and is reported when it completes",
+  "the step 2e rerun list, which the stop condition should be ruled on before it is posted",
+  "step 3, the test fixtures on a real trace slice from a development seed with the is_measurement guard"
+ ],
+ "_provenance": {
+  "git_commit": "13e9978cae09d06ffef12576b20a0acddad8783c",
+  "script": "d205/work/esc.py and census.py (session scratch)",
+  "model": "none",
+  "device": "cpu",
+  "n": 3,
+  "timestamp": "2026-11-23T14:04:26.324848",
+  "load_at_run": "load average 1.10 on a box with no other python process"
+ }
+}

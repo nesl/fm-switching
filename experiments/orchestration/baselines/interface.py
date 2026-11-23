@@ -133,6 +133,53 @@ class EpisodicStream:
     def latest_score(self) -> Optional[float]:
         return self.delivered_scores[-1] if self.delivered_scores else None
 
+    def _require_device_channel(self, who: str) -> None:
+        if self.device_scores is None:
+            raise RuntimeError(
+                "%s asked for the DEVICE score channel on stream %r and it was never supplied. "
+                "A neutral value may not be invented here: the value this replaces was a literal "
+                "0.0, and because the score is log P(Yes) that 0.0 was the MAXIMUM of the range, "
+                "so every arm reading it escalated on every instant (D200 (3), D205)."
+                % (who, self.stream_id))
+
+    def latest_device_score(self, who: str = "an arm") -> Optional[float]:
+        """The newest score the DEVICE itself produced, or None if no instant has arrived yet.
+
+        D205: distinct from `latest_score()`, which is the application-visible stream and carries
+        the CLOUD's answer whenever one arrived in time. An arm whose threshold was fitted on
+        DEVICE scores must compare against a device score.
+        """
+        self._require_device_channel(who)
+        return self.device_scores[-1] if self.device_scores else None
+
+    def current_episode_device_scores(self, who: str = "an arm") -> Tuple[float, ...]:
+        """The DEVICE's scores for the CURRENT EP-G episode only, oldest first.
+
+        D205 (2): both INAR-VL and Hybrid LLM specify a WITHIN-CLIP trajectory. INAR-VL's card A1
+        substitutes the trajectory for signals the paper computes from ONE image, and Hybrid LLM's
+        card A4 fits its features on the offsets of ONE clip. The harness window is a 40-entry
+        deque that does not respect clip or episode boundaries: measured on a dry cell, 5,289 of
+        5,499 windows carrying an episode key spanned more than one episode. Slicing to the current
+        episode is therefore the cards' own definition, ruled a fidelity fix.
+
+        The slice is the CONTIGUOUS TAIL whose episode id equals the newest one, so an id that
+        recurs after an interruption cannot pull an older run of instants back in.
+        """
+        self._require_device_channel(who)
+        ids, vals = self.device_episode_ids, self.device_scores
+        if not vals:
+            return ()
+        if not ids or len(ids) != len(vals):
+            # No episode key at all: a one-frame (non EP-G) trace has no episodes, so the whole
+            # window IS the current episode. This is not a fallback for a missing key on an EP-G
+            # trace, which cannot happen: cstate fills both from the same deque rows.
+            return tuple(vals)
+        last = ids[-1]
+        i = len(ids)
+        while i > 0 and ids[i - 1] == last:
+            i -= 1
+        return tuple(vals[i:])
+
 
 @dataclass(frozen=True)
 class EvidenceItem:
