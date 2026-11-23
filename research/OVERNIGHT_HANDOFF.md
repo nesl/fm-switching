@@ -1,6 +1,23 @@
 # HANDOFF. READ THIS FIRST.
 
-## STATE AT 22:05Z 2026-11-23. THE H100 HAS BEEN IDLE ABOUT EIGHT HOURS AND NEEDS THE USER.
+## STATE AT 2026-11-23T22:05Z (14:05 PST). THE H100 IS RUNNING; THE EARLIER IDLE CLAIM WAS WRONG.
+
+CORRECTED 2026-11-23. The line that stood here said the H100 HAD BEEN IDLE ABOUT EIGHT HOURS and
+needed the user. THAT WAS FALSE, and the error was a TIMEZONE READ: this box commits in PST
+(UTC-8) and the commit times were read as if they were UTC, which puts every H100 commit eight
+hours earlier than it happened and turns a machine that has just committed into one idle since
+morning.
+
+What was actually true at that moment: the H100 committed `-rr` s6 at 2026-11-23T14:05:53-08:00,
+which IS 22:05:53Z, so it had committed ONE MINUTE AFTER the timestamp in the heading rather than
+eight hours before it, and it was already running s7. It needed nothing.
+
+STANDING RULE, so this cannot recur: EVERY TIME IN THIS HANDOFF STATES ITS ZONE, and idleness is
+DERIVED FROM THE NEWEST H100 COMMIT'S TIMESTAMP WITH ITS OFFSET, not from a bare clock time. Use
+`git log --date=iso-strict`, which prints the offset, rather than a format that drops it. A claim
+that a machine is idle is an operational alarm: it can send the user to a terminal at night, and
+an eight-hour error in the wrong direction is the difference between 'all is well' and 'something
+has been broken since morning'.
 
 THE PREVIOUS VERSION OF THIS FILE SAID "NO AUTONOMOUS WORK REMAINS, STAND DOWN". THAT WAS WRITTEN AT
 01:11Z AND WAS 178 COMMITS STALE. It is replaced because a watchdog-resumed session that reads a
