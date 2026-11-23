@@ -1,0 +1,80 @@
+{
+ "_study": "StudyLADDER-FINAL",
+ "_status": "PRE-REGISTERED AND FROZEN BY HASH BEFORE ANY LADDER CELL RUNS. The bar DEFINITIONS and every COMPARATOR NUMBER below are fixed here. Only the final rungs' own measured numbers are filled later, from the commit that contains Session A's hits 22, 26 and 6 (D209 (2)).",
+ "_why_this_can_be_frozen_before_session_A_lands": "the bars are stated RELATIVE to arms measured in the SAME run (rung 3 against rung 2's gain over base, rung 4 against rung 3's gain over base). Session A's touch-price flip moves the measured numbers of rungs 2, 3 and 4; it does not move a bar DEFINITION, and it cannot move the base comparator, because covex-v6-base has no state planner and never reads the touch price. So nothing in this document depends on when Session A lands.",
+ "_arms": {"rung_2": "covex-v6-state-final", "rung_3": "covex-v6-fair-final", "rung_4": "covex-v6-final"},
+ "_modules_built_at": "62b8a7eb1088656220d08b5b624b564f44ac412c (arms_final_ladder.py, planner_deficit_weights.py; name proof d208_ladder_name_proof.json all_pass true)",
+ "_cells_will_run_at": "THE SESSION A COMMIT, not yet in existence. Stated here so every bar says which commit it was measured at: the COMPARATOR numbers below are committed numbers measured before Session A, and the LADDER numbers will be measured at the Session A commit. If Session A's flip changes the base comparator's own digest, proof (a) escalates and this pre-registration is re-derived rather than reinterpreted.",
+
+ "THE_BASE_COMPARATOR_NAMED_ONCE_SO_IT_IS_NOT_RE_LITIGATED": {
+  "arm": "hybrid-F-lhreq-noc3, ALIASED covex-v6-base. ONE ARM, TWO NAMES.",
+  "citation": "arm_names_v6.py OLD_TO_RUNG maps \"hybrid-F-lhreq-noc3\" -> \"covex-v6-base\", and V6_LADDER rung 0 records implemented_by \"hybrid-F-lhreq-noc3\" with committed_as [\"hybrid-F-lhreq-noc3\"]. It is a RENAME TABLE, not two arms.",
+  "confirmed_a_second_way_in_the_measurements": "the committed 17-arm dry-digest table gives covex-v6-base and hybrid-F-lhreq-noc3 the SAME digest af8befb9420ad86a / 12,085, and covex-v6-rules and v5-rules-2 the same 18067c4c66bb44b8 / 11,955. The alias is visible in the numbers, not only in the map.",
+  "confirmed_a_third_way_in_a_committed_derivation": "d181_share_floors.json's own source field reads \"hybrid-F-lhreq-noc3 (covex-v6-base) seeds 4 to 7, _L3_epg_rq30, healthy windows only\", so a committed derivation already writes both names for one arm.",
+  "NOT_a_definition_clash": "this is the opposite of CLAUDE.md check 4's failure mode: one object with a documented alias, not one name with two definitions. It was escalated and resolved rather than assumed, and it is written down here so the next reader does not repeat the search.",
+  "A_REAL_INCONSISTENCY_FOUND_AND_IT_IS_IN_DIRECTORY_NAMING_ONLY": "the 1x plain-tag RUN DIRECTORIES are keyed by the OLD name (hybrid-F-lhreq-noc3_n16_s{4,5,6,7}_1200s_h27_3t_L3_epg_rq30, all four present and verified) while the _kv0.25, _kv0.5 and _lpt2048 variants are keyed by the NEW name (covex-v6-base_...). That is an output-directory naming inconsistency, NOT an ambiguity in the arm. Every base number below names the directory it came from.",
+  "no_base_cell_needs_running": true
+ },
+
+ "COMPARATOR_NUMBERS_FIXED_HERE": {
+  "_scored_by": "the COMMITTED scorer d179_rung2_verdict.py, unchanged, per seed, numerator COMMITTED_RULE_PRIMARY; one canonical scorer version per D209 (1)",
+  "_source_records": ["d196_rr_four_seed_verdict.json (robot)", "d185_rung3_verdict.json (alert)"],
+  "_directory_every_base_number_came_from": "hybrid-F-lhreq-noc3_n16_s{seed}_1200s_h27_3t_L3_epg_rq30",
+  "base_robot_on_time": {"4": 35, "5": 27, "6": 41, "7": 19},
+  "base_alert_mean_per_episode_attainment": {"4": 0.44249, "5": 0.396211,
+                                             "6": 0.465479, "7": 0.553811},
+  "_context_not_a_bar": {
+   "committed_rung_3_alert": {"4": 0.4412, "5": 0.4269, "6": 0.4356, "7": 0.475},
+   "committed_rung_3_robot": {"4": 122, "5": 114, "6": 109, "7": 84},
+   "committed_rr_alert": {"4": 0.6256, "5": 0.6366, "6": 0.6399, "7": 0.6527},
+   "committed_rr_robot": {"4": 126, "5": 121, "6": 110, "7": 84},
+   "_note": "the -rr numbers stand as measurements of their OWN code (D209 (1)) and are context here, not bars. NOTE ALSO that base's alert attainment EXCEEDS committed rung 2's at every seed (0.4425 against 0.2288 at s4), so 'above base's' is a materially harder alert bar than 'above rung 2's' and is the one D208 sets."}
+ },
+
+ "THE_BARS": {
+  "_per_seed_at_1x": true,
+  "_fail_fast_D196": "s4 alone first per rung. A rung continues to s5 to s7 ONLY if its s4 passes its bars. covex-v6-state-final has no bar of its own and its s5 to s7 run WITH covex-v6-fair-final.",
+  "covex-v6-fair-final": {
+   "check_1_alert": "mean per-episode alert attainment STRICTLY ABOVE base's at that seed (s4 > 0.44249, s5 > 0.396211, s6 > 0.465479, s7 > 0.553811)",
+   "check_2_robot": "robot on-time at least base + 0.90 x (covex-v6-state-final's on-time minus base) at that seed, the D190 (3) retention form and the SAME arithmetic the -rr bars used (s4 example with the committed rung 3 standing in for the final rung 2: 35 + 0.90 x (122 - 35) = 113.3, so the bar was 114)",
+   "check_3_single_shot": "at least 90 percent of single-shot questions answered within 2 s",
+   "reported_beside_NOT_a_bar": "late alert instants with their denominator; the committed rung-3 s4 reference is 2,290 of 8,356 sent"
+  },
+  "covex-v6-final": {
+   "check_1_alert": "mean per-episode alert attainment STRICTLY ABOVE covex-v6-fair-final's at that seed",
+   "check_2_robot": "robot on-time at least base + 0.90 x (covex-v6-fair-final's on-time minus base) at that seed (D190 (3))",
+   "reported_beside_NOT_a_bar": "Gate A as EXPOSURE plus OVERRUN MAGNITUDE per D206 (1), with the retired would-have-missed count kept ONLY as a labelled identity column. The committed exposure on the rung-3 sent cells is 46 of 463 (9.94 percent) at safety factor 1.863404, worst overrun 1.5035x the predicted service."
+  },
+  "_every_result_reported_whatever_its_direction": true,
+  "_nothing_is_tuned": "MARGIN_CF, the safety factor, the deficit gain and the floors are not touched whatever the outcome. A rung that misses its bar is reported as missing it."
+ },
+
+ "PROOFS_OWED": {
+  "a": "covex-v6-base, covex-v6-rules and every reported baseline BYTE-IDENTICAL to the committed 17-arm dry-digest table (d179_offswitch_digest_proofs.json) on the committed recipe. ESCALATE AND STOP if any moves. A VERIFIED CENSUS NARROWS THE GRANTED HIT-6 EXCEPTION: covex-v6-base and covex-v6-rules never read gpu_kv_fraction, so hit 6 must NOT move either, and a move there is a real escalation rather than the exception.",
+  "b": "Step 2b per rung on the dry s4 cell, with COUNTS BY MECHANISM so a reader can see which switch moved what",
+  "c": "the id(obs) fix: how many rung-2 decisions it changes on dry s4, against covex-v6-state-uo-c5attr",
+  "d": "Gate A for covex-v6-final as exposure plus overrun magnitude",
+  "name_proof": "DONE AND COMMITTED: d208_ladder_name_proof.json, all_pass true, with a negative control that an unregistered name does NOT resolve, and the factory identity of all nine protected committed names unchanged before and after registration"
+ },
+
+ "MECHANISM_NOTES_FIXED_HERE": {
+  "the_id_obs_fix_was_ALREADY_BUILT": "arms_v6state.QCACHE_KEY_FIX_SWITCH, keyed on (epoch, now_s) which cannot alias, built and proven under D188 (2) and left OFF BY DEFAULT with the committed ruling that it stays off 'until the final rung-2 arm and its comparators are rerun TOGETHER with it ON'. THIS LADDER IS THAT RERUN, so rung 2 turns the committed switch on rather than reimplementing it.",
+  "corrected_line_number": "the switch is read at arms_v6state.py:302 on this tip. D208 cites :236, which is stale; recorded so the citation does not propagate.",
+  "hit_22_is_SESSION_A_s_to_flip": "touch_policy.py:108 currently reads TOUCH_PRICE_MODE = \"reload-proxy\" with the comment 'DEFAULT, the committed behaviour; nothing changes', so the corrected charge exists behind a default-off switch and NO digest has moved. A fix that ships default-off is a held mechanism that changes nothing. This session did NOT flip it: touch_policy.py is Session A's file.",
+  "RELOAD_and_per_request_host_belief": "UNEXERCISED FOR A STRUCTURAL REASON, not a hedge. cstate.py:673 _host_fraction is an aggregate fraction, and the H100's real-engine probe confirms host residency is observable only in aggregate on this build, folded per request into prompt_tokens_details.cached_tokens and separable only with one request in flight. Reported, never papered over, and no per-request belief is invented.",
+  "gpu_kv_fraction_affects_RUNG_4_ONLY_among_our_arms": "a verified census finds ZERO occurrences in arms_v6state.py, arms_v6fair.py, arms_v6rr.py, release_recheck.py and arms_v6c5.py, so rungs 2 and 3 do not inherit hit 6. Rung 4 does. Separately arms.py:82 _caps is write-only, a different cause and another session's. CONSEQUENCE FOR READING: flat rung-4 behaviour across 1x and 0.25x is a candidate UNEXERCISED CHANNEL under Rule 2, not an equivalence between the conditions.",
+  "the_flexible_split_consumer": "ABSENT BY CONSTRUCTION on the c5attr base (share_admission._share_ok returns before SA.allowed), Rule 2 unexpressible, and NOT a mechanism this ladder dropped.",
+  "ablations": "DEFERRED by D210, not missing. No gain-0 or one-factor arms are registered for the final ladder."
+ },
+
+ "_step_0_what_would_invalidate_this_run": [
+  "the base comparator changing: SETTLED, one arm with a documented alias, three independent confirmations above",
+  "a default being restored or flipped: OPEN AND OWNED BY SESSION A (hit 22). The ladder cells run only on the commit that contains it, so no cell is produced that D209 (1) would supersede.",
+  "the base reference arm having no cell at the tag the bar is stated at: CHECKED, all four seeds present under the old directory name",
+  "a mechanism unreachable at this size: two reported above, RELOAD and gpu_kv_fraction, neither smoothed",
+  "a baseline digest moving: proof (a), and it is an ESCALATE-AND-STOP rather than a note"
+ ],
+ "_provenance": {"script": "hand-written pre-registration; arms by arms_final_ladder.py, switches verified by d208_ladder_name_proof.py",
+                 "model": "n/a", "device": "flash (CPU only)", "n": 3,
+                 "origin_main_sha_read": "62b8a7eb1088656220d08b5b624b564f44ac412c"}
+}

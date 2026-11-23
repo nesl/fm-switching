@@ -5,94 +5,133 @@
  "rung_2_covex_v6_state_final": {
   "built_from": "covex-v6-state-uo-c5attr",
   "mechanisms_of_the_rung_below": [
-   {"mechanism": "the C5 attribution rule (rung 2's defining rule)",
+   {
+    "mechanism": "the C5 attribution rule (rung 2's defining rule)",
     "file_line": "arms_v6c5.py, class V6StateUoC5AttrArm:47, inherited by arms_final_ladder.V6StateFinal",
     "counter": "c5_attr_suppressed_decrease, c5_attr_slow_all_self_released",
-    "live": "YES, by class inheritance; the final rung adds no override on this path"},
-   {"mechanism": "v5 state planner TOUCH / KEEP decisions (plan_state)",
+    "live": "YES, by class inheritance; the final rung adds no override on this path"
+   },
+   {
+    "mechanism": "v5 state planner TOUCH / KEEP decisions (plan_state)",
     "file_line": "arms_v6state.py:200 _cf_engine, plan_state via v5/cf_planner.py",
     "counter": "state_decisions, state_touch_emitted",
-    "live": "YES"},
-   {"mechanism": "D162 pricing (prerequisite of the release re-check above)",
+    "live": "YES"
+   },
+   {
+    "mechanism": "D162 pricing (prerequisite of the release re-check above)",
     "file_line": "arms_v6state.py:513 live2_d162_pricing = True",
     "counter": "n/a, a declared flag; read back at construction",
-    "live": "YES, read back"},
-   {"mechanism": "the declared constant planner weight (D206 item 1a)",
+    "live": "YES, read back"
+   },
+   {
+    "mechanism": "the declared constant planner weight (D206 item 1a)",
     "file_line": "v5/cf_objective.NoPlannerDeficitFeed via arms_v6state.py:200",
     "counter": "NoPlannerDeficitFeed.reads",
-    "live": "YES, and CORRECT for this rung: rung 2 has no deficits by design"}
+    "live": "YES, and CORRECT for this rung: rung 2 has no deficits by design"
+   }
   ],
   "what_this_rung_ADDS": [
-   {"mechanism": "the D188 (2) id(obs) cache-key fix",
+   {
+    "mechanism": "the D188 (2) id(obs) cache-key fix",
     "file_line": "arms_v6state.py:302, switch arms_v6state.QCACHE_KEY_FIX_SWITCH, turned on at arms_final_ladder._set_qcache_fix and read back through arms_v6state.qcache_key_fix_enabled",
     "counter": "PENDING: proof (c), the decision delta against covex-v6-state-uo-c5attr on dry s4",
-    "note": "NOT new code. The fix was built and proven under D188 (2) and left OFF BY DEFAULT with the ruling that it stays off 'until the final rung-2 arm and its comparators are rerun TOGETHER with it ON'. This ladder is that rerun, so the final rung turns the committed switch on rather than reimplementing it."}
+    "note": "NOT new code. The fix was built and proven under D188 (2) and left OFF BY DEFAULT with the ruling that it stays off 'until the final rung-2 arm and its comparators are rerun TOGETHER with it ON'. This ladder is that rerun, so the final rung turns the committed switch on rather than reimplementing it."
+   }
   ],
   "MISSING_OR_AT_RISK": [
-   {"mechanism": "RELOAD, and any per-request HOST residency belief",
+   {
+    "mechanism": "RELOAD, and any per-request HOST residency belief",
     "status": "AT RISK OF BEING STRUCTURALLY UNEXERCISED, reported rather than papered over",
-    "evidence": "cstate.py:673 _host_fraction sums est_tokens over sessions whose believed_tier() is host and divides by the host tier size, so what reaches the arm is an AGGREGATE FRACTION, not a per-request residency. A parallel real-engine probe reports host residency is observable only in aggregate on this engine. If a rung's RELOAD lever never fires, that is Rule 2 UNEXERCISED FOR A STRUCTURAL REASON and must be reported as such, not as evidence that RELOAD does not help.",
-    "action": "REPORTED, NOT ADDED. No per-request host belief is invented here."},
-   {"mechanism": "gpu_kv_fraction reaching the arms",
+    "evidence": "cstate.py:673 _host_fraction sums est_tokens over sessions whose believed_tier() is host and divides by the host tier size, so what reaches the arm is an AGGREGATE FRACTION, not a per-request residency. A parallel real-engine probe reports host residency is observable only in aggregate on this engine. If a rung's RELOAD lever never fires, that is Rule 2 UNEXERCISED FOR A STRUCTURAL REASON and must be reported as such, not as evidence that RELOAD does not help. CONFIRMED by the H100's real-engine probe: host residency is observable only through aggregates such as vllm:prompt_tokens_by_source_total{source=\"external_kv_transfer\"}; per request it is folded into prompt_tokens_details.cached_tokens and cannot be separated, and differencing the aggregates is exact only with ONE request in flight. So this is evidence-backed, not a hedge.",
+    "action": "REPORTED, NOT ADDED. No per-request host belief is invented here."
+   },
+   {
+    "mechanism": "gpu_kv_fraction reaching the arms (RUNG 4 ONLY among our arms)",
     "status": "AT RISK, two independent reasons",
     "evidence": "cstate.py:663 reads the metrics key vllm:gpu_cache_usage_perc with a silent 0.0 default, and the probe reports the engine does not emit that key, so gpu_kv_fraction is 0.0 in EVERY live cell on this build (open hit 6). Separately arms.py:82 _caps is WRITE-ONLY, so the coordinator's KV pool never reaches the arms that read it (open hit 14 shape).",
-    "action": "REPORTED. If any final rung's behaviour looks FLAT across the 1x and 0.25x conditions, that is a candidate UNEXERCISED CHANNEL under Rule 2 rather than an equivalence between the conditions."}
+    "action": "REPORTED, and scoped to rung 4. Flat RUNG-4 behaviour across the 1x and 0.25x conditions is a candidate UNEXERCISED CHANNEL under Rule 2, not an equivalence between the conditions. Rungs 2 and 3 are safe from it.",
+    "scope_NARROWED_BY_A_VERIFIED_CENSUS": "ZERO occurrences of gpu_kv_fraction in arms_v6state.py, arms_v6fair.py, arms_v6rr.py, release_recheck.py and arms_v6c5.py, so RUNGS 2 AND 3 DO NOT INHERIT HIT 6. Rung 4 does. arms.py:82 _caps being write-only is a SEPARATE cause and another session's."
+   }
   ]
  },
  "rung_3_covex_v6_fair_final": {
   "built_from": "covex-v6-state-final, plus the committed covex-v6-fair-c5attr and covex-v6-fair-c5attr-rr mechanisms",
   "mechanisms_of_the_rung_below": "all of rung 2's, by class inheritance through arms_v6fairfeed.make_class('covex-v6-state-final'); the qcache switch is set on the instance by make_rung3 and read back",
   "what_this_rung_ADDS": [
-   {"mechanism": "the per-device deficit FEED, three denominators (D178 (1), D185 (1))",
+   {
+    "mechanism": "the per-device deficit FEED, three denominators (D178 (1), D185 (1))",
     "file_line": "arms_v6fairfeed.py:130 DeficitFeed(gain=); hooks at :279/:288 offered instants, :294/:303 offered questions, :311/:313 completions",
     "counter": "PENDING: deficit_feed.counts alert_instants_offered, recall_questions_offered, assistance_questions_offered, alert_episodes_closed",
-    "live": "YES, feed present with gain 2.0, verified at construction"},
-   {"mechanism": "consumer (a), the ORDERING consumer, D185 (3a), the PRIMARY one",
+    "live": "YES, feed present with gain 2.0, verified at construction"
+   },
+   {
+    "mechanism": "consumer (a), the ORDERING consumer, D185 (3a), the PRIMARY one",
     "file_line": "arms_v6fairfeed.py:154-191 _install_ordering_override; read as the leading sort key at hybrid/hybrid_arm.py:399, 483, 486",
     "counter": "PENDING: deficit_feed.counts.order_key_resolved against order_key_unresolved_device",
-    "live": "YES"},
-   {"mechanism": "consumer (b), the FLEXIBLE SPLIT, D185 (3b)",
+    "live": "YES"
+   },
+   {
+    "mechanism": "consumer (b), the FLEXIBLE SPLIT, D185 (3b)",
     "file_line": "arms_v6fairfeed.py:217 live2_share_weights; read at share_admission.py:162-168",
     "counter": "n/a",
-    "live": "NO, AND THAT IS NOT A GAP: ABSENT BY CONSTRUCTION on a base with no share admission, because share_admission._share_ok returns before SA.allowed. Rule 2 unexpressible. Rung 3's own module records the same. REPORTED, not added."},
-   {"mechanism": "the STATE PLANNER reading that same feed (D206 (2), newly applied here)",
+    "live": "NO, AND THAT IS NOT A GAP: ABSENT BY CONSTRUCTION on a base with no share admission, because share_admission._share_ok returns before SA.allowed. Rule 2 unexpressible. Rung 3's own module records the same. REPORTED, not added."
+   },
+   {
+    "mechanism": "the STATE PLANNER reading that same feed (D206 (2), newly applied here)",
     "file_line": "arms_final_ladder._PlannerFeedMixin._cf_engine via planner_deficit_weights.wire_planner; verified source PlannerDeficitWeights, not the declared constant",
     "counter": "PENDING: planner_weight_report() reads, unresolved, reads_above_the_w1_floor",
     "live": "YES, verified at construction and wired eagerly so a failure raises there",
-    "measured_consequence": "the same swap moved 687 of 60,473 rung-3 state decisions on the dry s4 cell of the PRE-FINAL arm (63,242 reads, 0 unresolved, 53,597 above the floor)"},
-   {"mechanism": "the ALERT release re-check (D179 (4))",
+    "measured_consequence": "the same swap moved 687 of 60,473 rung-3 state decisions on the dry s4 cell of the PRE-FINAL arm (63,242 reads, 0 unresolved, 53,597 above the floor)"
+   },
+   {
+    "mechanism": "the ALERT release re-check (D179 (4))",
     "file_line": "arms_v6rr._AlertRecheckMixin, switch release_recheck.SWITCH_ATTR set in make_rung3 and read back through release_recheck.arm_enables; types read back as ('alert',)",
     "counter": "PENDING: release_infeasible_alert, with release_infeasible_recall and _assistance required to stay ZERO so alert-only holds all cell",
-    "live": "YES, switch and types both read back"},
-   {"mechanism": "the gain-0 negative control as a named arm",
+    "live": "YES, switch and types both read back"
+   },
+   {
+    "mechanism": "the gain-0 negative control as a named arm",
     "file_line": "NOT REGISTERED for the final ladder: D210 defers all ablations until the policy is frozen",
     "counter": "n/a",
-    "live": "DEFERRED BY RULING, not missing"}
+    "live": "DEFERRED BY RULING, not missing"
+   }
   ]
  },
  "rung_4_covex_v6_final": {
   "built_from": "covex-v6-fair-final, plus the committed covex-v6-cf-c5attr mechanisms",
   "mechanisms_of_the_rung_below": "all of rung 3's, by class inheritance; MRO measured as V6Final, _Rung4Mixin, _ProtectDeferMixin, V6FairFinalWired, _PlannerFeedMixin, V6FairFinal, _AlertRecheckMixin, so every lower rung fires bottom up on each epoch",
   "what_this_rung_ADDS": [
-   {"mechanism": "PROTECT-AND-DEFER (a cold rebuild), spec v6 section 7",
+   {
+    "mechanism": "PROTECT-AND-DEFER (a cold rebuild), spec v6 section 7",
     "file_line": "arms_v6cf._ProtectDeferMixin over cf_protect_defer, unchanged",
     "counter": "PENDING: pd_decisions, pd_state_defers, pd_state_chunks, pd_protects, with the gate counters so a zero can be classified",
-    "live": "YES by MRO; at 1x the committed measurement is that it is UNEXERCISED (reach-limited, D198), which is Rule 2 and not a negative"},
-   {"mechanism": "QUESTION DEFERRAL (a recall query), D151 (3), scoped in by D191 item 2",
+    "live": "YES by MRO; at 1x the committed measurement is that it is UNEXERCISED (reach-limited, D198), which is Rule 2 and not a negative"
+   },
+   {
+    "mechanism": "QUESTION DEFERRAL (a recall query), D151 (3), scoped in by D191 item 2",
     "file_line": "arms_v6cfr3._Rung4Mixin over cf_request_defer; switch read back in make_rung4",
     "counter": "PENDING: rd_question_defers, rd_reached_harm, rd_decider_weight_above_floor",
-    "live": "YES"},
-   {"mechanism": "the two legs' per-device w_d (D185 (4))",
+    "live": "YES"
+   },
+   {
+    "mechanism": "the two legs' per-device w_d (D185 (4))",
     "file_line": "arms_v6cfr3._weight_of wired at arms_final_ladder.make_rung4; W_WIRED_PROOF records the accessor and the probe value",
     "counter": "PENDING: the bar distribution n_distinct and n_above_w1_floor",
-    "live": "YES, live_weight true at construction"},
-   {"mechanism": "ONE deficit source across the limb and the legs (D206)",
+    "live": "YES, live_weight true at construction"
+   },
+   {
+    "mechanism": "ONE deficit source across the limb and the legs (D206)",
     "file_line": "verified at construction: arm._planner_w_source._arm._feed IS arm._feed",
     "counter": "identity, not a counter",
-    "live": "YES, and the REGISTER MATTERS: the limb and the legs read ONE object, so their weights are equal BY CONSTRUCTION with maximum absolute difference exactly 0. That is an IDENTITY and must not be reported as a measurement of agreement. The MEASUREMENT is that the weight is NON-CONSTANT."}
+    "live": "YES, and the REGISTER MATTERS: the limb and the legs read ONE object, so their weights are equal BY CONSTRUCTION with maximum absolute difference exactly 0. That is an IDENTITY and must not be reported as a measurement of agreement. The MEASUREMENT is that the weight is NON-CONSTANT."
+   }
   ]
  },
- "_provenance": {"script": "hand-written from the constructed arms and the committed modules; switches verified by d208_ladder_name_proof.py",
-                 "device": "flash (CPU only)", "model": "n/a",
-                 "origin_main_sha_read": "62b8a7eb1088656220d08b5b624b564f44ac412c"}
+ "_provenance": {
+  "script": "hand-written from the constructed arms and the committed modules; switches verified by d208_ladder_name_proof.py",
+  "device": "flash (CPU only)",
+  "model": "n/a",
+  "origin_main_sha_read": "62b8a7eb1088656220d08b5b624b564f44ac412c"
+ },
+ "_base_comparator": "hybrid-F-lhreq-noc3, aliased covex-v6-base: ONE ARM, TWO NAMES (arm_names_v6.OLD_TO_RUNG), confirmed by the digests themselves (both read af8befb9420ad86a / 12,085)."
 }
