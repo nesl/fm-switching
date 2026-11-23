@@ -1,6 +1,6 @@
 # StudyTABLE1: canonical correct-by-deadline table (D209)
 
-Pipeline sha canon 4bf15a21 (episodic_lib 2856152b, dsmap b600c819, dashcam_episodic 1d0125c9). Seeds 4-7, four-seed means. Superseded arms dropped (D205): confidence-cascade.
+Pipeline sha canon f1737872 (episodic_lib 2856152b, dsmap b600c819, dashcam_episodic 1d0125c9). Seeds 4-7, four-seed means. Superseded arms dropped (D205): confidence-cascade.
 
 Columns: robot correct-by-deadline (correct by 3 s, cloud if on time else device); robot D176 (same, excluding the over-32k context-refusal recalls); single-shot correct by 2 s (StudySS2); pooled correct-in-time over robot and single-shot units; dashcam delivered-stream Nexar challenge mAP (D199, on-time cloud only, EVAL); and the on-time service columns. The dashcam D192 per-episode attainment is beside the mAP and is NOT part of the claim.
 
@@ -32,3 +32,36 @@ Columns: robot correct-by-deadline (correct by 3 s, cloud if on time else device
 | lmcache | 0.262 | 0.277 | 0.531 | 0.463 | 0.633 | 0.020 | 0.083 | n/a |
 
 Dashcam is a ranking metric (challenge mAP) with no per-unit correctness, so it is not pooled into the unit count; the pooled column is robot and single-shot units only. The D192 column is the thresholded per-episode attainment, kept beside the mAP and labelled not part of the claim (D199).
+
+## Paired question-clustered CIs (correct-in-time diff, 2000 reps, seed 0)
+
+Diff = arm minus comparator, pooled over seeds 4-7, clusters resampled by question identity. Positive favours the arm.
+
+| arm | pooled vs -rr [95% CI] | pooled vs device-only [95% CI] | robot vs device-only | single-shot vs device-only |
+|---|---|---|---|---|
+| fair-c5attr-rr | n/a | +0.112 [+0.071, +0.155] | +0.260 [+0.208, +0.313] | +0.062 [+0.008, +0.115] |
+| state-uo | -0.004 [-0.008, +0.000] | +0.108 [+0.068, +0.150] | +0.247 [+0.197, +0.300] | +0.060 [+0.007, +0.112] |
+| fair-c5attr | -0.004 [-0.009, +0.001] | +0.108 [+0.070, +0.148] | +0.252 [+0.200, +0.302] | +0.059 [+0.006, +0.109] |
+| fair-c5attr-gain0 | -0.007 [-0.012, -0.002] | +0.105 [+0.066, +0.146] | +0.241 [+0.190, +0.293] | +0.059 [+0.006, +0.110] |
+| state-uo-c5attr | -0.009 [-0.014, -0.004] | +0.103 [+0.063, +0.144] | +0.235 [+0.185, +0.288] | +0.058 [+0.006, +0.108] |
+| state-shares-r1 | -0.011 [-0.019, -0.005] | +0.100 [+0.060, +0.142] | +0.212 [+0.162, +0.263] | +0.062 [+0.008, +0.114] |
+| state-shares-r2 | -0.018 [-0.026, -0.010] | +0.094 [+0.055, +0.135] | +0.190 [+0.141, +0.240] | +0.062 [+0.008, +0.112] |
+| state-shares | -0.021 [-0.033, -0.010] | +0.090 [+0.052, +0.131] | +0.171 [+0.134, +0.212] | +0.063 [+0.010, +0.113] |
+| base | -0.039 [-0.053, -0.025] | +0.073 [+0.034, +0.112] | +0.103 [+0.076, +0.132] | +0.063 [+0.009, +0.115] |
+| rules | -0.060 [-0.078, -0.042] | +0.052 [+0.020, +0.085] | +0.085 [+0.056, +0.115] | +0.041 [-0.004, +0.082] |
+| simplestream | -0.074 [-0.089, -0.059] | +0.038 [-0.004, +0.082] | -0.037 [-0.085, +0.008] | +0.063 [+0.007, +0.116] |
+| streamscout | -0.075 [-0.090, -0.059] | +0.037 [-0.005, +0.081] | -0.039 [-0.087, +0.006] | +0.063 [+0.007, +0.116] |
+| eco-llm | -0.089 [-0.118, -0.060] | +0.022 [+0.004, +0.040] | +0.025 [+0.002, +0.048] | +0.022 [-0.002, +0.045] |
+| llf | -0.089 [-0.115, -0.063] | +0.022 [-0.001, +0.046] | +0.021 [+0.008, +0.035] | +0.023 [-0.007, +0.053] |
+| mooncake | -0.091 [-0.121, -0.062] | +0.020 [+0.003, +0.037] | +0.019 [+0.008, +0.031] | +0.021 [-0.003, +0.044] |
+| b7-edf-feasibility | -0.094 [-0.123, -0.064] | +0.018 [+0.001, +0.036] | +0.016 [+0.006, +0.029] | +0.019 [-0.004, +0.041] |
+| edf | -0.106 [-0.142, -0.070] | +0.006 [-0.005, +0.017] | +0.013 [+0.002, +0.025] | +0.003 [-0.012, +0.017] |
+| kvflow-prefetch | -0.111 [-0.152, -0.070] | +0.002 [-0.009, +0.013] | +0.014 [+0.005, +0.025] | -0.002 [-0.016, +0.013] |
+| always-cloud-fcfs | -0.111 [-0.151, -0.071] | +0.002 [-0.009, +0.013] | +0.012 [+0.003, +0.022] | -0.002 [-0.017, +0.013] |
+| device-only | -0.112 [-0.155, -0.071] | n/a | n/a | n/a |
+| warm-all-lru | -0.113 [-0.152, -0.072] | -0.000 [-0.009, +0.009] | +0.007 [+0.001, +0.015] | -0.003 [-0.014, +0.008] |
+| attentionstore-prefetch | -0.114 [-0.158, -0.074] | -0.002 [-0.011, +0.007] | +0.012 [+0.003, +0.023] | -0.006 [-0.019, +0.004] |
+| querystream-proactive | -0.114 [-0.157, -0.074] | -0.002 [-0.011, +0.007] | +0.008 [+0.001, +0.016] | -0.005 [-0.017, +0.007] |
+| lmcache | -0.115 [-0.158, -0.076] | -0.003 [-0.012, +0.005] | +0.008 [+0.001, +0.016] | -0.006 [-0.019, +0.004] |
+
+The dashcam delivered-stream mAP paired CIs vs rung 3 and device-only are in the StudyDSMAP report (reports/study_dsmap.md); they are not separable (all span 0, MDE 0.048 > arm gaps).
