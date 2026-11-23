@@ -33,7 +33,6 @@ import os
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.join(REPO, "experiments", "orchestration", "live2"))
@@ -305,7 +304,9 @@ def write_readme(rows, stubs):
     A(f"- runs dir last commit: {head}")
     A(f"- scorer score.py last commit: {sc_score}")
     A(f"- d179_rung2_verdict.py last commit: {sc_d179}")
-    A(f"- built (UTC): {datetime.now(timezone.utc).isoformat()}")
+    A("- build time is deliberately NOT stamped here: the output is byte-deterministic given the "
+      "input, so the D190 poll commits only on a real data change. The git commit of this file is "
+      "the build time of record.")
     A("- source data: results/orchestration/live2/frozen_test/runs/<cell>/cell.json and "
       "outcomes.jsonl.gz; scorers experiments/orchestration/live2/scorer/score.py and "
       "experiments/orchestration/live2/d179_rung2_verdict.py")
