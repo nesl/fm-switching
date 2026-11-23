@@ -1,0 +1,205 @@
+{
+ "_what": "StudyEXIT2-fit: trajectory exit model, fit DEV report EVAL (D202).",
+ "platt_cloud_32BI": {
+  "a": 0.04504049942859716,
+  "b": 0.5807632429263443
+ },
+ "ks": [
+  2,
+  3,
+  4
+ ],
+ "pre_event_window_s": [
+  -3.0,
+  -0.5
+ ],
+ "d197_reference_theta_raw": -2.9298319411413662,
+ "clip_overlap": {
+  "n_dev": 90,
+  "n_workload_clips": 296,
+  "workload_clips_in_dev": 88,
+  "workload_uses_dev_clips": true
+ },
+ "by_k": {
+  "2": {
+   "logistic_coef": {
+    "level": 1.1374476482124711,
+    "slope": 0.9121197877486465,
+    "intercept": -0.9000917595104515
+   },
+   "n_train": 766,
+   "n_train_pos": 226,
+   "crash_theta_prob": 0.47883428519434745,
+   "achieved_no_crash_dev_fire_rate": 0.1111111111111111,
+   "n_neg_dev_episodes": 45,
+   "normal_bound_prob": 0.22245060794945143,
+   "achieved_crash_dev_normal_exit_rate": 0.1111111111111111,
+   "n_pos_dev_episodes": 45,
+   "eval": {
+    "n_crash_eval": 105,
+    "n_nocrash_eval": 105,
+    "crash_rule": {
+     "fraction_crash_caught": 0.14285714285714285,
+     "firing_time_before_event_s": {
+      "median": 0.56,
+      "iqr": [
+       0.23,
+       2.55
+      ],
+      "n": 15
+     },
+     "false_crash_exit_rate_on_no_crash": 0.06666666666666667,
+     "instants_saved_per_true_crash_exit": {
+      "median": 1,
+      "iqr": [
+       0.5,
+       5.0
+      ],
+      "n": 15
+     }
+    },
+    "normal_rule": {
+     "false_normal_exit_rate_on_crash": 0.22857142857142856,
+     "true_normal_exit_rate_on_no_crash": 0.37142857142857144,
+     "instants_saved_per_true_normal_exit": {
+      "median": 11,
+      "iqr": [
+       11.0,
+       23.0
+      ],
+      "n": 39
+     }
+    }
+   },
+   "label_shuffle_control": {
+    "no_crash_firing_rate": 0.06666666666666667,
+    "overall_firing_rate_label_independent": 0.12380952380952381,
+    "_note": "firing depends only on the k window, so it is label-independent; the overall firing rate and the no-crash rate agree up to the crash episodes' own firing."
+   }
+  },
+  "3": {
+   "logistic_coef": {
+    "level": 1.1176248344331023,
+    "slope": 1.1837317145226978,
+    "intercept": -0.8156824370741892
+   },
+   "n_train": 721,
+   "n_train_pos": 226,
+   "crash_theta_prob": 0.5046039274752636,
+   "achieved_no_crash_dev_fire_rate": 0.1111111111111111,
+   "n_neg_dev_episodes": 45,
+   "normal_bound_prob": 0.2370460480396714,
+   "achieved_crash_dev_normal_exit_rate": 0.1111111111111111,
+   "n_pos_dev_episodes": 45,
+   "eval": {
+    "n_crash_eval": 105,
+    "n_nocrash_eval": 105,
+    "crash_rule": {
+     "fraction_crash_caught": 0.13333333333333333,
+     "firing_time_before_event_s": {
+      "median": 0.4,
+      "iqr": [
+       0.0625,
+       1.2225
+      ],
+      "n": 14
+     },
+     "false_crash_exit_rate_on_no_crash": 0.0380952380952381,
+     "instants_saved_per_true_crash_exit": {
+      "median": 1.0,
+      "iqr": [
+       0.0,
+       2.5
+      ],
+      "n": 14
+     }
+    },
+    "normal_rule": {
+     "false_normal_exit_rate_on_crash": 0.21904761904761905,
+     "true_normal_exit_rate_on_no_crash": 0.34285714285714286,
+     "instants_saved_per_true_normal_exit": {
+      "median": 10.5,
+      "iqr": [
+       9.5,
+       21.0
+      ],
+      "n": 36
+     }
+    }
+   },
+   "label_shuffle_control": {
+    "no_crash_firing_rate": 0.0380952380952381,
+    "overall_firing_rate_label_independent": 0.10476190476190476,
+    "_note": "firing depends only on the k window, so it is label-independent; the overall firing rate and the no-crash rate agree up to the crash episodes' own firing."
+   }
+  },
+  "4": {
+   "logistic_coef": {
+    "level": 1.1097619339108251,
+    "slope": 1.2557779675135596,
+    "intercept": -0.7190462744912793
+   },
+   "n_train": 676,
+   "n_train_pos": 226,
+   "crash_theta_prob": 0.5078567361298828,
+   "achieved_no_crash_dev_fire_rate": 0.1111111111111111,
+   "n_neg_dev_episodes": 45,
+   "normal_bound_prob": 0.2681982982934134,
+   "achieved_crash_dev_normal_exit_rate": 0.1111111111111111,
+   "n_pos_dev_episodes": 45,
+   "eval": {
+    "n_crash_eval": 105,
+    "n_nocrash_eval": 105,
+    "crash_rule": {
+     "fraction_crash_caught": 0.1619047619047619,
+     "firing_time_before_event_s": {
+      "median": 0.48,
+      "iqr": [
+       0.08,
+       2.03
+      ],
+      "n": 17
+     },
+     "false_crash_exit_rate_on_no_crash": 0.0380952380952381,
+     "instants_saved_per_true_crash_exit": {
+      "median": 2,
+      "iqr": [
+       0.0,
+       5.0
+      ],
+      "n": 17
+     }
+    },
+    "normal_rule": {
+     "false_normal_exit_rate_on_crash": 0.26666666666666666,
+     "true_normal_exit_rate_on_no_crash": 0.37142857142857144,
+     "instants_saved_per_true_normal_exit": {
+      "median": 9,
+      "iqr": [
+       8.5,
+       21.0
+      ],
+      "n": 39
+     }
+    }
+   },
+   "label_shuffle_control": {
+    "no_crash_firing_rate": 0.0380952380952381,
+    "overall_firing_rate_label_independent": 0.12857142857142856,
+    "_note": "firing depends only on the k window, so it is label-independent; the overall firing rate and the no-crash rate agree up to the crash episodes' own firing."
+   }
+  }
+ },
+ "d197_level_only_reference": {
+  "DEV": {
+   "crash_caught_rate": 0.2,
+   "false_crash_rate": 0.1111111111111111,
+   "median_fire_time_s": 0.43
+  },
+  "EVAL": {
+   "crash_caught_rate": 0.09523809523809523,
+   "false_crash_rate": 0.02857142857142857,
+   "median_fire_time_s": 0.08
+  }
+ }
+}
