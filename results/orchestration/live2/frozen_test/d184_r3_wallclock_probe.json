@@ -1,0 +1,119 @@
+{
+ "_what": "the wall-clock sensitivity of the dry harness, isolated on one arm. A proof pass that ran 9 dry cells at once disagreed with a committed digest on exactly one of them, and this file is the probe that says why.",
+ "_arm": "covex-v6-state-uo-c5attr",
+ "_cell": {
+  "seed": 4,
+  "n": 16,
+  "run_s": 1200.0,
+  "ratio": "40:40:20",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dashcam_format": "epg",
+  "robot_upload": "per-frame",
+  "robot_reask_mean_s": 30.0
+ },
+ "_committed": {
+  "digest": "9a4be873eb3c5fba",
+  "rows": 14218,
+  "src": "c5attr_digest_proofs.json P3_dry_default_is_unexercised candidate"
+ },
+ "_caching_register": "DRY cells: no engine, no server, no prefix cache, and no model latency is measured anywhere here. The sensitivity is to HOST WALL CLOCK inside the decision path.",
+ "_design": "two hypotheses for the disagreement, separated by one pair of cells. H1 the proof's own wrappers on `_deficit_order_key` and `decide`. H2 host load. Both cells below run the SAME arm on the SAME cell at loadavg about 2; the first keeps the wrappers, the second has none. If H1 held, the first would still disagree.",
+ "A_instrumented_at_low_load": {
+  "arm": "covex-v6-state-uo-c5attr",
+  "seed": 4,
+  "digest": "9a4be873eb3c5fba",
+  "rows": 14218,
+  "order_hook": {
+   "core": "HybridArm",
+   "overridden": false,
+   "calls": 72953,
+   "none_args": 0,
+   "distinct_device_args": 16,
+   "device_args_sample": [
+    "asst000",
+    "asst001",
+    "asst002",
+    "dash000",
+    "dash001",
+    "dash002",
+    "dash003",
+    "dash004"
+   ],
+   "distinct_key_values": 1,
+   "nonzero_keys": 0,
+   "kinds": [
+    "dash",
+    "recall"
+   ]
+  },
+  "share_counts": {},
+  "deficit_feed_completions": null,
+  "n_weight_samples": 0,
+  "feed": null,
+  "host": {
+   "wall_s": 218.42,
+   "loadavg_start": [
+    1.02783203125,
+    3.82763671875,
+    5.87158203125
+   ],
+   "loadavg_end": [
+    2.12646484375,
+    2.92333984375,
+    5.06494140625
+   ],
+   "pid": 4047725
+  }
+ },
+ "B_bare_at_low_load": {
+  "arm": "covex-v6-state-uo-c5attr",
+  "digest": "9a4be873eb3c5fba",
+  "rows": 14218,
+  "chain": [
+   "V6StateUoC5AttrArm",
+   "V5Rules2Arm",
+   "HybridArm"
+  ],
+  "c5_attr_flag_by_chain_object": [
+   true,
+   true,
+   true
+  ],
+  "c5_attr_flag_on_core": true,
+  "attr_mon_len_at_end": 0,
+  "attr_mon_tail": [],
+  "cap_at_end": 8,
+  "has_live2_completed": true,
+  "live2_completed_qualname": "HybridArm.live2_completed",
+  "counters": {}
+ },
+ "C_instrumented_at_concurrency_9": {
+  "digest": "4dcd17bbcaf9262e",
+  "rows": 14203,
+  "concurrency": 9,
+  "loadavg_about": 9,
+  "wall_s_about": 600,
+  "_note": "the first proof pass. The other EIGHT cells of that pass reproduced their expected digests, both positive controls included, so arm-versus-arm checking could not have seen this."
+ },
+ "verdict": {
+  "cause": "HOST LOAD, not the instrumentation",
+  "evidence": "A and B agree with each other AND with the committed value (9a4be873eb3c5fba / 14218 and 9a4be873eb3c5fba / 14218), so removing the wrappers changes nothing and reducing load fixes it. Wall time per cell fell from about 600 s to 218.4 s.",
+  "wrappers_exonerated": true,
+  "why_this_arm": "the C5 attribution rule is the one mechanism in this set gated on a latency EWMA. Bare and quiet it is UNEXERCISED in dry: _attr_mon empty at end of run, cap still 8, and no c5_attr counter exists at all, which is what c5attr_digest_proofs.json P3 recorded. Under load the cap moved.",
+  "named_defect": "the reproduce-across-runs defect named at 3325e02c, now with a measured trigger: concurrency. Patching cf_instrument.over_budget off does not cover it.",
+  "consequence": "a dry digest from this harness is a property of the arm AND of how busy the host was. d184_r3_c5attr_proofs.json therefore runs bare at declared concurrency 4 and carries a self-reproduction control on its comparator."
+ },
+ "_provenance": {
+  "git_commit": "c032a0888566f8a46e86ea44289f8bfa51d959e2",
+  "script": "experiments/orchestration/live2/d184_r3_c5attr_proofs.py (--one, A) and d184_r3_offswitch_diagnosis.py (--one, B)",
+  "model": "n/a",
+  "timestamp": "2026-11-22T22:20:59.361275",
+  "device": "cpu_dry",
+  "n": 16,
+  "_git_commit_register": "the commit the MEASUREMENT RAN ON: the code tree is `git archive <this ref> experiments`, not origin/main at writing time",
+  "host": "flash",
+  "n_cells": 2,
+  "max_workers": 4
+ }
+}

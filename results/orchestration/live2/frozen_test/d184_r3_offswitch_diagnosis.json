@@ -1,0 +1,156 @@
+{
+ "_what": "why covex-v6-fair-c5attr-off does not collapse to covex-v6-state-uo-c5attr; NO instrumentation, one dry cell per process",
+ "cell": {
+  "seed": 4,
+  "n": 16,
+  "run_s": 1200.0,
+  "ratio": "40:40:20",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dashcam_format": "epg",
+  "robot_upload": "per-frame",
+  "robot_reask_mean_s": 30.0
+ },
+ "cells": {
+  "covex-v6-state-uo": {
+   "arm": "covex-v6-state-uo",
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "chain": [
+    "V6StateArm",
+    "V5Rules2Arm",
+    "HybridArm"
+   ],
+   "c5_attr_flag_by_chain_object": [
+    false,
+    false,
+    false
+   ],
+   "c5_attr_flag_on_core": false,
+   "attr_mon_len_at_end": 0,
+   "attr_mon_tail": [],
+   "cap_at_end": 8,
+   "has_live2_completed": true,
+   "live2_completed_qualname": "HybridArm.live2_completed",
+   "counters": {}
+  },
+  "covex-v6-state-uo-c5attr": {
+   "arm": "covex-v6-state-uo-c5attr",
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "chain": [
+    "V6StateUoC5AttrArm",
+    "V5Rules2Arm",
+    "HybridArm"
+   ],
+   "c5_attr_flag_by_chain_object": [
+    true,
+    true,
+    true
+   ],
+   "c5_attr_flag_on_core": true,
+   "attr_mon_len_at_end": 0,
+   "attr_mon_tail": [],
+   "cap_at_end": 8,
+   "has_live2_completed": true,
+   "live2_completed_qualname": "HybridArm.live2_completed",
+   "counters": {}
+  },
+  "covex-v6-fair-c5attr-off": {
+   "arm": "covex-v6-fair-c5attr-off",
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "chain": [
+    "V6FairFeed_covex_v6_state_uo_c5attr",
+    "V5Rules2Arm",
+    "HybridArm"
+   ],
+   "c5_attr_flag_by_chain_object": [
+    true,
+    true,
+    true
+   ],
+   "c5_attr_flag_on_core": true,
+   "attr_mon_len_at_end": 0,
+   "attr_mon_tail": [],
+   "cap_at_end": 8,
+   "has_live2_completed": true,
+   "live2_completed_qualname": "DeficitFeedMixin.live2_completed",
+   "counters": {}
+  },
+  "covex-v6-fair-c5attr-gain0": {
+   "arm": "covex-v6-fair-c5attr-gain0",
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "chain": [
+    "V6FairFeed_covex_v6_state_uo_c5attr",
+    "V5Rules2Arm",
+    "HybridArm"
+   ],
+   "c5_attr_flag_by_chain_object": [
+    true,
+    true,
+    true
+   ],
+   "c5_attr_flag_on_core": true,
+   "attr_mon_len_at_end": 0,
+   "attr_mon_tail": [],
+   "cap_at_end": 8,
+   "has_live2_completed": true,
+   "live2_completed_qualname": "DeficitFeedMixin.live2_completed",
+   "counters": {
+    "deficit_feed_completions": 11910
+   }
+  }
+ },
+ "diffs": {
+  "covex-v6-state-uo__vs__covex-v6-state-uo-c5attr": {
+   "positional": 0,
+   "setwise": 0,
+   "rows": [
+    14218,
+    14218
+   ],
+   "first_differing": null
+  },
+  "covex-v6-state-uo-c5attr__vs__covex-v6-fair-c5attr-off": {
+   "positional": 0,
+   "setwise": 0,
+   "rows": [
+    14218,
+    14218
+   ],
+   "first_differing": null
+  },
+  "covex-v6-state-uo__vs__covex-v6-fair-c5attr-off": {
+   "positional": 0,
+   "setwise": 0,
+   "rows": [
+    14218,
+    14218
+   ],
+   "first_differing": null
+  },
+  "covex-v6-fair-c5attr-off__vs__covex-v6-fair-c5attr-gain0": {
+   "positional": 0,
+   "setwise": 0,
+   "rows": [
+    14218,
+    14218
+   ],
+   "first_differing": null
+  }
+ },
+ "_provenance": {
+  "git_commit": "c032a0888566f8a46e86ea44289f8bfa51d959e2",
+  "script": "experiments/orchestration/live2/d184_r3_offswitch_diagnosis.py",
+  "model": "n/a",
+  "timestamp": "2026-11-22T22:20:59.361275",
+  "device": "cpu_dry",
+  "n": 16,
+  "_git_commit_register": "the commit the MEASUREMENT RAN ON: the code tree is `git archive <this ref> experiments`, not origin/main at writing time",
+  "host": "flash",
+  "n_cells": 4,
+  "max_workers": 4
+ }
+}

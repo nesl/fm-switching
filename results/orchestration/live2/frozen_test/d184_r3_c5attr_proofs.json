@@ -1,0 +1,1201 @@
+{
+ "_what": "D184 rung 3 on the c5attr base: the addendum 12 item 5 pass condition with per-consumer attribution, the off-switch identity against values committed BEFORE the change, and the name proof through run_live2_real.py itself",
+ "_why_rerun_on_this_base": "d178_deficit_feed_proofs.json proved the pass condition on covex-v6-state-shares. D184 determined shares fails its three D179 (6) checks at three of four seeds, so rung 2 is covex-v6-state-uo-c5attr and the pass condition must hold ON THE BASE THAT WILL RUN. The two bases differ in exactly the place that matters: share admission.",
+ "_protocol": "ONE dry cell per process (subprocess), planner wall-clock cutoff patched off, POSTED knobs forwarded, seed 4, NO SHIM of any kind",
+ "_digest_recipe": "sha256(json.dumps(rows without arm_version, sort_keys=True, separators=(',',':'), default=float))[:16]; comparable only within this recipe",
+ "_form": "w_d = 1 + 2.0 * (shortfall_d / target_d), floored at 1, PER DEVICE; range [1, 3]; GAIN pre-registered in deficit_gain_d178.py",
+ "_the_read": {
+  "ordering_PRIMARY": [
+   "hybrid/hybrid_arm.py:399 sorted(obs.recall, key=(_deficit_order_key(...), dl))",
+   "hybrid/hybrid_arm.py:483 items.sort(key=(_deficit_order_key(...), ...))",
+   "hybrid/hybrid_arm.py:486 the same sort on the C1-off branch",
+   "all three USE the value to change an order, and the order decides which items the C5 cap loop admits first"
+  ],
+  "flexible_split": [
+   "share_admission.py:162-168 via the coordinator's SA.allowed(weights_by_type=)",
+   "PRE-REGISTERED AS ABSENT ON THIS BASE: _share_ok returns before SA.allowed for an arm that does not enable share admission, and V6StateUoC5AttrArm sets only c5_attr_self_released, so the weights have NO READER on the c5attr base"
+  ]
+ },
+ "_prereg_pass_condition": "PASS: gain 2.0 against gain 0 shows differing decision rows SETWISE and the count is ATTRIBUTABLE to a named consumer. FAILURE: zero differing decisions, in which case rung 3 on this base is a NON-CONTRIBUTION, is NOT TUNED, and no cell list is posted (a rung-3 cell whose ordering consumer does not fire would be a rename).",
+ "_prereg_expected_split_zero": "The SPLIT consumer is expected to move ZERO on this base, by construction, and that zero is Rule 2's `unexpressible`, not evidence about the policy. The pass therefore rests on the ORDERING consumer alone, which is also the consumer addendum 12 item 3a calls the PRIMARY one.",
+ "cell": {
+  "seed": 4,
+  "n": 16,
+  "run_s": 1200.0,
+  "ratio": "40:40:20",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dashcam_format": "epg",
+  "robot_upload": "per-frame",
+  "robot_reask_mean_s": 30.0
+ },
+ "committed_bar": {
+  "covex-v6-base": {
+   "digest": "af8befb9420ad86a",
+   "rows": 12085,
+   "src": "d179_offswitch_digest_proofs.json arms[covex-v6-base]; d187_r1_proofs.json off_switch_identity; c5attr_digest_proofs.json P1",
+   "role": "POSITIVE CONTROL: a known-good committed arm that cannot legitimately fail"
+  },
+  "v5-rules-2": {
+   "digest": "18067c4c66bb44b8",
+   "rows": 11955,
+   "src": "d179_offswitch_digest_proofs.json arms[v5-rules-2]; c5attr_digest_proofs.json P1",
+   "role": "POSITIVE CONTROL: a known-good committed arm that cannot legitimately fail"
+  },
+  "covex-v6-state-uo": {
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "src": "d179_offswitch_digest_proofs.json arms[covex-v6-state-uo]; d187_r1_proofs.json and d187_r2_proofs.json off_switch_identity; c5attr_digest_proofs.json P1 and P3",
+   "role": "the rung-1 parent of the c5attr base"
+  },
+  "covex-v6-state-uo-c5attr": {
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "src": "c5attr_digest_proofs.json P3_dry_default_is_unexercised candidate",
+   "role": "THE COMPARATOR for the off-switch identity, and the base rung 3 builds on. Equal to covex-v6-state-uo on a DRY cell because the C5 attribution rule needs measured first-token latency to fire and a dry cell has none (P3's own finding)."
+  }
+ },
+ "item3_name_proof": {
+  "_claim": "every rung-3 c5attr name reaches make_arm in the HARNESS'S own process, and an unknown name on the same path still raises",
+  "entry_point": "experiments/orchestration/live2/run_live2_real.py",
+  "posted_knobs": [
+   "--ratio",
+   "40:40:20",
+   "--robot-question-set",
+   "lh_req",
+   "--ss-question-set",
+   "ss2",
+   "--dashcam-format",
+   "epg",
+   "--robot-upload",
+   "per-frame",
+   "--robot-reask-mean-s",
+   "30.0"
+  ],
+  "negative_control": {
+   "probe": {
+    "arm": "covex-v6-fair-c5attr-not-an-arm",
+    "seed": 0,
+    "returncode": 1,
+    "raised_unknown_arm": true,
+    "tail": "KeyError: \"unknown arm 'covex-v6-fair-c5attr-not-an-arm'; known: ['always-cloud-fcfs', 'attentionstore', 'attentionstore-prefetch', 'attentionstore-prefetch-noyield', 'attentionstore-prefetch-off', 'b10-blocking-aware', 'b7-edf-feasibility', 'b9', 'builder-acfcfs', 'builder-default', 'builder-s1-fai"
+   },
+   "_why": "'no KeyError appeared' passes trivially if the subprocess never reached make_arm, if the parser rejected something first, or if the grep looks for the wrong string",
+   "verdict": "PASS: the check can see an unresolved name"
+  },
+  "probes": [
+   {
+    "arm": "covex-v6-fair-c5attr",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   {
+    "arm": "covex-v6-fair-c5attr-off",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   {
+    "arm": "covex-v6-fair-c5attr-gain0",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   {
+    "arm": "covex-v6-fair-c5attr-orderonly",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   {
+    "arm": "covex-v6-fair-c5attr-splitonly",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   }
+  ],
+  "verdict": "PASS: all 5 names resolve"
+ },
+ "_determinism_control": {
+  "_claim": "the COMPARATOR is run twice, in two separate processes at this concurrency, and must give the same digest. Without this, a difference between gain 2.0 and gain 0 could be the wall-clock sensitivity rather than the mechanism.",
+  "comparator": "covex-v6-fair-c5attr-gain0",
+  "run1": {
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "wall_s": 298.18
+  },
+  "run2": {
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "wall_s": 220.4
+  },
+  "max_workers": 4,
+  "self_reproduces": true,
+  "verdict": "PASS"
+ },
+ "item2_off_switch_identity": {
+  "_claim": "with live2_deficit_feed OFF, covex-v6-fair-c5attr is byte-identical to covex-v6-state-uo-c5attr, and every non-rung-3 arm is unchanged against a value committed BEFORE the change",
+  "_control_validated": "consistency check 7: covex-v6-state-uo-c5attr is the COMPARATOR for every treatment below, so its own digest is checked against a committed value FIRST. A broken control passes every check applied to the treatment.",
+  "_positive_controls": "covex-v6-base and v5-rules-2 are known-good committed arms and MUST pass. If one of them fails, the CHECK is broken, not the arm.",
+  "_no_instrumentation": "every cell here runs BARE: no wrapper on `_deficit_order_key`, none on `decide`, no shim on any dataclass. An earlier pass wrapped both, and although the wrappers turn out NOT to be the cause, the bare run is the honest register: see `_wallclock_sensitivity`.",
+  "rows": [
+   {
+    "arm": "covex-v6-base",
+    "seed": 4,
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "instrumented": false,
+    "order_key_resolved": null,
+    "order_key_unresolved_device": null,
+    "order_hook": {
+     "core": "HybridArm",
+     "overridden": false,
+     "instrumented": false,
+     "calls": 0,
+     "none_args": 0,
+     "distinct_device_args": 0,
+     "device_args_sample": [],
+     "distinct_key_values": 0,
+     "nonzero_keys": 0,
+     "kinds": []
+    },
+    "c5_attr": {
+     "flag_on_core": false,
+     "attr_mon_len_at_end": 0,
+     "cap_at_end": 8,
+     "counters": {
+      "c5_dash_held": 18113
+     }
+    },
+    "share_counts": {},
+    "deficit_feed_completions": null,
+    "n_weight_samples": 0,
+    "host": {
+     "wall_s": 244.61,
+     "loadavg_start": [
+      2.1513671875,
+      2.3203125,
+      4.51806640625
+     ],
+     "loadavg_end": [
+      4.18505859375,
+      3.365234375,
+      4.43017578125
+     ],
+     "pid": 4051168
+    },
+    "committed": {
+     "digest": "af8befb9420ad86a",
+     "rows": 12085,
+     "src": "d179_offswitch_digest_proofs.json arms[covex-v6-base]; d187_r1_proofs.json off_switch_identity; c5attr_digest_proofs.json P1",
+     "role": "POSITIVE CONTROL: a known-good committed arm that cannot legitimately fail"
+    },
+    "agrees": true
+   },
+   {
+    "arm": "v5-rules-2",
+    "seed": 4,
+    "digest": "18067c4c66bb44b8",
+    "rows": 11955,
+    "instrumented": false,
+    "order_key_resolved": null,
+    "order_key_unresolved_device": null,
+    "order_hook": {
+     "core": "HybridArm",
+     "overridden": false,
+     "instrumented": false,
+     "calls": 0,
+     "none_args": 0,
+     "distinct_device_args": 0,
+     "device_args_sample": [],
+     "distinct_key_values": 0,
+     "nonzero_keys": 0,
+     "kinds": []
+    },
+    "c5_attr": {
+     "flag_on_core": false,
+     "attr_mon_len_at_end": 0,
+     "cap_at_end": 8,
+     "counters": {}
+    },
+    "share_counts": {},
+    "deficit_feed_completions": null,
+    "n_weight_samples": 0,
+    "host": {
+     "wall_s": 238.63,
+     "loadavg_start": [
+      2.1513671875,
+      2.3203125,
+      4.51806640625
+     ],
+     "loadavg_end": [
+      4.20166015625,
+      3.3544921875,
+      4.4326171875
+     ],
+     "pid": 4051167
+    },
+    "committed": {
+     "digest": "18067c4c66bb44b8",
+     "rows": 11955,
+     "src": "d179_offswitch_digest_proofs.json arms[v5-rules-2]; c5attr_digest_proofs.json P1",
+     "role": "POSITIVE CONTROL: a known-good committed arm that cannot legitimately fail"
+    },
+    "agrees": true
+   },
+   {
+    "arm": "covex-v6-state-uo",
+    "seed": 4,
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "instrumented": false,
+    "order_key_resolved": null,
+    "order_key_unresolved_device": null,
+    "order_hook": {
+     "core": "HybridArm",
+     "overridden": false,
+     "instrumented": false,
+     "calls": 0,
+     "none_args": 0,
+     "distinct_device_args": 0,
+     "device_args_sample": [],
+     "distinct_key_values": 0,
+     "nonzero_keys": 0,
+     "kinds": []
+    },
+    "c5_attr": {
+     "flag_on_core": false,
+     "attr_mon_len_at_end": 0,
+     "cap_at_end": 8,
+     "counters": {}
+    },
+    "share_counts": {},
+    "deficit_feed_completions": null,
+    "n_weight_samples": 0,
+    "host": {
+     "wall_s": 314.79,
+     "loadavg_start": [
+      2.1513671875,
+      2.3203125,
+      4.51806640625
+     ],
+     "loadavg_end": [
+      4.1435546875,
+      3.5302734375,
+      4.40771484375
+     ],
+     "pid": 4051169
+    },
+    "committed": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218,
+     "src": "d179_offswitch_digest_proofs.json arms[covex-v6-state-uo]; d187_r1_proofs.json and d187_r2_proofs.json off_switch_identity; c5attr_digest_proofs.json P1 and P3",
+     "role": "the rung-1 parent of the c5attr base"
+    },
+    "agrees": true
+   },
+   {
+    "arm": "covex-v6-state-uo-c5attr",
+    "seed": 4,
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "instrumented": false,
+    "order_key_resolved": null,
+    "order_key_unresolved_device": null,
+    "order_hook": {
+     "core": "HybridArm",
+     "overridden": false,
+     "instrumented": false,
+     "calls": 0,
+     "none_args": 0,
+     "distinct_device_args": 0,
+     "device_args_sample": [],
+     "distinct_key_values": 0,
+     "nonzero_keys": 0,
+     "kinds": []
+    },
+    "c5_attr": {
+     "flag_on_core": true,
+     "attr_mon_len_at_end": 0,
+     "cap_at_end": 8,
+     "counters": {}
+    },
+    "share_counts": {},
+    "deficit_feed_completions": null,
+    "n_weight_samples": 0,
+    "host": {
+     "wall_s": 317.82,
+     "loadavg_start": [
+      2.1513671875,
+      2.3203125,
+      4.51806640625
+     ],
+     "loadavg_end": [
+      4.1435546875,
+      3.5302734375,
+      4.40771484375
+     ],
+     "pid": 4051170
+    },
+    "committed": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218,
+     "src": "c5attr_digest_proofs.json P3_dry_default_is_unexercised candidate",
+     "role": "THE COMPARATOR for the off-switch identity, and the base rung 3 builds on. Equal to covex-v6-state-uo on a DRY cell because the C5 attribution rule needs measured first-token latency to fire and a dry cell has none (P3's own finding)."
+    },
+    "agrees": true
+   },
+   {
+    "arm": "covex-v6-fair-c5attr-off",
+    "seed": 4,
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "instrumented": false,
+    "order_key_resolved": null,
+    "order_key_unresolved_device": null,
+    "order_hook": {
+     "core": "HybridArm",
+     "overridden": false,
+     "instrumented": false,
+     "calls": 0,
+     "none_args": 0,
+     "distinct_device_args": 0,
+     "device_args_sample": [],
+     "distinct_key_values": 0,
+     "nonzero_keys": 0,
+     "kinds": []
+    },
+    "c5_attr": {
+     "flag_on_core": true,
+     "attr_mon_len_at_end": 0,
+     "cap_at_end": 8,
+     "counters": {}
+    },
+    "share_counts": {},
+    "deficit_feed_completions": null,
+    "n_weight_samples": 0,
+    "host": {
+     "wall_s": 303.07,
+     "loadavg_start": [
+      4.20166015625,
+      3.3544921875,
+      4.4326171875
+     ],
+     "loadavg_end": [
+      4.10791015625,
+      3.8779296875,
+      4.34716796875
+     ],
+     "pid": 4052061
+    },
+    "committed": null,
+    "agrees": null
+   }
+  ],
+  "off_digest": "9a4be873eb3c5fba",
+  "base_digest": "9a4be873eb3c5fba",
+  "off_equals_base": true,
+  "off_equals_committed_base": true,
+  "committed_bar_all_agree": true,
+  "verdict": "PASS"
+ },
+ "item1_pass_condition": {
+  "_claim": "PASS: gain 2.0 against gain 0 shows differing decision rows SETWISE and the count is ATTRIBUTABLE to a named consumer. FAILURE: zero differing decisions, in which case rung 3 on this base is a NON-CONTRIBUTION, is NOT TUNED, and no cell list is posted (a rung-3 cell whose ordering consumer does not fire would be a rename).",
+  "comparator": {
+   "arm": "covex-v6-fair-c5attr-gain0",
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "_why": "gain 0 and not the rung-2 base: it leaves BOTH consumers, every hook and every counter live and removes ONLY the quantity under test, so a difference cannot be attributed to the plumbing",
+   "equals_rung2_base": true,
+   "equals_committed_base": true
+  },
+  "by_consumer": {
+   "both": {
+    "arm": "covex-v6-fair-c5attr",
+    "digest": "12e4f73ce0ebd865",
+    "rows": 13812,
+    "identical_to_gain0": false,
+    "order_key_resolved": 72953,
+    "order_key_unresolved_device": null,
+    "diff_vs_gain0": {
+     "positional": 12272,
+     "setwise": 4512,
+     "rows_comparator": 14218,
+     "rows_treatment": 13812,
+     "first_differing": {
+      "index": 1942,
+      "comparator": {
+       "H": null,
+       "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+       },
+       "cost_model_id": null,
+       "defer_s": null,
+       "desired_tier": null,
+       "kind": "release_monitor",
+       "mu": null,
+       "note": null,
+       "opportunity_ids": [
+        "opp0001969"
+       ],
+       "piece_tokens": null,
+       "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+       },
+       "representation": null,
+       "representation_defaulted": false,
+       "t": 207.1,
+       "traffic_mix": {
+        "monitor": 0,
+        "piece": 0,
+        "recall": 1,
+        "whole": 0
+       }
+      },
+      "treatment": {
+       "H": null,
+       "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+       },
+       "cost_model_id": null,
+       "defer_s": null,
+       "desired_tier": null,
+       "kind": "release_monitor",
+       "mu": null,
+       "note": null,
+       "opportunity_ids": [
+        "opp0001971"
+       ],
+       "piece_tokens": null,
+       "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+       },
+       "representation": null,
+       "representation_defaulted": false,
+       "t": 207.1,
+       "traffic_mix": {
+        "monitor": 0,
+        "piece": 0,
+        "recall": 1,
+        "whole": 0
+       }
+      }
+     }
+    }
+   },
+   "orderonly": {
+    "arm": "covex-v6-fair-c5attr-orderonly",
+    "digest": "12e4f73ce0ebd865",
+    "rows": 13812,
+    "identical_to_gain0": false,
+    "order_key_resolved": 72953,
+    "order_key_unresolved_device": null,
+    "diff_vs_gain0": {
+     "positional": 12272,
+     "setwise": 4512,
+     "rows_comparator": 14218,
+     "rows_treatment": 13812,
+     "first_differing": {
+      "index": 1942,
+      "comparator": {
+       "H": null,
+       "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+       },
+       "cost_model_id": null,
+       "defer_s": null,
+       "desired_tier": null,
+       "kind": "release_monitor",
+       "mu": null,
+       "note": null,
+       "opportunity_ids": [
+        "opp0001969"
+       ],
+       "piece_tokens": null,
+       "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+       },
+       "representation": null,
+       "representation_defaulted": false,
+       "t": 207.1,
+       "traffic_mix": {
+        "monitor": 0,
+        "piece": 0,
+        "recall": 1,
+        "whole": 0
+       }
+      },
+      "treatment": {
+       "H": null,
+       "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+       },
+       "cost_model_id": null,
+       "defer_s": null,
+       "desired_tier": null,
+       "kind": "release_monitor",
+       "mu": null,
+       "note": null,
+       "opportunity_ids": [
+        "opp0001971"
+       ],
+       "piece_tokens": null,
+       "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+       },
+       "representation": null,
+       "representation_defaulted": false,
+       "t": 207.1,
+       "traffic_mix": {
+        "monitor": 0,
+        "piece": 0,
+        "recall": 1,
+        "whole": 0
+       }
+      }
+     }
+    }
+   },
+   "splitonly": {
+    "arm": "covex-v6-fair-c5attr-splitonly",
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "identical_to_gain0": true,
+    "order_key_resolved": null,
+    "order_key_unresolved_device": null,
+    "diff_vs_gain0": {
+     "positional": 0,
+     "setwise": 0,
+     "rows_comparator": 14218,
+     "rows_treatment": 14218,
+     "first_differing": null
+    }
+   }
+  },
+  "attribution": {
+   "ordering_alone_setwise": 4512,
+   "split_alone_setwise": 0,
+   "both_setwise": 4512,
+   "ordering_alone_positional": 12272,
+   "split_alone_positional": 0,
+   "both_positional": 12272,
+   "both_equals_orderonly": true,
+   "_note": "ordering and split are not required to add up: they interact through which request is admitted first. The three numbers are reported separately, never summed. On this base the split is ABSENT BY CONSTRUCTION and a zero from it is Rule 2's `unexpressible`."
+  },
+  "verdict": "PASS"
+ },
+ "item1b_weights_vary": {
+  "_claim": "the per-device weights vary ACROSS DEVICES; a weight constant at 1.0 everywhere means the feed is CONSTANT, a stopping condition and not a result",
+  "_register": "END-OF-RUN value per device, from the arm's own deficit_feed_report. NOT a distribution over time: sampling over time needs a wrapper, and a wrapper is what perturbed a cell here. The over-time spread on the SHARES base is in d178_deficit_feed_proofs.json and is not re-claimed for this base.",
+  "both": {
+   "asst000": {
+    "weight": 1.0,
+    "shortfall": 0.0,
+    "type": "assistance"
+   },
+   "asst001": {
+    "weight": 1.0,
+    "shortfall": 0.0,
+    "type": "assistance"
+   },
+   "asst002": {
+    "weight": 1.0,
+    "shortfall": 0.0,
+    "type": "assistance"
+   },
+   "dash000": {
+    "weight": 1.026091,
+    "shortfall": 0.003261,
+    "type": "alert"
+   },
+   "dash001": {
+    "weight": 1.043185,
+    "shortfall": 0.005398,
+    "type": "alert"
+   },
+   "dash002": {
+    "weight": 1.039586,
+    "shortfall": 0.004948,
+    "type": "alert"
+   },
+   "dash003": {
+    "weight": 1.044603,
+    "shortfall": 0.005575,
+    "type": "alert"
+   },
+   "dash004": {
+    "weight": 1.045997,
+    "shortfall": 0.00575,
+    "type": "alert"
+   },
+   "dash005": {
+    "weight": 1.036887,
+    "shortfall": 0.004611,
+    "type": "alert"
+   },
+   "robo000": {
+    "weight": 1.777778,
+    "shortfall": 0.35,
+    "type": "recall"
+   },
+   "robo001": {
+    "weight": 2.365079,
+    "shortfall": 0.614286,
+    "type": "recall"
+   },
+   "robo002": {
+    "weight": 2.027778,
+    "shortfall": 0.4625,
+    "type": "recall"
+   },
+   "robo003": {
+    "weight": 2.259259,
+    "shortfall": 0.566667,
+    "type": "recall"
+   },
+   "robo004": {
+    "weight": 2.097222,
+    "shortfall": 0.49375,
+    "type": "recall"
+   },
+   "robo005": {
+    "weight": 1.632479,
+    "shortfall": 0.284615,
+    "type": "recall"
+   },
+   "robo006": {
+    "weight": 2.407407,
+    "shortfall": 0.633333,
+    "type": "recall"
+   },
+   "_ALL": {
+    "min": 1.0,
+    "max": 2.407407,
+    "median": 1.0453,
+    "constant_at_one": false,
+    "devices": 16,
+    "devices_above_one": 13,
+    "distinct": 14,
+    "register": "end-of-run value per device, NOT a distribution over time"
+   }
+  },
+  "gain0": {
+   "asst000": {
+    "weight": 1.0,
+    "shortfall": 0.0,
+    "type": "assistance"
+   },
+   "asst001": {
+    "weight": 1.0,
+    "shortfall": 0.0,
+    "type": "assistance"
+   },
+   "asst002": {
+    "weight": 1.0,
+    "shortfall": 0.0,
+    "type": "assistance"
+   },
+   "dash000": {
+    "weight": 1.0,
+    "shortfall": 0.002362,
+    "type": "alert"
+   },
+   "dash001": {
+    "weight": 1.0,
+    "shortfall": 0.002249,
+    "type": "alert"
+   },
+   "dash002": {
+    "weight": 1.0,
+    "shortfall": 0.001574,
+    "type": "alert"
+   },
+   "dash003": {
+    "weight": 1.0,
+    "shortfall": 0.005086,
+    "type": "alert"
+   },
+   "dash004": {
+    "weight": 1.0,
+    "shortfall": 0.008956,
+    "type": "alert"
+   },
+   "dash005": {
+    "weight": 1.0,
+    "shortfall": 0.002137,
+    "type": "alert"
+   },
+   "robo000": {
+    "weight": 1.0,
+    "shortfall": 0.35,
+    "type": "recall"
+   },
+   "robo001": {
+    "weight": 1.0,
+    "shortfall": 0.614286,
+    "type": "recall"
+   },
+   "robo002": {
+    "weight": 1.0,
+    "shortfall": 0.4625,
+    "type": "recall"
+   },
+   "robo003": {
+    "weight": 1.0,
+    "shortfall": 0.566667,
+    "type": "recall"
+   },
+   "robo004": {
+    "weight": 1.0,
+    "shortfall": 0.49375,
+    "type": "recall"
+   },
+   "robo005": {
+    "weight": 1.0,
+    "shortfall": 0.284615,
+    "type": "recall"
+   },
+   "robo006": {
+    "weight": 1.0,
+    "shortfall": 0.633333,
+    "type": "recall"
+   },
+   "_ALL": {
+    "min": 1.0,
+    "max": 1.0,
+    "median": 1.0,
+    "constant_at_one": true,
+    "devices": 16,
+    "devices_above_one": 0,
+    "distinct": 1,
+    "register": "end-of-run value per device, NOT a distribution over time"
+   }
+  },
+  "feed_at_end": {
+   "gain": 2.0,
+   "gain_ruling": "D178 (2), corrected by flash addendum 12 item 2",
+   "form": "w_d = 1 + gain * (shortfall_d / target_d), floored at 1, PER DEVICE",
+   "targets": {
+    "alert": 0.25,
+    "recall": 0.9,
+    "assistance": 0.9
+   },
+   "target_source": "D178 (1), spec v6 sections 2 and 8",
+   "units": {
+    "alert": "device-episode",
+    "recall": "device",
+    "assistance": "device"
+   },
+   "currency": "on-time CLOUD answers only (D177, D178 (1)); device_on_time recorded, never added to the numerator",
+   "alert_decision_instants_per_episode": 19,
+   "n_offers": 12253,
+   "n_completions": 11345,
+   "per_device": {
+    "asst000": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 119,
+     "cloud_on_time": 119
+    },
+    "asst001": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 120,
+     "cloud_on_time": 120
+    },
+    "asst002": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 118,
+     "cloud_on_time": 118
+    },
+    "dash000": {
+     "type": "alert",
+     "shortfall": 0.003261,
+     "weight": 1.026091,
+     "episodes_closed": 117,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash001": {
+     "type": "alert",
+     "shortfall": 0.005398,
+     "weight": 1.043185,
+     "episodes_closed": 117,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash002": {
+     "type": "alert",
+     "shortfall": 0.004948,
+     "weight": 1.039586,
+     "episodes_closed": 117,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash003": {
+     "type": "alert",
+     "shortfall": 0.005575,
+     "weight": 1.044603,
+     "episodes_closed": 118,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash004": {
+     "type": "alert",
+     "shortfall": 0.00575,
+     "weight": 1.045997,
+     "episodes_closed": 119,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash005": {
+     "type": "alert",
+     "shortfall": 0.004611,
+     "weight": 1.036887,
+     "episodes_closed": 117,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "robo000": {
+     "type": "recall",
+     "shortfall": 0.35,
+     "weight": 1.777778,
+     "episodes_closed": null,
+     "offered": 20,
+     "cloud_on_time": 11
+    },
+    "robo001": {
+     "type": "recall",
+     "shortfall": 0.614286,
+     "weight": 2.365079,
+     "episodes_closed": null,
+     "offered": 21,
+     "cloud_on_time": 6
+    },
+    "robo002": {
+     "type": "recall",
+     "shortfall": 0.4625,
+     "weight": 2.027778,
+     "episodes_closed": null,
+     "offered": 16,
+     "cloud_on_time": 7
+    },
+    "robo003": {
+     "type": "recall",
+     "shortfall": 0.566667,
+     "weight": 2.259259,
+     "episodes_closed": null,
+     "offered": 15,
+     "cloud_on_time": 5
+    },
+    "robo004": {
+     "type": "recall",
+     "shortfall": 0.49375,
+     "weight": 2.097222,
+     "episodes_closed": null,
+     "offered": 32,
+     "cloud_on_time": 13
+    },
+    "robo005": {
+     "type": "recall",
+     "shortfall": 0.284615,
+     "weight": 1.632479,
+     "episodes_closed": null,
+     "offered": 13,
+     "cloud_on_time": 8
+    },
+    "robo006": {
+     "type": "recall",
+     "shortfall": 0.633333,
+     "weight": 2.407407,
+     "episodes_closed": null,
+     "offered": 15,
+     "cloud_on_time": 4
+    }
+   },
+   "weights_by_type_over_all_devices": {
+    "alert": 1.045997,
+    "recall": 2.407407,
+    "assistance": 1.0
+   },
+   "weights_by_type_pending": {
+    "alert": 1.0,
+    "recall": 1.0,
+    "assistance": 1.0
+   },
+   "type_shortfall_DIAGNOSTIC_ONLY": {
+    "alert": 0.004927,
+    "recall": 0.48645,
+    "assistance": 0.0
+   },
+   "n_units": {
+    "alert": 705,
+    "recall": 7,
+    "assistance": 3
+   },
+   "counts": {
+    "alert_cloud_late": 395,
+    "alert_cloud_on_time": 10491,
+    "alert_device_on_time": 10886,
+    "alert_episode_key_agree": 10886,
+    "alert_episode_key_from_record": 10886,
+    "alert_episodes_closed": 705,
+    "alert_episodes_open": 6,
+    "alert_instant_repeat": 9726,
+    "alert_instants_offered": 11764,
+    "assistance_cloud_on_time": 357,
+    "assistance_device_late": 97,
+    "assistance_device_on_time": 260,
+    "assistance_questions_offered": 357,
+    "completion_background_skipped": 159,
+    "order_key_resolved": 72953,
+    "recall_cloud_late": 48,
+    "recall_cloud_on_time": 54,
+    "recall_device_on_time": 102,
+    "recall_question_repeat": 4,
+    "recall_questions_offered": 132
+   },
+   "switch": {
+    "name": "live2_deficit_feed",
+    "on": true,
+    "scope": "arm instance",
+    "chain": [
+     true,
+     true,
+     true
+    ]
+   },
+   "consumers": {
+    "ordering": {
+     "on": true,
+     "hook": "hybrid/hybrid_arm.py _deficit_order_key, overridden on the INNER HybridArm instance",
+     "installed_on": "HybridArm",
+     "shadowed": true
+    },
+    "flexible_split": {
+     "on": true,
+     "read": "share_admission.py:162-168 via coordinator SA.allowed(weights_by_type=)",
+     "weights_now": {
+      "alert": 1.0,
+      "recall": 1.0,
+      "assistance": 1.0
+     }
+    }
+   },
+   "base": "covex-v6-state-uo-c5attr",
+   "weights_have_a_reader": false
+  }
+ },
+ "item1c_negative_control_gain0": {
+  "_claim": "CLAUDE.md Step 4: gain 0 leaves every hook, counter and BOTH consumers live and removes only the quantity under test, so every weight must be exactly 1.0 and the arm must collapse to the rung-2 base",
+  "all_weights_one": true,
+  "devices_seen": 16,
+  "order_key_resolved": 72953,
+  "digest": "9a4be873eb3c5fba",
+  "base_digest": "9a4be873eb3c5fba",
+  "identical_to_base": true,
+  "verdict": "PASS"
+ },
+ "item2b_step2b_device_visible": {
+  "_claim": "the ordering hook RESOLVES A DEVICE on this base, counted by the arm's own closure rather than by a wrapper. The previous inert fix was caught by counting the hook's arguments: it received None on all 10,956 calls and the per-device weight collapsed to one value.",
+  "_read": "arms_v6fairfeed.py:174-179 bumps order_key_unresolved_device or order_key_resolved inside the function that hybrid_arm.py:399/483/486 call",
+  "rung3": {
+   "order_key_resolved": 72953,
+   "order_key_unresolved_device": 0,
+   "devices_with_a_weight": 16,
+   "distinct_weights": 14
+  },
+  "gain0": {
+   "order_key_resolved": 72953,
+   "order_key_unresolved_device": null
+  },
+  "base": {
+   "order_key_resolved": null,
+   "_note": "the base has no feed, so it has no counter: None is expected here"
+  },
+  "verdict": "PASS"
+ },
+ "_wallclock_sensitivity": {
+  "_what": "consistency checks 1 and 7, and a finding in its own right. A first pass of this proof ran 9 cells at once and ONE of them disagreed with its committed value. The discrepancy is recorded here with its cause rather than dropped, and the cause is NOT the one it first looked like.",
+  "_caching_register": "every cell here is a DRY cell: no engine, no server, no prefix cache, and no measurement of a model's latency. The sensitivity below is to HOST WALL CLOCK inside the decision path, not to any cache.",
+  "disagreeing_cell": {
+   "arm": "covex-v6-state-uo-c5attr",
+   "digest": "4dcd17bbcaf9262e",
+   "rows": 14203,
+   "committed": "9a4be873eb3c5fba / 14218",
+   "concurrency": 9,
+   "loadavg_about": 9,
+   "wall_s_about": 600,
+   "_note": "the other 8 cells of that pass DID reproduce their expected digests, including the two positive controls, so arm-versus-arm checking could not have seen this"
+  },
+  "probe_that_separated_the_two_hypotheses": {
+   "_design": "the same arm, the same wrappers, run ALONE at loadavg 2. If the wrappers were the cause the digest would still disagree; if host load was the cause it would agree.",
+   "instrumented_at_load_2": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "wall_s": 218.42,
+    "loadavg_start": 1.03
+   },
+   "bare_at_load_2": {
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218
+   },
+   "conclusion": "HOST LOAD, not the instrumentation. The wrappers are exonerated and the dry path retains a wall-clock sensitivity that the `cf_instrument.over_budget` patch does not cover. This is the reproduce-across-runs defect named at 3325e02c, now with a measured trigger: concurrency."
+  },
+  "bare_rerun_at_this_concurrency": {
+   "arm": "covex-v6-state-uo-c5attr",
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "agrees_with_committed": true
+  },
+  "c5_attr_counters_bare": {
+   "flag_on_core": true,
+   "attr_mon_len_at_end": 0,
+   "cap_at_end": 8,
+   "counters": {}
+  },
+  "why_this_arm": "the C5 attribution rule is the one mechanism in this set gated on a latency EWMA. Bare and quiet, it is UNEXERCISED in dry: `_attr_mon` is empty at end of run, `cap` is still 8 and no c5_attr counter exists at all, which is exactly what c5attr_digest_proofs.json P3 recorded as `P3_dry_default_is_unexercised`. Under load the cap moved, so the one arm with a timing-gated rule was the one arm perturbed.",
+  "consequence_for_this_file": "every number reported here comes from a BARE run at declared concurrency 4, with the comparator run twice as a self-reproduction control (see _determinism_control).",
+  "consequence_for_others": "a dry digest from this harness is a property of the arm AND of how busy the host was. Proof scripts here that run many cells at once should carry a self-reproduction control; d179_offswitch_digest_proofs.json ran at concurrency 18 and carries one for covex-v6-state-uo only."
+ },
+ "verdicts": {
+  "_determinism_control": "PASS",
+  "item1_pass_condition": "PASS",
+  "item1c_negative_control_gain0": "PASS",
+  "item2_off_switch_identity": "PASS",
+  "item2b_step2b_device_visible": "PASS",
+  "item3_name_proof": "PASS: all 5 names resolve"
+ },
+ "verdict": "ALL_PASS",
+ "_provenance": {
+  "git_commit": "c032a0888566f8a46e86ea44289f8bfa51d959e2",
+  "script": "experiments/orchestration/live2/d184_r3_c5attr_proofs.py",
+  "model": "n/a",
+  "timestamp": "2026-11-22T22:20:59.361275",
+  "device": "cpu_dry",
+  "n": 16,
+  "_git_commit_register": "the commit the MEASUREMENT RAN ON: the code tree is `git archive <this ref> experiments`, not origin/main at writing time",
+  "host": "flash",
+  "n_cells": 10,
+  "max_workers": 4
+ },
+ "_cross_check_against_committed": {
+  "_what": "CLAUDE.md consistency check 1. origin/main moved while these cells were running, and the new head carries d185_fair_c5attr_gate.json: an INDEPENDENT session's Step 2b on the same base, run at commit 40992dbe. It was found before conclusions were written and is cross-checked rather than ignored.",
+  "source_of_prior": "results/orchestration/live2/frozen_test/d185_fair_c5attr_gate.json (0c43c12d)",
+  "prior_commit": "40992dbee5ebb7f8965b91589943b3ba7700bc99",
+  "this_commit": "c032a0888566f8a46e86ea44289f8bfa51d959e2",
+  "table": [
+   {
+    "quantity": "gain0",
+    "this_run": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218,
+     "setwise": null
+    },
+    "prior_run": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218,
+     "setwise": null
+    },
+    "ratio": "1.000 (exact)",
+    "agree": true
+   },
+   {
+    "quantity": "both",
+    "this_run": {
+     "digest": "12e4f73ce0ebd865",
+     "rows": 13812,
+     "setwise": 4512
+    },
+    "prior_run": {
+     "digest": "12e4f73ce0ebd865",
+     "rows": 13812,
+     "setwise": 4512
+    },
+    "ratio": "1.000 (exact)",
+    "agree": true
+   },
+   {
+    "quantity": "orderonly",
+    "this_run": {
+     "digest": "12e4f73ce0ebd865",
+     "rows": 13812,
+     "setwise": 4512
+    },
+    "prior_run": {
+     "digest": "12e4f73ce0ebd865",
+     "rows": 13812,
+     "setwise": 4512
+    },
+    "ratio": "1.000 (exact)",
+    "agree": true
+   },
+   {
+    "quantity": "splitonly",
+    "this_run": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218,
+     "setwise": 0
+    },
+    "prior_run": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218,
+     "setwise": 0
+    },
+    "ratio": "1.000 (exact)",
+    "agree": true
+   }
+  ],
+  "also_agreeing": {
+   "first_difference_index": {
+    "this_run": 1942,
+    "prior_run": 1942,
+    "agree": true
+   },
+   "first_difference_detail": "both runs: at t=207.1 the control releases monitor opp0001969 and the treatment releases opp0001971, an ordering swap",
+   "orderonly_byte_identical_to_both": {
+    "this_run": true,
+    "prior_run": true
+   },
+   "off_switch_and_base": "both runs give covex-v6-fair-c5attr-off and covex-v6-state-uo-c5attr 9a4be873eb3c5fba / 14,218"
+  },
+  "all_agree": true,
+  "_why_it_matters_twice": "first, it is an exact independent replication of the pass condition on a different commit, which is stronger than either run alone. Second, it is the bar that retires the concurrency-9 anomaly: the perturbed digest 4dcd17bbcaf9262e appears in neither run, and the committed value appears in both.",
+  "_what_this_file_adds_over_the_prior_gate": [
+   "the POSITIVE CONTROLS the gate did not run: covex-v6-base af8befb9420ad86a / 12,085 and v5-rules-2 18067c4c66bb44b8 / 11,955, plus covex-v6-state-uo, each against a value committed before the change, so the comparator side of the comparison is audited too",
+   "the name proof extended from 2 probes to all FIVE rung-3 names plus the negative control",
+   "device resolution counted from the arm's OWN closure (order_key_resolved 72,953 / unresolved 0) rather than from a wrapper",
+   "the per-device weight table at end of run (1.0 to 2.4074, 13 of 16 above 1.0)",
+   "a self-reproduction control on the comparator, and the wall-clock sensitivity finding that makes one necessary"
+  ]
+ }
+}

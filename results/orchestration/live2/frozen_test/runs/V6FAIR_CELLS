@@ -1,0 +1,148 @@
+# RUNG 3 (covex-v6-fair-c5attr) ON THE D184 FALLBACK BASE, FOUR SEEDS.
+# One cell per line: "arm n seed tag". Lines starting # are NOT run.
+#
+# THESE CELLS TAKE PRIORITY OVER THE REMAINING _kv0.5 HALF-MEMORY CELLS of the frozen-test
+# driver's matrix tail. Rungs 3 and 4 are the gate; _kv0.5 is a sensitivity sweep on an already
+# answered question. Run these first.
+#
+# WHY THIS BASE. D184 fired: covex-v6-state-shares must meet all three D179 (6) checks at all four
+# seeds to be rung 2, and the best shares version (r1) passes at s5 only (check 2 retention
+# against a 0.90 bar: 0.7229 / 0.9773 / 0.7727 / 0.8906). So rung 2 is covex-v6-state-uo-c5attr
+# and rung 3 builds on it. This list does not wait on shares.
+#
+# ------------------------------------------------------------------------------- THE MECHANISM
+# A PER-DEVICE DEFICIT FEED turns each device's own shortfall against its own target into a
+# weight, and the weight ORDERS competing deadline requests:
+#
+#     w_d = 1 + 2.0 * (shortfall_d / target_d),   floored at 1,   range [1, 3],   PER DEVICE
+#
+# GAIN = 2.0 is pre-registered in experiments/orchestration/live2/deficit_gain_d178.py and was
+# declared before any rung-3 cell ran. The NORMALISED form is the only form run; the raw
+# unnormalised form is corrected in place in that module and is NOT RUN at any gain.
+# Targets (D178 (1)): alert 0.25 per DEVICE-EPISODE over a declared 19 decision instants; recall
+# and assistance 0.90 per DEVICE over OFFERED questions. Currency is ON-TIME CLOUD ANSWERS ALONE
+# (D177); device_on_time is recorded beside the numerator and never added to it. Classification is
+# by DEVICE-ID PREFIX, not by the completion hook's `kind`, because that hook reports "recall" for
+# both recall and assistance.
+#
+# ------------------------------------------------------- THE READ THAT CONSUMES THE WEIGHTS
+# CONSUMER 1, ORDERING, THE PRIMARY ONE AND THE ONLY LIVE ONE ON THIS BASE. The arm shadows
+# `_deficit_order_key` on the INNER HybridArm instance to return the NEGATIVE w_d
+# (arms_v6fairfeed.py:171-181), and three sites in the frozen hybrid/hybrid_arm.py USE it as the
+# leading sort key:
+#
+#     hybrid/hybrid_arm.py:399   sorted(obs.recall, key=(self._deficit_order_key(
+#                                  self._device_of(x.session_id), "recall"), x.deadline_s))
+#     hybrid/hybrid_arm.py:483   items.sort(key=(self._deficit_order_key(it["device_id"],
+#                                  it["kind"]), not it["risk"], -idx(it), it["dl"], it["id"]))
+#     hybrid/hybrid_arm.py:486   the same sort on the C1-off branch
+#
+# All three CHANGE AN ORDER, and the order decides which items the C5 cap loop admits first, so
+# this is a read that moves a decision and not a log field. The frozen default returns 0.0, a
+# constant, which cannot reorder anything, so no other arm is touched.
+#
+# THE HOOK RESOLVES A REAL DEVICE, counted by the arm's own closure and not by a wrapper:
+# order_key_resolved = 72,953 and order_key_unresolved_device = 0 on the s4 dry cell, over 16
+# devices carrying 14 distinct weights. This counter exists because the previous attempt at this
+# hook received None on all 10,956 calls and the per-device weight collapsed to ONE value while
+# every surface sign said the mechanism was live (3325e02c).
+#
+# CONSUMER 2, THE FLEXIBLE SPLIT, IS ABSENT BY CONSTRUCTION ON THIS BASE, and that is reported as
+# absent rather than as a zero. The weights reach it only through SA.allowed(weights_by_type=),
+# and share_admission._share_ok returns before SA.allowed for an arm that does not enable share
+# admission; V6StateUoC5AttrArm sets only c5_attr_self_released. Measured: the split-only arm
+# moves EXACTLY 0 decisions here, which is Rule 2's `unexpressible`, not evidence about the
+# policy. Nothing testable is lost: on the shares base, where it IS wired, the split also
+# contributed 0 against 3,902 for ordering (d178_deficit_feed_proofs.json).
+#
+# A STALE DOCSTRING, recorded and deliberately not edited: arms_v6fairfeed.py:26-34 still says the
+# weights have NO reader at all on c5attr and calls the feed an absent link there. The D182
+# ordering consumer made that false and the measurement below refutes it. It is not edited here
+# because that file is on the live path and this session is not its owner.
+#
+# --------------------------------------------- THE PRE-REGISTERED PASS CONDITION, AND ITS FAILURE
+# PASS CONDITION (user addendum 12 item 5, pre-registered before any rung-3 cell): gain 2.0
+# against gain 0 MUST show differing decision rows, and the count MUST be ATTRIBUTABLE to a named
+# consumer, because "a combined count that cannot be attributed is not a pass".
+# FAILURE CONDITION: zero differing decisions, in which case rung 3 is reported as a
+# NON-CONTRIBUTION, is NEVER TUNED, and no cell list is posted. A rung-3 cell whose ordering
+# consumer does not fire would be a rename.
+# The gain-0 control is a CELL and not a code edit, and it is the comparator rather than the
+# rung-2 base because it leaves both consumers, every hook and every counter live and removes only
+# the quantity under test.
+#
+# MET ON THIS BASE, measured not assumed (d184_r3_c5attr_proofs.json, dry s4, 16 devices, 1200 s,
+# posted knobs, bare, concurrency 4):
+#
+#   arm                              digest            rows    vs gain-0 (setwise / positional)
+#   covex-v6-fair-c5attr-gain0       9a4be873eb3c5fba  14218   comparator
+#   covex-v6-fair-c5attr             12e4f73ce0ebd865  13812   4512 / 12272
+#   covex-v6-fair-c5attr-orderonly   12e4f73ce0ebd865  13812   4512 / 12272   BYTE-IDENTICAL
+#   covex-v6-fair-c5attr-splitonly   9a4be873eb3c5fba  14218      0 /     0   ABSENT, see above
+#
+# So rung 3's ENTIRE contribution on this base is the ORDERING consumer, the same finding as on
+# the shares base and by the same attribution. First differing decision: at t=207.1 the comparator
+# releases monitor opp0001969 and the treatment releases opp0001971.
+# Weights at end of run span 1.0 to 2.4074 over 16 devices, 13 above 1.0, 14 distinct values; the
+# recall devices carry them (robo006 2.4074, robo001 2.3651) and the alert devices sit just above
+# 1.0 because dry alert traffic is almost all on time. At gain 0 every weight is exactly 1.0.
+#
+# INDEPENDENTLY REPLICATED, EXACTLY. While these cells were running, origin/main gained
+# d185_fair_c5attr_gate.json (0c43c12d): another session's Step 2b on this same base at commit
+# 40992dbe. Every quantity agrees to the digit, including the digests, the row counts, the 4,512
+# setwise and 12,272 positional counts, the byte-identity of the order-only arm, and the first
+# differing decision at index 1942. Two sessions, two commits, one answer. That cross-check is
+# recorded in d184_r3_c5attr_proofs.json under _cross_check_against_committed, and it also retires
+# the load artefact described below: the perturbed digest appears in neither run.
+#
+# ---------------------------------------------------------------- THE OTHER PROOFS, WITH DIGESTS
+# OFF-SWITCH IDENTITY, each arm against a value committed BEFORE this change, not against itself:
+#
+#   covex-v6-base                    af8befb9420ad86a  12085   committed, POSITIVE CONTROL  PASS
+#   v5-rules-2                       18067c4c66bb44b8  11955   committed, POSITIVE CONTROL  PASS
+#   covex-v6-state-uo                9a4be873eb3c5fba  14218   committed                    PASS
+#   covex-v6-state-uo-c5attr         9a4be873eb3c5fba  14218   committed (P3)               PASS
+#   covex-v6-fair-c5attr-off         9a4be873eb3c5fba  14218   byte-identical to the base   PASS
+#
+# The base's own digest is checked FIRST, because it is the comparator for every treatment above
+# and a broken control passes every check applied to the treatment.
+#
+# NAME PROOF through run_live2_real.py ITSELF as a subprocess with the posted knobs: all five names
+# resolve (covex-v6-fair-c5attr and its -off, -gain0, -orderonly, -splitonly siblings), WITH a
+# negative control that an unknown name still raises KeyError "unknown arm". The harness imports
+# only `arms` and `hybrid`, so a name that resolves in a friendly process can still die at cell
+# start, which is how four covex-v6-state cells were once skipped.
+#
+# D188 HOLDS: live2_qcache_key_fix reads False on every arm above, the floors and W_max are frozen,
+# and the arms_v6state id(obs) cache fix is NOT enabled in any cell here.
+#
+# ------------------------------------------------- ONE WARNING FOR WHOEVER RUNS THE DRY PROOFS
+# CONCURRENCY IS A MEASUREMENT PARAMETER IN THE DRY HARNESS, measured here rather than assumed.
+# A first pass of these proofs ran 9 dry cells at once (loadavg about 9 on 24 cores, about 600 s
+# per cell) and covex-v6-state-uo-c5attr gave 4dcd17bbcaf9262e / 14,203 against its committed
+# 9a4be873eb3c5fba / 14,218, while the other eight cells, including both positive controls, all
+# reproduced. The same arm run ALONE at loadavg 2 gives the committed digest in 218 s, with and
+# without instrumentation, so the cause is HOST LOAD and not the proof's wrappers: the dry path
+# keeps a wall-clock sensitivity that patching cf_instrument.over_budget does not cover. This is
+# the reproduce-across-runs defect named at 3325e02c, now with a measured trigger. The arm that
+# moved is the one arm here with a latency-EWMA-gated rule; bare and quiet, that rule is
+# UNEXERCISED in dry (_attr_mon empty, cap still 8, no c5_attr counter), which is what
+# c5attr_digest_proofs.json P3 already recorded. Every digest above comes from a bare run at
+# concurrency 4 with the comparator run TWICE as a self-reproduction control (both
+# 9a4be873eb3c5fba / 14,218). These are LIVE cells and are not affected, but a future dry digest
+# proof on this harness should declare its concurrency and carry that control.
+#
+# ---------------------------------------------------------------------------- OVERLAP, READ THIS
+# results/orchestration/live2/frozen_test/runs/V6FAIR_C5ATTR_CELLS already posts
+# covex-v6-fair-c5attr at seeds 4 and 5 with a -gain0 cell beside each. This list is the FULL
+# four-seed set the rung-3 headline needs. DO NOT RUN THE s4 AND s5 ROWS TWICE: a cell that
+# already exists on disk under the same name is skipped by the driver, so the net new work here is
+# seeds 6 and 7. That list was GATED at 2e5645da and no covex-v6-fair-c5attr cell is on disk yet,
+# so if it runs first, this list contributes s6 and s7; if it does not, this list is self-contained. The -gain0 comparator cells for s6 and s7 are NOT posted by me, because the
+# attribution above is established on the dry s4 cell and the user's instruction for this list
+# named the headline arm only; if the live headline is to carry its own per-seed control, those
+# two cells need a user ruling, not a quiet addition by me.
+covex-v6-fair-c5attr 16 4 _L3_epg_rq30
+covex-v6-fair-c5attr 16 5 _L3_epg_rq30
+covex-v6-fair-c5attr 16 6 _L3_epg_rq30
+covex-v6-fair-c5attr 16 7 _L3_epg_rq30
