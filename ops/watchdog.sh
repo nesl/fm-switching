@@ -16,6 +16,16 @@ STATE=$REPO/ops/watchdog.state
 MAX_RESTARTS=6
 WINDOW_S=3600
 CLAUDE=/home/pragya/.local/bin/claude
+# --permission-mode auto, on the user's explicit ruling ("Resume session with auto mode"), which
+# overrides D187 (5)'s earlier "only the permission settings already configured". Applied because
+# the DEFAULT mode made a resumed session useless: it was refused repo writes, refused even grep
+# READS under /tmp/claude-1001/ where the whole workflow lives, and prompted for tmux ls. A
+# watchdog that faithfully restarts a session which cannot do the work is not resilience, and that
+# limitation was reported to the user rather than worked around until they ruled. The H100 made the
+# same change to its own watchdog at 4188b698 after the same test, so both boxes now resume in the
+# mode their interactive sessions already run in. This is NOT a bypass: permission checks still
+# apply, nothing disables TLS, and no credential is introduced.
+PERM_MODE=auto
 # DEFECT FOUND 2026-11-23: the prompt named a path that does NOT EXIST in this checkout. The
 # handoff file is committed on origin/main and present in the /tmp worktree, but this repo is at an
 # older commit, so a resumed session was told to read its own instructions from a missing file. The
@@ -77,5 +87,5 @@ echo "$first $count" > "$STATE"
 
 log "RESTART $count/$MAX_RESTARTS: session $SESSION absent, starting in tmux"
 tmux new-session -d -s "$SESSION" -c "$REPO" \
-  "$CLAUDE -c -p '$PROMPT' >> $REPO/ops/track.log 2>&1; echo exited >> $REPO/ops/track.log" \
+  "$CLAUDE -c --permission-mode $PERM_MODE -p '$PROMPT' >> $REPO/ops/track.log 2>&1; echo exited >> $REPO/ops/track.log" \
   && log "started" || log "FAILED to start tmux session"
