@@ -91,8 +91,10 @@ def main() -> int:
                        device_answers_on_time_not_counted=True),
         target=DF.TARGETS["alert"], attainment=round(att, 6),
         shortfall=round(max(DF.TARGETS["alert"] - att, 0.0), 6),
-        weight_if_this_were_the_only_unit=round(
-            GAIND.weight(max(DF.TARGETS["alert"] - att, 0.0)), 6),
+        weight_of_this_unit=round(
+            GAIND.weight(max(DF.TARGETS["alert"] - att, 0.0), DF.TARGETS["alert"]), 6),
+        weight_under_the_superseded_raw_form=round(
+            1.0 + GAIND.GAIN * max(DF.TARGETS["alert"] - att, 0.0), 6),
         episode_key_derivation=dict(
             used_here="play_id and t_local, which only an offline reader has",
             used_by_the_feed=("the EP-G prompt-token law: position = (prompt_tokens - 42)/338 - 1,"
@@ -138,7 +140,8 @@ def main() -> int:
                              sent_to_cloud=sum(1 for q in qs if q["cloud_request_sent"])),
             numerator=dict(value=k_ont, counts="cloud_on_time ONLY (D177, D178 (1))"),
             target=DF.TARGETS[qtype], attainment=round(att, 6), shortfall=round(sf, 6),
-            weight_if_this_were_the_only_unit=round(GAIND.weight(sf), 6))
+            weight_of_this_unit=round(GAIND.weight(sf, DF.TARGETS[qtype]), 6),
+            weight_under_the_superseded_raw_form=round(1.0 + GAIND.GAIN * sf, 6))
 
     rec = device_unit("robo", "recall")
     asst = device_unit("asst", "assistance")
@@ -151,6 +154,12 @@ def main() -> int:
     for r in reqs:
         ev.append((float(r.get("t_done") or 0.0), 1, r["device_id"], r["opportunity_id"]))
     ev.sort(key=lambda e: (e[0], e[1]))
+    # the episode key the OFFLINE reader can derive, passed in as `episode_id` so the replay uses
+    # the same authority a live run does (the completion hook) rather than the token law
+    epk = {r["opportunity_id"]: "%s|e%03d" % (r["play_id"],
+                                              round((float(r["t_local"]) - INSTANT_T0_S)
+                                                    / INSTANT_CADENCE_S) // DF.EPG_CAP_FRAMES)
+           for r in outs if str(r["device_id"]).startswith("dash")}
     for _t, what, did, oid in ev:
         if what == 0:
             if str(did)[:4] == "dash":
@@ -160,8 +169,9 @@ def main() -> int:
         else:
             feed.observe_completion(device_id=did,
                                     kind=("monitor" if str(did)[:4] == "dash" else "recall"),
-                                    cloud_on_time=ont.get(oid, False), prompt_tokens=pt.get(oid))
-    w = feed.weights()
+                                    cloud_on_time=ont.get(oid, False), prompt_tokens=pt.get(oid),
+                                    episode_id=epk.get(oid))
+    w = feed.weights_by_type()
     tot = sum(w.values())
     consumer = {}
     for t, v in w.items():
@@ -183,8 +193,11 @@ def main() -> int:
                             "constructed here"),
         gain=GAIND.GAIN, gain_ruling=GAIND.GAIN_RULING,
         alert_unit=alert, recall_unit=rec, assistance_unit=asst,
-        whole_cell=dict(shortfall=feed.as_dict()["shortfall"],
-                        weights=feed.as_dict()["weights"],
+        whole_cell=dict(per_device=feed.as_dict()["per_device"],
+                        weights_by_type_max_over_devices=feed.as_dict()[
+                            "weights_by_type_over_all_devices"],
+                        type_shortfall_DIAGNOSTIC_ONLY=feed.as_dict()[
+                            "type_shortfall_DIAGNOSTIC_ONLY"],
                         n_units=feed.as_dict()["n_units"],
                         counts=feed.as_dict()["counts"]),
         consumer_effect=dict(
@@ -196,7 +209,12 @@ def main() -> int:
             _what=("a shortfall cannot exceed its own target, so the UNNORMALISED form's "
                    "reachable range differs by type and the declared 1 to 3 is reachable only by "
                    "a type whose target is 1"),
-            by_type={t: [1.0, round(GAIND.weight(tg), 3)] for t, tg in DF.TARGETS.items()}))
+            by_type={t: [1.0, round(GAIND.weight(tg, tg), 3)] for t, tg in DF.TARGETS.items()},
+            _corrected=("under the NORMALISED form the range is 1 to 3 for EVERY type; the row "
+                        "below is what the SUPERSEDED raw form reached and is kept so the "
+                        "correction's direction is visible in the trace too"),
+            by_type_under_the_superseded_raw_form={
+                t: [1.0, round(1.0 + GAIND.GAIN * tg, 3)] for t, tg in DF.TARGETS.items()}))
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(out, indent=1, default=str) + "\n")
     print(json.dumps(dict(alert=dict(device=alert["device_id"], n=alert["denominator"]["value"],
@@ -207,7 +225,8 @@ def main() -> int:
                           assistance=dict(device=asst["device_id"],
                                           n=asst["denominator"]["value"],
                                           ont=asst["numerator"]["value"], sf=asst["shortfall"]),
-                          whole_cell=out["whole_cell"]["weights"]), indent=1))
+                          whole_cell=out["whole_cell"][
+                              "weights_by_type_max_over_devices"]), indent=1))
     print("wrote", OUT)
     return 0
 

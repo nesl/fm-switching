@@ -1,8 +1,12 @@
 {
- "_what": "the D178 (1) per-type deficit feed of covex-v6-fair (rung 3): switch-off identity against committed digests, Step 2b, the weight distribution, and the gain-0 negative control",
- "_protocol": "ONE dry cell per process (subprocess), planner wall-clock cutoff patched off, POSTED knobs forwarded, seeds 0/4/5/6/7 only",
+ "_what": "the PER-DEVICE normalised deficit feed of covex-v6-fair (rung 3) and its two consumers: identity against committed digests, the addendum 12 item 5 pass condition with per-consumer attribution, the weight distribution, and the gain-0 negative control",
+ "_protocol": "ONE dry cell per process (subprocess), planner wall-clock cutoff patched off, POSTED knobs forwarded, seed 4, 3 concurrent",
  "_digest_recipe": "sha256(json.dumps(rows without arm_version, sort_keys=True, separators=(',',':'), default=float))[:16]; comparable only within this recipe",
- "_shim": "coordinator.py:1436 calls SA.allowed WITHOUT weights_by_type, so the weights have no reader in the committed tree. --shim forwards arm.live2_share_weights() into that one argument and changes nothing else. Both the shimmed and the un-shimmed number are reported.",
+ "_form": "w_d = 1 + 2.0 * (shortfall_d / target_d), floored at 1, PER DEVICE; the raw unnormalised form is corrected in place in deficit_gain_d178.py and is NOT RUN",
+ "_consumers": {
+  "ordering": "PRIMARY. hybrid_arm._deficit_order_key, overridden on the inner HybridArm instance to return the NEGATIVE w_d. WIRED but blind: the committed call sites pass a device_id the frozen dataclasses do not have, so --order-shim is needed until the one-line fix lands.",
+  "flexible_split": "share_admission.py:162-168 through the coordinator's SA.allowed(weights_by_type=) call site. FULLY WIRED, no shim."
+ },
  "cell": {
   "seed": 4,
   "n": 16,
@@ -15,106 +19,63 @@
   "robot_reask_mean_s": 30.0
  },
  "committed_bar": {
-  "covex-v6-state-uo": {
-   "digest": "9a4be873eb3c5fba",
-   "rows": 14218,
-   "src": "c5attr_digest_proofs.json P1 before (f2d617fa); d179_share_admission_proofs.json off_switch_identity"
-  },
   "covex-v6-base": {
    "digest": "af8befb9420ad86a",
    "rows": 12085,
-   "src": "c5attr_digest_proofs.json P1 before (f2d617fa); d179_share_admission_proofs.json off_switch_identity"
+   "src": "c5attr_digest_proofs.json P1 before-side (f2d617fa); d179_share_admission_proofs.json off_switch_identity"
   },
   "v5-rules-2": {
    "digest": "18067c4c66bb44b8",
    "rows": 11955,
-   "src": "c5attr_digest_proofs.json P1 before (f2d617fa)"
-  },
-  "b7-edf-feasibility": {
-   "digest": "b9aadd1c3a2b26d5",
-   "rows": 12265,
-   "src": "c5attr_digest_proofs.json P1 before (f2d617fa)"
+   "src": "c5attr_digest_proofs.json P1 before-side (f2d617fa)"
   },
   "covex-v6-state-shares": {
    "digest": "3a5b40d78b9dcb3b",
    "rows": 13390,
-   "src": "d179_share_admission_proofs.json step_2b shares_on"
+   "src": "d179_share_admission_proofs.json step_2b shares_on; also reproduced by d178_deficit_feed_proofs.json before the hybrid_arm ordering hook existed"
   }
  },
- "a_other_arms_unchanged": {
-  "_claim": "no arm but the two new names decides differently after this change; the bar is a value committed BEFORE it, not this run's own other side",
+ "a_identity": {
+  "_claim": "the new ordering hook moved no existing arm, and the switch off collapses to the rung-2 base; the bar is a value committed BEFORE this work",
   "rows": [
    {
     "arm": "covex-v6-base",
-    "shim": false,
+    "order_shim": false,
+    "shim": null,
     "seed": 4,
     "digest": "af8befb9420ad86a",
     "rows": 12085,
     "share_counts": {},
     "deficit_feed_completions": null,
     "n_weight_samples": 0,
-    "feed": null,
     "committed": {
      "digest": "af8befb9420ad86a",
      "rows": 12085,
-     "src": "c5attr_digest_proofs.json P1 before (f2d617fa); d179_share_admission_proofs.json off_switch_identity"
+     "src": "c5attr_digest_proofs.json P1 before-side (f2d617fa); d179_share_admission_proofs.json off_switch_identity"
     },
     "agrees": true
    },
    {
     "arm": "v5-rules-2",
-    "shim": false,
+    "order_shim": false,
+    "shim": null,
     "seed": 4,
     "digest": "18067c4c66bb44b8",
     "rows": 11955,
     "share_counts": {},
     "deficit_feed_completions": null,
     "n_weight_samples": 0,
-    "feed": null,
     "committed": {
      "digest": "18067c4c66bb44b8",
      "rows": 11955,
-     "src": "c5attr_digest_proofs.json P1 before (f2d617fa)"
-    },
-    "agrees": true
-   },
-   {
-    "arm": "b7-edf-feasibility",
-    "shim": false,
-    "seed": 4,
-    "digest": "b9aadd1c3a2b26d5",
-    "rows": 12265,
-    "share_counts": {},
-    "deficit_feed_completions": null,
-    "n_weight_samples": 0,
-    "feed": null,
-    "committed": {
-     "digest": "b9aadd1c3a2b26d5",
-     "rows": 12265,
-     "src": "c5attr_digest_proofs.json P1 before (f2d617fa)"
-    },
-    "agrees": true
-   },
-   {
-    "arm": "covex-v6-state-uo",
-    "shim": false,
-    "seed": 4,
-    "digest": "9a4be873eb3c5fba",
-    "rows": 14218,
-    "share_counts": {},
-    "deficit_feed_completions": null,
-    "n_weight_samples": 0,
-    "feed": null,
-    "committed": {
-     "digest": "9a4be873eb3c5fba",
-     "rows": 14218,
-     "src": "c5attr_digest_proofs.json P1 before (f2d617fa); d179_share_admission_proofs.json off_switch_identity"
+     "src": "c5attr_digest_proofs.json P1 before-side (f2d617fa)"
     },
     "agrees": true
    },
    {
     "arm": "covex-v6-state-shares",
-    "shim": false,
+    "order_shim": false,
+    "shim": null,
     "seed": 4,
     "digest": "3a5b40d78b9dcb3b",
     "rows": 13390,
@@ -140,146 +101,519 @@
      "share_reason_w_max": 57,
      "share_w_high_water": 15410,
      "share_w_over_wmax_periods": 113,
-     "share_w_samples": 10657,
+     "share_w_over_wmax_periods_TIME": 18476,
+     "share_w_samples_TIME": 137577,
+     "share_w_samples_per_gate_call": 10657,
      "share_w_tracked_at_end": 1,
      "share_w_zero_returns": 241
     },
     "deficit_feed_completions": null,
     "n_weight_samples": 0,
-    "feed": null,
     "committed": {
      "digest": "3a5b40d78b9dcb3b",
      "rows": 13390,
-     "src": "d179_share_admission_proofs.json step_2b shares_on"
+     "src": "d179_share_admission_proofs.json step_2b shares_on; also reproduced by d178_deficit_feed_proofs.json before the hybrid_arm ordering hook existed"
     },
     "agrees": true
    },
    {
-    "arm": "covex-v6-state-uo-c5attr",
-    "shim": false,
+    "arm": "covex-v6-fair-shares-off",
+    "order_shim": false,
+    "shim": null,
     "seed": 4,
-    "digest": "9a4be873eb3c5fba",
-    "rows": 14218,
-    "share_counts": {},
+    "digest": "3a5b40d78b9dcb3b",
+    "rows": 13390,
+    "share_counts": {
+     "share_admit_alert": 10064,
+     "share_admit_assistance": 322,
+     "share_admit_recall": 184,
+     "share_at_or_above_floor_assistance": 444,
+     "share_at_or_above_floor_recall": 1019,
+     "share_deny_assistance": 39,
+     "share_deny_recall": 48,
+     "share_hold_instants_assistance": 8,
+     "share_hold_instants_recall": 22,
+     "share_hold_periods_assistance": 39,
+     "share_hold_periods_recall": 48,
+     "share_reason_borrow_background": 13,
+     "share_reason_floor_denied_background": 4,
+     "share_reason_oversize_alone": 197,
+     "share_reason_oversize_alone_over_wmax": 56,
+     "share_reason_oversize_wait_for_own_type": 26,
+     "share_reason_own_floor": 10120,
+     "share_reason_own_share": 184,
+     "share_reason_w_max": 57,
+     "share_w_high_water": 15410,
+     "share_w_over_wmax_periods": 113,
+     "share_w_over_wmax_periods_TIME": 18476,
+     "share_w_samples_TIME": 137577,
+     "share_w_samples_per_gate_call": 10657,
+     "share_w_tracked_at_end": 1,
+     "share_w_zero_returns": 241
+    },
     "deficit_feed_completions": null,
     "n_weight_samples": 0,
-    "feed": null,
     "committed": null,
     "agrees": null
    }
   ],
-  "positive_control": "b7-edf-feasibility and v5-rules-2 are known-good committed arms and must pass; if one of them fails, the CHECK is broken, not the arm",
+  "control_validated": "covex-v6-state-shares is the COMPARATOR for every treatment below, so its own digest is checked against a committed value FIRST: a broken control passes every check applied to the treatment",
+  "positive_control": "covex-v6-base and v5-rules-2 are known-good committed arms and must pass; if one of them fails, the CHECK is broken, not the arm",
+  "switch_off_identical": true,
   "verdict": "PASS"
  },
  "_base_rerun_for_rows": {
   "digest": "3a5b40d78b9dcb3b",
   "rows": 13390,
   "agrees_with_first_run": true,
-  "_why": "the rows themselves are needed for a row-level diff, and a dry cell does not reproduce inside one process, so the base is re-run in its OWN process and the two digests are compared before the diff is read"
+  "_why": "the rows themselves are needed for a row-level diff, and a dry cell does not reproduce inside one process, so the base is re-run in its OWN process and the two digests are compared before any diff is read"
  },
- "a_switch_off_collapses": {
-  "_claim": "with live2_deficit_feed OFF the rung-3 arm IS the rung-2 base, byte-identically",
-  "base": {
+ "b_pass_condition": {
+  "_claim": "addendum 12 item 5: gain 2.0 against gain 0 MUST show differing decisions, and the count MUST be attributable to a consumer",
+  "comparator": {
+   "arm": "covex-v6-fair-shares-gain0",
    "digest": "3a5b40d78b9dcb3b",
    "rows": 13390,
-   "committed": {
+   "_why": "gain 0 and not the rung-2 base: it leaves BOTH consumers live and fully instrumented and removes only the quantity under test, so a difference cannot be attributed to the plumbing"
+  },
+  "gain0_equals_rung2_base": true,
+  "by_consumer": {
+   "both": {
+    "arm": "covex-v6-fair-shares",
+    "order_shim": true,
+    "digest": "b85c9ee3216476b3",
+    "rows": 12576,
+    "identical_to_gain0": false,
+    "diff_vs_gain0": {
+     "positional": 12137,
+     "setwise": 3902,
+     "rows_comparator": 13390,
+     "rows_treatment": 12576,
+     "first_differing": {
+      "index": 1186,
+      "comparator": {
+       "H": null,
+       "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+       },
+       "cost_model_id": null,
+       "defer_s": null,
+       "desired_tier": null,
+       "kind": "release_infeasible",
+       "mu": null,
+       "note": null,
+       "opportunity_ids": [
+        "opp0001168"
+       ],
+       "piece_tokens": null,
+       "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+       },
+       "representation": null,
+       "representation_defaulted": false,
+       "t": 130.8,
+       "traffic_mix": {
+        "monitor": 0,
+        "piece": 0,
+        "recall": 1,
+        "whole": 0
+       }
+      },
+      "treatment": {
+       "H": null,
+       "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+       },
+       "cost_model_id": null,
+       "defer_s": null,
+       "desired_tier": null,
+       "kind": "share_hold",
+       "mu": null,
+       "note": null,
+       "opportunity_ids": [
+        "build:robo000|s000|1011205677616862_start_0.0_end_314.103"
+       ],
+       "piece_tokens": null,
+       "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+       },
+       "representation": null,
+       "representation_defaulted": false,
+       "t": 130.8,
+       "traffic_mix": {}
+      }
+     }
+    }
+   },
+   "orderonly": {
+    "arm": "covex-v6-fair-shares-orderonly",
+    "order_shim": true,
+    "digest": "b85c9ee3216476b3",
+    "rows": 12576,
+    "identical_to_gain0": false,
+    "diff_vs_gain0": {
+     "positional": 12137,
+     "setwise": 3902,
+     "rows_comparator": 13390,
+     "rows_treatment": 12576,
+     "first_differing": {
+      "index": 1186,
+      "comparator": {
+       "H": null,
+       "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+       },
+       "cost_model_id": null,
+       "defer_s": null,
+       "desired_tier": null,
+       "kind": "release_infeasible",
+       "mu": null,
+       "note": null,
+       "opportunity_ids": [
+        "opp0001168"
+       ],
+       "piece_tokens": null,
+       "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+       },
+       "representation": null,
+       "representation_defaulted": false,
+       "t": 130.8,
+       "traffic_mix": {
+        "monitor": 0,
+        "piece": 0,
+        "recall": 1,
+        "whole": 0
+       }
+      },
+      "treatment": {
+       "H": null,
+       "belief": {
+        "cold_tokens_by_session": {},
+        "gpu_tokens_by_session": {},
+        "host_tokens_by_session": {}
+       },
+       "cost_model_id": null,
+       "defer_s": null,
+       "desired_tier": null,
+       "kind": "share_hold",
+       "mu": null,
+       "note": null,
+       "opportunity_ids": [
+        "build:robo000|s000|1011205677616862_start_0.0_end_314.103"
+       ],
+       "piece_tokens": null,
+       "predicted": {
+        "completion_s": null,
+        "imposed_delay_s_by_request": {},
+        "ttft_s": null
+       },
+       "representation": null,
+       "representation_defaulted": false,
+       "t": 130.8,
+       "traffic_mix": {}
+      }
+     }
+    }
+   },
+   "splitonly": {
+    "arm": "covex-v6-fair-shares-splitonly",
+    "order_shim": true,
     "digest": "3a5b40d78b9dcb3b",
     "rows": 13390,
-    "src": "d179_share_admission_proofs.json step_2b shares_on"
+    "identical_to_gain0": true,
+    "diff_vs_gain0": {
+     "positional": 0,
+     "setwise": 0,
+     "rows_comparator": 13390,
+     "rows_treatment": 13390,
+     "first_differing": null
+    }
+   },
+   "both_no_order_shim": {
+    "arm": "covex-v6-fair-shares",
+    "order_shim": false,
+    "digest": "3a5b40d78b9dcb3b",
+    "rows": 13390,
+    "identical_to_gain0": true,
+    "diff_vs_gain0": {
+     "positional": 0,
+     "setwise": 0,
+     "rows_comparator": 13390,
+     "rows_treatment": 13390,
+     "first_differing": null
+    }
    }
   },
-  "off": {
-   "digest": "3a5b40d78b9dcb3b",
-   "rows": 13390
+  "attribution": {
+   "ordering_alone": 3902,
+   "split_alone": 0,
+   "both": 3902,
+   "additive": true,
+   "_note": "ordering and split are not required to add up: they interact through which request is admitted first. The three numbers are reported separately rather than summed."
   },
-  "identical": true,
   "verdict": "PASS"
  },
- "b_step_2b": {
-  "_claim": "the switch ON moves decisions; the number of differing rows and the first one",
-  "unshimmed": {
-   "digest": "3a5b40d78b9dcb3b",
-   "rows": 13390,
-   "identical_to_base": true,
-   "diff": {
-    "positional": 0,
-    "setwise": 0,
-    "rows_base": 13390,
-    "rows_feed": 13390,
-    "first_differing": null
-   },
-   "reading": "ZERO differing decisions against the committed coordinator is an ABSENT LINK, never a negative: Rule 2's UNEXPRESSIBLE category. The channel the mechanism acts through (weights_by_type) is discarded by the gate."
-  },
-  "shimmed": {
-   "digest": "3a5b40d78b9dcb3b",
-   "rows": 13390,
-   "identical_to_base": true,
-   "diff": {
-    "positional": 0,
-    "setwise": 0,
-    "rows_base": 13390,
-    "rows_feed": 13390,
-    "first_differing": null
-   }
-  }
- },
  "c_weights_vary": {
-  "_claim": "the weights vary across types and over time; a weight constant at 1.0 everywhere means the feed is CONSTANT, which is a stopping condition",
-  "on_shimmed": {
-   "alert": {
+  "_claim": "the per-device weights vary across devices and over time; a weight constant at 1.0 everywhere means the feed is CONSTANT, a stopping condition",
+  "both": {
+   "asst000": {
     "min": 1.0,
-    "median": 1.008614,
-    "max": 1.015137,
-    "n": 12001,
-    "distinct_values": 592,
-    "constant_at_one": false
+    "median": 1.0,
+    "max": 3.0,
+    "n": 11863,
+    "distinct": 60
    },
-   "recall": {
+   "asst001": {
     "min": 1.0,
-    "median": 1.971789,
-    "max": 2.8,
-    "n": 12001,
-    "distinct_values": 146,
-    "constant_at_one": false
+    "median": 1.0,
+    "max": 3.0,
+    "n": 11907,
+    "distinct": 55
    },
-   "assistance": {
+   "asst002": {
     "min": 1.0,
-    "median": 1.013043,
-    "max": 2.8,
-    "n": 12001,
-    "distinct_values": 282,
-    "constant_at_one": false
+    "median": 1.02935,
+    "max": 3.0,
+    "n": 11791,
+    "distinct": 127
+   },
+   "dash000": {
+    "min": 1.0,
+    "median": 1.049536,
+    "max": 1.087719,
+    "n": 11682,
+    "distinct": 93
+   },
+   "dash001": {
+    "min": 1.0,
+    "median": 1.02448,
+    "max": 1.059406,
+    "n": 11817,
+    "distinct": 95
+   },
+   "dash002": {
+    "min": 1.0,
+    "median": 1.041817,
+    "max": 1.077562,
+    "n": 11819,
+    "distinct": 98
+   },
+   "dash003": {
+    "min": 1.0,
+    "median": 1.016917,
+    "max": 1.05668,
+    "n": 11877,
+    "distinct": 84
+   },
+   "dash004": {
+    "min": 1.0,
+    "median": 1.056899,
+    "max": 1.157895,
+    "n": 11939,
+    "distinct": 97
+   },
+   "dash005": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.054696,
+    "n": 11710,
+    "distinct": 46
+   },
+   "robo000": {
+    "min": 1.0,
+    "median": 1.444444,
+    "max": 3.0,
+    "n": 10433,
+    "distinct": 22
+   },
+   "robo001": {
+    "min": 2.012346,
+    "median": 2.555556,
+    "max": 3.0,
+    "n": 8841,
+    "distinct": 17
+   },
+   "robo002": {
+    "min": 1.0,
+    "median": 2.259259,
+    "max": 3.0,
+    "n": 11051,
+    "distinct": 14
+   },
+   "robo003": {
+    "min": 1.730159,
+    "median": 2.407407,
+    "max": 3.0,
+    "n": 7808,
+    "distinct": 13
+   },
+   "robo004": {
+    "min": 1.0,
+    "median": 2.111111,
+    "max": 3.0,
+    "n": 10733,
+    "distinct": 31
+   },
+   "robo005": {
+    "min": 1.0,
+    "median": 1.383838,
+    "max": 3.0,
+    "n": 11932,
+    "distinct": 12
+   },
+   "robo006": {
+    "min": 1.0,
+    "median": 2.444444,
+    "max": 3.0,
+    "n": 9996,
+    "distinct": 16
+   },
+   "_ALL": {
+    "min": 1.0,
+    "max": 3.0,
+    "constant_at_one": false,
+    "devices": 16,
+    "devices_above_one": 16
    }
   },
-  "on_unshimmed": {
-   "alert": {
+  "gain0": {
+   "asst000": {
     "min": 1.0,
-    "median": 1.008614,
-    "max": 1.015137,
-    "n": 12001,
-    "distinct_values": 592,
-    "constant_at_one": false
+    "median": 1.0,
+    "max": 1.0,
+    "n": 11863,
+    "distinct": 1
    },
-   "recall": {
+   "asst001": {
     "min": 1.0,
-    "median": 1.971789,
-    "max": 2.8,
-    "n": 12001,
-    "distinct_values": 146,
-    "constant_at_one": false
+    "median": 1.0,
+    "max": 1.0,
+    "n": 11907,
+    "distinct": 1
    },
-   "assistance": {
+   "asst002": {
     "min": 1.0,
-    "median": 1.013043,
-    "max": 2.8,
-    "n": 12001,
-    "distinct_values": 282,
-    "constant_at_one": false
+    "median": 1.0,
+    "max": 1.0,
+    "n": 11791,
+    "distinct": 1
+   },
+   "dash000": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 11682,
+    "distinct": 1
+   },
+   "dash001": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 11817,
+    "distinct": 1
+   },
+   "dash002": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 11819,
+    "distinct": 1
+   },
+   "dash003": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 11877,
+    "distinct": 1
+   },
+   "dash004": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 11939,
+    "distinct": 1
+   },
+   "dash005": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 11710,
+    "distinct": 1
+   },
+   "robo000": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 10433,
+    "distinct": 1
+   },
+   "robo001": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 8841,
+    "distinct": 1
+   },
+   "robo002": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 11051,
+    "distinct": 1
+   },
+   "robo003": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 7808,
+    "distinct": 1
+   },
+   "robo004": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 10733,
+    "distinct": 1
+   },
+   "robo005": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 11932,
+    "distinct": 1
+   },
+   "robo006": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 9996,
+    "distinct": 1
+   },
+   "_ALL": {
+    "min": 1.0,
+    "max": 1.0,
+    "constant_at_one": true,
+    "devices": 16,
+    "devices_above_one": 0
    }
   },
-  "feed": {
+  "feed_at_end": {
    "gain": 2.0,
-   "gain_ruling": "D178 (2)",
+   "gain_ruling": "D178 (2), corrected by flash addendum 12 item 2",
+   "form": "w_d = 1 + gain * (shortfall_d / target_d), floored at 1, PER DEVICE",
    "targets": {
     "alert": 0.25,
     "recall": 0.9,
@@ -287,23 +621,158 @@
    },
    "target_source": "D178 (1), spec v6 sections 2 and 8",
    "units": {
-    "alert": "episode",
+    "alert": "device-episode",
     "recall": "device",
     "assistance": "device"
    },
    "currency": "on-time CLOUD answers only (D177, D178 (1)); device_on_time recorded, never added to the numerator",
    "alert_decision_instants_per_episode": 19,
-   "n_offers": 12253,
-   "n_completions": 10443,
-   "weights": {
-    "alert": 1.010943,
-    "recall": 2.16023,
-    "assistance": 1.012942
+   "n_offers": 12251,
+   "n_completions": 10249,
+   "per_device": {
+    "asst000": {
+     "type": "assistance",
+     "shortfall": 0.017647,
+     "weight": 1.039216,
+     "episodes_closed": null,
+     "offered": 119,
+     "cloud_on_time": 105
+    },
+    "asst001": {
+     "type": "assistance",
+     "shortfall": 0.0,
+     "weight": 1.0,
+     "episodes_closed": null,
+     "offered": 120,
+     "cloud_on_time": 110
+    },
+    "asst002": {
+     "type": "assistance",
+     "shortfall": 0.010169,
+     "weight": 1.022599,
+     "episodes_closed": null,
+     "offered": 118,
+     "cloud_on_time": 105
+    },
+    "dash000": {
+     "type": "alert",
+     "shortfall": 0.005735,
+     "weight": 1.045884,
+     "episodes_closed": 117,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash001": {
+     "type": "alert",
+     "shortfall": 0.006579,
+     "weight": 1.052632,
+     "episodes_closed": 114,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash002": {
+     "type": "alert",
+     "shortfall": 0.005672,
+     "weight": 1.045372,
+     "episodes_closed": 116,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash003": {
+     "type": "alert",
+     "shortfall": 0.006352,
+     "weight": 1.050817,
+     "episodes_closed": 116,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash004": {
+     "type": "alert",
+     "shortfall": 0.005735,
+     "weight": 1.045884,
+     "episodes_closed": 117,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "dash005": {
+     "type": "alert",
+     "shortfall": 0.006064,
+     "weight": 1.048513,
+     "episodes_closed": 115,
+     "offered": null,
+     "cloud_on_time": null
+    },
+    "robo000": {
+     "type": "recall",
+     "shortfall": 0.5,
+     "weight": 2.111111,
+     "episodes_closed": null,
+     "offered": 20,
+     "cloud_on_time": 8
+    },
+    "robo001": {
+     "type": "recall",
+     "shortfall": 0.709524,
+     "weight": 2.57672,
+     "episodes_closed": null,
+     "offered": 21,
+     "cloud_on_time": 4
+    },
+    "robo002": {
+     "type": "recall",
+     "shortfall": 0.7125,
+     "weight": 2.583333,
+     "episodes_closed": null,
+     "offered": 16,
+     "cloud_on_time": 3
+    },
+    "robo003": {
+     "type": "recall",
+     "shortfall": 0.633333,
+     "weight": 2.407407,
+     "episodes_closed": null,
+     "offered": 15,
+     "cloud_on_time": 4
+    },
+    "robo004": {
+     "type": "recall",
+     "shortfall": 0.5875,
+     "weight": 2.305556,
+     "episodes_closed": null,
+     "offered": 32,
+     "cloud_on_time": 10
+    },
+    "robo005": {
+     "type": "recall",
+     "shortfall": 0.284615,
+     "weight": 1.632479,
+     "episodes_closed": null,
+     "offered": 13,
+     "cloud_on_time": 8
+    },
+    "robo006": {
+     "type": "recall",
+     "shortfall": 0.633333,
+     "weight": 2.407407,
+     "episodes_closed": null,
+     "offered": 15,
+     "cloud_on_time": 4
+    }
    },
-   "shortfall": {
-    "alert": 0.005471,
+   "weights_by_type_over_all_devices": {
+    "alert": 1.052632,
+    "recall": 2.583333,
+    "assistance": 1.039216
+   },
+   "weights_by_type_pending": {
+    "alert": 1.048513,
+    "recall": 1.0,
+    "assistance": 1.0
+   },
+   "type_shortfall_DIAGNOSTIC_ONLY": {
+    "alert": 0.00602,
     "recall": 0.580115,
-    "assistance": 0.006471
+    "assistance": 0.009272
    },
    "n_units": {
     "alert": 695,
@@ -311,24 +780,26 @@
     "assistance": 3
    },
    "counts": {
-    "alert_cloud_late": 198,
-    "alert_cloud_on_time": 9866,
-    "alert_device_on_time": 10064,
-    "alert_episode_key_from_token_law": 10064,
+    "alert_cloud_late": 138,
+    "alert_cloud_on_time": 9732,
+    "alert_device_on_time": 9870,
+    "alert_episode_key_agree": 9870,
+    "alert_episode_key_from_record": 9870,
     "alert_episodes_closed": 695,
     "alert_episodes_open": 6,
-    "alert_instant_repeat": 3149,
-    "alert_instants_offered": 11764,
-    "assistance_cloud_on_time": 322,
-    "assistance_device_late": 87,
-    "assistance_device_on_time": 235,
-    "assistance_question_repeat": 39,
+    "alert_instant_repeat": 7571,
+    "alert_instants_offered": 11762,
+    "assistance_cloud_on_time": 320,
+    "assistance_device_late": 86,
+    "assistance_device_on_time": 234,
+    "assistance_question_repeat": 51,
     "assistance_questions_offered": 357,
-    "completion_background_skipped": 126,
-    "recall_cloud_late": 16,
+    "completion_background_skipped": 125,
+    "order_key_resolved": 73110,
+    "recall_cloud_late": 18,
     "recall_cloud_on_time": 41,
-    "recall_device_on_time": 57,
-    "recall_question_repeat": 37,
+    "recall_device_on_time": 59,
+    "recall_question_repeat": 40,
     "recall_questions_offered": 132
    },
    "switch": {
@@ -341,149 +812,34 @@
      true
     ]
    },
+   "consumers": {
+    "ordering": {
+     "on": true,
+     "hook": "hybrid/hybrid_arm.py _deficit_order_key, overridden on the INNER HybridArm instance",
+     "installed_on": "HybridArm",
+     "shadowed": true
+    },
+    "flexible_split": {
+     "on": true,
+     "read": "share_admission.py:162-168 via coordinator SA.allowed(weights_by_type=)",
+     "weights_now": {
+      "alert": 1.048512585812357,
+      "recall": 1.0,
+      "assistance": 1.0
+     }
+    }
+   },
    "base": "covex-v6-state-shares",
    "weights_have_a_reader": true
   }
  },
  "d_negative_control_gain0": {
-  "_claim": "gain 0 leaves every hook and counter live and removes only the quantity under test: every weight exactly 1.0 and a byte-identical collapse to the rung-2 base",
-  "weights": {
-   "alert": {
-    "min": 1.0,
-    "median": 1.0,
-    "max": 1.0,
-    "n": 12001,
-    "distinct_values": 1,
-    "constant_at_one": true
-   },
-   "recall": {
-    "min": 1.0,
-    "median": 1.0,
-    "max": 1.0,
-    "n": 12001,
-    "distinct_values": 1,
-    "constant_at_one": true
-   },
-   "assistance": {
-    "min": 1.0,
-    "median": 1.0,
-    "max": 1.0,
-    "n": 12001,
-    "distinct_values": 1,
-    "constant_at_one": true
-   }
-  },
+  "_claim": "gain 0 leaves every hook, counter and BOTH consumers live and removes only the quantity under test: every weight exactly 1.0 and a byte-identical collapse to the rung-2 base",
   "all_weights_one": true,
+  "devices_seen": 16,
   "digest": "3a5b40d78b9dcb3b",
-  "rows": 13390,
   "base_digest": "3a5b40d78b9dcb3b",
   "identical_to_base": true,
-  "verdict": "PASS"
- },
- "e_c5attr_base_has_no_reader": {
-  "_claim": "on the c5attr rung-2 base the weights have NO reader AT ALL, because that base carries no D179 share admission, so `_share_ok` returns before `SA.allowed` is reached and even the shim cannot deliver them. ABSENT LINK BY CONSTRUCTION, and the cells say so rather than the argument alone.",
-  "base": {
-   "digest": "9a4be873eb3c5fba",
-   "rows": 14218
-  },
-  "off": {
-   "digest": "9a4be873eb3c5fba",
-   "rows": 14218
-  },
-  "on_shimmed": {
-   "digest": "9a4be873eb3c5fba",
-   "rows": 14218,
-   "feed": {
-    "alert": 1.007401,
-    "recall": 1.9729,
-    "assistance": 1.0
-   }
-  },
-  "off_identical": true,
-  "on_identical": true
- },
- "f_replay_committed_live_cell": {
-  "cell": "covex-v6-state_n16_s5_1200s_h27_3t_L3_epg_rq30",
-  "feed": {
-   "gain": 2.0,
-   "gain_ruling": "D178 (2)",
-   "targets": {
-    "alert": 0.25,
-    "recall": 0.9,
-    "assistance": 0.9
-   },
-   "target_source": "D178 (1), spec v6 sections 2 and 8",
-   "units": {
-    "alert": "episode",
-    "recall": "device",
-    "assistance": "device"
-   },
-   "currency": "on-time CLOUD answers only (D177, D178 (1)); device_on_time recorded, never added to the numerator",
-   "alert_decision_instants_per_episode": 19,
-   "n_offers": 12252,
-   "n_completions": 9114,
-   "weights": {
-    "alert": 1.291651,
-    "recall": 1.209524,
-    "assistance": 1.0
-   },
-   "shortfall": {
-    "alert": 0.145826,
-    "recall": 0.104762,
-    "assistance": 0.0
-   },
-   "n_units": {
-    "alert": 701,
-    "recall": 7,
-    "assistance": 3
-   },
-   "counts": {
-    "alert_cloud_late": 5854,
-    "alert_cloud_on_time": 2458,
-    "alert_episode_key_from_token_law": 8312,
-    "alert_episodes_closed": 701,
-    "alert_episodes_open": 6,
-    "alert_instants_offered": 11769,
-    "assistance_cloud_late": 6,
-    "assistance_cloud_on_time": 350,
-    "assistance_questions_offered": 356,
-    "recall_cloud_late": 327,
-    "recall_cloud_on_time": 119,
-    "recall_questions_offered": 127
-   }
-  },
-  "independent": {
-   "alert": 0.1427,
-   "recall": 0.1048,
-   "assistance": 0.0,
-   "alert_episodes": 714,
-   "alert_pooled_shortfall": 0.0411,
-   "alert_flat19_on_true_episodes": 0.1467,
-   "_how": "episode from play_id and t_local (= round((t_local - 3.0)/0.5) // 21), each episode's OWN instant count as denominator, numerator cloud_payload.on_time",
-   "_why_the_two_differ": "the feed uses a DECLARED 19 instants per episode, so the truncated last episode of each play is given 19 and its shortfall is overstated: flat 19 on the true episodes is 0.1467 against 0.1427, and the feed's own episode detection (707 of 714) brings it to about 0.1456. The bar below is therefore 0.01 absolute, which the 0.0029 difference clears, and the three numbers are all reported so the denominator choice and the detection are separable"
-  },
-  "agreement": {
-   "alert": {
-    "feed": 0.1458,
-    "independent": 0.1427,
-    "delta": 0.0031,
-    "agrees": true
-   },
-   "recall": {
-    "feed": 0.1048,
-    "independent": 0.1048,
-    "delta": -0.0,
-    "agrees": true
-   },
-   "assistance": {
-    "feed": 0.0,
-    "independent": 0.0,
-    "delta": 0.0,
-    "agrees": true
-   }
-  },
-  "episodes_feed": 701,
-  "episodes_independent": 714,
   "verdict": "PASS"
  }
 }

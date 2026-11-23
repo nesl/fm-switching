@@ -114,10 +114,18 @@ class DeficitFeedMixin:
 
     _fairfeed_base_name = ""
 
-    def _fairfeed_init(self, *, deficit_feed: bool, gain: float) -> None:
+    def _fairfeed_init(self, *, deficit_feed: bool, gain: float,
+                       ordering: bool = True, split: bool = True) -> None:
         self.arm_version = FAIRFEED_VERSION
         self._feed = DF.DeficitFeed(gain=float(gain))
         self._feed_gain = float(gain)
+        # the TWO CONSUMERS, each switchable ALONE, because addendum 12 item 5 requires the Step 2b
+        # count to be ATTRIBUTABLE: "a combined count that cannot be attributed is not a pass".
+        # One-factor arms are the only way to say which consumer moved a decision.
+        self._feed_ordering = bool(ordering)
+        self._feed_split = bool(split)
+        self._fairfeed_pending: Dict[str, set] = {"alert": set(), "recall": set(),
+                                                  "assistance": set()}
         # the SWITCH, on the instance, and on every object the decide path can bind `self` to
         targets = self._fairfeed_targets()
         for obj in targets:
@@ -130,23 +138,106 @@ class DeficitFeedMixin:
         if self._feed_on != bool(deficit_feed):                            # pragma: no cover
             raise DeficitFeedSwitchError(
                 "%s did not take on the instance of %s" % (SWITCH_ATTR, type(self).__name__))
+        self._install_ordering_override()
 
-    # ---- the one output ----------------------------------------------------------------------
+    # ---- consumer 1 (the PRIMARY one): ORDERING ----------------------------------------------
+    def _install_ordering_override(self) -> None:
+        """Bind `_deficit_order_key` ON THE HYBRID CORE INSTANCE, never on a class.
+
+        The hook is defined on `HybridArm` with a neutral 0.0 default and is called as
+        `self._deficit_order_key(...)` from the two deadline-ordering sites, where `self` is the
+        INNER HybridArm object and not this wrapper. So the override has to live on that object, or
+        it is never consulted: this is the three-object-chain lesson `arms_v6c5.py` records, from
+        the other direction. It is set as an INSTANCE attribute shadowing the class method, so no
+        other arm in the process can inherit it, and a plain function is bound rather than a method
+        so the instance-attribute call passes no `self`.
+        """
+        core = None
+        for obj in reversed(self._fairfeed_targets()):
+            if hasattr(type(obj), "_deficit_order_key"):
+                core = obj
+                break
+        self._fairfeed_order_core = core
+        if core is None:                                                   # pragma: no cover
+            self._feed._bump("order_hook_absent_on_chain")
+            return
+        if not (self._feed_on and self._feed_ordering):
+            # leave the frozen neutral default in place; nothing is shadowed at all
+            return
+        feed = self._feed
+        counts = self._feed.counts
+        resolve = self._fairfeed_resolve_device
+
+        def _key(device_id: Any, kind: Any) -> float:
+            did = resolve(device_id, kind)
+            if did is None:
+                counts["order_key_unresolved_device"] = \
+                    counts.get("order_key_unresolved_device", 0) + 1
+                return 0.0
+            counts["order_key_resolved"] = counts.get("order_key_resolved", 0) + 1
+            # NEGATIVE, so a LARGER w_d sorts FIRST under an ascending sort (addendum 12 item 3a)
+            return -float(feed.weight_device(did))
+
+        object.__setattr__(core, "_deficit_order_key", _key)
+
+    def _fairfeed_resolve_device(self, device_id: Any, kind: Any) -> Optional[str]:
+        """The device this ordering item belongs to, or None rather than a guess.
+
+        THE ARGUMENT IS NOT ALWAYS A DEVICE ID, and that is measured, not assumed: on the committed
+        `hybrid_arm.py` the three call sites pass `getattr(<frozen dataclass>, "device_id", None)`,
+        and neither `interface.EpisodicStream` nor `interface.RecallQuery` HAS that field, so every
+        one of 10,956 calls in a 180 s dry cell receives None. The one-line fix in `hybrid_arm.py`
+        is named in this build's report; until it lands, an unresolved item is COUNTED and takes
+        the neutral 0.0, so the ordering collapses to the frozen order rather than to an invented
+        one. This resolver therefore accepts a device id, a dashcam stream id (which IS the device
+        id: the roster's `sh_instant` is keyed by exactly `dash000` to `dash005` and `hybrid_arm`
+        looks items up in it by `stream_id`), or a session id (mapped through the roster's
+        `session_device`), and returns None for anything else.
+        """
+        if device_id is None:
+            return None
+        s = str(device_id)
+        if DF.DeficitFeed.type_of(s) is not None and "|" not in s:
+            return s
+        sd = getattr(self, "_fairfeed_session_device", None) or {}
+        got = sd.get(s)
+        return str(got) if got else None
+
+    # ---- consumer 2: the FLEXIBLE SPLIT -------------------------------------------------------
     def live2_share_weights(self) -> Optional[Dict[str, float]]:
-        """The per-type weights for D179's flexible pool, or None when the switch is off.
+        """Per type, the MAXIMUM `w_d` over that type's devices with PENDING WORK, or None.
 
         None, not a dict of ones: `SA.allowed` treats a falsy `weights_by_type` as "split equally"
         and so takes the identical branch, and returning None makes the OFF arm's behaviour a
-        property of this one line instead of of floating-point equality.
+        property of this one line instead of of floating-point equality. The same is true of the
+        split-off ablation, which is why it returns None too rather than a neutral dict.
         """
-        if not getattr(self, "_feed_on", False):
+        if not (getattr(self, "_feed_on", False) and getattr(self, "_feed_split", False)):
             return None
-        return self._feed.weights()
+        pend = set()
+        for s in self._fairfeed_pending.values():
+            pend |= s
+        return self._feed.weights_by_type(pend)
 
     def deficit_feed_report(self) -> Dict[str, Any]:
-        d = dict(self._feed.as_dict())
+        pend = set()
+        for s in (getattr(self, "_fairfeed_pending", None) or {}).values():
+            pend |= s
+        d = dict(self._feed.as_dict(pending=pend))
         d["switch"] = {"name": SWITCH_ATTR, "on": bool(getattr(self, "_feed_on", False)),
                        "scope": "arm instance", "chain": self._fairfeed_switch_chain()}
+        d["consumers"] = {
+            "ordering": {"on": bool(getattr(self, "_feed_ordering", False)),
+                         "hook": "hybrid/hybrid_arm.py _deficit_order_key, overridden on the "
+                                 "INNER HybridArm instance",
+                         "installed_on": (type(getattr(self, "_fairfeed_order_core", None))
+                                          .__name__),
+                         "shadowed": ("_deficit_order_key" in
+                                      vars(getattr(self, "_fairfeed_order_core", None) or object()))},
+            "flexible_split": {"on": bool(getattr(self, "_feed_split", False)),
+                               "read": "share_admission.py:162-168 via "
+                                       "coordinator SA.allowed(weights_by_type=)",
+                               "weights_now": self.live2_share_weights()}}
         d["base"] = self._fairfeed_base_name
         d["weights_have_a_reader"] = bool(
             BASE_HAS_WEIGHT_READER.get(self._fairfeed_base_name, False))
@@ -178,19 +269,33 @@ class DeficitFeedMixin:
     def live2_roster(self, roster: Dict[str, Any]) -> None:
         if getattr(self, "_feed_on", False):
             self._fairfeed_session_device = dict(roster.get("session_device") or {})
+            # PENDING ALERT WORK is the set of devices with a monitor instant currently OFFERED,
+            # which is exactly what `sh_instant` holds. Not "every alert device": a standing
+            # stream is not pending work, and a type that is not competing must not hold a share
+            # it cannot use (addendum 12 item 3b).
+            pend = set()
             for did, inst in (roster.get("sh_instant") or {}).items():
                 self._feed.observe_offered_instant(did, (inst or {}).get("opportunity_id"))
+                if DF.DeficitFeed.type_of(did) == "alert":
+                    pend.add(str(did))
+            self._fairfeed_pending["alert"] = pend
         return super().live2_roster(roster)                                # type: ignore[misc]
 
     def decide(self, obs: Any) -> Any:
         if getattr(self, "_feed_on", False):
             sd = getattr(self, "_fairfeed_session_device", None) or {}
+            pend: Dict[str, set] = {"recall": set(), "assistance": set()}
             for q in (getattr(obs, "recall", None) or ()):
                 did = sd.get(getattr(q, "session_id", None))
                 if did is None:
                     self._feed._bump("question_offer_no_device")
                     continue
                 self._feed.observe_offered_question(did, getattr(q, "query_id", None))
+                t = DF.DeficitFeed.type_of(did)
+                if t in pend:
+                    pend[t].add(str(did))
+            self._fairfeed_pending["recall"] = pend["recall"]
+            self._fairfeed_pending["assistance"] = pend["assistance"]
         return super().decide(obs)                                         # type: ignore[misc]
 
     def live2_completed(self, rec: Dict[str, Any]) -> None:
@@ -200,7 +305,8 @@ class DeficitFeedMixin:
                 cloud_on_time=rec.get("cloud_on_time"),
                 device_on_time=rec.get("device_on_time"),
                 prompt_tokens=rec.get("prompt_tokens"),
-                episode_id=rec.get("episode_id"))
+                episode_id=rec.get("episode_id"),
+                episode_index=rec.get("episode_index"))
             n = int(self.stats.get("deficit_feed_completions", 0)) + 1
             self.stats["deficit_feed_completions"] = n
             # the arm_stats block a cell reader takes, refreshed periodically rather than on every
@@ -232,14 +338,28 @@ class DeficitFeedMixin:
                      currency="on-time CLOUD answers only (D177, D178 (1))",
                      targets=dict(DF.TARGETS), units=dict(DF.UNIT),
                      alert_decision_instants_per_episode=DF.EPG_DECISION_INSTANTS,
-                     consumer=("share_admission.allowed(weights_by_type=) at "
-                               "share_admission.py:162-166, which splits the FLEXIBLE pool only; "
-                               "the floors in share_capacity.py are NOT weighted"),
+                     consumers=dict(
+                         ordering=dict(
+                             on=bool(getattr(self, "_feed_ordering", False)),
+                             role="PRIMARY (addendum 12 item 3a)",
+                             read="hybrid/hybrid_arm.py `_deficit_order_key`, the first key at "
+                                  "both deadline-ordering sites; overridden on the INNER "
+                                  "HybridArm instance to return the NEGATIVE w_d",
+                             known_gap=("the committed call sites pass getattr(<frozen "
+                                        "dataclass>, 'device_id', None) and neither "
+                                        "EpisodicStream nor RecallQuery has that field, so every "
+                                        "call receives None and an unresolved item takes the "
+                                        "neutral 0.0; see order_key_unresolved_device")),
+                         flexible_split=dict(
+                             on=bool(getattr(self, "_feed_split", False)),
+                             read="share_admission.py:162-168 via the coordinator's "
+                                  "SA.allowed(weights_by_type=) call site",
+                             rule="per type, the MAXIMUM w_d over that type's devices with "
+                                  "pending work; 1.0 for a type with none",
+                             weighted="the FLEXIBLE pool only; floors, W_max and the oversize "
+                                      "rule are UNCHANGED (D179 intact)")),
                      consumer_wired=bool(
-                         BASE_HAS_WEIGHT_READER.get(self._fairfeed_base_name, False)),
-                     not_wired_note=("coordinator.py:1437 (origin/main) calls SA.allowed without "
-                                     "weights_by_type, so against the committed coordinator "
-                                     "these weights are computed and NOT READ")))
+                         BASE_HAS_WEIGHT_READER.get(self._fairfeed_base_name, False))))
         return d
 
 
@@ -254,10 +374,12 @@ _CLASSES = {b: make_class(b) for b in BASES}
 
 
 def make(name: str, base_name: str, *, deficit_feed: bool = True,
-         gain: float = GAIND.GAIN, **kw: Any) -> Any:
+         gain: float = GAIND.GAIN, ordering: bool = True, split: bool = True,
+         **kw: Any) -> Any:
     cls = _CLASSES[base_name]
     arm = cls(name=name, **kw)
-    arm._fairfeed_init(deficit_feed=deficit_feed, gain=gain)
+    arm._fairfeed_init(deficit_feed=deficit_feed, gain=gain,
+                       ordering=ordering, split=split)
     return arm
 
 
@@ -270,13 +392,22 @@ for _b, _tag in (("covex-v6-state-shares", "shares"), ("covex-v6-state-uo-c5attr
     # CLAUDE.md Step 4, part one: the SWITCH off must collapse to the rung-2 base byte-identically
     V6FAIRFEED_ARMS[_n + "-off"] = (
         lambda _b=_b, _n=_n, **kw: make(_n + "-off", _b, deficit_feed=False, **kw))
-    # CLAUDE.md Step 4, part two: the MECHANISM disabled at gain 0, with the switch still ON, so
-    # every weight is exactly 1.0 and the arm must collapse to the base as well. This is the
-    # stronger control of the two: it leaves every hook, every counter and every code path live
-    # and removes only the quantity under test.
+    # CLAUDE.md Step 4, part two, and the addendum 12 item 5 COMPARATOR: the mechanism disabled at
+    # gain 0, with the switch and BOTH consumers still ON, so every weight is exactly 1.0 and the
+    # arm must collapse to the base as well. This is the stronger control of the two: it leaves
+    # every hook, every counter and every code path live and removes only the quantity under test.
     V6FAIRFEED_ARMS[_n + "-gain0"] = (
         lambda _b=_b, _n=_n, **kw: make(_n + "-gain0", _b,
                                         gain=GAIND.NEGATIVE_CONTROL_GAIN, **kw))
+    # ONE-FACTOR CONSUMER ABLATIONS. Addendum 12 item 5 requires the Step 2b count to be
+    # ATTRIBUTABLE to a consumer, and "a combined count that cannot be attributed is not a pass".
+    # These two arms are the only way to say which consumer moved a decision: each is the full
+    # rung-3 arm with ONE consumer disabled, so the difference against gain 0 is that consumer's
+    # alone. They are named so the attribution is a cell and not a code edit.
+    V6FAIRFEED_ARMS[_n + "-orderonly"] = (
+        lambda _b=_b, _n=_n, **kw: make(_n + "-orderonly", _b, split=False, **kw))
+    V6FAIRFEED_ARMS[_n + "-splitonly"] = (
+        lambda _b=_b, _n=_n, **kw: make(_n + "-splitonly", _b, ordering=False, **kw))
 
 
 def register() -> None:

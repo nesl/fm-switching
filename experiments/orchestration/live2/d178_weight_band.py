@@ -1,5 +1,24 @@
 #!/usr/bin/env python3
-"""WHY THE DEFICIT WEIGHTS MOVE NO ADMISSION AT THE COMMITTED FLOORS: the weight-sensitive band.
+"""THE WEIGHT-SENSITIVE BAND: what bounds the FLEXIBLE-SPLIT consumer, and what does not bound it.
+
+SCOPE, AND IT IS NARROWER THAN THIS FILE'S FIRST VERSION CLAIMED. Addendum 12 item 3 gives the
+deficit weights TWO consumers, and this analysis bounds ONE of them:
+
+  CONSUMER 2, THE FLEXIBLE SPLIT, IS BAND-LIMITED, and everything below is about it. The weights
+  scale the flexible pool and hence `own_share`, so they can change an admission only for a
+  request whose size falls in the band `own_floor < u <= own_share`.
+
+  CONSUMER 1, THE ORDERING, IS NOT BAND-LIMITED AT ALL, and nothing here applies to it. It changes
+  WHICH of the competing requests is considered first, not whether any single one fits a share, so
+  it can move a decision for request sizes anywhere - including the 95.0 percent of share
+  decisions that take `own_floor`, where two alert requests from differently starved devices now
+  compete in a different order while both remain inside the same floor. That is why the user calls
+  ordering the PRIMARY consumer, and it is what this file's own numbers predict: a mechanism acting
+  only through `own_share` had almost nothing to act on.
+
+So the verdict below is a statement about the SPLIT consumer in isolation. The Step 2b attribution
+in `d178_deficit_feed_proofs.json` is what measures each consumer against the gain-0 comparator,
+and it supersedes any reading of this file as a verdict on the rung.
 
 CLAUDE.md Rule 2 asks which kind of null this is, and this file is the answer's evidence. It is
 pure arithmetic over the FROZEN capacity numbers (`share_capacity.py`) and the reason histogram
@@ -105,7 +124,11 @@ def main() -> int:
                                    "_why_they_differ": ("a shortfall cannot exceed its own "
                                                         "target, and the form is unnormalised")},
         "bands": bands,
-        "verdict": ("CANCELLED BY GEOMETRY, with a measured denominator. Of the 10,657 share "
+        "_scope": ("this bounds the FLEXIBLE-SPLIT consumer ONLY. The ORDERING consumer is not "
+                   "band-limited: it reorders requests that are all inside their own floor, where "
+                   "95.0 percent of share decisions sit, so none of the numbers below bound it."),
+        "verdict": ("FOR THE SPLIT CONSUMER ALONE: cancelled by geometry, with a measured "
+                    "denominator. Of the 10,657 share "
                     "decisions in the dry seed-4 posted cell, 10,120 (95.0 percent) took "
                     "`own_floor`, 197 + 56 + 26 took an OVERSIZE branch, 57 took `w_max` and 17 "
                     "took a background borrow bounded by other types' unweighted FLOORS: 10,473 "

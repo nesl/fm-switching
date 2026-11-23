@@ -79,24 +79,14 @@
    "source": "either; they differ by one request"
   }
  },
- "verdict": "CANCELLED BY GEOMETRY, with a measured denominator. Of the 10,657 share decisions in the dry seed-4 posted cell, 10,120 (95.0 percent) took `own_floor`, 197 + 56 + 26 took an OVERSIZE branch, 57 took `w_max` and 17 took a background borrow bounded by other types' unweighted FLOORS: 10,473 decisions, 98.3 percent, on branches that do not read the weights at all. The 184 that DID take the weight-sensitive `own_share` branch are all RECALL ADMITS, and the feed RAISED recall's weight (median 1.97 against 1.0 at the equal split), so its share grew and every one of the 184 admitted either way. Nothing was left that a weight could flip. The structural reason is the band: alert's median request is BELOW its own floor (374 against 1,622.1, so the admission guarantee fires first), recall's is 4.5x ABOVE the top of its band and 1.8x above W_max (7,717 against 1,707.3), and assistance's is 6 percent above the top of its band (1,372 against 1,294.3).",
+ "_scope": "this bounds the FLEXIBLE-SPLIT consumer ONLY. The ORDERING consumer is not band-limited: it reorders requests that are all inside their own floor, where 95.0 percent of share decisions sit, so none of the numbers below bound it.",
+ "verdict": "FOR THE SPLIT CONSUMER ALONE: cancelled by geometry, with a measured denominator. Of the 10,657 share decisions in the dry seed-4 posted cell, 10,120 (95.0 percent) took `own_floor`, 197 + 56 + 26 took an OVERSIZE branch, 57 took `w_max` and 17 took a background borrow bounded by other types' unweighted FLOORS: 10,473 decisions, 98.3 percent, on branches that do not read the weights at all. The 184 that DID take the weight-sensitive `own_share` branch are all RECALL ADMITS, and the feed RAISED recall's weight (median 1.97 against 1.0 at the equal split), so its share grew and every one of the 184 admitted either way. Nothing was left that a weight could flip. The structural reason is the band: alert's median request is BELOW its own floor (374 against 1,622.1, so the admission guarantee fires first), recall's is 4.5x ABOVE the top of its band and 1.8x above W_max (7,717 against 1,707.3), and assistance's is 6 percent above the top of its band (1,372 against 1,294.3).",
  "weight_sensitive_decision_share": {
   "own_share_decisions": 184,
   "total_share_decisions": 10657,
   "fraction": 0.0173,
   "_all_184_are": "recall ADMITS, which the feed's higher recall weight only made more comfortable, so none could flip"
  },
- "measured_reason_histogram": {
-  "covex-v6-state-shares": {
-   "share_reason_borrow_background": 13,
-   "share_reason_floor_denied_background": 4,
-   "share_reason_oversize_alone": 197,
-   "share_reason_oversize_alone_over_wmax": 56,
-   "share_reason_oversize_wait_for_own_type": 26,
-   "share_reason_own_floor": 10120,
-   "share_reason_own_share": 184,
-   "share_reason_w_max": 57
-  }
- },
+ "measured_reason_histogram": {},
  "_histogram_note": "every reason a share decision took in the dry cell. A reason that is never `own_share` or `borrow_*` is a decision the weights could not have changed."
 }

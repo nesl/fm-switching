@@ -3,7 +3,7 @@
  "_source": "results/orchestration/live2/frozen_test/runs/covex-v6-state_n16_s5_1200s_h27_3t_L3_epg_rq30",
  "_not_a_measurement": "read-only from one committed cell; no cell is run and no arm is constructed here",
  "gain": 2.0,
- "gain_ruling": "D178 (2)",
+ "gain_ruling": "D178 (2), corrected by flash addendum 12 item 2",
  "alert_unit": {
   "unit": "one ALERT EPISODE",
   "device_id": "dash000",
@@ -257,7 +257,8 @@
   "target": 0.25,
   "attainment": 0.0,
   "shortfall": 0.25,
-  "weight_if_this_were_the_only_unit": 1.5,
+  "weight_of_this_unit": 3.0,
+  "weight_under_the_superseded_raw_form": 1.5,
   "episode_key_derivation": {
    "used_here": "play_id and t_local, which only an offline reader has",
    "used_by_the_feed": "the EP-G prompt-token law: position = (prompt_tokens - 42)/338 - 1, and a position that does not rise is a new episode",
@@ -446,7 +447,8 @@
   "target": 0.9,
   "attainment": 0.166667,
   "shortfall": 0.733333,
-  "weight_if_this_were_the_only_unit": 2.466667
+  "weight_of_this_unit": 2.62963,
+  "weight_under_the_superseded_raw_form": 2.466667
  },
  "assistance_unit": {
   "unit": "one ASSISTANCE DEVICE",
@@ -1410,29 +1412,160 @@
   "target": 0.9,
   "attainment": 0.966102,
   "shortfall": 0.0,
-  "weight_if_this_were_the_only_unit": 1.0
+  "weight_of_this_unit": 1.0,
+  "weight_under_the_superseded_raw_form": 1.0
  },
  "whole_cell": {
-  "shortfall": {
-   "alert": 0.145826,
+  "per_device": {
+   "asst000": {
+    "type": "assistance",
+    "shortfall": 0.0,
+    "weight": 1.0,
+    "episodes_closed": null,
+    "offered": 118,
+    "cloud_on_time": 118
+   },
+   "asst001": {
+    "type": "assistance",
+    "shortfall": 0.0,
+    "weight": 1.0,
+    "episodes_closed": null,
+    "offered": 120,
+    "cloud_on_time": 118
+   },
+   "asst002": {
+    "type": "assistance",
+    "shortfall": 0.0,
+    "weight": 1.0,
+    "episodes_closed": null,
+    "offered": 118,
+    "cloud_on_time": 114
+   },
+   "dash000": {
+    "type": "alert",
+    "shortfall": 0.137107,
+    "weight": 2.09686,
+    "episodes_closed": 119,
+    "offered": null,
+    "cloud_on_time": null
+   },
+   "dash001": {
+    "type": "alert",
+    "shortfall": 0.143612,
+    "weight": 2.148898,
+    "episodes_closed": 117,
+    "offered": null,
+    "cloud_on_time": null
+   },
+   "dash002": {
+    "type": "alert",
+    "shortfall": 0.145861,
+    "weight": 2.166892,
+    "episodes_closed": 117,
+    "offered": null,
+    "cloud_on_time": null
+   },
+   "dash003": {
+    "type": "alert",
+    "shortfall": 0.146874,
+    "weight": 2.174989,
+    "episodes_closed": 117,
+    "offered": null,
+    "cloud_on_time": null
+   },
+   "dash004": {
+    "type": "alert",
+    "shortfall": 0.161044,
+    "weight": 2.288349,
+    "episodes_closed": 117,
+    "offered": null,
+    "cloud_on_time": null
+   },
+   "dash005": {
+    "type": "alert",
+    "shortfall": 0.143387,
+    "weight": 2.147099,
+    "episodes_closed": 117,
+    "offered": null,
+    "cloud_on_time": null
+   },
+   "robo000": {
+    "type": "recall",
+    "shortfall": 0.0,
+    "weight": 1.0,
+    "episodes_closed": null,
+    "offered": 22,
+    "cloud_on_time": 22
+   },
+   "robo001": {
+    "type": "recall",
+    "shortfall": 0.733333,
+    "weight": 2.62963,
+    "episodes_closed": null,
+    "offered": 6,
+    "cloud_on_time": 1
+   },
+   "robo002": {
+    "type": "recall",
+    "shortfall": 0.0,
+    "weight": 1.0,
+    "episodes_closed": null,
+    "offered": 27,
+    "cloud_on_time": 26
+   },
+   "robo003": {
+    "type": "recall",
+    "shortfall": 0.0,
+    "weight": 1.0,
+    "episodes_closed": null,
+    "offered": 19,
+    "cloud_on_time": 19
+   },
+   "robo004": {
+    "type": "recall",
+    "shortfall": 0.0,
+    "weight": 1.0,
+    "episodes_closed": null,
+    "offered": 10,
+    "cloud_on_time": 9
+   },
+   "robo005": {
+    "type": "recall",
+    "shortfall": 0.0,
+    "weight": 1.0,
+    "episodes_closed": null,
+    "offered": 23,
+    "cloud_on_time": 23
+   },
+   "robo006": {
+    "type": "recall",
+    "shortfall": 0.0,
+    "weight": 1.0,
+    "episodes_closed": null,
+    "offered": 20,
+    "cloud_on_time": 19
+   }
+  },
+  "weights_by_type_max_over_devices": {
+   "alert": 2.288349,
+   "recall": 2.62963,
+   "assistance": 1.0
+  },
+  "type_shortfall_DIAGNOSTIC_ONLY": {
+   "alert": 0.146288,
    "recall": 0.104762,
    "assistance": 0.0
   },
-  "weights": {
-   "alert": 1.291651,
-   "recall": 1.209524,
-   "assistance": 1.0
-  },
   "n_units": {
-   "alert": 701,
+   "alert": 704,
    "recall": 7,
    "assistance": 3
   },
   "counts": {
    "alert_cloud_late": 5854,
    "alert_cloud_on_time": 2458,
-   "alert_episode_key_from_token_law": 8312,
-   "alert_episodes_closed": 701,
+   "alert_episode_key_from_record": 8312,
+   "alert_episodes_closed": 704,
    "alert_episodes_open": 6,
    "alert_instants_offered": 11769,
    "assistance_cloud_late": 6,
@@ -1447,40 +1580,55 @@
   "_what": "what share_admission.allowed does with these weights: the FLEXIBLE pool (1802.6 of 4323.3 uncached tokens) is split by weight; the FLOORS are not weighted",
   "by_type": {
    "alert": {
-    "weight": 1.291651,
+    "weight": 2.288349,
     "flexible_equal_split_tokens": 600.9,
-    "flexible_weighted_tokens": 665.0,
-    "delta_tokens": 64.1,
+    "flexible_weighted_tokens": 697.0,
+    "delta_tokens": 96.2,
     "floor_tokens": 1622.1,
     "share_equal": 2223.0,
-    "share_weighted": 2287.1,
-    "share_change_pct": 2.89
+    "share_weighted": 2319.1,
+    "share_change_pct": 4.33
    },
    "recall": {
-    "weight": 1.209524,
+    "weight": 2.62963,
     "flexible_equal_split_tokens": 600.9,
-    "flexible_weighted_tokens": 622.7,
-    "delta_tokens": 21.9,
+    "flexible_weighted_tokens": 801.0,
+    "delta_tokens": 200.1,
     "floor_tokens": 655.8,
     "share_equal": 1256.7,
-    "share_weighted": 1278.5,
-    "share_change_pct": 1.74
+    "share_weighted": 1456.8,
+    "share_change_pct": 15.92
    },
    "assistance": {
     "weight": 1.0,
     "flexible_equal_split_tokens": 600.9,
-    "flexible_weighted_tokens": 514.9,
-    "delta_tokens": -86.0,
+    "flexible_weighted_tokens": 304.6,
+    "delta_tokens": -296.3,
     "floor_tokens": 242.8,
     "share_equal": 843.7,
-    "share_weighted": 757.7,
-    "share_change_pct": -10.19
+    "share_weighted": 547.4,
+    "share_change_pct": -35.12
    }
   }
  },
  "reachable_weight_ranges": {
   "_what": "a shortfall cannot exceed its own target, so the UNNORMALISED form's reachable range differs by type and the declared 1 to 3 is reachable only by a type whose target is 1",
   "by_type": {
+   "alert": [
+    1.0,
+    3.0
+   ],
+   "recall": [
+    1.0,
+    3.0
+   ],
+   "assistance": [
+    1.0,
+    3.0
+   ]
+  },
+  "_corrected": "under the NORMALISED form the range is 1 to 3 for EVERY type; the row below is what the SUPERSEDED raw form reached and is kept so the correction's direction is visible in the trace too",
+  "by_type_under_the_superseded_raw_form": {
    "alert": [
     1.0,
     1.5
