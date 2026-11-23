@@ -1,8 +1,8 @@
 {
  "what": "per-skip diagnosis of the robot (recall) loss under D179 share-based admission, from committed cells only",
  "ruling": "user ruling 2026-11-22, flash addendum 13; D179 (1) and (4); D174 (1)",
- "rev": "7344a64951ddda2ed6418aa46cc29128301e86c7",
- "rev_sha": "7344a64951ddda2ed6418aa46cc29128301e86c7",
+ "rev": "bef1c32822aa17284d7ae35d372a9fbf40780040",
+ "rev_sha": "bef1c32822aa17284d7ae35d372a9fbf40780040",
  "read_only": true,
  "cells_run": 0,
  "positive_control": {
@@ -479,6 +479,28 @@
      "classification": "a_MISPRICED_SIZE",
      "why": "predicted u = 20381 (readiness GPU-WARM, est_tokens 25501, built_tokens 5120) against an engine-reported uncached of 1096 on the SAME opportunity in uo, a factor of 18.596; uo delivered it on time, and with the engine's own count b0 + b1*u = 0.268 s against 2.920 s of slack, so it fitted."
     }
+   },
+   "proposed_fix_input_probe": {
+    "class_a_skips": 57,
+    "fix_input_present_and_nonzero": 57,
+    "reconstructed_last_reported_cached_tokens": {
+     "n": 57,
+     "min": 1984,
+     "p10": 2976,
+     "p50": 12416,
+     "p90": 18176,
+     "max": 20608
+    },
+    "built_tokens_at_skip": {
+     "n": 57,
+     "min": 0,
+     "p10": 3072,
+     "p50": 5120,
+     "p90": 7289,
+     "max": 11385
+    },
+    "size_term_alone_would_fit_the_slack": 49,
+    "register": "an UPPER BOUND on what the size channel recovers, not a measurement: the queue term still applies on top, and the reconstruction of the field lags the engine's real cache because the history grows between requests"
    },
    "recall": {
     "n": 70,
@@ -4086,6 +4108,28 @@
      "why": "predicted u = 16626 (readiness GPU-WARM, est_tokens 22891, built_tokens 6265) against an engine-reported uncached of 1154 on the SAME opportunity in uo, a factor of 14.407; uo delivered it on time, and with the engine's own count b0 + b1*u = 0.278 s against 2.904 s of slack, so it fitted."
     }
    },
+   "proposed_fix_input_probe": {
+    "class_a_skips": 44,
+    "fix_input_present_and_nonzero": 44,
+    "reconstructed_last_reported_cached_tokens": {
+     "n": 44,
+     "min": 992,
+     "p10": 9088,
+     "p50": 16912.0,
+     "p90": 21504,
+     "max": 21504
+    },
+    "built_tokens_at_skip": {
+     "n": 44,
+     "min": 1024,
+     "p10": 2169,
+     "p50": 6265.0,
+     "p90": 8192,
+     "max": 8192
+    },
+    "size_term_alone_would_fit_the_slack": 40,
+    "register": "an UPPER BOUND on what the size channel recovers, not a measurement: the queue term still applies on top, and the reconstruction of the field lags the engine's real cache because the history grows between requests"
+   },
    "recall": {
     "n": 48,
     "joined_to_uo_outcome": 48,
@@ -6838,6 +6882,28 @@
      "why": "predicted u = 18752 (readiness GPU-WARM, est_tokens 26041, built_tokens 7289) against an engine-reported uncached of 1113 on the SAME opportunity in uo, a factor of 16.848; uo delivered it on time, and with the engine's own count b0 + b1*u = 0.271 s against 2.963 s of slack, so it fitted."
     }
    },
+   "proposed_fix_input_probe": {
+    "class_a_skips": 41,
+    "fix_input_present_and_nonzero": 41,
+    "reconstructed_last_reported_cached_tokens": {
+     "n": 41,
+     "min": 992,
+     "p10": 5936,
+     "p50": 14464,
+     "p90": 21328,
+     "max": 21952
+    },
+    "built_tokens_at_skip": {
+     "n": 41,
+     "min": 0,
+     "p10": 2169,
+     "p50": 4096,
+     "p90": 8313,
+     "max": 9337
+    },
+    "size_term_alone_would_fit_the_slack": 32,
+    "register": "an UPPER BOUND on what the size channel recovers, not a measurement: the queue term still applies on top, and the reconstruction of the field lags the engine's real cache because the history grows between requests"
+   },
    "recall": {
     "n": 46,
     "joined_to_uo_outcome": 46,
@@ -9334,6 +9400,28 @@
      "why": "predicted u = 12405 (readiness GPU-WARM, est_tokens 16501, built_tokens 4096) against an engine-reported uncached of 748 on the SAME opportunity in uo, a factor of 16.584; uo delivered it on time, and with the engine's own count b0 + b1*u = 0.204 s against 2.966 s of slack, so it fitted."
     }
    },
+   "proposed_fix_input_probe": {
+    "class_a_skips": 44,
+    "fix_input_present_and_nonzero": 44,
+    "reconstructed_last_reported_cached_tokens": {
+     "n": 44,
+     "min": 992,
+     "p10": 3952,
+     "p50": 15704.0,
+     "p90": 17456,
+     "max": 18448
+    },
+    "built_tokens_at_skip": {
+     "n": 44,
+     "min": 1024,
+     "p10": 2048,
+     "p50": 3193.0,
+     "p90": 6265,
+     "max": 6265
+    },
+    "size_term_alone_would_fit_the_slack": 38,
+    "register": "an UPPER BOUND on what the size channel recovers, not a measurement: the queue term still applies on top, and the reconstruction of the field lags the engine's real cache because the history grows between requests"
+   },
    "recall": {
     "n": 46,
     "joined_to_uo_outcome": 46,
@@ -11557,11 +11645,11 @@
   "model": "none (no inference; committed cells only)",
   "device": "flash (CPU, read-only)",
   "n": 248,
-  "cells_rev": "7344a64951ddda2ed6418aa46cc29128301e86c7",
-  "cells_rev_sha": "7344a64951ddda2ed6418aa46cc29128301e86c7",
-  "timestamp": "2026-11-22T18:14:34.296523",
+  "cells_rev": "bef1c32822aa17284d7ae35d372a9fbf40780040",
+  "cells_rev_sha": "bef1c32822aa17284d7ae35d372a9fbf40780040",
+  "timestamp": "2026-11-22T18:17:16.493123",
   "args": {
-   "rev": "7344a64951ddda2ed6418aa46cc29128301e86c7",
+   "rev": "bef1c32822aa17284d7ae35d372a9fbf40780040",
    "seeds": "4,5,6,7",
    "qcache_report": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d179/final/qc_report.json",
    "out": "/tmp/claude-1001/-home-pragya-Desktop-FM-switching/8ab3f7e8-2a5d-4e65-8ff9-c6ae1f12519b/scratchpad/d179/final/d179_recall_skip_diagnosis.json"

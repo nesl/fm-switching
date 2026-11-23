@@ -307,6 +307,54 @@ def skips_of(c: Dict[str, Any], ix: Dict[str, Any]) -> List[Dict[str, Any]]:
     return out
 
 
+def fix_input_probe(c: Dict[str, Any], rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Would the PROPOSED fix have had an input at each mispriced skip, and would it have helped?
+
+    The fix is to read the engine's own last-reported prefix for the session instead of
+    `built_tokens` alone. That quantity already exists on the session: `engine_actions.py:358`
+    writes `session.last_telemetry_cached_tokens = ct` on every completed request with a session
+    (reached from coordinator.py:1666), and `coordinator.py:1673-1674` restores only `belief` and
+    `last_touch_s` when belief-apply is off, so the field survives on every arm. It is read
+    nowhere in the pricing path, which makes it ABSENT in CLAUDE.md's sense.
+
+    This probe reconstructs that field from the SHARES cell's own request log - the last completed
+    request on the same session before the skip - and reports (i) how often it exists and is
+    non-zero and (ii) how often the size term alone would then fit the slack. It is a BOUND on the
+    fix, not a measurement of it: the real field also moves with requests this reconstruction
+    cannot see, and the queue term still applies on top of the size term, so the second figure is
+    an upper bound on what the fix recovers through the size channel alone.
+    """
+    by_sess: Dict[str, List[Any]] = defaultdict(list)
+    for r in c["request"]:
+        if r.get("session_id") and r.get("t_done") is not None \
+                and r.get("cached_tokens") is not None:
+            by_sess[str(r["session_id"])].append((float(r["t_done"]), int(r["cached_tokens"])))
+    for k in by_sess:
+        by_sess[k].sort()
+    sel = [r for r in rows if r["klass"] == "a_MISPRICED_SIZE"]
+    avail, fits, cts = 0, 0, []
+    for r in sel:
+        hist = [ct for (t, ct) in by_sess.get(r["session_id"], ()) if t < r["t_skip"]]
+        last = hist[-1] if hist else 0
+        cts.append(last)
+        if last > 0:
+            avail += 1
+        prefix = max(int(r["built_tokens_at_skip"]), last)
+        u = max(int(r["est_tokens_at_skip"] or 0) - prefix, 0)
+        if DP.INTERCEPT_S + DP.PER_UNCACHED_S * float(u) <= (r["remaining_s"] or 0.0):
+            fits += 1
+    return {
+        "class_a_skips": len(sel),
+        "fix_input_present_and_nonzero": avail,
+        "reconstructed_last_reported_cached_tokens": _dist(cts),
+        "built_tokens_at_skip": _dist([r["built_tokens_at_skip"] for r in sel]),
+        "size_term_alone_would_fit_the_slack": fits,
+        "register": ("an UPPER BOUND on what the size channel recovers, not a measurement: the "
+                     "queue term still applies on top, and the reconstruction of the field lags "
+                     "the engine's real cache because the history grows between requests"),
+    }
+
+
 def analyse_seed(rev: str, seed: int) -> Dict[str, Any]:
     a_rev = rev
     cells = {k: load_cell(rev, f"{v}_n16_s{seed}{CELL_SUFFIX}") for k, v in ARMS.items()}
@@ -732,6 +780,7 @@ def analyse_seed(rev: str, seed: int) -> Dict[str, Any]:
         "robot_sent_and_on_time_shares": {"sent": len(sent_recall), "on_time": sent_on_time},
         "engine_uncached_of_sent_robot_recalls": uncached_now,
         "traced_unit": traced_unit(recall_rows),
+        "proposed_fix_input_probe": fix_input_probe(sh, recall_rows),
         "recall": summarise(recall_rows), "assistance": summarise(asst_rows),
         "unclassified_skips": summarise(other_rows),
         "rows": rows,
