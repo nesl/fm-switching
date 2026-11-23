@@ -1,0 +1,434 @@
+{
+ "_what": "cf_protect_defer mechanism tests: switch, bar, harm arithmetic, the SIGN, the two negative controls, the gates, the latest safe start",
+ "_register": "unit arithmetic on driven inputs; NO cell, NO harness, NO engine",
+ "all_pass": true,
+ "n_checks": 36,
+ "n_failed": 0,
+ "checks": [
+  {
+   "check": "switch default is False on an arm that declares nothing",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "switch True on the INSTANCE reads True",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "a truthy CLASS attribute RAISES",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "a False class attribute is allowed through as False",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "MARGIN_CF_ON_TIME is derived, not retyped",
+   "pass": true,
+   "detail": {
+    "value": 0.65824,
+    "margin_cf": 0.16456,
+    "a_d2_dev": 0.25
+   }
+  },
+  {
+   "check": "MARGIN_CF_ON_TIME rounds to D177 (3)'s 0.6582",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "bar at w = 1 is exactly MARGIN_CF_ON_TIME",
+   "pass": true,
+   "detail": {
+    "bar": 0.65824,
+    "w_d": 1.0,
+    "bar_weight_source": "robo001",
+    "margin_scale": 1.0,
+    "reading": "decider",
+    "margin_cf_on_time": 0.65824
+   }
+  },
+  {
+   "check": "delta first token = PER_QUEUE_S x u, imported not retyped",
+   "pass": true,
+   "detail": {
+    "got": 0.31453333285653196,
+    "expect": 0.31453333285653196,
+    "per_queue_s": 0.0001535807289338535,
+    "source": "cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)"
+   }
+  },
+  {
+   "check": "harm = sum_j w_j x (p_before - p_after), by hand",
+   "pass": true,
+   "detail": {
+    "got": 0.9435999985695959,
+    "expect": 0.9435999985695959,
+    "p_before": 0.86,
+    "p_after": 0.545466667143468
+   }
+  },
+  {
+   "check": "harm is in on-time units (cf_objective.ON_TIME_UNITS)",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "harm rises with u",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "harm rises with the number of others harmed",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "a request already past delivering loses nothing (D175 (1))",
+   "pass": true,
+   "detail": {
+    "form": "on-time-cloud",
+    "harm": 0.0,
+    "harm_unscaled": 0.0,
+    "harm_scale": 1.0,
+    "harm_device_discounted": 0.0,
+    "delta_first_token_s": 0.31453333285653196,
+    "delta_capped_at_healthy_bound": false,
+    "u_rebuild": 2048,
+    "per_queue_s": 0.0001535807289338535,
+    "price_source": "cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)",
+    "n_others_considered": 3,
+    "n_others_moved": 0,
+    "harm_by_type": {},
+    "rows": [],
+    "on_time_units": true
+   }
+  },
+  {
+   "check": "under the device-discounted reading an alert row whose device answer is on time contributes ZERO harm",
+   "pass": true,
+   "detail": {
+    "on_time_cloud": 0.9435999985695959,
+    "device_discounted": 0.0
+   }
+  },
+  {
+   "check": "and the same rows with NO device answer lose everything",
+   "pass": true,
+   "detail": {
+    "discounted": 0.9435999990000001,
+    "harm": 0.9435999985695959
+   }
+  },
+  {
+   "check": "the test cell fires at w = 1 (so both directions are observable)",
+   "pass": true,
+   "detail": {
+    "harm": 2.58,
+    "bar": 0.65824,
+    "action": "PROTECT_AND_DEFER"
+   }
+  },
+  {
+   "check": "RULED reading: a lagging ALERT type (w_j up) defers MORE - harm rises, bar fixed",
+   "pass": true,
+   "detail": {
+    "harm": [
+     2.58,
+     5.16
+    ],
+    "bar": [
+     0.65824,
+     0.65824
+    ]
+   }
+  },
+  {
+   "check": "RULED reading: a lagging RECALL device (w_R up) defers LESS - bar rises, harm fixed",
+   "pass": true,
+   "detail": {
+    "harm": [
+     2.58,
+     2.58
+    ],
+    "bar": [
+     0.65824,
+     32.912
+    ],
+    "action": "BASE"
+   }
+  },
+  {
+   "check": "RULED reading: the harm-to-bar ratio RISES with the harmed type's weight",
+   "pass": true,
+   "detail": [
+    3.9195430238210984,
+    7.839086047642197,
+    195.97715119105493
+   ]
+  },
+  {
+   "check": "WRONG reading (harmed weight on the bar): the ratio is CONSTANT, so the deficit weight is INERT - cancelled by geometry, not reversed",
+   "pass": true,
+   "detail": [
+    3.9195430238210984,
+    3.9195430238210984,
+    3.919543023821099
+   ]
+  },
+  {
+   "check": "WRONG reading: raising the DECIDER's weight changes neither bar nor action, so a lagging recall device's rebuild is deferred exactly as readily",
+   "pass": true,
+   "detail": {
+    "bar": [
+     0.65824,
+     0.65824
+    ],
+    "action": [
+     "PROTECT_AND_DEFER",
+     "PROTECT_AND_DEFER"
+    ],
+    "ruled_for_contrast": [
+     "PROTECT_AND_DEFER",
+     "BASE"
+    ]
+   }
+  },
+  {
+   "check": "the bar records WHICH device its weight came from",
+   "pass": true,
+   "detail": {
+    "ruled": "robo001",
+    "wrong": "dash000"
+   }
+  },
+  {
+   "check": "NEGATIVE CONTROL 1: harm forced to zero never defers",
+   "pass": true,
+   "detail": {
+    "gate": "harm_does_not_exceed_the_bar"
+   }
+  },
+  {
+   "check": "NEGATIVE CONTROL 2: an enormous bar never defers, and it scales THE BAR ALONE",
+   "pass": true,
+   "detail": {
+    "gate": "harm_does_not_exceed_the_bar",
+    "bar": 658240000.0,
+    "harm": 2.58
+   }
+  },
+  {
+   "check": "the BROKEN form of control 2 (scaling the weight) does NOT collapse, which is why it is not the control",
+   "pass": true,
+   "detail": {
+    "action": "PROTECT_AND_DEFER",
+    "harm": 2580000000.0,
+    "bar": 658240000.0
+   }
+  },
+  {
+   "check": "no active alert episode is a gate, before any harm is computed",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "a rebuild that fits the free pool evicts nobody and is a gate",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "no victim with a question in the horizon is a gate",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "a FITTED kappa was found",
+   "pass": true,
+   "detail": {
+    "kappa": 1.5775406165458339,
+    "source": "v5/cf_margin.safety_factor(cf_cost.load_residuals()); residuals results/orchestration/live2/frozen_test/runs (committed request logs), split 'fit on the non-hybrid arms, test on the hybrids'"
+   }
+  },
+  {
+   "check": "latest start = deadline - kappa x predicted service, by hand",
+   "pass": true,
+   "detail": {
+    "got": 35.267378,
+    "expect": 35.2673781503625,
+    "kappa": 1.5775406165458339
+   }
+  },
+  {
+   "check": "deferral_s = latest start - now",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "when the latest safe start has passed the compound SENDS LESS instead of deferring",
+   "pass": true,
+   "detail": {
+    "action": "PROTECT_AND_CHUNK",
+    "gate": "must_start_now_so_send_less: the whole tail of 20000 tokens carries 2.5800 on-time answers of harm against a bar of 0.6582, and a slice of 1024 carries 0.4718",
+    "chunk_tokens": 1024,
+    "ladder": [
+     {
+      "slice_tokens": 2048,
+      "harm": 0.9435999985695959
+     },
+     {
+      "slice_tokens": 1024,
+      "harm": 0.4717999992847981
+     }
+    ]
+   }
+  },
+  {
+   "check": "the slice chosen is the LARGEST rung whose harm is at or below the bar, so its size is a consequence of the bar and not a knob",
+   "pass": true,
+   "detail": {
+    "chunked": 0.4717999992847981,
+    "whole": 2.58,
+    "bar": 0.65824,
+    "ladder": [
+     {
+      "slice_tokens": 2048,
+      "harm": 0.9435999985695959
+     },
+     {
+      "slice_tokens": 1024,
+      "harm": 0.4717999992847981
+     }
+    ]
+   }
+  },
+  {
+   "check": "a REQUEST leg (chunk_tokens None) past its latest safe start is UNEXPRESSIBLE, never a silent chunk: a query is one prompt",
+   "pass": true,
+   "detail": {
+    "action": "BASE",
+    "gate": "wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of. The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here",
+    "crosses_bar": true
+   }
+  },
+  {
+   "check": "and it still records that it crossed the bar, so the loss is counted and not hidden",
+   "pass": true,
+   "detail": {
+    "harm": 2.58,
+    "bar": 0.65824
+   }
+  },
+  {
+   "check": "the trace is produced and names every term",
+   "pass": true,
+   "detail": {
+    "n_lines": 26
+   }
+  }
+ ],
+ "traced_decision": [
+  "PROTECT-AND-DEFER DECISION  robo001  t = 10.000 s",
+  "  inputs",
+  "    rebuild R uncached tokens        u = 20000",
+  "    free GPU KV pool                     5000.0 tokens   (rebuild fits: False)",
+  "    alert episodes active            True (3 instant(s) pending)",
+  "    victim history H                 s9, next question in 4.00 s, 7000 tokens warm",
+  "  HARM: on-time cloud answers lost by others (D177, D162 queue term)",
+  "    per_queue_s (imported)           0.0001535807289 s per uncached token",
+  "    delta first token  = 0.0001535807289 x 20000 = 2.781000 s  [CAPPED at the healthy bound]",
+  "    others considered 3, of which moved 3",
+  "      a0             dash000    w = 1.0000  p 0.860000 -> 0.000000  lost 0.860000",
+  "      a1             dash001    w = 1.0000  p 0.860000 -> 0.000000  lost 0.860000",
+  "      a2             dash002    w = 1.0000  p 0.860000 -> 0.000000  lost 0.860000",
+  "    HARM = 2.580000 on-time cloud answers   by type {'alert': 2.58}",
+  "    (the same rows under the device-discounted reading: 0.000000; see HARM_FORM_NOTE)",
+  "  THE BAR: w_d x MARGIN_CF",
+  "    MARGIN_CF (on-time units)        0.65824000000000005   cf_objective.attainment_margin(cf_margin.MARGIN_CF) = 0.16456 / 0.250 = 0.65824000000000005; D177 (3) states it as 0.6582 in on-time units",
+  "    w_d = 1.000000  from device robo001 (reading 'decider')",
+  "    BAR = 1.000000 x 0.65824000000000005 = 0.658240",
+  "    w source: synthetic test weights",
+  "  TEST: harm 2.580000 > bar 0.658240",
+  "  LATEST SAFE START (D125 kappa, D151 (3))",
+  "    predicted service  3.000000 s   kappa 1.5775406165458   calibrated True",
+  "    latest start = deadline - kappa x service = 35.267378 s  (deferral 25.267378 s, must start now False)",
+  "  ACTION: PROTECT_AND_DEFER",
+  "    reason: defer_to_latest_safe_start"
+ ],
+ "mechanism": {
+  "version": "cf-protect-defer-1.0",
+  "compound": "protect and defer (spec v6 section 7, D165 (D))",
+  "not_built_here": [
+   "keep-ready set",
+   "admit with protected victim",
+   "plan_sync"
+  ],
+  "switch": {
+   "attr": "live2_cf_protect_defer",
+   "scope": "arm instance",
+   "default": false,
+   "class_level_on": "RAISES"
+  },
+  "margin": {
+   "value": 0.65824,
+   "source": "cf_objective.attainment_margin(cf_margin.MARGIN_CF) = 0.16456 / 0.250 = 0.65824000000000005; D177 (3) states it as 0.6582 in on-time units",
+   "tuned": false,
+   "swept": false
+  },
+  "weight": {
+   "injected": true,
+   "default": "constant 1.0 (covex-v6-fair's deficit weight is NOT wired here; w = 1 + 2.0 x shortfall floored at 1 is another session's component)",
+   "declared_gain": 2.0,
+   "declared_gain_source": "deficit_gain_d178.GAIN (D178 (2), pre-registered 2026-11-22)",
+   "adapter": "D178 (2)'s weight is per query TYPE; this injection point is per DEVICE, so the adapter maps a device to its type's weight. One device has one type (spec v6 section 2, D148), so the map is total and unambiguous.",
+   "bar_readings": [
+    "decider",
+    "max_harmed"
+   ],
+   "bar_reading_default": "decider",
+   "note": "'decider' is the ruled reading (D171 (1), D178 (5), spec v6 section 7): the bar is MARGIN_CF scaled by the deficit weight of the device the DECISION IS ABOUT. 'max_harmed' is the WRONG reading, kept reachable only so what it does can be measured: under it the harmed type's weight scales harm and bar together, so the ratio that decides is unchanged and the deficit weight is INERT (cancelled by geometry), while the DECIDING device's own deficit is ignored entirely. Measured in cf_pd_tests.py::t_sign."
+  },
+  "harm": {
+   "forms": [
+    "on-time-cloud",
+    "device-discounted"
+   ],
+   "default": "on-time-cloud",
+   "note": "'on-time-cloud' is D177's currency and the unit MARGIN_CF_ON_TIME is expressed in: a displaced request's loss is w_j x (p_before - p_after) on-time CLOUD answers, and a refused request contributes nothing because p = 0 on both sides (D175 (1): only a DELIVERED cloud answer replaces the device's). 'device-discounted' multiplies each row by (1 - p_device_on_time_j), which is the literal reading of D165 (B)'s sentence 'a question whose device answer was already on time loses nothing when the cloud answer is late'. THE TWO ARE NOT INTERCHANGEABLE AND THE DIFFERENCE IS NOT COSMETIC: the measured Orin tables give p_device_on_time = 1.0 for EVERY robot question and for dashcam at EVERY episode position (v5/cf_objective.py, the DeviceLatency note), so under 'device-discounted' the harm of displacing an alert or a recall request is EXACTLY ZERO and this compound could only ever fire on assistance. Both are computed and reported; the default is the one whose units match the bar, and the choice is a user ruling, not this module's.",
+   "price_source": "cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)",
+   "per_queue_s": 0.0001535807289338535,
+   "valuation": "cf_objective.harm_warm_from_queue_delay"
+  },
+  "kappa": {
+   "kappa": 1.5775406165458339,
+   "calibrated": true,
+   "quantile": 0.9,
+   "source": "v5/cf_margin.safety_factor(cf_cost.load_residuals()); residuals results/orchestration/live2/frozen_test/runs (committed request logs), split 'fit on the non-hybrid arms, test on the hybrids'",
+   "register": "FITTED and committed: q90 of actual over predicted service, the same factor v5/cf_planner.py:357 uses. TWO CAVEATS: its split is held-out-BY-ARM ('fit on the non-hybrid arms, test on the hybrids'), not D125's words 'FIT/DEV'; and the residual summary itself carries gate_status 'FAILS: decode over-predicts by 25 to 32 percent in every held-out class and warm is confounded with arm (spec v5 section 12)'. A latest-start time quoted from it must carry both."
+  },
+  "constants": {
+   "decision_period_s": 0.1,
+   "state_horizon_s": 60.0,
+   "alert_uncached_tokens": 374.0
+  },
+  "proxies": {
+   "alert_uncached_tokens": {
+    "proxy": "share_capacity.FACTORS['alert']['median_uncached'] = 374.0",
+    "what_it_actually_measures": "the median uncached tokens of an EP-G dashcam request over 39,949 sent requests in the four committed covex-v6-base cells; it is 374 in each cell separately",
+    "valid_for": "sizing the SERVICE TIME of a pending alert instant, which is what the on-time curve needs. It is a population median, so a single instant's own episode length is not represented and a long episode's harm is understated",
+    "not_valid_for": "any claim about one named instant's tokens"
+   }
+  },
+  "what_a_dry_cell_cannot_establish": "the MAGNITUDE of harm against a real engine, and therefore whether the bar is ever crossed in a live regime. A dry cell does not exercise price: covex-v6-rules and covex-v6-rules-wo are byte-identical dry, so the charge mode is unexercised dry, and D174 part B3 found the same."
+ },
+ "_provenance": {
+  "git_commit": "472375721d392051ca8d9c6382608fa5e300773d",
+  "script": "cf_pd_tests.py",
+  "model": "n/a (unit arithmetic, CPU)",
+  "timestamp": "2026-11-22T16:44:49.376086",
+  "device": "flash"
+ }
+}
