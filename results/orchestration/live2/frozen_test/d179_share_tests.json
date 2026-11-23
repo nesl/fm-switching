@@ -3,6 +3,14 @@
  "_runner": "a plain script, because pytest is NOT installed in the fmtk env. Explicit pass/fail summary, non-zero exit on any FAIL",
  "_register": "PENDING IS NOT A PASS. A check whose mechanism does not exist has not tested the claim (CLAUDE.md Rule 1 in its test-side form), so the counts are kept separate and PENDING is never folded into GREEN",
  "interface_commit": "f3482026 experiments/orchestration/live2/share_admission.py",
+ "code_under_test_sha256_16": {
+  "share_admission.py": "b497951b498ed76c",
+  "share_capacity.py": "2f02efafe987c204",
+  "release_recheck.py": "51cad3aa78e42018",
+  "coordinator.py": "701a67afb6c69909",
+  "bodies.py": "857cd8746db73500",
+  "d162_price.py": "72d476cff9c5a8e9"
+ },
  "capacity": {
   "w_max_tokens": 4323.3,
   "u_alert_tokens": 374.0,
@@ -74,8 +82,43 @@
    "what": "shares sum to W_max (floors plus flexible, exactly)"
   },
   {
-   "status": "PENDING",
-   "reason": "share_admission.allowed() body not landed yet (session A commit 2): session A commit 2: the allocator body",
+   "status": "GREEN",
+   "per_type": [
+    {
+     "type": "alert",
+     "asked": 1621,
+     "floor": 1622.1,
+     "others_hold": {
+      "recall": 2458,
+      "assistance": 242
+     },
+     "admitted": true,
+     "reason": "own_floor"
+    },
+    {
+     "type": "recall",
+     "asked": 654,
+     "floor": 655.8,
+     "others_hold": {
+      "alert": 3424,
+      "assistance": 242
+     },
+     "admitted": true,
+     "reason": "own_floor"
+    },
+    {
+     "type": "assistance",
+     "asked": 241,
+     "floor": 242.8,
+     "others_hold": {
+      "alert": 3424,
+      "recall": 655
+     },
+     "admitted": true,
+     "reason": "own_floor"
+    }
+   ],
+   "_what_would_fail_if_wrong": "an allocator that divided only the free remainder, or that let the flexible pool be claimed before floors were met, would deny a type its reserved capacity under exactly the saturation D179 exists to fix - and would do so silently, as a lower admit rate and not as an error",
    "id": "T2",
    "what": "floors are honoured under contention"
   },
@@ -101,20 +144,67 @@
    "what": "the background classifier (load-bearing for T3b)"
   },
   {
-   "status": "PENDING",
-   "reason": "share_admission.allowed() body not landed yet (session A commit 2): session A commit 2: the allocator body",
+   "status": "GREEN",
+   "kind": "whole",
+   "asked": 450,
+   "free_pool": {
+    "admitted": true,
+    "reason": "own_floor"
+   },
+   "only_other_floor_left": {
+    "admitted": false,
+    "reason": "floor_denied_background",
+    "other": "alert",
+    "other_floor": 1622.1
+   },
+   "_what_would_fail_if_wrong": "an allocator that compared a background request against W_max minus total W, rather than against the capacity outside other types' floors, would admit warming into the alert reservation and recreate the dashcam loss D179 is fixing - while every aggregate counter looked healthier",
    "id": "T3b",
    "what": "background work never enters another type's floor"
   },
   {
-   "status": "PENDING",
-   "reason": "share_admission.allowed() body not landed yet (session A commit 2): session A commit 2: the allocator body",
+   "status": "GREEN",
+   "type": "alert",
+   "own_share": 2223.0,
+   "asked": 327,
+   "borrowed": {
+    "admitted": true,
+    "reason": "own_share"
+   },
+   "over_wmax": {
+    "asked": 2101,
+    "admitted": false,
+    "reason": "floor_denied"
+   },
+   "_what_would_fail_if_wrong": "an allocator that capped every type at its own share would leave W_max unused whenever demand was uneven, which is every real cell: the shares would cost throughput for no reason and the arm would lose to C5 for a reason that has nothing to do with D179's claim",
    "id": "T4",
    "what": "the borrowing path works, and is bounded by W_max"
   },
   {
-   "status": "PENDING",
-   "reason": "share_admission.allowed() body not landed yet (session A commit 2): session A commit 2: the allocator body",
+   "status": "GREEN",
+   "type": "assistance",
+   "oversize_tokens": 4324,
+   "own_type_idle": {
+    "admitted": true,
+    "reason": "oversize_alone_over_wmax"
+   },
+   "own_type_in_flight": {
+    "admitted": false,
+    "reason": "oversize_wait_for_own_type"
+   },
+   "background_same_size": {
+    "admitted": false,
+    "reason": "w_max"
+   },
+   "own_type_idle_but_infeasible": {
+    "admitted": false,
+    "reason": "infeasible"
+   },
+   "feasible_none_is_the_old_behaviour": {
+    "admitted": true,
+    "reason": "oversize_alone_over_wmax"
+   },
+   "_register": "ALL THREE CONJUNCTS ARE NOW TESTED. The b7-feasible conjunct became observable when `feasible` was added to allowed(); before that it rested on a caller convention nothing could reach, and this check's earlier docstring said so. The ORDERING - that the caller establishes feasibility before consulting allowed() - is still session B's and is not tested here; T6b tests the release-time instance of it",
+   "_what_would_fail_if_wrong": "without the exemption an assistance request larger than its share could never be sent and that type would go to zero; with the exemption unguarded, two oversize requests of one type would be in flight together and W would exceed W_max, which is the one thing the capacity number means",
    "id": "T5",
    "what": "an oversize deadline request is admitted only when alone"
   },
@@ -149,8 +239,78 @@
    "what": "the release re-check has a reachable path"
   },
   {
-   "status": "PENDING",
-   "reason": "session B's release re-check has no entry point yet. For this check to be written it needs: (i) a predicate callable, taking the request's predicted first-token time and its slack at the release instant, returning feasible/infeasible; and (ii) a counter incremented on each skip, distinguishable from an arrival-time b7 decline, so a release skip cannot be read as an arrival decline. Both named in arm_stats.",
+   "status": "GREEN",
+   "paths": {
+    "alert": {
+     "feasible_sent": 1,
+     "infeasible_sent": 0,
+     "counts": {
+      "release_infeasible": 1,
+      "release_infeasible_alert": 1
+     },
+     "decision": "DEVICE-on-release-infeasible",
+     "state": "declined"
+    },
+    "not_an_arrival_decline": {
+     "decision_kinds_on_the_skip": [
+      "release_infeasible"
+     ],
+     "release_log_kind": "release_infeasible",
+     "arrival_log_kind": "decline",
+     "release_decision": "DEVICE-on-release-infeasible",
+     "arrival_decision": "DEVICE",
+     "counters": {
+      "release": [
+       "release_infeasible",
+       "release_infeasible_alert",
+       "release_infeasible_assistance",
+       "release_infeasible_recall"
+      ],
+      "arrival": "recall_DEVICE"
+     }
+    },
+    "recall": {
+     "feasible_sent": 1,
+     "infeasible_sent": 0,
+     "counts": {
+      "release_infeasible": 1,
+      "release_infeasible_recall": 1,
+      "release_infeasible_alert": 0
+     }
+    },
+    "queue_term": {
+     "rows": [
+      {
+       "queued_uncached_ahead": 0,
+       "submitted": 1,
+       "skipped": 0
+      },
+      {
+       "queued_uncached_ahead": 30000,
+       "submitted": 0,
+       "skipped": 1
+      }
+     ],
+     "d162_est_s": {
+      "queue_0": 0.137121,
+      "queue_30000": 4.744543
+     },
+     "b7_arrival_est_s_has_no_queue_term": 0.013196,
+     "_why": "b7's est is costs.recall_ttft_s, an ISOLATED reload TTFT: it takes no queue argument, so the same two conditions give it the same number and it cannot see that the work ahead grew between arrival and release"
+    },
+    "skip_is_free": {
+     "spent_gpu_seconds_before": 0.0,
+     "spent_gpu_seconds_after": 0.0,
+     "uncached_in_flight_after": 0
+    }
+   },
+   "predicate": "release_recheck.decide, the committed D162 first-token model",
+   "call_sites": {
+    "alert": "coordinator.py:935-957",
+    "recall_and_assistance": "coordinator.py:1237-1264"
+   },
+   "_register": "a DRY unit fixture: it establishes the LOGIC of the skip, not a rate. How often the predicate fires in a cell is a live-cell question and this check does not answer it",
+   "_what_would_fail_if_wrong": "a predicate that always said feasible would leave the infeasible half sending, and one that always said infeasible would stop the feasible half: either is a mechanism that re-asks nothing, and only testing both directions sees it. A skip that wrote b7's arrival counter or its 'decline' row would make every committed cell's arrival-decline count silently include release skips",
    "id": "T6b",
    "what": "the release re-check skips an infeasible request"
   },
@@ -180,8 +340,60 @@
    "what": "a skipped alert frame is carried by the next request (body level)"
   },
   {
-   "status": "PENDING",
-   "reason": "needs session B's skip path. The check is: release one EP-G monitor at instant k, skip instant k+1 through the re-check, and assert the frame of k+1 is absent from the coordinator's `_mon_sent[device]` and present in instant k+2's `_live2.frame_refs` with its bytes (path not None). Session B need expose only that the skip returns without touching `_mon_sent`; the assertion is then readable off `co.epg_requests`.",
+   "status": "GREEN",
+   "asserted_on": "(1) the coordinator's `_mon_sent[device]` SET MEMBERSHIP, with the released instant's frames as the positive control that the set moves at all; (2) the next request's BODY - `_live2.frame_refs` together with the per-frame bytes-versus-uuid split, because under EP-G the ref list alone is true in both arms; (3) the uncached token count, as CORROBORATION ONLY",
+   "why_not_the_count": "both wrong skip paths move the token count DOWN or leave it flat while the body stays well formed, so the charge, the budget spend and the D162 queue term all read BETTER and a count-based check reads either bug as an improvement. The evidence has to be the observables that move the other way",
+   "the_two_sets_are_different_bugs": {
+    "_mon_sent": "submission time, drives the CHARGE (n_new, coordinator.py:886). A skip that marked it sent leaves the bytes alone and UNDERCHARGES by one frame: caught by the set-membership assertion only",
+    "_mon_confirmed": "200 time, drives the WIRE FORM (coordinator.py:887-888). A skip that marked it confirmed sends a uuid-only reference to bytes the engine never received: caught by the bytes assertion only",
+    "_why_it_is_here": "the discrimination controls established this, and it was not what this check assumed before they were run: neither assertion stands in for the other"
+   },
+   "mon_sent_after_released_instant": [
+    "f00.jpg",
+    "f01.jpg",
+    "f02.jpg",
+    "f03.jpg"
+   ],
+   "mon_sent_after_skip": [
+    "f00.jpg",
+    "f01.jpg",
+    "f02.jpg",
+    "f03.jpg"
+   ],
+   "mon_sent_after_release_control": [
+    "f00.jpg",
+    "f01.jpg",
+    "f02.jpg",
+    "f03.jpg",
+    "f04.jpg"
+   ],
+   "next_request_frame_refs": [
+    "f00.jpg",
+    "f01.jpg",
+    "f02.jpg",
+    "f03.jpg",
+    "f04.jpg",
+    "f05.jpg"
+   ],
+   "bytes_carrying_indices": {
+    "skip": [
+     4,
+     5
+    ],
+    "control": [
+     5
+    ]
+   },
+   "charged_tokens": {
+    "skip": 718,
+    "control": 380,
+    "delta": 338,
+    "epg_tok_per_frame": 338
+   },
+   "skipped_frame_ref": "f04.jpg",
+   "call_site": "coordinator.py:935-957, which returns at 956; the only write to `_mon_sent` on this path is at 1420, after the submit",
+   "_register": "a DRY unit fixture on three hand-built instants: it establishes the LOGIC of the skip path, not that the mechanism fires in any cell",
+   "_what_would_fail_if_wrong": "a skip path that added the frame to `_mon_sent` on the way out, which assertion 1 catches on the set and which UNDERCHARGES the next request by one frame; or one that added it to `_mon_confirmed`, which assertion 2 catches on the body because the frame would then go as a uuid-only reference to bytes the engine never received. The token count catches NEITHER: it falls or stays flat in both",
    "id": "T7b",
    "what": "a release skip leaves the frame unsent (coordinator level)"
   },
@@ -359,30 +571,31 @@
  ],
  "green": [
   "T1",
-  "T3a",
-  "T6a",
-  "T7a",
-  "T8"
- ],
- "pending": [
   "T2",
+  "T3a",
   "T3b",
   "T4",
   "T5",
+  "T6a",
   "T6b",
-  "T7b"
+  "T7a",
+  "T7b",
+  "T8"
  ],
+ "pending": [],
  "failed": [],
  "counts": {
-  "green": 5,
-  "pending": 6,
+  "green": 11,
+  "pending": 0,
   "failed": 0
  },
  "stub_controls": {
-  "_what": "which PENDING checks would catch a wrong allocator body, proved by running them against two deliberately wrong ones",
+  "_what": "which checks would catch a wrong allocator body, proved by running them against four deliberately wrong ones",
   "stubs": {
    "always-admit": "admits everything",
-   "always-deny": "denies everything"
+   "always-deny": "denies everything",
+   "remainder-only": "divides only the free remainder: no floors at all",
+   "no-floors": "an equal cut of W_max per type, so no floor is reserved"
   },
   "by_stub": {
    "always-admit": {
@@ -396,38 +609,130 @@
     "T3b": "CAUGHT: a background warm may borrow a FREE flexible pool; denied with 'stub: deny everything'",
     "T4": "CAUGHT: a deadline alert request of 327 tokens was denied with its own share of 2223.0 exhausted and 2100.3 tokens of W_max unused; reason 'stub: de",
     "T5": "CAUGHT: an oversize assistance request was denied with nothing of its type in flight, so it can never be sent at all; reason 'stub: deny everything'"
+   },
+   "remainder-only": {
+    "T2": "PASSED",
+    "T3b": "CAUGHT: a background recall warm of 450 tokens was admitted with the flexible pool exhausted and only alert's floor of 1622.1 tokens free; reason 's",
+    "T4": "CAUGHT: a borrow of 2101 tokens carried total W past W_max = 4323.3 and was admitted for a reason other than the oversize-when-alone rule: 'stub-rem",
+    "T5": "CAUGHT: an oversize assistance request was denied with nothing of its type in flight, so it can never be sent at all; reason 'stub-remainder: free r"
+   },
+   "no-floors": {
+    "T2": "CAUGHT: type alert was denied 1621 tokens inside its own floor of 1622.1 while the other types held {'recall': 2458.4000000000005, 'assistance': 242",
+    "T3b": "PASSED",
+    "T4": "CAUGHT: a deadline alert request of 327 tokens was denied with its own share of 2223.0 exhausted and 2100.3 tokens of W_max unused; reason 'stub-nof",
+    "T5": "CAUGHT: an oversize assistance request was denied with nothing of its type in flight, so it can never be sent at all; reason 'stub-nofloors: equal c"
    }
   },
   "per_check": {
    "T2": {
     "caught_by": [
-     "always-deny"
+     "always-deny",
+     "no-floors"
     ],
     "verdict": "DISCRIMINATING"
    },
    "T3b": {
     "caught_by": [
      "always-admit",
-     "always-deny"
+     "always-deny",
+     "remainder-only"
     ],
     "verdict": "DISCRIMINATING"
    },
    "T4": {
     "caught_by": [
      "always-admit",
-     "always-deny"
+     "always-deny",
+     "remainder-only",
+     "no-floors"
     ],
     "verdict": "DISCRIMINATING"
    },
    "T5": {
     "caught_by": [
      "always-admit",
-     "always-deny"
+     "always-deny",
+     "remainder-only",
+     "no-floors"
     ],
     "verdict": "DISCRIMINATING"
    }
   },
-  "all_discriminating": true
+  "all_discriminating": true,
+  "_note": "always-admit cannot catch T2, which asserts an ADMIT: an allocator that admits everything honours every floor trivially. That is why remainder-only and no-floors were added - a check shown only the one wrong body it cannot fail to catch has not been shown to discriminate"
  },
- "verdict": "NO_FAILURES: 5 green, 6 pending a body that is not landed"
+ "recheck_controls": {
+  "_what": "whether T6b and T7b would catch a WRONG re-check: the predicate forced both ways, and the two wrong implementations that are not predicates at all - a skip path that marks the frame sent, and one that marks it confirmed",
+  "stubs": {
+   "always-feasible": "decide() always returns feasible, so nothing is skipped",
+   "always-infeasible": "decide() always returns infeasible, so all is skipped",
+   "wrong-skip-marks-sent": "records the frame as SENT: `_mon_sent` drives the CHARGE, so the next request is undercharged by one frame and the bytes are unaffected",
+   "wrong-skip-marks-confirmed": "records the frame as CONFIRMED: `_mon_confirmed` drives the WIRE FORM, so the next request references bytes the engine never received"
+  },
+  "by_stub": {
+   "always-feasible": {
+    "T6b": "CAUGHT: an alert past hope went on the wire anyway",
+    "T7b": "CAUGHT: instant 1 was meant to be skipped and was sent"
+   },
+   "always-infeasible": {
+    "T6b": "CAUGHT: a feasible alert must still be sent by the re-check",
+    "T7b": "CAUGHT: instant 0 must be released, or the fixture proves nothing"
+   }
+  },
+  "wrong_skip_paths": {
+   "marks-sent": {
+    "assertion_1_set_membership": "CAUGHT: `_mon_sent` after the skip is ['f00.jpg', 'f01.jpg', 'f02.jpg', 'f03.jpg', 'f04.jpg'], not the released instant's four frames",
+    "assertion_2_bytes_in_body": "PASSED: the skipped frame still carried bytes",
+    "charged_under_the_bug": 380,
+    "charged_correct_skip": 718,
+    "charged_no_skip_control": 380,
+    "count_differs_from_the_correct_skip": true,
+    "bugged_charge_is_itself_a_legal_charge": true,
+    "what_the_count_shows": "380 against the correct 718, and 380 is itself a legal EP-G charge, so in a cell - where there is no oracle for what the charge should have been - it reads as ordinary. Lower means the budget spend and the D162 queue term both improve",
+    "T7b": "CAUGHT: a release skip CHANGED `_mon_sent`: it is ['f00.jpg', 'f01.jpg', 'f02.jpg', 'f03.jpg', 'f04.jpg'], not the four frames of the released instant. A skip that mark"
+   },
+   "marks-confirmed": {
+    "assertion_1_set_membership": "PASSED: `_mon_sent` was untouched",
+    "assertion_2_bytes_in_body": "CAUGHT: the skipped frame went as a uuid-only reference; bytes carried by [5]",
+    "charged_under_the_bug": 718,
+    "charged_correct_skip": 718,
+    "charged_no_skip_control": 380,
+    "count_differs_from_the_correct_skip": false,
+    "bugged_charge_is_itself_a_legal_charge": true,
+    "what_the_count_shows": "NOTHING: the charge is identical to the correct skip's 718, so the count carries no signal about this bug at all",
+    "T7b": "CAUGHT: the skipped frame 'f04.jpg' went as a uuid-only REFERENCE after the skip, so the request points at bytes the engine never received; bytes carried by [5]"
+   }
+  },
+  "per_check": {
+   "T6b": {
+    "caught_by": [
+     "always-feasible",
+     "always-infeasible"
+    ],
+    "verdict": "DISCRIMINATING"
+   },
+   "T7b": {
+    "caught_by": [
+     "always-feasible",
+     "always-infeasible",
+     "wrong-skip-marks-sent",
+     "wrong-skip-marks-confirmed"
+    ],
+    "verdict": "DISCRIMINATING"
+   }
+  },
+  "all_discriminating": true,
+  "_the_register_point": "the token count is not a usable assertion target for either bug, for two DIFFERENT reasons, and the numbers above are what establish that rather than a claim about it. Under marks-confirmed the charge is IDENTICAL to the correct skip's, so it carries no signal at all. Under marks-sent it falls, and the value it falls to is itself a legal EP-G charge, so a cell - which has no oracle for what the charge should have been - sees an ordinary number while the budget spend and the D162 queue term both improve",
+  "_and_the_thing_the_controls_taught": "assertion 1 catches marks-sent and NOT marks-confirmed; assertion 2 catches marks-confirmed and NOT marks-sent. `_mon_sent` and `_mon_confirmed` are different sets driving different things, so neither assertion stands in for the other and T7b needs both. This was not what the check assumed before the controls were run"
+ },
+ "verdict": "NO_FAILURES: 11 green, 0 pending a body that is not landed",
+ "_body_digest": "27f047587c5e591a",
+ "_provenance": {
+  "git_commit": "unknown",
+  "script": "d179_share_tests.py",
+  "model": "none",
+  "timestamp": "2026-11-22T16:38:00.522494",
+  "device": "none",
+  "n": 11
+ }
 }
