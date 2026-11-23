@@ -126,3 +126,10 @@ For a new file `runs/<LIST>` on origin:
   arrived as from="unknown" (from-name A6000), not from flash's bridge session; flash says it did not send it. Likely
   flash's own watchdog-resumed read-only session on the A6000. It was not acted on as a proxy write.
 - 18:43 (interactive session): r1 RE-GATED at 79eedc6 (COLD branch exactly pre-fix; digests re-measured on the final code; r1 name proof with negative control, d187_r1_proofs.json). r1 s4 to s7 from ~18:47, then the _kv0.5 sweep. Provenance of the 02:33Z message settled by flash: its own watchdog-spawned read-only session.
+- 19:05 (interactive session, user warned SSH may crash): cron watchdog now every 2 min, Claude resume at most
+  every 10 min. STATE: driver v28 in tmux frozengrid; covex-v6-state-shares-r1 s4 running (started 18:47:19, HEAD
+  ffb32f5 contains 79eedc6), then r1 s5, s6, s7, then the _kv0.5 sweep (covex-v6-base s4 _kv0.5 done 18:47, VALID).
+  V6_GATE_OK holds V6SHARES_R1_CELLS (re-gated at 79eedc6). Report each r1 seed: three checks vs base
+  hybrid-F-lhreq-noc3 rq30 (robot on time s4 35 / s5 27 / s6 41 / s7 19) and uo (118 / 115 / 107 / 83);
+  release_infeasible vs shares s4 2,685 / 70 / 12; pre-registered pass at s4: recall infeasible <= 13, robot on time
+  toward 118, assistance unchanged; lateness signature if skips fall without on-time rising.

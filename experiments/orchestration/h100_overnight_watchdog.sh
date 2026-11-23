@@ -69,8 +69,8 @@ fi
 # 3. Claude session
 if pgrep -u pragya -x $CPROC >/dev/null || tmux has-session -t $CSESS 2>/dev/null; then
   w "claude: a session is running"
-elif [ -f $ST/claude_launched ] && [ $(( $(date +%s) - $(stat -c %Y $ST/claude_launched) )) -lt 1200 ]; then
-  w "claude: absent, last launch under 20 min ago, waiting"
+elif [ -f $ST/claude_launched ] && [ $(( $(date +%s) - $(stat -c %Y $ST/claude_launched) )) -lt 600 ]; then
+  w "claude: absent, last launch under 10 min ago, waiting"
 else
   act "tmux new-session -d -s claudeh100 \"cd /home/pragya/Desktop && claude -c -p 'Read fm-switching/research/OVERNIGHT_HANDOFF_H100.md (and fm-switching/research/OVERNIGHT_HANDOFF.md for flash state) and continue the H100 queue under D187' >> $ST/claude_resume.log 2>&1\""
   [ "$DRY" = 1 ] || touch $ST/claude_launched
