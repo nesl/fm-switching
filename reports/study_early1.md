@@ -23,7 +23,7 @@ E9c reproduction: one-frame ALL challenge mAP gap 0.11444 against the committed 
 | 2.5 | 0.110 | 0.135 | +0.025 [-0.015, 0.073] |
 | 3 | 0.057 | 0.104 | +0.047 [0.006, 0.182] |
 
-challenge mAP: 4B 0.522, 32B 0.637, gap +0.114.
+challenge mAP: 4B 0.522, 32B 0.637, gap +0.114 [95% CI +0.061, +0.169].
 
 Horizon shift (largest delta with AP_32B(t0+delta) >= AP_4B(t0)):
 - t0 = 0.5 s: delta = 0.0 s (AP_4B=0.673)
@@ -43,7 +43,7 @@ Horizon shift (largest delta with AP_32B(t0+delta) >= AP_4B(t0)):
 | 2.5 | 0.137 | 0.165 | +0.027 [-0.019, 0.184] |
 | 3 | 0.079 | 0.083 | +0.003 [-0.008, 0.031] |
 
-challenge mAP: 4B 0.544, 32B 0.652, gap +0.108.
+challenge mAP: 4B 0.544, 32B 0.652, gap +0.108 [95% CI +0.002, +0.186].
 
 Horizon shift (largest delta with AP_32B(t0+delta) >= AP_4B(t0)):
 - t0 = 0.5 s: delta = 0.0 s (AP_4B=0.680)
@@ -62,7 +62,7 @@ Horizon shift (largest delta with AP_32B(t0+delta) >= AP_4B(t0)):
 | 2.5 | 0.118 | 0.150 | +0.032 [-0.075, 0.114] |
 | 3 | 0.062 | 0.193 | +0.131 [0.022, 0.427] |
 
-challenge mAP: 4B 0.528, 32B 0.639, gap +0.112.
+challenge mAP: 4B 0.528, 32B 0.639, gap +0.112 [95% CI +0.049, +0.174].
 
 Horizon shift (largest delta with AP_32B(t0+delta) >= AP_4B(t0)):
 - t0 = 0.5 s: delta = 0.0 s (AP_4B=0.676)
@@ -83,7 +83,7 @@ Horizon shift (largest delta with AP_32B(t0+delta) >= AP_4B(t0)):
 | 2.5 | 0.524 | 0.598 | +0.075 [0.012, 0.128] |
 | 3 | 0.525 | 0.585 | +0.059 [0.001, 0.123] |
 
-challenge mAP: 4B 0.581, 32B 0.660, gap +0.079.
+challenge mAP: 4B 0.581, 32B 0.660, gap +0.079 [95% CI +0.023, +0.130].
 
 Horizon shift (largest delta with AP_32B(t0+delta) >= AP_4B(t0)):
 - t0 = 0.5 s: delta = 0.5 s (AP_4B=0.623)
@@ -103,7 +103,7 @@ Horizon shift (largest delta with AP_32B(t0+delta) >= AP_4B(t0)):
 | 2.5 | 0.515 | 0.557 | +0.042 [-0.051, 0.125] |
 | 3 | 0.514 | 0.537 | +0.023 [-0.070, 0.116] |
 
-challenge mAP: 4B 0.605, 32B 0.627, gap +0.022.
+challenge mAP: 4B 0.605, 32B 0.627, gap +0.022 [95% CI -0.063, +0.111].
 
 Horizon shift (largest delta with AP_32B(t0+delta) >= AP_4B(t0)):
 - t0 = 0.5 s: delta = 0.0 s (AP_4B=0.656)
@@ -122,7 +122,7 @@ Horizon shift (largest delta with AP_32B(t0+delta) >= AP_4B(t0)):
 | 2.5 | 0.533 | 0.637 | +0.104 [0.031, 0.171] |
 | 3 | 0.535 | 0.616 | +0.082 [0.009, 0.156] |
 
-challenge mAP: 4B 0.576, 32B 0.683, gap +0.108.
+challenge mAP: 4B 0.576, 32B 0.683, gap +0.108 [95% CI +0.042, +0.163].
 
 Horizon shift (largest delta with AP_32B(t0+delta) >= AP_4B(t0)):
 - t0 = 0.5 s: delta = 2.5 s (AP_4B=0.614)

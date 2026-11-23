@@ -407,9 +407,11 @@ def _md(results):
                 cis = f"[{ci[0]:.3f}, {ci[1]:.3f}]" if ci else "n/a"
                 A(f"| {h:g} | {a4:.3f} | {a3:.3f} | {pz['diff_32B_minus_4B']:+.3f} {cis} |")
             A("")
+            gci = tab.get("challenge_mAP_gap_ci")
+            gcis = f" [95% CI {gci[0]:+.3f}, {gci[1]:+.3f}]" if gci else ""
             A(f"challenge mAP: 4B {tab['by_model']['4B']['challenge_mAP']:.3f}, "
               f"32B {tab['by_model']['32B']['challenge_mAP']:.3f}, gap "
-              f"{tab['challenge_mAP_gap_32B_minus_4B']:+.3f}.")
+              f"{tab['challenge_mAP_gap_32B_minus_4B']:+.3f}{gcis}.")
             A("")
             hs = tab["horizon_shift"]
             A("Horizon shift (largest delta with AP_32B(t0+delta) >= AP_4B(t0)):")
