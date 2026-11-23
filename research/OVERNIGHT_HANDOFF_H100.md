@@ -92,3 +92,11 @@ For a new file `runs/<LIST>` on origin:
   killed, run unaffected. Logged in frozen_grid.log.
 
 ## Resumed-session log (append one line per pass: time, what you checked, what you did)
+- 18:30 (interactive session): V6SHARES_R1_CELLS GATED (sha256 a6aa07e5..., posting 04aecb8, pre-registration
+  c7c60e5). PROVISIONAL points: off-switch digests are stated in the list header (no proof JSON); no separate -r1 name
+  proof (same registry as covex-v6-state-shares). The fix changes recall pricing; for the queued _kv0.5 arms
+  (covex-v6-base, covex-v6-rules = v5-rules-2, baselines) it reaches no decision (no D162 pricing, no re-check).
+  Replayed driver selection: r1 s4, s5, s6, s7 next (from ~18:47), then the _kv0.5 sweep. Report per r1 seed:
+  release_infeasible per type vs s4 2,685 / 70 / 12, recall predicted-vs-engine uncached ratio, W overrun without
+  recall, the three checks (pre-registered pass: recall infeasible <= 13 and robot on time toward 118 at s4;
+  assistance must not move).
