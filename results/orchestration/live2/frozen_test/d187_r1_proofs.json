@@ -1,0 +1,60 @@
+{
+ "_what": "Proofs for the D187 (1) cold-pricing fix and the covex-v6-state-shares-r1 label, committed as a FILE because the H100 gated V6SHARES_R1_CELLS PROVISIONALLY on two points: the off-switch digests were asserted in the cell-list header with no proof JSON, and the r1 name had no proof of its own. Both are closed here. The H100's objection was right: a digest in prose is not mechanically checkable.",
+ "digest_recipe": "sha256(json.dumps(rows_without_arm_version, sort_keys=True, separators=(',',':'), default=float))[:16], as in /tmp/claude-1001/fresh.py",
+ "cell": "seed 4, 16 devices, 1200 s, ratio 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0",
+ "code_under_test": "04aecb8a (the commit that contains the fix, the P0 serialisation and the label)",
+ "off_switch_identity": {
+  "verdict": "PASS on both arms, each audited against a value committed BEFORE the change",
+  "cells": [
+   {
+    "arm": "covex-v6-base",
+    "d162_priced": false,
+    "has_release_recheck": false,
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "committed_value": "af8befb9420ad86a / 12085",
+    "identical": true
+   },
+   {
+    "arm": "covex-v6-state-uo",
+    "d162_priced": true,
+    "has_release_recheck": false,
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "state_decisions": 60934,
+    "committed_value": "9a4be873eb3c5fba / 14218",
+    "identical": true
+   }
+  ],
+  "WHY_THE_UO_RESULT_IS_THE_ONE_THAT_MATTERS": "covex-v6-state-uo is check 2's COMPARATOR. It has no release re-check, so the repriced _uncached reaches only its D162 budget charge, and budget_refusal is ABSENT (not merely zero) in all eight committed rung-2 cells, so that charge never bound. The prediction was therefore that uo's digest is unchanged, it was written into the pre-registration before the run, and it is now measured. CONSEQUENCE: check 2's comparator survives the fix and NO COMMITTED CELL NEEDS RERUNNING.",
+  "budget_refusal_absent_in_all_eight": true
+ },
+ "r1_name_proof": {
+  "_what": "covex-v6-state-shares-r1 resolves through run_live2_real.py itself, with a negative control",
+  "probes": {
+   "covex-v6-state-shares-r1": {
+    "arm": "covex-v6-state-shares-r1",
+    "rc": 0,
+    "unknown_arm": false,
+    "tail": "}"
+   },
+   "covex-v6-state-shares-r1-not-an-arm": {
+    "arm": "covex-v6-state-shares-r1-not-an-arm",
+    "rc": 1,
+    "unknown_arm": true,
+    "tail": "KeyError: \"unknown arm 'covex-v6-state-shares-r1-not-an-arm'; known: ['always-cloud-fcfs', 'attentionstore', 'attentionstore-prefetch', 'attentionstore-prefetch-noyield', 'attentionstore-prefetch-off'"
+   }
+  },
+  "verdict": "PASS",
+  "_note": "Run through run_live2_real.py ITSELF as a subprocess, which is the established pattern here: the harness imports only `arms` and `hybrid`, so a name that resolves in a friendly process can still die at cell start. The NEGATIVE CONTROL is not optional, because 'no KeyError appeared' passes trivially if the subprocess failed for any other reason."
+ },
+ "WHAT_THESE_PROOFS_DO_NOT_SHOW": "They show the fix is HARMLESS. They show NOTHING about whether it FIRES. On a dry cell session.last_telemetry_cached_tokens is always None because there is no engine, so the repriced branch is never taken dry. The firing proof is the live r1 cells, against the pass check pre-registered at c7c60e5b with its failure condition.",
+ "_provenance": {
+  "git_commit": "04aecb8a",
+  "script": "fresh.py and a name probe, one cell per process",
+  "model": null,
+  "device": "flash_cpu",
+  "n": 16,
+  "timestamp": "2026-11-22T18:30:41.419272"
+ }
+}
