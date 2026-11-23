@@ -96,7 +96,9 @@ def per_cell(arm_raw, seed):
 def main():
     arms = [(disp, raw) for disp, raw in E.ARMS if disp not in SUPERSEDED]
     arms.append((RR, "covex-v6-fair-c5attr-rr"))
-    dropped = [disp for disp, _ in E.ARMS if disp in SUPERSEDED]
+    # superseded arms that have committed cells (so the exclusion is visible even after they are
+    # removed from the registry): D205.
+    dropped = sorted(a for a in SUPERSEDED if any(E.cell_dir(a, s)[0] for s in E.SEEDS))
 
     rows = []
     for disp, raw in arms:
