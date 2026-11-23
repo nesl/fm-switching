@@ -73,6 +73,79 @@ def robot_d176(cell, path, std_correct, std_n):
     return std_correct - over_correct, std_n - len(over_rows)
 
 
+def collect_units(arm_raw, seed, device_only=False):
+    """Per-unit correct-in-time for one cell, keyed by question identity. Robot units key ('R', oid)
+    carry standing_correct_by_deadline (device-only: device_correct within the 3 s deadline); single
+    -shot units key ('S', qid) carry the on-time cloud-else-device correctness (device-only: device).
+    These are the units the paired question-clustered bootstrap resamples."""
+    path, _ = E.cell_dir(arm_raw, seed)
+    if path is None:
+        return {}
+    cell = E.load_cell(path)
+    rr = (((cell.get("score") or {}).get("score") or {}).get("robot_rows")) or []
+    over = over32k_oids(path)
+    units = {}
+    for r in rr:
+        oid = r.get("opportunity_id")
+        if oid is None or oid in over:  # D176: over-32k refusals excluded from the unit pool
+            continue
+        if device_only:
+            ok = bool(r.get("device_correct")) and (r.get("device_latency_s") or 1e9) <= 3.0
+        else:
+            ok = bool(r.get("standing_correct_by_deadline"))
+        units[("R", oid)] = 1 if ok else 0
+    corr = E.ss2_correctness()
+    for o in E.read_jsonl_gz(os.path.join(path, "outcomes.jsonl")):
+        if not str(o.get("device_id", "")).startswith("asst"):
+            continue
+        qid = o.get("question_id")
+        c = corr.get(qid)
+        if c is None:
+            continue
+        if device_only:
+            ok = c.get("device")
+        else:
+            on_time = bool((o.get("cloud_payload") or {}).get("on_time")) or bool(o.get("within_L"))
+            ok = c.get("cloud") if on_time else c.get("device")
+        units[("S", qid)] = 1 if ok else 0
+    return units
+
+
+def paired_ci(units_a, units_c, kind=None, nb=2000, seed=0):
+    """Paired question-clustered bootstrap of the correct-in-time fraction difference A - C. Clusters
+    are question identities present in BOTH arms; a resampled question contributes all its per-seed
+    instances for both arms. kind filters to 'R' (robot) or 'S' (single-shot); None pools both.
+    Returns (point_diff, lo95, hi95) or None."""
+    import numpy as np
+    # per-question lists across seeds, for the common questions
+    agg_a, agg_c = {}, {}
+    for s, u in units_a.items():
+        for k, v in u.items():
+            if kind and k[0] != kind:
+                continue
+            agg_a.setdefault(k, []).append(v)
+    for s, u in units_c.items():
+        for k, v in u.items():
+            if kind and k[0] != kind:
+                continue
+            agg_c.setdefault(k, []).append(v)
+    common = sorted(set(agg_a) & set(agg_c))
+    if len(common) < 5:
+        return None
+    a_sum = np.array([sum(agg_a[k]) for k in common], float)
+    a_n = np.array([len(agg_a[k]) for k in common], float)
+    c_sum = np.array([sum(agg_c[k]) for k in common], float)
+    c_n = np.array([len(agg_c[k]) for k in common], float)
+    point = a_sum.sum() / a_n.sum() - c_sum.sum() / c_n.sum()
+    rng = np.random.default_rng(seed)
+    m = len(common)
+    diffs = np.empty(nb)
+    for b in range(nb):
+        idx = rng.integers(0, m, m)
+        diffs[b] = a_sum[idx].sum() / a_n[idx].sum() - c_sum[idx].sum() / c_n[idx].sum()
+    return float(point), float(np.percentile(diffs, 2.5)), float(np.percentile(diffs, 97.5))
+
+
 def per_cell(arm_raw, seed):
     path, used_rerun = E.cell_dir(arm_raw, seed)
     if path is None:
@@ -181,6 +254,23 @@ def main():
         means[a]["dashcam_delivered_mAP_EVAL"] = delivered.get(a)
         means[a]["dashcam_episode_attain_D192"] = ep.get(a)
 
+    # paired question-clustered CIs of correct-in-time (pooled / robot / single-shot) vs the rung-3
+    # peer covex-v6-fair-c5attr-rr and vs device-only. Units pooled over seeds, clustered by question.
+    armmap = dict(arms)
+    units = {disp: {s: collect_units(raw, s) for s in E.SEEDS} for disp, raw in arms}
+    units[DEVICE] = {s: collect_units("hybrid-F-lhreq-noc3", s, device_only=True) for s in E.SEEDS}
+    for disp in list(means):
+        if disp not in units:
+            continue
+        for ref in (RR, DEVICE):
+            if disp == ref or ref not in units:
+                continue
+            for kind, tag in ((None, "pooled"), ("R", "robot"), ("S", "ss")):
+                ci = paired_ci(units[disp], units[ref], kind=kind)
+                if ci:
+                    means[disp][f"ci_vs_{'rr' if ref == RR else 'dev'}_{tag}"] = \
+                        {"diff": ci[0], "lo": ci[1], "hi": ci[2]}
+
     result = {"_what": "StudyTABLE1 (D209 canonical pipeline).", "pipeline_sha": sha,
               "superseded_dropped": dropped, "seeds": E.SEEDS,
               "arms": sorted(means), "four_seed_means": means}
@@ -191,8 +281,10 @@ def main():
     print("arms:", len(means))
     for a in sorted(means, key=lambda a: -(means[a]["pooled_frac"] or 0))[:6]:
         m = means[a]
+        ci = m.get("ci_vs_rr_pooled")
+        cis = f" vs-rr pooled {ci['diff']:+.3f}[{ci['lo']:+.3f},{ci['hi']:+.3f}]" if ci else ""
         print(f"  {a:22} robot {m['robot_acc']:.3f} (D176 {m['robot_d176_acc']:.3f}) ss {m['ss_acc']:.3f} "
-              f"pooled {m['pooled_frac']:.3f} dash_mAP {m.get('dashcam_delivered_mAP_EVAL')}")
+              f"pooled {m['pooled_frac']:.3f} dash_mAP {m.get('dashcam_delivered_mAP_EVAL')}{cis}")
 
 
 def dashcam_delivered(arms):
@@ -260,6 +352,25 @@ def write_md(means, sha, dropped, dash):
       "into the unit count; the pooled column is robot and single-shot units only. The D192 column is "
       "the thresholded per-episode attainment, kept beside the mAP and labelled not part of the "
       "claim (D199).")
+    A("")
+    A("## Paired question-clustered CIs (correct-in-time diff, 2000 reps, seed 0)")
+    A("")
+    A("Diff = arm minus comparator, pooled over seeds 4-7, clusters resampled by question identity. "
+      "Positive favours the arm.")
+    A("")
+    A("| arm | pooled vs -rr [95% CI] | pooled vs device-only [95% CI] | robot vs device-only | single-shot vs device-only |")
+    A("|---|---|---|---|---|")
+
+    def ci(m, key):
+        c = m.get(key)
+        return f"{c['diff']:+.3f} [{c['lo']:+.3f}, {c['hi']:+.3f}]" if c else "n/a"
+    for a in order:
+        m = means[a]
+        A(f"| {a} | {ci(m, 'ci_vs_rr_pooled')} | {ci(m, 'ci_vs_dev_pooled')} | "
+          f"{ci(m, 'ci_vs_dev_robot')} | {ci(m, 'ci_vs_dev_ss')} |")
+    A("")
+    A("The dashcam delivered-stream mAP paired CIs vs rung 3 and device-only are in the StudyDSMAP "
+      "report (reports/study_dsmap.md); they are not separable (all span 0, MDE 0.048 > arm gaps).")
     (OUTDIR / "table1.md").write_text("\n".join(L) + "\n")
 
 
