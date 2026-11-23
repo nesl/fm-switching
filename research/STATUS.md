@@ -41,7 +41,7 @@ tighter than specified; and the oversize serialisation above is the lever that w
 
 ## 2026-11-22 (main flash session): rung 2 shares cells gated and running; rung 3's deficit feed found absent twice over
 
-**Last updated: 2026-11-22.** StudyD179-SHARES, StudyFAIR-FEED and StudyPORT-EXCL, under D179 to
+**Last updated: 2026-11-23.** StudyD179-SHARES, StudyFAIR-FEED and StudyPORT-EXCL, under D179 to
 D182 and the user addenda 1 to 12.
 
 **RUNG 2.** V6SHARES_CELLS is posted at `19d8b416` (sha256 `75909a17cdb886ea`) and gated
