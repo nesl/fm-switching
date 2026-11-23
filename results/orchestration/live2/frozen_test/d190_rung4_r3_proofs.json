@@ -1,0 +1,3140 @@
+{
+ "_what": "D190 (3) / D191 items 1 and 2: the proofs for RUNG 4 ON THE RUNG-3 BASE (covex-v6-cf-c5attr) before any cell of it is posted. One JSON, as asked.",
+ "_register": "EVERY cell below was run on a CLEAN `git archive` CHECKOUT of the commit named in _provenance, NOT in the shared worktree, ONE DRY CELL PER PROCESS, and at CONCURRENCY 1. Concurrency 1 is not caution: see host_load_hazard_measured.",
+ "cell": "dry, seed 4, 16 devices, 1200 s, posted knobs (ratio 40:40:20, lh_req, ss2, epg, per-frame, reask 30.0), planner wall-clock cutoff off",
+ "digest_recipe": "sha256(json.dumps(rows_without_arm_version, sort_keys=True, separators=(',',':'), default=float))[:16], computed by the COMMITTED cf_pd_one_cell.py and not reimplemented here",
+ "concurrency": 1,
+ "host_load_at_each_cell_start": [
+  "=== pos_fair  covex-v6-fair-c5attr  kv=1.0  10:25:39  load=2.16",
+  "=== r4_off  covex-v6-cf-c5attr-off  kv=1.0  10:28:38  load=1.52",
+  "=== r4_full  covex-v6-cf-c5attr  kv=1.0  10:31:31  load=1.04",
+  "=== r4_rqonly  covex-v6-cf-c5attr-rqonly  kv=1.0  10:34:22  load=1.23",
+  "=== r4_pdonly  covex-v6-cf-c5attr-pdonly  kv=1.0  10:37:19  load=1.16",
+  "=== pos_base  covex-v6-base  kv=1.0  10:40:16  load=1.39",
+  "=== pos_uo  covex-v6-state-uo-c5attr  kv=1.0  10:43:16  load=1.68",
+  "=== r4_w1  covex-v6-cf-c5attr-w1  kv=1.0  10:47:31  load=2.78",
+  "=== r4_gain0  covex-v6-cf-c5attr-gain0  kv=1.0  10:50:30  load=1.21",
+  "=== r4_harm0  covex-v6-cf-c5attr-harm0  kv=1.0  10:53:27  load=1.14",
+  "=== r4_marginhuge  covex-v6-cf-c5attr-margin-huge  kv=1.0  10:58:39  load=4.24",
+  "=== r4_off_kv025  covex-v6-cf-c5attr-off  kv=0.25  11:03:50  load=4.36",
+  "=== r4_pdonly_kv025  covex-v6-cf-c5attr-pdonly  kv=0.25  11:09:18  load=4.18",
+  "=== r4_full_kv025  covex-v6-cf-c5attr  kv=0.25  11:14:24  load=4.13"
+ ],
+ "concurrency_caveat": "concurrency 1 FROM THIS SESSION. Another session ran three concurrent dry cells in the same scratchpad for part of this battery, so host load was 2 to 6 and is recorded per cell above. The three positive controls are the check on whether it perturbed anything.",
+ "import_on_a_clean_checkout": {
+  "_claim": "`import arms` succeeds on a CLEAN COMMITTED checkout WITH rung 4 registered. This was the standing blocker: cf_protect_defer.py:150 read cf_objective.attainment_margin, which is in no commit, so on origin the import raised AttributeError and EVERY ARM DIED AT CELL START (2026-11-22 22:46, five gated cells). A SECOND read, cf_objective.ON_TIME_UNITS, raised at RUN TIME on the first decision that reached the harm, which the import fix alone did not surface.",
+  "returncode": 0,
+  "arms_registered": "206",
+  "verdict": "PASS",
+  "stderr_tail": "",
+  "both_fixes_are_derivation_or_reporting_only": {
+   "MARGIN_CF_ON_TIME": "prefers cf_objective.attainment_margin; otherwise cf_margin.MARGIN_CF / cf_ontime_frozen.A_D2_DEV, the same two committed constants the function divides. 0.65824, asserted.",
+   "on_time_units": "a REPORTED field. The harm call passes acc_cloud=1.0, acc_device=0.0, under which the committed option_value is w * p, which is exactly D177's branch. Nothing that decides moves."
+  },
+  "track_A_status_at_measurement": "cf_objective.attainment_margin is STILL NOT in any commit; the fallback path is the one in force, and every cell below records which path it used"
+ },
+ "proof_5_positive_control": {
+  "_claim": "three COMMITTED arms reproduce their committed digests on this clean tree. CLAUDE.md: an impossible failure and an impossible success are equally diagnostic, and if a known-good arm fails, the check is broken, not the arm.",
+  "cells": [
+   {
+    "arm": "covex-v6-base",
+    "this_run": [
+     "af8befb9420ad86a",
+     12085
+    ],
+    "committed": [
+     "af8befb9420ad86a",
+     12085
+    ],
+    "source_of_prior": "results/orchestration/live2/frozen_test/c5attr_digest_proofs.json",
+    "verdict": "PASS"
+   },
+   {
+    "arm": "covex-v6-state-uo-c5attr",
+    "this_run": [
+     "9a4be873eb3c5fba",
+     14218
+    ],
+    "committed": [
+     "9a4be873eb3c5fba",
+     14218
+    ],
+    "source_of_prior": "results/orchestration/live2/frozen_test/d185_fair_c5attr_gate.json (2_off_switch_identity.base_digest)",
+    "verdict": "PASS"
+   },
+   {
+    "arm": "covex-v6-fair-c5attr",
+    "this_run": [
+     "12e4f73ce0ebd865",
+     13812
+    ],
+    "committed": [
+     "12e4f73ce0ebd865",
+     13812
+    ],
+    "source_of_prior": "results/orchestration/live2/frozen_test/d185_fair_c5attr_gate.json (1_step2b...both_consumers)",
+    "verdict": "PASS"
+   }
+  ],
+  "verdict": "PASS"
+ },
+ "host_load_hazard_measured": {
+  "_what": "why every cell here runs ALONE. The same three arms were first run at CONCURRENCY 3 on this host.",
+  "at_concurrency_3": {
+   "covex-v6-base": [
+    "af8befb9420ad86a",
+    12085,
+    "matched"
+   ],
+   "covex-v6-fair-c5attr": [
+    "12e4f73ce0ebd865",
+    13812,
+    "matched"
+   ],
+   "covex-v6-state-uo-c5attr": [
+    "639cd15ed38c9da0",
+    14207,
+    "MISMATCH against 9a4be873eb3c5fba / 14,218"
+   ]
+  },
+  "alone": {
+   "covex-v6-state-uo-c5attr": [
+    "9a4be873eb3c5fba",
+    14218,
+    "matched exactly"
+   ]
+  },
+  "reading": "the rung-2 arm's dry digest is sensitive to host load and the two other arms' are not, so a concurrent run can move one side of a comparison and not the other. Consistent with the documented `id(obs)` cache key in arms_v6state._queued_behind, which makes decisions depend on allocation history; that fix stays OFF per D190 (6). Everything below is concurrency 1."
+ },
+ "proof_2_byte_identity_of_other_arms": {
+  "_claim": "the two committed files this work touched (cf_protect_defer.py, arms.py) move NO other arm. Each arm below is a committed arm run on this tree, where the rung-4 switches are default OFF and rung 4 is registered.",
+  "cells": [
+   {
+    "arm": "covex-v6-base",
+    "this_run": [
+     "af8befb9420ad86a",
+     12085
+    ],
+    "committed": [
+     "af8befb9420ad86a",
+     12085
+    ],
+    "source_of_prior": "results/orchestration/live2/frozen_test/c5attr_digest_proofs.json",
+    "verdict": "PASS"
+   },
+   {
+    "arm": "covex-v6-state-uo-c5attr",
+    "this_run": [
+     "9a4be873eb3c5fba",
+     14218
+    ],
+    "committed": [
+     "9a4be873eb3c5fba",
+     14218
+    ],
+    "source_of_prior": "results/orchestration/live2/frozen_test/d185_fair_c5attr_gate.json (2_off_switch_identity.base_digest)",
+    "verdict": "PASS"
+   },
+   {
+    "arm": "covex-v6-fair-c5attr",
+    "this_run": [
+     "12e4f73ce0ebd865",
+     13812
+    ],
+    "committed": [
+     "12e4f73ce0ebd865",
+     13812
+    ],
+    "source_of_prior": "results/orchestration/live2/frozen_test/d185_fair_c5attr_gate.json (1_step2b...both_consumers)",
+    "verdict": "PASS"
+   }
+  ],
+  "note": "the rung-4 family is registered in arms.py in these very processes, so this also proves the registration itself is additive and perturbs nothing"
+ },
+ "proof_3_off_switch_identity": {
+  "_claim": "covex-v6-cf-c5attr-off, with BOTH compounds off, is byte-identical to the COMMITTED RUNG-3 arm. The bar is RUNG 3 (12e4f73ce0ebd865 / 13,812), NOT rung 2 (9a4be873eb3c5fba / 14,218): checking the wrong one would credit rung 4 with the rung below it.",
+  "off_arm": {
+   "arm": "covex-v6-cf-c5attr-off",
+   "digest": "12e4f73ce0ebd865",
+   "rows": 13812
+  },
+  "rung3_this_run": {
+   "arm": "covex-v6-fair-c5attr",
+   "digest": "12e4f73ce0ebd865",
+   "rows": 13812
+  },
+  "committed_rung3": [
+   "12e4f73ce0ebd865",
+   13812
+  ],
+  "equals_rung3_this_run": true,
+  "equals_committed_rung3": true,
+  "diff": {
+   "A": "r4_off",
+   "B": "pos_fair",
+   "rows_A": 13812,
+   "rows_B": 13812,
+   "differing_setwise": 0,
+   "differing_positional": 0,
+   "identical": true,
+   "first_difference": null
+  },
+  "verdict": "PASS"
+ },
+ "proof_1_step_2b": {
+  "_claim": "CLAUDE.md Step 2b, run BEFORE any cell is posted, on the RUNG-3 BASE the cells will run on and at the MEMORY SETTING they will run at. Each leg separately, which is addendum 12 item 5: a combined count that cannot be attributed is not a pass.",
+  "comparator": "covex-v6-cf-c5attr-off at the SAME memory setting",
+  "a_protect_and_defer_at_1x": {
+   "A": "r4_pdonly",
+   "B": "r4_off",
+   "rows_A": 13812,
+   "rows_B": 13812,
+   "differing_setwise": 0,
+   "differing_positional": 0,
+   "identical": true,
+   "first_difference": null,
+   "arm": "covex-v6-cf-c5attr-pdonly",
+   "counters": {
+    "pd_decisions": 244,
+    "pd_decisions_request": 82,
+    "pd_decisions_state": 162,
+    "pd_deferred_to_guard_epochs": 1044,
+    "pd_free_kv_max": 62944,
+    "pd_free_kv_min": 9783,
+    "pd_free_kv_sum": 9762902,
+    "pd_gate_no_active_alert_episode": 48,
+    "pd_gate_rebuild_fits_without_evicting": 194,
+    "pd_gate_wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of. The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here": 2,
+    "pd_harm_gt_0": 2,
+    "pd_harm_gt_0p01": 2,
+    "pd_harm_gt_0p1": 2,
+    "pd_harm_gt_0p65824": 2,
+    "pd_harm_gt_1": 2,
+    "pd_harm_gt_2": 2,
+    "pd_harm_gt_5": 1,
+    "pd_harm_micro_max": 5145860,
+    "pd_harm_micro_sum": 7195529,
+    "pd_harm_n": 2,
+    "pd_harm_over_bar": 2,
+    "pd_kv_bound_by_belief": 244,
+    "pd_request_crossed_bar_unexpressible": 2,
+    "pd_u_max": 16558,
+    "pd_u_sum": 877752,
+    "pd_victim_found": 200
+   },
+   "gate_mix": {
+    "pd_gate_no_active_alert_episode": 48,
+    "pd_gate_rebuild_fits_without_evicting": 194,
+    "pd_gate_wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of. The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here": 2
+   },
+   "harm_distribution": {
+    "n": 2,
+    "min": 2.0496690406103424,
+    "p25": 2.0496690406103424,
+    "median": 2.0496690406103424,
+    "p75": 2.0496690406103424,
+    "p90": 2.0496690406103424,
+    "max": 5.145859887968879,
+    "n_zero": 0,
+    "n_distinct": 2,
+    "bar_at_w1": 0.65824,
+    "n_over_bar_at_w1": 2
+   },
+   "traced_decision": null
+  },
+  "b_protect_and_defer_at_0p25x": {
+   "A": "r4_pdonly_kv025",
+   "B": "r4_off_kv025",
+   "rows_A": 13782,
+   "rows_B": 13812,
+   "differing_setwise": 4806,
+   "differing_positional": 9372,
+   "identical": false,
+   "first_difference": {
+    "index": 4331,
+    "A": {
+     "H": null,
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": "gpu",
+     "kind": "state_action",
+     "mu": null,
+     "note": "session=robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "opportunity_ids": [],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": null,
+     "representation_defaulted": false,
+     "t": 443.3,
+     "traffic_mix": {
+      "monitor": 4,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    },
+    "B": {
+     "H": null,
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_recall",
+     "mu": null,
+     "note": "session=robo005|s001|791449306887400_start_0.0_end_304.403",
+     "opportunity_ids": [
+      "opp0004420"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": "D2",
+     "representation_defaulted": true,
+     "t": 443.3,
+     "traffic_mix": {
+      "monitor": 4,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    }
+   },
+   "arm": "covex-v6-cf-c5attr-pdonly at --kv-scale 0.25",
+   "counters": {
+    "pd_decisions": 260,
+    "pd_decisions_request": 98,
+    "pd_decisions_state": 162,
+    "pd_deferred_to_guard_epochs": 1016,
+    "pd_free_kv_max": 15736,
+    "pd_free_kv_min": 0,
+    "pd_free_kv_sum": 1230553,
+    "pd_gate_defer_to_latest_safe_start": 21,
+    "pd_gate_harm_does_not_exceed_the_bar": 82,
+    "pd_gate_must_start_now_so_send_less: the whole tail of 1024 tokens carries 2.0864 on-time answers of harm against a bar of 1.3348, and a slice of 512 carries 1.0946": 1,
+    "pd_gate_must_start_now_so_send_less: the whole tail of 1024 tokens carries 2.0919 on-time answers of harm against a bar of 1.3348, and a slice of 512 carries 1.1412": 1,
+    "pd_gate_no_active_alert_episode": 51,
+    "pd_gate_rebuild_fits_without_evicting": 74,
+    "pd_gate_wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of. The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here": 30,
+    "pd_harm_gt_0": 135,
+    "pd_harm_gt_0p01": 84,
+    "pd_harm_gt_0p1": 77,
+    "pd_harm_gt_0p65824": 69,
+    "pd_harm_gt_1": 68,
+    "pd_harm_gt_2": 49,
+    "pd_harm_gt_5": 10,
+    "pd_harm_micro_max": 6182890,
+    "pd_harm_micro_sum": 189748662,
+    "pd_harm_n": 135,
+    "pd_harm_over_bar": 53,
+    "pd_kv_bound_by_belief": 260,
+    "pd_protects": 20,
+    "pd_request_crossed_bar_unexpressible": 30,
+    "pd_request_defers": 16,
+    "pd_state_chunks": 2,
+    "pd_state_defers": 5,
+    "pd_u_max": 16558,
+    "pd_u_sum": 1016990,
+    "pd_victim_found": 216
+   },
+   "gate_mix": {
+    "pd_gate_defer_to_latest_safe_start": 21,
+    "pd_gate_harm_does_not_exceed_the_bar": 82,
+    "pd_gate_must_start_now_so_send_less: the whole tail of 1024 tokens carries 2.0864 on-time answers of harm against a bar of 1.3348, and a slice of 512 carries 1.0946": 1,
+    "pd_gate_must_start_now_so_send_less: the whole tail of 1024 tokens carries 2.0919 on-time answers of harm against a bar of 1.3348, and a slice of 512 carries 1.1412": 1,
+    "pd_gate_no_active_alert_episode": 51,
+    "pd_gate_rebuild_fits_without_evicting": 74,
+    "pd_gate_wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of. The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here": 30
+   },
+   "harm_distribution": {
+    "n": 135,
+    "min": 0.00024762897707009124,
+    "p25": 0.0005114338646234895,
+    "median": 1.0053093505269004,
+    "p75": 2.0919441080244057,
+    "p90": 4.1135697493529655,
+    "max": 6.18289031238277,
+    "n_zero": 0,
+    "n_distinct": 118,
+    "bar_at_w1": 0.65824,
+    "n_over_bar_at_w1": 69
+   },
+   "traced_decision": [
+    "PROTECT-AND-DEFER DECISION  robo005  t = 443.300 s",
+    "  inputs",
+    "    rebuild R uncached tokens        u = 6400",
+    "    free GPU KV pool                     3988.0 tokens   (rebuild fits: False)",
+    "    alert episodes active            True (2 instant(s) pending)",
+    "    victim history H                 robo000|s001|1085041543181381_start_0.0_end_386.067, next question in 0.00 s, 2169 tokens warm",
+    "  HARM: on-time cloud answers lost by others (D177, D162 queue term)",
+    "    per_queue_s (imported)           0.0001535807289 s per uncached token",
+    "    delta first token  = 0.0001535807289 x 6400 = 0.982917 s",
+    "    others considered 2, of which moved 2",
+    "      opp0004419     dash001    w = 1.0077  p 0.999494 -> 0.000000  lost 1.007192",
+    "      opp0004421     dash000    w = 1.0385  p 0.999680 -> 0.000000  lost 1.038179",
+    "    HARM = 2.045371 on-time cloud answers   by type {'alert': 2.045371195}",
+    "    (the same rows under the device-discounted reading: 0.000000; see HARM_FORM_NOTE)",
+    "  THE BAR: w_d x MARGIN_CF",
+    "    MARGIN_CF (on-time units)        0.65824000000000005   MARGIN_CF / A_D2_DEV = 0.16456 / 0.250 = 0.65824000000000005; D177 (3) states it as 0.6582 in on-time units. Path: cf_objective.attainment_margin (the canonical function)",
+    "    w_d = 1.518519  from device robo005 (reading 'decider')",
+    "    BAR = 1.518519 x 0.65824000000000005 = 0.999550",
+    "    w source: covex-v6-fair's deficit weight, LIVE: deficit_feed.DeficitFeed.weight_device, w = 1 + 2 * shortfall floored at 1 (D178 (2)), read per decision off the rung-3 feed this arm IS",
+    "  TEST: harm 2.045371 > bar 0.999550",
+    "  LATEST SAFE START (D125 kappa, D151 (3))",
+    "    predicted service  1.179955 s   kappa 1.5775406165458   calibrated True",
+    "    latest start = deadline - kappa x service = 444.338573 s  (deferral 1.038573 s, must start now False)",
+    "  ACTION: PROTECT_AND_DEFER",
+    "    reason: defer_to_latest_safe_start"
+   ],
+   "matched_memory_control": "covex-v6-cf-c5attr-off at --kv-scale 0.25, in this comparison"
+  },
+  "c_question_deferral_at_1x": {
+   "A": "r4_rqonly",
+   "B": "r4_off",
+   "rows_A": 13773,
+   "rows_B": 13812,
+   "differing_setwise": 6069,
+   "differing_positional": 8462,
+   "identical": false,
+   "first_difference": {
+    "index": 5350,
+    "A": {
+     "H": null,
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": 1.006723,
+     "desired_tier": null,
+     "kind": "defer",
+     "mu": null,
+     "note": null,
+     "opportunity_ids": [
+      "opp0005455"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": null,
+     "representation_defaulted": false,
+     "t": 542.9,
+     "traffic_mix": {
+      "monitor": 3,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    },
+    "B": {
+     "H": null,
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_recall",
+     "mu": null,
+     "note": "session=robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "opportunity_ids": [
+      "opp0005455"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": "D2",
+     "representation_defaulted": true,
+     "t": 542.9,
+     "traffic_mix": {
+      "monitor": 3,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    }
+   },
+   "arm": "covex-v6-cf-c5attr-rqonly",
+   "counters": {
+    "rd_decider_weight_above_floor": 22,
+    "rd_decisions": 88,
+    "rd_defer_slack_used_ms_sum": 3753,
+    "rd_deferred_to_guard_epochs": 1050,
+    "rd_gate_defer_to_latest_safe_start": 6,
+    "rd_gate_must_start_now_no_slack": 47,
+    "rd_gate_no_active_alert_episode": 19,
+    "rd_gate_saving_does_not_exceed_margin": 16,
+    "rd_harm_now_micro_sum": 50673158,
+    "rd_harm_saved_micro_sum": 15841170,
+    "rd_net_micro_max": 3018912,
+    "rd_own_loss_micro_sum": 613773,
+    "rd_question_defers": 6,
+    "rd_reached_harm": 22,
+    "rd_skipped_already_deferred": 4,
+    "rd_u_built_only_minus_u_sum": -81920,
+    "rd_u_built_won": 60,
+    "rd_u_cold": 28,
+    "rd_u_differs_from_built_only": 28,
+    "rd_u_not_cold": 60
+   },
+   "report": {
+    "switch": {
+     "attr": "live2_cf_request_defer",
+     "on": true,
+     "chain": [
+      {
+       "class": "V6CfRung4C5Attr",
+       "declared_on_instance": true,
+       "value": true,
+       "type": "bool"
+      },
+      {
+       "class": "V5Rules2Arm",
+       "declared_on_instance": true,
+       "value": true,
+       "type": "bool"
+      },
+      {
+       "class": "HybridArm",
+       "declared_on_instance": true,
+       "value": true,
+       "type": "bool"
+      }
+     ]
+    },
+    "net_gain": {
+     "n": 22,
+     "min": -0.04509402393738593,
+     "median": -0.012226848347845307,
+     "p90": 2.020642744892879,
+     "max": 3.018912452638392,
+     "n_distinct": 22
+    },
+    "bar": {
+     "n": 22,
+     "min": 0.7557570370370371,
+     "median": 1.4023373913043478,
+     "max": 1.97472,
+     "n_distinct": 17,
+     "at_w1": 0.65824,
+     "n_above_w1_floor": 22
+    },
+    "traced_decision": [
+     "request-deferral decision, robo000 at t = 542.9 s",
+     "  uncached prefill u          = 5410 tokens",
+     "  alert instants pending      = 1",
+     "  added first-token delay     = 0.830872 s  (0.0001535807289338535 x u)",
+     "  harm if sent now            = 1.005309 on-time answers over 1 rows",
+     "  deferral                    = 1.006723 s to the latest safe start",
+     "  harm SAVED                  = 1.005309 over 1 rows (alert 1.005309); 0 rows still harmed, 0.000000",
+     "  OWN loss                    = 0.017766  (w_R 1.1481 x (p 0.986884 -> 0.971410), slack 2.881 -> 1.874 s)",
+     "  NET                         = 0.987543  against bar 0.755757  (w_R x MARGIN_CF, robo000)",
+     "  crosses the bar             = True",
+     "  gate / action               = defer_to_latest_safe_start / DEFER_TO_LATEST_SAFE_START"
+    ],
+    "traced_decision_record": {
+     "version": "cf-request-defer-1.1",
+     "decider_device_id": "robo000",
+     "now_s": 542.9,
+     "alert_active": true,
+     "n_alert_pending": 1,
+     "u_request": 5410,
+     "w_source": "covex-v6-fair's deficit weight, LIVE: deficit_feed.DeficitFeed.weight_device, w = 1 + 2 * shortfall floored at 1 (D178 (2)), read per decision off the rung-3 feed this arm IS",
+     "action": "DEFER_TO_LATEST_SAFE_START",
+     "gate": "defer_to_latest_safe_start",
+     "harm_scale": 1.0,
+     "margin_scale": 1.0,
+     "latest_safe_start": {
+      "latest_start_s": 543.906723,
+      "predicted_service_s": 1.001163,
+      "safety_factor": 1.8721,
+      "feasible": true,
+      "must_start_now": false,
+      "deferral_s": 1.006723,
+      "decode_included": true,
+      "latest_start_if_decode_omitted_s": 543.912524,
+      "decode_omission_error_s": 0.005801,
+      "safety_factor_source": "results/orchestration/live2/frozen_test/d190_recall_lag_diagnosis.json",
+      "safety_factor_quantile": "nearest-rank q90 over n=5",
+      "safety_factor_measured_range": [
+       1.3856,
+       1.8721
+      ],
+      "committed_kappa_not_used_here": 1.5775406165458339
+     },
+     "deferral_s": 1.006723,
+     "must_start_now": false,
+     "lss_feasible": true,
+     "harm_now": 1.0053093505269004,
+     "harm_by_type_now": {
+      "alert": 1.005309351
+     },
+     "delta_first_token_s": 0.8308717435321474,
+     "per_queue_s": 0.0001535807289338535,
+     "price_source": "cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)",
+     "n_others_considered": 1,
+     "n_others_moved": 1,
+     "harm_saved_unscaled": 1.005309351,
+     "harm_saved": 1.005309351,
+     "harm_saved_alert": 1.005309351,
+     "harm_still_inflicted": 0.0,
+     "n_rows_saved": 1,
+     "n_rows_still_harmed": 0,
+     "saved_rows_sample": [
+      {
+       "req_id": "opp0005452",
+       "qtype": "alert",
+       "slack_s": 0.5561290000000554,
+       "value_lost": 1.005309351
+      }
+     ],
+     "own_engine_s": 0.9571627197300879,
+     "own_slack_now_s": 2.880999999999972,
+     "own_slack_after_s": 1.8742770000000064,
+     "own_p_before": 0.9868835822698799,
+     "own_p_after": 0.9714100124466081,
+     "own_loss": 0.017765950537830654,
+     "w_decider": 1.1481481481481481,
+     "net_gain": 0.9875434004621693,
+     "bar": {
+      "bar": 0.7557570370370371,
+      "w_d": 1.1481481481481481,
+      "bar_weight_source": "robo000",
+      "margin_scale": 1.0,
+      "reading": "decider",
+      "margin_cf_on_time": 0.65824
+     },
+     "bar_value": 0.7557570370370371,
+     "crosses_bar": true,
+     "units": "counts of expected on-time cloud answers, per-device w_d weighted; MARGIN_CF = 0.65824 on-time answers (D191 item 1)",
+     "residency_input": {
+      "kind": "RESIDENT_TOKEN_COUNT",
+      "quantity": "u_request = readiness_tokens - built_tokens_by_session[session]",
+      "is_a_tier_label": false,
+      "why_it_matters": "D190 (5) track C: the hybrid gate prices on the three-label residency_readiness(), so GPU-WARM at 44 percent resident and at 28 percent resident price identically; on one history that collapse was 8.17x optimistic (0.6506 s predicted, 5.3166 s observed)",
+      "exposure_this_module_does_inherit": "built_tokens_by_session is the coordinator's BELIEF, not engine telemetry (D44, D47), so an overstated belief understates u and puts the latest safe start too late by that much",
+      "measured_predictor_bias": "D162 under-predicts first token by 1.39x to 1.87x on the five recall questions SENT in the committed rung-3 cells (d190_recall_lag_diagnosis.json)",
+      "kappa_coverage": "kappa = 1.577541 covers 1.39x and DOES NOT cover 1.87x. Not widened: D191 item 2 fixes the safety factor to committed FIT data, and a factor fitted to the cells under diagnosis would be tuning. The consequence is reported as 'any recall made late by a deferral' and is expected to be non-zero."
+     },
+     "would_miss_deadline_under_measured_bias": {
+      "recall_deadline_s_label": 3.0,
+      "predicted_total_service_s": 1.0011627197300879,
+      "deferral_s": 1.006723,
+      "safety_factor_used": 1.8721,
+      "at_measured_worst_bias": {
+       "bias": 1.8721,
+       "overrun_s": 0.0,
+       "would_miss": false
+      },
+      "at_measured_best_bias": {
+       "bias": 1.3856,
+       "overrun_s": -0.4870656631486879,
+       "would_miss": false
+      },
+      "at_committed_kappa": {
+       "bias": 1.5775406165458339,
+       "overrun_s": -0.2949018734609909,
+       "would_miss": false
+      }
+     },
+     "session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "u_detail": {
+      "u": 5410,
+      "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+      "u_built_only": 5410,
+      "readiness": "GPU-WARM",
+      "built_tokens": 5241,
+      "telemetry_cached_tokens": 0,
+      "prompt_tokens": 10651
+     }
+    },
+    "traced_bar_crossing": [
+     "request-deferral decision, robo000 at t = 542.9 s",
+     "  uncached prefill u          = 5410 tokens",
+     "  alert instants pending      = 1",
+     "  added first-token delay     = 0.830872 s  (0.0001535807289338535 x u)",
+     "  harm if sent now            = 1.005309 on-time answers over 1 rows",
+     "  deferral                    = 1.006723 s to the latest safe start",
+     "  harm SAVED                  = 1.005309 over 1 rows (alert 1.005309); 0 rows still harmed, 0.000000",
+     "  OWN loss                    = 0.017766  (w_R 1.1481 x (p 0.986884 -> 0.971410), slack 2.881 -> 1.874 s)",
+     "  NET                         = 0.987543  against bar 0.755757  (w_R x MARGIN_CF, robo000)",
+     "  crosses the bar             = True",
+     "  gate / action               = defer_to_latest_safe_start / DEFER_TO_LATEST_SAFE_START"
+    ],
+    "traced_bar_crossing_record": {
+     "version": "cf-request-defer-1.1",
+     "decider_device_id": "robo000",
+     "now_s": 542.9,
+     "alert_active": true,
+     "n_alert_pending": 1,
+     "u_request": 5410,
+     "w_source": "covex-v6-fair's deficit weight, LIVE: deficit_feed.DeficitFeed.weight_device, w = 1 + 2 * shortfall floored at 1 (D178 (2)), read per decision off the rung-3 feed this arm IS",
+     "action": "DEFER_TO_LATEST_SAFE_START",
+     "gate": "defer_to_latest_safe_start",
+     "harm_scale": 1.0,
+     "margin_scale": 1.0,
+     "latest_safe_start": {
+      "latest_start_s": 543.906723,
+      "predicted_service_s": 1.001163,
+      "safety_factor": 1.8721,
+      "feasible": true,
+      "must_start_now": false,
+      "deferral_s": 1.006723,
+      "decode_included": true,
+      "latest_start_if_decode_omitted_s": 543.912524,
+      "decode_omission_error_s": 0.005801,
+      "safety_factor_source": "results/orchestration/live2/frozen_test/d190_recall_lag_diagnosis.json",
+      "safety_factor_quantile": "nearest-rank q90 over n=5",
+      "safety_factor_measured_range": [
+       1.3856,
+       1.8721
+      ],
+      "committed_kappa_not_used_here": 1.5775406165458339
+     },
+     "deferral_s": 1.006723,
+     "must_start_now": false,
+     "lss_feasible": true,
+     "harm_now": 1.0053093505269004,
+     "harm_by_type_now": {
+      "alert": 1.005309351
+     },
+     "delta_first_token_s": 0.8308717435321474,
+     "per_queue_s": 0.0001535807289338535,
+     "price_source": "cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)",
+     "n_others_considered": 1,
+     "n_others_moved": 1,
+     "harm_saved_unscaled": 1.005309351,
+     "harm_saved": 1.005309351,
+     "harm_saved_alert": 1.005309351,
+     "harm_still_inflicted": 0.0,
+     "n_rows_saved": 1,
+     "n_rows_still_harmed": 0,
+     "saved_rows_sample": [
+      {
+       "req_id": "opp0005452",
+       "qtype": "alert",
+       "slack_s": 0.5561290000000554,
+       "value_lost": 1.005309351
+      }
+     ],
+     "own_engine_s": 0.9571627197300879,
+     "own_slack_now_s": 2.880999999999972,
+     "own_slack_after_s": 1.8742770000000064,
+     "own_p_before": 0.9868835822698799,
+     "own_p_after": 0.9714100124466081,
+     "own_loss": 0.017765950537830654,
+     "w_decider": 1.1481481481481481,
+     "net_gain": 0.9875434004621693,
+     "bar": {
+      "bar": 0.7557570370370371,
+      "w_d": 1.1481481481481481,
+      "bar_weight_source": "robo000",
+      "margin_scale": 1.0,
+      "reading": "decider",
+      "margin_cf_on_time": 0.65824
+     },
+     "bar_value": 0.7557570370370371,
+     "crosses_bar": true,
+     "units": "counts of expected on-time cloud answers, per-device w_d weighted; MARGIN_CF = 0.65824 on-time answers (D191 item 1)",
+     "residency_input": {
+      "kind": "RESIDENT_TOKEN_COUNT",
+      "quantity": "u_request = readiness_tokens - built_tokens_by_session[session]",
+      "is_a_tier_label": false,
+      "why_it_matters": "D190 (5) track C: the hybrid gate prices on the three-label residency_readiness(), so GPU-WARM at 44 percent resident and at 28 percent resident price identically; on one history that collapse was 8.17x optimistic (0.6506 s predicted, 5.3166 s observed)",
+      "exposure_this_module_does_inherit": "built_tokens_by_session is the coordinator's BELIEF, not engine telemetry (D44, D47), so an overstated belief understates u and puts the latest safe start too late by that much",
+      "measured_predictor_bias": "D162 under-predicts first token by 1.39x to 1.87x on the five recall questions SENT in the committed rung-3 cells (d190_recall_lag_diagnosis.json)",
+      "kappa_coverage": "kappa = 1.577541 covers 1.39x and DOES NOT cover 1.87x. Not widened: D191 item 2 fixes the safety factor to committed FIT data, and a factor fitted to the cells under diagnosis would be tuning. The consequence is reported as 'any recall made late by a deferral' and is expected to be non-zero."
+     },
+     "would_miss_deadline_under_measured_bias": {
+      "recall_deadline_s_label": 3.0,
+      "predicted_total_service_s": 1.0011627197300879,
+      "deferral_s": 1.006723,
+      "safety_factor_used": 1.8721,
+      "at_measured_worst_bias": {
+       "bias": 1.8721,
+       "overrun_s": 0.0,
+       "would_miss": false
+      },
+      "at_measured_best_bias": {
+       "bias": 1.3856,
+       "overrun_s": -0.4870656631486879,
+       "would_miss": false
+      },
+      "at_committed_kappa": {
+       "bias": 1.5775406165458339,
+       "overrun_s": -0.2949018734609909,
+       "would_miss": false
+      }
+     },
+     "session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "u_detail": {
+      "u": 5410,
+      "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+      "u_built_only": 5410,
+      "readiness": "GPU-WARM",
+      "built_tokens": 5241,
+      "telemetry_cached_tokens": 0,
+      "prompt_tokens": 10651
+     }
+    }
+   }
+  },
+  "d_FULL_RUNG_4_at_1x": {
+   "A": "r4_full",
+   "B": "r4_off",
+   "rows_A": 13773,
+   "rows_B": 13812,
+   "differing_setwise": 6069,
+   "differing_positional": 8462,
+   "identical": false,
+   "first_difference": {
+    "index": 5350,
+    "A": {
+     "H": null,
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": 1.006723,
+     "desired_tier": null,
+     "kind": "defer",
+     "mu": null,
+     "note": null,
+     "opportunity_ids": [
+      "opp0005455"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": null,
+     "representation_defaulted": false,
+     "t": 542.9,
+     "traffic_mix": {
+      "monitor": 3,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    },
+    "B": {
+     "H": null,
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_recall",
+     "mu": null,
+     "note": "session=robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "opportunity_ids": [
+      "opp0005455"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": "D2",
+     "representation_defaulted": true,
+     "t": 542.9,
+     "traffic_mix": {
+      "monitor": 3,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    }
+   },
+   "arm": "covex-v6-cf-c5attr",
+   "rd_counters": {
+    "rd_decider_weight_above_floor": 22,
+    "rd_decisions": 88,
+    "rd_defer_slack_used_ms_sum": 3753,
+    "rd_deferred_to_guard_epochs": 1050,
+    "rd_gate_defer_to_latest_safe_start": 6,
+    "rd_gate_must_start_now_no_slack": 47,
+    "rd_gate_no_active_alert_episode": 19,
+    "rd_gate_saving_does_not_exceed_margin": 16,
+    "rd_harm_now_micro_sum": 50673158,
+    "rd_harm_saved_micro_sum": 15841170,
+    "rd_net_micro_max": 3018912,
+    "rd_own_loss_micro_sum": 613773,
+    "rd_question_defers": 6,
+    "rd_reached_harm": 22,
+    "rd_skipped_already_deferred": 4,
+    "rd_u_built_only_minus_u_sum": -81920,
+    "rd_u_built_won": 60,
+    "rd_u_cold": 28,
+    "rd_u_differs_from_built_only": 28,
+    "rd_u_not_cold": 60
+   },
+   "pd_counters": {
+    "pd_decisions": 250,
+    "pd_decisions_request": 88,
+    "pd_decisions_state": 162,
+    "pd_deferred_to_guard_epochs": 1050,
+    "pd_free_kv_max": 62944,
+    "pd_free_kv_min": 9783,
+    "pd_free_kv_sum": 9929601,
+    "pd_gate_harm_does_not_exceed_the_bar": 1,
+    "pd_gate_no_active_alert_episode": 50,
+    "pd_gate_rebuild_fits_without_evicting": 198,
+    "pd_gate_wanted_to_act_but_a_request_has_no_slice_channel: the latest safe start is already here and a recall query is one prompt, so there is nothing to send less of. The registered candidate that WOULD apply is DEVICE_ANSWERS (spec v6 section 7's request row), which is not part of the protect-and-defer compound and is not built here": 1,
+    "pd_harm_gt_0": 2,
+    "pd_harm_gt_0p01": 2,
+    "pd_harm_gt_0p1": 2,
+    "pd_harm_gt_0p65824": 2,
+    "pd_harm_gt_1": 2,
+    "pd_harm_gt_2": 1,
+    "pd_harm_gt_5": 1,
+    "pd_harm_micro_max": 5175119,
+    "pd_harm_micro_sum": 6242809,
+    "pd_harm_n": 2,
+    "pd_harm_over_bar": 1,
+    "pd_kv_bound_by_belief": 250,
+    "pd_request_crossed_bar_unexpressible": 1,
+    "pd_u_max": 16558,
+    "pd_u_sum": 917638,
+    "pd_victim_found": 206
+   },
+   "rd_report": {
+    "switch": {
+     "attr": "live2_cf_request_defer",
+     "on": true,
+     "chain": [
+      {
+       "class": "V6CfRung4C5Attr",
+       "declared_on_instance": true,
+       "value": true,
+       "type": "bool"
+      },
+      {
+       "class": "V5Rules2Arm",
+       "declared_on_instance": true,
+       "value": true,
+       "type": "bool"
+      },
+      {
+       "class": "HybridArm",
+       "declared_on_instance": true,
+       "value": true,
+       "type": "bool"
+      }
+     ]
+    },
+    "net_gain": {
+     "n": 22,
+     "min": -0.04509402393738593,
+     "median": -0.012226848347845307,
+     "p90": 2.020642744892879,
+     "max": 3.018912452638392,
+     "n_distinct": 22
+    },
+    "bar": {
+     "n": 22,
+     "min": 0.7557570370370371,
+     "median": 1.4023373913043478,
+     "max": 1.97472,
+     "n_distinct": 17,
+     "at_w1": 0.65824,
+     "n_above_w1_floor": 22
+    },
+    "traced_decision": [
+     "request-deferral decision, robo000 at t = 542.9 s",
+     "  uncached prefill u          = 5410 tokens",
+     "  alert instants pending      = 1",
+     "  added first-token delay     = 0.830872 s  (0.0001535807289338535 x u)",
+     "  harm if sent now            = 1.005309 on-time answers over 1 rows",
+     "  deferral                    = 1.006723 s to the latest safe start",
+     "  harm SAVED                  = 1.005309 over 1 rows (alert 1.005309); 0 rows still harmed, 0.000000",
+     "  OWN loss                    = 0.017766  (w_R 1.1481 x (p 0.986884 -> 0.971410), slack 2.881 -> 1.874 s)",
+     "  NET                         = 0.987543  against bar 0.755757  (w_R x MARGIN_CF, robo000)",
+     "  crosses the bar             = True",
+     "  gate / action               = defer_to_latest_safe_start / DEFER_TO_LATEST_SAFE_START"
+    ],
+    "traced_decision_record": {
+     "version": "cf-request-defer-1.1",
+     "decider_device_id": "robo000",
+     "now_s": 542.9,
+     "alert_active": true,
+     "n_alert_pending": 1,
+     "u_request": 5410,
+     "w_source": "covex-v6-fair's deficit weight, LIVE: deficit_feed.DeficitFeed.weight_device, w = 1 + 2 * shortfall floored at 1 (D178 (2)), read per decision off the rung-3 feed this arm IS",
+     "action": "DEFER_TO_LATEST_SAFE_START",
+     "gate": "defer_to_latest_safe_start",
+     "harm_scale": 1.0,
+     "margin_scale": 1.0,
+     "latest_safe_start": {
+      "latest_start_s": 543.906723,
+      "predicted_service_s": 1.001163,
+      "safety_factor": 1.8721,
+      "feasible": true,
+      "must_start_now": false,
+      "deferral_s": 1.006723,
+      "decode_included": true,
+      "latest_start_if_decode_omitted_s": 543.912524,
+      "decode_omission_error_s": 0.005801,
+      "safety_factor_source": "results/orchestration/live2/frozen_test/d190_recall_lag_diagnosis.json",
+      "safety_factor_quantile": "nearest-rank q90 over n=5",
+      "safety_factor_measured_range": [
+       1.3856,
+       1.8721
+      ],
+      "committed_kappa_not_used_here": 1.5775406165458339
+     },
+     "deferral_s": 1.006723,
+     "must_start_now": false,
+     "lss_feasible": true,
+     "harm_now": 1.0053093505269004,
+     "harm_by_type_now": {
+      "alert": 1.005309351
+     },
+     "delta_first_token_s": 0.8308717435321474,
+     "per_queue_s": 0.0001535807289338535,
+     "price_source": "cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)",
+     "n_others_considered": 1,
+     "n_others_moved": 1,
+     "harm_saved_unscaled": 1.005309351,
+     "harm_saved": 1.005309351,
+     "harm_saved_alert": 1.005309351,
+     "harm_still_inflicted": 0.0,
+     "n_rows_saved": 1,
+     "n_rows_still_harmed": 0,
+     "saved_rows_sample": [
+      {
+       "req_id": "opp0005452",
+       "qtype": "alert",
+       "slack_s": 0.5561290000000554,
+       "value_lost": 1.005309351
+      }
+     ],
+     "own_engine_s": 0.9571627197300879,
+     "own_slack_now_s": 2.880999999999972,
+     "own_slack_after_s": 1.8742770000000064,
+     "own_p_before": 0.9868835822698799,
+     "own_p_after": 0.9714100124466081,
+     "own_loss": 0.017765950537830654,
+     "w_decider": 1.1481481481481481,
+     "net_gain": 0.9875434004621693,
+     "bar": {
+      "bar": 0.7557570370370371,
+      "w_d": 1.1481481481481481,
+      "bar_weight_source": "robo000",
+      "margin_scale": 1.0,
+      "reading": "decider",
+      "margin_cf_on_time": 0.65824
+     },
+     "bar_value": 0.7557570370370371,
+     "crosses_bar": true,
+     "units": "counts of expected on-time cloud answers, per-device w_d weighted; MARGIN_CF = 0.65824 on-time answers (D191 item 1)",
+     "residency_input": {
+      "kind": "RESIDENT_TOKEN_COUNT",
+      "quantity": "u_request = readiness_tokens - built_tokens_by_session[session]",
+      "is_a_tier_label": false,
+      "why_it_matters": "D190 (5) track C: the hybrid gate prices on the three-label residency_readiness(), so GPU-WARM at 44 percent resident and at 28 percent resident price identically; on one history that collapse was 8.17x optimistic (0.6506 s predicted, 5.3166 s observed)",
+      "exposure_this_module_does_inherit": "built_tokens_by_session is the coordinator's BELIEF, not engine telemetry (D44, D47), so an overstated belief understates u and puts the latest safe start too late by that much",
+      "measured_predictor_bias": "D162 under-predicts first token by 1.39x to 1.87x on the five recall questions SENT in the committed rung-3 cells (d190_recall_lag_diagnosis.json)",
+      "kappa_coverage": "kappa = 1.577541 covers 1.39x and DOES NOT cover 1.87x. Not widened: D191 item 2 fixes the safety factor to committed FIT data, and a factor fitted to the cells under diagnosis would be tuning. The consequence is reported as 'any recall made late by a deferral' and is expected to be non-zero."
+     },
+     "would_miss_deadline_under_measured_bias": {
+      "recall_deadline_s_label": 3.0,
+      "predicted_total_service_s": 1.0011627197300879,
+      "deferral_s": 1.006723,
+      "safety_factor_used": 1.8721,
+      "at_measured_worst_bias": {
+       "bias": 1.8721,
+       "overrun_s": 0.0,
+       "would_miss": false
+      },
+      "at_measured_best_bias": {
+       "bias": 1.3856,
+       "overrun_s": -0.4870656631486879,
+       "would_miss": false
+      },
+      "at_committed_kappa": {
+       "bias": 1.5775406165458339,
+       "overrun_s": -0.2949018734609909,
+       "would_miss": false
+      }
+     },
+     "session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "u_detail": {
+      "u": 5410,
+      "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+      "u_built_only": 5410,
+      "readiness": "GPU-WARM",
+      "built_tokens": 5241,
+      "telemetry_cached_tokens": 0,
+      "prompt_tokens": 10651
+     }
+    },
+    "traced_bar_crossing": [
+     "request-deferral decision, robo000 at t = 542.9 s",
+     "  uncached prefill u          = 5410 tokens",
+     "  alert instants pending      = 1",
+     "  added first-token delay     = 0.830872 s  (0.0001535807289338535 x u)",
+     "  harm if sent now            = 1.005309 on-time answers over 1 rows",
+     "  deferral                    = 1.006723 s to the latest safe start",
+     "  harm SAVED                  = 1.005309 over 1 rows (alert 1.005309); 0 rows still harmed, 0.000000",
+     "  OWN loss                    = 0.017766  (w_R 1.1481 x (p 0.986884 -> 0.971410), slack 2.881 -> 1.874 s)",
+     "  NET                         = 0.987543  against bar 0.755757  (w_R x MARGIN_CF, robo000)",
+     "  crosses the bar             = True",
+     "  gate / action               = defer_to_latest_safe_start / DEFER_TO_LATEST_SAFE_START"
+    ],
+    "traced_bar_crossing_record": {
+     "version": "cf-request-defer-1.1",
+     "decider_device_id": "robo000",
+     "now_s": 542.9,
+     "alert_active": true,
+     "n_alert_pending": 1,
+     "u_request": 5410,
+     "w_source": "covex-v6-fair's deficit weight, LIVE: deficit_feed.DeficitFeed.weight_device, w = 1 + 2 * shortfall floored at 1 (D178 (2)), read per decision off the rung-3 feed this arm IS",
+     "action": "DEFER_TO_LATEST_SAFE_START",
+     "gate": "defer_to_latest_safe_start",
+     "harm_scale": 1.0,
+     "margin_scale": 1.0,
+     "latest_safe_start": {
+      "latest_start_s": 543.906723,
+      "predicted_service_s": 1.001163,
+      "safety_factor": 1.8721,
+      "feasible": true,
+      "must_start_now": false,
+      "deferral_s": 1.006723,
+      "decode_included": true,
+      "latest_start_if_decode_omitted_s": 543.912524,
+      "decode_omission_error_s": 0.005801,
+      "safety_factor_source": "results/orchestration/live2/frozen_test/d190_recall_lag_diagnosis.json",
+      "safety_factor_quantile": "nearest-rank q90 over n=5",
+      "safety_factor_measured_range": [
+       1.3856,
+       1.8721
+      ],
+      "committed_kappa_not_used_here": 1.5775406165458339
+     },
+     "deferral_s": 1.006723,
+     "must_start_now": false,
+     "lss_feasible": true,
+     "harm_now": 1.0053093505269004,
+     "harm_by_type_now": {
+      "alert": 1.005309351
+     },
+     "delta_first_token_s": 0.8308717435321474,
+     "per_queue_s": 0.0001535807289338535,
+     "price_source": "cost_model_gate_d162.json :: model.first_token (gate commit 68a2b47)",
+     "n_others_considered": 1,
+     "n_others_moved": 1,
+     "harm_saved_unscaled": 1.005309351,
+     "harm_saved": 1.005309351,
+     "harm_saved_alert": 1.005309351,
+     "harm_still_inflicted": 0.0,
+     "n_rows_saved": 1,
+     "n_rows_still_harmed": 0,
+     "saved_rows_sample": [
+      {
+       "req_id": "opp0005452",
+       "qtype": "alert",
+       "slack_s": 0.5561290000000554,
+       "value_lost": 1.005309351
+      }
+     ],
+     "own_engine_s": 0.9571627197300879,
+     "own_slack_now_s": 2.880999999999972,
+     "own_slack_after_s": 1.8742770000000064,
+     "own_p_before": 0.9868835822698799,
+     "own_p_after": 0.9714100124466081,
+     "own_loss": 0.017765950537830654,
+     "w_decider": 1.1481481481481481,
+     "net_gain": 0.9875434004621693,
+     "bar": {
+      "bar": 0.7557570370370371,
+      "w_d": 1.1481481481481481,
+      "bar_weight_source": "robo000",
+      "margin_scale": 1.0,
+      "reading": "decider",
+      "margin_cf_on_time": 0.65824
+     },
+     "bar_value": 0.7557570370370371,
+     "crosses_bar": true,
+     "units": "counts of expected on-time cloud answers, per-device w_d weighted; MARGIN_CF = 0.65824 on-time answers (D191 item 1)",
+     "residency_input": {
+      "kind": "RESIDENT_TOKEN_COUNT",
+      "quantity": "u_request = readiness_tokens - built_tokens_by_session[session]",
+      "is_a_tier_label": false,
+      "why_it_matters": "D190 (5) track C: the hybrid gate prices on the three-label residency_readiness(), so GPU-WARM at 44 percent resident and at 28 percent resident price identically; on one history that collapse was 8.17x optimistic (0.6506 s predicted, 5.3166 s observed)",
+      "exposure_this_module_does_inherit": "built_tokens_by_session is the coordinator's BELIEF, not engine telemetry (D44, D47), so an overstated belief understates u and puts the latest safe start too late by that much",
+      "measured_predictor_bias": "D162 under-predicts first token by 1.39x to 1.87x on the five recall questions SENT in the committed rung-3 cells (d190_recall_lag_diagnosis.json)",
+      "kappa_coverage": "kappa = 1.577541 covers 1.39x and DOES NOT cover 1.87x. Not widened: D191 item 2 fixes the safety factor to committed FIT data, and a factor fitted to the cells under diagnosis would be tuning. The consequence is reported as 'any recall made late by a deferral' and is expected to be non-zero."
+     },
+     "would_miss_deadline_under_measured_bias": {
+      "recall_deadline_s_label": 3.0,
+      "predicted_total_service_s": 1.0011627197300879,
+      "deferral_s": 1.006723,
+      "safety_factor_used": 1.8721,
+      "at_measured_worst_bias": {
+       "bias": 1.8721,
+       "overrun_s": 0.0,
+       "would_miss": false
+      },
+      "at_measured_best_bias": {
+       "bias": 1.3856,
+       "overrun_s": -0.4870656631486879,
+       "would_miss": false
+      },
+      "at_committed_kappa": {
+       "bias": 1.5775406165458339,
+       "overrun_s": -0.2949018734609909,
+       "would_miss": false
+      }
+     },
+     "session_id": "robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "u_detail": {
+      "u": 5410,
+      "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+      "u_built_only": 5410,
+      "readiness": "GPU-WARM",
+      "built_tokens": 5241,
+      "telemetry_cached_tokens": 0,
+      "prompt_tokens": 10651
+     }
+    }
+   },
+   "w_wired_proof": {
+    "accessor": "make.<locals>.<lambda>",
+    "live_weight": true,
+    "probe_device": "robo000",
+    "probe_value_at_construction": 1.0,
+    "bar_at_probe": 0.65824,
+    "feed_present": true,
+    "feed_gain": 2.0,
+    "note": "1.0 at construction is CORRECT and is not a failure: no opportunity has been offered yet, so every shortfall is 0 and every weight is at the D178 (2) floor. What must be true at construction is that the ACCESSOR is the live one; that the VALUE moves is a run-time property and is measured by pd_bar_distinct_values and the bar distribution in the proofs."
+   }
+  },
+  "e_FULL_RUNG_4_at_0p25x": {
+   "A": "r4_full_kv025",
+   "B": "r4_off_kv025",
+   "rows_A": 13782,
+   "rows_B": 13812,
+   "differing_setwise": 4806,
+   "differing_positional": 9372,
+   "identical": false,
+   "first_difference": {
+    "index": 4331,
+    "A": {
+     "H": null,
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": "gpu",
+     "kind": "state_action",
+     "mu": null,
+     "note": "session=robo000|s001|1085041543181381_start_0.0_end_386.067",
+     "opportunity_ids": [],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": null,
+     "representation_defaulted": false,
+     "t": 443.3,
+     "traffic_mix": {
+      "monitor": 4,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    },
+    "B": {
+     "H": null,
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_recall",
+     "mu": null,
+     "note": "session=robo005|s001|791449306887400_start_0.0_end_304.403",
+     "opportunity_ids": [
+      "opp0004420"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": "D2",
+     "representation_defaulted": true,
+     "t": 443.3,
+     "traffic_mix": {
+      "monitor": 4,
+      "piece": 0,
+      "recall": 0,
+      "whole": 0
+     }
+    }
+   },
+   "arm": "covex-v6-cf-c5attr at --kv-scale 0.25"
+  }
+ },
+ "port_rule_characteristic_decisions": {
+  "_claim": "CLAUDE.md 'Citing results': the count of the decision kind this arm EXISTS TO MAKE, recorded and confirmed NON-ZERO before the arm is scored. ZERO is an ABSENT LINK and is reported as such, never as a negative about the policy.",
+  "per_cell": [
+   {
+    "cell": "r4_pdonly",
+    "pd_state_defers": 0,
+    "pd_state_chunks": 0,
+    "pd_request_defers": 0,
+    "rd_question_defers": 0,
+    "TOTAL_characteristic_decisions": 0,
+    "non_zero": false
+   },
+   {
+    "cell": "r4_rqonly",
+    "pd_state_defers": 0,
+    "pd_state_chunks": 0,
+    "pd_request_defers": 0,
+    "rd_question_defers": 6,
+    "TOTAL_characteristic_decisions": 6,
+    "non_zero": true
+   },
+   {
+    "cell": "r4_full",
+    "pd_state_defers": 0,
+    "pd_state_chunks": 0,
+    "pd_request_defers": 0,
+    "rd_question_defers": 6,
+    "TOTAL_characteristic_decisions": 6,
+    "non_zero": true
+   },
+   {
+    "cell": "r4_pdonly_kv025",
+    "pd_state_defers": 5,
+    "pd_state_chunks": 2,
+    "pd_request_defers": 16,
+    "rd_question_defers": 0,
+    "TOTAL_characteristic_decisions": 23,
+    "non_zero": true
+   },
+   {
+    "cell": "r4_full_kv025",
+    "pd_state_defers": 5,
+    "pd_state_chunks": 2,
+    "pd_request_defers": 16,
+    "rd_question_defers": 0,
+    "TOTAL_characteristic_decisions": 23,
+    "non_zero": true
+   }
+  ]
+ },
+ "proof_4_harness_name_proof": {
+  "_claim": "every rung-4 name a cell line could carry resolves through run_live2_real.py ITSELF, spawned as a subprocess with the POSTED KNOBS. A bare make_arm in this process is the check that passed while the harness was failing.",
+  "entry_point": "experiments/orchestration/live2/run_live2_real.py",
+  "posted_knobs_on_the_command_line": [
+   "--ratio",
+   "40:40:20",
+   "--robot-question-set",
+   "lh_req",
+   "--ss-question-set",
+   "ss2",
+   "--dashcam-format",
+   "epg",
+   "--robot-upload",
+   "per-frame",
+   "--robot-reask-mean-s",
+   "30.0"
+  ],
+  "probes": {
+   "covex-v6-cf-c5attr": {
+    "arm": "covex-v6-cf-c5attr",
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   "covex-v6-cf-c5attr-off": {
+    "arm": "covex-v6-cf-c5attr-off",
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   "covex-v6-cf-c5attr-pdonly": {
+    "arm": "covex-v6-cf-c5attr-pdonly",
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   "covex-v6-cf-c5attr-rqonly": {
+    "arm": "covex-v6-cf-c5attr-rqonly",
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   "covex-v6-cf-c5attr-not-an-arm": {
+    "arm": "covex-v6-cf-c5attr-not-an-arm",
+    "returncode": 1,
+    "raised_unknown_arm": true,
+    "tail": "KeyError: \"unknown arm 'covex-v6-cf-c5attr-not-an-arm'; known: ['always-cloud-fcfs', 'attentionstore', 'attentionstore-prefetch', 'attentionstore-prefetch-noyield', 'attentionstore-prefetch-off', 'b10-blocking-aware', 'b7-edf-feasibility', 'b9', 'builder-acfcfs', 'builder-default', 'builder-s1-fairs"
+   }
+  },
+  "negative_control": {
+   "_claim": "an UNKNOWN name must STILL exit non-zero through this same path",
+   "arm": "covex-v6-cf-c5attr-not-an-arm",
+   "returncode": 1,
+   "raised_unknown_arm": true,
+   "verdict": "PASS"
+  },
+  "verdict": "PASS"
+ },
+ "step_4_negative_controls": {
+  "_claim": "the mechanism disabled AT ITS SOURCE must collapse to the -off digest. Both controls are NAMED ARMS, so each control is a cell and not a code edit.",
+  "harm_zero": {
+   "A": "r4_harm0",
+   "B": "r4_off",
+   "rows_A": 13812,
+   "rows_B": 13812,
+   "differing_setwise": 0,
+   "differing_positional": 0,
+   "identical": true,
+   "first_difference": null,
+   "_what": "harm_scale = 0.0 on BOTH legs, every hook and counter still live",
+   "digest": "12e4f73ce0ebd865",
+   "rows": 13812,
+   "verdict": "PASS (collapses to -off)"
+  },
+  "margin_huge": {
+   "A": "r4_marginhuge",
+   "B": "r4_off",
+   "rows_A": 13812,
+   "rows_B": 13812,
+   "differing_setwise": 0,
+   "differing_positional": 0,
+   "identical": true,
+   "first_difference": null,
+   "_what": "the BAR AND ONLY THE BAR scaled by 1e9. Scaling the WEIGHT instead is the broken control cf_protect_defer records: every harm row carries the same weight, so harm and bar scale together and the control reproduces the treatment.",
+   "digest": "12e4f73ce0ebd865",
+   "rows": 13812,
+   "verdict": "PASS (collapses to -off)"
+  }
+ },
+ "is_the_deficit_weight_live": {
+  "_claim": "the whole reason rung 4 is built on the RUNG-3 base. On the rung-2 base w_j and w_R are identically 1.0, the deciding ratio is harm / MARGIN_CF, and the deficit counters cannot move a deferral: Rule 2's `cancelled by geometry` BY CONSTRUCTION. Here the bar must be a DISTRIBUTION, not a constant.",
+  "bar_distribution_full_rung4": {
+   "n": 22,
+   "min": 0.7557570370370371,
+   "median": 1.4023373913043478,
+   "max": 1.97472,
+   "n_distinct": 17,
+   "at_w1": 0.65824,
+   "n_above_w1_floor": 22
+  },
+  "w1_ablation": {
+   "A": "r4_w1",
+   "B": "r4_full",
+   "rows_A": 13767,
+   "rows_B": 13773,
+   "differing_setwise": 228,
+   "differing_positional": 5857,
+   "identical": false,
+   "first_difference": {
+    "index": 7916,
+    "A": {
+     "H": null,
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": 1.118943,
+     "desired_tier": null,
+     "kind": "defer",
+     "mu": null,
+     "note": null,
+     "opportunity_ids": [
+      "opp0008035"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": null,
+     "representation_defaulted": false,
+     "t": 792.2,
+     "traffic_mix": {
+      "monitor": 5,
+      "piece": 1,
+      "recall": 1,
+      "whole": 0
+     }
+    },
+    "B": {
+     "H": null,
+     "belief": {
+      "cold_tokens_by_session": {},
+      "gpu_tokens_by_session": {},
+      "host_tokens_by_session": {}
+     },
+     "cost_model_id": null,
+     "defer_s": null,
+     "desired_tier": null,
+     "kind": "release_recall",
+     "mu": null,
+     "note": "session=robo004|s001|538469475795868_start_0.0_end_520.785",
+     "opportunity_ids": [
+      "opp0008035"
+     ],
+     "piece_tokens": null,
+     "predicted": {
+      "completion_s": null,
+      "imposed_delay_s_by_request": {},
+      "ttft_s": null
+     },
+     "representation": "D2",
+     "representation_defaulted": true,
+     "t": 792.2,
+     "traffic_mix": {
+      "monitor": 5,
+      "piece": 1,
+      "recall": 1,
+      "whole": 0
+     }
+    }
+   },
+   "_what": "both compounds ON, w_d pinned at 1.0. A difference against the live-weight arm is the WEIGHT's and nothing else's"
+  },
+  "gain0_control": {
+   "_what": "rung 3's gain set to 0 with both compounds on. This is a control for the RUNG BELOW, not for the compound's weight: it flattens the ordering key too, so it tests the deficit feed and not the inequality.",
+   "against_w1_which_is_NOT_its_bar": {
+    "A": "r4_gain0",
+    "B": "r4_w1",
+    "rows_A": 14201,
+    "rows_B": 13767,
+    "differing_setwise": 12270,
+    "differing_positional": 12255,
+    "identical": false,
+    "first_difference": {
+     "index": 1942,
+     "A": {
+      "H": null,
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_monitor",
+      "mu": null,
+      "note": null,
+      "opportunity_ids": [
+       "opp0001969"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 207.1,
+      "traffic_mix": {
+       "monitor": 0,
+       "piece": 0,
+       "recall": 1,
+       "whole": 0
+      }
+     },
+     "B": {
+      "H": null,
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_monitor",
+      "mu": null,
+      "note": null,
+      "opportunity_ids": [
+       "opp0001971"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 207.1,
+      "traffic_mix": {
+       "monitor": 0,
+       "piece": 0,
+       "recall": 1,
+       "whole": 0
+      }
+     }
+    }
+   },
+   "against_rung2_which_is": {
+    "A": "r4_gain0",
+    "B": "pos_uo",
+    "rows_A": 14201,
+    "rows_B": 14218,
+    "differing_setwise": 427,
+    "differing_positional": 7428,
+    "identical": false,
+    "first_difference": {
+     "index": 6790,
+     "A": {
+      "H": null,
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": 0.721445,
+      "desired_tier": null,
+      "kind": "defer",
+      "mu": null,
+      "note": null,
+      "opportunity_ids": [
+       "opp0006840"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": null,
+      "representation_defaulted": false,
+      "t": 677.4,
+      "traffic_mix": {
+       "monitor": 1,
+       "piece": 0,
+       "recall": 2,
+       "whole": 0
+      }
+     },
+     "B": {
+      "H": null,
+      "belief": {
+       "cold_tokens_by_session": {},
+       "gpu_tokens_by_session": {},
+       "host_tokens_by_session": {}
+      },
+      "cost_model_id": null,
+      "defer_s": null,
+      "desired_tier": null,
+      "kind": "release_recall",
+      "mu": null,
+      "note": "session=robo003|s001|3703477849945137_start_0.0_end_599.96",
+      "opportunity_ids": [
+       "opp0006840"
+      ],
+      "piece_tokens": null,
+      "predicted": {
+       "completion_s": null,
+       "imposed_delay_s_by_request": {},
+       "ttft_s": null
+      },
+      "representation": "D2",
+      "representation_defaulted": true,
+      "t": 677.4,
+      "traffic_mix": {
+       "monitor": 1,
+       "piece": 0,
+       "recall": 2,
+       "whole": 0
+      }
+     }
+    }
+   },
+   "_my_corrected_expectation": "gain0 should sit NEAR rung 2 (same frozen order) and differ from it by the compound's own deferrals, not near -w1"
+  },
+  "w_source_in_the_full_arm": "covex-v6-fair's deficit weight, LIVE: deficit_feed.DeficitFeed.weight_device, w = 1 + 2 * shortfall floored at 1 (D178 (2)), read per decision off the rung-3 feed this arm IS"
+ },
+ "proof_6_pricing_requirement_1_u": {
+  "_claim": "u is computed by the D186 / r1 correction, not by built_tokens alone, and the two forms are SHOWN SIDE BY SIDE rather than assumed equal (D193 (2)).",
+  "rule": "u = tokens if readiness is COLD, else max(tokens - max(built, telemetry), 0); the telemetry is trusted only while NOT believed COLD because it is never reset on eviction (the e9569009 guard)",
+  "why_it_matters_here": "built_tokens alone priced recall 15.6x too high under shares. In this module u multiplies the queued-ahead price, so it would OVER-PRICE THE HARM OF SENDING NOW and therefore OVER-DEFER: a failure that would look like the mechanism working.",
+  "engine_reported_uncached_is_NOT_available_dry": "a dry cell has no engine, so there is no engine-reported uncached count to compare against. What IS compared is the two PREDICTIONS, per candidate, above. The external register is the committed engine-reported figures for these same lagging devices in d190_recall_lag_diagnosis.json: 8,215 and 14,516 (robo001, seed 5) and 4,181, 313 and 1,921 (robo004, seed 7). A live cell is where the third column comes from.",
+  "full_rung4": {
+   "counters": {
+    "rd_u_built_only_minus_u_sum": -81920,
+    "rd_u_built_won": 60,
+    "rd_u_cold": 28,
+    "rd_u_differs_from_built_only": 28,
+    "rd_u_not_cold": 60
+   },
+   "all_candidates_sample": [
+    {
+     "t": 6.9,
+     "readiness": "COLD",
+     "prompt_tokens": 7051,
+     "u_in_force": 7051,
+     "u_built_tokens_only": 6027,
+     "built_tokens": 1024,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.8547723727130904
+    },
+    {
+     "t": 34.9,
+     "readiness": "COLD",
+     "prompt_tokens": 8311,
+     "u_in_force": 8311,
+     "u_built_tokens_only": 7287,
+     "built_tokens": 1024,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.8767897966550355
+    },
+    {
+     "t": 66.1,
+     "readiness": "COLD",
+     "prompt_tokens": 9751,
+     "u_in_force": 9751,
+     "u_built_tokens_only": 8727,
+     "built_tokens": 1024,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.8949851297302841
+    },
+    {
+     "t": 95.0,
+     "readiness": "COLD",
+     "prompt_tokens": 7951,
+     "u_in_force": 7951,
+     "u_built_tokens_only": 4879,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6136335052194692
+    },
+    {
+     "t": 108.8,
+     "readiness": "COLD",
+     "prompt_tokens": 11641,
+     "u_in_force": 11641,
+     "u_built_tokens_only": 10617,
+     "built_tokens": 1024,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.9120350485353492
+    },
+    {
+     "t": 113.7,
+     "readiness": "COLD",
+     "prompt_tokens": 11821,
+     "u_in_force": 11821,
+     "u_built_tokens_only": 10797,
+     "built_tokens": 1024,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.9133745030031301
+    },
+    {
+     "t": 126.8,
+     "readiness": "COLD",
+     "prompt_tokens": 6421,
+     "u_in_force": 6421,
+     "u_built_tokens_only": 3349,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.521569848933188
+    },
+    {
+     "t": 129.6,
+     "readiness": "COLD",
+     "prompt_tokens": 12541,
+     "u_in_force": 12541,
+     "u_built_tokens_only": 11517,
+     "built_tokens": 1024,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.9183478191531775
+    },
+    {
+     "t": 137.4,
+     "readiness": "COLD",
+     "prompt_tokens": 9841,
+     "u_in_force": 9841,
+     "u_built_tokens_only": 6769,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6878366019713443
+    },
+    {
+     "t": 148.5,
+     "readiness": "COLD",
+     "prompt_tokens": 7321,
+     "u_in_force": 7321,
+     "u_built_tokens_only": 4249,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.5803851932796066
+    },
+    {
+     "t": 156.8,
+     "readiness": "COLD",
+     "prompt_tokens": 7411,
+     "u_in_force": 7411,
+     "u_built_tokens_only": 4339,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.585481041694778
+    },
+    {
+     "t": 158.7,
+     "readiness": "COLD",
+     "prompt_tokens": 7771,
+     "u_in_force": 7771,
+     "u_built_tokens_only": 4699,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6046840818427487
+    },
+    {
+     "t": 160.1,
+     "readiness": "COLD",
+     "prompt_tokens": 10921,
+     "u_in_force": 10921,
+     "u_built_tokens_only": 7849,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7187070781064006
+    },
+    {
+     "t": 177.8,
+     "readiness": "COLD",
+     "prompt_tokens": 8671,
+     "u_in_force": 8671,
+     "u_built_tokens_only": 5599,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6457156037365932
+    },
+    {
+     "t": 185.8,
+     "readiness": "COLD",
+     "prompt_tokens": 12001,
+     "u_in_force": 12001,
+     "u_built_tokens_only": 8929,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7440213315557037
+    },
+    {
+     "t": 197.1,
+     "readiness": "COLD",
+     "prompt_tokens": 12541,
+     "u_in_force": 12541,
+     "u_built_tokens_only": 9469,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7550434574595327
+    },
+    {
+     "t": 197.4,
+     "readiness": "COLD",
+     "prompt_tokens": 12541,
+     "u_in_force": 12541,
+     "u_built_tokens_only": 9469,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7550434574595327
+    },
+    {
+     "t": 200.5,
+     "readiness": "COLD",
+     "prompt_tokens": 11731,
+     "u_in_force": 11731,
+     "u_built_tokens_only": 6611,
+     "built_tokens": 5120,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.5635495695166652
+    },
+    {
+     "t": 202.9,
+     "readiness": "COLD",
+     "prompt_tokens": 12811,
+     "u_in_force": 12811,
+     "u_built_tokens_only": 9739,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7602060729060963
+    },
+    {
+     "t": 203.7,
+     "readiness": "COLD",
+     "prompt_tokens": 11821,
+     "u_in_force": 11821,
+     "u_built_tokens_only": 6701,
+     "built_tokens": 5120,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.5668725150156502
+    },
+    {
+     "t": 206.8,
+     "readiness": "COLD",
+     "prompt_tokens": 10021,
+     "u_in_force": 10021,
+     "u_built_tokens_only": 6949,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6934437680870172
+    },
+    {
+     "t": 214.8,
+     "readiness": "COLD",
+     "prompt_tokens": 10021,
+     "u_in_force": 10021,
+     "u_built_tokens_only": 5925,
+     "built_tokens": 4096,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.5912583574493564
+    },
+    {
+     "t": 233.4,
+     "readiness": "COLD",
+     "prompt_tokens": 10831,
+     "u_in_force": 10831,
+     "u_built_tokens_only": 6735,
+     "built_tokens": 4096,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.621826239497738
+    },
+    {
+     "t": 237.6,
+     "readiness": "COLD",
+     "prompt_tokens": 11371,
+     "u_in_force": 11371,
+     "u_built_tokens_only": 8299,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7298390642863425
+    },
+    {
+     "t": 241.3,
+     "readiness": "COLD",
+     "prompt_tokens": 11551,
+     "u_in_force": 11551,
+     "u_built_tokens_only": 8479,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7340490000865726
+    },
+    {
+     "t": 248.9,
+     "readiness": "COLD",
+     "prompt_tokens": 11551,
+     "u_in_force": 11551,
+     "u_built_tokens_only": 7455,
+     "built_tokens": 4096,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6453986667820968
+    },
+    {
+     "t": 269.8,
+     "readiness": "COLD",
+     "prompt_tokens": 12811,
+     "u_in_force": 12811,
+     "u_built_tokens_only": 9739,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7602060729060963
+    },
+    {
+     "t": 278.2,
+     "readiness": "COLD",
+     "prompt_tokens": 12811,
+     "u_in_force": 12811,
+     "u_built_tokens_only": 8715,
+     "built_tokens": 4096,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6802747638747951
+    },
+    {
+     "t": 443.3,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 11641,
+     "u_in_force": 6400,
+     "u_built_tokens_only": 6400,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 468.4,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 12721,
+     "u_in_force": 7480,
+     "u_built_tokens_only": 7480,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 488.4,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 13621,
+     "u_in_force": 8380,
+     "u_built_tokens_only": 8380,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 542.9,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 10651,
+     "u_in_force": 5410,
+     "u_built_tokens_only": 5410,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 544.0,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 10651,
+     "u_in_force": 5410,
+     "u_built_tokens_only": 5410,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 587.9,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 5521,
+     "u_in_force": 3352,
+     "u_built_tokens_only": 3352,
+     "built_tokens": 2169,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 591.4,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 5611,
+     "u_in_force": 3442,
+     "u_built_tokens_only": 3442,
+     "built_tokens": 2169,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 621.3,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 14161,
+     "u_in_force": 7896,
+     "u_built_tokens_only": 7896,
+     "built_tokens": 6265,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 643.6,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 7951,
+     "u_in_force": 4758,
+     "u_built_tokens_only": 4758,
+     "built_tokens": 3193,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 655.3,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 16591,
+     "u_in_force": 9302,
+     "u_built_tokens_only": 9302,
+     "built_tokens": 7289,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 673.9,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 17401,
+     "u_in_force": 10112,
+     "u_built_tokens_only": 10112,
+     "built_tokens": 7289,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 676.9,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 16681,
+     "u_in_force": 9392,
+     "u_built_tokens_only": 9392,
+     "built_tokens": 7289,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    }
+   ],
+   "deferral_candidates_that_FIRED": [
+    {
+     "t": 542.9,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 10651,
+     "u_in_force": 5410,
+     "u_built_tokens_only": 5410,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 677.4,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 9571,
+     "u_in_force": 6378,
+     "u_built_tokens_only": 6378,
+     "built_tokens": 3193,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 743.5,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 12451,
+     "u_in_force": 7210,
+     "u_built_tokens_only": 7210,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 747.1,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 12631,
+     "u_in_force": 7390,
+     "u_built_tokens_only": 7390,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 935.0,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 10921,
+     "u_in_force": 6704,
+     "u_built_tokens_only": 6704,
+     "built_tokens": 4217,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 935.5,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 10921,
+     "u_in_force": 6704,
+     "u_built_tokens_only": 6704,
+     "built_tokens": 4217,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    }
+   ],
+   "n_candidates": 88,
+   "n_fired": 6
+  },
+  "rqonly": {
+   "counters": {
+    "rd_u_built_only_minus_u_sum": -81920,
+    "rd_u_built_won": 60,
+    "rd_u_cold": 28,
+    "rd_u_differs_from_built_only": 28,
+    "rd_u_not_cold": 60
+   },
+   "all_candidates_sample": [
+    {
+     "t": 6.9,
+     "readiness": "COLD",
+     "prompt_tokens": 7051,
+     "u_in_force": 7051,
+     "u_built_tokens_only": 6027,
+     "built_tokens": 1024,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.8547723727130904
+    },
+    {
+     "t": 34.9,
+     "readiness": "COLD",
+     "prompt_tokens": 8311,
+     "u_in_force": 8311,
+     "u_built_tokens_only": 7287,
+     "built_tokens": 1024,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.8767897966550355
+    },
+    {
+     "t": 66.1,
+     "readiness": "COLD",
+     "prompt_tokens": 9751,
+     "u_in_force": 9751,
+     "u_built_tokens_only": 8727,
+     "built_tokens": 1024,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.8949851297302841
+    },
+    {
+     "t": 95.0,
+     "readiness": "COLD",
+     "prompt_tokens": 7951,
+     "u_in_force": 7951,
+     "u_built_tokens_only": 4879,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6136335052194692
+    },
+    {
+     "t": 108.8,
+     "readiness": "COLD",
+     "prompt_tokens": 11641,
+     "u_in_force": 11641,
+     "u_built_tokens_only": 10617,
+     "built_tokens": 1024,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.9120350485353492
+    },
+    {
+     "t": 113.7,
+     "readiness": "COLD",
+     "prompt_tokens": 11821,
+     "u_in_force": 11821,
+     "u_built_tokens_only": 10797,
+     "built_tokens": 1024,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.9133745030031301
+    },
+    {
+     "t": 126.8,
+     "readiness": "COLD",
+     "prompt_tokens": 6421,
+     "u_in_force": 6421,
+     "u_built_tokens_only": 3349,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.521569848933188
+    },
+    {
+     "t": 129.6,
+     "readiness": "COLD",
+     "prompt_tokens": 12541,
+     "u_in_force": 12541,
+     "u_built_tokens_only": 11517,
+     "built_tokens": 1024,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.9183478191531775
+    },
+    {
+     "t": 137.4,
+     "readiness": "COLD",
+     "prompt_tokens": 9841,
+     "u_in_force": 9841,
+     "u_built_tokens_only": 6769,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6878366019713443
+    },
+    {
+     "t": 148.5,
+     "readiness": "COLD",
+     "prompt_tokens": 7321,
+     "u_in_force": 7321,
+     "u_built_tokens_only": 4249,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.5803851932796066
+    },
+    {
+     "t": 156.8,
+     "readiness": "COLD",
+     "prompt_tokens": 7411,
+     "u_in_force": 7411,
+     "u_built_tokens_only": 4339,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.585481041694778
+    },
+    {
+     "t": 158.7,
+     "readiness": "COLD",
+     "prompt_tokens": 7771,
+     "u_in_force": 7771,
+     "u_built_tokens_only": 4699,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6046840818427487
+    },
+    {
+     "t": 160.1,
+     "readiness": "COLD",
+     "prompt_tokens": 10921,
+     "u_in_force": 10921,
+     "u_built_tokens_only": 7849,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7187070781064006
+    },
+    {
+     "t": 177.8,
+     "readiness": "COLD",
+     "prompt_tokens": 8671,
+     "u_in_force": 8671,
+     "u_built_tokens_only": 5599,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6457156037365932
+    },
+    {
+     "t": 185.8,
+     "readiness": "COLD",
+     "prompt_tokens": 12001,
+     "u_in_force": 12001,
+     "u_built_tokens_only": 8929,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7440213315557037
+    },
+    {
+     "t": 197.1,
+     "readiness": "COLD",
+     "prompt_tokens": 12541,
+     "u_in_force": 12541,
+     "u_built_tokens_only": 9469,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7550434574595327
+    },
+    {
+     "t": 197.4,
+     "readiness": "COLD",
+     "prompt_tokens": 12541,
+     "u_in_force": 12541,
+     "u_built_tokens_only": 9469,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7550434574595327
+    },
+    {
+     "t": 200.5,
+     "readiness": "COLD",
+     "prompt_tokens": 11731,
+     "u_in_force": 11731,
+     "u_built_tokens_only": 6611,
+     "built_tokens": 5120,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.5635495695166652
+    },
+    {
+     "t": 202.9,
+     "readiness": "COLD",
+     "prompt_tokens": 12811,
+     "u_in_force": 12811,
+     "u_built_tokens_only": 9739,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7602060729060963
+    },
+    {
+     "t": 203.7,
+     "readiness": "COLD",
+     "prompt_tokens": 11821,
+     "u_in_force": 11821,
+     "u_built_tokens_only": 6701,
+     "built_tokens": 5120,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.5668725150156502
+    },
+    {
+     "t": 206.8,
+     "readiness": "COLD",
+     "prompt_tokens": 10021,
+     "u_in_force": 10021,
+     "u_built_tokens_only": 6949,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6934437680870172
+    },
+    {
+     "t": 214.8,
+     "readiness": "COLD",
+     "prompt_tokens": 10021,
+     "u_in_force": 10021,
+     "u_built_tokens_only": 5925,
+     "built_tokens": 4096,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.5912583574493564
+    },
+    {
+     "t": 233.4,
+     "readiness": "COLD",
+     "prompt_tokens": 10831,
+     "u_in_force": 10831,
+     "u_built_tokens_only": 6735,
+     "built_tokens": 4096,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.621826239497738
+    },
+    {
+     "t": 237.6,
+     "readiness": "COLD",
+     "prompt_tokens": 11371,
+     "u_in_force": 11371,
+     "u_built_tokens_only": 8299,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7298390642863425
+    },
+    {
+     "t": 241.3,
+     "readiness": "COLD",
+     "prompt_tokens": 11551,
+     "u_in_force": 11551,
+     "u_built_tokens_only": 8479,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7340490000865726
+    },
+    {
+     "t": 248.9,
+     "readiness": "COLD",
+     "prompt_tokens": 11551,
+     "u_in_force": 11551,
+     "u_built_tokens_only": 7455,
+     "built_tokens": 4096,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6453986667820968
+    },
+    {
+     "t": 269.8,
+     "readiness": "COLD",
+     "prompt_tokens": 12811,
+     "u_in_force": 12811,
+     "u_built_tokens_only": 9739,
+     "built_tokens": 3072,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.7602060729060963
+    },
+    {
+     "t": 278.2,
+     "readiness": "COLD",
+     "prompt_tokens": 12811,
+     "u_in_force": 12811,
+     "u_built_tokens_only": 8715,
+     "built_tokens": 4096,
+     "telemetry_cached_tokens": 0,
+     "rule": "COLD: u = tokens, nothing subtracted (the e9569009 guard)",
+     "ratio_builtonly_over_inforce": 0.6802747638747951
+    },
+    {
+     "t": 443.3,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 11641,
+     "u_in_force": 6400,
+     "u_built_tokens_only": 6400,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 468.4,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 12721,
+     "u_in_force": 7480,
+     "u_built_tokens_only": 7480,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 488.4,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 13621,
+     "u_in_force": 8380,
+     "u_built_tokens_only": 8380,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 542.9,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 10651,
+     "u_in_force": 5410,
+     "u_built_tokens_only": 5410,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 544.0,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 10651,
+     "u_in_force": 5410,
+     "u_built_tokens_only": 5410,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 587.9,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 5521,
+     "u_in_force": 3352,
+     "u_built_tokens_only": 3352,
+     "built_tokens": 2169,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 591.4,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 5611,
+     "u_in_force": 3442,
+     "u_built_tokens_only": 3442,
+     "built_tokens": 2169,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 621.3,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 14161,
+     "u_in_force": 7896,
+     "u_built_tokens_only": 7896,
+     "built_tokens": 6265,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 643.6,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 7951,
+     "u_in_force": 4758,
+     "u_built_tokens_only": 4758,
+     "built_tokens": 3193,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 655.3,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 16591,
+     "u_in_force": 9302,
+     "u_built_tokens_only": 9302,
+     "built_tokens": 7289,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 673.9,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 17401,
+     "u_in_force": 10112,
+     "u_built_tokens_only": 10112,
+     "built_tokens": 7289,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 676.9,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 16681,
+     "u_in_force": 9392,
+     "u_built_tokens_only": 9392,
+     "built_tokens": 7289,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    }
+   ],
+   "deferral_candidates_that_FIRED": [
+    {
+     "t": 542.9,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 10651,
+     "u_in_force": 5410,
+     "u_built_tokens_only": 5410,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 677.4,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 9571,
+     "u_in_force": 6378,
+     "u_built_tokens_only": 6378,
+     "built_tokens": 3193,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 743.5,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 12451,
+     "u_in_force": 7210,
+     "u_built_tokens_only": 7210,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 747.1,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 12631,
+     "u_in_force": 7390,
+     "u_built_tokens_only": 7390,
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 935.0,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 10921,
+     "u_in_force": 6704,
+     "u_built_tokens_only": 6704,
+     "built_tokens": 4217,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    },
+    {
+     "t": 935.5,
+     "readiness": "GPU-WARM",
+     "prompt_tokens": 10921,
+     "u_in_force": 6704,
+     "u_built_tokens_only": 6704,
+     "built_tokens": 4217,
+     "telemetry_cached_tokens": 0,
+     "rule": "NOT COLD: u = tokens - max(built, telemetry)",
+     "ratio_builtonly_over_inforce": 1.0
+    }
+   ],
+   "n_candidates": 88,
+   "n_fired": 6
+  }
+ },
+ "proof_7_pricing_requirement_2_safety_factor": {
+  "_claim": "the latest safe start carries the MEASURED D162 under-prediction as its safety factor, derived from committed RUNG-3 data, with the quantile and source stated (D193 (2)).",
+  "measured_safety_factor": {
+   "safety_factor": 1.8721,
+   "quantile": 0.9,
+   "quantile_method": "nearest-rank",
+   "quantile_nearest_rank": 1.8721,
+   "quantile_linear_interpolation": 1.74398,
+   "n": 5,
+   "min": 1.3856,
+   "max": 1.8721,
+   "all_values_sorted": [
+    1.3856,
+    1.4286,
+    1.5075,
+    1.5518,
+    1.8721
+   ],
+   "rows": [
+    {
+     "device_key": "s5_robo001",
+     "opportunity_id": "opp0003224",
+     "observed_over_predicted": 1.3856
+    },
+    {
+     "device_key": "s5_robo001",
+     "opportunity_id": "opp0008040",
+     "observed_over_predicted": 1.4286
+    },
+    {
+     "device_key": "s7_robo004",
+     "opportunity_id": "opp0011227",
+     "observed_over_predicted": 1.5075
+    },
+    {
+     "device_key": "s7_robo004",
+     "opportunity_id": "opp0011265",
+     "observed_over_predicted": 1.8721
+    },
+    {
+     "device_key": "s7_robo004",
+     "opportunity_id": "opp0011680",
+     "observed_over_predicted": 1.5518
+    }
+   ],
+   "source": "results/orchestration/live2/frozen_test/d190_recall_lag_diagnosis.json",
+   "source_path_within_file": "devices.<device>.D162_positive_control_on_sent_rows[].observed_over_predicted",
+   "source_cells": {
+    "seed_5": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr_n16_s5_1200s_h27_3t_L3_epg_rq30",
+    "seed_7": "results/orchestration/live2/frozen_test/runs/covex-v6-fair-c5attr_n16_s7_1200s_h27_3t_L3_epg_rq30",
+    "_why_these": "d185_rung3_verdict.json per_seed[].cells.shares names exactly these two directories at seeds 5 and 7 (arms.shares = covex-v6-fair-c5attr). The sibling `..._rerun` directories hold only mm_gate.json and mm_uuid_check.json, i.e. preflight stubs with no outcomes, request or decision log, so they are NOT the scored cells.",
+    "_input_stack_decoding_match": "the two cells are the SAME arm, the SAME code revision and the SAME posted knobs (16 devices, 1200 s, 40:40:20, lh_req, ss2, epg, per-frame, reask 30 s, tag _L3_epg_rq30) at two different SEEDS, so they are not an arm-versus-arm comparison and no stack or decoding difference is claimed or needed. Where a committed figure from ANOTHER arm is cited (always-cloud-fcfs at seed 7, edf at seed 7) it is used only as an independent reading of a TRACE-DETERMINED quantity (history_tokens), which is identical across arms by construction.",
+    "_experiments_md_status_checked": "research/EXPERIMENTS.md at c9fc3eac grepped for INVALID: no row marks covex-v6-fair-c5attr, covex-v6-state-uo-c5attr, hybrid-F-lhreq-noc3, always-cloud-fcfs or edf INVALID. The INVALID rows are E24, E24b and the other pre-protocol simulator rows, none of which is cited here."
+   },
+   "what_the_ratio_is": "observed engine first-token time divided by the committed D162 model's prediction on the ENGINE-REPORTED uncached and queued-ahead token counts, for every recall question actually SENT in the two committed covex-v6-fair-c5attr cells (seeds 5 and 7). Both sides measured; the ratio is a model error, not two predictions compared.",
+   "why_not_tuning": "the ratios come from the RUNG-3 BASE's own committed cells, not from rung 4's cells. Same practice as D180 to D182, which derived the D179 floors from committed covex-v6-base cells.",
+   "sample_caveat": "n = 5. At this n the nearest-rank q90 IS THE MAXIMUM, and the linear-interpolation q90 is 1.74398. The nearest-rank value is the one in force: it is D125's own convention for kappa and it is the CONSERVATIVE direction, since a larger factor puts the latest safe start EARLIER and so cannot cause the lateness this factor exists to prevent. Five rows is a real limitation on how well the tail is characterised and it is not presented as more than it is.",
+   "committed_kappa_it_replaces_on_this_path": {
+    "value": 1.5775406165458339,
+    "source": "cf_margin.safety_factor(cf_cost.load_residuals()), q90 on a held-out-BY-ARM split of cf_service_residuals.json",
+    "coverage": "it COVERS the 1.3856 low end of the measured range and DOES NOT COVER the 1.8721 high end, which is the gap this factor closes",
+    "still_in_force_for": "cf_protect_defer, unchanged: its arms have a posted cell list owned by another session and changing their safety factor would change what those cells measure"
+   }
+  },
+  "scope": "cf_request_defer only. cf_protect_defer.KAPPA is LEFT AS COMMITTED at 1.5775406165458339 because its arms have a posted cell list owned by another session; the tree holds two factors on purpose and each records which it is.",
+  "self_inflicted_loss_column": {
+   "_claim": "how many DEFERRED QUESTIONS would have missed the 3 s deadline under the measured bias. D191 names this as the column that can turn a pass into a real harm, so it is here and not in a footnote.",
+   "arithmetic": "overrun = (bias - safety_factor) x predicted_service, so it is at or below zero for every bias at or below the factor. That is why the factor is the q90 and not the median.",
+   "full_rung4": {
+    "n_deferrals": 6,
+    "deferred_and_would_have_missed_at_measured_worst_bias": 0,
+    "deferred_and_would_have_missed_under_the_committed_kappa": 0,
+    "slack_used_s": [
+     0.37529,
+     0.439147,
+     0.601225,
+     0.610225,
+     0.721445,
+     1.006723
+    ],
+    "per_deferral": [
+     {
+      "t": 542.9,
+      "deferral_s": 1.006723,
+      "predicted_total_service_s": 1.0011627197300879,
+      "overrun_at_measured_worst_bias_s": 0.0,
+      "would_miss_at_measured_worst_bias": false,
+      "overrun_at_committed_kappa_s": -0.2949018734609909,
+      "would_miss_under_committed_kappa": false
+     },
+     {
+      "t": 677.4,
+      "deferral_s": 0.721445,
+      "predicted_total_service_s": 1.1759817486989061,
+      "overrun_at_measured_worst_bias_s": 0.0,
+      "would_miss_at_measured_worst_bias": false,
+      "overrun_at_committed_kappa_s": -0.346396458850102,
+      "would_miss_under_committed_kappa": false
+     },
+     {
+      "t": 743.5,
+      "deferral_s": 0.439147,
+      "predicted_total_service_s": 1.3262394264902873,
+      "overrun_at_measured_worst_bias_s": 0.0,
+      "would_miss_at_measured_worst_bias": false,
+      "overrun_at_committed_kappa_s": -0.390656267779586,
+      "would_miss_under_committed_kappa": false
+     },
+     {
+      "t": 747.1,
+      "deferral_s": 0.37529,
+      "predicted_total_service_s": 1.3587470971663071,
+      "overrun_at_measured_worst_bias_s": 0.0,
+      "would_miss_at_measured_worst_bias": false,
+      "overrun_at_committed_kappa_s": -0.4002317072114455,
+      "would_miss_under_committed_kappa": false
+     },
+     {
+      "t": 935.0,
+      "deferral_s": 0.601225,
+      "predicted_total_service_s": 1.2348567522565868,
+      "overrun_at_measured_worst_bias_s": 0.0,
+      "would_miss_at_measured_worst_bias": false,
+      "overrun_at_committed_kappa_s": -0.3637386435989143,
+      "would_miss_under_committed_kappa": false
+     },
+     {
+      "t": 935.5,
+      "deferral_s": 0.610225,
+      "predicted_total_service_s": 1.2348567522565868,
+      "overrun_at_measured_worst_bias_s": 0.0,
+      "would_miss_at_measured_worst_bias": false,
+      "overrun_at_committed_kappa_s": -0.3637386435989143,
+      "would_miss_under_committed_kappa": false
+     }
+    ],
+    "counters": {
+     "rd_defer_slack_used_ms_sum": 3753,
+     "rd_deferred_to_guard_epochs": 1050,
+     "rd_gate_defer_to_latest_safe_start": 6,
+     "rd_gate_must_start_now_no_slack": 47,
+     "rd_question_defers": 6,
+     "rd_skipped_already_deferred": 4
+    }
+   },
+   "rqonly": {
+    "n_deferrals": 6,
+    "deferred_and_would_have_missed_at_measured_worst_bias": 0,
+    "deferred_and_would_have_missed_under_the_committed_kappa": 0,
+    "slack_used_s": [
+     0.37529,
+     0.439147,
+     0.601225,
+     0.610225,
+     0.721445,
+     1.006723
+    ],
+    "per_deferral": [
+     {
+      "t": 542.9,
+      "deferral_s": 1.006723,
+      "predicted_total_service_s": 1.0011627197300879,
+      "overrun_at_measured_worst_bias_s": 0.0,
+      "would_miss_at_measured_worst_bias": false,
+      "overrun_at_committed_kappa_s": -0.2949018734609909,
+      "would_miss_under_committed_kappa": false
+     },
+     {
+      "t": 677.4,
+      "deferral_s": 0.721445,
+      "predicted_total_service_s": 1.1759817486989061,
+      "overrun_at_measured_worst_bias_s": 0.0,
+      "would_miss_at_measured_worst_bias": false,
+      "overrun_at_committed_kappa_s": -0.346396458850102,
+      "would_miss_under_committed_kappa": false
+     },
+     {
+      "t": 743.5,
+      "deferral_s": 0.439147,
+      "predicted_total_service_s": 1.3262394264902873,
+      "overrun_at_measured_worst_bias_s": 0.0,
+      "would_miss_at_measured_worst_bias": false,
+      "overrun_at_committed_kappa_s": -0.390656267779586,
+      "would_miss_under_committed_kappa": false
+     },
+     {
+      "t": 747.1,
+      "deferral_s": 0.37529,
+      "predicted_total_service_s": 1.3587470971663071,
+      "overrun_at_measured_worst_bias_s": 0.0,
+      "would_miss_at_measured_worst_bias": false,
+      "overrun_at_committed_kappa_s": -0.4002317072114455,
+      "would_miss_under_committed_kappa": false
+     },
+     {
+      "t": 935.0,
+      "deferral_s": 0.601225,
+      "predicted_total_service_s": 1.2348567522565868,
+      "overrun_at_measured_worst_bias_s": 0.0,
+      "would_miss_at_measured_worst_bias": false,
+      "overrun_at_committed_kappa_s": -0.3637386435989143,
+      "would_miss_under_committed_kappa": false
+     },
+     {
+      "t": 935.5,
+      "deferral_s": 0.610225,
+      "predicted_total_service_s": 1.2348567522565868,
+      "overrun_at_measured_worst_bias_s": 0.0,
+      "would_miss_at_measured_worst_bias": false,
+      "overrun_at_committed_kappa_s": -0.3637386435989143,
+      "would_miss_under_committed_kappa": false
+     }
+    ],
+    "counters": {
+     "rd_defer_slack_used_ms_sum": 3753,
+     "rd_deferred_to_guard_epochs": 1050,
+     "rd_gate_defer_to_latest_safe_start": 6,
+     "rd_gate_must_start_now_no_slack": 47,
+     "rd_question_defers": 6,
+     "rd_skipped_already_deferred": 4
+    }
+   }
+  }
+ },
+ "residency_input_of_the_prediction": {
+  "_claim": "D190 (5) track C asked which residency input the latest-safe-start prediction consumes. STATED, and in the data on every decision as `residency_input`.",
+  "declared": {
+   "kind": "RESIDENT_TOKEN_COUNT",
+   "quantity": "u_request = readiness_tokens - built_tokens_by_session[session]",
+   "is_a_tier_label": false,
+   "why_it_matters": "D190 (5) track C: the hybrid gate prices on the three-label residency_readiness(), so GPU-WARM at 44 percent resident and at 28 percent resident price identically; on one history that collapse was 8.17x optimistic (0.6506 s predicted, 5.3166 s observed)",
+   "exposure_this_module_does_inherit": "built_tokens_by_session is the coordinator's BELIEF, not engine telemetry (D44, D47), so an overstated belief understates u and puts the latest safe start too late by that much",
+   "measured_predictor_bias": "D162 under-predicts first token by 1.39x to 1.87x on the five recall questions SENT in the committed rung-3 cells (d190_recall_lag_diagnosis.json)",
+   "kappa_coverage": "kappa = 1.577541 covers 1.39x and DOES NOT cover 1.87x. Not widened: D191 item 2 fixes the safety factor to committed FIT data, and a factor fitted to the cells under diagnosis would be tuning. The consequence is reported as 'any recall made late by a deferral' and is expected to be non-zero."
+  }
+ },
+ "_provenance": {
+  "git_commit": "ec2d6a838f915e62b1eba95408b808f23caadabd",
+  "script": "d190_proofs.py over cfr3_one_cell.py cells",
+  "model": null,
+  "device": "flash_cpu",
+  "n": 16,
+  "_note": "stamped to the commit the clean checkout was archived from, which is the commit measured"
+ },
+ "GATE_A_dry_s4_report": {
+  "_what": "GATE A of section 4a of the pre-registration: the DRY s4 REPORT AS A GATE. Four items, read before any cell is posted.",
+  "cell": "covex-v6-cf-c5attr, dry, seed 4, 16 devices, 1200 s, posted knobs, 1x memory, clean checkout",
+  "item_1_recall_questions_deferred": {
+   "n_question_deferrals": 6,
+   "n_candidates_that_reached_the_harm": 22,
+   "n_decisions": 88,
+   "gate_mix": {
+    "rd_gate_defer_to_latest_safe_start": 6,
+    "rd_gate_must_start_now_no_slack": 47,
+    "rd_gate_no_active_alert_episode": 19,
+    "rd_gate_saving_does_not_exceed_margin": 16
+   }
+  },
+  "item_2_slack_used_per_deferral_s": {
+   "all_values_sorted": [
+    0.37529,
+    0.439147,
+    0.601225,
+    0.610225,
+    0.721445,
+    1.006723
+   ],
+   "median": 0.605725,
+   "p90_nearest_rank": 1.006723,
+   "min": 0.37529,
+   "max": 1.006723,
+   "note": "all six values distinct, so this is a distribution and not a constant; the unit is seconds of the question's own slack spent waiting"
+  },
+  "item_3_predicted_u_against_ENGINE_REPORTED_u": {
+   "VERDICT": "NOT MEASURABLE IN A DRY CELL, and that is itself a reason to stop before cells",
+   "why": "a dry cell has no engine, so there is no engine-reported uncached count. `last_telemetry_cached_tokens` is identically 0 in every decision (rd_u_telemetry_won = 0, rd_u_built_won = 60), so on the NOT-COLD branch max(built, telemetry) collapses to built and u equals u_built_only EXACTLY on all six deferral candidates. The telemetry half of the D186 / r1 correction is therefore CONSTANT (zero) dry: Rule 2's `unexercised` for that sub-link. It is implemented and reads the right quantity; it cannot vary without an engine.",
+   "what_DOES_vary_dry": "the COLD guard. rd_u_cold = 28 and rd_u_not_cold = 60, and u differs from u_built_only on exactly the 28 COLD decisions, where built-only UNDERSTATES u by 81,920 tokens in total. So the correction is not inert dry, but only one of its two halves is exercised.",
+   "per_deferral": [
+    {
+     "u_in_force": 5410,
+     "u_built_tokens_only": 5410,
+     "equal": true,
+     "readiness": "GPU-WARM",
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "prompt_tokens": 10651
+    },
+    {
+     "u_in_force": 6378,
+     "u_built_tokens_only": 6378,
+     "equal": true,
+     "readiness": "GPU-WARM",
+     "built_tokens": 3193,
+     "telemetry_cached_tokens": 0,
+     "prompt_tokens": 9571
+    },
+    {
+     "u_in_force": 7210,
+     "u_built_tokens_only": 7210,
+     "equal": true,
+     "readiness": "GPU-WARM",
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "prompt_tokens": 12451
+    },
+    {
+     "u_in_force": 7390,
+     "u_built_tokens_only": 7390,
+     "equal": true,
+     "readiness": "GPU-WARM",
+     "built_tokens": 5241,
+     "telemetry_cached_tokens": 0,
+     "prompt_tokens": 12631
+    },
+    {
+     "u_in_force": 6704,
+     "u_built_tokens_only": 6704,
+     "equal": true,
+     "readiness": "GPU-WARM",
+     "built_tokens": 4217,
+     "telemetry_cached_tokens": 0,
+     "prompt_tokens": 10921
+    },
+    {
+     "u_in_force": 6704,
+     "u_built_tokens_only": 6704,
+     "equal": true,
+     "readiness": "GPU-WARM",
+     "built_tokens": 4217,
+     "telemetry_cached_tokens": 0,
+     "prompt_tokens": 10921
+    }
+   ],
+   "external_register": "the committed engine-reported uncached figures for these same lagging devices are 8,215 and 14,516 (robo001, seed 5) and 4,181, 313 and 1,921 (robo004, seed 7), d190_recall_lag_diagnosis.json. The six deferral candidates here predict 5,410 to 7,390, which is inside that range but is NOT the same quantity on the same opportunities and is not offered as agreement."
+  },
+  "item_4_would_have_missed_3s_under_the_measured_bias": {
+   "raw_count_at_the_measured_worst_bias": 0,
+   "n_deferrals": 6,
+   "ratio": 0.0,
+   "THE_ZERO_IS_A_TAUTOLOGY_NOT_A_MEASUREMENT": "the safety factor in force IS the maximum of the five measured biases (1.8721), so the overrun at that bias is identically (1.8721 - 1.8721) x service = 0.000000 for every deferral, by construction. Section 4a of the pre-registration says in advance that a tautology does not pass this gate, so the sensitivity below is what decides.",
+   "sensitivity": {
+    "bias_1.8721": {
+     "bias": 1.8721,
+     "n_would_miss": 0,
+     "n_deferrals": 6,
+     "max_overrun_s": 0.0
+    },
+    "bias_1.9000": {
+     "bias": 1.9,
+     "n_would_miss": 6,
+     "n_deferrals": 6,
+     "max_overrun_s": 0.03790904401093972
+    },
+    "bias_1.9500": {
+     "bias": 1.95,
+     "n_would_miss": 6,
+     "n_deferrals": 6,
+     "max_overrun_s": 0.10584639886925513
+    },
+    "bias_2.0000": {
+     "bias": 2.0,
+     "n_would_miss": 6,
+     "n_deferrals": 6,
+     "max_overrun_s": 0.17378375372757054
+    },
+    "bias_2.5000": {
+     "bias": 2.5,
+     "n_would_miss": 6,
+     "n_deferrals": 6,
+     "max_overrun_s": 0.8531573023107242
+    }
+   },
+   "MARGIN_IS_ZERO": "every deferral sits EXACTLY on its own deadline under the assumed worst case. At a bias of 1.95, which is 4.2 percent above the maximum of five observations, 6 of 6 deferrals miss, with a worst overrun of 0.1058 s. n = 5 cannot characterise that tail.",
+   "VERDICT": "MATERIAL. STOP. NO CELLS POSTED."
+  },
+  "GATE_A_VERDICT": "STOP AND REPORT. NO CELLS POSTED.",
+  "GATE_A_REASONS": [
+   "item 4 is material: the 0 of 6 is an arithmetic identity of the safety-factor choice, and it flips to 6 of 6 at a bias 4.2 percent above the maximum of the five observations the factor is derived from. The pre-registration forbids passing this gate on a tautology, and the ruling says to stop when in doubt rather than to pick a threshold that lets the run proceed.",
+   "item 3 cannot be satisfied by a dry cell at all: there is no engine-reported u, and the telemetry half of the pricing correction is constant at zero without an engine."
+  ],
+  "WHAT_IS_NOT_BEING_DONE_AND_WHY": "the safety factor is NOT being raised to buy margin. Raising it pushes the latest safe start earlier, which shrinks every deferral and drives the deferral count toward zero, so it would trade a self-inflicted loss for an absent mechanism, and it would be a parameter changed after seeing the result. MARGIN_CF is not widened either. The options are named for the user and none is taken unilaterally: (a) accept and post, on the record that the margin is zero; (b) re-derive the factor at the same q90 from MORE committed rung-3 sent rows, which is a better measurement of the same quantity from the same base cells rather than a new method, but which does change a pre-registered number after the result is visible; (c) give the deferral a floor on the slack it must retain, which is a DESIGN CHANGE and so is a stop under the standing instruction rather than something to build."
+ },
+ "cells_posted": {
+  "n": 0,
+  "why": "GATE A says STOP. No RUNG4 cell list has been posted or gated."
+ }
+}

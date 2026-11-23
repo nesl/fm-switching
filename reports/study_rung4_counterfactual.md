@@ -186,6 +186,54 @@ rung 4's characteristic decision - a question deferral, a rebuild deferral or a 
 **non-zero**. Zero is an **ABSENT LINK** and is reported as such, never as a negative about the
 policy.
 
+## 4a. FAIL-FAST: THE DRY s4 REPORT IS A GATE, AND s4 IS POSTED ALONE
+
+User ruling, recorded here **before any cell is posted**. It adds to the pre-registration and
+changes none of the bars in section 4.
+
+### Gate A, the dry s4 report. Before ANY cell is posted it must show, and be read:
+
+1. the number of recall questions **DEFERRED**;
+2. **SLACK USED** per deferral, median and p90;
+3. **PREDICTED u AGAINST ENGINE-REPORTED u** for the deferral candidates;
+4. **how many deferred questions WOULD HAVE MISSED 3 s** under the measured D162 under-prediction
+   (1.39x to 1.87x on the rung-3 sent cells).
+
+**If the would-have-missed count is MATERIAL: STOP AND REPORT. NO CELLS.**
+
+**On "material", and this is written down so it cannot be argued past later.** No threshold is
+chosen here, because a threshold chosen by the party that wants to proceed is not a gate. The
+report gives the **raw count** and its **ratio to the deferral count**, and if the figure is
+anything that could move the verdict, the run **STOPS**. When in doubt, stop and report rather than
+decide. A deferral that makes a recall late is a **self-inflicted loss**, and this gate exists to
+catch it before GPU is spent.
+
+**A tautology does not pass this gate.** The safety factor in force (1.8721) IS the maximum of the
+five measured biases, so the overrun at that bias is identically zero by construction and a
+"0 of N would miss" reading there is an arithmetic identity, not a measurement. The report must
+therefore also give the **sensitivity**: the bias at which deferrals begin to miss, and the count
+and worst overrun at biases above the measured maximum. A zero that flips to N of N just above the
+assumed worst case is **material**.
+
+### Gate B, two stages. s4 is posted ALONE, not s4 to s7.
+
+After s4 lands it is scored against rung 3 s4, and s5, s6 and s7 are posted **only if BOTH** hold:
+
+| conjunct | bar at s4 |
+|---|---|
+| mean per-episode alert attainment | **above 0.441** (rung 3's s4 value) |
+| robot on-time retention >= 0.90 of rung 3's gain over base | **at least 113.3, i.e. 114 or more as an integer count** |
+
+The robot bar in absolute terms, supplied so it is not re-derived: rung 3 s4 robot on time is 122,
+base is 35, the gain is 87, ninety percent of 87 is 78.3, and 35 + 78.3 = 113.3. The report gives
+the **raw count** and the **computed retention** beside it.
+
+**Otherwise: STOP, diagnose FROM THE LOGGED DECISIONS, and report to the user before spending more
+GPU.** s5 to s7 are not posted on a hope that a later seed recovers it.
+
+This two-stage rule is in this file **before s4 runs**, so the stopping condition is on record
+rather than decided afterwards.
+
 ## 4b. PRE-REGISTERED REPORTED SECONDARIES. These are NOT GATES.
 
 Four quantities, declared here **before any of them exists as a number**, to be computed by the

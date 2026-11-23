@@ -104,7 +104,8 @@
     "n_others_moved": 0,
     "harm_by_type": {},
     "rows": [],
-    "on_time_units": true
+    "on_time_units": true,
+    "on_time_units_source": "the flag is not in this tree; on-time units are obtained on this call by acc_cloud=1.0 and acc_device=0.0, under which the committed option_value is w * p, identical to the D177 branch"
    }
   },
   {
@@ -347,7 +348,7 @@
   "    HARM = 2.580000 on-time cloud answers   by type {'alert': 2.58}",
   "    (the same rows under the device-discounted reading: 0.000000; see HARM_FORM_NOTE)",
   "  THE BAR: w_d x MARGIN_CF",
-  "    MARGIN_CF (on-time units)        0.65824000000000005   cf_objective.attainment_margin(cf_margin.MARGIN_CF) = 0.16456 / 0.250 = 0.65824000000000005; D177 (3) states it as 0.6582 in on-time units",
+  "    MARGIN_CF (on-time units)        0.65824000000000005   MARGIN_CF / A_D2_DEV = 0.16456 / 0.250 = 0.65824000000000005; D177 (3) states it as 0.6582 in on-time units. Path: cf_objective.attainment_margin (the canonical function)",
   "    w_d = 1.000000  from device robo001 (reading 'decider')",
   "    BAR = 1.000000 x 0.65824000000000005 = 0.658240",
   "    w source: synthetic test weights",
@@ -374,7 +375,7 @@
   },
   "margin": {
    "value": 0.65824,
-   "source": "cf_objective.attainment_margin(cf_margin.MARGIN_CF) = 0.16456 / 0.250 = 0.65824000000000005; D177 (3) states it as 0.6582 in on-time units",
+   "source": "MARGIN_CF / A_D2_DEV = 0.16456 / 0.250 = 0.65824000000000005; D177 (3) states it as 0.6582 in on-time units. Path: cf_objective.attainment_margin (the canonical function)",
    "tuned": false,
    "swept": false
   },
@@ -425,10 +426,11 @@
   "what_a_dry_cell_cannot_establish": "the MAGNITUDE of harm against a real engine, and therefore whether the bar is ever crossed in a live regime. A dry cell does not exercise price: covex-v6-rules and covex-v6-rules-wo are byte-identical dry, so the charge mode is unexercised dry, and D174 part B3 found the same."
  },
  "_provenance": {
-  "git_commit": "472375721d392051ca8d9c6382608fa5e300773d",
+  "git_commit": "ec2d6a838f915e62b1eba95408b808f23caadabd",
   "script": "cf_pd_tests.py",
   "model": "n/a (unit arithmetic, CPU)",
-  "timestamp": "2026-11-22T16:44:49.376086",
-  "device": "flash"
+  "timestamp": "2026-11-23T11:22:19.679518",
+  "device": "flash",
+  "_note": "regenerated on a CLEAN git archive checkout of ec2d6a83, which has no .git directory, so the script stamped \"unknown\"; the sha is filled in by hand here and is the commit the archive was made from. Regenerated because three STRING leaves had gone stale against the committed file after MARGIN_CF_ON_TIME_SOURCE was reworded; zero numeric and zero boolean leaves were affected. Run under conda run -n fmtk python, per the interpreter ruling."
  }
 }
