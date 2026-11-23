@@ -22,7 +22,7 @@ For every scorable cell the D179 scorer re-derives the counts from the raw logs.
 
 ## Arm families present (scorable)
 
-always-cloud-fcfs, attentionstore-prefetch, b7-edf-feasibility, base, confidence-cascade, covex-v6-fair-c5attr-rr, eco-llm, edf, fair-c5attr, fair-c5attr-gain0, joint-c3, kvflow-prefetch, llf, lmcache, mooncake, querystream-proactive, r3-streaming, rules, shares, shares-r1, shares-r2, simplestream, state, state-uo, state-uo-c5attr, streamscout, v5-rules-old, warm-all-lru
+always-cloud-fcfs, attentionstore-prefetch, b7-edf-feasibility, base, covex-v6-fair-c5attr-rr, eco-llm, edf, fair-c5attr, fair-c5attr-gain0, joint-c3, kvflow-prefetch, llf, lmcache, mooncake, querystream-proactive, r3-streaming, rules, shares, shares-r1, shares-r2, simplestream, state, state-uo, state-uo-c5attr, streamscout, v5-rules-old, warm-all-lru
 
 base and rules each cover two raw arm names at different memory: base = hybrid-F-lhreq-noc3 (1x) and covex-v6-base (0.5x); rules = v5-rules-2 (1x) and covex-v6-rules (0.5x). v5-rules-old is the superseded rules arm, kept separate. joint-c3 is hybrid-F-lhreq (the joint policy with C3), kept beside the noc3 base. The rule-based C5 fix family, drawn as one family in F1, is the -c5attr arms (state-uo-c5attr, fair-c5attr, fair-c5attr-gain0).
 
@@ -32,6 +32,7 @@ base and rules each cover two raw arm names at different memory: base = hybrid-F
 - covex-v6-state_n16_s4_1200s_h27_3t_L3_epg_rq30: preflight-only stub, absent: cell.json, outcomes.jsonl.gz
 - covex-v6-state_n16_s6_1200s_h27_3t_L3_epg_rq30: preflight-only stub, absent: outcomes.jsonl.gz
 - covex-v6-state_n16_s7_1200s_h27_3t_L3_epg_rq30: preflight-only stub, absent: cell.json, outcomes.jsonl.gz
+- eco-llm_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
 - llf_n16_s4_1200s_h27_3t_L2.5_epg_rq30: name did not match the rq30 cell pattern
 - llf_n16_s4_1200s_h27_3t_kv0.25_L3_epg_rq30: name did not match the rq30 cell pattern
 - mooncake_n16_s4_1200s_h27_3t_L2.5_epg_rq30: name did not match the rq30 cell pattern
@@ -41,7 +42,7 @@ base and rules each cover two raw arm names at different memory: base = hybrid-F
 
 ## Provenance
 
-- runs dir last commit: 9f7cfae8
+- runs dir last commit: 8be71182
 - scorer score.py last commit: 9803dca0
 - d179_rung2_verdict.py last commit: 302ac817
 - build time is deliberately NOT stamped here: the output is byte-deterministic given the input, so the D190 poll commits only on a real data change. The git commit of this file is the build time of record.
