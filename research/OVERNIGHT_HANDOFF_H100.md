@@ -160,3 +160,6 @@ For a new file `runs/<LIST>` on origin:
   s6 109/121, 339, 0.500 MEET (c5attr 105, 327, 0.331 MEET)  robot late 12 (> 10, flagged)
   s7  84/105, 354, 0.547 MEET (c5attr 83, 350, 0.286 MEET)
   The ordering feed meets dashcam at every seed and roughly doubles on-time against gain0, with robot and SS held. The _kv0.5 sweep resumed 00:35:32 (llf s4); 19 cells to about 07:45.
+- 07:15 USER QUEUE after the _kv0.5 sweep (full memory, _L3_epg_rq30, 16 devices, 1200 s), each gated on a list flash posts:
+  (1) kvflow-prefetch s4-s7, with published-prefetch proofs (port rule, -off identity, name proof); (2) streamscout s6, s7 and lmcache s6, s7 (BASELINE_MATRIX has only s4 / s5). Requested from flash 07:15.
+  (3) "no parsable score" runs (edf s4-s7, llf s4, always-cloud-fcfs s5, hybrid-F-lhreq-noc3 s4-s6): ALL have valid cell.json with score.ok true, and the stdout trailing JSON parses to the same by_deadline. A reader / format issue, not failed cells (always-cloud s5's first attempt failed; its valid _rerun exists). No rerun.
