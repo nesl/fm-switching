@@ -24,14 +24,24 @@ of them. Both variants are registered here under their own names, so the choice 
 TIME by picking the name, and nothing in this module has to change either way. Hardwiring one base
 would have meant a code edit between the check and the cell, which is the shape D172 (2) forbids.
 
-ONE CONSEQUENCE OF THE CONTINGENCY, AND IT IS A FINDING, NOT A CAVEAT. The weights this feed
-produces are consumed by D179 share admission and by nothing else: `share_admission.allowed`
-reads `weights_by_type` at share_admission.py:162-166 to split the FLEXIBLE pool. The c5attr base
-does NOT carry share admission (`arms_v6c5.V6StateUoC5AttrArm` sets only
-`c5_attr_self_released`), so on THAT base the weights have no reader at all and the deficit feed
-is an ABSENT LINK by construction, in CLAUDE.md Step 2's exact sense. `covex-v6-fair-c5attr` is
-registered so the contingency is expressible and so the feed's COUNTERS can be reported from it,
-but it cannot steer anything and must not be read as a test of the weighting.
+ONE CONSEQUENCE OF THE CONTINGENCY. CORRECTED 2026-11-23: THE PARAGRAPH THAT STOOD HERE WAS MADE
+FALSE BY D182 AND IS NOW WRONG IN THE DIRECTION THAT UNDERSTATES THIS ARM. It said the weights
+have NO READER AT ALL on the c5attr base and that the feed is an ABSENT LINK there. That was true
+when the only consumer was the flexible split, and D182 added a SECOND consumer: the ORDERING hook
+`hybrid_arm._deficit_order_key`, consumed as the LEADING SORT KEY at hybrid/hybrid_arm.py:399, 483
+and 486. Ordering does NOT go through share admission, so it fires on this base.
+
+MEASURED, on a dry seed-4 cell, bare, and replicated independently by two other sessions to the
+digit: gain 2.0 against the gain-0 control moves 4,512 decisions setwise, 12,272 positionally;
+the ORDER-ONLY arm is BYTE-IDENTICAL to the both-consumers arm (12e4f73ce0ebd865 / 13,812) and
+the SPLIT-ONLY arm moves EXACTLY ZERO (9a4be873eb3c5fba / 14,218, identical to the control). The
+first difference is an ordering swap at index 1942, t = 207.1 s.
+
+SO THE ACCURATE STATEMENT IS NARROWER THAN THE OLD ONE: on the c5attr base the FLEXIBLE-SPLIT
+consumer is absent by construction, because `_share_ok` returns before `SA.allowed` when an arm
+carries no share admission, and that is Rule 2's `unexpressible` rather than a null about the
+policy. The ORDERING consumer is present, fires, and is the whole of rung 3's contribution on this
+base. `covex-v6-fair-c5attr` therefore CAN be read as a test of the weighting, through ordering.
 
 THE SWITCH IS AN ARM-SCOPED INSTANCE ATTRIBUTE, `live2_deficit_feed`, DEFAULT FALSE, and a truthy
 CLASS attribute RAISES. Exactly the pattern `release_recheck.arm_enables` and

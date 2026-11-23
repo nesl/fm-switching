@@ -378,3 +378,56 @@ AN ENVIRONMENT GOTCHA FOUND IN PASSING, recorded because it cost real work and f
 `conda run` DOES NOT FORWARD STDIN, so `conda run -n fmtk python - <<'EOF'` runs nothing and EXITS 0.
 Four patch scripts silently no-opped and a sweep ran on unpatched code before it was noticed. Pass a
 file to `conda run` instead. Same family as the existing note about `&` in a conda run command.
+
+---
+
+## 2026-11-23 06:50Z FINDING THAT LANDS ON A PROOF I DIRECTED: a dry digest is NOT a pure function of the arm, and HOST LOAD can change it
+
+WHAT WAS MEASURED. A session running NINE dry cells at once got
+`covex-v6-state-uo-c5attr` = 4dcd17bbcaf9262e / 14,203 against its committed
+9a4be873eb3c5fba / 14,218, while the other eight cells reproduced, both positive controls included.
+Run ALONE at loadavg 2 the same arm with the same wrappers gives the COMMITTED digest, and so does
+a bare run. THE CAUSE IS HOST LOAD. The dry path retains a wall-clock sensitivity that patching
+`cf_instrument.over_budget` does NOT cover.
+
+WHY IT HIT THAT ARM AND NOT THE OTHER EIGHT: c5attr is the one arm with a LATENCY-EWMA-GATED rule,
+and bare-and-quiet that rule is unexercised in dry (`_attr_mon` empty, cap 8, no `c5_attr`
+counter). Under load the EWMA sees different timings and the rule reaches a decision.
+
+THIS IS A THIRD EXPLANATION FOR THE REPRODUCE-ACROSS-RUNS DEFECT, and unlike the others it has a
+MEASURED TRIGGER. The earlier candidates were the planner wall-clock cutoff (disproved), and the
+`arms_v6state.py:236` `id(obs)` memory-address cache key (a real mechanism, prepared behind a
+switch under D188 (2)). Host load is a third, independent path, and it is the only one of the three
+that an experimenter controls directly.
+
+THE CONSEQUENCE FOR WORK I DIRECTED, stated because it is mine and not the finder's.
+`results/orchestration/live2/frozen_test/d179_offswitch_digest_proofs.json` is the 17-arm
+byte-identity proof, and I instructed it to be run at CONCURRENCY 18 under the user's addendum 6
+parallelisation ruling. It carries a self-reproduction control for `covex-v6-state-uo` ONLY. So the
+other sixteen arms in that proof were measured under exactly the condition now shown to perturb a
+digest, with no per-arm self-reproduction control.
+
+WHAT SAVES IT, AND WHAT DOES NOT. Every digest in that proof MATCHED A COMMITTED VALUE, and a load
+artefact manifests as a MISMATCH, so a match is the safe direction: the proof's conclusion (every
+arm byte-identical with the switches off) is not threatened by this. What IS weakened is the claim
+that parallel execution introduced no nondeterminism, which the user's addendum 6 explicitly asked
+to be checked. The honest position: the identity results stand because they match committed bars,
+and the no-parallel-nondeterminism claim rests on one arm's self-reproduction rather than
+seventeen.
+
+RECOMMENDED, NOT DONE OVERNIGHT: re-run that proof at low concurrency, or add a self-reproduction
+control per arm, before it is cited as evidence about parallel determinism. It is already sound as
+evidence about the off-switch.
+
+A GENERAL RULE THIS SUGGESTS, for the user to accept or reject: a dry digest should be quoted with
+the CONCURRENCY it was measured at, and a digest that does not match a committed bar should be
+re-run ALONE before it is believed. Tonight's own proofs were all run at low concurrency (two to
+four cells) and all matched committed bars, which is why they are unaffected.
+
+ALSO FIXED, in the live path, because it was false in the direction that understates an arm: the
+`arms_v6fairfeed.py` docstring said the deficit weights have NO READER AT ALL on the c5attr base and
+called the feed an ABSENT LINK there. D182 added the ORDERING consumer, which does not go through
+share admission and does fire on that base. The accurate statement is narrower: the FLEXIBLE-SPLIT
+consumer is absent by construction there (Rule 2 `unexpressible`), the ORDERING consumer is present
+and is the whole of rung 3's contribution. Measured at 4,512 differing decisions, replicated
+independently by THREE sessions to the digit.
