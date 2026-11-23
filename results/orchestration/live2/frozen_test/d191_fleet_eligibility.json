@@ -1,0 +1,73 @@
+{
+ "_what": "D97 robot-pool eligibility at 12 / 16 / 20 devices, 40:40:20, lh_req, rq30, 1200 s, from the TRACE only",
+ "_rule": "D82 / D95 (2): a fleet size enters a comparison only if its robot pool reaches 20 pooled questions, at EVERY seed used",
+ "mode": "A",
+ "rows": [
+  {
+   "n_devices": 12,
+   "seed": 4,
+   "robot_questions": 361,
+   "robot_devices": 7,
+   "eligible_ge20": true,
+   "n_records": 13940
+  },
+  {
+   "n_devices": 12,
+   "seed": 5,
+   "robot_questions": 361,
+   "robot_devices": 7,
+   "eligible_ge20": true,
+   "n_records": 13935
+  },
+  {
+   "n_devices": 16,
+   "seed": 4,
+   "robot_questions": 489,
+   "robot_devices": 10,
+   "eligible_ge20": true,
+   "n_records": 17576
+  },
+  {
+   "n_devices": 16,
+   "seed": 5,
+   "robot_questions": 483,
+   "robot_devices": 10,
+   "eligible_ge20": true,
+   "n_records": 17571
+  },
+  {
+   "n_devices": 20,
+   "seed": 4,
+   "robot_questions": 634,
+   "robot_devices": 12,
+   "eligible_ge20": true,
+   "n_records": 22591
+  },
+  {
+   "n_devices": 20,
+   "seed": 5,
+   "robot_questions": 639,
+   "robot_devices": 12,
+   "eligible_ge20": true,
+   "n_records": 22658
+  }
+ ],
+ "verdict_12": true,
+ "verdict_20": true,
+ "_provenance": {
+  "git_commit": "a560a1f4353c70bb535394efb7f41beddc8b369e",
+  "script": "elig.py",
+  "device": "cpu_trace_only",
+  "n": 6,
+  "note": "trace generation only, no GPU, no cell run"
+ },
+ "positive_control": {
+  "quantity": "recall questions at 16 devices seed 4",
+  "this_run": 489,
+  "prior": 489,
+  "source_of_prior": "the committed 489 recall decisions recorded for this workload in DEVWAIT_READY (cascade-routing port note)",
+  "ratio": 1.0,
+  "agree": true,
+  "_why": "a size whose committed count is known must reproduce it, or the counting instrument is wrong rather than the sizes"
+ }
+}

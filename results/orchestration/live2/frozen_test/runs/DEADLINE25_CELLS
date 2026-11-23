@@ -1,0 +1,33 @@
+# D191 (3): RECALL DEADLINE 2.5 s, edge condition. Posted 2026-11-23 by the main flash session.
+# No new code: driver v31 reads the deadline from the tag's _L<seconds> token and passes
+# --robot-deadline-s 2.5. run_live2_real.py:97 already has the option, and :198-199 appends
+# _L<seconds> to the tag whenever it differs from the trace-name anchor, so _L2.5 is the existing
+# mechanism and not a new one.
+#
+# ARMS are D189's edge-condition set: llf (scheduler), mooncake (KV cache), simplestream
+# (streaming), eco-llm (routing), plus the frozen rungs covex-v6-base and covex-v6-rules.
+# cascade-routing and r3-streaming stay EXCLUDED under D130. Our later rungs run once the policy is
+# frozen. 16 devices, seeds 4 and 5, 1200 s, posted knobs.
+#
+# D97 ELIGIBILITY CONFIRMED FROM THE TRACE, outcome-independent and before any GPU run, in
+# d191_fleet_eligibility.json: at 16 devices the robot pool is 489 questions at seed 4 and 483 at
+# seed 5, far above D82's 20-question bar. POSITIVE CONTROL: the 489 figure reproduces the committed
+# 489 recall decisions recorded for this workload, so the counting instrument is sound.
+#
+# WHAT THIS CONDITION DOES NOT SETTLE, stated so nobody reads it as a re-score: 2.5 s is a DIFFERENT
+# TARGET from the pre-registered 3 s (D147), so these cells are a SEPARATE CONDITION and may not be
+# compared against the 3 s grid as though the same target applied. D178 (1) requires pass/fail to be
+# computed offline from raw outcomes, so no rerun is needed for a target change; this list exists
+# because the DEADLINE itself changes what the arms DO, which re-scoring cannot capture.
+llf 16 4 _L2.5_epg_rq30
+mooncake 16 4 _L2.5_epg_rq30
+simplestream 16 4 _L2.5_epg_rq30
+eco-llm 16 4 _L2.5_epg_rq30
+covex-v6-base 16 4 _L2.5_epg_rq30
+covex-v6-rules 16 4 _L2.5_epg_rq30
+llf 16 5 _L2.5_epg_rq30
+mooncake 16 5 _L2.5_epg_rq30
+simplestream 16 5 _L2.5_epg_rq30
+eco-llm 16 5 _L2.5_epg_rq30
+covex-v6-base 16 5 _L2.5_epg_rq30
+covex-v6-rules 16 5 _L2.5_epg_rq30

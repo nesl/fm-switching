@@ -1,0 +1,48 @@
+# D191 (3): LOAD AT 12 AND 20 DEVICES, edge condition. Posted 2026-11-23 by the main flash session.
+# No new code: n is field 2 of the cell line and the drivers already pass it; DEFER_SIZES is not read
+# by v28 to v31. Tag stays _L3_epg_rq30, so the deadline is the committed 3 s.
+#
+# ARMS as D189's edge-condition set, cascade-routing and r3-streaming EXCLUDED under D130.
+# Seeds 4 and 5, 1200 s, posted knobs, ratio 40:40:20.
+#
+# THE H100 ASKED WHETHER THE HARNESS ACCEPTS n = 12 AND 20 ON THIS WORKLOAD, since 16 has been the
+# only size. CONFIRMED BY GENERATING THE TRACES, not by reading the code: 12 devices gives 13,940 and
+# 13,935 records with 361 robot questions across 7 robot devices at seeds 4 and 5; 20 devices gives
+# 22,591 and 22,658 records with 634 and 639 robot questions across 12 robot devices. No error, no
+# empty trace. Recorded in d191_fleet_eligibility.json.
+#
+# D97 / D82 ELIGIBILITY HOLDS AT BOTH SIZES AND BOTH SEEDS: the robot pool is 361 at 12 devices and
+# 634 to 639 at 20, far above the 20-question bar, so neither size is excluded as not measurable.
+# POSITIVE CONTROL in the same run: 16 devices seed 4 reproduces the committed 489 recall questions.
+#
+# TWO THINGS A READER MUST NOT DO WITH THESE CELLS. (1) The D179 to D182 FLOORS AND W_max WERE
+# DERIVED AT 16 DEVICES and are frozen under D188; at 12 and 20 devices they are further from the
+# regime they were measured in, so these cells characterise the BASELINES under load and may not be
+# read against the D179 checks. (2) 20 devices was measured SATURATED at 97 percent of the committed
+# 32B one-frame peak under D144 (1), which is why 16 and 18 are the grid sizes; a 20-device result is
+# a saturation point, not an operating point, and the arms' ordering there carries little
+# information. Both sizes are still worth running as the load axis of the edge-condition plots.
+llf 12 4 _L3_epg_rq30
+mooncake 12 4 _L3_epg_rq30
+simplestream 12 4 _L3_epg_rq30
+eco-llm 12 4 _L3_epg_rq30
+covex-v6-base 12 4 _L3_epg_rq30
+covex-v6-rules 12 4 _L3_epg_rq30
+llf 20 4 _L3_epg_rq30
+mooncake 20 4 _L3_epg_rq30
+simplestream 20 4 _L3_epg_rq30
+eco-llm 20 4 _L3_epg_rq30
+covex-v6-base 20 4 _L3_epg_rq30
+covex-v6-rules 20 4 _L3_epg_rq30
+llf 12 5 _L3_epg_rq30
+mooncake 12 5 _L3_epg_rq30
+simplestream 12 5 _L3_epg_rq30
+eco-llm 12 5 _L3_epg_rq30
+covex-v6-base 12 5 _L3_epg_rq30
+covex-v6-rules 12 5 _L3_epg_rq30
+llf 20 5 _L3_epg_rq30
+mooncake 20 5 _L3_epg_rq30
+simplestream 20 5 _L3_epg_rq30
+eco-llm 20 5 _L3_epg_rq30
+covex-v6-base 20 5 _L3_epg_rq30
+covex-v6-rules 20 5 _L3_epg_rq30
