@@ -1232,11 +1232,22 @@ class Live2Coordinator:
         # (engine_actions.py:358) and was read NOWHERE in the pricing path: written and never read.
         # MAX of the two, not replacement: `built_tokens` exists before a session's first request
         # and the telemetry only after one, and both are LOWER BOUNDS on the true prefix.
-        _prefix = max(int(getattr(s, "built_tokens", 0) or 0),
-                      int(getattr(s, "last_telemetry_cached_tokens", 0) or 0))
-        _uncached = (max(int(tokens) - _prefix, 0) if _prefix
-                     else (int(tokens) if s.residency_readiness() == "COLD"
-                           else max(int(tokens) - int(getattr(s, "built_tokens", 0) or 0), 0)))
+        # THE TELEMETRY IS ONLY TRUSTED WHILE THE SESSION IS BELIEVED RESIDENT, and that condition
+        # is not cosmetic. `last_telemetry_cached_tokens` is written on a completed request
+        # (engine_actions.py:358) and is NEVER RESET ON EVICTION: there is no write to it anywhere
+        # else in the tree. So after an eviction it still holds the prefix the engine USED to have.
+        # Subtracting it then UNDERSTATES the work and admits a request that cannot make its
+        # deadline, which is the mirror image of the bug this block exists to fix, and it would
+        # have shown up as lateness rather than as skips. Found by the H100 reading the code rather
+        # than by any test here, before the first r1 cell ran.
+        #
+        # Gating on COLD keeps the fix exactly where the fault was: readiness is GPU-WARM at 69 of
+        # the 70 mispriced skips at s4, so the repriced path still covers them.
+        _cold = (s.residency_readiness() == "COLD")
+        _tel = 0 if _cold else int(getattr(s, "last_telemetry_cached_tokens", 0) or 0)
+        _prefix = max(int(getattr(s, "built_tokens", 0) or 0), _tel)
+        _uncached = (int(tokens) if _cold and not _prefix
+                     else max(int(tokens) - _prefix, 0))
         if self._d162_pricing:
             cost = DP.price_gpu_s(_uncached, self._uncached_in_flight, self._charge_mode)
         # ---- D179 (4) RELEASE RE-CHECK, RECALL AND ASSISTANCE PATHS (session B). BEGIN block --
