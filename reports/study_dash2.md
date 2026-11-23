@@ -173,6 +173,8 @@ Part 6 (vs device-only 0.620, cross-fitted ALL, 100 percent crop coverage for ev
 | EP-B 5 s blocks | 0.724 | +0.104 [+0.043, +0.155] | 376 | +0.276 |
 | EP-G full run-up | 0.642 | +0.022 [-0.057, +0.093] | 372 | +0.058 |
 
+CORRECTION (StudyCTX1, D207): the EP-B result below does NOT survive verification. Part 6 here did not apply D153 (minimum 3 frames) and used cross-fitted calibration selected on the evaluation data; under DEV selection with DEV-fitted calibration and D153, EP-B is 24.5 percent non-decision crops and its DEV gain over device-only is -0.037 (worse than device-only), and C1 is 100 percent non-decision (not deployable). The DEV-selected condition is C3 (3 frames), and it is NOT build-ready (EVAL gain vs device-only CI lower bound below zero). See reports/study_ctx1.md. The paragraph below is left as the original Part 6 reading and is superseded by StudyCTX1.
+
 Decision. The 21-frame restart explains only part of the shrink, and in a direction opposite to the
 hypothesis: a FRESH short recent window is more discriminative at the crop than the full run-up. The
 best context is EP-B (5 s blocks), challenge mAP 0.724 (+0.104 over device-only, CI excludes zero) at
