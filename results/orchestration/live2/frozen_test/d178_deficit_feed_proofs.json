@@ -1,0 +1,489 @@
+{
+ "_what": "the D178 (1) per-type deficit feed of covex-v6-fair (rung 3): switch-off identity against committed digests, Step 2b, the weight distribution, and the gain-0 negative control",
+ "_protocol": "ONE dry cell per process (subprocess), planner wall-clock cutoff patched off, POSTED knobs forwarded, seeds 0/4/5/6/7 only",
+ "_digest_recipe": "sha256(json.dumps(rows without arm_version, sort_keys=True, separators=(',',':'), default=float))[:16]; comparable only within this recipe",
+ "_shim": "coordinator.py:1436 calls SA.allowed WITHOUT weights_by_type, so the weights have no reader in the committed tree. --shim forwards arm.live2_share_weights() into that one argument and changes nothing else. Both the shimmed and the un-shimmed number are reported.",
+ "cell": {
+  "seed": 4,
+  "n": 16,
+  "run_s": 1200.0,
+  "ratio": "40:40:20",
+  "robot_question_set": "lh_req",
+  "ss_question_set": "ss2",
+  "dashcam_format": "epg",
+  "robot_upload": "per-frame",
+  "robot_reask_mean_s": 30.0
+ },
+ "committed_bar": {
+  "covex-v6-state-uo": {
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "src": "c5attr_digest_proofs.json P1 before (f2d617fa); d179_share_admission_proofs.json off_switch_identity"
+  },
+  "covex-v6-base": {
+   "digest": "af8befb9420ad86a",
+   "rows": 12085,
+   "src": "c5attr_digest_proofs.json P1 before (f2d617fa); d179_share_admission_proofs.json off_switch_identity"
+  },
+  "v5-rules-2": {
+   "digest": "18067c4c66bb44b8",
+   "rows": 11955,
+   "src": "c5attr_digest_proofs.json P1 before (f2d617fa)"
+  },
+  "b7-edf-feasibility": {
+   "digest": "b9aadd1c3a2b26d5",
+   "rows": 12265,
+   "src": "c5attr_digest_proofs.json P1 before (f2d617fa)"
+  },
+  "covex-v6-state-shares": {
+   "digest": "3a5b40d78b9dcb3b",
+   "rows": 13390,
+   "src": "d179_share_admission_proofs.json step_2b shares_on"
+  }
+ },
+ "a_other_arms_unchanged": {
+  "_claim": "no arm but the two new names decides differently after this change; the bar is a value committed BEFORE it, not this run's own other side",
+  "rows": [
+   {
+    "arm": "covex-v6-base",
+    "shim": false,
+    "seed": 4,
+    "digest": "af8befb9420ad86a",
+    "rows": 12085,
+    "share_counts": {},
+    "deficit_feed_completions": null,
+    "n_weight_samples": 0,
+    "feed": null,
+    "committed": {
+     "digest": "af8befb9420ad86a",
+     "rows": 12085,
+     "src": "c5attr_digest_proofs.json P1 before (f2d617fa); d179_share_admission_proofs.json off_switch_identity"
+    },
+    "agrees": true
+   },
+   {
+    "arm": "v5-rules-2",
+    "shim": false,
+    "seed": 4,
+    "digest": "18067c4c66bb44b8",
+    "rows": 11955,
+    "share_counts": {},
+    "deficit_feed_completions": null,
+    "n_weight_samples": 0,
+    "feed": null,
+    "committed": {
+     "digest": "18067c4c66bb44b8",
+     "rows": 11955,
+     "src": "c5attr_digest_proofs.json P1 before (f2d617fa)"
+    },
+    "agrees": true
+   },
+   {
+    "arm": "b7-edf-feasibility",
+    "shim": false,
+    "seed": 4,
+    "digest": "b9aadd1c3a2b26d5",
+    "rows": 12265,
+    "share_counts": {},
+    "deficit_feed_completions": null,
+    "n_weight_samples": 0,
+    "feed": null,
+    "committed": {
+     "digest": "b9aadd1c3a2b26d5",
+     "rows": 12265,
+     "src": "c5attr_digest_proofs.json P1 before (f2d617fa)"
+    },
+    "agrees": true
+   },
+   {
+    "arm": "covex-v6-state-uo",
+    "shim": false,
+    "seed": 4,
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "share_counts": {},
+    "deficit_feed_completions": null,
+    "n_weight_samples": 0,
+    "feed": null,
+    "committed": {
+     "digest": "9a4be873eb3c5fba",
+     "rows": 14218,
+     "src": "c5attr_digest_proofs.json P1 before (f2d617fa); d179_share_admission_proofs.json off_switch_identity"
+    },
+    "agrees": true
+   },
+   {
+    "arm": "covex-v6-state-shares",
+    "shim": false,
+    "seed": 4,
+    "digest": "3a5b40d78b9dcb3b",
+    "rows": 13390,
+    "share_counts": {
+     "share_admit_alert": 10064,
+     "share_admit_assistance": 322,
+     "share_admit_recall": 184,
+     "share_at_or_above_floor_assistance": 444,
+     "share_at_or_above_floor_recall": 1019,
+     "share_deny_assistance": 39,
+     "share_deny_recall": 48,
+     "share_hold_instants_assistance": 8,
+     "share_hold_instants_recall": 22,
+     "share_hold_periods_assistance": 39,
+     "share_hold_periods_recall": 48,
+     "share_reason_borrow_background": 13,
+     "share_reason_floor_denied_background": 4,
+     "share_reason_oversize_alone": 197,
+     "share_reason_oversize_alone_over_wmax": 56,
+     "share_reason_oversize_wait_for_own_type": 26,
+     "share_reason_own_floor": 10120,
+     "share_reason_own_share": 184,
+     "share_reason_w_max": 57,
+     "share_w_high_water": 15410,
+     "share_w_over_wmax_periods": 113,
+     "share_w_samples": 10657,
+     "share_w_tracked_at_end": 1,
+     "share_w_zero_returns": 241
+    },
+    "deficit_feed_completions": null,
+    "n_weight_samples": 0,
+    "feed": null,
+    "committed": {
+     "digest": "3a5b40d78b9dcb3b",
+     "rows": 13390,
+     "src": "d179_share_admission_proofs.json step_2b shares_on"
+    },
+    "agrees": true
+   },
+   {
+    "arm": "covex-v6-state-uo-c5attr",
+    "shim": false,
+    "seed": 4,
+    "digest": "9a4be873eb3c5fba",
+    "rows": 14218,
+    "share_counts": {},
+    "deficit_feed_completions": null,
+    "n_weight_samples": 0,
+    "feed": null,
+    "committed": null,
+    "agrees": null
+   }
+  ],
+  "positive_control": "b7-edf-feasibility and v5-rules-2 are known-good committed arms and must pass; if one of them fails, the CHECK is broken, not the arm",
+  "verdict": "PASS"
+ },
+ "_base_rerun_for_rows": {
+  "digest": "3a5b40d78b9dcb3b",
+  "rows": 13390,
+  "agrees_with_first_run": true,
+  "_why": "the rows themselves are needed for a row-level diff, and a dry cell does not reproduce inside one process, so the base is re-run in its OWN process and the two digests are compared before the diff is read"
+ },
+ "a_switch_off_collapses": {
+  "_claim": "with live2_deficit_feed OFF the rung-3 arm IS the rung-2 base, byte-identically",
+  "base": {
+   "digest": "3a5b40d78b9dcb3b",
+   "rows": 13390,
+   "committed": {
+    "digest": "3a5b40d78b9dcb3b",
+    "rows": 13390,
+    "src": "d179_share_admission_proofs.json step_2b shares_on"
+   }
+  },
+  "off": {
+   "digest": "3a5b40d78b9dcb3b",
+   "rows": 13390
+  },
+  "identical": true,
+  "verdict": "PASS"
+ },
+ "b_step_2b": {
+  "_claim": "the switch ON moves decisions; the number of differing rows and the first one",
+  "unshimmed": {
+   "digest": "3a5b40d78b9dcb3b",
+   "rows": 13390,
+   "identical_to_base": true,
+   "diff": {
+    "positional": 0,
+    "setwise": 0,
+    "rows_base": 13390,
+    "rows_feed": 13390,
+    "first_differing": null
+   },
+   "reading": "ZERO differing decisions against the committed coordinator is an ABSENT LINK, never a negative: Rule 2's UNEXPRESSIBLE category. The channel the mechanism acts through (weights_by_type) is discarded by the gate."
+  },
+  "shimmed": {
+   "digest": "3a5b40d78b9dcb3b",
+   "rows": 13390,
+   "identical_to_base": true,
+   "diff": {
+    "positional": 0,
+    "setwise": 0,
+    "rows_base": 13390,
+    "rows_feed": 13390,
+    "first_differing": null
+   }
+  }
+ },
+ "c_weights_vary": {
+  "_claim": "the weights vary across types and over time; a weight constant at 1.0 everywhere means the feed is CONSTANT, which is a stopping condition",
+  "on_shimmed": {
+   "alert": {
+    "min": 1.0,
+    "median": 1.008614,
+    "max": 1.015137,
+    "n": 12001,
+    "distinct_values": 592,
+    "constant_at_one": false
+   },
+   "recall": {
+    "min": 1.0,
+    "median": 1.971789,
+    "max": 2.8,
+    "n": 12001,
+    "distinct_values": 146,
+    "constant_at_one": false
+   },
+   "assistance": {
+    "min": 1.0,
+    "median": 1.013043,
+    "max": 2.8,
+    "n": 12001,
+    "distinct_values": 282,
+    "constant_at_one": false
+   }
+  },
+  "on_unshimmed": {
+   "alert": {
+    "min": 1.0,
+    "median": 1.008614,
+    "max": 1.015137,
+    "n": 12001,
+    "distinct_values": 592,
+    "constant_at_one": false
+   },
+   "recall": {
+    "min": 1.0,
+    "median": 1.971789,
+    "max": 2.8,
+    "n": 12001,
+    "distinct_values": 146,
+    "constant_at_one": false
+   },
+   "assistance": {
+    "min": 1.0,
+    "median": 1.013043,
+    "max": 2.8,
+    "n": 12001,
+    "distinct_values": 282,
+    "constant_at_one": false
+   }
+  },
+  "feed": {
+   "gain": 2.0,
+   "gain_ruling": "D178 (2)",
+   "targets": {
+    "alert": 0.25,
+    "recall": 0.9,
+    "assistance": 0.9
+   },
+   "target_source": "D178 (1), spec v6 sections 2 and 8",
+   "units": {
+    "alert": "episode",
+    "recall": "device",
+    "assistance": "device"
+   },
+   "currency": "on-time CLOUD answers only (D177, D178 (1)); device_on_time recorded, never added to the numerator",
+   "alert_decision_instants_per_episode": 19,
+   "n_offers": 12253,
+   "n_completions": 10443,
+   "weights": {
+    "alert": 1.010943,
+    "recall": 2.16023,
+    "assistance": 1.012942
+   },
+   "shortfall": {
+    "alert": 0.005471,
+    "recall": 0.580115,
+    "assistance": 0.006471
+   },
+   "n_units": {
+    "alert": 695,
+    "recall": 7,
+    "assistance": 3
+   },
+   "counts": {
+    "alert_cloud_late": 198,
+    "alert_cloud_on_time": 9866,
+    "alert_device_on_time": 10064,
+    "alert_episode_key_from_token_law": 10064,
+    "alert_episodes_closed": 695,
+    "alert_episodes_open": 6,
+    "alert_instant_repeat": 3149,
+    "alert_instants_offered": 11764,
+    "assistance_cloud_on_time": 322,
+    "assistance_device_late": 87,
+    "assistance_device_on_time": 235,
+    "assistance_question_repeat": 39,
+    "assistance_questions_offered": 357,
+    "completion_background_skipped": 126,
+    "recall_cloud_late": 16,
+    "recall_cloud_on_time": 41,
+    "recall_device_on_time": 57,
+    "recall_question_repeat": 37,
+    "recall_questions_offered": 132
+   },
+   "switch": {
+    "name": "live2_deficit_feed",
+    "on": true,
+    "scope": "arm instance",
+    "chain": [
+     true,
+     true,
+     true
+    ]
+   },
+   "base": "covex-v6-state-shares",
+   "weights_have_a_reader": true
+  }
+ },
+ "d_negative_control_gain0": {
+  "_claim": "gain 0 leaves every hook and counter live and removes only the quantity under test: every weight exactly 1.0 and a byte-identical collapse to the rung-2 base",
+  "weights": {
+   "alert": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 12001,
+    "distinct_values": 1,
+    "constant_at_one": true
+   },
+   "recall": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 12001,
+    "distinct_values": 1,
+    "constant_at_one": true
+   },
+   "assistance": {
+    "min": 1.0,
+    "median": 1.0,
+    "max": 1.0,
+    "n": 12001,
+    "distinct_values": 1,
+    "constant_at_one": true
+   }
+  },
+  "all_weights_one": true,
+  "digest": "3a5b40d78b9dcb3b",
+  "rows": 13390,
+  "base_digest": "3a5b40d78b9dcb3b",
+  "identical_to_base": true,
+  "verdict": "PASS"
+ },
+ "e_c5attr_base_has_no_reader": {
+  "_claim": "on the c5attr rung-2 base the weights have NO reader AT ALL, because that base carries no D179 share admission, so `_share_ok` returns before `SA.allowed` is reached and even the shim cannot deliver them. ABSENT LINK BY CONSTRUCTION, and the cells say so rather than the argument alone.",
+  "base": {
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218
+  },
+  "off": {
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218
+  },
+  "on_shimmed": {
+   "digest": "9a4be873eb3c5fba",
+   "rows": 14218,
+   "feed": {
+    "alert": 1.007401,
+    "recall": 1.9729,
+    "assistance": 1.0
+   }
+  },
+  "off_identical": true,
+  "on_identical": true
+ },
+ "f_replay_committed_live_cell": {
+  "cell": "covex-v6-state_n16_s5_1200s_h27_3t_L3_epg_rq30",
+  "feed": {
+   "gain": 2.0,
+   "gain_ruling": "D178 (2)",
+   "targets": {
+    "alert": 0.25,
+    "recall": 0.9,
+    "assistance": 0.9
+   },
+   "target_source": "D178 (1), spec v6 sections 2 and 8",
+   "units": {
+    "alert": "episode",
+    "recall": "device",
+    "assistance": "device"
+   },
+   "currency": "on-time CLOUD answers only (D177, D178 (1)); device_on_time recorded, never added to the numerator",
+   "alert_decision_instants_per_episode": 19,
+   "n_offers": 12252,
+   "n_completions": 9114,
+   "weights": {
+    "alert": 1.291651,
+    "recall": 1.209524,
+    "assistance": 1.0
+   },
+   "shortfall": {
+    "alert": 0.145826,
+    "recall": 0.104762,
+    "assistance": 0.0
+   },
+   "n_units": {
+    "alert": 701,
+    "recall": 7,
+    "assistance": 3
+   },
+   "counts": {
+    "alert_cloud_late": 5854,
+    "alert_cloud_on_time": 2458,
+    "alert_episode_key_from_token_law": 8312,
+    "alert_episodes_closed": 701,
+    "alert_episodes_open": 6,
+    "alert_instants_offered": 11769,
+    "assistance_cloud_late": 6,
+    "assistance_cloud_on_time": 350,
+    "assistance_questions_offered": 356,
+    "recall_cloud_late": 327,
+    "recall_cloud_on_time": 119,
+    "recall_questions_offered": 127
+   }
+  },
+  "independent": {
+   "alert": 0.1427,
+   "recall": 0.1048,
+   "assistance": 0.0,
+   "alert_episodes": 714,
+   "alert_pooled_shortfall": 0.0411,
+   "alert_flat19_on_true_episodes": 0.1467,
+   "_how": "episode from play_id and t_local (= round((t_local - 3.0)/0.5) // 21), each episode's OWN instant count as denominator, numerator cloud_payload.on_time",
+   "_why_the_two_differ": "the feed uses a DECLARED 19 instants per episode, so the truncated last episode of each play is given 19 and its shortfall is overstated: flat 19 on the true episodes is 0.1467 against 0.1427, and the feed's own episode detection (707 of 714) brings it to about 0.1456. The bar below is therefore 0.01 absolute, which the 0.0029 difference clears, and the three numbers are all reported so the denominator choice and the detection are separable"
+  },
+  "agreement": {
+   "alert": {
+    "feed": 0.1458,
+    "independent": 0.1427,
+    "delta": 0.0031,
+    "agrees": true
+   },
+   "recall": {
+    "feed": 0.1048,
+    "independent": 0.1048,
+    "delta": -0.0,
+    "agrees": true
+   },
+   "assistance": {
+    "feed": 0.0,
+    "independent": 0.0,
+    "delta": 0.0,
+    "agrees": true
+   }
+  },
+  "episodes_feed": 701,
+  "episodes_independent": 714,
+  "verdict": "PASS"
+ }
+}

@@ -1,0 +1,102 @@
+{
+ "_what": "why the D178 (1) deficit weights move no admission at the committed D179 / D180 / D181 floors: the weight-sensitive band and where each type's measured median request sits relative to it",
+ "_not_a_cell": "pure arithmetic over frozen numbers plus an already-measured histogram",
+ "_the_one_read_of_the_weights": "share_admission.py:162-168, which scales the FLEXIBLE pool only; the floors are not weighted (D179 (3))",
+ "capacity": {
+  "w_max_tokens": 4323.3,
+  "floors_tokens": {
+   "alert": 1622.1,
+   "recall": 655.8,
+   "assistance": 242.8
+  },
+  "flexible_tokens": 1802.6
+ },
+ "weight_range_at_gain_2": {
+  "alert": [
+   1.0,
+   1.5
+  ],
+  "recall": [
+   1.0,
+   2.8
+  ],
+  "assistance": [
+   1.0,
+   2.8
+  ],
+  "_why_they_differ": "a shortfall cannot exceed its own target, and the form is unnormalised"
+ },
+ "bands": {
+  "alert": {
+   "median_uncached": 374.0,
+   "floor": 1622.1,
+   "own_share_at_weakest": 1895.2,
+   "own_share_equal": 2223.0,
+   "own_share_at_strongest": 2673.6,
+   "weight_sensitive_band": [
+    1622.1,
+    2673.6
+   ],
+   "median_inside_band": false,
+   "median_decision_changes_with_weight": false,
+   "branch_a_median_request_takes": "own_floor (the admission GUARANTEE, tested before headroom)",
+   "distance_to_band_tokens": -1248.1,
+   "distance_to_band_pct": -76.9,
+   "source": "offered (C5 declines are a throttle)"
+  },
+  "recall": {
+   "median_uncached": 7717.0,
+   "floor": 655.8,
+   "own_share_at_weakest": 928.9,
+   "own_share_equal": 1256.7,
+   "own_share_at_strongest": 1707.3,
+   "weight_sensitive_band": [
+    655.8,
+    1707.3
+   ],
+   "median_inside_band": false,
+   "median_decision_changes_with_weight": false,
+   "branch_a_median_request_takes": "oversize (weight-independent)",
+   "distance_to_band_tokens": 6009.7,
+   "distance_to_band_pct": 352.0,
+   "source": "submitted (b7 declines are feasibility)"
+  },
+  "assistance": {
+   "median_uncached": 1372.0,
+   "floor": 242.8,
+   "own_share_at_weakest": 515.9,
+   "own_share_equal": 843.7,
+   "own_share_at_strongest": 1294.3,
+   "weight_sensitive_band": [
+    242.8,
+    1294.3
+   ],
+   "median_inside_band": false,
+   "median_decision_changes_with_weight": false,
+   "branch_a_median_request_takes": "oversize (weight-independent)",
+   "distance_to_band_tokens": 77.7,
+   "distance_to_band_pct": 6.0,
+   "source": "either; they differ by one request"
+  }
+ },
+ "verdict": "CANCELLED BY GEOMETRY, with a measured denominator. Of the 10,657 share decisions in the dry seed-4 posted cell, 10,120 (95.0 percent) took `own_floor`, 197 + 56 + 26 took an OVERSIZE branch, 57 took `w_max` and 17 took a background borrow bounded by other types' unweighted FLOORS: 10,473 decisions, 98.3 percent, on branches that do not read the weights at all. The 184 that DID take the weight-sensitive `own_share` branch are all RECALL ADMITS, and the feed RAISED recall's weight (median 1.97 against 1.0 at the equal split), so its share grew and every one of the 184 admitted either way. Nothing was left that a weight could flip. The structural reason is the band: alert's median request is BELOW its own floor (374 against 1,622.1, so the admission guarantee fires first), recall's is 4.5x ABOVE the top of its band and 1.8x above W_max (7,717 against 1,707.3), and assistance's is 6 percent above the top of its band (1,372 against 1,294.3).",
+ "weight_sensitive_decision_share": {
+  "own_share_decisions": 184,
+  "total_share_decisions": 10657,
+  "fraction": 0.0173,
+  "_all_184_are": "recall ADMITS, which the feed's higher recall weight only made more comfortable, so none could flip"
+ },
+ "measured_reason_histogram": {
+  "covex-v6-state-shares": {
+   "share_reason_borrow_background": 13,
+   "share_reason_floor_denied_background": 4,
+   "share_reason_oversize_alone": 197,
+   "share_reason_oversize_alone_over_wmax": 56,
+   "share_reason_oversize_wait_for_own_type": 26,
+   "share_reason_own_floor": 10120,
+   "share_reason_own_share": 184,
+   "share_reason_w_max": 57
+  }
+ },
+ "_histogram_note": "every reason a share decision took in the dry cell. A reason that is never `own_share` or `borrow_*` is a decision the weights could not have changed."
+}

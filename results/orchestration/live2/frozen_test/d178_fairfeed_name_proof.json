@@ -1,0 +1,146 @@
+{
+ "_what": "the rung-3 deficit-feed names resolve through run_live2_real.py itself, and live2_deficit_feed is on for them and off for every other registered arm",
+ "_register": "P0 and P1 are SUBPROCESS probes of the harness's own entry point with the posted knobs; P2 is an in-process attribute read and is a statement about REGISTRATION ONLY, never about the switch moving a decision",
+ "entry_point": "experiments/orchestration/live2/run_live2_real.py",
+ "posted_knobs": [
+  "--ratio",
+  "40:40:20",
+  "--robot-question-set",
+  "lh_req",
+  "--ss-question-set",
+  "ss2",
+  "--dashcam-format",
+  "epg",
+  "--robot-upload",
+  "per-frame",
+  "--robot-reask-mean-s",
+  "30.0"
+ ],
+ "P0_negative_control": {
+  "_claim": "an unknown name on the SAME path still raises, so P1 is not vacuous",
+  "probe": {
+   "arm": "covex-v6-fair-shares-not-an-arm",
+   "seed": 0,
+   "returncode": 1,
+   "raised_unknown_arm": true,
+   "tail": "KeyError: \"unknown arm 'covex-v6-fair-shares-not-an-arm'; known: ['always-cloud-fcfs', 'attentionstore', 'attentionstore-prefetch', 'attentionstore-prefetch-noyield', 'attentionstore-prefetch-off', 'b10-blocking-aware', 'b7-edf-feasibility', 'b9', 'builder-acfcfs', 'builder-default', 'builder-s1-fai"
+  },
+  "verdict": "PASS"
+ },
+ "P1_names_resolve_in_the_harness": {
+  "_claim": "each rung-3 name reaches make_arm in the harness's own process",
+  "probes": [
+   {
+    "arm": "covex-v6-fair-shares",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   {
+    "arm": "covex-v6-fair-shares-off",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   {
+    "arm": "covex-v6-fair-shares-gain0",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   {
+    "arm": "covex-v6-fair-c5attr",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   {
+    "arm": "covex-v6-fair-c5attr-off",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   },
+   {
+    "arm": "covex-v6-fair-c5attr-gain0",
+    "seed": 0,
+    "returncode": 0,
+    "raised_unknown_arm": false,
+    "tail": "}"
+   }
+  ],
+  "verdict": "PASS"
+ },
+ "P2_switch_is_arm_scoped": {
+  "_claim": "live2_deficit_feed reads ON for the rung-3 arms that declare it and OFF for every other arm in the registry, on every object of each chain",
+  "sweep": {
+   "switch_name": "live2_deficit_feed",
+   "arms_under_test": {
+    "covex-v6-fair-c5attr": [
+     true,
+     true,
+     true
+    ],
+    "covex-v6-fair-c5attr-gain0": [
+     true,
+     true,
+     true
+    ],
+    "covex-v6-fair-c5attr-off": [
+     false,
+     false,
+     false
+    ],
+    "covex-v6-fair-shares": [
+     true,
+     true,
+     true
+    ],
+    "covex-v6-fair-shares-gain0": [
+     true,
+     true,
+     true
+    ],
+    "covex-v6-fair-shares-off": [
+     false,
+     false,
+     false
+    ]
+   },
+   "weights_exposed": {
+    "covex-v6-fair-c5attr": {
+     "alert": 1.0,
+     "recall": 1.0,
+     "assistance": 1.0
+    },
+    "covex-v6-fair-c5attr-gain0": {
+     "alert": 1.0,
+     "recall": 1.0,
+     "assistance": 1.0
+    },
+    "covex-v6-fair-c5attr-off": null,
+    "covex-v6-fair-shares": {
+     "alert": 1.0,
+     "recall": 1.0,
+     "assistance": 1.0
+    },
+    "covex-v6-fair-shares-gain0": {
+     "alert": 1.0,
+     "recall": 1.0,
+     "assistance": 1.0
+    },
+    "covex-v6-fair-shares-off": null
+   },
+   "n_other_arms_all_off": 175,
+   "other_arms_with_the_switch_on": {},
+   "unconstructible": {},
+   "_what_a_chain_is": "the wrapper and every object `_rules`/`_base` reaches; a single getattr on the wrapper is the check that passes while the inner object decides differently"
+  },
+  "verdict": "PASS",
+  "_note": "the -off names carry the switch set to False deliberately; that is the Step 4 control, not a leak"
+ }
+}

@@ -740,6 +740,15 @@ ARMS.update(V6C5_ARMS)
 from arms_v6shares import V6SHARES_ARMS                                 # noqa: E402
 ARMS.update(V6SHARES_ARMS)
 
+# D177 (2) / D178 (1) rung 3 as the DEFICIT FEED ONLY (the value reader is removed), on EITHER
+# rung-2 base: which of covex-v6-state-shares and covex-v6-state-uo-c5attr is rung 2 is the
+# addendum 9 item A contingency and is not settled yet, so BOTH variants are registered and the
+# choice is made at cell time by picking the name. Registered HERE for the same reason as every
+# other v6 family above: a name registered only in its own module does not exist in the harness's
+# process.
+from arms_v6fairfeed import V6FAIRFEED_ARMS                             # noqa: E402
+ARMS.update(V6FAIRFEED_ARMS)
+
 
 def _register_v6_aliases() -> None:
     """Rungs 0, 1 and 4, which alias committed arms. Deferred into a function because the rung-0

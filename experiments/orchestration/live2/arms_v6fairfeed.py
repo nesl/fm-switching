@@ -1,0 +1,286 @@
+#!/usr/bin/env python3
+"""covex-v6-fair as D177 (2) leaves it: THE DEFICIT FEED ONLY, on EITHER rung-2 base.
+
+    rung 2 (covex-v6-state-shares OR covex-v6-state-uo-c5attr)
+      + DEFICIT FEED   per-type shortfalls against the D178 (1) targets, each over its OWN
+                       denominator, turned into w_t = 1 + 2.0 * shortfall_t, floored at 1
+      - VALUE READER   REMOVED (D177 (2)); the quality table is reporting only and no accuracy
+                       number is read anywhere on this path
+
+WHY THIS IS A NEW MODULE AND NOT A FLAG ON `arms_v6fair.py`. `arms_v6fair.V6FairArm` is the
+pre-D177 rung 3: it declares `value_reader=True`, it builds on `covex-v6-state` rather than on a
+rung-2 base with D179 share admission, it classifies assistance as recall (`arms_v6fair.py:129`
+maps every non-monitor kind to "robot", and on the committed cells every `asst00x` completion
+arrives as kind "recall"), and it feeds `cf_objective.DeficitCounters`, whose targets are one
+per-device 0.90 for all three types with no per-episode reset and whose gain is the module default
+1.0. Each of those is something D177 or D178 changed. Editing it in place would also rewrite the
+meaning of a name that `arm_names_v6` already describes. So this is a separate module and a
+separate family of names, and `arms_v6fair` is left exactly as committed.
+
+THE BASE IS A PARAMETER, BECAUSE WHICH RUNG 2 IS RUNG 2 IS NOT YET DECIDED. The user's addendum 9
+item A fixes the contingency: rung 2 will be `covex-v6-state-shares` if it passes all three D179
+(6) pre-registered checks, and `covex-v6-state-uo-c5attr` as a logged override if shares fails any
+of them. Both variants are registered here under their own names, so the choice is made AT CELL
+TIME by picking the name, and nothing in this module has to change either way. Hardwiring one base
+would have meant a code edit between the check and the cell, which is the shape D172 (2) forbids.
+
+ONE CONSEQUENCE OF THE CONTINGENCY, AND IT IS A FINDING, NOT A CAVEAT. The weights this feed
+produces are consumed by D179 share admission and by nothing else: `share_admission.allowed`
+reads `weights_by_type` at share_admission.py:162-166 to split the FLEXIBLE pool. The c5attr base
+does NOT carry share admission (`arms_v6c5.V6StateUoC5AttrArm` sets only
+`c5_attr_self_released`), so on THAT base the weights have no reader at all and the deficit feed
+is an ABSENT LINK by construction, in CLAUDE.md Step 2's exact sense. `covex-v6-fair-c5attr` is
+registered so the contingency is expressible and so the feed's COUNTERS can be reported from it,
+but it cannot steer anything and must not be read as a test of the weighting.
+
+THE SWITCH IS AN ARM-SCOPED INSTANCE ATTRIBUTE, `live2_deficit_feed`, DEFAULT FALSE, and a truthy
+CLASS attribute RAISES. Exactly the pattern `release_recheck.arm_enables` and
+`share_admission.arm_enables` establish, and for the reason both of their docstrings record: a
+class attribute turns the rung on for every arm that inherits it and makes the cells incomparable
+(the D172 rung-2 note on `live2_belief_apply`), and a module global that defaulted ON once cost a
+whole live cell here. A class default of FALSE is allowed through, because it cannot turn anything
+on. The switch is set on every object the decide path can bind `self` to, through the base's own
+`switch_targets()` walk where there is one.
+
+WHAT IS NOT WIRED YET, SAID HERE RATHER THAN DISCOVERED IN A NULL. The coordinator's single
+admission gate calls `SA.allowed(...)` WITHOUT `weights_by_type` (coordinator.py:1437 (origin/main)), so in a
+run against the committed coordinator these weights are computed, exposed and NOT READ: the
+flexible pool still splits equally. `live2_share_weights()` is the accessor the gate needs and the
+one-line change is named in this build's report. Until that line lands, this feed is Rule 2's
+UNEXPRESSIBLE category on both bases and no cell of it may be read as evidence about the policy.
+The proofs in `d178_deficit_feed_proofs.py` therefore run the Step 2b comparison through an
+explicitly declared PROOF-ONLY SHIM on `_share_ok`, and report the un-shimmed number beside it,
+which is zero.
+"""
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional
+
+import arms_v6c5 as C5
+import arms_v6shares as SH
+import deficit_feed as DF
+import deficit_gain_d178 as GAIND
+import share_admission as SA
+
+FAIRFEED_VERSION = "covex-v6-fair-feed-1.0"
+SWITCH_ATTR = "live2_deficit_feed"
+
+# The two rung-2 bases of the addendum 9 item A contingency, by the name each is registered under.
+BASES: Dict[str, Any] = {
+    "covex-v6-state-shares": SH.V6StateSharesArm,
+    "covex-v6-state-uo-c5attr": C5.V6StateUoC5AttrArm,
+}
+# Which bases carry a reader for the weights. See the module docstring.
+BASE_HAS_WEIGHT_READER = {"covex-v6-state-shares": True, "covex-v6-state-uo-c5attr": False}
+
+
+class DeficitFeedSwitchError(RuntimeError):
+    """Raised when the switch is set in a way that could turn the rung on for every arm."""
+
+
+def arm_enables(arm: Any) -> bool:
+    """Read `live2_deficit_feed` from the ARM INSTANCE only. Default False; a class-level ON RAISES.
+
+    Same strictness, and the same words, as `release_recheck.arm_enables` and
+    `share_admission.arm_enables`. `getattr` would read a class attribute as though the instance
+    had declared it, which is how one switch turns a rung on for every arm in a run.
+    """
+    try:
+        own = vars(arm)
+    except TypeError:                                                       # pragma: no cover
+        own = {}
+    if SWITCH_ATTR not in own:
+        for klass in type(arm).__mro__:
+            if bool(klass.__dict__.get(SWITCH_ATTR, False)):
+                raise DeficitFeedSwitchError(
+                    "%s is ON as a CLASS attribute of %s and the instance declares nothing. "
+                    "D178 (2) and the addendum require an arm-scoped INSTANCE attribute: a "
+                    "class-level switch turns this rung on for every arm that inherits it and "
+                    "makes the cells incomparable." % (SWITCH_ATTR, klass.__name__))
+        return False
+    return bool(own[SWITCH_ATTR])
+
+
+class DeficitFeedMixin:
+    """The feed, over whichever rung-2 base it is mixed into.
+
+    Three hooks in, one accessor out:
+
+        live2_roster      OFFERED alert decision instants (the per-episode denominator)
+        decide            OFFERED recall and assistance questions (the per-device denominators)
+        live2_completed   the numerator: ON-TIME CLOUD answers only (D177, D178 (1))
+        live2_share_weights()   the ONE output, for SA.allowed(weights_by_type=...)
+    """
+
+    _fairfeed_base_name = ""
+
+    def _fairfeed_init(self, *, deficit_feed: bool, gain: float) -> None:
+        self.arm_version = FAIRFEED_VERSION
+        self._feed = DF.DeficitFeed(gain=float(gain))
+        self._feed_gain = float(gain)
+        # the SWITCH, on the instance, and on every object the decide path can bind `self` to
+        targets = self._fairfeed_targets()
+        for obj in targets:
+            try:
+                object.__setattr__(obj, SWITCH_ATTR, bool(deficit_feed))
+            except Exception:                                              # noqa: BLE001
+                setattr(obj, SWITCH_ATTR, bool(deficit_feed))
+        # read back through the strict reader, so a construction that did not take RAISES here
+        self._feed_on = arm_enables(self)
+        if self._feed_on != bool(deficit_feed):                            # pragma: no cover
+            raise DeficitFeedSwitchError(
+                "%s did not take on the instance of %s" % (SWITCH_ATTR, type(self).__name__))
+
+    # ---- the one output ----------------------------------------------------------------------
+    def live2_share_weights(self) -> Optional[Dict[str, float]]:
+        """The per-type weights for D179's flexible pool, or None when the switch is off.
+
+        None, not a dict of ones: `SA.allowed` treats a falsy `weights_by_type` as "split equally"
+        and so takes the identical branch, and returning None makes the OFF arm's behaviour a
+        property of this one line instead of of floating-point equality.
+        """
+        if not getattr(self, "_feed_on", False):
+            return None
+        return self._feed.weights()
+
+    def deficit_feed_report(self) -> Dict[str, Any]:
+        d = dict(self._feed.as_dict())
+        d["switch"] = {"name": SWITCH_ATTR, "on": bool(getattr(self, "_feed_on", False)),
+                       "scope": "arm instance", "chain": self._fairfeed_switch_chain()}
+        d["base"] = self._fairfeed_base_name
+        d["weights_have_a_reader"] = bool(
+            BASE_HAS_WEIGHT_READER.get(self._fairfeed_base_name, False))
+        return d
+
+    def _fairfeed_targets(self) -> List[Any]:
+        """Every object the decide path can bind `self` to: this wrapper and its delegation chain.
+
+        The shares base publishes the walk as `switch_targets()`; the c5attr base does not, so the
+        chain is walked the same way here rather than left at the wrapper. Setting only the
+        wrapper is how a switch reads as live and is not (`arms_v6shares.py`'s own note).
+        """
+        walk = getattr(self, "switch_targets", None)
+        if callable(walk):
+            return list(walk())
+        out: List[Any] = []
+        o: Any = self
+        seen = set()
+        while o is not None and id(o) not in seen:
+            seen.add(id(o))
+            out.append(o)
+            o = o.__dict__.get("_rules") or o.__dict__.get("_base")
+        return out
+
+    def _fairfeed_switch_chain(self) -> List[bool]:
+        return [bool(vars(o).get(SWITCH_ATTR, False)) for o in self._fairfeed_targets()]
+
+    # ---- the three feeds ---------------------------------------------------------------------
+    def live2_roster(self, roster: Dict[str, Any]) -> None:
+        if getattr(self, "_feed_on", False):
+            self._fairfeed_session_device = dict(roster.get("session_device") or {})
+            for did, inst in (roster.get("sh_instant") or {}).items():
+                self._feed.observe_offered_instant(did, (inst or {}).get("opportunity_id"))
+        return super().live2_roster(roster)                                # type: ignore[misc]
+
+    def decide(self, obs: Any) -> Any:
+        if getattr(self, "_feed_on", False):
+            sd = getattr(self, "_fairfeed_session_device", None) or {}
+            for q in (getattr(obs, "recall", None) or ()):
+                did = sd.get(getattr(q, "session_id", None))
+                if did is None:
+                    self._feed._bump("question_offer_no_device")
+                    continue
+                self._feed.observe_offered_question(did, getattr(q, "query_id", None))
+        return super().decide(obs)                                         # type: ignore[misc]
+
+    def live2_completed(self, rec: Dict[str, Any]) -> None:
+        if getattr(self, "_feed_on", False):
+            self._feed.observe_completion(
+                device_id=rec.get("device_id"), kind=rec.get("kind"),
+                cloud_on_time=rec.get("cloud_on_time"),
+                device_on_time=rec.get("device_on_time"),
+                prompt_tokens=rec.get("prompt_tokens"),
+                episode_id=rec.get("episode_id"))
+            n = int(self.stats.get("deficit_feed_completions", 0)) + 1
+            self.stats["deficit_feed_completions"] = n
+            # the arm_stats block a cell reader takes, refreshed periodically rather than on every
+            # completion: `as_dict` walks every scored unit, and at about 12,000 completions per
+            # cell a per-completion refresh is quadratic in the episode count for no new reader.
+            if n % 250 == 0:
+                self.stats["deficit_feed"] = self._feed.as_dict()
+        # DELEGATE TO `_rules`, NOT THROUGH `super()`. The base chain does not DEFINE
+        # `live2_completed` at any level above the inner HybridArm: V6StateArm reaches it through
+        # its own `__getattr__`, and a `super()` lookup does not consult an instance's
+        # `__getattr__`, so `getattr(super(), "live2_completed", None)` silently returns None and
+        # the inner arm never hears a completion. That would drop the C2 throttle's release
+        # bookkeeping and the c5attr base's whole attribution signal, and it would show up only as
+        # the OFF arm failing to collapse. `arms_v6fair.py:101` delegates the same way.
+        inner = getattr(self._rules, "live2_completed", None)
+        if callable(inner):
+            inner(rec)
+
+    def live2_describe(self) -> Dict[str, Any]:
+        d = dict(super().live2_describe())                                 # type: ignore[misc]
+        d.update(arm=self.name, arm_version=FAIRFEED_VERSION,
+                 covex_v6_fair_feed=dict(
+                     rung=3, rules_base=self._fairfeed_base_name,
+                     switch=SWITCH_ATTR, switch_on=bool(getattr(self, "_feed_on", False)),
+                     switch_chain=self._fairfeed_switch_chain(),
+                     gain=self._feed_gain, gain_declared=GAIND.GAIN,
+                     gain_ruling=GAIND.GAIN_RULING, gain_source=GAIND.GAIN_SOURCE,
+                     value_reader="REMOVED (D177 (2)); no accuracy value is read on this path",
+                     currency="on-time CLOUD answers only (D177, D178 (1))",
+                     targets=dict(DF.TARGETS), units=dict(DF.UNIT),
+                     alert_decision_instants_per_episode=DF.EPG_DECISION_INSTANTS,
+                     consumer=("share_admission.allowed(weights_by_type=) at "
+                               "share_admission.py:162-166, which splits the FLEXIBLE pool only; "
+                               "the floors in share_capacity.py are NOT weighted"),
+                     consumer_wired=bool(
+                         BASE_HAS_WEIGHT_READER.get(self._fairfeed_base_name, False)),
+                     not_wired_note=("coordinator.py:1437 (origin/main) calls SA.allowed without "
+                                     "weights_by_type, so against the committed coordinator "
+                                     "these weights are computed and NOT READ")))
+        return d
+
+
+def make_class(base_name: str) -> Any:
+    """The arm class for one rung-2 base. The base is a PARAMETER, never hardwired."""
+    base = BASES[base_name]
+    ns = {"_fairfeed_base_name": base_name}
+    return type("V6FairFeed_" + base_name.replace("-", "_"), (DeficitFeedMixin, base), ns)
+
+
+_CLASSES = {b: make_class(b) for b in BASES}
+
+
+def make(name: str, base_name: str, *, deficit_feed: bool = True,
+         gain: float = GAIND.GAIN, **kw: Any) -> Any:
+    cls = _CLASSES[base_name]
+    arm = cls(name=name, **kw)
+    arm._fairfeed_init(deficit_feed=deficit_feed, gain=gain)
+    return arm
+
+
+# Names. The base is chosen by picking the name AT CELL TIME (addendum 9 item A).
+V6FAIRFEED_ARMS: Dict[str, Any] = {}
+for _b, _tag in (("covex-v6-state-shares", "shares"), ("covex-v6-state-uo-c5attr", "c5attr")):
+    _n = "covex-v6-fair-" + _tag
+    V6FAIRFEED_ARMS[_n] = (
+        lambda _b=_b, _n=_n, **kw: make(_n, _b, **kw))
+    # CLAUDE.md Step 4, part one: the SWITCH off must collapse to the rung-2 base byte-identically
+    V6FAIRFEED_ARMS[_n + "-off"] = (
+        lambda _b=_b, _n=_n, **kw: make(_n + "-off", _b, deficit_feed=False, **kw))
+    # CLAUDE.md Step 4, part two: the MECHANISM disabled at gain 0, with the switch still ON, so
+    # every weight is exactly 1.0 and the arm must collapse to the base as well. This is the
+    # stronger control of the two: it leaves every hook, every counter and every code path live
+    # and removes only the quantity under test.
+    V6FAIRFEED_ARMS[_n + "-gain0"] = (
+        lambda _b=_b, _n=_n, **kw: make(_n + "-gain0", _b,
+                                        gain=GAIND.NEGATIVE_CONTROL_GAIN, **kw))
+
+
+def register() -> None:
+    import arms as A
+    SH.register()
+    C5.register()
+    A.ARMS.update(V6FAIRFEED_ARMS)
