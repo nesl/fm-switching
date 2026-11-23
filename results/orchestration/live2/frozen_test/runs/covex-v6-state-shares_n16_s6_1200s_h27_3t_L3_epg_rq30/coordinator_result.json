@@ -1,0 +1,514 @@
+{
+ "arm": "covex-v6-state-shares",
+ "arm_version": "covex-v6-state-shares-1.0",
+ "is_measurement": false,
+ "tick_s": 0.1,
+ "decision_period_s": 0.1,
+ "h_s": null,
+ "upload_mode": "A",
+ "window_s": 1200.0,
+ "n_devices": 16,
+ "n_sessions": 379,
+ "n_opportunities": 12264,
+ "n_requests": 10091,
+ "n_decisions": 13480,
+ "counts": {
+  "belief_corrections": 522,
+  "belief_corrections_changed": 6,
+  "belief_to_gpu": 6,
+  "completed_monitor": 9566,
+  "completed_piece": 105,
+  "completed_recall": 417,
+  "device_wait_measured": 9983,
+  "device_wait_measured_dashcam": 9566,
+  "device_wait_measured_robot": 67,
+  "device_wait_measured_single_shot": 350,
+  "epg_frames_bytes_resent_unconfirmed": 5427,
+  "epg_frames_sent_as_bytes": 17470,
+  "epg_frames_sent_as_reference": 90312,
+  "epg_monitor_requests": 9569,
+  "racefix_bytes_confirmed_monitor": 17465,
+  "racefix_bytes_confirmed_session": 3188,
+  "racefix_bytes_resent": 0,
+  "racefix_confirm_dropped_stale": 0,
+  "recall_CLOUD": 513,
+  "recall_DEFER": 1,
+  "recall_REJECT": 8,
+  "release_infeasible": 2251,
+  "release_infeasible_alert": 2198,
+  "release_infeasible_assistance": 7,
+  "release_infeasible_recall": 46,
+  "session_MATERIALIZE": 145,
+  "share_admit_alert": 9569,
+  "share_admit_assistance": 350,
+  "share_admit_recall": 172,
+  "share_at_or_above_floor_alert": 5722,
+  "share_at_or_above_floor_assistance": 1563,
+  "share_at_or_above_floor_recall": 732,
+  "share_deny_alert": 1756,
+  "share_deny_assistance": 27,
+  "share_deny_recall": 55,
+  "share_hold_instants_alert": 1099,
+  "share_hold_instants_assistance": 8,
+  "share_hold_instants_recall": 22,
+  "share_hold_periods_alert": 1756,
+  "share_hold_periods_assistance": 27,
+  "share_hold_periods_recall": 55,
+  "share_reason_borrow_background": 5,
+  "share_reason_borrow_deadline": 3557,
+  "share_reason_floor_denied": 1427,
+  "share_reason_floor_denied_background": 7,
+  "share_reason_oversize_alone": 246,
+  "share_reason_oversize_alone_over_wmax": 66,
+  "share_reason_oversize_wait_for_own_type": 164,
+  "share_reason_own_floor": 3698,
+  "share_reason_own_share": 2519,
+  "share_reason_w_max": 240,
+  "state_priced_build": 144,
+  "state_priced_build_cold": 49,
+  "state_priced_build_gpu": 95,
+  "submitted_monitor": 9569,
+  "submitted_piece": 105,
+  "submitted_recall": 417
+ },
+ "n_monitor_answers": 11783,
+ "n_recall_answers": 478,
+ "n_on_time": 9836,
+ "submit_delay_ms": {
+  "n": 10091,
+  "p50": 5.6459,
+  "p90": 11.4604,
+  "p99": 19.6758,
+  "max": 398.5789
+ },
+ "decision_time": {
+  "n": 12000,
+  "cpu_clock": "time.thread_time() of the deciding thread",
+  "wall_ms": {
+   "n": 12000,
+   "p50": 1.3113,
+   "p90": 1.8964,
+   "p99": 2.1659,
+   "max": 6.4962
+  },
+  "cpu_ms": {
+   "n": 12000,
+   "p50": 1.3053,
+   "p90": 1.8872,
+   "p99": 2.145,
+   "max": 6.4889
+  },
+  "wall_over_cpu": {
+   "n": 12000,
+   "p50": 1.0047,
+   "p90": 1.007,
+   "p99": 1.0228,
+   "max": 1.7026
+  },
+  "candidates": {
+   "n": 12000,
+   "p50": 6,
+   "p90": 6,
+   "p99": 7,
+   "max": 8
+  },
+  "candidates_source": "pending items ordered"
+ },
+ "n_pulls": 0,
+ "n_cloud_answers": 9983,
+ "decision_latency_ms": {
+  "p50": 1.3113,
+  "p99": 2.1659,
+  "max": 6.4962,
+  "n": 12000
+ },
+ "cpu_s": 517.087,
+ "wall_s": 1197.831,
+ "cpu_percent": 43.2,
+ "request_rate_per_s": 8.42,
+ "budget_gpu_s": 1200.0,
+ "budget_spent_gpu_s": 1010.98,
+ "epoch_overruns": 0,
+ "max_epoch_lag_s": 0.0,
+ "wall_guard_hit": false,
+ "wall_guard_s": null,
+ "virtual_t_reached_s": 0.0,
+ "n_errors": 0,
+ "first_errors": [],
+ "mu_time_average": null,
+ "arm_stats": {
+  "share_admission": {
+   "enabled": true,
+   "w_max": 4323.3,
+   "floors": {
+    "alert": 1622.1,
+    "recall": 655.8,
+    "assistance": 242.8
+   },
+   "flexible": 1802.6,
+   "w_now_by_type": {
+    "alert": 1816,
+    "recall": 0,
+    "assistance": 0
+   },
+   "admits_by_type": {},
+   "deferred_by_type": {},
+   "borrowed_by_type": {},
+   "borrow_denied_floor_by_type": {},
+   "_note": "counters fill in session A commit 2; shape is frozen"
+  },
+  "share_w_high_water": 11965,
+  "share_w_zero_returns": 618,
+  "share_w_tracked_at_end": 3,
+  "share_w_over_wmax_periods": 51,
+  "share_w_over_wmax_types": {
+   "alert+recall": 8,
+   "recall": 20,
+   "alert": 13,
+   "alert+assistance+recall": 4,
+   "alert+assistance": 6
+  },
+  "share_w_samples_per_gate_call": 11929,
+  "share_w_over_wmax_periods_TIME": 13421,
+  "share_w_samples_TIME": 231363,
+  "share_w_over_wmax_types_TIME": {
+   "alert+recall": 3664,
+   "recall": 7639,
+   "alert+assistance+recall": 890,
+   "alert": 196,
+   "alert+assistance": 785,
+   "assistance+recall": 247
+  },
+  "state_skipped_nothing_built": 12237,
+  "share_admit_recall": 172,
+  "share_reason_own_share": 2519,
+  "submitted_piece": 105,
+  "share_reason_borrow_background": 5,
+  "share_at_or_above_floor_recall": 732,
+  "share_deny_recall": 55,
+  "share_reason_floor_denied_background": 7,
+  "share_hold_periods_recall": 55,
+  "share_hold_instants_recall": 22,
+  "state_skipped_no_question_estimate": 11661,
+  "share_admit_assistance": 350,
+  "share_reason_oversize_alone": 246,
+  "submitted_recall": 417,
+  "share_admit_alert": 9569,
+  "share_reason_own_floor": 3698,
+  "submitted_monitor": 9569,
+  "share_reason_oversize_alone_over_wmax": 66,
+  "share_deny_assistance": 27,
+  "share_reason_w_max": 240,
+  "share_hold_periods_assistance": 27,
+  "share_hold_instants_assistance": 8,
+  "release_infeasible": 2251,
+  "release_infeasible_alert": 2198,
+  "release_infeasible_assistance": 7,
+  "share_reason_borrow_deadline": 3557,
+  "share_at_or_above_floor_assistance": 1563,
+  "share_at_or_above_floor_alert": 5722,
+  "share_deny_alert": 1756,
+  "share_reason_floor_denied": 1427,
+  "share_hold_periods_alert": 1756,
+  "share_hold_instants_alert": 1099,
+  "share_reason_oversize_wait_for_own_type": 164,
+  "release_infeasible_recall": 46,
+  "state_decisions": 60095,
+  "state_decisions_without_a_rebuild": 60011,
+  "harm_warm_no_queue": 57651,
+  "cf_planner_decisions": 60095,
+  "cf_planner_decisions_state": 60095,
+  "cf_budget_ms": 20.0,
+  "state_chosen_KEEP": 60091,
+  "state_delta_max_milli": 179,
+  "state_delta_milli_sum": 1397696,
+  "state_delta_n": 60095,
+  "gain_TOUCH_n": 60095,
+  "gain_TOUCH_milli_sum": 1397119,
+  "gain_TOUCH_max_milli": 160,
+  "gain_HOLD_BACK_n": 60095,
+  "gain_HOLD_BACK_milli_sum": 818,
+  "gain_HOLD_BACK_max_milli": 179,
+  "harm_warm_priced": 2528,
+  "harm_warm_nonzero": 1782,
+  "harm_warm_milli_sum": 818,
+  "harm_warm_max_milli": 179,
+  "state_delta_gt_0": 58014,
+  "state_decisions_with_a_rebuild": 84,
+  "gain_WARM_n": 84,
+  "gain_WARM_milli_sum": 1466,
+  "gain_WARM_max_milli": 142,
+  "state_delta_gt_0p01": 26009,
+  "state_delta_gt_0p05": 10269,
+  "state_delta_gt_0p1": 3691,
+  "state_delta_gt_0p12": 2539,
+  "harm_warm_capped": 5,
+  "state_chosen_HOLD_BACK": 4,
+  "state_delta_over_margin": 4,
+  "state_delta_gt_0p14": 575,
+  "state_delta_gt_0p16": 14,
+  "state_delta_gt_0p16456": 4,
+  "gain_HOLD_BACK_over_margin": 4,
+  "state_deviations": 4,
+  "state_hold_back_enacted": 4,
+  "epochs": 12000,
+  "chunk_roster_missing_est_tokens": 1,
+  "chunk_trigger_size": 136,
+  "warm_ahead_wanted": 265,
+  "warm_ahead_emitted": 149,
+  "warm_ahead_unexpressible": 2,
+  "chunk_trigger_horizon": 129,
+  "jit_suppressed_already_used": 145079,
+  "c2_throttled_dash": 7443,
+  "c5_dash_held": 29991,
+  "decisions": 12000,
+  "ss_seen": 384,
+  "c2_throttle_periods": 1482,
+  "c2_robots_at_risk_while_throttling": 91,
+  "planner_time_limit": {
+   "budget_ms": 20.0,
+   "decisions": 60095,
+   "abandoned_to_base": 0,
+   "fraction": 0.0,
+   "by_kind": {
+    "state": {
+     "decisions": 60095,
+     "abandoned_to_base": 0,
+     "fraction": 0.0
+    }
+   },
+   "over_1_percent": [],
+   "flag": false,
+   "_note": "cf_instrument.over_budget is a WALL-CLOCK limit (D99 (3), D151 (5)), so this rate is a property of the host CPU as well as of the policy. The H100 host is about 2.2x slower than flash on the committed policy benchmark (D115 (1)), so a rate measured on flash is a LOWER BOUND for a live cell and must not be quoted for one. Proofs run with the limit OFF so a decision digest is a property of the arm; live cells run with it ON because it is a real cost"
+  }
+ },
+ "dashcam_format": "epg",
+ "epg": {
+  "requests": 9569,
+  "frames_min": 3,
+  "frames_max": 21,
+  "frames_median": 11,
+  "frames_total": 107782,
+  "prompt_tokens_total": 36832214,
+  "episodes": 676,
+  "by_episode_index": {
+   "2": {
+    "n": 565,
+    "frames": 1695,
+    "as_reference": 0
+   },
+   "3": {
+    "n": 588,
+    "frames": 2352,
+    "as_reference": 471
+   },
+   "4": {
+    "n": 596,
+    "frames": 2980,
+    "as_reference": 1873
+   },
+   "5": {
+    "n": 593,
+    "frames": 3558,
+    "as_reference": 2551
+   },
+   "6": {
+    "n": 574,
+    "frames": 4018,
+    "as_reference": 3080
+   },
+   "7": {
+    "n": 586,
+    "frames": 4688,
+    "as_reference": 3727
+   },
+   "8": {
+    "n": 579,
+    "frames": 5211,
+    "as_reference": 4306
+   },
+   "9": {
+    "n": 564,
+    "frames": 5640,
+    "as_reference": 4705
+   },
+   "10": {
+    "n": 542,
+    "frames": 5962,
+    "as_reference": 5068
+   },
+   "11": {
+    "n": 529,
+    "frames": 6348,
+    "as_reference": 5470
+   },
+   "12": {
+    "n": 456,
+    "frames": 5928,
+    "as_reference": 5211
+   },
+   "13": {
+    "n": 435,
+    "frames": 6090,
+    "as_reference": 5393
+   },
+   "14": {
+    "n": 422,
+    "frames": 6330,
+    "as_reference": 5649
+   },
+   "15": {
+    "n": 421,
+    "frames": 6736,
+    "as_reference": 6071
+   },
+   "16": {
+    "n": 426,
+    "frames": 7242,
+    "as_reference": 6549
+   },
+   "17": {
+    "n": 431,
+    "frames": 7758,
+    "as_reference": 7036
+   },
+   "18": {
+    "n": 413,
+    "frames": 7847,
+    "as_reference": 7196
+   },
+   "19": {
+    "n": 430,
+    "frames": 8600,
+    "as_reference": 7852
+   },
+   "20": {
+    "n": 419,
+    "frames": 8799,
+    "as_reference": 8104
+   }
+  }
+ },
+ "bridge": {
+  "arm": "covex-v6-state-shares",
+  "n_events": 17587,
+  "n_ticks": 213776,
+  "n_pulls": 0,
+  "n_cloud_answers": 9983,
+  "n_decisions": 12000,
+  "decision_period_s": 0.1,
+  "n_forwarded_on_completion": 9983,
+  "n_skipped_forwarded": 9983,
+  "n_forward_mismatch": 0,
+  "n_recall_first_token": 417,
+  "n_recall_letter_differs": 0,
+  "recall_letter_diffs": [],
+  "n_monitor_score_differs": 0
+ },
+ "self_ticks": 93775,
+ "self_tick_s": 0.005,
+ "backend": {
+  "n_built": 10091,
+  "callback_errors": [],
+  "wire_image_parts": {
+   "piece": 5060,
+   "assistive": 350,
+   "monitor": 107782,
+   "recall": 9040
+  },
+  "wire_image_parts_with_uuid": {
+   "piece": 5060,
+   "assistive": 350,
+   "monitor": 107782,
+   "recall": 9040
+  },
+  "wire_extra_delay_ms": {
+   "n": 10091,
+   "p50": 8.9199,
+   "p90": 17.4802,
+   "p99": 24.9021,
+   "max": 2127.3373
+  },
+  "submit_delay_total_ms": {
+   "n": 10091,
+   "p50": 15.7748,
+   "p90": 26.9435,
+   "p99": 37.9865,
+   "max": 2130.1033
+  },
+  "first_line_to_first_content_ms": {
+   "n": 10088,
+   "p50": 0.1585,
+   "p99": 3.283,
+   "max": 66.8237
+  },
+  "n_callback_errors": 0,
+  "build_ms_total": 3871.193,
+  "build_ms_mean": 0.3836,
+  "cache": {
+   "n_cached": 18270,
+   "held_bytes": 1329597674,
+   "cap_bytes": 1500000000,
+   "hits": 20658,
+   "misses": 18270,
+   "encoded_bytes": 1329597674,
+   "hit_fraction": 0.530672
+  }
+ },
+ "cache": {
+  "n_cached": 18270,
+  "held_bytes": 1329597674,
+  "cap_bytes": 1500000000,
+  "hits": 20658,
+  "misses": 18270,
+  "encoded_bytes": 1329597674,
+  "hit_fraction": 0.530672
+ },
+ "pid": 919582,
+ "cpu_s_child": 517.101,
+ "completion_to_forward_ms": {
+  "n": 9983,
+  "p50_ms": 0.0551,
+  "p90_ms": 0.0844,
+  "p99_ms": 0.0989,
+  "max_ms": 0.4382
+ },
+ "first_token_to_forward_ms": {
+  "n": 9983,
+  "p50_ms": 0.0551,
+  "p90_ms": 0.0844,
+  "p99_ms": 0.0989,
+  "max_ms": 0.4382
+ },
+ "memory_pressure": {
+  "kv_capacity_enforced": true,
+  "gpu_kv_tokens": 62944,
+  "pressure": {
+   "epochs": 12000,
+   "epochs_over_cap": 0,
+   "peak_tokens": 32470,
+   "intervals": [],
+   "host_peak_tokens": 0,
+   "host_epochs_over_cap": 0,
+   "intervals_n": 0
+  },
+  "enact_placement_totals": {
+   "calls": 12000,
+   "offloaded": 0,
+   "kept_warm": 0,
+   "evicted": 0,
+   "resident": 20
+  }
+ },
+ "wire_events_sent": 17587,
+ "wire_replies_received": 9983,
+ "wire_write_errors": 1,
+ "wire_max_send_backlog": 31,
+ "completion_to_emulator_ms": {
+  "n": 9983,
+  "p50_ms": 5.1188,
+  "p90_ms": 9.1977,
+  "p99_ms": 10.1357,
+  "max_ms": 10.7794
+ }
+}
